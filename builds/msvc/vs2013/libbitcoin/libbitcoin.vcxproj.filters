@@ -970,6 +970,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\network_settings.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\handlers.hpp">
+      <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\resource.rc">
