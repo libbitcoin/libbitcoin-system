@@ -17,29 +17,27 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/unicode/unicode_istream.hpp>
+#ifndef LIBBITCOIN_HANDLERS_HPP
+#define LIBBITCOIN_HANDLERS_HPP
 
-#include <cstddef>
-#include <iostream>
-#include <bitcoin/bitcoin/unicode/unicode_streambuf.hpp>
+#include <functional>
+#include <bitcoin/bitcoin/error.hpp>
 
 namespace libbitcoin {
 
-unicode_istream::unicode_istream(std::istream& narrow_stream,
-    std::wistream& wide_stream, size_t size)
-#ifdef _MSC_VER
-  : std::istream(new unicode_streambuf(wide_stream.rdbuf(), size))
-#else
-  : std::istream(narrow_stream.rdbuf())
-#endif
-{
-}
+    typedef std::function<void(const code&)> handle0;
 
-unicode_istream::~unicode_istream()
-{
-#ifdef _MSC_VER
-    delete rdbuf();
-#endif
-}
+    template <typename Type>
+    using handle1 = std::function<void(const code&, const Type&)>;
+
+    template <typename Type1, typename Type2>
+    using handle2 = std::function<void(const code&, const Type1&,
+        const Type2&)>;
+
+    template <typename Type1, typename Type2, typename Type3>
+    using handle3 = std::function<void(const code&, const Type1&,
+        const Type2&, const Type3&)>;
 
 } // namespace libbitcoin
+
+#endif

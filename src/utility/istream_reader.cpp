@@ -23,7 +23,7 @@
 namespace libbitcoin {
 
 istream_reader::istream_reader(std::istream& stream)
-: stream_(stream)
+  : stream_(stream)
 {
 }
 

@@ -28,9 +28,9 @@ namespace libbitcoin {
 // Construct bc::ofstream.
 ofstream::ofstream(const std::string& path, std::ofstream::openmode mode)
 #ifdef _MSC_VER
-    : std::ofstream(bc::to_utf16(path), mode)
+  : std::ofstream(bc::to_utf16(path), mode)
 #else
-    : std::ofstream(path, mode)
+  : std::ofstream(path, mode)
 #endif
 {
 }

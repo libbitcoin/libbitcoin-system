@@ -28,9 +28,9 @@ namespace libbitcoin {
 // Construct bc::ifstream.
 ifstream::ifstream(const std::string& path, std::ifstream::openmode mode)
 #ifdef _MSC_VER
-    : std::ifstream(bc::to_utf16(path), mode)
+  : std::ifstream(bc::to_utf16(path), mode)
 #else
-    : std::ifstream(path, mode)
+  : std::ifstream(path, mode)
 #endif
 {
 }

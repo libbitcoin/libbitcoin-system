@@ -222,6 +222,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base58.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base64.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base85.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\handlers.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\checksum.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\crypto.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\elliptic_curve.hpp" />
