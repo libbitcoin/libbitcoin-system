@@ -37,7 +37,7 @@ INITIALIZE_TRACK(bc::network::protocol_address);
 namespace libbitcoin {
 namespace network {
 
-#define NAME "adddress"
+#define NAME "address"
 
 using namespace bc::message;
 using std::placeholders::_1;
