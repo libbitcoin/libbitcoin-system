@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_SESSION_HPP
-#define LIBBITCOIN_NETWORK_SESSION_HPP
+#ifndef LIBBITCOIN_NETWORK_P2P_HPP
+#define LIBBITCOIN_NETWORK_P2P_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -44,7 +44,7 @@
 namespace libbitcoin {
 namespace network {
 
-class BC_API session
+class BC_API p2p
 {
 public:
     static const uint16_t mainnet;
@@ -56,7 +56,7 @@ public:
     typedef std::function<void(const code&, size_t)>
         fetch_connection_count_handler;
 
-    session(threadpool& pool, hosts& hosts, connector& network,
+    p2p(threadpool& pool, hosts& hosts, connector& network,
         uint16_t port=mainnet, bool relay=true, size_t max_outbound=8,
         size_t max_inbound=8,
         const config::endpoint::list& seeds=session_seed::mainnet,
@@ -64,8 +64,8 @@ public:
         const timeout& timeouts=timeout::defaults);
     
     /// This class is not copyable.
-    session(const session&) = delete;
-    void operator=(const session&) = delete;
+    p2p(const p2p&) = delete;
+    void operator=(const p2p&) = delete;
 
     void start(completion_handler handle_complete);
     void stop(completion_handler handle_complete);
@@ -80,7 +80,7 @@ public:
     void broadcast(const Message& packet, broadcast_handler handle_send)
     {
         dispatch_.ordered(
-            std::bind(&network::session::do_broadcast<Message>,
+            std::bind(&network::p2p::do_broadcast<Message>,
                 this, packet, handle_send));
     }
 

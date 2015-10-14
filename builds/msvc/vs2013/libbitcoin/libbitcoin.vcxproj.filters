@@ -494,9 +494,6 @@
     <ClCompile Include="..\..\..\..\src\wallet\ek_private.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\network\session.cpp">
-      <Filter>src\network</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\network\protocol.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
@@ -507,6 +504,9 @@
       <Filter>src\network</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\network\connector.cpp">
+      <Filter>src\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\p2p.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
   </ItemGroup>
@@ -958,9 +958,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\handlers.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\session.hpp">
-      <Filter>include\bitcoin\network</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
@@ -971,6 +968,9 @@
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\connector.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\p2p.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
   </ItemGroup>
