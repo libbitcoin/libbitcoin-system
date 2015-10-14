@@ -117,8 +117,8 @@ src_libbitcoin_la_SOURCES = \
     src/network/acceptor.cpp \
     src/network/caller.cpp \
     src/network/channel.cpp \
+    src/network/connector.cpp \
     src/network/hosts.cpp \
-    src/network/initiator.cpp \
     src/network/message_subscriber.cpp \
     src/network/protocol.cpp \
     src/network/protocol_address.cpp \
@@ -400,8 +400,8 @@ include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/asio.hpp \
     include/bitcoin/bitcoin/network/caller.hpp \
     include/bitcoin/bitcoin/network/channel.hpp \
+    include/bitcoin/bitcoin/network/connector.hpp \
     include/bitcoin/bitcoin/network/hosts.hpp \
-    include/bitcoin/bitcoin/network/initiator.hpp \
     include/bitcoin/bitcoin/network/message_subscriber.hpp \
     include/bitcoin/bitcoin/network/network_settings.hpp \
     include/bitcoin/bitcoin/network/protocol.hpp \

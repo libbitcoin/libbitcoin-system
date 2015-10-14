@@ -299,9 +299,6 @@
     <ClCompile Include="..\..\..\..\src\network\protocol_address.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\network\initiator.cpp">
-      <Filter>src\network</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\deadline.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
@@ -507,6 +504,9 @@
       <Filter>src\network</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\network\caller.cpp">
+      <Filter>src\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\connector.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
   </ItemGroup>
@@ -719,9 +719,6 @@
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_address.hpp">
-      <Filter>include\bitcoin\network</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\initiator.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\deadline.hpp">
@@ -971,6 +968,9 @@
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\caller.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\connector.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
   </ItemGroup>

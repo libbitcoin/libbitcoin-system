@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_INITIATOR_HPP
-#define LIBBITCOIN_NETWORK_INITIATOR_HPP
+#ifndef LIBBITCOIN_NETWORK_CONNECTOR_HPP
+#define LIBBITCOIN_NETWORK_CONNECTOR_HPP
 
 #include <cstdint>
 #include <memory>
@@ -40,18 +40,18 @@
 namespace libbitcoin {
 namespace network {
 
-class BC_API initiator
+class BC_API connector
 {
 public:
     /// Magic number that identifies p2p protocol messages.
     static const uint32_t mainnet;
 
-    initiator(threadpool& pool, uint32_t network_magic=mainnet,
+    connector(threadpool& pool, uint32_t network_magic=mainnet,
         const timeout& timeouts=timeout::defaults);
 
     /// This class is not copyable.
-    initiator(const initiator&) = delete;
-    void operator=(const initiator&) = delete;
+    connector(const connector&) = delete;
+    void operator=(const connector&) = delete;
 
     void listen(uint16_t port, acceptor::listen_handler handle_listen);
     void connect(const std::string& hostname, uint16_t port,

@@ -28,8 +28,8 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/connector.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
-#include <bitcoin/bitcoin/network/initiator.hpp>
 #include <bitcoin/bitcoin/network/protocol_version.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -51,7 +51,7 @@ public:
     static const config::endpoint::list testnet;
 
     session_seed(threadpool& pool, hosts& hosts, const timeout& timeouts,
-        initiator& network, const config::endpoint::list& seeds,
+        connector& network, const config::endpoint::list& seeds,
         const message::network_address& self);
     ~session_seed();
 
@@ -73,7 +73,7 @@ private:
     threadpool& pool_;
     hosts& hosts_;
     const timeout& timeouts_;
-    initiator& network_;
+    connector& network_;
     const config::endpoint::list& seeds_;
     const message::network_address self_;
 };

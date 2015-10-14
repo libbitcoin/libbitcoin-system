@@ -29,11 +29,11 @@
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
-#include <bitcoin/bitcoin/network/proxy.hpp>
+#include <bitcoin/bitcoin/network/connector.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
-#include <bitcoin/bitcoin/network/initiator.hpp>
 #include <bitcoin/bitcoin/network/protocol_ping.hpp>
 #include <bitcoin/bitcoin/network/protocol_seed.hpp>
+#include <bitcoin/bitcoin/network/proxy.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
@@ -69,7 +69,7 @@ const config::endpoint::list session_seed::testnet
 
 // This is not currently stoppable.
 session_seed::session_seed(threadpool& pool, hosts& hosts, const timeout& timeouts,
-    initiator& network, const config::endpoint::list& seeds,
+    connector& network, const config::endpoint::list& seeds,
     const message::network_address& self)
   : dispatch_(pool),
     hosts_(hosts),

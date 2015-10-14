@@ -34,8 +34,8 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/connector.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
-#include <bitcoin/bitcoin/network/initiator.hpp>
 #include <bitcoin/bitcoin/network/protocol_version.hpp>
 #include <bitcoin/bitcoin/network/session_seed.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
@@ -56,7 +56,7 @@ public:
     typedef std::function<void(const code&, size_t)>
         fetch_connection_count_handler;
 
-    session(threadpool& pool, hosts& hosts, initiator& network,
+    session(threadpool& pool, hosts& hosts, connector& network,
         uint16_t port=mainnet, bool relay=true, size_t max_outbound=8,
         size_t max_inbound=8,
         const config::endpoint::list& seeds=session_seed::mainnet,
@@ -147,7 +147,7 @@ private:
     dispatcher dispatch_;
     threadpool& pool_;
     hosts& hosts_;
-    initiator& network_;
+    connector& network_;
     std::shared_ptr<protocol_version> handshake_;
     channel_subscriber_ptr channel_subscriber_;
 

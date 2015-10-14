@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/network/initiator.hpp>
+#include <bitcoin/bitcoin/network/connector.hpp>
 
 #include <algorithm>
 #include <cstdint>
@@ -38,15 +38,15 @@ namespace network {
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-const uint32_t initiator::mainnet = 3652501241;
+const uint32_t connector::mainnet = 3652501241;
 
-initiator::initiator(threadpool& pool, uint32_t network_magic,
+connector::connector(threadpool& pool, uint32_t network_magic,
     const timeout& timeouts)
   : pool_(pool), magic_(network_magic), timeouts_(timeouts)
 {
 }
 
-void initiator::resolve_handler(const boost_code& ec,
+void connector::resolve_handler(const boost_code& ec,
     asio::iterator endpoint_iterator, caller::handler handle_connect,
     asio::resolver_ptr, asio::query_ptr /* query */)
 {
@@ -67,7 +67,7 @@ void initiator::resolve_handler(const boost_code& ec,
 // TODO: add stop().
 
 // TODO: make cancellable (via acceptor).
-void initiator::listen(uint16_t port, acceptor::listen_handler handle_listen)
+void connector::listen(uint16_t port, acceptor::listen_handler handle_listen)
 {
     const auto accept = std::make_shared<asio::acceptor>(pool_.service());
 
@@ -92,7 +92,7 @@ void initiator::listen(uint16_t port, acceptor::listen_handler handle_listen)
 }
 
 // TODO: make cancellable (via caller).
-void initiator::connect(const std::string& hostname, uint16_t port,
+void connector::connect(const std::string& hostname, uint16_t port,
     caller::handler handle_connect)
 {
     const auto resolve = std::make_shared<asio::resolver>(pool_.service());
@@ -100,7 +100,7 @@ void initiator::connect(const std::string& hostname, uint16_t port,
     const auto text_port = std::to_string(port);
     const auto query = std::make_shared<asio::query>(hostname, text_port);
     resolve->async_resolve(*query,
-        std::bind(&initiator::resolve_handler,
+        std::bind(&connector::resolve_handler,
             this, _1, _2, handle_connect, resolve, query));
 }
 

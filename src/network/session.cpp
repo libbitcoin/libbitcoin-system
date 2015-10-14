@@ -33,8 +33,8 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/acceptor.hpp>
+#include <bitcoin/bitcoin/network/connector.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
-#include <bitcoin/bitcoin/network/initiator.hpp>
 #include <bitcoin/bitcoin/network/protocol_address.hpp>
 #include <bitcoin/bitcoin/network/protocol_ping.hpp>
 #include <bitcoin/bitcoin/network/protocol_version.hpp>
@@ -57,7 +57,7 @@ using boost::posix_time::seconds;
 
 const uint16_t session::mainnet = 8333;
 
-session::session(threadpool& pool, hosts& hosts, initiator& network,
+session::session(threadpool& pool, hosts& hosts, connector& network,
     uint16_t port, bool relay, size_t max_outbound, size_t max_inbound,
     const config::endpoint::list& seeds, const config::authority& self,
     const timeout& timeouts)
