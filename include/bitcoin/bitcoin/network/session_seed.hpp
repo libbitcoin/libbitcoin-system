@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_SEEDER_HPP
-#define LIBBITCOIN_NETWORK_SEEDER_HPP
+#ifndef LIBBITCOIN_NETWORK_SESSION_SEED_HPP
+#define LIBBITCOIN_NETWORK_SESSION_SEED_HPP
 
 #include <cstddef>
 #include <memory>
@@ -40,8 +40,8 @@
 namespace libbitcoin {
 namespace network {
 
-class BC_API seeder
-  : public std::enable_shared_from_this<seeder>, track<seeder>
+class BC_API session_seed
+  : public std::enable_shared_from_this<session_seed>, track<session_seed>
 {
 public:
     typedef std::function<void(const code&)> handler;
@@ -50,14 +50,14 @@ public:
     static const config::endpoint::list mainnet;
     static const config::endpoint::list testnet;
 
-    seeder(threadpool& pool, hosts& hosts, const timeout& timeouts,
+    session_seed(threadpool& pool, hosts& hosts, const timeout& timeouts,
         initiator& network, const config::endpoint::list& seeds,
         const message::network_address& self);
-    ~seeder();
+    ~session_seed();
 
     /// This class is not copyable.
-    seeder(const seeder&) = delete;
-    void operator=(const seeder&) = delete;
+    session_seed(const session_seed&) = delete;
+    void operator=(const session_seed&) = delete;
 
     void start(handler handle_seeded);
 

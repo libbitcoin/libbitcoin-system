@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/network/seeder.hpp>
+#include <bitcoin/bitcoin/network/session_seed.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -40,7 +40,7 @@
 #include <bitcoin/bitcoin/utility/string.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
 
-INITIALIZE_TRACK(bc::network::seeder);
+INITIALIZE_TRACK(bc::network::session_seed);
 
 namespace libbitcoin {
 namespace network {
@@ -48,7 +48,7 @@ namespace network {
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-const config::endpoint::list seeder::mainnet
+const config::endpoint::list session_seed::mainnet
 {
     { "seed.bitnodes.io", 8333 },
     { "seed.bitcoinstats.com", 8333 },
@@ -59,7 +59,7 @@ const config::endpoint::list seeder::mainnet
 };
 
 // Based on bitcoinstats.com/network/dns-servers
-const config::endpoint::list seeder::testnet
+const config::endpoint::list session_seed::testnet
 {
     { "testnet-seed.alexykot.me", 18333 },
     { "testnet-seed.bitcoin.petertodd.org", 18333 },
@@ -68,7 +68,7 @@ const config::endpoint::list seeder::testnet
 };
 
 // This is not currently stoppable.
-seeder::seeder(threadpool& pool, hosts& hosts, const timeout& timeouts,
+session_seed::session_seed(threadpool& pool, hosts& hosts, const timeout& timeouts,
     initiator& network, const config::endpoint::list& seeds,
     const message::network_address& self)
   : dispatch_(pool),
@@ -78,20 +78,20 @@ seeder::seeder(threadpool& pool, hosts& hosts, const timeout& timeouts,
     network_(network),
     seeds_(seeds),
     self_(self),
-    CONSTRUCT_TRACK(seeder, LOG_NETWORK)
+    CONSTRUCT_TRACK(session_seed, LOG_NETWORK)
 {
 }
 
-seeder::~seeder()
+session_seed::~session_seed()
 {
     log_info(LOG_PROTOCOL)
-        << "Closed seeder";
+        << "Closed session_seed";
 }
 
 // TODO: notify all channels to stop.
 // This will result in the completion handler being invoked.
 // This is properly implemented through the planned session generalization.
-void seeder::start(handler complete)
+void session_seed::start(handler complete)
 {
     if (seeds_.empty() || hosts_.capacity() == 0)
     {
@@ -102,11 +102,11 @@ void seeder::start(handler complete)
     }
 
     auto multiple =
-        std::bind(&seeder::handle_stopped,
+        std::bind(&session_seed::handle_stopped,
             shared_from_this(), hosts_.size(), complete);
 
-    // Require all seed callbacks before calling seeder::handle_complete.
-    auto single = synchronize(multiple, seeds_.size(), "seeder", true);
+    // Require all seed callbacks before calling session_seed::handle_complete.
+    auto single = synchronize(multiple, seeds_.size(), "session_seed", true);
 
     // Require one callback per channel before calling single.
     // We don't use parallel here because connect is itself asynchronous.
@@ -115,7 +115,7 @@ void seeder::start(handler complete)
 }
 
 // This accepts no error code becuase individual seed errors are suppressed.
-void seeder::handle_stopped(size_t host_start_size, handler complete)
+void session_seed::handle_stopped(size_t host_start_size, handler complete)
 {
     // TODO: there is a race in that hosts_.size() is not ordered.
     // We succeed only if there is a seed count increase.
@@ -125,18 +125,18 @@ void seeder::handle_stopped(size_t host_start_size, handler complete)
         complete(error::operation_failed);
 }
 
-void seeder::start_connect(const config::endpoint& seed, handler complete)
+void session_seed::start_connect(const config::endpoint& seed, handler complete)
 {
     log_info(LOG_PROTOCOL)
         << "Contacting seed [" << seed << "]";
 
     // OUTBOUND CONNECT (concurrent)
     network_.connect(seed.host(), seed.port(),
-        std::bind(&seeder::handle_connected,
+        std::bind(&session_seed::handle_connected,
             shared_from_this(), _1, _2, seed, complete));
 }
 
-void seeder::handle_connected(const code& ec, channel::ptr peer,
+void session_seed::handle_connected(const code& ec, channel::ptr peer,
     const config::endpoint& seed, handler complete)
 {
     if (ec)
@@ -153,7 +153,7 @@ void seeder::handle_connected(const code& ec, channel::ptr peer,
 
     static const bool relay = false;
     const auto callback = 
-        dispatch_.ordered_delegate(&seeder::handle_handshake,
+        dispatch_.ordered_delegate(&session_seed::handle_handshake,
             shared_from_this(), _1, peer, seed, complete);
 
     // TODO: set height.
@@ -167,7 +167,7 @@ void seeder::handle_connected(const code& ec, channel::ptr peer,
     peer->start();
 }
 
-void seeder::handle_handshake(const code& ec, channel::ptr peer,
+void session_seed::handle_handshake(const code& ec, channel::ptr peer,
     const config::endpoint& seed, handler complete)
 {
     if (ec)

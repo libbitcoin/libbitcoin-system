@@ -37,7 +37,7 @@
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/initiator.hpp>
 #include <bitcoin/bitcoin/network/protocol_version.hpp>
-#include <bitcoin/bitcoin/network/seeder.hpp>
+#include <bitcoin/bitcoin/network/session_seed.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -59,7 +59,7 @@ public:
     session(threadpool& pool, hosts& hosts, initiator& network,
         uint16_t port=mainnet, bool relay=true, size_t max_outbound=8,
         size_t max_inbound=8,
-        const config::endpoint::list& seeds=seeder::mainnet,
+        const config::endpoint::list& seeds=session_seed::mainnet,
         const config::authority& self=bc::unspecified_network_address,
         const timeout& timeouts=timeout::defaults);
     
