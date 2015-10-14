@@ -120,8 +120,8 @@ src_libbitcoin_la_SOURCES = \
     src/network/hosts.cpp \
     src/network/initiator.cpp \
     src/network/message_subscriber.cpp \
+    src/network/protocol.cpp \
     src/network/protocol_address.cpp \
-    src/network/protocol_base_base.cpp \
     src/network/protocol_ping.cpp \
     src/network/protocol_seed.cpp \
     src/network/protocol_version.cpp \
@@ -404,9 +404,9 @@ include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/initiator.hpp \
     include/bitcoin/bitcoin/network/message_subscriber.hpp \
     include/bitcoin/bitcoin/network/network_settings.hpp \
+    include/bitcoin/bitcoin/network/protocol.hpp \
     include/bitcoin/bitcoin/network/protocol_address.hpp \
     include/bitcoin/bitcoin/network/protocol_base.hpp \
-    include/bitcoin/bitcoin/network/protocol_base_base.hpp \
     include/bitcoin/bitcoin/network/protocol_ping.hpp \
     include/bitcoin/bitcoin/network/protocol_seed.hpp \
     include/bitcoin/bitcoin/network/protocol_version.hpp \

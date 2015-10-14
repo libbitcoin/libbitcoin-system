@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_PROTOCOL_BASE_BASE_HPP
-#define LIBBITCOIN_NETWORK_PROTOCOL_BASE_BASE_HPP
+#ifndef LIBBITCOIN_NETWORK_PROTOCOL_HPP
+#define LIBBITCOIN_NETWORK_PROTOCOL_HPP
 
 #include <functional>
 #include <memory>
@@ -39,8 +39,8 @@ namespace network {
 /**
  * Virtual base class for protocol implementations.
  */
-class BC_API protocol_base_base
-  : public std::enable_shared_from_this<protocol_base_base>
+class BC_API protocol
+  : public std::enable_shared_from_this<protocol>
 {
 public:
     /**
@@ -59,7 +59,7 @@ protected:
      * @param[in]  name      The instance name for logging purposes.
      * @param[in]  complete  Callback invoked upon stop if not null.
      */
-    protocol_base_base(channel::ptr channel, threadpool& pool,
+    protocol(channel::ptr channel, threadpool& pool,
         const std::string& name, handler complete=nullptr);
 
     /**
@@ -70,13 +70,13 @@ protected:
      * @param[in]  name      The instance name for logging purposes.
      * @param[in]  complete  Callback invoked upon stop if not null.
      */
-    protocol_base_base(channel::ptr peer, threadpool& pool,
+    protocol(channel::ptr peer, threadpool& pool,
         const asio::duration& timeout, const std::string& name,
         handler complete=nullptr);
 
     /// Instances of this class are not copyable.
-    protocol_base_base(const protocol_base_base&) = delete;
-    void operator=(const protocol_base_base&) = delete;
+    protocol(const protocol&) = delete;
+    void operator=(const protocol&) = delete;
     
     /**
      * Get a shared pointer to the derived instance from this.

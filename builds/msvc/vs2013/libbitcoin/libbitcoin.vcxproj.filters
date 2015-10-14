@@ -449,9 +449,6 @@
     <ClCompile Include="..\..\..\..\src\message\heading.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\network\protocol_base_base.cpp">
-      <Filter>src\network</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\network\message_subscriber.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
@@ -507,6 +504,9 @@
       <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\network\session.cpp">
+      <Filter>src\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\protocol.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
   </ItemGroup>
@@ -898,9 +898,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\header.hpp">
       <Filter>include\bitcoin\chain</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_base_base.hpp">
-      <Filter>include\bitcoin\network</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\message_subscriber.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
@@ -971,6 +968,9 @@
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\session.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
   </ItemGroup>

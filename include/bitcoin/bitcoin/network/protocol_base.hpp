@@ -26,7 +26,7 @@
 #include <utility>
 #include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/protocol_base_base.hpp>
+#include <bitcoin/bitcoin/network/protocol.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -40,7 +40,7 @@ namespace network {
  */
 template <class Protocol>
 class protocol_base
-  : public protocol_base_base
+  : public protocol
 {
 protected:
     /**
@@ -52,7 +52,7 @@ protected:
      */
     protocol_base(channel::ptr channel, threadpool& pool,
         const std::string& name, handler complete=nullptr)
-      : protocol_base_base(channel, pool, name, complete)
+      : protocol(channel, pool, name, complete)
     {
     }
 
