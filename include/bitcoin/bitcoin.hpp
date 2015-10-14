@@ -78,8 +78,8 @@
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/network/acceptor.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
+#include <bitcoin/bitcoin/network/caller.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/connector.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/initiator.hpp>
 #include <bitcoin/bitcoin/network/message_subscriber.hpp>

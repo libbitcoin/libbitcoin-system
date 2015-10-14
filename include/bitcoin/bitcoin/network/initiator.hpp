@@ -30,9 +30,9 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/acceptor.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
+#include <bitcoin/bitcoin/network/caller.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/proxy.hpp>
-#include <bitcoin/bitcoin/network/connector.hpp>
 #include <bitcoin/bitcoin/network/protocol_version.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -55,11 +55,11 @@ public:
 
     void listen(uint16_t port, acceptor::listen_handler handle_listen);
     void connect(const std::string& hostname, uint16_t port,
-        connector::handler handle_connect);
+        caller::handler handle_connect);
 
 private:
     void resolve_handler(const boost_code& ec, asio::iterator endpoint_iterator,
-        connector::handler handle_connect, asio::resolver_ptr, asio::query_ptr);
+        caller::handler handle_connect, asio::resolver_ptr, asio::query_ptr);
 
     threadpool& pool_;
     uint32_t magic_;

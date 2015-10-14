@@ -115,8 +115,8 @@ src_libbitcoin_la_SOURCES = \
     src/message/verack.cpp \
     src/message/version.cpp \
     src/network/acceptor.cpp \
+    src/network/caller.cpp \
     src/network/channel.cpp \
-    src/network/connector.cpp \
     src/network/hosts.cpp \
     src/network/initiator.cpp \
     src/network/message_subscriber.cpp \
@@ -398,8 +398,8 @@ include_bitcoin_bitcoin_networkdir = ${includedir}/bitcoin/bitcoin/network
 include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/acceptor.hpp \
     include/bitcoin/bitcoin/network/asio.hpp \
+    include/bitcoin/bitcoin/network/caller.hpp \
     include/bitcoin/bitcoin/network/channel.hpp \
-    include/bitcoin/bitcoin/network/connector.hpp \
     include/bitcoin/bitcoin/network/hosts.hpp \
     include/bitcoin/bitcoin/network/initiator.hpp \
     include/bitcoin/bitcoin/network/message_subscriber.hpp \

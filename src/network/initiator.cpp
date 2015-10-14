@@ -27,9 +27,9 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/acceptor.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
+#include <bitcoin/bitcoin/network/caller.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/proxy.hpp>
-#include <bitcoin/bitcoin/network/connector.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 
 namespace libbitcoin {
@@ -47,18 +47,18 @@ initiator::initiator(threadpool& pool, uint32_t network_magic,
 }
 
 void initiator::resolve_handler(const boost_code& ec,
-    asio::iterator endpoint_iterator, connector::handler handle_connect,
+    asio::iterator endpoint_iterator, caller::handler handle_connect,
     asio::resolver_ptr, asio::query_ptr /* query */)
 {
     if (ec)
     {
         // TODO: log query info.
-        // TODO: pass query to connector for logging.
+        // TODO: pass query to caller for logging.
         handle_connect(error::resolve_failed, nullptr);
         return;
     }
 
-    const auto outbound = std::make_shared<connector>(pool_, magic_,
+    const auto outbound = std::make_shared<caller>(pool_, magic_,
         timeouts_);
 
     outbound->connect(endpoint_iterator, handle_connect);
@@ -91,9 +91,9 @@ void initiator::listen(uint16_t port, acceptor::listen_handler handle_listen)
     handle_listen(ec, inbound);
 }
 
-// TODO: make cancellable (via connector).
+// TODO: make cancellable (via caller).
 void initiator::connect(const std::string& hostname, uint16_t port,
-    connector::handler handle_connect)
+    caller::handler handle_connect)
 {
     const auto resolve = std::make_shared<asio::resolver>(pool_.service());
 

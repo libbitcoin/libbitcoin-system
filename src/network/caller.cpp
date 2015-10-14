@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/network/connector.hpp>
+#include <bitcoin/bitcoin/network/caller.hpp>
 
 #include <cstdint>
 #include <functional>
@@ -34,7 +34,7 @@
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
-INITIALIZE_TRACK(bc::network::connector);
+INITIALIZE_TRACK(bc::network::caller);
 
 namespace libbitcoin {
 namespace network {
@@ -43,25 +43,25 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 
 // There is no way to cancel channel creation, must wait for timer.
-connector::connector(threadpool& pool, uint32_t network_magic, 
+caller::caller(threadpool& pool, uint32_t network_magic, 
     const timeout& timeouts)
   : pool_(pool), magic_(network_magic), timeouts_(timeouts),
     deadline_(std::make_shared<deadline>(pool, timeouts.connect)),
-    CONSTRUCT_TRACK(connector, LOG_NETWORK)
+    CONSTRUCT_TRACK(caller, LOG_NETWORK)
 {
 }
 
 // Calling this with an outstanding call will cause the outstnding call to
 // destruct and invoke stop, canceling the timer and firing the callback.
-void connector::connect(asio::iterator endpoint_iterator,
+void caller::connect(asio::iterator endpoint_iterator,
     handler handle_connect)
 {
     // Handle one callback before calling handle_connect.
-    const auto complete = synchronize(handle_connect, 1, "connector");
+    const auto complete = synchronize(handle_connect, 1, "caller");
 
     // Start the deadline timer with completion handler.
     deadline_->start(
-        std::bind(&connector::handle_timer,
+        std::bind(&caller::handle_timer,
             shared_from_this(), _1, complete));
 
     // Create a socket for the connection.
@@ -70,11 +70,11 @@ void connector::connect(asio::iterator endpoint_iterator,
     // Start the socket connection with completion handler.
     using namespace boost::asio;
     async_connect(*socket, endpoint_iterator,
-        std::bind(&connector::create_channel,
+        std::bind(&caller::create_channel,
             shared_from_this(), _1, _2, socket, complete));
 }
 
-void connector::create_channel(const boost_code& ec, asio::iterator,
+void caller::create_channel(const boost_code& ec, asio::iterator,
     asio::socket_ptr socket, handler complete)
 {
     deadline_->cancel();
@@ -93,7 +93,7 @@ void connector::create_channel(const boost_code& ec, asio::iterator,
     complete(error::success, peer);
 }
 
-void connector::handle_timer(const code& ec, handler complete)
+void caller::handle_timer(const code& ec, handler complete)
 {
     // The handler most not expect a node when there is an error.
     if (!deadline::canceled(ec))

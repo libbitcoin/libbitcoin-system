@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_CONNECTOR_HPP
-#define LIBBITCOIN_NETWORK_CONNECTOR_HPP
+#ifndef LIBBITCOIN_NETWORK_CALLER_HPP
+#define LIBBITCOIN_NETWORK_CALLER_HPP
 
 #include <cstdint>
 #include <memory>
@@ -39,25 +39,24 @@ namespace network {
  * Class wrapper for boost::asio::async_connect.
  * This simplifies invocation and eliminates boost-speific error handling.
  */
-class connector
-  : public std::enable_shared_from_this<connector>, track<connector>
+class caller
+  : public std::enable_shared_from_this<caller>, track<caller>
 {
 public:
-    typedef std::shared_ptr<connector> ptr;
+    typedef std::shared_ptr<caller> ptr;
     typedef std::function<void(const code&, channel::ptr)> handler;
 
     /**
-     * Construct a socket connector.
-     * @param[in]  pool           The thread pool used by the connector.
+     * Construct a socket caller.
+     * @param[in]  pool           The thread pool used by the caller.
      * @param[in]  network_magic  The magic bytes that identify the network.
      * @param[in]  timeout        The collection of network timeout settings.
      */
-    connector(threadpool& pool, uint32_t network_magic,
-        const timeout& timeout);
+    caller(threadpool& pool, uint32_t network_magic, const timeout& timeout);
 
     /// This class is not copyable.
-    connector(const connector&) = delete;
-    void operator=(const connector&) = delete;
+    caller(const caller&) = delete;
+    void operator=(const caller&) = delete;
 
     /**
      * Connect to the specified endpoint.

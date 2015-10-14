@@ -293,9 +293,6 @@
     <ClCompile Include="..\..\..\..\src\config\endpoint.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\network\connector.cpp">
-      <Filter>src\network</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\network\protocol_ping.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
@@ -509,6 +506,9 @@
     <ClCompile Include="..\..\..\..\src\network\session_seed.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\caller.cpp">
+      <Filter>src\network</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -711,9 +711,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\endpoint.hpp">
       <Filter>include\bitcoin\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\connector.hpp">
-      <Filter>include\bitcoin\network</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\synchronizer.hpp">
       <Filter>include\bitcoin\utility</Filter>
@@ -971,6 +968,9 @@
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\session_seed.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\caller.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
   </ItemGroup>
