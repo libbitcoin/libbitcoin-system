@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/network/protocol.hpp>
+#include <bitcoin/bitcoin/network/session.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -43,7 +43,7 @@
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
-INITIALIZE_TRACK(bc::network::protocol::channel_subscriber);
+INITIALIZE_TRACK(bc::network::session::channel_subscriber);
 
 namespace libbitcoin {
 namespace network {
@@ -55,9 +55,9 @@ using boost::format;
 using boost::posix_time::time_duration;
 using boost::posix_time::seconds;
 
-const uint16_t protocol::mainnet = 8333;
+const uint16_t session::mainnet = 8333;
 
-protocol::protocol(threadpool& pool, hosts& hosts, initiator& network,
+session::session(threadpool& pool, hosts& hosts, initiator& network,
     uint16_t port, bool relay, size_t max_outbound, size_t max_inbound,
     const config::endpoint::list& seeds, const config::authority& self,
     const timeout& timeouts)
@@ -79,19 +79,19 @@ protocol::protocol(threadpool& pool, hosts& hosts, initiator& network,
 // TODO: add seed connections to session_seed (i.e. connect once).
 // TODO: add manual connections via config in session_manual.
 
-void protocol::start(completion_handler handle_complete)
+void session::start(completion_handler handle_complete)
 {
     // Start inbound connection listener if configured.
     if (inbound_port_ > 0 && max_inbound_ > 0)
         start_accepting();
 
     hosts_.load(
-        std::bind(&protocol::handle_hosts_loaded,
+        std::bind(&session::handle_hosts_loaded,
             this, handle_complete));
 }
 
 // TODO: move seeding to node start.
-void protocol::handle_hosts_loaded(completion_handler handle_complete)
+void session::handle_hosts_loaded(completion_handler handle_complete)
 {
     const auto need_seeding = (max_outbound_ > 0 && hosts_.size() == 0 &&
         hosts_.capacity() > 0 && !seeds_.empty());
@@ -102,7 +102,7 @@ void protocol::handle_hosts_loaded(completion_handler handle_complete)
         start_connecting(error::success, handle_complete);
 }
 
-void protocol::stop(completion_handler handle_complete)
+void session::stop(completion_handler handle_complete)
 {
     // Stop protocol subscribers.
     channel_subscriber_->relay(error::service_stopped, nullptr);
@@ -120,10 +120,10 @@ void protocol::stop(completion_handler handle_complete)
     hosts_.save(handle_complete);
 }
 
-void protocol::start_seeding(completion_handler handle_complete)
+void session::start_seeding(completion_handler handle_complete)
 {
     const auto complete =
-        std::bind(&protocol::start_connecting,
+        std::bind(&session::start_connecting,
             this, _1, handle_complete);
 
     // This will always call complete no later than implied by timeouts.
@@ -134,7 +134,7 @@ void protocol::start_seeding(completion_handler handle_complete)
 
 // TODO: implement on session_outbound.
 
-void protocol::start_connecting(const code& ec,
+void session::start_connecting(const code& ec,
     completion_handler handle_complete)
 {
     if (ec)
@@ -152,14 +152,14 @@ void protocol::start_connecting(const code& ec,
     handle_complete(error::success);
 }
 
-void protocol::new_connection()
+void session::new_connection()
 {
     hosts_.fetch_address(
-        dispatch_.concurrent_delegate(&protocol::start_connect,
+        dispatch_.concurrent_delegate(&session::start_connect,
             this, _1, _2));
 }
 
-void protocol::start_connect(const code& ec, const config::authority& peer)
+void session::start_connect(const code& ec, const config::authority& peer)
 {
     if (ec)
     {
@@ -184,11 +184,11 @@ void protocol::start_connect(const code& ec, const config::authority& peer)
 
     // OUTBOUND CONNECT (sequential)
     network_.connect(peer.to_hostname(), peer.port(),
-        dispatch_.ordered_delegate(&protocol::handle_connect,
+        dispatch_.ordered_delegate(&session::handle_connect,
             this, _1, _2, peer));
 }
 
-void protocol::handle_connect(const code& ec, channel::ptr node,
+void session::handle_connect(const code& ec, channel::ptr node,
     const config::authority& peer)
 {
     if (ec)
@@ -210,7 +210,7 @@ void protocol::handle_connect(const code& ec, channel::ptr node,
         << outbound_connections_.size() << " total)";
 
     const auto stop_handler =
-        dispatch_.ordered_delegate(&protocol::outbound_channel_stopped,
+        dispatch_.ordered_delegate(&session::outbound_channel_stopped,
             this, _1, node, peer.to_string());
 
     start_talking(node, stop_handler, relay_);
@@ -218,7 +218,7 @@ void protocol::handle_connect(const code& ec, channel::ptr node,
 
 // TODO: implement on session_manual.
 
-void protocol::retry_manual_connection(const config::endpoint& address,
+void session::retry_manual_connection(const config::endpoint& address,
     bool relay, size_t retry)
 {
     const auto done = (retry == 1);
@@ -234,16 +234,16 @@ void protocol::retry_manual_connection(const config::endpoint& address,
     maintain_connection(address.host(), address.port(), relay, retries);
 }
 
-void protocol::maintain_connection(const std::string& hostname, uint16_t port,
+void session::maintain_connection(const std::string& hostname, uint16_t port,
     bool relay, size_t retry)
 {
     // MANUAL CONNECT
     network_.connect(hostname, port,
-        dispatch_.ordered_delegate(&protocol::handle_manual_connect,
+        dispatch_.ordered_delegate(&session::handle_manual_connect,
             this, _1, _2, hostname, port, relay, retry));
 }
 
-void protocol::handle_manual_connect(const code& ec,
+void session::handle_manual_connect(const code& ec,
     channel::ptr node, const std::string& hostname, uint16_t port, bool relay,
     size_t retries)
 {
@@ -271,7 +271,7 @@ void protocol::handle_manual_connect(const code& ec,
         << manual_connections_.size() << " total)";
 
     const auto stop_handler =
-        dispatch_.ordered_delegate(&protocol::manual_channel_stopped,
+        dispatch_.ordered_delegate(&session::manual_channel_stopped,
             this, _1, node, peer.to_string(), relay, retries);
 
     start_talking(node, stop_handler, relay);
@@ -279,14 +279,14 @@ void protocol::handle_manual_connect(const code& ec,
 
 // TODO: implement on session_inbound.
 
-void protocol::start_accepting()
+void session::start_accepting()
 {
     network_.listen(inbound_port_,
-        dispatch_.ordered_delegate(&protocol::start_accept,
+        dispatch_.ordered_delegate(&session::start_accept,
             this, _1, _2));
 }
 
-void protocol::start_accept(const code& ec, acceptor::ptr accept)
+void session::start_accept(const code& ec, acceptor::ptr accept)
 {
     BITCOIN_ASSERT(accept);
 
@@ -299,11 +299,11 @@ void protocol::start_accept(const code& ec, acceptor::ptr accept)
 
     // ACCEPT INCOMING CONNECTIONS
     accept->accept(
-        dispatch_.ordered_delegate(&protocol::handle_accept,
+        dispatch_.ordered_delegate(&session::handle_accept,
             this, _1, _2, accept));
 }
 
-void protocol::handle_accept(const code& ec, channel::ptr node,
+void session::handle_accept(const code& ec, channel::ptr node,
     acceptor::ptr accept)
 {
     // Relisten for connections.
@@ -347,7 +347,7 @@ void protocol::handle_accept(const code& ec, channel::ptr node,
         << inbound_connections_.size() << " total)";
 
     const auto stop_handler = 
-        dispatch_.ordered_delegate(&protocol::inbound_channel_stopped,
+        dispatch_.ordered_delegate(&session::inbound_channel_stopped,
             this, _1, node, address.to_string());
 
     start_talking(node, stop_handler, relay_);
@@ -355,7 +355,7 @@ void protocol::handle_accept(const code& ec, channel::ptr node,
 
 // TODO: virtual base method.
 
-void protocol::start_talking(channel::ptr node,
+void session::start_talking(channel::ptr node,
     proxy::stop_handler handle_stop, bool relay)
 {
     node->subscribe_stop(handle_stop);
@@ -364,7 +364,7 @@ void protocol::start_talking(channel::ptr node,
     channel_subscriber_->relay(error::success, node);
 
     const auto callback = 
-        dispatch_.ordered_delegate(&protocol::handle_handshake,
+        dispatch_.ordered_delegate(&session::handle_handshake,
             this, _1, node);
 
     // TODO: set height.
@@ -378,7 +378,7 @@ void protocol::start_talking(channel::ptr node,
     node->start();
 }
 
-void protocol::handle_handshake(const code& ec, channel::ptr node)
+void session::handle_handshake(const code& ec, channel::ptr node)
 {
     if (ec)
     {
@@ -397,7 +397,7 @@ void protocol::handle_handshake(const code& ec, channel::ptr node)
 
 // TODO: abstract base method, implement in derived.
 
-void protocol::outbound_channel_stopped(const code& ec,
+void session::outbound_channel_stopped(const code& ec,
     channel::ptr node, const std::string& address)
 {
     log_debug(LOG_PROTOCOL)
@@ -411,7 +411,7 @@ void protocol::outbound_channel_stopped(const code& ec,
         new_connection();
 }
 
-void protocol::manual_channel_stopped(const code& ec,
+void session::manual_channel_stopped(const code& ec,
     channel::ptr node, const std::string& address, bool relay, size_t retries)
 {
     log_debug(LOG_PROTOCOL)
@@ -425,7 +425,7 @@ void protocol::manual_channel_stopped(const code& ec,
         retry_manual_connection(address, relay, retries);
 }
 
-void protocol::inbound_channel_stopped(const code& ec,
+void session::inbound_channel_stopped(const code& ec,
     channel::ptr node, const std::string& address)
 {
     log_debug(LOG_PROTOCOL)
@@ -438,12 +438,12 @@ void protocol::inbound_channel_stopped(const code& ec,
 
 // TODO: retain these on protocol base.
 
-void protocol::blacklist(const config::authority& peer)
+void session::blacklist(const config::authority& peer)
 {
     blacklisted_.push_back(peer);
 }
 
-void protocol::remove_connection(channel_ptr_list& connections,
+void session::remove_connection(channel_ptr_list& connections,
     channel::ptr node)
 {
     auto it = std::find(connections.begin(), connections.end(), node);
@@ -451,18 +451,18 @@ void protocol::remove_connection(channel_ptr_list& connections,
         connections.erase(it);
 }
 
-void protocol::subscribe_channel(channel_handler handle_channel)
+void session::subscribe_channel(channel_handler handle_channel)
 {
     channel_subscriber_->subscribe(handle_channel);
 }
 
-size_t protocol::connection_count() const
+size_t session::connection_count() const
 {
     return outbound_connections_.size() + manual_connections_.size() +
         inbound_connections_.size();
 }
 
-bool protocol::is_blacklisted(const config::authority& peer) const
+bool session::is_blacklisted(const config::authority& peer) const
 {
     const auto found = [&peer](const config::authority& host)
     {
@@ -474,7 +474,7 @@ bool protocol::is_blacklisted(const config::authority& peer) const
     return true;
 }
 
-bool protocol::is_connected(const config::authority& peer) const
+bool session::is_connected(const config::authority& peer) const
 {
     const auto& inn = inbound_connections_;
     const auto& out = outbound_connections_;
@@ -489,7 +489,7 @@ bool protocol::is_connected(const config::authority& peer) const
         (std::find_if(man.begin(), man.end(), found) != man.end());
 }
 
-bool protocol::is_loopback(channel::ptr node) const
+bool session::is_loopback(channel::ptr node) const
 {
     const auto& outbound = outbound_connections_;
     const auto id = node->identifier();

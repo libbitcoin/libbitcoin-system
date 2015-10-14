@@ -120,7 +120,6 @@ src_libbitcoin_la_SOURCES = \
     src/network/hosts.cpp \
     src/network/initiator.cpp \
     src/network/message_subscriber.cpp \
-    src/network/protocol.cpp \
     src/network/protocol_address.cpp \
     src/network/protocol_base_base.cpp \
     src/network/protocol_ping.cpp \
@@ -128,6 +127,7 @@ src_libbitcoin_la_SOURCES = \
     src/network/protocol_version.cpp \
     src/network/proxy.cpp \
     src/network/seeder.cpp \
+    src/network/session.cpp \
     src/network/timeout.cpp \
     src/unicode/console_streambuf.cpp \
     src/unicode/ifstream.cpp \
@@ -404,7 +404,6 @@ include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/initiator.hpp \
     include/bitcoin/bitcoin/network/message_subscriber.hpp \
     include/bitcoin/bitcoin/network/network_settings.hpp \
-    include/bitcoin/bitcoin/network/protocol.hpp \
     include/bitcoin/bitcoin/network/protocol_address.hpp \
     include/bitcoin/bitcoin/network/protocol_base.hpp \
     include/bitcoin/bitcoin/network/protocol_base_base.hpp \
@@ -413,6 +412,7 @@ include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/protocol_version.hpp \
     include/bitcoin/bitcoin/network/proxy.hpp \
     include/bitcoin/bitcoin/network/seeder.hpp \
+    include/bitcoin/bitcoin/network/session.hpp \
     include/bitcoin/bitcoin/network/shared_const_buffer.hpp \
     include/bitcoin/bitcoin/network/timeout.hpp
 
