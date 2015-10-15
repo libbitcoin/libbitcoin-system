@@ -144,7 +144,7 @@ void protocol::handle_stop(const code& ec)
 
 void protocol::handle_timer(const code& ec)
 {
-    if (stopped() || deadline::canceled(ec))
+    if (stopped())
         return;
 
     log_debug(LOG_PROTOCOL)

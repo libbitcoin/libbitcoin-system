@@ -77,7 +77,7 @@ p2p::p2p(threadpool& pool, hosts& hosts, connector& network,
 }
 
 // TODO: add seed connections to session_seed (i.e. connect once).
-// TODO: add manual connections via config in p2p_manual.
+// TODO: add manual connections via config in session_manual.
 
 void p2p::start(completion_handler handle_complete)
 {
@@ -132,7 +132,7 @@ void p2p::start_seeding(completion_handler handle_complete)
         self_.to_network_address())->start(complete);
 }
 
-// TODO: implement on p2p_outbound.
+// TODO: implement on session_outbound.
 
 void p2p::start_connecting(const code& ec,
     completion_handler handle_complete)
@@ -216,7 +216,7 @@ void p2p::handle_connect(const code& ec, channel::ptr node,
     start_talking(node, stop_handler, relay_);
 }
 
-// TODO: implement on p2p_manual.
+// TODO: implement on session_manual.
 
 void p2p::retry_manual_connection(const config::endpoint& address,
     bool relay, size_t retry)
@@ -277,7 +277,7 @@ void p2p::handle_manual_connect(const code& ec,
     start_talking(node, stop_handler, relay);
 }
 
-// TODO: implement on p2p_inbound.
+// TODO: implement on session_inbound.
 
 void p2p::start_accepting()
 {

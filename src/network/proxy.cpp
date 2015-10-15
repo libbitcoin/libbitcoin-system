@@ -219,9 +219,6 @@ void proxy::handle_expiration(const code& ec)
     if (stopped())
         return;
 
-    if (deadline::canceled(ec))
-        return;
-
     log_info(LOG_NETWORK)
         << "Channel lifetime expired [" << address() << "]";
 
@@ -233,9 +230,6 @@ void proxy::handle_inactivity(const code& ec)
     if (stopped())
         return;
 
-    if (deadline::canceled(ec))
-        return;
-
     log_info(LOG_NETWORK)
         << "Channel inactivity timeout [" << address() << "]";
 
@@ -245,9 +239,6 @@ void proxy::handle_inactivity(const code& ec)
 void proxy::handle_revival(const code& ec)
 {
     if (stopped())
-        return;
-
-    if (deadline::canceled(ec))
         return;
 
     // Nothing to do, no handler registered.
