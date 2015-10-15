@@ -22,59 +22,48 @@
 
 #include <cstdint>
 #include <memory>
+#include <string>
+#include <thread>
 #include <boost/date_time.hpp>
+#include <boost/utility.hpp>
+#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/timeout.hpp>
+#include <bitcoin/bitcoin/network/acceptor.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/deadline.hpp>
-#include <bitcoin/bitcoin/utility/synchronizer.hpp>
+#include <bitcoin/bitcoin/network/caller.hpp>
+#include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/proxy.hpp>
+#include <bitcoin/bitcoin/network/protocol_version.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
-/**
- * Class wrapper for boost::asio::async_connect.
- * This simplifies invocation and eliminates boost-speific error handling.
- */
-class connector
-  : public std::enable_shared_from_this<connector>, track<connector>
+class BC_API connector
 {
 public:
-    typedef std::shared_ptr<connector> ptr;
-    typedef std::function<void(const code&, channel::ptr)> handler;
+    /// Magic number that identifies p2p protocol messages.
+    static const uint32_t mainnet;
 
-    /**
-     * Construct a socket connector.
-     * @param[in]  pool           The thread pool used by the connector.
-     * @param[in]  network_magic  The magic bytes that identify the network.
-     * @param[in]  timeout        The collection of network timeout settings.
-     */
-    connector(threadpool& pool, uint32_t network_magic,
-        const timeout& timeout);
+    connector(threadpool& pool, uint32_t network_magic=mainnet,
+        const timeout& timeouts=timeout::defaults);
 
     /// This class is not copyable.
     connector(const connector&) = delete;
     void operator=(const connector&) = delete;
 
-    /**
-     * Connect to the specified endpoint.
-     * @param[in]  endpoint_iterator The endpoint iterator to connect with.
-     * @param[in]  handle_connect    Will be invoked upon expire or connection.
-     */
-    void connect(asio::iterator endpoint_iterator, handler handle_connect);
+    void listen(uint16_t port, acceptor::listen_handler handle_listen);
+    void connect(const std::string& hostname, uint16_t port,
+        caller::handler handle_connect);
 
 private:
-    void create_channel(const boost_code& ec, asio::iterator,
-        asio::socket_ptr socket, handler complete);
-    void handle_timer(const code& ec, handler complete);
+    void resolve_handler(const boost_code& ec, asio::iterator endpoint_iterator,
+        caller::handler handle_connect, asio::resolver_ptr, asio::query_ptr);
 
     threadpool& pool_;
     uint32_t magic_;
     const timeout& timeouts_;
-    deadline::ptr deadline_;
 };
 
 } // namespace network

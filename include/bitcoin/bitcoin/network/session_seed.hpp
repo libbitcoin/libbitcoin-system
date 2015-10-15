@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_SEEDER_HPP
-#define LIBBITCOIN_NETWORK_SEEDER_HPP
+#ifndef LIBBITCOIN_NETWORK_SESSION_SEED_HPP
+#define LIBBITCOIN_NETWORK_SESSION_SEED_HPP
 
 #include <cstddef>
 #include <memory>
@@ -28,8 +28,8 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/connector.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
-#include <bitcoin/bitcoin/network/initiator.hpp>
 #include <bitcoin/bitcoin/network/protocol_version.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -40,8 +40,8 @@
 namespace libbitcoin {
 namespace network {
 
-class BC_API seeder
-  : public std::enable_shared_from_this<seeder>, track<seeder>
+class BC_API session_seed
+  : public std::enable_shared_from_this<session_seed>, track<session_seed>
 {
 public:
     typedef std::function<void(const code&)> handler;
@@ -50,14 +50,14 @@ public:
     static const config::endpoint::list mainnet;
     static const config::endpoint::list testnet;
 
-    seeder(threadpool& pool, hosts& hosts, const timeout& timeouts,
-        initiator& network, const config::endpoint::list& seeds,
+    session_seed(threadpool& pool, hosts& hosts, const timeout& timeouts,
+        connector& network, const config::endpoint::list& seeds,
         const message::network_address& self);
-    ~seeder();
+    ~session_seed();
 
     /// This class is not copyable.
-    seeder(const seeder&) = delete;
-    void operator=(const seeder&) = delete;
+    session_seed(const session_seed&) = delete;
+    void operator=(const session_seed&) = delete;
 
     void start(handler handle_seeded);
 
@@ -73,7 +73,7 @@ private:
     threadpool& pool_;
     hosts& hosts_;
     const timeout& timeouts_;
-    initiator& network_;
+    connector& network_;
     const config::endpoint::list& seeds_;
     const message::network_address self_;
 };
