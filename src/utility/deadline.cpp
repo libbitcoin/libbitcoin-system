@@ -30,30 +30,19 @@ namespace libbitcoin {
 
 using std::placeholders::_1;
 
-// Use these to make sude codes stay in sync.
-static const auto std_timeout = error::channel_timeout;
-static const auto std_cancel = error::operation_failed;
-static const auto boost_cancel = asio::error::operation_aborted;
-
 // This can be dereferenced with an outstanding callback because the timer
 // closure captures an instance of this class and the callback.
-// This is guaranteed to call handler exactly once (unless prepetually reset).
+// This is guaranteed to call handler exactly once (unless canceled or reset).
 deadline::deadline(threadpool& pool, const asio::duration duration)
   : duration_(duration), timer_(pool.service()),
     CONSTRUCT_TRACK(deadline, LOG_NETWORK)
 {
 }
 
-// static, allows caller to test for timer cancellation in handler.
-bool deadline::canceled(const code& ec)
-{
-    return ec == std_cancel;
-}
-
 // static, allows caller to test for timer expiration in handler.
 bool deadline::expired(const code& ec)
 {
-    return ec == std_timeout;
+    return ec == error::channel_timeout;
 }
 
 void deadline::start(handler handle)
@@ -83,14 +72,14 @@ void deadline::cancel()
     BITCOIN_ASSERT(!ec);
 }
 
-// A boost success code implies that the timer fired.
 void deadline::handle_timer(const boost_code& ec, handler handle) const
 {
+    // A boost success code implies that the timer fired.
+    // An asio operation_aborted code implies that the timer was canceled.
+    // If canceled the timer will not invoke the callback.
     if (!ec)
-        handle(std_timeout);
-    else if (boost_cancel)
-        handle(std_cancel);
-    else
+        handle(error::channel_timeout);
+    else if (ec != asio::error::operation_aborted)
         handle(error::boost_to_error_code(ec));
 }
 

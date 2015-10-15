@@ -53,12 +53,6 @@ public:
     void operator=(const deadline&) = delete;
 
     /**
-     * Test handler error code for indication that the timer was stopped.
-     * @param[in]  ec  The error code passed in the handler invocation.
-     */
-    static bool canceled(const code& ec);
-
-    /**
      * Test handler error code for indication that the timer fired.
      * @param[in]  ec  The error code passed in the handler invocation.
      */

@@ -66,7 +66,7 @@ void protocol_ping::start()
 // This is fired by the callback (i.e. base timer and stop handler).
 void protocol_ping::send_ping(const code& ec)
 {
-    if (stopped() || deadline::canceled(ec))
+    if (stopped())
         return;
 
     if (ec && ec != error::channel_timeout)
