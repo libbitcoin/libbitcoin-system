@@ -239,12 +239,20 @@ void ignore_output(log_level, const std::string&, const std::string&)
 
 BOOST_AUTO_TEST_SUITE(script_tests)
 
+BOOST_AUTO_TEST_CASE(from_data__testnet_119058_non_standard)
+{
+    const auto raw_script = to_chunk(base16_literal("0130323066643366303435313438356531306633383837363437356630643265396130393739343332353534313766653139316438623963623230653430643863333030326431373463336539306366323433393231383761313037623634373337633937333135633932393264653431373731636565613062323563633534353732653302ae"));
+
+    chain::script parsed;
+    BOOST_REQUIRE(parsed.from_data(raw_script, true, chain::script::parse_mode::raw_data));
+}
+
 BOOST_AUTO_TEST_CASE(from_data_fails_parse)
 {
     const auto raw_script = to_chunk(base16_literal("3045022100ff1fc58dbd608e5e05846a8e6b45a46ad49878aef6879ad1a7cf4c5a7f853683022074a6a10f6053ab3cddc5620d169c7374cd42c1416c51b9744db2c8d9febfb84d01"));
 
     chain::script parsed;
-    BOOST_REQUIRE_EQUAL(false, parsed.from_data(raw_script, true, chain::script::parse_mode::strict));
+    BOOST_REQUIRE(!parsed.from_data(raw_script, true, chain::script::parse_mode::strict));
 }
 
 BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip)
