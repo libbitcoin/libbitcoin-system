@@ -50,11 +50,5 @@ timeout::timeout(
 {
 }
 
-// TODO: wrap boost timers with our own and map error codes internally.
-bool timeout::canceled(const boost_code& ec)
-{
-    return ec == asio::error::operation_aborted;
-}
-
 } // namespace network
 } // namespace libbitcoin

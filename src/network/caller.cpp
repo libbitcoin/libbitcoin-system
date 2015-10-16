@@ -57,6 +57,7 @@ void caller::connect(asio::iterator endpoint_iterator,
     handler handle_connect)
 {
     // Handle one callback before calling handle_connect.
+    // TODO: register the complete delegate with an external stop notifier.
     const auto complete = synchronize(handle_connect, 1, "caller");
 
     // Start the deadline timer with completion handler.
@@ -96,7 +97,7 @@ void caller::create_channel(const boost_code& ec, asio::iterator,
 void caller::handle_timer(const code& ec, handler complete)
 {
     // The handler must not expect a node when there is an error.
-    complete(ec, nullptr);
+    complete(error::channel_timeout, nullptr);
 }
 
 } // namespace network

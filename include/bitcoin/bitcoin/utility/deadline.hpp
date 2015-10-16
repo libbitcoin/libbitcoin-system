@@ -53,12 +53,6 @@ public:
     void operator=(const deadline&) = delete;
 
     /**
-     * Test handler error code for indication that the timer fired.
-     * @param[in]  ec  The error code passed in the handler invocation.
-     */
-    static bool expired(const code& ec);
-
-    /**
      * Start the timer.
      * Use expired(ec) in handler to test for expiration.
      * @param[in]  handle  Callback invoked upon expire or cancel.
@@ -74,8 +68,7 @@ public:
     void start(handler handle, const asio::duration duration);
 
     /**
-     * Cancel the timer.
-     * Use canceled(ec) in handler to test for cancellation.
+     * Cancel the timer. The handler will not be invoked.
      */
     void cancel();
 
