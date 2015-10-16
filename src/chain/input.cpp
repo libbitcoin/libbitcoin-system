@@ -80,14 +80,12 @@ bool input::from_data(std::istream& stream)
 bool input::from_data(reader& source)
 {
     auto result = true;
-
     reset();
-
     result = previous_output.from_data(source);
 
     if (result)
     {
-        auto mode = script::parse_mode::strict;
+        auto mode = script::parse_mode::raw_data_fallback;
 
         if (previous_output.is_null())
             mode = script::parse_mode::raw_data;
