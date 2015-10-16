@@ -70,6 +70,7 @@ p2p::p2p(threadpool& pool, hosts& hosts, connector& network,
     self_(self),
     timeouts_(timeouts),
     relay_(relay),
+    stopped_(true),
     inbound_port_(port),
     max_inbound_(max_inbound),
     max_outbound_(max_outbound)
@@ -81,6 +82,8 @@ p2p::p2p(threadpool& pool, hosts& hosts, connector& network,
 
 void p2p::start(completion_handler handle_complete)
 {
+    stopped_ = false;
+
     // Start inbound connection listener if configured.
     if (inbound_port_ > 0 && max_inbound_ > 0)
         start_accepting();
@@ -104,6 +107,8 @@ void p2p::handle_hosts_loaded(completion_handler handle_complete)
 
 void p2p::stop(completion_handler handle_complete)
 {
+    stopped_ = true;
+
     // Stop protocol subscribers.
     channel_subscriber_->relay(error::service_stopped, nullptr);
 
@@ -161,6 +166,9 @@ void p2p::new_connection()
 
 void p2p::start_connect(const code& ec, const config::authority& peer)
 {
+    if (stopped_)
+        return;
+
     if (ec)
     {
         handle_connect(ec, nullptr, peer);
@@ -237,6 +245,9 @@ void p2p::retry_manual_connection(const config::endpoint& address,
 void p2p::maintain_connection(const std::string& hostname, uint16_t port,
     bool relay, size_t retry)
 {
+    if (stopped_)
+        return;
+
     // MANUAL CONNECT
     network_.connect(hostname, port,
         dispatch_.ordered_delegate(&p2p::handle_manual_connect,

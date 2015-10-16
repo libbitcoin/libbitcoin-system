@@ -159,6 +159,7 @@ private:
     size_t max_inbound_;
     size_t max_outbound_;
     bool relay_;
+    bool stopped_;
 
     channel_ptr_list manual_connections_;
     channel_ptr_list inbound_connections_;
