@@ -57,6 +57,7 @@ void caller::connect(asio::iterator endpoint_iterator,
     handler handle_connect)
 {
     // Handle one callback before calling handle_connect.
+    // TODO: register the complete delegate with an external stop notifier.
     const auto complete = synchronize(handle_connect, 1, "caller");
 
     // Start the deadline timer with completion handler.

@@ -131,8 +131,8 @@ void p2p::start_seeding(completion_handler handle_complete)
         std::bind(&p2p::start_connecting,
             this, _1, handle_complete);
 
+    // There is presently no way to get stop notification to this.
     // This will always call complete no later than implied by timeouts.
-    // There is presently no way to get stop notification to the seed p2p.
     std::make_shared<session_seed>(pool_, hosts_, timeouts_, network_, seeds_,
         self_.to_network_address())->start(complete);
 }
@@ -191,6 +191,8 @@ void p2p::start_connect(const code& ec, const config::authority& peer)
         << "Connecting to peer [" << peer.to_string() << "]";
 
     // OUTBOUND CONNECT (sequential)
+    // There is presently no way to get stop notification to this.
+    // This will always call complete no later than implied by timeout.
     network_.connect(peer.to_hostname(), peer.port(),
         dispatch_.ordered_delegate(&p2p::handle_connect,
             this, _1, _2, peer));
@@ -249,6 +251,8 @@ void p2p::maintain_connection(const std::string& hostname, uint16_t port,
         return;
 
     // MANUAL CONNECT
+    // There is presently no way to get stop notification to this.
+    // This will always call complete no later than implied by timeout.
     network_.connect(hostname, port,
         dispatch_.ordered_delegate(&p2p::handle_manual_connect,
             this, _1, _2, hostname, port, relay, retry));
