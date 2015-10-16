@@ -246,6 +246,7 @@ void proxy::handle_revival(const code& ec)
         return;
 
     revival_handler_(ec);
+    reset_revival();
 }
 
 void proxy::read_heading()
