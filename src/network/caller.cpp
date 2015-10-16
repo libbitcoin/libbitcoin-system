@@ -96,7 +96,7 @@ void caller::create_channel(const boost_code& ec, asio::iterator,
 void caller::handle_timer(const code& ec, handler complete)
 {
     // The handler must not expect a node when there is an error.
-    complete(ec, nullptr);
+    complete(error::channel_timeout, nullptr);
 }
 
 } // namespace network

@@ -32,7 +32,6 @@ class BC_API timeout
 {
 public:
     static const timeout defaults;
-    static bool canceled(const boost_code& ec);
 
     timeout(
         uint32_t connect_timeout_seconds=5,
