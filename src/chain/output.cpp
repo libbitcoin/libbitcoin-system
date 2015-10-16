@@ -76,14 +76,13 @@ bool output::from_data(std::istream& stream)
 bool output::from_data(reader& source)
 {
     auto result = true;
-
     reset();
-
     value = source.read_8_bytes_little_endian();
     result = source;
 
     if (result)
-        result = script.from_data(source, true, script::parse_mode::strict);
+        result = script.from_data(source, true, 
+        script::parse_mode::raw_data_fallback);
 
     if (!result)
         reset();
