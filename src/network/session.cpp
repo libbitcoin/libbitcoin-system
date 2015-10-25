@@ -199,7 +199,7 @@ void session::handle_handshake(const code& ec, channel::ptr channel,
 {
     if (ec)
     {
-        log_debug(LOG_PROTOCOL)
+        log_debug(LOG_NETWORK)
             << "Failure in handshake with [" << channel->address()
             << "] " << ec.message();
         handle_started(ec);
@@ -302,13 +302,13 @@ void session::remove(const code& ec, channel::ptr channel,
 void session::handle_unpend(const code& ec)
 {
     if (ec)
-        log_debug(LOG_PROTOCOL) << "Failed to unpend a channel.";
+        log_debug(LOG_NETWORK) << "Failed to unpend a channel.";
 }
 
 void session::handle_remove(const code& ec)
 {
     if (ec)
-        log_debug(LOG_PROTOCOL) << "Failed to remove a channel.";
+        log_debug(LOG_NETWORK) << "Failed to remove a channel.";
 }
 
 } // namespace network

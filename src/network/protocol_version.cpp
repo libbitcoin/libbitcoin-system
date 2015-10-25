@@ -101,7 +101,7 @@ protocol_version::protocol_version(threadpool& pool, p2p&,
         synchronizer_factory(handler)),
     height_(height),
     version_(template_factory(channel, settings, height)),
-    CONSTRUCT_TRACK(protocol_version, LOG_NETWORK)
+    CONSTRUCT_TRACK(protocol_version, LOG_PROTOCOL)
 {
 }
 
@@ -129,7 +129,7 @@ void protocol_version::handle_receive_version(const code& ec,
         return;
     }
 
-    log_debug(LOG_NETWORK)
+    log_debug(LOG_PROTOCOL)
         << "Peer [" << authority() << "] version (" << message.value
         << ") services (" << message.services << ") " << message.user_agent;
 

@@ -58,7 +58,7 @@ protocol_seed::protocol_seed(threadpool& pool, p2p& network,
     network_(network),
     self_(settings.self),
     disabled_(settings.host_pool_capacity == 0),
-    CONSTRUCT_TRACK(protocol_seed, LOG_NETWORK)
+    CONSTRUCT_TRACK(protocol_seed, LOG_PROTOCOL)
 {
 }
 

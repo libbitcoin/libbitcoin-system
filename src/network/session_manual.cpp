@@ -84,7 +84,7 @@ void session_manual::handle_connect(const code& ec, channel::ptr channel,
 {
     if (ec)
     {
-        log_warning(LOG_PROTOCOL)
+        log_warning(LOG_NETWORK)
             << "Failure connecting [" << config::endpoint(hostname, port)
             << "] manually: " << ec.message();
 
@@ -102,7 +102,7 @@ void session_manual::handle_connect(const code& ec, channel::ptr channel,
     // We only invoke the callback on the first successful connection.
     handler(ec, channel);
 
-    log_info(LOG_PROTOCOL)
+    log_info(LOG_NETWORK)
         << "Connected manual channel [" << config::endpoint(hostname, port)
         << "] as [" << channel->address() << "]";
 

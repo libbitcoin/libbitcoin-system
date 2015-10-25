@@ -54,7 +54,7 @@ void session_outbound::start()
 
     if (settings_.outbound_connections == 0)
     {
-        log_debug(LOG_PROTOCOL)
+        log_debug(LOG_NETWORK)
             << "No configured outbound connections.";
         return;
     }
@@ -80,7 +80,7 @@ void session_outbound::start_connect(const code& ec, const authority& host,
 
     if (ec)
     {
-        log_debug(LOG_PROTOCOL)
+        log_debug(LOG_NETWORK)
             << "Failure fetching address [" << host << "] "
             << ec.message();
         new_connection(connect);
@@ -89,13 +89,13 @@ void session_outbound::start_connect(const code& ec, const authority& host,
 
     if (blacklisted(host))
     {
-        log_debug(LOG_PROTOCOL)
+        log_debug(LOG_NETWORK)
             << "Fetched blacklisted address [" << host << "] ";
         new_connection(connect);
         return;
     }
 
-    log_debug(LOG_PROTOCOL)
+    log_debug(LOG_NETWORK)
         << "Connecting to channel [" << host << "]";
 
     // OUTBOUND CONNECT
@@ -109,14 +109,14 @@ void session_outbound::handle_connect(const code& ec, channel::ptr channel,
 {
     if (ec)
     {
-        log_debug(LOG_PROTOCOL)
+        log_debug(LOG_NETWORK)
             << "Failure connecting [" << host << "] outbound: "
             << ec.message();
         new_connection(connect);
         return;
     }
 
-    log_info(LOG_PROTOCOL)
+    log_info(LOG_NETWORK)
         << "Connected to outbound channel [" << channel->address() << "]";
 
     register_channel(channel, 

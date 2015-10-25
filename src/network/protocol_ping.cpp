@@ -45,7 +45,7 @@ using std::placeholders::_2;
 protocol_ping::protocol_ping(threadpool& pool, p2p&, const settings& settings,
     channel::ptr channel)
   : protocol_base(pool, channel, settings.channel_heartbeat(), NAME),
-    CONSTRUCT_TRACK(protocol_ping, LOG_NETWORK)
+    CONSTRUCT_TRACK(protocol_ping, LOG_PROTOCOL)
 {
 }
 
@@ -71,7 +71,7 @@ void protocol_ping::send_ping(const code& ec)
 
     if (ec && ec != error::channel_timeout)
     {
-        log_debug(LOG_NETWORK)
+        log_debug(LOG_PROTOCOL)
             << "Failure in ping timer for [" << authority() << "] "
             << ec.message();
         stop(ec);
@@ -92,7 +92,7 @@ void protocol_ping::handle_receive_ping(const code& ec,
 
     if (ec)
     {
-        log_debug(LOG_NETWORK)
+        log_debug(LOG_PROTOCOL)
             << "Failure getting ping from [" << authority() << "] "
             << ec.message();
         stop(ec);
@@ -112,7 +112,7 @@ void protocol_ping::handle_receive_pong(const code& ec,
 
     if (ec)
     {
-        log_debug(LOG_NETWORK)
+        log_debug(LOG_PROTOCOL)
             << "Failure getting pong from [" << authority() << "] "
             << ec.message();
         stop(ec);
@@ -121,7 +121,7 @@ void protocol_ping::handle_receive_pong(const code& ec,
 
     if (message.nonce != nonce)
     {
-        log_warning(LOG_NETWORK)
+        log_warning(LOG_PROTOCOL)
             << "Invalid pong nonce from [" << authority() << "]";
 
         // This could result from message overlap due to a short period,
@@ -137,7 +137,7 @@ void protocol_ping::handle_send_ping(const code& ec)
 
     if (ec)
     {
-        log_debug(LOG_NETWORK)
+        log_debug(LOG_PROTOCOL)
             << "Failure sending ping to [" << authority() << "] "
             << ec.message();
         stop(ec);
@@ -151,7 +151,7 @@ void protocol_ping::handle_send_pong(const code& ec)
 
     if (ec)
     {
-        log_debug(LOG_NETWORK)
+        log_debug(LOG_PROTOCOL)
             << "Failure sending pong to [" << authority() << "] "
             << ec.message();
         stop(ec);

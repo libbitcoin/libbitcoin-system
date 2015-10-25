@@ -55,7 +55,7 @@ void session_inbound::start()
 
     if (settings_.inbound_port == 0 || settings_.inbound_connection_limit == 0)
     {
-        log_info(LOG_PROTOCOL)
+        log_info(LOG_NETWORK)
             << "Not configured to accept incoming channels.";
         return;
     }
@@ -76,7 +76,7 @@ void session_inbound::start_accept(const code& ec, acceptor::ptr accept)
 
     if (ec)
     {
-        log_error(LOG_PROTOCOL)
+        log_error(LOG_NETWORK)
             << "Error starting listener: " << ec.message();
         return;
     }
@@ -94,14 +94,14 @@ void session_inbound::handle_accept(const code& ec, channel::ptr channel,
 
     if (ec)
     {
-        log_debug(LOG_PROTOCOL)
+        log_debug(LOG_NETWORK)
             << "Failure accepting connection: " << ec.message();
         return;
     }
 
     if (blacklisted(channel->address()))
     {
-        log_debug(LOG_PROTOCOL)
+        log_debug(LOG_NETWORK)
             << "Rejected inbound connection from ["
             << channel->address() << "] due to blacklisted address.";
         return;
@@ -117,13 +117,13 @@ void session_inbound::handle_connection_count(size_t connections,
 {
     if (connections >= settings_.inbound_connection_limit)
     {
-        log_debug(LOG_PROTOCOL)
+        log_debug(LOG_NETWORK)
             << "Rejected inbound connection from ["
             << channel->address() << "] due to connection limit.";
         return;
     }
    
-    log_info(LOG_PROTOCOL)
+    log_info(LOG_NETWORK)
         << "Connected inbound channel [" << channel->address() << "]";
 
     register_channel(channel, 
