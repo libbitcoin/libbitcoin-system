@@ -17,59 +17,58 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_SESSION_SEED_HPP
-#define LIBBITCOIN_NETWORK_SESSION_SEED_HPP
+#ifndef LIBBITCOIN_NETWORK_SESSION_MANUAL_HPP
+#define LIBBITCOIN_NETWORK_SESSION_MANUAL_HPP
 
 #include <cstddef>
+#include <cstdint>
 #include <memory>
-#include <vector>
-#include <bitcoin/bitcoin/config/endpoint.hpp>
+#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/connector.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/network/p2p.hpp>
 #include <bitcoin/bitcoin/network/session.hpp>
-#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
-class BC_API session_seed
-  : public session, track<session_seed>
+class BC_API session_manual
+  : public session, track<session_manual>
 {
 public:
-    typedef std::shared_ptr<session_seed> ptr;
+    typedef std::shared_ptr<session_manual> ptr;
+    typedef std::function<void(const code&, channel::ptr)> channel_handler;
 
-    session_seed(threadpool& pool, p2p& network, const settings& settings);
+    session_manual(threadpool& pool, p2p& network, const settings& settings);
 
     /// This class is not copyable.
-    session_seed(const session_seed&) = delete;
-    void operator=(const session_seed&) = delete;
+    session_manual(const session_manual&) = delete;
+    void operator=(const session_manual&) = delete;
 
-    void start(result_handler handler);
+    void connect(const std::string& hostname, uint16_t port);
+    void connect(const std::string& hostname, uint16_t port,
+        channel_handler handler);
 
 private:
-    void handle_count(size_t start_size, result_handler handler);
-    void start_seeding(size_t start_size, connector::ptr connect,
-        result_handler handler);
-    void start_seed(const config::endpoint& seed, connector::ptr connect,
-        result_handler handler);
+    void start_connect(const std::string& hostname, uint16_t port,
+        channel_handler handler, uint16_t retries);
     void handle_connect(const code& ec, channel::ptr channel,
-        const config::endpoint& seed, result_handler handler);
-    void handle_complete(size_t start_size, result_handler handler);
-    void handle_final_count(size_t current_size, size_t start_size,
-        result_handler handler);
+        const std::string& hostname, uint16_t port,
+        channel_handler handler, uint16_t retries);
 
-    void handle_channel_start(const code& ec, channel::ptr channel,
-        result_handler handler);
-    void handle_channel_stop(const code& ec);
+    void handle_channel_start(const code& ec, channel::ptr channel);
+    void handle_channel_stop(const code& ec, const std::string& hostname,
+        uint16_t port);
+
+    connector::ptr connect_;
 };
 
 } // namespace network
 } // namespace libbitcoin
 
 #endif
-

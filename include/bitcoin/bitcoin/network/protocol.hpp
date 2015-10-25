@@ -43,6 +43,8 @@ class BC_API protocol
   : public std::enable_shared_from_this<protocol>
 {
 public:
+    typedef std::function<void(const code&)> completion_handler;
+
     /**
      * Starts the protocol, release any reference after calling.
      * A protocol instance is not restartable.
@@ -50,29 +52,28 @@ public:
     virtual void start();
 
 protected:
-    typedef std::function<void(const code&)> handler;
 
     /**
      * Construct an address protocol instance.
-     * @param[in]  channel   The channel on which to start the protocol.
-     * @param[in]  pool      The thread pool used by the dispacher.
-     * @param[in]  name      The instance name for logging purposes.
-     * @param[in]  complete  Callback invoked upon stop if not null.
+     * @param[in]  pool     The thread pool used by the dispacher.
+     * @param[in]  channel  The channel on which to start the protocol.
+     * @param[in]  name     The instance name for logging purposes.
+     * @param[in]  handler  Callback invoked upon protocol stop.
      */
-    protocol(channel::ptr channel, threadpool& pool,
-        const std::string& name, handler complete=nullptr);
+    protocol(threadpool& pool, channel::ptr channel, const std::string& name,
+        completion_handler handler=nullptr);
 
     /**
      * Construct an address protocol instance.
-     * @param[in]  peer      The channel on which to start the protocol.
-     * @param[in]  pool      The thread pool used by the dispacher.
-     * @param[in]  timeout   The timer period.
-     * @param[in]  name      The instance name for logging purposes.
-     * @param[in]  complete  Callback invoked upon stop if not null.
+     * @param[in]  pool     The thread pool used by the dispacher.
+     * @param[in]  channel  The channel on which to start the protocol.
+     * @param[in]  timeout  The timer period.
+     * @param[in]  name     The instance name for logging purposes.
+     * @param[in]  handler  Callback invoked upon timer expiration.
      */
-    protocol(channel::ptr peer, threadpool& pool,
+    protocol(threadpool& pool, channel::ptr channel,
         const asio::duration& timeout, const std::string& name,
-        handler complete=nullptr);
+        completion_handler handler=nullptr);
 
     /// Instances of this class are not copyable.
     protocol(const protocol&) = delete;
@@ -95,24 +96,24 @@ protected:
     config::authority authority() const;
     
     /**
-     * Invoke the completion callback.
+     * Invoke the completion handler.
      * @param[in]  ec  The error code of the preceding operation.
      */
-    void callback(const code& ec) const;
+    void complete(const code& ec) const;
     
     /**
-     * Set the completion callback.
+     * Set the completion callback. Only call in start, before subscriptions.
      * This is used to defer the callback configuration until after construct
      * so as to enable self-referential callbacks (that use shared_from_this).
-     * @param[in]  callback  The complation callback.
+     * @param[in]  handler  The completion handler.
      */
-    void set_callback(handler complete);
+    void set_handler(completion_handler handler);
 
     /**
-     * Set the channel identity for own-channel detection.
-     * @param[in]  value  The identifier value.
+     * Set the channel version.
+     * @param[in]  value  The version message.
      */
-    void set_identifier(uint64_t value);
+    void set_version(const message::version& value);
     
     /**
      * Stop the channel.
@@ -125,8 +126,7 @@ protected:
      */
     bool stopped() const;
 
-    // TODO: limit exposure to base.
-    channel::ptr channel_;
+    /// This could probably be private.
     dispatcher dispatch_;
 
 private:
@@ -136,9 +136,9 @@ private:
     void handle_timer(const code& ec);
 
     const std::string name_;
-    handler callback_;
-    bool stopped_;
     deadline::ptr deadline_;
+    channel::ptr channel_;
+    completion_handler completion_handler_;
 
     // Deferred startup function.
     std::function<void()> start_;

@@ -343,7 +343,7 @@ static void set_utf8_stdio(FILE* file)
 {
 #ifdef _MSC_VER
     if (_setmode(_fileno(file), _O_U8TEXT) == -1)
-        throw std::exception("Could not set STDIO to utf8 mode.");
+        throw std::runtime_error("Could not set STDIO to utf8 mode.");
 #endif
 }
 
@@ -351,7 +351,7 @@ static void set_binary_stdio(FILE* file)
 {
 #ifdef _MSC_VER
     if (_setmode(_fileno(file), _O_BINARY) == -1)
-        throw std::exception("Could not set STDIO to binary mode.");
+        throw std::runtime_error("Could not set STDIO to binary mode.");
 #endif
 }
 

@@ -36,13 +36,12 @@ namespace network {
 
 using std::placeholders::_1;
 
-protocol::protocol(channel::ptr channel, threadpool& pool,
-    const std::string& name, handler complete)
-  : channel_(channel),
+protocol::protocol(threadpool& pool, channel::ptr channel,
+    const std::string& name, completion_handler handler)
+  : name_(name),
     dispatch_(pool),
-    name_(name),
-    callback_(complete),
-    stopped_(false)
+    channel_(channel),
+    completion_handler_(handler)
 {
     start_ = [this]()
     {
@@ -50,9 +49,10 @@ protocol::protocol(channel::ptr channel, threadpool& pool,
     };
 }
 
-protocol::protocol(channel::ptr channel, threadpool& pool,
-    const asio::duration& timeout, const std::string& name, handler complete)
-  : protocol(channel, pool, name, complete)
+protocol::protocol(threadpool& pool, channel::ptr channel,
+    const asio::duration& timeout, const std::string& name,
+    completion_handler handler)
+  : protocol(pool, channel, name, handler)
 {
     start_ = [this, &pool, &timeout]()
     {
@@ -62,28 +62,28 @@ protocol::protocol(channel::ptr channel, threadpool& pool,
 
 config::authority protocol::authority() const
 {
-    return channel_->address();
+    return stopped() ? config::authority() : channel_->address();
 }
 
-// If an error code is passed to the callback the channel is also stopped.
-void protocol::callback(const code& ec) const
+void protocol::complete(const code& ec) const
 {
-    if (callback_ != nullptr)
-        callback_(ec);
+    if (completion_handler_ != nullptr)
+        completion_handler_(ec);
 }
 
 // This must only be called from start() and before any subscriptions.
 // Ideally avoid this, but it works around no self-closure in construct.
-void protocol::set_callback(handler complete)
+void protocol::set_handler(completion_handler handler)
 {
-    BITCOIN_ASSERT_MSG(callback_ == nullptr, "The callback cannot be reset.");
-    if (callback_ == nullptr)
-        callback_ = complete;
+    BITCOIN_ASSERT_MSG(handler == nullptr, "The callback cannot be reset.");
+    if (completion_handler_ == nullptr)
+        completion_handler_ = handler;
 }
 
-void protocol::set_identifier(uint64_t value)
+void protocol::set_version(const message::version& value)
 {
-    channel_->set_identifier(value);
+    if (!stopped())
+        channel_->set_version(value);
 }
 
 // Startup is deferred until after construct in order to use shared_from_this.
@@ -91,7 +91,8 @@ void protocol::set_identifier(uint64_t value)
 // called from construct, but that requires use of boost::share_ptr as well.
 void protocol::start()
 {
-    BITCOIN_ASSERT_MSG(start_ != nullptr, "The protocol cannot be restarted.");
+    BITCOIN_ASSERT_MSG(start_ != nullptr, "Protocol cannot be restarted.");
+
     if (start_ == nullptr)
         return;
 
@@ -99,47 +100,55 @@ void protocol::start()
     start_ = nullptr;
 }
 
+// Protocols either stop themselves or stop on channel stop.
 void protocol::stop(const code& ec)
 {
-    if (!stopped())
-        channel_->stop(ec);
+    if (stopped())
+        return;
+
+    channel_->stop(ec);
 }
 
 bool protocol::stopped() const
 {
-    return stopped_;
+    return start_ != nullptr || channel_ == nullptr;
 }
 
 void protocol::subscribe_stop()
 {
+    if (stopped())
+        return;
+
     channel_->subscribe_stop(
-        std::bind(&protocol::handle_stop,
+        dispatch_.unordered_delegate(&protocol::handle_stop,
             shared_from_this(), _1));
 }
 
 void protocol::subscribe_timer(threadpool& pool,
     const asio::duration& timeout)
 {
+    if (stopped())
+        return;
+
     deadline_ = std::make_shared<deadline>(pool, timeout);
     deadline_->start(
-        std::bind(&protocol::handle_timer,
+        dispatch_.unordered_delegate(&protocol::handle_timer,
             shared_from_this(), _1));
 }
     
 void protocol::handle_stop(const code& ec)
 {
-    if (stopped())
-        return;
+    // All dynamic calls must be stranded in order to protect this resource.
+    channel_ = nullptr;
 
     log_debug(LOG_PROTOCOL)
         << "Stopped " << name_ << " protocol on [" << authority() << "] "
         << ec.message();
 
-    stopped_ = true;
     if (deadline_)
         deadline_->cancel();
 
-    callback(ec);
+    complete(ec);
 }
 
 void protocol::handle_timer(const code& ec)
@@ -151,7 +160,7 @@ void protocol::handle_timer(const code& ec)
         << "Fired " << name_ << " protocol timer on [" << authority() << "] "
         << ec.message();
 
-    callback(error::channel_timeout);
+    complete(error::channel_timeout);
 }
 
 } // namespace network

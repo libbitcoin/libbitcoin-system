@@ -20,50 +20,61 @@
 #ifndef LIBBITCOIN_NETWORK_CONNECTOR_HPP
 #define LIBBITCOIN_NETWORK_CONNECTOR_HPP
 
-#include <cstdint>
+#include <functional>
 #include <memory>
 #include <string>
-#include <thread>
-#include <boost/date_time.hpp>
-#include <boost/utility.hpp>
+#include <bitcoin/bitcoin/config/authority.hpp>
+#include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/network/acceptor.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
-#include <bitcoin/bitcoin/network/caller.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/proxy.hpp>
-#include <bitcoin/bitcoin/network/protocol_version.hpp>
-#include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
 class BC_API connector
+  : public std::enable_shared_from_this<connector>, track<connector>
 {
 public:
-    /// Magic number that identifies p2p protocol messages.
-    static const uint32_t mainnet;
+    typedef std::shared_ptr<connector> ptr;
+    typedef std::function<void(const code&, channel::ptr)> connect_handler;
 
-    connector(threadpool& pool, uint32_t network_magic=mainnet,
-        const timeout& timeouts=timeout::defaults);
+    /// Construct the connector.
+    connector(threadpool& pool, const settings& settings);
 
     /// This class is not copyable.
     connector(const connector&) = delete;
     void operator=(const connector&) = delete;
 
-    void listen(uint16_t port, acceptor::listen_handler handle_listen);
+    /// Cancel all outstanding connection attempt.
+    void cancel();
+
+    /// Try to connect to the endpoint.
+    void connect(const config::endpoint& endpoint,
+        connect_handler handler);
+
+    /// Try to connect to the authority.
+    void connect(const config::authority& authority,
+        connect_handler handler);
+
+    /// Try to connect to host:port.
     void connect(const std::string& hostname, uint16_t port,
-        caller::handler handle_connect);
+        connect_handler handler);
 
 private:
-    void resolve_handler(const boost_code& ec, asio::iterator endpoint_iterator,
-        caller::handler handle_connect, asio::resolver_ptr, asio::query_ptr);
+    void handle_resolve(const boost_code& ec, asio::iterator iterator,
+        connect_handler handler);
+    void handle_timer(const code& ec, asio::socket_ptr socket,
+        connect_handler handler);
+    void handle_connect(const boost_code& ec, asio::iterator iterator,
+        asio::socket_ptr socket, deadline::ptr timer, connect_handler handler);
 
     threadpool& pool_;
-    uint32_t magic_;
-    const timeout& timeouts_;
+    const settings& settings_;
+    std::shared_ptr<asio::resolver> resolver_;
 };
 
 } // namespace network

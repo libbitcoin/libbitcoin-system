@@ -26,7 +26,7 @@
 #include <bitcoin/bitcoin/message/get_address.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/hosts.hpp>
+#include <bitcoin/bitcoin/network/p2p.hpp>
 #include <bitcoin/bitcoin/network/protocol_base.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -43,27 +43,29 @@ using namespace bc::message;
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-protocol_address::protocol_address(channel::ptr peer, threadpool& pool,
-    hosts& hosts, const config::authority& self)
-  : hosts_(hosts),
-    self_(self),
-    protocol_base(peer, pool, NAME),
+protocol_address::protocol_address(threadpool& pool, p2p& network,
+    const settings& settings, channel::ptr channel)
+  : protocol_base(pool, channel, NAME),
+    network_(network),
+    self_(settings.self),
+    disabled_(settings.host_pool_capacity == 0),
     CONSTRUCT_TRACK(protocol_address, LOG_NETWORK)
 {
 }
 
 void protocol_address::start()
 {
-    protocol_base::start();
-
     if (self_.port() != 0)
     {
         address self({ { self_.to_network_address() } });
         send(self, &protocol_address::handle_send_address, _1);
     }
 
-    if (hosts_.capacity() == 0)
+    // If we can't store addresses we don't ask for or receive them.
+    if (disabled_)
         return;
+
+    protocol_base::start();
 
     subscribe<get_address>(
         &protocol_address::handle_receive_get_address, _1, _2);
@@ -92,8 +94,8 @@ void protocol_address::handle_receive_address(const code& ec,
         << "Storing addresses from [" << authority() << "] ("
         << message.addresses.size() << ")";
 
-    // TODO: manage timestamps (active peers are connected < 3 hours ago).
-    hosts_.store(message.addresses,
+    // TODO: manage timestamps (active channels are connected < 3 hours ago).
+    network_.store(message.addresses,
         bind(&protocol_address::handle_store_addresses, _1));
 }
 
@@ -112,7 +114,7 @@ void protocol_address::handle_receive_get_address(const code& ec,
         return;
     }
 
-    // TODO: allowing repeated queries can allow a peer to map our history.
+    // TODO: allowing repeated queries can allow a channel to map our history.
     // Resubscribe to get_address messages.
     subscribe<get_address>(
         &protocol_address::handle_receive_get_address, _1, _2);
