@@ -21,6 +21,7 @@
 #define LIBBITCOIN_NETWORK_SETTINGS_HPP
 
 #include <cstdint>
+#include <boost/asio.hpp>
 #include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
@@ -38,6 +39,7 @@ struct BC_API settings
     uint16_t inbound_port;
     uint32_t inbound_connection_limit;
     uint32_t outbound_connections;
+    uint16_t connect_attempts;
     uint32_t connect_timeout_seconds;
     uint32_t channel_handshake_seconds;
     uint32_t channel_revival_minutes;
@@ -51,7 +53,50 @@ struct BC_API settings
     boost::filesystem::path debug_file;
     boost::filesystem::path error_file;
     config::authority self;
+    config::authority::list blacklists;
     config::endpoint::list seeds;
+
+    boost::posix_time::time_duration connect_timeout() const
+    {
+        using namespace boost::posix_time;
+        return time_duration(0, 0, connect_timeout_seconds);
+    }
+
+    boost::posix_time::time_duration channel_handshake() const
+    {
+        using namespace boost::posix_time;
+        return time_duration(0, 0, channel_handshake_seconds);
+    }
+
+    boost::posix_time::time_duration channel_revival() const
+    {
+        using namespace boost::posix_time;
+        return time_duration(0, channel_revival_minutes, 0);
+    }
+
+    boost::posix_time::time_duration channel_heartbeat() const
+    {
+        using namespace boost::posix_time;
+        return time_duration(0, channel_heartbeat_minutes, 0);
+    }
+
+    boost::posix_time::time_duration channel_inactivity() const
+    {
+        using namespace boost::posix_time;
+        return time_duration(0, channel_inactivity_minutes, 0);
+    }
+
+    boost::posix_time::time_duration channel_expiration() const
+    {
+        using namespace boost::posix_time;
+        return time_duration(0, channel_expiration_minutes, 0);
+    }
+
+    boost::posix_time::time_duration channel_germination() const
+    {
+        using namespace boost::posix_time;
+        return time_duration(0, 0, channel_germination_seconds);
+    }
 };
 
 } // namespace network

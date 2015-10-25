@@ -24,8 +24,8 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
 #include <bitcoin/bitcoin/message/get_address.hpp>
-#include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/p2p.hpp>
 #include <bitcoin/bitcoin/network/protocol_base.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
@@ -44,42 +44,43 @@ using namespace bc::message;
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-protocol_base<protocol_seed>::handler protocol_seed::synchronizer(
-    handler complete)
+protocol::completion_handler protocol_seed::synchronizer_factory(
+    completion_handler handler)
 {
-    return synchronize(complete, 3, NAME);
+    return synchronize(handler, 3, NAME);
 }
 
 // Require three callbacks (or any error) before calling complete.
-protocol_seed::protocol_seed(channel::ptr peer, threadpool& pool,
-    const asio::duration& timeout, handler complete, hosts& hosts,
-    const config::authority& self)
-  : hosts_(hosts),
-    self_(self),
-    protocol_base(peer, pool, timeout, NAME, synchronizer(complete)),
+protocol_seed::protocol_seed(threadpool& pool, p2p& network,
+    const settings& settings, channel::ptr channel, completion_handler handler)
+  : protocol_base(pool, channel, settings.channel_germination(), NAME,
+        synchronizer_factory(handler)),
+    network_(network),
+    self_(settings.self),
+    disabled_(settings.host_pool_capacity == 0),
     CONSTRUCT_TRACK(protocol_seed, LOG_NETWORK)
 {
 }
 
 void protocol_seed::start()
 {
+    if (disabled_)
+    {
+        // Stops channel and ends callback synchronization.
+        stop(error::not_found);
+        return;
+    }
+
     protocol_base::start();
 
     if (self_.port() == 0)
     {
-        callback(error::success);
+        complete(error::success);
     }
     else
     {
         address self({ { self_.to_network_address() } });
         send(self, &protocol_seed::handle_send_address, _1);
-    }
-
-    if (hosts_.capacity() == 0)
-    {
-        // Stops channel and ends callback synchronization.
-        stop(error::not_found);
-        return;
     }
 
     subscribe<address>(&protocol_seed::handle_receive_address, _1, _2);
@@ -108,8 +109,8 @@ void protocol_seed::handle_receive_address(const code& ec,
         << "Storing addresses from seed [" << authority() << "] ("
         << message.addresses.size() << ")";
 
-    // TODO: manage timestamps (active peers are connected < 3 hours ago).
-    hosts_.store(message.addresses,
+    // TODO: manage timestamps (active channels are connected < 3 hours ago).
+    network_.store(message.addresses,
         bind(&protocol_seed::handle_store_addresses, _1));
 }
 
@@ -128,7 +129,7 @@ void protocol_seed::handle_send_address(const code& ec)
     }
 
     // 1 of 3
-    callback(error::success);
+    complete(error::success);
 }
 
 void protocol_seed::handle_send_get_address(const code& ec)
@@ -146,7 +147,7 @@ void protocol_seed::handle_send_get_address(const code& ec)
     }
 
     // 2 of 3
-    callback(error::success);
+    complete(error::success);
 }
 
 void protocol_seed::handle_store_addresses(const code& ec)
@@ -164,7 +165,7 @@ void protocol_seed::handle_store_addresses(const code& ec)
     }
 
     // 3 of 3
-    callback(error::success);
+    complete(error::success);
     stop(error::channel_stopped);
 }
 

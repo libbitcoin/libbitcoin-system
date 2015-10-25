@@ -33,58 +33,66 @@
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/network/proxy.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
+#include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/network/message_subscriber.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
+#include <bitcoin/bitcoin/utility/subscriber.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
 class BC_API channel
-  : public track<channel>
+  : public proxy, track<channel>
 {
 public:
     typedef std::shared_ptr<channel> ptr;
+    typedef subscriber<const code&, ptr> channel_subscriber;
+    typedef std::function<void(const code&)> result_handler;
 
-    channel(proxy::ptr proxy);
     channel(threadpool& pool, asio::socket_ptr socket,
-        uint32_t network_magic, const timeout& timeouts);
-    ~channel();
+        const settings& settings);
 
     /// This class is not copyable.
     channel(const channel&) = delete;
     void operator=(const channel&) = delete;
 
-    uint64_t identifier() const;
-    void set_identifier(uint64_t value);
-
     void start();
-    void stop(const code& ec);
-    config::authority address() const;
+
+    uint64_t nonce() const;
+    void set_nonce(uint64_t value);
+
+    const message::version& version() const;
+    void set_version(const message::version& value);
+
     void reset_revival();
-    void set_revival_handler(proxy::handler handler);
+    void set_revival_handler(result_handler handler);
 
-    template <class Message, typename Handler>
-    void send(Message&& packet, Handler&& handler)
-    {
-        proxy_->send(std::forward<Message>(packet),
-            std::forward<Handler>(handler));
-    }
-
-    template <class Message, typename Handler>
-    void subscribe(Handler&& handler)
-    {
-        proxy_->subscribe<Message>(std::forward<Handler>(handler));
-    }
-
-    void subscribe_stop(proxy::stop_handler handle);
+protected:
+    void handle_activity();
+    void handle_stopping();
 
 private:
-    proxy::ptr proxy_;
-    uint64_t identifier_;
+    void start_timers();
+
+    void start_expiration();
+    void handle_expiration(const code& ec);
+
+    void start_inactivity();
+    void handle_inactivity(const code& ec);
+
+    void start_revival();
+    void handle_revival(const code& ec);
+
+    uint64_t nonce_;
+    message::version version_;
+    deadline::ptr expiration_;
+    deadline::ptr inactivity_;
+    deadline::ptr revival_;
+    result_handler revival_handler_;
 };
 
 } // namespace network

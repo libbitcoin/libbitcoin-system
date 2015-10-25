@@ -22,154 +22,169 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
-#include <boost/date_time.hpp>
-#include <boost/filesystem.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/config/authority.hpp>
-#include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/connector.hpp>
+#include <bitcoin/bitcoin/network/connections.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
-#include <bitcoin/bitcoin/network/protocol_version.hpp>
-#include <bitcoin/bitcoin/network/session_seed.hpp>
-#include <bitcoin/bitcoin/utility/subscriber.hpp>
+#include <bitcoin/bitcoin/network/network_settings.hpp>
+#include <bitcoin/bitcoin/network/pending.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
+/// This class provides the top level public interface to the networking layer.
+/// All operations are thread safe
 class BC_API p2p
 {
 public:
-    static const uint16_t mainnet;
+    static const settings mainnet;
+    static const settings testnet;
 
-    typedef subscriber<const code&, channel::ptr> channel_subscriber;
-    typedef std::function<void(const code&)> completion_handler;
+    typedef message::network_address address;
+    typedef std::function<void(bool)> truth_handler;
+    typedef std::function<void(size_t)> count_handler;
+    typedef std::function<void(const code&)> result_handler;
     typedef std::function<void(const code&, channel::ptr)> channel_handler;
-    typedef std::function<void(const code&, channel::ptr)> broadcast_handler;
-    typedef std::function<void(const code&, size_t)>
-        fetch_connection_count_handler;
+    typedef std::function<void(const code&, const address&)> address_handler;
 
-    p2p(threadpool& pool, hosts& hosts, connector& network,
-        uint16_t port=mainnet, bool relay=true, size_t max_outbound=8,
-        size_t max_inbound=8,
-        const config::endpoint::list& seeds=session_seed::mainnet,
-        const config::authority& self=bc::unspecified_network_address,
-        const timeout& timeouts=timeout::defaults);
+    /// Construct the p2p networking instance.
+    p2p(const settings& settings=mainnet);
+
+    /// Ensure all threads are coalesced.
+    ~p2p();
     
     /// This class is not copyable.
     p2p(const p2p&) = delete;
     void operator=(const p2p&) = delete;
 
-    void start(completion_handler handle_complete);
-    void stop(completion_handler handle_complete);
-    void blacklist(const config::authority& peer);
-    void subscribe_channel(channel_handler handle_channel);
-    void maintain_connection(const std::string& hostname, uint16_t port,
-        bool relay=true, size_t retries=0);
+    /// Return the current block height.
+    size_t height();
 
-    size_t connection_count() const;
+    /// Set the current block height, for use in version messages.
+    void set_height(size_t value);
 
+    /// Calls handler after hosts file load and seeding has completed.
+    void start(result_handler handler);
+
+    /// Stop after saving hosts file.
+    /// Handler indicates hosts save result and is called after all threads
+    /// are coalesced. This call is optional.
+    void stop(result_handler handler);
+
+    /// Stop without saving hosts file.
+    /// This call is optional as desctruct will do the same, although this
+    /// allows the caller to block until all threads are coalesced.
+    void stop();
+
+    // ------------------------------------------------------------------------
+
+    /// Determine if the nonce is from a pending connection.
+    void pent(uint64_t version_nonce, truth_handler handler);
+
+    /// Pend a connection.
+    void pend(channel::ptr channel, result_handler handler);
+
+    /// Unpend a connection.
+    void unpend(channel::ptr channel, result_handler handler);
+
+    /// Get the number of pending connections.
+    void pent_count(count_handler handler);
+
+    // ------------------------------------------------------------------------
+
+    /// Determine if there exists a connection to the address.
+    void connected(const address& address, truth_handler handler);
+
+    /// Store a connection.
+    void store(channel::ptr channel, result_handler handler);
+
+    /// Remove a connection.
+    void remove(channel::ptr channel, result_handler handler);
+
+    /// Get the number of connections.
+    void connected_count(count_handler handler);
+
+    // ------------------------------------------------------------------------
+
+    /// Get a randomly-selected adress.
+    void fetch_address(address_handler handler);
+
+    /// Store an address.
+    void store(const address& address, result_handler handler);
+
+    /// Store a collection of addresses.
+    void store(const address::list& addresses, result_handler handler);
+
+    /// Remove an address.
+    void remove(const address& address, result_handler handler);
+
+    /// Get the number of addresses.
+    void address_count(count_handler handler);
+
+    // ------------------------------------------------------------------------
+
+    /// Maintain a connection to hostname:port.
+    void connect(const std::string& hostname, uint16_t port);
+
+    /// Maintain a connection to hostname:port.
+    /// The callback that will fire on first connection established only.
+    void connect(const std::string& hostname, uint16_t port,
+        channel_handler handler);
+
+    /// Subscribe to connection creation events.
+    void subscribe(channel_handler handler);
+
+    /// Relay a connection creation or p2p stop event to subscribers.
+    void relay(const code& ec, channel::ptr channel);
+
+    /// Send a message to all connections.
     template <typename Message>
-    void broadcast(const Message& packet, broadcast_handler handle_send)
+    void broadcast(const Message& message, channel_handler handler)
     {
         dispatch_.ordered(
             std::bind(&network::p2p::do_broadcast<Message>,
-                this, packet, handle_send));
+                this, message, handler));
     }
 
 private:
-    typedef std::vector<channel::ptr> channel_ptr_list;
-    typedef channel_subscriber::ptr channel_subscriber_ptr;
-
-    // Common to all connection types.
-    void handle_handshake(const code& ec, channel::ptr node);
-    void handle_hosts_loaded(completion_handler handle_complete);
-    void start_talking(channel::ptr node,
-        proxy::stop_handler handle_stop, bool relay);
-    void remove_connection(channel_ptr_list& connections, channel::ptr node);
-
-    // Inbound connections.
-    void start_accepting();
-    void start_accept(const code& ec, acceptor::ptr accept);
-    void handle_accept(const code& ec, channel::ptr node,
-        acceptor::ptr accept);
-
-    // Outbound connections.
-    void new_connection();
-    void start_seeding(completion_handler handle_complete);
-    void start_connecting(const code& ec, completion_handler handle_complete);
-    void start_connect(const code& ec, const config::authority& peer);
-    void handle_connect(const code& ec, channel::ptr node,
-        const config::authority& peer);
-
-    // Manual connections.
-    void handle_manual_connect(const code& ec, channel::ptr node,
-        const std::string& hostname, uint16_t port, bool relay, size_t retry);
-    void retry_manual_connection(const config::endpoint& address,
-        bool relay, size_t retry);
-
-    // Remove channels from lists when disconnected.
-    void inbound_channel_stopped(const code& ec, channel::ptr node,
-        const std::string& hostname);
-    void outbound_channel_stopped(const code& ec, channel::ptr node,
-        const std::string& hostname);
-    void manual_channel_stopped(const code& ec, channel::ptr node,
-        const std::string& hostname, bool relay, size_t retries);
-
-    // Channel metadata.
-    bool is_blacklisted(const config::authority& peer) const;
-    bool is_connected(const config::authority& peer) const;
-    bool is_loopback(channel::ptr node) const;
-
-    template <typename Message>
-    void do_broadcast(const Message& packet, broadcast_handler handle_send)
+    template <class Session, typename... Args>
+    typename Session::ptr attach(Args&&... args)
     {
-        for (const auto node: outbound_connections_)
-            node->send(packet,
-                [=](const code& ec){ handle_send(ec, node); });
-
-        for (const auto node: manual_connections_)
-            node->send(packet,
-                [=](const code& ec){ handle_send(ec, node); });
-
-        for (const auto node: inbound_connections_)
-            node->send(packet,
-                [=](const code& ec){ handle_send(ec, node); });
+        auto session = std::make_shared<Session>(pool_, *this, settings_);
+        session->start(std::forward<Args>(args)...);
+        return session;
     }
 
-    dispatcher dispatch_;
-    threadpool& pool_;
-    hosts& hosts_;
-    connector& network_;
-    std::shared_ptr<protocol_version> handshake_;
-    channel_subscriber_ptr channel_subscriber_;
+    template <typename Message>
+    void do_broadcast(const Message& message, channel_handler handler) const
+    {
+        connections_.broadcast(message, handler);
+    }
 
-    // Configuration.
-    const config::endpoint::list& seeds_;
-    const config::authority self_;
-    const timeout& timeouts_;
-    uint16_t inbound_port_;
-    size_t max_inbound_;
-    size_t max_outbound_;
-    bool relay_;
+    bool stopped() const;
+    void handle_stop(const code& ec, result_handler handler);
+    void handle_hosts_loaded(const code& ec, result_handler handler);
+    void handle_hosts_seeded(const code& ec, result_handler handler);
+
     bool stopped_;
-
-    channel_ptr_list manual_connections_;
-    channel_ptr_list inbound_connections_;
-    channel_ptr_list outbound_connections_;
-
-    config::authority::list blacklisted_;
+    size_t height_;
+    const settings& settings_;
+    threadpool pool_;
+    dispatcher dispatch_;
+    pending pending_;
+    connections connections_;
+    hosts hosts_;
+    channel::channel_subscriber::ptr subscriber_;
 };
 
 } // namespace network
 } // namespace libbitcoin
 
 #endif
-

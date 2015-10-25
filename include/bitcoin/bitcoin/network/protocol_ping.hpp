@@ -27,6 +27,7 @@
 #include <bitcoin/bitcoin/message/pong.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/p2p.hpp>
 #include <bitcoin/bitcoin/network/protocol_base.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -36,7 +37,7 @@ namespace network {
         
 /**
  * Ping-pong protocol, Bubba's favorite.
- * Attach this to a node immediately following handshake completion.
+ * Attach this to a channel immediately following handshake completion.
  */
 class BC_API protocol_ping
   : public protocol_base<protocol_ping>, track<protocol_ping>
@@ -46,12 +47,12 @@ public:
 
     /**
      * Construct a ping protocol instance.
-     * @param[in]  channel  The channel on which to start the protocol.
-     * @param[in]  pool     The thread pool used by the protocol.
-     * @param[in]  period   The time period of outgoing ping messages.
+     * @param[in]  pool      The thread pool used by the protocol.
+     * @param[in]  settings  Configuration settings.
+     * @param[in]  channel   The channel on which to start the protocol.
      */
-    protocol_ping(channel::ptr channel, threadpool& pool,
-        const asio::duration& period);
+    protocol_ping(threadpool& pool, p2p&, const settings& settings,
+        channel::ptr channel);
 
     /**
      * Starts the protocol, release any reference after calling.

@@ -28,11 +28,12 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
+#include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/network_settings.hpp>
+#include <bitcoin/bitcoin/network/p2p.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/version.hpp>
 
@@ -64,36 +65,44 @@ const message::version protocol_version::template_
     RELAY_TRUE
 };
 
-protocol_base<protocol_version>::handler protocol_version::synchronizer(
-    handler complete)
+protocol::completion_handler protocol_version::synchronizer_factory(
+    completion_handler handler)
 {
-    return synchronize(complete, 3, NAME);
+    return synchronize(handler, 3, NAME);
 }
 
-protocol_version::protocol_version(channel::ptr channel, threadpool& pool,
-    const asio::duration& timeout, handler complete, hosts& hosts,
-    const config::authority& self, uint32_t height, bool relay)
-  : version_(template_),
-    protocol_base(channel, pool, timeout, NAME, synchronizer(complete)),
-    CONSTRUCT_TRACK(protocol_version, LOG_NETWORK)
+message::version protocol_version::template_factory(channel::ptr channel,
+    const settings& settings, size_t height)
 {
+    auto version = protocol_version::template_;
+
     // The timestamp should not used here and there's no need to set services.
-    version_.address_you = authority().to_network_address();
+    version.address_you = channel->address().to_network_address();
 
     // The timestamp should not used here and services should be set in config.
-    version_.address_me = self.to_network_address();
+    version.address_me = settings.self.to_network_address();
 
     // It is expected that the version is constructed shortly before use.
-    version_.start_height = height;
+    BITCOIN_ASSERT_MSG(height < max_uint32, "Time to upgrade the protocol.");
+    version.start_height = static_cast<uint32_t>(height);
 
     // Set required transaction relay policy for the connection.
-    version_.relay = relay;
+    version.relay = settings.relay_transactions;
 
-    // The nonce is used to detect connections to self.
-    version_.nonce = pseudo_random();
+    // A non-zero nonce is used to detect connections to self.
+    version.nonce = channel->nonce();
+    return version;
+}
 
-    // TODO: Add nonce to channel state for loopback detection in the context.
-    set_identifier(version_.nonce);
+protocol_version::protocol_version(threadpool& pool, p2p&,
+    const settings& settings, channel::ptr channel, size_t height,
+    completion_handler handler)
+  : protocol_base(pool, channel, settings.channel_handshake(), NAME,
+        synchronizer_factory(handler)),
+    height_(height),
+    version_(template_factory(channel, settings, height)),
+    CONSTRUCT_TRACK(protocol_version, LOG_NETWORK)
+{
 }
 
 void protocol_version::start()
@@ -120,24 +129,11 @@ void protocol_version::handle_receive_version(const code& ec,
         return;
     }
 
-    if (message.value < bc::peer_minimum_version)
-    {
-        log_debug(LOG_NETWORK)
-            << "Peer version (" << message.value << ") below minimum ("
-            << bc::peer_minimum_version << ") [" << authority() << "]";
-        stop(error::accept_failed);
-        return;
-    }
-
-    // TODO: add loopback detection to the channel.
-    // TODO: set the protocol version on peer (for feature degradation).
-    // TODO: save relay to peer and have protocol not relay if false.
-    // TODO: trace out version.version|services|user_agent.
-    // peer->set_version(version);
     log_debug(LOG_NETWORK)
-        << "Peer version [" << authority() << "] ("
-        << message.value << ") " << message.user_agent;
+        << "Peer [" << authority() << "] version (" << message.value
+        << ") services (" << message.services << ") " << message.user_agent;
 
+    set_version(message);
     send(verack(), &protocol_version::handle_verack_sent, _1);
 }
 
@@ -156,7 +152,7 @@ void protocol_version::handle_verack_sent(const code& ec)
     }
 
     // 1 of 3
-    callback(error::success);
+    complete(error::success);
 }
 
 void protocol_version::handle_version_sent(const code& ec)
@@ -174,7 +170,7 @@ void protocol_version::handle_version_sent(const code& ec)
     }
 
     // 2 of 3
-    callback(error::success);
+    complete(error::success);
 }
 
 void protocol_version::handle_receive_verack(const code& ec,
@@ -193,7 +189,7 @@ void protocol_version::handle_receive_verack(const code& ec,
     }
 
     // 3 of 3
-    callback(error::success);
+    complete(error::success);
 }
 
 } // namespace network

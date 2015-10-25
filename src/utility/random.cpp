@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/utility/random.hpp>
 
 #include <cstdint>
+#include <stdexcept>
 #include <random>
 #include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -39,6 +40,21 @@ uint64_t pseudo_random()
     std::random_device device;
     std::uniform_int_distribution<uint64_t> distribution;
     return distribution(device);
+}
+
+// Not fully testable due to lack of random engine injection.
+// This may be truly random depending on the underlying device.
+uint64_t nonzero_pseudo_random()
+{
+    for (auto index = 0; index < 100; ++index)
+    {
+        const auto value = pseudo_random();
+        if (value > 0)
+            return value;
+    }
+
+    // If above doesn't return something is seriously wrong with the RNG.
+    throw std::runtime_error("The RNG produces 100 consecutive zero values.");
 }
 
 // Not fully testable due to lack of random engine injection.

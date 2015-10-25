@@ -34,6 +34,12 @@ namespace libbitcoin {
 BC_API uint64_t pseudo_random();
 
 /**
+ * Generate a non-zero pseudo random number within the domain.
+ * @return  The 64 bit number (use % to subset domain).
+ */
+BC_API uint64_t nonzero_pseudo_random();
+
+/**
  * Fill a buffer with randomness using the default random engine.
  * @param[in]  chunk  The buffer to fill with randomness.
  */

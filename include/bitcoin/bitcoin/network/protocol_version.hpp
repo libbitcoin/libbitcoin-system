@@ -20,50 +20,35 @@
 #ifndef LIBBITCOIN_NETWORK_PROTOCOL_VERSION_HPP
 #define LIBBITCOIN_NETWORK_PROTOCOL_VERSION_HPP
 
-#include <cstdint>
-#include <bitcoin/bitcoin/config/authority.hpp>
+#include <cstddef>
+#include <memory>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/hosts.hpp>
+#include <bitcoin/bitcoin/network/p2p.hpp>
 #include <bitcoin/bitcoin/network/protocol_base.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
-    
-/**
- * Version protocol (handshake).
- * Attach this to a node immediately following socket creation.
- */
+
 class BC_API protocol_version
   : public protocol_base<protocol_version>, track<protocol_version>
 {
 public:
-    /**
-     * Start a version protocol instance.
-     * @param[in]  channel   The channel on which to start the protocol.
-     * @param[in]  pool      The thread pool used by the protocol.
-     * @param[in]  timeout   The timer period.
-     * @param[in]  complete  Callback invoked upon stop or complete.
-     * @param[in]  height    The current height of the local blockchain.
-     * @param[in]  self      The authority that represents us to this peer.
-     * @param[in]  relay     Set relay in version message to peer.
-     */
-    protocol_version(channel::ptr channel, threadpool& pool,
-        const asio::duration& timeout, handler complete, hosts& hosts,
-        const config::authority& self, uint32_t height, bool relay);
+    typedef std::shared_ptr<protocol_version> ptr;
 
-    /**
-     * Starts the protocol, release any reference after calling.
-     */
+    protocol_version(threadpool& pool, p2p&, const settings& settings,
+        channel::ptr channel, size_t height, completion_handler handler);
+
     void start() override;
 
 private:
-    static handler synchronizer(handler complete);
+    static completion_handler synchronizer_factory(completion_handler handler);
+    static message::version template_factory(channel::ptr channel,
+        const settings& settings, size_t height);
 
     void handle_receive_version(const code& ec,
         const message::version& version);
@@ -73,6 +58,7 @@ private:
 
     static const message::version template_;
 
+    size_t height_;
     message::version version_;
 };
 

@@ -45,29 +45,30 @@ class protocol_base
 protected:
     /**
      * Construct a base protocol instance.
-     * @param[in]  channel   The channel on which to start the protocol.
-     * @param[in]  pool      The thread pool used by the dispacher.
-     * @param[in]  name      The instance name for logging purposes.
-     * @param[in]  complete  Callback invoked upon stop if not null.
+     * @param[in]  pool     The thread pool used by the dispacher.
+     * @param[in]  channel  The channel on which to start the protocol.
+     * @param[in]  name     The instance name for logging purposes.
+     * @param[in]  handler  Callback invoked upon stop if not null.
      */
-    protocol_base(channel::ptr channel, threadpool& pool,
-        const std::string& name, handler complete=nullptr)
-      : protocol(channel, pool, name, complete)
+    protocol_base(threadpool& pool, channel::ptr channel,
+        const std::string& name, completion_handler handler=nullptr)
+      : protocol(pool, channel, name, handler),
+        weak_channel_(channel)
     {
     }
 
     /**
      * Construct a base protocol instance.
-     * @param[in]  peer      The channel on which to start the protocol.
-     * @param[in]  pool      The thread pool used by the dispacher.
-     * @param[in]  timeout   The timer period.
-     * @param[in]  name      The instance name for logging purposes.
-     * @param[in]  complete  Callback invoked upon stop if not null.
+     * @param[in]  pool     The thread pool used by the dispacher.
+     * @param[in]  channel  The channel on which to start the protocol.
+     * @param[in]  timeout  The timer period.
+     * @param[in]  name     The instance name for logging purposes.
+     * @param[in]  handler  Callback invoked upon stop if not null.
      */
-    protocol_base(channel::ptr peer, threadpool& pool,
+    protocol_base(threadpool& pool, channel::ptr channel,
         const asio::duration& timeout, const std::string& name,
-        handler complete=nullptr)
-      : protocol_base(peer, pool, name, complete)
+        completion_handler handler=nullptr)
+      : protocol_base(pool, channel, name, handler)
     {
     }
 
@@ -83,18 +84,30 @@ protected:
     template <class Message, typename Handler, typename... Args>
     void send(Message&& packet, Handler&& handler, Args&&... args)
     {
-        channel_->send(std::forward<Message>(packet),
-            dispatch_.ordered_delegate(std::forward<Handler>(handler),
-                shared_from_base<Protocol>(), std::forward<Args>(args)...));
+        auto channel = weak_channel_.lock();
+        if (channel)
+            channel->send(std::forward<Message>(packet),
+                dispatch_.ordered_delegate(std::forward<Handler>(handler),
+                    shared_from_base<Protocol>(), 
+                        std::forward<Args>(args)...));
     }
 
     template <class Message, typename Handler, typename... Args>
     void subscribe(Handler&& handler, Args&&... args)
     {
-        channel_->subscribe<Message>(
-            dispatch_.ordered_delegate(std::forward<Handler>(handler),
-                shared_from_base<Protocol>(), std::forward<Args>(args)...));
+        auto channel = weak_channel_.lock();
+        if (channel)
+            channel->template subscribe<Message>(
+                dispatch_.ordered_delegate(std::forward<Handler>(handler),
+                    shared_from_base<Protocol>(),
+                        std::forward<Args>(args)...));
     }
+
+private:
+
+    // A weak reference is used to allow disposal of the instance.
+    // A copy use used in order to prohibit access by derived protocols.
+    std::weak_ptr<channel> weak_channel_;
 };
 
 } // namespace network

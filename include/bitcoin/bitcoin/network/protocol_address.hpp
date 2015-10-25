@@ -28,7 +28,7 @@
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/protocol_base.hpp>
-#include <bitcoin/bitcoin/network/hosts.hpp>
+#include <bitcoin/bitcoin/network/p2p.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -37,21 +37,23 @@ namespace network {
 
 /**
  * Address protocol.
- * Attach this to a node immediately following handshake completion.
+ * Attach this to a channel immediately following handshake completion.
  */
 class BC_API protocol_address
   : public protocol_base<protocol_address>, track<protocol_address>
 {
 public:
+    typedef std::shared_ptr<protocol_address> ptr;
+
     /**
      * Start an address protocol instance.
-     * @param[in]  peer   The channel on which to start the protocol.
-     * @param[in]  pool   The thread pool used by the protocol.
-     * @param[in]  hosts  The address pool that this class populates.
-     * @param[in]  self   The authority that represents us to this peer.
+     * @param[in]  pool      The thread pool used by the protocol.
+     * @param[in]  network   The network interface.
+     * @param[in]  settings  Configuration settings.
+     * @param[in]  channel   The channel on which to start the protocol.
      */
-    protocol_address(channel::ptr peer, threadpool& pool, hosts& hosts,
-        const config::authority& self);
+    protocol_address(threadpool& pool, p2p& network, const settings& settings,
+        channel::ptr channel);
 
     /**
      * Starts the protocol, release any reference after calling.
@@ -67,8 +69,9 @@ private:
     void handle_send_get_address(const code& ec);
     void handle_store_addresses(const code& ec);
 
-    hosts& hosts_;
+    p2p& network_;
     const config::authority self_;
+    bool disabled_;
 };
 
 } // namespace network
