@@ -60,7 +60,10 @@ session::session(threadpool& pool, p2p& network, const settings& settings,
 acceptor::ptr session::create_acceptor()
 {
     const auto accept = std::make_shared<acceptor>(pool_, settings_);
-    const auto handle_stop = [accept]() { accept->cancel(); };
+    const auto handle_stop = [accept]()
+    {
+        accept->cancel();
+    };
     subscribe_stop(handle_stop);
     return accept;
 }
@@ -68,7 +71,10 @@ acceptor::ptr session::create_acceptor()
 connector::ptr session::create_connector()
 {
     const auto connect = std::make_shared<connector>(pool_, settings_);
-    const auto handle_stop = [connect]() { connect->cancel(); };
+    const auto handle_stop = [connect]()
+    {
+        connect->cancel();
+    };
     subscribe_stop(handle_stop);
     return connect;
 }
