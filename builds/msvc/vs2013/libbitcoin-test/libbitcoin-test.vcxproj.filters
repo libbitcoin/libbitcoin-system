@@ -28,6 +28,9 @@
     <Filter Include="src\formats">
       <UniqueIdentifier>{b3025452-8224-4517-9629-f317973d1c17}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\network">
+      <UniqueIdentifier>{83fe9ca1-2248-423d-9aa4-5b81a1b0bc2a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -269,6 +272,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\hd_private.cpp">
       <Filter>src\wallet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\network\network.cpp">
+      <Filter>src\network</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

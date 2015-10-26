@@ -263,6 +263,7 @@ test_libbitcoin_test_SOURCES = \
     test/message/reject.cpp \
     test/message/verack.cpp \
     test/message/version.cpp \
+    test/network/network.cpp \
     test/unicode/unicode.cpp \
     test/unicode/unicode_istream.cpp \
     test/unicode/unicode_ostream.cpp \
