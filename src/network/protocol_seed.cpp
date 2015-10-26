@@ -30,6 +30,7 @@
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
+#include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -98,14 +99,14 @@ void protocol_seed::handle_receive_address(const code& ec,
         // We are getting here with channel stopped because this session
         // doesn't register a stop handler. We may be getting stopped due to
         // failure to handle ping on this session.
-        log_debug(LOG_PROTOCOL)
+        log::debug(LOG_PROTOCOL)
             << "Failure receiving addresses from seed [" << authority() << "] "
             << ec.message();
         stop(ec);
         return;
     }
 
-    log_debug(LOG_PROTOCOL)
+    log::debug(LOG_PROTOCOL)
         << "Storing addresses from seed [" << authority() << "] ("
         << message.addresses.size() << ")";
 
@@ -121,7 +122,7 @@ void protocol_seed::handle_send_address(const code& ec)
 
     if (ec)
     {
-        log_debug(LOG_PROTOCOL)
+        log::debug(LOG_PROTOCOL)
             << "Failure sending address to seed [" << authority() << "] "
             << ec.message();
         stop(ec);
@@ -139,7 +140,7 @@ void protocol_seed::handle_send_get_address(const code& ec)
 
     if (ec)
     {
-        log_debug(LOG_PROTOCOL)
+        log::debug(LOG_PROTOCOL)
             << "Failure sending get_address to seed [" << authority() << "] "
             << ec.message();
         stop(ec);
@@ -157,7 +158,7 @@ void protocol_seed::handle_store_addresses(const code& ec)
 
     if (ec)
     {
-        log_error(LOG_PROTOCOL)
+        log::error(LOG_PROTOCOL)
             << "Failure storing addresses from seed [" << authority() << "] "
             << ec.message();
         stop(ec);

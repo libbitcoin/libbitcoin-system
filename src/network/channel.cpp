@@ -30,6 +30,7 @@
 #include <bitcoin/bitcoin/network/proxy.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
+#include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
 
 // This must be declared in the global namespace.
@@ -59,7 +60,7 @@ channel::channel(threadpool& pool, asio::socket_ptr socket,
 
 void channel::start()
 {
-    proxy::start();
+    proxy::talk();
     start_timers();
 }
 
@@ -154,7 +155,7 @@ void channel::handle_expiration(const code& ec)
     if (stopped())
         return;
 
-    log_info(LOG_NETWORK)
+    log::info(LOG_NETWORK)
         << "Channel lifetime expired [" << address() << "]";
 
     stop(error::channel_timeout);
@@ -165,7 +166,7 @@ void channel::handle_inactivity(const code& ec)
     if (stopped())
         return;
 
-    log_info(LOG_NETWORK)
+    log::info(LOG_NETWORK)
         << "Channel inactivity timeout [" << address() << "]";
 
     stop(error::channel_timeout);

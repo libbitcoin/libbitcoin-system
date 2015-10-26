@@ -39,7 +39,6 @@
 #include <bitcoin/bitcoin/network/session_outbound.hpp>
 #include <bitcoin/bitcoin/network/session_seed.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 INITIALIZE_TRACK(bc::network::channel::channel_subscriber);
@@ -230,14 +229,14 @@ void p2p::handle_hosts_seeded(const code& ec, result_handler handler)
     if (stopped())
         return;
 
-    // This is the end of the startup cycle.
-    // Inbound calls may still be accepting even if this returns failure.
-    handler(ec);
-
     // If hosts load/seeding was successful, start outbound calls.
     // This session keeps itself in scope as configured until stop.
     if (!ec)
         attach<session_outbound>();
+
+    // This is the end of the startup cycle.
+    // Inbound calls may still be accepting even if this returns failure.
+    handler(ec);
 }
 
 // Shutdown processing.
@@ -245,28 +244,28 @@ void p2p::handle_hosts_seeded(const code& ec, result_handler handler)
 
 void p2p::stop()
 {
-    stopped_ = true;
-    relay(error::service_stopped, nullptr);
-    connections_.clear(error::service_stopped);
-    pool_.shutdown();
-    pool_.join();
+    stop(nullptr);
 }
 
+// This must be called from the thread that constructed this class.
 void p2p::stop(result_handler handler)
 {
     stopped_ = true;
     relay(error::service_stopped, nullptr);
     connections_.clear(error::service_stopped);
-    hosts_.save(
-        dispatch_.ordered_delegate(&p2p::handle_stop,
-            this, _1, handler));
-}
 
-// This will block until all work ends and threads coalesce.
-void p2p::handle_stop(const code& ec, result_handler handler)
-{
+    if (handler != nullptr)
+        hosts_.save(
+            dispatch_.ordered_delegate(&p2p::handle_stop,
+                this, _1, handler));
+
+    // This will wait for host save to complete, including handle_stop call.
     pool_.shutdown();
     pool_.join();
+}
+
+void p2p::handle_stop(const code& ec, result_handler handler)
+{
     handler(ec);
 }
 

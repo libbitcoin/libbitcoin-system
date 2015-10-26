@@ -130,6 +130,7 @@ protected:
     dispatcher dispatch_;
 
 private:
+    bool started() const;
     void subscribe_stop();
     void subscribe_timer(threadpool& pool, const asio::duration& timeout);
     void handle_stop(const code& ec);

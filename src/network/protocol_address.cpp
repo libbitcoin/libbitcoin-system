@@ -29,7 +29,7 @@
 #include <bitcoin/bitcoin/network/p2p.hpp>
 #include <bitcoin/bitcoin/network/protocol_base.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 INITIALIZE_TRACK(bc::network::protocol_address);
@@ -80,7 +80,7 @@ void protocol_address::handle_receive_address(const code& ec,
 
     if (ec)
     {
-        log_debug(LOG_PROTOCOL)
+        log::debug(LOG_PROTOCOL)
             << "Failure receiving address message from ["
             << authority() << "] " << ec.message();
         stop(ec);
@@ -90,7 +90,7 @@ void protocol_address::handle_receive_address(const code& ec,
     // Resubscribe to address messages.
     subscribe<address>(&protocol_address::handle_receive_address, _1, _2);
 
-    log_debug(LOG_PROTOCOL)
+    log::debug(LOG_PROTOCOL)
         << "Storing addresses from [" << authority() << "] ("
         << message.addresses.size() << ")";
 
@@ -107,7 +107,7 @@ void protocol_address::handle_receive_get_address(const code& ec,
 
     if (ec)
     {
-        log_debug(LOG_PROTOCOL)
+        log::debug(LOG_PROTOCOL)
             << "Failure receiving get_address message from ["
             << authority() << "] " << ec.message();
         stop(ec);
@@ -125,7 +125,7 @@ void protocol_address::handle_receive_get_address(const code& ec,
     if (active.addresses.empty())
         return;
 
-    log_debug(LOG_PROTOCOL)
+    log::debug(LOG_PROTOCOL)
         << "Sending addresses to [" << authority() << "] ("
         << active.addresses.size() << ")";
 
@@ -139,7 +139,7 @@ void protocol_address::handle_send_address(const code& ec)
 
     if (ec)
     {
-        log_debug(LOG_PROTOCOL)
+        log::debug(LOG_PROTOCOL)
             << "Failure sending address [" << authority() << "] "
             << ec.message();
         stop(ec);
@@ -153,7 +153,7 @@ void protocol_address::handle_send_get_address(const code& ec)
 
     if (ec)
     {
-        log_debug(LOG_PROTOCOL)
+        log::debug(LOG_PROTOCOL)
             << "Failure sending get_address [" << authority() << "] "
             << ec.message();
         stop(ec);
@@ -167,7 +167,7 @@ void protocol_address::handle_store_addresses(const code& ec)
 
     if (ec)
     {
-        log_error(LOG_PROTOCOL)
+        log::error(LOG_PROTOCOL)
             << "Failure storing addresses from [" << authority() << "] "
             << ec.message();
         stop(ec);

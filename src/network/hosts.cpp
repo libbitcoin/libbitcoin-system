@@ -28,6 +28,7 @@
 #include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/unicode/ifstream.hpp>
 #include <bitcoin/bitcoin/unicode/ofstream.hpp>
+#include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -135,10 +136,10 @@ void hosts::store(const address::list& hosts, result_handler handler)
 void hosts::do_store(const address& host, result_handler handler)
 {
     if (!host.is_valid())
-        log_debug(LOG_PROTOCOL)
+        log::debug(LOG_PROTOCOL)
             << "Invalid host address from peer";
     else if (find(host) != buffer_.end())
-        log_debug(LOG_PROTOCOL)
+        log::debug(LOG_PROTOCOL)
             << "Redundant host address from peer";
     else
         buffer_.push_back(host);

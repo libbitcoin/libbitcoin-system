@@ -34,6 +34,7 @@
 #include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/network/p2p.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/version.hpp>
 
@@ -122,14 +123,14 @@ void protocol_version::handle_receive_version(const code& ec,
 
     if (ec)
     {
-        log_error(LOG_PROTOCOL)
+        log::error(LOG_PROTOCOL)
             << "Failure receiving version from [" << authority() << "] "
             << ec.message();
         stop(ec);
         return;
     }
 
-    log_debug(LOG_PROTOCOL)
+    log::debug(LOG_PROTOCOL)
         << "Peer [" << authority() << "] version (" << message.value
         << ") services (" << message.services << ") " << message.user_agent;
 
@@ -144,7 +145,7 @@ void protocol_version::handle_verack_sent(const code& ec)
 
     if (ec)
     {
-        log_error(LOG_PROTOCOL)
+        log::error(LOG_PROTOCOL)
             << "Failure sending verack to [" << authority() << "] "
             << ec.message();
         stop(ec);
@@ -162,7 +163,7 @@ void protocol_version::handle_version_sent(const code& ec)
 
     if (ec)
     {
-        log_error(LOG_PROTOCOL)
+        log::error(LOG_PROTOCOL)
             << "Failure sending version to [" << authority() << "] "
             << ec.message();
         stop(ec);
@@ -181,7 +182,7 @@ void protocol_version::handle_receive_verack(const code& ec,
 
     if (ec)
     {
-        log_error(LOG_PROTOCOL)
+        log::error(LOG_PROTOCOL)
             << "Failure receiving verack from [" << authority() << "] "
             << ec.message();
         stop(ec);

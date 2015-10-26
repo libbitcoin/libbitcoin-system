@@ -32,7 +32,7 @@
 #include <bitcoin/bitcoin/network/protocol_seed.hpp>
 #include <bitcoin/bitcoin/network/proxy.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/logger.hpp>
+#include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
 
 INITIALIZE_TRACK(bc::network::session_seed);
@@ -71,7 +71,7 @@ void session_seed::handle_count(size_t start_size, result_handler handler)
 
     if (settings_.seeds.empty())
     {
-        log_info(LOG_NETWORK)
+        log::info(LOG_NETWORK)
             << "Seeding is required but no seed channels are configured.";
         handler(bc::error::operation_failed);
         return;
@@ -105,10 +105,8 @@ void session_seed::start_seed(const config::endpoint& seed,
     if (stopped())
         return;
 
-    log_info(LOG_NETWORK)
+    log::info(LOG_NETWORK)
         << "Contacting seed [" << seed << "]";
-
-    // TODO: connect to seed, using connector.
 
     // OUTBOUND CONNECT
     connect->connect(seed,
@@ -121,7 +119,7 @@ void session_seed::handle_connect(const code& ec, channel::ptr channel,
 {
     if (ec)
     {
-        log_info(LOG_NETWORK)
+        log::info(LOG_NETWORK)
             << "Failure contacting seed [" << seed << "] " << ec.message();
         handler(ec);
         return;
@@ -129,13 +127,13 @@ void session_seed::handle_connect(const code& ec, channel::ptr channel,
 
     if (blacklisted(channel->address()))
     {
-        log_debug(LOG_NETWORK)
+        log::debug(LOG_NETWORK)
             << "Seed is on blacklisted address [" << seed << "] ";
         handler(error::address_blocked);
         return;
     }
 
-    log_info(LOG_NETWORK)
+    log::info(LOG_NETWORK)
         << "Connected seed [" << seed << "] as " << channel->address();
 
     register_channel(channel, 

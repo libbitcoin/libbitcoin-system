@@ -27,6 +27,7 @@
 #include <bitcoin/bitcoin/network/p2p.hpp>
 #include <bitcoin/bitcoin/network/protocol_base.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -71,7 +72,7 @@ void protocol_ping::send_ping(const code& ec)
 
     if (ec && ec != error::channel_timeout)
     {
-        log_debug(LOG_PROTOCOL)
+        log::debug(LOG_PROTOCOL)
             << "Failure in ping timer for [" << authority() << "] "
             << ec.message();
         stop(ec);
@@ -92,7 +93,7 @@ void protocol_ping::handle_receive_ping(const code& ec,
 
     if (ec)
     {
-        log_debug(LOG_PROTOCOL)
+        log::debug(LOG_PROTOCOL)
             << "Failure getting ping from [" << authority() << "] "
             << ec.message();
         stop(ec);
@@ -112,7 +113,7 @@ void protocol_ping::handle_receive_pong(const code& ec,
 
     if (ec)
     {
-        log_debug(LOG_PROTOCOL)
+        log::debug(LOG_PROTOCOL)
             << "Failure getting pong from [" << authority() << "] "
             << ec.message();
         stop(ec);
@@ -121,7 +122,7 @@ void protocol_ping::handle_receive_pong(const code& ec,
 
     if (message.nonce != nonce)
     {
-        log_warning(LOG_PROTOCOL)
+        log::warning(LOG_PROTOCOL)
             << "Invalid pong nonce from [" << authority() << "]";
 
         // This could result from message overlap due to a short period,
@@ -137,7 +138,7 @@ void protocol_ping::handle_send_ping(const code& ec)
 
     if (ec)
     {
-        log_debug(LOG_PROTOCOL)
+        log::debug(LOG_PROTOCOL)
             << "Failure sending ping to [" << authority() << "] "
             << ec.message();
         stop(ec);
@@ -151,7 +152,7 @@ void protocol_ping::handle_send_pong(const code& ec)
 
     if (ec)
     {
-        log_debug(LOG_PROTOCOL)
+        log::debug(LOG_PROTOCOL)
             << "Failure sending pong to [" << authority() << "] "
             << ec.message();
         stop(ec);

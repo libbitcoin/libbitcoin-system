@@ -31,7 +31,7 @@
 #include <bitcoin/bitcoin/network/protocol_address.hpp>
 #include <bitcoin/bitcoin/network/protocol_ping.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/logger.hpp>
+#include <bitcoin/bitcoin/utility/log.hpp>
 
 INITIALIZE_TRACK(bc::network::session_manual);
 
@@ -84,7 +84,7 @@ void session_manual::handle_connect(const code& ec, channel::ptr channel,
 {
     if (ec)
     {
-        log_warning(LOG_NETWORK)
+        log::warning(LOG_NETWORK)
             << "Failure connecting [" << config::endpoint(hostname, port)
             << "] manually: " << ec.message();
 
@@ -102,7 +102,7 @@ void session_manual::handle_connect(const code& ec, channel::ptr channel,
     // We only invoke the callback on the first successful connection.
     handler(ec, channel);
 
-    log_info(LOG_NETWORK)
+    log::info(LOG_NETWORK)
         << "Connected manual channel [" << config::endpoint(hostname, port)
         << "] as [" << channel->address() << "]";
 

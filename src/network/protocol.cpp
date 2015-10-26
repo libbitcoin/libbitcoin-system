@@ -29,6 +29,7 @@
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
+#include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -75,15 +76,22 @@ void protocol::complete(const code& ec) const
 // Ideally avoid this, but it works around no self-closure in construct.
 void protocol::set_handler(completion_handler handler)
 {
-    BITCOIN_ASSERT_MSG(handler == nullptr, "The callback cannot be reset.");
+    BITCOIN_ASSERT_MSG(completion_handler_ == nullptr, "Callback is set.");
     if (completion_handler_ == nullptr)
         completion_handler_ = handler;
 }
 
 void protocol::set_version(const message::version& value)
 {
-    if (!stopped())
-        channel_->set_version(value);
+    if (stopped())
+        return;
+
+    channel_->set_version(value);
+}
+
+bool protocol::started() const
+{
+    return start_ == nullptr;
 }
 
 // Startup is deferred until after construct in order to use shared_from_this.
@@ -91,9 +99,9 @@ void protocol::set_version(const message::version& value)
 // called from construct, but that requires use of boost::share_ptr as well.
 void protocol::start()
 {
-    BITCOIN_ASSERT_MSG(start_ != nullptr, "Protocol cannot be restarted.");
+    BITCOIN_ASSERT_MSG(!started(), "Protocol is started.");
 
-    if (start_ == nullptr)
+    if (started())
         return;
 
     start_();
@@ -111,7 +119,7 @@ void protocol::stop(const code& ec)
 
 bool protocol::stopped() const
 {
-    return start_ != nullptr || channel_ == nullptr;
+    return !channel_;
 }
 
 void protocol::subscribe_stop()
@@ -138,10 +146,10 @@ void protocol::subscribe_timer(threadpool& pool,
     
 void protocol::handle_stop(const code& ec)
 {
-    // All dynamic calls must be stranded in order to protect this resource.
+    // This resource must be protected by stranding calls on this class.
     channel_ = nullptr;
 
-    log_debug(LOG_PROTOCOL)
+    log::debug(LOG_PROTOCOL)
         << "Stopped " << name_ << " protocol on [" << authority() << "] "
         << ec.message();
 
@@ -156,7 +164,7 @@ void protocol::handle_timer(const code& ec)
     if (stopped())
         return;
 
-    log_debug(LOG_PROTOCOL)
+    log::debug(LOG_PROTOCOL)
         << "Fired " << name_ << " protocol timer on [" << authority() << "] "
         << ec.message();
 

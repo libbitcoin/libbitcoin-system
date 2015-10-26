@@ -35,6 +35,7 @@
 #include <bitcoin/bitcoin/network/protocol_ping.hpp>
 #include <bitcoin/bitcoin/network/protocol_version.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
+#include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -205,7 +206,7 @@ void session::handle_handshake(const code& ec, channel::ptr channel,
 {
     if (ec)
     {
-        log_debug(LOG_NETWORK)
+        log::debug(LOG_NETWORK)
             << "Failure in handshake with [" << channel->address()
             << "] " << ec.message();
         handle_started(ec);
@@ -231,7 +232,7 @@ void session::handle_is_pending(bool pending, channel::ptr channel,
 {
     if (pending)
     {
-        log_debug(LOG_NETWORK)
+        log::debug(LOG_NETWORK)
             << "Rejected connection from [" << channel->address()
             << "] as loopback.";
         handle_started(error::accept_failed);
@@ -241,7 +242,7 @@ void session::handle_is_pending(bool pending, channel::ptr channel,
     const auto version = channel->version();
     if (version.value < bc::peer_minimum_version)
     {
-        log_debug(LOG_NETWORK)
+        log::debug(LOG_NETWORK)
             << "Peer version (" << version.value << ") below minimum ("
             << bc::peer_minimum_version << ") [" << channel->address() << "]";
         handle_started(error::accept_failed);
@@ -308,13 +309,13 @@ void session::remove(const code& ec, channel::ptr channel,
 void session::handle_unpend(const code& ec)
 {
     if (ec)
-        log_debug(LOG_NETWORK) << "Failed to unpend a channel.";
+        log::debug(LOG_NETWORK) << "Failed to unpend a channel.";
 }
 
 void session::handle_remove(const code& ec)
 {
     if (ec)
-        log_debug(LOG_NETWORK) << "Failed to remove a channel.";
+        log::debug(LOG_NETWORK) << "Failed to remove a channel.";
 }
 
 } // namespace network

@@ -31,19 +31,33 @@ BOOST_AUTO_TEST_CASE(p2p__start__defaults__okay)
     settings configuration = p2p::testnet;
     configuration.threads = 1;
     configuration.inbound_connection_limit = 0;
+    configuration.seeds = { configuration.seeds[1] };
 
     p2p network(configuration);
 
+    std::promise<const code&> started;
+    const auto start_handler = [&started](const code& ec)
+    {
+        started.set_value(ec);
+    };
+
+    network.start(start_handler);
+
+    // Wait until start is complete.
+    const auto start_code = started.get_future().get().value();
+    BOOST_REQUIRE_EQUAL(start_code, error::success);
+
     std::promise<const code&> stopped;
-    const auto handler = [&stopped](const code& ec)
+    const auto stop_handler = [&stopped](const code& ec)
     {
         stopped.set_value(ec);
     };
 
-    network.start(handler);
+    network.stop(stop_handler);
 
-    // Wait until start is complete and verify it was successful.
-    BOOST_REQUIRE_EQUAL(stopped.get_future().get().value(), error::success);
+    // Wait until stop is complete.
+    const auto stop_code = stopped.get_future().get().value();
+    BOOST_REQUIRE_EQUAL(stop_code, error::success);
 }
 
 BOOST_AUTO_TEST_CASE(p2p__stop__defaults__okay)
@@ -52,14 +66,18 @@ BOOST_AUTO_TEST_CASE(p2p__stop__defaults__okay)
     configuration.threads = 1;
     configuration.inbound_connection_limit = 0;
 
-    p2p network;
+    p2p network(configuration);
 
-    const auto handler = [](const code& ec)
+    std::promise<const code&> result;
+    const auto handler = [&result](const code& ec)
     {
-        BOOST_REQUIRE(!ec);
+        result.set_value(ec);
     };
 
     network.stop(handler);
+
+    // Wait until stop is complete and verify it was successful.
+    BOOST_REQUIRE_EQUAL(result.get_future().get().value(), error::success);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

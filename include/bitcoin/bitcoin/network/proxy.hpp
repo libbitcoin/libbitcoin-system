@@ -38,7 +38,6 @@
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
-#include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
@@ -97,13 +96,13 @@ public:
         message_subscriber_.subscribe<Message>(std::forward<Handler>(handler));
     }
 
-    void start();
+    void talk();
+    bool stopped() const;
     void stop(const code& ec);
     void subscribe_stop(stop_handler handler);
     config::authority address() const;
 
 protected:
-    bool stopped() const;
     virtual void handle_activity() = 0;
     virtual void handle_stopping() = 0;
 

@@ -52,7 +52,7 @@
     #include <atomic>
     #include <cstddef>
     #include <string>
-    #include <bitcoin/bitcoin/utility/logger.hpp>
+    #include <bitcoin/bitcoin/utility/log.hpp>
 
     #define INITIALIZE_TRACK(class_name) \
         template <> \
@@ -69,13 +69,13 @@
         track(const std::string& class_name, const std::string& log_name)
           : class_(class_name), log_(log_name)
         {
-            bc::log_debug(log_)
+            bc::log::debug(log_)
                 << class_ << "(" << ++instances << ")";
         }
 
         ~track()
         {
-            bc::log_debug(log_)
+            bc::log::debug(log_)
                 << "~" << class_ << "(" << --instances << ")";
         }
 

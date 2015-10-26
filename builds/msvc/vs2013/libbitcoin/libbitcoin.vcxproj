@@ -141,6 +141,7 @@
     <ClCompile Include="..\..\..\..\src\network\acceptor.cpp" />
     <ClCompile Include="..\..\..\..\src\network\channel.cpp" />
     <ClCompile Include="..\..\..\..\src\network\connections.cpp" />
+    <ClCompile Include="..\..\..\..\src\network\logging.cpp" />
     <ClCompile Include="..\..\..\..\src\network\message_subscriber.cpp" />
     <ClCompile Include="..\..\..\..\src\network\pending.cpp" />
     <ClCompile Include="..\..\..\..\src\network\protocol.cpp" />
@@ -171,7 +172,7 @@
     <ClCompile Include="..\..\..\..\src\utility\evaluation_context.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\istream_reader.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\random.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\logger.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\log.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\ostream_writer.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\string.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\thread.cpp" />
@@ -265,6 +266,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\asio.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\connections.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\logging.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\message_subscriber.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\network_settings.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\pending.hpp" />
@@ -308,7 +310,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\exceptions.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\istream_reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\random.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\logger.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\log.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\ostream_writer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\serializer.hpp" />

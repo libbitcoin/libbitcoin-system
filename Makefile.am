@@ -119,6 +119,7 @@ src_libbitcoin_la_SOURCES = \
     src/network/connections.cpp \
     src/network/connector.cpp \
     src/network/hosts.cpp \
+    src/network/logging.cpp \
     src/network/message_subscriber.cpp \
     src/network/p2p.cpp \
     src/network/pending.cpp \
@@ -148,7 +149,7 @@ src_libbitcoin_la_SOURCES = \
     src/utility/evaluation_context.cpp \
     src/utility/evaluation_context.hpp \
     src/utility/istream_reader.cpp \
-    src/utility/logger.cpp \
+    src/utility/log.cpp \
     src/utility/ostream_writer.cpp \
     src/utility/random.cpp \
     src/utility/string.cpp \
@@ -407,6 +408,7 @@ include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/connections.hpp \
     include/bitcoin/bitcoin/network/connector.hpp \
     include/bitcoin/bitcoin/network/hosts.hpp \
+    include/bitcoin/bitcoin/network/logging.hpp \
     include/bitcoin/bitcoin/network/message_subscriber.hpp \
     include/bitcoin/bitcoin/network/network_settings.hpp \
     include/bitcoin/bitcoin/network/p2p.hpp \
@@ -452,7 +454,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/endian.hpp \
     include/bitcoin/bitcoin/utility/exceptions.hpp \
     include/bitcoin/bitcoin/utility/istream_reader.hpp \
-    include/bitcoin/bitcoin/utility/logger.hpp \
+    include/bitcoin/bitcoin/utility/log.hpp \
     include/bitcoin/bitcoin/utility/ostream_writer.hpp \
     include/bitcoin/bitcoin/utility/random.hpp \
     include/bitcoin/bitcoin/utility/reader.hpp \

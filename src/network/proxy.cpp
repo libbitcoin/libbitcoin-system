@@ -39,7 +39,7 @@
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
-#include <bitcoin/bitcoin/utility/logger.hpp>
+#include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
@@ -61,7 +61,7 @@ using boost::posix_time::time_duration;
 static constexpr size_t max_payload_size = 10 * 1024 * 1024;
 
 proxy::proxy(threadpool& pool, asio::socket_ptr socket, uint32_t magic)
-  : stopped_(true),
+  : stopped_(false),
     magic_(magic),
     dispatch_(pool),
     socket_(socket),
@@ -80,13 +80,11 @@ proxy::~proxy()
     stop(error::channel_stopped);
 }
 
-void proxy::start()
+void proxy::talk()
 {
-    // If we ever allow restart we need to isolate start (stop is already).
-    if (!stopped())
+    if (stopped())
         return;
 
-    stopped_ = false;
     read_heading();
 }
 
@@ -176,7 +174,7 @@ void proxy::handle_read_heading(const boost_code& ec, size_t)
 
     if (ec)
     {
-        log_debug(LOG_NETWORK)
+        log::debug(LOG_NETWORK)
             << "Channel failure [" << address() << "] "
             << code(error::boost_to_error_code(ec)).message();
         stop(ec);
@@ -188,7 +186,7 @@ void proxy::handle_read_heading(const boost_code& ec, size_t)
     const auto parsed = head.from_data(istream);
     if (!parsed || head.magic != magic_)
     {
-        log_warning(LOG_NETWORK) 
+        log::warning(LOG_NETWORK) 
             << "Invalid heading received [" << address() << "]";
         stop(error::bad_stream);
         return;
@@ -196,14 +194,14 @@ void proxy::handle_read_heading(const boost_code& ec, size_t)
 
     if (head.payload_size > max_payload_size)
     {
-        log_warning(LOG_NETWORK)
+        log::warning(LOG_NETWORK)
             << "Oversized payload indicated [" << address() << "] ("
             << head.payload_size << " bytes)";
         stop(error::bad_stream);
         return;
     }
 
-    log_debug(LOG_NETWORK)
+    log::debug(LOG_NETWORK)
         << "Receive " << head.command << " [" << address() << "] ("
         << head.payload_size << " bytes)";
 
@@ -221,7 +219,7 @@ void proxy::handle_read_payload(const boost_code& ec, size_t,
 
     if (heading.checksum != bitcoin_checksum(payload_buffer_))
     {
-        log_warning(LOG_NETWORK) 
+        log::warning(LOG_NETWORK) 
             << "Invalid bitcoin checksum from [" << address() << "]";
         stop(error::bad_stream);
         return;
@@ -243,14 +241,14 @@ void proxy::handle_read_payload(const boost_code& ec, size_t,
 
     // Warn about unconsumed bytes in the stream.
     if (!error && istream.peek() != std::istream::traits_type::eof())
-        log_warning(LOG_NETWORK)
+        log::warning(LOG_NETWORK)
             << "Valid message [" << heading.command
             << "] handled, unused bytes remain in payload.";
 
     // Stop the channel if there was a read error.
     if (ec)
     {
-        log_warning(LOG_NETWORK)
+        log::warning(LOG_NETWORK)
             << "Invalid payload of " << heading.command
             << " from [" << address() << "] (deferred)"
             << code(error::boost_to_error_code(ec)).message();
@@ -261,7 +259,7 @@ void proxy::handle_read_payload(const boost_code& ec, size_t,
     // Stop the channel if there was an error from parse.
     if (error)
     {
-        log_warning(LOG_NETWORK)
+        log::warning(LOG_NETWORK)
             << "Invalid stream load of " << heading.command
             << " from [" << address() << "] " << error.message();
         stop(error);
@@ -277,7 +275,7 @@ void proxy::do_send(const data_chunk& message, send_handler handler,
         return;
     }
 
-    log_debug(LOG_NETWORK)
+    log::debug(LOG_NETWORK)
         << "Send " << command << " [" << address() << "] ("
         << message.size() << " bytes)";
 
