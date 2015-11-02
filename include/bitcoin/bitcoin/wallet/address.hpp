@@ -24,6 +24,7 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/script.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/utility/endian.hpp>
 
 namespace libbitcoin {
 
@@ -142,16 +143,10 @@ namespace std
     {
         size_t operator()(const libbitcoin::payment_address& payaddr) const
         {
-            using libbitcoin::short_hash;
-            using libbitcoin::short_hash_size;
-            std::string raw_addr;
-            raw_addr.resize(short_hash_size + 1);
-            raw_addr[0] = payaddr.version();
-            const short_hash& addr_hash = payaddr.hash();
-            std::copy(addr_hash.begin(), addr_hash.end(),
-                raw_addr.begin() + 1);
-            std::hash<std::string> functor;
-            return functor(raw_addr);
+            // The address already contains a well-scrambled hash,
+            // so just return some of that:
+            return libbitcoin::from_little_endian_unsafe<size_t>(
+                payaddr.hash().begin());
         }
     };
 
