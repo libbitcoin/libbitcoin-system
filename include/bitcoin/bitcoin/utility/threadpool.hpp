@@ -30,18 +30,7 @@
 namespace libbitcoin {
 
 /**
- * Threadpool represents a collection of running threads which can
- * be passed operations through their io_service.
- *
- * @code
- *  void task_foo();
- *
- *  // Run threadpool with a single running thread.
- *  threadpool pool(1);
- *  // Post operation to threadpool.
- *  // task_foo() will be called inside threadpool.
- *  pool.service.post(task_foo);
- * @endcode
+ * A collection of threads which can be passed operations through io_service.
  */
 class BC_API threadpool
 {

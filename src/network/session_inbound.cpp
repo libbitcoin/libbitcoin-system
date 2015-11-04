@@ -49,14 +49,13 @@ session_inbound::session_inbound(threadpool& pool, p2p& network,
 
 void session_inbound::start()
 {
-    // If we ever allow restart we need to isolate start.
     if (!stopped())
         return;
 
     if (settings_.inbound_port == 0 || settings_.inbound_connection_limit == 0)
     {
         log::info(LOG_NETWORK)
-            << "Not configured to accept incoming channels.";
+            << "Not configured for accepting incoming channels.";
         return;
     }
 
@@ -99,11 +98,11 @@ void session_inbound::handle_accept(const code& ec, channel::ptr channel,
         return;
     }
 
-    if (blacklisted(channel->address()))
+    if (blacklisted(channel->authority()))
     {
         log::debug(LOG_NETWORK)
             << "Rejected inbound connection from ["
-            << channel->address() << "] due to blacklisted address.";
+            << channel->authority() << "] due to blacklisted address.";
         return;
     }
 
@@ -119,12 +118,12 @@ void session_inbound::handle_connection_count(size_t connections,
     {
         log::debug(LOG_NETWORK)
             << "Rejected inbound connection from ["
-            << channel->address() << "] due to connection limit.";
+            << channel->authority() << "] due to connection limit.";
         return;
     }
    
     log::info(LOG_NETWORK)
-        << "Connected inbound channel [" << channel->address() << "]";
+        << "Connected inbound channel [" << channel->authority() << "]";
 
     register_channel(channel, 
         std::bind(&session_inbound::handle_channel_start,
@@ -139,8 +138,8 @@ void session_inbound::handle_channel_start(const code& ec,
     if (ec)
         return;
 
-    attach<protocol_ping>(channel);
-    attach<protocol_address>(channel);
+    attach<protocol_ping>(channel, settings_);
+    attach<protocol_address>(channel, settings_);
 }
 
 void session_inbound::handle_channel_stop(const code&)

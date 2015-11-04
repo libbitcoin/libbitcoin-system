@@ -74,6 +74,10 @@ void threadpool::join()
     for (auto& thread: threads_)
         if (thread.joinable())
             thread.join();
+
+    // This allows the pool to be cleanly restarted by calling spawn.
+    threads_.clear();
+    service_.reset();
 }
 
 asio::service& threadpool::service()

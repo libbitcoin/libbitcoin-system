@@ -123,7 +123,6 @@ src_libbitcoin_la_SOURCES = \
     src/network/message_subscriber.cpp \
     src/network/p2p.cpp \
     src/network/pending.cpp \
-    src/network/protocol.cpp \
     src/network/protocol_address.cpp \
     src/network/protocol_ping.cpp \
     src/network/protocol_seed.cpp \
@@ -264,7 +263,7 @@ test_libbitcoin_test_SOURCES = \
     test/message/reject.cpp \
     test/message/verack.cpp \
     test/message/version.cpp \
-    test/network/network.cpp \
+    test/network/p2p.cpp \
     test/unicode/unicode.cpp \
     test/unicode/unicode_istream.cpp \
     test/unicode/unicode_ostream.cpp \
@@ -413,11 +412,12 @@ include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/network_settings.hpp \
     include/bitcoin/bitcoin/network/p2p.hpp \
     include/bitcoin/bitcoin/network/pending.hpp \
-    include/bitcoin/bitcoin/network/protocol.hpp \
     include/bitcoin/bitcoin/network/protocol_address.hpp \
     include/bitcoin/bitcoin/network/protocol_base.hpp \
+    include/bitcoin/bitcoin/network/protocol_dispatch.hpp \
     include/bitcoin/bitcoin/network/protocol_ping.hpp \
     include/bitcoin/bitcoin/network/protocol_seed.hpp \
+    include/bitcoin/bitcoin/network/protocol_timed.hpp \
     include/bitcoin/bitcoin/network/protocol_version.hpp \
     include/bitcoin/bitcoin/network/proxy.hpp \
     include/bitcoin/bitcoin/network/session.hpp \

@@ -40,6 +40,7 @@ public:
     typedef std::function<void(const code&)> result_handler;
 
     pending(threadpool& pool);
+    ~pending();
 
     /// This class is not copyable.
     pending(const pending&) = delete;

@@ -26,7 +26,7 @@
 #include <bitcoin/bitcoin/message/get_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/p2p.hpp>
-#include <bitcoin/bitcoin/network/protocol_base.hpp>
+#include <bitcoin/bitcoin/network/protocol_timed.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
@@ -45,47 +45,56 @@ using namespace bc::message;
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-protocol::completion_handler protocol_seed::synchronizer_factory(
-    completion_handler handler)
-{
-    return synchronize(handler, 3, NAME);
-}
-
 // Require three callbacks (or any error) before calling complete.
 protocol_seed::protocol_seed(threadpool& pool, p2p& network,
-    const settings& settings, channel::ptr channel, completion_handler handler)
-  : protocol_base(pool, channel, settings.channel_germination(), NAME,
-        synchronizer_factory(handler)),
+    channel::ptr channel)
+  : protocol_timed(pool, channel, NAME),
     network_(network),
-    self_(settings.self),
-    disabled_(settings.host_pool_capacity == 0),
     CONSTRUCT_TRACK(protocol_seed, LOG_PROTOCOL)
 {
 }
 
-void protocol_seed::start()
+void protocol_seed::start(const settings& settings, event_handler handler)
 {
-    if (disabled_)
+    if (settings.host_pool_capacity == 0)
     {
         // Stops channel and ends callback synchronization.
-        stop(error::not_found);
+        handler(error::not_found);
         return;
     }
 
-    protocol_base::start();
+    // The synchronnizer is the only object that is aware of completion.
+    const auto seeding_complete =
+        bind(&protocol_seed::handle_seeding_complete, _1, handler);
 
-    if (self_.port() == 0)
-    {
-        complete(error::success);
-    }
-    else
-    {
-        address self({ { self_.to_network_address() } });
-        send(self, &protocol_seed::handle_send_address, _1);
-    }
+    protocol_timed::start(settings.channel_germination(),
+        synchronize(seeding_complete, 3, NAME));
 
+    send_own_address(settings);
     subscribe<address>(&protocol_seed::handle_receive_address, _1, _2);
     send(get_address(), &protocol_seed::handle_send_get_address, _1);
+}
+
+void protocol_seed::send_own_address(const settings& settings)
+{
+    if (settings.self.port() == 0)
+    {
+        set_event(error::success);
+        return;
+    }
+
+    address self({ { settings.self.to_network_address() } });
+    send(self, &protocol_seed::handle_send_address, _1);
+}
+
+void protocol_seed::handle_seeding_complete(const code& ec,
+    event_handler handler)
+{
+    cancel_timer();
+    handler(ec);
+
+    if (ec)
+        stop(ec);
 }
 
 void protocol_seed::handle_receive_address(const code& ec,
@@ -96,13 +105,10 @@ void protocol_seed::handle_receive_address(const code& ec,
 
     if (ec)
     {
-        // We are getting here with channel stopped because this session
-        // doesn't register a stop handler. We may be getting stopped due to
-        // failure to handle ping on this session.
         log::debug(LOG_PROTOCOL)
             << "Failure receiving addresses from seed [" << authority() << "] "
             << ec.message();
-        stop(ec);
+        set_event(ec);
         return;
     }
 
@@ -125,12 +131,12 @@ void protocol_seed::handle_send_address(const code& ec)
         log::debug(LOG_PROTOCOL)
             << "Failure sending address to seed [" << authority() << "] "
             << ec.message();
-        stop(ec);
+        set_event(ec);
         return;
     }
 
     // 1 of 3
-    complete(error::success);
+    set_event(error::success);
 }
 
 void protocol_seed::handle_send_get_address(const code& ec)
@@ -143,12 +149,12 @@ void protocol_seed::handle_send_get_address(const code& ec)
         log::debug(LOG_PROTOCOL)
             << "Failure sending get_address to seed [" << authority() << "] "
             << ec.message();
-        stop(ec);
+        set_event(ec);
         return;
     }
 
     // 2 of 3
-    complete(error::success);
+    set_event(error::success);
 }
 
 void protocol_seed::handle_store_addresses(const code& ec)
@@ -161,13 +167,15 @@ void protocol_seed::handle_store_addresses(const code& ec)
         log::error(LOG_PROTOCOL)
             << "Failure storing addresses from seed [" << authority() << "] "
             << ec.message();
-        stop(ec);
+        set_event(ec);
         return;
     }
 
+    log::debug(LOG_PROTOCOL)
+        << "Stopping completed seed [" << authority() << "] ";
+
     // 3 of 3
-    complete(error::success);
-    stop(error::channel_stopped);
+    set_event(error::channel_stopped);
 }
 
 } // namespace network

@@ -49,7 +49,7 @@ public:
     typedef std::function<void(bool)> truth_handler;
     typedef std::function<void(size_t)> count_handler;
     typedef std::function<void(const code&)> result_handler;
-    typedef std::function<void(const code&, const address&)> address_handler;
+    typedef std::function<void(const code&, const address&)> fetch_handler;
 
     hosts(threadpool& pool, const settings& settings);
 
@@ -63,7 +63,7 @@ public:
     void remove(const address& host, result_handler handler);
     void load(result_handler handler);
     void save(result_handler handler);
-    void fetch_address(address_handler handler);
+    void fetch(fetch_handler handler);
 
 private:
     typedef boost::circular_buffer<address> list;
@@ -76,12 +76,15 @@ private:
     void do_remove(const address& host, result_handler handler);
     void do_load(const path& file_path, result_handler handler);
     void do_save(const path& file_path, result_handler handler);
-    void do_fetch_address(address_handler handler);
+    void do_fetch(fetch_handler handler);
     size_t select_random_host();
 
     list buffer_;
     dispatcher dispatch_;
     boost::filesystem::path file_path_;
+
+    // HACK: we use this because the buffer capacity cannot be set to zero.
+    const bool disabled_;
 };
 
 } // namespace network

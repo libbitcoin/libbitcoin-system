@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -31,6 +32,11 @@ namespace network {
 pending::pending(threadpool& pool)
   : dispatch_(pool)
 {
+}
+
+pending::~pending()
+{
+    BITCOIN_ASSERT_MSG(buffer_.empty(), "Pending buffer not empty.");
 }
 
 pending::iterator pending::find(const uint64_t version_nonce) const

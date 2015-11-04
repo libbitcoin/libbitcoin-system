@@ -52,12 +52,19 @@ session_seed::session_seed(threadpool& pool, p2p& network,
 
 void session_seed::start(result_handler handler)
 {
-    // If we ever allow restart we need to isolate start.
     if (!stopped())
+    {
+        handler(error::operation_failed);
         return;
+    }
 
-    if (settings_.outbound_connections == 0)
+    if (settings_.host_pool_capacity == 0)
+    {
+        log::info(LOG_NETWORK)
+            << "Not configured to populate a host pool.";
         handler(error::success);
+        return;
+    }
 
     address_count(
         dispatch_.ordered_delegate(&session_seed::handle_count,
@@ -67,13 +74,19 @@ void session_seed::start(result_handler handler)
 void session_seed::handle_count(size_t start_size, result_handler handler)
 {
     if (start_size != 0)
+    {
+        log::debug(LOG_NETWORK)
+            << "Seeding is not required because there are " 
+            << start_size << " cached addresses.";
         handler(error::success);
+        return;
+    }
 
     if (settings_.seeds.empty())
     {
-        log::info(LOG_NETWORK)
-            << "Seeding is required but no seed channels are configured.";
-        handler(bc::error::operation_failed);
+        log::error(LOG_NETWORK)
+            << "Seeding is required but no seeds are configured.";
+        handler(error::operation_failed);
         return;
     }
 
@@ -103,7 +116,10 @@ void session_seed::start_seed(const config::endpoint& seed,
     connector::ptr connect, result_handler handler)
 {
     if (stopped())
+    {
+        handler(error::channel_stopped);
         return;
+    }
 
     log::info(LOG_NETWORK)
         << "Contacting seed [" << seed << "]";
@@ -125,16 +141,17 @@ void session_seed::handle_connect(const code& ec, channel::ptr channel,
         return;
     }
 
-    if (blacklisted(channel->address()))
+    if (blacklisted(channel->authority()))
     {
         log::debug(LOG_NETWORK)
-            << "Seed is on blacklisted address [" << seed << "] ";
+            << "Seed [" << seed << "] on blacklisted address ["
+            << channel->authority() << "]";
         handler(error::address_blocked);
         return;
     }
 
     log::info(LOG_NETWORK)
-        << "Connected seed [" << seed << "] as " << channel->address();
+        << "Connected seed [" << seed << "] as " << channel->authority();
 
     register_channel(channel, 
         std::bind(&session_seed::handle_channel_start,
@@ -147,10 +164,13 @@ void session_seed::handle_channel_start(const code& ec, channel::ptr channel,
     result_handler handler)
 {
     if (ec)
+    {
+        handler(ec);
         return;
+    }
 
-    attach<protocol_ping>(channel);
-    attach<protocol_seed>(channel, handler);
+    attach<protocol_ping>(channel, settings_);
+    attach<protocol_seed>(channel, settings_, handler);
 };
 
 void session_seed::handle_channel_stop(const code&)
@@ -170,8 +190,8 @@ void session_seed::handle_complete(size_t start_size, result_handler handler)
 void session_seed::handle_final_count(size_t current_size, size_t start_size,
     result_handler handler)
 {
-    const auto result = current_size > start_size ? bc::error::success :
-        bc::error::operation_failed;
+    const auto result = current_size > start_size ? error::success :
+        error::operation_failed;
 
     handler(result);
 }

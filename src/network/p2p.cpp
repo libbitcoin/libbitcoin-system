@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
+#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
@@ -39,6 +40,8 @@
 #include <bitcoin/bitcoin/network/session_outbound.hpp>
 #include <bitcoin/bitcoin/network/session_seed.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/log.hpp>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 INITIALIZE_TRACK(bc::network::channel::channel_subscriber);
@@ -149,7 +152,6 @@ p2p::p2p(const settings& settings)
   : stopped_(true),
     height_(0),
     settings_(settings),
-    pool_(settings_.threads),
     dispatch_(pool_),
     pending_(pool_),
     connections_(pool_),
@@ -185,20 +187,14 @@ void p2p::set_height(size_t value)
 
 void p2p::start(result_handler handler)
 {
-    // If we ever allow restart we need to isolate start/stop.
     if (!stopped())
-        return;
-
-    stopped_ = false;
-
-    // This session keeps itself in scope as configured until stop.
-    attach<session_inbound>();
-
-    if (settings_.host_pool_capacity == 0)
     {
-        handler(error::success);
+        handler(error::operation_failed);
         return;
     }
+
+    stopped_ = false;
+    pool_.spawn(settings_.threads, thread_priority::low);
 
     hosts_.load(
         dispatch_.ordered_delegate(&p2p::handle_hosts_loaded,
@@ -208,10 +204,15 @@ void p2p::start(result_handler handler)
 void p2p::handle_hosts_loaded(const code& ec, result_handler handler)
 {
     if (stopped())
+    {
+        handler(error::service_stopped);
         return;
+    }
 
     if (ec)
     {
+        log::error(LOG_NETWORK)
+            << "Error loading host addresses: " << ec.message();
         handler(ec);
         return;
     }
@@ -220,23 +221,34 @@ void p2p::handle_hosts_loaded(const code& ec, result_handler handler)
         dispatch_.ordered_delegate(&p2p::handle_hosts_seeded,
             this, _1, handler);
 
-    // This session keeps itself in scope as configured until complete or stop.
+    // The instance is retained by the stop handler (i.e. until shutdown).
     attach<session_seed>(handle_complete);
 }
 
+// This is the end of the startup cycle.
 void p2p::handle_hosts_seeded(const code& ec, result_handler handler)
 {
     if (stopped())
+    {
+        handler(error::service_stopped);
         return;
+    }
 
-    // If hosts load/seeding was successful, start outbound calls.
-    // This session keeps itself in scope as configured until stop.
-    if (!ec)
-        attach<session_outbound>();
+    if (ec)
+    {
+        log::error(LOG_NETWORK)
+            << "Error seeding host addresses: " << ec.message();
+        handler(ec);
+        return;
+    }
 
-    // This is the end of the startup cycle.
-    // Inbound calls may still be accepting even if this returns failure.
-    handler(ec);
+    // If hosts load/seeding was successful, start other sessions.
+    // These are retained by the stop handler (and one manual reference).
+    attach<session_inbound>();
+    attach<session_outbound>();
+    manual_ = attach<session_manual>();
+
+    handler(error::success);
 }
 
 // Shutdown processing.
@@ -250,23 +262,36 @@ void p2p::stop()
 // This must be called from the thread that constructed this class.
 void p2p::stop(result_handler handler)
 {
+    if (stopped())
+    {
+        handle_hosts_saved(error::service_stopped, handler);
+        return;
+    }
+
     stopped_ = true;
+    manual_ = nullptr;
     relay(error::service_stopped, nullptr);
-    connections_.clear(error::service_stopped);
 
-    if (handler != nullptr)
-        hosts_.save(
-            dispatch_.ordered_delegate(&p2p::handle_stop,
-                this, _1, handler));
+    // This is asynchronous, will complete on join.
+    connections_.clear(error::channel_stopped);
 
-    // This will wait for host save to complete, including handle_stop call.
+    hosts_.save(
+        dispatch_.ordered_delegate(&p2p::handle_hosts_saved,
+            this, _1, handler));
+
+    // Join will wait for host save to complete, including handle_stop call.
     pool_.shutdown();
     pool_.join();
 }
 
-void p2p::handle_stop(const code& ec, result_handler handler)
+void p2p::handle_hosts_saved(const code& ec, result_handler handler)
 {
-    handler(ec);
+    if (!stopped() && ec)
+        log::error(LOG_NETWORK)
+            << "Error saving hosts file: " << ec.message();
+
+    if (handler)
+        handler(ec);
 }
 
 bool p2p::stopped() const
@@ -325,7 +350,7 @@ void p2p::connected_count(count_handler handler)
 
 void p2p::fetch_address(address_handler handler)
 {
-    hosts_.fetch_address(handler);
+    hosts_.fetch(handler);
 }
 
 void p2p::store(const address& address, result_handler handler)
@@ -351,23 +376,21 @@ void p2p::address_count(count_handler handler)
 // Channel management.
 // ----------------------------------------------------------------------------
 
-// This can be called without starting the network.
 void p2p::connect(const std::string& hostname, uint16_t port)
 {
-    // This session keeps itself in scope until complete or stop.
-    // For frequent connections it would be more efficient to keep the session
-    // in a member and connect as necessary, but this is simpler.
-    attach<session_manual>()->connect(hostname, port);
+    if (stopped())
+        return;
+
+    manual_->connect(hostname, port);
 }
 
-// This can be called without starting the network.
 void p2p::connect(const std::string& hostname, uint16_t port,
     channel_handler handler)
 {
-    // This session keeps itself in scope until complete or stop.
-    // For frequent connections it would be more efficient to keep the session
-    // in a member and connect as necessary, but this is simpler.
-    attach<session_manual>()->connect(hostname, port, handler);
+    if (stopped())
+        handler(error::service_stopped, nullptr);
+    else
+        manual_->connect(hostname, port, handler);
 }
 
 void p2p::subscribe(channel_handler handler)

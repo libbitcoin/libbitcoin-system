@@ -23,9 +23,10 @@
 #include <string>
 #include <bitcoin/bitcoin/message/ping.hpp>
 #include <bitcoin/bitcoin/message/pong.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/p2p.hpp>
-#include <bitcoin/bitcoin/network/protocol_base.hpp>
+#include <bitcoin/bitcoin/network/protocol_timed.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
@@ -43,25 +44,21 @@ using namespace bc::message;
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-protocol_ping::protocol_ping(threadpool& pool, p2p&, const settings& settings,
-    channel::ptr channel)
-  : protocol_base(pool, channel, settings.channel_heartbeat(), NAME),
+protocol_ping::protocol_ping(threadpool& pool, p2p&, channel::ptr channel)
+  : protocol_timed(pool, channel, NAME),
     CONSTRUCT_TRACK(protocol_ping, LOG_PROTOCOL)
 {
 }
 
-void protocol_ping::start()
+void protocol_ping::start(const settings& settings)
 {
-    protocol_base::start();
-
-    // Unfortunately this cannot be set on construct because of the inability of
-    // shared_from_this to execute within a constructor.
-    set_handler(bind(&protocol_ping::send_ping, _1));
+    protocol_timed::start(settings.channel_heartbeat(),
+        bind(&protocol_ping::send_ping, _1));
 
     subscribe<ping>(&protocol_ping::handle_receive_ping, _1, _2);
 
     // Send initial ping message by simulating first heartbeat.
-    complete(error::success);
+    set_event(error::success);
 }
 
 // This is fired by the callback (i.e. base timer and stop handler).
@@ -142,7 +139,10 @@ void protocol_ping::handle_send_ping(const code& ec)
             << "Failure sending ping to [" << authority() << "] "
             << ec.message();
         stop(ec);
+        return;
     }
+
+    protocol_timed::reset_timer();
 }
 
 void protocol_ping::handle_send_pong(const code& ec)

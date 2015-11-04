@@ -23,6 +23,7 @@
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -33,11 +34,16 @@ connections::connections(threadpool& pool)
 {
 }
 
+connections::~connections()
+{
+    BITCOIN_ASSERT_MSG(buffer_.empty(), "Connection buffer not empty.");
+}
+
 connections::iterator connections::find(const authority& authority) const
 {
     const auto found = [&authority](const channel::ptr& entry)
     {
-        return entry->address() == authority;
+        return entry->authority() == authority;
     };
 
     return std::find_if(buffer_.begin(), buffer_.end(), found);
@@ -103,7 +109,7 @@ void connections::store(const channel::ptr& channel, result_handler handler)
 
 void connections::do_store(const channel::ptr& channel, result_handler handler)
 {
-    const auto found = find(channel->address()) != buffer_.end();
+    const auto found = find(channel->authority()) != buffer_.end();
     if (found)
     {
         handler(error::address_in_use);

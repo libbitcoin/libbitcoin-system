@@ -21,7 +21,6 @@
 
 #include <cstdint>
 #include <cstdlib>
-#include <memory>
 #include <functional>
 #include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
@@ -33,6 +32,7 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/network/p2p.hpp>
+#include <bitcoin/bitcoin/network/protocol_timed.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
@@ -53,7 +53,7 @@ using namespace bc::message;
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-const message::version protocol_version::template_
+const version protocol_version::template_
 {
     bc::protocol_version,
     services::node_network,
@@ -66,19 +66,13 @@ const message::version protocol_version::template_
     RELAY_TRUE
 };
 
-protocol::completion_handler protocol_version::synchronizer_factory(
-    completion_handler handler)
-{
-    return synchronize(handler, 3, NAME);
-}
-
-message::version protocol_version::template_factory(channel::ptr channel,
-    const settings& settings, size_t height)
+version protocol_version::template_factory(const config::authority& authority,
+    const settings& settings, uint64_t nonce, size_t height)
 {
     auto version = protocol_version::template_;
 
     // The timestamp should not used here and there's no need to set services.
-    version.address_you = channel->address().to_network_address();
+    version.address_you = authority.to_network_address();
 
     // The timestamp should not used here and services should be set in config.
     version.address_me = settings.self.to_network_address();
@@ -91,28 +85,42 @@ message::version protocol_version::template_factory(channel::ptr channel,
     version.relay = settings.relay_transactions;
 
     // A non-zero nonce is used to detect connections to self.
-    version.nonce = channel->nonce();
+    version.nonce = nonce;
     return version;
 }
 
 protocol_version::protocol_version(threadpool& pool, p2p&,
-    const settings& settings, channel::ptr channel, size_t height,
-    completion_handler handler)
-  : protocol_base(pool, channel, settings.channel_handshake(), NAME,
-        synchronizer_factory(handler)),
-    height_(height),
-    version_(template_factory(channel, settings, height)),
+    channel::ptr channel)
+  : protocol_timed(pool, channel, NAME),
     CONSTRUCT_TRACK(protocol_version, LOG_PROTOCOL)
 {
 }
 
-void protocol_version::start()
+void protocol_version::start(const settings& settings, size_t height,
+    event_handler handler)
 {
-    protocol_base::start();
+    const auto self = template_factory(authority(), settings, nonce(), height);
+
+    // The synchronnizer is the only object that is aware of completion.
+    const auto handshake_complete =
+        bind(&protocol_version::handle_handshake_complete, _1, handler);
+
+    protocol_timed::start(settings.channel_handshake(),
+        synchronize(handshake_complete, 3, NAME));
 
     subscribe<version>(&protocol_version::handle_receive_version, _1, _2);
     subscribe<verack>(&protocol_version::handle_receive_verack, _1, _2);
-    send(version_, &protocol_version::handle_version_sent, _1);
+    send(self, &protocol_version::handle_version_sent, _1);
+}
+
+void protocol_version::handle_handshake_complete(const code& ec,
+    event_handler handler)
+{
+    cancel_timer();
+    handler(ec);
+
+    if (ec)
+        stop(ec);
 }
 
 void protocol_version::handle_receive_version(const code& ec,
@@ -126,7 +134,7 @@ void protocol_version::handle_receive_version(const code& ec,
         log::error(LOG_PROTOCOL)
             << "Failure receiving version from [" << authority() << "] "
             << ec.message();
-        stop(ec);
+        set_event(ec);
         return;
     }
 
@@ -148,12 +156,12 @@ void protocol_version::handle_verack_sent(const code& ec)
         log::error(LOG_PROTOCOL)
             << "Failure sending verack to [" << authority() << "] "
             << ec.message();
-        stop(ec);
+        set_event(ec);
         return;
     }
 
     // 1 of 3
-    complete(error::success);
+    set_event(error::success);
 }
 
 void protocol_version::handle_version_sent(const code& ec)
@@ -166,12 +174,12 @@ void protocol_version::handle_version_sent(const code& ec)
         log::error(LOG_PROTOCOL)
             << "Failure sending version to [" << authority() << "] "
             << ec.message();
-        stop(ec);
+        set_event(ec);
         return;
     }
 
     // 2 of 3
-    complete(error::success);
+    set_event(error::success);
 }
 
 void protocol_version::handle_receive_verack(const code& ec,
@@ -185,12 +193,12 @@ void protocol_version::handle_receive_verack(const code& ec,
         log::error(LOG_PROTOCOL)
             << "Failure receiving verack from [" << authority() << "] "
             << ec.message();
-        stop(ec);
+        set_event(ec);
         return;
     }
 
     // 3 of 3
-    complete(error::success);
+    set_event(error::success);
 }
 
 } // namespace network

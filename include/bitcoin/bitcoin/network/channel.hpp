@@ -59,6 +59,7 @@ public:
     channel(const channel&) = delete;
     void operator=(const channel&) = delete;
 
+    void talk();
     void start();
 
     uint64_t nonce() const;

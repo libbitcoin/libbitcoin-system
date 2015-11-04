@@ -28,7 +28,7 @@
 #include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/p2p.hpp>
-#include <bitcoin/bitcoin/network/protocol_base.hpp>
+#include <bitcoin/bitcoin/network/protocol_timed.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -39,30 +39,28 @@ namespace network {
  * Attach this to a channel immediately following seed handshake completion.
  */
 class BC_API protocol_seed
-  : public protocol_base<protocol_seed>, track<protocol_seed>
+  : public protocol_timed<protocol_seed>, track<protocol_seed>
 {
 public:
     typedef std::shared_ptr<protocol_seed> ptr;
 
     /**
-     * Start a seed protocol instance.
+     * Construct a seed protocol instance.
      * @param[in]  pool      The thread pool used by the protocol.
      * @param[in]  network   The network interface.
-     * @param[in]  settings  Configuration settings.
      * @param[in]  channel   The channel on which to start the protocol.
-     * @param[in]  handler   Callback invoked upon stop or complete.
      */
-    protocol_seed(threadpool& pool, p2p& network, const settings& settings,
-        channel::ptr channel, completion_handler handler);
+    protocol_seed(threadpool& pool, p2p& network, channel::ptr channel);
 
     /**
-     * Starts the protocol, release any reference after calling.
+     * Start the protocol.
+     * @param[in]  settings  Configuration settings.
+     * @param[in]  handler   Invoked upon stop or complete.
      */
-    void start() override;
+    void start(const settings& settings, event_handler handler);
 
 private:
-    static completion_handler synchronizer_factory(completion_handler handler);
-
+    void send_own_address(const settings& settings);
     void handle_receive_address(const code& ec,
         const message::address& address);
     void handle_receive_get_address(const code& ec,
@@ -70,10 +68,10 @@ private:
     void handle_send_address(const code& ec);
     void handle_send_get_address(const code& ec);
     void handle_store_addresses(const code& ec);
+    void handle_seeding_complete(const code& ec, event_handler handler);
 
     p2p& network_;
     const config::authority self_;
-    bool disabled_;
 };
 
 } // namespace network

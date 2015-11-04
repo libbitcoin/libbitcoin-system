@@ -18,7 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/alert.hpp>
+
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -79,19 +82,23 @@ bool alert::from_data(reader& source)
 
     reset();
 
-    uint64_t payload_size = source.read_variable_uint_little_endian();
-    uint64_t signature_size = 0;
+    auto size = source.read_variable_uint_little_endian();
+    BITCOIN_ASSERT(size <= bc::max_size_t);
+    const auto payload_size = static_cast<size_t>(size);
+    size_t signature_size = 0;
     result = source;
 
     if (result)
     {
         payload = source.read_data(payload_size);
-        result = source && (payload.size() == payload_size );
+        result = source && (payload.size() == payload_size);
     }
 
     if (result)
     {
-        signature_size = source.read_variable_uint_little_endian();
+        size = source.read_variable_uint_little_endian();
+        BITCOIN_ASSERT(size <= bc::max_size_t);
+        signature_size = static_cast<size_t>(size);
         result = source;
     }
 

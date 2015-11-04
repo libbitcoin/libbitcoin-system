@@ -30,12 +30,13 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/connector.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
-#include <bitcoin/bitcoin/network/p2p.hpp>
 #include <bitcoin/bitcoin/network/session.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
+    
+class p2p;
 
 class BC_API session_manual
   : public session, track<session_manual>
@@ -50,6 +51,8 @@ public:
     session_manual(const session_manual&) = delete;
     void operator=(const session_manual&) = delete;
 
+    void start() override;
+
     void connect(const std::string& hostname, uint16_t port);
     void connect(const std::string& hostname, uint16_t port,
         channel_handler handler);
@@ -61,7 +64,8 @@ private:
         const std::string& hostname, uint16_t port,
         channel_handler handler, uint16_t retries);
 
-    void handle_channel_start(const code& ec, channel::ptr channel);
+    void handle_channel_start(const code& ec, channel::ptr channel,
+        channel_handler handler);
     void handle_channel_stop(const code& ec, const std::string& hostname,
         uint16_t port);
 

@@ -144,7 +144,6 @@
     <ClCompile Include="..\..\..\..\src\network\logging.cpp" />
     <ClCompile Include="..\..\..\..\src\network\message_subscriber.cpp" />
     <ClCompile Include="..\..\..\..\src\network\pending.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\protocol.cpp" />
     <ClCompile Include="..\..\..\..\src\network\proxy.cpp" />
     <ClCompile Include="..\..\..\..\src\network\protocol_seed.cpp" />
     <ClCompile Include="..\..\..\..\src\network\protocol_version.cpp" />
@@ -270,9 +269,10 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\message_subscriber.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\network_settings.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\pending.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\proxy.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_base.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_timed.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\proxy.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_dispatch.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_seed.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_version.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\hosts.hpp" />

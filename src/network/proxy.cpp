@@ -60,24 +60,34 @@ using boost::posix_time::time_duration;
 // TODO: this is made-up, configure payload size guard for DoS protection.
 static constexpr size_t max_payload_size = 10 * 1024 * 1024;
 
+// Cache the address for logging after stop.
+config::authority proxy::authority_factory(asio::socket_ptr socket)
+{
+    boost_code ec;
+    const auto endpoint = socket->remote_endpoint(ec);
+    return ec ? config::authority() : config::authority(endpoint);
+}
+
 proxy::proxy(threadpool& pool, asio::socket_ptr socket, uint32_t magic)
-  : stopped_(false),
+  : stopped_(true),
     magic_(magic),
     dispatch_(pool),
     socket_(socket),
+    authority_(authority_factory(socket)),
     message_subscriber_(pool),
-    stop_subscriber_(std::make_shared<stop_subscriber>(pool, "stop_subscriber", LOG_NETWORK))
+    stop_subscriber_(std::make_shared<stop_subscriber>(pool, "stop_subscriber",
+        LOG_NETWORK))
 {
-    // Cache the address for logging after stop.
-    boost_code ec;
-    const auto endpoint = socket_->remote_endpoint(ec);
-    if (!ec)
-        authority_ = config::authority(endpoint);
 }
 
 proxy::~proxy()
 {
     stop(error::channel_stopped);
+}
+
+void proxy::start()
+{
+    stopped_ = false;
 }
 
 void proxy::talk()
@@ -88,7 +98,7 @@ void proxy::talk()
     read_heading();
 }
 
-config::authority proxy::address() const
+config::authority proxy::authority() const
 {
     return authority_;
 }
@@ -175,7 +185,7 @@ void proxy::handle_read_heading(const boost_code& ec, size_t)
     if (ec)
     {
         log::debug(LOG_NETWORK)
-            << "Channel failure [" << address() << "] "
+            << "Channel failure [" << authority() << "] "
             << code(error::boost_to_error_code(ec)).message();
         stop(ec);
         return;
@@ -187,7 +197,7 @@ void proxy::handle_read_heading(const boost_code& ec, size_t)
     if (!parsed || head.magic != magic_)
     {
         log::warning(LOG_NETWORK) 
-            << "Invalid heading received [" << address() << "]";
+            << "Invalid heading received [" << authority() << "]";
         stop(error::bad_stream);
         return;
     }
@@ -195,14 +205,14 @@ void proxy::handle_read_heading(const boost_code& ec, size_t)
     if (head.payload_size > max_payload_size)
     {
         log::warning(LOG_NETWORK)
-            << "Oversized payload indicated [" << address() << "] ("
+            << "Oversized payload indicated [" << authority() << "] ("
             << head.payload_size << " bytes)";
         stop(error::bad_stream);
         return;
     }
 
     log::debug(LOG_NETWORK)
-        << "Receive " << head.command << " [" << address() << "] ("
+        << "Receive " << head.command << " [" << authority() << "] ("
         << head.payload_size << " bytes)";
 
     read_payload(head);
@@ -220,7 +230,7 @@ void proxy::handle_read_payload(const boost_code& ec, size_t,
     if (heading.checksum != bitcoin_checksum(payload_buffer_))
     {
         log::warning(LOG_NETWORK) 
-            << "Invalid bitcoin checksum from [" << address() << "]";
+            << "Invalid bitcoin checksum from [" << authority() << "]";
         stop(error::bad_stream);
         return;
     }
@@ -250,7 +260,7 @@ void proxy::handle_read_payload(const boost_code& ec, size_t,
     {
         log::warning(LOG_NETWORK)
             << "Invalid payload of " << heading.command
-            << " from [" << address() << "] (deferred)"
+            << " from [" << authority() << "] (deferred)"
             << code(error::boost_to_error_code(ec)).message();
         stop(ec);
         return;
@@ -261,7 +271,7 @@ void proxy::handle_read_payload(const boost_code& ec, size_t,
     {
         log::warning(LOG_NETWORK)
             << "Invalid stream load of " << heading.command
-            << " from [" << address() << "] " << error.message();
+            << " from [" << authority() << "] " << error.message();
         stop(error);
     }
 }
@@ -276,7 +286,7 @@ void proxy::do_send(const data_chunk& message, send_handler handler,
     }
 
     log::debug(LOG_NETWORK)
-        << "Send " << command << " [" << address() << "] ("
+        << "Send " << command << " [" << authority() << "] ("
         << message.size() << " bytes)";
 
     const shared_const_buffer buffer(message);

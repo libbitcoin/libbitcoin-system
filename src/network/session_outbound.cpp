@@ -48,14 +48,13 @@ session_outbound::session_outbound(threadpool& pool, p2p& network,
 
 void session_outbound::start()
 {
-    // If we ever allow restart we need to isolate start.
     if (!stopped())
         return;
 
     if (settings_.outbound_connections == 0)
     {
-        log::debug(LOG_NETWORK)
-            << "No configured outbound connections.";
+        log::info(LOG_NETWORK)
+            << "Not configured for generating outbound connections.";
         return;
     }
 
@@ -117,7 +116,7 @@ void session_outbound::handle_connect(const code& ec, channel::ptr channel,
     }
 
     log::info(LOG_NETWORK)
-        << "Connected to outbound channel [" << channel->address() << "]";
+        << "Connected to outbound channel [" << channel->authority() << "]";
 
     register_channel(channel, 
         std::bind(&session_outbound::handle_channel_start,
@@ -132,8 +131,8 @@ void session_outbound::handle_channel_start(const code& ec,
     if (ec)
         return;
 
-    attach<protocol_ping>(channel);
-    attach<protocol_address>(channel);
+    attach<protocol_ping>(channel, settings_);
+    attach<protocol_address>(channel, settings_);
 }
 
 void session_outbound::handle_channel_stop(const code& ec,

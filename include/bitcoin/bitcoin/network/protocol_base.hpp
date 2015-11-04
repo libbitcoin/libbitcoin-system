@@ -21,12 +21,12 @@
 #define LIBBITCOIN_NETWORK_PROTOCOL_BASE_HPP
 
 #include <functional>
-#include <memory>
 #include <string>
-#include <utility>
+#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/protocol.hpp>
+#include <bitcoin/bitcoin/network/protocol_dispatch.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -35,79 +35,87 @@ namespace libbitcoin {
 namespace network {
 
 /**
- * Templated intermediate base class for protocol implementations.
- * This simplifies calling bind, send and subscribe.
+ * Base class for stateful protocol implementation.
  */
 template <class Protocol>
-class protocol_base
-  : public protocol
+class BC_API protocol_base
+  : public protocol_dispatch<Protocol>
 {
+public:
+    typedef std::function<void(const code&)> event_handler;
+
 protected:
+
     /**
-     * Construct a base protocol instance.
+     * Construct a protocol instance.
      * @param[in]  pool     The thread pool used by the dispacher.
      * @param[in]  channel  The channel on which to start the protocol.
      * @param[in]  name     The instance name for logging purposes.
-     * @param[in]  handler  Callback invoked upon stop if not null.
      */
     protocol_base(threadpool& pool, channel::ptr channel,
-        const std::string& name, completion_handler handler=nullptr)
-      : protocol(pool, channel, name, handler),
-        weak_channel_(channel)
+        const std::string& name)
+      : protocol_dispatch(pool, channel, name),
+        event_handler_(nullptr)
     {
+    }
+    
+    /**
+     * Invoke the event handler.
+     * @param[in]  ec  The error code of the preceding operation.
+     */
+    void set_event(const code& ec)
+    {
+        call(&protocol_base::do_set_event, ec);
     }
 
     /**
-     * Construct a base protocol instance.
-     * @param[in]  pool     The thread pool used by the dispacher.
-     * @param[in]  channel  The channel on which to start the protocol.
-     * @param[in]  timeout  The timer period.
-     * @param[in]  name     The instance name for logging purposes.
-     * @param[in]  handler  Callback invoked upon stop if not null.
+     * Start the protocol with no event handler.
      */
-    protocol_base(threadpool& pool, channel::ptr channel,
-        const asio::duration& timeout, const std::string& name,
-        completion_handler handler=nullptr)
-      : protocol_base(pool, channel, name, handler)
+    void start()
     {
+        const auto unhandled = [](const code& ec) {};
+        start(unhandled);
     }
 
-    template <typename Handler, typename... Args>
-    auto bind(Handler&& handler, Args&&... args) ->
-        decltype(std::bind(std::forward<Handler>(handler),
-            std::shared_ptr<Protocol>(), std::forward<Args>(args)...))
+    /**
+     * Start the protocol.
+     * The event handler may be invoked any number of times until released
+     * when the protocol is stopped. A channel_stopped code indicates stop.
+     * @param[in]  handler  The handler to call unpon each completion event.
+     */
+    void start(event_handler handler)
     {
-        return std::bind(std::forward<Handler>(handler),
-            shared_from_base<Protocol>(), std::forward<Args>(args)...);
-    }
+        if (event_handler_ || stopped())
+        {
+            handler(error::channel_stopped);
+            return;
+        }
 
-    template <class Message, typename Handler, typename... Args>
-    void send(Message&& packet, Handler&& handler, Args&&... args)
-    {
-        auto channel = weak_channel_.lock();
-        if (channel)
-            channel->send(std::forward<Message>(packet),
-                dispatch_.ordered_delegate(std::forward<Handler>(handler),
-                    shared_from_base<Protocol>(), 
-                        std::forward<Args>(args)...));
-    }
-
-    template <class Message, typename Handler, typename... Args>
-    void subscribe(Handler&& handler, Args&&... args)
-    {
-        auto channel = weak_channel_.lock();
-        if (channel)
-            channel->template subscribe<Message>(
-                dispatch_.ordered_delegate(std::forward<Handler>(handler),
-                    shared_from_base<Protocol>(),
-                        std::forward<Args>(args)...));
+        event_handler_ = handler;
+        subscribe_stop(&protocol_base::handle_stop, _1);
     }
 
 private:
+    void do_set_event(const code& ec)
+    {
+        if (event_handler_)
+            event_handler_(ec);
 
-    // A weak reference is used to allow disposal of the instance.
-    // A copy use used in order to prohibit access by derived protocols.
-    std::weak_ptr<channel> weak_channel_;
+        if (ec == error::channel_stopped)
+            event_handler_ = nullptr;
+    }
+
+    void handle_stop(const code& ec)
+    {
+        log::debug(LOG_PROTOCOL)
+            << "Stopped protocol_" << name() << " on [" << authority() << "] "
+            << ec.message();
+    
+        // Event handlers can depend on this code for channel stop.
+        set_event(error::channel_stopped);
+    }
+
+    event_handler event_handler_;
 };
 
 } // namespace network

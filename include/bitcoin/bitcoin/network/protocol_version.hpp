@@ -21,45 +21,57 @@
 #define LIBBITCOIN_NETWORK_PROTOCOL_VERSION_HPP
 
 #include <cstddef>
+#include <cstdint>
 #include <memory>
+#include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/network/p2p.hpp>
-#include <bitcoin/bitcoin/network/protocol_base.hpp>
+#include <bitcoin/bitcoin/network/protocol_timed.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
 class BC_API protocol_version
-  : public protocol_base<protocol_version>, track<protocol_version>
+  : public protocol_timed<protocol_version>, track<protocol_version>
 {
 public:
     typedef std::shared_ptr<protocol_version> ptr;
 
-    protocol_version(threadpool& pool, p2p&, const settings& settings,
-        channel::ptr channel, size_t height, completion_handler handler);
-
-    void start() override;
+    /**
+     * Construct a version protocol instance.
+     * @param[in]  pool      The thread pool used by the protocol.
+     * @param[in]  network   The network interface.
+     * @param[in]  channel   The channel on which to start the protocol.
+     */
+    protocol_version(threadpool& pool, p2p&, channel::ptr channel);
+    
+    /**
+     * Start the protocol.
+     * @param[in]  settings  Configuration settings.
+     * @param[in]  height    Our current blockchain height.
+     * @param[in]  handler   Invoked upon stop or complete.
+     */
+    void start(const settings& settings, size_t height, event_handler handler);
 
 private:
-    static completion_handler synchronizer_factory(completion_handler handler);
-    static message::version template_factory(channel::ptr channel,
-        const settings& settings, size_t height);
+    static message::version template_factory(
+        const config::authority& authority, const settings& settings,
+        uint64_t nonce, size_t height);
 
     void handle_receive_version(const code& ec,
         const message::version& version);
     void handle_receive_verack(const code& ec, const message::verack&);
     void handle_version_sent(const code& ec);
     void handle_verack_sent(const code& ec);
+    void handle_handshake_complete(const code& ec, event_handler handler);
 
     static const message::version template_;
-
-    size_t height_;
-    message::version version_;
 };
 
 } // namespace network

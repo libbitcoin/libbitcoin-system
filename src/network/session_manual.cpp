@@ -43,10 +43,15 @@ using std::placeholders::_2;
 
 session_manual::session_manual(threadpool& pool, p2p& network,
     const settings& settings)
-  : connect_(create_connector()),
-    session(pool, network, settings, false, false),
+  : session(pool, network, settings, false, false),
     CONSTRUCT_TRACK(session_manual, LOG_NETWORK)
 {
+}
+
+void session_manual::start()
+{
+    session::start();
+    connect_ = create_connector();
 }
 
 // Must call start() before connect.
@@ -60,8 +65,6 @@ void session_manual::connect(const std::string& hostname, uint16_t port)
 void session_manual::connect(const std::string& hostname, uint16_t port,
     channel_handler handler)
 {
-    // This recreates the connector for each new connect, and each time a
-    // connection is restarted. Need to split start() and connect() here.
     start_connect(hostname, port, handler, settings_.connect_attempts);
 }
 
@@ -69,7 +72,10 @@ void session_manual::start_connect(const std::string& hostname, uint16_t port,
     channel_handler handler, uint16_t retries)
 {
     if (stopped())
+    {
+        handler(error::service_stopped, nullptr);
         return;
+    }
 
     // MANUAL CONNECT OUTBOUND
     connect_->connect(hostname, port,
@@ -99,29 +105,34 @@ void session_manual::handle_connect(const code& ec, channel::ptr channel,
         return;
     }
 
-    // We only invoke the callback on the first successful connection.
-    handler(ec, channel);
-
     log::info(LOG_NETWORK)
         << "Connected manual channel [" << config::endpoint(hostname, port)
-        << "] as [" << channel->address() << "]";
+        << "] as [" << channel->authority() << "]";
 
     register_channel(channel, 
         std::bind(&session_manual::handle_channel_start,
-            shared_from_base<session_manual>(), _1, channel),
+            shared_from_base<session_manual>(), _1, channel, handler),
         std::bind(&session_manual::handle_channel_stop,
             shared_from_base<session_manual>(), _1, hostname, port));
 }
 
-void session_manual::handle_channel_start(const code& ec, channel::ptr channel)
+void session_manual::handle_channel_start(const code& ec, channel::ptr channel,
+    channel_handler handler)
 {
     if (ec)
+    {
+        handler(ec, nullptr);
         return;
+    }
 
-    attach<protocol_ping>(channel);
-    attach<protocol_address>(channel);
+    handler(ec, channel);
+
+    attach<protocol_ping>(channel, settings_);
+    attach<protocol_address>(channel, settings_);
 }
 
+// We only invoke the callback on the first successful connection.
+// This invokes reconnect on no-callback overload.
 void session_manual::handle_channel_stop(const code& ec,
     const std::string& hostname, uint16_t port)
 {

@@ -18,8 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/merkle_block.hpp>
+
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -82,7 +84,6 @@ bool merkle_block::from_data(reader& source)
     reset();
 
     result = header.from_data(source, true);
-
     uint64_t hash_count = 0;
 
     if (result)
@@ -99,7 +100,9 @@ bool merkle_block::from_data(reader& source)
 
     if (result)
     {
-        uint64_t flag_count = source.read_variable_uint_little_endian();
+        auto size = source.read_variable_uint_little_endian();
+        BITCOIN_ASSERT(size <= bc::max_size_t);
+        const auto flag_count = static_cast<size_t>(size);
         flags = source.read_data(flag_count);
         result = source && (flags.size() == flag_count);
     }

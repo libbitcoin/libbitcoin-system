@@ -37,9 +37,10 @@ namespace libbitcoin {
 namespace network {
 
 hosts::hosts(threadpool& pool, const settings& settings)
-  : buffer_(std::min(settings.host_pool_capacity, 1u)),
+  : buffer_(std::max(settings.host_pool_capacity, 1u)),
     dispatch_(pool),
-    file_path_(settings.hosts_file)
+    file_path_(settings.hosts_file),
+    disabled_(settings.host_pool_capacity == 0)
 {
 }
 
@@ -61,6 +62,12 @@ void hosts::load(result_handler handler)
 
 void hosts::do_load(const path& file_path, result_handler handler)
 {
+    if (disabled_)
+    {
+        handler(error::success);
+        return;
+    }
+
     bc::ifstream file(file_path.string());
     if (file.bad())
     {
@@ -88,6 +95,12 @@ void hosts::save(result_handler handler)
 
 void hosts::do_save(const path& path, result_handler handler)
 {
+    if (disabled_)
+    {
+        handler(error::success);
+        return;
+    }
+
     bc::ofstream file(path.string());
     if (file.bad())
     {
@@ -148,13 +161,13 @@ void hosts::do_store(const address& host, result_handler handler)
     handler(error::success);
 }
 
-void hosts::fetch_address(address_handler handler)
+void hosts::fetch(fetch_handler handler)
 {
-    dispatch_.unordered(&hosts::do_fetch_address,
+    dispatch_.unordered(&hosts::do_fetch,
         this, handler);
 }
 
-void hosts::do_fetch_address(address_handler handler)
+void hosts::do_fetch(fetch_handler handler)
 {
     if (buffer_.empty())
     {

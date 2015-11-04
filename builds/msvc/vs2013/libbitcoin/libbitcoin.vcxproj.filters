@@ -485,9 +485,6 @@
     <ClCompile Include="..\..\..\..\src\wallet\ek_private.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\network\protocol.cpp">
-      <Filter>src\network</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\network\session_seed.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
@@ -826,9 +823,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\version.hpp">
       <Filter>include\bitcoin\message</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_base.hpp">
-      <Filter>include\bitcoin\network</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_seed.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
@@ -967,9 +961,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\handlers.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol.hpp">
-      <Filter>include\bitcoin\network</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\session_seed.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
@@ -1001,6 +992,15 @@
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\logging.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_timed.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_dispatch.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_base.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
   </ItemGroup>

@@ -30,8 +30,8 @@
 
 namespace libbitcoin {
 
-log::log(level level, const std::string& domain)
-  : level_(level), domain_(domain)
+log::log(level value, const std::string& domain)
+  : level_(value), domain_(domain)
 {
 }
 
@@ -54,6 +54,11 @@ log::~log()
 void log::set_output_function(functor value)
 {
     destinations_[level_] = value;
+}
+
+void log::clear()
+{
+    destinations_.clear();
 }
 
 log log::debug(const std::string& domain)
@@ -81,9 +86,9 @@ log log::fatal(const std::string& domain)
     return log(level::fatal, domain);
 }
 
-std::string log::to_text(level level)
+std::string log::to_text(level value)
 {
-    switch (level)
+    switch (value)
     {
         case level::debug:
             return "DEBUG";
@@ -102,11 +107,11 @@ std::string log::to_text(level level)
     }
 }
 
-void log::to_stream(std::ostream& out, level level, const std::string& domain,
+void log::to_stream(std::ostream& out, level value, const std::string& domain,
     const std::string& body)
 {
     std::ostringstream buffer;
-    buffer << to_text(level);
+    buffer << to_text(value);
     if (!domain.empty())
         buffer << " [" << domain << "]";
 
@@ -121,16 +126,16 @@ void log::output_ignore(level, const std::string&, const std::string&)
 {
 }
 
-void log::output_cout(level level, const std::string& domain,
+void log::output_cout(level value, const std::string& domain,
     const std::string& body)
 {
-    to_stream(bc::cout, level, domain, body);
+    to_stream(bc::cout, value, domain, body);
 }
 
-void log::output_cerr(level level, const std::string& domain,
+void log::output_cerr(level value, const std::string& domain,
     const std::string& body)
 {
-    to_stream(bc::cerr, level, domain, body);
+    to_stream(bc::cerr, value, domain, body);
 }
 
 log::destinations log::destinations_

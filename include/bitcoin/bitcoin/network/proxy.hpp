@@ -97,10 +97,11 @@ public:
     }
 
     void talk();
+    void start();
     bool stopped() const;
     void stop(const code& ec);
     void subscribe_stop(stop_handler handler);
-    config::authority address() const;
+    config::authority authority() const;
 
 protected:
     virtual void handle_activity() = 0;
@@ -112,6 +113,8 @@ private:
 
     typedef byte_source<data_chunk> payload_source;
     typedef boost::iostreams::stream<payload_source> payload_stream;
+
+    static config::authority authority_factory(asio::socket_ptr socket);
 
     void stop(const boost_code& ec);
     void do_stop(const code& ec);

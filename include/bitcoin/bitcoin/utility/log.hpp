@@ -44,12 +44,17 @@ public:
     typedef std::function<void(level, const std::string&, const std::string&)>
         functor;
 
-    log(level level, const std::string& domain);
+    log(level value, const std::string& domain);
     log(log&& other);
     ~log();
 
-    static std::string to_text(level level);
+    /// Clear all log configuration.
+    static void clear();
 
+    /// Convert the log level value to English text.
+    static std::string to_text(level value);
+
+    // Stream to these functions.
     static log debug(const std::string& domain);
     static log info(const std::string& domain);
     static log warning(const std::string& domain);
@@ -69,14 +74,14 @@ public:
 private:
     typedef std::map<level, functor> destinations;
 
-    static void output_ignore(level level, const std::string& domain,
+    static void output_ignore(level value, const std::string& domain,
         const std::string& body);
-    static void output_cout(level level, const std::string& domain,
+    static void output_cout(level value, const std::string& domain,
         const std::string& body);
-    static void output_cerr(level level, const std::string& domain,
+    static void output_cerr(level value, const std::string& domain,
         const std::string& body);
 
-    static void to_stream(std::ostream& out, level level,
+    static void to_stream(std::ostream& out, level value,
         const std::string& domain, const std::string& body);
 
     static destinations destinations_;

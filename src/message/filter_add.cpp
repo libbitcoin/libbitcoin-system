@@ -18,7 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/filter_add.hpp>
+
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -78,7 +81,9 @@ bool filter_add::from_data(reader& source)
 
     reset();
 
-    uint64_t data_size = source.read_variable_uint_little_endian();
+    auto size = source.read_variable_uint_little_endian();
+    BITCOIN_ASSERT(size <= bc::max_size_t);
+    const auto data_size = static_cast<size_t>(size);
     result = source;
 
     if (result)

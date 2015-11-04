@@ -80,6 +80,7 @@ connector::ptr session::create_connector()
     return connect;
 }
 
+// If we ever allow restart we need to guard start.
 void session::start()
 {
     if (!stopped())
@@ -112,6 +113,8 @@ void session::handle_channel(const code& ec, channel::ptr,
 {
     if (ec == error::service_stopped)
         handler();
+    else
+        subscribe_stop(handler);
 }
 
 void session::address_count(count_handler handler)
@@ -143,7 +146,10 @@ void session::register_channel(channel::ptr channel,
     result_handler handle_started, result_handler handle_stopped)
 {
     if (stopped())
+    {
+        handle_started(error::service_stopped);
         return;
+    }
 
     // Place invocation of start handler on ordered delegate.
     const auto start_handler = 
@@ -154,6 +160,8 @@ void session::register_channel(channel::ptr channel,
     const auto stop_handler =
         dispatch_.ordered_delegate(&session::handle_stopped,
             shared_from_this(), _1, handle_stopped);
+
+    channel->start();
 
     // Call remove just after stopped is called.
     const auto remove_handler =
@@ -195,10 +203,10 @@ void session::handle_pend(const code& ec, channel::ptr channel,
             shared_from_this(), _1, channel, handle_started, handle_stopped);
 
     // Subscribe start handler to handshake completion.
-    attach<protocol_version>(channel, network_.height(), handler);
+    attach<protocol_version>(channel, settings_, network_.height(), handler);
 
     // Start reading messages from the socket.
-    channel->start();
+    channel->talk();
 }
 
 void session::handle_handshake(const code& ec, channel::ptr channel,
@@ -207,7 +215,7 @@ void session::handle_handshake(const code& ec, channel::ptr channel,
     if (ec)
     {
         log::debug(LOG_NETWORK)
-            << "Failure in handshake with [" << channel->address()
+            << "Failure in handshake with [" << channel->authority()
             << "] " << ec.message();
         handle_started(ec);
         return;
@@ -233,7 +241,7 @@ void session::handle_is_pending(bool pending, channel::ptr channel,
     if (pending)
     {
         log::debug(LOG_NETWORK)
-            << "Rejected connection from [" << channel->address()
+            << "Rejected connection from [" << channel->authority()
             << "] as loopback.";
         handle_started(error::accept_failed);
         return;
@@ -244,7 +252,8 @@ void session::handle_is_pending(bool pending, channel::ptr channel,
     {
         log::debug(LOG_NETWORK)
             << "Peer version (" << version.value << ") below minimum ("
-            << bc::peer_minimum_version << ") [" << channel->address() << "]";
+            << bc::peer_minimum_version << ") [" 
+            << channel->authority() << "]";
         handle_started(error::accept_failed);
         return;
     }
@@ -309,13 +318,13 @@ void session::remove(const code& ec, channel::ptr channel,
 void session::handle_unpend(const code& ec)
 {
     if (ec)
-        log::debug(LOG_NETWORK) << "Failed to unpend a channel.";
+        log::warning(LOG_NETWORK) << "Failed to unpend a channel.";
 }
 
 void session::handle_remove(const code& ec)
 {
     if (ec)
-        log::debug(LOG_NETWORK) << "Failed to remove a channel.";
+        log::warning(LOG_NETWORK) << "Failed to remove a channel.";
 }
 
 } // namespace network

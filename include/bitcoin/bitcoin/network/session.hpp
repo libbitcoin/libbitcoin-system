@@ -32,13 +32,14 @@
 #include <bitcoin/bitcoin/network/connector.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/network/proxy.hpp>
-#include <bitcoin/bitcoin/network/p2p.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
+
+class p2p;
 
 /// A base class for sessions, where a session maintains the lifetime of a set
 /// of channels operating in a context (inbound, outbound, manual, seeding). 
@@ -73,10 +74,10 @@ public:
 
 protected:
     template <class Protocol, typename... Args>
-    void attach(Args&&... args)
+    void attach(channel::ptr channel, Args&&... args)
     {
-        std::make_shared<Protocol>(pool_, network_, settings_,
-            std::forward<Args>(args)...)->start();
+        std::make_shared<Protocol>(pool_, network_, channel)
+            ->start(std::forward<Args>(args)...);
     }
 
     template <class Derived>
