@@ -273,7 +273,7 @@ void p2p::stop(result_handler handler)
     relay(error::service_stopped, nullptr);
 
     // This is asynchronous, will complete on join.
-    connections_.clear(error::channel_stopped);
+    connections_.clear(error::service_stopped);
 
     hosts_.save(
         dispatch_.ordered_delegate(&p2p::handle_hosts_saved,
@@ -395,7 +395,10 @@ void p2p::connect(const std::string& hostname, uint16_t port,
 
 void p2p::subscribe(channel_handler handler)
 {
-    subscriber_->subscribe(handler);
+    if (stopped())
+        handler(error::service_stopped, nullptr);
+    else
+        subscriber_->subscribe(handler);
 }
 
 /// This is not intended for public use but needs to be accessible.
