@@ -77,15 +77,24 @@ void session_outbound::start_connect(const code& ec, const authority& host,
     if (stopped())
         return;
 
+    // This prevents a tight loop in an unusual circumstance.
+    // TODO: rebuild connection count once addresses are found.
+    if (ec == error::not_found)
+    {
+        log::error(LOG_NETWORK)
+            << "The address pool is empty, suspending outbound session.";
+        return;
+    }
+
     if (ec)
     {
-        log::debug(LOG_NETWORK)
-            << "Failure fetching address [" << host << "] "
-            << ec.message();
+        log::error(LOG_NETWORK)
+            << "Failure fetching new address: " << ec.message();
         new_connection(connect);
         return;
     }
 
+    // This could create a tight loop in the case of a small pool.
     if (blacklisted(host))
     {
         log::debug(LOG_NETWORK)
