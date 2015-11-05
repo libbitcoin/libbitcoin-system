@@ -81,7 +81,7 @@ public:
         }
     }
 
-    void clear(const code& ec);
+    void stop(const code& ec);
     void count(count_handler handler);
     void store(const channel::ptr& channel, result_handler handler);
     void remove(const channel::ptr& channel, result_handler handler);
@@ -95,7 +95,7 @@ private:
     iterator find(const channel::ptr& channel) const;
     iterator find(const authority& authority) const;
 
-    void do_clear(const code& ec);
+    void do_stop(const code& ec);
     void do_count(count_handler handler) const;
     void do_store(const channel::ptr& channel, result_handler handler);
     void do_remove(const channel::ptr& channel, result_handler handler);

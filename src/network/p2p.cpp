@@ -271,9 +271,7 @@ void p2p::stop(result_handler handler)
     stopped_ = true;
     manual_ = nullptr;
     relay(error::service_stopped, nullptr);
-
-    // This is asynchronous, will complete on join.
-    connections_.clear(error::service_stopped);
+    connections_.stop(error::service_stopped);
 
     hosts_.save(
         dispatch_.ordered_delegate(&p2p::handle_hosts_saved,

@@ -54,18 +54,16 @@ connections::iterator connections::find(const channel::ptr& channel) const
     return std::find(buffer_.begin(), buffer_.end(), channel);
 }
 
-void connections::clear(const code& ec)
+void connections::stop(const code& ec)
 {
-    dispatch_.ordered(&connections::do_clear,
+    dispatch_.ordered(&connections::do_stop,
         this, ec);
 }
 
-void connections::do_clear(const code& ec)
+void connections::do_stop(const code& ec)
 {
     for (auto channel: buffer_)
         channel->stop(ec);
-
-    buffer_.clear();
 }
 
 void connections::exists(const authority& address, truth_handler handler)
