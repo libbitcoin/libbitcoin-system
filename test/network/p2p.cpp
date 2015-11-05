@@ -35,11 +35,8 @@ using namespace bc::network;
     boost::unit_test::framework::current_test_case().p_name
 
 // TODO: build mock and/or use dedicated test service.
-#define SEED1 \
-    { "testnet-seed.bitcoin.petertodd.org:18333" }
-
-#define SEED2 \
-    { "testnet-seed.bitcoin.schildbach.de:18333" }
+#define SEED1 "testnet-seed.bitcoin.petertodd.org:18333"
+#define SEED2 "testnet-seed.bitcoin.schildbach.de:18333"
 
 // NOTE: this is insufficient as the address varies.
 #define SEED1_AUTHORITIES \
@@ -58,7 +55,7 @@ using namespace bc::network;
 #define SETTINGS_TESTNET_ONE_THREAD_ONE_SEED(config) \
     SETTINGS_TESTNET_ONE_THREAD_NO_CONNECTIONS(config); \
     config.host_pool_capacity = 42; \
-    configuration.seeds = { SEED1 }; \
+    configuration.seeds = { { SEED1 } }; \
     configuration.hosts_file = get_log_path(TEST_NAME, "hosts")
 
 std::string get_log_path(const std::string& test, const std::string& file)
@@ -274,7 +271,7 @@ BOOST_AUTO_TEST_CASE(p2p__start__seed_session_blacklisted__start_operation_faile
     SETTINGS_TESTNET_ONE_THREAD_NO_CONNECTIONS(configuration);
     configuration.host_pool_capacity = 42;
     configuration.hosts_file = get_log_path(TEST_NAME, "hosts");
-    configuration.seeds = { SEED1 };
+    configuration.seeds = { { SEED1 } };
     configuration.blacklists = SEED1_AUTHORITIES;
     p2p network(configuration);
 
