@@ -395,12 +395,10 @@ void p2p::connect(const std::string& hostname, uint16_t port,
 
 void p2p::subscribe(channel_handler handler)
 {
-    if (stopped())
-        handler(error::service_stopped, nullptr);
-    else
-        subscriber_->subscribe(handler);
+    subscriber_->subscribe(handler);
 }
 
+/// This is not intended for public use but needs to be accessible.
 void p2p::relay(const code& ec, channel::ptr channel)
 {
     subscriber_->relay(ec, channel);
