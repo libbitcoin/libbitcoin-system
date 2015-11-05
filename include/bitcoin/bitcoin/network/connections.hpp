@@ -54,6 +54,7 @@ public:
     connections(const connections&) = delete;
     void operator=(const connections&) = delete;
 
+    /// handle_complete returns operation_failed if send to any channel failed.
     template <typename Message>
     void broadcast(const Message& message, channel_handler handle_channel,
         result_handler handle_complete) const
