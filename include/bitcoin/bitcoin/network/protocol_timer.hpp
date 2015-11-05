@@ -17,15 +17,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_PROTOCOL_TIMED_HPP
-#define LIBBITCOIN_NETWORK_PROTOCOL_TIMED_HPP
+#ifndef LIBBITCOIN_NETWORK_PROTOCOL_TIMER_HPP
+#define LIBBITCOIN_NETWORK_PROTOCOL_TIMER_HPP
 
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/protocol_base.hpp>
+#include <bitcoin/bitcoin/network/protocol_events.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -35,9 +35,8 @@ namespace network {
 /**
  * Base class for timed protocol implementation.
  */
-template <class Protocol>
-class protocol_timed
-  : public protocol_base<Protocol>
+class BC_API protocol_timer
+  : public protocol_events
 {
 protected:
 
@@ -47,11 +46,8 @@ protected:
      * @param[in]  channel  The channel on which to start the protocol.
      * @param[in]  name     The instance name for logging purposes.
      */
-    protocol_timed(threadpool& pool, channel::ptr channel,
-        const std::string& name)
-      : protocol_base(pool, channel, name)
-    {
-    }
+    protocol_timer(threadpool& pool, channel::ptr channel,
+        const std::string& name);
 
     /**
      * Define the event handler and start the protocol and timer.
@@ -59,53 +55,21 @@ protected:
      * @param[in]  timeout  The timer period (not automatically reset).
      * @param[in]  handler  Invoke automatically on stop and timer events.
      */
-    void start(const asio::duration& timeout, event_handler handler)
-    {
-        deadline_ = std::make_shared<deadline>(pool(), timeout);
-        reset_timer();
-
-        protocol_base::start(bind(&protocol_timed::handle_event, _1, handler));
-    }
+    void start(const asio::duration& timeout, event_handler handler);
 
     /**
      * Cancel the timer.
      */
-    void cancel_timer()
-    {
-        deadline_->cancel();
-    }
+    void cancel_timer();
 
     /**
      * Restart the timer.
      */
-    void reset_timer()
-    {
-        if (stopped())
-            return;
-
-        deadline_->start(bind(&protocol_timed::handle_timer, _1));
-    }
+    void reset_timer();
 
 private:
-    void handle_timer(const code& ec)
-    {
-        if (stopped())
-            return;
-
-        log::debug(LOG_PROTOCOL)
-            << "Fired protocol_" << name() << " timer on ["
-            << authority() << "] " << ec.message();
-
-        set_event(error::channel_timeout);
-    }
-
-    void handle_event(const code& ec, event_handler handler)
-    {
-        if (ec == error::channel_stopped)
-            cancel_timer();
-
-        handler(ec);
-    }
+    void handle_timer(const code& ec);
+    void handle_event(const code& ec, event_handler handler);
 
     deadline::ptr deadline_;
 };

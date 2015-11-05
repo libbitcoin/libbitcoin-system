@@ -22,17 +22,15 @@
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
-#include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/network/p2p.hpp>
-#include <bitcoin/bitcoin/network/protocol_timed.hpp>
+#include <bitcoin/bitcoin/network/protocol_timer.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
@@ -91,7 +89,7 @@ version protocol_version::template_factory(const config::authority& authority,
 
 protocol_version::protocol_version(threadpool& pool, p2p&,
     channel::ptr channel)
-  : protocol_timed(pool, channel, NAME),
+  : protocol_timer(pool, channel, NAME),
     CONSTRUCT_TRACK(protocol_version, LOG_PROTOCOL)
 {
 }
@@ -101,16 +99,19 @@ void protocol_version::start(const settings& settings, size_t height,
 {
     const auto self = template_factory(authority(), settings, nonce(), height);
 
-    // The synchronnizer is the only object that is aware of completion.
-    const auto handshake_complete =
-        bind(&protocol_version::handle_handshake_complete, _1, handler);
+    // The synchronizer is the only object that is aware of completion.
+    const auto handshake_complete = bind<protocol_version>(
+        &protocol_version::handle_handshake_complete, _1, handler);
 
-    protocol_timed::start(settings.channel_handshake(),
+    protocol_timer::start(settings.channel_handshake(),
         synchronize(handshake_complete, 3, NAME));
 
-    subscribe<version>(&protocol_version::handle_receive_version, _1, _2);
-    subscribe<verack>(&protocol_version::handle_receive_verack, _1, _2);
-    send(self, &protocol_version::handle_version_sent, _1);
+    subscribe<protocol_version, version>
+        (&protocol_version::handle_receive_version, _1, _2);
+    subscribe<protocol_version, verack>(
+        &protocol_version::handle_receive_verack, _1, _2);
+    send<protocol_version>(self,
+        &protocol_version::handle_version_sent, _1);
 }
 
 void protocol_version::handle_handshake_complete(const code& ec,
@@ -143,7 +144,8 @@ void protocol_version::handle_receive_version(const code& ec,
         << ") services (" << message.services << ") " << message.user_agent;
 
     set_version(message);
-    send(verack(), &protocol_version::handle_verack_sent, _1);
+    send<protocol_version>(verack(),
+        &protocol_version::handle_verack_sent, _1);
 }
 
 void protocol_version::handle_verack_sent(const code& ec)

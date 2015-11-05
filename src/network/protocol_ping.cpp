@@ -23,14 +23,12 @@
 #include <string>
 #include <bitcoin/bitcoin/message/ping.hpp>
 #include <bitcoin/bitcoin/message/pong.hpp>
-#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/p2p.hpp>
-#include <bitcoin/bitcoin/network/protocol_timed.hpp>
+#include <bitcoin/bitcoin/network/protocol_timer.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
-#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 INITIALIZE_TRACK(bc::network::protocol_ping);
@@ -45,17 +43,18 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 
 protocol_ping::protocol_ping(threadpool& pool, p2p&, channel::ptr channel)
-  : protocol_timed(pool, channel, NAME),
+  : protocol_timer(pool, channel, NAME),
     CONSTRUCT_TRACK(protocol_ping, LOG_PROTOCOL)
 {
 }
 
 void protocol_ping::start(const settings& settings)
 {
-    protocol_timed::start(settings.channel_heartbeat(),
-        bind(&protocol_ping::send_ping, _1));
+    protocol_timer::start(settings.channel_heartbeat(), bind<protocol_ping>(
+        &protocol_ping::send_ping, _1));
 
-    subscribe<ping>(&protocol_ping::handle_receive_ping, _1, _2);
+    subscribe<protocol_ping, ping>(
+        &protocol_ping::handle_receive_ping, _1, _2);
 
     // Send initial ping message by simulating first heartbeat.
     set_event(error::success);
@@ -78,8 +77,10 @@ void protocol_ping::send_ping(const code& ec)
 
     const auto nonce = pseudo_random();
 
-    subscribe<pong>(&protocol_ping::handle_receive_pong, _1, _2, nonce);
-    send(ping(nonce), &protocol_ping::handle_send_ping, _1);
+    subscribe<protocol_ping, pong>(
+        &protocol_ping::handle_receive_pong, _1, _2, nonce);
+    send<protocol_ping>(ping(nonce),
+        &protocol_ping::handle_send_ping, _1);
 }
 
 void protocol_ping::handle_receive_ping(const code& ec,
@@ -98,8 +99,10 @@ void protocol_ping::handle_receive_ping(const code& ec,
     }
 
     // Resubscribe to ping messages.
-    subscribe<ping>(&protocol_ping::handle_receive_ping, _1, _2);
-    send(pong(message.nonce), &protocol_ping::handle_send_pong, _1);
+    subscribe<protocol_ping, ping>(
+        &protocol_ping::handle_receive_ping, _1, _2);
+    send<protocol_ping>(pong(message.nonce),
+        &protocol_ping::handle_send_pong, _1);
 }
 
 void protocol_ping::handle_receive_pong(const code& ec,
@@ -142,7 +145,7 @@ void protocol_ping::handle_send_ping(const code& ec)
         return;
     }
 
-    protocol_timed::reset_timer();
+    reset_timer();
 }
 
 void protocol_ping::handle_send_pong(const code& ec)

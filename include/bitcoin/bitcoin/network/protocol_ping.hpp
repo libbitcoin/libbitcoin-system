@@ -20,15 +20,14 @@
 #ifndef LIBBITCOIN_NETWORK_PROTOCOL_PING_HPP
 #define LIBBITCOIN_NETWORK_PROTOCOL_PING_HPP
 
-#include <string>
+#include <memory>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/ping.hpp>
 #include <bitcoin/bitcoin/message/pong.hpp>
-#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/p2p.hpp>
-#include <bitcoin/bitcoin/network/protocol_timed.hpp>
+#include <bitcoin/bitcoin/network/protocol_timer.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -40,7 +39,7 @@ namespace network {
  * Attach this to a channel immediately following handshake completion.
  */
 class BC_API protocol_ping
-  : public protocol_timed<protocol_ping>, track<protocol_ping>
+  : public protocol_timer, track<protocol_ping>
 {
 public:
     typedef std::shared_ptr<protocol_ping> ptr;

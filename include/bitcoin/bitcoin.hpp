@@ -89,9 +89,10 @@
 #include <bitcoin/bitcoin/network/pending.hpp>
 #include <bitcoin/bitcoin/network/protocol_address.hpp>
 #include <bitcoin/bitcoin/network/protocol_base.hpp>
-#include <bitcoin/bitcoin/network/protocol_dispatch.hpp>
+#include <bitcoin/bitcoin/network/protocol_events.hpp>
 #include <bitcoin/bitcoin/network/protocol_ping.hpp>
 #include <bitcoin/bitcoin/network/protocol_seed.hpp>
+#include <bitcoin/bitcoin/network/protocol_timer.hpp>
 #include <bitcoin/bitcoin/network/protocol_version.hpp>
 #include <bitcoin/bitcoin/network/proxy.hpp>
 #include <bitcoin/bitcoin/network/session.hpp>

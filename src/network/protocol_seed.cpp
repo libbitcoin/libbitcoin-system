@@ -26,10 +26,8 @@
 #include <bitcoin/bitcoin/message/get_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/p2p.hpp>
-#include <bitcoin/bitcoin/network/protocol_timed.hpp>
+#include <bitcoin/bitcoin/network/protocol_timer.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/deadline.hpp>
-#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -48,7 +46,7 @@ using std::placeholders::_2;
 // Require three callbacks (or any error) before calling complete.
 protocol_seed::protocol_seed(threadpool& pool, p2p& network,
     channel::ptr channel)
-  : protocol_timed(pool, channel, NAME),
+  : protocol_timer(pool, channel, NAME),
     network_(network),
     CONSTRUCT_TRACK(protocol_seed, LOG_PROTOCOL)
 {
@@ -63,16 +61,18 @@ void protocol_seed::start(const settings& settings, event_handler handler)
         return;
     }
 
-    // The synchronnizer is the only object that is aware of completion.
-    const auto seeding_complete =
-        bind(&protocol_seed::handle_seeding_complete, _1, handler);
+    // The synchronizer is the only object that is aware of completion.
+    const auto seeding_complete = bind<protocol_seed>(
+        &protocol_seed::handle_seeding_complete, _1, handler);
 
-    protocol_timed::start(settings.channel_germination(),
+    protocol_timer::start(settings.channel_germination(),
         synchronize(seeding_complete, 3, NAME));
 
     send_own_address(settings);
-    subscribe<address>(&protocol_seed::handle_receive_address, _1, _2);
-    send(get_address(), &protocol_seed::handle_send_get_address, _1);
+    subscribe<protocol_seed, address>(
+        &protocol_seed::handle_receive_address, _1, _2);
+    send<protocol_seed>(get_address(),
+        &protocol_seed::handle_send_get_address, _1);
 }
 
 void protocol_seed::send_own_address(const settings& settings)
@@ -84,7 +84,8 @@ void protocol_seed::send_own_address(const settings& settings)
     }
 
     address self({ { settings.self.to_network_address() } });
-    send(self, &protocol_seed::handle_send_address, _1);
+    send<protocol_seed>(self,
+        &protocol_seed::handle_send_address, _1);
 }
 
 void protocol_seed::handle_seeding_complete(const code& ec,
@@ -117,8 +118,8 @@ void protocol_seed::handle_receive_address(const code& ec,
         << message.addresses.size() << ")";
 
     // TODO: manage timestamps (active channels are connected < 3 hours ago).
-    network_.store(message.addresses,
-        bind(&protocol_seed::handle_store_addresses, _1));
+    network_.store(message.addresses, bind<protocol_seed>(
+        &protocol_seed::handle_store_addresses, _1));
 }
 
 void protocol_seed::handle_send_address(const code& ec)

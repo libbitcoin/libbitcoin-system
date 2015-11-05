@@ -31,14 +31,14 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/network/p2p.hpp>
-#include <bitcoin/bitcoin/network/protocol_timed.hpp>
+#include <bitcoin/bitcoin/network/protocol_timer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
 class BC_API protocol_version
-  : public protocol_timed<protocol_version>, track<protocol_version>
+  : public protocol_timer, track<protocol_version>
 {
 public:
     typedef std::shared_ptr<protocol_version> ptr;

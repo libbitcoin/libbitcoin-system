@@ -28,7 +28,8 @@
 #include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/p2p.hpp>
-#include <bitcoin/bitcoin/network/protocol_timed.hpp>
+#include <bitcoin/bitcoin/network/protocol_timer.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -39,7 +40,7 @@ namespace network {
  * Attach this to a channel immediately following seed handshake completion.
  */
 class BC_API protocol_seed
-  : public protocol_timed<protocol_seed>, track<protocol_seed>
+  : public protocol_timer, track<protocol_seed>
 {
 public:
     typedef std::shared_ptr<protocol_seed> ptr;

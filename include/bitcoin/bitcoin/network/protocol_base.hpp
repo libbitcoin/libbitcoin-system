@@ -21,13 +21,14 @@
 #define LIBBITCOIN_NETWORK_PROTOCOL_BASE_HPP
 
 #include <functional>
+#include <memory>
 #include <string>
+#include <utility>
+#include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/protocol_dispatch.hpp>
-#include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -35,87 +36,104 @@ namespace libbitcoin {
 namespace network {
 
 /**
- * Base class for stateful protocol implementation.
+ * Base class for protocol implementation.
+ * This simplifies calling bind, send and subscribe.
+ * Instances of this class are not copyable.
  */
-template <class Protocol>
 class BC_API protocol_base
-  : public protocol_dispatch<Protocol>
+  : public std::enable_shared_from_this<protocol_base>
 {
-public:
-    typedef std::function<void(const code&)> event_handler;
-
 protected:
-
     /**
-     * Construct a protocol instance.
+     * Construct a base protocol instance.
      * @param[in]  pool     The thread pool used by the dispacher.
      * @param[in]  channel  The channel on which to start the protocol.
      * @param[in]  name     The instance name for logging purposes.
      */
     protocol_base(threadpool& pool, channel::ptr channel,
-        const std::string& name)
-      : protocol_dispatch(pool, channel, name),
-        event_handler_(nullptr)
-    {
-    }
+        const std::string& name);
     
-    /**
-     * Invoke the event handler.
-     * @param[in]  ec  The error code of the preceding operation.
-     */
-    void set_event(const code& ec)
+    /// Get a shared pointer to the derived instance from this.
+    /// Used by implementations to obtain a shared pointer of the derived type.
+    /// Required because enable_shared_from_this doesn't support inheritance.
+    template <class Protocol>
+    std::shared_ptr<Protocol> shared_from_base()
     {
-        call(&protocol_base::do_set_event, ec);
+        return std::static_pointer_cast<Protocol>(shared_from_this());
     }
 
-    /**
-     * Start the protocol with no event handler.
-     */
-    void start()
+    /// Bind a method in the derived class.
+    template <class Protocol, typename Handler, typename... Args>
+    auto bind(Handler&& handler, Args&&... args) ->
+        decltype(std::bind(std::forward<Handler>(handler),
+            std::shared_ptr<Protocol>(), std::forward<Args>(args)...))
     {
-        const auto unhandled = [](const code& ec) {};
-        start(unhandled);
+        return std::bind(std::forward<Handler>(handler),
+            shared_from_base<Protocol>(), std::forward<Args>(args)...);
     }
 
-    /**
-     * Start the protocol.
-     * The event handler may be invoked any number of times until released
-     * when the protocol is stopped. A channel_stopped code indicates stop.
-     * @param[in]  handler  The handler to call unpon each completion event.
-     */
-    void start(event_handler handler)
+    /// Call a method in the derived class.
+    template <class Protocol, typename Handler, typename... Args>
+    void call(Handler&& handler, Args&&... args)
     {
-        if (event_handler_ || stopped())
-        {
-            handler(error::channel_stopped);
-            return;
-        }
-
-        event_handler_ = handler;
-        subscribe_stop(&protocol_base::handle_stop, _1);
+        dispatch_.ordered(std::forward<Handler>(handler),
+            shared_from_base<Protocol>(), std::forward<Args>(args)...);
     }
+
+    /// Send a message on the channel and handle the result.
+    template <class Protocol, class Message, typename Handler, typename... Args>
+    void send(Message&& packet, Handler&& handler, Args&&... args)
+    {
+        channel_->send(std::forward<Message>(packet),
+            dispatch_.ordered_delegate(std::forward<Handler>(handler),
+                shared_from_base<Protocol>(), std::forward<Args>(args)...));
+    }
+
+    /// Subscribe to all channel messages.
+    template <class Protocol, class Message, typename Handler, typename... Args>
+    void subscribe(Handler&& handler, Args&&... args)
+    {
+        channel_->template subscribe<Message>(
+            dispatch_.ordered_delegate(std::forward<Handler>(handler),
+                shared_from_base<Protocol>(), std::forward<Args>(args)...));
+    }
+
+    /// Subscribe to the channel stop.
+    template <class Protocol, typename Handler, typename... Args>
+    void subscribe_stop(Handler&& handler, Args&&... args)
+    {
+        channel_->subscribe_stop(
+            dispatch_.ordered_delegate(std::forward<Handler>(handler),
+                shared_from_base<Protocol>(), std::forward<Args>(args)...));
+    }
+
+    /// Get the address of the channel.
+    config::authority authority() const;
+
+    /// Get the protocol name, for logging purposes.
+    const std::string& name();
+
+    /// Get the channel nonce.
+    uint64_t nonce();
+
+    /// Get the threadpool.
+    threadpool& pool();
+
+    /// Set the channel version. This method is not thread safe and must
+    /// complete before any other protocol might read the version.
+    void set_version(const message::version& value);
+
+    /// Stop the channel.
+    void stop(const code& ec);
+
+    /// Determine if the channel is stopped.
+    bool stopped() const;
 
 private:
-    void do_set_event(const code& ec)
-    {
-        if (event_handler_)
-            event_handler_(ec);
-
-        if (ec == error::channel_stopped)
-            event_handler_ = nullptr;
-    }
-
-    void handle_stop(const code& ec)
-    {
-        log::debug(LOG_PROTOCOL)
-            << "Stopped protocol_" << name() << " on [" << authority() << "] "
-            << ec.message();
-    
-        // Event handlers can depend on this code for channel stop.
-        set_event(error::channel_stopped);
-    }
-
-    event_handler event_handler_;
+    threadpool& pool_;
+    dispatcher dispatch_;
+    channel::ptr channel_;
+    const std::string name_;
 };
 
 } // namespace network

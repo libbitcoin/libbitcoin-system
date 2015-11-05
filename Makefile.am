@@ -124,8 +124,11 @@ src_libbitcoin_la_SOURCES = \
     src/network/p2p.cpp \
     src/network/pending.cpp \
     src/network/protocol_address.cpp \
+    src/network/protocol_base.cpp \
+    src/network/protocol_events.cpp \
     src/network/protocol_ping.cpp \
     src/network/protocol_seed.cpp \
+    src/network/protocol_timer.cpp \
     src/network/protocol_version.cpp \
     src/network/proxy.cpp \
     src/network/session.cpp \
@@ -414,10 +417,10 @@ include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/pending.hpp \
     include/bitcoin/bitcoin/network/protocol_address.hpp \
     include/bitcoin/bitcoin/network/protocol_base.hpp \
-    include/bitcoin/bitcoin/network/protocol_dispatch.hpp \
+    include/bitcoin/bitcoin/network/protocol_events.hpp \
     include/bitcoin/bitcoin/network/protocol_ping.hpp \
     include/bitcoin/bitcoin/network/protocol_seed.hpp \
-    include/bitcoin/bitcoin/network/protocol_timed.hpp \
+    include/bitcoin/bitcoin/network/protocol_timer.hpp \
     include/bitcoin/bitcoin/network/protocol_version.hpp \
     include/bitcoin/bitcoin/network/proxy.hpp \
     include/bitcoin/bitcoin/network/session.hpp \

@@ -27,7 +27,7 @@
 #include <bitcoin/bitcoin/message/address.hpp>
 #include <bitcoin/bitcoin/message/get_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/protocol_base.hpp>
+#include <bitcoin/bitcoin/network/protocol_events.hpp>
 #include <bitcoin/bitcoin/network/p2p.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -40,7 +40,7 @@ namespace network {
  * Attach this to a channel immediately following handshake completion.
  */
 class BC_API protocol_address
-    : public protocol_base<protocol_address>, track<protocol_address>
+  : public protocol_events, track<protocol_address>
 {
 public:
     typedef std::shared_ptr<protocol_address> ptr;
