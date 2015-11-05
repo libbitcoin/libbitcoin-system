@@ -128,7 +128,7 @@ private:
 
     bool stopped_;
     bool incoming_;
-    bool temporary_;
+    bool notify_;
     threadpool& pool_;
     p2p& network_;
 };

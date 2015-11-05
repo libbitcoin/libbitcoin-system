@@ -50,7 +50,7 @@ session::session(threadpool& pool, p2p& network, const settings& settings,
     bool incoming, bool temporary)
   : stopped_(true),
     incoming_(incoming),
-    temporary_(temporary),
+    notify_(!temporary),
     pool_(pool),
     network_(network),
     settings_(settings),
@@ -258,12 +258,6 @@ void session::handle_is_pending(bool pending, channel::ptr channel,
         return;
     }
 
-    if (temporary_)
-    {
-        handle_stored(error::success, channel, handle_started, handle_stopped);
-        return;
-    }
-
     network_.store(channel, 
         std::bind(&session::handle_stored,
             shared_from_this(), _1, channel, handle_started, handle_stopped));
@@ -282,7 +276,11 @@ void session::handle_stored(const code& ec, channel::ptr channel,
 
     // Must register handle_stop whenever handle_started returns success.
     channel->subscribe_stop(handle_stopped);
-    network_.relay(error::success, channel);
+
+    // Don't notify of channel creation if we are seeding (for example).
+    if (notify_)
+        network_.relay(error::success, channel);
+
     handle_started(error::success);
 }
 
@@ -320,13 +318,15 @@ void session::remove(const code& ec, channel::ptr channel,
 void session::handle_unpend(const code& ec)
 {
     if (ec)
-        log::warning(LOG_NETWORK) << "Failed to unpend a channel.";
+        log::warning(LOG_NETWORK)
+            << "Failed to unpend a channel: " << ec.message();
 }
 
 void session::handle_remove(const code& ec)
 {
     if (ec)
-        log::warning(LOG_NETWORK) << "Failed to remove a channel.";
+        log::warning(LOG_NETWORK)
+            << "Failed to remove a channel: " << ec.message();
 }
 
 } // namespace network
