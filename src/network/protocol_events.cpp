@@ -47,7 +47,7 @@ void protocol_events::set_event(const code& ec)
 
 void protocol_events::start()
 {
-    const auto unhandled = [](const code& ec) {};
+    const auto unhandled = [](const code&) {};
     start(unhandled);
 }
 
