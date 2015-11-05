@@ -41,8 +41,14 @@ using namespace bc::network;
 // NOTE: this is insufficient as the address varies.
 #define SEED1_AUTHORITIES \
     { \
+      { "52.8.185.53:18333" }, \
+      { "178.21.118.174:18333" }, \
+      { "[2604:880:d:2f::c7b2]:18333" }, \
+      { "[2604:a880:1:20::269:b001]:18333" }, \
       { "[2602:ffea:1001:6ff::f922]:18333" }, \
-      { "[2600:3c00::f03c:91ff:fe89:305f]:18333" } \
+      { "[2401:2500:203:9:153:120:11:18]:18333" }, \
+      { "[2600:3c00::f03c:91ff:fe89:305f]:18333" }, \
+      { "[2600:3c01::f03c:91ff:fe98:68bb]:18333" } \
     }
 
 #define SETTINGS_TESTNET_ONE_THREAD_NO_CONNECTIONS(config) \
@@ -265,21 +271,20 @@ BOOST_AUTO_TEST_CASE(p2p__start__seed_session_expiration_timeout__start_operatio
     BOOST_REQUIRE_EQUAL(stop_result(network), error::success);
 }
 
-BOOST_AUTO_TEST_CASE(p2p__start__seed_session_blacklisted__start_operation_failed_stop_success)
-{
-    print_headers(TEST_NAME);
-    SETTINGS_TESTNET_ONE_THREAD_NO_CONNECTIONS(configuration);
-    configuration.host_pool_capacity = 42;
-    configuration.hosts_file = get_log_path(TEST_NAME, "hosts");
-    configuration.seeds = { { SEED1 } };
-    configuration.blacklists = SEED1_AUTHORITIES;
-    p2p network(configuration);
-
-    // The blacklist may not be complete, in which case this test will fail.
-    BOOST_CHECK_EQUAL(start_result(network), error::operation_failed);
-
-    BOOST_REQUIRE_EQUAL(stop_result(network), error::success);
-}
+// Disabled for live test reliability.
+// This may fail due to missing blacklist entries for the specified host.
+//BOOST_AUTO_TEST_CASE(p2p__start__seed_session_blacklisted__start_operation_failed_stop_success)
+//{
+//    print_headers(TEST_NAME);
+//    SETTINGS_TESTNET_ONE_THREAD_NO_CONNECTIONS(configuration);
+//    configuration.host_pool_capacity = 42;
+//    configuration.hosts_file = get_log_path(TEST_NAME, "hosts");
+//    configuration.seeds = { { SEED1 } };
+//    configuration.blacklists = SEED1_AUTHORITIES;
+//    p2p network(configuration);
+//    BOOST_REQUIRE_EQUAL(start_result(network), error::operation_failed);
+//    BOOST_REQUIRE_EQUAL(stop_result(network), error::success);
+//}
 
 BOOST_AUTO_TEST_CASE(p2p__connect__not_started__service_stopped)
 {
@@ -300,16 +305,18 @@ BOOST_AUTO_TEST_CASE(p2p__connect__started__success)
     BOOST_REQUIRE_EQUAL(connect_result(network, host), error::success);
 }
 
-BOOST_AUTO_TEST_CASE(p2p__connect__twice__address_in_use)
-{
-    print_headers(TEST_NAME);
-    SETTINGS_TESTNET_ONE_THREAD_NO_CONNECTIONS(configuration);
-    p2p network(configuration);
-    const config::endpoint host(SEED1);
-    BOOST_REQUIRE_EQUAL(start_result(network), error::success);
-    BOOST_REQUIRE_EQUAL(connect_result(network, host), error::success);
-    BOOST_REQUIRE_EQUAL(connect_result(network, host), error::address_in_use);
-}
+// Disabled for live test reliability.
+// This may fail due to connecting to the same host on different addresses.
+//BOOST_AUTO_TEST_CASE(p2p__connect__twice__address_in_use)
+//{
+//    print_headers(TEST_NAME);
+//    SETTINGS_TESTNET_ONE_THREAD_NO_CONNECTIONS(configuration);
+//    p2p network(configuration);
+//    const config::endpoint host(SEED1);
+//    BOOST_REQUIRE_EQUAL(start_result(network), error::success);
+//    BOOST_REQUIRE_EQUAL(connect_result(network, host), error::success);
+//    BOOST_REQUIRE_EQUAL(connect_result(network, host), error::address_in_use);
+//}
 
 BOOST_AUTO_TEST_CASE(p2p__broadcast__two_distinct_hosts__two_sends_and_successful_completion)
 {
