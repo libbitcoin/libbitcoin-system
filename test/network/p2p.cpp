@@ -25,6 +25,7 @@
 #include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
+using namespace bc::message;
 using namespace bc::network;
 
 #define TEST_SET_NAME \
@@ -36,6 +37,9 @@ using namespace bc::network;
 // TODO: build mock and/or use dedicated test service.
 #define SEED1 \
     { "testnet-seed.bitcoin.petertodd.org:18333" }
+
+#define SEED2 \
+    { "testnet-seed.bitcoin.schildbach.de:18333" }
 
 // NOTE: this is insufficient as the address varies.
 #define SEED1_AUTHORITIES \
@@ -122,6 +126,28 @@ static int connect_result(p2p& network, const config::endpoint& host)
     };
     network.connect(host.host(), host.port(), handler);
     return promise.get_future().get().value();
+}
+
+template<class Message>
+static int send_result(const Message& message, p2p& network, int channels)
+{
+    const auto channel_counter = [&channels](const code& ec, channel::ptr channel)
+    {
+        BOOST_REQUIRE_EQUAL(ec, error::success);
+        --channels;
+    };
+
+    std::promise<code> promise;
+    const auto completion_counter = [&promise](const code& ec)
+    {
+        promise.set_value(ec);
+    };
+
+    network.broadcast(message, channel_counter, completion_counter);
+    const auto result = promise.get_future().get().value();
+
+    BOOST_REQUIRE_EQUAL(channels, 0);
+    return result;
 }
 
 BOOST_FIXTURE_TEST_SUITE(p2p_tests, log_setup_fixture)
@@ -286,17 +312,19 @@ BOOST_AUTO_TEST_CASE(p2p__connect__twice__address_in_use)
     BOOST_REQUIRE_EQUAL(start_result(network), error::success);
     BOOST_REQUIRE_EQUAL(connect_result(network, host), error::success);
     BOOST_REQUIRE_EQUAL(connect_result(network, host), error::address_in_use);
-    network.stop();
+}
 
-    //const auto handle_complete = [](const code& ec)
-    //{
-    //};
-
-    //const auto handle_channel = [](const code& ec, channel::ptr channel)
-    //{
-    //};
-
-    //network.broadcast(message::ping(0), handle_channel, handle_complete);
+BOOST_AUTO_TEST_CASE(p2p__broadcast__two_distinct_hosts__two_sends_and_successful_completion)
+{
+    print_headers(TEST_NAME);
+    SETTINGS_TESTNET_ONE_THREAD_NO_CONNECTIONS(configuration);
+    p2p network(configuration);
+    const config::endpoint host1(SEED1);
+    const config::endpoint host2(SEED2);
+    BOOST_REQUIRE_EQUAL(start_result(network), error::success);
+    BOOST_REQUIRE_EQUAL(connect_result(network, host1), error::success);
+    BOOST_REQUIRE_EQUAL(connect_result(network, host2), error::success);
+    BOOST_REQUIRE_EQUAL(send_result(ping(0), network, 2), error::success);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
