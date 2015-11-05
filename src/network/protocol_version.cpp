@@ -42,7 +42,7 @@ namespace libbitcoin {
 namespace network {
 
 #define NAME "version"
-#define CLASS protocol_version
+#define PROTOCOL protocol_version
 #define RELAY_TRUE true
 #define GENESIS_HEIGHT 0
 #define UNSPECIFIED_NONCE 0
@@ -100,18 +100,15 @@ void protocol_version::start(const settings& settings, size_t height,
     const auto self = template_factory(authority(), settings, nonce(), height);
 
     // The synchronizer is the only object that is aware of completion.
-    const auto handshake_complete = bind<protocol_version>(
-        &protocol_version::handle_handshake_complete, _1, handler);
+    const auto handshake_complete = 
+        BIND2(handle_handshake_complete, _1, handler);
 
     protocol_timer::start(settings.channel_handshake(),
         synchronize(handshake_complete, 3, NAME));
 
-    subscribe<protocol_version, version>
-        (&protocol_version::handle_receive_version, _1, _2);
-    subscribe<protocol_version, verack>(
-        &protocol_version::handle_receive_verack, _1, _2);
-    send<protocol_version>(self,
-        &protocol_version::handle_version_sent, _1);
+    SUBSCRIBE2(version, handle_receive_version, _1, _2);
+    SUBSCRIBE2(verack, handle_receive_verack, _1, _2);
+    SEND1(self, handle_version_sent, _1);
 }
 
 void protocol_version::handle_handshake_complete(const code& ec,
@@ -144,8 +141,7 @@ void protocol_version::handle_receive_version(const code& ec,
         << ") services (" << message.services << ") " << message.user_agent;
 
     set_version(message);
-    send<protocol_version>(verack(),
-        &protocol_version::handle_verack_sent, _1);
+    SEND1(verack(), handle_verack_sent, _1);
 }
 
 void protocol_version::handle_verack_sent(const code& ec)

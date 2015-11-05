@@ -32,6 +32,7 @@
 namespace libbitcoin {
 namespace network {
 
+#define PROTOCOL protocol_timer
 using std::placeholders::_1;
 
 protocol_timer::protocol_timer(threadpool& pool, channel::ptr channel,
@@ -46,8 +47,7 @@ void protocol_timer::start(const asio::duration& timeout,
     deadline_ = std::make_shared<deadline>(pool(), timeout);
     reset_timer();
 
-    protocol_events::start(bind<protocol_timer>(
-        &protocol_timer::handle_event, _1, handler));
+    protocol_events::start(BIND2(handle_event, _1, handler));
 }
 
 void protocol_timer::cancel_timer()
@@ -60,8 +60,7 @@ void protocol_timer::reset_timer()
     if (stopped())
         return;
 
-    deadline_->start(bind<protocol_timer>(
-        &protocol_timer::handle_timer, _1));
+    deadline_->start(BIND1(handle_timer, _1));
 }
 
 void protocol_timer::handle_timer(const code& ec)

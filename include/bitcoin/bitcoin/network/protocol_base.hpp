@@ -136,6 +136,23 @@ private:
     const std::string name_;
 };
 
+// These are declared to improve the readability of protocols.
+// These require that PROTOCOL be defined in each source file where used.
+#define BIND1(method, p1) \
+    bind<PROTOCOL>(&PROTOCOL::method, p1)
+#define BIND2(method, p1, p2) \
+    bind<PROTOCOL>(&PROTOCOL::method, p1, p2)
+#define CALL1(method, p1) \
+    call<PROTOCOL>(&PROTOCOL::method, p1)
+#define SEND1(message, method, p1) \
+    send<PROTOCOL>(message, &PROTOCOL::method, p1)
+#define SUBSCRIBE_STOP1(method, p1) \
+    subscribe_stop<PROTOCOL>(&PROTOCOL::method, p1)
+#define SUBSCRIBE2(message, method, p1, p2) \
+    subscribe<PROTOCOL, message>(&PROTOCOL::method, p1, p2)
+#define SUBSCRIBE3(message, method, p1, p2, p3) \
+    subscribe<PROTOCOL, message>(&PROTOCOL::method, p1, p2, p3)
+
 } // namespace network
 } // namespace libbitcoin
 

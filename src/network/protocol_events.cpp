@@ -30,6 +30,7 @@
 namespace libbitcoin {
 namespace network {
 
+#define PROTOCOL protocol_events
 using std::placeholders::_1;
 
 protocol_events::protocol_events(threadpool& pool, channel::ptr channel,
@@ -41,8 +42,7 @@ protocol_events::protocol_events(threadpool& pool, channel::ptr channel,
 
 void protocol_events::set_event(const code& ec)
 {
-    call<protocol_events>(
-        &protocol_events::do_set_event, ec);
+    CALL1(do_set_event, ec);
 }
 
 void protocol_events::start()
@@ -60,8 +60,7 @@ void protocol_events::start(event_handler handler)
     }
 
     event_handler_ = handler;
-    subscribe_stop<protocol_events>(
-        &protocol_events::handle_stop, _1);
+    SUBSCRIBE_STOP1(handle_stop, _1);
 }
 
 void protocol_events::do_set_event(const code& ec)

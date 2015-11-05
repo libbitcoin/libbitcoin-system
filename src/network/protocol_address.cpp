@@ -37,6 +37,7 @@ namespace libbitcoin {
 namespace network {
 
 #define NAME "address"
+#define PROTOCOL protocol_address
 
 using namespace bc::message;
 using std::placeholders::_1;
@@ -55,8 +56,7 @@ void protocol_address::start(const settings& settings)
     if (settings.self.port() != 0)
     {
         self_.addresses.push_back(settings.self.to_network_address());
-        send<protocol_address>(self_,
-            &protocol_address::handle_send_address, _1);
+        SEND1(self_, handle_send_address, _1);
     }
 
     // If we can't store addresses we don't ask for or receive them.
@@ -65,10 +65,8 @@ void protocol_address::start(const settings& settings)
 
     protocol_events::start();
 
-    subscribe<protocol_address, get_address>(
-        &protocol_address::handle_receive_get_address, _1, _2);
-    send<protocol_address>(get_address(),
-        &protocol_address::handle_send_get_address, _1);
+    SUBSCRIBE2(get_address, handle_receive_get_address, _1, _2);
+    SEND1(get_address(), handle_send_get_address, _1);
 }
 
 void protocol_address::handle_receive_address(const code& ec,
@@ -87,16 +85,14 @@ void protocol_address::handle_receive_address(const code& ec,
     }
 
     // Resubscribe to address messages.
-    subscribe<protocol_address, address>(
-        &protocol_address::handle_receive_address, _1, _2);
+    SUBSCRIBE2(address, handle_receive_address, _1, _2);
 
     log::debug(LOG_PROTOCOL)
         << "Storing addresses from [" << authority() << "] ("
         << message.addresses.size() << ")";
 
     // TODO: manage timestamps (active channels are connected < 3 hours ago).
-    network_.store(message.addresses, bind<protocol_address>(
-        &protocol_address::handle_store_addresses, _1));
+    network_.store(message.addresses, BIND1(handle_store_addresses, _1));
 }
 
 void protocol_address::handle_receive_get_address(const code& ec,
@@ -116,8 +112,7 @@ void protocol_address::handle_receive_get_address(const code& ec,
 
     // TODO: allowing repeated queries can allow a channel to map our history.
     // Resubscribe to get_address messages.
-    subscribe<protocol_address, get_address>(
-        &protocol_address::handle_receive_get_address, _1, _2);
+    SUBSCRIBE2(get_address, handle_receive_get_address, _1, _2);
 
     // TODO: pull active hosts from host cache (currently just resending self).
     // TODO: need to distort for privacy, don't send currently-connected peers.
@@ -128,8 +123,7 @@ void protocol_address::handle_receive_get_address(const code& ec,
         << "Sending addresses to [" << authority() << "] ("
         << self_.addresses.size() << ")";
 
-    send<protocol_address>(self_,
-        &protocol_address::handle_send_address, _1);
+    SEND1(self_, handle_send_address, _1);
 }
 
 void protocol_address::handle_send_address(const code& ec)
