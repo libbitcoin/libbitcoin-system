@@ -274,6 +274,8 @@ void session::handle_stored(const code& ec, channel::ptr channel,
 {
     if (ec)
     {
+        // If not success then the channel must be stopped.
+        channel->stop(ec);
         handle_started(ec);
         return;
     }
@@ -286,7 +288,7 @@ void session::handle_stored(const code& ec, channel::ptr channel,
 
 void session::handle_started(const code& ec, result_handler handle_started)
 {
-    // End of the start sequence with possible error code.
+    // End of the start sequence, with possible failure code.
     handle_started(ec);
 }
 

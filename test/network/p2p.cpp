@@ -275,17 +275,28 @@ BOOST_AUTO_TEST_CASE(p2p__connect__started__success)
     const config::endpoint host(SEED1);
     BOOST_REQUIRE_EQUAL(start_result(network), error::success);
     BOOST_REQUIRE_EQUAL(connect_result(network, host), error::success);
-    BOOST_REQUIRE_EQUAL(stop_result(network), error::success);
+}
 
-    ////const auto handle_complete = [](const code& ec)
-    ////{
-    ////};
+BOOST_AUTO_TEST_CASE(p2p__connect__twice__address_in_use)
+{
+    print_headers(TEST_NAME);
+    SETTINGS_TESTNET_ONE_THREAD_NO_CONNECTIONS(configuration);
+    p2p network(configuration);
+    const config::endpoint host(SEED1);
+    BOOST_REQUIRE_EQUAL(start_result(network), error::success);
+    BOOST_REQUIRE_EQUAL(connect_result(network, host), error::success);
+    BOOST_REQUIRE_EQUAL(connect_result(network, host), error::address_in_use);
+    network.stop();
 
-    ////const auto handle_channel = [](const code& ec, channel::ptr channel)
-    ////{
-    ////};
+    //const auto handle_complete = [](const code& ec)
+    //{
+    //};
 
-    ////network.broadcast(message::ping(0), handle_channel, handle_complete);
+    //const auto handle_channel = [](const code& ec, channel::ptr channel)
+    //{
+    //};
+
+    //network.broadcast(message::ping(0), handle_channel, handle_complete);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
