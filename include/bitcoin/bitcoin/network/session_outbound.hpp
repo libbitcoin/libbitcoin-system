@@ -55,9 +55,10 @@ private:
         connector::ptr connect);
     void handle_connect(const code& ec, channel::ptr channel,
         const authority& host, connector::ptr connect);
-
-    void handle_channel_start(const code& ec, channel::ptr channel);
+    
     void handle_channel_stop(const code& ec, connector::ptr connect);
+    void handle_channel_start(const code& ec, connector::ptr connect,
+        channel::ptr channel);
 };
 
 } // namespace network

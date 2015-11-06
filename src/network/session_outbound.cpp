@@ -129,16 +129,20 @@ void session_outbound::handle_connect(const code& ec, channel::ptr channel,
 
     register_channel(channel, 
         std::bind(&session_outbound::handle_channel_start,
-            shared_from_base<session_outbound>(), _1, channel),
+            shared_from_base<session_outbound>(), _1, connect, channel),
         std::bind(&session_outbound::handle_channel_stop,
             shared_from_base<session_outbound>(), _1, connect));
 }
 
 void session_outbound::handle_channel_start(const code& ec,
-    channel::ptr channel)
+    connector::ptr connect, channel::ptr channel)
 {
+    // Treat a start failure just like a stop.
     if (ec)
+    {
+        handle_channel_stop(ec, connect);
         return;
+    }
 
     attach<protocol_ping>(channel, settings_);
     attach<protocol_address>(channel, settings_);

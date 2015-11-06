@@ -151,46 +151,40 @@ void session::register_channel(channel::ptr channel,
         return;
     }
 
+    // After this point we must stop the channel if there is a start error.
+    // This is managed in session::handle_started, where all starts terminate.
+    channel->start();
+
+    // Place invocation of stop handler on ordered delegate.
+    const auto remove_handler =
+        dispatch_.ordered_delegate(&session::remove,
+            shared_from_this(), _1, channel, handle_stopped);
+
     // Place invocation of start handler on ordered delegate.
     const auto start_handler = 
         dispatch_.ordered_delegate(&session::handle_started,
-            shared_from_this(), _1, handle_started);
-
-    // Place invocation of stop handler on ordered delegate.
-    const auto stop_handler =
-        dispatch_.ordered_delegate(&session::handle_stopped,
-            shared_from_this(), _1, handle_stopped);
-
-    channel->start();
-
-    // Call remove just after stopped is called.
-    const auto remove_handler =
-        dispatch_.ordered_delegate(&session::remove,
-            shared_from_this(), _1, channel, stop_handler);
+            shared_from_this(), _1, channel, handle_started, remove_handler);
 
     if (incoming_)
     {
-        // Bypass pending registration for incomming channels.
         dispatch_.ordered(&session::handle_pend,
-            shared_from_this(), error::success, channel, start_handler,
-                remove_handler);
+            shared_from_this(), error::success, channel, start_handler);
         return;
     }
 
     channel->set_nonce(nonzero_pseudo_random());
 
-    // Call unpend just after started is called.
     const auto unpend_handler =
         dispatch_.ordered_delegate(&session::unpend,
             shared_from_this(), _1, channel, start_handler);
 
     network_.pend(channel,
         dispatch_.ordered_delegate(&session::handle_pend,
-            shared_from_this(), _1, channel, unpend_handler, remove_handler));
+            shared_from_this(), _1, channel, unpend_handler));
 }
 
 void session::handle_pend(const code& ec, channel::ptr channel,
-    result_handler handle_started, result_handler handle_stopped)
+    result_handler handle_started)
 {
     if (ec)
     {
@@ -200,7 +194,7 @@ void session::handle_pend(const code& ec, channel::ptr channel,
 
     const auto handler =
         dispatch_.ordered_delegate(&session::handle_handshake,
-            shared_from_this(), _1, channel, handle_started, handle_stopped);
+            shared_from_this(), _1, channel, handle_started);
 
     // Subscribe start handler to handshake completion.
     attach<protocol_version>(channel, settings_, network_.height(), handler);
@@ -210,7 +204,7 @@ void session::handle_pend(const code& ec, channel::ptr channel,
 }
 
 void session::handle_handshake(const code& ec, channel::ptr channel,
-    result_handler handle_started, result_handler handle_stopped)
+    result_handler handle_started)
 {
     if (ec)
     {
@@ -225,18 +219,17 @@ void session::handle_handshake(const code& ec, channel::ptr channel,
     {
         network_.pent(channel->version().nonce,
             dispatch_.ordered_delegate(&session::handle_is_pending,
-                shared_from_this(), _1, channel, handle_started,
-                    handle_stopped));
+                shared_from_this(), _1, channel, handle_started));
         return;
     }
 
     // Bypass loopback test for outgoing channels.
     dispatch_.ordered(&session::handle_is_pending,
-        shared_from_this(), false, channel, handle_started, handle_stopped);
+        shared_from_this(), false, channel, handle_started);
 }
 
 void session::handle_is_pending(bool pending, channel::ptr channel,
-    result_handler handle_started, result_handler handle_stopped)
+    result_handler handle_started)
 {
     if (pending)
     {
@@ -260,40 +253,30 @@ void session::handle_is_pending(bool pending, channel::ptr channel,
 
     network_.store(channel, 
         std::bind(&session::handle_stored,
-            shared_from_this(), _1, channel, handle_started, handle_stopped));
+            shared_from_this(), _1, channel, handle_started));
 }
 
 void session::handle_stored(const code& ec, channel::ptr channel,
-    result_handler handle_started, result_handler handle_stopped)
+    result_handler handle_started)
 {
-    if (ec)
-    {
-        // If not success then the channel must be stopped.
-        channel->stop(ec);
-        handle_started(ec);
-        return;
-    }
-
-    // Must register handle_stop whenever handle_started returns success.
-    channel->subscribe_stop(handle_stopped);
-
     // Don't notify of channel creation if we are seeding (for example).
     if (notify_)
         network_.relay(error::success, channel);
 
-    handle_started(error::success);
-}
-
-void session::handle_started(const code& ec, result_handler handle_started)
-{
-    // End of the start sequence, with possible failure code.
     handle_started(ec);
 }
 
-void session::handle_stopped(const code& reason, result_handler handle_stopped)
+void session::handle_started(const code& ec, channel::ptr channel,
+    result_handler handle_started, result_handler handle_stopped)
 {
-    // End of the stop sequence, with stop reason code.
-    handle_stopped(reason);
+    // We must either stop or subscribe the channel for stop before returning.
+    if (ec)
+        channel->stop(ec);
+    else
+        channel->subscribe_stop(handle_stopped);
+
+    // End of the start sequence.
+    handle_started(ec);
 }
 
 void session::unpend(const code& ec, channel::ptr channel,

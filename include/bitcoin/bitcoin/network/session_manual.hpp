@@ -64,8 +64,8 @@ private:
         const std::string& hostname, uint16_t port,
         channel_handler handler, uint16_t retries);
 
-    void handle_channel_start(const code& ec, channel::ptr channel,
-        channel_handler handler);
+    void handle_channel_start(const code& ec, const std::string& hostname,
+        uint16_t port, channel::ptr channel, channel_handler handler);
     void handle_channel_stop(const code& ec, const std::string& hostname,
         uint16_t port);
 

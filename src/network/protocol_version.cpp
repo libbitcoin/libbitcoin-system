@@ -116,9 +116,6 @@ void protocol_version::handle_handshake_complete(const code& ec,
 {
     cancel_timer();
     handler(ec);
-
-    if (ec)
-        stop(ec);
 }
 
 void protocol_version::handle_receive_version(const code& ec,
@@ -129,7 +126,7 @@ void protocol_version::handle_receive_version(const code& ec,
 
     if (ec)
     {
-        log::error(LOG_PROTOCOL)
+        log::debug(LOG_PROTOCOL)
             << "Failure receiving version from [" << authority() << "] "
             << ec.message();
         set_event(ec);
@@ -151,7 +148,7 @@ void protocol_version::handle_verack_sent(const code& ec)
 
     if (ec)
     {
-        log::error(LOG_PROTOCOL)
+        log::debug(LOG_PROTOCOL)
             << "Failure sending verack to [" << authority() << "] "
             << ec.message();
         set_event(ec);
@@ -169,7 +166,7 @@ void protocol_version::handle_version_sent(const code& ec)
 
     if (ec)
     {
-        log::error(LOG_PROTOCOL)
+        log::debug(LOG_PROTOCOL)
             << "Failure sending version to [" << authority() << "] "
             << ec.message();
         set_event(ec);
@@ -188,7 +185,7 @@ void protocol_version::handle_receive_verack(const code& ec,
 
     if (ec)
     {
-        log::error(LOG_PROTOCOL)
+        log::debug(LOG_PROTOCOL)
             << "Failure receiving verack from [" << authority() << "] "
             << ec.message();
         set_event(ec);

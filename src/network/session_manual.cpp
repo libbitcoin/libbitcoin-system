@@ -111,28 +111,35 @@ void session_manual::handle_connect(const code& ec, channel::ptr channel,
 
     register_channel(channel, 
         std::bind(&session_manual::handle_channel_start,
-            shared_from_base<session_manual>(), _1, channel, handler),
+            shared_from_base<session_manual>(), _1, hostname, port, channel, handler),
         std::bind(&session_manual::handle_channel_stop,
             shared_from_base<session_manual>(), _1, hostname, port));
 }
 
-void session_manual::handle_channel_start(const code& ec, channel::ptr channel,
-    channel_handler handler)
+void session_manual::handle_channel_start(const code& ec, const std::string& hostname,
+    uint16_t port, channel::ptr channel, channel_handler handler)
 {
-    if (ec)
+    if (ec != error::service_stopped)
     {
-        handler(ec, nullptr);
+        handler(ec, channel);
         return;
     }
 
-    handler(ec, channel);
+    // Treat a start failure just like a stop, but preserve the start handler.
+    if (ec)
+    {
+        connect(hostname, port, handler);
+        return;
+    }
+
+    // Notify of successful first handshake.
+    handler(error::success, channel);
 
     attach<protocol_ping>(channel, settings_);
     attach<protocol_address>(channel, settings_);
 }
 
-// We only invoke the callback on the first successful connection.
-// This invokes reconnect on no-callback overload.
+// After a stop we don't use the caller's start handler, but keep connecting.
 void session_manual::handle_channel_stop(const code& ec,
     const std::string& hostname, uint16_t port)
 {
