@@ -55,7 +55,7 @@ void session_inbound::start()
     if (settings_.inbound_port == 0 || settings_.inbound_connection_limit == 0)
     {
         log::info(LOG_NETWORK)
-            << "Not configured for accepting incoming channels.";
+            << "Not configured for accepting incoming connections.";
         return;
     }
 

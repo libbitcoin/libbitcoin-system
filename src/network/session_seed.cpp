@@ -61,7 +61,7 @@ void session_seed::start(result_handler handler)
     if (settings_.host_pool_capacity == 0)
     {
         log::info(LOG_NETWORK)
-            << "Not configured to populate a host pool.";
+            << "Not configured to populate an address pool.";
         handler(error::success);
         return;
     }
