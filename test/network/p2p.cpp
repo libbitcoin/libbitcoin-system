@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE(p2p__set_height__value__expected)
     BOOST_REQUIRE_EQUAL(network.height(), expected_height);
 }
 
-BOOST_AUTO_TEST_CASE(p2p__start__no_sessions__start_success__success)
+BOOST_AUTO_TEST_CASE(p2p__start__no_sessions__start_success)
 {
     print_headers(TEST_NAME);
     SETTINGS_TESTNET_ONE_THREAD_NO_CONNECTIONS(configuration);
