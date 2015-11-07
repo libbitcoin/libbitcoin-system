@@ -163,8 +163,7 @@ p2p::p2p(const settings& settings)
 
 p2p::~p2p()
 {
-    // This will block until all work ends and threads coalesce.
-    stop();
+    close();
 }
 
 // Properties.
@@ -194,6 +193,8 @@ void p2p::start(result_handler handler)
     }
 
     stopped_ = false;
+
+    pool_.join();
     pool_.spawn(settings_.threads, thread_priority::low);
 
     hosts_.load(
@@ -254,12 +255,18 @@ void p2p::handle_hosts_seeded(const code& ec, result_handler handler)
 // Shutdown processing.
 // ----------------------------------------------------------------------------
 
-void p2p::stop()
+void p2p::close()
 {
-    stop(nullptr);
+    stop();
+    pool_.join();
 }
 
-// This must be called from the thread that constructed this class.
+void p2p::stop()
+{
+    const auto unhandled = [](const code&){};
+    stop(unhandled);
+}
+
 void p2p::stop(result_handler handler)
 {
     if (stopped())
@@ -277,19 +284,16 @@ void p2p::stop(result_handler handler)
         dispatch_.ordered_delegate(&p2p::handle_hosts_saved,
             this, _1, handler));
 
-    // Join will wait for host save to complete, including handle_stop call.
     pool_.shutdown();
-    pool_.join();
 }
 
 void p2p::handle_hosts_saved(const code& ec, result_handler handler)
 {
-    if (!stopped() && ec)
+    if (ec)
         log::error(LOG_NETWORK)
             << "Error saving hosts file: " << ec.message();
 
-    if (handler)
-        handler(ec);
+    handler(ec);
 }
 
 bool p2p::stopped() const

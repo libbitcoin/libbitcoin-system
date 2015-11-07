@@ -71,20 +71,21 @@ public:
     /// Set the current block height, for use in version messages.
     virtual void set_height(size_t value);
 
-    /// Calls handler after hosts file load and seeding has completed.
+    /// Start connecting.
+    /// Handler returns the result of host file load and seeding operations.
+    // This must be called from the thread that constructed this class.
     virtual void start(result_handler handler);
 
-    /// Stop after saving hosts file.
-    /// This call is optional as destruct will do the same. The handler
-    /// provides the hosts save result, called after all threads are coalesced.
-    /// This must be called from the thread that constructed this class.
+    /// Non-blocking call to coalesce all work.
+    /// Handler returns the result of host file save operation.
     virtual void stop(result_handler handler);
 
-    /// Stop after saving hosts file.
-    /// This call is optional as destruct will do the same, although this
-    /// allows the caller to block until all threads are coalesced.
-    /// This must be called from the thread that constructed this class.
+    /// Non-blocking call to coalesce all work.
     virtual void stop();
+
+    /// Blocking call to coalesce all work and then terminate all threads.
+    /// This must be called from the thread that constructed this class.
+    void close();
 
     // ------------------------------------------------------------------------
 
