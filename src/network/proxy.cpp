@@ -98,7 +98,7 @@ void proxy::talk()
     read_heading();
 }
 
-config::authority proxy::authority() const
+const config::authority& proxy::authority() const
 {
     return authority_;
 }
