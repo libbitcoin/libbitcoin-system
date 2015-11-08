@@ -21,11 +21,11 @@
 #define LIBBITCOIN_NETWORK_SETTINGS_HPP
 
 #include <cstdint>
-#include <boost/asio.hpp>
 #include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
 
 namespace libbitcoin {
 namespace network {
@@ -56,46 +56,39 @@ struct BC_API settings
     config::authority::list blacklists;
     config::endpoint::list seeds;
 
-    boost::posix_time::time_duration connect_timeout() const
+    asio::duration connect_timeout() const
     {
-        using namespace boost::posix_time;
-        return time_duration(0, 0, connect_timeout_seconds);
+        return asio::duration(0, 0, connect_timeout_seconds);
     }
 
-    boost::posix_time::time_duration channel_handshake() const
+    asio::duration channel_handshake() const
     {
-        using namespace boost::posix_time;
-        return time_duration(0, 0, channel_handshake_seconds);
+        return asio::duration(0, 0, channel_handshake_seconds);
     }
 
-    boost::posix_time::time_duration channel_revival() const
+    asio::duration channel_revival() const
     {
-        using namespace boost::posix_time;
-        return time_duration(0, channel_revival_minutes, 0);
+        return asio::duration(0, channel_revival_minutes, 0);
     }
 
-    boost::posix_time::time_duration channel_heartbeat() const
+    asio::duration channel_heartbeat() const
     {
-        using namespace boost::posix_time;
-        return time_duration(0, channel_heartbeat_minutes, 0);
+        return asio::duration(0, channel_heartbeat_minutes, 0);
     }
 
-    boost::posix_time::time_duration channel_inactivity() const
+    asio::duration channel_inactivity() const
     {
-        using namespace boost::posix_time;
-        return time_duration(0, channel_inactivity_minutes, 0);
+        return asio::duration(0, channel_inactivity_minutes, 0);
     }
 
-    boost::posix_time::time_duration channel_expiration() const
+    asio::duration channel_expiration() const
     {
-        using namespace boost::posix_time;
-        return time_duration(0, channel_expiration_minutes, 0);
+        return asio::duration(0, channel_expiration_minutes, 0);
     }
 
-    boost::posix_time::time_duration channel_germination() const
+    asio::duration channel_germination() const
     {
-        using namespace boost::posix_time;
-        return time_duration(0, 0, channel_germination_seconds);
+        return asio::duration(0, 0, channel_germination_seconds);
     }
 };
 
