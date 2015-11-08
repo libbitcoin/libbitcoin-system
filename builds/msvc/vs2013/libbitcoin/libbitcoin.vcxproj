@@ -330,6 +330,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\ek_private.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\ek_public.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\ek_token.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\settings.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\uri_reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\encrypted_keys.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\dictionary.hpp" />

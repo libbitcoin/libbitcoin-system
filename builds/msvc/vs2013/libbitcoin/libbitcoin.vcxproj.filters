@@ -1012,6 +1012,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_timer.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\settings.hpp">
+      <Filter>include\bitcoin\wallet</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\resource.rc">
