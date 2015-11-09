@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/wallet/uri.hpp>
 
 #include <iomanip>
+#include <sstream>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
 
