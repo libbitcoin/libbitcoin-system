@@ -34,21 +34,18 @@
 #define CONSTRUCT_TRACK(class_name, log_name) \
     track<class_name>(#class_name, log_name)
 
-////#ifdef NDEBUG
-////    #define INITIALIZE_TRACK(class_name)
-////
-////    template <class Shared>
-////    class track
-////    {
-////    protected:
-////        track(const std::string& log_name, const std::string&)
-////          : log_(log_name)
-////        {
-////        }
-////
-////        const std::string log_;
-////    };
-////#else
+#ifdef NDEBUG
+    #define INITIALIZE_TRACK(class_name)
+
+    template <class Shared>
+    class track
+    {
+    protected:
+        track(const std::string&, const std::string&)
+        {
+        }
+    };
+#else
     #include <atomic>
     #include <cstddef>
     #include <string>
@@ -83,6 +80,6 @@
         const std::string class_;
         const std::string log_;
     };
-////#endif
+#endif
 
 #endif
