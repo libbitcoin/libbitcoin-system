@@ -48,7 +48,7 @@ namespace network {
 #define NETWORK_DEBUG_FILE                  boost::filesystem::path("debug.log")
 #define NETWORK_ERROR_FILE                  boost::filesystem::path("error.log")
 #define NETWORK_SELF                        bc::unspecified_network_address
-#define NETWORK_BLACKLISTS                  {}
+#define NETWORK_BLACKLISTS                  config::authority::list()
 
 /// mainnet settings
 /// Seeds based on bitcoinstats.com/network/dns-servers
