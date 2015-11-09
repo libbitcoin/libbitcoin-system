@@ -52,7 +52,7 @@ constexpr size_t utf8_max_character_size = 4;
 // Ensure console_streambuf::initialize is called only once.
 static std::once_flag io_mutex;
 
-// Ensure initialize_icu_installation is called only once.
+// Ensure validate_localization is called only once.
 static std::once_flag icu_mutex;
 
 // Static initializer for bc::cin.
