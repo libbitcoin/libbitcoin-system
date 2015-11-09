@@ -226,7 +226,7 @@ void p2p::stop(result_handler handler)
 {
     if (stopped())
     {
-        handle_hosts_saved(error::service_stopped, handler);
+        handler(error::service_stopped);
         return;
     }
 
