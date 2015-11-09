@@ -81,10 +81,10 @@ bool operation::from_data(std::istream& stream)
 
 bool operation::from_data(reader& source)
 {
+    auto result = true;
     reset();
     const auto byte = source.read_byte();
-    if (!source)
-        return false;
+    result = source;
 
     auto op_code = static_cast<opcode>(byte);
     if (byte == 0 && op_code != opcode::zero)
@@ -93,19 +93,19 @@ bool operation::from_data(reader& source)
     if (0 < byte && byte <= 75)
         op_code = opcode::special;
 
-    if (operation::must_read_data(op_code))
+    uint32_t size;
+    if (operation::must_read_data(op_code) &&
+        read_opcode_data_size(size, op_code, byte, source))
     {
-        uint32_t size;
-        if (!read_opcode_data_size(size, op_code, byte, source))
-            return false;
-
         data = source.read_data(size);
-        if (!source || data.size() != size)
-            return false;
+        result = (source && (data.size() == size));
     }
 
+    if (!result)
+        reset();
+
     code = op_code;
-    return true;
+    return result;
 }
 
 data_chunk operation::to_data() const
