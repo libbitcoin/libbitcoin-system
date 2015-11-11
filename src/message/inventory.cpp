@@ -132,7 +132,7 @@ uint64_t inventory::serialized_size() const
         inventory_vector::satoshi_fixed_size();
 }
 
-size_t inventory::count(inventory_type_id type_id)
+size_t inventory::count(inventory_type_id type_id) const
 {
     const auto is_of_type = [type_id](const inventory_vector& element)
     {
