@@ -51,8 +51,7 @@ class BC_API proxy
 {
 public:
     typedef subscriber<const code&> stop_subscriber;
-    typedef std::function<void(const code&)> send_handler;
-    typedef std::function<void(const code&)> stop_handler;
+    typedef std::function<void(const code&)> result_handler;
 
     template <class Derived>
     std::shared_ptr<Derived> shared_from_base()
@@ -100,7 +99,7 @@ public:
     void start();
     bool stopped() const;
     void stop(const code& ec);
-    void subscribe_stop(stop_handler handler);
+    void subscribe_stop(result_handler handler);
     const config::authority& authority() const;
 
 protected:
@@ -126,8 +125,8 @@ private:
     void handle_read_payload(const boost_code& ec, size_t,
         const message::heading& heading);
 
-    void call_handle_send(const boost_code& ec, send_handler handler);
-    void do_send(const data_chunk& message, send_handler handler,
+    void call_handle_send(const boost_code& ec, result_handler handler);
+    void do_send(const data_chunk& message, result_handler handler,
         const std::string& command);
 
     bool stopped_;

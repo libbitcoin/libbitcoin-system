@@ -124,7 +124,7 @@ void proxy::stop(const code& ec)
         shared_from_this(), ec);
 }
 
-void proxy::subscribe_stop(stop_handler handler)
+void proxy::subscribe_stop(result_handler handler)
 {
     if (stopped())
         handler(error::channel_stopped);
@@ -276,7 +276,7 @@ void proxy::handle_read_payload(const boost_code& ec, size_t,
     }
 }
 
-void proxy::do_send(const data_chunk& message, send_handler handler,
+void proxy::do_send(const data_chunk& message, result_handler handler,
     const std::string& command)
 {
     if (stopped())
@@ -295,7 +295,7 @@ void proxy::do_send(const data_chunk& message, send_handler handler,
             shared_from_this(), _1, handler));
 }
 
-void proxy::call_handle_send(const boost_code& ec, send_handler handler)
+void proxy::call_handle_send(const boost_code& ec, result_handler handler)
 {
     handler(error::boost_to_error_code(ec));
 }
