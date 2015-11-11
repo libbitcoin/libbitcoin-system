@@ -52,6 +52,10 @@ protected:
      */
     protocol_base(threadpool& pool, channel::ptr channel,
         const std::string& name);
+
+    /// This class is not copyable.
+    protocol_base(const protocol_base&) = delete;
+    void operator=(const protocol_base&) = delete;
     
     /// Get a shared pointer to the derived instance from this.
     /// Used by implementations to obtain a shared pointer of the derived type.
