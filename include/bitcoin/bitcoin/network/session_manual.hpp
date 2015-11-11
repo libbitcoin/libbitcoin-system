@@ -47,10 +47,6 @@ public:
 
     session_manual(threadpool& pool, p2p& network, const settings& settings);
 
-    /// This class is not copyable.
-    session_manual(const session_manual&) = delete;
-    void operator=(const session_manual&) = delete;
-
     void start() override;
 
     void connect(const std::string& hostname, uint16_t port);

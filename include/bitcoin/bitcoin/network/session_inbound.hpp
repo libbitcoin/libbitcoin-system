@@ -45,10 +45,6 @@ public:
 
     session_inbound(threadpool& pool, p2p& network, const settings& settings);
 
-    /// This class is not copyable.
-    session_inbound(const session_inbound&) = delete;
-    void operator=(const session_inbound&) = delete;
-
     void start() override;
 
 private:

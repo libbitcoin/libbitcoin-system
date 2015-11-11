@@ -43,10 +43,6 @@ public:
 
     session_outbound(threadpool& pool, p2p& network, const settings& settings);
 
-    /// This class is not copyable.
-    session_outbound(const session_outbound&) = delete;
-    void operator=(const session_outbound&) = delete;
-
     void start() override;
 
 private:

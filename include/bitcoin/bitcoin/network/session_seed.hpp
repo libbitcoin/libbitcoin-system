@@ -46,10 +46,6 @@ public:
 
     session_seed(threadpool& pool, p2p& network, const settings& settings);
 
-    /// This class is not copyable.
-    session_seed(const session_seed&) = delete;
-    void operator=(const session_seed&) = delete;
-
     void start(result_handler handler);
 
 private:
