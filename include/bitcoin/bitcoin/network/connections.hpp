@@ -66,7 +66,7 @@ public:
 
         for (const auto channel: buffer_)
         {
-            const auto handle_send = [=](const code& ec)
+            const auto handle_send = [=](const code ec)
             {
                 handle_channel(ec, channel);
 

@@ -57,7 +57,7 @@ void session_manual::start()
 // Must call start() before connect.
 void session_manual::connect(const std::string& hostname, uint16_t port)
 {
-    const auto unhandled = [](const code&, channel::ptr) {};
+    const auto unhandled = [](const code, channel::ptr) {};
     connect(hostname, port, unhandled);
 }
 

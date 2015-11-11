@@ -218,7 +218,7 @@ void p2p::close()
 
 void p2p::stop()
 {
-    const auto unhandled = [](const code&){};
+    const auto unhandled = [](const code){};
     stop(unhandled);
 }
 
