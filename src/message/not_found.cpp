@@ -19,6 +19,8 @@
  */
 #include <bitcoin/bitcoin/message/not_found.hpp>
 
+#include <initializer_list>
+
 namespace libbitcoin {
 namespace message {
 
@@ -46,12 +48,13 @@ not_found not_found::factory_from_data(reader& source)
 }
 
 not_found::not_found()
+  : inventory()
 {
 }
 
-not_found::not_found(const inventory_vector::list& elements)
+not_found::not_found(const std::initializer_list<inventory_vector> elements)
+  : inventory(elements)
 {
-    inventories = elements;
 }
 
 } // namspace message

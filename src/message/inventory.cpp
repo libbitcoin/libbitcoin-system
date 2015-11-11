@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/message/inventory.hpp>
 
+#include <initializer_list>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -49,6 +50,15 @@ inventory inventory::factory_from_data(reader& source)
     inventory instance;
     instance.from_data(source);
     return instance;
+}
+
+inventory::inventory()
+{
+}
+
+inventory::inventory(const std::initializer_list<inventory_vector> elements)
+{
+    inventories.insert(inventories.end(), elements.begin(), elements.end());
 }
 
 bool inventory::is_valid() const
