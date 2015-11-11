@@ -203,9 +203,6 @@
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\logger.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\threadpool.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
@@ -272,14 +269,8 @@
     <ClCompile Include="..\..\..\..\src\utility\thread.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\network\acceptor.cpp">
-      <Filter>src\network</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\random.cpp">
       <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\network\timeout.cpp">
-      <Filter>src\network</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\authority.cpp">
       <Filter>src\config</Filter>
@@ -494,19 +485,49 @@
     <ClCompile Include="..\..\..\..\src\wallet\ek_private.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\network\protocol.cpp">
-      <Filter>src\network</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\network\session_seed.cpp">
-      <Filter>src\network</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\network\caller.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\network\connector.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\network\p2p.cpp">
+      <Filter>src\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\acceptor.cpp">
+      <Filter>src\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\session_manual.cpp">
+      <Filter>src\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\session_outbound.cpp">
+      <Filter>src\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\session_inbound.cpp">
+      <Filter>src\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\session.cpp">
+      <Filter>src\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\connections.cpp">
+      <Filter>src\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\pending.cpp">
+      <Filter>src\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\log.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\logging.cpp">
+      <Filter>src\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\protocol_base.cpp">
+      <Filter>src\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\protocol_events.cpp">
+      <Filter>src\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\protocol_timer.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
   </ItemGroup>
@@ -584,9 +605,6 @@
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\endian.hpp">
-      <Filter>include\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\logger.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\serializer.hpp">
@@ -696,9 +714,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\timer.hpp">
       <Filter>include\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\timeout.hpp">
-      <Filter>include\bitcoin\network</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\authority.hpp">
       <Filter>include\bitcoin\config</Filter>
@@ -816,9 +831,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\version.hpp">
       <Filter>include\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_base.hpp">
-      <Filter>include\bitcoin\network</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_seed.hpp">
       <Filter>include\bitcoin\network</Filter>
@@ -958,13 +970,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\handlers.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol.hpp">
-      <Filter>include\bitcoin\network</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\session_seed.hpp">
-      <Filter>include\bitcoin\network</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\caller.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\connector.hpp">
@@ -972,6 +978,42 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\p2p.hpp">
       <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\session_manual.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\session_outbound.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\session_inbound.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\session.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\connections.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\pending.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\log.hpp">
+      <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\logging.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_base.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_events.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_timer.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\settings.hpp">
+      <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

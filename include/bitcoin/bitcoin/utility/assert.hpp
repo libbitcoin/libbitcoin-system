@@ -34,25 +34,22 @@
 #define CONSTRUCT_TRACK(class_name, log_name) \
     track<class_name>(#class_name, log_name)
 
-////#ifdef NDEBUG
-////    #define INITIALIZE_TRACK(class_name)
-////
-////    template <class Shared>
-////    class track
-////    {
-////    protected:
-////        track(const std::string& log_name, const std::string&)
-////          : log_(log_name)
-////        {
-////        }
-////
-////        const std::string log_;
-////    };
-////#else
+#ifdef NDEBUG
+    #define INITIALIZE_TRACK(class_name)
+
+    template <class Shared>
+    class track
+    {
+    protected:
+        track(const std::string&, const std::string&)
+        {
+        }
+    };
+#else
     #include <atomic>
     #include <cstddef>
     #include <string>
-    #include <bitcoin/bitcoin/utility/logger.hpp>
+    #include <bitcoin/bitcoin/utility/log.hpp>
 
     #define INITIALIZE_TRACK(class_name) \
         template <> \
@@ -69,13 +66,13 @@
         track(const std::string& class_name, const std::string& log_name)
           : class_(class_name), log_(log_name)
         {
-            bc::log_debug(log_)
+            bc::log::debug(log_)
                 << class_ << "(" << ++instances << ")";
         }
 
         ~track()
         {
-            bc::log_debug(log_)
+            bc::log::debug(log_)
                 << "~" << class_ << "(" << --instances << ")";
         }
 
@@ -83,6 +80,6 @@
         const std::string class_;
         const std::string log_;
     };
-////#endif
+#endif
 
 #endif

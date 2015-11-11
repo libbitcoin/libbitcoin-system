@@ -20,60 +20,58 @@
 #ifndef LIBBITCOIN_NETWORK_PROTOCOL_VERSION_HPP
 #define LIBBITCOIN_NETWORK_PROTOCOL_VERSION_HPP
 
+#include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/hosts.hpp>
-#include <bitcoin/bitcoin/network/protocol_base.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/network/network_settings.hpp>
+#include <bitcoin/bitcoin/network/p2p.hpp>
+#include <bitcoin/bitcoin/network/protocol_timer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
-    
-/**
- * Version protocol (handshake).
- * Attach this to a node immediately following socket creation.
- */
+
 class BC_API protocol_version
-  : public protocol_base<protocol_version>, track<protocol_version>
+  : public protocol_timer, track<protocol_version>
 {
 public:
-    /**
-     * Start a version protocol instance.
-     * @param[in]  channel   The channel on which to start the protocol.
-     * @param[in]  pool      The thread pool used by the protocol.
-     * @param[in]  timeout   The timer period.
-     * @param[in]  complete  Callback invoked upon stop or complete.
-     * @param[in]  height    The current height of the local blockchain.
-     * @param[in]  self      The authority that represents us to this peer.
-     * @param[in]  relay     Set relay in version message to peer.
-     */
-    protocol_version(channel::ptr channel, threadpool& pool,
-        const asio::duration& timeout, handler complete, hosts& hosts,
-        const config::authority& self, uint32_t height, bool relay);
+    typedef std::shared_ptr<protocol_version> ptr;
 
     /**
-     * Starts the protocol, release any reference after calling.
+     * Construct a version protocol instance.
+     * @param[in]  pool      The thread pool used by the protocol.
+     * @param[in]  network   The network interface.
+     * @param[in]  channel   The channel on which to start the protocol.
      */
-    void start() override;
+    protocol_version(threadpool& pool, p2p&, channel::ptr channel);
+    
+    /**
+     * Start the protocol.
+     * @param[in]  settings  Configuration settings.
+     * @param[in]  height    Our current blockchain height.
+     * @param[in]  handler   Invoked upon stop or complete.
+     */
+    void start(const settings& settings, size_t height, event_handler handler);
 
 private:
-    static handler synchronizer(handler complete);
+    static message::version template_factory(
+        const config::authority& authority, const settings& settings,
+        uint64_t nonce, size_t height);
 
     void handle_receive_version(const code& ec,
         const message::version& version);
     void handle_receive_verack(const code& ec, const message::verack&);
     void handle_version_sent(const code& ec);
     void handle_verack_sent(const code& ec);
+    void handle_handshake_complete(const code& ec, event_handler handler);
 
     static const message::version template_;
-
-    message::version version_;
 };
 
 } // namespace network

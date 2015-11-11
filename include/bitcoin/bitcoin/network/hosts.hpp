@@ -27,74 +27,64 @@
 #include <vector>
 #include <boost/circular_buffer.hpp>
 #include <boost/filesystem.hpp>
-#include <bitcoin/bitcoin/config/authority.hpp>
-#include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
+#include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
-// TODO: rename to host_pool for symmetry with mempool and txpool (break).
+/// The hosts class manages a thread-safe dynamic store of network addresses.
+/// The store can be loaded and saved from/to the specified file path.
+/// The file is a line-oriented set of config::authority serializations.
+/// Duplicate addresses and those with zero-valued ports are disacarded.
 class BC_API hosts
 {
 public:
-    typedef std::function<void(const code&)> load_handler;
-    typedef std::function<void(const code&)> save_handler;
-    typedef std::function<void(const code&)> store_handler;
-    typedef std::function<void(const code&)> remove_handler;
-    typedef std::function<void(const code&, size_t)> fetch_count_handler;
-    typedef std::function<void(const code&, const message::network_address&)>
-        fetch_address_handler;
+    typedef boost::filesystem::path path;
+    typedef message::network_address address;
+    typedef std::function<void(bool)> truth_handler;
+    typedef std::function<void(size_t)> count_handler;
+    typedef std::function<void(const code&)> result_handler;
+    typedef std::function<void(const code&, const address&)> fetch_handler;
 
-    hosts(threadpool& pool,
-        const boost::filesystem::path& file_path="hosts.cache",
-        size_t capacity=1000);
-    ~hosts();
+    hosts(threadpool& pool, const settings& settings);
 
     /// This class is not copyable.
     hosts(const hosts&) = delete;
     void operator=(const hosts&) = delete;
 
-    size_t capacity();
-    size_t size();
-    void load(load_handler handle_load);
-    void save(save_handler handle_save);
-    void store(const message::network_address& address,
-        store_handler handle_store);
-    void store(const message::network_address::list& addresses,
-        store_handler handle_store);
-    void remove(const message::network_address& address,
-        remove_handler handle_remove);
-    void fetch_address(fetch_address_handler handle_fetch);
-    void fetch_count(fetch_count_handler handle_fetch);
+    void count(count_handler handler);
+    void store(const address& host, result_handler handler);
+    void store(const address::list& hosts, result_handler handler);
+    void remove(const address& host, result_handler handler);
+    void load(result_handler handler);
+    void save(result_handler handler);
+    void fetch(fetch_handler handler);
 
 private:
-    typedef boost::circular_buffer<message::network_address> list;
+    typedef boost::circular_buffer<address> list;
     typedef list::iterator iterator;
 
-    bool exists(const message::network_address& address);
-    iterator find(const message::network_address& address);
+    iterator find(const address& host);
 
-    void do_load(const boost::filesystem::path& path,
-        load_handler handle_load);
-    void do_save(const boost::filesystem::path& path,
-        save_handler handle_save);
-    void do_remove(const message::network_address& address,
-        remove_handler handle_remove);
-    void do_store(const message::network_address& address,
-        store_handler handle_store);
-    void do_fetch_address(fetch_address_handler handle_fetch_address);
-    void do_fetch_count(fetch_count_handler handle_fetch);
+    void do_count(count_handler handler);
+    void do_store(const address& host, result_handler handler);
+    void do_remove(const address& host, result_handler handler);
+    void do_load(const path& file_path, result_handler handler);
+    void do_save(const path& file_path, result_handler handler);
+    void do_fetch(fetch_handler handler);
     size_t select_random_host();
 
     list buffer_;
     dispatcher dispatch_;
     boost::filesystem::path file_path_;
+
+    // HACK: we use this because the buffer capacity cannot be set to zero.
+    const bool disabled_;
 };
 
 } // namespace network

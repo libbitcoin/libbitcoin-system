@@ -21,7 +21,6 @@
       <!-- NOMINMAX enables use of std::min/max without conflict. -->
       <!-- WIN32_LEAN_AND_MEAN avoids boost conflict: lists.boost.org/boost-users/2008/07/37824.php. -->
       <PreprocessorDefinitions>WITH_ICU;WIN32_LEAN_AND_MEAN;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Option-testnet)' == 'true'">ENABLE_TESTNET;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Linkage-libbitcoin)' == 'static' Or '$(Linkage-libbitcoin)' == 'ltcg'">BC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>      
     </ClCompile>
     <Link>
@@ -59,7 +58,6 @@
   <!-- Messages -->
   
   <Target Name="libbitcoin-option-info" BeforeTargets="PrepareForBuild">
-    <Message Text="Option-testnet    : $(Option-testnet)" Importance="high"/>
   </Target>  
 
   <Target Name="libbitcoin-info" BeforeTargets="AfterBuild" Condition="'$(Linkage-libbitcoin)' == 'dynamic'">

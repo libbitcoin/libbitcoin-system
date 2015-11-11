@@ -25,9 +25,55 @@
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
 
 namespace libbitcoin {
 namespace network {
+
+/// default settings
+#define NETWORK_THREADS                     4
+#define NETWORK_INBOUND_CONNECTION_LIMIT    8
+#define NETWORK_OUTBOUND_CONNECTIONS        8
+#define NETWORK_CONNECT_ATTEMPTS            0
+#define NETWORK_CONNECT_TIMEOUT_SECONDS     5
+#define NETWORK_CHANNEL_HANDSHAKE_SECONDS   30
+#define NETWORK_CHANNEL_REVIVAL_MINUTES     5
+#define NETWORK_CHANNEL_HEARTBEAT_MINUTES   5
+#define NETWORK_CHANNEL_INACTIVITY_MINUTES  30
+#define NETWORK_CHANNEL_EXPIRATION_MINUTES  90
+#define NETWORK_CHANNEL_GERMINATION_SECONDS 30
+#define NETWORK_HOST_POOL_CAPACITY          1000
+#define NETWORK_RELAY_TRANSACTIONS          true
+#define NETWORK_HOSTS_FILE                  boost::filesystem::path("hosts.cache")
+#define NETWORK_DEBUG_FILE                  boost::filesystem::path("debug.log")
+#define NETWORK_ERROR_FILE                  boost::filesystem::path("error.log")
+#define NETWORK_SELF                        bc::unspecified_network_address
+#define NETWORK_BLACKLISTS                  config::authority::list()
+
+/// mainnet settings
+/// Seeds based on bitcoinstats.com/network/dns-servers
+#define NETWORK_IDENTIFIER_MAINNET          3652501241
+#define NETWORK_INBOUND_PORT_MAINNET        8333
+#define NETWORK_SEEDS_MAINNET \
+{ \
+    { "seed.bitchannels.io", 8333 }, \
+    { "seed.bitcoinstats.com", 8333 }, \
+    { "seed.bitcoin.sipa.be", 8333 }, \
+    { "dnsseed.bluematt.me", 8333 }, \
+    { "seed.bitcoin.jonasschnelli.ch", 8333 }, \
+    { "dnsseed.bitcoin.dashjr.org", 8333 } \
+}
+
+/// testnet settings
+#define NETWORK_IDENTIFIER_TESTNET          118034699
+#define NETWORK_INBOUND_PORT_TESTNET        18333
+#define NETWORK_SEEDS_TESTNET \
+{ \
+    { "testnet-seed.alexykot.me", 18333 }, \
+    { "testnet-seed.bitcoin.petertodd.org", 18333 }, \
+    { "testnet-seed.bluematt.me", 18333 }, \
+    { "testnet-seed.bitcoin.schildbach.de", 18333 } \
+}
 
 // This file is network_settings.hpp to deconflict with wallet::settings.hpp.
 // This is in network vs. config because plan to move to libbitcoin-network.
@@ -38,6 +84,7 @@ struct BC_API settings
     uint16_t inbound_port;
     uint32_t inbound_connection_limit;
     uint32_t outbound_connections;
+    uint16_t connect_attempts;
     uint32_t connect_timeout_seconds;
     uint32_t channel_handshake_seconds;
     uint32_t channel_revival_minutes;
@@ -51,7 +98,43 @@ struct BC_API settings
     boost::filesystem::path debug_file;
     boost::filesystem::path error_file;
     config::authority self;
+    config::authority::list blacklists;
     config::endpoint::list seeds;
+
+    asio::duration connect_timeout() const
+    {
+        return asio::duration(0, 0, connect_timeout_seconds);
+    }
+
+    asio::duration channel_handshake() const
+    {
+        return asio::duration(0, 0, channel_handshake_seconds);
+    }
+
+    asio::duration channel_revival() const
+    {
+        return asio::duration(0, channel_revival_minutes, 0);
+    }
+
+    asio::duration channel_heartbeat() const
+    {
+        return asio::duration(0, channel_heartbeat_minutes, 0);
+    }
+
+    asio::duration channel_inactivity() const
+    {
+        return asio::duration(0, channel_inactivity_minutes, 0);
+    }
+
+    asio::duration channel_expiration() const
+    {
+        return asio::duration(0, channel_expiration_minutes, 0);
+    }
+
+    asio::duration channel_germination() const
+    {
+        return asio::duration(0, 0, channel_germination_seconds);
+    }
 };
 
 } // namespace network

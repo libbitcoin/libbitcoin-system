@@ -20,14 +20,14 @@
 #ifndef LIBBITCOIN_NETWORK_PROTOCOL_PING_HPP
 #define LIBBITCOIN_NETWORK_PROTOCOL_PING_HPP
 
-#include <string>
+#include <memory>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/ping.hpp>
 #include <bitcoin/bitcoin/message/pong.hpp>
-#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/protocol_base.hpp>
+#include <bitcoin/bitcoin/network/p2p.hpp>
+#include <bitcoin/bitcoin/network/protocol_timer.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -35,28 +35,27 @@ namespace libbitcoin {
 namespace network {
         
 /**
- * Ping-pong protocol, Bubba's favorite.
- * Attach this to a node immediately following handshake completion.
+ * Ping-pong protocol.
+ * Attach this to a channel immediately following handshake completion.
  */
 class BC_API protocol_ping
-  : public protocol_base<protocol_ping>, track<protocol_ping>
+  : public protocol_timer, track<protocol_ping>
 {
 public:
     typedef std::shared_ptr<protocol_ping> ptr;
 
     /**
      * Construct a ping protocol instance.
-     * @param[in]  channel  The channel on which to start the protocol.
-     * @param[in]  pool     The thread pool used by the protocol.
-     * @param[in]  period   The time period of outgoing ping messages.
+     * @param[in]  pool      The thread pool used by the protocol.
+     * @param[in]  channel   The channel on which to start the protocol.
      */
-    protocol_ping(channel::ptr channel, threadpool& pool,
-        const asio::duration& period);
+    protocol_ping(threadpool& pool, p2p&, channel::ptr channel);
 
     /**
-     * Starts the protocol, release any reference after calling.
+     * Start the protocol.
+     * @param[in]  settings  Configuration settings.
      */
-    void start() override;
+    void start(const settings& settings);
 
 private:
     void send_ping(const code& ec);

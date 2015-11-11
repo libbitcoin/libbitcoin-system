@@ -23,21 +23,16 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
-#include <vector>
-#include <boost/algorithm/string.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/connector.hpp>
-#include <bitcoin/bitcoin/network/hosts.hpp>
+#include <bitcoin/bitcoin/network/p2p.hpp>
 #include <bitcoin/bitcoin/network/protocol_ping.hpp>
 #include <bitcoin/bitcoin/network/protocol_seed.hpp>
 #include <bitcoin/bitcoin/network/proxy.hpp>
-#include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/logger.hpp>
-#include <bitcoin/bitcoin/utility/string.hpp>
+#include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
 
 INITIALIZE_TRACK(bc::network::session_seed);
@@ -48,143 +43,158 @@ namespace network {
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-const config::endpoint::list session_seed::mainnet
-{
-    { "seed.bitnodes.io", 8333 },
-    { "seed.bitcoinstats.com", 8333 },
-    { "seed.bitcoin.sipa.be", 8333 },
-    { "dnsseed.bluematt.me", 8333 },
-    { "seed.bitcoin.jonasschnelli.ch", 8333 },
-    { "dnsseed.bitcoin.dashjr.org", 8333 }
-};
-
-// Based on bitcoinstats.com/network/dns-servers
-const config::endpoint::list session_seed::testnet
-{
-    { "testnet-seed.alexykot.me", 18333 },
-    { "testnet-seed.bitcoin.petertodd.org", 18333 },
-    { "testnet-seed.bluematt.me", 18333 },
-    { "testnet-seed.bitcoin.schildbach.de", 18333 }
-};
-
-// This is not currently stoppable.
-session_seed::session_seed(threadpool& pool, hosts& hosts, const timeout& timeouts,
-    connector& network, const config::endpoint::list& seeds,
-    const message::network_address& self)
-  : dispatch_(pool),
-    hosts_(hosts),
-    timeouts_(timeouts),
-    pool_(pool),
-    network_(network),
-    seeds_(seeds),
-    self_(self),
+session_seed::session_seed(threadpool& pool, p2p& network,
+    const settings& settings)
+  : session(pool, network, settings, false, true),
     CONSTRUCT_TRACK(session_seed, LOG_NETWORK)
 {
 }
 
-session_seed::~session_seed()
+void session_seed::start(result_handler handler)
 {
-    log_info(LOG_PROTOCOL)
-        << "Closed session_seed";
-}
-
-// TODO: notify all channels to stop.
-// This will result in the completion handler being invoked.
-// This is properly implemented through the planned session generalization.
-void session_seed::start(handler complete)
-{
-    if (seeds_.empty() || hosts_.capacity() == 0)
+    if (!stopped())
     {
-        log_info(LOG_PROTOCOL)
-            << "No seeds and/or host capacity configured.";
-        complete(error::operation_failed);
+        handler(error::operation_failed);
         return;
     }
 
-    auto multiple =
-        std::bind(&session_seed::handle_stopped,
-            shared_from_this(), hosts_.size(), complete);
+    if (settings_.host_pool_capacity == 0)
+    {
+        log::info(LOG_NETWORK)
+            << "Not configured to populate an address pool.";
+        handler(error::success);
+        return;
+    }
 
-    // Require all seed callbacks before calling session_seed::handle_complete.
-    auto single = synchronize(multiple, seeds_.size(), "session_seed", true);
+    address_count(
+        dispatch_.ordered_delegate(&session_seed::handle_count,
+            shared_from_base<session_seed>(), _1, handler));
+}
+
+void session_seed::handle_count(size_t start_size, result_handler handler)
+{
+    if (start_size != 0)
+    {
+        log::debug(LOG_NETWORK)
+            << "Seeding is not required because there are " 
+            << start_size << " cached addresses.";
+        handler(error::success);
+        return;
+    }
+
+    if (settings_.seeds.empty())
+    {
+        log::error(LOG_NETWORK)
+            << "Seeding is required but no seeds are configured.";
+        handler(error::operation_failed);
+        return;
+    }
+
+    session::start();
+    const auto connect = create_connector();
+    start_seeding(start_size, connect, handler);
+}
+
+void session_seed::start_seeding(size_t start_size, connector::ptr connect,
+    result_handler handler)
+{
+    const auto& seeds = settings_.seeds;
+    auto multiple =
+        dispatch_.ordered_delegate(&session_seed::handle_complete,
+            shared_from_base<session_seed>(), start_size, handler);
+
+    // Require all seed callbacks before calling session_seed::handle_stopped.
+    auto single = synchronize(multiple, seeds.size(), "session_seed", true);
 
     // Require one callback per channel before calling single.
     // We don't use parallel here because connect is itself asynchronous.
-    for (const auto& seed: seeds_)
-        start_connect(seed, synchronize(single, 1, seed.to_string()));
+    for (const auto& seed: seeds)
+        start_seed(seed, connect, synchronize(single, 1, seed.to_string()));
 }
 
-// This accepts no error code becuase individual seed errors are suppressed.
-void session_seed::handle_stopped(size_t host_start_size, handler complete)
+void session_seed::start_seed(const config::endpoint& seed,
+    connector::ptr connect, result_handler handler)
 {
-    // TODO: there is a race in that hosts_.size() is not ordered.
-    // We succeed only if there is a seed count increase.
-    if (hosts_.size() > host_start_size)
-        complete(error::success);
-    else
-        complete(error::operation_failed);
-}
+    if (stopped())
+    {
+        handler(error::channel_stopped);
+        return;
+    }
 
-void session_seed::start_connect(const config::endpoint& seed, handler complete)
-{
-    log_info(LOG_PROTOCOL)
+    log::info(LOG_NETWORK)
         << "Contacting seed [" << seed << "]";
 
-    // OUTBOUND CONNECT (concurrent)
-    network_.connect(seed.host(), seed.port(),
-        std::bind(&session_seed::handle_connected,
-            shared_from_this(), _1, _2, seed, complete));
+    // OUTBOUND CONNECT
+    connect->connect(seed,
+        dispatch_.ordered_delegate(&session_seed::handle_connect,
+            shared_from_base<session_seed>(), _1, _2, seed, handler));
 }
 
-void session_seed::handle_connected(const code& ec, channel::ptr peer,
-    const config::endpoint& seed, handler complete)
+void session_seed::handle_connect(const code& ec, channel::ptr channel,
+    const config::endpoint& seed, result_handler handler)
 {
     if (ec)
     {
-        log_info(LOG_PROTOCOL)
-            << "Failure contacting seed [" << seed << "] "
-            << ec.message();
-        complete(ec);
+        log::info(LOG_NETWORK)
+            << "Failure contacting seed [" << seed << "] " << ec.message();
+        handler(ec);
         return;
     }
 
-    log_info(LOG_PROTOCOL)
-        << "Connected seed [" << seed << "] as " << peer->address();
+    if (blacklisted(channel->authority()))
+    {
+        log::debug(LOG_NETWORK)
+            << "Seed [" << seed << "] on blacklisted address ["
+            << channel->authority() << "]";
+        handler(error::address_blocked);
+        return;
+    }
 
-    static const bool relay = false;
-    const auto callback = 
-        dispatch_.ordered_delegate(&session_seed::handle_handshake,
-            shared_from_this(), _1, peer, seed, complete);
+    log::info(LOG_NETWORK)
+        << "Connected seed [" << seed << "] as " << channel->authority();
 
-    // TODO: set height.
-    const auto blockchain_height = 0;
-
-    // Attach version protocol to the new connection (until complete).
-    std::make_shared<protocol_version>(peer, pool_, timeouts_.handshake,
-        callback, hosts_, self_, blockchain_height, relay)->start();
-
-    // Protocols never start a channel.
-    peer->start();
+    register_channel(channel, 
+        std::bind(&session_seed::handle_channel_start,
+            shared_from_base<session_seed>(), _1, channel, handler),
+        std::bind(&session_seed::handle_channel_stop,
+            shared_from_base<session_seed>(), _1));
 }
 
-void session_seed::handle_handshake(const code& ec, channel::ptr peer,
-    const config::endpoint& seed, handler complete)
+void session_seed::handle_channel_start(const code& ec, channel::ptr channel,
+    result_handler handler)
 {
     if (ec)
     {
-        log_debug(LOG_PROTOCOL) << "Failure in seed handshake ["
-            << peer->address() << "] " << ec.message();
-        complete(ec);
+        handler(ec);
         return;
     }
 
-    // Attach ping protocol to the new connection (until peer stop event).
-    std::make_shared<protocol_ping>(peer, pool_, timeouts_.heartbeat)->start();
-
-    // Attach address seed protocol to the new connection.
-    std::make_shared<protocol_seed>(peer, pool_, timeouts_.germination,
-        complete, hosts_, self_)->start();
+    attach<protocol_ping>(channel, settings_);
+    attach<protocol_seed>(channel, settings_, handler);
 };
+
+void session_seed::handle_channel_stop(const code&)
+{
+}
+
+// This accepts no error code because individual seed errors are suppressed.
+void session_seed::handle_complete(size_t start_size, result_handler handler)
+{
+    address_count(
+        dispatch_.ordered_delegate(&session_seed::handle_final_count,
+            shared_from_base<session_seed>(), _1, start_size, handler));
+}
+
+
+// We succeed only if there is a host count increase.
+void session_seed::handle_final_count(size_t current_size, size_t start_size,
+    result_handler handler)
+{
+    const auto result = current_size > start_size ? error::success :
+        error::operation_failed;
+
+    handler(result);
+}
 
 } // namespace network
 } // namespace libbitcoin

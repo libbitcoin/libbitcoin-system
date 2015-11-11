@@ -27,8 +27,7 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/proxy.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -39,30 +38,35 @@ class BC_API acceptor
 {
 public:
     typedef std::shared_ptr<acceptor> ptr;
-    typedef std::function<void (const code&, channel::ptr)> accept_handler;
-    typedef std::function<void(const code&, acceptor::ptr)> listen_handler;
+    typedef std::function<void(const code&)> result_handler;
+    typedef std::function<void(const code&, channel::ptr)> accept_handler;
 
-    acceptor(threadpool& pool, asio::acceptor_ptr accept,
-        uint32_t network_magic, const timeout& timeouts=timeout::defaults);
+    /// Construct the acceptor, handler called after listener start or fail.
+    acceptor(threadpool& pool, const settings& settings);
 
     /// This class is not copyable.
     acceptor(const acceptor&) = delete;
     void operator=(const acceptor&) = delete;
 
-    void accept(accept_handler handle_accept);
+    /// Cancel the listener and all outstanding accept attempts.
+    void cancel();
+
+    /// Start the listener on the specified port.
+    void listen(uint16_t port, result_handler handler);
+
+    /// Accept the next connection available, until canceled.
+    void accept(accept_handler handler);
 
 private:
-    void create_channel(const boost_code& ec,
-        asio::socket_ptr socket, accept_handler handle_accept);
+    void handle_accept(const boost_code& ec, asio::socket_ptr socket,
+        accept_handler handler);
 
     threadpool& pool_;
-    uint32_t magic_;
-    const timeout& timeouts_;
-    asio::acceptor_ptr asio_acceptor_;
+    const settings& settings_;
+    asio::acceptor_ptr acceptor_;
 };
 
 } // namespace network
 } // namespace libbitcoin
 
 #endif
-

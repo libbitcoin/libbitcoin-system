@@ -22,6 +22,8 @@
 
 #include <chrono>
 
+// TODO: use boost::timer::auto_cpu_timer
+
 namespace libbitcoin {
 
     // From: github.com/picanumber/bureaucrat/blob/master/time_lapse.h

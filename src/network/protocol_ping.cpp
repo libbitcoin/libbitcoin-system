@@ -24,11 +24,11 @@
 #include <bitcoin/bitcoin/message/ping.hpp>
 #include <bitcoin/bitcoin/message/pong.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/timeout.hpp>
-#include <bitcoin/bitcoin/network/protocol_base.hpp>
+#include <bitcoin/bitcoin/network/p2p.hpp>
+#include <bitcoin/bitcoin/network/protocol_timer.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
-#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 INITIALIZE_TRACK(bc::network::protocol_ping);
@@ -37,30 +37,27 @@ namespace libbitcoin {
 namespace network {
 
 #define NAME "ping"
+#define PROTOCOL protocol_ping
 
 using namespace bc::message;
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-protocol_ping::protocol_ping(channel::ptr channel, threadpool& pool,
-    const asio::duration& period)
-  : protocol_base(channel, pool, period, NAME),
-    CONSTRUCT_TRACK(protocol_ping, LOG_NETWORK)
+protocol_ping::protocol_ping(threadpool& pool, p2p&, channel::ptr channel)
+  : protocol_timer(pool, channel, NAME),
+    CONSTRUCT_TRACK(protocol_ping, LOG_PROTOCOL)
 {
 }
 
-void protocol_ping::start()
+void protocol_ping::start(const settings& settings)
 {
-    protocol_base::start();
+    protocol_timer::start(settings.channel_heartbeat(),
+        BIND1(send_ping, _1));
 
-    // Unfortunately this cannt be set on construct because of the inability of
-    // shared_from_this to execute within a constructor.
-    set_callback(bind(&protocol_ping::send_ping, _1));
-
-    subscribe<ping>(&protocol_ping::handle_receive_ping, _1, _2);
+    SUBSCRIBE2(ping, handle_receive_ping, _1, _2);
 
     // Send initial ping message by simulating first heartbeat.
-    callback(error::success);
+    set_event(error::success);
 }
 
 // This is fired by the callback (i.e. base timer and stop handler).
@@ -71,7 +68,7 @@ void protocol_ping::send_ping(const code& ec)
 
     if (ec && ec != error::channel_timeout)
     {
-        log_debug(LOG_NETWORK)
+        log::debug(LOG_PROTOCOL)
             << "Failure in ping timer for [" << authority() << "] "
             << ec.message();
         stop(ec);
@@ -80,8 +77,8 @@ void protocol_ping::send_ping(const code& ec)
 
     const auto nonce = pseudo_random();
 
-    subscribe<pong>(&protocol_ping::handle_receive_pong, _1, _2, nonce);
-    send(ping(nonce), &protocol_ping::handle_send_ping, _1);
+    SUBSCRIBE3(pong, handle_receive_pong, _1, _2, nonce);
+    SEND1(ping(nonce), handle_send_ping, _1);
 }
 
 void protocol_ping::handle_receive_ping(const code& ec,
@@ -92,7 +89,7 @@ void protocol_ping::handle_receive_ping(const code& ec,
 
     if (ec)
     {
-        log_debug(LOG_NETWORK)
+        log::debug(LOG_PROTOCOL)
             << "Failure getting ping from [" << authority() << "] "
             << ec.message();
         stop(ec);
@@ -100,8 +97,8 @@ void protocol_ping::handle_receive_ping(const code& ec,
     }
 
     // Resubscribe to ping messages.
-    subscribe<ping>(&protocol_ping::handle_receive_ping, _1, _2);
-    send(pong(message.nonce), &protocol_ping::handle_send_pong, _1);
+    SUBSCRIBE2(ping, handle_receive_ping, _1, _2);
+    SEND1(pong(message.nonce), handle_send_pong, _1);
 }
 
 void protocol_ping::handle_receive_pong(const code& ec,
@@ -112,7 +109,7 @@ void protocol_ping::handle_receive_pong(const code& ec,
 
     if (ec)
     {
-        log_debug(LOG_NETWORK)
+        log::debug(LOG_PROTOCOL)
             << "Failure getting pong from [" << authority() << "] "
             << ec.message();
         stop(ec);
@@ -121,7 +118,7 @@ void protocol_ping::handle_receive_pong(const code& ec,
 
     if (message.nonce != nonce)
     {
-        log_warning(LOG_NETWORK)
+        log::warning(LOG_PROTOCOL)
             << "Invalid pong nonce from [" << authority() << "]";
 
         // This could result from message overlap due to a short period,
@@ -137,11 +134,14 @@ void protocol_ping::handle_send_ping(const code& ec)
 
     if (ec)
     {
-        log_debug(LOG_NETWORK)
+        log::debug(LOG_PROTOCOL)
             << "Failure sending ping to [" << authority() << "] "
             << ec.message();
         stop(ec);
+        return;
     }
+
+    reset_timer();
 }
 
 void protocol_ping::handle_send_pong(const code& ec)
@@ -151,7 +151,7 @@ void protocol_ping::handle_send_pong(const code& ec)
 
     if (ec)
     {
-        log_debug(LOG_NETWORK)
+        log::debug(LOG_PROTOCOL)
             << "Failure sending pong to [" << authority() << "] "
             << ec.message();
         stop(ec);

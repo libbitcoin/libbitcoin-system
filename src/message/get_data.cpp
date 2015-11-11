@@ -19,6 +19,8 @@
  */
 #include <bitcoin/bitcoin/message/get_data.hpp>
 
+#include <initializer_list>
+
 namespace libbitcoin {
 namespace message {
 
@@ -46,12 +48,13 @@ get_data get_data::factory_from_data(reader& source)
 }
 
 get_data::get_data()
+  : inventory()
 {
 }
 
-get_data::get_data(const inventory_vector::list& elements)
+get_data::get_data(const std::initializer_list<inventory_vector> elements)
+  : inventory(elements)
 {
-    inventories = elements;
 }
 
 } // namspace message

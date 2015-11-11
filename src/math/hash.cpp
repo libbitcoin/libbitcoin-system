@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <errno.h>
 #include <new>
 #include <stdexcept>
 #include "../math/external/crypto_scrypt.h"

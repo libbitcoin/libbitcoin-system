@@ -56,7 +56,7 @@ public:
             BITCOIN_ASSERT(*counter_ <= clearance_count_);
             if (*counter_ == clearance_count_)
             {
-                //log_debug(LOG_NETWORK)
+                //log::debug(LOG_NETWORK)
                 //    << "Synchronizing [" << name_ << "] > "
                 //    << clearance_count_ << " (ignored)";
                 return;
@@ -66,7 +66,7 @@ public:
 
             if (ec)
             {
-                //log_debug(LOG_NETWORK)
+                //log::debug(LOG_NETWORK)
                 //    << "Synchronizing [" << name_ << "] " << *counter_
                 //    << "/" << clearance_count_ << " " << ec.message()
                 //    << (suppress_errors_ ? " (suppressed)" : "");
@@ -76,7 +76,7 @@ public:
             }
             else
             {
-                //log_debug(LOG_NETWORK)
+                //log::debug(LOG_NETWORK)
                 //    << "Synchronizing [" << name_ << "] " << *counter_ << "/"
                 //    << clearance_count_;
             }

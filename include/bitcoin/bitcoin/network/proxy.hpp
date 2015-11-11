@@ -35,11 +35,9 @@
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/messages.hpp>
 #include <bitcoin/bitcoin/network/message_subscriber.hpp>
-#include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
-#include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
@@ -49,16 +47,19 @@ namespace libbitcoin {
 namespace network {
 
 class BC_API proxy
-  : public std::enable_shared_from_this<proxy>, track<proxy>
+  : public std::enable_shared_from_this<proxy>
 {
 public:
-    typedef std::shared_ptr<proxy> ptr;
-    typedef std::function<void(const code&)> handler;
-    typedef std::function<void(const code&)> stop_handler;
     typedef subscriber<const code&> stop_subscriber;
+    typedef std::function<void(const code&)> result_handler;
 
-    proxy(asio::socket_ptr socket, threadpool& pool,
-        uint32_t network_magic, const timeout& timeouts=timeout::defaults);
+    template <class Derived>
+    std::shared_ptr<Derived> shared_from_base()
+    {
+        return std::static_pointer_cast<Derived>(shared_from_this());
+    }
+
+    proxy(threadpool& pool, asio::socket_ptr socket, uint32_t magic);
     ~proxy();
 
     /// This class is not copyable.
@@ -74,11 +75,11 @@ public:
             return;
         }
 
-        const auto& command = packet.command;
-        const auto bytes = message::serialize(std::forward<Message>(packet), magic_);
-        const auto callback = std::forward<Handler>(handler);
+        using namespace message;
+        const auto bytes = serialize(std::forward<Message>(packet), magic_);
+        const auto handle_send = std::forward<Handler>(handler);
         dispatch_.ordered(&proxy::do_send,
-            shared_from_this(), bytes, callback, command);
+            shared_from_this(), bytes, handle_send, packet.command);
     }
 
     template <class Message, typename Handler>
@@ -94,16 +95,16 @@ public:
         message_subscriber_.subscribe<Message>(std::forward<Handler>(handler));
     }
 
-    config::authority address() const;
-    bool stopped() const;
-
+    void talk();
     void start();
+    bool stopped() const;
     void stop(const code& ec);
-    void subscribe_stop(stop_handler handler);
+    void subscribe_stop(result_handler handler);
+    const config::authority& authority() const;
 
-    // TODO: move to channel.
-    void reset_revival();
-    void set_revival_handler(handler handler);
+protected:
+    virtual void handle_activity() = 0;
+    virtual void handle_stopping() = 0;
 
 private:
     typedef byte_source<message::heading::buffer> heading_source;
@@ -112,21 +113,11 @@ private:
     typedef byte_source<data_chunk> payload_source;
     typedef boost::iostreams::stream<payload_source> payload_stream;
 
+    static config::authority authority_factory(asio::socket_ptr socket);
+
     void stop(const boost_code& ec);
     void do_stop(const code& ec);
 
-    void start_timers();
-    void clear_timers();
-
-    void start_expiration();
-    void handle_expiration(const code& ec);
-
-    void start_inactivity();
-    void handle_inactivity(const code& ec);
-
-    void start_revival();
-    void handle_revival(const code& ec);
-    
     void read_heading();
     void handle_read_heading(const boost_code& ec, size_t);
 
@@ -134,24 +125,19 @@ private:
     void handle_read_payload(const boost_code& ec, size_t,
         const message::heading& heading);
 
-    void call_handle_send(const boost_code& ec, handler handler);
-    void do_send(const data_chunk& message, handler handler,
+    void call_handle_send(const boost_code& ec, result_handler handler);
+    void do_send(const data_chunk& message, result_handler handler,
         const std::string& command);
 
+    bool stopped_;
+    uint32_t magic_;
+    dispatcher dispatch_;
     asio::socket_ptr socket_;
     config::authority authority_;
-    message::heading::buffer heading_buffer_;
-    data_chunk payload_buffer_;
-    dispatcher dispatch_;
-    const timeout& timeouts_;
-    deadline::ptr expiration_;
-    deadline::ptr inactivity_;
-    deadline::ptr revival_;
-    handler revival_handler_;
-    uint32_t magic_;
-    bool stopped_;
     message_subscriber message_subscriber_;
     stop_subscriber::ptr stop_subscriber_;
+    message::heading::buffer heading_buffer_;
+    data_chunk payload_buffer_;
 };
 
 } // namespace network

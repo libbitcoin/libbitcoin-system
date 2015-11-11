@@ -28,54 +28,41 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/connector.hpp>
-#include <bitcoin/bitcoin/network/hosts.hpp>
-#include <bitcoin/bitcoin/network/protocol_version.hpp>
-#include <bitcoin/bitcoin/network/timeout.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/network/network_settings.hpp>
+#include <bitcoin/bitcoin/network/session.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
-#include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
+class p2p;
+
 class BC_API session_seed
-  : public std::enable_shared_from_this<session_seed>, track<session_seed>
+  : public session, track<session_seed>
 {
 public:
-    typedef std::function<void(const code&)> handler;
-    typedef std::function<void(const code&, channel::ptr)> ptr;
+    typedef std::shared_ptr<session_seed> ptr;
 
-    static const config::endpoint::list mainnet;
-    static const config::endpoint::list testnet;
+    session_seed(threadpool& pool, p2p& network, const settings& settings);
 
-    session_seed(threadpool& pool, hosts& hosts, const timeout& timeouts,
-        connector& network, const config::endpoint::list& seeds,
-        const message::network_address& self);
-    ~session_seed();
-
-    /// This class is not copyable.
-    session_seed(const session_seed&) = delete;
-    void operator=(const session_seed&) = delete;
-
-    void start(handler handle_seeded);
+    void start(result_handler handler);
 
 private:
-    void start_connect(const config::endpoint& seed, handler complete);
-    void handle_stopped(size_t host_start_size, handler complete);
-    void handle_connected(const code& ec, channel::ptr peer,
-        const config::endpoint& seed, handler complete);
-    void handle_handshake(const code& ec, channel::ptr peer,
-        const config::endpoint& seed, handler complete);
+    void handle_count(size_t start_size, result_handler handler);
+    void start_seeding(size_t start_size, connector::ptr connect,
+        result_handler handler);
+    void start_seed(const config::endpoint& seed, connector::ptr connect,
+        result_handler handler);
+    void handle_connect(const code& ec, channel::ptr channel,
+        const config::endpoint& seed, result_handler handler);
+    void handle_complete(size_t start_size, result_handler handler);
+    void handle_final_count(size_t current_size, size_t start_size,
+        result_handler handler);
 
-    dispatcher dispatch_;
-    threadpool& pool_;
-    hosts& hosts_;
-    const timeout& timeouts_;
-    connector& network_;
-    const config::endpoint::list& seeds_;
-    const message::network_address self_;
+    void handle_channel_start(const code& ec, channel::ptr channel,
+        result_handler handler);
+    void handle_channel_stop(const code& ec);
 };
 
 } // namespace network

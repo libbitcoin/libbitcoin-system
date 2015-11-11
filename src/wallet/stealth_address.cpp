@@ -53,7 +53,7 @@ constexpr size_t min_address_size = version_size + options_size +
 
 // Document the assumption that the prefix is defined with an 8 bit block size.
 static_assert(binary_type::bits_per_block == byte_bits,
-    "The declaraction of stealh_prefix must have an 8 bit block size.");
+    "The stealth prefix must use an 8 bit block size.");
 
 const uint8_t stealth_address::mainnet_p2kh = 0x2a;
 const uint8_t stealth_address::reuse_key_flag = 1 << 0;

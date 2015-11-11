@@ -115,20 +115,27 @@ src_libbitcoin_la_SOURCES = \
     src/message/verack.cpp \
     src/message/version.cpp \
     src/network/acceptor.cpp \
-    src/network/caller.cpp \
     src/network/channel.cpp \
+    src/network/connections.cpp \
     src/network/connector.cpp \
     src/network/hosts.cpp \
+    src/network/logging.cpp \
     src/network/message_subscriber.cpp \
     src/network/p2p.cpp \
-    src/network/protocol.cpp \
+    src/network/pending.cpp \
     src/network/protocol_address.cpp \
+    src/network/protocol_base.cpp \
+    src/network/protocol_events.cpp \
     src/network/protocol_ping.cpp \
     src/network/protocol_seed.cpp \
+    src/network/protocol_timer.cpp \
     src/network/protocol_version.cpp \
     src/network/proxy.cpp \
+    src/network/session.cpp \
+    src/network/session_inbound.cpp \
+    src/network/session_manual.cpp \
+    src/network/session_outbound.cpp \
     src/network/session_seed.cpp \
-    src/network/timeout.cpp \
     src/unicode/console_streambuf.cpp \
     src/unicode/ifstream.cpp \
     src/unicode/ofstream.cpp \
@@ -144,7 +151,7 @@ src_libbitcoin_la_SOURCES = \
     src/utility/evaluation_context.cpp \
     src/utility/evaluation_context.hpp \
     src/utility/istream_reader.cpp \
-    src/utility/logger.cpp \
+    src/utility/log.cpp \
     src/utility/ostream_writer.cpp \
     src/utility/random.cpp \
     src/utility/string.cpp \
@@ -259,6 +266,7 @@ test_libbitcoin_test_SOURCES = \
     test/message/reject.cpp \
     test/message/verack.cpp \
     test/message/version.cpp \
+    test/network/p2p.cpp \
     test/unicode/unicode.cpp \
     test/unicode/unicode_istream.cpp \
     test/unicode/unicode_ostream.cpp \
@@ -398,23 +406,29 @@ include_bitcoin_bitcoin_networkdir = ${includedir}/bitcoin/bitcoin/network
 include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/acceptor.hpp \
     include/bitcoin/bitcoin/network/asio.hpp \
-    include/bitcoin/bitcoin/network/caller.hpp \
     include/bitcoin/bitcoin/network/channel.hpp \
+    include/bitcoin/bitcoin/network/connections.hpp \
     include/bitcoin/bitcoin/network/connector.hpp \
     include/bitcoin/bitcoin/network/hosts.hpp \
+    include/bitcoin/bitcoin/network/logging.hpp \
     include/bitcoin/bitcoin/network/message_subscriber.hpp \
     include/bitcoin/bitcoin/network/network_settings.hpp \
     include/bitcoin/bitcoin/network/p2p.hpp \
-    include/bitcoin/bitcoin/network/protocol.hpp \
+    include/bitcoin/bitcoin/network/pending.hpp \
     include/bitcoin/bitcoin/network/protocol_address.hpp \
     include/bitcoin/bitcoin/network/protocol_base.hpp \
+    include/bitcoin/bitcoin/network/protocol_events.hpp \
     include/bitcoin/bitcoin/network/protocol_ping.hpp \
     include/bitcoin/bitcoin/network/protocol_seed.hpp \
+    include/bitcoin/bitcoin/network/protocol_timer.hpp \
     include/bitcoin/bitcoin/network/protocol_version.hpp \
     include/bitcoin/bitcoin/network/proxy.hpp \
+    include/bitcoin/bitcoin/network/session.hpp \
+    include/bitcoin/bitcoin/network/session_inbound.hpp \
+    include/bitcoin/bitcoin/network/session_manual.hpp \
+    include/bitcoin/bitcoin/network/session_outbound.hpp \
     include/bitcoin/bitcoin/network/session_seed.hpp \
-    include/bitcoin/bitcoin/network/shared_const_buffer.hpp \
-    include/bitcoin/bitcoin/network/timeout.hpp
+    include/bitcoin/bitcoin/network/shared_const_buffer.hpp
 
 include_bitcoin_bitcoin_unicodedir = ${includedir}/bitcoin/bitcoin/unicode
 include_bitcoin_bitcoin_unicode_HEADERS = \
@@ -443,7 +457,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/endian.hpp \
     include/bitcoin/bitcoin/utility/exceptions.hpp \
     include/bitcoin/bitcoin/utility/istream_reader.hpp \
-    include/bitcoin/bitcoin/utility/logger.hpp \
+    include/bitcoin/bitcoin/utility/log.hpp \
     include/bitcoin/bitcoin/utility/ostream_writer.hpp \
     include/bitcoin/bitcoin/utility/random.hpp \
     include/bitcoin/bitcoin/utility/reader.hpp \

@@ -24,12 +24,11 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
 #include <bitcoin/bitcoin/message/get_address.hpp>
-#include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/hosts.hpp>
-#include <bitcoin/bitcoin/network/protocol_base.hpp>
+#include <bitcoin/bitcoin/network/p2p.hpp>
+#include <bitcoin/bitcoin/network/protocol_events.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 INITIALIZE_TRACK(bc::network::protocol_address);
@@ -38,36 +37,36 @@ namespace libbitcoin {
 namespace network {
 
 #define NAME "address"
+#define PROTOCOL protocol_address
 
 using namespace bc::message;
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-protocol_address::protocol_address(channel::ptr peer, threadpool& pool,
-    hosts& hosts, const config::authority& self)
-  : hosts_(hosts),
-    self_(self),
-    protocol_base(peer, pool, NAME),
-    CONSTRUCT_TRACK(protocol_address, LOG_NETWORK)
+protocol_address::protocol_address(threadpool& pool, p2p& network,
+    channel::ptr channel)
+  : protocol_events(pool, channel, NAME),
+    network_(network),
+    CONSTRUCT_TRACK(protocol_address, LOG_PROTOCOL)
 {
 }
 
-void protocol_address::start()
+void protocol_address::start(const settings& settings)
 {
-    protocol_base::start();
-
-    if (self_.port() != 0)
+    if (settings.self.port() != 0)
     {
-        address self({ { self_.to_network_address() } });
-        send(self, &protocol_address::handle_send_address, _1);
+        self_.addresses.push_back(settings.self.to_network_address());
+        SEND1(self_, handle_send_address, _1);
     }
 
-    if (hosts_.capacity() == 0)
+    // If we can't store addresses we don't ask for or receive them.
+    if (settings.host_pool_capacity == 0)
         return;
 
-    subscribe<get_address>(
-        &protocol_address::handle_receive_get_address, _1, _2);
-    send(get_address(), &protocol_address::handle_send_get_address, _1);
+    protocol_events::start();
+
+    SUBSCRIBE2(get_address, handle_receive_get_address, _1, _2);
+    SEND1(get_address(), handle_send_get_address, _1);
 }
 
 void protocol_address::handle_receive_address(const code& ec,
@@ -78,7 +77,7 @@ void protocol_address::handle_receive_address(const code& ec,
 
     if (ec)
     {
-        log_debug(LOG_PROTOCOL)
+        log::debug(LOG_PROTOCOL)
             << "Failure receiving address message from ["
             << authority() << "] " << ec.message();
         stop(ec);
@@ -86,15 +85,14 @@ void protocol_address::handle_receive_address(const code& ec,
     }
 
     // Resubscribe to address messages.
-    subscribe<address>(&protocol_address::handle_receive_address, _1, _2);
+    SUBSCRIBE2(address, handle_receive_address, _1, _2);
 
-    log_debug(LOG_PROTOCOL)
+    log::debug(LOG_PROTOCOL)
         << "Storing addresses from [" << authority() << "] ("
         << message.addresses.size() << ")";
 
-    // TODO: manage timestamps (active peers are connected < 3 hours ago).
-    hosts_.store(message.addresses,
-        bind(&protocol_address::handle_store_addresses, _1));
+    // TODO: manage timestamps (active channels are connected < 3 hours ago).
+    network_.store(message.addresses, BIND1(handle_store_addresses, _1));
 }
 
 void protocol_address::handle_receive_get_address(const code& ec,
@@ -105,29 +103,27 @@ void protocol_address::handle_receive_get_address(const code& ec,
 
     if (ec)
     {
-        log_debug(LOG_PROTOCOL)
+        log::debug(LOG_PROTOCOL)
             << "Failure receiving get_address message from ["
             << authority() << "] " << ec.message();
         stop(ec);
         return;
     }
 
-    // TODO: allowing repeated queries can allow a peer to map our history.
+    // TODO: allowing repeated queries can allow a channel to map our history.
     // Resubscribe to get_address messages.
-    subscribe<get_address>(
-        &protocol_address::handle_receive_get_address, _1, _2);
+    SUBSCRIBE2(get_address, handle_receive_get_address, _1, _2);
 
     // TODO: pull active hosts from host cache (currently just resending self).
     // TODO: need to distort for privacy, don't send currently-connected peers.
-    address active({ { self_.to_network_address() } });
-    if (active.addresses.empty())
+    if (self_.addresses.empty())
         return;
 
-    log_debug(LOG_PROTOCOL)
+    log::debug(LOG_PROTOCOL)
         << "Sending addresses to [" << authority() << "] ("
-        << active.addresses.size() << ")";
+        << self_.addresses.size() << ")";
 
-    send(active, &protocol_address::handle_send_address, _1);
+    SEND1(self_, handle_send_address, _1);
 }
 
 void protocol_address::handle_send_address(const code& ec)
@@ -137,7 +133,7 @@ void protocol_address::handle_send_address(const code& ec)
 
     if (ec)
     {
-        log_debug(LOG_PROTOCOL)
+        log::debug(LOG_PROTOCOL)
             << "Failure sending address [" << authority() << "] "
             << ec.message();
         stop(ec);
@@ -151,7 +147,7 @@ void protocol_address::handle_send_get_address(const code& ec)
 
     if (ec)
     {
-        log_debug(LOG_PROTOCOL)
+        log::debug(LOG_PROTOCOL)
             << "Failure sending get_address [" << authority() << "] "
             << ec.message();
         stop(ec);
@@ -165,7 +161,7 @@ void protocol_address::handle_store_addresses(const code& ec)
 
     if (ec)
     {
-        log_error(LOG_PROTOCOL)
+        log::error(LOG_PROTOCOL)
             << "Failure storing addresses from [" << authority() << "] "
             << ec.message();
         stop(ec);

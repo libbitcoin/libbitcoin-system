@@ -31,12 +31,7 @@ namespace libbitcoin {
 template <typename... Args>
 subscriber<Args...>::subscriber(threadpool& pool,
     const std::string& class_name, const std::string& log_name)
-  : dispatch_(pool), track<subscriber<Args...>>(class_name, log_name)
-{
-}
-
-template <typename... Args>
-subscriber<Args...>::~subscriber()
+  : dispatch_(pool)/*, track<subscriber<Args...>>(class_name, log_name)*/
 {
 }
 

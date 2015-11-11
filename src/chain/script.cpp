@@ -32,7 +32,7 @@
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
-#include <bitcoin/bitcoin/utility/logger.hpp>
+#include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 #include <bitcoin/bitcoin/utility/variable_uint_size.hpp>
 #include "../utility/conditional_stack.hpp"
@@ -1601,7 +1601,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
             return false;
 
         default:
-            log_fatal(LOG_SCRIPT) << "Unimplemented operation <none "
+            log::fatal(LOG_SCRIPT) << "Unimplemented operation <none "
                 << static_cast<int>(op.code) << ">";
             return false;
     }
@@ -1693,11 +1693,11 @@ bool next_step(const transaction& parent_tx, uint32_t input_index,
     // opcodes above should assert 9;,sinside run_operation
     else if (!run_operation(op, parent_tx, input_index, script, context))
         return false;
-    //log_debug() << "--------------------";
-    //log_debug() << "Run: " << opcode_to_string(op.code);
-    //log_debug() << "Stack:";
+    //log::debug() << "--------------------";
+    //log::debug() << "Run: " << opcode_to_string(op.code);
+    //log::debug() << "Stack:";
     //for (auto s: stack_)
-    //    log_debug() << "[" << encode_base16(s) << "]";
+    //    log::debug() << "[" << encode_base16(s) << "]";
     if (context.primary.size() + context.secondary.size() > 1000)
         return false;
 

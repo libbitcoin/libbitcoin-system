@@ -20,9 +20,13 @@
 #ifndef LIBBITCOIN_MESSAGE_INVENTORY_HPP
 #define LIBBITCOIN_MESSAGE_INVENTORY_HPP
 
+#include <cstddef>
+#include <cstdint>
+#include <initializer_list>
 #include <istream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/message/inventory_type_id.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -38,6 +42,9 @@ public:
     static inventory factory_from_data(std::istream& stream);
     static inventory factory_from_data(reader& source);
 
+    inventory();
+    inventory(const std::initializer_list<inventory_vector> elements);
+
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
     bool from_data(reader& source);
@@ -47,6 +54,7 @@ public:
     bool is_valid() const;
     void reset();
     uint64_t serialized_size() const;
+    size_t count(inventory_type_id type_id) const;
 
     static const std::string command;
 

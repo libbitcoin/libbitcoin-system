@@ -187,7 +187,7 @@ bool parse_token(data_chunk& raw_script, std::string token)
     }
     else
     {
-        log_error() << "Token parsing failed with: " << token;
+        BOOST_MESSAGE("Token parsing failed with: " << token);
         return false;
     }
 
@@ -227,13 +227,13 @@ bool run_script(const script_test& test)
     if (!parse(output, test.output))
         return false;
 
-    //log_debug() << test.input << " -> " << input;
-    //log_debug() << test.output << " -> " << output;
+    //log::debug() << test.input << " -> " << input;
+    //log::debug() << test.output << " -> " << output;
     chain::transaction tx;
     return chain::script::verify(input, output, tx, 0);
 }
 
-void ignore_output(log_level, const std::string&, const std::string&)
+void ignore_output(log::level, const std::string&, const std::string&)
 {
 }
 
@@ -305,7 +305,7 @@ BOOST_AUTO_TEST_CASE(json_valid)
 BOOST_AUTO_TEST_CASE(json_invalid)
 {
     // Shut up!
-    log_fatal().set_output_function(ignore_output);
+    log::fatal("").set_output_function(ignore_output);
     size_t count = 0;
 
     for (const script_test& test: invalid_scripts)

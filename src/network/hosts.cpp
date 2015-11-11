@@ -21,82 +21,57 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <cstdint>
-#include <cstdlib>
-#include <iostream>
 #include <string>
 #include <vector>
-#include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/format.hpp>
-#include <boost/lexical_cast.hpp>
-#include <bitcoin/bitcoin/config/endpoint.hpp>
+#include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/formats/base16.hpp>
-#include <bitcoin/bitcoin/message/network_address.hpp>
-#include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/unicode/ifstream.hpp>
 #include <bitcoin/bitcoin/unicode/ofstream.hpp>
-#include <bitcoin/bitcoin/unicode/unicode.hpp>
+#include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
-#include <bitcoin/bitcoin/utility/string.hpp>
-#include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
-    
-using boost::format;
-using boost::filesystem::path;
 
-hosts::hosts(threadpool& pool, const path& file_path, size_t capacity)
-  : buffer_(capacity), dispatch_(pool), file_path_(file_path)
+hosts::hosts(threadpool& pool, const settings& settings)
+  : buffer_(std::max(settings.host_pool_capacity, 1u)),
+    dispatch_(pool),
+    file_path_(settings.hosts_file),
+    disabled_(settings.host_pool_capacity == 0)
 {
 }
 
-hosts::~hosts()
+hosts::iterator hosts::find(const address& host)
 {
-    // This was reportedly required for use with circular_buffer.
-}
-
-hosts::iterator hosts::find(const message::network_address& address)
-{
-    const auto found = [address](const message::network_address& entry)
+    const auto found = [&host](const address& entry)
     {
-        return entry.port == address.port && entry.ip == address.ip;
+        return entry.port == host.port && entry.ip == host.ip;
     };
 
     return std::find_if(buffer_.begin(), buffer_.end(), found);
 }
 
-bool hosts::exists(const message::network_address& address)
+void hosts::load(result_handler handler)
 {
-    return find(address) != buffer_.end();
+    dispatch_.ordered(&hosts::do_load,
+        this, file_path_.string(), handler);
 }
 
-size_t hosts::capacity()
+void hosts::do_load(const path& file_path, result_handler handler)
 {
-    return buffer_.capacity();
-}
+    if (disabled_)
+    {
+        handler(error::success);
+        return;
+    }
 
-size_t hosts::size()
-{
-    return buffer_.size();
-}
-
-void hosts::load(load_handler handle_load)
-{
-    dispatch_.unordered(&hosts::do_load,
-        this, file_path_.string(), handle_load);
-}
-
-void hosts::do_load(const path& path, load_handler handle_load)
-{
-    bc::ifstream file(path.string());
+    bc::ifstream file(file_path.string());
     if (file.bad())
     {
-        handle_load(error::file_system);
+        handler(error::file_system);
         return;
     }
 
@@ -109,110 +84,111 @@ void hosts::do_load(const path& path, load_handler handle_load)
             buffer_.push_back(host.to_network_address());
     }
 
-    handle_load(error::success);
+    handler(error::success);
 }
 
-void hosts::save(save_handler handle_save)
+void hosts::save(result_handler handler)
 {
     dispatch_.ordered(&hosts::do_save,
-        this, file_path_.string(), handle_save);
+        this, file_path_.string(), handler);
 }
 
-void hosts::do_save(const path& path, save_handler handle_save)
+void hosts::do_save(const path& path, result_handler handler)
 {
+    if (disabled_)
+    {
+        handler(error::success);
+        return;
+    }
+
     bc::ofstream file(path.string());
     if (file.bad())
     {
-        handle_save(error::file_system);
+        handler(error::file_system);
         return;
     }
 
     for (const auto& entry: buffer_)
         file << config::authority(entry) << std::endl;
 
-    handle_save(error::success);
+    handler(error::success);
 }
 
-void hosts::remove(const message::network_address& address,
-    remove_handler handle_remove)
+void hosts::remove(const address& host, result_handler handler)
 {
     dispatch_.unordered(&hosts::do_remove,
-        this, address, handle_remove);
+        this, host, handler);
 }
 
-void hosts::do_remove(const message::network_address& address,
-    remove_handler handle_remove)
+void hosts::do_remove(const address& host, result_handler handler)
 {
-    const auto it = find(address);
+    auto it = find(host);
     if (it == buffer_.end())
     {
-        handle_remove(error::not_found);
+        handler(error::not_found);
         return;
     }
 
     buffer_.erase(it);
-    handle_remove(error::success);
+    handler(error::success);
 }
 
-void hosts::store(const message::network_address& address,
-    store_handler handle_store)
+void hosts::store(const address& host, result_handler handler)
 {
     dispatch_.unordered(&hosts::do_store,
-        this, address, handle_store);
+        this, host, handler);
 }
 
-void hosts::store(const message::network_address::list& addresses,
-    store_handler handle_store)
+void hosts::store(const address::list& hosts, result_handler handler)
 {
     // We disperse here to allow other addresses messages to interleave hosts.
-    dispatch_.disperse(addresses, "hosts", handle_store,
+    dispatch_.disperse(hosts, "hosts", handler,
         &hosts::do_store, this);
 }
 
-void hosts::do_store(const message::network_address& address,
-    store_handler handle_store)
+void hosts::do_store(const address& host, result_handler handler)
 {
-    if (!address.is_valid())
-        log_debug(LOG_PROTOCOL)
+    if (!host.is_valid())
+        log::debug(LOG_PROTOCOL)
             << "Invalid host address from peer";
-    else if (exists(address))
-        log_debug(LOG_PROTOCOL)
+    else if (find(host) != buffer_.end())
+        log::debug(LOG_PROTOCOL)
             << "Redundant host address from peer";
     else
-        buffer_.push_back(address);
+        buffer_.push_back(host);
 
     // We don't treat invalid address as an error, just log it.
-    handle_store(error::success);
+    handler(error::success);
 }
 
-void hosts::fetch_address(fetch_address_handler handle_fetch)
+void hosts::fetch(fetch_handler handler)
 {
-    dispatch_.unordered(&hosts::do_fetch_address,
-        this, handle_fetch);
+    dispatch_.unordered(&hosts::do_fetch,
+        this, handler);
 }
 
-void hosts::do_fetch_address(fetch_address_handler handle_fetch)
+void hosts::do_fetch(fetch_handler handler)
 {
     if (buffer_.empty())
     {
-        handle_fetch(error::not_found, message::network_address());
+        handler(error::not_found, address());
         return;
     }
 
-    // Randomly select a host from the buffer.
+    // Randomly select an address from the buffer.
     const auto index = static_cast<size_t>(pseudo_random() % buffer_.size());
-    handle_fetch(error::success, buffer_[index]);
+    handler(error::success, buffer_[index]);
 }
 
-void hosts::fetch_count(fetch_count_handler handle_fetch)
+void hosts::count(count_handler handler)
 {
-    dispatch_.unordered(&hosts::do_fetch_count,
-        this, handle_fetch);
+    dispatch_.ordered(&hosts::do_count,
+        this, handler);
 }
 
-void hosts::do_fetch_count(fetch_count_handler handle_fetch)
+void hosts::do_count(count_handler handler)
 {
-    handle_fetch(error::success, buffer_.size());
+    handler(buffer_.size());
 }
 
 } // namespace network

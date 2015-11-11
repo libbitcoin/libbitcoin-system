@@ -17,42 +17,59 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_TIMEOUT_HPP
-#define LIBBITCOIN_NETWORK_TIMEOUT_HPP
+#include <bitcoin/bitcoin/network/protocol_base.hpp>
 
-#include <cstdint>
-#include <bitcoin/bitcoin/define.hpp>
+#include <string>
+#include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/network/asio.hpp>
+#include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/utility/dispatcher.hpp>
+#include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
-class BC_API timeout
+protocol_base::protocol_base(threadpool& pool, channel::ptr channel,
+    const std::string& name)
+  : pool_(pool), dispatch_(pool), channel_(channel), name_(name)
 {
-public:
-    static const timeout defaults;
+}
 
-    timeout(
-        uint32_t connect_timeout_seconds=5,
-        uint32_t channel_handshake_seconds=30,
-        uint32_t channel_revival_minutes=5,
-        uint32_t channel_heartbeat_minutes=5,
-        uint32_t channel_inactivity_minutes=30,
-        uint32_t channel_expiration_minutes=90,
-        uint32_t channel_germination_seconds=30);
+config::authority protocol_base::authority() const
+{
+    return channel_->authority();
+}
 
-    asio::duration connect;
-    asio::duration handshake;
-    asio::duration revival;
-    asio::duration heartbeat;
-    asio::duration inactivity;
-    asio::duration expiration;
-    asio::duration germination;
-};
+const std::string& protocol_base::name()
+{
+    return name_;
+}
+
+uint64_t protocol_base::nonce()
+{
+    return channel_->nonce();
+}
+
+threadpool& protocol_base::pool()
+{
+    return pool_;
+}
+
+void protocol_base::set_version(const message::version& value)
+{
+    channel_->set_version(value);
+}
+    
+void protocol_base::stop(const code& ec)
+{
+    channel_->stop(ec);
+}
+    
+bool protocol_base::stopped() const
+{
+    return channel_->stopped();
+}
 
 } // namespace network
 } // namespace libbitcoin
-
-#endif
 

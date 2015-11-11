@@ -26,76 +26,184 @@
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/message/heading.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
+#include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/network/proxy.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/deadline.hpp>
+#include <bitcoin/bitcoin/utility/log.hpp>
+#include <bitcoin/bitcoin/utility/random.hpp>
 
+// This must be declared in the global namespace.
 INITIALIZE_TRACK(bc::network::channel);
 
 namespace libbitcoin {
 namespace network {
 
-// TODO: derive channel from proxy, adding timers, tracking, nonce.
-channel::channel(proxy::ptr proxy)
-  : proxy_(proxy),
-    identifier_(0),
+// Factory for deadline timer pointer construction.
+static deadline::ptr alarm(threadpool& pool, const asio::duration& duration)
+{
+    return std::make_shared<deadline>(pool, duration);
+}
+
+channel::channel(threadpool& pool, asio::socket_ptr socket,
+    const settings& settings)
+  : proxy(pool, socket, settings.identifier),
+    nonce_(0),
+    version_({ 0 }),
+    located_start_(null_hash),
+    located_stop_(null_hash),
+    revival_handler_(nullptr),
+    expiration_(alarm(pool, pseudo_randomize(settings.channel_expiration()))),
+    inactivity_(alarm(pool, settings.channel_inactivity())),
+    revival_(alarm(pool, settings.channel_revival())),
     CONSTRUCT_TRACK(channel, LOG_NETWORK)
 {
 }
 
-// This implements the set of proxy messsage handler methods.
-////DEFINE_CHANNEL_MESSAGE_SUBSCRIBERS()
-
-// TODO: move proxy timeouts to channel (revival deprecated).
-channel::channel(threadpool& pool, asio::socket_ptr socket,
-    uint32_t network_magic, const timeout& timeouts)
-  : channel(std::make_shared<proxy>(socket, pool, network_magic, timeouts))
-{
-}
-
-channel::~channel()
-{
-    proxy_->stop(error::channel_stopped);
-}
-
 void channel::start()
 {
-    proxy_->start();
+    proxy::start();
 }
 
-void channel::stop(const code& ec)
+void channel::talk()
 {
-    proxy_->stop(ec);
+    proxy::talk();
+    start_timers();
 }
 
-config::authority channel::address() const
+uint64_t channel::nonce() const
 {
-    return proxy_->address();
+    return nonce_;
 }
 
-// TODO: make private, pass on notfy.
-uint64_t channel::identifier() const
+void channel::set_nonce(uint64_t value)
 {
-    return identifier_;
+    nonce_ = value;
 }
 
-void channel::set_identifier(uint64_t value)
+bool channel::located(const hash_digest& start, const hash_digest& stop) const
 {
-    identifier_ = value;
+    return located_start_ == start && located_stop_ == stop;
+}
+
+void channel::set_located(const hash_digest& start, const hash_digest& stop)
+{
+    located_start_ = start;
+    located_stop_ = stop;
+}
+
+const message::version& channel::version() const
+{
+    return version_;
+}
+
+void channel::set_version(const message::version& value)
+{
+    version_ = value;
+}
+
+void channel::handle_stopping()
+{
+    expiration_->cancel();
+    inactivity_->cancel();
+    revival_->cancel();
+    revival_handler_ = nullptr;
+}
+
+void channel::handle_activity()
+{
+    start_inactivity();
+}
+
+void channel::start_timers()
+{
+    if (stopped())
+        return;
+
+    start_expiration();
+    start_revival();
+    start_inactivity();
 }
 
 void channel::reset_revival()
 {
-    return proxy_->reset_revival();
+    if (stopped())
+        return;
+
+    start_revival();
 }
 
-void channel::set_revival_handler(proxy::handler handler)
+void channel::set_revival_handler(result_handler handler)
 {
-    return proxy_->set_revival_handler(handler);
+    revival_handler_ = handler;
 }
 
-void channel::subscribe_stop(proxy::stop_handler handler)
+void channel::start_expiration()
 {
-    proxy_->subscribe_stop(handler);
+    if (stopped())
+        return;
+
+    expiration_->start(
+        std::bind(&channel::handle_expiration,
+            shared_from_base<channel>(), _1));
+}
+
+void channel::start_inactivity()
+{
+    if (stopped())
+        return;
+
+    inactivity_->start(
+        std::bind(&channel::handle_inactivity,
+            shared_from_base<channel>(), _1));
+}
+
+void channel::start_revival()
+{
+    if (stopped())
+        return;
+
+    revival_->start(
+        std::bind(&channel::handle_revival,
+            shared_from_base<channel>(), _1));
+}
+
+void channel::handle_expiration(const code& ec)
+{
+    if (stopped())
+        return;
+
+    log::debug(LOG_NETWORK)
+        << "Channel lifetime expired [" << authority() << "]";
+
+    stop(error::channel_timeout);
+}
+
+void channel::handle_inactivity(const code& ec)
+{
+    if (stopped())
+        return;
+
+    log::debug(LOG_NETWORK)
+        << "Channel inactivity timeout [" << authority() << "]";
+
+    stop(error::channel_timeout);
+}
+
+void channel::handle_revival(const code& ec)
+{
+    if (stopped())
+        return;
+
+    // Nothing to do, no handler registered.
+    if (!revival_handler_)
+        return;
+
+    log::debug(LOG_NETWORK)
+        << "Channel revival invoked [" << authority() << "]";
+
+    revival_handler_(ec);
+    reset_revival();
 }
 
 } // namespace network

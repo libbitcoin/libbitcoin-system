@@ -10,9 +10,6 @@
     <Filter Include="src\message">
       <UniqueIdentifier>{0ba03093-8321-433f-8c41-1869141054c1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\utiltiy">
-      <UniqueIdentifier>{63815092-ade6-4e7d-8078-cf178f62dadc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\config">
       <UniqueIdentifier>{cc48916c-3671-46e2-8ea0-33479bb67a0f}</UniqueIdentifier>
     </Filter>
@@ -27,6 +24,12 @@
     </Filter>
     <Filter Include="src\formats">
       <UniqueIdentifier>{b3025452-8224-4517-9629-f317973d1c17}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\network">
+      <UniqueIdentifier>{83fe9ca1-2248-423d-9aa4-5b81a1b0bc2a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\utility">
+      <UniqueIdentifier>{63815092-ade6-4e7d-8078-cf178f62dadc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -210,25 +213,25 @@
       <Filter>src\unicode</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\utility\random.cpp">
-      <Filter>src\utiltiy</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\utility\serializer.cpp">
-      <Filter>src\utiltiy</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\utility\stream.cpp">
-      <Filter>src\utiltiy</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\utility\thread.cpp">
-      <Filter>src\utiltiy</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\utility\binary.cpp">
-      <Filter>src\utiltiy</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\utility\data.cpp">
-      <Filter>src\utiltiy</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\utility\endian.cpp">
-      <Filter>src\utiltiy</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\bitcoin_uri.cpp">
       <Filter>src\wallet</Filter>
@@ -269,6 +272,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\hd_private.cpp">
       <Filter>src\wallet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\network\p2p.cpp">
+      <Filter>src\network</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

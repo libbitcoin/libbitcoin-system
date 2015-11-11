@@ -52,7 +52,7 @@ constexpr size_t utf8_max_character_size = 4;
 // Ensure console_streambuf::initialize is called only once.
 static std::once_flag io_mutex;
 
-// Ensure initialize_icu_installation is called only once.
+// Ensure validate_localization is called only once.
 static std::once_flag icu_mutex;
 
 // Static initializer for bc::cin.
@@ -343,7 +343,7 @@ static void set_utf8_stdio(FILE* file)
 {
 #ifdef _MSC_VER
     if (_setmode(_fileno(file), _O_U8TEXT) == -1)
-        throw std::exception("Could not set STDIO to utf8 mode.");
+        throw std::runtime_error("Could not set STDIO to utf8 mode.");
 #endif
 }
 
@@ -351,7 +351,7 @@ static void set_binary_stdio(FILE* file)
 {
 #ifdef _MSC_VER
     if (_setmode(_fileno(file), _O_BINARY) == -1)
-        throw std::exception("Could not set STDIO to binary mode.");
+        throw std::runtime_error("Could not set STDIO to binary mode.");
 #endif
 }
 

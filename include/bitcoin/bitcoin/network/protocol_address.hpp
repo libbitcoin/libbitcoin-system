@@ -25,10 +25,10 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
-#include <bitcoin/bitcoin/message/network_address.hpp>
+#include <bitcoin/bitcoin/message/get_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/protocol_base.hpp>
-#include <bitcoin/bitcoin/network/hosts.hpp>
+#include <bitcoin/bitcoin/network/protocol_events.hpp>
+#include <bitcoin/bitcoin/network/p2p.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -37,26 +37,27 @@ namespace network {
 
 /**
  * Address protocol.
- * Attach this to a node immediately following handshake completion.
+ * Attach this to a channel immediately following handshake completion.
  */
 class BC_API protocol_address
-  : public protocol_base<protocol_address>, track<protocol_address>
+  : public protocol_events, track<protocol_address>
 {
 public:
-    /**
-     * Start an address protocol instance.
-     * @param[in]  peer   The channel on which to start the protocol.
-     * @param[in]  pool   The thread pool used by the protocol.
-     * @param[in]  hosts  The address pool that this class populates.
-     * @param[in]  self   The authority that represents us to this peer.
-     */
-    protocol_address(channel::ptr peer, threadpool& pool, hosts& hosts,
-        const config::authority& self);
+    typedef std::shared_ptr<protocol_address> ptr;
 
     /**
-     * Starts the protocol, release any reference after calling.
+     * Construct an address protocol instance.
+     * @param[in]  pool      The thread pool used by the protocol.
+     * @param[in]  network   The network interface.
+     * @param[in]  channel   The channel on which to start the protocol.
      */
-    void start() override;
+    protocol_address(threadpool& pool, p2p& network, channel::ptr channel);
+
+    /**
+     * Start the protocol.
+     * @param[in]  settings  Configuration settings.
+     */
+    void start(const settings& settings);
 
 private:
     void handle_receive_address(const code& ec,
@@ -67,8 +68,8 @@ private:
     void handle_send_get_address(const code& ec);
     void handle_store_addresses(const code& ec);
 
-    hosts& hosts_;
-    const config::authority self_;
+    p2p& network_;
+    message::address self_;
 };
 
 } // namespace network

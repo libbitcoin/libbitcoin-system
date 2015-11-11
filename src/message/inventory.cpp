@@ -19,7 +19,9 @@
  */
 #include <bitcoin/bitcoin/message/inventory.hpp>
 
+#include <initializer_list>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/message/inventory_type_id.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -51,6 +53,15 @@ inventory inventory::factory_from_data(reader& source)
     return instance;
 }
 
+inventory::inventory()
+{
+}
+
+inventory::inventory(const std::initializer_list<inventory_vector> elements)
+{
+    inventories.insert(inventories.end(), elements.begin(), elements.end());
+}
+
 bool inventory::is_valid() const
 {
     return !inventories.empty();
@@ -77,7 +88,7 @@ bool inventory::from_data(reader& source)
 {
     auto result = true;
     reset();
-    uint64_t count = source.read_variable_uint_little_endian();
+    const auto count = source.read_variable_uint_little_endian();
     result = source;
 
     for (uint64_t i = 0; (i < count) && result; ++i)
@@ -111,8 +122,8 @@ void inventory::to_data(std::ostream& stream) const
 void inventory::to_data(writer& sink) const
 {
     sink.write_variable_uint_little_endian(inventories.size());
-    for (const inventory_vector inv : inventories)
-        inv.to_data(sink);
+    for (const auto& element: inventories)
+        element.to_data(sink);
 }
 
 uint64_t inventory::serialized_size() const
@@ -121,13 +132,19 @@ uint64_t inventory::serialized_size() const
         inventory_vector::satoshi_fixed_size();
 }
 
+size_t inventory::count(inventory_type_id type_id) const
+{
+    const auto is_of_type = [type_id](const inventory_vector& element)
+    {
+        return element.type == type_id;
+    };
+
+    return count_if(inventories.begin(), inventories.end(), is_of_type);
+}
+
 bool operator==(const inventory& left, const inventory& right)
 {
-    auto result = (left.inventories.size() == right.inventories.size());
-    for (size_t i = 0; (i < left.inventories.size()) && result; i++)
-        result = (left.inventories[i] == right.inventories[i]);
-
-    return result;
+    return left.inventories == right.inventories;
 }
 
 bool operator!=(const inventory& left, const inventory& right)

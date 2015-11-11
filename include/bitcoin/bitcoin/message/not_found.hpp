@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_MESSAGE_NOT_FOUND_HPP
 #define LIBBITCOIN_MESSAGE_NOT_FOUND_HPP
 
+#include <initializer_list>
 #include <istream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
@@ -39,7 +40,7 @@ public:
     static not_found factory_from_data(reader& source);
 
     not_found();
-    not_found(const inventory_vector::list& elements);
+    not_found(const std::initializer_list<inventory_vector> elements);
 
     static const std::string command;
 };

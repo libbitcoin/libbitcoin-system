@@ -29,14 +29,10 @@
 
 namespace libbitcoin {
 
-#define MAKE_SUBSCRIBER(Message, pool, log_name) \
-    std::make_shared<Message##_subscriber>( \
-        pool, #Message "_subscriber", log_name)
-
 template <typename... Args>
 class subscriber
-  : public std::enable_shared_from_this<subscriber<Args...>>,
-    track<subscriber<Args...>>
+  : public std::enable_shared_from_this<subscriber<Args...>>/*,
+    track<subscriber<Args...>>*/
 {
 public:
     typedef std::function<void (Args...)> handler;
@@ -44,7 +40,6 @@ public:
 
     subscriber(threadpool& pool, const std::string& class_name,
         const std::string& log_name);
-    ~subscriber();
 
     void subscribe(handler notifier);
     void relay(Args... args);

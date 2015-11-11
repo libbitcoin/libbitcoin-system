@@ -34,21 +34,19 @@
 #include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/message_subscriber.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
-#include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
-#include <bitcoin/bitcoin/utility/logger.hpp>
+#include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
-// These must be declared in the global namespace.
+// This must be declared in the global namespace.
 INITIALIZE_TRACK(bc::network::proxy::stop_subscriber)
-INITIALIZE_TRACK(bc::network::proxy)
 
 namespace libbitcoin {
 namespace network {
@@ -59,41 +57,48 @@ using std::placeholders::_2;
 using boost::format;
 using boost::posix_time::time_duration;
 
-// The proxy will have no config with timers moved to channel.
-proxy::proxy(asio::socket_ptr socket, threadpool& pool, uint32_t network_magic,
-    const timeout& timeouts)
-  : socket_(socket),
-    dispatch_(pool),
-    timeouts_(timeouts),
-    expiration_(std::make_shared<deadline>(pool, timeouts.expiration)),
-    inactivity_(std::make_shared<deadline>(pool, timeouts.inactivity)),
-    revival_(std::make_shared<deadline>(pool, timeouts.revival)),
-    revival_handler_(nullptr),
-    magic_(network_magic),
-    stopped_(false),
-    message_subscriber_(pool),
-    stop_subscriber_(MAKE_SUBSCRIBER(stop, pool, LOG_NETWORK)),
-    CONSTRUCT_TRACK(proxy, LOG_NETWORK)
+// TODO: this is made-up, configure payload size guard for DoS protection.
+static constexpr size_t max_payload_size = 10 * 1024 * 1024;
+
+// Cache the address for logging after stop.
+config::authority proxy::authority_factory(asio::socket_ptr socket)
 {
-    // Cache the endpoint address for logging after stop.
     boost_code ec;
-    const auto endpoint = socket_->remote_endpoint(ec);
-    if (!ec)
-        authority_ = config::authority(endpoint);
+    const auto endpoint = socket->remote_endpoint(ec);
+    return ec ? config::authority() : config::authority(endpoint);
+}
+
+proxy::proxy(threadpool& pool, asio::socket_ptr socket, uint32_t magic)
+  : stopped_(true),
+    magic_(magic),
+    dispatch_(pool),
+    socket_(socket),
+    authority_(authority_factory(socket)),
+    message_subscriber_(pool),
+    stop_subscriber_(std::make_shared<stop_subscriber>(pool, "stop_subscriber",
+        LOG_NETWORK))
+{
 }
 
 proxy::~proxy()
 {
-    BITCOIN_ASSERT_MSG(stopped_, "The channel is not stopped.");
+    stop(error::channel_stopped);
 }
 
 void proxy::start()
 {
-    read_heading();
-    start_timers();
+    stopped_ = false;
 }
 
-config::authority proxy::address() const
+void proxy::talk()
+{
+    if (stopped())
+        return;
+
+    read_heading();
+}
+
+const config::authority& proxy::authority() const
 {
     return authority_;
 }
@@ -119,7 +124,7 @@ void proxy::stop(const code& ec)
         shared_from_this(), ec);
 }
 
-void proxy::subscribe_stop(stop_handler handler)
+void proxy::subscribe_stop(result_handler handler)
 {
     if (stopped())
         handler(error::channel_stopped);
@@ -133,7 +138,7 @@ void proxy::do_stop(const code& ec)
         return;
 
     stopped_ = true;
-    clear_timers();
+    handle_stopping();
 
     // Close the socket, ignore the error code.
     boost_code ignore;
@@ -146,107 +151,6 @@ void proxy::do_stop(const code& ec)
 
     // All stop subscriptions are fired with the channel stop reason code.
     stop_subscriber_->relay(ec);
-}
-
-void proxy::clear_timers()
-{
-    expiration_->cancel();
-    inactivity_->cancel();
-    revival_->cancel();
-    revival_handler_ = nullptr;
-}
-
-void proxy::start_timers()
-{
-    if (stopped())
-        return;
-
-    start_expiration();
-    start_revival();
-    start_inactivity();
-}
-
-void proxy::reset_revival()
-{
-    if (stopped())
-        return;
-
-    start_revival();
-}
-
-void proxy::set_revival_handler(handler handler)
-{
-    if (stopped())
-        return;
-
-    revival_handler_ = handler;
-}
-
-void proxy::start_expiration()
-{
-    if (stopped())
-        return;
-
-    const auto timeout = pseudo_randomize(timeouts_.expiration);
-
-    expiration_->start(
-        std::bind(&proxy::handle_expiration,
-            shared_from_this(), _1), timeout);
-}
-
-void proxy::start_inactivity()
-{
-    if (stopped())
-        return;
-
-    inactivity_->start(
-        std::bind(&proxy::handle_inactivity,
-            shared_from_this(), _1));
-}
-
-void proxy::start_revival()
-{
-    if (stopped())
-        return;
-
-    revival_->start(
-        std::bind(&proxy::handle_revival,
-            shared_from_this(), _1));
-}
-
-void proxy::handle_expiration(const code& ec)
-{
-    if (stopped())
-        return;
-
-    log_info(LOG_NETWORK)
-        << "Channel lifetime expired [" << address() << "]";
-
-    stop(error::channel_timeout);
-}
-
-void proxy::handle_inactivity(const code& ec)
-{
-    if (stopped())
-        return;
-
-    log_info(LOG_NETWORK)
-        << "Channel inactivity timeout [" << address() << "]";
-
-    stop(error::channel_timeout);
-}
-
-void proxy::handle_revival(const code& ec)
-{
-    if (stopped())
-        return;
-
-    // Nothing to do, no handler registered.
-    if (revival_handler_ == nullptr)
-        return;
-
-    revival_handler_(ec);
-    reset_revival();
 }
 
 void proxy::read_heading()
@@ -280,8 +184,8 @@ void proxy::handle_read_heading(const boost_code& ec, size_t)
 
     if (ec)
     {
-        log_debug(LOG_NETWORK)
-            << "Channel failure [" << address() << "] "
+        log::debug(LOG_NETWORK)
+            << "Channel failure [" << authority() << "] "
             << code(error::boost_to_error_code(ec)).message();
         stop(ec);
         return;
@@ -292,28 +196,27 @@ void proxy::handle_read_heading(const boost_code& ec, size_t)
     const auto parsed = head.from_data(istream);
     if (!parsed || head.magic != magic_)
     {
-        log_warning(LOG_NETWORK) 
-            << "Invalid heading received [" << address() << "]";
+        log::warning(LOG_NETWORK) 
+            << "Invalid heading received [" << authority() << "]";
         stop(error::bad_stream);
         return;
     }
 
-    // TODO: configure payload size guard for DoS protection.
-    if (head.payload_size > (2 * 1024 * 1024))
+    if (head.payload_size > max_payload_size)
     {
-        log_warning(LOG_NETWORK)
-            << "Oversized payload indicated [" << address() << "] ("
+        log::warning(LOG_NETWORK)
+            << "Oversized payload indicated [" << authority() << "] ("
             << head.payload_size << " bytes)";
         stop(error::bad_stream);
         return;
     }
 
-    log_debug(LOG_NETWORK)
-        << "Receive " << head.command << " [" << address() << "] ("
+    log::debug(LOG_NETWORK)
+        << "Receive " << head.command << " [" << authority() << "] ("
         << head.payload_size << " bytes)";
 
     read_payload(head);
-    start_inactivity();
+    handle_activity();
 }
 
 void proxy::handle_read_payload(const boost_code& ec, size_t,
@@ -326,8 +229,8 @@ void proxy::handle_read_payload(const boost_code& ec, size_t,
 
     if (heading.checksum != bitcoin_checksum(payload_buffer_))
     {
-        log_warning(LOG_NETWORK) 
-            << "Invalid bitcoin checksum from [" << address() << "]";
+        log::warning(LOG_NETWORK) 
+            << "Invalid bitcoin checksum from [" << authority() << "]";
         stop(error::bad_stream);
         return;
     }
@@ -339,7 +242,7 @@ void proxy::handle_read_payload(const boost_code& ec, size_t,
     if (!ec)
         read_heading();
 
-    start_inactivity();
+    handle_activity();
 
     // Parse and publish the payload to message subscribers.
     payload_source source(payload_copy);
@@ -348,16 +251,16 @@ void proxy::handle_read_payload(const boost_code& ec, size_t,
 
     // Warn about unconsumed bytes in the stream.
     if (!error && istream.peek() != std::istream::traits_type::eof())
-        log_warning(LOG_NETWORK)
+        log::warning(LOG_NETWORK)
             << "Valid message [" << heading.command
             << "] handled, unused bytes remain in payload.";
 
     // Stop the channel if there was a read error.
     if (ec)
     {
-        log_warning(LOG_NETWORK)
+        log::warning(LOG_NETWORK)
             << "Invalid payload of " << heading.command
-            << " from [" << address() << "] (deferred)"
+            << " from [" << authority() << "] (deferred)"
             << code(error::boost_to_error_code(ec)).message();
         stop(ec);
         return;
@@ -366,14 +269,14 @@ void proxy::handle_read_payload(const boost_code& ec, size_t,
     // Stop the channel if there was an error from parse.
     if (error)
     {
-        log_warning(LOG_NETWORK)
+        log::warning(LOG_NETWORK)
             << "Invalid stream load of " << heading.command
-            << " from [" << address() << "] " << error.message();
+            << " from [" << authority() << "] " << error.message();
         stop(error);
     }
 }
 
-void proxy::do_send(const data_chunk& message, handler handler,
+void proxy::do_send(const data_chunk& message, result_handler handler,
     const std::string& command)
 {
     if (stopped())
@@ -382,8 +285,8 @@ void proxy::do_send(const data_chunk& message, handler handler,
         return;
     }
 
-    log_debug(LOG_NETWORK)
-        << "Send " << command << " [" << address() << "] ("
+    log::debug(LOG_NETWORK)
+        << "Send " << command << " [" << authority() << "] ("
         << message.size() << " bytes)";
 
     const shared_const_buffer buffer(message);
@@ -392,7 +295,7 @@ void proxy::do_send(const data_chunk& message, handler handler,
             shared_from_this(), _1, handler));
 }
 
-void proxy::call_handle_send(const boost_code& ec, handler handler)
+void proxy::call_handle_send(const boost_code& ec, result_handler handler)
 {
     handler(error::boost_to_error_code(ec));
 }

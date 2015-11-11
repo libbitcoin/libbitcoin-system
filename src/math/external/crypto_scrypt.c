@@ -269,7 +269,7 @@ int crypto_scrypt(const uint8_t* passphrase, size_t passphrase_length,
         goto err0;
     if ((XY = malloc(256 * r)) == NULL)
         goto err1;
-    if ((V = malloc(128 * r * N)) == NULL)
+    if ((V = malloc(128 * r * (size_t)N)) == NULL)
         goto err2;
 
     /* 1: (B_0 ... B_{p-1}) <-- PBKDF2(P, S, 1, p * MFLen) */
