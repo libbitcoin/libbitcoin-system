@@ -65,6 +65,9 @@ public:
     uint64_t nonce() const;
     void set_nonce(uint64_t value);
 
+    bool located(const hash_digest& start, const hash_digest& stop) const;
+    void set_located(const hash_digest& start, const hash_digest& stop);
+
     const message::version& version() const;
     void set_version(const message::version& value);
 
@@ -88,6 +91,8 @@ private:
     void handle_revival(const code& ec);
 
     uint64_t nonce_;
+    hash_digest located_start_;
+    hash_digest located_stop_;
     message::version version_;
     deadline::ptr expiration_;
     deadline::ptr inactivity_;

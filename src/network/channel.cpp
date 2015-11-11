@@ -50,6 +50,8 @@ channel::channel(threadpool& pool, asio::socket_ptr socket,
   : proxy(pool, socket, settings.identifier),
     nonce_(0),
     version_({ 0 }),
+    located_start_(null_hash),
+    located_stop_(null_hash),
     revival_handler_(nullptr),
     expiration_(alarm(pool, pseudo_randomize(settings.channel_expiration()))),
     inactivity_(alarm(pool, settings.channel_inactivity())),
@@ -77,6 +79,17 @@ uint64_t channel::nonce() const
 void channel::set_nonce(uint64_t value)
 {
     nonce_ = value;
+}
+
+bool channel::located(const hash_digest& start, const hash_digest& stop) const
+{
+    return located_start_ == start && located_stop_ == stop;
+}
+
+void channel::set_located(const hash_digest& start, const hash_digest& stop)
+{
+    located_start_ = start;
+    located_stop_ = stop;
 }
 
 const message::version& channel::version() const
