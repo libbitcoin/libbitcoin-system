@@ -341,6 +341,7 @@ BOOST_AUTO_TEST_CASE(p2p__connect__started__success)
     p2p network(configuration);
     const config::endpoint host(SEED1);
     BOOST_REQUIRE_EQUAL(start_result(network), error::success);
+    network.run();
     BOOST_REQUIRE_EQUAL(connect_result(network, host), error::success);
 }
 
@@ -353,6 +354,7 @@ BOOST_AUTO_TEST_CASE(p2p__connect__started__success)
 ////    p2p network(configuration);
 ////    const config::endpoint host(SEED1);
 ////    BOOST_REQUIRE_EQUAL(start_result(network), error::success);
+////    network.run();
 ////    BOOST_REQUIRE_EQUAL(connect_result(network, host), error::success);
 ////    BOOST_REQUIRE_EQUAL(connect_result(network, host), error::address_in_use);
 ////}
@@ -364,6 +366,7 @@ BOOST_AUTO_TEST_CASE(p2p__subscribe__connect__success)
     p2p network(configuration);
     const config::endpoint host(SEED1);
     BOOST_REQUIRE_EQUAL(start_result(network), error::success);
+    network.run();
     BOOST_REQUIRE_EQUAL(subscribe_result(network, host), error::success);
 }
 
@@ -383,6 +386,7 @@ BOOST_AUTO_TEST_CASE(p2p__broadcast__ping_two_distinct_hosts__two_sends_and_succ
     const config::endpoint host1(SEED1);
     const config::endpoint host2(SEED2);
     BOOST_REQUIRE_EQUAL(start_result(network), error::success);
+    network.run();
     BOOST_REQUIRE_EQUAL(connect_result(network, host1), error::success);
     BOOST_REQUIRE_EQUAL(connect_result(network, host2), error::success);
     BOOST_REQUIRE_EQUAL(send_result(ping(0), network, 2), error::success);
@@ -394,6 +398,7 @@ BOOST_AUTO_TEST_CASE(p2p__subscribe__seed_outbound__success)
     SETTINGS_TESTNET_TWO_THREADS_ONE_SEED_OUTBOUND(configuration);
     p2p network(configuration);
     BOOST_REQUIRE_EQUAL(start_result(network), error::success);
+    network.run();
     BOOST_REQUIRE_EQUAL(subscribe_result(network), error::success);
 }
 

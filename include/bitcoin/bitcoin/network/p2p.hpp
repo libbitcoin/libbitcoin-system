@@ -41,7 +41,7 @@ namespace libbitcoin {
 namespace network {
 
 /// This class provides the top level public interface to the networking layer.
-/// All methods with the exception of start and stop are thread safe.
+/// All methods except start, run, stop and close are thread safe.
 class BC_API p2p
 {
 public:
@@ -55,6 +55,8 @@ public:
     typedef std::function<void(const code&, channel::ptr)> channel_handler;
     typedef std::function<void(const code&, const address&)> address_handler;
 
+    // ------------------------------------------------------------------------
+
     /// Construct the p2p networking instance.
     p2p(const settings& settings=mainnet);
 
@@ -65,27 +67,47 @@ public:
     p2p(const p2p&) = delete;
     void operator=(const p2p&) = delete;
 
+    // ------------------------------------------------------------------------
+
+    /// Send message to all connections, handler invoked for each channel.
+    template <typename Message>
+    void broadcast(const Message& message, channel_handler handle_channel,
+        result_handler handle_complete)
+    {
+        dispatch_.ordered(
+            std::bind(&network::p2p::do_broadcast<Message>,
+                this, message, handle_channel, handle_complete));
+    }
+
+    // ------------------------------------------------------------------------
+
     /// Return the current block height.
     virtual size_t height();
 
     /// Set the current block height, for use in version messages.
     virtual void set_height(size_t value);
 
-    /// Start connecting.
-    /// Handler returns the result of host file load and seeding operations.
-    // This must be called from the thread that constructed this class.
+    // ------------------------------------------------------------------------
+
+    /// Invoke startup sequence, call from constructing thread.
     virtual void start(result_handler handler);
 
-    /// Non-blocking call to coalesce all work.
+    /// Begin long running sessions, call from start result handler.
+    virtual void run();
+
+    // ------------------------------------------------------------------------
+
+    /// Non-blocking call to coalesce all work, start may be reinvoked after.
     /// Handler returns the result of host file save operation.
     virtual void stop(result_handler handler);
 
-    /// Non-blocking call to coalesce all work.
+    /// Non-blocking call to coalesce all work, start may be reinvoked after.
     virtual void stop();
 
     /// Blocking call to coalesce all work and then terminate all threads.
-    /// This must be called from the thread that constructed this class.
-    void close();
+    /// Call from thread that constructed this class, or don't call at all.
+    /// This calls stop, and start may be reinvoked after calling this.
+    virtual void close();
 
     // ------------------------------------------------------------------------
 
@@ -148,16 +170,13 @@ public:
     /// Relay a connection creation or service stop event to subscribers.
     virtual void relay(const code& ec, channel::ptr channel);
 
-    /// Send a message to all connections.
-    /// The handler is invoked for each affected channel.
-    template <typename Message>
-    void broadcast(const Message& message, channel_handler handle_channel,
-        result_handler handle_complete)
-    {
-        dispatch_.ordered(
-            std::bind(&network::p2p::do_broadcast<Message>,
-                this, message, handle_channel, handle_complete));
-    }
+private:
+    threadpool pool_;
+
+protected:
+    virtual bool stopped() const;
+
+    dispatcher dispatch_;
 
 private:
     template <class Session, typename... Args>
@@ -175,7 +194,7 @@ private:
         connections_.broadcast(message, handle_channel, handle_complete);
     }
 
-    bool stopped() const;
+    void start();
     void handle_hosts_loaded(const code& ec, result_handler handler);
     void handle_hosts_seeded(const code& ec, result_handler handler);
     void handle_hosts_saved(const code& ec, result_handler handler);
@@ -183,8 +202,6 @@ private:
     bool stopped_;
     size_t height_;
     const settings& settings_;
-    threadpool pool_;
-    dispatcher dispatch_;
     pending pending_;
     connections connections_;
     hosts hosts_;

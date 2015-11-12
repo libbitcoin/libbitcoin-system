@@ -139,6 +139,17 @@ void p2p::set_height(size_t value)
 // Startup processing.
 // ----------------------------------------------------------------------------
 
+void p2p::start()
+{
+    stopped_ = false;
+    pool_.join();
+    pool_.spawn(settings_.threads, thread_priority::low);
+
+    // There is no need to seed or run the service to perform manual connection.
+    // This instance is retained by the stop handler and the member reference.
+    manual_ = attach<session_manual>();
+}
+
 void p2p::start(result_handler handler)
 {
     if (!stopped())
@@ -147,10 +158,7 @@ void p2p::start(result_handler handler)
         return;
     }
 
-    stopped_ = false;
-
-    pool_.join();
-    pool_.spawn(settings_.threads, thread_priority::low);
+    start();
 
     hosts_.load(
         dispatch_.ordered_delegate(&p2p::handle_hosts_loaded,
@@ -173,15 +181,12 @@ void p2p::handle_hosts_loaded(const code& ec, result_handler handler)
         return;
     }
 
-    const auto handle_complete =
+    // The instance is retained by the stop handler (until shutdown).
+    attach<session_seed>(
         dispatch_.ordered_delegate(&p2p::handle_hosts_seeded,
-            this, _1, handler);
-
-    // The instance is retained by the stop handler (i.e. until shutdown).
-    attach<session_seed>(handle_complete);
+            this, _1, handler));
 }
 
-// This is the end of the startup cycle.
 void p2p::handle_hosts_seeded(const code& ec, result_handler handler)
 {
     if (stopped())
@@ -198,13 +203,15 @@ void p2p::handle_hosts_seeded(const code& ec, result_handler handler)
         return;
     }
 
-    // If hosts load/seeding was successful, start other sessions.
-    // These are retained by the stop handler (and one manual reference).
+    // This is the end of the startup sequence.
+    handler(error::success);
+}
+
+void p2p::run()
+{
+    // These instances are retained by the stop handler (until shutdown).
     attach<session_inbound>();
     attach<session_outbound>();
-    manual_ = attach<session_manual>();
-
-    handler(error::success);
 }
 
 // Shutdown processing.
