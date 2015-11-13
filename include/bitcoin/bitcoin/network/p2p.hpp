@@ -174,14 +174,6 @@ private:
     threadpool pool_;
 
 protected:
-    virtual bool stopped() const;
-
-    dispatcher dispatch_;
-
-private:
-    threadpool pool_;
-
-protected:
     template <class Session, typename... Args>
     typename Session::ptr attach(Args&&... args)
     {

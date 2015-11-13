@@ -521,9 +521,6 @@
     <ClCompile Include="..\..\..\..\src\network\logging.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\network\protocol_base.cpp">
-      <Filter>src\network</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\network\protocol_events.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
