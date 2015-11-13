@@ -178,6 +178,46 @@ private:
 #undef BIND_HANDLER
 #undef BIND_ELEMENT
 
+// These are declared to improve binding readability in derived classes.
+// These require that CLASS be defined in each source file where used,
+// and that the base of the derive class implement the necessary methods.
+
+#define BIND1(method, p1) \
+    bind<CLASS>(&CLASS::method, p1)
+#define BIND2(method, p1, p2) \
+    bind<CLASS>(&CLASS::method, p1, p2)
+#define BIND3(method, p1, p2, p3) \
+    bind<CLASS>(&CLASS::method, p1, p2, p3)
+#define BIND4(method, p1, p2, p3, p4) \
+    bind<CLASS>(&CLASS::method, p1, p2, p3, p4)
+#define BIND5(method, p1, p2, p3, p4, p5) \
+    bind<CLASS>(&CLASS::method, p1, p2, p3, p4, p5)
+
+#define ORDERED2(method, p1, p2) \
+    ordered<CLASS>(&CLASS::method, p1, p2)
+#define ORDERED3(method, p1, p2, p3) \
+    ordered<CLASS>(&CLASS::method, p1, p2, p3)
+#define ORDERED4(method, p1, p2, p3, p4) \
+    ordered<CLASS>(&CLASS::method, p1, p2, p3, p4)
+#define ORDERED5(method, p1, p2, p3, p4, p5) \
+    ordered<CLASS>(&CLASS::method, p1, p2, p3, p4, p5)
+#define ORDERED6(method, p1, p2, p3, p4, p5, p6) \
+    ordered<CLASS>(&CLASS::method, p1, p2, p3, p4, p5, p6)
+
+#define CALL1(method, p1) \
+    call<CLASS>(&CLASS::method, p1)
+
+#define SEND1(message, method, p1) \
+    send<CLASS>(message, &CLASS::method, p1)
+
+#define SUBSCRIBE_STOP1(method, p1) \
+    subscribe_stop<CLASS>(&CLASS::method, p1)
+
+#define SUBSCRIBE2(message, method, p1, p2) \
+    subscribe<CLASS, message>(&CLASS::method, p1, p2)
+
+#define SUBSCRIBE3(message, method, p1, p2, p3) \
+    subscribe<CLASS, message>(&CLASS::method, p1, p2, p3)
 
 } // namespace libbitcoin
 

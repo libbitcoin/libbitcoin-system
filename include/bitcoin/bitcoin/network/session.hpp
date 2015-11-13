@@ -32,6 +32,7 @@
 #include <bitcoin/bitcoin/network/connector.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/network/proxy.hpp>
+#include <bitcoin/bitcoin/utility/delegates.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -73,6 +74,8 @@ public:
     virtual void start();
 
 protected:
+
+    /// Attach a protocol to a channel.
     template <class Protocol, typename... Args>
     void attach(channel::ptr channel, Args&&... args)
     {
@@ -80,10 +83,24 @@ protected:
             ->start(std::forward<Args>(args)...);
     }
 
-    template <class Derived>
-    std::shared_ptr<Derived> shared_from_base()
+    /// Bind a method in the derived class.
+    template <class Protocol, typename Handler, typename... Args>
+    auto bind(Handler&& handler, Args&&... args) ->
+        decltype(std::bind(std::forward<Handler>(handler),
+            std::shared_ptr<Protocol>(), std::forward<Args>(args)...))
     {
-        return std::static_pointer_cast<Derived>(shared_from_this());
+        return std::bind(std::forward<Handler>(handler),
+            shared_from_base<Protocol>(), std::forward<Args>(args)...);
+    }
+
+    /// Bind an ordered delegate to a method in the derived class.
+    template <class Protocol, typename Handler, typename... Args>
+    auto ordered(Handler&& handler, Args&&... args) ->
+        delegate::ordered<decltype(std::bind(std::forward<Handler>(handler),
+            std::shared_ptr<Protocol>(), std::forward<Args>(args)...))>
+    {
+        return dispatch_.ordered_delegate(std::forward<Handler>(handler),
+            shared_from_base<Protocol>(), std::forward<Args>(args)...);
     }
 
     bool stopped() const;
@@ -99,10 +116,17 @@ protected:
     void register_channel(channel::ptr channel, result_handler handle_started,
         result_handler handle_stopped);
 
-    dispatcher dispatch_;
     const settings& settings_;
 
 private:
+
+    // Required because enable_shared_from_this doesn't support inheritance.
+    template <class Derived>
+    std::shared_ptr<Derived> shared_from_base()
+    {
+        return std::static_pointer_cast<Derived>(shared_from_this());
+    }
+
     void handle_stop();
     void handle_channel(const code& ec, channel::ptr channel,
         stop_handler handler);
@@ -132,6 +156,7 @@ private:
     bool notify_;
     threadpool& pool_;
     p2p& network_;
+    dispatcher dispatch_;
 };
 
 } // namespace network

@@ -38,6 +38,8 @@ INITIALIZE_TRACK(bc::network::session_manual);
 namespace libbitcoin {
 namespace network {
 
+#define CLASS session_manual
+
 using std::placeholders::_1;
 using std::placeholders::_2;
 
@@ -79,9 +81,7 @@ void session_manual::start_connect(const std::string& hostname, uint16_t port,
 
     // MANUAL CONNECT OUTBOUND
     connect_->connect(hostname, port,
-        dispatch_.ordered_delegate(&session_manual::handle_connect,
-            shared_from_base<session_manual>(), _1, _2, hostname, port,
-                handler, retries));
+        ORDERED6(handle_connect, _1, _2, hostname, port, handler, retries));
 }
 
 void session_manual::handle_connect(const code& ec, channel::ptr channel,
@@ -110,10 +110,8 @@ void session_manual::handle_connect(const code& ec, channel::ptr channel,
         << "] as [" << channel->authority() << "]";
 
     register_channel(channel, 
-        std::bind(&session_manual::handle_channel_start,
-            shared_from_base<session_manual>(), _1, hostname, port, channel, handler),
-        std::bind(&session_manual::handle_channel_stop,
-            shared_from_base<session_manual>(), _1, hostname, port));
+        BIND5(handle_channel_start, _1, hostname, port, channel, handler),
+        BIND3(handle_channel_stop, _1, hostname, port));
 }
 
 void session_manual::handle_channel_start(const code& ec, const std::string& hostname,

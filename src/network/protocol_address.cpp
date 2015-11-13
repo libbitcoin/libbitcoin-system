@@ -37,7 +37,7 @@ namespace libbitcoin {
 namespace network {
 
 #define NAME "address"
-#define PROTOCOL protocol_address
+#define CLASS protocol_address
 
 using namespace bc::message;
 using std::placeholders::_1;

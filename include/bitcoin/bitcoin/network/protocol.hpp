@@ -40,8 +40,8 @@ namespace network {
  * This simplifies calling bind, send and subscribe.
  * Instances of this class are not copyable.
  */
-class BC_API protocol_base
-  : public std::enable_shared_from_this<protocol_base>
+class BC_API protocol
+  : public std::enable_shared_from_this<protocol>
 {
 protected:
     /**
@@ -50,21 +50,12 @@ protected:
      * @param[in]  channel  The channel on which to start the protocol.
      * @param[in]  name     The instance name for logging purposes.
      */
-    protocol_base(threadpool& pool, channel::ptr channel,
+    protocol(threadpool& pool, channel::ptr channel,
         const std::string& name);
 
     /// This class is not copyable.
-    protocol_base(const protocol_base&) = delete;
-    void operator=(const protocol_base&) = delete;
-    
-    /// Get a shared pointer to the derived instance from this.
-    /// Used by implementations to obtain a shared pointer of the derived type.
-    /// Required because enable_shared_from_this doesn't support inheritance.
-    template <class Protocol>
-    std::shared_ptr<Protocol> shared_from_base()
-    {
-        return std::static_pointer_cast<Protocol>(shared_from_this());
-    }
+    protocol(const protocol&) = delete;
+    void operator=(const protocol&) = delete;
 
     /// Bind a method in the derived class.
     template <class Protocol, typename Handler, typename... Args>
@@ -134,28 +125,19 @@ protected:
     bool stopped() const;
 
 private:
+
+    // Required because enable_shared_from_this doesn't support inheritance.
+    template <class Protocol>
+    std::shared_ptr<Protocol> shared_from_base()
+    {
+        return std::static_pointer_cast<Protocol>(shared_from_this());
+    }
+
     threadpool& pool_;
     dispatcher dispatch_;
     channel::ptr channel_;
     const std::string name_;
 };
-
-// These are declared to improve the readability of protocols.
-// These require that PROTOCOL be defined in each source file where used.
-#define BIND1(method, p1) \
-    bind<PROTOCOL>(&PROTOCOL::method, p1)
-#define BIND2(method, p1, p2) \
-    bind<PROTOCOL>(&PROTOCOL::method, p1, p2)
-#define CALL1(method, p1) \
-    call<PROTOCOL>(&PROTOCOL::method, p1)
-#define SEND1(message, method, p1) \
-    send<PROTOCOL>(message, &PROTOCOL::method, p1)
-#define SUBSCRIBE_STOP1(method, p1) \
-    subscribe_stop<PROTOCOL>(&PROTOCOL::method, p1)
-#define SUBSCRIBE2(message, method, p1, p2) \
-    subscribe<PROTOCOL, message>(&PROTOCOL::method, p1, p2)
-#define SUBSCRIBE3(message, method, p1, p2, p3) \
-    subscribe<PROTOCOL, message>(&PROTOCOL::method, p1, p2, p3)
 
 } // namespace network
 } // namespace libbitcoin

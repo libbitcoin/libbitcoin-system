@@ -25,7 +25,7 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/protocol_base.hpp>
+#include <bitcoin/bitcoin/network/protocol.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -35,7 +35,7 @@ namespace network {
  * Base class for stateful protocol implementation.
  */
 class BC_API protocol_events
-  : public protocol_base
+  : public protocol
 {
 public:
     typedef std::function<void(const code&)> event_handler;

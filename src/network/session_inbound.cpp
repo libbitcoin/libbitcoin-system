@@ -37,6 +37,8 @@ INITIALIZE_TRACK(bc::network::session_inbound);
 namespace libbitcoin {
 namespace network {
 
+#define CLASS session_inbound
+
 using std::placeholders::_1;
 using std::placeholders::_2;
 
@@ -61,11 +63,10 @@ void session_inbound::start()
 
     session::start();
     const auto accept = create_acceptor();
+    const auto port = settings_.inbound_port;
 
     // START LISTENING ON PORT
-    accept->listen(settings_.inbound_port,
-        dispatch_.ordered_delegate(&session_inbound::start_accept,
-            shared_from_base<session_inbound>(), _1, accept));
+    accept->listen(port, ORDERED2(start_accept, _1, accept));
 }
 
 void session_inbound::start_accept(const code& ec, acceptor::ptr accept)
@@ -81,9 +82,7 @@ void session_inbound::start_accept(const code& ec, acceptor::ptr accept)
     }
 
     // ACCEPT THE NEXT INCOMING CONNECTION
-    accept->accept(
-        dispatch_.ordered_delegate(&session_inbound::handle_accept,
-            shared_from_base<session_inbound>(), _1, _2, accept));
+    accept->accept(ORDERED3(handle_accept, _1, _2, accept));
 }
 
 void session_inbound::handle_accept(const code& ec, channel::ptr channel,
@@ -109,9 +108,7 @@ void session_inbound::handle_accept(const code& ec, channel::ptr channel,
         return;
     }
 
-    connection_count(
-        dispatch_.ordered_delegate(&session_inbound::handle_connection_count,
-            shared_from_base<session_inbound>(), _1, channel));
+    connection_count(ORDERED2(handle_connection_count, _1, channel));
 }
 
 void session_inbound::handle_connection_count(size_t connections,
@@ -129,10 +126,8 @@ void session_inbound::handle_connection_count(size_t connections,
         << "Connected inbound channel [" << channel->authority() << "]";
 
     register_channel(channel, 
-        std::bind(&session_inbound::handle_channel_start,
-            shared_from_base<session_inbound>(), _1, channel),
-        std::bind(&session_inbound::handle_channel_stop,
-            shared_from_base<session_inbound>(), _1));
+        BIND2(handle_channel_start, _1, channel),
+        BIND1(handle_channel_stop, _1));
 }
 
 void session_inbound::handle_channel_start(const code& ec,

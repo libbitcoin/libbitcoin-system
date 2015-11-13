@@ -1006,9 +1006,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\logging.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_base.hpp">
-      <Filter>include\bitcoin\network</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_events.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>

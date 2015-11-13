@@ -174,11 +174,6 @@ private:
     threadpool pool_;
 
 protected:
-    virtual bool stopped() const;
-
-    dispatcher dispatch_;
-
-private:
     template <class Session, typename... Args>
     typename Session::ptr attach(Args&&... args)
     {
@@ -187,6 +182,11 @@ private:
         return session;
     }
 
+    virtual bool stopped() const;
+
+    dispatcher dispatch_;
+
+private:
     template <typename Message>
     void do_broadcast(const Message& message, channel_handler handle_channel,
         result_handler handle_complete) const

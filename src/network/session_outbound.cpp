@@ -36,6 +36,8 @@ INITIALIZE_TRACK(bc::network::session_outbound);
 namespace libbitcoin {
 namespace network {
 
+#define CLASS session_outbound
+
 using std::placeholders::_1;
 using std::placeholders::_2;
 
@@ -66,9 +68,7 @@ void session_outbound::start()
 
 void session_outbound::new_connection(connector::ptr connect)
 {
-    fetch_address(
-        dispatch_.ordered_delegate(&session_outbound::start_connect,
-            shared_from_base<session_outbound>(), _1, _2, connect));
+    fetch_address(ORDERED3(start_connect, _1, _2, connect));
 }
 
 void session_outbound::start_connect(const code& ec, const authority& host,
@@ -107,9 +107,7 @@ void session_outbound::start_connect(const code& ec, const authority& host,
         << "Connecting to channel [" << host << "]";
 
     // OUTBOUND CONNECT
-    connect->connect(host,
-        dispatch_.ordered_delegate(&session_outbound::handle_connect,
-            shared_from_base<session_outbound>(), _1, _2, host, connect));
+    connect->connect(host, ORDERED4(handle_connect, _1, _2, host, connect));
 }
 
 void session_outbound::handle_connect(const code& ec, channel::ptr channel,
@@ -128,10 +126,8 @@ void session_outbound::handle_connect(const code& ec, channel::ptr channel,
         << "Connected to outbound channel [" << channel->authority() << "]";
 
     register_channel(channel, 
-        std::bind(&session_outbound::handle_channel_start,
-            shared_from_base<session_outbound>(), _1, connect, channel),
-        std::bind(&session_outbound::handle_channel_stop,
-            shared_from_base<session_outbound>(), _1, connect));
+        BIND3(handle_channel_start, _1, connect, channel),
+        BIND2(handle_channel_stop, _1, connect));
 }
 
 void session_outbound::handle_channel_start(const code& ec,

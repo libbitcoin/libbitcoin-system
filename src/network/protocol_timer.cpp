@@ -33,7 +33,7 @@
 namespace libbitcoin {
 namespace network {
 
-#define PROTOCOL protocol_timer
+#define CLASS protocol_timer
 using std::placeholders::_1;
 
 protocol_timer::protocol_timer(threadpool& pool, channel::ptr channel,

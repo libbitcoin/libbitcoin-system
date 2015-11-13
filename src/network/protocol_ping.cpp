@@ -37,7 +37,7 @@ namespace libbitcoin {
 namespace network {
 
 #define NAME "ping"
-#define PROTOCOL protocol_ping
+#define CLASS protocol_ping
 
 using namespace bc::message;
 using std::placeholders::_1;

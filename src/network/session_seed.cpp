@@ -40,6 +40,8 @@ INITIALIZE_TRACK(bc::network::session_seed);
 namespace libbitcoin {
 namespace network {
 
+#define CLASS session_seed
+
 using std::placeholders::_1;
 using std::placeholders::_2;
 
@@ -66,9 +68,7 @@ void session_seed::start(result_handler handler)
         return;
     }
 
-    address_count(
-        dispatch_.ordered_delegate(&session_seed::handle_count,
-            shared_from_base<session_seed>(), _1, handler));
+    address_count(ORDERED2(handle_count, _1, handler));
 }
 
 void session_seed::handle_count(size_t start_size, result_handler handler)
@@ -99,9 +99,7 @@ void session_seed::start_seeding(size_t start_size, connector::ptr connect,
     result_handler handler)
 {
     const auto& seeds = settings_.seeds;
-    auto multiple =
-        dispatch_.ordered_delegate(&session_seed::handle_complete,
-            shared_from_base<session_seed>(), start_size, handler);
+    auto multiple = ORDERED2(handle_complete, start_size, handler);
 
     // Require all seed callbacks before calling session_seed::handle_stopped.
     auto single = synchronize(multiple, seeds.size(), "session_seed", true);
@@ -125,9 +123,7 @@ void session_seed::start_seed(const config::endpoint& seed,
         << "Contacting seed [" << seed << "]";
 
     // OUTBOUND CONNECT
-    connect->connect(seed,
-        dispatch_.ordered_delegate(&session_seed::handle_connect,
-            shared_from_base<session_seed>(), _1, _2, seed, handler));
+    connect->connect(seed, ORDERED4(handle_connect, _1, _2, seed, handler));
 }
 
 void session_seed::handle_connect(const code& ec, channel::ptr channel,
@@ -154,10 +150,8 @@ void session_seed::handle_connect(const code& ec, channel::ptr channel,
         << "Connected seed [" << seed << "] as " << channel->authority();
 
     register_channel(channel, 
-        std::bind(&session_seed::handle_channel_start,
-            shared_from_base<session_seed>(), _1, channel, handler),
-        std::bind(&session_seed::handle_channel_stop,
-            shared_from_base<session_seed>(), _1));
+        BIND3(handle_channel_start, _1, channel, handler),
+        BIND1(handle_channel_stop, _1));
 }
 
 void session_seed::handle_channel_start(const code& ec, channel::ptr channel,
@@ -180,11 +174,8 @@ void session_seed::handle_channel_stop(const code&)
 // This accepts no error code because individual seed errors are suppressed.
 void session_seed::handle_complete(size_t start_size, result_handler handler)
 {
-    address_count(
-        dispatch_.ordered_delegate(&session_seed::handle_final_count,
-            shared_from_base<session_seed>(), _1, start_size, handler));
+    address_count(ORDERED3(handle_final_count, _1, start_size, handler));
 }
-
 
 // We succeed only if there is a host count increase.
 void session_seed::handle_final_count(size_t current_size, size_t start_size,

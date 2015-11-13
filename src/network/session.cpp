@@ -53,8 +53,8 @@ session::session(threadpool& pool, p2p& network, const settings& settings,
     notify_(!temporary),
     pool_(pool),
     network_(network),
-    settings_(settings),
-    dispatch_(pool)
+    dispatch_(pool),
+    settings_(settings)
 {
 }
 
@@ -191,6 +191,9 @@ void session::handle_pend(const code& ec, channel::ptr channel,
         handle_started(ec);
         return;
     }
+
+    // TODO: there is a race here between completion of handshake and start of other protocols.
+    // Incoming ping and address messages are being missed.
 
     const auto handler =
         dispatch_.ordered_delegate(&session::handle_handshake,

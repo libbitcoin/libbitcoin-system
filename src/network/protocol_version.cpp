@@ -42,7 +42,7 @@ namespace libbitcoin {
 namespace network {
 
 #define NAME "version"
-#define PROTOCOL protocol_version
+#define CLASS protocol_version
 #define RELAY_TRUE true
 #define GENESIS_HEIGHT 0
 #define UNSPECIFIED_NONCE 0

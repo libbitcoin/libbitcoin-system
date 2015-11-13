@@ -23,19 +23,19 @@
 #include <string>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/protocol_base.hpp>
+#include <bitcoin/bitcoin/network/protocol.hpp>
 #include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
-#define PROTOCOL protocol_events
+#define CLASS protocol_events
 using std::placeholders::_1;
 
 protocol_events::protocol_events(threadpool& pool, channel::ptr channel,
     const std::string& name)
-  : protocol_base(pool, channel, name),
+  : protocol(pool, channel, name),
     event_handler_(nullptr)
 {
 }

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/network/protocol_base.hpp>
+#include <bitcoin/bitcoin/network/protocol.hpp>
 
 #include <string>
 #include <bitcoin/bitcoin/config/authority.hpp>
@@ -29,43 +29,43 @@
 namespace libbitcoin {
 namespace network {
 
-protocol_base::protocol_base(threadpool& pool, channel::ptr channel,
+protocol::protocol(threadpool& pool, channel::ptr channel,
     const std::string& name)
   : pool_(pool), dispatch_(pool), channel_(channel), name_(name)
 {
 }
 
-config::authority protocol_base::authority() const
+config::authority protocol::authority() const
 {
     return channel_->authority();
 }
 
-const std::string& protocol_base::name()
+const std::string& protocol::name()
 {
     return name_;
 }
 
-uint64_t protocol_base::nonce()
+uint64_t protocol::nonce()
 {
     return channel_->nonce();
 }
 
-threadpool& protocol_base::pool()
+threadpool& protocol::pool()
 {
     return pool_;
 }
 
-void protocol_base::set_version(const message::version& value)
+void protocol::set_version(const message::version& value)
 {
     channel_->set_version(value);
 }
     
-void protocol_base::stop(const code& ec)
+void protocol::stop(const code& ec)
 {
     channel_->stop(ec);
 }
     
-bool protocol_base::stopped() const
+bool protocol::stopped() const
 {
     return channel_->stopped();
 }
