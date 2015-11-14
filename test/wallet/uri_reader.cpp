@@ -20,6 +20,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <boost/optional.hpp>
+#include <boost/utility/in_place_factory.hpp>
 #include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
