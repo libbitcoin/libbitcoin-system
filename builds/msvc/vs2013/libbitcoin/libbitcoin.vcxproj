@@ -121,6 +121,7 @@
     <ClCompile Include="..\..\..\..\src\message\filter_clear.cpp" />
     <ClCompile Include="..\..\..\..\src\message\filter_load.cpp" />
     <ClCompile Include="..\..\..\..\src\message\get_headers.cpp" />
+    <ClCompile Include="..\..\..\..\src\message\headers.cpp" />
     <ClCompile Include="..\..\..\..\src\message\memory_pool.cpp" />
     <ClCompile Include="..\..\..\..\src\message\merkle_block.cpp" />
     <ClCompile Include="..\..\..\..\src\message\nonce.cpp" />
@@ -247,6 +248,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\filter_clear.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\filter_load.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\get_headers.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\headers.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\memory_pool.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\merkle_block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\nonce.hpp" />
