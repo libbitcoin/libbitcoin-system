@@ -48,6 +48,7 @@ enum class message_type
     get_blocks,
     get_data,
     get_headers,
+    headers,
     inventory,
     memory_pool,
     merkle_block,

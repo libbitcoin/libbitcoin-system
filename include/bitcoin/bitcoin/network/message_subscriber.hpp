@@ -61,6 +61,7 @@ public:
     DEFINE_SUBSCRIBER_TYPE(get_blocks);
     DEFINE_SUBSCRIBER_TYPE(get_data);
     DEFINE_SUBSCRIBER_TYPE(get_headers);
+    DEFINE_SUBSCRIBER_TYPE(headers);
     DEFINE_SUBSCRIBER_TYPE(inventory);
     DEFINE_SUBSCRIBER_TYPE(memory_pool);
     DEFINE_SUBSCRIBER_TYPE(merkle_block);
@@ -137,6 +138,7 @@ private:
     DEFINE_SUBSCRIBER_OVERLOAD(get_blocks);
     DEFINE_SUBSCRIBER_OVERLOAD(get_data);
     DEFINE_SUBSCRIBER_OVERLOAD(get_headers);
+    DEFINE_SUBSCRIBER_OVERLOAD(headers);
     DEFINE_SUBSCRIBER_OVERLOAD(inventory);
     DEFINE_SUBSCRIBER_OVERLOAD(memory_pool);
     DEFINE_SUBSCRIBER_OVERLOAD(merkle_block);
@@ -158,6 +160,7 @@ private:
     DECLARE_SUBSCRIBER(get_blocks);
     DECLARE_SUBSCRIBER(get_data);
     DECLARE_SUBSCRIBER(get_headers);
+    DECLARE_SUBSCRIBER(headers);
     DECLARE_SUBSCRIBER(inventory);
     DECLARE_SUBSCRIBER(memory_pool);
     DECLARE_SUBSCRIBER(merkle_block);
