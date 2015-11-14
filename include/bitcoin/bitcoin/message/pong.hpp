@@ -32,9 +32,6 @@
 namespace libbitcoin {
 namespace message {
 
-/**
- * Pong message class.
- */
 class BC_API pong
   : public nonce_
 {
