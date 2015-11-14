@@ -34,7 +34,8 @@ public:
     static get_headers factory_from_data(reader& source);
 
     get_headers();
-    get_headers(const block_locator start_hashes, const hash_digest hash_stop);
+    get_headers(const block_locator& start_hashes,
+        const hash_digest& hash_stop);
 
     static const std::string command;
 };
