@@ -132,8 +132,8 @@ void session_manual::handle_channel_start(const code& ec, const std::string& hos
     // Notify of successful first handshake.
     handler(error::success, channel);
 
-    attach<protocol_ping>(channel, settings_);
-    attach<protocol_address>(channel, settings_);
+    attach<protocol_ping>(channel)->start(settings_);
+    attach<protocol_address>(channel)->start(settings_);
 }
 
 // After a stop we don't use the caller's start handler, but keep connecting.

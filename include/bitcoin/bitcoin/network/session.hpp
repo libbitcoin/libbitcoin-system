@@ -75,12 +75,12 @@ public:
 
 protected:
 
-    /// Attach a protocol to a channel.
+    /// Attach a protocol to a channel, caller must start the channel.
     template <class Protocol, typename... Args>
-    void attach(channel::ptr channel, Args&&... args)
+    typename Protocol::ptr attach(channel::ptr channel, Args&&... args)
     {
-        std::make_shared<Protocol>(pool_, network_, channel)
-            ->start(std::forward<Args>(args)...);
+        return std::make_shared<Protocol>(pool_, network_, channel,
+            std::forward<Args>(args)...);
     }
 
     /// Bind a method in the derived class.

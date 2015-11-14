@@ -135,8 +135,8 @@ void session_inbound::handle_channel_start(const code& ec,
     if (ec)
         return;
 
-    attach<protocol_ping>(channel, settings_);
-    attach<protocol_address>(channel, settings_);
+    attach<protocol_ping>(channel)->start(settings_);
+    attach<protocol_address>(channel)->start(settings_);
 }
 
 void session_inbound::handle_channel_stop(const code&)

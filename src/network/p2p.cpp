@@ -147,7 +147,8 @@ void p2p::start()
 
     // There is no need to seed or run the service to perform manual connection.
     // This instance is retained by the stop handler and the member reference.
-    manual_ = attach<session_manual>();
+    manual_ = attach<session_manual>(settings_);
+    manual_->start();
 }
 
 void p2p::start(result_handler handler)
@@ -159,7 +160,6 @@ void p2p::start(result_handler handler)
     }
 
     start();
-
     hosts_.load(
         dispatch_.ordered_delegate(&p2p::handle_hosts_loaded,
             this, _1, handler));
@@ -181,10 +181,12 @@ void p2p::handle_hosts_loaded(const code& ec, result_handler handler)
         return;
     }
 
-    // The instance is retained by the stop handler (until shutdown).
-    attach<session_seed>(
+    auto seeded_handler = 
         dispatch_.ordered_delegate(&p2p::handle_hosts_seeded,
-            this, _1, handler));
+            this, _1, handler);
+
+    // The instance is retained by the stop handler (until shutdown).
+    attach<session_seed>(settings_)->start(seeded_handler);
 }
 
 void p2p::handle_hosts_seeded(const code& ec, result_handler handler)
@@ -210,8 +212,8 @@ void p2p::handle_hosts_seeded(const code& ec, result_handler handler)
 void p2p::run()
 {
     // These instances are retained by the stop handler (until shutdown).
-    attach<session_inbound>();
-    attach<session_outbound>();
+    attach<session_inbound>(settings_)->start();
+    attach<session_outbound>(settings_)->start();
 }
 
 // Shutdown processing.

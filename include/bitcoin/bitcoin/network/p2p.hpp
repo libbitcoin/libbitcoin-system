@@ -174,12 +174,13 @@ private:
     threadpool pool_;
 
 protected:
+
+    /// Attach a session to the network, caller must start the session.
     template <class Session, typename... Args>
     typename Session::ptr attach(Args&&... args)
     {
-        auto session = std::make_shared<Session>(pool_, *this, settings_);
-        session->start(std::forward<Args>(args)...);
-        return session;
+        return std::make_shared<Session>(pool_, *this,
+            std::forward<Args>(args)...);
     }
 
     virtual bool stopped() const;

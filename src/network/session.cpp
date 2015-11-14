@@ -200,7 +200,8 @@ void session::handle_pend(const code& ec, channel::ptr channel,
             shared_from_this(), _1, channel, handle_started);
 
     // Subscribe start handler to handshake completion.
-    attach<protocol_version>(channel, settings_, network_.height(), handler);
+    attach<protocol_version>(channel)->
+        start(settings_, network_.height(), handler);
 
     // Start reading messages from the socket.
     channel->talk();
