@@ -66,7 +66,7 @@ protected:
      * Start the protocol.
      * The event handler may be invoked any number of times until released
      * when the protocol is stopped. A channel_stopped code indicates stop.
-     * @param[in]  handler  The handler to call unpon each completion event.
+     * @param[in]  handler  The handler to call upon each completion event.
      */
     void start(event_handler handler);
 
