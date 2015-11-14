@@ -42,7 +42,7 @@ public:
     static uint64_t satoshi_fixed_size();
 
     pong();
-    pong(const uint64_t nonce);
+    pong(uint64_t nonce);
 
     static const std::string command;
 };
