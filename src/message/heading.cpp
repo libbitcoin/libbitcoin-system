@@ -144,6 +144,8 @@ message_type heading::type() const
         return message_type::get_data;
     if (command == get_headers::command)
         return message_type::get_headers;
+    if (command == headers::command)
+        return message_type::headers;
     if (command == inventory::command)
         return message_type::inventory;
     if (command == memory_pool::command)

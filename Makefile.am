@@ -100,6 +100,7 @@ src_libbitcoin_la_SOURCES = \
     src/message/get_blocks.cpp \
     src/message/get_data.cpp \
     src/message/get_headers.cpp \
+    src/message/headers.cpp \
     src/message/heading.cpp \
     src/message/inventory.cpp \
     src/message/inventory_type_id.cpp \
@@ -253,6 +254,7 @@ test_libbitcoin_test_SOURCES = \
     test/message/get_blocks.cpp \
     test/message/get_data.cpp \
     test/message/get_headers.cpp \
+    test/message/headers.cpp \
     test/message/heading.cpp \
     test/message/inventory.cpp \
     test/message/inventory_type_id.cpp \
@@ -387,6 +389,7 @@ include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/get_blocks.hpp \
     include/bitcoin/bitcoin/message/get_data.hpp \
     include/bitcoin/bitcoin/message/get_headers.hpp \
+    include/bitcoin/bitcoin/message/headers.hpp \
     include/bitcoin/bitcoin/message/heading.hpp \
     include/bitcoin/bitcoin/message/inventory.hpp \
     include/bitcoin/bitcoin/message/inventory_type_id.hpp \

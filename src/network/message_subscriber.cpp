@@ -53,6 +53,7 @@ TRACK_SUBSCRIBER(get_address)
 TRACK_SUBSCRIBER(get_blocks)
 TRACK_SUBSCRIBER(get_data)
 TRACK_SUBSCRIBER(get_headers)
+TRACK_SUBSCRIBER(headers)
 TRACK_SUBSCRIBER(inventory)
 TRACK_SUBSCRIBER(memory_pool)
 TRACK_SUBSCRIBER(merkle_block)
@@ -80,6 +81,7 @@ message_subscriber::message_subscriber(threadpool& pool)
     INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, get_blocks),
     INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, get_data),
     INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, get_headers),
+    INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, headers),
     INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, inventory),
     INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, memory_pool),
     INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, merkle_block),
@@ -105,6 +107,7 @@ void message_subscriber::broadcast(const code& ec)
     RELAY_MESSAGE(get_blocks);
     RELAY_MESSAGE(get_data);
     RELAY_MESSAGE(get_headers);
+    RELAY_MESSAGE(headers);
     RELAY_MESSAGE(inventory);
     RELAY_MESSAGE(memory_pool);
     RELAY_MESSAGE(merkle_block);
@@ -131,6 +134,7 @@ code message_subscriber::load(message_type type, std::istream& stream) const
         CASE_LOAD_STREAM(get_blocks);
         CASE_LOAD_STREAM(get_data);
         CASE_LOAD_STREAM(get_headers);
+        CASE_LOAD_STREAM(headers);
         CASE_LOAD_STREAM(inventory);
         CASE_LOAD_STREAM(memory_pool);
         CASE_LOAD_STREAM(merkle_block);
