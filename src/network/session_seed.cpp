@@ -22,7 +22,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <memory>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
@@ -91,8 +90,7 @@ void session_seed::handle_count(size_t start_size, result_handler handler)
     }
 
     session::start();
-    const auto connect = create_connector();
-    start_seeding(start_size, connect, handler);
+    start_seeding(start_size, create_connector(), handler);
 }
 
 void session_seed::start_seeding(size_t start_size, connector::ptr connect,

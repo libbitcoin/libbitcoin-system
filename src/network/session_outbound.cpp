@@ -21,7 +21,6 @@
 
 #include <cstddef>
 #include <functional>
-#include <memory>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
