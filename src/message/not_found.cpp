@@ -52,7 +52,7 @@ not_found::not_found()
 {
 }
 
-not_found::not_found(const std::initializer_list<inventory_vector> elements)
+not_found::not_found(const std::initializer_list<inventory_vector>& elements)
   : inventory(elements)
 {
 }

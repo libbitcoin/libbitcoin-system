@@ -57,7 +57,7 @@ inventory::inventory()
 {
 }
 
-inventory::inventory(const std::initializer_list<inventory_vector> elements)
+inventory::inventory(const std::initializer_list<inventory_vector>& elements)
 {
     inventories.insert(inventories.end(), elements.begin(), elements.end());
 }

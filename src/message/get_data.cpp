@@ -52,7 +52,7 @@ get_data::get_data()
 {
 }
 
-get_data::get_data(const std::initializer_list<inventory_vector> elements)
+get_data::get_data(const std::initializer_list<inventory_vector>& elements)
   : inventory(elements)
 {
 }

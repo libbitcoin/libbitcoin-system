@@ -40,7 +40,7 @@ public:
     static not_found factory_from_data(reader& source);
 
     not_found();
-    not_found(const std::initializer_list<inventory_vector> elements);
+    not_found(const std::initializer_list<inventory_vector>& elements);
 
     static const std::string command;
 };
