@@ -75,6 +75,7 @@ select_outputs_result select_outputs(output_info_list unspent,
         result.points.push_back(min_greater->point);
         return result;
     }
+
     // Not found in greaters so try several lessers instead. Rearrange from
     // biggest to smallest. We want to use the fewest inputs possible.
     std::sort(lesser_begin, lesser_end, greater);
