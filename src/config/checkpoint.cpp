@@ -28,6 +28,7 @@
 #include <boost/regex.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {
 namespace config {
@@ -81,6 +82,29 @@ std::string checkpoint::to_string() const
     std::stringstream value;
     value << *this;
     return value.str();
+}
+
+config::checkpoint::list& checkpoint::sort(list& checks)
+{
+    const auto comparitor = [](const checkpoint& left, const checkpoint& right)
+    {
+        return left.height() < right.height();
+    };
+
+    std::sort(checks.begin(), checks.end(), comparitor);
+    return checks;
+}
+
+bool checkpoint::validate(const hash_digest& hash, const size_t height,
+    const list& checks)
+{
+    const auto match_invalid = [&height, &hash](const config::checkpoint& item)
+    {
+        return height == item.height() && hash != item.hash();
+    };
+
+    const auto it = std::find_if(checks.begin(), checks.end(), match_invalid);
+    return it == checks.end();
 }
 
 std::istream& operator>>(std::istream& input, checkpoint& argument)
