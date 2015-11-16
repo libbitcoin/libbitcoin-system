@@ -187,7 +187,8 @@ bool parse_token(data_chunk& raw_script, std::string token)
     }
     else
     {
-        BOOST_MESSAGE("Token parsing failed with: " << token);
+        // see: stackoverflow.com/questions/15192332/boost-message-undefined
+        BOOST_TEST_MESSAGE("Token parsing failed with: " << token);
         return false;
     }
 

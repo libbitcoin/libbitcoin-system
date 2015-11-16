@@ -687,7 +687,7 @@ BOOST_AUTO_TEST_SUITE_END()
 //
 //        auto key = encode_base58(out_private_key);
 //        key.resize(2);
-//        BOOST_MESSAGE("0x" + hex(byte) + " " + key);
+//        BOOST_TEST_MESSAGE("0x" + hex(byte) + " " + key);
 //    }
 //}
 //
@@ -712,7 +712,7 @@ BOOST_AUTO_TEST_SUITE_END()
 //        auto public_key = encode_base58(out_public_key);
 //        private_key.resize(2);
 //        public_key.resize(7);
-//        BOOST_MESSAGE("0x" + hex(byte) + " " + private_key + " " + public_key);
+//        BOOST_TEST_MESSAGE("0x" + hex(byte) + " " + private_key + " " + public_key);
 //    }
 //}
 //
