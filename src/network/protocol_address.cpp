@@ -64,7 +64,6 @@ void protocol_address::start(const settings& settings)
         return;
 
     protocol_events::start();
-
     SUBSCRIBE2(get_address, handle_receive_get_address, _1, _2);
     SEND1(get_address(), handle_send_get_address, _1);
 }

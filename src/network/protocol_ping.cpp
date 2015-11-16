@@ -51,9 +51,7 @@ protocol_ping::protocol_ping(threadpool& pool, p2p&, channel::ptr channel)
 
 void protocol_ping::start(const settings& settings)
 {
-    protocol_timer::start(settings.channel_heartbeat(),
-        BIND1(send_ping, _1));
-
+    protocol_timer::start(settings.channel_heartbeat(), BIND1(send_ping, _1));
     SUBSCRIBE2(ping, handle_receive_ping, _1, _2);
 
     // Send initial ping message by simulating first heartbeat.

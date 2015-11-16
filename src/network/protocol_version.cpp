@@ -98,13 +98,9 @@ void protocol_version::start(const settings& settings, size_t height,
     event_handler handler)
 {
     const auto self = template_factory(authority(), settings, nonce(), height);
-
-    // The synchronizer is the only object that is aware of completion.
-    const auto handshake_complete = 
-        BIND2(handle_handshake_complete, _1, handler);
-
+    const auto complete = BIND2(handle_handshake_complete, _1, handler);
     protocol_timer::start(settings.channel_handshake(),
-        synchronize(handshake_complete, 3, NAME));
+        synchronize(complete, 3, NAME));
 
     SUBSCRIBE2(version, handle_receive_version, _1, _2);
     SUBSCRIBE2(verack, handle_receive_verack, _1, _2);

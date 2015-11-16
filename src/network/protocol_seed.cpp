@@ -62,9 +62,7 @@ void protocol_seed::start(const settings& settings, event_handler handler)
         return;
     }
 
-    // The synchronizer is the only object that is aware of completion.
     const auto seeding_complete = BIND2(handle_seeding_complete, _1, handler);
-
     protocol_timer::start(settings.channel_germination(),
         synchronize(seeding_complete, 3, NAME));
 
