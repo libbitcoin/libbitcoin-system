@@ -116,11 +116,6 @@ p2p::p2p(const settings& settings)
 {
 }
 
-p2p::~p2p()
-{
-    close();
-}
-
 // Properties.
 // ----------------------------------------------------------------------------
 
@@ -136,20 +131,13 @@ void p2p::set_height(size_t value)
     height_ = value;
 }
 
-// Startup processing.
-// ----------------------------------------------------------------------------
-
-void p2p::start()
+bool p2p::stopped() const
 {
-    stopped_ = false;
-    pool_.join();
-    pool_.spawn(settings_.threads, thread_priority::low);
-
-    // There is no need to seed or run the service to perform manual connection.
-    // This instance is retained by the stop handler and the member reference.
-    manual_ = attach<session_manual>(settings_);
-    manual_->start();
+    return stopped_;
 }
+
+// Start sequence.
+// ----------------------------------------------------------------------------
 
 void p2p::start(result_handler handler)
 {
@@ -159,7 +147,16 @@ void p2p::start(result_handler handler)
         return;
     }
 
-    start();
+    stopped_ = false;
+
+    pool_.join();
+    pool_.spawn(settings_.threads, thread_priority::low);
+
+    // There is no need to seed or run the service to perform manual connection.
+    // This instance is retained by the stop handler and the member reference.
+    manual_ = attach<session_manual>(settings_);
+    manual_->start();
+
     hosts_.load(
         dispatch_.ordered_delegate(&p2p::handle_hosts_loaded,
             this, _1, handler));
@@ -205,31 +202,25 @@ void p2p::handle_hosts_seeded(const code& ec, result_handler handler)
         return;
     }
 
-    // This is the end of the startup sequence.
+    // This is the end of the start sequence.
     handler(error::success);
 }
 
-void p2p::run()
+// Run sequence.
+// ----------------------------------------------------------------------------
+
+void p2p::run(result_handler handler)
 {
     // These instances are retained by the stop handler (until shutdown).
     attach<session_inbound>(settings_)->start();
     attach<session_outbound>(settings_)->start();
+
+    // This is the end of the run sequence.
+    handler(error::success);
 }
 
-// Shutdown processing.
+// Stop sequence.
 // ----------------------------------------------------------------------------
-
-void p2p::close()
-{
-    stop();
-    pool_.join();
-}
-
-void p2p::stop()
-{
-    const auto unhandled = [](const code){};
-    stop(unhandled);
-}
 
 void p2p::stop(result_handler handler)
 {
@@ -257,12 +248,22 @@ void p2p::handle_hosts_saved(const code& ec, result_handler handler)
         log::error(LOG_NETWORK)
             << "Error saving hosts file: " << ec.message();
 
+    // This is the end of the stop sequence.
     handler(ec);
 }
 
-bool p2p::stopped() const
+// Destruct sequence.
+// ----------------------------------------------------------------------------
+
+p2p::~p2p()
 {
-    return stopped_;
+    close();
+}
+
+void p2p::close()
+{
+    stop([](code){});
+    pool_.join();
 }
 
 // Pending connections collection.

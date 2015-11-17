@@ -89,20 +89,15 @@ public:
 
     // ------------------------------------------------------------------------
 
-    /// Invoke startup sequence, call from constructing thread.
+    /// Invoke startup and seeding sequence, call from constructing thread.
     virtual void start(result_handler handler);
 
-    /// Begin long running sessions, call from start result handler.
-    virtual void run();
-
-    // ------------------------------------------------------------------------
+    /// Begin long running sessions, call from start handler.
+    virtual void run(result_handler handler);
 
     /// Non-blocking call to coalesce all work, start may be reinvoked after.
     /// Handler returns the result of host file save operation.
     virtual void stop(result_handler handler);
-
-    /// Non-blocking call to coalesce all work, start may be reinvoked after.
-    virtual void stop();
 
     /// Blocking call to coalesce all work and then terminate all threads.
     /// Call from thread that constructed this class, or don't call at all.

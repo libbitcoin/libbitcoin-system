@@ -108,7 +108,7 @@ static void print_headers(const std::string& test)
 static int start_result(p2p& network)
 {
     std::promise<code> promise;
-    const auto handler = [&promise](const code& ec)
+    const auto handler = [&promise](code ec)
     {
         promise.set_value(ec);
     };
@@ -119,7 +119,7 @@ static int start_result(p2p& network)
 static int stop_result(p2p& network)
 {
     std::promise<code> promise;
-    const auto handler = [&promise](const code& ec)
+    const auto handler = [&promise](code ec)
     {
         promise.set_value(ec);
     };
@@ -130,7 +130,7 @@ static int stop_result(p2p& network)
 static int connect_result(p2p& network, const config::endpoint& host)
 {
     std::promise<code> promise;
-    const auto handler = [&promise](const code& ec, channel::ptr)
+    const auto handler = [&promise](code ec, channel::ptr)
     {
         promise.set_value(ec);
     };
@@ -138,10 +138,21 @@ static int connect_result(p2p& network, const config::endpoint& host)
     return promise.get_future().get().value();
 }
 
+static int run_result(p2p& network)
+{
+    std::promise<code> promise;
+    const auto handler = [&promise](code ec)
+    {
+        promise.set_value(ec);
+    };
+    network.run(handler);
+    return promise.get_future().get().value();
+}
+
 static int subscribe_result(p2p& network)
 {
     std::promise<code> promise;
-    const auto handler = [&promise](const code& ec, channel::ptr)
+    const auto handler = [&promise](code ec, channel::ptr)
     {
         promise.set_value(ec);
     };
@@ -152,7 +163,7 @@ static int subscribe_result(p2p& network)
 static int subscribe_result(p2p& network, const config::endpoint& host)
 {
     std::promise<code> promise;
-    const auto handler = [&promise](const code& ec, channel::ptr)
+    const auto handler = [&promise](code ec, channel::ptr)
     {
         promise.set_value(ec);
     };
@@ -164,14 +175,14 @@ static int subscribe_result(p2p& network, const config::endpoint& host)
 template<class Message>
 static int send_result(const Message& message, p2p& network, int channels)
 {
-    const auto channel_counter = [&channels](const code& ec, channel::ptr channel)
+    const auto channel_counter = [&channels](code ec, channel::ptr channel)
     {
         BOOST_REQUIRE_EQUAL(ec, error::success);
         --channels;
     };
 
     std::promise<code> promise;
-    const auto completion_counter = [&promise](const code& ec)
+    const auto completion_counter = [&promise](code ec)
     {
         promise.set_value(ec);
     };
@@ -241,7 +252,7 @@ BOOST_AUTO_TEST_CASE(p2p__start__seed_session__start_stop1_start_success)
     SETTINGS_TESTNET_ONE_THREAD_ONE_SEED(configuration);
     p2p network(configuration);
     BOOST_REQUIRE_EQUAL(start_result(network), error::success);
-    network.stop();
+    BOOST_REQUIRE_EQUAL(stop_result(network), error::success);
     BOOST_REQUIRE_EQUAL(start_result(network), error::success);
 }
 
@@ -341,7 +352,7 @@ BOOST_AUTO_TEST_CASE(p2p__connect__started__success)
     p2p network(configuration);
     const config::endpoint host(SEED1);
     BOOST_REQUIRE_EQUAL(start_result(network), error::success);
-    network.run();
+    BOOST_REQUIRE_EQUAL(run_result(network), error::success);
     BOOST_REQUIRE_EQUAL(connect_result(network, host), error::success);
 }
 
@@ -354,7 +365,7 @@ BOOST_AUTO_TEST_CASE(p2p__connect__started__success)
 ////    p2p network(configuration);
 ////    const config::endpoint host(SEED1);
 ////    BOOST_REQUIRE_EQUAL(start_result(network), error::success);
-////    network.run();
+////    BOOST_REQUIRE_EQUAL(run_result(network), error::success);
 ////    BOOST_REQUIRE_EQUAL(connect_result(network, host), error::success);
 ////    BOOST_REQUIRE_EQUAL(connect_result(network, host), error::address_in_use);
 ////}
@@ -366,7 +377,7 @@ BOOST_AUTO_TEST_CASE(p2p__subscribe__connect__success)
     p2p network(configuration);
     const config::endpoint host(SEED1);
     BOOST_REQUIRE_EQUAL(start_result(network), error::success);
-    network.run();
+    BOOST_REQUIRE_EQUAL(run_result(network), error::success);
     BOOST_REQUIRE_EQUAL(subscribe_result(network, host), error::success);
 }
 
@@ -386,7 +397,7 @@ BOOST_AUTO_TEST_CASE(p2p__broadcast__ping_two_distinct_hosts__two_sends_and_succ
     const config::endpoint host1(SEED1);
     const config::endpoint host2(SEED2);
     BOOST_REQUIRE_EQUAL(start_result(network), error::success);
-    network.run();
+    BOOST_REQUIRE_EQUAL(run_result(network), error::success);
     BOOST_REQUIRE_EQUAL(connect_result(network, host1), error::success);
     BOOST_REQUIRE_EQUAL(connect_result(network, host2), error::success);
     BOOST_REQUIRE_EQUAL(send_result(ping(0), network, 2), error::success);
@@ -398,7 +409,7 @@ BOOST_AUTO_TEST_CASE(p2p__subscribe__seed_outbound__success)
     SETTINGS_TESTNET_TWO_THREADS_ONE_SEED_OUTBOUND(configuration);
     p2p network(configuration);
     BOOST_REQUIRE_EQUAL(start_result(network), error::success);
-    network.run();
+    BOOST_REQUIRE_EQUAL(run_result(network), error::success);
     BOOST_REQUIRE_EQUAL(subscribe_result(network), error::success);
 }
 
