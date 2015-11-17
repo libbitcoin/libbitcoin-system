@@ -116,7 +116,8 @@ void session_manual::handle_connect(const code& ec, channel::ptr channel,
 void session_manual::handle_channel_start(const code& ec, const std::string& hostname,
     uint16_t port, channel::ptr channel, channel_handler handler)
 {
-    if (ec != error::service_stopped)
+    // We should stop on all non-recoverable errors, otherwise this cycles forever.
+    if (ec == error::service_stopped)
     {
         handler(ec, channel);
         return;
