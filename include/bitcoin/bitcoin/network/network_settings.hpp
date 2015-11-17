@@ -69,10 +69,9 @@ namespace network {
 #define NETWORK_INBOUND_PORT_TESTNET        18333
 #define NETWORK_SEEDS_TESTNET \
 { \
-    { "testnet-seed.alexykot.me", 18333 }, \
     { "testnet-seed.bitcoin.petertodd.org", 18333 }, \
-    { "testnet-seed.bluematt.me", 18333 }, \
-    { "testnet-seed.bitcoin.schildbach.de", 18333 } \
+    { "testnet-seed.bitcoin.schildbach.de", 18333 }, \
+    { "testnet-seed.bluematt.me", 18333 } \
 }
 
 // This file is network_settings.hpp to deconflict with wallet::settings.hpp.
