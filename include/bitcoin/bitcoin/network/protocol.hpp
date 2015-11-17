@@ -116,7 +116,10 @@ protected:
 
     /// Set the channel version. This method is not thread safe and must
     /// complete before any other protocol might read the version.
-    void set_version(const message::version& value);
+    void set_peer_version(const message::version& value);
+
+    /// Get the peer version message.
+    const message::version& peer_version();
 
     /// Stop the channel.
     void stop(const code& ec);

@@ -133,7 +133,7 @@ void protocol_version::handle_receive_version(const code& ec,
         << "Peer [" << authority() << "] version (" << message.value
         << ") services (" << message.services << ") " << message.user_agent;
 
-    set_version(message);
+    set_peer_version(message);
     SEND1(verack(), handle_verack_sent, _1);
 }
 

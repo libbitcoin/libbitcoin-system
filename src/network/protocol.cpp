@@ -55,7 +55,12 @@ threadpool& protocol::pool()
     return pool_;
 }
 
-void protocol::set_version(const message::version& value)
+const message::version& protocol::peer_version()
+{
+    return channel_->version();
+}
+
+void protocol::set_peer_version(const message::version& value)
 {
     channel_->set_version(value);
 }
