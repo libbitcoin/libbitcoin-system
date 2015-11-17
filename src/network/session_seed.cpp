@@ -40,6 +40,7 @@ namespace libbitcoin {
 namespace network {
 
 #define CLASS session_seed
+#define NAME "session_seed"
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -100,7 +101,7 @@ void session_seed::start_seeding(size_t start_size, connector::ptr connect,
     auto multiple = ORDERED2(handle_complete, start_size, handler);
 
     // Require all seed callbacks before calling session_seed::handle_stopped.
-    auto single = synchronize(multiple, seeds.size(), "session_seed", true);
+    auto single = synchronize(multiple, seeds.size(), NAME, true);
 
     // Require one callback per channel before calling single.
     // We don't use parallel here because connect is itself asynchronous.
