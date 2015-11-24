@@ -61,14 +61,14 @@ public:
     template <typename Handler, typename... Args>
     void concurrent(Handler&& handler, Args&&... args)
     {
-        work_.concurrent(BIND_HANDLER(handler, args));
+        work_.concurrent(FORWARD_HANDLER(handler), FORWARD_ARGS(args));
     }
 
     /// Post a job to the strand. Ordered and not concurrent.
     template <typename Handler, typename... Args>
     void ordered(Handler&& handler, Args&&... args)
     {
-        work_.ordered(BIND_HANDLER(handler, args));
+        work_.ordered(FORWARD_HANDLER(handler), FORWARD_ARGS(args));
     }
 
     /// Posts a strand-wrapped job to the service. Not ordered or concurrent.
@@ -76,7 +76,7 @@ public:
     template <typename Handler, typename... Args>
     void unordered(Handler&& handler, Args&&... args)
     {
-        work_.unordered(BIND_HANDLER(handler, args));
+        work_.unordered(FORWARD_HANDLER(handler), FORWARD_ARGS(args));
     }
 
     /// Executes the job against each member of a collection concurrently.
