@@ -53,11 +53,11 @@ struct concurrent
     template <typename... Args>
     void operator()(Args&&... args)
     {
-        work.concurrent(BIND_HANDLER(handler, args));
+        heap.concurrent(BIND_HANDLER(handler, args));
     }
 
     Handler handler;
-    work& work;
+    work& heap;
 };
 
 /// Ordered synchronous delegate.
@@ -67,11 +67,11 @@ struct ordered
     template <typename... Args>
     void operator()(Args&&... args)
     {
-        work.ordered(BIND_HANDLER(handler, args));
+        heap.ordered(BIND_HANDLER(handler, args));
     }
 
     Handler handler;
-    work& work;
+    work& heap;
 };
 
 /// Unordered synchronous delegate.
@@ -81,11 +81,11 @@ struct unordered
     template <typename... Args>
     void operator()(Args&&... args)
     {
-        work.unordered(BIND_HANDLER(handler, args));
+        heap.unordered(BIND_HANDLER(handler, args));
     }
 
     Handler handler;
-    work& work;
+    work& heap;
 };
 
 #undef FORWARD_ARGS

@@ -41,7 +41,7 @@ namespace libbitcoin {
 #define BIND_HANDLER(handler, args) \
     std::bind(FORWARD_HANDLER(handler), FORWARD_ARGS(args))
 
-/// boost asio class wrapper to enable work queue management.
+/// boost asio class wrapper to enable work heap management.
 class BC_API work
 {
 public:

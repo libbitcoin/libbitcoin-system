@@ -61,14 +61,14 @@ public:
     template <typename... Args>
     void concurrent(Args&&... args)
     {
-        work_.concurrent(BIND_ARGS(args));
+        heap_.concurrent(BIND_ARGS(args));
     }
 
     /// Post a job to the strand. Ordered and not concurrent.
     template <typename... Args>
     void ordered(Args&&... args)
     {
-        work_.ordered(BIND_ARGS(args));
+        heap_.ordered(BIND_ARGS(args));
     }
 
     /// Posts a strand-wrapped job to the service. Not ordered or concurrent.
@@ -76,7 +76,7 @@ public:
     template <typename... Args>
     void unordered(Args&&... args)
     {
-        work_.unordered(BIND_ARGS(args));
+        heap_.unordered(BIND_ARGS(args));
     }
 
     /// Returns a delegate that will execute the job on the current thread.
@@ -98,7 +98,7 @@ public:
         return
         {
             BIND_ARGS(args),
-            work_
+            heap_
         };
     }
 
@@ -110,7 +110,7 @@ public:
         return
         {
             BIND_ARGS(args),
-            work_
+            heap_
         };
     }
 
@@ -122,7 +122,7 @@ public:
         return
         {
             BIND_ARGS(args),
-            work_
+            heap_
         };
     }
 
@@ -163,7 +163,7 @@ public:
     }
 
 private:
-    work work_;
+    work heap_;
 };
 
 #undef FORWARD_ARGS
