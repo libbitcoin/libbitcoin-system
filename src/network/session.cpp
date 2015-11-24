@@ -189,7 +189,7 @@ void session::register_channel(channel::ptr channel,
 {
     // Place invocation of stop handler on ordered delegate.
     const auto stop_handler =
-        dispatch_.ordered_delegate(&session::remove,
+        dispatch_.ordered_delegate(&session::do_remove,
             shared_from_this(), _1, channel, handle_stopped);
 
     // Place invocation of start handler on ordered delegate.
@@ -213,7 +213,7 @@ void session::register_channel(channel::ptr channel,
     channel->set_nonce(nonzero_pseudo_random());
 
     const auto unpend_handler =
-        dispatch_.ordered_delegate(&session::unpend,
+        dispatch_.ordered_delegate(&session::do_unpend,
             shared_from_this(), _1, channel, start_handler);
 
     network_.pend(channel,
@@ -334,7 +334,7 @@ void session::handle_started(const code& ec, channel::ptr channel,
     handle_started(ec);
 }
 
-void session::unpend(const code& ec, channel::ptr channel,
+void session::do_unpend(const code& ec, channel::ptr channel,
     result_handler handle_started)
 {
     channel->set_nonce(0);
@@ -344,7 +344,7 @@ void session::unpend(const code& ec, channel::ptr channel,
             shared_from_this(), _1));
 }
 
-void session::remove(const code& ec, channel::ptr channel,
+void session::do_remove(const code& ec, channel::ptr channel,
     result_handler handle_stopped)
 {
     handle_stopped(ec);

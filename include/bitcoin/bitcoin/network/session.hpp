@@ -137,14 +137,14 @@ private:
         result_handler handle_started);
     void handle_is_pending(bool pending, channel::ptr channel,
         result_handler handle_started);
-    void unpend(const code& ec, channel::ptr channel,
+    void do_unpend(const code& ec, channel::ptr channel,
         result_handler handle_started);
     void handle_unpend(const code& ec);
     void handle_stored(const code& ec, channel::ptr channel,
         result_handler handle_started);
     void handle_started(const code& ec, channel::ptr channel,
         result_handler handle_started, result_handler handle_stopped);
-    void remove(const code& ec, channel::ptr channel,
+    void do_remove(const code& ec, channel::ptr channel,
         result_handler handle_stopped);
     void handle_remove(const code& ec);
 
