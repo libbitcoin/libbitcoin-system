@@ -36,10 +36,10 @@
     value##_subscriber_(std::make_shared<value##_subscriber_type>( \
         pool, #value "_sub"))
 
-#define RELAY_MESSAGE(value) \
-    value##_subscriber_->relay(ec, message::value())
+#define RELAY_MESSAGE(code, value) \
+    value##_subscriber_->relay(code, message::value())
 
-#define CASE_LOAD_STREAM(value) \
+#define CASE_LOAD_STREAM(stream, value) \
     case message_type::value: \
         return load<message::value>(stream, value##_subscriber_)
 
@@ -97,54 +97,54 @@ message_subscriber::message_subscriber(threadpool& pool)
 
 void message_subscriber::broadcast(const code& ec)
 {
-    RELAY_MESSAGE(address);
-    RELAY_MESSAGE(alert);
-    RELAY_MESSAGE(block);
-    RELAY_MESSAGE(filter_add);
-    RELAY_MESSAGE(filter_clear);
-    RELAY_MESSAGE(filter_load);
-    RELAY_MESSAGE(get_address);
-    RELAY_MESSAGE(get_blocks);
-    RELAY_MESSAGE(get_data);
-    RELAY_MESSAGE(get_headers);
-    RELAY_MESSAGE(headers);
-    RELAY_MESSAGE(inventory);
-    RELAY_MESSAGE(memory_pool);
-    RELAY_MESSAGE(merkle_block);
-    RELAY_MESSAGE(not_found);
-    RELAY_MESSAGE(ping);
-    RELAY_MESSAGE(pong);
-    RELAY_MESSAGE(reject);
-    RELAY_MESSAGE(transaction);
-    RELAY_MESSAGE(verack);
-    RELAY_MESSAGE(version);
+    RELAY_MESSAGE(ec, address);
+    RELAY_MESSAGE(ec, alert);
+    RELAY_MESSAGE(ec, block);
+    RELAY_MESSAGE(ec, filter_add);
+    RELAY_MESSAGE(ec, filter_clear);
+    RELAY_MESSAGE(ec, filter_load);
+    RELAY_MESSAGE(ec, get_address);
+    RELAY_MESSAGE(ec, get_blocks);
+    RELAY_MESSAGE(ec, get_data);
+    RELAY_MESSAGE(ec, get_headers);
+    RELAY_MESSAGE(ec, headers);
+    RELAY_MESSAGE(ec, inventory);
+    RELAY_MESSAGE(ec, memory_pool);
+    RELAY_MESSAGE(ec, merkle_block);
+    RELAY_MESSAGE(ec, not_found);
+    RELAY_MESSAGE(ec, ping);
+    RELAY_MESSAGE(ec, pong);
+    RELAY_MESSAGE(ec, reject);
+    RELAY_MESSAGE(ec, transaction);
+    RELAY_MESSAGE(ec, verack);
+    RELAY_MESSAGE(ec, version);
 }
 
 code message_subscriber::load(message_type type, std::istream& stream) const
 {
     switch (type)
     {
-        CASE_LOAD_STREAM(address);
-        CASE_LOAD_STREAM(alert);
-        CASE_LOAD_STREAM(block);
-        CASE_LOAD_STREAM(filter_add);
-        CASE_LOAD_STREAM(filter_clear);
-        CASE_LOAD_STREAM(filter_load);
-        CASE_LOAD_STREAM(get_address);
-        CASE_LOAD_STREAM(get_blocks);
-        CASE_LOAD_STREAM(get_data);
-        CASE_LOAD_STREAM(get_headers);
-        CASE_LOAD_STREAM(headers);
-        CASE_LOAD_STREAM(inventory);
-        CASE_LOAD_STREAM(memory_pool);
-        CASE_LOAD_STREAM(merkle_block);
-        CASE_LOAD_STREAM(not_found);
-        CASE_LOAD_STREAM(ping);
-        CASE_LOAD_STREAM(pong);
-        CASE_LOAD_STREAM(reject);
-        CASE_LOAD_STREAM(transaction);
-        CASE_LOAD_STREAM(verack);
-        CASE_LOAD_STREAM(version);
+        CASE_LOAD_STREAM(stream, address);
+        CASE_LOAD_STREAM(stream, alert);
+        CASE_LOAD_STREAM(stream, block);
+        CASE_LOAD_STREAM(stream, filter_add);
+        CASE_LOAD_STREAM(stream, filter_clear);
+        CASE_LOAD_STREAM(stream, filter_load);
+        CASE_LOAD_STREAM(stream, get_address);
+        CASE_LOAD_STREAM(stream, get_blocks);
+        CASE_LOAD_STREAM(stream, get_data);
+        CASE_LOAD_STREAM(stream, get_headers);
+        CASE_LOAD_STREAM(stream, headers);
+        CASE_LOAD_STREAM(stream, inventory);
+        CASE_LOAD_STREAM(stream, memory_pool);
+        CASE_LOAD_STREAM(stream, merkle_block);
+        CASE_LOAD_STREAM(stream, not_found);
+        CASE_LOAD_STREAM(stream, ping);
+        CASE_LOAD_STREAM(stream, pong);
+        CASE_LOAD_STREAM(stream, reject);
+        CASE_LOAD_STREAM(stream, transaction);
+        CASE_LOAD_STREAM(stream, verack);
+        CASE_LOAD_STREAM(stream, version);
         case message_type::unknown:
         default:
             return error::not_found;
