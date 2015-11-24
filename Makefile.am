@@ -153,12 +153,14 @@ src_libbitcoin_la_SOURCES = \
     src/utility/evaluation_context.hpp \
     src/utility/istream_reader.cpp \
     src/utility/log.cpp \
+    src/utility/monitor.cpp \
     src/utility/ostream_writer.cpp \
     src/utility/random.cpp \
     src/utility/string.cpp \
     src/utility/thread.cpp \
     src/utility/threadpool.cpp \
     src/utility/variable_uint_size.cpp \
+    src/utility/work.cpp \
     src/wallet/bitcoin_uri.cpp \
     src/wallet/dictionary.cpp \
     src/wallet/ec_private.cpp \
@@ -408,7 +410,6 @@ include_bitcoin_bitcoin_message_HEADERS = \
 include_bitcoin_bitcoin_networkdir = ${includedir}/bitcoin/bitcoin/network
 include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/acceptor.hpp \
-    include/bitcoin/bitcoin/network/asio.hpp \
     include/bitcoin/bitcoin/network/channel.hpp \
     include/bitcoin/bitcoin/network/connections.hpp \
     include/bitcoin/bitcoin/network/connector.hpp \
@@ -446,6 +447,7 @@ include_bitcoin_bitcoin_unicode_HEADERS = \
 include_bitcoin_bitcoin_utilitydir = ${includedir}/bitcoin/bitcoin/utility
 include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/array_slice.hpp \
+    include/bitcoin/bitcoin/utility/asio.hpp \
     include/bitcoin/bitcoin/utility/assert.hpp \
     include/bitcoin/bitcoin/utility/binary.hpp \
     include/bitcoin/bitcoin/utility/collection.hpp \
@@ -461,6 +463,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/exceptions.hpp \
     include/bitcoin/bitcoin/utility/istream_reader.hpp \
     include/bitcoin/bitcoin/utility/log.hpp \
+    include/bitcoin/bitcoin/utility/monitor.hpp \
     include/bitcoin/bitcoin/utility/ostream_writer.hpp \
     include/bitcoin/bitcoin/utility/random.hpp \
     include/bitcoin/bitcoin/utility/reader.hpp \
@@ -471,7 +474,9 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/thread.hpp \
     include/bitcoin/bitcoin/utility/threadpool.hpp \
     include/bitcoin/bitcoin/utility/timer.hpp \
+    include/bitcoin/bitcoin/utility/track.hpp \
     include/bitcoin/bitcoin/utility/variable_uint_size.hpp \
+    include/bitcoin/bitcoin/utility/work.hpp \
     include/bitcoin/bitcoin/utility/writer.hpp
 
 include_bitcoin_bitcoin_walletdir = ${includedir}/bitcoin/bitcoin/wallet

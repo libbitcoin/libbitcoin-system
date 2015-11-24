@@ -56,7 +56,7 @@ using namespace bc::network;
     config.threads = 1; \
     config.host_pool_capacity = 0; \
     config.outbound_connections = 0; \
-    config.inbound_connection_limit = 0
+    config.connection_limit = 0
 
 #define SETTINGS_TESTNET_ONE_THREAD_ONE_SEED(config) \
     SETTINGS_TESTNET_ONE_THREAD_NO_CONNECTIONS(config); \
@@ -67,7 +67,7 @@ using namespace bc::network;
 #define SETTINGS_TESTNET_TWO_THREADS_ONE_SEED_OUTBOUND(config) \
     settings config = p2p::testnet; \
     config.threads = 2; \
-    config.inbound_connection_limit = 0; \
+    config.connection_limit = 0; \
     config.seeds = { { SEED1 } }; \
     config.hosts_file = get_log_path(TEST_NAME, "hosts")
 
@@ -227,7 +227,7 @@ BOOST_AUTO_TEST_CASE(p2p__start__no_connections__start_stop_success)
     BOOST_REQUIRE_EQUAL(stop_result(network), error::success);
 }
 
-BOOST_AUTO_TEST_CASE(p2p__start__no_sessions__start_success_start_operation_failed)
+BOOST_AUTO_TEST_CASE(p2p__start__no_sessions__start_success_start_operation_fail)
 {
     print_headers(TEST_NAME);
     SETTINGS_TESTNET_ONE_THREAD_NO_CONNECTIONS(configuration);
@@ -246,17 +246,7 @@ BOOST_AUTO_TEST_CASE(p2p__start__seed_session__start_stop_start_success)
     BOOST_REQUIRE_EQUAL(start_result(network), error::success);
 }
 
-BOOST_AUTO_TEST_CASE(p2p__start__seed_session__start_stop1_start_success)
-{
-    print_headers(TEST_NAME);
-    SETTINGS_TESTNET_ONE_THREAD_ONE_SEED(configuration);
-    p2p network(configuration);
-    BOOST_REQUIRE_EQUAL(start_result(network), error::success);
-    BOOST_REQUIRE_EQUAL(stop_result(network), error::success);
-    BOOST_REQUIRE_EQUAL(start_result(network), error::success);
-}
-
-BOOST_AUTO_TEST_CASE(p2p__start__seed_session_handshake_timeout__start_operation_failed_stop_success)
+BOOST_AUTO_TEST_CASE(p2p__start__seed_session_handshake_timeout__start_operation_fail_stop_success)
 {
     print_headers(TEST_NAME);
     SETTINGS_TESTNET_ONE_THREAD_ONE_SEED(configuration);
@@ -272,7 +262,7 @@ BOOST_AUTO_TEST_CASE(p2p__start__seed_session_handshake_timeout__start_operation
     BOOST_REQUIRE_EQUAL(stop_result(network), error::success);
 }
 
-BOOST_AUTO_TEST_CASE(p2p__start__seed_session_connect_timeout__start_operation_failed_stop_success)
+BOOST_AUTO_TEST_CASE(p2p__start__seed_session_connect_timeout__start_operation_fail_stop_success)
 {
     print_headers(TEST_NAME);
     SETTINGS_TESTNET_ONE_THREAD_ONE_SEED(configuration);
@@ -282,7 +272,7 @@ BOOST_AUTO_TEST_CASE(p2p__start__seed_session_connect_timeout__start_operation_f
     BOOST_REQUIRE_EQUAL(stop_result(network), error::success);
 }
 
-BOOST_AUTO_TEST_CASE(p2p__start__seed_session_germination_timeout__start_operation_failed_stop_success)
+BOOST_AUTO_TEST_CASE(p2p__start__seed_session_germination_timeout__start_operation_fail_stop_success)
 {
     print_headers(TEST_NAME);
     SETTINGS_TESTNET_ONE_THREAD_ONE_SEED(configuration);
@@ -292,7 +282,7 @@ BOOST_AUTO_TEST_CASE(p2p__start__seed_session_germination_timeout__start_operati
     BOOST_REQUIRE_EQUAL(stop_result(network), error::success);
 }
 
-BOOST_AUTO_TEST_CASE(p2p__start__seed_session_inactivity_timeout__start_operation_failed_stop_success)
+BOOST_AUTO_TEST_CASE(p2p__start__seed_session_inactivity_timeout__start_operation_fail_stop_success)
 {
     print_headers(TEST_NAME);
     SETTINGS_TESTNET_ONE_THREAD_ONE_SEED(configuration);
@@ -302,7 +292,7 @@ BOOST_AUTO_TEST_CASE(p2p__start__seed_session_inactivity_timeout__start_operatio
     BOOST_REQUIRE_EQUAL(stop_result(network), error::success);
 }
 
-BOOST_AUTO_TEST_CASE(p2p__start__seed_session_expiration_timeout__start_operation_failed_stop_success)
+BOOST_AUTO_TEST_CASE(p2p__start__seed_session_expiration_timeout__start_operation_fail_stop_success)
 {
     print_headers(TEST_NAME);
     SETTINGS_TESTNET_ONE_THREAD_ONE_SEED(configuration);
@@ -314,7 +304,7 @@ BOOST_AUTO_TEST_CASE(p2p__start__seed_session_expiration_timeout__start_operatio
 
 // Disabled for live test reliability.
 // This may fail due to missing blacklist entries for the specified host.
-////BOOST_AUTO_TEST_CASE(p2p__start__seed_session_blacklisted__start_operation_failed_stop_success)
+////BOOST_AUTO_TEST_CASE(p2p__start__seed_session_blacklisted__start_operation_fail_stop_success)
 ////{
 ////    print_headers(TEST_NAME);
 ////    SETTINGS_TESTNET_ONE_THREAD_NO_CONNECTIONS(configuration);

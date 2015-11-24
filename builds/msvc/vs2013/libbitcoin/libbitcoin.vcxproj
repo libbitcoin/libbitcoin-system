@@ -174,6 +174,7 @@
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\evaluation_context.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\istream_reader.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\monitor.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\random.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\log.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\ostream_writer.cpp" />
@@ -181,6 +182,7 @@
     <ClCompile Include="..\..\..\..\src\utility\thread.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\threadpool.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\variable_uint_size.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\work.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\dictionary.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\ec_public.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\ek_private.cpp" />
@@ -267,7 +269,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\not_found.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\verack.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\acceptor.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\asio.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\connections.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\logging.hpp" />
@@ -299,9 +300,11 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\unicode_ostream.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\unicode_streambuf.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\array_slice.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\asio.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\assert.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\deadline.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\delegates.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\monitor.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\synchronizer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\dispatcher.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\binary.hpp" />
@@ -324,7 +327,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\thread.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\threadpool.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\timer.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\track.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\variable_uint_size.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\work.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\writer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\version.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\bitcoin_uri.hpp" />

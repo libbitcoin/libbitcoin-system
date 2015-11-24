@@ -43,41 +43,62 @@ using std::placeholders::_2;
 session_outbound::session_outbound(threadpool& pool, p2p& network,
     const settings& settings)
   : session(pool, network, settings, false, false),
-    CONSTRUCT_TRACK(session_outbound, LOG_NETWORK)
+    CONSTRUCT_TRACK(session_outbound)
 {
 }
 
-void session_outbound::start()
+// Start sequence.
+// ----------------------------------------------------------------------------
+
+void session_outbound::start(result_handler handler)
 {
-    if (!stopped())
+    session::start(ORDERED2(handle_started, _1, handler));
+}
+
+void session_outbound::handle_started(const code& ec, result_handler handler)
+{
+    if (ec)
+    {
+        handler(ec);
         return;
+    }
 
     if (settings_.outbound_connections == 0)
     {
         log::info(LOG_NETWORK)
             << "Not configured for generating outbound connections.";
+        handler(error::success);
         return;
     }
 
-    session::start();
     const auto connect = create_connector();
     for (size_t peer = 0; peer < settings_.outbound_connections; ++peer)
         new_connection(connect);
+
+    // This is the end of the start sequence.
+    handler(error::success);
 }
+
+// Connnect cycle.
+// ----------------------------------------------------------------------------
 
 void session_outbound::new_connection(connector::ptr connect)
 {
+    if (stopped())
+    {
+        log::debug(LOG_NETWORK)
+            << "Suspended outbound connection.";
+        return;
+    }
+
     fetch_address(ORDERED3(start_connect, _1, _2, connect));
 }
 
 void session_outbound::start_connect(const code& ec, const authority& host,
     connector::ptr connect)
 {
-    if (stopped())
-        return;
-
-    // This prevents a tight loop in an unusual circumstance.
     // TODO: rebuild connection count once addresses are found.
+    // This termination prevents a tight loop in the empty address pool case.
     if (ec == error::not_found)
     {
         log::error(LOG_NETWORK)
@@ -126,7 +147,7 @@ void session_outbound::handle_connect(const code& ec, channel::ptr channel,
 
     register_channel(channel, 
         BIND3(handle_channel_start, _1, connect, channel),
-        BIND2(handle_channel_stop, _1, connect));
+        BIND3(handle_channel_stop, _1, connect, channel));
 }
 
 void session_outbound::handle_channel_start(const code& ec,
@@ -135,7 +156,7 @@ void session_outbound::handle_channel_start(const code& ec,
     // Treat a start failure just like a stop.
     if (ec)
     {
-        handle_channel_stop(ec, connect);
+        handle_channel_stop(ec, connect, channel);
         return;
     }
 
@@ -144,10 +165,16 @@ void session_outbound::handle_channel_start(const code& ec,
 }
 
 void session_outbound::handle_channel_stop(const code& ec,
-    connector::ptr connect)
+    connector::ptr connect, channel::ptr channel)
 {
-    if (ec != error::service_stopped)
-        new_connection(connect);
+    // HACK
+    channel->stop(ec);
+
+    log::debug(LOG_NETWORK)
+        << "Outbound channel stopped [" << channel->authority() << "] "
+        << ec.message();
+
+    new_connection(connect);
 }
 
 } // namespace network

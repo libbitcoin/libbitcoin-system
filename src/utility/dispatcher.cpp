@@ -19,14 +19,14 @@
  */
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 
-#include <new>
-#include <thread>
+#include <string>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
+#include <bitcoin/bitcoin/utility/work.hpp>
 
 namespace libbitcoin {
 
-dispatcher::dispatcher(threadpool& pool)
-  : service_(pool.service()), strand_(service_)
+dispatcher::dispatcher(threadpool& pool, const std::string& name)
+  : work_(pool, name)
 {
 }
 

@@ -533,6 +533,12 @@
     <ClCompile Include="..\..\..\..\src\network\protocol.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\work.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\monitor.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -838,9 +844,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_seed.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\asio.hpp">
-      <Filter>include\bitcoin\network</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\delegates.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
@@ -1020,6 +1023,18 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol.hpp">
       <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\work.hpp">
+      <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\monitor.hpp">
+      <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\track.hpp">
+      <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\asio.hpp">
+      <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

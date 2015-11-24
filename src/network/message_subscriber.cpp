@@ -32,9 +32,9 @@
 #define TRACK_SUBSCRIBER(value) \
     INITIALIZE_TRACK(bc::network::message_subscriber::value##_subscriber_type)
 
-#define INITIALIZE_SUBSCRIBER(pool, log, value) \
+#define INITIALIZE_SUBSCRIBER(pool, value) \
     value##_subscriber_(std::make_shared<value##_subscriber_type>( \
-        pool, #value, log))
+        pool, #value "_sub"))
 
 #define RELAY_MESSAGE(value) \
     value##_subscriber_->relay(ec, message::value())
@@ -71,27 +71,27 @@ namespace network {
 using namespace message;
 
 message_subscriber::message_subscriber(threadpool& pool)
-  : INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, address),
-    INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, alert),
-    INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, block),
-    INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, filter_add),
-    INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, filter_clear),
-    INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, filter_load),
-    INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, get_address),
-    INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, get_blocks),
-    INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, get_data),
-    INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, get_headers),
-    INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, headers),
-    INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, inventory),
-    INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, memory_pool),
-    INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, merkle_block),
-    INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, not_found),
-    INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, ping),
-    INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, pong),
-    INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, reject),
-    INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, transaction),
-    INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, verack),
-    INITIALIZE_SUBSCRIBER(pool, LOG_PROTOCOL, version)
+  : INITIALIZE_SUBSCRIBER(pool, address),
+    INITIALIZE_SUBSCRIBER(pool, alert),
+    INITIALIZE_SUBSCRIBER(pool, block),
+    INITIALIZE_SUBSCRIBER(pool, filter_add),
+    INITIALIZE_SUBSCRIBER(pool, filter_clear),
+    INITIALIZE_SUBSCRIBER(pool, filter_load),
+    INITIALIZE_SUBSCRIBER(pool, get_address),
+    INITIALIZE_SUBSCRIBER(pool, get_blocks),
+    INITIALIZE_SUBSCRIBER(pool, get_data),
+    INITIALIZE_SUBSCRIBER(pool, get_headers),
+    INITIALIZE_SUBSCRIBER(pool, headers),
+    INITIALIZE_SUBSCRIBER(pool, inventory),
+    INITIALIZE_SUBSCRIBER(pool, memory_pool),
+    INITIALIZE_SUBSCRIBER(pool, merkle_block),
+    INITIALIZE_SUBSCRIBER(pool, not_found),
+    INITIALIZE_SUBSCRIBER(pool, ping),
+    INITIALIZE_SUBSCRIBER(pool, pong),
+    INITIALIZE_SUBSCRIBER(pool, reject),
+    INITIALIZE_SUBSCRIBER(pool, transaction),
+    INITIALIZE_SUBSCRIBER(pool, verack),
+    INITIALIZE_SUBSCRIBER(pool, version)
 {
 }
 

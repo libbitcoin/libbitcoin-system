@@ -23,7 +23,7 @@
 #include <memory>
 #include <string>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/network/asio.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/protocol_events.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
@@ -42,20 +42,36 @@ protocol_timer::protocol_timer(threadpool& pool, channel::ptr channel,
 {
 }
 
+// Start sequence.
+// ----------------------------------------------------------------------------
+
+// protected:
 void protocol_timer::start(const asio::duration& timeout,
-    event_handler handler)
+    event_handler handle_event)
 {
+    protocol_events::start(BIND2(handle_notify, _1, handle_event));
     deadline_ = std::make_shared<deadline>(pool(), timeout);
     reset_timer();
-
-    protocol_events::start(BIND2(handle_event, _1, handler));
 }
 
+void protocol_timer::handle_notify(const code& ec, event_handler handler)
+{
+    if (ec == error::channel_stopped)
+        cancel_timer();
+
+    handler(ec);
+}
+
+// Timers (these inherently race, so no need to strand).
+// ----------------------------------------------------------------------------
+
+// protected:
 void protocol_timer::cancel_timer()
 {
     deadline_->cancel();
 }
 
+// protected:
 void protocol_timer::reset_timer()
 {
     if (stopped())
@@ -74,14 +90,6 @@ void protocol_timer::handle_timer(const code& ec)
         << ec.message();
 
     set_event(error::channel_timeout);
-}
-
-void protocol_timer::handle_event(const code& ec, event_handler handler)
-{
-    if (ec == error::channel_stopped)
-        cancel_timer();
-
-    handler(ec);
 }
 
 } // namespace network

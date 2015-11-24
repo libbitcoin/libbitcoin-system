@@ -46,19 +46,17 @@
 namespace libbitcoin {
 namespace network {
 
+/// Manages all socket communication, thread safe.
 class BC_API proxy
   : public std::enable_shared_from_this<proxy>
 {
 public:
+    typedef std::shared_ptr<proxy> ptr;
     typedef subscriber<const code&> stop_subscriber;
+    typedef std::function<void()> completion_handler;
     typedef std::function<void(const code&)> result_handler;
 
-    template <class Derived>
-    std::shared_ptr<Derived> shared_from_base()
-    {
-        return std::static_pointer_cast<Derived>(shared_from_this());
-    }
-
+    /// Construct an instance.
     proxy(threadpool& pool, asio::socket_ptr socket, uint32_t magic);
     ~proxy();
 
@@ -66,76 +64,103 @@ public:
     proxy(const proxy&) = delete;
     void operator=(const proxy&) = delete;
 
+    /// Send a message on the socket.
     template <class Message, typename Handler>
-    void send(Message&& packet, Handler&& handler)
+    void send(const Message& packet, Handler&& handler)
     {
-        if (stopped())
+        const auto command = packet.command;
+        const auto data = message::serialize(packet, magic_);
+        const auto self = shared_from_this();
+        auto call = [self, command, data](Handler handler)
         {
-            handler(error::channel_stopped);
-            return;
-        }
+            self->do_send(data, handler, command);
+        };
 
-        using namespace message;
-        const auto bytes = serialize(std::forward<Message>(packet), magic_);
-        const auto handle_send = std::forward<Handler>(handler);
-        dispatch_.ordered(&proxy::do_send,
-            shared_from_this(), bytes, handle_send, packet.command);
+        dispatch_.unordered(call, handler);
     }
 
+    /// Subscribe to messages of the specified type on the socket.
     template <class Message, typename Handler>
     void subscribe(Handler&& handler)
     {
-        if (stopped())
+        const auto self = shared_from_this();
+        auto call = [self](Handler handler)
         {
-            handler(error::channel_stopped, Message());
-            return;
-        }
+            if (self->stopped())
+                handler(error::channel_stopped, Message());
+            else
+                self->message_subscriber_.subscribe<Message>(handler);
+        };
 
-        // Subscribing must be immediate, we cannot switch thread contexts.
-        message_subscriber_.subscribe<Message>(std::forward<Handler>(handler));
+        // See comments in proxy::subscribe_stop.
+        if (starting_)
+            call(std::forward<Handler>(handler));
+        else
+            dispatch_.unordered(call, handler);
     }
 
-    void talk();
-    void start();
-    bool stopped() const;
-    void stop(const code& ec);
-    void subscribe_stop(result_handler handler);
-    const config::authority& authority() const;
+    /// Subscribe to the stop event.
+    virtual void subscribe_stop(result_handler handler);
+
+    /// Get the authority of the far end of this socket.
+    virtual const config::authority& authority() const;
+
+    /// Read messages from this socket.
+    virtual void start(result_handler handler);
+
+    /// Stop reading or sending messages on this socket.
+    virtual void stop(const code& ec);
 
 protected:
+    template <class Derived>
+    std::shared_ptr<Derived> shared_from_base()
+    {
+        return std::static_pointer_cast<Derived>(shared_from_this());
+    }
+
+    virtual bool stopped() const;
     virtual void handle_activity() = 0;
     virtual void handle_stopping() = 0;
 
 private:
     typedef byte_source<message::heading::buffer> heading_source;
     typedef boost::iostreams::stream<heading_source> heading_stream;
-
     typedef byte_source<data_chunk> payload_source;
     typedef boost::iostreams::stream<payload_source> payload_stream;
 
     static config::authority authority_factory(asio::socket_ptr socket);
 
+    // Unordered, to protect registration.
     void stop(const boost_code& ec);
     void do_stop(const code& ec);
+    void do_subscribe_stop(result_handler handler);
 
+    // Ordered, to protect socket and read sequence.
     void read_heading();
     void handle_read_heading(const boost_code& ec, size_t);
 
+    // Ordered, to protect socket and read sequence.
     void read_payload(const message::heading& head);
     void handle_read_payload(const boost_code& ec, size_t,
         const message::heading& heading);
 
+    // Unordered, to protect socket and limit shutdown log messages.
     void call_handle_send(const boost_code& ec, result_handler handler);
     void do_send(const data_chunk& message, result_handler handler,
         const std::string& command);
-
+    
     bool stopped_;
-    uint32_t magic_;
+    bool starting_;
+
+    const uint32_t magic_;
+    const config::authority authority_;
+
     dispatcher dispatch_;
     asio::socket_ptr socket_;
-    config::authority authority_;
+
     message_subscriber message_subscriber_;
     stop_subscriber::ptr stop_subscriber_;
+
     message::heading::buffer heading_buffer_;
     data_chunk payload_buffer_;
 };

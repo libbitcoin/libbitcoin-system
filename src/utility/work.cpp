@@ -17,21 +17,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_ASSERT_HPP
-#define LIBBITCOIN_ASSERT_HPP
+#include <bitcoin/bitcoin/utility/work.hpp>
 
-#ifdef NDEBUG
-    #define BITCOIN_ASSERT(expr)
-    #define BITCOIN_ASSERT_MSG(expr, msg)
-    #define DEBUG_ONLY(expression)
-#else
-    #include <cassert>
-    #define BITCOIN_ASSERT(expr) assert(expr)
-    #define BITCOIN_ASSERT_MSG(expr, msg) assert((expr)&&(msg))
-    #define DEBUG_ONLY(expression) expression
-#endif
+#include <memory>
+#include <string>
+#include <bitcoin/bitcoin/utility/delegates.hpp>
+#include <bitcoin/bitcoin/utility/threadpool.hpp>
 
-#include <bitcoin/bitcoin/utility/monitor.hpp>
-#include <bitcoin/bitcoin/utility/track.hpp>
+namespace libbitcoin {
 
-#endif
+work::work(threadpool& pool, const std::string& name)
+  : name_(name),
+    ordered_(std::make_shared<monitor::count>(0)),
+    unordered_(std::make_shared<monitor::count>(0)),
+    concurrent_(std::make_shared<monitor::count>(0)),
+    service_(pool.service()),
+    strand_(service_)
+{
+}
+
+} // namespace libbitcoin

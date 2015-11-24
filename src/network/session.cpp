@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
@@ -42,6 +43,8 @@
 
 namespace libbitcoin {
 namespace network {
+    
+#define NAME "session"
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -53,69 +56,13 @@ session::session(threadpool& pool, p2p& network, const settings& settings,
     notify_(!temporary),
     pool_(pool),
     network_(network),
-    dispatch_(pool),
+    dispatch_(pool, NAME),
     settings_(settings)
 {
 }
 
-acceptor::ptr session::create_acceptor()
-{
-    const auto accept = std::make_shared<acceptor>(pool_, settings_);
-    const auto handle_stop = [accept]()
-    {
-        accept->cancel();
-    };
-    subscribe_stop(handle_stop);
-    return accept;
-}
-
-connector::ptr session::create_connector()
-{
-    const auto connect = std::make_shared<connector>(pool_, settings_);
-    const auto handle_stop = [connect]()
-    {
-        connect->cancel();
-    };
-    subscribe_stop(handle_stop);
-    return connect;
-}
-
-// If we ever allow restart we need to guard start.
-void session::start()
-{
-    if (!stopped())
-        return;
-
-    stopped_ = false;
-    subscribe_stop(std::bind(&session::handle_stop,
-        shared_from_this()));
-}
-
-void session::handle_stop()
-{
-    stopped_ = true;
-}
-
-bool session::stopped() const
-{
-    return stopped_;
-}
-
-void session::subscribe_stop(stop_handler handler)
-{
-    network_.subscribe(
-        dispatch_.ordered_delegate(&session::handle_channel,
-            shared_from_this(), _1, _2, handler));
-}
-
-void session::handle_channel(const code& ec, channel::ptr,
-    stop_handler handler)
-{
-    if (ec == error::service_stopped)
-        handler();
-    else
-        subscribe_stop(handler);
-}
+// Properties.
+// ----------------------------------------------------------------------------
 
 void session::address_count(count_handler handler)
 {
@@ -140,30 +87,121 @@ bool session::blacklisted(const authority& authority) const
     return it != blocked.end();
 }
 
-// The two handlers are always ordered on the session strand.
-// This should be the first call after a socket is opened on a channel.
-void session::register_channel(channel::ptr channel,
-    result_handler handle_started, result_handler handle_stopped)
+// Socket creators.
+// ----------------------------------------------------------------------------
+
+acceptor::ptr session::create_acceptor()
 {
-    if (stopped())
+    const auto accept = std::make_shared<acceptor>(pool_, settings_);
+    const auto handle_stop = [accept]()
     {
-        handle_started(error::service_stopped);
+        accept->cancel();
+    };
+
+    subscribe_stop(handle_stop);
+    return accept;
+}
+
+connector::ptr session::create_connector()
+{
+    const auto connect = std::make_shared<connector>(pool_, settings_);
+    const auto handle_stop = [connect]()
+    {
+        connect->cancel();
+    };
+
+    subscribe_stop(handle_stop);
+    return connect;
+}
+
+// Start sequence.
+// ----------------------------------------------------------------------------
+
+// public:
+void session::start(result_handler handler)
+{
+    dispatch_.ordered(&session::do_start,
+        shared_from_this(), handler);
+}
+
+void session::do_start(result_handler handler)
+{
+    if (!stopped())
+    {
+        handler(error::operation_failed);
         return;
     }
 
-    // After this point we must stop the channel if there is a start error.
-    // This is managed in session::handle_started, where all starts terminate.
-    channel->start();
+    const auto subscribe_handler =
+        dispatch_.ordered_delegate(&session::handle_stop,
+            shared_from_this());
 
+    stopped_ = false;
+    subscribe_stop(subscribe_handler);
+
+    // This is the end of the start sequence.
+    handler(error::success);
+}
+
+void session::subscribe_stop(stop_handler handler)
+{
+    const auto subscribe_handler =
+        dispatch_.ordered_delegate(&session::handle_channel_event,
+            shared_from_this(), _1, _2, handler);
+
+    network_.subscribe(subscribe_handler);
+}
+
+// Stop sequence (initiated by stop handler).
+// ----------------------------------------------------------------------------
+
+// private:
+void session::handle_channel_event(const code& ec, channel::ptr,
+    stop_handler handler)
+{
+    if (ec == error::service_stopped)
+        handler();
+    else
+        subscribe_stop(handler);
+}
+
+void session::handle_stop()
+{
+    stopped_ = true;
+}
+
+bool session::stopped() const
+{
+    return stopped_;
+}
+
+// Channel registration sequence.
+// ----------------------------------------------------------------------------
+// BUGBUG: there is a race here between completion of handshake and start of
+// other protocols. Initial incoming messages (ping, address, get-headers)
+// initiated by peer are being missed. To resolve this we would need to suspend
+// and restart talk or pre-register for the messages. Stop messages are never
+// missed since protocol::start is ordered on the channel strand.
+
+// protected:
+void session::register_channel(channel::ptr channel,
+    result_handler handle_started, result_handler handle_stopped)
+{
     // Place invocation of stop handler on ordered delegate.
-    const auto remove_handler =
+    const auto stop_handler =
         dispatch_.ordered_delegate(&session::remove,
             shared_from_this(), _1, channel, handle_stopped);
 
     // Place invocation of start handler on ordered delegate.
-    const auto start_handler = 
+    auto start_handler =
         dispatch_.ordered_delegate(&session::handle_started,
-            shared_from_this(), _1, channel, handle_started, remove_handler);
+            shared_from_this(), _1, channel, handle_started, stop_handler);
+
+    if (stopped())
+    {
+        start_handler(error::service_stopped);
+        return;
+    }
 
     if (incoming_)
     {
@@ -171,7 +209,7 @@ void session::register_channel(channel::ptr channel,
             shared_from_this(), error::success, channel, start_handler);
         return;
     }
-
+    
     channel->set_nonce(nonzero_pseudo_random());
 
     const auto unpend_handler =
@@ -192,19 +230,23 @@ void session::handle_pend(const code& ec, channel::ptr channel,
         return;
     }
 
-    // TODO: there is a race here between completion of handshake and start of other protocols.
-    // Incoming ping and address messages are being missed.
+    const auto handler =
+        dispatch_.bound_delegate(&session::handle_channel_start,
+            shared_from_this(), _1, channel, handle_started);
 
+    // The channel starts, invokes the handler, then starts the read cycle.
+    channel->start(handler);
+}
+
+void session::handle_channel_start(const code& ec, channel::ptr channel,
+    result_handler handle_started)
+{
     const auto handler =
         dispatch_.ordered_delegate(&session::handle_handshake,
             shared_from_this(), _1, channel, handle_started);
 
-    // Subscribe start handler to handshake completion.
     attach<protocol_version>(channel)->
         start(settings_, network_.height(), handler);
-
-    // Start reading messages from the socket.
-    channel->talk();
 }
 
 void session::handle_handshake(const code& ec, channel::ptr channel,
@@ -219,17 +261,15 @@ void session::handle_handshake(const code& ec, channel::ptr channel,
         return;
     }
     
-    if (incoming_)
-    {
-        network_.pent(channel->version().nonce,
-            dispatch_.ordered_delegate(&session::handle_is_pending,
-                shared_from_this(), _1, channel, handle_started));
-        return;
-    }
+    auto handler = 
+        dispatch_.ordered_delegate(&session::handle_is_pending,
+            shared_from_this(), _1, channel, handle_started);
 
-    // Bypass loopback test for outgoing channels.
-    dispatch_.ordered(&session::handle_is_pending,
-        shared_from_this(), false, channel, handle_started);
+    // The loopback test is for incoming channels only.
+    if (incoming_)
+        network_.pent(channel->version().nonce, handler);
+    else
+        handler(false);
 }
 
 void session::handle_is_pending(bool pending, channel::ptr channel,
@@ -255,19 +295,22 @@ void session::handle_is_pending(bool pending, channel::ptr channel,
         return;
     }
 
-    network_.store(channel, 
-        std::bind(&session::handle_stored,
-            shared_from_this(), _1, channel, handle_started));
+    const auto handler = 
+        dispatch_.bound_delegate(&session::handle_stored,
+            shared_from_this(), _1, channel, handle_started);
+
+    network_.store(channel, handler);
 }
 
 void session::handle_stored(const code& ec, channel::ptr channel,
     result_handler handle_started)
 {
-    // Don't notify of channel creation if we are seeding (for example).
-    if (notify_)
-        network_.relay(error::success, channel);
-
+    // Connection-in-use indicated here by error::address_in_use.
     handle_started(ec);
+
+    // Don't notify of channel creation if we are seeding (for example).
+    if (!ec && notify_)
+        network_.relay(error::success, channel);
 }
 
 void session::handle_started(const code& ec, channel::ptr channel,
@@ -279,7 +322,15 @@ void session::handle_started(const code& ec, channel::ptr channel,
     else
         channel->subscribe_stop(handle_stopped);
 
-    // End of the start sequence.
+    ////if (ec)
+    ////    log::debug(LOG_NETWORK)
+    ////        << "Failed to start [" << channel->authority() << "] "
+    ////        << ec.message();
+    ////else
+    ////    log::debug(LOG_NETWORK)
+    ////        << "Started [" << channel ->authority() << "]";
+
+    // End of the registration sequence.
     handle_started(ec);
 }
 
@@ -289,7 +340,7 @@ void session::unpend(const code& ec, channel::ptr channel,
     channel->set_nonce(0);
     handle_started(ec);
     network_.unpend(channel,
-        std::bind(&session::handle_unpend,
+        dispatch_.bound_delegate(&session::handle_unpend,
             shared_from_this(), _1));
 }
 
@@ -298,7 +349,7 @@ void session::remove(const code& ec, channel::ptr channel,
 {
     handle_stopped(ec);
     network_.remove(channel,
-        std::bind(&session::handle_remove,
+        dispatch_.bound_delegate(&session::handle_remove,
             shared_from_this(), _1));
 }
 

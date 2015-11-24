@@ -39,6 +39,7 @@ public:
     typedef std::function<void(size_t)> count_handler;
     typedef std::function<void(const code&)> result_handler;
 
+    /// Construct an instance.
     pending(threadpool& pool);
     ~pending();
 

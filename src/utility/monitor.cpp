@@ -17,21 +17,29 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_ASSERT_HPP
-#define LIBBITCOIN_ASSERT_HPP
-
-#ifdef NDEBUG
-    #define BITCOIN_ASSERT(expr)
-    #define BITCOIN_ASSERT_MSG(expr, msg)
-    #define DEBUG_ONLY(expression)
-#else
-    #include <cassert>
-    #define BITCOIN_ASSERT(expr) assert(expr)
-    #define BITCOIN_ASSERT_MSG(expr, msg) assert((expr)&&(msg))
-    #define DEBUG_ONLY(expression) expression
-#endif
-
 #include <bitcoin/bitcoin/utility/monitor.hpp>
-#include <bitcoin/bitcoin/utility/track.hpp>
 
+#include <cstddef>
+#include <string>
+
+namespace libbitcoin {
+
+monitor::monitor(count_ptr counter, const std::string& name)
+  : counter_(counter), name_(name)
+{
+    trace((*counter_)++, "+");
+}
+
+monitor::~monitor()
+{
+    trace(--(*counter_), "-");
+}
+
+void monitor::trace(size_t count, const std::string& action) const
+{
+#ifndef NDEBUG
+    log::debug(LOG_TRACK) << action << " " name_ << " {" << count << "}";
 #endif
+}
+
+} // namespace libbitcoin

@@ -90,22 +90,27 @@ version protocol_version::template_factory(const config::authority& authority,
 protocol_version::protocol_version(threadpool& pool, p2p&,
     channel::ptr channel)
   : protocol_timer(pool, channel, NAME),
-    CONSTRUCT_TRACK(protocol_version, LOG_PROTOCOL)
+    CONSTRUCT_TRACK(protocol_version)
 {
 }
+
+// Start sequence.
+// ----------------------------------------------------------------------------
 
 void protocol_version::start(const settings& settings, size_t height,
     event_handler handler)
 {
-    const auto self = template_factory(authority(), settings, nonce(), height);
-    const auto complete = BIND2(handle_handshake_complete, _1, handler);
     protocol_timer::start(settings.channel_handshake(),
-        synchronize(complete, 3, NAME));
+        synchronize(BIND2(handle_handshake_complete, _1, handler), 3, NAME));
 
+    const auto self = template_factory(authority(), settings, nonce(), height);
     SUBSCRIBE2(version, handle_receive_version, _1, _2);
     SUBSCRIBE2(verack, handle_receive_verack, _1, _2);
     SEND1(self, handle_version_sent, _1);
 }
+
+// Protocol.
+// ----------------------------------------------------------------------------
 
 void protocol_version::handle_handshake_complete(const code& ec,
     event_handler handler)

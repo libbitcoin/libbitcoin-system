@@ -49,7 +49,7 @@ INITIALIZE_TRACK(bc::network::channel::channel_subscriber);
 namespace libbitcoin {
 namespace network {
 
-#define NAME "channel::subscriber"
+#define NAME "p2p"
 
 using std::placeholders::_1;
 
@@ -58,9 +58,9 @@ const settings p2p::mainnet
     NETWORK_THREADS,
     NETWORK_IDENTIFIER_MAINNET,
     NETWORK_INBOUND_PORT_MAINNET,
-    NETWORK_INBOUND_CONNECTION_LIMIT,
+    NETWORK_CONNECTION_LIMIT,
     NETWORK_OUTBOUND_CONNECTIONS,
-    NETWORK_CONNECT_ATTEMPTS,
+    NETWORK_MANUAL_RETRY_LIMIT,
     NETWORK_CONNECT_TIMEOUT_SECONDS,
     NETWORK_CHANNEL_HANDSHAKE_SECONDS,
     NETWORK_CHANNEL_REVIVAL_MINUTES,
@@ -83,9 +83,9 @@ const settings p2p::testnet
     NETWORK_THREADS,
     NETWORK_IDENTIFIER_TESTNET,
     NETWORK_INBOUND_PORT_TESTNET,
-    NETWORK_INBOUND_CONNECTION_LIMIT,
+    NETWORK_CONNECTION_LIMIT,
     NETWORK_OUTBOUND_CONNECTIONS,
-    NETWORK_CONNECT_ATTEMPTS,
+    NETWORK_MANUAL_RETRY_LIMIT,
     NETWORK_CONNECT_TIMEOUT_SECONDS,
     NETWORK_CHANNEL_HANDSHAKE_SECONDS,
     NETWORK_CHANNEL_REVIVAL_MINUTES,
@@ -107,12 +107,11 @@ p2p::p2p(const settings& settings)
   : stopped_(true),
     height_(0),
     settings_(settings),
-    dispatch_(pool_),
+    dispatch_(pool_, NAME),
     pending_(pool_),
     connections_(pool_),
     hosts_(pool_, settings_),
-    subscriber_(std::make_shared<channel::channel_subscriber>(pool_, NAME,
-        LOG_NETWORK))
+    subscriber_(std::make_shared<channel::channel_subscriber>(pool_, NAME "_sub"))
 {
 }
 
@@ -152,14 +151,37 @@ void p2p::start(result_handler handler)
     pool_.join();
     pool_.spawn(settings_.threads, thread_priority::low);
 
-    // There is no need to seed or run the service to perform manual connection.
+    const auto handle_manual_started =
+        dispatch_.ordered_delegate(&p2p::handle_manual_started,
+            this, _1, handler);
+
+    // There is no need to seed or run to perform manual connection.
     // This instance is retained by the stop handler and the member reference.
     manual_ = attach<session_manual>(settings_);
-    manual_->start();
+    manual_->start(handle_manual_started);
+}
 
-    hosts_.load(
+void p2p::handle_manual_started(const code& ec, result_handler handler)
+{
+    if (stopped())
+    {
+        handler(error::service_stopped);
+        return;
+    }
+
+    if (ec)
+    {
+        log::error(LOG_NETWORK)
+            << "Error starting manual session: " << ec.message();
+        handler(ec);
+        return;
+    }
+
+    const auto hosts_loaded_handler =
         dispatch_.ordered_delegate(&p2p::handle_hosts_loaded,
-            this, _1, handler));
+            this, _1, handler);
+
+    hosts_.load(hosts_loaded_handler);
 }
 
 void p2p::handle_hosts_loaded(const code& ec, result_handler handler)
@@ -178,7 +200,7 @@ void p2p::handle_hosts_loaded(const code& ec, result_handler handler)
         return;
     }
 
-    auto seeded_handler = 
+    const auto seeded_handler =
         dispatch_.ordered_delegate(&p2p::handle_hosts_seeded,
             this, _1, handler);
 
@@ -211,9 +233,41 @@ void p2p::handle_hosts_seeded(const code& ec, result_handler handler)
 
 void p2p::run(result_handler handler)
 {
-    // These instances are retained by the stop handler (until shutdown).
-    attach<session_inbound>(settings_)->start();
-    attach<session_outbound>(settings_)->start();
+    const auto inbound_started_handler =
+        dispatch_.ordered_delegate(&p2p::handle_inbound_started,
+            this, _1, handler);
+
+    // This instance is retained by the stop handler (until shutdown).
+    attach<session_inbound>(settings_)->start(inbound_started_handler);
+}
+
+void p2p::handle_inbound_started(const code& ec, result_handler handler)
+{
+    if (ec)
+    {
+        log::error(LOG_NETWORK)
+            << "Error starting inbound session: " << ec.message();
+        handler(ec);
+        return;
+    }
+
+    const auto outbound_started_handler =
+        dispatch_.ordered_delegate(&p2p::handle_outbound_started,
+            this, _1, handler);
+
+    // This instance is retained by the stop handler (until shutdown).
+    attach<session_outbound>(settings_)->start(outbound_started_handler);
+}
+
+void p2p::handle_outbound_started(const code& ec, result_handler handler)
+{
+    if (ec)
+    {
+        log::error(LOG_NETWORK)
+            << "Error starting outbound session: " << ec.message();
+        handler(ec);
+        return;
+    }
 
     // This is the end of the run sequence.
     handler(error::success);
@@ -229,16 +283,16 @@ void p2p::stop(result_handler handler)
         handler(error::service_stopped);
         return;
     }
+    
+    const auto hosts_save_handler =
+        dispatch_.ordered_delegate(&p2p::handle_hosts_saved,
+            this, _1, handler);
 
     stopped_ = true;
     manual_ = nullptr;
     relay(error::service_stopped, nullptr);
     connections_.stop(error::service_stopped);
-
-    hosts_.save(
-        dispatch_.ordered_delegate(&p2p::handle_hosts_saved,
-            this, _1, handler));
-
+    hosts_.save(hosts_save_handler);
     pool_.shutdown();
 }
 
@@ -257,12 +311,16 @@ void p2p::handle_hosts_saved(const code& ec, result_handler handler)
 
 p2p::~p2p()
 {
+    // A reference cycle cannot exist with this class, since we don't capture
+    // shared pointers to it. Therefore this will always clear subscriptions.
     close();
 }
 
 void p2p::close()
 {
     stop([](code){});
+
+    // This is the end of the stop sequence.
     pool_.join();
 }
 
@@ -340,7 +398,7 @@ void p2p::address_count(count_handler handler)
     hosts_.count(handler);
 }
 
-// Channel management.
+// Manual connections.
 // ----------------------------------------------------------------------------
 
 void p2p::connect(const std::string& hostname, uint16_t port)
@@ -360,6 +418,10 @@ void p2p::connect(const std::string& hostname, uint16_t port,
         manual_->connect(hostname, port, handler);
 }
 
+// Channel subscription.
+// ----------------------------------------------------------------------------
+
+// We can allow subscription when stopped given that we clear on destruct.
 void p2p::subscribe(channel_handler handler)
 {
     if (stopped())

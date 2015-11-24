@@ -36,9 +36,11 @@
 namespace libbitcoin {
 namespace network {
 
+#define NAME "hosts"
+
 hosts::hosts(threadpool& pool, const settings& settings)
   : buffer_(std::max(settings.host_pool_capacity, 1u)),
-    dispatch_(pool),
+    dispatch_(pool, NAME),
     file_path_(settings.hosts_file),
     disabled_(settings.host_pool_capacity == 0)
 {

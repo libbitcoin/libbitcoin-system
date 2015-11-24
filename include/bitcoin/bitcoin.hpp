@@ -78,7 +78,6 @@
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/network/acceptor.hpp>
-#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/connections.hpp>
 #include <bitcoin/bitcoin/network/connector.hpp>
@@ -110,6 +109,7 @@
 #include <bitcoin/bitcoin/unicode/unicode_ostream.hpp>
 #include <bitcoin/bitcoin/unicode/unicode_streambuf.hpp>
 #include <bitcoin/bitcoin/utility/array_slice.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/binary.hpp>
 #include <bitcoin/bitcoin/utility/collection.hpp>
@@ -125,6 +125,7 @@
 #include <bitcoin/bitcoin/utility/exceptions.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
 #include <bitcoin/bitcoin/utility/log.hpp>
+#include <bitcoin/bitcoin/utility/monitor.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -135,7 +136,9 @@
 #include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 #include <bitcoin/bitcoin/utility/timer.hpp>
+#include <bitcoin/bitcoin/utility/track.hpp>
 #include <bitcoin/bitcoin/utility/variable_uint_size.hpp>
+#include <bitcoin/bitcoin/utility/work.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
 #include <bitcoin/bitcoin/wallet/bitcoin_uri.hpp>
 #include <bitcoin/bitcoin/wallet/dictionary.hpp>

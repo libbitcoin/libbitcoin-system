@@ -17,21 +17,43 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_ASSERT_HPP
-#define LIBBITCOIN_ASSERT_HPP
+#ifndef LIBBITCOIN_MONITOR_HPP
+#define LIBBITCOIN_MONITOR_HPP
 
-#ifdef NDEBUG
-    #define BITCOIN_ASSERT(expr)
-    #define BITCOIN_ASSERT_MSG(expr, msg)
-    #define DEBUG_ONLY(expression)
-#else
-    #include <cassert>
-    #define BITCOIN_ASSERT(expr) assert(expr)
-    #define BITCOIN_ASSERT_MSG(expr, msg) assert((expr)&&(msg))
-    #define DEBUG_ONLY(expression) expression
-#endif
+#include <atomic>
+#include <cstddef>
+#include <functional>
+#include <memory>
+#include <string>
+#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/log.hpp>
 
-#include <bitcoin/bitcoin/utility/monitor.hpp>
-#include <bitcoin/bitcoin/utility/track.hpp>
+namespace libbitcoin {
+
+/// A reference counting wrapper for closures placed on the asio work heap.
+class BC_API monitor
+{
+public:
+    typedef std::atomic<size_t> count;
+    typedef std::shared_ptr<count> count_ptr;
+
+    monitor(count_ptr counter, const std::string& name);
+    ~monitor();
+
+    template <typename Handler>
+    void invoke(Handler handler) const
+    {
+        ////trace(*counter_, "*");
+        handler();
+    }
+
+    void trace(size_t count, const std::string& action) const;
+
+private:
+    count_ptr counter_;
+    const std::string name_;
+};
+
+} // namespace libbitcoin
 
 #endif

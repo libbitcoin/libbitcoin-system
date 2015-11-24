@@ -27,7 +27,7 @@
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/network/asio.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -35,6 +35,7 @@
 namespace libbitcoin {
 namespace network {
 
+/// Create outbound socket connections, thread safe.
 class BC_API connector
   : public std::enable_shared_from_this<connector>, track<connector>
 {
@@ -42,7 +43,7 @@ public:
     typedef std::shared_ptr<connector> ptr;
     typedef std::function<void(const code&, channel::ptr)> connect_handler;
 
-    /// Construct the connector.
+    /// Construct an instance.
     connector(threadpool& pool, const settings& settings);
 
     /// This class is not copyable.

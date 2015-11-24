@@ -45,35 +45,56 @@ using std::placeholders::_2;
 session_manual::session_manual(threadpool& pool, p2p& network,
     const settings& settings)
   : session(pool, network, settings, false, false),
-    CONSTRUCT_TRACK(session_manual, LOG_NETWORK)
+    CONSTRUCT_TRACK(session_manual)
 {
 }
 
-void session_manual::start()
+// Start sequence.
+// ----------------------------------------------------------------------------
+
+// Must call start before connect.
+void session_manual::start(result_handler handler)
 {
-    session::start();
+    session::start(ORDERED2(handle_started, _1, handler));
+}
+
+void session_manual::handle_started(const code& ec, result_handler handler)
+{
+    if (ec)
+    {
+        handler(ec);
+        return;
+    }
+
     connect_ = create_connector();
+
+    // This is the end of the start sequence.
+    handler(error::success);
 }
 
-// Must call start() before connect.
+// Connect sequence/cycle,
+// ----------------------------------------------------------------------------
+
 void session_manual::connect(const std::string& hostname, uint16_t port)
 {
-    const auto unhandled = [](const code, channel::ptr) {};
+    const auto unhandled = [](code, channel::ptr) {};
     connect(hostname, port, unhandled);
 }
 
-// Must call start() before connect.
 void session_manual::connect(const std::string& hostname, uint16_t port,
     channel_handler handler)
 {
-    start_connect(hostname, port, handler, settings_.connect_attempts);
+    start_connect(hostname, port, handler, settings_.manual_retry_limit);
 }
 
+// The first connect is a sequence, which then spawns a cycle.
 void session_manual::start_connect(const std::string& hostname, uint16_t port,
-    channel_handler handler, uint16_t retries)
+    channel_handler handler, uint32_t retries)
 {
     if (stopped())
     {
+        log::debug(LOG_NETWORK)
+            << "Suspended manual connection.";
         handler(error::service_stopped, nullptr);
         return;
     }
@@ -85,7 +106,7 @@ void session_manual::start_connect(const std::string& hostname, uint16_t port,
 
 void session_manual::handle_connect(const code& ec, channel::ptr channel,
     const std::string& hostname, uint16_t port, channel_handler handler,
-    uint16_t retries)
+    uint32_t retries)
 {
     if (ec)
     {
@@ -94,7 +115,7 @@ void session_manual::handle_connect(const code& ec, channel::ptr channel,
             << "] manually: " << ec.message();
 
         // Retry logic.
-        if (settings_.connect_attempts == 0)
+        if (settings_.manual_retry_limit == 0)
             start_connect(hostname, port, handler, 0);
         else if (retries > 0)
             start_connect(hostname, port, handler, retries - 1);
@@ -116,13 +137,6 @@ void session_manual::handle_connect(const code& ec, channel::ptr channel,
 void session_manual::handle_channel_start(const code& ec, const std::string& hostname,
     uint16_t port, channel::ptr channel, channel_handler handler)
 {
-    // We should stop on all non-recoverable errors, otherwise this cycles forever.
-    if (ec == error::service_stopped)
-    {
-        handler(ec, channel);
-        return;
-    }
-
     // Treat a start failure just like a stop, but preserve the start handler.
     if (ec)
     {
@@ -130,9 +144,10 @@ void session_manual::handle_channel_start(const code& ec, const std::string& hos
         return;
     }
 
-    // Notify of successful first handshake.
+    // This is the end of the connect sequence (the handler goes out of scope).
     handler(error::success, channel);
 
+    // This is the beginning of the connect cycle.
     attach<protocol_ping>(channel)->start(settings_);
     attach<protocol_address>(channel)->start(settings_);
 }
@@ -141,8 +156,10 @@ void session_manual::handle_channel_start(const code& ec, const std::string& hos
 void session_manual::handle_channel_stop(const code& ec,
     const std::string& hostname, uint16_t port)
 {
-    if (ec != error::service_stopped)
-        connect(hostname, port);
+    log::debug(LOG_NETWORK)
+        << "Manual channel stopped: " << ec.message();
+
+    connect(hostname, port);
 }
 
 } // namespace network

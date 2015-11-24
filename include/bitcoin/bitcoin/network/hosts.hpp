@@ -51,6 +51,7 @@ public:
     typedef std::function<void(const code&)> result_handler;
     typedef std::function<void(const code&, const address&)> fetch_handler;
 
+    /// Construct an instance.
     hosts(threadpool& pool, const settings& settings);
 
     /// This class is not copyable.

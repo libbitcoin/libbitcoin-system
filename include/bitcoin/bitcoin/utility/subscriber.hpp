@@ -38,8 +38,7 @@ public:
     typedef std::function<void (Args...)> handler;
     typedef std::shared_ptr<subscriber<Args...>> ptr;
 
-    subscriber(threadpool& pool, const std::string& class_name,
-        const std::string& log_name);
+    subscriber(threadpool& pool, const std::string& class_name);
 
     void subscribe(handler notifier);
     void relay(Args... args);

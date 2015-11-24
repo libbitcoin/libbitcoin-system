@@ -47,26 +47,36 @@ protocol_address::protocol_address(threadpool& pool, p2p& network,
     channel::ptr channel)
   : protocol_events(pool, channel, NAME),
     network_(network),
-    CONSTRUCT_TRACK(protocol_address, LOG_PROTOCOL)
+    CONSTRUCT_TRACK(protocol_address)
 {
 }
+
+// Start sequence.
+// ----------------------------------------------------------------------------
 
 void protocol_address::start(const settings& settings)
 {
+    // This protocol doesn't care about stop events.
+    const auto unhandled = [](code){};
+    protocol_events::start(unhandled);
+
     if (settings.self.port() != 0)
     {
-        self_.addresses.push_back(settings.self.to_network_address());
+        self_ = address({ { settings.self.to_network_address() } });
         SEND1(self_, handle_send_address, _1);
     }
 
-    // If we can't store addresses we don't ask for or receive them.
+    // If we can't store addresses we don't ask for or handle them.
     if (settings.host_pool_capacity == 0)
         return;
 
-    protocol_events::start();
+    SUBSCRIBE2(address, handle_receive_address, _1, _2);
     SUBSCRIBE2(get_address, handle_receive_get_address, _1, _2);
     SEND1(get_address(), handle_send_get_address, _1);
 }
+
+// Protocol.
+// ----------------------------------------------------------------------------
 
 void protocol_address::handle_receive_address(const code& ec,
     const address& message)

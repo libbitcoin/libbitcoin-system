@@ -40,46 +40,51 @@ protocol_events::protocol_events(threadpool& pool, channel::ptr channel,
 {
 }
 
-void protocol_events::set_event(const code& ec)
+// Properties.
+// ----------------------------------------------------------------------------
+
+// protected:
+bool protocol_events::stopped() const
 {
-    CALL1(do_set_event, ec);
+    return !event_handler_;
 }
 
-void protocol_events::start()
-{
-    const auto unhandled = [](const code) {};
-    start(unhandled);
-}
+// Start sequence.
+// ----------------------------------------------------------------------------
 
+// protected:
 void protocol_events::start(event_handler handler)
 {
-    if (event_handler_ || stopped())
-    {
-        handler(error::channel_stopped);
-        return;
-    }
-
     event_handler_ = handler;
-    SUBSCRIBE_STOP1(handle_stop, _1);
+    SUBSCRIBE_STOP1(handle_stopped, _1);
 }
 
-void protocol_events::do_set_event(const code& ec)
-{
-    if (event_handler_)
-        event_handler_(ec);
+// Stop (invoked by stop handler only).
+// ----------------------------------------------------------------------------
 
-    if (ec == error::channel_stopped)
-        event_handler_ = nullptr;
-}
-
-void protocol_events::handle_stop(const code& ec)
+// private:
+void protocol_events::handle_stopped(const code& ec)
 {
     log::debug(LOG_PROTOCOL)
-        << "Stopped protocol_" << name() << " on [" << authority() << "] "
+        << "Stop protocol_" << name() << " on [" << authority() << "] "
         << ec.message();
     
     // Event handlers can depend on this code for channel stop.
     set_event(error::channel_stopped);
+}
+
+// Set event.
+// ----------------------------------------------------------------------------
+
+// protected:
+void protocol_events::set_event(const code& ec)
+{
+    if (stopped())
+        return;
+
+    event_handler_(ec);
+    if (ec == error::channel_stopped)
+        event_handler_ = nullptr;
 }
 
 } // namespace network

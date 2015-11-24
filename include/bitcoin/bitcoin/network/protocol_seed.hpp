@@ -25,7 +25,7 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
 #include <bitcoin/bitcoin/message/get_address.hpp>
-#include <bitcoin/bitcoin/network/asio.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/p2p.hpp>
 #include <bitcoin/bitcoin/network/protocol_timer.hpp>

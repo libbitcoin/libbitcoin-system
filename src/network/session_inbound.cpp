@@ -44,34 +44,55 @@ using std::placeholders::_2;
 session_inbound::session_inbound(threadpool& pool, p2p& network,
     const settings& settings)
   : session(pool, network, settings, true, false),
-    CONSTRUCT_TRACK(session_inbound, LOG_NETWORK)
+    CONSTRUCT_TRACK(session_inbound)
 {
 }
 
-void session_inbound::start()
-{
-    if (!stopped())
-        return;
+// Start sequence.
+// ----------------------------------------------------------------------------
 
-    if (settings_.inbound_port == 0 || settings_.inbound_connection_limit == 0)
+void session_inbound::start(result_handler handler)
+{
+    session::start(ORDERED2(handle_started, _1, handler));
+}
+
+void session_inbound::handle_started(const code& ec, result_handler handler)
+{
+    if (ec)
     {
-        log::info(LOG_NETWORK)
-            << "Not configured for accepting incoming connections.";
+        handler(ec);
         return;
     }
 
-    session::start();
+    if (settings_.inbound_port == 0 || settings_.connection_limit == 0)
+    {
+        log::info(LOG_NETWORK)
+            << "Not configured for accepting incoming connections.";
+        handler(error::success);
+        return;
+    }
+
     const auto accept = create_acceptor();
     const auto port = settings_.inbound_port;
 
     // START LISTENING ON PORT
     accept->listen(port, ORDERED2(start_accept, _1, accept));
+
+    // This is the end of the start sequence.
+    handler(error::success);
 }
+
+// Accept sequence.
+// ----------------------------------------------------------------------------
 
 void session_inbound::start_accept(const code& ec, acceptor::ptr accept)
 {
     if (stopped())
+    {
+        log::debug(LOG_NETWORK)
+            << "Suspended inbound connection.";
         return;
+    }
 
     if (ec)
     {
@@ -88,7 +109,11 @@ void session_inbound::handle_accept(const code& ec, channel::ptr channel,
     acceptor::ptr accept)
 {
     if (stopped())
+    {
+        log::debug(LOG_NETWORK)
+            << "Suspended inbound connection.";
         return;
+    }
 
     start_accept(error::success, accept);
 
@@ -113,7 +138,7 @@ void session_inbound::handle_accept(const code& ec, channel::ptr channel,
 void session_inbound::handle_connection_count(size_t connections,
     channel::ptr channel)
 {
-    if (connections >= settings_.inbound_connection_limit)
+    if (connections >= settings_.connection_limit)
     {
         log::debug(LOG_NETWORK)
             << "Rejected inbound connection from ["
@@ -139,8 +164,10 @@ void session_inbound::handle_channel_start(const code& ec,
     attach<protocol_address>(channel)->start(settings_);
 }
 
-void session_inbound::handle_channel_stop(const code&)
+void session_inbound::handle_channel_stop(const code& ec)
 {
+    log::debug(LOG_NETWORK)
+        << "Inbound channel stopped: " << ec.message();
 }
 
 } // namespace network

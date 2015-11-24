@@ -40,8 +40,7 @@
 namespace libbitcoin {
 namespace network {
 
-/// This class provides the top level public interface to the networking layer.
-/// All methods except start, run, stop and close are thread safe.
+/// Top level public networking interface, partly thread safe.
 class BC_API p2p
 {
 public:
@@ -57,7 +56,7 @@ public:
 
     // ------------------------------------------------------------------------
 
-    /// Construct the p2p networking instance.
+    /// Construct an instance.
     p2p(const settings& settings=mainnet);
 
     /// Ensure all threads are coalesced.
@@ -88,6 +87,7 @@ public:
     virtual void set_height(size_t value);
 
     // ------------------------------------------------------------------------
+    // THESE METHODS ARE NOT THREAD SAFE
 
     /// Invoke startup and seeding sequence, call from constructing thread.
     virtual void start(result_handler handler);
@@ -150,6 +150,7 @@ public:
     virtual void address_count(count_handler handler);
 
     // ------------------------------------------------------------------------
+    // THESE METHODS ARE NOT THREAD SAFE
 
     /// Maintain a connection to hostname:port.
     virtual void connect(const std::string& hostname, uint16_t port);
@@ -178,6 +179,7 @@ protected:
             std::forward<Args>(args)...);
     }
 
+    /// Determine if the network is stopped. This is not thread safe.
     virtual bool stopped() const;
 
     dispatcher dispatch_;
@@ -191,6 +193,9 @@ private:
     }
 
     void start();
+    void handle_manual_started(const code& ec, result_handler handler);
+    void handle_inbound_started(const code& ec, result_handler handler);
+    void handle_outbound_started(const code& ec, result_handler handler);
     void handle_hosts_loaded(const code& ec, result_handler handler);
     void handle_hosts_seeded(const code& ec, result_handler handler);
     void handle_hosts_saved(const code& ec, result_handler handler);

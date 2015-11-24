@@ -23,7 +23,7 @@
 #include <memory>
 #include <string>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/network/asio.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/network/proxy.hpp>
@@ -31,12 +31,12 @@
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
-#define NAME "connector"
-
 INITIALIZE_TRACK(bc::network::connector);
 
 namespace libbitcoin {
 namespace network {
+
+#define NAME "connector"
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -45,7 +45,7 @@ connector::connector(threadpool& pool, const settings& settings)
   : pool_(pool),
     settings_(settings),
     resolver_(std::make_shared<asio::resolver>(pool.service())),
-    CONSTRUCT_TRACK(connector, LOG_NETWORK)
+    CONSTRUCT_TRACK(connector)
 {
 }
 

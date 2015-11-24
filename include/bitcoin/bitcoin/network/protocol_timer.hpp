@@ -23,7 +23,7 @@
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/network/asio.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/protocol_events.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
@@ -69,7 +69,7 @@ protected:
 
 private:
     void handle_timer(const code& ec);
-    void handle_event(const code& ec, event_handler handler);
+    void handle_notify(const code& ec, event_handler handler);
 
     deadline::ptr deadline_;
 };

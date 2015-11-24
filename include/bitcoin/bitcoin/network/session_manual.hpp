@@ -38,6 +38,7 @@ namespace network {
     
 class p2p;
 
+/// Manual connections session, thread safe.
 class BC_API session_manual
   : public session, track<session_manual>
 {
@@ -45,21 +46,27 @@ public:
     typedef std::shared_ptr<session_manual> ptr;
     typedef std::function<void(const code&, channel::ptr)> channel_handler;
 
+    /// Construct an instance.
     session_manual(threadpool& pool, p2p& network, const settings& settings);
 
-    void start() override;
+    /// Start the session.
+    void start(result_handler handler) override;
 
+    /// Maintain connection to a node.
     void connect(const std::string& hostname, uint16_t port);
+
+    /// Maintain connection to a node with callback on first connect.
     void connect(const std::string& hostname, uint16_t port,
         channel_handler handler);
 
 private:
     void start_connect(const std::string& hostname, uint16_t port,
-        channel_handler handler, uint16_t retries);
+        channel_handler handler, uint32_t retries);
     void handle_connect(const code& ec, channel::ptr channel,
         const std::string& hostname, uint16_t port,
-        channel_handler handler, uint16_t retries);
+        channel_handler handler, uint32_t retries);
 
+    void handle_started(const code& ec, result_handler handler);
     void handle_channel_start(const code& ec, const std::string& hostname,
         uint16_t port, channel::ptr channel, channel_handler handler);
     void handle_channel_stop(const code& ec, const std::string& hostname,

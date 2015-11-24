@@ -31,7 +31,9 @@ namespace network {
 
 protocol::protocol(threadpool& pool, channel::ptr channel,
     const std::string& name)
-  : pool_(pool), dispatch_(pool), channel_(channel), name_(name)
+  : pool_(pool),
+    channel_(channel),
+    name_(name)
 {
 }
 
@@ -40,7 +42,7 @@ config::authority protocol::authority() const
     return channel_->authority();
 }
 
-const std::string& protocol::name()
+const std::string& protocol::name() const
 {
     return name_;
 }
@@ -60,21 +62,17 @@ const message::version& protocol::peer_version()
     return channel_->version();
 }
 
+// Not thread safe, isolate from peer_version reads.
 void protocol::set_peer_version(const message::version& value)
 {
     channel_->set_version(value);
 }
-    
+
+// Stop the channel.
 void protocol::stop(const code& ec)
 {
     channel_->stop(ec);
 }
-    
-bool protocol::stopped() const
-{
-    return channel_->stopped();
-}
 
 } // namespace network
 } // namespace libbitcoin
-

@@ -32,7 +32,7 @@
 #include <bitcoin/bitcoin/messages.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/network/proxy.hpp>
-#include <bitcoin/bitcoin/network/asio.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/network/message_subscriber.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
@@ -44,14 +44,15 @@
 namespace libbitcoin {
 namespace network {
 
+/// A concrete proxy with timers and state, mostly thread safe.
 class BC_API channel
   : public proxy, track<channel>
 {
 public:
     typedef std::shared_ptr<channel> ptr;
     typedef subscriber<const code&, ptr> channel_subscriber;
-    typedef std::function<void(const code&)> result_handler;
 
+    /// Construct an instance.
     channel(threadpool& pool, asio::socket_ptr socket,
         const settings& settings);
 
@@ -59,27 +60,28 @@ public:
     channel(const channel&) = delete;
     void operator=(const channel&) = delete;
 
-    void talk();
-    void start();
+    void start(result_handler handler) override;
 
     uint64_t nonce() const;
-    void set_nonce(uint64_t value);
+    virtual void set_nonce(uint64_t value);
 
-    bool located(const hash_digest& start, const hash_digest& stop) const;
-    void set_located(const hash_digest& start, const hash_digest& stop);
+    virtual const message::version& version() const;
+    virtual void set_version(const message::version& value);
 
-    const message::version& version() const;
-    void set_version(const message::version& value);
+    virtual void reset_revival();
+    virtual void set_revival_handler(result_handler handler);
 
-    void reset_revival();
-    void set_revival_handler(result_handler handler);
+    virtual bool located(const hash_digest& start,
+        const hash_digest& stop) const;
+    virtual void set_located(const hash_digest& start,
+        const hash_digest& stop);
 
 protected:
-    void handle_activity();
-    void handle_stopping();
+    virtual void handle_activity();
+    virtual void handle_stopping();
 
 private:
-    void start_timers();
+    void do_start(const code& ec, result_handler handler);
 
     void start_expiration();
     void handle_expiration(const code& ec);

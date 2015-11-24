@@ -29,8 +29,10 @@
 namespace libbitcoin {
 namespace network {
 
+#define NAME "pending"
+
 pending::pending(threadpool& pool)
-  : dispatch_(pool)
+  : dispatch_(pool, NAME)
 {
 }
 

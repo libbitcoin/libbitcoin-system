@@ -37,9 +37,6 @@ namespace network {
 class BC_API protocol_events
   : public protocol
 {
-public:
-    typedef std::function<void(const code&)> event_handler;
-
 protected:
 
     /**
@@ -50,29 +47,30 @@ protected:
      */
     protocol_events(threadpool& pool, channel::ptr channel,
         const std::string& name);
-    
+
+    /**
+     * Start the protocol.
+     * The event handler may be invoked one or more times.
+     * @param[in]  handler  The handler to call at each completion event.
+     */
+    virtual void start(event_handler handler);
+
     /**
      * Invoke the event handler.
      * @param[in]  ec  The error code of the preceding operation.
      */
-    void set_event(const code& ec);
+    virtual void set_event(const code& ec);
 
     /**
-     * Start the protocol with no event handler.
+     * Determine if the underlying channel has been stopped.
+     * This is not ordered on the channel, so the value can be delayed.
      */
-    void start();
-
-    /**
-     * Start the protocol.
-     * The event handler may be invoked any number of times until released
-     * when the protocol is stopped. A channel_stopped code indicates stop.
-     * @param[in]  handler  The handler to call upon each completion event.
-     */
-    void start(event_handler handler);
+    virtual bool stopped() const;
 
 private:
+    void handle_started(completion_handler handler);
+    void handle_stopped(const code& ec);
     void do_set_event(const code& ec);
-    void handle_stop(const code& ec);
 
     event_handler event_handler_;
 };

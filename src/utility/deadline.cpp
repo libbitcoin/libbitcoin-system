@@ -35,7 +35,7 @@ using std::placeholders::_1;
 // This is guaranteed to call handler exactly once unless canceled or reset.
 deadline::deadline(threadpool& pool, const asio::duration duration)
   : duration_(duration), timer_(pool.service()),
-    CONSTRUCT_TRACK(deadline, LOG_NETWORK)
+    CONSTRUCT_TRACK(deadline)
 {
 }
 

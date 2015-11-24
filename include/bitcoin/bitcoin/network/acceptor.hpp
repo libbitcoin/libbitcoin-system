@@ -25,7 +25,7 @@
 #include <memory>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/network/asio.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -33,6 +33,7 @@
 namespace libbitcoin {
 namespace network {
 
+/// Create inbound socket connections, thread safe.
 class BC_API acceptor
   : public std::enable_shared_from_this<acceptor>, track<acceptor>
 {
@@ -41,7 +42,7 @@ public:
     typedef std::function<void(const code&)> result_handler;
     typedef std::function<void(const code&, channel::ptr)> accept_handler;
 
-    /// Construct the acceptor, handler called after listener start or fail.
+    /// Construct an instance.
     acceptor(threadpool& pool, const settings& settings);
 
     /// This class is not copyable.

@@ -80,7 +80,7 @@ namespace libbitcoin {
 namespace message {
 
 /// The blockchain block and tx objects are isomorphic with the corresponding
-/// message block and tx objects by design. This minimizes lage item copying.
+/// message block and tx objects by design. This minimizes large item copying.
 typedef bc::chain::block block;
 typedef bc::chain::transaction transaction;
 

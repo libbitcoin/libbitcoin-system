@@ -49,27 +49,33 @@ protocol_seed::protocol_seed(threadpool& pool, p2p& network,
     channel::ptr channel)
   : protocol_timer(pool, channel, NAME),
     network_(network),
-    CONSTRUCT_TRACK(protocol_seed, LOG_PROTOCOL)
+    CONSTRUCT_TRACK(protocol_seed)
 {
 }
+
+// Start sequence.
+// ----------------------------------------------------------------------------
 
 void protocol_seed::start(const settings& settings, event_handler handler)
 {
+    auto complete = BIND2(handle_seeding_complete, _1, handler);
+
     if (settings.host_pool_capacity == 0)
     {
-        // Stops channel and ends callback synchronization.
-        handler(error::not_found);
+        complete(error::not_found);
         return;
     }
 
-    const auto seeding_complete = BIND2(handle_seeding_complete, _1, handler);
     protocol_timer::start(settings.channel_germination(),
-        synchronize(seeding_complete, 3, NAME));
+        synchronize(complete, 3, NAME));
 
-    send_own_address(settings);
     SUBSCRIBE2(address, handle_receive_address, _1, _2);
+    send_own_address(settings);
     SEND1(get_address(), handle_send_get_address, _1);
 }
+
+// Protocol.
+// ----------------------------------------------------------------------------
 
 void protocol_seed::send_own_address(const settings& settings)
 {
@@ -79,7 +85,7 @@ void protocol_seed::send_own_address(const settings& settings)
         return;
     }
 
-    address self({ { settings.self.to_network_address() } });
+    const address self({ { settings.self.to_network_address() } });
     SEND1(self, handle_send_address, _1);
 }
 

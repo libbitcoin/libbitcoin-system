@@ -23,7 +23,7 @@
 #include <memory>
 #include <iostream>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/network/asio.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/network/proxy.hpp>
@@ -43,7 +43,7 @@ acceptor::acceptor(threadpool& pool, const settings& settings)
   : pool_(pool),
     settings_(settings),
     acceptor_(std::make_shared<asio::acceptor>(pool_.service())),
-    CONSTRUCT_TRACK(acceptor, LOG_NETWORK)
+    CONSTRUCT_TRACK(acceptor)
 {
 }
 

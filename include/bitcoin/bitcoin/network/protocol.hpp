@@ -22,12 +22,13 @@
 
 #include <functional>
 #include <memory>
+#include <future>
 #include <string>
 #include <utility>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/network/asio.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -35,21 +36,22 @@
 namespace libbitcoin {
 namespace network {
 
-/**
- * Base class for protocol implementation.
- * This simplifies calling bind, send and subscribe.
- * Instances of this class are not copyable.
- */
+#define HANDLER_PROTOCOL_ARGS(handler, args) \
+    std::forward<Handler>(handler), \
+    shared_from_base<Protocol>(), \
+    std::forward<Args>(args)...
+#define BOUND(handler, args) \
+    dispatcher::bound_delegate(HANDLER_PROTOCOL_ARGS(handler, args))
+
+/// Virtual base class for protocol implementation, mostly thread safe.
 class BC_API protocol
   : public std::enable_shared_from_this<protocol>
 {
 protected:
-    /**
-     * Construct a base protocol instance.
-     * @param[in]  pool     The thread pool used by the dispacher.
-     * @param[in]  channel  The channel on which to start the protocol.
-     * @param[in]  name     The instance name for logging purposes.
-     */
+    typedef std::function<void()> completion_handler;
+    typedef std::function<void(const code&)> event_handler;
+
+    /// Construct an instance.
     protocol(threadpool& pool, channel::ptr channel,
         const std::string& name);
 
@@ -60,72 +62,54 @@ protected:
     /// Bind a method in the derived class.
     template <class Protocol, typename Handler, typename... Args>
     auto bind(Handler&& handler, Args&&... args) ->
-        decltype(std::bind(std::forward<Handler>(handler),
-            std::shared_ptr<Protocol>(), std::forward<Args>(args)...))
+        decltype(std::bind(HANDLER_PROTOCOL_ARGS(handler, args)))
     {
-        return std::bind(std::forward<Handler>(handler),
-            shared_from_base<Protocol>(), std::forward<Args>(args)...);
-    }
-
-    /// Call a method in the derived class.
-    template <class Protocol, typename Handler, typename... Args>
-    void call(Handler&& handler, Args&&... args)
-    {
-        dispatch_.ordered(std::forward<Handler>(handler),
-            shared_from_base<Protocol>(), std::forward<Args>(args)...);
+        return std::bind(HANDLER_PROTOCOL_ARGS(handler, args));
     }
 
     /// Send a message on the channel and handle the result.
     template <class Protocol, class Message, typename Handler, typename... Args>
     void send(Message&& packet, Handler&& handler, Args&&... args)
     {
-        channel_->send(std::forward<Message>(packet),
-            dispatch_.ordered_delegate(std::forward<Handler>(handler),
-                shared_from_base<Protocol>(), std::forward<Args>(args)...));
+        channel_->send(std::forward<Message>(packet), BOUND(handler, args));
     }
 
-    /// Subscribe to all channel messages.
+    /// Subscribe to all channel messages, blocking until subscribed.
     template <class Protocol, class Message, typename Handler, typename... Args>
     void subscribe(Handler&& handler, Args&&... args)
     {
-        channel_->template subscribe<Message>(
-            dispatch_.ordered_delegate(std::forward<Handler>(handler),
-                shared_from_base<Protocol>(), std::forward<Args>(args)...));
+        channel_->template subscribe<Message>(BOUND(handler, args));
     }
 
-    /// Subscribe to the channel stop.
+    /// Subscribe to the channel stop, blocking until subscribed.
     template <class Protocol, typename Handler, typename... Args>
     void subscribe_stop(Handler&& handler, Args&&... args)
     {
-        channel_->subscribe_stop(
-            dispatch_.ordered_delegate(std::forward<Handler>(handler),
-                shared_from_base<Protocol>(), std::forward<Args>(args)...));
+        channel_->subscribe_stop(BOUND(handler, args));
     }
 
     /// Get the address of the channel.
-    config::authority authority() const;
+    virtual config::authority authority() const;
 
     /// Get the protocol name, for logging purposes.
-    const std::string& name();
+    virtual const std::string& name() const;
 
     /// Get the channel nonce.
-    uint64_t nonce();
+    virtual uint64_t nonce();
 
     /// Get the threadpool.
-    threadpool& pool();
+    virtual threadpool& pool();
 
-    /// Set the channel version. This method is not thread safe and must
-    /// complete before any other protocol might read the version.
+    /// Set the channel version. This method is NOT thread safe and must
+    /// complete before any other thread could read the peer version.
     void set_peer_version(const message::version& value);
 
-    /// Get the peer version message.
-    const message::version& peer_version();
+    /// Get the peer version message. This method is NOT thread safe and must
+    /// not be called if any other thread could write the peer version.
+    virtual const message::version& peer_version();
 
-    /// Stop the channel.
-    void stop(const code& ec);
-
-    /// Determine if the channel is stopped.
-    bool stopped() const;
+    /// Stop the channel (and the protocol).
+    virtual void stop(const code& ec);
 
 private:
 
@@ -137,10 +121,30 @@ private:
     }
 
     threadpool& pool_;
-    dispatcher dispatch_;
     channel::ptr channel_;
     const std::string name_;
 };
+
+#undef HANDLER_PROTOCOL_ARGS
+#undef BOUND
+
+#define BIND1(method, p1) \
+    bind<CLASS>(&CLASS::method, p1)
+#define BIND2(method, p1, p2) \
+    bind<CLASS>(&CLASS::method, p1, p2)
+
+#define SEND1(message, method, p1) \
+    send<CLASS>(message, &CLASS::method, p1)
+#define SEND2(message, method, p1, p2) \
+    send<CLASS>(message, &CLASS::method, p1, p2)
+
+#define SUBSCRIBE2(message, method, p1, p2) \
+    subscribe<CLASS, message>(&CLASS::method, p1, p2)
+#define SUBSCRIBE3(message, method, p1, p2, p3) \
+    subscribe<CLASS, message>(&CLASS::method, p1, p2, p3)
+
+#define SUBSCRIBE_STOP1(method, p1) \
+    subscribe_stop<CLASS>(&CLASS::method, p1)
 
 } // namespace network
 } // namespace libbitcoin

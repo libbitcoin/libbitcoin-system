@@ -35,24 +35,29 @@ namespace network {
 
 class p2p;
 
+/// Outbound connections session, thread safe.
 class BC_API session_outbound
   : public session, track<session_outbound>
 {
 public:
     typedef std::shared_ptr<session_outbound> ptr;
 
+    /// Construct an instance.
     session_outbound(threadpool& pool, p2p& network, const settings& settings);
 
-    void start() override;
+    /// Start the session.
+    void start(result_handler handler) override;
 
 private:
     void new_connection(connector::ptr connect);
     void start_connect(const code& ec, const authority& host,
         connector::ptr connect);
+    void handle_started(const code& ec, result_handler handler);
     void handle_connect(const code& ec, channel::ptr channel,
         const authority& host, connector::ptr connect);
     
-    void handle_channel_stop(const code& ec, connector::ptr connect);
+    void handle_channel_stop(const code& ec, connector::ptr connect,
+        channel::ptr channel);
     void handle_channel_start(const code& ec, connector::ptr connect,
         channel::ptr channel);
 };

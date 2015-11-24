@@ -27,15 +27,15 @@
 namespace libbitcoin {
 namespace network {
 
-// A reference-counted non-modifiable buffer class.
+// A reference-counted non-modifiable buffer class, not thread safe.
 class BC_API shared_const_buffer
 {
 public:
-    // Implement the ConstBufferSequence requirements.
+    /// Implementation of ConstBufferSequence requirements.
     typedef boost::asio::const_buffer value_type;
     typedef const value_type* const_iterator;
 
-     // Construct from a stream object.
+    /// Construct an instance.
     explicit shared_const_buffer(const data_chunk& data)
       : data_(std::make_shared<data_chunk>(data.begin(), data.end())),
         buffer_(boost::asio::buffer(*data_))

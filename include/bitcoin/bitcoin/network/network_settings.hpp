@@ -25,16 +25,16 @@
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/network/asio.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 
 namespace libbitcoin {
 namespace network {
 
 /// default settings
 #define NETWORK_THREADS                     4
-#define NETWORK_INBOUND_CONNECTION_LIMIT    8
+#define NETWORK_CONNECTION_LIMIT            16
 #define NETWORK_OUTBOUND_CONNECTIONS        8
-#define NETWORK_CONNECT_ATTEMPTS            0
+#define NETWORK_MANUAL_RETRY_LIMIT          0
 #define NETWORK_CONNECT_TIMEOUT_SECONDS     5
 #define NETWORK_CHANNEL_HANDSHAKE_SECONDS   30
 #define NETWORK_CHANNEL_REVIVAL_MINUTES     5
@@ -74,6 +74,7 @@ namespace network {
     { "testnet-seed.bluematt.me", 18333 } \
 }
 
+// Common network configuration settings, thread safe.
 // This file is network_settings.hpp to deconflict with wallet::settings.hpp.
 // This is in network vs. config because plan to move to libbitcoin-network.
 struct BC_API settings
@@ -81,9 +82,9 @@ struct BC_API settings
     uint32_t threads;
     uint32_t identifier;
     uint16_t inbound_port;
-    uint32_t inbound_connection_limit;
+    uint32_t connection_limit;
     uint32_t outbound_connections;
-    uint16_t connect_attempts;
+    uint32_t manual_retry_limit;
     uint32_t connect_timeout_seconds;
     uint32_t channel_handshake_seconds;
     uint32_t channel_revival_minutes;

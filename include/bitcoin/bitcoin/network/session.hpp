@@ -42,8 +42,7 @@ namespace network {
 
 class p2p;
 
-/// A base class for sessions, where a session maintains the lifetime of a set
-/// of channels operating in a context (inbound, outbound, manual, seeding). 
+/// Base class for maintaining the lifetime of a channel set, thread safe.
 class BC_API session
   : public std::enable_shared_from_this<session>
 {
@@ -57,21 +56,13 @@ public:
     typedef std::function<void(const code&, acceptor::ptr)> accept_handler;
     typedef std::function<void(const code&, const authority&)> host_handler;
 
+    /// Construct an instance.
     session(threadpool& pool, p2p& network, const settings& settings,
         bool outgoing, bool persistent);
     
     /// This class is not copyable.
     session(const session&) = delete;
     void operator=(const session&) = delete;
-
-    /// Create a new channel acceptor.
-    acceptor::ptr create_acceptor();
-
-    /// Create a new channel connector with the configured timeout.
-    connector::ptr create_connector();
-
-    /// Start creating connections.
-    virtual void start();
 
 protected:
 
@@ -96,31 +87,37 @@ protected:
     /// Bind an ordered delegate to a method in the derived class.
     template <class Protocol, typename Handler, typename... Args>
     auto ordered(Handler&& handler, Args&&... args) ->
-        delegate::ordered<decltype(std::bind(std::forward<Handler>(handler),
+        delegates::ordered<decltype(std::bind(std::forward<Handler>(handler),
             std::shared_ptr<Protocol>(), std::forward<Args>(args)...))>
     {
         return dispatch_.ordered_delegate(std::forward<Handler>(handler),
             shared_from_base<Protocol>(), std::forward<Args>(args)...);
     }
 
-    bool stopped() const;
-    void subscribe_stop(stop_handler handler);
+    /// Properties.
+    virtual void address_count(count_handler handler);
+    virtual void fetch_address(host_handler handler);
+    virtual void connection_count(count_handler handler);
+    virtual bool blacklisted(const authority& authority) const;
+    virtual bool stopped() const;
 
-    acceptor::ptr listener();
+    /// Socket creators.
+    virtual acceptor::ptr create_acceptor();
+    virtual connector::ptr create_connector();
 
-    void address_count(count_handler handler);
-    void fetch_address(host_handler handler);
-    
-    bool blacklisted(const authority& authority) const;
-    void connection_count(count_handler handler);
-    void register_channel(channel::ptr channel, result_handler handle_started,
-        result_handler handle_stopped);
+    /// Start the session, invokes handler once stop is registered.
+    virtual void start(result_handler handler);
+
+    /// Subscribe to receive session stop notification.
+    virtual void subscribe_stop(stop_handler handler);
+
+    /// Register a new channel with the session and bind its handlers.
+    virtual void register_channel(channel::ptr channel,
+        result_handler handle_started, result_handler handle_stopped);
 
     const settings& settings_;
 
 private:
-
-    // Required because enable_shared_from_this doesn't support inheritance.
     template <class Derived>
     std::shared_ptr<Derived> shared_from_base()
     {
@@ -128,27 +125,27 @@ private:
     }
 
     void handle_stop();
-    void handle_channel(const code& ec, channel::ptr channel,
-        stop_handler handler);
+    void do_start(result_handler handler);
 
+    void handle_channel_event(const code& ec, channel::ptr channel,
+        stop_handler handler);
+    void handle_channel_start(const code& ec, channel::ptr channel,
+        result_handler handle_started);
     void handle_pend(const code& ec, channel::ptr channel,
         result_handler handle_started);
     void handle_handshake(const code& ec, channel::ptr channel,
         result_handler handle_started);
     void handle_is_pending(bool pending, channel::ptr channel,
         result_handler handle_started);
-    void handle_stored(const code& ec, channel::ptr channel,
-        result_handler handle_started);
-
     void unpend(const code& ec, channel::ptr channel,
         result_handler handle_started);
     void handle_unpend(const code& ec);
-
+    void handle_stored(const code& ec, channel::ptr channel,
+        result_handler handle_started);
     void handle_started(const code& ec, channel::ptr channel,
         result_handler handle_started, result_handler handle_stopped);
-
     void remove(const code& ec, channel::ptr channel,
-        result_handler handle_started);
+        result_handler handle_stopped);
     void handle_remove(const code& ec);
 
     bool stopped_;
@@ -158,6 +155,28 @@ private:
     p2p& network_;
     dispatcher dispatch_;
 };
+
+#define BIND1(method, p1) \
+    bind<CLASS>(&CLASS::method, p1)
+#define BIND2(method, p1, p2) \
+    bind<CLASS>(&CLASS::method, p1, p2)
+#define BIND3(method, p1, p2, p3) \
+    bind<CLASS>(&CLASS::method, p1, p2, p3)
+#define BIND4(method, p1, p2, p3, p4) \
+    bind<CLASS>(&CLASS::method, p1, p2, p3, p4)
+#define BIND5(method, p1, p2, p3, p4, p5) \
+    bind<CLASS>(&CLASS::method, p1, p2, p3, p4, p5)
+
+#define ORDERED2(method, p1, p2) \
+    ordered<CLASS>(&CLASS::method, p1, p2)
+#define ORDERED3(method, p1, p2, p3) \
+    ordered<CLASS>(&CLASS::method, p1, p2, p3)
+#define ORDERED4(method, p1, p2, p3, p4) \
+    ordered<CLASS>(&CLASS::method, p1, p2, p3, p4)
+#define ORDERED5(method, p1, p2, p3, p4, p5) \
+    ordered<CLASS>(&CLASS::method, p1, p2, p3, p4, p5)
+#define ORDERED6(method, p1, p2, p3, p4, p5, p6) \
+    ordered<CLASS>(&CLASS::method, p1, p2, p3, p4, p5, p6)
 
 } // namespace network
 } // namespace libbitcoin

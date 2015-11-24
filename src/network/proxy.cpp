@@ -31,7 +31,7 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/messages.hpp>
-#include <bitcoin/bitcoin/network/asio.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/network/message_subscriber.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -51,13 +51,15 @@ INITIALIZE_TRACK(bc::network::proxy::stop_subscriber)
 namespace libbitcoin {
 namespace network {
 
+#define NAME "proxy"
+
 using namespace message;
 using std::placeholders::_1;
 using std::placeholders::_2;
 using boost::format;
 using boost::posix_time::time_duration;
 
-// TODO: this is made-up, configure payload size guard for DoS protection.
+// TODO: this is made up, configure payload size guard for DoS protection.
 static constexpr size_t max_payload_size = 10 * 1024 * 1024;
 
 // Cache the address for logging after stop.
@@ -70,66 +72,67 @@ config::authority proxy::authority_factory(asio::socket_ptr socket)
 
 proxy::proxy(threadpool& pool, asio::socket_ptr socket, uint32_t magic)
   : stopped_(true),
+    starting_(true),
     magic_(magic),
-    dispatch_(pool),
-    socket_(socket),
     authority_(authority_factory(socket)),
+    dispatch_(pool, NAME),
+    socket_(socket),
     message_subscriber_(pool),
-    stop_subscriber_(std::make_shared<stop_subscriber>(pool, "stop_subscriber",
-        LOG_NETWORK))
+    stop_subscriber_(std::make_shared<stop_subscriber>(pool, NAME "_sub"))
 {
 }
 
 proxy::~proxy()
 {
-    stop(error::channel_stopped);
+    do_stop(error::channel_stopped);
 }
 
-void proxy::start()
-{
-    stopped_ = false;
-}
+// Properties.
+// ----------------------------------------------------------------------------
 
-void proxy::talk()
-{
-    if (stopped())
-        return;
-
-    read_heading();
-}
-
+// public:
 const config::authority& proxy::authority() const
 {
     return authority_;
 }
 
-bool proxy::stopped() const
+// Start sequence.
+// ----------------------------------------------------------------------------
+
+// public:
+void proxy::start(result_handler handler)
 {
-    return stopped_;
+    // Start must execute sequentially.
+
+    if (!stopped())
+    {
+        handler(error::operation_failed);
+        return;
+    }
+
+    // Must start before invoking start handler, to avoid blocking.
+    stopped_ = false;
+
+    // Allow for subscription before first read, so no messages are missed.
+    handler(error::success);
+
+    // Must guard subscriptions after start but cannot during.
+    starting_ = false;
+
+    // Start the read cycle.
+    read_heading();
 }
 
-void proxy::stop(const boost_code& ec)
-{
-    stop(error::boost_to_error_code(ec));
-}
+// Stop sequence.
+// ----------------------------------------------------------------------------
 
+// public:
 void proxy::stop(const code& ec)
 {
     BITCOIN_ASSERT_MSG(ec, "The stop code must be an error code.");
 
-    if (stopped())
-        return;
-
-    dispatch_.ordered(&proxy::do_stop,
+    dispatch_.unordered(&proxy::do_stop,
         shared_from_this(), ec);
-}
-
-void proxy::subscribe_stop(result_handler handler)
-{
-    if (stopped())
-        handler(error::channel_stopped);
-    else
-        stop_subscriber_->subscribe(handler);
 }
 
 void proxy::do_stop(const code& ec)
@@ -138,6 +141,7 @@ void proxy::do_stop(const code& ec)
         return;
 
     stopped_ = true;
+    starting_ = true;
     handle_stopping();
 
     // Close the socket, ignore the error code.
@@ -152,6 +156,50 @@ void proxy::do_stop(const code& ec)
     // All stop subscriptions are fired with the channel stop reason code.
     stop_subscriber_->relay(ec);
 }
+
+void proxy::stop(const boost_code& ec)
+{
+    stop(error::boost_to_error_code(ec));
+}
+
+bool proxy::stopped() const
+{
+    return stopped_;
+}
+
+// Stop subscription sequence.
+// ----------------------------------------------------------------------------
+// Stop and message subscription must be ordered, as otherwise the stopped
+// state of the proxy is subject to a race. The race results in subscriptions
+// being registered after stop, never clearing, resulting in socket leaks. The
+// race is prevented by subscribing from an ordered call. There are two ways to
+// accomplish this: (1) strand all methods that call subscribe, or (2) strand
+// all calls to stop. The latter is preferrable as it minimizes the size
+// of the commuting region and also allows for cleaner logical decomposition.
+// We bypass this ordering during startup by making startup sequential.
+// This simplifies subscriptions during and after startup as they do not
+// require completion handlers, and prevents startup deadlocked startups.
+
+// public:
+void proxy::subscribe_stop(result_handler handler)
+{
+    if (starting_)
+        do_subscribe_stop(handler);
+    else
+        dispatch_.unordered(&proxy::do_subscribe_stop,
+            shared_from_this(), handler);
+}
+
+void proxy::do_subscribe_stop(result_handler handler)
+{
+    if (stopped())
+        handler(error::channel_stopped);
+    else
+        stop_subscriber_->subscribe(handler);
+}
+
+// Read cycle (read continues until stop).
+// ----------------------------------------------------------------------------
 
 void proxy::read_heading()
 {
@@ -247,15 +295,16 @@ void proxy::handle_read_payload(const boost_code& ec, size_t,
     // Parse and publish the payload to message subscribers.
     payload_source source(payload_copy);
     payload_stream istream(source);
-    const auto error = message_subscriber_.load(heading.type(), istream);
+    const auto parse_error = message_subscriber_.load(heading.type(), istream);
+    const auto unconsumed = istream.peek() != std::istream::traits_type::eof();
 
-    // Warn about unconsumed bytes in the stream.
-    if (!error && istream.peek() != std::istream::traits_type::eof())
+    if (!parse_error && unconsumed)
+    {
         log::warning(LOG_NETWORK)
             << "Valid message [" << heading.command
             << "] handled, unused bytes remain in payload.";
+    }
 
-    // Stop the channel if there was a read error.
     if (ec)
     {
         log::warning(LOG_NETWORK)
@@ -266,16 +315,19 @@ void proxy::handle_read_payload(const boost_code& ec, size_t,
         return;
     }
 
-    // Stop the channel if there was an error from parse.
-    if (error)
+    if (parse_error)
     {
         log::warning(LOG_NETWORK)
             << "Invalid stream load of " << heading.command
-            << " from [" << authority() << "] " << error.message();
-        stop(error);
+            << " from [" << authority() << "] " << parse_error.message();
+        stop(parse_error);
     }
 }
 
+// Message send sequence (public template calls do_send with order).
+// ----------------------------------------------------------------------------
+
+// Send handlers are invoked in parallel (unstranded).
 void proxy::do_send(const data_chunk& message, result_handler handler,
     const std::string& command)
 {
@@ -295,6 +347,7 @@ void proxy::do_send(const data_chunk& message, result_handler handler,
             shared_from_this(), _1, handler));
 }
 
+// This just allows us to translate th boost error code.
 void proxy::call_handle_send(const boost_code& ec, result_handler handler)
 {
     handler(error::boost_to_error_code(ec));

@@ -48,15 +48,23 @@ using std::placeholders::_2;
 session_seed::session_seed(threadpool& pool, p2p& network,
     const settings& settings)
   : session(pool, network, settings, false, true),
-    CONSTRUCT_TRACK(session_seed, LOG_NETWORK)
+    CONSTRUCT_TRACK(session_seed)
 {
 }
 
+// Start sequence.
+// ----------------------------------------------------------------------------
+
 void session_seed::start(result_handler handler)
 {
-    if (!stopped())
+    session::start(ORDERED2(handle_started, _1, handler));
+}
+
+void session_seed::handle_started(const code& ec, result_handler handler)
+{
+    if (ec)
     {
-        handler(error::operation_failed);
+        handler(ec);
         return;
     }
 
@@ -89,24 +97,28 @@ void session_seed::handle_count(size_t start_size, result_handler handler)
         handler(error::operation_failed);
         return;
     }
-
-    session::start();
+    
+    // This is NOT technically the end of the start sequence, since the handler
+    // is not invoked until seeding operations are complete.
     start_seeding(start_size, create_connector(), handler);
 }
+
+// Seed sequence.
+// ----------------------------------------------------------------------------
 
 void session_seed::start_seeding(size_t start_size, connector::ptr connect,
     result_handler handler)
 {
-    const auto& seeds = settings_.seeds;
-    auto multiple = ORDERED2(handle_complete, start_size, handler);
+    // When all seeds are synchronized call session_seed::handle_complete.
+    auto all = ORDERED2(handle_complete, start_size, handler);
 
-    // Require all seed callbacks before calling session_seed::handle_stopped.
-    auto single = synchronize(multiple, seeds.size(), NAME, true);
+    // Synchronize each individual seed before calling handle_complete.
+    auto each = synchronize(all, settings_.seeds.size(), NAME, true);
 
-    // Require one callback per channel before calling single.
+    // Require one callback before completing each channel.
     // We don't use parallel here because connect is itself asynchronous.
-    for (const auto& seed: seeds)
-        start_seed(seed, connect, synchronize(single, 1, seed.to_string()));
+    for (const auto& seed: settings_.seeds)
+        start_seed(seed, connect, synchronize(each, 1, seed.to_string()));
 }
 
 void session_seed::start_seed(const config::endpoint& seed,
@@ -114,6 +126,8 @@ void session_seed::start_seed(const config::endpoint& seed,
 {
     if (stopped())
     {
+        log::debug(LOG_NETWORK)
+            << "Suspended seed connection";
         handler(error::channel_stopped);
         return;
     }
@@ -166,8 +180,10 @@ void session_seed::handle_channel_start(const code& ec, channel::ptr channel,
     attach<protocol_seed>(channel)->start(settings_, handler);
 };
 
-void session_seed::handle_channel_stop(const code&)
+void session_seed::handle_channel_stop(const code& ec)
 {
+    log::debug(LOG_NETWORK)
+        << "Seed channel stopped: " << ec.message();
 }
 
 // This accepts no error code because individual seed errors are suppressed.
@@ -183,6 +199,7 @@ void session_seed::handle_final_count(size_t current_size, size_t start_size,
     const auto result = current_size > start_size ? error::success :
         error::operation_failed;
 
+    // This is the end of the seed sequence.
     handler(result);
 }
 

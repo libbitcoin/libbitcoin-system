@@ -38,6 +38,7 @@
 namespace libbitcoin {
 namespace network {
 
+/// Pool of active connections, thread safe.
 class BC_API connections
 {
 public:
@@ -47,6 +48,7 @@ public:
     typedef std::function<void(const code&)> result_handler;
     typedef std::function<void(const code&, channel::ptr)> channel_handler;
 
+    /// Construct an instance.
     connections(threadpool& pool);
     ~connections();
 

@@ -38,15 +38,18 @@ namespace network {
 
 class p2p;
 
+/// Seed connections session, thread safe.
 class BC_API session_seed
   : public session, track<session_seed>
 {
 public:
     typedef std::shared_ptr<session_seed> ptr;
 
+    /// Construct an instance.
     session_seed(threadpool& pool, p2p& network, const settings& settings);
 
-    void start(result_handler handler);
+    /// Start the session.
+    void start(result_handler handler) override;
 
 private:
     void handle_count(size_t start_size, result_handler handler);
@@ -54,6 +57,7 @@ private:
         result_handler handler);
     void start_seed(const config::endpoint& seed, connector::ptr connect,
         result_handler handler);
+    void handle_started(const code& ec, result_handler handler);
     void handle_connect(const code& ec, channel::ptr channel,
         const config::endpoint& seed, result_handler handler);
     void handle_complete(size_t start_size, result_handler handler);

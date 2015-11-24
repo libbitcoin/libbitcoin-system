@@ -48,6 +48,7 @@ namespace network {
 #define DECLARE_SUBSCRIBER(value) \
     value##_subscriber_type::ptr value##_subscriber_
 
+/// Aggregation of subscribers by messasge type, thread safe.
 class BC_API message_subscriber
 {
 public:
