@@ -38,7 +38,7 @@ monitor::~monitor()
 void monitor::trace(size_t count, const std::string& action) const
 {
 #ifndef NDEBUG
-    log::debug(LOG_TRACK) << action << " " name_ << " {" << count << "}";
+    log::debug(LOG_TRACK) << action << " " << name_ << " {" << count << "}";
 #endif
 }
 
