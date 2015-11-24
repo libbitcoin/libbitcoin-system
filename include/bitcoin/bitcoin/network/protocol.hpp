@@ -59,6 +59,13 @@ protected:
     protocol(const protocol&) = delete;
     void operator=(const protocol&) = delete;
 
+    /// Required because enable_shared_from_this doesn't support inheritance.
+    template <class Protocol>
+    std::shared_ptr<Protocol> shared_from_base()
+    {
+        return std::static_pointer_cast<Protocol>(shared_from_this());
+    }
+
     /// Bind a method in the derived class.
     template <class Protocol, typename Handler, typename... Args>
     auto bind(Handler&& handler, Args&&... args) ->
@@ -112,14 +119,6 @@ protected:
     virtual void stop(const code& ec);
 
 private:
-
-    // Required because enable_shared_from_this doesn't support inheritance.
-    template <class Protocol>
-    std::shared_ptr<Protocol> shared_from_base()
-    {
-        return std::static_pointer_cast<Protocol>(shared_from_this());
-    }
-
     threadpool& pool_;
     channel::ptr channel_;
     const std::string name_;
