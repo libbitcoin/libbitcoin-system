@@ -147,7 +147,7 @@ private:
         const message::heading& heading);
 
     // Unordered, to protect socket and limit shutdown log messages.
-    void call_handle_send(const boost_code& ec, result_handler handler);
+    void handle_send(const boost_code& ec, result_handler handler);
     void do_send(const data_chunk& message, result_handler handler,
         const std::string& command);
     
