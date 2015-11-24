@@ -51,32 +51,79 @@ public:
     dispatcher(threadpool& pool, const std::string& name);
 
     /// Invokes a job on the current thread.
-    template <typename Handler, typename... Args>
-    static void bound(Handler&& handler, Args&&... args)
+    template <typename... Args>
+    static void bound(Args&&... args)
     {
-        BIND_HANDLER(handler, args)();
+        BIND_ARGS(args)();
     }
 
     /// Posts a job to the service. Concurrent and not ordered.
-    template <typename Handler, typename... Args>
-    void concurrent(Handler&& handler, Args&&... args)
+    template <typename... Args>
+    void concurrent(Args&&... args)
     {
-        work_.concurrent(FORWARD_HANDLER(handler), FORWARD_ARGS(args));
+        work_.concurrent(BIND_ARGS(args));
     }
 
     /// Post a job to the strand. Ordered and not concurrent.
-    template <typename Handler, typename... Args>
-    void ordered(Handler&& handler, Args&&... args)
+    template <typename... Args>
+    void ordered(Args&&... args)
     {
-        work_.ordered(FORWARD_HANDLER(handler), FORWARD_ARGS(args));
+        work_.ordered(BIND_ARGS(args));
     }
 
     /// Posts a strand-wrapped job to the service. Not ordered or concurrent.
     /// The wrap provides non-concurrency, order is prevented by service post.
-    template <typename Handler, typename... Args>
-    void unordered(Handler&& handler, Args&&... args)
+    template <typename... Args>
+    void unordered(Args&&... args)
     {
-        work_.unordered(FORWARD_HANDLER(handler), FORWARD_ARGS(args));
+        work_.unordered(BIND_ARGS(args));
+    }
+
+    /// Returns a delegate that will execute the job on the current thread.
+    template <typename... Args>
+    static auto bound_delegate(Args&&... args) ->
+        delegates::bound<decltype(BIND_ARGS(args))>
+    {
+        return
+        {
+            BIND_ARGS(args)
+        };
+    }
+
+    /// Returns a delegate that will post the job via the service.
+    template <typename... Args>
+    auto concurrent_delegate(Args&&... args) ->
+        delegates::concurrent<decltype(BIND_ARGS(args))>
+    {
+        return
+        {
+            BIND_ARGS(args),
+            work_
+        };
+    }
+
+    /// Returns a delegate that will post the job via the strand.
+    template <typename... Args>
+    auto ordered_delegate(Args&&... args) ->
+        delegates::ordered<decltype(BIND_ARGS(args))>
+    {
+        return
+        {
+            BIND_ARGS(args),
+            work_
+        };
+    }
+
+    /// Returns a delegate that will post a wrapped job via the service.
+    template <typename... Args>
+    auto unordered_delegate(Args&&... args) ->
+        delegates::unordered<decltype(BIND_ARGS(args))>
+    {
+        return
+        {
+            BIND_ARGS(args),
+            work_
+        };
     }
 
     /// Executes the job against each member of a collection concurrently.
@@ -113,53 +160,6 @@ public:
 
         for (const auto& element: collection)
             ordered(BIND_ELEMENT(args, element, call));
-    }
-
-    /// Returns a delegate that will execute the job on the current thread.
-    template <typename Handler, typename... Args>
-    static auto bound_delegate(Handler&& handler, Args&&... args) ->
-        delegates::bound<decltype(BIND_HANDLER(handler, args))>
-    {
-        return
-        {
-            BIND_HANDLER(handler, args)
-        };
-    }
-
-    /// Returns a delegate that will post the job via the service.
-    template <typename Handler, typename... Args>
-    auto concurrent_delegate(Handler&& handler, Args&&... args) ->
-        delegates::concurrent<decltype(BIND_HANDLER(handler, args))>
-    {
-        return
-        {
-            BIND_HANDLER(handler, args),
-            work_
-        };
-    }
-
-    /// Returns a delegate that will post the job via the strand.
-    template <typename Handler, typename... Args>
-    auto ordered_delegate(Handler&& handler, Args&&... args) ->
-        delegates::ordered<decltype(BIND_HANDLER(handler, args))>
-    {
-        return
-        {
-            BIND_HANDLER(handler, args),
-            work_
-        };
-    }
-
-    /// Returns a delegate that will post a wrapped job via the service.
-    template <typename Handler, typename... Args>
-    auto unordered_delegate(Handler&& handler, Args&&... args) ->
-        delegates::unordered<decltype(BIND_HANDLER(handler, args))>
-    {
-        return
-        {
-            BIND_HANDLER(handler, args),
-            work_
-        };
     }
 
 private:
