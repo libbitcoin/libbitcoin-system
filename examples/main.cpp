@@ -20,9 +20,6 @@
 #include <cstdlib>
 #include <string>
 #include <bitcoin/bitcoin.hpp>
-#if !defined(__MACH__) && !defined(_MSC_VER)
-#include <unistd.h>
-#endif
 
 BC_USE_LIBBITCOIN_MAIN
 
@@ -42,7 +39,7 @@ int bc::main(int argc, char* argv[])
     if (argc > 1)
         bc::cout << "argv[1] : " << argv[1] << std::endl;
 
-#ifndef __MACH__
+#ifdef _MSC_VER
     if (environ[0] != nullptr)
         bc::cout << "environ[0] : " << environ[0] << std::endl;
 #endif
