@@ -51,10 +51,12 @@ class BC_API proxy
   : public std::enable_shared_from_this<proxy>
 {
 public:
-    typedef std::shared_ptr<proxy> ptr;
-    typedef subscriber<const code&> stop_subscriber;
-    typedef std::function<void()> completion_handler;
+    template <class Message>
+    using message_handler = std::function<void(const code&, const Message&)>;
     typedef std::function<void(const code&)> result_handler;
+    typedef std::function<void()> completion_handler;
+    typedef subscriber<const code&> stop_subscriber;
+    typedef std::shared_ptr<proxy> ptr;
 
     /// Construct an instance.
     proxy(threadpool& pool, asio::socket_ptr socket, uint32_t magic);
@@ -65,13 +67,13 @@ public:
     void operator=(const proxy&) = delete;
 
     /// Send a message on the socket.
-    template <class Message, typename Handler>
-    void send(const Message& packet, Handler&& handler)
+    template <class Message>
+    void send(const Message& packet, result_handler handler)
     {
         const auto command = packet.command;
         const auto data = message::serialize(packet, magic_);
         const auto self = shared_from_this();
-        auto call = [self, command, data](Handler handler)
+        auto call = [self, command, data](result_handler handler)
         {
             self->do_send(data, handler, command);
         };
@@ -80,11 +82,11 @@ public:
     }
 
     /// Subscribe to messages of the specified type on the socket.
-    template <class Message, typename Handler>
-    void subscribe(Handler&& handler)
+    template <class Message>
+    void subscribe(message_handler<Message> handler)
     {
         const auto self = shared_from_this();
-        auto call = [self](Handler handler)
+        auto call = [self](message_handler<Message> handler)
         {
             if (self->stopped())
                 handler(error::channel_stopped, Message());
@@ -94,7 +96,7 @@ public:
 
         // See comments in proxy::subscribe_stop.
         if (starting_)
-            call(std::forward<Handler>(handler));
+            call(handler);
         else
             dispatch_.unordered(call, handler);
     }
