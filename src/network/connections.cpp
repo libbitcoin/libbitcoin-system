@@ -38,7 +38,7 @@ connections::connections(threadpool& pool)
 
 connections::~connections()
 {
-    BITCOIN_ASSERT_MSG(buffer_.empty(), "Connection buffer not empty.");
+    BITCOIN_ASSERT_MSG(buffer_.empty(), "Connections was not cleared.");
 }
 
 connections::iterator connections::find(const authority& authority) const
@@ -66,6 +66,8 @@ void connections::do_stop(const code& ec)
 {
     for (auto channel: buffer_)
         channel->stop(ec);
+
+    ////buffer_.clear();
 }
 
 void connections::exists(const authority& address, truth_handler handler)

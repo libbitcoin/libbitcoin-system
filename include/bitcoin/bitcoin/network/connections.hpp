@@ -50,6 +50,8 @@ public:
 
     /// Construct an instance.
     connections(threadpool& pool);
+
+    /// Validate connections stopped.
     ~connections();
 
     /// This class is not copyable.

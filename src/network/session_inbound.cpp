@@ -53,7 +53,7 @@ session_inbound::session_inbound(threadpool& pool, p2p& network,
 
 void session_inbound::start(result_handler handler)
 {
-    session::start(ORDERED2(handle_started, _1, handler));
+    session::start(CONCURRENT2(handle_started, _1, handler));
 }
 
 void session_inbound::handle_started(const code& ec, result_handler handler)
@@ -76,7 +76,7 @@ void session_inbound::handle_started(const code& ec, result_handler handler)
     const auto port = settings_.inbound_port;
 
     // START LISTENING ON PORT
-    accept->listen(port, ORDERED2(start_accept, _1, accept));
+    accept->listen(port, BIND2(start_accept, _1, accept));
 
     // This is the end of the start sequence.
     handler(error::success);
@@ -102,7 +102,7 @@ void session_inbound::start_accept(const code& ec, acceptor::ptr accept)
     }
 
     // ACCEPT THE NEXT INCOMING CONNECTION
-    accept->accept(ORDERED3(handle_accept, _1, _2, accept));
+    accept->accept(BIND3(handle_accept, _1, _2, accept));
 }
 
 void session_inbound::handle_accept(const code& ec, channel::ptr channel,
@@ -132,7 +132,7 @@ void session_inbound::handle_accept(const code& ec, channel::ptr channel,
         return;
     }
 
-    connection_count(ORDERED2(handle_connection_count, _1, channel));
+    connection_count(BIND2(handle_connection_count, _1, channel));
 }
 
 void session_inbound::handle_connection_count(size_t connections,
@@ -157,8 +157,14 @@ void session_inbound::handle_connection_count(size_t connections,
 void session_inbound::handle_channel_start(const code& ec,
     channel::ptr channel)
 {
+    
     if (ec)
+    {
+        log::info(LOG_NETWORK)
+            << "Inbound channel failed to start [" << channel->authority()
+            << "] " << ec.message();
         return;
+    }
 
     attach<protocol_ping>(channel)->start(settings_);
     attach<protocol_address>(channel)->start(settings_);

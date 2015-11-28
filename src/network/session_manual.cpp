@@ -55,7 +55,7 @@ session_manual::session_manual(threadpool& pool, p2p& network,
 // Must call start before connect.
 void session_manual::start(result_handler handler)
 {
-    session::start(ORDERED2(handle_started, _1, handler));
+    session::start(CONCURRENT2(handle_started, _1, handler));
 }
 
 void session_manual::handle_started(const code& ec, result_handler handler)
@@ -100,8 +100,8 @@ void session_manual::start_connect(const std::string& hostname, uint16_t port,
     }
 
     // MANUAL CONNECT OUTBOUND
-    connect_->connect(hostname, port,
-        ORDERED6(handle_connect, _1, _2, hostname, port, handler, retries));
+    connect_->connect(hostname, port, BIND6(handle_connect, _1, _2, hostname,
+        port, handler, retries));
 }
 
 void session_manual::handle_connect(const code& ec, channel::ptr channel,
@@ -140,6 +140,10 @@ void session_manual::handle_channel_start(const code& ec, const std::string& hos
     // Treat a start failure just like a stop, but preserve the start handler.
     if (ec)
     {
+        log::info(LOG_NETWORK)
+            << "Manual channel failed to start [" << channel->authority()
+            << "] " << ec.message();
+
         connect(hostname, port, handler);
         return;
     }

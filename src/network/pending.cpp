@@ -38,7 +38,7 @@ pending::pending(threadpool& pool)
 
 pending::~pending()
 {
-    BITCOIN_ASSERT_MSG(buffer_.empty(), "Pending buffer not empty.");
+    BITCOIN_ASSERT_MSG(buffer_.empty(), "Pending was not cleared.");
 }
 
 pending::iterator pending::find(const uint64_t version_nonce) const
@@ -56,18 +56,18 @@ pending::iterator pending::find(const channel::ptr& channel) const
     return std::find(buffer_.begin(), buffer_.end(), channel);
 }
 
-void pending::clear(const code& ec)
+void pending::stop(const code& ec)
 {
-    dispatch_.ordered(&pending::do_clear,
+    dispatch_.ordered(&pending::do_stop,
         this, ec);
 }
 
-void pending::do_clear(const code& ec)
+void pending::do_stop(const code& ec)
 {
     for (auto channel: buffer_)
         channel->stop(ec);
 
-    buffer_.clear();
+    ////buffer_.clear();
 }
 
 void pending::exists(uint64_t version_nonce, truth_handler handler)

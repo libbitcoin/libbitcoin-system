@@ -37,8 +37,9 @@ namespace network {
 using std::placeholders::_1;
 
 protocol_timer::protocol_timer(threadpool& pool, channel::ptr channel,
-    const std::string& name)
-  : protocol_events(pool, channel, name)
+    bool perpetual, const std::string& name)
+  : protocol_events(pool, channel, name),
+    perpetual_(perpetual)
 {
 }
 
@@ -49,38 +50,35 @@ protocol_timer::protocol_timer(threadpool& pool, channel::ptr channel,
 void protocol_timer::start(const asio::duration& timeout,
     event_handler handle_event)
 {
-    protocol_events::start(BIND2(handle_notify, _1, handle_event));
-    deadline_ = std::make_shared<deadline>(pool(), timeout);
-    reset_timer();
+    // Timer invocation of the notification handler can occur concurrently with
+    // derived external invocation of the handler.
+    const auto timer = std::make_shared<deadline>(pool(), timeout);
+    protocol_events::start(BIND3(handle_notify, _1, timer, handle_event));
+    reset_timer(timer);
 }
 
-void protocol_timer::handle_notify(const code& ec, event_handler handler)
+void protocol_timer::handle_notify(const code& ec, deadline::ptr timer,
+    event_handler handler)
 {
     if (ec == error::channel_stopped)
-        cancel_timer();
+        timer->cancel();
 
     handler(ec);
 }
 
-// Timers (these inherently race, so no need to strand).
+// Timer.
 // ----------------------------------------------------------------------------
 
-// protected:
-void protocol_timer::cancel_timer()
-{
-    deadline_->cancel();
-}
-
-// protected:
-void protocol_timer::reset_timer()
+// private:
+void protocol_timer::reset_timer(deadline::ptr timer)
 {
     if (stopped())
         return;
 
-    deadline_->start(BIND1(handle_timer, _1));
+    timer->start(BIND2(handle_timer, _1, timer));
 }
 
-void protocol_timer::handle_timer(const code& ec)
+void protocol_timer::handle_timer(const code& ec, deadline::ptr timer)
 {
     if (stopped())
         return;
@@ -90,6 +88,9 @@ void protocol_timer::handle_timer(const code& ec)
         << ec.message();
 
     set_event(error::channel_timeout);
+
+    if (perpetual_)
+        reset_timer(timer);
 }
 
 } // namespace network

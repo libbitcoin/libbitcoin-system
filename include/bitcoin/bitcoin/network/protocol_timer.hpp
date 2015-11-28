@@ -42,12 +42,13 @@ protected:
 
     /**
      * Construct a timed protocol instance.
-     * @param[in]  pool     The thread pool used by the dispacher.
-     * @param[in]  channel  The channel on which to start the protocol.
-     * @param[in]  name     The instance name for logging purposes.
+     * @param[in]  pool       The thread pool used by the dispacher.
+     * @param[in]  channel    The channel on which to start the protocol.
+     * @param[in]  perpetual  Set for automatic timer reset unless stopped.
+     * @param[in]  name       The instance name for logging purposes.
      */
     protocol_timer(threadpool& pool, channel::ptr channel,
-        const std::string& name);
+        bool perpetual, const std::string& name);
 
     /**
      * Define the event handler and start the protocol and timer.
@@ -57,21 +58,13 @@ protected:
      */
     void start(const asio::duration& timeout, event_handler handler);
 
-    /**
-     * Cancel the timer.
-     */
-    void cancel_timer();
-
-    /**
-     * Restart the timer.
-     */
-    void reset_timer();
-
 private:
-    void handle_timer(const code& ec);
-    void handle_notify(const code& ec, event_handler handler);
+    void reset_timer(deadline::ptr timer);
+    void handle_timer(const code& ec, deadline::ptr timer);
+    void handle_notify(const code& ec, deadline::ptr timer,
+        event_handler handler);
 
-    deadline::ptr deadline_;
+    const bool perpetual_;
 };
 
 } // namespace network

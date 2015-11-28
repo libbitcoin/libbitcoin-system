@@ -35,6 +35,7 @@
 #include <bitcoin/bitcoin/network/protocol_address.hpp>
 #include <bitcoin/bitcoin/network/protocol_ping.hpp>
 #include <bitcoin/bitcoin/network/protocol_version.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
@@ -59,6 +60,11 @@ session::session(threadpool& pool, p2p& network, const settings& settings,
     dispatch_(pool, NAME),
     settings_(settings)
 {
+}
+
+session::~session()
+{
+    BITCOIN_ASSERT_MSG(stopped(), "The session was not stopped.");
 }
 
 // Properties.
@@ -93,25 +99,35 @@ bool session::blacklisted(const authority& authority) const
 acceptor::ptr session::create_acceptor()
 {
     const auto accept = std::make_shared<acceptor>(pool_, settings_);
-    const auto handle_stop = [accept]()
-    {
-        accept->cancel();
-    };
 
-    subscribe_stop(handle_stop);
+    // Stop on the subscriber thread.
+    subscribe_stop(
+        std::bind(&session::do_stop_acceptor,
+            shared_from_this(), accept));
+
     return accept;
+}
+
+void session::do_stop_acceptor(acceptor::ptr accept)
+{
+    accept->stop();
 }
 
 connector::ptr session::create_connector()
 {
     const auto connect = std::make_shared<connector>(pool_, settings_);
-    const auto handle_stop = [connect]()
-    {
-        connect->cancel();
-    };
 
-    subscribe_stop(handle_stop);
+    // Stop on the subscriber thread.
+    subscribe_stop(
+        std::bind(&session::do_stop_connector,
+            shared_from_this(), connect));
+
     return connect;
+}
+
+void session::do_stop_connector(connector::ptr connect)
+{
+    connect->stop();
 }
 
 // Start sequence.
@@ -120,52 +136,24 @@ connector::ptr session::create_connector()
 // public:
 void session::start(result_handler handler)
 {
-    dispatch_.ordered(&session::do_start,
-        shared_from_this(), handler);
-}
-
-void session::do_start(result_handler handler)
-{
     if (!stopped())
     {
         handler(error::operation_failed);
         return;
     }
 
-    const auto subscribe_handler =
-        dispatch_.ordered_delegate(&session::handle_stop,
-            shared_from_this());
-
     stopped_ = false;
-    subscribe_stop(subscribe_handler);
+
+    // Must subscribe on the start thread.
+    subscribe_stop(
+        std::bind(&session::do_stop_session,
+            shared_from_this()));
 
     // This is the end of the start sequence.
     handler(error::success);
 }
 
-void session::subscribe_stop(stop_handler handler)
-{
-    const auto subscribe_handler =
-        dispatch_.ordered_delegate(&session::handle_channel_event,
-            shared_from_this(), _1, _2, handler);
-
-    network_.subscribe(subscribe_handler);
-}
-
-// Stop sequence (initiated by stop handler).
-// ----------------------------------------------------------------------------
-
-// private:
-void session::handle_channel_event(const code& ec, channel::ptr,
-    stop_handler handler)
-{
-    if (ec == error::service_stopped)
-        handler();
-    else
-        subscribe_stop(handler);
-}
-
-void session::handle_stop()
+void session::do_stop_session()
 {
     stopped_ = true;
 }
@@ -175,7 +163,109 @@ bool session::stopped() const
     return stopped_;
 }
 
-// Channel registration sequence.
+// Subscribe Stop sequence.
+// ----------------------------------------------------------------------------
+
+// public:
+void session::subscribe_stop(stop_handler handler)
+{
+    // Must resubscribe on the subscriber thread.
+    network_.subscribe(
+        std::bind(&session::handle_channel_event,
+            shared_from_this(), _1, _2, handler));
+}
+
+void session::handle_channel_event(const code& ec, channel::ptr,
+    stop_handler handler)
+{
+    // This is the end of the subscribe stop sequence.
+    if (ec == error::service_stopped)
+        handler();
+    else
+        subscribe_stop(handler);
+}
+
+// Connect sequence.
+// TODO: move to intermediate base class.
+// This is a mini-session within the base session.
+// ----------------------------------------------------------------------------
+
+void session::connect(connector::ptr connect, uint32_t limit,
+    channel_handler handler)
+{
+    const auto complete = synchronize(handler, 1, NAME);
+
+    // We can't use dispatch::race here because it doesn't increment the shared
+    // pointer reference count.
+    for (uint32_t iteration = 0; iteration < limit; ++iteration)
+        dispatch_.concurrent(&session::new_connect,
+            shared_from_this(), connect, complete);
+}
+
+void session::new_connect(connector::ptr connect, channel_handler handler)
+{
+    if (stopped())
+    {
+        log::debug(LOG_NETWORK)
+            << "Suspended outbound connection.";
+        return;
+    }
+
+    fetch_address(
+        dispatch_.concurrent_delegate(&session::start_connect,
+            shared_from_this(), _1, _2, connect, handler));
+}
+
+void session::start_connect(const code& ec, const authority& host,
+    connector::ptr connect, channel_handler handler)
+{
+    // This termination prevents a tight loop in the empty address pool case.
+    if (ec)
+    {
+        log::error(LOG_NETWORK)
+            << "Failure fetching new address: " << ec.message();
+        handler(ec, nullptr);
+        return;
+    }
+
+    // This could create a tight loop in the case of a small pool.
+    if (blacklisted(host))
+    {
+        log::debug(LOG_NETWORK)
+            << "Fetched blacklisted address [" << host << "] ";
+        new_connect(connect, handler);
+        return;
+    }
+
+    log::debug(LOG_NETWORK)
+        << "Connecting to [" << host << "]";
+
+    // CONNECT
+    connect->connect(host,
+        dispatch_.concurrent_delegate(&session::handle_connect,
+            shared_from_this(), _1, _2, host, connect, handler));
+}
+
+void session::handle_connect(const code& ec, channel::ptr channel,
+    const authority& host, connector::ptr connect, channel_handler handler)
+{
+    if (ec)
+    {
+        log::debug(LOG_NETWORK)
+            << "Failure connecting to [" << host << "] "
+            << ec.message();
+        new_connect(connect, handler);
+        return;
+    }
+
+    log::debug(LOG_NETWORK)
+        << "Connected to [" << channel->authority() << "]";
+
+    // This is the end of the connect sequence.
+    handler(error::success, channel);
+}
+
+// Registration sequence.
 // ----------------------------------------------------------------------------
 // BUGBUG: there is a race here between completion of handshake and start of
 // other protocols. Initial incoming messages (ping, address, get-headers)
@@ -189,12 +279,12 @@ void session::register_channel(channel::ptr channel,
 {
     // Place invocation of stop handler on ordered delegate.
     const auto stop_handler =
-        dispatch_.ordered_delegate(&session::do_remove,
+        dispatch_.concurrent_delegate(&session::do_remove,
             shared_from_this(), _1, channel, handle_stopped);
 
     // Place invocation of start handler on ordered delegate.
     auto start_handler =
-        dispatch_.ordered_delegate(&session::handle_started,
+        dispatch_.concurrent_delegate(&session::handle_started,
             shared_from_this(), _1, channel, handle_started, stop_handler);
 
     if (stopped())
@@ -205,7 +295,7 @@ void session::register_channel(channel::ptr channel,
 
     if (incoming_)
     {
-        dispatch_.ordered(&session::handle_pend,
+        dispatch_.concurrent(&session::handle_pend,
             shared_from_this(), error::success, channel, start_handler);
         return;
     }
@@ -213,11 +303,11 @@ void session::register_channel(channel::ptr channel,
     channel->set_nonce(nonzero_pseudo_random());
 
     const auto unpend_handler =
-        dispatch_.ordered_delegate(&session::do_unpend,
+        dispatch_.concurrent_delegate(&session::do_unpend,
             shared_from_this(), _1, channel, start_handler);
 
     network_.pend(channel,
-        dispatch_.ordered_delegate(&session::handle_pend,
+        dispatch_.concurrent_delegate(&session::handle_pend,
             shared_from_this(), _1, channel, unpend_handler));
 }
 
@@ -231,7 +321,7 @@ void session::handle_pend(const code& ec, channel::ptr channel,
     }
 
     const auto handler =
-        dispatch_.bound_delegate(&session::handle_channel_start,
+        dispatch_.concurrent_delegate(&session::handle_channel_start,
             shared_from_this(), _1, channel, handle_started);
 
     // The channel starts, invokes the handler, then starts the read cycle.
@@ -242,7 +332,7 @@ void session::handle_channel_start(const code& ec, channel::ptr channel,
     result_handler handle_started)
 {
     const auto handler =
-        dispatch_.ordered_delegate(&session::handle_handshake,
+        dispatch_.concurrent_delegate(&session::handle_handshake,
             shared_from_this(), _1, channel, handle_started);
 
     attach<protocol_version>(channel)->
@@ -262,7 +352,7 @@ void session::handle_handshake(const code& ec, channel::ptr channel,
     }
     
     auto handler = 
-        dispatch_.ordered_delegate(&session::handle_is_pending,
+        dispatch_.concurrent_delegate(&session::handle_is_pending,
             shared_from_this(), _1, channel, handle_started);
 
     // The loopback test is for incoming channels only.
@@ -296,7 +386,7 @@ void session::handle_is_pending(bool pending, channel::ptr channel,
     }
 
     const auto handler = 
-        dispatch_.bound_delegate(&session::handle_stored,
+        dispatch_.concurrent_delegate(&session::handle_stored,
             shared_from_this(), _1, channel, handle_started);
 
     network_.store(channel, handler);
@@ -330,7 +420,7 @@ void session::handle_started(const code& ec, channel::ptr channel,
     ////    log::debug(LOG_NETWORK)
     ////        << "Started [" << channel ->authority() << "]";
 
-    // End of the registration sequence.
+    // This is the end of the registration sequence.
     handle_started(ec);
 }
 
@@ -340,7 +430,7 @@ void session::do_unpend(const code& ec, channel::ptr channel,
     channel->set_nonce(0);
     handle_started(ec);
     network_.unpend(channel,
-        dispatch_.bound_delegate(&session::handle_unpend,
+        dispatch_.concurrent_delegate(&session::handle_unpend,
             shared_from_this(), _1));
 }
 
@@ -349,21 +439,21 @@ void session::do_remove(const code& ec, channel::ptr channel,
 {
     handle_stopped(ec);
     network_.remove(channel,
-        dispatch_.bound_delegate(&session::handle_remove,
+        dispatch_.concurrent_delegate(&session::handle_remove,
             shared_from_this(), _1));
 }
 
 void session::handle_unpend(const code& ec)
 {
     if (ec)
-        log::warning(LOG_NETWORK)
+        log::debug(LOG_NETWORK)
             << "Failed to unpend a channel: " << ec.message();
 }
 
 void session::handle_remove(const code& ec)
 {
     if (ec)
-        log::warning(LOG_NETWORK)
+        log::debug(LOG_NETWORK)
             << "Failed to remove a channel: " << ec.message();
 }
 

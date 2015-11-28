@@ -60,6 +60,8 @@ public:
 
     /// Construct an instance.
     proxy(threadpool& pool, asio::socket_ptr socket, uint32_t magic);
+
+    /// Validate proxy stopped.
     ~proxy();
 
     /// This class is not copyable.

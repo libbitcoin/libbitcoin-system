@@ -28,13 +28,17 @@ INITIALIZE_TRACK(bc::deadline);
 
 namespace libbitcoin {
 
+#define NAME "deadline"
+
 using std::placeholders::_1;
 
 // This can be dereferenced with an outstanding callback because the timer
 // closure captures an instance of this class and the callback.
 // This is guaranteed to call handler exactly once unless canceled or reset.
 deadline::deadline(threadpool& pool, const asio::duration duration)
-  : duration_(duration), timer_(pool.service()),
+  : duration_(duration),
+    timer_(pool.service()),
+    dispatch_(pool, NAME),
     CONSTRUCT_TRACK(deadline)
 {
 }
@@ -46,27 +50,36 @@ void deadline::start(handler handle)
 
 void deadline::start(handler handle, const asio::duration duration)
 {
-    cancel();
+    // Protect the timer_ member against concurrent acccess. 
+    dispatch_.unordered(&deadline::do_start,
+        shared_from_this(), handle, duration);
+}
+
+// Destruct will not happen until the timer is canceled or expires.
+void deadline::do_start(handler handle, const asio::duration duration)
+{
+    do_cancel();
     timer_.expires_from_now(duration);
     timer_.async_wait(
         std::bind(&deadline::handle_timer,
             shared_from_this(), _1, handle));
 }
 
-// Destruct will not happen until the timer is canceled or expires.
-// Cancellation calls handle_timer with asio::error::operation_aborted.
+// Cancelation calls handle_timer with asio::error::operation_aborted.
 void deadline::cancel()
 {
-    boost_code ec;
-    timer_.cancel(ec);
-
-    // If cancellation fails the call to handle_timer would be delayed until
-    // the timer actually fires. So there is no need to handle this error, it
-    // just results in a slower completion (and is very unlikely to occur).
-    BITCOIN_ASSERT(!ec);
+    // Protect the timer_ member against concurrent acccess. 
+    dispatch_.unordered(&deadline::do_cancel,
+        shared_from_this());
 }
 
-// If the timer is canceled the callback is not fired.
+// We do not handle the cancelation result code, which will return success
+// in the case of a race in which the timer is already canceled.
+void deadline::do_cancel()
+{
+    timer_.cancel();
+}
+
 // If the timer expires the callback is fired with a success code.
 // If the timer fails the callback is fired with the normalized error code.
 void deadline::handle_timer(const boost_code& ec, handler handle) const

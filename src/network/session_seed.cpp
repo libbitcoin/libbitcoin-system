@@ -57,7 +57,7 @@ session_seed::session_seed(threadpool& pool, p2p& network,
 
 void session_seed::start(result_handler handler)
 {
-    session::start(ORDERED2(handle_started, _1, handler));
+    session::start(CONCURRENT2(handle_started, _1, handler));
 }
 
 void session_seed::handle_started(const code& ec, result_handler handler)
@@ -76,7 +76,7 @@ void session_seed::handle_started(const code& ec, result_handler handler)
         return;
     }
 
-    address_count(ORDERED2(handle_count, _1, handler));
+    address_count(BIND2(handle_count, _1, handler));
 }
 
 void session_seed::handle_count(size_t start_size, result_handler handler)
@@ -110,15 +110,14 @@ void session_seed::start_seeding(size_t start_size, connector::ptr connect,
     result_handler handler)
 {
     // When all seeds are synchronized call session_seed::handle_complete.
-    auto all = ORDERED2(handle_complete, start_size, handler);
+    auto all = BIND2(handle_complete, start_size, handler);
 
     // Synchronize each individual seed before calling handle_complete.
     auto each = synchronize(all, settings_.seeds.size(), NAME, true);
 
-    // Require one callback before completing each channel.
     // We don't use parallel here because connect is itself asynchronous.
     for (const auto& seed: settings_.seeds)
-        start_seed(seed, connect, synchronize(each, 1, seed.to_string()));
+        start_seed(seed, connect, each);
 }
 
 void session_seed::start_seed(const config::endpoint& seed,
@@ -136,7 +135,7 @@ void session_seed::start_seed(const config::endpoint& seed,
         << "Contacting seed [" << seed << "]";
 
     // OUTBOUND CONNECT
-    connect->connect(seed, ORDERED4(handle_connect, _1, _2, seed, handler));
+    connect->connect(seed, BIND4(handle_connect, _1, _2, seed, handler));
 }
 
 void session_seed::handle_connect(const code& ec, channel::ptr channel,
@@ -189,7 +188,7 @@ void session_seed::handle_channel_stop(const code& ec)
 // This accepts no error code because individual seed errors are suppressed.
 void session_seed::handle_complete(size_t start_size, result_handler handler)
 {
-    address_count(ORDERED3(handle_final_count, _1, start_size, handler));
+    address_count(BIND3(handle_final_count, _1, start_size, handler));
 }
 
 // We succeed only if there is a host count increase.

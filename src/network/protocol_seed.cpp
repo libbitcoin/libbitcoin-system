@@ -47,7 +47,7 @@ using std::placeholders::_2;
 // Require three callbacks (or any error) before calling complete.
 protocol_seed::protocol_seed(threadpool& pool, p2p& network,
     channel::ptr channel)
-  : protocol_timer(pool, channel, NAME),
+  : protocol_timer(pool, channel, false, NAME),
     network_(network),
     CONSTRUCT_TRACK(protocol_seed)
 {
@@ -92,11 +92,8 @@ void protocol_seed::send_own_address(const settings& settings)
 void protocol_seed::handle_seeding_complete(const code& ec,
     event_handler handler)
 {
-    cancel_timer();
     handler(ec);
-
-    if (ec)
-        stop(ec);
+    stop(ec);
 }
 
 void protocol_seed::handle_receive_address(const code& ec,

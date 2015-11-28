@@ -40,8 +40,10 @@ namespace libbitcoin {
     std::bind(FORWARD_HANDLER(handler), FORWARD_ARGS(args))
 #define BIND_ARGS(args) \
     std::bind(FORWARD_ARGS(args))
-#define BIND_ELEMENT(args, call, element) \
-    std::bind(FORWARD_ARGS(args), call, element)
+#define BIND_RACE(args, call) \
+    std::bind(FORWARD_ARGS(args), call)
+#define BIND_ELEMENT(args, element, call) \
+    std::bind(FORWARD_ARGS(args), element, call)
 
 /// Convenience class for objects wishing to synchronize operations.
 /// If the ios service is stopped jobs will not be dispatched.
@@ -126,6 +128,17 @@ public:
         };
     }
 
+    /// Executes multiple identical jobs concurrently until one completes.
+    template <typename Count, typename Handler, typename... Args>
+    void race(Count count, const std::string& name, Handler&& handler,
+        Args&&... args)
+    {
+        const auto call = synchronize(FORWARD_HANDLER(handler), 1, name);
+
+        for (Count iteration = 0; iteration < count; ++iteration)
+            concurrent(BIND_RACE(args, call));
+    }
+
     /// Executes the job against each member of a collection concurrently.
     template <typename Element, typename Handler, typename... Args>
     void parallel(const std::vector<Element>& collection,
@@ -170,6 +183,7 @@ private:
 #undef FORWARD_HANDLER
 #undef BIND_HANDLER
 #undef BIND_ARGS
+#undef BIND_RACE
 #undef BIND_ELEMENT
 
 } // namespace libbitcoin

@@ -52,7 +52,7 @@ session_outbound::session_outbound(threadpool& pool, p2p& network,
 
 void session_outbound::start(result_handler handler)
 {
-    session::start(ORDERED2(handle_started, _1, handler));
+    session::start(CONCURRENT2(handle_started, _1, handler));
 }
 
 void session_outbound::handle_started(const code& ec, result_handler handler)
@@ -91,53 +91,19 @@ void session_outbound::new_connection(connector::ptr connect)
         return;
     }
 
-    fetch_address(ORDERED3(start_connect, _1, _2, connect));
-}
+    // TODO: add setting for concurrent connect limit.
+    const auto limit = /*settings_.outbound_connections*/ 1;
 
-void session_outbound::start_connect(const code& ec, const authority& host,
-    connector::ptr connect)
-{
-    // TODO: rebuild connection count once addresses are found.
-    // This termination prevents a tight loop in the empty address pool case.
-    if (ec == error::not_found)
-    {
-        log::error(LOG_NETWORK)
-            << "The address pool is empty, suspending outbound session.";
-        return;
-    }
-
-    if (ec)
-    {
-        log::error(LOG_NETWORK)
-            << "Failure fetching new address: " << ec.message();
-        new_connection(connect);
-        return;
-    }
-
-    // This could create a tight loop in the case of a small pool.
-    if (blacklisted(host))
-    {
-        log::debug(LOG_NETWORK)
-            << "Fetched blacklisted address [" << host << "] ";
-        new_connection(connect);
-        return;
-    }
-
-    log::debug(LOG_NETWORK)
-        << "Connecting to channel [" << host << "]";
-
-    // OUTBOUND CONNECT
-    connect->connect(host, ORDERED4(handle_connect, _1, _2, host, connect));
+    this->connect(connect, limit, BIND3(handle_connect, _1, _2, connect));
 }
 
 void session_outbound::handle_connect(const code& ec, channel::ptr channel,
-    const authority& host, connector::ptr connect)
+    connector::ptr connect)
 {
     if (ec)
     {
         log::debug(LOG_NETWORK)
-            << "Failure connecting [" << host << "] outbound: "
-            << ec.message();
+            << "Failure connecting outbound: " << ec.message();
         new_connection(connect);
         return;
     }
@@ -156,7 +122,11 @@ void session_outbound::handle_channel_start(const code& ec,
     // Treat a start failure just like a stop.
     if (ec)
     {
-        handle_channel_stop(ec, connect, channel);
+        log::debug(LOG_NETWORK)
+            << "Outbound channel failed to start ["
+            << channel->authority() << "] " << ec.message();
+
+        new_connection(connect);
         return;
     }
 
@@ -167,9 +137,6 @@ void session_outbound::handle_channel_start(const code& ec,
 void session_outbound::handle_channel_stop(const code& ec,
     connector::ptr connect, channel::ptr channel)
 {
-    // HACK
-    channel->stop(ec);
-
     log::debug(LOG_NETWORK)
         << "Outbound channel stopped [" << channel->authority() << "] "
         << ec.message();

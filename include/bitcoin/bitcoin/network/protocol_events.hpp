@@ -62,7 +62,7 @@ protected:
     virtual void set_event(const code& ec);
 
     /**
-     * Determine if the underlying channel has been stopped.
+     * Determine if the event handler has been cleared.
      * This is not ordered on the channel, so the value can be delayed.
      */
     virtual bool stopped() const;
@@ -72,6 +72,7 @@ private:
     void handle_stopped(const code& ec);
     void do_set_event(const code& ec);
 
+    bool stopped_;
     event_handler event_handler_;
 };
 

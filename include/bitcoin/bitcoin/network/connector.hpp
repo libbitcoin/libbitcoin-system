@@ -27,9 +27,10 @@
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
+#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -41,17 +42,17 @@ class BC_API connector
 {
 public:
     typedef std::shared_ptr<connector> ptr;
-    typedef std::function<void(const code&, channel::ptr)> connect_handler;
+    typedef std::function<void(const code& ec, channel::ptr)> connect_handler;
 
     /// Construct an instance.
     connector(threadpool& pool, const settings& settings);
 
+    /// Validate connector stopped.
+    ~connector();
+
     /// This class is not copyable.
     connector(const connector&) = delete;
     void operator=(const connector&) = delete;
-
-    /// Cancel all outstanding connection attempt.
-    void cancel();
 
     /// Try to connect to the endpoint.
     void connect(const config::endpoint& endpoint,
@@ -65,7 +66,21 @@ public:
     void connect(const std::string& hostname, uint16_t port,
         connect_handler handler);
 
+    /// Cancel all outstanding connection attempt.
+    void stop();
+
 private:
+    bool stopped();
+
+    // Pending connect clearance.
+    void cancel();
+    void pend(asio::socket_ptr socket);
+    void unpend(asio::socket_ptr socket);
+    
+    void do_stop();
+    void do_connect(const std::string& hostname, uint16_t port,
+        connect_handler handler);
+    void handle_cancel(asio::socket_ptr socket);
     void handle_resolve(const boost_code& ec, asio::iterator iterator,
         connect_handler handler);
     void handle_timer(const code& ec, asio::socket_ptr socket,
@@ -73,9 +88,12 @@ private:
     void handle_connect(const boost_code& ec, asio::iterator iterator,
         asio::socket_ptr socket, deadline::ptr timer, connect_handler handler);
 
+    bool stopped_;
     threadpool& pool_;
     const settings& settings_;
+    dispatcher dispatch_;
     std::shared_ptr<asio::resolver> resolver_;
+    std::vector<asio::socket_ptr> pending_;
 };
 
 } // namespace network

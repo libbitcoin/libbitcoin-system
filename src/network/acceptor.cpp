@@ -39,23 +39,61 @@ namespace network {
 
 using std::placeholders::_1;
 
+// The acceptor_ member is protected against concurrent access.
 acceptor::acceptor(threadpool& pool, const settings& settings)
   : pool_(pool),
     settings_(settings),
+    dispatch_(pool, NAME),
     acceptor_(std::make_shared<asio::acceptor>(pool_.service())),
     CONSTRUCT_TRACK(acceptor)
 {
 }
 
-// This will invoke the handler of all outstanding accept calls.
-void acceptor::cancel()
+acceptor::~acceptor()
 {
-    acceptor_->cancel();
+    BITCOIN_ASSERT_MSG(stopped(), "The acceptor was not stopped.");
 }
 
+// Stop sequence.
+// ----------------------------------------------------------------------------
+
+// public:
+void acceptor::stop()
+{
+    dispatch_.ordered(&acceptor::do_stop,
+        shared_from_this());
+}
+
+// This will invoke the handler of all outstanding accept calls.
+void acceptor::do_stop()
+{
+    acceptor_->close();
+}
+
+bool acceptor::stopped()
+{
+    return !acceptor_->is_open();
+}
+
+// Listen sequence.
+// ----------------------------------------------------------------------------
+
+// public:
 // This is hardwired to listen on IPv6.
 void acceptor::listen(uint16_t port, result_handler handler)
 {
+    dispatch_.unordered(&acceptor::do_listen,
+        shared_from_this(), port, handler);
+}
+
+void acceptor::do_listen(uint16_t port, result_handler handler)
+{
+    if (!stopped())
+    {
+        handler(error::operation_failed);
+        return;
+    }
+
     boost_code ec;
     asio::endpoint endpoint(asio::tcp::v6(), settings_.inbound_port);
     acceptor_->open(endpoint.protocol(), ec);
@@ -69,27 +107,43 @@ void acceptor::listen(uint16_t port, result_handler handler)
     if (!ec)
         acceptor_->listen(asio::max_connections, ec);
 
+    // This is the end of the listen sequence.
     handler(error::boost_to_error_code(ec));
 }
 
-// This can be called repeatedly, but doesn't need to be.
+// Accept sequence.
+// ----------------------------------------------------------------------------
+
+// public:
 void acceptor::accept(accept_handler handler)
 {
-    const auto handle_accept = synchronize(handler, 1, NAME);
+    dispatch_.unordered(&acceptor::do_accept,
+        shared_from_this(), handler);
+}
+
+void acceptor::do_accept(accept_handler handler)
+{
+    if (stopped())
+    {
+        handler(error::service_stopped, nullptr);
+        return;
+    }
 
     const auto socket = std::make_shared<asio::socket>(pool_.service());
+
     acceptor_->async_accept(*socket,
         std::bind(&acceptor::handle_accept,
-            shared_from_this(), _1, socket, handle_accept));
+            shared_from_this(), _1, socket, handler));
 }
 
 void acceptor::handle_accept(const boost_code& ec, asio::socket_ptr socket,
     accept_handler handler)
 {
+    // This is the end of the accept sequence.
     if (ec)
         handler(error::boost_to_error_code(ec), nullptr);
     else
-        handler(error::success, 
+        handler(error::success,
             std::make_shared<channel>(pool_, socket, settings_));
 }
 

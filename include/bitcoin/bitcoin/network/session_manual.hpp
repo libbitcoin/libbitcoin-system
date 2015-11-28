@@ -72,6 +72,7 @@ private:
     void handle_channel_stop(const code& ec, const std::string& hostname,
         uint16_t port);
 
+    // This can hold a session reference, it will be cleared on connector stop.
     connector::ptr connect_;
 };
 

@@ -25,9 +25,10 @@
 #include <memory>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
+#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -45,12 +46,12 @@ public:
     /// Construct an instance.
     acceptor(threadpool& pool, const settings& settings);
 
+    /// Validate acceptor stopped.
+    ~acceptor();
+
     /// This class is not copyable.
     acceptor(const acceptor&) = delete;
     void operator=(const acceptor&) = delete;
-
-    /// Cancel the listener and all outstanding accept attempts.
-    void cancel();
 
     /// Start the listener on the specified port.
     void listen(uint16_t port, result_handler handler);
@@ -58,12 +59,21 @@ public:
     /// Accept the next connection available, until canceled.
     void accept(accept_handler handler);
 
+    /// Cancel the listener and all outstanding accept attempts.
+    void stop();
+
 private:
+    bool stopped();
+
+    void do_stop();
+    void do_accept(accept_handler handler);
+    void do_listen(uint16_t port, result_handler handler);
     void handle_accept(const boost_code& ec, asio::socket_ptr socket,
         accept_handler handler);
 
     threadpool& pool_;
     const settings& settings_;
+    dispatcher dispatch_;
     asio::acceptor_ptr acceptor_;
 };
 

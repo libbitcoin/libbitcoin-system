@@ -64,12 +64,11 @@ private:
         const config::authority& authority, const settings& settings,
         uint64_t nonce, size_t height);
 
-    void handle_receive_version(const code& ec,
-        const message::version& version);
     void handle_receive_verack(const code& ec, const message::verack&);
     void handle_version_sent(const code& ec);
     void handle_verack_sent(const code& ec);
-    void handle_handshake_complete(const code& ec, event_handler handler);
+    void handle_receive_version(const code& ec,
+        const message::version& version);
 
     static const message::version template_;
 };

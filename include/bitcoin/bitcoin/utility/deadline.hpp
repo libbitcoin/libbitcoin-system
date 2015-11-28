@@ -25,14 +25,15 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 
 /**
- * Class wrapper for boost::asio::deadline_timer.
- * This simplifies invocation, eliminates boost-speific error handling and makes
- * timer firing and cancellation conditions safer.
+ * Class wrapper for boost::asio::deadline_timer, thread safe.
+ * This simplifies invocation, eliminates boost-specific error handling and
+ * makes timer firing and cancellation conditions safer.
  */
 class BC_API deadline
   : public std::enable_shared_from_this<deadline>, track<deadline>
@@ -53,14 +54,14 @@ public:
     void operator=(const deadline&) = delete;
 
     /**
-     * Start the timer.
+     * Start or restart the timer.
      * Use expired(ec) in handler to test for expiration.
      * @param[in]  handle  Callback invoked upon expire or cancel.
      */
     void start(handler handle);
 
     /**
-     * Start the timer.
+     * Start or restart the timer.
      * Use expired(ec) in handler to test for expiration.
      * @param[in]  handle    Callback invoked upon expire or cancel.
      * @param[in]  duration  The time period from start to expiration.
@@ -68,15 +69,18 @@ public:
     void start(handler handle, const asio::duration duration);
 
     /**
-     * Cancel the timer. The handler will not be invoked.
+     * Cancel the timer. The handler will be invoked.
      */
     void cancel();
 
 private:
+    void do_cancel();
+    void do_start(handler handle, const asio::duration duration);
     void handle_timer(const boost_code& ec, handler handle) const;
 
     asio::timer timer_;
     asio::duration duration_;
+    dispatcher dispatch_;
 };
 
 } // namespace libbitcoin

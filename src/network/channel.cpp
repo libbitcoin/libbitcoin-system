@@ -109,6 +109,7 @@ void channel::set_version(const message::version& value)
 // Proxy pure virtual protected and ordered handlers.
 // ----------------------------------------------------------------------------
 
+// It is possible that this may be called multipled times.
 void channel::handle_stopping()
 {
     expiration_->cancel();

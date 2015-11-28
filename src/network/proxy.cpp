@@ -84,7 +84,9 @@ proxy::proxy(threadpool& pool, asio::socket_ptr socket, uint32_t magic)
 
 proxy::~proxy()
 {
-    do_stop(error::channel_stopped);
+    // Destruct is too late to clear subscriptions, so can't rely on stop here.
+
+    BITCOIN_ASSERT_MSG(stopped(), "The channel was not stopped.");
 }
 
 // Properties.
@@ -131,17 +133,16 @@ void proxy::stop(const code& ec)
 {
     BITCOIN_ASSERT_MSG(ec, "The stop code must be an error code.");
 
-    dispatch_.unordered(&proxy::do_stop,
-        shared_from_this(), ec);
-}
-
-void proxy::do_stop(const code& ec)
-{
     if (stopped())
         return;
 
+    // Since this class does not control thread deactivation, all messages must
+    // be queued before return from stop, so no strand.
+
     stopped_ = true;
     starting_ = true;
+
+    // It is possible that this may be called multiple times.
     handle_stopping();
 
     // Close the socket, ignore the error code.
@@ -169,16 +170,6 @@ bool proxy::stopped() const
 
 // Stop subscription sequence.
 // ----------------------------------------------------------------------------
-// Stop and message subscription must be ordered, as otherwise the stopped
-// state of the proxy is subject to a race. The race results in subscriptions
-// being registered after stop, never clearing, resulting in socket leaks. The
-// race is prevented by subscribing from an ordered call. There are two ways to
-// accomplish this: (1) strand all methods that call subscribe, or (2) strand
-// all calls to stop. The latter is preferrable as it minimizes the size
-// of the commuting region and also allows for cleaner logical decomposition.
-// We bypass this ordering during startup by making startup sequential.
-// This simplifies subscriptions during and after startup as they do not
-// require completion handlers, and prevents startup deadlocked startups.
 
 // public:
 void proxy::subscribe_stop(result_handler handler)
@@ -340,7 +331,7 @@ void proxy::do_send(const data_chunk& message, result_handler handler,
     log::debug(LOG_NETWORK)
         << "Send " << command << " [" << authority() << "] ("
         << message.size() << " bytes)";
-
+    
     const shared_const_buffer buffer(message);
     async_write(*socket_, buffer,
         std::bind(&proxy::handle_send,

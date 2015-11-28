@@ -44,7 +44,7 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 
 protocol_ping::protocol_ping(threadpool& pool, p2p&, channel::ptr channel)
-  : protocol_timer(pool, channel, NAME),
+  : protocol_timer(pool, channel, true, NAME),
     CONSTRUCT_TRACK(protocol_ping)
 {
 }
@@ -139,8 +139,6 @@ void protocol_ping::handle_send_ping(const code& ec)
         stop(ec);
         return;
     }
-
-    reset_timer();
 }
 
 void protocol_ping::handle_send_pong(const code& ec)

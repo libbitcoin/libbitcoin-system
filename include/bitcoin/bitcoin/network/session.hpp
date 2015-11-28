@@ -59,7 +59,10 @@ public:
     /// Construct an instance.
     session(threadpool& pool, p2p& network, const settings& settings,
         bool outgoing, bool persistent);
-    
+
+    /// Validate session stopped.
+    ~session();
+
     /// This class is not copyable.
     session(const session&) = delete;
     void operator=(const session&) = delete;
@@ -84,15 +87,25 @@ protected:
             shared_from_base<Protocol>(), std::forward<Args>(args)...);
     }
 
-    /// Bind an ordered delegate to a method in the derived class.
+    /// Bind a concurrent delegate to a method in the derived class.
     template <class Protocol, typename Handler, typename... Args>
-    auto ordered(Handler&& handler, Args&&... args) ->
-        delegates::ordered<decltype(std::bind(std::forward<Handler>(handler),
-            std::shared_ptr<Protocol>(), std::forward<Args>(args)...))>
+    auto concurrent(Handler&& handler, Args&&... args) ->
+        delegates::concurrent<decltype(std::bind(std::forward<Handler>(handler),
+        std::shared_ptr<Protocol>(), std::forward<Args>(args)...))>
     {
-        return dispatch_.ordered_delegate(std::forward<Handler>(handler),
+        return dispatch_.concurrent_delegate(std::forward<Handler>(handler),
             shared_from_base<Protocol>(), std::forward<Args>(args)...);
     }
+
+    /////// Bind an ordered delegate to a method in the derived class.
+    ////template <class Protocol, typename Handler, typename... Args>
+    ////auto ordered(Handler&& handler, Args&&... args) ->
+    ////    delegates::ordered<decltype(std::bind(std::forward<Handler>(handler),
+    ////        std::shared_ptr<Protocol>(), std::forward<Args>(args)...))>
+    ////{
+    ////    return dispatch_.ordered_delegate(std::forward<Handler>(handler),
+    ////        shared_from_base<Protocol>(), std::forward<Args>(args)...);
+    ////}
 
     /// Properties.
     virtual void address_count(count_handler handler);
@@ -111,6 +124,10 @@ protected:
     /// Subscribe to receive session stop notification.
     virtual void subscribe_stop(stop_handler handler);
 
+    /// Create a channel from the specified number of concurrent attempts.
+    void connect(connector::ptr connect, uint32_t limit,
+        channel_handler handler);
+
     /// Register a new channel with the session and bind its handlers.
     virtual void register_channel(channel::ptr channel,
         result_handler handle_started, result_handler handle_stopped);
@@ -124,11 +141,26 @@ private:
         return std::static_pointer_cast<Derived>(shared_from_this());
     }
 
-    void handle_stop();
-    void do_start(result_handler handler);
+    // Socket creators.
+    void do_stop_acceptor(acceptor::ptr connect);
+    void do_stop_connector(connector::ptr connect);
 
+    // Start sequence.
+    void do_stop_session();
+
+    // Stop sequence
     void handle_channel_event(const code& ec, channel::ptr channel,
         stop_handler handler);
+
+    // Connect sequence
+    void new_connect(connector::ptr connect, channel_handler handler);
+    void start_connect(const code& ec, const authority& host,
+        connector::ptr connect, channel_handler handler);
+    void handle_connect(const code& ec, channel::ptr channel,
+        const authority& host, connector::ptr connect,
+        channel_handler handler);
+
+    // Registration sequence.
     void handle_channel_start(const code& ec, channel::ptr channel,
         result_handler handle_started);
     void handle_pend(const code& ec, channel::ptr channel,
@@ -166,17 +198,11 @@ private:
     bind<CLASS>(&CLASS::method, p1, p2, p3, p4)
 #define BIND5(method, p1, p2, p3, p4, p5) \
     bind<CLASS>(&CLASS::method, p1, p2, p3, p4, p5)
+#define BIND6(method, p1, p2, p3, p4, p5, p6) \
+    bind<CLASS>(&CLASS::method, p1, p2, p3, p4, p5, p6)
 
-#define ORDERED2(method, p1, p2) \
-    ordered<CLASS>(&CLASS::method, p1, p2)
-#define ORDERED3(method, p1, p2, p3) \
-    ordered<CLASS>(&CLASS::method, p1, p2, p3)
-#define ORDERED4(method, p1, p2, p3, p4) \
-    ordered<CLASS>(&CLASS::method, p1, p2, p3, p4)
-#define ORDERED5(method, p1, p2, p3, p4, p5) \
-    ordered<CLASS>(&CLASS::method, p1, p2, p3, p4, p5)
-#define ORDERED6(method, p1, p2, p3, p4, p5, p6) \
-    ordered<CLASS>(&CLASS::method, p1, p2, p3, p4, p5, p6)
+#define CONCURRENT2(method, p1, p2) \
+    concurrent<CLASS>(&CLASS::method, p1, p2)
 
 } // namespace network
 } // namespace libbitcoin

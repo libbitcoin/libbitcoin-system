@@ -36,6 +36,7 @@ using std::placeholders::_1;
 protocol_events::protocol_events(threadpool& pool, channel::ptr channel,
     const std::string& name)
   : protocol(pool, channel, name),
+    stopped_(true),
     event_handler_(nullptr)
 {
 }
@@ -46,7 +47,7 @@ protocol_events::protocol_events(threadpool& pool, channel::ptr channel,
 // protected:
 bool protocol_events::stopped() const
 {
-    return !event_handler_;
+    return stopped_;
 }
 
 // Start sequence.
@@ -55,7 +56,11 @@ bool protocol_events::stopped() const
 // protected:
 void protocol_events::start(event_handler handler)
 {
+    stopped_ = false;
+
+    // This is not cleared until destruct, so cannot contain a self-reference.
     event_handler_ = handler;
+
     SUBSCRIBE_STOP1(handle_stopped, _1);
 }
 
@@ -83,8 +88,10 @@ void protocol_events::set_event(const code& ec)
         return;
 
     event_handler_(ec);
+
+    // We cannot set event handler to null since this method is not protected.
     if (ec == error::channel_stopped)
-        event_handler_ = nullptr;
+        stopped_ = true;
 }
 
 } // namespace network
