@@ -459,6 +459,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/delegates.hpp \
     include/bitcoin/bitcoin/utility/deserializer.hpp \
     include/bitcoin/bitcoin/utility/dispatcher.hpp \
+    include/bitcoin/bitcoin/utility/enable_shared_from_base.hpp \
     include/bitcoin/bitcoin/utility/endian.hpp \
     include/bitcoin/bitcoin/utility/exceptions.hpp \
     include/bitcoin/bitcoin/utility/istream_reader.hpp \

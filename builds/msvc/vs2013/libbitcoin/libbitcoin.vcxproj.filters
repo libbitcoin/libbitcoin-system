@@ -1036,6 +1036,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\asio.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\enable_shared_from_base.hpp">
+      <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\resource.rc">

@@ -26,6 +26,7 @@
 #include <bitcoin/bitcoin/message/get_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/p2p.hpp>
+#include <bitcoin/bitcoin/network/protocol.hpp>
 #include <bitcoin/bitcoin/network/protocol_events.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/log.hpp>

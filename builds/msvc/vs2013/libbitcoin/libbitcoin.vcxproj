@@ -304,6 +304,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\assert.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\deadline.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\delegates.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\enable_shared_from_base.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\monitor.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\synchronizer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\dispatcher.hpp" />

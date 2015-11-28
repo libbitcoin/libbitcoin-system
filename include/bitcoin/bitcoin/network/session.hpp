@@ -34,17 +34,32 @@
 #include <bitcoin/bitcoin/network/proxy.hpp>
 #include <bitcoin/bitcoin/utility/delegates.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
+#include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
+#define SESSION_ARGS(handler, args) \
+    std::forward<Handler>(handler), \
+    shared_from_base<Session>(), \
+    std::forward<Args>(args)...
+#define BOUND_SESSION(handler, args) \
+    std::bind(SESSION_ARGS(handler, args))
+
+#define SESSION_ARGS_TYPE(handler, args) \
+    std::forward<Handler>(handler), \
+    std::shared_ptr<Session>(), \
+    std::forward<Args>(args)...
+#define BOUND_SESSION_TYPE(handler, args) \
+    std::bind(SESSION_ARGS_TYPE(handler, args))
+
 class p2p;
 
 /// Base class for maintaining the lifetime of a channel set, thread safe.
 class BC_API session
-  : public std::enable_shared_from_this<session>
+  : public enable_shared_from_base<session>
 {
 public:
     typedef config::authority authority;
@@ -78,34 +93,20 @@ protected:
     }
 
     /// Bind a method in the derived class.
-    template <class Protocol, typename Handler, typename... Args>
+    template <class Session, typename Handler, typename... Args>
     auto bind(Handler&& handler, Args&&... args) ->
-        decltype(std::bind(std::forward<Handler>(handler),
-            std::shared_ptr<Protocol>(), std::forward<Args>(args)...))
+        decltype(BOUND_SESSION_TYPE(handler, args))
     {
-        return std::bind(std::forward<Handler>(handler),
-            shared_from_base<Protocol>(), std::forward<Args>(args)...);
+        return BOUND_SESSION(handler, args);
     }
 
     /// Bind a concurrent delegate to a method in the derived class.
-    template <class Protocol, typename Handler, typename... Args>
+    template <class Session, typename Handler, typename... Args>
     auto concurrent(Handler&& handler, Args&&... args) ->
-        delegates::concurrent<decltype(std::bind(std::forward<Handler>(handler),
-        std::shared_ptr<Protocol>(), std::forward<Args>(args)...))>
+        delegates::concurrent<decltype(BOUND_SESSION_TYPE(handler, args))>
     {
-        return dispatch_.concurrent_delegate(std::forward<Handler>(handler),
-            shared_from_base<Protocol>(), std::forward<Args>(args)...);
+        return dispatch_.concurrent_delegate(SESSION_ARGS(handler, args));
     }
-
-    /////// Bind an ordered delegate to a method in the derived class.
-    ////template <class Protocol, typename Handler, typename... Args>
-    ////auto ordered(Handler&& handler, Args&&... args) ->
-    ////    delegates::ordered<decltype(std::bind(std::forward<Handler>(handler),
-    ////        std::shared_ptr<Protocol>(), std::forward<Args>(args)...))>
-    ////{
-    ////    return dispatch_.ordered_delegate(std::forward<Handler>(handler),
-    ////        shared_from_base<Protocol>(), std::forward<Args>(args)...);
-    ////}
 
     /// Properties.
     virtual void address_count(count_handler handler);
@@ -134,11 +135,6 @@ protected:
     const settings& settings_;
 
 private:
-    template <class Derived>
-    std::shared_ptr<Derived> shared_from_base()
-    {
-        return std::static_pointer_cast<Derived>(shared_from_this());
-    }
 
     // Socket creators.
     void do_stop_acceptor(acceptor::ptr connect);
@@ -186,6 +182,9 @@ private:
     p2p& network_;
     dispatcher dispatch_;
 };
+
+#undef HANDLER_SESSION_ARGS
+#undef BOUND_SESSION
 
 #define BIND1(method, p1) \
     bind<CLASS>(&CLASS::method, p1)

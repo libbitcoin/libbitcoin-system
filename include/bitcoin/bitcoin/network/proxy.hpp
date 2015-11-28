@@ -40,6 +40,7 @@
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
+#include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -48,7 +49,7 @@ namespace network {
 
 /// Manages all socket communication, thread safe.
 class BC_API proxy
-  : public std::enable_shared_from_this<proxy>
+  : public enable_shared_from_base<proxy>
 {
 public:
     template <class Message>
@@ -116,12 +117,6 @@ public:
     virtual void stop(const code& ec);
 
 protected:
-    template <class Derived>
-    std::shared_ptr<Derived> shared_from_base()
-    {
-        return std::static_pointer_cast<Derived>(shared_from_this());
-    }
-
     virtual bool stopped() const;
     virtual void handle_activity() = 0;
     virtual void handle_stopping() = 0;

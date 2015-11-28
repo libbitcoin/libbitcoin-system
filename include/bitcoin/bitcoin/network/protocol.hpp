@@ -22,7 +22,6 @@
 
 #include <functional>
 #include <memory>
-#include <future>
 #include <string>
 #include <utility>
 #include <bitcoin/bitcoin/config/authority.hpp>
@@ -31,21 +30,29 @@
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
+#include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
-#define HANDLER_PROTOCOL_ARGS(handler, args) \
+#define PROTOCOL_ARGS(handler, args) \
     std::forward<Handler>(handler), \
     shared_from_base<Protocol>(), \
     std::forward<Args>(args)...
-#define BOUND(handler, args) \
-    dispatcher::bound_delegate(HANDLER_PROTOCOL_ARGS(handler, args))
+#define BOUND_PROTOCOL(handler, args) \
+    std::bind(PROTOCOL_ARGS(handler, args))
+
+#define PROTOCOL_ARGS_TYPE(handler, args) \
+    std::forward<Handler>(handler), \
+    std::shared_ptr<Protocol>(), \
+    std::forward<Args>(args)...
+#define BOUND_PROTOCOL_TYPE(handler, args) \
+    std::bind(PROTOCOL_ARGS_TYPE(handler, args))
 
 /// Virtual base class for protocol implementation, mostly thread safe.
 class BC_API protocol
-  : public std::enable_shared_from_this<protocol>
+  : public enable_shared_from_base<protocol>
 {
 protected:
     typedef std::function<void()> completion_handler;
@@ -59,40 +66,34 @@ protected:
     protocol(const protocol&) = delete;
     void operator=(const protocol&) = delete;
 
-    /// Required because enable_shared_from_this doesn't support inheritance.
-    template <class Protocol>
-    std::shared_ptr<Protocol> shared_from_base()
-    {
-        return std::static_pointer_cast<Protocol>(shared_from_this());
-    }
-
     /// Bind a method in the derived class.
     template <class Protocol, typename Handler, typename... Args>
     auto bind(Handler&& handler, Args&&... args) ->
-        decltype(std::bind(HANDLER_PROTOCOL_ARGS(handler, args)))
+        decltype(BOUND_PROTOCOL_TYPE(handler, args))
     {
-        return std::bind(HANDLER_PROTOCOL_ARGS(handler, args));
+        return BOUND_PROTOCOL(handler, args);
     }
 
     /// Send a message on the channel and handle the result.
     template <class Protocol, class Message, typename Handler, typename... Args>
     void send(Message&& packet, Handler&& handler, Args&&... args)
     {
-        channel_->send(std::forward<Message>(packet), BOUND(handler, args));
+        channel_->send(std::forward<Message>(packet),
+            BOUND_PROTOCOL(handler, args));
     }
 
     /// Subscribe to all channel messages, blocking until subscribed.
     template <class Protocol, class Message, typename Handler, typename... Args>
     void subscribe(Handler&& handler, Args&&... args)
     {
-        channel_->template subscribe<Message>(BOUND(handler, args));
+        channel_->template subscribe<Message>(BOUND_PROTOCOL(handler, args));
     }
 
     /// Subscribe to the channel stop, blocking until subscribed.
     template <class Protocol, typename Handler, typename... Args>
     void subscribe_stop(Handler&& handler, Args&&... args)
     {
-        channel_->subscribe_stop(BOUND(handler, args));
+        channel_->subscribe_stop(BOUND_PROTOCOL(handler, args));
     }
 
     /// Get the address of the channel.
@@ -125,7 +126,7 @@ private:
 };
 
 #undef HANDLER_PROTOCOL_ARGS
-#undef BOUND
+#undef BOUND_PROTOCOL
 
 #define BIND1(method, p1) \
     bind<CLASS>(&CLASS::method, p1)
