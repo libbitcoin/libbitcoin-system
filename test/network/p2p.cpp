@@ -393,6 +393,7 @@ BOOST_AUTO_TEST_CASE(p2p__broadcast__ping_two_distinct_hosts__two_sends_and_succ
     BOOST_REQUIRE_EQUAL(send_result(ping(0), network, 2), error::success);
 }
 
+// This will hang for a long time if all connections are created before subscription.
 BOOST_AUTO_TEST_CASE(p2p__subscribe__seed_outbound__success)
 {
     print_headers(TEST_NAME);
