@@ -124,9 +124,8 @@ protected:
     /// Subscribe to receive session stop notification.
     virtual void subscribe_stop(stop_handler handler);
 
-    /// Create a channel from the specified number of concurrent attempts.
-    void connect(connector::ptr connect, uint32_t limit,
-        channel_handler handler);
+    /// Create a channel from the configured number of concurrent attempts.
+    void connect(connector::ptr connect, channel_handler handler);
 
     /// Register a new channel with the session and bind its handlers.
     virtual void register_channel(channel::ptr channel,

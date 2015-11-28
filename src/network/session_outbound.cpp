@@ -91,10 +91,7 @@ void session_outbound::new_connection(connector::ptr connect)
         return;
     }
 
-    // TODO: add setting for concurrent connect limit.
-    const auto limit = /*settings_.outbound_connections*/ 1;
-
-    this->connect(connect, limit, BIND3(handle_connect, _1, _2, connect));
+    this->connect(connect, BIND3(handle_connect, _1, _2, connect));
 }
 
 void session_outbound::handle_connect(const code& ec, channel::ptr channel,

@@ -190,14 +190,14 @@ void session::handle_channel_event(const code& ec, channel::ptr,
 // This is a mini-session within the base session.
 // ----------------------------------------------------------------------------
 
-void session::connect(connector::ptr connect, uint32_t limit,
-    channel_handler handler)
+void session::connect(connector::ptr connect, channel_handler handler)
 {
+    const auto batch = std::max(settings_.connect_batch_size, 1u);
     const auto complete = synchronize(handler, 1, NAME);
 
     // We can't use dispatch::race here because it doesn't increment the shared
     // pointer reference count.
-    for (uint32_t iteration = 0; iteration < limit; ++iteration)
+    for (uint32_t host = 0; host < batch; ++host)
         dispatch_.concurrent(&session::new_connect,
             shared_from_this(), connect, complete);
 }

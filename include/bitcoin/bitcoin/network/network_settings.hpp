@@ -35,6 +35,7 @@ namespace network {
 #define NETWORK_CONNECTION_LIMIT            16
 #define NETWORK_OUTBOUND_CONNECTIONS        8
 #define NETWORK_MANUAL_RETRY_LIMIT          0
+#define NETWORK_CONNECT_BATCH_SIZE          5
 #define NETWORK_CONNECT_TIMEOUT_SECONDS     5
 #define NETWORK_CHANNEL_HANDSHAKE_SECONDS   30
 #define NETWORK_CHANNEL_REVIVAL_MINUTES     5
@@ -85,6 +86,7 @@ struct BC_API settings
     uint32_t connection_limit;
     uint32_t outbound_connections;
     uint32_t manual_retry_limit;
+    uint32_t connect_batch_size;
     uint32_t connect_timeout_seconds;
     uint32_t channel_handshake_seconds;
     uint32_t channel_revival_minutes;
