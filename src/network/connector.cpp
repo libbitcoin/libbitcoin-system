@@ -21,6 +21,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
@@ -49,7 +50,6 @@ connector::connector(threadpool& pool, const settings& settings)
   : stopped_(false),
     pool_(pool),
     settings_(settings),
-    dispatch_(pool, NAME),
     resolver_(std::make_shared<asio::resolver>(pool.service())),
     CONSTRUCT_TRACK(connector)
 {
@@ -66,56 +66,24 @@ connector::~connector()
 // public:
 void connector::stop()
 {
-    // BUGBUG: unsafe stop, second context change.
-    dispatch_.ordered(&connector::do_stop,
-        shared_from_this());
-}
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    if (true)
+    {
+        std::lock_guard<std::mutex> lock(resolver_mutex_);
 
-void connector::do_stop()
-{
-    if (stopped())
-        return;
+        // This will invoke the handlers of all outstanding resolve calls.
+        resolver_->cancel();
+    }
+    ///////////////////////////////////////////////////////////////////////////
 
+    clear();
     stopped_ = true;
-
-    // This will invoke the handlers of all outstanding resolve calls.
-    resolver_->cancel();
-
-    // This will invoke the handlers of all outstanding connect calls.
-    cancel();
 }
 
 bool connector::stopped()
 {
     return stopped_;
-}
-
-// Pending connect clearance.
-// ----------------------------------------------------------------------------
-
-// private:
-void connector::pend(asio::socket_ptr socket)
-{
-    pending_.push_back(socket);
-}
-
-void connector::unpend(asio::socket_ptr socket)
-{
-    auto it = std::find(pending_.begin(), pending_.end(), socket);
-
-    // Cancel pending can occur before unpend.
-    if (it != pending_.end())
-        pending_.erase(it);
-}
-
-void connector::cancel()
-{
-    // The pending collection exists to allow for connect cancelation.
-    // If we did not cancel connect attempts their closures would leak.
-    for (auto socket: pending_)
-        socket->cancel();
-
-    pending_.clear();
 }
 
 // Connect sequence.
@@ -137,13 +105,6 @@ void connector::connect(const authority& authority, connect_handler handler)
 void connector::connect(const std::string& hostname, uint16_t port,
     connect_handler handler)
 {
-    dispatch_.ordered(&connector::do_connect,
-        shared_from_this(), hostname, port, handler);
-}
-
-void connector::do_connect(const std::string& hostname, uint16_t port,
-    connect_handler handler)
-{
     if (stopped())
     {
         handler(error::service_stopped, nullptr);
@@ -153,9 +114,15 @@ void connector::do_connect(const std::string& hostname, uint16_t port,
     const auto port_text = std::to_string(port);
     const auto query = std::make_shared<asio::query>(hostname, port_text);
 
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(resolver_mutex_);
+
+    // async_resolve will not invoke the handler within this function.
     resolver_->async_resolve(*query, 
-        dispatch_.ordered_delegate(&connector::handle_resolve,
+        std::bind(&connector::handle_resolve,
             shared_from_this(), _1, _2, handler));
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 void connector::handle_resolve(const boost_code& ec, asio::iterator iterator,
@@ -183,14 +150,14 @@ void connector::handle_resolve(const boost_code& ec, asio::iterator iterator,
     // Manage the socket-timer race.
     const auto handle_connect = synchronize(handler, 1, NAME);
 
-    // This is end #1 of the connnect sequence.
+    // This is branch #1 of the connnect sequence.
     timer->start(
         std::bind(&connector::handle_timer,
             shared_from_this(), _1, socket, handle_connect));
 
-    // This is end #2 of the connnect sequence.
+    // This is branch #2 of the connnect sequence.
     boost::asio::async_connect(*socket, iterator,
-        dispatch_.ordered_delegate(&connector::handle_connect,
+        std::bind(&connector::handle_connect,
             shared_from_this(), _1, _2, socket, timer, handle_connect));
 }
 
@@ -227,6 +194,55 @@ void connector::handle_connect(const boost_code& ec, asio::iterator,
             std::make_shared<channel>(pool_, socket, settings_));
 
     timer->stop();
+}
+
+// Pending connect clearance.
+// ----------------------------------------------------------------------------
+// The pending collection exists to allow for connect cancelation.
+// If we did not cancel connect attempts their closures would leak.
+// The clear method invokes the handlers of all outstanding connect calls.
+
+// private:
+void connector::pend(asio::socket_ptr socket)
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(pending_mutex_);
+
+    pending_.push_back(socket);
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+void connector::unpend(asio::socket_ptr socket)
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(pending_mutex_);
+
+    auto it = std::find(pending_.begin(), pending_.end(), socket);
+
+    // clear can occur before unpend, so we may not find the entry.
+    if (it != pending_.end())
+        pending_.erase(it);
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+void connector::clear()
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(pending_mutex_);
+
+    // TODO: ensure socket cancel will not invoke member handler in scope.
+    // BUGBUG: socket::cancel fails with error::operation_not_supported
+    // on Windows XP and Windows Server 2003, but handler invocation required.
+    // We should enable BOOST_ASIO_ENABLE_CANCELIO and BOOST_ASIO_DISABLE_IOCP
+    // on these platforms only. See: bit.ly/1YC0p9e
+    for (auto socket : pending_)
+        socket->cancel();
+
+    pending_.clear();
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 } // namespace network

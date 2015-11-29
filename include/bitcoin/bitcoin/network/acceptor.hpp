@@ -23,12 +23,12 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
-#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -63,18 +63,14 @@ public:
     void stop();
 
 private:
-    bool stopped();
-
-    void do_stop();
-    void do_accept(accept_handler handler);
-    void do_listen(uint16_t port, result_handler handler);
     void handle_accept(const boost_code& ec, asio::socket_ptr socket,
         accept_handler handler);
 
     threadpool& pool_;
     const settings& settings_;
-    dispatcher dispatch_;
+
     asio::acceptor_ptr acceptor_;
+    std::mutex acceptor_mutex_;
 };
 
 } // namespace network

@@ -22,6 +22,7 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
@@ -30,7 +31,6 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
-#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -70,17 +70,15 @@ public:
     void stop();
 
 private:
+
+    // This is a weak stop indicator.
     bool stopped();
 
     // Pending connect clearance.
-    void cancel();
+    void clear();
     void pend(asio::socket_ptr socket);
     void unpend(asio::socket_ptr socket);
-    
-    void do_stop();
-    void do_connect(const std::string& hostname, uint16_t port,
-        connect_handler handler);
-    void handle_cancel(asio::socket_ptr socket);
+
     void handle_resolve(const boost_code& ec, asio::iterator iterator,
         connect_handler handler);
     void handle_timer(const code& ec, asio::socket_ptr socket,
@@ -91,9 +89,12 @@ private:
     bool stopped_;
     threadpool& pool_;
     const settings& settings_;
-    dispatcher dispatch_;
+
     std::shared_ptr<asio::resolver> resolver_;
+    std::mutex resolver_mutex_;
+
     std::vector<asio::socket_ptr> pending_;
+    std::mutex pending_mutex_;
 };
 
 } // namespace network
