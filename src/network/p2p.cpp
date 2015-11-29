@@ -278,6 +278,7 @@ void p2p::stop(result_handler handler)
     }
     
     // All shutdown actions must be queued by the end of the stop call.
+    // Queued shutdown operations must not enqueue additional operations.
 
     stopped_ = true;
     manual_ = nullptr;
