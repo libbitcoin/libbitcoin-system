@@ -115,6 +115,8 @@ void channel::handle_stopping()
     expiration_->stop();
     inactivity_->stop();
     revival_->stop();
+
+    // BUGBUG: this needs to be guarded (but is deprecated).
     revival_handler_ = nullptr;
 }
 
@@ -183,6 +185,7 @@ void channel::reset_revival()
 // public:
 void channel::set_revival_handler(result_handler handler)
 {
+    // BUGBUG: this needs to be guarded (but is deprecated).
     revival_handler_ = handler;
 }
 
@@ -201,13 +204,14 @@ void channel::handle_revival(const code& ec)
     if (stopped())
         return;
 
-    // Nothing to do, no handler registered.
+    // BUGBUG: this needs to be guarded (but is deprecated).
     if (!revival_handler_)
         return;
 
     log::debug(LOG_NETWORK)
         << "Channel revival invoked [" << authority() << "]";
 
+    // BUGBUG: this needs to be guarded (but is deprecated).
     revival_handler_(ec);
     reset_revival();
 }
