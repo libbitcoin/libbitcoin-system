@@ -435,7 +435,6 @@ void p2p::subscribe(channel_handler handler)
         handler(error::service_stopped, nullptr);
     else
         subscriber_->subscribe(handler);
-
 }
 
 // This does not require subscriber_ protection.
