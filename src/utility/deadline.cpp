@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 
 #include <functional>
+#include <mutex>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
