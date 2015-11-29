@@ -20,6 +20,8 @@
 #include <bitcoin/bitcoin/network/protocol_events.hpp>
 
 #include <functional>
+#include <memory>
+#include <mutex>
 #include <string>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
@@ -47,6 +49,7 @@ protocol_events::protocol_events(threadpool& pool, channel::ptr channel,
 // protected:
 bool protocol_events::stopped() const
 {
+    // This is a weak indication, but sufficient for shutdown initiation.
     return stopped_;
 }
 
@@ -57,10 +60,7 @@ bool protocol_events::stopped() const
 void protocol_events::start(event_handler handler)
 {
     stopped_ = false;
-
-    // This is not cleared until destruct, so cannot contain a self-reference.
     event_handler_ = handler;
-
     SUBSCRIBE_STOP1(handle_stopped, _1);
 }
 
@@ -84,14 +84,24 @@ void protocol_events::handle_stopped(const code& ec)
 // protected:
 void protocol_events::set_event(const code& ec)
 {
-    if (stopped())
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(event_mutex_);
+
+    if (!event_handler_)
         return;
 
+    // This will deadlock if event_handler_ invokes this set_event.
     event_handler_(ec);
 
-    // We cannot set event handler to null since this method is not protected.
+    // A lock is required in order to clear the closure on stop.
+    // A boolean stopped is used to avoid a read lock on each stop test.
     if (ec == error::channel_stopped)
+    {
         stopped_ = true;
+        event_handler_ = nullptr;
+    }
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 } // namespace network

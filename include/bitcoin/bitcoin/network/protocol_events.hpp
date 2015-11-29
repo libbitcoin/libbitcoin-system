@@ -21,6 +21,7 @@
 #define LIBBITCOIN_NETWORK_PROTOCOL_EVENTS_HPP
 
 #include <functional>
+#include <mutex>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
@@ -74,6 +75,7 @@ private:
 
     bool stopped_;
     event_handler event_handler_;
+    std::mutex event_mutex_;
 };
 
 } // namespace network
