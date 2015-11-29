@@ -225,7 +225,7 @@ void connector::handle_connect(const boost_code& ec, asio::iterator,
         handler(error::success,
             std::make_shared<channel>(pool_, socket, settings_));
 
-    timer->cancel();
+    timer->stop();
 }
 
 } // namespace network

@@ -26,7 +26,6 @@
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/protocol_events.hpp>
-#include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -50,18 +49,16 @@ protocol_timer::protocol_timer(threadpool& pool, channel::ptr channel,
 void protocol_timer::start(const asio::duration& timeout,
     event_handler handle_event)
 {
-    // Timer invocation of the notification handler can occur concurrently with
-    // derived external invocation of the handler.
-    const auto timer = std::make_shared<deadline>(pool(), timeout);
-    protocol_events::start(BIND3(handle_notify, _1, timer, handle_event));
-    reset_timer(timer);
+    // The deadline timer is thread safe.
+    timer_ = std::make_shared<deadline>(pool(), timeout);
+    protocol_events::start(BIND2(handle_notify, _1, handle_event));
+    reset_timer();
 }
 
-void protocol_timer::handle_notify(const code& ec, deadline::ptr timer,
-    event_handler handler)
+void protocol_timer::handle_notify(const code& ec, event_handler handler)
 {
     if (ec == error::channel_stopped)
-        timer->cancel();
+        timer_->stop();
 
     handler(ec);
 }
@@ -70,15 +67,15 @@ void protocol_timer::handle_notify(const code& ec, deadline::ptr timer,
 // ----------------------------------------------------------------------------
 
 // private:
-void protocol_timer::reset_timer(deadline::ptr timer)
+void protocol_timer::reset_timer()
 {
     if (stopped())
         return;
 
-    timer->start(BIND2(handle_timer, _1, timer));
+    timer_->start(BIND1(handle_timer, _1));
 }
 
-void protocol_timer::handle_timer(const code& ec, deadline::ptr timer)
+void protocol_timer::handle_timer(const code& ec)
 {
     if (stopped())
         return;
@@ -89,8 +86,9 @@ void protocol_timer::handle_timer(const code& ec, deadline::ptr timer)
 
     set_event(error::channel_timeout);
 
+    // A perpetual timer resets itself until the channel is stopped.
     if (perpetual_)
-        reset_timer(timer);
+        reset_timer();
 }
 
 } // namespace network

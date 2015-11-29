@@ -21,11 +21,11 @@
 #define LIBBITCOIN_DEADLINE_HPP
 
 #include <memory>
+#include <mutex>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -71,16 +71,14 @@ public:
     /**
      * Cancel the timer. The handler will be invoked.
      */
-    void cancel();
+    void stop();
 
 private:
-    void do_cancel();
-    void do_start(handler handle, const asio::duration duration);
     void handle_timer(const boost_code& ec, handler handle) const;
 
     asio::timer timer_;
     asio::duration duration_;
-    dispatcher dispatch_;
+    std::mutex timer_mutex_;
 };
 
 } // namespace libbitcoin

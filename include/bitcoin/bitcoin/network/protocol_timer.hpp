@@ -59,12 +59,12 @@ protected:
     void start(const asio::duration& timeout, event_handler handler);
 
 private:
-    void reset_timer(deadline::ptr timer);
-    void handle_timer(const code& ec, deadline::ptr timer);
-    void handle_notify(const code& ec, deadline::ptr timer,
-        event_handler handler);
+    void reset_timer();
+    void handle_timer(const code& ec);
+    void handle_notify(const code& ec, event_handler handler);
 
     const bool perpetual_;
+    deadline::ptr timer_;
 };
 
 } // namespace network

@@ -112,9 +112,9 @@ void channel::set_version(const message::version& value)
 // It is possible that this may be called multipled times.
 void channel::handle_stopping()
 {
-    expiration_->cancel();
-    inactivity_->cancel();
-    revival_->cancel();
+    expiration_->stop();
+    inactivity_->stop();
+    revival_->stop();
     revival_handler_ = nullptr;
 }
 
