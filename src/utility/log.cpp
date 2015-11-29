@@ -20,7 +20,6 @@
 #include <bitcoin/bitcoin/utility/log.hpp>
 
 #include <iostream>
-#include <mutex>
 #include <utility>
 #include <sstream>
 #include <string>
