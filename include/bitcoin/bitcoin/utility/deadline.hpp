@@ -55,6 +55,7 @@ public:
 
     /**
      * Start or restart the timer.
+     * The handler will not be invoked within the scope of this call.
      * Use expired(ec) in handler to test for expiration.
      * @param[in]  handle  Callback invoked upon expire or cancel.
      */
@@ -62,6 +63,7 @@ public:
 
     /**
      * Start or restart the timer.
+     * The handler will not be invoked within the scope of this call.
      * Use expired(ec) in handler to test for expiration.
      * @param[in]  handle    Callback invoked upon expire or cancel.
      * @param[in]  duration  The time period from start to expiration.
