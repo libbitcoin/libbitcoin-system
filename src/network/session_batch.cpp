@@ -52,10 +52,9 @@ void session_batch::connect(connector::ptr connect, channel_handler handler)
     const auto batch = std::max(settings_.connect_batch_size, 1u);
     const auto complete = synchronize(handler, 1, NAME);
 
-    // We can't use dispatch::race here because it doesn't increment the shared
-    // pointer reference count.
+    // We can't use dispatch::race because it doesn't increment the refcount.
     for (uint32_t host = 0; host < batch; ++host)
-        CONCURRENT2(new_connect, connect, complete);
+        INVOKE2(new_connect, connect, complete);
 }
 
 void session_batch::new_connect(connector::ptr connect,

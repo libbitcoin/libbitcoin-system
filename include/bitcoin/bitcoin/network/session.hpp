@@ -98,6 +98,13 @@ protected:
             std::forward<Args>(args)...);
     }
 
+    /// Dispatch a concurrent method in the derived class.
+    template <class Session, typename Handler, typename... Args>
+    void concurrent(Handler&& handler, Args&&... args)
+    {
+        return dispatch_.concurrent(SESSION_ARGS(handler, args));
+    }
+
     /// Bind a method in the derived class.
     template <class Session, typename Handler, typename... Args>
     auto bind(Handler&& handler, Args&&... args) ->
@@ -108,7 +115,7 @@ protected:
 
     /// Bind a concurrent delegate to a method in the derived class.
     template <class Session, typename Handler, typename... Args>
-    auto concurrent(Handler&& handler, Args&&... args) ->
+    auto concurrent_delegate(Handler&& handler, Args&&... args) ->
         delegates::concurrent<decltype(BOUND_SESSION_TYPE(handler, args))>
     {
         return dispatch_.concurrent_delegate(SESSION_ARGS(handler, args));
@@ -185,6 +192,9 @@ private:
 #undef SESSION_ARGS_TYPE
 #undef BOUND_SESSION_TYPE
 
+#define INVOKE2(method, p1, p2) \
+    concurrent<CLASS>(&CLASS::method, p1, p2)
+
 #define BIND1(method, p1) \
     bind<CLASS>(&CLASS::method, p1)
 #define BIND2(method, p1, p2) \
@@ -199,15 +209,15 @@ private:
     bind<CLASS>(&CLASS::method, p1, p2, p3, p4, p5, p6)
 
 #define CONCURRENT1(method, p1) \
-    concurrent<CLASS>(&CLASS::method, p1)
+    concurrent_delegate<CLASS>(&CLASS::method, p1)
 #define CONCURRENT2(method, p1, p2) \
-    concurrent<CLASS>(&CLASS::method, p1, p2)
+    concurrent_delegate<CLASS>(&CLASS::method, p1, p2)
 #define CONCURRENT3(method, p1, p2, p3) \
-    concurrent<CLASS>(&CLASS::method, p1, p2, p3)
+    concurrent_delegate<CLASS>(&CLASS::method, p1, p2, p3)
 #define CONCURRENT4(method, p1, p2, p3, p4) \
-    concurrent<CLASS>(&CLASS::method, p1, p2, p3, p4)
+    concurrent_delegate<CLASS>(&CLASS::method, p1, p2, p3, p4)
 #define CONCURRENT5(method, p1, p2, p3, p4, p5) \
-    concurrent<CLASS>(&CLASS::method, p1, p2, p3, p4, p5)
+    concurrent_delegate<CLASS>(&CLASS::method, p1, p2, p3, p4, p5)
 
 } // namespace network
 } // namespace libbitcoin
