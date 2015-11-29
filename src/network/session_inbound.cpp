@@ -43,7 +43,7 @@ using std::placeholders::_2;
 
 session_inbound::session_inbound(threadpool& pool, p2p& network,
     const settings& settings)
-  : session(pool, network, settings, true, false),
+  : session(pool, network, settings, true, true),
     CONSTRUCT_TRACK(session_inbound)
 {
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2018 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,17 +17,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_SESSION_OUTBOUND_HPP
-#define LIBBITCOIN_NETWORK_SESSION_OUTBOUND_HPP
+#ifndef LIBBITCOIN_NETWORK_SESSION_BATCH_HPP
+#define LIBBITCOIN_NETWORK_SESSION_BATCH_HPP
 
-#include <cstddef>
-#include <memory>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/message/network_address.hpp>
+#include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/connector.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
-#include <bitcoin/bitcoin/network/session_batch.hpp>
+#include <bitcoin/bitcoin/network/session.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -35,29 +34,28 @@ namespace network {
 
 class p2p;
 
-/// Outbound connections session, thread safe.
-class BC_API session_outbound
-  : public session_batch, track<session_outbound>
+/// Intermediate base class for adding batch connect sequence.
+class BC_API session_batch
+  : public session
 {
-public:
-    typedef std::shared_ptr<session_outbound> ptr;
+protected:
 
     /// Construct an instance.
-    session_outbound(threadpool& pool, p2p& network, const settings& settings);
+    session_batch(threadpool& pool, p2p& network, const settings& settings,
+        bool persistent);
 
-    /// Start the session.
-    void start(result_handler handler) override;
+    /// Create a channel from the configured number of concurrent attempts.
+    void connect(connector::ptr connect, channel_handler handler);
 
 private:
-    void new_connection(connector::ptr connect);
-    void handle_started(const code& ec, result_handler handler);
-    void handle_connect(const code& ec, channel::ptr channel,
-        connector::ptr connect);
 
-    void handle_channel_stop(const code& ec, connector::ptr connect,
-        channel::ptr channel);
-    void handle_channel_start(const code& ec, connector::ptr connect,
-        channel::ptr channel);
+    // Connect sequence
+    void new_connect(connector::ptr connect, channel_handler handler);
+    void start_connect(const code& ec, const authority& host,
+        connector::ptr connect, channel_handler handler);
+    void handle_connect(const code& ec, channel::ptr channel,
+        const authority& host, connector::ptr connect,
+        channel_handler handler);
 };
 
 } // namespace network

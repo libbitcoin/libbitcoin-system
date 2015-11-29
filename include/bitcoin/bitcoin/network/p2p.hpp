@@ -166,9 +166,6 @@ public:
     /// Relay a connection creation or service stop event to subscribers.
     virtual void relay(const code& ec, channel::ptr channel);
 
-private:
-    threadpool pool_;
-
 protected:
 
     /// Attach a session to the network, caller must start the session.
@@ -181,8 +178,6 @@ protected:
 
     /// Determine if the network is stopped. This is not thread safe.
     virtual bool stopped() const;
-
-    dispatcher dispatch_;
 
 private:
     template <typename Message>
@@ -203,11 +198,16 @@ private:
     bool stopped_;
     size_t height_;
     const settings& settings_;
+
+    threadpool pool_;
+    dispatcher dispatch_;
+
+    hosts hosts_;
     pending pending_;
     connections connections_;
-    hosts hosts_;
-    channel::channel_subscriber::ptr subscriber_;
+
     session_manual::ptr manual_;
+    channel::channel_subscriber::ptr subscriber_;
 };
 
 } // namespace network

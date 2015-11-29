@@ -157,6 +157,7 @@
     <ClCompile Include="..\..\..\..\src\network\protocol_ping.cpp" />
     <ClCompile Include="..\..\..\..\src\network\p2p.cpp" />
     <ClCompile Include="..\..\..\..\src\network\session.cpp" />
+    <ClCompile Include="..\..\..\..\src\network\session_batch.cpp" />
     <ClCompile Include="..\..\..\..\src\network\session_inbound.cpp" />
     <ClCompile Include="..\..\..\..\src\network\session_manual.cpp" />
     <ClCompile Include="..\..\..\..\src\network\session_outbound.cpp" />
@@ -287,6 +288,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_ping.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\p2p.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\session.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\session_batch.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\session_inbound.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\session_manual.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\session_outbound.hpp" />

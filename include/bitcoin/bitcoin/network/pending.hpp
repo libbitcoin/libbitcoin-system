@@ -47,7 +47,7 @@ public:
     pending(const pending&) = delete;
     void operator=(const pending&) = delete;
 
-    void stop(const code& ec);
+    ////void stop(const code& ec);
     void count(count_handler handler);
     void store(const channel::ptr& channel, result_handler handler);
     void remove(const channel::ptr& channel, result_handler handler);

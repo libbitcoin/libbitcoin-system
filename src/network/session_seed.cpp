@@ -47,7 +47,7 @@ using std::placeholders::_2;
 
 session_seed::session_seed(threadpool& pool, p2p& network,
     const settings& settings)
-  : session(pool, network, settings, false, true),
+  : session(pool, network, settings, true, false),
     CONSTRUCT_TRACK(session_seed)
 {
 }

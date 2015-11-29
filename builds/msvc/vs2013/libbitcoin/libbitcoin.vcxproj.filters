@@ -539,6 +539,9 @@
     <ClCompile Include="..\..\..\..\src\utility\monitor.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\session_batch.cpp">
+      <Filter>src\network</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -1038,6 +1041,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\enable_shared_from_base.hpp">
       <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\session_batch.hpp">
+      <Filter>include\bitcoin\network</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

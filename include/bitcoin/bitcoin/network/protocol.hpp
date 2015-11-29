@@ -125,8 +125,10 @@ private:
     const std::string name_;
 };
 
-#undef HANDLER_PROTOCOL_ARGS
+#undef PROTOCOL_ARGS
 #undef BOUND_PROTOCOL
+#undef PROTOCOL_ARGS_TYPE
+#undef BOUND_PROTOCOL_TYPE
 
 #define BIND1(method, p1) \
     bind<CLASS>(&CLASS::method, p1)

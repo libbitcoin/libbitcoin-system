@@ -30,7 +30,7 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/connector.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
-#include <bitcoin/bitcoin/network/session.hpp>
+#include <bitcoin/bitcoin/network/session_batch.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -40,7 +40,7 @@ class p2p;
 
 /// Manual connections session, thread safe.
 class BC_API session_manual
-  : public session, track<session_manual>
+  : public session_batch, track<session_manual>
 {
 public:
     typedef std::shared_ptr<session_manual> ptr;

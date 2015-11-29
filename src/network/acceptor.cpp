@@ -60,6 +60,7 @@ acceptor::~acceptor()
 // public:
 void acceptor::stop()
 {
+    // BUGBUG: unsafe stop, second context change.
     dispatch_.ordered(&acceptor::do_stop,
         shared_from_this());
 }

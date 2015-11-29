@@ -71,6 +71,14 @@ public:
     typedef std::function<void(const code&, acceptor::ptr)> accept_handler;
     typedef std::function<void(const code&, const authority&)> host_handler;
 
+    /// Start the session, invokes handler once stop is registered.
+    virtual void start(result_handler handler);
+
+    /// Subscribe to receive session stop notification.
+    virtual void subscribe_stop(stop_handler handler);
+
+protected:
+
     /// Construct an instance.
     session(threadpool& pool, p2p& network, const settings& settings,
         bool outgoing, bool persistent);
@@ -81,8 +89,6 @@ public:
     /// This class is not copyable.
     session(const session&) = delete;
     void operator=(const session&) = delete;
-
-protected:
 
     /// Attach a protocol to a channel, caller must start the channel.
     template <class Protocol, typename... Args>
@@ -118,15 +124,6 @@ protected:
     /// Socket creators.
     virtual acceptor::ptr create_acceptor();
     virtual connector::ptr create_connector();
-
-    /// Start the session, invokes handler once stop is registered.
-    virtual void start(result_handler handler);
-
-    /// Subscribe to receive session stop notification.
-    virtual void subscribe_stop(stop_handler handler);
-
-    /// Create a channel from the configured number of concurrent attempts.
-    void connect(connector::ptr connect, channel_handler handler);
 
     /// Register a new channel with the session and bind its handlers.
     virtual void register_channel(channel::ptr channel,
@@ -183,8 +180,10 @@ private:
     dispatcher dispatch_;
 };
 
-#undef HANDLER_SESSION_ARGS
+#undef SESSION_ARGS
 #undef BOUND_SESSION
+#undef SESSION_ARGS_TYPE
+#undef BOUND_SESSION_TYPE
 
 #define BIND1(method, p1) \
     bind<CLASS>(&CLASS::method, p1)
@@ -199,8 +198,16 @@ private:
 #define BIND6(method, p1, p2, p3, p4, p5, p6) \
     bind<CLASS>(&CLASS::method, p1, p2, p3, p4, p5, p6)
 
+#define CONCURRENT1(method, p1) \
+    concurrent<CLASS>(&CLASS::method, p1)
 #define CONCURRENT2(method, p1, p2) \
     concurrent<CLASS>(&CLASS::method, p1, p2)
+#define CONCURRENT3(method, p1, p2, p3) \
+    concurrent<CLASS>(&CLASS::method, p1, p2, p3)
+#define CONCURRENT4(method, p1, p2, p3, p4) \
+    concurrent<CLASS>(&CLASS::method, p1, p2, p3, p4)
+#define CONCURRENT5(method, p1, p2, p3, p4, p5) \
+    concurrent<CLASS>(&CLASS::method, p1, p2, p3, p4, p5)
 
 } // namespace network
 } // namespace libbitcoin

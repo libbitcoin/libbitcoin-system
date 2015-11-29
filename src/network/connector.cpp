@@ -66,6 +66,7 @@ connector::~connector()
 // public:
 void connector::stop()
 {
+    // BUGBUG: unsafe stop, second context change.
     dispatch_.ordered(&connector::do_stop,
         shared_from_this());
 }

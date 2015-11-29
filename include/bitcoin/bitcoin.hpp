@@ -96,6 +96,7 @@
 #include <bitcoin/bitcoin/network/protocol_version.hpp>
 #include <bitcoin/bitcoin/network/proxy.hpp>
 #include <bitcoin/bitcoin/network/session.hpp>
+#include <bitcoin/bitcoin/network/session_batch.hpp>
 #include <bitcoin/bitcoin/network/session_inbound.hpp>
 #include <bitcoin/bitcoin/network/session_manual.hpp>
 #include <bitcoin/bitcoin/network/session_outbound.hpp>

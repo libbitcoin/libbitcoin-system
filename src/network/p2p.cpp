@@ -110,10 +110,11 @@ p2p::p2p(const settings& settings)
     height_(0),
     settings_(settings),
     dispatch_(pool_, NAME),
+    hosts_(pool_, settings_),
     pending_(pool_),
     connections_(pool_),
-    hosts_(pool_, settings_),
-    subscriber_(std::make_shared<channel::channel_subscriber>(pool_, NAME "_sub"))
+    subscriber_(
+        std::make_shared<channel::channel_subscriber>(pool_, NAME "_sub"))
 {
 }
 
@@ -153,14 +154,12 @@ void p2p::start(result_handler handler)
     pool_.join();
     pool_.spawn(settings_.threads, thread_priority::low);
 
-    const auto handle_manual_started =
-        dispatch_.concurrent_delegate(&p2p::handle_manual_started,
-            this, _1, handler);
-
     // There is no need to seed or run to perform manual connection.
     // This instance is retained by the stop handler and the member reference.
     manual_ = attach<session_manual>(settings_);
-    manual_->start(handle_manual_started);
+    manual_->start(
+        std::bind(&p2p::handle_manual_started,
+            this, _1, handler));
 }
 
 void p2p::handle_manual_started(const code& ec, result_handler handler)
@@ -179,11 +178,9 @@ void p2p::handle_manual_started(const code& ec, result_handler handler)
         return;
     }
 
-    const auto hosts_loaded_handler =
-        dispatch_.concurrent_delegate(&p2p::handle_hosts_loaded,
-            this, _1, handler);
-
-    hosts_.load(hosts_loaded_handler);
+    hosts_.load(
+        std::bind(&p2p::handle_hosts_loaded,
+            this, _1, handler));
 }
 
 void p2p::handle_hosts_loaded(const code& ec, result_handler handler)
@@ -202,12 +199,10 @@ void p2p::handle_hosts_loaded(const code& ec, result_handler handler)
         return;
     }
 
-    const auto seeded_handler =
-        dispatch_.concurrent_delegate(&p2p::handle_hosts_seeded,
-            this, _1, handler);
-
     // The instance is retained by the stop handler (until shutdown).
-    attach<session_seed>(settings_)->start(seeded_handler);
+    attach<session_seed>(settings_)->start(
+        std::bind(&p2p::handle_hosts_seeded,
+            this, _1, handler));
 }
 
 void p2p::handle_hosts_seeded(const code& ec, result_handler handler)
@@ -235,12 +230,10 @@ void p2p::handle_hosts_seeded(const code& ec, result_handler handler)
 
 void p2p::run(result_handler handler)
 {
-    const auto inbound_started_handler =
-        dispatch_.concurrent_delegate(&p2p::handle_inbound_started,
-            this, _1, handler);
-
     // This instance is retained by the stop handler (until shutdown).
-    attach<session_inbound>(settings_)->start(inbound_started_handler);
+    attach<session_inbound>(settings_)->start(
+        std::bind(&p2p::handle_inbound_started,
+            this, _1, handler));
 }
 
 void p2p::handle_inbound_started(const code& ec, result_handler handler)
@@ -253,12 +246,10 @@ void p2p::handle_inbound_started(const code& ec, result_handler handler)
         return;
     }
 
-    const auto outbound_started_handler =
-        dispatch_.concurrent_delegate(&p2p::handle_outbound_started,
-            this, _1, handler);
-
     // This instance is retained by the stop handler (until shutdown).
-    attach<session_outbound>(settings_)->start(outbound_started_handler);
+    attach<session_outbound>(settings_)->start(
+        std::bind(&p2p::handle_outbound_started,
+            this, _1, handler));
 }
 
 void p2p::handle_outbound_started(const code& ec, result_handler handler)
@@ -287,15 +278,15 @@ void p2p::stop(result_handler handler)
     }
     
     // All shutdown actions must be queued by the end of the stop call.
-    const auto hosts_save_handler =
-        std::bind(&p2p::handle_hosts_saved,
-            this, _1, handler);
 
     stopped_ = true;
     manual_ = nullptr;
     relay(error::service_stopped, nullptr);
     connections_.stop(error::service_stopped);
-    hosts_.save(hosts_save_handler);
+    hosts_.save(
+        std::bind(&p2p::handle_hosts_saved,
+            this, _1, handler));
+
     pool_.shutdown();
 }
 

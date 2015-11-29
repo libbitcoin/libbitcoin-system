@@ -66,7 +66,7 @@ public:
     void connect(const std::string& hostname, uint16_t port,
         connect_handler handler);
 
-    /// Cancel all outstanding connection attempt.
+    /// Cancel all outstanding connection attempts.
     void stop();
 
 private:

@@ -58,6 +58,7 @@ connections::iterator connections::find(const channel::ptr& channel) const
 
 void connections::stop(const code& ec)
 {
+    // Safe to change context only if this completes before work suspension.
     dispatch_.ordered(&connections::do_stop,
         this, ec);
 }

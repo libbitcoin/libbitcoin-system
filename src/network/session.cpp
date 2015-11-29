@@ -51,10 +51,10 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 
 session::session(threadpool& pool, p2p& network, const settings& settings,
-    bool incoming, bool temporary)
+    bool outgoing, bool persistent)
   : stopped_(true),
-    incoming_(incoming),
-    notify_(!temporary),
+    incoming_(!outgoing),
+    notify_(persistent),
     pool_(pool),
     network_(network),
     dispatch_(pool, NAME),
@@ -70,22 +70,25 @@ session::~session()
 // Properties.
 // ----------------------------------------------------------------------------
 
+// protected:
 void session::address_count(count_handler handler)
 {
     network_.address_count(handler);
 }
 
+// protected:
 void session::fetch_address(host_handler handler)
 {
     network_.fetch_address(handler);
 }
 
+// protected:
 void session::connection_count(count_handler handler)
 {
     network_.connected_count(handler);
 }
 
-// This is threadsafe because settings is const.
+// protected:
 bool session::blacklisted(const authority& authority) const
 {
     const auto& blocked = settings_.blacklists;
@@ -96,6 +99,7 @@ bool session::blacklisted(const authority& authority) const
 // Socket creators.
 // ----------------------------------------------------------------------------
 
+// protected:
 acceptor::ptr session::create_acceptor()
 {
     const auto accept = std::make_shared<acceptor>(pool_, settings_);
@@ -113,6 +117,7 @@ void session::do_stop_acceptor(acceptor::ptr accept)
     accept->stop();
 }
 
+// protected:
 connector::ptr session::create_connector()
 {
     const auto connect = std::make_shared<connector>(pool_, settings_);
@@ -183,86 +188,6 @@ void session::handle_channel_event(const code& ec, channel::ptr,
         handler();
     else
         subscribe_stop(handler);
-}
-
-// Connect sequence.
-// TODO: move to intermediate base class.
-// This is a mini-session within the base session.
-// ----------------------------------------------------------------------------
-
-void session::connect(connector::ptr connect, channel_handler handler)
-{
-    const auto batch = std::max(settings_.connect_batch_size, 1u);
-    const auto complete = synchronize(handler, 1, NAME);
-
-    // We can't use dispatch::race here because it doesn't increment the shared
-    // pointer reference count.
-    for (uint32_t host = 0; host < batch; ++host)
-        dispatch_.concurrent(&session::new_connect,
-            shared_from_this(), connect, complete);
-}
-
-void session::new_connect(connector::ptr connect, channel_handler handler)
-{
-    if (stopped())
-    {
-        log::debug(LOG_NETWORK)
-            << "Suspended outbound connection.";
-        return;
-    }
-
-    fetch_address(
-        dispatch_.concurrent_delegate(&session::start_connect,
-            shared_from_this(), _1, _2, connect, handler));
-}
-
-void session::start_connect(const code& ec, const authority& host,
-    connector::ptr connect, channel_handler handler)
-{
-    // This termination prevents a tight loop in the empty address pool case.
-    if (ec)
-    {
-        log::error(LOG_NETWORK)
-            << "Failure fetching new address: " << ec.message();
-        handler(ec, nullptr);
-        return;
-    }
-
-    // This could create a tight loop in the case of a small pool.
-    if (blacklisted(host))
-    {
-        log::debug(LOG_NETWORK)
-            << "Fetched blacklisted address [" << host << "] ";
-        new_connect(connect, handler);
-        return;
-    }
-
-    log::debug(LOG_NETWORK)
-        << "Connecting to [" << host << "]";
-
-    // CONNECT
-    connect->connect(host,
-        dispatch_.concurrent_delegate(&session::handle_connect,
-            shared_from_this(), _1, _2, host, connect, handler));
-}
-
-void session::handle_connect(const code& ec, channel::ptr channel,
-    const authority& host, connector::ptr connect, channel_handler handler)
-{
-    if (ec)
-    {
-        log::debug(LOG_NETWORK)
-            << "Failure connecting to [" << host << "] "
-            << ec.message();
-        new_connect(connect, handler);
-        return;
-    }
-
-    log::debug(LOG_NETWORK)
-        << "Connected to [" << channel->authority() << "]";
-
-    // This is the end of the connect sequence.
-    handler(error::success, channel);
 }
 
 // Registration sequence.
@@ -398,7 +323,7 @@ void session::handle_stored(const code& ec, channel::ptr channel,
     // Connection-in-use indicated here by error::address_in_use.
     handle_started(ec);
 
-    // Don't notify of channel creation if we are seeding (for example).
+    // Don't notify of channel creation if we are seeding or syncing.
     if (!ec && notify_)
         network_.relay(error::success, channel);
 }

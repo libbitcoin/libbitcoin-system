@@ -42,7 +42,7 @@ using std::placeholders::_2;
 
 session_outbound::session_outbound(threadpool& pool, p2p& network,
     const settings& settings)
-  : session(pool, network, settings, false, false),
+  : session_batch(pool, network, settings, true),
     CONSTRUCT_TRACK(session_outbound)
 {
 }

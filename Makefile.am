@@ -133,6 +133,7 @@ src_libbitcoin_la_SOURCES = \
     src/network/protocol_version.cpp \
     src/network/proxy.cpp \
     src/network/session.cpp \
+    src/network/session_batch.cpp \
     src/network/session_inbound.cpp \
     src/network/session_manual.cpp \
     src/network/session_outbound.cpp \
@@ -428,6 +429,7 @@ include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/protocol_version.hpp \
     include/bitcoin/bitcoin/network/proxy.hpp \
     include/bitcoin/bitcoin/network/session.hpp \
+    include/bitcoin/bitcoin/network/session_batch.hpp \
     include/bitcoin/bitcoin/network/session_inbound.hpp \
     include/bitcoin/bitcoin/network/session_manual.hpp \
     include/bitcoin/bitcoin/network/session_outbound.hpp \
