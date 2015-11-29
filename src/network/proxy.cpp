@@ -289,14 +289,14 @@ void proxy::handle_read_payload(const boost_code& ec, size_t,
     const auto parse_error = message_subscriber_.load(heading.type(), istream);
     const auto unconsumed = istream.peek() != std::istream::traits_type::eof();
 
-    if (!parse_error && unconsumed)
+    if (!parse_error && unconsumed && !stopped())
     {
         log::warning(LOG_NETWORK)
             << "Valid message [" << heading.command
             << "] handled, unused bytes remain in payload.";
     }
 
-    if (ec)
+    if (ec && !stopped())
     {
         log::warning(LOG_NETWORK)
             << "Invalid payload of " << heading.command
@@ -306,7 +306,7 @@ void proxy::handle_read_payload(const boost_code& ec, size_t,
         return;
     }
 
-    if (parse_error)
+    if (parse_error && !stopped())
     {
         log::warning(LOG_NETWORK)
             << "Invalid stream load of " << heading.command
