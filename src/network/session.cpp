@@ -44,7 +44,8 @@
 
 namespace libbitcoin {
 namespace network {
-    
+
+#define CLASS session
 #define NAME "session"
 
 using std::placeholders::_1;
@@ -98,17 +99,13 @@ bool session::blacklisted(const authority& authority) const
 
 // Socket creators.
 // ----------------------------------------------------------------------------
+// Must stop on the subscriber thread.
 
 // protected:
 acceptor::ptr session::create_acceptor()
 {
     const auto accept = std::make_shared<acceptor>(pool_, settings_);
-
-    // Stop on the subscriber thread.
-    subscribe_stop(
-        std::bind(&session::do_stop_acceptor,
-            shared_from_this(), accept));
-
+    subscribe_stop(BIND_1(do_stop_acceptor, accept));
     return accept;
 }
 
@@ -121,12 +118,7 @@ void session::do_stop_acceptor(acceptor::ptr accept)
 connector::ptr session::create_connector()
 {
     const auto connect = std::make_shared<connector>(pool_, settings_);
-
-    // Stop on the subscriber thread.
-    subscribe_stop(
-        std::bind(&session::do_stop_connector,
-            shared_from_this(), connect));
-
+    subscribe_stop(BIND_1(do_stop_connector, connect));
     return connect;
 }
 
@@ -137,6 +129,7 @@ void session::do_stop_connector(connector::ptr connect)
 
 // Start sequence.
 // ----------------------------------------------------------------------------
+// Must subscribe on the start thread.
 
 // public:
 void session::start(result_handler handler)
@@ -148,11 +141,7 @@ void session::start(result_handler handler)
     }
 
     stopped_ = false;
-
-    // Must subscribe on the start thread.
-    subscribe_stop(
-        std::bind(&session::do_stop_session,
-            shared_from_this()));
+    subscribe_stop(BIND_0(do_stop_session));
 
     // This is the end of the start sequence.
     handler(error::success);
@@ -170,14 +159,12 @@ bool session::stopped() const
 
 // Subscribe Stop sequence.
 // ----------------------------------------------------------------------------
+// Must resubscribe on the subscriber thread.
 
 // public:
 void session::subscribe_stop(stop_handler handler)
 {
-    // Must resubscribe on the subscriber thread.
-    network_.subscribe(
-        std::bind(&session::handle_channel_event,
-            shared_from_this(), _1, _2, handler));
+    network_.subscribe(BIND_3(handle_channel_event, _1, _2, handler));
 }
 
 void session::handle_channel_event(const code& ec, channel::ptr,
@@ -202,15 +189,11 @@ void session::handle_channel_event(const code& ec, channel::ptr,
 void session::register_channel(channel::ptr channel,
     result_handler handle_started, result_handler handle_stopped)
 {
-    // Place invocation of stop handler on ordered delegate.
-    const auto stop_handler =
-        dispatch_.concurrent_delegate(&session::do_remove,
-            shared_from_this(), _1, channel, handle_stopped);
+    result_handler stop_handler =
+        BIND_3(do_remove, _1, channel, handle_stopped);
 
-    // Place invocation of start handler on ordered delegate.
-    auto start_handler =
-        dispatch_.concurrent_delegate(&session::handle_started,
-            shared_from_this(), _1, channel, handle_started, stop_handler);
+    result_handler start_handler =
+        BIND_4(handle_started, _1, channel, handle_started, stop_handler);
 
     if (stopped())
     {
@@ -220,20 +203,17 @@ void session::register_channel(channel::ptr channel,
 
     if (incoming_)
     {
-        dispatch_.concurrent(&session::handle_pend,
-            shared_from_this(), error::success, channel, start_handler);
+        handle_pend(error::success, channel, start_handler);
         return;
     }
-    
+
     channel->set_nonce(nonzero_pseudo_random());
 
-    const auto unpend_handler =
-        dispatch_.concurrent_delegate(&session::do_unpend,
-            shared_from_this(), _1, channel, start_handler);
+    result_handler unpend_handler =
+        BIND_3(do_unpend, _1, channel, start_handler);
 
     network_.pend(channel,
-        dispatch_.concurrent_delegate(&session::handle_pend,
-            shared_from_this(), _1, channel, unpend_handler));
+        BIND_3(handle_pend, _1, channel, unpend_handler));
 }
 
 void session::handle_pend(const code& ec, channel::ptr channel,
@@ -247,16 +227,15 @@ void session::handle_pend(const code& ec, channel::ptr channel,
 
     // The channel starts, invokes the handler, then starts the read cycle.
     channel->start(
-        dispatch_.concurrent_delegate(&session::handle_channel_start,
-            shared_from_this(), _1, channel, handle_started));
+        BIND_3(handle_channel_start, _1, channel, handle_started));
 }
 
 void session::handle_channel_start(const code& ec, channel::ptr channel,
     result_handler handle_started)
 {
-    attach<protocol_version>(channel)->start(settings_, network_.height(),
-        dispatch_.concurrent_delegate(&session::handle_handshake,
-            shared_from_this(), _1, channel, handle_started));
+    attach<protocol_version>(channel)->
+        start(settings_, network_.height(),
+            BIND_3(handle_handshake, _1, channel, handle_started));
 }
 
 void session::handle_handshake(const code& ec, channel::ptr channel,
@@ -270,10 +249,9 @@ void session::handle_handshake(const code& ec, channel::ptr channel,
         handle_started(ec);
         return;
     }
-    
-    auto handler = 
-        dispatch_.concurrent_delegate(&session::handle_is_pending,
-            shared_from_this(), _1, channel, handle_started);
+
+    truth_handler handler = 
+        BIND_3(handle_is_pending, _1, channel, handle_started);
 
     // The loopback test is for incoming channels only.
     if (incoming_)
@@ -306,8 +284,7 @@ void session::handle_is_pending(bool pending, channel::ptr channel,
     }
 
     network_.store(channel,
-        dispatch_.concurrent_delegate(&session::handle_stored,
-            shared_from_this(), _1, channel, handle_started));
+        BIND_3(handle_stored, _1, channel, handle_started));
 }
 
 void session::handle_stored(const code& ec, channel::ptr channel,
@@ -324,19 +301,11 @@ void session::handle_stored(const code& ec, channel::ptr channel,
 void session::handle_started(const code& ec, channel::ptr channel,
     result_handler handle_started, result_handler handle_stopped)
 {
-    // We must either stop or subscribe the channel for stop before returning.
+    // Must either stop or subscribe the channel for stop before returning.
     if (ec)
         channel->stop(ec);
     else
         channel->subscribe_stop(handle_stopped);
-
-    ////if (ec)
-    ////    log::debug(LOG_NETWORK)
-    ////        << "Failed to start [" << channel->authority() << "] "
-    ////        << ec.message();
-    ////else
-    ////    log::debug(LOG_NETWORK)
-    ////        << "Started [" << channel ->authority() << "]";
 
     // This is the end of the registration sequence.
     handle_started(ec);
@@ -347,18 +316,14 @@ void session::do_unpend(const code& ec, channel::ptr channel,
 {
     channel->set_nonce(0);
     handle_started(ec);
-    network_.unpend(channel,
-        dispatch_.concurrent_delegate(&session::handle_unpend,
-            shared_from_this(), _1));
+    network_.unpend(channel, BIND_1(handle_unpend, _1));
 }
 
 void session::do_remove(const code& ec, channel::ptr channel,
     result_handler handle_stopped)
 {
     handle_stopped(ec);
-    network_.remove(channel,
-        dispatch_.concurrent_delegate(&session::handle_remove,
-            shared_from_this(), _1));
+    network_.remove(channel, BIND_1(handle_remove, _1));
 }
 
 void session::handle_unpend(const code& ec)

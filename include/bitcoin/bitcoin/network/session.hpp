@@ -42,6 +42,24 @@
 namespace libbitcoin {
 namespace network {
 
+// Base session type.
+
+#define BASE_ARGS(handler, args) \
+    std::forward<Handler>(handler), \
+    shared_from_this(), \
+    std::forward<Args>(args)...
+#define BOUND_BASE(handler, args) \
+    std::bind(BASE_ARGS(handler, args))
+
+#define BASE_ARGS_TYPE(handler, args) \
+    std::forward<Handler>(handler), \
+    std::shared_ptr<session>(), \
+    std::forward<Args>(args)...
+#define BOUND_BASE_TYPE(handler, args) \
+    std::bind(BASE_ARGS_TYPE(handler, args))
+
+// Derived session types.
+
 #define SESSION_ARGS(handler, args) \
     std::forward<Handler>(handler), \
     shared_from_base<Session>(), \
@@ -99,19 +117,19 @@ protected:
             std::forward<Args>(args)...);
     }
 
-    /// Dispatch a concurrent method in the derived class.
-    template <class Session, typename Handler, typename... Args>
-    void concurrent(Handler&& handler, Args&&... args)
-    {
-        return dispatch_.concurrent(SESSION_ARGS(handler, args));
-    }
-
     /// Bind a method in the derived class.
     template <class Session, typename Handler, typename... Args>
     auto bind(Handler&& handler, Args&&... args) ->
         decltype(BOUND_SESSION_TYPE(handler, args))
     {
         return BOUND_SESSION(handler, args);
+    }
+
+    /// Dispatch a concurrent method in the derived class.
+    template <class Session, typename Handler, typename... Args>
+    void concurrent(Handler&& handler, Args&&... args)
+    {
+        return dispatch_.concurrent(SESSION_ARGS(handler, args));
     }
 
     /// Bind a concurrent delegate to a method in the derived class.
@@ -140,6 +158,14 @@ protected:
     const settings& settings_;
 
 private:
+
+    /// Bind a method in the base class.
+    template <typename Handler, typename... Args>
+    auto base_bind(Handler&& handler, Args&&... args) ->
+        decltype(BOUND_BASE_TYPE(handler, args))
+    {
+        return BOUND_BASE(handler, args);
+    }
 
     // Socket creators.
     void do_stop_acceptor(acceptor::ptr connect);
@@ -188,6 +214,26 @@ private:
     dispatcher dispatch_;
 };
 
+// Base session type.
+
+#undef BASE_ARGS
+#undef BOUND_BASE
+#undef BASE_ARGS_TYPE
+#undef BOUND_BASE_TYPE
+
+#define BIND_0(method) \
+    base_bind(&CLASS::method)
+#define BIND_1(method, p1) \
+    base_bind(&CLASS::method, p1)
+#define BIND_2(method, p1, p2) \
+    base_bind(&CLASS::method, p1, p2)
+#define BIND_3(method, p1, p2, p3) \
+    base_bind(&CLASS::method, p1, p2, p3)
+#define BIND_4(method, p1, p2, p3, p4) \
+    base_bind(&CLASS::method, p1, p2, p3, p4)
+
+// Derived session types.
+
 #undef SESSION_ARGS
 #undef BOUND_SESSION
 #undef SESSION_ARGS_TYPE
@@ -195,7 +241,6 @@ private:
 
 #define INVOKE2(method, p1, p2) \
     concurrent<CLASS>(&CLASS::method, p1, p2)
-
 #define BIND1(method, p1) \
     bind<CLASS>(&CLASS::method, p1)
 #define BIND2(method, p1, p2) \
@@ -219,6 +264,7 @@ private:
     concurrent_delegate<CLASS>(&CLASS::method, p1, p2, p3, p4)
 #define CONCURRENT5(method, p1, p2, p3, p4, p5) \
     concurrent_delegate<CLASS>(&CLASS::method, p1, p2, p3, p4, p5)
+
 
 } // namespace network
 } // namespace libbitcoin
