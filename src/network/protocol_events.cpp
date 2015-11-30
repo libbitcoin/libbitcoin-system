@@ -59,8 +59,17 @@ bool protocol_events::stopped() const
 // protected:
 void protocol_events::start(event_handler handler)
 {
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    if (true)
+    {
+        std::lock_guard<std::mutex> lock(event_mutex_);
+
+        event_handler_ = handler;
+    }
+    ///////////////////////////////////////////////////////////////////////////
+
     stopped_ = false;
-    event_handler_ = handler;
     SUBSCRIBE_STOP1(handle_stopped, _1);
 }
 
