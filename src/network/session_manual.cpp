@@ -49,28 +49,8 @@ session_manual::session_manual(threadpool& pool, p2p& network,
 {
 }
 
-// Start sequence.
+// Start sequence (base implementation only).
 // ----------------------------------------------------------------------------
-
-// Must call start before connect.
-void session_manual::start(result_handler handler)
-{
-    session::start(CONCURRENT2(handle_started, _1, handler));
-}
-
-void session_manual::handle_started(const code& ec, result_handler handler)
-{
-    if (ec)
-    {
-        handler(ec);
-        return;
-    }
-
-    connect_ = create_connector();
-
-    // This is the end of the start sequence.
-    handler(error::success);
-}
 
 // Connect sequence/cycle,
 // ----------------------------------------------------------------------------
@@ -99,9 +79,12 @@ void session_manual::start_connect(const std::string& hostname, uint16_t port,
         return;
     }
 
+    // We create this for each connect sequence, which avoids complex cleanup.
+    auto connector = create_connector();
+
     // MANUAL CONNECT OUTBOUND
-    connect_->connect(hostname, port, BIND6(handle_connect, _1, _2, hostname,
-        port, handler, retries));
+    connector->connect(hostname, port,
+        BIND6(handle_connect, _1, _2, hostname, port, handler, retries));
 }
 
 void session_manual::handle_connect(const code& ec, channel::ptr channel,

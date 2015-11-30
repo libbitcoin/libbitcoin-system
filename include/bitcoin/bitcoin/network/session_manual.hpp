@@ -49,9 +49,6 @@ public:
     /// Construct an instance.
     session_manual(threadpool& pool, p2p& network, const settings& settings);
 
-    /// Start the session.
-    void start(result_handler handler) override;
-
     /// Maintain connection to a node.
     void connect(const std::string& hostname, uint16_t port);
 
@@ -66,14 +63,10 @@ private:
         const std::string& hostname, uint16_t port,
         channel_handler handler, uint32_t retries);
 
-    void handle_started(const code& ec, result_handler handler);
     void handle_channel_start(const code& ec, const std::string& hostname,
         uint16_t port, channel::ptr channel, channel_handler handler);
     void handle_channel_stop(const code& ec, const std::string& hostname,
         uint16_t port);
-
-    // This can hold a session reference, it will be cleared on connector stop.
-    connector::ptr connect_;
 };
 
 } // namespace network
