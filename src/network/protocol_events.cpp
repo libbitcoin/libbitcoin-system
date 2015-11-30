@@ -35,6 +35,8 @@ namespace network {
 #define CLASS protocol_events
 using std::placeholders::_1;
 
+// It is not possible for this class to produce a deadlock.
+
 protocol_events::protocol_events(threadpool& pool, channel::ptr channel,
     const std::string& name)
   : protocol(pool, channel, name),

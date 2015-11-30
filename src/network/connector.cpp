@@ -198,6 +198,7 @@ void connector::handle_connect(const boost_code& ec, asio::iterator,
 
 // Pending connect.
 // ----------------------------------------------------------------------------
+// TODO: move this to independent class (see proxy pending).
 // The pending collection exists to allow for connect cancelation.
 // If we did not cancel connect attempts their closures would leak.
 // The clear method invokes the handlers of all outstanding connect calls.

@@ -180,9 +180,6 @@ void session::handle_channel_event(const code& ec, channel::ptr,
 
 // Registration sequence.
 // ----------------------------------------------------------------------------
-// BUGBUG: there is a race here between completion of handshake and start of
-// other protocols. Initial incoming messages (ping, address, get-headers)
-// initiated by peer are sometimes missed.
 
 // protected:
 void session::register_channel(channel::ptr channel,
@@ -284,7 +281,6 @@ void session::handle_is_pending(bool pending, channel::ptr channel,
         return;
     }
 
-    // This call is a context switch, which creates the message race.
     network_.store(channel,
         BIND_3(handle_stored, _1, channel, handle_started));
 }

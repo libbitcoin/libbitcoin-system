@@ -28,6 +28,8 @@
 
 namespace libbitcoin {
 
+// It is not possible for this class to produce a deadlock.
+
 template <typename Handler>
 class synchronizer
 {
