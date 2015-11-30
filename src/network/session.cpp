@@ -245,23 +245,18 @@ void session::handle_pend(const code& ec, channel::ptr channel,
         return;
     }
 
-    const auto handler =
-        dispatch_.concurrent_delegate(&session::handle_channel_start,
-            shared_from_this(), _1, channel, handle_started);
-
     // The channel starts, invokes the handler, then starts the read cycle.
-    channel->start(handler);
+    channel->start(
+        dispatch_.concurrent_delegate(&session::handle_channel_start,
+            shared_from_this(), _1, channel, handle_started));
 }
 
 void session::handle_channel_start(const code& ec, channel::ptr channel,
     result_handler handle_started)
 {
-    const auto handler =
+    attach<protocol_version>(channel)->start(settings_, network_.height(),
         dispatch_.concurrent_delegate(&session::handle_handshake,
-            shared_from_this(), _1, channel, handle_started);
-
-    attach<protocol_version>(channel)->
-        start(settings_, network_.height(), handler);
+            shared_from_this(), _1, channel, handle_started));
 }
 
 void session::handle_handshake(const code& ec, channel::ptr channel,
@@ -310,11 +305,9 @@ void session::handle_is_pending(bool pending, channel::ptr channel,
         return;
     }
 
-    const auto handler = 
+    network_.store(channel,
         dispatch_.concurrent_delegate(&session::handle_stored,
-            shared_from_this(), _1, channel, handle_started);
-
-    network_.store(channel, handler);
+            shared_from_this(), _1, channel, handle_started));
 }
 
 void session::handle_stored(const code& ec, channel::ptr channel,
