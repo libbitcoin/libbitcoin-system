@@ -64,9 +64,14 @@ static void log_to_file(std::ofstream& file, log::level level,
     {
         // This is overkill as we may locking across different files, but
         // since fatal/error/warning logging is very infrequent this is ok.
+        
+        // Critical Section
+        ///////////////////////////////////////////////////////////////////////
         std::lock_guard<std::mutex> lock_file(file_mutex);
+
         file << message;
         file.flush();
+        ///////////////////////////////////////////////////////////////////////
     }
 }
 
@@ -82,18 +87,28 @@ static void log_to_both(std::ostream& device, std::ofstream& file,
         // since fatal/error/warning logging is very infrequent this is ok.
         // Also cout and cerr devices are typically writing to the same
         // display. Locking across both devices prevents presentation mixing.
+
+        // Critical Section
+        ///////////////////////////////////////////////////////////////////////
         std::lock_guard<std::mutex> lock_console(console_mutex);
+
         device << message;
         device.flush();
+        ///////////////////////////////////////////////////////////////////////
     }
 
     if (!message.empty())
     {
         // This is overkill as we may locking across different files, but
         // since fatal/error/warning logging is very infrequent this is ok.
+
+        // Critical Section
+        ///////////////////////////////////////////////////////////////////////
         std::lock_guard<std::mutex> lock_file(file_mutex);
+
         file << message;
         file.flush();
+        ///////////////////////////////////////////////////////////////////////
     }
 }
 
