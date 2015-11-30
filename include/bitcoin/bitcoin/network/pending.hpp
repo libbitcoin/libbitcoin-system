@@ -22,52 +22,38 @@
 
 #include <cstdint>
 #include <functional>
+#include <mutex>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/utility/dispatcher.hpp>
-#include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
+/// Class to manage a pending channel pool, thread safe.
 class BC_API pending
 {
 public:
     typedef std::function<void(bool)> truth_handler;
-    typedef std::function<void(size_t)> count_handler;
     typedef std::function<void(const code&)> result_handler;
-
-    /// Construct an instance.
-    pending(threadpool& pool);
+    
+    pending();
     ~pending();
 
     /// This class is not copyable.
     pending(const pending&) = delete;
     void operator=(const pending&) = delete;
 
-    ////void stop(const code& ec);
-    void count(count_handler handler);
+    void exists(uint64_t version_nonce, truth_handler handler);
     void store(const channel::ptr& channel, result_handler handler);
     void remove(const channel::ptr& channel, result_handler handler);
-    void exists(uint64_t version_nonce, truth_handler handler);
 
 private:
     typedef std::vector<channel::ptr> list;
-    typedef list::const_iterator iterator;
-
-    iterator find(const uint64_t nonce) const;
-    iterator find(const channel::ptr& channel) const;
-
-    void do_stop(const code& ec);
-    void do_count(count_handler handler) const;
-    void do_store(const channel::ptr& channel, result_handler handler);
-    void do_remove(const channel::ptr& channel, result_handler handler);
-    void do_exists(uint64_t version_nonce, truth_handler handler) const;
 
     list buffer_;
-    dispatcher dispatch_;
+    std::mutex buffer_mutex_;
 };
 
 } // namespace network

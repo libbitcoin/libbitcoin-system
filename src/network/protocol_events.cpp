@@ -89,28 +89,35 @@ void protocol_events::handle_stopped(const code& ec)
 
 // Set event.
 // ----------------------------------------------------------------------------
+// A lock is required in order to clear the closure on stop.
+// A boolean stopped is used to avoid a read lock on each stop test.
 
 // protected:
 void protocol_events::set_event(const code& ec)
 {
+    event_handler handler;
+
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    std::lock_guard<std::mutex> lock(event_mutex_);
-
-    if (!event_handler_)
-        return;
-
-    // This will deadlock if event_handler_ invokes this set_event.
-    event_handler_(ec);
-
-    // A lock is required in order to clear the closure on stop.
-    // A boolean stopped is used to avoid a read lock on each stop test.
-    if (ec == error::channel_stopped)
+    if (true)
     {
-        stopped_ = true;
-        event_handler_ = nullptr;
+        std::lock_guard<std::mutex> lock(event_mutex_);
+
+        if (!event_handler_)
+            return;
+
+        handler = event_handler_;
+
+        if (ec == error::channel_stopped)
+        {
+            stopped_ = true;
+            event_handler_ = nullptr;
+        }
     }
     ///////////////////////////////////////////////////////////////////////////
+
+    // Invoke the event handler temporary copy outside of the critical section.
+    handler(ec);
 }
 
 } // namespace network

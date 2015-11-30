@@ -34,7 +34,6 @@
 #include <bitcoin/bitcoin/network/connections.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
-#include <bitcoin/bitcoin/network/pending.hpp>
 #include <bitcoin/bitcoin/network/session_manual.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -104,20 +103,6 @@ public:
     /// Call from thread that constructed this class, or don't call at all.
     /// This calls stop, and start may be reinvoked after calling this.
     virtual void close();
-
-    // ------------------------------------------------------------------------
-
-    /// Determine if the nonce is from a pending connection.
-    virtual void pent(uint64_t version_nonce, truth_handler handler);
-
-    /// Pend a connection.
-    virtual void pend(channel::ptr channel, result_handler handler);
-
-    /// Unpend a connection.
-    virtual void unpend(channel::ptr channel, result_handler handler);
-
-    /// Get the number of pending connections.
-    virtual void pent_count(count_handler handler);
 
     // ------------------------------------------------------------------------
 
@@ -204,7 +189,6 @@ private:
     dispatcher dispatch_;
 
     hosts hosts_;
-    pending pending_;
     connections connections_;
 
     session_manual::ptr manual_;

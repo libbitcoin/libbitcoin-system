@@ -30,7 +30,6 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
-#include <bitcoin/bitcoin/network/pending.hpp>
 #include <bitcoin/bitcoin/network/protocol_address.hpp>
 #include <bitcoin/bitcoin/network/protocol_ping.hpp>
 #include <bitcoin/bitcoin/network/protocol_seed.hpp>
@@ -111,7 +110,6 @@ p2p::p2p(const settings& settings)
     settings_(settings),
     dispatch_(pool_, NAME),
     hosts_(pool_, settings_),
-    pending_(pool_),
     connections_(pool_),
     subscriber_(
         std::make_shared<channel::channel_subscriber>(pool_, NAME "_sub"))
@@ -319,29 +317,6 @@ void p2p::close()
 
     // This is the end of the stop sequence.
     pool_.join();
-}
-
-// Pending connections collection.
-// ----------------------------------------------------------------------------
-
-void p2p::pent(uint64_t version_nonce, truth_handler handler)
-{
-    pending_.exists(version_nonce, handler);
-}
-
-void p2p::pend(channel::ptr channel, result_handler handler)
-{
-    pending_.store(channel, handler);
-}
-
-void p2p::unpend(channel::ptr channel, result_handler handler)
-{
-    pending_.remove(channel, handler);
-}
-
-void p2p::pent_count(count_handler handler)
-{
-    pending_.count(handler);
 }
 
 // Connections collection.

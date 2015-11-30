@@ -63,7 +63,7 @@ void session_batch::new_connect(connector::ptr connect,
     if (stopped())
     {
         log::debug(LOG_NETWORK)
-            << "Suspended outbound connection.";
+            << "Suspended batch connection.";
         return;
     }
 

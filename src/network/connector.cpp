@@ -196,7 +196,7 @@ void connector::handle_connect(const boost_code& ec, asio::iterator,
     timer->stop();
 }
 
-// Pending connect clearance.
+// Pending connect.
 // ----------------------------------------------------------------------------
 // The pending collection exists to allow for connect cancelation.
 // If we did not cancel connect attempts their closures would leak.

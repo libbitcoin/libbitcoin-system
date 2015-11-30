@@ -21,18 +21,17 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <mutex>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
-#define NAME "pending"
+// It is not possible for this class to produce a deadlock.
 
-pending::pending(threadpool& pool)
-  : dispatch_(pool, NAME)
+pending::pending()
 {
 }
 
@@ -40,35 +39,6 @@ pending::~pending()
 {
     BITCOIN_ASSERT_MSG(buffer_.empty(), "Pending was not cleared.");
 }
-
-pending::iterator pending::find(const uint64_t version_nonce) const
-{
-    const auto found = [version_nonce](const channel::ptr& entry)
-    {
-        return entry->nonce() == version_nonce;
-    };
-
-    return std::find_if(buffer_.begin(), buffer_.end(), found);
-}
-
-pending::iterator pending::find(const channel::ptr& channel) const
-{
-    return std::find(buffer_.begin(), buffer_.end(), channel);
-}
-
-////void pending::stop(const code& ec)
-////{
-////    dispatch_.ordered(&pending::do_stop,
-////        this, ec);
-////}
-////
-////void pending::do_stop(const code& ec)
-////{
-////    for (auto channel: buffer_)
-////        channel->stop(ec);
-////
-////    ////buffer_.clear();
-////}
 
 void pending::exists(uint64_t version_nonce, truth_handler handler)
 {
@@ -78,64 +48,67 @@ void pending::exists(uint64_t version_nonce, truth_handler handler)
         handler(false);
         return;
     }
-        
-    dispatch_.ordered(&pending::do_exists,
-        this, version_nonce, handler);
-}
 
-void pending::do_exists(uint64_t version_nonce, truth_handler handler) const
-{
-    const auto found = find(version_nonce) != buffer_.end();
+    const auto match = [version_nonce](const channel::ptr& entry)
+    {
+        return entry->nonce() == version_nonce;
+    };
+
+    bool found;
+
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    if (true)
+    {
+        std::lock_guard<std::mutex> lock(buffer_mutex_);
+
+        const auto it = std::find_if(buffer_.begin(), buffer_.end(), match);
+        found = it != buffer_.end();
+    }
+    ///////////////////////////////////////////////////////////////////////////
+
     handler(found);
 }
 
 void pending::remove(const channel::ptr& channel, result_handler handler)
 {
-    dispatch_.ordered(&pending::do_remove,
-        this, channel, handler);
-}
+    bool found;
 
-void pending::do_remove(const channel::ptr& channel, result_handler handler)
-{
-    auto it = std::find(buffer_.begin(), buffer_.end(), channel);
-    if (it == buffer_.end())
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    if (true)
     {
-        handler(error::not_found);
-        return;
-    }
+        std::lock_guard<std::mutex> lock(buffer_mutex_);
 
-    buffer_.erase(it);
-    handler(error::success);
+        auto it = std::find(buffer_.begin(), buffer_.end(), channel);
+        found = it != buffer_.end();
+
+        if (found)
+            buffer_.erase(it);
+    }
+    ///////////////////////////////////////////////////////////////////////////
+
+    handler(found ? error::success : error::not_found);
 }
 
 void pending::store(const channel::ptr& channel, result_handler handler)
 {
-    dispatch_.ordered(&pending::do_store,
-        this, channel, handler);
-}
-
-void pending::do_store(const channel::ptr& channel, result_handler handler)
-{
-    const auto found = find(channel->nonce()) != buffer_.end();
-    if (found)
+    const auto handle_result = [this, handler, channel](bool found)
     {
-        handler(error::address_in_use);
-        return;
-    }
+        // Critical Section
+        ///////////////////////////////////////////////////////////////////////
+        if (!found)
+        {
+            std::lock_guard<std::mutex> lock(buffer_mutex_);
 
-    buffer_.push_back(channel);
-    handler(error::success);
-}
+            buffer_.push_back(channel);
+        }
+        ///////////////////////////////////////////////////////////////////////
 
-void pending::count(count_handler handler)
-{
-    dispatch_.ordered(&pending::do_count,
-        this, handler);
-}
+        handler(found ? error::address_in_use : error::success);
+    };
 
-void pending::do_count(count_handler handler) const
-{
-    handler(buffer_.size());
+    exists(channel->nonce(), handle_result);
 }
 
 } // namespace network

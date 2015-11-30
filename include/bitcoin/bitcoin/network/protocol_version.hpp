@@ -53,9 +53,9 @@ public:
     
     /**
      * Start the protocol.
-     * @param[in]  settings  Configuration settings.
-     * @param[in]  height    Our current blockchain height.
-     * @param[in]  handler   Invoked upon stop or complete.
+     * @param[in]  settings Configuration settings.
+     * @param[in]  height   Our current blockchain height.
+     * @param[in]  handler  Invoked upon stop or receipt of version and verack.
      */
     void start(const settings& settings, size_t height, event_handler handler);
 
@@ -64,11 +64,11 @@ private:
         const config::authority& authority, const settings& settings,
         uint64_t nonce, size_t height);
 
-    void handle_receive_verack(const code& ec, const message::verack&);
     void handle_version_sent(const code& ec);
     void handle_verack_sent(const code& ec);
     void handle_receive_version(const code& ec,
         const message::version& version);
+    void handle_receive_verack(const code& ec, const message::verack&);
 
     static const message::version template_;
 };

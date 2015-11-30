@@ -100,8 +100,9 @@ protocol_version::protocol_version(threadpool& pool, p2p&,
 void protocol_version::start(const settings& settings, size_t height,
     event_handler handler)
 {
+    // The handler is invoked in the context of the last message receipt.
     protocol_timer::start(settings.channel_handshake(),
-        synchronize(handler, 3, NAME));
+        synchronize(handler, 2, NAME));
 
     const auto self = template_factory(authority(), settings, nonce(), height);
     SUBSCRIBE2(version, handle_receive_version, _1, _2);
@@ -133,41 +134,8 @@ void protocol_version::handle_receive_version(const code& ec,
 
     set_peer_version(message);
     SEND1(verack(), handle_verack_sent, _1);
-}
 
-void protocol_version::handle_verack_sent(const code& ec)
-{
-    if (stopped())
-        return;
-
-    if (ec)
-    {
-        log::debug(LOG_PROTOCOL)
-            << "Failure sending verack to [" << authority() << "] "
-            << ec.message();
-        set_event(ec);
-        return;
-    }
-
-    // 1 of 3
-    set_event(error::success);
-}
-
-void protocol_version::handle_version_sent(const code& ec)
-{
-    if (stopped())
-        return;
-
-    if (ec)
-    {
-        log::debug(LOG_PROTOCOL)
-            << "Failure sending version to [" << authority() << "] "
-            << ec.message();
-        set_event(ec);
-        return;
-    }
-
-    // 2 of 3
+    // 1 of 2
     set_event(error::success);
 }
 
@@ -186,8 +154,38 @@ void protocol_version::handle_receive_verack(const code& ec,
         return;
     }
 
-    // 3 of 3
+    // 2 of 2
     set_event(error::success);
+}
+
+void protocol_version::handle_version_sent(const code& ec)
+{
+    if (stopped())
+        return;
+
+    if (ec)
+    {
+        log::debug(LOG_PROTOCOL)
+            << "Failure sending version to [" << authority() << "] "
+            << ec.message();
+        set_event(ec);
+        return;
+    }
+}
+
+void protocol_version::handle_verack_sent(const code& ec)
+{
+    if (stopped())
+        return;
+
+    if (ec)
+    {
+        log::debug(LOG_PROTOCOL)
+            << "Failure sending verack to [" << authority() << "] "
+            << ec.message();
+        set_event(ec);
+        return;
+    }
 }
 
 } // namespace network

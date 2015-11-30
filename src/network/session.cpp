@@ -31,6 +31,7 @@
 #include <bitcoin/bitcoin/network/connector.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/network/p2p.hpp>
+#include <bitcoin/bitcoin/network/pending.hpp>
 #include <bitcoin/bitcoin/network/proxy.hpp>
 #include <bitcoin/bitcoin/network/protocol_address.hpp>
 #include <bitcoin/bitcoin/network/protocol_ping.hpp>
@@ -181,9 +182,7 @@ void session::handle_channel_event(const code& ec, channel::ptr,
 // ----------------------------------------------------------------------------
 // BUGBUG: there is a race here between completion of handshake and start of
 // other protocols. Initial incoming messages (ping, address, get-headers)
-// initiated by peer are being missed. To resolve this we would need to suspend
-// and restart talk or pre-register for the messages. Stop messages are never
-// missed since protocol::start is ordered on the channel strand.
+// initiated by peer are sometimes missed.
 
 // protected:
 void session::register_channel(channel::ptr channel,
@@ -212,7 +211,7 @@ void session::register_channel(channel::ptr channel,
     result_handler unpend_handler =
         BIND_3(do_unpend, _1, channel, start_handler);
 
-    network_.pend(channel,
+    pending_.store(channel,
         BIND_3(handle_pend, _1, channel, unpend_handler));
 }
 
@@ -233,6 +232,8 @@ void session::handle_pend(const code& ec, channel::ptr channel,
 void session::handle_channel_start(const code& ec, channel::ptr channel,
     result_handler handle_started)
 {
+    // BUGBUG: we are getting a handshake timeout after session stop. We should
+    // instead see an immediate stop from protocol_events::handle_stopped.
     attach<protocol_version>(channel)->
         start(settings_, network_.height(),
             BIND_3(handle_handshake, _1, channel, handle_started));
@@ -255,7 +256,7 @@ void session::handle_handshake(const code& ec, channel::ptr channel,
 
     // The loopback test is for incoming channels only.
     if (incoming_)
-        network_.pent(channel->version().nonce, handler);
+        pending_.exists(channel->version().nonce, handler);
     else
         handler(false);
 }
@@ -283,6 +284,7 @@ void session::handle_is_pending(bool pending, channel::ptr channel,
         return;
     }
 
+    // This call is a context switch, which creates the message race.
     network_.store(channel,
         BIND_3(handle_stored, _1, channel, handle_started));
 }
@@ -316,7 +318,7 @@ void session::do_unpend(const code& ec, channel::ptr channel,
 {
     channel->set_nonce(0);
     handle_started(ec);
-    network_.unpend(channel, BIND_1(handle_unpend, _1));
+    pending_.remove(channel, BIND_1(handle_unpend, _1));
 }
 
 void session::do_remove(const code& ec, channel::ptr channel,
