@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_NETWORK_ACCEPTOR_HPP
 #define LIBBITCOIN_NETWORK_ACCEPTOR_HPP
 
+#include <atomic>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -63,9 +64,11 @@ public:
     void stop();
 
 private:
+    bool stopped();
     void handle_accept(const boost_code& ec, asio::socket_ptr socket,
         accept_handler handler);
 
+    std::atomic<bool> stopped_;
     threadpool& pool_;
     const settings& settings_;
 

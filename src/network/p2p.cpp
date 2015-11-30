@@ -122,7 +122,7 @@ p2p::p2p(const settings& settings)
 // ----------------------------------------------------------------------------
 
 // The blockchain height is set in the version message for handshake.
-size_t p2p::height()
+size_t p2p::height() const
 {
     return height_;
 }

@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_NETWORK_SESSION_HPP
 #define LIBBITCOIN_NETWORK_SESSION_HPP
 
+#include <atomic>
 #include <cstddef>
 #include <functional>
 #include <memory>
@@ -179,9 +180,9 @@ private:
         result_handler handle_stopped);
     void handle_remove(const code& ec);
 
-    bool stopped_;
-    bool incoming_;
-    bool notify_;
+    std::atomic<bool> stopped_;
+    const bool incoming_;
+    const bool notify_;
     threadpool& pool_;
     p2p& network_;
     dispatcher dispatch_;

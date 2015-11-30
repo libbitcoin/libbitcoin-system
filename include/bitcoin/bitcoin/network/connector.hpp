@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_NETWORK_CONNECTOR_HPP
 #define LIBBITCOIN_NETWORK_CONNECTOR_HPP
 
+#include <atomic>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -86,7 +87,7 @@ private:
     void handle_connect(const boost_code& ec, asio::iterator iterator,
         asio::socket_ptr socket, deadline::ptr timer, connect_handler handler);
 
-    bool stopped_;
+    std::atomic<bool> stopped_;
     threadpool& pool_;
     const settings& settings_;
 

@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_NETWORK_P2P_HPP
 #define LIBBITCOIN_NETWORK_P2P_HPP
 
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -81,7 +82,7 @@ public:
     // ------------------------------------------------------------------------
 
     /// Return the current block height.
-    virtual size_t height();
+    virtual size_t height() const;
 
     /// Set the current block height, for use in version messages.
     virtual void set_height(size_t value);
@@ -195,8 +196,8 @@ private:
     void handle_hosts_seeded(const code& ec, result_handler handler);
     void handle_hosts_saved(const code& ec, result_handler handler);
 
-    bool stopped_;
-    size_t height_;
+    std::atomic<bool> stopped_;
+    std::atomic<size_t> height_;
     const settings& settings_;
 
     threadpool pool_;

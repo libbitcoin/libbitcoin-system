@@ -44,7 +44,8 @@ static const auto reuse_address = asio::acceptor::reuse_address(true);
 // This is safe against deadlock as handlers are invoked outside of the
 // critical sections. We can't use a dispatch guard becuase of context change.
 acceptor::acceptor(threadpool& pool, const settings& settings)
-  : pool_(pool),
+  : stopped_(true),
+    pool_(pool),
     settings_(settings),
     acceptor_(std::make_shared<asio::acceptor>(pool_.service())),
     CONSTRUCT_TRACK(acceptor)
@@ -62,12 +63,20 @@ acceptor::~acceptor()
 // public:
 void acceptor::stop()
 {
+    stopped_ = true;
+
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
     std::lock_guard<std::mutex> lock(acceptor_mutex_);
 
     acceptor_->close();
     ///////////////////////////////////////////////////////////////////////////
+}
+
+// This is only used to validate shutdown.
+bool acceptor::stopped()
+{
+    return stopped_;
 }
 
 // Listen sequence.
@@ -77,6 +86,7 @@ void acceptor::stop()
 // This is hardwired to listen on IPv6.
 void acceptor::listen(uint16_t port, result_handler handler)
 {
+    stopped_ = false;
     code ec(error::operation_failed);
 
     // Critical Section

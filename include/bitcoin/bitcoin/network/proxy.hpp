@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_NETWORK_PROXY_HPP
 #define LIBBITCOIN_NETWORK_PROXY_HPP
 
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -148,8 +149,8 @@ private:
     void do_send(const data_chunk& message, result_handler handler,
         const std::string& command);
     
-    bool stopped_;
-    bool starting_;
+    std::atomic<bool> stopped_;
+    std::atomic<bool> starting_;
 
     const uint32_t magic_;
     const config::authority authority_;
