@@ -49,12 +49,11 @@ void pending::exists(uint64_t version_nonce, truth_handler handler)
         return;
     }
 
+    bool found;
     const auto match = [version_nonce](const channel::ptr& entry)
     {
         return entry->nonce() == version_nonce;
     };
-
-    bool found;
 
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
@@ -93,22 +92,28 @@ void pending::remove(const channel::ptr& channel, result_handler handler)
 
 void pending::store(const channel::ptr& channel, result_handler handler)
 {
-    const auto handle_result = [this, handler, channel](bool found)
+    bool found;
+    const auto version_nonce = channel->nonce();
+    const auto match = [version_nonce](const channel::ptr& entry)
     {
-        // Critical Section
-        ///////////////////////////////////////////////////////////////////////
-        if (!found)
-        {
-            std::lock_guard<std::mutex> lock(buffer_mutex_);
-
-            buffer_.push_back(channel);
-        }
-        ///////////////////////////////////////////////////////////////////////
-
-        handler(found ? error::address_in_use : error::success);
+        return entry->nonce() == version_nonce;
     };
 
-    exists(channel->nonce(), handle_result);
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    if (true)
+    {
+        std::lock_guard<std::mutex> lock(buffer_mutex_);
+
+        const auto it = std::find_if(buffer_.begin(), buffer_.end(), match);
+        found = it != buffer_.end();
+
+        if (!found)
+            buffer_.push_back(channel);
+    }
+    ///////////////////////////////////////////////////////////////////////////
+
+    handler(found ? error::address_in_use : error::success);
 }
 
 } // namespace network
