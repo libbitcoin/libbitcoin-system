@@ -155,7 +155,10 @@ private:
     const uint32_t magic_;
     const config::authority authority_;
 
+    // TODO: remove.
     dispatcher dispatch_;
+
+    // TODO: protect access to these using a critical section(s).
     asio::socket_ptr socket_;
 
     message_subscriber message_subscriber_;
