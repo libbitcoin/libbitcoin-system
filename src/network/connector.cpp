@@ -62,19 +62,20 @@ connector::connector(threadpool& pool, const settings& settings)
 // public:
 void connector::stop()
 {
+    safe_stop();
+    pending_.clear();
+}
+
+void connector::safe_stop()
+{
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    if (true)
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 
-        // This will asynchronously invoke the handler of each pending resolve.
-        resolver_->cancel();
-    }
-    ///////////////////////////////////////////////////////////////////////////
-
-    pending_.clear();
+    // This will asynchronously invoke the handler of each pending resolve.
+    resolver_->cancel();
     stopped_ = true;
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 bool connector::stopped()
@@ -108,15 +109,19 @@ void connector::connect(const std::string& hostname, uint16_t port,
         return;
     }
 
-    const auto port_text = std::to_string(port);
-    const auto query = std::make_shared<asio::query>(hostname, port_text);
+    auto query = std::make_shared<asio::query>(hostname, std::to_string(port));
 
+    safe_resolve(query, handler);
+}
+
+void connector::safe_resolve(asio::query_ptr query, connect_handler handler)
+{
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
     std::lock_guard<std::mutex> lock(mutex_);
 
     // async_resolve will not invoke the handler within this function.
-    resolver_->async_resolve(*query, 
+    resolver_->async_resolve(*query,
         std::bind(&connector::handle_resolve,
             shared_from_this(), _1, _2, handler));
     ///////////////////////////////////////////////////////////////////////////
@@ -127,14 +132,12 @@ void connector::handle_resolve(const boost_code& ec, asio::iterator iterator,
 {
     if (stopped())
     {
-        // We preserve the asynchronous contract of the async_connect.
         dispatch_.unordered(handler, error::service_stopped, nullptr);
         return;
     }
 
     if (ec)
     {
-        // We preserve the asynchronous contract of the async_connect.
         dispatch_.concurrent(handler, error::resolve_failed, nullptr);
         return;
     }

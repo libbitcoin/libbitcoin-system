@@ -70,9 +70,9 @@ public:
     void stop();
 
 private:
-
-    // This is a weak stop indicator.
     bool stopped();
+    void safe_stop();
+    void safe_resolve(asio::query_ptr query, connect_handler handler);
 
     void handle_resolve(const boost_code& ec, asio::iterator iterator,
         connect_handler handler);

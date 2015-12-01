@@ -54,7 +54,7 @@ acceptor::acceptor(threadpool& pool, const settings& settings)
 
 acceptor::~acceptor()
 {
-    BITCOIN_ASSERT_MSG(stopped(), "The acceptor was not stopped.");
+    BITCOIN_ASSERT_MSG(!acceptor_->is_open(), "The acceptor was not stopped.");
 }
 
 // Stop sequence.
@@ -63,8 +63,6 @@ acceptor::~acceptor()
 // public:
 void acceptor::stop()
 {
-    stopped_ = true;
-
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
     std::lock_guard<std::mutex> lock(mutex_);
@@ -74,12 +72,6 @@ void acceptor::stop()
     ///////////////////////////////////////////////////////////////////////////
 }
 
-// This is only used to validate shutdown.
-bool acceptor::stopped()
-{
-    return stopped_;
-}
-
 // Listen sequence.
 // ----------------------------------------------------------------------------
 
@@ -87,38 +79,35 @@ bool acceptor::stopped()
 // This is hardwired to listen on IPv6.
 void acceptor::listen(uint16_t port, result_handler handler)
 {
-    stopped_ = false;
-    code ec(error::operation_failed);
+    // This is the end of the listen sequence.
+    handler(safe_listen(port));
+}
 
+code acceptor::safe_listen(uint16_t port)
+{
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    if (true)
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 
-        if (acceptor_->is_open())
-        {
-            boost_code error;
-            asio::endpoint endpoint(asio::tcp::v6(), settings_.inbound_port);
+    if (acceptor_->is_open())
+        return error::operation_failed;
 
-            acceptor_->open(endpoint.protocol(), error);
+    boost_code error;
+    asio::endpoint endpoint(asio::tcp::v6(), settings_.inbound_port);
 
-            if (!error)
-                acceptor_->set_option(reuse_address, error);
+    acceptor_->open(endpoint.protocol(), error);
 
-            if (!error)
-                acceptor_->bind(endpoint, error);
+    if (!error)
+        acceptor_->set_option(reuse_address, error);
 
-            if (!error)
-                acceptor_->listen(asio::max_connections, error);
+    if (!error)
+        acceptor_->bind(endpoint, error);
 
-            ec = error::boost_to_error_code(error);
-        }
-    }
+    if (!error)
+        acceptor_->listen(asio::max_connections, error);
+
+    return error::boost_to_error_code(error);
     ///////////////////////////////////////////////////////////////////////////
-
-    // This is the end of the listen sequence.
-    handler(ec);
 }
 
 // Accept sequence.
@@ -127,28 +116,29 @@ void acceptor::listen(uint16_t port, result_handler handler)
 // public:
 void acceptor::accept(accept_handler handler)
 {
+    // We preserve the asynchronous contract of the async_accept.
+    if (!safe_accept(handler))
+        dispatch_.concurrent(handler, error::service_stopped, nullptr);
+}
+
+bool acceptor::safe_accept(accept_handler handler)
+{
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    if (true)
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 
-        if (acceptor_->is_open())
-        {
-            auto socket = std::make_shared<asio::socket>(pool_.service());
+    if (!acceptor_->is_open())
+        return false;
 
-            // async_accept will not invoke the handler within this function.
-            acceptor_->async_accept(*socket,
-                std::bind(&acceptor::handle_accept,
-                    shared_from_this(), _1, socket, handler));
-        }
+    auto socket = std::make_shared<asio::socket>(pool_.service());
 
-        return;
-    }
+    // async_accept will not invoke the handler within this function.
+    acceptor_->async_accept(*socket,
+        std::bind(&acceptor::handle_accept,
+            shared_from_this(), _1, socket, handler));
+
+    return true;
     ///////////////////////////////////////////////////////////////////////////
-
-    // We preserve the asynchronous contract of the async_accept.
-    dispatch_.concurrent(handler, error::service_stopped, nullptr);
 }
 
 void acceptor::handle_accept(const boost_code& ec, asio::socket_ptr socket,

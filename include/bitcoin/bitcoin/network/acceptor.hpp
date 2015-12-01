@@ -66,6 +66,8 @@ public:
 
 private:
     bool stopped();
+    code safe_listen(uint16_t port);
+    bool safe_accept(accept_handler handler);
     void handle_accept(const boost_code& ec, asio::socket_ptr socket,
         accept_handler handler);
 
