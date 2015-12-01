@@ -36,6 +36,7 @@
 #include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/network/message_subscriber.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
+#include <bitcoin/bitcoin/utility/atomic.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
@@ -99,7 +100,9 @@ private:
     deadline::ptr expiration_;
     deadline::ptr inactivity_;
     deadline::ptr revival_;
-    result_handler revival_handler_;
+
+    // Deperecated.
+    bc::atomic<result_handler> revival_handler_;
 };
 
 } // namespace network

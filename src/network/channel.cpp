@@ -55,7 +55,6 @@ channel::channel(threadpool& pool, asio::socket_ptr socket,
     version_({ 0 }),
     located_start_(null_hash),
     located_stop_(null_hash),
-    revival_handler_(nullptr),
     expiration_(alarm(pool, pseudo_randomize(settings.channel_expiration()))),
     inactivity_(alarm(pool, settings.channel_inactivity())),
     revival_(alarm(pool, settings.channel_revival())),
@@ -115,9 +114,7 @@ void channel::handle_stopping()
     expiration_->stop();
     inactivity_->stop();
     revival_->stop();
-
-    // BUGBUG: this needs to be guarded (but is deprecated).
-    revival_handler_ = nullptr;
+    revival_handler_.store(nullptr);
 }
 
 void channel::handle_activity()
@@ -185,8 +182,7 @@ void channel::reset_revival()
 // public:
 void channel::set_revival_handler(result_handler handler)
 {
-    // BUGBUG: this needs to be guarded (but is deprecated).
-    revival_handler_ = handler;
+    revival_handler_.store(handler);
 }
 
 void channel::start_revival()
@@ -204,15 +200,15 @@ void channel::handle_revival(const code& ec)
     if (stopped())
         return;
 
-    // BUGBUG: this needs to be guarded (but is deprecated).
-    if (!revival_handler_)
+    auto revive = revival_handler_.load();
+
+    if (!revive)
         return;
 
     log::debug(LOG_NETWORK)
         << "Channel revival invoked [" << authority() << "]";
 
-    // BUGBUG: this needs to be guarded (but is deprecated).
-    revival_handler_(ec);
+    revive(ec);
     reset_revival();
 }
 
