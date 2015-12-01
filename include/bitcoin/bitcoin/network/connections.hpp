@@ -25,15 +25,14 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
-#include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
@@ -49,7 +48,7 @@ public:
     typedef std::function<void(const code&, channel::ptr)> channel_handler;
 
     /// Construct an instance.
-    connections(threadpool& pool);
+    connections();
 
     /// Validate connections stopped.
     ~connections();
@@ -59,16 +58,19 @@ public:
     void operator=(const connections&) = delete;
 
     /// handle_complete returns operation_failed if send to any channel failed.
+    /// This will broadcast to all channels stored at the start of the call.
     template <typename Message>
     void broadcast(const Message& message, channel_handler handle_channel,
-        result_handler handle_complete) const
+        result_handler handle_complete)
     {
-        const auto size = buffer_.size();
+        // TODO: dispatch this onto a concurrent thread (handlers).
+        auto buffer = copy();
+        const auto size = buffer.size();
         const auto counter = std::make_shared<std::atomic<size_t>>(size);
         const auto result = std::make_shared<std::atomic<error::error_code_t>>(
             error::success);
 
-        for (const auto channel: buffer_)
+        for (const auto channel: buffer)
         {
             const auto handle_send = [=](const code ec)
             {
@@ -93,20 +95,11 @@ public:
 
 private:
     typedef std::vector<channel::ptr> list;
-    typedef list::const_iterator iterator;
 
-    iterator find(const uint64_t nonce) const;
-    iterator find(const channel::ptr& channel) const;
-    iterator find(const authority& authority) const;
-
-    void do_stop(const code& ec);
-    void do_count(count_handler handler) const;
-    void do_store(const channel::ptr& channel, result_handler handler);
-    void do_remove(const channel::ptr& channel, result_handler handler);
-    void do_exists(const authority& authority, truth_handler handler) const;
+    list copy();
 
     list buffer_;
-    dispatcher dispatch_;
+    std::mutex buffer_mutex_;
 };
 
 } // namespace network

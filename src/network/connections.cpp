@@ -20,19 +20,18 @@
 #include <bitcoin/bitcoin/network/connections.hpp>
 
 #include <algorithm>
+#include <mutex>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
-#define NAME "connections"
+// It is not possible for this class to produce a deadlock.
 
-connections::connections(threadpool& pool)
-  : dispatch_(pool, NAME)
+connections::connections()
 {
 }
 
@@ -41,97 +40,108 @@ connections::~connections()
     BITCOIN_ASSERT_MSG(buffer_.empty(), "Connections was not cleared.");
 }
 
-connections::iterator connections::find(const authority& authority) const
+connections::list connections::copy()
 {
-    const auto found = [&authority](const channel::ptr& entry)
-    {
-        return entry->authority() == authority;
-    };
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(buffer_mutex_);
 
-    return std::find_if(buffer_.begin(), buffer_.end(), found);
-}
-
-connections::iterator connections::find(const channel::ptr& channel) const
-{
-    return std::find(buffer_.begin(), buffer_.end(), channel);
+    return buffer_;
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 void connections::stop(const code& ec)
 {
-    // Safe to change context only if this completes before work suspension.
-    dispatch_.ordered(&connections::do_stop,
-        this, ec);
-}
-
-void connections::do_stop(const code& ec)
-{
-    for (auto channel: buffer_)
+    // TODO: dispatch this onto a concurrent thread (handlers).
+    // This will stop all channels stored at the start of the call.
+    auto buffer = copy();
+    for (auto channel: buffer)
         channel->stop(ec);
-
-    ////buffer_.clear();
 }
 
 void connections::exists(const authority& address, truth_handler handler)
 {
-    dispatch_.ordered(&connections::do_exists,
-        this, address, handler);
-}
+    bool found;
+    const auto match = [&address](const channel::ptr& entry)
+    {
+        return entry->authority() == address;
+    };
 
-void connections::do_exists(const authority& address,
-    truth_handler handler) const
-{
-    const auto found = find(address) != buffer_.end();
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    if (true)
+    {
+        std::lock_guard<std::mutex> lock(buffer_mutex_);
+
+        const auto it = std::find_if(buffer_.begin(), buffer_.end(), match);
+        found = it != buffer_.end();
+    }
+    ///////////////////////////////////////////////////////////////////////////
+
     handler(found);
 }
 
 void connections::remove(const channel::ptr& channel, result_handler handler)
 {
-    dispatch_.ordered(&connections::do_remove,
-        this, channel, handler);
-}
+    bool found;
 
-void connections::do_remove(const channel::ptr& channel,
-    result_handler handler)
-{
-    auto it = std::find(buffer_.begin(), buffer_.end(), channel);
-    if (it == buffer_.end())
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    if (true)
     {
-        handler(error::not_found);
-        return;
-    }
+        std::lock_guard<std::mutex> lock(buffer_mutex_);
 
-    buffer_.erase(it);
-    handler(error::success);
+        auto it = std::find(buffer_.begin(), buffer_.end(), channel);
+        found = it != buffer_.end();
+        if (found)
+            buffer_.erase(it);
+    }
+    ///////////////////////////////////////////////////////////////////////////
+
+    handler(found ? error::success : error::not_found);
 }
 
 void connections::store(const channel::ptr& channel, result_handler handler)
 {
-    dispatch_.ordered(&connections::do_store,
-        this, channel, handler);
-}
-
-void connections::do_store(const channel::ptr& channel, result_handler handler)
-{
-    const auto found = find(channel->authority()) != buffer_.end();
-    if (found)
+    bool found;
+    const auto address = channel->authority();
+    const auto match = [&address](const channel::ptr& entry)
     {
-        handler(error::address_in_use);
-        return;
-    }
+        return entry->authority() == address;
+    };
 
-    buffer_.push_back(channel);
-    handler(error::success);
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    if (true)
+    {
+        std::lock_guard<std::mutex> lock(buffer_mutex_);
+
+        const auto it = std::find_if(buffer_.begin(), buffer_.end(), match);
+        found = it != buffer_.end();
+
+        if (!found)
+            buffer_.push_back(channel);
+    }
+    ///////////////////////////////////////////////////////////////////////////
+
+    handler(found ? error::address_in_use : error::success);
 }
 
 void connections::count(count_handler handler)
 {
-    dispatch_.ordered(&connections::do_count,
-        this, handler);
-}
+    size_t size;
 
-void connections::do_count(count_handler handler) const
-{
-    handler(buffer_.size());
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    if (true)
+    {
+        std::lock_guard<std::mutex> lock(buffer_mutex_);
+
+        size = buffer_.size();
+    }
+    ///////////////////////////////////////////////////////////////////////////
+
+    handler(size);
 }
 
 } // namespace network

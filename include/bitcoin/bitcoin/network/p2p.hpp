@@ -168,7 +168,7 @@ protected:
 private:
     template <typename Message>
     void do_broadcast(const Message& message, channel_handler handle_channel,
-        result_handler handle_complete) const
+        result_handler handle_complete)
     {
         connections_.broadcast(message, handle_channel, handle_complete);
     }

@@ -110,7 +110,6 @@ p2p::p2p(const settings& settings)
     settings_(settings),
     dispatch_(pool_, NAME),
     hosts_(pool_, settings_),
-    connections_(pool_),
     subscriber_(
         std::make_shared<channel::channel_subscriber>(pool_, NAME "_sub"))
 {
@@ -281,7 +280,10 @@ void p2p::stop(result_handler handler)
     stopped_ = true;
     manual_ = nullptr;
     relay(error::service_stopped, nullptr);
+
+    // BUGBUG: it is possible to register after this stop.
     connections_.stop(error::service_stopped);
+
     hosts_.save(
         std::bind(&p2p::handle_hosts_saved,
             this, _1, handler));
@@ -394,8 +396,10 @@ void p2p::connect(const std::string& hostname, uint16_t port,
 // ----------------------------------------------------------------------------
 
 // BUGBUG: we rely on this handler invocation to ensure session cleanup.
-// A stop-registration race that may prevent store or call of handler in the
-// case where the service is not started, based on threadpool deactivation.
+// A stop-registration race exists that may prevent store or call of handler in
+// the case where the service is has become stopped. If the threadpool is shut 
+// down subscriber_->subscribe is a no-op. This can only be prevented by
+// instead protecting the network stopped indicator using a critical section.
 void p2p::subscribe(channel_handler handler)
 {
     if (stopped())
