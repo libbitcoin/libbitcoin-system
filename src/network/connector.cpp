@@ -50,14 +50,10 @@ connector::connector(threadpool& pool, const settings& settings)
   : stopped_(false),
     pool_(pool),
     settings_(settings),
+    dispatch_(pool, NAME),
     resolver_(std::make_shared<asio::resolver>(pool.service())),
     CONSTRUCT_TRACK(connector)
 {
-}
-
-connector::~connector()
-{
-    BITCOIN_ASSERT_MSG(pending_.empty(), "The connector was not stopped.");
 }
 
 // Stop sequence.
@@ -70,14 +66,14 @@ void connector::stop()
     ///////////////////////////////////////////////////////////////////////////
     if (true)
     {
-        std::lock_guard<std::mutex> lock(resolver_mutex_);
+        std::lock_guard<std::mutex> lock(mutex_);
 
-        // This will invoke the handlers of all outstanding resolve calls.
+        // This will asynchronously invoke the handler of each pending resolve.
         resolver_->cancel();
     }
     ///////////////////////////////////////////////////////////////////////////
 
-    clear();
+    pending_.clear();
     stopped_ = true;
 }
 
@@ -107,7 +103,7 @@ void connector::connect(const std::string& hostname, uint16_t port,
 {
     if (stopped())
     {
-        // TODO: this must be concurrent.
+        // We do not preserve the asynchronous contract of the async_resolve.
         handler(error::service_stopped, nullptr);
         return;
     }
@@ -117,7 +113,7 @@ void connector::connect(const std::string& hostname, uint16_t port,
 
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    std::lock_guard<std::mutex> lock(resolver_mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 
     // async_resolve will not invoke the handler within this function.
     resolver_->async_resolve(*query, 
@@ -131,14 +127,14 @@ void connector::handle_resolve(const boost_code& ec, asio::iterator iterator,
 {
     if (stopped())
     {
-        // TODO: this must be concurrent.
+        // We do not preserve the asynchronous contract of the async_connect.
         handler(error::service_stopped, nullptr);
         return;
     }
 
     if (ec)
     {
-        // TODO: this must be concurrent.
+        // We do not preserve the asynchronous contract of the async_connect.
         handler(error::resolve_failed, nullptr);
         return;
     }
@@ -148,7 +144,7 @@ void connector::handle_resolve(const boost_code& ec, asio::iterator iterator,
     const auto socket = std::make_shared<asio::socket>(pool_.service());
 
     // Retain a socket reference until connected, allowing connect cancelation.
-    pend(socket);
+    pending_.store(socket);
 
     // Manage the socket-timer race.
     const auto handle_connect = synchronize(handler, 1, NAME);
@@ -187,7 +183,7 @@ void connector::handle_timer(const code& ec, asio::socket_ptr socket,
 void connector::handle_connect(const boost_code& ec, asio::iterator,
     asio::socket_ptr socket, deadline::ptr timer, connect_handler handler)
 {
-    unpend(socket);
+    pending_.remove(socket);
 
     // This is the end of the connect sequence.
     if (ec)
@@ -197,56 +193,6 @@ void connector::handle_connect(const boost_code& ec, asio::iterator,
             std::make_shared<channel>(pool_, socket, settings_));
 
     timer->stop();
-}
-
-// Pending connect.
-// ----------------------------------------------------------------------------
-// TODO: move this to independent class (see proxy pending).
-// The pending collection exists to allow for connect cancelation.
-// If we did not cancel connect attempts their closures would leak.
-// The clear method invokes the handlers of all outstanding connect calls.
-
-// private:
-void connector::pend(asio::socket_ptr socket)
-{
-    // Critical Section
-    ///////////////////////////////////////////////////////////////////////////
-    std::lock_guard<std::mutex> lock(pending_mutex_);
-
-    pending_.push_back(socket);
-    ///////////////////////////////////////////////////////////////////////////
-}
-
-void connector::unpend(asio::socket_ptr socket)
-{
-    // Critical Section
-    ///////////////////////////////////////////////////////////////////////////
-    std::lock_guard<std::mutex> lock(pending_mutex_);
-
-    auto it = std::find(pending_.begin(), pending_.end(), socket);
-
-    // clear can occur before unpend, so we may not find the entry.
-    if (it != pending_.end())
-        pending_.erase(it);
-    ///////////////////////////////////////////////////////////////////////////
-}
-
-void connector::clear()
-{
-    // Critical Section
-    ///////////////////////////////////////////////////////////////////////////
-    std::lock_guard<std::mutex> lock(pending_mutex_);
-
-    // TODO: ensure socket cancel will not invoke member handler in scope.
-    // BUGBUG: socket::cancel fails with error::operation_not_supported
-    // on Windows XP and Windows Server 2003, but handler invocation required.
-    // We should enable BOOST_ASIO_ENABLE_CANCELIO and BOOST_ASIO_DISABLE_IOCP
-    // on these platforms only. See: bit.ly/1YC0p9e
-    for (auto socket : pending_)
-        socket->cancel();
-
-    pending_.clear();
-    ///////////////////////////////////////////////////////////////////////////
 }
 
 } // namespace network

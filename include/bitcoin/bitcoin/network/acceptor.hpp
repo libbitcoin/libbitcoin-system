@@ -30,12 +30,13 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
+#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
-/// Create inbound socket connections, thread safe.
+/// Create inbound socket connections, thread and lock safe.
 class BC_API acceptor
   : public std::enable_shared_from_this<acceptor>, track<acceptor>
 {
@@ -71,9 +72,9 @@ private:
     std::atomic<bool> stopped_;
     threadpool& pool_;
     const settings& settings_;
-
+    dispatcher dispatch_;
     asio::acceptor_ptr acceptor_;
-    std::mutex acceptor_mutex_;
+    std::mutex mutex_;
 };
 
 } // namespace network

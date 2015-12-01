@@ -31,13 +31,15 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
+#include <bitcoin/bitcoin/network/pending_sockets.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
+#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
-/// Create outbound socket connections, thread safe.
+/// Create outbound socket connections, thread and lock safe.
 class BC_API connector
   : public std::enable_shared_from_this<connector>, track<connector>
 {
@@ -47,9 +49,6 @@ public:
 
     /// Construct an instance.
     connector(threadpool& pool, const settings& settings);
-
-    /// Validate connector stopped.
-    ~connector();
 
     /// This class is not copyable.
     connector(const connector&) = delete;
@@ -75,11 +74,6 @@ private:
     // This is a weak stop indicator.
     bool stopped();
 
-    // Pending connect clearance.
-    void clear();
-    void pend(asio::socket_ptr socket);
-    void unpend(asio::socket_ptr socket);
-
     void handle_resolve(const boost_code& ec, asio::iterator iterator,
         connect_handler handler);
     void handle_timer(const code& ec, asio::socket_ptr socket,
@@ -90,12 +84,11 @@ private:
     std::atomic<bool> stopped_;
     threadpool& pool_;
     const settings& settings_;
-
+    pending_sockets pending_;
+    dispatcher dispatch_;
     std::shared_ptr<asio::resolver> resolver_;
-    std::mutex resolver_mutex_;
+    std::mutex mutex_;
 
-    std::vector<asio::socket_ptr> pending_;
-    std::mutex pending_mutex_;
 };
 
 } // namespace network

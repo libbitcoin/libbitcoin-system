@@ -86,7 +86,8 @@
 #include <bitcoin/bitcoin/network/message_subscriber.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/network/p2p.hpp>
-#include <bitcoin/bitcoin/network/pending.hpp>
+#include <bitcoin/bitcoin/network/pending_channels.hpp>
+#include <bitcoin/bitcoin/network/pending_sockets.hpp>
 #include <bitcoin/bitcoin/network/protocol.hpp>
 #include <bitcoin/bitcoin/network/protocol_address.hpp>
 #include <bitcoin/bitcoin/network/protocol_events.hpp>

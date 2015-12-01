@@ -23,6 +23,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <atomic>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
@@ -49,6 +50,9 @@ public:
     /// Construct an instance.
     session_manual(threadpool& pool, p2p& network, const settings& settings);
 
+    /// Start the manual session.
+    void start(result_handler handler);
+
     /// Maintain connection to a node.
     void connect(const std::string& hostname, uint16_t port);
 
@@ -57,6 +61,7 @@ public:
         channel_handler handler);
 
 private:
+    void handle_started(const code& ec, result_handler handler);
     void start_connect(const std::string& hostname, uint16_t port,
         channel_handler handler, uint32_t retries);
     void handle_connect(const code& ec, channel::ptr channel,
@@ -67,6 +72,8 @@ private:
         uint16_t port, channel::ptr channel, channel_handler handler);
     void handle_channel_stop(const code& ec, const std::string& hostname,
         uint16_t port);
+
+    std::atomic<connector::ptr> connector_;
 };
 
 } // namespace network

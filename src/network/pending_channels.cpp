@@ -17,10 +17,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/network/pending.hpp>
+#include <bitcoin/bitcoin/network/pending_channels.hpp>
 
 #include <algorithm>
 #include <cstdint>
+#include <functional>
 #include <mutex>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
@@ -29,70 +30,17 @@
 namespace libbitcoin {
 namespace network {
 
-// It is not possible for this class to produce a deadlock.
-
-pending::pending()
+pending_channels::pending_channels()
 {
 }
 
-pending::~pending()
+pending_channels::~pending_channels()
 {
-    BITCOIN_ASSERT_MSG(buffer_.empty(), "Pending was not cleared.");
+    BITCOIN_ASSERT_MSG(channels_.empty(), "Pending channels not cleared.");
 }
 
-void pending::exists(uint64_t version_nonce, truth_handler handler)
+bool pending_channels::safe_store(channel::ptr channel)
 {
-    // This is an optimization that requires we always set a non-zero nonce.
-    if (version_nonce == 0)
-    {
-        handler(false);
-        return;
-    }
-
-    bool found;
-    const auto match = [version_nonce](const channel::ptr& entry)
-    {
-        return entry->nonce() == version_nonce;
-    };
-
-    // Critical Section
-    ///////////////////////////////////////////////////////////////////////////
-    if (true)
-    {
-        std::lock_guard<std::mutex> lock(buffer_mutex_);
-
-        const auto it = std::find_if(buffer_.begin(), buffer_.end(), match);
-        found = it != buffer_.end();
-    }
-    ///////////////////////////////////////////////////////////////////////////
-
-    handler(found);
-}
-
-void pending::remove(const channel::ptr& channel, result_handler handler)
-{
-    bool found;
-
-    // Critical Section
-    ///////////////////////////////////////////////////////////////////////////
-    if (true)
-    {
-        std::lock_guard<std::mutex> lock(buffer_mutex_);
-
-        auto it = std::find(buffer_.begin(), buffer_.end(), channel);
-        found = it != buffer_.end();
-
-        if (found)
-            buffer_.erase(it);
-    }
-    ///////////////////////////////////////////////////////////////////////////
-
-    handler(found ? error::success : error::not_found);
-}
-
-void pending::store(const channel::ptr& channel, result_handler handler)
-{
-    bool found;
     const auto version_nonce = channel->nonce();
     const auto match = [version_nonce](const channel::ptr& entry)
     {
@@ -101,19 +49,64 @@ void pending::store(const channel::ptr& channel, result_handler handler)
 
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    if (true)
-    {
-        std::lock_guard<std::mutex> lock(buffer_mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 
-        const auto it = std::find_if(buffer_.begin(), buffer_.end(), match);
-        found = it != buffer_.end();
+    const auto it = std::find_if(channels_.begin(), channels_.end(), match);
+    const auto found = it != channels_.end();
 
-        if (!found)
-            buffer_.push_back(channel);
-    }
+    if (!found)
+        channels_.push_back(channel);
+
+    return found;
     ///////////////////////////////////////////////////////////////////////////
+}
 
-    handler(found ? error::address_in_use : error::success);
+void pending_channels::store(channel::ptr channel, result_handler handler)
+{
+    handler(safe_store(channel) ? error::address_in_use : error::success);
+}
+
+bool pending_channels::safe_remove(channel::ptr channel)
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    const auto it = std::find(channels_.begin(), channels_.end(), channel);
+    const auto found = it != channels_.end();
+
+    if (found)
+        channels_.erase(it);
+
+    return found;
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+void pending_channels::remove(channel::ptr channel, result_handler handler)
+{
+    handler(safe_remove(channel) ? error::success : error::not_found);
+}
+
+bool pending_channels::safe_exists(uint64_t version_nonce)
+{
+    const auto match = [version_nonce](channel::ptr entry)
+    {
+        return entry->nonce() == version_nonce;
+    };
+
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    const auto it = std::find_if(channels_.begin(), channels_.end(), match);
+    return it != channels_.end();
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+void pending_channels::exists(uint64_t version_nonce, truth_handler handler)
+{
+    // This is an optimization that requires we always set a non-zero nonce.
+    handler(version_nonce == 0 ? false : safe_exists(version_nonce));
 }
 
 } // namespace network

@@ -123,7 +123,8 @@ src_libbitcoin_la_SOURCES = \
     src/network/logging.cpp \
     src/network/message_subscriber.cpp \
     src/network/p2p.cpp \
-    src/network/pending.cpp \
+    src/network/pending_channels.cpp \
+    src/network/pending_sockets.cpp \
     src/network/protocol.cpp \
     src/network/protocol_address.cpp \
     src/network/protocol_events.cpp \
@@ -419,7 +420,8 @@ include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/message_subscriber.hpp \
     include/bitcoin/bitcoin/network/network_settings.hpp \
     include/bitcoin/bitcoin/network/p2p.hpp \
-    include/bitcoin/bitcoin/network/pending.hpp \
+    include/bitcoin/bitcoin/network/pending_channels.hpp \
+    include/bitcoin/bitcoin/network/pending_sockets.hpp \
     include/bitcoin/bitcoin/network/protocol.hpp \
     include/bitcoin/bitcoin/network/protocol_address.hpp \
     include/bitcoin/bitcoin/network/protocol_events.hpp \

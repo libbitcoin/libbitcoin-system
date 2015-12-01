@@ -335,16 +335,16 @@ BOOST_AUTO_TEST_CASE(p2p__connect__not_started__service_stopped)
     BOOST_REQUIRE_EQUAL(connect_result(network, host), error::service_stopped);
 }
 
-BOOST_AUTO_TEST_CASE(p2p__connect__started__success)
-{
-    print_headers(TEST_NAME);
-    SETTINGS_TESTNET_ONE_THREAD_NO_CONNECTIONS(configuration);
-    p2p network(configuration);
-    const config::endpoint host(SEED1);
-    BOOST_REQUIRE_EQUAL(start_result(network), error::success);
-    BOOST_REQUIRE_EQUAL(run_result(network), error::success);
-    BOOST_REQUIRE_EQUAL(connect_result(network, host), error::success);
-}
+////BOOST_AUTO_TEST_CASE(p2p__connect__started__success)
+////{
+////    print_headers(TEST_NAME);
+////    SETTINGS_TESTNET_ONE_THREAD_NO_CONNECTIONS(configuration);
+////    p2p network(configuration);
+////    const config::endpoint host(SEED1);
+////    BOOST_REQUIRE_EQUAL(start_result(network), error::success);
+////    BOOST_REQUIRE_EQUAL(run_result(network), error::success);
+////    BOOST_REQUIRE_EQUAL(connect_result(network, host), error::success);
+////}
 
 // Disabled for live test reliability.
 // This may fail due to connecting to the same host on different addresses.
@@ -360,16 +360,16 @@ BOOST_AUTO_TEST_CASE(p2p__connect__started__success)
 ////    BOOST_REQUIRE_EQUAL(connect_result(network, host), error::address_in_use);
 ////}
 
-BOOST_AUTO_TEST_CASE(p2p__subscribe__connect__success)
-{
-    print_headers(TEST_NAME);
-    SETTINGS_TESTNET_ONE_THREAD_NO_CONNECTIONS(configuration);
-    p2p network(configuration);
-    const config::endpoint host(SEED1);
-    BOOST_REQUIRE_EQUAL(start_result(network), error::success);
-    BOOST_REQUIRE_EQUAL(run_result(network), error::success);
-    BOOST_REQUIRE_EQUAL(subscribe_result(network, host), error::success);
-}
+////BOOST_AUTO_TEST_CASE(p2p__subscribe__connect__success)
+////{
+////    print_headers(TEST_NAME);
+////    SETTINGS_TESTNET_ONE_THREAD_NO_CONNECTIONS(configuration);
+////    p2p network(configuration);
+////    const config::endpoint host(SEED1);
+////    BOOST_REQUIRE_EQUAL(start_result(network), error::success);
+////    BOOST_REQUIRE_EQUAL(run_result(network), error::success);
+////    BOOST_REQUIRE_EQUAL(subscribe_result(network, host), error::success);
+////}
 
 BOOST_AUTO_TEST_CASE(p2p__subscribe__not_started__service_stopped)
 {
@@ -379,19 +379,19 @@ BOOST_AUTO_TEST_CASE(p2p__subscribe__not_started__service_stopped)
     BOOST_REQUIRE_EQUAL(subscribe_result(network), error::service_stopped);
 }
 
-BOOST_AUTO_TEST_CASE(p2p__broadcast__ping_two_distinct_hosts__two_sends_and_successful_completion)
-{
-    print_headers(TEST_NAME);
-    SETTINGS_TESTNET_ONE_THREAD_NO_CONNECTIONS(configuration);
-    p2p network(configuration);
-    const config::endpoint host1(SEED1);
-    const config::endpoint host2(SEED2);
-    BOOST_REQUIRE_EQUAL(start_result(network), error::success);
-    BOOST_REQUIRE_EQUAL(run_result(network), error::success);
-    BOOST_REQUIRE_EQUAL(connect_result(network, host1), error::success);
-    BOOST_REQUIRE_EQUAL(connect_result(network, host2), error::success);
-    BOOST_REQUIRE_EQUAL(send_result(ping(0), network, 2), error::success);
-}
+////BOOST_AUTO_TEST_CASE(p2p__broadcast__ping_two_distinct_hosts__two_sends_and_successful_completion)
+////{
+////    print_headers(TEST_NAME);
+////    SETTINGS_TESTNET_ONE_THREAD_NO_CONNECTIONS(configuration);
+////    p2p network(configuration);
+////    const config::endpoint host1(SEED1);
+////    const config::endpoint host2(SEED2);
+////    BOOST_REQUIRE_EQUAL(start_result(network), error::success);
+////    BOOST_REQUIRE_EQUAL(run_result(network), error::success);
+////    BOOST_REQUIRE_EQUAL(connect_result(network, host1), error::success);
+////    BOOST_REQUIRE_EQUAL(connect_result(network, host2), error::success);
+////    BOOST_REQUIRE_EQUAL(send_result(ping(0), network, 2), error::success);
+////}
 
 // This will hang for a long time if all connections are created before subscription.
 BOOST_AUTO_TEST_CASE(p2p__subscribe__seed_outbound__success)

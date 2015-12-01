@@ -36,17 +36,17 @@ INITIALIZE_TRACK(bc::network::acceptor);
 namespace libbitcoin {
 namespace network {
 
+#define NAME "acceptor"
+
 using std::placeholders::_1;
 
 static const auto reuse_address = asio::acceptor::reuse_address(true);
 
-// The acceptor_ member is protected against concurrent access.
-// This is safe against deadlock as handlers are invoked outside of the
-// critical sections. We can't use a dispatch guard becuase of context change.
 acceptor::acceptor(threadpool& pool, const settings& settings)
   : stopped_(true),
     pool_(pool),
     settings_(settings),
+    dispatch_(pool, NAME),
     acceptor_(std::make_shared<asio::acceptor>(pool_.service())),
     CONSTRUCT_TRACK(acceptor)
 {
@@ -67,8 +67,9 @@ void acceptor::stop()
 
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    std::lock_guard<std::mutex> lock(acceptor_mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 
+    // This will asynchronously invoke the handler of each pending accept.
     acceptor_->close();
     ///////////////////////////////////////////////////////////////////////////
 }
@@ -93,7 +94,7 @@ void acceptor::listen(uint16_t port, result_handler handler)
     ///////////////////////////////////////////////////////////////////////////
     if (true)
     {
-        std::lock_guard<std::mutex> lock(acceptor_mutex_);
+        std::lock_guard<std::mutex> lock(mutex_);
 
         if (acceptor_->is_open())
         {
@@ -130,7 +131,7 @@ void acceptor::accept(accept_handler handler)
     ///////////////////////////////////////////////////////////////////////////
     if (true)
     {
-        std::lock_guard<std::mutex> lock(acceptor_mutex_);
+        std::lock_guard<std::mutex> lock(mutex_);
 
         if (acceptor_->is_open())
         {
@@ -146,7 +147,7 @@ void acceptor::accept(accept_handler handler)
     }
     ///////////////////////////////////////////////////////////////////////////
 
-    // TODO: this must be concurrent.
+    // We do not preserve the asynchronous contract of the async_accept.
     handler(error::service_stopped, nullptr);
 }
 

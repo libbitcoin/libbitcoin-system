@@ -32,7 +32,7 @@
 #include <bitcoin/bitcoin/network/connections.hpp>
 #include <bitcoin/bitcoin/network/connector.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
-#include <bitcoin/bitcoin/network/pending.hpp>
+#include <bitcoin/bitcoin/network/pending_channels.hpp>
 #include <bitcoin/bitcoin/network/proxy.hpp>
 #include <bitcoin/bitcoin/utility/delegates.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
@@ -212,8 +212,8 @@ private:
     const bool notify_;
     threadpool& pool_;
     p2p& network_;
-    pending pending_;
     dispatcher dispatch_;
+    pending_channels pending_;
 };
 
 // Base session type.

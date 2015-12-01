@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_PENDING_HPP
-#define LIBBITCOIN_NETWORK_PENDING_HPP
+#ifndef LIBBITCOIN_NETWORK_PENDING_CHANNELS_HPP
+#define LIBBITCOIN_NETWORK_PENDING_CHANNELS_HPP
 
 #include <cstdint>
 #include <functional>
@@ -31,29 +31,33 @@
 namespace libbitcoin {
 namespace network {
 
-/// Class to manage a pending channel pool, thread safe.
-class BC_API pending
+/// Class to manage a pending channel pool, thread and lock safe.
+class BC_API pending_channels
 {
 public:
     typedef std::function<void(bool)> truth_handler;
     typedef std::function<void(const code&)> result_handler;
     
-    pending();
-    ~pending();
+    pending_channels();
+    ~pending_channels();
 
     /// This class is not copyable.
-    pending(const pending&) = delete;
-    void operator=(const pending&) = delete;
+    pending_channels(const pending_channels&) = delete;
+    void operator=(const pending_channels&) = delete;
 
     void exists(uint64_t version_nonce, truth_handler handler);
-    void store(const channel::ptr& channel, result_handler handler);
-    void remove(const channel::ptr& channel, result_handler handler);
+    void store(channel::ptr channel, result_handler handler);
+    void remove(channel::ptr channel, result_handler handler);
 
 private:
     typedef std::vector<channel::ptr> list;
 
-    list buffer_;
-    std::mutex buffer_mutex_;
+    bool safe_store(channel::ptr channel);
+    bool safe_remove(channel::ptr channel);
+    bool safe_exists(uint64_t version_nonce);
+
+    list channels_;
+    std::mutex mutex_;
 };
 
 } // namespace network

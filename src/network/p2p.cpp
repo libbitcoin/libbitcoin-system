@@ -110,6 +110,7 @@ p2p::p2p(const settings& settings)
     settings_(settings),
     dispatch_(pool_, NAME),
     hosts_(pool_, settings_),
+    connections_(pool_),
     subscriber_(
         std::make_shared<channel::channel_subscriber>(pool_, NAME "_sub"))
 {
@@ -154,9 +155,11 @@ void p2p::start(result_handler handler)
     // There is no need to seed or run to perform manual connection.
     // This instance is retained by the stop handler and the member reference.
     manual_ = attach<session_manual>(settings_);
-    manual_->start(
-        std::bind(&p2p::handle_manual_started,
-            this, _1, handler));
+    ////manual_->start(
+    ////    std::bind(&p2p::handle_manual_started,
+    ////        this, _1, handler));
+
+    handle_manual_started(error::success, handler);
 }
 
 void p2p::handle_manual_started(const code& ec, result_handler handler)

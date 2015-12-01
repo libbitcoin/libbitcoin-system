@@ -32,12 +32,14 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
+#include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
-/// Pool of active connections, thread safe.
+/// Pool of active connections, thread and lock safe.
 class BC_API connections
 {
 public:
@@ -48,7 +50,7 @@ public:
     typedef std::function<void(const code&, channel::ptr)> channel_handler;
 
     /// Construct an instance.
-    connections();
+    connections(threadpool& pool);
 
     /// Validate connections stopped.
     ~connections();
@@ -57,20 +59,35 @@ public:
     connections(const connections&) = delete;
     void operator=(const connections&) = delete;
 
-    /// handle_complete returns operation_failed if send to any channel failed.
-    /// This will broadcast to all channels stored at the start of the call.
+    /// Completion handler returns operation_failed if any channel send failed.
     template <typename Message>
     void broadcast(const Message& message, channel_handler handle_channel,
         result_handler handle_complete)
     {
-        // TODO: dispatch this onto a concurrent thread (handlers).
-        auto buffer = copy();
-        const auto size = buffer.size();
+        dispatch_.do_broadcast(message, handle_channel, handle_complete);
+    }
+
+    void stop(const code& ec);
+    void count(count_handler handler);
+    void store(channel::ptr channel, result_handler handler);
+    void remove(channel::ptr channel, result_handler handler);
+    void exists(const authority& authority, truth_handler handler);
+
+private:
+    typedef std::vector<channel::ptr> list;
+
+    template <typename Message>
+    void do_broadcast(const Message& message, channel_handler handle_channel,
+        result_handler handle_complete)
+    {
+        // The list is copied, which protects the iteration without a lock.
+        auto channels = safe_copy();
+        const auto size = channels.size();
         const auto counter = std::make_shared<std::atomic<size_t>>(size);
         const auto result = std::make_shared<std::atomic<error::error_code_t>>(
             error::success);
 
-        for (const auto channel: buffer)
+        for (const auto channel: channels)
         {
             const auto handle_send = [=](const code ec)
             {
@@ -87,19 +104,15 @@ public:
         }
     }
 
-    void stop(const code& ec);
-    void count(count_handler handler);
-    void store(const channel::ptr& channel, result_handler handler);
-    void remove(const channel::ptr& channel, result_handler handler);
-    void exists(const authority& authority, truth_handler handler);
+    list safe_copy();
+    size_t safe_count();
+    bool safe_store(channel::ptr channel);
+    bool safe_remove(channel::ptr channel);
+    bool safe_exists(const authority& address);
 
-private:
-    typedef std::vector<channel::ptr> list;
-
-    list copy();
-
-    list buffer_;
-    std::mutex buffer_mutex_;
+    list channels_;
+    std::mutex mutex_;
+    dispatcher dispatch_;
 };
 
 } // namespace network
