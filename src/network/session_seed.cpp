@@ -61,8 +61,6 @@ void session_seed::start(result_handler handler)
     {
         log::info(LOG_NETWORK)
             << "Not configured to populate an address pool.";
-
-        // TODO: concurrent?
         handler(error::success);
         return;
     }

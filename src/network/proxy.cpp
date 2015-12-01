@@ -338,7 +338,7 @@ void proxy::do_send(const data_chunk& message, result_handler handler,
             shared_from_this(), _1, handler));
 }
 
-// This just allows us to translate th boost error code.
+// This just allows us to translate the boost error code.
 void proxy::handle_send(const boost_code& ec, result_handler handler)
 {
     handler(error::boost_to_error_code(ec));

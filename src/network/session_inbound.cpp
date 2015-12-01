@@ -57,8 +57,6 @@ void session_inbound::start(result_handler handler)
     {
         log::info(LOG_NETWORK)
             << "Not configured for accepting incoming connections.";
-
-        // TODO: concurrent?
         handler(error::success);
         return;
     }

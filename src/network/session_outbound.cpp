@@ -56,8 +56,6 @@ void session_outbound::start(result_handler handler)
     {
         log::info(LOG_NETWORK)
             << "Not configured for generating outbound connections.";
-
-        // TODO: concurrent?
         handler(error::success);
         return;
     }
