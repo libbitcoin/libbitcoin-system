@@ -55,7 +55,7 @@ void deadline::start(handler handle, const asio::duration duration)
 
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    std::lock_guard<std::mutex> lock(timer_mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 
     timer_.cancel();
     timer_.expires_from_now(duration);
@@ -73,7 +73,7 @@ void deadline::stop()
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    std::lock_guard<std::mutex> lock(timer_mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 
     timer_.cancel();
     ///////////////////////////////////////////////////////////////////////////

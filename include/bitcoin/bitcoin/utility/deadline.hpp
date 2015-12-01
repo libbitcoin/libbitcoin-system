@@ -80,7 +80,7 @@ private:
 
     asio::timer timer_;
     asio::duration duration_;
-    std::mutex timer_mutex_;
+    std::mutex mutex_;
 };
 
 } // namespace libbitcoin
