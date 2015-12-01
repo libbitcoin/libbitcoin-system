@@ -241,8 +241,6 @@ private:
 #undef SESSION_ARGS_TYPE
 #undef BOUND_SESSION_TYPE
 
-#define INVOKE2(method, p1, p2) \
-    concurrent<CLASS>(&CLASS::method, p1, p2)
 #define BIND1(method, p1) \
     bind<CLASS>(&CLASS::method, p1)
 #define BIND2(method, p1, p2) \
@@ -256,18 +254,11 @@ private:
 #define BIND6(method, p1, p2, p3, p4, p5, p6) \
     bind<CLASS>(&CLASS::method, p1, p2, p3, p4, p5, p6)
 
-#define CONCURRENT1(method, p1) \
-    concurrent_delegate<CLASS>(&CLASS::method, p1)
 #define CONCURRENT2(method, p1, p2) \
     concurrent_delegate<CLASS>(&CLASS::method, p1, p2)
-#define CONCURRENT3(method, p1, p2, p3) \
-    concurrent_delegate<CLASS>(&CLASS::method, p1, p2, p3)
-#define CONCURRENT4(method, p1, p2, p3, p4) \
-    concurrent_delegate<CLASS>(&CLASS::method, p1, p2, p3, p4)
-#define CONCURRENT5(method, p1, p2, p3, p4, p5) \
-    concurrent_delegate<CLASS>(&CLASS::method, p1, p2, p3, p4, p5)
-#define CONCURRENT6(method, p1, p2, p3, p4, p5, p6) \
-    concurrent_delegate<CLASS>(&CLASS::method, p1, p2, p3, p4, p5, p6)
+
+#define INVOKE2(method, p1, p2) \
+    concurrent<CLASS>(&CLASS::method, p1, p2)
 
 
 } // namespace network

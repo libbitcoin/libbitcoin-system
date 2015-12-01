@@ -67,7 +67,7 @@ void session_batch::new_connect(connector::ptr connect,
         return;
     }
 
-    fetch_address(CONCURRENT4(start_connect, _1, _2, connect, handler));
+    fetch_address(BIND4(start_connect, _1, _2, connect, handler));
 }
 
 void session_batch::start_connect(const code& ec, const authority& host,
@@ -95,7 +95,7 @@ void session_batch::start_connect(const code& ec, const authority& host,
         << "Connecting to [" << host << "]";
 
     // CONNECT
-    connect->connect(host, CONCURRENT5(handle_connect, _1, _2, host, connect,
+    connect->connect(host, BIND5(handle_connect, _1, _2, host, connect,
         handler));
 }
 

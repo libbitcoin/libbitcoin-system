@@ -147,8 +147,8 @@ void acceptor::accept(accept_handler handler)
     }
     ///////////////////////////////////////////////////////////////////////////
 
-    // We do not preserve the asynchronous contract of the async_accept.
-    handler(error::service_stopped, nullptr);
+    // We preserve the asynchronous contract of the async_accept.
+    dispatch_.concurrent(handler, error::service_stopped, nullptr);
 }
 
 void acceptor::handle_accept(const boost_code& ec, asio::socket_ptr socket,

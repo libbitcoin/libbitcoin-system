@@ -103,8 +103,8 @@ void connector::connect(const std::string& hostname, uint16_t port,
 {
     if (stopped())
     {
-        // We do not preserve the asynchronous contract of the async_resolve.
-        handler(error::service_stopped, nullptr);
+        // We preserve the asynchronous contract of the async_resolve.
+        dispatch_.unordered(handler, error::service_stopped, nullptr);
         return;
     }
 
@@ -127,15 +127,15 @@ void connector::handle_resolve(const boost_code& ec, asio::iterator iterator,
 {
     if (stopped())
     {
-        // We do not preserve the asynchronous contract of the async_connect.
-        handler(error::service_stopped, nullptr);
+        // We preserve the asynchronous contract of the async_connect.
+        dispatch_.unordered(handler, error::service_stopped, nullptr);
         return;
     }
 
     if (ec)
     {
-        // We do not preserve the asynchronous contract of the async_connect.
-        handler(error::resolve_failed, nullptr);
+        // We preserve the asynchronous contract of the async_connect.
+        dispatch_.concurrent(handler, error::resolve_failed, nullptr);
         return;
     }
 
