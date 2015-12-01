@@ -228,8 +228,6 @@ void session::handle_pend(const code& ec, channel::ptr channel,
 void session::handle_channel_start(const code& ec, channel::ptr channel,
     result_handler handle_started)
 {
-    // BUGBUG: we should not be tying up a thread waiting for handshake.
-    // TODO: we need to register protocols before next message is processed.
     attach<protocol_version>(channel)->
         start(settings_, network_.height(),
             BIND_3(handle_handshake, _1, channel, handle_started));
