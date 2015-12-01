@@ -146,6 +146,7 @@ void acceptor::accept(accept_handler handler)
     }
     ///////////////////////////////////////////////////////////////////////////
 
+    // TODO: this must be concurrent.
     handler(error::service_stopped, nullptr);
 }
 

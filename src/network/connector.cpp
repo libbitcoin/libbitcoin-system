@@ -57,7 +57,7 @@ connector::connector(threadpool& pool, const settings& settings)
 
 connector::~connector()
 {
-    BITCOIN_ASSERT_MSG(stopped(), "The connector was not stopped.");
+    BITCOIN_ASSERT_MSG(pending_.empty(), "The connector was not stopped.");
 }
 
 // Stop sequence.
@@ -107,6 +107,7 @@ void connector::connect(const std::string& hostname, uint16_t port,
 {
     if (stopped())
     {
+        // TODO: this must be concurrent.
         handler(error::service_stopped, nullptr);
         return;
     }
@@ -130,12 +131,14 @@ void connector::handle_resolve(const boost_code& ec, asio::iterator iterator,
 {
     if (stopped())
     {
+        // TODO: this must be concurrent.
         handler(error::service_stopped, nullptr);
         return;
     }
 
     if (ec)
     {
+        // TODO: this must be concurrent.
         handler(error::resolve_failed, nullptr);
         return;
     }
