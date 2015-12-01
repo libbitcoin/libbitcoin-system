@@ -100,7 +100,7 @@ bool session::blacklisted(const authority& authority) const
 
 // Socket creators.
 // ----------------------------------------------------------------------------
-// Must stop on the subscriber thread.
+// Must not change context in the stop handlers (must use bind).
 
 // protected:
 acceptor::ptr session::create_acceptor()
@@ -130,7 +130,7 @@ void session::do_stop_connector(connector::ptr connect)
 
 // Start sequence.
 // ----------------------------------------------------------------------------
-// Must subscribe on the start thread.
+// Must not change context before subscribing.
 
 // public:
 void session::start(result_handler handler)
@@ -160,7 +160,8 @@ bool session::stopped() const
 
 // Subscribe Stop sequence.
 // ----------------------------------------------------------------------------
-// Must resubscribe on the subscriber thread.
+// Must not change context before resubscribing.
+// Must not change context in event handler (use bind).
 
 // public:
 void session::subscribe_stop(stop_handler handler)
@@ -180,6 +181,7 @@ void session::handle_channel_event(const code& ec, channel::ptr,
 
 // Registration sequence.
 // ----------------------------------------------------------------------------
+// Must not change context in start or stop sequences (use bind).
 
 // protected:
 void session::register_channel(channel::ptr channel,
@@ -229,8 +231,8 @@ void session::handle_pend(const code& ec, channel::ptr channel,
 void session::handle_channel_start(const code& ec, channel::ptr channel,
     result_handler handle_started)
 {
-    // BUGBUG: we are getting a handshake timeout after session stop. We should
-    // instead see an immediate stop from protocol_events::handle_stopped.
+    // BUGBUG: we should not be tying up a thread waiting for handshake.
+    // TODO: we need to register protocols before next message is processed.
     attach<protocol_version>(channel)->
         start(settings_, network_.height(),
             BIND_3(handle_handshake, _1, channel, handle_started));
