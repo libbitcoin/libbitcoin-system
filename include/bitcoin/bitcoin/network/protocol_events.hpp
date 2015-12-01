@@ -20,20 +20,19 @@
 #ifndef LIBBITCOIN_NETWORK_PROTOCOL_EVENTS_HPP
 #define LIBBITCOIN_NETWORK_PROTOCOL_EVENTS_HPP
 
-#include <functional>
-#include <mutex>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/protocol.hpp>
+#include <bitcoin/bitcoin/utility/atomic.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
 /**
- * Base class for stateful protocol implementation.
+ * Base class for stateful protocol implementation, thread and lock safe.
  */
 class BC_API protocol_events
   : public protocol
@@ -64,18 +63,15 @@ protected:
 
     /**
      * Determine if the event handler has been cleared.
-     * This is not ordered on the channel, so the value can be delayed.
      */
-    virtual bool stopped() const;
+    virtual bool stopped();
 
 private:
     void handle_started(completion_handler handler);
     void handle_stopped(const code& ec);
     void do_set_event(const code& ec);
 
-    bool stopped_;
-    event_handler event_handler_;
-    std::mutex event_mutex_;
+    bc::atomic<event_handler> handler_;
 };
 
 } // namespace network

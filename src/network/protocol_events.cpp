@@ -20,8 +20,6 @@
 #include <bitcoin/bitcoin/network/protocol_events.hpp>
 
 #include <functional>
-#include <memory>
-#include <mutex>
 #include <string>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
@@ -33,52 +31,35 @@ namespace libbitcoin {
 namespace network {
 
 #define CLASS protocol_events
-using std::placeholders::_1;
 
-// It is not possible for this class to produce a deadlock.
+using std::placeholders::_1;
 
 protocol_events::protocol_events(threadpool& pool, channel::ptr channel,
     const std::string& name)
-  : protocol(pool, channel, name),
-    stopped_(true),
-    event_handler_(nullptr)
+  : protocol(pool, channel, name)
 {
 }
 
 // Properties.
 // ----------------------------------------------------------------------------
 
-// protected:
-bool protocol_events::stopped() const
+bool protocol_events::stopped()
 {
-    // This is a weak indication, but sufficient for shutdown initiation.
-    return stopped_;
+    return !handler_.load();
 }
 
-// Start sequence.
+// Start.
 // ----------------------------------------------------------------------------
 
-// protected:
 void protocol_events::start(event_handler handler)
 {
-    // Critical Section
-    ///////////////////////////////////////////////////////////////////////////
-    if (true)
-    {
-        std::lock_guard<std::mutex> lock(event_mutex_);
-
-        event_handler_ = handler;
-    }
-    ///////////////////////////////////////////////////////////////////////////
-
-    stopped_ = false;
+    handler_.store(handler);
     SUBSCRIBE_STOP1(handle_stopped, _1);
 }
 
-// Stop (invoked by stop handler only).
+// Stop.
 // ----------------------------------------------------------------------------
 
-// private:
 void protocol_events::handle_stopped(const code& ec)
 {
     log::debug(LOG_PROTOCOL)
@@ -89,36 +70,18 @@ void protocol_events::handle_stopped(const code& ec)
     set_event(error::channel_stopped);
 }
 
-// Set event.
+// Set Event.
 // ----------------------------------------------------------------------------
-// A lock is required in order to clear the closure on stop.
-// A boolean stopped is used to avoid a read lock on each stop test.
 
-// protected:
 void protocol_events::set_event(const code& ec)
 {
-    event_handler handler;
+    auto handler = handler_.load();
+    if (!handler)
+        return;
 
-    // Critical Section
-    ///////////////////////////////////////////////////////////////////////////
-    if (true)
-    {
-        std::lock_guard<std::mutex> lock(event_mutex_);
+    if (ec == error::channel_stopped)
+        handler_.store(nullptr);
 
-        if (!event_handler_)
-            return;
-
-        handler = event_handler_;
-
-        if (ec == error::channel_stopped)
-        {
-            stopped_ = true;
-            event_handler_ = nullptr;
-        }
-    }
-    ///////////////////////////////////////////////////////////////////////////
-
-    // Invoke the event handler temporary copy outside of the critical section.
     handler(ec);
 }
 

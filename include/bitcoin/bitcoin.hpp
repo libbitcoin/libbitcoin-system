@@ -113,6 +113,7 @@
 #include <bitcoin/bitcoin/utility/array_slice.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/atomic.hpp>
 #include <bitcoin/bitcoin/utility/binary.hpp>
 #include <bitcoin/bitcoin/utility/collection.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
