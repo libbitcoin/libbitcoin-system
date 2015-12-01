@@ -28,6 +28,7 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/connections.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/network/protocol_address.hpp>
@@ -110,7 +111,7 @@ p2p::p2p(const settings& settings)
     settings_(settings),
     dispatch_(pool_, NAME),
     hosts_(pool_, settings_),
-    connections_(pool_),
+    connections_(std::make_shared<connections>(pool_)),
     subscriber_(
         std::make_shared<channel::channel_subscriber>(pool_, NAME "_sub"))
 {
@@ -285,7 +286,7 @@ void p2p::stop(result_handler handler)
     relay(error::service_stopped, nullptr);
 
     // BUGBUG: it is possible to register after this stop.
-    connections_.stop(error::service_stopped);
+    connections_->stop(error::service_stopped);
 
     hosts_.save(
         std::bind(&p2p::handle_hosts_saved,
@@ -329,22 +330,22 @@ void p2p::close()
 
 void p2p::connected(const address& address, truth_handler handler)
 {
-    connections_.exists(address, handler);
+    connections_->exists(address, handler);
 }
 
 void p2p::store(channel::ptr channel, result_handler handler)
 {
-    connections_.store(channel, handler);
+    connections_->store(channel, handler);
 }
 
 void p2p::remove(channel::ptr channel, result_handler handler)
 {
-    connections_.remove(channel, handler);
+    connections_->remove(channel, handler);
 }
 
 void p2p::connected_count(count_handler handler)
 {
-    connections_.count(handler);
+    connections_->count(handler);
 }
 
 // Hosts collection.

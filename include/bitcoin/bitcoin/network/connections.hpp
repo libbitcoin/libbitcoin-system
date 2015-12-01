@@ -41,6 +41,7 @@ namespace network {
 
 /// Pool of active connections, thread and lock safe.
 class BC_API connections
+  : public std::enable_shared_from_this<connections>
 {
 public:
     typedef config::authority authority;
@@ -64,7 +65,8 @@ public:
     void broadcast(const Message& message, channel_handler handle_channel,
         result_handler handle_complete)
     {
-        dispatch_.do_broadcast(message, handle_channel, handle_complete);
+        dispatch_.concurrent(&connections::do_broadcast<Message>,
+            shared_from_this(), message, handle_channel, handle_complete);
     }
 
     void stop(const code& ec);

@@ -170,7 +170,7 @@ private:
     void do_broadcast(const Message& message, channel_handler handle_channel,
         result_handler handle_complete)
     {
-        connections_.broadcast(message, handle_channel, handle_complete);
+        connections_->broadcast(message, handle_channel, handle_complete);
     }
 
     void start();
@@ -189,7 +189,7 @@ private:
     dispatcher dispatch_;
 
     hosts hosts_;
-    connections connections_;
+    std::shared_ptr<connections> connections_;
 
     session_manual::ptr manual_;
     channel::channel_subscriber::ptr subscriber_;

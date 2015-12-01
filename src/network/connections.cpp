@@ -33,7 +33,7 @@ namespace network {
 #define NAME "connections"
 
 connections::connections(threadpool& pool)
-    : dispatch_(pool, NAME)
+  : dispatch_(pool, NAME)
 {
 }
 
