@@ -23,7 +23,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
-#include <atomic>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
@@ -32,6 +31,7 @@
 #include <bitcoin/bitcoin/network/connector.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/network/session_batch.hpp>
+#include <bitcoin/bitcoin/utility/atomic.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -73,7 +73,7 @@ private:
     void handle_channel_stop(const code& ec, const std::string& hostname,
         uint16_t port);
 
-    std::atomic<connector::ptr> connector_;
+    bc::atomic<connector::ptr> connector_;
 };
 
 } // namespace network

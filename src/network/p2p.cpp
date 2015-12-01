@@ -156,11 +156,9 @@ void p2p::start(result_handler handler)
     // There is no need to seed or run to perform manual connection.
     // This instance is retained by the stop handler and the member reference.
     manual_ = attach<session_manual>(settings_);
-    ////manual_->start(
-    ////    std::bind(&p2p::handle_manual_started,
-    ////        this, _1, handler));
-
-    handle_manual_started(error::success, handler);
+    manual_->start(
+        std::bind(&p2p::handle_manual_started,
+            this, _1, handler));
 }
 
 void p2p::handle_manual_started(const code& ec, result_handler handler)

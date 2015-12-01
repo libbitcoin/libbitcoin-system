@@ -106,7 +106,7 @@ void session_manual::start_connect(const std::string& hostname, uint16_t port,
 
     // MANUAL CONNECT OUTBOUND
     connector->connect(hostname, port,
-        CONCURRENT6(handle_connect, _1, _2, hostname, port, handler, retries));
+        BIND6(handle_connect, _1, _2, hostname, port, handler, retries));
 }
 
 void session_manual::handle_connect(const code& ec, channel::ptr channel,
