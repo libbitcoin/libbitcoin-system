@@ -266,6 +266,8 @@ private:
     concurrent_delegate<CLASS>(&CLASS::method, p1, p2, p3, p4)
 #define CONCURRENT5(method, p1, p2, p3, p4, p5) \
     concurrent_delegate<CLASS>(&CLASS::method, p1, p2, p3, p4, p5)
+#define CONCURRENT6(method, p1, p2, p3, p4, p5, p6) \
+    concurrent_delegate<CLASS>(&CLASS::method, p1, p2, p3, p4, p5, p6)
 
 
 } // namespace network
