@@ -119,13 +119,13 @@ p2p::p2p(const settings& settings)
 // Properties.
 // ----------------------------------------------------------------------------
 
-// The blockchain height is set in the version message for handshake.
+// The blockchain height is set in our version message for handshake.
 size_t p2p::height() const
 {
     return height_;
 }
 
-// The height is set externally and is safe as a naturally atomic value.
+// The height is set externally and is safe as an atomic.
 void p2p::set_height(size_t value)
 {
     height_ = value;
