@@ -57,6 +57,16 @@ session_seed::session_seed(threadpool& pool, p2p& network,
 
 void session_seed::start(result_handler handler)
 {
+    if (settings_.host_pool_capacity == 0)
+    {
+        log::info(LOG_NETWORK)
+            << "Not configured to populate an address pool.";
+
+        // TODO: concurrent?
+        handler(error::success);
+        return;
+    }
+
     session::start(CONCURRENT2(handle_started, _1, handler));
 }
 
@@ -65,14 +75,6 @@ void session_seed::handle_started(const code& ec, result_handler handler)
     if (ec)
     {
         handler(ec);
-        return;
-    }
-
-    if (settings_.host_pool_capacity == 0)
-    {
-        log::info(LOG_NETWORK)
-            << "Not configured to populate an address pool.";
-        handler(error::success);
         return;
     }
 

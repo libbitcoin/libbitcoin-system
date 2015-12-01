@@ -52,6 +52,16 @@ session_outbound::session_outbound(threadpool& pool, p2p& network,
 
 void session_outbound::start(result_handler handler)
 {
+    if (settings_.outbound_connections == 0)
+    {
+        log::info(LOG_NETWORK)
+            << "Not configured for generating outbound connections.";
+
+        // TODO: concurrent?
+        handler(error::success);
+        return;
+    }
+
     session::start(CONCURRENT2(handle_started, _1, handler));
 }
 
@@ -60,14 +70,6 @@ void session_outbound::handle_started(const code& ec, result_handler handler)
     if (ec)
     {
         handler(ec);
-        return;
-    }
-
-    if (settings_.outbound_connections == 0)
-    {
-        log::info(LOG_NETWORK)
-            << "Not configured for generating outbound connections.";
-        handler(error::success);
         return;
     }
 

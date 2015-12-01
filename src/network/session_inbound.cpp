@@ -53,6 +53,16 @@ session_inbound::session_inbound(threadpool& pool, p2p& network,
 
 void session_inbound::start(result_handler handler)
 {
+    if (settings_.inbound_port == 0 || settings_.connection_limit == 0)
+    {
+        log::info(LOG_NETWORK)
+            << "Not configured for accepting incoming connections.";
+
+        // TODO: concurrent?
+        handler(error::success);
+        return;
+    }
+
     session::start(CONCURRENT2(handle_started, _1, handler));
 }
 
@@ -61,14 +71,6 @@ void session_inbound::handle_started(const code& ec, result_handler handler)
     if (ec)
     {
         handler(ec);
-        return;
-    }
-
-    if (settings_.inbound_port == 0 || settings_.connection_limit == 0)
-    {
-        log::info(LOG_NETWORK)
-            << "Not configured for accepting incoming connections.";
-        handler(error::success);
         return;
     }
 
