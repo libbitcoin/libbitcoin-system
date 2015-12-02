@@ -24,7 +24,6 @@
 #include <cstdlib>
 #include <functional>
 #include <memory>
-#include <mutex>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/error.hpp>
@@ -106,8 +105,6 @@ const config::authority& proxy::authority() const
 // public:
 void proxy::start(result_handler handler)
 {
-
-    // We don't allow restart of a stopped connection, so this is sufficient.
     if (!stopped())
     {
         handler(error::operation_failed);
@@ -132,29 +129,21 @@ void proxy::stop(const code& ec)
 {
     BITCOIN_ASSERT_MSG(ec, "The stop code must be an error code.");
 
-    // Critical Section
-    ///////////////////////////////////////////////////////////////////////////
-    if (true)
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
+    if (stopped())
+        return;
 
-        if (stopped())
-            return;
-
-        // Short circuit new subscriptions, since once this method completes it
-        // is presumed that new thread work will be prevented.
-        stopped_ = true;
-    }
-    ///////////////////////////////////////////////////////////////////////////
-
-    // Give channel opportunity to terminate timers.
-    handle_stopping();
+    // Short circuit new subscriptions, since once this method completes it
+    // is presumed that new thread work will be prevented.
+    stopped_ = true;
 
     // This fires all message subscriptions with the channel_stopped code.
     message_subscriber_.broadcast(error::channel_stopped);
 
     // This fires all stop subscriptions with the channel stop reason code.
     stop_subscriber_->relay(ec);
+
+    // Give channel opportunity to terminate timers.
+    handle_stopping();
 
     // The socket_ must be guarded against concurrent use.
     dispatch_.ordered(&proxy::do_close, shared_from_this());
@@ -181,22 +170,10 @@ bool proxy::stopped() const
 // public:
 void proxy::subscribe_stop(result_handler handler)
 {
-    // Critical Section
-    ///////////////////////////////////////////////////////////////////////
-    if (true)
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-
-        if (!stopped())
-        {
-            stop_subscriber_->subscribe(handler);
-            return;
-        }
-    }
-    ///////////////////////////////////////////////////////////////////////
-
-    // If stopped invoke the handler directly, outside critical section.
-    handler(error::channel_stopped);
+    if (stopped())
+        handler(error::channel_stopped);
+    else
+        stop_subscriber_->subscribe(handler);
 }
 
 // Read cycle (read continues until stop).

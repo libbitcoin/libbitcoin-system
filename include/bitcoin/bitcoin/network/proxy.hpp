@@ -25,7 +25,6 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
-#include <mutex>
 #include <string>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
@@ -92,24 +91,10 @@ public:
     template <class Message>
     void subscribe(message_handler<Message> handler)
     {
-        // Critical Section
-        ///////////////////////////////////////////////////////////////////////
-        if (true)
-        {
-            std::lock_guard<std::mutex> lock(mutex_);
-
-            if (!stopped())
-            {
-                message_subscriber_.subscribe<Message>(handler);
-                return;
-            }
-        }
-        ///////////////////////////////////////////////////////////////////////
-
-        // If stopped invoke the handler directly, outside critical section.
-        // If we did not short-cuircuit subscriptions after stop the handlers
-        // would not fire once work stoppage occurs.
-        handler(error::channel_stopped, Message());
+        if (stopped())
+            handler(error::channel_stopped, Message());
+        else
+            message_subscriber_.subscribe<Message>(handler);
     }
 
     /// Subscribe to the stop event.
@@ -165,7 +150,6 @@ private:
     // The subscription process is protected by mutex.
     message_subscriber message_subscriber_;
     stop_subscriber::ptr stop_subscriber_;
-    std::mutex mutex_;
 };
 
 } // namespace network
