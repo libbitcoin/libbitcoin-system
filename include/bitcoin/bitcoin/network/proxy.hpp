@@ -89,12 +89,13 @@ public:
 
     /// Subscribe to messages of the specified type on the socket.
     template <class Message>
-    void subscribe(message_handler<Message> handler)
+    void subscribe(message_handler<Message>&& handler)
     {
         if (stopped())
             handler(error::channel_stopped, Message());
         else
-            message_subscriber_.subscribe<Message>(handler);
+            message_subscriber_.subscribe<Message>(
+                std::forward<message_handler<Message>>(handler));
     }
 
     /// Subscribe to the stop event.
@@ -130,7 +131,7 @@ private:
 
     void read_payload(const message::heading& head);
     void handle_read_payload(const boost_code& ec, size_t,
-        const message::heading& heading);
+        const message::heading& head);
 
     void handle_send(const boost_code& ec, result_handler handler);
     void do_send(const data_chunk& message, result_handler handler,
@@ -147,7 +148,8 @@ private:
     data_chunk payload_buffer_;
     message::heading::buffer heading_buffer_;
 
-    // The subscription process is protected by mutex.
+    // The subscription process is protected by sequential start/stop.
+    // Additionally each subscriber maintains an internal ordered strand.
     message_subscriber message_subscriber_;
     stop_subscriber::ptr stop_subscriber_;
 };

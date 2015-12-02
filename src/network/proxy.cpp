@@ -213,7 +213,7 @@ void proxy::handle_read_heading(const boost_code& ec, size_t)
     if (ec)
     {
         log::debug(LOG_NETWORK)
-            << "Channel failure [" << authority() << "] "
+            << "Heading read failure [" << authority() << "] "
             << code(error::boost_to_error_code(ec)).message();
         stop(ec);
         return;
@@ -222,10 +222,11 @@ void proxy::handle_read_heading(const boost_code& ec, size_t)
     heading head;
     heading_stream istream(heading_buffer_);
     const auto parsed = head.from_data(istream);
+
     if (!parsed || head.magic != magic_)
     {
         log::warning(LOG_NETWORK) 
-            << "Invalid heading received [" << authority() << "]";
+            << "Invalid heading from [" << authority() << "]";
         stop(error::bad_stream);
         return;
     }
@@ -233,32 +234,34 @@ void proxy::handle_read_heading(const boost_code& ec, size_t)
     if (head.payload_size > max_payload_size)
     {
         log::warning(LOG_NETWORK)
-            << "Oversized payload indicated [" << authority() << "] ("
+            << "Oversized payload indicated by " << head.command
+            << " heading from [" << authority() << "] ("
             << head.payload_size << " bytes)";
         stop(error::bad_stream);
         return;
     }
 
-    log::debug(LOG_NETWORK)
-        << "Receive " << head.command << " [" << authority() << "] ("
-        << head.payload_size << " bytes)";
+    ////log::debug(LOG_NETWORK)
+    ////    << "Valid " << head.command << " heading from ["
+    ////    << authority() << "] (" << head.payload_size << " bytes)";
 
     read_payload(head);
     handle_activity();
 }
 
 void proxy::handle_read_payload(const boost_code& ec, size_t,
-    const heading& heading)
+    const heading& head)
 {
     if (stopped())
         return;
 
     // Ignore read error here, client may have disconnected.
 
-    if (heading.checksum != bitcoin_checksum(payload_buffer_))
+    if (head.checksum != bitcoin_checksum(payload_buffer_))
     {
         log::warning(LOG_NETWORK) 
-            << "Invalid bitcoin checksum from [" << authority() << "]";
+            << "Invalid " << head.command << " checksum from ["
+            << authority() << "]";
         stop(error::bad_stream);
         return;
     }
@@ -275,31 +278,40 @@ void proxy::handle_read_payload(const boost_code& ec, size_t,
     // Parse and publish the payload to message subscribers.
     payload_source source(payload_copy);
     payload_stream istream(source);
-    const auto parse_error = message_subscriber_.load(heading.type(), istream);
+
+    // Notify subscribers of the new message.
+    const auto parse_error = message_subscriber_.load(head.type(), istream);
     const auto unconsumed = istream.peek() != std::istream::traits_type::eof();
 
-    if (!parse_error && unconsumed && !stopped())
+    if (stopped())
+        return;
+
+    if (!parse_error)
     {
-        log::warning(LOG_NETWORK)
-            << "Valid message [" << heading.command
-            << "] handled, unused bytes remain in payload.";
+        if (unconsumed)
+            log::warning(LOG_NETWORK)
+            << "Valid " << head.command << " payload from ["
+                << authority() << "] unused bytes remain.";
+        else
+            log::debug(LOG_NETWORK)
+            << "Valid " << head.command << " payload from ["
+                << authority() << "] (" << payload_copy.size() << " bytes)";
     }
 
-    if (ec && !stopped())
+    if (ec)
     {
         log::warning(LOG_NETWORK)
-            << "Invalid payload of " << heading.command
-            << " from [" << authority() << "] (deferred)"
+            << "Payload read failure [" << authority() << "] "
             << code(error::boost_to_error_code(ec)).message();
         stop(ec);
         return;
     }
 
-    if (parse_error && !stopped())
+    if (parse_error)
     {
         log::warning(LOG_NETWORK)
-            << "Invalid stream load of " << heading.command
-            << " from [" << authority() << "] " << parse_error.message();
+            << "Invalid " << head.command << " stream from ["
+            << authority() << "] " << parse_error.message();
         stop(parse_error);
     }
 }
@@ -317,7 +329,7 @@ void proxy::do_send(const data_chunk& message, result_handler handler,
     }
 
     log::debug(LOG_NETWORK)
-        << "Send " << command << " [" << authority() << "] ("
+        << "Sending " << command << " to [" << authority() << "] ("
         << message.size() << " bytes)";
 
     // The socket is protected by an ordered strand.
@@ -327,10 +339,16 @@ void proxy::do_send(const data_chunk& message, result_handler handler,
             shared_from_this(), _1, handler));
 }
 
-// This just allows us to translate the boost error code.
 void proxy::handle_send(const boost_code& ec, result_handler handler)
 {
-    handler(error::boost_to_error_code(ec));
+    const auto error = code(error::boost_to_error_code(ec));
+
+    if (error)
+        log::debug(LOG_NETWORK)
+            << "Failure sending message to [" << authority() << "] "
+            << error.message();
+
+    handler(error);
 }
 
 } // namespace network
