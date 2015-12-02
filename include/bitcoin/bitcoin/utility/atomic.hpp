@@ -36,7 +36,7 @@ public:
 
     /// Create an atomically-accessible copied instance of the type.
     atomic(const Type& instance)
-      : store(instance)
+      : instance_(instance)
     {
     }
 
