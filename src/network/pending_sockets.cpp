@@ -21,6 +21,8 @@
 
 #include <algorithm>
 #include <mutex>
+#include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/network/proxy.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
@@ -36,11 +38,6 @@ pending_sockets::~pending_sockets()
     BITCOIN_ASSERT_MSG(sockets_.empty(), "Pending sockets not cleared.");
 }
 
-// BUGBUG: socket::cancel fails with error::operation_not_supported
-// on Windows XP and Windows Server 2003, but handler invocation is required.
-// We should enable BOOST_ASIO_ENABLE_CANCELIO and BOOST_ASIO_DISABLE_IOCP
-// on these platforms only. See: bit.ly/1YC0p9e
-
 void pending_sockets::clear()
 {
     // Critical Section
@@ -48,8 +45,8 @@ void pending_sockets::clear()
     std::lock_guard<std::mutex> lock(mutex_);
 
     // This will asynchronously invoke the handler of each pending connect.
-    for (auto socket : sockets_)
-        socket->cancel();
+    for (auto socket: sockets_)
+        proxy::close(socket);
 
     sockets_.clear();
     ///////////////////////////////////////////////////////////////////////////
@@ -74,7 +71,7 @@ void pending_sockets::remove(asio::socket_ptr socket)
 
     auto it = std::find(sockets_.begin(), sockets_.end(), socket);
 
-    // Clear can occur before unpend, so the entry may not be found.
+    // Clear can be called at any time, so the entry may not be found.
     if (it != sockets_.end())
         sockets_.erase(it);
     ///////////////////////////////////////////////////////////////////////////

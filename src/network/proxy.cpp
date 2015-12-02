@@ -24,24 +24,18 @@
 #include <cstdlib>
 #include <functional>
 #include <memory>
-#include <boost/date_time.hpp>
-#include <boost/format.hpp>
+#include <mutex>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/messages.hpp>
-#include <bitcoin/bitcoin/utility/asio.hpp>
-#include <bitcoin/bitcoin/network/message_subscriber.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/deadline.hpp>
-#include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/log.hpp>
-#include <bitcoin/bitcoin/utility/random.hpp>
-#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -56,11 +50,21 @@ namespace network {
 using namespace message;
 using std::placeholders::_1;
 using std::placeholders::_2;
-using boost::format;
-using boost::posix_time::time_duration;
 
 // TODO: this is made up, configure payload size guard for DoS protection.
 static constexpr size_t max_payload_size = 10 * 1024 * 1024;
+
+// BUGBUG: socket::cancel fails with error::operation_not_supported
+// on Windows XP and Windows Server 2003, but handler invocation is required.
+// We should enable BOOST_ASIO_ENABLE_CANCELIO and BOOST_ASIO_DISABLE_IOCP
+// on these platforms only. See: bit.ly/1YC0p9e
+void proxy::close(asio::socket_ptr socket)
+{
+    // Ignoring socket error codes creates exception safety.
+    boost_code ignore;
+    socket->shutdown(asio::socket::shutdown_both, ignore);
+    socket->cancel(ignore);
+}
 
 // Cache the address for logging after stop.
 config::authority proxy::authority_factory(asio::socket_ptr socket)
@@ -72,7 +76,6 @@ config::authority proxy::authority_factory(asio::socket_ptr socket)
 
 proxy::proxy(threadpool& pool, asio::socket_ptr socket, uint32_t magic)
   : stopped_(true),
-    starting_(true),
     magic_(magic),
     authority_(authority_factory(socket)),
     dispatch_(pool, NAME),
@@ -84,8 +87,6 @@ proxy::proxy(threadpool& pool, asio::socket_ptr socket, uint32_t magic)
 
 proxy::~proxy()
 {
-    // Destruct is too late to clear subscriptions, so can't rely on stop here.
-
     BITCOIN_ASSERT_MSG(stopped(), "The channel was not stopped.");
 }
 
@@ -100,26 +101,24 @@ const config::authority& proxy::authority() const
 
 // Start sequence.
 // ----------------------------------------------------------------------------
+// Start is not thread safe and proxy is not restartable (see asio socket).
 
 // public:
 void proxy::start(result_handler handler)
 {
-    // Start must execute sequentially.
 
+    // We don't allow restart of a stopped connection, so this is sufficient.
     if (!stopped())
     {
         handler(error::operation_failed);
         return;
     }
 
-    // Must start before invoking start handler, to avoid blocking.
+    // Must indicate start before invoking start handler.
     stopped_ = false;
 
     // Allow for subscription before first read, so no messages are missed.
     handler(error::success);
-
-    // Must guard subscriptions after start but cannot during.
-    starting_ = false;
 
     // Start the read cycle.
     read_heading();
@@ -133,29 +132,37 @@ void proxy::stop(const code& ec)
 {
     BITCOIN_ASSERT_MSG(ec, "The stop code must be an error code.");
 
-    if (stopped())
-        return;
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    if (true)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
 
-    // Since this class does not control thread deactivation, all messages must
-    // be queued before return from stop, so no strand.
+        if (stopped())
+            return;
 
-    stopped_ = true;
-    starting_ = true;
+        // Short circuit new subscriptions, since once this method completes it
+        // is presumed that new thread work will be prevented.
+        stopped_ = true;
+    }
+    ///////////////////////////////////////////////////////////////////////////
 
-    // It is possible that this may be called multiple times.
+    // Give channel opportunity to terminate timers.
     handle_stopping();
 
-    // Close the socket, ignore the error code.
-    boost_code ignore;
-    socket_->shutdown(asio::socket::shutdown_both, ignore);
-    socket_->close(ignore);
-
-    // All message subscribers relay the channel stop code.
-    // This results in all message subscriptions fired with the same code.
+    // This fires all message subscriptions with the channel_stopped code.
     message_subscriber_.broadcast(error::channel_stopped);
 
-    // All stop subscriptions are fired with the channel stop reason code.
+    // This fires all stop subscriptions with the channel stop reason code.
     stop_subscriber_->relay(ec);
+
+    // The socket_ must be guarded against concurrent use.
+    dispatch_.ordered(&proxy::do_close, shared_from_this());
+}
+
+void proxy::do_close()
+{
+    proxy::close(socket_);
 }
 
 void proxy::stop(const boost_code& ec)
@@ -174,19 +181,22 @@ bool proxy::stopped() const
 // public:
 void proxy::subscribe_stop(result_handler handler)
 {
-    if (starting_)
-        do_subscribe_stop(handler);
-    else
-        dispatch_.unordered(&proxy::do_subscribe_stop,
-            shared_from_this(), handler);
-}
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////
+    if (true)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
 
-void proxy::do_subscribe_stop(result_handler handler)
-{
-    if (stopped())
-        handler(error::channel_stopped);
-    else
-        stop_subscriber_->subscribe(handler);
+        if (!stopped())
+        {
+            stop_subscriber_->subscribe(handler);
+            return;
+        }
+    }
+    ///////////////////////////////////////////////////////////////////////
+
+    // If stopped invoke the handler directly, outside critical section.
+    handler(error::channel_stopped);
 }
 
 // Read cycle (read continues until stop).
@@ -197,6 +207,7 @@ void proxy::read_heading()
     if (stopped())
         return;
 
+    // The socket is protected by an ordered strand.
     using namespace boost::asio;
     async_read(*socket_, buffer(heading_buffer_),
         dispatch_.ordered_delegate(&proxy::handle_read_heading,
@@ -210,6 +221,7 @@ void proxy::read_payload(const heading& head)
 
     payload_buffer_.resize(head.payload_size);
 
+    // The socket is protected by an ordered strand.
     using namespace boost::asio;
     async_read(*socket_, buffer(payload_buffer_, head.payload_size),
         dispatch_.ordered_delegate(&proxy::handle_read_payload,
@@ -315,10 +327,9 @@ void proxy::handle_read_payload(const boost_code& ec, size_t,
     }
 }
 
-// Message send sequence (public template calls do_send with order).
+// Message send sequence.
 // ----------------------------------------------------------------------------
 
-// Send handlers are invoked in parallel (unstranded).
 void proxy::do_send(const data_chunk& message, result_handler handler,
     const std::string& command)
 {
@@ -331,7 +342,8 @@ void proxy::do_send(const data_chunk& message, result_handler handler,
     log::debug(LOG_NETWORK)
         << "Send " << command << " [" << authority() << "] ("
         << message.size() << " bytes)";
-    
+
+    // The socket is protected by an ordered strand.
     const shared_const_buffer buffer(message);
     async_write(*socket_, buffer,
         std::bind(&proxy::handle_send,

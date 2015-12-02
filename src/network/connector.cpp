@@ -175,8 +175,13 @@ void connector::handle_timer(const code& ec, asio::socket_ptr socket,
         handler(ec, nullptr);
     else
         handler(error::channel_timeout, nullptr);
-      
-    socket->cancel();
+
+    // BUGBUG: asio::socket is not thread safe, so this will cause a failure in
+    // the case where the channel has been created and a method on the socket
+    // is  executing concurrently with this close call. The only way to guard
+    // against this issue is to create a socket wrapper class (lighter than
+    // channel).
+    proxy::close(socket);
 }
 
 // Connect sequence.
@@ -192,10 +197,14 @@ void connector::handle_connect(const boost_code& ec, asio::iterator,
     if (ec)
         handler(error::boost_to_error_code(ec), nullptr);
     else
-        handler(error::success,
-            std::make_shared<channel>(pool_, socket, settings_));
+        handler(error::success, new_channel(socket));
 
     timer->stop();
+}
+
+std::shared_ptr<channel> connector::new_channel(asio::socket_ptr socket)
+{
+    return std::make_shared<channel>(pool_, socket, settings_);
 }
 
 } // namespace network

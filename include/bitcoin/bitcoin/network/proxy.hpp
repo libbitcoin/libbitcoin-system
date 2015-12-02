@@ -25,9 +25,8 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
-#include <boost/array.hpp>
-#include <boost/date_time.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
@@ -36,6 +35,7 @@
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/messages.hpp>
 #include <bitcoin/bitcoin/network/message_subscriber.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
@@ -60,6 +60,8 @@ public:
     typedef subscriber<const code&> stop_subscriber;
     typedef std::shared_ptr<proxy> ptr;
 
+    static void close(asio::socket_ptr socket);
+
     /// Construct an instance.
     proxy(threadpool& pool, asio::socket_ptr socket, uint32_t magic);
 
@@ -75,34 +77,39 @@ public:
     void send(const Message& packet, result_handler handler)
     {
         const auto command = packet.command;
-        const auto data = message::serialize(packet, magic_);
         const auto self = shared_from_this();
-        auto call = [self, command, data](result_handler handler)
+        const auto data = message::serialize(packet, magic_);
+        auto sender = [self, command, data](result_handler handler)
         {
             self->do_send(data, handler, command);
         };
 
-        dispatch_.unordered(call, handler);
+        // The socket is protected and suspended by an ordered strand.
+        dispatch_.ordered(sender, handler);
     }
 
     /// Subscribe to messages of the specified type on the socket.
     template <class Message>
     void subscribe(message_handler<Message> handler)
     {
-        const auto self = shared_from_this();
-        auto call = [self](message_handler<Message> handler)
+        // Critical Section
+        ///////////////////////////////////////////////////////////////////////
+        if (true)
         {
-            if (self->stopped())
-                handler(error::channel_stopped, Message());
-            else
-                self->message_subscriber_.subscribe<Message>(handler);
-        };
+            std::lock_guard<std::mutex> lock(mutex_);
 
-        // See comments in proxy::subscribe_stop.
-        if (starting_)
-            call(handler);
-        else
-            dispatch_.unordered(call, handler);
+            if (!stopped())
+            {
+                message_subscriber_.subscribe<Message>(handler);
+                return;
+            }
+        }
+        ///////////////////////////////////////////////////////////////////////
+
+        // If stopped invoke the handler directly, outside critical section.
+        // If we did not short-cuircuit subscriptions after stop the handlers
+        // would not fire once work stoppage occurs.
+        handler(error::channel_stopped, Message());
     }
 
     /// Subscribe to the stop event.
@@ -130,42 +137,35 @@ private:
 
     static config::authority authority_factory(asio::socket_ptr socket);
 
-    // Unordered, to protect registration.
+    void do_close();
     void stop(const boost_code& ec);
-    void do_stop(const code& ec);
-    void do_subscribe_stop(result_handler handler);
 
-    // Ordered, to protect socket and read sequence.
     void read_heading();
     void handle_read_heading(const boost_code& ec, size_t);
 
-    // Ordered, to protect socket and read sequence.
     void read_payload(const message::heading& head);
     void handle_read_payload(const boost_code& ec, size_t,
         const message::heading& heading);
 
-    // Unordered, to protect socket and limit shutdown log messages.
     void handle_send(const boost_code& ec, result_handler handler);
     void do_send(const data_chunk& message, result_handler handler,
         const std::string& command);
     
     std::atomic<bool> stopped_;
-    std::atomic<bool> starting_;
 
     const uint32_t magic_;
     const config::authority authority_;
 
-    // TODO: remove.
+    // The socket and buffers are protected by an ordered strand.
     dispatcher dispatch_;
-
-    // TODO: protect access to these using a critical section(s).
     asio::socket_ptr socket_;
+    data_chunk payload_buffer_;
+    message::heading::buffer heading_buffer_;
 
+    // The subscription process is protected by mutex.
     message_subscriber message_subscriber_;
     stop_subscriber::ptr stop_subscriber_;
-
-    message::heading::buffer heading_buffer_;
-    data_chunk payload_buffer_;
+    std::mutex mutex_;
 };
 
 } // namespace network

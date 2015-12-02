@@ -71,6 +71,9 @@ public:
 
 private:
     bool stopped();
+    void close_socket(asio::socket_ptr socket);
+    std::shared_ptr<channel> new_channel(asio::socket_ptr socket);
+
     void safe_stop();
     void safe_resolve(asio::query_ptr query, connect_handler handler);
 
@@ -88,7 +91,6 @@ private:
     dispatcher dispatch_;
     std::shared_ptr<asio::resolver> resolver_;
     std::mutex mutex_;
-
 };
 
 } // namespace network
