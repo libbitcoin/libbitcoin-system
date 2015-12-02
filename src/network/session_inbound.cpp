@@ -29,7 +29,6 @@
 #include <bitcoin/bitcoin/network/protocol_ping.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/log.hpp>
-#include <bitcoin/bitcoin/utility/subscriber.hpp>
 
 INITIALIZE_TRACK(bc::network::session_inbound);
 
