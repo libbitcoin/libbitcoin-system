@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
@@ -51,8 +52,10 @@ public:
     typedef std::function<void(bool)> truth_handler;
     typedef std::function<void(size_t)> count_handler;
     typedef std::function<void(const code&)> result_handler;
-    typedef std::function<void(const code&, channel::ptr)> channel_handler;
     typedef std::function<void(const code&, const address&)> address_handler;
+    typedef std::function<void(const code&, channel::ptr)> channel_handler;
+    typedef std::function<bool(const code&, channel::ptr)> new_channel_handler;
+    typedef resubscriber<const code&, channel::ptr> channel_subscriber;
 
     // ------------------------------------------------------------------------
 
@@ -87,7 +90,6 @@ public:
     virtual void set_height(size_t value);
 
     // ------------------------------------------------------------------------
-    // THESE METHODS ARE NOT THREAD SAFE
 
     /// Invoke startup and seeding sequence, call from constructing thread.
     virtual void start(result_handler handler);
@@ -95,8 +97,22 @@ public:
     /// Begin long running sessions, call from start handler.
     virtual void run(result_handler handler);
 
-    /// Non-blocking call to coalesce all work, start may be reinvoked after.
-    /// Handler returns the result of host file save operation.
+    /// Subscribe to connection creation and service stop events.
+    virtual void subscribe(new_channel_handler handler);
+
+    /// Relay a connection creation or service stop event to subscribers.
+    virtual void relay(const code& ec, channel::ptr channel);
+
+    /// Maintain a connection to hostname:port.
+    virtual void connect(const std::string& hostname, uint16_t port);
+
+    /// Maintain a connection to hostname:port.
+    /// The callback is invoked by the first connection creation only.
+    virtual void connect(const std::string& hostname, uint16_t port,
+        channel_handler handler);
+
+    /// Non-blocking call to coalesce all work, start may be reinvoked after
+    /// handler fired. Handler returns the result of host file save operation.
     virtual void stop(result_handler handler);
 
     /// Blocking call to coalesce all work and then terminate all threads.
@@ -135,23 +151,6 @@ public:
     /// Get the number of addresses.
     virtual void address_count(count_handler handler);
 
-    // ------------------------------------------------------------------------
-    // THESE METHODS ARE NOT THREAD SAFE
-
-    /// Maintain a connection to hostname:port.
-    virtual void connect(const std::string& hostname, uint16_t port);
-
-    /// Maintain a connection to hostname:port.
-    /// The callback is invoked by the first connection creation only.
-    virtual void connect(const std::string& hostname, uint16_t port,
-        channel_handler handler);
-
-    /// Subscribe to connection creation and service stop events.
-    virtual void subscribe(channel_handler handler);
-
-    /// Relay a connection creation or service stop event to subscribers.
-    virtual void relay(const code& ec, channel::ptr channel);
-
 protected:
 
     /// Attach a session to the network, caller must start the session.
@@ -173,7 +172,6 @@ private:
         connections_->broadcast(message, handle_channel, handle_complete);
     }
 
-    void start();
     void handle_manual_started(const code& ec, result_handler handler);
     void handle_inbound_started(const code& ec, result_handler handler);
     void handle_outbound_started(const code& ec, result_handler handler);
@@ -183,16 +181,20 @@ private:
 
     std::atomic<bool> stopped_;
     std::atomic<size_t> height_;
+    bc::atomic<session_manual::ptr> manual_;
     const settings& settings_;
 
+    // These are thread safe.
     threadpool pool_;
     dispatcher dispatch_;
 
+    // These are thread safe (internal strand).
     hosts hosts_;
     std::shared_ptr<connections> connections_;
 
-    session_manual::ptr manual_;
-    channel::channel_subscriber::ptr subscriber_;
+    // Subscriber registration/stop is protected by mutex.
+    channel_subscriber::ptr subscriber_;
+    std::mutex mutex_;
 };
 
 } // namespace network

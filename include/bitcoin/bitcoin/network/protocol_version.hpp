@@ -66,9 +66,10 @@ private:
 
     void handle_version_sent(const code& ec);
     void handle_verack_sent(const code& ec);
-    void handle_receive_version(const code& ec,
+
+    bool handle_receive_version(const code& ec,
         const message::version& version);
-    void handle_receive_verack(const code& ec, const message::verack&);
+    bool handle_receive_verack(const code& ec, const message::verack&);
 
     static const message::version template_;
 };

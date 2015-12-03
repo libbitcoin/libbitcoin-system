@@ -62,14 +62,16 @@ public:
 
 private:
     void send_own_address(const settings& settings);
-    void handle_receive_address(const code& ec,
-        const message::address& address);
-    void handle_receive_get_address(const code& ec,
-        const message::get_address& message);
+
     void handle_send_address(const code& ec);
     void handle_send_get_address(const code& ec);
     void handle_store_addresses(const code& ec);
     void handle_seeding_complete(const code& ec, event_handler handler);
+
+    bool handle_receive_address(const code& ec,
+        const message::address& address);
+    ////bool handle_receive_get_address(const code& ec,
+    ////    const message::get_address& message);
 
     p2p& network_;
     const config::authority self_;

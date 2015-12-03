@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/error.hpp>
@@ -100,11 +101,11 @@ const config::authority& proxy::authority() const
 
 // Start sequence.
 // ----------------------------------------------------------------------------
-// Start is not thread safe and proxy is not restartable (see asio socket).
 
 // public:
 void proxy::start(result_handler handler)
 {
+    // No critical section because proxy is not restartable (see asio socket).
     if (!stopped())
     {
         handler(error::operation_failed);
@@ -132,15 +133,22 @@ void proxy::stop(const code& ec)
     if (stopped())
         return;
 
-    // Short circuit new subscriptions, since once this method completes it
-    // is presumed that new thread work will be prevented.
-    stopped_ = true;
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    if (true)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
 
-    // This fires all message subscriptions with the channel_stopped code.
-    message_subscriber_.broadcast(error::channel_stopped);
+        // Short circuit new subscriptions, since they will not get cleared.
+        stopped_ = true;
 
-    // This fires all stop subscriptions with the channel stop reason code.
-    stop_subscriber_->relay(ec);
+        // This fires all message subscriptions with the channel_stopped code.
+        message_subscriber_.broadcast(error::channel_stopped);
+
+        // This fires all stop subscriptions with the channel stop reason code.
+        stop_subscriber_->relay(ec);
+    }
+    ///////////////////////////////////////////////////////////////////////////
 
     // Give channel opportunity to terminate timers.
     handle_stopping();
@@ -170,10 +178,21 @@ bool proxy::stopped() const
 // public:
 void proxy::subscribe_stop(result_handler handler)
 {
-    if (stopped())
-        handler(error::channel_stopped);
-    else
-        stop_subscriber_->subscribe(handler);
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    if (true)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+
+        if (!stopped())
+        {
+            stop_subscriber_->subscribe(handler);
+            return;
+        }
+    }
+    ///////////////////////////////////////////////////////////////////////////
+
+    handler(error::channel_stopped);
 }
 
 // Read cycle (read continues until stop).

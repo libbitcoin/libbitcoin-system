@@ -113,11 +113,11 @@ void protocol_version::start(const settings& settings, size_t height,
 // Protocol.
 // ----------------------------------------------------------------------------
 
-void protocol_version::handle_receive_version(const code& ec,
+bool protocol_version::handle_receive_version(const code& ec,
     const version& message)
 {
     if (stopped())
-        return;
+        return false;
 
     if (ec)
     {
@@ -125,7 +125,7 @@ void protocol_version::handle_receive_version(const code& ec,
             << "Failure receiving version from [" << authority() << "] "
             << ec.message();
         set_event(ec);
-        return;
+        return false;
     }
 
     log::debug(LOG_PROTOCOL)
@@ -137,13 +137,14 @@ void protocol_version::handle_receive_version(const code& ec,
 
     // 1 of 2
     set_event(error::success);
+    return false;
 }
 
-void protocol_version::handle_receive_verack(const code& ec,
+bool protocol_version::handle_receive_verack(const code& ec,
     const message::verack&)
 {
     if (stopped())
-        return;
+        return false;
 
     if (ec)
     {
@@ -151,11 +152,12 @@ void protocol_version::handle_receive_verack(const code& ec,
             << "Failure receiving verack from [" << authority() << "] "
             << ec.message();
         set_event(ec);
-        return;
+        return false;
     }
 
     // 2 of 2
     set_event(error::success);
+    return false;
 }
 
 void protocol_version::handle_version_sent(const code& ec)

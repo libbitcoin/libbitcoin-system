@@ -59,11 +59,13 @@ public:
 
 private:
     void send_ping(const code& ec);
-    void handle_receive_ping(const code& ec, const message::ping& message);
-    void handle_receive_pong(const code& ec, const message::pong& message,
-        uint64_t nonce);
+
     void handle_send_ping(const code& ec);
     void handle_send_pong(const code& ec);
+
+    bool handle_receive_ping(const code& ec, const message::ping& message);
+    bool handle_receive_pong(const code& ec, const message::pong& message,
+        uint64_t nonce);
 };
 
 } // namespace network

@@ -163,17 +163,22 @@ bool session::stopped() const
 // public:
 void session::subscribe_stop(stop_handler handler)
 {
+    // This uses the channel subscriber to detect stop.
     network_.subscribe(BIND_3(handle_channel_event, _1, _2, handler));
 }
 
-void session::handle_channel_event(const code& ec, channel::ptr,
+bool session::handle_channel_event(const code& ec, channel::ptr,
     stop_handler handler)
 {
-    // This is the end of the subscribe stop sequence.
     if (ec == error::service_stopped)
+    {
+        // This is the end of the subscribe stop sequence.
         handler();
-    else
-        subscribe_stop(handler);
+        return false;
+    }
+
+    // Resubscribe to channel events.
+    return true;
 }
 
 // Registration sequence.
@@ -188,7 +193,7 @@ void session::register_channel(channel::ptr channel,
         BIND_3(do_remove, _1, channel, handle_stopped);
 
     result_handler start_handler =
-        BIND_4(handle_started, _1, channel, handle_started, stop_handler);
+        BIND_4(handle_start, _1, channel, handle_started, stop_handler);
 
     if (stopped())
     {
@@ -293,7 +298,7 @@ void session::handle_stored(const code& ec, channel::ptr channel,
         network_.relay(error::success, channel);
 }
 
-void session::handle_started(const code& ec, channel::ptr channel,
+void session::handle_start(const code& ec, channel::ptr channel,
     result_handler handle_started, result_handler handle_stopped)
 {
     // Must either stop or subscribe the channel for stop before returning.

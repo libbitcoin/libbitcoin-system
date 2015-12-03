@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
@@ -44,7 +45,7 @@
 #include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
-INITIALIZE_TRACK(bc::network::channel::channel_subscriber);
+INITIALIZE_TRACK(bc::network::p2p::channel_subscriber);
 
 namespace libbitcoin {
 namespace network {
@@ -112,8 +113,7 @@ p2p::p2p(const settings& settings)
     dispatch_(pool_, NAME),
     hosts_(pool_, settings_),
     connections_(std::make_shared<connections>(pool_)),
-    subscriber_(
-        std::make_shared<channel::channel_subscriber>(pool_, NAME "_sub"))
+    subscriber_(std::make_shared<channel_subscriber>(pool_, NAME "_sub"))
 {
 }
 
@@ -132,6 +132,7 @@ void p2p::set_height(size_t value)
     height_ = value;
 }
 
+// protected:
 bool p2p::stopped() const
 {
     return stopped_;
@@ -148,17 +149,20 @@ void p2p::start(result_handler handler)
         return;
     }
 
+    // Start is not thread safe, so stopped_/subscriber_ is not guarded.
     stopped_ = false;
 
     pool_.join();
     pool_.spawn(settings_.threads, thread_priority::low);
 
-    // There is no need to seed or run to perform manual connection.
-    // This instance is retained by the stop handler and the member reference.
-    manual_ = attach<session_manual>(settings_);
-    manual_->start(
+    const auto manual_started_handler =
         std::bind(&p2p::handle_manual_started,
-            this, _1, handler));
+            this, _1, handler);
+
+    // This instance is retained by stop handler and member references.
+    auto manual = attach<session_manual>(settings_);
+    manual->start(manual_started_handler);
+    manual_.store(manual);
 }
 
 void p2p::handle_manual_started(const code& ec, result_handler handler)
@@ -265,39 +269,101 @@ void p2p::handle_outbound_started(const code& ec, result_handler handler)
     handler(error::success);
 }
 
-// Stop sequence.
+// Channel subscription.
 // ----------------------------------------------------------------------------
 
-void p2p::stop(result_handler handler)
+void p2p::subscribe(new_channel_handler handler)
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    if (true)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+
+        // stopped_/subscriber_ is the guarded relation.
+        if (!stopped())
+        {
+            subscriber_->subscribe(handler);
+            return;
+        }
+    }
+    ///////////////////////////////////////////////////////////////////////////
+
+    handler(error::service_stopped, nullptr);
+}
+
+// This is not intended for public use but needs to be accessible.
+void p2p::relay(const code& ec, channel::ptr channel)
+{
+    subscriber_->relay(ec, channel);
+}
+
+// Manual connections.
+// ----------------------------------------------------------------------------
+
+void p2p::connect(const std::string& hostname, uint16_t port)
+{
+    if (stopped())
+        return;
+
+    auto manual = manual_.load();
+    if (manual)
+        manual->connect(hostname, port);
+}
+
+void p2p::connect(const std::string& hostname, uint16_t port,
+    channel_handler handler)
 {
     if (stopped())
     {
-        handler(error::service_stopped);
+        handler(error::service_stopped, nullptr);
         return;
     }
-    
-    // All shutdown actions must be queued by the end of the stop call.
-    // Queued shutdown operations must not enqueue additional operations.
 
-    stopped_ = true;
-    manual_ = nullptr;
-    relay(error::service_stopped, nullptr);
+    auto manual = manual_.load();
+    if (manual)
+        manual->connect(hostname, port, handler);
+}
 
-    // BUGBUG: it is possible to register after this stop.
-    connections_->stop(error::service_stopped);
+// Stop sequence.
+// ----------------------------------------------------------------------------
+// All shutdown actions must be queued by the end of the stop call.
+// IOW queued shutdown operations must not enqueue additional work.
 
-    hosts_.save(
-        std::bind(&p2p::handle_hosts_saved,
-            this, _1, handler));
+void p2p::stop(result_handler handler)
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    if (true)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
 
-    pool_.shutdown();
+        // stopped_/subscriber_ is the guarded relation.
+        if (!stopped())
+        {
+            stopped_ = true;
+            subscriber_->relay(error::service_stopped, nullptr);
+            connections_->stop(error::service_stopped);
+            manual_.store(nullptr);
+
+            hosts_.save(
+                std::bind(&p2p::handle_hosts_saved,
+                    this, _1, handler));
+
+            pool_.shutdown();
+            return;
+        }
+    }
+    ///////////////////////////////////////////////////////////////////////////
+
+    handler(error::service_stopped);
 }
 
 void p2p::handle_hosts_saved(const code& ec, result_handler handler)
 {
     if (ec)
         log::error(LOG_NETWORK)
-            << "Error saving hosts file: " << ec.message();
+        << "Error saving hosts file: " << ec.message();
 
     // This is the end of the stop sequence.
     handler(ec);
@@ -310,8 +376,7 @@ p2p::~p2p()
 {
     // A reference cycle cannot exist with this class, since we don't capture
     // shared pointers to it. Therefore this will always clear subscriptions.
-    // It is not too late to clear subscriptions here, as threads are still
-    // active in the case where stop has not yet been called.
+    // This allows for shutdown based on destruct without need to call stop.
     close();
 }
 
@@ -319,7 +384,7 @@ void p2p::close()
 {
     stop([](code){});
 
-    // This is the end of the stop sequence.
+    // This is the end of the destruct sequence.
     pool_.join();
 }
 
@@ -372,49 +437,6 @@ void p2p::remove(const address& address, result_handler handler)
 void p2p::address_count(count_handler handler)
 {
     hosts_.count(handler);
-}
-
-// Manual connections.
-// ----------------------------------------------------------------------------
-
-void p2p::connect(const std::string& hostname, uint16_t port)
-{
-    if (stopped())
-        return;
-
-    manual_->connect(hostname, port);
-}
-
-void p2p::connect(const std::string& hostname, uint16_t port,
-    channel_handler handler)
-{
-    if (stopped())
-        handler(error::service_stopped, nullptr);
-    else
-        manual_->connect(hostname, port, handler);
-}
-
-// Channel subscription.
-// ----------------------------------------------------------------------------
-
-// BUGBUG: we rely on this handler invocation to ensure session cleanup.
-// A stop-registration race exists that may prevent store or call of handler in
-// the case where the service is has become stopped. If the threadpool is shut 
-// down subscriber_->subscribe is a no-op. This can only be prevented by
-// instead protecting the network stopped indicator using a critical section.
-void p2p::subscribe(channel_handler handler)
-{
-    if (stopped())
-        handler(error::service_stopped, nullptr);
-    else
-        subscriber_->subscribe(handler);
-}
-
-// This does not require subscriber_ protection.
-// This is not intended for public use but needs to be accessible.
-void p2p::relay(const code& ec, channel::ptr channel)
-{
-    subscriber_->relay(ec, channel);
 }
 
 } // namespace network

@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
@@ -53,7 +54,7 @@ class BC_API proxy
 {
 public:
     template <class Message>
-    using message_handler = std::function<void(const code&, const Message&)>;
+    using message_handler = std::function<bool(const code&, const Message&)>;
     typedef std::function<void(const code&)> result_handler;
     typedef std::function<void()> completion_handler;
     typedef subscriber<const code&> stop_subscriber;
@@ -91,11 +92,22 @@ public:
     template <class Message>
     void subscribe(message_handler<Message>&& handler)
     {
-        if (stopped())
-            handler(error::channel_stopped, Message());
-        else
-            message_subscriber_.subscribe<Message>(
-                std::forward<message_handler<Message>>(handler));
+        // Critical Section
+        ///////////////////////////////////////////////////////////////////////
+        if (true)
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+
+            if (!stopped())
+            {
+                auto stopped = std::forward<message_handler<Message>>(handler);
+                message_subscriber_.subscribe<Message>(stopped);
+                return;
+            }
+        }
+        ///////////////////////////////////////////////////////////////////////
+
+        handler(error::channel_stopped, Message());
     }
 
     /// Subscribe to the stop event.
@@ -148,10 +160,10 @@ private:
     data_chunk payload_buffer_;
     message::heading::buffer heading_buffer_;
 
-    // The subscription process is protected by sequential start/stop.
-    // Additionally each subscriber maintains an internal ordered strand.
+    // The mutex ensures no registration will occur after stop broadcasts.
     message_subscriber message_subscriber_;
     stop_subscriber::ptr stop_subscriber_;
+    std::mutex mutex_;
 };
 
 } // namespace network

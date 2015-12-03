@@ -96,11 +96,11 @@ void protocol_seed::handle_seeding_complete(const code& ec,
     stop(ec);
 }
 
-void protocol_seed::handle_receive_address(const code& ec,
+bool protocol_seed::handle_receive_address(const code& ec,
     const address& message)
 {
     if (stopped())
-        return;
+        return false;
 
     if (ec)
     {
@@ -108,7 +108,7 @@ void protocol_seed::handle_receive_address(const code& ec,
             << "Failure receiving addresses from seed [" << authority() << "] "
             << ec.message();
         set_event(ec);
-        return;
+        return false;
     }
 
     log::debug(LOG_PROTOCOL)
@@ -117,6 +117,8 @@ void protocol_seed::handle_receive_address(const code& ec,
 
     // TODO: manage timestamps (active channels are connected < 3 hours ago).
     network_.store(message.addresses, BIND1(handle_store_addresses, _1));
+
+    return false;
 }
 
 void protocol_seed::handle_send_address(const code& ec)

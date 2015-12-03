@@ -155,6 +155,7 @@ static int subscribe_result(p2p& network)
     const auto handler = [&promise](code ec, channel::ptr)
     {
         promise.set_value(ec);
+        return false;
     };
     network.subscribe(handler);
     return promise.get_future().get().value();
@@ -166,6 +167,7 @@ static int subscribe_result(p2p& network, const config::endpoint& host)
     const auto handler = [&promise](code ec, channel::ptr)
     {
         promise.set_value(ec);
+        return false;
     };
     network.subscribe(handler);
     network.connect(host.host(), host.port());

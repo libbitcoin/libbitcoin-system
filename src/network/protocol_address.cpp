@@ -79,11 +79,11 @@ void protocol_address::start(const settings& settings)
 // Protocol.
 // ----------------------------------------------------------------------------
 
-void protocol_address::handle_receive_address(const code& ec,
+bool protocol_address::handle_receive_address(const code& ec,
     const address& message)
 {
     if (stopped())
-        return;
+        return false;
 
     if (ec)
     {
@@ -91,11 +91,8 @@ void protocol_address::handle_receive_address(const code& ec,
             << "Failure receiving address message from ["
             << authority() << "] " << ec.message();
         stop(ec);
-        return;
+        return false;
     }
-
-    // Resubscribe to address messages.
-    SUBSCRIBE2(address, handle_receive_address, _1, _2);
 
     log::debug(LOG_PROTOCOL)
         << "Storing addresses from [" << authority() << "] ("
@@ -103,13 +100,16 @@ void protocol_address::handle_receive_address(const code& ec,
 
     // TODO: manage timestamps (active channels are connected < 3 hours ago).
     network_.store(message.addresses, BIND1(handle_store_addresses, _1));
+
+    // RESUBSCRIBE
+    return true;
 }
 
-void protocol_address::handle_receive_get_address(const code& ec,
+bool protocol_address::handle_receive_get_address(const code& ec,
     const get_address& message)
 {
     if (stopped())
-        return;
+        return false;
 
     if (ec)
     {
@@ -117,23 +117,24 @@ void protocol_address::handle_receive_get_address(const code& ec,
             << "Failure receiving get_address message from ["
             << authority() << "] " << ec.message();
         stop(ec);
-        return;
+        return false;
     }
 
     // TODO: allowing repeated queries can allow a channel to map our history.
-    // Resubscribe to get_address messages.
-    SUBSCRIBE2(get_address, handle_receive_get_address, _1, _2);
-
     // TODO: pull active hosts from host cache (currently just resending self).
     // TODO: need to distort for privacy, don't send currently-connected peers.
+
     if (self_.addresses.empty())
-        return;
+        return false;
 
     log::debug(LOG_PROTOCOL)
         << "Sending addresses to [" << authority() << "] ("
         << self_.addresses.size() << ")";
 
     SEND1(self_, handle_send_address, _1);
+
+    // RESUBSCRIBE
+    return true;
 }
 
 void protocol_address::handle_send_address(const code& ec)

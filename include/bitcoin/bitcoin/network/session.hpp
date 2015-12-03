@@ -37,7 +37,6 @@
 #include <bitcoin/bitcoin/utility/delegates.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
-#include <bitcoin/bitcoin/utility/subscriber.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -159,7 +158,6 @@ protected:
     const settings& settings_;
 
 private:
-
     /// Bind a method in the base class.
     template <typename Handler, typename... Args>
     auto base_bind(Handler&& handler, Args&&... args) ->
@@ -176,7 +174,7 @@ private:
     void do_stop_session();
 
     // Stop sequence
-    void handle_channel_event(const code& ec, channel::ptr channel,
+    bool handle_channel_event(const code& ec, channel::ptr channel,
         stop_handler handler);
 
     // Connect sequence
@@ -201,7 +199,7 @@ private:
     void handle_unpend(const code& ec);
     void handle_stored(const code& ec, channel::ptr channel,
         result_handler handle_started);
-    void handle_started(const code& ec, channel::ptr channel,
+    void handle_start(const code& ec, channel::ptr channel,
         result_handler handle_started, result_handler handle_stopped);
     void do_remove(const code& ec, channel::ptr channel,
         result_handler handle_stopped);

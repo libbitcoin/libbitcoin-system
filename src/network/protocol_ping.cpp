@@ -80,11 +80,11 @@ void protocol_ping::send_ping(const code& ec)
     SEND1(ping(nonce), handle_send_ping, _1);
 }
 
-void protocol_ping::handle_receive_ping(const code& ec,
+bool protocol_ping::handle_receive_ping(const code& ec,
     const message::ping& message)
 {
     if (stopped())
-        return;
+        return false;
 
     if (ec)
     {
@@ -92,19 +92,20 @@ void protocol_ping::handle_receive_ping(const code& ec,
             << "Failure getting ping from [" << authority() << "] "
             << ec.message();
         stop(ec);
-        return;
+        return false;
     }
 
-    // Resubscribe to ping messages.
-    SUBSCRIBE2(ping, handle_receive_ping, _1, _2);
     SEND1(pong(message.nonce), handle_send_pong, _1);
+
+    // RESUBSCRIBE
+    return true;
 }
 
-void protocol_ping::handle_receive_pong(const code& ec,
+bool protocol_ping::handle_receive_pong(const code& ec,
     const message::pong& message, uint64_t nonce)
 {
     if (stopped())
-        return;
+        return false;
 
     if (ec)
     {
@@ -112,7 +113,7 @@ void protocol_ping::handle_receive_pong(const code& ec,
             << "Failure getting pong from [" << authority() << "] "
             << ec.message();
         stop(ec);
-        return;
+        return false;
     }
 
     if (message.nonce != nonce)
@@ -124,6 +125,8 @@ void protocol_ping::handle_receive_pong(const code& ec,
         // but we assume the response is not as expected and terminate.
         stop(error::bad_stream);
     }
+
+    return false;
 }
 
 void protocol_ping::handle_send_ping(const code& ec)

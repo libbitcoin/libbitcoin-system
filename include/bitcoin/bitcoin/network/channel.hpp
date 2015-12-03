@@ -39,7 +39,6 @@
 #include <bitcoin/bitcoin/utility/atomic.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
-#include <bitcoin/bitcoin/utility/subscriber.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -51,7 +50,6 @@ class BC_API channel
 {
 public:
     typedef std::shared_ptr<channel> ptr;
-    typedef subscriber<const code&, ptr> channel_subscriber;
 
     /// Construct an instance.
     channel(threadpool& pool, asio::socket_ptr socket,
