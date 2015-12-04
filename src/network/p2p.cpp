@@ -272,7 +272,7 @@ void p2p::handle_outbound_started(const code& ec, result_handler handler)
 // Channel subscription.
 // ----------------------------------------------------------------------------
 
-void p2p::subscribe(new_channel_handler handler)
+void p2p::subscribe(connect_handler handler)
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////

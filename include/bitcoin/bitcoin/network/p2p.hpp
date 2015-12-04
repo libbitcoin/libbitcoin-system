@@ -54,7 +54,7 @@ public:
     typedef std::function<void(const code&)> result_handler;
     typedef std::function<void(const code&, const address&)> address_handler;
     typedef std::function<void(const code&, channel::ptr)> channel_handler;
-    typedef std::function<bool(const code&, channel::ptr)> new_channel_handler;
+    typedef std::function<bool(const code&, channel::ptr)> connect_handler;
     typedef resubscriber<const code&, channel::ptr> channel_subscriber;
 
     // ------------------------------------------------------------------------
@@ -98,7 +98,7 @@ public:
     virtual void run(result_handler handler);
 
     /// Subscribe to connection creation and service stop events.
-    virtual void subscribe(new_channel_handler handler);
+    virtual void subscribe(connect_handler handler);
 
     /// Relay a connection creation or service stop event to subscribers.
     virtual void relay(const code& ec, channel::ptr channel);
