@@ -84,6 +84,7 @@ void protocol_timer::handle_timer(const code& ec)
         << "Fired protocol_" << name() << " timer on [" << authority() << "] "
         << ec.message();
 
+    // The handler completes before the timer is reset.
     set_event(error::channel_timeout);
 
     // A perpetual timer resets itself until the channel is stopped.

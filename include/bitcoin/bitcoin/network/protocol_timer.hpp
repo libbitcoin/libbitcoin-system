@@ -53,6 +53,7 @@ protected:
     /**
      * Define the event handler and start the protocol and timer.
      * The timer is automatically canceled on stop (only).
+     * The timer is suspended while the handler is executing.
      * @param[in]  timeout  The timer period (not automatically reset).
      * @param[in]  handler  Invoke automatically on stop and timer events.
      */
