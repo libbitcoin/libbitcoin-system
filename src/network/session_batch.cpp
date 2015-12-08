@@ -54,7 +54,7 @@ void session_batch::connect(connector::ptr connect, channel_handler handler)
 
     // We can't use dispatch::race because it doesn't increment the refcount.
     for (uint32_t host = 0; host < batch; ++host)
-        INVOKE2(new_connect, connect, complete);
+        new_connect(connect, complete);
 }
 
 void session_batch::new_connect(connector::ptr connect,

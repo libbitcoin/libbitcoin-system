@@ -125,12 +125,12 @@ protected:
         return BOUND_SESSION(handler, args);
     }
 
-    /// Dispatch a concurrent method in the derived class.
-    template <class Session, typename Handler, typename... Args>
-    void concurrent(Handler&& handler, Args&&... args)
-    {
-        return dispatch_.concurrent(SESSION_ARGS(handler, args));
-    }
+    /////// Dispatch a concurrent method in the derived class.
+    ////template <class Session, typename Handler, typename... Args>
+    ////void concurrent(Handler&& handler, Args&&... args)
+    ////{
+    ////    return dispatch_.concurrent(SESSION_ARGS(handler, args));
+    ////}
 
     /// Bind a concurrent delegate to a method in the derived class.
     template <class Session, typename Handler, typename... Args>
@@ -254,9 +254,6 @@ private:
 
 #define CONCURRENT2(method, p1, p2) \
     concurrent_delegate<CLASS>(&CLASS::method, p1, p2)
-
-#define INVOKE2(method, p1, p2) \
-    concurrent<CLASS>(&CLASS::method, p1, p2)
 
 
 } // namespace network
