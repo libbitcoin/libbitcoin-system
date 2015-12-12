@@ -206,7 +206,7 @@ bool parse(script_type& result_script, std::string format)
     return true;
 }
 
-bool run_script(const script_test& test)
+bool run_script(const script_test& test, uint32_t context)
 {
     script_type input, output;
     if (!parse(input, test.input))
@@ -214,9 +214,12 @@ bool run_script(const script_test& test)
     if (!parse(output, test.output))
         return false;
     transaction_type tx;
-    //log_debug() << test.input << " -> " << input;
-    //log_debug() << test.output << " -> " << output;
-    return output.run(input, tx, 0);
+
+    ////log_debug() << test.input << " -> " << input;
+    ////log_debug() << test.output << " -> " << output;
+
+    // This does not consider bip65_enabled enabled, !bip16_enabled or both.
+    return output.run(input, tx, 0, context);
 }
 
 void ignore_output(log_level,
@@ -226,11 +229,19 @@ void ignore_output(log_level,
 
 BOOST_AUTO_TEST_SUITE(script_tests)
 
+BOOST_AUTO_TEST_CASE(script_json_bip65_valid)
+{
+    for (const auto& test: valid_bip65_scripts)
+    {
+        BOOST_CHECK(run_script(test, script_context::bip65_enabled));
+    }
+}
+
 BOOST_AUTO_TEST_CASE(script_json_valid)
 {
-    for (const script_test& test: valid_scripts)
+    for (const auto& test: valid_scripts)
     {
-        BOOST_REQUIRE(run_script(test));
+        BOOST_CHECK(run_script(test, 0));
     }
 }
 
@@ -238,9 +249,10 @@ BOOST_AUTO_TEST_CASE(script_json_invalid)
 {
     // Shut up!
     log_fatal().set_output_function(ignore_output);
-    for (const script_test& test: invalid_scripts)
+    for (const auto& test: invalid_scripts)
     {
-        BOOST_REQUIRE(!run_script(test));
+        // TODO: isolate the BIP16 scripts to an independent test case.
+        BOOST_CHECK(!run_script(test, script_context::bip16_enabled));
     }
 }
 
@@ -262,8 +274,7 @@ BOOST_AUTO_TEST_CASE(script_checksig_uses_one_hash)
     data_chunk rawscr;
     decode_base16(rawscr, "76a91433cef61749d11ba2adf091a5e045678177fe3a6d88ac");
     script_code = parse_script(rawscr);
-    BOOST_REQUIRE(check_signature(
-        signature, pubkey, script_code, parent_tx, input_index));
+    BOOST_REQUIRE(check_signature(signature, pubkey, script_code, parent_tx, input_index));
 }
 
 BOOST_AUTO_TEST_CASE(script_checksig_normal)
@@ -284,8 +295,7 @@ BOOST_AUTO_TEST_CASE(script_checksig_normal)
     data_chunk rawscr;
     decode_base16(rawscr, "76a914fcc9b36d38cf55d7d5b4ee4dddb6b2c17612f48c88ac");
     script_code = parse_script(rawscr);
-    BOOST_REQUIRE(check_signature(
-        signature, pubkey, script_code, parent_tx, input_index));
+    BOOST_REQUIRE(check_signature(signature, pubkey, script_code, parent_tx, input_index));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

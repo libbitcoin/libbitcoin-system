@@ -25,12 +25,20 @@
 
 struct script_test
 {
-    std::string input, output, description;
+    std::string input;
+    std::string output;
+    std::string description;
 };
 
 typedef std::vector<script_test> script_test_list;
 
-script_test_list valid_scripts{{
+const script_test_list valid_bip65_scripts
+{{
+    { "", "DEPTH 0 EQUAL", "TODO" }
+}};
+
+const script_test_list valid_scripts
+{{
     {"", "DEPTH 0 EQUAL", "Test the test: we should have an empty stack after scriptSig evaluation"},
     {"  ", "DEPTH 0 EQUAL", "and multiple spaces should not change that."},
     {"   ", "DEPTH 0 EQUAL", ""},
@@ -467,7 +475,8 @@ script_test_list valid_scripts{{
     {"0x00", "SIZE 0 EQUAL", "Basic OP_0 execution"}
 }};
 
-script_test_list invalid_scripts{{
+const script_test_list invalid_scripts
+{{
     {"", "DEPTH", "Test the test: we should have an empty stack after scriptSig evaluation"},
     {"  ", "DEPTH", "and multiple spaces should not change that."},
     {"   ", "DEPTH", ""},
