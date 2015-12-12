@@ -206,42 +206,79 @@ bool parse(script_type& result_script, std::string format)
     return true;
 }
 
-bool run_script(const script_test& test, uint32_t context)
+bool run_script(const script_test& test, const transaction_type& tx,
+    uint32_t context)
 {
-    script_type input, output;
+    script_type input;
+    script_type output;
+
     if (!parse(input, test.input))
         return false;
+
     if (!parse(output, test.output))
         return false;
-    transaction_type tx;
 
-    ////log_debug() << test.input << " -> " << input;
-    ////log_debug() << test.output << " -> " << output;
+    ////std::cout << test.input << " -> " << input << std::endl;
+    ////std::cout << test.output << " -> " << output << std::endl;
 
-    // This does not consider bip65_enabled enabled, !bip16_enabled or both.
     return output.run(input, tx, 0, context);
 }
 
-void ignore_output(log_level,
-    const std::string&, const std::string&)
+void ignore_output(log_level, const std::string&, const std::string&)
 {
 }
 
 BOOST_AUTO_TEST_SUITE(script_tests)
 
+// Valid pay-to-script-hash scripts are valid regardless of context,
+// however after bip16 activation the scripts have additional constraints.
+BOOST_AUTO_TEST_CASE(script_json_bip16_invalid)
+{
+    transaction_type tx;
+    for (const auto& test: invalid_bip16_scripts)
+    {
+        BOOST_CHECK(!run_script(test, tx, script_context::bip16_enabled));
+    }
+}
+
+// Prior to bio65 activation op_nop2 always returns true, but after it
+// becomes a locktime comparer.
+BOOST_AUTO_TEST_CASE(script_json_bip65_invalid)
+{
+    transaction_type tx;
+    tx.locktime = 99;
+
+    transaction_input_type input;
+    input.sequence = 42;
+    tx.inputs.push_back(input);
+
+    for (const auto& test: invalid_bip65_scripts)
+    {
+        BOOST_CHECK(!run_script(test, tx, script_context::bip65_enabled));
+    }
+}
+
 BOOST_AUTO_TEST_CASE(script_json_bip65_valid)
 {
+    transaction_type tx;
+    tx.locktime = 500000042;
+
+    transaction_input_type input;
+    input.sequence = 42;
+    tx.inputs.push_back(input);
+
     for (const auto& test: valid_bip65_scripts)
     {
-        BOOST_CHECK(run_script(test, script_context::bip65_enabled));
+        BOOST_CHECK(run_script(test, tx, script_context::bip65_enabled));
     }
 }
 
 BOOST_AUTO_TEST_CASE(script_json_valid)
 {
+    transaction_type tx;
     for (const auto& test: valid_scripts)
     {
-        BOOST_CHECK(run_script(test, 0));
+        BOOST_CHECK(run_script(test, tx, 0));
     }
 }
 
@@ -249,10 +286,11 @@ BOOST_AUTO_TEST_CASE(script_json_invalid)
 {
     // Shut up!
     log_fatal().set_output_function(ignore_output);
+
+    transaction_type tx;
     for (const auto& test: invalid_scripts)
     {
-        // TODO: isolate the BIP16 scripts to an independent test case.
-        BOOST_CHECK(!run_script(test, script_context::bip16_enabled));
+        BOOST_CHECK(!run_script(test, tx, 0));
     }
 }
 
