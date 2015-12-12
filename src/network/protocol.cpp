@@ -181,7 +181,7 @@ void protocol::start_connecting(completion_handler handle_complete, bool relay)
     handle_complete(error::success);
 
     // Start outbound connection attempts at a max rate of 10/sec.
-    for (auto channel = 0; channel < max_outbound_; ++channel)
+    for (size_t channel = 0; channel < max_outbound_; ++channel)
     {
         new_connection(relay);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
