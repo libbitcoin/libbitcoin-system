@@ -139,6 +139,7 @@ enum class opcode : uint8_t
     checkmultisigverify = 175,
     op_nop1 = 176,
     op_nop2 = 177,
+    checklocktimeverify = op_nop2,
     op_nop3 = 178,
     op_nop4 = 179,
     op_nop5 = 180,
@@ -150,6 +151,13 @@ enum class opcode : uint8_t
     bad_operation,
     raw_data
 };
+
+typedef enum script_context_ : uint32_t
+{
+    bip16_enabled = 1 << 0,
+    bip65_enabled = 1 << 1,
+    all_enabled = bip16_enabled | bip65_enabled
+} script_context;
 
 struct BC_API operation
 {
@@ -186,7 +194,7 @@ public:
     BC_API void push_operation(const operation& oper);
     BC_API bool run(const script_type& input_script, 
         const transaction_type& parent_tx, uint32_t input_index,
-        bool bip16_enabled=true);
+        uint32_t flags);
 
     BC_API payment_type type() const;
 
@@ -212,12 +220,15 @@ private:
         bool_stack stack_;
     };
 
-    bool run(const transaction_type& parent_tx, uint32_t input_index);
+    bool run(const transaction_type& parent_tx, uint32_t input_index,
+        uint32_t flags);
     bool next_step(operation_stack::iterator it,
-        const transaction_type& parent_tx, uint32_t input_index);
+        const transaction_type& parent_tx, uint32_t input_index,
+        uint32_t flags);
     bool increment_op_counter(opcode code);
     bool run_operation(const operation& op,
-        const transaction_type& parent_tx, uint32_t input_index);
+        const transaction_type& parent_tx, uint32_t input_index,
+        uint32_t flags);
 
     bool op_negative_1();
     bool op_x(opcode code);
@@ -284,6 +295,9 @@ private:
         const transaction_type& parent_tx, uint32_t input_index);
     bool op_checkmultisigverify(
         const transaction_type& parent_tx, uint32_t input_index);
+    // activated in place of op_nop2 by BIP65
+    bool op_checklocktimeverify(const transaction_type& parent_tx,
+        uint32_t input_index);
 
     data_chunk pop_stack();
 
@@ -296,9 +310,9 @@ private:
 };
 
 BC_API opcode data_to_opcode(const data_chunk& data);
-BC_API std::string opcode_to_string(opcode code);
+BC_API std::string opcode_to_string(opcode code, uint32_t flags);
 BC_API opcode string_to_opcode(const std::string& code_repr);
-BC_API std::string pretty(const script_type& script);
+BC_API std::string pretty(const script_type& script, uint32_t flags);
 BC_API script_type unpretty(const std::string& pretty);
 BC_API std::istream& operator>>(
     std::istream& stream, script_type& script);

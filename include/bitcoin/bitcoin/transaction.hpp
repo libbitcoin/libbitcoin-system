@@ -51,6 +51,7 @@ BC_API std::string pretty(const transaction_type& transaction);
 // TODO: rename to is_previous_output_null (API consistency)
 BC_API bool previous_output_is_null(const output_point& previous_output);
 BC_API bool is_coinbase(const transaction_type& tx);
+BC_API bool is_final(const transaction_input_type& tx_input);
 BC_API bool is_final(const transaction_type& tx, size_t block_height, 
     uint32_t block_time);
 BC_API bool is_locktime_conflict(const transaction_type& tx);

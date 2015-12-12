@@ -43,6 +43,12 @@ static const data_chunk stack_true_value{1};
 
 constexpr size_t op_counter_limit = 201;
 
+// Test flags for a given context.
+bool is_context(uint32_t flags, script_context flag)
+{
+    return (flag & flags) != 0;
+}
+
 // Convert opcode to its actual numeric value.
 template<typename OpCode>
 auto base_value(OpCode code)
@@ -147,18 +153,18 @@ bool is_push_only(const operation_stack& operations)
 
 bool script_type::run(const script_type& input_script,
     const transaction_type& parent_tx, uint32_t input_index,
-    bool bip16_enabled)
+    uint32_t flags)
 {
     // Copy the script.
     auto copy_script = input_script;
 
     stack_.clear();
     copy_script.stack_.clear();
-    if (!copy_script.run(parent_tx, input_index))
+    if (!copy_script.run(parent_tx, input_index, flags))
         return false;
 
     stack_ = copy_script.stack_;
-    if (!run(parent_tx, input_index))
+    if (!run(parent_tx, input_index, flags))
         return false;
 
     if (stack_.empty())
@@ -168,7 +174,8 @@ bool script_type::run(const script_type& input_script,
         return false;
 
     // Additional validation for spend-to-script-hash transactions
-    if (bip16_enabled && type() == payment_type::script_hash)
+    if (is_context(flags, script_context::bip16_enabled) &&
+        type() == payment_type::script_hash)
     {
         if (!is_push_only(copy_script.operations()))
             return false;
@@ -191,7 +198,7 @@ bool script_type::run(const script_type& input_script,
         eval_script.stack_ = eval_stack;
 
         // Run script
-        if (!eval_script.run(parent_tx, input_index))
+        if (!eval_script.run(parent_tx, input_index, flags))
             return false;
 
         if (eval_script.stack_.empty())
@@ -237,7 +244,8 @@ bool opcode_is_disabled(opcode code)
     return true;
 }
 
-bool script_type::run(const transaction_type& parent_tx, uint32_t input_index)
+bool script_type::run(const transaction_type& parent_tx, uint32_t input_index,
+    uint32_t flags)
 {
     if (script_size(*this) > 10000)
         return false;
@@ -246,7 +254,7 @@ bool script_type::run(const transaction_type& parent_tx, uint32_t input_index)
     codehash_begin_ = operations_.begin();
     conditional_stack_.clear();
     for (auto it = operations_.begin(); it != operations_.end(); ++it)
-        if (!next_step(it, parent_tx, input_index))
+        if (!next_step(it, parent_tx, input_index, flags))
             return false;
     if (!conditional_stack_.closed())
         return false;
@@ -254,7 +262,7 @@ bool script_type::run(const transaction_type& parent_tx, uint32_t input_index)
 }
 
 bool script_type::next_step(operation_stack::iterator it,
-    const transaction_type& parent_tx, uint32_t input_index)
+    const transaction_type& parent_tx, uint32_t input_index, uint32_t flags)
 {
     const operation& op = *it;
     if (op.data.size() > 520)
@@ -290,7 +298,7 @@ bool script_type::next_step(operation_stack::iterator it,
     else if (op.code == opcode::codeseparator)
         codehash_begin_ = it;
     // opcodes above should assert inside run_operation
-    else if (!run_operation(op, parent_tx, input_index))
+    else if (!run_operation(op, parent_tx, input_index, flags))
         return false;
     //log_debug() << "--------------------";
     //log_debug() << "Run: " << opcode_to_string(op.code);
@@ -1183,8 +1191,39 @@ bool script_type::op_checkmultisigverify(
     return true;
 }
 
+bool is_locktime_type_match(uint32_t left, uint32_t right)
+{
+    return (left < locktime_threshold) == (right < locktime_threshold);
+}
+
+bool script_type::op_checklocktimeverify(const transaction_type& parent_tx,
+    uint32_t input_index)
+{
+    // BIP65: the nSequence field of the txin is 0xffffffff.
+    if (is_final(parent_tx.inputs[input_index]))
+        return false;
+
+    // BIP65: the stack is empty.
+    if (stack_.empty())
+        return false;
+
+    // BIP65: the top item on the stack is less than 0.
+    script_number number;
+    if (!number.set_data(pop_stack()) || number < 0)
+        return false;
+
+    // BIP65: the top stack item is greater than the tx's nLockTime.
+    const auto stack_locktime = static_cast<uint32_t>(number.int32());
+    if (stack_locktime > parent_tx.locktime)
+        return false;
+
+    // BIP65: the stack lock-time type differs from that of tx nLockTime.
+    return is_locktime_type_match(parent_tx.locktime, stack_locktime);
+}
+
 bool script_type::run_operation(const operation& op,
-    const transaction_type& parent_tx, uint32_t input_index)
+    const transaction_type& parent_tx, uint32_t input_index,
+    uint32_t flags)
 {
     switch (op.code)
     {
@@ -1447,8 +1486,13 @@ bool script_type::run_operation(const operation& op,
         case opcode::checkmultisigverify:
             return op_checkmultisigverify(parent_tx, input_index);
 
+        case opcode::checklocktimeverify:
+            return is_context(flags, script_context::bip65_enabled) ?
+                op_checklocktimeverify(parent_tx, input_index) : true;
+
         case opcode::op_nop1:
-        case opcode::op_nop2:
+        // op_nop2 has been consumed by checklocktimeverify
+        ////case opcode::op_nop2:
         case opcode::op_nop3:
         case opcode::op_nop4:
         case opcode::op_nop5:
@@ -1557,7 +1601,7 @@ payment_type script_type::type() const
     return payment_type::non_standard;
 }
 
-std::string opcode_to_string(opcode code)
+std::string opcode_to_string(opcode code, uint32_t flags)
 {
     switch (code)
     {
@@ -1767,8 +1811,11 @@ std::string opcode_to_string(opcode code)
             return "checkmultisigverify";
         case opcode::op_nop1:
             return "nop1";
-        case opcode::op_nop2:
-            return "nop2";
+        ////case opcode::op_nop2:
+        ////    return "nop2";
+        case opcode::checklocktimeverify:
+            return is_context(flags, script_context::bip65_enabled) ? 
+                "checklocktimeverify" : "nop2";
         case opcode::op_nop3:
             return "nop3";
         case opcode::op_nop4:
@@ -2005,6 +2052,8 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::op_nop1;
     else if (code_repr == "nop2")
         return opcode::op_nop2;
+    else if (code_repr == "checklocktimeverify")
+        return opcode::checklocktimeverify;
     else if (code_repr == "nop3")
         return opcode::op_nop3;
     else if (code_repr == "nop4")
@@ -2027,7 +2076,7 @@ opcode string_to_opcode(const std::string& code_repr)
     return opcode::bad_operation;
 }
 
-std::string pretty(const script_type& script)
+std::string pretty(const script_type& script, uint32_t flags)
 {
     const operation_stack& opers = script.operations();
     std::ostringstream ss;
@@ -2037,7 +2086,7 @@ std::string pretty(const script_type& script)
             ss << " ";
         const operation& op = *it;
         if (op.data.empty())
-            ss << opcode_to_string(op.code);
+            ss << opcode_to_string(op.code, flags);
         else
             ss << "[ " << encode_base16(op.data) << " ]";
     }
@@ -2101,7 +2150,8 @@ std::istream& operator>>(std::istream& stream, script_type& script)
 
 std::ostream& operator<<(std::ostream& stream, const script_type& script)
 {
-    stream << pretty(script);
+    // Since BIP65 context free script serialization is not possible.
+    stream << pretty(script, script_context::all_enabled);
     return stream;
 }
 
