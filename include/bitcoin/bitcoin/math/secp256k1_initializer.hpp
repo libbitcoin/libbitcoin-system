@@ -35,7 +35,7 @@ namespace libbitcoin {
 class BC_API secp256k1_initializer
 {
 private:
-    static void set_context(secp256k1_context_t** context, int flags);
+    static void set_context(secp256k1_context** context, int flags);
 
 protected:
     int flags_;
@@ -55,11 +55,11 @@ public:
     /**
      * Call to obtain the secp256k1 context, initialized on first call.
      */
-    secp256k1_context_t* context();
+    secp256k1_context* context();
 
 private:
     std::once_flag mutex_;
-    secp256k1_context_t* context_;
+    secp256k1_context* context_;
 };
 
 /**

@@ -75,32 +75,27 @@ BC_API bool verify_private_key(const ec_secret& private_key);
  * Create a deterministic EC signature using a private key.
  * This function will always produce a valid signature.
  */
-BC_API endorsement sign(ec_secret secret, hash_digest hash);
+BC_API endorsement sign(const ec_secret& secret, const hash_digest& hash);
 
 /**
  * Create an compact EC signature for use in message signing.
  * This function will always produce a valid signature.
  */
-BC_API compact_signature sign_compact(ec_secret secret, hash_digest hash);
+BC_API compact_signature sign_compact(const ec_secret& secret,
+    const hash_digest& hash);
 
 /**
  * Verifies an EC signature using a public key.
  */
-BC_API bool verify_signature(const ec_point& public_key, hash_digest hash,
-    const endorsement& signature);
+BC_API bool verify_signature(const ec_point& public_key,
+    const hash_digest& hash, const endorsement& signature);
 
 /**
  * Recovers the public key from a compact message signature.
  * @return a public point, or a zero-length chunk if something goes wrong.
  */
-BC_API ec_point recover_compact(compact_signature signature,
-    hash_digest hash, bool compressed=true);
-
-/**
- * Computes the sum a += G*b, where G is the curve's generator point.
- * @return false on failure (such as infinity or zero).
- */
-BC_API bool ec_add(ec_point& a, const ec_secret& b);
+BC_API ec_point recover_compact(const compact_signature& signature,
+    const hash_digest& hash, bool compressed=true);
 
 /**
  * Computes the sum a = (a + b) % n, where n is the curve order.
@@ -109,16 +104,22 @@ BC_API bool ec_add(ec_point& a, const ec_secret& b);
 BC_API bool ec_add(ec_secret& a, const ec_secret& b);
 
 /**
- * Computes the product a *= b.
+ * Computes the sum a += G*b, where G is the curve's generator point.
  * @return false on failure (such as infinity or zero).
  */
-BC_API bool ec_multiply(ec_point& a, const ec_secret& b);
+BC_API bool ec_add(ec_point& a, const ec_secret& b);
 
 /**
  * Computes the product a = (a * b) % n, where n is the curve order.
  * @return false on failure (such as a zero result).
  */
 BC_API bool ec_multiply(ec_secret& a, const ec_secret& b);
+
+/**
+ * Computes the product a *= b.
+ * @return false on failure (such as infinity or zero).
+ */
+BC_API bool ec_multiply(ec_point& a, const ec_secret& b);
 
 ///////////////////////////////////////////////////////////////////////////////
 // DEPRECATED (now redundant with secp256k1 implementation)

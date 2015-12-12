@@ -29,7 +29,7 @@ secp256k1_signing signing;
 secp256k1_verification verification;
 
 // Static helper for use with std::call_once.
-void secp256k1_initializer::set_context(secp256k1_context_t** context,
+void secp256k1_initializer::set_context(secp256k1_context** context,
     int flags)
 {
     *context = secp256k1_context_create(flags);
@@ -49,7 +49,7 @@ secp256k1_initializer::~secp256k1_initializer()
 }
 
 // Get the curve context and initialize on first use.
-secp256k1_context_t* secp256k1_initializer::context()
+secp256k1_context* secp256k1_initializer::context()
 {
     std::call_once(mutex_, set_context, &context_, flags_);
     return context_;

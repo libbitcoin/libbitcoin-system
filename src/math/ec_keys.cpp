@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <mutex>
 #include <secp256k1.h>
+#include <secp256k1_recovery.h>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/secp256k1_initializer.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -29,33 +30,34 @@
 
 namespace libbitcoin {
 
-ec_point secret_to_public_key(const ec_secret& secret,
-    bool compressed)
+BC_CONSTFUNC int to_flags(bool compressed)
 {
-    const auto signing_context = signing.context();
-    size_t public_key_size = ec_uncompressed_size;
-    if (compressed)
-        public_key_size = ec_compressed_size;
+    return compressed ? SECP256K1_EC_COMPRESSED : SECP256K1_EC_UNCOMPRESSED;
+}
 
-    ec_point out(public_key_size);
-    int out_size;
+ec_point secret_to_public_key(const ec_secret& secret, bool compressed)
+{
+    secp256k1_pubkey key;
+    const auto context = signing.context();
 
-    if (secp256k1_ec_pubkey_create(signing_context, out.data(), &out_size,
-        secret.data(), compressed) == 1)
-    {
-        BITCOIN_ASSERT_MSG(public_key_size == static_cast<size_t>(out_size),
-            "secp256k1_ec_pubkey_create returned invalid size");
-        return out;
-    }
+    if (secp256k1_ec_pubkey_create(context, &key, secret.data()) != 1)
+        return ec_point();
 
-    return ec_point();
+    const auto flags = to_flags(compressed);
+    const auto size = compressed ? ec_compressed_size : ec_uncompressed_size;
+    auto out_size = size;
+    ec_point out(size);
+
+    secp256k1_ec_pubkey_serialize(context, out.data(), &out_size, &key, flags);
+    return out_size == size ? out : ec_point();
 }
 
 bool verify_public_key(const ec_point& public_key)
 {
-    const auto verification_context = verification.context();
-    return secp256k1_ec_pubkey_verify(verification_context, public_key.data(),
-        static_cast<uint32_t>(public_key.size())) == 1;
+    secp256k1_pubkey key;
+    const auto context = verification.context();
+    return (secp256k1_ec_pubkey_parse(context, &key, public_key.data(),
+        public_key.size()) == 1);
 }
 
 bool verify_public_key_fast(const ec_point& public_key)
@@ -71,108 +73,139 @@ bool verify_public_key_fast(const ec_point& public_key)
 
 bool verify_private_key(const ec_secret& private_key)
 {
-    const auto verification_context = verification.context();
-    return secp256k1_ec_seckey_verify(verification_context, private_key.data())
-        == 1;
+    const auto context = verification.context();
+    return secp256k1_ec_seckey_verify(context, private_key.data()) == 1;
 }
 
-endorsement sign(ec_secret secret, hash_digest hash)
+endorsement sign(const ec_secret& secret, const hash_digest& hash)
 {
-    const auto signing_context = signing.context();
-    int out_size = max_endorsement_size;
-    endorsement signature(out_size);
+    secp256k1_ecdsa_signature signature;
+    const auto context = signing.context();
 
-    if (secp256k1_ecdsa_sign(signing_context, hash.data(), signature.data(),
-        &out_size, secret.data(), secp256k1_nonce_function_rfc6979, nullptr)
-        != 1)
-    {
-        BITCOIN_ASSERT_MSG(false, "secp256k1_ecdsa_sign failed");
-        out_size = 0;
-    };
+    if (secp256k1_ecdsa_sign(context, &signature, hash.data(), secret.data(),
+        secp256k1_nonce_function_rfc6979, nullptr) != 1)
+        return endorsement();
 
-    signature.resize(out_size);
-    return signature;
-}
+    auto size = max_endorsement_size;
+    endorsement out(size);
+    if (secp256k1_ecdsa_signature_serialize_der(context, out.data(), &size,
+        &signature) != 1)
+        return endorsement();
 
-compact_signature sign_compact(ec_secret secret, hash_digest hash)
-{
-    const auto signing_context = signing.context();
-    compact_signature out;
-
-    if (secp256k1_ecdsa_sign_compact(signing_context, hash.data(),
-        out.signature.data(), secret.data(), secp256k1_nonce_function_rfc6979,
-        nullptr, &out.recid) != 1)
-    {
-        BITCOIN_ASSERT_MSG(false, "secp256k1_ecdsa_sign_compact failed");
-        return compact_signature();
-    }
-
+    out.resize(size);
     return out;
 }
 
-bool verify_signature(const ec_point& public_key, hash_digest hash,
+compact_signature sign_compact(const ec_secret& secret,
+    const hash_digest& hash)
+{
+    secp256k1_ecdsa_recoverable_signature signature;
+    const auto context = signing.context();
+
+    if (secp256k1_ecdsa_sign_recoverable(context, &signature, hash.data(),
+        secret.data(), secp256k1_nonce_function_rfc6979, nullptr) != 1)
+        return compact_signature();
+
+    compact_signature out;
+    secp256k1_ecdsa_recoverable_signature_serialize_compact(context,
+        out.signature.data(), &out.recid, &signature);
+    return out;
+}
+
+// secp256k1_ecdsa_verify rejects non-normalized signatures, so we normalize.
+bool verify_signature(const ec_point& public_key, const hash_digest& hash,
     const endorsement& signature)
 {
-    auto signing_context = verification.context();
-    auto result = secp256k1_ecdsa_verify(signing_context, hash.data(),
-        signature.data(), 
-        static_cast<uint32_t>(signature.size()), public_key.data(),
-        static_cast<uint32_t>(public_key.size()));
+    secp256k1_ecdsa_signature original;
+    const auto context = verification.context();
 
-    BITCOIN_ASSERT_MSG(result >= 0, "secp256k1_ecdsa_verify failed");
+    if (secp256k1_ecdsa_signature_parse_der(context, &original, signature.data(),
+        signature.size()) != 1)
+        return false;
 
-    return result == 1;
+    secp256k1_pubkey key;
+    secp256k1_ecdsa_signature normal;
+    secp256k1_ecdsa_signature_normalize(context, &normal, &original);
+    return
+        secp256k1_ec_pubkey_parse(context, &key, public_key.data(),
+            public_key.size()) == 1 &&
+        secp256k1_ecdsa_verify(context, &normal, hash.data(), &key) == 1;
 }
 
-ec_point recover_compact(compact_signature signature, hash_digest hash,
-    bool compressed)
+ec_point recover_compact(const compact_signature& signature,
+    const hash_digest& hash, bool compressed)
 {
-    const auto verification_context = verification.context();
-    size_t public_key_size = ec_uncompressed_size;
-    if (compressed)
-        public_key_size = ec_compressed_size;
+    secp256k1_pubkey key;
+    secp256k1_ecdsa_recoverable_signature sign;
+    const auto context = verification.context();
 
-    ec_point out(public_key_size);
-    int out_size;
+    if (secp256k1_ecdsa_recoverable_signature_parse_compact(context, &sign,
+        signature.signature.data(), signature.recid) != 1)
+        return ec_point();
 
-    if (secp256k1_ecdsa_recover_compact(verification_context, hash.data(),
-        signature.signature.data(), out.data(), &out_size, compressed,
-        signature.recid) == 1)
-    {
-        BITCOIN_ASSERT_MSG(public_key_size == static_cast<size_t>(out_size),
-            "secp256k1_ecdsa_recover_compact returned invalid size");
-        return out;
-    }
+    if (secp256k1_ecdsa_recover(context, &key, &sign, hash.data()) != 1)
+        return ec_point();
 
-    return ec_point();
-}
-
-bool ec_add(ec_point& a, const ec_secret& b)
-{
-    const auto verification_context = verification.context();
-    return secp256k1_ec_pubkey_tweak_add(verification_context, a.data(),
-        static_cast<uint32_t>(a.size()), b.data()) == 1;
+    const auto flags = to_flags(compressed);
+    const auto size = compressed ? ec_compressed_size : ec_uncompressed_size;
+    auto out_size = size;
+    ec_point out(size);
+    secp256k1_ec_pubkey_serialize(context, out.data(), &out_size, &key, flags);
+    return out_size == size ? out : ec_point();
 }
 
 bool ec_add(ec_secret& a, const ec_secret& b)
 {
-    const auto verification_context = verification.context();
-    return secp256k1_ec_privkey_tweak_add(verification_context, a.data(),
-        b.data()) == 1;
+    const auto context = verification.context();
+    return secp256k1_ec_privkey_tweak_add(context, a.data(), b.data()) == 1;
 }
 
-bool ec_multiply(ec_point& a, const ec_secret& b)
+bool ec_add(ec_point& a, const ec_secret& b)
 {
-    const auto verification_context = verification.context();
-    return secp256k1_ec_pubkey_tweak_mul(verification_context, a.data(),
-        static_cast<uint32_t>(a.size()), b.data()) == 1;
+    secp256k1_pubkey point;
+    const auto context = verification.context();
+
+    if (secp256k1_ec_pubkey_parse(context, &point, a.data(), a.size()) != 1 ||
+        secp256k1_ec_pubkey_tweak_add(context, &point, b.data()) != 1)
+        return false;
+
+    const auto compressed = a.size() == ec_compressed_size;
+    const auto size = compressed ? ec_compressed_size : ec_uncompressed_size;
+
+    if (size != a.size())
+        return false;
+
+    auto out_size = size;
+    const auto flags = to_flags(compressed);
+    secp256k1_ec_pubkey_serialize(context, a.data(), &out_size, &point, flags);
+    return out_size == size;
 }
 
 bool ec_multiply(ec_secret& a, const ec_secret& b)
 {
-    const auto verification_context = verification.context();
-    return secp256k1_ec_privkey_tweak_mul(verification_context, a.data(),
-        b.data()) == 1;
+    const auto context = verification.context();
+    return secp256k1_ec_privkey_tweak_mul(context, a.data(), b.data()) == 1;
+}
+
+bool ec_multiply(ec_point& a, const ec_secret& b)
+{
+    secp256k1_pubkey point;
+    const auto context = verification.context();
+
+    if (secp256k1_ec_pubkey_parse(context, &point, a.data(), a.size()) != 1 ||
+        secp256k1_ec_pubkey_tweak_mul(context, &point, b.data()) != 1)
+        return false;
+
+    const auto compressed = a.size() == ec_compressed_size;
+    const auto size = compressed ? ec_compressed_size : ec_uncompressed_size;
+
+    if (size != a.size())
+        return false;
+
+    auto out_size = size;
+    const auto flags = to_flags(compressed);
+    secp256k1_ec_pubkey_serialize(context, a.data(), &out_size, &point, flags);
+    return out_size == size;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
