@@ -173,7 +173,7 @@ bool script_type::run(const script_type& input_script,
     if (!cast_to_bool(stack_.back()))
         return false;
 
-    // Additional validation for spend-to-script-hash transactions
+    // Additional validation for pay-to-script-hash transactions
     if (is_context(flags, script_context::bip16_enabled) &&
         type() == payment_type::script_hash)
     {
@@ -1191,14 +1191,18 @@ bool script_type::op_checkmultisigverify(
     return true;
 }
 
-bool is_locktime_type_match(uint32_t left, uint32_t right)
+bool is_locktime_type_match(int64_t left, int64_t right)
 {
-    return (left < locktime_threshold) == (right < locktime_threshold);
+    const auto threshold = static_cast<int64_t>(locktime_threshold);
+    return (left < threshold) == (right < threshold);
 }
 
 bool script_type::op_checklocktimeverify(const transaction_type& parent_tx,
     uint32_t input_index)
 {
+    if (input_index >= parent_tx.inputs.size())
+        return false;
+
     // BIP65: the nSequence field of the txin is 0xffffffff.
     if (is_final(parent_tx.inputs[input_index]))
         return false;
@@ -1207,18 +1211,24 @@ bool script_type::op_checklocktimeverify(const transaction_type& parent_tx,
     if (stack_.empty())
         return false;
 
-    // BIP65: the top item on the stack is less than 0.
+    // BIP65: We extend the (signed) CLTV script number range to 5 bytes in
+    // order to reach the domain of the (unsigned) tx.locktime field.
     script_number number;
-    if (!number.set_data(pop_stack()) || number < 0)
+    if (!number.set_data(pop_stack(), cltv_max_script_number_size))
         return false;
 
+    // BIP65: the top item on the stack is less than 0.
+    if (number < 0)
+        return false;
+    
     // BIP65: the top stack item is greater than the tx's nLockTime.
-    const auto stack_locktime = static_cast<uint32_t>(number.int32());
-    if (stack_locktime > parent_tx.locktime)
+    const auto stack = number.int64();
+    const auto transaction = static_cast<int64_t>(parent_tx.locktime);
+    if (stack > transaction)
         return false;
 
     // BIP65: the stack lock-time type differs from that of tx nLockTime.
-    return is_locktime_type_match(parent_tx.locktime, stack_locktime);
+    return is_locktime_type_match(stack, transaction);
 }
 
 bool script_type::run_operation(const operation& op,

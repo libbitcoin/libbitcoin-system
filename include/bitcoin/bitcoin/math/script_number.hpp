@@ -26,8 +26,9 @@
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
-
+    
 BC_CONSTEXPR size_t max_script_number_size = 4;
+BC_CONSTEXPR size_t cltv_max_script_number_size = 5;
 
 /**
  * Numeric opcodes (OP_1ADD, etc) are restricted to operating on
@@ -47,10 +48,12 @@ public:
 
     // Undefined state. set_data() must be called after.
     BC_API script_number();
-    BC_API bool set_data(const data_chunk& data);
+    BC_API bool set_data(const data_chunk& data,
+        uint8_t max_size=max_script_number_size);
 
     BC_API data_chunk data() const;
     BC_API int32_t int32() const;
+    BC_API int64_t int64() const;
 
     // Arithmetic with a number.
     BC_API script_number operator+(const int64_t value) const;

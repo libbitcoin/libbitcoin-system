@@ -33,7 +33,7 @@ data_chunk script_number_serialize(const int64_t value)
     const bool is_negative = value < 0;
     uint64_t abs_value = is_negative ? -value : value;
 
-    while(abs_value)
+    while (abs_value)
     {
         result.push_back(abs_value & 0xff);
         abs_value >>= 8;
@@ -60,7 +60,6 @@ data_chunk script_number_serialize(const int64_t value)
 
 int64_t script_number_deserialize(const data_chunk& data)
 {
-    BITCOIN_ASSERT(data.size() <= max_script_number_size);
     if (data.empty())
         return 0;
 
@@ -85,9 +84,9 @@ script_number::script_number()
     // You must call set_data() after.
 }
 
-bool script_number::set_data(const data_chunk& data)
+bool script_number::set_data(const data_chunk& data, uint8_t max_size)
 {
-    if (data.size() > max_script_number_size)
+    if (data.size() > max_size)
         return false;
 
     value_ = script_number_deserialize(data);
@@ -106,6 +105,11 @@ int32_t script_number::int32() const
         return min_int32;
 
     return static_cast<int32_t>(value_);
+}
+
+int64_t script_number::int64() const
+{
+    return value_;
 }
 
 bool script_number::operator==(const int64_t value) const
