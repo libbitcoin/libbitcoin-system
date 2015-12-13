@@ -332,6 +332,9 @@
     <ClCompile Include="..\..\..\..\src\utility\sequencer.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\external\lax_der_parsing.c">
+      <Filter>src\math\external</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -609,6 +612,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\sequencer.hpp">
       <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\math\external\lax_der_parsing.h">
+      <Filter>src\math\external</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
