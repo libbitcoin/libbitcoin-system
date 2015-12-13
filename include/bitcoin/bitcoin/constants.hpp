@@ -93,12 +93,14 @@ BC_CONSTFUNC uint64_t max_money()
     BC_CONSTEXPR uint32_t bip16_switchover_timestamp = 1333238400;
     BC_CONSTEXPR uint32_t bip16_switchover_height = 514;
     BC_CONSTEXPR uint32_t bip65_switchover_height = 0;
+    BC_CONSTEXPR uint32_t bip66_switchover_height = 0;
     BC_CONSTEXPR uint16_t protocol_port = 18333;
 #else
     // [April 1 2012]
     BC_CONSTEXPR uint32_t bip16_switchover_timestamp = 1333238400;
     BC_CONSTEXPR uint32_t bip16_switchover_height = 173805;
     BC_CONSTEXPR uint32_t bip65_switchover_height = 0;
+    BC_CONSTEXPR uint32_t bip66_switchover_height = 0;
     BC_CONSTEXPR uint16_t protocol_port = 8333;
 #endif
 

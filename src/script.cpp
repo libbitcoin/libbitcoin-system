@@ -952,7 +952,7 @@ inline hash_digest one_hash()
 
 hash_digest script_type::generate_signature_hash(
     transaction_type parent_tx, uint32_t input_index,
-    const script_type& script_code, uint32_t hash_type)
+    const script_type& script_code, uint8_t hash_type)
 {
     // This is NOT considered an error result and callers should not test
     // for one_hash. This is a bitcoind bug we perpetuate.
@@ -1010,102 +1010,119 @@ hash_digest script_type::generate_signature_hash(
 }
 
 // This uses the simpler and more secure deterministic nonce technique.
-bool create_signature(data_chunk& signature, const ec_secret& private_key,
+bool create_endorsement(endorsement& signature, const ec_secret& private_key,
     const script_type& prevout_script, const transaction_type& new_tx,
-    uint32_t input_index, uint32_t hash_type)
+    uint32_t input_index, uint8_t hash_type)
 {
     // This always produces a valid signature hash.
-    const auto sighash =
-        script_type::generate_signature_hash(
-            new_tx, input_index, prevout_script, hash_type);
+    const auto sighash = script_type::generate_signature_hash(
+        new_tx, input_index, prevout_script, hash_type);
 
-    // Create the EC signature.
+    // Create the DER signature.
     signature = sign(private_key, sighash);
+    if (signature.empty())
+        return false;
 
-    // Add the sighash type to the end of the signature.
+    // Add the sighash type to the end of the signature to make an endorsement.
     signature.push_back(hash_type);
     return true;
 }
 
 // This uses the legacy non-deterministic nonce technique.
-bool create_signature(data_chunk& signature, const ec_secret& private_key,
+bool create_endorsement(endorsement& signature, const ec_secret& private_key,
     const script_type& prevout_script, const transaction_type& new_tx,
-    uint32_t input_index, uint32_t hash_type, const ec_secret& nonce)
+    uint32_t input_index, uint8_t hash_type, const ec_secret& nonce)
 {
     // This always produces a valid signature hash.
-    const auto sighash =
-        script_type::generate_signature_hash(
-            new_tx, input_index, prevout_script, hash_type);
+    const auto sighash = script_type::generate_signature_hash(
+        new_tx, input_index, prevout_script, hash_type);
 
-    // Create the EC signature.
+    // Create the DER signature.
     signature = sign(private_key, sighash, nonce);
     if (signature.empty())
         return false;
 
-    // Add the sighash type to the end of the signature.
+    // Add the sighash type to the end of the signature to make an endorsement.
     signature.push_back(hash_type);
     return true;
 }
 
-bool check_signature(data_slice signature, const ec_point& public_key,
-    const script_type& script_code, const transaction_type& parent_tx,
-    uint32_t input_index)
+bool check_ec_signature(const ec_signature& signature, uint8_t hash_type,
+    const ec_point& public_key, const script_type& script_code,
+    const transaction_type& parent_tx, uint32_t input_index)
 {
     if (public_key.empty())
         return false;
-    if (signature.empty())
-        return false;
-
-    // Remove the sighash type from the end of the signature.
-    data_chunk ec_signature = to_data_chunk(signature);
-    const auto hash_type = ec_signature.back();
-    ec_signature.pop_back();
 
     // This always produces a valid signature hash.
-    const auto sighash =
-        script_type::generate_signature_hash(
-            parent_tx, input_index, script_code, hash_type);
+    const auto hash = script_type::generate_signature_hash(parent_tx,
+        input_index, script_code, hash_type);
 
     // Validate the EC signature.
-    return verify_signature(public_key, sighash, ec_signature);
+    return verify_signature(public_key, hash, signature);
 }
 
-bool script_type::op_checksig(
-    const transaction_type& parent_tx, uint32_t input_index)
+bool script_type::op_checksig(const transaction_type& parent_tx,
+    uint32_t input_index, bool strict)
 {
-    if (op_checksigverify(parent_tx, input_index))
-        stack_.push_back(stack_true_value);
-    else
-        stack_.push_back(stack_false_value);
+    switch (op_checksigverify(parent_tx, input_index, strict))
+    {
+        case result::valid:
+            stack_.push_back(stack_true_value);
+            break;
+        case result::invalid:
+            stack_.push_back(stack_false_value);
+            break;
+        case result::lax_encoding:
+            return false;
+    }
+
     return true;
 }
 
-bool script_type::op_checksigverify(
-    const transaction_type& parent_tx, uint32_t input_index)
+script_type::result script_type::op_checksigverify(
+    const transaction_type& parent_tx, uint32_t input_index, bool strict)
 {
     if (stack_.size() < 2)
-        return false;
-    data_chunk pubkey = pop_stack(), signature = pop_stack();
+        return result::invalid;
+
+    const auto pubkey = pop_stack();
+    auto endorsement = pop_stack();
+    const auto hash_type = endorsement.back();
+    auto& distinguished = endorsement;
+    distinguished.pop_back();
+
+    ec_signature signature;
+    if (strict && parse_signature(signature, distinguished, true))
+        return result::lax_encoding;
 
     script_type script_code;
     for (auto it = codehash_begin_; it != operations_.end(); ++it)
-    {
-        const operation op = *it;
-        if (op.data == signature || op.code == opcode::codeseparator)
-            continue;
-        script_code.push_operation(op);
-    }
-    return check_signature(signature, pubkey, script_code, parent_tx,
-        input_index);
+        if (it->data != distinguished && it->code != opcode::codeseparator)
+            script_code.push_operation(*it);
+
+    if (!strict && parse_signature(signature, distinguished, false))
+        return result::invalid;
+
+    return check_ec_signature(signature, hash_type, pubkey, script_code,
+        parent_tx, input_index) ? result::valid : result::invalid;
 }
 
-bool script_type::op_checkmultisig(
-    const transaction_type& parent_tx, uint32_t input_index)
+bool script_type::op_checkmultisig(const transaction_type& parent_tx,
+    uint32_t input_index, bool strict)
 {
-    if (op_checkmultisigverify(parent_tx, input_index))
-        stack_.push_back(stack_true_value);
-    else
-        stack_.push_back(stack_false_value);
+    switch (op_checkmultisigverify(parent_tx, input_index, strict))
+    {
+        case result::valid:
+            stack_.push_back(stack_true_value);
+            break;
+        case result::invalid:
+            stack_.push_back(stack_false_value);
+            break;
+        case result::lax_encoding:
+            return false;
+    }
+
     return true;
 }
 
@@ -1113,82 +1130,89 @@ bool script_type::read_section(data_stack& section, size_t count)
 {
     if (stack_.size() < count)
         return false;
+
     for (size_t i = 0; i < count; ++i)
         section.push_back(pop_stack());
+
     return true;
 }
-bool script_type::op_checkmultisigverify(
-    const transaction_type& parent_tx, uint32_t input_index)
+
+script_type::result script_type::op_checkmultisigverify(
+    const transaction_type& parent_tx, uint32_t input_index, bool strict)
 {
     int32_t pubkeys_count;
     if (!read_value(stack_, pubkeys_count))
-        return false;
+        return result::invalid;
 
     if (pubkeys_count < 0 || pubkeys_count > 20)
-        return false;
+        return result::invalid;
     op_counter_ += pubkeys_count;
     if (op_counter_ > op_counter_limit)
-        return false;
+        return result::invalid;
 
     data_stack pubkeys;
     if (!read_section(pubkeys, pubkeys_count))
-        return false;
+        return result::invalid;
 
     int32_t sigs_count;
     if (!read_value(stack_, sigs_count))
-        return false;
+        return result::invalid;
     if (sigs_count < 0 || sigs_count > pubkeys_count)
-        return false;
+        return result::invalid;
 
-    data_stack signatures;
-    if (!read_section(signatures, sigs_count))
-        return false;
+    data_stack endorsements;
+    if (!read_section(endorsements, sigs_count))
+        return result::invalid;
 
     // Due to a bug in bitcoind, we need to read an extra null value
     // which we discard after.
     if (stack_.empty())
-        return false;
+        return result::invalid;
     stack_.pop_back();
 
-    auto is_signature =
-        [&signatures](const data_chunk& data)
-        {
-            return std::find(signatures.begin(), signatures.end(),
-                data) != signatures.end();
-        };
+    auto is_endorsement = [&endorsements](const data_chunk& data)
+    {
+        return std::find(endorsements.begin(), endorsements.end(), data) !=
+            endorsements.end();
+    };
+
     script_type script_code;
     for (auto it = codehash_begin_; it != operations_.end(); ++it)
-    {
-        const operation op = *it;
-        if (op.code == opcode::codeseparator)
-            continue;
-        if (is_signature(op.data))
-            continue;
-        script_code.push_operation(op);
-    }
+        if (it->code != opcode::codeseparator && !is_endorsement(it->data))
+            script_code.push_operation(*it);
 
     // When checking the signatures against our public keys,
     // we always advance forwards until we either run out of pubkeys (fail)
     // or finish with our signatures (pass)
-    auto pubkey_current = pubkeys.begin();
-    for (const data_chunk& signature: signatures)
+    auto pubkey = pubkeys.begin();
+    for (const auto& endorsement: endorsements)
     {
-        for (auto pubkey_iter = pubkey_current; ;)
+        const auto hash_type = endorsement.back();
+        auto distinguished = endorsement;
+        distinguished.pop_back();
+
+        ec_signature signature;
+        if (strict && parse_signature(signature, distinguished, true))
+            return result::lax_encoding;
+
+        for (auto it = pubkey;;)
         {
-            if (check_signature(signature, *pubkey_iter,
-                script_code, parent_tx, input_index))
+            if ((strict || parse_signature(signature, distinguished, false)) &&
+                check_ec_signature(signature, hash_type, *it, script_code,
+                    parent_tx, input_index))
             {
-                pubkey_current = pubkey_iter;
+                pubkey = it;
                 break;
             }
+
             // pubkeys are only exhausted when script failed
-            ++pubkey_iter;
-            if (pubkey_iter == pubkeys.end())
-                return false;
+            ++it;
+            if (it == pubkeys.end())
+                return result::invalid;
         }
     }
 
-    return true;
+    return result::valid;
 }
 
 bool is_locktime_type_match(int64_t left, int64_t right)
@@ -1485,16 +1509,22 @@ bool script_type::run_operation(const operation& op,
             return true;
 
         case opcode::checksig:
-            return op_checksig(parent_tx, input_index);
+            return op_checksig(parent_tx, input_index, 
+                is_context(flags, script_context::bip66_enabled));
 
         case opcode::checksigverify:
-            return op_checksigverify(parent_tx, input_index);
+            return op_checksigverify(parent_tx, input_index,
+                is_context(flags, script_context::bip66_enabled)) ==
+                    result::valid;
 
         case opcode::checkmultisig:
-            return op_checkmultisig(parent_tx, input_index);
+            return op_checkmultisig(parent_tx, input_index,
+                is_context(flags, script_context::bip66_enabled));
 
         case opcode::checkmultisigverify:
-            return op_checkmultisigverify(parent_tx, input_index);
+            return op_checkmultisigverify(parent_tx, input_index,
+                is_context(flags, script_context::bip66_enabled)) ==
+                    result::valid;
 
         case opcode::checklocktimeverify:
             return is_context(flags, script_context::bip65_enabled) ?
