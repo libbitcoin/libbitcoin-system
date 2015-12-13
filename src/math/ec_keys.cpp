@@ -27,6 +27,7 @@
 #include <bitcoin/bitcoin/math/secp256k1_initializer.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
+#include "external\lax_der_parsing.h"
 
 namespace libbitcoin {
 
@@ -77,20 +78,20 @@ bool verify_private_key(const ec_secret& private_key)
     return secp256k1_ec_seckey_verify(context, private_key.data()) == 1;
 }
 
-endorsement sign(const ec_secret& secret, const hash_digest& hash)
+der_signature sign(const ec_secret& secret, const hash_digest& hash)
 {
     secp256k1_ecdsa_signature signature;
     const auto context = signing.context();
 
     if (secp256k1_ecdsa_sign(context, &signature, hash.data(), secret.data(),
         secp256k1_nonce_function_rfc6979, nullptr) != 1)
-        return endorsement();
+        return der_signature();
 
-    auto size = max_endorsement_size;
-    endorsement out(size);
+    auto size = max_der_signature_size;
+    der_signature out(size);
     if (secp256k1_ecdsa_signature_serialize_der(context, out.data(), &size,
         &signature) != 1)
-        return endorsement();
+        return der_signature();
 
     out.resize(size);
     return out;
@@ -112,24 +113,48 @@ compact_signature sign_compact(const ec_secret& secret,
     return out;
 }
 
-// secp256k1_ecdsa_verify rejects non-normalized signatures, so we normalize.
-bool verify_signature(const ec_point& public_key, const hash_digest& hash,
-    const endorsement& signature)
+bool parse_signature(ec_signature& out_signature,
+    const der_signature& signature, bool strict)
 {
-    secp256k1_ecdsa_signature original;
+    bool valid;
+    secp256k1_ecdsa_signature parsed;
     const auto context = verification.context();
 
-    if (secp256k1_ecdsa_signature_parse_der(context, &original, signature.data(),
-        signature.size()) != 1)
-        return false;
+    if (strict)
+        valid = secp256k1_ecdsa_signature_parse_der(context, &parsed,
+            signature.data(), signature.size()) == 1;
+    else
+        valid = ecdsa_signature_parse_der_lax(context, &parsed,
+            signature.data(), signature.size()) == 1;
+
+    if (valid)
+        std::copy(std::begin(parsed.data), std::end(parsed.data),
+            out_signature.begin());
+
+    return valid;
+}
+
+bool verify_signature(const ec_point& public_key, const hash_digest& hash,
+    const ec_signature& signature)
+{
+    const auto context = verification.context();
 
     secp256k1_pubkey key;
     secp256k1_ecdsa_signature normal;
-    secp256k1_ecdsa_signature_normalize(context, &normal, &original);
-    return
-        secp256k1_ec_pubkey_parse(context, &key, public_key.data(),
-            public_key.size()) == 1 &&
-        secp256k1_ecdsa_verify(context, &normal, hash.data(), &key) == 1;
+    secp256k1_ecdsa_signature parsed;
+
+    // We copy to avoid exposing external types.
+    std::copy(signature.begin(), signature.end(), std::begin(parsed.data));
+
+    // secp256k1_ecdsa_verify rejects non-normalized (low-s) signatures, but
+    // bitcoin does not have such a limitation, so we always normalize.
+    secp256k1_ecdsa_signature_normalize(context, &normal, &parsed);
+
+    if (secp256k1_ec_pubkey_parse(context, &key, public_key.data(),
+        public_key.size()) != 1)
+        return false;
+
+    return secp256k1_ecdsa_verify(context, &normal, hash.data(), &key) == 1;
 }
 
 ec_point recover_compact(const compact_signature& signature,
@@ -249,7 +274,7 @@ ec_secret create_nonce(ec_secret secret, hash_digest hash, uint32_t index)
 ///////////////////////////////////////////////////////////////////////////////
 // DEPRECATED (deterministic signatures are safer)
 ///////////////////////////////////////////////////////////////////////////////
-endorsement sign(ec_secret secret, hash_digest hash, ec_secret /* nonce */)
+der_signature sign(ec_secret secret, hash_digest hash, ec_secret /* nonce */)
 {
     // THE CALLER'S NONCE IS IGNORED.
     return sign(secret, hash);

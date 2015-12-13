@@ -37,15 +37,22 @@ BC_CONSTEXPR size_t ec_compressed_size = 33;
 BC_CONSTEXPR size_t ec_uncompressed_size = 65;
 typedef data_chunk ec_point;
 
-// Full ecdsa signatures for input endorsement:
-BC_CONSTEXPR size_t max_endorsement_size = 72;
+// DER encoded signature with sighash byte for input endorsement:
+BC_CONSTEXPR size_t max_endorsement_size = 73;
 typedef data_chunk endorsement;
 
-// Compact ecdsa signature for message signing:
-BC_CONSTEXPR size_t compact_signature_size = 64;
-struct compact_signature
+// DER encoded signature.
+BC_CONSTEXPR size_t max_der_signature_size = 72;
+typedef data_chunk der_signature;
+
+// Parsed ecdsa signature:
+BC_CONSTEXPR size_t ec_signature_size = 64;
+typedef byte_array<ec_signature_size> ec_signature;
+
+// Recoverable ecdsa signature for message signing:
+struct BC_API compact_signature
 {
-    byte_array<compact_signature_size> signature;
+    ec_signature signature;
     int recid;
 };
 
@@ -72,23 +79,30 @@ BC_API bool verify_public_key_fast(const ec_point& public_key);
 BC_API bool verify_private_key(const ec_secret& private_key);
 
 /**
- * Create a deterministic EC signature using a private key.
+ * Creates a deterministic and strict DER signature using a private key.
  * This function will always produce a valid signature.
  */
-BC_API endorsement sign(const ec_secret& secret, const hash_digest& hash);
+BC_API der_signature sign(const ec_secret& secret, const hash_digest& hash);
 
 /**
- * Create an compact EC signature for use in message signing.
+ * Creates a compact EC signature for use in message signing.
  * This function will always produce a valid signature.
  */
 BC_API compact_signature sign_compact(const ec_secret& secret,
     const hash_digest& hash);
 
 /**
+ * Parses a DER encoded signature with optional strict DER enforcement.
+ * Treats an empty DER signature as invalid, in accordance with BIP66.
+ */
+BC_API bool parse_signature(ec_signature& out_signature,
+    const der_signature& signature, bool strict);
+
+/**
  * Verifies an EC signature using a public key.
  */
 BC_API bool verify_signature(const ec_point& public_key,
-    const hash_digest& hash, const endorsement& signature);
+    const hash_digest& hash, const ec_signature& signature);
 
 /**
  * Recovers the public key from a compact message signature.
@@ -131,7 +145,7 @@ BC_API ec_secret create_nonce(ec_secret secret, hash_digest hash,
 // DEPRECATED (deterministic signatures are safer)
 ///////////////////////////////////////////////////////////////////////////////
 
-BC_API endorsement sign(ec_secret secret, hash_digest hash, ec_secret);
+BC_API der_signature sign(ec_secret secret, hash_digest hash, ec_secret);
 
 ///////////////////////////////////////////////////////////////////////////////
 // DEPRECATED (deterministic signatures are safer)

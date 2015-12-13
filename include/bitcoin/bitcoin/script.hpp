@@ -154,9 +154,11 @@ enum class opcode : uint8_t
 
 typedef enum script_context_ : uint32_t
 {
+    none_enabled = 0,
     bip16_enabled = 1 << 0,
     bip65_enabled = 1 << 1,
-    all_enabled = bip16_enabled | bip65_enabled
+    bip66_enabled = 1 << 2,
+    all_enabled = 0xffffffff
 } script_context;
 
 struct BC_API operation
@@ -202,9 +204,16 @@ public:
 
     BC_API static hash_digest generate_signature_hash(
         transaction_type parent_tx, uint32_t input_index,
-        const script_type& script_code, uint32_t hash_type);
+        const script_type& script_code, uint8_t hash_type);
 
 private:
+    enum class result
+    {
+        valid,
+        invalid,
+        lax_encoding
+    };
+
     class conditional_stack
     {
     public:
@@ -220,6 +229,7 @@ private:
         bool_stack stack_;
     };
 
+    data_chunk pop_stack();
     bool run(const transaction_type& parent_tx, uint32_t input_index,
         uint32_t flags);
     bool next_step(operation_stack::iterator it,
@@ -229,6 +239,7 @@ private:
     bool run_operation(const operation& op,
         const transaction_type& parent_tx, uint32_t input_index,
         uint32_t flags);
+    bool read_section(data_stack& section, size_t count);
 
     bool op_negative_1();
     bool op_x(opcode code);
@@ -284,26 +295,26 @@ private:
     bool op_sha256();
     bool op_hash160();
     bool op_hash256();
+
     // op_checksig is a specialised case of op_checksigverify
     bool op_checksig(
-        const transaction_type& parent_tx, uint32_t input_index);
-    bool op_checksigverify(
-        const transaction_type& parent_tx, uint32_t input_index);
+        const transaction_type& parent_tx, uint32_t input_index, bool strict);
+    result op_checksigverify(
+        const transaction_type& parent_tx, uint32_t input_index, bool strict);
+
     // multisig variants
-    bool read_section(data_stack& section, size_t count);
     bool op_checkmultisig(
-        const transaction_type& parent_tx, uint32_t input_index);
-    bool op_checkmultisigverify(
-        const transaction_type& parent_tx, uint32_t input_index);
+        const transaction_type& parent_tx, uint32_t input_index, bool strict);
+    result op_checkmultisigverify(
+        const transaction_type& parent_tx, uint32_t input_index, bool strict);
+
     // activated in place of op_nop2 by BIP65
     bool op_checklocktimeverify(const transaction_type& parent_tx,
         uint32_t input_index);
 
-    data_chunk pop_stack();
-
     operation_stack operations_;
-    // Used when executing the script
-    data_stack stack_, alternate_stack_;
+    data_stack stack_;
+    data_stack alternate_stack_;
     size_t op_counter_ = 0;
     operation_stack::iterator codehash_begin_;
     conditional_stack conditional_stack_;
@@ -324,15 +335,16 @@ BC_API script_type parse_script(data_slice raw_script);
 BC_API data_chunk save_script(const script_type& script);
 BC_API size_t script_size(const script_type& script);
 
-BC_API bool check_signature(data_slice signature,
-    const ec_point& public_key, const script_type& script_code,
-    const transaction_type& parent_tx, uint32_t input_index);
-BC_API bool create_signature(data_chunk& signature,
+BC_API bool check_ec_signature(const ec_signature& signature,
+    uint8_t hash_type, const ec_point& public_key, 
+    const script_type& script_code, const transaction_type& parent_tx,
+    uint32_t input_index);
+BC_API bool create_endorsement(endorsement& signature,
     const ec_secret& private_key, const script_type& prevout_script,
-    const transaction_type& tx, uint32_t input_index, uint32_t hash_type);
-BC_API bool create_signature(data_chunk& signature,
+    const transaction_type& tx, uint32_t input_index, uint8_t hash_type);
+BC_API bool create_endorsement(endorsement& signature,
     const ec_secret& private_key, const script_type& prevout_script,
-    const transaction_type& tx, uint32_t input_index, uint32_t hash_type,
+    const transaction_type& tx, uint32_t input_index, uint8_t hash_type,
     const ec_secret& nonce);
 
 } // namespace libbitcoin

@@ -187,12 +187,15 @@ bool parse(script_type& result_script, std::string format)
     boost::trim(format);
     if (format.empty())
         return true;
+
     const auto tokens = split(format);
     data_chunk raw_script;
     for (const auto& token: tokens)
         if (!parse_token(raw_script, token))
             return false;
+
     parse_token(raw_script, "ENDING");
+
     try
     {
         result_script = parse_script(raw_script);
@@ -201,9 +204,8 @@ bool parse(script_type& result_script, std::string format)
     {
         return false;
     }
-    if (result_script.operations().empty())
-        return false;
-    return true;
+
+    return !result_script.operations().empty();
 }
 
 bool run_script(const script_test& test, const transaction_type& tx,
@@ -232,68 +234,131 @@ BOOST_AUTO_TEST_SUITE(script_tests)
 
 // Valid pay-to-script-hash scripts are valid regardless of context,
 // however after bip16 activation the scripts have additional constraints.
-BOOST_AUTO_TEST_CASE(script_json_bip16_invalid)
+BOOST_AUTO_TEST_CASE(script_bip16_valid)
 {
     transaction_type tx;
-    for (const auto& test: invalid_bip16_scripts)
+    for (const auto& test: valid_bip16_scripts)
     {
-        BOOST_CHECK(!run_script(test, tx, script_context::bip16_enabled));
+        // These are valid prior to and after BIP16 activation.
+        BOOST_CHECK_MESSAGE(run_script(test, tx, script_context::none_enabled), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, script_context::bip16_enabled), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, script_context::all_enabled), test.description);
     }
 }
 
-// Prior to bio65 activation op_nop2 always returns true, but after it
-// becomes a locktime comparer.
-BOOST_AUTO_TEST_CASE(script_json_bip65_invalid)
+BOOST_AUTO_TEST_CASE(script_bip16_invalidated)
 {
     transaction_type tx;
-    tx.locktime = 99;
-
-    transaction_input_type input;
-    input.sequence = 42;
-    tx.inputs.push_back(input);
-
-    for (const auto& test: invalid_bip65_scripts)
+    for (const auto& test: invalidated_bip16_scripts)
     {
-        BOOST_CHECK(!run_script(test, tx, script_context::bip65_enabled));
+        // These are valid prior to BIP16 activation and invalid after.
+        BOOST_CHECK_MESSAGE(run_script(test, tx, script_context::none_enabled), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, script_context::bip16_enabled), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, script_context::all_enabled), test.description);
     }
 }
 
-BOOST_AUTO_TEST_CASE(script_json_bip65_valid)
+// Prior to bip65 activation op_nop2 always returns true, but after it becomes a locktime comparer.
+BOOST_AUTO_TEST_CASE(script_bip65_valid)
 {
     transaction_type tx;
     tx.locktime = 500000042;
-
     transaction_input_type input;
     input.sequence = 42;
     tx.inputs.push_back(input);
 
     for (const auto& test: valid_bip65_scripts)
     {
-        BOOST_CHECK(run_script(test, tx, script_context::bip65_enabled));
+        // These are valid prior to and after BIP65 activation.
+        BOOST_CHECK_MESSAGE(run_script(test, tx, script_context::none_enabled), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, script_context::bip65_enabled), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, script_context::all_enabled), test.description);
     }
 }
 
-BOOST_AUTO_TEST_CASE(script_json_valid)
+BOOST_AUTO_TEST_CASE(script_bip65_invalid)
 {
     transaction_type tx;
-    for (const auto& test: valid_scripts)
+    tx.locktime = 99;
+    transaction_input_type input;
+    input.sequence = 42;
+    tx.inputs.push_back(input);
+
+    for (const auto& test: invalid_bip65_scripts)
     {
-        BOOST_CHECK(run_script(test, tx, 0));
+        // These are invalid prior to and after BIP65 activation.
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, script_context::none_enabled), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, script_context::bip65_enabled), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, script_context::all_enabled), test.description);
     }
 }
 
-BOOST_AUTO_TEST_CASE(script_json_invalid)
+BOOST_AUTO_TEST_CASE(script_bip65_invalidated)
 {
-    // Shut up!
-    log_fatal().set_output_function(ignore_output);
-
     transaction_type tx;
-    for (const auto& test: invalid_scripts)
+    tx.locktime = 99;
+    transaction_input_type input;
+    input.sequence = 42;
+    tx.inputs.push_back(input);
+
+    for (const auto& test : invalidated_bip65_scripts)
     {
-        BOOST_CHECK(!run_script(test, tx, 0));
+        // These are valid prior to BIP65 activation and invalid after.
+        BOOST_CHECK_MESSAGE(run_script(test, tx, script_context::none_enabled), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, script_context::bip65_enabled), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, script_context::all_enabled), test.description);
     }
 }
 
+// These are scripts potentially affected by bip66 (but should not be).
+BOOST_AUTO_TEST_CASE(script_multisig_valid)
+{
+    transaction_type tx;
+    for (const auto& test: valid_multisig_scripts)
+    {
+        // These are always valid.
+        BOOST_CHECK_MESSAGE(run_script(test, tx, script_context::none_enabled), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, script_context::bip66_enabled), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, script_context::all_enabled), test.description);
+    }
+}
+
+// These are scripts potentially affected by bip66 (but should not be).
+BOOST_AUTO_TEST_CASE(script_multisig_invalid)
+{
+    transaction_type tx;
+    for (const auto& test: invalid_multisig_scripts)
+    {
+        // These are always invalid.
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, script_context::none_enabled), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, script_context::bip66_enabled), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, script_context::all_enabled), test.description);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(script_context_free_valid)
+{
+    transaction_type tx;
+    for (const auto& test: valid_context_free_scripts)
+    {
+        // These are always valid.
+        BOOST_CHECK_MESSAGE(run_script(test, tx, script_context::none_enabled), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, script_context::all_enabled), test.description);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(script_context_free_invalid)
+{
+    transaction_type tx;
+    for (const auto& test: invalid_context_free_scripts)
+    {
+        // These are always invalid.
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, script_context::none_enabled), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, script_context::all_enabled), test.description);
+    }
+}
+
+// These are special tests for checksig.
 BOOST_AUTO_TEST_CASE(script_checksig_uses_one_hash)
 {
     // input 315ac7d4c26d69668129cc352851d9389b4a6868f1509c6c8b66bead11e2619f:1
@@ -303,8 +368,8 @@ BOOST_AUTO_TEST_CASE(script_checksig_uses_one_hash)
     satoshi_load(txdat.begin(), txdat.end(), parent_tx);
     uint32_t input_index = 1;
 
-    data_chunk signature;
-    decode_base16(signature, "30450220087ede38729e6d35e4f515505018e659222031273b7366920f393ee3ab17bc1e022100ca43164b757d1a6d1235f13200d4b5f76dd8fda4ec9fc28546b2df5b1211e8df03");
+    data_chunk distinguished;
+    decode_base16(distinguished, "30450220087ede38729e6d35e4f515505018e659222031273b7366920f393ee3ab17bc1e022100ca43164b757d1a6d1235f13200d4b5f76dd8fda4ec9fc28546b2df5b1211e8df");
     data_chunk pubkey;
     decode_base16(pubkey, "0275983913e60093b767e85597ca9397fb2f418e57f998d6afbbc536116085b1cb");
 
@@ -312,7 +377,10 @@ BOOST_AUTO_TEST_CASE(script_checksig_uses_one_hash)
     data_chunk rawscr;
     decode_base16(rawscr, "76a91433cef61749d11ba2adf091a5e045678177fe3a6d88ac");
     script_code = parse_script(rawscr);
-    BOOST_REQUIRE(check_signature(signature, pubkey, script_code, parent_tx, input_index));
+
+    ec_signature signature;
+    BOOST_REQUIRE(parse_signature(signature, distinguished, false));
+    BOOST_REQUIRE(check_ec_signature(signature, sighash::single, pubkey, script_code, parent_tx, input_index));
 }
 
 BOOST_AUTO_TEST_CASE(script_checksig_normal)
@@ -324,8 +392,8 @@ BOOST_AUTO_TEST_CASE(script_checksig_normal)
     satoshi_load(txdat.begin(), txdat.end(), parent_tx);
     uint32_t input_index = 0;
 
-    data_chunk signature;
-    decode_base16(signature, "304402205d8feeb312478e468d0b514e63e113958d7214fa572acd87079a7f0cc026fc5c02200fa76ea05bf243af6d0f9177f241caf606d01fcfd5e62d6befbca24e569e5c2703");
+    data_chunk distinguished;
+    decode_base16(distinguished, "304402205d8feeb312478e468d0b514e63e113958d7214fa572acd87079a7f0cc026fc5c02200fa76ea05bf243af6d0f9177f241caf606d01fcfd5e62d6befbca24e569e5c27");
     data_chunk pubkey;
     decode_base16(pubkey, "02100a1a9ca2c18932d6577c58f225580184d0e08226d41959874ac963e3c1b2fe");
 
@@ -333,7 +401,10 @@ BOOST_AUTO_TEST_CASE(script_checksig_normal)
     data_chunk rawscr;
     decode_base16(rawscr, "76a914fcc9b36d38cf55d7d5b4ee4dddb6b2c17612f48c88ac");
     script_code = parse_script(rawscr);
-    BOOST_REQUIRE(check_signature(signature, pubkey, script_code, parent_tx, input_index));
+
+    ec_signature signature;
+    BOOST_REQUIRE(parse_signature(signature, distinguished, false));
+    BOOST_REQUIRE(check_ec_signature(signature, sighash::single, pubkey, script_code, parent_tx, input_index));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
