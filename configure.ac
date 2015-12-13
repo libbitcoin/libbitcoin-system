@@ -7,9 +7,7 @@
 
 # Standard declarations.
 #==============================================================================
-# Requires Automake 1.14 or newer.
-
-# Declare the required version of Autoconf.
+# Declare the required version of autoconf.
 AC_PREREQ([2.65])
 
 # Process command-line arguments and perform initialization and verification.
