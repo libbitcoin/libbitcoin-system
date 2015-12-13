@@ -27,7 +27,7 @@
 #include <bitcoin/bitcoin/math/secp256k1_initializer.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
-#include "external\lax_der_parsing.h"
+#include "../math/external/lax_der_parsing.h"
 
 namespace libbitcoin {
 
