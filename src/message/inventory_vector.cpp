@@ -75,12 +75,11 @@ bool inventory_vector::from_data(std::istream& stream)
 
 bool inventory_vector::from_data(reader& source)
 {
-    auto result = true;
     reset();
     uint32_t raw_type = source.read_4_bytes_little_endian();
     type = inventory_type_from_number(raw_type);
     hash = source.read_hash();
-    result = source;
+    bool result = static_cast<bool>(source);
     if (!result)
         reset();
 

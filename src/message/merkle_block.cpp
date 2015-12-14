@@ -79,11 +79,9 @@ bool merkle_block::from_data(std::istream& stream)
 
 bool merkle_block::from_data(reader& source)
 {
-    bool result = true;
-
     reset();
 
-    result = header.from_data(source, true);
+    bool result = header.from_data(source, true);
     uint64_t hash_count = 0;
 
     if (result)
