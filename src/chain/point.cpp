@@ -77,11 +77,10 @@ bool point::from_data(std::istream& stream)
 
 bool point::from_data(reader& source)
 {
-    auto result = true;
     reset();
     hash = source.read_hash();
     index = source.read_4_bytes_little_endian();
-    result = source;
+    auto result = static_cast<bool>(source);
     if (!result)
         reset();
 
