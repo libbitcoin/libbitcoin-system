@@ -1093,7 +1093,7 @@ script_type::result script_type::op_checksigverify(
     distinguished.pop_back();
 
     ec_signature signature;
-    if (strict && parse_signature(signature, distinguished, true))
+    if (strict && !parse_signature(signature, distinguished, true))
         return result::lax_encoding;
 
     script_type script_code;
@@ -1101,7 +1101,7 @@ script_type::result script_type::op_checksigverify(
         if (it->data != distinguished && it->code != opcode::codeseparator)
             script_code.push_operation(*it);
 
-    if (!strict && parse_signature(signature, distinguished, false))
+    if (!strict && !parse_signature(signature, distinguished, false))
         return result::invalid;
 
     return check_ec_signature(signature, hash_type, pubkey, script_code,
@@ -1192,13 +1192,13 @@ script_type::result script_type::op_checkmultisigverify(
         distinguished.pop_back();
 
         ec_signature signature;
-        if (strict && parse_signature(signature, distinguished, true))
+        if (strict && !parse_signature(signature, distinguished, true))
             return result::lax_encoding;
 
         for (auto it = pubkey;;)
         {
-            if ((strict || parse_signature(signature, distinguished, false)) &&
-                check_ec_signature(signature, hash_type, *it, script_code,
+            if ((strict || !parse_signature(signature, distinguished, false))
+                && check_ec_signature(signature, hash_type, *it, script_code,
                     parent_tx, input_index))
             {
                 pubkey = it;
