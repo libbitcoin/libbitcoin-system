@@ -36,7 +36,7 @@ public:
     static byte_array<prefix_size> prefix_factory(uint8_t address,
         bool multiplied);
 
-    parse_encrypted_private(const encrypted_private& key);
+    explicit parse_encrypted_private(const encrypted_private& key);
 
     bool multiplied() const;
     uint8_t address_version() const;
