@@ -304,7 +304,6 @@ std::string printer::format_usage_parameters()
     std::vector<std::string> optional_arguments;
     std::vector<std::string> multiple_arguments;
 
-    std::stringstream output;
     const auto& parameters = get_parameters();
     
     for (const auto& parameter: parameters)
