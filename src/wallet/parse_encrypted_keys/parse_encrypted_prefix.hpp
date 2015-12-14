@@ -45,7 +45,7 @@ public:
     static constexpr uint8_t prefix_size = Size;
 
 protected:
-    parse_encrypted_prefix(const byte_array<Size>& value);
+    explicit parse_encrypted_prefix(const byte_array<Size>& value);
 
     uint8_t context() const;
     byte_array<Size> prefix() const;

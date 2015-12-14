@@ -81,10 +81,9 @@ bool transaction::from_data(std::istream& stream)
 
 bool transaction::from_data(reader& source)
 {
-    auto result = true;
     reset();
     version = source.read_4_bytes_little_endian();
-    result = source;
+    auto result = static_cast<bool>(source);
 
     if (result)
     {

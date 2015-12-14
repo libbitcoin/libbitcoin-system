@@ -77,14 +77,12 @@ bool filter_add::from_data(std::istream& stream)
 
 bool filter_add::from_data(reader& source)
 {
-    bool result = false;
-
     reset();
 
     auto size = source.read_variable_uint_little_endian();
     BITCOIN_ASSERT(size <= bc::max_size_t);
     const auto data_size = static_cast<size_t>(size);
-    result = source;
+    bool result = static_cast<bool>(source);
 
     if (result)
     {

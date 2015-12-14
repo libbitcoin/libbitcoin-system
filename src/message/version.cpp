@@ -89,12 +89,11 @@ bool version::from_data(std::istream& stream)
 
 bool version::from_data(reader& source)
 {
-    auto result = false;
     reset();
     value = source.read_4_bytes_little_endian();
     services = source.read_8_bytes_little_endian();
     timestamp = source.read_8_bytes_little_endian();
-    result = source;
+    auto result = static_cast<bool>(source);
     if (result)
         result = address_me.from_data(source, false);
 

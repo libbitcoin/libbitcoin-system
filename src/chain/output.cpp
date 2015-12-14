@@ -75,10 +75,9 @@ bool output::from_data(std::istream& stream)
 
 bool output::from_data(reader& source)
 {
-    auto result = true;
     reset();
     value = source.read_8_bytes_little_endian();
-    result = source;
+    auto result = static_cast<bool>(source);
 
     if (result)
         result = script.from_data(source, true, 

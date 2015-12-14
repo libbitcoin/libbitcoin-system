@@ -78,15 +78,13 @@ bool alert::from_data(std::istream& stream)
 
 bool alert::from_data(reader& source)
 {
-    bool result = false;
-
     reset();
 
     auto size = source.read_variable_uint_little_endian();
     BITCOIN_ASSERT(size <= bc::max_size_t);
     const auto payload_size = static_cast<size_t>(size);
     size_t signature_size = 0;
-    result = source;
+    auto result = static_cast<bool>(source);
 
     if (result)
     {

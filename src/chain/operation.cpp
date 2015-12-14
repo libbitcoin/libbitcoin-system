@@ -81,10 +81,9 @@ bool operation::from_data(std::istream& stream)
 
 bool operation::from_data(reader& source)
 {
-    auto result = true;
     reset();
     const auto byte = source.read_byte();
-    result = source;
+    auto result = static_cast<bool>(source);
 
     auto op_code = static_cast<opcode>(byte);
     if (byte == 0 && op_code != opcode::zero)
@@ -92,9 +91,9 @@ bool operation::from_data(reader& source)
 
     code = ((0 < byte && byte <= 75) ? opcode::special : op_code);
 
-    uint32_t size;
     if (operation::must_read_data(code))
     {
+        uint32_t size;
         read_opcode_data_size(size, code, byte, source);
         data = source.read_data(size);
         result = (source && (data.size() == size));

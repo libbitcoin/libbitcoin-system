@@ -233,7 +233,6 @@ hd_public hd_private::to_public() const
 hd_private hd_private::derive_private(uint32_t index) const
 {
     constexpr uint8_t depth = 0;
-    constexpr size_t size = sizeof(depth) + ec_secret_size + sizeof(index);
 
     const auto data = (index >= hd_first_hardened_key) ?
         splice(to_array(depth), secret_, to_big_endian(index)) :

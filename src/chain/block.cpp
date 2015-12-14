@@ -77,9 +77,8 @@ bool block::from_data(std::istream& stream)
 
 bool block::from_data(reader& source)
 {
-    auto result = true;
     reset();
-    result = header.from_data(source, false);
+    auto result = header.from_data(source, false);
 
     if (result)
     {

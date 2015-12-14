@@ -85,12 +85,10 @@ bool headers::from_data(std::istream& stream)
 
 bool headers::from_data(reader& source)
 {
-    auto result = true;
-
     reset();
 
     uint64_t count = source.read_variable_uint_little_endian();
-    result = source;
+    auto result = static_cast<bool>(source);
 
     for (uint64_t i = 0; (i < count) && result; ++i)
     {
