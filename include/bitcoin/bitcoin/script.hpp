@@ -155,9 +155,22 @@ enum class opcode : uint8_t
 typedef enum script_context_ : uint32_t
 {
     none_enabled = 0,
+
+    /// pay-to-script-hash enabled
     bip16_enabled = 1 << 0,
-    bip65_enabled = 1 << 1,
-    bip66_enabled = 1 << 2,
+
+    /// no duplicated unspent transaction ids
+    bip30_enabled = 1 << 1,
+
+    /// coinbase must include height
+    bip34_enabled = 1 << 2,
+
+    /// strict DER signatures required
+    bip66_enabled = 1 << 3,
+
+    /// nop2 becomes check locktime verify
+    bip65_enabled = 1 << 4,
+
     all_enabled = 0xffffffff
 } script_context;
 
@@ -335,6 +348,7 @@ BC_API script_type parse_script(data_slice raw_script);
 BC_API data_chunk save_script(const script_type& script);
 BC_API size_t script_size(const script_type& script);
 
+BC_API bool is_active(uint32_t flags, script_context flag);
 BC_API bool check_ec_signature(const ec_signature& signature,
     uint8_t hash_type, const ec_point& public_key, 
     const script_type& script_code, const transaction_type& parent_tx,
