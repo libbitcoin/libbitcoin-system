@@ -1192,14 +1192,13 @@ script_type::result script_type::op_checkmultisigverify(
         distinguished.pop_back();
 
         ec_signature signature;
-        if (strict && !parse_signature(signature, distinguished, true))
-            return result::lax_encoding;
+        if (!parse_signature(signature, distinguished, strict))
+            return strict ? result::lax_encoding : result::invalid;
 
         for (auto it = pubkey;;)
         {
-            if ((strict || !parse_signature(signature, distinguished, false))
-                && check_ec_signature(signature, hash_type, *it, script_code,
-                    parent_tx, input_index))
+            if (check_ec_signature(signature, hash_type, *it, script_code,
+                parent_tx, input_index))
             {
                 pubkey = it;
                 break;
