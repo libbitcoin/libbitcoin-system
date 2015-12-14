@@ -44,7 +44,7 @@ static const data_chunk stack_true_value{1};
 constexpr size_t op_counter_limit = 201;
 
 // Test flags for a given context.
-bool is_context(uint32_t flags, script_context flag)
+bool is_active(uint32_t flags, script_context flag)
 {
     return (flag & flags) != 0;
 }
@@ -174,7 +174,7 @@ bool script_type::run(const script_type& input_script,
         return false;
 
     // Additional validation for pay-to-script-hash transactions
-    if (is_context(flags, script_context::bip16_enabled) &&
+    if (is_active(flags, script_context::bip16_enabled) &&
         type() == payment_type::script_hash)
     {
         if (!is_push_only(copy_script.operations()))
@@ -1510,24 +1510,24 @@ bool script_type::run_operation(const operation& op,
 
         case opcode::checksig:
             return op_checksig(parent_tx, input_index, 
-                is_context(flags, script_context::bip66_enabled));
+                is_active(flags, script_context::bip66_enabled));
 
         case opcode::checksigverify:
             return op_checksigverify(parent_tx, input_index,
-                is_context(flags, script_context::bip66_enabled)) ==
+                is_active(flags, script_context::bip66_enabled)) ==
                     result::valid;
 
         case opcode::checkmultisig:
             return op_checkmultisig(parent_tx, input_index,
-                is_context(flags, script_context::bip66_enabled));
+                is_active(flags, script_context::bip66_enabled));
 
         case opcode::checkmultisigverify:
             return op_checkmultisigverify(parent_tx, input_index,
-                is_context(flags, script_context::bip66_enabled)) ==
+                is_active(flags, script_context::bip66_enabled)) ==
                     result::valid;
 
         case opcode::checklocktimeverify:
-            return is_context(flags, script_context::bip65_enabled) ?
+            return is_active(flags, script_context::bip65_enabled) ?
                 op_checklocktimeverify(parent_tx, input_index) : true;
 
         case opcode::op_nop1:
@@ -1854,7 +1854,7 @@ std::string opcode_to_string(opcode code, uint32_t flags)
         ////case opcode::op_nop2:
         ////    return "nop2";
         case opcode::checklocktimeverify:
-            return is_context(flags, script_context::bip65_enabled) ? 
+            return is_active(flags, script_context::bip65_enabled) ? 
                 "checklocktimeverify" : "nop2";
         case opcode::op_nop3:
             return "nop3";
