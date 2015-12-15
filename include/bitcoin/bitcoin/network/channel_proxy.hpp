@@ -222,8 +222,13 @@ private:
     void handle_revival(const boost::system::error_code& ec);
     
     void read_header();
+    void do_read_header();
+
     void read_checksum(const header_type& header);
+    void do_read_checksum(const header_type& header);
+
     void read_payload(const header_type& header);
+    void do_read_payload(const header_type& header);
 
     void handle_read_header(const boost::system::error_code& ec,
         size_t bytes_transferred);

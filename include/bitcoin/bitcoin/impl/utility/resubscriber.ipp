@@ -34,15 +34,15 @@ resubscriber<Args...>::resubscriber(threadpool& pool)
 template <typename... Args>
 void resubscriber<Args...>::subscribe(resubscription_handler notifier)
 {
-    strand_.wrap(&resubscriber<Args...>::do_subscribe,
-        this->shared_from_this(), notifier)();
+    strand_.queue(&resubscriber<Args...>::do_subscribe,
+        this->shared_from_this(), notifier);
 }
 
 template <typename... Args>
 void resubscriber<Args...>::relay(Args... args)
 {
-    strand_.wrap(&resubscriber<Args...>::do_relay,
-        this->shared_from_this(), args...)();
+    strand_.queue(&resubscriber<Args...>::do_relay,
+        this->shared_from_this(), args...);
 }
 
 template <typename... Args>

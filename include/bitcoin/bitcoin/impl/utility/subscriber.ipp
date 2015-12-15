@@ -34,15 +34,15 @@ subscriber<Args...>::subscriber(threadpool& pool)
 template <typename... Args>
 void subscriber<Args...>::subscribe(subscription_handler notifier)
 {
-    strand_.wrap(&subscriber<Args...>::do_subscribe,
-        this->shared_from_this(), notifier)();
+    strand_.queue(&subscriber<Args...>::do_subscribe,
+        this->shared_from_this(), notifier);
 }
 
 template <typename... Args>
 void subscriber<Args...>::relay(Args... args)
 {
-    strand_.wrap(&subscriber<Args...>::do_relay,
-        this->shared_from_this(), args...)();
+    strand_.queue(&subscriber<Args...>::do_relay,
+        this->shared_from_this(), args...);
 }
 
 template <typename... Args>
