@@ -17,54 +17,54 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SUBSCRIBER_IPP
-#define LIBBITCOIN_SUBSCRIBER_IPP
+#ifndef LIBBITCOIN_RESUBSCRIBER_IPP
+#define LIBBITCOIN_RESUBSCRIBER_IPP
 
 #include <bitcoin/bitcoin/utility/sequencer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
-   
+
 namespace libbitcoin {
 
 template <typename... Args>
-subscriber<Args...>::subscriber(threadpool& pool)
+resubscriber<Args...>::resubscriber(threadpool& pool)
   : strand_(pool)
 {
 }
 
 template <typename... Args>
-void subscriber<Args...>::subscribe(subscription_handler notifier)
+void resubscriber<Args...>::subscribe(resubscription_handler notifier)
 {
-    strand_.wrap(&subscriber<Args...>::do_subscribe,
+    strand_.wrap(&resubscriber<Args...>::do_subscribe,
         this->shared_from_this(), notifier)();
 }
 
 template <typename... Args>
-void subscriber<Args...>::relay(Args... args)
+void resubscriber<Args...>::relay(Args... args)
 {
-    strand_.wrap(&subscriber<Args...>::do_relay,
+    strand_.wrap(&resubscriber<Args...>::do_relay,
         this->shared_from_this(), args...)();
 }
 
 template <typename... Args>
-void subscriber<Args...>::do_subscribe(subscription_handler notifier)
+void resubscriber<Args...>::do_subscribe(resubscription_handler notifier)
 {
     subscriptions_.push_back(notifier);
 }
 
 template <typename... Args>
-void subscriber<Args...>::do_relay(Args... args)
+void resubscriber<Args...>::do_relay(Args... args)
 {
     if (subscriptions_.empty())
         return;
 
     const auto subscriptions_copy = subscriptions_;
     subscriptions_.clear();
+
     for (const auto notifier: subscriptions_copy)
-        notifier(args...);
+        if (notifier(args...))
+            subscriptions_.push_back(notifier);
 }
 
 } // namespace libbitcoin
-
-#include <bitcoin/bitcoin/impl/utility/subscriber.ipp>
 
 #endif

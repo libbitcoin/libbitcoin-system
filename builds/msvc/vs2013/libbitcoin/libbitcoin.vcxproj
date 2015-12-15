@@ -200,6 +200,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\unicode_streambuf.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\array_slice.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\assert.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\resubscriber.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\synchronizer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\sequencer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\binary.hpp" />
@@ -248,6 +249,7 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\collection.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\data.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\endian.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\resubscriber.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\serializer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\subscriber.ipp" />
     <None Include="packages.config" />

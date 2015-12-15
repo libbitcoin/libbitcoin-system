@@ -41,6 +41,7 @@
 #include <bitcoin/bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
+#include <bitcoin/bitcoin/utility/resubscriber.hpp>
 #include <bitcoin/bitcoin/utility/sequencer.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -83,34 +84,39 @@ class BC_API channel_proxy
   : public std::enable_shared_from_this<channel_proxy>
 {
 public:
-    typedef std::function<void (const std::error_code&)> send_handler;
-    typedef std::function<void (const std::error_code&,
+    template <class Message>
+    using message_handler = std::function<
+        bool(const std::error_code&, const Message&)>;
+
+    typedef std::function<bool(const std::error_code&,
         const version_type&)> receive_version_handler;
-    typedef std::function<void (const std::error_code&,
+    typedef std::function<bool(const std::error_code&,
         const verack_type&)> receive_verack_handler;
-    typedef std::function<void (const std::error_code&,
+    typedef std::function<bool(const std::error_code&,
         const address_type&)> receive_address_handler;
-    typedef std::function<void (const std::error_code&,
+    typedef std::function<bool(const std::error_code&,
         const get_address_type&)> receive_get_address_handler;
-    typedef std::function<void (const std::error_code&,
+    typedef std::function<bool(const std::error_code&,
         const inventory_type&)> receive_inventory_handler;
-    typedef std::function<void (const std::error_code&,
+    typedef std::function<bool(const std::error_code&,
         const get_data_type&)> receive_get_data_handler;
-    typedef std::function<void (const std::error_code&,
+    typedef std::function<bool(const std::error_code&,
         const get_blocks_type&)> receive_get_blocks_handler;
-    typedef std::function<void (const std::error_code&,
+    typedef std::function<bool(const std::error_code&,
         const transaction_type&)> receive_transaction_handler;
-    typedef std::function<void(const std::error_code&,
+    typedef std::function<bool(const std::error_code&,
         const block_type&)> receive_block_handler;
-    typedef std::function<void (const std::error_code&,
+    typedef std::function<bool(const std::error_code&,
         const ping_type&)> receive_ping_handler;
-    typedef std::function<void (const std::error_code&,
+    typedef std::function<bool(const std::error_code&,
         const pong_type&)> receive_pong_handler;
-    typedef std::function<void (const std::error_code&,
+    typedef std::function<bool(const std::error_code&,
         const header_type&, const data_chunk&)> receive_raw_handler;
-    typedef std::function<void (const std::error_code&)> stop_handler;
-    typedef std::function<void (const std::error_code&)> revival_handler;
-    typedef std::function<void (const std::error_code&)> expiration_handler;
+
+    typedef std::function<void(const std::error_code&)> stop_handler;
+    typedef std::function<void(const std::error_code&)> revival_handler;
+    typedef std::function<void(const std::error_code&)> expiration_handler;
+    typedef std::function<void(const std::error_code&)> send_handler;
 
     channel_proxy(threadpool& pool, socket_ptr socket,
         const timeout& timeouts);
@@ -149,14 +155,11 @@ public:
     void subscribe_version(receive_version_handler handle_receive);
     void subscribe_verack(receive_verack_handler handle_receive);
     void subscribe_address(receive_address_handler handle_receive);
-    void subscribe_get_address(
-        receive_get_address_handler handle_receive);
+    void subscribe_get_address(receive_get_address_handler handle_receive);
     void subscribe_inventory(receive_inventory_handler handle_receive);
     void subscribe_get_data(receive_get_data_handler handle_receive);
-    void subscribe_get_blocks(
-        receive_get_blocks_handler handle_receive);
-    void subscribe_transaction(
-        receive_transaction_handler handle_receive);
+    void subscribe_get_blocks(receive_get_blocks_handler handle_receive);
+    void subscribe_transaction(receive_transaction_handler handle_receive);
     void subscribe_block(receive_block_handler handle_receive);
     void subscribe_ping(receive_ping_handler handle_receive);
     void subscribe_pong(receive_pong_handler handle_receive);
@@ -165,36 +168,37 @@ public:
     void subscribe_stop(stop_handler handle_stop);
 
 private:
-    typedef subscriber<const std::error_code&, const version_type&>
+    typedef resubscriber<const std::error_code&, const version_type&>
         version_subscriber;
-    typedef subscriber<const std::error_code&, const verack_type&>
+    typedef resubscriber<const std::error_code&, const verack_type&>
         verack_subscriber;
-    typedef subscriber<const std::error_code&, const address_type&>
+    typedef resubscriber<const std::error_code&, const address_type&>
         address_subscriber;
-    typedef subscriber<const std::error_code&, const get_address_type&>
+    typedef resubscriber<const std::error_code&, const get_address_type&>
         get_address_subscriber;
-    typedef subscriber<const std::error_code&, const inventory_type&>
+    typedef resubscriber<const std::error_code&, const inventory_type&>
         inventory_subscriber;
-    typedef subscriber<const std::error_code&, const get_data_type&>
+    typedef resubscriber<const std::error_code&, const get_data_type&>
         get_data_subscriber;
-    typedef subscriber<const std::error_code&, const get_blocks_type&>
+    typedef resubscriber<const std::error_code&, const get_blocks_type&>
         get_blocks_subscriber;
-    typedef subscriber<const std::error_code&, const transaction_type&>
+    typedef resubscriber<const std::error_code&, const transaction_type&>
         transaction_subscriber;
-    typedef subscriber<const std::error_code&, const block_type&>
+    typedef resubscriber<const std::error_code&, const block_type&>
         block_subscriber;
-    typedef subscriber<const std::error_code&, const ping_type&>
+    typedef resubscriber<const std::error_code&, const ping_type&>
         ping_subscriber;
-    typedef subscriber<const std::error_code&, const pong_type&>
+    typedef resubscriber<const std::error_code&, const pong_type&>
         pong_subscriber;
-    typedef subscriber<const std::error_code&, const header_type&,
+    typedef resubscriber<const std::error_code&, const header_type&,
         const data_chunk&> raw_subscriber;
     typedef subscriber<const std::error_code&> stop_subscriber;
 
     template<typename Message, class Subscriber>
     void establish_relay(Subscriber subscriber);
-    template <typename Message, class Subscriber, typename Callback>
-    void subscribe(Subscriber subscriber, Callback handler) const;
+    template <typename Message, class Subscriber>
+    void subscribe(Subscriber subscriber,
+        message_handler<Message> handler) const;
     template <typename Message, class Subscriber>
     void notify_stop(Subscriber subscriber) const;
 
@@ -230,8 +234,8 @@ private:
 
     void handle_send_ping(const std::error_code& ec);
     void handle_send_pong(const std::error_code& ec);
-    void handle_receive_ping(const std::error_code& ec, const ping_type& ping);
-    void handle_receive_pong(const std::error_code& ec, const pong_type& pong,
+    bool handle_receive_ping(const std::error_code& ec, const ping_type& ping);
+    bool handle_receive_pong(const std::error_code& ec, const pong_type& pong,
         uint64_t nonce);
 
     void do_send(const data_chunk& message, send_handler handle_send,

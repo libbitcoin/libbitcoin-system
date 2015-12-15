@@ -126,6 +126,9 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\subscriber.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\resubscriber.ipp">
+      <Filter>include\bitcoin\impl\utility</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\block.cpp">
@@ -615,6 +618,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\lax_der_parsing.h">
       <Filter>src\math\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\resubscriber.hpp">
+      <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

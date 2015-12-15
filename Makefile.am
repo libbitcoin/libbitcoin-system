@@ -244,6 +244,7 @@ include_bitcoin_bitcoin_impl_utility_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/collection.ipp \
     include/bitcoin/bitcoin/impl/utility/data.ipp \
     include/bitcoin/bitcoin/impl/utility/endian.ipp \
+    include/bitcoin/bitcoin/impl/utility/resubscriber.ipp \
     include/bitcoin/bitcoin/impl/utility/serializer.ipp \
     include/bitcoin/bitcoin/impl/utility/subscriber.ipp
 
@@ -303,6 +304,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/endian.hpp \
     include/bitcoin/bitcoin/utility/logger.hpp \
     include/bitcoin/bitcoin/utility/random.hpp \
+    include/bitcoin/bitcoin/utility/resubscriber.hpp \
     include/bitcoin/bitcoin/utility/sequencer.hpp \
     include/bitcoin/bitcoin/utility/serializer.hpp \
     include/bitcoin/bitcoin/utility/string.hpp \

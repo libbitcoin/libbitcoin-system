@@ -294,7 +294,7 @@ void protocol::handle_handshake(const std::error_code& ec, channel_ptr node)
 
         // Subscribe to address messages.
         node->subscribe_address(
-            strand_.wrap(&protocol::handle_address_message,
+            std::bind(&protocol::handle_address_message,
                 this, _1, _2, node));
 
         // Ask for addresses.
@@ -498,11 +498,11 @@ void protocol::inbound_channel_stopped(const std::error_code& ec,
     remove_connection(inbound_connections_, node);
 }
 
-void protocol::handle_address_message(const std::error_code& ec,
+bool protocol::handle_address_message(const std::error_code& ec,
     const address_type& message, channel_ptr node)
 {
     if (ec == error::channel_stopped)
-        return;
+        return false;
 
     if (ec)
     {
@@ -510,7 +510,7 @@ void protocol::handle_address_message(const std::error_code& ec,
         log_debug(LOG_PROTOCOL)
             << "Failure getting addresses from ["
             << node->address() << "] " << ec.message();
-        return;
+        return false;
     }
 
     log_debug(LOG_PROTOCOL)
@@ -523,10 +523,7 @@ void protocol::handle_address_message(const std::error_code& ec,
             strand_.wrap(&protocol::handle_store_address,
                 this, _1));
 
-    // Subscribe to address messages.
-    node->subscribe_address(
-        strand_.wrap(&protocol::handle_address_message,
-            this, _1, _2, node));
+    return true;
 }
 
 void protocol::handle_store_address(const std::error_code& ec)

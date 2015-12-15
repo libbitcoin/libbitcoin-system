@@ -111,13 +111,17 @@ void channel_proxy::establish_relay(Subscriber subscriber)
 }
 
 // Subscribing must be immediate, we cannot switch thread contexts.
-template <typename Message, class Subscriber, typename Callback>
-void channel_proxy::subscribe(Subscriber subscriber, Callback handler) const
+template <typename Message, class Subscriber>
+void channel_proxy::subscribe(Subscriber subscriber,
+    message_handler<Message> handler) const
 {
-    if (stopped())
-        subscriber->relay(error::channel_stopped, Message());
-    else
+    if (!stopped())
+    {
         subscriber->subscribe(handler);
+        return;
+    }
+
+    handler(error::channel_stopped, Message());
 }
 
 // Subscriber doesn't have an unsubscribe, we just send service_stopped.
@@ -137,7 +141,7 @@ void channel_proxy::start()
 
     // Subscribe to ping messages.
     subscribe_ping(
-        strand_.wrap(&channel_proxy::handle_receive_ping,
+        std::bind(&channel_proxy::handle_receive_ping,
             shared_from_this(), _1, _2));
 
     // TODO: defer this until handshake completion.
@@ -148,28 +152,25 @@ void channel_proxy::start()
             shared_from_this(), boost::system::error_code()));
 }
 
-void channel_proxy::handle_receive_ping(const std::error_code& ec,
+bool channel_proxy::handle_receive_ping(const std::error_code& ec,
     const ping_type& ping)
 {
     if (stopped())
-        return;
-
-    // Resubscribe to ping messages.
-    subscribe_ping(
-        strand_.wrap(&channel_proxy::handle_receive_ping,
-            shared_from_this(), _1, _2));
+        return false;
 
     if (ec)
     {
         log_debug(LOG_NETWORK)
             << "Failure getting ping from [" << address() << "]";
-        return;
+        return false;
     }
 
     const pong_type reply_pong = { ping.nonce };
     send(reply_pong,
         std::bind(&channel_proxy::handle_send_pong,
             shared_from_this(), _1));
+
+    return true;
 }
 
 void channel_proxy::handle_send_pong(const std::error_code& ec)
@@ -367,7 +368,7 @@ void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
 
     // Subscribe to pong messages.
     subscribe_pong(
-        strand_.wrap(&channel_proxy::handle_receive_pong,
+        std::bind(&channel_proxy::handle_receive_pong,
             shared_from_this(), _1, _2, nonce));
 
     const ping_type random_ping = { nonce };
@@ -407,17 +408,17 @@ void channel_proxy::handle_send_ping(const std::error_code& ec)
         << "Ping sent [" << address() << "]";
 }
 
-void channel_proxy::handle_receive_pong(const std::error_code& ec,
+bool channel_proxy::handle_receive_pong(const std::error_code& ec,
     const pong_type& ping, uint64_t nonce)
 {
     if (stopped())
-        return;
+        return false;
 
     if (ec)
     {
         log_debug(LOG_NETWORK)
             << "Failure getting pong from [" << address() << "]";
-        return;
+        return false;
     }
 
     if (ping.nonce != nonce)
@@ -429,6 +430,8 @@ void channel_proxy::handle_receive_pong(const std::error_code& ec,
         // But we assume the response is not as expected and terminate.
         stop(error::bad_stream);
     }
+
+    return false;
 }
 
 void channel_proxy::read_header()
