@@ -33,13 +33,12 @@ class subscriber
   : public std::enable_shared_from_this<subscriber<Args...>>
 {
 public:
-    typedef std::function<void (Args...)> subscription_handler;
+    typedef std::function<void(Args...)> subscription_handler;
     typedef std::shared_ptr<subscriber<Args...>> ptr;
 
     subscriber(threadpool& pool);
-    ~subscriber();
 
-    void subscribe(subscription_handler handler);
+    void subscribe(subscription_handler notifier);
     void relay(Args... args);
 
 private:
@@ -51,9 +50,6 @@ private:
     sequencer strand_;
     subscription_list subscriptions_;
 };
-
-template <typename... Args>
-using subscriber_ptr = std::shared_ptr<subscriber<Args...>>;
 
 } // namespace libbitcoin
 

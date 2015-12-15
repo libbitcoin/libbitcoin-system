@@ -156,7 +156,7 @@ private:
         completion_handler handle_complete);
     void handle_hosts_save(const std::error_code& ec,
         completion_handler handle_complete);
-    void handle_address_message(const std::error_code& ec,
+    bool handle_address_message(const std::error_code& ec,
         const address_type& message, channel_ptr node);
     void handle_store_address(const std::error_code& ec);
 

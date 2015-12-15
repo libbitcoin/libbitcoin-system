@@ -17,54 +17,42 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SUBSCRIBER_IPP
-#define LIBBITCOIN_SUBSCRIBER_IPP
+#ifndef  LIBBITCOIN_RESUBSCRIBER_HPP
+#define  LIBBITCOIN_RESUBSCRIBER_HPP
 
+#include <functional>
+#include <memory>
+#include <vector>
 #include <bitcoin/bitcoin/utility/sequencer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
-   
+
 namespace libbitcoin {
 
 template <typename... Args>
-subscriber<Args...>::subscriber(threadpool& pool)
-  : strand_(pool)
+class resubscriber
+  : public std::enable_shared_from_this<resubscriber<Args...>>
 {
-}
+public:
+    typedef std::function<bool(Args...)> resubscription_handler;
+    typedef std::shared_ptr<resubscriber<Args...>> ptr;
 
-template <typename... Args>
-void subscriber<Args...>::subscribe(subscription_handler notifier)
-{
-    strand_.wrap(&subscriber<Args...>::do_subscribe,
-        this->shared_from_this(), notifier)();
-}
+    resubscriber(threadpool& pool);
 
-template <typename... Args>
-void subscriber<Args...>::relay(Args... args)
-{
-    strand_.wrap(&subscriber<Args...>::do_relay,
-        this->shared_from_this(), args...)();
-}
+    void subscribe(resubscription_handler notifier);
+    void relay(Args... args);
 
-template <typename... Args>
-void subscriber<Args...>::do_subscribe(subscription_handler notifier)
-{
-    subscriptions_.push_back(notifier);
-}
+private:
+    typedef std::vector<resubscription_handler> subscription_list;
 
-template <typename... Args>
-void subscriber<Args...>::do_relay(Args... args)
-{
-    if (subscriptions_.empty())
-        return;
+    void do_subscribe(resubscription_handler notifier);
+    void do_relay(Args... args);
 
-    const auto subscriptions_copy = subscriptions_;
-    subscriptions_.clear();
-    for (const auto notifier: subscriptions_copy)
-        notifier(args...);
-}
+    sequencer strand_;
+    subscription_list subscriptions_;
+};
 
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/utility/subscriber.ipp>
+#include <bitcoin/bitcoin/impl/utility/resubscriber.ipp>
 
 #endif

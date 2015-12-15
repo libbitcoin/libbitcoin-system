@@ -118,12 +118,12 @@ void handshake::start(channel_ptr node, handshake_handler handle_handshake,
 
     // 1 of 3
     node->subscribe_version(
-        strand_.wrap(&handshake::receive_version,
+        std::bind(&handshake::receive_version,
             this, _1, _2, node, complete));
 
     // 2 of 3
     node->subscribe_verack(
-        strand_.wrap(&handshake::receive_verack,
+        std::bind(&handshake::receive_verack,
             this, _1, _2, node, complete));
 
     // 3 of 3
@@ -168,14 +168,14 @@ void handshake::handle_version_sent(const std::error_code& ec,
     completion_callback(ec);
 }
 
-void handshake::receive_version(const std::error_code& ec, 
+bool handshake::receive_version(const std::error_code& ec, 
     const version_type& version, channel_ptr node,
     handshake_handler completion_callback)
 {
     if (ec)
     {
         completion_callback(ec);
-        return;
+        return false;
     }
 
     // TODO: add loopback detection to the channel.
@@ -190,12 +190,14 @@ void handshake::receive_version(const std::error_code& ec,
             << "Peer version (" << version.version << ") below minimum ("
             << bc::peer_minimum_version << ") [" << node->address() << "]";
         completion_callback(error::accept_failed);
-        return;
+        return false;
     }
 
     node->send(verack_type(),
         strand_.wrap(&handshake::handle_verack_sent,
             this, _1, completion_callback));
+
+    return false;
 }
 
 void handshake::handle_verack_sent(const std::error_code& ec,
@@ -204,7 +206,7 @@ void handshake::handle_verack_sent(const std::error_code& ec,
     completion_callback(ec);
 }
 
-void handshake::receive_verack(const std::error_code& ec, const verack_type&,
+bool handshake::receive_verack(const std::error_code& ec, const verack_type&,
     channel_ptr node, handshake_handler completion_callback)
 {
     if (!ec)
@@ -221,6 +223,7 @@ void handshake::receive_verack(const std::error_code& ec, const verack_type&,
     // We may not get this response before timeout, in which case we can
     // only assume that our version wasn't accepted.
     completion_callback(ec);
+    return false;
 }
 
 void handshake::set_start_height(uint64_t height, setter_handler handle_set)

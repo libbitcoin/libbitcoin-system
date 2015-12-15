@@ -65,10 +65,10 @@ private:
         handshake_handler completion_callback);
     void handle_verack_sent(const std::error_code& ec,
         handshake_handler completion_callback);
-    void receive_version(const std::error_code& ec,
+    bool receive_version(const std::error_code& ec,
         const version_type& version, channel_ptr node,
         handshake_handler completion_callback);
-    void receive_verack(const std::error_code& ec, const verack_type&,
+    bool receive_verack(const std::error_code& ec, const verack_type&,
         channel_ptr node, handshake_handler completion_callback);
 
     void start_timer(channel_ptr node, handshake_handler completion_callback);

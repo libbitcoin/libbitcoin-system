@@ -171,7 +171,7 @@ void seeder::handle_handshake(const std::error_code& ec, channel_ptr node,
     // We could start ping-pong here but probabaly not important.
 
     node->subscribe_address(
-        strand_.wrap(&seeder::handle_receive,
+        std::bind(&seeder::handle_receive,
             this, _1, _2, seed, node, completion_callback));
 
     node->send(get_address_type(),
@@ -191,7 +191,7 @@ void seeder::handle_send(const std::error_code& ec,
     }
 }
 
-void seeder::handle_receive(const std::error_code& ec,
+bool seeder::handle_receive(const std::error_code& ec,
     const address_type& message, const config::endpoint& seed,
     channel_ptr node, seeded_handler completion_callback)
 {
@@ -201,7 +201,7 @@ void seeder::handle_receive(const std::error_code& ec,
             << "Failure getting addresses from seed [" << seed << "] "
             << ec.message();
         completion_callback(error::success);
-        return;
+        return false;
     }
 
     log_info(LOG_PROTOCOL)
@@ -218,6 +218,7 @@ void seeder::handle_receive(const std::error_code& ec,
 
     // We are using this call to keep node in scope until receive.
     node->stop(error::channel_stopped);
+    return false;
 }
 
 // This is called for each individual address in the packet.
