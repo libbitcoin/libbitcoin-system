@@ -268,9 +268,9 @@ void channel_proxy::clear_timers()
 void channel_proxy::start_timers()
 {
     set_expiration(pseudo_randomize(timeouts_.expiration));
-    set_heartbeat(timeouts_.heartbeat);
-    set_revival(timeouts_.revival);
-    set_inactivity(timeouts_.inactivity);
+    set_heartbeat(pseudo_randomize(timeouts_.heartbeat));
+    set_inactivity(pseudo_randomize(timeouts_.inactivity));
+    set_revival(pseudo_randomize(timeouts_.revival, 10));
 }
 
 void channel_proxy::reset_inactivity()
