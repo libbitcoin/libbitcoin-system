@@ -39,7 +39,7 @@
 #include <bitcoin/bitcoin/network/peer.hpp>
 #include <bitcoin/bitcoin/network/seeder.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
-#include <bitcoin/bitcoin/utility/subscriber.hpp>
+#include <bitcoin/bitcoin/utility/resubscriber.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -48,13 +48,13 @@ namespace network {
 class BC_API protocol
 {
 public:
-    typedef std::function<void (const std::error_code&)>
+    typedef std::function<void(const std::error_code&)>
         completion_handler;
-    typedef std::function<void (const std::error_code&, size_t)>
+    typedef std::function<void(const std::error_code&, size_t)>
         fetch_connection_count_handler;
-    typedef std::function<void (const std::error_code&, channel_ptr)>
+    typedef std::function<bool(const std::error_code&, channel_ptr)>
         channel_handler;
-    typedef std::function<void (const std::error_code&, size_t)>
+    typedef std::function<void(const std::error_code&, size_t)>
         broadcast_handler;
 
     protocol(threadpool& pool, hosts& hosts, handshake& shake, peer& network,
@@ -145,7 +145,8 @@ public:
 
 private:
     typedef std::vector<channel_ptr> channel_ptr_list;
-    typedef subscriber<const std::error_code&, channel_ptr> channel_subscriber;
+    typedef resubscriber<const std::error_code&, channel_ptr> 
+        channel_subscriber;
 
     // Startup sequence
     void handle_hosts_load(const std::error_code& ec,
