@@ -36,6 +36,7 @@ namespace bc = libbitcoin;
 #define LOG_POLLER      "poller"
 #define LOG_SESSION     "session"
 #define LOG_RESPONDER   "responder"
+#define LOG_INVENTORY   "inventory"
 #define LOG_SCRIPT      "script"
 #define LOG_TXPOOL      "transaction_pool"
 #define LOG_TXIDX       "transaction_indexer"
