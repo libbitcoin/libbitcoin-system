@@ -436,23 +436,44 @@ bool channel_proxy::handle_receive_pong(const std::error_code& ec,
 
 void channel_proxy::read_header()
 {
+    strand_.queue(
+        std::bind(&channel_proxy::do_read_header,
+            shared_from_this()));
+}
+
+void channel_proxy::do_read_header()
+{
     async_read(*socket_, buffer(inbound_header_),
-        strand_.wrap(&channel_proxy::handle_read_header,
+        std::bind(&channel_proxy::handle_read_header,
             shared_from_this(), _1, _2));
 }
 
 void channel_proxy::read_checksum(const header_type& header)
 {
+    strand_.queue(
+        std::bind(&channel_proxy::do_read_checksum,
+            shared_from_this(), header));
+}
+
+void channel_proxy::do_read_checksum(const header_type& header)
+{
     async_read(*socket_, buffer(inbound_checksum_),
-        strand_.wrap(&channel_proxy::handle_read_checksum,
+        std::bind(&channel_proxy::handle_read_checksum,
             shared_from_this(), _1, _2, header));
 }
 
 void channel_proxy::read_payload(const header_type& header)
 {
+    strand_.queue(
+        std::bind(&channel_proxy::do_read_payload,
+            shared_from_this(), header));
+}
+
+void channel_proxy::do_read_payload(const header_type& header)
+{
     inbound_payload_.resize(header.payload_length);
     async_read(*socket_, buffer(inbound_payload_, header.payload_length),
-        strand_.wrap(&channel_proxy::handle_read_payload,
+        std::bind(&channel_proxy::handle_read_payload,
             shared_from_this(), _1, _2, header));
 }
 
