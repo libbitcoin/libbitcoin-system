@@ -54,9 +54,9 @@ public:
             BITCOIN_ASSERT(*counter_ <= clearance_count_);
             if (*counter_ == clearance_count_)
             {
-                //log_debug(LOG_PROTOCOL)
-                //    << "Handled [" << name_ << "] > "
-                //    << clearance_count_ << " (ignored)";
+                ////log_debug(LOG_PROTOCOL)
+                ////    << "Handled [" << name_ << "] > "
+                ////    << clearance_count_ << " (ignored)";
                 return;
             }
 
@@ -64,9 +64,9 @@ public:
 
             if (code)
             {
-                log_debug(LOG_PROTOCOL)
-                    << "Handled [" << name_ << "] " << *counter_
-                    << "/" << clearance_count_ << " " << code.message();
+                ////log_debug(LOG_PROTOCOL)
+                ////    << "Handled [" << name_ << "] " << *counter_
+                ////    << "/" << clearance_count_ << " " << code.message();
 
                 // Stop because of failure.
                 *counter_ = clearance_count_;
@@ -80,9 +80,9 @@ public:
 
             if (!code)
             {
-                log_debug(LOG_PROTOCOL)
-                    << "Handled [" << name_ << "] " << *counter_ << "/"
-                    << clearance_count_;
+                ////log_debug(LOG_PROTOCOL)
+                ////    << "Handled [" << name_ << "] " << *counter_ << "/"
+                ////    << clearance_count_;
             }
         }
 

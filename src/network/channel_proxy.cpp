@@ -101,8 +101,8 @@ channel_proxy::~channel_proxy()
 template<typename Message, class Subscriber>
 void channel_proxy::establish_relay(Subscriber subscriber)
 {
-    const auto message_handler = [subscriber](const std::error_code& ec,
-        const Message& message)
+    const auto message_handler = [subscriber](std::error_code ec,
+        Message message)
     {
         subscriber->relay(ec, message);
     };
@@ -270,7 +270,7 @@ void channel_proxy::start_timers()
     set_expiration(pseudo_randomize(timeouts_.expiration));
     set_heartbeat(pseudo_randomize(timeouts_.heartbeat));
     set_inactivity(pseudo_randomize(timeouts_.inactivity));
-    set_revival(pseudo_randomize(timeouts_.revival, 10));
+    set_revival(pseudo_randomize(timeouts_.revival));
 }
 
 void channel_proxy::reset_inactivity()
@@ -585,24 +585,25 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
         return;
     }
 
-    // Parse and publish the raw payload to subscribers.
-    raw_subscriber_->relay(error::success, header, inbound_payload_);
-
     // Copy the buffer before registering for new messages.
     const data_chunk payload_copy(inbound_payload_);
 
-    // This must be called before calling subscribe notification handlers.
-    if (!ec)
-        read_header();
-
-    reset_inactivity();
+    // Parse and publish the raw payload to subscribers.
+    raw_subscriber_->relay(error::success, header, payload_copy);
 
     // Parse and publish the payload to message subscribers.
     stream_loader_.load(header.command, payload_copy);
 
-    // Now we stop the channel if there was an error and we aren't yet stopped.
     if (ec)
+    {
         stop(ec);
+        return;
+    }
+
+    reset_inactivity();
+
+    // Restart the read cycle.
+    read_header();
 }
 
 void channel_proxy::subscribe_version(

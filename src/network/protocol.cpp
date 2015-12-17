@@ -115,7 +115,7 @@ void protocol::start(completion_handler handle_complete)
     }
 
     host_pool_.load(
-        strand_.wrap(&protocol::handle_hosts_load,
+        std::bind(&protocol::handle_hosts_load,
             this, _1, handle_complete));
 }
 
@@ -131,7 +131,7 @@ void protocol::handle_hosts_load(const std::error_code& ec,
     }
 
     host_pool_.fetch_count(
-        strand_.wrap(&protocol::handle_hosts_count,
+        std::bind(&protocol::handle_hosts_count,
             this, _1, _2, handle_complete));
 }
 
@@ -154,7 +154,7 @@ void protocol::handle_hosts_count(const std::error_code& ec,
     }
 
     seeder_.start(
-        strand_.wrap(&protocol::handle_seeder_start,
+        std::bind(&protocol::handle_seeder_start,
             this, _1, handle_complete));
 }
 
@@ -180,25 +180,25 @@ void protocol::start_connecting(completion_handler handle_complete, bool relay)
 
     handle_complete(error::success);
 
-    // Start outbound connection attempts at a max rate of 10/sec.
+    // Start outbound connection attempts at a max rate of 10/minute.
     for (size_t channel = 0; channel < max_outbound_; ++channel)
     {
         new_connection(relay);
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::seconds(6));
     }
 }
 
 void protocol::accept_connections(bool relay)
 {
     network_.listen(inbound_port_,
-        strand_.wrap(&protocol::start_accept,
+        std::bind(&protocol::start_accept,
             this, _1, _2, relay));
 }
 
 void protocol::new_connection(bool relay)
 {
     host_pool_.fetch_address(
-        strand_.wrap(&protocol::start_connect,
+        std::bind(&protocol::start_connect,
             this, _1, _2, relay));
 }
 
@@ -260,7 +260,7 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
 
     // Subscribe to events and start talking on the socket.
     handshake_.start(node, 
-        strand_.wrap(&protocol::handle_handshake,
+        std::bind(&protocol::handle_handshake,
             this, _1, node), relay);
 
     // Start reading from the socket (causing events).
@@ -368,7 +368,7 @@ void protocol::handle_manual_connect(const std::error_code& ec,
 
     // Subscribe to events and start talking on the socket.
     handshake_.start(node, 
-        strand_.wrap(&protocol::handle_handshake,
+        std::bind(&protocol::handle_handshake,
             this, _1, node), relay);
 
     // Start reading from the socket (causing events).
@@ -444,7 +444,7 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
 
     // Subscribe to events and start talking on the socket.
     handshake_.start(node, 
-        strand_.wrap(&protocol::handle_handshake,
+        std::bind(&protocol::handle_handshake,
             this, _1, node), relay);
 
     // Start reading from the socket (causing events).
@@ -520,7 +520,7 @@ bool protocol::handle_address_message(const std::error_code& ec,
     // TODO: have host pool process address list internally.
     for (const auto& net_address: message.addresses)
         host_pool_.store(net_address,
-            strand_.wrap(&protocol::handle_store_address,
+            std::bind(&protocol::handle_store_address,
                 this, _1));
 
     return true;
