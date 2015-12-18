@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_CHANNEL_PROXY_HPP
 #define LIBBITCOIN_CHANNEL_PROXY_HPP
 
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -260,7 +261,7 @@ private:
     boost::asio::deadline_timer revival_;
 
     revival_handler revival_handler_;
-    bool stopped_;
+    std::atomic<bool> stopped_;
     uint64_t nonce_;
     channel_stream_loader stream_loader_;
 
