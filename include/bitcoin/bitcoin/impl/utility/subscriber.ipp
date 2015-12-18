@@ -36,7 +36,7 @@ subscriber<Args...>::subscriber(threadpool& pool)
 template <typename... Args>
 subscriber<Args...>::~subscriber()
 {
-    BITCOIN_ASSERT_MSG(stopped, "subscriber not stopped");
+    BITCOIN_ASSERT_MSG(stopped_, "subscriber not stopped");
     BITCOIN_ASSERT_MSG(subscriptions_.empty(), "subscriber not cleared");
 }
 

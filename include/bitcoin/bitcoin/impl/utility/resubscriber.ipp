@@ -36,7 +36,7 @@ resubscriber<Args...>::resubscriber(threadpool& pool)
 template <typename... Args>
 resubscriber<Args...>::~resubscriber()
 {
-    BITCOIN_ASSERT_MSG(stopped, "resubscriber not stopped");
+    BITCOIN_ASSERT_MSG(stopped_, "resubscriber not stopped");
     BITCOIN_ASSERT_MSG(subscriptions_.empty(), "resubscriber not cleared");
 }
 
