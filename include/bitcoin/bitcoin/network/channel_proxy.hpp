@@ -138,12 +138,6 @@ public:
     template <typename Message>
     void send(const Message& packet, send_handler handle_send)
     {
-        if (stopped())
-        {
-            handle_send(error::channel_stopped);
-            return;
-        }
-
         const auto message = create_raw_message(packet);
         const auto command = satoshi_command(packet);
         strand_.queue(
