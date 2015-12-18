@@ -34,9 +34,9 @@ namespace network {
 static std::atomic<size_t> instances_(0);
 
 channel::channel(channel_proxy_ptr proxy)
-  : proxy_(proxy), nonce_(0)
+  : proxy_(proxy), nonce_(0), threshold_(null_hash)
 {
-    ++instances_;
+    ////++instances_;
 }
 
 channel::channel(threadpool& pool, socket_ptr socket, const timeout& timeouts)
@@ -49,9 +49,9 @@ channel::~channel()
     // A proxy reference may be held externally, so ensure the proxy is closed.
     proxy_->stop(error::channel_stopped);
 
-    // Leak tracking.
-    log_debug(LOG_NETWORK)
-        << "Closed a channel and (" << --instances_ << ") remain open";
+    ////// Leak tracking.
+    ////log_debug(LOG_NETWORK)
+    ////    << "Closed a channel and (" << --instances_ << ") remain open";
 }
 
 void channel::start()
@@ -78,6 +78,16 @@ uint64_t channel::nonce() const
 void channel::set_nonce(uint64_t nonce)
 {
     nonce_ = nonce;
+}
+
+const hash_digest& channel::threshold() const
+{
+    return threshold_;
+}
+
+void channel::set_threshold(const hash_digest& threshold)
+{
+    threshold_ = threshold;
 }
 
 void channel::reset_revival()
