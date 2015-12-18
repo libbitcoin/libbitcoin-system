@@ -36,7 +36,11 @@ static std::atomic<size_t> instances_(0);
 channel::channel(channel_proxy_ptr proxy)
   : proxy_(proxy), nonce_(0), threshold_(null_hash)
 {
-    ////++instances_;
+    const auto count = ++instances_;
+
+    // Leak tracking.
+    log_debug(LOG_NETWORK)
+        << "Opened a channel and (" << count << ") are now open";
 }
 
 channel::channel(threadpool& pool, socket_ptr socket, const timeout& timeouts)
@@ -49,9 +53,11 @@ channel::~channel()
     // A proxy reference may be held externally, so ensure the proxy is closed.
     proxy_->stop(error::channel_stopped);
 
-    ////// Leak tracking.
-    ////log_debug(LOG_NETWORK)
-    ////    << "Closed a channel and (" << --instances_ << ") remain open";
+    const auto count = --instances_;
+
+    // Leak tracking.
+    log_debug(LOG_NETWORK)
+        << "Closed a channel and (" << count << ") remain open";
 }
 
 void channel::start()

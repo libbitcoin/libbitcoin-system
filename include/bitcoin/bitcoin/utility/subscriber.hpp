@@ -22,6 +22,7 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <vector>
 #include <bitcoin/bitcoin/utility/sequencer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -37,8 +38,15 @@ public:
     typedef std::shared_ptr<subscriber<Args...>> ptr;
 
     subscriber(threadpool& pool);
+    ~subscriber();
 
+    /// Call stop to prevent new subscriptions.
+    void stop();
+
+    /// Use the resubscriber template to resubscribe in the handler.
     void subscribe(subscription_handler notifier);
+
+    /// Call relay to invoke all handlers, which clears them.
     void relay(Args... args);
 
 private:
@@ -47,6 +55,8 @@ private:
     void do_subscribe(subscription_handler notifier);
     void do_relay(Args... args);
 
+    bool stopped_;
+    std::mutex mutex_;
     sequencer strand_;
     subscription_list subscriptions_;
 };

@@ -20,6 +20,8 @@
 #ifndef LIBBITCOIN_RESUBSCRIBER_IPP
 #define LIBBITCOIN_RESUBSCRIBER_IPP
 
+#include <mutex>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/sequencer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -27,15 +29,39 @@ namespace libbitcoin {
 
 template <typename... Args>
 resubscriber<Args...>::resubscriber(threadpool& pool)
-  : strand_(pool)
+  : strand_(pool), stopped_(false)
 {
+}
+
+template <typename... Args>
+resubscriber<Args...>::~resubscriber()
+{
+    BITCOIN_ASSERT_MSG(stopped_, "resubscriber not stopped");
+    BITCOIN_ASSERT_MSG(subscriptions_.empty(), "resubscriber not cleared");
+}
+
+template <typename... Args>
+void resubscriber<Args...>::stop()
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    stopped_ = true;
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 template <typename... Args>
 void resubscriber<Args...>::subscribe(resubscription_handler notifier)
 {
-    strand_.queue(&resubscriber<Args...>::do_subscribe,
-        this->shared_from_this(), notifier);
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    if (!stopped_)
+        strand_.queue(&resubscriber<Args...>::do_subscribe,
+            this->shared_from_this(), notifier);
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 template <typename... Args>
@@ -60,9 +86,18 @@ void resubscriber<Args...>::do_relay(Args... args)
     const auto subscriptions_copy = subscriptions_;
     subscriptions_.clear();
 
-    for (const auto notifier: subscriptions_copy)
-        if (notifier(args...))
+    for (const auto notifier : subscriptions_copy)
+    {
+        const auto renew = notifier(args...);
+
+        // Critical Section
+        ///////////////////////////////////////////////////////////////////////
+        std::lock_guard<std::mutex> lock(mutex_);
+
+        if (renew && !stopped_)
             subscriptions_.push_back(notifier);
+        ///////////////////////////////////////////////////////////////////////
+    }
 }
 
 } // namespace libbitcoin

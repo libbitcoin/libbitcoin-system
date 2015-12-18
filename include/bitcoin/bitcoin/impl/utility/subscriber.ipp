@@ -20,6 +20,8 @@
 #ifndef LIBBITCOIN_SUBSCRIBER_IPP
 #define LIBBITCOIN_SUBSCRIBER_IPP
 
+#include <mutex>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/sequencer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
    
@@ -27,15 +29,39 @@ namespace libbitcoin {
 
 template <typename... Args>
 subscriber<Args...>::subscriber(threadpool& pool)
-  : strand_(pool)
+  : strand_(pool), stopped_(false)
 {
+}
+
+template <typename... Args>
+subscriber<Args...>::~subscriber()
+{
+    BITCOIN_ASSERT_MSG(stopped_, "subscriber not stopped");
+    BITCOIN_ASSERT_MSG(subscriptions_.empty(), "subscriber not cleared");
+}
+
+template <typename... Args>
+void subscriber<Args...>::stop()
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    stopped_ = true;
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 template <typename... Args>
 void subscriber<Args...>::subscribe(subscription_handler notifier)
 {
-    strand_.queue(&subscriber<Args...>::do_subscribe,
-        this->shared_from_this(), notifier);
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    if (!stopped_)
+        strand_.queue(&subscriber<Args...>::do_subscribe,
+            this->shared_from_this(), notifier);
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 template <typename... Args>
@@ -54,13 +80,10 @@ void subscriber<Args...>::do_subscribe(subscription_handler notifier)
 template <typename... Args>
 void subscriber<Args...>::do_relay(Args... args)
 {
-    if (subscriptions_.empty())
-        return;
-
-    const auto subscriptions_copy = subscriptions_;
-    subscriptions_.clear();
-    for (const auto notifier: subscriptions_copy)
+    for (const auto notifier: subscriptions_)
         notifier(args...);
+
+    subscriptions_.clear();
 }
 
 } // namespace libbitcoin
