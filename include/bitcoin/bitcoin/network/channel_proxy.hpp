@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <system_error>
 #include <string>
 #include <boost/array.hpp>
@@ -193,12 +194,11 @@ private:
     void establish_relay(Subscriber subscriber);
     template <typename Message, class Subscriber>
     void subscribe(Subscriber subscriber,
-        message_handler<Message> handler) const;
+        message_handler<Message> handler);
     template <typename Message, class Subscriber>
     void notify_stop(Subscriber subscriber) const;
 
     void stop(const boost::system::error_code& ec);
-    void do_stop(const std::error_code& ec);
     void clear_subscriptions(const std::error_code& ec);
     void clear_timers();
 
@@ -254,9 +254,9 @@ private:
     boost::asio::deadline_timer heartbeat_;
     boost::asio::deadline_timer revival_;
 
-    revival_handler revival_handler_;
+    std::mutex mutex_;
     std::atomic<bool> stopped_;
-    uint64_t nonce_;
+    revival_handler revival_handler_;
     channel_stream_loader stream_loader_;
 
     // Header minus checksum is 4 + 12 + 4 = 20 bytes

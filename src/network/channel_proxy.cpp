@@ -19,10 +19,12 @@
  */
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <memory>
+#include <mutex>
 #include <system_error>
 #include <boost/asio.hpp>
 #include <boost/date_time.hpp>
@@ -55,6 +57,9 @@ using boost::asio::ip::tcp;
 using boost::format;
 using boost::posix_time::time_duration;
 
+// Leak tracking.
+static std::atomic<size_t> instances_(0);
+
 channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
     const timeout& timeouts=timeout::defaults)
   : strand_(pool),
@@ -64,8 +69,8 @@ channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
     inactivity_(pool.service()),
     heartbeat_(pool.service()),
     revival_(pool.service()),
-    revival_handler_(nullptr),
     stopped_(false),
+    revival_handler_(nullptr),
     version_subscriber_(std::make_shared<version_subscriber>(pool)),
     verack_subscriber_(std::make_shared<verack_subscriber>(pool)),
     address_subscriber_(std::make_shared<address_subscriber>(pool)),
@@ -91,11 +96,23 @@ channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
     establish_relay<block_type>(block_subscriber_);
     establish_relay<ping_type>(ping_subscriber_);
     establish_relay<pong_type>(pong_subscriber_);
+
+    const auto count = ++instances_;
+
+    // Leak tracking.
+    log_debug(LOG_NETWORK)
+        << "Opened a proxy and (" << count << ") are now open";
 }
 
 channel_proxy::~channel_proxy()
 {
-    do_stop(error::channel_stopped);
+    stop(error::channel_stopped);
+
+    const auto count = --instances_;
+
+    // Leak tracking.
+    log_debug(LOG_NETWORK)
+        << "Closed a proxy and (" << count << ") remain open";
 }
 
 template<typename Message, class Subscriber>
@@ -110,25 +127,12 @@ void channel_proxy::establish_relay(Subscriber subscriber)
     stream_loader_.add<Message>(message_handler);
 }
 
-// Subscribing must be immediate, we cannot switch thread contexts.
-template <typename Message, class Subscriber>
-void channel_proxy::subscribe(Subscriber subscriber,
-    message_handler<Message> handler) const
-{
-    if (!stopped())
-    {
-        subscriber->subscribe(handler);
-        return;
-    }
-
-    handler(error::channel_stopped, Message());
-}
-
 // Subscriber doesn't have an unsubscribe, we just send service_stopped.
 // The subscriber then has the option to not resubscribe in the handler.
 template <typename Message, class Subscriber>
 void channel_proxy::notify_stop(Subscriber subscriber) const
 {
+    subscriber->stop();
     subscriber->relay(error::channel_stopped, Message());
 }
 
@@ -210,31 +214,27 @@ void channel_proxy::stop(const boost::system::error_code& ec)
 
 void channel_proxy::stop(const std::error_code& ec)
 {
-    if (stopped())
-        return;
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    if (true)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
 
-    strand_.queue(
-        std::bind(&channel_proxy::do_stop,
-            shared_from_this(), ec));
-}
+        if (stopped())
+            return;
 
-void channel_proxy::do_stop(const std::error_code& ec)
-{
-    // Test and set value atomically.
-    if (stopped())
-        return;
+        stopped_ = true;
+        clear_timers();
 
-    // An atomic would not be effective here.
-    stopped_ = true;
-    clear_timers();
+        // Shutter the socket, ignore the error code.
+        boost::system::error_code code;
+        socket_->shutdown(tcp::socket::shutdown_both, code);
+        socket_->close(code);
 
-    // Shutter the socket, ignore the error code.
-    boost::system::error_code code;
-    socket_->shutdown(tcp::socket::shutdown_both, code);
-    socket_->close(code);
-
-    // Clear all message subscriptions and notify with stop reason code.
-    clear_subscriptions(ec);
+        // Clear all message subscriptions and notify with stop reason code.
+        clear_subscriptions(ec);
+    }
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 void channel_proxy::clear_subscriptions(const std::error_code& ec)
@@ -250,7 +250,11 @@ void channel_proxy::clear_subscriptions(const std::error_code& ec)
     notify_stop<block_type>(block_subscriber_);
     notify_stop<ping_type>(ping_subscriber_);
     notify_stop<pong_type>(pong_subscriber_);
+
+    raw_subscriber_->stop();
     raw_subscriber_->relay(ec, header_type(), data_chunk());
+
+    stop_subscriber_->stop();
     stop_subscriber_->relay(ec);
 }
 
@@ -339,7 +343,7 @@ void channel_proxy::set_revival(const time_duration& timeout)
 
 void channel_proxy::handle_expiration(const boost::system::error_code& ec)
 {
-    if (timeout::canceled(ec))
+    if (stopped() || timeout::canceled(ec))
         return;
 
     log_info(LOG_NETWORK)
@@ -350,7 +354,7 @@ void channel_proxy::handle_expiration(const boost::system::error_code& ec)
 
 void channel_proxy::handle_inactivity(const boost::system::error_code& ec)
 {
-    if (timeout::canceled(ec))
+    if (stopped() || timeout::canceled(ec))
         return;
 
     log_info(LOG_NETWORK)
@@ -361,7 +365,7 @@ void channel_proxy::handle_inactivity(const boost::system::error_code& ec)
 
 void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
 {
-    if (timeout::canceled(ec))
+    if (stopped() || timeout::canceled(ec))
         return;
 
     const auto nonce = pseudo_random();
@@ -381,7 +385,7 @@ void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
 
 void channel_proxy::handle_revival(const boost::system::error_code& ec)
 {
-    if (timeout::canceled(ec))
+    if (stopped() || timeout::canceled(ec))
         return;
 
     // Nothing to do, no handler registered.
@@ -672,25 +676,74 @@ void channel_proxy::subscribe_pong(
     subscribe<pong_type>(pong_subscriber_, handle_receive);
 }
 
+template <typename Message, class Subscriber>
+void channel_proxy::subscribe(Subscriber subscriber,
+    message_handler<Message> handler)
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    if (true)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+
+        if (!stopped())
+        {
+            subscriber->subscribe(handler);
+            return;
+        }
+    }
+    ///////////////////////////////////////////////////////////////////////////
+
+    handler(error::channel_stopped, Message());
+}
+
 void channel_proxy::subscribe_raw(receive_raw_handler handle_receive)
 {
-    if (stopped())
-        handle_receive(error::channel_stopped, header_type(), data_chunk());
-    else
-        raw_subscriber_->subscribe(handle_receive);
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    if (true)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+
+        if (!stopped())
+        {
+            raw_subscriber_->subscribe(handle_receive);
+            return;
+        }
+    }
+    ///////////////////////////////////////////////////////////////////////////
+
+    handle_receive(error::channel_stopped, header_type(), data_chunk());;
 }
 
 void channel_proxy::subscribe_stop(stop_handler handle_stop)
 {
-    if (stopped())
-        handle_stop(error::channel_stopped);
-    else
-        stop_subscriber_->subscribe(handle_stop);
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    if (true)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+
+        if (!stopped())
+        {
+            stop_subscriber_->subscribe(handle_stop);
+            return;
+        }
+    }
+    ///////////////////////////////////////////////////////////////////////////
+
+    handle_stop(error::channel_stopped);
 }
 
 void channel_proxy::do_send(const data_chunk& message,
     send_handler handle_send, const std::string& command)
 {
+    if (stopped())
+    {
+        handle_send(error::channel_stopped);
+        return;
+    }
+
     log_debug(LOG_NETWORK)
         << "Send " << command << " [" << address() << "] ("
         << message.size() << " bytes)";
@@ -724,6 +777,12 @@ void channel_proxy::send_raw(const header_type& packet_header,
 void channel_proxy::do_send_raw(const header_type& packet_header,
     const data_chunk& payload, send_handler handle_send)
 {
+    if (stopped())
+    {
+        handle_send(error::channel_stopped);
+        return;
+    }
+
     data_chunk message(satoshi_raw_size(packet_header));
     satoshi_save(packet_header, message.begin());
     extend_data(message, payload);

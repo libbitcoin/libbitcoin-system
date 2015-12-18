@@ -92,6 +92,7 @@ void protocol::handle_hosts_save(const std::error_code& ec,
 void protocol::notify_stop()
 {
     // Stop protocol subscribers.
+    channel_subscriber_->stop();
     channel_subscriber_->relay(error::service_stopped, nullptr);
 
     // Notify all channels to stop.
