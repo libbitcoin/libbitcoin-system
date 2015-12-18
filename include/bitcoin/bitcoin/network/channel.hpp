@@ -55,6 +55,8 @@ public:
     uint64_t nonce() const;
     void set_nonce(uint64_t nonce);
     config::authority address() const;
+    void set_threshold(const hash_digest& threshold);
+    const hash_digest& threshold() const;
 
     void reset_revival();
     void set_revival_handler(channel_proxy::revival_handler handler);
@@ -98,6 +100,7 @@ public:
 private:
     channel_proxy_ptr proxy_;
     uint64_t nonce_;
+    hash_digest threshold_;
 };
 
 } // namespace network
