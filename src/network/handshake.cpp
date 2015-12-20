@@ -193,6 +193,11 @@ bool handshake::receive_version(const std::error_code& ec,
         return false;
     }
 
+    log_debug(LOG_NETWORK)
+        << "Peer user agent (" << version.user_agent 
+        << ") version (" << version.version
+        << ") [" << node->address() << "]";
+
     node->send(verack_type(),
         strand_.wrap(&handshake::handle_verack_sent,
             this, _1, completion_callback));
