@@ -34,7 +34,10 @@ namespace network {
 static std::atomic<size_t> instances_(0);
 
 channel::channel(channel_proxy_ptr proxy)
-  : proxy_(proxy), nonce_(0), threshold_(null_hash)
+  : proxy_(proxy),
+    nonce_(0),
+    own_threshold_(null_hash),
+    peer_threshold_(null_hash)
 {
     const auto count = ++instances_;
 
@@ -86,14 +89,24 @@ void channel::set_nonce(uint64_t nonce)
     nonce_ = nonce;
 }
 
-const hash_digest& channel::threshold() const
+const hash_digest& channel::own_threshold() const
 {
-    return threshold_;
+    return own_threshold_;
 }
 
-void channel::set_threshold(const hash_digest& threshold)
+void channel::set_own_threshold(const hash_digest& threshold)
 {
-    threshold_ = threshold;
+    own_threshold_ = threshold;
+}
+
+const hash_digest& channel::peer_threshold() const
+{
+    return peer_threshold_;
+}
+
+void channel::set_peer_threshold(const hash_digest& threshold)
+{
+    peer_threshold_ = threshold;
 }
 
 void channel::reset_poll()
