@@ -315,52 +315,77 @@ void channel_proxy::set_sync_handler(sync_handler handler)
 
 void channel_proxy::set_expiration(const time_duration& timeout)
 {
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(timer_mutex_);
+
     // Ignore the error_code.
     boost::system::error_code ec;
     expiration_.expires_from_now(timeout, ec);
     expiration_.async_wait(
         std::bind(&channel_proxy::handle_expiration,
             shared_from_this(), _1));
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 void channel_proxy::set_inactivity(const time_duration& timeout)
 {
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(timer_mutex_);
+
     // Ignore the error_code.
     boost::system::error_code ec;
     inactivity_.expires_from_now(timeout, ec);
     inactivity_.async_wait(
         std::bind(&channel_proxy::handle_inactivity,
             shared_from_this(), _1));
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 void channel_proxy::set_heartbeat(const time_duration& timeout)
 {
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(timer_mutex_);
+
     // Ignore the error_code.
     boost::system::error_code ec;
     heartbeat_.expires_from_now(timeout, ec);
     heartbeat_.async_wait(
         std::bind(&channel_proxy::handle_heartbeat,
             shared_from_this(), _1));
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 void channel_proxy::set_poll(const time_duration& timeout)
 {
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(timer_mutex_);
+
     // Ignore the error_code.
     boost::system::error_code ec;
     poll_.expires_from_now(timeout, ec);
     poll_.async_wait(
         std::bind(&channel_proxy::handle_poll,
             shared_from_this(), _1));
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 void channel_proxy::set_sync(const time_duration& timeout)
 {
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(timer_mutex_);
+
     // Ignore the error_code.
     boost::system::error_code ec;
     sync_.expires_from_now(timeout, ec);
     sync_.async_wait(
         std::bind(&channel_proxy::handle_sync,
             shared_from_this(), _1));
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 void channel_proxy::handle_expiration(const boost::system::error_code& ec)

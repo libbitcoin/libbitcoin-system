@@ -260,6 +260,7 @@ private:
     boost::asio::deadline_timer heartbeat_;
     boost::asio::deadline_timer poll_;
     boost::asio::deadline_timer sync_;
+    std::mutex timer_mutex_;
 
     std::mutex mutex_;
     std::atomic<bool> stopped_;
