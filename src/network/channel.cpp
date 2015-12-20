@@ -96,14 +96,14 @@ void channel::set_threshold(const hash_digest& threshold)
     threshold_ = threshold;
 }
 
-void channel::reset_revival()
+void channel::reset_poll()
 {
-    return proxy_->reset_revival();
+    return proxy_->reset_poll();
 }
 
-void channel::set_revival_handler(channel_proxy::revival_handler handler)
+void channel::set_poll_handler(channel_proxy::poll_handler handler)
 {
-    return proxy_->set_revival_handler(handler);
+    return proxy_->set_poll_handler(handler);
 }
 
 void channel::subscribe_version(

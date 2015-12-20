@@ -37,14 +37,14 @@ public:
     timeout(
         uint32_t connect_timeout_seconds=5,
         uint32_t channel_handshake_seconds=30,
-        uint32_t channel_revival_minutes=5,
+        uint32_t channel_poll_seconds=5,
         uint32_t channel_heartbeat_minutes=5,
         uint32_t channel_inactivity_minutes = 30,
         uint32_t channel_expiration_minutes=90);
 
     boost::posix_time::time_duration connect;
     boost::posix_time::time_duration handshake;
-    boost::posix_time::time_duration revival;
+    boost::posix_time::time_duration poll;
     boost::posix_time::time_duration heartbeat;
     boost::posix_time::time_duration inactivity;
     boost::posix_time::time_duration expiration;

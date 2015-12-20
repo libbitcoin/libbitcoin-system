@@ -38,7 +38,7 @@ struct BC_API settings
     uint32_t outbound_connections;
     uint32_t connect_timeout_seconds;
     uint32_t channel_handshake_seconds;
-    uint32_t channel_revival_minutes;
+    uint32_t channel_poll_seconds;
     uint32_t channel_heartbeat_minutes;
     uint32_t channel_inactivity_minutes;
     uint32_t channel_expiration_minutes;

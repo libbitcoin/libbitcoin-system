@@ -68,9 +68,9 @@ channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
     expiration_(pool.service()),
     inactivity_(pool.service()),
     heartbeat_(pool.service()),
-    revival_(pool.service()),
+    poll_(pool.service()),
     stopped_(false),
-    revival_handler_(nullptr),
+    poll_handler_(nullptr),
     version_subscriber_(std::make_shared<version_subscriber>(pool)),
     verack_subscriber_(std::make_shared<verack_subscriber>(pool)),
     address_subscriber_(std::make_shared<address_subscriber>(pool)),
@@ -265,16 +265,17 @@ void channel_proxy::clear_timers()
     expiration_.cancel(ec);
     inactivity_.cancel(ec);
     heartbeat_.cancel(ec);
-    revival_.cancel(ec);
-    revival_handler_ = nullptr;
+    poll_.cancel(ec);
+    poll_handler_ = nullptr;
 }
 
 void channel_proxy::start_timers()
 {
-    set_expiration(pseudo_randomize(timeouts_.expiration));
-    set_heartbeat(pseudo_randomize(timeouts_.heartbeat));
-    set_inactivity(pseudo_randomize(timeouts_.inactivity));
-    set_revival(pseudo_randomize(timeouts_.revival));
+    // TODO: apply pseudo_randomize
+    set_expiration(timeouts_.expiration);
+    reset_heartbeat();
+    reset_inactivity();
+    reset_poll();
 }
 
 void channel_proxy::reset_inactivity()
@@ -287,14 +288,14 @@ void channel_proxy::reset_heartbeat()
     set_inactivity(timeouts_.heartbeat);
 }
 
-void channel_proxy::reset_revival()
+void channel_proxy::reset_poll()
 {
-    set_revival(timeouts_.revival);
+    set_poll(timeouts_.poll);
 }
 
-void channel_proxy::set_revival_handler(revival_handler handler)
+void channel_proxy::set_poll_handler(poll_handler handler)
 {
-    revival_handler_ = handler;
+    poll_handler_ = handler;
 }
 
 void channel_proxy::set_expiration(const time_duration& timeout)
@@ -330,14 +331,14 @@ void channel_proxy::set_heartbeat(const time_duration& timeout)
             shared_from_this(), _1));
 }
 
-void channel_proxy::set_revival(const time_duration& timeout)
+void channel_proxy::set_poll(const time_duration& timeout)
 {
     // Ignore the error_code.
     boost::system::error_code ec;
-    revival_.cancel(ec);
-    revival_.expires_from_now(timeout, ec);
-    revival_.async_wait(
-        std::bind(&channel_proxy::handle_revival,
+    poll_.cancel(ec);
+    poll_.expires_from_now(timeout, ec);
+    poll_.async_wait(
+        std::bind(&channel_proxy::handle_poll,
             shared_from_this(), _1));
 }
 
@@ -383,16 +384,16 @@ void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
     reset_heartbeat();
 }
 
-void channel_proxy::handle_revival(const boost::system::error_code& ec)
+void channel_proxy::handle_poll(const boost::system::error_code& ec)
 {
     if (stopped() || timeout::canceled(ec))
         return;
 
     // Nothing to do, no handler registered.
-    if (revival_handler_ == nullptr)
+    if (poll_handler_ == nullptr)
         return;
 
-    revival_handler_(bc::error::boost_to_error_code(ec));
+    poll_handler_(bc::error::boost_to_error_code(ec));
 }
 
 void channel_proxy::handle_send_ping(const std::error_code& ec)

@@ -116,7 +116,7 @@ public:
         const header_type&, const data_chunk&)> receive_raw_handler;
 
     typedef std::function<void(const std::error_code&)> stop_handler;
-    typedef std::function<void(const std::error_code&)> revival_handler;
+    typedef std::function<void(const std::error_code&)> poll_handler;
     typedef std::function<void(const std::error_code&)> expiration_handler;
     typedef std::function<void(const std::error_code&)> send_handler;
 
@@ -132,8 +132,8 @@ public:
     void stop(const std::error_code& ec);
     bool stopped() const;
     config::authority address() const;
-    void reset_revival();
-    void set_revival_handler(revival_handler handler);
+    void reset_poll();
+    void set_poll_handler(poll_handler handler);
     void set_nonce(uint64_t nonce);
 
     template <typename Message>
@@ -209,12 +209,12 @@ private:
     void set_expiration(const boost::posix_time::time_duration& timeout);
     void set_inactivity(const boost::posix_time::time_duration& timeout);
     void set_heartbeat(const boost::posix_time::time_duration& timeout);
-    void set_revival(const boost::posix_time::time_duration& timeout);
+    void set_poll(const boost::posix_time::time_duration& timeout);
 
     void handle_expiration(const boost::system::error_code& ec);
     void handle_inactivity(const boost::system::error_code& ec);
     void handle_heartbeat(const boost::system::error_code& ec);
-    void handle_revival(const boost::system::error_code& ec);
+    void handle_poll(const boost::system::error_code& ec);
     
     void read_header();
     void do_read_header();
@@ -252,11 +252,11 @@ private:
     boost::asio::deadline_timer expiration_;
     boost::asio::deadline_timer inactivity_;
     boost::asio::deadline_timer heartbeat_;
-    boost::asio::deadline_timer revival_;
+    boost::asio::deadline_timer poll_;
 
     std::mutex mutex_;
     std::atomic<bool> stopped_;
-    revival_handler revival_handler_;
+    poll_handler poll_handler_;
     channel_stream_loader stream_loader_;
 
     // Header minus checksum is 4 + 12 + 4 = 20 bytes

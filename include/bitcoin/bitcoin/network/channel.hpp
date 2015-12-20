@@ -58,8 +58,8 @@ public:
     void set_threshold(const hash_digest& threshold);
     const hash_digest& threshold() const;
 
-    void reset_revival();
-    void set_revival_handler(channel_proxy::revival_handler handler);
+    void reset_poll();
+    void set_poll_handler(channel_proxy::poll_handler handler);
 
     void subscribe_version(
         channel_proxy::receive_version_handler handle_receive);
