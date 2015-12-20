@@ -92,26 +92,38 @@ void channel::set_nonce(uint64_t nonce)
 
 hash_digest channel::own_threshold()
 {
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
     std::lock_guard<std::mutex> lock(own_threshold_mutex_);
     return own_threshold_;
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 void channel::set_own_threshold(const hash_digest& threshold)
 {
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
     std::lock_guard<std::mutex> lock(own_threshold_mutex_);
     own_threshold_ = threshold;
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 hash_digest channel::peer_threshold()
 {
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
     std::lock_guard<std::mutex> lock(peer_threshold_mutex_);
     return peer_threshold_;
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 void channel::set_peer_threshold(const hash_digest& threshold)
 {
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
     std::lock_guard<std::mutex> lock(peer_threshold_mutex_);
     peer_threshold_ = threshold;
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 void channel::reset_poll()
@@ -119,9 +131,19 @@ void channel::reset_poll()
     return proxy_->reset_poll();
 }
 
+void channel::reset_sync()
+{
+    return proxy_->reset_sync();
+}
+
 void channel::set_poll_handler(channel_proxy::poll_handler handler)
 {
     return proxy_->set_poll_handler(handler);
+}
+
+void channel::set_sync_handler(channel_proxy::sync_handler handler)
+{
+    return proxy_->set_sync_handler(handler);
 }
 
 void channel::subscribe_version(

@@ -63,7 +63,9 @@ public:
     void set_peer_threshold(const hash_digest& threshold);
 
     void reset_poll();
+    void reset_sync();
     void set_poll_handler(channel_proxy::poll_handler handler);
+    void set_sync_handler(channel_proxy::sync_handler handler);
 
     void subscribe_version(
         channel_proxy::receive_version_handler handle_receive);
