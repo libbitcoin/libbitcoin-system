@@ -23,6 +23,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
@@ -34,7 +35,10 @@ namespace network {
 static std::atomic<size_t> instances_(0);
 
 channel::channel(channel_proxy_ptr proxy)
-  : proxy_(proxy), nonce_(0), threshold_(null_hash)
+  : proxy_(proxy),
+    nonce_(0),
+    own_threshold_(null_hash),
+    peer_threshold_(null_hash)
 {
     const auto count = ++instances_;
 
@@ -78,22 +82,48 @@ config::authority channel::address() const
 // TODO: make private, pass on notfy.
 uint64_t channel::nonce() const
 {
-    return nonce_;
+    return nonce_.load();
 }
 
 void channel::set_nonce(uint64_t nonce)
 {
-    nonce_ = nonce;
+    nonce_.store(nonce);
 }
 
-const hash_digest& channel::threshold() const
+hash_digest channel::own_threshold()
 {
-    return threshold_;
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(own_threshold_mutex_);
+    return own_threshold_;
+    ///////////////////////////////////////////////////////////////////////////
 }
 
-void channel::set_threshold(const hash_digest& threshold)
+void channel::set_own_threshold(const hash_digest& threshold)
 {
-    threshold_ = threshold;
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(own_threshold_mutex_);
+    own_threshold_ = threshold;
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+hash_digest channel::peer_threshold()
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(peer_threshold_mutex_);
+    return peer_threshold_;
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+void channel::set_peer_threshold(const hash_digest& threshold)
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(peer_threshold_mutex_);
+    peer_threshold_ = threshold;
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 void channel::reset_poll()
@@ -101,9 +131,19 @@ void channel::reset_poll()
     return proxy_->reset_poll();
 }
 
+void channel::reset_sync()
+{
+    return proxy_->reset_sync();
+}
+
 void channel::set_poll_handler(channel_proxy::poll_handler handler)
 {
     return proxy_->set_poll_handler(handler);
+}
+
+void channel::set_sync_handler(channel_proxy::sync_handler handler)
+{
+    return proxy_->set_sync_handler(handler);
 }
 
 void channel::subscribe_version(

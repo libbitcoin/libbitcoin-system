@@ -117,6 +117,7 @@ public:
 
     typedef std::function<void(const std::error_code&)> stop_handler;
     typedef std::function<void(const std::error_code&)> poll_handler;
+    typedef std::function<void(const std::error_code&)> sync_handler;
     typedef std::function<void(const std::error_code&)> expiration_handler;
     typedef std::function<void(const std::error_code&)> send_handler;
 
@@ -133,7 +134,9 @@ public:
     bool stopped() const;
     config::authority address() const;
     void reset_poll();
+    void reset_sync();
     void set_poll_handler(poll_handler handler);
+    void set_sync_handler(sync_handler handler);
     void set_nonce(uint64_t nonce);
 
     template <typename Message>
@@ -145,6 +148,7 @@ public:
             std::bind(&channel_proxy::do_send,
                 shared_from_this(), message, handle_send, command));
     }
+
     void send_raw(const header_type& packet_header,
         const data_chunk& payload, send_handler handle_send);
 
@@ -210,11 +214,13 @@ private:
     void set_inactivity(const boost::posix_time::time_duration& timeout);
     void set_heartbeat(const boost::posix_time::time_duration& timeout);
     void set_poll(const boost::posix_time::time_duration& timeout);
+    void set_sync(const boost::posix_time::time_duration& timeout);
 
     void handle_expiration(const boost::system::error_code& ec);
     void handle_inactivity(const boost::system::error_code& ec);
     void handle_heartbeat(const boost::system::error_code& ec);
     void handle_poll(const boost::system::error_code& ec);
+    void handle_sync(const boost::system::error_code& ec);
     
     void read_header();
     void do_read_header();
@@ -253,10 +259,12 @@ private:
     boost::asio::deadline_timer inactivity_;
     boost::asio::deadline_timer heartbeat_;
     boost::asio::deadline_timer poll_;
+    boost::asio::deadline_timer sync_;
 
     std::mutex mutex_;
     std::atomic<bool> stopped_;
     poll_handler poll_handler_;
+    sync_handler sync_handler_;
     channel_stream_loader stream_loader_;
 
     // Header minus checksum is 4 + 12 + 4 = 20 bytes

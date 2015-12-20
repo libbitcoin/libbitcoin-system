@@ -20,9 +20,11 @@
 #ifndef LIBBITCOIN_CHANNEL_HPP
 #define LIBBITCOIN_CHANNEL_HPP
 
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
@@ -55,11 +57,15 @@ public:
     uint64_t nonce() const;
     void set_nonce(uint64_t nonce);
     config::authority address() const;
-    void set_threshold(const hash_digest& threshold);
-    const hash_digest& threshold() const;
+    hash_digest own_threshold();
+    void set_own_threshold(const hash_digest& threshold);
+    hash_digest peer_threshold();
+    void set_peer_threshold(const hash_digest& threshold);
 
     void reset_poll();
+    void reset_sync();
     void set_poll_handler(channel_proxy::poll_handler handler);
+    void set_sync_handler(channel_proxy::sync_handler handler);
 
     void subscribe_version(
         channel_proxy::receive_version_handler handle_receive);
@@ -99,8 +105,11 @@ public:
 
 private:
     channel_proxy_ptr proxy_;
-    uint64_t nonce_;
-    hash_digest threshold_;
+    std::atomic<uint64_t> nonce_;
+    hash_digest own_threshold_;
+    hash_digest peer_threshold_;
+    std::mutex own_threshold_mutex_;
+    std::mutex peer_threshold_mutex_;
 };
 
 } // namespace network
