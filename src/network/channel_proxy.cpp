@@ -279,7 +279,7 @@ void channel_proxy::start_timers()
     reset_heartbeat();
     reset_inactivity();
     reset_poll();
-    reset_sync();
+    ////reset_sync();
 }
 
 void channel_proxy::reset_inactivity()
