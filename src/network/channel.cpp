@@ -81,32 +81,32 @@ config::authority channel::address() const
 // TODO: make private, pass on notfy.
 uint64_t channel::nonce() const
 {
-    return nonce_;
+    return nonce_.load();
 }
 
 void channel::set_nonce(uint64_t nonce)
 {
-    nonce_ = nonce;
+    nonce_.store(nonce);
 }
 
-const hash_digest& channel::own_threshold() const
+const hash_digest channel::own_threshold() const
 {
-    return own_threshold_;
+    return own_threshold_.load();
 }
 
 void channel::set_own_threshold(const hash_digest& threshold)
 {
-    own_threshold_ = threshold;
+    own_threshold_.store(threshold);
 }
 
-const hash_digest& channel::peer_threshold() const
+const hash_digest channel::peer_threshold() const
 {
-    return peer_threshold_;
+    return peer_threshold_.load();
 }
 
 void channel::set_peer_threshold(const hash_digest& threshold)
 {
-    peer_threshold_ = threshold;
+    peer_threshold_.store(threshold);
 }
 
 void channel::reset_poll()
