@@ -300,7 +300,7 @@ void channel_proxy::reset_poll()
 void channel_proxy::reset_sync()
 {
     const boost::posix_time::time_duration one_minute(0, 1, 0);
-    set_poll(one_minute);
+    set_sync(one_minute);
 }
 
 void channel_proxy::set_poll_handler(poll_handler handler)
@@ -357,10 +357,10 @@ void channel_proxy::set_sync(const time_duration& timeout)
 {
     // Ignore the error_code.
     boost::system::error_code ec;
-    poll_.expires_from_now(timeout, ec);
-    poll_.async_wait(
+    sync_.expires_from_now(timeout, ec);
+    sync_.async_wait(
         std::bind(&channel_proxy::handle_sync,
-        shared_from_this(), _1));
+            shared_from_this(), _1));
 }
 
 void channel_proxy::handle_expiration(const boost::system::error_code& ec)
