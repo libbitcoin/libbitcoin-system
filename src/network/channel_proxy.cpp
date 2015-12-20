@@ -69,8 +69,10 @@ channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
     inactivity_(pool.service()),
     heartbeat_(pool.service()),
     poll_(pool.service()),
+    sync_(pool.service()),
     stopped_(false),
     poll_handler_(nullptr),
+    sync_handler_(nullptr),
     version_subscriber_(std::make_shared<version_subscriber>(pool)),
     verack_subscriber_(std::make_shared<verack_subscriber>(pool)),
     address_subscriber_(std::make_shared<address_subscriber>(pool)),
@@ -267,6 +269,7 @@ void channel_proxy::clear_timers()
     heartbeat_.cancel(ec);
     poll_.cancel(ec);
     poll_handler_ = nullptr;
+    sync_handler_ = nullptr;
 }
 
 void channel_proxy::start_timers()
@@ -276,6 +279,7 @@ void channel_proxy::start_timers()
     reset_heartbeat();
     reset_inactivity();
     reset_poll();
+    reset_sync();
 }
 
 void channel_proxy::reset_inactivity()
@@ -293,9 +297,20 @@ void channel_proxy::reset_poll()
     set_poll(timeouts_.poll);
 }
 
+void channel_proxy::reset_sync()
+{
+    const boost::posix_time::time_duration one_minute(0, 1, 0);
+    set_poll(one_minute);
+}
+
 void channel_proxy::set_poll_handler(poll_handler handler)
 {
     poll_handler_ = handler;
+}
+
+void channel_proxy::set_sync_handler(sync_handler handler)
+{
+    sync_handler_ = handler;
 }
 
 void channel_proxy::set_expiration(const time_duration& timeout)
@@ -336,6 +351,16 @@ void channel_proxy::set_poll(const time_duration& timeout)
     poll_.async_wait(
         std::bind(&channel_proxy::handle_poll,
             shared_from_this(), _1));
+}
+
+void channel_proxy::set_sync(const time_duration& timeout)
+{
+    // Ignore the error_code.
+    boost::system::error_code ec;
+    poll_.expires_from_now(timeout, ec);
+    poll_.async_wait(
+        std::bind(&channel_proxy::handle_sync,
+        shared_from_this(), _1));
 }
 
 void channel_proxy::handle_expiration(const boost::system::error_code& ec)
@@ -390,6 +415,18 @@ void channel_proxy::handle_poll(const boost::system::error_code& ec)
         return;
 
     poll_handler_(bc::error::boost_to_error_code(ec));
+}
+
+void channel_proxy::handle_sync(const boost::system::error_code& ec)
+{
+    if (stopped() || timeout::canceled(ec))
+        return;
+
+    // Nothing to do, no handler registered.
+    if (sync_handler_ == nullptr)
+        return;
+
+    sync_handler_(bc::error::boost_to_error_code(ec));
 }
 
 void channel_proxy::handle_send_ping(const std::error_code& ec)

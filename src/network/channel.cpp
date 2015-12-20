@@ -23,6 +23,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
@@ -89,24 +90,28 @@ void channel::set_nonce(uint64_t nonce)
     nonce_.store(nonce);
 }
 
-const hash_digest channel::own_threshold() const
+hash_digest channel::own_threshold()
 {
-    return own_threshold_.load();
+    std::lock_guard<std::mutex> lock(own_threshold_mutex_);
+    return own_threshold_;
 }
 
 void channel::set_own_threshold(const hash_digest& threshold)
 {
-    own_threshold_.store(threshold);
+    std::lock_guard<std::mutex> lock(own_threshold_mutex_);
+    own_threshold_ = threshold;
 }
 
-const hash_digest channel::peer_threshold() const
+hash_digest channel::peer_threshold()
 {
-    return peer_threshold_.load();
+    std::lock_guard<std::mutex> lock(peer_threshold_mutex_);
+    return peer_threshold_;
 }
 
 void channel::set_peer_threshold(const hash_digest& threshold)
 {
-    peer_threshold_.store(threshold);
+    std::lock_guard<std::mutex> lock(peer_threshold_mutex_);
+    peer_threshold_ = threshold;
 }
 
 void channel::reset_poll()
