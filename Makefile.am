@@ -76,6 +76,8 @@ src_libbitcoin_la_SOURCES = \
     src/math/external/hmac_sha256.h \
     src/math/external/hmac_sha512.c \
     src/math/external/hmac_sha512.h \
+    src/math/external/lax_der_parsing.c \
+    src/math/external/lax_der_parsing.h \
     src/math/external/pbkdf2_sha256.c \
     src/math/external/pbkdf2_sha256.h \
     src/math/external/pkcs5_pbkdf2.c \

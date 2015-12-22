@@ -241,7 +241,8 @@ BOOST_OPTIONS_CLANG=\
 # Define secp256k1 options.
 #------------------------------------------------------------------------------
 SECP256K1_OPTIONS=\
-"--disable-tests "
+"--disable-tests "\
+"--enable-module-recovery "
 
 # Define bitcoin options.
 #------------------------------------------------------------------------------
@@ -560,7 +561,7 @@ build_all()
 {
     build_from_tarball_icu $ICU_URL $ICU_ARCHIVE icu $PARALLEL $ICU_OPTIONS
     build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE boost $PARALLEL $BOOST_OPTIONS
-    build_from_github libbitcoin secp256k1 version3 $PARALLEL "$@" $SECP256K1_OPTIONS
+    build_from_github libbitcoin secp256k1 version4 $PARALLEL "$@" $SECP256K1_OPTIONS
     build_from_travis libbitcoin libbitcoin sync $PARALLEL "$@" $BITCOIN_OPTIONS
 }
 

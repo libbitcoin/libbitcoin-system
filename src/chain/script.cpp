@@ -415,44 +415,43 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
     return parent_tx.hash(hash_type);
 }
 
-// This uses the deterministic nonce technique.
-bool script::create_signature(data_chunk& signature, const ec_secret& secret,
-    const script& prevout_script, const transaction& new_tx,
-    uint32_t input_index, uint32_t hash_type)
+bool script::create_endorsement(endorsement& endorsement,
+    const ec_secret& secret, const script& prevout_script,
+    const transaction& new_tx, uint32_t input_index, uint32_t sighash_type)
 {
-    // This always produces a valid signature hash.
+    // This always produces a valid sighash.
     const auto sighash = generate_signature_hash(new_tx, input_index,
-        prevout_script, hash_type);
+        prevout_script, sighash_type);
 
-    // Create the EC signature.
-    if (!sign(signature, secret, sighash))
-        return false;
+    // Create the DER signature (always valid).
+    endorsement = der_sign(secret, sighash);
 
-    // Add the sighash type to the end of the signature.
-    signature.push_back(hash_type);
+    // Add the sighash type to the end of the DER signature.
+    endorsement.push_back(sighash_type);
     return true;
 }
 
 // Convert op data to a public key and verify the signature.
 // data_chunk is used instead of ec keys to optimize script processing.
-bool script::check_signature(data_slice signature, const data_chunk& point,
+bool script::check_endorsement(data_slice endorsement, const data_chunk& point,
     const script& script_code, const transaction& parent_tx,
     uint32_t input_index)
 {
     if (!is_point(point))
         return false;
 
-    // Remove the sighash type from the end of the signature.
-    auto ec_signature = to_chunk(signature);
-    const auto hash_type = ec_signature.back();
-    ec_signature.pop_back();
+    // Remove the sighash type from the end of the endorsement.
+    auto der_signature = to_chunk(endorsement);
+    const auto sighash_type = der_signature.back();
+    der_signature.pop_back();
 
     // This always produces a valid signature hash.
     const auto sighash = generate_signature_hash(parent_tx, input_index,
-        script_code, hash_type);
+        script_code, sighash_type);
 
-    // Validate the EC signature.
-    return verify_signature(point, sighash, ec_signature);
+    // Validate the DER signature.
+    static constexpr auto strict = false;
+    return der_verify(point, sighash, der_signature, strict);
 }
 
 inline bool cast_to_bool(const data_chunk& values)

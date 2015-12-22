@@ -51,13 +51,19 @@ hash_digest hash_message(data_slice message)
 }
 
 static bool recover(short_hash& out_hash, bool compressed,
-    const compact_signature& compact, uint8_t recovery_id,
+    const ec_signature& compact, uint8_t recovery_id,
     const hash_digest& message_digest)
 {
+    const recoverable_signature recoverable
+    {
+        compact,
+        recovery_id
+    };
+
     if (compressed)
     {
         ec_compressed point;
-        if (!recover_public(point, compact, recovery_id, message_digest))
+        if (!recover_public(point, recoverable, message_digest))
             return false;
 
         out_hash = bitcoin_short_hash(point);
@@ -65,7 +71,7 @@ static bool recover(short_hash& out_hash, bool compressed,
     }
 
     ec_uncompressed point;
-    if (!recover_public(point, compact, recovery_id, message_digest))
+    if (!recover_public(point, recoverable, message_digest))
         return false;
 
     out_hash = bitcoin_short_hash(point);
@@ -123,16 +129,15 @@ bool sign_message(message_signature& signature, data_slice message,
 bool sign_message(message_signature& signature, data_slice message,
     const ec_secret& secret, bool compressed)
 {
-    uint8_t recovery_id;
-    compact_signature compact;
-    if (!sign_compact(compact, recovery_id, secret, hash_message(message)))
+    recoverable_signature recoverable;
+    if (!sign_recoverable(recoverable, secret, hash_message(message)))
         return false;
 
     uint8_t magic;
-    if (!recovery_id_to_magic(magic, recovery_id, compressed))
+    if (!recovery_id_to_magic(magic, recoverable.recovery_id, compressed))
         return false;
 
-    signature = splice(to_array(magic), compact);
+    signature = splice(to_array(magic), recoverable.signature);
     return true;
 }
 

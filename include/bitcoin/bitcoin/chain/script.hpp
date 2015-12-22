@@ -103,12 +103,14 @@ public:
     static bool verify(const script& input_script,
         const script& output_script, const transaction& parent_tx,
         uint32_t input_index, bool bip16_enabled=true);
+
     static hash_digest generate_signature_hash(transaction parent_tx,
         uint32_t input_index, const script& script_code, uint32_t hash_type);
-    static bool check_signature(data_slice signature,
+
+    static bool check_endorsement(data_slice endorsement,
         const data_chunk& point, const script& script_code,
         const transaction& parent_tx, uint32_t input_index);
-    static bool create_signature(endorsement& signature,
+    static bool create_endorsement(endorsement& endorsement,
         const ec_secret& secret, const script& prevout_script,
         const transaction& tx, uint32_t input_index, uint32_t hash_type);
 
