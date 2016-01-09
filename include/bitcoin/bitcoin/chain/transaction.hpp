@@ -55,8 +55,8 @@ public:
     void reset();
     hash_digest hash() const;
 
-    // hash_type_code is used by OP_CHECKSIG
-    hash_digest hash(uint32_t hash_type_code) const;
+    // sighash_type is used by OP_CHECKSIG
+    hash_digest hash(uint8_t sighash_type) const;
     bool is_coinbase() const;
     bool is_final(uint64_t block_height, uint32_t block_time) const;
     bool is_locktime_conflict() const;

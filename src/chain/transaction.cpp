@@ -190,10 +190,10 @@ hash_digest transaction::hash() const
     return bitcoin_hash(to_data());
 }
 
-hash_digest transaction::hash(uint32_t hash_type_code) const
+hash_digest transaction::hash(uint8_t sighash_type) const
 {
-    data_chunk serialized = to_data();
-    extend_data(serialized, to_little_endian(hash_type_code));
+    auto serialized = to_data();
+    extend_data(serialized, to_little_endian(sighash_type));
     return bitcoin_hash(serialized);
 }
 
