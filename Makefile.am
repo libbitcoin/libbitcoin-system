@@ -243,7 +243,7 @@ test_libbitcoin_test_SOURCES = \
     test/math/big_number.cpp \
     test/math/big_number.hpp \
     test/math/checksum.cpp \
-    test/math/ec_keys.cpp \
+    test/math/elliptic_curve.cpp \
     test/math/hash.cpp \
     test/math/hash.hpp \
     test/math/hash_number.cpp \

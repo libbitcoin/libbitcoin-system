@@ -200,9 +200,6 @@
     <ClCompile Include="..\..\..\..\test\math\checksum.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\math\ec_keys.cpp">
-      <Filter>src\math</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\unicode\unicode_istream.cpp">
       <Filter>src\unicode</Filter>
     </ClCompile>
@@ -275,6 +272,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\network\p2p.cpp">
       <Filter>src\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\math\elliptic_curve.cpp">
+      <Filter>src\math</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

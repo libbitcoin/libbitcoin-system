@@ -100,7 +100,7 @@
     <ClCompile Include="..\..\..\..\test\main.cpp" />
     <ClCompile Include="..\..\..\..\test\math\big_number.cpp" />
     <ClCompile Include="..\..\..\..\test\math\checksum.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\ec_keys.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\elliptic_curve.cpp" />
     <ClCompile Include="..\..\..\..\test\math\hash.cpp" />
     <ClCompile Include="..\..\..\..\test\math\hash_number.cpp" />
     <ClCompile Include="..\..\..\..\test\math\script_number.cpp" />
@@ -181,7 +181,7 @@
   </Target>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSEXE|x64'">
     <PostBuildEvent>
-      <Command>"$(TargetPath)" --run_test=p2p_tests --show_progress=no --result_code=no --detect_memory_leak=0 --report_level=no --build_info=yes</Command>
+      <Command>"$(TargetPath)" --run_test=script_tests --show_progress=no --result_code=no --detect_memory_leak=0 --report_level=no --build_info=yes</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
