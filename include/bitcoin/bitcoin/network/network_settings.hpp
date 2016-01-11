@@ -89,7 +89,7 @@ struct BC_API settings
     uint32_t connect_batch_size;
     uint32_t connect_timeout_seconds;
     uint32_t channel_handshake_seconds;
-    uint32_t channel_revival_minutes;
+    uint32_t channel_poll_seconds;
     uint32_t channel_heartbeat_minutes;
     uint32_t channel_inactivity_minutes;
     uint32_t channel_expiration_minutes;
@@ -113,9 +113,9 @@ struct BC_API settings
         return asio::duration(0, 0, channel_handshake_seconds);
     }
 
-    asio::duration channel_revival() const
+    asio::duration channel_poll() const
     {
-        return asio::duration(0, channel_revival_minutes, 0);
+        return asio::duration(0, 0, channel_poll_seconds);
     }
 
     asio::duration channel_heartbeat() const

@@ -57,7 +57,7 @@ channel::channel(threadpool& pool, asio::socket_ptr socket,
     located_stop_(null_hash),
     expiration_(alarm(pool, settings.channel_expiration())),
     inactivity_(alarm(pool, settings.channel_inactivity())),
-    revival_(alarm(pool, settings.channel_revival())),
+    poll_(alarm(pool, settings.channel_poll())),
     CONSTRUCT_TRACK(channel)
 {
 }
@@ -77,7 +77,7 @@ void channel::start(result_handler handler)
 void channel::do_start(const code& ec, result_handler handler)
 {
     start_expiration();
-    start_revival();
+    start_poll();
     start_inactivity();
     handler(error::success);
 }
@@ -113,8 +113,8 @@ void channel::handle_stopping()
 {
     expiration_->stop();
     inactivity_->stop();
-    revival_->stop();
-    revival_handler_.store(nullptr);
+    poll_->stop();
+    poll_handler_.store(nullptr);
 }
 
 void channel::handle_activity()
@@ -171,45 +171,45 @@ void channel::handle_inactivity(const code& ec)
 // ----------------------------------------------------------------------------
 
 // public:
-void channel::reset_revival()
+void channel::reset_poll()
 {
     if (stopped())
         return;
 
-    start_revival();
+    start_poll();
 }
 
 // public:
-void channel::set_revival_handler(result_handler handler)
+void channel::set_poll_handler(result_handler handler)
 {
-    revival_handler_.store(handler);
+    poll_handler_.store(handler);
 }
 
-void channel::start_revival()
+void channel::start_poll()
 {
     if (stopped())
         return;
 
-    revival_->start(
-        std::bind(&channel::handle_revival,
+    poll_->start(
+        std::bind(&channel::handle_poll,
             shared_from_base<channel>(), _1));
 }
 
-void channel::handle_revival(const code& ec)
+void channel::handle_poll(const code& ec)
 {
     if (stopped())
         return;
 
-    auto revive = revival_handler_.load();
+    auto poll = poll_handler_.load();
 
-    if (!revive)
+    if (!poll)
         return;
 
     log::debug(LOG_NETWORK)
-        << "Channel revival invoked [" << authority() << "]";
+        << "Channel poll invoked [" << authority() << "]";
 
-    revive(ec);
-    reset_revival();
+    poll(ec);
+    reset_poll();
 }
 
 // Location tracking (thread unsafe, deprecated).

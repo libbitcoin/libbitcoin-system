@@ -67,8 +67,8 @@ public:
     virtual const message::version& version() const;
     virtual void set_version(const message::version& value);
 
-    virtual void reset_revival();
-    virtual void set_revival_handler(result_handler handler);
+    virtual void reset_poll();
+    virtual void set_poll_handler(result_handler handler);
 
     virtual bool located(const hash_digest& start,
         const hash_digest& stop) const;
@@ -88,8 +88,8 @@ private:
     void start_inactivity();
     void handle_inactivity(const code& ec);
 
-    void start_revival();
-    void handle_revival(const code& ec);
+    void start_poll();
+    void handle_poll(const code& ec);
 
     uint64_t nonce_;
     hash_digest located_start_;
@@ -97,10 +97,10 @@ private:
     message::version version_;
     deadline::ptr expiration_;
     deadline::ptr inactivity_;
-    deadline::ptr revival_;
+    deadline::ptr poll_;
 
     // Deperecated.
-    bc::atomic<result_handler> revival_handler_;
+    bc::atomic<result_handler> poll_handler_;
 };
 
 } // namespace network
