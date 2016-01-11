@@ -43,6 +43,9 @@
     case message_type::value: \
         return load<message::value>(stream, value##_subscriber_)
 
+#define STOP_SUBSCRIBER(value) \
+    value##_subscriber_->stop()
+
 TRACK_SUBSCRIBER(address)
 TRACK_SUBSCRIBER(alert)
 TRACK_SUBSCRIBER(block)
@@ -149,6 +152,31 @@ code message_subscriber::load(message_type type, std::istream& stream) const
         default:
             return error::not_found;
     }
+}
+
+void message_subscriber::stop()
+{
+    STOP_SUBSCRIBER(address);
+    STOP_SUBSCRIBER(alert);
+    STOP_SUBSCRIBER(block);
+    STOP_SUBSCRIBER(filter_add);
+    STOP_SUBSCRIBER(filter_clear);
+    STOP_SUBSCRIBER(filter_load);
+    STOP_SUBSCRIBER(get_address);
+    STOP_SUBSCRIBER(get_blocks);
+    STOP_SUBSCRIBER(get_data);
+    STOP_SUBSCRIBER(get_headers);
+    STOP_SUBSCRIBER(headers);
+    STOP_SUBSCRIBER(inventory);
+    STOP_SUBSCRIBER(memory_pool);
+    STOP_SUBSCRIBER(merkle_block);
+    STOP_SUBSCRIBER(not_found);
+    STOP_SUBSCRIBER(ping);
+    STOP_SUBSCRIBER(pong);
+    STOP_SUBSCRIBER(reject);
+    STOP_SUBSCRIBER(transaction);
+    STOP_SUBSCRIBER(verack);
+    STOP_SUBSCRIBER(version);
 }
 
 } // namespace network

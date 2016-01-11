@@ -128,6 +128,11 @@ public:
      */
     code load(message::message_type type, std::istream& stream) const;
 
+    /**
+     * Stop all subscribers so that they no longer accept subscription.
+     */
+    void stop();
+
 private:
     DEFINE_SUBSCRIBER_OVERLOAD(address);
     DEFINE_SUBSCRIBER_OVERLOAD(alert);

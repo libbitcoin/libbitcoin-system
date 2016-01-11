@@ -142,8 +142,14 @@ void proxy::stop(const code& ec)
         // Short circuit new subscriptions, since they will not get cleared.
         stopped_ = true;
 
+        // This prevents resubscription after stop is relayed.
+        message_subscriber_.stop();
+
         // This fires all message subscriptions with the channel_stopped code.
         message_subscriber_.broadcast(error::channel_stopped);
+
+        // This prevents resubscription after stop is relayed.
+        stop_subscriber_->stop();
 
         // This fires all stop subscriptions with the channel stop reason code.
         stop_subscriber_->relay(ec);

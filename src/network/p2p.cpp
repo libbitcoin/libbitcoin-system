@@ -342,6 +342,7 @@ void p2p::stop(result_handler handler)
         if (!stopped())
         {
             stopped_ = true;
+            subscriber_->stop();
             subscriber_->relay(error::service_stopped, nullptr);
             connections_->stop(error::service_stopped);
             manual_.store(nullptr);
