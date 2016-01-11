@@ -23,6 +23,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <utility>
 #include <string>
 #include <bitcoin/bitcoin/config/authority.hpp>
@@ -31,6 +32,7 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/messages.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/network/proxy.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
@@ -67,6 +69,12 @@ public:
     virtual const message::version& version() const;
     virtual void set_version(const message::version& value);
 
+    virtual hash_digest own_threshold();
+    virtual void set_own_threshold(const hash_digest& threshold);
+
+    virtual hash_digest peer_threshold();
+    virtual void set_peer_threshold(const hash_digest& threshold);
+
     virtual void reset_poll();
     virtual void set_poll_handler(result_handler handler);
 
@@ -98,6 +106,10 @@ private:
     deadline::ptr expiration_;
     deadline::ptr inactivity_;
     deadline::ptr poll_;
+    hash_digest own_threshold_;
+    hash_digest peer_threshold_;
+    std::mutex own_threshold_mutex_;
+    std::mutex peer_threshold_mutex_;
 
     // Deperecated.
     bc::atomic<result_handler> poll_handler_;

@@ -24,7 +24,9 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <bitcoin/bitcoin/config/authority.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/message/heading.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/network/network_settings.hpp>
@@ -53,6 +55,8 @@ channel::channel(threadpool& pool, asio::socket_ptr socket,
   : proxy(pool, socket, settings.identifier),
     nonce_(0),
     version_({ 0 }),
+    own_threshold_(null_hash),
+    peer_threshold_(null_hash),
     located_start_(null_hash),
     located_stop_(null_hash),
     expiration_(alarm(pool, settings.channel_expiration())),
@@ -103,6 +107,42 @@ const message::version& channel::version() const
 void channel::set_version(const message::version& value)
 {
     version_ = value;
+}
+
+hash_digest channel::own_threshold()
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(own_threshold_mutex_);
+    return own_threshold_;
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+void channel::set_own_threshold(const hash_digest& threshold)
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(own_threshold_mutex_);
+    own_threshold_ = threshold;
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+hash_digest channel::peer_threshold()
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(peer_threshold_mutex_);
+    return peer_threshold_;
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+void channel::set_peer_threshold(const hash_digest& threshold)
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(peer_threshold_mutex_);
+    peer_threshold_ = threshold;
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 // Proxy pure virtual protected and ordered handlers.
@@ -167,7 +207,7 @@ void channel::handle_inactivity(const code& ec)
     stop(error::channel_timeout);
 }
 
-// Revival timer (set/reset is thread unsafe, deprecated).
+// Poll timer (set/reset is thread unsafe, deprecated).
 // ----------------------------------------------------------------------------
 
 // public:
