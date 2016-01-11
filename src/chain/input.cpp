@@ -133,12 +133,12 @@ uint64_t input::serialized_size() const
     return 4 + previous_output.serialized_size() + script_size;
 }
 
-std::string input::to_string() const
+std::string input::to_string(uint32_t flags) const
 {
     std::ostringstream ss;
 
     ss << previous_output.to_string() << "\n"
-        << "\t" << script.to_string() << "\n"
+        << "\t" << script.to_string(flags) << "\n"
         << "\tsequence = " << sequence << "\n";
 
     return ss.str();

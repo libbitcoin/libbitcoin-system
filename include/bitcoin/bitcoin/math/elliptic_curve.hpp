@@ -128,10 +128,19 @@ BC_API bool verify(const ec_compressed& point);
 /// Verify a point.
 BC_API bool verify(const ec_uncompressed& point);
 
-/// Fast verification of point structure.
-BC_API bool is_point(data_slice point);
+// Detect public keys
+// ----------------------------------------------------------------------------
 
-// DER parse/sign/verify
+/// Fast detection of compressed public key structure.
+bool is_compressed_key(data_slice point);
+
+/// Fast detection of uncompressed public key structure.
+bool is_uncompressed_key(data_slice point);
+
+/// Fast detection of compressed or uncompressed public key structure.
+bool is_public_key(data_slice point);
+
+// DER parse/encode
 // ----------------------------------------------------------------------------
 
 /// Parse a DER encoded signature with optional strict DER enforcement.
@@ -139,29 +148,15 @@ BC_API bool is_point(data_slice point);
 BC_API bool parse_signature(ec_signature& out, 
     const der_signature& der_signature, bool strict);
 
-/// Create a deterministic and strict DER signature using a private key.
-/// This function will always produce a valid signature.
-BC_API der_signature der_sign(const ec_secret& secret,
-    const hash_digest& hash);
+/// Encode an EC signature as DER (strict).
+BC_API bool encode_signature(der_signature& out, const ec_signature& signature);
 
-/// This overload is exposed to optimize script processing.
-/// Verify a DER signature with a point (compressed or uncompressed).
-BC_API bool der_verify(const data_chunk& point, const hash_digest& hash,
-    const der_signature& der_signature, bool strict);
-
-////// Endorsement verify
-////// ----------------------------------------------------------------------------
-////
-/////// Verify an endorsement with compressed point.
-////BC_API bool verify_signature(const ec_compressed& point,
-////    const hash_digest& hash, const endorsement& endorsement, bool strict);
-////
-/////// Verify an endorsement with uncompressed point.
-////BC_API bool verify_signature(const ec_uncompressed& point,
-////    const hash_digest& hash, const endorsement& endorsement, bool strict);
-
-// EC signature verify
+// EC sign/verify
 // ----------------------------------------------------------------------------
+
+/// Create a deterministic ECDSA signature using a private key.
+BC_API bool sign(ec_signature& out, const ec_secret& secret,
+    const hash_digest& hash);
 
 /// Verify an EC signature using a compressed point.
 BC_API bool verify_signature(const ec_compressed& point,
@@ -171,6 +166,10 @@ BC_API bool verify_signature(const ec_compressed& point,
 BC_API bool verify_signature(const ec_uncompressed& point,
     const hash_digest& hash, const ec_signature& signature);
 
+/// Verify an EC signature using a potential point.
+BC_API bool verify_signature(data_slice point, const hash_digest& hash,
+    const ec_signature& signature);
+
 // Recoverable sign/recover
 // ----------------------------------------------------------------------------
 
@@ -179,11 +178,11 @@ BC_API bool sign_recoverable(recoverable_signature& out,
     const ec_secret& secret, const hash_digest& hash);
 
 /// Recover the compressed point from a recoverable message signature.
-BC_API bool recover_public(ec_compressed& point,
+BC_API bool recover_public(ec_compressed& out,
     const recoverable_signature& recoverable, const hash_digest& hash);
 
 /// Recover the uncompressed point from a recoverable message signature.
-BC_API bool recover_public(ec_uncompressed& point,
+BC_API bool recover_public(ec_uncompressed& out,
     const recoverable_signature& recoverable, const hash_digest& hash);
 
 } // namespace libbitcoin

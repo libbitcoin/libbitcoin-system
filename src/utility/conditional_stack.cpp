@@ -28,9 +28,9 @@ bool conditional_stack::closed() const
     return stack_.empty();
 }
 
-bool conditional_stack::has_failed_branches() const
+bool conditional_stack::succeeded() const
 {
-    return std::count(stack_.begin(), stack_.end(), false) > 0;
+    return std::count(stack_.begin(), stack_.end(), false) == 0;
 }
 
 void conditional_stack::clear()

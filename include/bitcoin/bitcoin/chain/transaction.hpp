@@ -50,13 +50,13 @@ public:
     data_chunk to_data() const;
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
-    std::string to_string() const;
+    std::string to_string(uint32_t flags) const;
     bool is_valid() const;
     void reset();
     hash_digest hash() const;
 
     // sighash_type is used by OP_CHECKSIG
-    hash_digest hash(uint8_t sighash_type) const;
+    hash_digest hash(uint32_t sighash_type) const;
     bool is_coinbase() const;
     bool is_final(uint64_t block_height, uint32_t block_time) const;
     bool is_locktime_conflict() const;

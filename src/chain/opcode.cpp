@@ -25,9 +25,9 @@
 namespace libbitcoin {
 namespace chain {
 
-std::string opcode_to_string(opcode code)
+std::string opcode_to_string(opcode value, uint32_t flags)
 {
-    switch (code)
+    switch (value)
     {
         case opcode::zero:
             return "zero";
@@ -258,255 +258,258 @@ std::string opcode_to_string(opcode code)
         default:
         {
             std::ostringstream ss;
-            ss << "<none " << static_cast<int>(code) << ">";
+            ss << "<none " << static_cast<int>(value) << ">";
             return ss.str();
         }
     }
 }
 
-opcode string_to_opcode(const std::string& code_repr)
+opcode string_to_opcode(const std::string& value)
 {
-    if (code_repr == "zero")
+    if (value == "zero")
         return opcode::zero;
-    else if (code_repr == "special")
+    else if (value == "special")
         return opcode::special;
-    else if (code_repr == "pushdata1")
+    else if (value == "pushdata1")
         return opcode::pushdata1;
-    else if (code_repr == "pushdata2")
+    else if (value == "pushdata2")
         return opcode::pushdata2;
-    else if (code_repr == "pushdata4")
+    else if (value == "pushdata4")
         return opcode::pushdata4;
-    else if (code_repr == "-1")
+    else if (value == "-1")
         return opcode::negative_1;
-    else if (code_repr == "reserved")
+    else if (value == "reserved")
         return opcode::reserved;
-    else if (code_repr == "1")
+    else if (value == "1")
         return opcode::op_1;
-    else if (code_repr == "2")
+    else if (value == "2")
         return opcode::op_2;
-    else if (code_repr == "3")
+    else if (value == "3")
         return opcode::op_3;
-    else if (code_repr == "4")
+    else if (value == "4")
         return opcode::op_4;
-    else if (code_repr == "5")
+    else if (value == "5")
         return opcode::op_5;
-    else if (code_repr == "6")
+    else if (value == "6")
         return opcode::op_6;
-    else if (code_repr == "7")
+    else if (value == "7")
         return opcode::op_7;
-    else if (code_repr == "8")
+    else if (value == "8")
         return opcode::op_8;
-    else if (code_repr == "9")
+    else if (value == "9")
         return opcode::op_9;
-    else if (code_repr == "10")
+    else if (value == "10")
         return opcode::op_10;
-    else if (code_repr == "11")
+    else if (value == "11")
         return opcode::op_11;
-    else if (code_repr == "12")
+    else if (value == "12")
         return opcode::op_12;
-    else if (code_repr == "13")
+    else if (value == "13")
         return opcode::op_13;
-    else if (code_repr == "14")
+    else if (value == "14")
         return opcode::op_14;
-    else if (code_repr == "15")
+    else if (value == "15")
         return opcode::op_15;
-    else if (code_repr == "16")
+    else if (value == "16")
         return opcode::op_16;
-    else if (code_repr == "nop")
+    else if (value == "nop")
         return opcode::nop;
-    else if (code_repr == "ver")
+    else if (value == "ver")
         return opcode::ver;
-    else if (code_repr == "if")
+    else if (value == "if")
         return opcode::if_;
-    else if (code_repr == "notif")
+    else if (value == "notif")
         return opcode::notif;
-    else if (code_repr == "verif")
+    else if (value == "verif")
         return opcode::verif;
-    else if (code_repr == "vernotif")
+    else if (value == "vernotif")
         return opcode::vernotif;
-    else if (code_repr == "else")
+    else if (value == "else")
         return opcode::else_;
-    else if (code_repr == "endif")
+    else if (value == "endif")
         return opcode::endif;
-    else if (code_repr == "verify")
+    else if (value == "verify")
         return opcode::verify;
-    else if (code_repr == "return")
+    else if (value == "return")
         return opcode::return_;
-    else if (code_repr == "toaltstack")
+    else if (value == "toaltstack")
         return opcode::toaltstack;
-    else if (code_repr == "fromaltstack")
+    else if (value == "fromaltstack")
         return opcode::fromaltstack;
-    else if (code_repr == "2drop")
+    else if (value == "2drop")
         return opcode::op_2drop;
-    else if (code_repr == "2dup")
+    else if (value == "2dup")
         return opcode::op_2dup;
-    else if (code_repr == "3dup")
+    else if (value == "3dup")
         return opcode::op_3dup;
-    else if (code_repr == "2over")
+    else if (value == "2over")
         return opcode::op_2over;
-    else if (code_repr == "2rot")
+    else if (value == "2rot")
         return opcode::op_2rot;
-    else if (code_repr == "2swap")
+    else if (value == "2swap")
         return opcode::op_2swap;
-    else if (code_repr == "ifdup")
+    else if (value == "ifdup")
         return opcode::ifdup;
-    else if (code_repr == "depth")
+    else if (value == "depth")
         return opcode::depth;
-    else if (code_repr == "drop")
+    else if (value == "drop")
         return opcode::drop;
-    else if (code_repr == "dup")
+    else if (value == "dup")
         return opcode::dup;
-    else if (code_repr == "nip")
+    else if (value == "nip")
         return opcode::nip;
-    else if (code_repr == "over")
+    else if (value == "over")
         return opcode::over;
-    else if (code_repr == "pick")
+    else if (value == "pick")
         return opcode::pick;
-    else if (code_repr == "roll")
+    else if (value == "roll")
         return opcode::roll;
-    else if (code_repr == "rot")
+    else if (value == "rot")
         return opcode::rot;
-    else if (code_repr == "swap")
+    else if (value == "swap")
         return opcode::swap;
-    else if (code_repr == "tuck")
+    else if (value == "tuck")
         return opcode::tuck;
-    else if (code_repr == "cat")
+    else if (value == "cat")
         return opcode::cat;
-    else if (code_repr == "substr")
+    else if (value == "substr")
         return opcode::substr;
-    else if (code_repr == "left")
+    else if (value == "left")
         return opcode::left;
-    else if (code_repr == "right")
+    else if (value == "right")
         return opcode::right;
-    else if (code_repr == "size")
+    else if (value == "size")
         return opcode::size;
-    else if (code_repr == "invert")
+    else if (value == "invert")
         return opcode::invert;
-    else if (code_repr == "and")
+    else if (value == "and")
         return opcode::and_;
-    else if (code_repr == "or")
+    else if (value == "or")
         return opcode::or_;
-    else if (code_repr == "xor")
+    else if (value == "xor")
         return opcode::xor_;
-    else if (code_repr == "equal")
+    else if (value == "equal")
         return opcode::equal;
-    else if (code_repr == "equalverify")
+    else if (value == "equalverify")
         return opcode::equalverify;
-    else if (code_repr == "reserved1")
+    else if (value == "reserved1")
         return opcode::reserved1;
-    else if (code_repr == "reserved2")
+    else if (value == "reserved2")
         return opcode::reserved2;
-    else if (code_repr == "1add")
+    else if (value == "1add")
         return opcode::op_1add;
-    else if (code_repr == "1sub")
+    else if (value == "1sub")
         return opcode::op_1sub;
-    else if (code_repr == "2mul")
+    else if (value == "2mul")
         return opcode::op_2mul;
-    else if (code_repr == "2div")
+    else if (value == "2div")
         return opcode::op_2div;
-    else if (code_repr == "negate")
+    else if (value == "negate")
         return opcode::negate;
-    else if (code_repr == "abs")
+    else if (value == "abs")
         return opcode::abs;
-    else if (code_repr == "not")
+    else if (value == "not")
         return opcode::not_;
-    else if (code_repr == "0notequal")
+    else if (value == "0notequal")
         return opcode::op_0notequal;
-    else if (code_repr == "add")
+    else if (value == "add")
         return opcode::add;
-    else if (code_repr == "sub")
+    else if (value == "sub")
         return opcode::sub;
-    else if (code_repr == "mul")
+    else if (value == "mul")
         return opcode::mul;
-    else if (code_repr == "div")
+    else if (value == "div")
         return opcode::div;
-    else if (code_repr == "mod")
+    else if (value == "mod")
         return opcode::mod;
-    else if (code_repr == "lshift")
+    else if (value == "lshift")
         return opcode::lshift;
-    else if (code_repr == "rshift")
+    else if (value == "rshift")
         return opcode::rshift;
-    else if (code_repr == "booland")
+    else if (value == "booland")
         return opcode::booland;
-    else if (code_repr == "boolor")
+    else if (value == "boolor")
         return opcode::boolor;
-    else if (code_repr == "numequal")
+    else if (value == "numequal")
         return opcode::numequal;
-    else if (code_repr == "numequalverify")
+    else if (value == "numequalverify")
         return opcode::numequalverify;
-    else if (code_repr == "numnotequal")
+    else if (value == "numnotequal")
         return opcode::numnotequal;
-    else if (code_repr == "lessthan")
+    else if (value == "lessthan")
         return opcode::lessthan;
-    else if (code_repr == "greaterthan")
+    else if (value == "greaterthan")
         return opcode::greaterthan;
-    else if (code_repr == "lessthanorequal")
+    else if (value == "lessthanorequal")
         return opcode::lessthanorequal;
-    else if (code_repr == "greaterthanorequal")
+    else if (value == "greaterthanorequal")
         return opcode::greaterthanorequal;
-    else if (code_repr == "min")
+    else if (value == "min")
         return opcode::min;
-    else if (code_repr == "max")
+    else if (value == "max")
         return opcode::max;
-    else if (code_repr == "within")
+    else if (value == "within")
         return opcode::within;
-    else if (code_repr == "ripemd160")
+    else if (value == "ripemd160")
         return opcode::ripemd160;
-    else if (code_repr == "sha1")
+    else if (value == "sha1")
         return opcode::sha1;
-    else if (code_repr == "sha256")
+    else if (value == "sha256")
         return opcode::sha256;
-    else if (code_repr == "hash160")
+    else if (value == "hash160")
         return opcode::hash160;
-    else if (code_repr == "hash256")
+    else if (value == "hash256")
         return opcode::hash256;
-    else if (code_repr == "codeseparator")
+    else if (value == "codeseparator")
         return opcode::codeseparator;
-    else if (code_repr == "checksig")
+    else if (value == "checksig")
         return opcode::checksig;
-    else if (code_repr == "checksigverify")
+    else if (value == "checksigverify")
         return opcode::checksigverify;
-    else if (code_repr == "checkmultisig")
+    else if (value == "checkmultisig")
         return opcode::checkmultisig;
-    else if (code_repr == "checkmultisigverify")
+    else if (value == "checkmultisigverify")
         return opcode::checkmultisigverify;
-    else if (code_repr == "nop1")
+    // Replaces nop2 with BIP65 activation.
+    else if (value == "checklocktimeverify")
+        return opcode::checklocktimeverify;
+    else if (value == "nop1")
         return opcode::op_nop1;
-    else if (code_repr == "nop2")
+    else if (value == "nop2")
         return opcode::op_nop2;
-    else if (code_repr == "nop3")
+    else if (value == "nop3")
         return opcode::op_nop3;
-    else if (code_repr == "nop4")
+    else if (value == "nop4")
         return opcode::op_nop4;
-    else if (code_repr == "nop5")
+    else if (value == "nop5")
         return opcode::op_nop5;
-    else if (code_repr == "nop6")
+    else if (value == "nop6")
         return opcode::op_nop6;
-    else if (code_repr == "nop7")
+    else if (value == "nop7")
         return opcode::op_nop7;
-    else if (code_repr == "nop8")
+    else if (value == "nop8")
         return opcode::op_nop8;
-    else if (code_repr == "nop9")
+    else if (value == "nop9")
         return opcode::op_nop9;
-    else if (code_repr == "nop10")
+    else if (value == "nop10")
         return opcode::op_nop10;
-    else if (code_repr == "raw_data")
+    else if (value == "raw_data")
         return opcode::raw_data;
     // ERROR: unknown...
     return opcode::bad_operation;
 }
 
-opcode data_to_opcode(const data_chunk& data)
+opcode data_to_opcode(const data_chunk& value)
 {
     static constexpr size_t limit = 76;
     opcode code;
-    if (data.size() < limit)
+    if (value.size() < limit)
         code = opcode::special;
-    else if (data.size() < max_uint8)
+    else if (value.size() < max_uint8)
         code = opcode::pushdata1;
-    else if (data.size() < max_uint16)
+    else if (value.size() < max_uint16)
         code = opcode::pushdata2;
-    else if (data.size() < max_uint32)
+    else if (value.size() < max_uint32)
         code = opcode::pushdata4;
     else
         code = opcode::bad_operation;

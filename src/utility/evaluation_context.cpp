@@ -23,10 +23,10 @@
 
 namespace libbitcoin {
 
-data_chunk evaluation_context::pop_primary()
+data_chunk evaluation_context::pop_stack()
 {
-    const auto value = primary.back();
-    primary.pop_back();
+    const auto value = stack.back();
+    stack.pop_back();
     return value;
 }
 

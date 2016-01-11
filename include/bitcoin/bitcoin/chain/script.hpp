@@ -41,12 +41,12 @@ enum signature_hash_algorithm : uint32_t
 {
     /// The default, signs all the inputs and outputs, protecting everything
     /// except the signature scripts against modification.
-    all = 1,
+    all = 0x01,
 
     /// Signs all of the inputs but none of the outputs, allowing anyone to
     /// change where the satoshis are going unless other signatures using 
     /// other signature hash flags protect the outputs.
-    none = 2,
+    none = 0x02,
 
     /// The only output signed is the one corresponding to this input (the
     /// output with the same output index number as this input), ensuring
@@ -56,7 +56,7 @@ enum signature_hash_algorithm : uint32_t
     /// security scheme. This input, as well as other inputs, are included
     /// in the signature. The sequence numbers of other inputs are not
     /// included in the signature, and can be updated.
-    single = 3,
+    single = 0x03,
 
     /// The above types can be modified with this flag, creating three new
     /// combined types.
@@ -75,7 +75,10 @@ enum signature_hash_algorithm : uint32_t
 
     /// Signs this one input and its corresponding output. Allows anyone to
     /// add or remove other inputs.
-    single_anyone_can_pay = single | anyone_can_pay
+    single_anyone_can_pay = single | anyone_can_pay,
+
+    /// Used to mask off the anyone_can_pay flag to access the enumeration.
+    mask = ~anyone_can_pay
 };
 
 // All prefix = true
@@ -102,17 +105,21 @@ public:
 
     static bool verify(const script& input_script,
         const script& output_script, const transaction& parent_tx,
-        uint32_t input_index, bool bip16_enabled=true);
+        uint32_t input_index, uint32_t flags);
 
     static hash_digest generate_signature_hash(transaction parent_tx,
-        uint32_t input_index, const script& script_code, uint32_t hash_type);
+        uint32_t input_index, const script& script_code, uint8_t sighash_type);
 
-    static bool check_endorsement(data_slice endorsement,
-        const data_chunk& point, const script& script_code,
-        const transaction& parent_tx, uint32_t input_index);
-    static bool create_endorsement(endorsement& endorsement,
-        const ec_secret& secret, const script& prevout_script,
-        const transaction& tx, uint32_t input_index, uint32_t hash_type);
+    static bool create_endorsement(endorsement& out, const ec_secret& secret,
+        const script& prevout_script, const transaction& new_tx,
+        uint32_t input_index, uint8_t sighash_type);
+
+    static bool is_active(uint32_t flags, script_context flag);
+
+    static bool check_signature(const ec_signature& signature,
+        uint8_t sighash_type, const data_chunk& public_key,
+        const script& script_code, const transaction& parent_tx,
+        uint32_t input_index);
 
     script_pattern pattern() const;
     bool is_raw_data() const;
@@ -124,7 +131,7 @@ public:
     void to_data(writer& sink, bool prefix) const;
 
     bool from_string(const std::string& human_readable);
-    std::string to_string() const;
+    std::string to_string(uint32_t flags) const;
     bool is_valid() const;
     void reset();
     uint64_t satoshi_content_size() const;

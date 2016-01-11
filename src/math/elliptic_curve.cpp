@@ -89,27 +89,6 @@ bool secret_to_public(const secp256k1_context* context, byte_array<Size>& out,
         serialize(context, out, pubkey);
 }
 
-// This uses a data slice and calls secp256k1_ec_pubkey_parse() in place of
-// parse() so that we can support the der_verify data_chunk optimization.
-static bool verify_signature(const secp256k1_context* context,
-    data_slice point, const hash_digest& hash, const ec_signature& signature)
-{
-    // Copy to avoid exposing external types.
-    secp256k1_ecdsa_signature parsed;
-    std::copy(signature.begin(), signature.end(), std::begin(parsed.data));
-
-    // secp256k1_ecdsa_verify rejects non-normalized (low-s) signatures, but
-    // bitcoin does not have such a limitation, so we always normalize.
-    secp256k1_ecdsa_signature normal;
-    secp256k1_ecdsa_signature_normalize(context, &normal, &parsed);
-
-    const auto size = point.size();
-    secp256k1_pubkey pubkey;
-    return 
-        secp256k1_ec_pubkey_parse(context, &pubkey, point.data(), size) == 1 &&
-        secp256k1_ecdsa_verify(context, &normal, hash.data(), &pubkey) == 1;
-}
-
 template <size_t Size>
 bool recover_public(const secp256k1_context* context, byte_array<Size>& out,
     const recoverable_signature& recoverable, const hash_digest& hash)
@@ -122,6 +101,21 @@ bool recover_public(const secp256k1_context* context, byte_array<Size>& out,
             &sign, recoverable.signature.data(), recovery_id) == 1 &&
         secp256k1_ecdsa_recover(context, &pubkey, &sign, hash.data()) == 1 &&
             serialize(context, out, pubkey);
+}
+
+bool verify_signature(const secp256k1_context* context,
+    const secp256k1_pubkey point, const hash_digest& hash,
+    const ec_signature& signature)
+{
+    // Copy to avoid exposing external types.
+    secp256k1_ecdsa_signature parsed;
+    std::copy(signature.begin(), signature.end(), std::begin(parsed.data));
+
+    // secp256k1_ecdsa_verify rejects non-normalized (low-s) signatures, but
+    // bitcoin does not have such a limitation, so we always normalize.
+    secp256k1_ecdsa_signature normal;
+    secp256k1_ecdsa_signature_normalize(context, &normal, &parsed);
+    return secp256k1_ecdsa_verify(context, &normal, hash.data(), &point) == 1;
 }
 
 // Add and multiply EC values
@@ -217,28 +211,36 @@ bool verify(const ec_uncompressed& point)
     return parse(context, pubkey, point);
 }
 
-bool is_point(data_slice point)
+// Detect public keys
+// ----------------------------------------------------------------------------
+
+bool is_compressed_key(data_slice point)
 {
     const auto size = point.size();
-    if (size != ec_compressed_size && size != ec_uncompressed_size)
+    if (size != ec_compressed_size)
         return false;
 
     const auto first = point.data()[0];
-    return size != ec_compressed_size ? first == uncompressed :
-        first == compressed_even || first == compressed_odd;
+    return first == compressed_even || first == compressed_odd;
 }
 
-// DER parse/sign/verify
-// ----------------------------------------------------------------------------
-
-der_signature to_der_signature(const endorsement& endorsement)
+bool is_uncompressed_key(data_slice point)
 {
-    auto out = endorsement;
-    if (!out.empty())
-        out.pop_back();
+    const auto size = point.size();
+    if (size != ec_uncompressed_size)
+        return false;
 
-    return out;
+    const auto first = point.data()[0];
+    return first == uncompressed;
 }
+
+bool is_public_key(data_slice point)
+{
+    return is_compressed_key(point) || is_uncompressed_key(point);
+}
+
+// DER parse/encode
+// ----------------------------------------------------------------------------
 
 bool parse_signature(ec_signature& out, const der_signature& der_signature,
     bool strict)
@@ -263,7 +265,25 @@ bool parse_signature(ec_signature& out, const der_signature& der_signature,
     return valid;
 }
 
-bool sign(der_signature& out, const ec_secret& secret, const hash_digest& hash)
+bool encode_signature(der_signature& out, const ec_signature& signature)
+{
+    secp256k1_ecdsa_signature sign;
+    const auto context = signing.context();
+    auto size = max_der_signature_size;
+    out.resize(size);
+
+    if (secp256k1_ecdsa_signature_serialize_der(context, out.data(), &size,
+        &sign) != 1)
+        return false;
+
+    out.resize(size);
+    return true;
+}
+
+// EC sign/verify
+// ----------------------------------------------------------------------------
+
+bool sign(ec_signature& out, const ec_secret& secret, const hash_digest& hash)
 {
     secp256k1_ecdsa_signature signature;
     const auto context = signing.context();
@@ -272,62 +292,48 @@ bool sign(der_signature& out, const ec_secret& secret, const hash_digest& hash)
         secp256k1_nonce_function_rfc6979, nullptr) != 1)
         return false;
 
-    auto size = max_der_signature_size;
-    out.resize(size);
-
-    if (secp256k1_ecdsa_signature_serialize_der(context, out.data(), &size,
-        &signature) != 1)
-        return false;
-
-    out.resize(size);
+    std::copy_n(std::begin(signature.data), out.size(), out.begin());
     return true;
 }
-
-bool der_verify(const data_chunk& point, const hash_digest& hash,
-    const der_signature& der_signature, bool strict)
-{
-    ec_signature signature;
-    const auto context = verification.context();
-    return parse_signature(signature, der_signature, strict) &&
-        verify_signature(context, point, hash, signature);
-}
-
-////// Endorsement verify
-////// ----------------------------------------------------------------------------
-////
-////bool verify_signature(const ec_compressed& point, const hash_digest& hash,
-////    const endorsement& endorsement, bool strict)
-////{
-////    ec_signature signature;
-////    const auto context = verification.context();
-////    return parse_signature(signature, to_der_signature(endorsement), strict) &&
-////        verify_signature(context, point, hash, signature);
-////}
-////
-////bool verify_signature(const ec_uncompressed& point, const hash_digest& hash,
-////    const endorsement& endorsement, bool strict)
-////{
-////    ec_signature signature;
-////    const auto context = verification.context();
-////    return parse_signature(signature, to_der_signature(endorsement), strict) &&
-////        verify_signature(context, point, hash, signature);
-////}
-
-// EC signature verify
-// ----------------------------------------------------------------------------
 
 bool verify_signature(const ec_compressed& point, const hash_digest& hash,
     const ec_signature& signature)
 {
+    secp256k1_pubkey pubkey;
     const auto context = verification.context();
-    return verify_signature(context, point, hash, signature);
+    return parse(context, pubkey, point) &&
+        verify_signature(context, pubkey, hash, signature);
 }
 
 bool verify_signature(const ec_uncompressed& point, const hash_digest& hash,
     const ec_signature& signature)
 {
+    secp256k1_pubkey pubkey;
     const auto context = verification.context();
-    return verify_signature(context, point, hash, signature);
+    return parse(context, pubkey, point) &&
+        verify_signature(context, pubkey, hash, signature);
+}
+
+bool verify_signature(data_slice point, const hash_digest& hash,
+    const ec_signature& signature)
+{
+    // Copy to avoid exposing external types.
+    secp256k1_ecdsa_signature parsed;
+    std::copy(signature.begin(), signature.end(), std::begin(parsed.data));
+
+    // secp256k1_ecdsa_verify rejects non-normalized (low-s) signatures, but
+    // bitcoin does not have such a limitation, so we always normalize.
+    secp256k1_ecdsa_signature normal;
+    const auto context = verification.context();
+    secp256k1_ecdsa_signature_normalize(context, &normal, &parsed);
+
+    // This uses a data slice and calls secp256k1_ec_pubkey_parse() in place of
+    // parse() so that we can support the der_verify data_chunk optimization.
+    secp256k1_pubkey pubkey;
+    const auto size = point.size();
+    return
+        secp256k1_ec_pubkey_parse(context, &pubkey, point.data(), size) == 1 &&
+        secp256k1_ecdsa_verify(context, &normal, hash.data(), &pubkey) == 1;
 }
 
 // Recoverable sign/recover

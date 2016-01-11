@@ -81,7 +81,7 @@ bool output::from_data(reader& source)
 
     if (result)
         result = script.from_data(source, true, 
-        script::parse_mode::raw_data_fallback);
+            script::parse_mode::raw_data_fallback);
 
     if (!result)
         reset();
@@ -116,12 +116,12 @@ uint64_t output::serialized_size() const
     return 8 + script.serialized_size(true);
 }
 
-std::string output::to_string() const
+std::string output::to_string(uint32_t flags) const
 {
     std::ostringstream ss;
 
     ss << "\tvalue = " << value << "\n"
-        << "\t" << script.to_string() << "\n";
+        << "\t" << script.to_string(flags) << "\n";
 
     return ss.str();
 }

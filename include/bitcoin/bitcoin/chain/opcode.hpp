@@ -135,6 +135,7 @@ enum class opcode : uint8_t
     checkmultisigverify = 175,
     op_nop1 = 176,
     op_nop2 = 177,
+    checklocktimeverify = op_nop2,
     op_nop3 = 178,
     op_nop4 = 179,
     op_nop5 = 180,
@@ -147,9 +148,31 @@ enum class opcode : uint8_t
     raw_data
 };
 
-BC_API std::string opcode_to_string(opcode code);
-BC_API opcode string_to_opcode(const std::string& code_repr);
-BC_API opcode data_to_opcode(const data_chunk& data);
+typedef enum script_context_ : uint32_t
+{
+    none_enabled = 0,
+
+    /// pay-to-script-hash enabled
+    bip16_enabled = 1 << 0,
+
+    /// no duplicated unspent transaction ids
+    bip30_enabled = 1 << 1,
+
+    /// coinbase must include height
+    bip34_enabled = 1 << 2,
+
+    /// strict DER signatures required
+    bip66_enabled = 1 << 3,
+
+    /// nop2 becomes check locktime verify
+    bip65_enabled = 1 << 4,
+
+    all_enabled = 0xffffffff
+} script_context;
+
+BC_API std::string opcode_to_string(opcode value, uint32_t flags);
+BC_API opcode string_to_opcode(const std::string& value);
+BC_API opcode data_to_opcode(const data_chunk& value);
 
 } // namspace chain
 } // namspace libbitcoin

@@ -166,7 +166,7 @@ uint64_t transaction::serialized_size() const
     return tx_size;
 }
 
-std::string transaction::to_string() const
+std::string transaction::to_string(uint32_t flags) const
 {
     std::ostringstream value;
     value << "Transaction:\n"
@@ -175,11 +175,11 @@ std::string transaction::to_string() const
         << "Inputs:\n";
 
     for (const auto input: inputs)
-        value << input.to_string();
+        value << input.to_string(flags);
 
     value << "Outputs:\n";
     for (const auto output: outputs)
-        value << output.to_string();
+        value << output.to_string(flags);
 
     value << "\n";
     return value.str();
@@ -190,7 +190,7 @@ hash_digest transaction::hash() const
     return bitcoin_hash(to_data());
 }
 
-hash_digest transaction::hash(uint8_t sighash_type) const
+hash_digest transaction::hash(uint32_t sighash_type) const
 {
     auto serialized = to_data();
     extend_data(serialized, to_little_endian(sighash_type));

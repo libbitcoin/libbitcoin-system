@@ -44,8 +44,14 @@ namespace chain {
 // False is an empty stack.
 static const data_chunk stack_false_value;
 static const data_chunk stack_true_value{ 1 };
-static constexpr uint32_t five_bits = 0x0000001f;
 static constexpr uint64_t op_counter_limit = 201;
+
+enum class signature_parse_result
+{
+    valid,
+    invalid,
+    lax_encoding
+};
 
 script script::factory_from_data(const data_chunk& data, bool prefix,
     parse_mode mode)
@@ -200,7 +206,7 @@ void script::to_data(writer& sink, bool prefix) const
     if ((operations.size() > 0) && (operations[0].code == opcode::raw_data))
         operations[0].to_data(sink);
     else
-        for (const operation& op: operations)
+        for (const auto& op: operations)
             op.to_data(sink);
 }
 
@@ -211,7 +217,7 @@ uint64_t script::satoshi_content_size() const
     if (operations.size() > 0 && (operations[0].code == opcode::raw_data))
         size = operations[0].serialized_size();
     else
-        for (const operation& op: operations)
+        for (const auto& op: operations)
             size += op.serialized_size();
 
     return size;
@@ -277,7 +283,7 @@ bool script::from_string(const std::string& human_readable)
     return !clear;
 }
 
-std::string script::to_string() const
+std::string script::to_string(uint32_t flags) const
 {
     std::ostringstream value;
 
@@ -286,7 +292,7 @@ std::string script::to_string() const
         if (it != operations.begin())
             value << " ";
 
-        value << (*it).to_string();
+        value << (*it).to_string(flags);
     }
 
     return value.str();
@@ -354,8 +360,20 @@ inline void nullify_input_sequences(input::list& inputs,
             inputs[index].sequence = 0;
 }
 
+inline uint8_t is_sighash_enum(uint8_t sighash_type,
+    signature_hash_algorithm value)
+{
+    return (sighash_type & signature_hash_algorithm::mask) == value;
+}
+
+inline uint8_t is_sighash_flag(uint8_t sighash_type,
+    signature_hash_algorithm value)
+{
+    return (sighash_type & value) != 0;
+}
+
 hash_digest script::generate_signature_hash(transaction parent_tx,
-    uint32_t input_index, const script& script_code, uint32_t hash_type)
+    uint32_t input_index, const script& script_code, uint8_t sighash_type)
 {
     // This is NOT considered an error result and callers should not test
     // for one_hash. This is a bitcoind bug we perpetuate.
@@ -374,17 +392,17 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
     // Transaction cannot be updated without resigning the input.
     // (note the lack of nullify_input_sequences() call)
 
-    // sighash::none signs no outputs so they can be changed.
-    if ((hash_type & five_bits) == signature_hash_algorithm::none)
+    if (is_sighash_enum(sighash_type, signature_hash_algorithm::none))
     {
+        // Sign no outputs, so they can be changed.
         parent_tx.outputs.clear();
         nullify_input_sequences(parent_tx.inputs, input_index);
     }
-
-    // Sign the single corresponding output to our index.
-    // We don't care about additional inputs or outputs to the tx.
-    else if ((hash_type & five_bits) == signature_hash_algorithm::single)
+    else if (is_sighash_enum(sighash_type, signature_hash_algorithm::single))
     {
+
+        // Sign the single output corresponding to our index.
+        // We don't care about additional inputs or outputs to the tx.
         auto& outputs = parent_tx.outputs;
         uint32_t output_index = input_index;
 
@@ -405,53 +423,15 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
         nullify_input_sequences(parent_tx.inputs, input_index);
     }
 
-    // Modifier to ignore the other inputs except our own.
-    if (hash_type & signature_hash_algorithm::anyone_can_pay)
+    // Flag to ignore the other inputs except our own.
+    if (is_sighash_flag(sighash_type,
+        signature_hash_algorithm::anyone_can_pay))
     {
         parent_tx.inputs[0] = parent_tx.inputs[input_index];
         parent_tx.inputs.resize(1);
     }
 
-    return parent_tx.hash(hash_type);
-}
-
-bool script::create_endorsement(endorsement& endorsement,
-    const ec_secret& secret, const script& prevout_script,
-    const transaction& new_tx, uint32_t input_index, uint32_t sighash_type)
-{
-    // This always produces a valid sighash.
-    const auto sighash = generate_signature_hash(new_tx, input_index,
-        prevout_script, sighash_type);
-
-    // Create the DER signature (always valid).
-    endorsement = der_sign(secret, sighash);
-
-    // Add the sighash type to the end of the DER signature.
-    endorsement.push_back(sighash_type);
-    return true;
-}
-
-// Convert op data to a public key and verify the signature.
-// data_chunk is used instead of ec keys to optimize script processing.
-bool script::check_endorsement(data_slice endorsement, const data_chunk& point,
-    const script& script_code, const transaction& parent_tx,
-    uint32_t input_index)
-{
-    if (!is_point(point))
-        return false;
-
-    // Remove the sighash type from the end of the endorsement.
-    auto der_signature = to_chunk(endorsement);
-    const auto sighash_type = der_signature.back();
-    der_signature.pop_back();
-
-    // This always produces a valid signature hash.
-    const auto sighash = generate_signature_hash(parent_tx, input_index,
-        script_code, sighash_type);
-
-    // Validate the DER signature.
-    static constexpr auto strict = false;
-    return der_verify(point, sighash, der_signature, strict);
+    return parent_tx.hash(sighash_type);
 }
 
 inline bool cast_to_bool(const data_chunk& values)
@@ -568,7 +548,7 @@ bool greater_op_16(opcode code)
 bool op_negative_1(evaluation_context& context)
 {
     script_number neg1(-1);
-    context.primary.push_back(neg1.data());
+    context.stack.push_back(neg1.data());
     return true;
 }
 
@@ -578,19 +558,19 @@ bool op_x(evaluation_context& context, opcode code)
         static_cast<uint8_t>(opcode::op_1) + 1;
 
     script_number value(difference);
-    context.primary.push_back(value.data());
+    context.stack.push_back(value.data());
     return true;
 }
 
 bool op_if(evaluation_context& context)
 {
     auto value = false;
-    if (!context.conditional.has_failed_branches())
+    if (context.conditional.succeeded())
     {
-        if (context.primary.size() < 1)
+        if (context.stack.size() < 1)
             return false;
 
-        value = cast_to_bool(context.pop_primary());
+        value = cast_to_bool(context.pop_stack());
     }
 
     context.conditional.open(value);
@@ -628,71 +608,71 @@ bool op_endif(evaluation_context& context)
 
 bool op_verify(evaluation_context& context)
 {
-    if (context.primary.size() < 1)
+    if (context.stack.size() < 1)
         return false;
 
-    if (!cast_to_bool(context.primary.back()))
+    if (!cast_to_bool(context.stack.back()))
         return false;
 
-    context.pop_primary();
+    context.pop_stack();
     return true;
 }
 
 bool op_toaltstack(evaluation_context& context)
 {
-    if (context.primary.size() < 1)
+    if (context.stack.size() < 1)
         return false;
 
-    const auto move_data = context.pop_primary();
-    context.secondary.push_back(move_data);
+    const auto move_data = context.pop_stack();
+    context.alternate.push_back(move_data);
     return true;
 }
 
 bool op_fromaltstack(evaluation_context& context)
 {
-    if (context.secondary.size() < 1)
+    if (context.alternate.size() < 1)
         return false;
 
-    context.primary.push_back(context.secondary.back());
-    context.secondary.pop_back();
+    context.stack.push_back(context.alternate.back());
+    context.alternate.pop_back();
     return true;
 }
 
 bool op_2drop(evaluation_context& context)
 {
-    if (context.primary.size() < 2)
+    if (context.stack.size() < 2)
         return false;
 
-    context.primary.pop_back();
-    context.primary.pop_back();
+    context.stack.pop_back();
+    context.stack.pop_back();
     return true;
 }
 
 bool op_2dup(evaluation_context& context)
 {
-    if (context.primary.size() < 2)
+    if (context.stack.size() < 2)
         return false;
 
-    const auto dup_first = *(context.primary.end() - 2);
-    const auto dup_second = *(context.primary.end() - 1);
+    const auto dup_first = *(context.stack.end() - 2);
+    const auto dup_second = *(context.stack.end() - 1);
 
-    context.primary.push_back(dup_first);
-    context.primary.push_back(dup_second);
+    context.stack.push_back(dup_first);
+    context.stack.push_back(dup_second);
     return true;
 }
 
 bool op_3dup(evaluation_context& context)
 {
-    if (context.primary.size() < 3)
+    if (context.stack.size() < 3)
         return false;
 
-    const auto dup_first = *(context.primary.end() - 3);
-    const auto dup_second = *(context.primary.end() - 2);
-    const auto dup_third = *(context.primary.end() - 1);
+    const auto dup_first = *(context.stack.end() - 3);
+    const auto dup_second = *(context.stack.end() - 2);
+    const auto dup_third = *(context.stack.end() - 1);
 
-    context.primary.push_back(dup_first);
-    context.primary.push_back(dup_second);
-    context.primary.push_back(dup_third);
+    context.stack.push_back(dup_first);
+    context.stack.push_back(dup_second);
+    context.stack.push_back(dup_third);
     return true;
 }
 
@@ -704,108 +684,108 @@ void copy_item_over_stack(DataStack& stack, size_t index)
 
 bool op_2over(evaluation_context& context)
 {
-    if (context.primary.size() < 4)
+    if (context.stack.size() < 4)
         return false;
 
-    copy_item_over_stack(context.primary, 4);
+    copy_item_over_stack(context.stack, 4);
 
     // Item -3 now becomes -4 because of last push
-    copy_item_over_stack(context.primary, 4);
+    copy_item_over_stack(context.stack, 4);
     return true;
 }
 
 bool op_2rot(evaluation_context& context)
 {
-    if (context.primary.size() < 6)
+    if (context.stack.size() < 6)
         return false;
 
-    const auto first_position = context.primary.end() - 6;
-    const auto second_position = context.primary.end() - 5;
-    const auto third_position = context.primary.end() - 4;
+    const auto first_position = context.stack.end() - 6;
+    const auto second_position = context.stack.end() - 5;
+    const auto third_position = context.stack.end() - 4;
 
     const auto dup_first = *(first_position);
     const auto dup_second = *(second_position);
 
-    context.primary.erase(first_position, third_position);
-    context.primary.push_back(dup_first);
-    context.primary.push_back(dup_second);
+    context.stack.erase(first_position, third_position);
+    context.stack.push_back(dup_first);
+    context.stack.push_back(dup_second);
     return true;
 }
 
 bool op_2swap(evaluation_context& context)
 {
-    if (context.primary.size() < 4)
+    if (context.stack.size() < 4)
         return false;
 
     // Before: x1 x2 x3 x4
     // After:  x3 x4 x1 x2
-    stack_swap(context.primary, 4, 2);
-    stack_swap(context.primary, 3, 1);
+    stack_swap(context.stack, 4, 2);
+    stack_swap(context.stack, 3, 1);
     return true;
 }
 
 bool op_ifdup(evaluation_context& context)
 {
-    if (context.primary.size() < 1)
+    if (context.stack.size() < 1)
         return false;
 
-    if (cast_to_bool(context.primary.back()))
-        context.primary.push_back(context.primary.back());
+    if (cast_to_bool(context.stack.back()))
+        context.stack.push_back(context.stack.back());
 
     return true;
 }
 
 bool op_depth(evaluation_context& context)
 {
-    script_number stack_size(context.primary.size());
-    context.primary.push_back(stack_size.data());
+    script_number stack_size(context.stack.size());
+    context.stack.push_back(stack_size.data());
     return true;
 }
 
 bool op_drop(evaluation_context& context)
 {
-    if (context.primary.size() < 1)
+    if (context.stack.size() < 1)
         return false;
 
-    context.primary.pop_back();
+    context.stack.pop_back();
     return true;
 }
 
 bool op_dup(evaluation_context& context)
 {
-    if (context.primary.size() < 1)
+    if (context.stack.size() < 1)
         return false;
 
-    context.primary.push_back(context.primary.back());
+    context.stack.push_back(context.stack.back());
     return true;
 }
 
 bool op_nip(evaluation_context& context)
 {
-    if (context.primary.size() < 2)
+    if (context.stack.size() < 2)
         return false;
 
-    context.primary.erase(context.primary.end() - 2);
+    context.stack.erase(context.stack.end() - 2);
     return true;
 }
 
 bool op_over(evaluation_context& context)
 {
-    if (context.primary.size() < 2)
+    if (context.stack.size() < 2)
         return false;
 
-    copy_item_over_stack(context.primary, 2);
+    copy_item_over_stack(context.stack, 2);
     return true;
 }
 
 bool op_pick(evaluation_context& context)
 {
-    return pick_roll_impl(context.primary, false);
+    return pick_roll_impl(context.stack, false);
 }
 
 bool op_roll(evaluation_context& context)
 {
-    return pick_roll_impl(context.primary, true);
+    return pick_roll_impl(context.stack, true);
 }
 
 bool op_rot(evaluation_context& context)
@@ -813,214 +793,214 @@ bool op_rot(evaluation_context& context)
     // Top 3 stack items are rotated to the left.
     // Before: x1 x2 x3
     // After:  x2 x3 x1
-    if (context.primary.size() < 3)
+    if (context.stack.size() < 3)
         return false;
 
-    stack_swap(context.primary, 3, 2);
-    stack_swap(context.primary, 2, 1);
+    stack_swap(context.stack, 3, 2);
+    stack_swap(context.stack, 2, 1);
     return true;
 }
 
 bool op_swap(evaluation_context& context)
 {
-    if (context.primary.size() < 2)
+    if (context.stack.size() < 2)
         return false;
 
-    stack_swap(context.primary, 2, 1);
+    stack_swap(context.stack, 2, 1);
     return true;
 }
 
 bool op_tuck(evaluation_context& context)
 {
-    if (context.primary.size() < 2)
+    if (context.stack.size() < 2)
         return false;
 
-    const auto data = context.primary.back();
-    context.primary.insert(context.primary.end() - 2, data);
+    const auto data = context.stack.back();
+    context.stack.insert(context.stack.end() - 2, data);
     return true;
 }
 
 bool op_size(evaluation_context& context)
 {
-    if (context.primary.size() < 1)
+    if (context.stack.size() < 1)
         return false;
 
-    const script_number top_item_size(context.primary.back().size());
-    context.primary.push_back(top_item_size.data());
+    const script_number top_item_size(context.stack.back().size());
+    context.stack.push_back(top_item_size.data());
     return true;
 }
 
 bool op_equal(evaluation_context& context)
 {
-    if (context.primary.size() < 2)
+    if (context.stack.size() < 2)
         return false;
 
-    if (context.pop_primary() == context.pop_primary())
-        context.primary.push_back(stack_true_value);
+    if (context.pop_stack() == context.pop_stack())
+        context.stack.push_back(stack_true_value);
     else
-        context.primary.push_back(stack_false_value);
+        context.stack.push_back(stack_false_value);
 
     return true;
 }
 
 bool op_equalverify(evaluation_context& context)
 {
-    if (context.primary.size() < 2)
+    if (context.stack.size() < 2)
         return false;
 
-    return context.pop_primary() == context.pop_primary();
+    return context.pop_stack() == context.pop_stack();
 }
 
 bool op_1add(evaluation_context& context)
 {
-    if (context.primary.size() < 1)
+    if (context.stack.size() < 1)
         return false;
 
     script_number number;
-    if (!number.set_data(context.pop_primary()))
+    if (!number.set_data(context.pop_stack()))
         return false;
 
     const script_number one(1);
     number += one;
-    context.primary.push_back(number.data());
+    context.stack.push_back(number.data());
     return true;
 }
 
 bool op_1sub(evaluation_context& context)
 {
-    if (context.primary.size() < 1)
+    if (context.stack.size() < 1)
         return false;
 
     script_number number;
-    if (!number.set_data(context.pop_primary()))
+    if (!number.set_data(context.pop_stack()))
         return false;
 
     const script_number one(1);
     number -= one;
-    context.primary.push_back(number.data());
+    context.stack.push_back(number.data());
     return true;
 }
 
 bool op_negate(evaluation_context& context)
 {
-    if (context.primary.size() < 1)
+    if (context.stack.size() < 1)
         return false;
 
     script_number number;
-    if (!number.set_data(context.pop_primary()))
+    if (!number.set_data(context.pop_stack()))
         return false;
 
     number = -number;
-    context.primary.push_back(number.data());
+    context.stack.push_back(number.data());
     return true;
 }
 
 bool op_abs(evaluation_context& context)
 {
-    if (context.primary.size() < 1)
+    if (context.stack.size() < 1)
         return false;
 
     script_number number;
-    if (!number.set_data(context.pop_primary()))
+    if (!number.set_data(context.pop_stack()))
         return false;
 
     const script_number zero(0);
     if (number < zero)
         number = -number;
 
-    context.primary.push_back(number.data());
+    context.stack.push_back(number.data());
     return true;
 }
 
 bool op_not(evaluation_context& context)
 {
-    if (context.primary.size() < 1)
+    if (context.stack.size() < 1)
         return false;
 
     script_number number;
-    if (!number.set_data(context.pop_primary()))
+    if (!number.set_data(context.pop_stack()))
         return false;
 
     const script_number zero(0);
-    context.primary.push_back(script_number(number == zero).data());
+    context.stack.push_back(script_number(number == zero).data());
     return true;
 }
 
 bool op_0notequal(evaluation_context& context)
 {
-    if (context.primary.size() < 1)
+    if (context.stack.size() < 1)
         return false;
 
     script_number number;
-    if (!number.set_data(context.pop_primary()))
+    if (!number.set_data(context.pop_stack()))
         return false;
 
     const script_number zero(0);
-    context.primary.push_back(script_number(number != zero).data());
+    context.stack.push_back(script_number(number != zero).data());
     return true;
 }
 
 bool op_add(evaluation_context& context)
 {
     script_number number_a, number_b;
-    if (!arithmetic_start_new(context.primary, number_a, number_b))
+    if (!arithmetic_start_new(context.stack, number_a, number_b))
         return false;
 
     const script_number result = number_a + number_b;
-    context.primary.push_back(result.data());
+    context.stack.push_back(result.data());
     return true;
 }
 
 bool op_sub(evaluation_context& context)
 {
     script_number number_a, number_b;
-    if (!arithmetic_start_new(context.primary, number_a, number_b))
+    if (!arithmetic_start_new(context.stack, number_a, number_b))
         return false;
 
     const script_number result = number_a - number_b;
-    context.primary.push_back(result.data());
+    context.stack.push_back(result.data());
     return true;
 }
 
 bool op_booland(evaluation_context& context)
 {
     script_number number_a, number_b;
-    if (!arithmetic_start_new(context.primary, number_a, number_b))
+    if (!arithmetic_start_new(context.stack, number_a, number_b))
         return false;
 
     const script_number zero(0);
     const script_number result(number_a != zero && number_b != zero);
-    context.primary.push_back(result.data());
+    context.stack.push_back(result.data());
     return true;
 }
 
 bool op_boolor(evaluation_context& context)
 {
     script_number number_a, number_b;
-    if (!arithmetic_start_new(context.primary, number_a, number_b))
+    if (!arithmetic_start_new(context.stack, number_a, number_b))
         return false;
 
     const script_number zero(0);
     const script_number result(number_a != zero || number_b != zero);
-    context.primary.push_back(result.data());
+    context.stack.push_back(result.data());
     return true;
 }
 
 bool op_numequal(evaluation_context& context)
 {
     script_number number_a, number_b;
-    if (!arithmetic_start_new(context.primary, number_a, number_b))
+    if (!arithmetic_start_new(context.stack, number_a, number_b))
         return false;
 
     const script_number result(number_a == number_b);
-    context.primary.push_back(result.data());
+    context.stack.push_back(result.data());
     return true;
 }
 
 bool op_numequalverify(evaluation_context& context)
 {
     script_number number_a, number_b;
-    if (!arithmetic_start_new(context.primary, number_a, number_b))
+    if (!arithmetic_start_new(context.stack, number_a, number_b))
         return false;
 
     return number_a == number_b;
@@ -1029,33 +1009,33 @@ bool op_numequalverify(evaluation_context& context)
 bool op_numnotequal(evaluation_context& context)
 {
     script_number number_a, number_b;
-    if (!arithmetic_start_new(context.primary, number_a, number_b))
+    if (!arithmetic_start_new(context.stack, number_a, number_b))
         return false;
 
     const script_number result(number_a != number_b);
-    context.primary.push_back(result.data());
+    context.stack.push_back(result.data());
     return true;
 }
 
 bool op_lessthan(evaluation_context& context)
 {
     script_number number_a, number_b;
-    if (!arithmetic_start_new(context.primary, number_a, number_b))
+    if (!arithmetic_start_new(context.stack, number_a, number_b))
         return false;
 
     const script_number result(number_a < number_b);
-    context.primary.push_back(result.data());
+    context.stack.push_back(result.data());
     return true;
 }
 
 bool op_greaterthan(evaluation_context& context)
 {
     script_number number_a, number_b;
-    if (!arithmetic_start_new(context.primary, number_a, number_b))
+    if (!arithmetic_start_new(context.stack, number_a, number_b))
         return false;
 
     const script_number result(number_a > number_b);
-    context.primary.push_back(result.data());
+    context.stack.push_back(result.data());
     return true;
 }
 
@@ -1063,11 +1043,11 @@ bool op_lessthanorequal(evaluation_context& context)
 {
     script_number number_a, number_b;
 
-    if (!arithmetic_start_new(context.primary, number_a, number_b))
+    if (!arithmetic_start_new(context.stack, number_a, number_b))
         return false;
 
     const script_number result(number_a <= number_b);
-    context.primary.push_back(result.data());
+    context.stack.push_back(result.data());
 
     return true;
 }
@@ -1075,24 +1055,24 @@ bool op_lessthanorequal(evaluation_context& context)
 bool op_greaterthanorequal(evaluation_context& context)
 {
     script_number number_a, number_b;
-    if (!arithmetic_start_new(context.primary, number_a, number_b))
+    if (!arithmetic_start_new(context.stack, number_a, number_b))
         return false;
 
     const script_number result(number_a >= number_b);
-    context.primary.push_back(result.data());
+    context.stack.push_back(result.data());
     return true;
 }
 
 bool op_min(evaluation_context& context)
 {
     script_number number_a, number_b;
-    if (!arithmetic_start_new(context.primary, number_a, number_b))
+    if (!arithmetic_start_new(context.stack, number_a, number_b))
         return false;
 
     if (number_a < number_b)
-        context.primary.push_back(number_a.data());
+        context.stack.push_back(number_a.data());
     else
-        context.primary.push_back(number_b.data());
+        context.stack.push_back(number_b.data());
 
     return true;
 }
@@ -1100,122 +1080,171 @@ bool op_min(evaluation_context& context)
 bool op_max(evaluation_context& context)
 {
     script_number number_a, number_b;
-    if (!arithmetic_start_new(context.primary, number_a, number_b))
+    if (!arithmetic_start_new(context.stack, number_a, number_b))
         return false;
 
     if (number_a < number_b)
-        context.primary.push_back(number_b.data());
+        context.stack.push_back(number_b.data());
     else
-        context.primary.push_back(number_a.data());
+        context.stack.push_back(number_a.data());
 
     return true;
 }
 
 bool op_within(evaluation_context& context)
 {
-    if (context.primary.size() < 3)
+    if (context.stack.size() < 3)
         return false;
 
     script_number upper;
-    if (!upper.set_data(context.pop_primary()))
+    if (!upper.set_data(context.pop_stack()))
         return false;
 
     script_number lower;
-    if (!lower.set_data(context.pop_primary()))
+    if (!lower.set_data(context.pop_stack()))
         return false;
 
     script_number value;
-    if (!value.set_data(context.pop_primary()))
+    if (!value.set_data(context.pop_stack()))
         return false;
 
     if ((lower <= value) && (value < upper))
-        context.primary.push_back(stack_true_value);
+        context.stack.push_back(stack_true_value);
     else
-        context.primary.push_back(stack_false_value);
+        context.stack.push_back(stack_false_value);
 
     return true;
 }
 
 bool op_ripemd160(evaluation_context& context)
 {
-    if (context.primary.size() < 1)
+    if (context.stack.size() < 1)
         return false;
 
-    const auto hash = ripemd160_hash(context.pop_primary());
-    context.primary.push_back(to_chunk(hash));
+    const auto hash = ripemd160_hash(context.pop_stack());
+    context.stack.push_back(to_chunk(hash));
     return true;
 }
 
 bool op_sha1(evaluation_context& context)
 {
-    if (context.primary.size() < 1)
+    if (context.stack.size() < 1)
         return false;
 
-    const auto hash = sha1_hash(context.pop_primary());
-    context.primary.push_back(to_chunk(hash));
+    const auto hash = sha1_hash(context.pop_stack());
+    context.stack.push_back(to_chunk(hash));
     return true;
 }
 
 bool op_sha256(evaluation_context& context)
 {
-    if (context.primary.size() < 1)
+    if (context.stack.size() < 1)
         return false;
 
-    const auto hash = sha256_hash(context.pop_primary());
-    context.primary.push_back(to_chunk(hash));
+    const auto hash = sha256_hash(context.pop_stack());
+    context.stack.push_back(to_chunk(hash));
     return true;
 }
 
 bool op_hash160(evaluation_context& context)
 {
-    if (context.primary.size() < 1)
+    if (context.stack.size() < 1)
         return false;
 
-    const auto hash = bitcoin_short_hash(context.pop_primary());
-    context.primary.push_back(to_chunk(hash));
+    const auto hash = bitcoin_short_hash(context.pop_stack());
+    context.stack.push_back(to_chunk(hash));
     return true;
 }
 
 bool op_hash256(evaluation_context& context)
 {
-    if (context.primary.size() < 1)
+    if (context.stack.size() < 1)
         return false;
 
-    const auto hash = bitcoin_hash(context.pop_primary());
-    context.primary.push_back(to_chunk(hash));
+    const auto hash = bitcoin_hash(context.pop_stack());
+    context.stack.push_back(to_chunk(hash));
     return true;
 }
 
-bool op_checksigverify(evaluation_context& context, const script& script,
-    const transaction& parent_tx, uint32_t input_index)
+bool create_endorsement(endorsement& out, const ec_secret& secret,
+    const script& prevout_script, const transaction& new_tx,
+    uint32_t input_index, uint8_t sighash_type)
 {
-    if (context.primary.size() < 2)
+    // This always produces a valid signature hash.
+    const auto sighash = script::generate_signature_hash(new_tx, input_index,
+        prevout_script, sighash_type);
+
+    // Create the EC signature and encode as DER.
+    ec_signature signature;
+    if (!sign(signature, secret, sighash) || !encode_signature(out, signature))
         return false;
 
-    const auto point = context.pop_primary();
-    const auto signature = context.pop_primary();
+    // Add the sighash type to the end of the DER signature -> endorsement.
+    out.push_back(sighash_type);
+    return true;
+}
+
+bool script::check_signature(const ec_signature& signature,
+    uint8_t sighash_type, const data_chunk& public_key,
+    const script& script_code, const transaction& parent_tx,
+    uint32_t input_index)
+{
+    if (public_key.empty())
+        return false;
+
+    // This always produces a valid signature hash.
+    const auto sighash = script::generate_signature_hash(parent_tx, input_index,
+        script_code, sighash_type);
+
+    // Validate the EC signature.
+    return verify_signature(public_key, sighash, signature);
+}
+
+signature_parse_result op_checksigverify(evaluation_context& context,
+    const script& script, const transaction& parent_tx, uint32_t input_index,
+    bool strict)
+{
+    if (context.stack.size() < 2)
+        return signature_parse_result::invalid;
+
+    const auto pubkey = context.pop_stack();
+    auto endorsement = context.pop_stack();
+    const auto sighash_type = endorsement.back();
+    auto& distinguished = endorsement;
+    distinguished.pop_back();
+
+    ec_signature signature;
+    if (strict && !parse_signature(signature, distinguished, true))
+        return signature_parse_result::lax_encoding;
 
     chain::script script_code;
-    for (auto it = context.codehash_begin; it != script.operations.end(); ++it)
-    {
-        const auto op = *it;
-        if (op.data == signature || op.code == opcode::codeseparator)
-            continue;
+    for (auto it = context.code_begin; it != script.operations.end(); ++it)
+        if (it->data != endorsement && it->code != opcode::codeseparator)
+            script_code.operations.push_back(*it);
 
-        script_code.operations.push_back(op);
-    }
+    if (!strict && !parse_signature(signature, distinguished, false))
+        return signature_parse_result::invalid;
 
-    return script::check_signature(signature, point, script_code, parent_tx,
-        input_index);
+    return script::check_signature(signature, sighash_type, pubkey,
+        script_code, parent_tx, input_index) ?
+        signature_parse_result::valid :
+        signature_parse_result::invalid;
 }
 
 bool op_checksig(evaluation_context& context, const script& script,
-    const transaction& parent_tx, uint32_t input_index)
+    const transaction& parent_tx, uint32_t input_index, bool strict)
 {
-    if (op_checksigverify(context, script, parent_tx, input_index))
-        context.primary.push_back(stack_true_value);
-    else
-        context.primary.push_back(stack_false_value);
+    switch (op_checksigverify(context, script, parent_tx, input_index, strict))
+    {
+        case signature_parse_result::valid:
+            context.stack.push_back(stack_true_value);
+            break;
+        case signature_parse_result::invalid:
+            context.stack.push_back(stack_false_value);
+            break;
+        case signature_parse_result::lax_encoding:
+            return false;
+    }
 
     return true;
 }
@@ -1223,105 +1252,162 @@ bool op_checksig(evaluation_context& context, const script& script,
 bool read_section(evaluation_context& context, data_stack& section,
     size_t count)
 {
-    if (context.primary.size() < count)
+    if (context.stack.size() < count)
         return false;
 
     for (size_t i = 0; i < count; ++i)
-        section.push_back(context.pop_primary());
+        section.push_back(context.pop_stack());
 
     return true;
 }
 
-bool op_checkmultisigverify(evaluation_context& context, const script& script,
-    const transaction& parent_tx, uint32_t input_index)
+signature_parse_result op_checkmultisigverify(evaluation_context& context,
+    const script& script, const transaction& parent_tx,
+    uint32_t input_index, bool strict)
 {
     int32_t pubkeys_count;
-    if (!read_value(context.primary, pubkeys_count))
-        return false;
+    if (!read_value(context.stack, pubkeys_count))
+        return signature_parse_result::invalid;
 
     if (pubkeys_count < 0 || pubkeys_count > 20)
-        return false;
+        return signature_parse_result::invalid;
 
     context.operation_counter += pubkeys_count;
     if (context.operation_counter > op_counter_limit)
-        return false;
+        return signature_parse_result::invalid;
 
     data_stack pubkeys;
     if (!read_section(context, pubkeys, pubkeys_count))
-        return false;
+        return signature_parse_result::invalid;
 
     int32_t sigs_count;
-    if (!read_value(context.primary, sigs_count))
-        return false;
+    if (!read_value(context.stack, sigs_count))
+        return signature_parse_result::invalid;
 
     if (sigs_count < 0 || sigs_count > pubkeys_count)
-        return false;
+        return signature_parse_result::invalid;
 
-    data_stack signatures;
-    if (!read_section(context, signatures, sigs_count))
-        return false;
+    data_stack endorsements;
+    if (!read_section(context, endorsements, sigs_count))
+        return signature_parse_result::invalid;
 
     // Due to a bug in bitcoind, we need to read an extra null value which we
     // discard later.
-    if (context.primary.empty())
-        return false;
+    if (context.stack.empty())
+        return signature_parse_result::invalid;
 
-    context.primary.pop_back();
-    const auto is_signature = [&signatures](const data_chunk& data)
+    context.stack.pop_back();
+    const auto is_endorsement = [&endorsements](const data_chunk& data)
     {
-        return std::find(signatures.begin(), signatures.end(), data) != 
-            signatures.end();
+        return std::find(endorsements.begin(), endorsements.end(), data) !=
+            endorsements.end();
     };
 
     chain::script script_code;
-    for (auto it = context.codehash_begin; it != script.operations.end(); ++it)
-    {
-        const operation op = *it;
-
-        if (op.code == opcode::codeseparator)
-            continue;
-
-        if (is_signature(op.data))
-            continue;
-
-        script_code.operations.push_back(op);
-    }
+    for (auto it = context.code_begin; it != script.operations.end(); ++it)
+        if (it->code != opcode::codeseparator && !is_endorsement(it->data))
+            script_code.operations.push_back(*it);
 
     // The exact number of signatures are required and must be in order.
     // One key can validate more than one script. So we always advance 
     // until we exhaust either pubkeys (fail) or signatures (pass).
     auto pubkey_iterator = pubkeys.begin();
-    for (const auto& signature: signatures)
+    for (const auto& endorsement: endorsements)
     {
+        const auto sighash_type = endorsement.back();
+        auto distinguished = endorsement;
+        distinguished.pop_back();
+
+        ec_signature signature;
+        if (!parse_signature(signature, distinguished, strict))
+            return strict ?
+                signature_parse_result::lax_encoding :
+                signature_parse_result::invalid;
+
         while (true)
         {
             const auto& point = *pubkey_iterator;
-            if (script::check_signature(signature, point, script_code,
-                parent_tx, input_index))
+            if (script::check_signature(signature, sighash_type, point,
+                script_code, parent_tx, input_index))
                 break;
 
             ++pubkey_iterator;
             if (pubkey_iterator == pubkeys.end())
-                return false;
+                return signature_parse_result::invalid;
         }
+    }
+
+    return signature_parse_result::valid;
+}
+
+bool op_checkmultisig(evaluation_context& context, const script& script,
+    const transaction& parent_tx, uint32_t input_index, bool strict)
+{
+    switch (op_checkmultisigverify(context, script, parent_tx, input_index,
+        strict))
+    {
+    case signature_parse_result::valid:
+        context.stack.push_back(stack_true_value);
+        break;
+    case signature_parse_result::invalid:
+        context.stack.push_back(stack_false_value);
+        break;
+    case signature_parse_result::lax_encoding:
+        return false;
     }
 
     return true;
 }
 
-bool op_checkmultisig(evaluation_context& context, const script& script,
+bool is_locktime_type_match(int64_t left, int64_t right)
+{
+    const auto threshold = static_cast<int64_t>(locktime_threshold);
+    return (left < threshold) == (right < threshold);
+}
+
+bool op_checklocktimeverify(evaluation_context& context, const script& script,
     const transaction& parent_tx, uint32_t input_index)
 {
-    if (op_checkmultisigverify(context, script, parent_tx, input_index))
-        context.primary.push_back(stack_true_value);
-    else
-        context.primary.push_back(stack_false_value);
+    if (input_index >= parent_tx.inputs.size())
+        return false;
 
-    return true;
+    // BIP65: the nSequence field of the txin is 0xffffffff.
+    if (parent_tx.inputs[input_index].is_final())
+        return false;
+
+    // BIP65: the stack is empty.
+    if (context.stack.empty())
+        return false;
+
+    // BIP65: We extend the (signed) CLTV script number range to 5 bytes in
+    // order to reach the domain of the (unsigned) tx.locktime field.
+    script_number number;
+    if (!number.set_data(context.pop_stack(), cltv_max_script_number_size))
+        return false;
+
+    // BIP65: the top item on the stack is less than 0.
+    if (number < 0)
+        return false;
+
+    // BIP65: the top stack item is greater than the tx's nLockTime.
+    const auto stack = number.int64();
+    const auto transaction = static_cast<int64_t>(parent_tx.locktime);
+    if (stack > transaction)
+        return false;
+
+    // BIP65: the stack lock-time type differs from that of tx nLockTime.
+    return is_locktime_type_match(stack, transaction);
+}
+
+// Test flags for a given context.
+bool script::is_active(uint32_t flags, script_context flag)
+{
+    return (flag & flags) != 0;
 }
 
 bool run_operation(const operation& op, const transaction& parent_tx,
-    uint32_t input_index, const script& script, evaluation_context& context)
+    uint32_t input_index, const script& script, evaluation_context& context,
+    uint32_t flags)
 {
     switch (op.code)
     {
@@ -1330,7 +1416,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
         case opcode::pushdata1:
         case opcode::pushdata2:
         case opcode::pushdata4:
-            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
+            BITCOIN_ASSERT_MSG(false,
                 "Invalid push operation in run_operation");
             return true;
 
@@ -1372,7 +1458,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
 
         case opcode::verif:
         case opcode::vernotif:
-            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
+            BITCOIN_ASSERT_MSG(false,
                 "Disabled opcodes (verif/vernotif) in run_operation");
             return false;
 
@@ -1446,7 +1532,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
         case opcode::substr:
         case opcode::left:
         case opcode::right:
-            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
+            BITCOIN_ASSERT_MSG(false,
                 "Disabled splice operations in run_operation");
             return false;
 
@@ -1460,7 +1546,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
         case opcode::and_:
         case opcode::or_:
         case opcode::xor_:
-            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
+            BITCOIN_ASSERT_MSG(false,
                 "Disabled bit logic operations in run_operation");
             return false;
 
@@ -1482,7 +1568,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
 
         case opcode::op_2mul:
         case opcode::op_2div:
-            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
+            BITCOIN_ASSERT_MSG(false,
                 "Disabled opcodes (2mul/2div) in run_operation");
             return false;
 
@@ -1509,7 +1595,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
         case opcode::mod:
         case opcode::lshift:
         case opcode::rshift:
-            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
+            BITCOIN_ASSERT_MSG(false,
                 "Disabled numeric operations in run_operation");
             return false;
 
@@ -1565,27 +1651,40 @@ bool run_operation(const operation& op, const transaction& parent_tx,
             return op_hash256(context);
 
         case opcode::codeseparator:
-            // This is set in the main run(...) loop
-            // codehash_begin_ is updated to the current
-            // operations_ iterator
-            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
+            // This is set in the main evaluate(...) loop
+            // code_begin is updated to the current position
+            BITCOIN_ASSERT_MSG(false,
                 "Invalid operation (codeseparator) in run_operation");
             return true;
 
         case opcode::checksig:
-            return op_checksig(context, script, parent_tx, input_index);
+            return op_checksig(context, script, parent_tx, input_index,
+                script::is_active(flags, script_context::bip66_enabled));
 
         case opcode::checksigverify:
-            return op_checksigverify(context, script, parent_tx, input_index);
+            return op_checksigverify(context, script, parent_tx, input_index,
+                script::is_active(flags, script_context::bip66_enabled)) ==
+                    signature_parse_result::valid;
 
         case opcode::checkmultisig:
-            return op_checkmultisig(context, script, parent_tx, input_index);
+            return op_checkmultisig(context, script, parent_tx, input_index,
+                script::is_active(flags, script_context::bip66_enabled));
 
         case opcode::checkmultisigverify:
-            return op_checkmultisigverify(context, script, parent_tx, input_index);
+            return op_checkmultisigverify(context, script, parent_tx, input_index,
+                script::is_active(flags, script_context::bip66_enabled)) ==
+                    signature_parse_result::valid;
+
+        case opcode::checklocktimeverify:
+            return script::is_active(context.flags, script_context::bip65_enabled) ?
+                op_checklocktimeverify(context, script, parent_tx,
+                    input_index) : true;
 
         case opcode::op_nop1:
-        case opcode::op_nop2:
+
+        // op_nop2 has been consumed by checklocktimeverify
+        ////case opcode::op_nop2:
+
         case opcode::op_nop3:
         case opcode::op_nop4:
         case opcode::op_nop5:
@@ -1600,8 +1699,8 @@ bool run_operation(const operation& op, const transaction& parent_tx,
             return false;
 
         default:
-            log::fatal(LOG_SCRIPT) << "Unimplemented operation <none "
-                << static_cast<int>(op.code) << ">";
+            ////log::fatal(LOG_SCRIPT) << "Unimplemented operation <none "
+            ////    << static_cast<int>(op.code) << ">";
             return false;
     }
 
@@ -1650,12 +1749,27 @@ bool opcode_is_disabled(opcode code)
         default:
             return false;
     }
-    return true;
+}
+
+bool opcode_is_empty_pusher(opcode code)
+{
+    switch (code)
+    {
+        // These operations may push empty data (opcode zero).
+        case opcode::special:
+        case opcode::pushdata1:
+        case opcode::pushdata2:
+        case opcode::pushdata4:
+            return true;
+
+        default:
+            return false;
+    }
 }
 
 bool next_step(const transaction& parent_tx, uint32_t input_index,
     operation::stack::const_iterator it, const script& script,
-    evaluation_context& context)
+    evaluation_context& context, uint32_t flags)
 {
     const auto& op = *it;
 
@@ -1667,77 +1781,75 @@ bool next_step(const transaction& parent_tx, uint32_t input_index,
 
     if (opcode_is_disabled(op.code))
         return false;
-
-    bool allow_execution = !context.conditional.has_failed_branches();
-
-    // continue onwards to next command.
-    if (!allow_execution && !is_condition_opcode(op.code))
+    
+    if (!context.conditional.succeeded() && !is_condition_opcode(op.code))
         return true;
 
     // push data to the stack
     if (op.code == opcode::zero)
-        context.primary.push_back(data_chunk());
-
-    // These operations may also push empty data (opcode zero)
-    // Hence we check the opcode over the shorter !op.data.empty()
-    else if (op.code == opcode::special
-        || op.code == opcode::pushdata1
-        || op.code == opcode::pushdata2
-        || op.code == opcode::pushdata4)
     {
-        context.primary.push_back(op.data);
+        context.stack.push_back(data_chunk());
     }
     else if (op.code == opcode::codeseparator)
-        context.codehash_begin = it;
-    // opcodes above should assert 9;,sinside run_operation
-    else if (!run_operation(op, parent_tx, input_index, script, context))
+    {
+        context.code_begin = it;
+    }
+    else if (opcode_is_empty_pusher(op.code))
+    {
+        context.stack.push_back(op.data);
+    }
+    else if (!run_operation(op, parent_tx, input_index, script, context,
+        flags))
+    {
+        // opcodes above should assert inside run_operation
         return false;
+    }
+
     //log::debug() << "--------------------";
     //log::debug() << "Run: " << opcode_to_string(op.code);
     //log::debug() << "Stack:";
-    //for (auto s: stack_)
+    //for (auto s: context.stack)
     //    log::debug() << "[" << encode_base16(s) << "]";
-    if (context.primary.size() + context.secondary.size() > 1000)
-        return false;
 
-    return true;
+    return (context.stack.size() + context.alternate.size() <= 1000);
 }
 
 bool evaluate(const transaction& parent_tx, uint32_t input_index,
-    const script& script, evaluation_context& context)
+    const script& script, evaluation_context& context, uint32_t flags)
 {
     if (script.satoshi_content_size() > 10000)
         return false;
 
     context.operation_counter = 0;
-    context.codehash_begin = script.operations.begin();
+    context.code_begin = script.operations.begin();
     for (auto it = script.operations.begin(); it != script.operations.end(); ++it)
-        if (!next_step(parent_tx, input_index, it, script, context))
+        if (!next_step(parent_tx, input_index, it, script, context, flags))
             return false;
 
     return context.conditional.closed();
 }
 
 bool script::verify(const script& input_script, const script& output_script,
-    const transaction& parent_tx, uint32_t input_index, bool bip16_enabled)
+    const transaction& parent_tx, uint32_t input_index, uint32_t flags)
 {
     evaluation_context input_context;
+    input_context.flags = flags;
+    if (!evaluate(parent_tx, input_index, input_script, input_context, flags))
+        return false;
+
     evaluation_context output_context;
-    if (!evaluate(parent_tx, input_index, input_script, input_context))
+    output_context.flags = flags;
+    output_context.stack = input_context.stack;
+    if (!evaluate(parent_tx, input_index, output_script, output_context,
+        flags))
         return false;
 
-    output_context.primary = input_context.primary;
-    if (!evaluate(parent_tx, input_index, output_script, output_context))
+    if (output_context.stack.empty() ||
+        !cast_to_bool(output_context.stack.back()))
         return false;
 
-    if (output_context.primary.empty())
-        return false;
-
-    if (!cast_to_bool(output_context.primary.back()))
-        return false;
-
-    // Additional validation for spend-to-script-hash transactions
-    if (bip16_enabled &&
+    // Additional validation for pay-to-script-hash transactions
+    if (is_active(flags, script_context::bip16_enabled) &&
         (output_script.pattern() == script_pattern::pay_script_hash))
     {
         if (!operation::is_push_only(input_script.operations))
@@ -1745,25 +1857,28 @@ bool script::verify(const script& input_script, const script& output_script,
 
         // Load last input_script stack item as a script
         evaluation_context eval_context;
-        eval_context.primary = input_context.primary;
-        script eval_script;
+        eval_context.flags = flags;
+        eval_context.stack = input_context.stack;
 
-        // Invalid script - parse-able only as raw_data
-        if (!eval_script.from_data(input_context.primary.back(), false,
+        // TODO: shouldn't this be parse_mode::strict?
+        // Invalid script - parsable only as raw_data
+        script eval_script;
+        if (!eval_script.from_data(input_context.stack.back(), false,
             parse_mode::raw_data_fallback))
             return false;
 
         // Pop last item and copy as starting stack to eval script
-        eval_context.primary.pop_back();
+        eval_context.stack.pop_back();
 
         // Run script
-        if (!evaluate(parent_tx, input_index, eval_script, eval_context))
+        if (!evaluate(parent_tx, input_index, eval_script, eval_context,
+            flags))
             return false;
 
-        if (eval_context.primary.empty())
+        if (eval_context.stack.empty())
             return false;
 
-        return cast_to_bool(eval_context.primary.back());
+        return cast_to_bool(eval_context.stack.back());
     }
 
     return true;
