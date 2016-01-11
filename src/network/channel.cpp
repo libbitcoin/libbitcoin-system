@@ -45,7 +45,7 @@ using std::placeholders::_1;
 // Factory for deadline timer pointer construction.
 static deadline::ptr alarm(threadpool& pool, const asio::duration& duration)
 {
-    return std::make_shared<deadline>(pool, duration);
+    return std::make_shared<deadline>(pool, pseudo_randomize(duration));
 }
 
 channel::channel(threadpool& pool, asio::socket_ptr socket,
@@ -55,7 +55,7 @@ channel::channel(threadpool& pool, asio::socket_ptr socket,
     version_({ 0 }),
     located_start_(null_hash),
     located_stop_(null_hash),
-    expiration_(alarm(pool, pseudo_randomize(settings.channel_expiration()))),
+    expiration_(alarm(pool, settings.channel_expiration())),
     inactivity_(alarm(pool, settings.channel_inactivity())),
     revival_(alarm(pool, settings.channel_revival())),
     CONSTRUCT_TRACK(channel)
