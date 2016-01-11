@@ -203,6 +203,16 @@ void proxy::read_heading()
     if (stopped())
         return;
 
+    dispatch_.ordered(
+        std::bind(&proxy::do_read_heading,
+            shared_from_this()));
+}
+
+void proxy::do_read_heading()
+{
+    if (stopped())
+        return;
+
     // The socket is protected by an ordered strand.
     using namespace boost::asio;
     async_read(*socket_, buffer(heading_buffer_),
@@ -211,6 +221,16 @@ void proxy::read_heading()
 }
 
 void proxy::read_payload(const heading& head)
+{
+    if (stopped())
+        return;
+
+    dispatch_.ordered(
+        std::bind(&proxy::do_read_payload,
+            shared_from_this(), head));
+}
+
+void proxy::do_read_payload(const heading& head)
 {
     if (stopped())
         return;

@@ -139,9 +139,11 @@ private:
     void stop(const boost_code& ec);
 
     void read_heading();
+    void do_read_heading();
     void handle_read_heading(const boost_code& ec, size_t);
 
     void read_payload(const message::heading& head);
+    void do_read_payload(const message::heading& head);
     void handle_read_payload(const boost_code& ec, size_t,
         const message::heading& head);
 
