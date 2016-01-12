@@ -31,8 +31,7 @@
 
 namespace libbitcoin {
 namespace message {
-    
-typedef std::vector<size_t> index_list;
+
 typedef std::vector<hash_digest> block_locator;
 
 class BC_API get_blocks
