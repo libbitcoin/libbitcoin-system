@@ -82,7 +82,7 @@ time_duration pseudo_randomize(const time_duration& expiration, uint8_t ratio)
     if (max_expire == 0)
         return expiration;
 
-    const auto offset = max_expire / ratio;
+    const auto offset = std::max(max_expire / ratio, 1);
     const auto random_offset = static_cast<int>(bc::pseudo_random() % offset);
     const auto expire = max_expire - random_offset;
     return seconds(expire);
