@@ -21,6 +21,7 @@
 #define LIBBITCOIN_CHAIN_BLOCK_HPP
 
 #include <istream>
+#include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/header.hpp>
@@ -36,6 +37,7 @@ class BC_API block
 {
 public:
     typedef std::vector<block> list;
+    typedef std::shared_ptr<chain::block> ptr;
 
     static block factory_from_data(const data_chunk& data);
     static block factory_from_data(std::istream& stream);
