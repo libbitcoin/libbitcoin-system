@@ -22,91 +22,78 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(parse_amount_tests)
+BOOST_AUTO_TEST_SUITE(base10_tests)
 
-#define TEST(NAME, EXPECTED, ...) \
-    BOOST_AUTO_TEST_CASE(parse_amount_##NAME##_test) \
-    { \
-        uint64_t result, expected = EXPECTED; \
-        BOOST_REQUIRE(decode_base10(result, __VA_ARGS__)); \
-        BOOST_REQUIRE_EQUAL(result, expected); \
-    }
+#define TEST_AMOUNT(NAME, EXPECTED, ...) \
+BOOST_AUTO_TEST_CASE(parse_amount_##NAME##_test) \
+{ \
+    uint64_t result, expected = EXPECTED; \
+    BOOST_REQUIRE(decode_base10(result, __VA_ARGS__)); \
+    BOOST_REQUIRE_EQUAL(result, expected); \
+}
 
-#define TEST_ERROR(NAME, ...) \
-    BOOST_AUTO_TEST_CASE(parse_amount_##NAME##_test) \
-    { \
-        uint64_t result; \
-        BOOST_REQUIRE(!decode_base10(result, __VA_ARGS__)); \
-    }
+#define TEST_AMOUNT_NEGATIVE(NAME, ...) \
+BOOST_AUTO_TEST_CASE(parse_amount_##NAME##_test) \
+{ \
+    uint64_t result; \
+    BOOST_REQUIRE(!decode_base10(result, __VA_ARGS__)); \
+}
+
+#define TEST_FORMAT(NAME, EXPECTED, ...) \
+BOOST_AUTO_TEST_CASE(format_amount_##NAME##_test) \
+{ \
+    std::string expected = EXPECTED; \
+    std::string result = encode_base10(__VA_ARGS__); \
+    BOOST_REQUIRE_EQUAL(result, expected); \
+}
 
 // Limits:
-TEST(zero,                      0, "0")
-TEST(max_uint64,                max_uint64, "18446744073709551615")
+TEST_AMOUNT(zero, 0, "0")
+TEST_AMOUNT(max_uint64, max_uint64, "18446744073709551615")
 
 // Max money:
-TEST(max_money,
-    max_money(), "20999999.9769", btc_decimal_places)
-TEST(overflow_max_money,
-    max_money() + 1, "20999999.97690001", btc_decimal_places)
+TEST_AMOUNT(max_money, max_money(), "20999999.9769", btc_decimal_places)
+TEST_AMOUNT(overflow_max_money, max_money() + 1, "20999999.97690001", btc_decimal_places)
 
 // Decimal points:
-TEST(pure_integer,              42, "42.0",         0)
-TEST(no_decimal,                1000000, "10",      mbtc_decimal_places)
-TEST(normal_decimal,            420000, "4.2",      mbtc_decimal_places)
-TEST(leading_decimal,           50000, ".5",        mbtc_decimal_places)
-TEST(trailing_decial,           500000, "5.",       mbtc_decimal_places)
-TEST(extra_zeros,               1002000, "010.020", mbtc_decimal_places)
-TEST(harmless_zeros,            1, "0.0000100",     mbtc_decimal_places)
-TEST(decimal_point_only,        0, ".")
+TEST_AMOUNT(pure_integer, 42, "42.0", 0)
+TEST_AMOUNT(no_decimal, 1000000, "10", mbtc_decimal_places)
+TEST_AMOUNT(normal_decimal, 420000, "4.2", mbtc_decimal_places)
+TEST_AMOUNT(leading_decimal, 50000, ".5", mbtc_decimal_places)
+TEST_AMOUNT(trailing_decial, 500000, "5.", mbtc_decimal_places)
+TEST_AMOUNT(extra_zeros, 1002000, "010.020", mbtc_decimal_places)
+TEST_AMOUNT(harmless_zeros, 1, "0.0000100", mbtc_decimal_places)
+TEST_AMOUNT(decimal_point_only, 0, ".")
 
 // Rounding:
-TEST(pure_integer_rounding,     1, ".1", 0, false)
-TEST(rounding,                  11, "0.101",   ubtc_decimal_places, false)
-TEST(rounding_carry,            1000, "9.991", ubtc_decimal_places, false)
-TEST(zero_past_max,             max_uint64, "18446744073709551615.0")
+TEST_AMOUNT(pure_integer_rounding, 1, ".1", 0, false)
+TEST_AMOUNT(rounding, 11, "0.101", ubtc_decimal_places, false)
+TEST_AMOUNT(rounding_carry, 1000, "9.991", ubtc_decimal_places, false)
+TEST_AMOUNT(zero_past_max, max_uint64, "18446744073709551615.0")
 
 // Format errors:
-TEST_ERROR(lexical_cast_fail,   "0.-1")
-TEST_ERROR(extra_decimal,       "0.0.0")
-TEST_ERROR(bad_characters,      "0x0ff")
+TEST_AMOUNT_NEGATIVE(lexical_cast_fail, "0.-1")
+TEST_AMOUNT_NEGATIVE(extra_decimal, "0.0.0")
+TEST_AMOUNT_NEGATIVE(bad_characters, "0x0ff")
 
 // Numeric errors:
-TEST_ERROR(overflow,            "18446744073709551616")
-TEST_ERROR(rounding_overflow,   "18446744073709551615.1", 0, false)
-TEST_ERROR(fractional_amount,   "0.999999999", btc_decimal_places)
-
-#undef TEST
-#undef TEST_ERROR
-
-BOOST_AUTO_TEST_SUITE_END()
-
-BOOST_AUTO_TEST_SUITE(format_amount_tests)
-
-#define TEST(NAME, EXPECTED, ...) \
-    BOOST_AUTO_TEST_CASE(format_amount_##NAME##_test) \
-    { \
-        std::string expected = EXPECTED; \
-        std::string result = encode_base10(__VA_ARGS__); \
-        BOOST_REQUIRE_EQUAL(result, expected); \
-    }
+TEST_AMOUNT_NEGATIVE(overflow, "18446744073709551616")
+TEST_AMOUNT_NEGATIVE(rounding_overflow, "18446744073709551615.1", 0, false)
+TEST_AMOUNT_NEGATIVE(fractional_amount, "0.999999999", btc_decimal_places)
 
 // Limits:
-TEST(zero,                      "0", 0)
-TEST(max_uint64,                "18446744073709551615", max_uint64)
+TEST_FORMAT(zero, "0", 0)
+TEST_FORMAT(max_uint64, "18446744073709551615", max_uint64)
 
 // Max money:
-TEST(max_money,
-    "20999999.9769", max_money(), btc_decimal_places)
-TEST(overflow_max_money,
-    "20999999.97690001", max_money() + 1, btc_decimal_places)
+TEST_FORMAT(max_money, "20999999.9769", max_money(), btc_decimal_places)
+TEST_FORMAT(overflow_max_money, "20999999.97690001", max_money() + 1, btc_decimal_places)
 
 // Decimal points:
-TEST(pure_integer,              "42", 42, 0)
-TEST(no_decimal,                "10", 1000000, mbtc_decimal_places)
-TEST(normal_decimal,            "4.2", 420000, mbtc_decimal_places)
-TEST(leading_zero,              "0.42", 42000, mbtc_decimal_places)
-TEST(internal_leading_zero,     "0.042", 4200, mbtc_decimal_places)
-
-#undef TEST
+TEST_FORMAT(pure_integer, "42", 42, 0)
+TEST_FORMAT(no_decimal, "10", 1000000, mbtc_decimal_places)
+TEST_FORMAT(normal_decimal, "4.2", 420000, mbtc_decimal_places)
+TEST_FORMAT(leading_zero, "0.42", 42000, mbtc_decimal_places)
+TEST_FORMAT(internal_leading_zero, "0.042", 4200, mbtc_decimal_places)
 
 BOOST_AUTO_TEST_SUITE_END()

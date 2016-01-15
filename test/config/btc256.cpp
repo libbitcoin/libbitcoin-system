@@ -26,7 +26,7 @@ using namespace bc::config;
 //using namespace boost;
 //using namespace boost::program_options;
 
-BOOST_AUTO_TEST_SUITE(config_tests)
+BOOST_AUTO_TEST_SUITE(btc256_tests)
 
 BOOST_AUTO_TEST_SUITE(btc256__construct)
 
