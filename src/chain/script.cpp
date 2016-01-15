@@ -1166,7 +1166,7 @@ bool op_hash256(evaluation_context& context)
     return true;
 }
 
-bool create_endorsement(endorsement& out, const ec_secret& secret,
+bool script::create_endorsement(endorsement& out, const ec_secret& secret,
     const script& prevout_script, const transaction& new_tx,
     uint32_t input_index, uint8_t sighash_type)
 {
