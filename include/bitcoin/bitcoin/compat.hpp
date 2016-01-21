@@ -45,6 +45,7 @@
     #define MAX_UINT32 UINT32_MAX
     #define MAX_UINT16 UINT16_MAX
     #define MAX_UINT8 UINT8_MAX
+    #define BC_MAX_SIZE SIZE_MAX
 #else
     #define MIN_INT64 std::numeric_limits<int64_t>::min()
     #define MAX_INT64 std::numeric_limits<int64_t>::max()
@@ -54,6 +55,7 @@
     #define MAX_UINT32 std::numeric_limits<uint32_t>::max()
     #define MAX_UINT16 std::numeric_limits<uint16_t>::max()
     #define MAX_UINT8 std::numeric_limits<uint8_t>::max()
+    #define BC_MAX_SIZE std::numeric_limits<size_t>::max()
 #endif
 
 #endif
