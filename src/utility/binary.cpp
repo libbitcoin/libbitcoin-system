@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/utility/binary.hpp>
 
 #include <sstream>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <iostream>
 
@@ -198,7 +199,7 @@ binary_type binary_type::get_substring(size_type start, size_type length) const
         start = current_size;
     }
 
-    if ((length == SIZE_MAX) || ((start + length) > current_size))
+    if ((length == max_size_t) || ((start + length) > current_size))
     {
         length = current_size - start;
     }

@@ -58,7 +58,7 @@ public:
 
     void shift_right(size_type distance);
 
-    binary_type get_substring(size_type first, size_type length = SIZE_MAX) const;
+    binary_type get_substring(size_type first, size_type length=max_size_t) const;
 
 private:
     friend bool operator==(
