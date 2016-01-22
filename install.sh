@@ -73,7 +73,7 @@ if [[ $TRAVIS == true ]]; then
     PARALLEL=$SEQUENTIAL
 elif [[ $OS == Linux ]]; then
     PARALLEL=`nproc`
-elif [[ $OS == Darwin ]]; then
+elif [[ $OS == Darwin || $OS == OpenBSD ]]; then
     PARALLEL=`sysctl -n hw.ncpu`
 else
     echo "Unsupported system: $OS"
