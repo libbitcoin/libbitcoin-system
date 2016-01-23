@@ -75,15 +75,13 @@ private:
     uint8_t final_block_excess_ = 0;
 };
 
-BC_API bool operator==(
-    const binary_type& prefix_a, const binary_type& prefix_b);
-BC_API bool operator!=(
-    const binary_type& prefix_a, const binary_type& prefix_b);
+BC_API bool operator==(const binary_type& lhs, const binary_type& rhs);
+BC_API bool operator!=(const binary_type& lhs, const binary_type& rhs);
+BC_API bool operator<(const binary_type& lhs, const binary_type& rhs);
 
-BC_API std::istream& operator>>(
-    std::istream& stream, binary_type& prefix);
-BC_API std::ostream& operator<<(
-    std::ostream& stream, const binary_type& prefix);
+BC_API std::istream& operator>>(std::istream& stream, binary_type& prefix);
+BC_API std::ostream& operator<<(std::ostream& stream,
+    const binary_type& prefix);
 
 } // namespace libbitcoin
 

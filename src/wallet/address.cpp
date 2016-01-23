@@ -72,6 +72,16 @@ std::string payment_address::encoded() const
     return encode_base58(data);
 }
 
+bool operator==(const payment_address& lhs, const payment_address& rhs)
+{
+    return lhs.hash() == rhs.hash() && lhs.version() == rhs.version();
+}
+
+bool operator<(const payment_address& lhs, const payment_address& rhs)
+{
+    return lhs.encoded() < lhs.encoded();
+}
+
 void set_public_key_hash(payment_address& address,
     const short_hash& pubkey_hash)
 {
@@ -147,11 +157,6 @@ bool extract(payment_address& address, const script_type& script)
     }
     // Should never happen!
     return false;
-}
-
-bool operator==(const payment_address& lhs, const payment_address& rhs)
-{
-    return lhs.hash() == rhs.hash() && lhs.version() == rhs.version();
 }
 
 bool unwrap(uint8_t& version, short_hash& hash, uint32_t& checksum,

@@ -213,22 +213,30 @@ binary_type binary_type::get_substring(size_type start, size_type length) const
     return result;
 }
 
-bool operator==(
-    const binary_type& prefix_a, const binary_type& prefix_b)
+bool operator==(const binary_type& lhs, const binary_type& rhs)
 {
-    for (binary_type::size_type i = 0; i < prefix_a.size() && i < prefix_b.size(); ++i)
-        if (prefix_a[i] != prefix_b[i])
+    for (binary_type::size_type i = 0; i < lhs.size() && i < rhs.size(); ++i)
+        if (lhs[i] != rhs[i])
             return false;
+
     return true;
 }
-bool operator!=(
-    const binary_type& prefix_a, const binary_type& prefix_b)
+bool operator!=(const binary_type& lhs, const binary_type& rhs)
 {
-    return !(prefix_a == prefix_b);
+    return !(lhs == rhs);
+}
+bool operator<(const binary_type& lhs, const binary_type& rhs)
+{
+    for (binary_type::size_type i = 0; i < lhs.size() && i < rhs.size(); ++i)
+        if (lhs[i] < rhs[i])
+            return true;
+        else if (lhs[i] > rhs[i])
+            return false;
+
+    return false;
 }
 
-std::istream& operator>>(
-    std::istream& stream, binary_type& prefix)
+std::istream& operator>>(std::istream& stream, binary_type& prefix)
 {
     std::string bitstring;
     stream >> bitstring;
@@ -272,8 +280,7 @@ std::istream& operator>>(
     prefix.resize(bitstring.size());
     return stream;
 }
-std::ostream& operator<<(
-    std::ostream& stream, const binary_type& prefix)
+std::ostream& operator<<(std::ostream& stream, const binary_type& prefix)
 {
     for (binary_type::size_type i = 0; i < prefix.size(); ++i)
         if (prefix[i])

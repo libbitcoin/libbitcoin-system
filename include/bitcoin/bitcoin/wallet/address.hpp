@@ -85,6 +85,9 @@ private:
     short_hash hash_ = null_short_hash;
 };
 
+BC_API bool operator==(const payment_address& lhs, const payment_address& rhs);
+BC_API bool operator<(const payment_address& lhs, const payment_address& rhs);
+
 BC_API void set_public_key_hash(payment_address& address,
     const short_hash& pubkey_hash);
 BC_API void set_script_hash(payment_address& address,
@@ -100,8 +103,6 @@ BC_API void set_script(payment_address& address,
  * Returns false on failure.
  */
 BC_API bool extract(payment_address& address, const script_type& script);
-
-BC_API bool operator==(const payment_address& lhs, const payment_address& rhs);
 
 /**
  * Unwrap a wrapped payload.
