@@ -49,7 +49,7 @@ bool to_stealth_prefix(uint32_t& out_prefix, const script& script)
 
     // A stealth prefix is the full 32 bits (prefix to the hash).
     // A stealth filter is a leftmost substring of the stealth prefix.
-    constexpr size_t size = binary_type::bits_per_block * sizeof(uint32_t);
+    constexpr size_t size = binary::bits_per_block * sizeof(uint32_t);
 
     const auto script_hash = bitcoin_hash(script.to_data(false));
     out_prefix = from_little_endian_unsafe<uint32_t>(script_hash.begin());
@@ -92,7 +92,7 @@ bool create_ephemeral_key(ec_secret& out_secret, const data_chunk& seed)
 
 // Mine a filter into the leftmost bytes of sha256(sha256(output-script)).
 bool create_stealth_data(data_chunk& out_stealth_data, ec_secret& out_secret,
-    const binary_type& filter, const data_chunk& seed)
+    const binary& filter, const data_chunk& seed)
 {
     // Create a valid ephemeral key pair.
     ec_secret secret;

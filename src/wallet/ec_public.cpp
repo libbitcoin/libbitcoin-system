@@ -212,6 +212,11 @@ ec_public& ec_public::operator=(const ec_public& other)
     return *this;
 }
 
+bool ec_public::operator<(const ec_public& other) const
+{
+    return encoded() < other.encoded();
+}
+
 bool ec_public::operator==(const ec_public& other) const
 {
     return valid_ == other.valid_ && compress_ == other.compress_ &&

@@ -45,6 +45,7 @@ public:
     bitcoin_uri(const std::string& uri, bool strict=true);
 
     /// Operators.
+    bool operator<(const bitcoin_uri& other) const;
     bool operator==(const bitcoin_uri& other) const;
     bool operator!=(const bitcoin_uri& other) const;
     bitcoin_uri& operator=(const bitcoin_uri& other);

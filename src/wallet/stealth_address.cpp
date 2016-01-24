@@ -52,7 +52,7 @@ constexpr size_t min_address_size = version_size + options_size +
     filter_length_size + checksum_size;
 
 // Document the assumption that the prefix is defined with an 8 bit block size.
-static_assert(binary_type::bits_per_block == byte_bits,
+static_assert(binary::bits_per_block == byte_bits,
     "The stealth prefix must use an 8 bit block size.");
 
 const uint8_t stealth_address::mainnet_p2kh = 0x2a;
@@ -82,7 +82,7 @@ stealth_address::stealth_address(const data_chunk& decoded)
 {
 }
 
-stealth_address::stealth_address(const binary_type& filter,
+stealth_address::stealth_address(const binary& filter,
     const ec_compressed& scan_key, const point_list& spend_keys,
     uint8_t signatures, uint8_t version)
   : stealth_address(from_stealth(filter, scan_key, spend_keys, signatures,
@@ -90,7 +90,7 @@ stealth_address::stealth_address(const binary_type& filter,
 {
 }
 
-stealth_address::stealth_address(uint8_t version, const binary_type& filter,
+stealth_address::stealth_address(uint8_t version, const binary& filter,
     const ec_compressed& scan_key, const point_list& spend_keys,
     uint8_t signatures)
   : valid_(true), filter_(filter), scan_key_(scan_key),
@@ -177,12 +177,12 @@ stealth_address stealth_address::from_stealth(const data_chunk& decoded)
 
     // Deserialize the filter bytes/blocks.
     const data_chunk raw_filter(iterator, iterator + filter_bytes);
-    const binary_type filter(filter_bits, raw_filter);
+    const binary filter(filter_bits, raw_filter);
     return stealth_address(filter, scan_key, spend_keys, signatures, version);
 }
 
 // This corrects signature and spend_keys.
-stealth_address stealth_address::from_stealth(const binary_type& filter,
+stealth_address stealth_address::from_stealth(const binary& filter,
     const ec_compressed& scan_key, const point_list& spend_keys,
     uint8_t signatures, uint8_t version)
 {
@@ -239,7 +239,7 @@ uint8_t stealth_address::version() const
 // Accessors.
 // ----------------------------------------------------------------------------
 
-const binary_type& stealth_address::filter() const
+const binary& stealth_address::filter() const
 {
     return filter_;
 }
@@ -326,6 +326,11 @@ stealth_address& stealth_address::operator=(const stealth_address& other)
     signatures_ = other.signatures_;
     filter_ = other.filter_;
     return *this;
+}
+
+bool stealth_address::operator<(const stealth_address& other) const
+{
+    return encoded() < other.encoded();
 }
 
 bool stealth_address::operator==(const stealth_address& other) const

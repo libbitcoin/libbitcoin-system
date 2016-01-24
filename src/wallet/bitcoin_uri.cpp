@@ -260,6 +260,11 @@ bitcoin_uri& bitcoin_uri::operator=(const bitcoin_uri& other)
     return *this;
 }
 
+bool bitcoin_uri::operator<(const bitcoin_uri& other) const
+{
+    return encoded() < other.encoded();
+}
+
 bool bitcoin_uri::operator==(const bitcoin_uri& other) const
 {
     return strict_ == other.strict_ && scheme_ == other.scheme_ &&

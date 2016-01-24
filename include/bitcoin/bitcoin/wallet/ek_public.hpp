@@ -39,6 +39,7 @@ public:
     ek_public(const ek_public& other);
 
     /// Operators.
+    bool operator<(const ek_public& other) const;
     bool operator==(const ek_public& other) const;
     bool operator!=(const ek_public& other) const;
     ek_public& operator=(const ek_public& other);

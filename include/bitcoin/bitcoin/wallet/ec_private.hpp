@@ -82,6 +82,7 @@ public:
         bool compress=true);
 
     /// Operators.
+    bool operator<(const ec_private& other) const;
     bool operator==(const ec_private& other) const;
     bool operator!=(const ec_private& other) const;
     ec_private& operator=(const ec_private& other);

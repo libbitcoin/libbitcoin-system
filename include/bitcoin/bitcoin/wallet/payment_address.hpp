@@ -63,6 +63,7 @@ public:
     payment_address(const chain::script& script, uint8_t version=mainnet_p2sh);
 
     /// Operators.
+    bool operator<(const payment_address& other) const;
     bool operator==(const payment_address& other) const;
     bool operator!=(const payment_address& other) const;
     payment_address& operator=(const payment_address& other);

@@ -101,6 +101,11 @@ ek_private& ek_private::operator=(const ek_private& other)
     return *this;
 }
 
+bool ek_private::operator<(const ek_private& other) const
+{
+    return encoded() < other.encoded();
+}
+
 bool ek_private::operator==(const ek_private& other) const
 {
     return valid_ == other.valid_ && private_ == other.private_;

@@ -102,7 +102,7 @@ static void print_headers(const std::string& test)
 {
     const auto header = "=========== " + test + " ==========";
     log::debug(TEST_SET_NAME) << header;
-    log::error(TEST_SET_NAME) << header;
+    log::info(TEST_SET_NAME) << header;
 }
 
 static int start_result(p2p& network)

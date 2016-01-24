@@ -21,12 +21,13 @@
 #define LIBBITCOIN_BINARY_HPP
 
 #include <cstdint>
+#include <string>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 
-class BC_API binary_type
+class BC_API binary
 {
 public:
     typedef uint8_t block;
@@ -35,32 +36,34 @@ public:
     static BC_CONSTEXPR size_type bits_per_block = byte_bits;
     static size_type blocks_size(const size_type bitsize);
 
-    binary_type();
-    binary_type(const binary_type& other);
-    binary_type(const std::string& bitstring);
-    binary_type(size_type size, data_slice blocks);
+    binary();
+    binary(const binary& other);
+    binary(const std::string& bitstring);
+    binary(size_type size, data_slice blocks);
 
     void resize(size_type size);
     bool operator[](size_type index) const;
     const data_chunk& blocks() const;
+    std::string encoded() const;
 
-    // size in bits
+    /// size in bits
     size_type size() const;
-    void append(const binary_type& post);
-    void prepend(const binary_type& prior);
+    void append(const binary& post);
+    void prepend(const binary& prior);
     void shift_left(size_type distance);
     void shift_right(size_type distance);
-    binary_type substring(size_type first, size_type length=max_size_t) const;
+    binary substring(size_type first, size_type length = max_size_t) const;
 
     bool is_prefix_of(data_slice field) const;
     bool is_prefix_of(const uint32_t field) const;
-    bool is_prefix_of(const binary_type& field) const;
+    bool is_prefix_of(const binary& field) const;
 
-    bool operator==(const binary_type& other) const;
-    bool operator!=(const binary_type& other) const;
-    binary_type& operator=(const binary_type& other);
-    friend std::istream& operator>>(std::istream& in, binary_type& to);
-    friend std::ostream& operator<<(std::ostream& out, const binary_type& of);
+    bool operator<(const binary& other) const;
+    bool operator==(const binary& other) const;
+    bool operator!=(const binary& other) const;
+    binary& operator=(const binary& other);
+    friend std::istream& operator>>(std::istream& in, binary& to);
+    friend std::ostream& operator<<(std::ostream& out, const binary& of);
 
 private:
     static uint8_t shift_block_right(uint8_t next, uint8_t current, uint8_t prior,
