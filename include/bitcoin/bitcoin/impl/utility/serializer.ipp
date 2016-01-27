@@ -65,6 +65,14 @@ void serializer<Iterator>::write_data(const uint8_t* data, size_t size)
 }
 
 template <typename Iterator>
+void serializer<Iterator>::write_error_code(const code& ec)
+{
+    const auto value = ec.value();
+    BITCOIN_ASSERT(value >= 0 && value <= max_uint32);
+    write_4_bytes_little_endian(static_cast<uint32_t>(value));
+}
+
+template <typename Iterator>
 void serializer<Iterator>::write_2_bytes_little_endian(uint16_t value)
 {
     write_little_endian(value);
