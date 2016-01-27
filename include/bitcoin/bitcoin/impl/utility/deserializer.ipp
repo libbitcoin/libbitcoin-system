@@ -21,6 +21,8 @@
 #define LIBBITCOIN_DESERIALIZER_IPP
 
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <boost/asio/streambuf.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
