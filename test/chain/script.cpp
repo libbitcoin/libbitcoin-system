@@ -528,7 +528,7 @@ BOOST_AUTO_TEST_CASE(script__create_endorsement__single_input_single_output__exp
     chain::script prevout_script;
     BOOST_REQUIRE(prevout_script.from_string("dup hash160 [ 88350574280395ad2c3e2ee20e322073d94e5e40 ] equalverify checksig"));
 
-    const auto secret = hash_literal("ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333");
+    const ec_secret secret = hash_literal("ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333");
 
     endorsement out;
     const uint32_t input_index = 0;
@@ -536,7 +536,7 @@ BOOST_AUTO_TEST_CASE(script__create_endorsement__single_input_single_output__exp
     BOOST_REQUIRE(chain::script::create_endorsement(out, secret, prevout_script, new_tx, input_index, sighash_type));
 
     const auto result = encode_base16(out);
-    const std::string expected("3045022100e428d3cc67a724cb6cfe8634aa299e58f189d9c46c02641e936c40cc16c7e8ed0220083949910fe999c21734a1f33e42fca15fb463ea2e08f0a1bccd952aacaadbb801");
+    const auto expected = "3045022100e428d3cc67a724cb6cfe8634aa299e58f189d9c46c02641e936c40cc16c7e8ed0220083949910fe999c21734a1f33e42fca15fb463ea2e08f0a1bccd952aacaadbb801";
     BOOST_REQUIRE_EQUAL(result, expected);
 }
 
@@ -550,7 +550,7 @@ BOOST_AUTO_TEST_CASE(script__create_endorsement__single_input_no_output__expecte
     chain::script prevout_script;
     BOOST_REQUIRE(prevout_script.from_string("dup hash160 [ 88350574280395ad2c3e2ee20e322073d94e5e40 ] equalverify checksig"));
 
-    const auto secret = hash_literal("ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333");
+    const ec_secret secret = hash_literal("ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333");
 
     endorsement out;
     const uint32_t input_index = 0;
@@ -558,7 +558,7 @@ BOOST_AUTO_TEST_CASE(script__create_endorsement__single_input_no_output__expecte
     BOOST_REQUIRE(chain::script::create_endorsement(out, secret, prevout_script, new_tx, input_index, sighash_type));
 
     const auto result = encode_base16(out);
-    const std::string expected("3045022100ba57820be5f0b93a0d5b880fbf2a86f819d959ecc24dc31b6b2d4f6ed286f253022071ccd021d540868ee10ca7634f4d270dfac7aea0d5912cf2b104111ac9bc756b01");
+    const auto expected = "3045022100ba57820be5f0b93a0d5b880fbf2a86f819d959ecc24dc31b6b2d4f6ed286f253022071ccd021d540868ee10ca7634f4d270dfac7aea0d5912cf2b104111ac9bc756b01";
     BOOST_REQUIRE_EQUAL(result, expected);
 }
 
@@ -577,7 +577,7 @@ BOOST_AUTO_TEST_CASE(script__generate_signature_hash__all__expected)
     const uint8_t sighash_type = chain::signature_hash_algorithm::all;
     const auto sighash = chain::script::generate_signature_hash(new_tx, input_index, prevout_script, sighash_type);
     const auto result = encode_base16(sighash);
-    const std::string expected("f89572635651b2e4f89778350616989183c98d1a721c911324bf9f17a0cf5bf0");
+    const auto expected = "f89572635651b2e4f89778350616989183c98d1a721c911324bf9f17a0cf5bf0";
     BOOST_REQUIRE_EQUAL(result, expected);
 }
 
