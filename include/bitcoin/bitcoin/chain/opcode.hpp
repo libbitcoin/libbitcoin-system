@@ -148,7 +148,7 @@ enum class opcode : uint8_t
     raw_data
 };
 
-typedef enum script_context_ : uint32_t
+enum script_context : uint32_t
 {
     none_enabled = 0,
 
@@ -168,7 +168,7 @@ typedef enum script_context_ : uint32_t
     bip65_enabled = 1 << 4,
 
     all_enabled = 0xffffffff
-} script_context;
+};
 
 BC_API std::string opcode_to_string(opcode value, uint32_t flags);
 BC_API opcode string_to_opcode(const std::string& value);
