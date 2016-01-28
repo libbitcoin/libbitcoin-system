@@ -518,4 +518,48 @@ BOOST_AUTO_TEST_CASE(script__checksig__normal)
     BOOST_REQUIRE(chain::script::check_signature(signature, chain::signature_hash_algorithm::single, pubkey, script_code, parent_tx, input_index));
 }
 
+BOOST_AUTO_TEST_CASE(script__create_endorsement__single_input_single_output__expected)
+{
+    data_chunk tx_data;
+    decode_base16(tx_data, "0100000001b3807042c92f449bbf79b33ca59d7dfec7f4cc71096704a9c526dddf496ee0970100000000ffffffff01905f0100000000001976a91418c0bd8d1818f1bf99cb1df2269c645318ef7b7388ac00000000");
+    chain::transaction new_tx;
+    new_tx.from_data(tx_data);
+
+    chain::script prevout_script;
+    BOOST_REQUIRE(prevout_script.from_string("dup hash160 [ 88350574280395ad2c3e2ee20e322073d94e5e40 ] equalverify checksig"));
+
+    const auto secret = hash_literal("ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333");
+
+    endorsement out;
+    const uint32_t input_index = 0;
+    const uint8_t sighash_type = chain::signature_hash_algorithm::all;
+    BOOST_REQUIRE(chain::script::create_endorsement(out, secret, prevout_script, new_tx, input_index, sighash_type));
+
+    const auto result = encode_base16(out);
+    const std::string expected("3045022100e428d3cc67a724cb6cfe8634aa299e58f189d9c46c02641e936c40cc16c7e8ed0220083949910fe999c21734a1f33e42fca15fb463ea2e08f0a1bccd952aacaadbb801");
+    BOOST_REQUIRE_EQUAL(result, expected);
+}
+
+BOOST_AUTO_TEST_CASE(script__create_endorsement__single_input_no_output__expected)
+{
+    data_chunk tx_data;
+    decode_base16(tx_data, "0100000001b3807042c92f449bbf79b33ca59d7dfec7f4cc71096704a9c526dddf496ee0970000000000ffffffff0000000000");
+    chain::transaction new_tx;
+    new_tx.from_data(tx_data);
+
+    chain::script prevout_script;
+    BOOST_REQUIRE(prevout_script.from_string("dup hash160 [ 88350574280395ad2c3e2ee20e322073d94e5e40 ] equalverify checksig"));
+
+    const auto secret = hash_literal("ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333");
+
+    endorsement out;
+    const uint32_t input_index = 0;
+    const uint8_t sighash_type = chain::signature_hash_algorithm::all;
+    BOOST_REQUIRE(chain::script::create_endorsement(out, secret, prevout_script, new_tx, input_index, sighash_type));
+
+    const auto result = encode_base16(out);
+    const std::string expected("3045022100ba57820be5f0b93a0d5b880fbf2a86f819d959ecc24dc31b6b2d4f6ed286f253022071ccd021d540868ee10ca7634f4d270dfac7aea0d5912cf2b104111ac9bc756b01");
+    BOOST_REQUIRE_EQUAL(result, expected);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
