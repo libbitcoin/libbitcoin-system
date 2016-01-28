@@ -34,6 +34,12 @@ BOOST_AUTO_TEST_SUITE(elliptic_curve_tests)
 #define SIGHASH2 "ed8f9b40c2d349c8a7e58cebe79faa25c21b6bb85b874901f72a1b3f1ad0a67f"
 #define SIGNATURE2 "3045022100bc494fbd09a8e77d8266e2abdea9aef08b9e71b451c7d8de9f63cda33a62437802206b93edd6af7c659db42c579eb34a3a4cb60c28b5a6bc86fd5266d42f6b8bb67d"
 
+// Scenario 3
+#define SECRET3 "ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333"
+#define SIGHASH3 "f89572635651b2e4f89778350616989183c98d1a721c911324bf9f17a0cf5bf0"
+#define EC_SIGNATURE3 "4832febef8b31c7c922a15cb4063a43ab69b099bba765e24facef50dfbb4d057928ed5c6b6886562c2fe6972fd7c7f462e557129067542cce6b37d72e5ea5037"
+#define DER_SIGNATURE3 "3044022057d0b4fb0df5cefa245e76ba9b099bb63aa46340cb152a927c1cb3f8befe324802203750eae5727db3e6cc4275062971552e467f7cfd7269fec2626588b6c6d58e92"
+
 BOOST_AUTO_TEST_CASE(elliptic_curve__secret_to_public__positive__test)
 {
     ec_compressed point;
@@ -51,13 +57,22 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__decompress__positive__test)
 BOOST_AUTO_TEST_CASE(elliptic_curve__sign__positive__test)
 {
     ec_signature signature;
-    const ec_secret secret = hash_literal("ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333");
-    const hash_digest sighash = hash_literal("f89572635651b2e4f89778350616989183c98d1a721c911324bf9f17a0cf5bf0");
+    const ec_secret secret = hash_literal(SECRET3);
+    const hash_digest sighash = hash_literal(SIGHASH3);
     BOOST_REQUIRE(sign(signature, secret, sighash));
 
     const auto result = encode_base16(signature);
-    const auto expected = "4832febef8b31c7c922a15cb4063a43ab69b099bba765e24facef50dfbb4d057928ed5c6b6886562c2fe6972fd7c7f462e557129067542cce6b37d72e5ea5037";
-    BOOST_REQUIRE_EQUAL(result, expected);
+    BOOST_REQUIRE_EQUAL(result, EC_SIGNATURE3);
+}
+
+BOOST_AUTO_TEST_CASE(elliptic_curve__encode_signature__positive__test)
+{
+    der_signature out;
+    const ec_signature signature = base16_literal(EC_SIGNATURE3);
+    BOOST_REQUIRE(encode_signature(out, signature));
+    
+    const auto result = encode_base16(out);
+    BOOST_REQUIRE_EQUAL(result, DER_SIGNATURE3);
 }
 
 BOOST_AUTO_TEST_CASE(elliptic_curve__sign__round_trip_positive__test)
