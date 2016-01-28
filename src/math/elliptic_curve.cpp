@@ -267,7 +267,10 @@ bool parse_signature(ec_signature& out, const der_signature& der_signature,
 
 bool encode_signature(der_signature& out, const ec_signature& signature)
 {
+    // Copy to avoid exposing external types.
     secp256k1_ecdsa_signature sign;
+    std::copy(signature.begin(), signature.end(), std::begin(sign.data));
+
     const auto context = signing.context();
     auto size = max_der_signature_size;
     out.resize(size);
