@@ -48,13 +48,25 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__decompress__positive__test)
     BOOST_REQUIRE_EQUAL(encode_base16(uncompressed), UNCOMPRESSED1);
 }
 
+BOOST_AUTO_TEST_CASE(elliptic_curve__sign__positive__test)
+{
+    ec_signature signature;
+    const ec_secret secret = hash_literal("ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333");
+    const hash_digest sighash = hash_literal("f89572635651b2e4f89778350616989183c98d1a721c911324bf9f17a0cf5bf0");
+    BOOST_REQUIRE(sign(signature, secret, sighash));
+
+    const auto result = encode_base16(signature);
+    const auto expected = "4832febef8b31c7c922a15cb4063a43ab69b099bba765e24facef50dfbb4d057928ed5c6b6886562c2fe6972fd7c7f462e557129067542cce6b37d72e5ea5037";
+    BOOST_REQUIRE_EQUAL(result, expected);
+}
+
 BOOST_AUTO_TEST_CASE(elliptic_curve__sign__round_trip_positive__test)
 {
     ec_compressed point;
     ec_signature signature;
     const data_chunk data{ 'd', 'a', 't', 'a' };
     const hash_digest hash = bitcoin_hash(data);
-    const ec_secret secret = base16_literal(SECRET1);
+    const ec_secret secret = hash_literal(SECRET1);
     BOOST_REQUIRE(secret_to_public(point, secret));
     BOOST_REQUIRE(sign(signature, secret, hash));
     BOOST_REQUIRE(verify_signature(point, hash, signature));
