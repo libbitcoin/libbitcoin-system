@@ -562,4 +562,23 @@ BOOST_AUTO_TEST_CASE(script__create_endorsement__single_input_no_output__expecte
     BOOST_REQUIRE_EQUAL(result, expected);
 }
 
+BOOST_AUTO_TEST_CASE(script__generate_signature_hash__all__expected)
+{
+    data_chunk tx_data;
+    decode_base16(tx_data, "0100000001b3807042c92f449bbf79b33ca59d7dfec7f4cc71096704a9c526dddf496ee0970000000000ffffffff0000000000");
+    chain::transaction new_tx;
+    new_tx.from_data(tx_data);
+
+    chain::script prevout_script;
+    BOOST_REQUIRE(prevout_script.from_string("dup hash160 [ 88350574280395ad2c3e2ee20e322073d94e5e40 ] equalverify checksig"));
+
+    endorsement out;
+    const uint32_t input_index = 0;
+    const uint8_t sighash_type = chain::signature_hash_algorithm::all;
+    const auto sighash = chain::script::generate_signature_hash(new_tx, input_index, prevout_script, sighash_type);
+    const auto result = encode_base16(sighash);
+    const std::string expected("f89572635651b2e4f89778350616989183c98d1a721c911324bf9f17a0cf5bf0");
+    BOOST_REQUIRE_EQUAL(result, expected);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
