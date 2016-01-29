@@ -151,7 +151,7 @@ The build script clones, builds and installs two unpackaged repositories, namely
 - [libbitcoin/secp256k1](https://github.com/libbitcoin/secp256k1)
 - [libbitcoin/libbitcoin](https://github.com/libbitcoin/libbitcoin)
 
-The script builds from the head of their `version3` and `version2` branches respectively. The `master` branch is a staging area for changes. The version branches are considered release quality.
+The script builds from the head of their `version4` and `version2` branches respectively. The `master` branch is a staging area for changes. The version branches are considered release quality.
 
 #### Build Options
 
