@@ -39,6 +39,10 @@ typedef boost::asio::ip::tcp::endpoint endpoint;
 typedef boost::asio::io_service service;
 typedef boost::asio::deadline_timer timer;
 typedef boost::posix_time::time_duration duration;
+typedef boost::posix_time::hours hours;
+typedef boost::posix_time::minutes minutes;
+typedef boost::posix_time::seconds seconds;
+typedef boost::posix_time::milliseconds milliseconds;
 
 typedef tcp::socket socket;
 typedef tcp::acceptor acceptor;
