@@ -65,7 +65,7 @@ void select_outputs::select(points_info& out, output_info::list unspent,
 
     if (minimum_greater != greater_end)
     {
-        BITCOIN_ASSERT(minimum_greater->value >= minimum);
+        BITCOIN_ASSERT(minimum_greater->value >= minimum_value);
         out.change = minimum_greater->value - minimum_value;
         out.points.push_back(minimum_greater->point);
         return;
