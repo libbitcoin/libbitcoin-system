@@ -21,32 +21,27 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <cstddef>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/endian.hpp>
-#include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 namespace wallet {
 
-select_outputs_result select_outputs(output_info_list unspent,
-    uint64_t min_value, select_outputs_algorithm DEBUG_ONLY(algorithm))
+using namespace bc::chain;
+
+void select_outputs::select(points_info& out, output_info::list unspent,
+    uint64_t minimum_value, algorithm DEBUG_ONLY(option))
 {
-    // Just one default implementation for now.
-    // Consider a switch case with greedy_select_outputs(min_value) etc.
-    // if this is ever extended with more algorithms.
-    BITCOIN_ASSERT(algorithm == select_outputs_algorithm::greedy);
+    out.change = 0;
+    out.points.clear();
 
     if (unspent.empty())
-        return select_outputs_result();
+        return;
 
-    const auto less_than_min_value = [min_value](const output_info& out_info)
+    const auto below_minimum = [minimum_value](const output_info& out_info)
     {
-        return out_info.value < min_value;
+        return out_info.value < minimum_value;
     };
 
     const auto lesser = [](const output_info& left, const output_info& right)
@@ -61,38 +56,40 @@ select_outputs_result select_outputs(output_info_list unspent,
 
     const auto lesser_begin = unspent.begin();
     const auto lesser_end = std::partition(unspent.begin(), unspent.end(),
-        less_than_min_value);
+        below_minimum);
 
     const auto greater_begin = lesser_end;
     const auto greater_end = unspent.end();
-    const auto min_greater = std::min_element(greater_begin, greater_end,
+    const auto minimum_greater = std::min_element(greater_begin, greater_end,
         lesser);
 
-    select_outputs_result result;
-    if (min_greater != greater_end)
+    if (minimum_greater != greater_end)
     {
-        result.change = min_greater->value - min_value;
-        result.points.push_back(min_greater->point);
-        return result;
+        BITCOIN_ASSERT(minimum_greater->value >= minimum);
+        out.change = minimum_greater->value - minimum_value;
+        out.points.push_back(minimum_greater->point);
+        return;
     }
 
-    // Not found in greaters so try several lessers instead. Rearrange from
-    // biggest to smallest. We want to use the fewest inputs possible.
+    // Not found in greaters so try several lessers instead.
+    // Sort descending, to use the fewest inputs possible.
     std::sort(lesser_begin, lesser_end, greater);
 
-    uint64_t accumulator = 0;
     for (auto it = lesser_begin; it != lesser_end; ++it)
     {
-        result.points.push_back(it->point);
-        accumulator += it->value;
-        if (accumulator >= min_value)
+        BITCOIN_ASSERT(out.change <= max_uint64 - it->value);
+        out.change += it->value;
+        out.points.push_back(it->point);
+
+        if (out.change >= minimum_value)
         {
-            result.change = accumulator - min_value;
-            return result;
+            out.change -= minimum_value;
+            return;
         }
     }
 
-    return select_outputs_result();
+    out.change = 0;
+    out.points.clear();
 }
 
 } // namspace wallet

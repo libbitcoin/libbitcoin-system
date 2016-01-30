@@ -20,46 +20,28 @@
 #ifndef LIBBITCOIN_WALLET_SELECT_OUTPUTS_HPP
 #define LIBBITCOIN_WALLET_SELECT_OUTPUTS_HPP
 
-#include <cstddef>
 #include <cstdint>
-#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/point.hpp>
 
 namespace libbitcoin {
 namespace wallet {
 
-// Used by transaction_indexer and select_outputs()
-struct BC_API output_info
+class BC_API select_outputs
 {
-    chain::output_point point;
-    uint64_t value;
+    enum class algorithm
+    {
+        greedy
+    };
+
+    /// Select optimal outpoints for a spend from unspent outputs list.
+    /// Return includes the amount of change remaining from the spend.
+    static void select(chain::points_info& out,
+        chain::output_info::list unspent, uint64_t minimum_value,
+        algorithm option=algorithm::greedy);
 };
-
-typedef std::vector<output_info> output_info_list;
-
-struct BC_API select_outputs_result
-{
-    chain::output_point::list points;
-    uint64_t change;
-};
-
-enum class select_outputs_algorithm
-{
-    greedy
-};
-
-/**
- * Select optimal outputs for a send from unspent outputs list.
- * Returns output list and remaining change to be sent to
- * a change address.
- */
-BC_API select_outputs_result select_outputs(output_info_list unspent,
-    uint64_t min_value,
-    select_outputs_algorithm algorithm=select_outputs_algorithm::greedy);
 
 } // namspace wallet
 } // namspace libbitcoin
 
 #endif
-
