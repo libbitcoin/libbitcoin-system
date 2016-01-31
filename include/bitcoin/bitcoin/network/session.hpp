@@ -174,7 +174,7 @@ private:
     void do_stop_session();
 
     // Stop sequence
-    bool handle_channel_event(const code& ec, channel::ptr channel,
+    bool handle_connect_event(const code& ec, channel::ptr channel,
         stop_handler handler);
 
     // Connect sequence
@@ -194,15 +194,13 @@ private:
         result_handler handle_started);
     void handle_is_pending(bool pending, channel::ptr channel,
         result_handler handle_started);
-    void do_unpend(const code& ec, channel::ptr channel,
-        result_handler handle_started);
-    void handle_unpend(const code& ec);
-    void handle_stored(const code& ec, channel::ptr channel,
-        result_handler handle_started);
     void handle_start(const code& ec, channel::ptr channel,
         result_handler handle_started, result_handler handle_stopped);
+    void do_unpend(const code& ec, channel::ptr channel,
+        result_handler handle_started);
     void do_remove(const code& ec, channel::ptr channel,
         result_handler handle_stopped);
+    void handle_unpend(const code& ec);
     void handle_remove(const code& ec);
 
     std::atomic<bool> stopped_;

@@ -289,7 +289,7 @@ void p2p::handle_outbound_started(const code& ec, result_handler handler)
 // Channel subscription.
 // ----------------------------------------------------------------------------
 
-void p2p::subscribe(connect_handler handler)
+void p2p::subscribe_connections(connect_handler handler)
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
@@ -307,12 +307,6 @@ void p2p::subscribe(connect_handler handler)
     ///////////////////////////////////////////////////////////////////////////
 
     handler(error::service_stopped, nullptr);
-}
-
-// This is not intended for public use but needs to be accessible.
-void p2p::relay(const code& ec, channel::ptr channel)
-{
-    subscriber_->relay(ec, channel);
 }
 
 // Manual connections.
@@ -416,7 +410,21 @@ void p2p::connected(const address& address, truth_handler handler)
 
 void p2p::store(channel::ptr channel, result_handler handler)
 {
-    connections_->store(channel, handler);
+    const auto new_connection_handler =
+        std::bind(&p2p::handle_new_connection,
+            this, _1, channel, handler);
+
+    connections_->store(channel, new_connection_handler);
+}
+
+void p2p::handle_new_connection(const code& ec, channel::ptr channel,
+    result_handler handler)
+{
+    // Connection-in-use indicated here by error::address_in_use.
+    handler(ec);
+    
+    if (!ec && channel->notify())
+        subscriber_->relay(error::success, channel);
 }
 
 void p2p::remove(channel::ptr channel, result_handler handler)

@@ -63,6 +63,9 @@ public:
 
     void start(result_handler handler) override;
 
+    bool notify() const;
+    virtual void set_notify(bool value);
+
     uint64_t nonce() const;
     virtual void set_nonce(uint64_t value);
 
@@ -99,6 +102,7 @@ private:
     void start_poll();
     void handle_poll(const code& ec);
 
+    bool notify_;
     uint64_t nonce_;
     hash_digest located_start_;
     hash_digest located_stop_;

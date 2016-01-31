@@ -99,10 +99,7 @@ public:
     virtual void run(result_handler handler);
 
     /// Subscribe to connection creation and service stop events.
-    virtual void subscribe(connect_handler handler);
-
-    /// Relay a connection creation or service stop event to subscribers.
-    virtual void relay(const code& ec, channel::ptr channel);
+    virtual void subscribe_connections(connect_handler handler);
 
     /// Maintain a connection to hostname:port.
     virtual void connect(const std::string& hostname, uint16_t port);
@@ -182,6 +179,8 @@ private:
     void handle_hosts_loaded(const code& ec, result_handler handler);
     void handle_hosts_seeded(const code& ec, result_handler handler);
     void handle_hosts_saved(const code& ec, result_handler handler);
+    void handle_new_connection(const code& ec, channel::ptr channel,
+        result_handler handler);
 
     std::atomic<bool> stopped_;
     std::atomic<size_t> height_;

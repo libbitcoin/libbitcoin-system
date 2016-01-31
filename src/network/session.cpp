@@ -164,10 +164,11 @@ bool session::stopped() const
 void session::subscribe_stop(stop_handler handler)
 {
     // This uses the channel subscriber to detect stop.
-    network_.subscribe(BIND_3(handle_channel_event, _1, _2, handler));
+    network_.subscribe_connections(
+        BIND_3(handle_connect_event, _1, _2, handler));
 }
 
-bool session::handle_channel_event(const code& ec, channel::ptr,
+bool session::handle_connect_event(const code& ec, channel::ptr,
     stop_handler handler)
 {
     if (ec == error::service_stopped)
@@ -177,7 +178,7 @@ bool session::handle_channel_event(const code& ec, channel::ptr,
         return false;
     }
 
-    // Resubscribe to channel events.
+    // Resubscribe to connection events.
     return true;
 }
 
@@ -207,6 +208,7 @@ void session::register_channel(channel::ptr channel,
         return;
     }
 
+    channel->set_notify(notify_);
     channel->set_nonce(nonzero_pseudo_random());
 
     result_handler unpend_handler =
@@ -283,19 +285,7 @@ void session::handle_is_pending(bool pending, channel::ptr channel,
         return;
     }
 
-    network_.store(channel,
-        BIND_3(handle_stored, _1, channel, handle_started));
-}
-
-void session::handle_stored(const code& ec, channel::ptr channel,
-    result_handler handle_started)
-{
-    // Connection-in-use indicated here by error::address_in_use.
-    handle_started(ec);
-
-    // Don't notify of channel creation if we are seeding or syncing.
-    if (!ec && notify_)
-        network_.relay(error::success, channel);
+    network_.store(channel, handle_started);
 }
 
 void session::handle_start(const code& ec, channel::ptr channel,

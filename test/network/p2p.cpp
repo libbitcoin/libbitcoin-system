@@ -157,7 +157,7 @@ static int subscribe_result(p2p& network)
         promise.set_value(ec);
         return false;
     };
-    network.subscribe(handler);
+    network.subscribe_connections(handler);
     return promise.get_future().get().value();
 }
 
@@ -169,7 +169,7 @@ static int subscribe_result(p2p& network, const config::endpoint& host)
         promise.set_value(ec);
         return false;
     };
-    network.subscribe(handler);
+    network.subscribe_connections(handler);
     network.connect(host.host(), host.port());
     return promise.get_future().get().value();
 }

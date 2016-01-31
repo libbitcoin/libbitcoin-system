@@ -53,6 +53,7 @@ static deadline::ptr alarm(threadpool& pool, const asio::duration& duration)
 channel::channel(threadpool& pool, asio::socket_ptr socket,
     const settings& settings)
   : proxy(pool, socket, settings.identifier),
+    notify_(false),
     nonce_(0),
     version_({ 0 }),
     own_threshold_(null_hash),
@@ -88,6 +89,16 @@ void channel::do_start(const code& ec, result_handler handler)
 
 // Properties (version write is thread unsafe, isolate from read).
 // ----------------------------------------------------------------------------
+
+bool channel::notify() const
+{
+    return notify_;
+}
+
+void channel::set_notify(bool value)
+{
+    notify_ = value;
+}
 
 uint64_t channel::nonce() const
 {
