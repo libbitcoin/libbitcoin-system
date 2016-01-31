@@ -32,9 +32,9 @@ doc_DATA = \
 # src/libbitcoin.la => ${libdir}
 #------------------------------------------------------------------------------
 lib_LTLIBRARIES = src/libbitcoin.la
-src_libbitcoin_la_CPPFLAGS = -I${srcdir}/include ${icu} ${boost_CPPFLAGS} ${pthread_CPPFLAGS} ${icu_i18n_CPPFLAGS} ${secp256k1_CPPFLAGS}
+src_libbitcoin_la_CPPFLAGS = -I${srcdir}/include ${icu} ${boost_CPPFLAGS} ${pthread_CPPFLAGS} ${png_CPPFLAGS} ${qrencode_CPPFLAGS} ${icu_i18n_CPPFLAGS} ${secp256k1_CPPFLAGS}
 src_libbitcoin_la_LDFLAGS = ${boost_LDFLAGS}
-src_libbitcoin_la_LIBADD = ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
+src_libbitcoin_la_LIBADD = ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${png_LIBS} ${qrencode_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
 src_libbitcoin_la_SOURCES = \
     src/constants.cpp \
     src/error.cpp \
@@ -136,6 +136,7 @@ src_libbitcoin_la_SOURCES = \
     src/utility/log.cpp \
     src/utility/monitor.cpp \
     src/utility/ostream_writer.cpp \
+    src/utility/png.cpp \
     src/utility/random.cpp \
     src/utility/string.cpp \
     src/utility/thread.cpp \
@@ -156,6 +157,7 @@ src_libbitcoin_la_SOURCES = \
     src/wallet/mini_keys.cpp \
     src/wallet/mnemonic.cpp \
     src/wallet/payment_address.cpp \
+    src/wallet/qrcode.cpp \
     src/wallet/select_outputs.cpp \
     src/wallet/stealth_address.cpp \
     src/wallet/uri.cpp \
@@ -175,9 +177,9 @@ src_libbitcoin_la_SOURCES = \
 if WITH_EXAMPLES
 
 noinst_PROGRAMS = examples/libbitcoin_examples
-examples_libbitcoin_examples_CPPFLAGS = -I${srcdir}/include ${icu} ${boost_CPPFLAGS} ${pthread_CPPFLAGS} ${icu_i18n_CPPFLAGS} ${secp256k1_CPPFLAGS}
+examples_libbitcoin_examples_CPPFLAGS = -I${srcdir}/include ${icu} ${boost_CPPFLAGS} ${pthread_CPPFLAGS} ${png_CPPFLAGS} ${qrencode_CPPFLAGS} ${icu_i18n_CPPFLAGS} ${secp256k1_CPPFLAGS}
 examples_libbitcoin_examples_LDFLAGS = ${boost_LDFLAGS}
-examples_libbitcoin_examples_LDADD = src/libbitcoin.la ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
+examples_libbitcoin_examples_LDADD = src/libbitcoin.la ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${png_LIBS} ${qrencode_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
 examples_libbitcoin_examples_SOURCES = \
     examples/main.cpp
 
@@ -190,9 +192,9 @@ if WITH_TESTS
 TESTS = libbitcoin_test_runner.sh
 
 check_PROGRAMS = test/libbitcoin_test
-test_libbitcoin_test_CPPFLAGS = -I${srcdir}/include ${icu} ${boost_CPPFLAGS} ${pthread_CPPFLAGS} ${icu_i18n_CPPFLAGS} ${secp256k1_CPPFLAGS}
+test_libbitcoin_test_CPPFLAGS = -I${srcdir}/include ${icu} ${boost_CPPFLAGS} ${pthread_CPPFLAGS} ${png_CPPFLAGS} ${qrencode_CPPFLAGS} ${icu_i18n_CPPFLAGS} ${secp256k1_CPPFLAGS}
 test_libbitcoin_test_LDFLAGS = ${boost_LDFLAGS}
-test_libbitcoin_test_LDADD = src/libbitcoin.la ${boost_unit_test_framework_LIBS} ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
+test_libbitcoin_test_LDADD = src/libbitcoin.la ${boost_unit_test_framework_LIBS} ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${png_LIBS} ${qrencode_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
 test_libbitcoin_test_SOURCES = \
     test/main.cpp \
     test/chain/block.cpp \
@@ -255,6 +257,7 @@ test_libbitcoin_test_SOURCES = \
     test/utility/binary.cpp \
     test/utility/data.cpp \
     test/utility/endian.cpp \
+    test/utility/png.cpp \
     test/utility/random.cpp \
     test/utility/serializer.cpp \
     test/utility/stream.cpp \
@@ -270,6 +273,7 @@ test_libbitcoin_test_SOURCES = \
     test/wallet/mnemonic.cpp \
     test/wallet/mnemonic.hpp \
     test/wallet/payment_address.cpp \
+    test/wallet/qrcode.cpp \
     test/wallet/stealth_address.cpp \
     test/wallet/uri.cpp \
     test/wallet/uri_reader.cpp
@@ -422,6 +426,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/log.hpp \
     include/bitcoin/bitcoin/utility/monitor.hpp \
     include/bitcoin/bitcoin/utility/ostream_writer.hpp \
+    include/bitcoin/bitcoin/utility/png.hpp \
     include/bitcoin/bitcoin/utility/random.hpp \
     include/bitcoin/bitcoin/utility/reader.hpp \
     include/bitcoin/bitcoin/utility/resubscriber.hpp \
@@ -453,6 +458,7 @@ include_bitcoin_bitcoin_wallet_HEADERS = \
     include/bitcoin/bitcoin/wallet/mini_keys.hpp \
     include/bitcoin/bitcoin/wallet/mnemonic.hpp \
     include/bitcoin/bitcoin/wallet/payment_address.hpp \
+    include/bitcoin/bitcoin/wallet/qrcode.hpp \
     include/bitcoin/bitcoin/wallet/select_outputs.hpp \
     include/bitcoin/bitcoin/wallet/settings.hpp \
     include/bitcoin/bitcoin/wallet/stealth_address.hpp \

@@ -108,6 +108,7 @@
 #include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/monitor.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/bitcoin/utility/png.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/resubscriber.hpp>
@@ -136,6 +137,7 @@
 #include <bitcoin/bitcoin/wallet/mini_keys.hpp>
 #include <bitcoin/bitcoin/wallet/mnemonic.hpp>
 #include <bitcoin/bitcoin/wallet/payment_address.hpp>
+#include <bitcoin/bitcoin/wallet/qrcode.hpp>
 #include <bitcoin/bitcoin/wallet/select_outputs.hpp>
 #include <bitcoin/bitcoin/wallet/settings.hpp>
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
