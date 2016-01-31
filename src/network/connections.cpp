@@ -90,6 +90,7 @@ bool connections::safe_remove(channel::ptr channel)
 
     const auto it = std::find(channels_.begin(), channels_.end(), channel);
     const auto found = it != channels_.end();
+
     if (found)
         channels_.erase(it);
 
