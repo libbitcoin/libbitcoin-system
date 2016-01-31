@@ -110,10 +110,10 @@ p2p::p2p(const settings& settings)
   : stopped_(true),
     height_(0),
     settings_(settings),
-    dispatch_(pool_, NAME),
-    hosts_(pool_, settings_),
-    connections_(std::make_shared<connections>(pool_)),
-    subscriber_(std::make_shared<channel_subscriber>(pool_, NAME "_sub"))
+    dispatch_(threadpool_, NAME),
+    hosts_(threadpool_, settings_),
+    connections_(std::make_shared<connections>(threadpool_)),
+    subscriber_(std::make_shared<channel_subscriber>(threadpool_, NAME "_sub"))
 {
 }
 
@@ -162,8 +162,8 @@ void p2p::start(result_handler handler)
 
     // It is possible for stop to become set during these operations.
 
-    pool_.join();
-    pool_.spawn(settings_.threads, thread_priority::low);
+    threadpool_.join();
+    threadpool_.spawn(settings_.threads, thread_priority::low);
 
     const auto manual_started_handler =
         std::bind(&p2p::handle_manual_started,
@@ -361,7 +361,7 @@ void p2p::stop(result_handler handler)
                 std::bind(&p2p::handle_hosts_saved,
                     this, _1, handler));
 
-            pool_.shutdown();
+            threadpool_.shutdown();
             return;
         }
     }
@@ -383,20 +383,20 @@ void p2p::handle_hosts_saved(const code& ec, result_handler handler)
 // Destruct sequence.
 // ----------------------------------------------------------------------------
 
+void p2p::close()
+{
+    stop([](code){});
+
+    // This is the end of the destruct sequence.
+    threadpool_.join();
+}
+
 p2p::~p2p()
 {
     // A reference cycle cannot exist with this class, since we don't capture
     // shared pointers to it. Therefore this will always clear subscriptions.
     // This allows for shutdown based on destruct without need to call stop.
     close();
-}
-
-void p2p::close()
-{
-    stop([](code){});
-
-    // This is the end of the destruct sequence.
-    pool_.join();
 }
 
 // Connections collection.

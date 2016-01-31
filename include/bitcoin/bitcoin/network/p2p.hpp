@@ -158,7 +158,7 @@ protected:
     template <class Session, typename... Args>
     typename Session::ptr attach(Args&&... args)
     {
-        return std::make_shared<Session>(pool_, *this,
+        return std::make_shared<Session>(threadpool_, *this,
             std::forward<Args>(args)...);
     }
 
@@ -186,7 +186,7 @@ private:
     const settings& settings_;
 
     // These are thread safe.
-    threadpool pool_;
+    threadpool threadpool_;
     dispatcher dispatch_;
 
     // These are thread safe (internal strand).
