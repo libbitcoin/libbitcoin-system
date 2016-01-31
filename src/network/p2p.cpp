@@ -143,14 +143,24 @@ bool p2p::stopped() const
 
 void p2p::start(result_handler handler)
 {
-    if (!stopped())
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    if (true)
     {
-        handler(error::operation_failed);
-        return;
-    }
+        std::lock_guard<std::mutex> lock(mutex_);
 
-    // Start is not thread safe, so stopped_/subscriber_ is not guarded.
-    stopped_ = false;
+        if (!stopped())
+        {
+            handler(error::operation_failed);
+            return;
+        }
+
+        // stopped_/subscriber_ is the guarded relation.
+        stopped_ = false;
+    }
+    ///////////////////////////////////////////////////////////////////////////
+
+    // It is possible for stop to become set during these operations.
 
     pool_.join();
     pool_.spawn(settings_.threads, thread_priority::low);
@@ -364,7 +374,7 @@ void p2p::handle_hosts_saved(const code& ec, result_handler handler)
 {
     if (ec)
         log::error(LOG_NETWORK)
-        << "Error saving hosts file: " << ec.message();
+            << "Error saving hosts file: " << ec.message();
 
     // This is the end of the stop sequence.
     handler(ec);
