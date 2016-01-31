@@ -106,6 +106,9 @@ const settings p2p::testnet
     NETWORK_SEEDS_TESTNET
 };
 
+/// No-operation handler, used in default stop handling.
+p2p::result_handler p2p::unhandled = [](code){};
+
 p2p::p2p(const settings& settings)
   : stopped_(true),
     height_(0),
@@ -143,24 +146,28 @@ bool p2p::stopped() const
 
 void p2p::start(result_handler handler)
 {
+    // This is used to invoke the handler outside of the critical section.
+    auto failed = false;
+
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
     if (true)
     {
         std::lock_guard<std::mutex> lock(mutex_);
 
-        if (!stopped())
-        {
-            handler(error::operation_failed);
-            return;
-        }
-
         // stopped_/subscriber_ is the guarded relation.
-        stopped_ = false;
+        if (stopped())
+            stopped_ = false;
+        else
+            failed = true;
     }
     ///////////////////////////////////////////////////////////////////////////
 
-    // It is possible for stop to become set during these operations.
+    if (failed)
+    {
+        handler(error::operation_failed);
+        return;
+    }
 
     threadpool_.join();
     threadpool_.spawn(settings_.threads, thread_priority::low);
@@ -385,7 +392,7 @@ void p2p::handle_hosts_saved(const code& ec, result_handler handler)
 
 void p2p::close()
 {
-    stop([](code){});
+    p2p::stop(unhandled);
 
     // This is the end of the destruct sequence.
     threadpool_.join();
@@ -396,7 +403,7 @@ p2p::~p2p()
     // A reference cycle cannot exist with this class, since we don't capture
     // shared pointers to it. Therefore this will always clear subscriptions.
     // This allows for shutdown based on destruct without need to call stop.
-    close();
+    p2p::close();
 }
 
 // Connections collection.

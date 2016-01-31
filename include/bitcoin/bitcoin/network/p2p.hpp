@@ -162,6 +162,9 @@ protected:
             std::forward<Args>(args)...);
     }
 
+    /// No-operation handler, used in default stop handling.
+    static result_handler unhandled;
+
     /// Determine if the network is stopped. This is not thread safe.
     virtual bool stopped() const;
 
