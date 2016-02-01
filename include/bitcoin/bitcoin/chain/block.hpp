@@ -37,7 +37,8 @@ class BC_API block
 {
 public:
     typedef std::vector<block> list;
-    typedef std::shared_ptr<chain::block> ptr;
+    typedef std::shared_ptr<block> ptr;
+    typedef std::vector<ptr> ptr_list;
 
     static block factory_from_data(const data_chunk& data);
     static block factory_from_data(std::istream& stream);
