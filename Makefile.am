@@ -53,6 +53,7 @@ src_libbitcoin_la_SOURCES = \
     src/config/directory.cpp \
     src/config/endpoint.cpp \
     src/config/parameter.cpp \
+    src/config/parser.cpp \
     src/config/printer.cpp \
     src/formats/base10.cpp \
     src/formats/base16.cpp \
@@ -339,6 +340,7 @@ include_bitcoin_bitcoin_config_HEADERS = \
     include/bitcoin/bitcoin/config/directory.hpp \
     include/bitcoin/bitcoin/config/endpoint.hpp \
     include/bitcoin/bitcoin/config/parameter.hpp \
+    include/bitcoin/bitcoin/config/parser.hpp \
     include/bitcoin/bitcoin/config/printer.hpp
 
 include_bitcoin_bitcoin_formatsdir = ${includedir}/bitcoin/bitcoin/formats

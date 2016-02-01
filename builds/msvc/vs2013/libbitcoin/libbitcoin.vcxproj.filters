@@ -551,6 +551,9 @@
     <ClCompile Include="..\..\..\..\src\math\external\lax_der_parsing.c">
       <Filter>src\math\external</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\parser.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -1065,6 +1068,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\lax_der_parsing.h">
       <Filter>src\math\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\parser.hpp">
+      <Filter>include\bitcoin\config</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

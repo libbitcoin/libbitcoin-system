@@ -86,6 +86,7 @@
     <ClCompile Include="..\..\..\..\src\config\directory.cpp" />
     <ClCompile Include="..\..\..\..\src\config\endpoint.cpp" />
     <ClCompile Include="..\..\..\..\src\config\parameter.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\parser.cpp" />
     <ClCompile Include="..\..\..\..\src\config\printer.cpp" />
     <ClCompile Include="..\..\..\..\src\constants.cpp" />
     <ClCompile Include="..\..\..\..\src\error.cpp" />
@@ -226,6 +227,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\directory.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\endpoint.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\parameter.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\parser.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\printer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\constants.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\define.hpp" />

@@ -37,6 +37,7 @@
 #include <bitcoin/bitcoin/config/directory.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/config/parameter.hpp>
+#include <bitcoin/bitcoin/config/parser.hpp>
 #include <bitcoin/bitcoin/config/printer.hpp>
 #include <bitcoin/bitcoin/formats/base10.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
