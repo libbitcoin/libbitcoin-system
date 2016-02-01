@@ -25,6 +25,14 @@
 #include <boost/program_options.hpp>
 
 namespace libbitcoin {
+
+// These are just annoyingly long.
+typedef boost::program_options::variables_map variables_map;
+typedef boost::program_options::option_description option_metadata;
+typedef boost::program_options::options_description options_metadata;
+typedef boost::program_options::positional_options_description
+    arguments_metadata;
+
 namespace config {
 
 /// Parse configurable values from environment variables, settings file, and
@@ -32,28 +40,23 @@ namespace config {
 class parser
 {
 public:
-    typedef boost::program_options::variables_map variables_map;
-    typedef boost::program_options::options_description options_description;
-    typedef boost::program_options::positional_options_description
-        positional_options_description;
-
     static bool get_option(variables_map& variables,
         const std::string& name);
 
     static boost::filesystem::path get_config_option(variables_map& variables,
         const std::string& name);
 
-    /// Load configuration file settings.
-    virtual options_description load_settings() = 0;
-
-    /// Load environment variable settings.
-    virtual options_description load_environment() = 0;
-
     /// Load command line options (named).
-    virtual options_description load_options() = 0;
+    virtual options_metadata load_options() = 0;
 
     /// Load command line arguments (positional).
-    virtual positional_options_description load_arguments() = 0;
+    virtual arguments_metadata load_arguments() = 0;
+
+    /// Load configuration file settings.
+    virtual options_metadata load_settings() = 0;
+
+    /// Load environment variable settings.
+    virtual options_metadata load_environment() = 0;
     
 protected:
     virtual void load_command_variables(variables_map& variables,
