@@ -17,16 +17,33 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CONFIG_CONFIG_DIRECTORY_HPP
-#define LIBBITCOIN_CONFIG_CONFIG_DIRECTORY_HPP
+#ifndef LIBBITCOIN_CONFIG_DIRECTORY_HPP
+#define LIBBITCOIN_CONFIG_DIRECTORY_HPP
 
 #include <string>
+#include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-
-/* NOTE: don't declare 'using namespace foo' in headers. */
 
 namespace libbitcoin {
 namespace config {
+
+// Declare config_default_path() via BC_DECLARE_CONFIG_DEFAULT_PATH(relative).
+#define CONFIG_DEFAULT_PATH(directory, subdirectory) \
+    static boost::filesystem::path config_default_path() \
+    { \
+        const boost::filesystem::path folder(directory); \
+        return folder / subdirectory; \
+    }
+
+// The SYSCONFDIR symbol must be defined at compile for the project.
+// Therefore this must be compiled directly into the relevant project(s).
+#ifdef _MSC_VER
+    #define BC_DECLARE_CONFIG_DEFAULT_PATH(relative) \
+        CONFIG_DEFAULT_PATH(bc::config::windows_config_directory(), relative)
+#else
+    #define BC_DECLARE_CONFIG_DEFAULT_PATH(relative) \
+        CONFIG_DEFAULT_PATH(SYSCONFDIR, relative)
+#endif
 
 /**
  * Get the windows configuration directory.
