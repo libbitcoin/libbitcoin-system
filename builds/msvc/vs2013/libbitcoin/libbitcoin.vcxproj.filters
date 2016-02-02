@@ -943,9 +943,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\bitcoin_uri.hpp">
       <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\variable_uint_size.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\ec_private.hpp">
       <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
@@ -1074,6 +1071,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\settings.hpp">
       <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\variable_uint_size.hpp">
+      <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
