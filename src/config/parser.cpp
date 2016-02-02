@@ -68,6 +68,14 @@ void parser::load_command_variables(variables_map& variables, int argc,
     store(command_parser.run(), variables);
 }
 
+void parser::load_environment_variables(variables_map& variables,
+    const std::string& prefix)
+{
+    const auto& environment_variables = load_environment();
+    const auto environment = parse_environment(environment_variables, prefix);
+    store(environment, variables);
+}
+
 bool parser::load_configuration_variables(variables_map& variables,
     const std::string& option_name)
 {
@@ -96,14 +104,6 @@ bool parser::load_configuration_variables(variables_map& variables,
     const auto config = parse_config_file(stream, config_settings);
     store(config, variables);
     return false;
-}
-
-void parser::load_environment_variables(variables_map& variables,
-    const std::string& prefix)
-{
-    const auto& environment_variables = load_environment();
-    const auto environment = parse_environment(environment_variables, prefix);
-    store(environment, variables);
 }
 
 } // namespace config

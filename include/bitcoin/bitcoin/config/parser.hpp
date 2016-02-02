@@ -50,11 +50,11 @@ public:
     /// Load command line arguments (positional).
     virtual arguments_metadata load_arguments() = 0;
 
-    /// Load configuration file settings.
-    virtual options_metadata load_settings() = 0;
-
     /// Load environment variable settings.
     virtual options_metadata load_environment() = 0;
+
+    /// Load configuration file settings.
+    virtual options_metadata load_settings() = 0;
     
 protected:
     virtual void load_command_variables(variables_map& variables,
