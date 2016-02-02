@@ -27,6 +27,14 @@
 
 namespace libbitcoin {
 
+/// Console result codes, positive values are domain-specific.
+enum console_result : int
+{
+    failure = -1,
+    okay = 0,
+    not_started = 1
+};
+
 /// Alias for error code declarations.
 typedef std::error_code code;
 
