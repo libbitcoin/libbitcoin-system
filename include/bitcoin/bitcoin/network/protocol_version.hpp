@@ -29,7 +29,7 @@
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/network_settings.hpp>
+#include <bitcoin/bitcoin/network/settings.hpp>
 #include <bitcoin/bitcoin/network/p2p.hpp>
 #include <bitcoin/bitcoin/network/protocol_timer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>

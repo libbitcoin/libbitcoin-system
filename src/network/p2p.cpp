@@ -31,7 +31,7 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/connections.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
-#include <bitcoin/bitcoin/network/network_settings.hpp>
+#include <bitcoin/bitcoin/network/settings.hpp>
 #include <bitcoin/bitcoin/network/protocol_address.hpp>
 #include <bitcoin/bitcoin/network/protocol_ping.hpp>
 #include <bitcoin/bitcoin/network/protocol_seed.hpp>
@@ -53,58 +53,6 @@ namespace network {
 #define NAME "p2p"
 
 using std::placeholders::_1;
-
-const settings p2p::mainnet
-{
-    NETWORK_THREADS,
-    NETWORK_IDENTIFIER_MAINNET,
-    NETWORK_INBOUND_PORT_MAINNET,
-    NETWORK_CONNECTION_LIMIT,
-    NETWORK_OUTBOUND_CONNECTIONS,
-    NETWORK_MANUAL_RETRY_LIMIT,
-    NETWORK_CONNECT_BATCH_SIZE,
-    NETWORK_CONNECT_TIMEOUT_SECONDS,
-    NETWORK_CHANNEL_HANDSHAKE_SECONDS,
-    NETWORK_CHANNEL_POLL_SECONDS,
-    NETWORK_CHANNEL_HEARTBEAT_MINUTES,
-    NETWORK_CHANNEL_INACTIVITY_MINUTES,
-    NETWORK_CHANNEL_EXPIRATION_MINUTES,
-    NETWORK_CHANNEL_GERMINATION_SECONDS,
-    NETWORK_HOST_POOL_CAPACITY,
-    NETWORK_RELAY_TRANSACTIONS,
-    NETWORK_HOSTS_FILE,
-    NETWORK_DEBUG_FILE,
-    NETWORK_ERROR_FILE,
-    NETWORK_SELF,
-    NETWORK_BLACKLISTS,
-    NETWORK_SEEDS_MAINNET
-};
-
-const settings p2p::testnet
-{
-    NETWORK_THREADS,
-    NETWORK_IDENTIFIER_TESTNET,
-    NETWORK_INBOUND_PORT_TESTNET,
-    NETWORK_CONNECTION_LIMIT,
-    NETWORK_OUTBOUND_CONNECTIONS,
-    NETWORK_MANUAL_RETRY_LIMIT,
-    NETWORK_CONNECT_BATCH_SIZE,
-    NETWORK_CONNECT_TIMEOUT_SECONDS,
-    NETWORK_CHANNEL_HANDSHAKE_SECONDS,
-    NETWORK_CHANNEL_POLL_SECONDS,
-    NETWORK_CHANNEL_HEARTBEAT_MINUTES,
-    NETWORK_CHANNEL_INACTIVITY_MINUTES,
-    NETWORK_CHANNEL_EXPIRATION_MINUTES,
-    NETWORK_CHANNEL_GERMINATION_SECONDS,
-    NETWORK_HOST_POOL_CAPACITY,
-    NETWORK_RELAY_TRANSACTIONS,
-    NETWORK_HOSTS_FILE,
-    NETWORK_DEBUG_FILE,
-    NETWORK_ERROR_FILE,
-    NETWORK_SELF,
-    NETWORK_BLACKLISTS,
-    NETWORK_SEEDS_TESTNET
-};
 
 /// No-operation handler, used in default stop handling.
 p2p::result_handler p2p::unhandled = [](code){};

@@ -25,7 +25,7 @@
 #include <vector>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/network/network_settings.hpp>
+#include <bitcoin/bitcoin/network/settings.hpp>
 #include <bitcoin/bitcoin/unicode/ifstream.hpp>
 #include <bitcoin/bitcoin/unicode/ofstream.hpp>
 #include <bitcoin/bitcoin/utility/log.hpp>

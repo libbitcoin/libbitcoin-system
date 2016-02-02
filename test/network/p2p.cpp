@@ -52,7 +52,7 @@ using namespace bc::network;
     }
 
 #define SETTINGS_TESTNET_ONE_THREAD_NO_CONNECTIONS(config) \
-    settings config = p2p::testnet; \
+    auto config = settings::testnet; \
     config.threads = 1; \
     config.host_pool_capacity = 0; \
     config.outbound_connections = 0; \
@@ -65,7 +65,7 @@ using namespace bc::network;
     config.hosts_file = get_log_path(TEST_NAME, "hosts")
 
 #define SETTINGS_TESTNET_TWO_THREADS_ONE_SEED_OUTBOUND(config) \
-    settings config = p2p::testnet; \
+    auto config = settings::testnet; \
     config.threads = 2; \
     config.connection_limit = 0; \
     config.seeds = { { SEED1 } }; \

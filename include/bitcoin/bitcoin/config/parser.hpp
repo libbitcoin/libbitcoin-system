@@ -40,9 +40,7 @@ namespace config {
 class parser
 {
 public:
-    static bool get_option(variables_map& variables,
-        const std::string& name);
-
+    static bool get_option(variables_map& variables, const std::string& name);
     static boost::filesystem::path get_config_option(variables_map& variables,
         const std::string& name);
 

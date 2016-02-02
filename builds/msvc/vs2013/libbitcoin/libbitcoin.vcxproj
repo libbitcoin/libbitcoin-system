@@ -165,6 +165,7 @@
     <ClCompile Include="..\..\..\..\src\network\session_manual.cpp" />
     <ClCompile Include="..\..\..\..\src\network\session_outbound.cpp" />
     <ClCompile Include="..\..\..\..\src\network\session_seed.cpp" />
+    <ClCompile Include="..\..\..\..\src\network\settings.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\console_streambuf.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\ifstream.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\ofstream.cpp" />
@@ -278,7 +279,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\connections.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\logging.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\message_subscriber.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\network_settings.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\settings.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\pending_channels.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\pending_sockets.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_events.hpp" />

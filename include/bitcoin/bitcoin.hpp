@@ -85,7 +85,6 @@
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/logging.hpp>
 #include <bitcoin/bitcoin/network/message_subscriber.hpp>
-#include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/network/p2p.hpp>
 #include <bitcoin/bitcoin/network/pending_channels.hpp>
 #include <bitcoin/bitcoin/network/pending_sockets.hpp>
@@ -103,6 +102,7 @@
 #include <bitcoin/bitcoin/network/session_manual.hpp>
 #include <bitcoin/bitcoin/network/session_outbound.hpp>
 #include <bitcoin/bitcoin/network/session_seed.hpp>
+#include <bitcoin/bitcoin/network/settings.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
 #include <bitcoin/bitcoin/unicode/console_streambuf.hpp>
 #include <bitcoin/bitcoin/unicode/ifstream.hpp>

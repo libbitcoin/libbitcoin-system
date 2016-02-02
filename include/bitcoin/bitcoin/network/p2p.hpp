@@ -34,8 +34,8 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/connections.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
-#include <bitcoin/bitcoin/network/network_settings.hpp>
 #include <bitcoin/bitcoin/network/session_manual.hpp>
+#include <bitcoin/bitcoin/network/settings.hpp>
 #include <bitcoin/bitcoin/utility/resubscriber.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -46,9 +46,6 @@ namespace network {
 class BC_API p2p
 {
 public:
-    static const settings mainnet;
-    static const settings testnet;
-
     typedef message::network_address address;
     typedef std::function<void(bool)> truth_handler;
     typedef std::function<void(size_t)> count_handler;
@@ -61,7 +58,7 @@ public:
     // ------------------------------------------------------------------------
 
     /// Construct an instance.
-    p2p(const settings& settings=mainnet);
+    p2p(const settings& settings=settings::mainnet);
 
     /// Ensure all threads are coalesced.
     ~p2p();
