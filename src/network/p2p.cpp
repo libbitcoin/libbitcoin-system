@@ -54,7 +54,7 @@ namespace network {
 
 using std::placeholders::_1;
 
-/// No-operation handler, used in default stop handling.
+// No-operation handler, used in default stop handling.
 p2p::result_handler p2p::unhandled = [](code){};
 
 p2p::p2p(const settings& settings)
