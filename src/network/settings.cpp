@@ -50,7 +50,7 @@ static const settings mainnet_defaults()
     value.debug_file = { "debug.log" };
     value.error_file = { "error.log" };
     value.self = unspecified_network_address;
-    value.blacklists = {};
+    value.blacklists = { {} };
 
     // Seeds based on bitcoinstats.com/network/dns-servers
     value.seeds = 
