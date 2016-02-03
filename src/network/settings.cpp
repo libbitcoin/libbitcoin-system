@@ -19,13 +19,13 @@
  */
 #include <bitcoin/bitcoin/network/settings.hpp>
 
-#include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 
 namespace libbitcoin {
 namespace network {
 
-using namespace boost::filesystem;
+using namespace asio;
 
 static const settings mainnet_defaults()
 {
@@ -46,9 +46,9 @@ static const settings mainnet_defaults()
     value.channel_germination_seconds = 30;
     value.host_pool_capacity = 1000;
     value.relay_transactions = true;
-    value.hosts_file = path("hosts.cache");
-    value.debug_file = path("debug.log");
-    value.error_file = path("error.log");
+    value.hosts_file = { "hosts.cache" };
+    value.debug_file = { "debug.log" };
+    value.error_file = { "error.log" };
     value.self = unspecified_network_address;
     value.blacklists = {};
 
@@ -82,40 +82,39 @@ static const settings testnet_defaults()
 const settings settings::mainnet = mainnet_defaults();
 const settings settings::testnet = testnet_defaults();
 
-
-asio::duration settings::connect_timeout() const
+duration settings::connect_timeout() const
 {
-    return asio::seconds(connect_timeout_seconds);
+    return seconds(connect_timeout_seconds);
 }
 
-asio::duration settings::channel_handshake() const
+duration settings::channel_handshake() const
 {
-    return asio::seconds(channel_handshake_seconds);
+    return seconds(channel_handshake_seconds);
 }
 
-asio::duration settings::channel_poll() const
+duration settings::channel_poll() const
 {
-    return asio::seconds(channel_poll_seconds);
+    return seconds(channel_poll_seconds);
 }
 
-asio::duration settings::channel_heartbeat() const
+duration settings::channel_heartbeat() const
 {
-    return asio::minutes(channel_heartbeat_minutes);
+    return minutes(channel_heartbeat_minutes);
 }
 
-asio::duration settings::channel_inactivity() const
+duration settings::channel_inactivity() const
 {
-    return asio::minutes(channel_inactivity_minutes);
+    return minutes(channel_inactivity_minutes);
 }
 
-asio::duration settings::channel_expiration() const
+duration settings::channel_expiration() const
 {
-    return asio::minutes(channel_expiration_minutes);
+    return minutes(channel_expiration_minutes);
 }
 
-asio::duration settings::channel_germination() const
+duration settings::channel_germination() const
 {
-    return asio::seconds(channel_germination_seconds);
+    return seconds(channel_germination_seconds);
 } 
 
 } // namespace network
