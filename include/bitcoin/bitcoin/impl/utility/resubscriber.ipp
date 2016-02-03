@@ -23,9 +23,11 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
+////#include <bitcoin/bitcoin/utility/track.hpp>
 
 namespace libbitcoin {
 
@@ -33,15 +35,14 @@ template <typename... Args>
 resubscriber<Args...>::resubscriber(threadpool& pool,
     const std::string& class_name)
   : stopped_(false),
-    dispatch_(pool, class_name)
-    /*, track<resubscriber<Args...>>(class_name)*/
+    dispatch_(pool, class_name)/*,
+    track<resubscriber<Args...>>(class_name)*/
 {
 }
 
 template <typename... Args>
 resubscriber<Args...>::~resubscriber()
 {
-    BITCOIN_ASSERT_MSG(stopped_, "resubscriber not stopped");
     BITCOIN_ASSERT_MSG(subscriptions_.empty(), "resubscriber not cleared");
 }
 
