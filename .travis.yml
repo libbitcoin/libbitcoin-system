@@ -11,11 +11,11 @@ language:
 os:
     - osx
     - linux
-    
+
 compiler:
     - clang
     - gcc
-    
+
 env:
     - LINK=static
     - LINK=dynamic
@@ -86,6 +86,6 @@ after_success:
     - if [[ $LINUX && $GCC   && $STATIC  ]]; then lcov --directory . --capture --output-file coverage.info; fi
     - if [[ $LINUX && $GCC   && $STATIC  ]]; then lcov --remove coverage.info "/usr/*" "$TRAVIS_BUILD_DIR/my-prefix/*" "my-build/*" "examples/*" "test/*" --output-file coverage.info; fi
     - if [[ $LINUX && $GCC   && $STATIC  ]]; then lcov --list coverage.info; fi
-    
+
     # Upload coverage info to coveralls service (--repo-token <private coveralls repo token>).
     - if [[ $LINUX && $GCC   && $STATIC  ]]; then coveralls-lcov coverage.info; fi

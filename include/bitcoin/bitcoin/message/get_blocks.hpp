@@ -55,7 +55,7 @@ public:
 
     // 10 sequential hashes, then exponential samples until reaching genesis.
     block_locator start_hashes;
-    hash_digest hash_stop;
+    hash_digest stop_hash;
 };
 
 BC_API bool operator==(const get_blocks& left, const get_blocks& right);

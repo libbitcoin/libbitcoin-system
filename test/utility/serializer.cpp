@@ -85,6 +85,23 @@ BOOST_AUTO_TEST_CASE(roundtrip_byte)
     BOOST_REQUIRE_EQUAL(false, !source);
 }
 
+BOOST_AUTO_TEST_CASE(roundtrip_error_code)
+{
+    const code expected(error::blockchain_reorganized);
+    data_chunk data(4);
+    auto source = make_deserializer(data.begin(), data.end());
+    auto sink = make_serializer(data.begin());
+
+    sink.write_error_code(expected);
+    auto result = source.read_error_code();
+
+    BOOST_REQUIRE_EQUAL(expected, result);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
+    BOOST_REQUIRE_EQUAL(false, !sink);
+    BOOST_REQUIRE_EQUAL(false, !source);
+}
+
 BOOST_AUTO_TEST_CASE(roundtrip_2_bytes_little_endian)
 {
     const uint16_t expected = 43707;

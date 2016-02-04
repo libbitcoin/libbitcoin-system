@@ -21,6 +21,7 @@
 #define LIBBITCOIN_CHAIN_BLOCK_HPP
 
 #include <istream>
+#include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/header.hpp>
@@ -36,6 +37,8 @@ class BC_API block
 {
 public:
     typedef std::vector<block> list;
+    typedef std::shared_ptr<block> ptr;
+    typedef std::vector<ptr> ptr_list;
 
     static block factory_from_data(const data_chunk& data);
     static block factory_from_data(std::istream& stream);
@@ -58,10 +61,6 @@ public:
     chain::header header;
     transaction::list transactions;
 };
-
-// A list of indices. Used for creating block_locator objects or
-// storing list of unconfirmed input indexes in tx pool.
-typedef std::vector<size_t> index_list;
 
 } // namspace chain
 } // namspace libbitcoin

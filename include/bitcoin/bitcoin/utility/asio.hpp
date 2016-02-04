@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_ASIO_HPP
-#define LIBBITCOIN_NETWORK_ASIO_HPP
+#ifndef LIBBITCOIN_ASIO_HPP
+#define LIBBITCOIN_ASIO_HPP
 
 #include <memory>
 #include <boost/asio.hpp>
@@ -39,6 +39,10 @@ typedef boost::asio::ip::tcp::endpoint endpoint;
 typedef boost::asio::io_service service;
 typedef boost::asio::deadline_timer timer;
 typedef boost::posix_time::time_duration duration;
+typedef boost::posix_time::hours hours;
+typedef boost::posix_time::minutes minutes;
+typedef boost::posix_time::seconds seconds;
+typedef boost::posix_time::milliseconds milliseconds;
 
 typedef tcp::socket socket;
 typedef tcp::acceptor acceptor;

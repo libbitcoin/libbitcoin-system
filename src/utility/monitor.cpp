@@ -17,26 +17,29 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_LOGGING_HPP
-#define LIBBITCOIN_NETWORK_LOGGING_HPP
+#include <bitcoin/bitcoin/utility/monitor.hpp>
 
-#include <fstream>
-#include <iostream>
-#include <bitcoin/bitcoin/compat.hpp>
-#include <bitcoin/bitcoin/define.hpp>
+#include <cstddef>
+#include <string>
 
 namespace libbitcoin {
-namespace network {
 
-//// Constant for logging file open mode (append output).
-BC_CONSTEXPR std::ofstream::openmode log_open_mode =
-    std::ofstream::out | std::ofstream::app;
+monitor::monitor(count_ptr counter, const std::string& name)
+  : counter_(counter), name_(name)
+{
+    trace(++(*counter_), "+");
+}
 
-/// Set up global logging.
-BC_API void initialize_logging(std::ofstream& debug, std::ofstream& error,
-    std::ostream& output_stream, std::ostream& error_stream);
+monitor::~monitor()
+{
+    trace(--(*counter_), "-");
+}
 
-} // namespace network
-} // namespace libbitcoin
-
+void monitor::trace(size_t count, const std::string& action) const
+{
+#ifndef NDEBUG
+    ////log::debug(LOG_TRACK) << action << " " << name_ << " {" << count << "}";
 #endif
+}
+
+} // namespace libbitcoin

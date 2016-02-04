@@ -189,6 +189,11 @@ payment_address& payment_address::operator=(const payment_address& other)
     return *this;
 }
 
+bool payment_address::operator<(const payment_address& other) const
+{
+    return encoded() < other.encoded();
+}
+
 bool payment_address::operator==(const payment_address& other) const
 {
     return valid_ == other.valid_ && version_ == other.version_ &&

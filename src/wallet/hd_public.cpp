@@ -257,6 +257,11 @@ hd_public& hd_public::operator=(const hd_public& other)
     return *this;
 }
 
+bool hd_public::operator<(const hd_public& other) const
+{
+    return encoded() < other.encoded();
+}
+
 bool hd_public::operator==(const hd_public& other) const
 {
     return valid_ == other.valid_ && chain_ == other.chain_ &&

@@ -55,7 +55,7 @@ headers::headers()
 {
 }
 
-headers::headers(const std::initializer_list<chain::header> elements)
+headers::headers(const std::initializer_list<chain::header>& elements)
 {
     this->elements.insert(this->elements.end(), elements.begin(),
         elements.end());

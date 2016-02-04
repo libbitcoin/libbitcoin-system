@@ -49,11 +49,11 @@ get_headers::get_headers()
 {
 }
 
-get_headers::get_headers(const block_locator start_hashes,
-    const hash_digest hash_stop)
+get_headers::get_headers(const block_locator& start_hashes,
+    const hash_digest& stop_hash)
 {
     this->start_hashes = start_hashes;
-    this->hash_stop = hash_stop;
+    this->stop_hash = stop_hash;
 }
 
 } // end message

@@ -48,6 +48,7 @@ struct BC_API hd_lineage
     uint32_t parent_fingerprint;
     uint32_t child_number;
 
+    bool operator<(const hd_lineage& other) const;
     bool operator==(const hd_lineage& other) const;
     bool operator!=(const hd_lineage& other) const;
 };
@@ -74,6 +75,7 @@ public:
     hd_public(const std::string& encoded, uint32_t prefix);
 
     /// Operators.
+    bool operator<(const hd_public& other) const;
     bool operator==(const hd_public& other) const;
     bool operator!=(const hd_public& other) const;
     hd_public& operator=(const hd_public& other);

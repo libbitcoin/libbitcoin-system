@@ -40,7 +40,7 @@ public:
     static get_data factory_from_data(reader& source);
 
     get_data();
-    get_data(const std::initializer_list<inventory_vector> elements);
+    get_data(const std::initializer_list<inventory_vector>& elements);
 
     static const std::string command;
 };

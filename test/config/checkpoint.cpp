@@ -73,21 +73,6 @@ BOOST_AUTO_TEST_CASE(checkpoint__construct__digest__expected)
     BOOST_REQUIRE_EQUAL(encode_hash(genesis.hash()), expected_hash);
 }
 
-BOOST_AUTO_TEST_CASE(checkpoint__construct__max_height__expected)
-{
-#if defined(UINTPTR_MAX) && defined(UINT64_MAX) && defined (UINT32_MAX)
-#if UINTPTR_MAX == UINT64_MAX
-    // 2^64-1
-    const auto check = checkpoint(CHECKPOINT_HASH_A ":18446744073709551615");
-    BOOST_REQUIRE_EQUAL(check.height(), 18446744073709551615u);
-#elif UINTPTR_MAX == UINT32_MAX
-    // 2^32-1
-    const auto check = checkpoint(CHECKPOINT_HASH_A ":4294967295");
-    BOOST_REQUIRE_EQUAL(check.height(), 4294967295u);
-#endif
-#endif
-}
-
 BOOST_AUTO_TEST_CASE(checkpoint__construct__invalid_height_value__throws_invalid_option_value)
 {
     // 2^64

@@ -43,7 +43,7 @@ public:
     static inventory factory_from_data(reader& source);
 
     inventory();
-    inventory(const std::initializer_list<inventory_vector> elements);
+    inventory(const std::initializer_list<inventory_vector>& elements);
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);

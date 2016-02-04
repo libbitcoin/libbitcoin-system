@@ -28,16 +28,18 @@
 
 namespace libbitcoin {
 
+/// TODO: move to script folder.
 class evaluation_context
 {
 public:
-    data_chunk pop_primary();
+    data_chunk pop_stack();
 
-    chain::operation::stack::const_iterator codehash_begin;
+    chain::operation::stack::const_iterator code_begin;
     uint64_t operation_counter;
-    data_stack primary;
-    data_stack secondary;
+    data_stack stack;
+    data_stack alternate;
     conditional_stack conditional;
+    uint32_t flags;
 };
 
 }

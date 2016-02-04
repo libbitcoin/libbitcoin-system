@@ -25,7 +25,8 @@
 namespace libbitcoin {
 namespace message {
 
-class BC_API get_headers : public get_blocks
+class BC_API get_headers
+  : public get_blocks
 {
 public:
     static get_headers factory_from_data(const data_chunk& data);
@@ -33,7 +34,8 @@ public:
     static get_headers factory_from_data(reader& source);
 
     get_headers();
-    get_headers(const block_locator start_hashes, const hash_digest hash_stop);
+    get_headers(const block_locator& start_hashes,
+        const hash_digest& stop_hash);
 
     static const std::string command;
 };

@@ -41,6 +41,7 @@ public:
     ek_token(const ek_token& other);
 
     /// Operators.
+    bool operator<(const ek_token& other) const;
     bool operator==(const ek_token& other) const;
     bool operator!=(const ek_token& other) const;
     ek_token& operator=(const ek_token& other);

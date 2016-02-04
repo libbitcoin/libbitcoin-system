@@ -41,7 +41,7 @@ static BC_CONSTEXPR size_t checksum_size = sizeof(uint32_t);
  */
 template <size_t Size>
 bool build_checked_array(byte_array<Size>& out,
-    std::initializer_list<data_slice> slices);
+    const std::initializer_list<data_slice>& slices);
 
 /**
  * Appends a four-byte checksum into the end of an array.

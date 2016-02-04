@@ -20,7 +20,12 @@
 #ifndef LIBBITCOIN_DESERIALIZER_HPP
 #define LIBBITCOIN_DESERIALIZER_HPP
 
+#include <cstddef>
 #include <cstdint>
+#include <string>
+#include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 
 namespace libbitcoin {
@@ -58,6 +63,7 @@ public:
     uint8_t read_byte();
     data_chunk read_data(size_t size);
     size_t read_data(uint8_t* data, size_t size);
+    code read_error_code();
     data_chunk read_data_to_eof();
     hash_digest read_hash();
     short_hash read_short_hash();

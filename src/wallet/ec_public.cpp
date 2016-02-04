@@ -75,7 +75,7 @@ ec_public::ec_public(const ec_compressed& point, bool compress)
 
 bool ec_public::is_point(data_slice decoded)
 {
-    return bc::is_point(decoded);
+    return bc::is_public_key(decoded);
 }
 
 // Factories.
@@ -210,6 +210,11 @@ ec_public& ec_public::operator=(const ec_public& other)
     version_ = other.version_;
     point_ = other.point_;
     return *this;
+}
+
+bool ec_public::operator<(const ec_public& other) const
+{
+    return encoded() < other.encoded();
 }
 
 bool ec_public::operator==(const ec_public& other) const

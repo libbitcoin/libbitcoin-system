@@ -24,11 +24,12 @@
 
 namespace libbitcoin {
 
+/// TODO: move to script folder.
 class conditional_stack
 {
 public:
     bool closed() const;
-    bool has_failed_branches() const;
+    bool succeeded() const;
     void clear();
     void open(bool value);
     void else_();

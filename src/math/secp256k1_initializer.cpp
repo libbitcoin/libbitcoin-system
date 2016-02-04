@@ -29,7 +29,7 @@ secp256k1_signing signing;
 secp256k1_verification verification;
 
 // Static helper for use with std::call_once.
-void secp256k1_initializer::set_context(secp256k1_context_t** context,
+void secp256k1_initializer::set_context(secp256k1_context** context,
     int flags)
 {
     *context = secp256k1_context_create(flags);
@@ -49,7 +49,7 @@ secp256k1_initializer::~secp256k1_initializer()
 }
 
 // Get the curve context and initialize on first use.
-secp256k1_context_t* secp256k1_initializer::context()
+secp256k1_context* secp256k1_initializer::context()
 {
     std::call_once(mutex_, set_context, &context_, flags_);
     return context_;
@@ -57,15 +57,14 @@ secp256k1_context_t* secp256k1_initializer::context()
 
 // Concrete type for signing init.
 secp256k1_signing::secp256k1_signing()
-    : secp256k1_initializer(SECP256K1_CONTEXT_SIGN)
+  : secp256k1_initializer(SECP256K1_CONTEXT_SIGN)
 {
 }
 
 // Concrete type for verification init.
 secp256k1_verification::secp256k1_verification()
-    : secp256k1_initializer(SECP256K1_CONTEXT_VERIFY)
+  : secp256k1_initializer(SECP256K1_CONTEXT_VERIFY)
 {
 }
 
 } // namespace libbitcoin
-

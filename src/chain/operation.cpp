@@ -186,12 +186,12 @@ uint64_t operation::serialized_size() const
     return size;
 }
 
-std::string operation::to_string() const
+std::string operation::to_string(uint32_t flags) const
 {
     std::ostringstream ss;
 
     if (data.empty())
-        ss << opcode_to_string(code);
+        ss << opcode_to_string(code, flags);
     else
         ss << "[ " << encode_base16(data) << " ]";
 
@@ -300,7 +300,7 @@ bool operation::is_pay_multisig_pattern(const operation::stack& ops)
         return false;
 
     for (auto op = ops.begin() + 1; op != ops.end() - 2; ++op)
-        if (!is_point(op->data))
+        if (!is_public_key(op->data))
             return false;
 
     return true;
@@ -310,7 +310,7 @@ bool operation::is_pay_public_key_pattern(const operation::stack& ops)
 {
     return ops.size() == 2
         && ops[0].code == opcode::special
-        && is_point(ops[0].data)
+        && is_public_key(ops[0].data)
         && ops[1].code == opcode::checksig;
 }
 
@@ -352,7 +352,8 @@ bool operation::is_sign_public_key_pattern(const operation::stack& ops)
 
 bool operation::is_sign_key_hash_pattern(const operation::stack& ops)
 {
-    return ops.size() == 2 && is_push_only(ops) && is_point(ops.back().data);
+    return ops.size() == 2 && is_push_only(ops) &&
+        is_public_key(ops.back().data);
 }
 
 bool operation::is_sign_script_hash_pattern(const operation::stack& ops)
@@ -394,7 +395,7 @@ operation::stack operation::to_null_data_pattern(data_slice data)
 
 operation::stack operation::to_pay_public_key_pattern(data_slice point)
 {
-    if (!is_point(point))
+    if (!is_public_key(point))
         return operation::stack();
 
     return operation::stack
@@ -438,7 +439,7 @@ operation::stack operation::to_pay_multisig_pattern(uint8_t signatures,
 
     for (const auto point: points)
     {
-        if (!is_point(point))
+        if (!is_public_key(point))
             return operation::stack();
 
         ops.push_back({ opcode::special, point });

@@ -31,55 +31,7 @@
     #define DEBUG_ONLY(expression) expression
 #endif
 
-#define CONSTRUCT_TRACK(class_name, log_name) \
-    track<class_name>(#class_name, log_name)
-
-#ifdef NDEBUG
-    #define INITIALIZE_TRACK(class_name)
-
-    template <class Shared>
-    class track
-    {
-    protected:
-        track(const std::string&, const std::string&)
-        {
-        }
-    };
-#else
-    #include <atomic>
-    #include <cstddef>
-    #include <string>
-    #include <bitcoin/bitcoin/utility/log.hpp>
-
-    #define INITIALIZE_TRACK(class_name) \
-        template <> \
-        track<class_name>::counter track<class_name>::instances(0);
-
-    template <class Shared>
-    class track
-    {
-    public:
-        typedef std::atomic<size_t> counter;
-        static counter instances;
-
-    protected:
-        track(const std::string& class_name, const std::string& log_name)
-          : class_(class_name), log_(log_name)
-        {
-            bc::log::debug(log_)
-                << class_ << "(" << ++instances << ")";
-        }
-
-        ~track()
-        {
-            bc::log::debug(log_)
-                << "~" << class_ << "(" << --instances << ")";
-        }
-
-    private:
-        const std::string class_;
-        const std::string log_;
-    };
-#endif
+#include <bitcoin/bitcoin/utility/monitor.hpp>
+#include <bitcoin/bitcoin/utility/track.hpp>
 
 #endif

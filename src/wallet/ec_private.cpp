@@ -213,6 +213,11 @@ ec_private& ec_private::operator=(const ec_private& other)
     return *this;
 }
 
+bool ec_private::operator<(const ec_private& other) const
+{
+    return encoded() < other.encoded();
+}
+
 bool ec_private::operator==(const ec_private& other) const
 {
     return valid_ == other.valid_ && compress_ == other.compress_ &&

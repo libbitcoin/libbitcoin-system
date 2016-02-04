@@ -25,66 +25,121 @@
 #include <utility>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/utility/delegates.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
+#include <bitcoin/bitcoin/utility/work.hpp>
 
 namespace libbitcoin {
-
-using std::placeholders::_1;
 
 #define FORWARD_ARGS(args) \
     std::forward<Args>(args)...
 #define FORWARD_HANDLER(handler) \
     std::forward<Handler>(handler)
-#define BIND_ARGS(args) \
-    std::bind(FORWARD_ARGS(args))
 #define BIND_HANDLER(handler, args) \
     std::bind(FORWARD_HANDLER(handler), FORWARD_ARGS(args))
-#define BIND_ELEMENT(args, call, element) \
-    std::bind(FORWARD_ARGS(args), call, element)
+#define BIND_ARGS(args) \
+    std::bind(FORWARD_ARGS(args))
+#define BIND_RACE(args, call) \
+    std::bind(FORWARD_ARGS(args), call)
+#define BIND_ELEMENT(args, element, call) \
+    std::bind(FORWARD_ARGS(args), element, call)
 
-/**
- * Convenience class for objects wishing to synchronize operations.
- * If the ios service is stopped jobs will not be dispatched.
- */
+/// Convenience class for objects wishing to synchronize operations.
+/// If the ios service is stopped jobs will not be dispatched.
 class BC_API dispatcher
 {
 public:
-    dispatcher(threadpool& pool);
+    dispatcher(threadpool& pool, const std::string& name);
 
-    /**
-     * Posts a job to the service. Concurrent and not ordered.
-     */
+    /// Invokes a job on the current thread.
+    template <typename... Args>
+    static void bound(Args&&... args)
+    {
+        BIND_ARGS(args)();
+    }
+
+    /// Posts a job to the service. Concurrent and not ordered.
     template <typename... Args>
     void concurrent(Args&&... args)
     {
-        service_.post(BIND_ARGS(args));
+        heap_.concurrent(BIND_ARGS(args));
     }
 
-    /**
-     * Post a job to the strand. Ordered and not concurrent.
-     */
+    /// Post a job to the strand. Ordered and not concurrent.
     template <typename... Args>
     void ordered(Args&&... args)
     {
-        strand_.post(BIND_ARGS(args));
+        heap_.ordered(BIND_ARGS(args));
     }
 
-    /**
-     * Posts a strand-wrapped job to the service. Not ordered or concurrent.
-     * The wrap provides non-concurrency, order is prevented by service post.
-     */
+    /// Posts a strand-wrapped job to the service. Not ordered or concurrent.
+    /// The wrap provides non-concurrency, order is prevented by service post.
     template <typename... Args>
     void unordered(Args&&... args)
     {
-        service_.post(strand_.wrap(BIND_ARGS(args)));
+        heap_.unordered(BIND_ARGS(args));
     }
 
-    /**
-     * Executes the job against each member of a collection concurrently.
-     */
+    /// Returns a delegate that will execute the job on the current thread.
+    template <typename... Args>
+    static auto bound_delegate(Args&&... args) ->
+        delegates::bound<decltype(BIND_ARGS(args))>
+    {
+        return
+        {
+            BIND_ARGS(args)
+        };
+    }
+
+    /// Returns a delegate that will post the job via the service.
+    template <typename... Args>
+    auto concurrent_delegate(Args&&... args) ->
+        delegates::concurrent<decltype(BIND_ARGS(args))>
+    {
+        return
+        {
+            BIND_ARGS(args),
+            heap_
+        };
+    }
+
+    /// Returns a delegate that will post the job via the strand.
+    template <typename... Args>
+    auto ordered_delegate(Args&&... args) ->
+        delegates::ordered<decltype(BIND_ARGS(args))>
+    {
+        return
+        {
+            BIND_ARGS(args),
+            heap_
+        };
+    }
+
+    /// Returns a delegate that will post a wrapped job via the service.
+    template <typename... Args>
+    auto unordered_delegate(Args&&... args) ->
+        delegates::unordered<decltype(BIND_ARGS(args))>
+    {
+        return
+        {
+            BIND_ARGS(args),
+            heap_
+        };
+    }
+
+    /// Executes multiple identical jobs concurrently until one completes.
+    template <typename Count, typename Handler, typename... Args>
+    void race(Count count, const std::string& name, Handler&& handler,
+        Args&&... args)
+    {
+        const auto call = synchronize(FORWARD_HANDLER(handler), 1, name);
+
+        for (Count iteration = 0; iteration < count; ++iteration)
+            concurrent(BIND_RACE(args, call));
+    }
+
+    /// Executes the job against each member of a collection concurrently.
     template <typename Element, typename Handler, typename... Args>
     void parallel(const std::vector<Element>& collection,
         const std::string& name, Handler&& handler, Args&&... args)
@@ -96,9 +151,7 @@ public:
             concurrent(BIND_ELEMENT(args, element, call));
     }
 
-    /**
-     * Disperses the job against each member of a collection without order.
-     */
+    /// Disperses the job against each member of a collection without order.
     template <typename Element, typename Handler, typename... Args>
     void disperse(const std::vector<Element>& collection,
         const std::string& name, Handler&& handler, Args&&... args)
@@ -110,9 +163,7 @@ public:
             unordered(BIND_ELEMENT(args, element, call));
     }
 
-    /**
-     * Disperses the job against each member of a collection with order.
-     */
+    /// Disperses the job against each member of a collection with order.
     template <typename Element, typename Handler, typename... Args>
     void serialize(const std::vector<Element>& collection,
         const std::string& name, Handler&& handler, Args&&... args)
@@ -124,60 +175,16 @@ public:
             ordered(BIND_ELEMENT(args, element, call));
     }
 
-    /**
-     * Returns a delegate that will post the job via the service.
-     */
-    template <typename Handler, typename... Args>
-    auto concurrent_delegate(Handler&& handler, Args&&... args) ->
-        delegate::concurrent<decltype(BIND_HANDLER(handler, args))>
-    {
-        return
-        {
-            BIND_HANDLER(handler, args),
-            service_
-        };
-    }
-
-    /**
-     * Returns a delegate that will post the job via the strand.
-     */
-    template <typename Handler, typename... Args>
-    auto ordered_delegate(Handler&& handler, Args&&... args) ->
-        delegate::ordered<decltype(BIND_HANDLER(handler, args))>
-    {
-        return
-        {
-            BIND_HANDLER(handler, args),
-            strand_
-        };
-    }
-
-    /**
-     * Returns a delegate that will post a wrapped job via the service.
-     */
-    template <typename Handler, typename... Args>
-    auto unordered_delegate(Handler&& handler, Args&&... args) ->
-        delegate::unordered<decltype(BIND_HANDLER(handler, args))>
-    {
-        return
-        {
-            BIND_HANDLER(handler, args),
-            service_,
-            strand_
-        };
-    }
-
 private:
-    asio::service& service_;
-    asio::service::strand strand_;
+    work heap_;
 };
 
 #undef FORWARD_ARGS
 #undef FORWARD_HANDLER
-#undef BIND_ARGS
 #undef BIND_HANDLER
+#undef BIND_ARGS
+#undef BIND_RACE
 #undef BIND_ELEMENT
-
 
 } // namespace libbitcoin
 

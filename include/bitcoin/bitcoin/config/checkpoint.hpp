@@ -43,6 +43,21 @@ public:
      * boost::program_options default_value.
      */
     typedef std::vector<checkpoint> list;
+
+    /**
+     * Sort a list of checkpoints in place.
+     * @param[in]  checks  The list of checkpoints.
+     */
+    static list& sort(list& checks);
+    
+    /**
+     * Validate a checkpoint against a list of checkpoints.
+     * @param[in]  hash    The hash of the checkpoint.
+     * @param[in]  height  The height of checkpoint.
+     * @param[in]  checks  The list of checkpoints.
+     */
+    static bool validate(const hash_digest& hash, const size_t height,
+        const list& checks);
     
     /**
      * Default constructor.

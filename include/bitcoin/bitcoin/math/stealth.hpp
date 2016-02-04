@@ -45,7 +45,7 @@ BC_API bool create_ephemeral_key(ec_secret& out_secret,
 /// Create an ephemeral public key from the provided seed with the
 /// null-data script data value that produces the desired filter prefix.
 BC_API bool create_stealth_data(data_chunk& out_stealth_data,
-    ec_secret& out_secret, const binary_type& filter, const data_chunk& seed);
+    ec_secret& out_secret, const binary& filter, const data_chunk& seed);
 
 /// Extract the stealth ephemeral public key from an output script.
 BC_API bool extract_ephemeral_key(ec_compressed& out_ephemeral_public_key,

@@ -61,7 +61,7 @@ pong::pong()
 {
 }
 
-pong::pong(const uint64_t nonce)
+pong::pong(uint64_t nonce)
   : nonce_(nonce)
 {
 }

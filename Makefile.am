@@ -53,6 +53,7 @@ src_libbitcoin_la_SOURCES = \
     src/config/directory.cpp \
     src/config/endpoint.cpp \
     src/config/parameter.cpp \
+    src/config/parser.cpp \
     src/config/printer.cpp \
     src/formats/base10.cpp \
     src/formats/base16.cpp \
@@ -76,6 +77,8 @@ src_libbitcoin_la_SOURCES = \
     src/math/external/hmac_sha256.h \
     src/math/external/hmac_sha512.c \
     src/math/external/hmac_sha512.h \
+    src/math/external/lax_der_parsing.c \
+    src/math/external/lax_der_parsing.h \
     src/math/external/pbkdf2_sha256.c \
     src/math/external/pbkdf2_sha256.h \
     src/math/external/pkcs5_pbkdf2.c \
@@ -115,28 +118,6 @@ src_libbitcoin_la_SOURCES = \
     src/message/reject.cpp \
     src/message/verack.cpp \
     src/message/version.cpp \
-    src/network/acceptor.cpp \
-    src/network/channel.cpp \
-    src/network/connections.cpp \
-    src/network/connector.cpp \
-    src/network/hosts.cpp \
-    src/network/logging.cpp \
-    src/network/message_subscriber.cpp \
-    src/network/p2p.cpp \
-    src/network/pending.cpp \
-    src/network/protocol_address.cpp \
-    src/network/protocol_base.cpp \
-    src/network/protocol_events.cpp \
-    src/network/protocol_ping.cpp \
-    src/network/protocol_seed.cpp \
-    src/network/protocol_timer.cpp \
-    src/network/protocol_version.cpp \
-    src/network/proxy.cpp \
-    src/network/session.cpp \
-    src/network/session_inbound.cpp \
-    src/network/session_manual.cpp \
-    src/network/session_outbound.cpp \
-    src/network/session_seed.cpp \
     src/unicode/console_streambuf.cpp \
     src/unicode/ifstream.cpp \
     src/unicode/ofstream.cpp \
@@ -153,12 +134,14 @@ src_libbitcoin_la_SOURCES = \
     src/utility/evaluation_context.hpp \
     src/utility/istream_reader.cpp \
     src/utility/log.cpp \
+    src/utility/monitor.cpp \
     src/utility/ostream_writer.cpp \
     src/utility/random.cpp \
     src/utility/string.cpp \
     src/utility/thread.cpp \
     src/utility/threadpool.cpp \
     src/utility/variable_uint_size.cpp \
+    src/utility/work.cpp \
     src/wallet/bitcoin_uri.cpp \
     src/wallet/dictionary.cpp \
     src/wallet/ec_private.cpp \
@@ -237,7 +220,7 @@ test_libbitcoin_test_SOURCES = \
     test/math/big_number.cpp \
     test/math/big_number.hpp \
     test/math/checksum.cpp \
-    test/math/ec_keys.cpp \
+    test/math/elliptic_curve.cpp \
     test/math/hash.cpp \
     test/math/hash.hpp \
     test/math/hash_number.cpp \
@@ -268,7 +251,6 @@ test_libbitcoin_test_SOURCES = \
     test/message/reject.cpp \
     test/message/verack.cpp \
     test/message/version.cpp \
-    test/network/p2p.cpp \
     test/unicode/unicode.cpp \
     test/unicode/unicode_istream.cpp \
     test/unicode/unicode_ostream.cpp \
@@ -333,6 +315,7 @@ include_bitcoin_bitcoin_config_HEADERS = \
     include/bitcoin/bitcoin/config/directory.hpp \
     include/bitcoin/bitcoin/config/endpoint.hpp \
     include/bitcoin/bitcoin/config/parameter.hpp \
+    include/bitcoin/bitcoin/config/parser.hpp \
     include/bitcoin/bitcoin/config/printer.hpp
 
 include_bitcoin_bitcoin_formatsdir = ${includedir}/bitcoin/bitcoin/formats
@@ -362,6 +345,7 @@ include_bitcoin_bitcoin_impl_utility_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/endian.ipp \
     include/bitcoin/bitcoin/impl/utility/istream_reader.ipp \
     include/bitcoin/bitcoin/impl/utility/ostream_writer.ipp \
+    include/bitcoin/bitcoin/impl/utility/resubscriber.ipp \
     include/bitcoin/bitcoin/impl/utility/serializer.ipp \
     include/bitcoin/bitcoin/impl/utility/subscriber.ipp
 
@@ -405,34 +389,6 @@ include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/verack.hpp \
     include/bitcoin/bitcoin/message/version.hpp
 
-include_bitcoin_bitcoin_networkdir = ${includedir}/bitcoin/bitcoin/network
-include_bitcoin_bitcoin_network_HEADERS = \
-    include/bitcoin/bitcoin/network/acceptor.hpp \
-    include/bitcoin/bitcoin/network/asio.hpp \
-    include/bitcoin/bitcoin/network/channel.hpp \
-    include/bitcoin/bitcoin/network/connections.hpp \
-    include/bitcoin/bitcoin/network/connector.hpp \
-    include/bitcoin/bitcoin/network/hosts.hpp \
-    include/bitcoin/bitcoin/network/logging.hpp \
-    include/bitcoin/bitcoin/network/message_subscriber.hpp \
-    include/bitcoin/bitcoin/network/network_settings.hpp \
-    include/bitcoin/bitcoin/network/p2p.hpp \
-    include/bitcoin/bitcoin/network/pending.hpp \
-    include/bitcoin/bitcoin/network/protocol_address.hpp \
-    include/bitcoin/bitcoin/network/protocol_base.hpp \
-    include/bitcoin/bitcoin/network/protocol_events.hpp \
-    include/bitcoin/bitcoin/network/protocol_ping.hpp \
-    include/bitcoin/bitcoin/network/protocol_seed.hpp \
-    include/bitcoin/bitcoin/network/protocol_timer.hpp \
-    include/bitcoin/bitcoin/network/protocol_version.hpp \
-    include/bitcoin/bitcoin/network/proxy.hpp \
-    include/bitcoin/bitcoin/network/session.hpp \
-    include/bitcoin/bitcoin/network/session_inbound.hpp \
-    include/bitcoin/bitcoin/network/session_manual.hpp \
-    include/bitcoin/bitcoin/network/session_outbound.hpp \
-    include/bitcoin/bitcoin/network/session_seed.hpp \
-    include/bitcoin/bitcoin/network/shared_const_buffer.hpp
-
 include_bitcoin_bitcoin_unicodedir = ${includedir}/bitcoin/bitcoin/unicode
 include_bitcoin_bitcoin_unicode_HEADERS = \
     include/bitcoin/bitcoin/unicode/console_streambuf.hpp \
@@ -446,7 +402,9 @@ include_bitcoin_bitcoin_unicode_HEADERS = \
 include_bitcoin_bitcoin_utilitydir = ${includedir}/bitcoin/bitcoin/utility
 include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/array_slice.hpp \
+    include/bitcoin/bitcoin/utility/asio.hpp \
     include/bitcoin/bitcoin/utility/assert.hpp \
+    include/bitcoin/bitcoin/utility/atomic.hpp \
     include/bitcoin/bitcoin/utility/binary.hpp \
     include/bitcoin/bitcoin/utility/collection.hpp \
     include/bitcoin/bitcoin/utility/container_sink.hpp \
@@ -457,13 +415,16 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/delegates.hpp \
     include/bitcoin/bitcoin/utility/deserializer.hpp \
     include/bitcoin/bitcoin/utility/dispatcher.hpp \
+    include/bitcoin/bitcoin/utility/enable_shared_from_base.hpp \
     include/bitcoin/bitcoin/utility/endian.hpp \
     include/bitcoin/bitcoin/utility/exceptions.hpp \
     include/bitcoin/bitcoin/utility/istream_reader.hpp \
     include/bitcoin/bitcoin/utility/log.hpp \
+    include/bitcoin/bitcoin/utility/monitor.hpp \
     include/bitcoin/bitcoin/utility/ostream_writer.hpp \
     include/bitcoin/bitcoin/utility/random.hpp \
     include/bitcoin/bitcoin/utility/reader.hpp \
+    include/bitcoin/bitcoin/utility/resubscriber.hpp \
     include/bitcoin/bitcoin/utility/serializer.hpp \
     include/bitcoin/bitcoin/utility/string.hpp \
     include/bitcoin/bitcoin/utility/subscriber.hpp \
@@ -471,7 +432,9 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/thread.hpp \
     include/bitcoin/bitcoin/utility/threadpool.hpp \
     include/bitcoin/bitcoin/utility/timer.hpp \
+    include/bitcoin/bitcoin/utility/track.hpp \
     include/bitcoin/bitcoin/utility/variable_uint_size.hpp \
+    include/bitcoin/bitcoin/utility/work.hpp \
     include/bitcoin/bitcoin/utility/writer.hpp
 
 include_bitcoin_bitcoin_walletdir = ${includedir}/bitcoin/bitcoin/wallet

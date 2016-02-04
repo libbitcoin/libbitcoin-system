@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 
 #include <functional>
+#include <mutex>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -30,12 +31,14 @@ namespace libbitcoin {
 
 using std::placeholders::_1;
 
+// This protects timer_ against concurrent acccess with no chance of deadlock.
 // This can be dereferenced with an outstanding callback because the timer
 // closure captures an instance of this class and the callback.
 // This is guaranteed to call handler exactly once unless canceled or reset.
 deadline::deadline(threadpool& pool, const asio::duration duration)
-  : duration_(duration), timer_(pool.service()),
-    CONSTRUCT_TRACK(deadline, LOG_NETWORK)
+  : duration_(duration),
+    timer_(pool.service()),
+    CONSTRUCT_TRACK(deadline)
 {
 }
 
@@ -46,27 +49,36 @@ void deadline::start(handler handle)
 
 void deadline::start(handler handle, const asio::duration duration)
 {
-    cancel();
-    timer_.expires_from_now(duration);
-    timer_.async_wait(
+    const auto timer_handler =
         std::bind(&deadline::handle_timer,
-            shared_from_this(), _1, handle));
+            shared_from_this(), _1, handle);
+
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    timer_.cancel();
+    timer_.expires_from_now(duration);
+
+    // async_wait will not invoke the handler within this function.
+    timer_.async_wait(timer_handler);
+    ///////////////////////////////////////////////////////////////////////////
 }
 
-// Destruct will not happen until the timer is canceled or expires.
 // Cancellation calls handle_timer with asio::error::operation_aborted.
-void deadline::cancel()
+// We do not handle the cancelation result code, which will return success
+// in the case of a race in which the timer is already canceled.
+// We don't use strand because cancel must not change context.
+void deadline::stop()
 {
-    boost_code ec;
-    timer_.cancel(ec);
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(mutex_);
 
-    // If cancellation fails the call to handle_timer would be delayed until
-    // the timer actually fires. So there is no need to handle this error, it
-    // just results in a slower completion (and is very unlikely to occur).
-    BITCOIN_ASSERT(!ec);
+    timer_.cancel();
+    ///////////////////////////////////////////////////////////////////////////
 }
 
-// If the timer is canceled the callback is not fired.
 // If the timer expires the callback is fired with a success code.
 // If the timer fails the callback is fired with the normalized error code.
 void deadline::handle_timer(const boost_code& ec, handler handle) const

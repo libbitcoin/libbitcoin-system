@@ -32,9 +32,6 @@
 namespace libbitcoin {
 namespace message {
 
-/**
- * Ping message class.
- */
 class BC_API ping
   : public nonce_
 {

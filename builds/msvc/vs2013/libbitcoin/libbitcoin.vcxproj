@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="Globals">
-    <NuGetPackageImportStamp>efc3bd94</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>530f0611</NuGetPackageImportStamp>
     <PlatformToolset>CTP_Nov2013</PlatformToolset>
     <ProjectGuid>{39F60708-FF48-4C22-952D-43470866F684}</ProjectGuid>
     <ProjectName>libbitcoin</ProjectName>
@@ -86,6 +86,7 @@
     <ClCompile Include="..\..\..\..\src\config\directory.cpp" />
     <ClCompile Include="..\..\..\..\src\config\endpoint.cpp" />
     <ClCompile Include="..\..\..\..\src\config\parameter.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\parser.cpp" />
     <ClCompile Include="..\..\..\..\src\config\printer.cpp" />
     <ClCompile Include="..\..\..\..\src\constants.cpp" />
     <ClCompile Include="..\..\..\..\src\error.cpp" />
@@ -107,6 +108,7 @@
     <ClCompile Include="..\..\..\..\src\math\external\sha1.c" />
     <ClCompile Include="..\..\..\..\src\math\external\sha256.c" />
     <ClCompile Include="..\..\..\..\src\math\external\sha512.c" />
+    <ClCompile Include="..\..\..\..\src\math\external\lax_der_parsing.c" />
     <ClCompile Include="..\..\..\..\src\math\external\zeroize.c" />
     <ClCompile Include="..\..\..\..\src\math\hash.cpp" />
     <ClCompile Include="..\..\..\..\src\math\hash_number.cpp" />
@@ -139,28 +141,6 @@
     <ClCompile Include="..\..\..\..\src\message\ping.cpp" />
     <ClCompile Include="..\..\..\..\src\message\not_found.cpp" />
     <ClCompile Include="..\..\..\..\src\message\verack.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\acceptor.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\channel.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\connections.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\logging.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\message_subscriber.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\pending.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\protocol_base.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\protocol_events.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\protocol_timer.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\proxy.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\protocol_seed.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\protocol_version.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\hosts.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\connector.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\protocol_address.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\protocol_ping.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\p2p.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\session.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\session_inbound.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\session_manual.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\session_outbound.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\session_seed.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\console_streambuf.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\ifstream.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\ofstream.cpp" />
@@ -174,6 +154,7 @@
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\evaluation_context.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\istream_reader.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\monitor.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\random.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\log.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\ostream_writer.cpp" />
@@ -181,6 +162,7 @@
     <ClCompile Include="..\..\..\..\src\utility\thread.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\threadpool.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\variable_uint_size.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\work.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\dictionary.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\ec_public.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\ek_private.cpp" />
@@ -221,6 +203,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\directory.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\endpoint.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\parameter.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\parser.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\printer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\constants.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\define.hpp" />
@@ -266,31 +249,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\network_address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\not_found.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\verack.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\acceptor.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\asio.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\connections.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\logging.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\message_subscriber.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\network_settings.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\pending.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_events.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_timer.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\proxy.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_base.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_seed.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_version.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\hosts.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\connector.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_address.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_ping.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\p2p.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\session.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\session_inbound.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\session_manual.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\session_outbound.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\session_seed.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\shared_const_buffer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\console_streambuf.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\ifstream.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\ofstream.hpp" />
@@ -299,9 +257,14 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\unicode_ostream.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\unicode_streambuf.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\array_slice.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\asio.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\assert.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\atomic.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\deadline.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\delegates.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\enable_shared_from_base.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\monitor.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\resubscriber.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\synchronizer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\dispatcher.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\binary.hpp" />
@@ -324,7 +287,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\thread.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\threadpool.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\timer.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\track.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\variable_uint_size.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\work.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\writer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\version.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\bitcoin_uri.hpp" />
@@ -356,6 +321,7 @@
     <ClInclude Include="..\..\..\..\src\math\external\sha1.h" />
     <ClInclude Include="..\..\..\..\src\math\external\sha256.h" />
     <ClInclude Include="..\..\..\..\src\math\external\sha512.h" />
+    <ClInclude Include="..\..\..\..\src\math\external\lax_der_parsing.h" />
     <ClInclude Include="..\..\..\..\src\math\external\zeroize.h" />
     <ClInclude Include="..\..\..\..\src\utility\conditional_stack.hpp" />
     <ClInclude Include="..\..\..\..\src\utility\evaluation_context.hpp" />
@@ -378,6 +344,7 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\endian.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\istream_reader.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\ostream_writer.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\resubscriber.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\serializer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\subscriber.ipp" />
     <None Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_key.ipp" />
@@ -397,7 +364,7 @@
     <Import Project="..\..\..\..\..\..\nuget\boost_regex-vc120.1.56.0.0\build\native\boost_regex-vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost_regex-vc120.1.56.0.0\build\native\boost_regex-vc120.targets')" />
     <Import Project="..\..\..\..\..\..\nuget\boost_system-vc120.1.56.0.0\build\native\boost_system-vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost_system-vc120.1.56.0.0\build\native\boost_system-vc120.targets')" />
     <Import Project="..\..\..\..\..\..\nuget\boost.1.56.0.0\build\native\boost.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost.1.56.0.0\build\native\boost.targets')" />
-    <Import Project="..\..\..\..\..\..\nuget\secp256k1_vc120.0.1.0.8\build\native\secp256k1_vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\secp256k1_vc120.0.1.0.8\build\native\secp256k1_vc120.targets')" />
+    <Import Project="..\..\..\..\..\..\nuget\secp256k1_vc120.0.1.0.13\build\native\secp256k1_vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\secp256k1_vc120.0.1.0.13\build\native\secp256k1_vc120.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -410,6 +377,6 @@
     <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost_regex-vc120.1.56.0.0\build\native\boost_regex-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost_regex-vc120.1.56.0.0\build\native\boost_regex-vc120.targets'))" />
     <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost_system-vc120.1.56.0.0\build\native\boost_system-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost_system-vc120.1.56.0.0\build\native\boost_system-vc120.targets'))" />
     <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost.1.56.0.0\build\native\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost.1.56.0.0\build\native\boost.targets'))" />
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\secp256k1_vc120.0.1.0.8\build\native\secp256k1_vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\secp256k1_vc120.0.1.0.8\build\native\secp256k1_vc120.targets'))" />
+    <Error Condition="!Exists('..\..\..\..\..\..\nuget\secp256k1_vc120.0.1.0.13\build\native\secp256k1_vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\secp256k1_vc120.0.1.0.13\build\native\secp256k1_vc120.targets'))" />
   </Target>
 </Project>

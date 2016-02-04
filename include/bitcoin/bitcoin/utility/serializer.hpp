@@ -20,7 +20,12 @@
 #ifndef LIBBITCOIN_SERIALIZER_HPP
 #define LIBBITCOIN_SERIALIZER_HPP
 
-#include <stdexcept>
+#include <cstddef>
+#include <cstdint>
+#include <string>
+#include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
@@ -53,6 +58,7 @@ public:
     void write_byte(uint8_t value);
     void write_data(const data_chunk& data);
     void write_data(const uint8_t* data, size_t size);
+    void write_error_code(const code& ec);
     void write_hash(const hash_digest& hash);
     void write_short_hash(const short_hash& hash);
 
@@ -89,7 +95,10 @@ public:
      */
     template <typename T>
     void write_little_endian(T n);
-
+    
+    /**
+     * Encodes a list of bytes.
+     */
     template <typename T>
     void write_data(const T& data);
 

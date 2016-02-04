@@ -28,6 +28,7 @@ namespace bc = libbitcoin;
 
 // Logger definitions. You can add your own to the logger.
 // Better to use a define because you get type safety.
+#define LOG_TRACK       "track"
 #define LOG_NETWORK     "network"
 #define LOG_DATABASE    "database"
 #define LOG_BLOCKCHAIN  "blockchain"
@@ -36,6 +37,7 @@ namespace bc = libbitcoin;
 #define LOG_POLLER      "poller"
 #define LOG_SESSION     "session"
 #define LOG_RESPONDER   "responder"
+#define LOG_INVENTORY   "inventory"
 #define LOG_SCRIPT      "script"
 #define LOG_TXPOOL      "transaction_pool"
 #define LOG_TXIDX       "transaction_indexer"
@@ -59,11 +61,10 @@ namespace bc = libbitcoin;
     #endif
 #endif
 
-// Now we use the generic helper definitions above to
-// define BC_API and BC_INTERNAL.
-// BC_API is used for the public API symbols. It either DLL imports or
-// DLL exports (or does nothing for static build)
-// BC_INTERNAL is used for non-api symbols.
+// Now we use the generic helper definitions above to define BC_API
+// and BC_INTERNAL. BC_API is used for the public API symbols. It either DLL
+// imports or DLL exports (or does nothing for static build) BC_INTERNAL is
+// used for non-api symbols.
 
 #if defined BC_STATIC
     #define BC_API
@@ -93,4 +94,3 @@ namespace bc = libbitcoin;
 #define LCOV_EXCL_STOP()
 
 #endif
-

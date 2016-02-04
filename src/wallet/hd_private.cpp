@@ -277,6 +277,11 @@ hd_private& hd_private::operator=(const hd_private& other)
     return *this;
 }
 
+bool hd_private::operator<(const hd_private& other) const
+{
+    return encoded() < other.encoded();
+}
+
 bool hd_private::operator==(const hd_private& other) const
 {
     return secret_ == other.secret_ && valid_ == other.valid_ &&

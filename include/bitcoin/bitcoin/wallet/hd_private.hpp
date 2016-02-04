@@ -61,6 +61,7 @@ public:
     hd_private(const std::string& encoded, uint32_t public_prefix);
 
     /// Operators.
+    bool operator<(const hd_private& other) const;
     bool operator==(const hd_private& other) const;
     bool operator!=(const hd_private& other) const;
     hd_private& operator=(const hd_private& other);

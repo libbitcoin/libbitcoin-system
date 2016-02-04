@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_SUITE(hash_tests)
 
 BOOST_AUTO_TEST_CASE(sha1_hash_test)
 {
-    for (const hash_result& result: sha1_tests)
+    for (const auto& result: sha1_tests)
     {
         data_chunk data;
         BOOST_REQUIRE(decode_base16(data, result.input));
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(sha1_hash_test)
 
 BOOST_AUTO_TEST_CASE(ripemd_hash_test)
 {
-    for (const hash_result& result: ripemd_tests)
+    for (const auto& result: ripemd_tests)
     {
         data_chunk data;
         BOOST_REQUIRE(decode_base16(data, result.input));
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(ripemd_hash_test)
 
 BOOST_AUTO_TEST_CASE(sha256_hash_test)
 {
-    for (const hash_result& result: sha256_tests)
+    for (const auto& result: sha256_tests)
     {
         data_chunk data;
         BOOST_REQUIRE(decode_base16(data, result.input));

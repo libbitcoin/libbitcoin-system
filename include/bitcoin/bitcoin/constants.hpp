@@ -43,14 +43,8 @@ BC_CONSTEXPR uint64_t max_uint64 = MAX_UINT64;
 BC_CONSTEXPR uint32_t max_uint32 = MAX_UINT32;
 BC_CONSTEXPR uint16_t max_uint16 = MAX_UINT16;
 BC_CONSTEXPR uint8_t max_uint8 = MAX_UINT8;
+BC_CONSTEXPR uint64_t max_size_t = BC_MAX_SIZE;
 BC_CONSTEXPR uint8_t byte_bits = 8;
-
-// Debian complains about missing UINTPTR_MAX definition for some weird reason.
-#ifdef UINTPTR_MAX
-    BC_CONSTEXPR uint64_t max_size_t = UINTPTR_MAX;
-#else
-    BC_CONSTEXPR uint64_t max_size_t = std::numeric_limits<size_t>::max();
-#endif
 
 // Network protocol
     

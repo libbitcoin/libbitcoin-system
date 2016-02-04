@@ -22,24 +22,58 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
+#include <string>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
+////#include <bitcoin/bitcoin/utility/track.hpp>
 
 namespace libbitcoin {
 
 template <typename... Args>
 subscriber<Args...>::subscriber(threadpool& pool,
-    const std::string& class_name, const std::string& log_name)
-  : dispatch_(pool)/*, track<subscriber<Args...>>(class_name, log_name)*/
+    const std::string& class_name)
+  : stopped_(false),
+    dispatch_(pool, class_name)/*,
+    track<subscriber<Args...>>(class_name)*/
 {
+}
+
+template <typename... Args>
+subscriber<Args...>::~subscriber()
+{
+    BITCOIN_ASSERT_MSG(subscriptions_.empty(), "subscriber not cleared");
+}
+
+template <typename... Args>
+void subscriber<Args...>::stop()
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    stopped_ = true;
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 template <typename... Args>
 void subscriber<Args...>::subscribe(handler notifier)
 {
-    dispatch_.ordered(&subscriber<Args...>::do_subscribe,
-        this->shared_from_this(), notifier);
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    if (!stopped_)
+        dispatch_.ordered(&subscriber<Args...>::do_subscribe,
+            this->shared_from_this(), notifier);
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+template <typename... Args>
+void subscriber<Args...>::do_subscribe(handler notifier)
+{
+    subscriptions_.push_back(notifier);
 }
 
 template <typename... Args>
@@ -50,21 +84,12 @@ void subscriber<Args...>::relay(Args... args)
 }
 
 template <typename... Args>
-void subscriber<Args...>::do_subscribe(handler notifier)
-{
-    subscriptions_.push_back(notifier);
-}
-
-template <typename... Args>
 void subscriber<Args...>::do_relay(Args... args)
 {
-    if (subscriptions_.empty())
-        return;
-
-    const auto subscriptions_copy = subscriptions_;
-    subscriptions_.clear();
-    for (const auto notifier: subscriptions_copy)
+    for (const auto notifier: subscriptions_)
         notifier(args...);
+
+    subscriptions_.clear();
 }
 
 } // namespace libbitcoin

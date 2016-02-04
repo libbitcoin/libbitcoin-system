@@ -54,13 +54,13 @@ get_blocks get_blocks::factory_from_data(reader& source)
 
 bool get_blocks::is_valid() const
 {
-    return !start_hashes.empty() || (hash_stop != null_hash);
+    return !start_hashes.empty() || (stop_hash != null_hash);
 }
 
 void get_blocks::reset()
 {
     start_hashes.clear();
-    hash_stop.fill(0);
+    stop_hash.fill(0);
 }
 
 bool get_blocks::from_data(const data_chunk& data)
@@ -79,19 +79,17 @@ bool get_blocks::from_data(reader& source)
 {
     reset();
 
-    // Discard protocol version because it is stupid
+    // Discard protocol version because it is stupid.
     source.read_4_bytes_little_endian();
 
-    // Note: changed to uint64_t to preclude possible loss of data.
-    uint64_t count = source.read_variable_uint_little_endian();
+    const auto count = source.read_variable_uint_little_endian();
 
-    for (uint64_t i = 0; (i < count) && source; ++i)
+    for (uint64_t i = 0; i < count && source; ++i)
         start_hashes.push_back(source.read_hash());
 
     if (source)
-        hash_stop = source.read_hash();
-
-    if (!source)
+        stop_hash = source.read_hash();
+    else
         reset();
 
     return source;
@@ -118,10 +116,10 @@ void get_blocks::to_data(writer& sink) const
     sink.write_4_bytes_little_endian(protocol_version);
     sink.write_variable_uint_little_endian(start_hashes.size());
 
-    for (hash_digest start_hash : start_hashes)
+    for (hash_digest start_hash: start_hashes)
         sink.write_hash(start_hash);
 
-    sink.write_hash(hash_stop);
+    sink.write_hash(stop_hash);
 }
 
 uint64_t get_blocks::serialized_size() const
@@ -133,10 +131,10 @@ uint64_t get_blocks::serialized_size() const
 bool operator==(const get_blocks& left, const get_blocks& right)
 {
     auto result = (left.start_hashes.size() == right.start_hashes.size());
-    for (size_t i = 0; (i < left.start_hashes.size()) && result; i++)
+    for (size_t i = 0; i < left.start_hashes.size() && result; i++)
         result = (left.start_hashes[i] == right.start_hashes[i]);
 
-    return result && (left.hash_stop == right.hash_stop);
+    return result && left.stop_hash == right.stop_hash;
 }
 
 bool operator!=(const get_blocks& left, const get_blocks& right)

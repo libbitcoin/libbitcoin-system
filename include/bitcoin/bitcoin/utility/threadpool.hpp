@@ -24,7 +24,7 @@
 #include <functional>
 #include <thread>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/network/asio.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
 
 namespace libbitcoin {

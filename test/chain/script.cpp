@@ -131,29 +131,25 @@ void push_data(data_chunk& raw_script, const data_chunk& data)
     extend_data(raw_script, raw_tmp_script);
 }
 
-bool parse_token(data_chunk& raw_script, std::string token)
+static const auto sentinel = "__ENDING__";
+
+bool parse_token(data_chunk& raw_script, data_chunk& raw_hex, std::string token)
 {
     boost::trim(token);
 
-    // skip this
     if (token.empty())
         return true;
 
-    static data_chunk hex_raw;
-    if (token == "ENDING" || !is_hex_data(token))
+    if (token == sentinel || !is_hex_data(token))
     {
-        if (!hex_raw.empty())
-        {
-            extend_data(raw_script, hex_raw);
-            hex_raw.resize(0);
-        }
+        extend_data(raw_script, raw_hex);
+        raw_hex.resize(0);
     }
 
-    if (token == "ENDING")
-    {
-        // Do nothing...
-    }
-    else if (is_number(token))
+    if (token == sentinel)
+        return true;
+
+    if (is_number(token))
     {
         const auto value = boost::lexical_cast<int64_t>(token);
         if (is_opx(value))
@@ -173,7 +169,7 @@ bool parse_token(data_chunk& raw_script, std::string token)
         if (!decode_base16(raw_data, hex_part))
             return false;
 
-        extend_data(hex_raw, raw_data);
+        extend_data(raw_hex, raw_data);
     }
     else if (is_quoted_string(token))
     {
@@ -201,13 +197,14 @@ bool parse(chain::script& result_script, std::string format)
     if (format.empty())
         return true;
 
-    const auto tokens = split(format);
+    data_chunk raw_hex;
     data_chunk raw_script;
+    const auto tokens = split(format);
     for (const auto& token: tokens)
-        if (!parse_token(raw_script, token))
+        if (!parse_token(raw_script, raw_hex, token))
             return false;
 
-    parse_token(raw_script, "ENDING");
+    parse_token(raw_script, raw_hex, sentinel);
 
     if (!result_script.from_data(raw_script, false, chain::script::parse_mode::strict))
         return false;
@@ -218,10 +215,11 @@ bool parse(chain::script& result_script, std::string format)
     return true;
 }
 
-bool run_script(const script_test& test)
+bool run_script(const script_test& test, const chain::transaction& tx, uint32_t flags)
 {
     chain::script input;
     chain::script output;
+
     if (!parse(input, test.input))
         return false;
 
@@ -230,12 +228,8 @@ bool run_script(const script_test& test)
 
     //log::debug() << test.input << " -> " << input;
     //log::debug() << test.output << " -> " << output;
-    chain::transaction tx;
-    return chain::script::verify(input, output, tx, 0);
-}
 
-void ignore_output(log::level, const std::string&, const std::string&)
-{
+    return chain::script::verify(input, output, tx, 0, flags);
 }
 
 BOOST_AUTO_TEST_SUITE(script_tests)
@@ -248,7 +242,7 @@ BOOST_AUTO_TEST_CASE(script__from_data__testnet_119058_non_parseable__fallback)
     BOOST_REQUIRE(parsed.from_data(raw_script, false, chain::script::parse_mode::raw_data_fallback));
 }
 
-BOOST_AUTO_TEST_CASE(from_data_fails_parse)
+BOOST_AUTO_TEST_CASE(script__from_data__parse__fails)
 {
     const auto raw_script = to_chunk(base16_literal("3045022100ff1fc58dbd608e5e05846a8e6b45a46ad49878aef6879ad1a7cf4c5a7f853683022074a6a10f6053ab3cddc5620d169c7374cd42c1416c51b9744db2c8d9febfb84d01"));
 
@@ -256,7 +250,7 @@ BOOST_AUTO_TEST_CASE(from_data_fails_parse)
     BOOST_REQUIRE(!parsed.from_data(raw_script, true, chain::script::parse_mode::strict));
 }
 
-BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip)
+BOOST_AUTO_TEST_CASE(script__from_data__to_data__roundtrips)
 {
     const auto normal_output_script = to_chunk(base16_literal("76a91406ccef231c2db72526df9338894ccf9355e8f12188ac"));
 
@@ -267,7 +261,7 @@ BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip)
     BOOST_REQUIRE(roundtrip == normal_output_script);
 }
 
-BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip_weird)
+BOOST_AUTO_TEST_CASE(script__from_data__to_data_weird__roundtrips)
 {
     const auto weird_raw_script = to_chunk(base16_literal(
         "0c49206c69656b20636174732e483045022100c7387f64e1f4"
@@ -295,82 +289,13 @@ BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip_weird)
     BOOST_REQUIRE(roundtrip_result == weird_raw_script);
 }
 
-BOOST_AUTO_TEST_CASE(json_valid)
-{
-    for (const script_test& test: valid_scripts)
-    {
-        BOOST_REQUIRE(run_script(test));
-    }
-}
-
-BOOST_AUTO_TEST_CASE(json_invalid)
-{
-    // Shut up!
-    log::fatal("").set_output_function(ignore_output);
-    size_t count = 0;
-
-    for (const script_test& test: invalid_scripts)
-    {
-        BOOST_REQUIRE(!run_script(test));
-        count++;
-    }
-}
-
-BOOST_AUTO_TEST_CASE(script_checksig_uses_one_hash)
-{
-    // input 315ac7d4c26d69668129cc352851d9389b4a6868f1509c6c8b66bead11e2619f:1
-    data_chunk raw_tx;
-    BOOST_REQUIRE(decode_base16(raw_tx, "0100000002dc38e9359bd7da3b58386204e186d9408685f427f5e513666db735aa8a6b2169000000006a47304402205d8feeb312478e468d0b514e63e113958d7214fa572acd87079a7f0cc026fc5c02200fa76ea05bf243af6d0f9177f241caf606d01fcfd5e62d6befbca24e569e5c27032102100a1a9ca2c18932d6577c58f225580184d0e08226d41959874ac963e3c1b2feffffffffdc38e9359bd7da3b58386204e186d9408685f427f5e513666db735aa8a6b2169010000006b4830450220087ede38729e6d35e4f515505018e659222031273b7366920f393ee3ab17bc1e022100ca43164b757d1a6d1235f13200d4b5f76dd8fda4ec9fc28546b2df5b1211e8df03210275983913e60093b767e85597ca9397fb2f418e57f998d6afbbc536116085b1cbffffffff0140899500000000001976a914fcc9b36d38cf55d7d5b4ee4dddb6b2c17612f48c88ac00000000"));
-
-    chain::transaction parent_tx;
-    BOOST_REQUIRE(parent_tx.from_data(raw_tx));
-
-    uint32_t input_index = 1;
-    data_chunk signature;
-    decode_base16(signature, "30450220087ede38729e6d35e4f515505018e659222031273b7366920f393ee3ab17bc1e022100ca43164b757d1a6d1235f13200d4b5f76dd8fda4ec9fc28546b2df5b1211e8df03");
-
-    data_chunk point;
-    decode_base16(point, "0275983913e60093b767e85597ca9397fb2f418e57f998d6afbbc536116085b1cb");
-
-    data_chunk raw_script;
-    decode_base16(raw_script, "76a91433cef61749d11ba2adf091a5e045678177fe3a6d88ac");
-
-    chain::script script_code;
-    BOOST_REQUIRE(script_code.from_data(raw_script, false, chain::script::parse_mode::raw_data_fallback));
-    BOOST_REQUIRE(chain::script::check_signature(signature, point, script_code, parent_tx, input_index));
-}
-
-BOOST_AUTO_TEST_CASE(script_checksig_normal)
-{
-    // input 315ac7d4c26d69668129cc352851d9389b4a6868f1509c6c8b66bead11e2619f:0
-    data_chunk raw_tx;
-    decode_base16(raw_tx, "0100000002dc38e9359bd7da3b58386204e186d9408685f427f5e513666db735aa8a6b2169000000006a47304402205d8feeb312478e468d0b514e63e113958d7214fa572acd87079a7f0cc026fc5c02200fa76ea05bf243af6d0f9177f241caf606d01fcfd5e62d6befbca24e569e5c27032102100a1a9ca2c18932d6577c58f225580184d0e08226d41959874ac963e3c1b2feffffffffdc38e9359bd7da3b58386204e186d9408685f427f5e513666db735aa8a6b2169010000006b4830450220087ede38729e6d35e4f515505018e659222031273b7366920f393ee3ab17bc1e022100ca43164b757d1a6d1235f13200d4b5f76dd8fda4ec9fc28546b2df5b1211e8df03210275983913e60093b767e85597ca9397fb2f418e57f998d6afbbc536116085b1cbffffffff0140899500000000001976a914fcc9b36d38cf55d7d5b4ee4dddb6b2c17612f48c88ac00000000");
-
-    chain::transaction parent_tx;
-    BOOST_REQUIRE(parent_tx.from_data(raw_tx));
-
-    uint32_t input_index = 0;
-    data_chunk signature;
-    decode_base16(signature, "304402205d8feeb312478e468d0b514e63e113958d7214fa572acd87079a7f0cc026fc5c02200fa76ea05bf243af6d0f9177f241caf606d01fcfd5e62d6befbca24e569e5c2703");
-
-    data_chunk point;
-    decode_base16(point, "02100a1a9ca2c18932d6577c58f225580184d0e08226d41959874ac963e3c1b2fe");
-
-    data_chunk raw_script;
-    decode_base16(raw_script, "76a914fcc9b36d38cf55d7d5b4ee4dddb6b2c17612f48c88ac");
-
-    chain::script script_code;
-    BOOST_REQUIRE_EQUAL(true, script_code.from_data(raw_script, false, chain::script::parse_mode::raw_data_fallback));
-    BOOST_REQUIRE(chain::script::check_signature(signature, point, script_code, parent_tx, input_index));
-}
-
-BOOST_AUTO_TEST_CASE(is_raw_data_operations_size_not_equal_one_returns_false)
+BOOST_AUTO_TEST_CASE(script__is_raw_data_operations_size_not_equal_one_returns_false)
 {
     chain::script instance;
     BOOST_REQUIRE_EQUAL(false, instance.is_raw_data());
 }
 
-BOOST_AUTO_TEST_CASE(is_raw_data_code_not_equal_raw_data_returns_false)
+BOOST_AUTO_TEST_CASE(script__is_raw_data_code_not_equal_raw_data_returns_false)
 {
     chain::script instance;
     instance.operations.emplace_back();
@@ -378,7 +303,7 @@ BOOST_AUTO_TEST_CASE(is_raw_data_code_not_equal_raw_data_returns_false)
     BOOST_REQUIRE_EQUAL(false, instance.is_raw_data());
 }
 
-BOOST_AUTO_TEST_CASE(is_raw_data_returns_true)
+BOOST_AUTO_TEST_CASE(script__is_raw_data_returns_true)
 {
     chain::script instance;
     instance.operations.emplace_back();
@@ -386,14 +311,14 @@ BOOST_AUTO_TEST_CASE(is_raw_data_returns_true)
     BOOST_REQUIRE_EQUAL(true, instance.is_raw_data());
 }
 
-BOOST_AUTO_TEST_CASE(factory_from_data_chunk_test)
+BOOST_AUTO_TEST_CASE(script__factory_from_data_chunk_test)
 {
     auto raw = to_chunk(base16_literal("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
     auto instance = chain::script::factory_from_data(raw, false, chain::script::parse_mode::strict);
     BOOST_REQUIRE(instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(factory_from_data_stream_test)
+BOOST_AUTO_TEST_CASE(script__factory_from_data_stream_test)
 {
     auto raw = to_chunk(base16_literal("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
     data_source istream(raw);
@@ -401,13 +326,259 @@ BOOST_AUTO_TEST_CASE(factory_from_data_stream_test)
     BOOST_REQUIRE(instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(factory_from_data_reader_test)
+BOOST_AUTO_TEST_CASE(script__factory_from_data_reader_test)
 {
     auto raw = to_chunk(base16_literal("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
     data_source istream(raw);
     istream_reader source(istream);
     auto instance = chain::script::factory_from_data(source, false, chain::script::parse_mode::strict);
     BOOST_REQUIRE(instance.is_valid());
+}
+
+// Valid pay-to-script-hash scripts are valid regardless of context,
+// however after bip16 activation the scripts have additional constraints.
+BOOST_AUTO_TEST_CASE(script__bip16__valid)
+{
+    chain::transaction tx;
+    for (const auto& test: valid_bip16_scripts)
+    {
+        // These are valid prior to and after BIP16 activation.
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::none_enabled), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::bip16_enabled), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::all_enabled), test.description);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(script__bip16__invalidated)
+{
+    chain::transaction tx;
+    for (const auto& test: invalidated_bip16_scripts)
+    {
+        // These are valid prior to BIP16 activation and invalid after.
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::none_enabled), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::bip16_enabled), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::all_enabled), test.description);
+    }
+}
+
+// Prior to bip65 activation op_nop2 always returns true, but after it becomes a locktime comparer.
+BOOST_AUTO_TEST_CASE(script__bip65__valid)
+{
+    chain::transaction tx;
+    tx.locktime = 500000042;
+    chain::input input;
+    input.sequence = 42;
+    tx.inputs.push_back(input);
+
+    for (const auto& test: valid_bip65_scripts)
+    {
+        // These are valid prior to and after BIP65 activation.
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::none_enabled), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::bip65_enabled), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::all_enabled), test.description);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(script__bip65__invalid)
+{
+    chain::transaction tx;
+    tx.locktime = 99;
+    chain::input input;
+    input.sequence = 42;
+    tx.inputs.push_back(input);
+
+    for (const auto& test: invalid_bip65_scripts)
+    {
+        // These are invalid prior to and after BIP65 activation.
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::none_enabled), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::bip65_enabled), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::all_enabled), test.description);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(script__bip65__invalidated)
+{
+    chain::transaction tx;
+    tx.locktime = 99;
+    chain::input input;
+    input.sequence = 42;
+    tx.inputs.push_back(input);
+
+    for (const auto& test: invalidated_bip65_scripts)
+    {
+        // These are valid prior to BIP65 activation and invalid after.
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::none_enabled), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::bip65_enabled), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::all_enabled), test.description);
+    }
+}
+
+// These are scripts potentially affected by bip66 (but should not be).
+BOOST_AUTO_TEST_CASE(script__multisig__valid)
+{
+    chain::transaction tx;
+    for (const auto& test: valid_multisig_scripts)
+    {
+        // These are always valid.
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::none_enabled), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::bip66_enabled), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::all_enabled), test.description);
+    }
+}
+
+// These are scripts potentially affected by bip66 (but should not be).
+BOOST_AUTO_TEST_CASE(script__multisig__invalid)
+{
+    chain::transaction tx;
+    for (const auto& test: invalid_multisig_scripts)
+    {
+        // These are always invalid.
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::none_enabled), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::bip66_enabled), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::all_enabled), test.description);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(script__context_free__valid)
+{
+    chain::transaction tx;
+    for (const auto& test: valid_context_free_scripts)
+    {
+        // These are always valid.
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::none_enabled), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::all_enabled), test.description);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(script__context_free__invalid)
+{
+    chain::transaction tx;
+    for (const auto& test: invalid_context_free_scripts)
+    {
+        // These are always invalid.
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::none_enabled), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::all_enabled), test.description);
+    }
+}
+
+// These are special tests for checksig.
+BOOST_AUTO_TEST_CASE(script__checksig__uses_one_hash)
+{
+    // input 315ac7d4c26d69668129cc352851d9389b4a6868f1509c6c8b66bead11e2619f:1
+    data_chunk tx_data;
+    decode_base16(tx_data, "0100000002dc38e9359bd7da3b58386204e186d9408685f427f5e513666db735aa8a6b2169000000006a47304402205d8feeb312478e468d0b514e63e113958d7214fa572acd87079a7f0cc026fc5c02200fa76ea05bf243af6d0f9177f241caf606d01fcfd5e62d6befbca24e569e5c27032102100a1a9ca2c18932d6577c58f225580184d0e08226d41959874ac963e3c1b2feffffffffdc38e9359bd7da3b58386204e186d9408685f427f5e513666db735aa8a6b2169010000006b4830450220087ede38729e6d35e4f515505018e659222031273b7366920f393ee3ab17bc1e022100ca43164b757d1a6d1235f13200d4b5f76dd8fda4ec9fc28546b2df5b1211e8df03210275983913e60093b767e85597ca9397fb2f418e57f998d6afbbc536116085b1cbffffffff0140899500000000001976a914fcc9b36d38cf55d7d5b4ee4dddb6b2c17612f48c88ac00000000");
+    chain::transaction parent_tx;
+    parent_tx.from_data(tx_data);
+
+    data_chunk distinguished;
+    decode_base16(distinguished, "30450220087ede38729e6d35e4f515505018e659222031273b7366920f393ee3ab17bc1e022100ca43164b757d1a6d1235f13200d4b5f76dd8fda4ec9fc28546b2df5b1211e8df");
+    
+    data_chunk pubkey;
+    decode_base16(pubkey, "0275983913e60093b767e85597ca9397fb2f418e57f998d6afbbc536116085b1cb");
+
+    data_chunk script_data;
+    decode_base16(script_data, "76a91433cef61749d11ba2adf091a5e045678177fe3a6d88ac");
+
+    chain::script script_code;
+    static const bool prefix = false;
+    BOOST_REQUIRE(script_code.from_data(script_data, prefix, chain::script::parse_mode::strict));
+
+    ec_signature signature;
+    static const bool strict = true;
+    static const uint32_t input_index = 1;
+    BOOST_REQUIRE(parse_signature(signature, distinguished, strict));
+    BOOST_REQUIRE(chain::script::check_signature(signature, chain::signature_hash_algorithm::single, pubkey, script_code, parent_tx, input_index));
+}
+
+BOOST_AUTO_TEST_CASE(script__checksig__normal)
+{
+    // input 315ac7d4c26d69668129cc352851d9389b4a6868f1509c6c8b66bead11e2619f:0
+    data_chunk tx_data;
+    decode_base16(tx_data, "0100000002dc38e9359bd7da3b58386204e186d9408685f427f5e513666db735aa8a6b2169000000006a47304402205d8feeb312478e468d0b514e63e113958d7214fa572acd87079a7f0cc026fc5c02200fa76ea05bf243af6d0f9177f241caf606d01fcfd5e62d6befbca24e569e5c27032102100a1a9ca2c18932d6577c58f225580184d0e08226d41959874ac963e3c1b2feffffffffdc38e9359bd7da3b58386204e186d9408685f427f5e513666db735aa8a6b2169010000006b4830450220087ede38729e6d35e4f515505018e659222031273b7366920f393ee3ab17bc1e022100ca43164b757d1a6d1235f13200d4b5f76dd8fda4ec9fc28546b2df5b1211e8df03210275983913e60093b767e85597ca9397fb2f418e57f998d6afbbc536116085b1cbffffffff0140899500000000001976a914fcc9b36d38cf55d7d5b4ee4dddb6b2c17612f48c88ac00000000");
+    chain::transaction parent_tx;
+    parent_tx.from_data(tx_data);
+
+    data_chunk distinguished;
+    decode_base16(distinguished, "304402205d8feeb312478e468d0b514e63e113958d7214fa572acd87079a7f0cc026fc5c02200fa76ea05bf243af6d0f9177f241caf606d01fcfd5e62d6befbca24e569e5c27");
+    
+    data_chunk pubkey;
+    decode_base16(pubkey, "02100a1a9ca2c18932d6577c58f225580184d0e08226d41959874ac963e3c1b2fe");
+
+    data_chunk script_data;
+    decode_base16(script_data, "76a914fcc9b36d38cf55d7d5b4ee4dddb6b2c17612f48c88ac");
+
+    chain::script script_code;
+    static const bool prefix = false;
+    BOOST_REQUIRE(script_code.from_data(script_data, prefix, chain::script::parse_mode::strict));
+
+    ec_signature signature;
+    static const bool strict = true;
+    static const uint32_t input_index = 0;
+    BOOST_REQUIRE(parse_signature(signature, distinguished, strict));
+    BOOST_REQUIRE(chain::script::check_signature(signature, chain::signature_hash_algorithm::single, pubkey, script_code, parent_tx, input_index));
+}
+
+BOOST_AUTO_TEST_CASE(script__create_endorsement__single_input_single_output__expected)
+{
+    data_chunk tx_data;
+    decode_base16(tx_data, "0100000001b3807042c92f449bbf79b33ca59d7dfec7f4cc71096704a9c526dddf496ee0970100000000ffffffff01905f0100000000001976a91418c0bd8d1818f1bf99cb1df2269c645318ef7b7388ac00000000");
+    chain::transaction new_tx;
+    new_tx.from_data(tx_data);
+
+    chain::script prevout_script;
+    BOOST_REQUIRE(prevout_script.from_string("dup hash160 [ 88350574280395ad2c3e2ee20e322073d94e5e40 ] equalverify checksig"));
+
+    const ec_secret secret = hash_literal("ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333");
+
+    endorsement out;
+    const uint32_t input_index = 0;
+    const uint8_t sighash_type = chain::signature_hash_algorithm::all;
+    BOOST_REQUIRE(chain::script::create_endorsement(out, secret, prevout_script, new_tx, input_index, sighash_type));
+
+    const auto result = encode_base16(out);
+    const auto expected = "3045022100e428d3cc67a724cb6cfe8634aa299e58f189d9c46c02641e936c40cc16c7e8ed0220083949910fe999c21734a1f33e42fca15fb463ea2e08f0a1bccd952aacaadbb801";
+    BOOST_REQUIRE_EQUAL(result, expected);
+}
+
+BOOST_AUTO_TEST_CASE(script__create_endorsement__single_input_no_output__expected)
+{
+    data_chunk tx_data;
+    decode_base16(tx_data, "0100000001b3807042c92f449bbf79b33ca59d7dfec7f4cc71096704a9c526dddf496ee0970000000000ffffffff0000000000");
+    chain::transaction new_tx;
+    new_tx.from_data(tx_data);
+
+    chain::script prevout_script;
+    BOOST_REQUIRE(prevout_script.from_string("dup hash160 [ 88350574280395ad2c3e2ee20e322073d94e5e40 ] equalverify checksig"));
+
+    const ec_secret secret = hash_literal("ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333");
+
+    endorsement out;
+    const uint32_t input_index = 0;
+    const uint8_t sighash_type = chain::signature_hash_algorithm::all;
+    BOOST_REQUIRE(chain::script::create_endorsement(out, secret, prevout_script, new_tx, input_index, sighash_type));
+
+    const auto result = encode_base16(out);
+    const auto expected = "3045022100ba57820be5f0b93a0d5b880fbf2a86f819d959ecc24dc31b6b2d4f6ed286f253022071ccd021d540868ee10ca7634f4d270dfac7aea0d5912cf2b104111ac9bc756b01";
+    BOOST_REQUIRE_EQUAL(result, expected);
+}
+
+BOOST_AUTO_TEST_CASE(script__generate_signature_hash__all__expected)
+{
+    data_chunk tx_data;
+    decode_base16(tx_data, "0100000001b3807042c92f449bbf79b33ca59d7dfec7f4cc71096704a9c526dddf496ee0970000000000ffffffff0000000000");
+    chain::transaction new_tx;
+    new_tx.from_data(tx_data);
+
+    chain::script prevout_script;
+    BOOST_REQUIRE(prevout_script.from_string("dup hash160 [ 88350574280395ad2c3e2ee20e322073d94e5e40 ] equalverify checksig"));
+
+    endorsement out;
+    const uint32_t input_index = 0;
+    const uint8_t sighash_type = chain::signature_hash_algorithm::all;
+    const auto sighash = chain::script::generate_signature_hash(new_tx, input_index, prevout_script, sighash_type);
+    const auto result = encode_base16(sighash);
+    const auto expected = "f89572635651b2e4f89778350616989183c98d1a721c911324bf9f17a0cf5bf0";
+    BOOST_REQUIRE_EQUAL(result, expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

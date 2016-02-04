@@ -28,6 +28,8 @@
 
 namespace libbitcoin {
 
+// It is not possible for this class to produce a deadlock.
+
 template <typename Handler>
 class synchronizer
 {
@@ -48,7 +50,8 @@ public:
     {
         auto cleared = false;
 
-        // This requires a critical section, not just an atomic counter.
+        // Critical Section
+        ///////////////////////////////////////////////////////////////////////
         if (true)
         {
             std::lock_guard<std::mutex> lock(*counter_mutex_);
@@ -83,6 +86,7 @@ public:
 
             cleared = (*counter_ == clearance_count_);
         }
+        ///////////////////////////////////////////////////////////////////////
 
         // Use execute flag to keep this log task out of the critical section.
         if (cleared)

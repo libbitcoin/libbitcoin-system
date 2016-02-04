@@ -22,10 +22,13 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
+#include <string>
 #include <vector>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
+////#include <bitcoin/bitcoin/utility/track.hpp>
 
 namespace libbitcoin {
 
@@ -38,10 +41,16 @@ public:
     typedef std::function<void (Args...)> handler;
     typedef std::shared_ptr<subscriber<Args...>> ptr;
 
-    subscriber(threadpool& pool, const std::string& class_name,
-        const std::string& log_name);
+    subscriber(threadpool& pool, const std::string& class_name);
+    ~subscriber();
 
+    /// Call stop to prevent new subscriptions.
+    void stop();
+
+    /// Use the resubscriber template to resubscribe in the handler.
     void subscribe(handler notifier);
+
+    /// Call relay to invoke all handlers, which clears them.
     void relay(Args... args);
 
 private:
@@ -50,6 +59,8 @@ private:
     void do_subscribe(handler notifier);
     void do_relay(Args... args);
 
+    bool stopped_;
+    std::mutex mutex_;
     dispatcher dispatch_;
     list subscriptions_;
 };

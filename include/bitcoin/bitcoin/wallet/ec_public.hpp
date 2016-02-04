@@ -53,6 +53,7 @@ public:
     ec_public(const ec_uncompressed& point, bool compress=false);
 
     /// Operators.
+    bool operator<(const ec_public& other) const;
     bool operator==(const ec_public& other) const;
     bool operator!=(const ec_public& other) const;
     ec_public& operator=(const ec_public& other);

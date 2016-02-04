@@ -1,17 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ProjectSchemaDefinitions xmlns="clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework">
-  <Rule Name="libbitcoin-options-uiextension" PageTemplate="tool" DisplayName="Bitcoin Options" SwitchPrefix="/" Order="1">
-    <Rule.Categories>
-      <Category Name="testnet" DisplayName="testnet" />
-    </Rule.Categories>
-    <Rule.DataSource>
-      <DataSource Persistence="ProjectFile" ItemType="" />
-    </Rule.DataSource>
-    <EnumProperty Name="Option-testnet" DisplayName="Enable Testnet" Description="Enable the Testnet build option" Category="testnet">
-      <EnumValue Name="" DisplayName="No" />
-      <EnumValue Name="true" DisplayName="Yes" />
-    </EnumProperty>
-  </Rule>
   <Rule Name="libbitcoin-linkage-uiextension" PageTemplate="tool" DisplayName="Local Dependencies" SwitchPrefix="/" Order="1">
     <Rule.Categories>
       <Category Name="libbitcoin" DisplayName="libbitcoin" />

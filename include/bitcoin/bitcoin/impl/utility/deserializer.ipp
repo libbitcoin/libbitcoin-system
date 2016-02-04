@@ -21,7 +21,10 @@
 #define LIBBITCOIN_DESERIALIZER_IPP
 
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <boost/asio/streambuf.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/exceptions.hpp>
@@ -171,6 +174,13 @@ size_t deserializer<Iterator, SafeCheckLast>::read_data(uint8_t* data,
     for (size_t i = 0; i < size; ++i)
         data[i] = read_byte();
     return size;
+}
+
+template <typename Iterator, bool SafeCheckLast>
+code deserializer<Iterator, SafeCheckLast>::read_error_code()
+{
+    const auto value = read_little_endian<uint32_t>();
+    return code(static_cast<error::error_code_t>(value));
 }
 
 template <typename Iterator, bool SafeCheckLast>
