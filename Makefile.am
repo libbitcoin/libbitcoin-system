@@ -118,31 +118,6 @@ src_libbitcoin_la_SOURCES = \
     src/message/reject.cpp \
     src/message/verack.cpp \
     src/message/version.cpp \
-    src/network/acceptor.cpp \
-    src/network/channel.cpp \
-    src/network/connections.cpp \
-    src/network/connector.cpp \
-    src/network/hosts.cpp \
-    src/network/logging.cpp \
-    src/network/message_subscriber.cpp \
-    src/network/p2p.cpp \
-    src/network/pending_channels.cpp \
-    src/network/pending_sockets.cpp \
-    src/network/protocol.cpp \
-    src/network/protocol_address.cpp \
-    src/network/protocol_events.cpp \
-    src/network/protocol_ping.cpp \
-    src/network/protocol_seed.cpp \
-    src/network/protocol_timer.cpp \
-    src/network/protocol_version.cpp \
-    src/network/proxy.cpp \
-    src/network/session.cpp \
-    src/network/session_batch.cpp \
-    src/network/session_inbound.cpp \
-    src/network/session_manual.cpp \
-    src/network/session_outbound.cpp \
-    src/network/session_seed.cpp \
-    src/network/settings.cpp \
     src/unicode/console_streambuf.cpp \
     src/unicode/ifstream.cpp \
     src/unicode/ofstream.cpp \
@@ -276,7 +251,6 @@ test_libbitcoin_test_SOURCES = \
     test/message/reject.cpp \
     test/message/verack.cpp \
     test/message/version.cpp \
-    test/network/p2p.cpp \
     test/unicode/unicode.cpp \
     test/unicode/unicode_istream.cpp \
     test/unicode/unicode_ostream.cpp \
@@ -414,35 +388,6 @@ include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/reject.hpp \
     include/bitcoin/bitcoin/message/verack.hpp \
     include/bitcoin/bitcoin/message/version.hpp
-
-include_bitcoin_bitcoin_networkdir = ${includedir}/bitcoin/bitcoin/network
-include_bitcoin_bitcoin_network_HEADERS = \
-    include/bitcoin/bitcoin/network/acceptor.hpp \
-    include/bitcoin/bitcoin/network/channel.hpp \
-    include/bitcoin/bitcoin/network/connections.hpp \
-    include/bitcoin/bitcoin/network/connector.hpp \
-    include/bitcoin/bitcoin/network/hosts.hpp \
-    include/bitcoin/bitcoin/network/logging.hpp \
-    include/bitcoin/bitcoin/network/message_subscriber.hpp \
-    include/bitcoin/bitcoin/network/p2p.hpp \
-    include/bitcoin/bitcoin/network/pending_channels.hpp \
-    include/bitcoin/bitcoin/network/pending_sockets.hpp \
-    include/bitcoin/bitcoin/network/protocol.hpp \
-    include/bitcoin/bitcoin/network/protocol_address.hpp \
-    include/bitcoin/bitcoin/network/protocol_events.hpp \
-    include/bitcoin/bitcoin/network/protocol_ping.hpp \
-    include/bitcoin/bitcoin/network/protocol_seed.hpp \
-    include/bitcoin/bitcoin/network/protocol_timer.hpp \
-    include/bitcoin/bitcoin/network/protocol_version.hpp \
-    include/bitcoin/bitcoin/network/proxy.hpp \
-    include/bitcoin/bitcoin/network/session.hpp \
-    include/bitcoin/bitcoin/network/session_batch.hpp \
-    include/bitcoin/bitcoin/network/session_inbound.hpp \
-    include/bitcoin/bitcoin/network/session_manual.hpp \
-    include/bitcoin/bitcoin/network/session_outbound.hpp \
-    include/bitcoin/bitcoin/network/session_seed.hpp \
-    include/bitcoin/bitcoin/network/settings.hpp \
-    include/bitcoin/bitcoin/network/shared_const_buffer.hpp
 
 include_bitcoin_bitcoin_unicodedir = ${includedir}/bitcoin/bitcoin/unicode
 include_bitcoin_bitcoin_unicode_HEADERS = \

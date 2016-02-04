@@ -22,7 +22,7 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <boost/iostreams/categories.hpp>
+#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {

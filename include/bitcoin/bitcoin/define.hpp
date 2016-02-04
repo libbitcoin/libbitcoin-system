@@ -61,11 +61,10 @@ namespace bc = libbitcoin;
     #endif
 #endif
 
-// Now we use the generic helper definitions above to
-// define BC_API and BC_INTERNAL.
-// BC_API is used for the public API symbols. It either DLL imports or
-// DLL exports (or does nothing for static build)
-// BC_INTERNAL is used for non-api symbols.
+// Now we use the generic helper definitions above to define BC_API
+// and BC_INTERNAL. BC_API is used for the public API symbols. It either DLL
+// imports or DLL exports (or does nothing for static build) BC_INTERNAL is
+// used for non-api symbols.
 
 #if defined BC_STATIC
     #define BC_API

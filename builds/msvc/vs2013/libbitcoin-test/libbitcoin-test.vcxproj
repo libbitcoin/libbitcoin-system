@@ -128,7 +128,6 @@
     <ClCompile Include="..\..\..\..\test\message\ping.cpp" />
     <ClCompile Include="..\..\..\..\test\message\not_found.cpp" />
     <ClCompile Include="..\..\..\..\test\message\verack.cpp" />
-    <ClCompile Include="..\..\..\..\test\network\p2p.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\unicode.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\unicode_istream.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\unicode_ostream.cpp" />

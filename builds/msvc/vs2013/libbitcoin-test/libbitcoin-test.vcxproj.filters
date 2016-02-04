@@ -25,9 +25,6 @@
     <Filter Include="src\formats">
       <UniqueIdentifier>{b3025452-8224-4517-9629-f317973d1c17}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\network">
-      <UniqueIdentifier>{83fe9ca1-2248-423d-9aa4-5b81a1b0bc2a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\utility">
       <UniqueIdentifier>{63815092-ade6-4e7d-8078-cf178f62dadc}</UniqueIdentifier>
     </Filter>
@@ -269,9 +266,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\hd_private.cpp">
       <Filter>src\wallet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\network\p2p.cpp">
-      <Filter>src\network</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\elliptic_curve.cpp">
       <Filter>src\math</Filter>
