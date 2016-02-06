@@ -41,7 +41,7 @@
 #define BC_PRINTER_OPTION_TABLE_HEADER "Options (named):"
 #define BC_PRINTER_USAGE_FORMAT "Usage: %1% %2% %3%"
 #define BC_PRINTER_SETTINGS_TABLE_HEADER "Configuration Settings:"
-#define BC_PRINTER_VALUE_TEXT "VALUE"
+#define BC_PRINTER_VALUE_TEXT "value"
 
 // Not localizable formatters.
 #define BC_PRINTER_USAGE_OPTION_MULTIPLE_FORMAT " [--%1% %2%]..."
