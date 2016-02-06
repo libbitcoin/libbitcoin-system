@@ -27,6 +27,7 @@
 #include <vector>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
+#include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 ////#include <bitcoin/bitcoin/utility/track.hpp>
 
@@ -34,7 +35,7 @@ namespace libbitcoin {
 
 template <typename... Args>
 class subscriber
-  : public std::enable_shared_from_this<subscriber<Args...>>/*,
+  : public enable_shared_from_base<subscriber<Args...>>/*,
     track<subscriber<Args...>>*/
 {
 public:

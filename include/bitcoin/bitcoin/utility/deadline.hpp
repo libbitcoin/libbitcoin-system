@@ -25,6 +25,7 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
+#include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -36,7 +37,7 @@ namespace libbitcoin {
  * makes timer firing and cancellation conditions safer.
  */
 class BC_API deadline
-  : public std::enable_shared_from_this<deadline>, track<deadline>
+  : public enable_shared_from_base<deadline>, track<deadline>
 {
 public:
     typedef std::shared_ptr<deadline> ptr;

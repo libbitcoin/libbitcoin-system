@@ -316,7 +316,7 @@ BOOST_AUTO_TEST_CASE(printer__format_usage_parameters__unsorted_multiple_paramet
         arguments.add("SIMPLE", 1);
         arguments.add("ARRAY", -1));
     CONFIG_PRINTER_INITIALIZE(10u, 3u);
-    BOOST_REQUIRE_EQUAL(help.format_usage_parameters(), "[-mst] --longy VALUE [--untoggled] [--defaulty VALUE] [--multy VALUE]... REQUIRED [SIMPLE] [ARRAY]...");
+    BOOST_REQUIRE_EQUAL(help.format_usage_parameters(), "[-mst] --longy value [--untoggled] [--defaulty value] [--multy value]... REQUIRED [SIMPLE] [ARRAY]...");
 }
 BOOST_AUTO_TEST_SUITE_END()
 
