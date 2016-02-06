@@ -32,8 +32,7 @@ enum console_result : int
 {
     failure = -1,
     okay = 0,
-    invalid = 1,
-    not_started = 1
+    invalid = 1
 };
 
 /// Alias for error code declarations.

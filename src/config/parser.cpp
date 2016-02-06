@@ -21,7 +21,8 @@
 
 #include <string>
 #include <sstream>
-#include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/program_options.hpp>
 #include <boost/throw_exception.hpp>
 #include <bitcoin/bitcoin/unicode/ifstream.hpp>
@@ -32,6 +33,15 @@ namespace config {
 using namespace boost::filesystem;
 using namespace boost::program_options;
 using namespace boost::system;
+
+// The error is obtained from boost, which circumvents our localization.
+// English-only hack to patch missing arg name in boost exception message.
+std::string parser::format_invalid_parameter(const std::string& message)
+{
+    std::string clean_message(message);
+    boost::replace_all(clean_message, "for option is invalid", "is invalid");
+    return "Error: " + clean_message;
+}
 
 path parser::get_config_option(variables_map& variables,
     const std::string& name)

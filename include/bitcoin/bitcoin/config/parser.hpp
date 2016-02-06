@@ -40,6 +40,7 @@ namespace config {
 class parser
 {
 public:
+    static std::string format_invalid_parameter(const std::string& message);
     static bool get_option(variables_map& variables, const std::string& name);
     static boost::filesystem::path get_config_option(variables_map& variables,
         const std::string& name);
