@@ -22,11 +22,9 @@
 
 #include <atomic>
 #include <cstddef>
-#include <functional>
 #include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/log.hpp>
 
 namespace libbitcoin {
 

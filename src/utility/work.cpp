@@ -36,4 +36,24 @@ work::work(threadpool& pool, const std::string& name)
 {
 }
 
+size_t work::ordered_backlog()
+{
+    return ordered_->load();
+}
+
+size_t work::unordered_backlog()
+{
+    return unordered_->load();
+}
+
+size_t work::concurrent_backlog()
+{
+    return concurrent_->load();
+}
+
+size_t work::combined_backlog()
+{
+    return ordered_backlog() + unordered_backlog() + concurrent_backlog();
+}
+
 } // namespace libbitcoin
