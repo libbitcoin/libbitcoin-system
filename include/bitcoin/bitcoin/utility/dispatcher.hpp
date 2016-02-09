@@ -52,6 +52,11 @@ class BC_API dispatcher
 public:
     dispatcher(threadpool& pool, const std::string& name);
 
+    size_t ordered_backlog();
+    size_t unordered_backlog();
+    size_t concurrent_backlog();
+    size_t combined_backlog();
+
     /// Invokes a job on the current thread.
     template <typename... Args>
     static void bound(Args&&... args)

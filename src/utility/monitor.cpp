@@ -21,6 +21,7 @@
 
 #include <cstddef>
 #include <string>
+#include <bitcoin/bitcoin/utility/log.hpp>
 
 namespace libbitcoin {
 

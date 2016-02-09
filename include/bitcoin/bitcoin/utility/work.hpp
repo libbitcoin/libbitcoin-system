@@ -84,6 +84,11 @@ public:
             UNORDERED, unordered_)));
     }
 
+    size_t ordered_backlog();
+    size_t unordered_backlog();
+    size_t concurrent_backlog();
+    size_t combined_backlog();
+
 private:
     template <typename Handler>
     auto inject(Handler handler, const std::string& context,
