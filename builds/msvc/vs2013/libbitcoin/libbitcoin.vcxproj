@@ -188,10 +188,12 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\header.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\history_row.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\opcode.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\operation.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\stealth_row.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\input.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\output.hpp" />
