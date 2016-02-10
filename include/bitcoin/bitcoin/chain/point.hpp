@@ -43,6 +43,7 @@ public:
     static point factory_from_data(reader& source);
     static uint64_t satoshi_fixed_size();
 
+    uint64_t checksum() const;
     bool is_null() const;
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
