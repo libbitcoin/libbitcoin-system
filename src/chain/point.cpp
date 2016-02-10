@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/chain/point.hpp>
 
+#include <cstdint>
 #include <sstream>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
@@ -27,6 +28,7 @@
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -129,6 +131,35 @@ std::string point::to_string() const
 bool point::is_null() const
 {
     return (index == max_input_sequence) && (hash == null_hash);
+}
+
+// Fast modulus calculation where divisor is a power of 2.
+static uint64_t remainder(const hash_digest& value, const uint64_t divisor)
+{
+    BITCOIN_ASSERT(divisor % 2 == 0);
+
+    // Only use the first 8 bytes of hash value for this calculation.
+    const auto hash_value = from_little_endian_unsafe<uint64_t>(value.begin());
+
+    // x mod 2**n == x & (2**n - 1)
+    return hash_value & (divisor - 1);
+}
+
+// This is only used with output_point currently, see blockchain and database.
+uint64_t point::checksum() const
+{
+    // Assuming outpoint hash is sufficiently random, this method works well
+    // for generating row checksums. Max pow2 value for a uint64_t is 1 << 63.
+    static constexpr uint64_t divisor = uint64_t{ 1 } << 63;
+    static_assert(divisor == 9223372036854775808ull, "Wrong divisor value.");
+
+    // Write index onto a copy of the outpoint hash.
+    auto copy = hash;
+    auto serial = make_serializer(copy.begin());
+    serial.write_4_bytes_little_endian(index);
+
+    // Collapse it into uint64_t.
+    return remainder(copy, divisor);
 }
 
 bool operator==(const point& left, const point& right)
