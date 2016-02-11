@@ -69,7 +69,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\test\chain\genesis_block.hpp" />
     <ClInclude Include="..\..\..\..\test\chain\script.hpp" />
     <ClInclude Include="..\..\..\..\test\math\big_number.hpp" />
     <ClInclude Include="..\..\..\..\test\math\hash.hpp" />
@@ -78,7 +77,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\test\chain\block.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\genesis_block.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\header.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\input.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\output.cpp" />

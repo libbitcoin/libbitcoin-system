@@ -19,15 +19,14 @@
  */
 #include <boost/test/unit_test.hpp>
 #include <bitcoin/bitcoin.hpp>
-#include "genesis_block.hpp"
 
 // TODO: move this into the tests by source file organization.
 BOOST_AUTO_TEST_SUITE(satoshi_words)
 
-BOOST_AUTO_TEST_CASE(satoshi_words_mainnet_or_testnet)
+BOOST_AUTO_TEST_CASE(satoshi_words_mainnet)
 {
-    // Create genesis block.
-    auto block = genesis_block();
+    // Create mainnet genesis block.
+    const auto block = bc::chain::block::genesis_mainnet();
 
     // Genesis block contains a single coinbase transaction.
     BOOST_REQUIRE_EQUAL(block.transactions.size(), 1u);

@@ -36,9 +36,6 @@
     <ClInclude Include="..\..\..\..\test\chain\script.hpp">
       <Filter>src\chain</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\test\chain\genesis_block.hpp">
-      <Filter>src\chain</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\test\math\hash.hpp">
       <Filter>src\math</Filter>
     </ClInclude>
@@ -138,9 +135,6 @@
       <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\block.cpp">
-      <Filter>src\chain</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\genesis_block.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\header.cpp">
