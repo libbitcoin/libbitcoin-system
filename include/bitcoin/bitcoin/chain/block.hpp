@@ -45,6 +45,8 @@ public:
     static block factory_from_data(reader& source);
     static hash_digest generate_merkle_root(
         const transaction::list& transactions);
+    static block genesis_mainnet();
+    static block genesis_testnet();
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
