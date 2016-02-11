@@ -34,6 +34,24 @@ BOOST_AUTO_TEST_CASE(from_data_fails)
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
 }
 
+BOOST_AUTO_TEST_CASE(block__genesis__mainnet__valid_structure)
+{
+    const auto genesis = bc::chain::block::genesis_mainnet();
+    BOOST_REQUIRE(genesis.is_valid());
+    BOOST_REQUIRE_EQUAL(genesis.transactions.size(), 1u);
+    const auto root = bc::chain::block::generate_merkle_root(genesis.transactions);
+    BOOST_REQUIRE(root == genesis.header.merkle);
+}
+
+BOOST_AUTO_TEST_CASE(block__genesis__testnet__valid_structure)
+{
+    const auto genesis = bc::chain::block::genesis_testnet();
+    BOOST_REQUIRE(genesis.is_valid());
+    BOOST_REQUIRE_EQUAL(genesis.transactions.size(), 1u);
+    const auto root = bc::chain::block::generate_merkle_root(genesis.transactions);
+    BOOST_REQUIRE(root == genesis.header.merkle);
+}
+
 BOOST_AUTO_TEST_CASE(roundtrip_mainnet_genesis_block_serialization_factory_data_chunk)
 {
     const auto genesis = bc::chain::block::genesis_mainnet();
