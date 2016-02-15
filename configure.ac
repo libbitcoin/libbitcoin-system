@@ -111,6 +111,28 @@ AC_MSG_RESULT([$with_icu])
 AS_CASE([${with_icu}], [yes], AC_DEFINE([BOOST_HAS_ICU]))
 AS_CASE([${with_icu}], [yes], AC_SUBST([icu], [-DWITH_ICU]))
 
+# Implement --with-png and output ${png}.
+#------------------------------------------------------------------------------
+AC_MSG_CHECKING([--with-png option])
+AC_ARG_WITH([png],
+    AS_HELP_STRING([--with-png],
+        [Compile with Libpng support. @<:@default=no@:>@]),
+    [with_png=$withval],
+    [with_png=no])
+AC_MSG_RESULT([$with_png])
+AS_CASE([${with_png}], [yes], AC_SUBST([png], [-DWITH_PNG]))
+
+# Implement --with-qrencode and output ${qrencode}.
+#------------------------------------------------------------------------------
+AC_MSG_CHECKING([--with-qrencode option])
+AC_ARG_WITH([qrencode],
+    AS_HELP_STRING([--with-qrencode],
+        [Compile with QREncode. @<:@default=no@:>@]),
+    [with_qrencode=$withval],
+    [with_qrencode=no])
+AC_MSG_RESULT([$with_qrencode])
+AS_CASE([${with_qrencode}], [yes], AC_SUBST([qrencode], [-DWITH_QRENCODE]))
+
 # Implement --enable-ndebug and define NDEBUG.
 #------------------------------------------------------------------------------
 AC_MSG_CHECKING([--enable-ndebug option])
@@ -201,6 +223,20 @@ AX_PTHREAD(
     [AC_MSG_ERROR([pthread library is required but was not found.])])
 # Hard wired -lpthread because AX_PTHREAD does not do it.
 AC_SUBST([pthread_LIBS], [-lpthread])
+
+# Require png if --with_png and output ${png_CPPFLAGS/LIBS}.
+#------------------------------------------------------------------------------
+AS_CASE([${with_png}], [yes],
+    AC_SUBST([png_CPPFLAGS], [-DWITH_PNG])
+    AC_SUBST([png_LIBS], [-lpng])
+    AC_MSG_NOTICE([png_LIBS : ${png_LIBS}]))
+
+# Require qrencode if --with_qrencode and output ${qrencode_CPPFLAGS/LIBS}.
+#------------------------------------------------------------------------------
+AS_CASE([${with_qrencode}], [yes],
+    AC_SUBST([qrencode_CPPFLAGS], [-DWITH_QRENCODE])
+    AC_SUBST([qrencode_LIBS], [-lqrencode])
+    AC_MSG_NOTICE([qrencode_LIBS : ${qrencode_LIBS}]))
 
 # Require rt if on linux and output ${rt_LIBS}.
 #------------------------------------------------------------------------------
