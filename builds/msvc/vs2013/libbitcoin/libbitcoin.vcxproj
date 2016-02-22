@@ -222,7 +222,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\hash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\hash_number.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\script_number.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\secp256k1_initializer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\stealth.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\uint256.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\messages.hpp" />
@@ -325,6 +324,7 @@
     <ClInclude Include="..\..\..\..\src\math\external\sha512.h" />
     <ClInclude Include="..\..\..\..\src\math\external\lax_der_parsing.h" />
     <ClInclude Include="..\..\..\..\src\math\external\zeroize.h" />
+    <ClInclude Include="..\..\..\..\src\math\secp256k1_initializer.hpp" />
     <ClInclude Include="..\..\..\..\src\utility\conditional_stack.hpp" />
     <ClInclude Include="..\..\..\..\src\utility\evaluation_context.hpp" />
     <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_key.hpp" />

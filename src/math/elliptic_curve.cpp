@@ -23,10 +23,10 @@
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/math/secp256k1_initializer.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include "../math/external/lax_der_parsing.h"
+#include "secp256k1_initializer.hpp"
 
 namespace libbitcoin {
     

@@ -637,9 +637,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\ofstream.hpp">
       <Filter>include\bitcoin\unicode</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\secp256k1_initializer.hpp">
-      <Filter>include\bitcoin\math</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\thread.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
@@ -921,6 +918,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\stealth_row.hpp">
       <Filter>include\bitcoin\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\math\secp256k1_initializer.hpp">
+      <Filter>src\math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
