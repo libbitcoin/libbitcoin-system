@@ -67,6 +67,7 @@ src_libbitcoin_la_SOURCES = \
     src/math/hash_number.cpp \
     src/math/script_number.cpp \
     src/math/secp256k1_initializer.cpp \
+    src/math/secp256k1_initializer.hpp \
     src/math/stealth.cpp \
     src/math/uint256.cpp \
     src/math/external/aes256.c \
@@ -361,7 +362,6 @@ include_bitcoin_bitcoin_math_HEADERS = \
     include/bitcoin/bitcoin/math/hash.hpp \
     include/bitcoin/bitcoin/math/hash_number.hpp \
     include/bitcoin/bitcoin/math/script_number.hpp \
-    include/bitcoin/bitcoin/math/secp256k1_initializer.hpp \
     include/bitcoin/bitcoin/math/stealth.hpp \
     include/bitcoin/bitcoin/math/uint256.hpp
 
