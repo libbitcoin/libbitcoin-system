@@ -34,7 +34,7 @@ enum class point_kind : uint32_t
     spend = 1
 };
 
-struct history_row
+struct BC_API history_row
 {
     /// Is this an output or spend.
     point_kind kind;

@@ -66,22 +66,6 @@ BC_API bool operator!=(const point& left, const point& right);
 typedef point input_point;
 typedef point output_point;
 
-struct BC_API spend_info
-{
-    typedef std::vector<spend_info> list;
-
-    input_point point;
-    output_point previous_output;
-};
-
-struct BC_API output_info
-{
-    typedef std::vector<output_info> list;
-
-    output_point point;
-    uint64_t value;
-};
-
 struct BC_API points_info
 {
     output_point::list points;

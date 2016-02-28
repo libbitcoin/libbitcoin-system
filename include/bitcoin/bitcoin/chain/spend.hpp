@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2016 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,25 +17,32 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CHAIN_STEALTH_ROW_HPP
-#define LIBBITCOIN_CHAIN_STEALTH_ROW_HPP
+#ifndef LIBBITCOIN_CHAIN_SPEND_HPP
+#define LIBBITCOIN_CHAIN_SPEND_HPP
 
 #include <vector>
-#include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/chain/point.hpp>
 
 namespace libbitcoin {
 namespace chain {
 
-struct BC_API stealth_row
+struct BC_API spend
 {
-    hash_digest ephemeral_key;
-    short_hash address;
-    hash_digest transaction_hash;
+    bool valid;
+    uint32_t index;
+    hash_digest hash;
 };
 
-typedef std::vector<stealth_row> stealth;
+struct BC_API spend_info
+{
+    typedef std::vector<spend_info> list;
 
-} // namespace chain
-} // namespace libbitcoin
+    input_point point;
+    output_point previous_output;
+};
+
+} // namspace chain
+} // namspace libbitcoin
 
 #endif
