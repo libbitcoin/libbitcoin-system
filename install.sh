@@ -263,12 +263,12 @@ ICU_OPTIONS=\
 # Define png options.
 #------------------------------------------------------------------------------
 PNG_OPTIONS=\
-" "
+"${with_pkgconfigdir} "
 
 # Define qrencode options.
 #------------------------------------------------------------------------------
 QRENCODE_OPTIONS=\
-" "
+"${with_pkgconfigdir} "
 
 # Define boost options for gcc.
 #------------------------------------------------------------------------------
@@ -478,50 +478,16 @@ push_directory()
 
 # Build functions.
 #==============================================================================
-build_from_tarball_icu()
-{
-    local URL=$1
-    local ARCHIVE=$2
-    local REPO=$3
-    local JOBS=$4
-    shift 4
-
-    if [[ !($BUILD_ICU) ]]; then
-        initialize_icu_packages
-        display_message "ICU build not enabled"
-        return
-    fi
-
-    display_message "Download $ARCHIVE"
-
-    create_directory $REPO
-    push_directory $REPO
-
-    # Extract the source locally.
-    wget --output-document $ARCHIVE $URL
-    tar --extract --file $ARCHIVE --strip-components=1
-    push_directory "source"
-
-    # Build and install.
-    # ICU is a typical GNU build except that it fails on unknown options.
-    configure_options $ICU_LINK $ICU_STANDARD ${prefix} "$@"
-    make_jobs $JOBS --silent
-    make install
-    configure_links
-
-    pop_directory
-    pop_directory
-}
-
 build_from_tarball()
 {
     local URL=$1
     local ARCHIVE=$2
     local ARCHIVE_TYPE=$3
     local JOBS=$4
-    local LINK=$5
-    local STANDARD=$6
-    shift 6
+    local PUSH_DIR=$5
+    local LINK=$6
+    local STANDARD=$7
+    shift 7
 
     display_message "Download $ARCHIVE"
 
@@ -533,12 +499,14 @@ build_from_tarball()
     # Extract the source locally.
     wget --output-document $ARCHIVE $URL
     tar --extract --file $ARCHIVE --$ARCHIVE_TYPE --strip-components=1
+    push_directory $PUSH_DIR
 
     configure_options $LINK $STANDARD ${prefix} "$@"
     make_jobs $JOBS --silent
     make install
     configure_links
 
+    pop_directory
     pop_directory
 }
 
@@ -648,9 +616,9 @@ build_from_travis()
 #==============================================================================
 build_all()
 {
-    build_from_tarball_icu $ICU_URL $ICU_ARCHIVE icu $PARALLEL $ICU_OPTIONS
-    build_from_tarball $PNG_URL $PNG_ARCHIVE xz $PARALLEL $PNG_OPTIONS $PNG_LINK $PNG_STANDARD
-    build_from_tarball $QRENCODE_URL $QRENCODE_ARCHIVE bzip2 $PARALLEL $QRENCODE_OPTIONS $QRENCODE_LINK $QRENCODE_STANDARD
+    build_from_tarball $ICU_URL $ICU_ARCHIVE gzip $PARALLEL source $ICU_LINK $ICU_STANDARD $ICU_OPTIONS
+    build_from_tarball $PNG_URL $PNG_ARCHIVE xz $PARALLEL . $PNG_LINK $PNG_STANDARD $PNG_OPTIONS
+    build_from_tarball $QRENCODE_URL $QRENCODE_ARCHIVE bzip2 $PARALLEL . $QRENCODE_LINK $QRENCODE_STANDARD $QRENCODE_OPTIONS
     build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE boost $PARALLEL $BOOST_OPTIONS
     build_from_github libbitcoin secp256k1 version4 $PARALLEL "$@" $SECP256K1_OPTIONS
     build_from_travis libbitcoin libbitcoin master $PARALLEL "$@" $BITCOIN_OPTIONS

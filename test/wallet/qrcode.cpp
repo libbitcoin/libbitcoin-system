@@ -104,9 +104,9 @@ BOOST_AUTO_TEST_CASE(qrcode__invoke__qrencode_data__success)
         0x85, 0x02, 0x03, 0x02, 0x03, 0x02, 0x03, 0x02, 0x02, 0x02, 0x02, 0x03,
         0x02, 0x03, 0x02, 0x02, 0x03, 0x03, 0x03, 0x02, 0x02
     };
-    const auto& expected_data_len = 849;
+    constexpr uint32_t expected_data_len = 849;
 
-    const data_chunk& encoded_qrcode = qrencode_data(to_chunk(address));
+    const auto encoded_qrcode = qr::encode(to_chunk(address));
 
     BOOST_REQUIRE_EQUAL(encoded_qrcode.size(), expected_data_len);
     BOOST_REQUIRE_EQUAL(std::memcmp(encoded_qrcode.data(),
