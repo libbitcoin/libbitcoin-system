@@ -22,9 +22,9 @@
 
 #include <functional>
 #include <memory>
-#include <mutex>
 #include <string>
 #include <vector>
+#include <boost/thread.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
@@ -61,9 +61,9 @@ private:
     void do_relay(Args... args);
 
     bool stopped_;
-    std::mutex mutex_;
     dispatcher dispatch_;
     list subscriptions_;
+    boost::shared_mutex mutex_;
 };
 
 } // namespace libbitcoin
