@@ -24,10 +24,10 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <boost/thread.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 ////#include <bitcoin/bitcoin/utility/track.hpp>
 
@@ -63,7 +63,7 @@ private:
     bool stopped_;
     dispatcher dispatch_;
     list subscriptions_;
-    boost::shared_mutex mutex_;
+    shared_mutex mutex_;
 };
 
 } // namespace libbitcoin

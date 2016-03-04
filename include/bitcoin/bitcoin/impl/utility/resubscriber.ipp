@@ -23,9 +23,9 @@
 #include <functional>
 #include <memory>
 #include <string>
-#include <boost/thread.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 ////#include <bitcoin/bitcoin/utility/track.hpp>
 
@@ -51,7 +51,7 @@ void resubscriber<Args...>::stop()
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    boost::shared_lock<boost::shared_mutex> unique_lock(mutex_);
+    unique_lock lock(mutex_);
 
     stopped_ = true;
     ///////////////////////////////////////////////////////////////////////////
@@ -62,7 +62,7 @@ void resubscriber<Args...>::subscribe(handler notifier)
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    boost::shared_lock<boost::shared_mutex> shared_lock(mutex_);
+    shared_lock lock(mutex_);
 
     if (!stopped_)
         dispatch_.ordered(&resubscriber<Args...>::do_subscribe,
@@ -98,7 +98,7 @@ void resubscriber<Args...>::do_relay(Args... args)
 
         // Critical Section
         ///////////////////////////////////////////////////////////////////////
-        boost::shared_lock<boost::shared_mutex> unique_lock(mutex_);
+        unique_lock lock(mutex_);
 
         if (renew && !stopped_)
             subscriptions_.push_back(notifier);
