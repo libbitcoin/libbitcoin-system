@@ -22,6 +22,7 @@
 
 #include <cstdint>
 #include <istream>
+#include <memory>
 #include <string>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
@@ -38,6 +39,8 @@ class BC_API transaction
 {
 public:
     typedef std::vector<transaction> list;
+    typedef std::shared_ptr<transaction> ptr;
+    typedef std::vector<ptr> ptr_list;
 
     static transaction factory_from_data(const data_chunk& data);
     static transaction factory_from_data(std::istream& stream);

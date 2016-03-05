@@ -21,6 +21,7 @@
 #define LIBBITCOIN_MESSAGE_ALERT_HPP
 
 #include <istream>
+#include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -33,6 +34,8 @@ namespace message {
 class BC_API alert
 {
 public:
+    typedef std::shared_ptr<alert> ptr;
+
     static alert factory_from_data(const data_chunk& data);
     static alert factory_from_data(std::istream& stream);
     static alert factory_from_data(reader& source);

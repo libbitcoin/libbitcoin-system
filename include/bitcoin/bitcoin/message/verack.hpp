@@ -21,6 +21,7 @@
 #define LIBBITCOIN_MESSAGE_VERACK_HPP
 
 #include <istream>
+#include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -30,10 +31,12 @@
 namespace libbitcoin {
 namespace message {
 
-// The checksum ignored by the verack command.
+// The checksum is ignored by the verack command.
 class BC_API verack
 {
 public:
+    typedef std::shared_ptr<verack> ptr;
+
     static verack factory_from_data(const data_chunk& data);
     static verack factory_from_data(std::istream& stream);
     static verack factory_from_data(reader& source);

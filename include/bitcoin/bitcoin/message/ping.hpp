@@ -22,6 +22,7 @@
 
 #include <cstdint>
 #include <istream>
+#include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/nonce.hpp>
@@ -36,6 +37,8 @@ class BC_API ping
   : public nonce_
 {
 public:
+    typedef std::shared_ptr<ping> ptr;
+
     static ping factory_from_data(const data_chunk& data);
     static ping factory_from_data(std::istream& stream);
     static ping factory_from_data(reader& source);

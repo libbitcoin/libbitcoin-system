@@ -21,6 +21,7 @@
 #define LIBBITCOIN_MESSAGE_GET_DATA_HPP
 
 #include <initializer_list>
+#include <memory>
 #include <istream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
@@ -35,6 +36,8 @@ class BC_API get_data
   : public inventory
 {
 public:
+    typedef std::shared_ptr<get_data> ptr;
+
     static get_data factory_from_data(const data_chunk& data);
     static get_data factory_from_data(std::istream& stream);
     static get_data factory_from_data(reader& source);

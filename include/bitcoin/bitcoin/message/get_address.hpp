@@ -21,6 +21,7 @@
 #define LIBBITCOIN_MESSAGE_GET_ADDRESS_HPP
 
 #include <istream>
+#include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -33,6 +34,8 @@ namespace message {
 class BC_API get_address
 {
 public:
+    typedef std::shared_ptr<get_address> ptr;
+
     static get_address factory_from_data(const data_chunk& data);
     static get_address factory_from_data(std::istream& stream);
     static get_address factory_from_data(reader& source);

@@ -20,6 +20,9 @@
 #ifndef LIBBITCOIN_MESSAGE_GET_HEADERS_HPP
 #define LIBBITCOIN_MESSAGE_GET_HEADERS_HPP
 
+#include <istream>
+#include <memory>
+#include <string>
 #include <bitcoin/bitcoin/message/get_blocks.hpp>
 
 namespace libbitcoin {
@@ -29,6 +32,8 @@ class BC_API get_headers
   : public get_blocks
 {
 public:
+    typedef std::shared_ptr<get_headers> ptr;
+
     static get_headers factory_from_data(const data_chunk& data);
     static get_headers factory_from_data(std::istream& stream);
     static get_headers factory_from_data(reader& source);
