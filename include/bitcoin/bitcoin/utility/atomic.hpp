@@ -40,7 +40,7 @@ public:
     {
     }
 
-    Type load()
+    Type load() const
     {
         // Critical Section
         ///////////////////////////////////////////////////////////////////////
@@ -62,7 +62,7 @@ public:
 
 private:
     Type instance_;
-    shared_mutex mutex_;
+    mutable shared_mutex mutex_;
 };
 
 } // namespace libbitcoin

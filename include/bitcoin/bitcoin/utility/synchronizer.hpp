@@ -104,7 +104,7 @@ private:
 
     // We use pointer to reference the same value/mutex across instance copies.
     std::shared_ptr<size_t> counter_;
-    mutable shared_mutex counter_mutex_;
+    std::shared_ptr<shared_mutex> counter_mutex_;
 };
 
 template <typename Handler>
