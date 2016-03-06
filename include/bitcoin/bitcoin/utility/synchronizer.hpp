@@ -40,7 +40,7 @@ public:
         clearance_count_(clearance_count),
         name_(name),
         counter_(std::make_shared<std::size_t>(0)),
-        counter_mutex_(std::make_shared<std::mutex>()),
+        counter_mutex_(std::make_shared<shared_mutex>()),
         suppress_errors_(suppress_errors)
     {
     }
@@ -104,7 +104,7 @@ private:
 
     // We use pointer to reference the same value/mutex across instance copies.
     std::shared_ptr<size_t> counter_;
-    shared_mutex counter_mutex_;
+    mutable shared_mutex counter_mutex_;
 };
 
 template <typename Handler>
