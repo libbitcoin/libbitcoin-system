@@ -51,14 +51,14 @@ public:
     /// Return true from the handler to resubscribe.
     void subscribe(handler notifier);
 
-    /// Call relay to invoke all handlers, which clears subscription if false.
+    /// Call to invoke all handlers, which clears subscription if false.
     void relay(Args... args);
+
+    /// Invoke all handlers in order on the current thread.
+    void do_relay(Args... args);
 
 private:
     typedef std::vector<handler> list;
-
-    void do_subscribe(handler notifier);
-    void do_relay(Args... args);
 
     bool stopped_;
     dispatcher dispatch_;

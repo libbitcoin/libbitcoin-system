@@ -62,18 +62,11 @@ void subscriber<Args...>::subscribe(handler notifier)
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    shared_lock lock(mutex_);
+    unique_lock lock(mutex_);
 
     if (!stopped_)
-        dispatch_.ordered(&subscriber<Args...>::do_subscribe,
-            this->shared_from_this(), notifier);
+        subscriptions_.push_back(notifier);
     ///////////////////////////////////////////////////////////////////////////
-}
-
-template <typename... Args>
-void subscriber<Args...>::do_subscribe(handler notifier)
-{
-    subscriptions_.push_back(notifier);
 }
 
 template <typename... Args>
@@ -86,10 +79,15 @@ void subscriber<Args...>::relay(Args... args)
 template <typename... Args>
 void subscriber<Args...>::do_relay(Args... args)
 {
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    unique_lock lock(mutex_);
+
     for (const auto notifier: subscriptions_)
         notifier(args...);
 
     subscriptions_.clear();
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 } // namespace libbitcoin

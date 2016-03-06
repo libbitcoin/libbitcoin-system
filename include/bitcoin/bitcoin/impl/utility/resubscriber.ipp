@@ -62,18 +62,11 @@ void resubscriber<Args...>::subscribe(handler notifier)
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    shared_lock lock(mutex_);
+    unique_lock lock(mutex_);
 
     if (!stopped_)
-        dispatch_.ordered(&resubscriber<Args...>::do_subscribe,
-            this->shared_from_this(), notifier);
+        subscriptions_.push_back(notifier);
     ///////////////////////////////////////////////////////////////////////////
-}
-
-template <typename... Args>
-void resubscriber<Args...>::do_subscribe(handler notifier)
-{
-    subscriptions_.push_back(notifier);
 }
 
 template <typename... Args>
@@ -86,6 +79,10 @@ void resubscriber<Args...>::relay(Args... args)
 template <typename... Args>
 void resubscriber<Args...>::do_relay(Args... args)
 {
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    unique_lock lock(mutex_);
+
     if (subscriptions_.empty())
         return;
 
@@ -93,17 +90,9 @@ void resubscriber<Args...>::do_relay(Args... args)
     subscriptions_.clear();
 
     for (const auto notifier: subscriptions_copy)
-    {
-        const auto renew = notifier(args...);
-
-        // Critical Section
-        ///////////////////////////////////////////////////////////////////////
-        unique_lock lock(mutex_);
-
-        if (renew && !stopped_)
+        if (notifier(args...) && !stopped_)
             subscriptions_.push_back(notifier);
-        ///////////////////////////////////////////////////////////////////////
-    }
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 } // namespace libbitcoin
