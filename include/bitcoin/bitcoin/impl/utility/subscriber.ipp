@@ -83,6 +83,8 @@ void subscriber<Args...>::do_relay(Args... args)
     ///////////////////////////////////////////////////////////////////////////
     unique_lock lock(mutex_);
 
+    // If do_relay is called publicly then notifier must never call back into
+    // this class, otherwise a deadlock will result.
     for (const auto notifier: subscriptions_)
         notifier(args...);
 

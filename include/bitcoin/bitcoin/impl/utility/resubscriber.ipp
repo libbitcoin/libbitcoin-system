@@ -89,6 +89,8 @@ void resubscriber<Args...>::do_relay(Args... args)
     const auto subscriptions_copy = subscriptions_;
     subscriptions_.clear();
 
+    // If do_relay is called publicly then notifier must never call back into
+    // this class, otherwise a deadlock will result.
     for (const auto notifier: subscriptions_copy)
         if (notifier(args...) && !stopped_)
             subscriptions_.push_back(notifier);
