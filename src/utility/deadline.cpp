@@ -25,8 +25,6 @@
 #include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
-INITIALIZE_TRACK(bc::deadline);
-
 namespace libbitcoin {
 
 using std::placeholders::_1;

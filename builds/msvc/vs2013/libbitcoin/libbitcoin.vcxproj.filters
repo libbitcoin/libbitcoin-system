@@ -135,6 +135,9 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\resubscriber.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\track.ipp">
+      <Filter>include\bitcoin\impl\utility</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\constants.cpp">

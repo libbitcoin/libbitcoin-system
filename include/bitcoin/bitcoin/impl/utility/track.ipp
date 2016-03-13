@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2016 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,30 +17,38 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_TRACK_HPP
-#define LIBBITCOIN_TRACK_HPP
+#ifndef LIBBITCOIN_TRACK_IPP
+#define LIBBITCOIN_TRACK_IPP
 
 #include <atomic>
 #include <cstddef>
 #include <string>
-
-#define CONSTRUCT_TRACK(class_name) \
-    track<class_name>(#class_name)
+#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/log.hpp>
 
 template <class Shared>
-class track
+std::atomic<size_t> track<Shared>::instances(0);
+
+template <class Shared>
+track<Shared>::track(const std::string& DEBUG_ONLY(class_name))
+#ifndef NDEBUG
+  : class_(class_name)
+#endif
 {
-public:
-    static std::atomic<size_t> instances;
+#ifndef NDEBUG
+    bc::log::debug(LOG_TRACK)
+        << class_ << "(" << ++instances << ")";
+#endif
+}
 
-protected:
-    track(const std::string& class_name);
-    ~track();
-
-private:
-    const std::string class_;
-};
-
-#include <bitcoin/bitcoin/impl/utility/track.ipp>
+template <class Shared>
+track<Shared>::~track()
+{
+#ifndef NDEBUG
+    bc::log::debug(LOG_TRACK)
+        << "~" << class_ << "(" << --instances << ")";
+#endif
+}
 
 #endif

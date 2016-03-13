@@ -354,7 +354,8 @@ include_bitcoin_bitcoin_impl_utility_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/ostream_writer.ipp \
     include/bitcoin/bitcoin/impl/utility/resubscriber.ipp \
     include/bitcoin/bitcoin/impl/utility/serializer.ipp \
-    include/bitcoin/bitcoin/impl/utility/subscriber.ipp
+    include/bitcoin/bitcoin/impl/utility/subscriber.ipp \
+    include/bitcoin/bitcoin/impl/utility/track.ipp
 
 include_bitcoin_bitcoin_mathdir = ${includedir}/bitcoin/bitcoin/math
 include_bitcoin_bitcoin_math_HEADERS = \

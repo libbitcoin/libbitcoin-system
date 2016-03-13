@@ -350,6 +350,7 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\resubscriber.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\serializer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\subscriber.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\track.ipp" />
     <None Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_key.ipp" />
     <None Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_prefix.ipp" />
     <None Include="packages.config" />
