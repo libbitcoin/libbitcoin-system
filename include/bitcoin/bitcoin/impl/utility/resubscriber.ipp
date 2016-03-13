@@ -23,6 +23,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <utility>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
@@ -34,7 +35,7 @@ namespace libbitcoin {
 template <typename... Args>
 resubscriber<Args...>::resubscriber(threadpool& pool,
     const std::string& class_name)
-  : stopped_(false),
+  : stopped_(true),
     dispatch_(pool, class_name)/*,
     track<resubscriber<Args...>>(class_name)*/
 {
@@ -47,26 +48,68 @@ resubscriber<Args...>::~resubscriber()
 }
 
 template <typename... Args>
-void resubscriber<Args...>::stop()
+void resubscriber<Args...>::start()
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    unique_lock lock(mutex_);
+    mutex_.lock_upgrade();
 
-    stopped_ = true;
+    if (stopped_)
+    {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        mutex_.unlock_upgrade_and_lock();
+        stopped_ = false;
+        mutex_.unlock();
+        //---------------------------------------------------------------------
+        return;
+    }
+
+    mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 }
 
 template <typename... Args>
-void resubscriber<Args...>::subscribe(handler notifier)
+void resubscriber<Args...>::stop()
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    unique_lock lock(mutex_);
+    mutex_.lock_upgrade();
 
     if (!stopped_)
-        subscriptions_.push_back(notifier);
+    {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        mutex_.unlock_upgrade_and_lock();
+        stopped_ = true;
+        mutex_.unlock();
+        //---------------------------------------------------------------------
+        return;
+    }
+
+    mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
+}
+
+template <typename... Args>
+void resubscriber<Args...>::subscribe(handler notifier, Args... stopped_args)
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    mutex_.lock_upgrade();
+
+    if (!stopped_)
+    {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        mutex_.unlock_upgrade_and_lock();
+        subscriptions_.push_back(notifier);
+        mutex_.unlock();
+        //---------------------------------------------------------------------
+        return;
+    }
+
+    mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
+
+    notifier(stopped_args...);
 }
 
 template <typename... Args>
@@ -81,19 +124,41 @@ void resubscriber<Args...>::do_relay(Args... args)
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    unique_lock lock(mutex_);
+    mutex_.lock();
 
-    if (subscriptions_.empty())
+    // Move subscribers from the member list to a temporary list.
+    list subscriptions;
+    move_append(subscriptions, subscriptions_);
+
+    mutex_.unlock();
+    ///////////////////////////////////////////////////////////////////////////
+
+    // Build list of renewals by moving from temporary list after invoking.
+    list renewals;
+
+    // Invoke subscribers from temporary list.
+    for (const auto& notifier: subscriptions)
+        if (notifier(args...))
+            renewals.push_back(std::move(notifier));
+
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    mutex_.lock_upgrade();
+
+    if (!stopped_)
+    {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        mutex_.unlock_upgrade_and_lock();
+
+        // Move renewals onto subscriptions member (which may have changed).
+        move_append(subscriptions_, renewals);
+
+        mutex_.unlock();
+        //---------------------------------------------------------------------
         return;
+    }
 
-    const auto subscriptions_copy = subscriptions_;
-    subscriptions_.clear();
-
-    // If do_relay is called publicly then notifier must never call back into
-    // this class, otherwise a deadlock will result.
-    for (const auto notifier: subscriptions_copy)
-        if (notifier(args...) && !stopped_)
-            subscriptions_.push_back(notifier);
+    mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 }
 

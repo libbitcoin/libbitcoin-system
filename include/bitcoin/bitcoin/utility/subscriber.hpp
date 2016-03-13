@@ -45,11 +45,14 @@ public:
     subscriber(threadpool& pool, const std::string& class_name);
     ~subscriber();
 
+    /// Call start to enable new subscriptions.
+    void start();
+
     /// Call stop to prevent new subscriptions.
     void stop();
 
     /// Use the resubscriber template to resubscribe in the handler.
-    void subscribe(handler notifier);
+    void subscribe(handler notifier, Args... stopped_args);
 
     /// Call to invoke all handlers, which clears them.
     void relay(Args... args);
@@ -63,7 +66,7 @@ private:
     bool stopped_;
     dispatcher dispatch_;
     list subscriptions_;
-    mutable shared_mutex mutex_;
+    mutable upgrade_mutex mutex_;
 };
 
 } // namespace libbitcoin

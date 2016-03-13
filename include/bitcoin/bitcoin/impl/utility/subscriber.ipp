@@ -34,7 +34,7 @@ namespace libbitcoin {
 template <typename... Args>
 subscriber<Args...>::subscriber(threadpool& pool,
     const std::string& class_name)
-  : stopped_(false),
+    : stopped_(true),
     dispatch_(pool, class_name)/*,
     track<subscriber<Args...>>(class_name)*/
 {
@@ -47,26 +47,68 @@ subscriber<Args...>::~subscriber()
 }
 
 template <typename... Args>
-void subscriber<Args...>::stop()
+void subscriber<Args...>::start()
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    unique_lock lock(mutex_);
+    mutex_.lock_upgrade();
 
-    stopped_ = true;
+    if (stopped_)
+    {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        mutex_.unlock_upgrade_and_lock();
+        stopped_ = false;
+        mutex_.unlock();
+        //---------------------------------------------------------------------
+        return;
+    }
+
+    mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 }
 
 template <typename... Args>
-void subscriber<Args...>::subscribe(handler notifier)
+void subscriber<Args...>::stop()
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    unique_lock lock(mutex_);
+    mutex_.lock_upgrade();
 
     if (!stopped_)
-        subscriptions_.push_back(notifier);
+    {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        mutex_.unlock_upgrade_and_lock();
+        stopped_ = true;
+        mutex_.unlock();
+        //---------------------------------------------------------------------
+        return;
+    }
+
+    mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
+}
+
+template <typename... Args>
+void subscriber<Args...>::subscribe(handler notifier, Args... stopped_args)
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    mutex_.lock_upgrade();
+
+    if (!stopped_)
+    {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        mutex_.unlock_upgrade_and_lock();
+        subscriptions_.push_back(notifier);
+        mutex_.unlock();
+        //---------------------------------------------------------------------
+        return;
+    }
+
+    mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
+
+    notifier(stopped_args...);
 }
 
 template <typename... Args>
@@ -81,15 +123,18 @@ void subscriber<Args...>::do_relay(Args... args)
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    unique_lock lock(mutex_);
+    mutex_.lock();
 
-    // If do_relay is called publicly then notifier must never call back into
-    // this class, otherwise a deadlock will result.
-    for (const auto notifier: subscriptions_)
-        notifier(args...);
+    // Move subscribers from the member list to a temporary list.
+    list subscriptions;
+    move_append(subscriptions, subscriptions_);
 
-    subscriptions_.clear();
+    mutex_.unlock();
     ///////////////////////////////////////////////////////////////////////////
+
+    // Invoke subscribers from temporary list.
+    for (const auto& notifier: subscriptions)
+        notifier(args...);
 }
 
 } // namespace libbitcoin
