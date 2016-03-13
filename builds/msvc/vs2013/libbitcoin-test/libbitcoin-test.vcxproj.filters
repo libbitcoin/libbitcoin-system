@@ -264,5 +264,8 @@
     <ClCompile Include="..\..\..\..\test\math\elliptic_curve.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\utility\collection.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

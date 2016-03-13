@@ -256,6 +256,7 @@ test_libbitcoin_test_SOURCES = \
     test/unicode/unicode_istream.cpp \
     test/unicode/unicode_ostream.cpp \
     test/utility/binary.cpp \
+    test/utility/collection.cpp \
     test/utility/data.cpp \
     test/utility/endian.cpp \
     test/utility/png.cpp \
