@@ -82,7 +82,7 @@ typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,
 }
 
 template <typename Type>
-typename void move_append(std::vector<Type>& target, std::vector<Type>& source)
+void move_append(std::vector<Type>& target, std::vector<Type>& source)
 {
     target.reserve(target.size() + source.size());
     std::move(source.begin(), source.end(), std::back_inserter(target));

@@ -96,8 +96,7 @@ typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,
  * @param[in]  source     The source list
  */
 template <typename Type>
-typename void move_append(std::vector<Type>& target,
-    std::vector<Type>& source);
+void move_append(std::vector<Type>& target, std::vector<Type>& source);
 
 } // namespace libbitcoin
 
