@@ -145,7 +145,8 @@ void resubscriber<Args...>::do_relay(Args... args)
     ///////////////////////////////////////////////////////////////////////////
     mutex_.lock_upgrade();
 
-    if (!stopped_)
+    // We must relay even if stopped.
+    if (!renewals.empty())
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_.unlock_upgrade_and_lock();
