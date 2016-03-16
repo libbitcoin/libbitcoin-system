@@ -21,6 +21,7 @@
 #define LIBBITCOIN_MESSAGE_MERKLE_BLOCK_HPP
 
 #include <istream>
+#include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/header.hpp>
@@ -34,6 +35,7 @@ namespace message {
 class BC_API merkle_block
 {
 public:
+    typedef std::shared_ptr<merkle_block> ptr;
     typedef std::vector<merkle_block> list;
 
     static merkle_block factory_from_data(const data_chunk& data);

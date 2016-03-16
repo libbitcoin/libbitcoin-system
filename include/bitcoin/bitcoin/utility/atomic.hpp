@@ -20,7 +20,7 @@
 #ifndef LIBBITCOIN_ATOMIC_POINTER_HPP
 #define LIBBITCOIN_ATOMIC_POINTER_HPP
 
-#include <mutex>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 
 namespace libbitcoin {
 
@@ -40,11 +40,11 @@ public:
     {
     }
 
-    Type load()
+    Type load() const
     {
         // Critical Section
         ///////////////////////////////////////////////////////////////////////
-        std::lock_guard<std::mutex> lock(mutex_);
+        shared_lock lock(mutex_);
 
         return instance_;
         ///////////////////////////////////////////////////////////////////////
@@ -54,7 +54,7 @@ public:
     {
         // Critical Section
         ///////////////////////////////////////////////////////////////////////
-        std::lock_guard<std::mutex> lock(mutex_);
+        unique_lock lock(mutex_);
 
         instance_ = instance;
         ///////////////////////////////////////////////////////////////////////
@@ -62,7 +62,7 @@ public:
 
 private:
     Type instance_;
-    std::mutex mutex_;
+    mutable shared_mutex mutex_;
 };
 
 } // namespace libbitcoin

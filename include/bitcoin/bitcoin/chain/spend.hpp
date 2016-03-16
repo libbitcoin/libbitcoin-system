@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2016 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,30 +17,32 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_TRACK_HPP
-#define LIBBITCOIN_TRACK_HPP
+#ifndef LIBBITCOIN_CHAIN_SPEND_HPP
+#define LIBBITCOIN_CHAIN_SPEND_HPP
 
-#include <atomic>
-#include <cstddef>
-#include <string>
+#include <vector>
+#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/chain/point.hpp>
 
-#define CONSTRUCT_TRACK(class_name) \
-    track<class_name>(#class_name)
+namespace libbitcoin {
+namespace chain {
 
-template <class Shared>
-class track
+struct BC_API spend
 {
-public:
-    static std::atomic<size_t> instances;
-
-protected:
-    track(const std::string& class_name);
-    ~track();
-
-private:
-    const std::string class_;
+    bool valid;
+    uint32_t index;
+    hash_digest hash;
 };
 
-#include <bitcoin/bitcoin/impl/utility/track.ipp>
+struct BC_API spend_info
+{
+    typedef std::vector<spend_info> list;
+
+    input_point point;
+    output_point previous_output;
+};
+
+} // namspace chain
+} // namspace libbitcoin
 
 #endif

@@ -21,6 +21,7 @@
 #define LIBBITCOIN_MESSAGE_MEMORY_POOL_HPP
 
 #include <istream>
+#include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -33,6 +34,8 @@ namespace message {
 class BC_API memory_pool
 {
 public:
+    typedef std::shared_ptr<memory_pool> ptr;
+
     static memory_pool factory_from_data(const data_chunk& data);
     static memory_pool factory_from_data(std::istream& stream);
     static memory_pool factory_from_data(reader& source);

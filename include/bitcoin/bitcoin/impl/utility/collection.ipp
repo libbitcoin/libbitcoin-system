@@ -20,6 +20,8 @@
 #ifndef LIBBITCOIN_COLLECTION_IPP
 #define LIBBITCOIN_COLLECTION_IPP
 
+#include <algorithm>
+#include <iterator>
 #include <cstddef>
 #include <iterator>
 #include <iostream>
@@ -77,6 +79,14 @@ typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,
     return list.insert(
         std::upper_bound(list.begin(), list.end(), element, predicate),
         element);
+}
+
+template <typename Type>
+void move_append(std::vector<Type>& target, std::vector<Type>& source)
+{
+    target.reserve(target.size() + source.size());
+    std::move(source.begin(), source.end(), std::back_inserter(target));
+    source.clear();
 }
 
 } // namespace libbitcoin

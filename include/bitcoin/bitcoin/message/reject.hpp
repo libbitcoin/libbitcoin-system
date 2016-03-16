@@ -22,6 +22,7 @@
 
 #include <cstdint>
 #include <istream>
+#include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -45,6 +46,8 @@ public:
         insufficient_fee = 0x42,
         checkpoint = 0x43
     };
+
+    typedef std::shared_ptr<reject> ptr;
 
     static reject factory_from_data(const data_chunk& data);
     static reject factory_from_data(std::istream& stream);

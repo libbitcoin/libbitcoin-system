@@ -22,10 +22,11 @@
 
 #include <functional>
 #include <memory>
-#include <mutex>
 #include <string>
+#include <utility>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 ////#include <bitcoin/bitcoin/utility/track.hpp>
 
@@ -34,7 +35,7 @@ namespace libbitcoin {
 template <typename... Args>
 resubscriber<Args...>::resubscriber(threadpool& pool,
     const std::string& class_name)
-  : stopped_(false),
+  : stopped_(true),
     dispatch_(pool, class_name)/*,
     track<resubscriber<Args...>>(class_name)*/
 {
@@ -47,33 +48,68 @@ resubscriber<Args...>::~resubscriber()
 }
 
 template <typename... Args>
+void resubscriber<Args...>::start()
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    mutex_.lock_upgrade();
+
+    if (stopped_)
+    {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        mutex_.unlock_upgrade_and_lock();
+        stopped_ = false;
+        mutex_.unlock();
+        //---------------------------------------------------------------------
+        return;
+    }
+
+    mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+template <typename... Args>
 void resubscriber<Args...>::stop()
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    std::lock_guard<std::mutex> lock(mutex_);
+    mutex_.lock_upgrade();
 
-    stopped_ = true;
+    if (!stopped_)
+    {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        mutex_.unlock_upgrade_and_lock();
+        stopped_ = true;
+        mutex_.unlock();
+        //---------------------------------------------------------------------
+        return;
+    }
+
+    mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 }
 
 template <typename... Args>
-void resubscriber<Args...>::subscribe(handler notifier)
+void resubscriber<Args...>::subscribe(handler notifier, Args... stopped_args)
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    std::lock_guard<std::mutex> lock(mutex_);
+    mutex_.lock_upgrade();
 
     if (!stopped_)
-        dispatch_.ordered(&resubscriber<Args...>::do_subscribe,
-            this->shared_from_this(), notifier);
-    ///////////////////////////////////////////////////////////////////////////
-}
+    {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        mutex_.unlock_upgrade_and_lock();
+        subscriptions_.push_back(notifier);
+        mutex_.unlock();
+        //---------------------------------------------------------------------
+        return;
+    }
 
-template <typename... Args>
-void resubscriber<Args...>::do_subscribe(handler notifier)
-{
-    subscriptions_.push_back(notifier);
+    mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
+
+    notifier(stopped_args...);
 }
 
 template <typename... Args>
@@ -86,24 +122,47 @@ void resubscriber<Args...>::relay(Args... args)
 template <typename... Args>
 void resubscriber<Args...>::do_relay(Args... args)
 {
-    if (subscriptions_.empty())
-        return;
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    mutex_.lock();
 
-    const auto subscriptions_copy = subscriptions_;
-    subscriptions_.clear();
+    // Move subscribers from the member list to a temporary list.
+    list subscriptions;
+    move_append(subscriptions, subscriptions_);
 
-    for (const auto notifier: subscriptions_copy)
+    mutex_.unlock();
+    ///////////////////////////////////////////////////////////////////////////
+
+    // Build list of renewals by moving from temporary list after invoking.
+    list renewals;
+
+    // Invoke subscribers from temporary list.
+    for (const auto& notifier: subscriptions)
+        if (notifier(args...))
+            renewals.push_back(std::move(notifier));
+
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    mutex_.lock_upgrade();
+
+    // This is dangerous since the service may be stopped.
+    // Yet if this is a stop subscription requestig a resubscribe it's
+    // required to capture the service stop.
+    if (!renewals.empty())
     {
-        const auto renew = notifier(args...);
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        mutex_.unlock_upgrade_and_lock();
 
-        // Critical Section
-        ///////////////////////////////////////////////////////////////////////
-        std::lock_guard<std::mutex> lock(mutex_);
+        // Move renewals onto subscriptions member (which may have changed).
+        move_append(subscriptions_, renewals);
 
-        if (renew && !stopped_)
-            subscriptions_.push_back(notifier);
-        ///////////////////////////////////////////////////////////////////////
+        mutex_.unlock();
+        //---------------------------------------------------------------------
+        return;
     }
+
+    mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 } // namespace libbitcoin

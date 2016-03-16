@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <initializer_list>
 #include <istream>
+#include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/inventory_type_id.hpp>
@@ -38,6 +39,8 @@ namespace message {
 class BC_API inventory
 {
 public:
+    typedef std::shared_ptr<inventory> ptr;
+
     static inventory factory_from_data(const data_chunk& data);
     static inventory factory_from_data(std::istream& stream);
     static inventory factory_from_data(reader& source);

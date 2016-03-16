@@ -80,14 +80,23 @@ Consequent if_else(bool antecedent, const Consequent consequent,
  * Facilitate a list insertion sort by inserting into a sorted position.
  * @param      <Type>       The type of list member elements.
  * @param      <Predicate>  The sort predicate function signature.
- * @param[in]  list         The list to search.
+ * @param[in]  list         The list to modify.
  * @param[in]  element      The element to insert.
  * @param[in]  predicate    The sort predicate.
- * @return                  Thevector iterator.
+ * @return                  The vector iterator.
  */
 template <typename Type, typename Predicate>
 typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,
     const Type& element, Predicate predicate);
+
+/**
+ * Move members of a source list to end of a target list. Source is cleared.
+ * @param      <Type>     The type of list member elements.
+ * @param[in]  target     The target list.
+ * @param[in]  source     The source list
+ */
+template <typename Type>
+void move_append(std::vector<Type>& target, std::vector<Type>& source);
 
 } // namespace libbitcoin
 

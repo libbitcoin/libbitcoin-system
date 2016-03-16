@@ -26,7 +26,7 @@
 namespace libbitcoin {
 namespace chain {
 
-struct stealth_row
+struct BC_API stealth_row
 {
     hash_digest ephemeral_key;
     short_hash address;

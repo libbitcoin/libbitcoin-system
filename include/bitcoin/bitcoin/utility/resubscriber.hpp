@@ -22,12 +22,12 @@
 
 #include <functional>
 #include <memory>
-#include <mutex>
 #include <string>
 #include <vector>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 ////#include <bitcoin/bitcoin/utility/track.hpp>
 
@@ -45,25 +45,28 @@ public:
     resubscriber(threadpool& pool, const std::string& class_name);
     ~resubscriber();
 
+    /// Call start to enable new subscriptions.
+    void start();
+
     /// Call stop to prevent new subscriptions.
     void stop();
 
     /// Return true from the handler to resubscribe.
-    void subscribe(handler notifier);
+    void subscribe(handler notifier, Args... stopped_args);
 
-    /// Call relay to invoke all handlers, which clears subscription if false.
+    /// Call to invoke all handlers, which clears subscription if false.
     void relay(Args... args);
+
+    /// Invoke all handlers in order on the current thread.
+    void do_relay(Args... args);
 
 private:
     typedef std::vector<handler> list;
 
-    void do_subscribe(handler notifier);
-    void do_relay(Args... args);
-
     bool stopped_;
-    std::mutex mutex_;
     dispatcher dispatch_;
     list subscriptions_;
+    mutable upgrade_mutex mutex_;
 };
 
 } // namespace libbitcoin

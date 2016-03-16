@@ -22,6 +22,7 @@
 
 #include <initializer_list>
 #include <istream>
+#include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
@@ -35,6 +36,8 @@ class BC_API not_found
   : public inventory
 {
 public:
+    typedef std::shared_ptr<not_found> ptr;
+
     static not_found factory_from_data(const data_chunk& data);
     static not_found factory_from_data(std::istream& stream);
     static not_found factory_from_data(reader& source);

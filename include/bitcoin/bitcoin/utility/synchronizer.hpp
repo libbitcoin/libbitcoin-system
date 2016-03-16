@@ -22,9 +22,9 @@
 
 #include <cstddef>
 #include <memory>
-#include <mutex>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 
 namespace libbitcoin {
 
@@ -40,7 +40,7 @@ public:
         clearance_count_(clearance_count),
         name_(name),
         counter_(std::make_shared<std::size_t>(0)),
-        counter_mutex_(std::make_shared<std::mutex>()),
+        counter_mutex_(std::make_shared<shared_mutex>()),
         suppress_errors_(suppress_errors)
     {
     }
@@ -54,7 +54,7 @@ public:
         ///////////////////////////////////////////////////////////////////////
         if (true)
         {
-            std::lock_guard<std::mutex> lock(*counter_mutex_);
+            unique_lock lock(*counter_mutex_);
 
             BITCOIN_ASSERT(*counter_ <= clearance_count_);
             if (*counter_ == clearance_count_)
@@ -104,7 +104,7 @@ private:
 
     // We use pointer to reference the same value/mutex across instance copies.
     std::shared_ptr<size_t> counter_;
-    std::shared_ptr<std::mutex> counter_mutex_;
+    std::shared_ptr<shared_mutex> counter_mutex_;
 };
 
 template <typename Handler>

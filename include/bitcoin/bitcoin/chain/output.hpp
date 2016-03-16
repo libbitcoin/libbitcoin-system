@@ -24,6 +24,7 @@
 #include <istream>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/chain/point.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
@@ -54,6 +55,14 @@ public:
 
     uint64_t value;
     chain::script script;
+};
+
+struct BC_API output_info
+{
+    typedef std::vector<output_info> list;
+
+    output_point point;
+    uint64_t value;
 };
 
 } // namspace chain

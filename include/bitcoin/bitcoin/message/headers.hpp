@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <initializer_list>
 #include <istream>
+#include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/header.hpp>
@@ -37,6 +38,8 @@ namespace message {
 class BC_API headers
 {
 public:
+    typedef std::shared_ptr<headers> ptr;
+
     static headers factory_from_data(const data_chunk& data);
     static headers factory_from_data(std::istream& stream);
     static headers factory_from_data(reader& source);

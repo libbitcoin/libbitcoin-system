@@ -256,6 +256,7 @@ test_libbitcoin_test_SOURCES = \
     test/unicode/unicode_istream.cpp \
     test/unicode/unicode_ostream.cpp \
     test/utility/binary.cpp \
+    test/utility/collection.cpp \
     test/utility/data.cpp \
     test/utility/endian.cpp \
     test/utility/png.cpp \
@@ -309,6 +310,7 @@ include_bitcoin_bitcoin_chain_HEADERS = \
     include/bitcoin/bitcoin/chain/output.hpp \
     include/bitcoin/bitcoin/chain/point.hpp \
     include/bitcoin/bitcoin/chain/script.hpp \
+    include/bitcoin/bitcoin/chain/spend.hpp \
     include/bitcoin/bitcoin/chain/stealth_row.hpp \
     include/bitcoin/bitcoin/chain/transaction.hpp
 
@@ -352,7 +354,8 @@ include_bitcoin_bitcoin_impl_utility_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/ostream_writer.ipp \
     include/bitcoin/bitcoin/impl/utility/resubscriber.ipp \
     include/bitcoin/bitcoin/impl/utility/serializer.ipp \
-    include/bitcoin/bitcoin/impl/utility/subscriber.ipp
+    include/bitcoin/bitcoin/impl/utility/subscriber.ipp \
+    include/bitcoin/bitcoin/impl/utility/track.ipp
 
 include_bitcoin_bitcoin_mathdir = ${includedir}/bitcoin/bitcoin/math
 include_bitcoin_bitcoin_math_HEADERS = \

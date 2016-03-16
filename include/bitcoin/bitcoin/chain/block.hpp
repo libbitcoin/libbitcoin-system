@@ -23,6 +23,7 @@
 #include <istream>
 #include <memory>
 #include <string>
+#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>

@@ -20,12 +20,10 @@
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 
 #include <functional>
-#include <mutex>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
-
-INITIALIZE_TRACK(bc::deadline);
 
 namespace libbitcoin {
 
@@ -55,7 +53,7 @@ void deadline::start(handler handle, const asio::duration duration)
 
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    std::lock_guard<std::mutex> lock(mutex_);
+    unique_lock lock(mutex_);
 
     timer_.cancel();
     timer_.expires_from_now(duration);
@@ -73,7 +71,7 @@ void deadline::stop()
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    std::lock_guard<std::mutex> lock(mutex_);
+    unique_lock lock(mutex_);
 
     timer_.cancel();
     ///////////////////////////////////////////////////////////////////////////

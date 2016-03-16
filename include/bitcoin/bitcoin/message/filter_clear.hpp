@@ -21,6 +21,7 @@
 #define LIBBITCOIN_MESSAGE_FILTER_CLEAR_HPP
 
 #include <istream>
+#include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -33,6 +34,8 @@ namespace message {
 class BC_API filter_clear
 {
 public:
+    typedef std::shared_ptr<filter_clear> ptr;
+
     static filter_clear factory_from_data(const data_chunk& data);
     static filter_clear factory_from_data(std::istream& stream);
     static filter_clear factory_from_data(reader& source);

@@ -22,6 +22,7 @@
 
 #include <cstdint>
 #include <istream>
+#include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
@@ -35,6 +36,8 @@ namespace message {
 class BC_API version
 {
 public:
+    typedef std::shared_ptr<version> ptr;
+
     static version factory_from_data(const data_chunk& data);
     static version factory_from_data(std::istream& stream);
     static version factory_from_data(reader& source);

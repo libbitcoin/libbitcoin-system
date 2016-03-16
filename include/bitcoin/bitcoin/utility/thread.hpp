@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_THREAD_HPP
 #define LIBBITCOIN_THREAD_HPP
 
+#include <boost/thread.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
@@ -31,6 +32,14 @@ enum class thread_priority
     low,
     lowest
 };
+
+typedef boost::shared_mutex shared_mutex;
+typedef boost::unique_lock<shared_mutex> unique_lock;
+typedef boost::shared_lock<shared_mutex> shared_lock;
+
+typedef boost::upgrade_mutex upgrade_mutex;
+typedef boost::unique_lock<upgrade_mutex> upgrade_unique_lock;
+typedef boost::shared_lock<upgrade_mutex> upgrade_shared_lock;
 
 BC_API void set_thread_priority(thread_priority priority);
 

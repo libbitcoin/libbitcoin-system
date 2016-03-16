@@ -135,6 +135,9 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\resubscriber.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\track.ipp">
+      <Filter>include\bitcoin\impl\utility</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\constants.cpp">
@@ -921,6 +924,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\secp256k1_initializer.hpp">
       <Filter>src\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\spend.hpp">
+      <Filter>include\bitcoin\chain</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

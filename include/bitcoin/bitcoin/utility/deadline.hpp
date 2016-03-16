@@ -21,12 +21,12 @@
 #define LIBBITCOIN_DEADLINE_HPP
 
 #include <memory>
-#include <mutex>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -81,7 +81,7 @@ private:
 
     asio::timer timer_;
     asio::duration duration_;
-    std::mutex mutex_;
+    mutable shared_mutex mutex_;
 };
 
 } // namespace libbitcoin
