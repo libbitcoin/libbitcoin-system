@@ -40,10 +40,12 @@ namespace libbitcoin {
     std::bind(FORWARD_HANDLER(handler), FORWARD_ARGS(args))
 #define BIND_ARGS(args) \
     std::bind(FORWARD_ARGS(args))
+
+// Collection dispatch doesn't forward args, self pointer needs to increment.
 #define BIND_RACE(args, call) \
-    std::bind(FORWARD_ARGS(args), call)
+    std::bind(args..., call)
 #define BIND_ELEMENT(args, element, call) \
-    std::bind(FORWARD_ARGS(args), element, call)
+    std::bind(args..., element, call)
 
 /// Convenience class for objects wishing to synchronize operations.
 /// If the ios service is stopped jobs will not be dispatched.
@@ -136,7 +138,7 @@ public:
     /// Executes multiple identical jobs concurrently until one completes.
     template <typename Count, typename Handler, typename... Args>
     void race(Count count, const std::string& name, Handler&& handler,
-        Args&&... args)
+        Args... args)
     {
         const auto call = synchronize(FORWARD_HANDLER(handler), 1, name);
 
@@ -147,7 +149,7 @@ public:
     /// Executes the job against each member of a collection concurrently.
     template <typename Element, typename Handler, typename... Args>
     void parallel(const std::vector<Element>& collection,
-        const std::string& name, Handler&& handler, Args&&... args)
+        const std::string& name, Handler&& handler, Args... args)
     {
         const auto call = synchronize(FORWARD_HANDLER(handler),
             collection.size(), name);
@@ -159,7 +161,7 @@ public:
     /// Disperses the job against each member of a collection without order.
     template <typename Element, typename Handler, typename... Args>
     void disperse(const std::vector<Element>& collection,
-        const std::string& name, Handler&& handler, Args&&... args)
+        const std::string& name, Handler&& handler, Args... args)
     {
         const auto call = synchronize(FORWARD_HANDLER(handler),
             collection.size(), name);
@@ -171,7 +173,7 @@ public:
     /// Disperses the job against each member of a collection with order.
     template <typename Element, typename Handler, typename... Args>
     void serialize(const std::vector<Element>& collection,
-        const std::string& name, Handler&& handler, Args&&... args)
+        const std::string& name, Handler&& handler, Args... args)
     {
         const auto call = synchronize(FORWARD_HANDLER(handler),
             collection.size(), name);
