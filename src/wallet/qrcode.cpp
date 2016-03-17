@@ -48,7 +48,7 @@ data_chunk qr::encode(const data_chunk& data, const uint32_t version,
     if (qr::encode(istream, version, level, mode, case_sensitive, ostream))
         return out;
 
-    return data_chunk{};
+    return {};
 }
 
 bool qr::encode(std::istream& in, std::ostream& out)
