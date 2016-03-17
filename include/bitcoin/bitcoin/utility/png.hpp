@@ -34,20 +34,20 @@ namespace libbitcoin {
 
 class BC_API png
 {
-  public:
+public:
     static BC_CONSTEXPR uint32_t margin = 2;
     static BC_CONSTEXPR uint32_t dots_per_inch = 72;
     static BC_CONSTEXPR uint32_t inches_per_meter = (100.0 / 2.54);
 
-    BC_API static const color get_default_foreground()
+    static const color get_default_foreground()
     {
-        static BC_CONSTEXPR color default_foreground{0, 0, 0, 255};
+        static BC_CONSTEXPR color default_foreground{ 0, 0, 0, 255 };
         return default_foreground;
     }
 
-    BC_API static const color get_default_background()
+    static const color get_default_background()
     {
-        static BC_CONSTEXPR color default_background{255, 255, 255, 255};
+        static BC_CONSTEXPR color default_background{ 255, 255, 255, 255 };
         return default_background;
     }
 
@@ -57,14 +57,14 @@ class BC_API png
      * size parameter specifies the number of dots (pixels) per qr code
      * modules.
      */
-    BC_API static bool write_png(const data_chunk& data, const uint32_t size,
+    static bool write_png(const data_chunk& data, const uint32_t size,
         std::ostream& out);
 
     /**
      * A method that takes encoded qrcode data as a data chunk and writes
      * it to an output stream in png format with the specified parameters.
      */
-    BC_API static bool write_png(const data_chunk& data, const uint32_t size,
+    static bool write_png(const data_chunk& data, const uint32_t size,
         const uint32_t dots_per_inch, const uint32_t margin,
         const uint32_t inches_per_meter, const color foreground,
         const color background, std::ostream& out);
@@ -75,7 +75,7 @@ class BC_API png
      * parameters.  The size parameter specifies the number of dots
      * (pixels) per qr code modules.
      */
-    BC_API static bool write_png(std::istream& in, const uint32_t size,
+    static bool write_png(std::istream& in, const uint32_t size,
         std::ostream& out);
 
     /**
@@ -83,7 +83,7 @@ class BC_API png
      * writes it to an output stream in png format with the specified
      * parameters.
      */
-    BC_API static bool write_png(std::istream& in, const uint32_t size,
+    static bool write_png(std::istream& in, const uint32_t size,
         const uint32_t dots_per_inch, const uint32_t margin,
         const uint32_t inches_per_meter, const color foreground,
         const color background, std::ostream& out);

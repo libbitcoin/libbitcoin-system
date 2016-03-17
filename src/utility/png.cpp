@@ -63,8 +63,7 @@ bool png::write_png(std::istream& in, const uint32_t size,
 extern "C" void sink_write(png_structp png_ptr,
     png_bytep data, png_size_t length)
 {
-    auto& sink = *reinterpret_cast<ostream_writer*>(
-        png_get_io_ptr(png_ptr));
+    auto& sink = *reinterpret_cast<ostream_writer*>(png_get_io_ptr(png_ptr));
     sink.write_data(reinterpret_cast<const uint8_t*>(data), size_t(length));
 }
 
@@ -102,8 +101,8 @@ bool png::write_png(std::istream& in, const uint32_t size,
         data_chunk row;
         row.reserve(row_size);
 
-        auto png_ptr = png_create_write_struct(
-            PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+        auto png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL,
+            NULL, NULL);
         if (png_ptr == NULL)
             return false;
 
@@ -154,8 +153,7 @@ bool png::write_png(std::istream& in, const uint32_t size,
             row.assign(row_size, margin_value);
             row_ptr = row.data();
             row_ptr += margin_size / bits_per_byte;
-            bit = (bits_per_byte - 1) -
-                (margin_size % bits_per_byte);
+            bit = (bits_per_byte - 1) - (margin_size % bits_per_byte);
 
             for (auto x = 0; x < width; x++)
             {
@@ -191,6 +189,7 @@ bool png::write_png(std::istream& in, const uint32_t size,
     {
         return false;
     }
+
     return true;
 }
 
