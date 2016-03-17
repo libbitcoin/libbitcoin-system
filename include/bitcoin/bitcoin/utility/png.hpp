@@ -24,67 +24,73 @@
 #include <istream>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/color.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 #ifdef WITH_PNG
 #include "png.h"
-#endif
 
 namespace libbitcoin {
 
-#ifdef WITH_PNG
+class BC_API png
+{
+  public:
+    static BC_CONSTEXPR uint32_t margin = 2;
+    static BC_CONSTEXPR uint32_t dots_per_inch = 72;
+    static BC_CONSTEXPR uint32_t inches_per_meter = (100.0 / 2.54);
 
-namespace png {
+    BC_API static const color get_default_foreground()
+    {
+        static BC_CONSTEXPR color default_foreground{0, 0, 0, 255};
+        return default_foreground;
+    }
 
-typedef uint32_t color[4];
+    BC_API static const color get_default_background()
+    {
+        static BC_CONSTEXPR color default_background{255, 255, 255, 255};
+        return default_background;
+    }
 
-BC_CONSTEXPR uint32_t dpi = 72;
-BC_CONSTEXPR uint32_t margin = 2;
-BC_CONSTEXPR uint32_t inches_per_meter = (100.0 / 2.54);
-BC_CONSTEXPR color foreground = {0, 0, 0, 255};
-BC_CONSTEXPR color background = {255, 255, 255, 255};
+    /**
+     * A method that takes encoded qrcode as a data chunk and writes it to
+     * an output stream in png format with the default parameters.  The
+     * size parameter specifies the number of dots (pixels) per qr code
+     * modules.
+     */
+    BC_API static bool write_png(const data_chunk& data, const uint32_t size,
+        std::ostream& out);
 
-} // namespace png
+    /**
+     * A method that takes encoded qrcode data as a data chunk and writes
+     * it to an output stream in png format with the specified parameters.
+     */
+    BC_API static bool write_png(const data_chunk& data, const uint32_t size,
+        const uint32_t dots_per_inch, const uint32_t margin,
+        const uint32_t inches_per_meter, const color foreground,
+        const color background, std::ostream& out);
 
-/**
- * A method that takes encoded qrcode as a data chunk and writes it to
- * an output stream in png format with the default parameters.  The
- * size parameter specifies the number of dots (pixels) per qr code
- * modules.
- */
-BC_API bool write_png(const data_chunk& data, const uint32_t size,
-    std::ostream& out);
+    /**
+     * A method that reads encoded qrcode data via an input stream and
+     * writes it to an output stream in png format with the default
+     * parameters.  The size parameter specifies the number of dots
+     * (pixels) per qr code modules.
+     */
+    BC_API static bool write_png(std::istream& in, const uint32_t size,
+        std::ostream& out);
 
-/**
- * A method that takes encoded qrcode data as a data chunk and writes
- * it to an output stream in png format with the specified parameters.
- */
-BC_API bool write_png(const data_chunk& data, const uint32_t size,
-    const uint32_t dpi, const uint32_t margin, const uint32_t inches_per_meter,
-    const png::color foreground, const png::color background,
-    std::ostream& out);
-
-/**
- * A method that reads encoded qrcode data via an input stream and
- * writes it to an output stream in png format with the default
- * parameters.  The size parameter specifies the number of dots
- * (pixels) per qr code modules.
- */
-BC_API bool write_png(std::istream& in, const uint32_t size,
-    std::ostream& out);
-
-/**
- * A method that reads encoded qrcode data via an input stream and
- * writes it to an output stream in png format with the specified
- * parameters.
- */
-BC_API bool write_png(std::istream& in, const uint32_t size,
-    const uint32_t dpi, const uint32_t margin, const uint32_t inches_per_meter,
-    const png::color foreground, const png::color background,
-    std::ostream& out);
-
-#endif
+    /**
+     * A method that reads encoded qrcode data via an input stream and
+     * writes it to an output stream in png format with the specified
+     * parameters.
+     */
+    BC_API static bool write_png(std::istream& in, const uint32_t size,
+        const uint32_t dots_per_inch, const uint32_t margin,
+        const uint32_t inches_per_meter, const color foreground,
+        const color background, std::ostream& out);
+};
 
 } // namespace libbitcoin
+
+#endif // WITH_PNG
 
 #endif

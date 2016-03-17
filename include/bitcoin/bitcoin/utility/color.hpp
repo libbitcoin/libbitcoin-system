@@ -1,0 +1,42 @@
+/**
+ * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+ *
+ * This file is part of libbitcoin.
+ *
+ * libbitcoin is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License with
+ * additional permissions to the one published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option)
+ * any later version. For more information see LICENSE.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+#ifndef LIBBITCOIN_COLOR_HPP
+#define LIBBITCOIN_COLOR_HPP
+
+#include <bitcoin/bitcoin/compat.hpp>
+#include <bitcoin/bitcoin/define.hpp>
+
+namespace libbitcoin {
+
+class BC_API color
+{
+  public:
+    constexpr color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) :
+        red(r), green(g), blue(b), alpha(a) {}
+
+    uint8_t red;
+    uint8_t green;
+    uint8_t blue;
+    uint8_t alpha;
+};
+
+} // namespace libbitcoin
+
+#endif

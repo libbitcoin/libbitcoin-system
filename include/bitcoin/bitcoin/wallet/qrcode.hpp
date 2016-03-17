@@ -29,60 +29,53 @@
 
 #ifdef WITH_QRENCODE
 #include "qrencode.h"
-#endif
-
 
 namespace libbitcoin {
 namespace wallet {
 
-#ifdef WITH_QRENCODE
+class BC_API qr
+{
+    typedef QRencodeMode encode_mode;
+    typedef QRecLevel error_recovery_level;
 
-typedef uint32_t qr_version;
-typedef QRecLevel qr_rec_level;
-typedef QRencodeMode qr_encode_mode;
-typedef uint32_t qr_case_sensitive;
+  public:
+    static BC_CONSTEXPR uint32_t version = 0;
+    static BC_CONSTEXPR bool case_sensitive = true;
+    static BC_CONSTEXPR encode_mode mode = QR_MODE_8;
+    static BC_CONSTEXPR error_recovery_level level = QR_ECLEVEL_L;
 
-namespace qrcode {
+    /**
+     * A method that takes an input stream and writes the encoded qr data
+     * to the specified output stream with default parameter values.
+     */
+    BC_API static bool encode(std::istream& in, std::ostream& out);
 
-BC_CONSTEXPR qr_version version = 0;
-BC_CONSTEXPR qr_rec_level level = QR_ECLEVEL_L;
-BC_CONSTEXPR qr_encode_mode hint = QR_MODE_8;
-BC_CONSTEXPR qr_case_sensitive case_sensitive = 1;
+    /**
+     * A method that takes a data chunk and returns the encoded qr data as
+     * a data_chunk with default parameter values.
+     */
+    BC_API static data_chunk encode(const data_chunk& data);
 
-} // namespace qrcode
+    /**
+     * A method that takes a data chunk and returns the encoded qr data as
+     * a data chunk with the specified parameter values.
+     */
+    BC_API static data_chunk encode(const data_chunk& data,
+        const uint32_t version, const error_recovery_level level,
+        const encode_mode mode, const bool case_sensitive);
 
-/**
- * A method that takes an input stream and writes the encoded qr data
- * to the specified output stream with default parameter values.
- */
-BC_API bool qrencode_data(std::istream& in, std::ostream& out);
-
-/**
- * A method that takes a data chunk and returns the encoded qr data as
- * a data_chunk with default parameter values.
- */
-BC_API data_chunk qrencode_data(const data_chunk& data);
-
-/**
- * A method that takes a data chunk and returns the encoded qr data as
- * a data chunk with the specified parameter values.
- */
-BC_API data_chunk qrencode_data(const data_chunk& data,
-    const qr_version version, const qr_rec_level level,
-    const qr_encode_mode hint, const qr_case_sensitive cs);
-
-/**
- * A method that takes an input stream and writes the encoded qr data
- * to the output stream with the specified parameter values.
- */
-BC_API bool qrencode_data(std::istream& in, const qr_version version,
-    const qr_rec_level level, const qr_encode_mode hint,
-    const qr_case_sensitive cs, std::ostream& out);
-
-#endif
+    /**
+     * A method that takes an input stream and writes the encoded qr data
+     * to the output stream with the specified parameter values.
+     */
+    BC_API static bool encode(std::istream& in, const uint32_t version,
+        const error_recovery_level level, const encode_mode mode,
+        const bool case_sensitive, std::ostream& out);
+};
 
 } // namespace wallet
 } // namespace libbitcoin
 
-#endif
+#endif // WITH_QRENCODE
 
+#endif

@@ -27,46 +27,44 @@
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 
+#ifdef WITH_QRENCODE
+
 namespace libbitcoin {
 namespace wallet {
 
-#ifdef WITH_QRENCODE
-
-data_chunk qrencode_data(const data_chunk& data)
+data_chunk qr::encode(const data_chunk& data)
 {
-    return qrencode_data(data, qrcode::version,
-        qrcode::level, qrcode::hint, qrcode::case_sensitive);
+    return qr::encode(data, version, level, mode, case_sensitive);
 }
 
-data_chunk qrencode_data(const data_chunk& data, const qr_version version,
-    const qr_rec_level level, const qr_encode_mode hint,
-    const qr_case_sensitive cs)
+data_chunk qr::encode(const data_chunk& data, const uint32_t version,
+    const error_recovery_level level, const encode_mode mode,
+    const bool case_sensitive)
 {
     data_chunk out;
     data_sink ostream(out);
     data_source istream(data);
 
-    if (qrencode_data(istream, version, level, hint, cs, ostream))
+    if (qr::encode(istream, version, level, mode, case_sensitive, ostream))
         return out;
 
-    return data_chunk();
+    return {};
 }
 
-bool qrencode_data(std::istream& in, std::ostream& out)
+bool qr::encode(std::istream& in, std::ostream& out)
 {
-    return qrencode_data(in, qrcode::version,
-        qrcode::level, qrcode::hint, qrcode::case_sensitive, out);
+    return qr::encode(in, version, level, mode, case_sensitive, out);
 }
 
-bool qrencode_data(std::istream& in, const qr_version version,
-    const qr_rec_level level, const qr_encode_mode hint,
-    const qr_case_sensitive cs, std::ostream& out)
+bool qr::encode(std::istream& in, const uint32_t version,
+    const error_recovery_level level, const encode_mode mode,
+    const bool case_sensitive, std::ostream& out)
 {
     std::string qr_string;
     getline(in, qr_string);
 
-    QRcode* qrcode = QRcode_encodeString(qr_string.c_str(), version,
-        level, hint, cs);
+    const auto qrcode = QRcode_encodeString(qr_string.c_str(), version,
+        level, mode, case_sensitive);
     if (qrcode)
     {
         // Write out raw format of QRcode structure (defined in
@@ -82,10 +80,11 @@ bool qrencode_data(std::istream& in, const qr_version version,
         sink.write_data(qrcode->data, qrcode->width * qrcode->width);
         out.flush();
     }
+
     return (qrcode != nullptr);
 }
 
-#endif
-
 } // namespace wallet
 } // namespace libbitcoin
+
+#endif // WITH_QRENCODE

@@ -25,7 +25,7 @@ Version: @PACKAGE_VERSION@
 #==============================================================================
 # Dependencies that publish package configuration.
 #------------------------------------------------------------------------------
-Requires: @icu_i18n_PKG@ libsecp256k1 >= 0.0.1
+Requires: @png_PKG@ @qrencode_PKG@ @icu_i18n_PKG@ libsecp256k1 >= 0.0.1
 
 # Include directory and any other required compiler flags.
 #------------------------------------------------------------------------------

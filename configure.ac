@@ -224,19 +224,25 @@ AX_PTHREAD(
 # Hard wired -lpthread because AX_PTHREAD does not do it.
 AC_SUBST([pthread_LIBS], [-lpthread])
 
-# Require png if --with_png and output ${png_CPPFLAGS/LIBS}.
+# Require png of at least version 1.6.2 and output ${png_CPPFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
 AS_CASE([${with_png}], [yes],
-    AC_SUBST([png_CPPFLAGS], [-DWITH_PNG])
-    AC_SUBST([png_LIBS], [-lpng])
-    AC_MSG_NOTICE([png_LIBS : ${png_LIBS}]))
+    [PKG_CHECK_MODULES([png], [libpng >= 1.6.2])
+     AC_SUBST([png_PKG], ['libpng >= 1.6.2'])
+     AC_SUBST([png_CPPFLAGS], [${png_CFLAGS}])
+     AC_MSG_NOTICE([png_CPPFLAGS : ${png_CPPFLAGS}])
+     AC_MSG_NOTICE([png_LIBS : ${png_LIBS}])],
+    [AC_SUBST([png_PKG], [])])
 
-# Require qrencode if --with_qrencode and output ${qrencode_CPPFLAGS/LIBS}.
+# Require qrencode of at least version 3.4.4 and output ${qrencode_CPPFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
 AS_CASE([${with_qrencode}], [yes],
-    AC_SUBST([qrencode_CPPFLAGS], [-DWITH_QRENCODE])
-    AC_SUBST([qrencode_LIBS], [-lqrencode])
-    AC_MSG_NOTICE([qrencode_LIBS : ${qrencode_LIBS}]))
+    [PKG_CHECK_MODULES([qrencode], [libqrencode >= 3.4.4])
+     AC_SUBST([qrencode_PKG], ['libqrencode >= 3.4.4'])
+     AC_SUBST([qrencode_CPPFLAGS], [${qrencode_CFLAGS}])
+     AC_MSG_NOTICE([qrencode_CPPFLAGS : ${qrencode_CPPFLAGS}])
+     AC_MSG_NOTICE([qrencode_LIBS : ${qrencode_LIBS}])],
+    [AC_SUBST([qrencode_PKG], [])])
 
 # Require rt if on linux and output ${rt_LIBS}.
 #------------------------------------------------------------------------------

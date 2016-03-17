@@ -24,6 +24,7 @@
 #include <iostream>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
+#include <bitcoin/bitcoin/utility/color.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -33,144 +34,152 @@ namespace libbitcoin {
 
 #ifdef WITH_PNG
 
-bool write_png(const data_chunk& data, const uint32_t size,
+bool png::write_png(const data_chunk& data, const uint32_t size,
     std::ostream& out)
 {
     data_source istream(data);
-    return write_png(istream, size, out);
+    return png::write_png(istream, size, out);
 }
 
-bool write_png(const data_chunk& data, const uint32_t size,
-    const uint32_t dpi, const uint32_t margin, const uint32_t inches_per_meter,
-    const png::color foreground, const png::color background,
-    std::ostream& out)
+bool png::write_png(const data_chunk& data, const uint32_t size,
+    const uint32_t dots_per_inch, const uint32_t margin,
+    const uint32_t inches_per_meter, const color foreground,
+    const color background, std::ostream& out)
 {
     data_source istream(data);
-    return write_png(istream, size, dpi, margin, inches_per_meter,
-        foreground, background, out);
+    return png::write_png(istream, size, dots_per_inch, margin,
+        inches_per_meter, get_default_foreground(),
+        get_default_background(), out);
 }
 
-bool write_png(std::istream& in, const uint32_t size,
+bool png::write_png(std::istream& in, const uint32_t size,
     std::ostream& out)
 {
-    return write_png(in, size, png::dpi, png::margin,
-        png::inches_per_meter, png::foreground, png::background, out);
+    return png::write_png(in, size, dots_per_inch, margin,
+        inches_per_meter, get_default_foreground(),
+        get_default_background(), out);
 }
 
-extern "C" void internal_png_sink_write(png_structp png_ptr,
+extern "C" void sink_write(png_structp png_ptr,
     png_bytep data, png_size_t length)
 {
-    ostream_writer& sink = *reinterpret_cast<ostream_writer*>(
+    auto& sink = *reinterpret_cast<ostream_writer*>(
         png_get_io_ptr(png_ptr));
     sink.write_data(reinterpret_cast<const uint8_t*>(data), size_t(length));
 }
 
-extern "C" void user_error_fn(png_structp png_ptr, png_const_charp error_msg)
+extern "C" void error_callback(png_structp png_ptr,
+    png_const_charp error_message)
 {
-    throw std::runtime_error(error_msg);
+    throw std::runtime_error(error_message);
 }
 
-bool write_png(std::istream& in, const uint32_t size,
-    const uint32_t dpi, const uint32_t margin, const uint32_t inches_per_meter,
-    const png::color foreground, const png::color background,
-    std::ostream& out)
+bool png::write_png(std::istream& in, const uint32_t size,
+    const uint32_t dots_per_inch, const uint32_t margin,
+    const uint32_t inches_per_meter, const color foreground,
+    const color background, std::ostream& out)
 {
-    uint32_t version, width;
-    int32_t x, y, xx, yy, bit;
-    const auto bits_per_byte = 8;
-
     if (size == 0)
         return false;
 
+    uint32_t version, width;
     istream_reader source(in);
     source.read_data(reinterpret_cast<uint8_t*>(&version), sizeof(uint32_t));
     source.read_data(reinterpret_cast<uint8_t*>(&width), sizeof(uint32_t));
 
     data_chunk data = source.read_data(width * width);
 
-    const auto margin_value = 0xff;
-    const auto realwidth = (width + margin * 2) * size;
-    const auto row_size = (realwidth + 7) / bits_per_byte;
-
-    data_chunk row;
-    row.reserve(row_size);
-
-    png_structp png_ptr = png_create_write_struct(
-        PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-    if (png_ptr == NULL)
-        return false;
-
-    png_infop info_ptr = png_create_info_struct(png_ptr);
-    if (info_ptr == NULL)
-        return false;
-
-    png_color raw_palette;
-    png_colorp palette = &raw_palette;
-    palette[0].red   = foreground[0];
-    palette[0].green = foreground[1];
-    palette[0].blue  = foreground[2];
-    palette[1].red   = background[0];
-    palette[1].green = background[1];
-    palette[1].blue  = background[2];
-
-    png_byte alpha_values[2];
-    alpha_values[0] = foreground[3];
-    alpha_values[1] = background[3];
-    png_set_PLTE(png_ptr, info_ptr, palette, 2);
-    png_set_tRNS(png_ptr, info_ptr, alpha_values, 2, NULL);
-
-
-    ostream_writer sink(out);
-    png_set_write_fn(png_ptr, &sink, internal_png_sink_write, NULL);
-    png_set_error_fn(png_ptr, NULL, user_error_fn, NULL);
-
     try
     {
-        png_set_IHDR(png_ptr, info_ptr,
-                     realwidth, realwidth,
-                     1,
-                     PNG_COLOR_TYPE_PALETTE,
-                     PNG_INTERLACE_NONE,
-                     PNG_COMPRESSION_TYPE_DEFAULT,
-                     PNG_FILTER_TYPE_DEFAULT);
-        png_set_pHYs(png_ptr, info_ptr,
-                     dpi * inches_per_meter,
-                     dpi * inches_per_meter,
-                     PNG_RESOLUTION_METER);
+        static constexpr int32_t bit_depth = 1;
+        static constexpr int32_t bits_per_byte = 8;
+        static constexpr uint8_t margin_value = 0xff;
+
+        const auto margin_size = margin * size;
+        const auto realwidth = (width + margin * 2) * size;
+        const auto row_size = (realwidth + 7) / bits_per_byte;
+
+        data_chunk row;
+        row.reserve(row_size);
+
+        auto png_ptr = png_create_write_struct(
+            PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+        if (png_ptr == NULL)
+            return false;
+
+        auto info_ptr = png_create_info_struct(png_ptr);
+        if (info_ptr == NULL)
+            return false;
+
+        png_color raw_palette;
+        auto palette = &raw_palette;
+        palette[0].red = foreground.red;
+        palette[0].green = foreground.green;
+        palette[0].blue = foreground.blue;
+        palette[1].red = background.red;
+        palette[1].green = background.green;
+        palette[1].blue = background.blue;
+
+        png_byte alpha_values[2];
+        alpha_values[0] = foreground.alpha;
+        alpha_values[1] = background.alpha;
+
+        png_set_PLTE(png_ptr, info_ptr, palette, 2);
+        png_set_tRNS(png_ptr, info_ptr, alpha_values, 2, NULL);
+
+        ostream_writer sink(out);
+        png_set_write_fn(png_ptr, &sink, sink_write, NULL);
+        png_set_error_fn(png_ptr, NULL, error_callback, NULL);
+
+        png_set_IHDR(png_ptr, info_ptr, realwidth, realwidth, bit_depth,
+            PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE,
+            PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+
+        png_set_pHYs(png_ptr, info_ptr, dots_per_inch * inches_per_meter,
+            dots_per_inch * inches_per_meter, PNG_RESOLUTION_METER);
+
         png_write_info(png_ptr, info_ptr);
 
         // write top margin
         row.assign(row_size, margin_value);
-        for(y = 0; y < margin * size; y++)
+        for (auto y = 0; y < margin_size; y++)
             png_write_row(png_ptr, row.data());
 
         // write data
-        unsigned char *p = data.data(), *q;
-        for(y = 0; y < width; y++) {
-            bit = bits_per_byte - 1;
+        unsigned char* row_ptr = nullptr;
+        auto data_ptr = data.data();
+        for (auto y = 0; y < width; y++)
+        {
+            auto bit = bits_per_byte - 1;
             row.assign(row_size, margin_value);
-            q = row.data();
-            q += margin * size / bits_per_byte;
+            row_ptr = row.data();
+            row_ptr += margin_size / bits_per_byte;
             bit = (bits_per_byte - 1) -
-                (margin * size % bits_per_byte);
-            for(x = 0; x < width; x++) {
-                for(xx = 0; xx < size; xx++) {
-                    *q ^= (*p & 1) << bit;
+                (margin_size % bits_per_byte);
+
+            for (auto x = 0; x < width; x++)
+            {
+                for (auto xx = 0; xx < size; xx++)
+                {
+                    *row_ptr ^= (*data_ptr & 1) << bit;
                     bit--;
-                    if(bit < 0) {
-                        q++;
+                    if (bit < 0)
+                    {
+                        row_ptr++;
                         bit = bits_per_byte - 1;
                     }
                 }
-                p++;
+
+                data_ptr++;
             }
-            for(yy = 0; yy < size; yy++)
+
+            for (auto yy = 0; yy < size; yy++)
                 png_write_row(png_ptr, row.data());
         }
 
         // write bottom margin
         row.assign(row_size, margin_value);
-        for(y = 0; y < margin * size; y++)
+        for (auto y = 0; y < margin_size; y++)
             png_write_row(png_ptr, row.data());
 
         png_write_end(png_ptr, info_ptr);
