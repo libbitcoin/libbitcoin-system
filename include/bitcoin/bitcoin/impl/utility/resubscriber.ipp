@@ -145,10 +145,7 @@ void resubscriber<Args...>::do_relay(Args... args)
     ///////////////////////////////////////////////////////////////////////////
     mutex_.lock_upgrade();
 
-    // This is dangerous since the service may be stopped.
-    // Yet if this is a stop subscription requestig a resubscribe it's
-    // required to capture the service stop.
-    if (!renewals.empty())
+    if (!renewals.empty() && !stopped_)
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_.unlock_upgrade_and_lock();

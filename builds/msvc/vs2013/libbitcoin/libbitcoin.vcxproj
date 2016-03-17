@@ -155,6 +155,7 @@
     <ClCompile Include="..\..\..\..\src\utility\evaluation_context.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\istream_reader.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\monitor.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\png.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\random.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\log.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\ostream_writer.cpp" />
@@ -262,10 +263,12 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\asio.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\assert.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\atomic.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\color.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\deadline.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\delegates.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\enable_shared_from_base.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\monitor.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\png.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\resubscriber.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\synchronizer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\dispatcher.hpp" />

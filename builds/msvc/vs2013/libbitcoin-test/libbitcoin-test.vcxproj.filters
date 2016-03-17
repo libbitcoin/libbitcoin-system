@@ -267,5 +267,8 @@
     <ClCompile Include="..\..\..\..\test\utility\collection.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\utility\png.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

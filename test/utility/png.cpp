@@ -33,7 +33,8 @@ BOOST_AUTO_TEST_CASE(png__size_one__success)
     data_chunk out;
     data_sink ostream(out);
 
-    const uint8_t raw_input_data[] = {
+    const uint8_t raw_input_data[] =
+    {
         0x03, 0x00, 0x00, 0x00, 0x1d, 0x00, 0x00, 0x00, 0xc1, 0xc1, 0xc1, 0xc1,
         0xc1, 0xc1, 0xc1, 0xc0, 0x84, 0x02, 0x03, 0x02, 0x03, 0x03, 0x03, 0x02,
         0x03, 0x03, 0x03, 0x02, 0x03, 0xc0, 0xc1, 0xc1, 0xc1, 0xc1, 0xc1, 0xc1,
@@ -108,7 +109,8 @@ BOOST_AUTO_TEST_CASE(png__size_one__success)
     };
     const auto input_data = to_chunk(raw_input_data);
 
-    const uint8_t expected_data[] = {
+    const uint8_t expected_data[] =
+    {
         0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
         0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x21, 0x00, 0x00, 0x00, 0x21,
         0x01, 0x03, 0x00, 0x00, 0x00, 0x6d, 0x2a, 0x50, 0x2c, 0x00, 0x00, 0x00,
@@ -137,11 +139,10 @@ BOOST_AUTO_TEST_CASE(png__size_one__success)
     constexpr uint32_t expected_data_length = 285;
 
     constexpr uint32_t size = 1;
-    const auto ret = png::write_png(input_data, size, ostream);
+    /* result */ png::write_png(input_data, size, ostream);
 
     BOOST_REQUIRE_EQUAL(out.size(), expected_data_length);
-    BOOST_REQUIRE_EQUAL(std::memcmp(
-        out.data(), expected_data, expected_data_length), 0);
+    BOOST_REQUIRE_EQUAL(std::memcmp(out.data(), expected_data, expected_data_length), 0);
 }
 
 #endif // WITH_PNG
