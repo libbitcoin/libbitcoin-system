@@ -479,6 +479,9 @@
     <ClCompile Include="..\..\..\..\src\config\parser.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\png.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -927,6 +930,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\spend.hpp">
       <Filter>include\bitcoin\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\color.hpp">
+      <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\png.hpp">
+      <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
