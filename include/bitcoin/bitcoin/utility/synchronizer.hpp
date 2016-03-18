@@ -40,55 +40,43 @@ public:
         clearance_count_(clearance_count),
         name_(name),
         counter_(std::make_shared<std::size_t>(0)),
-        counter_mutex_(std::make_shared<shared_mutex>()),
+        mutex_(std::make_shared<shared_mutex>()),
         suppress_errors_(suppress_errors)
     {
     }
 
     template <typename... Args>
-    void operator()(const code& ec, Args... args)
+    void operator()(const code& ec, Args&&... args)
     {
-        auto cleared = false;
-
         // Critical Section
         ///////////////////////////////////////////////////////////////////////
-        if (true)
+        mutex_->lock_upgrade();
+
+        BITCOIN_ASSERT(*counter_ <= clearance_count_);
+
+        if (*counter_ == clearance_count_)
         {
-            unique_lock lock(*counter_mutex_);
+            mutex_->unlock_upgrade();
+            //-----------------------------------------------------------------
+            return;
+        }
 
-            BITCOIN_ASSERT(*counter_ <= clearance_count_);
-            if (*counter_ == clearance_count_)
-            {
-                //log::debug(LOG_NETWORK)
-                //    << "Synchronizing [" << name_ << "] > "
-                //    << clearance_count_ << " (ignored)";
-                return;
-            }
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        mutex_->unlock_upgrade_and_lock();
 
+        if (ec && !suppress_errors_)
+            *counter_ = clearance_count_;
+        else
             ++(*counter_);
 
-            if (ec)
-            {
-                //log::debug(LOG_NETWORK)
-                //    << "Synchronizing [" << name_ << "] " << *counter_
-                //    << "/" << clearance_count_ << " " << ec.message()
-                //    << (suppress_errors_ ? " (suppressed)" : "");
+        mutex_->unlock_and_lock_upgrade();
+        //---------------------------------------------------------------------
 
-                if (!suppress_errors_)
-                    *counter_ = clearance_count_;
-            }
-            else
-            {
-                //log::debug(LOG_NETWORK)
-                //    << "Synchronizing [" << name_ << "] " << *counter_ << "/"
-                //    << clearance_count_;
-            }
+        const auto cleared = (*counter_ == clearance_count_);
 
-            cleared = (*counter_ == clearance_count_);
-        }
+        mutex_->unlock_upgrade();
         ///////////////////////////////////////////////////////////////////////
 
-        // Use execute flag to keep this log task out of the critical section.
         if (cleared)
         {
             const auto result = suppress_errors_ ? error::success : ec;
@@ -104,7 +92,7 @@ private:
 
     // We use pointer to reference the same value/mutex across instance copies.
     std::shared_ptr<size_t> counter_;
-    std::shared_ptr<shared_mutex> counter_mutex_;
+    std::shared_ptr<upgrade_mutex> mutex_;
 };
 
 template <typename Handler>
