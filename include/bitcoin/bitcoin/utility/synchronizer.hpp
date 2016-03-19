@@ -35,7 +35,7 @@ class synchronizer
 {
 public:
     synchronizer(Handler handler, size_t clearance_count,
-        const std::string& name, bool suppress_errors=false)
+        const std::string& name, bool suppress_errors)
       : handler_(handler),
         clearance_count_(clearance_count),
         name_(name),
@@ -52,33 +52,30 @@ public:
         ///////////////////////////////////////////////////////////////////////
         mutex_->lock_upgrade();
 
-        BITCOIN_ASSERT(*counter_ <= clearance_count_);
+        const auto initial_count = *counter_;
+        BITCOIN_ASSERT(initial_count <= clearance_count_);
 
-        if (*counter_ == clearance_count_)
+        if (initial_count == clearance_count_)
         {
             mutex_->unlock_upgrade();
             //-----------------------------------------------------------------
             return;
         }
 
+        const auto complete = ec && !suppress_errors_;
+        const auto count = complete ? clearance_count_ : initial_count + 1;
+        const auto cleared = count == clearance_count_;
+
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_->unlock_upgrade_and_lock();
-
-        if (ec && !suppress_errors_)
-            *counter_ = clearance_count_;
-        else
-            ++(*counter_);
-
-        mutex_->unlock_and_lock_upgrade();
-        //---------------------------------------------------------------------
-
-        const auto cleared = (*counter_ == clearance_count_);
-
-        mutex_->unlock_upgrade();
+        (*counter_) = count;
+        mutex_->unlock();
         ///////////////////////////////////////////////////////////////////////
 
         if (cleared)
         {
+            // If not suppressing errors pass the last result code.
+            // This is useful when clearance count is one.
             const auto result = suppress_errors_ ? error::success : ec;
             handler_(result, std::forward<Args>(args)...);
         }
