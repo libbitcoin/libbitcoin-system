@@ -140,7 +140,10 @@ public:
     void race(Count count, const std::string& name, Handler&& handler,
         Args... args)
     {
-        const auto call = synchronize(FORWARD_HANDLER(handler), 1, name);
+        // The first fail will also terminate race and return the code.
+        static const size_t clearance_count = 1;
+        const auto call = synchronize(FORWARD_HANDLER(handler),
+            clearance_count, name, false);
 
         for (Count iteration = 0; iteration < count; ++iteration)
             concurrent(BIND_RACE(args, call));
@@ -151,8 +154,9 @@ public:
     void parallel(const std::vector<Element>& collection,
         const std::string& name, Handler&& handler, Args... args)
     {
+        // Failures are suppressed, success always returned to handler.
         const auto call = synchronize(FORWARD_HANDLER(handler),
-            collection.size(), name);
+            collection.size(), name, true);
 
         for (const auto& element: collection)
             concurrent(BIND_ELEMENT(args, element, call));
@@ -163,8 +167,9 @@ public:
     void disperse(const std::vector<Element>& collection,
         const std::string& name, Handler&& handler, Args... args)
     {
+        // Failures are suppressed, success always returned to handler.
         const auto call = synchronize(FORWARD_HANDLER(handler),
-            collection.size(), name);
+            collection.size(), name, true);
 
         for (const auto& element: collection)
             unordered(BIND_ELEMENT(args, element, call));
@@ -175,8 +180,9 @@ public:
     void serialize(const std::vector<Element>& collection,
         const std::string& name, Handler&& handler, Args... args)
     {
+        // Failures are suppressed, success always returned to handler.
         const auto call = synchronize(FORWARD_HANDLER(handler),
-            collection.size(), name);
+            collection.size(), name, true);
 
         for (const auto& element: collection)
             ordered(BIND_ELEMENT(args, element, call));

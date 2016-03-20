@@ -79,6 +79,7 @@ void deadline::stop()
 
 // If the timer expires the callback is fired with a success code.
 // If the timer fails the callback is fired with the normalized error code.
+// If the timer is canceled no call is made.
 void deadline::handle_timer(const boost_code& ec, handler handle) const
 {
     if (!ec)

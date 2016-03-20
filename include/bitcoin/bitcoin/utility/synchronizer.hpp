@@ -35,62 +35,47 @@ class synchronizer
 {
 public:
     synchronizer(Handler handler, size_t clearance_count,
-        const std::string& name, bool suppress_errors=false)
+        const std::string& name, bool suppress_errors)
       : handler_(handler),
         clearance_count_(clearance_count),
         name_(name),
-        counter_(std::make_shared<std::size_t>(0)),
-        counter_mutex_(std::make_shared<shared_mutex>()),
+        counter_(std::make_shared<size_t>(0)),
+        mutex_(std::make_shared<upgrade_mutex>()),
         suppress_errors_(suppress_errors)
     {
     }
 
     template <typename... Args>
-    void operator()(const code& ec, Args... args)
+    void operator()(const code& ec, Args&&... args)
     {
-        auto cleared = false;
-
         // Critical Section
         ///////////////////////////////////////////////////////////////////////
-        if (true)
+        mutex_->lock_upgrade();
+
+        const auto initial_count = *counter_;
+        BITCOIN_ASSERT(initial_count <= clearance_count_);
+
+        if (initial_count == clearance_count_)
         {
-            unique_lock lock(*counter_mutex_);
-
-            BITCOIN_ASSERT(*counter_ <= clearance_count_);
-            if (*counter_ == clearance_count_)
-            {
-                //log::debug(LOG_NETWORK)
-                //    << "Synchronizing [" << name_ << "] > "
-                //    << clearance_count_ << " (ignored)";
-                return;
-            }
-
-            ++(*counter_);
-
-            if (ec)
-            {
-                //log::debug(LOG_NETWORK)
-                //    << "Synchronizing [" << name_ << "] " << *counter_
-                //    << "/" << clearance_count_ << " " << ec.message()
-                //    << (suppress_errors_ ? " (suppressed)" : "");
-
-                if (!suppress_errors_)
-                    *counter_ = clearance_count_;
-            }
-            else
-            {
-                //log::debug(LOG_NETWORK)
-                //    << "Synchronizing [" << name_ << "] " << *counter_ << "/"
-                //    << clearance_count_;
-            }
-
-            cleared = (*counter_ == clearance_count_);
+            mutex_->unlock_upgrade();
+            //-----------------------------------------------------------------
+            return;
         }
+
+        const auto terminate = ec && !suppress_errors_;
+        const auto count = terminate ? clearance_count_ : initial_count + 1;
+        const auto cleared = count == clearance_count_;
+
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        mutex_->unlock_upgrade_and_lock();
+        (*counter_) = count;
+        mutex_->unlock();
         ///////////////////////////////////////////////////////////////////////
 
-        // Use execute flag to keep this log task out of the critical section.
         if (cleared)
         {
+            // If not suppressing errors pass the last result code.
+            // This is useful when clearance count is one.
             const auto result = suppress_errors_ ? error::success : ec;
             handler_(result, std::forward<Args>(args)...);
         }
@@ -104,7 +89,7 @@ private:
 
     // We use pointer to reference the same value/mutex across instance copies.
     std::shared_ptr<size_t> counter_;
-    std::shared_ptr<shared_mutex> counter_mutex_;
+    std::shared_ptr<upgrade_mutex> mutex_;
 };
 
 template <typename Handler>
