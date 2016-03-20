@@ -39,8 +39,8 @@ public:
       : handler_(handler),
         clearance_count_(clearance_count),
         name_(name),
-        counter_(std::make_shared<std::size_t>(0)),
-        mutex_(std::make_shared<shared_mutex>()),
+        counter_(std::make_shared<size_t>(0)),
+        mutex_(std::make_shared<upgrade_mutex>()),
         suppress_errors_(suppress_errors)
     {
     }
@@ -62,8 +62,8 @@ public:
             return;
         }
 
-        const auto complete = ec && !suppress_errors_;
-        const auto count = complete ? clearance_count_ : initial_count + 1;
+        const auto terminate = ec && !suppress_errors_;
+        const auto count = terminate ? clearance_count_ : initial_count + 1;
         const auto cleared = count == clearance_count_;
 
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
