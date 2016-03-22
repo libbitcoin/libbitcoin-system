@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_THREAD_HPP
 #define LIBBITCOIN_THREAD_HPP
 
+#include <memory>
 #include <boost/thread.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 
@@ -33,13 +34,33 @@ enum class thread_priority
     lowest
 };
 
+typedef boost::mutex unique_mutex;
 typedef boost::shared_mutex shared_mutex;
+typedef boost::upgrade_mutex upgrade_mutex;
+
 typedef boost::unique_lock<shared_mutex> unique_lock;
 typedef boost::shared_lock<shared_mutex> shared_lock;
 
-typedef boost::upgrade_mutex upgrade_mutex;
-typedef boost::unique_lock<upgrade_mutex> upgrade_unique_lock;
-typedef boost::shared_lock<upgrade_mutex> upgrade_shared_lock;
+// TODO: move to own files.
+class BC_API conditional_lock
+{
+public:
+    conditional_lock(std::shared_ptr<shared_mutex> mutex_ptr)
+      : mutex_ptr_(mutex_ptr)
+    {
+        if (mutex_ptr_)
+            mutex_ptr->lock();
+    }
+
+    ~conditional_lock()
+    {
+        if (mutex_ptr_)
+            mutex_ptr_->unlock();
+    }
+
+private:
+    const std::shared_ptr<shared_mutex> mutex_ptr_;
+};
 
 BC_API void set_thread_priority(thread_priority priority);
 
