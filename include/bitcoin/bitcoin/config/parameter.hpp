@@ -59,7 +59,7 @@ typedef std::vector<parameter> parameter_list;
  * Normalized storage for command line arguments and options.
  * TEST: option_metadata does not provide virtual methods so must wrap to mock.
  */
-class parameter
+class BC_API parameter
 {
 private:
 
@@ -83,24 +83,24 @@ public:
     /**
      * Sentinel - the option is not a positional argument.
      */
-    BC_API static const int not_positional;
+    static const int not_positional;
 
     /**
      * Sentinel - there is no short name.
      */
-    BC_API static const char no_short_name;
+    static const char no_short_name;
 
     /**
      * The character used to prefix command line options.
      */
-    BC_API static const char option_prefix_char;
+    static const char option_prefix_char;
 
     /**
      * Populate with normalized parameter data.
      * @param[in]  option     The metadata of the option to test.
      * @param[in]  arguments  The list of supported positional arguments.
      */
-    BC_API virtual void initialize(
+    virtual void initialize(
         const boost::program_options::option_description& option,
         const argument_list& arguments);
 
@@ -111,7 +111,7 @@ public:
      * @param[in]  arguments  The list of supported positional arguments.
      * @return                Relative position or -1 if not positional.
      */
-    BC_API virtual int position(
+    virtual int position(
         const boost::program_options::option_description& option,
         const argument_list& arguments) const;
 
@@ -122,7 +122,7 @@ public:
      * @param[in]  arguments  The argument names list.
      * @return                The arguments limit value for the option.
      */
-    BC_API unsigned arguments_limit(int position, 
+    unsigned arguments_limit(int position, 
         const boost::program_options::option_description& option,
         const argument_list& arguments) const;
 
@@ -131,7 +131,7 @@ public:
      * @param[in]  option  The metadata of the option to test.
      * @return             The short name character or null character.
      */
-    BC_API virtual char short_name(
+    virtual char short_name(
         const boost::program_options::option_description& option) const;
 
     /**

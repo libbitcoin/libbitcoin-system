@@ -28,7 +28,7 @@
 #include <windows.h>
 
 // Get Windows input handle.
-static void* get_input_handle()
+static LPVOID get_input_handle()
 {
     auto handle = GetStdHandle(STD_INPUT_HANDLE);
     if (handle == INVALID_HANDLE_VALUE || handle == nullptr)

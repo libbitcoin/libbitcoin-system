@@ -31,7 +31,7 @@ namespace libbitcoin {
  * This class and members are no-ops when called in non-MSVC++ builds.
  */
 class BC_API console_streambuf
-    : public std::wstreambuf
+  : public std::wstreambuf
 {
 public:
     /**
