@@ -23,6 +23,7 @@
 #include <string>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
+#include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
 
@@ -37,7 +38,7 @@ namespace config {
 
 /// Parse configurable values from environment variables, settings file, and
 /// command line positional and non-positional options.
-class parser
+class BC_API parser
 {
 public:
     static std::string format_invalid_parameter(const std::string& message);
