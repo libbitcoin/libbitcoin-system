@@ -139,10 +139,10 @@ void log::output_cerr(level value, const std::string& domain,
 
 log::destinations log::destinations_
 {
-#ifdef DEBUG
-    std::make_pair(level::debug, output_cout),
-#else
+#ifdef NDEBUG
     std::make_pair(level::debug, output_ignore),
+#else
+    std::make_pair(level::debug, output_cout),
 #endif
     std::make_pair(level::info, output_cout),
     std::make_pair(level::warning, output_cerr),

@@ -37,7 +37,7 @@ void secp256k1_initializer::set_context(secp256k1_context** context,
 
 // Protected base class constructor (must be derived).
 secp256k1_initializer::secp256k1_initializer(int flags)
-    : flags_(flags), context_(nullptr)
+  : flags_(flags), context_(nullptr)
 {
 }
 
