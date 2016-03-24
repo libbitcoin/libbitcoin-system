@@ -89,6 +89,9 @@ namespace bc = libbitcoin;
     #endif
 #endif
 
+// Avoid namespace conflict between boost::placeholders and std::placeholders. 
+#define BOOST_BIND_NO_PLACEHOLDERS
+
 // Define so we can have better visibility of lcov exclusion ranges.
 #define LCOV_EXCL_START(text)
 #define LCOV_EXCL_STOP()
