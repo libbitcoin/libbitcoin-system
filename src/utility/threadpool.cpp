@@ -35,6 +35,7 @@ threadpool::threadpool(size_t number_threads, thread_priority priority)
 threadpool::~threadpool()
 {
     shutdown();
+    join();
 }
 
 void threadpool::spawn(size_t number_threads, thread_priority priority)
