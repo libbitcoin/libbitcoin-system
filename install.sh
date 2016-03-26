@@ -132,6 +132,10 @@ fi
 
 # Parse command line options that are handled by this script.
 #------------------------------------------------------------------------------
+# Set default values for tarball builds
+BUILD_ICU="no"
+BUILD_PNG="no"
+BUILD_QRENCODE="no"
 for OPTION in "$@"; do
     case $OPTION in
         # Custom build options (in the form of --build-<option>).
@@ -480,14 +484,24 @@ push_directory()
 #==============================================================================
 build_from_tarball()
 {
-    local URL=$1
-    local ARCHIVE=$2
-    local ARCHIVE_TYPE=$3
-    local JOBS=$4
-    local PUSH_DIR=$5
-    local LINK=$6
-    local STANDARD=$7
-    shift 7
+    local BUILD_PKG=$1
+    local PKG_NAME=$2
+    local URL=$3
+    local ARCHIVE=$4
+    local ARCHIVE_TYPE=$5
+    local JOBS=$6
+    local PUSH_DIR=$7
+    local LINK=$8
+    local STANDARD=$9
+    shift 9
+
+    if [[ ! $BUILD_PKG = "yes" ]]; then
+        if [[ $PKG_NAME = "ICU" ]]; then
+            initialize_icu_packages
+        fi
+        display_message "$PKG_NAME build not enabled"
+        return
+    fi
 
     display_message "Download $ARCHIVE"
 
@@ -616,9 +630,9 @@ build_from_travis()
 #==============================================================================
 build_all()
 {
-    build_from_tarball $ICU_URL $ICU_ARCHIVE gzip $PARALLEL source $ICU_LINK $ICU_STANDARD $ICU_OPTIONS
-    build_from_tarball $PNG_URL $PNG_ARCHIVE xz $PARALLEL . $PNG_LINK $PNG_STANDARD $PNG_OPTIONS
-    build_from_tarball $QRENCODE_URL $QRENCODE_ARCHIVE bzip2 $PARALLEL . $QRENCODE_LINK $QRENCODE_STANDARD $QRENCODE_OPTIONS
+    build_from_tarball $BUILD_ICU ICU $ICU_URL $ICU_ARCHIVE gzip $PARALLEL source $ICU_LINK $ICU_STANDARD $ICU_OPTIONS
+    build_from_tarball $BUILD_PNG PNG $PNG_URL $PNG_ARCHIVE xz $PARALLEL . $PNG_LINK $PNG_STANDARD $PNG_OPTIONS
+    build_from_tarball $BUILD_QRENCODE QRENCODE $QRENCODE_URL $QRENCODE_ARCHIVE bzip2 $PARALLEL . $QRENCODE_LINK $QRENCODE_STANDARD $QRENCODE_OPTIONS
     build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE boost $PARALLEL $BOOST_OPTIONS
     build_from_github libbitcoin secp256k1 version4 $PARALLEL "$@" $SECP256K1_OPTIONS
     build_from_travis libbitcoin libbitcoin master $PARALLEL "$@" $BITCOIN_OPTIONS
