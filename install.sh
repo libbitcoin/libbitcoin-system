@@ -38,7 +38,7 @@ BUILD_DIR="build-libbitcoin"
 ICU_URL="http://download.icu-project.org/files/icu4c/55.1/icu4c-55_1-src.tgz"
 ICU_ARCHIVE="icu4c-55_1-src.tgz"
 ICU_STANDARD=\
-"CXXFLAGS=-std=c++0x"
+"CXXFLAGS=-std=c++11"
 
 # PNG archive.
 #------------------------------------------------------------------------------
@@ -126,7 +126,8 @@ echo "Make with stdlib: $LIBC"
 #------------------------------------------------------------------------------
 COMPILER="GCC"
 if [[ $CXX == "clang++" ]]; then
-    BOOST_TOOLS="toolset=clang cxxflags=-stdlib=$LIBC linkflags=-stdlib=$LIBC"  
+    BOOST_CXX="-std=c++11 -stdlib=$LIBC"
+    BOOST_TOOLS="toolset=clang cxxflags=$BOOST_CXX linkflags=-stdlib=$LIBC"
     COMPILER="CLANG"
 fi
 
