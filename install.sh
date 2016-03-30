@@ -37,42 +37,21 @@ BUILD_DIR="build-libbitcoin"
 #------------------------------------------------------------------------------
 ICU_URL="http://download.icu-project.org/files/icu4c/55.1/icu4c-55_1-src.tgz"
 ICU_ARCHIVE="icu4c-55_1-src.tgz"
-ICU_STANDARD=\
-"CXXFLAGS=-std=c++11"
 
 # PNG archive.
 #------------------------------------------------------------------------------
 PNG_URL="http://downloads.sourceforge.net/project/libpng/libpng16/1.6.21/libpng-1.6.21.tar.xz"
 PNG_ARCHIVE="libpng-1.6.21.tar.xz"
-PNG_STANDARD=\
-""
 
-# QRENCODE archive.
+# QREncode archive.
 #------------------------------------------------------------------------------
 QRENCODE_URL="http://fukuchi.org/works/qrencode/qrencode-3.4.4.tar.bz2"
 QRENCODE_ARCHIVE="qrencode-3.4.4.tar.bz2"
-QRENCODE_STANDARD=\
-""
 
-# Boost archive for gcc.
+# Boost archive.
 #------------------------------------------------------------------------------
-BOOST_URL_GCC="http://github.com/libbitcoin/libbitcoin-build/blob/master/mirror/boost_1_55_0.tar.bz2?raw=true"
-BOOST_ARCHIVE_GCC="boost_1_55_0.tar.bz2"
-BOOST_STANDARD_GCC=\
-"threading=multi "\
-"variant=release "\
-"-d0 "\
-"-q"
-
-# Boost archive for clang.
-#------------------------------------------------------------------------------
-BOOST_URL_CLANG="http://github.com/libbitcoin/libbitcoin-build/blob/master/mirror/boost_1_54_0.tar.bz2?raw=true"
-BOOST_ARCHIVE_CLANG="boost_1_54_0.tar.bz2"
-BOOST_STANDARD_CLANG=\
-"threading=multi "\
-"variant=release "\
-"-d0 "\
-"-q"
+BOOST_URL="https://sourceforge.net/projects/boost/files/boost/1.56.0/boost_1_56_0.tar.bz2"
+BOOST_ARCHIVE="boost_1_56_0.tar.bz2"
 
 
 # Initialize the build environment.
@@ -97,38 +76,21 @@ else
     echo "Unsupported system: $OS"
     exit 1
 fi
-echo "Make jobs: $PARALLEL"
-echo "Make for system: $OS"
 
 # Define operating system specific settings.
+# Must always require clang on OSX (clang) and stdlibc on Linux(gcc or clang).
 #------------------------------------------------------------------------------
 if [[ $OS == Darwin ]]; then
-    # Always require clang, common lib linking will otherwise fail.
     export CC="clang"
     export CXX="clang++"
-    LIBC="libc++"
-
-    # Always initialize prefix on OSX so default is useful.
-    PREFIX="/usr/local"
+    STDLIB="c++"
 elif [[ $OS == OpenBSD ]]; then
     make() { gmake "$@"; }
     export CC="egcc"
     export CXX="eg++"
-    LIBC="libestdc++"
-else
-    LIBC="libstdc++"
-fi
-echo "Make with cc: $CC"
-echo "Make with cxx: $CXX"
-echo "Make with stdlib: $LIBC"
-
-# Define compiler specific settings.
-#------------------------------------------------------------------------------
-COMPILER="GCC"
-if [[ $CXX == "clang++" ]]; then
-    BOOST_CXX="-std=c++11 -stdlib=$LIBC"
-    BOOST_TOOLS="toolset=clang cxxflags=$BOOST_CXX linkflags=-stdlib=$LIBC"
-    COMPILER="CLANG"
+    STDLIB="estdc++"
+else # Linux
+    STDLIB="stdc++"
 fi
 
 # Parse command line options that are handled by this script.
@@ -136,10 +98,10 @@ fi
 for OPTION in "$@"; do
     case $OPTION in
         # Custom build options (in the form of --build-<option>).
+        (--build-boost)    BUILD_BOOST="yes";;
         (--build-icu)      BUILD_ICU="yes";;
         (--build-png)      BUILD_PNG="yes";;
         (--build-qrencode) BUILD_QRENCODE="yes";;
-        (--build-boost)    BUILD_BOOST="yes";;
         (--build-dir=*)    BUILD_DIR="${OPTION#*=}";;
         
         # Standard build options.
@@ -151,69 +113,20 @@ for OPTION in "$@"; do
         (--with-qrencode)  WITH_QRENCODE="yes";;
     esac
 done
-echo "Build directory: $BUILD_DIR"
-echo "Prefix directory: $PREFIX"
-
-# Warn on configurations that imply static/prefix isolation.
-#------------------------------------------------------------------------------
-if [[ $BUILD_ICU == yes ]]; then
-    if [[ !($PREFIX)]]; then
-        echo "Warning: --prefix recommended when building ICU."
-    fi
-    if [[ !($DISABLE_SHARED) ]]; then
-        echo "Warning: --disable-shared recommended when building ICU."
-    fi
-fi
-if [[ $BUILD_QRENCODE == yes ]]; then
-    if [[ !($PREFIX)]]; then
-        echo "Warning: --prefix recommended when building QRENCODE."
-    fi
-    if [[ !($DISABLE_SHARED) ]]; then
-        echo "Warning: --disable-shared recommended when building QRENCODE."
-    fi
-fi
-if [[ $BUILD_PNG == yes ]]; then
-    if [[ !($PREFIX)]]; then
-        echo "Warning: --prefix recommended when building PNG."
-    fi
-    if [[ !($DISABLE_SHARED) ]]; then
-        echo "Warning: --disable-shared recommended when building PNG."
-    fi
-fi
-if [[ $BUILD_BOOST == yes ]]; then
-    if [[ !($PREFIX)]]; then    
-        echo "Warning: --prefix recommended when building boost."
-    fi
-    if [[ !($DISABLE_SHARED) ]]; then
-        echo "Warning: --disable-shared recommended when building boost."
-    fi
-fi
 
 # Purge custom options so they don't go to configure.
 #------------------------------------------------------------------------------
 CONFIGURE_OPTIONS=( "$@" )
-CUSTOM_OPTIONS=( "--build-icu" "--build-boost" "--build-png" "--build-qrencode" "--build-dir=$BUILD_DIR")
+CUSTOM_OPTIONS=( "--build-icu" "--build-boost" "--build-png" "--build-qrencode" "--build-dir=$BUILD_DIR" )
 for CUSTOM_OPTION in "${CUSTOM_OPTIONS[@]}"; do
     CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/$CUSTOM_OPTION}" )
 done
 
-# Set link variables.
+# Always set a prefix (required on OSX and for lib detection).
 #------------------------------------------------------------------------------
-if [[ $DISABLE_STATIC == yes ]]; then
-    BOOST_LINK="link=shared"
-    ICU_LINK="--enable-shared --disable-static"
-    PNG_LINK="--enable-shared --disable-static"
-    QRENCODE_LINK="--enable-shared --disable-static"
-elif [[ $DISABLE_SHARED == yes ]]; then
-    BOOST_LINK="link=static"
-    ICU_LINK="--disable-shared --enable-static"
-    PNG_LINK="--disable-shared --enable-static"
-    QRENCODE_LINK="--disable-shared --enable-static"
-else
-    BOOST_LINK="link=static,shared"
-    ICU_LINK="--enable-shared --enable-static"
-    PNG_LINK="--enable-shared --enable-static"
-    QRENCODE_LINK="--enable-shared --enable-static"
+if [[ !($PREFIX) ]]; then
+    PREFIX="/usr/local"
+    CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--prefix=$PREFIX")
 fi
 
 # Incorporate the prefix.
@@ -225,9 +138,6 @@ if [[ $PREFIX ]]; then
     # Augment PKG_CONFIG_PATH search path with our prefix.
     export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$PREFIX_PKG_CONFIG_DIR"
     
-    # Set public prefix variable.
-    prefix="--prefix=$PREFIX"
-    
     # Set a package config save path that can be passed via our builds.
     with_pkgconfigdir="--with-pkgconfigdir=$PREFIX_PKG_CONFIG_DIR"
     
@@ -236,102 +146,90 @@ if [[ $PREFIX ]]; then
         # --with-boost=<path>, /usr, /usr/local, /opt, /opt/local, $BOOST_ROOT.
         # We use --with-boost to prioritize the --prefix path when we build it.
         # Otherwise standard paths suffice for Linux, Homebrew and MacPorts.
-        with_boost="--with-boost=$PREFIX" 
+        # ax_boost_base.m4 appends /include and adds to BOOST_CPPFLAGS
+        # ax_boost_base.m4 searches for /lib /lib64 and adds to BOOST_LDFLAGS
+        with_boost="--with-boost=$PREFIX"
     fi
 fi
 
-# Echo published dynamic build options.
+# Echo generated values.
 #------------------------------------------------------------------------------
-echo "  prefix: ${prefix}"
-echo "  with_boost: ${with_boost}"
-echo "  with_pkgconfigdir: ${with_pkgconfigdir}"
+echo "OS                : $OS"
+echo "PARALLEL          : $PARALLEL"
+echo "CC                : $CC"
+echo "CXX               : $CXX"
+echo "STDLIB            : $STDLIB"
+echo "BUILD_BOOST       : $BUILD_BOOST"
+echo "BUILD_ICU         : $BUILD_ICU"
+echo "BUILD_PNG         : $BUILD_PNG"
+echo "BUILD_QRENCODE    : $BUILD_QRENCODE"
+echo "BUILD_DIR         : $BUILD_DIR"
+echo "PREFIX            : $PREFIX"
+echo "DISABLE_SHARED    : $DISABLE_SHARED"
+echo "DISABLE_STATIC    : $DISABLE_STATIC"
+echo "WITH_ICU          : $WITH_ICU"
+echo "WITH_PNG          : $WITH_PNG"
+echo "WITH_QRENCODE     : $WITH_QRENCODE"
+echo "with_boost        : ${with_boost}"
+echo "with_pkgconfigdir : ${with_pkgconfigdir}"
 
 
 # Define build options.
 #==============================================================================
 # Define icu options.
 #------------------------------------------------------------------------------
-ICU_OPTIONS=\
-"--enable-draft "\
-"--enable-tools "\
-"--disable-extras "\
-"--disable-icuio "\
-"--disable-layout "\
-"--disable-layoutex "\
-"--disable-tests "\
-"--disable-samples "
+ICU_OPTIONS=(
+"--enable-draft" \
+"--enable-tools" \
+"--disable-extras" \
+"--disable-icuio" \
+"--disable-layout" \
+"--disable-layoutex" \
+"--disable-tests" \
+"--disable-samples")
 
 # Define png options.
 #------------------------------------------------------------------------------
-PNG_OPTIONS=\
-"${with_pkgconfigdir} "
+PNG_OPTIONS=()
 
 # Define qrencode options.
 #------------------------------------------------------------------------------
-QRENCODE_OPTIONS=\
-"${with_pkgconfigdir} "
+QRENCODE_OPTIONS=()
 
-# Define boost options for gcc.
+# Define boost options.
+# https://trac.macports.org/ticket/42282 (no clang 3.4+ with boost 1.55)
 #------------------------------------------------------------------------------
-BOOST_OPTIONS_GCC=\
-"--with-chrono "\
-"--with-date_time "\
-"--with-filesystem "\
-"--with-iostreams "\
-"--with-locale "\
-"--with-program_options "\
-"--with-regex "\
-"--with-system "\
-"--with-thread "\
-"--with-test "
-
-# Define boost options for clang.
-#------------------------------------------------------------------------------
-BOOST_OPTIONS_CLANG=\
-"--with-chrono "\
-"--with-date_time "\
-"--with-filesystem "\
-"--with-iostreams "\
-"--with-locale "\
-"--with-program_options "\
-"--with-regex "\
-"--with-system "\
-"--with-thread "\
-"--with-test "
+BOOST_OPTIONS=(
+"--with-chrono" \
+"--with-date_time" \
+"--with-filesystem" \
+"--with-iostreams" \
+"--with-locale" \
+"--with-program_options" \
+"--with-regex" \
+"--with-system" \
+"--with-thread" \
+"--with-test" \
+"threading=multi" \
+"variant=release" \
+"-d0" \
+"-q")
 
 # Define secp256k1 options.
 #------------------------------------------------------------------------------
-SECP256K1_OPTIONS=\
-"--disable-tests "\
-"--enable-module-recovery "
+SECP256K1_OPTIONS=(
+"--disable-tests" \
+"--enable-module-recovery")
 
 # Define bitcoin options.
 #------------------------------------------------------------------------------
-BITCOIN_OPTIONS=\
-"${with_boost} "\
-"${with_pkgconfigdir} "
+BITCOIN_OPTIONS=(
+"${with_boost}" \
+"${with_pkgconfigdir}")
 
 
-# Define utility functions.
+# Utility functions.
 #==============================================================================
-circumvent_boost_icu_detection()
-{
-    # Boost expects a directory structure for ICU which is incorrect.
-    # Boost ICU discovery fails when using prefix, can't fix with -sICU_LINK,
-    # so we rewrite the two 'has_icu_test.cpp' files to always return success.
-    
-    if [[ $WITH_ICU ]]; then
-        local SUCCESS="int main() { return 0; }"
-        local REGEX_TEST="libs/regex/build/has_icu_test.cpp"
-        local LOCALE_TEST="libs/locale/build/has_icu_test.cpp"
-        
-        echo $SUCCESS > $REGEX_TEST
-        echo $SUCCESS > $LOCALE_TEST
-
-        echo "hack: ICU detection modified, will always indicate found."
-    fi
-}
-
 configure_options()
 {
     echo "configure: $@"
@@ -340,8 +238,8 @@ configure_options()
 
 configure_links()
 {
-    # Configure dynamic linker run-time bindings.
-    if [[ ($OS == Linux) && !($PREFIX) ]]; then
+    # Configure dynamic linker run-time bindings when installing to system.
+    if [[ ($OS == Linux) && ($PREFIX == "/usr/local") ]]; then
         ldconfig
     fi
 }
@@ -369,58 +267,7 @@ initialize_git()
     git config user.name anonymous
 }
 
-initialize_boost_icu()
-{
-    if [[ $WITH_ICU ]]; then
-        # Restrict other local options when compiling boost with icu.
-        BOOST_ICU_ONLY="boost.locale.iconv=off boost.locale.posix=off"
-        
-        # Extract ICU prefix directory from package config variable.
-        local ICU_PREFIX=`pkg-config icu-i18n --variable=prefix`
-        BOOST_ICU_PATH="-sICU_PATH=$ICU_PREFIX"
-        BOOTSTRAP_WITH_ICU="--with-icu=$ICU_PREFIX"
-
-        # Extract ICU libs from package config variables and augment with -ldl.
-        local ICU_LIBS="`pkg-config icu-i18n --libs` -ldl"
-        BOOST_ICU_LINK="-sICU_LINK=$ICU_LIBS"
-    fi
-}
-
-initialize_icu_packages()
-{
-    if [[ ($OS == Darwin) && !($BUILD_ICU) ]]; then
-        # Update PKG_CONFIG_PATH for ICU package installations on OSX.
-        # OSX provides libicucore.dylib with no pkgconfig and doesn't support
-        # renaming or important features, so we can't use that.
-        HOMEBREW_ICU_PKG_CONFIG="/usr/local/opt/icu4c/lib/pkgconfig"
-        MACPORTS_ICU_PKG_CONFIG="/opt/local/lib/pkgconfig"
-        
-        if [[ -d "$HOMEBREW_ICU_PKG_CONFIG" ]]; then
-            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOMEBREW_ICU_PKG_CONFIG"
-        elif [[ -d "$MACPORTS_ICU_PKG_CONFIG" ]]; then
-            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$MACPORTS_ICU_PKG_CONFIG"
-        fi
-    fi
-}
-
-initialize_options()
-{
-    if [[ !($BOOST_OPTIONS) ]]; then
-        # Select compiler-conditional generated configuration parameters.
-        if [[ $COMPILER == CLANG ]]; then
-            BOOST_URL=$BOOST_URL_CLANG
-            BOOST_ARCHIVE=$BOOST_ARCHIVE_CLANG
-            BOOST_STANDARD=$BOOST_STANDARD_CLANG
-            BOOST_OPTIONS=$BOOST_OPTIONS_CLANG
-        else
-            BOOST_URL=$BOOST_URL_GCC
-            BOOST_ARCHIVE=$BOOST_ARCHIVE_GCC
-            BOOST_STANDARD=$BOOST_STANDARD_GCC
-            BOOST_OPTIONS=$BOOST_OPTIONS_GCC
-        fi
-    fi
-}
-
+# make_current_directory jobs [configure_options]
 make_current_directory()
 {
     local JOBS=$1
@@ -433,35 +280,43 @@ make_current_directory()
     configure_links
 }
 
+# make_jobs jobs [make_options]
 make_jobs()
 {
     local JOBS=$1
-    local TARGET=$2
+    shift 1
 
     # Avoid setting -j1 (causes problems on Travis).
     if [[ $JOBS > $SEQUENTIAL ]]; then
-        make -j$JOBS $TARGET
+        make -j$JOBS "$@"
     else
-        make $TARGET
+        make "$@"
     fi
 }
 
+# make_tests jobs
 make_tests()
 {
     local JOBS=$1
+    
+    # Disable exit on error.
+    set +e
 
     # Build and run unit tests relative to the primary directory.
-    # VERBOSE=1 ensures test-suite.log output sent to console (gcc).
-    if ! make_jobs $JOBS check VERBOSE=1; then
-        if [ -e "test-suite.log" ]; then
-            echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
-            echo "cat test-suite.log"
-            echo "------------------------------"
-            cat "test-suite.log"
-            echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-        fi
+    # VERBOSE=1 ensures test runner output sent to console (gcc).
+    make_jobs $JOBS check "VERBOSE=1"
+    
+    # Test runners emit to the test.log file.
+    if [[ -e "test.log" ]]; then
+        cat "test.log"
+    fi
+    
+    if [[ $? -ne 0 ]]; then
         exit 1
     fi
+
+    # Reenable exit on error.
+    set -e
 }
 
 pop_directory()
@@ -479,30 +334,59 @@ push_directory()
 
 # Build functions.
 #==============================================================================
+
+# Because PKG_CONFIG_PATH doesn't get updated by Homebrew or MacPorts.
+initialize_icu_packages()
+{
+    if [[ ($OS == Darwin) ]]; then
+        # Update PKG_CONFIG_PATH for ICU package installations on OSX.
+        # OSX provides libicucore.dylib with no pkgconfig and doesn't support
+        # renaming or important features, so we can't use that.
+        local HOMEBREW_ICU_PKG_CONFIG="/usr/local/opt/icu4c/lib/pkgconfig"
+        local MACPORTS_ICU_PKG_CONFIG="/opt/local/lib/pkgconfig"
+        
+        if [[ -d "$HOMEBREW_ICU_PKG_CONFIG" ]]; then
+            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOMEBREW_ICU_PKG_CONFIG"
+        elif [[ -d "$MACPORTS_ICU_PKG_CONFIG" ]]; then
+            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$MACPORTS_ICU_PKG_CONFIG"
+        fi
+    fi
+}
+
 build_from_tarball()
 {
     local URL=$1
     local ARCHIVE=$2
-    local ARCHIVE_TYPE=$3
-    local JOBS=$4
-    local PUSH_DIR=$5
-    local LINK=$6
-    local STANDARD=$7
+    local COMPRESSION=$3
+    local PUSH_DIR=$4
+    local JOBS=$5
+    local BUILD=$6
+    local OPTIONS=$7
     shift 7
 
+    if [[ !($BUILD) ]]; then
+        if [[ $ARCHIVE == $ICU_ARCHIVE ]]; then
+            initialize_icu_packages
+        fi    
+        return
+    fi
+    
     display_message "Download $ARCHIVE"
-
-    local EXTRACTED_DIR=`echo $ARCHIVE | sed "s/.tar.$ARCHIVE_TYPE//g"`
-
-    create_directory $EXTRACTED_DIR
-    push_directory $EXTRACTED_DIR
+    
+    # Use the suffixed archive name as the extraction directory.
+    local EXTRACT="build-$ARCHIVE"
+    create_directory $EXTRACT
+    push_directory $EXTRACT
 
     # Extract the source locally.
     wget --output-document $ARCHIVE $URL
-    tar --extract --file $ARCHIVE --$ARCHIVE_TYPE --strip-components=1
+    tar --extract --file $ARCHIVE --$COMPRESSION --strip-components=1
     push_directory $PUSH_DIR
 
-    configure_options $LINK $STANDARD ${prefix} "$@"
+    # Join generated and command line options.
+    local CONFIGURATION=("${OPTIONS[@]}" "$@")
+    
+    configure_options "${CONFIGURATION[@]}"
     make_jobs $JOBS --silent
     make install
     configure_links
@@ -511,49 +395,115 @@ build_from_tarball()
     pop_directory
 }
 
+# Because boost ICU detection is broken.
+circumvent_boost_icu_detection()
+{
+    # Boost expects a directory structure for ICU which is incorrect.
+    # Boost ICU discovery fails when using prefix, can't fix with -sICU_LINK,
+    # so we rewrite the two 'has_icu_test.cpp' files to always return success.
+
+    local SUCCESS="int main() { return 0; }"
+    local REGEX_TEST="libs/regex/build/has_icu_test.cpp"
+    local LOCALE_TEST="libs/locale/build/has_icu_test.cpp"
+    
+    echo $SUCCESS > $REGEX_TEST
+    echo $SUCCESS > $LOCALE_TEST
+
+    echo "hack: ICU detection modified, will always indicate found."
+}
+
+# Because boost doesn't support autoconfig.
+initialize_boost_configuration()
+{
+    if [[ $DISABLE_STATIC ]]; then
+        BOOST_LINK="link=shared"
+    elif [[ $DISABLE_SHARED ]]; then
+        BOOST_LINK="link=static"
+    else
+        BOOST_LINK="link=static,shared"
+    fi
+
+    if [[ ($OS == Linux && $CC == "clang") || ($OS == OpenBSD) ]]; then
+        BOOST_TOOLSET="toolset=$CC"
+        BOOST_CXXFLAGS="cxxflags=-stdlib=lib$STDLIB"
+        BOOST_LINKFLAGS="linkflags=-stdlib=lib$STDLIB"
+    fi
+}
+
+# Because boost doesn't support pkg-config.
+initialize_boost_icu_configuration()
+{
+    if [[ $WITH_ICU ]]; then
+        circumvent_boost_icu_detection
+    
+        # Restrict other locale options when compiling boost with icu.
+        BOOST_ICU_ICONV_OFF="boost.locale.iconv=off"
+        BOOST_ICU_POSIX_OFF="boost.locale.posix=off"
+
+        # Extract ICU libs from package config variables and augment with -ldl.
+        ICU_LIBS=( `pkg-config icu-i18n --libs` "-ldl" )
+        
+        # This is a HACK for boost m4 scripts that fail with ICU dependency.
+        # See custom edits in ax-boost-locale.m4 and ax_boost_regex.m4.
+        export BOOST_ICU_LIBS="${ICU_LIBS[@]}"
+        
+        # Extract ICU prefix directory from package config variable.
+        ICU_PREFIX=`pkg-config icu-i18n --variable=prefix`
+    fi
+}
+
 build_from_tarball_boost()
 {
     local URL=$1
     local ARCHIVE=$2
-    local REPO=$3
-    local JOBS=$4
-    shift 4
+    local COMPRESSION=$3
+    local PUSH_DIR=$4
+    local JOBS=$5
+    local BUILD=$6
+    shift 6
 
-    if [[ !($BUILD_BOOST) ]]; then
-        display_message "Boost build not enabled"
+    if [[ !($BUILD) ]]; then
         return
     fi
     
     display_message "Download $ARCHIVE"
 
-    create_directory $REPO
-    push_directory $REPO
+    create_directory $PUSH_DIR
+    push_directory $PUSH_DIR
 
     # Extract the source locally.
     wget --output-document $ARCHIVE $URL
-    tar --extract --file $ARCHIVE --bzip2 --strip-components=1
+    tar --extract --file $ARCHIVE --$COMPRESSION --strip-components=1
     
-    # Circumvent Boost ICU detection bug.
-    circumvent_boost_icu_detection
-
-    initialize_boost_icu
+    initialize_boost_configuration
+    initialize_boost_icu_configuration
+    
+    echo "BOOST >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+    echo "BOOST_LINK            : $BOOST_LINK" 
+    echo "BOOST_TOOLSET         : $BOOST_TOOLSET" 
+    echo "BOOST_CXXFLAGS        : $BOOST_CXXFLAGS" 
+    echo "BOOST_LINKFLAGS       : $BOOST_LINKFLAGS" 
+    echo "BOOST_ICU_ICONV_OFF   : $BOOST_ICU_ICONV_OFF" 
+    echo "BOOST_ICU_POSIX_OFF   : $BOOST_ICU_POSIX_OFF" 
+    echo "--prefix=             : $PREFIX" 
+    echo "-sICU_PATH=           : $ICU_PREFIX" 
+    echo "-sICU_LINK=           : ${ICU_LIBS[@]}"
+    echo "BOOST_OPTIONS         : $@"
+    echo "BOOST <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
     
     # Build and install.
-    BOOSTSTRAP_OPTIONS="${prefix} $BOOTSTRAP_WITH_ICU"
-    B2_OPTIONS="install --reconfigure -j $JOBS ${prefix} $BOOST_LINK $BOOST_TOOLS $BOOST_STANDARD $BOOST_ICU_PATH $BOOST_ICU_LINK $BOOST_ICU_ONLY $@"
-    
-    echo "bootstrap: $BOOSTSTRAP_OPTIONS"
-    echo "b2: $B2_OPTIONS"
-    echo
-    
-    ./bootstrap.sh $BOOSTSTRAP_OPTIONS
-    ./b2 $B2_OPTIONS
-    
-    # Boost has no pkg-config, m4 searches in the following order:
-    # --with-boost=<path>, /usr, /usr/local, /opt, /opt/local, $BOOST_ROOT.
-    # We use --with-boost to prioritize the --prefix path when we build it.
-    # Otherwise standard paths suffice for Linux, Homebrew and MacPorts.
-    with_boost="--with-boost=$PREFIX"
+    ./bootstrap.sh --prefix=$PREFIX --with-icu=$ICU_PREFIX
+    ./b2 install --reconfigure -j $JOBS \
+        $BOOST_LINK \
+        $BOOST_TOOLSET \
+        $BOOST_CXXFLAGS \
+        $BOOST_LINKFLAGS \
+        $BOOST_ICU_ICONV_OFF \
+        $BOOST_ICU_POSIX_OFF \
+        "--prefix=$PREFIX" \
+        "-sICU_PATH=$ICU_PREFIX" \
+        "-sICU_LINK=${ICU_LIBS[@]}" \
+        "$@"
 
     pop_directory
 }
@@ -564,17 +514,21 @@ build_from_github()
     local REPO=$2
     local BRANCH=$3
     local JOBS=$4
-    shift 4
+    local OPTIONS=$5
+    shift 5
 
     FORK="$ACCOUNT/$REPO"
     display_message "Download $FORK/$BRANCH"
     
     # Clone the repository locally.
     git clone --branch $BRANCH --single-branch "https://github.com/$FORK"
+    
+    # Join generated and command line options.
+    local CONFIGURATION=("${OPTIONS[@]}" "$@")
 
     # Build the local repository clone.
     push_directory $REPO
-    make_current_directory $JOBS "$@"
+    make_current_directory $JOBS "${CONFIGURATION[@]}"
     pop_directory
 }
 
@@ -582,12 +536,16 @@ build_from_local()
 {
     local MESSAGE="$1"
     local JOBS=$2
-    shift 2
+    local OPTIONS=$3
+    shift 3
 
     display_message "$MESSAGE"
+    
+    # Join generated and command line options.
+    local CONFIGURATION=("${OPTIONS[@]}" "$@")
 
     # Build the current directory.
-    make_current_directory $JOBS "$@"
+    make_current_directory $JOBS "${CONFIGURATION[@]}"
 }
 
 build_from_travis()
@@ -596,16 +554,17 @@ build_from_travis()
     local REPO=$2
     local BRANCH=$3
     local JOBS=$4
-    shift 4
+    local OPTIONS=$5
+    shift 5
 
     # The primary build is not downloaded if we are running in Travis.
     if [[ $TRAVIS == true ]]; then
         push_directory ".."
-        build_from_local "Local $TRAVIS_REPO_SLUG" $JOBS "$@"
+        build_from_local "Local $TRAVIS_REPO_SLUG" $JOBS "${OPTIONS[@]}" "$@"
         make_tests $JOBS
         pop_directory
     else
-        build_from_github $ACCOUNT $REPO $BRANCH $JOBS "$@"
+        build_from_github $ACCOUNT $REPO $BRANCH $JOBS "${OPTIONS[@]}" "$@"
         push_directory $REPO
         make_tests $JOBS
         pop_directory
@@ -617,12 +576,13 @@ build_from_travis()
 #==============================================================================
 build_all()
 {
-    build_from_tarball $ICU_URL $ICU_ARCHIVE gzip $PARALLEL source $ICU_LINK $ICU_STANDARD $ICU_OPTIONS
-    build_from_tarball $PNG_URL $PNG_ARCHIVE xz $PARALLEL . $PNG_LINK $PNG_STANDARD $PNG_OPTIONS
-    build_from_tarball $QRENCODE_URL $QRENCODE_ARCHIVE bzip2 $PARALLEL . $QRENCODE_LINK $QRENCODE_STANDARD $QRENCODE_OPTIONS
-    build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE boost $PARALLEL $BOOST_OPTIONS
-    build_from_github libbitcoin secp256k1 version4 $PARALLEL "$@" $SECP256K1_OPTIONS
-    build_from_travis libbitcoin libbitcoin master $PARALLEL "$@" $BITCOIN_OPTIONS
+    # Hack: ICU static only builds are disabled.
+    build_from_tarball       $ICU_URL      $ICU_ARCHIVE      gzip  source $PARALLEL  "$BUILD_ICU"      "${ICU_OPTIONS[@]}"       "${@/--disable-shared}"
+    build_from_tarball       $PNG_URL      $PNG_ARCHIVE      xz    .      $PARALLEL  "$BUILD_PNG"      "${PNG_OPTIONS[@]}"       "$@"
+    build_from_tarball       $QRENCODE_URL $QRENCODE_ARCHIVE bzip2 .      $PARALLEL  "$BUILD_QRENCODE" "${QRENCODE_OPTIONS[@]}"  "$@"
+    build_from_tarball_boost $BOOST_URL    $BOOST_ARCHIVE    bzip2 boost  $PARALLEL  "$BUILD_BOOST"    "${BOOST_OPTIONS[@]}"
+    build_from_github        libbitcoin    secp256k1         version4     $PARALLEL                    "${SECP256K1_OPTIONS[@]}" "$@"
+    build_from_travis        libbitcoin    libbitcoin        master       $PARALLEL                    "${BITCOIN_OPTIONS[@]}"   "$@"
 }
 
 
@@ -631,6 +591,6 @@ build_all()
 create_directory "$BUILD_DIR"
 push_directory "$BUILD_DIR"
 initialize_git
-initialize_options
 time build_all "${CONFIGURE_OPTIONS[@]}"
 pop_directory
+
