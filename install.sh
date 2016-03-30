@@ -580,6 +580,8 @@ build_from_travis()
 #==============================================================================
 build_all()
 {
+    export LD_LIBRARY_PATH="$PREFIX/lib"
+    
     # Hack: ICU static only builds are disabled.
     build_from_tarball       $ICU_URL      $ICU_ARCHIVE      gzip  source $PARALLEL  "$BUILD_ICU"      "${ICU_OPTIONS[@]}"       "${@/--disable-shared}"
     build_from_tarball       $PNG_URL      $PNG_ARCHIVE      xz    .      $PARALLEL  "$BUILD_PNG"      "${PNG_OPTIONS[@]}"       "$@"
