@@ -103,7 +103,7 @@ for OPTION in "$@"; do
         (--build-png)      BUILD_PNG="yes";;
         (--build-qrencode) BUILD_QRENCODE="yes";;
         (--build-dir=*)    BUILD_DIR="${OPTION#*=}";;
-        
+
         # Standard build options.
         (--prefix=*)       PREFIX="${OPTION#*=}";;
         (--disable-shared) DISABLE_SHARED="yes";;
@@ -142,10 +142,10 @@ if [[ $PREFIX ]]; then
 
     # Augment PKG_CONFIG_PATH search path with our prefix.
     export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$PREFIX_PKG_CONFIG_DIR"
-    
+
     # Set a package config save path that can be passed via our builds.
     with_pkgconfigdir="--with-pkgconfigdir=$PREFIX_PKG_CONFIG_DIR"
-    
+
     if [[ $BUILD_BOOST ]]; then
         # Boost has no pkg-config, m4 searches in the following order:
         # --with-boost=<path>, /usr, /usr/local, /opt, /opt/local, $BOOST_ROOT.
@@ -303,7 +303,7 @@ make_jobs()
 make_tests()
 {
     local JOBS=$1
-    
+
     # Disable exit on error.
     set +e
 
@@ -311,12 +311,12 @@ make_tests()
     # VERBOSE=1 ensures test runner output sent to console (gcc).
     make_jobs $JOBS check "VERBOSE=1"
     local RESULT=$?
-    
+
     # Test runners emit to the test.log file.
     if [[ -e "test.log" ]]; then
         cat "test.log"
     fi
-    
+
     if [[ $RESULT -ne 0 ]]; then
         exit $RESULT
     fi
@@ -333,7 +333,7 @@ pop_directory()
 push_directory()
 {
     local DIRECTORY="$1"
-    
+
     pushd "$DIRECTORY" >/dev/null
 }
 
@@ -350,7 +350,7 @@ initialize_icu_packages()
         # renaming or important features, so we can't use that.
         local HOMEBREW_ICU_PKG_CONFIG="/usr/local/opt/icu4c/lib/pkgconfig"
         local MACPORTS_ICU_PKG_CONFIG="/opt/local/lib/pkgconfig"
-        
+
         if [[ -d "$HOMEBREW_ICU_PKG_CONFIG" ]]; then
             export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOMEBREW_ICU_PKG_CONFIG"
         elif [[ -d "$MACPORTS_ICU_PKG_CONFIG" ]]; then
@@ -373,12 +373,12 @@ build_from_tarball()
     if [[ !($BUILD) ]]; then
         if [[ $ARCHIVE == $ICU_ARCHIVE ]]; then
             initialize_icu_packages
-        fi    
+        fi
         return
     fi
-    
+
     display_message "Download $ARCHIVE"
-    
+
     # Use the suffixed archive name as the extraction directory.
     local EXTRACT="build-$ARCHIVE"
     create_directory $EXTRACT
@@ -391,7 +391,7 @@ build_from_tarball()
 
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
-    
+
     configure_options "${CONFIGURATION[@]}"
     make_jobs $JOBS --silent
     make install
@@ -411,7 +411,7 @@ circumvent_boost_icu_detection()
     local SUCCESS="int main() { return 0; }"
     local REGEX_TEST="libs/regex/build/has_icu_test.cpp"
     local LOCALE_TEST="libs/locale/build/has_icu_test.cpp"
-    
+
     echo $SUCCESS > $REGEX_TEST
     echo $SUCCESS > $LOCALE_TEST
 
@@ -441,18 +441,18 @@ initialize_boost_icu_configuration()
 {
     if [[ $WITH_ICU ]]; then
         circumvent_boost_icu_detection
-    
+
         # Restrict other locale options when compiling boost with icu.
         BOOST_ICU_ICONV_OFF="boost.locale.iconv=off"
         BOOST_ICU_POSIX_OFF="boost.locale.posix=off"
 
         # Extract ICU libs from package config variables and augment with -ldl.
         ICU_LIBS=( `pkg-config icu-i18n --libs` "-ldl" )
-        
+
         # This is a HACK for boost m4 scripts that fail with ICU dependency.
         # See custom edits in ax-boost-locale.m4 and ax_boost_regex.m4.
         export BOOST_ICU_LIBS="${ICU_LIBS[@]}"
-        
+
         # Extract ICU prefix directory from package config variable.
         ICU_PREFIX=`pkg-config icu-i18n --variable=prefix`
     fi
@@ -471,7 +471,7 @@ build_from_tarball_boost()
     if [[ !($BUILD) ]]; then
         return
     fi
-    
+
     display_message "Download $ARCHIVE"
 
     create_directory $PUSH_DIR
@@ -480,10 +480,10 @@ build_from_tarball_boost()
     # Extract the source locally.
     wget --output-document $ARCHIVE $URL
     tar --extract --file $ARCHIVE --$COMPRESSION --strip-components=1
-    
+
     initialize_boost_configuration
     initialize_boost_icu_configuration
-    
+
     echo "BOOST_LINK            : $BOOST_LINK" 
     echo "BOOST_TOOLSET         : $BOOST_TOOLSET" 
     echo "BOOST_CXXFLAGS        : $BOOST_CXXFLAGS" 
@@ -494,7 +494,7 @@ build_from_tarball_boost()
     echo "-sICU_PATH=           : $ICU_PREFIX" 
     echo "-sICU_LINK=           : ${ICU_LIBS[@]}"
     echo "BOOST_OPTIONS         : $@"
-    
+
     # Build and install.
     ./bootstrap.sh "--prefix=$PREFIX" "--with-icu=$ICU_PREFIX"
     ./b2 install --reconfigure -j $JOBS \
@@ -523,10 +523,10 @@ build_from_github()
 
     FORK="$ACCOUNT/$REPO"
     display_message "Download $FORK/$BRANCH"
-    
+
     # Clone the repository locally.
     git clone --branch $BRANCH --single-branch "https://github.com/$FORK"
-    
+
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
 
@@ -544,7 +544,7 @@ build_from_local()
     shift 3
 
     display_message "$MESSAGE"
-    
+
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
 
@@ -580,10 +580,12 @@ build_from_travis()
 #==============================================================================
 build_all()
 {
-    export LD_LIBRARY_PATH="$PREFIX/lib"
-    
-    # Hack: ICU static only builds are disabled.
-    build_from_tarball       $ICU_URL      $ICU_ARCHIVE      gzip  source $PARALLEL  "$BUILD_ICU"      "${ICU_OPTIONS[@]}"       "${@/--disable-shared}"
+    # Hack: ICU static only builds are disabled (@/--disable-shared).
+    # This allows executables to locate shared ICU dependency in static builds.
+    # Invoking the shared executables built with ICU requires this setting.
+    #export LD_LIBRARY_PATH="$PREFIX/lib"
+
+    build_from_tarball       $ICU_URL      $ICU_ARCHIVE      gzip  source $PARALLEL  "$BUILD_ICU"      "${ICU_OPTIONS[@]}"       "$@"
     build_from_tarball       $PNG_URL      $PNG_ARCHIVE      xz    .      $PARALLEL  "$BUILD_PNG"      "${PNG_OPTIONS[@]}"       "$@"
     build_from_tarball       $QRENCODE_URL $QRENCODE_ARCHIVE bzip2 .      $PARALLEL  "$BUILD_QRENCODE" "${QRENCODE_OPTIONS[@]}"  "$@"
     build_from_tarball_boost $BOOST_URL    $BOOST_ARCHIVE    bzip2 boost  $PARALLEL  "$BUILD_BOOST"    "${BOOST_OPTIONS[@]}"
