@@ -116,10 +116,15 @@ done
 
 # Purge custom options so they don't go to configure.
 #------------------------------------------------------------------------------
-CONFIGURE_OPTIONS=( "$@" )
-CUSTOM_OPTIONS=( "--build-icu" "--build-boost" "--build-png" "--build-qrencode" "--build-dir=$BUILD_DIR" )
+CONFIGURE_OPTIONS=("$@")
+CUSTOM_OPTIONS=(
+"--build-icu" \
+"--build-boost" \
+"--build-png" \
+"--build-qrencode" \
+"--build-dir=$BUILD_DIR")
 for CUSTOM_OPTION in "${CUSTOM_OPTIONS[@]}"; do
-    CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/$CUSTOM_OPTION}" )
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/$CUSTOM_OPTION}")
 done
 
 # Always set a prefix (required on OSX and for lib detection).
@@ -154,24 +159,24 @@ fi
 
 # Echo generated values.
 #------------------------------------------------------------------------------
-echo "OS                : $OS"
-echo "PARALLEL          : $PARALLEL"
-echo "CC                : $CC"
-echo "CXX               : $CXX"
-echo "STDLIB            : $STDLIB"
-echo "BUILD_BOOST       : $BUILD_BOOST"
-echo "BUILD_ICU         : $BUILD_ICU"
-echo "BUILD_PNG         : $BUILD_PNG"
-echo "BUILD_QRENCODE    : $BUILD_QRENCODE"
-echo "BUILD_DIR         : $BUILD_DIR"
-echo "PREFIX            : $PREFIX"
-echo "DISABLE_SHARED    : $DISABLE_SHARED"
-echo "DISABLE_STATIC    : $DISABLE_STATIC"
-echo "WITH_ICU          : $WITH_ICU"
-echo "WITH_PNG          : $WITH_PNG"
-echo "WITH_QRENCODE     : $WITH_QRENCODE"
-echo "with_boost        : ${with_boost}"
-echo "with_pkgconfigdir : ${with_pkgconfigdir}"
+echo "OS                    : $OS"
+echo "PARALLEL              : $PARALLEL"
+echo "CC                    : $CC"
+echo "CXX                   : $CXX"
+echo "STDLIB                : $STDLIB"
+echo "BUILD_BOOST           : $BUILD_BOOST"
+echo "BUILD_ICU             : $BUILD_ICU"
+echo "BUILD_PNG             : $BUILD_PNG"
+echo "BUILD_QRENCODE        : $BUILD_QRENCODE"
+echo "BUILD_DIR             : $BUILD_DIR"
+echo "PREFIX                : $PREFIX"
+echo "DISABLE_SHARED        : $DISABLE_SHARED"
+echo "DISABLE_STATIC        : $DISABLE_STATIC"
+echo "WITH_ICU              : $WITH_ICU"
+echo "WITH_PNG              : $WITH_PNG"
+echo "WITH_QRENCODE         : $WITH_QRENCODE"
+echo "with_boost            : ${with_boost}"
+echo "with_pkgconfigdir     : ${with_pkgconfigdir}"
 
 
 # Define build options.
@@ -305,14 +310,15 @@ make_tests()
     # Build and run unit tests relative to the primary directory.
     # VERBOSE=1 ensures test runner output sent to console (gcc).
     make_jobs $JOBS check "VERBOSE=1"
+    local RESULT=$?
     
     # Test runners emit to the test.log file.
     if [[ -e "test.log" ]]; then
         cat "test.log"
     fi
     
-    if [[ $? -ne 0 ]]; then
-        exit 1
+    if [[ $RESULT -ne 0 ]]; then
+        exit $RESULT
     fi
 
     # Reenable exit on error.
@@ -478,7 +484,6 @@ build_from_tarball_boost()
     initialize_boost_configuration
     initialize_boost_icu_configuration
     
-    echo "BOOST >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
     echo "BOOST_LINK            : $BOOST_LINK" 
     echo "BOOST_TOOLSET         : $BOOST_TOOLSET" 
     echo "BOOST_CXXFLAGS        : $BOOST_CXXFLAGS" 
@@ -489,7 +494,6 @@ build_from_tarball_boost()
     echo "-sICU_PATH=           : $ICU_PREFIX" 
     echo "-sICU_LINK=           : ${ICU_LIBS[@]}"
     echo "BOOST_OPTIONS         : $@"
-    echo "BOOST <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
     
     # Build and install.
     ./bootstrap.sh "--prefix=$PREFIX" "--with-icu=$ICU_PREFIX"
