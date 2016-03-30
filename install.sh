@@ -492,7 +492,7 @@ build_from_tarball_boost()
     echo "BOOST <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
     
     # Build and install.
-    ./bootstrap.sh --prefix=$PREFIX --with-icu=$ICU_PREFIX
+    ./bootstrap.sh "--prefix=$PREFIX" "--with-icu=$ICU_PREFIX"
     ./b2 install --reconfigure -j $JOBS \
         $BOOST_LINK \
         $BOOST_TOOLSET \
