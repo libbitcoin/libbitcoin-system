@@ -62,7 +62,7 @@ install:
     - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then brew unlink boost; brew install boost; fi
 
     # Download and install packages for linux/gcc/dynamic.
-    - if [[ $LINUX && $GCC   && $DYNAMIC ]]; then sudo apt-get -qq install boost1.55; fi
+    - if [[ $LINUX && $GCC   && $DYNAMIC ]]; then sudo apt-get -qq install boost1.56; fi
 
 script:
 
