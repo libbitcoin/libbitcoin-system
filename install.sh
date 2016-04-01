@@ -678,19 +678,19 @@ build_from_travis()
 #==============================================================================
 build_all()
 {
-    #build_from_tarball       $ICU_URL      $ICU_ARCHIVE      gzip  source $PARALLEL  "$BUILD_ICU"      "${ICU_OPTIONS[@]}"       "$@"
-    #build_from_tarball       $ZLIB_URL     $ZLIB_ARCHIVE     xz    .      $PARALLEL  "$BUILD_ZLIB"     "${ZLIB_OPTIONS[@]}"      "$@"
-    #build_from_tarball       $PNG_URL      $PNG_ARCHIVE      xz    .      $PARALLEL  "$BUILD_PNG"      "${PNG_OPTIONS[@]}"       "$@"
-    #build_from_tarball       $QRENCODE_URL $QRENCODE_ARCHIVE bzip2 .      $PARALLEL  "$BUILD_QRENCODE" "${QRENCODE_OPTIONS[@]}"  "$@"
-    #build_from_tarball_boost $BOOST_URL    $BOOST_ARCHIVE    bzip2 .      $PARALLEL  "$BUILD_BOOST"    "${BOOST_OPTIONS[@]}"
-    #build_from_github        libbitcoin    secp256k1         version4     $PARALLEL                    "${SECP256K1_OPTIONS[@]}" "$@"
+    build_from_tarball       $ICU_URL      $ICU_ARCHIVE      gzip  source $PARALLEL  "$BUILD_ICU"      "${ICU_OPTIONS[@]}"       "$@"
+    build_from_tarball       $ZLIB_URL     $ZLIB_ARCHIVE     xz    .      $PARALLEL  "$BUILD_ZLIB"     "${ZLIB_OPTIONS[@]}"      "$@"
+    build_from_tarball       $PNG_URL      $PNG_ARCHIVE      xz    .      $PARALLEL  "$BUILD_PNG"      "${PNG_OPTIONS[@]}"       "$@"
+    build_from_tarball       $QRENCODE_URL $QRENCODE_ARCHIVE bzip2 .      $PARALLEL  "$BUILD_QRENCODE" "${QRENCODE_OPTIONS[@]}"  "$@"
+    build_from_tarball_boost $BOOST_URL    $BOOST_ARCHIVE    bzip2 .      $PARALLEL  "$BUILD_BOOST"    "${BOOST_OPTIONS[@]}"
+    build_from_github        libbitcoin    secp256k1         version4     $PARALLEL                    "${SECP256K1_OPTIONS[@]}" "$@"
     build_from_travis        libbitcoin    libbitcoin        master       $PARALLEL                    "${BITCOIN_OPTIONS[@]}"   "$@"
 }
 
 
 # Build the primary library and all dependencies.
 #==============================================================================
-#create_directory "$BUILD_DIR"
+create_directory "$BUILD_DIR"
 push_directory "$BUILD_DIR"
 initialize_git
 time build_all "${CONFIGURE_OPTIONS[@]}"
