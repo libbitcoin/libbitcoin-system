@@ -513,11 +513,11 @@ initialize_boost_configuration()
     if [[ $CC ]]; then
         BOOST_TOOLSET="toolset=$CC"
     fi
-    if [[ $CXXFLAGS ]]; then
-        BOOST_CXXFLAGS="cxxflags=$CXXFLAGS"
-    fi
-    if [[ $LDLIBS ]]; then
-        BOOST_LINKFLAGS="linkflags=$LDLIBS"
+
+    if [[ ($OS == Linux && $CC == "clang") || ($OS == OpenBSD) ]]; then
+        STDLIB_FLAG="-stdlib=lib$STDLIB"
+        BOOST_CXXFLAGS="cxxflags=$STDLIB_FLAG"
+        BOOST_LINKFLAGS="linkflags=$STDLIB_FLAG"
     fi
 }
 
@@ -580,8 +580,8 @@ build_from_tarball_boost()
     echo "variant               : release"
     echo "threading             : multi"
     echo "toolset               : $CC"
-    echo "cxxflags              : $CXXFLAGS"
-    echo "linkflags             : $LDLIBS"
+    echo "cxxflags              : $STDLIB_FLAG"
+    echo "linkflags             : $STDLIB_FLAG"
     echo "link                  : $BOOST_LINK"
     echo "boost.locale.iconv    : $BOOST_ICU_ICONV"
     echo "boost.locale.posix    : $BOOST_ICU_POSIX"
@@ -613,7 +613,7 @@ build_from_tarball_boost()
         "threading=multi" \
         "$BOOST_TOOLSET" \
         "$BOOST_CXXFLAGS" \
-        "$BOOST_LDLIBS" \
+        "$BOOST_LINKFLAGS" \
         "link=$BOOST_LINK" \
         "boost.locale.iconv=$BOOST_ICU_ICONV" \
         "boost.locale.posix=$BOOST_ICU_POSIX" \

@@ -68,7 +68,7 @@ script:
     - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then ./install.sh ; fi
 
     - if [[ $LINUX && $CLANG && $STATIC  ]]; then ./install.sh --with-icu --with-png --with-qrencode --build-icu --build-png --build-qrencode --build-boost --disable-shared --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os' CXXFLAGS='-Os'; fi
-    - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then sudo CXX=$CXX CC=$CC ./install.sh --with-icu --build-icu --build-boost --disable-ndebug --disable-static CFLAGS='-Os' CXXFLAGS='-Os'; fi
+    - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then CXX=$CXX CC=$CC ./install.sh --build-boost --disable-static --prefix=$TRAVIS_BUILD_DIR/my-prefix --build-dir=my-build; fi
 
     - if [[ $LINUX && $GCC   && $STATIC  ]]; then ./install.sh --with-icu --with-png --with-qrencode --build-icu --build-png --build-qrencode --build-boost --disable-shared --prefix=$TRAVIS_BUILD_DIR/my-prefix --build-dir=my-build; fi
     - if [[ $LINUX && $GCC   && $DYNAMIC ]]; then sudo CXX=$CXX CC=$CC ./install.sh --build-boost CFLAGS='-O0 -g --coverage' CXXFLAGS='-O0 -g --coverage'; fi
