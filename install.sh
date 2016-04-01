@@ -111,11 +111,11 @@ fi
 for OPTION in "$@"; do
     case $OPTION in
         # Custom build options (in the form of --build-<option>).
-        (--build-boost)    BUILD_BOOST="yes";;
         (--build-icu)      BUILD_ICU="yes";;
-        (--build-png)      BUILD_PNG="yes";;
         (--build-zlib)     BUILD_ZLIB="yes";;
+        (--build-png)      BUILD_PNG="yes";;
         (--build-qrencode) BUILD_QRENCODE="yes";;
+        (--build-boost)    BUILD_BOOST="yes";;
         (--build-dir=*)    BUILD_DIR="${OPTION#*=}";;
 
         # Standard build options.
@@ -128,7 +128,7 @@ for OPTION in "$@"; do
     esac
 done
 
-# Rationalize treatment of static and shared options.
+# Normalize of static and shared options.
 #------------------------------------------------------------------------------
 if [[ $DISABLE_SHARED ]]; then
     CONFIGURE_OPTIONS=("$@" "--enable-static")
@@ -139,7 +139,7 @@ else
     CONFIGURE_OPTIONS=("$@" "--enable-static")
 fi
 
-# Purge our custom build options so they don't break configure.
+# Purge custom build options so they don't break configure.
 #------------------------------------------------------------------------------
 CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-*/}")
 
@@ -155,25 +155,23 @@ fi
 
 # Incorporate the prefix.
 #------------------------------------------------------------------------------
-if [[ $PREFIX ]]; then
-    # Set the prefix-based package config directory.
-    PREFIX_PKG_CONFIG_DIR="$PREFIX/lib/pkgconfig"
+# Set the prefix-based package config directory.
+PREFIX_PKG_CONFIG_DIR="$PREFIX/lib/pkgconfig"
 
-    # Augment PKG_CONFIG_PATH search path with our prefix.
-    export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$PREFIX_PKG_CONFIG_DIR"
+# Augment PKG_CONFIG_PATH search path with our prefix.
+export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$PREFIX_PKG_CONFIG_DIR"
 
-    # Set a package config save path that can be passed via our builds.
-    with_pkgconfigdir="--with-pkgconfigdir=$PREFIX_PKG_CONFIG_DIR"
+# Set a package config save path that can be passed via our builds.
+with_pkgconfigdir="--with-pkgconfigdir=$PREFIX_PKG_CONFIG_DIR"
 
-    if [[ $BUILD_BOOST ]]; then
-        # Boost has no pkg-config, m4 searches in the following order:
-        # --with-boost=<path>, /usr, /usr/local, /opt, /opt/local, $BOOST_ROOT.
-        # We use --with-boost to prioritize the --prefix path when we build it.
-        # Otherwise standard paths suffice for Linux, Homebrew and MacPorts.
-        # ax_boost_base.m4 appends /include and adds to BOOST_CPPFLAGS
-        # ax_boost_base.m4 searches for /lib /lib64 and adds to BOOST_LDFLAGS
-        with_boost="--with-boost=$PREFIX"
-    fi
+if [[ $BUILD_BOOST ]]; then
+    # Boost has no pkg-config, m4 searches in the following order:
+    # --with-boost=<path>, /usr, /usr/local, /opt, /opt/local, $BOOST_ROOT.
+    # We use --with-boost to prioritize the --prefix path when we build it.
+    # Otherwise standard paths suffice for Linux, Homebrew and MacPorts.
+    # ax_boost_base.m4 appends /include and adds to BOOST_CPPFLAGS
+    # ax_boost_base.m4 searches for /lib /lib64 and adds to BOOST_LDFLAGS
+    with_boost="--with-boost=$PREFIX"
 fi
 
 # Echo generated values.
@@ -291,7 +289,8 @@ create_directory()
 
 display_message()
 {
-    MESSAGE="$1"
+    local MESSAGE="$1"
+
     echo
     echo "********************** $MESSAGE **********************"
     echo
