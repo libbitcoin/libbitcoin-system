@@ -9,8 +9,9 @@
 #
 # Script options:
 # --build-icu              Builds ICU libraries.
+# --build-zlib             Builds ZLib libraries.
+# --build-png              Builds PNG libraries.
 # --build-qrencode         Builds QREncode libraries.
-# --build-png              Builds LIBPNG libraries.
 # --build-boost            Builds Boost libraries.
 # --build-dir=<path>       Location of downloaded and intermediate files.
 # --prefix=<absolute-path> Library install location (defaults to /usr/local).
@@ -38,6 +39,11 @@ BUILD_DIR="build-libbitcoin"
 ICU_URL="http://download.icu-project.org/files/icu4c/55.1/icu4c-55_1-src.tgz"
 ICU_ARCHIVE="icu4c-55_1-src.tgz"
 
+# ZLib archive.
+#------------------------------------------------------------------------------
+ZLIB_URL="http://zlib.net/zlib-1.2.8.tar.xz"
+ZLIB_ARCHIVE="zlib-1.2.8.tar.xz"
+
 # PNG archive.
 #------------------------------------------------------------------------------
 PNG_URL="http://downloads.sourceforge.net/project/libpng/libpng16/1.6.21/libpng-1.6.21.tar.xz"
@@ -50,7 +56,7 @@ QRENCODE_ARCHIVE="qrencode-3.4.4.tar.bz2"
 
 # Boost archive.
 #------------------------------------------------------------------------------
-BOOST_URL="https://sourceforge.net/projects/boost/files/boost/1.56.0/boost_1_56_0.tar.bz2"
+BOOST_URL="http://downloads.sourceforge.net/project/boost/boost/1.56.0/boost_1_56_0.tar.bz2"
 BOOST_ARCHIVE="boost_1_56_0.tar.bz2"
 
 
@@ -101,9 +107,10 @@ for OPTION in "$@"; do
         (--build-boost)    BUILD_BOOST="yes";;
         (--build-icu)      BUILD_ICU="yes";;
         (--build-png)      BUILD_PNG="yes";;
+        (--build-zlib)     BUILD_ZLIB="yes";;
         (--build-qrencode) BUILD_QRENCODE="yes";;
         (--build-dir=*)    BUILD_DIR="${OPTION#*=}";;
-        
+
         # Standard build options.
         (--prefix=*)       PREFIX="${OPTION#*=}";;
         (--disable-shared) DISABLE_SHARED="yes";;
@@ -114,17 +121,27 @@ for OPTION in "$@"; do
     esac
 done
 
-# Purge custom options so they don't go to configure.
+# Rationalize treatment of static and shared options.
 #------------------------------------------------------------------------------
-CONFIGURE_OPTIONS=( "$@" )
-CUSTOM_OPTIONS=( "--build-icu" "--build-boost" "--build-png" "--build-qrencode" "--build-dir=$BUILD_DIR" )
-for CUSTOM_OPTION in "${CUSTOM_OPTIONS[@]}"; do
-    CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/$CUSTOM_OPTION}" )
-done
+if [[ $DISABLE_SHARED ]]; then
+    CONFIGURE_OPTIONS=("$@" "--enable-static")
+elif [[ $DISABLE_STATIC ]]; then
+    CONFIGURE_OPTIONS=("$@" "--enable-shared")
+else
+    CONFIGURE_OPTIONS=("$@" "--enable-shared")
+    CONFIGURE_OPTIONS=("$@" "--enable-static")
+fi
+
+# Purge our custom build options so they don't break configure.
+#------------------------------------------------------------------------------
+CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-*/}")
 
 # Always set a prefix (required on OSX and for lib detection).
 #------------------------------------------------------------------------------
-if [[ !($PREFIX) ]]; then
+if [[ $PREFIX ]]; then
+    # Incorporate the custom libdir into each object, for runtime resolution.
+    # export LD_RUN_PATH="$PREFIX/lib"
+#else
     PREFIX="/usr/local"
     CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--prefix=$PREFIX")
 fi
@@ -137,10 +154,10 @@ if [[ $PREFIX ]]; then
 
     # Augment PKG_CONFIG_PATH search path with our prefix.
     export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$PREFIX_PKG_CONFIG_DIR"
-    
+
     # Set a package config save path that can be passed via our builds.
     with_pkgconfigdir="--with-pkgconfigdir=$PREFIX_PKG_CONFIG_DIR"
-    
+
     if [[ $BUILD_BOOST ]]; then
         # Boost has no pkg-config, m4 searches in the following order:
         # --with-boost=<path>, /usr, /usr/local, /opt, /opt/local, $BOOST_ROOT.
@@ -154,24 +171,25 @@ fi
 
 # Echo generated values.
 #------------------------------------------------------------------------------
-echo "OS                : $OS"
-echo "PARALLEL          : $PARALLEL"
-echo "CC                : $CC"
-echo "CXX               : $CXX"
-echo "STDLIB            : $STDLIB"
-echo "BUILD_BOOST       : $BUILD_BOOST"
-echo "BUILD_ICU         : $BUILD_ICU"
-echo "BUILD_PNG         : $BUILD_PNG"
-echo "BUILD_QRENCODE    : $BUILD_QRENCODE"
-echo "BUILD_DIR         : $BUILD_DIR"
-echo "PREFIX            : $PREFIX"
-echo "DISABLE_SHARED    : $DISABLE_SHARED"
-echo "DISABLE_STATIC    : $DISABLE_STATIC"
-echo "WITH_ICU          : $WITH_ICU"
-echo "WITH_PNG          : $WITH_PNG"
-echo "WITH_QRENCODE     : $WITH_QRENCODE"
-echo "with_boost        : ${with_boost}"
-echo "with_pkgconfigdir : ${with_pkgconfigdir}"
+echo "OS                    : $OS"
+echo "PARALLEL              : $PARALLEL"
+echo "CC                    : $CC"
+echo "CXX                   : $CXX"
+echo "STDLIB                : $STDLIB"
+echo "WITH_ICU              : $WITH_ICU"
+echo "WITH_PNG              : $WITH_PNG"
+echo "WITH_QRENCODE         : $WITH_QRENCODE"
+echo "BUILD_ICU             : $BUILD_ICU"
+echo "BUILD_ZLIB            : $BUILD_ZLIB"
+echo "BUILD_PNG             : $BUILD_PNG"
+echo "BUILD_QRENCODE        : $BUILD_QRENCODE"
+echo "BUILD_BOOST           : $BUILD_BOOST"
+echo "PREFIX                : $PREFIX"
+echo "BUILD_DIR             : $BUILD_DIR"
+echo "DISABLE_SHARED        : $DISABLE_SHARED"
+echo "DISABLE_STATIC        : $DISABLE_STATIC"
+echo "with_boost            : ${with_boost}"
+echo "with_pkgconfigdir     : ${with_pkgconfigdir}"
 
 
 # Define build options.
@@ -187,6 +205,10 @@ ICU_OPTIONS=(
 "--disable-layoutex" \
 "--disable-tests" \
 "--disable-samples")
+
+# Define zlib options.
+#------------------------------------------------------------------------------
+ZLIB_OPTIONS=()
 
 # Define png options.
 #------------------------------------------------------------------------------
@@ -209,11 +231,7 @@ BOOST_OPTIONS=(
 "--with-regex" \
 "--with-system" \
 "--with-thread" \
-"--with-test" \
-"threading=multi" \
-"variant=release" \
-"-d0" \
-"-q")
+"--with-test")
 
 # Define secp256k1 options.
 #------------------------------------------------------------------------------
@@ -232,7 +250,13 @@ BITCOIN_OPTIONS=(
 #==============================================================================
 configure_options()
 {
-    echo "configure: $@"
+    echo "configure options:"
+    for OPTION in "$@"; do
+        if [[ $OPTION ]]; then
+            echo $OPTION
+        fi
+    done
+
     ./configure "$@"
 }
 
@@ -298,21 +322,22 @@ make_jobs()
 make_tests()
 {
     local JOBS=$1
-    
+
     # Disable exit on error.
     set +e
 
     # Build and run unit tests relative to the primary directory.
     # VERBOSE=1 ensures test runner output sent to console (gcc).
     make_jobs $JOBS check "VERBOSE=1"
-    
+    local RESULT=$?
+
     # Test runners emit to the test.log file.
     if [[ -e "test.log" ]]; then
         cat "test.log"
     fi
-    
-    if [[ $? -ne 0 ]]; then
-        exit 1
+
+    if [[ $RESULT -ne 0 ]]; then
+        exit $RESULT
     fi
 
     # Reenable exit on error.
@@ -327,7 +352,7 @@ pop_directory()
 push_directory()
 {
     local DIRECTORY="$1"
-    
+
     pushd "$DIRECTORY" >/dev/null
 }
 
@@ -344,7 +369,7 @@ initialize_icu_packages()
         # renaming or important features, so we can't use that.
         local HOMEBREW_ICU_PKG_CONFIG="/usr/local/opt/icu4c/lib/pkgconfig"
         local MACPORTS_ICU_PKG_CONFIG="/opt/local/lib/pkgconfig"
-        
+
         if [[ -d "$HOMEBREW_ICU_PKG_CONFIG" ]]; then
             export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOMEBREW_ICU_PKG_CONFIG"
         elif [[ -d "$MACPORTS_ICU_PKG_CONFIG" ]]; then
@@ -353,6 +378,27 @@ initialize_icu_packages()
     fi
 }
 
+# Because ZLIB doesn't actually parse its --disable-shared option.
+# Because ZLIB doesn't follow GNU recommentation for unknown arguments.
+patch_zlib_configuration()
+{
+    sed --in-place=.tmp "s/leave 1/shift/" -i configure
+    sed --in-place=.tmp "s/--static/--static | --disable-shared/" -i configure
+    sed --in-place=.tmp "/unknown option/d" -i configure
+    sed --in-place=.tmp "/help for help/d" -i configure
+
+    echo "Hack: ZLIB configuration options modified."
+}
+
+# Because ZLIB can't build shared only.
+clean_zlib_build()
+{
+    if [[ $DISABLE_STATIC ]]; then
+        rm --force "$PREFIX/lib/libz.a"
+    fi
+}
+
+# Standard build from tarball.
 build_from_tarball()
 {
     local URL=$1
@@ -364,15 +410,29 @@ build_from_tarball()
     local OPTIONS=$7
     shift 7
 
+    # For some platforms we need to set ICU pkg-config path.
     if [[ !($BUILD) ]]; then
         if [[ $ARCHIVE == $ICU_ARCHIVE ]]; then
             initialize_icu_packages
-        fi    
+        fi
         return
     fi
-    
+
+    # Because libpng doesn't actually use pkg-config to locate zlib.
+    # Because ICU tools don't know how to locate internal dependencies.
+    if [[ ($ARCHIVE == $ICU_ARCHIVE) || ($ARCHIVE == $PNG_ARCHIVE) ]]; then
+        local SAVE_LDFLAGS=$LDFLAGS
+        export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
+    fi
+
+    # Because libpng doesn't actually use pkg-config to locate zlib.h.
+    if [[ ($ARCHIVE == $PNG_ARCHIVE) ]]; then
+        local SAVE_CPPFLAGS=$CPPFLAGS
+        export CPPFLAGS="$CPPFLAGS -I$PREFIX/include"
+    fi
+
     display_message "Download $ARCHIVE"
-    
+
     # Use the suffixed archive name as the extraction directory.
     local EXTRACT="build-$ARCHIVE"
     create_directory $EXTRACT
@@ -383,19 +443,33 @@ build_from_tarball()
     tar --extract --file $ARCHIVE --$COMPRESSION --strip-components=1
     push_directory $PUSH_DIR
 
+    # Enable static only zlib build.
+    if [[ $ARCHIVE == $ZLIB_ARCHIVE ]]; then
+        patch_zlib_configuration
+    fi
+
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
-    
+
     configure_options "${CONFIGURATION[@]}"
     make_jobs $JOBS --silent
     make install
     configure_links
 
+    # Enable shared only zlib build.
+    if [[ $ARCHIVE == $ZLIB_ARCHIVE ]]; then
+        clean_zlib_build
+    fi
+
     pop_directory
     pop_directory
+
+    # Restore flags to prevent side effects.
+    LDFLAGS=$SAVE_LDFLAGS
+    CPPFLAGS=$SAVE_LCPPFLAGS
 }
 
-# Because boost ICU detection is broken.
+# Because boost ICU detection assumes in incorrect ICU path.
 circumvent_boost_icu_detection()
 {
     # Boost expects a directory structure for ICU which is incorrect.
@@ -405,11 +479,11 @@ circumvent_boost_icu_detection()
     local SUCCESS="int main() { return 0; }"
     local REGEX_TEST="libs/regex/build/has_icu_test.cpp"
     local LOCALE_TEST="libs/locale/build/has_icu_test.cpp"
-    
+
     echo $SUCCESS > $REGEX_TEST
     echo $SUCCESS > $LOCALE_TEST
 
-    echo "hack: ICU detection modified, will always indicate found."
+    echo "Hack: ICU detection modified, will always indicate found."
 }
 
 # Because boost doesn't support autoconfig.
@@ -430,28 +504,29 @@ initialize_boost_configuration()
     fi
 }
 
-# Because boost doesn't support pkg-config.
+# Because boost doesn't use pkg-config.
 initialize_boost_icu_configuration()
 {
     if [[ $WITH_ICU ]]; then
         circumvent_boost_icu_detection
-    
+
         # Restrict other locale options when compiling boost with icu.
         BOOST_ICU_ICONV_OFF="boost.locale.iconv=off"
         BOOST_ICU_POSIX_OFF="boost.locale.posix=off"
 
         # Extract ICU libs from package config variables and augment with -ldl.
         ICU_LIBS=( `pkg-config icu-i18n --libs` "-ldl" )
-        
+
         # This is a HACK for boost m4 scripts that fail with ICU dependency.
         # See custom edits in ax-boost-locale.m4 and ax_boost_regex.m4.
         export BOOST_ICU_LIBS="${ICU_LIBS[@]}"
-        
+
         # Extract ICU prefix directory from package config variable.
         ICU_PREFIX=`pkg-config icu-i18n --variable=prefix`
     fi
 }
 
+# Because boost doesn't use autoconfig.
 build_from_tarball_boost()
 {
     local URL=$1
@@ -465,49 +540,74 @@ build_from_tarball_boost()
     if [[ !($BUILD) ]]; then
         return
     fi
-    
+
     display_message "Download $ARCHIVE"
 
-    create_directory $PUSH_DIR
-    push_directory $PUSH_DIR
+    # Use the suffixed archive name as the extraction directory.
+    local EXTRACT="build-$ARCHIVE"
+    create_directory $EXTRACT
+    push_directory $EXTRACT
 
     # Extract the source locally.
     wget --output-document $ARCHIVE $URL
     tar --extract --file $ARCHIVE --$COMPRESSION --strip-components=1
-    
+
     initialize_boost_configuration
     initialize_boost_icu_configuration
-    
-    echo "BOOST >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-    echo "BOOST_LINK            : $BOOST_LINK" 
-    echo "BOOST_TOOLSET         : $BOOST_TOOLSET" 
-    echo "BOOST_CXXFLAGS        : $BOOST_CXXFLAGS" 
-    echo "BOOST_LINKFLAGS       : $BOOST_LINKFLAGS" 
-    echo "BOOST_ICU_ICONV_OFF   : $BOOST_ICU_ICONV_OFF" 
-    echo "BOOST_ICU_POSIX_OFF   : $BOOST_ICU_POSIX_OFF" 
-    echo "--prefix=             : $PREFIX" 
-    echo "-sICU_PATH=           : $ICU_PREFIX" 
-    echo "-sICU_LINK=           : ${ICU_LIBS[@]}"
+
+    echo "BOOST_TOOLSET         : $BOOST_TOOLSET"
+    echo "BOOST_CXXFLAGS        : $BOOST_CXXFLAGS"
+    echo "BOOST_LINKFLAGS       : $BOOST_LINKFLAGS"
+    echo "BOOST_LINK            : $BOOST_LINK"
+    echo "BOOST_ICU_ICONV_OFF   : $BOOST_ICU_ICONV_OFF"
+    echo "BOOST_ICU_POSIX_OFF   : $BOOST_ICU_POSIX_OFF"
+    echo "threading             : multi"
+    echo "variant               : release"
+    echo "-sNO_BZIP2            : 1" 
+    echo "-sICU_PATH            : $ICU_PREFIX"
+    echo "-sICU_LINK            : ${ICU_LIBS[@]}"
+    echo "-sZLIB_LIBPATH        : $PREFIX/lib"
+    echo "-sZLIB_INCLUDE        : $PREFIX/include"
+    echo "-j                    : $JOBS"
+    echo "-d0                   : [supress informational messages]"
+    echo "-q                    : [stop at the first error]"
+    echo "--reconfigure         : [ignore cached configuration]"
+    echo "--prefix              : $PREFIX"
     echo "BOOST_OPTIONS         : $@"
-    echo "BOOST <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
-    
+
+    # boost_iostreams
+    # The zlib options prevent boost linkage to system libs in the case where
+    # we have built zlib in a prefix dir. Disabling zlib in boost is broken in
+    # all versions (through 1.60). https://svn.boost.org/trac/boost/ticket/9156
+    # The bzip2 auto-detection is not implemented, but disabling it works.
+
     # Build and install.
-    ./bootstrap.sh --prefix=$PREFIX --with-icu=$ICU_PREFIX
-    ./b2 install --reconfigure -j $JOBS \
-        $BOOST_LINK \
+    ./bootstrap.sh "--prefix=$PREFIX" "--with-icu=$ICU_PREFIX"
+    ./b2 install \
         $BOOST_TOOLSET \
         $BOOST_CXXFLAGS \
         $BOOST_LINKFLAGS \
+        $BOOST_LINK \
         $BOOST_ICU_ICONV_OFF \
         $BOOST_ICU_POSIX_OFF \
-        "--prefix=$PREFIX" \
+        "threading=multi" \
+        "variant=release" \
+        "-sNO_BZIP2=1" \
         "-sICU_PATH=$ICU_PREFIX" \
         "-sICU_LINK=${ICU_LIBS[@]}" \
+        "-sZLIB_LIBPATH=$PREFIX/lib" \
+        "-sZLIB_INCLUDE=$PREFIX/include" \
+        "-j $JOBS" \
+        "-d0" \
+        "-q" \
+        "--reconfigure" \
+        "--prefix=$PREFIX" \
         "$@"
 
     pop_directory
 }
 
+# Standard build from github.
 build_from_github()
 {
     local ACCOUNT=$1
@@ -519,10 +619,10 @@ build_from_github()
 
     FORK="$ACCOUNT/$REPO"
     display_message "Download $FORK/$BRANCH"
-    
+
     # Clone the repository locally.
     git clone --branch $BRANCH --single-branch "https://github.com/$FORK"
-    
+
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
 
@@ -532,6 +632,7 @@ build_from_github()
     pop_directory
 }
 
+# Standard build of current directory.
 build_from_local()
 {
     local MESSAGE="$1"
@@ -540,7 +641,7 @@ build_from_local()
     shift 3
 
     display_message "$MESSAGE"
-    
+
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
 
@@ -548,6 +649,7 @@ build_from_local()
     make_current_directory $JOBS "${CONFIGURATION[@]}"
 }
 
+# Because Travis alread has downloaded the primary repo.
 build_from_travis()
 {
     local ACCOUNT=$1
@@ -576,19 +678,19 @@ build_from_travis()
 #==============================================================================
 build_all()
 {
-    # Hack: ICU static only builds are disabled.
-    build_from_tarball       $ICU_URL      $ICU_ARCHIVE      gzip  source $PARALLEL  "$BUILD_ICU"      "${ICU_OPTIONS[@]}"       "${@/--disable-shared}"
-    build_from_tarball       $PNG_URL      $PNG_ARCHIVE      xz    .      $PARALLEL  "$BUILD_PNG"      "${PNG_OPTIONS[@]}"       "$@"
-    build_from_tarball       $QRENCODE_URL $QRENCODE_ARCHIVE bzip2 .      $PARALLEL  "$BUILD_QRENCODE" "${QRENCODE_OPTIONS[@]}"  "$@"
-    build_from_tarball_boost $BOOST_URL    $BOOST_ARCHIVE    bzip2 boost  $PARALLEL  "$BUILD_BOOST"    "${BOOST_OPTIONS[@]}"
-    build_from_github        libbitcoin    secp256k1         version4     $PARALLEL                    "${SECP256K1_OPTIONS[@]}" "$@"
+    #build_from_tarball       $ICU_URL      $ICU_ARCHIVE      gzip  source $PARALLEL  "$BUILD_ICU"      "${ICU_OPTIONS[@]}"       "$@"
+    #build_from_tarball       $ZLIB_URL     $ZLIB_ARCHIVE     xz    .      $PARALLEL  "$BUILD_ZLIB"     "${ZLIB_OPTIONS[@]}"      "$@"
+    #build_from_tarball       $PNG_URL      $PNG_ARCHIVE      xz    .      $PARALLEL  "$BUILD_PNG"      "${PNG_OPTIONS[@]}"       "$@"
+    #build_from_tarball       $QRENCODE_URL $QRENCODE_ARCHIVE bzip2 .      $PARALLEL  "$BUILD_QRENCODE" "${QRENCODE_OPTIONS[@]}"  "$@"
+    #build_from_tarball_boost $BOOST_URL    $BOOST_ARCHIVE    bzip2 .      $PARALLEL  "$BUILD_BOOST"    "${BOOST_OPTIONS[@]}"
+    #build_from_github        libbitcoin    secp256k1         version4     $PARALLEL                    "${SECP256K1_OPTIONS[@]}" "$@"
     build_from_travis        libbitcoin    libbitcoin        master       $PARALLEL                    "${BITCOIN_OPTIONS[@]}"   "$@"
 }
 
 
 # Build the primary library and all dependencies.
 #==============================================================================
-create_directory "$BUILD_DIR"
+#create_directory "$BUILD_DIR"
 push_directory "$BUILD_DIR"
 initialize_git
 time build_all "${CONFIGURE_OPTIONS[@]}"
