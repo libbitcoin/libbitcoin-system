@@ -99,6 +99,13 @@ else # Linux
     STDLIB="stdc++"
 fi
 
+# Link to appropriate standard library in non-default scnearios.
+#------------------------------------------------------------------------------
+if [[ ($OS == Linux && $CC == "clang") || ($OS == OpenBSD) ]]; then
+    export LDLIBS="-l$STDLIB $LDLIBS"
+    export CXXFLAGS="-stdlib=lib$STDLIB $CXXFLAGS"
+fi
+
 # Parse command line options that are handled by this script.
 #------------------------------------------------------------------------------
 for OPTION in "$@"; do
@@ -171,11 +178,17 @@ fi
 
 # Echo generated values.
 #------------------------------------------------------------------------------
+echo "Libbitcoin installer configuration."
+echo "--------------------------------------------------------------------"
 echo "OS                    : $OS"
 echo "PARALLEL              : $PARALLEL"
 echo "CC                    : $CC"
 echo "CXX                   : $CXX"
-echo "STDLIB                : $STDLIB"
+echo "CPPFLAGS              : $CPPFLAGS"
+echo "CFLAGS                : $CFLAGS"
+echo "CXXFLAGS              : $CXXFLAGS"
+echo "LDFLAGS               : $LDFLAGS"
+echo "LDLIBS                : $LDLIBS"
 echo "WITH_ICU              : $WITH_ICU"
 echo "WITH_PNG              : $WITH_PNG"
 echo "WITH_QRENCODE         : $WITH_QRENCODE"
@@ -190,6 +203,7 @@ echo "DISABLE_SHARED        : $DISABLE_SHARED"
 echo "DISABLE_STATIC        : $DISABLE_STATIC"
 echo "with_boost            : ${with_boost}"
 echo "with_pkgconfigdir     : ${with_pkgconfigdir}"
+echo "--------------------------------------------------------------------"
 
 
 # Define build options.
@@ -219,7 +233,6 @@ PNG_OPTIONS=()
 QRENCODE_OPTIONS=()
 
 # Define boost options.
-# https://trac.macports.org/ticket/42282 (no clang 3.4+ with boost 1.55)
 #------------------------------------------------------------------------------
 BOOST_OPTIONS=(
 "--with-chrono" \
@@ -387,7 +400,7 @@ patch_zlib_configuration()
     sed --in-place=.tmp "/unknown option/d" -i configure
     sed --in-place=.tmp "/help for help/d" -i configure
 
-    echo "Hack: ZLIB configuration options modified."
+    # echo "Hack: ZLIB configuration options modified."
 }
 
 # Because ZLIB can't build shared only.
@@ -422,13 +435,13 @@ build_from_tarball()
     # Because ICU tools don't know how to locate internal dependencies.
     if [[ ($ARCHIVE == $ICU_ARCHIVE) || ($ARCHIVE == $PNG_ARCHIVE) ]]; then
         local SAVE_LDFLAGS=$LDFLAGS
-        export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
+        export LDFLAGS="-L$PREFIX/lib $LDFLAGS"
     fi
 
     # Because libpng doesn't actually use pkg-config to locate zlib.h.
     if [[ ($ARCHIVE == $PNG_ARCHIVE) ]]; then
         local SAVE_CPPFLAGS=$CPPFLAGS
-        export CPPFLAGS="$CPPFLAGS -I$PREFIX/include"
+        export CPPFLAGS="-I$PREFIX/include $CPPFLAGS"
     fi
 
     display_message "Download $ARCHIVE"
@@ -483,24 +496,28 @@ circumvent_boost_icu_detection()
     echo $SUCCESS > $REGEX_TEST
     echo $SUCCESS > $LOCALE_TEST
 
-    echo "Hack: ICU detection modified, will always indicate found."
+    # echo "Hack: ICU detection modified, will always indicate found."
 }
 
-# Because boost doesn't support autoconfig.
+# Because boost doesn't support autoconfig and doesn't like empty settings.
 initialize_boost_configuration()
 {
     if [[ $DISABLE_STATIC ]]; then
-        BOOST_LINK="link=shared"
+        BOOST_LINK="shared"
     elif [[ $DISABLE_SHARED ]]; then
-        BOOST_LINK="link=static"
+        BOOST_LINK="static"
     else
-        BOOST_LINK="link=static,shared"
+        BOOST_LINK="static,shared"
     fi
 
-    if [[ ($OS == Linux && $CC == "clang") || ($OS == OpenBSD) ]]; then
+    if [[ $CC ]]; then
         BOOST_TOOLSET="toolset=$CC"
-        BOOST_CXXFLAGS="cxxflags=-stdlib=lib$STDLIB"
-        BOOST_LINKFLAGS="linkflags=-stdlib=lib$STDLIB"
+    fi
+    if [[ $CXXFLAGS ]]; then
+        BOOST_CXXFLAGS="cxxflags=$CXXFLAGS"
+    fi
+    if [[ $LDLIBS ]]; then
+        BOOST_LINKFLAGS="linkflags=$LDLIBS"
     fi
 }
 
@@ -511,13 +528,13 @@ initialize_boost_icu_configuration()
         circumvent_boost_icu_detection
 
         # Restrict other locale options when compiling boost with icu.
-        BOOST_ICU_ICONV_OFF="boost.locale.iconv=off"
-        BOOST_ICU_POSIX_OFF="boost.locale.posix=off"
+        BOOST_ICU_ICONV="off"
+        BOOST_ICU_POSIX="off"
 
         # Extract ICU libs from package config variables and augment with -ldl.
         ICU_LIBS=( `pkg-config icu-i18n --libs` "-ldl" )
 
-        # This is a HACK for boost m4 scripts that fail with ICU dependency.
+        # This is a hack for boost m4 scripts that fail with ICU dependency.
         # See custom edits in ax-boost-locale.m4 and ax_boost_regex.m4.
         export BOOST_ICU_LIBS="${ICU_LIBS[@]}"
 
@@ -555,14 +572,16 @@ build_from_tarball_boost()
     initialize_boost_configuration
     initialize_boost_icu_configuration
 
-    echo "BOOST_TOOLSET         : $BOOST_TOOLSET"
-    echo "BOOST_CXXFLAGS        : $BOOST_CXXFLAGS"
-    echo "BOOST_LINKFLAGS       : $BOOST_LINKFLAGS"
-    echo "BOOST_LINK            : $BOOST_LINK"
-    echo "BOOST_ICU_ICONV_OFF   : $BOOST_ICU_ICONV_OFF"
-    echo "BOOST_ICU_POSIX_OFF   : $BOOST_ICU_POSIX_OFF"
-    echo "threading             : multi"
+    echo "Libbitcoin boost configuration."
+    echo "--------------------------------------------------------------------"
     echo "variant               : release"
+    echo "threading             : multi"
+    echo "toolset               : $CC"
+    echo "cxxflags              : $CXXFLAGS"
+    echo "linkflags             : $LDLIBS"
+    echo "link                  : $BOOST_LINK"
+    echo "boost.locale.iconv    : $BOOST_ICU_ICONV"
+    echo "boost.locale.posix    : $BOOST_ICU_POSIX"
     echo "-sNO_BZIP2            : 1" 
     echo "-sICU_PATH            : $ICU_PREFIX"
     echo "-sICU_LINK            : ${ICU_LIBS[@]}"
@@ -574,6 +593,7 @@ build_from_tarball_boost()
     echo "--reconfigure         : [ignore cached configuration]"
     echo "--prefix              : $PREFIX"
     echo "BOOST_OPTIONS         : $@"
+    echo "--------------------------------------------------------------------"
 
     # boost_iostreams
     # The zlib options prevent boost linkage to system libs in the case where
@@ -581,17 +601,19 @@ build_from_tarball_boost()
     # all versions (through 1.60). https://svn.boost.org/trac/boost/ticket/9156
     # The bzip2 auto-detection is not implemented, but disabling it works.
 
-    # Build and install.
-    ./bootstrap.sh "--prefix=$PREFIX" "--with-icu=$ICU_PREFIX"
+    ./bootstrap.sh \
+        "--prefix=$PREFIX" \
+        "--with-icu=$ICU_PREFIX"
+
     ./b2 install \
-        $BOOST_TOOLSET \
-        $BOOST_CXXFLAGS \
-        $BOOST_LINKFLAGS \
-        $BOOST_LINK \
-        $BOOST_ICU_ICONV_OFF \
-        $BOOST_ICU_POSIX_OFF \
-        "threading=multi" \
         "variant=release" \
+        "threading=multi" \
+        "$BOOST_TOOLSET" \
+        "$BOOST_CXXFLAGS" \
+        "$BOOST_LDLIBS" \
+        "link=$BOOST_LINK" \
+        "boost.locale.iconv=$BOOST_ICU_ICONV" \
+        "boost.locale.posix=$BOOST_ICU_POSIX" \
         "-sNO_BZIP2=1" \
         "-sICU_PATH=$ICU_PREFIX" \
         "-sICU_LINK=${ICU_LIBS[@]}" \
