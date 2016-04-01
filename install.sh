@@ -524,6 +524,9 @@ initialize_boost_configuration()
 # Because boost doesn't use pkg-config.
 initialize_boost_icu_configuration()
 {
+    BOOST_ICU_ICONV="on"
+    BOOST_ICU_POSIX="on"
+
     if [[ $WITH_ICU ]]; then
         circumvent_boost_icu_detection
 
