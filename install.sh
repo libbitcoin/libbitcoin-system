@@ -148,9 +148,9 @@ CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-*/}")
 if [[ !($PREFIX) ]]; then
     PREFIX="/usr/local"
     CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--prefix=$PREFIX")
-#else
+else
     # Incorporate the custom libdir into each object, for runtime resolution.
-    # export LD_RUN_PATH="$PREFIX/lib"
+    export LD_RUN_PATH="$PREFIX/lib"
 fi
 
 # Incorporate the prefix.
@@ -478,8 +478,8 @@ build_from_tarball()
     pop_directory
 
     # Restore flags to prevent side effects.
-    LDFLAGS=$SAVE_LDFLAGS
-    CPPFLAGS=$SAVE_LCPPFLAGS
+    export LDFLAGS=$SAVE_LDFLAGS
+    export CPPFLAGS=$SAVE_LCPPFLAGS
 }
 
 # Because boost ICU detection assumes in incorrect ICU path.
