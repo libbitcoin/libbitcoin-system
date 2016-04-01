@@ -138,7 +138,7 @@ CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-*/}")
 
 # Always set a prefix (required on OSX and for lib detection).
 #------------------------------------------------------------------------------
-if [[ $PREFIX ]]; then
+if [[ !($PREFIX) ]]; then
     # Incorporate the custom libdir into each object, for runtime resolution.
     # export LD_RUN_PATH="$PREFIX/lib"
 #else
