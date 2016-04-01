@@ -28,7 +28,7 @@
 # Depending on the caller's permission to the --prefix or --build-dir
 # directory, the script may need to be sudo'd.
 
-# Define common constants.
+# Define constants.
 #==============================================================================
 # The default build directory.
 #------------------------------------------------------------------------------
@@ -84,7 +84,6 @@ else
 fi
 
 # Define operating system specific settings.
-# Must always require clang on OSX (clang) and stdlibc on Linux(gcc or clang).
 #------------------------------------------------------------------------------
 if [[ $OS == Darwin ]]; then
     export CC="clang"
@@ -218,18 +217,6 @@ ICU_OPTIONS=(
 "--disable-tests" \
 "--disable-samples")
 
-# Define zlib options.
-#------------------------------------------------------------------------------
-ZLIB_OPTIONS=()
-
-# Define png options.
-#------------------------------------------------------------------------------
-PNG_OPTIONS=()
-
-# Define qrencode options.
-#------------------------------------------------------------------------------
-QRENCODE_OPTIONS=()
-
 # Define boost options.
 #------------------------------------------------------------------------------
 BOOST_OPTIONS=(
@@ -257,7 +244,7 @@ BITCOIN_OPTIONS=(
 "${with_pkgconfigdir}")
 
 
-# Utility functions.
+# Define utility functions.
 #==============================================================================
 configure_options()
 {
@@ -369,7 +356,7 @@ push_directory()
 }
 
 
-# Build functions.
+# Define build functions.
 #==============================================================================
 
 # Because PKG_CONFIG_PATH doesn't get updated by Homebrew or MacPorts.
@@ -394,10 +381,10 @@ initialize_icu_packages()
 # Because ZLIB doesn't follow GNU recommentation for unknown arguments.
 patch_zlib_configuration()
 {
-    sed --in-place=.tmp "s/leave 1/shift/" -i configure
-    sed --in-place=.tmp "s/--static/--static | --disable-shared/" -i configure
-    sed --in-place=.tmp "/unknown option/d" -i configure
-    sed --in-place=.tmp "/help for help/d" -i configure
+    sed -i.tmp "s/leave 1/shift/" configure
+    sed -i.tmp "s/--static/--static | --disable-shared/" configure
+    sed -i.tmp "/unknown option/d" configure
+    sed -i.tmp "/help for help/d" configure
 
     # echo "Hack: ZLIB configuration options modified."
 }
@@ -707,8 +694,8 @@ build_all()
     build_from_tarball       $PNG_URL      $PNG_ARCHIVE      xz    .      $PARALLEL  "$BUILD_PNG"      "${PNG_OPTIONS[@]}"       "$@"
     build_from_tarball       $QRENCODE_URL $QRENCODE_ARCHIVE bzip2 .      $PARALLEL  "$BUILD_QRENCODE" "${QRENCODE_OPTIONS[@]}"  "$@"
     build_from_tarball_boost $BOOST_URL    $BOOST_ARCHIVE    bzip2 .      $PARALLEL  "$BUILD_BOOST"    "${BOOST_OPTIONS[@]}"
-    build_from_github        libbitcoin    secp256k1         version4     $PARALLEL                    "${SECP256K1_OPTIONS[@]}" "$@"
-    build_from_travis        libbitcoin    libbitcoin        master       $PARALLEL                    "${BITCOIN_OPTIONS[@]}"   "$@"
+    build_from_github libbitcoin secp256k1 version4 $PARALLEL ${SECP256K1_OPTIONS[@]} "$@"
+    build_from_travis libbitcoin libbitcoin master $PARALLEL ${BITCOIN_OPTIONS[@]} "$@"
 }
 
 
@@ -719,4 +706,3 @@ push_directory "$BUILD_DIR"
 initialize_git
 time build_all "${CONFIGURE_OPTIONS[@]}"
 pop_directory
-

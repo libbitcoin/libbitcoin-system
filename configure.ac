@@ -151,7 +151,7 @@ AS_CASE([${enable_shared}], [yes], AC_DEFINE([BOOST_TEST_DYN_LINK]))
 
 # Check dependencies.
 #==============================================================================
-# Require Boost of at least version 1.56.0 output ${boost_CPPFLAGS/LDFLAGS}.
+# Require Boost of at least version 1.56.0 and output ${boost_CPPFLAGS/LDFLAGS}.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*],
     [AX_BOOST_BASE([1.56.0],
@@ -278,12 +278,6 @@ AC_MSG_NOTICE([secp256k1_LIBS : ${secp256k1_LIBS}])
 AS_CASE([${CC}], [*],
     [AX_CHECK_COMPILE_FLAG([-std=c++11],
         [CXXFLAGS="$CXXFLAGS -std=c++11"])])
-
-# Clean up boost 1.54 headers. Enabled in clang only.
-#------------------------------------------------------------------------------
-AS_CASE([${CC}], [*clang*],
-    [AX_CHECK_COMPILE_FLAG([-Wno-deprecated-register],
-        [CXXFLAGS="$CXXFLAGS -Wno-deprecated-register"])])
 
 # Clean up boost 1.55 headers. Enabled in gcc only.
 #------------------------------------------------------------------------------
