@@ -169,16 +169,28 @@ $ ./install.sh --enable-testnet
 
 #### Compiling with ICU (International Components for Unicode)
 
-Since the addition of [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) and later [BIP-38](https://github.com/bitcoin/bips/blob/master/bip-0038.mediawiki) support, libbitcoin conditionally incorporates [ICU](http://site.icu-project.org). To use the BIP-38 and BIP-39 passphrase normalization features libbitcoin must be compiled with ICU support. Currently [libbitcoin-explorer] is the only other library that accesses this feature, so if you do not intend to use passphrase normalization ICU can be avoided:
+Since the addition of [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) and later [BIP-38](https://github.com/bitcoin/bips/blob/master/bip-0038.mediawiki) support, libbitcoin conditionally incorporates [ICU](http://site.icu-project.org). To use the BIP-38 and BIP-39 passphrase normalization features libbitcoin must be compiled with the `--with-icu` option. Currently [libbitcoin-explorer](https://github.com/libbitcoin/libbitcoin-explorer) is the only other library that accesses this feature, so if you do not intend to use passphrase normalization this dependency can be avoided.
 ```sh
 $ ./install.sh --with-icu
 ```
 
-#### Building ICU and/or Boost
+#### Compiling with QR Code Support
 
-The installer can download and install ICU and/or Boost. These are large dependencies that are not typically preinstalled at a sufficient level. It is recommended to use a prefix directory when building these components.
+Since the addition of [qrcode](https://github.com/evoskuil/libbitcoin/blob/master/src/wallet/qrcode.cpp) support, libbitcoin conditionally incorporates `qrencode`. This requires compiling with the `--with-qrencode` option. Currently [libbitcoin-explorer](https://github.com/libbitcoin/libbitcoin-explorer) is the only other library that accesses this feature, so if you do not intend to use qrcode this dependency can be avoided.
 ```sh
-$ ./install.sh --with-icu --build-icu --build-boost --prefix=/home/me/myprefix
+$ ./install.sh --with-qrencode
+```
+
+Since the addition of [png](https://github.com/evoskuil/libbitcoin/blob/master/src/utility/png.cpp) support, libbitcoin conditionally incorporates `libpng` (which in turn requires `zlib`). This requires compiling with the `--with-png` option. Currently [libbitcoin-explorer](https://github.com/libbitcoin/libbitcoin-explorer) is the only other library that accesses this feature, so if you do not intend to use png this dependency can be avoided.
+```sh
+$ ./instalinstall.sh --with-png
+```
+
+#### Building ICU, ZLib, PNG, QREncode and/or Boost
+
+The installer can download and install any or all of these dependencies. ICU is a large package that is not typically preinstalled at a sufficient level. Using these builds ensures compiler and configuration compatailbity across all of the build components. It is recommended to use a prefix directory when building these components.
+```sh
+$ ./install.sh --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --prefix=/home/me/myprefix
 ```
 
 ### Windows
