@@ -151,25 +151,15 @@ AS_CASE([${enable_shared}], [yes], AC_DEFINE([BOOST_TEST_DYN_LINK]))
 
 # Check dependencies.
 #==============================================================================
-# Require Boost of at least version 1.55.0 if in gcc and output ${boost_CPPFLAGS/LDFLAGS}.
+# Require Boost of at least version 1.56.0 and output ${boost_CPPFLAGS/LDFLAGS}.
 #------------------------------------------------------------------------------
-AS_CASE([${CC}], [*gcc*],
-    [AX_BOOST_BASE([1.55.0],
+AS_CASE([${CC}], [*],
+    [AX_BOOST_BASE([1.56.0],
         [AC_SUBST([boost_CPPFLAGS], [${BOOST_CPPFLAGS}])
          AC_SUBST([boost_LDFLAGS], [${BOOST_LDFLAGS}])
          AC_MSG_NOTICE([boost_CPPFLAGS : ${boost_CPPFLAGS}])
          AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])],
-        [AC_MSG_ERROR([Boost 1.55.0 or later is required but was not found.])])])
-
-# Require Boost of at least version 1.54.0 if in clang and output ${boost_CPPFLAGS/LDFLAGS}.
-#------------------------------------------------------------------------------
-AS_CASE([${CC}], [*clang*],
-    [AX_BOOST_BASE([1.54.0],
-        [AC_SUBST([boost_CPPFLAGS], [${BOOST_CPPFLAGS}])
-         AC_SUBST([boost_LDFLAGS], [${BOOST_LDFLAGS}])
-         AC_MSG_NOTICE([boost_CPPFLAGS : ${boost_CPPFLAGS}])
-         AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])],
-        [AC_MSG_ERROR([Boost 1.54.0 or later is required but was not found.])])])
+        [AC_MSG_ERROR([Boost 1.56.0 or later is required but was not found.])])])
 
 AX_BOOST_CHRONO
 AC_SUBST([boost_chrono_LIBS], [${BOOST_CHRONO_LIB}])
@@ -224,26 +214,6 @@ AX_PTHREAD(
 # Hard wired -lpthread because AX_PTHREAD does not do it.
 AC_SUBST([pthread_LIBS], [-lpthread])
 
-# Require png of at least version 1.6.2 and output ${png_CPPFLAGS/LIBS/PKG}.
-#------------------------------------------------------------------------------
-AS_CASE([${with_png}], [yes],
-    [PKG_CHECK_MODULES([png], [libpng >= 1.6.2])
-     AC_SUBST([png_PKG], ['libpng >= 1.6.2'])
-     AC_SUBST([png_CPPFLAGS], [${png_CFLAGS}])
-     AC_MSG_NOTICE([png_CPPFLAGS : ${png_CPPFLAGS}])
-     AC_MSG_NOTICE([png_LIBS : ${png_LIBS}])],
-    [AC_SUBST([png_PKG], [])])
-
-# Require qrencode of at least version 3.4.4 and output ${qrencode_CPPFLAGS/LIBS/PKG}.
-#------------------------------------------------------------------------------
-AS_CASE([${with_qrencode}], [yes],
-    [PKG_CHECK_MODULES([qrencode], [libqrencode >= 3.4.4])
-     AC_SUBST([qrencode_PKG], ['libqrencode >= 3.4.4'])
-     AC_SUBST([qrencode_CPPFLAGS], [${qrencode_CFLAGS}])
-     AC_MSG_NOTICE([qrencode_CPPFLAGS : ${qrencode_CPPFLAGS}])
-     AC_MSG_NOTICE([qrencode_LIBS : ${qrencode_LIBS}])],
-    [AC_SUBST([qrencode_PKG], [])])
-
 # Require rt if on linux and output ${rt_LIBS}.
 #------------------------------------------------------------------------------
 AS_CASE([${host_os}], [*linux*],
@@ -272,6 +242,26 @@ AS_CASE([${host_os}], [*linux*],
         [AC_MSG_ERROR([dl library is required but was not found.])])],
     [AC_SUBST([dl_LIBS], [])])
 
+# Require png of at least version 1.6.2 and output ${png_CPPFLAGS/LIBS/PKG}.
+#------------------------------------------------------------------------------
+AS_CASE([${with_png}], [yes],
+    [PKG_CHECK_MODULES([png], [libpng >= 1.6.2])
+     AC_SUBST([png_PKG], ['libpng >= 1.6.2'])
+     AC_SUBST([png_CPPFLAGS], [${png_CFLAGS}])
+     AC_MSG_NOTICE([png_CPPFLAGS : ${png_CPPFLAGS}])
+     AC_MSG_NOTICE([png_LIBS : ${png_LIBS}])],
+    [AC_SUBST([png_PKG], [])])
+
+# Require qrencode of at least version 3.4.4 and output ${qrencode_CPPFLAGS/LIBS/PKG}.
+#------------------------------------------------------------------------------
+AS_CASE([${with_qrencode}], [yes],
+    [PKG_CHECK_MODULES([qrencode], [libqrencode >= 3.4.4])
+     AC_SUBST([qrencode_PKG], ['libqrencode >= 3.4.4'])
+     AC_SUBST([qrencode_CPPFLAGS], [${qrencode_CFLAGS}])
+     AC_MSG_NOTICE([qrencode_CPPFLAGS : ${qrencode_CPPFLAGS}])
+     AC_MSG_NOTICE([qrencode_LIBS : ${qrencode_LIBS}])],
+    [AC_SUBST([qrencode_PKG], [])])
+
 # Require secp256k1 of at least version 0.0.1 and output ${secp256k1_CPPFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
 PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1])
@@ -288,12 +278,6 @@ AC_MSG_NOTICE([secp256k1_LIBS : ${secp256k1_LIBS}])
 AS_CASE([${CC}], [*],
     [AX_CHECK_COMPILE_FLAG([-std=c++11],
         [CXXFLAGS="$CXXFLAGS -std=c++11"])])
-
-# Clean up boost 1.54 headers. Enabled in clang only.
-#------------------------------------------------------------------------------
-AS_CASE([${CC}], [*clang*],
-    [AX_CHECK_COMPILE_FLAG([-Wno-deprecated-register],
-        [CXXFLAGS="$CXXFLAGS -Wno-deprecated-register"])])
 
 # Clean up boost 1.55 headers. Enabled in gcc only.
 #------------------------------------------------------------------------------
