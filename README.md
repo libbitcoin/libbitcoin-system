@@ -55,7 +55,7 @@ Next install the [build system](http://wikipedia.org/wiki/GNU_build_system) (Aut
 ```sh
 $ sudo apt-get install build-essential autoconf automake libtool pkg-config git
 ```
-Next install the [Boost](http://www.boost.org) (minimum 1.55.0 for GCC or 1.54.0 for Clang) development package:
+Next install the [Boost](http://www.boost.org) (minimum 1.56.0) development package:
 ```sh
 $ sudo apt-get install libboost-all-dev
 ```
@@ -102,7 +102,7 @@ Next install the [build system](http://wikipedia.org/wiki/GNU_build_system) (Aut
 ```sh
 $ brew install autoconf automake libtool pkgconfig wget
 ```
-Next install the [Boost](http://www.boost.org) (1.54.0 or newer) development package:
+Next install the [Boost](http://www.boost.org) (1.56.0 or newer) development package:
 ```sh
 $ brew install boost
 ```
@@ -125,7 +125,7 @@ Next install the [build system](http://wikipedia.org/wiki/GNU_build_system) (Aut
 ```sh
 $ sudo port install autoconf automake libtool pkgconfig wget
 ```
-Next install the [Boost](http://www.boost.org) (1.54.0 or newer) development package. The `-` options remove MacPort defaults that are not Boost defaults:
+Next install the [Boost](http://www.boost.org) (1.56.0 or newer) development package. The `-` options remove MacPort defaults that are not Boost defaults:
 ```sh
 $ sudo port install boost -no_single -no_static -python27
 ```
@@ -162,7 +162,7 @@ $ ./install.sh CFLAGS="-Og -g" --prefix=/home/me/myprefix
 
 #### Compiling for Testnet
 
-Currently libbitcoin cannot work with both [testnet](https://en.bitcoin.it/wiki/Testnet) and mainnet. This restriction will be lifted in a future version. In order to work with testnet in the interim libbitcoin must be recompiled with the testnet option:
+Currently libbitcoin cannot work with both [testnet](https://en.bitcoin.it/wiki/Testnet) and mainnet. This restriction will be lifted in version3 [currently master]. In order to work with testnet in the interim libbitcoin must be recompiled with the testnet option:
 ```sh
 $ ./install.sh --enable-testnet
 ```
@@ -205,10 +205,12 @@ The required set of NuGet packages can be viewed using the [NuGet package manage
  * [boost\_chrono-vc120](http://www.nuget.org/packages/boost_chrono-vc120)
  * [boost\_date\_time-vc120](http://www.nuget.org/packages/boost_date_time-vc120)
  * [boost\_filesystem-vc120](http://www.nuget.org/packages/boost_filesystem-vc120)
+ * [boost\_iostreams-vc120](http://www.nuget.org/packages/boost_iostreams-vc120)
  * [boost\_locale-vc120](http://www.nuget.org/packages/boost_locale-vc120)
  * [boost\_program\_options-vc120](http://www.nuget.org/packages/boost_program_options-vc120)
  * [boost\_regex-vc120](http://www.nuget.org/packages/boost_regex-vc120)
  * [boost\_system-vc120](http://www.nuget.org/packages/boost_system-vc120)
+ * [boost\_thread-vc120](http://www.nuget.org/packages/boost_thread-vc120)
  * [boost\_unit\_test\_framework-vc120](http://www.nuget.org/packages/boost_unit_test_framework-vc120)
 * Packages maintained by [evoskuil](http://www.nuget.org/profiles/evoskuil)
  * [secp256k1\_vc120](http://www.nuget.org/packages/secp256k1_vc120)
