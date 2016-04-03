@@ -81,6 +81,14 @@ BC_CONSTFUNC uint64_t max_money()
         max_money_recursive(coin_price(initial_block_reward));
 }
 
+// For configuration settings initialization.
+enum class settings
+{
+    none,
+    mainnet,
+    testnet
+};
+
 enum services: uint64_t
 {
     // The node is capable of serving the block chain.
