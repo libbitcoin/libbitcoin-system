@@ -22,7 +22,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
+#include <stdexcept>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/utility/color.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -48,23 +50,25 @@ bool png::write_png(const data_chunk& data, const uint32_t size,
 {
     data_source istream(data);
     return png::write_png(istream, size, dots_per_inch, margin,
-        inches_per_meter, get_default_foreground(),
-        get_default_background(), out);
+        inches_per_meter, get_default_foreground(), get_default_background(),
+        out);
 }
 
 bool png::write_png(std::istream& in, const uint32_t size,
     std::ostream& out)
 {
-    return png::write_png(in, size, dots_per_inch, margin,
-        inches_per_meter, get_default_foreground(),
-        get_default_background(), out);
+    return png::write_png(in, size, dots_per_inch, margin, inches_per_meter,
+        get_default_foreground(), get_default_background(), out);
 }
 
-extern "C" void sink_write(png_structp png_ptr,
-    png_bytep data, png_size_t length)
+extern "C" void sink_write(png_structp png_ptr, png_bytep data,
+    png_size_t length)
 {
+    static_assert(sizeof(length) <= sizeof(size_t), "png_size_t too large");
+    const auto size = static_cast<size_t>(length);
+
     auto& sink = *reinterpret_cast<ostream_writer*>(png_get_io_ptr(png_ptr));
-    sink.write_data(reinterpret_cast<const uint8_t*>(data), size_t(length));
+    sink.write_data(reinterpret_cast<const uint8_t*>(data), size);
 }
 
 extern "C" void error_callback(png_structp png_ptr,
@@ -86,7 +90,11 @@ bool png::write_png(std::istream& in, const uint32_t size,
     source.read_data(reinterpret_cast<uint8_t*>(&version), sizeof(uint32_t));
     source.read_data(reinterpret_cast<uint8_t*>(&width), sizeof(uint32_t));
 
-    data_chunk data = source.read_data(width * width);
+    if (bc::max_size_t / width < width)
+        return false;
+
+    const auto area = width * width;
+    auto data = source.read_data(area);
 
     try
     {
@@ -94,6 +102,7 @@ bool png::write_png(std::istream& in, const uint32_t size,
         static constexpr int32_t bits_per_byte = 8;
         static constexpr uint8_t margin_value = 0xff;
 
+        // TODO: unguarded overflow conditions.
         const auto margin_size = margin * size;
         const auto realwidth = (width + margin * 2) * size;
         const auto row_size = (realwidth + 7) / bits_per_byte;
@@ -101,13 +110,13 @@ bool png::write_png(std::istream& in, const uint32_t size,
         data_chunk row;
         row.reserve(row_size);
 
-        auto png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL,
-            NULL, NULL);
-        if (png_ptr == NULL)
+        auto png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr,
+            nullptr, nullptr);
+        if (png_ptr == nullptr)
             return false;
 
         auto info_ptr = png_create_info_struct(png_ptr);
-        if (info_ptr == NULL)
+        if (info_ptr == nullptr)
             return false;
 
         png_color raw_palette;
@@ -124,11 +133,11 @@ bool png::write_png(std::istream& in, const uint32_t size,
         alpha_values[1] = background.alpha;
 
         png_set_PLTE(png_ptr, info_ptr, palette, 2);
-        png_set_tRNS(png_ptr, info_ptr, alpha_values, 2, NULL);
+        png_set_tRNS(png_ptr, info_ptr, alpha_values, 2, nullptr);
 
         ostream_writer sink(out);
-        png_set_write_fn(png_ptr, &sink, sink_write, NULL);
-        png_set_error_fn(png_ptr, NULL, error_callback, NULL);
+        png_set_write_fn(png_ptr, &sink, sink_write, nullptr);
+        png_set_error_fn(png_ptr, nullptr, error_callback, nullptr);
 
         png_set_IHDR(png_ptr, info_ptr, realwidth, realwidth, bit_depth,
             PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE,
@@ -145,10 +154,11 @@ bool png::write_png(std::istream& in, const uint32_t size,
             png_write_row(png_ptr, row.data());
 
         // write data
-        unsigned char* row_ptr = nullptr;
+        uint8_t* row_ptr = nullptr;
         auto data_ptr = data.data();
         for (auto y = 0; y < width; y++)
         {
+            // TODO: unguarded overflow conditions.
             auto bit = bits_per_byte - 1;
             row.assign(row_size, margin_value);
             row_ptr = row.data();
@@ -185,7 +195,7 @@ bool png::write_png(std::istream& in, const uint32_t size,
 
         out.flush();
     }
-    catch(const std::runtime_error& error)
+    catch (const std::runtime_error& error)
     {
         return false;
     }
