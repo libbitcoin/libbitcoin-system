@@ -20,8 +20,8 @@
 #include <bitcoin/bitcoin/math/stealth.hpp>
 
 #include <algorithm>
-#include <bitcoin/bitcoin/chain/operation.hpp>
-#include <bitcoin/bitcoin/chain/script.hpp>
+#include <bitcoin/bitcoin/chain/script/operation.hpp>
+#include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/binary.hpp>

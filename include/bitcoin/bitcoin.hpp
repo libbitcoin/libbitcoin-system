@@ -26,14 +26,14 @@
 #include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/chain/history_row.hpp>
 #include <bitcoin/bitcoin/chain/input.hpp>
-#include <bitcoin/bitcoin/chain/opcode.hpp>
-#include <bitcoin/bitcoin/chain/operation.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
 #include <bitcoin/bitcoin/chain/point.hpp>
-#include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/chain/spend.hpp>
 #include <bitcoin/bitcoin/chain/stealth_row.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
+#include <bitcoin/bitcoin/chain/script/opcode.hpp>
+#include <bitcoin/bitcoin/chain/script/operation.hpp>
+#include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/config/btc256.hpp>
 #include <bitcoin/bitcoin/config/checkpoint.hpp>

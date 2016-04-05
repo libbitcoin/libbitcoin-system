@@ -17,12 +17,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/chain/operation.hpp>
+#include <bitcoin/bitcoin/chain/script/operation.hpp>
 
 #include <algorithm>
 #include <sstream>
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/chain/script.hpp>
+#include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -97,7 +97,6 @@ bool operation::from_data(reader& source)
         read_opcode_data_size(size, code, byte, source);
         data = source.read_data(size);
         result = (source && (data.size() == size));
-
     }
 
     if (!result)
