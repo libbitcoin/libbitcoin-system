@@ -270,5 +270,8 @@
     <ClCompile Include="..\..\..\..\test\utility\png.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\qrcode.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

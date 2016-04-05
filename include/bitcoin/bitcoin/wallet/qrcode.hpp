@@ -28,7 +28,7 @@
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 #ifdef WITH_QRENCODE
-#include "qrencode.h"
+#include <qrencode.h>
 
 namespace libbitcoin {
 namespace wallet {

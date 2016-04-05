@@ -19,7 +19,9 @@
 #include <bitcoin/bitcoin/wallet/qrcode.hpp>
 
 #include <iostream>
+#include <string>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -65,23 +67,29 @@ bool qr::encode(std::istream& in, const uint32_t version,
 
     const auto qrcode = QRcode_encodeString(qr_string.c_str(), version,
         level, mode, case_sensitive);
-    if (qrcode)
-    {
-        // Write out raw format of QRcode structure (defined in
-        // qrencode.h). Format written is:
-        // uint32_t version
-        // uint32_t width
-        // unsigned char* data (of width * width length)
-        ostream_writer sink(out);
-        sink.write_data(reinterpret_cast<const uint8_t*>(&qrcode->version),
-            sizeof(uint32_t));
-        sink.write_data(reinterpret_cast<const uint8_t*>(&qrcode->width),
-            sizeof(uint32_t));
-        sink.write_data(qrcode->data, qrcode->width * qrcode->width);
-        out.flush();
-    }
 
-    return (qrcode != nullptr);
+    if (qrcode == nullptr)
+        return false;
+
+    if (bc::max_size_t / qrcode->width < qrcode->width)
+        return false;
+
+    const auto area = qrcode->width * qrcode->width;
+    auto width_ptr = reinterpret_cast<const uint8_t*>(&qrcode->width);
+    auto version_ptr = reinterpret_cast<const uint8_t*>(&qrcode->version);
+
+    // Write out raw format of QRcode structure (defined in qrencode.h).
+    // Format written is:
+    // uint32_t version
+    // uint32_t width
+    // unsigned char* data (of width^2 length)
+    ostream_writer sink(out);
+    sink.write_data(version_ptr, sizeof(uint32_t));
+    sink.write_data(width_ptr, sizeof(uint32_t));
+    sink.write_data(qrcode->data, area);
+    out.flush();
+
+    return true;
 }
 
 } // namespace wallet

@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <boost/test/unit_test.hpp>
+
+#include <cstdint>
 #include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
@@ -29,9 +31,8 @@ BOOST_AUTO_TEST_SUITE(qrcode_tests)
 
 BOOST_AUTO_TEST_CASE(qrcode__invoke__qrencode_data__success)
 {
-    std::string address = "bitcoin:1L4M4obtbpexxuKpLrDimMEYWB2Rx2yzus";
-
-    const unsigned char expected_data[] = {
+    static const uint8_t expected_data[]
+    {
         0x03, 0x00, 0x00, 0x00, 0x1d, 0x00, 0x00, 0x00, 0xc1, 0xc1, 0xc1, 0xc1,
         0xc1, 0xc1, 0xc1, 0xc0, 0x84, 0x02, 0x03, 0x02, 0x03, 0x03, 0x03, 0x02,
         0x03, 0x03, 0x03, 0x02, 0x03, 0xc0, 0xc1, 0xc1, 0xc1, 0xc1, 0xc1, 0xc1,
@@ -104,13 +105,13 @@ BOOST_AUTO_TEST_CASE(qrcode__invoke__qrencode_data__success)
         0x85, 0x02, 0x03, 0x02, 0x03, 0x02, 0x03, 0x02, 0x02, 0x02, 0x02, 0x03,
         0x02, 0x03, 0x02, 0x02, 0x03, 0x03, 0x03, 0x02, 0x02
     };
-    constexpr uint32_t expected_data_len = 849;
 
+    static const auto expected_data_length = sizeof(expected_data) / sizeof(uint8_t);
+    static const std::string address = "bitcoin:1L4M4obtbpexxuKpLrDimMEYWB2Rx2yzus";
     const auto encoded_qrcode = qr::encode(to_chunk(address));
 
-    BOOST_REQUIRE_EQUAL(encoded_qrcode.size(), expected_data_len);
-    BOOST_REQUIRE_EQUAL(std::memcmp(encoded_qrcode.data(),
-        expected_data, expected_data_len), 0);
+    BOOST_REQUIRE_EQUAL(encoded_qrcode.size(), expected_data_length);
+    BOOST_REQUIRE(std::memcmp(encoded_qrcode.data(), expected_data, expected_data_length) == 0);
 }
 
 #endif // WITH_QRENCODE

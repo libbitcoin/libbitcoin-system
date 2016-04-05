@@ -28,7 +28,7 @@
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 #ifdef WITH_PNG
-#include "png.h"
+#include <png.h>
 
 namespace libbitcoin {
 

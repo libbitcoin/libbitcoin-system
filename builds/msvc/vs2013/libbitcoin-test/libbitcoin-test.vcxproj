@@ -141,6 +141,7 @@
     <ClCompile Include="..\..\..\..\test\wallet\ec_public.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\hd_private.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\payment_address.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\qrcode.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\uri_reader.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\bitcoin_uri.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\encrypted_keys.cpp" />
