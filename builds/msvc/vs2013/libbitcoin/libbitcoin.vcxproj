@@ -73,10 +73,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\block.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\header.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\opcode.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\operation.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\point.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\script.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\script\conditional_stack.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\script\evaluation_context.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\script\opcode.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\script\operation.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\script\script.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\transaction.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\input.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\output.cpp" />
@@ -148,11 +150,9 @@
     <ClCompile Include="..\..\..\..\src\unicode\unicode_istream.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\unicode_ostream.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\unicode_streambuf.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\conditional_stack.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\deadline.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\dispatcher.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\evaluation_context.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\istream_reader.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\monitor.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\png.cpp" />
@@ -191,10 +191,10 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\header.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\history_row.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\opcode.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\operation.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\opcode.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\operation.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\script.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\spend.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\stealth_row.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\transaction.hpp" />
@@ -318,6 +318,8 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\select_outputs.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\stealth_address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\uri.hpp" />
+    <ClInclude Include="..\..\..\..\src\chain\script\conditional_stack.hpp" />
+    <ClInclude Include="..\..\..\..\src\chain\script\evaluation_context.hpp" />
     <ClInclude Include="..\..\..\..\src\math\external\aes256.h" />
     <ClInclude Include="..\..\..\..\src\math\external\crypto_scrypt.h" />
     <ClInclude Include="..\..\..\..\src\math\external\hmac_sha256.h" />
@@ -331,8 +333,6 @@
     <ClInclude Include="..\..\..\..\src\math\external\lax_der_parsing.h" />
     <ClInclude Include="..\..\..\..\src\math\external\zeroize.h" />
     <ClInclude Include="..\..\..\..\src\math\secp256k1_initializer.hpp" />
-    <ClInclude Include="..\..\..\..\src\utility\conditional_stack.hpp" />
-    <ClInclude Include="..\..\..\..\src\utility\evaluation_context.hpp" />
     <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_key.hpp" />
     <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_prefix.hpp" />
     <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_private.hpp" />

@@ -17,28 +17,42 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CONDITIONAL_STACK_HPP
-#define LIBBITCOIN_CONDITIONAL_STACK_HPP
+#include "conditional_stack.hpp"
 
-#include <vector>
+#include <algorithm>
 
 namespace libbitcoin {
+namespace chain {
 
-/// TODO: move to script folder.
-class conditional_stack
+bool conditional_stack::closed() const
 {
-public:
-    bool closed() const;
-    bool succeeded() const;
-    void clear();
-    void open(bool value);
-    void else_();
-    void close();
-
-private:
-    std::vector<bool> stack_;
-};
-
+    return stack_.empty();
 }
 
-#endif
+bool conditional_stack::succeeded() const
+{
+    return std::count(stack_.begin(), stack_.end(), false) == 0;
+}
+
+void conditional_stack::clear()
+{
+    stack_.clear();
+}
+
+void conditional_stack::open(bool value)
+{
+    stack_.push_back(value);
+}
+
+void conditional_stack::else_()
+{
+    stack_.back() = !stack_.back();
+}
+
+void conditional_stack::close()
+{
+    stack_.pop_back();
+}
+
+} // namspace chain
+} // namspace libbitcoin

@@ -21,6 +21,7 @@
 #define LIBBITCOIN_CHAIN_STEALTH_ROW_HPP
 
 #include <vector>
+#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {

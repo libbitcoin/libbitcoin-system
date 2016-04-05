@@ -17,26 +17,26 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/chain/script.hpp>
+#include <bitcoin/bitcoin/chain/script/script.hpp>
 
 #include <sstream>
 #include <boost/algorithm/string.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/chain/operation.hpp>
+#include <bitcoin/bitcoin/chain/script/operation.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/script_number.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
-#include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 #include <bitcoin/bitcoin/utility/variable_uint_size.hpp>
-#include "../utility/conditional_stack.hpp"
-#include "../utility/evaluation_context.hpp"
+#include "conditional_stack.hpp"
+#include "evaluation_context.hpp"
 
 namespace libbitcoin {
 namespace chain {
@@ -460,7 +460,7 @@ void stack_swap(DataStack& stack, size_t index_a, size_t index_b)
 template <typename DataStack>
 data_chunk pop_item(DataStack& stack)
 {
-    data_chunk value = stack.back();
+    const auto value = stack.back();
     stack.pop_back();
     return value;
 }
@@ -1822,6 +1822,7 @@ bool evaluate(const transaction& parent_tx, uint32_t input_index,
 
     context.operation_counter = 0;
     context.code_begin = script.operations.begin();
+
     for (auto it = script.operations.begin(); it != script.operations.end(); ++it)
         if (!next_step(parent_tx, input_index, it, script, context, flags))
             return false;
@@ -1834,12 +1835,14 @@ bool script::verify(const script& input_script, const script& output_script,
 {
     evaluation_context input_context;
     input_context.flags = flags;
+
     if (!evaluate(parent_tx, input_index, input_script, input_context, flags))
         return false;
 
     evaluation_context output_context;
     output_context.flags = flags;
     output_context.stack = input_context.stack;
+
     if (!evaluate(parent_tx, input_index, output_script, output_context,
         flags))
         return false;

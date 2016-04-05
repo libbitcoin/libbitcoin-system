@@ -23,8 +23,8 @@
 #include <cstddef>
 #include <iostream>
 #include <vector>
+#include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/chain/opcode.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -82,10 +82,9 @@ enum class script_pattern
 class BC_API operation
 {
 public:
-    static const size_t max_null_data_size;
-
-    typedef std::vector<operation> list;
     typedef std::vector<operation> stack;
+
+    static const size_t max_null_data_size;
 
     static operation factory_from_data(const data_chunk& data);
     static operation factory_from_data(std::istream& stream);

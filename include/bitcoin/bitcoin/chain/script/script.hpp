@@ -20,11 +20,12 @@
 #ifndef LIBBITCOIN_CHAIN_SCRIPT_HPP
 #define LIBBITCOIN_CHAIN_SCRIPT_HPP
 
-//#include <string>
+#include <cstdint>
 #include <istream>
+#include <string>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/chain/operation.hpp>
+#include <bitcoin/bitcoin/chain/script/operation.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -87,8 +88,6 @@ enum signature_hash_algorithm : uint32_t
 class BC_API script
 {
 public:
-    typedef std::vector<script> list;
-
     enum class parse_mode
     {
         strict,

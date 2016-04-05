@@ -22,9 +22,9 @@
 
 #include <cstdint>
 #include <istream>
-#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/point.hpp>
-#include <bitcoin/bitcoin/chain/script.hpp>
+#include <bitcoin/bitcoin/chain/script/script.hpp>
+#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>

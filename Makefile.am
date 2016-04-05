@@ -41,12 +41,16 @@ src_libbitcoin_la_SOURCES = \
     src/chain/block.cpp \
     src/chain/header.cpp \
     src/chain/input.cpp \
-    src/chain/opcode.cpp \
-    src/chain/operation.cpp \
     src/chain/output.cpp \
     src/chain/point.cpp \
-    src/chain/script.cpp \
     src/chain/transaction.cpp \
+    src/chain/script/conditional_stack.cpp \
+    src/chain/script/conditional_stack.hpp \
+    src/chain/script/evaluation_context.cpp \
+    src/chain/script/evaluation_context.hpp \
+    src/chain/script/opcode.cpp \
+    src/chain/script/operation.cpp \
+    src/chain/script/script.cpp \
     src/config/authority.cpp \
     src/config/btc256.cpp \
     src/config/checkpoint.cpp \
@@ -127,12 +131,8 @@ src_libbitcoin_la_SOURCES = \
     src/unicode/unicode_ostream.cpp \
     src/unicode/unicode_streambuf.cpp \
     src/utility/binary.cpp \
-    src/utility/conditional_stack.cpp \
-    src/utility/conditional_stack.hpp \
     src/utility/deadline.cpp \
     src/utility/dispatcher.cpp \
-    src/utility/evaluation_context.cpp \
-    src/utility/evaluation_context.hpp \
     src/utility/istream_reader.cpp \
     src/utility/log.cpp \
     src/utility/monitor.cpp \
@@ -305,14 +305,17 @@ include_bitcoin_bitcoin_chain_HEADERS = \
     include/bitcoin/bitcoin/chain/header.hpp \
     include/bitcoin/bitcoin/chain/history_row.hpp \
     include/bitcoin/bitcoin/chain/input.hpp \
-    include/bitcoin/bitcoin/chain/opcode.hpp \
-    include/bitcoin/bitcoin/chain/operation.hpp \
     include/bitcoin/bitcoin/chain/output.hpp \
     include/bitcoin/bitcoin/chain/point.hpp \
-    include/bitcoin/bitcoin/chain/script.hpp \
     include/bitcoin/bitcoin/chain/spend.hpp \
     include/bitcoin/bitcoin/chain/stealth_row.hpp \
     include/bitcoin/bitcoin/chain/transaction.hpp
+
+include_bitcoin_bitcoin_chain_scriptdir = ${includedir}/bitcoin/bitcoin/chain/script
+include_bitcoin_bitcoin_chain_script_HEADERS = \
+    include/bitcoin/bitcoin/chain/script/opcode.hpp \
+    include/bitcoin/bitcoin/chain/script/operation.hpp \
+    include/bitcoin/bitcoin/chain/script/script.hpp
 
 include_bitcoin_bitcoin_configdir = ${includedir}/bitcoin/bitcoin/config
 include_bitcoin_bitcoin_config_HEADERS = \
