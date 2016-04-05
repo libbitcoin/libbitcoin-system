@@ -482,6 +482,9 @@
     <ClCompile Include="..\..\..\..\src\utility\png.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\qrcode.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -936,6 +939,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\png.hpp">
       <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\qrcode.hpp">
+      <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
