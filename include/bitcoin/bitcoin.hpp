@@ -94,6 +94,7 @@
 #include <bitcoin/bitcoin/utility/binary.hpp>
 #include <bitcoin/bitcoin/utility/collection.hpp>
 #include <bitcoin/bitcoin/utility/color.hpp>
+#include <bitcoin/bitcoin/utility/conditional_lock.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -113,6 +114,7 @@
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/resubscriber.hpp>
+#include <bitcoin/bitcoin/utility/scope_lock.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>

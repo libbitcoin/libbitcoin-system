@@ -17,32 +17,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_THREAD_HPP
-#define LIBBITCOIN_THREAD_HPP
+#include <bitcoin/bitcoin/utility/scope_lock.hpp>
 
 #include <memory>
-#include <boost/thread.hpp>
-#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 
 namespace libbitcoin {
 
-enum class thread_priority
+scope_lock::scope_lock(shared_mutex& mutex)
+  : mutex_(mutex)
 {
-    high,
-    normal,
-    low,
-    lowest
-};
+    mutex_.lock();
+}
 
-typedef boost::mutex unique_mutex;
-typedef boost::shared_mutex shared_mutex;
-typedef boost::upgrade_mutex upgrade_mutex;
-
-typedef boost::unique_lock<shared_mutex> unique_lock;
-typedef boost::shared_lock<shared_mutex> shared_lock;
-
-BC_API void set_thread_priority(thread_priority priority);
+scope_lock::~scope_lock()
+{
+    mutex_.unlock();
+}
 
 } // namespace libbitcoin
-
-#endif
