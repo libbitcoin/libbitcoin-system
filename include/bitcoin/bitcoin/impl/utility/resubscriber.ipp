@@ -100,7 +100,7 @@ void resubscriber<Args...>::subscribe(handler notifier, Args... stopped_args)
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_.unlock_upgrade_and_lock();
-        subscriptions_.push_back(notifier);
+        subscriptions_.emplace_back(notifier);
         mutex_.unlock();
         //---------------------------------------------------------------------
         return;
@@ -139,7 +139,7 @@ void resubscriber<Args...>::do_relay(Args... args)
     // Invoke subscribers from temporary list.
     for (const auto& notifier: subscriptions)
         if (notifier(args...))
-            renewals.push_back(std::move(notifier));
+            renewals.emplace_back(notifier);
 
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
