@@ -22,7 +22,7 @@
 
 #include <chrono>
 
-// TODO: use boost::timer::auto_cpu_timer
+// boost::timer::auto_cpu_timer requires the boost timer lib dependency.
 
 namespace libbitcoin {
 
