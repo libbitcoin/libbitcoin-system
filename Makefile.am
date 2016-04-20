@@ -131,6 +131,7 @@ src_libbitcoin_la_SOURCES = \
     src/unicode/unicode_ostream.cpp \
     src/unicode/unicode_streambuf.cpp \
     src/utility/binary.cpp \
+    src/utility/conditional_lock.cpp \
     src/utility/deadline.cpp \
     src/utility/dispatcher.cpp \
     src/utility/istream_reader.cpp \
@@ -139,6 +140,7 @@ src_libbitcoin_la_SOURCES = \
     src/utility/ostream_writer.cpp \
     src/utility/png.cpp \
     src/utility/random.cpp \
+    src/utility/scope_lock.cpp \
     src/utility/string.cpp \
     src/utility/thread.cpp \
     src/utility/threadpool.cpp \
@@ -418,6 +420,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/binary.hpp \
     include/bitcoin/bitcoin/utility/collection.hpp \
     include/bitcoin/bitcoin/utility/color.hpp \
+    include/bitcoin/bitcoin/utility/conditional_lock.hpp \
     include/bitcoin/bitcoin/utility/container_sink.hpp \
     include/bitcoin/bitcoin/utility/container_source.hpp \
     include/bitcoin/bitcoin/utility/data.hpp \
@@ -437,6 +440,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/random.hpp \
     include/bitcoin/bitcoin/utility/reader.hpp \
     include/bitcoin/bitcoin/utility/resubscriber.hpp \
+    include/bitcoin/bitcoin/utility/scope_lock.hpp \
     include/bitcoin/bitcoin/utility/serializer.hpp \
     include/bitcoin/bitcoin/utility/string.hpp \
     include/bitcoin/bitcoin/utility/subscriber.hpp \

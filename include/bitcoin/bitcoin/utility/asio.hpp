@@ -22,6 +22,7 @@
 
 #include <memory>
 #include <boost/asio.hpp>
+#include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
 
 // Convenience namespace for commonly used boost asio aliases.
@@ -36,13 +37,16 @@ typedef boost::asio::ip::address address;
 typedef boost::asio::ip::address_v4 ipv4;
 typedef boost::asio::ip::address_v6 ipv6;
 typedef boost::asio::ip::tcp::endpoint endpoint;
+typedef boost::asio::const_buffer const_buffer;
 typedef boost::asio::io_service service;
 typedef boost::asio::deadline_timer timer;
+typedef boost::posix_time::time_period time_period;
 typedef boost::posix_time::time_duration duration;
 typedef boost::posix_time::hours hours;
 typedef boost::posix_time::minutes minutes;
 typedef boost::posix_time::seconds seconds;
 typedef boost::posix_time::milliseconds milliseconds;
+typedef boost::posix_time::microseconds microseconds;
 
 typedef tcp::socket socket;
 typedef tcp::acceptor acceptor;

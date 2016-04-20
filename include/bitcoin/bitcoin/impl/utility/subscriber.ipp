@@ -99,7 +99,7 @@ void subscriber<Args...>::subscribe(handler notifier, Args... stopped_args)
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_.unlock_upgrade_and_lock();
-        subscriptions_.push_back(notifier);
+        subscriptions_.emplace_back(notifier);
         mutex_.unlock();
         //---------------------------------------------------------------------
         return;

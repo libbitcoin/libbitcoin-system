@@ -211,7 +211,7 @@ size_t to_utf8(char out[], size_t out_bytes, const wchar_t in[],
     return bytes;
 }
 
-// All non-leading bytes of utf8 have th same two bit prefix.
+// All non-leading bytes of utf8 have the same two bit prefix.
 static bool is_utf8_trailing_byte(char byte)
 {
     // 10xxxxxx
