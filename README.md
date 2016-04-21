@@ -183,7 +183,7 @@ $ ./install.sh --with-qrencode
 
 Since the addition of [png](https://github.com/evoskuil/libbitcoin/blob/master/src/utility/png.cpp) support, libbitcoin conditionally incorporates `libpng` (which in turn requires `zlib`). This requires compiling with the `--with-png` option. Currently [libbitcoin-explorer](https://github.com/libbitcoin/libbitcoin-explorer) is the only other library that accesses this feature, so if you do not intend to use png this dependency can be avoided.
 ```sh
-$ ./instalinstall.sh --with-png
+$ ./install.sh --with-png
 ```
 
 #### Building ICU, ZLib, PNG, QREncode and/or Boost
