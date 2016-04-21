@@ -160,13 +160,6 @@ Any set of `./configure` options can be passed via the build script, for example
 $ ./install.sh CFLAGS="-Og -g" --prefix=/home/me/myprefix
 ```
 
-#### Compiling for Testnet
-
-Currently libbitcoin cannot work with both [testnet](https://en.bitcoin.it/wiki/Testnet) and mainnet. This restriction will be lifted in version3 [currently master]. In order to work with testnet in the interim libbitcoin must be recompiled with the testnet option:
-```sh
-$ ./install.sh --enable-testnet
-```
-
 #### Compiling with ICU (International Components for Unicode)
 
 Since the addition of [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) and later [BIP-38](https://github.com/bitcoin/bips/blob/master/bip-0038.mediawiki) support, libbitcoin conditionally incorporates [ICU](http://site.icu-project.org). To use the BIP-38 and BIP-39 passphrase normalization features libbitcoin must be compiled with the `--with-icu` option. Currently [libbitcoin-explorer](https://github.com/libbitcoin/libbitcoin-explorer) is the only other library that accesses this feature, so if you do not intend to use passphrase normalization this dependency can be avoided.
