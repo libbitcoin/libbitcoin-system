@@ -23,6 +23,7 @@
 #include <cstddef>
 #include <string>
 #include <vector>
+#include <boost/functional/hash.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -152,14 +153,13 @@ BC_API short_hash bitcoin_short_hash(data_slice data);
 BC_API data_chunk scrypt(data_slice data, data_slice salt, uint64_t N,
     uint32_t p, uint32_t r, size_t length);
 
-/// Make hash_digest and short_hash hashable for std::*map variants
+/// Make hashes compatible with std and boost map variants.
 template <typename HashType>
-struct BC_API std_hash_wrapper
+struct BC_API hash_wrapper
 {
     size_t operator()(const HashType& hash) const
     {
-        std::hash<std::string> functor;
-        return functor(std::string(std::begin(hash), std::end(hash)));
+        return boost::hash_range(hash.begin(), hash.end());
     }
 };
 
@@ -168,30 +168,48 @@ struct BC_API std_hash_wrapper
 /// Extend std namespace with our hash wrappers
 namespace std
 {
-    using libbitcoin::std_hash_wrapper;
-    using libbitcoin::short_hash;
-    using libbitcoin::hash_digest;
-    using libbitcoin::long_hash;
-
     template <>
-    struct BC_API hash<short_hash>
-      : public std_hash_wrapper<short_hash>
+    struct BC_API hash<bc::short_hash>
+      : public bc::hash_wrapper<bc::short_hash>
     {
     };
 
     template <>
-    struct BC_API hash<hash_digest>
-      : public std_hash_wrapper<hash_digest>
+    struct BC_API hash<bc::hash_digest>
+      : public bc::hash_wrapper<bc::hash_digest>
     {
     };
 
     template <>
-    struct BC_API hash<long_hash>
-      : public std_hash_wrapper<long_hash>
+    struct BC_API hash<bc::long_hash>
+      : public bc::hash_wrapper<bc::long_hash>
     {
     };
 
 } // namespace std
+
+/// Extend boost namespace with our hash wrappers
+namespace boost
+{
+    template <>
+    struct BC_API hash<bc::short_hash>
+      : public bc::hash_wrapper<bc::short_hash>
+    {
+    };
+
+    template <>
+    struct BC_API hash<bc::hash_digest>
+      : public bc::hash_wrapper<bc::hash_digest>
+    {
+    };
+
+    template <>
+    struct BC_API hash<bc::long_hash>
+      : public bc::hash_wrapper<bc::long_hash>
+    {
+    };
+
+} // namespace boost
 
 #include <bitcoin/bitcoin/impl/math/hash.ipp>
 
