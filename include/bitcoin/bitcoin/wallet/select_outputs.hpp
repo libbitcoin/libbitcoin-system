@@ -28,7 +28,7 @@
 namespace libbitcoin {
 namespace wallet {
 
-class BC_API select_outputs
+struct BC_API select_outputs
 {
     enum class algorithm
     {
