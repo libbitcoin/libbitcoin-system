@@ -104,6 +104,14 @@ private:
     short_hash hash_;
 };
 
+/// The pre-encoded structure of a payment address or other similar data.
+struct BC_API wrapped_data
+{
+    uint8_t version;
+    data_chunk payload;
+    uint32_t checksum;
+};
+
 } // namspace wallet
 } // namspace libbitcoin
 

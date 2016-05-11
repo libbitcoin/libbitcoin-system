@@ -37,6 +37,7 @@ class BC_API point
 {
 public:
     typedef std::vector<point> list;
+    typedef std::vector<uint32_t> indexes;
 
     static point factory_from_data(const data_chunk& data);
     static point factory_from_data(std::istream& stream);

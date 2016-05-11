@@ -64,6 +64,9 @@ public:
     uint32_t timestamp;
     uint32_t bits;
     uint32_t nonce;
+
+    // The longest size (64) of a protocol variable int is deserialized here.
+    // WHen writing a block the size of the transaction collection is used.
     uint64_t transaction_count;
 };
 

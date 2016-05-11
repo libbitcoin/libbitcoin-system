@@ -305,12 +305,12 @@ include_bitcoin_bitcoin_chaindir = ${includedir}/bitcoin/bitcoin/chain
 include_bitcoin_bitcoin_chain_HEADERS = \
     include/bitcoin/bitcoin/chain/block.hpp \
     include/bitcoin/bitcoin/chain/header.hpp \
-    include/bitcoin/bitcoin/chain/history_row.hpp \
+    include/bitcoin/bitcoin/chain/history.hpp \
     include/bitcoin/bitcoin/chain/input.hpp \
     include/bitcoin/bitcoin/chain/output.hpp \
     include/bitcoin/bitcoin/chain/point.hpp \
     include/bitcoin/bitcoin/chain/spend.hpp \
-    include/bitcoin/bitcoin/chain/stealth_row.hpp \
+    include/bitcoin/bitcoin/chain/stealth.hpp \
     include/bitcoin/bitcoin/chain/transaction.hpp
 
 include_bitcoin_bitcoin_chain_scriptdir = ${includedir}/bitcoin/bitcoin/chain/script

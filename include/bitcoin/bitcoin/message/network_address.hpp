@@ -62,6 +62,7 @@ public:
     void reset();
     uint64_t serialized_size(bool with_timestamp /*= false*/) const;
 
+    // Starting version 31402, addresses are prefixed with a timestamp.
     uint32_t timestamp;
     uint64_t services;
     ip_address ip;

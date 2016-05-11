@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CHAIN_HISTORY_ROW_HPP
-#define LIBBITCOIN_CHAIN_HISTORY_ROW_HPP
+#ifndef LIBBITCOIN_CHAIN_HISTORY_HPP
+#define LIBBITCOIN_CHAIN_HISTORY_HPP
 
 #include <cstdint>
 #include <vector>
@@ -35,20 +35,18 @@ enum class point_kind : uint32_t
     spend = 1
 };
 
-struct BC_API history_row
+/// This structure is used in the client-server protocol in v1/v2/v3.
+struct BC_API history_compact
 {
-    /// Is this an output or spend.
+    typedef std::vector<history_compact> list;
+
     point_kind kind;
-
-    /// Input or output point.
     chain::point point;
-
-    /// Block height of the transaction.
     uint64_t height;
 
     union
     {
-        /// If output, then satoshis value of output.
+        /// If output, then satoshi value of output.
         uint64_t value;
 
         /// If spend, then checksum hash of previous output point
@@ -58,7 +56,23 @@ struct BC_API history_row
     };
 };
 
-typedef std::vector<history_row> history;
+/// This structure is used between client and API callers in v3.
+/// This structure is used in the client-server protocol in v1/v2.
+struct BC_API history
+{
+    typedef std::vector<history> list;
+
+    /// The output is always populated.
+    output_point output;
+    uint64_t output_height;
+
+    /// The satoshi value of the output.
+    uint64_t value;
+
+    /// If there is no spend the spend is null_hash.
+    input_point spend;
+    uint64_t spend_height;
+};
 
 } // namespace chain
 } // namespace libbitcoin

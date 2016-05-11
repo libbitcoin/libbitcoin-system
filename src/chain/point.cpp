@@ -130,7 +130,7 @@ std::string point::to_string() const
 
 bool point::is_null() const
 {
-    return (index == max_input_sequence) && (hash == null_hash);
+    return (index == max_uint32) && (hash == null_hash);
 }
 
 // Fast modulus calculation where divisor is a power of 2.
