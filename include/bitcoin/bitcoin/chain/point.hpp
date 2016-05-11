@@ -44,7 +44,12 @@ public:
     static point factory_from_data(reader& source);
     static uint64_t satoshi_fixed_size();
 
+    /// Preserved for compatability with server v2.
     uint64_t checksum() const;
+
+    /// Greater entropy than checksum.
+    uint64_t checksum2() const;
+
     bool is_null() const;
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
