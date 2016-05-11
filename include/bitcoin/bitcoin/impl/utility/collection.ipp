@@ -76,9 +76,8 @@ template <typename Type, typename Predicate>
 typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,
     Type& element, Predicate predicate)
 {
-    return list.insert(
-        std::upper_bound(list.begin(), list.end(), element, predicate),
-        element);
+    return list.insert(std::upper_bound(list.begin(), list.end(), element,
+        predicate), element);
 }
 
 template <typename Type>
@@ -87,6 +86,14 @@ void move_append(std::vector<Type>& target, std::vector<Type>& source)
     target.reserve(target.size() + source.size());
     std::move(source.begin(), source.end(), std::back_inserter(target));
     source.clear();
+}
+
+template <typename Collection>
+Collection reverse(const Collection& list)
+{
+    Collection out;
+    std::reverse_copy(list.begin(), list.end(), out.begin());
+    return out;
 }
 
 } // namespace libbitcoin
