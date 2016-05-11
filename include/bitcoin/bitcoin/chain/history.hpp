@@ -40,8 +40,13 @@ struct BC_API history_compact
 {
     typedef std::vector<history_compact> list;
 
+    // The type of point (output or spend).
     point_kind kind;
+
+    /// The point that identifies the record.
     chain::point point;
+
+    /// The height of the point.
     uint64_t height;
 
     union
@@ -62,16 +67,24 @@ struct BC_API history
 {
     typedef std::vector<history> list;
 
-    /// The output is always populated.
+    /// If there is no output this is null_hash:max.
     output_point output;
     uint64_t output_height;
 
     /// The satoshi value of the output.
     uint64_t value;
 
-    /// If there is no spend the spend is null_hash.
+    /// If there is no spend this is null_hash:max.
     input_point spend;
-    uint64_t spend_height;
+
+    union
+    {
+        /// The height of the spend or max if no spend.
+        uint64_t spend_height;
+
+        /// During expansion this value temporarily doubles as a checksum.
+        uint64_t temporary_checksum;
+    };
 };
 
 } // namespace chain
