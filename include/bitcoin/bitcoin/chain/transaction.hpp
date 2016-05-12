@@ -41,6 +41,7 @@ public:
     typedef std::vector<transaction> list;
     typedef std::shared_ptr<transaction> ptr;
     typedef std::vector<ptr> ptr_list;
+    typedef std::vector<size_t> indexes;
 
     static transaction factory_from_data(const data_chunk& data);
     static transaction factory_from_data(std::istream& stream);

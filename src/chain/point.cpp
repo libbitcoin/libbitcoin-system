@@ -130,26 +130,12 @@ std::string point::to_string() const
 
 bool point::is_null() const
 {
-    return (index == max_input_sequence) && (hash == null_hash);
+    return (index == max_uint32) && (hash == null_hash);
 }
 
-// Fast modulus calculation where divisor is a power of 2.
-static uint64_t remainder(const hash_digest& value, const uint64_t divisor)
-{
-    BITCOIN_ASSERT(divisor % 2 == 0);
-
-    // Only use the first 8 bytes of hash value for this calculation.
-    const auto hash_value = from_little_endian_unsafe<uint64_t>(value.begin());
-
-    // x mod 2**n == x & (2**n - 1)
-    return hash_value & (divisor - 1);
-}
-
-// This is only used with output_point currently, see blockchain and database.
+// This only provides 32 bits of entropy, so checksum2 is preferred.
 uint64_t point::checksum() const
 {
-    // Assuming outpoint hash is sufficiently random, this method works well
-    // for generating row checksums. Max pow2 value for a uint64_t is 1 << 63.
     static constexpr uint64_t divisor = uint64_t{ 1 } << 63;
     static_assert(divisor == 9223372036854775808ull, "Wrong divisor value.");
 
@@ -157,9 +143,21 @@ uint64_t point::checksum() const
     auto copy = hash;
     auto serial = make_serializer(copy.begin());
     serial.write_4_bytes_little_endian(index);
+    const auto hash_value = from_little_endian_unsafe<uint64_t>(copy.begin());
 
-    // Collapse it into uint64_t.
-    return remainder(copy, divisor);
+    // x mod 2**n == x & (2**n - 1)
+    return hash_value & (divisor - 1);
+}
+
+// This is only used with output_point identification within a set of history
+// rows of the same address. Collision may result in miscorrelation of points.
+uint64_t point::checksum2() const
+{
+    // Get the first 64 bits of the transaction hash.
+    auto value = from_little_endian_unsafe<uint64_t>(hash.begin());
+    
+    // In order to avoid collision on the same transaction add the index.
+    return value + index;
 }
 
 bool operator==(const point& left, const point& right)

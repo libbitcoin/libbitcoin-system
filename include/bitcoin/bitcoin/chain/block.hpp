@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_CHAIN_BLOCK_HPP
 #define LIBBITCOIN_CHAIN_BLOCK_HPP
 
+#include <cstdint>
 #include <istream>
 #include <memory>
 #include <string>
@@ -40,6 +41,7 @@ public:
     typedef std::vector<block> list;
     typedef std::shared_ptr<block> ptr;
     typedef std::vector<ptr> ptr_list;
+    typedef std::vector<size_t> indexes;
 
     static block factory_from_data(const data_chunk& data);
     static block factory_from_data(std::istream& stream);

@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CHAIN_HISTORY_ROW_HPP
-#define LIBBITCOIN_CHAIN_HISTORY_ROW_HPP
+#ifndef LIBBITCOIN_CHAIN_HISTORY_HPP
+#define LIBBITCOIN_CHAIN_HISTORY_HPP
 
 #include <cstdint>
 #include <vector>
@@ -35,20 +35,24 @@ enum class point_kind : uint32_t
     spend = 1
 };
 
-struct BC_API history_row
+/// This structure models the client-server protocol in v1/v2/v3.
+/// The height value here is 64 bit, but 32 bits on the wire.
+struct BC_API history_compact
 {
-    /// Is this an output or spend.
+    typedef std::vector<history_compact> list;
+
+    // The type of point (output or spend).
     point_kind kind;
 
-    /// Input or output point.
+    /// The point that identifies the record.
     chain::point point;
 
-    /// Block height of the transaction.
+    /// The height of the point.
     uint64_t height;
 
     union
     {
-        /// If output, then satoshis value of output.
+        /// If output, then satoshi value of output.
         uint64_t value;
 
         /// If spend, then checksum hash of previous output point
@@ -58,7 +62,32 @@ struct BC_API history_row
     };
 };
 
-typedef std::vector<history_row> history;
+/// This structure is used between client and API callers in v3.
+/// This structure models the client-server protocol in v1/v2.
+/// The height values here are 64 bit, but 32 bits on the wire.
+struct BC_API history
+{
+    typedef std::vector<history> list;
+
+    /// If there is no output this is null_hash:max.
+    output_point output;
+    uint64_t output_height;
+
+    /// The satoshi value of the output.
+    uint64_t value;
+
+    /// If there is no spend this is null_hash:max.
+    input_point spend;
+
+    union
+    {
+        /// The height of the spend or max if no spend.
+        uint64_t spend_height;
+
+        /// During expansion this value temporarily doubles as a checksum.
+        uint64_t temporary_checksum;
+    };
+};
 
 } // namespace chain
 } // namespace libbitcoin
