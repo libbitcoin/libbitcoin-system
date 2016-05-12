@@ -35,7 +35,8 @@ enum class point_kind : uint32_t
     spend = 1
 };
 
-/// This structure is used in the client-server protocol in v1/v2/v3.
+/// This structure models the client-server protocol in v1/v2/v3.
+/// The height value here is 64 bit, but 32 bits on the wire.
 struct BC_API history_compact
 {
     typedef std::vector<history_compact> list;
@@ -62,7 +63,8 @@ struct BC_API history_compact
 };
 
 /// This structure is used between client and API callers in v3.
-/// This structure is used in the client-server protocol in v1/v2.
+/// This structure models the client-server protocol in v1/v2.
+/// The height values here are 64 bit, but 32 bits on the wire.
 struct BC_API history
 {
     typedef std::vector<history> list;
