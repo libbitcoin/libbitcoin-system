@@ -21,15 +21,18 @@
 #define LIBBITCOIN_ASSERT_HPP
 
 #ifdef NDEBUG
-    #define BITCOIN_ASSERT(expr)
-    #define BITCOIN_ASSERT_MSG(expr, msg)
+    #define BITCOIN_ASSERT(expression)
+    #define BITCOIN_ASSERT_MSG(expression, text)
     #define DEBUG_ONLY(expression)
 #else
     #include <cassert>
-    #define BITCOIN_ASSERT(expr) assert(expr)
-    #define BITCOIN_ASSERT_MSG(expr, msg) assert((expr)&&(msg))
+    #define BITCOIN_ASSERT(expression) assert(expression)
+    #define BITCOIN_ASSERT_MSG(expression, text) assert((expression)&&(text))
     #define DEBUG_ONLY(expression) expression
 #endif
+
+// This is used to prevent bogus compiler warnings about unused variables.
+#define UNUSED(expression) (void)(expression)
 
 #include <bitcoin/bitcoin/utility/monitor.hpp>
 #include <bitcoin/bitcoin/utility/track.hpp>
