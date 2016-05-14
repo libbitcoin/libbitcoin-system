@@ -1,0 +1,31 @@
+version: 3.0.0.{build}-{branch}
+
+os:
+  - Visual Studio 2013
+  
+platform:
+  - x64
+  - Win32
+
+configuration:
+  - StaticDebug
+  - StaticRelease
+  
+matrix:
+  fast_finish: true
+  
+skip_tags: true
+clone_folder: c:\projects\bc
+
+before_build:
+  - cd c:\projects\bc\builds\msvc\vs2013
+  - nuget restore
+  
+build:
+  parallel: true
+  project: c:\projects\bc\builds\msvc\vs2013\libbitcoin.sln
+  
+test_script:
+  - c:\projects\bc\bin\x64\Release\v120\static\libbitcoin-test.exe
+  
+
