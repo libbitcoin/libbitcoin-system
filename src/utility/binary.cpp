@@ -11,7 +11,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
@@ -31,6 +31,15 @@ namespace libbitcoin {
 binary::size_type binary::blocks_size(const size_type bitsize)
 {
     return bitsize == 0 ? 0 : (bitsize - 1) / bits_per_block + 1;
+}
+
+bool binary::is_base2(const std::string& text)
+{
+    for (const auto& character: text)
+        if (character != '0' && character != '1')
+            return false;
+
+    return true;
 }
 
 binary::binary()

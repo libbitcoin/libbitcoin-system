@@ -85,6 +85,7 @@
     <ClCompile Include="..\..\..\..\test\chain\script.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp" />
     <ClCompile Include="..\..\..\..\test\config\authority.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\base58.cpp" />
     <ClCompile Include="..\..\..\..\test\config\btc256.cpp" />
     <ClCompile Include="..\..\..\..\test\config\checkpoint.cpp" />
     <ClCompile Include="..\..\..\..\test\config\endpoint.cpp" />

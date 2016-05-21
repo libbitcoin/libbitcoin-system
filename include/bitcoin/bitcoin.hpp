@@ -35,6 +35,12 @@
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
 #include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
+#include <bitcoin/bitcoin/config/base16.hpp>
+#include <bitcoin/bitcoin/config/base2.hpp>
+#include <bitcoin/bitcoin/config/base58.hpp>
+#include <bitcoin/bitcoin/config/base64.hpp>
+#include <bitcoin/bitcoin/config/base85.hpp>
+#include <bitcoin/bitcoin/config/btc160.hpp>
 #include <bitcoin/bitcoin/config/btc256.hpp>
 #include <bitcoin/bitcoin/config/checkpoint.hpp>
 #include <bitcoin/bitcoin/config/directory.hpp>

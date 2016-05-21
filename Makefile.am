@@ -52,6 +52,12 @@ src_libbitcoin_la_SOURCES = \
     src/chain/script/operation.cpp \
     src/chain/script/script.cpp \
     src/config/authority.cpp \
+    src/config/base16.cpp \
+    src/config/base2.cpp \
+    src/config/base58.cpp \
+    src/config/base64.cpp \
+    src/config/base85.cpp \
+    src/config/btc160.cpp \
     src/config/btc256.cpp \
     src/config/checkpoint.cpp \
     src/config/directory.cpp \
@@ -210,6 +216,7 @@ test_libbitcoin_test_SOURCES = \
     test/chain/script.hpp \
     test/chain/transaction.cpp \
     test/config/authority.cpp \
+    test/config/base58.cpp \
     test/config/btc256.cpp \
     test/config/checkpoint.cpp \
     test/config/endpoint.cpp \
@@ -322,6 +329,12 @@ include_bitcoin_bitcoin_chain_script_HEADERS = \
 include_bitcoin_bitcoin_configdir = ${includedir}/bitcoin/bitcoin/config
 include_bitcoin_bitcoin_config_HEADERS = \
     include/bitcoin/bitcoin/config/authority.hpp \
+    include/bitcoin/bitcoin/config/base16.hpp \
+    include/bitcoin/bitcoin/config/base2.hpp \
+    include/bitcoin/bitcoin/config/base58.hpp \
+    include/bitcoin/bitcoin/config/base64.hpp \
+    include/bitcoin/bitcoin/config/base85.hpp \
+    include/bitcoin/bitcoin/config/btc160.hpp \
     include/bitcoin/bitcoin/config/btc256.hpp \
     include/bitcoin/bitcoin/config/checkpoint.hpp \
     include/bitcoin/bitcoin/config/directory.hpp \
