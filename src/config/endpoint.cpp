@@ -28,7 +28,7 @@
 #include <boost/regex.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/formats/base16.hpp>
+#include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
 
 namespace libbitcoin {

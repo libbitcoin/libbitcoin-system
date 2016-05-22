@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <string>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin/formats/base58.hpp>
+#include <bitcoin/bitcoin/formats/base_58.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/wallet/ec_private.hpp>

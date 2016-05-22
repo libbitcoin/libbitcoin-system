@@ -161,21 +161,6 @@
     <ClCompile Include="..\..\..\..\test\config\btc256.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\formats\base58.cpp">
-      <Filter>src\formats</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\formats\base64.cpp">
-      <Filter>src\formats</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\formats\base85.cpp">
-      <Filter>src\formats</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\formats\base10.cpp">
-      <Filter>src\formats</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\formats\base16.cpp">
-      <Filter>src\formats</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\hash.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
@@ -275,6 +260,21 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\base58.cpp">
       <Filter>src\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\formats\base_10.cpp">
+      <Filter>src\formats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\formats\base_16.cpp">
+      <Filter>src\formats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\formats\base_58.cpp">
+      <Filter>src\formats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\formats\base_64.cpp">
+      <Filter>src\formats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\formats\base_85.cpp">
+      <Filter>src\formats</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

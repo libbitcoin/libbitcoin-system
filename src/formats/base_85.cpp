@@ -47,7 +47,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //  --------------------------------------------------------------------------
 
-#include <bitcoin/bitcoin/formats/base85.hpp>
+#include <bitcoin/bitcoin/formats/base_85.hpp>
 
 #include <cstddef>
 #include <cstdint>

@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_BASE64_HPP
-#define LIBBITCOIN_BASE64_HPP
+#ifndef LIBBITCOIN_BASE_58_HPP
+#define LIBBITCOIN_BASE_58_HPP
 
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
@@ -26,19 +26,40 @@
 
 namespace libbitcoin {
 
-/**
- * Encode data as base64.
- * @return the base64 encoded string.
- */
-BC_API std::string encode_base64(data_slice unencoded);
+BC_API bool is_base58(const char ch);
+BC_API bool is_base58(const std::string& text);
 
 /**
- * Attempt to decode base64 data.
- * @return false if the input contains non-base64 characters.
+ * Converts a base58 string to a number of bytes.
+ * @return false if the input is malformed, or the wrong length.
  */
-BC_API bool decode_base64(data_chunk& out, const std::string& in);
+template <size_t Size>
+bool decode_base58(byte_array<Size>& out, const std::string &in);
+
+/**
+ * Converts a base58 string literal to a data array.
+ * This would be better as a C++11 user-defined literal,
+ * but MSVC doesn't support those.
+ * TODO: determine if the sizing function is always accurate.
+ */
+template <size_t Size>
+byte_array<Size * 733 / 1000> base58_literal(const char(&string)[Size]);
+
+/**
+ * Encode data as base58.
+ * @return the base58 encoded string.
+ */
+BC_API std::string encode_base58(data_slice unencoded);
+
+/**
+ * Attempt to decode base58 data.
+ * @return false if the input contains non-base58 characters.
+ */
+BC_API bool decode_base58(data_chunk& out, const std::string& in);
 
 } // namespace libbitcoin
+
+#include <bitcoin/bitcoin/impl/formats/base_58.ipp>
 
 #endif
 

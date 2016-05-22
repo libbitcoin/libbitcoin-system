@@ -91,11 +91,11 @@
     <ClCompile Include="..\..\..\..\test\config\endpoint.cpp" />
     <ClCompile Include="..\..\..\..\test\config\parameter.cpp" />
     <ClCompile Include="..\..\..\..\test\config\printer.cpp" />
-    <ClCompile Include="..\..\..\..\test\formats\base10.cpp" />
-    <ClCompile Include="..\..\..\..\test\formats\base16.cpp" />
-    <ClCompile Include="..\..\..\..\test\formats\base58.cpp" />
-    <ClCompile Include="..\..\..\..\test\formats\base64.cpp" />
-    <ClCompile Include="..\..\..\..\test\formats\base85.cpp" />
+    <ClCompile Include="..\..\..\..\test\formats\base_10.cpp" />
+    <ClCompile Include="..\..\..\..\test\formats\base_16.cpp" />
+    <ClCompile Include="..\..\..\..\test\formats\base_58.cpp" />
+    <ClCompile Include="..\..\..\..\test\formats\base_64.cpp" />
+    <ClCompile Include="..\..\..\..\test\formats\base_85.cpp" />
     <ClCompile Include="..\..\..\..\test\main.cpp" />
     <ClCompile Include="..\..\..\..\test\math\big_number.cpp" />
     <ClCompile Include="..\..\..\..\test\math\checksum.cpp" />

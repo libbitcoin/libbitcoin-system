@@ -22,7 +22,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/formats/base16.hpp>
+#include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {

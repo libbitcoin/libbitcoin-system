@@ -22,7 +22,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin/formats/base58.hpp>
+#include <bitcoin/bitcoin/formats/base_58.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>

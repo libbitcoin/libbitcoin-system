@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_BASE16_HPP
-#define LIBBITCOIN_BASE16_HPP
+#ifndef LIBBITCOIN_BASE_16_HPP
+#define LIBBITCOIN_BASE_16_HPP
 
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
@@ -80,6 +80,6 @@ BC_API hash_digest hash_literal(const char (&string)[2*hash_size + 1]);
 
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/formats/base16.ipp>
+#include <bitcoin/bitcoin/impl/formats/base_16.ipp>
 
 #endif

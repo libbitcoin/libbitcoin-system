@@ -22,7 +22,7 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(base10_tests)
+BOOST_AUTO_TEST_SUITE(base_10_tests)
 
 #define TEST_AMOUNT(NAME, EXPECTED, ...) \
 BOOST_AUTO_TEST_CASE(parse_amount_##NAME##_test) \

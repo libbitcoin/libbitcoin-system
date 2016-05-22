@@ -22,7 +22,7 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(base58_tests)
+BOOST_AUTO_TEST_SUITE(base_58_tests)
 
 void encdec_test(const std::string& hex, const std::string& encoded)
 {

@@ -24,7 +24,7 @@
 #include <string>
 #include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/formats/base85.hpp>
+#include <bitcoin/bitcoin/formats/base_85.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {

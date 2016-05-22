@@ -23,7 +23,7 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(base85_tests)
+BOOST_AUTO_TEST_SUITE(base_85_tests)
 
 #define BASE85_ENCODED "HelloWorld"
 #define BASE85_DECODED \

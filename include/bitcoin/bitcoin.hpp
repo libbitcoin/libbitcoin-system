@@ -48,11 +48,11 @@
 #include <bitcoin/bitcoin/config/parameter.hpp>
 #include <bitcoin/bitcoin/config/parser.hpp>
 #include <bitcoin/bitcoin/config/printer.hpp>
-#include <bitcoin/bitcoin/formats/base10.hpp>
-#include <bitcoin/bitcoin/formats/base16.hpp>
-#include <bitcoin/bitcoin/formats/base58.hpp>
-#include <bitcoin/bitcoin/formats/base64.hpp>
-#include <bitcoin/bitcoin/formats/base85.hpp>
+#include <bitcoin/bitcoin/formats/base_10.hpp>
+#include <bitcoin/bitcoin/formats/base_16.hpp>
+#include <bitcoin/bitcoin/formats/base_58.hpp>
+#include <bitcoin/bitcoin/formats/base_64.hpp>
+#include <bitcoin/bitcoin/formats/base_85.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/crypto.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>

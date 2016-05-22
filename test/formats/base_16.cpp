@@ -22,7 +22,7 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(base16_tests)
+BOOST_AUTO_TEST_SUITE(base_16_tests)
 
 BOOST_AUTO_TEST_CASE(base16_literal_test)
 {

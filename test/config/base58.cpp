@@ -32,17 +32,11 @@ using namespace bc::config;
     0xa7, 0x97, 0x0c, 0xa3, 0x74, 0x51, 0x3d, 0xd0,  0x06 \
 }}
 
-BOOST_AUTO_TEST_SUITE(primitives)
-BOOST_AUTO_TEST_SUITE(primitives__base58)
+BOOST_AUTO_TEST_SUITE(base58_tests)
 
 BOOST_AUTO_TEST_CASE(base58__constructor__default__does_not_throw)
 {
     BOOST_REQUIRE_NO_THROW(base58());
-}
-
-BOOST_AUTO_TEST_CASE(base58__constructor__bogus_string__throws_invalid_option)
-{
-    //BX_REQUIRE_THROW_INVALID_OPTION_VALUE(base58("bo-gus"));
 }
 
 BOOST_AUTO_TEST_CASE(base58__constructor__valid_string_cast__decodes)
@@ -52,10 +46,14 @@ BOOST_AUTO_TEST_CASE(base58__constructor__valid_string_cast__decodes)
     BOOST_REQUIRE(original == instance);
 }
 
-BOOST_AUTO_TEST_CASE(base58__constructor__copy_address_primitives__round_trips)
-{
-    //BX_SERIALIZE_COPY_ROUND_TRIP(base58, BASE58_ENCODED_A);
-}
+////BOOST_AUTO_TEST_CASE(base58__constructor__bogus_string__throws_invalid_option)
+////{
+////    //BX_REQUIRE_THROW_INVALID_OPTION_VALUE(base58("bo-gus"));
+////}
 
-BOOST_AUTO_TEST_SUITE_END()
+////BOOST_AUTO_TEST_CASE(base58__constructor__copy_address_primitives__round_trips)
+////{
+////    //BX_SERIALIZE_COPY_ROUND_TRIP(base58, BASE58_ENCODED_A);
+////}
+
 BOOST_AUTO_TEST_SUITE_END()
