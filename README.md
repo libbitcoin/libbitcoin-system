@@ -24,6 +24,8 @@ $ make
 $ sudo make install
 $ sudo ldconfig
 ```
+A minimal libbitcoin build requires boost and libsecp256k1. The [libbitcoin/secp256k1](https://github.com/libbitcoin/secp256k1) repository is forked from [bitcoin-core/secp256k1](https://github.com/bitcoin-core/secp256k1) in order to control for changes and to incorporate the necessary Visual Studio build. The original repository can be used directly but recent changes to the public interface may cause build breaks. The `--enable-module-recovery` switch is required.
+
 Detailed instructions are provided below.
 
   * [Debian/Ubuntu](#debianubuntu)
@@ -188,7 +190,7 @@ $ ./install.sh --with-icu --with-png --with-qrencode --build-icu --build-zlib --
 
 ### Windows
 
-Visual Studio solutions are maintained for all libbitcoin libraries and dependencies.
+Visual Studio solutions are maintained for all libbitcoin libraries. NuGet packages exist for dependencies with the exceptions of the optional ZLib, PNG, and QREncode (required for QR code functionality). ICU is integrated into Windows and therefore not required as an additional dependency when using ICU features.
 
 > The libbitcoin execution environment supports `Windows XP Service Pack 2` and newer.
 
@@ -230,7 +232,7 @@ After cloning the the repository the libbitcoin build can be performed manually 
 
 #### Optional: Building secp256k1
 
-The secp256k1 package above is maintained using the same [Visual Studio template](https://github.com/evoskuil/visual-studio-template) as all libbitcoin libraries. If so desired it can be built locally, in the same manner as libbitcoin. The repository of secp256k1 used by libbitcoin is forked from [bitcoin/secp256k1](https://github.com/bitcoin/secp256k1) in order to control for changes and to incorporate the necessary Visual Studio build and cross-compile compatibility fixes:
+The secp256k1 package above is maintained using the same [Visual Studio template](https://github.com/evoskuil/visual-studio-template) as all libbitcoin libraries. If so desired it can be built locally, in the same manner as libbitcoin.
 
 * [libbitcoin/secp256k1/version4](https://github.com/libbitcoin/secp256k1/tree/version4)
 
