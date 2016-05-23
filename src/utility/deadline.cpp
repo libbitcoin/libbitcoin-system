@@ -11,7 +11,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
@@ -29,7 +29,7 @@ namespace libbitcoin {
 
 using std::placeholders::_1;
 
-// This protects timer_ against concurrent acccess with no chance of deadlock.
+// This protects timer_ against concurrent access with no chance of deadlock.
 // This can be dereferenced with an outstanding callback because the timer
 // closure captures an instance of this class and the callback.
 // This is guaranteed to call handler exactly once unless canceled or reset.

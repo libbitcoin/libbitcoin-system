@@ -3,8 +3,8 @@
  *
  * This file is part of libbitcoin.
  *
- * libbitcoin is free software: you can redistribute it and/or
- * modify it under the terms of the GNU Affero General Public License with
+ * libbitcoin is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License with
  * additional permissions to the one published by the Free Software
  * Foundation, either version 3 of the License, or (at your option)
  * any later version. For more information see LICENSE.
@@ -24,13 +24,14 @@
 #include <string>
 #include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/formats/base16.hpp>
+#include <bitcoin/bitcoin/formats/base_16.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {
 namespace config {
 
 btc256::btc256()
-  : value_(bc::null_hash)
+  : value_(null_hash)
 {
 }
 

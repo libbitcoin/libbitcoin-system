@@ -93,9 +93,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\formats\base16.ipp">
-      <Filter>include\bitcoin\impl\formats</Filter>
-    </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\array_slice.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
     </None>
@@ -123,9 +120,6 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\ostream_writer.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\formats\base58.ipp">
-      <Filter>include\bitcoin\impl\formats</Filter>
-    </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\math\checksum.ipp">
       <Filter>include\bitcoin\impl\math</Filter>
     </None>
@@ -144,6 +138,12 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\track.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\formats\base_16.ipp">
+      <Filter>include\bitcoin\impl\formats</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\formats\base_58.ipp">
+      <Filter>include\bitcoin\impl\formats</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\constants.cpp">
@@ -151,18 +151,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\error.cpp">
       <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\formats\base10.cpp">
-      <Filter>src\formats</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\formats\base16.cpp">
-      <Filter>src\formats</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\formats\base58.cpp">
-      <Filter>src\formats</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\formats\base64.cpp">
-      <Filter>src\formats</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\checksum.cpp">
       <Filter>src\math</Filter>
@@ -223,9 +211,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\printer.cpp">
       <Filter>src\config</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\formats\base85.cpp">
-      <Filter>src\formats</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\external\pkcs5_pbkdf2.c">
       <Filter>src\math\external</Filter>
@@ -497,6 +482,39 @@
     <ClCompile Include="..\..\..\..\src\utility\scope_lock.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\base85.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\base2.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\base16.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\base58.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\base64.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\btc160.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\formats\base_10.cpp">
+      <Filter>src\formats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\formats\base_16.cpp">
+      <Filter>src\formats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\formats\base_58.cpp">
+      <Filter>src\formats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\formats\base_64.cpp">
+      <Filter>src\formats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\formats\base_85.cpp">
+      <Filter>src\formats</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -519,18 +537,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\error.hpp">
       <Filter>include\bitcoin</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base10.hpp">
-      <Filter>include\bitcoin\formats</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base16.hpp">
-      <Filter>include\bitcoin\formats</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base58.hpp">
-      <Filter>include\bitcoin\formats</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base64.hpp">
-      <Filter>include\bitcoin\formats</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\checksum.hpp">
       <Filter>include\bitcoin\math</Filter>
@@ -594,9 +600,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\version.hpp">
       <Filter>include\bitcoin</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base85.hpp">
-      <Filter>include\bitcoin\formats</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\dictionary.hpp">
       <Filter>include\bitcoin\wallet</Filter>
@@ -960,6 +963,39 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\stealth.hpp">
       <Filter>include\bitcoin\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base58.hpp">
+      <Filter>include\bitcoin\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base64.hpp">
+      <Filter>include\bitcoin\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\btc160.hpp">
+      <Filter>include\bitcoin\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base2.hpp">
+      <Filter>include\bitcoin\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base16.hpp">
+      <Filter>include\bitcoin\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base85.hpp">
+      <Filter>include\bitcoin\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base_10.hpp">
+      <Filter>include\bitcoin\formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base_16.hpp">
+      <Filter>include\bitcoin\formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base_64.hpp">
+      <Filter>include\bitcoin\formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base_58.hpp">
+      <Filter>include\bitcoin\formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base_85.hpp">
+      <Filter>include\bitcoin\formats</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

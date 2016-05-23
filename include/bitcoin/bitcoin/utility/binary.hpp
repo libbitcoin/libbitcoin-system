@@ -11,7 +11,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
@@ -35,6 +35,7 @@ public:
 
     static BC_CONSTEXPR size_type bits_per_block = byte_bits;
     static size_type blocks_size(const size_type bitsize);
+    static bool is_base2(const std::string& text);
 
     binary();
     binary(const binary& other);

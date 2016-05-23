@@ -1,0 +1,90 @@
+/**
+ * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+ *
+ * This file is part of libbitcoin.
+ *
+ * libbitcoin is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License with
+ * additional permissions to the one published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option)
+ * any later version. For more information see LICENSE.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+#include <bitcoin/bitcoin/config/base85.hpp>
+
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <boost/program_options.hpp>
+#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/formats/base_85.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
+
+namespace libbitcoin {
+namespace config {
+
+base85::base85()
+{
+}
+
+base85::base85(const std::string& base85)
+{
+    std::stringstream(base85) >> *this;
+}
+
+base85::base85(const hash_digest& value)
+  : value_(value)
+{
+}
+
+base85::base85(const base85& other)
+  : base85(other.value_)
+{
+}
+
+base85::operator const hash_digest&() const
+{
+    return value_;
+}
+
+base85::operator data_slice() const
+{
+    return value_;
+}
+
+std::istream& operator>>(std::istream& input, base85& argument)
+{
+    std::string base85;
+    input >> base85;
+
+    data_chunk out_value;
+    if (!decode_base85(out_value, base85) || out_value.size() != hash_size)
+    {
+        using namespace boost::program_options;
+        BOOST_THROW_EXCEPTION(invalid_option_value(base85));
+    }
+
+    std::copy(out_value.begin(), out_value.end(), argument.value_.begin());
+    return input;
+}
+
+std::ostream& operator<<(std::ostream& output, const base85& argument)
+{
+    std::string decoded;
+
+    // Z85 requires four byte alignment (hash_digest is 32).
+    /* bool */ encode_base85(decoded, argument.value_);
+
+    output << decoded;
+    return output;
+}
+
+} // namespace config
+} // namespace libbitcoin
