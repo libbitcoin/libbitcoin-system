@@ -29,7 +29,7 @@ namespace libbitcoin {
 
 using std::placeholders::_1;
 
-// This protects timer_ against concurrent acccess with no chance of deadlock.
+// This protects timer_ against concurrent access with no chance of deadlock.
 // This can be dereferenced with an outstanding callback because the timer
 // closure captures an instance of this class and the callback.
 // This is guaranteed to call handler exactly once unless canceled or reset.
