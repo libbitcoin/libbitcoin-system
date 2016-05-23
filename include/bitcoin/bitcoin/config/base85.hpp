@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
@@ -35,6 +36,12 @@ namespace config {
 class BC_API base85
 {
 public:
+    /**
+     * A list of base85 values.
+     * This must provide operator<< for ostream in order to be used as a 
+     * boost::program_options default_value.
+     */
+    typedef std::vector<base85> list;
 
     /**
      * Default constructor.
