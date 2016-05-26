@@ -260,9 +260,6 @@
     <ClCompile Include="..\..\..\..\src\config\authority.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\config\btc256.cpp">
-      <Filter>src\config</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\checkpoint.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
@@ -482,9 +479,6 @@
     <ClCompile Include="..\..\..\..\src\utility\scope_lock.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\config\base85.cpp">
-      <Filter>src\config</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\base2.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
@@ -495,9 +489,6 @@
       <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\base64.cpp">
-      <Filter>src\config</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\config\btc160.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\formats\base_10.cpp">
@@ -514,6 +505,15 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\formats\base_85.cpp">
       <Filter>src\formats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\hash256.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\hash160.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\sodium.cpp">
+      <Filter>src\config</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -671,9 +671,6 @@
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\authority.hpp">
-      <Filter>include\bitcoin\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\btc256.hpp">
       <Filter>include\bitcoin\config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\checkpoint.hpp">
@@ -970,16 +967,10 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base64.hpp">
       <Filter>include\bitcoin\config</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\btc160.hpp">
-      <Filter>include\bitcoin\config</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base2.hpp">
       <Filter>include\bitcoin\config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base16.hpp">
-      <Filter>include\bitcoin\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base85.hpp">
       <Filter>include\bitcoin\config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base_10.hpp">
@@ -996,6 +987,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base_85.hpp">
       <Filter>include\bitcoin\formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\hash160.hpp">
+      <Filter>include\bitcoin\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\hash256.hpp">
+      <Filter>include\bitcoin\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\sodium.hpp">
+      <Filter>include\bitcoin\config</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

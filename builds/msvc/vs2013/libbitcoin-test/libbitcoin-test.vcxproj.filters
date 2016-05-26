@@ -158,9 +158,6 @@
     <ClCompile Include="..\..\..\..\test\config\authority.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\config\btc256.cpp">
-      <Filter>src\config</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\hash.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
@@ -275,6 +272,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\formats\base_85.cpp">
       <Filter>src\formats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\config\hash256.cpp">
+      <Filter>src\config</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

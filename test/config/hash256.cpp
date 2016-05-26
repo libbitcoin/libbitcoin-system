@@ -24,13 +24,13 @@
 using namespace bc;
 using namespace bc::config;
 
-BOOST_AUTO_TEST_SUITE(btc256_tests)
+BOOST_AUTO_TEST_SUITE(hash256_tests)
 
-BOOST_AUTO_TEST_SUITE(btc256__construct)
+BOOST_AUTO_TEST_SUITE(hash256__construct)
 
-BOOST_AUTO_TEST_CASE(btc256__construct__default__null_hash)
+BOOST_AUTO_TEST_CASE(hash256__construct__default__null_hash)
 {
-    const btc256 uninitialized_hash;
+    const hash256 uninitialized_hash;
     const auto expectation = encode_hash(bc::null_hash);
     const auto result = encode_hash(uninitialized_hash);
     BOOST_REQUIRE_EQUAL(expectation, result);

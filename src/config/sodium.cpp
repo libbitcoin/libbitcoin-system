@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/config/base85.hpp>
+#include <bitcoin/bitcoin/config/sodium.hpp>
 
 #include <iostream>
 #include <sstream>
@@ -30,36 +30,36 @@
 namespace libbitcoin {
 namespace config {
 
-base85::base85()
+sodium::sodium()
 {
 }
 
-base85::base85(const std::string& base85)
+sodium::sodium(const std::string& base85)
 {
     std::stringstream(base85) >> *this;
 }
 
-base85::base85(const hash_digest& value)
+sodium::sodium(const hash_digest& value)
   : value_(value)
 {
 }
 
-base85::base85(const base85& other)
-  : base85(other.value_)
+sodium::sodium(const sodium& other)
+  : sodium(other.value_)
 {
 }
 
-base85::operator const hash_digest&() const
-{
-    return value_;
-}
-
-base85::operator data_slice() const
+sodium::operator const hash_digest&() const
 {
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, base85& argument)
+sodium::operator data_slice() const
+{
+    return value_;
+}
+
+std::istream& operator>>(std::istream& input, sodium& argument)
 {
     std::string base85;
     input >> base85;
@@ -75,7 +75,7 @@ std::istream& operator>>(std::istream& input, base85& argument)
     return input;
 }
 
-std::ostream& operator<<(std::ostream& output, const base85& argument)
+std::ostream& operator<<(std::ostream& output, const sodium& argument)
 {
     std::string decoded;
 

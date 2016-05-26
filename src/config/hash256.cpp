@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/config/btc160.hpp>
+#include <bitcoin/bitcoin/config/hash256.hpp>
 
 #include <iostream>
 #include <sstream>
@@ -30,37 +30,45 @@
 namespace libbitcoin {
 namespace config {
 
-btc160::btc160()
-  : value_(null_short_hash)
+hash256::hash256()
+  : value_(null_hash)
 {
 }
 
-btc160::btc160(const std::string& hexcode)
+hash256::hash256(const std::string& hexcode)
+  : hash256()
 {
     std::stringstream(hexcode) >> *this;
 }
 
-btc160::btc160(const short_hash& value)
+hash256::hash256(const hash_digest& value)
   : value_(value)
 {
 }
 
-btc160::btc160(const btc160& other)
-  : btc160(other.value_)
+hash256::hash256(const hash256& other)
+  : hash256(other.value_)
 {
 }
 
-btc160::operator const short_hash&() const
+std::string hash256::to_string() const
+{
+    std::stringstream value;
+    value << *this;
+    return value.str();
+}
+
+hash256::operator const hash_digest&() const
 {
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, btc160& argument)
+std::istream& operator>>(std::istream& input, hash256& argument)
 {
     std::string hexcode;
     input >> hexcode;
 
-    if (!decode_base16(argument.value_, hexcode))
+    if (!decode_hash(argument.value_, hexcode))
     {
         using namespace boost::program_options;
         BOOST_THROW_EXCEPTION(invalid_option_value(hexcode));
@@ -69,9 +77,9 @@ std::istream& operator>>(std::istream& input, btc160& argument)
     return input;
 }
 
-std::ostream& operator<<(std::ostream& output, const btc160& argument)
+std::ostream& operator<<(std::ostream& output, const hash256& argument)
 {
-    output << encode_base16(argument.value_);
+    output << encode_hash(argument.value_);
     return output;
 }
 

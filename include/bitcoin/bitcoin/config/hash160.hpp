@@ -17,66 +17,52 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CONFIG_BASE85_HPP
-#define LIBBITCOIN_CONFIG_BASE85_HPP
+#ifndef LIBBITCOIN_CONFIG_HASH160_HPP
+#define LIBBITCOIN_CONFIG_HASH160_HPP
 
 #include <iostream>
 #include <string>
-#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {
 namespace config {
 
 /**
- * Serialization helper for base58 encoded data.
+ * Serialization helper for a bitcoin 160 bit hash.
  */
-class BC_API base85
+class BC_API hash160
 {
 public:
-    /**
-     * A list of base85 values.
-     * This must provide operator<< for ostream in order to be used as a 
-     * boost::program_options default_value.
-     */
-    typedef std::vector<base85> list;
 
     /**
      * Default constructor.
      */
-    base85();
+    hash160();
 
     /**
      * Initialization constructor.
-     * @param[in]  base85  The value to initialize with.
+     * @param[in]  hexcode  The value to initialize with.
      */
-    base85(const std::string& base85);
+    hash160(const std::string& hexcode);
 
     /**
      * Initialization constructor.
      * @param[in]  value  The value to initialize with.
      */
-    base85(const hash_digest& value);
+    hash160(const short_hash& value);
 
     /**
      * Copy constructor.
      * @param[in]  other  The object to copy into self on construct.
      */
-    base85(const base85& other);
+    hash160(const hash160& other);
 
     /**
      * Overload cast to internal type.
      * @return  This object's value cast to internal type.
      */
-    operator const hash_digest&() const;
-
-    /**
-     * Overload cast to generic data reference.
-     * @return  This object's value cast to generic data.
-     */
-    operator data_slice() const;
+    operator const short_hash&() const;
 
     /**
      * Overload stream in. Throws if input is invalid.
@@ -85,7 +71,7 @@ public:
      * @return                The input stream reference.
      */
     friend std::istream& operator>>(std::istream& input,
-        base85& argument);
+        hash160& argument);
 
     /**
      * Overload stream out.
@@ -94,14 +80,14 @@ public:
      * @return                The output stream reference.
      */
     friend std::ostream& operator<<(std::ostream& output,
-        const base85& argument);
+        const hash160& argument);
 
 private:
 
     /**
      * The state of this object.
      */
-    hash_digest value_;
+    short_hash value_;
 };
 
 } // namespace config
