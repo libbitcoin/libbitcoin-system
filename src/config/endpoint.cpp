@@ -113,7 +113,7 @@ std::istream& operator>>(std::istream& input, endpoint& argument)
     input >> value;
 
     // std::regex requires gcc 4.9, so we are using boost::regex for now.
-    static const regex regular("^((tcp|udp|http|https):\\/\\/)?"
+    static const regex regular("^((tcp|udp|http|https|inproc):\\/\\/)?"
         "(\\[([0-9a-f:\\.]+)]|([^:]+))(:([0-9]{1,5}))?$");
 
     sregex_iterator it(value.begin(), value.end(), regular), end;
