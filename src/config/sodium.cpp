@@ -17,69 +17,85 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/config/btc256.hpp>
+#include <bitcoin/bitcoin/config/sodium.hpp>
 
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/formats/base_16.hpp>
+#include <bitcoin/bitcoin/formats/base_85.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {
 namespace config {
 
-btc256::btc256()
+sodium::sodium()
   : value_(null_hash)
 {
 }
 
-btc256::btc256(const std::string& hexcode)
-  : btc256()
+sodium::sodium(const std::string& base85)
 {
-    std::stringstream(hexcode) >> *this;
+    std::stringstream(base85) >> *this;
 }
 
-btc256::btc256(const hash_digest& value)
+sodium::sodium(const hash_digest& value)
   : value_(value)
 {
 }
 
-btc256::btc256(const btc256& other)
-  : btc256(other.value_)
+sodium::sodium(const sodium& other)
+  : sodium(other.value_)
 {
 }
 
-std::string btc256::to_string() const
+sodium::operator const hash_digest&() const
+{
+    return value_;
+}
+
+sodium::operator data_slice() const
+{
+    return value_;
+}
+
+sodium::operator const bool() const
+{
+    return value_ != null_hash;
+}
+
+std::string sodium::to_string() const
 {
     std::stringstream value;
     value << *this;
     return value.str();
 }
 
-btc256::operator const hash_digest&() const
+std::istream& operator>>(std::istream& input, sodium& argument)
 {
-    return value_;
-}
+    std::string base85;
+    input >> base85;
 
-std::istream& operator>>(std::istream& input, btc256& argument)
-{
-    std::string hexcode;
-    input >> hexcode;
-
-    if (!decode_hash(argument.value_, hexcode))
+    data_chunk out_value;
+    if (!decode_base85(out_value, base85) || out_value.size() != hash_size)
     {
         using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(invalid_option_value(hexcode));
+        BOOST_THROW_EXCEPTION(invalid_option_value(base85));
     }
 
+    std::copy(out_value.begin(), out_value.end(), argument.value_.begin());
     return input;
 }
 
-std::ostream& operator<<(std::ostream& output, const btc256& argument)
+std::ostream& operator<<(std::ostream& output, const sodium& argument)
 {
-    output << encode_hash(argument.value_);
+    std::string decoded;
+
+    // Z85 requires four byte alignment (hash_digest is 32).
+    /* bool */ encode_base85(decoded, argument.value_);
+
+    output << decoded;
     return output;
 }
 

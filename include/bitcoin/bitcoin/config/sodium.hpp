@@ -17,52 +17,78 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CONFIG_BTC160_HPP
-#define LIBBITCOIN_CONFIG_BTC160_HPP
+#ifndef LIBBITCOIN_CONFIG_SODIUM_HPP
+#define LIBBITCOIN_CONFIG_SODIUM_HPP
 
 #include <iostream>
 #include <string>
+#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {
 namespace config {
 
 /**
- * Serialization helper for a bitcoin 160 bit hash.
+ * Serialization helper for base58 sodium keys.
  */
-class BC_API btc160
+class BC_API sodium
 {
 public:
+    /**
+     * A list of base85 values.
+     * This must provide operator<< for ostream in order to be used as a 
+     * boost::program_options default_value.
+     */
+    typedef std::vector<sodium> list;
 
     /**
      * Default constructor.
      */
-    btc160();
+    sodium();
 
     /**
      * Initialization constructor.
-     * @param[in]  hexcode  The value to initialize with.
+     * @param[in]  base85  The value to initialize with.
      */
-    btc160(const std::string& hexcode);
+    sodium(const std::string& base85);
 
     /**
      * Initialization constructor.
      * @param[in]  value  The value to initialize with.
      */
-    btc160(const short_hash& value);
+    sodium(const hash_digest& value);
 
     /**
      * Copy constructor.
      * @param[in]  other  The object to copy into self on construct.
      */
-    btc160(const btc160& other);
+    sodium(const sodium& other);
+
+    /**
+     * Getter.
+     * @return True if the key is initialized.
+     */
+    operator const bool() const;
 
     /**
      * Overload cast to internal type.
      * @return  This object's value cast to internal type.
      */
-    operator const short_hash&() const;
+    operator const hash_digest&() const;
+
+    /**
+     * Overload cast to generic data reference.
+     * @return  This object's value cast to generic data.
+     */
+    operator data_slice() const;
+
+    /**
+     * Get the key as a base85 encoded (z85) string.
+     * @return The encoded key.
+     */
+    std::string to_string() const;
 
     /**
      * Overload stream in. Throws if input is invalid.
@@ -71,7 +97,7 @@ public:
      * @return                The input stream reference.
      */
     friend std::istream& operator>>(std::istream& input,
-        btc160& argument);
+        sodium& argument);
 
     /**
      * Overload stream out.
@@ -80,14 +106,14 @@ public:
      * @return                The output stream reference.
      */
     friend std::ostream& operator<<(std::ostream& output,
-        const btc160& argument);
+        const sodium& argument);
 
 private:
 
     /**
      * The state of this object.
      */
-    short_hash value_;
+    hash_digest value_;
 };
 
 } // namespace config

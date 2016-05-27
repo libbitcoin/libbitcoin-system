@@ -56,15 +56,15 @@ src_libbitcoin_la_SOURCES = \
     src/config/base2.cpp \
     src/config/base58.cpp \
     src/config/base64.cpp \
-    src/config/base85.cpp \
-    src/config/btc160.cpp \
-    src/config/btc256.cpp \
     src/config/checkpoint.cpp \
     src/config/directory.cpp \
     src/config/endpoint.cpp \
+    src/config/hash160.cpp \
+    src/config/hash256.cpp \
     src/config/parameter.cpp \
     src/config/parser.cpp \
     src/config/printer.cpp \
+    src/config/sodium.cpp \
     src/formats/base_10.cpp \
     src/formats/base_16.cpp \
     src/formats/base_58.cpp \
@@ -217,9 +217,9 @@ test_libbitcoin_test_SOURCES = \
     test/chain/transaction.cpp \
     test/config/authority.cpp \
     test/config/base58.cpp \
-    test/config/btc256.cpp \
     test/config/checkpoint.cpp \
     test/config/endpoint.cpp \
+    test/config/hash256.cpp \
     test/config/parameter.cpp \
     test/config/printer.cpp \
     test/formats/base_10.cpp \
@@ -333,15 +333,15 @@ include_bitcoin_bitcoin_config_HEADERS = \
     include/bitcoin/bitcoin/config/base2.hpp \
     include/bitcoin/bitcoin/config/base58.hpp \
     include/bitcoin/bitcoin/config/base64.hpp \
-    include/bitcoin/bitcoin/config/base85.hpp \
-    include/bitcoin/bitcoin/config/btc160.hpp \
-    include/bitcoin/bitcoin/config/btc256.hpp \
     include/bitcoin/bitcoin/config/checkpoint.hpp \
     include/bitcoin/bitcoin/config/directory.hpp \
     include/bitcoin/bitcoin/config/endpoint.hpp \
+    include/bitcoin/bitcoin/config/hash160.hpp \
+    include/bitcoin/bitcoin/config/hash256.hpp \
     include/bitcoin/bitcoin/config/parameter.hpp \
     include/bitcoin/bitcoin/config/parser.hpp \
-    include/bitcoin/bitcoin/config/printer.hpp
+    include/bitcoin/bitcoin/config/printer.hpp \
+    include/bitcoin/bitcoin/config/sodium.hpp
 
 include_bitcoin_bitcoin_formatsdir = ${includedir}/bitcoin/bitcoin/formats
 include_bitcoin_bitcoin_formats_HEADERS = \

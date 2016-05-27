@@ -17,72 +17,61 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/config/base85.hpp>
+#include <bitcoin/bitcoin/config/hash160.hpp>
 
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/formats/base_85.hpp>
+#include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {
 namespace config {
 
-base85::base85()
+hash160::hash160()
+  : value_(null_short_hash)
 {
 }
 
-base85::base85(const std::string& base85)
+hash160::hash160(const std::string& hexcode)
 {
-    std::stringstream(base85) >> *this;
+    std::stringstream(hexcode) >> *this;
 }
 
-base85::base85(const hash_digest& value)
+hash160::hash160(const short_hash& value)
   : value_(value)
 {
 }
 
-base85::base85(const base85& other)
-  : base85(other.value_)
+hash160::hash160(const hash160& other)
+  : hash160(other.value_)
 {
 }
 
-base85::operator const hash_digest&() const
+hash160::operator const short_hash&() const
 {
     return value_;
 }
 
-base85::operator data_slice() const
+std::istream& operator>>(std::istream& input, hash160& argument)
 {
-    return value_;
-}
+    std::string hexcode;
+    input >> hexcode;
 
-std::istream& operator>>(std::istream& input, base85& argument)
-{
-    std::string base85;
-    input >> base85;
-
-    data_chunk out_value;
-    if (!decode_base85(out_value, base85) || out_value.size() != hash_size)
+    if (!decode_base16(argument.value_, hexcode))
     {
         using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(invalid_option_value(base85));
+        BOOST_THROW_EXCEPTION(invalid_option_value(hexcode));
     }
 
-    std::copy(out_value.begin(), out_value.end(), argument.value_.begin());
     return input;
 }
 
-std::ostream& operator<<(std::ostream& output, const base85& argument)
+std::ostream& operator<<(std::ostream& output, const hash160& argument)
 {
-    std::string decoded;
-
-    // Z85 requires four byte alignment (hash_digest is 32).
-    /* bool */ encode_base85(decoded, argument.value_);
-
-    output << decoded;
+    output << encode_base16(argument.value_);
     return output;
 }
 
