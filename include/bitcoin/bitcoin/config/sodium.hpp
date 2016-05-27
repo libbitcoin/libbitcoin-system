@@ -67,6 +67,12 @@ public:
     sodium(const sodium& other);
 
     /**
+     * Getter.
+     * @return True if the key is initialized.
+     */
+    operator const bool() const;
+
+    /**
      * Overload cast to internal type.
      * @return  This object's value cast to internal type.
      */
@@ -77,6 +83,12 @@ public:
      * @return  This object's value cast to generic data.
      */
     operator data_slice() const;
+
+    /**
+     * Get the key as a base85 encoded (z85) string.
+     * @return The encoded key.
+     */
+    std::string to_string() const;
 
     /**
      * Overload stream in. Throws if input is invalid.

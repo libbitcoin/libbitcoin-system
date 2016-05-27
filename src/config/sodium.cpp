@@ -31,6 +31,7 @@ namespace libbitcoin {
 namespace config {
 
 sodium::sodium()
+  : value_(null_hash)
 {
 }
 
@@ -57,6 +58,18 @@ sodium::operator const hash_digest&() const
 sodium::operator data_slice() const
 {
     return value_;
+}
+
+sodium::operator const bool() const
+{
+    return value_ != null_hash;
+}
+
+std::string sodium::to_string() const
+{
+    std::stringstream value;
+    value << *this;
+    return value.str();
 }
 
 std::istream& operator>>(std::istream& input, sodium& argument)
