@@ -92,4 +92,3 @@ const asio::service& threadpool::service() const
 }
 
 } // namespace libbitcoin
-
