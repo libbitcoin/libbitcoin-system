@@ -26,22 +26,6 @@ namespace libbitcoin {
 
 namespace bc = libbitcoin;
 
-// Logger definitions. You can add your own to the logger.
-// Better to use a define because you get type safety.
-#define LOG_TRACK       "track"
-#define LOG_NETWORK     "network"
-#define LOG_DATABASE    "database"
-#define LOG_BLOCKCHAIN  "blockchain"
-#define LOG_VALIDATE    "validate"
-#define LOG_PROTOCOL    "protocol"
-#define LOG_POLLER      "poller"
-#define LOG_SESSION     "session"
-#define LOG_RESPONDER   "responder"
-#define LOG_INVENTORY   "inventory"
-#define LOG_SCRIPT      "script"
-#define LOG_TXPOOL      "transaction_pool"
-#define LOG_TXIDX       "transaction_indexer"
-
 // See http://gcc.gnu.org/wiki/Visibility
 
 // Generic helper definitions for shared library support
@@ -88,6 +72,9 @@ namespace bc = libbitcoin;
         #define BC_DEPRECATED
     #endif
 #endif
+
+// Log name.
+#define LOG_SYSTEM "system"
 
 // Avoid namespace conflict between boost::placeholders and std::placeholders. 
 #define BOOST_BIND_NO_PLACEHOLDERS
