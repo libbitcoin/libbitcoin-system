@@ -99,7 +99,7 @@ private:
     void spawn_once(thread_priority priority=thread_priority::normal);
 
     asio::service service_;
-    std::vector<std::thread> threads_;
+    std::vector<asio::thread> threads_;
     std::shared_ptr<asio::service::work> work_;
 };
 

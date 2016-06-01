@@ -37,7 +37,7 @@ track<Shared>::track(const std::string& DEBUG_ONLY(class_name))
 #endif
 {
 #ifndef NDEBUG
-    bc::log::debug(LOG_TRACK)
+    bc::log::debug(LOG_SYSTEM)
         << class_ << "(" << ++instances << ")";
 #endif
 }
@@ -46,7 +46,7 @@ template <class Shared>
 track<Shared>::~track()
 {
 #ifndef NDEBUG
-    bc::log::debug(LOG_TRACK)
+    bc::log::debug(LOG_SYSTEM)
         << "~" << class_ << "(" << --instances << ")";
 #endif
 }

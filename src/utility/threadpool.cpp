@@ -57,7 +57,7 @@ void threadpool::spawn_once(thread_priority priority)
         service_.run();
     };
 
-    threads_.push_back(std::thread(action));
+    threads_.push_back(asio::thread(action));
 }
 
 void threadpool::abort()

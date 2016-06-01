@@ -23,9 +23,11 @@
 #include <memory>
 #include <boost/asio.hpp>
 #include <boost/date_time.hpp>
+#include <boost/thread.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
 
 // Convenience namespace for commonly used boost asio aliases.
+// boost::thread is only used because of thread_specific_ptr limitation.
 
 namespace libbitcoin {
 namespace asio {
@@ -47,6 +49,7 @@ typedef boost::posix_time::minutes minutes;
 typedef boost::posix_time::seconds seconds;
 typedef boost::posix_time::milliseconds milliseconds;
 typedef boost::posix_time::microseconds microseconds;
+typedef boost::thread thread;
 
 typedef tcp::socket socket;
 typedef tcp::acceptor acceptor;
