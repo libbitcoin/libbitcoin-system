@@ -33,24 +33,27 @@ namespace chain {
 
 const std::string chain::block::command = "block";
 
-block block::factory_from_data(const data_chunk& data)
+block block::factory_from_data(const data_chunk& data,
+    bool with_transaction_count)
 {
     block instance;
-    instance.from_data(data);
+    instance.from_data(data, with_transaction_count);
     return instance;
 }
 
-block block::factory_from_data(std::istream& stream)
+block block::factory_from_data(std::istream& stream,
+    bool with_transaction_count)
 {
     block instance;
-    instance.from_data(stream);
+    instance.from_data(stream, with_transaction_count);
     return instance;
 }
 
-block block::factory_from_data(reader& source)
+block block::factory_from_data(reader& source,
+    bool with_transaction_count)
 {
     block instance;
-    instance.from_data(source);
+    instance.from_data(source, with_transaction_count);
     return instance;
 }
 
@@ -65,30 +68,24 @@ void block::reset()
     transactions.clear();
 }
 
-bool block::from_data(const data_chunk& data)
+bool block::from_data(const data_chunk& data, bool with_transaction_count)
 {
     data_source istream(data);
-    return from_data(istream);
+    return from_data(istream, with_transaction_count);
 }
 
-bool block::from_data(std::istream& stream)
+bool block::from_data(std::istream& stream, bool with_transaction_count)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(source, with_transaction_count);
 }
 
-bool block::from_data(reader& source)
+bool block::from_data(reader& source, bool with_transaction_count)
 {
     reset();
-    auto result = header.from_data(source, false);
+    auto result = header.from_data(source, with_transaction_count);
 
-    if (result)
-    {
-        header.transaction_count = source.read_variable_uint_little_endian();
-        result = source;
-    }
-
-    for (uint64_t i = 0; (i < header.transaction_count) && result; ++i)
+    for (uint64_t i = 0; i < header.transaction_count && result; ++i)
     {
         transactions.emplace_back();
         result = transactions.back().from_data(source);
@@ -100,34 +97,33 @@ bool block::from_data(reader& source)
     return result;
 }
 
-data_chunk block::to_data() const
+data_chunk block::to_data(bool with_transaction_count) const
 {
     data_chunk data;
     data_sink ostream(data);
-    to_data(ostream);
+    to_data(ostream, with_transaction_count);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == serialized_size(with_transaction_count));
     return data;
 }
 
-void block::to_data(std::ostream& stream) const
+void block::to_data(std::ostream& stream, bool with_transaction_count) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(sink, with_transaction_count);
 }
 
-void block::to_data(writer& sink) const
+void block::to_data(writer& sink, bool with_transaction_count) const
 {
-    header.to_data(sink, false);
-    sink.write_variable_uint_little_endian(transactions.size());
+    header.to_data(sink, with_transaction_count);
+
     for (const auto& tx: transactions)
         tx.to_data(sink);
 }
 
-uint64_t block::serialized_size() const
+uint64_t block::serialized_size(bool with_transaction_count) const
 {
-    uint64_t block_size = header.serialized_size(false) + 
-        variable_uint_size(transactions.size());
+    auto block_size = header.serialized_size(with_transaction_count);
 
     for (const auto& tx: transactions)
         block_size += tx.serialized_size();

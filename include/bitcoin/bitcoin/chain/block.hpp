@@ -43,23 +43,26 @@ public:
     typedef std::vector<ptr> ptr_list;
     typedef std::vector<size_t> indexes;
 
-    static block factory_from_data(const data_chunk& data);
-    static block factory_from_data(std::istream& stream);
-    static block factory_from_data(reader& source);
+    static block factory_from_data(const data_chunk& data,
+        bool with_transaction_count = true);
+    static block factory_from_data(std::istream& stream,
+        bool with_transaction_count = true);
+    static block factory_from_data(reader& source,
+        bool with_transaction_count = true);
     static hash_digest generate_merkle_root(
         const transaction::list& transactions);
     static block genesis_mainnet();
     static block genesis_testnet();
 
-    bool from_data(const data_chunk& data);
-    bool from_data(std::istream& stream);
-    bool from_data(reader& source);
-    data_chunk to_data() const;
-    void to_data(std::ostream& stream) const;
-    void to_data(writer& sink) const;
+    bool from_data(const data_chunk& data, bool with_transaction_count = true);
+    bool from_data(std::istream& stream, bool with_transaction_count = true);
+    bool from_data(reader& source, bool with_transaction_count = true);
+    data_chunk to_data(bool with_transaction_count = true) const;
+    void to_data(std::ostream& stream, bool with_transaction_count = true) const;
+    void to_data(writer& sink, bool with_transaction_count = true) const;
     bool is_valid() const;
     void reset();
-    uint64_t serialized_size() const;
+    uint64_t serialized_size(bool with_transaction_count = true) const;
 
     static const std::string command;
 
