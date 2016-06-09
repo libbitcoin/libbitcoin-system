@@ -24,6 +24,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <initializer_list>
+#include <queue>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/array_slice.hpp>
@@ -45,6 +46,7 @@ struct byte_array_parts
 typedef byte_array<1> one_byte;
 typedef array_slice<uint8_t> data_slice;
 typedef std::vector<uint8_t> data_chunk;
+typedef std::queue<data_chunk> data_queue;
 typedef std::vector<data_chunk> data_stack;
 typedef std::initializer_list<data_slice> loaf;
 
