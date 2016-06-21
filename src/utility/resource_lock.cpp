@@ -63,6 +63,7 @@ bool resource_lock::lock()
         lock_ = nullptr;
         return false;
     }
+
     // Should not arrive here!
     BITCOIN_ASSERT_MSG(false, "Reached unreachable code path.");
     return false;
