@@ -93,6 +93,7 @@
 #include <bitcoin/bitcoin/unicode/unicode_istream.hpp>
 #include <bitcoin/bitcoin/unicode/unicode_ostream.hpp>
 #include <bitcoin/bitcoin/unicode/unicode_streambuf.hpp>
+#include <bitcoin/bitcoin/utility/pid_lock.hpp>
 #include <bitcoin/bitcoin/utility/array_slice.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>

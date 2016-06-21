@@ -136,6 +136,7 @@ src_libbitcoin_la_SOURCES = \
     src/unicode/unicode_istream.cpp \
     src/unicode/unicode_ostream.cpp \
     src/unicode/unicode_streambuf.cpp \
+    src/utility/pid_lock.cpp \
     src/utility/binary.cpp \
     src/utility/conditional_lock.cpp \
     src/utility/deadline.cpp \
@@ -270,6 +271,7 @@ test_libbitcoin_test_SOURCES = \
     test/utility/data.cpp \
     test/utility/endian.cpp \
     test/utility/resource_lock.cpp \
+    test/utility/pid_lock.cpp \
     test/utility/png.cpp \
     test/utility/random.cpp \
     test/utility/serializer.cpp \
@@ -428,6 +430,7 @@ include_bitcoin_bitcoin_unicode_HEADERS = \
 
 include_bitcoin_bitcoin_utilitydir = ${includedir}/bitcoin/bitcoin/utility
 include_bitcoin_bitcoin_utility_HEADERS = \
+    include/bitcoin/bitcoin/utility/pid_lock.hpp \
     include/bitcoin/bitcoin/utility/array_slice.hpp \
     include/bitcoin/bitcoin/utility/asio.hpp \
     include/bitcoin/bitcoin/utility/assert.hpp \
