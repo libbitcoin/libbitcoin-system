@@ -27,7 +27,7 @@
 
 namespace libbitcoin {
 
-void touch_file(const file_path& path)
+static void touch_file(const resource_lock::file_path& path)
 {
     bc::ofstream file(path.string(), std::ofstream::app);
     file.close();
@@ -71,9 +71,7 @@ bool resource_lock::unlock()
 {
     boost::system::error_code ec;
     boost::filesystem::remove(lock_path_, ec);
-    if (ec)
-        return false;
-    return true;
+    return !ec;
 }
 
 } // namespace libbitcoin

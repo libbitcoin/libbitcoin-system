@@ -17,15 +17,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_FILE_LOCK_HPP
-#define LIBBITCOIN_FILE_LOCK_HPP
+#ifndef LIBBITCOIN_RESOURCE_LOCK_HPP
+#define LIBBITCOIN_RESOURCE_LOCK_HPP
 
+#include <memory>
 #include <boost/filesystem.hpp>
 #include <boost/interprocess/sync/file_lock.hpp>
 
 namespace libbitcoin {
-
-typedef boost::filesystem::path file_path;
 
 /**
  * A resource lock device that ensures exclusive access to a resource.
@@ -36,6 +35,8 @@ typedef boost::filesystem::path file_path;
 class resource_lock
 {
 public:
+    typedef boost::filesystem::path file_path;
+
     // Take an explicit path.
     resource_lock(const file_path& lock_path);
 
