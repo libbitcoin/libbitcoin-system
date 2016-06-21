@@ -25,7 +25,7 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(resource_lock_tests)
 
-BOOST_AUTO_TEST_CASE(resource_lock__duplicate_locks)
+BOOST_AUTO_TEST_CASE(resource_lock__lock__duplicate_locks_fail)
 {
     resource_lock main("foo");
     BOOST_REQUIRE(main.lock());
