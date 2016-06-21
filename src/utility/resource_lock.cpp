@@ -40,12 +40,14 @@ resource_lock::resource_lock(const file_path& lock_path)
 
 bool resource_lock::lock()
 {
-    // If file exists then avoid touching it.
-    if (!boost::filesystem::exists(lock_path_))
+    // If file exists then lock is already acquired.
+    if (boost::filesystem::exists(lock_path_))
     {
-        // Touch the lock file to ensure its existence.
-        touch_file(lock_path_);
+        return false;
     }
+
+    // Touch the lock file to ensure its existence.
+    touch_file(lock_path_);
 
     // BOOST:
     // Opens a file lock. Throws interprocess_exception if the file does not

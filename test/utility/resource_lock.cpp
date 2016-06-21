@@ -33,11 +33,10 @@ BOOST_AUTO_TEST_CASE(resource_lock__duplicate_locks)
         []()
         {
             resource_lock duplicate("foo");
-            BOOST_REQUIRE(duplicate.lock());
-            BOOST_REQUIRE(duplicate.unlock());
+            BOOST_REQUIRE(!duplicate.lock());
         });
     thread.join();
-    main.unlock();
+    BOOST_REQUIRE(main.unlock());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
