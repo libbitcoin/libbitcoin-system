@@ -59,9 +59,7 @@ bool pid_lock::unlock()
 {
     boost::system::error_code ec;
     boost::filesystem::remove(path(), ec);
-    if (ec)
-        return false;
-    return true;
+    return !ec;
 }
 
 // Opens the pid lock file and fetches the process ID.
