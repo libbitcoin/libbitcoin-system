@@ -28,9 +28,9 @@
 
 namespace libbitcoin {
 
-const file_path PID_FOLDER = "/var/tmp/";
+const pid_lock::file_path PID_FOLDER = "/var/tmp/";
 
-file_path pid_path(const std::string& process_name)
+pid_lock::file_path pid_path(const std::string& process_name)
 {
     const std::string file_name = process_name + ".pid";
     return PID_FOLDER / file_name;
@@ -65,7 +65,7 @@ bool pid_lock::unlock()
 }
 
 // Opens the pid lock file and fetches the process ID.
-int fetch_pid(const file_path& path)
+static int fetch_pid(const pid_lock::file_path& path)
 {
     std::ifstream file(path.string());
     int pid;
@@ -74,7 +74,7 @@ int fetch_pid(const file_path& path)
     return pid;
 }
 // Checks whether the given process ID is running.
-bool check_pid_running(int pid)
+static bool check_pid_running(int pid)
 {
 #ifdef _WIN32
     // Unimplemented!
@@ -93,7 +93,7 @@ bool pid_lock::is_locked()
     return check_pid_running(pid);
 }
 
-file_path pid_lock::path()
+pid_lock::file_path pid_lock::path()
 {
     return pid_path(process_name_);
 }

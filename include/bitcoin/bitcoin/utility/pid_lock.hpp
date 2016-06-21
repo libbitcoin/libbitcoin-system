@@ -17,15 +17,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_APPLICATION_LOCK_HPP
-#define LIBBITCOIN_APPLICATION_LOCK_HPP
+#ifndef LIBBITCOIN_PID_LOCK_HPP
+#define LIBBITCOIN_PID_LOCK_HPP
 
 #include <string>
 #include <boost/filesystem.hpp>
 
 namespace libbitcoin {
-
-typedef boost::filesystem::path file_path;
 
 /**
  * An application level process id lock mechanism.
@@ -34,6 +32,8 @@ typedef boost::filesystem::path file_path;
 class pid_lock
 {
 public:
+    typedef boost::filesystem::path file_path;
+
     pid_lock(const std::string& process_name);
 
     bool lock();
