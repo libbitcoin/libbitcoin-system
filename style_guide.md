@@ -26,11 +26,9 @@ Spaces between all operators: `x = 5 * 8 + 4 * 2`.
 
 If the order is ambiguous or confusing then use parenthesis: `x = (5 * 8) + (4 * 2)`.
 
-Avoid per/postfix operators in compound expressions: `auto total = count++`.
+Avoid pre/postfix operators in compound expressions: `auto total = count++`.
 
-Avoid the ternary operators: `auto letter = first ? alpha : omega`.
-
-Avoid raw pointers in C++, using smart pointers if necessary.
+Avoid raw pointers in C++, using smart pointers if pointers are necessary.
 
 Use standard integer types where possible:
 
@@ -107,6 +105,16 @@ Don't use global variables or `goto`, we are grown-ups now.
 Don't tolerate warnings and don't suppress them due to laziness.
 
 Use the following source file layouts.
+
+Precede comments with a blank line.
+
+Precede each new scope with a blank line.
+
+Use //// to temporarily disable code.
+
+Use /// for public API documentation (short form) or javadoc format.
+
+Use // for source code commentary.
 
 ### IPP Format
 
