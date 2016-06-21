@@ -104,17 +104,17 @@ Don't use global variables or `goto`, we are grown-ups now.
 
 Don't tolerate warnings and don't suppress them due to laziness.
 
-Use the following source file layouts.
-
-Precede comments with a blank line.
-
-Precede each new scope with a blank line.
-
 Use //// to temporarily disable code.
 
 Use /// for public API documentation (short form) or javadoc format.
 
 Use // for source code commentary.
+
+Follow the closing of a scope with a blank line before a subsequent statement.
+
+Precede comments with a blank line.
+
+Use the following source file layouts.
 
 ### IPP Format
 
