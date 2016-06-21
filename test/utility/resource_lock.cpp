@@ -17,37 +17,28 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/file_lock.hpp>
+#include <boost/test/unit_test.hpp>
 
-namespace libbitcoin {
+#include <bitcoin/bitcoin.hpp>
 
-const char* generate_pid_name()
+using namespace bc;
+
+BOOST_AUTO_TEST_SUITE(resource_lock_tests)
+
+BOOST_AUTO_TEST_CASE(resource_lock__duplicate_locks)
 {
+    resource_lock main("foo");
+    BOOST_REQUIRE(main.lock());
+    std::thread thread(
+        []()
+        {
+            resource_lock duplicate("foo");
+            BOOST_REQUIRE(duplicate.lock());
+            BOOST_REQUIRE(duplicate.unlock());
+        });
+    thread.join();
+    main.unlock();
 }
 
-file_lock::file_lock(const path& lock_file_path)
-  : lock_file_path_(lock_file_path)
-{
-}
-
-bool file_lock::lock()
-{
-    // Touch the lock file to ensure its existence.
-    bc::ofstream file(lock_file_path_, std::ios::app);
-    file.close();
-
-    // BOOST:
-    // Opens a file lock. Throws interprocess_exception if the file does not
-    // exist or there are no operating system resources. The file lock is
-    // destroyed on its destruct and does not throw.
-    lock_ = std::make_shared<boost_file_lock>(lock_file_path_.c_str());
-    return lock_.try_lock();
-}
-bool file_lock::unlock()
-{
-    // BUGBUG: Throws if the lock is not held (i.e. in error condition).
-    boost::filesystem::remove(lock_);
-}
-
-} // namespace libbitcoin
+BOOST_AUTO_TEST_SUITE_END()
 

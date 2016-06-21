@@ -20,20 +20,24 @@
 #ifndef LIBBITCOIN_FILE_LOCK_HPP
 #define LIBBITCOIN_FILE_LOCK_HPP
 
+#include <boost/filesystem.hpp>
 #include <boost/interprocess/sync/file_lock.hpp>
 
 namespace libbitcoin {
 
-using namespace boost::filesystem;
+typedef boost::filesystem::path file_path;
 
 /**
- * A file lock device that ensures exclusive access to a resource.
+ * A resource lock device that ensures exclusive access to a resource.
+ * It takes a path for creating a lock file object that can be used
+ * for telling the usage of some resource between processes.
+ * Example: opening/closing blockchain database.
  */
-class file_lock
+class resource_lock
 {
 public:
     // Take an explicit path.
-    file_lock(const path& lock_file_path);
+    resource_lock(const file_path& lock_path);
 
     bool lock();
     bool unlock();
@@ -42,7 +46,7 @@ private:
     typedef boost::interprocess::file_lock boost_file_lock;
     typedef std::shared_ptr<boost_file_lock> lock_ptr;
 
-    const path& lock_file_path_;
+    const file_path& lock_path_;
     lock_ptr lock_;
 };
 

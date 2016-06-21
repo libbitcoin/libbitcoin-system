@@ -140,7 +140,7 @@ src_libbitcoin_la_SOURCES = \
     src/utility/conditional_lock.cpp \
     src/utility/deadline.cpp \
     src/utility/dispatcher.cpp \
-    src/utility/file_lock.cpp \
+    src/utility/resource_lock.cpp \
     src/utility/istream_reader.cpp \
     src/utility/log.cpp \
     src/utility/monitor.cpp \
@@ -269,6 +269,7 @@ test_libbitcoin_test_SOURCES = \
     test/utility/collection.cpp \
     test/utility/data.cpp \
     test/utility/endian.cpp \
+    test/utility/resource_lock.cpp \
     test/utility/png.cpp \
     test/utility/random.cpp \
     test/utility/serializer.cpp \
@@ -446,7 +447,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/enable_shared_from_base.hpp \
     include/bitcoin/bitcoin/utility/endian.hpp \
     include/bitcoin/bitcoin/utility/exceptions.hpp \
-    include/bitcoin/bitcoin/utility/file_lock.hpp \
+    include/bitcoin/bitcoin/utility/resource_lock.hpp \
     include/bitcoin/bitcoin/utility/istream_reader.hpp \
     include/bitcoin/bitcoin/utility/log.hpp \
     include/bitcoin/bitcoin/utility/monitor.hpp \
