@@ -2,7 +2,7 @@
 
 Maximum of 80 characters per line [exceptions allowed for test vectors], 4 space indents, no tabs.
 
-Each continued line should be nested by 1 indent.
+Each continued line should be nested by 1 indent. Parameter stacking is discouraged.
 
 If you're nesting more than 3 levels deep then generally you are doing something wrong. Reorganize and/or break it into functions. Always prefer flat over nested, dumb over clever, slow+clear over fast+obtuse.
 
