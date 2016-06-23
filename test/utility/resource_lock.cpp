@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -17,32 +17,27 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_IFSTREAM_HPP
-#define LIBBITCOIN_IFSTREAM_HPP
+#include <boost/test/unit_test.hpp>
 
-#include <fstream>
-#include <string>
-#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin.hpp>
 
-namespace libbitcoin {
+using namespace bc;
 
-/**
- * Use bc::ifstream in place of std::ifstream.
- * This provides utf8 to utf16 path translation for Windows.
- */
-class BC_API ifstream
-  : public std::ifstream
+BOOST_AUTO_TEST_SUITE(resource_lock_tests)
+
+BOOST_AUTO_TEST_CASE(resource_lock__lock__duplicate_locks_fail)
 {
-public:
-    /**
-     * Construct bc::ifstream.
-     * @param[in]  path  The utf8 path to the file.
-     * @param[in]  mode  The file opening mode.
-     */
-    ifstream(const std::string& path, 
-        std::ifstream::openmode mode=std::ifstream::in);
-};
+    resource_lock main("foo");
+    BOOST_REQUIRE(main.lock());
+    std::thread thread(
+        []()
+        {
+            resource_lock duplicate("foo");
+            BOOST_REQUIRE(!duplicate.lock());
+        });
+    thread.join();
+    BOOST_REQUIRE(main.unlock());
+}
 
-} // namespace libbitcoin
+BOOST_AUTO_TEST_SUITE_END()
 
-#endif

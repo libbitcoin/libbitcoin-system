@@ -30,8 +30,8 @@ namespace libbitcoin {
  * Use bc::ofstream in place of std::ofstream.
  * This provides utf8 to utf16 path translation for Windows.
  */
-class BC_API ofstream :
-    public std::ofstream
+class BC_API ofstream
+  : public std::ofstream
 {
 public:
     /**
@@ -40,7 +40,7 @@ public:
      * @param[in]  mode  The file opening mode.
      */
     ofstream(const std::string& path,
-        std::ifstream::openmode mode=std::ifstream::out);
+        std::ofstream::openmode mode=std::ofstream::out);
 };
 
 } // namespace libbitcoin

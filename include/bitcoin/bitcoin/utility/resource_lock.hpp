@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -17,32 +17,41 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_IFSTREAM_HPP
-#define LIBBITCOIN_IFSTREAM_HPP
+#ifndef LIBBITCOIN_RESOURCE_LOCK_HPP
+#define LIBBITCOIN_RESOURCE_LOCK_HPP
 
-#include <fstream>
-#include <string>
-#include <bitcoin/bitcoin/define.hpp>
+#include <memory>
+#include <boost/filesystem.hpp>
+#include <boost/interprocess/sync/file_lock.hpp>
 
 namespace libbitcoin {
 
 /**
- * Use bc::ifstream in place of std::ifstream.
- * This provides utf8 to utf16 path translation for Windows.
+ * A resource lock device that ensures exclusive access to a resource.
+ * It takes a path for creating a lock file object that can be used
+ * for telling the usage of some resource between processes.
+ * Example: opening/closing blockchain database.
  */
-class BC_API ifstream
-  : public std::ifstream
+class resource_lock
 {
 public:
-    /**
-     * Construct bc::ifstream.
-     * @param[in]  path  The utf8 path to the file.
-     * @param[in]  mode  The file opening mode.
-     */
-    ifstream(const std::string& path, 
-        std::ifstream::openmode mode=std::ifstream::in);
+    typedef boost::filesystem::path file_path;
+
+    // Take an explicit path.
+    resource_lock(const file_path& lock_path);
+
+    bool lock();
+    bool unlock();
+
+private:
+    typedef boost::interprocess::file_lock boost_file_lock;
+    typedef std::shared_ptr<boost_file_lock> lock_ptr;
+
+    const file_path& lock_path_;
+    lock_ptr lock_;
 };
 
 } // namespace libbitcoin
 
 #endif
+
