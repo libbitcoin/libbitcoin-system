@@ -2,7 +2,7 @@
 
 Maximum of 80 characters per line [exceptions allowed for test vectors], 4 space indents, no tabs.
 
-Each continued line should be nested by 1 indent.
+Each continued line should be nested by 1 indent. Parameter stacking is discouraged.
 
 If you're nesting more than 3 levels deep then generally you are doing something wrong. Reorganize and/or break it into functions. Always prefer flat over nested, dumb over clever, slow+clear over fast+obtuse.
 
@@ -26,11 +26,9 @@ Spaces between all operators: `x = 5 * 8 + 4 * 2`.
 
 If the order is ambiguous or confusing then use parenthesis: `x = (5 * 8) + (4 * 2)`.
 
-Avoid per/postfix operators in compound expressions: `auto total = count++`.
+Avoid pre/postfix operators in compound expressions: `auto total = count++`.
 
-Avoid the ternary operators: `auto letter = first ? alpha : omega`.
-
-Avoid raw pointers in C++, using smart pointers if necessary.
+Avoid raw pointers in C++, using smart pointers if pointers are necessary.
 
 Use standard integer types where possible:
 
@@ -105,6 +103,16 @@ Test subtraction for underflow and addition for overflow, before performing the 
 Don't use global variables or `goto`, we are grown-ups now.
 
 Don't tolerate warnings and don't suppress them due to laziness.
+
+Use //// to temporarily disable code.
+
+Use /// for public API documentation (short form) or javadoc format.
+
+Use // for source code commentary.
+
+Follow the closing of a scope with a blank line before a subsequent statement.
+
+Precede comments with a blank line.
 
 Use the following source file layouts.
 
