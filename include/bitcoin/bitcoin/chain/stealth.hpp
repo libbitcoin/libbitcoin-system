@@ -29,12 +29,12 @@
 namespace libbitcoin {
 namespace chain {
 
-/// Differentiate subscription to address or stealth address.
+/// Differentiate subscription to payment address or stealth address.
 /// v2 (deprecated) requires an explicit subscription type.
 /// v3 eliminates the subscription type, which we map to 'unspecified'.
 enum class subscribe_type : uint8_t
 {
-    address = 0,
+    payment = 0,
     stealth = 1,
     unspecified = 2
 };
