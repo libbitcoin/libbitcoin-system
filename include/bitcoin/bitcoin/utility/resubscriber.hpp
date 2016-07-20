@@ -58,6 +58,7 @@ public:
     void relay(Args... args);
 
     /// Invoke all handlers in order on the current thread.
+    /// This method should not be called from multiple threads concurrently.
     void do_relay(Args... args);
 
 private:

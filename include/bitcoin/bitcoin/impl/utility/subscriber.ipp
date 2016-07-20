@@ -125,6 +125,7 @@ void subscriber<Args...>::do_relay(Args... args)
     ///////////////////////////////////////////////////////////////////////////
     mutex_.lock();
 
+    // TODO: consider hosting list on smart pointer and swapping.
     // Move subscribers from the member list to a temporary list.
     list subscriptions;
     move_append(subscriptions, subscriptions_);

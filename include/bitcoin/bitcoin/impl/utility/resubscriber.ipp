@@ -119,6 +119,8 @@ void resubscriber<Args...>::relay(Args... args)
         this->shared_from_this(), args...);
 }
 
+// This method should not be called from multiple threads concurrently.
+// It is however safe when called concurrently with other methods.
 template <typename... Args>
 void resubscriber<Args...>::do_relay(Args... args)
 {
@@ -126,6 +128,7 @@ void resubscriber<Args...>::do_relay(Args... args)
     ///////////////////////////////////////////////////////////////////////////
     mutex_.lock();
 
+    // TODO: consider hosting list on smart pointer and swapping.
     // Move subscribers from the member list to a temporary list.
     list subscriptions;
     move_append(subscriptions, subscriptions_);
