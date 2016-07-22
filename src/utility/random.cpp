@@ -19,16 +19,15 @@
  */
 #include <bitcoin/bitcoin/utility/random.hpp>
 
+#include <chrono>
 #include <cstdint>
 #include <stdexcept>
 #include <random>
-#include <boost/date_time.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
-
-using namespace boost::posix_time;
 
 // DO NOT USE srand() and rand() on MSVC as srand must be called per thread.
 // As a result it is difficult to use safely.
@@ -71,21 +70,32 @@ void pseudo_random_fill(data_chunk& chunk)
     }
 }
 
+// Randomly select a time duration in the range:
+// [(expiration - expiration / ratio) .. expiration]
 // Not fully testable due to lack of random engine injection.
-// Randomly select a time duration in the range [expiration/ratio, expiration].
-time_duration pseudo_randomize(const time_duration& expiration, uint8_t ratio)
+asio::duration pseudo_randomize(const asio::duration& expiration, uint8_t ratio)
 {
     if (ratio == 0)
         return expiration;
 
-    const auto max_expire = expiration.total_seconds();
-    if (max_expire == 0)
+    // Uses milliseconds level resolution.
+    const auto max_expire = std::chrono::duration_cast<asio::milliseconds>(
+        expiration).count();
+
+    // [10 secs, 4] => 10000 / 4 => 2500
+    const auto divisor = max_expire / ratio;
+
+    if (divisor == 0)
         return expiration;
 
-    const auto offset = std::max(max_expire / ratio, 1);
-    const auto random_offset = static_cast<int>(bc::pseudo_random() % offset);
-    const auto expire = max_expire - random_offset;
-    return seconds(expire);
+    // [0..2^64) % 2500 => [0..2500]
+    const auto random_offset = static_cast<int>(bc::pseudo_random() % divisor);
+
+    // (10000 - [0..2500]) => [7500..10000]
+    const auto expires = max_expire - random_offset;
+
+    // [7.5..10] second duration.
+    return asio::milliseconds(expires);
 }
 
 } // namespace libbitcoin

@@ -21,8 +21,8 @@
 #define LIBBITCOIN_RANDOM_HPP
 
 #include <cstdint>
-#include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
@@ -52,8 +52,8 @@ BC_API void pseudo_random_fill(data_chunk& chunk);
  *                      portion of the maximum duration.
  * @return              The randomized duration.
  */
-BC_API boost::posix_time::time_duration pseudo_randomize(
-    const boost::posix_time::time_duration& maximum, uint8_t ratio=2);
+BC_API asio::duration pseudo_randomize(const asio::duration& maximum,
+    uint8_t ratio=2);
 
 } // namespace libbitcoin
 
