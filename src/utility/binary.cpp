@@ -247,8 +247,11 @@ bool binary::operator<(const binary& other) const
 
 bool binary::operator==(const binary& other) const
 {
+    if (size() != other.size())
+        return false;
+
     const auto self = *this;
-    for (binary::size_type i = 0; i < size() && i < other.size(); ++i)
+    for (binary::size_type i = 0; i < size(); ++i)
         if (self[i] != other[i])
             return false;
 
