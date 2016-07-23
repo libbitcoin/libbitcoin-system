@@ -99,7 +99,7 @@ void notifier<Key, Args...>::subscribe(handler handler, const Key& key,
 
     if (!stopped_)
     {
-        auto it = subscriptions_.find(key);
+        const auto it = subscriptions_.find(key);
         const auto expires = asio::steady_clock::now() + duration;
 
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -120,6 +120,36 @@ void notifier<Key, Args...>::subscribe(handler handler, const Key& key,
     ///////////////////////////////////////////////////////////////////////////
 
     handler(stopped_args...);
+}
+
+template <typename Key, typename... Args>
+void notifier<Key, Args...>::unsubscribe(const Key& key,
+    Args... unsubscribed_args)
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    subscribe_mutex_.lock_upgrade();
+
+    if (!stopped_)
+    {
+        const auto it = subscriptions_.find(key);
+
+        if (it != subscriptions_.end())
+        {
+            const auto handler = it->second.notify;
+
+            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            subscribe_mutex_.unlock_upgrade_and_lock();
+            subscriptions_.erase(it);
+            subscribe_mutex_.unlock();
+            //-----------------------------------------------------------------
+            handler(unsubscribed_args...);
+            return;
+        }
+    }
+
+    subscribe_mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 template <typename Key, typename... Args>
