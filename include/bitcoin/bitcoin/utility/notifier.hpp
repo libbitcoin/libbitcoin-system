@@ -20,6 +20,7 @@
 #ifndef  LIBBITCOIN_NOTIFIER_HPP
 #define  LIBBITCOIN_NOTIFIER_HPP
 
+#include <cstddef>
 #include <functional>
 #include <memory>
 #include <string>
@@ -43,7 +44,9 @@ public:
     typedef std::function<bool (Args...)> handler;
     typedef std::shared_ptr<notifier<Key, Args...>> ptr;
 
-    /// Construct an instance. The class_name is for debugging.
+    /// Construct an instance.
+    /// A limit of zero is unlimited, the class_name is for debugging.
+    notifier(threadpool& pool, size_t limit, const std::string& class_name);
     notifier(threadpool& pool, const std::string& class_name);
     ~notifier();
 
@@ -79,7 +82,8 @@ private:
     typedef std::unordered_map<Key, value> map;
 
     void do_invoke(Args... args);
-    
+
+    const size_t limit_;
     bool stopped_;
     map subscriptions_;
     dispatcher dispatch_;
