@@ -35,8 +35,8 @@ namespace libbitcoin {
 
 template <typename... Args>
 class subscriber
-  : public enable_shared_from_base<subscriber<Args...>>/*,
-    track<subscriber<Args...>>*/
+  : public enable_shared_from_base<subscriber<Args...>>
+    /*, track<subscriber<Args...>>*/
 {
 public:
     typedef std::function<void (Args...)> handler;
@@ -45,27 +45,29 @@ public:
     subscriber(threadpool& pool, const std::string& class_name);
     ~subscriber();
 
-    /// Call start to enable new subscriptions.
+    /// Enable new subscriptions.
     void start();
 
-    /// Call stop to prevent new subscriptions.
+    /// Prevent new subscriptions.
     void stop();
 
-    /// Use the resubscriber template to resubscribe in the handler.
-    void subscribe(handler notifier, Args... stopped_args);
+    /// Subscribe to notifications (for one invocation only).
+    void subscribe(handler handler, Args... stopped_args);
 
-    /// Call to invoke all handlers, which clears them.
+    /// Invoke and clear all handlers sequentially (blocking).
+    void invoke(Args... args);
+
+    /// Invoke and clear all handlers sequentially (non-blocking).
     void relay(Args... args);
-
-    /// Invoke all handlers in order on the current thread.
-    void do_relay(Args... args);
 
 private:
     typedef std::vector<handler> list;
 
+    void do_invoke(Args... args);
+
     bool stopped_;
-    dispatcher dispatch_;
     list subscriptions_;
+    dispatcher dispatch_;
     mutable upgrade_mutex mutex_;
 };
 

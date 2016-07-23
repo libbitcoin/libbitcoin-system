@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2016 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,13 +17,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_RESUBSCRIBER_IPP
-#define LIBBITCOIN_RESUBSCRIBER_IPP
+#ifndef LIBBITCOIN_NOTIFIER_IPP
+#define LIBBITCOIN_NOTIFIER_IPP
 
 #include <functional>
 #include <memory>
 #include <string>
 #include <utility>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
@@ -31,23 +32,23 @@
 ////#include <bitcoin/bitcoin/utility/track.hpp>
 
 namespace libbitcoin {
-
-template <typename... Args>
-resubscriber<Args...>::resubscriber(threadpool& pool,
+    
+template <typename Key, typename... Args>
+notifier<Key, Args...>::notifier(threadpool& pool,
     const std::string& class_name)
   : stopped_(true), dispatch_(pool, class_name)
-    /*, track<resubscriber<Args...>>(class_name)*/
+    /*, track<notifier<Key, Args...>>(class_name)*/
 {
 }
 
-template <typename... Args>
-resubscriber<Args...>::~resubscriber()
+template <typename Key, typename... Args>
+notifier<Key, Args...>::~notifier()
 {
-    BITCOIN_ASSERT_MSG(subscriptions_.empty(), "resubscriber not cleared");
+    BITCOIN_ASSERT_MSG(subscriptions_.empty(), "notifier not cleared");
 }
 
-template <typename... Args>
-void resubscriber<Args...>::start()
+template <typename Key, typename... Args>
+void notifier<Key, Args...>::start()
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
@@ -67,8 +68,8 @@ void resubscriber<Args...>::start()
     ///////////////////////////////////////////////////////////////////////////
 }
 
-template <typename... Args>
-void resubscriber<Args...>::stop()
+template <typename Key, typename... Args>
+void notifier<Key, Args...>::stop()
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
@@ -88,8 +89,9 @@ void resubscriber<Args...>::stop()
     ///////////////////////////////////////////////////////////////////////////
 }
 
-template <typename... Args>
-void resubscriber<Args...>::subscribe(handler handler, Args... stopped_args)
+template <typename Key, typename... Args>
+void notifier<Key, Args...>::subscribe(handler handler, Key key,
+    asio::duration duration, Args... stopped_args)
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
@@ -97,9 +99,18 @@ void resubscriber<Args...>::subscribe(handler handler, Args... stopped_args)
 
     if (!stopped_)
     {
+        auto it = subscriptions_.find(key);
+        const auto expires = asio::steady_clock::now() + duration;
+
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         subscribe_mutex_.unlock_upgrade_and_lock();
-        subscriptions_.emplace_back(handler);
+
+        if (it != subscriptions_.end())
+            it->second.expires = expires;
+        else
+            subscriptions_.emplace(
+                std::make_pair(key, value{ handler, expires }));
+
         subscribe_mutex_.unlock();
         //---------------------------------------------------------------------
         return;
@@ -111,8 +122,42 @@ void resubscriber<Args...>::subscribe(handler handler, Args... stopped_args)
     handler(stopped_args...);
 }
 
-template <typename... Args>
-void resubscriber<Args...>::invoke(Args... args)
+template <typename Key, typename... Args>
+void notifier<Key, Args...>::purge(Args... expired_args)
+{
+    const auto now = asio::steady_clock::now();
+
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    subscribe_mutex_.lock();
+
+    // Move subscribers from the member map to a temporary map.
+    map subscriptions;
+    std::swap(subscriptions, subscriptions_);
+
+    subscribe_mutex_.unlock();
+    ///////////////////////////////////////////////////////////////////////////
+
+    // Subscriptions may be created while this loop is executing.
+    // Invoke and discard expired subscribers from temporary map.
+    for (const auto& entry: subscriptions)
+    {
+        if (now > entry.second.expires)
+        {
+            entry.second.handler(expired_args...);
+            continue;
+        }
+
+        // Critical Section
+        ///////////////////////////////////////////////////////////////////
+        unique_lock(subscribe_mutex_);
+        subscriptions_.emplace(entry);
+        ///////////////////////////////////////////////////////////////////
+    }
+}
+
+template <typename Key, typename... Args>
+void notifier<Key, Args...>::invoke(Args... args)
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
@@ -121,39 +166,39 @@ void resubscriber<Args...>::invoke(Args... args)
     ///////////////////////////////////////////////////////////////////////////
 }
 
-template <typename... Args>
-void resubscriber<Args...>::relay(Args... args)
+template <typename Key, typename... Args>
+void notifier<Key, Args...>::relay(Args... args)
 {
     // The ordered dispatch prevents concurrent do_invoke.
-    dispatch_.ordered(&resubscriber<Args...>::do_invoke,
+    dispatch_.ordered(&notifier<Key, Args...>::do_invoke,
         this->shared_from_this(), args...);
 }
 
 // private
-template <typename... Args>
-void resubscriber<Args...>::do_invoke(Args... args)
+template <typename Key, typename... Args>
+void notifier<Key, Args...>::do_invoke(Args... args)
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
     subscribe_mutex_.lock();
 
-    // Move subscribers from the member list to a temporary list.
-    list subscriptions;
+    // Move subscribers from the member map to a temporary map.
+    map subscriptions;
     std::swap(subscriptions, subscriptions_);
 
     subscribe_mutex_.unlock();
     ///////////////////////////////////////////////////////////////////////////
 
     // Subscriptions may be created while this loop is executing.
-    // Invoke subscribers from temporary list and resubscribe as indicated.
-    for (const auto& handler: subscriptions)
+    // Invoke subscribers from temporary map and resubscribe as indicated.
+    for (const auto& entry: subscriptions)
     {
-        if (handler(args...))
+        if (entry.second.handler(args...))
         {
             // Critical Section
             ///////////////////////////////////////////////////////////////////
             unique_lock(subscribe_mutex_);
-            subscriptions_.emplace_back(handler);
+            subscriptions_.emplace(entry);
             ///////////////////////////////////////////////////////////////////
         }
     }

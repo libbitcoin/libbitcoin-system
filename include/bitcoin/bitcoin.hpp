@@ -115,6 +115,7 @@
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
 #include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/monitor.hpp>
+#include <bitcoin/bitcoin/utility/notifier.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 #include <bitcoin/bitcoin/utility/png.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
