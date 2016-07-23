@@ -20,42 +20,47 @@
 #ifndef LIBBITCOIN_ASIO_HPP
 #define LIBBITCOIN_ASIO_HPP
 
+#include <chrono>
 #include <memory>
 #include <boost/asio.hpp>
-#include <boost/date_time.hpp>
 #include <boost/thread.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
 
 // Convenience namespace for commonly used boost asio aliases.
-// boost::thread is only used because of thread_specific_ptr limitation.
 
 namespace libbitcoin {
 namespace asio {
 
 namespace error = boost::asio::error;
 
-typedef boost::asio::ip::tcp tcp;
+typedef std::chrono::hours hours;
+typedef std::chrono::minutes minutes;
+typedef std::chrono::seconds seconds;
+typedef std::chrono::milliseconds milliseconds;
+typedef std::chrono::microseconds microseconds;
+
+// Steady clock: use for continuity, not time of day determinations.
+typedef std::chrono::steady_clock steady_clock;
+typedef steady_clock::duration duration;
+typedef steady_clock::time_point time_point;
+typedef boost::asio::basic_waitable_timer<steady_clock> timer;
+
+typedef boost::asio::const_buffer const_buffer;
+typedef boost::asio::io_service service;
 typedef boost::asio::ip::address address;
 typedef boost::asio::ip::address_v4 ipv4;
 typedef boost::asio::ip::address_v6 ipv6;
+typedef boost::asio::ip::tcp tcp;
 typedef boost::asio::ip::tcp::endpoint endpoint;
-typedef boost::asio::const_buffer const_buffer;
-typedef boost::asio::io_service service;
-typedef boost::asio::deadline_timer timer;
-typedef boost::posix_time::time_period time_period;
-typedef boost::posix_time::time_duration duration;
-typedef boost::posix_time::hours hours;
-typedef boost::posix_time::minutes minutes;
-typedef boost::posix_time::seconds seconds;
-typedef boost::posix_time::milliseconds milliseconds;
-typedef boost::posix_time::microseconds microseconds;
-typedef boost::thread thread;
 
 typedef tcp::socket socket;
 typedef tcp::acceptor acceptor;
 typedef tcp::resolver resolver;
 typedef tcp::resolver::query query;
 typedef tcp::resolver::iterator iterator;
+
+// This is used because of thread_specific_ptr limitation.
+typedef boost::thread thread;
 
 typedef std::shared_ptr<socket> socket_ptr;
 typedef std::shared_ptr<acceptor> acceptor_ptr;
@@ -68,4 +73,3 @@ BC_CONSTEXPR int max_connections = boost::asio::socket_base::max_connections;
 } // namespace libbitcoin
 
 #endif
-

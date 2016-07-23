@@ -21,6 +21,7 @@
 #define LIBBITCOIN_TIMER_HPP
 
 #include <chrono>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 
 // boost::timer::auto_cpu_timer requires the boost timer lib dependency.
 
@@ -31,8 +32,7 @@ namespace libbitcoin {
 	/**
 	 * Class to measure the execution time of a callable.
 	 */
-	template <typename Time = std::chrono::milliseconds,
-        class Clock = std::chrono::system_clock> 
+    template <typename Time = asio::milliseconds, class Clock=asio::steady_clock> 
 	struct timer
 	{
 		/**
@@ -41,9 +41,10 @@ namespace libbitcoin {
 		template <typename Function, typename ...Args>
         static typename Time::rep execution(Function func, Args&&... args)
 		{
-            auto start = Clock::now();
+            const auto start = Clock::now();
 			func(std::forward<Args>(args)...);
-            auto duration = std::chrono::duration_cast<Time>(Clock::now() - start);
+            const auto difference = Clock::now() - start;
+            const auto duration = std::chrono::duration_cast<Time>(difference);
 			return duration.count();
 		}
 

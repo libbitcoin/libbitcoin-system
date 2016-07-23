@@ -283,6 +283,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\delegates.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\enable_shared_from_base.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\monitor.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\notifier.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\png.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\resubscriber.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\conditional_lock.hpp" />
@@ -367,6 +368,7 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\deserializer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\endian.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\istream_reader.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\notifier.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\ostream_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\resubscriber.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\serializer.ipp" />

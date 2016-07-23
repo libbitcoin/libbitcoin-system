@@ -34,9 +34,8 @@ namespace libbitcoin {
 template <typename... Args>
 subscriber<Args...>::subscriber(threadpool& pool,
     const std::string& class_name)
-    : stopped_(true),
-    dispatch_(pool, class_name)/*,
-    track<subscriber<Args...>>(class_name)*/
+  : stopped_(true), dispatch_(pool, class_name)
+    /*, track<subscriber<Args...>>(class_name)*/
 {
 }
 
@@ -89,7 +88,7 @@ void subscriber<Args...>::stop()
 }
 
 template <typename... Args>
-void subscriber<Args...>::subscribe(handler notifier, Args... stopped_args)
+void subscriber<Args...>::subscribe(handler handler, Args... stopped_args)
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
@@ -99,7 +98,7 @@ void subscriber<Args...>::subscribe(handler notifier, Args... stopped_args)
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_.unlock_upgrade_and_lock();
-        subscriptions_.emplace_back(notifier);
+        subscriptions_.emplace_back(handler);
         mutex_.unlock();
         //---------------------------------------------------------------------
         return;
@@ -108,18 +107,30 @@ void subscriber<Args...>::subscribe(handler notifier, Args... stopped_args)
     mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 
-    notifier(stopped_args...);
+    handler(stopped_args...);
+}
+
+template <typename... Args>
+void subscriber<Args...>::invoke(Args... args)
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    unique_lock(invoke_mutex_);
+    do_invoke(args...);
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 template <typename... Args>
 void subscriber<Args...>::relay(Args... args)
 {
-    dispatch_.ordered(&subscriber<Args...>::do_relay,
+    // The ordered dispatch prevents concurrent do_invoke.
+    dispatch_.ordered(&subscriber<Args...>::do_invoke,
         this->shared_from_this(), args...);
 }
 
+// private
 template <typename... Args>
-void subscriber<Args...>::do_relay(Args... args)
+void subscriber<Args...>::do_invoke(Args... args)
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
@@ -127,14 +138,15 @@ void subscriber<Args...>::do_relay(Args... args)
 
     // Move subscribers from the member list to a temporary list.
     list subscriptions;
-    move_append(subscriptions, subscriptions_);
+    std::swap(subscriptions, subscriptions_);
 
     mutex_.unlock();
     ///////////////////////////////////////////////////////////////////////////
 
-    // Invoke subscribers from temporary list.
-    for (const auto& notifier: subscriptions)
-        notifier(args...);
+    // Subscriptions may be created while this loop is executing.
+    // Invoke subscribers from temporary list, without subscription renewal.
+    for (const auto& handler: subscriptions)
+        handler(args...);
 }
 
 } // namespace libbitcoin

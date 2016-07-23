@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2016 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,13 +17,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef  LIBBITCOIN_RESUBSCRIBER_HPP
-#define  LIBBITCOIN_RESUBSCRIBER_HPP
+#ifndef  LIBBITCOIN_NOTIFIER_HPP
+#define  LIBBITCOIN_NOTIFIER_HPP
 
 #include <functional>
 #include <memory>
 #include <string>
-#include <vector>
+#include <unordered_map>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
@@ -33,18 +34,18 @@
 
 namespace libbitcoin {
 
-template <typename... Args>
-class resubscriber
-  : public enable_shared_from_base<resubscriber<Args...>>
-    /*, track<resubscriber<Args...>>*/
+template <typename Key, typename... Args>
+class notifier
+  : public enable_shared_from_base<notifier<Key, Args...>>
+    /*, track<notifier<Key, Args...>>*/
 {
 public:
     typedef std::function<bool (Args...)> handler;
-    typedef std::shared_ptr<resubscriber<Args...>> ptr;
+    typedef std::shared_ptr<notifier<Key, Args...>> ptr;
 
     /// Construct an instance. The class_name is for debugging.
-    resubscriber(threadpool& pool, const std::string& class_name);
-    ~resubscriber();
+    notifier(threadpool& pool, const std::string& class_name);
+    ~notifier();
 
     /// Enable new subscriptions.
     void start();
@@ -52,9 +53,15 @@ public:
     /// Prevent new subscriptions.
     void stop();
 
-    /// Subscribe to notifications with an option to resubscribe.
+    /// Subscribe to notifications for the specified amount of time.
     /// Return true from the handler to resubscribe to notifications.
-    void subscribe(handler handler, Args... stopped_args);
+    /// If key is matched the existing subscription is extended by duration.
+    /// If stopped this will invoke the hander with the specified arguments.
+    void subscribe(handler handler, const Key& key,
+        const asio::duration& duration, Args... stopped_args);
+
+    /// Remove any expired subscriptions (blocking).
+    void purge(Args... expired_args);
 
     /// Invoke all handlers sequentially (blocking).
     void invoke(Args... args);
@@ -63,12 +70,13 @@ public:
     void relay(Args... args);
 
 private:
-    typedef std::vector<handler> list;
+    typedef struct { handler notify; asio::time_point expires; } value;
+    typedef std::unordered_map<Key, value> map;
 
     void do_invoke(Args... args);
-
+    
     bool stopped_;
-    list subscriptions_;
+    map subscriptions_;
     dispatcher dispatch_;
     mutable unique_mutex invoke_mutex_;
     mutable upgrade_mutex subscribe_mutex_;
@@ -76,6 +84,6 @@ private:
 
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/utility/resubscriber.ipp>
+#include <bitcoin/bitcoin/impl/utility/notifier.ipp>
 
 #endif
