@@ -144,7 +144,7 @@ void notifier<Key, Args...>::purge(Args... expired_args)
     {
         if (now > entry.second.expires)
         {
-            entry.second.handler(expired_args...);
+            entry.second.notify(expired_args...);
             continue;
         }
 
@@ -193,7 +193,7 @@ void notifier<Key, Args...>::do_invoke(Args... args)
     // Invoke subscribers from temporary map and resubscribe as indicated.
     for (const auto& entry: subscriptions)
     {
-        if (entry.second.handler(args...))
+        if (entry.second.notify(args...))
         {
             // Critical Section
             ///////////////////////////////////////////////////////////////////

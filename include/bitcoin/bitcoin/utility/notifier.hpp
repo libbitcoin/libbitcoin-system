@@ -70,7 +70,7 @@ public:
     void relay(Args... args);
 
 private:
-    typedef struct { handler handler; asio::time_point expires; } value;
+    typedef struct { handler notify; asio::time_point expires; } value;
     typedef std::unordered_map<Key, value> map;
 
     void do_invoke(Args... args);
