@@ -20,10 +20,12 @@
 #ifndef LIBBITCOIN_NOTIFIER_IPP
 #define LIBBITCOIN_NOTIFIER_IPP
 
+#include <cstddef>
 #include <functional>
 #include <memory>
 #include <string>
 #include <utility>
+#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
@@ -32,11 +34,19 @@
 ////#include <bitcoin/bitcoin/utility/track.hpp>
 
 namespace libbitcoin {
-    
+
 template <typename Key, typename... Args>
 notifier<Key, Args...>::notifier(threadpool& pool,
     const std::string& class_name)
-  : stopped_(true), dispatch_(pool, class_name)
+  : limit_(0), stopped_(true), dispatch_(pool, class_name)
+    /*, track<notifier<Key, Args...>>(class_name)*/
+{
+}
+
+template <typename Key, typename... Args>
+notifier<Key, Args...>::notifier(threadpool& pool, size_t limit,
+    const std::string& class_name)
+  : limit_(unlimited), stopped_(true), dispatch_(pool, class_name)
     /*, track<notifier<Key, Args...>>(class_name)*/
 {
 }
@@ -100,25 +110,34 @@ void notifier<Key, Args...>::subscribe(handler handler, const Key& key,
     if (!stopped_)
     {
         const auto it = subscriptions_.find(key);
-        const auto expires = asio::steady_clock::now() + duration;
-
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        subscribe_mutex_.unlock_upgrade_and_lock();
 
         if (it != subscriptions_.end())
+        {
+            const auto expires = asio::steady_clock::now() + duration;
+            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            subscribe_mutex_.unlock_upgrade_and_lock();
             it->second.expires = expires;
-        else
+            subscribe_mutex_.unlock();
+            //---------------------------------------------------------------------
+            return;
+        }
+        else if (limit_ == 0 || subscriptions_.size() < limit_)
+        {
+            const auto expires = asio::steady_clock::now() + duration;
+            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            subscribe_mutex_.unlock_upgrade_and_lock();
             subscriptions_.emplace(
                 std::make_pair(key, value{ handler, expires }));
-
-        subscribe_mutex_.unlock();
-        //---------------------------------------------------------------------
-        return;
+            subscribe_mutex_.unlock();
+            //---------------------------------------------------------------------
+            return;
+        }
     }
 
     subscribe_mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 
+    // Limit exceeded and stopped share the same return arguments.
     handler(stopped_args...);
 }
 
