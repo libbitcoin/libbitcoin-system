@@ -28,9 +28,9 @@
 
 namespace libbitcoin {
 
-binary::size_type binary::blocks_size(const size_type bitsize)
+binary::size_type binary::blocks_size(const size_type bit_size)
 {
-    return bitsize == 0 ? 0 : (bitsize - 1) / bits_per_block + 1;
+    return bit_size == 0 ? 0 : (bit_size - 1) / bits_per_block + 1;
 }
 
 bool binary::is_base2(const std::string& text)
@@ -52,10 +52,10 @@ binary::binary(const binary& other)
 {
 }
 
-binary::binary(const std::string& bitstring)
+binary::binary(const std::string& bit_string)
   : binary()
 {
-    std::stringstream(bitstring) >> *this;
+    std::stringstream(bit_string) >> *this;
 }
 
 binary::binary(size_type size, data_slice blocks)

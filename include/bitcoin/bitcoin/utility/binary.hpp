@@ -34,12 +34,12 @@ public:
     typedef std::size_t size_type;
 
     static BC_CONSTEXPR size_type bits_per_block = byte_bits;
-    static size_type blocks_size(const size_type bitsize);
+    static size_type blocks_size(const size_type bit_size);
     static bool is_base2(const std::string& text);
 
     binary();
     binary(const binary& other);
-    binary(const std::string& bitstring);
+    binary(const std::string& bit_string);
     binary(size_type size, data_slice blocks);
 
     void resize(size_type size);
@@ -53,7 +53,7 @@ public:
     void prepend(const binary& prior);
     void shift_left(size_type distance);
     void shift_right(size_type distance);
-    binary substring(size_type first, size_type length = max_size_t) const;
+    binary substring(size_type first, size_type length=max_size_t) const;
 
     bool is_prefix_of(data_slice field) const;
     bool is_prefix_of(const uint32_t field) const;
@@ -76,6 +76,16 @@ private:
 
 } // namespace libbitcoin
 
+namespace std
+{
+    template<>
+    struct hash<bc::binary>
+    {
+        size_t operator()(const bc::binary& value) const
+        {
+            return std::hash<std::string>()(value.encoded());
+        }
+    };
+} // namespace std
+
 #endif
-
-
