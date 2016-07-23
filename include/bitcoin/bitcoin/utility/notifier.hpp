@@ -57,8 +57,8 @@ public:
     /// Return true from the handler to resubscribe to notifications.
     /// If key is matched the existing subscription is extended by duration.
     /// If stopped this will invoke the hander with the specified arguments.
-    void subscribe(handler handler, Key key, asio::duration duration,
-        Args... stopped_args);
+    void subscribe(handler handler, const Key& key,
+        const asio::duration& duration, Args... stopped_args);
 
     /// Remove any expired subscriptions (blocking).
     void purge(Args... expired_args);

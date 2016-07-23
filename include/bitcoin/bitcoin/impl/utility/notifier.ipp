@@ -90,8 +90,8 @@ void notifier<Key, Args...>::stop()
 }
 
 template <typename Key, typename... Args>
-void notifier<Key, Args...>::subscribe(handler handler, Key key,
-    asio::duration duration, Args... stopped_args)
+void notifier<Key, Args...>::subscribe(handler handler, const Key& key,
+    const asio::duration& duration, Args... stopped_args)
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
