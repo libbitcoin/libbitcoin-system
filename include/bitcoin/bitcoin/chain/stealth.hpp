@@ -36,7 +36,8 @@ enum class subscribe_type : uint8_t
 {
     payment = 0,
     stealth = 1,
-    unspecified = 2
+    unspecified = 2,
+    unsubscribe = 3
 };
 
 /// This structure is used in the client-server protocol in v2/v3.

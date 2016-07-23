@@ -60,7 +60,12 @@ public:
     void subscribe(handler handler, const Key& key,
         const asio::duration& duration, Args... stopped_args);
 
+    /// Remove the subscription matching the specified key.
+    /// If subscribed this invokes notification with the specified arguments.
+    void unsubscribe(const Key& key, Args... unsubscribed_args);
+
     /// Remove any expired subscriptions (blocking).
+    /// Invokes expiration notification with the specified arguments.
     void purge(Args... expired_args);
 
     /// Invoke all handlers sequentially (blocking).
