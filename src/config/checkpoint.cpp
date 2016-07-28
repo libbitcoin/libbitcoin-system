@@ -107,6 +107,11 @@ bool checkpoint::validate(const hash_digest& hash, const size_t height,
     return it == checks.end();
 }
 
+bool checkpoint::operator==(const checkpoint& other) const
+{
+    return height_ == other.height_ && hash_ == other.hash_;
+}
+
 std::istream& operator>>(std::istream& input, checkpoint& argument)
 {
     std::string value;
