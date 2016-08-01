@@ -84,15 +84,16 @@ std::string checkpoint::to_string() const
     return value.str();
 }
 
-config::checkpoint::list& checkpoint::sort(list& checks)
+config::checkpoint::list checkpoint::sort(const list& checks)
 {
     const auto comparitor = [](const checkpoint& left, const checkpoint& right)
     {
         return left.height() < right.height();
     };
 
-    std::sort(checks.begin(), checks.end(), comparitor);
-    return checks;
+    auto copy = checks;
+    std::sort(copy.begin(), copy.end(), comparitor);
+    return copy;
 }
 
 bool checkpoint::validate(const hash_digest& hash, const size_t height,
