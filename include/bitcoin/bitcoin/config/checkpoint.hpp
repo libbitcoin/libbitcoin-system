@@ -45,10 +45,11 @@ public:
     typedef std::vector<checkpoint> list;
 
     /**
-     * Sort a list of checkpoints in place.
+     * Created a sorted copy of the list of checkpoints.
      * @param[in]  checks  The list of checkpoints.
+     * @return             The sorted list of checkpoints.
      */
-    static list& sort(list& checks);
+    static list sort(const list& checks);
     
     /**
      * Validate a checkpoint against a list of checkpoints.
