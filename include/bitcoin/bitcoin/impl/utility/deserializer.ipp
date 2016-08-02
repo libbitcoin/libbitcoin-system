@@ -206,6 +206,12 @@ short_hash deserializer<Iterator, SafeCheckLast>::read_short_hash()
 }
 
 template <typename Iterator, bool SafeCheckLast>
+mini_hash deserializer<Iterator, SafeCheckLast>::read_mini_hash()
+{
+    return read_bytes<mini_hash_size>();
+}
+
+template <typename Iterator, bool SafeCheckLast>
 std::string deserializer<Iterator, SafeCheckLast>::read_fixed_string(
     size_t length)
 {

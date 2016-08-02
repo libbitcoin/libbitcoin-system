@@ -165,6 +165,11 @@ short_hash istream_reader::read_short_hash()
     return read_bytes<short_hash_size>();
 }
 
+mini_hash istream_reader::read_mini_hash()
+{
+    return read_bytes<mini_hash_size>();
+}
+
 std::string istream_reader::read_fixed_string(size_t length)
 {
     auto string_bytes = read_data(length);

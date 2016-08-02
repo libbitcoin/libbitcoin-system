@@ -42,6 +42,7 @@ public:
     data_chunk read_data_to_eof();
     hash_digest read_hash();
     short_hash read_short_hash();
+    mini_hash read_mini_hash();
 
     // These read data in little endian format: 
     uint16_t read_2_bytes_little_endian();

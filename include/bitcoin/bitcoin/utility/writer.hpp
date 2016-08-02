@@ -41,6 +41,7 @@ public:
     virtual void write_data(const uint8_t* data, size_t size) = 0;
     virtual void write_hash(const hash_digest& value) = 0;
     virtual void write_short_hash(const short_hash& value) = 0;
+    virtual void write_mini_hash(const mini_hash& value) = 0;
 
     // These write data in little endian format:
     virtual void write_2_bytes_little_endian(uint16_t value) = 0;

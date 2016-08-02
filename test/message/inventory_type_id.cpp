@@ -45,6 +45,11 @@ BOOST_AUTO_TEST_CASE(inventory_type_to_number_block_returns_2)
     BOOST_REQUIRE_EQUAL(2u, message::inventory_type_to_number(message::inventory_type_id::block));
 }
 
+BOOST_AUTO_TEST_CASE(inventory_type_to_number_block_returns_4)
+{
+    BOOST_REQUIRE_EQUAL(4u, message::inventory_type_to_number(message::inventory_type_id::compact_block));
+}
+
 BOOST_AUTO_TEST_CASE(inventory_type_from_number_0_returns_error)
 {
     BOOST_REQUIRE(message::inventory_type_id::error == message::inventory_type_from_number(0u));
@@ -58,6 +63,11 @@ BOOST_AUTO_TEST_CASE(inventory_type_from_number_1_returns_transaction)
 BOOST_AUTO_TEST_CASE(inventory_type_from_number_2_returns_block)
 {
     BOOST_REQUIRE(message::inventory_type_id::block == message::inventory_type_from_number(2u));
+}
+
+BOOST_AUTO_TEST_CASE(inventory_type_from_number_4_returns_compact_block)
+{
+    BOOST_REQUIRE(message::inventory_type_id::compact_block == message::inventory_type_from_number(4u));
 }
 
 BOOST_AUTO_TEST_CASE(inventory_type_from_number_other_returns_none)

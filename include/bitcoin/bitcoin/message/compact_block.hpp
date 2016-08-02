@@ -17,17 +17,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_MESSAGE_HEADING_HPP
-#define LIBBITCOIN_MESSAGE_HEADING_HPP
+#ifndef LIBBITCOIN_MESSAGE_COMPACT_BLOCK_HPP
+#define LIBBITCOIN_MESSAGE_COMPACT_BLOCK_HPP
 
-#include <cstdint>
-#include <cstddef>
 #include <istream>
-#include <string>
-#include <boost/array.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/math/checksum.hpp>
+#include <bitcoin/bitcoin/chain/header.hpp>
+#include <bitcoin/bitcoin/message/prefilled_transaction.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
@@ -35,49 +31,16 @@
 namespace libbitcoin {
 namespace message {
 
-enum class message_type
-{
-    unknown,
-    address,
-    alert,
-    block,
-    block_transactions,
-    compact_block,
-    filter_add,
-    filter_clear,
-    filter_load,
-    get_address,
-    get_block_transactions,
-    get_blocks,
-    get_data,
-    get_headers,
-    headers,
-    inventory,
-    memory_pool,
-    merkle_block,
-    not_found,
-    ping,
-    pong,
-    reject,
-    send_compact_blocks,
-    send_headers,
-    transaction,
-    verack,
-    version
-};
-
-class BC_API heading
+class BC_API compact_block
 {
 public:
-    // Header minus checksum is 4 + 12 + 4 + 4 = 24 bytes
-    // boost1.54/linux/clang/libstdc++-4.8 error if std::array
-    // could not match 'boost::array' against 'std::array'
-    typedef boost::array<uint8_t, 24> buffer;
+    typedef std::shared_ptr<compact_block> ptr;
+    typedef mini_hash short_id;
+    typedef mini_hash_list short_id_list;
 
-    static const size_t serialized_size();
-    static heading factory_from_data(const data_chunk& data);
-    static heading factory_from_data(std::istream& stream);
-    static heading factory_from_data(reader& source);
+    static compact_block factory_from_data(const data_chunk& data);
+    static compact_block factory_from_data(std::istream& stream);
+    static compact_block factory_from_data(reader& source);
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
@@ -87,16 +50,15 @@ public:
     void to_data(writer& sink) const;
     bool is_valid() const;
     void reset();
-    message_type type() const;
+    uint64_t serialized_size() const;
 
-    uint32_t magic;
-    std::string command;
-    uint32_t payload_size;
-    uint32_t checksum;
+    static const std::string command;
+
+    chain::header header;
+    uint64_t nonce;
+    short_id_list short_ids;
+    prefilled_transaction::list transactions;
 };
-
-BC_API bool operator==(const heading& left, const heading& right);
-BC_API bool operator!=(const heading& left, const heading& right);
 
 } // namspace message
 } // namspace libbitcoin

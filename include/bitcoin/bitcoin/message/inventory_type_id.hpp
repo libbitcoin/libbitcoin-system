@@ -32,6 +32,7 @@ enum class inventory_type_id
     transaction,
     block,
     filtered_block,
+    compact_block,
     none
 };
 

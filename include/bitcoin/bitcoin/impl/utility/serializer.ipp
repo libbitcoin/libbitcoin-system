@@ -193,6 +193,13 @@ void serializer<Iterator>::write_short_hash(const short_hash& hash)
 }
 
 template <typename Iterator>
+void serializer<Iterator>::write_mini_hash(
+    const mini_hash& hash)
+{
+    write_data(hash);
+}
+
+template <typename Iterator>
 void serializer<Iterator>::write_fixed_string(const std::string& value,
     size_t size)
 {

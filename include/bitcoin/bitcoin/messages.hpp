@@ -26,10 +26,13 @@
 #include <bitcoin/bitcoin/message/address.hpp>
 #include <bitcoin/bitcoin/message/alert.hpp>
 #include <bitcoin/bitcoin/message/alert_payload.hpp>
+#include <bitcoin/bitcoin/message/block_transactions.hpp>
+#include <bitcoin/bitcoin/message/compact_block.hpp>
 #include <bitcoin/bitcoin/message/filter_add.hpp>
 #include <bitcoin/bitcoin/message/filter_clear.hpp>
 #include <bitcoin/bitcoin/message/filter_load.hpp>
 #include <bitcoin/bitcoin/message/get_address.hpp>
+#include <bitcoin/bitcoin/message/get_block_transactions.hpp>
 #include <bitcoin/bitcoin/message/get_blocks.hpp>
 #include <bitcoin/bitcoin/message/get_data.hpp>
 #include <bitcoin/bitcoin/message/get_headers.hpp>
@@ -45,6 +48,8 @@
 #include <bitcoin/bitcoin/message/ping.hpp>
 #include <bitcoin/bitcoin/message/pong.hpp>
 #include <bitcoin/bitcoin/message/reject.hpp>
+#include <bitcoin/bitcoin/message/send_compact_blocks.hpp>
+#include <bitcoin/bitcoin/message/send_headers.hpp>
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -75,6 +80,11 @@
 // submitorder  [deprecated in protocol]
 // reply        [deprecated in protocol]
 // alert        [no support intended]
+// sendheaders  [BIP130: not yet supported]
+// blocktxn     [BIP152: not yet supported]
+// cmpctblock   [BIP152: not yet supported]
+// getblocktxn  [BIP152: not yet supported]
+// sendcmpct    [BIP152: not yet supported]
 
 namespace libbitcoin {
 namespace message {

@@ -107,10 +107,13 @@ src_libbitcoin_la_SOURCES = \
     src/message/address.cpp \
     src/message/alert.cpp \
     src/message/alert_payload.cpp \
+    src/message/block_transactions.cpp \
+    src/message/compact_block.cpp \
     src/message/filter_add.cpp \
     src/message/filter_clear.cpp \
     src/message/filter_load.cpp \
     src/message/get_address.cpp \
+    src/message/get_block_transactions.cpp \
     src/message/get_blocks.cpp \
     src/message/get_data.cpp \
     src/message/get_headers.cpp \
@@ -126,7 +129,10 @@ src_libbitcoin_la_SOURCES = \
     src/message/not_found.cpp \
     src/message/ping.cpp \
     src/message/pong.cpp \
+    src/message/prefilled_transaction.cpp \
     src/message/reject.cpp \
+    src/message/send_compact_blocks.cpp \
+    src/message/send_headers.cpp \
     src/message/verack.cpp \
     src/message/version.cpp \
     src/unicode/console_streambuf.cpp \
@@ -241,10 +247,13 @@ test_libbitcoin_test_SOURCES = \
     test/message/address.cpp \
     test/message/alert.cpp \
     test/message/alert_payload.cpp \
+    test/message/block_transactions.cpp \
+    test/message/compact_block.cpp \
     test/message/filter_add.cpp \
     test/message/filter_clear.cpp \
     test/message/filter_load.cpp \
     test/message/get_address.cpp \
+    test/message/get_block_transactions.cpp \
     test/message/get_blocks.cpp \
     test/message/get_data.cpp \
     test/message/get_headers.cpp \
@@ -259,7 +268,10 @@ test_libbitcoin_test_SOURCES = \
     test/message/not_found.cpp \
     test/message/ping.cpp \
     test/message/pong.cpp \
+    test/message/prefilled_transaction.cpp \
     test/message/reject.cpp \
+    test/message/send_compact_blocks.cpp \
+    test/message/send_headers.cpp \
     test/message/verack.cpp \
     test/message/version.cpp \
     test/unicode/unicode.cpp \
@@ -394,10 +406,13 @@ include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/address.hpp \
     include/bitcoin/bitcoin/message/alert.hpp \
     include/bitcoin/bitcoin/message/alert_payload.hpp \
+    include/bitcoin/bitcoin/message/block_transactions.hpp \
+    include/bitcoin/bitcoin/message/compact_block.hpp \
     include/bitcoin/bitcoin/message/filter_add.hpp \
     include/bitcoin/bitcoin/message/filter_clear.hpp \
     include/bitcoin/bitcoin/message/filter_load.hpp \
     include/bitcoin/bitcoin/message/get_address.hpp \
+    include/bitcoin/bitcoin/message/get_block_transactions.hpp \
     include/bitcoin/bitcoin/message/get_blocks.hpp \
     include/bitcoin/bitcoin/message/get_data.hpp \
     include/bitcoin/bitcoin/message/get_headers.hpp \
@@ -413,7 +428,10 @@ include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/not_found.hpp \
     include/bitcoin/bitcoin/message/ping.hpp \
     include/bitcoin/bitcoin/message/pong.hpp \
+    include/bitcoin/bitcoin/message/prefilled_transaction.hpp \
     include/bitcoin/bitcoin/message/reject.hpp \
+    include/bitcoin/bitcoin/message/send_compact_blocks.hpp \
+    include/bitcoin/bitcoin/message/send_headers.hpp \
     include/bitcoin/bitcoin/message/verack.hpp \
     include/bitcoin/bitcoin/message/version.hpp
 

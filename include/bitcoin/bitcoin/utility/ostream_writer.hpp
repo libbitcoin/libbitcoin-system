@@ -39,6 +39,7 @@ public:
     void write_data(const uint8_t* data, size_t size);
     void write_hash(const hash_digest& value);
     void write_short_hash(const short_hash& value);
+    void write_mini_hash(const mini_hash& value);
 
     // These write data in little endian format:
     void write_2_bytes_little_endian(uint16_t value);

@@ -55,6 +55,11 @@ header header::factory_from_data(reader& source,
     return instance;
 }
 
+uint64_t header::satoshi_fixed_size_without_transaction_count()
+{
+    return 80;
+}
+
 bool header::is_valid() const
 {
     return (version != 0) ||
@@ -141,7 +146,7 @@ void header::to_data(writer& sink, bool with_transaction_count) const
 
 uint64_t header::serialized_size(bool with_transaction_count) const
 {
-    uint64_t size = 80;
+    uint64_t size = satoshi_fixed_size_without_transaction_count();
     if (with_transaction_count)
         size += variable_uint_size(transaction_count);
 

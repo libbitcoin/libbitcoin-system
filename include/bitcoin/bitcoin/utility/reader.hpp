@@ -39,6 +39,7 @@ public:
     virtual data_chunk read_data_to_eof() = 0;
     virtual hash_digest read_hash() = 0;
     virtual short_hash read_short_hash() = 0;
+    virtual mini_hash read_mini_hash() = 0;
 
     // These read data in little endian format:
     virtual uint16_t read_2_bytes_little_endian() = 0;
