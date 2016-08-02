@@ -47,9 +47,10 @@ BC_CONSTEXPR uint64_t max_size_t = BC_MAX_SIZE;
 BC_CONSTEXPR uint8_t byte_bits = 8;
 
 // Network protocol
-    
-// 70001 for version.relay, we do not yet fully support this level.
-BC_CONSTEXPR uint32_t protocol_version = 70001;
+
+// 70001 for version.relay (supported).
+// 70012 for send_headers (supported).
+BC_CONSTEXPR uint32_t protocol_version = 70012;
 
 // Currently set > 60000 to simplify BIP-31 (ping).
 BC_CONSTEXPR uint32_t peer_minimum_version = 60001;

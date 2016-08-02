@@ -19,8 +19,10 @@
  */
 #include <bitcoin/bitcoin/message/inventory.hpp>
 
+#include <algorithm>
 #include <initializer_list>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/message/inventory_type_id.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -57,9 +59,25 @@ inventory::inventory()
 {
 }
 
-inventory::inventory(const std::initializer_list<inventory_vector>& elements)
+inventory::inventory(const inventory_vector::list& values)
 {
-    inventories.insert(inventories.end(), elements.begin(), elements.end());
+    inventories.insert(inventories.end(), values.begin(), values.end());
+}
+
+inventory::inventory(const hash_list& hashes, inventory_type_id type_id)
+{
+    const auto map = [type_id](const hash_digest& hash)
+    {
+        return inventory_vector{ type_id, hash };
+    };
+
+    inventories.resize(hashes.size());
+    std::transform(hashes.begin(), hashes.end(), inventories.begin(), map);
+}
+
+inventory::inventory(const std::initializer_list<inventory_vector>& values)
+{
+    inventories.insert(inventories.end(), values.begin(), values.end());
 }
 
 bool inventory::is_valid() const
@@ -139,6 +157,17 @@ size_t inventory::count(inventory_type_id type_id) const
     };
 
     return count_if(inventories.begin(), inventories.end(), is_of_type);
+}
+
+void inventory::reduce(hash_list& out, inventory_type_id type_id) const
+{
+    out.reserve(inventories.size());
+
+    for (const auto& inventory: inventories)
+        if (inventory.type == type_id)
+            out.push_back(inventory.hash);
+
+    out.shrink_to_fit();
 }
 
 bool operator==(const inventory& left, const inventory& right)

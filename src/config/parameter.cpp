@@ -68,7 +68,7 @@ char parameter::short_name(const po::option_description& option) const
     auto is_short_name = name[0] == option_prefix_char && 
         name[1] != option_prefix_char;
 
-    return if_else(is_short_name, name[1], no_short_name);
+    return is_short_name ? name[1] : no_short_name;
 }
 
 // 100% component coverage

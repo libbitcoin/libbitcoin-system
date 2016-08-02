@@ -23,6 +23,7 @@
 #include <istream>
 #include <memory>
 #include <string>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/message/get_blocks.hpp>
 
 namespace libbitcoin {
@@ -39,8 +40,7 @@ public:
     static get_headers factory_from_data(reader& source);
 
     get_headers();
-    get_headers(const block_locator& start_hashes,
-        const hash_digest& stop_hash);
+    get_headers(const hash_list& start_hashes, const hash_digest& stop_hash);
 
     static const std::string command;
 };

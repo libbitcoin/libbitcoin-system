@@ -19,6 +19,8 @@
  */
 #include <bitcoin/bitcoin/message/headers.hpp>
 
+#include <algorithm>
+#include <utility>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -55,10 +57,14 @@ headers::headers()
 {
 }
 
-headers::headers(const std::initializer_list<chain::header>& elements)
+headers::headers(const chain::header::list& values)
 {
-    this->elements.insert(this->elements.end(), elements.begin(),
-        elements.end());
+    elements.insert(elements.end(), values.begin(), values.end());
+}
+
+headers::headers(const std::initializer_list<chain::header>& values)
+{
+    elements.insert(elements.end(), values.begin(), values.end());
 }
 
 bool headers::is_valid() const

@@ -493,10 +493,10 @@ void printer::commandline(std::ostream& output)
     const auto& argument_table = format_parameters_table(true);
 
     // Don't write a header if a table is empty.
-    std::string option_table_header(if_else(option_table.empty(), "",
-        BC_PRINTER_OPTION_TABLE_HEADER "\n"));
-    std::string argument_table_header(if_else(argument_table.empty(), "",
-        BC_PRINTER_ARGUMENT_TABLE_HEADER "\n"));
+    std::string option_table_header(option_table.empty() ? "" :
+        BC_PRINTER_OPTION_TABLE_HEADER "\n");
+    std::string argument_table_header(argument_table.empty() ? "" :
+        BC_PRINTER_ARGUMENT_TABLE_HEADER "\n");
 
     output
         << std::endl << format_usage()

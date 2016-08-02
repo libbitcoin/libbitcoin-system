@@ -25,6 +25,7 @@
 #include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/message/inventory.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -43,7 +44,9 @@ public:
     static not_found factory_from_data(reader& source);
 
     not_found();
-    not_found(const std::initializer_list<inventory_vector>& elements);
+    not_found(const inventory_vector::list& values);
+    not_found(const hash_list& hashes, inventory_type_id type_id);
+    not_found(const std::initializer_list<inventory_vector>& values);
 
     static const std::string command;
 };

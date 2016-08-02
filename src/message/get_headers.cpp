@@ -19,6 +19,8 @@
  */
 #include <bitcoin/bitcoin/message/get_headers.hpp>
 
+#include <bitcoin/bitcoin/math/hash.hpp>
+
 namespace libbitcoin {
 namespace message {
 
@@ -49,7 +51,7 @@ get_headers::get_headers()
 {
 }
 
-get_headers::get_headers(const block_locator& start_hashes,
+get_headers::get_headers(const hash_list& start_hashes,
     const hash_digest& stop_hash)
 {
     this->start_hashes = start_hashes;

@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/get_data.hpp>
 
 #include <initializer_list>
+#include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -49,6 +50,16 @@ get_data get_data::factory_from_data(reader& source)
 
 get_data::get_data()
   : inventory()
+{
+}
+
+get_data::get_data(const inventory_vector::list& elements)
+  : inventory(elements)
+{
+}
+
+get_data::get_data(const hash_list& hashes, inventory_type_id type_id)
+  : inventory(hashes, type_id)
 {
 }
 

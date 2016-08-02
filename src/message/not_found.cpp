@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/not_found.hpp>
 
 #include <initializer_list>
+#include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -52,8 +53,18 @@ not_found::not_found()
 {
 }
 
-not_found::not_found(const std::initializer_list<inventory_vector>& elements)
-  : inventory(elements)
+not_found::not_found(const inventory_vector::list& values)
+  : inventory(values)
+{
+}
+
+not_found::not_found(const hash_list& hashes, inventory_type_id type_id)
+  : inventory(hashes, type_id)
+{
+}
+
+not_found::not_found(const std::initializer_list<inventory_vector>& values)
+  : inventory(values)
 {
 }
 
