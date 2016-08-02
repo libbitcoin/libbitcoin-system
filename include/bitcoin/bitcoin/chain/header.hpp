@@ -44,6 +44,7 @@ public:
         bool with_transaction_count = true);
     static header factory_from_data(reader& source,
         bool with_transaction_count = true);
+    static uint64_t satoshi_fixed_size_without_transaction_count();
 
     bool from_data(const data_chunk& data, bool with_transaction_count = true);
     bool from_data(std::istream& stream, bool with_transaction_count = true);

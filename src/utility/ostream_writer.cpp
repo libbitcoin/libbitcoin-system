@@ -137,6 +137,11 @@ void ostream_writer::write_short_hash(const short_hash& value)
     stream_.write(reinterpret_cast<const char*>(value.data()), value.size());
 }
 
+void ostream_writer::write_mini_hash(const mini_hash& value)
+{
+    stream_.write(reinterpret_cast<const char*>(value.data()), value.size());
+}
+
 void ostream_writer::write_fixed_string(const std::string& value, size_t size)
 {
     const auto min_size = std::min(size, value.size());

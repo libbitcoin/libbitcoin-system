@@ -128,8 +128,12 @@ message_type heading::type() const
         return message_type::address;
     if (command == alert::command)
         return message_type::alert;
+    if (command == block_transactions::command)
+        return message_type::block_transactions;
     if (command == block::command)
         return message_type::block;
+    if (command == compact_block::command)
+        return message_type::compact_block;
     if (command == filter_add::command)
         return message_type::filter_add;
     if (command == filter_clear::command)
@@ -138,6 +142,8 @@ message_type heading::type() const
         return message_type::filter_load;
     if (command == get_address::command)
         return message_type::get_address;
+    if (command == get_block_transactions::command)
+        return message_type::get_block_transactions;
     if (command == get_blocks::command)
         return message_type::get_blocks;
     if (command == get_data::command)
@@ -160,6 +166,10 @@ message_type heading::type() const
         return message_type::pong;
     if (command == reject::command)
         return message_type::reject;
+    if (command == send_compact_blocks::command)
+        return message_type::send_compact_blocks;
+    if (command == send_headers::command)
+        return message_type::send_headers;
     if (command == transaction::command)
         return message_type::transaction;
     if (command == verack::command)

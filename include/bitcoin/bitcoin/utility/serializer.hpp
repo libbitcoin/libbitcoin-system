@@ -61,6 +61,7 @@ public:
     void write_error_code(const code& ec);
     void write_hash(const hash_digest& hash);
     void write_short_hash(const short_hash& hash);
+    void write_mini_hash(const mini_hash& hash);
 
     // These write data in little endian format:
     void write_2_bytes_little_endian(uint16_t value);

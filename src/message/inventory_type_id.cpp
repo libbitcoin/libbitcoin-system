@@ -34,6 +34,8 @@ uint32_t inventory_type_to_number(inventory_type_id inv_type)
             return 1;
         case inventory_type_id::block:
             return 2;
+        case inventory_type_id::compact_block:
+            return 4;
     }
 }
 
@@ -47,6 +49,8 @@ inventory_type_id inventory_type_from_number(uint32_t raw_type)
             return inventory_type_id::transaction;
         case 2:
             return inventory_type_id::block;
+        case 4:
+            return inventory_type_id::compact_block;
         default:
             return inventory_type_id::none;
     }
