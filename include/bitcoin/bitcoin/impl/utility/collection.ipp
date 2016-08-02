@@ -62,15 +62,15 @@ int find_position(const Container& list, const Element& value)
     return static_cast<int>(std::distance(list.begin(), it));
 }
 
-template <typename Consequent, typename Alternate>
-Consequent if_else(bool antecedent, const Consequent consequent,
-    const Alternate alternative)
-{
-    if (antecedent)
-        return consequent;
-    else
-        return alternative;
-}
+////template <typename Consequent, typename Alternate>
+////Consequent if_else(bool antecedent, const Consequent consequent,
+////    const Alternate alternative)
+////{
+////    if (antecedent)
+////        return consequent;
+////    else
+////        return alternative;
+////}
 
 template <typename Type, typename Predicate>
 typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,

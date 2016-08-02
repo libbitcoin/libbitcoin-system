@@ -61,20 +61,20 @@ int find_pair_position(const std::vector<const Pair>& list, Key& key);
 template <typename Element, typename Container>
 int find_position(const Container& list, const Element& value);
 
-/**
- * Avoid the ternary (just for fun). Must precede template usage for gcc build.
- * You should use with expressions as consequent or alternative as they will be
- * executed regardless of the predicate.
- * @param      <Consequent>  The type of the consequent.
- * @param      <Alternate>   The type of the alternative.
- * @param[in]  antecedent    The proposition's antecedent.
- * @param[in]  consequent    The proposition's consequent (if predicate).
- * @param[in]  consequent    The proposition's alternative (if !predicate).
- * @return                   Either the consequent or the alternative.
- */
-template <typename Consequent, typename Alternate>
-Consequent if_else(bool antecedent, const Consequent consequent,
-    const Alternate alternative);
+/////**
+//// * Avoid the ternary (just for fun). Must precede template usage for gcc build.
+//// * You should use with expressions as consequent or alternative as they will be
+//// * executed regardless of the predicate.
+//// * @param      <Consequent>  The type of the consequent.
+//// * @param      <Alternate>   The type of the alternative.
+//// * @param[in]  antecedent    The proposition's antecedent.
+//// * @param[in]  consequent    The proposition's consequent (if predicate).
+//// * @param[in]  consequent    The proposition's alternative (if !predicate).
+//// * @return                   Either the consequent or the alternative.
+//// */
+////template <typename Consequent, typename Alternate>
+////Consequent if_else(bool antecedent, const Consequent consequent,
+////    const Alternate alternative);
 
 /**
  * Facilitate a list insertion sort by inserting into a sorted position.
