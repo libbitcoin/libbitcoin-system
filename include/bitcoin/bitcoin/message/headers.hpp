@@ -45,7 +45,8 @@ public:
     static headers factory_from_data(reader& source);
 
     headers();
-    headers(const std::initializer_list<chain::header>& elements);
+    headers(const chain::header::list& values);
+    headers(const std::initializer_list<chain::header>& values);
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);

@@ -27,6 +27,7 @@
 #include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/message/inventory_type_id.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -46,7 +47,9 @@ public:
     static inventory factory_from_data(reader& source);
 
     inventory();
-    inventory(const std::initializer_list<inventory_vector>& elements);
+    inventory(const inventory_vector::list& values);
+    inventory(const hash_list& hashes, inventory_type_id type_id);
+    inventory(const std::initializer_list<inventory_vector>& values);
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
@@ -58,6 +61,7 @@ public:
     void reset();
     uint64_t serialized_size() const;
     size_t count(inventory_type_id type_id) const;
+    void reduce(hash_list& out, inventory_type_id type_id) const;
 
     static const std::string command;
 

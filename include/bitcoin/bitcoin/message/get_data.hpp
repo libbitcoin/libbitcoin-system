@@ -25,6 +25,7 @@
 #include <istream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/message/inventory.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -43,6 +44,8 @@ public:
     static get_data factory_from_data(reader& source);
 
     get_data();
+    get_data(const inventory_vector::list& list);
+    get_data(const hash_list& hashes, inventory_type_id type_id);
     get_data(const std::initializer_list<inventory_vector>& elements);
 
     static const std::string command;
