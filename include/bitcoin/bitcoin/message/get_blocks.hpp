@@ -33,8 +33,6 @@
 namespace libbitcoin {
 namespace message {
 
-typedef std::vector<hash_digest> block_locator;
-
 class BC_API get_blocks
 {
 public:
@@ -57,7 +55,7 @@ public:
     static const std::string command;
 
     // 10 sequential hashes, then exponential samples until reaching genesis.
-    block_locator start_hashes;
+    hash_list start_hashes;
     hash_digest stop_hash;
 };
 
