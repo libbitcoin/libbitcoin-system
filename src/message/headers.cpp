@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/headers.hpp>
 
 #include <algorithm>
+#include <cstdint>
 #include <utility>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -127,15 +128,27 @@ void headers::to_data(std::ostream& stream) const
 void headers::to_data(writer& sink) const
 {
     sink.write_variable_uint_little_endian(elements.size());
-    for (const auto& head : elements)
+
+    for (const auto& head: elements)
         head.to_data(sink, true);
+}
+
+void headers::to_hashes(hash_list& out) const
+{
+    const auto map = [](const chain::header& header)
+    {
+        return header.hash();
+    };
+
+    out.resize(elements.size());
+    std::transform(elements.begin(), elements.end(), out.begin(), map);
 }
 
 uint64_t headers::serialized_size() const
 {
     uint64_t size = variable_uint_size(elements.size());
 
-    for (const auto& head : elements)
+    for (const auto& head: elements)
         size += head.serialized_size(true);
 
     return size;
