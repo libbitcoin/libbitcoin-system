@@ -143,6 +143,17 @@ void inventory::to_data(writer& sink) const
         element.to_data(sink);
 }
 
+void inventory::to_hashes(hash_list& out, inventory_type_id type_id) const
+{
+    out.reserve(inventories.size());
+
+    for (const auto& inventory: inventories)
+        if (inventory.type == type_id)
+            out.push_back(inventory.hash);
+
+    out.shrink_to_fit();
+}
+
 uint64_t inventory::serialized_size() const
 {
     return variable_uint_size(inventories.size()) + inventories.size() *
@@ -157,17 +168,6 @@ size_t inventory::count(inventory_type_id type_id) const
     };
 
     return count_if(inventories.begin(), inventories.end(), is_of_type);
-}
-
-void inventory::reduce(hash_list& out, inventory_type_id type_id) const
-{
-    out.reserve(inventories.size());
-
-    for (const auto& inventory: inventories)
-        if (inventory.type == type_id)
-            out.push_back(inventory.hash);
-
-    out.shrink_to_fit();
 }
 
 bool operator==(const inventory& left, const inventory& right)

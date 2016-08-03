@@ -54,37 +54,45 @@
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
-// List of bitcoin messages
-// ------------------------
-// version
-// verack
-// getaddr
-// addr
-// inv
-// getdata
-// getblocks
-// block
-// tx
-// ping
-// pong
-// notfound
-// reject       [not yet supported]
-// getheaders   [not yet supported]
-// headers      [not yet supported]
-// mempool      [BIP35: not yet supported]
-// filterload   [BIP37: no support intended]
-// filteradd    [BIP37: no support intended]
-// filterclear  [BIP37: no support intended]
-// merkleblock  [BIP37: no support intended]
-// checkorder   [deprecated in protocol]
-// submitorder  [deprecated in protocol]
-// reply        [deprecated in protocol]
-// alert        [no support intended]
-// sendheaders  [BIP130: not yet supported]
-// blocktxn     [BIP152: not yet supported]
-// cmpctblock   [BIP152: not yet supported]
-// getblocktxn  [BIP152: not yet supported]
-// sendcmpct    [BIP152: not yet supported]
+// libbitcoin-network
+// ----------------------------------------------------------------------------
+// [heading]    v1        209           checksum added to original heading
+// version      v1        106           added ip address fields
+// version      v2      70001           added relay field
+// verack       v1
+// getaddr      v1
+// addr         v1      31402           previous version without time
+// ping         v1
+// ping         v2      60001   BIP031  added nonce field
+// pong         v1      60001   BIP031
+// reject       v3      70002   BIP061
+// alert        --        311           no intent to support
+// checkorder   --                      obsolete
+// reply        --                      obsolete
+// submitorder  --                      obsolete
+
+// libbitcoin-node (only)
+// ----------------------------------------------------------------------------
+// getblocks    v1
+// inv          v1
+// getdata      v1
+// getdata      v3      70001   BIP037  allows filtered_block flag
+// block        v1
+// tx           v1
+// notfound     v2      70001
+// getheaders   v3      31800
+// headers      v3      31800
+// mempool      --      60002   BIP035
+// mempool      v3      70002           allow multiple inv messages in reply
+// sendheaders  v3      70012   BIP130
+// blocktxn     v3              BIP152
+// cmpctblock   v3              BIP152
+// getblocktxn  v3              BIP152
+// sendcmpct    v3              BIP152
+// merkleblock  v3      70001   BIP037
+// filterload   --      70001   BIP037  no intent to support
+// filteradd    --      70001   BIP037  no intent to support
+// filterclear  --      70001   BIP037  no intent to support
 
 namespace libbitcoin {
 namespace message {
