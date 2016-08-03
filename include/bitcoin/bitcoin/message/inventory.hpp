@@ -57,11 +57,11 @@ public:
     data_chunk to_data() const;
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
+    void to_hashes(hash_list& out, inventory_type_id type_id) const;
     bool is_valid() const;
     void reset();
     uint64_t serialized_size() const;
     size_t count(inventory_type_id type_id) const;
-    void reduce(hash_list& out, inventory_type_id type_id) const;
 
     static const std::string command;
 
