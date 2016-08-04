@@ -57,7 +57,7 @@
 // libbitcoin-network
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // [heading]    v1        209           checksum added to original heading
-// version      v1        106           added ip address fields
+// version      v1        106           added receiver ip address field
 // version      v2      70001           added relay field
 // verack       v1
 // getaddr      v1

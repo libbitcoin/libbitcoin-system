@@ -30,9 +30,22 @@
 namespace libbitcoin {
 namespace message {
 
+// Header minus checksum is 4 + 12 + 4 + 4 = 24 bytes
 const size_t heading::serialized_size()
 {
-    return buffer::static_size;
+    return 24u;
+}
+
+// A maximal inventory is 50,000 entries.
+// Inventory with 50,000 entries is 9 + 36 * 50,000 bytes (1,800,009).
+// According to protocol documentation get_blocks is limited only by the
+// general maximum payload size of 0x02000000 (33,554,432). But this is an
+// absurd limit for a message that should always be very small.
+const size_t heading::maximum_payload_size()
+{
+    static constexpr size_t maimum = 9u + 36u * 50000u;
+    static_assert(maimum <= max_size_t, "maximum_payload_size overflow");
+    return maimum;
 }
 
 heading heading::factory_from_data(const data_chunk& data)

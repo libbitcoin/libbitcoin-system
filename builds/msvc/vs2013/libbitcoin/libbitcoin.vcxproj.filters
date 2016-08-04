@@ -398,9 +398,6 @@
     <ClCompile Include="..\..\..\..\src\wallet\bitcoin_uri.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\variable_uint_size.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\ec_private.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
@@ -535,6 +532,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\send_headers.cpp">
       <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\variable_uint_size.cpp">
+      <Filter>src\utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
