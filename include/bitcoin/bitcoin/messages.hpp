@@ -54,20 +54,20 @@
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
+// Minimum conditional protocol version: 31800
+
 // libbitcoin-network
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// [heading]    v1        209           checksum added to original heading
-// version      v1        106           added receiver ip address field
 // version      v2      70001           added relay field
 // verack       v1
 // getaddr      v1
-// addr         v1      31402           previous version without time
+// addr         v1
 // ping         v1
 // ping         v2      60001   BIP031  added nonce field
 // pong         v1      60001   BIP031
 // reject       v3      70002   BIP061
 // ----------------------------------------------------------------------------
-// alert        --        311           no intent to support
+// alert        --                      no intent to support
 // checkorder   --                      obsolete
 // reply        --                      obsolete
 // submitorder  --                      obsolete

@@ -30,10 +30,10 @@
 namespace libbitcoin {
 namespace message {
 
-// Header minus checksum is 4 + 12 + 4 + 4 = 24 bytes
 const size_t heading::serialized_size()
 {
-    return 24u;
+    return sizeof(uint32_t) + command_size + sizeof(uint32_t) +
+        sizeof(uint32_t);
 }
 
 // A maximal inventory is 50,000 entries, the largest valid message.
@@ -44,9 +44,10 @@ const size_t heading::serialized_size()
 // absurd limit for a message that should always be very small.
 const size_t heading::maximum_payload_size()
 {
-    static constexpr size_t maimum = 3u + 36u * 50000u;
-    static_assert(maimum <= max_size_t, "maximum_payload_size overflow");
-    return maimum;
+    static constexpr size_t vector = sizeof(uint32_t) + hash_size;
+    static constexpr size_t maximum = 3u + vector * 50000u;
+    static_assert(maximum <= max_size_t, "maximum_payload_size overflow");
+    return maximum;
 }
 
 heading heading::factory_from_data(const data_chunk& data)

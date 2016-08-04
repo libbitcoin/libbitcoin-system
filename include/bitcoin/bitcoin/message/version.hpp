@@ -54,33 +54,14 @@ public:
 
     static const std::string command;
 
-    // version >= 0
     uint32_t value;
     uint64_t services_sender;
     uint64_t timestamp;
-
-    // version >= 106
-    //-------------------------------------------------------------------------
-    // This is not present in protocol version 60002 according to bitcoin.it.
-    // But according to bitcoin.org it was added in version 106.
-    ////uint64_t services_recevier;
-    //-------------------------------------------------------------------------
     network_address address_recevier;
-
-    // version >= 0
-    //-------------------------------------------------------------------------
-    // This is not present in protocol version 60002 according to bitcoin wiki.
-    // But according to bitcoin.org it was original (and duplicated).
-    ////uint64_t services_sender;
-    //-------------------------------------------------------------------------
     network_address address_sender;
     uint64_t nonce;
     std::string user_agent;
-    //-------------------------------------------------------------------------
-    // This was previously >= version 209 in libbitcoin, but that is not
-    // documented by bitcoin.it or bitcoin.org, so is now treated as original.
     uint32_t start_height;
-    //-------------------------------------------------------------------------
 
     // version >= 70001
     bool relay;
