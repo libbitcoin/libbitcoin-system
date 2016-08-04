@@ -36,14 +36,15 @@ const size_t heading::serialized_size()
     return 24u;
 }
 
-// A maximal inventory is 50,000 entries.
-// Inventory with 50,000 entries is 9 + 36 * 50,000 bytes (1,800,009).
+// A maximal inventory is 50,000 entries, the largest valid message.
+// Inventory with 50,000 entries is 3 + 36 * 50,000 bytes (1,800,003).
+// The variable integer portion is maximum 3 bytes (with a count of 50,000).
 // According to protocol documentation get_blocks is limited only by the
 // general maximum payload size of 0x02000000 (33,554,432). But this is an
 // absurd limit for a message that should always be very small.
 const size_t heading::maximum_payload_size()
 {
-    static constexpr size_t maimum = 9u + 36u * 50000u;
+    static constexpr size_t maimum = 3u + 36u * 50000u;
     static_assert(maimum <= max_size_t, "maximum_payload_size overflow");
     return maimum;
 }
