@@ -56,7 +56,6 @@ bool version::is_valid() const
     return (value != 0)
         || (services_sender != 0)
         || (timestamp != 0)
-        ////|| (services_recevier != 0)
         || address_recevier.is_valid()
         || address_sender.is_valid()
         || (nonce != 0)
@@ -70,7 +69,6 @@ void version::reset()
     value = 0;
     services_sender = 0;
     timestamp = 0;
-    ////services_recevier = 0;
     address_recevier.reset();
     address_sender.reset();
     nonce = 0;
@@ -99,14 +97,7 @@ bool version::from_data(reader& source)
     services_sender = source.read_8_bytes_little_endian();
     timestamp = source.read_8_bytes_little_endian();
     auto result = static_cast<bool>(source);
-
-    if (result && (value >= 106))
-    {
-        /*services_recevier = source.read_8_bytes_little_endian();*/
-        result = address_recevier.from_data(source, false);
-    }
-
-    /*const auto services_sender_copy = source.read_8_bytes_little_endian();*/
+    result = address_recevier.from_data(source, false);
     result = result && address_sender.from_data(source, false);
     nonce = source.read_8_bytes_little_endian();
     user_agent = source.read_string();
@@ -115,8 +106,8 @@ bool version::from_data(reader& source)
     if (value >= 70001)
         relay = (source.read_byte() != 0);
 
-    // The protocol requires duplication of the sender's services.
-    result &= (source /*&& services_sender == services_sender_copy*/);
+    // The protocol expects duplication of the sender's services.
+    result &= (source && services_sender == address_sender.services);
 
     if (!result)
         reset();
@@ -145,14 +136,7 @@ void version::to_data(writer& sink) const
     sink.write_4_bytes_little_endian(value);
     sink.write_8_bytes_little_endian(services_sender);
     sink.write_8_bytes_little_endian(timestamp);
-
-    if (value >= 106)
-    {
-        ////sink.write_8_bytes_little_endian(services_recevier);
-        address_recevier.to_data(sink, false);
-    }
-
-    ////sink.write_8_bytes_little_endian(services_sender);
+    address_recevier.to_data(sink, false);
     address_sender.to_data(sink, false);
     sink.write_8_bytes_little_endian(nonce);
     sink.write_string(user_agent);
@@ -164,13 +148,11 @@ void version::to_data(writer& sink) const
 
 uint64_t version::serialized_size() const
 {
-    auto size = sizeof(value) + sizeof(services_sender) + sizeof(timestamp);
-
-    if (value >= 106)
-        size += /*sizeof(services_recevier) +*/  
-            address_recevier.serialized_size(false);
-
-    size += /*sizeof(services_sender) +*/
+    auto size = 
+        sizeof(value) +
+        sizeof(services_sender) +
+        sizeof(timestamp) +
+        address_recevier.serialized_size(false) +
         address_sender.serialized_size(false) +
         sizeof(nonce) +
         variable_uint_size(user_agent.size()) + user_agent.size() +
