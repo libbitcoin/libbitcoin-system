@@ -31,16 +31,19 @@ bool equal_without_timestamp(const message::network_address& left,
         && (left.port == right.port);
 }
 
+// Compares all values except the ipaddress timestamps.
 bool equal(const message::version& left, const message::version& right)
 {
     return (left.value == right.value)
-        && (left.services == right.services)
+        && (left.services_sender == right.services_sender)
         && (left.timestamp == right.timestamp)
-        && equal_without_timestamp(left.address_me, right.address_me)
-        && equal_without_timestamp(left.address_you, right.address_you)
+        ////&& (left.services_recevier == right.services_recevier)
+        && equal_without_timestamp(left.address_recevier, right.address_recevier)
+        && equal_without_timestamp(left.address_sender, right.address_sender)
         && (left.nonce == right.nonce)
         && (left.user_agent == right.user_agent)
-        && (left.start_height == right.start_height);
+        && (left.start_height == right.start_height)
+        && (left.relay == right.relay);
 }
 
 BOOST_AUTO_TEST_SUITE(version_tests)
@@ -60,6 +63,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
         210u,
         1515u,
         979797u,
+        ////424242u,
         {
             734678u,
             5357534u,
@@ -103,6 +107,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
         210u,
         1515u,
         979797u,
+        ////424242u,
         {
             734678u,
             5357534u,
@@ -147,6 +152,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
         210u,
         1515u,
         979797u,
+        ////424242u,
         {
             734678u,
             5357534u,

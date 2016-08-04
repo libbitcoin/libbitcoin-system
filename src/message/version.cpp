@@ -54,25 +54,29 @@ version version::factory_from_data(reader& source)
 bool version::is_valid() const
 {
     return (value != 0)
-        || (services != 0)
+        || (services_sender != 0)
         || (timestamp != 0)
-        || address_me.is_valid()
-        || address_you.is_valid()
+        ////|| (services_recevier != 0)
+        || address_recevier.is_valid()
+        || address_sender.is_valid()
         || (nonce != 0)
         || !user_agent.empty()
+        || (start_height != 0)
         || (relay != 0);
 }
 
 void version::reset()
 {
     value = 0;
-    services = 0;
+    services_sender = 0;
     timestamp = 0;
-    address_me.reset();
-    address_you.reset();
+    ////services_recevier = 0;
+    address_recevier.reset();
+    address_sender.reset();
     nonce = 0;
     user_agent.clear();
-    relay = 0;
+    start_height = 0;
+    relay = false;
 }
 
 bool version::from_data(const data_chunk& data)
@@ -90,28 +94,29 @@ bool version::from_data(std::istream& stream)
 bool version::from_data(reader& source)
 {
     reset();
+
     value = source.read_4_bytes_little_endian();
-    services = source.read_8_bytes_little_endian();
+    services_sender = source.read_8_bytes_little_endian();
     timestamp = source.read_8_bytes_little_endian();
     auto result = static_cast<bool>(source);
-    if (result)
-        result = address_me.from_data(source, false);
 
     if (result && (value >= 106))
     {
-        result = address_you.from_data(source, false);
-        nonce = source.read_8_bytes_little_endian();
-        user_agent = source.read_string();
-        if (value >= 209)
-            start_height = source.read_4_bytes_little_endian();
-
-        // The satoshi client treats 209 as the "initial protocol version"
-        // and disconnects peers below 31800 (for getheaders support).
-        if (value >= 70001)
-            relay = (source.read_byte() != 0);
-
-        result &= source;
+        /*services_recevier = source.read_8_bytes_little_endian();*/
+        result = address_recevier.from_data(source, false);
     }
+
+    /*const auto services_sender_copy = source.read_8_bytes_little_endian();*/
+    result = result && address_sender.from_data(source, false);
+    nonce = source.read_8_bytes_little_endian();
+    user_agent = source.read_string();
+    start_height = source.read_4_bytes_little_endian();
+
+    if (value >= 70001)
+        relay = (source.read_byte() != 0);
+
+    // The protocol requires duplication of the sender's services.
+    result &= (source /*&& services_sender == services_sender_copy*/);
 
     if (!result)
         reset();
@@ -138,18 +143,20 @@ void version::to_data(std::ostream& stream) const
 void version::to_data(writer& sink) const
 {
     sink.write_4_bytes_little_endian(value);
-    sink.write_8_bytes_little_endian(services);
+    sink.write_8_bytes_little_endian(services_sender);
     sink.write_8_bytes_little_endian(timestamp);
-    address_me.to_data(sink, false);
+
     if (value >= 106)
     {
-        address_you.to_data(sink, false);
-        sink.write_8_bytes_little_endian(nonce);
-        sink.write_string(user_agent);
+        ////sink.write_8_bytes_little_endian(services_recevier);
+        address_recevier.to_data(sink, false);
     }
 
-    if (value >= 209)
-        sink.write_4_bytes_little_endian(start_height);
+    ////sink.write_8_bytes_little_endian(services_sender);
+    address_sender.to_data(sink, false);
+    sink.write_8_bytes_little_endian(nonce);
+    sink.write_string(user_agent);
+    sink.write_4_bytes_little_endian(start_height);
 
     if (value >= 70001)
         sink.write_byte(relay ? 1 : 0);
@@ -157,18 +164,20 @@ void version::to_data(writer& sink) const
 
 uint64_t version::serialized_size() const
 {
-    auto size = 4 + 8 + 8 + address_me.serialized_size(false);
-    if (value >= 106)
-    {
-        size += address_you.serialized_size(false) + 8 +
-            variable_uint_size(user_agent.size()) + user_agent.size();
-    }
+    auto size = sizeof(value) + sizeof(services_sender) + sizeof(timestamp);
 
-    if (value >= 209)
-        size += 4;
+    if (value >= 106)
+        size += /*sizeof(services_recevier) +*/  
+            address_recevier.serialized_size(false);
+
+    size += /*sizeof(services_sender) +*/
+        address_sender.serialized_size(false) +
+        sizeof(nonce) +
+        variable_uint_size(user_agent.size()) + user_agent.size() +
+        sizeof(start_height);
 
     if (value >= 70001)
-        size += 1;
+        size += sizeof(uint8_t);
 
     return size;
 }
