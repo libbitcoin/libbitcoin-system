@@ -40,7 +40,7 @@ enum class message_type
     unknown,
     address,
     alert,
-    block,
+    block_message,
     block_transactions,
     compact_block,
     filter_add,
@@ -61,7 +61,7 @@ enum class message_type
     reject,
     send_compact_blocks,
     send_headers,
-    transaction,
+    transaction_message,
     verack,
     version
 };
