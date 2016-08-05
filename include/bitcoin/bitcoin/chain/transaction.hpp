@@ -69,6 +69,21 @@ public:
 
     static const std::string command;
 
+    transaction();
+    transaction(const transaction& other);
+    transaction(uint32_t version, uint32_t locktime, const input::list& inputs,
+        const output::list& outputs);
+
+    transaction(transaction&& other);
+    transaction(uint32_t version, uint32_t locktime, input::list&& inputs,
+        output::list&& outputs);
+
+    /// This class is move assignable [but not copy assignable].
+    transaction& operator=(transaction&& other);
+
+    // TODO: eliminate blockchain copy scenarios and then delete this.
+    transaction& operator=(const transaction& other) /*= delete*/;
+
     uint32_t version;
     uint32_t locktime;
     input::list inputs;

@@ -536,6 +536,12 @@
     <ClCompile Include="..\..\..\..\src\utility\variable_uint_size.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\message\block_message.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\message\transaction_message.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -1037,6 +1043,12 @@
       <Filter>include\bitcoin\message</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\block_transactions.hpp">
+      <Filter>include\bitcoin\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\block_message.hpp">
+      <Filter>include\bitcoin\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\transaction_message.hpp">
       <Filter>include\bitcoin\message</Filter>
     </ClInclude>
   </ItemGroup>

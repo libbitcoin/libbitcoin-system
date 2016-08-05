@@ -64,6 +64,7 @@
 #include <bitcoin/bitcoin/message/address.hpp>
 #include <bitcoin/bitcoin/message/alert.hpp>
 #include <bitcoin/bitcoin/message/alert_payload.hpp>
+#include <bitcoin/bitcoin/message/block_message.hpp>
 #include <bitcoin/bitcoin/message/block_transactions.hpp>
 #include <bitcoin/bitcoin/message/compact_block.hpp>
 #include <bitcoin/bitcoin/message/filter_add.hpp>
@@ -90,6 +91,7 @@
 #include <bitcoin/bitcoin/message/reject.hpp>
 #include <bitcoin/bitcoin/message/send_compact_blocks.hpp>
 #include <bitcoin/bitcoin/message/send_headers.hpp>
+#include <bitcoin/bitcoin/message/transaction_message.hpp>
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/unicode/console_streambuf.hpp>

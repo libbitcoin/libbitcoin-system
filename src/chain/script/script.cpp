@@ -372,9 +372,12 @@ inline uint8_t is_sighash_flag(uint8_t sighash_type,
     return (sighash_type & value) != 0;
 }
 
-hash_digest script::generate_signature_hash(transaction parent_tx,
+hash_digest script::generate_signature_hash(const transaction& parent_tx,
     uint32_t input_index, const script& script_code, uint8_t sighash_type)
 {
+    // Copy the parent transaction.
+    transaction parent(parent_tx);
+
     // This is NOT considered an error result and callers should not test
     // for one_hash. This is a bitcoind bug we perpetuate.
     if (input_index >= parent_tx.inputs.size())
@@ -383,10 +386,10 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
     // FindAndDelete(OP_CODESEPARATOR) done in op_checksigverify(...)
 
     // Blank all other inputs' signatures
-    for (auto& input: parent_tx.inputs)
+    for (auto& input: parent.inputs)
         input.script.reset();
 
-    parent_tx.inputs[input_index].script = script_code;
+    parent.inputs[input_index].script = script_code;
 
     // The default sighash::all signs all outputs, and the current input.
     // Transaction cannot be updated without resigning the input.
@@ -395,15 +398,15 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
     if (is_sighash_enum(sighash_type, signature_hash_algorithm::none))
     {
         // Sign no outputs, so they can be changed.
-        parent_tx.outputs.clear();
-        nullify_input_sequences(parent_tx.inputs, input_index);
+        parent.outputs.clear();
+        nullify_input_sequences(parent.inputs, input_index);
     }
     else if (is_sighash_enum(sighash_type, signature_hash_algorithm::single))
     {
 
         // Sign the single output corresponding to our index.
         // We don't care about additional inputs or outputs to the tx.
-        auto& outputs = parent_tx.outputs;
+        auto& outputs = parent.outputs;
         uint32_t output_index = input_index;
 
         // This is NOT considered an error result and callers should not test
@@ -420,18 +423,18 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
             it->script.reset();
         }
 
-        nullify_input_sequences(parent_tx.inputs, input_index);
+        nullify_input_sequences(parent.inputs, input_index);
     }
 
     // Flag to ignore the other inputs except our own.
     if (is_sighash_flag(sighash_type,
         signature_hash_algorithm::anyone_can_pay))
     {
-        parent_tx.inputs[0] = parent_tx.inputs[input_index];
-        parent_tx.inputs.resize(1);
+        parent.inputs[0] = parent.inputs[input_index];
+        parent.inputs.resize(1);
     }
 
-    return parent_tx.hash(sighash_type);
+    return parent.hash(sighash_type);
 }
 
 inline bool cast_to_bool(const data_chunk& values)
