@@ -106,7 +106,7 @@ public:
         const script& output_script, const transaction& parent_tx,
         uint32_t input_index, uint32_t flags);
 
-    static hash_digest generate_signature_hash(transaction parent_tx,
+    static hash_digest generate_signature_hash(const transaction& parent_tx,
         uint32_t input_index, const script& script_code, uint8_t sighash_type);
 
     static bool create_endorsement(endorsement& out, const ec_secret& secret,
