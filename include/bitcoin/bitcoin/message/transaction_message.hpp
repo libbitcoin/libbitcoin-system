@@ -25,6 +25,8 @@
 #include <istream>
 #include <memory>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/chain/input.hpp>
+#include <bitcoin/bitcoin/chain/output.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -45,11 +47,26 @@ public:
     static transaction_message factory_from_data(std::istream& stream);
     static transaction_message factory_from_data(reader& source);
 
+    transaction_message();
+    transaction_message(const transaction& other);
+    transaction_message(const transaction_message& other);
+    transaction_message(uint32_t version, uint32_t locktime,
+        const chain::input::list& inputs, const chain::output::list& outputs);
+
+    transaction_message(transaction&& other);
+    transaction_message(transaction_message&& other);
+    transaction_message(uint32_t version, uint32_t locktime,
+        chain::input::list&& inputs, chain::output::list&& outputs);
+
+    /// This class is move assignable but not copy assignable.
+    transaction_message& operator=(transaction_message&& other);
+    void operator=(const transaction_message&) = delete;
+
     uint64_t originator() const;
     void set_originator(uint64_t value);
 
 private:
-    uint64_t originator_ = 0;
+    uint64_t originator_;
 };
 
 } // namspace message

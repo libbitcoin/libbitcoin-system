@@ -20,7 +20,10 @@
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 
 #include <sstream>
+#include <utility>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/chain/input.hpp>
+#include <bitcoin/bitcoin/chain/output.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -51,6 +54,58 @@ transaction transaction::factory_from_data(reader& source)
     transaction instance;
     instance.from_data(source);
     return instance;
+}
+
+// default constructors
+
+transaction::transaction()
+  : version(0), locktime(0)
+{
+}
+
+transaction::transaction(const transaction& other)
+  : transaction(other.version, other.locktime, other.inputs, other.outputs)
+{
+}
+
+transaction::transaction(uint32_t version, uint32_t locktime,
+    const input::list& inputs, const output::list& outputs)
+  : version(version), locktime(locktime), inputs(inputs), outputs(outputs)
+{
+}
+
+transaction::transaction(transaction&& other)
+  : transaction(other.version, other.locktime, 
+        std::forward<input::list>(other.inputs),
+        std::forward<output::list>(other.outputs))
+{
+}
+
+transaction::transaction(uint32_t version, uint32_t locktime,
+    input::list&& inputs, output::list&& outputs)
+  : version(version), locktime(locktime),
+    inputs(std::forward<input::list>(inputs)),
+    outputs(std::forward<output::list>(outputs))
+{
+}
+
+transaction& transaction::operator=(transaction&& other)
+{
+    version = other.version;
+    locktime = other.locktime;
+    inputs = std::move(other.inputs);
+    outputs = std::move(other.outputs);
+    return *this;
+}
+
+// TODO: eliminate blockchain copy scenarios and then delete this.
+transaction& transaction::operator=(const transaction& other)
+{
+    version = other.version;
+    locktime = other.locktime;
+    inputs = other.inputs;
+    outputs = other.outputs;
+    return *this;
 }
 
 bool transaction::is_valid() const
@@ -87,25 +142,39 @@ bool transaction::from_data(reader& source)
 
     if (result)
     {
-        uint64_t tx_in_count = source.read_variable_uint_little_endian();
+        const auto tx_in_count = source.read_variable_uint_little_endian();
         result = source;
 
-        for (uint64_t i = 0; (i < tx_in_count) && result; ++i)
+        if (result)
         {
-            inputs.emplace_back();
-            result = inputs.back().from_data(source);
+            inputs.resize(tx_in_count);
+
+            for (auto& input: inputs)
+            {
+                result = input.from_data(source);
+
+                if (!result)
+                    break;
+            }
         }
     }
 
     if (result)
     {
-        auto tx_out_count = source.read_variable_uint_little_endian();
+        const auto tx_out_count = source.read_variable_uint_little_endian();
         result = source;
 
-        for (uint64_t i = 0; (i < tx_out_count) && result; ++i)
+        if (result)
         {
-            outputs.emplace_back();
-            result = outputs.back().from_data(source);
+            outputs.resize(tx_out_count);
+
+            for (auto& output: outputs)
+            {
+                result = output.from_data(source);
+
+                if (!result)
+                    break;
+            }
         }
     }
 

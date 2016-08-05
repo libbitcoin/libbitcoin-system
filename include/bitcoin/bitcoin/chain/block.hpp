@@ -66,6 +66,19 @@ public:
 
     static const std::string command;
 
+    block();
+    block(const block& other);
+    block(const chain::header& header,
+        const chain::transaction::list& transactions);
+
+    block(block&& other);
+    block(chain::header&& header,
+        chain::transaction::list&& transactions);
+
+    /// This class is move assignable but not copy assignable.
+    block& operator=(block&& other);
+    void operator=(const block&) = delete;
+
     chain::header header;
     transaction::list transactions;
 };

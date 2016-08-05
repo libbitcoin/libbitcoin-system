@@ -22,6 +22,9 @@
 #include <cstdint>
 #include <cstddef>
 #include <istream>
+#include <utility>
+#include <bitcoin/bitcoin/chain/header.hpp>
+#include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 
@@ -50,6 +53,55 @@ block_message block_message::factory_from_data(reader& source,
     block_message instance;
     instance.from_data(source, with_transaction_count);
     return instance;
+}
+
+block_message::block_message()
+  : block(), originator_(0)
+{
+}
+
+block_message::block_message(const chain::block& other)
+  : block_message(other.header, other.transactions)
+{
+}
+
+block_message::block_message(const block_message& other)
+  : block_message(other.header, other.transactions)
+{
+}
+
+block_message::block_message(const chain::header& header,
+    const chain::transaction::list& transactions)
+  : block(header, transactions), originator_(0)
+{
+}
+
+block_message::block_message(chain::block&& other)
+  : block_message(std::forward<chain::header>(other.header),
+        std::forward<chain::transaction::list>(other.transactions))
+{
+}
+
+block_message::block_message(block_message&& other)
+  : block_message(std::forward<chain::header>(other.header),
+        std::forward<chain::transaction::list>(other.transactions))
+{
+}
+
+block_message::block_message(chain::header&& header,
+    chain::transaction::list&& transactions)
+  : block(std::forward<chain::header>(header),
+        std::forward<chain::transaction::list>(transactions)),
+    originator_(0)
+{
+}
+
+block_message& block_message::operator=(block_message&& other)
+{
+    header = std::move(other.header);
+    transactions = std::move(other.transactions);
+    originator_ = other.originator_;
+    return *this;
 }
 
 uint64_t block_message::originator() const

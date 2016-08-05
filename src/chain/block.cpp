@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/chain/block.hpp>
 
+#include <utility>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
@@ -57,6 +58,40 @@ block block::factory_from_data(reader& source,
     return instance;
 }
 
+block::block()
+{
+}
+
+block::block(const block& other)
+  : block(other.header, other.transactions)
+{
+}
+
+block::block(const chain::header& header,
+    const chain::transaction::list& transactions)
+  : header(header), transactions(transactions)
+{
+}
+
+block::block(block&& other)
+  : block(std::forward<chain::header>(other.header),
+        std::forward<chain::transaction::list>(other.transactions))
+{
+}
+
+block::block(chain::header&& header, chain::transaction::list&& transactions)
+  : header(std::forward<chain::header>(header)),
+    transactions(std::forward<chain::transaction::list>(transactions))
+{
+}
+
+block& block::operator=(block&& other)
+{
+    header = std::move(other.header);
+    transactions = std::move(other.transactions);
+    return *this;
+}
+
 bool block::is_valid() const
 {
     return !transactions.empty() || header.is_valid();
@@ -85,10 +120,17 @@ bool block::from_data(reader& source, bool with_transaction_count)
     reset();
     auto result = header.from_data(source, with_transaction_count);
 
-    for (uint64_t i = 0; i < header.transaction_count && result; ++i)
+    if (result)
     {
-        transactions.emplace_back();
-        result = transactions.back().from_data(source);
+        transactions.resize(header.transaction_count);
+
+        for (auto& tx: transactions)
+        {
+            result = tx.from_data(source);
+
+            if (!result)
+                break;
+        }
     }
 
     if (!result)
