@@ -66,6 +66,7 @@ bool filter_add::is_valid() const
 void filter_add::reset()
 {
     data.clear();
+    data.shrink_to_fit();
 }
 
 bool filter_add::from_data(const uint32_t version, const data_chunk& data)

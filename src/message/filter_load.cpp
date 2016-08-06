@@ -69,6 +69,7 @@ bool filter_load::is_valid() const
 void filter_load::reset()
 {
     filter.clear();
+    filter.shrink_to_fit();
     hash_functions = 0;
     tweak = 0;
     flags = 0x00;

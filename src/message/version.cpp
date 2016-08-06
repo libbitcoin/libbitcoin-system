@@ -78,6 +78,7 @@ void version::reset()
     address_sender.reset();
     nonce = 0;
     user_agent.clear();
+    user_agent.shrink_to_fit();
     start_height = 0;
     relay = false;
 }

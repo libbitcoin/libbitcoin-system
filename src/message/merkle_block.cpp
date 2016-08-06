@@ -67,7 +67,9 @@ void merkle_block::reset()
 {
     header.reset();
     hashes.clear();
+    hashes.shrink_to_fit();
     flags.clear();
+    flags.shrink_to_fit();
 }
 
 bool merkle_block::from_data(const uint32_t version, const data_chunk& data)
@@ -97,6 +99,9 @@ bool merkle_block::from_data(const uint32_t version, reader& source)
         hash_count = source.read_variable_uint_little_endian();
         result = source;
     }
+
+    if (result)
+        hashes.reserve(hash_count);
 
     for (uint64_t i = 0; (i < hash_count) && result; ++i)
     {

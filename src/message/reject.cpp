@@ -69,8 +69,10 @@ bool reject::is_valid() const
 void reject::reset()
 {
     message.clear();
+    message.shrink_to_fit();
     code = error_code::undefined;
     reason.clear();
+    reason.shrink_to_fit();
     data.fill(0);
 }
 

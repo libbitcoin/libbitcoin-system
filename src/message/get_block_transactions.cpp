@@ -67,6 +67,7 @@ void get_block_transactions::reset()
 {
     block_hash = null_hash;
     indexes.clear();
+    indexes.shrink_to_fit();
 }
 
 bool get_block_transactions::from_data(const uint32_t version,
@@ -92,6 +93,9 @@ bool get_block_transactions::from_data(const uint32_t version,
 
     const auto count = source.read_variable_uint_little_endian();
     result &= static_cast<bool>(source);
+
+    if (result)
+        indexes.reserve(count);
 
     for (uint64_t i = 0; (i < count) && result; ++i)
     {

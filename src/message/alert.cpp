@@ -63,7 +63,9 @@ bool alert::is_valid() const
 void alert::reset()
 {
     payload.clear();
+    payload.shrink_to_fit();
     signature.clear();
+    signature.shrink_to_fit();
 }
 
 bool alert::from_data(const uint32_t version, const data_chunk& data)

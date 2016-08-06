@@ -94,6 +94,7 @@ bool inventory::is_valid() const
 void inventory::reset()
 {
     inventories.clear();
+    inventories.shrink_to_fit();
 }
 
 bool inventory::from_data(const uint32_t version, const data_chunk& data)
@@ -114,10 +115,17 @@ bool inventory::from_data(const uint32_t version, reader& source)
     const auto count = source.read_variable_uint_little_endian();
     auto result = static_cast<bool>(source);
 
-    for (uint64_t i = 0; (i < count) && result; ++i)
+    if (result)
     {
-        inventories.emplace_back();
-        result = inventories.back().from_data(version, source);
+        inventories.resize(count);
+
+        for (auto& inventory: inventories)
+        {
+            result = inventory.from_data(version, source);
+
+            if (!result)
+                break;
+        }
     }
 
     if (!result)

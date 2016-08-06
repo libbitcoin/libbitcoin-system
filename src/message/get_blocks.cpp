@@ -65,6 +65,7 @@ bool get_blocks::is_valid() const
 void get_blocks::reset()
 {
     start_hashes.clear();
+    start_hashes.shrink_to_fit();
     stop_hash.fill(0);
 }
 
@@ -88,6 +89,7 @@ bool get_blocks::from_data(const uint32_t version, reader& source)
     source.read_4_bytes_little_endian();
 
     const auto count = source.read_variable_uint_little_endian();
+    start_hashes.reserve(count);
 
     for (uint64_t i = 0; i < count && source; ++i)
         start_hashes.push_back(source.read_hash());

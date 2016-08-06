@@ -89,13 +89,18 @@ void alert_payload::reset()
     id = 0;
     cancel = 0;
     set_cancel.clear();
+    set_cancel.shrink_to_fit();
     min_version = 0;
     max_version = 0;
     set_sub_version.clear();
+    set_sub_version.shrink_to_fit();
     priority = 0;
     comment.clear();
+    comment.shrink_to_fit();
     status_bar.clear();
+    status_bar.shrink_to_fit();
     reserved.clear();
+    reserved.shrink_to_fit();
 }
 
 bool alert_payload::from_data(const uint32_t version, const data_chunk& data)

@@ -66,6 +66,7 @@ void block_transactions::reset()
 {
     block_hash = null_hash;
     transactions.clear();
+    transactions.shrink_to_fit();
 }
 
 bool block_transactions::from_data(const uint32_t version,
@@ -91,10 +92,17 @@ bool block_transactions::from_data(const uint32_t version, reader& source)
     const auto count = source.read_variable_uint_little_endian();
     result &= static_cast<bool>(source);
 
-    for (uint64_t i = 0; (i < count) && result; ++i)
+    if (result)
     {
-        transactions.emplace_back();
-        result = transactions.back().from_data(source);
+        transactions.resize(count);
+
+        for (auto& transaction: transactions)
+        {
+            result = transaction.from_data(source);
+
+            if (!result)
+                break;
+        }
     }
 
     if (!result)

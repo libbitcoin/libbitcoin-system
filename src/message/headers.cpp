@@ -82,6 +82,7 @@ bool headers::is_valid() const
 void headers::reset()
 {
     elements.clear();
+    elements.shrink_to_fit();
 }
 
 bool headers::from_data(const uint32_t version, const data_chunk& data)
@@ -100,13 +101,20 @@ bool headers::from_data(const uint32_t version, reader& source)
 {
     reset();
 
-    uint64_t count = source.read_variable_uint_little_endian();
+    const auto count = source.read_variable_uint_little_endian();
     auto result = static_cast<bool>(source);
 
-    for (uint64_t i = 0; (i < count) && result; ++i)
+    if (result)
     {
-        elements.emplace_back();
-        result = elements.back().from_data(source, true);
+        elements.resize(count);
+
+        for (auto& element: elements)
+        {
+            result = element.from_data(source, true);
+
+            if (!result)
+                break;
+        }
     }
 
     if (!result)

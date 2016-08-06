@@ -68,7 +68,9 @@ void compact_block::reset()
     header.reset();
     nonce = 0;
     short_ids.clear();
+    short_ids.shrink_to_fit();
     transactions.clear();
+    transactions.shrink_to_fit();
 }
 
 bool compact_block::from_data(const uint32_t version, const data_chunk& data)
@@ -93,6 +95,9 @@ bool compact_block::from_data(const uint32_t version, reader& source)
     const auto short_ids_count = source.read_variable_uint_little_endian();
     result &= static_cast<bool>(source);
 
+    if (result)
+        short_ids.reserve(short_ids_count);
+
     for (uint64_t i = 0; (i < short_ids_count) && result; ++i)
     {
         short_ids.push_back(source.read_mini_hash());
@@ -102,10 +107,17 @@ bool compact_block::from_data(const uint32_t version, reader& source)
     const auto transaction_count = source.read_variable_uint_little_endian();
     result &= static_cast<bool>(source);
 
-    for (uint64_t i = 0; (i < transaction_count) && result; ++i)
+    if (result)
     {
-        transactions.emplace_back();
-        result = transactions.back().from_data(version, source);
+        transactions.resize(transaction_count);
+
+        for (auto& transaction: transactions)
+        {
+            result = transaction.from_data(version, source);
+
+            if (!result)
+                break;
+        }
     }
 
     if (!result || insufficient_version)

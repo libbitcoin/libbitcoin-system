@@ -86,6 +86,7 @@ void heading::reset()
 {
     magic = 0;
     command.clear();
+    command.shrink_to_fit();
     payload_size = 0;
     checksum = 0;
 }

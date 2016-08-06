@@ -99,6 +99,7 @@ void block::reset()
 {
     header.reset();
     transactions.clear();
+    transactions.shrink_to_fit();
 }
 
 bool block::from_data(const data_chunk& data, bool with_transaction_count)

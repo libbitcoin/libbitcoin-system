@@ -117,7 +117,9 @@ void transaction::reset()
     version = 0;
     locktime = 0;
     inputs.clear();
+    inputs.shrink_to_fit();
     outputs.clear();
+    outputs.shrink_to_fit();
 }
 
 bool transaction::from_data(const data_chunk& data)
