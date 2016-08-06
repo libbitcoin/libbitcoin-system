@@ -24,6 +24,8 @@
 #include <utility>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/message/inventory_type_id.hpp>
+#include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -152,6 +154,18 @@ void headers::to_hashes(hash_list& out) const
     const auto map = [](const chain::header& header)
     {
         return header.hash();
+    };
+
+    out.resize(elements.size());
+    std::transform(elements.begin(), elements.end(), out.begin(), map);
+}
+
+void headers::to_inventory(inventory_vector::list& out,
+    inventory_type_id type_id) const
+{
+    const auto map = [type_id](const chain::header& header)
+    {
+        return inventory_vector{ type_id, header.hash() };
     };
 
     out.resize(elements.size());

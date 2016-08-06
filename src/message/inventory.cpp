@@ -25,6 +25,7 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/message/inventory_type_id.hpp>
+#include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -168,6 +169,19 @@ void inventory::to_hashes(hash_list& out, inventory_type_id type_id) const
     out.shrink_to_fit();
 }
 
+void inventory::reduce(inventory_vector::list& out,
+    inventory_type_id type_id) const
+{
+    const auto is_type = [type_id](const inventory_vector& element)
+    {
+        return element.type == type_id;
+    };
+
+    out.reserve(inventories.size());
+    std::copy_if(inventories.begin(), inventories.end(), out.begin(), is_type);
+    out.shrink_to_fit();
+}
+
 uint64_t inventory::serialized_size(const uint32_t version) const
 {
     return variable_uint_size(inventories.size()) + inventories.size() *
@@ -176,12 +190,12 @@ uint64_t inventory::serialized_size(const uint32_t version) const
 
 size_t inventory::count(inventory_type_id type_id) const
 {
-    const auto is_of_type = [type_id](const inventory_vector& element)
+    const auto is_type = [type_id](const inventory_vector& element)
     {
         return element.type == type_id;
     };
 
-    return count_if(inventories.begin(), inventories.end(), is_of_type);
+    return count_if(inventories.begin(), inventories.end(), is_type);
 }
 
 bool operator==(const inventory& left, const inventory& right)

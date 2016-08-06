@@ -58,6 +58,7 @@ public:
     void to_data(const uint32_t version, std::ostream& stream) const;
     void to_data(const uint32_t version, writer& sink) const;
     void to_hashes(hash_list& out, inventory_type_id type_id) const;
+    void reduce(inventory_vector::list& out, inventory_type_id type_id) const;
     bool is_valid() const;
     void reset();
     uint64_t serialized_size(const uint32_t version) const;

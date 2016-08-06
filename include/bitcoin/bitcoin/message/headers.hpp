@@ -29,6 +29,8 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/message/inventory_type_id.hpp>
+#include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
@@ -56,6 +58,8 @@ public:
     void to_data(const uint32_t version, std::ostream& stream) const;
     void to_data(const uint32_t version, writer& sink) const;
     void to_hashes(hash_list& out) const;
+    void to_inventory(inventory_vector::list& out,
+        inventory_type_id type_id) const;
     bool is_valid() const;
     void reset();
     uint64_t serialized_size(const uint32_t version) const;
