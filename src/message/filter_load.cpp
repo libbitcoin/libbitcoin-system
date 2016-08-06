@@ -91,8 +91,8 @@ bool filter_load::from_data(const uint32_t version, reader& source)
 {
     reset();
 
-    bool insufficent_version = (version < filter_load::version_minimum);
-    auto size = source.read_variable_uint_little_endian();
+    const auto  insufficent_version = (version < filter_load::version_minimum);
+    const auto size = source.read_variable_uint_little_endian();
     BITCOIN_ASSERT(size <= bc::max_size_t);
     const auto filter_size = static_cast<size_t>(size);
     bool result = static_cast<bool>(source);

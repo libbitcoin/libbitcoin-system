@@ -110,6 +110,7 @@ bool heading::from_data(const uint32_t version, reader& source)
     command = source.read_fixed_string(command_size);
     payload_size = source.read_4_bytes_little_endian();
     checksum = source.read_4_bytes_little_endian();
+
     if (!source)
         reset();
 

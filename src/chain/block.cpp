@@ -117,6 +117,7 @@ bool block::from_data(std::istream& stream, bool with_transaction_count)
 bool block::from_data(reader& source, bool with_transaction_count)
 {
     reset();
+
     auto result = header.from_data(source, with_transaction_count);
 
     if (result)

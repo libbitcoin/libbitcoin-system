@@ -80,9 +80,11 @@ bool point::from_data(std::istream& stream)
 bool point::from_data(reader& source)
 {
     reset();
+
     hash = source.read_hash();
     index = source.read_4_bytes_little_endian();
-    auto result = static_cast<bool>(source);
+    const auto result = static_cast<bool>(source);
+
     if (!result)
         reset();
 
@@ -133,6 +135,9 @@ bool point::is_null() const
     return (index == max_uint32) && (hash == null_hash);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// TODO: review to determine if use of this should be replaced by checksum2.
+///////////////////////////////////////////////////////////////////////////////
 // This only provides 32 bits of entropy, so checksum2 is preferred.
 uint64_t point::checksum() const
 {
@@ -154,7 +159,7 @@ uint64_t point::checksum() const
 uint64_t point::checksum2() const
 {
     // Get the first 64 bits of the transaction hash.
-    auto value = from_little_endian_unsafe<uint64_t>(hash.begin());
+    const auto value = from_little_endian_unsafe<uint64_t>(hash.begin());
     
     // In order to avoid collision on the same transaction add the index.
     return value + index;

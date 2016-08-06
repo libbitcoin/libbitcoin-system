@@ -88,9 +88,9 @@ bool compact_block::from_data(const uint32_t version, std::istream& stream)
 bool compact_block::from_data(const uint32_t version, reader& source)
 {
     reset();
+
     auto insufficient_version = (version < compact_block::version_minimum);
     auto result = header.from_data(source, false);
-
     nonce = source.read_8_bytes_little_endian();
     const auto short_ids_count = source.read_variable_uint_little_endian();
     result &= static_cast<bool>(source);

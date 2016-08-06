@@ -123,7 +123,7 @@ void get_blocks::to_data(const uint32_t version, writer& sink) const
     sink.write_4_bytes_little_endian(version);
     sink.write_variable_uint_little_endian(start_hashes.size());
 
-    for (hash_digest start_hash: start_hashes)
+    for (const auto& start_hash: start_hashes)
         sink.write_hash(start_hash);
 
     sink.write_hash(stop_hash);
@@ -138,6 +138,7 @@ uint64_t get_blocks::serialized_size(const uint32_t version) const
 bool operator==(const get_blocks& left, const get_blocks& right)
 {
     auto result = (left.start_hashes.size() == right.start_hashes.size());
+
     for (size_t i = 0; i < left.start_hashes.size() && result; i++)
         result = (left.start_hashes[i] == right.start_hashes[i]);
 

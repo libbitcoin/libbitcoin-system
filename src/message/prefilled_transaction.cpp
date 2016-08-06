@@ -81,6 +81,7 @@ bool prefilled_transaction::from_data(const uint32_t version,
     reader& source)
 {
     reset();
+
     index = source.read_variable_uint_little_endian();
     auto result = static_cast<bool>(source);
 

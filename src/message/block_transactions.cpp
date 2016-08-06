@@ -132,6 +132,7 @@ void block_transactions::to_data(const uint32_t version, writer& sink) const
 {
     sink.write_hash(block_hash);
     sink.write_variable_uint_little_endian(transactions.size());
+
     for (const auto& element: transactions)
         element.to_data(sink);
 }

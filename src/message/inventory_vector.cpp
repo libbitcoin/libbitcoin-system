@@ -81,10 +81,12 @@ bool inventory_vector::from_data(const uint32_t version,
     reader& source)
 {
     reset();
+
     uint32_t raw_type = source.read_4_bytes_little_endian();
     type = inventory_type_from_number(raw_type);
     hash = source.read_hash();
     bool result = static_cast<bool>(source);
+
     if (!result)
         reset();
 
@@ -111,7 +113,7 @@ void inventory_vector::to_data(const uint32_t version,
 void inventory_vector::to_data(const uint32_t version,
     writer& sink) const
 {
-    uint32_t raw_type = inventory_type_to_number(type);
+    const auto raw_type = inventory_type_to_number(type);
     sink.write_4_bytes_little_endian(raw_type);
     sink.write_hash(hash);
 }

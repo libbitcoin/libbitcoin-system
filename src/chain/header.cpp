@@ -93,8 +93,8 @@ bool header::from_data(std::istream& stream, bool with_transaction_count)
 
 bool header::from_data(reader& source, bool with_transaction_count)
 {
-    auto result = true;
     reset();
+
     version = source.read_4_bytes_little_endian();
     previous_block_hash = source.read_hash();
     merkle = source.read_hash();
@@ -105,7 +105,8 @@ bool header::from_data(reader& source, bool with_transaction_count)
     if (with_transaction_count)
         transaction_count = source.read_variable_uint_little_endian();
 
-    result = source;
+    const auto result = static_cast<bool>(source);
+
     if (!result)
         reset();
 
@@ -144,7 +145,8 @@ void header::to_data(writer& sink, bool with_transaction_count) const
 
 uint64_t header::serialized_size(bool with_transaction_count) const
 {
-    uint64_t size = satoshi_fixed_size_without_transaction_count();
+    auto size = satoshi_fixed_size_without_transaction_count();
+
     if (with_transaction_count)
         size += variable_uint_size(transaction_count);
 

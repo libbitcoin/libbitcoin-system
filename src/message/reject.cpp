@@ -90,8 +90,7 @@ bool reject::from_data(const uint32_t version, std::istream& stream)
 
 bool reject::from_data(const uint32_t version, reader& source)
 {
-    bool result = false;
-    bool version_insufficient = (version < reject::version_minimum);
+    const auto insufficient_version = (version < reject::version_minimum);
 
     reset();
 
@@ -105,7 +104,8 @@ bool reject::from_data(const uint32_t version, reader& source)
         data = source.read_hash();
     }
 
-    result = source && !version_insufficient;
+
+    const auto result = source && !insufficient_version;
 
     if (!result)
         reset();

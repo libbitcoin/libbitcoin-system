@@ -111,7 +111,7 @@ bool merkle_block::from_data(const uint32_t version, reader& source)
 
     if (result)
     {
-        auto size = source.read_variable_uint_little_endian();
+        const auto size = source.read_variable_uint_little_endian();
         BITCOIN_ASSERT(size <= bc::max_size_t);
         const auto flag_count = static_cast<size_t>(size);
         flags = source.read_data(flag_count);

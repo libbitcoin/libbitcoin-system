@@ -124,16 +124,18 @@ bool alert_payload::from_data(const uint32_t version, reader& source)
     expiration = source.read_8_bytes_little_endian();
     id = source.read_4_bytes_little_endian();
     cancel = source.read_4_bytes_little_endian();
+    const auto cancel_size = source.read_variable_uint_little_endian();
+    set_cancel.reserve(cancel_size);
 
-    uint64_t set_cancel_size = source.read_variable_uint_little_endian();
-    for (uint64_t i = 0; i < set_cancel_size && source; i++)
+    for (uint64_t i = 0; i < cancel_size && source; i++)
         set_cancel.push_back(source.read_4_bytes_little_endian());
 
     min_version = source.read_4_bytes_little_endian();
     max_version = source.read_4_bytes_little_endian();
+    const auto sub_version_size = source.read_variable_uint_little_endian();
+    set_sub_version.reserve(sub_version_size);
 
-    uint64_t set_sub_version_size = source.read_variable_uint_little_endian();
-    for (uint64_t i = 0; i < set_sub_version_size && source; i++)
+    for (uint64_t i = 0; i < sub_version_size && source; i++)
         set_sub_version.push_back(source.read_string());
 
     priority = source.read_4_bytes_little_endian();
@@ -170,16 +172,16 @@ void alert_payload::to_data(const uint32_t version, writer& sink) const
     sink.write_8_bytes_little_endian(expiration);
     sink.write_4_bytes_little_endian(id);
     sink.write_4_bytes_little_endian(cancel);
-
     sink.write_variable_uint_little_endian(set_cancel.size());
-    for (const auto& entry : set_cancel)
+
+    for (const auto& entry: set_cancel)
         sink.write_4_bytes_little_endian(entry);
 
     sink.write_4_bytes_little_endian(min_version);
     sink.write_4_bytes_little_endian(max_version);
-
     sink.write_variable_uint_little_endian(set_sub_version.size());
-    for (const auto& entry : set_sub_version)
+
+    for (const auto& entry: set_sub_version)
         sink.write_string(entry);
 
     sink.write_4_bytes_little_endian(priority);
@@ -219,17 +221,16 @@ bool operator==(const alert_payload& left,
         (left.status_bar == right.status_bar) &&
         (left.reserved == right.reserved);
 
-    for (std::vector<uint32_t>::size_type i = 0; i < left.set_cancel.size() && result; i++)
+    for (size_t i = 0; i < left.set_cancel.size() && result; i++)
         result = (left.set_cancel[i] == right.set_cancel[i]);
 
-    for (std::vector<std::string>::size_type i = 0; i < left.set_sub_version.size() && result; i++)
+    for (size_t i = 0; i < left.set_sub_version.size() && result; i++)
         result = (left.set_sub_version[i] == right.set_sub_version[i]);
 
     return result;
 }
 
-bool operator!=(const alert_payload& left,
-    const alert_payload& right)
+bool operator!=(const alert_payload& left, const alert_payload& right)
 {
     return !(left == right);
 }

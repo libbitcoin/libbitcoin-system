@@ -151,10 +151,10 @@ bool operator==(const alert& left, const alert& right)
     bool result = (left.payload.size() == right.payload.size()) &&
         (left.signature.size() == right.signature.size());
 
-    for (data_chunk::size_type i = 0; i < left.payload.size() && result; i++)
+    for (size_t i = 0; i < left.payload.size() && result; i++)
         result = (left.payload[i] == right.payload[i]);
 
-    for (data_chunk::size_type i = 0; i < left.signature.size() && result; i++)
+    for (size_t i = 0; i < left.signature.size() && result; i++)
         result = (left.signature[i] == right.signature[i]);
 
     return result;

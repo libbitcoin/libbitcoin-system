@@ -145,8 +145,8 @@ void headers::to_data(const uint32_t version, writer& sink) const
 {
     sink.write_variable_uint_little_endian(elements.size());
 
-    for (const auto& head: elements)
-        head.to_data(sink, true);
+    for (const auto& element: elements)
+        element.to_data(sink, true);
 }
 
 void headers::to_hashes(hash_list& out) const
@@ -176,8 +176,8 @@ uint64_t headers::serialized_size(const uint32_t version) const
 {
     uint64_t size = variable_uint_size(elements.size());
 
-    for (const auto& head: elements)
-        size += head.serialized_size(true);
+    for (const auto& element: elements)
+        size += element.serialized_size(true);
 
     return size;
 }

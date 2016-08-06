@@ -90,7 +90,7 @@ bool network_address::from_data(const uint32_t version,
 bool network_address::from_data(const uint32_t version,
     reader& source, bool with_timestamp)
 {
-    bool result = false;
+    auto result = false;
 
     reset();
 
@@ -147,6 +147,7 @@ uint64_t network_address::satoshi_fixed_size(const uint32_t version,
     bool with_timestamp)
 {
     uint64_t result = 26;
+
     if (with_timestamp)
         result += 4;
 

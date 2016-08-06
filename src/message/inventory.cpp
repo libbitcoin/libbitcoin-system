@@ -154,8 +154,9 @@ void inventory::to_data(const uint32_t version, std::ostream& stream) const
 void inventory::to_data(const uint32_t version, writer& sink) const
 {
     sink.write_variable_uint_little_endian(inventories.size());
-    for (const auto& element: inventories)
-        element.to_data(version, sink);
+
+    for (const auto& inventory: inventories)
+        inventory.to_data(version, sink);
 }
 
 void inventory::to_hashes(hash_list& out, inventory_type_id type_id) const

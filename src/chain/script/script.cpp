@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/chain/script/script.hpp>
 
+#include <numeric>
 #include <sstream>
 #include <boost/algorithm/string.hpp>
 #include <boost/iostreams/stream.hpp>
@@ -127,6 +128,7 @@ void script::reset()
 bool script::from_data(const data_chunk& data, bool prefix, parse_mode mode)
 {
     auto result = true;
+
     if (prefix)
     {
         data_source istream(data);
@@ -136,6 +138,7 @@ bool script::from_data(const data_chunk& data, bool prefix, parse_mode mode)
     {
         reset();
         result = deserialize(data, mode);
+
         if (!result)
             reset();
     }
@@ -151,15 +154,17 @@ bool script::from_data(std::istream& stream, bool prefix, parse_mode mode)
 
 bool script::from_data(reader& source, bool prefix, parse_mode mode)
 {
+    reset();
+
     auto result = true;
     data_chunk raw_script;
-    reset();
 
     if (prefix)
     {
-        auto script_length = source.read_variable_uint_little_endian();
+        const auto script_length = source.read_variable_uint_little_endian();
         result = source;
         BITCOIN_ASSERT(script_length <= max_uint32);
+
         if (result)
         {
             auto script_length32 = static_cast<uint32_t>(script_length);
@@ -212,20 +217,24 @@ void script::to_data(writer& sink, bool prefix) const
 
 uint64_t script::satoshi_content_size() const
 {
-    uint64_t size = 0;
-
     if (operations.size() > 0 && (operations[0].code == opcode::raw_data))
-        size = operations[0].serialized_size();
-    else
-        for (const auto& op: operations)
-            size += op.serialized_size();
+    {
+        return operations[0].serialized_size();
+    }
+    
+    const auto value = [](uint64_t total, const operation& op)
+    {
+        return total + op.serialized_size();
+    };
 
-    return size;
+    return std::accumulate(operations.begin(), operations.end(), uint64_t(0),
+        value);
 }
 
 uint64_t script::serialized_size(bool prefix) const
 {
-    uint64_t size = satoshi_content_size();
+    auto size = satoshi_content_size();
+
     if (prefix)
         size += variable_uint_size(size);
 
@@ -239,7 +248,7 @@ bool script::from_string(const std::string& human_readable)
     const auto tokens = split(human_readable);
     auto clear = false;
 
-    for (auto token = tokens.begin(); (token != tokens.end()); ++token)
+    for (auto token = tokens.begin(); token != tokens.end(); ++token)
     {
         opcode code;
         data_chunk data;
@@ -273,7 +282,7 @@ bool script::from_string(const std::string& human_readable)
             break;
         }
 
-        operations.push_back(operation{ code, data });
+        operations.push_back({ code, data });
     }
 
     // empty invalid/failed parse content
@@ -292,7 +301,7 @@ std::string script::to_string(uint32_t flags) const
         if (it != operations.begin())
             value << " ";
 
-        value << (*it).to_string(flags);
+        value << it->to_string(flags);
     }
 
     return value.str();
@@ -300,13 +309,14 @@ std::string script::to_string(uint32_t flags) const
 
 bool script::deserialize(const data_chunk& raw_script, parse_mode mode)
 {
-    auto success = false;
-    if (mode != parse_mode::raw_data)
-        success = parse(raw_script);
+    auto result = false;
 
-    if (!success && (mode != parse_mode::strict))
+    if (mode != parse_mode::raw_data)
+        result = parse(raw_script);
+
+    if (!result && (mode != parse_mode::strict))
     {
-        success = true;
+        result = true;
 
         // recognize as raw data
         const auto op = operation
@@ -319,26 +329,26 @@ bool script::deserialize(const data_chunk& raw_script, parse_mode mode)
         operations.push_back(op);
     }
 
-    return success;
+    return result;
 }
 
 bool script::parse(const data_chunk& raw_script)
 {
-    auto success = true;
+    auto result = true;
 
     if (raw_script.begin() != raw_script.end())
     {
         data_source istream(raw_script);
 
-        while (success && istream &&
+        while (result && istream &&
             (istream.peek() != std::istream::traits_type::eof()))
         {
             operations.emplace_back();
-            success = operations.back().from_data(istream);
+            result = operations.back().from_data(istream);
         }
     }
 
-    return success;
+    return result;
 }
 
 inline hash_digest one_hash()
@@ -490,10 +500,12 @@ bool pick_roll_impl(DataStack& stack, bool is_roll)
         return false;
 
     int32_t value;
+
     if (!read_value(stack, value))
         return false;
 
     const auto stack_size = static_cast<int32_t>(stack.size());
+
     if (value < 0 || value >= stack_size)
         return false;
 
@@ -1217,10 +1229,12 @@ signature_parse_result op_checksigverify(evaluation_context& context,
     distinguished.pop_back();
 
     ec_signature signature;
+
     if (strict && !parse_signature(signature, distinguished, true))
         return signature_parse_result::lax_encoding;
 
     chain::script script_code;
+
     for (auto it = context.code_begin; it != script.operations.end(); ++it)
         if (it->data != endorsement && it->code != opcode::codeseparator)
             script_code.operations.push_back(*it);
@@ -1269,6 +1283,7 @@ signature_parse_result op_checkmultisigverify(evaluation_context& context,
     uint32_t input_index, bool strict)
 {
     int32_t pubkeys_count;
+
     if (!read_value(context.stack, pubkeys_count))
         return signature_parse_result::invalid;
 
@@ -1276,14 +1291,17 @@ signature_parse_result op_checkmultisigverify(evaluation_context& context,
         return signature_parse_result::invalid;
 
     context.operation_counter += pubkeys_count;
+
     if (context.operation_counter > op_counter_limit)
         return signature_parse_result::invalid;
 
     data_stack pubkeys;
+
     if (!read_section(context, pubkeys, pubkeys_count))
         return signature_parse_result::invalid;
 
     int32_t sigs_count;
+
     if (!read_value(context.stack, sigs_count))
         return signature_parse_result::invalid;
 
@@ -1291,6 +1309,7 @@ signature_parse_result op_checkmultisigverify(evaluation_context& context,
         return signature_parse_result::invalid;
 
     data_stack endorsements;
+
     if (!read_section(context, endorsements, sigs_count))
         return signature_parse_result::invalid;
 
@@ -1307,6 +1326,7 @@ signature_parse_result op_checkmultisigverify(evaluation_context& context,
     };
 
     chain::script script_code;
+
     for (auto it = context.code_begin; it != script.operations.end(); ++it)
         if (it->code != opcode::codeseparator && !is_endorsement(it->data))
             script_code.operations.push_back(*it);
@@ -1315,6 +1335,7 @@ signature_parse_result op_checkmultisigverify(evaluation_context& context,
     // One key can validate more than one script. So we always advance 
     // until we exhaust either pubkeys (fail) or signatures (pass).
     auto pubkey_iterator = pubkeys.begin();
+
     for (const auto& endorsement: endorsements)
     {
         const auto sighash_type = endorsement.back();
@@ -1322,6 +1343,7 @@ signature_parse_result op_checkmultisigverify(evaluation_context& context,
         distinguished.pop_back();
 
         ec_signature signature;
+
         if (!parse_signature(signature, distinguished, strict))
             return strict ?
                 signature_parse_result::lax_encoding :
@@ -1330,11 +1352,13 @@ signature_parse_result op_checkmultisigverify(evaluation_context& context,
         while (true)
         {
             const auto& point = *pubkey_iterator;
+
             if (script::check_signature(signature, sighash_type, point,
                 script_code, parent_tx, input_index))
                 break;
 
             ++pubkey_iterator;
+
             if (pubkey_iterator == pubkeys.end())
                 return signature_parse_result::invalid;
         }
@@ -1349,14 +1373,14 @@ bool op_checkmultisig(evaluation_context& context, const script& script,
     switch (op_checkmultisigverify(context, script, parent_tx, input_index,
         strict))
     {
-    case signature_parse_result::valid:
-        context.stack.push_back(stack_true_value);
-        break;
-    case signature_parse_result::invalid:
-        context.stack.push_back(stack_false_value);
-        break;
-    case signature_parse_result::lax_encoding:
-        return false;
+        case signature_parse_result::valid:
+            context.stack.push_back(stack_true_value);
+            break;
+        case signature_parse_result::invalid:
+            context.stack.push_back(stack_false_value);
+            break;
+        case signature_parse_result::lax_encoding:
+            return false;
     }
 
     return true;
@@ -1395,6 +1419,7 @@ bool op_checklocktimeverify(evaluation_context& context, const script& script,
     // BIP65: the top stack item is greater than the tx's nLockTime.
     const auto stack = number.int64();
     const auto transaction = static_cast<int64_t>(parent_tx.locktime);
+
     if (stack > transaction)
         return false;
 
@@ -1869,6 +1894,7 @@ bool script::verify(const script& input_script, const script& output_script,
         // TODO: shouldn't this be parse_mode::strict?
         // Invalid script - parsable only as raw_data
         script eval_script;
+
         if (!eval_script.from_data(input_context.stack.back(), false,
             parse_mode::raw_data_fallback))
             return false;

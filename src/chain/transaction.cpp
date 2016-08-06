@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 
+#include <numeric>
 #include <sstream>
 #include <utility>
 #include <boost/iostreams/stream.hpp>
@@ -211,10 +212,12 @@ void transaction::to_data(writer& sink) const
 {
     sink.write_4_bytes_little_endian(version);
     sink.write_variable_uint_little_endian(inputs.size());
+
     for (const auto& input: inputs)
         input.to_data(sink);
 
     sink.write_variable_uint_little_endian(outputs.size());
+
     for (const auto& output: outputs)
         output.to_data(sink);
 
@@ -277,6 +280,7 @@ bool transaction::is_final(uint64_t block_height, uint32_t block_time) const
         return true;
 
     auto max_locktime = block_time;
+
     if (locktime < locktime_threshold)
         max_locktime = static_cast<uint32_t>(block_height);
 
@@ -304,11 +308,12 @@ bool transaction::is_locktime_conflict() const
 
 uint64_t transaction::total_output_value() const
 {
-    uint64_t total = 0;
-    for (const auto& output: outputs)
-        total += output.value;
+    const auto value = [](uint64_t total, const output& output)
+    {
+        return total + output.value;
+    };
 
-    return total;
+    return std::accumulate(outputs.begin(), outputs.end(), uint64_t(0), value);
 }
 
 } // namspace chain

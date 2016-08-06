@@ -85,8 +85,9 @@ bool send_compact_blocks::from_data(const uint32_t version,
     reader& source)
 {
     reset();
-    bool insufficient_version = (version < send_compact_blocks::version_minimum);
-    auto mode = source.read_byte();
+    const auto insufficient_version = (version < send_compact_blocks::version_minimum);
+
+    const auto mode = source.read_byte();
     auto result = static_cast<bool>(source);
 
     if (mode > 1)

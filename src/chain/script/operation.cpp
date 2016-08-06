@@ -82,10 +82,11 @@ bool operation::from_data(std::istream& stream)
 bool operation::from_data(reader& source)
 {
     reset();
+
     const auto byte = source.read_byte();
     auto result = static_cast<bool>(source);
-
     auto op_code = static_cast<opcode>(byte);
+
     if (byte == 0 && op_code != opcode::zero)
         return false;
 
@@ -285,16 +286,19 @@ bool operation::is_pay_multisig_pattern(const operation::stack& ops)
     static constexpr size_t op_16 = static_cast<uint8_t>(opcode::op_16);
 
     const auto op_count = ops.size();
+
     if (op_count < 4 || ops[op_count - 1].code != opcode::checkmultisig)
         return false;
 
     const auto op_m = static_cast<uint8_t>(ops[0].code);
     const auto op_n = static_cast<uint8_t>(ops[op_count - 2].code);
+
     if (op_m < op_1 || op_m > op_n || op_n < op_1 || op_n > op_16)
         return false;
 
     const auto n = op_n - op_1;
     const auto points = op_count - 3u;
+
     if (n != points)
         return false;
 
@@ -361,10 +365,12 @@ bool operation::is_sign_script_hash_pattern(const operation::stack& ops)
         return false;
 
     const auto& redeem_data = ops.back().data;
+
     if (redeem_data.empty())
         return false;
 
     script redeem_script;
+
     if (!redeem_script.from_data(redeem_data, false, script::parse_mode::strict))
         return false;
 
@@ -383,24 +389,24 @@ bool operation::is_sign_script_hash_pattern(const operation::stack& ops)
 operation::stack operation::to_null_data_pattern(data_slice data)
 {
     if (data.size() > max_null_data_size)
-        return operation::stack();
+        return{};
 
     return operation::stack
     {
-        operation{ opcode::return_, data_chunk() },
-        operation{ opcode::special, to_chunk(data) }
+        { opcode::return_, {} },
+        { opcode::special, to_chunk(data) }
     };
 }
 
 operation::stack operation::to_pay_public_key_pattern(data_slice point)
 {
     if (!is_public_key(point))
-        return operation::stack();
+        return{};
 
     return operation::stack
     {
-        operation{ opcode::special, to_chunk(point) },
-        operation{ opcode::checksig, data_chunk() }
+        { opcode::special, to_chunk(point) },
+        { opcode::checksig, {} }
     };
 }
 
@@ -427,25 +433,26 @@ operation::stack operation::to_pay_multisig_pattern(uint8_t signatures,
 
     const auto m = signatures;
     const auto n = points.size();
+
     if (m < 1 || m > n || n < 1 || n > max)
         return operation::stack();
 
     const auto op_m = static_cast<opcode>(m + zero);
     const auto op_n = static_cast<opcode>(points.size() + zero);
 
-    operation::stack ops;
-    ops.push_back({ op_m, data_chunk() });
+    operation::stack ops(points.size() + 3);
+    ops.push_back({ op_m, {} });
 
     for (const auto point: points)
     {
         if (!is_public_key(point))
-            return operation::stack();
+            return{};
 
         ops.push_back({ opcode::special, point });
     }
 
-    ops.push_back({ op_n, data_chunk() });
-    ops.push_back({ opcode::checkmultisig, data_chunk() });
+    ops.push_back({ op_n, {} });
+    ops.push_back({ opcode::checkmultisig, {} });
     return ops;
 }
 
@@ -453,11 +460,11 @@ operation::stack operation::to_pay_key_hash_pattern(const short_hash& hash)
 {
     return operation::stack
     {
-        operation{ opcode::dup, data_chunk() },
-        operation{ opcode::hash160, data_chunk() },
-        operation{ opcode::special, to_chunk(hash) },
-        operation{ opcode::equalverify, data_chunk() },
-        operation{ opcode::checksig, data_chunk() }
+        { opcode::dup, {} },
+        { opcode::hash160, {} },
+        { opcode::special, to_chunk(hash) },
+        { opcode::equalverify, {} },
+        { opcode::checksig, {} }
     };
 }
 
@@ -465,9 +472,9 @@ operation::stack operation::to_pay_script_hash_pattern(const short_hash& hash)
 {
     return operation::stack
     {
-        operation{ opcode::hash160, data_chunk() },
-        operation{ opcode::special, to_chunk(hash) },
-        operation{ opcode::equal, data_chunk() }
+        { opcode::hash160, {} },
+        { opcode::special, to_chunk(hash) },
+        { opcode::equal, {} }
     };
 }
 
