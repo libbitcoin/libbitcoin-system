@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
     const data_chunk raw{ 0xab, 0xcd };
     message::block_transactions instance{};
 
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(peer_minimum_version, raw));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
@@ -83,13 +83,14 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
         "10c3d488ac20300500000000001976a914905f933de850988603aafeeb2fd7fc"
         "e61e66fe5d88ac00000000"))));
 
-    const auto data = expected.to_data();
-    const auto result = message::block_transactions::factory_from_data(data);
+    const auto data = expected.to_data(peer_minimum_version);
+    const auto result = message::block_transactions::factory_from_data(
+        peer_minimum_version, data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(peer_minimum_version), result.serialized_size(peer_minimum_version));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
@@ -127,14 +128,15 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
         "e61e66fe5d88ac00000000"))));
 
 
-    const auto data = expected.to_data();
+    const auto data = expected.to_data(peer_minimum_version);
     data_source istream(data);
-    auto result = message::block_transactions::factory_from_data(istream);
+    auto result = message::block_transactions::factory_from_data(
+        peer_minimum_version, istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(peer_minimum_version), result.serialized_size(peer_minimum_version));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
@@ -172,15 +174,16 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
         "e61e66fe5d88ac00000000"))));
 
 
-    const auto data = expected.to_data();
+    const auto data = expected.to_data(peer_minimum_version);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = message::block_transactions::factory_from_data(source);
+    const auto result = message::block_transactions::factory_from_data(
+        peer_minimum_version, source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(peer_minimum_version), result.serialized_size(peer_minimum_version));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

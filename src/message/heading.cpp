@@ -30,7 +30,7 @@
 namespace libbitcoin {
 namespace message {
 
-const size_t heading::serialized_size()
+const size_t heading::serialized_size(const uint32_t version)
 {
     return sizeof(uint32_t) + command_size + sizeof(uint32_t) +
         sizeof(uint32_t);
@@ -50,24 +50,27 @@ const size_t heading::maximum_payload_size()
     return maximum;
 }
 
-heading heading::factory_from_data(const data_chunk& data)
+heading heading::factory_from_data(const uint32_t version,
+    const data_chunk& data)
 {
     heading instance;
-    instance.from_data(data);
+    instance.from_data(version, data);
     return instance;
 }
 
-heading heading::factory_from_data(std::istream& stream)
+heading heading::factory_from_data(const uint32_t version,
+    std::istream& stream)
 {
     heading instance;
-    instance.from_data(stream);
+    instance.from_data(version, stream);
     return instance;
 }
 
-heading heading::factory_from_data(reader& source)
+heading heading::factory_from_data(const uint32_t version,
+    reader& source)
 {
     heading instance;
-    instance.from_data(source);
+    instance.from_data(version, source);
     return instance;
 }
 
@@ -87,19 +90,19 @@ void heading::reset()
     checksum = 0;
 }
 
-bool heading::from_data(const data_chunk& data)
+bool heading::from_data(const uint32_t version, const data_chunk& data)
 {
     data_source istream(data);
-    return from_data(istream);
+    return from_data(version, istream);
 }
 
-bool heading::from_data(std::istream& stream)
+bool heading::from_data(const uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(version, source);
 }
 
-bool heading::from_data(reader& source)
+bool heading::from_data(const uint32_t version, reader& source)
 {
     reset();
     magic = source.read_4_bytes_little_endian();
@@ -112,23 +115,23 @@ bool heading::from_data(reader& source)
     return source;
 }
 
-data_chunk heading::to_data() const
+data_chunk heading::to_data(const uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
-    to_data(ostream);
+    to_data(version, ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == heading::serialized_size());
+    BITCOIN_ASSERT(data.size() == heading::serialized_size(version));
     return data;
 }
 
-void heading::to_data(std::ostream& stream) const
+void heading::to_data(const uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(version, sink);
 }
 
-void heading::to_data(writer& sink) const
+void heading::to_data(const uint32_t version, writer& sink) const
 {
     sink.write_4_bytes_little_endian(magic);
     sink.write_fixed_string(command, command_size);

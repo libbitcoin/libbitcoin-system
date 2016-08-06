@@ -33,24 +33,27 @@ namespace message {
 
 const std::string message::headers::command = "headers";
 
-headers headers::factory_from_data(const data_chunk& data)
+headers headers::factory_from_data(const uint32_t version,
+    const data_chunk& data)
 {
     headers instance;
-    instance.from_data(data);
+    instance.from_data(version, data);
     return instance;
 }
 
-headers headers::factory_from_data(std::istream& stream)
+headers headers::factory_from_data(const uint32_t version,
+    std::istream& stream)
 {
     headers instance;
-    instance.from_data(stream);
+    instance.from_data(version, stream);
     return instance;
 }
 
-headers headers::factory_from_data(reader& source)
+headers headers::factory_from_data(const uint32_t version,
+    reader& source)
 {
     headers instance;
-    instance.from_data(source);
+    instance.from_data(version, source);
     return instance;
 }
 
@@ -78,19 +81,19 @@ void headers::reset()
     elements.clear();
 }
 
-bool headers::from_data(const data_chunk& data)
+bool headers::from_data(const uint32_t version, const data_chunk& data)
 {
     data_source istream(data);
-    return from_data(istream);
+    return from_data(version, istream);
 }
 
-bool headers::from_data(std::istream& stream)
+bool headers::from_data(const uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(version, source);
 }
 
-bool headers::from_data(reader& source)
+bool headers::from_data(const uint32_t version, reader& source)
 {
     reset();
 
@@ -109,23 +112,23 @@ bool headers::from_data(reader& source)
     return result;
 }
 
-data_chunk headers::to_data() const
+data_chunk headers::to_data(const uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
-    to_data(ostream);
+    to_data(version, ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == serialized_size(version));
     return data;
 }
 
-void headers::to_data(std::ostream& stream) const
+void headers::to_data(const uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(version, sink);
 }
 
-void headers::to_data(writer& sink) const
+void headers::to_data(const uint32_t version, writer& sink) const
 {
     sink.write_variable_uint_little_endian(elements.size());
 
@@ -144,7 +147,7 @@ void headers::to_hashes(hash_list& out) const
     std::transform(elements.begin(), elements.end(), out.begin(), map);
 }
 
-uint64_t headers::serialized_size() const
+uint64_t headers::serialized_size(const uint32_t version) const
 {
     uint64_t size = variable_uint_size(elements.size());
 

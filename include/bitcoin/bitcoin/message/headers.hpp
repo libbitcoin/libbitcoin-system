@@ -41,24 +41,24 @@ class BC_API headers
 public:
     typedef std::shared_ptr<headers> ptr;
 
-    static headers factory_from_data(const data_chunk& data);
-    static headers factory_from_data(std::istream& stream);
-    static headers factory_from_data(reader& source);
+    static headers factory_from_data(const uint32_t version, const data_chunk& data);
+    static headers factory_from_data(const uint32_t version, std::istream& stream);
+    static headers factory_from_data(const uint32_t version, reader& source);
 
     headers();
     headers(const chain::header::list& values);
     headers(const std::initializer_list<chain::header>& values);
 
-    bool from_data(const data_chunk& data);
-    bool from_data(std::istream& stream);
-    bool from_data(reader& source);
-    data_chunk to_data() const;
-    void to_data(std::ostream& stream) const;
-    void to_data(writer& sink) const;
+    bool from_data(const uint32_t version, const data_chunk& data);
+    bool from_data(const uint32_t version, std::istream& stream);
+    bool from_data(const uint32_t version, reader& source);
+    data_chunk to_data(const uint32_t version) const;
+    void to_data(const uint32_t version, std::ostream& stream) const;
+    void to_data(const uint32_t version, writer& sink) const;
     void to_hashes(hash_list& out) const;
     bool is_valid() const;
     void reset();
-    uint64_t serialized_size() const;
+    uint64_t serialized_size(const uint32_t version) const;
 
     static const std::string command;
 

@@ -26,24 +26,27 @@ namespace message {
 
 const std::string message::get_headers::command = "getheaders";
 
-get_headers get_headers::factory_from_data(const data_chunk& data)
+get_headers get_headers::factory_from_data(const uint32_t version,
+    const data_chunk& data)
 {
     get_headers instance;
-    instance.from_data(data);
+    instance.from_data(version, data);
     return instance;
 }
 
-get_headers get_headers::factory_from_data(std::istream& stream)
+get_headers get_headers::factory_from_data(const uint32_t version,
+    std::istream& stream)
 {
     get_headers instance;
-    instance.from_data(stream);
+    instance.from_data(version, stream);
     return instance;
 }
 
-get_headers get_headers::factory_from_data(reader& source)
+get_headers get_headers::factory_from_data(const uint32_t version,
+    reader& source)
 {
     get_headers instance;
-    instance.from_data(source);
+    instance.from_data(version, source);
     return instance;
 }
 

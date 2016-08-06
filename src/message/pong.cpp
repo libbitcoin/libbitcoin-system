@@ -30,30 +30,30 @@ namespace message {
 
 const std::string message::pong::command = "pong";
 
-pong pong::factory_from_data(const data_chunk& data)
+pong pong::factory_from_data(const uint32_t version, const data_chunk& data)
 {
     pong instance;
-    instance.from_data(data);
+    instance.from_data(version, data);
     return instance;
 }
 
-pong pong::factory_from_data(std::istream& stream)
+pong pong::factory_from_data(const uint32_t version, std::istream& stream)
 {
     pong instance;
-    instance.from_data(stream);
+    instance.from_data(version, stream);
     return instance;
 }
 
-pong pong::factory_from_data(reader& source)
+pong pong::factory_from_data(const uint32_t version, reader& source)
 {
     pong instance;
-    instance.from_data(source);
+    instance.from_data(version, source);
     return instance;
 }
 
-uint64_t pong::satoshi_fixed_size()
+uint64_t pong::satoshi_fixed_size(const uint32_t version)
 {
-    return nonce_::satoshi_fixed_size();
+    return nonce_::satoshi_fixed_size(version);
 }
 
 pong::pong()

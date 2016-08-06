@@ -29,24 +29,27 @@ namespace message {
 
 const std::string message::filter_clear::command = "filterclear";
 
-filter_clear filter_clear::factory_from_data(const data_chunk& data)
+filter_clear filter_clear::factory_from_data(const uint32_t version,
+    const data_chunk& data)
 {
     filter_clear instance;
-    instance.from_data(data);
+    instance.from_data(version, data);
     return instance;
 }
 
-filter_clear filter_clear::factory_from_data(std::istream& stream)
+filter_clear filter_clear::factory_from_data(const uint32_t version,
+    std::istream& stream)
 {
     filter_clear instance;
-    instance.from_data(stream);
+    instance.from_data(version, stream);
     return instance;
 }
 
-filter_clear filter_clear::factory_from_data(reader& source)
+filter_clear filter_clear::factory_from_data(const uint32_t version,
+    reader& source)
 {
     filter_clear instance;
-    instance.from_data(source);
+    instance.from_data(version, source);
     return instance;
 }
 
@@ -59,50 +62,50 @@ void filter_clear::reset()
 {
 }
 
-bool filter_clear::from_data(const data_chunk& data)
+bool filter_clear::from_data(const uint32_t version, const data_chunk& data)
 {
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
-    return from_data(istream);
+    return from_data(version, istream);
 }
 
-bool filter_clear::from_data(std::istream& stream)
+bool filter_clear::from_data(const uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(version, source);
 }
 
-bool filter_clear::from_data(reader& source)
+bool filter_clear::from_data(const uint32_t version, reader& source)
 {
     reset();
     return source;
 }
 
-data_chunk filter_clear::to_data() const
+data_chunk filter_clear::to_data(const uint32_t version) const
 {
     data_chunk data;
     boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
-    to_data(ostream);
+    to_data(version, ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == serialized_size(version));
     return data;
 }
 
-void filter_clear::to_data(std::ostream& stream) const
+void filter_clear::to_data(const uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(version, sink);
 }
 
-void filter_clear::to_data(writer& sink) const
+void filter_clear::to_data(const uint32_t version, writer& sink) const
 {
 }
 
-uint64_t filter_clear::serialized_size() const
+uint64_t filter_clear::serialized_size(const uint32_t version) const
 {
-    return filter_clear::satoshi_fixed_size();
+    return filter_clear::satoshi_fixed_size(version);
 }
 
-uint64_t filter_clear::satoshi_fixed_size()
+uint64_t filter_clear::satoshi_fixed_size(const uint32_t version)
 {
     return 0;
 }

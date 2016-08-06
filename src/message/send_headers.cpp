@@ -29,24 +29,27 @@ namespace message {
 
 const std::string message::send_headers::command = "sendheaders";
 
-send_headers send_headers::factory_from_data(const data_chunk& data)
+send_headers send_headers::factory_from_data(const uint32_t version,
+    const data_chunk& data)
 {
     send_headers instance;
-    instance.from_data(data);
+    instance.from_data(version, data);
     return instance;
 }
 
-send_headers send_headers::factory_from_data(std::istream& stream)
+send_headers send_headers::factory_from_data(const uint32_t version,
+    std::istream& stream)
 {
     send_headers instance;
-    instance.from_data(stream);
+    instance.from_data(version, stream);
     return instance;
 }
 
-send_headers send_headers::factory_from_data(reader& source)
+send_headers send_headers::factory_from_data(const uint32_t version,
+    reader& source)
 {
     send_headers instance;
-    instance.from_data(source);
+    instance.from_data(version, source);
     return instance;
 }
 
@@ -59,45 +62,45 @@ void send_headers::reset()
 {
 }
 
-bool send_headers::from_data(const data_chunk& data)
+bool send_headers::from_data(const uint32_t version, const data_chunk& data)
 {
     data_source istream(data);
-    return from_data(istream);
+    return from_data(version, istream);
 }
 
-bool send_headers::from_data(std::istream& stream)
+bool send_headers::from_data(const uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(version, source);
 }
 
-bool send_headers::from_data(reader& source)
+bool send_headers::from_data(const uint32_t version, reader& source)
 {
     reset();
     return source;
 }
 
-data_chunk send_headers::to_data() const
+data_chunk send_headers::to_data(const uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
-    to_data(ostream);
+    to_data(version, ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == serialized_size(version));
     return data;
 }
 
-void send_headers::to_data(std::ostream& stream) const
+void send_headers::to_data(const uint32_t version, std::ostream& stream) const
 {
 }
 
-uint64_t send_headers::serialized_size() const
+uint64_t send_headers::serialized_size(const uint32_t version) const
 {
-    return send_headers::satoshi_fixed_size();
+    return send_headers::satoshi_fixed_size(version);
 }
 
 
-uint64_t send_headers::satoshi_fixed_size()
+uint64_t send_headers::satoshi_fixed_size(const uint32_t version)
 {
     return 0;
 }

@@ -32,24 +32,27 @@ namespace message {
 
 const std::string message::filter_load::command = "filterload";
 
-filter_load filter_load::factory_from_data(const data_chunk& data)
+filter_load filter_load::factory_from_data(const uint32_t version,
+    const data_chunk& data)
 {
     filter_load instance;
-    instance.from_data(data);
+    instance.from_data(version, data);
     return instance;
 }
 
-filter_load filter_load::factory_from_data(std::istream& stream)
+filter_load filter_load::factory_from_data(const uint32_t version,
+    std::istream& stream)
 {
     filter_load instance;
-    instance.from_data(stream);
+    instance.from_data(version, stream);
     return instance;
 }
 
-filter_load filter_load::factory_from_data(reader& source)
+filter_load filter_load::factory_from_data(const uint32_t version,
+    reader& source)
 {
     filter_load instance;
-    instance.from_data(source);
+    instance.from_data(version, source);
     return instance;
 }
 
@@ -69,19 +72,19 @@ void filter_load::reset()
     flags = 0x00;
 }
 
-bool filter_load::from_data(const data_chunk& data)
+bool filter_load::from_data(const uint32_t version, const data_chunk& data)
 {
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
-    return from_data(istream);
+    return from_data(version, istream);
 }
 
-bool filter_load::from_data(std::istream& stream)
+bool filter_load::from_data(const uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(version, source);
 }
 
-bool filter_load::from_data(reader& source)
+bool filter_load::from_data(const uint32_t version, reader& source)
 {
     reset();
 
@@ -105,23 +108,23 @@ bool filter_load::from_data(reader& source)
     return result;
 }
 
-data_chunk filter_load::to_data() const
+data_chunk filter_load::to_data(const uint32_t version) const
 {
     data_chunk data;
     boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
-    to_data(ostream);
+    to_data(version, ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == serialized_size(version));
     return data;
 }
 
-void filter_load::to_data(std::ostream& stream) const
+void filter_load::to_data(const uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(version, sink);
 }
 
-void filter_load::to_data(writer& sink) const
+void filter_load::to_data(const uint32_t version, writer& sink) const
 {
     sink.write_variable_uint_little_endian(filter.size());
     sink.write_data(filter);
@@ -130,7 +133,7 @@ void filter_load::to_data(writer& sink) const
     sink.write_byte(flags);
 }
 
-uint64_t filter_load::serialized_size() const
+uint64_t filter_load::serialized_size(const uint32_t version) const
 {
     return 1 + 4 + 4 + variable_uint_size(filter.size()) + filter.size();
 }

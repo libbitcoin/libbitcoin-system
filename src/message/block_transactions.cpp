@@ -31,24 +31,26 @@ namespace message {
 const std::string message::block_transactions::command = "blocktxn";
 
 block_transactions block_transactions::factory_from_data(
-    const data_chunk& data)
+    const uint32_t version, const data_chunk& data)
 {
     block_transactions instance;
-    instance.from_data(data);
+    instance.from_data(version, data);
     return instance;
 }
 
-block_transactions block_transactions::factory_from_data(std::istream& stream)
+block_transactions block_transactions::factory_from_data(
+    const uint32_t version, std::istream& stream)
 {
     block_transactions instance;
-    instance.from_data(stream);
+    instance.from_data(version, stream);
     return instance;
 }
 
-block_transactions block_transactions::factory_from_data(reader& source)
+block_transactions block_transactions::factory_from_data(
+    const uint32_t version, reader& source)
 {
     block_transactions instance;
-    instance.from_data(source);
+    instance.from_data(version, source);
     return instance;
 }
 
@@ -63,19 +65,21 @@ void block_transactions::reset()
     transactions.clear();
 }
 
-bool block_transactions::from_data(const data_chunk& data)
+bool block_transactions::from_data(const uint32_t version,
+    const data_chunk& data)
 {
     data_source istream(data);
-    return from_data(istream);
+    return from_data(version, istream);
 }
 
-bool block_transactions::from_data(std::istream& stream)
+bool block_transactions::from_data(const uint32_t version,
+    std::istream& stream)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(version, source);
 }
 
-bool block_transactions::from_data(reader& source)
+bool block_transactions::from_data(const uint32_t version, reader& source)
 {
     reset();
     block_hash = source.read_hash();
@@ -96,23 +100,24 @@ bool block_transactions::from_data(reader& source)
     return result;
 }
 
-data_chunk block_transactions::to_data() const
+data_chunk block_transactions::to_data(const uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
-    to_data(ostream);
+    to_data(version, ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == serialized_size(version));
     return data;
 }
 
-void block_transactions::to_data(std::ostream& stream) const
+void block_transactions::to_data(const uint32_t version,
+    std::ostream& stream) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(version, sink);
 }
 
-void block_transactions::to_data(writer& sink) const
+void block_transactions::to_data(const uint32_t version, writer& sink) const
 {
     sink.write_hash(block_hash);
     sink.write_variable_uint_little_endian(transactions.size());
@@ -120,7 +125,7 @@ void block_transactions::to_data(writer& sink) const
         element.to_data(sink);
 }
 
-uint64_t block_transactions::serialized_size() const
+uint64_t block_transactions::serialized_size(const uint32_t version) const
 {
     uint64_t size = hash_size + variable_uint_size(transactions.size());
 

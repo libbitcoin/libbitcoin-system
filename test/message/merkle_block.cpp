@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(from_data_fails)
     const data_chunk data{ 10 };
     message::merkle_block instance{};
 
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(data));
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(peer_minimum_version, data));
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
 }
 
@@ -55,8 +55,9 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
         }
     };
 
-    const auto data = expected.to_data();
-    const auto result = message::merkle_block::factory_from_data(data);
+    const auto data = expected.to_data(peer_minimum_version);
+    const auto result = message::merkle_block::factory_from_data(
+        peer_minimum_version, data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -83,9 +84,10 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
         }
     };
 
-    const auto data = expected.to_data();
+    const auto data = expected.to_data(peer_minimum_version);
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
-    const auto result = message::merkle_block::factory_from_data(istream);
+    const auto result = message::merkle_block::factory_from_data(
+        peer_minimum_version, istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -112,10 +114,11 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
         }
     };
 
-    const auto data = expected.to_data();
+    const auto data = expected.to_data(peer_minimum_version);
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     istream_reader source(istream);
-    const auto result = message::merkle_block::factory_from_data(source);
+    const auto result = message::merkle_block::factory_from_data(
+        peer_minimum_version, source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);

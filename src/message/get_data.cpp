@@ -27,24 +27,27 @@ namespace message {
 
 const std::string message::get_data::command = "getdata";
 
-get_data get_data::factory_from_data(const data_chunk& data)
+get_data get_data::factory_from_data(const uint32_t version,
+    const data_chunk& data)
 {
     get_data instance;
-    instance.from_data(data);
+    instance.from_data(version,data);
     return instance;
 }
 
-get_data get_data::factory_from_data(std::istream& stream)
+get_data get_data::factory_from_data(const uint32_t version,
+    std::istream& stream)
 {
     get_data instance;
-    instance.from_data(stream);
+    instance.from_data(version, stream);
     return instance;
 }
 
-get_data get_data::factory_from_data(reader& source)
+get_data get_data::factory_from_data(const uint32_t version,
+    reader& source)
 {
     get_data instance;
-    instance.from_data(source);
+    instance.from_data(version, source);
     return instance;
 }
 

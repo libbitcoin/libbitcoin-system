@@ -39,10 +39,10 @@ class BC_API pong
 public:
     typedef std::shared_ptr<pong> ptr;
 
-    static pong factory_from_data(const data_chunk& data);
-    static pong factory_from_data(std::istream& stream);
-    static pong factory_from_data(reader& source);
-    static uint64_t satoshi_fixed_size();
+    static pong factory_from_data(const uint32_t version, const data_chunk& data);
+    static pong factory_from_data(const uint32_t version, std::istream& stream);
+    static pong factory_from_data(const uint32_t version, reader& source);
+    static uint64_t satoshi_fixed_size(const uint32_t version);
 
     pong();
     pong(uint64_t nonce);

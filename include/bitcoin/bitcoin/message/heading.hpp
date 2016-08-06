@@ -69,18 +69,18 @@ enum class message_type
 class BC_API heading
 {
 public:
-    static const size_t serialized_size();
+    static const size_t serialized_size(const uint32_t version);
     static const size_t maximum_payload_size();
-    static heading factory_from_data(const data_chunk& data);
-    static heading factory_from_data(std::istream& stream);
-    static heading factory_from_data(reader& source);
+    static heading factory_from_data(const uint32_t version, const data_chunk& data);
+    static heading factory_from_data(const uint32_t version, std::istream& stream);
+    static heading factory_from_data(const uint32_t version, reader& source);
 
-    bool from_data(const data_chunk& data);
-    bool from_data(std::istream& stream);
-    bool from_data(reader& source);
-    data_chunk to_data() const;
-    void to_data(std::ostream& stream) const;
-    void to_data(writer& sink) const;
+    bool from_data(const uint32_t version, const data_chunk& data);
+    bool from_data(const uint32_t version, std::istream& stream);
+    bool from_data(const uint32_t version, reader& source);
+    data_chunk to_data(const uint32_t version) const;
+    void to_data(const uint32_t version, std::ostream& stream) const;
+    void to_data(const uint32_t version, writer& sink) const;
     bool is_valid() const;
     void reset();
     message_type type() const;

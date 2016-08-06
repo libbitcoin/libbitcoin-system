@@ -35,9 +35,9 @@ class BC_API get_headers
 public:
     typedef std::shared_ptr<get_headers> ptr;
 
-    static get_headers factory_from_data(const data_chunk& data);
-    static get_headers factory_from_data(std::istream& stream);
-    static get_headers factory_from_data(reader& source);
+    static get_headers factory_from_data(const uint32_t version, const data_chunk& data);
+    static get_headers factory_from_data(const uint32_t version, std::istream& stream);
+    static get_headers factory_from_data(const uint32_t version, reader& source);
 
     get_headers();
     get_headers(const hash_list& start_hashes, const hash_digest& stop_hash);

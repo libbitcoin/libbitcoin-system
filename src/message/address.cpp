@@ -30,24 +30,24 @@ namespace message {
 
 const std::string message::address::command = "addr";
 
-address address::factory_from_data(const data_chunk& data)
+address address::factory_from_data(const uint32_t version, const data_chunk& data)
 {
     address instance;
-    instance.from_data(data);
+    instance.from_data(version, data);
     return instance;
 }
 
-address address::factory_from_data(std::istream& stream)
+address address::factory_from_data(const uint32_t version, std::istream& stream)
 {
     address instance;
-    instance.from_data(stream);
+    instance.from_data(version, stream);
     return instance;
 }
 
-address address::factory_from_data(reader& source)
+address address::factory_from_data(const uint32_t version, reader& source)
 {
     address instance;
-    instance.from_data(source);
+    instance.from_data(version, source);
     return instance;
 }
 
@@ -61,19 +61,19 @@ void address::reset()
     addresses.clear();
 }
 
-bool address::from_data(const data_chunk& data)
+bool address::from_data(const uint32_t version, const data_chunk& data)
 {
     data_source istream(data);
-    return from_data(istream);
+    return from_data(version, istream);
 }
 
-bool address::from_data(std::istream& stream)
+bool address::from_data(const uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(version, source);
 }
 
-bool address::from_data(reader& source)
+bool address::from_data(const uint32_t version, reader& source)
 {
     reset();
 
@@ -83,7 +83,7 @@ bool address::from_data(reader& source)
     for (uint64_t i = 0; (i < count) && result; ++i)
     {
         addresses.emplace_back();
-        result = addresses.back().from_data(source, true);
+        result = addresses.back().from_data(version, source, true);
     }
 
     if (!result)
@@ -92,33 +92,33 @@ bool address::from_data(reader& source)
     return result;
 }
 
-data_chunk address::to_data() const
+data_chunk address::to_data(const uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
-    to_data(ostream);
+    to_data(version, ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == serialized_size(version));
     return data;
 }
 
-void address::to_data(std::ostream& stream) const
+void address::to_data(const uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(version, sink);
 }
 
-void address::to_data(writer& sink) const
+void address::to_data(const uint32_t version, writer& sink) const
 {
     sink.write_variable_uint_little_endian(addresses.size());
     for (const network_address& net_address : addresses)
-        net_address.to_data(sink, true);
+        net_address.to_data(version, sink, true);
 }
 
-uint64_t address::serialized_size() const
+uint64_t address::serialized_size(const uint32_t version) const
 {
     return variable_uint_size(addresses.size()) + 
-        (addresses.size() * network_address::satoshi_fixed_size(true));
+        (addresses.size() * network_address::satoshi_fixed_size(version, true));
 }
 
 } // namspace message

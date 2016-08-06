@@ -27,24 +27,27 @@ namespace message {
 
 const std::string message::not_found::command = "notfound";
 
-not_found not_found::factory_from_data(const data_chunk& data)
+not_found not_found::factory_from_data(const uint32_t version,
+    const data_chunk& data)
 {
     not_found instance;
-    instance.from_data(data);
+    instance.from_data(version, data);
     return instance;
 }
 
-not_found not_found::factory_from_data(std::istream& stream)
+not_found not_found::factory_from_data(const uint32_t version,
+    std::istream& stream)
 {
     not_found instance;
-    instance.from_data(stream);
+    instance.from_data(version, stream);
     return instance;
 }
 
-not_found not_found::factory_from_data(reader& source)
+not_found not_found::factory_from_data(const uint32_t version,
+    reader& source)
 {
     not_found instance;
-    instance.from_data(source);
+    instance.from_data(version, source);
     return instance;
 }
 
