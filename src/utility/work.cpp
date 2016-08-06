@@ -27,12 +27,12 @@
 namespace libbitcoin {
 
 work::work(threadpool& pool, const std::string& name)
-  : name_(name),
-    ordered_(std::make_shared<monitor::count>(0)),
+  : ordered_(std::make_shared<monitor::count>(0)),
     unordered_(std::make_shared<monitor::count>(0)),
     concurrent_(std::make_shared<monitor::count>(0)),
     service_(pool.service()),
-    strand_(service_)
+    strand_(service_),
+    name_(name)
 {
 }
 
