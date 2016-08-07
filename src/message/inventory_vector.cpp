@@ -118,6 +118,13 @@ void inventory_vector::to_data(const uint32_t version,
     sink.write_hash(hash);
 }
 
+bool inventory_vector::is_block_type() const
+{
+    return type == message::inventory_type_id::block ||
+        type == message::inventory_type_id::compact_block ||
+        type == message::inventory_type_id::filtered_block;
+}
+
 uint64_t inventory_vector::serialized_size(const uint32_t version) const
 {
     return inventory_vector::satoshi_fixed_size(version);

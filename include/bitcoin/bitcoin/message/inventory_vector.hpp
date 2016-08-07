@@ -49,9 +49,9 @@ public:
     void to_data(writer& sink) const;
     bool is_valid() const;
     void reset();
+    uint64_t serialized_size() const;
     bool is_block_type() const;
     bool is_transaction_type() const;
-    uint64_t serialized_size() const;
 
     inventory_type_id type;
     hash_digest hash;
