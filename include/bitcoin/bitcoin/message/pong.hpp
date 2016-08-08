@@ -47,7 +47,13 @@ public:
     pong();
     pong(uint64_t nonce);
 
+    bool from_data(const uint32_t version, const data_chunk& data) override;
+    bool from_data(const uint32_t version, std::istream& stream) override;
+    bool from_data(const uint32_t version, reader& source) override;
+
     static const std::string command;
+    static const uint32_t version_minimum;
+    static const uint32_t version_maximum;
 };
 
 } // namspace message

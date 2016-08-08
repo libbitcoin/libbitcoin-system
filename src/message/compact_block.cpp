@@ -21,6 +21,7 @@
 
 #include <initializer_list>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -30,6 +31,8 @@ namespace libbitcoin {
 namespace message {
 
 const std::string message::compact_block::command = "cmpctblock";
+const uint32_t message::compact_block::version_minimum = bip152_minimum_version;
+const uint32_t message::compact_block::version_maximum = bip152_minimum_version;
 
 compact_block compact_block::factory_from_data(const uint32_t version,
     const data_chunk& data)
@@ -57,7 +60,7 @@ compact_block compact_block::factory_from_data(const uint32_t version,
 
 bool compact_block::is_valid() const
 {
-    return header.is_valid();
+    return header.is_valid() && !short_ids.empty() && !transactions.empty();
 }
 
 void compact_block::reset()
@@ -83,6 +86,7 @@ bool compact_block::from_data(const uint32_t version, std::istream& stream)
 bool compact_block::from_data(const uint32_t version, reader& source)
 {
     reset();
+    auto insufficient_version = (version < compact_block::version_minimum);
     auto result = header.from_data(source, false);
 
     nonce = source.read_8_bytes_little_endian();
@@ -104,10 +108,10 @@ bool compact_block::from_data(const uint32_t version, reader& source)
         result = transactions.back().from_data(version, source);
     }
 
-    if (!result)
+    if (!result || insufficient_version)
         reset();
 
-    return result;
+    return result && !insufficient_version;
 }
 
 data_chunk compact_block::to_data(const uint32_t version) const

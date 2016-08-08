@@ -48,12 +48,20 @@ BC_CONSTEXPR uint8_t byte_bits = 8;
 
 // Network protocol
 
+BC_CONSTEXPR uint32_t header_sync_minimum_version = 31800;
+BC_CONSTEXPR uint32_t bip31_minimum_version = 60001;
+BC_CONSTEXPR uint32_t bip35_minimum_version = 60002;
+BC_CONSTEXPR uint32_t bip37_minimum_version = 70001;
+BC_CONSTEXPR uint32_t bip61_minimum_version = 70002;
+BC_CONSTEXPR uint32_t bip130_minimum_version = 70012;
+BC_CONSTEXPR uint32_t bip152_minimum_version = max_uint32;
+
 // 70001 for version.relay (supported).
 // 70012 for send_headers (supported).
-BC_CONSTEXPR uint32_t protocol_version = 70012;
+BC_CONSTEXPR uint32_t protocol_version = bip130_minimum_version;
 
 // Currently set > 60000 to simplify BIP-31 (ping).
-BC_CONSTEXPR uint32_t peer_minimum_version = 60001;
+BC_CONSTEXPR uint32_t peer_minimum_version = bip31_minimum_version;
 
 // Consensus constants.
 BC_CONSTEXPR uint32_t reward_interval = 210000;

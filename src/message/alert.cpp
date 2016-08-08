@@ -31,6 +31,8 @@ namespace libbitcoin {
 namespace message {
 
 const std::string message::alert::command = "alert";
+const uint32_t message::alert::version_minimum = peer_minimum_version;
+const uint32_t message::alert::version_maximum = protocol_version;
 
 alert alert::factory_from_data(const uint32_t version, const data_chunk& data)
 {

@@ -19,11 +19,11 @@
  */
 #include <bitcoin/bitcoin/message/prefilled_transaction.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
 
 namespace libbitcoin {
 namespace message {

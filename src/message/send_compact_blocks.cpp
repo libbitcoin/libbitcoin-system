@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/message/send_compact_blocks.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -28,6 +29,8 @@ namespace libbitcoin {
 namespace message {
 
 const std::string message::send_compact_blocks::command = "sendcmpct";
+const uint32_t message::send_compact_blocks::version_minimum = bip152_minimum_version;
+const uint32_t message::send_compact_blocks::version_maximum = bip152_minimum_version;
 
 send_compact_blocks send_compact_blocks::factory_from_data(
     const uint32_t version, const data_chunk& data)
@@ -82,6 +85,7 @@ bool send_compact_blocks::from_data(const uint32_t version,
     reader& source)
 {
     reset();
+    bool insufficient_version = (version < send_compact_blocks::version_minimum);
     auto mode = source.read_byte();
     auto result = static_cast<bool>(source);
 
@@ -93,10 +97,10 @@ bool send_compact_blocks::from_data(const uint32_t version,
     this->version = source.read_8_bytes_little_endian();
     result &= static_cast<bool>(source);
 
-    if (!result)
+    if (!result || insufficient_version)
         reset();
 
-    return result;
+    return result && !insufficient_version;
 }
 
 data_chunk send_compact_blocks::to_data(const uint32_t version) const

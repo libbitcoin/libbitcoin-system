@@ -33,8 +33,6 @@
 namespace libbitcoin {
 namespace chain {
 
-const std::string chain::transaction::command = "tx";
-
 transaction transaction::factory_from_data(const data_chunk& data)
 {
     transaction instance;

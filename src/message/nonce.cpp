@@ -21,6 +21,7 @@
 
 #include <cstdint>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -60,7 +61,8 @@ bool nonce_::from_data(const uint32_t version, reader& source)
 {
     reset();
 
-    nonce = source.read_8_bytes_little_endian();
+    if (version >= bip31_minimum_version)
+        nonce = source.read_8_bytes_little_endian();
 
     if (!source)
         reset();

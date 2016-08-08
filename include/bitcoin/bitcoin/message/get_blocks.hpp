@@ -53,6 +53,8 @@ public:
     uint64_t serialized_size(const uint32_t version) const;
 
     static const std::string command;
+    static const uint32_t version_minimum;
+    static const uint32_t version_maximum;
 
     // 10 sequential hashes, then exponential samples until reaching genesis.
     hash_list start_hashes;

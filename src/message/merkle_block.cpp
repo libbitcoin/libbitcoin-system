@@ -31,6 +31,8 @@ namespace libbitcoin {
 namespace message {
 
 const std::string message::merkle_block::command = "merkleblock";
+const uint32_t message::merkle_block::version_minimum = bip37_minimum_version;
+const uint32_t message::merkle_block::version_maximum = protocol_version;
 
 merkle_block merkle_block::factory_from_data(const uint32_t version,
     const data_chunk& data)
@@ -84,8 +86,11 @@ bool merkle_block::from_data(const uint32_t version, reader& source)
 {
     reset();
 
-    bool result = header.from_data(source, true);
+    bool result = !(version < merkle_block::version_minimum);
     uint64_t hash_count = 0;
+
+    if (result)
+        result = header.from_data(source, true);
 
     if (result)
     {

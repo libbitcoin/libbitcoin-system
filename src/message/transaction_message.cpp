@@ -21,6 +21,7 @@
 
 #include <istream>
 #include <utility>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/chain/input.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -28,6 +29,10 @@
 
 namespace libbitcoin {
 namespace message {
+
+const std::string message::transaction_message::command = "tx";
+const uint32_t message::transaction_message::version_minimum = peer_minimum_version;
+const uint32_t message::transaction_message::version_maximum = protocol_version;
 
 transaction_message transaction_message::factory_from_data(
     const uint32_t version, const data_chunk& data)

@@ -43,6 +43,8 @@ public:
     get_headers(const hash_list& start_hashes, const hash_digest& stop_hash);
 
     static const std::string command;
+    static const uint32_t version_minimum;
+    static const uint32_t version_maximum;
 };
 
 } // end message

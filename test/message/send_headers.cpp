@@ -28,40 +28,64 @@ BOOST_AUTO_TEST_SUITE(send_headers_tests)
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
     const message::send_headers expected{};
-    const auto data = expected.to_data(peer_minimum_version);
+    const auto data = expected.to_data(protocol_version);
     const auto result = message::send_headers::factory_from_data(
-        peer_minimum_version, data);
+        protocol_version, data);
 
     BOOST_REQUIRE_EQUAL(0u, data.size());
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(protocol_version));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
     const message::send_headers expected{};
-    const auto data = expected.to_data(peer_minimum_version);
+    const auto data = expected.to_data(protocol_version);
     data_source istream(data);
     const auto result = message::send_headers::factory_from_data(
-        peer_minimum_version, istream);
+        protocol_version, istream);
 
     BOOST_REQUIRE_EQUAL(0u, data.size());
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(protocol_version));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
     const message::send_headers expected{};
-    const auto data = expected.to_data(peer_minimum_version);
+    const auto data = expected.to_data(protocol_version);
     data_source istream(data);
     istream_reader source(istream);
     const auto result = message::send_headers::factory_from_data(
-        peer_minimum_version, source);
+        protocol_version, source);
 
     BOOST_REQUIRE_EQUAL(0u, data.size());
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(protocol_version));
+}
+
+BOOST_AUTO_TEST_CASE(from_data_reader_version_prior_bip130_failure)
+{
+    data_chunk data{};
+    data_source istream(data);
+    istream_reader source(istream);
+    message::send_headers instance{};
+    const auto result = instance.from_data(bip130_minimum_version - 1, source);
+
+    BOOST_REQUIRE(!result);
+    BOOST_REQUIRE(!instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(from_data_reader_version_at_least_bip130_success)
+{
+    data_chunk data{};
+    data_source istream(data);
+    istream_reader source(istream);
+    message::send_headers instance{};
+    const auto result = instance.from_data(bip130_minimum_version, source);
+
+    BOOST_REQUIRE(result);
+    BOOST_REQUIRE(instance.is_valid());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

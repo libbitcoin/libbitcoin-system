@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <utility>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -32,6 +33,8 @@ namespace libbitcoin {
 namespace message {
 
 const std::string message::headers::command = "headers";
+const uint32_t message::headers::version_minimum = peer_minimum_version;
+const uint32_t message::headers::version_maximum = protocol_version;
 
 headers headers::factory_from_data(const uint32_t version,
     const data_chunk& data)

@@ -31,6 +31,19 @@ BOOST_AUTO_TEST_CASE(pong_satoshi_fixed_size_returns_sizeof_uint64_t)
         message::pong::satoshi_fixed_size(peer_minimum_version));
 }
 
+BOOST_AUTO_TEST_CASE(pong_from_data_insufficient_version_failure)
+{
+    const message::pong expected
+    {
+        213153u
+    };
+
+    const auto data = expected.to_data(protocol_version);
+    message::pong instance;
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(
+        message::pong::version_minimum - 1, data));
+}
+
 BOOST_AUTO_TEST_CASE(pong_roundtrip_to_data_factory_from_data_chunk)
 {
     const message::pong expected

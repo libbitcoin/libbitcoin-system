@@ -52,6 +52,8 @@ public:
     uint64_t serialized_size(const uint32_t version) const;
 
     static const std::string command;
+    static const uint32_t version_minimum;
+    static const uint32_t version_maximum;
 
     bool high_bandwidth_mode;
     uint64_t version;

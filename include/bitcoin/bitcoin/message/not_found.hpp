@@ -25,6 +25,7 @@
 #include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/message/inventory.hpp>
@@ -48,7 +49,13 @@ public:
     not_found(const hash_list& hashes, inventory_type_id type_id);
     not_found(const std::initializer_list<inventory_vector>& values);
 
+    bool from_data(const uint32_t version, const data_chunk& data) override;
+    bool from_data(const uint32_t version, std::istream& stream) override;
+    bool from_data(const uint32_t version, reader& source) override;
+
     static const std::string command;
+    static const uint32_t version_minimum;
+    static const uint32_t version_maximum;
 };
 
 } // namspace message

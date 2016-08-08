@@ -25,6 +25,7 @@
 #include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
@@ -53,6 +54,8 @@ public:
     uint64_t serialized_size(const uint32_t version) const;
 
     static const std::string command;
+    static const uint32_t version_minimum;
+    static const uint32_t version_maximum;
 
     uint32_t value;
     uint64_t services_sender;

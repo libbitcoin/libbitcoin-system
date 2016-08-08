@@ -41,6 +41,8 @@ public:
     static send_headers factory_from_data(const uint32_t version, reader& source);
     static uint64_t satoshi_fixed_size(const uint32_t version);
 
+    send_headers();
+
     bool from_data(const uint32_t version, const data_chunk& data);
     bool from_data(const uint32_t version, std::istream& stream);
     bool from_data(const uint32_t version, reader& source);
@@ -52,6 +54,11 @@ public:
     uint64_t serialized_size(const uint32_t version) const;
 
     static const std::string command;
+    static const uint32_t version_minimum;
+    static const uint32_t version_maximum;
+
+private:
+    bool version_unsupported_;
 };
 
 } // namspace message

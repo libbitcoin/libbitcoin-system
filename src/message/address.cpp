@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/address.hpp>
 
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -29,6 +30,8 @@ namespace libbitcoin {
 namespace message {
 
 const std::string message::address::command = "addr";
+const uint32_t message::address::version_minimum = peer_minimum_version;
+const uint32_t message::address::version_maximum = protocol_version;
 
 address address::factory_from_data(const uint32_t version, const data_chunk& data)
 {

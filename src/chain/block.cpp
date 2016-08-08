@@ -32,8 +32,6 @@
 namespace libbitcoin {
 namespace chain {
 
-const std::string chain::block::command = "block";
-
 block block::factory_from_data(const data_chunk& data,
     bool with_transaction_count)
 {

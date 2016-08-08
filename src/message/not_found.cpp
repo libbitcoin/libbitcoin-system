@@ -20,12 +20,15 @@
 #include <bitcoin/bitcoin/message/not_found.hpp>
 
 #include <initializer_list>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {
 namespace message {
 
 const std::string message::not_found::command = "notfound";
+const uint32_t message::not_found::version_minimum = bip37_minimum_version;
+const uint32_t message::not_found::version_maximum = protocol_version;
 
 not_found not_found::factory_from_data(const uint32_t version,
     const data_chunk& data)
@@ -69,6 +72,29 @@ not_found::not_found(const hash_list& hashes, inventory_type_id type_id)
 not_found::not_found(const std::initializer_list<inventory_vector>& values)
   : inventory(values)
 {
+}
+
+bool not_found::from_data(const uint32_t version, const data_chunk& data)
+{
+    return inventory::from_data(version, data);
+}
+
+bool not_found::from_data(const uint32_t version, std::istream& stream)
+{
+    return inventory::from_data(version, stream);
+}
+
+bool not_found::from_data(const uint32_t version, reader& source)
+{
+    bool result = !(version < not_found::version_minimum);
+
+    if (result)
+        result = inventory::from_data(version, source);
+
+    if (!result)
+        reset();
+
+    return result;
 }
 
 } // namspace message

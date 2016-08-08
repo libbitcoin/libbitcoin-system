@@ -48,6 +48,8 @@ public:
     ping(const uint64_t nonce);
 
     static const std::string command;
+    static const uint32_t version_minimum;
+    static const uint32_t version_maximum;
 };
 
 } // namspace message

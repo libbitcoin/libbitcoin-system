@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/block_transactions.hpp>
 
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -29,6 +30,8 @@ namespace libbitcoin {
 namespace message {
 
 const std::string message::block_transactions::command = "blocktxn";
+const uint32_t message::block_transactions::version_minimum = bip152_minimum_version;
+const uint32_t message::block_transactions::version_maximum = bip152_minimum_version;
 
 block_transactions block_transactions::factory_from_data(
     const uint32_t version, const data_chunk& data)
@@ -82,9 +85,9 @@ bool block_transactions::from_data(const uint32_t version,
 bool block_transactions::from_data(const uint32_t version, reader& source)
 {
     reset();
+    auto result = !(version < block_transactions::version_minimum);
     block_hash = source.read_hash();
-    auto result = static_cast<bool>(source);
-
+    result &= static_cast<bool>(source);
     const auto count = source.read_variable_uint_little_endian();
     result &= static_cast<bool>(source);
 

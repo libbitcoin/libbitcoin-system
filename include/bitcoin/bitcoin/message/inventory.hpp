@@ -51,9 +51,9 @@ public:
     inventory(const hash_list& hashes, inventory_type_id type_id);
     inventory(const std::initializer_list<inventory_vector>& values);
 
-    bool from_data(const uint32_t version, const data_chunk& data);
-    bool from_data(const uint32_t version, std::istream& stream);
-    bool from_data(const uint32_t version, reader& source);
+    virtual bool from_data(const uint32_t version, const data_chunk& data);
+    virtual bool from_data(const uint32_t version, std::istream& stream);
+    virtual bool from_data(const uint32_t version, reader& source);
     data_chunk to_data(const uint32_t version) const;
     void to_data(const uint32_t version, std::ostream& stream) const;
     void to_data(const uint32_t version, writer& sink) const;
@@ -64,6 +64,8 @@ public:
     size_t count(inventory_type_id type_id) const;
 
     static const std::string command;
+    static const uint32_t version_minimum;
+    static const uint32_t version_maximum;
 
     inventory_vector::list inventories;
 };

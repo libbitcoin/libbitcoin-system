@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <initializer_list>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/message/inventory_type_id.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -33,6 +34,8 @@ namespace libbitcoin {
 namespace message {
 
 const std::string message::inventory::command = "inv";
+const uint32_t message::inventory::version_minimum = peer_minimum_version;
+const uint32_t message::inventory::version_maximum = protocol_version;
 
 inventory inventory::factory_from_data(const uint32_t version,
     const data_chunk& data)

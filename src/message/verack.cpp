@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -28,6 +29,8 @@ namespace libbitcoin {
 namespace message {
 
 const std::string message::verack::command = "verack";
+const uint32_t message::verack::version_minimum = peer_minimum_version;
+const uint32_t message::verack::version_maximum = protocol_version;
 
 verack verack::factory_from_data(const uint32_t version,
     const data_chunk& data)

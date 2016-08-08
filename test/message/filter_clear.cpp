@@ -25,43 +25,55 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(filter_clear_tests)
 
+BOOST_AUTO_TEST_CASE(from_data_insufficient_version_failure)
+{
+    const message::filter_clear expected;
+
+    const data_chunk raw = expected.to_data(protocol_version);
+    message::filter_clear instance{};
+
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(
+        message::filter_clear::version_minimum - 1, raw));
+    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+}
+
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
     const message::filter_clear expected{};
-    const auto data = expected.to_data(peer_minimum_version);
+    const auto data = expected.to_data(protocol_version);
     const auto result = message::filter_clear::factory_from_data(
-        peer_minimum_version, data);
+        protocol_version, data);
 
     BOOST_REQUIRE_EQUAL(0u, data.size());
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(protocol_version));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
     const message::filter_clear expected{};
-    const auto data = expected.to_data(peer_minimum_version);
+    const auto data = expected.to_data(protocol_version);
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     const auto result = message::filter_clear::factory_from_data(
-        peer_minimum_version, istream);
+        protocol_version, istream);
 
     BOOST_REQUIRE_EQUAL(0u, data.size());
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(protocol_version));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
     const message::filter_clear expected{};
-    const auto data = expected.to_data(peer_minimum_version);
+    const auto data = expected.to_data(protocol_version);
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     istream_reader source(istream);
     const auto result = message::filter_clear::factory_from_data(
-        peer_minimum_version, source);
+        protocol_version, source);
 
     BOOST_REQUIRE_EQUAL(0u, data.size());
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(protocol_version));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

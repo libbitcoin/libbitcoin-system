@@ -48,7 +48,13 @@ public:
     get_data(const hash_list& hashes, inventory_type_id type_id);
     get_data(const std::initializer_list<inventory_vector>& elements);
 
+    bool from_data(const uint32_t version, const data_chunk& data) override;
+    bool from_data(const uint32_t version, std::istream& stream) override;
+    bool from_data(const uint32_t version, reader& source) override;
+
     static const std::string command;
+    static const uint32_t version_minimum;
+    static const uint32_t version_maximum;
 };
 
 } // namspace message

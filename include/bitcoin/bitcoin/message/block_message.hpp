@@ -83,6 +83,10 @@ public:
     uint64_t originator() const;
     void set_originator(uint64_t value);
 
+    static const std::string command;
+    static const uint32_t version_minimum;
+    static const uint32_t version_maximum;
+
 private:
     uint64_t originator_;
 };

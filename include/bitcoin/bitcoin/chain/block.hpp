@@ -64,8 +64,6 @@ public:
     void reset();
     uint64_t serialized_size(bool with_transaction_count = true) const;
 
-    static const std::string command;
-
     block();
     block(const block& other);
     block(const chain::header& header,

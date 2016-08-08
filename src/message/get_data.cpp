@@ -20,12 +20,15 @@
 #include <bitcoin/bitcoin/message/get_data.hpp>
 
 #include <initializer_list>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {
 namespace message {
 
 const std::string message::get_data::command = "getdata";
+const uint32_t message::get_data::version_minimum = peer_minimum_version;
+const uint32_t message::get_data::version_maximum = protocol_version;
 
 get_data get_data::factory_from_data(const uint32_t version,
     const data_chunk& data)
@@ -69,6 +72,29 @@ get_data::get_data(const hash_list& hashes, inventory_type_id type_id)
 get_data::get_data(const std::initializer_list<inventory_vector>& elements)
   : inventory(elements)
 {
+}
+
+bool get_data::from_data(const uint32_t version, const data_chunk& data)
+{
+    return inventory::from_data(version, data);
+}
+
+bool get_data::from_data(const uint32_t version, std::istream& stream)
+{
+    return inventory::from_data(version, stream);
+}
+
+bool get_data::from_data(const uint32_t version, reader& source)
+{
+    bool result = !(version < get_data::version_minimum);
+
+    if (result)
+        result = inventory::from_data(version, source);
+
+    if (!result)
+        reset();
+
+    return result;
 }
 
 } // namspace message

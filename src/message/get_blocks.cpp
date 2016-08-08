@@ -30,6 +30,8 @@ namespace libbitcoin {
 namespace message {
 
 const std::string message::get_blocks::command = "getblocks";
+const uint32_t message::get_blocks::version_minimum = peer_minimum_version;
+const uint32_t message::get_blocks::version_maximum = protocol_version;
 
 get_blocks get_blocks::factory_from_data(const uint32_t version,
     const data_chunk& data)
@@ -116,7 +118,7 @@ void get_blocks::to_data(const uint32_t version, std::ostream& stream) const
 
 void get_blocks::to_data(const uint32_t version, writer& sink) const
 {
-    sink.write_4_bytes_little_endian(protocol_version);
+    sink.write_4_bytes_little_endian(version);
     sink.write_variable_uint_little_endian(start_hashes.size());
 
     for (hash_digest start_hash: start_hashes)

@@ -39,9 +39,9 @@ class BC_API nonce_
 public:
     static uint64_t satoshi_fixed_size(const uint32_t version);
 
-    bool from_data(const uint32_t version, const data_chunk& data);
-    bool from_data(const uint32_t version, std::istream& stream);
-    bool from_data(const uint32_t version, reader& source);
+    virtual bool from_data(const uint32_t version, const data_chunk& data);
+    virtual bool from_data(const uint32_t version, std::istream& stream);
+    virtual bool from_data(const uint32_t version, reader& source);
     data_chunk to_data(const uint32_t version) const;
     void to_data(const uint32_t version, std::ostream& stream) const;
     void to_data(const uint32_t version, writer& sink) const;

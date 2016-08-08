@@ -31,6 +31,8 @@ namespace libbitcoin {
 namespace message {
 
 const std::string message::filter_add::command = "filteradd";
+const uint32_t message::filter_add::version_minimum = bip37_minimum_version;
+const uint32_t message::filter_add::version_maximum = protocol_version;
 
 filter_add filter_add::factory_from_data(const uint32_t version,
     const data_chunk& data)
@@ -82,6 +84,7 @@ bool filter_add::from_data(const uint32_t version, reader& source)
 {
     reset();
 
+    bool insufficient_version = (version < filter_add::version_minimum);
     auto size = source.read_variable_uint_little_endian();
     BITCOIN_ASSERT(size <= bc::max_size_t);
     const auto data_size = static_cast<size_t>(size);
@@ -93,10 +96,10 @@ bool filter_add::from_data(const uint32_t version, reader& source)
         result = source && (data.size() == data_size);
     }
 
-    if (!result)
+    if (!result || insufficient_version)
         reset();
 
-    return result;
+    return result && !insufficient_version;
 }
 
 data_chunk filter_add::to_data(const uint32_t version) const

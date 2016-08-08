@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/message/memory_pool.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -28,6 +29,8 @@ namespace libbitcoin {
 namespace message {
 
 const std::string message::memory_pool::command = "mempool";
+const uint32_t message::memory_pool::version_minimum = bip35_minimum_version;
+const uint32_t message::memory_pool::version_maximum = protocol_version;
 
 memory_pool memory_pool::factory_from_data(const uint32_t version,
     const data_chunk& data)
@@ -53,13 +56,19 @@ memory_pool memory_pool::factory_from_data(const uint32_t version,
     return instance;
 }
 
+memory_pool::memory_pool()
+{
+    reset();
+}
+
 bool memory_pool::is_valid() const
 {
-    return true;
+    return !insufficient_version_;
 }
 
 void memory_pool::reset()
 {
+    insufficient_version_ = false;
 }
 
 bool memory_pool::from_data(const uint32_t version, const data_chunk& data)
@@ -77,7 +86,8 @@ bool memory_pool::from_data(const uint32_t version, std::istream& stream)
 bool memory_pool::from_data(const uint32_t version, reader& source)
 {
     reset();
-    return source;
+    insufficient_version_ = (version < memory_pool::version_minimum);
+    return !insufficient_version_;
 }
 
 data_chunk memory_pool::to_data(const uint32_t version) const

@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/message/filter_clear.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -28,6 +29,8 @@ namespace libbitcoin {
 namespace message {
 
 const std::string message::filter_clear::command = "filterclear";
+const uint32_t message::filter_clear::version_minimum = bip37_minimum_version;
+const uint32_t message::filter_clear::version_maximum = protocol_version;
 
 filter_clear filter_clear::factory_from_data(const uint32_t version,
     const data_chunk& data)
@@ -53,13 +56,19 @@ filter_clear filter_clear::factory_from_data(const uint32_t version,
     return instance;
 }
 
+filter_clear::filter_clear()
+{
+    reset();
+}
+
 bool filter_clear::is_valid() const
 {
-    return true;
+    return !insufficient_version_;
 }
 
 void filter_clear::reset()
 {
+    insufficient_version_ = false;
 }
 
 bool filter_clear::from_data(const uint32_t version, const data_chunk& data)
@@ -77,7 +86,8 @@ bool filter_clear::from_data(const uint32_t version, std::istream& stream)
 bool filter_clear::from_data(const uint32_t version, reader& source)
 {
     reset();
-    return source;
+    insufficient_version_ = (version < filter_clear::version_minimum);
+    return !insufficient_version_;
 }
 
 data_chunk filter_clear::to_data(const uint32_t version) const
