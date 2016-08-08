@@ -109,7 +109,7 @@ data_chunk serialize(const uint32_t version, const Message& packet,
     uint32_t magic)
 {
     // Serialize the payload (required for header size).
-    auto payload = packet.to_data();
+    auto payload = packet.to_data(version);
 
     // Construct the payload header.
     heading head;

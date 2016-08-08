@@ -86,11 +86,6 @@ header_message::header_message(const header_message& other)
 {
 }
 
-header_message::header_message(chain::header&& other)
-  : header_message(std::forward<chain::header>(other))
-{
-}
-
 bool header_message::from_data(const uint32_t version, const data_chunk& data,
     bool with_transaction_count)
 {

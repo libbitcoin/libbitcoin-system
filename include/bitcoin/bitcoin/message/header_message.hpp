@@ -55,9 +55,6 @@ public:
     header_message(const chain::header& other);
     header_message(const header_message& other);
 
-    header_message(chain::header&& other);
-    header_message(header_message&& other);
-
     bool from_data(const uint32_t version, const data_chunk& data,
         bool with_transaction_count = true);
     bool from_data(const uint32_t version, std::istream& stream,
