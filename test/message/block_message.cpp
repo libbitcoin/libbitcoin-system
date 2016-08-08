@@ -32,7 +32,6 @@ BOOST_AUTO_TEST_CASE(from_data_fails)
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(peer_minimum_version, data));
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
-    BOOST_REQUIRE_EQUAL(peer_minimum_version, instance.originator());
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_mainnet_genesis_block_serialization_factory_data_chunk)
@@ -58,6 +57,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_mainnet_genesis_block_serialization_factory_data_
     BOOST_REQUIRE(genesis.header.bits == block.header.bits);
     BOOST_REQUIRE(genesis.header.nonce == block.header.nonce);
     BOOST_REQUIRE(genesis.header == block.header);
+    BOOST_REQUIRE_EQUAL(peer_minimum_version, block.originator());
 
     // Verify merkle root from transactions.
     const auto merkle = message::block_message::generate_merkle_root(block.transactions);
@@ -88,6 +88,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_mainnet_genesis_block_serialization_factory_strea
     BOOST_REQUIRE(genesis.header.bits == block.header.bits);
     BOOST_REQUIRE(genesis.header.nonce == block.header.nonce);
     BOOST_REQUIRE(genesis.header == block.header);
+    BOOST_REQUIRE_EQUAL(peer_minimum_version, block.originator());
 
     // Verify merkle root from transactions.
     const auto merkle = message::block_message::generate_merkle_root(block.transactions);
@@ -109,7 +110,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_mainnet_genesis_block_serialization_factory_reade
     data_source stream(raw_block_message);
     istream_reader reader(stream);
     const auto block = message::block_message::factory_from_data(
-        peer_minimum_version, reader);
+        peer_minimum_version + 1, reader);
 
     BOOST_REQUIRE(block.is_valid());
     BOOST_REQUIRE(genesis.header.version == block.header.version);
@@ -119,6 +120,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_mainnet_genesis_block_serialization_factory_reade
     BOOST_REQUIRE(genesis.header.bits == block.header.bits);
     BOOST_REQUIRE(genesis.header.nonce == block.header.nonce);
     BOOST_REQUIRE(genesis.header == block.header);
+    BOOST_REQUIRE_EQUAL(peer_minimum_version + 1, block.originator());
 
     // Verify merkle root from transactions.
     const auto merkle = message::block_message::generate_merkle_root(block.transactions);
