@@ -21,6 +21,7 @@
 
 #include <istream>
 #include <utility>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/chain/input.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -29,26 +30,31 @@
 namespace libbitcoin {
 namespace message {
 
+const std::string message::transaction_message::command = "tx";
+const uint32_t message::transaction_message::version_minimum = peer_minimum_version;
+const uint32_t message::transaction_message::version_maximum = protocol_version;
+
 transaction_message transaction_message::factory_from_data(
-    const data_chunk& data)
+    const uint32_t version, const data_chunk& data)
 {
     transaction_message instance;
-    instance.from_data(data);
+    instance.from_data(version, data);
     return instance;
 }
 
 transaction_message transaction_message::factory_from_data(
-    std::istream& stream)
+    const uint32_t version, std::istream& stream)
 {
     transaction_message instance;
-    instance.from_data(stream);
+    instance.from_data(version, stream);
     return instance;
 }
 
-transaction_message transaction_message::factory_from_data(reader& source)
+transaction_message transaction_message::factory_from_data(
+    const uint32_t version, reader& source)
 {
     transaction_message instance;
-    instance.from_data(source);
+    instance.from_data(version, source);
     return instance;
 }
 
@@ -95,6 +101,47 @@ transaction_message::transaction_message(uint32_t version, uint32_t locktime,
         std::forward<chain::output::list>(outputs)),
     originator_(0)
 {
+}
+
+bool transaction_message::from_data(const uint32_t version,
+    const data_chunk& data)
+{
+    originator_ = version;
+    return transaction::from_data(data);
+}
+
+bool transaction_message::from_data(const uint32_t version,
+    std::istream& stream)
+{
+    originator_ = version;
+    return transaction::from_data(stream);
+}
+
+bool transaction_message::from_data(const uint32_t version, reader& source)
+{
+    originator_ = version;
+    return transaction::from_data(source);
+}
+
+data_chunk transaction_message::to_data(const uint32_t version) const
+{
+    return transaction::to_data();
+}
+
+void transaction_message::to_data(const uint32_t version,
+    std::ostream& stream) const
+{
+    transaction::to_data(stream);
+}
+
+void transaction_message::to_data(const uint32_t version, writer& sink) const
+{
+    transaction::to_data(sink);
+}
+
+uint64_t transaction_message::serialized_size(const uint32_t version) const
+{
+    return transaction::serialized_size();
 }
 
 transaction_message& transaction_message::operator=(

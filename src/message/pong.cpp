@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/pong.hpp>
 
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -29,31 +30,33 @@ namespace libbitcoin {
 namespace message {
 
 const std::string message::pong::command = "pong";
+const uint32_t message::pong::version_minimum = bip31_minimum_version;
+const uint32_t message::pong::version_maximum = protocol_version;
 
-pong pong::factory_from_data(const data_chunk& data)
+pong pong::factory_from_data(const uint32_t version, const data_chunk& data)
 {
     pong instance;
-    instance.from_data(data);
+    instance.from_data(version, data);
     return instance;
 }
 
-pong pong::factory_from_data(std::istream& stream)
+pong pong::factory_from_data(const uint32_t version, std::istream& stream)
 {
     pong instance;
-    instance.from_data(stream);
+    instance.from_data(version, stream);
     return instance;
 }
 
-pong pong::factory_from_data(reader& source)
+pong pong::factory_from_data(const uint32_t version, reader& source)
 {
     pong instance;
-    instance.from_data(source);
+    instance.from_data(version, source);
     return instance;
 }
 
-uint64_t pong::satoshi_fixed_size()
+uint64_t pong::satoshi_fixed_size(const uint32_t version)
 {
-    return nonce_::satoshi_fixed_size();
+    return nonce_::satoshi_fixed_size(version);
 }
 
 pong::pong()
@@ -64,6 +67,29 @@ pong::pong()
 pong::pong(uint64_t nonce)
   : nonce_(nonce)
 {
+}
+
+bool pong::from_data(const uint32_t version, const data_chunk& data)
+{
+    return nonce_::from_data(version, data);
+}
+
+bool pong::from_data(const uint32_t version, std::istream& stream)
+{
+    return nonce_::from_data(version, stream);
+}
+
+bool pong::from_data(const uint32_t version, reader& source)
+{
+    bool result = !(version < pong::version_minimum);
+
+    if (result)
+        result = nonce_::from_data(version, source);
+
+    if (!result)
+        reset();
+
+    return result;
 }
 
 } // namspace message

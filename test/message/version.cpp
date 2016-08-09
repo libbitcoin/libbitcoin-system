@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
     const data_chunk raw{ 0xab };
     message::version instance{};
 
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(protocol_version, raw));
 }
 
 BOOST_AUTO_TEST_CASE(version__from_data_chunk__mismatched_sender_services__invalid)
@@ -90,10 +90,54 @@ BOOST_AUTO_TEST_CASE(version__from_data_chunk__mismatched_sender_services__inval
         100u
     };
 
-    const auto data = expected.to_data();
-    const auto result = message::version::factory_from_data(data);
+    const auto data = expected.to_data(protocol_version);
+    const auto result = message::version::factory_from_data(
+        protocol_version, data);
 
     BOOST_REQUIRE(!result.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(version__from_data_chunk__version_meets_bip37)
+{
+    const auto sender_services = 1515u;
+    const message::version expected
+    {
+        bip37_minimum_version,
+        sender_services,
+        979797u,
+        {
+            734678u,
+            5357534u,
+            {
+                {
+                    0x47, 0x81, 0x6a, 0x40, 0xbb, 0x92, 0xbd, 0xb4,
+                    0xe0, 0xb8, 0x25, 0x68, 0x61, 0xf9, 0x6a, 0x55
+                }
+            },
+            123u
+        },
+        {
+            46324u,
+            sender_services,
+            {
+                {
+                    0xab, 0xcd, 0x6a, 0x40, 0x33, 0x92, 0x77, 0xb4,
+                    0xe0, 0xb8, 0xda, 0x43, 0x61, 0x66, 0x6a, 0x88
+                }
+            },
+            351u
+        },
+        13626u,
+        "my agent",
+        100u,
+        true
+    };
+
+    const auto data = expected.to_data(protocol_version);
+    const auto result = message::version::factory_from_data(
+        protocol_version, data);
+
+    BOOST_REQUIRE(result.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
@@ -131,13 +175,16 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
         100u
     };
 
-    const auto data = expected.to_data();
-    const auto result = message::version::factory_from_data(data);
+    const auto data = expected.to_data(protocol_version);
+    const auto result = message::version::factory_from_data(
+        protocol_version, data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result));
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
+    BOOST_REQUIRE_EQUAL(data.size(),
+        result.serialized_size(protocol_version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(protocol_version),
+        result.serialized_size(protocol_version));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
@@ -175,14 +222,17 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
         100u
     };
 
-    const auto data = expected.to_data();
+    const auto data = expected.to_data(protocol_version);
     data_source istream(data);
-    const auto result = message::version::factory_from_data(istream);
+    const auto result = message::version::factory_from_data(
+        protocol_version, istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result));
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
+    BOOST_REQUIRE_EQUAL(data.size(),
+        result.serialized_size(protocol_version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(protocol_version),
+        result.serialized_size(protocol_version));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
@@ -220,15 +270,18 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
         100u
     };
 
-    const auto data = expected.to_data();
+    const auto data = expected.to_data(protocol_version);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = message::version::factory_from_data(source);
+    const auto result = message::version::factory_from_data(
+        protocol_version, source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result));
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
+    BOOST_REQUIRE_EQUAL(data.size(),
+        result.serialized_size(protocol_version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(protocol_version),
+        result.serialized_size(protocol_version));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

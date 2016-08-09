@@ -31,25 +31,27 @@ namespace libbitcoin {
 namespace message {
 
 const std::string message::alert::command = "alert";
+const uint32_t message::alert::version_minimum = peer_minimum_version;
+const uint32_t message::alert::version_maximum = protocol_version;
 
-alert alert::factory_from_data(const data_chunk& data)
+alert alert::factory_from_data(const uint32_t version, const data_chunk& data)
 {
     alert instance;
-    instance.from_data(data);
+    instance.from_data(version, data);
     return instance;
 }
 
-alert alert::factory_from_data(std::istream& stream)
+alert alert::factory_from_data(const uint32_t version, std::istream& stream)
 {
     alert instance;
-    instance.from_data(stream);
+    instance.from_data(version, stream);
     return instance;
 }
 
-alert alert::factory_from_data(reader& source)
+alert alert::factory_from_data(const uint32_t version, reader& source)
 {
     alert instance;
-    instance.from_data(source);
+    instance.from_data(version, source);
     return instance;
 }
 
@@ -64,19 +66,19 @@ void alert::reset()
     signature.clear();
 }
 
-bool alert::from_data(const data_chunk& data)
+bool alert::from_data(const uint32_t version, const data_chunk& data)
 {
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
-    return from_data(istream);
+    return from_data(version, istream);
 }
 
-bool alert::from_data(std::istream& stream)
+bool alert::from_data(const uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(version, source);
 }
 
-bool alert::from_data(reader& source)
+bool alert::from_data(const uint32_t version, reader& source)
 {
     reset();
 
@@ -112,23 +114,23 @@ bool alert::from_data(reader& source)
     return result;
 }
 
-data_chunk alert::to_data() const
+data_chunk alert::to_data(const uint32_t version) const
 {
     data_chunk data;
     boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
-    to_data(ostream);
+    to_data(version, ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == serialized_size(version));
     return data;
 }
 
-void alert::to_data(std::ostream& stream) const
+void alert::to_data(const uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(version, sink);
 }
 
-void alert::to_data(writer& sink) const
+void alert::to_data(const uint32_t version, writer& sink) const
 {
     sink.write_variable_uint_little_endian(payload.size());
     sink.write_data(payload);
@@ -136,7 +138,7 @@ void alert::to_data(writer& sink) const
     sink.write_data(signature);
 }
 
-uint64_t alert::serialized_size() const
+uint64_t alert::serialized_size(const uint32_t version) const
 {
     return variable_uint_size(payload.size()) + payload.size() +
         variable_uint_size(signature.size()) + signature.size();

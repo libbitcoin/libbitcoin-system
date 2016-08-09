@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/message/memory_pool.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -28,81 +29,93 @@ namespace libbitcoin {
 namespace message {
 
 const std::string message::memory_pool::command = "mempool";
+const uint32_t message::memory_pool::version_minimum = bip35_minimum_version;
+const uint32_t message::memory_pool::version_maximum = protocol_version;
 
-memory_pool memory_pool::factory_from_data(const data_chunk& data)
+memory_pool memory_pool::factory_from_data(const uint32_t version,
+    const data_chunk& data)
 {
     memory_pool instance;
-    instance.from_data(data);
+    instance.from_data(version, data);
     return instance;
 }
 
-memory_pool memory_pool::factory_from_data(std::istream& stream)
+memory_pool memory_pool::factory_from_data(const uint32_t version,
+    std::istream& stream)
 {
     memory_pool instance;
-    instance.from_data(stream);
+    instance.from_data(version, stream);
     return instance;
 }
 
-memory_pool memory_pool::factory_from_data(reader& source)
+memory_pool memory_pool::factory_from_data(const uint32_t version,
+    reader& source)
 {
     memory_pool instance;
-    instance.from_data(source);
+    instance.from_data(version, source);
     return instance;
+}
+
+memory_pool::memory_pool()
+{
+    reset();
 }
 
 bool memory_pool::is_valid() const
 {
-    return true;
+    return !insufficient_version_;
 }
 
 void memory_pool::reset()
 {
+    insufficient_version_ = false;
 }
 
-bool memory_pool::from_data(const data_chunk& data)
+bool memory_pool::from_data(const uint32_t version, const data_chunk& data)
 {
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
-    return from_data(istream);
+    return from_data(version, istream);
 }
 
-bool memory_pool::from_data(std::istream& stream)
+bool memory_pool::from_data(const uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(version, source);
 }
 
-bool memory_pool::from_data(reader& source)
+bool memory_pool::from_data(const uint32_t version, reader& source)
 {
     reset();
-    return source;
+    insufficient_version_ = (version < memory_pool::version_minimum);
+    return !insufficient_version_;
 }
 
-data_chunk memory_pool::to_data() const
+data_chunk memory_pool::to_data(const uint32_t version) const
 {
     data_chunk data;
     boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
-    to_data(ostream);
+    to_data(version, ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == serialized_size(version));
     return data;
 }
 
-void memory_pool::to_data(std::ostream& stream) const
+void memory_pool::to_data(const uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(version, sink);
 }
 
-void memory_pool::to_data(writer& sink) const
+void memory_pool::to_data(const uint32_t version, writer& sink) const
 {
 }
 
-uint64_t memory_pool::serialized_size() const
+uint64_t memory_pool::serialized_size(const uint32_t version) const
 {
-    return memory_pool::satoshi_fixed_size();
+    return memory_pool::satoshi_fixed_size(version);
 }
 
-uint64_t memory_pool::satoshi_fixed_size()
+uint64_t memory_pool::satoshi_fixed_size(const uint32_t version)
 {
     return 0;
 }

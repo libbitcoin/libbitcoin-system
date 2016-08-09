@@ -28,10 +28,14 @@ BOOST_AUTO_TEST_SUITE(send_compact_blocks_tests)
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
     const message::send_compact_blocks expected{ true, 164 };
-    const auto data = expected.to_data();
-    const auto result = message::send_compact_blocks::factory_from_data(data);
+    const auto data = expected.to_data(message::send_compact_blocks::version_minimum);
+    const auto result = message::send_compact_blocks::factory_from_data(
+        message::send_compact_blocks::version_minimum, data);
 
-    BOOST_REQUIRE_EQUAL(message::send_compact_blocks::satoshi_fixed_size(), data.size());
+    BOOST_REQUIRE_EQUAL(
+        message::send_compact_blocks::satoshi_fixed_size(
+            message::send_compact_blocks::version_minimum),
+        data.size());
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE_EQUAL(expected.high_bandwidth_mode, result.high_bandwidth_mode);
     BOOST_REQUIRE_EQUAL(expected.version, result.version);
@@ -40,11 +44,15 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
     const message::send_compact_blocks expected{ false, 5 };
-    const auto data = expected.to_data();
+    const auto data = expected.to_data(message::send_compact_blocks::version_minimum);
     data_source istream(data);
-    const auto result = message::send_compact_blocks::factory_from_data(istream);
+    const auto result = message::send_compact_blocks::factory_from_data(
+        message::send_compact_blocks::version_minimum, istream);
 
-    BOOST_REQUIRE_EQUAL(message::send_compact_blocks::satoshi_fixed_size(), data.size());
+    BOOST_REQUIRE_EQUAL(
+        message::send_compact_blocks::satoshi_fixed_size(
+            message::send_compact_blocks::version_minimum),
+        data.size());
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE_EQUAL(expected.high_bandwidth_mode, result.high_bandwidth_mode);
     BOOST_REQUIRE_EQUAL(expected.version, result.version);
@@ -53,12 +61,16 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
     const message::send_compact_blocks expected{ true, 257 };
-    const auto data = expected.to_data();
+    const auto data = expected.to_data(message::send_compact_blocks::version_minimum);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = message::send_compact_blocks::factory_from_data(source);
+    const auto result = message::send_compact_blocks::factory_from_data(
+        message::send_compact_blocks::version_minimum, source);
 
-    BOOST_REQUIRE_EQUAL(message::send_compact_blocks::satoshi_fixed_size(), data.size());
+    BOOST_REQUIRE_EQUAL(
+        message::send_compact_blocks::satoshi_fixed_size(
+            message::send_compact_blocks::version_minimum),
+        data.size());
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE_EQUAL(expected.high_bandwidth_mode, result.high_bandwidth_mode);
     BOOST_REQUIRE_EQUAL(expected.version, result.version);
@@ -68,7 +80,16 @@ BOOST_AUTO_TEST_CASE(from_data_reader_invalid_mode_byte)
 {
     data_chunk raw_data{ 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 };
     message::send_compact_blocks msg;
-    bool result = msg.from_data(raw_data);
+    bool result = msg.from_data(message::send_compact_blocks::version_minimum, raw_data);
+    BOOST_REQUIRE(!result);
+}
+
+BOOST_AUTO_TEST_CASE(from_data_reader_insufficient_version_failure)
+{
+    const message::send_compact_blocks expected{ true, 257 };
+    data_chunk raw_data = expected.to_data(message::send_compact_blocks::version_minimum);
+    message::send_compact_blocks msg;
+    bool result = msg.from_data(message::send_compact_blocks::version_minimum - 1, raw_data);
     BOOST_REQUIRE(!result);
 }
 

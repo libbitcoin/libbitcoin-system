@@ -21,6 +21,7 @@
 
 #include <cstdint>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -44,23 +45,24 @@ void nonce_::reset()
     nonce = 0;
 }
 
-bool nonce_::from_data(const data_chunk& data)
+bool nonce_::from_data(const uint32_t version, const data_chunk& data)
 {
     data_source istream(data);
-    return from_data(istream);
+    return from_data(version, istream);
 }
 
-bool nonce_::from_data(std::istream& stream)
+bool nonce_::from_data(const uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(version, source);
 }
 
-bool nonce_::from_data(reader& source)
+bool nonce_::from_data(const uint32_t version, reader& source)
 {
     reset();
 
-    nonce = source.read_8_bytes_little_endian();
+    if (version >= bip31_minimum_version)
+        nonce = source.read_8_bytes_little_endian();
 
     if (!source)
         reset();
@@ -68,33 +70,33 @@ bool nonce_::from_data(reader& source)
     return source;
 }
 
-data_chunk nonce_::to_data() const
+data_chunk nonce_::to_data(const uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
-    to_data(ostream);
+    to_data(version, ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == serialized_size(version));
     return data;
 }
 
-void nonce_::to_data(std::ostream& stream) const
+void nonce_::to_data(const uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(version, sink);
 }
 
-void nonce_::to_data(writer& sink) const
+void nonce_::to_data(const uint32_t version, writer& sink) const
 {
     sink.write_8_bytes_little_endian(nonce);
 }
 
-uint64_t nonce_::serialized_size() const
+uint64_t nonce_::serialized_size(const uint32_t version) const
 {
-    return nonce_::satoshi_fixed_size();
+    return nonce_::satoshi_fixed_size(version);
 }
 
-uint64_t nonce_::satoshi_fixed_size()
+uint64_t nonce_::satoshi_fixed_size(const uint32_t version)
 {
     return 8;
 }

@@ -19,8 +19,9 @@
  */
 #include <bitcoin/bitcoin/message/reject.hpp>
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/chain/block.hpp>
-#include <bitcoin/bitcoin/chain/transaction.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/message/block_message.hpp>
+#include <bitcoin/bitcoin/message/transaction_message.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -30,25 +31,30 @@ namespace libbitcoin {
 namespace message {
 
 const std::string message::reject::command = "reject";
+const uint32_t message::reject::version_minimum = bip61_minimum_version;
+const uint32_t message::reject::version_maximum = protocol_version;
 
-reject reject::factory_from_data(const data_chunk& data)
+reject reject::factory_from_data(const uint32_t version,
+    const data_chunk& data)
 {
     reject instance;
-    instance.from_data(data);
+    instance.from_data(version, data);
     return instance;
 }
 
-reject reject::factory_from_data(std::istream& stream)
+reject reject::factory_from_data(const uint32_t version,
+    std::istream& stream)
 {
     reject instance;
-    instance.from_data(stream);
+    instance.from_data(version, stream);
     return instance;
 }
 
-reject reject::factory_from_data(reader& source)
+reject reject::factory_from_data(const uint32_t version,
+    reader& source)
 {
     reject instance;
-    instance.from_data(source);
+    instance.from_data(version, source);
     return instance;
 }
 
@@ -68,21 +74,22 @@ void reject::reset()
     data.fill(0);
 }
 
-bool reject::from_data(const data_chunk& data)
+bool reject::from_data(const uint32_t version, const data_chunk& data)
 {
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
-    return from_data(istream);
+    return from_data(version, istream);
 }
 
-bool reject::from_data(std::istream& stream)
+bool reject::from_data(const uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(version, source);
 }
 
-bool reject::from_data(reader& source)
+bool reject::from_data(const uint32_t version, reader& source)
 {
-    bool result = 0;
+    bool result = false;
+    bool version_insufficient = (version < reject::version_minimum);
 
     reset();
 
@@ -90,13 +97,13 @@ bool reject::from_data(reader& source)
     code = error_code_from_byte(source.read_byte());
     reason = source.read_string();
 
-    if ((message == chain::block::command) ||
-        (message == chain::transaction::command))
+    if ((message == block_message::command) ||
+        (message == transaction_message::command))
     {
         data = source.read_hash();
     }
 
-    result = source;
+    result = source && !version_insufficient;
 
     if (!result)
         reset();
@@ -104,42 +111,42 @@ bool reject::from_data(reader& source)
     return result;
 }
 
-data_chunk reject::to_data() const
+data_chunk reject::to_data(const uint32_t version) const
 {
     data_chunk data;
     boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
-    to_data(ostream);
+    to_data(version, ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == serialized_size(version));
     return data;
 }
 
-void reject::to_data(std::ostream& stream) const
+void reject::to_data(const uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(version, sink);
 }
 
-void reject::to_data(writer& sink) const
+void reject::to_data(const uint32_t version, writer& sink) const
 {
     sink.write_string(message);
     sink.write_byte(error_code_to_byte(code));
     sink.write_string(reason);
 
-    if ((message == chain::block::command) ||
-        (message == chain::transaction::command))
+    if ((message == block_message::command) ||
+        (message == transaction_message::command))
     {
         sink.write_hash(data);
     }
 }
 
-uint64_t reject::serialized_size() const
+uint64_t reject::serialized_size(const uint32_t version) const
 {
     uint64_t size = 1 + variable_uint_size(message.size()) + message.size() +
         variable_uint_size(reason.size()) + reason.size();
 
-    if ((message == chain::block::command) ||
-        (message == chain::transaction::command))
+    if ((message == block_message::command) ||
+        (message == transaction_message::command))
     {
         size += hash_size;
     }

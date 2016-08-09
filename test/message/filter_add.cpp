@@ -30,7 +30,26 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
     data_chunk raw = { 0xab, 0x11 };
     message::filter_add instance;
 
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(protocol_version, raw));
+}
+
+BOOST_AUTO_TEST_CASE(from_data_insufficient_version_failure)
+{
+    const message::filter_add expected
+        {
+            {
+                0x1F, 0x9a, 0x0d, 0x24, 0x9a, 0xd5, 0x39, 0x89,
+                0xbb, 0x85, 0x0a, 0x3d, 0x79, 0x24, 0xed, 0x0f,
+                0xc3, 0x0d, 0x6f, 0x55, 0x7d, 0x71, 0x12, 0x1a,
+                0x37, 0xc0, 0xb0, 0x32, 0xf0, 0xd6, 0x6e, 0xdf
+            }
+        };
+
+    const auto data = expected.to_data(protocol_version);
+    message::filter_add instance;
+
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(
+        message::filter_add::version_minimum - 1, data));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
@@ -45,13 +64,16 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
         }
     };
 
-    const auto data = expected.to_data();
-    const auto result = message::filter_add::factory_from_data(data);
+    const auto data = expected.to_data(protocol_version);
+    const auto result = message::filter_add::factory_from_data(
+        protocol_version, data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
+    BOOST_REQUIRE_EQUAL(data.size(),
+        result.serialized_size(protocol_version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(protocol_version),
+        result.serialized_size(protocol_version));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
@@ -66,14 +88,17 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
         }
     };
 
-    const auto data = expected.to_data();
+    const auto data = expected.to_data(protocol_version);
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
-    const auto result = message::filter_add::factory_from_data(istream);
+    const auto result = message::filter_add::factory_from_data(
+        protocol_version, istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
+    BOOST_REQUIRE_EQUAL(data.size(),
+        result.serialized_size(protocol_version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(protocol_version),
+        result.serialized_size(protocol_version));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
@@ -88,15 +113,18 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
         }
     };
 
-    const auto data = expected.to_data();
+    const auto data = expected.to_data(protocol_version);
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     istream_reader source(istream);
-    const auto result = message::filter_add::factory_from_data(source);
+    const auto result = message::filter_add::factory_from_data(
+        protocol_version, source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
+    BOOST_REQUIRE_EQUAL(data.size(),
+        result.serialized_size(protocol_version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(protocol_version),
+        result.serialized_size(protocol_version));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

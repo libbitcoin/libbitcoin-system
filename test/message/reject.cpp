@@ -50,67 +50,93 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
     const data_chunk raw{ 0xab };
     message::reject instance{};
 
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(protocol_version, raw));
+}
+
+BOOST_AUTO_TEST_CASE(from_data_insufficient_version_failure)
+{
+    const message::reject expected
+    {
+        message::block_message::command,
+        message::reject::error_code::dust,
+        reason_text,
+        data
+    };
+
+    const data_chunk raw = expected.to_data(protocol_version);
+    message::reject instance{};
+
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(
+        message::reject::version_minimum - 1, raw));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
     const message::reject expected
     {
-        chain::block::command,
+        message::block_message::command,
         message::reject::error_code::dust,
         reason_text,
         data
     };
 
-    const auto data = expected.to_data();
-    const auto result = message::reject::factory_from_data(data);
+    const auto data = expected.to_data(protocol_version);
+    const auto result = message::reject::factory_from_data(
+        protocol_version, data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result));
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
+    BOOST_REQUIRE_EQUAL(data.size(),
+        result.serialized_size(protocol_version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(protocol_version),
+        result.serialized_size(protocol_version));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
     const message::reject expected
     {
-        chain::block::command,
+        message::block_message::command,
         message::reject::error_code::insufficient_fee,
         reason_text,
         data
     };
 
-    const auto data = expected.to_data();
+    const auto data = expected.to_data(protocol_version);
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
-    const auto result = message::reject::factory_from_data(istream);
+    const auto result = message::reject::factory_from_data(
+        protocol_version, istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result));
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
+    BOOST_REQUIRE_EQUAL(data.size(),
+        result.serialized_size(protocol_version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(protocol_version),
+        result.serialized_size(protocol_version));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
     const message::reject expected
     {
-        chain::transaction::command,
+        message::transaction_message::command,
         message::reject::error_code::duplicate,
         reason_text,
         data
     };
 
-    const auto data = expected.to_data();
+    const auto data = expected.to_data(protocol_version);
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     istream_reader source(istream);
-    const auto result = message::reject::factory_from_data(source);
+    const auto result = message::reject::factory_from_data(
+        protocol_version, source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result));
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
+    BOOST_REQUIRE_EQUAL(data.size(),
+        result.serialized_size(protocol_version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(protocol_version),
+        result.serialized_size(protocol_version));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

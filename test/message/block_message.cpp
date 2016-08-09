@@ -30,14 +30,14 @@ BOOST_AUTO_TEST_CASE(from_data_fails)
     data_chunk data(10);
     message::block_message instance;
 
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(data));
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(peer_minimum_version, data));
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_mainnet_genesis_block_serialization_factory_data_chunk)
 {
     const auto genesis = bc::message::block_message::genesis_mainnet();
-    BOOST_REQUIRE_EQUAL(genesis.serialized_size(), 285u);
+    BOOST_REQUIRE_EQUAL(genesis.serialized_size(peer_minimum_version), 285u);
     BOOST_REQUIRE_EQUAL(genesis.header.serialized_size(false), 80u);
 
     // Save genesis block.
@@ -46,7 +46,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_mainnet_genesis_block_serialization_factory_data_
     BOOST_REQUIRE_EQUAL(raw_block_message.size(), 285u);
 
     // Reload genesis block.
-    const auto block = message::block_message::factory_from_data(raw_block_message);
+    const auto block = message::block_message::factory_from_data(
+        peer_minimum_version, raw_block_message);
 
     BOOST_REQUIRE(block.is_valid());
     BOOST_REQUIRE(genesis.header.version == block.header.version);
@@ -56,6 +57,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_mainnet_genesis_block_serialization_factory_data_
     BOOST_REQUIRE(genesis.header.bits == block.header.bits);
     BOOST_REQUIRE(genesis.header.nonce == block.header.nonce);
     BOOST_REQUIRE(genesis.header == block.header);
+    BOOST_REQUIRE_EQUAL(peer_minimum_version, block.originator());
 
     // Verify merkle root from transactions.
     const auto merkle = message::block_message::generate_merkle_root(block.transactions);
@@ -75,7 +77,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_mainnet_genesis_block_serialization_factory_strea
 
     // Reload genesis block.
     data_source stream(raw_block_message);
-    const auto block = message::block_message::factory_from_data(stream);
+    const auto block = message::block_message::factory_from_data(
+        peer_minimum_version, stream);
 
     BOOST_REQUIRE(block.is_valid());
     BOOST_REQUIRE(genesis.header.version == block.header.version);
@@ -85,6 +88,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_mainnet_genesis_block_serialization_factory_strea
     BOOST_REQUIRE(genesis.header.bits == block.header.bits);
     BOOST_REQUIRE(genesis.header.nonce == block.header.nonce);
     BOOST_REQUIRE(genesis.header == block.header);
+    BOOST_REQUIRE_EQUAL(peer_minimum_version, block.originator());
 
     // Verify merkle root from transactions.
     const auto merkle = message::block_message::generate_merkle_root(block.transactions);
@@ -105,7 +109,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_mainnet_genesis_block_serialization_factory_reade
     // Reload genesis block.
     data_source stream(raw_block_message);
     istream_reader reader(stream);
-    const auto block = message::block_message::factory_from_data(reader);
+    const auto block = message::block_message::factory_from_data(
+        peer_minimum_version + 1, reader);
 
     BOOST_REQUIRE(block.is_valid());
     BOOST_REQUIRE(genesis.header.version == block.header.version);
@@ -115,6 +120,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_mainnet_genesis_block_serialization_factory_reade
     BOOST_REQUIRE(genesis.header.bits == block.header.bits);
     BOOST_REQUIRE(genesis.header.nonce == block.header.nonce);
     BOOST_REQUIRE(genesis.header == block.header);
+    BOOST_REQUIRE_EQUAL(peer_minimum_version + 1, block.originator());
 
     // Verify merkle root from transactions.
     const auto merkle = message::block_message::generate_merkle_root(block.transactions);

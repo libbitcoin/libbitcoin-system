@@ -31,25 +31,30 @@ namespace libbitcoin {
 namespace message {
 
 const std::string message::filter_add::command = "filteradd";
+const uint32_t message::filter_add::version_minimum = bip37_minimum_version;
+const uint32_t message::filter_add::version_maximum = protocol_version;
 
-filter_add filter_add::factory_from_data(const data_chunk& data)
+filter_add filter_add::factory_from_data(const uint32_t version,
+    const data_chunk& data)
 {
     filter_add instance;
-    instance.from_data(data);
+    instance.from_data(version, data);
     return instance;
 }
 
-filter_add filter_add::factory_from_data(std::istream& stream)
+filter_add filter_add::factory_from_data(const uint32_t version,
+    std::istream& stream)
 {
     filter_add instance;
-    instance.from_data(stream);
+    instance.from_data(version, stream);
     return instance;
 }
 
-filter_add filter_add::factory_from_data(reader& source)
+filter_add filter_add::factory_from_data(const uint32_t version,
+    reader& source)
 {
     filter_add instance;
-    instance.from_data(source);
+    instance.from_data(version, source);
     return instance;
 }
 
@@ -63,22 +68,23 @@ void filter_add::reset()
     data.clear();
 }
 
-bool filter_add::from_data(const data_chunk& data)
+bool filter_add::from_data(const uint32_t version, const data_chunk& data)
 {
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
-    return from_data(istream);
+    return from_data(version, istream);
 }
 
-bool filter_add::from_data(std::istream& stream)
+bool filter_add::from_data(const uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(version, source);
 }
 
-bool filter_add::from_data(reader& source)
+bool filter_add::from_data(const uint32_t version, reader& source)
 {
     reset();
 
+    bool insufficient_version = (version < filter_add::version_minimum);
     auto size = source.read_variable_uint_little_endian();
     BITCOIN_ASSERT(size <= bc::max_size_t);
     const auto data_size = static_cast<size_t>(size);
@@ -90,35 +96,35 @@ bool filter_add::from_data(reader& source)
         result = source && (data.size() == data_size);
     }
 
-    if (!result)
+    if (!result || insufficient_version)
         reset();
 
-    return result;
+    return result && !insufficient_version;
 }
 
-data_chunk filter_add::to_data() const
+data_chunk filter_add::to_data(const uint32_t version) const
 {
     data_chunk data;
     boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
-    to_data(ostream);
+    to_data(version, ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == serialized_size(version));
     return data;
 }
 
-void filter_add::to_data(std::ostream& stream) const
+void filter_add::to_data(const uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(version, sink);
 }
 
-void filter_add::to_data(writer& sink) const
+void filter_add::to_data(const uint32_t version, writer& sink) const
 {
     sink.write_variable_uint_little_endian(data.size());
     sink.write_data(data);
 }
 
-uint64_t filter_add::serialized_size() const
+uint64_t filter_add::serialized_size(const uint32_t version) const
 {
     return variable_uint_size(data.size()) + data.size();
 }

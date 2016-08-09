@@ -30,25 +30,30 @@ namespace libbitcoin {
 namespace message {
 
 const std::string message::get_blocks::command = "getblocks";
+const uint32_t message::get_blocks::version_minimum = peer_minimum_version;
+const uint32_t message::get_blocks::version_maximum = protocol_version;
 
-get_blocks get_blocks::factory_from_data(const data_chunk& data)
+get_blocks get_blocks::factory_from_data(const uint32_t version,
+    const data_chunk& data)
 {
     get_blocks instance;
-    instance.from_data(data);
+    instance.from_data(version, data);
     return instance;
 }
 
-get_blocks get_blocks::factory_from_data(std::istream& stream)
+get_blocks get_blocks::factory_from_data(const uint32_t version,
+    std::istream& stream)
 {
     get_blocks instance;
-    instance.from_data(stream);
+    instance.from_data(version, stream);
     return instance;
 }
 
-get_blocks get_blocks::factory_from_data(reader& source)
+get_blocks get_blocks::factory_from_data(const uint32_t version,
+    reader& source)
 {
     get_blocks instance;
-    instance.from_data(source);
+    instance.from_data(version, source);
     return instance;
 }
 
@@ -63,19 +68,19 @@ void get_blocks::reset()
     stop_hash.fill(0);
 }
 
-bool get_blocks::from_data(const data_chunk& data)
+bool get_blocks::from_data(const uint32_t version, const data_chunk& data)
 {
     data_source istream(data);
-    return from_data(istream);
+    return from_data(version, istream);
 }
 
-bool get_blocks::from_data(std::istream& stream)
+bool get_blocks::from_data(const uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(version, source);
 }
 
-bool get_blocks::from_data(reader& source)
+bool get_blocks::from_data(const uint32_t version, reader& source)
 {
     reset();
 
@@ -95,25 +100,25 @@ bool get_blocks::from_data(reader& source)
     return source;
 }
 
-data_chunk get_blocks::to_data() const
+data_chunk get_blocks::to_data(const uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
-    to_data(ostream);
+    to_data(version, ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == serialized_size(version));
     return data;
 }
 
-void get_blocks::to_data(std::ostream& stream) const
+void get_blocks::to_data(const uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(version, sink);
 }
 
-void get_blocks::to_data(writer& sink) const
+void get_blocks::to_data(const uint32_t version, writer& sink) const
 {
-    sink.write_4_bytes_little_endian(protocol_version);
+    sink.write_4_bytes_little_endian(version);
     sink.write_variable_uint_little_endian(start_hashes.size());
 
     for (hash_digest start_hash: start_hashes)
@@ -122,7 +127,7 @@ void get_blocks::to_data(writer& sink) const
     sink.write_hash(stop_hash);
 }
 
-uint64_t get_blocks::serialized_size() const
+uint64_t get_blocks::serialized_size(const uint32_t version) const
 {
     return 36 + variable_uint_size(start_hashes.size()) +
         hash_size * start_hashes.size();

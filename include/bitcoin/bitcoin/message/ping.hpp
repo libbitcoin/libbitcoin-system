@@ -39,15 +39,17 @@ class BC_API ping
 public:
     typedef std::shared_ptr<ping> ptr;
 
-    static ping factory_from_data(const data_chunk& data);
-    static ping factory_from_data(std::istream& stream);
-    static ping factory_from_data(reader& source);
-    static uint64_t satoshi_fixed_size();
+    static ping factory_from_data(const uint32_t version, const data_chunk& data);
+    static ping factory_from_data(const uint32_t version, std::istream& stream);
+    static ping factory_from_data(const uint32_t version, reader& source);
+    static uint64_t satoshi_fixed_size(const uint32_t version);
 
     ping();
     ping(const uint64_t nonce);
 
     static const std::string command;
+    static const uint32_t version_minimum;
+    static const uint32_t version_maximum;
 };
 
 } // namspace message

@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <initializer_list>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/message/inventory_type_id.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -33,25 +34,30 @@ namespace libbitcoin {
 namespace message {
 
 const std::string message::inventory::command = "inv";
+const uint32_t message::inventory::version_minimum = peer_minimum_version;
+const uint32_t message::inventory::version_maximum = protocol_version;
 
-inventory inventory::factory_from_data(const data_chunk& data)
+inventory inventory::factory_from_data(const uint32_t version,
+    const data_chunk& data)
 {
     inventory instance;
-    instance.from_data(data);
+    instance.from_data(version, data);
     return instance;
 }
 
-inventory inventory::factory_from_data(std::istream& stream)
+inventory inventory::factory_from_data(const uint32_t version,
+    std::istream& stream)
 {
     inventory instance;
-    instance.from_data(stream);
+    instance.from_data(version, stream);
     return instance;
 }
 
-inventory inventory::factory_from_data(reader& source)
+inventory inventory::factory_from_data(const uint32_t version,
+    reader& source)
 {
     inventory instance;
-    instance.from_data(source);
+    instance.from_data(version, source);
     return instance;
 }
 
@@ -90,19 +96,19 @@ void inventory::reset()
     inventories.clear();
 }
 
-bool inventory::from_data(const data_chunk& data)
+bool inventory::from_data(const uint32_t version, const data_chunk& data)
 {
     data_source istream(data);
-    return from_data(istream);
+    return from_data(version, istream);
 }
 
-bool inventory::from_data(std::istream& stream)
+bool inventory::from_data(const uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(version, source);
 }
 
-bool inventory::from_data(reader& source)
+bool inventory::from_data(const uint32_t version, reader& source)
 {
     reset();
     const auto count = source.read_variable_uint_little_endian();
@@ -111,7 +117,7 @@ bool inventory::from_data(reader& source)
     for (uint64_t i = 0; (i < count) && result; ++i)
     {
         inventories.emplace_back();
-        result = inventories.back().from_data(source);
+        result = inventories.back().from_data(version, source);
     }
 
     if (!result)
@@ -120,27 +126,27 @@ bool inventory::from_data(reader& source)
     return result;
 }
 
-data_chunk inventory::to_data() const
+data_chunk inventory::to_data(const uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
-    to_data(ostream);
+    to_data(version, ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == serialized_size(version));
     return data;
 }
 
-void inventory::to_data(std::ostream& stream) const
+void inventory::to_data(const uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(version, sink);
 }
 
-void inventory::to_data(writer& sink) const
+void inventory::to_data(const uint32_t version, writer& sink) const
 {
     sink.write_variable_uint_little_endian(inventories.size());
     for (const auto& element: inventories)
-        element.to_data(sink);
+        element.to_data(version, sink);
 }
 
 void inventory::to_hashes(hash_list& out, inventory_type_id type_id) const
@@ -154,10 +160,10 @@ void inventory::to_hashes(hash_list& out, inventory_type_id type_id) const
     out.shrink_to_fit();
 }
 
-uint64_t inventory::serialized_size() const
+uint64_t inventory::serialized_size(const uint32_t version) const
 {
     return variable_uint_size(inventories.size()) + inventories.size() *
-        inventory_vector::satoshi_fixed_size();
+        inventory_vector::satoshi_fixed_size(version);
 }
 
 size_t inventory::count(inventory_type_id type_id) const

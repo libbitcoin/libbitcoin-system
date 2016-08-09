@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
     const data_chunk raw{ 0xab, 0x11 };
     message::alert instance;
 
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(peer_minimum_version, raw));
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
 }
 
@@ -88,16 +88,17 @@ BOOST_AUTO_TEST_CASE(wiki_sample_test)
     };
 
     const message::alert expected{ raw_payload, raw_signature };
-    const auto result = message::alert::factory_from_data(raw);
+    const auto result = message::alert::factory_from_data(
+        peer_minimum_version, raw);
 
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(raw.size(), result.serialized_size());
+    BOOST_REQUIRE_EQUAL(raw.size(), result.serialized_size(peer_minimum_version));
     BOOST_REQUIRE(result == expected);
 
-    const auto data = expected.to_data();
+    const auto data = expected.to_data(peer_minimum_version);
 
     BOOST_REQUIRE_EQUAL(raw.size(), data.size());
-    BOOST_REQUIRE_EQUAL(data.size(), expected.serialized_size());
+    BOOST_REQUIRE_EQUAL(data.size(), expected.serialized_size(peer_minimum_version));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
@@ -108,13 +109,14 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
         { 0x04, 0xff, 0xab, 0xcd, 0xee }
     };
 
-    const auto data = expected.to_data();
-    const auto result = message::alert::factory_from_data(data);
+    const auto data = expected.to_data(peer_minimum_version);
+    const auto result = message::alert::factory_from_data(
+        peer_minimum_version, data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(peer_minimum_version), result.serialized_size(peer_minimum_version));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
@@ -125,14 +127,14 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
         { 0x04, 0xff, 0xab, 0xcd, 0xee }
     };
 
-    const auto data = expected.to_data();
+    const auto data = expected.to_data(peer_minimum_version);
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
-    const auto result = message::alert::factory_from_data(istream);
+    const auto result = message::alert::factory_from_data(peer_minimum_version, istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(peer_minimum_version), result.serialized_size(peer_minimum_version));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
@@ -143,15 +145,16 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
         { 0x04, 0xff, 0xab, 0xcd, 0xee }
     };
 
-    const auto data = expected.to_data();
+    const auto data = expected.to_data(peer_minimum_version);
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     istream_reader source(istream);
-    const auto result = message::alert::factory_from_data(source);
+    const auto result = message::alert::factory_from_data(
+        peer_minimum_version, source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(peer_minimum_version), result.serialized_size(peer_minimum_version));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

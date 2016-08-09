@@ -57,8 +57,6 @@ public:
     void reset();
     uint64_t serialized_size(bool with_transaction_count = true) const;
 
-    static const std::string command;
-
     uint32_t version;
     hash_digest previous_block_hash;
     hash_digest merkle;

@@ -19,35 +19,36 @@
  */
 #include <bitcoin/bitcoin/message/prefilled_transaction.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
 
 namespace libbitcoin {
 namespace message {
 
 prefilled_transaction prefilled_transaction::factory_from_data(
-    const data_chunk& data)
+    const uint32_t version, const data_chunk& data)
 {
     prefilled_transaction instance;
-    instance.from_data(data);
+    instance.from_data(version, data);
     return instance;
 }
 
 prefilled_transaction prefilled_transaction::factory_from_data(
-    std::istream& stream)
+    const uint32_t version, std::istream& stream)
 {
     prefilled_transaction instance;
-    instance.from_data(stream);
+    instance.from_data(version, stream);
     return instance;
 }
 
-prefilled_transaction prefilled_transaction::factory_from_data(reader& source)
+prefilled_transaction prefilled_transaction::factory_from_data(
+    const uint32_t version, reader& source)
 {
     prefilled_transaction instance;
-    instance.from_data(source);
+    instance.from_data(version, source);
     return instance;
 }
 
@@ -62,19 +63,22 @@ void prefilled_transaction::reset()
     transaction.reset();
 }
 
-bool prefilled_transaction::from_data(const data_chunk& data)
+bool prefilled_transaction::from_data(const uint32_t version,
+    const data_chunk& data)
 {
     data_source istream(data);
-    return from_data(istream);
+    return from_data(version, istream);
 }
 
-bool prefilled_transaction::from_data(std::istream& stream)
+bool prefilled_transaction::from_data(const uint32_t version,
+    std::istream& stream)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(version, source);
 }
 
-bool prefilled_transaction::from_data(reader& source)
+bool prefilled_transaction::from_data(const uint32_t version,
+    reader& source)
 {
     reset();
     index = source.read_variable_uint_little_endian();
@@ -89,29 +93,31 @@ bool prefilled_transaction::from_data(reader& source)
     return result;
 }
 
-data_chunk prefilled_transaction::to_data() const
+data_chunk prefilled_transaction::to_data(const uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
-    to_data(ostream);
+    to_data(version, ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == serialized_size(version));
     return data;
 }
 
-void prefilled_transaction::to_data(std::ostream& stream) const
+void prefilled_transaction::to_data(const uint32_t version,
+    std::ostream& stream) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(version, sink);
 }
 
-void prefilled_transaction::to_data(writer& sink) const
+void prefilled_transaction::to_data(const uint32_t version,
+    writer& sink) const
 {
     sink.write_variable_uint_little_endian(index);
     transaction.to_data(sink);
 }
 
-uint64_t prefilled_transaction::serialized_size() const
+uint64_t prefilled_transaction::serialized_size(const uint32_t version) const
 {
     return variable_uint_size(index) + transaction.serialized_size();
 }

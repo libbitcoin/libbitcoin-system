@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/version.hpp>
-
+#include <algorithm>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -29,25 +29,30 @@ namespace libbitcoin {
 namespace message {
 
 const std::string message::version::command = "version";
+const uint32_t message::version::version_minimum = peer_minimum_version;
+const uint32_t message::version::version_maximum = protocol_version;
 
-version version::factory_from_data(const data_chunk& data)
+version version::factory_from_data(const uint32_t version,
+    const data_chunk& data)
 {
-    version instance;
-    instance.from_data(data);
+    message::version instance;
+    instance.from_data(version, data);
     return instance;
 }
 
-version version::factory_from_data(std::istream& stream)
+version version::factory_from_data(const uint32_t version,
+    std::istream& stream)
 {
-    version instance;
-    instance.from_data(stream);
+    message::version instance;
+    instance.from_data(version, stream);
     return instance;
 }
 
-version version::factory_from_data(reader& source)
+version version::factory_from_data(const uint32_t version,
+    reader& source)
 {
-    version instance;
-    instance.from_data(source);
+    message::version instance;
+    instance.from_data(version, source);
     return instance;
 }
 
@@ -77,33 +82,34 @@ void version::reset()
     relay = false;
 }
 
-bool version::from_data(const data_chunk& data)
+bool version::from_data(const uint32_t version, const data_chunk& data)
 {
     data_source istream(data);
-    return from_data(istream);
+    return from_data(version, istream);
 }
 
-bool version::from_data(std::istream& stream)
+bool version::from_data(const uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(version, source);
 }
 
-bool version::from_data(reader& source)
+bool version::from_data(const uint32_t version, reader& source)
 {
     reset();
 
     value = source.read_4_bytes_little_endian();
+    const uint32_t effective_version = std::min(version, value);
     services_sender = source.read_8_bytes_little_endian();
     timestamp = source.read_8_bytes_little_endian();
     auto result = static_cast<bool>(source);
-    result = address_recevier.from_data(source, false);
-    result = result && address_sender.from_data(source, false);
+    result = address_recevier.from_data(version, source, false);
+    result = result && address_sender.from_data(version, source, false);
     nonce = source.read_8_bytes_little_endian();
     user_agent = source.read_string();
     start_height = source.read_4_bytes_little_endian();
 
-    if (value >= 70001)
+    if (effective_version >= bip37_minimum_version)
         relay = (source.read_byte() != 0);
 
     // The protocol expects duplication of the sender's services.
@@ -115,50 +121,51 @@ bool version::from_data(reader& source)
     return result;
 }
 
-data_chunk version::to_data() const
+data_chunk version::to_data(const uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
-    to_data(ostream);
+    to_data(version, ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == serialized_size(version));
     return data;
 }
 
-void version::to_data(std::ostream& stream) const
+void version::to_data(const uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(version, sink);
 }
 
-void version::to_data(writer& sink) const
+void version::to_data(const uint32_t version, writer& sink) const
 {
     sink.write_4_bytes_little_endian(value);
+    const uint32_t effective_version = std::min(version, value);
     sink.write_8_bytes_little_endian(services_sender);
     sink.write_8_bytes_little_endian(timestamp);
-    address_recevier.to_data(sink, false);
-    address_sender.to_data(sink, false);
+    address_recevier.to_data(version, sink, false);
+    address_sender.to_data(version, sink, false);
     sink.write_8_bytes_little_endian(nonce);
     sink.write_string(user_agent);
     sink.write_4_bytes_little_endian(start_height);
 
-    if (value >= 70001)
+    if (effective_version >= bip37_minimum_version)
         sink.write_byte(relay ? 1 : 0);
 }
 
-uint64_t version::serialized_size() const
+uint64_t version::serialized_size(const uint32_t version) const
 {
     auto size = 
         sizeof(value) +
         sizeof(services_sender) +
         sizeof(timestamp) +
-        address_recevier.serialized_size(false) +
-        address_sender.serialized_size(false) +
+        address_recevier.serialized_size(version, false) +
+        address_sender.serialized_size(version, false) +
         sizeof(nonce) +
         variable_uint_size(user_agent.size()) + user_agent.size() +
         sizeof(start_height);
 
-    if (value >= 70001)
+    if (value >= bip37_minimum_version)
         size += sizeof(uint8_t);
 
     return size;
