@@ -118,6 +118,16 @@ void inventory_vector::to_data(const uint32_t version,
     sink.write_hash(hash);
 }
 
+uint64_t inventory_vector::serialized_size(const uint32_t version) const
+{
+    return inventory_vector::satoshi_fixed_size(version);
+}
+
+uint64_t inventory_vector::satoshi_fixed_size(const uint32_t version)
+{
+    return sizeof(hash) + sizeof(uint32_t);
+}
+
 bool inventory_vector::is_block_type() const
 {
     return type == message::inventory_type_id::block ||
@@ -128,16 +138,6 @@ bool inventory_vector::is_block_type() const
 bool inventory_vector::is_transaction_type() const
 {
     return type == message::inventory_type_id::transaction;
-}
-
-uint64_t inventory_vector::serialized_size(const uint32_t version) const
-{
-    return inventory_vector::satoshi_fixed_size(version);
-}
-
-uint64_t inventory_vector::satoshi_fixed_size(const uint32_t version)
-{
-    return 36;
 }
 
 bool operator==(const inventory_vector& left, const inventory_vector& right)
