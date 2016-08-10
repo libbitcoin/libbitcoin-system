@@ -78,14 +78,14 @@ private:
 
 namespace std
 {
-    template<>
-    struct hash<bc::binary>
+template<>
+struct hash<bc::binary>
+{
+    size_t operator()(const bc::binary& value) const
     {
-        size_t operator()(const bc::binary& value) const
-        {
-            return std::hash<std::string>()(value.encoded());
-        }
-    };
+        return std::hash<std::string>()(value.encoded());
+    }
+};
 } // namespace std
 
 #endif
