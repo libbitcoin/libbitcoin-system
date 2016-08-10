@@ -30,7 +30,7 @@
 namespace libbitcoin {
 namespace message {
 
-nonce_::nonce_(const uint64_t nonce)
+nonce_::nonce_(uint64_t nonce)
 {
     this->nonce = nonce;
 }
@@ -45,19 +45,19 @@ void nonce_::reset()
     nonce = 0;
 }
 
-bool nonce_::from_data(const uint32_t version, const data_chunk& data)
+bool nonce_::from_data(uint32_t version, const data_chunk& data)
 {
     data_source istream(data);
     return from_data(version, istream);
 }
 
-bool nonce_::from_data(const uint32_t version, std::istream& stream)
+bool nonce_::from_data(uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(version, source);
 }
 
-bool nonce_::from_data(const uint32_t version, reader& source)
+bool nonce_::from_data(uint32_t version, reader& source)
 {
     reset();
 
@@ -70,7 +70,7 @@ bool nonce_::from_data(const uint32_t version, reader& source)
     return source;
 }
 
-data_chunk nonce_::to_data(const uint32_t version) const
+data_chunk nonce_::to_data(uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
@@ -80,23 +80,23 @@ data_chunk nonce_::to_data(const uint32_t version) const
     return data;
 }
 
-void nonce_::to_data(const uint32_t version, std::ostream& stream) const
+void nonce_::to_data(uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
     to_data(version, sink);
 }
 
-void nonce_::to_data(const uint32_t version, writer& sink) const
+void nonce_::to_data(uint32_t version, writer& sink) const
 {
     sink.write_8_bytes_little_endian(nonce);
 }
 
-uint64_t nonce_::serialized_size(const uint32_t version) const
+uint64_t nonce_::serialized_size(uint32_t version) const
 {
     return nonce_::satoshi_fixed_size(version);
 }
 
-uint64_t nonce_::satoshi_fixed_size(const uint32_t version)
+uint64_t nonce_::satoshi_fixed_size(uint32_t version)
 {
     return 8;
 }

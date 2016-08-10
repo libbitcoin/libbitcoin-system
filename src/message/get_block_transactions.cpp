@@ -70,21 +70,21 @@ void get_block_transactions::reset()
     indexes.shrink_to_fit();
 }
 
-bool get_block_transactions::from_data(const uint32_t version,
+bool get_block_transactions::from_data(uint32_t version,
     const data_chunk& data)
 {
     data_source istream(data);
     return from_data(version, istream);
 }
 
-bool get_block_transactions::from_data(const uint32_t version,
+bool get_block_transactions::from_data(uint32_t version,
     std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(version, source);
 }
 
-bool get_block_transactions::from_data(const uint32_t version,
+bool get_block_transactions::from_data(uint32_t version,
     reader& source)
 {
     reset();
@@ -109,7 +109,7 @@ bool get_block_transactions::from_data(const uint32_t version,
     return result;
 }
 
-data_chunk get_block_transactions::to_data(const uint32_t version) const
+data_chunk get_block_transactions::to_data(uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
@@ -119,14 +119,14 @@ data_chunk get_block_transactions::to_data(const uint32_t version) const
     return data;
 }
 
-void get_block_transactions::to_data(const uint32_t version,
+void get_block_transactions::to_data(uint32_t version,
     std::ostream& stream) const
 {
     ostream_writer sink(stream);
     to_data(version, sink);
 }
 
-void get_block_transactions::to_data(const uint32_t version,
+void get_block_transactions::to_data(uint32_t version,
     writer& sink) const
 {
     sink.write_hash(block_hash);
@@ -135,7 +135,7 @@ void get_block_transactions::to_data(const uint32_t version,
         sink.write_variable_uint_little_endian(element);
 }
 
-uint64_t get_block_transactions::serialized_size(const uint32_t version) const
+uint64_t get_block_transactions::serialized_size(uint32_t version) const
 {
     uint64_t size = hash_size + variable_uint_size(indexes.size());
 

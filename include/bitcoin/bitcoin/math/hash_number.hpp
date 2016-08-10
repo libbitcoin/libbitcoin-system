@@ -36,7 +36,7 @@ class hash_number
 {
 public:
     BC_API hash_number();
-    BC_API hash_number(const uint64_t value);
+    BC_API hash_number(uint64_t value);
     // Returns false if negative or overflowed.
     BC_API bool set_compact(uint32_t compact);
     BC_API uint32_t compact() const;

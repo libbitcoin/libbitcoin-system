@@ -105,7 +105,7 @@ namespace message {
 * Serialize a message object to the Bitcoin wire protocol encoding.
 */
 template <typename Message>
-data_chunk serialize(const uint32_t version, const Message& packet,
+data_chunk serialize(uint32_t version, const Message& packet,
     uint32_t magic)
 {
     // Serialize the payload (required for header size).

@@ -30,7 +30,7 @@ const std::string message::get_data::command = "getdata";
 const uint32_t message::get_data::version_minimum = peer_minimum_version;
 const uint32_t message::get_data::version_maximum = protocol_version;
 
-get_data get_data::factory_from_data(const uint32_t version,
+get_data get_data::factory_from_data(uint32_t version,
     const data_chunk& data)
 {
     get_data instance;
@@ -38,7 +38,7 @@ get_data get_data::factory_from_data(const uint32_t version,
     return instance;
 }
 
-get_data get_data::factory_from_data(const uint32_t version,
+get_data get_data::factory_from_data(uint32_t version,
     std::istream& stream)
 {
     get_data instance;
@@ -46,7 +46,7 @@ get_data get_data::factory_from_data(const uint32_t version,
     return instance;
 }
 
-get_data get_data::factory_from_data(const uint32_t version,
+get_data get_data::factory_from_data(uint32_t version,
     reader& source)
 {
     get_data instance;
@@ -74,17 +74,17 @@ get_data::get_data(const std::initializer_list<inventory_vector>& elements)
 {
 }
 
-bool get_data::from_data(const uint32_t version, const data_chunk& data)
+bool get_data::from_data(uint32_t version, const data_chunk& data)
 {
     return inventory::from_data(version, data);
 }
 
-bool get_data::from_data(const uint32_t version, std::istream& stream)
+bool get_data::from_data(uint32_t version, std::istream& stream)
 {
     return inventory::from_data(version, stream);
 }
 
-bool get_data::from_data(const uint32_t version, reader& source)
+bool get_data::from_data(uint32_t version, reader& source)
 {
     bool result = !(version < get_data::version_minimum);
 

@@ -30,7 +30,7 @@ const std::string message::not_found::command = "notfound";
 const uint32_t message::not_found::version_minimum = bip37_minimum_version;
 const uint32_t message::not_found::version_maximum = protocol_version;
 
-not_found not_found::factory_from_data(const uint32_t version,
+not_found not_found::factory_from_data(uint32_t version,
     const data_chunk& data)
 {
     not_found instance;
@@ -38,7 +38,7 @@ not_found not_found::factory_from_data(const uint32_t version,
     return instance;
 }
 
-not_found not_found::factory_from_data(const uint32_t version,
+not_found not_found::factory_from_data(uint32_t version,
     std::istream& stream)
 {
     not_found instance;
@@ -46,7 +46,7 @@ not_found not_found::factory_from_data(const uint32_t version,
     return instance;
 }
 
-not_found not_found::factory_from_data(const uint32_t version,
+not_found not_found::factory_from_data(uint32_t version,
     reader& source)
 {
     not_found instance;
@@ -74,17 +74,17 @@ not_found::not_found(const std::initializer_list<inventory_vector>& values)
 {
 }
 
-bool not_found::from_data(const uint32_t version, const data_chunk& data)
+bool not_found::from_data(uint32_t version, const data_chunk& data)
 {
     return inventory::from_data(version, data);
 }
 
-bool not_found::from_data(const uint32_t version, std::istream& stream)
+bool not_found::from_data(uint32_t version, std::istream& stream)
 {
     return inventory::from_data(version, stream);
 }
 
-bool not_found::from_data(const uint32_t version, reader& source)
+bool not_found::from_data(uint32_t version, reader& source)
 {
     bool result = !(version < not_found::version_minimum);
 

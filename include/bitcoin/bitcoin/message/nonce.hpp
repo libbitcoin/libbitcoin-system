@@ -37,22 +37,22 @@ namespace message {
 class BC_API nonce_
 {
 public:
-    static uint64_t satoshi_fixed_size(const uint32_t version);
+    static uint64_t satoshi_fixed_size(uint32_t version);
 
-    virtual bool from_data(const uint32_t version, const data_chunk& data);
-    virtual bool from_data(const uint32_t version, std::istream& stream);
-    virtual bool from_data(const uint32_t version, reader& source);
-    data_chunk to_data(const uint32_t version) const;
-    void to_data(const uint32_t version, std::ostream& stream) const;
-    void to_data(const uint32_t version, writer& sink) const;
+    virtual bool from_data(uint32_t version, const data_chunk& data);
+    virtual bool from_data(uint32_t version, std::istream& stream);
+    virtual bool from_data(uint32_t version, reader& source);
+    data_chunk to_data(uint32_t version) const;
+    void to_data(uint32_t version, std::ostream& stream) const;
+    void to_data(uint32_t version, writer& sink) const;
     bool is_valid() const;
     void reset();
-    uint64_t serialized_size(const uint32_t version) const;
+    uint64_t serialized_size(uint32_t version) const;
 
     uint64_t nonce;
 
 protected:
-    nonce_(const uint64_t nonce);
+    nonce_(uint64_t nonce);
 };
 
 BC_API bool operator==(const nonce_& left, const nonce_& right);

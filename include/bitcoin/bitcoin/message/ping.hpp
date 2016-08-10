@@ -39,13 +39,13 @@ class BC_API ping
 public:
     typedef std::shared_ptr<ping> ptr;
 
-    static ping factory_from_data(const uint32_t version, const data_chunk& data);
-    static ping factory_from_data(const uint32_t version, std::istream& stream);
-    static ping factory_from_data(const uint32_t version, reader& source);
-    static uint64_t satoshi_fixed_size(const uint32_t version);
+    static ping factory_from_data(uint32_t version, const data_chunk& data);
+    static ping factory_from_data(uint32_t version, std::istream& stream);
+    static ping factory_from_data(uint32_t version, reader& source);
+    static uint64_t satoshi_fixed_size(uint32_t version);
 
     ping();
-    ping(const uint64_t nonce);
+    ping(uint64_t nonce);
 
     static const std::string command;
     static const uint32_t version_minimum;

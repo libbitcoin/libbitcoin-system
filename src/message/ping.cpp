@@ -33,28 +33,28 @@ const std::string message::ping::command = "ping";
 const uint32_t message::ping::version_minimum = peer_minimum_version;
 const uint32_t message::ping::version_maximum = protocol_version;
 
-ping ping::factory_from_data(const uint32_t version, const data_chunk& data)
+ping ping::factory_from_data(uint32_t version, const data_chunk& data)
 {
     ping instance;
     instance.from_data(version, data);
     return instance;
 }
 
-ping ping::factory_from_data(const uint32_t version, std::istream& stream)
+ping ping::factory_from_data(uint32_t version, std::istream& stream)
 {
     ping instance;
     instance.from_data(version, stream);
     return instance;
 }
 
-ping ping::factory_from_data(const uint32_t version, reader& source)
+ping ping::factory_from_data(uint32_t version, reader& source)
 {
     ping instance;
     instance.from_data(version, source);
     return instance;
 }
 
-uint64_t ping::satoshi_fixed_size(const uint32_t version)
+uint64_t ping::satoshi_fixed_size(uint32_t version)
 {
     return nonce_::satoshi_fixed_size(version);
 }
@@ -64,7 +64,7 @@ ping::ping()
 {
 }
 
-ping::ping(const uint64_t nonce)
+ping::ping(uint64_t nonce)
   : nonce_(nonce)
 {
 }

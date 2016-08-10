@@ -38,7 +38,7 @@ const std::string message::inventory::command = "inv";
 const uint32_t message::inventory::version_minimum = peer_minimum_version;
 const uint32_t message::inventory::version_maximum = protocol_version;
 
-inventory inventory::factory_from_data(const uint32_t version,
+inventory inventory::factory_from_data(uint32_t version,
     const data_chunk& data)
 {
     inventory instance;
@@ -46,7 +46,7 @@ inventory inventory::factory_from_data(const uint32_t version,
     return instance;
 }
 
-inventory inventory::factory_from_data(const uint32_t version,
+inventory inventory::factory_from_data(uint32_t version,
     std::istream& stream)
 {
     inventory instance;
@@ -54,7 +54,7 @@ inventory inventory::factory_from_data(const uint32_t version,
     return instance;
 }
 
-inventory inventory::factory_from_data(const uint32_t version,
+inventory inventory::factory_from_data(uint32_t version,
     reader& source)
 {
     inventory instance;
@@ -98,19 +98,19 @@ void inventory::reset()
     inventories.shrink_to_fit();
 }
 
-bool inventory::from_data(const uint32_t version, const data_chunk& data)
+bool inventory::from_data(uint32_t version, const data_chunk& data)
 {
     data_source istream(data);
     return from_data(version, istream);
 }
 
-bool inventory::from_data(const uint32_t version, std::istream& stream)
+bool inventory::from_data(uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(version, source);
 }
 
-bool inventory::from_data(const uint32_t version, reader& source)
+bool inventory::from_data(uint32_t version, reader& source)
 {
     reset();
     const auto count = source.read_variable_uint_little_endian();
@@ -135,7 +135,7 @@ bool inventory::from_data(const uint32_t version, reader& source)
     return result;
 }
 
-data_chunk inventory::to_data(const uint32_t version) const
+data_chunk inventory::to_data(uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
@@ -145,13 +145,13 @@ data_chunk inventory::to_data(const uint32_t version) const
     return data;
 }
 
-void inventory::to_data(const uint32_t version, std::ostream& stream) const
+void inventory::to_data(uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
     to_data(version, sink);
 }
 
-void inventory::to_data(const uint32_t version, writer& sink) const
+void inventory::to_data(uint32_t version, writer& sink) const
 {
     sink.write_variable_uint_little_endian(inventories.size());
 
@@ -183,7 +183,7 @@ void inventory::reduce(inventory_vector::list& out,
     out.shrink_to_fit();
 }
 
-uint64_t inventory::serialized_size(const uint32_t version) const
+uint64_t inventory::serialized_size(uint32_t version) const
 {
     return variable_uint_size(inventories.size()) + inventories.size() *
         inventory_vector::satoshi_fixed_size(version);

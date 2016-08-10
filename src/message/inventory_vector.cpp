@@ -28,7 +28,7 @@
 namespace libbitcoin {
 namespace message {
 
-inventory_vector inventory_vector::factory_from_data(const uint32_t version,
+inventory_vector inventory_vector::factory_from_data(uint32_t version,
     const data_chunk& data)
 {
     inventory_vector instance;
@@ -36,7 +36,7 @@ inventory_vector inventory_vector::factory_from_data(const uint32_t version,
     return instance;
 }
 
-inventory_vector inventory_vector::factory_from_data(const uint32_t version,
+inventory_vector inventory_vector::factory_from_data(uint32_t version,
     std::istream& stream)
 {
     inventory_vector instance;
@@ -44,7 +44,7 @@ inventory_vector inventory_vector::factory_from_data(const uint32_t version,
     return instance;
 }
 
-inventory_vector inventory_vector::factory_from_data(const uint32_t version,
+inventory_vector inventory_vector::factory_from_data(uint32_t version,
     reader& source)
 {
     inventory_vector instance;
@@ -63,21 +63,21 @@ void inventory_vector::reset()
     hash.fill(0);
 }
 
-bool inventory_vector::from_data(const uint32_t version,
+bool inventory_vector::from_data(uint32_t version,
     const data_chunk& data)
 {
     data_source istream(data);
     return from_data(version, istream);
 }
 
-bool inventory_vector::from_data(const uint32_t version,
+bool inventory_vector::from_data(uint32_t version,
     std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(version, source);
 }
 
-bool inventory_vector::from_data(const uint32_t version,
+bool inventory_vector::from_data(uint32_t version,
     reader& source)
 {
     reset();
@@ -93,7 +93,7 @@ bool inventory_vector::from_data(const uint32_t version,
     return result;
 }
 
-data_chunk inventory_vector::to_data(const uint32_t version) const
+data_chunk inventory_vector::to_data(uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
@@ -103,14 +103,14 @@ data_chunk inventory_vector::to_data(const uint32_t version) const
     return data;
 }
 
-void inventory_vector::to_data(const uint32_t version,
+void inventory_vector::to_data(uint32_t version,
     std::ostream& stream) const
 {
     ostream_writer sink(stream);
     to_data(version, sink);
 }
 
-void inventory_vector::to_data(const uint32_t version,
+void inventory_vector::to_data(uint32_t version,
     writer& sink) const
 {
     const auto raw_type = inventory_type_to_number(type);
@@ -118,12 +118,12 @@ void inventory_vector::to_data(const uint32_t version,
     sink.write_hash(hash);
 }
 
-uint64_t inventory_vector::serialized_size(const uint32_t version) const
+uint64_t inventory_vector::serialized_size(uint32_t version) const
 {
     return inventory_vector::satoshi_fixed_size(version);
 }
 
-uint64_t inventory_vector::satoshi_fixed_size(const uint32_t version)
+uint64_t inventory_vector::satoshi_fixed_size(uint32_t version)
 {
     return sizeof(hash) + sizeof(uint32_t);
 }

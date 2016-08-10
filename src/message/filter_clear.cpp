@@ -32,7 +32,7 @@ const std::string message::filter_clear::command = "filterclear";
 const uint32_t message::filter_clear::version_minimum = bip37_minimum_version;
 const uint32_t message::filter_clear::version_maximum = protocol_version;
 
-filter_clear filter_clear::factory_from_data(const uint32_t version,
+filter_clear filter_clear::factory_from_data(uint32_t version,
     const data_chunk& data)
 {
     filter_clear instance;
@@ -40,7 +40,7 @@ filter_clear filter_clear::factory_from_data(const uint32_t version,
     return instance;
 }
 
-filter_clear filter_clear::factory_from_data(const uint32_t version,
+filter_clear filter_clear::factory_from_data(uint32_t version,
     std::istream& stream)
 {
     filter_clear instance;
@@ -48,7 +48,7 @@ filter_clear filter_clear::factory_from_data(const uint32_t version,
     return instance;
 }
 
-filter_clear filter_clear::factory_from_data(const uint32_t version,
+filter_clear filter_clear::factory_from_data(uint32_t version,
     reader& source)
 {
     filter_clear instance;
@@ -71,26 +71,26 @@ void filter_clear::reset()
     insufficient_version_ = false;
 }
 
-bool filter_clear::from_data(const uint32_t version, const data_chunk& data)
+bool filter_clear::from_data(uint32_t version, const data_chunk& data)
 {
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     return from_data(version, istream);
 }
 
-bool filter_clear::from_data(const uint32_t version, std::istream& stream)
+bool filter_clear::from_data(uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(version, source);
 }
 
-bool filter_clear::from_data(const uint32_t version, reader& source)
+bool filter_clear::from_data(uint32_t version, reader& source)
 {
     reset();
     insufficient_version_ = (version < filter_clear::version_minimum);
     return !insufficient_version_;
 }
 
-data_chunk filter_clear::to_data(const uint32_t version) const
+data_chunk filter_clear::to_data(uint32_t version) const
 {
     data_chunk data;
     boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
@@ -100,22 +100,22 @@ data_chunk filter_clear::to_data(const uint32_t version) const
     return data;
 }
 
-void filter_clear::to_data(const uint32_t version, std::ostream& stream) const
+void filter_clear::to_data(uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
     to_data(version, sink);
 }
 
-void filter_clear::to_data(const uint32_t version, writer& sink) const
+void filter_clear::to_data(uint32_t version, writer& sink) const
 {
 }
 
-uint64_t filter_clear::serialized_size(const uint32_t version) const
+uint64_t filter_clear::serialized_size(uint32_t version) const
 {
     return filter_clear::satoshi_fixed_size(version);
 }
 
-uint64_t filter_clear::satoshi_fixed_size(const uint32_t version)
+uint64_t filter_clear::satoshi_fixed_size(uint32_t version)
 {
     return 0;
 }

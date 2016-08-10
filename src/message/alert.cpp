@@ -34,21 +34,21 @@ const std::string message::alert::command = "alert";
 const uint32_t message::alert::version_minimum = peer_minimum_version;
 const uint32_t message::alert::version_maximum = protocol_version;
 
-alert alert::factory_from_data(const uint32_t version, const data_chunk& data)
+alert alert::factory_from_data(uint32_t version, const data_chunk& data)
 {
     alert instance;
     instance.from_data(version, data);
     return instance;
 }
 
-alert alert::factory_from_data(const uint32_t version, std::istream& stream)
+alert alert::factory_from_data(uint32_t version, std::istream& stream)
 {
     alert instance;
     instance.from_data(version, stream);
     return instance;
 }
 
-alert alert::factory_from_data(const uint32_t version, reader& source)
+alert alert::factory_from_data(uint32_t version, reader& source)
 {
     alert instance;
     instance.from_data(version, source);
@@ -68,19 +68,19 @@ void alert::reset()
     signature.shrink_to_fit();
 }
 
-bool alert::from_data(const uint32_t version, const data_chunk& data)
+bool alert::from_data(uint32_t version, const data_chunk& data)
 {
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     return from_data(version, istream);
 }
 
-bool alert::from_data(const uint32_t version, std::istream& stream)
+bool alert::from_data(uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(version, source);
 }
 
-bool alert::from_data(const uint32_t version, reader& source)
+bool alert::from_data(uint32_t version, reader& source)
 {
     reset();
 
@@ -116,7 +116,7 @@ bool alert::from_data(const uint32_t version, reader& source)
     return result;
 }
 
-data_chunk alert::to_data(const uint32_t version) const
+data_chunk alert::to_data(uint32_t version) const
 {
     data_chunk data;
     boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
@@ -126,13 +126,13 @@ data_chunk alert::to_data(const uint32_t version) const
     return data;
 }
 
-void alert::to_data(const uint32_t version, std::ostream& stream) const
+void alert::to_data(uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
     to_data(version, sink);
 }
 
-void alert::to_data(const uint32_t version, writer& sink) const
+void alert::to_data(uint32_t version, writer& sink) const
 {
     sink.write_variable_uint_little_endian(payload.size());
     sink.write_data(payload);
@@ -140,7 +140,7 @@ void alert::to_data(const uint32_t version, writer& sink) const
     sink.write_data(signature);
 }
 
-uint64_t alert::serialized_size(const uint32_t version) const
+uint64_t alert::serialized_size(uint32_t version) const
 {
     return variable_uint_size(payload.size()) + payload.size() +
         variable_uint_size(signature.size()) + signature.size();

@@ -26,7 +26,7 @@ namespace message {
 
 const std::string message::get_headers::command = "getheaders";
 
-get_headers get_headers::factory_from_data(const uint32_t version,
+get_headers get_headers::factory_from_data(uint32_t version,
     const data_chunk& data)
 {
     get_headers instance;
@@ -34,7 +34,7 @@ get_headers get_headers::factory_from_data(const uint32_t version,
     return instance;
 }
 
-get_headers get_headers::factory_from_data(const uint32_t version,
+get_headers get_headers::factory_from_data(uint32_t version,
     std::istream& stream)
 {
     get_headers instance;
@@ -42,7 +42,7 @@ get_headers get_headers::factory_from_data(const uint32_t version,
     return instance;
 }
 
-get_headers get_headers::factory_from_data(const uint32_t version,
+get_headers get_headers::factory_from_data(uint32_t version,
     reader& source)
 {
     get_headers instance;

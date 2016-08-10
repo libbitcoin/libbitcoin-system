@@ -33,28 +33,28 @@ const std::string message::pong::command = "pong";
 const uint32_t message::pong::version_minimum = bip31_minimum_version;
 const uint32_t message::pong::version_maximum = protocol_version;
 
-pong pong::factory_from_data(const uint32_t version, const data_chunk& data)
+pong pong::factory_from_data(uint32_t version, const data_chunk& data)
 {
     pong instance;
     instance.from_data(version, data);
     return instance;
 }
 
-pong pong::factory_from_data(const uint32_t version, std::istream& stream)
+pong pong::factory_from_data(uint32_t version, std::istream& stream)
 {
     pong instance;
     instance.from_data(version, stream);
     return instance;
 }
 
-pong pong::factory_from_data(const uint32_t version, reader& source)
+pong pong::factory_from_data(uint32_t version, reader& source)
 {
     pong instance;
     instance.from_data(version, source);
     return instance;
 }
 
-uint64_t pong::satoshi_fixed_size(const uint32_t version)
+uint64_t pong::satoshi_fixed_size(uint32_t version)
 {
     return nonce_::satoshi_fixed_size(version);
 }
@@ -69,17 +69,17 @@ pong::pong(uint64_t nonce)
 {
 }
 
-bool pong::from_data(const uint32_t version, const data_chunk& data)
+bool pong::from_data(uint32_t version, const data_chunk& data)
 {
     return nonce_::from_data(version, data);
 }
 
-bool pong::from_data(const uint32_t version, std::istream& stream)
+bool pong::from_data(uint32_t version, std::istream& stream)
 {
     return nonce_::from_data(version, stream);
 }
 
-bool pong::from_data(const uint32_t version, reader& source)
+bool pong::from_data(uint32_t version, reader& source)
 {
     bool result = !(version < pong::version_minimum);
 

@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_SUITE(script_number_tests)
         encode_base16((script_num).data())); \
     BOOST_CHECK_EQUAL((buffer_num).number, (script_num).int32())
 
-static bool is(const uint8_t byte)
+static bool is(uint8_t byte)
 {
     return byte != 0;
 }

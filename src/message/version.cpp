@@ -32,7 +32,7 @@ const std::string message::version::command = "version";
 const uint32_t message::version::version_minimum = peer_minimum_version;
 const uint32_t message::version::version_maximum = protocol_version;
 
-version version::factory_from_data(const uint32_t version,
+version version::factory_from_data(uint32_t version,
     const data_chunk& data)
 {
     message::version instance;
@@ -40,7 +40,7 @@ version version::factory_from_data(const uint32_t version,
     return instance;
 }
 
-version version::factory_from_data(const uint32_t version,
+version version::factory_from_data(uint32_t version,
     std::istream& stream)
 {
     message::version instance;
@@ -48,7 +48,7 @@ version version::factory_from_data(const uint32_t version,
     return instance;
 }
 
-version version::factory_from_data(const uint32_t version,
+version version::factory_from_data(uint32_t version,
     reader& source)
 {
     message::version instance;
@@ -83,19 +83,19 @@ void version::reset()
     relay = false;
 }
 
-bool version::from_data(const uint32_t version, const data_chunk& data)
+bool version::from_data(uint32_t version, const data_chunk& data)
 {
     data_source istream(data);
     return from_data(version, istream);
 }
 
-bool version::from_data(const uint32_t version, std::istream& stream)
+bool version::from_data(uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(version, source);
 }
 
-bool version::from_data(const uint32_t version, reader& source)
+bool version::from_data(uint32_t version, reader& source)
 {
     reset();
 
@@ -122,7 +122,7 @@ bool version::from_data(const uint32_t version, reader& source)
     return result;
 }
 
-data_chunk version::to_data(const uint32_t version) const
+data_chunk version::to_data(uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
@@ -132,13 +132,13 @@ data_chunk version::to_data(const uint32_t version) const
     return data;
 }
 
-void version::to_data(const uint32_t version, std::ostream& stream) const
+void version::to_data(uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
     to_data(version, sink);
 }
 
-void version::to_data(const uint32_t version, writer& sink) const
+void version::to_data(uint32_t version, writer& sink) const
 {
     sink.write_4_bytes_little_endian(value);
     const uint32_t effective_version = std::min(version, value);
@@ -154,7 +154,7 @@ void version::to_data(const uint32_t version, writer& sink) const
         sink.write_byte(relay ? 1 : 0);
 }
 
-uint64_t version::serialized_size(const uint32_t version) const
+uint64_t version::serialized_size(uint32_t version) const
 {
     auto size = 
         sizeof(value) +

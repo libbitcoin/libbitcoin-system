@@ -32,7 +32,7 @@ const std::string message::send_headers::command = "sendheaders";
 const uint32_t message::send_headers::version_minimum = bip130_minimum_version;
 const uint32_t message::send_headers::version_maximum = protocol_version;
 
-send_headers send_headers::factory_from_data(const uint32_t version,
+send_headers send_headers::factory_from_data(uint32_t version,
     const data_chunk& data)
 {
     send_headers instance;
@@ -40,7 +40,7 @@ send_headers send_headers::factory_from_data(const uint32_t version,
     return instance;
 }
 
-send_headers send_headers::factory_from_data(const uint32_t version,
+send_headers send_headers::factory_from_data(uint32_t version,
     std::istream& stream)
 {
     send_headers instance;
@@ -48,7 +48,7 @@ send_headers send_headers::factory_from_data(const uint32_t version,
     return instance;
 }
 
-send_headers send_headers::factory_from_data(const uint32_t version,
+send_headers send_headers::factory_from_data(uint32_t version,
     reader& source)
 {
     send_headers instance;
@@ -56,7 +56,7 @@ send_headers send_headers::factory_from_data(const uint32_t version,
     return instance;
 }
 
-uint64_t send_headers::satoshi_fixed_size(const uint32_t version)
+uint64_t send_headers::satoshi_fixed_size(uint32_t version)
 {
     return 0;
 }
@@ -76,19 +76,19 @@ void send_headers::reset()
     version_unsupported_ = false;
 }
 
-bool send_headers::from_data(const uint32_t version, const data_chunk& data)
+bool send_headers::from_data(uint32_t version, const data_chunk& data)
 {
     data_source istream(data);
     return from_data(version, istream);
 }
 
-bool send_headers::from_data(const uint32_t version, std::istream& stream)
+bool send_headers::from_data(uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(version, source);
 }
 
-bool send_headers::from_data(const uint32_t version, reader& source)
+bool send_headers::from_data(uint32_t version, reader& source)
 {
     reset();
 
@@ -98,7 +98,7 @@ bool send_headers::from_data(const uint32_t version, reader& source)
     return !version_unsupported_;
 }
 
-data_chunk send_headers::to_data(const uint32_t version) const
+data_chunk send_headers::to_data(uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
@@ -108,11 +108,11 @@ data_chunk send_headers::to_data(const uint32_t version) const
     return data;
 }
 
-void send_headers::to_data(const uint32_t version, std::ostream& stream) const
+void send_headers::to_data(uint32_t version, std::ostream& stream) const
 {
 }
 
-uint64_t send_headers::serialized_size(const uint32_t version) const
+uint64_t send_headers::serialized_size(uint32_t version) const
 {
     return send_headers::satoshi_fixed_size(version);
 }

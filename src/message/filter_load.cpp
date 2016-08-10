@@ -34,7 +34,7 @@ const std::string message::filter_load::command = "filterload";
 const uint32_t message::filter_load::version_minimum = bip37_minimum_version;
 const uint32_t message::filter_load::version_maximum = protocol_version;
 
-filter_load filter_load::factory_from_data(const uint32_t version,
+filter_load filter_load::factory_from_data(uint32_t version,
     const data_chunk& data)
 {
     filter_load instance;
@@ -42,7 +42,7 @@ filter_load filter_load::factory_from_data(const uint32_t version,
     return instance;
 }
 
-filter_load filter_load::factory_from_data(const uint32_t version,
+filter_load filter_load::factory_from_data(uint32_t version,
     std::istream& stream)
 {
     filter_load instance;
@@ -50,7 +50,7 @@ filter_load filter_load::factory_from_data(const uint32_t version,
     return instance;
 }
 
-filter_load filter_load::factory_from_data(const uint32_t version,
+filter_load filter_load::factory_from_data(uint32_t version,
     reader& source)
 {
     filter_load instance;
@@ -75,19 +75,19 @@ void filter_load::reset()
     flags = 0x00;
 }
 
-bool filter_load::from_data(const uint32_t version, const data_chunk& data)
+bool filter_load::from_data(uint32_t version, const data_chunk& data)
 {
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     return from_data(version, istream);
 }
 
-bool filter_load::from_data(const uint32_t version, std::istream& stream)
+bool filter_load::from_data(uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(version, source);
 }
 
-bool filter_load::from_data(const uint32_t version, reader& source)
+bool filter_load::from_data(uint32_t version, reader& source)
 {
     reset();
 
@@ -112,7 +112,7 @@ bool filter_load::from_data(const uint32_t version, reader& source)
     return result && !insufficent_version;
 }
 
-data_chunk filter_load::to_data(const uint32_t version) const
+data_chunk filter_load::to_data(uint32_t version) const
 {
     data_chunk data;
     boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
@@ -122,13 +122,13 @@ data_chunk filter_load::to_data(const uint32_t version) const
     return data;
 }
 
-void filter_load::to_data(const uint32_t version, std::ostream& stream) const
+void filter_load::to_data(uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
     to_data(version, sink);
 }
 
-void filter_load::to_data(const uint32_t version, writer& sink) const
+void filter_load::to_data(uint32_t version, writer& sink) const
 {
     sink.write_variable_uint_little_endian(filter.size());
     sink.write_data(filter);
@@ -137,7 +137,7 @@ void filter_load::to_data(const uint32_t version, writer& sink) const
     sink.write_byte(flags);
 }
 
-uint64_t filter_load::serialized_size(const uint32_t version) const
+uint64_t filter_load::serialized_size(uint32_t version) const
 {
     return 1 + 4 + 4 + variable_uint_size(filter.size()) + filter.size();
 }

@@ -33,7 +33,7 @@ ip_address null_address =
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-network_address network_address::factory_from_data(const uint32_t version,
+network_address network_address::factory_from_data(uint32_t version,
     const data_chunk& data, bool with_timestamp)
 {
     network_address instance;
@@ -41,7 +41,7 @@ network_address network_address::factory_from_data(const uint32_t version,
     return instance;
 }
 
-network_address network_address::factory_from_data(const uint32_t version,
+network_address network_address::factory_from_data(uint32_t version,
     std::istream& stream, bool with_timestamp)
 {
     network_address instance;
@@ -49,7 +49,7 @@ network_address network_address::factory_from_data(const uint32_t version,
     return instance;
 }
 
-network_address network_address::factory_from_data(const uint32_t version,
+network_address network_address::factory_from_data(uint32_t version,
     reader& source, bool with_timestamp)
 {
     network_address instance;
@@ -73,21 +73,21 @@ void network_address::reset()
     port = 0;
 }
 
-bool network_address::from_data(const uint32_t version,
+bool network_address::from_data(uint32_t version,
     const data_chunk& data, bool with_timestamp)
 {
     data_source istream(data);
     return from_data(version, istream, with_timestamp);
 }
 
-bool network_address::from_data(const uint32_t version,
+bool network_address::from_data(uint32_t version,
     std::istream& stream, bool with_timestamp)
 {
     istream_reader source(stream);
     return from_data(version, source, with_timestamp);
 }
 
-bool network_address::from_data(const uint32_t version,
+bool network_address::from_data(uint32_t version,
     reader& source, bool with_timestamp)
 {
     auto result = false;
@@ -108,7 +108,7 @@ bool network_address::from_data(const uint32_t version,
     return result;
 }
 
-data_chunk network_address::to_data(const uint32_t version,
+data_chunk network_address::to_data(uint32_t version,
     bool with_timestamp) const
 {
     data_chunk data;
@@ -119,14 +119,14 @@ data_chunk network_address::to_data(const uint32_t version,
     return data;
 }
 
-void network_address::to_data(const uint32_t version,
+void network_address::to_data(uint32_t version,
     std::ostream& stream, bool with_timestamp) const
 {
     ostream_writer sink(stream);
     to_data(version, sink, with_timestamp);
 }
 
-void network_address::to_data(const uint32_t version,
+void network_address::to_data(uint32_t version,
     writer& sink, bool with_timestamp) const
 {
     if (with_timestamp)
@@ -137,13 +137,13 @@ void network_address::to_data(const uint32_t version,
     sink.write_2_bytes_big_endian(port);
 }
 
-uint64_t network_address::serialized_size(const uint32_t version,
+uint64_t network_address::serialized_size(uint32_t version,
     bool with_timestamp) const
 {
     return network_address::satoshi_fixed_size(version, with_timestamp);
 }
 
-uint64_t network_address::satoshi_fixed_size(const uint32_t version,
+uint64_t network_address::satoshi_fixed_size(uint32_t version,
     bool with_timestamp)
 {
     uint64_t result = 26;

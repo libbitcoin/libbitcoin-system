@@ -36,7 +36,7 @@ const std::string message::block_message::command = "block";
 const uint32_t message::block_message::version_minimum = peer_minimum_version;
 const uint32_t message::block_message::version_maximum = protocol_version;
 
-block_message block_message::factory_from_data(const uint32_t version,
+block_message block_message::factory_from_data(uint32_t version,
     const data_chunk& data, bool with_transaction_count)
 {
     block_message instance;
@@ -44,7 +44,7 @@ block_message block_message::factory_from_data(const uint32_t version,
     return instance;
 }
 
-block_message block_message::factory_from_data(const uint32_t version,
+block_message block_message::factory_from_data(uint32_t version,
     std::istream& stream, bool with_transaction_count)
 {
     block_message instance;
@@ -52,7 +52,7 @@ block_message block_message::factory_from_data(const uint32_t version,
     return instance;
 }
 
-block_message block_message::factory_from_data(const uint32_t version,
+block_message block_message::factory_from_data(uint32_t version,
     reader& source, bool with_transaction_count)
 {
     block_message instance;
@@ -101,46 +101,46 @@ block_message::block_message(chain::header&& header,
 {
 }
 
-bool block_message::from_data(const uint32_t version, const data_chunk& data,
+bool block_message::from_data(uint32_t version, const data_chunk& data,
     bool with_transaction_count)
 {
     originator_ = version;
     return block::from_data(data, with_transaction_count);
 }
 
-bool block_message::from_data(const uint32_t version, std::istream& stream,
+bool block_message::from_data(uint32_t version, std::istream& stream,
     bool with_transaction_count)
 {
     originator_ = version;
     return block::from_data(stream, with_transaction_count);
 }
 
-bool block_message::from_data(const uint32_t version, reader& source,
+bool block_message::from_data(uint32_t version, reader& source,
     bool with_transaction_count)
 {
     originator_ = version;
     return block::from_data(source, with_transaction_count);
 }
 
-data_chunk block_message::to_data(const uint32_t version,
+data_chunk block_message::to_data(uint32_t version,
     bool with_transaction_count) const
 {
     return block::to_data(with_transaction_count);
 }
 
-void block_message::to_data(const uint32_t version, std::ostream& stream,
+void block_message::to_data(uint32_t version, std::ostream& stream,
     bool with_transaction_count) const
 {
     block::to_data(stream, with_transaction_count);
 }
 
-void block_message::to_data(const uint32_t version, writer& sink,
+void block_message::to_data(uint32_t version, writer& sink,
     bool with_transaction_count) const
 {
     block::to_data(sink, with_transaction_count);
 }
 
-uint64_t block_message::serialized_size(const uint32_t version,
+uint64_t block_message::serialized_size(uint32_t version,
     bool with_transaction_count) const
 {
     return block::serialized_size(with_transaction_count);

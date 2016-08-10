@@ -103,43 +103,43 @@ transaction_message::transaction_message(uint32_t version, uint32_t locktime,
 {
 }
 
-bool transaction_message::from_data(const uint32_t version,
+bool transaction_message::from_data(uint32_t version,
     const data_chunk& data)
 {
     originator_ = version;
     return transaction::from_data(data);
 }
 
-bool transaction_message::from_data(const uint32_t version,
+bool transaction_message::from_data(uint32_t version,
     std::istream& stream)
 {
     originator_ = version;
     return transaction::from_data(stream);
 }
 
-bool transaction_message::from_data(const uint32_t version, reader& source)
+bool transaction_message::from_data(uint32_t version, reader& source)
 {
     originator_ = version;
     return transaction::from_data(source);
 }
 
-data_chunk transaction_message::to_data(const uint32_t version) const
+data_chunk transaction_message::to_data(uint32_t version) const
 {
     return transaction::to_data();
 }
 
-void transaction_message::to_data(const uint32_t version,
+void transaction_message::to_data(uint32_t version,
     std::ostream& stream) const
 {
     transaction::to_data(stream);
 }
 
-void transaction_message::to_data(const uint32_t version, writer& sink) const
+void transaction_message::to_data(uint32_t version, writer& sink) const
 {
     transaction::to_data(sink);
 }
 
-uint64_t transaction_message::serialized_size(const uint32_t version) const
+uint64_t transaction_message::serialized_size(uint32_t version) const
 {
     return transaction::serialized_size();
 }

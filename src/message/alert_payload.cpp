@@ -40,7 +40,7 @@ const ec_uncompressed alert_payload::satoshi_public_key
     }
 };
 
-alert_payload alert_payload::factory_from_data(const uint32_t version,
+alert_payload alert_payload::factory_from_data(uint32_t version,
     const data_chunk& data)
 {
     alert_payload instance;
@@ -48,7 +48,7 @@ alert_payload alert_payload::factory_from_data(const uint32_t version,
     return instance;
 }
 
-alert_payload alert_payload::factory_from_data(const uint32_t version,
+alert_payload alert_payload::factory_from_data(uint32_t version,
     std::istream& stream)
 {
     alert_payload instance;
@@ -56,7 +56,7 @@ alert_payload alert_payload::factory_from_data(const uint32_t version,
     return instance;
 }
 
-alert_payload alert_payload::factory_from_data(const uint32_t version,
+alert_payload alert_payload::factory_from_data(uint32_t version,
     reader& source)
 {
     alert_payload instance;
@@ -103,19 +103,19 @@ void alert_payload::reset()
     reserved.shrink_to_fit();
 }
 
-bool alert_payload::from_data(const uint32_t version, const data_chunk& data)
+bool alert_payload::from_data(uint32_t version, const data_chunk& data)
 {
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     return from_data(version, istream);
 }
 
-bool alert_payload::from_data(const uint32_t version, std::istream& stream)
+bool alert_payload::from_data(uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(version, source);
 }
 
-bool alert_payload::from_data(const uint32_t version, reader& source)
+bool alert_payload::from_data(uint32_t version, reader& source)
 {
     reset();
 
@@ -149,7 +149,7 @@ bool alert_payload::from_data(const uint32_t version, reader& source)
     return source;
 }
 
-data_chunk alert_payload::to_data(const uint32_t version) const
+data_chunk alert_payload::to_data(uint32_t version) const
 {
     data_chunk data;
     boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
@@ -159,13 +159,13 @@ data_chunk alert_payload::to_data(const uint32_t version) const
     return data;
 }
 
-void alert_payload::to_data(const uint32_t version, std::ostream& stream) const
+void alert_payload::to_data(uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
     to_data(version, sink);
 }
 
-void alert_payload::to_data(const uint32_t version, writer& sink) const
+void alert_payload::to_data(uint32_t version, writer& sink) const
 {
     sink.write_4_bytes_little_endian(this->version);
     sink.write_8_bytes_little_endian(relay_until);
@@ -190,7 +190,7 @@ void alert_payload::to_data(const uint32_t version, writer& sink) const
     sink.write_string(reserved);
 }
 
-uint64_t alert_payload::serialized_size(const uint32_t version) const
+uint64_t alert_payload::serialized_size(uint32_t version) const
 {
     uint64_t size = 40 + variable_uint_size(comment.size()) + comment.size() +
         variable_uint_size(status_bar.size()) + status_bar.size() +

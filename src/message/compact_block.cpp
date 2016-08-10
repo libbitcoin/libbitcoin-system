@@ -34,7 +34,7 @@ const std::string message::compact_block::command = "cmpctblock";
 const uint32_t message::compact_block::version_minimum = bip152_minimum_version;
 const uint32_t message::compact_block::version_maximum = bip152_minimum_version;
 
-compact_block compact_block::factory_from_data(const uint32_t version,
+compact_block compact_block::factory_from_data(uint32_t version,
     const data_chunk& data)
 {
     compact_block instance;
@@ -42,7 +42,7 @@ compact_block compact_block::factory_from_data(const uint32_t version,
     return instance;
 }
 
-compact_block compact_block::factory_from_data(const uint32_t version,
+compact_block compact_block::factory_from_data(uint32_t version,
     std::istream& stream)
 {
     compact_block instance;
@@ -50,7 +50,7 @@ compact_block compact_block::factory_from_data(const uint32_t version,
     return instance;
 }
 
-compact_block compact_block::factory_from_data(const uint32_t version,
+compact_block compact_block::factory_from_data(uint32_t version,
     reader& source)
 {
     compact_block instance;
@@ -73,19 +73,19 @@ void compact_block::reset()
     transactions.shrink_to_fit();
 }
 
-bool compact_block::from_data(const uint32_t version, const data_chunk& data)
+bool compact_block::from_data(uint32_t version, const data_chunk& data)
 {
     data_source istream(data);
     return from_data(version, istream);
 }
 
-bool compact_block::from_data(const uint32_t version, std::istream& stream)
+bool compact_block::from_data(uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(version, source);
 }
 
-bool compact_block::from_data(const uint32_t version, reader& source)
+bool compact_block::from_data(uint32_t version, reader& source)
 {
     reset();
 
@@ -126,7 +126,7 @@ bool compact_block::from_data(const uint32_t version, reader& source)
     return result && !insufficient_version;
 }
 
-data_chunk compact_block::to_data(const uint32_t version) const
+data_chunk compact_block::to_data(uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
@@ -136,13 +136,13 @@ data_chunk compact_block::to_data(const uint32_t version) const
     return data;
 }
 
-void compact_block::to_data(const uint32_t version, std::ostream& stream) const
+void compact_block::to_data(uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
     to_data(version, sink);
 }
 
-void compact_block::to_data(const uint32_t version, writer& sink) const
+void compact_block::to_data(uint32_t version, writer& sink) const
 {
     header.to_data(sink, false);
     sink.write_8_bytes_little_endian(nonce);
@@ -155,7 +155,7 @@ void compact_block::to_data(const uint32_t version, writer& sink) const
         element.to_data(version, sink);
 }
 
-uint64_t compact_block::serialized_size(const uint32_t version) const
+uint64_t compact_block::serialized_size(uint32_t version) const
 {
     uint64_t size = chain::header::satoshi_fixed_size_without_transaction_count() +
         variable_uint_size(short_ids.size()) + (short_ids.size() * 6) +

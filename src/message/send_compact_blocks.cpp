@@ -67,21 +67,21 @@ void send_compact_blocks::reset()
     version = 0;
 }
 
-bool send_compact_blocks::from_data(const uint32_t version,
+bool send_compact_blocks::from_data(uint32_t version,
     const data_chunk& data)
 {
     data_source istream(data);
     return from_data(version, istream);
 }
 
-bool send_compact_blocks::from_data(const uint32_t version,
+bool send_compact_blocks::from_data(uint32_t version,
     std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(version, source);
 }
 
-bool send_compact_blocks::from_data(const uint32_t version,
+bool send_compact_blocks::from_data(uint32_t version,
     reader& source)
 {
     reset();
@@ -104,7 +104,7 @@ bool send_compact_blocks::from_data(const uint32_t version,
     return result && !insufficient_version;
 }
 
-data_chunk send_compact_blocks::to_data(const uint32_t version) const
+data_chunk send_compact_blocks::to_data(uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
@@ -114,27 +114,27 @@ data_chunk send_compact_blocks::to_data(const uint32_t version) const
     return data;
 }
 
-void send_compact_blocks::to_data(const uint32_t version,
+void send_compact_blocks::to_data(uint32_t version,
     std::ostream& stream) const
 {
     ostream_writer sink(stream);
     to_data(version, sink);
 }
 
-void send_compact_blocks::to_data(const uint32_t version,
+void send_compact_blocks::to_data(uint32_t version,
     writer& sink) const
 {
     sink.write_byte(high_bandwidth_mode ? 1 : 0);
     sink.write_8_bytes_little_endian(this->version);
 }
 
-uint64_t send_compact_blocks::serialized_size(const uint32_t version) const
+uint64_t send_compact_blocks::serialized_size(uint32_t version) const
 {
     return send_compact_blocks::satoshi_fixed_size(version);
 }
 
 
-uint64_t send_compact_blocks::satoshi_fixed_size(const uint32_t version)
+uint64_t send_compact_blocks::satoshi_fixed_size(uint32_t version)
 {
     return 9;
 }

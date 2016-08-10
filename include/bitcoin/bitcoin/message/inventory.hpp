@@ -42,26 +42,26 @@ class BC_API inventory
 public:
     typedef std::shared_ptr<inventory> ptr;
 
-    static inventory factory_from_data(const uint32_t version, const data_chunk& data);
-    static inventory factory_from_data(const uint32_t version, std::istream& stream);
-    static inventory factory_from_data(const uint32_t version, reader& source);
+    static inventory factory_from_data(uint32_t version, const data_chunk& data);
+    static inventory factory_from_data(uint32_t version, std::istream& stream);
+    static inventory factory_from_data(uint32_t version, reader& source);
 
     inventory();
     inventory(const inventory_vector::list& values);
     inventory(const hash_list& hashes, inventory_type_id type_id);
     inventory(const std::initializer_list<inventory_vector>& values);
 
-    virtual bool from_data(const uint32_t version, const data_chunk& data);
-    virtual bool from_data(const uint32_t version, std::istream& stream);
-    virtual bool from_data(const uint32_t version, reader& source);
-    data_chunk to_data(const uint32_t version) const;
-    void to_data(const uint32_t version, std::ostream& stream) const;
-    void to_data(const uint32_t version, writer& sink) const;
+    virtual bool from_data(uint32_t version, const data_chunk& data);
+    virtual bool from_data(uint32_t version, std::istream& stream);
+    virtual bool from_data(uint32_t version, reader& source);
+    data_chunk to_data(uint32_t version) const;
+    void to_data(uint32_t version, std::ostream& stream) const;
+    void to_data(uint32_t version, writer& sink) const;
     void to_hashes(hash_list& out, inventory_type_id type_id) const;
     void reduce(inventory_vector::list& out, inventory_type_id type_id) const;
     bool is_valid() const;
     void reset();
-    uint64_t serialized_size(const uint32_t version) const;
+    uint64_t serialized_size(uint32_t version) const;
     size_t count(inventory_type_id type_id) const;
 
     static const std::string command;
