@@ -24,6 +24,7 @@
 #include <istream>
 #include <string>
 #include <vector>
+#include <boost/functional/hash.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -44,11 +45,7 @@ public:
     static point factory_from_data(reader& source);
     static uint64_t satoshi_fixed_size();
 
-    /// Preserved for compatability with server v2.
     uint64_t checksum() const;
-
-    /// Greater entropy than checksum.
-    uint64_t checksum2() const;
 
     bool is_null() const;
     bool from_data(const data_chunk& data);
@@ -80,5 +77,32 @@ struct BC_API points_info
 
 } // namspace chain
 } // namspace libbitcoin
+
+namespace std
+{
+
+// Extend std namespace with our hash wrapper, used as database hash.
+template <>
+struct hash<bc::chain::point>
+{
+    // Changes to this function invalidate existing database files.
+    size_t operator()(const bc::chain::point& point) const
+    {
+        size_t seed = 0;
+        boost::hash_combine(seed, point.hash);
+        boost::hash_combine(seed, point.index);
+        return seed;
+    }
+};
+
+// Extend std namespace with the size of our point, used as database key size.
+template <>
+struct tuple_size<bc::chain::point>
+{
+    static const size_t value = std::tuple_size<bc::hash_digest>::value
+        + sizeof(uint32_t);
+};
+
+} // namspace std
 
 #endif
