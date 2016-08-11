@@ -61,6 +61,10 @@ public:
     block_message(chain::header&& header,
         chain::transaction::list&& transactions);
 
+    /// This class is move assignable but not copy assignable.
+    block_message& operator=(block_message&& other);
+    void operator=(const block_message&) = delete;
+
     bool from_data(uint32_t version, const data_chunk& data,
         bool with_transaction_count = true);
     bool from_data(uint32_t version, std::istream& stream,
@@ -75,10 +79,6 @@ public:
         bool with_transaction_count = true) const;
     uint64_t serialized_size(uint32_t version,
         bool with_transaction_count = true) const;
-
-    /// This class is move assignable but not copy assignable.
-    block_message& operator=(block_message&& other);
-    void operator=(const block_message&) = delete;
 
     uint64_t originator() const;
     void set_originator(uint64_t value);

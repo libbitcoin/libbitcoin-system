@@ -19,7 +19,9 @@
  */
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
 
+#include <cstdint>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/message/inventory.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -27,6 +29,40 @@
 
 namespace libbitcoin {
 namespace message {
+
+uint32_t inventory_vector::to_number(type_id inventory_type)
+{
+    switch (inventory_type)
+    {
+        case type_id::error:
+        case type_id::none:
+        default:
+            return 0;
+        case type_id::transaction:
+            return 1;
+        case type_id::block:
+            return 2;
+        case type_id::compact_block:
+            return 4;
+    }
+}
+
+inventory_vector::type_id inventory_vector::to_type(uint32_t value)
+{
+    switch (value)
+    {
+        case 0:
+            return type_id::error;
+        case 1:
+            return type_id::transaction;
+        case 2:
+            return type_id::block;
+        case 4:
+            return type_id::compact_block;
+        default:
+            return type_id::none;
+    }
+}
 
 inventory_vector inventory_vector::factory_from_data(uint32_t version,
     const data_chunk& data)
@@ -54,12 +90,12 @@ inventory_vector inventory_vector::factory_from_data(uint32_t version,
 
 bool inventory_vector::is_valid() const
 {
-    return (type != inventory_type_id::error) || (hash != null_hash);
+    return (type != inventory::type_id::error) || (hash != null_hash);
 }
 
 void inventory_vector::reset()
 {
-    type = inventory_type_id::error;
+    type = inventory::type_id::error;
     hash.fill(0);
 }
 
@@ -83,7 +119,7 @@ bool inventory_vector::from_data(uint32_t version,
     reset();
 
     uint32_t raw_type = source.read_4_bytes_little_endian();
-    type = inventory_type_from_number(raw_type);
+    type = inventory_vector::to_type(raw_type);
     hash = source.read_hash();
     bool result = static_cast<bool>(source);
 
@@ -113,7 +149,7 @@ void inventory_vector::to_data(uint32_t version,
 void inventory_vector::to_data(uint32_t version,
     writer& sink) const
 {
-    const auto raw_type = inventory_type_to_number(type);
+    const auto raw_type = inventory_vector::to_number(type);
     sink.write_4_bytes_little_endian(raw_type);
     sink.write_hash(hash);
 }
@@ -130,14 +166,15 @@ uint64_t inventory_vector::satoshi_fixed_size(uint32_t version)
 
 bool inventory_vector::is_block_type() const
 {
-    return type == message::inventory_type_id::block ||
-        type == message::inventory_type_id::compact_block ||
-        type == message::inventory_type_id::filtered_block;
+    return
+        type == inventory::type_id::block ||
+        type == inventory::type_id::compact_block ||
+        type == inventory::type_id::filtered_block;
 }
 
 bool inventory_vector::is_transaction_type() const
 {
-    return type == message::inventory_type_id::transaction;
+    return type == message::inventory::type_id::transaction;
 }
 
 bool operator==(const inventory_vector& left, const inventory_vector& right)

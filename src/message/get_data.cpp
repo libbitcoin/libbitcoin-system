@@ -21,6 +21,7 @@
 
 #include <initializer_list>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/message/inventory.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 
 namespace libbitcoin {
@@ -64,8 +65,8 @@ get_data::get_data(const inventory_vector::list& elements)
 {
 }
 
-get_data::get_data(const hash_list& hashes, inventory_type_id type_id)
-  : inventory(hashes, type_id)
+get_data::get_data(const hash_list& hashes, inventory::type_id type)
+  : inventory(hashes, type)
 {
 }
 

@@ -305,9 +305,6 @@
     <ClCompile Include="..\..\..\..\src\message\inventory.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\inventory_type_id.cpp">
-      <Filter>src\message</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\inventory_vector.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
@@ -728,9 +725,6 @@
       <Filter>include\bitcoin\message</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\inventory.hpp">
-      <Filter>include\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\inventory_type_id.hpp">
       <Filter>include\bitcoin\message</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\inventory_vector.hpp">

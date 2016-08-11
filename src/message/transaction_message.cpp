@@ -103,6 +103,17 @@ transaction_message::transaction_message(uint32_t version, uint32_t locktime,
 {
 }
 
+transaction_message& transaction_message::operator=(
+    transaction_message&& other)
+{
+    version = other.version;
+    locktime = other.locktime;
+    inputs = std::move(other.inputs);
+    outputs = std::move(other.outputs);
+    originator_ = other.originator_;
+    return *this;
+}
+
 bool transaction_message::from_data(uint32_t version,
     const data_chunk& data)
 {
@@ -142,17 +153,6 @@ void transaction_message::to_data(uint32_t version, writer& sink) const
 uint64_t transaction_message::serialized_size(uint32_t version) const
 {
     return transaction::serialized_size();
-}
-
-transaction_message& transaction_message::operator=(
-    transaction_message&& other)
-{
-    version = other.version;
-    locktime = other.locktime;
-    inputs = std::move(other.inputs);
-    outputs = std::move(other.outputs);
-    originator_ = other.originator_;
-    return *this;
 }
 
 uint64_t transaction_message::originator() const

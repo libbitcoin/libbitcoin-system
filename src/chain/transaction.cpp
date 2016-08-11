@@ -69,7 +69,10 @@ transaction::transaction(const transaction& other)
 
 transaction::transaction(uint32_t version, uint32_t locktime,
     const input::list& inputs, const output::list& outputs)
-  : version(version), locktime(locktime), inputs(inputs), outputs(outputs)
+  : version(version),
+    locktime(locktime),
+    inputs(inputs),
+    outputs(outputs)
 {
 }
 
@@ -82,7 +85,8 @@ transaction::transaction(transaction&& other)
 
 transaction::transaction(uint32_t version, uint32_t locktime,
     input::list&& inputs, output::list&& outputs)
-  : version(version), locktime(locktime),
+  : version(version),
+    locktime(locktime),
     inputs(std::forward<input::list>(inputs)),
     outputs(std::forward<output::list>(outputs))
 {
@@ -97,7 +101,7 @@ transaction& transaction::operator=(transaction&& other)
     return *this;
 }
 
-// TODO: eliminate blockchain copy scenarios and then delete this.
+// TODO: eliminate blockchain transaction copies and then delete this.
 transaction& transaction::operator=(const transaction& other)
 {
     version = other.version;

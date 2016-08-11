@@ -27,8 +27,8 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/message/inventory.hpp>
+#include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
@@ -47,7 +47,7 @@ public:
 
     not_found();
     not_found(const inventory_vector::list& values);
-    not_found(const hash_list& hashes, inventory_type_id type_id);
+    not_found(const hash_list& hashes, inventory::type_id type);
     not_found(const std::initializer_list<inventory_vector>& values);
 
     bool from_data(uint32_t version, const data_chunk& data) override;

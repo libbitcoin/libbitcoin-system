@@ -122,7 +122,6 @@ src_libbitcoin_la_SOURCES = \
     src/message/headers.cpp \
     src/message/heading.cpp \
     src/message/inventory.cpp \
-    src/message/inventory_type_id.cpp \
     src/message/inventory_vector.cpp \
     src/message/memory_pool.cpp \
     src/message/merkle_block.cpp \
@@ -263,7 +262,6 @@ test_libbitcoin_test_SOURCES = \
     test/message/headers.cpp \
     test/message/heading.cpp \
     test/message/inventory.cpp \
-    test/message/inventory_type_id.cpp \
     test/message/inventory_vector.cpp \
     test/message/memory_pool.cpp \
     test/message/merkle_block.cpp \
@@ -425,7 +423,6 @@ include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/headers.hpp \
     include/bitcoin/bitcoin/message/heading.hpp \
     include/bitcoin/bitcoin/message/inventory.hpp \
-    include/bitcoin/bitcoin/message/inventory_type_id.hpp \
     include/bitcoin/bitcoin/message/inventory_vector.hpp \
     include/bitcoin/bitcoin/message/memory_pool.hpp \
     include/bitcoin/bitcoin/message/merkle_block.hpp \

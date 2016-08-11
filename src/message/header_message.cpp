@@ -65,18 +65,8 @@ header_message::header_message()
 {
 }
 
-header_message::header_message(const uint32_t version,
-    const hash_digest previous_block_hash, const hash_digest merkle,
-    const uint32_t timestamp, const uint32_t bits, const uint32_t nonce,
-    const uint64_t transaction_count)
-  : header(version, previous_block_hash, merkle, timestamp, bits, nonce,
-        transaction_count)
-{
-}
-
-header_message::header_message(const chain::header& other)
-  : header_message(other.version, other.previous_block_hash, other.merkle,
-      other.timestamp, other.bits, other.nonce, other.transaction_count)
+header_message::header_message(const header& other)
+  : header(other)
 {
 }
 
@@ -84,6 +74,51 @@ header_message::header_message(const header_message& other)
 : header_message(other.version, other.previous_block_hash, other.merkle,
       other.timestamp, other.bits, other.nonce, other.transaction_count)
 {
+}
+
+header_message::header_message(uint32_t version,
+    const hash_digest& previous_block_hash, const hash_digest& merkle,
+    uint32_t timestamp, uint32_t bits, uint32_t nonce,
+    uint64_t transaction_count)
+  : header(version, previous_block_hash, merkle, timestamp, bits, nonce,
+        transaction_count)
+{
+}
+
+header_message::header_message(header&& other)
+  : header(std::forward<header>(other))
+{
+}
+
+header_message::header_message(header_message&& other)
+  : header_message(other.version,
+        std::forward<hash_digest>(other.previous_block_hash),
+        std::forward<hash_digest>(other.merkle), other.timestamp, other.bits,
+        other.nonce, other.transaction_count)
+{
+}
+
+header_message::header_message(uint32_t version,
+    hash_digest&& previous_block_hash, hash_digest&& merkle,
+    uint32_t timestamp, uint32_t bits, uint32_t nonce,
+    uint64_t transaction_count)
+  : header(version, std::forward<hash_digest>(previous_block_hash),
+        std::forward<hash_digest>(merkle), timestamp, bits, nonce,
+        transaction_count)
+{
+}
+
+header_message& header_message::operator=(header_message&& other)
+{
+    version = other.version;
+    previous_block_hash = std::move(other.previous_block_hash);
+    merkle = std::move(other.merkle);
+    timestamp = other.timestamp;
+    bits = other.bits;
+    nonce = other.nonce;
+    transaction_count = other.transaction_count;
+    originator_ = other.originator_;
+    return *this;
 }
 
 bool header_message::from_data(const uint32_t version, const data_chunk& data,
@@ -129,18 +164,6 @@ uint64_t header_message::serialized_size(const uint32_t version,
     bool with_transaction_count) const
 {
     return header::serialized_size(with_transaction_count);
-}
-
-header_message& header_message::operator=(header_message&& other)
-{
-    version = other.version;
-    previous_block_hash = other.previous_block_hash;
-    merkle = other.merkle;
-    timestamp = other.timestamp;
-    bits = other.bits;
-    nonce = other.nonce;
-    transaction_count = other.transaction_count;
-    return *this;
 }
 
 } // namspace message

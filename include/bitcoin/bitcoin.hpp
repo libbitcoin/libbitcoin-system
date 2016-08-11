@@ -79,7 +79,6 @@
 #include <bitcoin/bitcoin/message/headers.hpp>
 #include <bitcoin/bitcoin/message/heading.hpp>
 #include <bitcoin/bitcoin/message/inventory.hpp>
-#include <bitcoin/bitcoin/message/inventory_type_id.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/message/memory_pool.hpp>
 #include <bitcoin/bitcoin/message/merkle_block.hpp>

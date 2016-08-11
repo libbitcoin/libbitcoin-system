@@ -56,9 +56,6 @@
     <ClCompile Include="..\..\..\..\test\message\inventory.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\message\inventory_type_id.cpp">
-      <Filter>src\message</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\inventory_vector.cpp">
       <Filter>src\message</Filter>
     </ClCompile>

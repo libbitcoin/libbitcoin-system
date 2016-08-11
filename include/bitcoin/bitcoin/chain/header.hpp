@@ -37,6 +37,8 @@ class BC_API header
 {
 public:
     typedef std::vector<header> list;
+    typedef std::shared_ptr<header> ptr;
+    typedef std::vector<ptr> ptr_list;
 
     static header factory_from_data(const data_chunk& data,
         bool with_transaction_count = true);
@@ -47,13 +49,19 @@ public:
     static uint64_t satoshi_fixed_size_without_transaction_count();
 
     header();
-    header(uint32_t version, const hash_digest& previous_block_hash,
-        const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce, uint64_t transaction_count);
-    header(uint32_t version, const hash_digest& previous_block_hash,
-        const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce);
     header(const header& other);
+    header(uint32_t version, const hash_digest& previous_block_hash,
+        const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
+        uint32_t nonce, uint64_t transaction_count=0);
+
+    header(header&& other);
+    header(uint32_t version, hash_digest&& previous_block_hash,
+        hash_digest&& merkle, uint32_t timestamp, uint32_t bits,
+        uint32_t nonce, uint64_t transaction_count=0);
+
+    /// This class is move assignable but not copy assignable.
+    header& operator=(header&& other);
+    header& operator=(const header& other) = delete;
 
     bool from_data(const data_chunk& data, bool with_transaction_count = true);
     bool from_data(std::istream& stream, bool with_transaction_count = true);

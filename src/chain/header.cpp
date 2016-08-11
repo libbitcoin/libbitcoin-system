@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/chain/header.hpp>
 
+#include <utility>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -62,25 +63,55 @@ header::header()
 {
 }
 
-header::header(uint32_t version, const hash_digest& previous_block_hash,
-    const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
-    uint32_t nonce, uint64_t transaction_count)
-  : version(version), previous_block_hash(previous_block_hash), merkle(merkle),
-    timestamp(timestamp), bits(bits), nonce(nonce),
-    transaction_count(transaction_count)
-{
-}
-
-header::header(uint32_t version, const hash_digest& previous_block_hash,
-    const hash_digest& merkle, uint32_t timestamp, uint32_t bits, uint32_t nonce)
-  : header(version, previous_block_hash, merkle, timestamp, bits, nonce, 0)
-{
-}
-
 header::header(const header& other)
   : header(other.version, other.previous_block_hash, other.merkle,
         other.timestamp, other.bits, other.nonce, other.transaction_count)
 {
+}
+
+header::header(uint32_t version, const hash_digest& previous_block_hash,
+    const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
+    uint32_t nonce, uint64_t transaction_count)
+  : version(version),
+    previous_block_hash(previous_block_hash),
+    merkle(merkle),
+    timestamp(timestamp),
+    bits(bits),
+    nonce(nonce),
+    transaction_count(transaction_count)
+{
+}
+
+header::header(header&& other)
+  : header(other.version, std::forward<hash_digest>(other.previous_block_hash),
+        std::forward<hash_digest>(other.merkle), other.timestamp, other.bits,
+        other.nonce, other.transaction_count)
+{
+}
+
+header::header(uint32_t version, hash_digest&& previous_block_hash,
+    hash_digest&& merkle, uint32_t timestamp, uint32_t bits, uint32_t nonce,
+    uint64_t transaction_count)
+  : version(version),
+    previous_block_hash(std::forward<hash_digest>(previous_block_hash)),
+    merkle(std::forward<hash_digest>(merkle)),
+    timestamp(timestamp),
+    bits(bits),
+    nonce(nonce),
+    transaction_count(transaction_count)
+{
+}
+
+header& header::operator=(header&& other)
+{
+    version = other.version;
+    previous_block_hash = std::move(other.previous_block_hash);
+    merkle = std::move(other.merkle);
+    timestamp = other.timestamp;
+    bits = other.bits;
+    nonce = other.nonce;
+    transaction_count = other.transaction_count;
+    return *this;
 }
 
 bool header::is_valid() const

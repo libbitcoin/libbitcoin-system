@@ -23,7 +23,7 @@
 #include <initializer_list>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/message/inventory_type_id.hpp>
+#include <bitcoin/bitcoin/message/inventory.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -71,11 +71,11 @@ inventory::inventory(const inventory_vector::list& values)
     inventories.insert(inventories.end(), values.begin(), values.end());
 }
 
-inventory::inventory(const hash_list& hashes, inventory_type_id type_id)
+inventory::inventory(const hash_list& hashes, type_id type)
 {
-    const auto map = [type_id](const hash_digest& hash)
+    const auto map = [type](const hash_digest& hash)
     {
-        return inventory_vector{ type_id, hash };
+        return inventory_vector{ type, hash };
     };
 
     inventories.resize(hashes.size());
@@ -159,23 +159,22 @@ void inventory::to_data(uint32_t version, writer& sink) const
         inventory.to_data(version, sink);
 }
 
-void inventory::to_hashes(hash_list& out, inventory_type_id type_id) const
+void inventory::to_hashes(hash_list& out, type_id type) const
 {
     out.reserve(inventories.size());
 
     for (const auto& inventory: inventories)
-        if (inventory.type == type_id)
+        if (inventory.type == type)
             out.push_back(inventory.hash);
 
     out.shrink_to_fit();
 }
 
-void inventory::reduce(inventory_vector::list& out,
-    inventory_type_id type_id) const
+void inventory::reduce(inventory_vector::list& out, type_id type) const
 {
-    const auto is_type = [type_id](const inventory_vector& element)
+    const auto is_type = [type](const inventory_vector& element)
     {
-        return element.type == type_id;
+        return element.type == type;
     };
 
     out.reserve(inventories.size());
@@ -189,11 +188,11 @@ uint64_t inventory::serialized_size(uint32_t version) const
         inventory_vector::satoshi_fixed_size(version);
 }
 
-size_t inventory::count(inventory_type_id type_id) const
+size_t inventory::count(type_id type) const
 {
-    const auto is_type = [type_id](const inventory_vector& element)
+    const auto is_type = [type](const inventory_vector& element)
     {
-        return element.type == type_id;
+        return element.type == type;
     };
 
     return count_if(inventories.begin(), inventories.end(), is_type);

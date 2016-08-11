@@ -48,12 +48,21 @@ public:
         reader& source, bool with_transaction_count=true);
 
     header_message();
-    header_message(const uint32_t version,
-        const hash_digest previous_block_hash, const hash_digest merkle,
-        const uint32_t timestamp, const uint32_t bits, const uint32_t nonce,
-        const uint64_t transaction_count);
     header_message(const chain::header& other);
     header_message(const header_message& other);
+    header_message(uint32_t version, const hash_digest& previous_block_hash,
+        const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
+        uint32_t nonce, uint64_t transaction_count=0);
+
+    header_message(chain::header&& other);
+    header_message(header_message&& other);
+    header_message(uint32_t version, hash_digest&& previous_block_hash,
+        hash_digest&& merkle, uint32_t timestamp, uint32_t bits,
+        uint32_t nonce, uint64_t transaction_count = 0);
+
+    /// This class is move assignable but not copy assignable.
+    header_message& operator=(header_message&& other);
+    void operator=(const header_message&) = delete;
 
     bool from_data(const uint32_t version, const data_chunk& data,
         bool with_transaction_count = true);
@@ -69,10 +78,6 @@ public:
         bool with_transaction_count = true) const;
     uint64_t serialized_size(const uint32_t version,
         bool with_transaction_count = true) const;
-
-    /// This class is move assignable but not copy assignable.
-    header_message& operator=(header_message&& other);
-    void operator=(const header_message&) = delete;
 
     static const std::string command;
     static const uint32_t version_minimum;

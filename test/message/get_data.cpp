@@ -22,24 +22,25 @@
 #include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
+using namespace bc::message;
 
 BOOST_AUTO_TEST_SUITE(get_data_tests)
 
 BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 {
-    const data_chunk raw{ 0xab, 0xcd };
-    message::get_data instance{};
-
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(message::version::level::maximum, raw));
+    static const data_chunk raw{ 0xab, 0xcd };
+    get_data instance;
+    static const auto version = version::level::maximum;
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(version, raw));
 }
 
 BOOST_AUTO_TEST_CASE(from_data_insufficient_version_failure)
 {
-    const message::get_data expected
+    static const get_data expected
     {
         {
             {
-                message::inventory_type_id::error,
+                inventory_vector::type_id::error,
                 {
                     {
                         0x44, 0x9a, 0x0d, 0x24, 0x9a, 0xd5, 0x39, 0x89,
@@ -52,21 +53,19 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_version_failure)
         }
     };
 
-    const data_chunk raw = expected.to_data(message::version::level::maximum);
-    message::get_data instance{};
-
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(
-        message::get_data::version_minimum - 1, raw));
+    const data_chunk raw = expected.to_data(version::level::maximum);
+    get_data instance;
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(get_data::version_minimum - 1, raw));
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
-    const message::get_data expected
+    static const get_data expected
     {
         {
             {
-                message::inventory_type_id::error,
+                inventory_vector::type_id::error,
                 {
                     {
                         0x44, 0x9a, 0x0d, 0x24, 0x9a, 0xd5, 0x39, 0x89,
@@ -79,25 +78,22 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
         }
     };
 
-    const auto data = expected.to_data(message::version::level::maximum);
-    const auto result = message::get_data::factory_from_data(
-        message::version::level::maximum, data);
-
+    static const auto version = version::level::maximum;
+    const auto data = expected.to_data(version);
+    const auto result = get_data::factory_from_data(version, data);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(message::version::level::maximum));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::maximum),
-        result.serialized_size(message::version::level::maximum));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(version), result.serialized_size(version));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
-    const message::get_data expected
+    static const get_data expected
     {
         {
             {
-                message::inventory_type_id::transaction,
+                inventory_vector::type_id::transaction,
                 {
                     {
                         0x44, 0x9a, 0x0d, 0xee, 0x9a, 0xd5, 0x39, 0xee,
@@ -110,26 +106,23 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
         }
     };
 
-    const auto data = expected.to_data(message::version::level::maximum);
+    static const auto version = version::level::maximum;
+    const auto data = expected.to_data(version);
     data_source istream(data);
-    const auto result = message::get_data::factory_from_data(
-        message::version::level::maximum, istream);
-
+    const auto result = get_data::factory_from_data(version, istream);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(message::version::level::maximum));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::maximum),
-        result.serialized_size(message::version::level::maximum));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(version), result.serialized_size(version));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
-    const message::get_data expected
+    static const get_data expected
     {
         {
             {
-                message::inventory_type_id::block,
+                inventory_vector::type_id::block,
                 {
                     {
                         0x66, 0x9a, 0x0d, 0x24, 0x66, 0xd5, 0x39, 0x89,
@@ -142,18 +135,15 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
         }
     };
 
-    const auto data = expected.to_data(message::version::level::maximum);
+    static const auto version = version::level::maximum;
+    const auto data = expected.to_data(version);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = message::get_data::factory_from_data(
-        message::version::level::maximum, source);
-
+    const auto result = get_data::factory_from_data(version, source);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(message::version::level::maximum));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::maximum),
-        result.serialized_size(message::version::level::maximum));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(version), result.serialized_size(version));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

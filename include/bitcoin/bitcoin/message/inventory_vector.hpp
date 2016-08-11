@@ -23,7 +23,6 @@
 #include <istream>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/message/inventory_type_id.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
@@ -35,6 +34,19 @@ class BC_API inventory_vector
 {
 public:
     typedef std::vector<inventory_vector> list;
+
+    enum class type_id
+    {
+        error,
+        transaction,
+        block,
+        filtered_block,
+        compact_block,
+        none
+    };
+
+    static type_id to_type(uint32_t value);
+    static uint32_t to_number(type_id type);
 
     static inventory_vector factory_from_data(uint32_t version,
         const data_chunk& data);
@@ -56,7 +68,7 @@ public:
     bool is_block_type() const;
     bool is_transaction_type() const;
 
-    inventory_type_id type;
+    type_id type;
     hash_digest hash;
 };
 

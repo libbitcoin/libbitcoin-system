@@ -48,6 +48,21 @@ public:
     static transaction factory_from_data(reader& source);
     static uint64_t satoshi_fixed_size();
 
+    transaction();
+    transaction(const transaction& other);
+    transaction(uint32_t version, uint32_t locktime, const input::list& inputs,
+        const output::list& outputs);
+
+    transaction(transaction&& other);
+    transaction(uint32_t version, uint32_t locktime, input::list&& inputs,
+        output::list&& outputs);
+
+    /// This class is move assignable [but not copy assignable].
+    transaction& operator=(transaction&& other);
+
+    // TODO: eliminate blockchain transaction copies and then delete this.
+    transaction& operator=(const transaction& other) /*= delete*/;
+
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
     bool from_data(reader& source);
@@ -66,21 +81,6 @@ public:
     bool is_locktime_conflict() const;
     uint64_t total_output_value() const;
     uint64_t serialized_size() const;
-
-    transaction();
-    transaction(const transaction& other);
-    transaction(uint32_t version, uint32_t locktime, const input::list& inputs,
-        const output::list& outputs);
-
-    transaction(transaction&& other);
-    transaction(uint32_t version, uint32_t locktime, input::list&& inputs,
-        output::list&& outputs);
-
-    /// This class is move assignable [but not copy assignable].
-    transaction& operator=(transaction&& other);
-
-    // TODO: eliminate blockchain copy scenarios and then delete this.
-    transaction& operator=(const transaction& other) /*= delete*/;
 
     uint32_t version;
     uint32_t locktime;

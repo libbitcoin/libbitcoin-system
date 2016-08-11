@@ -96,7 +96,7 @@ config::checkpoint::list checkpoint::sort(const list& checks)
     return copy;
 }
 
-bool checkpoint::validate(const hash_digest& hash, const size_t height,
+bool checkpoint::validate(const hash_digest& hash, size_t height,
     const list& checks)
 {
     const auto match_invalid = [&height, &hash](const config::checkpoint& item)

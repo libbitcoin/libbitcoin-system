@@ -36,17 +36,15 @@ namespace libbitcoin {
 
 #ifdef WITH_PNG
 
-bool png::write_png(const data_chunk& data, const uint32_t size,
-    std::ostream& out)
+bool png::write_png(const data_chunk& data, uint32_t size, std::ostream& out)
 {
     data_source istream(data);
     return png::write_png(istream, size, out);
 }
 
-bool png::write_png(const data_chunk& data, const uint32_t size,
-    const uint32_t dots_per_inch, const uint32_t margin,
-    const uint32_t inches_per_meter, const color foreground,
-    const color background, std::ostream& out)
+bool png::write_png(const data_chunk& data, uint32_t size,
+    uint32_t dots_per_inch, uint32_t margin, uint32_t inches_per_meter,
+    const color& foreground, const color& background, std::ostream& out)
 {
     data_source istream(data);
     return png::write_png(istream, size, dots_per_inch, margin,
@@ -54,8 +52,7 @@ bool png::write_png(const data_chunk& data, const uint32_t size,
         out);
 }
 
-bool png::write_png(std::istream& in, const uint32_t size,
-    std::ostream& out)
+bool png::write_png(std::istream& in, uint32_t size, std::ostream& out)
 {
     return png::write_png(in, size, dots_per_inch, margin, inches_per_meter,
         get_default_foreground(), get_default_background(), out);
@@ -77,10 +74,9 @@ extern "C" void error_callback(png_structp png_ptr,
     throw std::runtime_error(error_message);
 }
 
-bool png::write_png(std::istream& in, const uint32_t size,
-    const uint32_t dots_per_inch, const uint32_t margin,
-    const uint32_t inches_per_meter, const color foreground,
-    const color background, std::ostream& out)
+bool png::write_png(std::istream& in, uint32_t size, uint32_t dots_per_inch,
+    uint32_t margin, uint32_t inches_per_meter, const color& foreground,
+    const color& background, std::ostream& out)
 {
     if (size == 0)
         return false;

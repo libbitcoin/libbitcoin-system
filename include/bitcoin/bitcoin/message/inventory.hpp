@@ -28,7 +28,6 @@
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/message/inventory_type_id.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -41,6 +40,7 @@ class BC_API inventory
 {
 public:
     typedef std::shared_ptr<inventory> ptr;
+    typedef inventory_vector::type_id type_id;
 
     static inventory factory_from_data(uint32_t version,
         const data_chunk& data);
@@ -49,7 +49,7 @@ public:
 
     inventory();
     inventory(const inventory_vector::list& values);
-    inventory(const hash_list& hashes, inventory_type_id type_id);
+    inventory(const hash_list& hashes, type_id type);
     inventory(const std::initializer_list<inventory_vector>& values);
 
     virtual bool from_data(uint32_t version, const data_chunk& data);
@@ -58,12 +58,12 @@ public:
     data_chunk to_data(uint32_t version) const;
     void to_data(uint32_t version, std::ostream& stream) const;
     void to_data(uint32_t version, writer& sink) const;
-    void to_hashes(hash_list& out, inventory_type_id type_id) const;
-    void reduce(inventory_vector::list& out, inventory_type_id type_id) const;
+    void to_hashes(hash_list& out, type_id type) const;
+    void reduce(inventory_vector::list& out, type_id type) const;
     bool is_valid() const;
     void reset();
     uint64_t serialized_size(uint32_t version) const;
-    size_t count(inventory_type_id type_id) const;
+    size_t count(type_id type) const;
 
     static const std::string command;
     static const uint32_t version_minimum;

@@ -65,8 +65,8 @@ block_message::block_message()
 {
 }
 
-block_message::block_message(const chain::block& other)
-  : block_message(other.header, other.transactions)
+block_message::block_message(const block& other)
+  : block(other)
 {
 }
 
@@ -81,9 +81,8 @@ block_message::block_message(const chain::header& header,
 {
 }
 
-block_message::block_message(chain::block&& other)
-  : block_message(std::forward<chain::header>(other.header),
-        std::forward<chain::transaction::list>(other.transactions))
+block_message::block_message(block&& other)
+  : block(std::forward<block>(other))
 {
 }
 
@@ -99,6 +98,14 @@ block_message::block_message(chain::header&& header,
         std::forward<chain::transaction::list>(transactions)),
     originator_(0)
 {
+}
+
+block_message& block_message::operator=(block_message&& other)
+{
+    header = std::move(other.header);
+    transactions = std::move(other.transactions);
+    originator_ = other.originator_;
+    return *this;
 }
 
 bool block_message::from_data(uint32_t version, const data_chunk& data,
@@ -144,14 +151,6 @@ uint64_t block_message::serialized_size(uint32_t version,
     bool with_transaction_count) const
 {
     return block::serialized_size(with_transaction_count);
-}
-
-block_message& block_message::operator=(block_message&& other)
-{
-    header = std::move(other.header);
-    transactions = std::move(other.transactions);
-    originator_ = other.originator_;
-    return *this;
 }
 
 uint64_t block_message::originator() const

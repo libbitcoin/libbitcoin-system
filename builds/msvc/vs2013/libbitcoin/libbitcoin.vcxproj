@@ -151,7 +151,6 @@
     <ClCompile Include="..\..\..\..\src\message\get_data.cpp" />
     <ClCompile Include="..\..\..\..\src\message\heading.cpp" />
     <ClCompile Include="..\..\..\..\src\message\inventory.cpp" />
-    <ClCompile Include="..\..\..\..\src\message\inventory_type_id.cpp" />
     <ClCompile Include="..\..\..\..\src\message\inventory_vector.cpp" />
     <ClCompile Include="..\..\..\..\src\message\network_address.cpp" />
     <ClCompile Include="..\..\..\..\src\message\ping.cpp" />
@@ -278,7 +277,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\get_data.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\heading.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\inventory.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\inventory_type_id.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\inventory_vector.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\network_address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\not_found.hpp" />

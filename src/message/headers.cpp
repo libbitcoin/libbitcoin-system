@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <utility>
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/message/inventory_type_id.hpp>
+#include <bitcoin/bitcoin/message/inventory.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -161,11 +161,11 @@ void headers::to_hashes(hash_list& out) const
 }
 
 void headers::to_inventory(inventory_vector::list& out,
-    inventory_type_id type_id) const
+    inventory::type_id type) const
 {
-    const auto map = [type_id](const chain::header& header)
+    const auto map = [type](const chain::header& header)
     {
-        return inventory_vector{ type_id, header.hash() };
+        return inventory_vector{ type, header.hash() };
     };
 
     out.resize(elements.size());
