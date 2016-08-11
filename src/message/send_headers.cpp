@@ -18,8 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/send_headers.hpp>
+
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -28,9 +29,9 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::send_headers::command = "sendheaders";
-const uint32_t message::send_headers::version_minimum = bip130_minimum_version;
-const uint32_t message::send_headers::version_maximum = protocol_version;
+const std::string send_headers::command = "sendheaders";
+const uint32_t send_headers::version_minimum = version::level::bip130;
+const uint32_t send_headers::version_maximum = version::level::maximum;
 
 send_headers send_headers::factory_from_data(uint32_t version,
     const data_chunk& data)

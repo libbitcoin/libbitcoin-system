@@ -36,8 +36,10 @@ class BC_API filter_add
 public:
     typedef std::shared_ptr<filter_add> ptr;
 
-    static filter_add factory_from_data(uint32_t version, const data_chunk& data);
-    static filter_add factory_from_data(uint32_t version, std::istream& stream);
+    static filter_add factory_from_data(uint32_t version,
+        const data_chunk& data);
+    static filter_add factory_from_data(uint32_t version,
+        std::istream& stream);
     static filter_add factory_from_data(uint32_t version, reader& source);
 
     bool from_data(uint32_t version, const data_chunk& data);

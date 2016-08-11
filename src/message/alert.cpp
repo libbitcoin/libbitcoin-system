@@ -20,7 +20,7 @@
 #include <bitcoin/bitcoin/message/alert.hpp>
 
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -30,9 +30,9 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::alert::command = "alert";
-const uint32_t message::alert::version_minimum = peer_minimum_version;
-const uint32_t message::alert::version_maximum = protocol_version;
+const std::string alert::command = "alert";
+const uint32_t alert::version_minimum = version::level::minimum;
+const uint32_t alert::version_maximum = version::level::maximum;
 
 alert alert::factory_from_data(uint32_t version, const data_chunk& data)
 {

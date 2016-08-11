@@ -18,8 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/reject.hpp>
+
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/message/block_message.hpp>
 #include <bitcoin/bitcoin/message/transaction_message.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -30,9 +31,9 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::reject::command = "reject";
-const uint32_t message::reject::version_minimum = bip61_minimum_version;
-const uint32_t message::reject::version_maximum = protocol_version;
+const std::string reject::command = "reject";
+const uint32_t reject::version_minimum = version::level::bip61;
+const uint32_t reject::version_maximum = version::level::maximum;
 
 reject reject::factory_from_data(uint32_t version,
     const data_chunk& data)

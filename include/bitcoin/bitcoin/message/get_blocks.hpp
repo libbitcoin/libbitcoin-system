@@ -38,8 +38,10 @@ class BC_API get_blocks
 public:
     typedef std::shared_ptr<get_blocks> ptr;
 
-    static get_blocks factory_from_data(uint32_t version, const data_chunk& data);
-    static get_blocks factory_from_data(uint32_t version, std::istream& stream);
+    static get_blocks factory_from_data(uint32_t version,
+        const data_chunk& data);
+    static get_blocks factory_from_data(uint32_t version,
+        std::istream& stream);
     static get_blocks factory_from_data(uint32_t version, reader& source);
 
     bool from_data(uint32_t version, const data_chunk& data);

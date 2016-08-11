@@ -20,15 +20,15 @@
 #include <bitcoin/bitcoin/message/get_data.hpp>
 
 #include <initializer_list>
-#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 
 namespace libbitcoin {
 namespace message {
 
-const std::string message::get_data::command = "getdata";
-const uint32_t message::get_data::version_minimum = peer_minimum_version;
-const uint32_t message::get_data::version_maximum = protocol_version;
+const std::string get_data::command = "getdata";
+const uint32_t get_data::version_minimum = version::level::minimum;
+const uint32_t get_data::version_maximum = version::level::maximum;
 
 get_data get_data::factory_from_data(uint32_t version,
     const data_chunk& data)

@@ -23,7 +23,7 @@
 #include <cstddef>
 #include <istream>
 #include <utility>
-#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -32,9 +32,9 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::block_message::command = "block";
-const uint32_t message::block_message::version_minimum = peer_minimum_version;
-const uint32_t message::block_message::version_maximum = protocol_version;
+const std::string block_message::command = "block";
+const uint32_t block_message::version_minimum = version::level::minimum;
+const uint32_t block_message::version_maximum = version::level::maximum;
 
 block_message block_message::factory_from_data(uint32_t version,
     const data_chunk& data, bool with_transaction_count)

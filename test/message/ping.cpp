@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_SUITE(ping_tests)
 BOOST_AUTO_TEST_CASE(ping_satoshi_fixed_size_returns_sizeof_uint64_t)
 {
     BOOST_REQUIRE_EQUAL(sizeof(uint64_t),
-        message::ping::satoshi_fixed_size(peer_minimum_version));
+        message::ping::satoshi_fixed_size(message::version::level::minimum));
 }
 
 BOOST_AUTO_TEST_CASE(ping_roundtrip_to_data_factory_from_data_chunk)
@@ -38,16 +38,16 @@ BOOST_AUTO_TEST_CASE(ping_roundtrip_to_data_factory_from_data_chunk)
         16545612u
     };
 
-    const auto data = expected.to_data(peer_minimum_version);
+    const auto data = expected.to_data(message::version::level::minimum);
     const auto result = message::ping::factory_from_data(
-        peer_minimum_version, data);
+        message::version::level::minimum, data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(peer_minimum_version));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(peer_minimum_version),
-        result.serialized_size(peer_minimum_version));
+        result.serialized_size(message::version::level::minimum));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum),
+        result.serialized_size(message::version::level::minimum));
 }
 
 BOOST_AUTO_TEST_CASE(ping_roundtrip_to_data_factory_from_data_stream)
@@ -57,17 +57,17 @@ BOOST_AUTO_TEST_CASE(ping_roundtrip_to_data_factory_from_data_stream)
         5087222u
     };
 
-    const auto data = expected.to_data(peer_minimum_version);
+    const auto data = expected.to_data(message::version::level::minimum);
     data_source istream(data);
     const auto result = message::ping::factory_from_data(
-        peer_minimum_version, istream);
+        message::version::level::minimum, istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(peer_minimum_version));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(peer_minimum_version),
-        result.serialized_size(peer_minimum_version));
+        result.serialized_size(message::version::level::minimum));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum),
+        result.serialized_size(message::version::level::minimum));
 }
 
 BOOST_AUTO_TEST_CASE(ping_roundtrip_to_data_factory_from_data_reader)
@@ -77,18 +77,18 @@ BOOST_AUTO_TEST_CASE(ping_roundtrip_to_data_factory_from_data_reader)
         6456147u
     };
 
-    const auto data = expected.to_data(peer_minimum_version);
+    const auto data = expected.to_data(message::version::level::minimum);
     data_source istream(data);
     istream_reader source(istream);
     const auto result = message::ping::factory_from_data(
-        peer_minimum_version, source);
+        message::version::level::minimum, source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(peer_minimum_version));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(peer_minimum_version),
-        result.serialized_size(peer_minimum_version));
+        result.serialized_size(message::version::level::minimum));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum),
+        result.serialized_size(message::version::level::minimum));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(from_data_fails)
 
     message::transaction_message instance;
 
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(peer_minimum_version, data));
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(message::version::level::minimum, data));
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
 }
 
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(from_data_valid_junk)
     boost::iostreams::stream<byte_source<std::array<uint8_t, 64>>> stream(source);
 
     message::transaction_message tx;
-    BOOST_REQUIRE(tx.from_data(peer_minimum_version, stream));
+    BOOST_REQUIRE(tx.from_data(message::version::level::minimum, stream));
 }
 
 BOOST_AUTO_TEST_CASE(case_1_factory_data_chunk)
@@ -64,14 +64,14 @@ BOOST_AUTO_TEST_CASE(case_1_factory_data_chunk)
     BOOST_REQUIRE_EQUAL(raw_tx.size(), 225u);
 
     message::transaction_message tx = message::transaction_message::factory_from_data(
-        peer_minimum_version, raw_tx);
+        message::version::level::minimum, raw_tx);
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(peer_minimum_version), 225u);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(message::version::level::minimum), 225u);
     BOOST_REQUIRE(tx.hash() == tx_hash);
 
     // Re-save tx and compare against original.
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(peer_minimum_version), raw_tx.size());
-    data_chunk resave = tx.to_data(peer_minimum_version);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(message::version::level::minimum), raw_tx.size());
+    data_chunk resave = tx.to_data(message::version::level::minimum);
     BOOST_REQUIRE(resave == raw_tx);
 }
 
@@ -100,13 +100,13 @@ BOOST_AUTO_TEST_CASE(case_2_factory_data_chunk)
     BOOST_REQUIRE_EQUAL(raw_tx.size(), 523u);
 
     message::transaction_message tx = message::transaction_message::factory_from_data(
-        peer_minimum_version, raw_tx);
+        message::version::level::minimum, raw_tx);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE(tx.hash() == tx_hash);
 
     // Re-save tx and compare against original.
-    BOOST_REQUIRE(tx.serialized_size(peer_minimum_version) == raw_tx.size());
-    data_chunk resave = tx.to_data(peer_minimum_version);
+    BOOST_REQUIRE(tx.serialized_size(message::version::level::minimum) == raw_tx.size());
+    data_chunk resave = tx.to_data(message::version::level::minimum);
     BOOST_REQUIRE(resave == raw_tx);
 }
 
@@ -127,14 +127,14 @@ BOOST_AUTO_TEST_CASE(case_1_factory_stream)
 
     data_source stream(raw_tx);
     message::transaction_message tx = message::transaction_message::factory_from_data(
-        peer_minimum_version, stream);
+        message::version::level::minimum, stream);
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(peer_minimum_version), 225u);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(message::version::level::minimum), 225u);
     BOOST_REQUIRE(tx.hash() == tx_hash);
 
     // Re-save tx and compare against original.
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(peer_minimum_version), raw_tx.size());
-    data_chunk resave = tx.to_data(peer_minimum_version);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(message::version::level::minimum), raw_tx.size());
+    data_chunk resave = tx.to_data(message::version::level::minimum);
     BOOST_REQUIRE(resave == raw_tx);
 }
 
@@ -164,13 +164,13 @@ BOOST_AUTO_TEST_CASE(case_2_factory_stream)
 
     data_source stream(raw_tx);
     message::transaction_message tx = message::transaction_message::factory_from_data(
-        peer_minimum_version, stream);
+        message::version::level::minimum, stream);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE(tx.hash() == tx_hash);
 
     // Re-save tx and compare against original.
-    BOOST_REQUIRE(tx.serialized_size(peer_minimum_version) == raw_tx.size());
-    data_chunk resave = tx.to_data(peer_minimum_version);
+    BOOST_REQUIRE(tx.serialized_size(message::version::level::minimum) == raw_tx.size());
+    data_chunk resave = tx.to_data(message::version::level::minimum);
     BOOST_REQUIRE(resave == raw_tx);
 }
 
@@ -192,14 +192,14 @@ BOOST_AUTO_TEST_CASE(case_1_factory_reader)
     data_source stream(raw_tx);
     istream_reader source(stream);
     message::transaction_message tx = message::transaction_message::factory_from_data(
-        peer_minimum_version, source);
+        message::version::level::minimum, source);
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(peer_minimum_version), 225u);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(message::version::level::minimum), 225u);
     BOOST_REQUIRE(tx.hash() == tx_hash);
 
     // Re-save tx and compare against original.
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(peer_minimum_version), raw_tx.size());
-    data_chunk resave = tx.to_data(peer_minimum_version);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(message::version::level::minimum), raw_tx.size());
+    data_chunk resave = tx.to_data(message::version::level::minimum);
     BOOST_REQUIRE(resave == raw_tx);
 }
 
@@ -230,13 +230,13 @@ BOOST_AUTO_TEST_CASE(case_2_factory_reader)
     data_source stream(raw_tx);
     istream_reader source(stream);
     message::transaction_message tx = message::transaction_message::factory_from_data(
-        peer_minimum_version, source);
+        message::version::level::minimum, source);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE(tx.hash() == tx_hash);
 
     // Re-save tx and compare against original.
-    BOOST_REQUIRE(tx.serialized_size(peer_minimum_version) == raw_tx.size());
-    data_chunk resave = tx.to_data(peer_minimum_version);
+    BOOST_REQUIRE(tx.serialized_size(message::version::level::minimum) == raw_tx.size());
+    data_chunk resave = tx.to_data(message::version::level::minimum);
     BOOST_REQUIRE(resave == raw_tx);
 }
 

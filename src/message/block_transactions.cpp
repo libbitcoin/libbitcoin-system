@@ -20,7 +20,7 @@
 #include <bitcoin/bitcoin/message/block_transactions.hpp>
 
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -29,9 +29,9 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::block_transactions::command = "blocktxn";
-const uint32_t message::block_transactions::version_minimum = bip152_minimum_version;
-const uint32_t message::block_transactions::version_maximum = bip152_minimum_version;
+const std::string block_transactions::command = "blocktxn";
+const uint32_t block_transactions::version_minimum = version::level::bip152;
+const uint32_t block_transactions::version_maximum = version::level::bip152;
 
 block_transactions block_transactions::factory_from_data(
     const uint32_t version, const data_chunk& data)

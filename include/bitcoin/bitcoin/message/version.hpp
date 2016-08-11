@@ -39,6 +39,36 @@ class BC_API version
 public:
     typedef std::shared_ptr<version> ptr;
 
+    enum level : uint32_t
+    {
+        // This is currently unspecified.
+        bip152 = max_uint32,
+
+        // send_headers
+        bip130 = 70012,
+
+        // reject
+        bip61 = 70002,
+
+        // filters, merkle_block, not_found, version.relay
+        bip37 = 70001,
+
+        // memory_pool
+        bip35 = 60002,
+
+        // ping.nonce, pong
+        bip31 = 60001,
+
+        // This preceded the BIP system.
+        headers = 31800,
+
+        // We require at least this of peers.
+        minimum = 31402,
+
+        // We support at most this internally.
+        maximum = bip130
+    };
+
     static version factory_from_data(uint32_t version, const data_chunk& data);
     static version factory_from_data(uint32_t version, std::istream& stream);
     static version factory_from_data(uint32_t version, reader& source);

@@ -20,7 +20,7 @@
 #include <bitcoin/bitcoin/message/filter_add.hpp>
 
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -30,9 +30,9 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::filter_add::command = "filteradd";
-const uint32_t message::filter_add::version_minimum = bip37_minimum_version;
-const uint32_t message::filter_add::version_maximum = protocol_version;
+const std::string filter_add::command = "filteradd";
+const uint32_t filter_add::version_minimum = version::level::bip37;
+const uint32_t filter_add::version_maximum = version::level::maximum;
 
 filter_add filter_add::factory_from_data(uint32_t version,
     const data_chunk& data)

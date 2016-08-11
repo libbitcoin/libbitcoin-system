@@ -28,40 +28,40 @@ BOOST_AUTO_TEST_SUITE(get_address_tests)
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
     const message::get_address expected{};
-    const auto data = expected.to_data(peer_minimum_version);
+    const auto data = expected.to_data(message::version::level::minimum);
     const auto result = message::get_address::factory_from_data(
-        peer_minimum_version, data);
+        message::version::level::minimum, data);
 
     BOOST_REQUIRE_EQUAL(0u, data.size());
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(message::version::level::minimum));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
     const message::get_address expected{};
-    const auto data = expected.to_data(peer_minimum_version);
+    const auto data = expected.to_data(message::version::level::minimum);
     data_source istream(data);
     const auto result = message::get_address::factory_from_data(
-        peer_minimum_version, istream);
+        message::version::level::minimum, istream);
 
     BOOST_REQUIRE_EQUAL(0u, data.size());
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(message::version::level::minimum));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
     const message::get_address expected{};
-    const auto data = expected.to_data(peer_minimum_version);
+    const auto data = expected.to_data(message::version::level::minimum);
     data_source istream(data);
     istream_reader source(istream);
     const auto result = message::get_address::factory_from_data(
-        peer_minimum_version, source);
+        message::version::level::minimum, source);
 
     BOOST_REQUIRE_EQUAL(0u, data.size());
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(message::version::level::minimum));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

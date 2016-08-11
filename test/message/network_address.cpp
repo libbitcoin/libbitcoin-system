@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
     message::network_address instance{};
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(
-        peer_minimum_version, raw, false));
+        message::version::level::minimum, raw, false));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk_without_timestamp)
@@ -61,16 +61,16 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk_without_timestamp
         123u
     };
 
-    const auto data = expected.to_data(peer_minimum_version, false);
+    const auto data = expected.to_data(message::version::level::minimum, false);
     const auto result = message::network_address::factory_from_data(
-        peer_minimum_version, data, false);
+        message::version::level::minimum, data, false);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result, false));
     BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(peer_minimum_version, false));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(peer_minimum_version, false),
-        result.serialized_size(peer_minimum_version, false));
+        result.serialized_size(message::version::level::minimum, false));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum, false),
+        result.serialized_size(message::version::level::minimum, false));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream_without_timestamp)
@@ -88,17 +88,17 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream_without_timestam
         123u
     };
 
-    const auto data = expected.to_data(peer_minimum_version, false);
+    const auto data = expected.to_data(message::version::level::minimum, false);
     data_source istream(data);
     const auto result = message::network_address::factory_from_data(
-        peer_minimum_version, istream, false);
+        message::version::level::minimum, istream, false);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result, false));
     BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(peer_minimum_version, false));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(peer_minimum_version, false),
-        result.serialized_size(peer_minimum_version, false));
+        result.serialized_size(message::version::level::minimum, false));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum, false),
+        result.serialized_size(message::version::level::minimum, false));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_without_timestamp)
@@ -116,18 +116,18 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_without_timestam
         123u
     };
 
-    const auto data = expected.to_data(peer_minimum_version, false);
+    const auto data = expected.to_data(message::version::level::minimum, false);
     data_source istream(data);
     istream_reader source(istream);
     const auto result = message::network_address::factory_from_data(
-        peer_minimum_version, source, false);
+        message::version::level::minimum, source, false);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result, false));
     BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(peer_minimum_version, false));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(peer_minimum_version, false),
-        result.serialized_size(peer_minimum_version, false));
+        result.serialized_size(message::version::level::minimum, false));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum, false),
+        result.serialized_size(message::version::level::minimum, false));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk_with_timestamp)
@@ -145,16 +145,16 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk_with_timestamp)
         123u
     };
 
-    const auto data = expected.to_data(peer_minimum_version, true);
+    const auto data = expected.to_data(message::version::level::minimum, true);
     const auto result = message::network_address::factory_from_data(
-        peer_minimum_version, data, true);
+        message::version::level::minimum, data, true);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result, true));
     BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(peer_minimum_version, true));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(peer_minimum_version, true),
-        result.serialized_size(peer_minimum_version, true));
+        result.serialized_size(message::version::level::minimum, true));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum, true),
+        result.serialized_size(message::version::level::minimum, true));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream_with_timestamp)
@@ -172,17 +172,17 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream_with_timestamp)
         123u
     };
 
-    const auto data = expected.to_data(peer_minimum_version, true);
+    const auto data = expected.to_data(message::version::level::minimum, true);
     data_source istream(data);
     const auto result = message::network_address::factory_from_data(
-        peer_minimum_version, istream, true);
+        message::version::level::minimum, istream, true);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result, true));
     BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(peer_minimum_version, true));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(peer_minimum_version, true),
-        result.serialized_size(peer_minimum_version, true));
+        result.serialized_size(message::version::level::minimum, true));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum, true),
+        result.serialized_size(message::version::level::minimum, true));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_with_timestamp)
@@ -200,18 +200,18 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_with_timestamp)
         123u
     };
 
-    const auto data = expected.to_data(peer_minimum_version, true);
+    const auto data = expected.to_data(message::version::level::minimum, true);
     data_source istream(data);
     istream_reader source(istream);
     const auto result = message::network_address::factory_from_data(
-        peer_minimum_version, source, true);
+        message::version::level::minimum, source, true);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result, true));
     BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(peer_minimum_version, true));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(peer_minimum_version, true),
-        result.serialized_size(peer_minimum_version, true));
+        result.serialized_size(message::version::level::minimum, true));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum, true),
+        result.serialized_size(message::version::level::minimum, true));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

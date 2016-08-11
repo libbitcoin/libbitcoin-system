@@ -20,7 +20,7 @@
 #include <bitcoin/bitcoin/message/ping.hpp>
 
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -29,9 +29,9 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::ping::command = "ping";
-const uint32_t message::ping::version_minimum = peer_minimum_version;
-const uint32_t message::ping::version_maximum = protocol_version;
+const std::string ping::command = "ping";
+const uint32_t ping::version_minimum = version::level::minimum;
+const uint32_t ping::version_maximum = version::level::maximum;
 
 ping ping::factory_from_data(uint32_t version, const data_chunk& data)
 {

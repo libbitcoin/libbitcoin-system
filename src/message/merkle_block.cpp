@@ -20,7 +20,7 @@
 #include <bitcoin/bitcoin/message/merkle_block.hpp>
 
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -30,9 +30,9 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::merkle_block::command = "merkleblock";
-const uint32_t message::merkle_block::version_minimum = bip37_minimum_version;
-const uint32_t message::merkle_block::version_maximum = protocol_version;
+const std::string merkle_block::command = "merkleblock";
+const uint32_t merkle_block::version_minimum = version::level::bip37;
+const uint32_t merkle_block::version_maximum = version::level::maximum;
 
 merkle_block merkle_block::factory_from_data(uint32_t version,
     const data_chunk& data)

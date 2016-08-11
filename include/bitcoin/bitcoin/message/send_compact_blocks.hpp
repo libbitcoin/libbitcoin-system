@@ -36,9 +36,12 @@ class BC_API send_compact_blocks
 public:
     typedef std::shared_ptr<send_compact_blocks> ptr;
 
-    static send_compact_blocks factory_from_data(uint32_t version, const data_chunk& data);
-    static send_compact_blocks factory_from_data(uint32_t version, std::istream& stream);
-    static send_compact_blocks factory_from_data(uint32_t version, reader& source);
+    static send_compact_blocks factory_from_data(uint32_t version,
+        const data_chunk& data);
+    static send_compact_blocks factory_from_data(uint32_t version,
+        std::istream& stream);
+    static send_compact_blocks factory_from_data(uint32_t version,
+        reader& source);
     static uint64_t satoshi_fixed_size(uint32_t version);
 
     bool from_data(uint32_t version, const data_chunk& data);

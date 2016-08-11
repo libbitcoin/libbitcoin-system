@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/version.hpp>
+
 #include <algorithm>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -28,9 +29,9 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::version::command = "version";
-const uint32_t message::version::version_minimum = peer_minimum_version;
-const uint32_t message::version::version_maximum = protocol_version;
+const std::string version::command = "version";
+const uint32_t message::version::version_minimum = level::minimum;
+const uint32_t message::version::version_maximum = level::maximum;
 
 version version::factory_from_data(uint32_t version,
     const data_chunk& data)
@@ -110,7 +111,7 @@ bool version::from_data(uint32_t version, reader& source)
     user_agent = source.read_string();
     start_height = source.read_4_bytes_little_endian();
 
-    if (effective_version >= bip37_minimum_version)
+    if (effective_version >= level::bip37)
         relay = (source.read_byte() != 0);
 
     // The protocol expects duplication of the sender's services.
@@ -150,7 +151,7 @@ void version::to_data(uint32_t version, writer& sink) const
     sink.write_string(user_agent);
     sink.write_4_bytes_little_endian(start_height);
 
-    if (effective_version >= bip37_minimum_version)
+    if (effective_version >= level::bip37)
         sink.write_byte(relay ? 1 : 0);
 }
 
@@ -166,7 +167,7 @@ uint64_t version::serialized_size(uint32_t version) const
         variable_uint_size(user_agent.size()) + user_agent.size() +
         sizeof(start_height);
 
-    if (value >= bip37_minimum_version)
+    if (value >= level::bip37)
         size += sizeof(uint8_t);
 
     return size;

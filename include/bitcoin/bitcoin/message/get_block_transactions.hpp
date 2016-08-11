@@ -35,9 +35,12 @@ class BC_API get_block_transactions
 public:
     typedef std::shared_ptr<get_block_transactions> ptr;
 
-    static get_block_transactions factory_from_data(uint32_t version, const data_chunk& data);
-    static get_block_transactions factory_from_data(uint32_t version, std::istream& stream);
-    static get_block_transactions factory_from_data(uint32_t version, reader& source);
+    static get_block_transactions factory_from_data(uint32_t version,
+        const data_chunk& data);
+    static get_block_transactions factory_from_data(uint32_t version,
+        std::istream& stream);
+    static get_block_transactions factory_from_data(uint32_t version,
+        reader& source);
 
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);

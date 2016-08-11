@@ -42,7 +42,8 @@ class BC_API inventory
 public:
     typedef std::shared_ptr<inventory> ptr;
 
-    static inventory factory_from_data(uint32_t version, const data_chunk& data);
+    static inventory factory_from_data(uint32_t version,
+        const data_chunk& data);
     static inventory factory_from_data(uint32_t version, std::istream& stream);
     static inventory factory_from_data(uint32_t version, reader& source);
 

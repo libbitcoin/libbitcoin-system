@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_data_fails)
     const data_chunk data{ 10 };
     message::merkle_block instance{};
 
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(protocol_version, data));
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(message::version::level::maximum, data));
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
 }
 
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_version_fails)
         }
     };
 
-    const auto data = expected.to_data(protocol_version);
+    const auto data = expected.to_data(message::version::level::maximum);
     message::merkle_block instance{};
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(
@@ -84,9 +84,9 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
         }
     };
 
-    const auto data = expected.to_data(protocol_version);
+    const auto data = expected.to_data(message::version::level::maximum);
     const auto result = message::merkle_block::factory_from_data(
-        protocol_version, data);
+        message::version::level::maximum, data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -113,10 +113,10 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
         }
     };
 
-    const auto data = expected.to_data(protocol_version);
+    const auto data = expected.to_data(message::version::level::maximum);
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     const auto result = message::merkle_block::factory_from_data(
-        protocol_version, istream);
+        message::version::level::maximum, istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -143,11 +143,11 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
         }
     };
 
-    const auto data = expected.to_data(protocol_version);
+    const auto data = expected.to_data(message::version::level::maximum);
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     istream_reader source(istream);
     const auto result = message::merkle_block::factory_from_data(
-        protocol_version, source);
+        message::version::level::maximum, source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);

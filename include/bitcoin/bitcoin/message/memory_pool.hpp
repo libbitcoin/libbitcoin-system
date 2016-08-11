@@ -36,8 +36,10 @@ class BC_API memory_pool
 public:
     typedef std::shared_ptr<memory_pool> ptr;
 
-    static memory_pool factory_from_data(uint32_t version, const data_chunk& data);
-    static memory_pool factory_from_data(uint32_t version, std::istream& stream);
+    static memory_pool factory_from_data(uint32_t version,
+        const data_chunk& data);
+    static memory_pool factory_from_data(uint32_t version,
+        std::istream& stream);
     static memory_pool factory_from_data(uint32_t version, reader& source);
     static uint64_t satoshi_fixed_size(uint32_t version);
 

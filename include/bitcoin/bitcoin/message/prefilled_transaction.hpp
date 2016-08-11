@@ -36,9 +36,12 @@ class BC_API prefilled_transaction
 public:
     typedef std::vector<prefilled_transaction> list;
 
-    static prefilled_transaction factory_from_data(uint32_t version, const data_chunk& data);
-    static prefilled_transaction factory_from_data(uint32_t version, std::istream& stream);
-    static prefilled_transaction factory_from_data(uint32_t version, reader& source);
+    static prefilled_transaction factory_from_data(uint32_t version,
+        const data_chunk& data);
+    static prefilled_transaction factory_from_data(uint32_t version,
+        std::istream& stream);
+    static prefilled_transaction factory_from_data(uint32_t version,
+        reader& source);
 
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);

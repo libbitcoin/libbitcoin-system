@@ -34,9 +34,12 @@ namespace message {
 class BC_API alert_payload
 {
 public:
-    static alert_payload factory_from_data(uint32_t version, const data_chunk& data);
-    static alert_payload factory_from_data(uint32_t version, std::istream& stream);
-    static alert_payload factory_from_data(uint32_t version, reader& source);
+    static alert_payload factory_from_data(uint32_t version,
+        const data_chunk& data);
+    static alert_payload factory_from_data(uint32_t version,
+        std::istream& stream);
+    static alert_payload factory_from_data(uint32_t version,
+        reader& source);
 
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);

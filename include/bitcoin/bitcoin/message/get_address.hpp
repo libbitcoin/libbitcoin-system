@@ -36,8 +36,10 @@ class BC_API get_address
 public:
     typedef std::shared_ptr<get_address> ptr;
 
-    static get_address factory_from_data(uint32_t version, const data_chunk& data);
-    static get_address factory_from_data(uint32_t version, std::istream& stream);
+    static get_address factory_from_data(uint32_t version,
+        const data_chunk& data);
+    static get_address factory_from_data(uint32_t version,
+        std::istream& stream);
     static get_address factory_from_data(uint32_t version, reader& source);
     static uint64_t satoshi_fixed_size(uint32_t version);
 

@@ -36,9 +36,12 @@ class BC_API inventory_vector
 public:
     typedef std::vector<inventory_vector> list;
 
-    static inventory_vector factory_from_data(uint32_t version, const data_chunk& data);
-    static inventory_vector factory_from_data(uint32_t version, std::istream& stream);
-    static inventory_vector factory_from_data(uint32_t version, reader& source);
+    static inventory_vector factory_from_data(uint32_t version,
+        const data_chunk& data);
+    static inventory_vector factory_from_data(uint32_t version,
+        std::istream& stream);
+    static inventory_vector factory_from_data(uint32_t version,
+        reader& source);
     static uint64_t satoshi_fixed_size(uint32_t version);
 
     bool from_data(uint32_t version, const data_chunk& data);
