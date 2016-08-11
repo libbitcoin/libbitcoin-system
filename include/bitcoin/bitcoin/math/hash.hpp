@@ -160,71 +160,30 @@ BC_API data_chunk scrypt(data_slice data, data_slice salt, uint64_t N,
 
 } // namespace libbitcoin
 
-// Extend std namespace with our hash wrappers.
+// Extend std and boost namespaces with our hash wrappers.
 
 namespace std
 {
-
-template <>
-struct hash<bc::short_hash>
+template <size_t Size>
+struct hash<bc::byte_array<Size>>
 {
-    size_t operator()(const bc::short_hash& hash) const
+    size_t operator()(const bc::byte_array<Size>& hash) const
     {
         return boost::hash_range(hash.begin(), hash.end());
     }
 };
-
-template <>
-struct hash<bc::hash_digest>
-{
-    size_t operator()(const bc::hash_digest& hash) const
-    {
-        return boost::hash_range(hash.begin(), hash.end());
-    }
-};
-
-template <>
-struct hash<bc::long_hash>
-{
-    size_t operator()(const bc::long_hash& hash) const
-    {
-        return boost::hash_range(hash.begin(), hash.end());
-    }
-};
-
 } // namespace std
-
-// Extend boost namespace with our hash wrappers.
 
 namespace boost
 {
-template <>
-struct hash<bc::short_hash>
+template <size_t Size>
+struct hash<bc::byte_array<Size>>
 {
-    size_t operator()(const bc::short_hash& hash) const
+    size_t operator()(const bc::byte_array<Size>& hash) const
     {
         return boost::hash_range(hash.begin(), hash.end());
     }
 };
-
-template <>
-struct hash<bc::hash_digest>
-{
-    size_t operator()(const bc::hash_digest& hash) const
-    {
-        return boost::hash_range(hash.begin(), hash.end());
-    }
-};
-
-template <>
-struct hash<bc::long_hash>
-{
-    size_t operator()(const bc::long_hash& hash) const
-    {
-        return boost::hash_range(hash.begin(), hash.end());
-    }
-};
-
 } // namespace boost
 
 #include <bitcoin/bitcoin/impl/math/hash.ipp>
