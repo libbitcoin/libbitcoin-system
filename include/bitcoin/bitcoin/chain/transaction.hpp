@@ -30,6 +30,7 @@
 #include <bitcoin/bitcoin/chain/output.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
@@ -86,6 +87,10 @@ public:
     uint32_t locktime;
     input::list inputs;
     output::list outputs;
+
+private:
+    mutable upgrade_mutex mutex_;
+    mutable std::shared_ptr<hash_digest> hash_;
 };
 
 } // namspace chain
