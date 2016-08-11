@@ -46,6 +46,15 @@ public:
         bool with_transaction_count = true);
     static uint64_t satoshi_fixed_size_without_transaction_count();
 
+    header();
+    header(uint32_t version, const hash_digest& previous_block_hash,
+        const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
+        uint32_t nonce, uint64_t transaction_count);
+    header(uint32_t version, const hash_digest& previous_block_hash,
+        const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
+        uint32_t nonce);
+    header(const header& other);
+
     bool from_data(const data_chunk& data, bool with_transaction_count = true);
     bool from_data(std::istream& stream, bool with_transaction_count = true);
     bool from_data(reader& source, bool with_transaction_count = true);

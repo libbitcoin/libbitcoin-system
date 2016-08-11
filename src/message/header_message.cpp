@@ -23,18 +23,18 @@
 #include <cstddef>
 #include <istream>
 #include <utility>
-#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 
 namespace libbitcoin {
 namespace message {
 
-const std::string message::header_message::command = "headers";
-const uint32_t message::header_message::version_minimum = peer_minimum_version;
-const uint32_t message::header_message::version_maximum = protocol_version;
+const std::string header_message::command = "headers";
+const uint32_t header_message::version_minimum = version::level::minimum;
+const uint32_t header_message::version_maximum = version::level::maximum;
 
 header_message header_message::factory_from_data(const uint32_t version,
     const data_chunk& data, bool with_transaction_count)
@@ -61,7 +61,7 @@ header_message header_message::factory_from_data(const uint32_t version,
 }
 
 header_message::header_message()
-  : header(), originator_(0)
+  : header()
 {
 }
 
@@ -69,8 +69,8 @@ header_message::header_message(const uint32_t version,
     const hash_digest previous_block_hash, const hash_digest merkle,
     const uint32_t timestamp, const uint32_t bits, const uint32_t nonce,
     const uint64_t transaction_count)
-  : header{ version, previous_block_hash, merkle,timestamp, bits, nonce, transaction_count },
-    originator_(0)
+  : header(version, previous_block_hash, merkle, timestamp, bits, nonce,
+        transaction_count)
 {
 }
 
@@ -140,18 +140,7 @@ header_message& header_message::operator=(header_message&& other)
     bits = other.bits;
     nonce = other.nonce;
     transaction_count = other.transaction_count;
-    originator_ = other.originator_;
     return *this;
-}
-
-uint64_t header_message::originator() const
-{
-    return originator_;
-}
-
-void header_message::set_originator(uint64_t value)
-{
-    originator_ = value;
 }
 
 } // namspace message

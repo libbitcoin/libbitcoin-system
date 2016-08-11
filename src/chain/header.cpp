@@ -58,6 +58,31 @@ uint64_t header::satoshi_fixed_size_without_transaction_count()
     return 80;
 }
 
+header::header()
+{
+}
+
+header::header(uint32_t version, const hash_digest& previous_block_hash,
+    const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
+    uint32_t nonce, uint64_t transaction_count)
+  : version(version), previous_block_hash(previous_block_hash), merkle(merkle),
+    timestamp(timestamp), bits(bits), nonce(nonce),
+    transaction_count(transaction_count)
+{
+}
+
+header::header(uint32_t version, const hash_digest& previous_block_hash,
+    const hash_digest& merkle, uint32_t timestamp, uint32_t bits, uint32_t nonce)
+  : header(version, previous_block_hash, merkle, timestamp, bits, nonce, 0)
+{
+}
+
+header::header(const header& other)
+  : header(other.version, other.previous_block_hash, other.merkle,
+        other.timestamp, other.bits, other.nonce, other.transaction_count)
+{
+}
+
 bool header::is_valid() const
 {
     return (version != 0) ||
