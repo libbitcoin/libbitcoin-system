@@ -30,7 +30,31 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 {
     const data_chunk raw{ 0xab, 0xcd };
     headers instance{};
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(version::level::minimum, raw));
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(
+        headers::version_minimum, raw));
+}
+
+BOOST_AUTO_TEST_CASE(from_data_insufficient_version_failure)
+{
+    static const headers expected
+    {
+        {
+            {
+                10,
+                hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+                hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+                531234,
+                6523454,
+                68644,
+                65
+            }
+        }
+    };
+
+    const data_chunk data = expected.to_data(headers::version_minimum);
+    headers instance{};
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(
+        headers::version_minimum - 1, data));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
@@ -50,7 +74,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
         }
     };
 
-    static const auto version = version::level::minimum;
+    static const auto version = headers::version_minimum;
     const auto data = expected.to_data(version);
     const auto result = headers::factory_from_data(version, data);
     BOOST_REQUIRE(result.is_valid());
@@ -76,7 +100,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
         }
     };
 
-    static const auto version = version::level::minimum;
+    static const auto version = headers::version_minimum;
     const auto data = expected.to_data(version);
     data_source istream(data);
     auto result = headers::factory_from_data(version, istream);
@@ -103,7 +127,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
         }
     };
 
-    static const auto version = version::level::minimum;
+    static const auto version = headers::version_minimum;
     const auto data = expected.to_data(version);
     data_source istream(data);
     istream_reader source(istream);

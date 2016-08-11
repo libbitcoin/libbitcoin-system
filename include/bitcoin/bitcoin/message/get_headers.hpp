@@ -42,7 +42,12 @@ public:
     static get_headers factory_from_data(uint32_t version, reader& source);
 
     get_headers();
-    get_headers(const hash_list& start_hashes, const hash_digest& stop_hash);
+    get_headers(const hash_list& start, const hash_digest& stop);
+    get_headers(hash_list&& start, hash_digest&& stop);
+
+    bool from_data(uint32_t version, const data_chunk& data) override;
+    bool from_data(uint32_t version, std::istream& stream) override;
+    bool from_data(uint32_t version, reader& source) override;
 
     static const std::string command;
     static const uint32_t version_minimum;

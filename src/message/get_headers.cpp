@@ -26,7 +26,7 @@ namespace libbitcoin {
 namespace message {
 
 const std::string get_headers::command = "getheaders";
-const uint32_t get_headers::version_minimum = version::level::minimum;
+const uint32_t get_headers::version_minimum = version::level::headers;
 const uint32_t get_headers::version_maximum = version::level::maximum;
 
 get_headers get_headers::factory_from_data(uint32_t version,
@@ -54,14 +54,40 @@ get_headers get_headers::factory_from_data(uint32_t version,
 }
 
 get_headers::get_headers()
+  : get_blocks()
 {
 }
 
-get_headers::get_headers(const hash_list& start_hashes,
-    const hash_digest& stop_hash)
+get_headers::get_headers(const hash_list& start, const hash_digest& stop)
+  : get_blocks(start, stop)
 {
-    this->start_hashes = start_hashes;
-    this->stop_hash = stop_hash;
+}
+
+get_headers::get_headers(hash_list&& start, hash_digest&& stop)
+  : get_headers(start, stop)
+{
+}
+
+bool get_headers::from_data(uint32_t version, const data_chunk& data)
+{
+    return get_blocks::from_data(version, data);
+}
+
+bool get_headers::from_data(uint32_t version, std::istream& stream)
+{
+    return get_blocks::from_data(version, stream);
+}
+
+bool get_headers::from_data(uint32_t version, reader& source)
+{
+    bool result = !(version < version_minimum);
+
+    if (result)
+        result = get_blocks::from_data(version, source);
+    else
+        reset();
+
+    return result;
 }
 
 } // end message
