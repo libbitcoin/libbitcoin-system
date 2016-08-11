@@ -277,10 +277,7 @@ hash_digest transaction::hash() const
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_.unlock_upgrade_and_lock();
-
-        if (!hash_)
-            hash_.reset(new hash_digest(bitcoin_hash(to_data())));
-
+        hash_.reset(new hash_digest(bitcoin_hash(to_data())));
         mutex_.unlock_and_lock_upgrade();
         //---------------------------------------------------------------------
     }

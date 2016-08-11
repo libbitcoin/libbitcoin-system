@@ -238,10 +238,7 @@ hash_digest header::hash() const
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_.unlock_upgrade_and_lock();
-
-        if (!hash_)
-            hash_.reset(new hash_digest(bitcoin_hash(to_data(false))));
-
+        hash_.reset(new hash_digest(bitcoin_hash(to_data(false))));
         mutex_.unlock_and_lock_upgrade();
         //---------------------------------------------------------------------
     }
