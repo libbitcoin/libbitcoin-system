@@ -297,5 +297,8 @@
     <ClCompile Include="..\..\..\..\test\message\transaction_message.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\headers.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -115,6 +115,7 @@
     <ClCompile Include="..\..\..\..\test\message\filter_load.cpp" />
     <ClCompile Include="..\..\..\..\test\message\get_block_transactions.cpp" />
     <ClCompile Include="..\..\..\..\test\message\get_headers.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\headers.cpp" />
     <ClCompile Include="..\..\..\..\test\message\memory_pool.cpp" />
     <ClCompile Include="..\..\..\..\test\message\merkle_block.cpp" />
     <ClCompile Include="..\..\..\..\test\message\pong.cpp" />
