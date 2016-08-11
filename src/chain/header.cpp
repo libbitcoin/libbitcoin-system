@@ -230,22 +230,27 @@ uint64_t header::serialized_size(bool with_transaction_count) const
 
 hash_digest header::hash() const
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
     mutex_.lock_upgrade();
 
-    if (hash_ == nullptr)
+    if (!hash_)
     {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_.unlock_upgrade_and_lock();
 
-        if (hash_ == nullptr)
+        if (!hash_)
             hash_.reset(new hash_digest(bitcoin_hash(to_data(false))));
 
-        mutex_.unlock();
+        //---------------------------------------------------------------------
+        mutex_.unlock_and_lock_upgrade();
     }
 
-    hash_digest result = *hash_;
+    hash_digest hash = *hash_;
     mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
 
-    return result;
+    return hash;
 }
 
 bool operator==(const header& left, const header& right)

@@ -269,22 +269,27 @@ std::string transaction::to_string(uint32_t flags) const
 
 hash_digest transaction::hash() const
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
     mutex_.lock_upgrade();
 
-    if (hash_ == nullptr)
+    if (!hash_)
     {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_.unlock_upgrade_and_lock();
 
-        if (hash_ == nullptr)
+        if (!hash_)
             hash_.reset(new hash_digest(bitcoin_hash(to_data())));
 
-        mutex_.unlock();
+        //---------------------------------------------------------------------
+        mutex_.unlock_and_lock_upgrade();
     }
 
-    hash_digest result = *hash_;
+    hash_digest hash = *hash_;
     mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
 
-    return result;
+    return hash;
 }
 
 hash_digest transaction::hash(uint32_t sighash_type) const
