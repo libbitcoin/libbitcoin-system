@@ -43,6 +43,7 @@ src_libbitcoin_la_SOURCES = \
     src/chain/input.cpp \
     src/chain/output.cpp \
     src/chain/point.cpp \
+    src/chain/point_byte_iterator.cpp \
     src/chain/transaction.cpp \
     src/chain/script/conditional_stack.cpp \
     src/chain/script/conditional_stack.hpp \
@@ -335,6 +336,7 @@ include_bitcoin_bitcoin_chain_HEADERS = \
     include/bitcoin/bitcoin/chain/input.hpp \
     include/bitcoin/bitcoin/chain/output.hpp \
     include/bitcoin/bitcoin/chain/point.hpp \
+    include/bitcoin/bitcoin/chain/point_byte_iterator.hpp \
     include/bitcoin/bitcoin/chain/spend.hpp \
     include/bitcoin/bitcoin/chain/stealth.hpp \
     include/bitcoin/bitcoin/chain/transaction.hpp

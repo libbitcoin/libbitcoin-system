@@ -25,6 +25,13 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(point_tests)
 
+BOOST_AUTO_TEST_CASE(begin_end_test)
+{
+    chain::point instance{ null_hash, 0 };
+
+    BOOST_REQUIRE(instance.begin() != instance.end());
+}
+
 BOOST_AUTO_TEST_CASE(from_data_fails)
 {
     data_chunk data(10);

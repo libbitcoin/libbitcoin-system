@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/chain/point_byte_iterator.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -61,6 +62,9 @@ public:
     bool is_valid() const;
     void reset();
     uint64_t serialized_size() const;
+
+    point_byte_iterator begin() const;
+    point_byte_iterator end() const;
 
     hash_digest hash;
     uint32_t index;
