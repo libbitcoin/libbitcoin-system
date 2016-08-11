@@ -28,7 +28,7 @@
 #include <bitcoin/bitcoin/chain/input.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
 #include <bitcoin/bitcoin/chain/point.hpp>
-#include <bitcoin/bitcoin/chain/point_byte_iterator.hpp>
+#include <bitcoin/bitcoin/chain/point_iterator.hpp>
 #include <bitcoin/bitcoin/chain/spend.hpp>
 #include <bitcoin/bitcoin/chain/stealth.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>

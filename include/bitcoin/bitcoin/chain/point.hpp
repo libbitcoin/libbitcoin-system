@@ -26,7 +26,7 @@
 #include <vector>
 #include <boost/functional/hash.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/chain/point_byte_iterator.hpp>
+#include <bitcoin/bitcoin/chain/point_iterator.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -60,8 +60,8 @@ public:
     void reset();
     uint64_t serialized_size() const;
 
-    point_byte_iterator begin() const;
-    point_byte_iterator end() const;
+    point_iterator begin() const;
+    point_iterator end() const;
 
     hash_digest hash;
     uint32_t index;

@@ -123,14 +123,14 @@ uint64_t point::satoshi_fixed_size()
     return hash_size + sizeof(uint32_t);
 }
 
-point_byte_iterator point::begin() const
+point_iterator point::begin() const
 {
-    return point_byte_iterator(*this);
+    return point_iterator(*this);
 }
 
-point_byte_iterator point::end() const
+point_iterator point::end() const
 {
-    return point_byte_iterator(*this, true);
+    return point_iterator(*this, true);
 }
 
 std::string point::to_string() const
@@ -145,7 +145,7 @@ bool point::is_null() const
     return index == max_uint32 && hash == null_hash;
 }
 
-// This value is stored in the database.
+// This value is stored in the database. This is NOT a bitcoin checksum.
 uint64_t point::checksum() const
 {
     return std::hash<point>()(*this);

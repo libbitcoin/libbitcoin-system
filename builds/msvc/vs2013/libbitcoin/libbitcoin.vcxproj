@@ -74,6 +74,7 @@
     <ClCompile Include="..\..\..\..\src\chain\block.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\header.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\point.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\point_iterator.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\script\conditional_stack.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\script\evaluation_context.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\script\opcode.cpp" />
@@ -207,6 +208,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\header.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\history.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point_iterator.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\opcode.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\operation.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\script.hpp" />
