@@ -103,8 +103,13 @@ struct hash<bc::chain::point>
 template <>
 struct tuple_size<bc::chain::point>
 {
-    static const size_t value = std::tuple_size<bc::hash_digest>::value
-        + sizeof(uint32_t);
+    static const size_t value = std::tuple_size<bc::hash_digest>::value +
+        sizeof(uint32_t);
+
+    operator std::size_t() const
+    {
+        return value;
+    }
 };
 
 } // namspace std
