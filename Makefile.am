@@ -127,7 +127,6 @@ src_libbitcoin_la_SOURCES = \
     src/message/memory_pool.cpp \
     src/message/merkle_block.cpp \
     src/message/network_address.cpp \
-    src/message/nonce.cpp \
     src/message/not_found.cpp \
     src/message/ping.cpp \
     src/message/pong.cpp \
@@ -431,7 +430,6 @@ include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/memory_pool.hpp \
     include/bitcoin/bitcoin/message/merkle_block.hpp \
     include/bitcoin/bitcoin/message/network_address.hpp \
-    include/bitcoin/bitcoin/message/nonce.hpp \
     include/bitcoin/bitcoin/message/not_found.hpp \
     include/bitcoin/bitcoin/message/ping.hpp \
     include/bitcoin/bitcoin/message/pong.hpp \

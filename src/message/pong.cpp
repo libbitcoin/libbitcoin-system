@@ -30,7 +30,7 @@ namespace libbitcoin {
 namespace message {
 
 const std::string pong::command = "pong";
-const uint32_t pong::version_minimum = version::level::bip31;
+const uint32_t pong::version_minimum = version::level::minimum;
 const uint32_t pong::version_maximum = version::level::maximum;
 
 pong pong::factory_from_data(uint32_t version, const data_chunk& data)
@@ -56,40 +56,77 @@ pong pong::factory_from_data(uint32_t version, reader& source)
 
 uint64_t pong::satoshi_fixed_size(uint32_t version)
 {
-    return nonce_::satoshi_fixed_size(version);
-}
-
-pong::pong()
-  : pong(0)
-{
-}
-
-pong::pong(uint64_t nonce)
-  : nonce_(nonce)
-{
+    return sizeof(nonce);
 }
 
 bool pong::from_data(uint32_t version, const data_chunk& data)
 {
-    return nonce_::from_data(version, data);
+    data_source istream(data);
+    return from_data(version, istream);
 }
 
 bool pong::from_data(uint32_t version, std::istream& stream)
 {
-    return nonce_::from_data(version, stream);
+    istream_reader source(stream);
+    return from_data(version, source);
 }
 
 bool pong::from_data(uint32_t version, reader& source)
 {
-    bool result = !(version < pong::version_minimum);
+    reset();
 
-    if (result)
-        result = nonce_::from_data(version, source);
+    nonce = source.read_8_bytes_little_endian();
 
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
+}
+
+data_chunk pong::to_data(uint32_t version) const
+{
+    data_chunk data;
+    data_sink ostream(data);
+    to_data(version, ostream);
+    ostream.flush();
+    BITCOIN_ASSERT(data.size() == serialized_size(version));
+    return data;
+}
+
+void pong::to_data(uint32_t version, std::ostream& stream) const
+{
+    ostream_writer sink(stream);
+    to_data(version, sink);
+}
+
+void pong::to_data(uint32_t version, writer& sink) const
+{
+    sink.write_8_bytes_little_endian(nonce);
+}
+
+bool pong::is_valid() const
+{
+    return (nonce != 0);
+}
+
+void pong::reset()
+{
+    nonce = 0;
+}
+
+uint64_t pong::serialized_size(uint32_t version) const
+{
+    return satoshi_fixed_size(version);
+}
+
+bool operator==(const pong& left, const pong& right)
+{
+    return (left.nonce == right.nonce);
+}
+
+bool operator!=(const pong& left, const pong& right)
+{
+    return !(left == right);
 }
 
 } // namspace message

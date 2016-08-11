@@ -25,7 +25,6 @@
 #include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/message/nonce.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
@@ -34,7 +33,6 @@ namespace libbitcoin {
 namespace message {
 
 class BC_API pong
-  : public nonce_
 {
 public:
     typedef std::shared_ptr<pong> ptr;
@@ -44,17 +42,26 @@ public:
     static pong factory_from_data(uint32_t version, reader& source);
     static uint64_t satoshi_fixed_size(uint32_t version);
 
-    pong();
-    pong(uint64_t nonce);
+    bool from_data(uint32_t version, const data_chunk& data);
+    bool from_data(uint32_t version, std::istream& stream);
+    bool from_data(uint32_t version, reader& source);
 
-    bool from_data(uint32_t version, const data_chunk& data) override;
-    bool from_data(uint32_t version, std::istream& stream) override;
-    bool from_data(uint32_t version, reader& source) override;
+    data_chunk to_data(uint32_t version) const;
+    void to_data(uint32_t version, std::ostream& stream) const;
+    void to_data(uint32_t version, writer& sink) const;
+    bool is_valid() const;
+    void reset();
+    uint64_t serialized_size(uint32_t version) const;
 
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
+
+    uint64_t nonce;
 };
+
+BC_API bool operator==(const pong& left, const pong& right);
+BC_API bool operator!=(const pong& left, const pong& right);
 
 } // namspace message
 } // namspace libbitcoin

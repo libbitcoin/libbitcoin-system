@@ -22,86 +22,74 @@
 #include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
+using namespace bc::message;
 
 BOOST_AUTO_TEST_SUITE(pong_tests)
 
-BOOST_AUTO_TEST_CASE(pong_satoshi_fixed_size_returns_sizeof_uint64_t)
+BOOST_AUTO_TEST_CASE(pong__satoshi_fixed_size__minimum__sizeof_uint64_t)
 {
-    BOOST_REQUIRE_EQUAL(sizeof(uint64_t),
-        message::pong::satoshi_fixed_size(message::version::level::minimum));
+    BOOST_REQUIRE_EQUAL(sizeof(uint64_t), pong::satoshi_fixed_size(version::level::minimum));
 }
 
-BOOST_AUTO_TEST_CASE(pong_from_data_insufficient_version_failure)
+BOOST_AUTO_TEST_CASE(pong__factory_from_data1__empty_data__invalid)
 {
-    const message::pong expected
-    {
-        213153u
-    };
-
-    const auto data = expected.to_data(message::version::level::maximum);
-    message::pong instance;
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(
-        message::pong::version_minimum - 1, data));
+    static const auto version = version::level::minimum;
+    const auto result = pong::factory_from_data(version, data_chunk{});
+    BOOST_REQUIRE(!result.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(pong_roundtrip_to_data_factory_from_data_chunk)
+BOOST_AUTO_TEST_CASE(pong__factory_from_data1__round_trip__expected)
 {
-    const message::pong expected
+    static const pong expected
     {
         4306550u
     };
 
-    const auto data = expected.to_data(message::version::level::minimum);
-    const auto result = message::pong::factory_from_data(
-        message::version::level::minimum, data);
+    static const auto version = version::level::minimum;
+    const auto data = expected.to_data(version);
+    const auto result = pong::factory_from_data(version, data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(message::version::level::minimum));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum),
-        result.serialized_size(message::version::level::minimum));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(version), result.serialized_size(version));
 }
 
-BOOST_AUTO_TEST_CASE(pong_roundtrip_to_data_factory_from_data_stream)
+BOOST_AUTO_TEST_CASE(pong__factory_from_data2__round_trip__expected)
 {
-    const message::pong expected
+    static const pong expected
     {
         3100693u
     };
 
-    const auto data = expected.to_data(message::version::level::minimum);
+    static const auto version = version::level::minimum;
+    const auto data = expected.to_data(version);
     data_source istream(data);
-    const auto result = message::pong::factory_from_data(
-        message::version::level::minimum, istream);
+    const auto result = pong::factory_from_data(version, istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(message::version::level::minimum));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum),
-        result.serialized_size(message::version::level::minimum));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(version), result.serialized_size(version));
 }
 
-BOOST_AUTO_TEST_CASE(pong_roundtrip_to_data_factory_from_data_reader)
+BOOST_AUTO_TEST_CASE(pong__factory_from_data3__round_trip__expected)
 {
-    const message::pong expected
+    static const pong expected
     {
         4642675u
     };
 
-    const auto data = expected.to_data(message::version::level::minimum);
+    static const auto version = version::level::minimum;
+    const auto data = expected.to_data(version);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = message::pong::factory_from_data(
-        message::version::level::minimum, source);
+    const auto result = pong::factory_from_data(version, source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(message::version::level::minimum));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum),
-        result.serialized_size(message::version::level::minimum));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(version), result.serialized_size(version));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

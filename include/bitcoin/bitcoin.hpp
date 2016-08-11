@@ -75,6 +75,7 @@
 #include <bitcoin/bitcoin/message/get_blocks.hpp>
 #include <bitcoin/bitcoin/message/get_data.hpp>
 #include <bitcoin/bitcoin/message/get_headers.hpp>
+#include <bitcoin/bitcoin/message/header_message.hpp>
 #include <bitcoin/bitcoin/message/headers.hpp>
 #include <bitcoin/bitcoin/message/heading.hpp>
 #include <bitcoin/bitcoin/message/inventory.hpp>
@@ -83,7 +84,6 @@
 #include <bitcoin/bitcoin/message/memory_pool.hpp>
 #include <bitcoin/bitcoin/message/merkle_block.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
-#include <bitcoin/bitcoin/message/nonce.hpp>
 #include <bitcoin/bitcoin/message/not_found.hpp>
 #include <bitcoin/bitcoin/message/ping.hpp>
 #include <bitcoin/bitcoin/message/pong.hpp>
