@@ -61,7 +61,9 @@ public:
 
     /// This class is move assignable but not copy assignable.
     header& operator=(header&& other);
-    header& operator=(const header& other) = delete;
+
+    // TODO: eliminate blockchain transaction copies and then delete this.
+    header& operator=(const header& other) /*= delete*/;
 
     bool from_data(const data_chunk& data, bool with_transaction_count = true);
     bool from_data(std::istream& stream, bool with_transaction_count = true);
