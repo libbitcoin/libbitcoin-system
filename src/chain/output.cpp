@@ -76,6 +76,7 @@ bool output::from_data(std::istream& stream)
 bool output::from_data(reader& source)
 {
     reset();
+
     value = source.read_8_bytes_little_endian();
     auto result = static_cast<bool>(source);
 

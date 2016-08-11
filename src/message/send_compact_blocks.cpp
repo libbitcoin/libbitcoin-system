@@ -18,8 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/send_compact_blocks.hpp>
+
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -28,9 +29,9 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::send_compact_blocks::command = "sendcmpct";
-const uint32_t message::send_compact_blocks::version_minimum = bip152_minimum_version;
-const uint32_t message::send_compact_blocks::version_maximum = bip152_minimum_version;
+const std::string send_compact_blocks::command = "sendcmpct";
+const uint32_t send_compact_blocks::version_minimum = version::level::bip152;
+const uint32_t send_compact_blocks::version_maximum = version::level::bip152;
 
 send_compact_blocks send_compact_blocks::factory_from_data(
     const uint32_t version, const data_chunk& data)
@@ -67,26 +68,27 @@ void send_compact_blocks::reset()
     version = 0;
 }
 
-bool send_compact_blocks::from_data(const uint32_t version,
+bool send_compact_blocks::from_data(uint32_t version,
     const data_chunk& data)
 {
     data_source istream(data);
     return from_data(version, istream);
 }
 
-bool send_compact_blocks::from_data(const uint32_t version,
+bool send_compact_blocks::from_data(uint32_t version,
     std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(version, source);
 }
 
-bool send_compact_blocks::from_data(const uint32_t version,
+bool send_compact_blocks::from_data(uint32_t version,
     reader& source)
 {
     reset();
-    bool insufficient_version = (version < send_compact_blocks::version_minimum);
-    auto mode = source.read_byte();
+    const auto insufficient_version = (version < send_compact_blocks::version_minimum);
+
+    const auto mode = source.read_byte();
     auto result = static_cast<bool>(source);
 
     if (mode > 1)
@@ -103,7 +105,7 @@ bool send_compact_blocks::from_data(const uint32_t version,
     return result && !insufficient_version;
 }
 
-data_chunk send_compact_blocks::to_data(const uint32_t version) const
+data_chunk send_compact_blocks::to_data(uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
@@ -113,27 +115,27 @@ data_chunk send_compact_blocks::to_data(const uint32_t version) const
     return data;
 }
 
-void send_compact_blocks::to_data(const uint32_t version,
+void send_compact_blocks::to_data(uint32_t version,
     std::ostream& stream) const
 {
     ostream_writer sink(stream);
     to_data(version, sink);
 }
 
-void send_compact_blocks::to_data(const uint32_t version,
+void send_compact_blocks::to_data(uint32_t version,
     writer& sink) const
 {
     sink.write_byte(high_bandwidth_mode ? 1 : 0);
     sink.write_8_bytes_little_endian(this->version);
 }
 
-uint64_t send_compact_blocks::serialized_size(const uint32_t version) const
+uint64_t send_compact_blocks::serialized_size(uint32_t version) const
 {
     return send_compact_blocks::satoshi_fixed_size(version);
 }
 
 
-uint64_t send_compact_blocks::satoshi_fixed_size(const uint32_t version)
+uint64_t send_compact_blocks::satoshi_fixed_size(uint32_t version)
 {
     return 9;
 }

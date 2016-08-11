@@ -23,7 +23,6 @@
 #include <istream>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/message/inventory_type_id.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
@@ -36,22 +35,40 @@ class BC_API inventory_vector
 public:
     typedef std::vector<inventory_vector> list;
 
-    static inventory_vector factory_from_data(const uint32_t version, const data_chunk& data);
-    static inventory_vector factory_from_data(const uint32_t version, std::istream& stream);
-    static inventory_vector factory_from_data(const uint32_t version, reader& source);
-    static uint64_t satoshi_fixed_size(const uint32_t version);
+    enum class type_id
+    {
+        error,
+        transaction,
+        block,
+        filtered_block,
+        compact_block,
+        none
+    };
 
-    bool from_data(const uint32_t version, const data_chunk& data);
-    bool from_data(const uint32_t version, std::istream& stream);
-    bool from_data(const uint32_t version, reader& source);
-    data_chunk to_data(const uint32_t version) const;
-    void to_data(const uint32_t version, std::ostream& stream) const;
-    void to_data(const uint32_t version, writer& sink) const;
+    static type_id to_type(uint32_t value);
+    static uint32_t to_number(type_id type);
+
+    static inventory_vector factory_from_data(uint32_t version,
+        const data_chunk& data);
+    static inventory_vector factory_from_data(uint32_t version,
+        std::istream& stream);
+    static inventory_vector factory_from_data(uint32_t version,
+        reader& source);
+    static uint64_t satoshi_fixed_size(uint32_t version);
+
+    bool from_data(uint32_t version, const data_chunk& data);
+    bool from_data(uint32_t version, std::istream& stream);
+    bool from_data(uint32_t version, reader& source);
+    data_chunk to_data(uint32_t version) const;
+    void to_data(uint32_t version, std::ostream& stream) const;
+    void to_data(uint32_t version, writer& sink) const;
     bool is_valid() const;
     void reset();
-    uint64_t serialized_size(const uint32_t version) const;
+    uint64_t serialized_size(uint32_t version) const;
+    bool is_block_type() const;
+    bool is_transaction_type() const;
 
-    inventory_type_id type;
+    type_id type;
     hash_digest hash;
 };
 

@@ -25,7 +25,7 @@ extern "C"
 {
 #endif
 
-void zeroize(void* const buffer, const size_t length);
+void zeroize(void* const buffer, size_t length);
 
 #ifdef __cplusplus
 }

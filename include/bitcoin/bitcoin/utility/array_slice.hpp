@@ -37,6 +37,11 @@ public:
     template <typename Container>
     array_slice(const Container& container);
 
+    // TODO: reliance this class causes unnecessary copying in cases where move
+    // arguments are not defined. This cannot itself be converted to move.
+    ////template <typename Container>
+    ////array_slice(Container&& container);
+
     array_slice(const T* begin, const T* end);
 
     const T* begin() const;

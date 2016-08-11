@@ -28,7 +28,7 @@
 
 namespace libbitcoin {
 
-binary::size_type binary::blocks_size(const size_type bit_size)
+binary::size_type binary::blocks_size(size_type bit_size)
 {
     return bit_size == 0 ? 0 : (bit_size - 1) / bits_per_block + 1;
 }
@@ -224,7 +224,7 @@ binary binary::substring(size_type start, size_type length) const
     return result;
 }
 
-bool binary::is_prefix_of(const uint32_t field) const
+bool binary::is_prefix_of(uint32_t field) const
 {
     return is_prefix_of(to_little_endian(field));
 }

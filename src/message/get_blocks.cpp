@@ -20,7 +20,7 @@
 #include <bitcoin/bitcoin/message/get_blocks.hpp>
 
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -29,11 +29,11 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::get_blocks::command = "getblocks";
-const uint32_t message::get_blocks::version_minimum = peer_minimum_version;
-const uint32_t message::get_blocks::version_maximum = protocol_version;
+const std::string get_blocks::command = "getblocks";
+const uint32_t get_blocks::version_minimum = version::level::minimum;
+const uint32_t get_blocks::version_maximum = version::level::maximum;
 
-get_blocks get_blocks::factory_from_data(const uint32_t version,
+get_blocks get_blocks::factory_from_data(uint32_t version,
     const data_chunk& data)
 {
     get_blocks instance;
@@ -41,7 +41,7 @@ get_blocks get_blocks::factory_from_data(const uint32_t version,
     return instance;
 }
 
-get_blocks get_blocks::factory_from_data(const uint32_t version,
+get_blocks get_blocks::factory_from_data(uint32_t version,
     std::istream& stream)
 {
     get_blocks instance;
@@ -49,7 +49,7 @@ get_blocks get_blocks::factory_from_data(const uint32_t version,
     return instance;
 }
 
-get_blocks get_blocks::factory_from_data(const uint32_t version,
+get_blocks get_blocks::factory_from_data(uint32_t version,
     reader& source)
 {
     get_blocks instance;
@@ -65,22 +65,23 @@ bool get_blocks::is_valid() const
 void get_blocks::reset()
 {
     start_hashes.clear();
+    start_hashes.shrink_to_fit();
     stop_hash.fill(0);
 }
 
-bool get_blocks::from_data(const uint32_t version, const data_chunk& data)
+bool get_blocks::from_data(uint32_t version, const data_chunk& data)
 {
     data_source istream(data);
     return from_data(version, istream);
 }
 
-bool get_blocks::from_data(const uint32_t version, std::istream& stream)
+bool get_blocks::from_data(uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(version, source);
 }
 
-bool get_blocks::from_data(const uint32_t version, reader& source)
+bool get_blocks::from_data(uint32_t version, reader& source)
 {
     reset();
 
@@ -88,6 +89,7 @@ bool get_blocks::from_data(const uint32_t version, reader& source)
     source.read_4_bytes_little_endian();
 
     const auto count = source.read_variable_uint_little_endian();
+    start_hashes.reserve(count);
 
     for (uint64_t i = 0; i < count && source; ++i)
         start_hashes.push_back(source.read_hash());
@@ -100,7 +102,7 @@ bool get_blocks::from_data(const uint32_t version, reader& source)
     return source;
 }
 
-data_chunk get_blocks::to_data(const uint32_t version) const
+data_chunk get_blocks::to_data(uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
@@ -110,24 +112,24 @@ data_chunk get_blocks::to_data(const uint32_t version) const
     return data;
 }
 
-void get_blocks::to_data(const uint32_t version, std::ostream& stream) const
+void get_blocks::to_data(uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
     to_data(version, sink);
 }
 
-void get_blocks::to_data(const uint32_t version, writer& sink) const
+void get_blocks::to_data(uint32_t version, writer& sink) const
 {
     sink.write_4_bytes_little_endian(version);
     sink.write_variable_uint_little_endian(start_hashes.size());
 
-    for (hash_digest start_hash: start_hashes)
+    for (const auto& start_hash: start_hashes)
         sink.write_hash(start_hash);
 
     sink.write_hash(stop_hash);
 }
 
-uint64_t get_blocks::serialized_size(const uint32_t version) const
+uint64_t get_blocks::serialized_size(uint32_t version) const
 {
     return 36 + variable_uint_size(start_hashes.size()) +
         hash_size * start_hashes.size();
@@ -136,6 +138,7 @@ uint64_t get_blocks::serialized_size(const uint32_t version) const
 bool operator==(const get_blocks& left, const get_blocks& right)
 {
     auto result = (left.start_hashes.size() == right.start_hashes.size());
+
     for (size_t i = 0; i < left.start_hashes.size() && result; i++)
         result = (left.start_hashes[i] == right.start_hashes[i]);
 

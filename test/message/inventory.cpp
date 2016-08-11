@@ -22,24 +22,25 @@
 #include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
+using namespace bc::message;
 
 BOOST_AUTO_TEST_SUITE(inventory_tests)
 
 BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 {
-    const data_chunk raw{ 0xab, 0xcd };
-    message::inventory instance{};
-
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(peer_minimum_version, raw));
+    static const auto version = version::level::minimum;
+    static const data_chunk raw{ 0xab, 0xcd };
+    inventory instance;
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(version, raw));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
-    const message::inventory expected
+    static const inventory expected
     {
         {
             {
-                message::inventory_type_id::error,
+                inventory::type_id::error,
                 {
                     {
                         0x44, 0x9a, 0x0d, 0x24, 0x9a, 0xd5, 0x39, 0x89,
@@ -52,25 +53,22 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
         }
     };
 
-    const auto data = expected.to_data(peer_minimum_version);
-    const auto result = message::inventory::factory_from_data(
-        peer_minimum_version, data);
-
+    static const auto version = version::level::minimum;
+    const auto data = expected.to_data(version);
+    const auto result = inventory::factory_from_data(version, data);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(peer_minimum_version));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(peer_minimum_version),
-        result.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(version), result.serialized_size(version));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
-    const message::inventory expected
+    static const inventory expected
     {
         {
             {
-                message::inventory_type_id::transaction,
+                inventory::type_id::transaction,
                 {
                     {
                         0x44, 0x9a, 0x0d, 0xee, 0x9a, 0xd5, 0x39, 0xee,
@@ -83,26 +81,23 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
         }
     };
 
-    const auto data = expected.to_data(peer_minimum_version);
+    static const auto version = version::level::minimum;
+    const auto data = expected.to_data(version);
     data_source istream(data);
-    auto result = message::inventory::factory_from_data(
-        peer_minimum_version, istream);
-
+    auto result = inventory::factory_from_data(version, istream);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(peer_minimum_version));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(peer_minimum_version),
-        result.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(version), result.serialized_size(version));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
-    const message::inventory expected
+    static const inventory expected
     {
         {
             {
-                message::inventory_type_id::block,
+                inventory::type_id::block,
                 {
                     {
                         0x66, 0x9a, 0x0d, 0x24, 0x66, 0xd5, 0x39, 0x89,
@@ -115,18 +110,15 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
         }
     };
 
-    const auto data = expected.to_data(peer_minimum_version);
+    static const auto version = version::level::minimum;
+    const auto data = expected.to_data(version);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = message::inventory::factory_from_data(
-        peer_minimum_version, source);
-
+    const auto result = inventory::factory_from_data(version, source);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(peer_minimum_version));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(peer_minimum_version),
-        result.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(version), result.serialized_size(version));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -41,13 +41,13 @@ namespace libbitcoin {
 #define BIND_ARGS(args) \
     std::bind(FORWARD_ARGS(args))
 
-// Collection dispatch doesn't forward args, self pointer needs to increment.
+// Collection dispatch doesn't forward args as move args can only forward once.
 #define BIND_RACE(args, call) \
     std::bind(args..., call)
 #define BIND_ELEMENT(args, element, call) \
     std::bind(args..., element, call)
 
-/// Convenience class for objects wishing to synchronize operations.
+/// This  class is thread safe.
 /// If the ios service is stopped jobs will not be dispatched.
 class BC_API dispatcher
 {
@@ -189,6 +189,8 @@ public:
     }
 
 private:
+
+    // This is thread safe.
     work heap_;
 };
 

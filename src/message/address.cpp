@@ -20,7 +20,7 @@
 #include <bitcoin/bitcoin/message/address.hpp>
 
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -29,25 +29,25 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::address::command = "addr";
-const uint32_t message::address::version_minimum = peer_minimum_version;
-const uint32_t message::address::version_maximum = protocol_version;
+const std::string address::command = "addr";
+const uint32_t address::version_minimum = version::level::minimum;
+const uint32_t address::version_maximum = version::level::maximum;
 
-address address::factory_from_data(const uint32_t version, const data_chunk& data)
+address address::factory_from_data(uint32_t version, const data_chunk& data)
 {
     address instance;
     instance.from_data(version, data);
     return instance;
 }
 
-address address::factory_from_data(const uint32_t version, std::istream& stream)
+address address::factory_from_data(uint32_t version, std::istream& stream)
 {
     address instance;
     instance.from_data(version, stream);
     return instance;
 }
 
-address address::factory_from_data(const uint32_t version, reader& source)
+address address::factory_from_data(uint32_t version, reader& source)
 {
     address instance;
     instance.from_data(version, source);
@@ -62,31 +62,39 @@ bool address::is_valid() const
 void address::reset()
 {
     addresses.clear();
+    addresses.shrink_to_fit();
 }
 
-bool address::from_data(const uint32_t version, const data_chunk& data)
+bool address::from_data(uint32_t version, const data_chunk& data)
 {
     data_source istream(data);
     return from_data(version, istream);
 }
 
-bool address::from_data(const uint32_t version, std::istream& stream)
+bool address::from_data(uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(version, source);
 }
 
-bool address::from_data(const uint32_t version, reader& source)
+bool address::from_data(uint32_t version, reader& source)
 {
     reset();
 
     uint64_t count = source.read_variable_uint_little_endian();
     auto result = static_cast<bool>(source);
 
-    for (uint64_t i = 0; (i < count) && result; ++i)
+    if (result)
     {
-        addresses.emplace_back();
-        result = addresses.back().from_data(version, source, true);
+        addresses.resize(count);
+
+        for (auto& address: addresses)
+        {
+            result = address.from_data(version, source, true);
+
+            if (!result)
+                break;
+        }
     }
 
     if (!result)
@@ -95,7 +103,7 @@ bool address::from_data(const uint32_t version, reader& source)
     return result;
 }
 
-data_chunk address::to_data(const uint32_t version) const
+data_chunk address::to_data(uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
@@ -105,20 +113,20 @@ data_chunk address::to_data(const uint32_t version) const
     return data;
 }
 
-void address::to_data(const uint32_t version, std::ostream& stream) const
+void address::to_data(uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
     to_data(version, sink);
 }
 
-void address::to_data(const uint32_t version, writer& sink) const
+void address::to_data(uint32_t version, writer& sink) const
 {
     sink.write_variable_uint_little_endian(addresses.size());
     for (const network_address& net_address : addresses)
         net_address.to_data(version, sink, true);
 }
 
-uint64_t address::serialized_size(const uint32_t version) const
+uint64_t address::serialized_size(uint32_t version) const
 {
     return variable_uint_size(addresses.size()) + 
         (addresses.size() * network_address::satoshi_fixed_size(version, true));

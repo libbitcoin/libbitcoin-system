@@ -80,9 +80,11 @@ bool point::from_data(std::istream& stream)
 bool point::from_data(reader& source)
 {
     reset();
+
     hash = source.read_hash();
     index = source.read_4_bytes_little_endian();
-    auto result = static_cast<bool>(source);
+    const auto result = static_cast<bool>(source);
+
     if (!result)
         reset();
 
@@ -118,46 +120,35 @@ uint64_t point::serialized_size() const
 
 uint64_t point::satoshi_fixed_size()
 {
-    return hash_size + 4;
+    return hash_size + sizeof(uint32_t);
+}
+
+point_iterator point::begin() const
+{
+    return point_iterator(*this);
+}
+
+point_iterator point::end() const
+{
+    return point_iterator(*this, true);
 }
 
 std::string point::to_string() const
 {
     std::ostringstream value;
-    value << "\thash = " << encode_hash(hash) << "\n" << "\tindex = " << index;
+    value << "\thash = " << encode_hash(hash) << "\n\tindex = " << index;
     return value.str();
 }
 
 bool point::is_null() const
 {
-    return (index == max_uint32) && (hash == null_hash);
+    return index == max_uint32 && hash == null_hash;
 }
 
-// This only provides 32 bits of entropy, so checksum2 is preferred.
+// This value is stored in the database. This is NOT a bitcoin checksum.
 uint64_t point::checksum() const
 {
-    static constexpr uint64_t divisor = uint64_t{ 1 } << 63;
-    static_assert(divisor == 9223372036854775808ull, "Wrong divisor value.");
-
-    // Write index onto a copy of the outpoint hash.
-    auto copy = hash;
-    auto serial = make_serializer(copy.begin());
-    serial.write_4_bytes_little_endian(index);
-    const auto hash_value = from_little_endian_unsafe<uint64_t>(copy.begin());
-
-    // x mod 2**n == x & (2**n - 1)
-    return hash_value & (divisor - 1);
-}
-
-// This is only used with output_point identification within a set of history
-// rows of the same address. Collision may result in miscorrelation of points.
-uint64_t point::checksum2() const
-{
-    // Get the first 64 bits of the transaction hash.
-    auto value = from_little_endian_unsafe<uint64_t>(hash.begin());
-    
-    // In order to avoid collision on the same transaction add the index.
-    return value + index;
+    return std::hash<point>()(*this);
 }
 
 bool operator==(const point& left, const point& right)

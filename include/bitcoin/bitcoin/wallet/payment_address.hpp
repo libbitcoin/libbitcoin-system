@@ -118,17 +118,14 @@ struct BC_API wrapped_data
 // Allow payment_address to be in indexed in std::*map classes.
 namespace std
 {
-    template <>
-    struct hash<bc::wallet::payment_address>
+template <>
+struct hash<bc::wallet::payment_address>
+{
+    size_t operator()(const bc::wallet::payment_address& address) const
     {
-        size_t operator()(const bc::wallet::payment_address& address) const
-        {
-            // The address already contains a well-scrambled hash,
-            // so just return some of that:
-            return bc::from_little_endian_unsafe<size_t>(
-                address.hash().begin());
-        }
-    };
+        return std::hash<bc::short_hash>()(address.hash());
+    }
+};
 
 } // namespace std
 

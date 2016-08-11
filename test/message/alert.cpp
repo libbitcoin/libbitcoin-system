@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
     const data_chunk raw{ 0xab, 0x11 };
     message::alert instance;
 
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(peer_minimum_version, raw));
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(message::version::level::minimum, raw));
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
 }
 
@@ -89,16 +89,16 @@ BOOST_AUTO_TEST_CASE(wiki_sample_test)
 
     const message::alert expected{ raw_payload, raw_signature };
     const auto result = message::alert::factory_from_data(
-        peer_minimum_version, raw);
+        message::version::level::minimum, raw);
 
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(raw.size(), result.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(raw.size(), result.serialized_size(message::version::level::minimum));
     BOOST_REQUIRE(result == expected);
 
-    const auto data = expected.to_data(peer_minimum_version);
+    const auto data = expected.to_data(message::version::level::minimum);
 
     BOOST_REQUIRE_EQUAL(raw.size(), data.size());
-    BOOST_REQUIRE_EQUAL(data.size(), expected.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(data.size(), expected.serialized_size(message::version::level::minimum));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
@@ -109,14 +109,14 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
         { 0x04, 0xff, 0xab, 0xcd, 0xee }
     };
 
-    const auto data = expected.to_data(peer_minimum_version);
+    const auto data = expected.to_data(message::version::level::minimum);
     const auto result = message::alert::factory_from_data(
-        peer_minimum_version, data);
+        message::version::level::minimum, data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(peer_minimum_version));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(peer_minimum_version), result.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(message::version::level::minimum));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum), result.serialized_size(message::version::level::minimum));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
@@ -127,14 +127,14 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
         { 0x04, 0xff, 0xab, 0xcd, 0xee }
     };
 
-    const auto data = expected.to_data(peer_minimum_version);
+    const auto data = expected.to_data(message::version::level::minimum);
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
-    const auto result = message::alert::factory_from_data(peer_minimum_version, istream);
+    const auto result = message::alert::factory_from_data(message::version::level::minimum, istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(peer_minimum_version));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(peer_minimum_version), result.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(message::version::level::minimum));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum), result.serialized_size(message::version::level::minimum));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
@@ -145,16 +145,16 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
         { 0x04, 0xff, 0xab, 0xcd, 0xee }
     };
 
-    const auto data = expected.to_data(peer_minimum_version);
+    const auto data = expected.to_data(message::version::level::minimum);
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     istream_reader source(istream);
     const auto result = message::alert::factory_from_data(
-        peer_minimum_version, source);
+        message::version::level::minimum, source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(peer_minimum_version));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(peer_minimum_version), result.serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(message::version::level::minimum));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum), result.serialized_size(message::version::level::minimum));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

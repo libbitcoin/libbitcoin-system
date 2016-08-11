@@ -80,6 +80,7 @@ bool input::from_data(std::istream& stream)
 bool input::from_data(reader& source)
 {
     reset();
+
     auto result = previous_output.from_data(source);
 
     if (result)

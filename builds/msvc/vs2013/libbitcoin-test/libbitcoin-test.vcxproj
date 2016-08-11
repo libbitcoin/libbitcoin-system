@@ -115,6 +115,7 @@
     <ClCompile Include="..\..\..\..\test\message\filter_load.cpp" />
     <ClCompile Include="..\..\..\..\test\message\get_block_transactions.cpp" />
     <ClCompile Include="..\..\..\..\test\message\get_headers.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\headers.cpp" />
     <ClCompile Include="..\..\..\..\test\message\memory_pool.cpp" />
     <ClCompile Include="..\..\..\..\test\message\merkle_block.cpp" />
     <ClCompile Include="..\..\..\..\test\message\pong.cpp" />
@@ -129,7 +130,6 @@
     <ClCompile Include="..\..\..\..\test\message\get_data.cpp" />
     <ClCompile Include="..\..\..\..\test\message\heading.cpp" />
     <ClCompile Include="..\..\..\..\test\message\inventory.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\inventory_type_id.cpp" />
     <ClCompile Include="..\..\..\..\test\message\inventory_vector.cpp" />
     <ClCompile Include="..\..\..\..\test\message\network_address.cpp" />
     <ClCompile Include="..\..\..\..\test\message\ping.cpp" />

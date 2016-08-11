@@ -44,30 +44,30 @@ class BC_API network_address
 public:
     typedef std::vector<network_address> list;
 
-    static network_address factory_from_data(const uint32_t version,
+    static network_address factory_from_data(uint32_t version,
         const data_chunk& data, bool with_timestamp /*= true*/);
-    static network_address factory_from_data(const uint32_t version,
+    static network_address factory_from_data(uint32_t version,
         std::istream& stream, bool with_timestamp /*= true*/);
-    static network_address factory_from_data(const uint32_t version,
+    static network_address factory_from_data(uint32_t version,
         reader& source, bool with_timestamp /*=true*/);
-    static uint64_t satoshi_fixed_size(const uint32_t version,
+    static uint64_t satoshi_fixed_size(uint32_t version,
         bool with_timestamp /*= false*/);
 
-    bool from_data(const uint32_t version, const data_chunk& data,
+    bool from_data(uint32_t version, const data_chunk& data,
         bool with_timestamp /*= true*/);
-    bool from_data(const uint32_t version, std::istream& stream,
+    bool from_data(uint32_t version, std::istream& stream,
         bool with_timestamp /*= true*/);
-    bool from_data(const uint32_t version, reader& source,
+    bool from_data(uint32_t version, reader& source,
         bool with_timestamp /*= true*/);
-    data_chunk to_data(const uint32_t version,
+    data_chunk to_data(uint32_t version,
         bool with_timestamp /*= true*/) const;
-    void to_data(const uint32_t version, std::ostream& stream,
+    void to_data(uint32_t version, std::ostream& stream,
         bool with_timestamp /*= true*/) const;
-    void to_data(const uint32_t version, writer& sink,
+    void to_data(uint32_t version, writer& sink,
         bool with_timestamp /*= true*/) const;
     bool is_valid() const;
     void reset();
-    uint64_t serialized_size(const uint32_t version,
+    uint64_t serialized_size(uint32_t version,
         bool with_timestamp /*= false*/) const;
 
     // Starting version 31402, addresses are prefixed with a timestamp.

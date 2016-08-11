@@ -23,7 +23,7 @@
 #include <cstddef>
 #include <string>
 #include <vector>
-#include <boost/functional/hash.hpp>
+#include <boost/functional/hash_fwd.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -158,61 +158,72 @@ BC_API short_hash bitcoin_short_hash(data_slice data);
 BC_API data_chunk scrypt(data_slice data, data_slice salt, uint64_t N,
     uint32_t p, uint32_t r, size_t length);
 
-/// Make hashes compatible with std and boost map variants.
-template <typename HashType>
-struct BC_API hash_wrapper
+} // namespace libbitcoin
+
+// Extend std namespace with our hash wrappers.
+
+namespace std
 {
-    size_t operator()(const HashType& hash) const
+
+template <>
+struct hash<bc::short_hash>
+{
+    size_t operator()(const bc::short_hash& hash) const
     {
         return boost::hash_range(hash.begin(), hash.end());
     }
 };
 
-} // namespace libbitcoin
-
-/// Extend std namespace with our hash wrappers
-namespace std
+template <>
+struct hash<bc::hash_digest>
 {
-    template <>
-    struct BC_API hash<bc::short_hash>
-      : public bc::hash_wrapper<bc::short_hash>
+    size_t operator()(const bc::hash_digest& hash) const
     {
-    };
+        return boost::hash_range(hash.begin(), hash.end());
+    }
+};
 
-    template <>
-    struct BC_API hash<bc::hash_digest>
-      : public bc::hash_wrapper<bc::hash_digest>
+template <>
+struct hash<bc::long_hash>
+{
+    size_t operator()(const bc::long_hash& hash) const
     {
-    };
-
-    template <>
-    struct BC_API hash<bc::long_hash>
-      : public bc::hash_wrapper<bc::long_hash>
-    {
-    };
+        return boost::hash_range(hash.begin(), hash.end());
+    }
+};
 
 } // namespace std
 
-/// Extend boost namespace with our hash wrappers
+// Extend boost namespace with our hash wrappers.
+
 namespace boost
 {
-    template <>
-    struct BC_API hash<bc::short_hash>
-      : public bc::hash_wrapper<bc::short_hash>
+template <>
+struct hash<bc::short_hash>
+{
+    size_t operator()(const bc::short_hash& hash) const
     {
-    };
+        return boost::hash_range(hash.begin(), hash.end());
+    }
+};
 
-    template <>
-    struct BC_API hash<bc::hash_digest>
-      : public bc::hash_wrapper<bc::hash_digest>
+template <>
+struct hash<bc::hash_digest>
+{
+    size_t operator()(const bc::hash_digest& hash) const
     {
-    };
+        return boost::hash_range(hash.begin(), hash.end());
+    }
+};
 
-    template <>
-    struct BC_API hash<bc::long_hash>
-      : public bc::hash_wrapper<bc::long_hash>
+template <>
+struct hash<bc::long_hash>
+{
+    size_t operator()(const bc::long_hash& hash) const
     {
-    };
+        return boost::hash_range(hash.begin(), hash.end());
+    }
+};
 
 } // namespace boost
 

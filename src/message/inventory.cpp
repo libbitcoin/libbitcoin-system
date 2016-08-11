@@ -22,9 +22,10 @@
 #include <algorithm>
 #include <initializer_list>
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/message/inventory_type_id.hpp>
+#include <bitcoin/bitcoin/message/inventory.hpp>
+#include <bitcoin/bitcoin/message/inventory_vector.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -33,11 +34,11 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::inventory::command = "inv";
-const uint32_t message::inventory::version_minimum = peer_minimum_version;
-const uint32_t message::inventory::version_maximum = protocol_version;
+const std::string inventory::command = "inv";
+const uint32_t inventory::version_minimum = version::level::minimum;
+const uint32_t inventory::version_maximum = version::level::maximum;
 
-inventory inventory::factory_from_data(const uint32_t version,
+inventory inventory::factory_from_data(uint32_t version,
     const data_chunk& data)
 {
     inventory instance;
@@ -45,7 +46,7 @@ inventory inventory::factory_from_data(const uint32_t version,
     return instance;
 }
 
-inventory inventory::factory_from_data(const uint32_t version,
+inventory inventory::factory_from_data(uint32_t version,
     std::istream& stream)
 {
     inventory instance;
@@ -53,7 +54,7 @@ inventory inventory::factory_from_data(const uint32_t version,
     return instance;
 }
 
-inventory inventory::factory_from_data(const uint32_t version,
+inventory inventory::factory_from_data(uint32_t version,
     reader& source)
 {
     inventory instance;
@@ -70,11 +71,11 @@ inventory::inventory(const inventory_vector::list& values)
     inventories.insert(inventories.end(), values.begin(), values.end());
 }
 
-inventory::inventory(const hash_list& hashes, inventory_type_id type_id)
+inventory::inventory(const hash_list& hashes, type_id type)
 {
-    const auto map = [type_id](const hash_digest& hash)
+    const auto map = [type](const hash_digest& hash)
     {
-        return inventory_vector{ type_id, hash };
+        return inventory_vector{ type, hash };
     };
 
     inventories.resize(hashes.size());
@@ -94,30 +95,38 @@ bool inventory::is_valid() const
 void inventory::reset()
 {
     inventories.clear();
+    inventories.shrink_to_fit();
 }
 
-bool inventory::from_data(const uint32_t version, const data_chunk& data)
+bool inventory::from_data(uint32_t version, const data_chunk& data)
 {
     data_source istream(data);
     return from_data(version, istream);
 }
 
-bool inventory::from_data(const uint32_t version, std::istream& stream)
+bool inventory::from_data(uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(version, source);
 }
 
-bool inventory::from_data(const uint32_t version, reader& source)
+bool inventory::from_data(uint32_t version, reader& source)
 {
     reset();
     const auto count = source.read_variable_uint_little_endian();
     auto result = static_cast<bool>(source);
 
-    for (uint64_t i = 0; (i < count) && result; ++i)
+    if (result)
     {
-        inventories.emplace_back();
-        result = inventories.back().from_data(version, source);
+        inventories.resize(count);
+
+        for (auto& inventory: inventories)
+        {
+            result = inventory.from_data(version, source);
+
+            if (!result)
+                break;
+        }
     }
 
     if (!result)
@@ -126,7 +135,7 @@ bool inventory::from_data(const uint32_t version, reader& source)
     return result;
 }
 
-data_chunk inventory::to_data(const uint32_t version) const
+data_chunk inventory::to_data(uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
@@ -136,44 +145,57 @@ data_chunk inventory::to_data(const uint32_t version) const
     return data;
 }
 
-void inventory::to_data(const uint32_t version, std::ostream& stream) const
+void inventory::to_data(uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
     to_data(version, sink);
 }
 
-void inventory::to_data(const uint32_t version, writer& sink) const
+void inventory::to_data(uint32_t version, writer& sink) const
 {
     sink.write_variable_uint_little_endian(inventories.size());
-    for (const auto& element: inventories)
-        element.to_data(version, sink);
+
+    for (const auto& inventory: inventories)
+        inventory.to_data(version, sink);
 }
 
-void inventory::to_hashes(hash_list& out, inventory_type_id type_id) const
+void inventory::to_hashes(hash_list& out, type_id type) const
 {
     out.reserve(inventories.size());
 
     for (const auto& inventory: inventories)
-        if (inventory.type == type_id)
+        if (inventory.type == type)
             out.push_back(inventory.hash);
 
     out.shrink_to_fit();
 }
 
-uint64_t inventory::serialized_size(const uint32_t version) const
+void inventory::reduce(inventory_vector::list& out, type_id type) const
+{
+    const auto is_type = [type](const inventory_vector& element)
+    {
+        return element.type == type;
+    };
+
+    out.reserve(inventories.size());
+    std::copy_if(inventories.begin(), inventories.end(), out.begin(), is_type);
+    out.shrink_to_fit();
+}
+
+uint64_t inventory::serialized_size(uint32_t version) const
 {
     return variable_uint_size(inventories.size()) + inventories.size() *
         inventory_vector::satoshi_fixed_size(version);
 }
 
-size_t inventory::count(inventory_type_id type_id) const
+size_t inventory::count(type_id type) const
 {
-    const auto is_of_type = [type_id](const inventory_vector& element)
+    const auto is_type = [type](const inventory_vector& element)
     {
-        return element.type == type_id;
+        return element.type == type;
     };
 
-    return count_if(inventories.begin(), inventories.end(), is_of_type);
+    return count_if(inventories.begin(), inventories.end(), is_type);
 }
 
 bool operator==(const inventory& left, const inventory& right)

@@ -20,7 +20,7 @@
 #include <bitcoin/bitcoin/message/merkle_block.hpp>
 
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -30,11 +30,11 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::merkle_block::command = "merkleblock";
-const uint32_t message::merkle_block::version_minimum = bip37_minimum_version;
-const uint32_t message::merkle_block::version_maximum = protocol_version;
+const std::string merkle_block::command = "merkleblock";
+const uint32_t merkle_block::version_minimum = version::level::bip37;
+const uint32_t merkle_block::version_maximum = version::level::maximum;
 
-merkle_block merkle_block::factory_from_data(const uint32_t version,
+merkle_block merkle_block::factory_from_data(uint32_t version,
     const data_chunk& data)
 {
     merkle_block instance;
@@ -42,7 +42,7 @@ merkle_block merkle_block::factory_from_data(const uint32_t version,
     return instance;
 }
 
-merkle_block merkle_block::factory_from_data(const uint32_t version,
+merkle_block merkle_block::factory_from_data(uint32_t version,
     std::istream& stream)
 {
     merkle_block instance;
@@ -50,7 +50,7 @@ merkle_block merkle_block::factory_from_data(const uint32_t version,
     return instance;
 }
 
-merkle_block merkle_block::factory_from_data(const uint32_t version,
+merkle_block merkle_block::factory_from_data(uint32_t version,
     reader& source)
 {
     merkle_block instance;
@@ -67,22 +67,24 @@ void merkle_block::reset()
 {
     header.reset();
     hashes.clear();
+    hashes.shrink_to_fit();
     flags.clear();
+    flags.shrink_to_fit();
 }
 
-bool merkle_block::from_data(const uint32_t version, const data_chunk& data)
+bool merkle_block::from_data(uint32_t version, const data_chunk& data)
 {
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     return from_data(version, istream);
 }
 
-bool merkle_block::from_data(const uint32_t version, std::istream& stream)
+bool merkle_block::from_data(uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(version, source);
 }
 
-bool merkle_block::from_data(const uint32_t version, reader& source)
+bool merkle_block::from_data(uint32_t version, reader& source)
 {
     reset();
 
@@ -98,6 +100,9 @@ bool merkle_block::from_data(const uint32_t version, reader& source)
         result = source;
     }
 
+    if (result)
+        hashes.reserve(hash_count);
+
     for (uint64_t i = 0; (i < hash_count) && result; ++i)
     {
         hashes.push_back(source.read_hash());
@@ -106,7 +111,7 @@ bool merkle_block::from_data(const uint32_t version, reader& source)
 
     if (result)
     {
-        auto size = source.read_variable_uint_little_endian();
+        const auto size = source.read_variable_uint_little_endian();
         BITCOIN_ASSERT(size <= bc::max_size_t);
         const auto flag_count = static_cast<size_t>(size);
         flags = source.read_data(flag_count);
@@ -119,7 +124,7 @@ bool merkle_block::from_data(const uint32_t version, reader& source)
     return result;
 }
 
-data_chunk merkle_block::to_data(const uint32_t version) const
+data_chunk merkle_block::to_data(uint32_t version) const
 {
     data_chunk data;
     boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
@@ -129,13 +134,13 @@ data_chunk merkle_block::to_data(const uint32_t version) const
     return data;
 }
 
-void merkle_block::to_data(const uint32_t version, std::ostream& stream) const
+void merkle_block::to_data(uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
     to_data(version, sink);
 }
 
-void merkle_block::to_data(const uint32_t version, writer& sink) const
+void merkle_block::to_data(uint32_t version, writer& sink) const
 {
     header.to_data(sink, true);
 
@@ -148,7 +153,7 @@ void merkle_block::to_data(const uint32_t version, writer& sink) const
     sink.write_data(flags);
 }
 
-uint64_t merkle_block::serialized_size(const uint32_t version) const
+uint64_t merkle_block::serialized_size(uint32_t version) const
 {
     return header.serialized_size(true) +
         variable_uint_size(hashes.size()) + (hash_size * hashes.size()) +

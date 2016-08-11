@@ -57,7 +57,7 @@ public:
      * @param[in]  height  The height of checkpoint.
      * @param[in]  checks  The list of checkpoints.
      */
-    static bool validate(const hash_digest& hash, const size_t height,
+    static bool validate(const hash_digest& hash, size_t height,
         const list& checks);
     
     /**

@@ -37,8 +37,8 @@ public:
     synchronizer(Handler handler, size_t clearance_count,
         const std::string& name, bool suppress_errors)
       : handler_(handler),
-        clearance_count_(clearance_count),
         name_(name),
+        clearance_count_(clearance_count),
         counter_(std::make_shared<size_t>(0)),
         mutex_(std::make_shared<upgrade_mutex>()),
         suppress_errors_(suppress_errors)
@@ -83,8 +83,8 @@ public:
 
 private:
     Handler handler_;
-    size_t clearance_count_;
     const std::string name_;
+    const size_t clearance_count_;
     const bool suppress_errors_;
 
     // We use pointer to reference the same value/mutex across instance copies.

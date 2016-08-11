@@ -39,26 +39,56 @@ class BC_API version
 public:
     typedef std::shared_ptr<version> ptr;
 
-    static version factory_from_data(const uint32_t version, const data_chunk& data);
-    static version factory_from_data(const uint32_t version, std::istream& stream);
-    static version factory_from_data(const uint32_t version, reader& source);
+    enum level: uint32_t
+    {
+        // This is currently unspecified.
+        bip152 = max_uint32,
 
-    bool from_data(const uint32_t version, const data_chunk& data);
-    bool from_data(const uint32_t version, std::istream& stream);
-    bool from_data(const uint32_t version, reader& source);
-    data_chunk to_data(const uint32_t version) const;
-    void to_data(const uint32_t version, std::ostream& stream) const;
-    void to_data(const uint32_t version, writer& sink) const;
+        // send_headers
+        bip130 = 70012,
+
+        // reject
+        bip61 = 70002,
+
+        // filters, merkle_block, not_found, version.relay
+        bip37 = 70001,
+
+        // memory_pool
+        bip35 = 60002,
+
+        // ping.nonce, pong
+        bip31 = 60001,
+
+        // This preceded the BIP system.
+        headers = 31800,
+
+        // We require at least this of peers.
+        minimum = 31402,
+
+        // We support at most this internally (bound to settings default).
+        maximum = bip130
+    };
+
+    static version factory_from_data(uint32_t version, const data_chunk& data);
+    static version factory_from_data(uint32_t version, std::istream& stream);
+    static version factory_from_data(uint32_t version, reader& source);
+
+    bool from_data(uint32_t version, const data_chunk& data);
+    bool from_data(uint32_t version, std::istream& stream);
+    bool from_data(uint32_t version, reader& source);
+    data_chunk to_data(uint32_t version) const;
+    void to_data(uint32_t version, std::ostream& stream) const;
+    void to_data(uint32_t version, writer& sink) const;
     bool is_valid() const;
     void reset();
-    uint64_t serialized_size(const uint32_t version) const;
+    uint64_t serialized_size(uint32_t version) const;
 
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
     uint32_t value;
-    uint64_t services_sender;
+    uint64_t services;
     uint64_t timestamp;
     network_address address_recevier;
     network_address address_sender;

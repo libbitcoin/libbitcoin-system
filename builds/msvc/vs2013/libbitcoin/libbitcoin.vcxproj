@@ -74,6 +74,7 @@
     <ClCompile Include="..\..\..\..\src\chain\block.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\header.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\point.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\point_iterator.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\script\conditional_stack.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\script\evaluation_context.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\script\opcode.cpp" />
@@ -136,9 +137,9 @@
     <ClCompile Include="..\..\..\..\src\message\get_block_transactions.cpp" />
     <ClCompile Include="..\..\..\..\src\message\get_headers.cpp" />
     <ClCompile Include="..\..\..\..\src\message\headers.cpp" />
+    <ClCompile Include="..\..\..\..\src\message\header_message.cpp" />
     <ClCompile Include="..\..\..\..\src\message\memory_pool.cpp" />
     <ClCompile Include="..\..\..\..\src\message\merkle_block.cpp" />
-    <ClCompile Include="..\..\..\..\src\message\nonce.cpp" />
     <ClCompile Include="..\..\..\..\src\message\pong.cpp" />
     <ClCompile Include="..\..\..\..\src\message\prefilled_transaction.cpp" />
     <ClCompile Include="..\..\..\..\src\message\reject.cpp" />
@@ -151,7 +152,6 @@
     <ClCompile Include="..\..\..\..\src\message\get_data.cpp" />
     <ClCompile Include="..\..\..\..\src\message\heading.cpp" />
     <ClCompile Include="..\..\..\..\src\message\inventory.cpp" />
-    <ClCompile Include="..\..\..\..\src\message\inventory_type_id.cpp" />
     <ClCompile Include="..\..\..\..\src\message\inventory_vector.cpp" />
     <ClCompile Include="..\..\..\..\src\message\network_address.cpp" />
     <ClCompile Include="..\..\..\..\src\message\ping.cpp" />
@@ -208,6 +208,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\header.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\history.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point_iterator.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\opcode.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\operation.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\script.hpp" />
@@ -262,9 +263,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\get_block_transactions.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\get_headers.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\headers.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\header_message.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\memory_pool.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\merkle_block.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\nonce.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\ping.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\pong.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\prefilled_transaction.hpp" />
@@ -278,7 +279,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\get_data.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\heading.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\inventory.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\inventory_type_id.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\inventory_vector.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\network_address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\not_found.hpp" />

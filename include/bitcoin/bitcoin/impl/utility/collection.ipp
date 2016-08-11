@@ -46,6 +46,7 @@ int find_pair_position(const std::vector<Pair>& list, const Key& key)
     };
 
     auto it = std::find_if(list.begin(), list.end(), predicate);
+
     if (it == list.end())
         return -1;
 
@@ -56,21 +57,12 @@ template <typename Element, typename Container>
 int find_position(const Container& list, const Element& value)
 {
     const auto it = std::find(std::begin(list), std::end(list), value);
+
     if (it == std::end(list))
         return -1;
 
     return static_cast<int>(std::distance(list.begin(), it));
 }
-
-////template <typename Consequent, typename Alternate>
-////Consequent if_else(bool antecedent, const Consequent consequent,
-////    const Alternate alternative)
-////{
-////    if (antecedent)
-////        return consequent;
-////    else
-////        return alternative;
-////}
 
 template <typename Type, typename Predicate>
 typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,
@@ -105,9 +97,11 @@ std::ostream& operator<<(std::ostream& output, const std::vector<Type>& list)
 {
     size_t current = 0;
     const auto end = list.size();
+
     for (const auto& element: list)
     {
         output << element;
+
         if (++current < end)
             output << std::endl;
     }

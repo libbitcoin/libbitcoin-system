@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_SUITE(memory_pool_tests)
 BOOST_AUTO_TEST_CASE(from_data_insufficient_version_failure)
 {
     const message::memory_pool expected;
-    const data_chunk data = expected.to_data(protocol_version);
+    const data_chunk data = expected.to_data(message::version::level::maximum);
     message::memory_pool instance{};
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(
@@ -39,40 +39,40 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_version_failure)
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
     const message::memory_pool expected{};
-    const auto data = expected.to_data(protocol_version);
+    const auto data = expected.to_data(message::version::level::maximum);
     const auto result = message::memory_pool::factory_from_data(
-        protocol_version, data);
+        message::version::level::maximum, data);
 
     BOOST_REQUIRE_EQUAL(0u, data.size());
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(protocol_version));
+    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(message::version::level::maximum));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
     const message::memory_pool expected{};
-    const auto data = expected.to_data(protocol_version);
+    const auto data = expected.to_data(message::version::level::maximum);
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     const auto result = message::memory_pool::factory_from_data(
-        protocol_version, istream);
+        message::version::level::maximum, istream);
 
     BOOST_REQUIRE_EQUAL(0u, data.size());
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(protocol_version));
+    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(message::version::level::maximum));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
     const message::memory_pool expected{};
-    const auto data = expected.to_data(protocol_version);
+    const auto data = expected.to_data(message::version::level::maximum);
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     istream_reader source(istream);
     const auto result = message::memory_pool::factory_from_data(
-        protocol_version, source);
+        message::version::level::maximum, source);
 
     BOOST_REQUIRE_EQUAL(0u, data.size());
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(protocol_version));
+    BOOST_REQUIRE_EQUAL(0u, result.serialized_size(message::version::level::maximum));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

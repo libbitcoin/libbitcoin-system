@@ -22,12 +22,13 @@
 #include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
+using namespace bc::message;
 
 BOOST_AUTO_TEST_SUITE(heading_tests)
 
 BOOST_AUTO_TEST_CASE(to_data_checksum_variations)
 {
-    message::heading instance
+    heading instance
     {
         32414u,
         "foo",
@@ -35,29 +36,28 @@ BOOST_AUTO_TEST_CASE(to_data_checksum_variations)
         0u
     };
 
-    auto zero_checksum = instance.to_data(peer_minimum_version);
-
-    BOOST_REQUIRE_EQUAL(zero_checksum.size(),
-        message::heading::serialized_size(peer_minimum_version));
+    const auto zero_checksum = instance.to_data();
+    BOOST_REQUIRE_EQUAL(zero_checksum.size(), heading::serialized_size());
 
     instance.checksum = 123u;
-    const auto nonzero_checksum = instance.to_data(peer_minimum_version);
-
-    BOOST_REQUIRE_EQUAL(nonzero_checksum.size(),
-        message::heading::serialized_size(peer_minimum_version));
+    const auto nonzero_checksum = instance.to_data();
+    BOOST_REQUIRE_EQUAL(nonzero_checksum.size(), heading::serialized_size());
 }
 
 BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 {
-    data_chunk raw{ 0xab, 0xcd };
-    message::heading instance{};
+    static const data_chunk raw
+    {
+        0xab, 0xcd
+    };
 
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(peer_minimum_version, raw));
+    heading instance;
+    BOOST_REQUIRE(!instance.from_data(raw));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
-    const message::heading expected
+    static const heading expected
     {
         32414u,
         "foo",
@@ -65,19 +65,16 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
         0u
     };
 
-    const auto data = expected.to_data(peer_minimum_version);
-    const auto result = message::heading::factory_from_data(
-        peer_minimum_version, data);
-
+    const auto data = expected.to_data();
+    const auto result = heading::factory_from_data(data);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        message::heading::serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(data.size(), heading::serialized_size());
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
-    const message::heading expected
+    static const heading expected
     {
         29145u,
         "bar",
@@ -85,20 +82,17 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
         0u
     };
 
-    const auto data = expected.to_data(peer_minimum_version);
+    const auto data = expected.to_data();
     data_source istream(data);
-    const auto result = message::heading::factory_from_data(
-        peer_minimum_version, istream);
-
+    const auto result = heading::factory_from_data(istream);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        message::heading::serialized_size(peer_minimum_version));
+    BOOST_REQUIRE_EQUAL(data.size(), heading::serialized_size());
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
-    const  message::heading expected
+    static const heading expected
     {
         1u,
         "bazbazbazbaz",
@@ -106,14 +100,11 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
         0u
     };
 
-    const auto data = expected.to_data(peer_minimum_version);
+    const auto data = expected.to_data();
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = message::heading::factory_from_data(
-        peer_minimum_version, source);
-
-    BOOST_REQUIRE_EQUAL(data.size(),
-        message::heading::serialized_size(peer_minimum_version));
+    const auto result = heading::factory_from_data(source);
+    BOOST_REQUIRE_EQUAL(data.size(), heading::serialized_size());
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
 }

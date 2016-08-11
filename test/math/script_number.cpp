@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_SUITE(script_number_tests)
         encode_base16((script_num).data())); \
     BOOST_CHECK_EQUAL((buffer_num).number, (script_num).int32())
 
-static bool is(const uint8_t byte)
+static bool is(uint8_t byte)
 {
     return byte != 0;
 }
@@ -154,8 +154,8 @@ static void CheckCompare(const int64_t num1, const int64_t num2,
 // Test
 // ----------------------------------------------------------------------------
 
-static void RunOperators(const int64_t num1, const int64_t num2,
-    const size_t value, const size_t offset, const size_t test)
+static void RunOperators(const int64_t num1, int64_t num2, size_t value,
+    size_t offset, size_t test)
 {
     //// Diagnostics
     //std::stringstream message;

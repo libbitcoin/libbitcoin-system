@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/chain/header.hpp>
 
+#include <utility>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -58,6 +59,74 @@ uint64_t header::satoshi_fixed_size_without_transaction_count()
     return 80;
 }
 
+header::header()
+{
+}
+
+header::header(const header& other)
+  : header(other.version, other.previous_block_hash, other.merkle,
+        other.timestamp, other.bits, other.nonce, other.transaction_count)
+{
+}
+
+header::header(uint32_t version, const hash_digest& previous_block_hash,
+    const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
+    uint32_t nonce, uint64_t transaction_count)
+  : version(version),
+    previous_block_hash(previous_block_hash),
+    merkle(merkle),
+    timestamp(timestamp),
+    bits(bits),
+    nonce(nonce),
+    transaction_count(transaction_count)
+{
+}
+
+header::header(header&& other)
+  : header(other.version, std::forward<hash_digest>(other.previous_block_hash),
+        std::forward<hash_digest>(other.merkle), other.timestamp, other.bits,
+        other.nonce, other.transaction_count)
+{
+}
+
+header::header(uint32_t version, hash_digest&& previous_block_hash,
+    hash_digest&& merkle, uint32_t timestamp, uint32_t bits, uint32_t nonce,
+    uint64_t transaction_count)
+  : version(version),
+    previous_block_hash(std::forward<hash_digest>(previous_block_hash)),
+    merkle(std::forward<hash_digest>(merkle)),
+    timestamp(timestamp),
+    bits(bits),
+    nonce(nonce),
+    transaction_count(transaction_count)
+{
+}
+
+header& header::operator=(header&& other)
+{
+    version = other.version;
+    previous_block_hash = std::move(other.previous_block_hash);
+    merkle = std::move(other.merkle);
+    timestamp = other.timestamp;
+    bits = other.bits;
+    nonce = other.nonce;
+    transaction_count = other.transaction_count;
+    return *this;
+}
+
+// TODO: eliminate header copies and then delete this.
+header& header::operator=(const header& other)
+{
+    version = other.version;
+    previous_block_hash = other.previous_block_hash;
+    merkle = other.merkle;
+    timestamp = other.timestamp;
+    bits = other.bits;
+    nonce = other.nonce;
+    transaction_count = other.transaction_count;
+    return *this;
+}
+
 bool header::is_valid() const
 {
     return (version != 0) ||
@@ -93,8 +162,8 @@ bool header::from_data(std::istream& stream, bool with_transaction_count)
 
 bool header::from_data(reader& source, bool with_transaction_count)
 {
-    auto result = true;
     reset();
+
     version = source.read_4_bytes_little_endian();
     previous_block_hash = source.read_hash();
     merkle = source.read_hash();
@@ -105,7 +174,8 @@ bool header::from_data(reader& source, bool with_transaction_count)
     if (with_transaction_count)
         transaction_count = source.read_variable_uint_little_endian();
 
-    result = source;
+    const auto result = static_cast<bool>(source);
+
     if (!result)
         reset();
 
@@ -144,7 +214,8 @@ void header::to_data(writer& sink, bool with_transaction_count) const
 
 uint64_t header::serialized_size(bool with_transaction_count) const
 {
-    uint64_t size = satoshi_fixed_size_without_transaction_count();
+    auto size = satoshi_fixed_size_without_transaction_count();
+
     if (with_transaction_count)
         size += variable_uint_size(transaction_count);
 

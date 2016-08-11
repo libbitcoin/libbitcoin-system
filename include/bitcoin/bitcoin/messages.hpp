@@ -38,7 +38,6 @@
 #include <bitcoin/bitcoin/message/headers.hpp>
 #include <bitcoin/bitcoin/message/heading.hpp>
 #include <bitcoin/bitcoin/message/inventory.hpp>
-#include <bitcoin/bitcoin/message/inventory_type_id.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/message/memory_pool.hpp>
 #include <bitcoin/bitcoin/message/merkle_block.hpp>
@@ -105,11 +104,11 @@ namespace message {
 * Serialize a message object to the Bitcoin wire protocol encoding.
 */
 template <typename Message>
-data_chunk serialize(const uint32_t version, const Message& packet,
+data_chunk serialize(uint32_t version, const Message& packet,
     uint32_t magic)
 {
     // Serialize the payload (required for header size).
-    auto payload = packet.to_data(version);
+    const auto payload = packet.to_data(version);
 
     // Construct the payload header.
     heading head;
@@ -119,7 +118,7 @@ data_chunk serialize(const uint32_t version, const Message& packet,
     head.checksum = bitcoin_checksum(payload);
 
     // Serialize header and copy the payload into a single message buffer.
-    auto message = head.to_data(version);
+    auto message = head.to_data();
     extend_data(message, payload);
     return message;
 }

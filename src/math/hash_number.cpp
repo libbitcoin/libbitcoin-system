@@ -24,7 +24,7 @@ namespace libbitcoin {
 hash_number::hash_number()
 {
 }
-hash_number::hash_number(const uint64_t value)
+hash_number::hash_number(uint64_t value)
   : hash_(value)
 {
 }

@@ -20,13 +20,16 @@
 #include <bitcoin/bitcoin/message/get_headers.hpp>
 
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 
 namespace libbitcoin {
 namespace message {
 
-const std::string message::get_headers::command = "getheaders";
+const std::string get_headers::command = "getheaders";
+const uint32_t get_headers::version_minimum = version::level::minimum;
+const uint32_t get_headers::version_maximum = version::level::maximum;
 
-get_headers get_headers::factory_from_data(const uint32_t version,
+get_headers get_headers::factory_from_data(uint32_t version,
     const data_chunk& data)
 {
     get_headers instance;
@@ -34,7 +37,7 @@ get_headers get_headers::factory_from_data(const uint32_t version,
     return instance;
 }
 
-get_headers get_headers::factory_from_data(const uint32_t version,
+get_headers get_headers::factory_from_data(uint32_t version,
     std::istream& stream)
 {
     get_headers instance;
@@ -42,7 +45,7 @@ get_headers get_headers::factory_from_data(const uint32_t version,
     return instance;
 }
 
-get_headers get_headers::factory_from_data(const uint32_t version,
+get_headers get_headers::factory_from_data(uint32_t version,
     reader& source)
 {
     get_headers instance;

@@ -20,7 +20,7 @@
 #include <bitcoin/bitcoin/message/pong.hpp>
 
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -29,67 +29,104 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::pong::command = "pong";
-const uint32_t message::pong::version_minimum = bip31_minimum_version;
-const uint32_t message::pong::version_maximum = protocol_version;
+const std::string pong::command = "pong";
+const uint32_t pong::version_minimum = version::level::minimum;
+const uint32_t pong::version_maximum = version::level::maximum;
 
-pong pong::factory_from_data(const uint32_t version, const data_chunk& data)
+pong pong::factory_from_data(uint32_t version, const data_chunk& data)
 {
     pong instance;
     instance.from_data(version, data);
     return instance;
 }
 
-pong pong::factory_from_data(const uint32_t version, std::istream& stream)
+pong pong::factory_from_data(uint32_t version, std::istream& stream)
 {
     pong instance;
     instance.from_data(version, stream);
     return instance;
 }
 
-pong pong::factory_from_data(const uint32_t version, reader& source)
+pong pong::factory_from_data(uint32_t version, reader& source)
 {
     pong instance;
     instance.from_data(version, source);
     return instance;
 }
 
-uint64_t pong::satoshi_fixed_size(const uint32_t version)
+uint64_t pong::satoshi_fixed_size(uint32_t version)
 {
-    return nonce_::satoshi_fixed_size(version);
+    return sizeof(nonce);
 }
 
-pong::pong()
-  : pong(0)
+bool pong::from_data(uint32_t version, const data_chunk& data)
 {
+    data_source istream(data);
+    return from_data(version, istream);
 }
 
-pong::pong(uint64_t nonce)
-  : nonce_(nonce)
+bool pong::from_data(uint32_t version, std::istream& stream)
 {
+    istream_reader source(stream);
+    return from_data(version, source);
 }
 
-bool pong::from_data(const uint32_t version, const data_chunk& data)
+bool pong::from_data(uint32_t version, reader& source)
 {
-    return nonce_::from_data(version, data);
-}
+    reset();
 
-bool pong::from_data(const uint32_t version, std::istream& stream)
-{
-    return nonce_::from_data(version, stream);
-}
+    nonce = source.read_8_bytes_little_endian();
 
-bool pong::from_data(const uint32_t version, reader& source)
-{
-    bool result = !(version < pong::version_minimum);
-
-    if (result)
-        result = nonce_::from_data(version, source);
-
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
+}
+
+data_chunk pong::to_data(uint32_t version) const
+{
+    data_chunk data;
+    data_sink ostream(data);
+    to_data(version, ostream);
+    ostream.flush();
+    BITCOIN_ASSERT(data.size() == serialized_size(version));
+    return data;
+}
+
+void pong::to_data(uint32_t version, std::ostream& stream) const
+{
+    ostream_writer sink(stream);
+    to_data(version, sink);
+}
+
+void pong::to_data(uint32_t version, writer& sink) const
+{
+    sink.write_8_bytes_little_endian(nonce);
+}
+
+bool pong::is_valid() const
+{
+    return (nonce != 0);
+}
+
+void pong::reset()
+{
+    nonce = 0;
+}
+
+uint64_t pong::serialized_size(uint32_t version) const
+{
+    return satoshi_fixed_size(version);
+}
+
+bool operator==(const pong& left, const pong& right)
+{
+    return (left.nonce == right.nonce);
+}
+
+bool operator!=(const pong& left, const pong& right)
+{
+    return !(left == right);
 }
 
 } // namspace message

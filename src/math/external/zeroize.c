@@ -23,7 +23,7 @@
 
 /* TODO: deal with determination of HAVE_SECUREZEROMEMORY and HAVE_MEMSET_S */
 /* These are performance optimizations, not required for security. */
-void zeroize(void* const buffer, const size_t length)
+void zeroize(void* const buffer, size_t length)
 {
 #ifdef HAVE_SECUREZEROMEMORY
     SecureZeroMemory(buffer, length);

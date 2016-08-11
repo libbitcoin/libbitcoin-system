@@ -43,6 +43,7 @@ src_libbitcoin_la_SOURCES = \
     src/chain/input.cpp \
     src/chain/output.cpp \
     src/chain/point.cpp \
+    src/chain/point_iterator.cpp \
     src/chain/transaction.cpp \
     src/chain/script/conditional_stack.cpp \
     src/chain/script/conditional_stack.hpp \
@@ -122,12 +123,10 @@ src_libbitcoin_la_SOURCES = \
     src/message/headers.cpp \
     src/message/heading.cpp \
     src/message/inventory.cpp \
-    src/message/inventory_type_id.cpp \
     src/message/inventory_vector.cpp \
     src/message/memory_pool.cpp \
     src/message/merkle_block.cpp \
     src/message/network_address.cpp \
-    src/message/nonce.cpp \
     src/message/not_found.cpp \
     src/message/ping.cpp \
     src/message/pong.cpp \
@@ -264,7 +263,6 @@ test_libbitcoin_test_SOURCES = \
     test/message/headers.cpp \
     test/message/heading.cpp \
     test/message/inventory.cpp \
-    test/message/inventory_type_id.cpp \
     test/message/inventory_vector.cpp \
     test/message/memory_pool.cpp \
     test/message/merkle_block.cpp \
@@ -335,6 +333,7 @@ include_bitcoin_bitcoin_chain_HEADERS = \
     include/bitcoin/bitcoin/chain/input.hpp \
     include/bitcoin/bitcoin/chain/output.hpp \
     include/bitcoin/bitcoin/chain/point.hpp \
+    include/bitcoin/bitcoin/chain/point_iterator.hpp \
     include/bitcoin/bitcoin/chain/spend.hpp \
     include/bitcoin/bitcoin/chain/stealth.hpp \
     include/bitcoin/bitcoin/chain/transaction.hpp
@@ -426,12 +425,10 @@ include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/headers.hpp \
     include/bitcoin/bitcoin/message/heading.hpp \
     include/bitcoin/bitcoin/message/inventory.hpp \
-    include/bitcoin/bitcoin/message/inventory_type_id.hpp \
     include/bitcoin/bitcoin/message/inventory_vector.hpp \
     include/bitcoin/bitcoin/message/memory_pool.hpp \
     include/bitcoin/bitcoin/message/merkle_block.hpp \
     include/bitcoin/bitcoin/message/network_address.hpp \
-    include/bitcoin/bitcoin/message/nonce.hpp \
     include/bitcoin/bitcoin/message/not_found.hpp \
     include/bitcoin/bitcoin/message/ping.hpp \
     include/bitcoin/bitcoin/message/pong.hpp \

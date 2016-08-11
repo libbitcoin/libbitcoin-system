@@ -305,9 +305,6 @@
     <ClCompile Include="..\..\..\..\src\message\inventory.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\inventory_type_id.cpp">
-      <Filter>src\message</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\inventory_vector.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
@@ -369,9 +366,6 @@
       <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\alert_payload.cpp">
-      <Filter>src\message</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\nonce.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\input.cpp">
@@ -541,6 +535,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\transaction_message.cpp">
       <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\message\header_message.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\point_iterator.cpp">
+      <Filter>src\chain</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -730,9 +730,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\inventory.hpp">
       <Filter>include\bitcoin\message</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\inventory_type_id.hpp">
-      <Filter>include\bitcoin\message</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\inventory_vector.hpp">
       <Filter>include\bitcoin\message</Filter>
     </ClInclude>
@@ -830,9 +827,6 @@
       <Filter>include\bitcoin\message</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\alert_payload.hpp">
-      <Filter>include\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\nonce.hpp">
       <Filter>include\bitcoin\message</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\input.hpp">
@@ -1050,6 +1044,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\transaction_message.hpp">
       <Filter>include\bitcoin\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\header_message.hpp">
+      <Filter>include\bitcoin\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point_iterator.hpp">
+      <Filter>include\bitcoin\chain</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

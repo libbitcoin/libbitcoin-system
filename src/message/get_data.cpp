@@ -20,17 +20,18 @@
 #include <bitcoin/bitcoin/message/get_data.hpp>
 
 #include <initializer_list>
-#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/message/inventory.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 
 namespace libbitcoin {
 namespace message {
 
-const std::string message::get_data::command = "getdata";
-const uint32_t message::get_data::version_minimum = peer_minimum_version;
-const uint32_t message::get_data::version_maximum = protocol_version;
+const std::string get_data::command = "getdata";
+const uint32_t get_data::version_minimum = version::level::minimum;
+const uint32_t get_data::version_maximum = version::level::maximum;
 
-get_data get_data::factory_from_data(const uint32_t version,
+get_data get_data::factory_from_data(uint32_t version,
     const data_chunk& data)
 {
     get_data instance;
@@ -38,7 +39,7 @@ get_data get_data::factory_from_data(const uint32_t version,
     return instance;
 }
 
-get_data get_data::factory_from_data(const uint32_t version,
+get_data get_data::factory_from_data(uint32_t version,
     std::istream& stream)
 {
     get_data instance;
@@ -46,7 +47,7 @@ get_data get_data::factory_from_data(const uint32_t version,
     return instance;
 }
 
-get_data get_data::factory_from_data(const uint32_t version,
+get_data get_data::factory_from_data(uint32_t version,
     reader& source)
 {
     get_data instance;
@@ -64,8 +65,8 @@ get_data::get_data(const inventory_vector::list& elements)
 {
 }
 
-get_data::get_data(const hash_list& hashes, inventory_type_id type_id)
-  : inventory(hashes, type_id)
+get_data::get_data(const hash_list& hashes, inventory::type_id type)
+  : inventory(hashes, type)
 {
 }
 
@@ -74,17 +75,17 @@ get_data::get_data(const std::initializer_list<inventory_vector>& elements)
 {
 }
 
-bool get_data::from_data(const uint32_t version, const data_chunk& data)
+bool get_data::from_data(uint32_t version, const data_chunk& data)
 {
     return inventory::from_data(version, data);
 }
 
-bool get_data::from_data(const uint32_t version, std::istream& stream)
+bool get_data::from_data(uint32_t version, std::istream& stream)
 {
     return inventory::from_data(version, stream);
 }
 
-bool get_data::from_data(const uint32_t version, reader& source)
+bool get_data::from_data(uint32_t version, reader& source)
 {
     bool result = !(version < get_data::version_minimum);
 

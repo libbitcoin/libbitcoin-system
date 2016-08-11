@@ -18,8 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/prefilled_transaction.hpp>
+
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -63,24 +64,25 @@ void prefilled_transaction::reset()
     transaction.reset();
 }
 
-bool prefilled_transaction::from_data(const uint32_t version,
+bool prefilled_transaction::from_data(uint32_t version,
     const data_chunk& data)
 {
     data_source istream(data);
     return from_data(version, istream);
 }
 
-bool prefilled_transaction::from_data(const uint32_t version,
+bool prefilled_transaction::from_data(uint32_t version,
     std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(version, source);
 }
 
-bool prefilled_transaction::from_data(const uint32_t version,
+bool prefilled_transaction::from_data(uint32_t version,
     reader& source)
 {
     reset();
+
     index = source.read_variable_uint_little_endian();
     auto result = static_cast<bool>(source);
 
@@ -93,7 +95,7 @@ bool prefilled_transaction::from_data(const uint32_t version,
     return result;
 }
 
-data_chunk prefilled_transaction::to_data(const uint32_t version) const
+data_chunk prefilled_transaction::to_data(uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
@@ -103,21 +105,21 @@ data_chunk prefilled_transaction::to_data(const uint32_t version) const
     return data;
 }
 
-void prefilled_transaction::to_data(const uint32_t version,
+void prefilled_transaction::to_data(uint32_t version,
     std::ostream& stream) const
 {
     ostream_writer sink(stream);
     to_data(version, sink);
 }
 
-void prefilled_transaction::to_data(const uint32_t version,
+void prefilled_transaction::to_data(uint32_t version,
     writer& sink) const
 {
     sink.write_variable_uint_little_endian(index);
     transaction.to_data(sink);
 }
 
-uint64_t prefilled_transaction::serialized_size(const uint32_t version) const
+uint64_t prefilled_transaction::serialized_size(uint32_t version) const
 {
     return variable_uint_size(index) + transaction.serialized_size();
 }

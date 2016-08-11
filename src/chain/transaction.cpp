@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 
+#include <numeric>
 #include <sstream>
 #include <utility>
 #include <boost/iostreams/stream.hpp>
@@ -68,7 +69,10 @@ transaction::transaction(const transaction& other)
 
 transaction::transaction(uint32_t version, uint32_t locktime,
     const input::list& inputs, const output::list& outputs)
-  : version(version), locktime(locktime), inputs(inputs), outputs(outputs)
+  : version(version),
+    locktime(locktime),
+    inputs(inputs),
+    outputs(outputs)
 {
 }
 
@@ -81,7 +85,8 @@ transaction::transaction(transaction&& other)
 
 transaction::transaction(uint32_t version, uint32_t locktime,
     input::list&& inputs, output::list&& outputs)
-  : version(version), locktime(locktime),
+  : version(version),
+    locktime(locktime),
     inputs(std::forward<input::list>(inputs)),
     outputs(std::forward<output::list>(outputs))
 {
@@ -96,7 +101,7 @@ transaction& transaction::operator=(transaction&& other)
     return *this;
 }
 
-// TODO: eliminate blockchain copy scenarios and then delete this.
+// TODO: eliminate blockchain transaction copies and then delete this.
 transaction& transaction::operator=(const transaction& other)
 {
     version = other.version;
@@ -117,7 +122,9 @@ void transaction::reset()
     version = 0;
     locktime = 0;
     inputs.clear();
+    inputs.shrink_to_fit();
     outputs.clear();
+    outputs.shrink_to_fit();
 }
 
 bool transaction::from_data(const data_chunk& data)
@@ -209,10 +216,12 @@ void transaction::to_data(writer& sink) const
 {
     sink.write_4_bytes_little_endian(version);
     sink.write_variable_uint_little_endian(inputs.size());
+
     for (const auto& input: inputs)
         input.to_data(sink);
 
     sink.write_variable_uint_little_endian(outputs.size());
+
     for (const auto& output: outputs)
         output.to_data(sink);
 
@@ -275,6 +284,7 @@ bool transaction::is_final(uint64_t block_height, uint32_t block_time) const
         return true;
 
     auto max_locktime = block_time;
+
     if (locktime < locktime_threshold)
         max_locktime = static_cast<uint32_t>(block_height);
 
@@ -302,11 +312,12 @@ bool transaction::is_locktime_conflict() const
 
 uint64_t transaction::total_output_value() const
 {
-    uint64_t total = 0;
-    for (const auto& output: outputs)
-        total += output.value;
+    const auto value = [](uint64_t total, const output& output)
+    {
+        return total + output.value;
+    };
 
-    return total;
+    return std::accumulate(outputs.begin(), outputs.end(), uint64_t(0), value);
 }
 
 } // namspace chain

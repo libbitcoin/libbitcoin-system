@@ -34,7 +34,7 @@ public:
     typedef std::size_t size_type;
 
     static BC_CONSTEXPR size_type bits_per_block = byte_bits;
-    static size_type blocks_size(const size_type bit_size);
+    static size_type blocks_size(size_type bit_size);
     static bool is_base2(const std::string& text);
 
     binary();
@@ -56,7 +56,7 @@ public:
     binary substring(size_type first, size_type length=max_size_t) const;
 
     bool is_prefix_of(data_slice field) const;
-    bool is_prefix_of(const uint32_t field) const;
+    bool is_prefix_of(uint32_t field) const;
     bool is_prefix_of(const binary& field) const;
 
     bool operator<(const binary& other) const;
@@ -78,14 +78,14 @@ private:
 
 namespace std
 {
-    template<>
-    struct hash<bc::binary>
+template<>
+struct hash<bc::binary>
+{
+    size_t operator()(const bc::binary& value) const
     {
-        size_t operator()(const bc::binary& value) const
-        {
-            return std::hash<std::string>()(value.encoded());
-        }
-    };
+        return std::hash<std::string>()(value.encoded());
+    }
+};
 } // namespace std
 
 #endif

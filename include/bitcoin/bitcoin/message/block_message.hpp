@@ -43,11 +43,11 @@ public:
     typedef std::vector<ptr> ptr_list;
     typedef std::vector<size_t> indexes;
 
-    static block_message factory_from_data(const uint32_t version,
+    static block_message factory_from_data(uint32_t version,
         const data_chunk& data, bool with_transaction_count=true);
-    static block_message factory_from_data(const uint32_t version,
+    static block_message factory_from_data(uint32_t version,
         std::istream& stream, bool with_transaction_count=true);
-    static block_message factory_from_data(const uint32_t version,
+    static block_message factory_from_data(uint32_t version,
         reader& source, bool with_transaction_count=true);
 
     block_message();
@@ -61,24 +61,24 @@ public:
     block_message(chain::header&& header,
         chain::transaction::list&& transactions);
 
-    bool from_data(const uint32_t version, const data_chunk& data,
-        bool with_transaction_count = true);
-    bool from_data(const uint32_t version, std::istream& stream,
-        bool with_transaction_count = true);
-    bool from_data(const uint32_t version, reader& source,
-        bool with_transaction_count = true);
-    data_chunk to_data(const uint32_t version,
-        bool with_transaction_count = true) const;
-    void to_data(const uint32_t version, std::ostream& stream,
-        bool with_transaction_count = true) const;
-    void to_data(const uint32_t version, writer& sink,
-        bool with_transaction_count = true) const;
-    uint64_t serialized_size(const uint32_t version,
-        bool with_transaction_count = true) const;
-
     /// This class is move assignable but not copy assignable.
     block_message& operator=(block_message&& other);
     void operator=(const block_message&) = delete;
+
+    bool from_data(uint32_t version, const data_chunk& data,
+        bool with_transaction_count = true);
+    bool from_data(uint32_t version, std::istream& stream,
+        bool with_transaction_count = true);
+    bool from_data(uint32_t version, reader& source,
+        bool with_transaction_count = true);
+    data_chunk to_data(uint32_t version,
+        bool with_transaction_count = true) const;
+    void to_data(uint32_t version, std::ostream& stream,
+        bool with_transaction_count = true) const;
+    void to_data(uint32_t version, writer& sink,
+        bool with_transaction_count = true) const;
+    uint64_t serialized_size(uint32_t version,
+        bool with_transaction_count = true) const;
 
     uint64_t originator() const;
     void set_originator(uint64_t value);

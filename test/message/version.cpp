@@ -35,7 +35,7 @@ bool equal_without_timestamp(const message::network_address& left,
 bool equal(const message::version& left, const message::version& right)
 {
     return (left.value == right.value)
-        && (left.services_sender == right.services_sender)
+        && (left.services == right.services)
         && (left.timestamp == right.timestamp)
         && equal_without_timestamp(left.address_recevier, right.address_recevier)
         && equal_without_timestamp(left.address_sender, right.address_sender)
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
     const data_chunk raw{ 0xab };
     message::version instance{};
 
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(protocol_version, raw));
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(message::version::level::maximum, raw));
 }
 
 BOOST_AUTO_TEST_CASE(version__from_data_chunk__mismatched_sender_services__invalid)
@@ -90,9 +90,9 @@ BOOST_AUTO_TEST_CASE(version__from_data_chunk__mismatched_sender_services__inval
         100u
     };
 
-    const auto data = expected.to_data(protocol_version);
+    const auto data = expected.to_data(message::version::level::maximum);
     const auto result = message::version::factory_from_data(
-        protocol_version, data);
+        message::version::level::maximum, data);
 
     BOOST_REQUIRE(!result.is_valid());
 }
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(version__from_data_chunk__version_meets_bip37)
     const auto sender_services = 1515u;
     const message::version expected
     {
-        bip37_minimum_version,
+        message::version::level::bip37,
         sender_services,
         979797u,
         {
@@ -133,9 +133,9 @@ BOOST_AUTO_TEST_CASE(version__from_data_chunk__version_meets_bip37)
         true
     };
 
-    const auto data = expected.to_data(protocol_version);
+    const auto data = expected.to_data(message::version::level::maximum);
     const auto result = message::version::factory_from_data(
-        protocol_version, data);
+        message::version::level::maximum, data);
 
     BOOST_REQUIRE(result.is_valid());
 }
@@ -175,16 +175,16 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
         100u
     };
 
-    const auto data = expected.to_data(protocol_version);
+    const auto data = expected.to_data(message::version::level::maximum);
     const auto result = message::version::factory_from_data(
-        protocol_version, data);
+        message::version::level::maximum, data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result));
     BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(protocol_version));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(protocol_version),
-        result.serialized_size(protocol_version));
+        result.serialized_size(message::version::level::maximum));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::maximum),
+        result.serialized_size(message::version::level::maximum));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
@@ -222,17 +222,17 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
         100u
     };
 
-    const auto data = expected.to_data(protocol_version);
+    const auto data = expected.to_data(message::version::level::maximum);
     data_source istream(data);
     const auto result = message::version::factory_from_data(
-        protocol_version, istream);
+        message::version::level::maximum, istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result));
     BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(protocol_version));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(protocol_version),
-        result.serialized_size(protocol_version));
+        result.serialized_size(message::version::level::maximum));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::maximum),
+        result.serialized_size(message::version::level::maximum));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
@@ -270,18 +270,18 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
         100u
     };
 
-    const auto data = expected.to_data(protocol_version);
+    const auto data = expected.to_data(message::version::level::maximum);
     data_source istream(data);
     istream_reader source(istream);
     const auto result = message::version::factory_from_data(
-        protocol_version, source);
+        message::version::level::maximum, source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result));
     BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(protocol_version));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(protocol_version),
-        result.serialized_size(protocol_version));
+        result.serialized_size(message::version::level::maximum));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::maximum),
+        result.serialized_size(message::version::level::maximum));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -21,7 +21,7 @@
 
 #include <initializer_list>
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -30,9 +30,9 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::get_block_transactions::command = "getblocktxn";
-const uint32_t message::get_block_transactions::version_minimum = bip152_minimum_version;
-const uint32_t message::get_block_transactions::version_maximum = bip152_minimum_version;
+const std::string get_block_transactions::command = "getblocktxn";
+const uint32_t get_block_transactions::version_minimum = version::level::bip152;
+const uint32_t get_block_transactions::version_maximum = version::level::bip152;
 
 get_block_transactions get_block_transactions::factory_from_data(
     const uint32_t version, const data_chunk& data)
@@ -67,23 +67,24 @@ void get_block_transactions::reset()
 {
     block_hash = null_hash;
     indexes.clear();
+    indexes.shrink_to_fit();
 }
 
-bool get_block_transactions::from_data(const uint32_t version,
+bool get_block_transactions::from_data(uint32_t version,
     const data_chunk& data)
 {
     data_source istream(data);
     return from_data(version, istream);
 }
 
-bool get_block_transactions::from_data(const uint32_t version,
+bool get_block_transactions::from_data(uint32_t version,
     std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(version, source);
 }
 
-bool get_block_transactions::from_data(const uint32_t version,
+bool get_block_transactions::from_data(uint32_t version,
     reader& source)
 {
     reset();
@@ -92,6 +93,9 @@ bool get_block_transactions::from_data(const uint32_t version,
 
     const auto count = source.read_variable_uint_little_endian();
     result &= static_cast<bool>(source);
+
+    if (result)
+        indexes.reserve(count);
 
     for (uint64_t i = 0; (i < count) && result; ++i)
     {
@@ -105,7 +109,7 @@ bool get_block_transactions::from_data(const uint32_t version,
     return result;
 }
 
-data_chunk get_block_transactions::to_data(const uint32_t version) const
+data_chunk get_block_transactions::to_data(uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
@@ -115,14 +119,14 @@ data_chunk get_block_transactions::to_data(const uint32_t version) const
     return data;
 }
 
-void get_block_transactions::to_data(const uint32_t version,
+void get_block_transactions::to_data(uint32_t version,
     std::ostream& stream) const
 {
     ostream_writer sink(stream);
     to_data(version, sink);
 }
 
-void get_block_transactions::to_data(const uint32_t version,
+void get_block_transactions::to_data(uint32_t version,
     writer& sink) const
 {
     sink.write_hash(block_hash);
@@ -131,7 +135,7 @@ void get_block_transactions::to_data(const uint32_t version,
         sink.write_variable_uint_little_endian(element);
 }
 
-uint64_t get_block_transactions::serialized_size(const uint32_t version) const
+uint64_t get_block_transactions::serialized_size(uint32_t version) const
 {
     uint64_t size = hash_size + variable_uint_size(indexes.size());
 

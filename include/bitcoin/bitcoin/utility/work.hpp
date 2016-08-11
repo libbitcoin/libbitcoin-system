@@ -41,6 +41,7 @@ namespace libbitcoin {
 #define BIND_HANDLER(handler, args) \
     std::bind(FORWARD_HANDLER(handler), FORWARD_ARGS(args))
 
+/// This  class is thread safe.
 /// boost asio class wrapper to enable work heap management.
 class BC_API work
 {
@@ -102,13 +103,13 @@ private:
         ////return std::bind(&monitor::invoke<Handler>, capture, handler);
     }
 
+    // These are thread safe.
     monitor::count_ptr ordered_;
     monitor::count_ptr unordered_;
     monitor::count_ptr concurrent_;
-
-    const std::string name_;
     asio::service& service_;
     asio::service::strand strand_;
+    const std::string name_;
 };
 
 #undef FORWARD_ARGS

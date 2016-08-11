@@ -54,16 +54,6 @@ public:
     static block genesis_mainnet();
     static block genesis_testnet();
 
-    bool from_data(const data_chunk& data, bool with_transaction_count = true);
-    bool from_data(std::istream& stream, bool with_transaction_count = true);
-    bool from_data(reader& source, bool with_transaction_count = true);
-    data_chunk to_data(bool with_transaction_count = true) const;
-    void to_data(std::ostream& stream, bool with_transaction_count = true) const;
-    void to_data(writer& sink, bool with_transaction_count = true) const;
-    bool is_valid() const;
-    void reset();
-    uint64_t serialized_size(bool with_transaction_count = true) const;
-
     block();
     block(const block& other);
     block(const chain::header& header,
@@ -76,6 +66,16 @@ public:
     /// This class is move assignable but not copy assignable.
     block& operator=(block&& other);
     void operator=(const block&) = delete;
+
+    bool from_data(const data_chunk& data, bool with_transaction_count = true);
+    bool from_data(std::istream& stream, bool with_transaction_count = true);
+    bool from_data(reader& source, bool with_transaction_count = true);
+    data_chunk to_data(bool with_transaction_count = true) const;
+    void to_data(std::ostream& stream, bool with_transaction_count = true) const;
+    void to_data(writer& sink, bool with_transaction_count = true) const;
+    bool is_valid() const;
+    void reset();
+    uint64_t serialized_size(bool with_transaction_count = true) const;
 
     chain::header header;
     transaction::list transactions;

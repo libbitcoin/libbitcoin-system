@@ -36,19 +36,22 @@ class BC_API filter_load
 public:
     typedef std::shared_ptr<filter_load> ptr;
 
-    static filter_load factory_from_data(const uint32_t version, const data_chunk& data);
-    static filter_load factory_from_data(const uint32_t version, std::istream& stream);
-    static filter_load factory_from_data(const uint32_t version, reader& source);
+    static filter_load factory_from_data(uint32_t version,
+        const data_chunk& data);
+    static filter_load factory_from_data(uint32_t version,
+        std::istream& stream);
+    static filter_load factory_from_data(uint32_t version,
+        reader& source);
 
-    bool from_data(const uint32_t version, const data_chunk& data);
-    bool from_data(const uint32_t version, std::istream& stream);
-    bool from_data(const uint32_t version, reader& source);
-    data_chunk to_data(const uint32_t version) const;
-    void to_data(const uint32_t version, std::ostream& stream) const;
-    void to_data(const uint32_t version, writer& sink) const;
+    bool from_data(uint32_t version, const data_chunk& data);
+    bool from_data(uint32_t version, std::istream& stream);
+    bool from_data(uint32_t version, reader& source);
+    data_chunk to_data(uint32_t version) const;
+    void to_data(uint32_t version, std::ostream& stream) const;
+    void to_data(uint32_t version, writer& sink) const;
     bool is_valid() const;
     void reset();
-    uint64_t serialized_size(const uint32_t version) const;
+    uint64_t serialized_size(uint32_t version) const;
 
     static const std::string command;
     static const uint32_t version_minimum;

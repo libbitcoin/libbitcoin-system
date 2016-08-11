@@ -40,9 +40,8 @@ data_chunk qr::encode(const data_chunk& data)
     return qr::encode(data, version, level, mode, case_sensitive);
 }
 
-data_chunk qr::encode(const data_chunk& data, const uint32_t version,
-    const error_recovery_level level, const encode_mode mode,
-    const bool case_sensitive)
+data_chunk qr::encode(const data_chunk& data, uint32_t version,
+    error_recovery_level level, encode_mode mode, bool case_sensitive)
 {
     data_chunk out;
     data_sink ostream(out);
@@ -59,9 +58,8 @@ bool qr::encode(std::istream& in, std::ostream& out)
     return qr::encode(in, version, level, mode, case_sensitive, out);
 }
 
-bool qr::encode(std::istream& in, const uint32_t version,
-    const error_recovery_level level, const encode_mode mode,
-    const bool case_sensitive, std::ostream& out)
+bool qr::encode(std::istream& in, uint32_t version, error_recovery_level level,
+    encode_mode mode, bool case_sensitive, std::ostream& out)
 {
     std::string qr_string;
     getline(in, qr_string);

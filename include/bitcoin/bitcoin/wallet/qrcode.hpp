@@ -68,9 +68,9 @@ class BC_API qr
      * A method that takes an input stream and writes the encoded qr data
      * to the output stream with the specified parameter values.
      */
-    BC_API static bool encode(std::istream& in, const uint32_t version,
-        const error_recovery_level level, const encode_mode mode,
-        const bool case_sensitive, std::ostream& out);
+    BC_API static bool encode(std::istream& in, uint32_t version,
+        error_recovery_level level, encode_mode mode, bool case_sensitive,
+        std::ostream& out);
 };
 
 } // namespace wallet
