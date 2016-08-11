@@ -242,8 +242,8 @@ hash_digest header::hash() const
         if (!hash_)
             hash_.reset(new hash_digest(bitcoin_hash(to_data(false))));
 
-        //---------------------------------------------------------------------
         mutex_.unlock_and_lock_upgrade();
+        //---------------------------------------------------------------------
     }
 
     hash_digest hash = *hash_;
