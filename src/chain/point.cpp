@@ -123,6 +123,16 @@ uint64_t point::satoshi_fixed_size()
     return hash_size + sizeof(uint32_t);
 }
 
+point_byte_iterator point::begin() const
+{
+    return point_byte_iterator(*this);
+}
+
+point_byte_iterator point::end() const
+{
+    return point_byte_iterator(*this, true);
+}
+
 std::string point::to_string() const
 {
     std::ostringstream value;
