@@ -88,7 +88,7 @@ public:
     static const uint32_t version_maximum;
 
     uint32_t value;
-    uint64_t services_sender;
+    uint64_t services;
     uint64_t timestamp;
     network_address address_recevier;
     network_address address_sender;

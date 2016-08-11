@@ -60,7 +60,7 @@ version version::factory_from_data(uint32_t version,
 bool version::is_valid() const
 {
     return (value != 0)
-        || (services_sender != 0)
+        || (services != 0)
         || (timestamp != 0)
         || address_recevier.is_valid()
         || address_sender.is_valid()
@@ -73,7 +73,7 @@ bool version::is_valid() const
 void version::reset()
 {
     value = 0;
-    services_sender = 0;
+    services = 0;
     timestamp = 0;
     address_recevier.reset();
     address_sender.reset();
@@ -102,7 +102,7 @@ bool version::from_data(uint32_t version, reader& source)
 
     value = source.read_4_bytes_little_endian();
     const uint32_t effective_version = std::min(version, value);
-    services_sender = source.read_8_bytes_little_endian();
+    services = source.read_8_bytes_little_endian();
     timestamp = source.read_8_bytes_little_endian();
     auto result = static_cast<bool>(source);
     result = address_recevier.from_data(version, source, false);
@@ -115,7 +115,7 @@ bool version::from_data(uint32_t version, reader& source)
         relay = (source.read_byte() != 0);
 
     // The protocol expects duplication of the sender's services.
-    result &= (source && services_sender == address_sender.services);
+    result &= (source && services == address_sender.services);
 
     if (!result)
         reset();
@@ -143,7 +143,7 @@ void version::to_data(uint32_t version, writer& sink) const
 {
     sink.write_4_bytes_little_endian(value);
     const uint32_t effective_version = std::min(version, value);
-    sink.write_8_bytes_little_endian(services_sender);
+    sink.write_8_bytes_little_endian(services);
     sink.write_8_bytes_little_endian(timestamp);
     address_recevier.to_data(version, sink, false);
     address_sender.to_data(version, sink, false);
@@ -159,7 +159,7 @@ uint64_t version::serialized_size(uint32_t version) const
 {
     auto size = 
         sizeof(value) +
-        sizeof(services_sender) +
+        sizeof(services) +
         sizeof(timestamp) +
         address_recevier.serialized_size(version, false) +
         address_sender.serialized_size(version, false) +

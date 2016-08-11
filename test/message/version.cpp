@@ -35,7 +35,7 @@ bool equal_without_timestamp(const message::network_address& left,
 bool equal(const message::version& left, const message::version& right)
 {
     return (left.value == right.value)
-        && (left.services_sender == right.services_sender)
+        && (left.services == right.services)
         && (left.timestamp == right.timestamp)
         && equal_without_timestamp(left.address_recevier, right.address_recevier)
         && equal_without_timestamp(left.address_sender, right.address_sender)
