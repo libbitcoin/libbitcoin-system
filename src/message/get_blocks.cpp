@@ -57,6 +57,22 @@ get_blocks get_blocks::factory_from_data(uint32_t version,
     return instance;
 }
 
+get_blocks::get_blocks()
+  : start_hashes(), stop_hash()
+{
+}
+
+get_blocks::get_blocks(const hash_list& start, const hash_digest& stop)
+  : start_hashes(start), stop_hash(stop)
+{
+}
+
+get_blocks::get_blocks(hash_list&& start, hash_digest&& stop)
+  : start_hashes(std::forward<hash_list>(start)),
+    stop_hash(std::forward<hash_digest>(stop))
+{
+}
+
 bool get_blocks::is_valid() const
 {
     return !start_hashes.empty() || (stop_hash != null_hash);
