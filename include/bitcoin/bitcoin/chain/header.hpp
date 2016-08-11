@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <istream>
 #include <string>
+#include <memory>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
