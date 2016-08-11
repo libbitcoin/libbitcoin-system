@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_ATOMIC_POINTER_HPP
 #define LIBBITCOIN_ATOMIC_POINTER_HPP
 
+#include <utility>
 #include <bitcoin/bitcoin/utility/thread.hpp>
 
 namespace libbitcoin {
@@ -37,6 +38,12 @@ public:
     /// Create an atomically-accessible copied instance of the type.
     atomic(const Type& instance)
       : instance_(instance)
+    {
+    }
+
+    /// Create an atomically-accessible moved instance of the type.
+    atomic(Type&& instance)
+      : instance_(std::forward<Type>(instance))
     {
     }
 
