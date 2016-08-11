@@ -86,7 +86,7 @@ enum services: uint64_t
     // The node is capable of serving the block chain.
     node_network = (1 << 0),
 
-    // See BIP 64
+    // Requires version >= 70004 (bip64)
     // The node is capable of responding to the getutxo protocol request.
     node_utxo = (1 << 1),
 

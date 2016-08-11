@@ -27,38 +27,32 @@
 
 namespace libbitcoin {
 
-    // From: github.com/picanumber/bureaucrat/blob/master/time_lapse.h
+// From: github.com/picanumber/bureaucrat/blob/master/time_lapse.h
 
-	/**
-	 * Class to measure the execution time of a callable.
-	 */
-    template <typename Time = asio::milliseconds, class Clock=asio::steady_clock> 
-	struct timer
-	{
-		/**
-		 * Returns the quantity (count) of the elapsed time as TimeT units.
-	 	 */
-		template <typename Function, typename ...Args>
-        static typename Time::rep execution(Function func, Args&&... args)
-		{
-            const auto start = Clock::now();
-			func(std::forward<Args>(args)...);
-            const auto difference = Clock::now() - start;
-            const auto duration = std::chrono::duration_cast<Time>(difference);
-			return duration.count();
-		}
+/// Class to measure the execution time of a callable.
+template <typename Time = asio::milliseconds, class Clock=asio::steady_clock> 
+struct timer
+{
+    /// Returns the quantity (count) of the elapsed time as TimeT units.
+    template <typename Function, typename ...Args>
+    static typename Time::rep execution(Function func, Args&&... args)
+    {
+        const auto start = Clock::now();
+        func(std::forward<Args>(args)...);
+        const auto difference = Clock::now() - start;
+        const auto duration = std::chrono::duration_cast<Time>(difference);
+        return duration.count();
+    }
 
-		/**
-		 * Returns the duration (in chrono's type system) of the elapsed time.
-		 */
-        template <typename Function, typename... Args>
-        static Time duration(Function func, Args&&... args)
-		{
-            auto start = Clock::now();
-			func(std::forward<Args>(args)...);
-            return std::chrono::duration_cast<Time>(Clock::now() - start);
-		}
-	};
+    /// Returns the duration (in chrono's type system) of the elapsed time.
+    template <typename Function, typename... Args>
+    static Time duration(Function func, Args&&... args)
+    {
+        auto start = Clock::now();
+        func(std::forward<Args>(args)...);
+        return std::chrono::duration_cast<Time>(Clock::now() - start);
+    }
+};
 
 } // namespace libbitcoin
 

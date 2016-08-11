@@ -39,7 +39,7 @@ class BC_API version
 public:
     typedef std::shared_ptr<version> ptr;
 
-    enum level : uint32_t
+    enum level: uint32_t
     {
         // This is currently unspecified.
         bip152 = max_uint32,
@@ -65,7 +65,7 @@ public:
         // We require at least this of peers.
         minimum = 31402,
 
-        // We support at most this internally.
+        // We support at most this internally (bound to settings default).
         maximum = bip130
     };
 
