@@ -30,6 +30,7 @@
 
 namespace libbitcoin {
 
+// Common bitcoin hash container sizes.
 static BC_CONSTEXPR size_t hash_size = 32;
 static BC_CONSTEXPR size_t half_hash_size = hash_size / 2;
 static BC_CONSTEXPR size_t quarter_hash_size = half_hash_size / 2;
@@ -37,7 +38,7 @@ static BC_CONSTEXPR size_t long_hash_size = 2 * hash_size;
 static BC_CONSTEXPR size_t short_hash_size = 20;
 static BC_CONSTEXPR size_t mini_hash_size = 6;
 
-// Standard hash containers.
+// Common bitcoin hash containers.
 typedef byte_array<hash_size> hash_digest;
 typedef byte_array<half_hash_size> half_hash;
 typedef byte_array<quarter_hash_size> quarter_hash;
@@ -45,24 +46,62 @@ typedef byte_array<long_hash_size> long_hash;
 typedef byte_array<short_hash_size> short_hash;
 typedef byte_array<mini_hash_size> mini_hash;
 
-// List of hashes. Useful primitive.
+// Lists of common bitcoin hashes.
 typedef std::vector<hash_digest> hash_list;
+typedef std::vector<half_hash> half_hash_list;
+typedef std::vector<quarter_hash> quarter_hash_list;
 typedef std::vector<long_hash> long_hash_list;
 typedef std::vector<short_hash> short_hash_list;
 typedef std::vector<mini_hash> mini_hash_list;
 
-BC_CONSTEXPR hash_digest null_hash =
+// Null-valued common bitcoin hashes.
+
+BC_CONSTEXPR hash_digest null_hash
 {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
 };
 
-BC_CONSTEXPR short_hash null_short_hash =
+BC_CONSTEXPR half_hash null_half_hash
 {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
 };
 
-BC_CONSTEXPR hash_digest null_mini_hash = { 0, 0, 0, 0, 0, 0 };
+BC_CONSTEXPR quarter_hash null_quarter_hash
+{
+    {
+        0, 0, 0, 0, 0, 0, 0, 0
+    }
+};
+
+BC_CONSTEXPR long_hash null_long_hash
+{
+    {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
+};
+
+BC_CONSTEXPR short_hash null_short_hash
+{
+    {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0
+    }
+};
+
+BC_CONSTEXPR mini_hash null_mini_hash
+{
+    {
+        0, 0, 0, 0, 0, 0
+    }
+};
 
 /**
  * Generate a scrypt hash to fill a byte array.
