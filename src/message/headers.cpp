@@ -35,7 +35,7 @@ namespace libbitcoin {
 namespace message {
 
 const std::string headers::command = "headers";
-const uint32_t headers::version_minimum = version::level::minimum;
+const uint32_t headers::version_minimum = version::level::headers;
 const uint32_t headers::version_maximum = version::level::maximum;
 
 headers headers::factory_from_data(uint32_t version,
@@ -103,8 +103,9 @@ bool headers::from_data(uint32_t version, reader& source)
 {
     reset();
 
+    auto result = !(version < version_minimum);
     const auto count = source.read_variable_uint_little_endian();
-    auto result = static_cast<bool>(source);
+    result &= static_cast<bool>(source);
 
     if (result)
     {

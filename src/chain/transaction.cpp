@@ -58,7 +58,7 @@ transaction transaction::factory_from_data(reader& source)
 // default constructors
 
 transaction::transaction()
-  : version(0), locktime(0)
+  : version(0), locktime(0), hash_(nullptr)
 {
 }
 
@@ -72,7 +72,8 @@ transaction::transaction(uint32_t version, uint32_t locktime,
   : version(version),
     locktime(locktime),
     inputs(inputs),
-    outputs(outputs)
+    outputs(outputs),
+    hash_(nullptr)
 {
 }
 
@@ -88,7 +89,8 @@ transaction::transaction(uint32_t version, uint32_t locktime,
   : version(version),
     locktime(locktime),
     inputs(std::forward<input::list>(inputs)),
-    outputs(std::forward<output::list>(outputs))
+    outputs(std::forward<output::list>(outputs)),
+    hash_(nullptr)
 {
 }
 
@@ -125,6 +127,10 @@ void transaction::reset()
     inputs.shrink_to_fit();
     outputs.clear();
     outputs.shrink_to_fit();
+
+    mutex_.lock();
+    hash_.reset();
+    mutex_.unlock();
 }
 
 bool transaction::from_data(const data_chunk& data)
@@ -263,7 +269,24 @@ std::string transaction::to_string(uint32_t flags) const
 
 hash_digest transaction::hash() const
 {
-    return bitcoin_hash(to_data());
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    mutex_.lock_upgrade();
+
+    if (!hash_)
+    {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        mutex_.unlock_upgrade_and_lock();
+        hash_.reset(new hash_digest(bitcoin_hash(to_data())));
+        mutex_.unlock_and_lock_upgrade();
+        //---------------------------------------------------------------------
+    }
+
+    hash_digest hash = *hash_;
+    mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
+
+    return hash;
 }
 
 hash_digest transaction::hash(uint32_t sighash_type) const

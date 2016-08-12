@@ -78,7 +78,8 @@ header::header(uint32_t version, const hash_digest& previous_block_hash,
     timestamp(timestamp),
     bits(bits),
     nonce(nonce),
-    transaction_count(transaction_count)
+    transaction_count(transaction_count),
+    hash_(nullptr)
 {
 }
 
@@ -98,7 +99,8 @@ header::header(uint32_t version, hash_digest&& previous_block_hash,
     timestamp(timestamp),
     bits(bits),
     nonce(nonce),
-    transaction_count(transaction_count)
+    transaction_count(transaction_count),
+    hash_(nullptr)
 {
 }
 
@@ -145,6 +147,10 @@ void header::reset()
     timestamp = 0;
     bits = 0;
     nonce = 0;
+
+    mutex_.lock();
+    hash_.reset();
+    mutex_.unlock();
 }
 
 bool header::from_data(const data_chunk& data,
@@ -224,7 +230,24 @@ uint64_t header::serialized_size(bool with_transaction_count) const
 
 hash_digest header::hash() const
 {
-    return bitcoin_hash(to_data(false));
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    mutex_.lock_upgrade();
+
+    if (!hash_)
+    {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        mutex_.unlock_upgrade_and_lock();
+        hash_.reset(new hash_digest(bitcoin_hash(to_data(false))));
+        mutex_.unlock_and_lock_upgrade();
+        //---------------------------------------------------------------------
+    }
+
+    hash_digest hash = *hash_;
+    mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
+
+    return hash;
 }
 
 bool operator==(const header& left, const header& right)

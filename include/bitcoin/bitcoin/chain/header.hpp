@@ -23,11 +23,13 @@
 #include <cstdint>
 #include <istream>
 #include <string>
+#include <memory>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
@@ -86,6 +88,10 @@ public:
     // The longest size (64) of a protocol variable int is deserialized here.
     // WHen writing a block the size of the transaction collection is used.
     uint64_t transaction_count;
+
+private:
+    mutable upgrade_mutex mutex_;
+    mutable std::shared_ptr<hash_digest> hash_;
 };
 
 BC_API bool operator==(const header& left, const header& right);

@@ -44,9 +44,13 @@ public:
         std::istream& stream);
     static get_blocks factory_from_data(uint32_t version, reader& source);
 
-    bool from_data(uint32_t version, const data_chunk& data);
-    bool from_data(uint32_t version, std::istream& stream);
-    bool from_data(uint32_t version, reader& source);
+    get_blocks();
+    get_blocks(const hash_list& start, const hash_digest& stop);
+    get_blocks(hash_list&& start, hash_digest&& stop);
+
+    virtual bool from_data(uint32_t version, const data_chunk& data);
+    virtual bool from_data(uint32_t version, std::istream& stream);
+    virtual bool from_data(uint32_t version, reader& source);
     data_chunk to_data(uint32_t version) const;
     void to_data(uint32_t version, std::ostream& stream) const;
     void to_data(uint32_t version, writer& sink) const;
