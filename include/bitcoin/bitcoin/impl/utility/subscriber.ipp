@@ -50,19 +50,19 @@ void subscriber<Args...>::start()
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    mutex_.lock_upgrade();
+    subscribe_mutex_.lock_upgrade();
 
     if (stopped_)
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        mutex_.unlock_upgrade_and_lock();
+        subscribe_mutex_.unlock_upgrade_and_lock();
         stopped_ = false;
-        mutex_.unlock();
+        subscribe_mutex_.unlock();
         //---------------------------------------------------------------------
         return;
     }
 
-    mutex_.unlock_upgrade();
+    subscribe_mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 }
 
@@ -71,19 +71,19 @@ void subscriber<Args...>::stop()
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    mutex_.lock_upgrade();
+    subscribe_mutex_.lock_upgrade();
 
     if (!stopped_)
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        mutex_.unlock_upgrade_and_lock();
+        subscribe_mutex_.unlock_upgrade_and_lock();
         stopped_ = true;
-        mutex_.unlock();
+        subscribe_mutex_.unlock();
         //---------------------------------------------------------------------
         return;
     }
 
-    mutex_.unlock_upgrade();
+    subscribe_mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 }
 
@@ -92,19 +92,19 @@ void subscriber<Args...>::subscribe(handler handler, Args... stopped_args)
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
-    mutex_.lock_upgrade();
+    subscribe_mutex_.lock_upgrade();
 
     if (!stopped_)
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        mutex_.unlock_upgrade_and_lock();
+        subscribe_mutex_.unlock_upgrade_and_lock();
         subscriptions_.emplace_back(handler);
-        mutex_.unlock();
+        subscribe_mutex_.unlock();
         //---------------------------------------------------------------------
         return;
     }
 
-    mutex_.unlock_upgrade();
+    subscribe_mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 
     handler(stopped_args...);
@@ -113,17 +113,13 @@ void subscriber<Args...>::subscribe(handler handler, Args... stopped_args)
 template <typename... Args>
 void subscriber<Args...>::invoke(Args... args)
 {
-    // Critical Section
-    ///////////////////////////////////////////////////////////////////////////
-    unique_lock(invoke_mutex_);
     do_invoke(args...);
-    ///////////////////////////////////////////////////////////////////////////
 }
 
 template <typename... Args>
 void subscriber<Args...>::relay(Args... args)
 {
-    // The ordered dispatch prevents concurrent do_invoke.
+    // This enqueues work while maintaining order.
     dispatch_.ordered(&subscriber<Args...>::do_invoke,
         this->shared_from_this(), args...);
 }
@@ -132,21 +128,27 @@ void subscriber<Args...>::relay(Args... args)
 template <typename... Args>
 void subscriber<Args...>::do_invoke(Args... args)
 {
-    // Critical Section
+    // Critical Section (prevent concurrent handler execution)
     ///////////////////////////////////////////////////////////////////////////
-    mutex_.lock();
+    unique_lock(invoke_mutex_);
+
+    // Critical Section (protect stop)
+    ///////////////////////////////////////////////////////////////////////////
+    subscribe_mutex_.lock();
 
     // Move subscribers from the member list to a temporary list.
     list subscriptions;
     std::swap(subscriptions, subscriptions_);
 
-    mutex_.unlock();
+    subscribe_mutex_.unlock();
     ///////////////////////////////////////////////////////////////////////////
 
     // Subscriptions may be created while this loop is executing.
     // Invoke subscribers from temporary list, without subscription renewal.
     for (const auto& handler: subscriptions)
         handler(args...);
+
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 } // namespace libbitcoin

@@ -114,17 +114,13 @@ void resubscriber<Args...>::subscribe(handler handler, Args... stopped_args)
 template <typename... Args>
 void resubscriber<Args...>::invoke(Args... args)
 {
-    // Critical Section
-    ///////////////////////////////////////////////////////////////////////////
-    unique_lock(invoke_mutex_);
     do_invoke(args...);
-    ///////////////////////////////////////////////////////////////////////////
 }
 
 template <typename... Args>
 void resubscriber<Args...>::relay(Args... args)
 {
-    // The ordered dispatch prevents concurrent do_invoke.
+    // This enqueues work while maintaining order.
     dispatch_.ordered(&resubscriber<Args...>::do_invoke,
         this->shared_from_this(), args...);
 }
@@ -133,7 +129,11 @@ void resubscriber<Args...>::relay(Args... args)
 template <typename... Args>
 void resubscriber<Args...>::do_invoke(Args... args)
 {
-    // Critical Section
+    // Critical Section (prevent concurrent handler execution)
+    ///////////////////////////////////////////////////////////////////////////
+    unique_lock(invoke_mutex_);
+
+    // Critical Section (protect stop)
     ///////////////////////////////////////////////////////////////////////////
     subscribe_mutex_.lock();
 
@@ -152,11 +152,25 @@ void resubscriber<Args...>::do_invoke(Args... args)
         {
             // Critical Section
             ///////////////////////////////////////////////////////////////////
-            unique_lock(subscribe_mutex_);
+            subscribe_mutex_.lock_upgrade();
+
+            if (stopped_)
+            {
+                subscribe_mutex_.unlock_upgrade();
+                //-------------------------------------------------------------
+                continue;
+            }
+
+            subscribe_mutex_.unlock_upgrade_and_lock();
+            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             subscriptions_.emplace_back(handler);
+
+            subscribe_mutex_.unlock();
             ///////////////////////////////////////////////////////////////////
         }
     }
+
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 } // namespace libbitcoin
