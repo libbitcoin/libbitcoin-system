@@ -68,7 +68,8 @@ private:
     bool stopped_;
     list subscriptions_;
     dispatcher dispatch_;
-    mutable upgrade_mutex mutex_;
+    mutable unique_mutex invoke_mutex_;
+    mutable upgrade_mutex subscribe_mutex_;
 };
 
 } // namespace libbitcoin
