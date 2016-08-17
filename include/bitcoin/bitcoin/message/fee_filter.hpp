@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -17,64 +17,32 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_MESSAGE_ANNOUNCE_VERSION_HPP
-#define LIBBITCOIN_MESSAGE_ANNOUNCE_VERSION_HPP
+#ifndef LIBBITCOIN_MESSAGE_FEE_FILTER_HPP
+#define LIBBITCOIN_MESSAGE_FEE_FILTER_HPP
 
 #include <cstdint>
 #include <istream>
 #include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
 namespace message {
-    
-// The checksum is ignored by the version command.
-class BC_API version
+
+class BC_API fee_filter
 {
 public:
-    typedef std::shared_ptr<version> ptr;
+    typedef std::shared_ptr<fee_filter> ptr;
 
-    enum level: uint32_t
-    {
-        // This is currently unspecified.
-        bip152 = 70014,
+    static fee_filter factory_from_data(uint32_t version, const data_chunk& data);
+    static fee_filter factory_from_data(uint32_t version, std::istream& stream);
+    static fee_filter factory_from_data(uint32_t version, reader& source);
+    static uint64_t satoshi_fixed_size(uint32_t version);
 
-        // fee_filter
-        bip133 = 70013,
-
-        // send_headers
-        bip130 = 70012,
-
-        // reject
-        bip61 = 70002,
-
-        // filters, merkle_block, not_found, version.relay
-        bip37 = 70001,
-
-        // memory_pool
-        bip35 = 60002,
-
-        // ping.nonce, pong
-        bip31 = 60001,
-
-        // This preceded the BIP system.
-        headers = 31800,
-
-        // We require at least this of peers.
-        minimum = 31402,
-
-        // We support at most this internally (bound to settings default).
-        maximum = bip130
-    };
-
-    static version factory_from_data(uint32_t version, const data_chunk& data);
-    static version factory_from_data(uint32_t version, std::istream& stream);
-    static version factory_from_data(uint32_t version, reader& source);
+    fee_filter();
+    fee_filter(uint64_t minimum);
 
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
@@ -86,24 +54,20 @@ public:
     void reset();
     uint64_t serialized_size(uint32_t version) const;
 
+    bool operator==(const fee_filter& other) const;
+    bool operator!=(const fee_filter& other) const;
+
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
-    uint32_t value;
-    uint64_t services;
-    uint64_t timestamp;
-    network_address address_recevier;
-    network_address address_sender;
-    uint64_t nonce;
-    std::string user_agent;
-    uint32_t start_height;
+    uint64_t minimum_fee;
 
-    // version >= 70001
-    bool relay;
+private:
+    bool valid_;
 };
 
-} // namspace message
-} // namspace libbitcoin
+} // end message
+} // end libbitcoin
 
 #endif
