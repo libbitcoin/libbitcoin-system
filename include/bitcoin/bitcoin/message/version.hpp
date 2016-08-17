@@ -50,10 +50,10 @@ public:
         // send_headers
         bip130 = 70012,
 
-        // reject
+        // reject (AND version.relay)
         bip61 = 70002,
 
-        // filters, merkle_block, not_found, version.relay
+        // filters, merkle_block, not_found (NOT version.relay)
         bip37 = 70001,
 
         // memory_pool
