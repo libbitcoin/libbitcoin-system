@@ -111,11 +111,13 @@ bool version::from_data(uint32_t version, reader& source)
     user_agent = source.read_string();
     start_height = source.read_4_bytes_little_endian();
 
-    if (effective_version >= level::bip37)
+    // HACK: due to the partial implementation of Bitcoin Core BIP37.
+    if (effective_version >= level::bip61)
         relay = (source.read_byte() != 0);
 
+    // HACK: disabled check due to inconsistent node implementation.
     // The protocol expects duplication of the sender's services.
-    result &= (source && services == address_sender.services);
+    result &= (source /*&& services == address_sender.services*/);
 
     if (!result)
         reset();
