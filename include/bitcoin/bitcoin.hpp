@@ -68,6 +68,7 @@
 #include <bitcoin/bitcoin/message/block_message.hpp>
 #include <bitcoin/bitcoin/message/block_transactions.hpp>
 #include <bitcoin/bitcoin/message/compact_block.hpp>
+#include <bitcoin/bitcoin/message/fee_filter.hpp>
 #include <bitcoin/bitcoin/message/filter_add.hpp>
 #include <bitcoin/bitcoin/message/filter_clear.hpp>
 #include <bitcoin/bitcoin/message/filter_load.hpp>

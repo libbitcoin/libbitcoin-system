@@ -111,6 +111,7 @@ src_libbitcoin_la_SOURCES = \
     src/message/block_message.cpp \
     src/message/block_transactions.cpp \
     src/message/compact_block.cpp \
+    src/message/fee_filter.cpp \
     src/message/filter_add.cpp \
     src/message/filter_clear.cpp \
     src/message/filter_load.cpp \
@@ -252,6 +253,7 @@ test_libbitcoin_test_SOURCES = \
     test/message/block_message.cpp \
     test/message/block_transactions.cpp \
     test/message/compact_block.cpp \
+    test/message/fee_filter.cpp \
     test/message/filter_add.cpp \
     test/message/filter_clear.cpp \
     test/message/filter_load.cpp \
@@ -413,6 +415,7 @@ include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/block_message.hpp \
     include/bitcoin/bitcoin/message/block_transactions.hpp \
     include/bitcoin/bitcoin/message/compact_block.hpp \
+    include/bitcoin/bitcoin/message/fee_filter.hpp \
     include/bitcoin/bitcoin/message/filter_add.hpp \
     include/bitcoin/bitcoin/message/filter_clear.hpp \
     include/bitcoin/bitcoin/message/filter_load.hpp \
