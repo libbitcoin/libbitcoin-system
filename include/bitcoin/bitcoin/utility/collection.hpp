@@ -83,14 +83,14 @@ typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,
 template <typename Type>
 void move_append(std::vector<Type>& target, std::vector<Type>& source);
 
-/**
- * Reverse a list, returning the new list.
- * @param      <Collection> The type of list.
- * @param[in]  list         The target list.
- * @returns                 The new reversed list
- */
-template <typename Collection>
-Collection reverse(const std::vector<Collection>& list);
+/////**
+//// * Reverse a list, returning the new list.
+//// * @param      <Collection> The type of list.
+//// * @param[in]  list         The target list.
+//// * @returns                 The new reversed list
+//// */
+////template <typename Collection>
+////Collection reverse(const std::vector<Collection>& list);
 
 } // namespace libbitcoin
 
