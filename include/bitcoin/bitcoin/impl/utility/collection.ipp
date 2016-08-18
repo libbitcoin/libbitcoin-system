@@ -80,13 +80,13 @@ void move_append(std::vector<Type>& target, std::vector<Type>& source)
     source.clear();
 }
 
-template <typename Collection>
-Collection reverse(const Collection& list)
-{
-    Collection out;
-    std::reverse_copy(list.begin(), list.end(), out.begin());
-    return out;
-}
+////template <typename Collection>
+////Collection reverse(const Collection& list)
+////{
+////    Collection out(list.size());
+////    std::reverse_copy(list.begin(), list.end(), out.begin());
+////    return out;
+////}
 
 } // namespace libbitcoin
 
