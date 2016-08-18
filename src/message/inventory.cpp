@@ -172,13 +172,12 @@ void inventory::to_hashes(hash_list& out, type_id type) const
 
 void inventory::reduce(inventory_vector::list& out, type_id type) const
 {
-    const auto is_type = [type](const inventory_vector& element)
-    {
-        return element.type == type;
-    };
-
     out.reserve(inventories.size());
-    std::copy_if(inventories.begin(), inventories.end(), out.begin(), is_type);
+
+    for (const auto& inventory: inventories)
+        if (inventory.type == type)
+            out.push_back(inventory);
+
     out.shrink_to_fit();
 }
 
