@@ -43,6 +43,7 @@ enum class message_type
     block_message,
     block_transactions,
     compact_block,
+    fee_filter,
     filter_add,
     filter_clear,
     filter_load,
