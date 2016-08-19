@@ -49,7 +49,6 @@ struct BC_API hd_lineage
     uint32_t parent_fingerprint;
     uint32_t child_number;
 
-    bool operator<(const hd_lineage& other) const;
     bool operator==(const hd_lineage& other) const;
     bool operator!=(const hd_lineage& other) const;
 };
