@@ -36,7 +36,7 @@
 
 #define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))
 
-#if SHA1_BIG_ENDIAN
+#ifdef SHA1_BIG_ENDIAN
 #define blk0(b, i) b->l[i]
 #else
 #define blk0(b, i) (b->l[i] = \
