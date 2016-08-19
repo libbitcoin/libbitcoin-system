@@ -27,6 +27,7 @@
 #include <bitcoin/bitcoin/message/block_message.hpp>
 #include <bitcoin/bitcoin/message/block_transactions.hpp>
 #include <bitcoin/bitcoin/message/compact_block.hpp>
+#include <bitcoin/bitcoin/message/fee_filter.hpp>
 #include <bitcoin/bitcoin/message/filter_add.hpp>
 #include <bitcoin/bitcoin/message/filter_clear.hpp>
 #include <bitcoin/bitcoin/message/filter_load.hpp>
@@ -86,6 +87,7 @@
 // mempool      --      60002   BIP035
 // mempool      v3      70002           allow multiple inv messages in reply
 // sendheaders  v3      70012   BIP130
+// feefilter    v3      70013   BIP133
 // blocktxn     v3      70014   BIP152
 // cmpctblock   v3      70014   BIP152
 // getblocktxn  v3      70014   BIP152
