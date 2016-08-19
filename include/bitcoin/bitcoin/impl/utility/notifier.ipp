@@ -199,7 +199,7 @@ void notifier<Key, Args...>::purge(Args... expired_args)
 
         // Critical Section
         ///////////////////////////////////////////////////////////////////
-        unique_lock(subscribe_mutex_);
+        unique_lock lock(subscribe_mutex_);
         subscriptions_.emplace(entry);
         ///////////////////////////////////////////////////////////////////
     }
@@ -225,7 +225,7 @@ void notifier<Key, Args...>::do_invoke(Args... args)
 {
     // Critical Section (prevent concurrent handler execution)
     ///////////////////////////////////////////////////////////////////////////
-    unique_lock(invoke_mutex_);
+    unique_lock lock(invoke_mutex_);
 
     // Critical Section (protect stop)
     ///////////////////////////////////////////////////////////////////////////

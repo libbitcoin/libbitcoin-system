@@ -131,7 +131,7 @@ void resubscriber<Args...>::do_invoke(Args... args)
 {
     // Critical Section (prevent concurrent handler execution)
     ///////////////////////////////////////////////////////////////////////////
-    unique_lock(invoke_mutex_);
+    unique_lock lock(invoke_mutex_);
 
     // Critical Section (protect stop)
     ///////////////////////////////////////////////////////////////////////////
