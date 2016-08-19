@@ -68,7 +68,7 @@ private:
     bool stopped_;
     list subscriptions_;
     dispatcher dispatch_;
-    mutable unique_mutex invoke_mutex_;
+    mutable upgrade_mutex invoke_mutex_;
     mutable upgrade_mutex subscribe_mutex_;
 };
 
