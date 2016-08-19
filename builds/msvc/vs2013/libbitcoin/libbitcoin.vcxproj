@@ -131,6 +131,7 @@
     <ClCompile Include="..\..\..\..\src\message\block_message.cpp" />
     <ClCompile Include="..\..\..\..\src\message\block_transactions.cpp" />
     <ClCompile Include="..\..\..\..\src\message\compact_block.cpp" />
+    <ClCompile Include="..\..\..\..\src\message\fee_filter.cpp" />
     <ClCompile Include="..\..\..\..\src\message\filter_add.cpp" />
     <ClCompile Include="..\..\..\..\src\message\filter_clear.cpp" />
     <ClCompile Include="..\..\..\..\src\message\filter_load.cpp" />
@@ -257,6 +258,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\block_message.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\block_transactions.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\compact_block.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\fee_filter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\filter_add.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\filter_clear.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\filter_load.hpp" />

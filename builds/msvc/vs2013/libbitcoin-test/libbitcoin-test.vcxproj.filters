@@ -300,5 +300,8 @@
     <ClCompile Include="..\..\..\..\test\message\headers.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\fee_filter.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
