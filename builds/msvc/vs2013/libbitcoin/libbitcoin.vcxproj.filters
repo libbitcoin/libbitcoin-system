@@ -542,6 +542,9 @@
     <ClCompile Include="..\..\..\..\src\chain\point_iterator.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\message\fee_filter.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -1050,6 +1053,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point_iterator.hpp">
       <Filter>include\bitcoin\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\fee_filter.hpp">
+      <Filter>include\bitcoin\message</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -110,6 +110,7 @@
     <ClCompile Include="..\..\..\..\test\message\block_message.cpp" />
     <ClCompile Include="..\..\..\..\test\message\block_transactions.cpp" />
     <ClCompile Include="..\..\..\..\test\message\compact_block.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\fee_filter.cpp" />
     <ClCompile Include="..\..\..\..\test\message\filter_add.cpp" />
     <ClCompile Include="..\..\..\..\test\message\filter_clear.cpp" />
     <ClCompile Include="..\..\..\..\test\message\filter_load.cpp" />
