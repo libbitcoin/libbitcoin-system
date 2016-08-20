@@ -120,7 +120,7 @@ template <size_t Size>
 byte_array<Size> to_array(data_slice bytes);
 
 /**
- * Create a data chunk from an interatable object.
+ * Create a data chunk from an iterable object.
  */
 template <typename Source>
 data_chunk to_chunk(const Source& bytes);
