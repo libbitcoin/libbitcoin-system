@@ -75,7 +75,7 @@ template <size_t Size>
 bool build_array(byte_array<Size>& out, loaf slices);
 
 /**
- * Extend iteratable object by appending other.
+ * Extend iterable object by appending other.
  */
 template <class Target, class Extension>
 void extend_data(Target& target, const Extension& extension);
