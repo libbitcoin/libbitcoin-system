@@ -94,7 +94,13 @@ T from_little_endian_stream_unsafe(std::istream& stream)
 {
     VERIFY_UNSIGNED(T);
     T out = 0;
-    stream.read(reinterpret_cast<char*>(&out), sizeof(T));
+    for (size_t i = 0; (i < sizeof(T)) && stream; i++)
+    {
+        uint8_t value = 0;
+        stream.read(reinterpret_cast<char*>(&value), sizeof value);
+        out |= static_cast<T>(value) << (8 * i);
+    }
+
     return out;
 }
 
