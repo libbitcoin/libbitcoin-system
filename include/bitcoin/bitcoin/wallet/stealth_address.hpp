@@ -41,8 +41,6 @@ public:
     static const uint8_t reuse_key_flag;
     static const uint8_t max_filter_bits;
 
-    typedef std::vector<ec_compressed> point_list;
-
     /// Constructors.
     stealth_address();
     stealth_address(const data_chunk& decoded);

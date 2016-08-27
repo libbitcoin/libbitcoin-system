@@ -110,9 +110,9 @@ public:
     /// stack factories
     static stack to_null_data_pattern(data_slice data);
     static stack to_pay_multisig_pattern(uint8_t signatures,
-        const std::vector<ec_compressed>& points);
+        const point_list& points);
     static stack to_pay_multisig_pattern(uint8_t signatures,
-        const std::vector<data_chunk>& points);
+        const data_stack& points);
     static stack to_pay_public_key_pattern(data_slice point);
     static stack to_pay_key_hash_pattern(const short_hash& hash);
     static stack to_pay_script_hash_pattern(const short_hash& hash);
