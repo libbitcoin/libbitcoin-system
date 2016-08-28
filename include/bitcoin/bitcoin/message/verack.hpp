@@ -57,7 +57,7 @@ public:
     static const uint32_t version_maximum;
 };
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin
 
 #endif

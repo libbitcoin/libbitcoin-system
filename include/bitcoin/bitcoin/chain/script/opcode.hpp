@@ -174,7 +174,7 @@ BC_API std::string opcode_to_string(opcode value, uint32_t flags);
 BC_API opcode string_to_opcode(const std::string& value);
 BC_API opcode data_to_opcode(const data_chunk& value);
 
-} // namspace chain
-} // namspace libbitcoin
+} // namespace chain
+} // namespace libbitcoin
 
 #endif

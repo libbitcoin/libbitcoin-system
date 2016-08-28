@@ -77,7 +77,7 @@ BC_API bool operator==(const inventory_vector& left,
 BC_API bool operator!=(const inventory_vector& left,
     const inventory_vector& right);
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin
 
 #endif

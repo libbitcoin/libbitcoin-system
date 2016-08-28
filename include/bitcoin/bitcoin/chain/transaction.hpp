@@ -93,7 +93,7 @@ private:
     mutable std::shared_ptr<hash_digest> hash_;
 };
 
-} // namspace chain
-} // namspace libbitcoin
+} // namespace chain
+} // namespace libbitcoin
 
 #endif

@@ -65,7 +65,7 @@ public:
     prefilled_transaction::list transactions;
 };
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin
 
 #endif

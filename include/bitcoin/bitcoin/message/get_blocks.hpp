@@ -70,7 +70,7 @@ public:
 BC_API bool operator==(const get_blocks& left, const get_blocks& right);
 BC_API bool operator!=(const get_blocks& left, const get_blocks& right);
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin
 
 #endif

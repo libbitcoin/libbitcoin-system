@@ -57,7 +57,7 @@ public:
     chain::transaction transaction;
 };
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin
 
 #endif

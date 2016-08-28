@@ -63,7 +63,7 @@ public:
 BC_API bool operator==(const pong& left, const pong& right);
 BC_API bool operator!=(const pong& left, const pong& right);
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin
 
 #endif

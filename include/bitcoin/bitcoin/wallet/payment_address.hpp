@@ -112,8 +112,8 @@ struct BC_API wrapped_data
     uint32_t checksum;
 };
 
-} // namspace wallet
-} // namspace libbitcoin
+} // namespace wallet
+} // namespace libbitcoin
 
 // Allow payment_address to be in indexed in std::*map classes.
 namespace std

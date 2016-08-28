@@ -70,7 +70,7 @@ private:
     uint8_t offset_;
 };
 
-} // namspace chain
-} // namspace libbitcoin
+} // namespace chain
+} // namespace libbitcoin
 
 #endif

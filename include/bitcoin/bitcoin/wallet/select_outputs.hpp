@@ -42,7 +42,7 @@ struct BC_API select_outputs
         algorithm option=algorithm::greedy);
 };
 
-} // namspace wallet
-} // namspace libbitcoin
+} // namespace wallet
+} // namespace libbitcoin
 
 #endif
