@@ -79,8 +79,8 @@ struct BC_API points_info
     uint64_t change;
 };
 
-} // namspace chain
-} // namspace libbitcoin
+} // namespace chain
+} // namespace libbitcoin
 
 namespace std
 {
@@ -112,6 +112,6 @@ struct tuple_size<bc::chain::point>
     }
 };
 
-} // namspace std
+} // namespace std
 
 #endif

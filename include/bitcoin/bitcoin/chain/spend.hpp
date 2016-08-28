@@ -42,7 +42,7 @@ struct BC_API spend_info
     output_point previous_output;
 };
 
-} // namspace chain
-} // namspace libbitcoin
+} // namespace chain
+} // namespace libbitcoin
 
 #endif

@@ -62,7 +62,7 @@ public:
     uint64_t version;
 };
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin
 
 #endif

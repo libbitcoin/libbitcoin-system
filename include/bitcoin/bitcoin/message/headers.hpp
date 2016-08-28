@@ -74,7 +74,7 @@ public:
 BC_API bool operator==(const headers& left, const headers& right);
 BC_API bool operator!=(const headers& left, const headers& right);
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin
 
 #endif

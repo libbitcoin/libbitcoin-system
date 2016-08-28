@@ -77,7 +77,7 @@ public:
     uint16_t port;
 };
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin
 
 #endif

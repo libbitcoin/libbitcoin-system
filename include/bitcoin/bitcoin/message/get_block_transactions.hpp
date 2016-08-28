@@ -60,7 +60,7 @@ public:
     std::vector<uint64_t> indexes;
 };
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin
 
 #endif

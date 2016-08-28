@@ -87,7 +87,7 @@ private:
     uint64_t originator_;
 };
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin
 
 #endif

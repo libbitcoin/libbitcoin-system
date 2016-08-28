@@ -57,7 +57,7 @@ public:
     network_address::list addresses;
 };
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin
 
 #endif

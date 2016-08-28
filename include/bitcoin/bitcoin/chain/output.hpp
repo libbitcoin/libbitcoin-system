@@ -65,7 +65,7 @@ struct BC_API output_info
     uint64_t value;
 };
 
-} // namspace chain
-} // namspace libbitcoin
+} // namespace chain
+} // namespace libbitcoin
 
 #endif

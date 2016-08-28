@@ -81,7 +81,7 @@ public:
     transaction::list transactions;
 };
 
-} // namspace chain
-} // namspace libbitcoin
+} // namespace chain
+} // namespace libbitcoin
 
 #endif

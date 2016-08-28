@@ -69,7 +69,7 @@ private:
 BC_API bool operator==(const ping& left, const ping& right);
 BC_API bool operator!=(const ping& left, const ping& right);
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin
 
 #endif
