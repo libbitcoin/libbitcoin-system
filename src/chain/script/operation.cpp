@@ -411,20 +411,20 @@ operation::stack operation::to_pay_public_key_pattern(data_slice point)
 }
 
 operation::stack operation::to_pay_multisig_pattern(uint8_t signatures,
-    const std::vector<ec_compressed>& points)
+    const point_list& points)
 {
     const auto conversion = [](const ec_compressed& point)
     {
         return to_chunk(point);
     };
 
-    std::vector<data_chunk> chunks(points.size());
+    data_stack chunks(points.size());
     std::transform(points.begin(), points.end(), chunks.begin(), conversion);
     return to_pay_multisig_pattern(signatures, chunks);
 }
 
 operation::stack operation::to_pay_multisig_pattern(uint8_t signatures,
-    const std::vector<data_chunk>& points)
+    const data_stack& points)
 {
     static constexpr size_t op_1 = static_cast<uint8_t>(opcode::op_1);
     static constexpr size_t op_16 = static_cast<uint8_t>(opcode::op_16);

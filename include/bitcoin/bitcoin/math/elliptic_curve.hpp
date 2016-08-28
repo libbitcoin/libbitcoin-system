@@ -36,6 +36,8 @@ typedef byte_array<ec_secret_size> ec_secret;
 BC_CONSTEXPR size_t ec_compressed_size = 33;
 typedef byte_array<ec_compressed_size> ec_compressed;
 
+typedef std::vector<ec_compressed> point_list;
+
 /// Uncompressed public key:
 BC_CONSTEXPR size_t ec_uncompressed_size = 65;
 typedef byte_array<ec_uncompressed_size> ec_uncompressed;

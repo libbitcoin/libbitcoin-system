@@ -255,7 +255,7 @@ uint8_t stealth_address::signatures() const
     return signatures_;
 }
 
-const stealth_address::point_list& stealth_address::spend_keys() const
+const point_list& stealth_address::spend_keys() const
 {
     return spend_keys_;
 }
