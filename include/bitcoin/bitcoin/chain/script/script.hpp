@@ -143,7 +143,7 @@ private:
     bool parse(const data_chunk& raw_script);
 };
 
-} // namspace chain
-} // namspace libbitcoin
+} // namespace chain
+} // namespace libbitcoin
 
 #endif
