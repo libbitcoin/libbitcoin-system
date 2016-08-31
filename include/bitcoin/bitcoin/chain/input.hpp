@@ -40,7 +40,6 @@ public:
     static input factory_from_data(const data_chunk& data);
     static input factory_from_data(std::istream& stream);
     static input factory_from_data(reader& source);
-    static uint64_t satoshi_fixed_size();
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
