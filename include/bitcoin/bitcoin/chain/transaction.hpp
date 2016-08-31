@@ -47,7 +47,6 @@ public:
     static transaction factory_from_data(const data_chunk& data);
     static transaction factory_from_data(std::istream& stream);
     static transaction factory_from_data(reader& source);
-    static uint64_t satoshi_fixed_size();
 
     transaction();
     transaction(const transaction& other);
