@@ -26,6 +26,7 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/math/hash_number.hpp>
+#include <bitcoin/bitcoin/version.hpp>
 
 namespace libbitcoin {
 
