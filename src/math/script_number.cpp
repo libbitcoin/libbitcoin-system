@@ -124,7 +124,7 @@ bool script_number::operator<=(const int64_t value) const
 {
     return value_ <= value;
 }
-bool script_number::operator< (const int64_t value) const
+bool script_number::operator<(const int64_t value) const
 {
     return value_ <  value;
 }
@@ -132,7 +132,7 @@ bool script_number::operator>=(const int64_t value) const
 {
     return value_ >= value;
 }
-bool script_number::operator> (const int64_t value) const
+bool script_number::operator>(const int64_t value) const
 {
     return value_ >  value;
 }
