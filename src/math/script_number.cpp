@@ -32,7 +32,7 @@ static constexpr uint8_t negative_mask = 0x80;
 static constexpr auto unsigned_max_int64 = static_cast<uint64_t>(max_int64);
 static constexpr auto absolute_min_int64 = static_cast<uint64_t>(-min_int64);
 
-// The result is always little-endian.
+// The result is always LSB first.
 data_chunk script_number_serialize(int64_t value)
 {
     if (value == 0)
@@ -70,7 +70,7 @@ data_chunk script_number_serialize(int64_t value)
     return result;
 }
 
-// The parameter is assumed to be little-endian.
+// The parameter is assumed to be LSB first.
 int64_t script_number_deserialize(const data_chunk& data)
 {
     if (data.empty())
@@ -239,6 +239,11 @@ script_number script_number::operator+(const script_number& other) const
 script_number script_number::operator-(const script_number& other) const
 {
     return operator-(other.value_);
+}
+
+script_number script_number::operator+() const
+{
+    return *this;
 }
 
 script_number script_number::operator-() const

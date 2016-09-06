@@ -50,11 +50,11 @@ public:
     /// Construct with specified value.
     explicit script_number(int64_t value);
 
-    /// Set the value from a byte vector with little-endian ordering.
+    /// Set the value from a byte vector with LSB first ordering.
     bool set_data(const data_chunk& data,
         uint8_t max_size=max_script_number_size);
 
-    /// Return the value as a byte vector with little-endian ordering.
+    /// Return the value as a byte vector with LSB first ordering.
     data_chunk data() const;
 
     /// Return the value bounded by the limits of int32.
@@ -63,19 +63,22 @@ public:
     /// Return the value.
     int64_t int64() const;
 
-    /// Arithmetic with a number.
+    /// Arithmetic with a number (throws on overflow).
     script_number operator+(const int64_t value) const;
     script_number operator-(const int64_t value) const;
     script_number& operator+=(const int64_t value);
     script_number& operator-=(const int64_t value);
 
-    /// Arithmetic with another script_number.
+    /// Arithmetic with another script_number (throws on overflow).
     script_number operator+(const script_number& other) const;
     script_number operator-(const script_number& other) const;
     script_number& operator+=(const script_number& other);
     script_number& operator-=(const script_number& other);
 
-    /// Negative of the script_number.
+    /// This script_number.
+    script_number operator+() const;
+
+    /// Math-negated copy of this script_number (throws on minimum value).
     script_number operator-() const;
 
     /// Comparison operators with a number.
