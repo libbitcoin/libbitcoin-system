@@ -43,6 +43,8 @@ namespace libbitcoin {
 namespace chain {
 
 // False is an empty stack.
+static const script_number one(1);
+static const script_number zero(0);
 static const data_chunk stack_false_value;
 static const data_chunk stack_true_value{ 1 };
 static constexpr uint64_t op_counter_limit = 201;
@@ -464,6 +466,11 @@ inline bool cast_to_bool(const data_chunk& values)
     return false;
 }
 
+inline uint8_t cast_to_number(bool value)
+{
+    return value ? 1 : 0;
+}
+
 template <typename DataStack>
 void stack_swap(DataStack& stack, size_t index_a, size_t index_b)
 {
@@ -485,11 +492,11 @@ bool read_value(DataStack& stack, int32_t& value)
     if (stack.empty())
         return false;
 
-    script_number mid;
-    if (!mid.set_data(pop_item(stack)))
+    script_number middle;
+    if (!middle.set_data(pop_item(stack)))
         return false;
 
-    value = mid.int32();
+    value = middle.int32();
     return true;
 }
 
@@ -523,18 +530,18 @@ bool pick_roll_impl(DataStack& stack, bool is_roll)
 // numequal, numequalverify, numnotequal, lessthan, greaterthan,
 // lessthanorequal, greaterthanorequal, min, max
 template <typename DataStack>
-bool arithmetic_start_new(DataStack& stack, script_number& number_a,
-    script_number& number_b)
+bool arithmetic_start_new(DataStack& stack, script_number& left,
+    script_number& right)
 {
     if (stack.size() < 2)
         return false;
 
     // The second number is at the top of the stack.
-    if (!number_b.set_data(pop_item(stack)))
+    if (!right.set_data(pop_item(stack)))
         return false;
 
     // The first is at the second position.
-    if (!number_a.set_data(pop_item(stack)))
+    if (!left.set_data(pop_item(stack)))
         return false;
 
     return true;
@@ -562,8 +569,8 @@ bool greater_op_16(opcode code)
 
 bool op_negative_1(evaluation_context& context)
 {
-    script_number neg1(-1);
-    context.stack.push_back(neg1.data());
+    static const script_number negative_1(-1);
+    context.stack.push_back(negative_1.data());
     return true;
 }
 
@@ -572,7 +579,7 @@ bool op_x(evaluation_context& context, opcode code)
     const auto difference = static_cast<uint8_t>(code) -
         static_cast<uint8_t>(opcode::op_1) + 1;
 
-    script_number value(difference);
+    const script_number value(difference);
     context.stack.push_back(value.data());
     return true;
 }
@@ -752,7 +759,12 @@ bool op_ifdup(evaluation_context& context)
 
 bool op_depth(evaluation_context& context)
 {
-    script_number stack_size(context.stack.size());
+    // Condition added by EKV on 2016.09.06.
+    const auto size = context.stack.size();
+    if (size > max_int32)
+        return false;
+
+    const script_number stack_size(size);
     context.stack.push_back(stack_size.data());
     return true;
 }
@@ -875,7 +887,6 @@ bool op_1add(evaluation_context& context)
     if (!number.set_data(context.pop_stack()))
         return false;
 
-    const script_number one(1);
     number += one;
     context.stack.push_back(number.data());
     return true;
@@ -890,7 +901,6 @@ bool op_1sub(evaluation_context& context)
     if (!number.set_data(context.pop_stack()))
         return false;
 
-    const script_number one(1);
     number -= one;
     context.stack.push_back(number.data());
     return true;
@@ -919,7 +929,6 @@ bool op_abs(evaluation_context& context)
     if (!number.set_data(context.pop_stack()))
         return false;
 
-    const script_number zero(0);
     if (number < zero)
         number = -number;
 
@@ -936,7 +945,6 @@ bool op_not(evaluation_context& context)
     if (!number.set_data(context.pop_stack()))
         return false;
 
-    const script_number zero(0);
     context.stack.push_back(script_number(number == zero).data());
     return true;
 }
@@ -950,118 +958,118 @@ bool op_0notequal(evaluation_context& context)
     if (!number.set_data(context.pop_stack()))
         return false;
 
-    const script_number zero(0);
     context.stack.push_back(script_number(number != zero).data());
     return true;
 }
 
 bool op_add(evaluation_context& context)
 {
-    script_number number_a, number_b;
-    if (!arithmetic_start_new(context.stack, number_a, number_b))
+    script_number left, right;
+    if (!arithmetic_start_new(context.stack, left, right))
         return false;
 
-    const script_number result = number_a + number_b;
+    const auto result = left + right;
     context.stack.push_back(result.data());
     return true;
 }
 
 bool op_sub(evaluation_context& context)
 {
-    script_number number_a, number_b;
-    if (!arithmetic_start_new(context.stack, number_a, number_b))
+    script_number left, right;
+    if (!arithmetic_start_new(context.stack, left, right))
         return false;
 
-    const script_number result = number_a - number_b;
+    const auto result = left - right;
     context.stack.push_back(result.data());
     return true;
 }
 
 bool op_booland(evaluation_context& context)
 {
-    script_number number_a, number_b;
-    if (!arithmetic_start_new(context.stack, number_a, number_b))
+    script_number left, right;
+    if (!arithmetic_start_new(context.stack, left, right))
         return false;
 
-    const script_number zero(0);
-    const script_number result(number_a != zero && number_b != zero);
+    const auto value = left != zero && right != zero;
+    const script_number result(cast_to_number(value));
     context.stack.push_back(result.data());
     return true;
 }
 
 bool op_boolor(evaluation_context& context)
 {
-    script_number number_a, number_b;
-    if (!arithmetic_start_new(context.stack, number_a, number_b))
+    script_number left, right;
+    if (!arithmetic_start_new(context.stack, left, right))
         return false;
 
-    const script_number zero(0);
-    const script_number result(number_a != zero || number_b != zero);
+    const auto value = left != zero || right != zero;
+    const script_number result(cast_to_number(value));
     context.stack.push_back(result.data());
     return true;
 }
 
 bool op_numequal(evaluation_context& context)
 {
-    script_number number_a, number_b;
-    if (!arithmetic_start_new(context.stack, number_a, number_b))
+    script_number left, right;
+    if (!arithmetic_start_new(context.stack, left, right))
         return false;
 
-    const script_number result(number_a == number_b);
+    const auto value = left == right;
+    const script_number result(cast_to_number(value));
     context.stack.push_back(result.data());
     return true;
 }
 
 bool op_numequalverify(evaluation_context& context)
 {
-    script_number number_a, number_b;
-    if (!arithmetic_start_new(context.stack, number_a, number_b))
+    script_number left, right;
+    if (!arithmetic_start_new(context.stack, left, right))
         return false;
 
-    return number_a == number_b;
+    return left == right;
 }
 
 bool op_numnotequal(evaluation_context& context)
 {
-    script_number number_a, number_b;
-    if (!arithmetic_start_new(context.stack, number_a, number_b))
+    script_number left, right;
+    if (!arithmetic_start_new(context.stack, left, right))
         return false;
 
-    const script_number result(number_a != number_b);
+    const script_number result(cast_to_number(left != right));
     context.stack.push_back(result.data());
     return true;
 }
 
 bool op_lessthan(evaluation_context& context)
 {
-    script_number number_a, number_b;
-    if (!arithmetic_start_new(context.stack, number_a, number_b))
+    script_number left, right;
+    if (!arithmetic_start_new(context.stack, left, right))
         return false;
 
-    const script_number result(number_a < number_b);
+    const script_number result(cast_to_number(left < right));
     context.stack.push_back(result.data());
     return true;
 }
 
 bool op_greaterthan(evaluation_context& context)
 {
-    script_number number_a, number_b;
-    if (!arithmetic_start_new(context.stack, number_a, number_b))
+    script_number left, right;
+    if (!arithmetic_start_new(context.stack, left, right))
         return false;
 
-    const script_number result(number_a > number_b);
+    const script_number result(cast_to_number(left > right));
     context.stack.push_back(result.data());
     return true;
 }
 
 bool op_lessthanorequal(evaluation_context& context)
 {
-    script_number number_a, number_b;
+    script_number left, right;
 
-    if (!arithmetic_start_new(context.stack, number_a, number_b))
+    if (!arithmetic_start_new(context.stack, left, right))
         return false;
 
-    const script_number result(number_a <= number_b);
+    const script_number result(cast_to_number(left <= right));
     context.stack.push_back(result.data());
 
     return true;
@@ -1069,39 +1077,39 @@ bool op_lessthanorequal(evaluation_context& context)
 
 bool op_greaterthanorequal(evaluation_context& context)
 {
-    script_number number_a, number_b;
-    if (!arithmetic_start_new(context.stack, number_a, number_b))
+    script_number left, right;
+    if (!arithmetic_start_new(context.stack, left, right))
         return false;
 
-    const script_number result(number_a >= number_b);
+    const script_number result(cast_to_number(left >= right));
     context.stack.push_back(result.data());
     return true;
 }
 
 bool op_min(evaluation_context& context)
 {
-    script_number number_a, number_b;
-    if (!arithmetic_start_new(context.stack, number_a, number_b))
+    script_number left, right;
+    if (!arithmetic_start_new(context.stack, left, right))
         return false;
 
-    if (number_a < number_b)
-        context.stack.push_back(number_a.data());
+    if (left < right)
+        context.stack.push_back(left.data());
     else
-        context.stack.push_back(number_b.data());
+        context.stack.push_back(right.data());
 
     return true;
 }
 
 bool op_max(evaluation_context& context)
 {
-    script_number number_a, number_b;
-    if (!arithmetic_start_new(context.stack, number_a, number_b))
+    script_number left, right;
+    if (!arithmetic_start_new(context.stack, left, right))
         return false;
 
-    if (number_a < number_b)
-        context.stack.push_back(number_b.data());
+    if (left < right)
+        context.stack.push_back(right.data());
     else
-        context.stack.push_back(number_a.data());
+        context.stack.push_back(left.data());
 
     return true;
 }
