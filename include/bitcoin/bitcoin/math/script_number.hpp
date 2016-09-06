@@ -48,7 +48,7 @@ public:
     script_number();
 
     /// Construct with specified value.
-    explicit script_number(const int64_t value);
+    explicit script_number(int64_t value);
 
     /// Set the value from a byte vector with little-endian ordering.
     bool set_data(const data_chunk& data,

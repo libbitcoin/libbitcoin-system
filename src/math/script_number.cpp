@@ -26,22 +26,24 @@
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
-    
-static const uint64_t byte_mask = 0xff;
-static const uint8_t negative_mask = 0x80;
+
+static constexpr uint64_t byte_mask = 0xff;
+static constexpr uint8_t negative_mask = 0x80;
+static constexpr auto unsigned_max_int64 = static_cast<uint64_t>(max_int64);
+static constexpr auto absolute_min_int64 = static_cast<uint64_t>(-min_int64);
 
 // The result is always little-endian.
-data_chunk script_number_serialize(const int64_t value)
+data_chunk script_number_serialize(int64_t value)
 {
     if (value == 0)
         return{};
 
-    if (value == min_int64)
-        throw std::out_of_range("the value is out of range");
-
     data_chunk result;
-    const auto is_negative = value < 0;
-    auto absolute_value = static_cast<uint64_t>(std::abs(value));
+    const auto negative = value < 0;
+
+    // std::abs cannot handle min_int64, so we use a special case.
+    auto absolute_value = value == min_int64 ? absolute_min_int64 :
+        static_cast<uint64_t>(std::abs(value));
 
     while (absolute_value != 0)
     {
@@ -61,8 +63,8 @@ data_chunk script_number_serialize(const int64_t value)
     // a negative when converting to an integral.
 
     if ((result.back() & negative_mask) != 0)
-        result.push_back(is_negative ? negative_mask : 0);
-    else if (is_negative)
+        result.push_back(negative ? negative_mask : 0);
+    else if (negative)
         result.back() |= negative_mask;
 
     return result;
@@ -74,24 +76,36 @@ int64_t script_number_deserialize(const data_chunk& data)
     if (data.empty())
         return 0;
 
-    const auto is_negative = (data.back() & negative_mask);
-    const auto consume_last_byte = (data.back() != negative_mask);
-    const auto mask_last_byte = (is_negative && consume_last_byte);
-    
-    uint64_t absolute_value = 0;
-    const auto bounds = (consume_last_byte) ? data.size() : data.size() - 1;
+    const auto consume_last_byte = data.back() != negative_mask;
+    const auto bounds = consume_last_byte ? data.size() : data.size() - 1;
 
-    for (size_t i = 0; i < bounds; ++i)
+    if (bounds > sizeof(uint64_t))
+        throw std::out_of_range("the data size is out of range");
+
+    const auto negative = data.back() & negative_mask;
+    const auto mask_last_byte = negative && consume_last_byte;
+    uint64_t absolute_value = 0;
+
+    for (size_t byte = 0; byte < bounds; ++byte)
     {
-        if (mask_last_byte && (i + 1 == bounds))
-            absolute_value |= static_cast<uint64_t>(data[i] & ~negative_mask)
-                << byte_bits * i;
-        else
-            absolute_value |= static_cast<uint64_t>(data[i]) << byte_bits * i;
+        const auto shift = byte_bits * byte;
+        const auto last_byte = byte + 1 == bounds;
+        const auto value = mask_last_byte && last_byte ?
+            data[byte] & ~negative_mask : data[byte];
+
+        absolute_value |= static_cast<uint64_t>(value) << shift;
     }
 
+    if ((!negative && absolute_value > unsigned_max_int64) ||
+        (negative && absolute_value > absolute_min_int64))
+        throw std::out_of_range("the data value is out of range");
+
+    // Cannot assign absolute_min_int64 to int64, so we use a special case.
+    if (negative && absolute_value == absolute_min_int64)
+        return min_int64;
+
     // If the input vector's most significant byte is 0x80 return a negative.
-    return is_negative ?
+    return negative ?
         static_cast<int64_t>(absolute_value) * -1 :
         static_cast<int64_t>(absolute_value);
 }
@@ -101,7 +115,7 @@ script_number::script_number()
 {
 }
 
-script_number::script_number(const int64_t value)
+script_number::script_number(int64_t value)
   : value_(value)
 {
 }
@@ -197,11 +211,23 @@ bool script_number::operator>(const script_number& other) const
 
 script_number script_number::operator+(const int64_t value) const
 {
+    if ((value > 0 && (value_ >= max_int64 - value)) ||
+        (value < 0 && (value_ <= min_int64 - value)))
+    {
+        throw std::overflow_error("integer overflow");
+    }
+
     return script_number(value_ + value);
 }
 
 script_number script_number::operator-(const int64_t value) const
 {
+    if ((value > 0 && (value_ <= min_int64 + value)) ||
+        (value < 0 && (value_ >= max_int64 + value)))
+    {
+        throw std::overflow_error("integer underflow");
+    }
+
     return script_number(value_ - value);
 }
 
@@ -228,7 +254,7 @@ script_number& script_number::operator+=(const int64_t value)
     if ((value > 0 && (value_ >= max_int64 - value)) ||
         (value < 0 && (value_ <= min_int64 - value)))
     {
-        throw std::overflow_error("integer overflow");
+        throw std::overflow_error("integer increment overflow");
     }
 
     value_ += value;
@@ -240,7 +266,7 @@ script_number& script_number::operator-=(const int64_t value)
     if ((value > 0 && (value_ <= min_int64 + value)) ||
         (value < 0 && (value_ >= max_int64 + value)))
     {
-        throw std::overflow_error("integer underflow");
+        throw std::overflow_error("integer decrement underflow");
     }
 
     value_ -= value;
