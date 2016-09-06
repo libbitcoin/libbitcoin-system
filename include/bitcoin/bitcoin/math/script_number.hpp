@@ -44,10 +44,11 @@ BC_CONSTEXPR size_t cltv_max_script_number_size = 5;
 class BC_API script_number
 {
 public:
-    explicit script_number(const int64_t value);
-
-    /// Undefined state, set_data() must be called after.
+    /// Construct with zero value, may call set_data() after.
     script_number();
+
+    /// Construct with specified value.
+    explicit script_number(const int64_t value);
 
     /// Set the value from a byte vector with little-endian ordering.
     bool set_data(const data_chunk& data,
@@ -56,7 +57,10 @@ public:
     /// Return the value as a byte vector with little-endian ordering.
     data_chunk data() const;
 
+    /// Return the value bounded by the limits of int32.
     int32_t int32() const;
+
+    /// Return the value.
     int64_t int64() const;
 
     /// Arithmetic with a number.

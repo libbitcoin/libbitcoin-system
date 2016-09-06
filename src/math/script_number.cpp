@@ -19,69 +19,91 @@
  */
 #include <bitcoin/bitcoin/math/script_number.hpp>
 
+#include <cstdint>
+#include <cstdlib>
+#include <stdexcept>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
+    
+static const uint64_t byte_mask = 0xff;
+static const uint8_t negative_mask = 0x80;
 
+// The result is always little-endian.
 data_chunk script_number_serialize(const int64_t value)
 {
     if (value == 0)
-        return data_chunk();
+        return{};
+
+    if (value == min_int64)
+        throw std::out_of_range("the value is out of range");
 
     data_chunk result;
-    const bool is_negative = value < 0;
-    uint64_t abs_value = is_negative ? -value : value;
+    const auto is_negative = value < 0;
+    auto absolute_value = static_cast<uint64_t>(std::abs(value));
 
-    while (abs_value)
+    while (absolute_value != 0)
     {
-        result.push_back(abs_value & 0xff);
-        abs_value >>= 8;
+        result.push_back(absolute_value & byte_mask);
+        absolute_value >>= byte_bits;
     }
 
-    // - If the most significant byte is >= 0x80 and the value is positive,
+    // If the most significant byte is >= 0x80 and the value is positive,
     // push a new zero-byte to make the significant byte < 0x80 again.
 
-    // - If the most significant byte is >= 0x80 and the value is negative,
+    // If the most significant byte is >= 0x80 and the value is negative,
     // push a new 0x80 byte that will be popped off when converting to
     // an integral.
 
-    // - If the most significant byte is < 0x80 and the value is negative,
+    // If the most significant byte is < 0x80 and the value is negative,
     // add 0x80 to it, since it will be subtracted and interpreted as
     // a negative when converting to an integral.
 
-    if ((result.back() & 0x80) != 0)
-        result.push_back(is_negative ? 0x80 : 0);
+    if ((result.back() & negative_mask) != 0)
+        result.push_back(is_negative ? negative_mask : 0);
     else if (is_negative)
-        result.back() |= 0x80;
+        result.back() |= negative_mask;
 
     return result;
 }
 
+// The parameter is assumed to be little-endian.
 int64_t script_number_deserialize(const data_chunk& data)
 {
     if (data.empty())
         return 0;
 
-    int64_t result = 0;
-    for (size_t i = 0; i != data.size(); ++i)
-        result |= static_cast<int64_t>(data[i]) << 8 * i;
+    const auto is_negative = (data.back() & negative_mask);
+    const auto consume_last_byte = (data.back() != negative_mask);
+    const auto mask_last_byte = (is_negative && consume_last_byte);
+    
+    uint64_t absolute_value = 0;
+    const auto bounds = (consume_last_byte) ? data.size() : data.size() - 1;
 
-    // If the input vector's most significant byte is 0x80, remove it from
-    // the result's msb and return a negative.
-    if (data.back() & 0x80)
-        return -(result & ~(0x80 << (8 * (data.size() - 1))));
+    for (size_t i = 0; i < bounds; ++i)
+    {
+        if (mask_last_byte && (i + 1 == bounds))
+            absolute_value |= static_cast<uint64_t>(data[i] & ~negative_mask)
+                << byte_bits * i;
+        else
+            absolute_value |= static_cast<uint64_t>(data[i]) << byte_bits * i;
+    }
 
-    return result;
+    // If the input vector's most significant byte is 0x80 return a negative.
+    return is_negative ?
+        static_cast<int64_t>(absolute_value) * -1 :
+        static_cast<int64_t>(absolute_value);
+}
+
+script_number::script_number()
+  : script_number(0)
+{
 }
 
 script_number::script_number(const int64_t value)
   : value_(value)
 {
-}
-script_number::script_number()
-{
-    // You must call set_data() after.
 }
 
 bool script_number::set_data(const data_chunk& data, uint8_t max_size)
@@ -92,6 +114,7 @@ bool script_number::set_data(const data_chunk& data, uint8_t max_size)
     value_ = script_number_deserialize(data);
     return true;
 }
+
 data_chunk script_number::data() const
 {
     return script_number_serialize(value_);
@@ -116,22 +139,27 @@ bool script_number::operator==(const int64_t value) const
 {
     return value_ == value;
 }
+
 bool script_number::operator!=(const int64_t value) const
 {
     return value_ != value;
 }
+
 bool script_number::operator<=(const int64_t value) const
 {
     return value_ <= value;
 }
+
 bool script_number::operator<(const int64_t value) const
 {
     return value_ <  value;
 }
+
 bool script_number::operator>=(const int64_t value) const
 {
     return value_ >= value;
 }
+
 bool script_number::operator>(const int64_t value) const
 {
     return value_ >  value;
@@ -141,22 +169,27 @@ bool script_number::operator==(const script_number& other) const
 {
     return operator==(other.value_);
 }
+
 bool script_number::operator!=(const script_number& other) const
 {
     return operator!=(other.value_);
 }
+
 bool script_number::operator<=(const script_number& other) const
 {
     return operator<=(other.value_);
 }
+
 bool script_number::operator<(const script_number& other) const
 {
     return operator<(other.value_);
 }
+
 bool script_number::operator>=(const script_number& other) const
 {
     return operator>=(other.value_);
 }
+
 bool script_number::operator>(const script_number& other) const
 {
     return operator>(other.value_);
@@ -184,30 +217,41 @@ script_number script_number::operator-(const script_number& other) const
 
 script_number script_number::operator-() const
 {
-    BITCOIN_ASSERT(value_ != std::numeric_limits<int64_t>::min());
+    if (value_ == min_int64)
+        throw std::out_of_range("negation would be out of range");
+
     return script_number(-value_);
 }
 
 script_number& script_number::operator+=(const int64_t value)
 {
-    BITCOIN_ASSERT(value == 0 ||
-        (value > 0 && value_ <= max_int64 - value) ||
-        (value < 0 && value_ >= min_int64 - value));
+    if ((value > 0 && (value_ >= max_int64 - value)) ||
+        (value < 0 && (value_ <= min_int64 - value)))
+    {
+        throw std::overflow_error("integer overflow");
+    }
+
     value_ += value;
     return *this;
 }
+
 script_number& script_number::operator-=(const int64_t value)
 {
-    BITCOIN_ASSERT(value == 0 ||
-        (value > 0 && value_ >= min_int64 + value) ||
-        (value < 0 && value_ <= max_int64 + value));
+    if ((value > 0 && (value_ <= min_int64 + value)) ||
+        (value < 0 && (value_ >= max_int64 + value)))
+    {
+        throw std::overflow_error("integer underflow");
+    }
+
     value_ -= value;
     return *this;
 }
+
 script_number& script_number::operator+=(const script_number& other)
 {
     return operator+=(other.value_);
 }
+
 script_number& script_number::operator-=(const script_number& other)
 {
     return operator-=(other.value_);
