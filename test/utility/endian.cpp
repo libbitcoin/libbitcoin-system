@@ -77,7 +77,6 @@ BOOST_AUTO_TEST_CASE(endian__from_little_endian_stream_unsafe__insufficient_data
     BOOST_REQUIRE(stream.eof());
 }
 
-// BE FAIL
 BOOST_AUTO_TEST_CASE(endian__from_little_endian_stream_unsafe__eof__stream_partial_read)
 {
     static const uint8_t content = 0xFF;
@@ -92,7 +91,6 @@ BOOST_AUTO_TEST_CASE(endian__from_little_endian_stream_unsafe__eof__stream_parti
     BOOST_REQUIRE(stream.eof());
 }
 
-// BE FAIL
 BOOST_AUTO_TEST_CASE(endian__from_little_endian_stream_unsafe__valid__expected)
 {
     static const uint64_t expected = 4234531234u;
