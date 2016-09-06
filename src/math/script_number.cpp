@@ -24,6 +24,9 @@
 
 namespace libbitcoin {
 
+static const uint8_t negative_mask = 0x80;
+static const uint64_t byte_mask = 0xff;
+
 data_chunk script_number_serialize(const int64_t value)
 {
     if (value == 0)
@@ -31,11 +34,12 @@ data_chunk script_number_serialize(const int64_t value)
 
     data_chunk result;
     const bool is_negative = value < 0;
-    uint64_t abs_value = is_negative ? -value : value;
+    uint64_t abs_value = is_negative ?
+        static_cast<uint64_t>(-value) : static_cast<uint64_t>(value);
 
     while (abs_value)
     {
-        result.push_back(abs_value & 0xff);
+        result.push_back(abs_value & byte_mask);
         abs_value >>= 8;
     }
 
@@ -50,10 +54,10 @@ data_chunk script_number_serialize(const int64_t value)
     // add 0x80 to it, since it will be subtracted and interpreted as
     // a negative when converting to an integral.
 
-    if ((result.back() & 0x80) != 0)
-        result.push_back(is_negative ? 0x80 : 0);
+    if ((result.back() & negative_mask) != 0)
+        result.push_back(is_negative ? negative_mask : 0);
     else if (is_negative)
-        result.back() |= 0x80;
+        result.back() |= negative_mask;
 
     return result;
 }
@@ -63,14 +67,23 @@ int64_t script_number_deserialize(const data_chunk& data)
     if (data.empty())
         return 0;
 
-    int64_t result = 0;
-    for (size_t i = 0; i != data.size(); ++i)
-        result |= static_cast<int64_t>(data[i]) << 8 * i;
+    const bool is_negative = (data.back() & negative_mask);
+    const bool consume_last_byte = (data.back() != negative_mask);
+    const bool mask_last_byte = is_negative && consume_last_byte;
 
-    // If the input vector's most significant byte is 0x80, remove it from
-    // the result's msb and return a negative.
-    if (data.back() & 0x80)
-        return -(result & ~(0x80 << (8 * (data.size() - 1))));
+    uint64_t abs_value = 0;
+    const size_t bounds = (consume_last_byte) ? data.size() : data.size() - 1;
+    for (size_t i = 0; i < bounds; ++i)
+    {
+        if (mask_last_byte && (i + 1 == bounds))
+            abs_value |= static_cast<uint64_t>(data[i] & ~negative_mask) << 8 * i;
+        else
+            abs_value |= static_cast<uint64_t>(data[i]) << 8 * i;
+    }
+
+    int64_t result = static_cast<int64_t>(abs_value);
+    if (is_negative)
+        result *= -1;
 
     return result;
 }
