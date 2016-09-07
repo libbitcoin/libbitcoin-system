@@ -79,8 +79,8 @@ int64_t script_number_deserialize(const data_chunk& data)
     const auto consume_last_byte = data.back() != negative_mask;
     const auto bounds = consume_last_byte ? data.size() : data.size() - 1;
 
-    if (bounds > sizeof(uint64_t))
-        throw std::out_of_range("the data size is out of range");
+    // This is guarded by set_data().
+    BITCOIN_ASSERT(bounds <= sizeof(uint64_t));
 
     const auto negative = data.back() & negative_mask;
     const auto mask_last_byte = negative && consume_last_byte;
@@ -120,9 +120,17 @@ script_number::script_number(int64_t value)
 {
 }
 
-bool script_number::set_data(const data_chunk& data, uint8_t max_size)
+bool script_number::set_data(const data_chunk& data, size_t max_size)
 {
-    if (data.size() > max_size)
+    const auto size = data.size();
+
+    if (size > max_size)
+        return false;
+
+    const auto bounds = !data.empty() && data.back() == negative_mask ?
+        size - 1 : size;
+
+    if (bounds > sizeof(uint64_t))
         return false;
 
     value_ = script_number_deserialize(data);
@@ -166,7 +174,7 @@ bool script_number::operator<=(const int64_t value) const
 
 bool script_number::operator<(const int64_t value) const
 {
-    return value_ <  value;
+    return value_ < value;
 }
 
 bool script_number::operator>=(const int64_t value) const
@@ -176,7 +184,7 @@ bool script_number::operator>=(const int64_t value) const
 
 bool script_number::operator>(const int64_t value) const
 {
-    return value_ >  value;
+    return value_ > value;
 }
 
 bool script_number::operator==(const script_number& other) const

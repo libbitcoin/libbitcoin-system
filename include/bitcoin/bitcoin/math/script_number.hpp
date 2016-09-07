@@ -27,9 +27,6 @@
 
 namespace libbitcoin {
 
-BC_CONSTEXPR size_t max_script_number_size = 4;
-BC_CONSTEXPR size_t cltv_max_script_number_size = 5;
-
 /**
  * Numeric opcodes (OP_1ADD, etc) are restricted to operating on
  * 4-byte integers. The semantics are subtle, though: operands must be
@@ -51,8 +48,7 @@ public:
     explicit script_number(int64_t value);
 
     /// Set the value from a byte vector with LSB first ordering.
-    bool set_data(const data_chunk& data,
-        uint8_t max_size=max_script_number_size);
+    bool set_data(const data_chunk& data, size_t max_size);
 
     /// Return the value as a byte vector with LSB first ordering.
     data_chunk data() const;
