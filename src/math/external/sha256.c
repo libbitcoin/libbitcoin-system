@@ -95,6 +95,10 @@ static unsigned char PAD[SHA256_BLOCK_LENGTH] =
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
+void SHA256Pad(SHA256CTX* context);
+void SHA256Transform(uint32_t state[SHA256_STATE_LENGTH],
+    const uint8_t block[SHA256_BLOCK_LENGTH]);
+
 void SHA256_(const uint8_t* input, size_t length,
     uint8_t digest[SHA256_DIGEST_LENGTH])
 {
@@ -102,13 +106,6 @@ void SHA256_(const uint8_t* input, size_t length,
     SHA256Init(&context);
     SHA256Update(&context, input, length);
     SHA256Final(&context, digest);
-}
-
-void SHA256Final(SHA256CTX* context, uint8_t digest[SHA256_DIGEST_LENGTH])
-{
-    SHA256Pad(context);
-    be32enc_vect(digest, context->state, SHA256_DIGEST_LENGTH);
-    zeroize((void*)context, sizeof *context);
 }
 
 void SHA256Init(SHA256CTX* context)
@@ -124,6 +121,52 @@ void SHA256Init(SHA256CTX* context)
     context->state[6] = 0x1F83D9AB;
     context->state[7] = 0x5BE0CD19;
 }
+
+void SHA256Update(SHA256CTX* context, const uint8_t* input, size_t length)
+{
+    uint32_t bitlen[2];
+    uint32_t r = (context->count[1] >> 3) & 0x3f;
+
+    bitlen[1] = ((uint32_t)length) << 3;
+    bitlen[0] = (uint32_t)(length >> 29);
+
+    if ((context->count[1] += bitlen[1]) < bitlen[1])
+    {
+        context->count[0]++;
+    }
+
+    context->count[0] += bitlen[0];
+
+    if (length < 64 - r)
+    {
+        memcpy(&context->buf[r], input, length);
+        return;
+    }
+
+    memcpy(&context->buf[r], input, 64 - r);
+    SHA256Transform(context->state, context->buf);
+
+    input += 64 - r;
+    length -= 64 - r;
+
+    while (length >= 64)
+    {
+        SHA256Transform(context->state, input);
+        input += 64;
+        length -= 64;
+    }
+
+    memcpy(context->buf, input, length);
+}
+
+void SHA256Final(SHA256CTX* context, uint8_t digest[SHA256_DIGEST_LENGTH])
+{
+    SHA256Pad(context);
+    be32enc_vect(digest, context->state, SHA256_DIGEST_LENGTH);
+    zeroize((void*)context, sizeof *context);
+}
+
+// Local
 
 void SHA256Pad(SHA256CTX* context)
 {
@@ -230,41 +273,4 @@ void SHA256Transform(uint32_t state[SHA256_STATE_LENGTH],
     zeroize((void*)S, sizeof S);
     zeroize((void*)&t0, sizeof t0);
     zeroize((void*)&t1, sizeof t1);
-}
-
-void SHA256Update(SHA256CTX* context, const uint8_t* input, size_t length)
-{
-    uint32_t bitlen[2];
-    uint32_t r = (context->count[1] >> 3) & 0x3f;
-
-    bitlen[1] = ((uint32_t)length) << 3;
-    bitlen[0] = (uint32_t)(length >> 29);
-
-    if ((context->count[1] += bitlen[1]) < bitlen[1])
-    {
-        context->count[0]++;
-    }
-
-    context->count[0] += bitlen[0];
-
-    if (length < 64 - r)
-    {
-        memcpy(&context->buf[r], input, length);
-        return;
-    }
-
-    memcpy(&context->buf[r], input, 64 - r);
-    SHA256Transform(context->state, context->buf);
-
-    input += 64 - r;
-    length -= 64 - r;
-
-    while (length >= 64)
-    {
-        SHA256Transform(context->state, input);
-        input += 64;
-        length -= 64;
-    }
-
-    memcpy(context->buf, input, length);
 }
