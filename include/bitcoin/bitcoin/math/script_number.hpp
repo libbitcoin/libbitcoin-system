@@ -27,9 +27,6 @@
 
 namespace libbitcoin {
 
-BC_CONSTEXPR size_t max_script_number_size = 4;
-BC_CONSTEXPR size_t cltv_max_script_number_size = 5;
-
 /**
  * Numeric opcodes (OP_1ADD, etc) are restricted to operating on
  * 4-byte integers. The semantics are subtle, though: operands must be
@@ -41,51 +38,60 @@ BC_CONSTEXPR size_t cltv_max_script_number_size = 5;
  * bytes but throwing an exception if arithmetic is done or the result is
  * interpreted as an integer.
  */
-class script_number
+class BC_API script_number
 {
 public:
-    BC_API explicit script_number(const int64_t value);
+    /// Construct with zero value, may call set_data() after.
+    script_number();
 
-    // Undefined state. set_data() must be called after.
-    BC_API script_number();
-    BC_API bool set_data(const data_chunk& data,
-        uint8_t max_size=max_script_number_size);
+    /// Construct with specified value.
+    explicit script_number(int64_t value);
 
-    BC_API data_chunk data() const;
-    BC_API int32_t int32() const;
-    BC_API int64_t int64() const;
+    /// Set the value from a byte vector with LSB first ordering.
+    bool set_data(const data_chunk& data, size_t max_size);
 
-    // Arithmetic with a number.
-    BC_API script_number operator+(const int64_t value) const;
-    BC_API script_number operator-(const int64_t value) const;
+    /// Return the value as a byte vector with LSB first ordering.
+    data_chunk data() const;
 
-    // Arithmetic with another script_number.
-    BC_API script_number operator+(const script_number& other) const;
-    BC_API script_number operator-(const script_number& other) const;
+    /// Return the value bounded by the limits of int32.
+    int32_t int32() const;
 
-    // -script_number
-    BC_API script_number operator-() const;
+    /// Return the value.
+    int64_t int64() const;
 
-    // Comparison operators with a number.
-    BC_API bool operator==(const int64_t value) const;
-    BC_API bool operator!=(const int64_t value) const;
-    BC_API bool operator<=(const int64_t value) const;
-    BC_API bool operator< (const int64_t value) const;
-    BC_API bool operator>=(const int64_t value) const;
-    BC_API bool operator> (const int64_t value) const;
+    /// Arithmetic with a number (throws on overflow).
+    script_number operator+(const int64_t value) const;
+    script_number operator-(const int64_t value) const;
+    script_number& operator+=(const int64_t value);
+    script_number& operator-=(const int64_t value);
 
-    // Comparison operators with another script_number.
-    BC_API bool operator==(const script_number& other) const;
-    BC_API bool operator!=(const script_number& other) const;
-    BC_API bool operator<=(const script_number& other) const;
-    BC_API bool operator<(const script_number& other) const;
-    BC_API bool operator>=(const script_number& other) const;
-    BC_API bool operator>(const script_number& other) const;
+    /// Arithmetic with another script_number (throws on overflow).
+    script_number operator+(const script_number& other) const;
+    script_number operator-(const script_number& other) const;
+    script_number& operator+=(const script_number& other);
+    script_number& operator-=(const script_number& other);
 
-    BC_API script_number& operator+=(const int64_t value);
-    BC_API script_number& operator-=(const int64_t value);
-    BC_API script_number& operator+=(const script_number& other);
-    BC_API script_number& operator-=(const script_number& other);
+    /// This script_number.
+    script_number operator+() const;
+
+    /// Math-negated copy of this script_number (throws on minimum value).
+    script_number operator-() const;
+
+    /// Comparison operators with a number.
+    bool operator==(const int64_t value) const;
+    bool operator!=(const int64_t value) const;
+    bool operator<=(const int64_t value) const;
+    bool operator<(const int64_t value) const;
+    bool operator>=(const int64_t value) const;
+    bool operator>(const int64_t value) const;
+
+    /// Comparison operators with another script_number.
+    bool operator==(const script_number& other) const;
+    bool operator!=(const script_number& other) const;
+    bool operator<=(const script_number& other) const;
+    bool operator<(const script_number& other) const;
+    bool operator>=(const script_number& other) const;
+    bool operator>(const script_number& other) const;
 
 private:
     int64_t value_;
