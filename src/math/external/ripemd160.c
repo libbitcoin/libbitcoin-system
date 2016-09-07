@@ -1,407 +1,379 @@
-/* OpenBSD: rmd160.h, v 1.5 2009/07/05 */
-/**
- * Copyright (c) 2001 Markus Friedl.  All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-/**
-* Preneel, Bosselaers, Dobbertin, "The Cryptographic Hash Function RIPEMD-160",
-* RSA Laboratories, CryptoBytes, Volume 3, Number 2, Autumn 1997,
-* ftp://ftp.rsasecurity.com/pub/cryptobytes/crypto3n2.pdf
-*/
+/********************************************************************\
+ *  FILE:     rmd160.c
+ *  CONTENTS: A sample C-implementation of the RIPEMD-160 hash-function.
+ *  TARGET:   any computer with an ANSI C compiler
+ *  AUTHOR:   Antoon Bosselaers, Dept. Electrical Eng.-ESAT/COSIC
+ *  DATE:     1 March 1996       VERSION:  1.0
+  * ADAPTED:  by Libbitcoin Developers on 7 September 2016
+\********************************************************************/
 #include "ripemd160.h"
 
-#include <stdint.h>
-#include <string.h>
-#include <bitcoin/bitcoin/compat.h>
 #include "zeroize.h"
 
-#ifdef __BIG_ENDIAN__
-    #define RIPEMD160_BIG_ENDIAN
-#elif defined __LITTLE_ENDIAN__
-    /* override */
-#elif defined __BYTE_ORDER
-    #if __BYTE_ORDER__ ==  __ORDER_BIG_ENDIAN__
-        #define RIPEMD160_BIG_ENDIAN
-    #endif
-#else /* !defined __LITTLE_ENDIAN__ */
-    #include <endian.h> /* machine/endian.h */
-    #if __BYTE_ORDER__ ==  __ORDER_BIG_ENDIAN__
-        #define RIPEMD160_BIG_ENDIAN
-    #endif
-#endif
+/* collect four bytes into one word: */
+#define BYTES_TO_DWORD(bytes) \
+   (((uint32_t)*((bytes) + 3) << 24) | \
+    ((uint32_t)*((bytes) + 2) << 16) | \
+    ((uint32_t)*((bytes) + 1) <<  8) | \
+    ((uint32_t)*((bytes) + 0) <<  0))
 
-#define byte_length 8
+/* ROL(x, n) cyclically rotates x over n bits to the left */
+/* x must be of an unsigned 32 bits type and 0 <= n < 32. */
+#define ROL(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
 
-#define PUT_64BIT_LE(cp, value) do \
+/* the five basic functions F(), G() and H() */
+#define F(x, y, z) ((x) ^ (y) ^ (z)) 
+#define G(x, y, z) (((x) & (y)) | (~(x) & (z))) 
+#define H(x, y, z) (((x) | ~(y)) ^ (z))
+#define I(x, y, z) (((x) & (z)) | ((y) & ~(z))) 
+#define J(x, y, z) ((x) ^ ((y) | ~(z)))
+  
+/* the ten basic operations FF() through III() */
+#define FF(a, b, c, d, e, x, s) \
 { \
-    (cp)[7] = (uint8_t)((value) >> (byte_length * 7)); \
-    (cp)[6] = (uint8_t)((value) >> (byte_length * 6)); \
-    (cp)[5] = (uint8_t)((value) >> (byte_length * 5)); \
-    (cp)[4] = (uint8_t)((value) >> (byte_length * 4)); \
-    (cp)[3] = (uint8_t)((value) >> (byte_length * 3)); \
-    (cp)[2] = (uint8_t)((value) >> (byte_length * 2)); \
-    (cp)[1] = (uint8_t)((value) >> (byte_length * 1)); \
-    (cp)[0] = (uint8_t)((value) >> (byte_length * 0)); \
-} while (0)
-
-#define PUT_32BIT_LE(cp, value) do \
+    (a) += F((b), (c), (d)) + (x); \
+    (a) = ROL((a), (s)) + (e); \
+    (c) = ROL((c), 10); \
+}
+#define GG(a, b, c, d, e, x, s) \
 { \
-    (cp)[3] = (uint8_t)((value) >> (byte_length * 3)); \
-    (cp)[2] = (uint8_t)((value) >> (byte_length * 2)); \
-    (cp)[1] = (uint8_t)((value) >> (byte_length * 1)); \
-    (cp)[0] = (uint8_t)((value) >> (byte_length * 0)); \
-} while (0)
-
-#define	H0 0x67452301U
-#define	H1 0xEFCDAB89U
-#define	H2 0x98BADCFEU
-#define	H3 0x10325476U
-#define	H4 0xC3D2E1F0U
-
-#define	K0 0x00000000U
-#define	K1 0x5A827999U
-#define	K2 0x6ED9EBA1U
-#define	K3 0x8F1BBCDCU
-#define	K4 0xA953FD4EU
-
-#define	KK0 0x50A28BE6U
-#define	KK1 0x5C4DD124U
-#define	KK2 0x6D703EF3U
-#define	KK3 0x7A6D76E9U
-#define	KK4 0x00000000U
-
-#define ROL(n, x) (((x) << (n)) | ((x) >> (32-(n))))
-
-#define F0(x, y, z) ((x) ^ (y) ^ (z))
-#define F1(x, y, z) (((x) & (y)) | ((~x) & (z)))
-#define F2(x, y, z) (((x) | (~y)) ^ (z))
-#define F3(x, y, z) (((x) & (z)) | ((y) & (~z)))
-#define F4(x, y, z) ((x) ^ ((y) | (~z)))
-
-#define R(a, b, c, d, e, Fj, Kj, sj, rj) do \
+    (a) += G((b), (c), (d)) + (x) + 0x5a827999UL; \
+    (a) = ROL((a), (s)) + (e); \
+    (c) = ROL((c), 10); \
+}
+#define HH(a, b, c, d, e, x, s) \
 { \
-    a = ROL(sj, a + Fj(b, c, d) + X(rj) + Kj) + e; \
-    c = ROL(10, c); \
-} while(0)
+    (a) += H((b), (c), (d)) + (x) + 0x6ed9eba1UL; \
+    (a) = ROL((a), (s)) + (e); \
+    (c) = ROL((c), 10); \
+}
+#define II(a, b, c, d, e, x, s) \
+{ \
+    (a) += I((b), (c), (d)) + (x) + 0x8f1bbcdcUL; \
+    (a) = ROL((a), (s)) + (e); \
+    (c) = ROL((c), 10); \
+}
+#define JJ(a, b, c, d, e, x, s) \
+{ \
+    (a) += J((b), (c), (d)) + (x) + 0xa953fd4eUL; \
+    (a) = ROL((a), (s)) + (e); \
+    (c) = ROL((c), 10); \
+}
+#define FFF(a, b, c, d, e, x, s) \
+{ \
+    (a) += F((b), (c), (d)) + (x); \
+    (a) = ROL((a), (s)) + (e); \
+    (c) = ROL((c), 10); \
+}
+#define GGG(a, b, c, d, e, x, s) \
+{ \
+    (a) += G((b), (c), (d)) + (x) + 0x7a6d76e9UL; \
+    (a) = ROL((a), (s)) + (e); \
+    (c) = ROL((c), 10); \
+}
+#define HHH(a, b, c, d, e, x, s) \
+{ \
+    (a) += H((b), (c), (d)) + (x) + 0x6d703ef3UL; \
+    (a) = ROL((a), (s)) + (e); \
+    (c) = ROL((c), 10); \
+}
+#define III(a, b, c, d, e, x, s) \
+{ \
+    (a) += I((b), (c), (d)) + (x) + 0x5c4dd124UL; \
+    (a) = ROL((a), (s)) + (e); \
+    (c) = ROL((c), 10); \
+}
+#define JJJ(a, b, c, d, e, x, s) \
+{ \
+    (a) += J((b), (c), (d)) + (x) + 0x50a28be6UL; \
+    (a) = ROL((a), (s)) + (e); \
+    (c) = ROL((c), 10); \
+}
 
-#define X(i) x[i]
+void RMDcompress(RMD160CTX* context);
+void RMDfinish(RMD160CTX* context, const uint8_t* message, size_t length);
 
-static uint8_t PAD[RMD160_BLOCK_LENGTH] = 
-{
-    0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
-
-void RMD160(const uint8_t* input, size_t length,
+void RMD160(const uint8_t* message, size_t length,
     uint8_t digest[RMD160_DIGEST_LENGTH])
 {
-    RMD160CTX ctx;
-    RMD160Init(&ctx);
-    RMD160Update(&ctx, input, length);
-    RMD160Final(&ctx, digest);
+    RMD160CTX context;
+    RMDInit(&context);
+    RMDUpdate(&context, message, length);
+    RMDFinal(&context, digest);
 }
 
-void RMD160Final(RMD160CTX* context, uint8_t digest[RMD160_DIGEST_LENGTH])
+void RMDInit(RMD160CTX* context)
 {
-    int i;
-    RMD160Pad(context);
-    for (i = 0; i < 5; i++)
+    context->state[0] = 0x67452301UL;
+    context->state[1] = 0xefcdab89UL;
+    context->state[2] = 0x98badcfeUL;
+    context->state[3] = 0x10325476UL;
+    context->state[4] = 0xc3d2e1f0UL;
+}
+
+void RMDUpdate(RMD160CTX* context, const uint8_t* message, size_t length)
+{
+    size_t i;
+    size_t byte;
+
+    for (byte = length; byte > 63; byte -= 64)
     {
-        PUT_32BIT_LE(digest + i * 4, context->state[i]);
-    }
-
-    zeroize(context, sizeof *context);
-}
-
-void RMD160Init(RMD160CTX* context)
-{
-    context->count = 0;
-
-    context->state[0] = H0;
-    context->state[1] = H1;
-    context->state[2] = H2;
-    context->state[3] = H3;
-    context->state[4] = H4;
-}
-
-void RMD160Pad(RMD160CTX* context)
-{
-    uint8_t len[8];
-    uint32_t plen;
-
-    PUT_64BIT_LE(len, context->count);
-
-    plen = RMD160_BLOCK_LENGTH -
-        ((context->count / 8) % RMD160_BLOCK_LENGTH);
-
-    if (plen < 1 + 8)
-    {
-        plen += RMD160_BLOCK_LENGTH;
-    }
-
-    RMD160Update(context, PAD, plen - 8);
-    RMD160Update(context, len, 8);
-}
-
-void RMD160Transform(uint32_t state[RMD160_STATE_LENGTH],
-    const uint8_t block[RMD160_BLOCK_LENGTH])
-{
-    uint32_t a, b, c, d, e, aa, bb, cc, dd, ee, t, x[16];
-
-#ifdef RIPEMD160_BIG_ENDIAN
-    memcpy(x, block, RMD160_BLOCK_LENGTH);
-#else
-    int i;
-    for (i = 0; i < 16; i++)
-    {
-        x[i] = (uint32_t)(
-        (uint32_t)(block[i * 4 + 0]) |
-        (uint32_t)(block[i * 4 + 1]) << byte_length * 1 |
-        (uint32_t)(block[i * 4 + 2]) << byte_length * 2 |
-        (uint32_t)(block[i * 4 + 3]) << byte_length * 3);
-    }
-#endif
-
-    a = state[0];
-    b = state[1];
-    c = state[2];
-    d = state[3];
-    e = state[4];
-
-    R(a, b, c, d, e, F0, K0, 11, 0);
-    R(e, a, b, c, d, F0, K0, 14, 1);
-    R(d, e, a, b, c, F0, K0, 15, 2);
-    R(c, d, e, a, b, F0, K0, 12, 3);
-    R(b, c, d, e, a, F0, K0, 5, 4);
-    R(a, b, c, d, e, F0, K0, 8, 5);
-    R(e, a, b, c, d, F0, K0, 7, 6);
-    R(d, e, a, b, c, F0, K0, 9, 7);
-    R(c, d, e, a, b, F0, K0, 11, 8);
-    R(b, c, d, e, a, F0, K0, 13, 9);
-    R(a, b, c, d, e, F0, K0, 14, 10);
-    R(e, a, b, c, d, F0, K0, 15, 11);
-    R(d, e, a, b, c, F0, K0, 6, 12);
-    R(c, d, e, a, b, F0, K0, 7, 13);
-    R(b, c, d, e, a, F0, K0, 9, 14);
-    R(a, b, c, d, e, F0, K0, 8, 15);
-
-    R(e, a, b, c, d, F1, K1, 7, 7);
-    R(d, e, a, b, c, F1, K1, 6, 4);
-    R(c, d, e, a, b, F1, K1, 8, 13);
-    R(b, c, d, e, a, F1, K1, 13, 1);
-    R(a, b, c, d, e, F1, K1, 11, 10);
-    R(e, a, b, c, d, F1, K1, 9, 6);
-    R(d, e, a, b, c, F1, K1, 7, 15);
-    R(c, d, e, a, b, F1, K1, 15, 3);
-    R(b, c, d, e, a, F1, K1, 7, 12);
-    R(a, b, c, d, e, F1, K1, 12, 0);
-    R(e, a, b, c, d, F1, K1, 15, 9);
-    R(d, e, a, b, c, F1, K1, 9, 5);
-    R(c, d, e, a, b, F1, K1, 11, 2);
-    R(b, c, d, e, a, F1, K1, 7, 14);
-    R(a, b, c, d, e, F1, K1, 13, 11);
-    R(e, a, b, c, d, F1, K1, 12, 8);
-
-    R(d, e, a, b, c, F2, K2, 11, 3);
-    R(c, d, e, a, b, F2, K2, 13, 10);
-    R(b, c, d, e, a, F2, K2, 6, 14);
-    R(a, b, c, d, e, F2, K2, 7, 4);
-    R(e, a, b, c, d, F2, K2, 14, 9);
-    R(d, e, a, b, c, F2, K2, 9, 15);
-    R(c, d, e, a, b, F2, K2, 13, 8);
-    R(b, c, d, e, a, F2, K2, 15, 1);
-    R(a, b, c, d, e, F2, K2, 14, 2);
-    R(e, a, b, c, d, F2, K2, 8, 7);
-    R(d, e, a, b, c, F2, K2, 13, 0);
-    R(c, d, e, a, b, F2, K2, 6, 6);
-    R(b, c, d, e, a, F2, K2, 5, 13);
-    R(a, b, c, d, e, F2, K2, 12, 11);
-    R(e, a, b, c, d, F2, K2, 7, 5);
-    R(d, e, a, b, c, F2, K2, 5, 12);
-
-    R(c, d, e, a, b, F3, K3, 11, 1);
-    R(b, c, d, e, a, F3, K3, 12, 9);
-    R(a, b, c, d, e, F3, K3, 14, 11);
-    R(e, a, b, c, d, F3, K3, 15, 10);
-    R(d, e, a, b, c, F3, K3, 14, 0);
-    R(c, d, e, a, b, F3, K3, 15, 8);
-    R(b, c, d, e, a, F3, K3, 9, 12);
-    R(a, b, c, d, e, F3, K3, 8, 4);
-    R(e, a, b, c, d, F3, K3, 9, 13);
-    R(d, e, a, b, c, F3, K3, 14, 3);
-    R(c, d, e, a, b, F3, K3, 5, 7);
-    R(b, c, d, e, a, F3, K3, 6, 15);
-    R(a, b, c, d, e, F3, K3, 8, 14);
-    R(e, a, b, c, d, F3, K3, 6, 5);
-    R(d, e, a, b, c, F3, K3, 5, 6);
-    R(c, d, e, a, b, F3, K3, 12, 2);
-
-    R(b, c, d, e, a, F4, K4, 9, 4);
-    R(a, b, c, d, e, F4, K4, 15, 0);
-    R(e, a, b, c, d, F4, K4, 5, 5);
-    R(d, e, a, b, c, F4, K4, 11, 9);
-    R(c, d, e, a, b, F4, K4, 6, 7);
-    R(b, c, d, e, a, F4, K4, 8, 12);
-    R(a, b, c, d, e, F4, K4, 13, 2);
-    R(e, a, b, c, d, F4, K4, 12, 10);
-    R(d, e, a, b, c, F4, K4, 5, 14);
-    R(c, d, e, a, b, F4, K4, 12, 1);
-    R(b, c, d, e, a, F4, K4, 13, 3);
-    R(a, b, c, d, e, F4, K4, 14, 8);
-    R(e, a, b, c, d, F4, K4, 11, 11);
-    R(d, e, a, b, c, F4, K4, 8, 6);
-    R(c, d, e, a, b, F4, K4, 5, 15);
-    R(b, c, d, e, a, F4, K4, 6, 13);
-
-    aa = a; bb = b; cc = c; dd = d; ee = e;
-
-    a = state[0];
-    b = state[1];
-    c = state[2];
-    d = state[3];
-    e = state[4];
-
-    R(a, b, c, d, e, F4, KK0, 8, 5);
-    R(e, a, b, c, d, F4, KK0, 9, 14);
-    R(d, e, a, b, c, F4, KK0, 9, 7);
-    R(c, d, e, a, b, F4, KK0, 11, 0);
-    R(b, c, d, e, a, F4, KK0, 13, 9);
-    R(a, b, c, d, e, F4, KK0, 15, 2);
-    R(e, a, b, c, d, F4, KK0, 15, 11);
-    R(d, e, a, b, c, F4, KK0, 5, 4);
-    R(c, d, e, a, b, F4, KK0, 7, 13);
-    R(b, c, d, e, a, F4, KK0, 7, 6);
-    R(a, b, c, d, e, F4, KK0, 8, 15);
-    R(e, a, b, c, d, F4, KK0, 11, 8);
-    R(d, e, a, b, c, F4, KK0, 14, 1);
-    R(c, d, e, a, b, F4, KK0, 14, 10);
-    R(b, c, d, e, a, F4, KK0, 12, 3);
-    R(a, b, c, d, e, F4, KK0, 6, 12);
-
-    R(e, a, b, c, d, F3, KK1, 9, 6);
-    R(d, e, a, b, c, F3, KK1, 13, 11);
-    R(c, d, e, a, b, F3, KK1, 15, 3);
-    R(b, c, d, e, a, F3, KK1, 7, 7);
-    R(a, b, c, d, e, F3, KK1, 12, 0);
-    R(e, a, b, c, d, F3, KK1, 8, 13);
-    R(d, e, a, b, c, F3, KK1, 9, 5);
-    R(c, d, e, a, b, F3, KK1, 11, 10);
-    R(b, c, d, e, a, F3, KK1, 7, 14);
-    R(a, b, c, d, e, F3, KK1, 7, 15);
-    R(e, a, b, c, d, F3, KK1, 12, 8);
-    R(d, e, a, b, c, F3, KK1, 7, 12);
-    R(c, d, e, a, b, F3, KK1, 6, 4);
-    R(b, c, d, e, a, F3, KK1, 15, 9);
-    R(a, b, c, d, e, F3, KK1, 13, 1);
-    R(e, a, b, c, d, F3, KK1, 11, 2);
-
-    R(d, e, a, b, c, F2, KK2, 9, 15);
-    R(c, d, e, a, b, F2, KK2, 7, 5);
-    R(b, c, d, e, a, F2, KK2, 15, 1);
-    R(a, b, c, d, e, F2, KK2, 11, 3);
-    R(e, a, b, c, d, F2, KK2, 8, 7);
-    R(d, e, a, b, c, F2, KK2, 6, 14);
-    R(c, d, e, a, b, F2, KK2, 6, 6);
-    R(b, c, d, e, a, F2, KK2, 14, 9);
-    R(a, b, c, d, e, F2, KK2, 12, 11);
-    R(e, a, b, c, d, F2, KK2, 13, 8);
-    R(d, e, a, b, c, F2, KK2, 5, 12);
-    R(c, d, e, a, b, F2, KK2, 14, 2);
-    R(b, c, d, e, a, F2, KK2, 13, 10);
-    R(a, b, c, d, e, F2, KK2, 13, 0);
-    R(e, a, b, c, d, F2, KK2, 7, 4);
-    R(d, e, a, b, c, F2, KK2, 5, 13);
-
-    R(c, d, e, a, b, F1, KK3, 15, 8);
-    R(b, c, d, e, a, F1, KK3, 5, 6);
-    R(a, b, c, d, e, F1, KK3, 8, 4);
-    R(e, a, b, c, d, F1, KK3, 11, 1);
-    R(d, e, a, b, c, F1, KK3, 14, 3);
-    R(c, d, e, a, b, F1, KK3, 14, 11);
-    R(b, c, d, e, a, F1, KK3, 6, 15);
-    R(a, b, c, d, e, F1, KK3, 14, 0);
-    R(e, a, b, c, d, F1, KK3, 6, 5);
-    R(d, e, a, b, c, F1, KK3, 9, 12);
-    R(c, d, e, a, b, F1, KK3, 12, 2);
-    R(b, c, d, e, a, F1, KK3, 9, 13);
-    R(a, b, c, d, e, F1, KK3, 12, 9);
-    R(e, a, b, c, d, F1, KK3, 5, 7);
-    R(d, e, a, b, c, F1, KK3, 15, 10);
-    R(c, d, e, a, b, F1, KK3, 8, 14);
-
-    R(b, c, d, e, a, F0, KK4, 8, 12);
-    R(a, b, c, d, e, F0, KK4, 5, 15);
-    R(e, a, b, c, d, F0, KK4, 12, 10);
-    R(d, e, a, b, c, F0, KK4, 9, 4);
-    R(c, d, e, a, b, F0, KK4, 12, 1);
-    R(b, c, d, e, a, F0, KK4, 5, 5);
-    R(a, b, c, d, e, F0, KK4, 14, 8);
-    R(e, a, b, c, d, F0, KK4, 6, 7);
-    R(d, e, a, b, c, F0, KK4, 8, 6);
-    R(c, d, e, a, b, F0, KK4, 13, 2);
-    R(b, c, d, e, a, F0, KK4, 6, 13);
-    R(a, b, c, d, e, F0, KK4, 5, 14);
-    R(e, a, b, c, d, F0, KK4, 15, 0);
-    R(d, e, a, b, c, F0, KK4, 13, 3);
-    R(c, d, e, a, b, F0, KK4, 11, 9);
-    R(b, c, d, e, a, F0, KK4, 11, 11);
-
-    t = state[1] + cc + d;
-    state[1] = state[2] + dd + e;
-    state[2] = state[3] + ee + a;
-    state[3] = state[4] + aa + b;
-    state[4] = state[0] + bb + c;
-    state[0] = t;
-}
-
-void RMD160Update(RMD160CTX* context, const uint8_t* input, size_t length)
-{
-    uint32_t have, off, need;
-
-    have = (context->count / 8) % RMD160_BLOCK_LENGTH;
-    need = RMD160_BLOCK_LENGTH - have;
-    context->count += 8 * length;
-    off = 0;
-
-    if (length >= need)
-    {
-        if (have)
+        for (i = 0; i < 16; i++)
         {
-            memcpy(context->buffer + have, input, need);
-            RMD160Transform(context->state, context->buffer);
-            off = need;
-            have = 0;
+            context->chunk[i] = BYTES_TO_DWORD(message);
+            message += 4;
         }
 
-        while (off + RMD160_BLOCK_LENGTH <= length) 
-        {
-            RMD160Transform(context->state, input + off);
-            off += RMD160_BLOCK_LENGTH;
-        }
+        RMDcompress(context);
     }
 
-    if (off < length)
+    RMDfinish(context, message, length);
+}
+
+void RMDFinal(RMD160CTX* context, uint8_t digest[RMD160_DIGEST_LENGTH])
+{
+    size_t i;
+
+    for (i = 0; i < RMD160_DIGEST_LENGTH; i += 4)
     {
-        memcpy(context->buffer + have, input + off, length - off);
+        digest[i + 0] = (context->state[i >> 2] >> 0);
+        digest[i + 1] = (context->state[i >> 2] >> 8);
+        digest[i + 2] = (context->state[i >> 2] >> 16);
+        digest[i + 3] = (context->state[i >> 2] >> 24);
     }
+}
+
+// Local
+
+void RMDcompress(RMD160CTX* context)
+{
+    uint32_t* state = context->state;
+    uint32_t* chunk = context->chunk;
+
+    uint32_t aa = state[0];
+    uint32_t bb = state[1];
+    uint32_t cc = state[2];
+    uint32_t dd = state[3];
+    uint32_t ee = state[4];
+
+    uint32_t aaa = aa;
+    uint32_t bbb = bb;
+    uint32_t ccc = cc;
+    uint32_t ddd = dd;
+    uint32_t eee = ee;
+
+    /* round 1 */
+    FF(aa, bb, cc, dd, ee, chunk[ 0], 11);
+    FF(ee, aa, bb, cc, dd, chunk[ 1], 14);
+    FF(dd, ee, aa, bb, cc, chunk[ 2], 15);
+    FF(cc, dd, ee, aa, bb, chunk[ 3], 12);
+    FF(bb, cc, dd, ee, aa, chunk[ 4],  5);
+    FF(aa, bb, cc, dd, ee, chunk[ 5],  8);
+    FF(ee, aa, bb, cc, dd, chunk[ 6],  7);
+    FF(dd, ee, aa, bb, cc, chunk[ 7],  9);
+    FF(cc, dd, ee, aa, bb, chunk[ 8], 11);
+    FF(bb, cc, dd, ee, aa, chunk[ 9], 13);
+    FF(aa, bb, cc, dd, ee, chunk[10], 14);
+    FF(ee, aa, bb, cc, dd, chunk[11], 15);
+    FF(dd, ee, aa, bb, cc, chunk[12],  6);
+    FF(cc, dd, ee, aa, bb, chunk[13],  7);
+    FF(bb, cc, dd, ee, aa, chunk[14],  9);
+    FF(aa, bb, cc, dd, ee, chunk[15],  8);
+                             
+    /* round 2 */
+    GG(ee, aa, bb, cc, dd, chunk[ 7],  7);
+    GG(dd, ee, aa, bb, cc, chunk[ 4],  6);
+    GG(cc, dd, ee, aa, bb, chunk[13],  8);
+    GG(bb, cc, dd, ee, aa, chunk[ 1], 13);
+    GG(aa, bb, cc, dd, ee, chunk[10], 11);
+    GG(ee, aa, bb, cc, dd, chunk[ 6],  9);
+    GG(dd, ee, aa, bb, cc, chunk[15],  7);
+    GG(cc, dd, ee, aa, bb, chunk[ 3], 15);
+    GG(bb, cc, dd, ee, aa, chunk[12],  7);
+    GG(aa, bb, cc, dd, ee, chunk[ 0], 12);
+    GG(ee, aa, bb, cc, dd, chunk[ 9], 15);
+    GG(dd, ee, aa, bb, cc, chunk[ 5],  9);
+    GG(cc, dd, ee, aa, bb, chunk[ 2], 11);
+    GG(bb, cc, dd, ee, aa, chunk[14],  7);
+    GG(aa, bb, cc, dd, ee, chunk[11], 13);
+    GG(ee, aa, bb, cc, dd, chunk[ 8], 12);
+
+    /* round 3 */
+    HH(dd, ee, aa, bb, cc, chunk[ 3], 11);
+    HH(cc, dd, ee, aa, bb, chunk[10], 13);
+    HH(bb, cc, dd, ee, aa, chunk[14],  6);
+    HH(aa, bb, cc, dd, ee, chunk[ 4],  7);
+    HH(ee, aa, bb, cc, dd, chunk[ 9], 14);
+    HH(dd, ee, aa, bb, cc, chunk[15],  9);
+    HH(cc, dd, ee, aa, bb, chunk[ 8], 13);
+    HH(bb, cc, dd, ee, aa, chunk[ 1], 15);
+    HH(aa, bb, cc, dd, ee, chunk[ 2], 14);
+    HH(ee, aa, bb, cc, dd, chunk[ 7],  8);
+    HH(dd, ee, aa, bb, cc, chunk[ 0], 13);
+    HH(cc, dd, ee, aa, bb, chunk[ 6],  6);
+    HH(bb, cc, dd, ee, aa, chunk[13],  5);
+    HH(aa, bb, cc, dd, ee, chunk[11], 12);
+    HH(ee, aa, bb, cc, dd, chunk[ 5],  7);
+    HH(dd, ee, aa, bb, cc, chunk[12],  5);
+
+    /* round 4 */
+    II(cc, dd, ee, aa, bb, chunk[ 1], 11);
+    II(bb, cc, dd, ee, aa, chunk[ 9], 12);
+    II(aa, bb, cc, dd, ee, chunk[11], 14);
+    II(ee, aa, bb, cc, dd, chunk[10], 15);
+    II(dd, ee, aa, bb, cc, chunk[ 0], 14);
+    II(cc, dd, ee, aa, bb, chunk[ 8], 15);
+    II(bb, cc, dd, ee, aa, chunk[12],  9);
+    II(aa, bb, cc, dd, ee, chunk[ 4],  8);
+    II(ee, aa, bb, cc, dd, chunk[13],  9);
+    II(dd, ee, aa, bb, cc, chunk[ 3], 14);
+    II(cc, dd, ee, aa, bb, chunk[ 7],  5);
+    II(bb, cc, dd, ee, aa, chunk[15],  6);
+    II(aa, bb, cc, dd, ee, chunk[14],  8);
+    II(ee, aa, bb, cc, dd, chunk[ 5],  6);
+    II(dd, ee, aa, bb, cc, chunk[ 6],  5);
+    II(cc, dd, ee, aa, bb, chunk[ 2], 12);
+
+    /* round 5 */
+    JJ(bb, cc, dd, ee, aa, chunk[ 4],  9);
+    JJ(aa, bb, cc, dd, ee, chunk[ 0], 15);
+    JJ(ee, aa, bb, cc, dd, chunk[ 5],  5);
+    JJ(dd, ee, aa, bb, cc, chunk[ 9], 11);
+    JJ(cc, dd, ee, aa, bb, chunk[ 7],  6);
+    JJ(bb, cc, dd, ee, aa, chunk[12],  8);
+    JJ(aa, bb, cc, dd, ee, chunk[ 2], 13);
+    JJ(ee, aa, bb, cc, dd, chunk[10], 12);
+    JJ(dd, ee, aa, bb, cc, chunk[14],  5);
+    JJ(cc, dd, ee, aa, bb, chunk[ 1], 12);
+    JJ(bb, cc, dd, ee, aa, chunk[ 3], 13);
+    JJ(aa, bb, cc, dd, ee, chunk[ 8], 14);
+    JJ(ee, aa, bb, cc, dd, chunk[11], 11);
+    JJ(dd, ee, aa, bb, cc, chunk[ 6],  8);
+    JJ(cc, dd, ee, aa, bb, chunk[15],  5);
+    JJ(bb, cc, dd, ee, aa, chunk[13],  6);
+
+    /* parallel round 1 */
+    JJJ(aaa, bbb, ccc, ddd, eee, chunk[ 5],  8);
+    JJJ(eee, aaa, bbb, ccc, ddd, chunk[14],  9);
+    JJJ(ddd, eee, aaa, bbb, ccc, chunk[ 7],  9);
+    JJJ(ccc, ddd, eee, aaa, bbb, chunk[ 0], 11);
+    JJJ(bbb, ccc, ddd, eee, aaa, chunk[ 9], 13);
+    JJJ(aaa, bbb, ccc, ddd, eee, chunk[ 2], 15);
+    JJJ(eee, aaa, bbb, ccc, ddd, chunk[11], 15);
+    JJJ(ddd, eee, aaa, bbb, ccc, chunk[ 4],  5);
+    JJJ(ccc, ddd, eee, aaa, bbb, chunk[13],  7);
+    JJJ(bbb, ccc, ddd, eee, aaa, chunk[ 6],  7);
+    JJJ(aaa, bbb, ccc, ddd, eee, chunk[15],  8);
+    JJJ(eee, aaa, bbb, ccc, ddd, chunk[ 8], 11);
+    JJJ(ddd, eee, aaa, bbb, ccc, chunk[ 1], 14);
+    JJJ(ccc, ddd, eee, aaa, bbb, chunk[10], 14);
+    JJJ(bbb, ccc, ddd, eee, aaa, chunk[ 3], 12);
+    JJJ(aaa, bbb, ccc, ddd, eee, chunk[12],  6);
+
+    /* parallel round 2 */
+    III(eee, aaa, bbb, ccc, ddd, chunk[ 6],  9); 
+    III(ddd, eee, aaa, bbb, ccc, chunk[11], 13);
+    III(ccc, ddd, eee, aaa, bbb, chunk[ 3], 15);
+    III(bbb, ccc, ddd, eee, aaa, chunk[ 7],  7);
+    III(aaa, bbb, ccc, ddd, eee, chunk[ 0], 12);
+    III(eee, aaa, bbb, ccc, ddd, chunk[13],  8);
+    III(ddd, eee, aaa, bbb, ccc, chunk[ 5],  9);
+    III(ccc, ddd, eee, aaa, bbb, chunk[10], 11);
+    III(bbb, ccc, ddd, eee, aaa, chunk[14],  7);
+    III(aaa, bbb, ccc, ddd, eee, chunk[15],  7);
+    III(eee, aaa, bbb, ccc, ddd, chunk[ 8], 12);
+    III(ddd, eee, aaa, bbb, ccc, chunk[12],  7);
+    III(ccc, ddd, eee, aaa, bbb, chunk[ 4],  6);
+    III(bbb, ccc, ddd, eee, aaa, chunk[ 9], 15);
+    III(aaa, bbb, ccc, ddd, eee, chunk[ 1], 13);
+    III(eee, aaa, bbb, ccc, ddd, chunk[ 2], 11);
+
+    /* parallel round 3 */
+    HHH(ddd, eee, aaa, bbb, ccc, chunk[15],  9);
+    HHH(ccc, ddd, eee, aaa, bbb, chunk[ 5],  7);
+    HHH(bbb, ccc, ddd, eee, aaa, chunk[ 1], 15);
+    HHH(aaa, bbb, ccc, ddd, eee, chunk[ 3], 11);
+    HHH(eee, aaa, bbb, ccc, ddd, chunk[ 7],  8);
+    HHH(ddd, eee, aaa, bbb, ccc, chunk[14],  6);
+    HHH(ccc, ddd, eee, aaa, bbb, chunk[ 6],  6);
+    HHH(bbb, ccc, ddd, eee, aaa, chunk[ 9], 14);
+    HHH(aaa, bbb, ccc, ddd, eee, chunk[11], 12);
+    HHH(eee, aaa, bbb, ccc, ddd, chunk[ 8], 13);
+    HHH(ddd, eee, aaa, bbb, ccc, chunk[12],  5);
+    HHH(ccc, ddd, eee, aaa, bbb, chunk[ 2], 14);
+    HHH(bbb, ccc, ddd, eee, aaa, chunk[10], 13);
+    HHH(aaa, bbb, ccc, ddd, eee, chunk[ 0], 13);
+    HHH(eee, aaa, bbb, ccc, ddd, chunk[ 4],  7);
+    HHH(ddd, eee, aaa, bbb, ccc, chunk[13],  5);
+
+    /* parallel round 4 */   
+    GGG(ccc, ddd, eee, aaa, bbb, chunk[ 8], 15);
+    GGG(bbb, ccc, ddd, eee, aaa, chunk[ 6],  5);
+    GGG(aaa, bbb, ccc, ddd, eee, chunk[ 4],  8);
+    GGG(eee, aaa, bbb, ccc, ddd, chunk[ 1], 11);
+    GGG(ddd, eee, aaa, bbb, ccc, chunk[ 3], 14);
+    GGG(ccc, ddd, eee, aaa, bbb, chunk[11], 14);
+    GGG(bbb, ccc, ddd, eee, aaa, chunk[15],  6);
+    GGG(aaa, bbb, ccc, ddd, eee, chunk[ 0], 14);
+    GGG(eee, aaa, bbb, ccc, ddd, chunk[ 5],  6);
+    GGG(ddd, eee, aaa, bbb, ccc, chunk[12],  9);
+    GGG(ccc, ddd, eee, aaa, bbb, chunk[ 2], 12);
+    GGG(bbb, ccc, ddd, eee, aaa, chunk[13],  9);
+    GGG(aaa, bbb, ccc, ddd, eee, chunk[ 9], 12);
+    GGG(eee, aaa, bbb, ccc, ddd, chunk[ 7],  5);
+    GGG(ddd, eee, aaa, bbb, ccc, chunk[10], 15);
+    GGG(ccc, ddd, eee, aaa, bbb, chunk[14],  8);
+
+    /* parallel round 5 */
+    FFF(bbb, ccc, ddd, eee, aaa, chunk[12] ,  8);
+    FFF(aaa, bbb, ccc, ddd, eee, chunk[15] ,  5);
+    FFF(eee, aaa, bbb, ccc, ddd, chunk[10] , 12);
+    FFF(ddd, eee, aaa, bbb, ccc, chunk[ 4] ,  9);
+    FFF(ccc, ddd, eee, aaa, bbb, chunk[ 1] , 12);
+    FFF(bbb, ccc, ddd, eee, aaa, chunk[ 5] ,  5);
+    FFF(aaa, bbb, ccc, ddd, eee, chunk[ 8] , 14);
+    FFF(eee, aaa, bbb, ccc, ddd, chunk[ 7] ,  6);
+    FFF(ddd, eee, aaa, bbb, ccc, chunk[ 6] ,  8);
+    FFF(ccc, ddd, eee, aaa, bbb, chunk[ 2] , 13);
+    FFF(bbb, ccc, ddd, eee, aaa, chunk[13] ,  6);
+    FFF(aaa, bbb, ccc, ddd, eee, chunk[14] ,  5);
+    FFF(eee, aaa, bbb, ccc, ddd, chunk[ 0] , 15);
+    FFF(ddd, eee, aaa, bbb, ccc, chunk[ 3] , 13);
+    FFF(ccc, ddd, eee, aaa, bbb, chunk[ 9] , 11);
+    FFF(bbb, ccc, ddd, eee, aaa, chunk[11] , 11);
+
+    /* combine results */
+    ddd += cc + state[1];
+    state[1] = state[2] + dd + eee;
+    state[2] = state[3] + ee + aaa;
+    state[3] = state[4] + aa + bbb;
+    state[4] = state[0] + bb + ccc;
+    state[0] = ddd;
+}
+
+void RMDfinish(RMD160CTX* context, const uint8_t* message, size_t length)
+{
+    uint32_t i;
+    uint32_t* chunk = context->chunk;
+    const uint32_t lo_length = (uint32_t)length;
+    const uint32_t hi_length = (uint32_t)(length >> 32);
+
+    zeroize(chunk, RMD160_CHUNK_LENGTH * sizeof(uint32_t));
+
+    for (i = 0; i < (lo_length & 63); i++)
+    {
+        chunk[i >> 2] ^= (uint32_t)*message++ << (8 * (i & 3));
+    }
+
+    chunk[(lo_length >> 2) & 15] ^= (uint32_t)1 << (8 * (lo_length & 3) + 7);
+
+    if ((lo_length & 63) > 55)
+    {
+        RMDcompress(context);
+        zeroize(chunk, RMD160_CHUNK_LENGTH * sizeof(uint32_t));
+    }
+
+    chunk[14] = lo_length << 3;
+    chunk[15] = (lo_length >> 29) | (hi_length << 3);
+    RMDcompress(context);
 }
