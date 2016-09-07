@@ -30,7 +30,7 @@ namespace libbitcoin {
 static constexpr uint64_t byte_mask = 0xff;
 static constexpr uint8_t negative_mask = 0x80;
 static constexpr auto unsigned_max_int64 = static_cast<uint64_t>(max_int64);
-static constexpr auto absolute_min_int64 = static_cast<uint64_t>(-min_int64);
+static constexpr auto absolute_min_int64 = static_cast<uint64_t>(min_int64);
 
 // The result is always LSB first.
 data_chunk script_number_serialize(int64_t value)
