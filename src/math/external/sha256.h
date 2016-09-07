@@ -49,16 +49,9 @@ typedef struct SHA256CTX
 void SHA256_(const uint8_t* input, size_t length,
     uint8_t digest[SHA256_DIGEST_LENGTH]);
 
-void SHA256Final(SHA256CTX* context, uint8_t digest[SHA256_DIGEST_LENGTH]);
-
 void SHA256Init(SHA256CTX* context);
-
-void SHA256Pad(SHA256CTX* context);
-
-void SHA256Transform(uint32_t state[SHA256_STATE_LENGTH],
-    const uint8_t block[SHA256_BLOCK_LENGTH]);
-
 void SHA256Update(SHA256CTX* context, const uint8_t* input, size_t length);
+void SHA256Final(SHA256CTX* context, uint8_t digest[SHA256_DIGEST_LENGTH]);
 
 #ifdef __cplusplus
 }

@@ -30,7 +30,8 @@
 extern "C" { 
 #endif
 
-typedef struct {
+typedef struct
+{
     uint8_t key[AES256_KEY_LENGTH];
     uint8_t enckey[AES256_KEY_LENGTH];
     uint8_t deckey[AES256_KEY_LENGTH];

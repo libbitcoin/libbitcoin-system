@@ -60,13 +60,11 @@ hash_digest sha256_hash(data_slice data)
 hash_digest sha256_hash(data_slice first, data_slice second)
 {
     hash_digest hash;
-
     SHA256CTX context;
     SHA256Init(&context);
     SHA256Update(&context, first.data(), first.size());
     SHA256Update(&context, second.data(), second.size());
     SHA256Final(&context, hash.data());
-
     return hash;
 }
 
