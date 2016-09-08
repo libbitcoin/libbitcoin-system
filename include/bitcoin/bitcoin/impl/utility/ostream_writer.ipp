@@ -38,7 +38,8 @@ void ostream_writer::write_big_endian(T value)
 template <typename T>
 void ostream_writer::write_little_endian(T value)
 {
-    stream_.write(reinterpret_cast<const char*>(&value), sizeof(T));
+    byte_array<sizeof(T)> bytes = to_little_endian(value);
+    write_bytes<sizeof(T)>(bytes);
 }
 
 template <typename T>
@@ -52,9 +53,6 @@ void ostream_writer::write_data(T& value)
 template <unsigned Size>
 void ostream_writer::write_bytes(const byte_array<Size>& value)
 {
-    //for (unsigned i = 0; i < Size; i++)
-    //    write_byte(value[i]);
-
     const auto size = value.size();
     if (size > 0)
         stream_.write(reinterpret_cast<const char*>(value.data()), size);
