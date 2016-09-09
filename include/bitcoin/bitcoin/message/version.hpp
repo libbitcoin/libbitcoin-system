@@ -78,7 +78,7 @@ public:
         maximum = bip130
     };
 
-    enum services: uint64_t
+    enum service: uint64_t
     {
         // The network exposes no services.
         none = 0,
