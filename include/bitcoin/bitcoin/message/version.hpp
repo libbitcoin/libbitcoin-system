@@ -80,15 +80,18 @@ public:
 
     enum services: uint64_t
     {
-        // The node is capable of serving the block chain.
+        // The network exposes no services.
+        none = 0,
+
+        // The network is capable of serving the block chain (full node).
         node_network = (1 << 0),
 
         // Requires version.value >= level::bip64
-        // The node is capable of responding to the getutxo protocol request.
+        // The network is capable of responding to the getutxo protocol request.
         node_utxo = (1 << 1),
 
         // Requires version.value >= level::bip111
-        // The node is capable and willing to handle bloom-filtered connections.
+        // The network is capable and willing to handle bloom-filtered connections.
         bloom_filters = (1 << 2)
     };
 

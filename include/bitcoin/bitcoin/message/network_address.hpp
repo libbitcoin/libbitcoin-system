@@ -71,8 +71,8 @@ public:
     uint16_t port;
 };
 
-// version::services::node_network
-BC_CONSTEXPR uint32_t default_service_bit = 1;
+// version::services::none
+BC_CONSTEXPR uint32_t no_services = 0;
 BC_CONSTEXPR uint32_t no_timestamp = 0;
 BC_CONSTEXPR uint16_t unspecified_ip_port = 0;
 BC_CONSTEXPR ip_address unspecified_ip_address
@@ -87,7 +87,7 @@ BC_CONSTEXPR ip_address unspecified_ip_address
 BC_CONSTEXPR network_address unspecified_network_address
 {
     no_timestamp,
-    default_service_bit,
+    no_services,
     unspecified_ip_address,
     unspecified_ip_port
 };
