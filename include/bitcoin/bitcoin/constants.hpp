@@ -82,37 +82,6 @@ enum class settings
     testnet
 };
 
-enum services: uint64_t
-{
-    // The node is capable of serving the block chain.
-    node_network = (1 << 0),
-
-    // Requires version >= 70004 (bip64)
-    // The node is capable of responding to the getutxo protocol request.
-    node_utxo = (1 << 1),
-
-    // Requires version >= 70011 (proposed)
-    // The node is capable and willing to handle bloom-filtered connections.
-    bloom_filters = (1 << 2)
-};
-
-BC_CONSTEXPR uint32_t no_timestamp = 0;
-BC_CONSTEXPR uint16_t unspecified_ip_port = 0;
-BC_CONSTEXPR message::ip_address unspecified_ip_address
-{
-    {
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00
-    }
-};
-BC_CONSTEXPR message::network_address unspecified_network_address
-{
-    no_timestamp,
-    services::node_network,
-    unspecified_ip_address,
-    unspecified_ip_port
-};
-
 // TODO: make static.
 BC_API hash_number max_target();
 

@@ -33,12 +33,6 @@ namespace message {
 
 typedef byte_array<16> ip_address;
 
-BC_CONSTEXPR ip_address localhost_ip_address =
-{
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01
-};
-
 class BC_API network_address
 {
 public:
@@ -75,6 +69,27 @@ public:
     uint64_t services;
     ip_address ip;
     uint16_t port;
+};
+
+// version::services::node_network
+BC_CONSTEXPR uint32_t default_service_bit = 1;
+BC_CONSTEXPR uint32_t no_timestamp = 0;
+BC_CONSTEXPR uint16_t unspecified_ip_port = 0;
+BC_CONSTEXPR ip_address unspecified_ip_address
+{
+    {
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00
+    }
+};
+
+// Defaults to full node services.
+BC_CONSTEXPR network_address unspecified_network_address
+{
+    no_timestamp,
+    default_service_bit,
+    unspecified_ip_address,
+    unspecified_ip_port
 };
 
 } // namespace message

@@ -32,7 +32,7 @@
 
 namespace libbitcoin {
 namespace message {
-    
+
 // The checksum is ignored by the version command.
 class BC_API version
 {
@@ -49,6 +49,12 @@ public:
 
         // send_headers
         bip130 = 70012,
+
+        // bloom_filters service bit
+        bip111 = 70011,
+
+        // node_utxo service bit
+        bip64 = 70004,
 
         // reject (AND version.relay)
         bip61 = 70002,
@@ -70,6 +76,20 @@ public:
 
         // We support at most this internally (bound to settings default).
         maximum = bip130
+    };
+
+    enum services: uint64_t
+    {
+        // The node is capable of serving the block chain.
+        node_network = (1 << 0),
+
+        // Requires version.value >= level::bip64
+        // The node is capable of responding to the getutxo protocol request.
+        node_utxo = (1 << 1),
+
+        // Requires version.value >= level::bip111
+        // The node is capable and willing to handle bloom-filtered connections.
+        bloom_filters = (1 << 2)
     };
 
     static version factory_from_data(uint32_t version, const data_chunk& data);
@@ -99,7 +119,7 @@ public:
     std::string user_agent;
     uint32_t start_height;
 
-    // version >= 70001
+    // version >= level::bip61
     bool relay;
 };
 
