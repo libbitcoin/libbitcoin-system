@@ -62,7 +62,7 @@ reject reject::factory_from_data(uint32_t version,
 bool reject::is_valid() const
 {
     return !message.empty()
-        || (code != error_code::undefined)
+        || (code != reason_code::undefined)
         || !reason.empty()
         || (data != null_hash);
 }
@@ -71,7 +71,7 @@ void reject::reset()
 {
     message.clear();
     message.shrink_to_fit();
-    code = error_code::undefined;
+    code = reason_code::undefined;
     reason.clear();
     reason.shrink_to_fit();
     data.fill(0);
@@ -96,7 +96,7 @@ bool reject::from_data(uint32_t version, reader& source)
     reset();
 
     message = source.read_string();
-    code = error_code_from_byte(source.read_byte());
+    code = reason_from_byte(source.read_byte());
     reason = source.read_string();
 
     if ((message == block_message::command) ||
@@ -133,7 +133,7 @@ void reject::to_data(uint32_t version, std::ostream& stream) const
 void reject::to_data(uint32_t version, writer& sink) const
 {
     sink.write_string(message);
-    sink.write_byte(error_code_to_byte(code));
+    sink.write_byte(reason_to_byte(code));
     sink.write_string(reason);
 
     if ((message == block_message::command) ||
@@ -157,50 +157,50 @@ uint64_t reject::serialized_size(uint32_t version) const
     return size;
 }
 
-reject::error_code reject::error_code_from_byte(uint8_t byte)
+reject::reason_code reject::reason_from_byte(uint8_t byte)
 {
     switch (byte)
     {
         case 0x01:
-            return error_code::malformed;
+            return reason_code::malformed;
         case 0x10:
-            return error_code::invalid;
+            return reason_code::invalid;
         case 0x11:
-            return error_code::obsolete;
+            return reason_code::obsolete;
         case 0x12:
-            return error_code::duplicate;
+            return reason_code::duplicate;
         case 0x40:
-            return error_code::nonstandard;
+            return reason_code::nonstandard;
         case 0x41:
-            return error_code::dust;
+            return reason_code::dust;
         case 0x42:
-            return error_code::insufficient_fee;
+            return reason_code::insufficient_fee;
         case 0x43:
-            return error_code::checkpoint;
+            return reason_code::checkpoint;
         default:
-            return error_code::undefined;
+            return reason_code::undefined;
     }
 }
 
-uint8_t reject::error_code_to_byte(const error_code code)
+uint8_t reject::reason_to_byte(reason_code value)
 {
-    switch (code)
+    switch (value)
     {
-        case error_code::malformed:
+        case reason_code::malformed:
             return 0x01;
-        case error_code::invalid:
+        case reason_code::invalid:
             return 0x10;
-        case error_code::obsolete:
+        case reason_code::obsolete:
             return 0x11;
-        case error_code::duplicate:
+        case reason_code::duplicate:
             return 0x12;
-        case error_code::nonstandard:
+        case reason_code::nonstandard:
             return 0x40;
-        case error_code::dust:
+        case reason_code::dust:
             return 0x41;
-        case error_code::insufficient_fee:
+        case reason_code::insufficient_fee:
             return 0x42;
-        case error_code::checkpoint:
+        case reason_code::checkpoint:
             return 0x43;
         default:
             return 0x00;

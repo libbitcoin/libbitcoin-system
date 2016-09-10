@@ -34,7 +34,7 @@ namespace message {
 class BC_API reject
 {
 public:
-    enum class error_code : uint8_t
+    enum class reason_code: uint8_t
     {
         undefined = 0x00,
         malformed = 0x01,
@@ -68,13 +68,13 @@ public:
     static const uint32_t version_maximum;
 
     std::string message;
-    error_code code;
+    reason_code code;
     std::string reason;
     hash_digest data;
 
 private:
-    static error_code error_code_from_byte(uint8_t byte);
-    static uint8_t error_code_to_byte(const error_code code);
+    static reason_code reason_from_byte(uint8_t byte);
+    static uint8_t reason_to_byte(reason_code value);
 };
 
 } // end message
