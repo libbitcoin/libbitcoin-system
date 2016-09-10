@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <boost/test/unit_test.hpp>
+
+#include <string>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin.hpp>
 
@@ -31,9 +33,9 @@ bool equal(const message::reject& left, const message::reject& right)
         && (left.data == right.data);
 }
 
-const std::string reason_text = "My Reason...";
+static const std::string reason_text = "My Reason...";
 
-const hash_digest data
+static const hash_digest data
 {
     {
         0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
@@ -47,7 +49,7 @@ BOOST_AUTO_TEST_SUITE(reject_tests)
 
 BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 {
-    const data_chunk raw{ 0xab };
+    static const data_chunk raw{ 0xab };
     message::reject instance{};
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(message::version::level::maximum, raw));
@@ -58,7 +60,7 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_version_failure)
     const message::reject expected
     {
         message::block_message::command,
-        message::reject::error_code::dust,
+        message::reject::reason_code::dust,
         reason_text,
         data
     };
@@ -75,7 +77,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
     const message::reject expected
     {
         message::block_message::command,
-        message::reject::error_code::dust,
+        message::reject::reason_code::dust,
         reason_text,
         data
     };
@@ -97,7 +99,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
     const message::reject expected
     {
         message::block_message::command,
-        message::reject::error_code::insufficient_fee,
+        message::reject::reason_code::insufficient_fee,
         reason_text,
         data
     };
@@ -120,7 +122,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
     const message::reject expected
     {
         message::transaction_message::command,
-        message::reject::error_code::duplicate,
+        message::reject::reason_code::duplicate,
         reason_text,
         data
     };
