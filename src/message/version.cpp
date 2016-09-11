@@ -101,23 +101,32 @@ bool version::from_data(uint32_t version, reader& source)
     reset();
 
     value = source.read_4_bytes_little_endian();
-    const uint32_t effective_version = std::min(version, value);
+    const auto effective_version = std::min(version, value);
     services = source.read_8_bytes_little_endian();
     timestamp = source.read_8_bytes_little_endian();
     auto result = static_cast<bool>(source);
-    result = address_recevier.from_data(version, source, false);
-    result = result && address_sender.from_data(version, source, false);
+    result &= address_recevier.from_data(version, source, false);
+    result &= address_sender.from_data(version, source, false);
     nonce = source.read_8_bytes_little_endian();
     user_agent = source.read_string();
     start_height = source.read_4_bytes_little_endian();
 
-    // HACK: due to the partial implementation of Bitcoin Core BIP37.
-    if (effective_version >= level::bip61)
-        relay = (source.read_byte() != 0);
+    const auto before_relay = (effective_version < level::bip37);
+
+    // Versions of /Satoshi:0.8.x/ parse but do not send the relay byte.
+    // This is undocumented and was resolved in /Satoshi:0.9.0/.
+    const auto buggy1 = (value == level::bip37 && source.is_exhausted());
+
+    // The /Satoshi:1.1.1/ node appears to be a fork of /Satoshi:0.8.x/.
+    // This presents a protocol version of 70006 while not including relay.
+    const auto buggy2 = (value == 70006 && source.is_exhausted());
+
+    relay = (buggy1 || buggy2 || before_relay || (source.read_byte() != 0));
+    result &= source;
 
     // HACK: disabled check due to inconsistent node implementation.
     // The protocol expects duplication of the sender's services.
-    result &= (source /*&& services == address_sender.services*/);
+    ////result &= (services == address_sender.services);
 
     if (!result)
         reset();
@@ -144,7 +153,7 @@ void version::to_data(uint32_t version, std::ostream& stream) const
 void version::to_data(uint32_t version, writer& sink) const
 {
     sink.write_4_bytes_little_endian(value);
-    const uint32_t effective_version = std::min(version, value);
+    const auto effective_version = std::min(version, value);
     sink.write_8_bytes_little_endian(services);
     sink.write_8_bytes_little_endian(timestamp);
     address_recevier.to_data(version, sink, false);
