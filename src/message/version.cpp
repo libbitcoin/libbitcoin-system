@@ -111,11 +111,17 @@ bool version::from_data(uint32_t version, reader& source)
     user_agent = source.read_string();
     start_height = source.read_4_bytes_little_endian();
 
+    const auto before_relay = (effective_version < level::bip37);
+
     // Versions of /Satoshi:0.8.x/ parse but do not send the relay byte.
     // This is undocumented and was resolved in /Satoshi:0.9.0/.
-    const auto before_relay = (effective_version < level::bip37);
-    const auto buggy_node = (value == level::bip37 && source.is_exhausted());
-    relay = (buggy_node || before_relay || (source.read_byte() != 0));
+    const auto buggy1 = (value == level::bip37 && source.is_exhausted());
+
+    // The /Satoshi:1.1.1/ node appears to be a fork of /Satoshi:0.8.x/.
+    // This presents a protocol version of 70006 while not including relay.
+    const auto buggy2 = (value == 70006 && source.is_exhausted());
+
+    relay = (buggy1 || buggy2 || before_relay || (source.read_byte() != 0));
     result &= source;
 
     // HACK: disabled check due to inconsistent node implementation.
