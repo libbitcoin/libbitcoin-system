@@ -87,7 +87,8 @@ BOOST_AUTO_TEST_CASE(version__from_data_chunk__mismatched_sender_services__inval
         },
         13626u,
         "my agent",
-        100u
+        100u,
+        true
     };
 
     const auto data = expected.to_data(message::version::level::maximum);
@@ -103,8 +104,7 @@ BOOST_AUTO_TEST_CASE(version__from_data_chunk__version_meets_bip37)
     const auto sender_services = 1515u;
     const message::version expected
     {
-        // HACK: due to the partial implementation of Bitcoin Core BIP37.
-        message::version::level::bip61,
+        message::version::level::bip37,
         sender_services,
         979797u,
         {
@@ -174,7 +174,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
         },
         13626u,
         "my agent",
-        100u
+        100u,
+        true
     };
 
     const auto data = expected.to_data(message::version::level::maximum);
@@ -221,7 +222,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
         },
         13626u,
         "my agent",
-        100u
+        100u,
+        true
     };
 
     const auto data = expected.to_data(message::version::level::maximum);
@@ -269,7 +271,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
         },
         13626u,
         "my agent",
-        100u
+        100u,
+        true
     };
 
     const auto data = expected.to_data(message::version::level::maximum);

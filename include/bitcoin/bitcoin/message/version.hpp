@@ -56,10 +56,10 @@ public:
         // node_utxo service bit
         bip64 = 70004,
 
-        // reject (AND version.relay)
+        // reject (satoshi node writes version.relay starting here)
         bip61 = 70002,
 
-        // filters, merkle_block, not_found (NOT version.relay)
+        // filters, merkle_block, not_found, version.relay
         bip37 = 70001,
 
         // memory_pool
@@ -68,10 +68,16 @@ public:
         // ping.nonce, pong
         bip31 = 60001,
 
+        // Don't request blocks from nodes of versions 32000-32400.
+        no_blocks_end = 32400,
+
+        // Don't request blocks from nodes of versions 32000-32400.
+        no_blocks_start = 32000,
+
         // This preceded the BIP system.
         headers = 31800,
 
-        // We require at least this of peers.
+        // We require at least this of peers, address.time fields.
         minimum = 31402,
 
         // We support at most this internally (bound to settings default).
