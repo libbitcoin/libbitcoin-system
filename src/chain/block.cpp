@@ -19,10 +19,13 @@
  */
 #include <bitcoin/bitcoin/chain/block.hpp>
 
+#include <numeric>
 #include <utility>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/math/script_number.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -163,17 +166,57 @@ void block::to_data(writer& sink, bool with_transaction_count) const
         tx.to_data(sink);
 }
 
+// overflow returns max_uint64
 uint64_t block::serialized_size(bool with_transaction_count) const
 {
     auto block_size = header.serialized_size(with_transaction_count);
 
-    for (const auto& tx: transactions)
-        block_size += tx.serialized_size();
+    const auto value = [](uint64_t total, const transaction& tx)
+    {
+        const auto size = tx.serialized_size();
+        return total >= max_uint64 - size ? max_uint64 : total + size;
+    };
 
+    const auto& txs = transactions;
+    return std::accumulate(txs.begin(), txs.end(), block_size, value);
     return block_size;
 }
 
-hash_digest build_merkle_tree(hash_list& merkle)
+// overflow returns max_size_t
+size_t block::signature_operations(bool strict) const
+{
+    const auto value = [strict](size_t total, const transaction& tx)
+    {
+        const auto count = tx.signature_operations(strict);
+        return total >= max_size_t - count ? max_size_t : total + count;
+    };
+
+    const auto& txs = transactions;
+    return std::accumulate(txs.begin(), txs.end(), size_t(0), value);
+}
+
+bool block::valid_coinbase_height(size_t height) const
+{
+    // There must be a transaction with an input.
+    if (transactions.empty() || transactions.front().inputs.empty())
+        return false;
+
+    // Get the serialized coinbase input script as a byte vector.
+    const auto& actual_tx = transactions.front();
+    const auto& actual_script = actual_tx.inputs.front().script;
+    const auto actual = actual_script.to_data(false);
+
+    // Create the expected script as a byte vector.
+    script expected_script;
+    script_number number(height);
+    expected_script.operations.push_back({ opcode::special, number.data() });
+    const auto expected = expected_script.to_data(false);
+
+    // Require that the coinbase script match the expected coinbase script.
+    return std::equal(expected.begin(), expected.end(), actual.begin());
+}
+
+hash_digest block::build_merkle_tree(hash_list& merkle)
 {
     // Stop if hash list is empty.
     if (merkle.empty())
@@ -220,15 +263,33 @@ hash_digest build_merkle_tree(hash_list& merkle)
     return merkle[0];
 }
 
-hash_digest block::generate_merkle_root(const transaction::list& transactions)
+hash_digest block::generate_merkle_root() const
 {
-    // Generate list of transaction hashes.
-    hash_list tx_hashes;
-    for (const auto& tx: transactions)
-        tx_hashes.push_back(tx.hash());
+    const auto hasher = [](const transaction& transaction)
+    {
+        return transaction.hash();
+    };
 
-    // Build merkle tree.
-    return build_merkle_tree(tx_hashes);
+    const auto& txs = transactions;
+    hash_list hashes(txs.size());
+    std::transform(txs.begin(), txs.end(), hashes.begin(), hasher);
+    return build_merkle_tree(hashes);
+}
+
+// Distinctness is defined by transaction hash.
+bool block::distinct_transactions() const
+{
+    const auto hasher = [](const transaction& transaction)
+    {
+        return transaction.hash();
+    };
+
+    const auto& txs = transactions;
+    hash_list hashes(txs.size());
+    std::transform(txs.begin(), txs.end(), hashes.begin(), hasher);
+    std::sort(hashes.begin(), hashes.end());
+    const auto distinct_end = std::unique(hashes.begin(), hashes.end());
+    return distinct_end == hashes.end();
 }
 
 static const std::string encoded_mainnet_genesis_block =
@@ -299,5 +360,5 @@ chain::block block::genesis_testnet()
     return genesis;
 }
 
-} // namspace chain
-} // namspace libbitcoin
+} // namespace chain
+} // namespace libbitcoin
