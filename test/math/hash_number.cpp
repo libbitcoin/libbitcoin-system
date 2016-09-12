@@ -26,30 +26,19 @@ BOOST_AUTO_TEST_SUITE(hash_number_tests)
 
 BOOST_AUTO_TEST_CASE(hash_number__simple__test)
 {
-    hash_number target;
-    uint32_t bits = 486604799;
-    target.set_compact(bits);
-    hash_digest block_hash = hash_literal(
-        "00000000b873e79784647a6c82962c70d228557d24a747ea4d1b8bbe878e1206");
+    static const auto block_hash = hash_literal("00000000b873e79784647a6c82962c70d228557d24a747ea4d1b8bbe878e1206");
 
+    hash_number target;
+    BOOST_REQUIRE(target.set_compact(486604799));
     BOOST_REQUIRE(!(target <= 0));
-    BOOST_REQUIRE(!(target > max_target()));
+
+    hash_number maximum;
+    BOOST_REQUIRE(maximum.set_compact(max_work_bits));
+    BOOST_REQUIRE(!(target > maximum));
 
     hash_number our_value;
     our_value.set_hash(block_hash);
     BOOST_REQUIRE(!(our_value > target));
 }
 
-//BOOST_AUTO_TEST_CASE(hash_number__work__test)
-//{
-//    hash_number orphan_work = 0;
-//    BOOST_REQUIRE_EQUAL(encode_base16(orphan_work.hash()), encode_base16(null_hash));
-//    orphan_work += block_work(486604799);
-//    BOOST_REQUIRE_EQUAL(encode_base16(orphan_work.hash()),
-//        "0100010001000000000000000000000000000000000000000000000000000000");
-//    hash_number main_work = 0;
-//    BOOST_REQUIRE(!(orphan_work <= main_work));
-//}
-
 BOOST_AUTO_TEST_SUITE_END()
-
