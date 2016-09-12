@@ -56,10 +56,10 @@ public:
 
     block();
     block(const block& other);
-    block(const header& header, const transaction::list& transactions);
+    block(const chain::header& header, const transaction::list& transactions);
 
     block(block&& other);
-    block(header&& header, transaction::list&& transactions);
+    block(chain::header&& header, transaction::list&& transactions);
 
     /// This class is move assignable but not copy assignable.
     block& operator=(block&& other);
