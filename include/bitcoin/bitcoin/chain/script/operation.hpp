@@ -73,7 +73,7 @@ enum class script_pattern
     /// Sign Script Hash [P2SH/BIP16]
     sign_script_hash,
 
-    /// The script is valid but does not conform to the standard tempaltes.
+    /// The script is valid but does not conform to the standard templates.
     /// Such scripts are always accepted if they are mined into blocks, but
     /// transactions with non-standard scripts may not be forwarded by peers.
     non_standard

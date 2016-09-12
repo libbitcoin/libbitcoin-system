@@ -129,5 +129,5 @@ bool operator!=(const pong& left, const pong& right)
     return !(left == right);
 }
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin

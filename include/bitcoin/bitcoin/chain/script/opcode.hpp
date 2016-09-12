@@ -170,9 +170,20 @@ enum script_context : uint32_t
     all_enabled = 0xffffffff
 };
 
-BC_API std::string opcode_to_string(opcode value, uint32_t flags);
-BC_API opcode string_to_opcode(const std::string& value);
+/// Determine if code is in the op_n range.
+BC_API bool within_op_n(opcode code);
+
+/// Return the op_n index (i.e. value of n).
+BC_API uint8_t decode_op_n(opcode code);
+
+/// Convert data to an opcode.
 BC_API opcode data_to_opcode(const data_chunk& value);
+
+/// Convert a string to an opcode.
+BC_API opcode string_to_opcode(const std::string& value);
+
+/// Convert an opcode to a string.
+BC_API std::string opcode_to_string(opcode value, uint32_t flags);
 
 } // namespace chain
 } // namespace libbitcoin

@@ -149,9 +149,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\src\constants.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\error.cpp">
       <Filter>src</Filter>
     </ClCompile>

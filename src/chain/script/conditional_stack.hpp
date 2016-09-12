@@ -39,7 +39,7 @@ private:
     std::vector<bool> stack_;
 };
 
-} // namspace chain
-} // namspace libbitcoin
+} // namespace chain
+} // namespace libbitcoin
 
 #endif

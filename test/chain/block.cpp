@@ -25,6 +25,8 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(block_tests)
 
+BOOST_AUTO_TEST_SUITE(block_serialization_tests)
+
 BOOST_AUTO_TEST_CASE(from_data_fails)
 {
     data_chunk data(10);
@@ -39,8 +41,7 @@ BOOST_AUTO_TEST_CASE(block__genesis__mainnet__valid_structure)
     const auto genesis = bc::chain::block::genesis_mainnet();
     BOOST_REQUIRE(genesis.is_valid());
     BOOST_REQUIRE_EQUAL(genesis.transactions.size(), 1u);
-    const auto root = bc::chain::block::generate_merkle_root(genesis.transactions);
-    BOOST_REQUIRE(root == genesis.header.merkle);
+    BOOST_REQUIRE(genesis.header.merkle == genesis.generate_merkle_root());
 }
 
 BOOST_AUTO_TEST_CASE(block__genesis__testnet__valid_structure)
@@ -48,8 +49,7 @@ BOOST_AUTO_TEST_CASE(block__genesis__testnet__valid_structure)
     const auto genesis = bc::chain::block::genesis_testnet();
     BOOST_REQUIRE(genesis.is_valid());
     BOOST_REQUIRE_EQUAL(genesis.transactions.size(), 1u);
-    const auto root = bc::chain::block::generate_merkle_root(genesis.transactions);
-    BOOST_REQUIRE(root == genesis.header.merkle);
+    BOOST_REQUIRE(genesis.header.merkle == genesis.generate_merkle_root());
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_mainnet_genesis_block_serialization_factory_data_chunk)
@@ -76,8 +76,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_mainnet_genesis_block_serialization_factory_data_
     BOOST_REQUIRE(genesis.header == block.header);
 
     // Verify merkle root from transactions.
-    const auto merkle = chain::block::generate_merkle_root(block.transactions);
-    BOOST_REQUIRE(genesis.header.merkle == merkle);
+    BOOST_REQUIRE(genesis.header.merkle == block.generate_merkle_root());
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_mainnet_genesis_block_serialization_factory_stream)
@@ -105,8 +104,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_mainnet_genesis_block_serialization_factory_strea
     BOOST_REQUIRE(genesis.header == block.header);
 
     // Verify merkle root from transactions.
-    const auto merkle = chain::block::generate_merkle_root(block.transactions);
-    BOOST_REQUIRE(genesis.header.merkle == merkle);
+    BOOST_REQUIRE(genesis.header.merkle == block.generate_merkle_root());
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_mainnet_genesis_block_serialization_factory_reader)
@@ -135,13 +133,17 @@ BOOST_AUTO_TEST_CASE(roundtrip_mainnet_genesis_block_serialization_factory_reade
     BOOST_REQUIRE(genesis.header == block.header);
 
     // Verify merkle root from transactions.
-    const auto merkle = chain::block::generate_merkle_root(block.transactions);
-    BOOST_REQUIRE(genesis.header.merkle == merkle);
+    BOOST_REQUIRE(genesis.header.merkle == block.generate_merkle_root());
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(block_generate_merkle_root_tests)
 
 BOOST_AUTO_TEST_CASE(generate_merkle_root_block_with_zero_transactions_matches_null_hash)
 {
-    BOOST_REQUIRE(null_hash == chain::block::generate_merkle_root(chain::transaction::list{}));
+    chain::block empty;
+    BOOST_REQUIRE(empty.generate_merkle_root() == null_hash);
 }
 
 BOOST_AUTO_TEST_CASE(generate_merkle_root_block_with_multiple_transactions_matches_historic_data)
@@ -203,7 +205,61 @@ BOOST_AUTO_TEST_CASE(generate_merkle_root_block_with_multiple_transactions_match
         }
     }
 
-    BOOST_REQUIRE(block100k.header.merkle == chain::block::generate_merkle_root(block100k.transactions));
+    BOOST_REQUIRE(block100k.generate_merkle_root() == block100k.header.merkle);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(block_is_distinct_transaction_set_tests)
+
+BOOST_AUTO_TEST_CASE(block__distinct_transactions__empty__true)
+{
+    chain::block value;
+    BOOST_REQUIRE(value.is_distinct_transaction_set());
+}
+
+BOOST_AUTO_TEST_CASE(validate_block__is_distinct_tx_set__single__true)
+{
+    chain::block value;
+    value.transactions.push_back({ 1, 0, {}, {} });
+    BOOST_REQUIRE(value.is_distinct_transaction_set());
+}
+
+BOOST_AUTO_TEST_CASE(validate_block__is_distinct_tx_set__duplicate__false)
+{
+    chain::block value;
+    value.transactions.push_back({ 1, 0, {}, {} });
+    value.transactions.push_back({ 1, 0, {}, {} });
+    BOOST_REQUIRE(!value.is_distinct_transaction_set());
+}
+
+BOOST_AUTO_TEST_CASE(validate_block__is_distinct_tx_set__distinct_by_version__true)
+{
+    chain::block value;
+    value.transactions.push_back({ 1, 0, {}, {} });
+    value.transactions.push_back({ 2, 0, {}, {} });
+    value.transactions.push_back({ 3, 0, {}, {} });
+    BOOST_REQUIRE(value.is_distinct_transaction_set());
+}
+
+BOOST_AUTO_TEST_CASE(validate_block__is_distinct_tx_set__partialy_distinct_by_version__false)
+{
+    chain::block value;
+    value.transactions.push_back({ 1, 0, {}, {} });
+    value.transactions.push_back({ 2, 0, {}, {} });
+    value.transactions.push_back({ 2, 0, {}, {} });
+    BOOST_REQUIRE(!value.is_distinct_transaction_set());
+}
+
+BOOST_AUTO_TEST_CASE(validate_block__is_distinct_tx_set__partialy_distinct_not_adjacent_by_version__false)
+{
+    chain::block value;
+    value.transactions.push_back({ 1, 0, {}, {} });
+    value.transactions.push_back({ 2, 0, {}, {} });
+    value.transactions.push_back({ 1, 0, {}, {} });
+    BOOST_REQUIRE(!value.is_distinct_transaction_set());
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

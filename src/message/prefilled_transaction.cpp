@@ -124,5 +124,5 @@ uint64_t prefilled_transaction::serialized_size(uint32_t version) const
     return variable_uint_size(index) + transaction.serialized_size();
 }
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin

@@ -177,5 +177,5 @@ bool operator!=(const point& left, const point& right)
     return !(left == right);
 }
 
-} // namspace chain
-} // namspace libbitcoin
+} // namespace chain
+} // namespace libbitcoin

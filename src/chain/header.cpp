@@ -19,9 +19,11 @@
  */
 #include <bitcoin/bitcoin/chain/header.hpp>
 
+#include <chrono>
 #include <utility>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/math/hash_number.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -250,6 +252,33 @@ hash_digest header::hash() const
     return hash;
 }
 
+bool header::is_valid_time_stamp() const
+{
+    // Use system clock because we require accurate time of day.
+    typedef std::chrono::system_clock wall_clock;
+    static const auto two_hours = std::chrono::hours(time_stamp_future_hours);
+    const auto time = wall_clock::from_time_t(timestamp);
+    const auto future = wall_clock::now() + two_hours;
+    return time <= future;
+}
+
+bool header::is_valid_proof_of_work() const
+{
+    // TODO: This should be statically-initialized.
+    hash_number maximum;
+    maximum.set_compact(max_work_bits);
+    if (!maximum.set_compact(bits))
+        return false;
+
+    hash_number target;
+    if (!target.set_compact(bits) || target > maximum)
+        return false;
+
+    hash_number value;
+    value.set_hash(hash());
+    return value <= target;
+}
+
 bool operator==(const header& left, const header& right)
 {
     return (left.version == right.version)
@@ -266,5 +295,5 @@ bool operator!=(const header& left, const header& right)
     return !(left == right);
 }
 
-} // namspace chain
-} // namspace libbitcoin
+} // namespace chain
+} // namespace libbitcoin

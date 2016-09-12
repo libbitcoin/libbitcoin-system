@@ -142,5 +142,5 @@ bool fee_filter::operator!=(const fee_filter& other) const
     return !(*this == other);
 }
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin

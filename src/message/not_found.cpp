@@ -98,5 +98,5 @@ bool not_found::from_data(uint32_t version, reader& source)
     return result;
 }
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin

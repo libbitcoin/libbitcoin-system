@@ -165,5 +165,5 @@ void transaction_message::set_originator(uint64_t value)
     originator_ = value;
 }
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin

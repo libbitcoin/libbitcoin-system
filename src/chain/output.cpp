@@ -127,5 +127,5 @@ std::string output::to_string(uint32_t flags) const
     return ss.str();
 }
 
-} // namspace chain
-} // namspace libbitcoin
+} // namespace chain
+} // namespace libbitcoin

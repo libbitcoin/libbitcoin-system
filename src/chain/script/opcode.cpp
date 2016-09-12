@@ -516,5 +516,21 @@ opcode data_to_opcode(const data_chunk& value)
     return code;
 }
 
-} // namspace chain
-} // namspace libbitcoin
+bool within_op_n(opcode code)
+{
+    const auto value = static_cast<uint8_t>(code);
+    constexpr auto op_1 = static_cast<uint8_t>(opcode::op_1);
+    constexpr auto op_16 = static_cast<uint8_t>(opcode::op_16);
+    return op_1 <= value && value <= op_16;
+}
+
+uint8_t decode_op_n(opcode code)
+{
+    BITCOIN_ASSERT(within_op_n(code));
+    const auto value = static_cast<uint8_t>(code);
+    constexpr auto op_0 = static_cast<uint8_t>(opcode::op_1) - 1;
+    return value - op_0;
+}
+
+} // namespace chain
+} // namespace libbitcoin

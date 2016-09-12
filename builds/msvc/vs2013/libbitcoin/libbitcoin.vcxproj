@@ -97,7 +97,6 @@
     <ClCompile Include="..\..\..\..\src\config\parameter.cpp" />
     <ClCompile Include="..\..\..\..\src\config\parser.cpp" />
     <ClCompile Include="..\..\..\..\src\config\printer.cpp" />
-    <ClCompile Include="..\..\..\..\src\constants.cpp" />
     <ClCompile Include="..\..\..\..\src\error.cpp" />
     <ClCompile Include="..\..\..\..\src\formats\base_10.cpp" />
     <ClCompile Include="..\..\..\..\src\formats\base_16.cpp" />

@@ -66,8 +66,8 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "object does not exist";
         case error::duplicate:
             return "matching previous object found";
-        case error::unspent_output:
-            return "unspent output";
+        case error::reserved:
+            return "reserved for future use";
         case error::unsupported_script_pattern:
             return "unsupport script pattern";
 
@@ -148,12 +148,12 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "block height mismatch in coinbase";
 
         // connect_block()
-        case error::duplicate_or_spent:
-            return "duplicate transaction with unspent outputs";
+        case error::unspent_duplicate:
+            return "duplicate id of transaction with unspent outputs";
         case error::validate_inputs_failed:
             return "validation of inputs failed";
-        case error::fees_out_of_range:
-            return "fees are out of range";
+        case error::spend_exceeds_value:
+            return "spend exceeds value of inputs";
         case error::coinbase_too_large:
             return "coinbase value is too large";
 
@@ -166,6 +166,10 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "address is blocked by policy";
         case error::channel_stopped:
             return "channel is stopped";
+
+        // check_transaction() (more)
+        case error::coinbase_maturity:
+            return "immature coinbase spent";
 
         // unknown errors
         case error::unknown:

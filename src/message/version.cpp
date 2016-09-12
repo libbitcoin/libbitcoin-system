@@ -184,5 +184,5 @@ uint64_t version::serialized_size(uint32_t version) const
     return size;
 }
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin

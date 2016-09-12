@@ -54,5 +54,5 @@ void conditional_stack::close()
     stack_.pop_back();
 }
 
-} // namspace chain
-} // namspace libbitcoin
+} // namespace chain
+} // namespace libbitcoin

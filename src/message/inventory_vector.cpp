@@ -187,5 +187,5 @@ bool operator!=(const inventory_vector& left, const inventory_vector& right)
     return !(left == right);
 }
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin

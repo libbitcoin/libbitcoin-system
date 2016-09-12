@@ -75,6 +75,8 @@ public:
     void to_data(writer& sink, bool with_transaction_count = true) const;
     hash_digest hash() const;
     bool is_valid() const;
+    bool is_valid_time_stamp() const;
+    bool is_valid_proof_of_work() const;
     void reset();
     uint64_t serialized_size(bool with_transaction_count = true) const;
 

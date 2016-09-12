@@ -43,7 +43,7 @@ public:
     uint32_t flags;
 };
 
-} // namspace chain
-} // namspace libbitcoin
+} // namespace chain
+} // namespace libbitcoin
 
 #endif

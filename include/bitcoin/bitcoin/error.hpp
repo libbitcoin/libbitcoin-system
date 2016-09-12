@@ -55,7 +55,7 @@ enum error_code_t
     // blockchain errors
     not_found,
     duplicate,
-    unspent_output,
+    reserved,
     unsupported_script_pattern,
 
     // network errors (more)
@@ -104,9 +104,9 @@ enum error_code_t
     coinbase_height_mismatch,
 
     // connect_block()
-    duplicate_or_spent,
+    unspent_duplicate,
     validate_inputs_failed,
-    fees_out_of_range,
+    spend_exceeds_value,
     coinbase_too_large,
 
     // file system errors
@@ -117,7 +117,10 @@ enum error_code_t
 
     // network errors (more)
     address_blocked,
-    channel_stopped
+    channel_stopped,
+
+    // check_transaction() (more)
+    coinbase_maturity
 };
 
 enum error_condition_t
