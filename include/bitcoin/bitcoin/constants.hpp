@@ -48,6 +48,8 @@ BC_CONSTEXPR uint64_t max_size_t = BC_MAX_SIZE;
 BC_CONSTEXPR uint8_t byte_bits = 8;
 
 // Consensus constants.
+BC_CONSTEXPR size_t min_coinbase_size = 2;
+BC_CONSTEXPR size_t max_coinbase_size = 100;
 BC_CONSTEXPR uint32_t reward_interval = 210000;
 BC_CONSTEXPR uint32_t coinbase_maturity = 100;
 BC_CONSTEXPR uint32_t initial_block_reward = 50;

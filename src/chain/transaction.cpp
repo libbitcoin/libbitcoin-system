@@ -314,8 +314,8 @@ bool transaction::is_invalid_coinbase() const
     if (!is_coinbase())
         return false;
 
-    const auto coinbase_size = inputs[0].script.serialized_size(false);
-    return coinbase_size < 2 || coinbase_size > 100;
+    const auto script_size = inputs[0].script.serialized_size(false);
+    return script_size < min_coinbase_size || script_size > max_coinbase_size;
 }
 
 // True if not coinbase but has null previous_output(s).
