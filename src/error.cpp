@@ -148,8 +148,8 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "block height mismatch in coinbase";
 
         // connect_block()
-        case error::duplicate_or_spent:
-            return "duplicate transaction with unspent outputs";
+        case error::unspent_duplicate:
+            return "duplicate id of transaction with unspent outputs";
         case error::validate_inputs_failed:
             return "validation of inputs failed";
         case error::spend_exceeds_value:

@@ -104,7 +104,7 @@ enum error_code_t
     coinbase_height_mismatch,
 
     // connect_block()
-    duplicate_or_spent,
+    unspent_duplicate,
     validate_inputs_failed,
     spend_exceeds_value,
     coinbase_too_large,
