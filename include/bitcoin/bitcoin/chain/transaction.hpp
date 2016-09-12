@@ -79,6 +79,8 @@ public:
     // sighash_type is used by OP_CHECKSIG
     hash_digest hash(uint32_t sighash_type) const;
     bool is_coinbase() const;
+    bool is_invalid_coinbase() const;
+    bool is_invalid_non_coinbase() const;
     bool is_final(uint64_t block_height, uint32_t block_time) const;
     bool is_locktime_conflict() const;
     size_t signature_operations(bool strict) const;

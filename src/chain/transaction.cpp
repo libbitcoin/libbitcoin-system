@@ -305,7 +305,30 @@ hash_digest transaction::hash(uint32_t sighash_type) const
 
 bool transaction::is_coinbase() const
 {
-    return (inputs.size() == 1) && inputs[0].previous_output.is_null();
+    return inputs.size() == 1 && inputs[0].previous_output.is_null();
+}
+
+// True if coinbase and has invalid input[0] script size.
+bool transaction::is_invalid_coinbase() const
+{
+    if (!is_coinbase())
+        return false;
+
+    const auto coinbase_size = inputs[0].script.serialized_size(false);
+    return coinbase_size < 2 || coinbase_size > 100;
+}
+
+// True if not coinbase but has null previous_output(s).
+bool transaction::is_invalid_non_coinbase() const
+{
+    if (is_coinbase())
+        return false;
+
+    for (const auto& input: inputs)
+        if (input.previous_output.is_null())
+            return true;
+
+    return false;
 }
 
 bool transaction::is_final(uint64_t block_height, uint32_t block_time) const
