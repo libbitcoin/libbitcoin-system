@@ -25,6 +25,8 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(block_tests)
 
+BOOST_AUTO_TEST_SUITE(block_serialization_tests)
+
 BOOST_AUTO_TEST_CASE(from_data_fails)
 {
     data_chunk data(10);
@@ -134,6 +136,10 @@ BOOST_AUTO_TEST_CASE(roundtrip_mainnet_genesis_block_serialization_factory_reade
     BOOST_REQUIRE(genesis.header.merkle == block.generate_merkle_root());
 }
 
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(block_generate_merkle_root_tests)
+
 BOOST_AUTO_TEST_CASE(generate_merkle_root_block_with_zero_transactions_matches_null_hash)
 {
     chain::block empty;
@@ -201,5 +207,59 @@ BOOST_AUTO_TEST_CASE(generate_merkle_root_block_with_multiple_transactions_match
 
     BOOST_REQUIRE(block100k.generate_merkle_root() == block100k.header.merkle);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(block_distinct_transactions_tests)
+
+BOOST_AUTO_TEST_CASE(block__distinct_transactions__empty__true)
+{
+    chain::block value;
+    BOOST_REQUIRE(value.distinct_transactions());
+}
+
+BOOST_AUTO_TEST_CASE(validate_block__is_distinct_tx_set__single__true)
+{
+    chain::block value;
+    value.transactions.push_back({ 1, 0, {}, {} });
+    BOOST_REQUIRE(value.distinct_transactions());
+}
+
+BOOST_AUTO_TEST_CASE(validate_block__is_distinct_tx_set__duplicate__false)
+{
+    chain::block value;
+    value.transactions.push_back({ 1, 0, {}, {} });
+    value.transactions.push_back({ 1, 0, {}, {} });
+    BOOST_REQUIRE(!value.distinct_transactions());
+}
+
+BOOST_AUTO_TEST_CASE(validate_block__is_distinct_tx_set__distinct_by_version__true)
+{
+    chain::block value;
+    value.transactions.push_back({ 1, 0, {}, {} });
+    value.transactions.push_back({ 2, 0, {}, {} });
+    value.transactions.push_back({ 3, 0, {}, {} });
+    BOOST_REQUIRE(value.distinct_transactions());
+}
+
+BOOST_AUTO_TEST_CASE(validate_block__is_distinct_tx_set__partialy_distinct_by_version__false)
+{
+    chain::block value;
+    value.transactions.push_back({ 1, 0, {}, {} });
+    value.transactions.push_back({ 2, 0, {}, {} });
+    value.transactions.push_back({ 2, 0, {}, {} });
+    BOOST_REQUIRE(!value.distinct_transactions());
+}
+
+BOOST_AUTO_TEST_CASE(validate_block__is_distinct_tx_set__partialy_distinct_not_adjacent_by_version__false)
+{
+    chain::block value;
+    value.transactions.push_back({ 1, 0, {}, {} });
+    value.transactions.push_back({ 2, 0, {}, {} });
+    value.transactions.push_back({ 1, 0, {}, {} });
+    BOOST_REQUIRE(!value.distinct_transactions());
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
