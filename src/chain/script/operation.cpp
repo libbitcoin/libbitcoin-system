@@ -478,5 +478,5 @@ operation::stack operation::to_pay_script_hash_pattern(const short_hash& hash)
     };
 }
 
-} // namspace chain
-} // namspace libbitcoin
+} // namespace chain
+} // namespace libbitcoin

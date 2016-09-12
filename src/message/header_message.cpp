@@ -166,5 +166,5 @@ uint64_t header_message::serialized_size(const uint32_t version,
     return header::serialized_size(with_transaction_count);
 }
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin

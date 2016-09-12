@@ -31,5 +31,5 @@ data_chunk evaluation_context::pop_stack()
     return value;
 }
 
-} // namspace chain
-} // namspace libbitcoin
+} // namespace chain
+} // namespace libbitcoin

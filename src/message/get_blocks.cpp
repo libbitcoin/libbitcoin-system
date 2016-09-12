@@ -166,5 +166,5 @@ bool operator!=(const get_blocks& left, const get_blocks& right)
     return !(left == right);
 }
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin

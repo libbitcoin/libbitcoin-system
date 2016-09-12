@@ -140,5 +140,5 @@ uint64_t send_compact_blocks::satoshi_fixed_size(uint32_t version)
     return 9;
 }
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin

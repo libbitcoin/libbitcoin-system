@@ -193,5 +193,5 @@ bool operator!=(const headers& left, const headers& right)
     return !(left == right);
 }
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin

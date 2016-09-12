@@ -147,5 +147,5 @@ bool operator!=(const ping& left, const ping& right)
     return !(left == right);
 }
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin

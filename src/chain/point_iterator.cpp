@@ -118,5 +118,5 @@ void point_iterator::decrement()
         offset_--;
 }
 
-} // namspace chain
-} // namspace libbitcoin
+} // namespace chain
+} // namespace libbitcoin

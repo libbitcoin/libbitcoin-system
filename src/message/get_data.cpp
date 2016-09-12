@@ -98,5 +98,5 @@ bool get_data::from_data(uint32_t version, reader& source)
     return result;
 }
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin

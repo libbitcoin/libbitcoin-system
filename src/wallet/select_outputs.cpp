@@ -92,5 +92,5 @@ void select_outputs::select(points_info& out, output_info::list unspent,
     out.points.clear();
 }
 
-} // namspace wallet
-} // namspace libbitcoin
+} // namespace wallet
+} // namespace libbitcoin

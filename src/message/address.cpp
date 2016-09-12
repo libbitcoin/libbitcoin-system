@@ -132,5 +132,5 @@ uint64_t address::serialized_size(uint32_t version) const
         (addresses.size() * network_address::satoshi_fixed_size(version, true));
 }
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin

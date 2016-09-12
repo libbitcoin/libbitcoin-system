@@ -147,5 +147,5 @@ uint64_t block_transactions::serialized_size(uint32_t version) const
     return size;
 }
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin

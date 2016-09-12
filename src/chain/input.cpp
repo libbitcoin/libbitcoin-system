@@ -150,5 +150,5 @@ bool input::is_final() const
     return (sequence == max_input_sequence);
 }
 
-} // namspace chain
-} // namspace libbitcoin
+} // namespace chain
+} // namespace libbitcoin

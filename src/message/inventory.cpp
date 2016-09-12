@@ -207,5 +207,5 @@ bool operator!=(const inventory& left, const inventory& right)
     return !(left == right);
 }
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin

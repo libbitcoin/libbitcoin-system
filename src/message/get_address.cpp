@@ -114,5 +114,5 @@ uint64_t get_address::satoshi_fixed_size(uint32_t version)
     return 0;
 }
 
-} // namspace message
-} // namspace libbitcoin
+} // namespace message
+} // namespace libbitcoin
