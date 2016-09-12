@@ -106,7 +106,7 @@ enum error_code_t
     // connect_block()
     duplicate_or_spent,
     validate_inputs_failed,
-    fees_out_of_range,
+    spend_exceeds_value,
     coinbase_too_large,
 
     // file system errors

@@ -152,8 +152,8 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "duplicate transaction with unspent outputs";
         case error::validate_inputs_failed:
             return "validation of inputs failed";
-        case error::fees_out_of_range:
-            return "fees are out of range";
+        case error::spend_exceeds_value:
+            return "spend exceeds value of inputs";
         case error::coinbase_too_large:
             return "coinbase value is too large";
 
