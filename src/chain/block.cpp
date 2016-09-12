@@ -340,8 +340,7 @@ chain::block block::genesis_mainnet()
 
     BITCOIN_ASSERT(genesis.is_valid());
     BITCOIN_ASSERT(genesis.transactions.size() == 1);
-    BITCOIN_ASSERT(chain::block::generate_merkle_root(genesis.transactions)
-        == genesis.header.merkle);
+    BITCOIN_ASSERT(genesis.generate_merkle_root() == genesis.header.merkle);
 
     return genesis;
 }
@@ -354,8 +353,7 @@ chain::block block::genesis_testnet()
 
     BITCOIN_ASSERT(genesis.is_valid());
     BITCOIN_ASSERT(genesis.transactions.size() == 1);
-    BITCOIN_ASSERT(chain::block::generate_merkle_root(genesis.transactions)
-        == genesis.header.merkle);
+    BITCOIN_ASSERT(genesis.generate_merkle_root() == genesis.header.merkle);
 
     return genesis;
 }
