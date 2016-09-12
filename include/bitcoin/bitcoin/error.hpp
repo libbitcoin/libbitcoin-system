@@ -55,7 +55,7 @@ enum error_code_t
     // blockchain errors
     not_found,
     duplicate,
-    unspent_output,
+    reserved,
     unsupported_script_pattern,
 
     // network errors (more)
