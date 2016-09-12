@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_CHAIN_TRANSACTION_HPP
 #define LIBBITCOIN_CHAIN_TRANSACTION_HPP
 
+#include <cstddef>
 #include <cstdint>
 #include <istream>
 #include <memory>
@@ -29,6 +30,7 @@
 #include <bitcoin/bitcoin/chain/input.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
@@ -79,6 +81,7 @@ public:
     bool is_coinbase() const;
     bool is_final(uint64_t block_height, uint32_t block_time) const;
     bool is_locktime_conflict() const;
+    size_t signature_operations(bool strict) const;
     uint64_t total_output_value() const;
     uint64_t serialized_size() const;
 

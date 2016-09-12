@@ -19,12 +19,15 @@
  */
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 
+#include <cstddef>
+#include <cstdint>
 #include <numeric>
 #include <sstream>
 #include <utility>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/chain/input.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
+#include <bitcoin/bitcoin/chain/script/operation.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -110,6 +113,10 @@ transaction& transaction::operator=(const transaction& other)
     locktime = other.locktime;
     inputs = other.inputs;
     outputs = other.outputs;
+
+    // This optimization forces a (safe) hash computation based on the
+    // assumption that it will at some point be computed for one or both.
+    hash_ = std::make_shared<hash_digest>(other.hash());
     return *this;
 }
 
@@ -333,15 +340,38 @@ bool transaction::is_locktime_conflict() const
     return locktime_set;
 }
 
+// Returns max_uint64 in case of overflow.
 uint64_t transaction::total_output_value() const
 {
     const auto value = [](uint64_t total, const output& output)
     {
-        return total + output.value;
+        const auto value = output.value;
+        return total >= max_uint64 - value ? max_uint64 : total + value;
     };
 
     return std::accumulate(outputs.begin(), outputs.end(), uint64_t(0), value);
 }
 
-} // namspace chain
-} // namspace libbitcoin
+// Returns max_size_t in case of overflow.
+size_t transaction::signature_operations(bool strict) const
+{
+    const auto in = [strict](size_t total, const input& input)
+    {
+        const auto count = input.script.signature_operations(strict);
+        return total >= max_size_t - count ? max_size_t : total + count;
+    };
+
+    const auto out = [strict](size_t total, const output& output)
+    {
+        const auto count = output.script.signature_operations(strict);
+        return total >= max_size_t - count ? max_size_t : total + count;
+    };
+
+    size_t total = 0;
+    auto ins = std::accumulate(inputs.begin(), inputs.end(), total, in);
+    auto outs = std::accumulate(outputs.begin(), outputs.end(), total, out);
+    return (ins >= max_size_t - outs) ? max_size_t : ins + outs;
+}
+
+} // namespace chain
+} // namespace libbitcoin
