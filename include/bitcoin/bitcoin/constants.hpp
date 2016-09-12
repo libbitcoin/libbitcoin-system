@@ -51,6 +51,7 @@ BC_CONSTEXPR uint8_t byte_bits = 8;
 BC_CONSTEXPR uint32_t reward_interval = 210000;
 BC_CONSTEXPR uint32_t coinbase_maturity = 100;
 BC_CONSTEXPR uint32_t initial_block_reward = 50;
+BC_CONSTEXPR uint32_t time_stamp_future_hours = 2;
 BC_CONSTEXPR uint32_t max_work_bits = 0x1d00ffff;
 BC_CONSTEXPR uint32_t max_input_sequence = max_uint32;
 
@@ -63,7 +64,7 @@ BC_CONSTFUNC uint64_t max_money_recursive(uint64_t current)
     return (current > 0) ? current + max_money_recursive(current >> 1) : 0;
 }
 
-BC_CONSTFUNC uint64_t coin_price(uint64_t value=1)
+BC_CONSTFUNC uint64_t bitcoin_to_satoshi(uint64_t value=1)
 {
     return value * 100000000;
 }
@@ -71,7 +72,7 @@ BC_CONSTFUNC uint64_t coin_price(uint64_t value=1)
 BC_CONSTFUNC uint64_t max_money()
 {
     return reward_interval *
-        max_money_recursive(coin_price(initial_block_reward));
+        max_money_recursive(bitcoin_to_satoshi(initial_block_reward));
 }
 
 // For configuration settings initialization.
@@ -81,9 +82,6 @@ enum class settings
     mainnet,
     testnet
 };
-
-// TODO: make static.
-BC_API hash_number max_target();
 
 } // namespace libbitcoin
 
