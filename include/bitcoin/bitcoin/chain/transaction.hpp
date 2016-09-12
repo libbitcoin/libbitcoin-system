@@ -73,19 +73,17 @@ public:
     void to_data(writer& sink) const;
     std::string to_string(uint32_t flags) const;
     bool is_valid() const;
-    void reset();
-    hash_digest hash() const;
-
-    // sighash_type is used by OP_CHECKSIG
-    hash_digest hash(uint32_t sighash_type) const;
     bool is_coinbase() const;
     bool is_invalid_coinbase() const;
     bool is_invalid_non_coinbase() const;
     bool is_final(uint64_t block_height, uint32_t block_time) const;
     bool is_locktime_conflict() const;
+    void reset();
+    hash_digest hash() const;
+    hash_digest hash(uint32_t sighash_type) const;
+    uint64_t serialized_size() const;
     size_t signature_operations(bool strict) const;
     uint64_t total_output_value() const;
-    uint64_t serialized_size() const;
 
     uint32_t version;
     uint32_t locktime;

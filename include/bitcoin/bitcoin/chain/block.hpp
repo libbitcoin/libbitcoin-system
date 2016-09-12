@@ -72,12 +72,12 @@ public:
     void to_data(std::ostream& stream, bool with_transaction_count = true) const;
     void to_data(writer& sink, bool with_transaction_count = true) const;
     bool is_valid() const;
+    bool is_distinct_transaction_set() const;
+    bool is_valid_coinbase_height(size_t height) const;
     void reset();
-    uint64_t serialized_size(bool with_transaction_count = true) const;
     hash_digest generate_merkle_root() const;
     size_t signature_operations(bool strict) const;
-    bool valid_coinbase_height(size_t height) const;
-    bool distinct_transactions() const;
+    uint64_t serialized_size(bool with_transaction_count = true) const;
 
     chain::header header;
     transaction::list transactions;

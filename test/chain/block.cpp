@@ -210,19 +210,19 @@ BOOST_AUTO_TEST_CASE(generate_merkle_root_block_with_multiple_transactions_match
 
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(block_distinct_transactions_tests)
+BOOST_AUTO_TEST_SUITE(block_is_distinct_transaction_set_tests)
 
 BOOST_AUTO_TEST_CASE(block__distinct_transactions__empty__true)
 {
     chain::block value;
-    BOOST_REQUIRE(value.distinct_transactions());
+    BOOST_REQUIRE(value.is_distinct_transaction_set());
 }
 
 BOOST_AUTO_TEST_CASE(validate_block__is_distinct_tx_set__single__true)
 {
     chain::block value;
     value.transactions.push_back({ 1, 0, {}, {} });
-    BOOST_REQUIRE(value.distinct_transactions());
+    BOOST_REQUIRE(value.is_distinct_transaction_set());
 }
 
 BOOST_AUTO_TEST_CASE(validate_block__is_distinct_tx_set__duplicate__false)
@@ -230,7 +230,7 @@ BOOST_AUTO_TEST_CASE(validate_block__is_distinct_tx_set__duplicate__false)
     chain::block value;
     value.transactions.push_back({ 1, 0, {}, {} });
     value.transactions.push_back({ 1, 0, {}, {} });
-    BOOST_REQUIRE(!value.distinct_transactions());
+    BOOST_REQUIRE(!value.is_distinct_transaction_set());
 }
 
 BOOST_AUTO_TEST_CASE(validate_block__is_distinct_tx_set__distinct_by_version__true)
@@ -239,7 +239,7 @@ BOOST_AUTO_TEST_CASE(validate_block__is_distinct_tx_set__distinct_by_version__tr
     value.transactions.push_back({ 1, 0, {}, {} });
     value.transactions.push_back({ 2, 0, {}, {} });
     value.transactions.push_back({ 3, 0, {}, {} });
-    BOOST_REQUIRE(value.distinct_transactions());
+    BOOST_REQUIRE(value.is_distinct_transaction_set());
 }
 
 BOOST_AUTO_TEST_CASE(validate_block__is_distinct_tx_set__partialy_distinct_by_version__false)
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(validate_block__is_distinct_tx_set__partialy_distinct_by_ve
     value.transactions.push_back({ 1, 0, {}, {} });
     value.transactions.push_back({ 2, 0, {}, {} });
     value.transactions.push_back({ 2, 0, {}, {} });
-    BOOST_REQUIRE(!value.distinct_transactions());
+    BOOST_REQUIRE(!value.is_distinct_transaction_set());
 }
 
 BOOST_AUTO_TEST_CASE(validate_block__is_distinct_tx_set__partialy_distinct_not_adjacent_by_version__false)
@@ -257,7 +257,7 @@ BOOST_AUTO_TEST_CASE(validate_block__is_distinct_tx_set__partialy_distinct_not_a
     value.transactions.push_back({ 1, 0, {}, {} });
     value.transactions.push_back({ 2, 0, {}, {} });
     value.transactions.push_back({ 1, 0, {}, {} });
-    BOOST_REQUIRE(!value.distinct_transactions());
+    BOOST_REQUIRE(!value.is_distinct_transaction_set());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -252,7 +252,7 @@ hash_digest header::hash() const
     return hash;
 }
 
-bool header::validate_time_stamp() const
+bool header::is_valid_time_stamp() const
 {
     // Use system clock because we require accurate time of day.
     typedef std::chrono::system_clock wall_clock;
@@ -262,7 +262,7 @@ bool header::validate_time_stamp() const
     return time <= future;
 }
 
-bool header::validate_proof_of_work() const
+bool header::is_valid_proof_of_work() const
 {
     // TODO: This should be statically-initialized.
     hash_number maximum;

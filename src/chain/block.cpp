@@ -195,7 +195,23 @@ size_t block::signature_operations(bool strict) const
     return std::accumulate(txs.begin(), txs.end(), size_t(0), value);
 }
 
-bool block::valid_coinbase_height(size_t height) const
+// Distinctness is defined by transaction hash.
+bool block::is_distinct_transaction_set() const
+{
+    const auto hasher = [](const transaction& transaction)
+    {
+        return transaction.hash();
+    };
+
+    const auto& txs = transactions;
+    hash_list hashes(txs.size());
+    std::transform(txs.begin(), txs.end(), hashes.begin(), hasher);
+    std::sort(hashes.begin(), hashes.end());
+    const auto distinct_end = std::unique(hashes.begin(), hashes.end());
+    return distinct_end == hashes.end();
+}
+
+bool block::is_valid_coinbase_height(size_t height) const
 {
     // There must be a transaction with an input.
     if (transactions.empty() || transactions.front().inputs.empty())
@@ -274,22 +290,6 @@ hash_digest block::generate_merkle_root() const
     hash_list hashes(txs.size());
     std::transform(txs.begin(), txs.end(), hashes.begin(), hasher);
     return build_merkle_tree(hashes);
-}
-
-// Distinctness is defined by transaction hash.
-bool block::distinct_transactions() const
-{
-    const auto hasher = [](const transaction& transaction)
-    {
-        return transaction.hash();
-    };
-
-    const auto& txs = transactions;
-    hash_list hashes(txs.size());
-    std::transform(txs.begin(), txs.end(), hashes.begin(), hasher);
-    std::sort(hashes.begin(), hashes.end());
-    const auto distinct_end = std::unique(hashes.begin(), hashes.end());
-    return distinct_end == hashes.end();
 }
 
 static const std::string encoded_mainnet_genesis_block =
