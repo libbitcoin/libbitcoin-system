@@ -167,6 +167,10 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         case error::channel_stopped:
             return "channel is stopped";
 
+        // check_transaction() (more)
+        case error::coinbase_maturity:
+            return "immature coinbase spent";
+
         // unknown errors
         case error::unknown:
         default:

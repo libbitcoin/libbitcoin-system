@@ -117,7 +117,10 @@ enum error_code_t
 
     // network errors (more)
     address_blocked,
-    channel_stopped
+    channel_stopped,
+
+    // check_transaction() (more)
+    coinbase_maturity
 };
 
 enum error_condition_t
