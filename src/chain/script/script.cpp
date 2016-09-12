@@ -19,11 +19,14 @@
  */
 #include <bitcoin/bitcoin/chain/script/script.hpp>
 
+#include <cstddef>
+#include <cstdint>
 #include <numeric>
 #include <sstream>
 #include <boost/algorithm/string.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
@@ -45,9 +48,10 @@ namespace chain {
 // False is an empty stack.
 static const data_chunk stack_false_value;
 static const data_chunk stack_true_value{ 1 };
-static constexpr uint64_t op_counter_limit = 201;
+static constexpr size_t op_counter_limit = 201;
 static constexpr size_t max_number_size = 4;
 static constexpr size_t cltv_max_number_size = 5;
+static constexpr size_t multisig_default_signature_ops = 20;
 
 enum class signature_parse_result
 {
@@ -226,7 +230,9 @@ uint64_t script::satoshi_content_size() const
     
     const auto value = [](uint64_t total, const operation& op)
     {
-        return total + op.serialized_size();
+        const auto op_size = op.serialized_size();
+        BITCOIN_ASSERT(total + op.serialized_size() <= max_uint64 - op_size);
+        return total + op_size;
     };
 
     return std::accumulate(operations.begin(), operations.end(), uint64_t(0),
@@ -307,6 +313,44 @@ std::string script::to_string(uint32_t flags) const
     }
 
     return value.str();
+}
+
+size_t script::signature_operations(bool strict) const
+{
+    size_t total = 0;
+    opcode last_opcode = opcode::bad_operation;
+
+    for (const auto& op: operations)
+    {
+        if (op.code == opcode::checksig ||
+            op.code == opcode::checksigverify)
+        {
+            total++;
+        }
+        else if (
+            op.code == opcode::checkmultisig ||
+            op.code == opcode::checkmultisigverify)
+        {
+            total += strict && within_op_n(last_opcode) ?
+                decode_op_n(last_opcode) : multisig_default_signature_ops;
+        }
+
+        last_opcode = op.code;
+    }
+
+    return total;
+}
+
+size_t script::pay_to_script_hash_signature_operations(const script& pay) const
+{
+    if (pay.operations.empty() || pattern() != script_pattern::pay_script_hash)
+        return 0;
+
+    script evaluate;
+    const auto& data = pay.operations.back().data;
+
+    return evaluate.from_data(data, false, script::parse_mode::strict) ?
+        evaluate.signature_operations(true) : max_size_t;
 }
 
 bool script::deserialize(const data_chunk& raw_script, parse_mode mode)
@@ -1927,5 +1971,5 @@ bool script::verify(const script& input_script, const script& output_script,
     return true;
 }
 
-} // namspace chain
-} // namspace libbitcoin
+} // namespace chain
+} // namespace libbitcoin
