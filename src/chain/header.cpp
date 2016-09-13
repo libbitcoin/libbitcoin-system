@@ -149,6 +149,7 @@ void header::reset()
     timestamp = 0;
     bits = 0;
     nonce = 0;
+    transaction_count = 0;
 
     mutex_.lock();
     hash_.reset();
