@@ -170,7 +170,6 @@ void block::to_data(writer& sink, bool with_transaction_count) const
 uint64_t block::serialized_size(bool with_transaction_count) const
 {
     auto block_size = header.serialized_size(with_transaction_count);
-
     const auto value = [](uint64_t total, const transaction& tx)
     {
         const auto size = tx.serialized_size();
@@ -193,6 +192,18 @@ size_t block::signature_operations(bool strict) const
 
     const auto& txs = transactions;
     return std::accumulate(txs.begin(), txs.end(), size_t(0), value);
+}
+
+bool block::is_final(size_t height) const
+{
+    const auto timestamp = header.timestamp;
+    const auto value = [height, timestamp](const transaction& tx)
+    {
+        return tx.is_final(height, timestamp);
+    };
+
+    const auto& txs = transactions;
+    return std::all_of(txs.begin(), txs.end(), value);
 }
 
 // Distinctness is defined by transaction hash.

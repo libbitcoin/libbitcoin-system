@@ -72,6 +72,7 @@ public:
     void to_data(std::ostream& stream, bool with_transaction_count=true) const;
     void to_data(writer& sink, bool with_transaction_count=true) const;
     bool is_valid() const;
+    bool is_final(size_t height) const;
     bool is_distinct_transaction_set() const;
     bool is_valid_coinbase_height(size_t height) const;
     void reset();
