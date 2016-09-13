@@ -81,7 +81,10 @@ public:
         minimum = 31402,
 
         // We support at most this internally (bound to settings default).
-        maximum = bip130
+        maximum = bip130,
+
+        // Used to generate canonical size required by consensus checks.
+        canonical = 0
     };
 
     enum service: uint64_t

@@ -28,6 +28,7 @@
 #include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 
@@ -66,19 +67,19 @@ public:
     void operator=(const block_message&) = delete;
 
     bool from_data(uint32_t version, const data_chunk& data,
-        bool with_transaction_count = true);
+        bool with_transaction_count=true);
     bool from_data(uint32_t version, std::istream& stream,
-        bool with_transaction_count = true);
+        bool with_transaction_count=true);
     bool from_data(uint32_t version, reader& source,
-        bool with_transaction_count = true);
-    data_chunk to_data(uint32_t version,
-        bool with_transaction_count = true) const;
+        bool with_transaction_count=true);
+    data_chunk to_data(uint32_t version=version::level::canonical,
+        bool with_transaction_count=true) const;
     void to_data(uint32_t version, std::ostream& stream,
-        bool with_transaction_count = true) const;
+        bool with_transaction_count=true) const;
     void to_data(uint32_t version, writer& sink,
-        bool with_transaction_count = true) const;
-    uint64_t serialized_size(uint32_t version,
-        bool with_transaction_count = true) const;
+        bool with_transaction_count=true) const;
+    uint64_t serialized_size(uint32_t version=version::level::canonical,
+        bool with_transaction_count=true) const;
 
     uint64_t originator() const;
     void set_originator(uint64_t value);

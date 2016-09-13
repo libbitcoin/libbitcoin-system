@@ -36,7 +36,7 @@ const std::string header_message::command = "headers";
 const uint32_t header_message::version_minimum = version::level::minimum;
 const uint32_t header_message::version_maximum = version::level::maximum;
 
-header_message header_message::factory_from_data(const uint32_t version,
+header_message header_message::factory_from_data(uint32_t version,
     const data_chunk& data, bool with_transaction_count)
 {
     header_message instance;
@@ -44,7 +44,7 @@ header_message header_message::factory_from_data(const uint32_t version,
     return instance;
 }
 
-header_message header_message::factory_from_data(const uint32_t version,
+header_message header_message::factory_from_data(uint32_t version,
     std::istream& stream, bool with_transaction_count)
 {
     header_message instance;
@@ -52,7 +52,7 @@ header_message header_message::factory_from_data(const uint32_t version,
     return instance;
 }
 
-header_message header_message::factory_from_data(const uint32_t version,
+header_message header_message::factory_from_data(uint32_t version,
     reader& source, bool with_transaction_count)
 {
     header_message instance;
@@ -121,46 +121,43 @@ header_message& header_message::operator=(header_message&& other)
     return *this;
 }
 
-bool header_message::from_data(const uint32_t version, const data_chunk& data,
+bool header_message::from_data(uint32_t, const data_chunk& data,
     bool with_transaction_count)
 {
-    originator_ = version;
     return header::from_data(data, with_transaction_count);
 }
 
-bool header_message::from_data(const uint32_t version, std::istream& stream,
+bool header_message::from_data(uint32_t, std::istream& stream,
     bool with_transaction_count)
 {
-    originator_ = version;
     return header::from_data(stream, with_transaction_count);
 }
 
-bool header_message::from_data(const uint32_t version, reader& source,
+bool header_message::from_data(uint32_t, reader& source,
     bool with_transaction_count)
 {
-    originator_ = version;
     return header::from_data(source, with_transaction_count);
 }
 
-data_chunk header_message::to_data(const uint32_t version,
+data_chunk header_message::to_data(uint32_t,
     bool with_transaction_count) const
 {
     return header::to_data(with_transaction_count);
 }
 
-void header_message::to_data(const uint32_t version, std::ostream& stream,
+void header_message::to_data(uint32_t, std::ostream& stream,
     bool with_transaction_count) const
 {
     header::to_data(stream, with_transaction_count);
 }
 
-void header_message::to_data(const uint32_t version, writer& sink,
+void header_message::to_data(uint32_t, writer& sink,
     bool with_transaction_count) const
 {
     header::to_data(sink, with_transaction_count);
 }
 
-uint64_t header_message::serialized_size(const uint32_t version,
+uint64_t header_message::serialized_size(uint32_t,
     bool with_transaction_count) const
 {
     return header::serialized_size(with_transaction_count);

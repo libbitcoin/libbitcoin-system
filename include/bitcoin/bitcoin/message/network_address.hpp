@@ -39,30 +39,26 @@ public:
     typedef std::vector<network_address> list;
 
     static network_address factory_from_data(uint32_t version,
-        const data_chunk& data, bool with_timestamp /*= true*/);
+        const data_chunk& data, bool with_timestamp);
     static network_address factory_from_data(uint32_t version,
-        std::istream& stream, bool with_timestamp /*= true*/);
+        std::istream& stream, bool with_timestamp);
     static network_address factory_from_data(uint32_t version,
-        reader& source, bool with_timestamp /*=true*/);
+        reader& source, bool with_timestamp);
     static uint64_t satoshi_fixed_size(uint32_t version,
-        bool with_timestamp /*= false*/);
+        bool with_timestamp);
 
     bool from_data(uint32_t version, const data_chunk& data,
-        bool with_timestamp /*= true*/);
+        bool with_timestamp);
     bool from_data(uint32_t version, std::istream& stream,
-        bool with_timestamp /*= true*/);
-    bool from_data(uint32_t version, reader& source,
-        bool with_timestamp /*= true*/);
-    data_chunk to_data(uint32_t version,
-        bool with_timestamp /*= true*/) const;
+        bool with_timestamp);
+    bool from_data(uint32_t version, reader& source, bool with_timestamp);
+    data_chunk to_data(uint32_t version, bool with_timestamp) const;
     void to_data(uint32_t version, std::ostream& stream,
-        bool with_timestamp /*= true*/) const;
-    void to_data(uint32_t version, writer& sink,
-        bool with_timestamp /*= true*/) const;
+        bool with_timestamp) const;
+    void to_data(uint32_t version, writer& sink, bool with_timestamp) const;
     bool is_valid() const;
     void reset();
-    uint64_t serialized_size(uint32_t version,
-        bool with_timestamp /*= false*/) const;
+    uint64_t serialized_size(uint32_t version, bool with_timestamp) const;
 
     // Starting version 31402, addresses are prefixed with a timestamp.
     uint32_t timestamp;

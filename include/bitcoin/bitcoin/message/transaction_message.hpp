@@ -28,6 +28,7 @@
 #include <bitcoin/bitcoin/chain/input.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 
@@ -68,10 +69,10 @@ public:
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
     bool from_data(uint32_t version, reader& source);
-    data_chunk to_data(uint32_t version) const;
+    data_chunk to_data(uint32_t version=version::level::canonical) const;
     void to_data(uint32_t version, std::ostream& stream) const;
     void to_data(uint32_t version, writer& sink) const;
-    uint64_t serialized_size(uint32_t version) const;
+    uint64_t serialized_size(uint32_t version=version::level::canonical) const;
     uint64_t originator() const;
     void set_originator(uint64_t value);
 
