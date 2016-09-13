@@ -43,11 +43,11 @@ public:
     typedef std::vector<ptr> ptr_list;
 
     static header factory_from_data(const data_chunk& data,
-        bool with_transaction_count = true);
+        bool with_transaction_count=true);
     static header factory_from_data(std::istream& stream,
-        bool with_transaction_count = true);
+        bool with_transaction_count=true);
     static header factory_from_data(reader& source,
-        bool with_transaction_count = true);
+        bool with_transaction_count=true);
     static uint64_t satoshi_fixed_size_without_transaction_count();
 
     header();
@@ -67,18 +67,18 @@ public:
     // TODO: eliminate blockchain transaction copies and then delete this.
     header& operator=(const header& other) /*= delete*/;
 
-    bool from_data(const data_chunk& data, bool with_transaction_count = true);
-    bool from_data(std::istream& stream, bool with_transaction_count = true);
-    bool from_data(reader& source, bool with_transaction_count = true);
-    data_chunk to_data(bool with_transaction_count = true) const;
-    void to_data(std::ostream& stream, bool with_transaction_count = true) const;
-    void to_data(writer& sink, bool with_transaction_count = true) const;
+    bool from_data(const data_chunk& data, bool with_transaction_count=true);
+    bool from_data(std::istream& stream, bool with_transaction_count=true);
+    bool from_data(reader& source, bool with_transaction_count=true);
+    data_chunk to_data(bool with_transaction_count=true) const;
+    void to_data(std::ostream& stream, bool with_transaction_count=true) const;
+    void to_data(writer& sink, bool with_transaction_count=true) const;
     hash_digest hash() const;
     bool is_valid() const;
     bool is_valid_time_stamp() const;
     bool is_valid_proof_of_work() const;
     void reset();
-    uint64_t serialized_size(bool with_transaction_count = true) const;
+    uint64_t serialized_size(bool with_transaction_count=true) const;
 
     uint32_t version;
     hash_digest previous_block_hash;

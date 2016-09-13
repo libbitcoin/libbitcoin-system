@@ -108,24 +108,21 @@ block_message& block_message::operator=(block_message&& other)
     return *this;
 }
 
-bool block_message::from_data(uint32_t version, const data_chunk& data,
+bool block_message::from_data(uint32_t, const data_chunk& data,
     bool with_transaction_count)
 {
-    originator_ = version;
     return block::from_data(data, with_transaction_count);
 }
 
-bool block_message::from_data(uint32_t version, std::istream& stream,
+bool block_message::from_data(uint32_t, std::istream& stream,
     bool with_transaction_count)
 {
-    originator_ = version;
     return block::from_data(stream, with_transaction_count);
 }
 
-bool block_message::from_data(uint32_t version, reader& source,
+bool block_message::from_data(uint32_t, reader& source,
     bool with_transaction_count)
 {
-    originator_ = version;
     return block::from_data(source, with_transaction_count);
 }
 

@@ -46,11 +46,11 @@ public:
     typedef std::vector<size_t> indexes;
 
     static block factory_from_data(const data_chunk& data,
-        bool with_transaction_count = true);
+        bool with_transaction_count=true);
     static block factory_from_data(std::istream& stream,
-        bool with_transaction_count = true);
+        bool with_transaction_count=true);
     static block factory_from_data(reader& source,
-        bool with_transaction_count = true);
+        bool with_transaction_count=true);
     static block genesis_mainnet();
     static block genesis_testnet();
 
@@ -65,19 +65,19 @@ public:
     block& operator=(block&& other);
     void operator=(const block&) = delete;
 
-    bool from_data(const data_chunk& data, bool with_transaction_count = true);
-    bool from_data(std::istream& stream, bool with_transaction_count = true);
-    bool from_data(reader& source, bool with_transaction_count = true);
-    data_chunk to_data(bool with_transaction_count = true) const;
-    void to_data(std::ostream& stream, bool with_transaction_count = true) const;
-    void to_data(writer& sink, bool with_transaction_count = true) const;
+    bool from_data(const data_chunk& data, bool with_transaction_count=true);
+    bool from_data(std::istream& stream, bool with_transaction_count=true);
+    bool from_data(reader& source, bool with_transaction_count=true);
+    data_chunk to_data(bool with_transaction_count=true) const;
+    void to_data(std::ostream& stream, bool with_transaction_count=true) const;
+    void to_data(writer& sink, bool with_transaction_count=true) const;
     bool is_valid() const;
     bool is_distinct_transaction_set() const;
     bool is_valid_coinbase_height(size_t height) const;
     void reset();
     hash_digest generate_merkle_root() const;
     size_t signature_operations(bool strict) const;
-    uint64_t serialized_size(bool with_transaction_count = true) const;
+    uint64_t serialized_size(bool with_transaction_count=true) const;
 
     chain::header header;
     transaction::list transactions;
