@@ -22,6 +22,7 @@
 
 #include <cstdint>
 #include <istream>
+#include <bitcoin/bitcoin/chain/output.hpp>
 #include <bitcoin/bitcoin/chain/point.hpp>
 #include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/define.hpp>
@@ -57,6 +58,8 @@ public:
     chain::script script;
     uint32_t sequence;
 };
+
+typedef point input_point;
 
 } // namespace chain
 } // namespace libbitcoin

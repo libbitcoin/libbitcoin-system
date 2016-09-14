@@ -135,16 +135,16 @@ uint64_t ping::serialized_size(uint32_t version) const
     return satoshi_fixed_size(version);
 }
 
-bool operator==(const ping& left, const ping& right)
+bool ping::operator==(const ping& other) const
 {
     // Nonce should be zero if not used.
-    return (left.nonce == right.nonce);
+    return (nonce == other.nonce);
 }
 
-bool operator!=(const ping& left, const ping& right)
+bool ping::operator!=(const ping& other) const
 {
     // Nonce should be zero if not used.
-    return !(left == right);
+    return !(*this == other);
 }
 
 } // namespace message

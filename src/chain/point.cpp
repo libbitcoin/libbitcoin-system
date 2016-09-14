@@ -167,14 +167,14 @@ uint64_t point::checksum() const
     // return std::hash<point>()(*this);
 }
 
-bool operator==(const point& left, const point& right)
+bool point::operator==(const point& other) const
 {
-    return left.hash == right.hash && left.index == right.index;
+    return hash == other.hash && index == other.index;
 }
 
-bool operator!=(const point& left, const point& right)
+bool point::operator!=(const point& other) const
 {
-    return !(left == right);
+    return !(*this == other);
 }
 
 } // namespace chain

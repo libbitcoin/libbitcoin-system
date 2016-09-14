@@ -205,35 +205,34 @@ uint64_t alert_payload::serialized_size(uint32_t version) const
     return size;
 }
 
-bool operator==(const alert_payload& left,
-    const alert_payload& right)
+bool alert_payload::operator==(const alert_payload& other) const
 {
-    bool result = (left.version == right.version) &&
-        (left.relay_until == right.relay_until) &&
-        (left.expiration == right.expiration) &&
-        (left.id == right.id) &&
-        (left.cancel == right.cancel) &&
-        (left.set_cancel.size() == right.set_cancel.size()) &&
-        (left.min_version == right.min_version) &&
-        (left.max_version == right.max_version) &&
-        (left.set_sub_version.size() == right.set_sub_version.size()) &&
-        (left.priority == right.priority) &&
-        (left.comment == right.comment) &&
-        (left.status_bar == right.status_bar) &&
-        (left.reserved == right.reserved);
+    bool result = (version == other.version) &&
+        (relay_until == other.relay_until) &&
+        (expiration == other.expiration) &&
+        (id == other.id) &&
+        (cancel == other.cancel) &&
+        (set_cancel.size() == other.set_cancel.size()) &&
+        (min_version == other.min_version) &&
+        (max_version == other.max_version) &&
+        (set_sub_version.size() == other.set_sub_version.size()) &&
+        (priority == other.priority) &&
+        (comment == other.comment) &&
+        (status_bar == other.status_bar) &&
+        (reserved == other.reserved);
 
-    for (size_t i = 0; i < left.set_cancel.size() && result; i++)
-        result = (left.set_cancel[i] == right.set_cancel[i]);
+    for (size_t i = 0; i < set_cancel.size() && result; i++)
+        result = (set_cancel[i] == other.set_cancel[i]);
 
-    for (size_t i = 0; i < left.set_sub_version.size() && result; i++)
-        result = (left.set_sub_version[i] == right.set_sub_version[i]);
+    for (size_t i = 0; i < set_sub_version.size() && result; i++)
+        result = (set_sub_version[i] == other.set_sub_version[i]);
 
     return result;
 }
 
-bool operator!=(const alert_payload& left, const alert_payload& right)
+bool alert_payload::operator!=(const alert_payload& other) const
 {
-    return !(left == right);
+    return !(*this == other);
 }
 
 } // end message

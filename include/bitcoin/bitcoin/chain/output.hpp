@@ -56,6 +56,14 @@ public:
     chain::script script;
 };
 
+typedef point output_point;
+
+struct BC_API points_info
+{
+    output_point::list points;
+    uint64_t change;
+};
+
 struct BC_API output_info
 {
     typedef std::vector<output_info> list;

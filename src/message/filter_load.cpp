@@ -142,24 +142,22 @@ uint64_t filter_load::serialized_size(uint32_t version) const
     return 1 + 4 + 4 + variable_uint_size(filter.size()) + filter.size();
 }
 
-bool operator==(const filter_load& left,
-    const filter_load& right)
+bool filter_load::operator==(const filter_load& other) const
 {
-    bool result = (left.filter.size() == right.filter.size()) &&
-        (left.hash_functions == right.hash_functions) &&
-        (left.tweak == right.tweak) &&
-        (left.flags == right.flags);
+    auto result = (filter.size() == other.filter.size()) &&
+        (hash_functions == other.hash_functions) &&
+        (tweak == other.tweak) &&
+        (flags == other.flags);
 
-    for (data_chunk::size_type i = 0; i < left.filter.size() && result; i++)
-        result = (left.filter[i] == right.filter[i]);
+    for (data_chunk::size_type i = 0; i < filter.size() && result; i++)
+        result = (filter[i] == other.filter[i]);
 
     return result;
 }
 
-bool operator!=(const filter_load& left,
-    const filter_load& right)
+bool filter_load::operator!=(const filter_load& other) const
 {
-    return !(left == right);
+    return !(*this == other);
 }
 
 } // end message

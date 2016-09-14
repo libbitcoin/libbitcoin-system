@@ -40,6 +40,9 @@ public:
     static alert factory_from_data(uint32_t version, std::istream& stream);
     static alert factory_from_data(uint32_t version, reader& source);
 
+    bool operator==(const alert& other) const;
+    bool operator!=(const alert& other) const;
+
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
     bool from_data(uint32_t version, reader& source);
@@ -57,9 +60,6 @@ public:
     data_chunk payload;
     data_chunk signature;
 };
-
-BC_API bool operator==(const alert& left, const alert& right);
-BC_API bool operator!=(const alert& left, const alert& right);
 
 } // end message
 } // end libbitcoin

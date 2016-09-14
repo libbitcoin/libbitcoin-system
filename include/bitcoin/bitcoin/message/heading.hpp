@@ -77,6 +77,9 @@ public:
     static heading factory_from_data(std::istream& stream);
     static heading factory_from_data(reader& source);
 
+    bool operator==(const heading& other) const;
+    bool operator!=(const heading& other) const;
+
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
     bool from_data(reader& source);
@@ -92,9 +95,6 @@ public:
     uint32_t payload_size;
     uint32_t checksum;
 };
-
-BC_API bool operator==(const heading& left, const heading& right);
-BC_API bool operator!=(const heading& left, const heading& right);
 
 } // namespace message
 } // namespace libbitcoin

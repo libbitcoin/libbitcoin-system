@@ -46,6 +46,9 @@ public:
     static point factory_from_data(reader& source);
     static uint64_t satoshi_fixed_size();
 
+    bool operator==(const point& other) const;
+    bool operator!=(const point& other) const;
+
     uint64_t checksum() const;
 
     bool is_null() const;
@@ -65,18 +68,6 @@ public:
 
     hash_digest hash;
     uint32_t index;
-};
-
-BC_API bool operator==(const point& left, const point& right);
-BC_API bool operator!=(const point& left, const point& right);
-
-typedef point input_point;
-typedef point output_point;
-
-struct BC_API points_info
-{
-    output_point::list points;
-    uint64_t change;
 };
 
 } // namespace chain

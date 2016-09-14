@@ -48,6 +48,9 @@ public:
     get_blocks(const hash_list& start, const hash_digest& stop);
     get_blocks(hash_list&& start, hash_digest&& stop);
 
+    bool operator==(const get_blocks& other) const;
+    bool operator!=(const get_blocks& other) const;
+
     virtual bool from_data(uint32_t version, const data_chunk& data);
     virtual bool from_data(uint32_t version, std::istream& stream);
     virtual bool from_data(uint32_t version, reader& source);
@@ -66,9 +69,6 @@ public:
     hash_list start_hashes;
     hash_digest stop_hash;
 };
-
-BC_API bool operator==(const get_blocks& left, const get_blocks& right);
-BC_API bool operator!=(const get_blocks& left, const get_blocks& right);
 
 } // namespace message
 } // namespace libbitcoin

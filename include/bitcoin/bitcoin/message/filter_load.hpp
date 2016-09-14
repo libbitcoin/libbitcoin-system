@@ -43,6 +43,9 @@ public:
     static filter_load factory_from_data(uint32_t version,
         reader& source);
 
+    bool operator==(const filter_load& other) const;
+    bool operator!=(const filter_load& other) const;
+
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
     bool from_data(uint32_t version, reader& source);
@@ -62,9 +65,6 @@ public:
     uint32_t tweak;
     uint8_t flags;
 };
-
-BC_API bool operator==(const filter_load& left, const filter_load& right);
-BC_API bool operator!=(const filter_load& left, const filter_load& right);
 
 } // end message
 } // end libbitcoin
