@@ -61,7 +61,7 @@ transaction transaction::factory_from_data(reader& source)
 // default constructors
 
 transaction::transaction()
-  : version(0), locktime(0), hash_(nullptr)
+  : version(0), locktime(0), sigops_(0), strict_sigops_(0)
 {
 }
 
@@ -76,7 +76,8 @@ transaction::transaction(uint32_t version, uint32_t locktime,
     locktime(locktime),
     inputs(inputs),
     outputs(outputs),
-    hash_(nullptr)
+    sigops_(0),
+    strict_sigops_(0)
 {
 }
 
@@ -93,7 +94,8 @@ transaction::transaction(uint32_t version, uint32_t locktime,
     locktime(locktime),
     inputs(std::forward<input::list>(inputs)),
     outputs(std::forward<output::list>(outputs)),
-    hash_(nullptr)
+    sigops_(0),
+    strict_sigops_(0)
 {
 }
 
@@ -113,6 +115,11 @@ transaction& transaction::operator=(const transaction& other)
     locktime = other.locktime;
     inputs = other.inputs;
     outputs = other.outputs;
+
+    // The cache benefit is lost on copy construction since we cannot safely
+    // copy from other without computing the value, which may never be unused.
+    sigops_ = 0;
+    strict_sigops_ = 0;
 
     // This optimization forces a (safe) hash computation based on the
     // assumption that it will at some point be computed for one or both.
@@ -135,9 +142,17 @@ void transaction::reset()
     outputs.clear();
     outputs.shrink_to_fit();
 
-    mutex_.lock();
+    hash_mutex_.lock();
     hash_.reset();
-    mutex_.unlock();
+    hash_mutex_.unlock();
+
+    sigops_mutex_.lock();
+    sigops_ = 0;
+    sigops_mutex_.unlock();
+
+    strict_sigops_mutex_.lock();
+    strict_sigops_ = 0;
+    strict_sigops_mutex_.unlock();
 }
 
 bool transaction::from_data(const data_chunk& data)
@@ -278,19 +293,19 @@ hash_digest transaction::hash() const
 {
     ///////////////////////////////////////////////////////////////////////////
     // Critical Section
-    mutex_.lock_upgrade();
+    hash_mutex_.lock_upgrade();
 
     if (!hash_)
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        mutex_.unlock_upgrade_and_lock();
+        hash_mutex_.unlock_upgrade_and_lock();
         hash_.reset(new hash_digest(bitcoin_hash(to_data())));
-        mutex_.unlock_and_lock_upgrade();
+        hash_mutex_.unlock_and_lock_upgrade();
         //---------------------------------------------------------------------
     }
 
-    hash_digest hash = *hash_;
-    mutex_.unlock_upgrade();
+    const auto hash = *hash_;
+    hash_mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 
     return hash;
@@ -378,6 +393,8 @@ uint64_t transaction::total_output_value() const
 // Returns max_size_t in case of overflow.
 size_t transaction::signature_operations(bool strict) const
 {
+    size_t sigops = 0;
+
     const auto in = [strict](size_t total, const input& input)
     {
         const auto count = input.script.signature_operations(strict);
@@ -390,10 +407,48 @@ size_t transaction::signature_operations(bool strict) const
         return total >= max_size_t - count ? max_size_t : total + count;
     };
 
-    size_t total = 0;
-    auto ins = std::accumulate(inputs.begin(), inputs.end(), total, in);
-    auto outs = std::accumulate(outputs.begin(), outputs.end(), total, out);
-    return (ins >= max_size_t - outs) ? max_size_t : ins + outs;
+    if (strict)
+    {
+        ///////////////////////////////////////////////////////////////////////////
+        // Critical Section
+        strict_sigops_mutex_.lock_upgrade();
+
+        if (strict_sigops_ == 0)
+        {
+            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            strict_sigops_mutex_.unlock_upgrade_and_lock();
+            std::accumulate(inputs.begin(), inputs.end(), strict_sigops_, in);
+            std::accumulate(outputs.begin(), outputs.end(), strict_sigops_, out);
+            strict_sigops_mutex_.unlock_and_lock_upgrade();
+            //---------------------------------------------------------------------
+        }
+
+        sigops = strict_sigops_;
+        strict_sigops_mutex_.unlock_upgrade();
+        ///////////////////////////////////////////////////////////////////////////
+    }
+    else
+    {
+        ///////////////////////////////////////////////////////////////////////////
+        // Critical Section
+        sigops_mutex_.lock_upgrade();
+
+        if (sigops_ == 0)
+        {
+            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            sigops_mutex_.unlock_upgrade_and_lock();
+            std::accumulate(inputs.begin(), inputs.end(), sigops_, in);
+            std::accumulate(outputs.begin(), outputs.end(), sigops_, out);
+            sigops_mutex_.unlock_and_lock_upgrade();
+            //---------------------------------------------------------------------
+        }
+
+        sigops = sigops_;
+        sigops_mutex_.unlock_upgrade();
+        ///////////////////////////////////////////////////////////////////////////
+    }
+
+    return sigops;
 }
 
 } // namespace chain

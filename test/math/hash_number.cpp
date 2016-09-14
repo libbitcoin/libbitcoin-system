@@ -36,8 +36,7 @@ BOOST_AUTO_TEST_CASE(hash_number__simple__test)
     BOOST_REQUIRE(maximum.set_compact(max_work_bits));
     BOOST_REQUIRE(!(target > maximum));
 
-    hash_number our_value;
-    our_value.set_hash(block_hash);
+    hash_number our_value(block_hash);
     BOOST_REQUIRE(!(our_value > target));
 }
 

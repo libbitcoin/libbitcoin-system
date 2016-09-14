@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/chain/block.hpp>
 
+#include <algorithm>
 #include <numeric>
 #include <utility>
 #include <boost/iostreams/stream.hpp>
@@ -60,6 +61,7 @@ block block::factory_from_data(reader& source,
 }
 
 block::block()
+  : sigops_(0), strict_sigops_(0)
 {
 }
 
@@ -70,7 +72,10 @@ block::block(const block& other)
 
 block::block(const chain::header& header,
     const chain::transaction::list& transactions)
-  : header(header), transactions(transactions)
+  : header(header),
+    transactions(transactions),
+    sigops_(0),
+    strict_sigops_(0)
 {
 }
 
@@ -82,7 +87,8 @@ block::block(block&& other)
 
 block::block(chain::header&& header, chain::transaction::list&& transactions)
   : header(std::forward<chain::header>(header)),
-    transactions(std::forward<chain::transaction::list>(transactions))
+    transactions(std::forward<chain::transaction::list>(transactions)),
+    sigops_(0), strict_sigops_(0)
 {
 }
 
@@ -90,6 +96,8 @@ block& block::operator=(block&& other)
 {
     header = std::move(other.header);
     transactions = std::move(other.transactions);
+    sigops_ = other.sigops_;
+    strict_sigops_ = other.strict_sigops_;
     return *this;
 }
 
@@ -103,6 +111,14 @@ void block::reset()
     header.reset();
     transactions.clear();
     transactions.shrink_to_fit();
+
+    sigops_mutex_.lock();
+    sigops_ = 0;
+    sigops_mutex_.unlock();
+
+    strict_sigops_mutex_.lock();
+    strict_sigops_ = 0;
+    strict_sigops_mutex_.unlock();
 }
 
 bool block::from_data(const data_chunk& data, bool with_transaction_count)
@@ -170,7 +186,6 @@ void block::to_data(writer& sink, bool with_transaction_count) const
 uint64_t block::serialized_size(bool with_transaction_count) const
 {
     auto block_size = header.serialized_size(with_transaction_count);
-
     const auto value = [](uint64_t total, const transaction& tx)
     {
         const auto size = tx.serialized_size();
@@ -183,16 +198,87 @@ uint64_t block::serialized_size(bool with_transaction_count) const
 }
 
 // overflow returns max_size_t
+// If the result is zero there is no cache benefit, which is ok.
 size_t block::signature_operations(bool strict) const
 {
+    size_t sigops = 0;
+    const auto& txs = transactions;
+
     const auto value = [strict](size_t total, const transaction& tx)
     {
         const auto count = tx.signature_operations(strict);
         return total >= max_size_t - count ? max_size_t : total + count;
     };
 
+    if (strict)
+    {
+        ///////////////////////////////////////////////////////////////////////////
+        // Critical Section
+        strict_sigops_mutex_.lock_upgrade();
+
+        if (strict_sigops_ == 0)
+        {
+            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            strict_sigops_mutex_.unlock_upgrade_and_lock();
+            std::accumulate(txs.begin(), txs.end(), strict_sigops_, value);
+            strict_sigops_mutex_.unlock_and_lock_upgrade();
+            //---------------------------------------------------------------------
+        }
+
+        sigops = strict_sigops_;
+        strict_sigops_mutex_.unlock_upgrade();
+        ///////////////////////////////////////////////////////////////////////////
+    }
+    else
+    {
+        ///////////////////////////////////////////////////////////////////////////
+        // Critical Section
+        sigops_mutex_.lock_upgrade();
+
+        if (sigops_ == 0)
+        {
+            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            sigops_mutex_.unlock_upgrade_and_lock();
+            std::accumulate(txs.begin(), txs.end(), sigops_, value);
+            sigops_mutex_.unlock_and_lock_upgrade();
+            //---------------------------------------------------------------------
+        }
+
+        sigops = sigops_;
+        sigops_mutex_.unlock_upgrade();
+        ///////////////////////////////////////////////////////////////////////////
+    }
+
+    return sigops;
+}
+
+// True if there is another coinbase other than the first tx.
+// No txs or coinbases also returns true.
+bool block::has_extra_coinbases() const
+{
     const auto& txs = transactions;
-    return std::accumulate(txs.begin(), txs.end(), size_t(0), value);
+
+    if (transactions.empty())
+        return false;
+
+    const auto value = [](const transaction& tx)
+    {
+        return tx.is_coinbase();
+    };
+
+    return std::none_of(txs.begin() + 1, txs.end(), value);
+}
+
+bool block::is_final(size_t height) const
+{
+    const auto timestamp = header.timestamp;
+    const auto value = [height, timestamp](const transaction& tx)
+    {
+        return tx.is_final(height, timestamp);
+    };
+
+    const auto& txs = transactions;
+    return std::all_of(txs.begin(), txs.end(), value);
 }
 
 // Distinctness is defined by transaction hash.
@@ -230,6 +316,11 @@ bool block::is_valid_coinbase_height(size_t height) const
 
     // Require that the coinbase script match the expected coinbase script.
     return std::equal(expected.begin(), expected.end(), actual.begin());
+}
+
+bool block::is_valid_merkle_root() const
+{
+    return generate_merkle_root() == header.merkle;
 }
 
 hash_digest block::build_merkle_tree(hash_list& merkle)
@@ -279,6 +370,7 @@ hash_digest block::build_merkle_tree(hash_list& merkle)
     return merkle[0];
 }
 
+// TODO: consider caching result.
 hash_digest block::generate_merkle_root() const
 {
     const auto hasher = [](const transaction& transaction)

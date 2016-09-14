@@ -101,8 +101,7 @@ header::header(uint32_t version, hash_digest&& previous_block_hash,
     timestamp(timestamp),
     bits(bits),
     nonce(nonce),
-    transaction_count(transaction_count),
-    hash_(nullptr)
+    transaction_count(transaction_count)
 {
 }
 
@@ -246,7 +245,7 @@ hash_digest header::hash() const
         //---------------------------------------------------------------------
     }
 
-    hash_digest hash = *hash_;
+    const auto hash = *hash_;
     mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 
@@ -267,16 +266,14 @@ bool header::is_valid_proof_of_work() const
 {
     // TODO: This should be statically-initialized.
     hash_number maximum;
-    maximum.set_compact(max_work_bits);
-    if (!maximum.set_compact(bits))
+    if (!maximum.set_compact(max_work_bits))
         return false;
 
     hash_number target;
     if (!target.set_compact(bits) || target > maximum)
         return false;
 
-    hash_number value;
-    value.set_hash(hash());
+    hash_number value(hash());
     return value <= target;
 }
 

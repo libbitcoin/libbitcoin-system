@@ -32,56 +32,43 @@ namespace libbitcoin {
  * Used for block proof of works to calculate whether they reach
  * a certain target or which chain is longest.
  */
-class hash_number
+class BC_API hash_number
 {
 public:
-    BC_API hash_number();
-    BC_API hash_number(uint64_t value);
-    // Returns false if negative or overflowed.
-    BC_API bool set_compact(uint32_t compact);
-    BC_API uint32_t compact() const;
-    BC_API void set_hash(const hash_digest& hash);
-    BC_API hash_digest hash() const;
+    /// Constructors.
+    hash_number();
+    hash_number(uint64_t value);
+    hash_number(const hash_digest& value);
 
-    BC_API const hash_number operator~() const;
+    /// Properties.
+    hash_digest hash() const;
+    uint32_t compact() const;
+    bool set_compact(uint32_t value);
 
-    // int64_t resolves to this in Satoshi's GetNextWorkRequired()
-    BC_API hash_number& operator*=(uint32_t value);
-    BC_API hash_number& operator/=(uint32_t value);
-    BC_API hash_number& operator<<=(uint32_t shift);
+    /// Copy Operators.
+    hash_number operator~() const;
+    hash_number operator<<(uint32_t value);
+    hash_number operator/(const hash_number& value);
+    hash_number operator+(const hash_number& value);
 
-    BC_API hash_number& operator/=(const hash_number& number_b);
-    BC_API hash_number& operator+=(const hash_number& number_b);
+    /// Change Operators.
+    hash_number& operator<<=(uint32_t value);
+    hash_number& operator*=(uint32_t value);
+    hash_number& operator/=(uint32_t value);
+    hash_number& operator/=(const hash_number& value);
+    hash_number& operator+=(const hash_number& value);
+
+    /// Comparison Operators.
+    bool operator==(uint64_t value) const;
+    bool operator!=(uint64_t value) const;
+    bool operator>(const hash_number& value) const;
+    bool operator<(const hash_number& value) const;
+    bool operator>=(const hash_number& value) const;
+    bool operator<=(const hash_number& value) const;
 
 private:
-    friend bool operator>(
-        const hash_number& number_a, const hash_number& number_b);
-    friend bool operator<=(
-        const hash_number& number_a, const hash_number& number_b);
-    friend const hash_number operator<<(
-        const hash_number& number_a, int shift);
-    friend const hash_number operator/(
-        const hash_number& number_a, const hash_number& number_b);
-    friend const hash_number operator+(
-        const hash_number& number_a, const hash_number& number_b);
-    friend bool operator==(
-        const hash_number& number, uint64_t value);
-
     uint256_t hash_;
 };
-
-BC_API bool operator>(
-    const hash_number& number_a, const hash_number& number_b);
-BC_API bool operator<=(
-    const hash_number& number_a, const hash_number& number_b);
-BC_API const hash_number operator<<(
-    const hash_number& number_a, int shift);
-BC_API const hash_number operator/(
-    const hash_number& number_a, const hash_number& number_b);
-BC_API const hash_number operator+(
-    const hash_number& number_a, const hash_number& number_b);
-BC_API bool operator==(
-    const hash_number& number, uint64_t value);
 
 } // namespace libbitcoin
 
