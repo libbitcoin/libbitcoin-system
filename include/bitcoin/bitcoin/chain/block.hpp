@@ -74,6 +74,7 @@ public:
     void to_data(writer& sink, bool with_transaction_count=true) const;
     bool is_valid() const;
     bool is_final(size_t height) const;
+    bool has_extra_coinbases() const;
     bool is_distinct_transaction_set() const;
     bool is_valid_coinbase_height(size_t height) const;
     void reset();

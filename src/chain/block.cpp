@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/chain/block.hpp>
 
+#include <algorithm>
 #include <numeric>
 #include <utility>
 #include <boost/iostreams/stream.hpp>
@@ -261,6 +262,23 @@ bool block::is_final(size_t height) const
 
     const auto& txs = transactions;
     return std::all_of(txs.begin(), txs.end(), value);
+}
+
+// True if there is another coinbase other than the first tx.
+// No txs or coinbases also returns true.
+bool block::has_extra_coinbases() const
+{
+    const auto& txs = transactions;
+
+    if (transactions.empty())
+        return false;
+
+    const auto value = [](const transaction& tx)
+    {
+        return tx.is_coinbase();
+    };
+
+    return std::none_of(txs.begin() + 1, txs.end(), value);
 }
 
 // Distinctness is defined by transaction hash.
