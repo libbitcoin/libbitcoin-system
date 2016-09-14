@@ -341,14 +341,21 @@ size_t script::signature_operations(bool strict) const
     return total;
 }
 
-size_t script::pay_to_script_hash_signature_operations(const script& pay) const
+// Returns max_size_t on parse failure.
+size_t script::pay_script_hash_sigops(const script& prevout) const
 {
-    if (pay.operations.empty() || pattern() != script_pattern::pay_script_hash)
+    // This script is empty, so it can't contain signatures.
+    if (operations.empty())
+        return 0;
+
+    // The previout script is not p2sh, so there is no signature increment.
+    if (prevout.pattern() != script_pattern::pay_script_hash)
         return 0;
 
     script evaluate;
-    const auto& data = pay.operations.back().data;
+    const auto& data = operations.back().data;
 
+    // Return the signature operations in the data script.
     return evaluate.from_data(data, false, script::parse_mode::strict) ?
         evaluate.signature_operations(true) : max_size_t;
 }

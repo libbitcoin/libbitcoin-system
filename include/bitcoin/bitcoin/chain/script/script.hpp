@@ -134,7 +134,7 @@ public:
     bool is_valid() const;
     void reset();
     size_t signature_operations(bool strict) const;
-    size_t pay_to_script_hash_signature_operations(const script& pay) const;
+    size_t pay_script_hash_sigops(const script& prevout) const;
     uint64_t satoshi_content_size() const;
     uint64_t serialized_size(bool prefix) const;
 
