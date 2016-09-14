@@ -266,16 +266,14 @@ bool header::is_valid_proof_of_work() const
 {
     // TODO: This should be statically-initialized.
     hash_number maximum;
-    maximum.set_compact(max_work_bits);
-    if (!maximum.set_compact(bits))
+    if (!maximum.set_compact(max_work_bits))
         return false;
 
     hash_number target;
     if (!target.set_compact(bits) || target > maximum)
         return false;
 
-    hash_number value;
-    value.set_hash(hash());
+    hash_number value(hash());
     return value <= target;
 }
 
