@@ -101,8 +101,7 @@ header::header(uint32_t version, hash_digest&& previous_block_hash,
     timestamp(timestamp),
     bits(bits),
     nonce(nonce),
-    transaction_count(transaction_count),
-    hash_(nullptr)
+    transaction_count(transaction_count)
 {
 }
 

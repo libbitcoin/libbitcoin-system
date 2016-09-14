@@ -32,6 +32,7 @@
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
@@ -85,6 +86,12 @@ public:
 
 private:
     static hash_digest build_merkle_tree(hash_list& merkle);
+
+    mutable upgrade_mutex sigops_mutex_;
+    mutable size_t sigops_;
+
+    mutable upgrade_mutex strict_sigops_mutex_;
+    mutable size_t strict_sigops_;
 };
 
 } // namespace chain
