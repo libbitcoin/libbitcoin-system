@@ -289,7 +289,7 @@ hash_digest transaction::hash() const
         //---------------------------------------------------------------------
     }
 
-    hash_digest hash = *hash_;
+    const auto hash = *hash_;
     mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 
