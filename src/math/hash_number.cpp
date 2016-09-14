@@ -19,95 +19,130 @@
  */
 #include <bitcoin/bitcoin/math/hash_number.hpp>
 
+#include <algorithm>
+
 namespace libbitcoin {
 
 hash_number::hash_number()
 {
 }
+
 hash_number::hash_number(uint64_t value)
   : hash_(value)
 {
 }
-bool hash_number::set_compact(uint32_t compact)
+
+hash_number::hash_number(const hash_digest& value)
 {
-    bool is_negative = true, is_overflow = true;
-    hash_.SetCompact(compact, &is_negative, &is_overflow);
+    std::copy(value.begin(), value.end(), hash_.begin());
+}
+
+bool hash_number::set_compact(uint32_t value)
+{
+    auto is_negative = true;
+    auto is_overflow = true;
+    hash_.SetCompact(value, &is_negative, &is_overflow);
     return !is_negative && !is_overflow;
 }
+
 uint32_t hash_number::compact() const
 {
     return hash_.GetCompact();
 }
-void hash_number::set_hash(const hash_digest& hash)
-{
-    std::copy(hash.begin(), hash.end(), hash_.begin());
-}
+
 hash_digest hash_number::hash() const
 {
-    hash_digest result;
-    std::copy(hash_.begin(), hash_.end(), result.begin());
-    return result;
+    hash_digest value;
+    std::copy(hash_.begin(), hash_.end(), value.begin());
+    return value;
 }
 
-const hash_number hash_number::operator~() const
+/// Copy Operators.
+
+hash_number hash_number::operator~() const
 {
     hash_number result;
     result.hash_ = ~hash_;
     return result;
 }
 
+hash_number hash_number::operator<<(uint32_t value)
+{
+    return hash_number(*this) <<= value;
+}
+
+hash_number hash_number::operator/(const hash_number& value)
+{
+    return hash_number(*this) /= value;
+}
+
+hash_number hash_number::operator+(const hash_number& value)
+{
+    return hash_number(*this) += value;
+}
+
+/// Change Operators.
+
 hash_number& hash_number::operator*=(uint32_t value)
 {
     hash_ *= value;
     return *this;
 }
+
 hash_number& hash_number::operator/=(uint32_t value)
 {
     hash_ /= value;
     return *this;
 }
-hash_number& hash_number::operator<<=(uint32_t shift)
+
+hash_number& hash_number::operator<<=(uint32_t value)
 {
-    hash_ <<= shift;
-    return *this;
-}
-hash_number& hash_number::operator/=(const hash_number& number_b)
-{
-    hash_ /= number_b.hash_;
-    return *this;
-}
-hash_number& hash_number::operator+=(const hash_number& number_b)
-{
-    hash_ += number_b.hash_;
+    hash_ <<= value;
     return *this;
 }
 
-bool operator>(const hash_number& number_a, const hash_number& number_b)
+hash_number& hash_number::operator/=(const hash_number& value)
 {
-    return number_a.hash_.CompareTo(number_b.hash_) > 0;
+    hash_ /= value.hash_;
+    return *this;
 }
-bool operator<=(const hash_number& number_a, const hash_number& number_b)
+
+hash_number& hash_number::operator+=(const hash_number& value)
 {
-    return number_a.hash_.CompareTo(number_b.hash_) <= 0;
+    hash_ += value.hash_;
+    return *this;
 }
-const hash_number operator<<(const hash_number& number_a, int shift)
+
+/// Comparison Operators.
+
+bool hash_number::operator==(uint64_t value) const
 {
-    return hash_number(number_a) <<= shift;
+    return hash_.EqualTo(value);
 }
-const hash_number operator/(
-    const hash_number& number_a, const hash_number& number_b)
+
+bool hash_number::operator!=(uint64_t value) const
 {
-    return hash_number(number_a) /= number_b;
+    return !(*this == value);
 }
-const hash_number operator+(
-    const hash_number& number_a, const hash_number& number_b)
+
+bool hash_number::operator>(const hash_number& value) const
 {
-    return hash_number(number_a) += number_b;
+    return hash_.CompareTo(value.hash_) > 0;
 }
-bool operator==(
-    const hash_number& number, uint64_t value)
+
+bool hash_number::operator<(const hash_number& value) const
 {
-    return number.hash_.EqualTo(value);
+    return hash_.CompareTo(value.hash_) < 0;
+}
+
+bool hash_number::operator>=(const hash_number& value) const
+{
+    return hash_.CompareTo(value.hash_) >= 0;
+}
+
+bool hash_number::operator<=(const hash_number& value) const
+{
+    return hash_.CompareTo(value.hash_) <= 0;
 }
 
 } // namespace libbitcoin
