@@ -252,18 +252,6 @@ size_t block::signature_operations(bool strict) const
     return sigops;
 }
 
-bool block::is_final(size_t height) const
-{
-    const auto timestamp = header.timestamp;
-    const auto value = [height, timestamp](const transaction& tx)
-    {
-        return tx.is_final(height, timestamp);
-    };
-
-    const auto& txs = transactions;
-    return std::all_of(txs.begin(), txs.end(), value);
-}
-
 // True if there is another coinbase other than the first tx.
 // No txs or coinbases also returns true.
 bool block::has_extra_coinbases() const
@@ -279,6 +267,18 @@ bool block::has_extra_coinbases() const
     };
 
     return std::none_of(txs.begin() + 1, txs.end(), value);
+}
+
+bool block::is_final(size_t height) const
+{
+    const auto timestamp = header.timestamp;
+    const auto value = [height, timestamp](const transaction& tx)
+    {
+        return tx.is_final(height, timestamp);
+    };
+
+    const auto& txs = transactions;
+    return std::all_of(txs.begin(), txs.end(), value);
 }
 
 // Distinctness is defined by transaction hash.
@@ -316,6 +316,11 @@ bool block::is_valid_coinbase_height(size_t height) const
 
     // Require that the coinbase script match the expected coinbase script.
     return std::equal(expected.begin(), expected.end(), actual.begin());
+}
+
+bool block::is_valid_merkle_root() const
+{
+    return generate_merkle_root() == header.merkle;
 }
 
 hash_digest block::build_merkle_tree(hash_list& merkle)
@@ -365,6 +370,7 @@ hash_digest block::build_merkle_tree(hash_list& merkle)
     return merkle[0];
 }
 
+// TODO: consider caching result.
 hash_digest block::generate_merkle_root() const
 {
     const auto hasher = [](const transaction& transaction)
