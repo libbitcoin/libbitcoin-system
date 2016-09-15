@@ -133,7 +133,6 @@ public:
 
 private:
     static bool is_push(const opcode code);
-    static uint64_t count_non_push(const operation::stack& operations);
     static bool must_read_data(opcode code);
     static bool read_opcode_data_size(uint32_t& count, opcode code,
         uint8_t byte, reader& source);
