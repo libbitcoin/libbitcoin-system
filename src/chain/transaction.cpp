@@ -24,11 +24,12 @@
 #include <numeric>
 #include <sstream>
 #include <utility>
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/chain/input.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/error.hpp>
+#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -393,6 +394,25 @@ size_t transaction::signature_operations() const
     std::accumulate(inputs.begin(), inputs.end(), sigops, in);
     std::accumulate(outputs.begin(), outputs.end(), sigops, out);
     return sigops;
+}
+
+// Block sigops computation summarizes across transactions.
+code transaction::validate(bool sigops) const
+{
+    if (inputs.empty() || outputs.empty())
+        return error::empty_transaction;
+    else if (serialized_size() > max_block_size)
+        return error::size_limits;
+    else if (total_output_value() > max_money())
+        return error::output_value_overflow;
+    else if (is_invalid_coinbase())
+        return error::invalid_coinbase_script_size;
+    else if (is_invalid_non_coinbase())
+        return error::previous_output_null;
+    else if (sigops && signature_operations() > max_block_sigops)
+        return error::too_many_sigs;
+    else
+        return error::success;
 }
 
 } // namespace chain

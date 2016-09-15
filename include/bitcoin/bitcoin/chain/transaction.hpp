@@ -26,9 +26,10 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/input.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
+#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -79,6 +80,7 @@ public:
     bool is_final(uint64_t block_height, uint32_t block_time) const;
     bool is_locktime_conflict() const;
     void reset();
+    code validate(bool sigops=true) const;
     hash_digest hash() const;
     hash_digest hash(uint32_t sighash_type) const;
     uint64_t serialized_size() const;

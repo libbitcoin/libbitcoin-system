@@ -20,10 +20,12 @@
 #include <bitcoin/bitcoin/chain/block.hpp>
 
 #include <algorithm>
+#include <cstddef>
 #include <numeric>
 #include <utility>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/script_number.hpp>
@@ -265,6 +267,32 @@ bool block::is_valid_coinbase_height(size_t height) const
 bool block::is_valid_merkle_root() const
 {
     return generate_merkle_root() == header.merkle;
+}
+
+code block::validate() const
+{
+    if (serialized_size() > max_block_size)
+        return error::size_limits;
+    else if (!header.is_valid_proof_of_work())
+        return error::proof_of_work;
+    else if (!header.is_valid_time_stamp())
+        return error::futuristic_timestamp;
+    else if (transactions.empty() || !transactions.front().is_coinbase())
+        return error::first_not_coinbase;
+    else if (has_extra_coinbases())
+        return error::extra_coinbases;
+    else if (!is_distinct_transaction_set())
+        return error::duplicate;
+    else if (signature_operations() > max_block_sigops)
+        return error::too_many_sigs;
+    else if (is_valid_merkle_root())
+        return error::merkle_mismatch;
+    else
+        for (const auto& tx: transactions)
+            if (auto error_code = tx.validate(false))
+                return error_code;
+
+    return error::success;
 }
 
 hash_digest block::build_merkle_tree(hash_list& merkle)

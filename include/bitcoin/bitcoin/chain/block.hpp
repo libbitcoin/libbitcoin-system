@@ -29,6 +29,7 @@
 #include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -78,6 +79,7 @@ public:
     bool is_distinct_transaction_set() const;
     bool is_valid_coinbase_height(size_t height) const;
     void reset();
+    code validate() const;
     hash_digest generate_merkle_root() const;
     uint64_t serialized_size(bool with_transaction_count = true) const;
     size_t signature_operations() const;

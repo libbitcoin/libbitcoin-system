@@ -77,6 +77,12 @@ BC_CONSTFUNC uint64_t max_money()
         max_money_recursive(bitcoin_to_satoshi(initial_block_reward));
 }
 
+// Max block size (1000000 bytes).
+BC_CONSTEXPR size_t max_block_size = 1000000;
+
+// Maximum signature operations per block (20000).
+BC_CONSTEXPR size_t max_block_sigops = max_block_size / 50;
+
 // For configuration settings initialization.
 enum class settings
 {
