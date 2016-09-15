@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_CHAIN_OUTPUT_HPP
 #define LIBBITCOIN_CHAIN_OUTPUT_HPP
 
+#include <cstddef>
 #include <cstdint>
 #include <istream>
 #include <bitcoin/bitcoin/chain/script/script.hpp>
@@ -49,6 +50,7 @@ public:
     bool is_valid() const;
     void reset();
     uint64_t serialized_size() const;
+    size_t signature_operations() const;
 
     uint64_t value;
     chain::script script;

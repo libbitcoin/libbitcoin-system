@@ -79,16 +79,14 @@ public:
     bool is_valid_coinbase_height(size_t height) const;
     void reset();
     hash_digest generate_merkle_root() const;
-    size_t signature_operations() const;
     uint64_t serialized_size(bool with_transaction_count = true) const;
+    size_t signature_operations() const;
 
     chain::header header;
     transaction::list transactions;
 
 private:
     static hash_digest build_merkle_tree(hash_list& merkle);
-
-    mutable size_t sigops_;
 };
 
 } // namespace chain

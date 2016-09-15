@@ -93,7 +93,6 @@ public:
 private:
     mutable upgrade_mutex hash_mutex_;
     mutable std::shared_ptr<hash_digest> hash_;
-    mutable size_t sigops_;
 };
 
 } // namespace chain

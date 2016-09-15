@@ -135,6 +135,18 @@ uint64_t input::serialized_size() const
     return 4 + previous_output.serialized_size() + script_size;
 }
 
+bool input::is_final() const
+{
+    return (sequence == max_input_sequence);
+}
+
+size_t input::signature_operations() const
+{
+    // This cannot overflow because each computation is limited.
+    return script.signature_operations(false) + 
+        script.pay_script_hash_sigops(previous_output.cache.script);
+}
+
 std::string input::to_string(uint32_t flags) const
 {
     std::ostringstream ss;
@@ -144,11 +156,6 @@ std::string input::to_string(uint32_t flags) const
         << "\tsequence = " << sequence << "\n";
 
     return ss.str();
-}
-
-bool input::is_final() const
-{
-    return (sequence == max_input_sequence);
 }
 
 } // namespace chain

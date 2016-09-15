@@ -61,7 +61,6 @@ block block::factory_from_data(reader& source,
 }
 
 block::block()
-  : sigops_(0)
 {
 }
 
@@ -73,8 +72,7 @@ block::block(const block& other)
 block::block(const chain::header& header,
     const chain::transaction::list& transactions)
   : header(header),
-    transactions(transactions),
-    sigops_(0)
+    transactions(transactions)
 {
 }
 
@@ -86,8 +84,7 @@ block::block(block&& other)
 
 block::block(chain::header&& header, chain::transaction::list&& transactions)
   : header(std::forward<chain::header>(header)),
-    transactions(std::forward<chain::transaction::list>(transactions)),
-    sigops_(0)
+    transactions(std::forward<chain::transaction::list>(transactions))
 {
 }
 
@@ -95,7 +92,6 @@ block& block::operator=(block&& other)
 {
     header = std::move(other.header);
     transactions = std::move(other.transactions);
-    sigops_ = other.sigops_;
     return *this;
 }
 
@@ -109,7 +105,6 @@ void block::reset()
     header.reset();
     transactions.clear();
     transactions.shrink_to_fit();
-    sigops_ = 0;
 }
 
 bool block::from_data(const data_chunk& data, bool with_transaction_count)
@@ -189,12 +184,8 @@ uint64_t block::serialized_size(bool with_transaction_count) const
 }
 
 // overflow returns max_size_t
-// If the actual value is zero there is no cache benefit, which is ok.
 size_t block::signature_operations() const
 {
-    if (sigops_ != 0)
-        return sigops_;
-
     const auto value = [](size_t total, const transaction& tx)
     {
         const auto count = tx.signature_operations();
@@ -202,7 +193,7 @@ size_t block::signature_operations() const
     };
 
     const auto& txs = transactions;
-    return std::accumulate(txs.begin(), txs.end(), sigops_, value);
+    return std::accumulate(txs.begin(), txs.end(), size_t(0), value);
 }
 
 // True if there is another coinbase other than the first tx.

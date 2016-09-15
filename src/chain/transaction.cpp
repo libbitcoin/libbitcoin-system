@@ -61,7 +61,7 @@ transaction transaction::factory_from_data(reader& source)
 // default constructors
 
 transaction::transaction()
-  : version(0), locktime(0), sigops_(0)
+  : version(0), locktime(0)
 {
 }
 
@@ -75,8 +75,7 @@ transaction::transaction(uint32_t version, uint32_t locktime,
   : version(version),
     locktime(locktime),
     inputs(inputs),
-    outputs(outputs),
-    sigops_(0)
+    outputs(outputs)
 {
 }
 
@@ -92,8 +91,7 @@ transaction::transaction(uint32_t version, uint32_t locktime,
   : version(version),
     locktime(locktime),
     inputs(std::forward<input::list>(inputs)),
-    outputs(std::forward<output::list>(outputs)),
-    sigops_(0)
+    outputs(std::forward<output::list>(outputs))
 {
 }
 
@@ -113,7 +111,6 @@ transaction& transaction::operator=(const transaction& other)
     locktime = other.locktime;
     inputs = other.inputs;
     outputs = other.outputs;
-    sigops_ = other.sigops_;
 
     // This optimization forces a (safe) hash computation based on the
     // assumption that it will at some point be computed for one or both.
@@ -135,7 +132,6 @@ void transaction::reset()
     inputs.shrink_to_fit();
     outputs.clear();
     outputs.shrink_to_fit();
-    sigops_ = 0;
 
     hash_mutex_.lock();
     hash_.reset();
@@ -355,7 +351,7 @@ bool transaction::is_final(uint64_t block_height, uint32_t block_time) const
 
 bool transaction::is_locktime_conflict() const
 {
-    auto locktime_set = locktime != 0;
+    const auto locktime_set = locktime != 0;
 
     if (locktime_set)
         for (const auto& input: inputs)
@@ -378,27 +374,25 @@ uint64_t transaction::total_output_value() const
 }
 
 // Returns max_size_t in case of overflow.
-// If the actual value is zero there is no cache benefit, which is ok.
 size_t transaction::signature_operations() const
 {
-    if (sigops_ != 0)
-        return sigops_;
-
     const auto in = [](size_t total, const input& input)
     {
-        const auto count = input.script.signature_operations(false);
+        // This includes BIP16 p2sh additional sigops if prevout is cached.
+        const auto count = input.signature_operations();
         return total >= max_size_t - count ? max_size_t : total + count;
     };
 
     const auto out = [](size_t total, const output& output)
     {
-        const auto count = output.script.signature_operations(false);
+        const auto count = output.signature_operations();
         return total >= max_size_t - count ? max_size_t : total + count;
     };
 
-    std::accumulate(inputs.begin(), inputs.end(), sigops_, in);
-    std::accumulate(outputs.begin(), outputs.end(), sigops_, out);
-    return sigops_;
+    size_t sigops = 0;
+    std::accumulate(inputs.begin(), inputs.end(), sigops, in);
+    std::accumulate(outputs.begin(), outputs.end(), sigops, out);
+    return sigops;
 }
 
 } // namespace chain

@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_CHAIN_INPUT_HPP
 #define LIBBITCOIN_CHAIN_INPUT_HPP
 
+#include <cstddef>
 #include <cstdint>
 #include <istream>
 #include <bitcoin/bitcoin/chain/output_point.hpp>
@@ -52,6 +53,7 @@ public:
     void reset();
     bool is_final() const;
     uint64_t serialized_size() const;
+    size_t signature_operations() const;
 
     output_point previous_output;
     chain::script script;
