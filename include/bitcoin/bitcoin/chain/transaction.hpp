@@ -26,9 +26,10 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/input.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
+#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -79,10 +80,11 @@ public:
     bool is_final(uint64_t block_height, uint32_t block_time) const;
     bool is_locktime_conflict() const;
     void reset();
+    code validate(bool sigops=true) const;
     hash_digest hash() const;
     hash_digest hash(uint32_t sighash_type) const;
     uint64_t serialized_size() const;
-    size_t signature_operations(bool strict) const;
+    size_t signature_operations() const;
     uint64_t total_output_value() const;
 
     uint32_t version;
@@ -93,12 +95,6 @@ public:
 private:
     mutable upgrade_mutex hash_mutex_;
     mutable std::shared_ptr<hash_digest> hash_;
-
-    mutable upgrade_mutex sigops_mutex_;
-    mutable size_t sigops_;
-
-    mutable upgrade_mutex strict_sigops_mutex_;
-    mutable size_t strict_sigops_;
 };
 
 } // namespace chain

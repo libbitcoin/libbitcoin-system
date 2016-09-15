@@ -130,21 +130,19 @@ uint64_t filter_add::serialized_size(uint32_t version) const
     return variable_uint_size(data.size()) + data.size();
 }
 
-bool operator==(const filter_add& left,
-    const filter_add& right)
+bool filter_add::operator==(const filter_add& other) const
 {
-    bool result = (left.data.size() == right.data.size());
+    auto result = (data.size() == other.data.size());
 
-    for (data_chunk::size_type i = 0; i < left.data.size() && result; i++)
-        result = (left.data[i] == right.data[i]);
+    for (data_chunk::size_type i = 0; i < data.size() && result; i++)
+        result = (data[i] == other.data[i]);
 
     return result;
 }
 
-bool operator!=(const filter_add& left,
-    const filter_add& right)
+bool filter_add::operator!=(const filter_add& other) const
 {
-    return !(left == right);
+    return !(*this == other);
 }
 
 } // end message

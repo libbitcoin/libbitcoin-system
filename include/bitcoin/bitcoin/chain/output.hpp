@@ -20,10 +20,9 @@
 #ifndef LIBBITCOIN_CHAIN_OUTPUT_HPP
 #define LIBBITCOIN_CHAIN_OUTPUT_HPP
 
+#include <cstddef>
 #include <cstdint>
 #include <istream>
-#include <vector>
-#include <bitcoin/bitcoin/chain/point.hpp>
 #include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -51,17 +50,10 @@ public:
     bool is_valid() const;
     void reset();
     uint64_t serialized_size() const;
+    size_t signature_operations() const;
 
     uint64_t value;
     chain::script script;
-};
-
-struct BC_API output_info
-{
-    typedef std::vector<output_info> list;
-
-    output_point point;
-    uint64_t value;
 };
 
 } // namespace chain

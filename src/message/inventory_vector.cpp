@@ -177,14 +177,14 @@ bool inventory_vector::is_transaction_type() const
     return type == message::inventory::type_id::transaction;
 }
 
-bool operator==(const inventory_vector& left, const inventory_vector& right)
+bool inventory_vector::operator==(const inventory_vector& other) const
 {
-    return (left.hash == right.hash) && (left.type == right.type);
+    return (hash == other.hash) && (type == other.type);
 }
 
-bool operator!=(const inventory_vector& left, const inventory_vector& right)
+bool inventory_vector::operator!=(const inventory_vector& other) const
 {
-    return !(left == right);
+    return !(*this == other);
 }
 
 } // namespace message

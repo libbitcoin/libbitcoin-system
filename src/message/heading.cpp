@@ -203,17 +203,17 @@ message_type heading::type() const
     return message_type::unknown;
 }
 
-bool operator==(const heading& left, const heading& right)
+bool heading::operator==(const heading& other) const
 {
-    return (left.magic == right.magic)
-        && (left.command == right.command)
-        && (left.payload_size == right.payload_size)
-        && (left.checksum == right.checksum);
+    return (magic == other.magic)
+        && (command == other.command)
+        && (payload_size == other.payload_size)
+        && (checksum == other.checksum);
 }
 
-bool operator!=(const heading& left, const heading& right)
+bool heading::operator!=(const heading& other) const
 {
-    return !(left == right);
+    return !(*this == other);
 }
 
 } // namespace message

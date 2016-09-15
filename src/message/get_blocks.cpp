@@ -151,19 +151,20 @@ uint64_t get_blocks::serialized_size(uint32_t version) const
         hash_size * start_hashes.size();
 }
 
-bool operator==(const get_blocks& left, const get_blocks& right)
+bool get_blocks::operator==(const get_blocks& other) const
 {
-    auto result = (left.start_hashes.size() == right.start_hashes.size());
+    auto result = (start_hashes.size() == other.start_hashes.size()) &&
+        stop_hash == other.stop_hash;
 
-    for (size_t i = 0; i < left.start_hashes.size() && result; i++)
-        result = (left.start_hashes[i] == right.start_hashes[i]);
+    for (size_t i = 0; i < start_hashes.size() && result; i++)
+        result = (start_hashes[i] == other.start_hashes[i]);
 
-    return result && left.stop_hash == right.stop_hash;
+    return result;
 }
 
-bool operator!=(const get_blocks& left, const get_blocks& right)
+bool get_blocks::operator!=(const get_blocks& other) const
 {
-    return !(left == right);
+    return !(*this == other);
 }
 
 } // namespace message

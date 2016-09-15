@@ -146,23 +146,23 @@ uint64_t alert::serialized_size(uint32_t version) const
         variable_uint_size(signature.size()) + signature.size();
 }
 
-bool operator==(const alert& left, const alert& right)
+bool alert::operator==(const alert& other) const
 {
-    bool result = (left.payload.size() == right.payload.size()) &&
-        (left.signature.size() == right.signature.size());
+    bool result = (payload.size() == other.payload.size()) &&
+        (signature.size() == other.signature.size());
 
-    for (size_t i = 0; i < left.payload.size() && result; i++)
-        result = (left.payload[i] == right.payload[i]);
+    for (size_t i = 0; i < payload.size() && result; i++)
+        result = (payload[i] == other.payload[i]);
 
-    for (size_t i = 0; i < left.signature.size() && result; i++)
-        result = (left.signature[i] == right.signature[i]);
+    for (size_t i = 0; i < signature.size() && result; i++)
+        result = (signature[i] == other.signature[i]);
 
     return result;
 }
 
-bool operator!=(const alert& left, const alert& right)
+bool alert::operator!=(const alert& other) const
 {
-    return !(left == right);
+    return !(*this == other);
 }
 
 } // end message

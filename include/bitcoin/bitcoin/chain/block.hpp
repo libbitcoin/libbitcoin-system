@@ -29,10 +29,10 @@
 #include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
-#include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
@@ -79,21 +79,16 @@ public:
     bool is_distinct_transaction_set() const;
     bool is_valid_coinbase_height(size_t height) const;
     void reset();
+    code validate() const;
     hash_digest generate_merkle_root() const;
-    size_t signature_operations(bool strict) const;
-    uint64_t serialized_size(bool with_transaction_count=true) const;
+    uint64_t serialized_size(bool with_transaction_count = true) const;
+    size_t signature_operations() const;
 
     chain::header header;
     transaction::list transactions;
 
 private:
     static hash_digest build_merkle_tree(hash_list& merkle);
-
-    mutable upgrade_mutex sigops_mutex_;
-    mutable size_t sigops_;
-
-    mutable upgrade_mutex strict_sigops_mutex_;
-    mutable size_t strict_sigops_;
 };
 
 } // namespace chain

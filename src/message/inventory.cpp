@@ -197,14 +197,14 @@ size_t inventory::count(type_id type) const
     return count_if(inventories.begin(), inventories.end(), is_type);
 }
 
-bool operator==(const inventory& left, const inventory& right)
+bool inventory::operator==(const inventory& other) const
 {
-    return left.inventories == right.inventories;
+    return inventories == other.inventories;
 }
 
-bool operator!=(const inventory& left, const inventory& right)
+bool inventory::operator!=(const inventory& other) const
 {
-    return !(left == right);
+    return !(*this == other);
 }
 
 } // namespace message

@@ -24,11 +24,12 @@
 #include <numeric>
 #include <sstream>
 #include <utility>
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/chain/input.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/error.hpp>
+#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -61,7 +62,7 @@ transaction transaction::factory_from_data(reader& source)
 // default constructors
 
 transaction::transaction()
-  : version(0), locktime(0), sigops_(0), strict_sigops_(0)
+  : version(0), locktime(0)
 {
 }
 
@@ -75,9 +76,7 @@ transaction::transaction(uint32_t version, uint32_t locktime,
   : version(version),
     locktime(locktime),
     inputs(inputs),
-    outputs(outputs),
-    sigops_(0),
-    strict_sigops_(0)
+    outputs(outputs)
 {
 }
 
@@ -93,9 +92,7 @@ transaction::transaction(uint32_t version, uint32_t locktime,
   : version(version),
     locktime(locktime),
     inputs(std::forward<input::list>(inputs)),
-    outputs(std::forward<output::list>(outputs)),
-    sigops_(0),
-    strict_sigops_(0)
+    outputs(std::forward<output::list>(outputs))
 {
 }
 
@@ -115,11 +112,6 @@ transaction& transaction::operator=(const transaction& other)
     locktime = other.locktime;
     inputs = other.inputs;
     outputs = other.outputs;
-
-    // The cache benefit is lost on copy construction since we cannot safely
-    // copy from other without computing the value, which may never be unused.
-    sigops_ = 0;
-    strict_sigops_ = 0;
 
     // This optimization forces a (safe) hash computation based on the
     // assumption that it will at some point be computed for one or both.
@@ -145,14 +137,6 @@ void transaction::reset()
     hash_mutex_.lock();
     hash_.reset();
     hash_mutex_.unlock();
-
-    sigops_mutex_.lock();
-    sigops_ = 0;
-    sigops_mutex_.unlock();
-
-    strict_sigops_mutex_.lock();
-    strict_sigops_ = 0;
-    strict_sigops_mutex_.unlock();
 }
 
 bool transaction::from_data(const data_chunk& data)
@@ -368,7 +352,7 @@ bool transaction::is_final(uint64_t block_height, uint32_t block_time) const
 
 bool transaction::is_locktime_conflict() const
 {
-    auto locktime_set = locktime != 0;
+    const auto locktime_set = locktime != 0;
 
     if (locktime_set)
         for (const auto& input: inputs)
@@ -391,64 +375,44 @@ uint64_t transaction::total_output_value() const
 }
 
 // Returns max_size_t in case of overflow.
-size_t transaction::signature_operations(bool strict) const
+size_t transaction::signature_operations() const
 {
+    const auto in = [](size_t total, const input& input)
+    {
+        // This includes BIP16 p2sh additional sigops if prevout is cached.
+        const auto count = input.signature_operations();
+        return total >= max_size_t - count ? max_size_t : total + count;
+    };
+
+    const auto out = [](size_t total, const output& output)
+    {
+        const auto count = output.signature_operations();
+        return total >= max_size_t - count ? max_size_t : total + count;
+    };
+
     size_t sigops = 0;
-
-    const auto in = [strict](size_t total, const input& input)
-    {
-        const auto count = input.script.signature_operations(strict);
-        return total >= max_size_t - count ? max_size_t : total + count;
-    };
-
-    const auto out = [strict](size_t total, const output& output)
-    {
-        const auto count = output.script.signature_operations(strict);
-        return total >= max_size_t - count ? max_size_t : total + count;
-    };
-
-    if (strict)
-    {
-        ///////////////////////////////////////////////////////////////////////////
-        // Critical Section
-        strict_sigops_mutex_.lock_upgrade();
-
-        if (strict_sigops_ == 0)
-        {
-            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            strict_sigops_mutex_.unlock_upgrade_and_lock();
-            std::accumulate(inputs.begin(), inputs.end(), strict_sigops_, in);
-            std::accumulate(outputs.begin(), outputs.end(), strict_sigops_, out);
-            strict_sigops_mutex_.unlock_and_lock_upgrade();
-            //---------------------------------------------------------------------
-        }
-
-        sigops = strict_sigops_;
-        strict_sigops_mutex_.unlock_upgrade();
-        ///////////////////////////////////////////////////////////////////////////
-    }
-    else
-    {
-        ///////////////////////////////////////////////////////////////////////////
-        // Critical Section
-        sigops_mutex_.lock_upgrade();
-
-        if (sigops_ == 0)
-        {
-            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            sigops_mutex_.unlock_upgrade_and_lock();
-            std::accumulate(inputs.begin(), inputs.end(), sigops_, in);
-            std::accumulate(outputs.begin(), outputs.end(), sigops_, out);
-            sigops_mutex_.unlock_and_lock_upgrade();
-            //---------------------------------------------------------------------
-        }
-
-        sigops = sigops_;
-        sigops_mutex_.unlock_upgrade();
-        ///////////////////////////////////////////////////////////////////////////
-    }
-
+    std::accumulate(inputs.begin(), inputs.end(), sigops, in);
+    std::accumulate(outputs.begin(), outputs.end(), sigops, out);
     return sigops;
+}
+
+// Block sigops computation summarizes across transactions.
+code transaction::validate(bool sigops) const
+{
+    if (inputs.empty() || outputs.empty())
+        return error::empty_transaction;
+    else if (serialized_size() > max_block_size)
+        return error::size_limits;
+    else if (total_output_value() > max_money())
+        return error::output_value_overflow;
+    else if (is_invalid_coinbase())
+        return error::invalid_coinbase_script_size;
+    else if (is_invalid_non_coinbase())
+        return error::previous_output_null;
+    else if (sigops && signature_operations() > max_block_sigops)
+        return error::too_many_sigs;
+    else
+        return error::success;
 }
 
 } // namespace chain

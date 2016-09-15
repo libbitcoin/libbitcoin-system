@@ -183,14 +183,14 @@ uint64_t headers::serialized_size(uint32_t version) const
     return size;
 }
 
-bool operator==(const headers& left, const headers& right)
+bool headers::operator==(const headers& other) const
 {
-    return left.elements == right.elements;
+    return elements == other.elements;
 }
 
-bool operator!=(const headers& left, const headers& right)
+bool headers::operator!=(const headers& other) const
 {
-    return !(left == right);
+    return !(*this == other);
 }
 
 } // namespace message

@@ -42,6 +42,9 @@ public:
         std::istream& stream);
     static filter_add factory_from_data(uint32_t version, reader& source);
 
+    bool operator==(const filter_add& other) const;
+    bool operator!=(const filter_add& other) const;
+
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
     bool from_data(uint32_t version, reader& source);
@@ -58,9 +61,6 @@ public:
 
     data_chunk data;
 };
-
-BC_API bool operator==(const filter_add& left,  const filter_add& right);
-BC_API bool operator!=(const filter_add& left, const filter_add& right);
 
 } // end message
 } // end libbitcoin

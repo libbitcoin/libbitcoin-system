@@ -22,8 +22,7 @@
 
 #include <cstdint>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/chain/output.hpp>
-#include <bitcoin/bitcoin/chain/point.hpp>
+#include <bitcoin/bitcoin/chain/output_point.hpp>
 
 namespace libbitcoin {
 namespace wallet {

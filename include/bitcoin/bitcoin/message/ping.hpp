@@ -45,6 +45,9 @@ public:
     ping();
     ping(uint64_t nonce);
 
+    bool operator==(const ping& other) const;
+    bool operator!=(const ping& other) const;
+
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
     bool from_data(uint32_t version, reader& source);
@@ -65,9 +68,6 @@ public:
 private:
     bool valid_;
 };
-
-BC_API bool operator==(const ping& left, const ping& right);
-BC_API bool operator!=(const ping& left, const ping& right);
 
 } // namespace message
 } // namespace libbitcoin

@@ -220,16 +220,6 @@ bool operation::read_opcode_data_size(uint32_t& count, opcode code,
     }
 }
 
-uint64_t operation::count_non_push(const operation::stack& ops)
-{
-    const auto found = [](const operation& op)
-    {
-        return !is_push(op.code);
-    };
-
-    return std::count_if(ops.begin(), ops.end(), found);
-}
-
 bool operation::must_read_data(opcode code)
 {
     return code == opcode::special
@@ -266,7 +256,12 @@ bool operation::is_push(const opcode code)
 
 bool operation::is_push_only(const operation::stack& ops)
 {
-    return count_non_push(ops) == 0;
+    const auto push = [](const operation& op)
+    {
+        return is_push(op.code);
+    };
+
+    return std::all_of(ops.begin(), ops.end(), push);
 }
 
 // pattern comparisons

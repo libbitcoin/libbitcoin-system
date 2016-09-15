@@ -52,6 +52,9 @@ public:
     inventory(const hash_list& hashes, type_id type);
     inventory(const std::initializer_list<inventory_vector>& values);
 
+    bool operator==(const inventory& other) const;
+    bool operator!=(const inventory& other) const;
+
     virtual bool from_data(uint32_t version, const data_chunk& data);
     virtual bool from_data(uint32_t version, std::istream& stream);
     virtual bool from_data(uint32_t version, reader& source);
@@ -71,9 +74,6 @@ public:
 
     inventory_vector::list inventories;
 };
-
-BC_API bool operator==(const inventory& left, const inventory& right);
-BC_API bool operator!=(const inventory& left, const inventory& right);
 
 } // namespace message
 } // namespace libbitcoin

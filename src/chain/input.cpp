@@ -85,10 +85,11 @@ bool input::from_data(reader& source)
 
     if (result)
     {
-        auto mode = script::parse_mode::raw_data_fallback;
-
-        if (previous_output.is_null())
-            mode = script::parse_mode::raw_data;
+        // Parse the coinbase tx as raw data.
+        // Always parse non-coinbase input/output scripts as fallback.
+        const auto mode = previous_output.is_null() ?
+            script::parse_mode::raw_data : 
+            script::parse_mode::raw_data_fallback;
 
         result = script.from_data(source, true, mode);
     }
@@ -134,6 +135,18 @@ uint64_t input::serialized_size() const
     return 4 + previous_output.serialized_size() + script_size;
 }
 
+bool input::is_final() const
+{
+    return (sequence == max_input_sequence);
+}
+
+size_t input::signature_operations() const
+{
+    // This cannot overflow because each computation is limited.
+    return script.signature_operations(false) + 
+        script.pay_script_hash_sigops(previous_output.cache.script);
+}
+
 std::string input::to_string(uint32_t flags) const
 {
     std::ostringstream ss;
@@ -143,11 +156,6 @@ std::string input::to_string(uint32_t flags) const
         << "\tsequence = " << sequence << "\n";
 
     return ss.str();
-}
-
-bool input::is_final() const
-{
-    return (sequence == max_input_sequence);
 }
 
 } // namespace chain

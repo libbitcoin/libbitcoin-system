@@ -51,6 +51,9 @@ public:
     headers(const chain::header::list& values);
     headers(const std::initializer_list<chain::header>& values);
 
+    bool operator==(const headers& other) const;
+    bool operator!=(const headers& other) const;
+
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
     bool from_data(uint32_t version, reader& source);
@@ -70,9 +73,6 @@ public:
 
     chain::header::list elements;
 };
-
-BC_API bool operator==(const headers& left, const headers& right);
-BC_API bool operator!=(const headers& left, const headers& right);
 
 } // namespace message
 } // namespace libbitcoin

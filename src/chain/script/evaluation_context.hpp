@@ -33,6 +33,9 @@ namespace chain {
 class evaluation_context
 {
 public:
+    evaluation_context(uint32_t flags);
+    evaluation_context(uint32_t flags, const data_stack& stack);
+
     data_chunk pop_stack();
 
     operation::stack::const_iterator code_begin;

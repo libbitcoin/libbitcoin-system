@@ -46,12 +46,25 @@ namespace libbitcoin {
 namespace chain {
 
 // False is an empty stack.
-static const data_chunk stack_false_value;
+static const data_chunk stack_false_value{};
 static const data_chunk stack_true_value{ 1 };
 static constexpr size_t op_counter_limit = 201;
 static constexpr size_t max_number_size = 4;
+static constexpr size_t max_stack_size = 1000;
+static constexpr size_t max_script_size = 10000;
 static constexpr size_t cltv_max_number_size = 5;
+static constexpr size_t max_data_script_size = 520;
+static constexpr size_t max_script_public_key_count = 20;
 static constexpr size_t multisig_default_signature_ops = 20;
+
+// bit.ly/2cPazSa
+static const hash_digest one_hash
+{
+    {
+        1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
+};
 
 enum class signature_parse_result
 {
@@ -224,14 +237,12 @@ void script::to_data(writer& sink, bool prefix) const
 uint64_t script::satoshi_content_size() const
 {
     if (operations.size() > 0 && (operations[0].code == opcode::raw_data))
-    {
         return operations[0].serialized_size();
-    }
-    
+
     const auto value = [](uint64_t total, const operation& op)
     {
         const auto op_size = op.serialized_size();
-        BITCOIN_ASSERT(total + op.serialized_size() <= max_uint64 - op_size);
+        BITCOIN_ASSERT(total <= max_uint64 - op_size);
         return total + op_size;
     };
 
@@ -315,7 +326,8 @@ std::string script::to_string(uint32_t flags) const
     return value.str();
 }
 
-size_t script::signature_operations(bool strict) const
+// See BIP16.
+size_t script::signature_operations(bool serialized_script) const
 {
     size_t total = 0;
     opcode last_opcode = opcode::bad_operation;
@@ -331,7 +343,7 @@ size_t script::signature_operations(bool strict) const
             op.code == opcode::checkmultisig ||
             op.code == opcode::checkmultisigverify)
         {
-            total += strict && within_op_n(last_opcode) ?
+            total += serialized_script && within_op_n(last_opcode) ?
                 decode_op_n(last_opcode) : multisig_default_signature_ops;
         }
 
@@ -341,23 +353,26 @@ size_t script::signature_operations(bool strict) const
     return total;
 }
 
-// Returns max_size_t on parse failure.
+// See BIP16.
 size_t script::pay_script_hash_sigops(const script& prevout) const
 {
-    // This script is empty, so it can't contain signatures.
-    if (operations.empty())
-        return 0;
-
-    // The previout script is not p2sh, so there is no signature increment.
+    // The prevout script is not p2sh, so no signature increment.
     if (prevout.pattern() != script_pattern::pay_script_hash)
         return 0;
 
-    script evaluate;
-    const auto& data = operations.back().data;
+    // Conditions added by EKV on 2016.09.15 for safety and BIP16 consistency.
+    // Only push data operations allowed in script, so no signature increment.
+    if (operations.empty() || !operation::is_push_only(operations))
+        return 0;
 
-    // Return the signature operations in the data script.
-    return evaluate.from_data(data, false, script::parse_mode::strict) ?
-        evaluate.signature_operations(true) : max_size_t;
+    script eval;
+
+    // We can be strict here and treat failure as zero signatures (data).
+    if (!eval.from_data(operations.back().data, false, parse_mode::strict))
+        return 0;
+
+    // Count the sigops in the serialized script using BIP16 rules.
+    return eval.signature_operations(true);
 }
 
 bool script::deserialize(const data_chunk& raw_script, parse_mode mode)
@@ -379,7 +394,7 @@ bool script::deserialize(const data_chunk& raw_script, parse_mode mode)
         };
 
         operations.clear();
-        operations.push_back(op);
+        operations.push_back(std::move(op));
     }
 
     return result;
@@ -402,17 +417,6 @@ bool script::parse(const data_chunk& raw_script)
     }
 
     return result;
-}
-
-inline hash_digest one_hash()
-{
-    return hash_digest
-    {
-        {
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-        }
-    };
 }
 
 inline void nullify_input_sequences(input::list& inputs,
@@ -442,9 +446,9 @@ hash_digest script::generate_signature_hash(const transaction& parent_tx,
     transaction parent(parent_tx);
 
     // This is NOT considered an error result and callers should not test
-    // for one_hash. This is a bitcoind bug we perpetuate.
+    // for one_hash. This is a bitcoind behavior we necessarily perpetuate.
     if (input_index >= parent_tx.inputs.size())
-        return one_hash();
+        return one_hash;
 
     // FindAndDelete(OP_CODESEPARATOR) done in op_checksigverify(...)
 
@@ -473,9 +477,9 @@ hash_digest script::generate_signature_hash(const transaction& parent_tx,
         uint32_t output_index = input_index;
 
         // This is NOT considered an error result and callers should not test
-        // for one_hash. This is a bitcoind bug we perpetuate.
+        // for one_hash. This is a bitcoind behavior we necessarily perpetuate.
         if (output_index >= outputs.size())
-            return one_hash();
+            return one_hash;
 
         outputs.resize(output_index + 1);
 
@@ -567,13 +571,13 @@ bool pick_roll_impl(DataStack& stack, bool is_roll)
     if (value < 0 || value >= stack_size)
         return false;
 
-    auto slice_iterator = stack.end() - value - 1;
-    auto item = *slice_iterator;
+    const auto slice_iterator = stack.end() - value - 1;
+    const auto item = *slice_iterator;
 
     if (is_roll)
         stack.erase(slice_iterator);
 
-    stack.push_back(item);
+    stack.push_back(std::move(item));
     return true;
 }
 
@@ -696,8 +700,7 @@ bool op_toaltstack(evaluation_context& context)
     if (context.stack.empty())
         return false;
 
-    const auto move_data = context.pop_stack();
-    context.alternate.push_back(move_data);
+    context.alternate.push_back(context.pop_stack());
     return true;
 }
 
@@ -729,8 +732,8 @@ bool op_2dup(evaluation_context& context)
     const auto dup_first = *(context.stack.end() - 2);
     const auto dup_second = *(context.stack.end() - 1);
 
-    context.stack.push_back(dup_first);
-    context.stack.push_back(dup_second);
+    context.stack.emplace_back(std::move(dup_first));
+    context.stack.emplace_back(std::move(dup_second));
     return true;
 }
 
@@ -743,16 +746,17 @@ bool op_3dup(evaluation_context& context)
     const auto dup_second = *(context.stack.end() - 2);
     const auto dup_third = *(context.stack.end() - 1);
 
-    context.stack.push_back(dup_first);
-    context.stack.push_back(dup_second);
-    context.stack.push_back(dup_third);
+    context.stack.emplace_back(std::move(dup_first));
+    context.stack.emplace_back(std::move(dup_second));
+    context.stack.emplace_back(std::move(dup_third));
     return true;
 }
 
 template <typename DataStack>
 void copy_item_over_stack(DataStack& stack, size_t index)
 {
-    stack.push_back(*(stack.end() - index));
+    const auto dup = *(stack.end() - index);
+    stack.emplace_back(std::move(dup));
 }
 
 bool op_2over(evaluation_context& context)
@@ -780,8 +784,8 @@ bool op_2rot(evaluation_context& context)
     const auto dup_second = *(second_position);
 
     context.stack.erase(first_position, third_position);
-    context.stack.push_back(dup_first);
-    context.stack.push_back(dup_second);
+    context.stack.emplace_back(std::move(dup_first));
+    context.stack.emplace_back(std::move(dup_second));
     return true;
 }
 
@@ -810,8 +814,9 @@ bool op_ifdup(evaluation_context& context)
 
 bool op_depth(evaluation_context& context)
 {
-    // Condition added by EKV on 2016.09.06.
     const auto size = context.stack.size();
+
+    // Condition added by EKV on 2016.09.06.
     if (size > max_int32)
         return false;
 
@@ -893,8 +898,7 @@ bool op_tuck(evaluation_context& context)
     if (context.stack.size() < 2)
         return false;
 
-    const auto data = context.stack.back();
-    context.stack.insert(context.stack.end() - 2, data);
+    context.stack.insert(context.stack.end() - 2, context.stack.back());
     return true;
 }
 
@@ -903,8 +907,9 @@ bool op_size(evaluation_context& context)
     if (context.stack.empty())
         return false;
 
-    // Condition added by EKV on 2016.09.06.
     const auto size = context.stack.back().size();
+
+    // Condition added by EKV on 2016.09.06.
     if (size > max_int32)
         return false;
 
@@ -1349,7 +1354,8 @@ signature_parse_result op_checkmultisigverify(evaluation_context& context,
     if (!read_value(context.stack, pubkeys_count))
         return signature_parse_result::invalid;
 
-    if (pubkeys_count < 0 || pubkeys_count > 20)
+    // bit.ly/2d1bsdB
+    if (pubkeys_count < 0 || pubkeys_count > max_script_public_key_count)
         return signature_parse_result::invalid;
 
     context.operation_counter += pubkeys_count;
@@ -1863,7 +1869,8 @@ bool next_step(const transaction& parent_tx, uint32_t input_index,
 {
     const auto& op = *it;
 
-    if (op.data.size() > 520)
+    // See BIP16
+    if (op.data.size() > max_data_script_size)
         return false;
 
     if (!increment_op_counter(op.code, context))
@@ -1878,7 +1885,7 @@ bool next_step(const transaction& parent_tx, uint32_t input_index,
     // push data to the stack
     if (op.code == opcode::zero)
     {
-        context.stack.push_back(data_chunk());
+        context.stack.push_back(data_chunk{});
     }
     else if (op.code == opcode::codeseparator)
     {
@@ -1901,13 +1908,15 @@ bool next_step(const transaction& parent_tx, uint32_t input_index,
     //for (auto s: context.stack)
     //    log::debug() << "[" << encode_base16(s) << "]";
 
-    return (context.stack.size() + context.alternate.size() <= 1000);
+    // bit.ly/2cowHlP
+    return context.stack.size() + context.alternate.size() <= max_stack_size;
 }
 
 bool evaluate(const transaction& parent_tx, uint32_t input_index,
     const script& script, evaluation_context& context, uint32_t flags)
 {
-    if (script.satoshi_content_size() > 10000)
+    // bit.ly/2c9HzmN
+    if (script.satoshi_content_size() > max_script_size)
         return false;
 
     context.operation_counter = 0;
@@ -1923,56 +1932,53 @@ bool evaluate(const transaction& parent_tx, uint32_t input_index,
 bool script::verify(const script& input_script, const script& output_script,
     const transaction& parent_tx, uint32_t input_index, uint32_t flags)
 {
-    evaluation_context input_context;
-    input_context.flags = flags;
+    evaluation_context in_context(flags);
 
-    if (!evaluate(parent_tx, input_index, input_script, input_context, flags))
+    // Evaluate the input script.
+    if (!evaluate(parent_tx, input_index, input_script, in_context, flags))
         return false;
 
-    evaluation_context output_context;
-    output_context.flags = flags;
-    output_context.stack = input_context.stack;
+    evaluation_context out_context(flags, in_context.stack);
 
-    if (!evaluate(parent_tx, input_index, output_script, output_context,
-        flags))
+    // Evaluate the output script.
+    if (!evaluate(parent_tx, input_index, output_script, out_context, flags))
         return false;
 
-    if (output_context.stack.empty() ||
-        !cast_to_bool(output_context.stack.back()))
+    // Return if stack is false.
+    if (out_context.stack.empty() || !cast_to_bool(out_context.stack.back()))
         return false;
 
-    // Additional validation for pay-to-script-hash transactions
+    // BIP16: Additional validation for pay-to-script-hash transactions.
     if (is_active(flags, script_context::bip16_enabled) &&
         (output_script.pattern() == script_pattern::pay_script_hash))
     {
+        // Condition added by EKV on 2016.09.14.
+        if (in_context.stack.empty())
+            return false;
+
+        // Only push data operations allowed in script.
         if (!operation::is_push_only(input_script.operations))
             return false;
 
-        // Load last input_script stack item as a script
-        evaluation_context eval_context;
-        eval_context.flags = flags;
-        eval_context.stack = input_context.stack;
+        // Use the last stack item as the serialized script.
+        script eval;
 
-        // TODO: shouldn't this be parse_mode::strict?
-        // Invalid script - parsable only as raw_data
-        script eval_script;
-
-        if (!eval_script.from_data(input_context.stack.back(), false,
+        // Always process a serialized script as fallback since it can be data.
+        if (!eval.from_data(in_context.stack.back(), false, 
             parse_mode::raw_data_fallback))
             return false;
 
-        // Pop last item and copy as starting stack to eval script
-        eval_context.stack.pop_back();
+        // Pop last item and use popped stack for eval script.
+        in_context.stack.pop_back();
+        evaluation_context eval_context(flags, in_context.stack);
 
-        // Run script
-        if (!evaluate(parent_tx, input_index, eval_script, eval_context,
-            flags))
+        // Evaluate the eval (serialized) script.
+        if (!evaluate(parent_tx, input_index, eval, eval_context, flags))
             return false;
 
-        if (eval_context.stack.empty())
-            return false;
-
-        return cast_to_bool(eval_context.stack.back());
+        // Return the stack state.
+        return !eval_context.stack.empty() &&
+            cast_to_bool(eval_context.stack.back());
     }
 
     return true;

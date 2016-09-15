@@ -42,6 +42,9 @@ public:
     static pong factory_from_data(uint32_t version, reader& source);
     static uint64_t satoshi_fixed_size(uint32_t version);
 
+    bool operator==(const pong& other) const;
+    bool operator!=(const pong& other) const;
+
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
     bool from_data(uint32_t version, reader& source);
@@ -59,9 +62,6 @@ public:
 
     uint64_t nonce;
 };
-
-BC_API bool operator==(const pong& left, const pong& right);
-BC_API bool operator!=(const pong& left, const pong& right);
 
 } // namespace message
 } // namespace libbitcoin

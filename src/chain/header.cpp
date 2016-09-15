@@ -277,20 +277,20 @@ bool header::is_valid_proof_of_work() const
     return value <= target;
 }
 
-bool operator==(const header& left, const header& right)
+bool header::operator==(const header& other) const
 {
-    return (left.version == right.version)
-        && (left.previous_block_hash == right.previous_block_hash)
-        && (left.merkle == right.merkle)
-        && (left.timestamp == right.timestamp)
-        && (left.bits == right.bits)
-        && (left.nonce == right.nonce)
-        && (left.transaction_count == right.transaction_count);
+    return (version == other.version)
+        && (previous_block_hash == other.previous_block_hash)
+        && (merkle == other.merkle)
+        && (timestamp == other.timestamp)
+        && (bits == other.bits)
+        && (nonce == other.nonce)
+        && (transaction_count == other.transaction_count);
 }
 
-bool operator!=(const header& left, const header& right)
+bool header::operator!=(const header& other) const
 {
-    return !(left == right);
+    return !(*this == other);
 }
 
 } // namespace chain

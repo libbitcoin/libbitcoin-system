@@ -81,8 +81,11 @@ bool output::from_data(reader& source)
     auto result = static_cast<bool>(source);
 
     if (result)
-        result = script.from_data(source, true, 
-            script::parse_mode::raw_data_fallback);
+    {
+        // Always parse non-coinbase input/output scripts as fallback.
+        static const auto mode = script::parse_mode::raw_data_fallback;
+        result = script.from_data(source, true, mode);
+    }
 
     if (!result)
         reset();
@@ -115,6 +118,11 @@ void output::to_data(writer& sink) const
 uint64_t output::serialized_size() const
 {
     return 8 + script.serialized_size(true);
+}
+
+size_t output::signature_operations() const
+{
+    return script.signature_operations(false);
 }
 
 std::string output::to_string(uint32_t flags) const

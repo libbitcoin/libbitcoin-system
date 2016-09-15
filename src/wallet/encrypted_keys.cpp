@@ -127,19 +127,19 @@ static one_byte point_sign(const one_byte& single, const hash_digest& hash)
 
 static hash_digest scrypt_token(data_slice data, data_slice salt)
 {
-    // Arbitrary scrypt parameters from BIP-38.
+    // Arbitrary scrypt parameters from BIP38.
     return scrypt<hash_size>(data, salt, 16384u, 8u, 8u);
 }
 
 static long_hash scrypt_pair(data_slice data, data_slice salt)
 {
-    // Arbitrary scrypt parameters from BIP-38.
+    // Arbitrary scrypt parameters from BIP38.
     return scrypt<long_hash_size>(data, salt, 1024u, 1u, 1u);
 }
 
 static long_hash scrypt_private(data_slice data, data_slice salt)
 {
-    // Arbitrary scrypt parameters from BIP-38.
+    // Arbitrary scrypt parameters from BIP38.
     return scrypt<long_hash_size>(data, salt, 16384u, 8u, 8u);
 }
 

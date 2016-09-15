@@ -160,26 +160,24 @@ uint64_t merkle_block::serialized_size(uint32_t version) const
         variable_uint_size(flags.size()) + flags.size();
 }
 
-bool operator==(const merkle_block& block_a,
-    const merkle_block& block_b)
+bool merkle_block::operator==(const merkle_block& other) const
 {
-    bool result = (block_a.header == block_b.header) &&
-        (block_a.hashes.size() == block_b.hashes.size()) &&
-        (block_a.flags.size() == block_b.flags.size());
+    auto result = (header == other.header) &&
+        (hashes.size() == other.hashes.size()) &&
+        (flags.size() == other.flags.size());
 
-    for (hash_list::size_type i = 0; i < block_a.hashes.size() && result; i++)
-        result = (block_a.hashes[i] == block_b.hashes[i]);
+    for (hash_list::size_type i = 0; i < hashes.size() && result; i++)
+        result = (hashes[i] == other.hashes[i]);
 
-    for (data_chunk::size_type i = 0; i < block_a.flags.size() && result; i++)
-        result = (block_a.flags[i] == block_b.flags[i]);
+    for (data_chunk::size_type i = 0; i < flags.size() && result; i++)
+        result = (flags[i] == other.flags[i]);
 
     return result;
 }
 
-bool operator!=(const merkle_block& block_a,
-    const merkle_block& block_b)
+bool merkle_block::operator!=(const merkle_block& other) const
 {
-    return !(block_a == block_b);
+    return !(*this == other);
 }
 
 } // end message

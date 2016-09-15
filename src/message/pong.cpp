@@ -119,14 +119,14 @@ uint64_t pong::serialized_size(uint32_t version) const
     return satoshi_fixed_size(version);
 }
 
-bool operator==(const pong& left, const pong& right)
+bool pong::operator==(const pong& other) const
 {
-    return (left.nonce == right.nonce);
+    return (nonce == other.nonce);
 }
 
-bool operator!=(const pong& left, const pong& right)
+bool pong::operator!=(const pong& other) const
 {
-    return !(left == right);
+    return !(*this == other);
 }
 
 } // namespace message

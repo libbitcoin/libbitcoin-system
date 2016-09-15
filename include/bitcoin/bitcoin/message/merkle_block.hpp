@@ -44,6 +44,9 @@ public:
         std::istream& stream);
     static merkle_block factory_from_data(uint32_t version, reader& source);
 
+    bool operator==(const merkle_block& other) const;
+    bool operator!=(const merkle_block& other) const;
+
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
     bool from_data(uint32_t version, reader& source);
@@ -62,9 +65,6 @@ public:
     hash_list hashes;
     data_chunk flags;
 };
-
-BC_API bool operator==(const merkle_block& left, const merkle_block& right);
-BC_API bool operator!=(const merkle_block& left, const merkle_block& right);
 
 } // end message
 } // end libbitcoin

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2016 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,29 +17,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include "evaluation_context.hpp"
+#ifndef LIBBITCOIN_CHAIN_INPUT_POINT_HPP
+#define LIBBITCOIN_CHAIN_INPUT_POINT_HPP
 
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/chain/point.hpp>
 
 namespace libbitcoin {
 namespace chain {
 
-evaluation_context::evaluation_context(uint32_t flags)
-  : flags(flags)
-{
-}
-
-evaluation_context::evaluation_context(uint32_t flags, const data_stack& stack)
-  : flags(flags), stack(stack)
-{
-}
-
-data_chunk evaluation_context::pop_stack()
-{
-    const auto value = stack.back();
-    stack.pop_back();
-    return value;
-}
+typedef point input_point;
 
 } // namespace chain
 } // namespace libbitcoin
+
+#endif

@@ -41,6 +41,9 @@ public:
     static alert_payload factory_from_data(uint32_t version,
         reader& source);
 
+    bool operator==(const alert_payload& other) const;
+    bool operator!=(const alert_payload& other) const;
+
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
     bool from_data(uint32_t version, reader& source);
@@ -67,9 +70,6 @@ public:
     std::string status_bar;
     std::string reserved;
 };
-
-BC_API bool operator==(const alert_payload& left, const alert_payload& right);
-BC_API bool operator!=(const alert_payload& left, const alert_payload& right);
 
 } // end message
 } // end libbitcoin

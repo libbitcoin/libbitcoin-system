@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/chain/input_point.hpp>
 #include <bitcoin/bitcoin/chain/point.hpp>
 
 namespace libbitcoin {
