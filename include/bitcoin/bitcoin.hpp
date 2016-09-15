@@ -26,7 +26,9 @@
 #include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/chain/history.hpp>
 #include <bitcoin/bitcoin/chain/input.hpp>
+#include <bitcoin/bitcoin/chain/input_point.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
+#include <bitcoin/bitcoin/chain/output_point.hpp>
 #include <bitcoin/bitcoin/chain/point.hpp>
 #include <bitcoin/bitcoin/chain/point_iterator.hpp>
 #include <bitcoin/bitcoin/chain/spend.hpp>

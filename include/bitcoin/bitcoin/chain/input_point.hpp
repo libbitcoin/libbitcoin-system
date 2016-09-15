@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2016 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,31 +17,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_WALLET_SELECT_OUTPUTS_HPP
-#define LIBBITCOIN_WALLET_SELECT_OUTPUTS_HPP
+#ifndef LIBBITCOIN_CHAIN_INPUT_POINT_HPP
+#define LIBBITCOIN_CHAIN_INPUT_POINT_HPP
 
-#include <cstdint>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/chain/output_point.hpp>
+#include <bitcoin/bitcoin/chain/point.hpp>
 
 namespace libbitcoin {
-namespace wallet {
+namespace chain {
 
-struct BC_API select_outputs
-{
-    enum class algorithm
-    {
-        greedy
-    };
+typedef point input_point;
 
-    /// Select optimal outpoints for a spend from unspent outputs list.
-    /// Return includes the amount of change remaining from the spend.
-    static void select(chain::points_info& out,
-        chain::output_info::list unspent, uint64_t minimum_value,
-        algorithm option=algorithm::greedy);
-};
-
-} // namespace wallet
+} // namespace chain
 } // namespace libbitcoin
 
 #endif

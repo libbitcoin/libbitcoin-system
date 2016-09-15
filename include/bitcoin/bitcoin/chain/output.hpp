@@ -22,8 +22,6 @@
 
 #include <cstdint>
 #include <istream>
-#include <vector>
-#include <bitcoin/bitcoin/chain/point.hpp>
 #include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -54,22 +52,6 @@ public:
 
     uint64_t value;
     chain::script script;
-};
-
-typedef point output_point;
-
-struct BC_API points_info
-{
-    output_point::list points;
-    uint64_t change;
-};
-
-struct BC_API output_info
-{
-    typedef std::vector<output_info> list;
-
-    output_point point;
-    uint64_t value;
 };
 
 } // namespace chain
