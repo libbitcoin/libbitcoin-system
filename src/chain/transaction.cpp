@@ -61,7 +61,7 @@ transaction transaction::factory_from_data(reader& source)
 // default constructors
 
 transaction::transaction()
-  : version(0), locktime(0), sigops_(0), strict_sigops_(0)
+  : version(0), locktime(0), sigops_(0)
 {
 }
 
@@ -76,8 +76,7 @@ transaction::transaction(uint32_t version, uint32_t locktime,
     locktime(locktime),
     inputs(inputs),
     outputs(outputs),
-    sigops_(0),
-    strict_sigops_(0)
+    sigops_(0)
 {
 }
 
@@ -94,8 +93,7 @@ transaction::transaction(uint32_t version, uint32_t locktime,
     locktime(locktime),
     inputs(std::forward<input::list>(inputs)),
     outputs(std::forward<output::list>(outputs)),
-    sigops_(0),
-    strict_sigops_(0)
+    sigops_(0)
 {
 }
 
@@ -115,11 +113,7 @@ transaction& transaction::operator=(const transaction& other)
     locktime = other.locktime;
     inputs = other.inputs;
     outputs = other.outputs;
-
-    // The cache benefit is lost on copy construction since we cannot safely
-    // copy from other without computing the value, which may never be unused.
-    sigops_ = 0;
-    strict_sigops_ = 0;
+    sigops_ = other.sigops_;
 
     // This optimization forces a (safe) hash computation based on the
     // assumption that it will at some point be computed for one or both.
@@ -141,18 +135,11 @@ void transaction::reset()
     inputs.shrink_to_fit();
     outputs.clear();
     outputs.shrink_to_fit();
+    sigops_ = 0;
 
     hash_mutex_.lock();
     hash_.reset();
     hash_mutex_.unlock();
-
-    sigops_mutex_.lock();
-    sigops_ = 0;
-    sigops_mutex_.unlock();
-
-    strict_sigops_mutex_.lock();
-    strict_sigops_ = 0;
-    strict_sigops_mutex_.unlock();
 }
 
 bool transaction::from_data(const data_chunk& data)
@@ -391,64 +378,27 @@ uint64_t transaction::total_output_value() const
 }
 
 // Returns max_size_t in case of overflow.
-size_t transaction::signature_operations(bool strict) const
+// If the actual value is zero there is no cache benefit, which is ok.
+size_t transaction::signature_operations() const
 {
-    size_t sigops = 0;
+    if (sigops_ != 0)
+        return sigops_;
 
-    const auto in = [strict](size_t total, const input& input)
+    const auto in = [](size_t total, const input& input)
     {
-        const auto count = input.script.signature_operations(strict);
+        const auto count = input.script.signature_operations(false);
         return total >= max_size_t - count ? max_size_t : total + count;
     };
 
-    const auto out = [strict](size_t total, const output& output)
+    const auto out = [](size_t total, const output& output)
     {
-        const auto count = output.script.signature_operations(strict);
+        const auto count = output.script.signature_operations(false);
         return total >= max_size_t - count ? max_size_t : total + count;
     };
 
-    if (strict)
-    {
-        ///////////////////////////////////////////////////////////////////////////
-        // Critical Section
-        strict_sigops_mutex_.lock_upgrade();
-
-        if (strict_sigops_ == 0)
-        {
-            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            strict_sigops_mutex_.unlock_upgrade_and_lock();
-            std::accumulate(inputs.begin(), inputs.end(), strict_sigops_, in);
-            std::accumulate(outputs.begin(), outputs.end(), strict_sigops_, out);
-            strict_sigops_mutex_.unlock_and_lock_upgrade();
-            //---------------------------------------------------------------------
-        }
-
-        sigops = strict_sigops_;
-        strict_sigops_mutex_.unlock_upgrade();
-        ///////////////////////////////////////////////////////////////////////////
-    }
-    else
-    {
-        ///////////////////////////////////////////////////////////////////////////
-        // Critical Section
-        sigops_mutex_.lock_upgrade();
-
-        if (sigops_ == 0)
-        {
-            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            sigops_mutex_.unlock_upgrade_and_lock();
-            std::accumulate(inputs.begin(), inputs.end(), sigops_, in);
-            std::accumulate(outputs.begin(), outputs.end(), sigops_, out);
-            sigops_mutex_.unlock_and_lock_upgrade();
-            //---------------------------------------------------------------------
-        }
-
-        sigops = sigops_;
-        sigops_mutex_.unlock_upgrade();
-        ///////////////////////////////////////////////////////////////////////////
-    }
-
-    return sigops;
+    std::accumulate(inputs.begin(), inputs.end(), sigops_, in);
+    std::accumulate(outputs.begin(), outputs.end(), sigops_, out);
+    return sigops_;
 }
 
 } // namespace chain

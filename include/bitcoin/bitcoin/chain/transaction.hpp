@@ -82,7 +82,7 @@ public:
     hash_digest hash() const;
     hash_digest hash(uint32_t sighash_type) const;
     uint64_t serialized_size() const;
-    size_t signature_operations(bool strict) const;
+    size_t signature_operations() const;
     uint64_t total_output_value() const;
 
     uint32_t version;
@@ -93,12 +93,7 @@ public:
 private:
     mutable upgrade_mutex hash_mutex_;
     mutable std::shared_ptr<hash_digest> hash_;
-
-    mutable upgrade_mutex sigops_mutex_;
     mutable size_t sigops_;
-
-    mutable upgrade_mutex strict_sigops_mutex_;
-    mutable size_t strict_sigops_;
 };
 
 } // namespace chain

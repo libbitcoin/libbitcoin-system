@@ -61,7 +61,7 @@ block block::factory_from_data(reader& source,
 }
 
 block::block()
-  : sigops_(0), strict_sigops_(0)
+  : sigops_(0)
 {
 }
 
@@ -74,8 +74,7 @@ block::block(const chain::header& header,
     const chain::transaction::list& transactions)
   : header(header),
     transactions(transactions),
-    sigops_(0),
-    strict_sigops_(0)
+    sigops_(0)
 {
 }
 
@@ -88,7 +87,7 @@ block::block(block&& other)
 block::block(chain::header&& header, chain::transaction::list&& transactions)
   : header(std::forward<chain::header>(header)),
     transactions(std::forward<chain::transaction::list>(transactions)),
-    sigops_(0), strict_sigops_(0)
+    sigops_(0)
 {
 }
 
@@ -97,7 +96,6 @@ block& block::operator=(block&& other)
     header = std::move(other.header);
     transactions = std::move(other.transactions);
     sigops_ = other.sigops_;
-    strict_sigops_ = other.strict_sigops_;
     return *this;
 }
 
@@ -111,14 +109,7 @@ void block::reset()
     header.reset();
     transactions.clear();
     transactions.shrink_to_fit();
-
-    sigops_mutex_.lock();
     sigops_ = 0;
-    sigops_mutex_.unlock();
-
-    strict_sigops_mutex_.lock();
-    strict_sigops_ = 0;
-    strict_sigops_mutex_.unlock();
 }
 
 bool block::from_data(const data_chunk& data, bool with_transaction_count)
@@ -198,58 +189,20 @@ uint64_t block::serialized_size(bool with_transaction_count) const
 }
 
 // overflow returns max_size_t
-// If the result is zero there is no cache benefit, which is ok.
-size_t block::signature_operations(bool strict) const
+// If the actual value is zero there is no cache benefit, which is ok.
+size_t block::signature_operations() const
 {
-    size_t sigops = 0;
-    const auto& txs = transactions;
+    if (sigops_ != 0)
+        return sigops_;
 
-    const auto value = [strict](size_t total, const transaction& tx)
+    const auto value = [](size_t total, const transaction& tx)
     {
-        const auto count = tx.signature_operations(strict);
+        const auto count = tx.signature_operations();
         return total >= max_size_t - count ? max_size_t : total + count;
     };
 
-    if (strict)
-    {
-        ///////////////////////////////////////////////////////////////////////////
-        // Critical Section
-        strict_sigops_mutex_.lock_upgrade();
-
-        if (strict_sigops_ == 0)
-        {
-            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            strict_sigops_mutex_.unlock_upgrade_and_lock();
-            std::accumulate(txs.begin(), txs.end(), strict_sigops_, value);
-            strict_sigops_mutex_.unlock_and_lock_upgrade();
-            //---------------------------------------------------------------------
-        }
-
-        sigops = strict_sigops_;
-        strict_sigops_mutex_.unlock_upgrade();
-        ///////////////////////////////////////////////////////////////////////////
-    }
-    else
-    {
-        ///////////////////////////////////////////////////////////////////////////
-        // Critical Section
-        sigops_mutex_.lock_upgrade();
-
-        if (sigops_ == 0)
-        {
-            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            sigops_mutex_.unlock_upgrade_and_lock();
-            std::accumulate(txs.begin(), txs.end(), sigops_, value);
-            sigops_mutex_.unlock_and_lock_upgrade();
-            //---------------------------------------------------------------------
-        }
-
-        sigops = sigops_;
-        sigops_mutex_.unlock_upgrade();
-        ///////////////////////////////////////////////////////////////////////////
-    }
-
-    return sigops;
+    const auto& txs = transactions;
+    return std::accumulate(txs.begin(), txs.end(), sigops_, value);
 }
 
 // True if there is another coinbase other than the first tx.
