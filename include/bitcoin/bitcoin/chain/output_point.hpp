@@ -40,30 +40,30 @@ public:
     output_point(const output_point& other);
     output_point(const chain::point& value);
     output_point(const hash_digest& hash, uint32_t index);
-    output_point(const chain::point& value, const chain::output& cache);
-    output_point(const hash_digest& hash, uint32_t index,
-        const chain::output& cache);
 
     // TODO: implement move argument constructors.
     ////output_point(output_point&& other);
     ////output_point(chain::point&& point);
     ////output_point(hash_digest&& hash, uint32_t index);
-    ////output_point(chain::point&& point, chain::output&& cache);
-    ////output_point(hash_digest&& hash, uint32_t index, chain::output&& cache);
 
     bool operator==(const output_point& other) const;
     bool operator!=(const output_point& other) const;
 
     void reset();
 
-    bool spent();
-    void set_spent();
+    // These fields do not participate in serialization or comparison.
 
-    // This is public but does not participate in serialization.
+    /// An output is spent if a valid transaction has a valid claim on it.
+    /// When validating blocks only long chain blocks can have a claim.
+    /// When validating a memory pool tx another mempool tx can have a claim.
+    bool spent;
+
+    /// A spend is confirmed if the spender is long chain (not memory pool).
+    bool confirmed;
+
+    /// The output cache contains the output referenced by the input point.
+    /// If the cache.value is not_found then the output has not been found.
     chain::output cache;
-
-private:
-    bool spent_;
 };
 
 struct BC_API points_info

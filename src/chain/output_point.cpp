@@ -27,60 +27,46 @@ namespace chain {
 
 const uint64_t output_point::not_found = max_uint64;
 
+// The metadata properties are not configured for initializer syntax.
+
 output_point::output_point()
   : cache({ not_found, {} }),
-    spent_(false)
+    spent(false),
+    confirmed(false)
 {
 }
 
 output_point::output_point(const output_point& other)
   : point(other),
     cache(other.cache),
-    spent_(other.spent_)
+    spent(other.spent),
+    confirmed(other.confirmed)
 {
 }
 
 output_point::output_point(const chain::point& value)
-  : output_point(value, {})
+  : point(value),
+    cache({ not_found, {} }),
+    spent(false),
+    confirmed(false)
 {
 }
 
 output_point::output_point(const hash_digest& hash, uint32_t index)
-  : output_point({ hash, index }, {})
-{
-}
-
-output_point::output_point(const chain::point& value,
-    const chain::output& cache)
-  : point(value),
-    cache(cache),
-    spent_(false)
-{
-}
-
-output_point::output_point(const hash_digest& hash, uint32_t index,
-    const chain::output& cache)
-  : output_point({ hash, index }, cache)
+  : point({ hash, index }),
+    cache({ not_found, {} }),
+    spent(false),
+    confirmed(false)
 {
 }
 
 void output_point::reset()
 {
-    spent_ = false;
+    spent = false;
+    confirmed = false;
     cache.value = not_found;
     cache.script.reset();
     static_cast<point>(*this).reset();
-}
-
-bool output_point::spent()
-{
-    return spent_;
-}
-
-void output_point::set_spent()
-{
-    // Must reset to revert to "unspent".
-    spent_ = true;
 }
 
 bool output_point::operator==(const output_point& other) const
