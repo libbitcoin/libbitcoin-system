@@ -133,8 +133,8 @@ public:
     std::string to_string(uint32_t flags) const;
     bool is_valid() const;
     void reset();
-    size_t signature_operations(bool strict) const;
     size_t pay_script_hash_sigops(const script& prevout) const;
+    size_t signature_operations(bool serialized_script) const;
     uint64_t satoshi_content_size() const;
     uint64_t serialized_size(bool prefix) const;
 
