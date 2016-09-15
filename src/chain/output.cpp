@@ -81,8 +81,11 @@ bool output::from_data(reader& source)
     auto result = static_cast<bool>(source);
 
     if (result)
-        result = script.from_data(source, true, 
-            script::parse_mode::raw_data_fallback);
+    {
+        // Always parse non-coinbase input/output scripts as fallback.
+        static const auto mode = script::parse_mode::raw_data_fallback;
+        result = script.from_data(source, true, mode);
+    }
 
     if (!result)
         reset();

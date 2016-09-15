@@ -85,10 +85,11 @@ bool input::from_data(reader& source)
 
     if (result)
     {
-        auto mode = script::parse_mode::raw_data_fallback;
-
-        if (previous_output.is_null())
-            mode = script::parse_mode::raw_data;
+        // Parse the coinbase tx as raw data.
+        // Always parse non-coinbase input/output scripts as fallback.
+        const auto mode = previous_output.is_null() ?
+            script::parse_mode::raw_data : 
+            script::parse_mode::raw_data_fallback;
 
         result = script.from_data(source, true, mode);
     }
