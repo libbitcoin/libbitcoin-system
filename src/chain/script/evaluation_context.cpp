@@ -24,6 +24,16 @@
 namespace libbitcoin {
 namespace chain {
 
+evaluation_context::evaluation_context(uint32_t flags)
+  : flags(flags)
+{
+}
+
+evaluation_context::evaluation_context(uint32_t flags, const data_stack& stack)
+  : flags(flags), stack(stack)
+{
+}
+
 data_chunk evaluation_context::pop_stack()
 {
     const auto value = stack.back();
