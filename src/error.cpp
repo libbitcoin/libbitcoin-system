@@ -106,8 +106,8 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         // check_transaction()
         case error::empty_transaction:
             return "transaction inputs or outputs are empty";
-        case error::output_value_overflow:
-            return "output value outside valid range";
+        case error::spend_overflow:
+            return "spend outside valid range";
         case error::invalid_coinbase_script_size:
             return "coinbase script is too small or large";
         case error::previous_output_null:

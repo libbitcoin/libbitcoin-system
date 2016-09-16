@@ -26,6 +26,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/chain/input.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
 #include <bitcoin/bitcoin/chain/point.hpp>
@@ -75,24 +76,32 @@ public:
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
     std::string to_string(uint32_t flags) const;
+
     bool is_valid() const;
     bool is_coinbase() const;
     bool is_invalid_coinbase() const;
     bool is_invalid_non_coinbase() const;
-    bool is_final(uint64_t block_height, uint32_t block_time) const;
+    bool is_overspent() const;
+    bool is_final(size_t block_height, uint32_t block_time) const;
     bool is_locktime_conflict() const;
     bool is_missing_inputs() const;
+    bool is_immature(size_t target_height) const;
     bool is_double_spend(bool include_unconfirmed) const;
+
     void reset();
-    code validate(bool transaction_pool=true) const;
-    code connect(uint32_t flags, bool transaction_pool=true) const;
-    hash_digest hash() const;
-    hash_digest hash(uint32_t sighash_type) const;
+    code check(bool transaction_pool = true) const;
+    code connect(const chain_state& state, bool transaction_pool=true) const;
+
     uint64_t serialized_size() const;
-    size_t signature_operations() const;
+    uint64_t total_input_value() const;
     uint64_t total_output_value() const;
     point::indexes missing_inputs() const;
+    point::indexes immature_inputs(size_t target_height) const;
     point::indexes double_spends(bool include_unconfirmed) const;
+    size_t signature_operations(bool bip16_active) const;
+    hash_digest hash(uint32_t sighash_type) const;
+    hash_digest hash() const;
+    uint64_t fees() const;
 
     /// The transaction duplicates another in the blockchain.
     /// This does not exclude the two excepted transactions (see BIP30).

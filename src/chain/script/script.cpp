@@ -327,7 +327,7 @@ std::string script::to_string(uint32_t flags) const
 }
 
 // See BIP16.
-size_t script::signature_operations(bool serialized_script) const
+size_t script::sigops(bool serialized_script) const
 {
     size_t total = 0;
     opcode last_opcode = opcode::bad_operation;
@@ -372,7 +372,7 @@ size_t script::pay_script_hash_sigops(const script& prevout) const
         return 0;
 
     // Count the sigops in the serialized script using BIP16 rules.
-    return eval.signature_operations(true);
+    return eval.sigops(true);
 }
 
 bool script::deserialize(const data_chunk& raw_script, parse_mode mode)
@@ -438,6 +438,13 @@ inline uint8_t is_sighash_flag(uint8_t sighash_type,
 {
     return (sighash_type & value) != 0;
 }
+
+////inline hash_digest hash(const transaction& tx, uint8_t sighash_type)
+////{
+////    auto serialized = tx.to_data();
+////    extend_data(serialized, to_little_endian(sighash_type));
+////    return bitcoin_hash(serialized);
+////}
 
 hash_digest script::generate_signature_hash(const transaction& parent_tx,
     uint32_t input_index, const script& script_code, uint8_t sighash_type)
@@ -1488,15 +1495,15 @@ bool op_checklocktimeverify(evaluation_context& context, const script& script,
     const auto stack = number.int64();
     const auto transaction = static_cast<int64_t>(parent_tx.locktime);
 
-    if (stack > transaction)
+    // BIP65: the stack lock-time type differs from that of tx nLockTime.
+    if (!is_locktime_type_match(stack, transaction))
         return false;
 
-    // BIP65: the stack lock-time type differs from that of tx nLockTime.
-    return is_locktime_type_match(stack, transaction);
+    return stack <= transaction;
 }
 
-// Test flags for a given context.
-bool script::is_set(uint32_t flags, script_context flag)
+// Test rule_fork flag for a given context.
+bool script::is_enabled(uint32_t flags, rule_fork flag)
 {
     return (flag & flags) != 0;
 }
@@ -1755,24 +1762,24 @@ bool run_operation(const operation& op, const transaction& parent_tx,
 
         case opcode::checksig:
             return op_checksig(context, script, parent_tx, input_index,
-                script::is_set(flags, script_context::bip66_enabled));
+                script::is_enabled(flags, rule_fork::bip66_rule));
 
         case opcode::checksigverify:
             return op_checksigverify(context, script, parent_tx, input_index,
-                script::is_set(flags, script_context::bip66_enabled)) ==
+                script::is_enabled(flags, rule_fork::bip66_rule)) ==
                     signature_parse_result::valid;
 
         case opcode::checkmultisig:
             return op_checkmultisig(context, script, parent_tx, input_index,
-                script::is_set(flags, script_context::bip66_enabled));
+                script::is_enabled(flags, rule_fork::bip66_rule));
 
         case opcode::checkmultisigverify:
             return op_checkmultisigverify(context, script, parent_tx, input_index,
-                script::is_set(flags, script_context::bip66_enabled)) ==
+                script::is_enabled(flags, rule_fork::bip66_rule)) ==
                     signature_parse_result::valid;
 
         case opcode::checklocktimeverify:
-            return script::is_set(context.flags, script_context::bip65_enabled) ?
+            return script::is_enabled(context.flags, rule_fork::bip65_rule) ?
                 op_checklocktimeverify(context, script, parent_tx,
                     input_index) : true;
 
@@ -1949,7 +1956,7 @@ bool script::verify(const script& input_script, const script& output_script,
         return false;
 
     // BIP16: Additional validation for pay-to-script-hash transactions.
-    if (is_set(flags, script_context::bip16_enabled) &&
+    if (is_enabled(flags, rule_fork::bip16_rule) &&
         (output_script.pattern() == script_pattern::pay_script_hash))
     {
         // Condition added by EKV on 2016.09.14.

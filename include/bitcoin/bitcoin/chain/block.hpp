@@ -26,12 +26,13 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/chain/header.hpp>
-#include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/math/hash_number.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
@@ -52,7 +53,9 @@ public:
     static block factory_from_data(std::istream& stream,
         bool with_transaction_count=true);
     static block factory_from_data(reader& source,
-        bool with_transaction_count=true);
+        bool with_transaction_count = true);
+    static uint64_t subsidy(size_t height);
+    static hash_number work(uint32_t bits);
     static block genesis_mainnet();
     static block genesis_testnet();
 
@@ -73,18 +76,26 @@ public:
     data_chunk to_data(bool with_transaction_count=true) const;
     void to_data(std::ostream& stream, bool with_transaction_count=true) const;
     void to_data(writer& sink, bool with_transaction_count = true) const;
-    bool has_extra_coinbases() const;
+
     bool is_valid() const;
+    bool is_extra_coinbases() const;
     bool is_final(size_t height) const;
     bool is_valid_merkle_root() const;
     bool is_distinct_transaction_set() const;
-    bool is_valid_coinbase_height(size_t height) const;
+    bool is_valid_coinbase_claim(size_t height) const;
+    bool is_valid_coinbase_script(size_t height) const;
+
     void reset();
-    code validate() const;
-    code connect(uint32_t flags, size_t height) const;
+    code check() const;
+    code connect(const chain_state& state) const;
+
+    uint64_t fees() const;
+    uint64_t claim() const;
+    uint64_t reward(size_t height) const;
+
     hash_digest generate_merkle_root() const;
     uint64_t serialized_size(bool with_transaction_count=true) const;
-    size_t signature_operations() const;
+    size_t signature_operations(bool bip16_active) const;
 
     chain::header header;
     transaction::list transactions;

@@ -38,6 +38,7 @@ src_libbitcoin_la_LIBADD = ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_
 src_libbitcoin_la_SOURCES = \
     src/error.cpp \
     src/chain/block.cpp \
+    src/chain/chain_state.cpp \
     src/chain/header.cpp \
     src/chain/input.cpp \
     src/chain/output.cpp \
@@ -330,6 +331,7 @@ include_bitcoin_bitcoin_HEADERS = \
 include_bitcoin_bitcoin_chaindir = ${includedir}/bitcoin/bitcoin/chain
 include_bitcoin_bitcoin_chain_HEADERS = \
     include/bitcoin/bitcoin/chain/block.hpp \
+    include/bitcoin/bitcoin/chain/chain_state.hpp \
     include/bitcoin/bitcoin/chain/header.hpp \
     include/bitcoin/bitcoin/chain/history.hpp \
     include/bitcoin/bitcoin/chain/input.hpp \

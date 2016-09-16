@@ -148,26 +148,26 @@ enum class opcode : uint8_t
     raw_data
 };
 
-enum script_context : uint32_t
+enum rule_fork : uint32_t
 {
-    none_enabled = 0,
+    no_rules = 0,
 
     /// pay-to-script-hash enabled
-    bip16_enabled = 1 << 0,
+    bip16_rule = 1 << 0,
 
     /// no duplicated unspent transaction ids
-    bip30_enabled = 1 << 1,
+    bip30_rule = 1 << 1,
 
     /// coinbase must include height
-    bip34_enabled = 1 << 2,
+    bip34_rule = 1 << 2,
 
     /// strict DER signatures required
-    bip66_enabled = 1 << 3,
+    bip66_rule = 1 << 3,
 
     /// nop2 becomes check locktime verify
-    bip65_enabled = 1 << 4,
+    bip65_rule = 1 << 4,
 
-    all_enabled = 0xffffffff
+    all_rules = 0xffffffff
 };
 
 /// Determine if code is in the op_n range.

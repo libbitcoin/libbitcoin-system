@@ -50,10 +50,11 @@ public:
     void to_data(writer& sink) const;
     std::string to_string(uint32_t flags) const;
     bool is_valid() const;
-    void reset();
     bool is_final() const;
+    bool is_output_mature(size_t target_height) const;
+    void reset();
     uint64_t serialized_size() const;
-    size_t signature_operations() const;
+    size_t signature_operations(bool bip16_active) const;
 
     output_point previous_output;
     chain::script script;

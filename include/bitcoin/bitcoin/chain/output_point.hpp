@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_CHAIN_OUTPUT_POINT_HPP
 #define LIBBITCOIN_CHAIN_OUTPUT_POINT_HPP
 
+#include <cstddef>
 #include <cstdint>
 #include <vector>
 #include <bitcoin/bitcoin/chain/output.hpp>
@@ -33,8 +34,11 @@ class BC_API output_point
   : public point
 {
 public:
-    /// This is a sentinel used in cache.value to indicate not cached.
+    /// This is a sentinel used in cache.value to indicate not populated.
     static const uint64_t not_found;
+
+    /// This is a sentinel used in .height to indicate not coinbase.
+    static const size_t not_coinbase;
 
     output_point();
     output_point(const output_point& other);
@@ -51,6 +55,9 @@ public:
 
     void reset();
 
+    /// Using .height and the given target height, determine spend maturity.
+    bool is_mature(size_t target_height) const;
+
     // These fields do not participate in serialization or comparison.
 
     /// An output is spent if a valid transaction has a valid claim on it.
@@ -60,6 +67,10 @@ public:
 
     /// A spend is confirmed if the spender is long chain (not memory pool).
     bool confirmed;
+
+    /// The height of a coinbase output is necessary in determining maturity.
+    /// This should be set to not_coinbase if the output is not coinbase.
+    size_t height;
 
     /// The output cache contains the output referenced by the input point.
     /// If the cache.value is not_found then the output has not been found.

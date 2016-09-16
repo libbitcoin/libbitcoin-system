@@ -79,7 +79,7 @@ enum error_code_t
 
     // check_transaction()
     empty_transaction,
-    output_value_overflow,
+    spend_overflow,
     invalid_coinbase_script_size,
     previous_output_null,
 

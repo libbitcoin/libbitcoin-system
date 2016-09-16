@@ -113,7 +113,7 @@ public:
         const script& prevout_script, const transaction& new_tx,
         uint32_t input_index, uint8_t sighash_type);
 
-    static bool is_set(uint32_t flags, script_context flag);
+    static bool is_enabled(uint32_t active_forks, rule_fork flag);
 
     static bool check_signature(const ec_signature& signature,
         uint8_t sighash_type, const data_chunk& public_key,
@@ -134,7 +134,7 @@ public:
     bool is_valid() const;
     void reset();
     size_t pay_script_hash_sigops(const script& prevout) const;
-    size_t signature_operations(bool serialized_script) const;
+    size_t sigops(bool serialized_script) const;
     uint64_t satoshi_content_size() const;
     uint64_t serialized_size(bool prefix) const;
 
