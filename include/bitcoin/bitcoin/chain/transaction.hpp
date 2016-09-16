@@ -28,6 +28,8 @@
 #include <vector>
 #include <bitcoin/bitcoin/chain/input.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
+#include <bitcoin/bitcoin/chain/point.hpp>
+#include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
@@ -79,13 +81,23 @@ public:
     bool is_invalid_non_coinbase() const;
     bool is_final(uint64_t block_height, uint32_t block_time) const;
     bool is_locktime_conflict() const;
+    bool is_missing_inputs() const;
+    bool is_double_spend(bool include_unconfirmed) const;
     void reset();
-    code validate(bool sigops=true) const;
+    code validate(bool transaction_pool=true) const;
+    code connect(uint32_t flags, bool transaction_pool=true) const;
     hash_digest hash() const;
     hash_digest hash(uint32_t sighash_type) const;
     uint64_t serialized_size() const;
     size_t signature_operations() const;
     uint64_t total_output_value() const;
+    point::indexes missing_inputs() const;
+    point::indexes double_spends(bool include_unconfirmed) const;
+
+    /// The transaction duplicates another in the blockchain.
+    /// This does not exclude the two excepted transactions (see BIP30).
+    bool duplicate() const;
+    void set_duplicate();
 
     uint32_t version;
     uint32_t locktime;
@@ -95,6 +107,7 @@ public:
 private:
     mutable upgrade_mutex hash_mutex_;
     mutable std::shared_ptr<hash_digest> hash_;
+    bool duplicate_;
 };
 
 } // namespace chain

@@ -1496,7 +1496,7 @@ bool op_checklocktimeverify(evaluation_context& context, const script& script,
 }
 
 // Test flags for a given context.
-bool script::is_active(uint32_t flags, script_context flag)
+bool script::is_set(uint32_t flags, script_context flag)
 {
     return (flag & flags) != 0;
 }
@@ -1755,24 +1755,24 @@ bool run_operation(const operation& op, const transaction& parent_tx,
 
         case opcode::checksig:
             return op_checksig(context, script, parent_tx, input_index,
-                script::is_active(flags, script_context::bip66_enabled));
+                script::is_set(flags, script_context::bip66_enabled));
 
         case opcode::checksigverify:
             return op_checksigverify(context, script, parent_tx, input_index,
-                script::is_active(flags, script_context::bip66_enabled)) ==
+                script::is_set(flags, script_context::bip66_enabled)) ==
                     signature_parse_result::valid;
 
         case opcode::checkmultisig:
             return op_checkmultisig(context, script, parent_tx, input_index,
-                script::is_active(flags, script_context::bip66_enabled));
+                script::is_set(flags, script_context::bip66_enabled));
 
         case opcode::checkmultisigverify:
             return op_checkmultisigverify(context, script, parent_tx, input_index,
-                script::is_active(flags, script_context::bip66_enabled)) ==
+                script::is_set(flags, script_context::bip66_enabled)) ==
                     signature_parse_result::valid;
 
         case opcode::checklocktimeverify:
-            return script::is_active(context.flags, script_context::bip65_enabled) ?
+            return script::is_set(context.flags, script_context::bip65_enabled) ?
                 op_checklocktimeverify(context, script, parent_tx,
                     input_index) : true;
 
@@ -1949,7 +1949,7 @@ bool script::verify(const script& input_script, const script& output_script,
         return false;
 
     // BIP16: Additional validation for pay-to-script-hash transactions.
-    if (is_active(flags, script_context::bip16_enabled) &&
+    if (is_set(flags, script_context::bip16_enabled) &&
         (output_script.pattern() == script_pattern::pay_script_hash))
     {
         // Condition added by EKV on 2016.09.14.

@@ -24,6 +24,8 @@
 #include <numeric>
 #include <utility>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/chain/script/opcode.hpp>
+#include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
@@ -269,6 +271,8 @@ bool block::is_valid_merkle_root() const
     return generate_merkle_root() == header.merkle;
 }
 
+// TODO: implement caching and invalidation.
+// These checks are self-contained; blockchain (and so version) independent.
 code block::validate() const
 {
     if (serialized_size() > max_block_size)
@@ -277,7 +281,9 @@ code block::validate() const
         return error::proof_of_work;
     else if (!header.is_valid_time_stamp())
         return error::futuristic_timestamp;
-    else if (transactions.empty() || !transactions.front().is_coinbase())
+    else if (transactions.empty())
+        return error::empty_block;
+    else if (!transactions.front().is_coinbase())
         return error::first_not_coinbase;
     else if (has_extra_coinbases())
         return error::extra_coinbases;
@@ -290,6 +296,22 @@ code block::validate() const
     else
         for (const auto& tx: transactions)
             if (auto error_code = tx.validate(false))
+                return error_code;
+
+    return error::success;
+}
+
+// zero height indicates orphan pool
+// These checks assume that prevout caching is completed on all tx.inputs.
+// Flags should be based on connecting at the specified blockchain height.
+code block::connect(uint32_t flags, size_t height) const
+{
+    // Recompute sigops for p2sh.
+    if (signature_operations() > max_block_sigops)
+        return error::too_many_sigs;
+    else
+        for (const auto& tx: transactions)
+            if (auto error_code = tx.connect(flags, false))
                 return error_code;
 
     return error::success;

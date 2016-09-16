@@ -27,6 +27,7 @@
 #include <string>
 #include <vector>
 #include <bitcoin/bitcoin/chain/header.hpp>
+#include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
@@ -80,8 +81,9 @@ public:
     bool is_valid_coinbase_height(size_t height) const;
     void reset();
     code validate() const;
+    code connect(uint32_t flags, size_t height) const;
     hash_digest generate_merkle_root() const;
-    uint64_t serialized_size(bool with_transaction_count = true) const;
+    uint64_t serialized_size(bool with_transaction_count=true) const;
     size_t signature_operations() const;
 
     chain::header header;

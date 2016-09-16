@@ -171,6 +171,10 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         case error::coinbase_maturity:
             return "immature coinbase spent";
 
+            // check_transaction() (more)
+        case error::empty_block:
+            return "block has no transactions";
+
         // unknown errors
         case error::unknown:
         default:
