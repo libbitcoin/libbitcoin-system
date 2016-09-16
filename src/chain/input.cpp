@@ -140,11 +140,17 @@ bool input::is_final() const
     return (sequence == max_input_sequence);
 }
 
-size_t input::signature_operations() const
+size_t input::signature_operations(bool bip16_active) const
 {
-    // This cannot overflow because each computation is limited.
-    return script.signature_operations(false) + 
-        script.pay_script_hash_sigops(previous_output.cache.script);
+    auto sigops = script.sigops(false);
+
+    if (bip16_active)
+    {
+        // This cannot overflow because each computation is limited.
+        sigops += script.pay_script_hash_sigops(previous_output.cache.script);
+    }
+
+    return sigops;
 }
 
 std::string input::to_string(uint32_t flags) const

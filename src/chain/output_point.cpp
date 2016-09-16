@@ -19,6 +19,8 @@
  */
 #include <bitcoin/bitcoin/chain/output_point.hpp>
 
+#include <cstddef>
+#include <cstdint>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/chain/point.hpp>
 
@@ -26,6 +28,7 @@ namespace libbitcoin {
 namespace chain {
 
 const uint64_t output_point::not_found = max_uint64;
+const size_t output_point::not_coinbase = max_size_t;
 
 // The metadata properties are not configured for initializer syntax.
 
@@ -67,6 +70,16 @@ void output_point::reset()
     cache.value = not_found;
     cache.script.reset();
     static_cast<point>(*this).reset();
+}
+
+// For tx pool validation target_height is that of the *next* block.
+// For block validation target_height is that for which block is considered.
+// Returns true if the previous output is mature enough to spend from height.
+bool output_point::is_mature(size_t target_height) const
+{
+    // If the prevout is not null then it is not from a coinbase transaction.
+    // If the prevout is null and its tx is valid then it must be a coinbase.
+    return !is_null() || ((target_height - 1) - height >= coinbase_maturity);
 }
 
 bool output_point::operator==(const output_point& other) const

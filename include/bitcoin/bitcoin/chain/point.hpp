@@ -38,6 +38,9 @@ namespace chain {
 class BC_API point
 {
 public:
+    /// This is a sentinel used in .index to indicate no output, e.g. coinbase.
+    static const uint32_t null_index;
+
     typedef std::vector<point> list;
     typedef std::vector<uint32_t> indexes;
 

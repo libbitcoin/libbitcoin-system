@@ -33,6 +33,8 @@
 namespace libbitcoin {
 namespace chain {
 
+const uint32_t point::null_index = max_uint32;
+
 point point::factory_from_data(const data_chunk& data)
 {
     point instance;
@@ -142,7 +144,7 @@ std::string point::to_string() const
 
 bool point::is_null() const
 {
-    return index == max_uint32 && hash == null_hash;
+    return index == null_index && hash == null_hash;
 }
 
 // This is used with output_point identification within a set of history rows

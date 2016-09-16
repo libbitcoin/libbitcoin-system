@@ -545,6 +545,9 @@
     <ClCompile Include="..\..\..\..\src\chain\output_point.cpp">
       <Filter>resource\src\chain</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\chain_state.cpp">
+      <Filter>resource\src\chain</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -1061,6 +1064,9 @@
       <Filter>include\bitcoin\chain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\input_point.hpp">
+      <Filter>include\bitcoin\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\chain_state.hpp">
       <Filter>include\bitcoin\chain</Filter>
     </ClInclude>
   </ItemGroup>

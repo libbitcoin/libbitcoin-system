@@ -21,15 +21,20 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <limits>
 #include <numeric>
+#include <type_traits>
 #include <utility>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/script/script.hpp>
+#include <bitcoin/bitcoin/config/checkpoint.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/math/hash_number.hpp>
 #include <bitcoin/bitcoin/math/script_number.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -39,6 +44,17 @@
 
 namespace libbitcoin {
 namespace chain {
+
+using namespace bc::config;
+
+// TODO: centralize without exposing numeric_limits to headers :/.
+template <typename Integer,
+    typename = std::enable_if<std::is_unsigned<Integer>::value>>
+Integer ceiling_add(Integer left, Integer right)
+{
+    static const auto ceiling = std::numeric_limits<Integer>::max();
+    return left > ceiling - right ? ceiling : left + right;
+}
 
 block block::factory_from_data(const data_chunk& data,
     bool with_transaction_count)
@@ -188,12 +204,11 @@ uint64_t block::serialized_size(bool with_transaction_count) const
 }
 
 // overflow returns max_size_t
-size_t block::signature_operations() const
+size_t block::signature_operations(bool bip16_active) const
 {
-    const auto value = [](size_t total, const transaction& tx)
+    const auto value = [bip16_active](size_t total, const transaction& tx)
     {
-        const auto count = tx.signature_operations();
-        return total >= max_size_t - count ? max_size_t : total + count;
+        return ceiling_add(total, tx.signature_operations(bip16_active));
     };
 
     const auto& txs = transactions;
@@ -202,10 +217,8 @@ size_t block::signature_operations() const
 
 // True if there is another coinbase other than the first tx.
 // No txs or coinbases also returns true.
-bool block::has_extra_coinbases() const
+bool block::is_extra_coinbases() const
 {
-    const auto& txs = transactions;
-
     if (transactions.empty())
         return false;
 
@@ -214,7 +227,8 @@ bool block::has_extra_coinbases() const
         return tx.is_coinbase();
     };
 
-    return std::none_of(txs.begin() + 1, txs.end(), value);
+    const auto& txs = transactions;
+    return std::any_of(txs.begin() + 1, txs.end(), value);
 }
 
 bool block::is_final(size_t height) const
@@ -245,9 +259,63 @@ bool block::is_distinct_transaction_set() const
     return distinct_end == hashes.end();
 }
 
-bool block::is_valid_coinbase_height(size_t height) const
+bool block::is_valid_merkle_root() const
 {
-    // There must be a transaction with an input.
+    return generate_merkle_root() == header.merkle;
+}
+
+// static
+hash_number block::work(uint32_t bits)
+{
+    hash_number target;
+
+    if (!target.set_compact(bits) || target == 0)
+        return 0;
+
+    // We need to compute 2**256 / (target+1), but we can't represent 2**256
+    // as it's too large for uint256. However as 2**256 is at least as large as
+    // target+1, it is equal to ((2**256 - target - 1) / (target+1)) + 1, or 
+    // ~target / (target+1) + 1.
+    return (~target / (target + 1)) + 1;
+}
+
+// static
+uint64_t block::subsidy(size_t height)
+{
+    auto subsidy = bitcoin_to_satoshi(initial_block_reward);
+    subsidy >>= (height / reward_interval);
+    return subsidy;
+}
+
+uint64_t block::fees() const
+{
+    const auto value = [](uint64_t total, const transaction& tx)
+    {
+        return ceiling_add(total, tx.fees());
+    };
+
+    const auto& txs = transactions;
+    return std::accumulate(txs.begin(), txs.end(), uint64_t(0), value);
+}
+
+uint64_t block::claim() const
+{
+    return transactions.empty() ? 0 :
+        transactions.front().total_output_value();
+}
+
+uint64_t block::reward(size_t height) const
+{
+    return ceiling_add(fees(), subsidy(height));
+}
+
+bool block::is_valid_coinbase_claim(size_t height) const
+{
+    return claim() <= reward(height);
+}
+
+bool block::is_valid_coinbase_script(size_t height) const
+{
     if (transactions.empty() || transactions.front().inputs.empty())
         return false;
 
@@ -266,52 +334,86 @@ bool block::is_valid_coinbase_height(size_t height) const
     return std::equal(expected.begin(), expected.end(), actual.begin());
 }
 
-bool block::is_valid_merkle_root() const
-{
-    return generate_merkle_root() == header.merkle;
-}
-
-// TODO: implement caching and invalidation.
 // These checks are self-contained; blockchain (and so version) independent.
-code block::validate() const
+code block::check() const
 {
     if (serialized_size() > max_block_size)
         return error::size_limits;
+
     else if (!header.is_valid_proof_of_work())
         return error::proof_of_work;
+
     else if (!header.is_valid_time_stamp())
         return error::futuristic_timestamp;
+
     else if (transactions.empty())
         return error::empty_block;
+
     else if (!transactions.front().is_coinbase())
         return error::first_not_coinbase;
-    else if (has_extra_coinbases())
+
+    else if (is_extra_coinbases())
         return error::extra_coinbases;
+
     else if (!is_distinct_transaction_set())
         return error::duplicate;
-    else if (signature_operations() > max_block_sigops)
+
+    // We cannot know if bip16 is enabled at this point so we disable it.
+    // This will not make a difference unless prevouts are populated, in which
+    // case they are ignored. This means that p2sh sigops are not counted here.
+    // This is a preliminary check, the final count must come from connect().
+    else if (signature_operations(false) > max_block_sigops)
         return error::too_many_sigs;
+
     else if (is_valid_merkle_root())
         return error::merkle_mismatch;
+
     else
         for (const auto& tx: transactions)
-            if (auto error_code = tx.validate(false))
+            if (auto error_code = tx.check(false))
                 return error_code;
 
     return error::success;
 }
 
-// zero height indicates orphan pool
+// TODO: implement sigops and total input/output value caching.
 // These checks assume that prevout caching is completed on all tx.inputs.
 // Flags should be based on connecting at the specified blockchain height.
-code block::connect(uint32_t flags, size_t height) const
+code block::connect(const chain_state& state) const
 {
-    // Recompute sigops for p2sh.
-    if (signature_operations() > max_block_sigops)
+    const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
+    const auto bip34 = state.is_enabled(rule_fork::bip34_rule);
+
+    if (!state.is_checkpoint_failure(header))
+        return error::checkpoints_failed;
+
+    else if(header.version < state.minimum_version)
+        return error::old_version_block;
+
+    else if (header.bits != state.work_required)
+        return error::incorrect_proof_of_work;
+
+    else if (header.timestamp <= state.median_time_past)
+        return error::timestamp_too_early;
+
+    // This recurses txs but is not applied to mempool (timestamp required).
+    else if (!is_final(state.next_height))
+        return error::non_final_transaction;
+
+    else if (bip34 && !is_valid_coinbase_script(state.next_height))
+        return error::coinbase_height_mismatch;
+
+    // This recomputes sigops to include p2sh from prevouts.
+    else if (signature_operations(bip16) > max_block_sigops)
         return error::too_many_sigs;
+
+    else if (!is_valid_coinbase_claim(state.next_height))
+        return error::coinbase_too_large;
+
+    // This recomputes sigops to include p2sh from prevouts.
     else
         for (const auto& tx: transactions)
-            if (auto error_code = tx.connect(flags, false))
+            if (auto error_code = tx.connect(state, false))
                 return error_code;
 
     return error::success;

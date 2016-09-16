@@ -343,9 +343,9 @@ BOOST_AUTO_TEST_CASE(script__bip16__valid)
     for (const auto& test: valid_bip16_scripts)
     {
         // These are valid prior to and after BIP16 activation.
-        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::none_enabled), test.description);
-        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::bip16_enabled), test.description);
-        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::all_enabled), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::rule_fork::no_rules), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::rule_fork::bip16_rule), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::rule_fork::all_rules), test.description);
     }
 }
 
@@ -355,9 +355,9 @@ BOOST_AUTO_TEST_CASE(script__bip16__invalidated)
     for (const auto& test: invalidated_bip16_scripts)
     {
         // These are valid prior to BIP16 activation and invalid after.
-        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::none_enabled), test.description);
-        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::bip16_enabled), test.description);
-        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::all_enabled), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::rule_fork::no_rules), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::rule_fork::bip16_rule), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::rule_fork::all_rules), test.description);
     }
 }
 
@@ -373,9 +373,9 @@ BOOST_AUTO_TEST_CASE(script__bip65__valid)
     for (const auto& test: valid_bip65_scripts)
     {
         // These are valid prior to and after BIP65 activation.
-        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::none_enabled), test.description);
-        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::bip65_enabled), test.description);
-        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::all_enabled), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::rule_fork::no_rules), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::rule_fork::bip65_rule), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::rule_fork::all_rules), test.description);
     }
 }
 
@@ -390,9 +390,9 @@ BOOST_AUTO_TEST_CASE(script__bip65__invalid)
     for (const auto& test: invalid_bip65_scripts)
     {
         // These are invalid prior to and after BIP65 activation.
-        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::none_enabled), test.description);
-        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::bip65_enabled), test.description);
-        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::all_enabled), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::rule_fork::no_rules), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::rule_fork::bip65_rule), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::rule_fork::all_rules), test.description);
     }
 }
 
@@ -407,9 +407,9 @@ BOOST_AUTO_TEST_CASE(script__bip65__invalidated)
     for (const auto& test: invalidated_bip65_scripts)
     {
         // These are valid prior to BIP65 activation and invalid after.
-        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::none_enabled), test.description);
-        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::bip65_enabled), test.description);
-        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::all_enabled), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::rule_fork::no_rules), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::rule_fork::bip65_rule), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::rule_fork::all_rules), test.description);
     }
 }
 
@@ -420,9 +420,9 @@ BOOST_AUTO_TEST_CASE(script__multisig__valid)
     for (const auto& test: valid_multisig_scripts)
     {
         // These are always valid.
-        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::none_enabled), test.description);
-        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::bip66_enabled), test.description);
-        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::all_enabled), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::rule_fork::no_rules), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::rule_fork::bip66_rule), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::rule_fork::all_rules), test.description);
     }
 }
 
@@ -433,9 +433,9 @@ BOOST_AUTO_TEST_CASE(script__multisig__invalid)
     for (const auto& test: invalid_multisig_scripts)
     {
         // These are always invalid.
-        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::none_enabled), test.description);
-        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::bip66_enabled), test.description);
-        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::all_enabled), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::rule_fork::no_rules), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::rule_fork::bip66_rule), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::rule_fork::all_rules), test.description);
     }
 }
 
@@ -445,8 +445,8 @@ BOOST_AUTO_TEST_CASE(script__context_free__valid)
     for (const auto& test: valid_context_free_scripts)
     {
         // These are always valid.
-        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::none_enabled), test.description);
-        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::script_context::all_enabled), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::rule_fork::no_rules), test.description);
+        BOOST_CHECK_MESSAGE(run_script(test, tx, chain::rule_fork::all_rules), test.description);
     }
 }
 
@@ -456,8 +456,8 @@ BOOST_AUTO_TEST_CASE(script__context_free__invalid)
     for (const auto& test: invalid_context_free_scripts)
     {
         // These are always invalid.
-        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::none_enabled), test.description);
-        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::script_context::all_enabled), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::rule_fork::no_rules), test.description);
+        BOOST_CHECK_MESSAGE(!run_script(test, tx, chain::rule_fork::all_rules), test.description);
     }
 }
 

@@ -22,9 +22,12 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <numeric>
+#include <type_traits>
 #include <sstream>
 #include <utility>
+#include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/chain/input.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
@@ -40,6 +43,22 @@
 
 namespace libbitcoin {
 namespace chain {
+    
+// TODO: centralize without exposing numeric_limits to headers :/.
+template <typename Integer,
+    typename = std::enable_if<std::is_unsigned<Integer>::value>>
+Integer ceiling_add(Integer left, Integer right)
+{
+    static const auto ceiling = std::numeric_limits<Integer>::max();
+    return left > ceiling - right ? ceiling : left + right;
+}
+
+template <typename Integer,
+    typename = std::enable_if<std::is_unsigned<Integer>::value>>
+Integer floor_subtract(Integer left, Integer right)
+{
+    return right > left ? 0 : left - right;
+}
 
 transaction transaction::factory_from_data(const data_chunk& data)
 {
@@ -344,43 +363,60 @@ bool transaction::is_invalid_non_coinbase() const
     if (is_coinbase())
         return false;
 
-    for (const auto& input: inputs)
-        if (input.previous_output.is_null())
-            return true;
+    const auto invalid = [](const input& input)
+    {
+        return input.previous_output.is_null();
+    };
 
-    return false;
+    return std::any_of(inputs.begin(), inputs.end(), invalid);
 }
 
-bool transaction::is_final(uint64_t block_height, uint32_t block_time) const
+bool transaction::is_final(size_t block_height, uint32_t block_time) const
 {
     if (locktime == 0)
         return true;
 
-    auto max_locktime = block_time;
-
-    if (locktime < locktime_threshold)
-        max_locktime = static_cast<uint32_t>(block_height);
+    BITCOIN_ASSERT(block_height <= max_uint32);
+    const auto max_locktime = locktime < locktime_threshold ?
+        static_cast<uint32_t>(block_height) : block_time;
 
     if (locktime < max_locktime)
         return true;
 
-    for (const auto& tx_input: inputs)
-        if (!tx_input.is_final())
-            return false;
+    const auto finalized = [](const input& input)
+    {
+        return input.is_final();
+    };
 
-    return true;
+    return std::all_of(inputs.begin(), inputs.end(), finalized);
 }
 
+// This is not a consensus rule, just detection of an irrational use.
 bool transaction::is_locktime_conflict() const
 {
-    const auto locktime_set = locktime != 0;
+    if (locktime == 0)
+        return false;
 
-    if (locktime_set)
-        for (const auto& input: inputs)
-            if (input.sequence < max_input_sequence)
-                return false;
+    const auto maximum = [](const input& input)
+    {
+        return input.sequence == max_input_sequence;
+    };
 
-    return locktime_set;
+    return std::all_of(inputs.begin(), inputs.end(), maximum);
+}
+
+// Returns max_uint64 in case of overflow.
+uint64_t transaction::total_input_value() const
+{
+    const auto value = [](uint64_t total, const input& input)
+    {
+        // Treat missing previous outputs as zero-valued, no math on sentinel.
+        const auto value = input.previous_output.cache.value;
+        const auto increment = value == output_point::not_found ? 0 : value;
+        return ceiling_add(total, increment);
+    };
+
+    return std::accumulate(inputs.begin(), inputs.end(), uint64_t(0), value);
 }
 
 // Returns max_uint64 in case of overflow.
@@ -388,27 +424,34 @@ uint64_t transaction::total_output_value() const
 {
     const auto value = [](uint64_t total, const output& output)
     {
-        const auto value = output.value;
-        return total >= max_uint64 - value ? max_uint64 : total + value;
+        return ceiling_add(total, output.value);
     };
 
     return std::accumulate(outputs.begin(), outputs.end(), uint64_t(0), value);
 }
 
-// Returns max_size_t in case of overflow.
-size_t transaction::signature_operations() const
+uint64_t transaction::fees() const
 {
-    const auto in = [](size_t total, const input& input)
+    return floor_subtract(total_input_value(), total_output_value());
+}
+
+bool transaction::is_overspent() const
+{
+    return total_output_value() > total_input_value();
+}
+
+// Returns max_size_t in case of overflow.
+size_t transaction::signature_operations(bool bip16_active) const
+{
+    const auto in = [bip16_active](size_t total, const input& input)
     {
         // This includes BIP16 p2sh additional sigops if prevout is cached.
-        const auto count = input.signature_operations();
-        return total >= max_size_t - count ? max_size_t : total + count;
+        return ceiling_add(total, input.signature_operations(bip16_active));
     };
 
     const auto out = [](size_t total, const output& output)
     {
-        const auto count = output.signature_operations();
-        return total >= max_size_t - count ? max_size_t : total + count;
+        return ceiling_add(total, output.signature_operations());
     };
 
     size_t sigops = 0;
@@ -465,40 +508,85 @@ point::indexes transaction::double_spends(bool include_unconfirmed) const
     return spends;
 }
 
-// TODO: implement sigops caching.
+bool transaction::is_immature(size_t target_height) const
+{
+    const auto immature = [target_height](const input& input)
+    {
+        return !input.previous_output.is_mature(target_height);
+    };
+
+    // This is an optimization of !immature_inputs().empty();
+    return std::any_of(inputs.begin(), inputs.end(), immature);
+}
+
+point::indexes transaction::immature_inputs(size_t target_height) const
+{
+    point::indexes immatures;
+
+    for (uint32_t in = 0; in < inputs.size(); ++in)
+        if (!inputs[in].previous_output.is_mature(target_height))
+            immatures.push_back(in);
+
+    return immatures;
+}
+
 // These checks are self-contained; blockchain (and so version) independent.
-code transaction::validate(bool transaction_pool) const
+code transaction::check(bool transaction_pool) const
 {
     if (inputs.empty() || outputs.empty())
         return error::empty_transaction;
-    else if (total_output_value() > max_money())
-        return error::output_value_overflow;
+
     else if (is_invalid_non_coinbase())
         return error::previous_output_null;
-    else if (transaction_pool && is_coinbase())
-        return error::coinbase_transaction;
-    else if (transaction_pool && serialized_size() > max_block_size)
-        return error::size_limits;
-    else if (transaction_pool && signature_operations() > max_block_sigops)
-        return error::too_many_sigs;
+
+    else if (total_output_value() > max_money())
+        return error::spend_overflow;
+
     else if (!transaction_pool && is_invalid_coinbase())
         return error::invalid_coinbase_script_size;
+
+    else if (transaction_pool && is_coinbase())
+        return error::coinbase_transaction;
+
+    else if (transaction_pool && serialized_size() >= max_block_size)
+        return error::size_limits;
+
+    // We cannot know if bip16 is enabled at this point so we disable it.
+    // This will not make a difference unless prevouts are populated, in which
+    // case they are ignored. This means that p2sh sigops are not counted here.
+    // This is a preliminary check, the final count must come from connect().
+    else if (transaction_pool && signature_operations(false) > max_block_sigops)
+        return error::too_many_sigs;
+
     else
         return error::success;
 }
 
+// TODO: implement sigops and total input/output value caching.
 // These checks assume that prevout caching is completed on all tx.inputs.
 // Flags for tx pool calls should be based on the current blockchain height.
-code transaction::connect(uint32_t flags, bool transaction_pool) const
+code transaction::connect(const chain_state& state, bool transaction_pool) const
 {
-    // Recompute sigops for p2sh.
-    if (script::is_set(flags, script_context::bip30_enabled) && duplicate())
+    const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
+    const auto bip30 = state.is_enabled(rule_fork::bip30_rule);
+
+    if (bip30 && duplicate())
         return error::unspent_duplicate;
+
     else if (is_missing_inputs())
         return error::input_not_found;
+
     else if (is_double_spend(transaction_pool))
-        return error::input_not_found;
-    else if (transaction_pool && signature_operations() > max_block_sigops)
+        return error::double_spend;
+
+    else if (is_immature(state.next_height))
+        return error::coinbase_maturity;
+
+    else if (is_overspent())
+        return error::spend_exceeds_value;
+
+    // This recomputes sigops to include p2sh from prevouts.
+    else if (transaction_pool && signature_operations(bip16) > max_block_sigops)
         return error::too_many_sigs;
 
     return error::success;

@@ -122,7 +122,7 @@ uint64_t output::serialized_size() const
 
 size_t output::signature_operations() const
 {
-    return script.signature_operations(false);
+    return script.sigops(false);
 }
 
 std::string output::to_string(uint32_t flags) const

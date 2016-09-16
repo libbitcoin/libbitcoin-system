@@ -72,6 +72,7 @@
       <ExcludedFromBuild Condition="$(PlatformToolset) != 'CTP_Nov2013'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\block.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\chain_state.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\header.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\output_point.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\point.cpp" />
@@ -206,6 +207,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\block.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\chain_state.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\header.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\history.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\input_point.hpp" />
