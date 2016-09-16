@@ -57,6 +57,33 @@ BC_CONSTEXPR uint32_t time_stamp_future_hours = 2;
 BC_CONSTEXPR uint32_t max_work_bits = 0x1d00ffff;
 BC_CONSTEXPR uint32_t max_input_sequence = max_uint32;
 
+// Consensus rule change activation and enforcement parameters.
+BC_CONSTEXPR uint8_t bip65_version = 4;
+BC_CONSTEXPR uint8_t bip66_version = 3;
+BC_CONSTEXPR uint8_t bip34_version = 2;
+BC_CONSTEXPR uint8_t first_version = 1;
+
+// Testnet activation parameters.
+BC_CONSTEXPR size_t testnet_active = 51;
+BC_CONSTEXPR size_t testnet_enforce = 75;
+BC_CONSTEXPR size_t testnet_sample = 100;
+
+// Mainnet activation parameters.
+BC_CONSTEXPR size_t mainnet_active = 750;
+BC_CONSTEXPR size_t mainnet_enforce = 950;
+BC_CONSTEXPR size_t mainnet_sample = 1000;
+
+// Block 173805 is the first mainnet block after date-based activation.
+// Block 514 is the first testnet block after date-based activation.
+BC_CONSTEXPR size_t mainnet_bip16_activation_height = 173805;
+BC_CONSTEXPR size_t testnet_bip16_activation_height = 514;
+
+// github.com/bitcoin/bips/blob/master/bip-0030.mediawiki#specification
+BC_CONSTEXPR size_t mainnet_bip30_exception_height1 = 91842;
+BC_CONSTEXPR size_t mainnet_bip30_exception_height2 = 91880;
+BC_CONSTEXPR size_t testnet_bip30_exception_height1 = 0;
+BC_CONSTEXPR size_t testnet_bip30_exception_height2 = 0;
+
 // Threshold for nLockTime: below this value it is interpreted as block number,
 // otherwise as UNIX timestamp. [Tue Nov 5 00:53:20 1985 UTC]
 BC_CONSTEXPR uint32_t locktime_threshold = 500000000;

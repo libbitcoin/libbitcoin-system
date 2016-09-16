@@ -35,8 +35,14 @@ class BC_API chain_state
 public:
     chain_state(const config::checkpoint::list& checkpoints);
 
-    bool is_checkpoint_failure(const header& header) const;
+    /// Determine it the flag is set in the active_forks member.
     bool is_enabled(rule_fork flag) const;
+
+    /// Determine it the flag is set and enabled for the given block's version.
+    bool is_enabled(const header& header, rule_fork flag) const;
+
+    /// Determine if the block fails a checkpoint at next_height.
+    bool is_checkpoint_failure(const header& header) const;
 
     size_t next_height;
     uint32_t active_forks;

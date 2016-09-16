@@ -24,6 +24,7 @@
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/config/checkpoint.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -35,14 +36,22 @@ chain_state::chain_state(const checkpoint::list& checkpoints)
 {
 }
 
-bool chain_state::is_checkpoint_failure(const header& header) const
-{
-    return !checkpoint::validate(header.hash(), next_height, checkpoints_);
-}
-
 bool chain_state::is_enabled(rule_fork flag) const
 {
     return script::is_enabled(active_forks, flag);
+}
+
+bool chain_state::is_enabled(const header& header, rule_fork flag) const
+{
+    return (is_enabled(flag)) &&
+       ((flag == rule_fork::bip65_rule && header.version >= bip65_version) ||
+        (flag == rule_fork::bip66_rule && header.version >= bip66_version) ||
+        (flag == rule_fork::bip34_rule && header.version >= bip34_version));
+}
+
+bool chain_state::is_checkpoint_failure(const header& header) const
+{
+    return !checkpoint::validate(header.hash(), next_height, checkpoints_);
 }
 
 } // namespace chain
