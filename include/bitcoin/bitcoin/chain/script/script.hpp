@@ -113,7 +113,7 @@ public:
         const script& prevout_script, const transaction& new_tx,
         uint32_t input_index, uint8_t sighash_type);
 
-    static bool is_active(uint32_t flags, script_context flag);
+    static bool is_set(uint32_t flags, script_context flag);
 
     static bool check_signature(const ec_signature& signature,
         uint8_t sighash_type, const data_chunk& public_key,

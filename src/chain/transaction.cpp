@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <numeric>
@@ -26,7 +27,9 @@
 #include <utility>
 #include <bitcoin/bitcoin/chain/input.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
+#include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
+#include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <boost/iostreams/stream.hpp>
@@ -62,7 +65,7 @@ transaction transaction::factory_from_data(reader& source)
 // default constructors
 
 transaction::transaction()
-  : version(0), locktime(0)
+  : version(0), locktime(0), duplicate_(false)
 {
 }
 
@@ -76,7 +79,8 @@ transaction::transaction(uint32_t version, uint32_t locktime,
   : version(version),
     locktime(locktime),
     inputs(inputs),
-    outputs(outputs)
+    outputs(outputs),
+    duplicate_(false)
 {
 }
 
@@ -92,7 +96,8 @@ transaction::transaction(uint32_t version, uint32_t locktime,
   : version(version),
     locktime(locktime),
     inputs(std::forward<input::list>(inputs)),
-    outputs(std::forward<output::list>(outputs))
+    outputs(std::forward<output::list>(outputs)),
+    duplicate_(false)
 {
 }
 
@@ -102,6 +107,7 @@ transaction& transaction::operator=(transaction&& other)
     locktime = other.locktime;
     inputs = std::move(other.inputs);
     outputs = std::move(other.outputs);
+    duplicate_ = other.duplicate_;
     return *this;
 }
 
@@ -112,6 +118,7 @@ transaction& transaction::operator=(const transaction& other)
     locktime = other.locktime;
     inputs = other.inputs;
     outputs = other.outputs;
+    duplicate_ = other.duplicate_;
 
     // This optimization forces a (safe) hash computation based on the
     // assumption that it will at some point be computed for one or both.
@@ -137,6 +144,7 @@ void transaction::reset()
     hash_mutex_.lock();
     hash_.reset();
     hash_mutex_.unlock();
+    duplicate_ = false;
 }
 
 bool transaction::from_data(const data_chunk& data)
@@ -273,6 +281,19 @@ std::string transaction::to_string(uint32_t flags) const
     return value.str();
 }
 
+bool transaction::duplicate() const
+{
+    return duplicate_;
+}
+
+// This may or may not include the transaction pool.
+// When the transaction is within a block this should be populated only from
+// the blockchain and otherwise may (or may not) consider the transaction pool.
+void transaction::set_duplicate()
+{
+    duplicate_ = true;
+}
+
 hash_digest transaction::hash() const
 {
     ///////////////////////////////////////////////////////////////////////////
@@ -396,23 +417,91 @@ size_t transaction::signature_operations() const
     return sigops;
 }
 
-// Block sigops computation summarizes across transactions.
-code transaction::validate(bool sigops) const
+bool transaction::is_missing_inputs() const
+{
+    const auto missing = [](const input& input)
+    {
+        // The cache value is set to not_found if the output doesn't exist.
+        return input.previous_output.cache.value == output_point::not_found;
+    };
+
+    // This is an optimization of !missing_inputs().empty();
+    return std::any_of(inputs.begin(), inputs.end(), missing);
+}
+
+point::indexes transaction::missing_inputs() const
+{
+    point::indexes missing;
+
+    // The cache value is set to not_found if the output doesn't exist.
+    for (uint32_t in = 0; in < inputs.size(); ++in)
+        if (inputs[in].previous_output.cache.value == output_point::not_found)
+            missing.push_back(in);
+
+    return missing;
+}
+
+bool transaction::is_double_spend(bool include_unconfirmed) const
+{
+    const auto spent = [include_unconfirmed](const input& input)
+    {
+        return input.previous_output.spent &&
+            (include_unconfirmed || input.previous_output.confirmed);
+    };
+
+    // This is an optimization of !double_spends().empty();
+    return std::any_of(inputs.begin(), inputs.end(), spent);
+}
+
+point::indexes transaction::double_spends(bool include_unconfirmed) const
+{
+    point::indexes spends;
+
+    for (uint32_t in = 0; in < inputs.size(); ++in)
+        if (inputs[in].previous_output.spent &&
+            (include_unconfirmed || inputs[in].previous_output.confirmed))
+            spends.push_back(in);
+
+    return spends;
+}
+
+// TODO: implement sigops caching.
+// These checks are self-contained; blockchain (and so version) independent.
+code transaction::validate(bool transaction_pool) const
 {
     if (inputs.empty() || outputs.empty())
         return error::empty_transaction;
-    else if (serialized_size() > max_block_size)
-        return error::size_limits;
     else if (total_output_value() > max_money())
         return error::output_value_overflow;
-    else if (is_invalid_coinbase())
-        return error::invalid_coinbase_script_size;
     else if (is_invalid_non_coinbase())
         return error::previous_output_null;
-    else if (sigops && signature_operations() > max_block_sigops)
+    else if (transaction_pool && is_coinbase())
+        return error::coinbase_transaction;
+    else if (transaction_pool && serialized_size() > max_block_size)
+        return error::size_limits;
+    else if (transaction_pool && signature_operations() > max_block_sigops)
         return error::too_many_sigs;
+    else if (!transaction_pool && is_invalid_coinbase())
+        return error::invalid_coinbase_script_size;
     else
         return error::success;
+}
+
+// These checks assume that prevout caching is completed on all tx.inputs.
+// Flags for tx pool calls should be based on the current blockchain height.
+code transaction::connect(uint32_t flags, bool transaction_pool) const
+{
+    // Recompute sigops for p2sh.
+    if (script::is_set(flags, script_context::bip30_enabled) && duplicate())
+        return error::unspent_duplicate;
+    else if (is_missing_inputs())
+        return error::input_not_found;
+    else if (is_double_spend(transaction_pool))
+        return error::input_not_found;
+    else if (transaction_pool && signature_operations() > max_block_sigops)
+        return error::too_many_sigs;
+
+    return error::success;
 }
 
 } // namespace chain

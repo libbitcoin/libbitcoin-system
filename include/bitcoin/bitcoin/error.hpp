@@ -120,7 +120,10 @@ enum error_code_t
     channel_stopped,
 
     // check_transaction() (more)
-    coinbase_maturity
+    coinbase_maturity,
+
+    // check_block() (more)
+    empty_block
 };
 
 enum error_condition_t
