@@ -188,6 +188,12 @@ void block::to_data(writer& sink, bool with_transaction_count) const
         tx.to_data(sink);
 }
 
+// Convenience property.
+hash_digest block::hash() const
+{
+    return header.hash();
+}
+
 // overflow returns max_uint64
 uint64_t block::serialized_size(bool with_transaction_count) const
 {

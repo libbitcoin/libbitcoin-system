@@ -86,6 +86,8 @@ public:
     bool is_valid_coinbase_script(size_t height) const;
 
     void reset();
+    hash_digest hash() const;
+
     code check() const;
     code check_transactions() const;
     code accept(const chain_state& state) const;
