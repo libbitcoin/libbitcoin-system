@@ -601,7 +601,7 @@ code transaction::connect(const chain_state& state) const
     BITCOIN_ASSERT(inputs.size() <= max_uint32);
 
     for (size_t in = 0; in < inputs.size(); ++in)
-        if (ec = connect_input(state, static_cast<uint32_t>(in)))
+        if ((ec = connect_input(state, static_cast<uint32_t>(in))))
             return ec;
 
     return error::success;
