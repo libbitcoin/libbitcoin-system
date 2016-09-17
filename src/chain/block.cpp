@@ -356,7 +356,7 @@ code block::check_transactions() const
     code ec;
 
     for (const auto& tx: transactions)
-        if (ec = tx.check(false))
+        if ((ec = tx.check(false)))
             return ec;
 
     return error::success;
@@ -367,7 +367,7 @@ code block::accept_transactions(const chain_state& state) const
     code ec;
 
     for (const auto& tx: transactions)
-        if (ec = tx.accept(state, false))
+        if ((ec = tx.accept(state, false)))
             return ec;
 
     return error::success;
@@ -378,7 +378,7 @@ code block::connect_transactions(const chain_state& state) const
     code ec;
 
     for (const auto& tx: transactions)
-        if (ec = tx.connect(state))
+        if ((ec = tx.connect(state)))
             return ec;
 
     return error::success;
