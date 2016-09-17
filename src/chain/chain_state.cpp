@@ -100,9 +100,18 @@ bool chain_state::is_checkpoint_failure(const header& header) const
     return !checkpoint::validate(header.hash(), next_height_, checkpoints_);
 }
 
+bool chain_state::use_full_validation() const
+{
+    // This requires that checkponts are sorted.
+    return checkpoints_.empty() || next_height_ > checkpoints_.back().height();
+}
+
 // Context.
 //-----------------------------------------------------------------------------
 
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// TODO: must set work_required_ and median_time_past_ from this call.
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void chain_state::set_context(size_t height, const versions& history)
 {
     //-------------------------------------------------------------------------

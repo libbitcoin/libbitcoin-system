@@ -44,9 +44,6 @@ public:
     uint32_t median_time_past() const;
     uint32_t work_required() const;
 
-    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    // TODO: must set work_required_ and median_time_past_ from this call.
-    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     /// Initialize enabled forks and minimum version for the given context.
     void set_context(size_t height, const versions& history);
 
@@ -59,16 +56,20 @@ public:
     /// Determine if the block fails a checkpoint at next_height.
     bool is_checkpoint_failure(const header& header) const;
 
+    /// This height requires full validation due to no checkpoint coverage.
+    bool use_full_validation() const;
+
     /// Use to initialize the history collection and parameterize the query.
     const uint32_t sample_size;
 
-private:
+protected:
     size_t next_height_;
     uint32_t work_required_;
     uint32_t median_time_past_;
     uint32_t minimum_version_;
     uint32_t enabled_forks_;
 
+private:
     const bool testnet_;
     const size_t active_;
     const size_t enforce_;
