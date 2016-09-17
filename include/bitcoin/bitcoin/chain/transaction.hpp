@@ -22,6 +22,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <istream>
 #include <memory>
 #include <string>
@@ -45,6 +46,14 @@ namespace chain {
 class BC_API transaction
 {
 public:
+    // TODO: remove with blockchain redesign.
+    // These properties facilitate transaction pool processing.
+    struct metadata
+    {
+        typedef std::function<void(const code&)> confirm_handler;
+        confirm_handler confirm;
+    };
+
     typedef std::vector<transaction> list;
     typedef std::shared_ptr<transaction> ptr;
     typedef std::vector<ptr> ptr_list;
@@ -114,6 +123,9 @@ public:
     uint32_t locktime;
     input::list inputs;
     output::list outputs;
+
+    /// Pool tracking, does not participate in serialization.
+    metadata metadata;
 
 private:
     mutable upgrade_mutex hash_mutex_;

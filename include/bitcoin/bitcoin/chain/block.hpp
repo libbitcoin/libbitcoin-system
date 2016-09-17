@@ -43,6 +43,15 @@ namespace chain {
 class BC_API block
 {
 public:
+    // TODO: remove with blockchain redesign.
+    // These properties facilitate block pool processing.
+    struct metadata
+    {
+        bool processed_orphan;
+        size_t validation_height;
+        code validation_result;
+    };
+
     typedef std::vector<block> list;
     typedef std::shared_ptr<block> ptr;
     typedef std::vector<ptr> ptr_list;
@@ -53,7 +62,7 @@ public:
     static block factory_from_data(std::istream& stream,
         bool with_transaction_count=true);
     static block factory_from_data(reader& source,
-        bool with_transaction_count = true);
+        bool with_transaction_count=true);
     static uint64_t subsidy(size_t height);
     static hash_number work(uint32_t bits);
     static block genesis_mainnet();
@@ -106,6 +115,9 @@ public:
 
     chain::header header;
     transaction::list transactions;
+
+    /// Pool tracking, does not participate in serialization.
+    metadata metadata;
 
 private:
     static hash_digest build_merkle_tree(hash_list& merkle);
