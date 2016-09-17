@@ -536,9 +536,6 @@ const script_test_list invalid_context_free_scripts
     { "NOP", "NOP", "" },
     { "NOP", "NOP DEPTH", "" },
     { "DEPTH", "", "" },
-    { "0x4c01", "0x01 NOP", "PUSHDATA1 with not enough bytes" },
-    { "0x4d0200ff", "0x01 NOP", "PUSHDATA2 with not enough bytes" },
-    { "0x4e03000000ffff", "0x01 NOP", "PUSHDATA4 with not enough bytes" },
     { "1", "IF 0x50 ENDIF 1", "0x50 is reserved" },
     { "0x52", "0x5f ADD 0x60 EQUAL", "0x51 through 0x60 push 1 through 16 onto stack" },
     { "0", "NOP", "" },
@@ -808,6 +805,14 @@ const script_test_list invalid_context_free_scripts
     { "NOP", "HASH160 1", "" },
     { "NOP", "HASH256 1", "" },
     { "0x00", "'00' EQUAL", "Basic OP_0 execution" }
+}};
+
+// These are always invalid due to parsing.
+const script_test_list invalid_parse_scripts
+{{
+    { "0x4c01", "0x01 NOP", "PUSHDATA1 with not enough bytes" },
+    { "0x4d0200ff", "0x01 NOP", "PUSHDATA2 with not enough bytes" },
+    { "0x4e03000000ffff", "0x01 NOP", "PUSHDATA4 with not enough bytes" }
 }};
 
 #endif

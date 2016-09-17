@@ -90,7 +90,9 @@ public:
 
     void reset();
     code check(bool transaction_pool = true) const;
-    code connect(const chain_state& state, bool transaction_pool=true) const;
+    code accept(const chain_state& state, bool transaction_pool=true) const;
+    code connect(const chain_state& state) const;
+    code connect_input(const chain_state& state, uint32_t input_index) const;
 
     uint64_t serialized_size() const;
     uint64_t total_input_value() const;

@@ -188,6 +188,12 @@ void block::to_data(writer& sink, bool with_transaction_count) const
         tx.to_data(sink);
 }
 
+// Convenience property.
+hash_digest block::hash() const
+{
+    return header.hash();
+}
+
 // overflow returns max_uint64
 uint64_t block::serialized_size(bool with_transaction_count) const
 {
@@ -213,6 +219,17 @@ size_t block::signature_operations(bool bip16_active) const
 
     const auto& txs = transactions;
     return std::accumulate(txs.begin(), txs.end(), size_t(0), value);
+}
+
+size_t block::total_inputs()
+{
+    const auto inputs = [](size_t total, const transaction& tx)
+    {
+        return ceiling_add(total, tx.inputs.size());
+    };
+
+    const auto& txs = transactions;
+    return std::accumulate(txs.begin(), txs.end(), size_t(0), inputs);
 }
 
 // True if there is another coinbase other than the first tx.
@@ -334,6 +351,39 @@ bool block::is_valid_coinbase_script(size_t height) const
     return std::equal(expected.begin(), expected.end(), actual.begin());
 }
 
+code block::check_transactions() const
+{
+    code ec;
+
+    for (const auto& tx: transactions)
+        if (ec = tx.check(false))
+            return ec;
+
+    return error::success;
+}
+
+code block::accept_transactions(const chain_state& state) const
+{
+    code ec;
+
+    for (const auto& tx: transactions)
+        if (ec = tx.accept(state, false))
+            return ec;
+
+    return error::success;
+}
+
+code block::connect_transactions(const chain_state& state) const
+{
+    code ec;
+
+    for (const auto& tx: transactions)
+        if (ec = tx.connect(state))
+            return ec;
+
+    return error::success;
+}
+
 // These checks are self-contained; blockchain (and so version) independent.
 code block::check() const
 {
@@ -369,17 +419,13 @@ code block::check() const
         return error::merkle_mismatch;
 
     else
-        for (const auto& tx: transactions)
-            if (auto error_code = tx.check(false))
-                return error_code;
-
-    return error::success;
+        return check_transactions();
 }
 
 // TODO: implement sigops and total input/output value caching.
 // These checks assume that prevout caching is completed on all tx.inputs.
 // Flags should be based on connecting at the specified blockchain height.
-code block::connect(const chain_state& state) const
+code block::accept(const chain_state& state) const
 {
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip34 = state.is_enabled(rule_fork::bip34_rule);
@@ -387,36 +433,36 @@ code block::connect(const chain_state& state) const
     if (!state.is_checkpoint_failure(header))
         return error::checkpoints_failed;
 
-    else if(header.version < state.minimum_version)
+    else if (header.version < state.minimum_version())
         return error::old_version_block;
 
-    else if (header.bits != state.work_required)
+    else if (header.bits != state.work_required())
         return error::incorrect_proof_of_work;
 
-    else if (header.timestamp <= state.median_time_past)
+    else if (header.timestamp <= state.median_time_past())
         return error::timestamp_too_early;
 
     // This recurses txs but is not applied to mempool (timestamp required).
-    else if (!is_final(state.next_height))
+    else if (!is_final(state.next_height()))
         return error::non_final_transaction;
 
-    else if (bip34 && !is_valid_coinbase_script(state.next_height))
+    else if (bip34 && !is_valid_coinbase_script(state.next_height()))
         return error::coinbase_height_mismatch;
 
     // This recomputes sigops to include p2sh from prevouts.
     else if (signature_operations(bip16) > max_block_sigops)
         return error::too_many_sigs;
 
-    else if (!is_valid_coinbase_claim(state.next_height))
+    else if (!is_valid_coinbase_claim(state.next_height()))
         return error::coinbase_too_large;
 
-    // This recomputes sigops to include p2sh from prevouts.
     else
-        for (const auto& tx: transactions)
-            if (auto error_code = tx.connect(state, false))
-                return error_code;
+        return accept_transactions(state);
+}
 
-    return error::success;
+code block::connect(const chain_state& state) const
+{
+    return connect_transactions(state);
 }
 
 hash_digest block::build_merkle_tree(hash_list& merkle)

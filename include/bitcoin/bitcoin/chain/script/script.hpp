@@ -102,23 +102,20 @@ public:
     static script factory_from_data(reader& source, bool prefix,
         parse_mode mode);
 
-    static bool verify(const script& input_script,
-        const script& output_script, const transaction& parent_tx,
-        uint32_t input_index, uint32_t flags);
-
-    static hash_digest generate_signature_hash(const transaction& parent_tx,
-        uint32_t input_index, const script& script_code, uint8_t sighash_type);
-
-    static bool create_endorsement(endorsement& out, const ec_secret& secret,
-        const script& prevout_script, const transaction& new_tx,
-        uint32_t input_index, uint8_t sighash_type);
-
     static bool is_enabled(uint32_t active_forks, rule_fork flag);
-
+    static hash_digest generate_signature_hash(const transaction& tx,
+        uint32_t input_index, const script& script_code, uint8_t sighash_type);
+    static bool create_endorsement(endorsement& out, const ec_secret& secret,
+        const script& prevout_script, const transaction& tx,
+        uint32_t input_index, uint8_t sighash_type);
     static bool check_signature(const ec_signature& signature,
         uint8_t sighash_type, const data_chunk& public_key,
-        const script& script_code, const transaction& parent_tx,
+        const script& script_code, const transaction& tx,
         uint32_t input_index);
+    static bool verify(const transaction& tx, uint32_t input_index,
+        uint32_t flags);
+    static bool verify(const transaction& tx, uint32_t input_index,
+        const script& prevout_script, uint32_t flags);
 
     script_pattern pattern() const;
     bool is_raw_data() const;
