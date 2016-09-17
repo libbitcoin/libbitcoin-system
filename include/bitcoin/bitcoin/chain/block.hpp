@@ -88,6 +88,8 @@ public:
     void reset();
     code check() const;
     code check_transactions() const;
+    code accept(const chain_state& state) const;
+    code accept_transactions(const chain_state& state) const;
     code connect(const chain_state& state) const;
     code connect_transactions(const chain_state& state) const;
 
@@ -95,6 +97,7 @@ public:
     uint64_t claim() const;
     uint64_t reward(size_t height) const;
 
+    size_t total_inputs();
     hash_digest generate_merkle_root() const;
     uint64_t serialized_size(bool with_transaction_count=true) const;
     size_t signature_operations(bool bip16_active) const;

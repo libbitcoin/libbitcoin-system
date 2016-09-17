@@ -215,6 +215,17 @@ size_t block::signature_operations(bool bip16_active) const
     return std::accumulate(txs.begin(), txs.end(), size_t(0), value);
 }
 
+size_t block::total_inputs()
+{
+    const auto inputs = [](size_t total, const transaction& tx)
+    {
+        return ceiling_add(total, tx.inputs.size());
+    };
+
+    const auto& txs = transactions;
+    return std::accumulate(txs.begin(), txs.end(), size_t(0), inputs);
+}
+
 // True if there is another coinbase other than the first tx.
 // No txs or coinbases also returns true.
 bool block::is_extra_coinbases() const
@@ -336,18 +347,33 @@ bool block::is_valid_coinbase_script(size_t height) const
 
 code block::check_transactions() const
 {
+    code ec;
+
     for (const auto& tx: transactions)
-        if (auto error_code = tx.check(false))
-            return error_code;
+        if (ec = tx.check(false))
+            return ec;
+
+    return error::success;
+}
+
+code block::accept_transactions(const chain_state& state) const
+{
+    code ec;
+
+    for (const auto& tx: transactions)
+        if (ec = tx.accept(state, false))
+            return ec;
 
     return error::success;
 }
 
 code block::connect_transactions(const chain_state& state) const
 {
+    code ec;
+
     for (const auto& tx: transactions)
-        if (auto error_code = tx.connect(state, false))
-            return error_code;
+        if (ec = tx.connect(state))
+            return ec;
 
     return error::success;
 }
@@ -393,7 +419,7 @@ code block::check() const
 // TODO: implement sigops and total input/output value caching.
 // These checks assume that prevout caching is completed on all tx.inputs.
 // Flags should be based on connecting at the specified blockchain height.
-code block::connect(const chain_state& state) const
+code block::accept(const chain_state& state) const
 {
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip34 = state.is_enabled(rule_fork::bip34_rule);
@@ -425,7 +451,12 @@ code block::connect(const chain_state& state) const
         return error::coinbase_too_large;
 
     else
-        return connect_transactions(state);
+        return accept_transactions(state);
+}
+
+code block::connect(const chain_state& state) const
+{
+    return connect_transactions(state);
 }
 
 hash_digest block::build_merkle_tree(hash_list& merkle)

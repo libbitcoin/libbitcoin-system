@@ -475,11 +475,12 @@ bool transaction::is_missing_inputs() const
 point::indexes transaction::missing_inputs() const
 {
     point::indexes missing;
+    BITCOIN_ASSERT(inputs.size() <= max_uint32);
 
     // The cache value is set to not_found if the output doesn't exist.
-    for (uint32_t in = 0; in < inputs.size(); ++in)
+    for (size_t in = 0; in < inputs.size(); ++in)
         if (inputs[in].previous_output.cache.value == output_point::not_found)
-            missing.push_back(in);
+            missing.push_back(static_cast<uint32_t>(in));
 
     return missing;
 }
@@ -499,11 +500,12 @@ bool transaction::is_double_spend(bool include_unconfirmed) const
 point::indexes transaction::double_spends(bool include_unconfirmed) const
 {
     point::indexes spends;
+    BITCOIN_ASSERT(inputs.size() <= max_uint32);
 
-    for (uint32_t in = 0; in < inputs.size(); ++in)
-        if (inputs[in].previous_output.spent &&
-            (include_unconfirmed || inputs[in].previous_output.confirmed))
-            spends.push_back(in);
+    for (size_t in = 0; in < inputs.size(); ++in)
+        if (inputs[in].previous_output.spent && (include_unconfirmed ||
+            inputs[in].previous_output.confirmed))
+            spends.push_back(static_cast<uint32_t>(in));
 
     return spends;
 }
@@ -522,10 +524,11 @@ bool transaction::is_immature(size_t target_height) const
 point::indexes transaction::immature_inputs(size_t target_height) const
 {
     point::indexes immatures;
+    BITCOIN_ASSERT(inputs.size() <= max_uint32);
 
-    for (uint32_t in = 0; in < inputs.size(); ++in)
+    for (size_t in = 0; in < inputs.size(); ++in)
         if (!inputs[in].previous_output.is_mature(target_height))
-            immatures.push_back(in);
+            immatures.push_back(static_cast<uint32_t>(in));
 
     return immatures;
 }
@@ -565,7 +568,7 @@ code transaction::check(bool transaction_pool) const
 // TODO: implement sigops and total input/output value caching.
 // These checks assume that prevout caching is completed on all tx.inputs.
 // Flags for tx pool calls should be based on the current blockchain height.
-code transaction::connect(const chain_state& state, bool transaction_pool) const
+code transaction::accept(const chain_state& state, bool transaction_pool) const
 {
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip30 = state.is_enabled(rule_fork::bip30_rule);
@@ -590,6 +593,26 @@ code transaction::connect(const chain_state& state, bool transaction_pool) const
         return error::too_many_sigs;
 
     return error::success;
+}
+
+code transaction::connect(const chain_state& state) const
+{
+    code ec;
+    BITCOIN_ASSERT(inputs.size() <= max_uint32);
+
+    for (size_t in = 0; in < inputs.size(); ++in)
+        if (ec = connect_input(state, static_cast<uint32_t>(in)))
+            return ec;
+
+    return error::success;
+}
+
+code transaction::connect_input(const chain_state& state,
+    uint32_t input_index) const
+{
+    const auto flags = state.enabled_forks();
+    const auto valid = script::verify(*this, input_index, flags);
+    return valid ? error::success : error::validate_inputs_failed;
 }
 
 } // namespace chain

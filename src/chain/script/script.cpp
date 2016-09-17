@@ -419,12 +419,12 @@ bool script::parse(const data_chunk& raw_script)
     return result;
 }
 
-inline void nullify_input_sequences(input::list& inputs,
+inline void zeroize_input_sequences(input::list& inputs,
     uint32_t except_input)
 {
-    for (size_t index = 0; index < inputs.size(); ++index)
-        if (index != except_input)
-            inputs[index].sequence = 0;
+    for (size_t in = 0; in < inputs.size(); ++in)
+        if (in != except_input)
+            inputs[in].sequence = 0;
 }
 
 inline uint8_t is_sighash_enum(uint8_t sighash_type,
@@ -446,15 +446,15 @@ inline uint8_t is_sighash_flag(uint8_t sighash_type,
 ////    return bitcoin_hash(serialized);
 ////}
 
-hash_digest script::generate_signature_hash(const transaction& parent_tx,
+hash_digest script::generate_signature_hash(const transaction& tx,
     uint32_t input_index, const script& script_code, uint8_t sighash_type)
 {
     // Copy the parent transaction.
-    transaction parent(parent_tx);
+    transaction parent(tx);
 
     // This is NOT considered an error result and callers should not test
     // for one_hash. This is a bitcoind behavior we necessarily perpetuate.
-    if (input_index >= parent_tx.inputs.size())
+    if (input_index >= tx.inputs.size())
         return one_hash;
 
     // FindAndDelete(OP_CODESEPARATOR) done in op_checksigverify(...)
@@ -467,13 +467,13 @@ hash_digest script::generate_signature_hash(const transaction& parent_tx,
 
     // The default sighash::all signs all outputs, and the current input.
     // Transaction cannot be updated without resigning the input.
-    // (note the lack of nullify_input_sequences() call)
+    // (note the lack of zeroize_input_sequences() call)
 
     if (is_sighash_enum(sighash_type, signature_hash_algorithm::none))
     {
         // Sign no outputs, so they can be changed.
         parent.outputs.clear();
-        nullify_input_sequences(parent.inputs, input_index);
+        zeroize_input_sequences(parent.inputs, input_index);
     }
     else if (is_sighash_enum(sighash_type, signature_hash_algorithm::single))
     {
@@ -497,7 +497,7 @@ hash_digest script::generate_signature_hash(const transaction& parent_tx,
             it->script.reset();
         }
 
-        nullify_input_sequences(parent.inputs, input_index);
+        zeroize_input_sequences(parent.inputs, input_index);
     }
 
     // Flag to ignore the other inputs except our own.
@@ -616,7 +616,14 @@ auto base_value(OpCode code) -> typename std::underlying_type<OpCode>::type
     return static_cast<typename std::underlying_type<OpCode>::type>(code);
 }
 
-bool is_condition_opcode(opcode code)
+template <typename DataStack>
+void copy_item_over_stack(DataStack& stack, size_t index)
+{
+    const auto dup = *(stack.end() - index);
+    stack.emplace_back(std::move(dup));
+}
+
+static bool is_condition_opcode(opcode code)
 {
     return code == opcode::if_
         || code == opcode::notif
@@ -624,19 +631,19 @@ bool is_condition_opcode(opcode code)
         || code == opcode::endif;
 }
 
-bool greater_op_16(opcode code)
+static bool greater_op_16(opcode code)
 {
     return base_value(code) > base_value(opcode::op_16);
 }
 
-bool op_negative_1(evaluation_context& context)
+static bool op_negative_1(evaluation_context& context)
 {
     static const script_number negative_1(-1);
     context.stack.push_back(negative_1.data());
     return true;
 }
 
-bool op_x(evaluation_context& context, opcode code)
+static bool op_x(evaluation_context& context, opcode code)
 {
     const auto difference = static_cast<uint8_t>(code) -
         static_cast<uint8_t>(opcode::op_1) + 1;
@@ -646,7 +653,7 @@ bool op_x(evaluation_context& context, opcode code)
     return true;
 }
 
-bool op_if(evaluation_context& context)
+static bool op_if(evaluation_context& context)
 {
     auto value = false;
     if (context.conditional.succeeded())
@@ -661,7 +668,7 @@ bool op_if(evaluation_context& context)
     return true;
 }
 
-bool op_notif(evaluation_context& context)
+static bool op_notif(evaluation_context& context)
 {
     // A bit hackish...
     // Open IF statement but then invert it to get NOTIF
@@ -672,7 +679,7 @@ bool op_notif(evaluation_context& context)
     return true;
 }
 
-bool op_else(evaluation_context& context)
+static bool op_else(evaluation_context& context)
 {
     if (context.conditional.closed())
         return false;
@@ -681,7 +688,7 @@ bool op_else(evaluation_context& context)
     return true;
 }
 
-bool op_endif(evaluation_context& context)
+static bool op_endif(evaluation_context& context)
 {
     if (context.conditional.closed())
         return false;
@@ -690,7 +697,7 @@ bool op_endif(evaluation_context& context)
     return true;
 }
 
-bool op_verify(evaluation_context& context)
+static bool op_verify(evaluation_context& context)
 {
     if (context.stack.empty())
         return false;
@@ -702,7 +709,7 @@ bool op_verify(evaluation_context& context)
     return true;
 }
 
-bool op_toaltstack(evaluation_context& context)
+static bool op_toaltstack(evaluation_context& context)
 {
     if (context.stack.empty())
         return false;
@@ -711,7 +718,7 @@ bool op_toaltstack(evaluation_context& context)
     return true;
 }
 
-bool op_fromaltstack(evaluation_context& context)
+static bool op_fromaltstack(evaluation_context& context)
 {
     if (context.alternate.empty())
         return false;
@@ -721,7 +728,7 @@ bool op_fromaltstack(evaluation_context& context)
     return true;
 }
 
-bool op_2drop(evaluation_context& context)
+static bool op_2drop(evaluation_context& context)
 {
     if (context.stack.size() < 2)
         return false;
@@ -731,7 +738,7 @@ bool op_2drop(evaluation_context& context)
     return true;
 }
 
-bool op_2dup(evaluation_context& context)
+static bool op_2dup(evaluation_context& context)
 {
     if (context.stack.size() < 2)
         return false;
@@ -744,7 +751,7 @@ bool op_2dup(evaluation_context& context)
     return true;
 }
 
-bool op_3dup(evaluation_context& context)
+static bool op_3dup(evaluation_context& context)
 {
     if (context.stack.size() < 3)
         return false;
@@ -759,14 +766,7 @@ bool op_3dup(evaluation_context& context)
     return true;
 }
 
-template <typename DataStack>
-void copy_item_over_stack(DataStack& stack, size_t index)
-{
-    const auto dup = *(stack.end() - index);
-    stack.emplace_back(std::move(dup));
-}
-
-bool op_2over(evaluation_context& context)
+static bool op_2over(evaluation_context& context)
 {
     if (context.stack.size() < 4)
         return false;
@@ -778,7 +778,7 @@ bool op_2over(evaluation_context& context)
     return true;
 }
 
-bool op_2rot(evaluation_context& context)
+static bool op_2rot(evaluation_context& context)
 {
     if (context.stack.size() < 6)
         return false;
@@ -796,7 +796,7 @@ bool op_2rot(evaluation_context& context)
     return true;
 }
 
-bool op_2swap(evaluation_context& context)
+static bool op_2swap(evaluation_context& context)
 {
     if (context.stack.size() < 4)
         return false;
@@ -808,7 +808,7 @@ bool op_2swap(evaluation_context& context)
     return true;
 }
 
-bool op_ifdup(evaluation_context& context)
+static bool op_ifdup(evaluation_context& context)
 {
     if (context.stack.empty())
         return false;
@@ -819,7 +819,7 @@ bool op_ifdup(evaluation_context& context)
     return true;
 }
 
-bool op_depth(evaluation_context& context)
+static bool op_depth(evaluation_context& context)
 {
     const auto size = context.stack.size();
 
@@ -832,7 +832,7 @@ bool op_depth(evaluation_context& context)
     return true;
 }
 
-bool op_drop(evaluation_context& context)
+static bool op_drop(evaluation_context& context)
 {
     if (context.stack.empty())
         return false;
@@ -841,7 +841,7 @@ bool op_drop(evaluation_context& context)
     return true;
 }
 
-bool op_dup(evaluation_context& context)
+static bool op_dup(evaluation_context& context)
 {
     if (context.stack.empty())
         return false;
@@ -850,7 +850,7 @@ bool op_dup(evaluation_context& context)
     return true;
 }
 
-bool op_nip(evaluation_context& context)
+static bool op_nip(evaluation_context& context)
 {
     if (context.stack.size() < 2)
         return false;
@@ -859,7 +859,7 @@ bool op_nip(evaluation_context& context)
     return true;
 }
 
-bool op_over(evaluation_context& context)
+static bool op_over(evaluation_context& context)
 {
     if (context.stack.size() < 2)
         return false;
@@ -868,17 +868,17 @@ bool op_over(evaluation_context& context)
     return true;
 }
 
-bool op_pick(evaluation_context& context)
+static bool op_pick(evaluation_context& context)
 {
     return pick_roll_impl(context.stack, false);
 }
 
-bool op_roll(evaluation_context& context)
+static bool op_roll(evaluation_context& context)
 {
     return pick_roll_impl(context.stack, true);
 }
 
-bool op_rot(evaluation_context& context)
+static bool op_rot(evaluation_context& context)
 {
     // Top 3 stack items are rotated to the left.
     // Before: x1 x2 x3
@@ -891,7 +891,7 @@ bool op_rot(evaluation_context& context)
     return true;
 }
 
-bool op_swap(evaluation_context& context)
+static bool op_swap(evaluation_context& context)
 {
     if (context.stack.size() < 2)
         return false;
@@ -900,7 +900,7 @@ bool op_swap(evaluation_context& context)
     return true;
 }
 
-bool op_tuck(evaluation_context& context)
+static bool op_tuck(evaluation_context& context)
 {
     if (context.stack.size() < 2)
         return false;
@@ -909,7 +909,7 @@ bool op_tuck(evaluation_context& context)
     return true;
 }
 
-bool op_size(evaluation_context& context)
+static bool op_size(evaluation_context& context)
 {
     if (context.stack.empty())
         return false;
@@ -925,7 +925,7 @@ bool op_size(evaluation_context& context)
     return true;
 }
 
-bool op_equal(evaluation_context& context)
+static bool op_equal(evaluation_context& context)
 {
     if (context.stack.size() < 2)
         return false;
@@ -938,7 +938,7 @@ bool op_equal(evaluation_context& context)
     return true;
 }
 
-bool op_equalverify(evaluation_context& context)
+static bool op_equalverify(evaluation_context& context)
 {
     if (context.stack.size() < 2)
         return false;
@@ -946,7 +946,7 @@ bool op_equalverify(evaluation_context& context)
     return context.pop_stack() == context.pop_stack();
 }
 
-bool op_1add(evaluation_context& context)
+static bool op_1add(evaluation_context& context)
 {
     if (context.stack.empty())
         return false;
@@ -960,7 +960,7 @@ bool op_1add(evaluation_context& context)
     return true;
 }
 
-bool op_1sub(evaluation_context& context)
+static bool op_1sub(evaluation_context& context)
 {
     if (context.stack.empty())
         return false;
@@ -974,7 +974,7 @@ bool op_1sub(evaluation_context& context)
     return true;
 }
 
-bool op_negate(evaluation_context& context)
+static bool op_negate(evaluation_context& context)
 {
     if (context.stack.empty())
         return false;
@@ -988,7 +988,7 @@ bool op_negate(evaluation_context& context)
     return true;
 }
 
-bool op_abs(evaluation_context& context)
+static bool op_abs(evaluation_context& context)
 {
     if (context.stack.empty())
         return false;
@@ -1004,7 +1004,7 @@ bool op_abs(evaluation_context& context)
     return true;
 }
 
-bool op_not(evaluation_context& context)
+static bool op_not(evaluation_context& context)
 {
     if (context.stack.empty())
         return false;
@@ -1017,7 +1017,7 @@ bool op_not(evaluation_context& context)
     return true;
 }
 
-bool op_0notequal(evaluation_context& context)
+static bool op_0notequal(evaluation_context& context)
 {
     if (context.stack.empty())
         return false;
@@ -1030,7 +1030,7 @@ bool op_0notequal(evaluation_context& context)
     return true;
 }
 
-bool op_add(evaluation_context& context)
+static bool op_add(evaluation_context& context)
 {
     script_number left, right;
     if (!arithmetic_start_new(context.stack, left, right))
@@ -1041,7 +1041,7 @@ bool op_add(evaluation_context& context)
     return true;
 }
 
-bool op_sub(evaluation_context& context)
+static bool op_sub(evaluation_context& context)
 {
     script_number left, right;
     if (!arithmetic_start_new(context.stack, left, right))
@@ -1052,7 +1052,7 @@ bool op_sub(evaluation_context& context)
     return true;
 }
 
-bool op_booland(evaluation_context& context)
+static bool op_booland(evaluation_context& context)
 {
     script_number left, right;
     if (!arithmetic_start_new(context.stack, left, right))
@@ -1063,7 +1063,7 @@ bool op_booland(evaluation_context& context)
     return true;
 }
 
-bool op_boolor(evaluation_context& context)
+static bool op_boolor(evaluation_context& context)
 {
     script_number left, right;
     if (!arithmetic_start_new(context.stack, left, right))
@@ -1074,7 +1074,7 @@ bool op_boolor(evaluation_context& context)
     return true;
 }
 
-bool op_numequal(evaluation_context& context)
+static bool op_numequal(evaluation_context& context)
 {
     script_number left, right;
     if (!arithmetic_start_new(context.stack, left, right))
@@ -1086,7 +1086,7 @@ bool op_numequal(evaluation_context& context)
     return true;
 }
 
-bool op_numequalverify(evaluation_context& context)
+static bool op_numequalverify(evaluation_context& context)
 {
     script_number left, right;
     if (!arithmetic_start_new(context.stack, left, right))
@@ -1095,7 +1095,7 @@ bool op_numequalverify(evaluation_context& context)
     return left == right;
 }
 
-bool op_numnotequal(evaluation_context& context)
+static bool op_numnotequal(evaluation_context& context)
 {
     script_number left, right;
     if (!arithmetic_start_new(context.stack, left, right))
@@ -1106,7 +1106,7 @@ bool op_numnotequal(evaluation_context& context)
     return true;
 }
 
-bool op_lessthan(evaluation_context& context)
+static bool op_lessthan(evaluation_context& context)
 {
     script_number left, right;
     if (!arithmetic_start_new(context.stack, left, right))
@@ -1117,7 +1117,7 @@ bool op_lessthan(evaluation_context& context)
     return true;
 }
 
-bool op_greaterthan(evaluation_context& context)
+static bool op_greaterthan(evaluation_context& context)
 {
     script_number left, right;
     if (!arithmetic_start_new(context.stack, left, right))
@@ -1128,7 +1128,7 @@ bool op_greaterthan(evaluation_context& context)
     return true;
 }
 
-bool op_lessthanorequal(evaluation_context& context)
+static bool op_lessthanorequal(evaluation_context& context)
 {
     script_number left, right;
 
@@ -1141,7 +1141,7 @@ bool op_lessthanorequal(evaluation_context& context)
     return true;
 }
 
-bool op_greaterthanorequal(evaluation_context& context)
+static bool op_greaterthanorequal(evaluation_context& context)
 {
     script_number left, right;
     if (!arithmetic_start_new(context.stack, left, right))
@@ -1152,7 +1152,7 @@ bool op_greaterthanorequal(evaluation_context& context)
     return true;
 }
 
-bool op_min(evaluation_context& context)
+static bool op_min(evaluation_context& context)
 {
     script_number left, right;
     if (!arithmetic_start_new(context.stack, left, right))
@@ -1166,7 +1166,7 @@ bool op_min(evaluation_context& context)
     return true;
 }
 
-bool op_max(evaluation_context& context)
+static bool op_max(evaluation_context& context)
 {
     script_number left, right;
     if (!arithmetic_start_new(context.stack, left, right))
@@ -1180,7 +1180,7 @@ bool op_max(evaluation_context& context)
     return true;
 }
 
-bool op_within(evaluation_context& context)
+static bool op_within(evaluation_context& context)
 {
     if (context.stack.size() < 3)
         return false;
@@ -1205,7 +1205,7 @@ bool op_within(evaluation_context& context)
     return true;
 }
 
-bool op_ripemd160(evaluation_context& context)
+static bool op_ripemd160(evaluation_context& context)
 {
     if (context.stack.empty())
         return false;
@@ -1215,7 +1215,7 @@ bool op_ripemd160(evaluation_context& context)
     return true;
 }
 
-bool op_sha1(evaluation_context& context)
+static bool op_sha1(evaluation_context& context)
 {
     if (context.stack.empty())
         return false;
@@ -1225,7 +1225,7 @@ bool op_sha1(evaluation_context& context)
     return true;
 }
 
-bool op_sha256(evaluation_context& context)
+static bool op_sha256(evaluation_context& context)
 {
     if (context.stack.empty())
         return false;
@@ -1235,7 +1235,7 @@ bool op_sha256(evaluation_context& context)
     return true;
 }
 
-bool op_hash160(evaluation_context& context)
+static bool op_hash160(evaluation_context& context)
 {
     if (context.stack.empty())
         return false;
@@ -1245,7 +1245,7 @@ bool op_hash160(evaluation_context& context)
     return true;
 }
 
-bool op_hash256(evaluation_context& context)
+static bool op_hash256(evaluation_context& context)
 {
     if (context.stack.empty())
         return false;
@@ -1256,11 +1256,11 @@ bool op_hash256(evaluation_context& context)
 }
 
 bool script::create_endorsement(endorsement& out, const ec_secret& secret,
-    const script& prevout_script, const transaction& new_tx,
-    uint32_t input_index, uint8_t sighash_type)
+    const script& prevout_script, const transaction& tx, uint32_t input_index,
+    uint8_t sighash_type)
 {
     // This always produces a valid signature hash.
-    const auto sighash = script::generate_signature_hash(new_tx, input_index,
+    const auto sighash = script::generate_signature_hash(tx, input_index,
         prevout_script, sighash_type);
 
     // Create the EC signature and encode as DER.
@@ -1275,22 +1275,21 @@ bool script::create_endorsement(endorsement& out, const ec_secret& secret,
 
 bool script::check_signature(const ec_signature& signature,
     uint8_t sighash_type, const data_chunk& public_key,
-    const script& script_code, const transaction& parent_tx,
-    uint32_t input_index)
+    const script& script_code, const transaction& tx, uint32_t input_index)
 {
     if (public_key.empty())
         return false;
 
     // This always produces a valid signature hash.
-    const auto sighash = script::generate_signature_hash(parent_tx, input_index,
+    const auto sighash = script::generate_signature_hash(tx, input_index,
         script_code, sighash_type);
 
     // Validate the EC signature.
     return verify_signature(public_key, sighash, signature);
 }
 
-signature_parse_result op_checksigverify(evaluation_context& context,
-    const script& script, const transaction& parent_tx, uint32_t input_index,
+static signature_parse_result op_checksigverify(evaluation_context& context,
+    const script& script, const transaction& tx, uint32_t input_index,
     bool strict)
 {
     if (context.stack.size() < 2)
@@ -1317,15 +1316,14 @@ signature_parse_result op_checksigverify(evaluation_context& context,
         return signature_parse_result::invalid;
 
     return script::check_signature(signature, sighash_type, pubkey,
-        script_code, parent_tx, input_index) ?
-        signature_parse_result::valid :
+        script_code, tx, input_index) ? signature_parse_result::valid :
         signature_parse_result::invalid;
 }
 
-bool op_checksig(evaluation_context& context, const script& script,
-    const transaction& parent_tx, uint32_t input_index, bool strict)
+static bool op_checksig(evaluation_context& context, const script& script,
+    const transaction& tx, uint32_t input_index, bool strict)
 {
-    switch (op_checksigverify(context, script, parent_tx, input_index, strict))
+    switch (op_checksigverify(context, script, tx, input_index, strict))
     {
         case signature_parse_result::valid:
             context.stack.push_back(stack_true_value);
@@ -1340,7 +1338,7 @@ bool op_checksig(evaluation_context& context, const script& script,
     return true;
 }
 
-bool read_section(evaluation_context& context, data_stack& section,
+static bool read_section(evaluation_context& context, data_stack& section,
     size_t count)
 {
     if (context.stack.size() < count)
@@ -1352,8 +1350,8 @@ bool read_section(evaluation_context& context, data_stack& section,
     return true;
 }
 
-signature_parse_result op_checkmultisigverify(evaluation_context& context,
-    const script& script, const transaction& parent_tx,
+static signature_parse_result op_checkmultisigverify(
+    evaluation_context& context, const script& script, const transaction& tx,
     uint32_t input_index, bool strict)
 {
     int32_t pubkeys_count;
@@ -1429,7 +1427,7 @@ signature_parse_result op_checkmultisigverify(evaluation_context& context,
             const auto& point = *pubkey_iterator;
 
             if (script::check_signature(signature, sighash_type, point,
-                script_code, parent_tx, input_index))
+                script_code, tx, input_index))
                 break;
 
             ++pubkey_iterator;
@@ -1442,11 +1440,10 @@ signature_parse_result op_checkmultisigverify(evaluation_context& context,
     return signature_parse_result::valid;
 }
 
-bool op_checkmultisig(evaluation_context& context, const script& script,
-    const transaction& parent_tx, uint32_t input_index, bool strict)
+static bool op_checkmultisig(evaluation_context& context, const script& script,
+    const transaction& tx, uint32_t input_index, bool strict)
 {
-    switch (op_checkmultisigverify(context, script, parent_tx, input_index,
-        strict))
+    switch (op_checkmultisigverify(context, script, tx, input_index, strict))
     {
         case signature_parse_result::valid:
             context.stack.push_back(stack_true_value);
@@ -1461,20 +1458,20 @@ bool op_checkmultisig(evaluation_context& context, const script& script,
     return true;
 }
 
-bool is_locktime_type_match(int64_t left, int64_t right)
+static bool is_locktime_type_match(int64_t left, int64_t right)
 {
     const auto threshold = static_cast<int64_t>(locktime_threshold);
     return (left < threshold) == (right < threshold);
 }
 
-bool op_checklocktimeverify(evaluation_context& context, const script& script,
-    const transaction& parent_tx, uint32_t input_index)
+static bool op_checklocktimeverify(evaluation_context& context,
+    const script& script, const transaction& tx, uint32_t input_index)
 {
-    if (input_index >= parent_tx.inputs.size())
+    if (input_index >= tx.inputs.size())
         return false;
 
     // BIP65: the nSequence field of the txin is 0xffffffff.
-    if (parent_tx.inputs[input_index].is_final())
+    if (tx.inputs[input_index].is_final())
         return false;
 
     // BIP65: the stack is empty.
@@ -1491,14 +1488,14 @@ bool op_checklocktimeverify(evaluation_context& context, const script& script,
     if (number < 0)
         return false;
 
-    // BIP65: the top stack item is greater than the tx's nLockTime.
     const auto stack = number.int64();
-    const auto transaction = static_cast<int64_t>(parent_tx.locktime);
+    const auto transaction = static_cast<int64_t>(tx.locktime);
 
     // BIP65: the stack lock-time type differs from that of tx nLockTime.
     if (!is_locktime_type_match(stack, transaction))
         return false;
 
+    // BIP65: the top stack item is greater than the tx's nLockTime.
     return stack <= transaction;
 }
 
@@ -1508,7 +1505,7 @@ bool script::is_enabled(uint32_t flags, rule_fork flag)
     return (flag & flags) != 0;
 }
 
-bool run_operation(const operation& op, const transaction& parent_tx,
+static bool run_operation(const operation& op, const transaction& tx,
     uint32_t input_index, const script& script, evaluation_context& context,
     uint32_t flags)
 {
@@ -1761,26 +1758,26 @@ bool run_operation(const operation& op, const transaction& parent_tx,
             return true;
 
         case opcode::checksig:
-            return op_checksig(context, script, parent_tx, input_index,
+            return op_checksig(context, script, tx, input_index,
                 script::is_enabled(flags, rule_fork::bip66_rule));
 
         case opcode::checksigverify:
-            return op_checksigverify(context, script, parent_tx, input_index,
+            return op_checksigverify(context, script, tx, input_index,
                 script::is_enabled(flags, rule_fork::bip66_rule)) ==
                     signature_parse_result::valid;
 
         case opcode::checkmultisig:
-            return op_checkmultisig(context, script, parent_tx, input_index,
+            return op_checkmultisig(context, script, tx, input_index,
                 script::is_enabled(flags, rule_fork::bip66_rule));
 
         case opcode::checkmultisigverify:
-            return op_checkmultisigverify(context, script, parent_tx, input_index,
+            return op_checkmultisigverify(context, script, tx, input_index,
                 script::is_enabled(flags, rule_fork::bip66_rule)) ==
                     signature_parse_result::valid;
 
         case opcode::checklocktimeverify:
             return script::is_enabled(context.flags, rule_fork::bip65_rule) ?
-                op_checklocktimeverify(context, script, parent_tx,
+                op_checklocktimeverify(context, script, tx,
                     input_index) : true;
 
         case opcode::op_nop1:
@@ -1810,7 +1807,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
     return false;
 }
 
-bool increment_op_counter(opcode code, evaluation_context& context)
+static bool increment_op_counter(opcode code, evaluation_context& context)
 {
     if (greater_op_16(code))
         ++context.operation_counter;
@@ -1821,7 +1818,7 @@ bool increment_op_counter(opcode code, evaluation_context& context)
     return true;
 }
 
-bool opcode_is_disabled(opcode code)
+static bool opcode_is_disabled(opcode code)
 {
     switch (code)
     {
@@ -1854,7 +1851,7 @@ bool opcode_is_disabled(opcode code)
     }
 }
 
-bool opcode_is_empty_pusher(opcode code)
+static bool opcode_is_empty_pusher(opcode code)
 {
     switch (code)
     {
@@ -1870,7 +1867,7 @@ bool opcode_is_empty_pusher(opcode code)
     }
 }
 
-bool next_step(const transaction& parent_tx, uint32_t input_index,
+static bool next_step(const transaction& tx, uint32_t input_index,
     operation::stack::const_iterator it, const script& script,
     evaluation_context& context, uint32_t flags)
 {
@@ -1885,7 +1882,7 @@ bool next_step(const transaction& parent_tx, uint32_t input_index,
 
     if (opcode_is_disabled(op.code))
         return false;
-    
+
     if (!context.conditional.succeeded() && !is_condition_opcode(op.code))
         return true;
 
@@ -1902,8 +1899,7 @@ bool next_step(const transaction& parent_tx, uint32_t input_index,
     {
         context.stack.push_back(op.data);
     }
-    else if (!run_operation(op, parent_tx, input_index, script, context,
-        flags))
+    else if (!run_operation(op, tx, input_index, script, context, flags))
     {
         // opcodes above should assert inside run_operation
         return false;
@@ -1919,7 +1915,8 @@ bool next_step(const transaction& parent_tx, uint32_t input_index,
     return context.stack.size() + context.alternate.size() <= max_stack_size;
 }
 
-bool evaluate(const transaction& parent_tx, uint32_t input_index,
+// The script paramter is NOT always tx.indexes[input_index].script.
+static bool evaluate(const transaction& tx, uint32_t input_index,
     const script& script, evaluation_context& context, uint32_t flags)
 {
     // bit.ly/2c9HzmN
@@ -1930,25 +1927,40 @@ bool evaluate(const transaction& parent_tx, uint32_t input_index,
     context.code_begin = script.operations.begin();
 
     for (auto it = script.operations.begin(); it != script.operations.end(); ++it)
-        if (!next_step(parent_tx, input_index, it, script, context, flags))
+        if (!next_step(tx, input_index, it, script, context, flags))
             return false;
 
     return context.conditional.closed();
 }
 
-bool script::verify(const script& input_script, const script& output_script,
-    const transaction& parent_tx, uint32_t input_index, uint32_t flags)
+bool script::verify(const transaction& tx, uint32_t input_index,
+    uint32_t flags)
 {
+    if (input_index >= tx.inputs.size())
+        return false;
+
+    // Obtain the previous script from the cached previous output.
+    const auto& script = tx.inputs[input_index].previous_output.cache.script;
+    return verify(tx, input_index, script, flags);
+}
+
+bool script::verify(const transaction& tx, uint32_t input_index,
+    const script& prevout_script, uint32_t flags)
+{
+    if (input_index >= tx.inputs.size())
+        return false;
+
+    const auto& input_script = tx.inputs[input_index].script;
     evaluation_context in_context(flags);
 
     // Evaluate the input script.
-    if (!evaluate(parent_tx, input_index, input_script, in_context, flags))
+    if (!evaluate(tx, input_index, input_script, in_context, flags))
         return false;
 
     evaluation_context out_context(flags, in_context.stack);
 
     // Evaluate the output script.
-    if (!evaluate(parent_tx, input_index, output_script, out_context, flags))
+    if (!evaluate(tx, input_index, prevout_script, out_context, flags))
         return false;
 
     // Return if stack is false.
@@ -1957,7 +1969,7 @@ bool script::verify(const script& input_script, const script& output_script,
 
     // BIP16: Additional validation for pay-to-script-hash transactions.
     if (is_enabled(flags, rule_fork::bip16_rule) &&
-        (output_script.pattern() == script_pattern::pay_script_hash))
+        (prevout_script.pattern() == script_pattern::pay_script_hash))
     {
         // Condition added by EKV on 2016.09.14.
         if (in_context.stack.empty())
@@ -1980,7 +1992,7 @@ bool script::verify(const script& input_script, const script& output_script,
         evaluation_context eval_context(flags, in_context.stack);
 
         // Evaluate the eval (serialized) script.
-        if (!evaluate(parent_tx, input_index, eval, eval_context, flags))
+        if (!evaluate(tx, input_index, eval, eval_context, flags))
             return false;
 
         // Return the stack state.
