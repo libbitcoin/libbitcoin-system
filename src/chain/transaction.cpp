@@ -607,10 +607,19 @@ code transaction::connect(const chain_state& state) const
     return error::success;
 }
 
+// Coinbase transactions return success, to simplify iteration.
 code transaction::connect_input(const chain_state& state,
     uint32_t input_index) const
 {
+    if (is_coinbase())
+        return error::success;
+
     if (input_index >= inputs.size())
+        return error::input_not_found;
+
+    // Verify that the previous output cache has been populated.
+    if (inputs[input_index].previous_output.cache.value ==
+        output_point::not_found)
         return error::input_not_found;
 
     const auto flags = state.enabled_forks();
