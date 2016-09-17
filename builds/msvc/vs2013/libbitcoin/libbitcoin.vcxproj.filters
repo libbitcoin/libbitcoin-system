@@ -910,9 +910,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\log.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\settings.hpp">
-      <Filter>include\bitcoin\wallet</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\headers.hpp">
       <Filter>include\bitcoin\message</Filter>
     </ClInclude>
