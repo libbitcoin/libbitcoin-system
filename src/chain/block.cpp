@@ -334,6 +334,24 @@ bool block::is_valid_coinbase_script(size_t height) const
     return std::equal(expected.begin(), expected.end(), actual.begin());
 }
 
+code block::check_transactions() const
+{
+    for (const auto& tx: transactions)
+        if (auto error_code = tx.check(false))
+            return error_code;
+
+    return error::success;
+}
+
+code block::connect_transactions(const chain_state& state) const
+{
+    for (const auto& tx: transactions)
+        if (auto error_code = tx.connect(state, false))
+            return error_code;
+
+    return error::success;
+}
+
 // These checks are self-contained; blockchain (and so version) independent.
 code block::check() const
 {
@@ -369,11 +387,7 @@ code block::check() const
         return error::merkle_mismatch;
 
     else
-        for (const auto& tx: transactions)
-            if (auto error_code = tx.check(false))
-                return error_code;
-
-    return error::success;
+        return check_transactions();
 }
 
 // TODO: implement sigops and total input/output value caching.
@@ -387,36 +401,31 @@ code block::connect(const chain_state& state) const
     if (!state.is_checkpoint_failure(header))
         return error::checkpoints_failed;
 
-    else if(header.version < state.minimum_version)
+    else if (header.version < state.minimum_version())
         return error::old_version_block;
 
-    else if (header.bits != state.work_required)
+    else if (header.bits != state.work_required())
         return error::incorrect_proof_of_work;
 
-    else if (header.timestamp <= state.median_time_past)
+    else if (header.timestamp <= state.median_time_past())
         return error::timestamp_too_early;
 
     // This recurses txs but is not applied to mempool (timestamp required).
-    else if (!is_final(state.next_height))
+    else if (!is_final(state.next_height()))
         return error::non_final_transaction;
 
-    else if (bip34 && !is_valid_coinbase_script(state.next_height))
+    else if (bip34 && !is_valid_coinbase_script(state.next_height()))
         return error::coinbase_height_mismatch;
 
     // This recomputes sigops to include p2sh from prevouts.
     else if (signature_operations(bip16) > max_block_sigops)
         return error::too_many_sigs;
 
-    else if (!is_valid_coinbase_claim(state.next_height))
+    else if (!is_valid_coinbase_claim(state.next_height()))
         return error::coinbase_too_large;
 
-    // This recomputes sigops to include p2sh from prevouts.
     else
-        for (const auto& tx: transactions)
-            if (auto error_code = tx.connect(state, false))
-                return error_code;
-
-    return error::success;
+        return connect_transactions(state);
 }
 
 hash_digest block::build_merkle_tree(hash_list& merkle)

@@ -87,7 +87,9 @@ public:
 
     void reset();
     code check() const;
+    code check_transactions() const;
     code connect(const chain_state& state) const;
+    code connect_transactions(const chain_state& state) const;
 
     uint64_t fees() const;
     uint64_t claim() const;
