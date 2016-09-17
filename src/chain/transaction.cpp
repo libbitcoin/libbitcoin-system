@@ -610,6 +610,9 @@ code transaction::connect(const chain_state& state) const
 code transaction::connect_input(const chain_state& state,
     uint32_t input_index) const
 {
+    if (input_index >= inputs.size())
+        return error::input_not_found;
+
     const auto flags = state.enabled_forks();
     const auto valid = script::verify(*this, input_index, flags);
     return valid ? error::success : error::validate_inputs_failed;
