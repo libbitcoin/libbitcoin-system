@@ -56,6 +56,8 @@ Integer ceiling_add(Integer left, Integer right)
     return left > ceiling - right ? ceiling : left + right;
 }
 
+const size_t block::metadata::orphan_height = 0;
+
 block block::factory_from_data(const data_chunk& data,
     bool with_transaction_count)
 {

@@ -47,9 +47,12 @@ public:
     // These properties facilitate block pool processing.
     struct metadata
     {
-        bool processed_orphan;
-        size_t validation_height;
-        code validation_result;
+        /// This is a sentinel used in .validation_height to indicate pool.
+        static const size_t orphan_height;
+
+        bool processed_orphan = false;
+        size_t validation_height = orphan_height;
+        code validation_result = error::not_found;
     };
 
     typedef std::vector<block> list;

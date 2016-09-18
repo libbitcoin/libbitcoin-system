@@ -51,7 +51,7 @@ public:
     struct metadata
     {
         typedef std::function<void(const code&)> confirm_handler;
-        confirm_handler confirm;
+        confirm_handler confirm = nullptr;
     };
 
     typedef std::vector<transaction> list;
