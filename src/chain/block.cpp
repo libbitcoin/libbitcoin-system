@@ -126,7 +126,7 @@ block::indexes locator_heights(size_t top)
     heights.push_back(0);
 
     // Validate the reservation computation.
-    BITCOIN_ASSERT(heights.size() == size);
+    BITCOIN_ASSERT(heights.size() == reservation);
     return heights;
 }
 
