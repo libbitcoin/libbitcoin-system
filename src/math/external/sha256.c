@@ -166,7 +166,7 @@ void SHA256Final(SHA256CTX* context, uint8_t digest[SHA256_DIGEST_LENGTH])
     zeroize((void*)context, sizeof *context);
 }
 
-// Local
+/* Local */
 
 void SHA256Pad(SHA256CTX* context)
 {

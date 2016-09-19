@@ -43,10 +43,19 @@ namespace chain {
 class BC_API block
 {
 public:
-    typedef std::vector<block> list;
-    typedef std::shared_ptr<block> ptr;
-    typedef std::vector<ptr> ptr_list;
     typedef std::vector<size_t> indexes;
+
+    // TODO: remove with blockchain redesign.
+    // These properties facilitate block pool processing.
+    struct metadata
+    {
+        /// This is a sentinel used in .validation_height to indicate pool.
+        static const size_t orphan_height;
+
+        mutable bool processed_orphan = false;
+        mutable size_t validation_height = orphan_height;
+        mutable code validation_result = error::not_found;
+    };
 
     static block factory_from_data(const data_chunk& data,
         bool with_transaction_count=true);
@@ -54,6 +63,7 @@ public:
         bool with_transaction_count=true);
     static block factory_from_data(reader& source,
         bool with_transaction_count = true);
+    static indexes locator_heights(size_t top);
     static uint64_t subsidy(size_t height);
     static hash_number work(uint32_t bits);
     static block genesis_mainnet();
@@ -99,13 +109,16 @@ public:
     uint64_t claim() const;
     uint64_t reward(size_t height) const;
 
-    size_t total_inputs();
+    size_t total_inputs() const;
     hash_digest generate_merkle_root() const;
     uint64_t serialized_size(bool with_transaction_count=true) const;
     size_t signature_operations(bool bip16_active) const;
 
     chain::header header;
     transaction::list transactions;
+
+    /// Pool tracking, does not participate in serialization.
+    metadata metadata;
 
 private:
     static hash_digest build_merkle_tree(hash_list& merkle);

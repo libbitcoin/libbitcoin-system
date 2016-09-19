@@ -50,44 +50,44 @@
     <Filter Include="include\bitcoin\chain\script">
       <UniqueIdentifier>{79ec2ad3-b61a-4014-9226-6bb821a06afc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="resource\src">
+    <Filter Include="src">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="resource\src\formats">
+    <Filter Include="src\formats">
       <UniqueIdentifier>{d8cc8c0d-5a89-4c99-a119-bee06babc686}</UniqueIdentifier>
     </Filter>
-    <Filter Include="resource\src\math">
+    <Filter Include="src\math">
       <UniqueIdentifier>{2fe97318-6a5c-42db-a6aa-4ab97b592991}</UniqueIdentifier>
     </Filter>
-    <Filter Include="resource\src\math\external">
+    <Filter Include="src\math\external">
       <UniqueIdentifier>{f8a260ce-e8da-4a00-8d29-1927686a2488}</UniqueIdentifier>
     </Filter>
-    <Filter Include="resource\src\utility">
+    <Filter Include="src\utility">
       <UniqueIdentifier>{8d26a34b-6f23-4d66-8d64-6b50feadc4db}</UniqueIdentifier>
     </Filter>
-    <Filter Include="resource\src\wallet">
+    <Filter Include="src\wallet">
       <UniqueIdentifier>{b2e7788e-4e44-4bbd-b5ba-5de47b5a1022}</UniqueIdentifier>
     </Filter>
-    <Filter Include="resource\src\wallet\parse_encrypted_keys">
+    <Filter Include="src\wallet\parse_encrypted_keys">
       <UniqueIdentifier>{e4e09666-0a4e-480d-8592-4d3727575613}</UniqueIdentifier>
     </Filter>
-    <Filter Include="resource\src\config">
+    <Filter Include="src\config">
       <UniqueIdentifier>{5aca2e32-6005-4543-bee5-6de0cd35f51c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="resource\src\external">
+    <Filter Include="src\external">
       <UniqueIdentifier>{cdbd60d2-a825-43a2-88b6-70fe206f0a50}</UniqueIdentifier>
     </Filter>
-    <Filter Include="resource\src\unicode">
+    <Filter Include="src\unicode">
       <UniqueIdentifier>{c863e8b4-d2e2-4f76-9482-1bf25cd830f7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="resource\src\chain">
+    <Filter Include="src\chain">
       <UniqueIdentifier>{6c79d9d7-2d5c-4c10-b5a8-59bd979494cd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="resource\src\chain\script">
+    <Filter Include="src\chain\script">
       <UniqueIdentifier>{6e622159-d2ed-4297-b7db-e111f5500299}</UniqueIdentifier>
     </Filter>
-    <Filter Include="resource\src\message">
+    <Filter Include="src\message">
       <UniqueIdentifier>{919f9823-945e-4ab1-82ab-2c7ba85502ed}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -127,10 +127,10 @@
       <Filter>include\bitcoin\impl\math</Filter>
     </None>
     <None Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_key.ipp">
-      <Filter>resource\src\wallet\parse_encrypted_keys</Filter>
+      <Filter>src\wallet\parse_encrypted_keys</Filter>
     </None>
     <None Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_prefix.ipp">
-      <Filter>resource\src\wallet\parse_encrypted_keys</Filter>
+      <Filter>src\wallet\parse_encrypted_keys</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\resubscriber.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
@@ -150,403 +150,403 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\error.cpp">
-      <Filter>resource\src</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\checksum.cpp">
-      <Filter>resource\src\math</Filter>
+      <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\crypto.cpp">
-      <Filter>resource\src\math</Filter>
+      <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\external\hmac_sha256.c">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\external\hmac_sha512.c">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\external\ripemd160.c">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\external\sha1.c">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\external\sha256.c">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\external\sha512.c">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\external\zeroize.c">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\hash.cpp">
-      <Filter>resource\src\math</Filter>
+      <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\hash_number.cpp">
-      <Filter>resource\src\math</Filter>
+      <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\script_number.cpp">
-      <Filter>resource\src\math</Filter>
+      <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp">
-      <Filter>resource\src\utility</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\threadpool.cpp">
-      <Filter>resource\src\utility</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\message.cpp">
-      <Filter>resource\src\wallet</Filter>
+      <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\mnemonic.cpp">
-      <Filter>resource\src\wallet</Filter>
+      <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\stealth_address.cpp">
-      <Filter>resource\src\wallet</Filter>
+      <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\uri.cpp">
-      <Filter>resource\src\wallet</Filter>
+      <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\parameter.cpp">
-      <Filter>resource\src\config</Filter>
+      <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\printer.cpp">
-      <Filter>resource\src\config</Filter>
+      <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\external\pkcs5_pbkdf2.c">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\dictionary.cpp">
-      <Filter>resource\src\wallet</Filter>
+      <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="$(VC_CTP_Nov2013_InstallDir)\crt\src\threadsafestatics.cpp">
-      <Filter>resource\src\external</Filter>
+      <Filter>src\external</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\directory.cpp">
-      <Filter>resource\src\config</Filter>
+      <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\unicode\unicode_ostream.cpp">
-      <Filter>resource\src\unicode</Filter>
+      <Filter>src\unicode</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\unicode\unicode_streambuf.cpp">
-      <Filter>resource\src\unicode</Filter>
+      <Filter>src\unicode</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\unicode\console_streambuf.cpp">
-      <Filter>resource\src\unicode</Filter>
+      <Filter>src\unicode</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\unicode\unicode.cpp">
-      <Filter>resource\src\unicode</Filter>
+      <Filter>src\unicode</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\unicode\unicode_istream.cpp">
-      <Filter>resource\src\unicode</Filter>
+      <Filter>src\unicode</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\unicode\ifstream.cpp">
-      <Filter>resource\src\unicode</Filter>
+      <Filter>src\unicode</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\unicode\ofstream.cpp">
-      <Filter>resource\src\unicode</Filter>
+      <Filter>src\unicode</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\uint256.cpp">
-      <Filter>resource\src\math</Filter>
+      <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\secp256k1_initializer.cpp">
-      <Filter>resource\src\math</Filter>
+      <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\thread.cpp">
-      <Filter>resource\src\utility</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\random.cpp">
-      <Filter>resource\src\utility</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\authority.cpp">
-      <Filter>resource\src\config</Filter>
+      <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\checkpoint.cpp">
-      <Filter>resource\src\config</Filter>
+      <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\endpoint.cpp">
-      <Filter>resource\src\config</Filter>
+      <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\deadline.cpp">
-      <Filter>resource\src\utility</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\dispatcher.cpp">
-      <Filter>resource\src\utility</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\block.cpp">
-      <Filter>resource\src\chain</Filter>
+      <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\point.cpp">
-      <Filter>resource\src\chain</Filter>
+      <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\transaction.cpp">
-      <Filter>resource\src\chain</Filter>
+      <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\external\aes256.c">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\external\pbkdf2_sha256.c">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\address.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\get_address.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\get_blocks.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\get_data.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\inventory.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\inventory_vector.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\network_address.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\not_found.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\verack.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\istream_reader.cpp">
-      <Filter>resource\src\utility</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\ostream_writer.cpp">
-      <Filter>resource\src\utility</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\payment_address.cpp">
-      <Filter>resource\src\wallet</Filter>
+      <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\select_outputs.cpp">
-      <Filter>resource\src\wallet</Filter>
+      <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\version.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\string.cpp">
-      <Filter>resource\src\utility</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\merkle_block.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\reject.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\alert.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\filter_add.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\filter_clear.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\filter_load.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\get_headers.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\memory_pool.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\ping.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\pong.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\alert_payload.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\input.cpp">
-      <Filter>resource\src\chain</Filter>
+      <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\output.cpp">
-      <Filter>resource\src\chain</Filter>
+      <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\header.cpp">
-      <Filter>resource\src\chain</Filter>
+      <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\heading.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\external\crypto_scrypt.c">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\mini_keys.cpp">
-      <Filter>resource\src\wallet</Filter>
+      <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\encrypted_keys.cpp">
-      <Filter>resource\src\wallet</Filter>
+      <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\bitcoin_uri.cpp">
-      <Filter>resource\src\wallet</Filter>
+      <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\ec_private.cpp">
-      <Filter>resource\src\wallet</Filter>
+      <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\elliptic_curve.cpp">
-      <Filter>resource\src\math</Filter>
+      <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\ec_public.cpp">
-      <Filter>resource\src\wallet</Filter>
+      <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\stealth.cpp">
-      <Filter>resource\src\math</Filter>
+      <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\hd_private.cpp">
-      <Filter>resource\src\wallet</Filter>
+      <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\hd_public.cpp">
-      <Filter>resource\src\wallet</Filter>
+      <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_private.cpp">
-      <Filter>resource\src\wallet\parse_encrypted_keys</Filter>
+      <Filter>src\wallet\parse_encrypted_keys</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_public.cpp">
-      <Filter>resource\src\wallet\parse_encrypted_keys</Filter>
+      <Filter>src\wallet\parse_encrypted_keys</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_token.cpp">
-      <Filter>resource\src\wallet\parse_encrypted_keys</Filter>
+      <Filter>src\wallet\parse_encrypted_keys</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\ek_public.cpp">
-      <Filter>resource\src\wallet</Filter>
+      <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\ek_token.cpp">
-      <Filter>resource\src\wallet</Filter>
+      <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\ek_private.cpp">
-      <Filter>resource\src\wallet</Filter>
+      <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\log.cpp">
-      <Filter>resource\src\utility</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\headers.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\work.cpp">
-      <Filter>resource\src\utility</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\monitor.cpp">
-      <Filter>resource\src\utility</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\external\lax_der_parsing.c">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\parser.cpp">
-      <Filter>resource\src\config</Filter>
+      <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\png.cpp">
-      <Filter>resource\src\utility</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\qrcode.cpp">
-      <Filter>resource\src\wallet</Filter>
+      <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\script\operation.cpp">
-      <Filter>resource\src\chain\script</Filter>
+      <Filter>src\chain\script</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\script\script.cpp">
-      <Filter>resource\src\chain\script</Filter>
+      <Filter>src\chain\script</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\script\conditional_stack.cpp">
-      <Filter>resource\src\chain\script</Filter>
+      <Filter>src\chain\script</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\script\evaluation_context.cpp">
-      <Filter>resource\src\chain\script</Filter>
+      <Filter>src\chain\script</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\script\opcode.cpp">
-      <Filter>resource\src\chain\script</Filter>
+      <Filter>src\chain\script</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\conditional_lock.cpp">
-      <Filter>resource\src\utility</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\scope_lock.cpp">
-      <Filter>resource\src\utility</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\base2.cpp">
-      <Filter>resource\src\config</Filter>
+      <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\base16.cpp">
-      <Filter>resource\src\config</Filter>
+      <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\base58.cpp">
-      <Filter>resource\src\config</Filter>
+      <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\base64.cpp">
-      <Filter>resource\src\config</Filter>
+      <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\formats\base_10.cpp">
-      <Filter>resource\src\formats</Filter>
+      <Filter>src\formats</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\formats\base_16.cpp">
-      <Filter>resource\src\formats</Filter>
+      <Filter>src\formats</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\formats\base_58.cpp">
-      <Filter>resource\src\formats</Filter>
+      <Filter>src\formats</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\formats\base_64.cpp">
-      <Filter>resource\src\formats</Filter>
+      <Filter>src\formats</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\formats\base_85.cpp">
-      <Filter>resource\src\formats</Filter>
+      <Filter>src\formats</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\hash256.cpp">
-      <Filter>resource\src\config</Filter>
+      <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\hash160.cpp">
-      <Filter>resource\src\config</Filter>
+      <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\sodium.cpp">
-      <Filter>resource\src\config</Filter>
+      <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\block_transactions.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\compact_block.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\get_block_transactions.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\prefilled_transaction.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\send_compact_blocks.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\send_headers.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\variable_uint_size.cpp">
-      <Filter>resource\src\utility</Filter>
+      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\block_message.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\transaction_message.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\header_message.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\point_iterator.cpp">
-      <Filter>resource\src\chain</Filter>
+      <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\fee_filter.cpp">
-      <Filter>resource\src\message</Filter>
+      <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\output_point.cpp">
-      <Filter>resource\src\chain</Filter>
+      <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\chain_state.cpp">
-      <Filter>resource\src\chain</Filter>
+      <Filter>src\chain</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -638,28 +638,28 @@
       <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\sha512.h">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\zeroize.h">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\hmac_sha256.h">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\hmac_sha512.h">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\pkcs5_pbkdf2.h">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\ripemd160.h">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\sha1.h">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\sha256.h">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\uint256.hpp">
       <Filter>include\bitcoin\math</Filter>
@@ -788,10 +788,10 @@
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\aes256.h">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\pbkdf2_sha256.h">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\version.hpp">
       <Filter>include\bitcoin\message</Filter>
@@ -848,7 +848,7 @@
       <Filter>include\bitcoin\chain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\crypto_scrypt.h">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\encrypted_keys.hpp">
       <Filter>include\bitcoin\wallet</Filter>
@@ -881,19 +881,19 @@
       <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_key.hpp">
-      <Filter>resource\src\wallet\parse_encrypted_keys</Filter>
+      <Filter>src\wallet\parse_encrypted_keys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_prefix.hpp">
-      <Filter>resource\src\wallet\parse_encrypted_keys</Filter>
+      <Filter>src\wallet\parse_encrypted_keys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_private.hpp">
-      <Filter>resource\src\wallet\parse_encrypted_keys</Filter>
+      <Filter>src\wallet\parse_encrypted_keys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_public.hpp">
-      <Filter>resource\src\wallet\parse_encrypted_keys</Filter>
+      <Filter>src\wallet\parse_encrypted_keys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_token.hpp">
-      <Filter>resource\src\wallet\parse_encrypted_keys</Filter>
+      <Filter>src\wallet\parse_encrypted_keys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\ek_public.hpp">
       <Filter>include\bitcoin\wallet</Filter>
@@ -935,7 +935,7 @@
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\lax_der_parsing.h">
-      <Filter>resource\src\math\external</Filter>
+      <Filter>src\math\external</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\parser.hpp">
       <Filter>include\bitcoin\config</Filter>
@@ -944,7 +944,7 @@
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\secp256k1_initializer.hpp">
-      <Filter>resource\src\math</Filter>
+      <Filter>src\math</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\spend.hpp">
       <Filter>include\bitcoin\chain</Filter>
@@ -968,10 +968,10 @@
       <Filter>include\bitcoin\chain\script</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\chain\script\evaluation_context.hpp">
-      <Filter>resource\src\chain\script</Filter>
+      <Filter>src\chain\script</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\chain\script\conditional_stack.hpp">
-      <Filter>resource\src\chain\script</Filter>
+      <Filter>src\chain\script</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\conditional_lock.hpp">
       <Filter>include\bitcoin\utility</Filter>

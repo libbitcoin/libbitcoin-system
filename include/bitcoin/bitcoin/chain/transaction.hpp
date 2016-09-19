@@ -22,6 +22,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <istream>
 #include <memory>
 #include <string>
@@ -46,9 +47,14 @@ class BC_API transaction
 {
 public:
     typedef std::vector<transaction> list;
-    typedef std::shared_ptr<transaction> ptr;
-    typedef std::vector<ptr> ptr_list;
-    typedef std::vector<size_t> indexes;
+
+    // TODO: remove with blockchain redesign.
+    // These properties facilitate transaction pool processing.
+    struct metadata
+    {
+        typedef std::function<void(const code&)> confirm_handler;
+        mutable confirm_handler confirm = nullptr;
+    };
 
     static transaction factory_from_data(const data_chunk& data);
     static transaction factory_from_data(std::istream& stream);
@@ -63,11 +69,9 @@ public:
     transaction(uint32_t version, uint32_t locktime, input::list&& inputs,
         output::list&& outputs);
 
-    /// This class is move assignable [but not copy assignable].
+    /// This class is move assignable but not copy assignable.
     transaction& operator=(transaction&& other);
-
-    // TODO: eliminate blockchain transaction copies and then delete this.
-    transaction& operator=(const transaction& other) /*= delete*/;
+    transaction& operator=(const transaction& other) = delete;
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
@@ -114,6 +118,9 @@ public:
     uint32_t locktime;
     input::list inputs;
     output::list outputs;
+
+    /// Pool tracking, does not participate in serialization.
+    metadata metadata;
 
 private:
     mutable upgrade_mutex hash_mutex_;

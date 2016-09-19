@@ -34,6 +34,7 @@ class BC_API get_headers
 {
 public:
     typedef std::shared_ptr<get_headers> ptr;
+    typedef std::shared_ptr<const get_headers> const_ptr;
 
     static get_headers factory_from_data(uint32_t version,
         const data_chunk& data);

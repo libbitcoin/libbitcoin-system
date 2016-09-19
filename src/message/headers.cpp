@@ -62,19 +62,21 @@ headers headers::factory_from_data(uint32_t version,
     return instance;
 }
 
-headers::headers()
-{
-}
-
-headers::headers(const chain::header::list& values)
-{
-    elements.insert(elements.end(), values.begin(), values.end());
-}
-
-headers::headers(const std::initializer_list<chain::header>& values)
-{
-    elements.insert(elements.end(), values.begin(), values.end());
-}
+////headers::headers()
+////{
+////}
+////
+////headers::headers(const chain::header::list& values)
+////{
+////    // Uses headers copy assignment.
+////    elements.insert(elements.end(), values.begin(), values.end());
+////}
+////
+////headers::headers(const std::initializer_list<chain::header>& values)
+////{
+////    // Uses headers copy assignment.
+////    elements.insert(elements.end(), values.begin(), values.end());
+////}
 
 bool headers::is_valid() const
 {

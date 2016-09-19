@@ -36,6 +36,7 @@ class BC_API pong
 {
 public:
     typedef std::shared_ptr<pong> ptr;
+    typedef std::shared_ptr<const pong> const_ptr;
 
     static pong factory_from_data(uint32_t version, const data_chunk& data);
     static pong factory_from_data(uint32_t version, std::istream& stream);

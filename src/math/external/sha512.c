@@ -176,7 +176,7 @@ void SHA512Final(SHA512CTX* context, uint8_t digest[SHA512_DIGEST_LENGTH])
     zeroize((void*)context, sizeof *context);
 }
 
-// Local
+/* Local */
 
 void SHA512Pad(SHA512CTX* context)
 {

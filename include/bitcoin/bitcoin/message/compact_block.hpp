@@ -35,6 +35,8 @@ class BC_API compact_block
 {
 public:
     typedef std::shared_ptr<compact_block> ptr;
+    typedef std::shared_ptr<const compact_block> const_ptr;
+
     typedef mini_hash short_id;
     typedef mini_hash_list short_id_list;
 

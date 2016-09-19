@@ -35,6 +35,7 @@ class BC_API send_compact_blocks
 {
 public:
     typedef std::shared_ptr<send_compact_blocks> ptr;
+    typedef std::shared_ptr<const send_compact_blocks> const_ptr;
 
     static send_compact_blocks factory_from_data(uint32_t version,
         const data_chunk& data);

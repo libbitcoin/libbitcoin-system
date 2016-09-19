@@ -39,8 +39,6 @@ class BC_API header
 {
 public:
     typedef std::vector<header> list;
-    typedef std::shared_ptr<header> ptr;
-    typedef std::vector<ptr> ptr_list;
 
     static header factory_from_data(const data_chunk& data,
         bool with_transaction_count=true);
@@ -63,9 +61,7 @@ public:
 
     /// This class is move assignable but not copy assignable.
     header& operator=(header&& other);
-
-    // TODO: eliminate blockchain transaction copies and then delete this.
-    header& operator=(const header& other) /*= delete*/;
+    header& operator=(const header& other) = delete;
 
     bool operator==(const header& other) const;
     bool operator!=(const header& other) const;

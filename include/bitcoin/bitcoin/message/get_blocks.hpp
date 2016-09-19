@@ -37,6 +37,7 @@ class BC_API get_blocks
 {
 public:
     typedef std::shared_ptr<get_blocks> ptr;
+    typedef std::shared_ptr<const get_blocks> const_ptr;
 
     static get_blocks factory_from_data(uint32_t version,
         const data_chunk& data);

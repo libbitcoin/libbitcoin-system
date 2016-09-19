@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <limits>
+#include <cmath>
 #include <numeric>
 #include <type_traits>
 #include <utility>
@@ -56,6 +57,15 @@ Integer ceiling_add(Integer left, Integer right)
     return left > ceiling - right ? ceiling : left + right;
 }
 
+template <typename Integer,
+    typename = std::enable_if<std::is_unsigned<Integer>::value>>
+Integer floor_subtract(Integer left, Integer right)
+{
+    return right > left ? 0 : left - right;
+}
+
+const size_t block::metadata::orphan_height = 0;
+
 block block::factory_from_data(const data_chunk& data,
     bool with_transaction_count)
 {
@@ -78,6 +88,46 @@ block block::factory_from_data(reader& source,
     block instance;
     instance.from_data(source, with_transaction_count);
     return instance;
+}
+
+inline size_t locator_size(size_t top)
+{
+    const auto first_ten = std::min(size_t(10), top);
+    const auto back_off = floor_subtract(top, size_t(10));
+    return first_ten + static_cast<size_t>(std::log2(back_off)) + size_t(1);
+}
+
+// This algorithm is a network best practice, not a consensus rule.
+block::indexes locator_heights(size_t top)
+{
+    BITCOIN_ASSERT(top <= max_int64);
+
+    // This implementation does not support generating a locator if the
+    // blockchain exceeds max_int64. This should be expanded to max_uint64.
+    if (top > max_int64)
+        return{};
+
+    int64_t step = 1;
+    block::indexes heights;
+    const auto reservation = locator_size(top);
+    heights.reserve(reservation);
+
+    // Start at the top of the chain and work backwards.
+    for (auto height = static_cast<size_t>(top); height > 0; height -= step)
+    {
+        // Push top 10 indexes first, then back off exponentially.
+        if (heights.size() >= 10)
+            step <<= 1;
+
+        heights.push_back(static_cast<size_t>(height));
+    }
+
+    //  Push the genesis block index.
+    heights.push_back(0);
+
+    // Validate the reservation computation.
+    BITCOIN_ASSERT(heights.size() == size);
+    return heights;
 }
 
 block::block()
@@ -221,7 +271,7 @@ size_t block::signature_operations(bool bip16_active) const
     return std::accumulate(txs.begin(), txs.end(), size_t(0), value);
 }
 
-size_t block::total_inputs()
+size_t block::total_inputs() const
 {
     const auto inputs = [](size_t total, const transaction& tx)
     {

@@ -39,10 +39,12 @@ class BC_API block_message
   : public chain::block
 {
 public:
-    typedef std::vector<block_message> list;
+    ////typedef std::vector<block_message> list;
+    ////typedef std::vector<size_t> indexes;
     typedef std::shared_ptr<block_message> ptr;
+    typedef std::shared_ptr<const block_message> const_ptr;
     typedef std::vector<ptr> ptr_list;
-    typedef std::vector<size_t> indexes;
+    typedef std::vector<const_ptr> const_ptr_list;
 
     static block_message factory_from_data(uint32_t version,
         const data_chunk& data, bool with_transaction_count=true);
