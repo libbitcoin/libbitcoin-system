@@ -43,6 +43,8 @@ namespace chain {
 class BC_API block
 {
 public:
+    typedef std::vector<size_t> indexes;
+
     // TODO: remove with blockchain redesign.
     // These properties facilitate block pool processing.
     struct metadata
@@ -50,22 +52,18 @@ public:
         /// This is a sentinel used in .validation_height to indicate pool.
         static const size_t orphan_height;
 
-        bool processed_orphan = false;
-        size_t validation_height = orphan_height;
-        code validation_result = error::not_found;
+        mutable bool processed_orphan = false;
+        mutable size_t validation_height = orphan_height;
+        mutable code validation_result = error::not_found;
     };
-
-    typedef std::vector<block> list;
-    typedef std::shared_ptr<block> ptr;
-    typedef std::vector<ptr> ptr_list;
-    typedef std::vector<size_t> indexes;
 
     static block factory_from_data(const data_chunk& data,
         bool with_transaction_count=true);
     static block factory_from_data(std::istream& stream,
         bool with_transaction_count=true);
     static block factory_from_data(reader& source,
-        bool with_transaction_count=true);
+        bool with_transaction_count = true);
+    static indexes locator_heights(size_t top);
     static uint64_t subsidy(size_t height);
     static hash_number work(uint32_t bits);
     static block genesis_mainnet();
@@ -111,7 +109,7 @@ public:
     uint64_t claim() const;
     uint64_t reward(size_t height) const;
 
-    size_t total_inputs();
+    size_t total_inputs() const;
     hash_digest generate_merkle_root() const;
     uint64_t serialized_size(bool with_transaction_count=true) const;
     size_t signature_operations(bool bip16_active) const;

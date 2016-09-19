@@ -35,6 +35,7 @@ class BC_API fee_filter
 {
 public:
     typedef std::shared_ptr<fee_filter> ptr;
+    typedef std::shared_ptr<const fee_filter> const_ptr;
 
     static fee_filter factory_from_data(uint32_t version, const data_chunk& data);
     static fee_filter factory_from_data(uint32_t version, std::istream& stream);

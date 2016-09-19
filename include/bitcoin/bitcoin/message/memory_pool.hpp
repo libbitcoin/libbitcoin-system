@@ -35,6 +35,7 @@ class BC_API memory_pool
 {
 public:
     typedef std::shared_ptr<memory_pool> ptr;
+    typedef std::shared_ptr<const memory_pool> const_ptr;
 
     static memory_pool factory_from_data(uint32_t version,
         const data_chunk& data);

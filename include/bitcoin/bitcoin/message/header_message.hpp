@@ -39,7 +39,9 @@ class BC_API header_message
 public:
     typedef std::vector<header_message> list;
     typedef std::shared_ptr<header_message> ptr;
+    typedef std::shared_ptr<const header_message> const_ptr;
     typedef std::vector<ptr> ptr_list;
+    typedef std::vector<const_ptr> const_ptr_list;
 
     static header_message factory_from_data(uint32_t version,
         const data_chunk& data, bool with_transaction_count=true);

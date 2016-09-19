@@ -38,6 +38,7 @@ class BC_API get_data
 {
 public:
     typedef std::shared_ptr<get_data> ptr;
+    typedef std::shared_ptr<const get_data> const_ptr;
 
     static get_data factory_from_data(uint32_t version,
         const data_chunk& data);

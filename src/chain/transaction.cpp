@@ -130,20 +130,19 @@ transaction& transaction::operator=(transaction&& other)
     return *this;
 }
 
-// TODO: eliminate blockchain transaction copies and then delete this.
-transaction& transaction::operator=(const transaction& other)
-{
-    version = other.version;
-    locktime = other.locktime;
-    inputs = other.inputs;
-    outputs = other.outputs;
-    duplicate_ = other.duplicate_;
-
-    // This optimization forces a (safe) hash computation based on the
-    // assumption that it will at some point be computed for one or both.
-    hash_ = std::make_shared<hash_digest>(other.hash());
-    return *this;
-}
+////transaction& transaction::operator=(const transaction& other)
+////{
+////    version = other.version;
+////    locktime = other.locktime;
+////    inputs = other.inputs;
+////    outputs = other.outputs;
+////    duplicate_ = other.duplicate_;
+////
+////    // This optimization forces a (safe) hash computation based on the
+////    // assumption that it will at some point be computed for one or both.
+////    hash_ = std::make_shared<hash_digest>(other.hash());
+////    return *this;
+////}
 
 bool transaction::is_valid() const
 {

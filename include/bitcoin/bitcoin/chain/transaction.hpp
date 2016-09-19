@@ -46,18 +46,15 @@ namespace chain {
 class BC_API transaction
 {
 public:
+    typedef std::vector<transaction> list;
+
     // TODO: remove with blockchain redesign.
     // These properties facilitate transaction pool processing.
     struct metadata
     {
         typedef std::function<void(const code&)> confirm_handler;
-        confirm_handler confirm = nullptr;
+        mutable confirm_handler confirm = nullptr;
     };
-
-    typedef std::vector<transaction> list;
-    typedef std::shared_ptr<transaction> ptr;
-    typedef std::vector<ptr> ptr_list;
-    typedef std::vector<size_t> indexes;
 
     static transaction factory_from_data(const data_chunk& data);
     static transaction factory_from_data(std::istream& stream);
@@ -72,11 +69,9 @@ public:
     transaction(uint32_t version, uint32_t locktime, input::list&& inputs,
         output::list&& outputs);
 
-    /// This class is move assignable [but not copy assignable].
+    /// This class is move assignable but not copy assignable.
     transaction& operator=(transaction&& other);
-
-    // TODO: eliminate blockchain transaction copies and then delete this.
-    transaction& operator=(const transaction& other) /*= delete*/;
+    transaction& operator=(const transaction& other) = delete;
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);

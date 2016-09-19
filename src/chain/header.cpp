@@ -117,18 +117,17 @@ header& header::operator=(header&& other)
     return *this;
 }
 
-// TODO: eliminate header copies and then delete this.
-header& header::operator=(const header& other)
-{
-    version = other.version;
-    previous_block_hash = other.previous_block_hash;
-    merkle = other.merkle;
-    timestamp = other.timestamp;
-    bits = other.bits;
-    nonce = other.nonce;
-    transaction_count = other.transaction_count;
-    return *this;
-}
+////header& header::operator=(const header& other)
+////{
+////    version = other.version;
+////    previous_block_hash = other.previous_block_hash;
+////    merkle = other.merkle;
+////    timestamp = other.timestamp;
+////    bits = other.bits;
+////    nonce = other.nonce;
+////    transaction_count = other.transaction_count;
+////    return *this;
+////}
 
 bool header::is_valid() const
 {
