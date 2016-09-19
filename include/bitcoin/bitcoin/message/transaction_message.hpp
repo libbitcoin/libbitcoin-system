@@ -39,8 +39,6 @@ class BC_API transaction_message
   : public chain::transaction
 {
 public:
-    ////typedef std::vector<size_t> indexes;
-    ////typedef std::vector<transaction_message> list;
     typedef std::shared_ptr<transaction_message> ptr;
     typedef std::shared_ptr<const transaction_message> const_ptr;
     typedef std::vector<ptr> ptr_list;
