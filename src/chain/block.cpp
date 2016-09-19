@@ -109,7 +109,8 @@ block::indexes locator_heights(size_t top)
 
     int64_t step = 1;
     block::indexes heights;
-    heights.reserve(locator_size(top));
+    const auto reservation = locator_size(top);
+    heights.reserve(reservation);
 
     // Start at the top of the chain and work backwards.
     for (auto height = static_cast<size_t>(top); height > 0; height -= step)
