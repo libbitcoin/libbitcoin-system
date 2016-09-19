@@ -69,9 +69,9 @@ public:
     transaction(uint32_t version, uint32_t locktime, input::list&& inputs,
         output::list&& outputs);
 
-    /// This class is move assignable but not copy assignable.
+    /// This class is move assignable [but not copy assignable].
     transaction& operator=(transaction&& other);
-    transaction& operator=(const transaction& other) = delete;
+    transaction& operator=(const transaction& other) /* = delete */;
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
