@@ -47,9 +47,9 @@ public:
     static headers factory_from_data(uint32_t version, std::istream& stream);
     static headers factory_from_data(uint32_t version, reader& source);
 
-    headers();
-    headers(const chain::header::list& values);
-    headers(const std::initializer_list<chain::header>& values);
+    ////headers();
+    ////headers(const chain::header::list& values);
+    ////headers(const std::initializer_list<chain::header>& values);
 
     bool operator==(const headers& other) const;
     bool operator!=(const headers& other) const;
