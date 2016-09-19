@@ -55,7 +55,7 @@ struct BC_API stealth_compact
 /// The normal stealth row includes the sign byte of the ephemeral public key.
 struct BC_API stealth
 {
-    ////typedef std::vector<stealth> list;
+    typedef std::vector<stealth> list;
 
     ec_compressed ephemeral_public_key;
     short_hash public_key_hash;

@@ -39,8 +39,6 @@ class BC_API block_message
   : public chain::block
 {
 public:
-    ////typedef std::vector<block_message> list;
-    ////typedef std::vector<size_t> indexes;
     typedef std::shared_ptr<block_message> ptr;
     typedef std::shared_ptr<const block_message> const_ptr;
     typedef std::vector<ptr> ptr_list;
