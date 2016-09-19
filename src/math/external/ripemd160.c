@@ -143,7 +143,7 @@ void RMDFinal(RMD160CTX* context, uint8_t digest[RMD160_DIGEST_LENGTH])
     }
 }
 
-// Local
+/* Local */
 
 void RMDcompress(RMD160CTX* context)
 {
