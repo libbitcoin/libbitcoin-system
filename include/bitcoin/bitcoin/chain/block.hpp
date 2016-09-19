@@ -76,9 +76,9 @@ public:
     block(block&& other);
     block(chain::header&& header, transaction::list&& transactions);
 
-    /// This class is move assignable but not copy assignable.
+    /// This class is move assignable [but not copy assignable].
     block& operator=(block&& other);
-    void operator=(const block&) = delete;
+    block& operator=(const block& other) /* = delete */;
 
     bool from_data(const data_chunk& data, bool with_transaction_count=true);
     bool from_data(std::istream& stream, bool with_transaction_count=true);

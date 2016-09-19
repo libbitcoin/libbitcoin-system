@@ -61,7 +61,7 @@ template <typename Integer,
     typename = std::enable_if<std::is_unsigned<Integer>::value>>
 Integer floor_subtract(Integer left, Integer right)
 {
-    return right > left ? 0 : left - right;
+    return right >= left ? 0 : left - right;
 }
 
 const size_t block::metadata::orphan_height = 0;
@@ -100,29 +100,22 @@ inline size_t locator_size(size_t top)
 // This algorithm is a network best practice, not a consensus rule.
 block::indexes locator_heights(size_t top)
 {
-    BITCOIN_ASSERT(top <= max_int64);
-
-    // This implementation does not support generating a locator if the
-    // blockchain exceeds max_int64. This should be expanded to max_uint64.
-    if (top > max_int64)
-        return{};
-
-    int64_t step = 1;
+    size_t step = 1;
     block::indexes heights;
     const auto reservation = locator_size(top);
     heights.reserve(reservation);
 
-    // Start at the top of the chain and work backwards.
-    for (auto height = static_cast<size_t>(top); height > 0; height -= step)
+    // Start at the top of the chain and work backwards to zero.
+    for (auto height = top; height > 0; height = floor_subtract(height, step))
     {
         // Push top 10 indexes first, then back off exponentially.
         if (heights.size() >= 10)
             step <<= 1;
 
-        heights.push_back(static_cast<size_t>(height));
+        heights.push_back(height);
     }
 
-    //  Push the genesis block index.
+    // Push the genesis block index.
     heights.push_back(0);
 
     // Validate the reservation computation.
@@ -162,6 +155,13 @@ block& block::operator=(block&& other)
 {
     header = std::move(other.header);
     transactions = std::move(other.transactions);
+    return *this;
+}
+
+block& block::operator=(const block& other)
+{
+    header = other.header;
+    transactions = other.transactions;
     return *this;
 }
 

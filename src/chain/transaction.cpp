@@ -57,7 +57,7 @@ template <typename Integer,
     typename = std::enable_if<std::is_unsigned<Integer>::value>>
 Integer floor_subtract(Integer left, Integer right)
 {
-    return right > left ? 0 : left - right;
+    return right >= left ? 0 : left - right;
 }
 
 transaction transaction::factory_from_data(const data_chunk& data)
@@ -126,23 +126,17 @@ transaction& transaction::operator=(transaction&& other)
     locktime = other.locktime;
     inputs = std::move(other.inputs);
     outputs = std::move(other.outputs);
-    duplicate_ = other.duplicate_;
     return *this;
 }
 
-////transaction& transaction::operator=(const transaction& other)
-////{
-////    version = other.version;
-////    locktime = other.locktime;
-////    inputs = other.inputs;
-////    outputs = other.outputs;
-////    duplicate_ = other.duplicate_;
-////
-////    // This optimization forces a (safe) hash computation based on the
-////    // assumption that it will at some point be computed for one or both.
-////    hash_ = std::make_shared<hash_digest>(other.hash());
-////    return *this;
-////}
+transaction& transaction::operator=(const transaction& other)
+{
+    version = other.version;
+    locktime = other.locktime;
+    inputs = other.inputs;
+    outputs = other.outputs;
+    return *this;
+}
 
 bool transaction::is_valid() const
 {

@@ -59,9 +59,9 @@ public:
         hash_digest&& merkle, uint32_t timestamp, uint32_t bits,
         uint32_t nonce, uint64_t transaction_count=0);
 
-    /// This class is move assignable but not copy assignable.
+    /// This class is move assignable [but not copy assignable].
     header& operator=(header&& other);
-    header& operator=(const header& other) = delete;
+    header& operator=(const header& other) /* = delete */;
 
     bool operator==(const header& other) const;
     bool operator!=(const header& other) const;
