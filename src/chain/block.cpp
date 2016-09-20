@@ -103,7 +103,7 @@ inline hash_list to_hashes(const transaction::list& transactions)
     return out;
 }
 
-inline size_t locator_size(size_t top)
+size_t block::locator_size(size_t top)
 {
     const auto first_ten = std::min(size_t(10), top);
     const auto back_off = floor_subtract(top, size_t(10));
