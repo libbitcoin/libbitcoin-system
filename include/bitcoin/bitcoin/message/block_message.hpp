@@ -82,14 +82,16 @@ public:
         bool with_transaction_count=true) const;
 
     uint64_t originator() const;
-    void set_originator(uint64_t value);
+
+    // HACK: The fact that this is const makes it unsafe.
+    void set_originator(uint64_t value) const;
 
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
 private:
-    uint64_t originator_;
+    mutable uint64_t originator_;
 };
 
 } // namespace message

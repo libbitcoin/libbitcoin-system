@@ -73,15 +73,18 @@ public:
     void to_data(uint32_t version, std::ostream& stream) const;
     void to_data(uint32_t version, writer& sink) const;
     uint64_t serialized_size(uint32_t version=version::level::canonical) const;
+
     uint64_t originator() const;
-    void set_originator(uint64_t value);
+
+    // HACK: The fact that this is const makes it unsafe.
+    void set_originator(uint64_t value) const;
 
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
 private:
-    uint64_t originator_;
+    mutable uint64_t originator_;
 };
 
 } // namespace message

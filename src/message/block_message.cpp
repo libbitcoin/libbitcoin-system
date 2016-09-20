@@ -155,7 +155,7 @@ uint64_t block_message::originator() const
     return originator_;
 }
 
-void block_message::set_originator(uint64_t value)
+void block_message::set_originator(uint64_t value) const
 {
     originator_ = value;
 }

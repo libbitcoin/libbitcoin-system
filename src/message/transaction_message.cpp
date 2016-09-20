@@ -154,7 +154,7 @@ uint64_t transaction_message::originator() const
     return originator_;
 }
 
-void transaction_message::set_originator(uint64_t value)
+void transaction_message::set_originator(uint64_t value) const
 {
     originator_ = value;
 }
