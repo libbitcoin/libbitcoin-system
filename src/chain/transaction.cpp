@@ -405,7 +405,7 @@ uint64_t transaction::total_input_value() const
     {
         // Treat missing previous outputs as zero-valued, no math on sentinel.
         const auto value = input.previous_output.cache.value;
-        const auto increment = value == output_point::not_found ? 0 : value;
+        const auto increment = value == output::not_found ? 0 : value;
         return ceiling_add(total, increment);
     };
 
@@ -458,7 +458,7 @@ bool transaction::is_missing_inputs() const
     const auto missing = [](const input& input)
     {
         // The cache value is set to not_found if the output doesn't exist.
-        return input.previous_output.cache.value == output_point::not_found;
+        return input.previous_output.cache.value == output::not_found;
     };
 
     // This is an optimization of !missing_inputs().empty();
@@ -472,7 +472,7 @@ point::indexes transaction::missing_inputs() const
 
     // The cache value is set to not_found if the output doesn't exist.
     for (size_t in = 0; in < inputs.size(); ++in)
-        if (inputs[in].previous_output.cache.value == output_point::not_found)
+        if (inputs[in].previous_output.cache.value == output::not_found)
             missing.push_back(static_cast<uint32_t>(in));
 
     return missing;
@@ -611,8 +611,7 @@ code transaction::connect_input(const chain_state& state,
         return error::input_not_found;
 
     // Verify that the previous output cache has been populated.
-    if (inputs[input_index].previous_output.cache.value ==
-        output_point::not_found)
+    if (inputs[input_index].previous_output.cache.value == output::not_found)
         return error::input_not_found;
 
     const auto flags = state.enabled_forks();

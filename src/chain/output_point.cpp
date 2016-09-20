@@ -27,13 +27,12 @@
 namespace libbitcoin {
 namespace chain {
 
-const uint64_t output_point::not_found = max_uint64;
 const size_t output_point::not_coinbase = max_size_t;
 
 // The metadata properties are not configured for initializer syntax.
 
 output_point::output_point()
-  : cache({ not_found, {} }),
+  : cache({ output::not_found, {} }),
     spent(false),
     confirmed(false)
 {
@@ -49,7 +48,7 @@ output_point::output_point(const output_point& other)
 
 output_point::output_point(const chain::point& value)
   : point(value),
-    cache({ not_found, {} }),
+    cache({ output::not_found, {} }),
     spent(false),
     confirmed(false)
 {
@@ -57,7 +56,7 @@ output_point::output_point(const chain::point& value)
 
 output_point::output_point(const hash_digest& hash, uint32_t index)
   : point({ hash, index }),
-    cache({ not_found, {} }),
+    cache({ output::not_found, {} }),
     spent(false),
     confirmed(false)
 {
@@ -67,7 +66,7 @@ void output_point::reset()
 {
     spent = false;
     confirmed = false;
-    cache.value = not_found;
+    cache.value = output::not_found;
     cache.script.reset();
     static_cast<point>(*this).reset();
 }
