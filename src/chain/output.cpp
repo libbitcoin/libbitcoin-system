@@ -19,8 +19,10 @@
  */
 #include <bitcoin/bitcoin/chain/output.hpp>
 
+#include <cstdint>
 #include <sstream>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -28,6 +30,8 @@
 
 namespace libbitcoin {
 namespace chain {
+
+const uint64_t output::not_found = max_uint64;
 
 output output::factory_from_data(const data_chunk& data)
 {
@@ -52,12 +56,13 @@ output output::factory_from_data(reader& source)
 
 bool output::is_valid() const
 {
-    return (value != 0) || script.is_valid();
+    // TODO: implement script valid private flag so that empty script is valid.
+    return (value != not_found) /*&& script.is_valid()*/;
 }
 
 void output::reset()
 {
-    value = 0;
+    value = not_found;
     script.reset();
 }
 

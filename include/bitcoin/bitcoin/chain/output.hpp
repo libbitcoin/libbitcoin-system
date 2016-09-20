@@ -34,6 +34,10 @@ namespace chain {
 class BC_API output
 {
 public:
+    /// This is a sentinel used in .value to indicate not found in store.
+    /// This is a sentinel used in cache.value to indicate not populated.
+    static const uint64_t not_found;
+
     typedef std::vector<output> list;
 
     static output factory_from_data(const data_chunk& data);

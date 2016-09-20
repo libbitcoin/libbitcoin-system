@@ -34,9 +34,6 @@ class BC_API output_point
   : public point
 {
 public:
-    /// This is a sentinel used in cache.value to indicate not populated.
-    static const uint64_t not_found;
-
     /// This is a sentinel used in .height to indicate not coinbase.
     static const size_t not_coinbase;
 
