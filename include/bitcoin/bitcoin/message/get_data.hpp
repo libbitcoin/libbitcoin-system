@@ -47,7 +47,7 @@ public:
 
     get_data();
     get_data(const inventory_vector::list& list);
-    get_data(const hash_list& hashes, inventory::type_id type);
+    get_data(const hash_list& hashes, type_id type);
     get_data(const std::initializer_list<inventory_vector>& elements);
 
     bool from_data(uint32_t version, const data_chunk& data) override;
