@@ -119,9 +119,6 @@ public:
 
     /// Pool tracking, does not participate in serialization.
     metadata metadata;
-
-private:
-    static hash_digest build_merkle_tree(hash_list& merkle);
 };
 
 } // namespace chain
