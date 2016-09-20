@@ -90,7 +90,20 @@ block block::factory_from_data(reader& source,
     return instance;
 }
 
-inline size_t locator_size(size_t top)
+// Hash ordering matters.
+inline hash_list to_hashes(const transaction::list& transactions)
+{
+    const auto map = [](const transaction& tx)
+    {
+        return tx.hash();
+    };
+
+    hash_list out(transactions.size());
+    std::transform(transactions.begin(), transactions.end(), out.begin(), map);
+    return out;
+}
+
+size_t block::locator_size(size_t top)
 {
     const auto first_ten = std::min(size_t(10), top);
     const auto back_off = floor_subtract(top, size_t(10));
@@ -326,6 +339,35 @@ bool block::is_distinct_transaction_set() const
     return distinct_end == hashes.end();
 }
 
+hash_digest block::generate_merkle_root() const
+{
+    auto merkle = to_hashes(transactions);
+
+    if (merkle.empty())
+        return null_hash;
+
+    hash_list update;
+
+    // Initial capacity is half of the original list (clear doesn't reset).
+    update.reserve((merkle.size() + 1) / 2);
+
+    while (merkle.size() > 1)
+    {
+        // If number of hashes is odd, duplicate last hash in the list.
+        if (merkle.size() % 2 != 0)
+            merkle.push_back(merkle.back());
+
+        for (auto it = merkle.begin(); it != merkle.end(); it += 2)
+            update.push_back(bitcoin_hash(build_chunk({ it[0], it[1] })));
+
+        std::swap(merkle, update);
+        update.clear();
+    }
+
+    // There is now only one item in the list.
+    return merkle.front();
+}
+
 bool block::is_valid_merkle_root() const
 {
     return generate_merkle_root() == header.merkle;
@@ -513,67 +555,6 @@ code block::accept(const chain_state& state) const
 code block::connect(const chain_state& state) const
 {
     return connect_transactions(state);
-}
-
-hash_digest block::build_merkle_tree(hash_list& merkle)
-{
-    // Stop if hash list is empty.
-    if (merkle.empty())
-        return null_hash;
-
-    // While there is more than 1 hash in the list, keep looping...
-    while (merkle.size() > 1)
-    {
-        // If number of hashes is odd, duplicate last hash in the list.
-        if (merkle.size() % 2 != 0)
-            merkle.push_back(merkle.back());
-
-        // List size is now even.
-        BITCOIN_ASSERT(merkle.size() % 2 == 0);
-
-        // New hash list.
-        hash_list new_merkle;
-
-        // Loop through hashes 2 at a time.
-        for (auto it = merkle.begin(); it != merkle.end(); it += 2)
-        {
-            // Join both current hashes together (concatenate).
-            data_chunk concat_data;
-            data_sink concat_stream(concat_data);
-            ostream_writer concat_sink(concat_stream);
-            concat_sink.write_hash(*it);
-            concat_sink.write_hash(*(it + 1));
-            concat_stream.flush();
-
-            BITCOIN_ASSERT(concat_data.size() == (2 * hash_size));
-
-            // Hash both of the hashes.
-            const auto new_root = bitcoin_hash(concat_data);
-
-            // Add this to the new list.
-            new_merkle.push_back(new_root);
-        }
-
-        // This is the new list.
-        merkle = new_merkle;
-    }
-
-    // Finally we end up with a single item.
-    return merkle[0];
-}
-
-// TODO: consider caching result.
-hash_digest block::generate_merkle_root() const
-{
-    const auto hasher = [](const transaction& transaction)
-    {
-        return transaction.hash();
-    };
-
-    const auto& txs = transactions;
-    hash_list hashes(txs.size());
-    std::transform(txs.begin(), txs.end(), hashes.begin(), hasher);
-    return build_merkle_tree(hashes);
 }
 
 static const std::string encoded_mainnet_genesis_block =
