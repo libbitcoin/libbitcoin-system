@@ -105,9 +105,10 @@ inline hash_list to_hashes(const transaction::list& transactions)
 
 size_t block::locator_size(size_t top)
 {
-    const auto first_ten = std::min(size_t(10), top);
-    const auto back_off = floor_subtract(top, size_t(10));
-    return first_ten + static_cast<size_t>(std::log2(back_off)) + size_t(1);
+    const auto first_ten_or_top = std::min(size_t(10), top);
+    const auto remaining = top - first_ten_or_top;
+    const auto back_off = remaining == 0 ? 0.0 : std::log2(remaining);
+    return first_ten_or_top + static_cast<size_t>(back_off) + size_t(1);
 }
 
 // This algorithm is a network best practice, not a consensus rule.

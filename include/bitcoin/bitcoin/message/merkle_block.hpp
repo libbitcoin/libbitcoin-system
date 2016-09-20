@@ -64,6 +64,9 @@ public:
 
     chain::header header;
     hash_list hashes;
+
+    // TODO: provide utility to compute this from the list of hashes based on
+    // the assumption that the hash list represents that of a complete block.
     data_chunk flags;
 };
 
