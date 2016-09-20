@@ -98,7 +98,7 @@ inline size_t locator_size(size_t top)
 }
 
 // This algorithm is a network best practice, not a consensus rule.
-block::indexes locator_heights(size_t top)
+block::indexes block::locator_heights(size_t top)
 {
     size_t step = 1;
     block::indexes heights;
