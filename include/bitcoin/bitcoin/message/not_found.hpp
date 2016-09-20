@@ -48,7 +48,7 @@ public:
 
     not_found();
     not_found(const inventory_vector::list& values);
-    not_found(const hash_list& hashes, inventory::type_id type);
+    not_found(const hash_list& hashes, type_id type);
     not_found(const std::initializer_list<inventory_vector>& values);
 
     bool from_data(uint32_t version, const data_chunk& data) override;
