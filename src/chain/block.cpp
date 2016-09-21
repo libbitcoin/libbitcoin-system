@@ -137,6 +137,11 @@ block::indexes block::locator_heights(size_t top)
     return heights;
 }
 
+bool block::is_retarget_height(size_t height)
+{
+    return height % retargeting_interval == 0;
+}
+
 block::block()
 {
 }

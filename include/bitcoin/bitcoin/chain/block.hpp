@@ -63,6 +63,8 @@ public:
         bool with_transaction_count=true);
     static block factory_from_data(reader& source,
         bool with_transaction_count = true);
+
+    static bool is_retarget_height(size_t height);
     static size_t locator_size(size_t top);
     static indexes locator_heights(size_t top);
     static uint64_t subsidy(size_t height);
