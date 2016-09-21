@@ -64,6 +64,10 @@ BC_CONSTEXPR uint64_t retargeting_factor = 4;
 BC_CONSTEXPR uint64_t target_spacing_seconds = 10 * 60;
 BC_CONSTEXPR uint64_t target_timespan_seconds = 2 * 7 * 24 * 60 * 60;
 
+// The target number of blocks for 2 weeks of work (2016 blocks).
+BC_CONSTEXPR uint64_t retargeting_interval = target_timespan_seconds /
+    target_spacing_seconds;
+
 // Consensus rule change activation and enforcement parameters.
 BC_CONSTEXPR uint8_t bip65_version = 4;
 BC_CONSTEXPR uint8_t bip66_version = 3;
