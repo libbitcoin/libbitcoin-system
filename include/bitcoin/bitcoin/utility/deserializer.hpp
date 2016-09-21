@@ -60,6 +60,7 @@ public:
     bool operator!() const;
 
     bool is_exhausted() const;
+    void skip_bytes(size_t size);
     uint8_t read_byte();
     data_chunk read_data(size_t size);
     size_t read_data(uint8_t* data, size_t size);

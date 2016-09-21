@@ -63,6 +63,13 @@ bool deserializer<Iterator, SafeCheckLast>::is_exhausted() const
 }
 
 template <typename Iterator, bool SafeCheckLast>
+void deserializer<Iterator, SafeCheckLast>::skip_bytes(size_t size)
+{
+    SAFE_CHECK_DISTANCE(size);
+    iterator_ += size;
+}
+
+template <typename Iterator, bool SafeCheckLast>
 uint8_t deserializer<Iterator, SafeCheckLast>::read_byte()
 {
     SAFE_CHECK_DISTANCE(1);
