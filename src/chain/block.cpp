@@ -212,20 +212,12 @@ bool block::from_data(reader& source, bool with_transaction_count)
 {
     reset();
 
-    auto result = header.from_data(source, with_transaction_count);
+    if (!header.from_data(source, with_transaction_count))
+        return false;
 
-    if (result)
-    {
-        transactions.resize(header.transaction_count);
-
-        for (auto& tx: transactions)
-        {
-            result = tx.from_data(source);
-
-            if (!result)
-                break;
-        }
-    }
+    transactions.resize(header.transaction_count);
+    auto from = [&source](transaction& tx) { return tx.from_data(source); };
+    auto result = std::all_of(transactions.begin(), transactions.end(), from);
 
     if (!result)
         reset();
@@ -252,9 +244,8 @@ void block::to_data(std::ostream& stream, bool with_transaction_count) const
 void block::to_data(writer& sink, bool with_transaction_count) const
 {
     header.to_data(sink, with_transaction_count);
-
-    for (const auto& tx: transactions)
-        tx.to_data(sink);
+    const auto to = [&sink](const transaction& tx) { tx.to_data(sink); };
+    std::for_each(transactions.begin(), transactions.end(), to);
 }
 
 // Convenience property.
@@ -266,7 +257,7 @@ hash_digest block::hash() const
 // overflow returns max_uint64
 uint64_t block::serialized_size(bool with_transaction_count) const
 {
-    auto block_size = header.serialized_size(with_transaction_count);
+    const auto block_size = header.serialized_size(with_transaction_count);
     const auto value = [](uint64_t total, const transaction& tx)
     {
         const auto size = tx.serialized_size();
