@@ -180,15 +180,15 @@ bool script::from_data(reader& source, bool prefix, parse_mode mode)
 
     if (prefix)
     {
-        const auto script_length = source.read_variable_uint_little_endian();
+        const auto script_size = source.read_variable_uint_little_endian();
         result = source;
-        BITCOIN_ASSERT(script_length <= max_uint32);
+        BITCOIN_ASSERT(script_size <= max_size_t);
 
         if (result)
         {
-            auto script_length32 = static_cast<uint32_t>(script_length);
-            raw_script = source.read_data(script_length32);
-            result = source && (raw_script.size() == script_length32);
+            const auto size = static_cast<size_t>(script_size);
+            raw_script = source.read_data(size);
+            result = source && (raw_script.size() == size);
         }
     }
     else
