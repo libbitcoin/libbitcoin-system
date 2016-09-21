@@ -58,7 +58,11 @@ install:
     - if [[ $LINUX && $CLANG ]]; then sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.4 50; fi
     - if [[ $LINUX && $CLANG ]]; then sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.4 50; fi
 
+    # Download and install packages for osx/clang/static.
+    - if [[ $OSX   && $CLANG && $STATIC  ]]; then brew unlink libtool; brew install libtool; fi
+
     # Download and install packages for osx/clang/dynamic.
+    - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then brew unlink libtool; brew install libtool; fi
     - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then brew unlink boost; brew install boost; fi
 
 script:
