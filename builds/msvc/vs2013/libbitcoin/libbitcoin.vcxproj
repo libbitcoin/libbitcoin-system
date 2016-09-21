@@ -217,7 +217,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\opcode.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\operation.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\script.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\spend.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\stealth.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\input.hpp" />
