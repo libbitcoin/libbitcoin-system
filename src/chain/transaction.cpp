@@ -390,12 +390,12 @@ bool transaction::is_locktime_conflict() const
     if (locktime == 0)
         return false;
 
-    const auto maximum = [](const input& input)
+    const auto finalized = [](const input& input)
     {
-        return input.sequence == max_input_sequence;
+        return input.is_final();
     };
 
-    return std::all_of(inputs.begin(), inputs.end(), maximum);
+    return std::all_of(inputs.begin(), inputs.end(), finalized);
 }
 
 // Returns max_uint64 in case of overflow.
