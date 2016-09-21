@@ -56,9 +56,11 @@ public:
         mutable confirm_handler confirm = nullptr;
     };
 
-    static transaction factory_from_data(const data_chunk& data);
-    static transaction factory_from_data(std::istream& stream);
-    static transaction factory_from_data(reader& source);
+    static transaction factory_from_data(const data_chunk& data,
+        bool satoshi=true);
+    static transaction factory_from_data(std::istream& stream,
+        bool satoshi=true);
+    static transaction factory_from_data(reader& source, bool satoshi=true);
 
     transaction();
     transaction(const transaction& other);
@@ -73,12 +75,13 @@ public:
     transaction& operator=(transaction&& other);
     transaction& operator=(const transaction& other) /* = delete */;
 
-    bool from_data(const data_chunk& data);
-    bool from_data(std::istream& stream);
-    bool from_data(reader& source);
-    data_chunk to_data() const;
-    void to_data(std::ostream& stream) const;
-    void to_data(writer& sink) const;
+    bool from_data(const data_chunk& data, bool satoshi=true);
+    bool from_data(std::istream& stream, bool satoshi=true);
+    bool from_data(reader& source, bool satoshi=true);
+
+    data_chunk to_data(bool satoshi=true) const;
+    void to_data(std::ostream& stream, bool satoshi=true) const;
+    void to_data(writer& sink, bool satoshi=true) const;
     std::string to_string(uint32_t flags) const;
 
     bool is_valid() const;
