@@ -57,7 +57,7 @@ output output::factory_from_data(reader& source)
 bool output::is_valid() const
 {
     // BUGBUG: an empty script is valid but currently reports otherwise.
-    BITCOIN_ASSERT_MSG(false, "not implemented");
+    ////BITCOIN_ASSERT_MSG(false, "not implemented");
 
     return (value != not_found) && script.is_valid();
 }

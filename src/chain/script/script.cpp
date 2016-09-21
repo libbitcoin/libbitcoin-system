@@ -137,7 +137,7 @@ bool script::is_raw_data() const
 bool script::is_valid() const
 {
     // BUGBUG: An empty script is valid.
-    BITCOIN_ASSERT_MSG(false, "not implemented");
+    ////BITCOIN_ASSERT_MSG(false, "not implemented");
 
     return !operations.empty();
 }

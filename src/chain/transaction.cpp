@@ -27,6 +27,7 @@
 #include <type_traits>
 #include <sstream>
 #include <utility>
+#include <vector>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/chain/input.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
@@ -60,24 +61,48 @@ Integer floor_subtract(Integer left, Integer right)
     return right >= left ? 0 : left - right;
 }
 
-transaction transaction::factory_from_data(const data_chunk& data)
+// Read a length-prefixed collection of inputs or outputs from the source.
+template<class Source, class Put>
+bool read(Source& source, std::vector<Put>& puts)
+{
+    const auto put_count = source.read_variable_uint_little_endian();
+
+    if (!source)
+        return false;
+
+    puts.resize(put_count);
+    auto from = [&source](Put& put) { return put.from_data(source); };
+    return std::all_of(puts.begin(), puts.end(), from);
+}
+
+// Write a length-prefixed collection of inputs or outputs to the sink.
+template<class Sink, class Put>
+void write(Sink& sink, const std::vector<Put>& puts)
+{
+    sink.write_variable_uint_little_endian(puts.size());
+    auto to = [&sink](const Put& put) { put.to_data(sink); };
+    std::for_each(puts.begin(), puts.end(), to);
+}
+
+transaction transaction::factory_from_data(const data_chunk& data,
+    bool satoshi)
 {
     transaction instance;
-    instance.from_data(data);
+    instance.from_data(data, satoshi);
     return instance;
 }
 
-transaction transaction::factory_from_data(std::istream& stream)
+transaction transaction::factory_from_data(std::istream& stream, bool satoshi)
 {
     transaction instance;
-    instance.from_data(stream);
+    instance.from_data(stream, satoshi);
     return instance;
 }
 
-transaction transaction::factory_from_data(reader& source)
+transaction transaction::factory_from_data(reader& source, bool satoshi)
 {
     transaction instance;
-    instance.from_data(source);
+    instance.from_data(source, satoshi);
     return instance;
 }
 
@@ -159,19 +184,19 @@ void transaction::reset()
     duplicate_ = false;
 }
 
-bool transaction::from_data(const data_chunk& data)
+bool transaction::from_data(const data_chunk& data, bool satoshi)
 {
     data_source istream(data);
-    return from_data(istream);
+    return from_data(istream, satoshi);
 }
 
-bool transaction::from_data(std::istream& stream)
+bool transaction::from_data(std::istream& stream, bool satoshi)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(source, satoshi);
 }
 
-bool transaction::from_data(reader& source)
+bool transaction::from_data(reader& source, bool satoshi)
 {
     reset();
     version = source.read_4_bytes_little_endian();
@@ -179,46 +204,19 @@ bool transaction::from_data(reader& source)
 
     if (result)
     {
-        const auto tx_in_count = source.read_variable_uint_little_endian();
-        result = source;
-
-        if (result)
+        if (satoshi)
         {
-            inputs.resize(tx_in_count);
-
-            for (auto& input: inputs)
-            {
-                result = input.from_data(source);
-
-                if (!result)
-                    break;
-            }
+            // Wire (satoshi protocol) deserialization.
+            result = read(source, inputs) && read(source, outputs);
+            locktime = result ? source.read_4_bytes_little_endian() : 0;
+            result &= source;
         }
-    }
-
-    if (result)
-    {
-        const auto tx_out_count = source.read_variable_uint_little_endian();
-        result = source;
-
-        if (result)
+        else
         {
-            outputs.resize(tx_out_count);
-
-            for (auto& output: outputs)
-            {
-                result = output.from_data(source);
-
-                if (!result)
-                    break;
-            }
+            // Database serialization (outputs forward).
+            locktime = source.read_4_bytes_little_endian();
+            result = source && read(source, outputs) && read(source, inputs);
         }
-    }
-
-    if (result)
-    {
-        locktime = source.read_4_bytes_little_endian();
-        result = source;
     }
 
     if (!result)
@@ -227,37 +225,41 @@ bool transaction::from_data(reader& source)
     return result;
 }
 
-data_chunk transaction::to_data() const
+data_chunk transaction::to_data(bool satoshi) const
 {
     data_chunk data;
     data_sink ostream(data);
-    to_data(ostream);
+    to_data(ostream, satoshi);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == serialized_size());
 
     return data;
 }
 
-void transaction::to_data(std::ostream& stream) const
+void transaction::to_data(std::ostream& stream, bool satoshi) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(sink, satoshi);
 }
 
-void transaction::to_data(writer& sink) const
+void transaction::to_data(writer& sink, bool satoshi) const
 {
     sink.write_4_bytes_little_endian(version);
-    sink.write_variable_uint_little_endian(inputs.size());
 
-    for (const auto& input: inputs)
-        input.to_data(sink);
-
-    sink.write_variable_uint_little_endian(outputs.size());
-
-    for (const auto& output: outputs)
-        output.to_data(sink);
-
-    sink.write_4_bytes_little_endian(locktime);
+    if (satoshi)
+    {
+        // Wire (satoshi protocol) serialization.
+        write(sink, inputs);
+        write(sink, outputs);
+        sink.write_4_bytes_little_endian(locktime);
+    }
+    else
+    {
+        // Database serialization (outputs forward).
+        sink.write_4_bytes_little_endian(locktime);
+        write(sink, outputs);
+        write(sink, inputs);
+    }
 }
 
 uint64_t transaction::serialized_size() const
