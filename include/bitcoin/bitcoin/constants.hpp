@@ -58,6 +58,7 @@ BC_CONSTEXPR uint32_t time_stamp_future_hours = 2;
 BC_CONSTEXPR uint32_t locktime_threshold = 500000000;
 BC_CONSTEXPR uint32_t max_work_bits = 0x1d00ffff;
 
+BC_CONSTEXPR uint32_t no_previous_output = max_uint32;
 BC_CONSTEXPR uint32_t max_input_sequence = max_uint32;
 BC_CONSTEXPR uint64_t retargeting_factor = 4;
 BC_CONSTEXPR uint64_t target_spacing_seconds = 10 * 60;

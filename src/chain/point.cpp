@@ -34,7 +34,7 @@ namespace libbitcoin {
 namespace chain {
 
 // This sentinel is serialized and defined by consensus, not implementation.
-const uint32_t point::null_index = max_input_sequence;
+const uint32_t point::null_index = no_previous_output;
 
 point point::factory_from_data(const data_chunk& data)
 {
