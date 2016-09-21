@@ -339,7 +339,7 @@ hash_digest transaction::hash(uint32_t sighash_type) const
 
 bool transaction::is_coinbase() const
 {
-    return inputs.size() == 1 && inputs[0].previous_output.is_null();
+    return inputs.size() == 1 && inputs.front().previous_output.is_null();
 }
 
 // True if coinbase and has invalid input[0] script size.
@@ -348,7 +348,7 @@ bool transaction::is_invalid_coinbase() const
     if (!is_coinbase())
         return false;
 
-    const auto script_size = inputs[0].script.serialized_size(false);
+    const auto script_size = inputs.front().script.serialized_size(false);
     return script_size < min_coinbase_size || script_size > max_coinbase_size;
 }
 
