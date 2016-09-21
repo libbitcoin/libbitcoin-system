@@ -34,6 +34,7 @@ namespace chain {
 class BC_API output
 {
 public:
+    /// TODO: set not_found as the default/invalid state via the ctor .
     /// This is a sentinel used in .value to indicate not found in store.
     /// This is a sentinel used in cache.value to indicate not populated.
     static const uint64_t not_found;

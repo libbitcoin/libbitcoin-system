@@ -53,6 +53,10 @@ input input::factory_from_data(reader& source)
 
 bool input::is_valid() const
 {
+    // BUGBUG: Currently this indicates invalid as coinbase (null previous output),
+    // when the script is empty; and when the sequence is zero (all are valid).
+    BITCOIN_ASSERT_MSG(false, "not implemented");
+
     return (sequence != 0) ||
         previous_output.is_valid() ||
         script.is_valid();

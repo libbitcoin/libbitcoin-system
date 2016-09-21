@@ -59,6 +59,9 @@ point point::factory_from_data(reader& source)
 
 bool point::is_valid() const
 {
+    // BUGBUG: zero index is valid and non-zero should not override null_hash.
+    BITCOIN_ASSERT_MSG(false, "not implemented");
+
     return (index != 0) || (hash != null_hash);
 }
 
