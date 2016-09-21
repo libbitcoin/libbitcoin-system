@@ -946,9 +946,6 @@
     <ClInclude Include="..\..\..\..\src\math\secp256k1_initializer.hpp">
       <Filter>src\math</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\spend.hpp">
-      <Filter>include\bitcoin\chain</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\color.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>

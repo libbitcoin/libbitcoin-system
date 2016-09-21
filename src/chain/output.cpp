@@ -56,8 +56,10 @@ output output::factory_from_data(reader& source)
 
 bool output::is_valid() const
 {
-    // TODO: implement script valid private flag so that empty script is valid.
-    return (value != not_found) /*&& script.is_valid()*/;
+    // BUGBUG: an empty script is valid but currently reports otherwise.
+    BITCOIN_ASSERT_MSG(false, "not implemented");
+
+    return (value != not_found) && script.is_valid();
 }
 
 void output::reset()
