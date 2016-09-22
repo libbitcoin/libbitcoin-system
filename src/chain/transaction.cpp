@@ -571,17 +571,17 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     if (bip30 && duplicate())
         return error::unspent_duplicate;
 
-    else if (is_missing_inputs())
-        return error::input_not_found;
+    ////else if (is_missing_inputs())
+    ////    return error::input_not_found;
 
     else if (is_double_spend(transaction_pool))
         return error::double_spend;
 
-    else if (is_immature(state.next_height()))
-        return error::coinbase_maturity;
+    ////else if (is_immature(state.next_height()))
+    ////    return error::coinbase_maturity;
 
-    else if (is_overspent())
-        return error::spend_exceeds_value;
+    ////else if (is_overspent())
+    ////    return error::spend_exceeds_value;
 
     // This recomputes sigops to include p2sh from prevouts.
     else if (transaction_pool && signature_operations(bip16) > max_block_sigops)
@@ -595,9 +595,9 @@ code transaction::connect(const chain_state& state) const
     code ec;
     BITCOIN_ASSERT(inputs.size() <= max_uint32);
 
-    for (size_t in = 0; in < inputs.size(); ++in)
-        if ((ec = connect_input(state, static_cast<uint32_t>(in))))
-            return ec;
+    ////for (size_t in = 0; in < inputs.size(); ++in)
+    ////    if ((ec = connect_input(state, static_cast<uint32_t>(in))))
+    ////        return ec;
 
     return error::success;
 }

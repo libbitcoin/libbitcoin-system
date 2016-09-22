@@ -553,11 +553,11 @@ code block::accept(const chain_state& state) const
     else if (header.version < state.minimum_version())
         return error::old_version_block;
 
-    else if (header.bits != state.work_required())
-        return error::incorrect_proof_of_work;
+    ////else if (header.bits != state.work_required())
+    ////    return error::incorrect_proof_of_work;
 
-    else if (header.timestamp <= state.median_time_past())
-        return error::timestamp_too_early;
+    ////else if (header.timestamp <= state.median_time_past())
+    ////    return error::timestamp_too_early;
 
     // This recurses txs but is not applied to mempool (timestamp required).
     else if (!is_final(state.next_height()))
@@ -570,8 +570,8 @@ code block::accept(const chain_state& state) const
     else if (signature_operations(bip16) > max_block_sigops)
         return error::too_many_sigs;
 
-    else if (!is_valid_coinbase_claim(state.next_height()))
-        return error::coinbase_too_large;
+    ////else if (!is_valid_coinbase_claim(state.next_height()))
+    ////    return error::coinbase_too_large;
 
     else
         return accept_transactions(state);
