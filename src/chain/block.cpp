@@ -532,7 +532,7 @@ code block::check() const
     else if (signature_operations(false) > max_block_sigops)
         return error::too_many_sigs;
 
-    else if (is_valid_merkle_root())
+    else if (!is_valid_merkle_root())
         return error::merkle_mismatch;
 
     else
