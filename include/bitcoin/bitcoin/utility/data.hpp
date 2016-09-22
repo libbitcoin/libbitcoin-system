@@ -83,8 +83,8 @@ void extend_data(Target& target, const Extension& extension);
 /**
  * Constrain a numeric value within a given range.
  */
-template <typename Value>
-Value range_constrain(Value value, Value minimum, Value maximum);
+template <typename Value, typename Bound>
+Bound range_constrain(Value value, Bound minimum, Bound maximum);
 
 /**
  * Extracty a subarray from start position with length end minus start.

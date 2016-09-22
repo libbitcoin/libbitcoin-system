@@ -52,7 +52,6 @@ public:
         /// This is a sentinel used in .validation_height to indicate pool.
         static const size_t orphan_height;
 
-        mutable bool processed_orphan = false;
         mutable size_t validation_height = orphan_height;
         mutable code validation_result = error::not_found;
     };
@@ -65,10 +64,11 @@ public:
         bool with_transaction_count = true);
 
     static bool is_retarget_height(size_t height);
+    static hash_number difficulty(uint32_t bits);
+    static uint32_t work_required(uint64_t timespan, uint32_t bits);
+    static uint64_t subsidy(size_t height);
     static size_t locator_size(size_t top);
     static indexes locator_heights(size_t top);
-    static uint64_t subsidy(size_t height);
-    static hash_number work(uint32_t bits);
     static block genesis_mainnet();
     static block genesis_testnet();
 
@@ -113,6 +113,7 @@ public:
     uint64_t reward(size_t height) const;
 
     size_t total_inputs() const;
+    hash_number difficulty() const;
     hash_digest generate_merkle_root() const;
     uint64_t serialized_size(bool with_transaction_count=true) const;
     size_t signature_operations(bool bip16_active) const;
