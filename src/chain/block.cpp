@@ -142,6 +142,52 @@ bool block::is_retarget_height(size_t height)
     return height % retargeting_interval == 0;
 }
 
+uint32_t block::work_required(uint64_t timespan, uint32_t bits)
+{
+    // Limit the actual timespan to the specified 32 bit range.
+    const auto constrained_timespan = bc::range_constrain(timespan,
+        timespan_lower_bound, timespan_upper_bound);
+
+    ///////////////////////////////////////////////////////////////////////////
+    // TODO: set_compact can fail but this was ungaurded in our implementation.
+    // Verify consensus behavior across full domain.
+    hash_number retarget;
+    retarget.set_compact(bits);
+    ///////////////////////////////////////////////////////////////////////////
+
+    hash_number maximum;
+    maximum.set_compact(max_work_bits);
+
+    retarget *= constrained_timespan;
+    retarget /= target_timespan_seconds;
+
+    if (retarget > maximum)
+        retarget = maximum;
+
+    return retarget.compact();
+}
+
+hash_number block::difficulty(uint32_t bits)
+{
+    hash_number target;
+
+    if (!target.set_compact(bits) || target == 0)
+        return 0;
+
+    // We need to compute 2**256 / (target+1), but we can't represent 2**256
+    // as it's too large for uint256. However as 2**256 is at least as large as
+    // target+1, it is equal to ((2**256 - target - 1) / (target+1)) + 1, or 
+    // ~target / (target+1) + 1.
+    return (~target / (target + 1)) + 1;
+}
+
+uint64_t block::subsidy(size_t height)
+{
+    auto subsidy = bitcoin_to_satoshi(initial_block_reward);
+    subsidy >>= (height / reward_interval);
+    return subsidy;
+}
+
 block::block()
 {
 }
@@ -368,29 +414,6 @@ hash_digest block::generate_merkle_root() const
 bool block::is_valid_merkle_root() const
 {
     return generate_merkle_root() == header.merkle;
-}
-
-// static
-hash_number block::work(uint32_t bits)
-{
-    hash_number target;
-
-    if (!target.set_compact(bits) || target == 0)
-        return 0;
-
-    // We need to compute 2**256 / (target+1), but we can't represent 2**256
-    // as it's too large for uint256. However as 2**256 is at least as large as
-    // target+1, it is equal to ((2**256 - target - 1) / (target+1)) + 1, or 
-    // ~target / (target+1) + 1.
-    return (~target / (target + 1)) + 1;
-}
-
-// static
-uint64_t block::subsidy(size_t height)
-{
-    auto subsidy = bitcoin_to_satoshi(initial_block_reward);
-    subsidy >>= (height / reward_interval);
-    return subsidy;
 }
 
 uint64_t block::fees() const

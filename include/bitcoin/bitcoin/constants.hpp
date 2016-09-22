@@ -68,6 +68,12 @@ BC_CONSTEXPR uint64_t target_timespan_seconds = 2 * 7 * 24 * 60 * 60;
 BC_CONSTEXPR uint64_t retargeting_interval = target_timespan_seconds /
     target_spacing_seconds;
 
+// The upper and lower bounds for the retargeting timespan.
+BC_CONSTEXPR uint32_t timespan_lower_bound = target_timespan_seconds /
+    retargeting_factor;
+BC_CONSTEXPR uint32_t timespan_upper_bound = target_timespan_seconds *
+    retargeting_factor;
+
 // Consensus rule change activation and enforcement parameters.
 BC_CONSTEXPR uint8_t bip65_version = 4;
 BC_CONSTEXPR uint8_t bip66_version = 3;

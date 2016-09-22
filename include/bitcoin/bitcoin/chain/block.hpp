@@ -65,10 +65,11 @@ public:
         bool with_transaction_count = true);
 
     static bool is_retarget_height(size_t height);
+    static hash_number difficulty(uint32_t bits);
+    static uint32_t work_required(uint64_t timespan, uint32_t bits);
+    static uint64_t subsidy(size_t height);
     static size_t locator_size(size_t top);
     static indexes locator_heights(size_t top);
-    static uint64_t subsidy(size_t height);
-    static hash_number work(uint32_t bits);
     static block genesis_mainnet();
     static block genesis_testnet();
 
