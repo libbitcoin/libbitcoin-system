@@ -532,7 +532,7 @@ code block::check() const
     else if (signature_operations(false) > max_block_sigops)
         return error::too_many_sigs;
 
-    else if (is_valid_merkle_root())
+    else if (!is_valid_merkle_root())
         return error::merkle_mismatch;
 
     else
@@ -547,7 +547,7 @@ code block::accept(const chain_state& state) const
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip34 = state.is_enabled(rule_fork::bip34_rule);
 
-    if (!state.is_checkpoint_failure(header))
+    if (state.is_checkpoint_failure(header))
         return error::checkpoints_failed;
 
     else if (header.version < state.minimum_version())

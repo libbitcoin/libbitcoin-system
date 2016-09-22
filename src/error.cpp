@@ -66,8 +66,8 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "object does not exist";
         case error::duplicate:
             return "matching previous object found";
-        case error::reserved:
-            return "reserved for future use";
+        case error::orphan:
+            return "missing block parent";
         case error::unsupported_script_pattern:
             return "unsupport script pattern";
 
