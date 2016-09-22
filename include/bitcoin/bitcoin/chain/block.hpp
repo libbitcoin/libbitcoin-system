@@ -52,7 +52,6 @@ public:
         /// This is a sentinel used in .validation_height to indicate pool.
         static const size_t orphan_height;
 
-        mutable bool processed_orphan = false;
         mutable size_t validation_height = orphan_height;
         mutable code validation_result = error::not_found;
     };
