@@ -300,6 +300,11 @@ hash_digest block::hash() const
     return header.hash();
 }
 
+hash_number block::difficulty() const
+{
+    return difficulty(header.bits);
+}
+
 // overflow returns max_uint64
 uint64_t block::serialized_size(bool with_transaction_count) const
 {
