@@ -90,16 +90,13 @@ block block::factory_from_data(reader& source,
     return instance;
 }
 
-// Hash ordering matters.
+// Hash ordering matters, don't use std::transform here.
 inline hash_list to_hashes(const transaction::list& transactions)
 {
-    const auto map = [](const transaction& tx)
-    {
-        return tx.hash();
-    };
-
-    hash_list out(transactions.size());
-    std::transform(transactions.begin(), transactions.end(), out.begin(), map);
+    hash_list out;
+    out.reserve(transactions.size());
+    auto hasher = [&out](const transaction& tx) { out.push_back(tx.hash()); };
+    std::for_each(transactions.begin(), transactions.end(), hasher);
     return out;
 }
 
