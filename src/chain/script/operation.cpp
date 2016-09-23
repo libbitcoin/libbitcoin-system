@@ -124,33 +124,30 @@ void operation::to_data(std::ostream& stream) const
 
 void operation::to_data(writer& sink) const
 {
-    if (code != opcode::raw_data)
+    auto raw_byte = static_cast<uint8_t>(code);
+    if (code == opcode::special)
+        raw_byte = static_cast<uint8_t>(data.size());
+
+    sink.write_byte(raw_byte);
+
+    switch (code)
     {
-        auto raw_byte = static_cast<uint8_t>(code);
-        if (code == opcode::special)
-            raw_byte = static_cast<uint8_t>(data.size());
+        case opcode::pushdata1:
+            sink.write_byte(static_cast<uint8_t>(data.size()));
+            break;
 
-        sink.write_byte(raw_byte);
+        case opcode::pushdata2:
+            sink.write_2_bytes_little_endian(
+                static_cast<uint16_t>(data.size()));
+            break;
 
-        switch (code)
-        {
-            case opcode::pushdata1:
-                sink.write_byte(static_cast<uint8_t>(data.size()));
-                break;
+        case opcode::pushdata4:
+            sink.write_4_bytes_little_endian(
+                static_cast<uint32_t>(data.size()));
+            break;
 
-            case opcode::pushdata2:
-                sink.write_2_bytes_little_endian(
-                    static_cast<uint16_t>(data.size()));
-                break;
-
-            case opcode::pushdata4:
-                sink.write_4_bytes_little_endian(
-                    static_cast<uint32_t>(data.size()));
-                break;
-
-            default:
-                break;
-        }
+        default:
+            break;
     }
 
     sink.write_data(data);
@@ -172,11 +169,6 @@ uint64_t operation::serialized_size() const
 
         case opcode::pushdata4:
             size += sizeof(uint32_t);
-            break;
-
-        case opcode::raw_data:
-            // remove padding for raw_data
-            size -= 1;
             break;
 
         default:

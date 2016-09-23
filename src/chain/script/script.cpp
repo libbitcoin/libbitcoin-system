@@ -232,7 +232,7 @@ void script::to_data(writer& sink, bool prefix) const
         sink.write_variable_uint_little_endian(satoshi_content_size());
 
     if ((operations.size() > 0) && (operations[0].code == opcode::raw_data))
-        operations[0].to_data(sink);
+        sink.write_data(operations[0].data);
     else
         for (const auto& op: operations)
             op.to_data(sink);
@@ -241,7 +241,7 @@ void script::to_data(writer& sink, bool prefix) const
 uint64_t script::satoshi_content_size() const
 {
     if (operations.size() > 0 && (operations[0].code == opcode::raw_data))
-        return operations[0].serialized_size();
+        return (operations[0].serialized_size() - 1);
 
     const auto value = [](uint64_t total, const operation& op)
     {
