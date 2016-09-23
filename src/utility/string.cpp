@@ -25,7 +25,7 @@
 
 namespace libbitcoin {
 
-std::string join(const std::vector<std::string>& words,
+std::string join(const string_list& words,
     const std::string& delimiter)
 {
     return boost::join(words, delimiter);
@@ -33,10 +33,10 @@ std::string join(const std::vector<std::string>& words,
 
 // Note that use of token_compress_on may cause unexpected results when
 // working with CSV-style lists that accept empty elements.
-std::vector<std::string> split(const std::string& sentence,
+string_list split(const std::string& sentence,
     const std::string& delimiter, bool trim)
 {
-    std::vector<std::string> words;
+    string_list words;
     const auto compress = boost::token_compress_on;
     const auto delimit = boost::is_any_of(delimiter);
 

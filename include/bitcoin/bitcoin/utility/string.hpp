@@ -26,13 +26,15 @@
 
 namespace libbitcoin {
 
+typedef std::vector<std::string> string_list;
+
 /**
  * Join a list of strings into a single string, in order.
  * @param[in]  words      The list of strings to join.
  * @param[in]  delimiter  The delimiter, defaults to " ".
  * @return                The resulting string.
  */
-BC_API std::string join(const std::vector<std::string>& words,
+BC_API std::string join(const string_list& words,
     const std::string& delimiter=" ");
 
 /**
@@ -43,7 +45,7 @@ BC_API std::string join(const std::vector<std::string>& words,
  * @param[in]  trim       Trim the sentence for whitespace, defaults to true.
  * @return                The list of resulting strings.
  */
-BC_API std::vector<std::string> split(const std::string& sentence,
+BC_API string_list split(const std::string& sentence,
     const std::string& delimiter=" ", bool trim=true);
 
 } // namespace libbitcoin
