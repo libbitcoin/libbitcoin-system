@@ -353,9 +353,9 @@ BOOST_AUTO_TEST_CASE(script__bip16__valid)
         BOOST_CHECK_MESSAGE(!tx.inputs.empty(), test.description);
 
         // These are valid prior to and after BIP16 activation.
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules), test.description);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::bip16_rule), test.description);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules), test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) == error::success, test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::bip16_rule) == error::success, test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules) == error::success, test.description);
     }
 }
 
@@ -367,9 +367,9 @@ BOOST_AUTO_TEST_CASE(script__bip16__invalidated)
         BOOST_CHECK_MESSAGE(!tx.inputs.empty(), test.description);
 
         // These are valid prior to BIP16 activation and invalid after.
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules), test.description);
-        BOOST_CHECK_MESSAGE(!script::verify(tx, 0, rule_fork::bip16_rule), test.description);
-        BOOST_CHECK_MESSAGE(!script::verify(tx, 0, rule_fork::all_rules), test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) == error::success, test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::bip16_rule) != error::success, test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules) != error::success, test.description);
     }
 }
 
@@ -385,9 +385,9 @@ BOOST_AUTO_TEST_CASE(script__bip65__valid)
         tx.inputs[0].sequence = 42;
 
         // These are valid prior to and after BIP65 activation.
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules), test.description);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::bip65_rule), test.description);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules), test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) == error::success, test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::bip65_rule) == error::success, test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules) == error::success, test.description);
     }
 }
 
@@ -402,9 +402,9 @@ BOOST_AUTO_TEST_CASE(script__bip65__invalid)
         tx.inputs[0].sequence = 42;
 
         // These are invalid prior to and after BIP65 activation.
-        BOOST_CHECK_MESSAGE(!script::verify(tx, 0, rule_fork::no_rules), test.description);
-        BOOST_CHECK_MESSAGE(!script::verify(tx, 0, rule_fork::bip65_rule), test.description);
-        BOOST_CHECK_MESSAGE(!script::verify(tx, 0, rule_fork::all_rules), test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) != error::success, test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::bip65_rule) != error::success, test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules) != error::success, test.description);
     }
 }
 
@@ -419,9 +419,9 @@ BOOST_AUTO_TEST_CASE(script__bip65__invalidated)
         tx.inputs[0].sequence = 42;
 
         // These are valid prior to BIP65 activation and invalid after.
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules), test.description);
-        BOOST_CHECK_MESSAGE(!script::verify(tx, 0, rule_fork::bip65_rule), test.description);
-        BOOST_CHECK_MESSAGE(!script::verify(tx, 0, rule_fork::all_rules), test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) == error::success, test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::bip65_rule) != error::success, test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules) != error::success, test.description);
     }
 }
 
@@ -434,9 +434,9 @@ BOOST_AUTO_TEST_CASE(script__multisig__valid)
         BOOST_CHECK_MESSAGE(!tx.inputs.empty(), test.description);
 
         // These are always valid.
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules), test.description);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::bip66_rule), test.description);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules), test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) == error::success, test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::bip66_rule) == error::success, test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules) == error::success, test.description);
     }
 }
 
@@ -449,9 +449,9 @@ BOOST_AUTO_TEST_CASE(script__multisig__invalid)
         BOOST_CHECK_MESSAGE(!tx.inputs.empty(), test.description);
 
         // These are always invalid.
-        BOOST_CHECK_MESSAGE(!script::verify(tx, 0, rule_fork::no_rules), test.description);
-        BOOST_CHECK_MESSAGE(!script::verify(tx, 0, rule_fork::bip66_rule), test.description);
-        BOOST_CHECK_MESSAGE(!script::verify(tx, 0, rule_fork::all_rules), test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) != error::success, test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::bip66_rule) != error::success, test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules) != error::success, test.description);
     }
 }
 
@@ -463,8 +463,8 @@ BOOST_AUTO_TEST_CASE(script__context_free__valid)
         BOOST_CHECK_MESSAGE(!tx.inputs.empty(), test.description);
 
         // These are always valid.
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules), test.description);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules), test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) == error::success, test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules) == error::success, test.description);
     }
 }
 
@@ -476,8 +476,8 @@ BOOST_AUTO_TEST_CASE(script__context_free__invalid)
         BOOST_CHECK_MESSAGE(!tx.inputs.empty(), test.description);
 
         // These are always invalid.
-        BOOST_CHECK_MESSAGE(!script::verify(tx, 0, rule_fork::no_rules), test.description);
-        BOOST_CHECK_MESSAGE(!script::verify(tx, 0, rule_fork::all_rules), test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) != error::success, test.description);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules) != error::success, test.description);
     }
 }
 

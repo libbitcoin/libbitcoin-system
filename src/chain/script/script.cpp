@@ -29,6 +29,7 @@
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
@@ -1940,59 +1941,63 @@ static bool evaluate(const transaction& tx, uint32_t input_index,
     return context.conditional.closed();
 }
 
-bool script::verify(const transaction& tx, uint32_t input_index,
+// TODO: return detailed result code indicating failure condition.
+code script::verify(const transaction& tx, uint32_t input_index,
     uint32_t flags)
 {
     if (input_index >= tx.inputs.size())
-        return false;
+        return error::input_not_found;
 
     // Obtain the previous script from the cached previous output.
     const auto& script = tx.inputs[input_index].previous_output.cache.script;
     return verify(tx, input_index, script, flags);
 }
 
-bool script::verify(const transaction& tx, uint32_t input_index,
+inline bool stack_result(const evaluation_context& context)
+{
+    return !context.stack.empty() && cast_to_bool(context.stack.back());
+}
+
+// TODO: return detailed result code indicating failure condition.
+code script::verify(const transaction& tx, uint32_t input_index,
     const script& prevout_script, uint32_t flags)
 {
     if (input_index >= tx.inputs.size())
-        return false;
+        return error::input_not_found;
 
     const auto& input_script = tx.inputs[input_index].script;
     evaluation_context in_context(flags);
 
     // Evaluate the input script.
     if (!evaluate(tx, input_index, input_script, in_context, flags))
-        return false;
+        return error::validate_inputs_failed;
 
     evaluation_context out_context(flags, in_context.stack);
 
     // Evaluate the output script.
     if (!evaluate(tx, input_index, prevout_script, out_context, flags))
-        return false;
+        return error::validate_inputs_failed;
 
     // Return if stack is false.
-    if (out_context.stack.empty() || !cast_to_bool(out_context.stack.back()))
-        return false;
+    if (!stack_result(out_context))
+        return error::validate_inputs_failed;
 
     // BIP16: Additional validation for pay-to-script-hash transactions.
     if (is_enabled(flags, rule_fork::bip16_rule) &&
         (prevout_script.pattern() == script_pattern::pay_script_hash))
     {
-        // Condition added by EKV on 2016.09.14.
-        if (in_context.stack.empty())
-            return false;
-
         // Only push data operations allowed in script.
         if (!operation::is_push_only(input_script.operations))
-            return false;
+            return error::validate_inputs_failed;
 
         // Use the last stack item as the serialized script.
         script eval;
 
+        // in_context.stack cannot be empty here because out_context is true.
         // Always process a serialized script as fallback since it can be data.
         if (!eval.from_data(in_context.stack.back(), false, 
             parse_mode::raw_data_fallback))
-            return false;
+            return error::validate_inputs_failed;
 
         // Pop last item and use popped stack for eval script.
         in_context.stack.pop_back();
@@ -2000,14 +2005,14 @@ bool script::verify(const transaction& tx, uint32_t input_index,
 
         // Evaluate the eval (serialized) script.
         if (!evaluate(tx, input_index, eval, eval_context, flags))
-            return false;
+            return error::validate_inputs_failed;
 
         // Return the stack state.
-        return !eval_context.stack.empty() &&
-            cast_to_bool(eval_context.stack.back());
+        if (!stack_result(eval_context))
+            return error::validate_inputs_failed;
     }
 
-    return true;
+    return error::success;
 }
 
 } // namespace chain

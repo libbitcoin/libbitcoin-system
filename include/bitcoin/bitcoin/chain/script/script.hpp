@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -112,9 +113,9 @@ public:
         uint8_t sighash_type, const data_chunk& public_key,
         const script& script_code, const transaction& tx,
         uint32_t input_index);
-    static bool verify(const transaction& tx, uint32_t input_index,
+    static code verify(const transaction& tx, uint32_t input_index,
         uint32_t flags);
-    static bool verify(const transaction& tx, uint32_t input_index,
+    static code verify(const transaction& tx, uint32_t input_index,
         const script& prevout_script, uint32_t flags);
 
     script_pattern pattern() const;
