@@ -21,6 +21,7 @@
 #define LIBBITCOIN_LOG_HPP
 
 #include <functional>
+#include <iostream>
 #include <map>
 #include <sstream>
 #include <string>
@@ -47,7 +48,7 @@ public:
     typedef std::function<void(level, const std::string&, const std::string&)>
         functor;
 
-    static const int append;
+    static const std::ios_base::openmode append;
 
     log(level value, const std::string& domain);
     log(log&& other);

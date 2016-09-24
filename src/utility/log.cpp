@@ -32,7 +32,8 @@
 
 namespace libbitcoin {
 
-const int log::append = std::ofstream::out | std::ofstream::app;
+const std::ios_base::openmode log::append = std::ofstream::out |
+    std::ofstream::app;
 
 log::log(level value, const std::string& domain)
   : level_(value), domain_(domain)
