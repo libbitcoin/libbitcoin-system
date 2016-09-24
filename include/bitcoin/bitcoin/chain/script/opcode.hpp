@@ -36,8 +36,7 @@ enum class opcode : uint8_t
     pushdata2 = 77,
     pushdata4 = 78,
     negative_1 = 79,
-    // reserved does nothing
-    reserved = 80,
+    reserved = 80,  // does nothing
     op_1 = 81,
     op_2 = 82,
     op_3 = 83,
@@ -144,6 +143,9 @@ enum class opcode : uint8_t
     op_nop8 = 183,
     op_nop9 = 184,
     op_nop10 = 185,
+
+    // These are internal use sentinels, NOT opcodes.
+    // The specific values of these only need to differ from actual opcodes.
     bad_operation,
     raw_data
 };

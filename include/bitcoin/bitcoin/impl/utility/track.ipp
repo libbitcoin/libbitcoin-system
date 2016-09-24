@@ -27,6 +27,12 @@
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/log.hpp>
 
+// libbitcoin defines the log and tracking but does not use them.
+// These are defined in bc so that they can be used in network and blockchain.
+
+// Log name.
+#define LOG_SYSTEM "system"
+
 template <class Shared>
 std::atomic<size_t> track<Shared>::instances(0);
 
@@ -37,8 +43,7 @@ track<Shared>::track(const std::string& DEBUG_ONLY(class_name))
 #endif
 {
 #ifndef NDEBUG
-    bc::log::debug(LOG_SYSTEM)
-        << class_ << "(" << ++instances << ")";
+    bc::log::debug(LOG_SYSTEM) << class_ << "(" << ++instances << ")";
 #endif
 }
 
@@ -46,8 +51,7 @@ template <class Shared>
 track<Shared>::~track()
 {
 #ifndef NDEBUG
-    bc::log::debug(LOG_SYSTEM)
-        << "~" << class_ << "(" << --instances << ")";
+    bc::log::debug(LOG_SYSTEM) << "~" << class_ << "(" << --instances << ")";
 #endif
 }
 

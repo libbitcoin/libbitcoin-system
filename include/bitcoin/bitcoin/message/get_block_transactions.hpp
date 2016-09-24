@@ -21,6 +21,7 @@
 #define LIBBITCOIN_MESSAGE_GET_BLOCK_TRANSACTIONS_HPP
 
 #include <istream>
+#include <memory>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>

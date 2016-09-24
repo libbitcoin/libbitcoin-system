@@ -231,9 +231,6 @@ transaction new_tx(const script_test& test)
     if (!parse(output_script, test.output))
         return{};
 
-    //log::debug() << test.input << " -> " << input;
-    //log::debug() << test.output << " -> " << output;
-
     input input;
     input.script = input_script;
     input.previous_output.cache.script = output_script;

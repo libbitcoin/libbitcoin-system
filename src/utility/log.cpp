@@ -27,7 +27,12 @@
 #include <boost/format.hpp>
 #include <bitcoin/bitcoin/unicode/unicode.hpp>
 
+// libbitcoin defines the log and tracking but does not use them.
+// These are defined in bc so that they can be used in network and blockchain.
+
 namespace libbitcoin {
+
+const int log::append = std::ofstream::out | std::ofstream::app;
 
 log::log(level value, const std::string& domain)
   : level_(value), domain_(domain)
