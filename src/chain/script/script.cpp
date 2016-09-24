@@ -1509,9 +1509,12 @@ bool script::is_enabled(uint32_t flags, rule_fork flag)
     return (flag & flags) != 0;
 }
 
-inline void report(const char message[])
+inline void report(const char*)
 {
-    BITCOIN_ASSERT_MSG(false, message);
+    // Don't assert here since invalid script values are possible due to public
+    // access to the script stack. Our test cases populate these values even in
+    // the cases where the script parser may not.
+    ////BITCOIN_ASSERT_MSG(false, message);
 }
 
 static bool run_operation(const operation& op, const transaction& tx,
@@ -1798,19 +1801,19 @@ static bool run_operation(const operation& op, const transaction& tx,
         case opcode::bad_operation:
             // Our test cases pass bad_operation into scripts, for example:
             // [if bad_operation else op_1 endif]
-            ////report("Invalid operation (bad_operation sentinel) in script.");
+            report("Invalid operation (bad_operation sentinel) in script.");
             return false;
 
         case opcode::raw_data:
             // Our test cases pass raw_data into scripts, for example:
             // [if raw_data else op_1 endif]
-            ////report("Invalid operation (raw_data sentinel) in script.");
+            report("Invalid operation (raw_data sentinel) in script.");
             return false;
 
         default:
             // Our test cases pass these values into scripts, for example:
             // [if 188 else op_1 endif]
-            ////report("Invalid operation (unnamed) in script.");
+            report("Invalid operation (unnamed) in script.");
             return false;
     }
 
