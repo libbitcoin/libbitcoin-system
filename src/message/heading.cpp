@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/heading.hpp>
 
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/messages.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -45,7 +46,7 @@ const size_t heading::maximum_size()
 const size_t heading::maximum_payload_size(uint32_t)
 {
     static constexpr size_t vector = sizeof(uint32_t) + hash_size;
-    static constexpr size_t maximum = 3u + vector * 50000u;
+    static constexpr size_t maximum = 3u + vector * max_inventory_count;
     static_assert(maximum <= max_size_t, "maximum_payload_size overflow");
     return maximum;
 }
