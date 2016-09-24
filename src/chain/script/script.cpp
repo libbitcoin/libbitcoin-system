@@ -33,6 +33,7 @@
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/script_number.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -1508,6 +1509,11 @@ bool script::is_enabled(uint32_t flags, rule_fork flag)
     return (flag & flags) != 0;
 }
 
+inline void report(const char message[])
+{
+    BITCOIN_ASSERT_MSG(false, message);
+}
+
 static bool run_operation(const operation& op, const transaction& tx,
     uint32_t input_index, const script& script, evaluation_context& context,
     uint32_t flags)
@@ -1519,8 +1525,7 @@ static bool run_operation(const operation& op, const transaction& tx,
         case opcode::pushdata1:
         case opcode::pushdata2:
         case opcode::pushdata4:
-            BITCOIN_ASSERT_MSG(false,
-                "Invalid push operation in run_operation");
+            report("Invalid push operation in script.");
             return true;
 
         case opcode::negative_1:
@@ -1561,8 +1566,7 @@ static bool run_operation(const operation& op, const transaction& tx,
 
         case opcode::verif:
         case opcode::vernotif:
-            BITCOIN_ASSERT_MSG(false,
-                "Disabled opcodes (verif/vernotif) in run_operation");
+            report("Disabled opcodes (verif/vernotif) in script.");
             return false;
 
         case opcode::else_:
@@ -1635,8 +1639,7 @@ static bool run_operation(const operation& op, const transaction& tx,
         case opcode::substr:
         case opcode::left:
         case opcode::right:
-            BITCOIN_ASSERT_MSG(false,
-                "Disabled splice operations in run_operation");
+            report("Disabled splice operations in script.");
             return false;
 
         case opcode::tuck:
@@ -1649,8 +1652,7 @@ static bool run_operation(const operation& op, const transaction& tx,
         case opcode::and_:
         case opcode::or_:
         case opcode::xor_:
-            BITCOIN_ASSERT_MSG(false,
-                "Disabled bit logic operations in run_operation");
+            report("Disabled bit logic operations in script.");
             return false;
 
         case opcode::equal:
@@ -1671,8 +1673,7 @@ static bool run_operation(const operation& op, const transaction& tx,
 
         case opcode::op_2mul:
         case opcode::op_2div:
-            BITCOIN_ASSERT_MSG(false,
-                "Disabled opcodes (2mul/2div) in run_operation");
+            report("Disabled opcodes (2mul/2div) in script.");
             return false;
 
         case opcode::negate:
@@ -1698,8 +1699,7 @@ static bool run_operation(const operation& op, const transaction& tx,
         case opcode::mod:
         case opcode::lshift:
         case opcode::rshift:
-            BITCOIN_ASSERT_MSG(false,
-                "Disabled numeric operations in run_operation");
+            report("Disabled numeric operations in script.");
             return false;
 
         case opcode::booland:
@@ -1754,10 +1754,7 @@ static bool run_operation(const operation& op, const transaction& tx,
             return op_hash256(context);
 
         case opcode::codeseparator:
-            // This is set in the main evaluate(...) loop
-            // code_begin is updated to the current position
-            BITCOIN_ASSERT_MSG(false,
-                "Invalid operation (codeseparator) in run_operation");
+            report("Invalid operation (codeseparator) in script.");
             return true;
 
         case opcode::checksig:
@@ -1798,12 +1795,22 @@ static bool run_operation(const operation& op, const transaction& tx,
         case opcode::op_nop10:
             return true;
 
+        case opcode::bad_operation:
+            // Our test cases pass bad_operation into scripts, for example:
+            // [if bad_operation else op_1 endif]
+            ////report("Invalid operation (bad_operation sentinel) in script.");
+            return false;
+
         case opcode::raw_data:
+            // Our test cases pass raw_data into scripts, for example:
+            // [if raw_data else op_1 endif]
+            ////report("Invalid operation (raw_data sentinel) in script.");
             return false;
 
         default:
-            ////log::fatal(LOG_SCRIPT) << "Unimplemented operation <none "
-            ////    << static_cast<int>(op.code) << ">";
+            // Our test cases pass these values into scripts, for example:
+            // [if 188 else op_1 endif]
+            ////report("Invalid operation (unnamed) in script.");
             return false;
     }
 
@@ -1907,12 +1914,6 @@ static bool next_step(const transaction& tx, uint32_t input_index,
         // opcodes above should assert inside run_operation
         return false;
     }
-
-    //log::debug() << "--------------------";
-    //log::debug() << "Run: " << opcode_to_string(op.code);
-    //log::debug() << "Stack:";
-    //for (auto s: context.stack)
-    //    log::debug() << "[" << encode_base16(s) << "]";
 
     // bit.ly/2cowHlP
     return context.stack.size() + context.alternate.size() <= max_stack_size;

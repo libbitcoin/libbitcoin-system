@@ -26,6 +26,9 @@
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 
+// libbitcoin defines the log and tracking but does not use them.
+// These are defined in bc so that they can be used in network and blockchain.
+
 namespace libbitcoin {
 
 class BC_API log
@@ -43,6 +46,8 @@ public:
 
     typedef std::function<void(level, const std::string&, const std::string&)>
         functor;
+
+    static const int append;
 
     log(level value, const std::string& domain);
     log(log&& other);

@@ -21,7 +21,10 @@
 
 #include <cstddef>
 #include <string>
-#include <bitcoin/bitcoin/utility/log.hpp>
+////#include <bitcoin/bitcoin/utility/log.hpp>
+
+// libbitcoin defines the log and tracking but does not use them.
+// These are defined in bc so that they can be used in network and blockchain.
 
 namespace libbitcoin {
 
@@ -38,9 +41,9 @@ monitor::~monitor()
 
 void monitor::trace(size_t count, const std::string& action) const
 {
-#ifndef NDEBUG
-    ////log::debug(LOG_SYSTEM) << action << " " << name_ << " {" << count << "}";
-#endif
+////#ifndef NDEBUG
+////    log::debug(LOG_SYSTEM) << action << " " << name_ << " {" << count << "}";
+////#endif
 }
 
 } // namespace libbitcoin

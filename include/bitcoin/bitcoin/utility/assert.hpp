@@ -34,7 +34,4 @@
 // This is used to prevent bogus compiler warnings about unused variables.
 #define UNUSED(expression) (void)(expression)
 
-#include <bitcoin/bitcoin/utility/monitor.hpp>
-#include <bitcoin/bitcoin/utility/track.hpp>
-
 #endif

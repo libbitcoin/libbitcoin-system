@@ -24,6 +24,9 @@
 #include <cstddef>
 #include <string>
 
+// libbitcoin defines the log and tracking but does not use them.
+// These are defined in bc so that they can be used in network and blockchain.
+
 #define CONSTRUCT_TRACK(class_name) \
     track<class_name>(#class_name)
 

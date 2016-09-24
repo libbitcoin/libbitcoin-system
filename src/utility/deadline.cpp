@@ -21,7 +21,6 @@
 
 #include <functional>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -35,8 +34,8 @@ using std::placeholders::_1;
 // This is guaranteed to call handler exactly once unless canceled or reset.
 deadline::deadline(threadpool& pool, const asio::duration duration)
   : duration_(duration),
-    timer_(pool.service()),
-    CONSTRUCT_TRACK(deadline)
+    timer_(pool.service())
+    /*, CONSTRUCT_TRACK(deadline)*/
 {
 }
 
