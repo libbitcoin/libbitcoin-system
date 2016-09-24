@@ -61,6 +61,7 @@
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/hash_number.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/math/script_number.hpp>
 #include <bitcoin/bitcoin/math/stealth.hpp>
 #include <bitcoin/bitcoin/math/uint256.hpp>
