@@ -40,9 +40,6 @@ log::log(level value, const std::string& domain)
 {
 }
 
-// g++ bug in initializer list.
-// It should be: stream_(std::move(other.stream_))
-// gcc.gnu.org/bugzilla/show_bug.cgi?id=54316
 log::log(log&& other)
   : level_(other.level_),
     domain_(std::move(other.domain_)),
