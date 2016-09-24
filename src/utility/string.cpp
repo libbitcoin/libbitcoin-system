@@ -25,16 +25,15 @@
 
 namespace libbitcoin {
 
-std::string join(const string_list& words,
-    const std::string& delimiter)
+std::string join(const string_list& words, const std::string& delimiter)
 {
     return boost::join(words, delimiter);
 }
 
 // Note that use of token_compress_on may cause unexpected results when
 // working with CSV-style lists that accept empty elements.
-string_list split(const std::string& sentence,
-    const std::string& delimiter, bool trim)
+string_list split(const std::string& sentence, const std::string& delimiter,
+    bool trim)
 {
     string_list words;
     const auto compress = boost::token_compress_on;
