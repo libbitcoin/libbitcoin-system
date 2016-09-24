@@ -71,6 +71,11 @@ void output_point::reset()
     static_cast<point>(*this).reset();
 }
 
+bool output_point::is_cached() const
+{
+    return cache.value != output::not_found;
+}
+
 // For tx pool validation target_height is that of the *next* block.
 // For block validation target_height is that for which block is considered.
 // Returns true if the previous output is mature enough to spend from height.
