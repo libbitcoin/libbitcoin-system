@@ -52,6 +52,9 @@ public:
 
     void reset();
 
+    /// Determine if the previous output cache is populated.
+    bool is_cached() const;
+
     /// Using .height and the given target height, determine spend maturity.
     bool is_mature(size_t target_height) const;
 
