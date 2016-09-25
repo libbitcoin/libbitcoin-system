@@ -490,7 +490,7 @@ code block::check() const
         return error::size_limits;
 
     else if (!header.is_valid_proof_of_work())
-        return error::proof_of_work;
+        return error::invalid_proof_of_work;
 
     else if (!header.is_valid_time_stamp())
         return error::futuristic_timestamp;
