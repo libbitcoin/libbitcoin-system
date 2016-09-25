@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <boost/test/unit_test.hpp>
+
+#include <cstddef>
+#include <cstdint>
 #include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
@@ -84,124 +87,226 @@ BOOST_AUTO_TEST_CASE(limit__floor_subtract__size_t_half_minus_maximum__minimum)
     BOOST_REQUIRE_EQUAL(floor_subtract(half, maximum), minimum);
 }
 
-static const uint32_t minimum32 = 0;
-static const uint32_t maximum32 = max_uint32;
-static const uint32_t half32 = maximum32 / 2;
+static const uint32_t min_uint32 = 0;
+static const uint32_t half_uint32 = max_uint32 / 2;
 
 // ceiling_add32
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(limit__ceiling_add__minimum32_plus_minimum__minimum32)
+BOOST_AUTO_TEST_CASE(limit__ceiling_add__min_uint32_plus_minimum__min_uint32)
 {
-    BOOST_REQUIRE_EQUAL(ceiling_add(minimum32, minimum32), minimum32);
+    BOOST_REQUIRE_EQUAL(ceiling_add(min_uint32, min_uint32), min_uint32);
 }
 
-BOOST_AUTO_TEST_CASE(limit__ceiling_add__maximum32_plus_maximum32__maximum32)
+BOOST_AUTO_TEST_CASE(limit__ceiling_add__max_uint32_plus_max_uint32__max_uint32)
 {
-    BOOST_REQUIRE_EQUAL(ceiling_add(maximum32, maximum32), maximum32);
+    BOOST_REQUIRE_EQUAL(ceiling_add(max_uint32, max_uint32), max_uint32);
 }
 
-BOOST_AUTO_TEST_CASE(limit__ceiling_add__minimum32_plus_maximum32__maximum32)
+BOOST_AUTO_TEST_CASE(limit__ceiling_add__min_uint32_plus_max_uint32__max_uint32)
 {
-    BOOST_REQUIRE_EQUAL(ceiling_add(minimum32, maximum32), maximum32);
+    BOOST_REQUIRE_EQUAL(ceiling_add(min_uint32, max_uint32), max_uint32);
 }
 
-BOOST_AUTO_TEST_CASE(limit__ceiling_add__maximum32_plus_minimum32__maximum32)
+BOOST_AUTO_TEST_CASE(limit__ceiling_add__max_uint32_plus_min_uint32__max_uint32)
 {
-    BOOST_REQUIRE_EQUAL(ceiling_add(maximum32, minimum32), maximum32);
+    BOOST_REQUIRE_EQUAL(ceiling_add(max_uint32, min_uint32), max_uint32);
 }
 
-BOOST_AUTO_TEST_CASE(limit__ceiling_add__half32_plus_maximum32__maximum32)
+BOOST_AUTO_TEST_CASE(limit__ceiling_add__half_uint32_plus_max_uint32__max_uint32)
 {
-    BOOST_REQUIRE_EQUAL(ceiling_add(half32, maximum32), maximum32);
+    BOOST_REQUIRE_EQUAL(ceiling_add(half_uint32, max_uint32), max_uint32);
 }
 
 // floor_subtract32
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(limit__floor_subtract__minimum32_minus_minimum32__minimum32)
+BOOST_AUTO_TEST_CASE(limit__floor_subtract__min_uint32_minus_min_uint32__min_uint32)
 {
-    BOOST_REQUIRE_EQUAL(floor_subtract(minimum32, minimum32), minimum32);
+    BOOST_REQUIRE_EQUAL(floor_subtract(min_uint32, min_uint32), min_uint32);
 }
 
-BOOST_AUTO_TEST_CASE(limit__floor_subtract__maximum32_minus_maximum32__minimum32)
+BOOST_AUTO_TEST_CASE(limit__floor_subtract__max_uint32_minus_max_uint32__min_uint32)
 {
-    BOOST_REQUIRE_EQUAL(floor_subtract(maximum32, maximum32), minimum32);
+    BOOST_REQUIRE_EQUAL(floor_subtract(max_uint32, max_uint32), min_uint32);
 }
 
-BOOST_AUTO_TEST_CASE(limit__floor_subtract__maximum32_minus_minimum32__maximum32)
+BOOST_AUTO_TEST_CASE(limit__floor_subtract__max_uint32_minus_min_uint32__max_uint32)
 {
-    BOOST_REQUIRE_EQUAL(floor_subtract(maximum32, minimum32), maximum32);
+    BOOST_REQUIRE_EQUAL(floor_subtract(max_uint32, min_uint32), max_uint32);
 }
 
-BOOST_AUTO_TEST_CASE(limit__floor_subtract__minimum32_minus_maximum32__minimum32)
+BOOST_AUTO_TEST_CASE(limit__floor_subtract__min_uint32_minus_max_uint32__min_uint32)
 {
-    BOOST_REQUIRE_EQUAL(floor_subtract(minimum32, maximum32), minimum32);
+    BOOST_REQUIRE_EQUAL(floor_subtract(min_uint32, max_uint32), min_uint32);
 }
 
-BOOST_AUTO_TEST_CASE(limit__floor_subtract__half32_minus_maximum32__minimum32)
+BOOST_AUTO_TEST_CASE(limit__floor_subtract__half_uint32_minus_max_uint32__min_uint32)
 {
-    BOOST_REQUIRE_EQUAL(floor_subtract(half32, maximum32), minimum32);
+    BOOST_REQUIRE_EQUAL(floor_subtract(half_uint32, max_uint32), min_uint32);
 }
 
-static const uint64_t minimum64 = 0;
-static const uint64_t maximum64 = max_uint64;
-static const uint64_t half64 = maximum64 / 2;
+static const uint64_t min_uint64 = 0;
+static const uint64_t half_uint64 = max_uint64 / 2;
 
 // ceiling_add64
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(limit__ceiling_add__minimum64_plus_minimum64__minimum64)
+BOOST_AUTO_TEST_CASE(limit__ceiling_add__min_uint64_plus_min_uint64__min_uint64)
 {
-    BOOST_REQUIRE_EQUAL(ceiling_add(minimum64, minimum64), minimum64);
+    BOOST_REQUIRE_EQUAL(ceiling_add(min_uint64, min_uint64), min_uint64);
 }
 
-BOOST_AUTO_TEST_CASE(limit__ceiling_add__maximum64_plus_maximum64__maximum64)
+BOOST_AUTO_TEST_CASE(limit__ceiling_add__max_uint64_plus_max_uint64__max_uint64)
 {
-    BOOST_REQUIRE_EQUAL(ceiling_add(maximum64, maximum64), maximum64);
+    BOOST_REQUIRE_EQUAL(ceiling_add(max_uint64, max_uint64), max_uint64);
 }
 
-BOOST_AUTO_TEST_CASE(limit__ceiling_add__minimum64_plus_maximum64__maximum64)
+BOOST_AUTO_TEST_CASE(limit__ceiling_add__min_uint64_plus_max_uint64__max_uint64)
 {
-    BOOST_REQUIRE_EQUAL(ceiling_add(minimum64, maximum64), maximum64);
+    BOOST_REQUIRE_EQUAL(ceiling_add(min_uint64, max_uint64), max_uint64);
 }
 
-BOOST_AUTO_TEST_CASE(limit__ceiling_add__maximum64_plus_minimum64__maximum64)
+BOOST_AUTO_TEST_CASE(limit__ceiling_add__max_uint64_plus_min_uint64__max_uint64)
 {
-    BOOST_REQUIRE_EQUAL(ceiling_add(maximum64, minimum64), maximum64);
+    BOOST_REQUIRE_EQUAL(ceiling_add(max_uint64, min_uint64), max_uint64);
 }
 
-BOOST_AUTO_TEST_CASE(limit__ceiling_add__half64_plus_maximum64__maximum64)
+BOOST_AUTO_TEST_CASE(limit__ceiling_add__half_uint64_plus_max_uint64__max_uint64)
 {
-    BOOST_REQUIRE_EQUAL(ceiling_add(half64, maximum64), maximum64);
+    BOOST_REQUIRE_EQUAL(ceiling_add(half_uint64, max_uint64), max_uint64);
 }
 
 // floor_subtract64
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(limit__floor_subtract__minimum64_minus_minimum64__minimum64)
+BOOST_AUTO_TEST_CASE(limit__floor_subtract__min_uint64_minus_min_uint64__min_uint64)
 {
-    BOOST_REQUIRE_EQUAL(floor_subtract(minimum64, minimum64), minimum64);
+    BOOST_REQUIRE_EQUAL(floor_subtract(min_uint64, min_uint64), min_uint64);
 }
 
-BOOST_AUTO_TEST_CASE(limit__floor_subtract__maximum64_minus_maximum64__minimum64)
+BOOST_AUTO_TEST_CASE(limit__floor_subtract__max_uint64_minus_max_uint64__min_uint64)
 {
-    BOOST_REQUIRE_EQUAL(floor_subtract(maximum64, maximum64), minimum64);
+    BOOST_REQUIRE_EQUAL(floor_subtract(max_uint64, max_uint64), min_uint64);
 }
 
-BOOST_AUTO_TEST_CASE(limit__floor_subtract__maximum64_minus_minimum64__maximum64)
+BOOST_AUTO_TEST_CASE(limit__floor_subtract__max_uint64_minus_min_uint64__max_uint64)
 {
-    BOOST_REQUIRE_EQUAL(floor_subtract(maximum64, minimum64), maximum64);
+    BOOST_REQUIRE_EQUAL(floor_subtract(max_uint64, min_uint64), max_uint64);
 }
 
-BOOST_AUTO_TEST_CASE(limit__floor_subtract__minimum64_minus_maximum64__minimum64)
+BOOST_AUTO_TEST_CASE(limit__floor_subtract__min_uint64_minus_max_uint64__min_uint64)
 {
-    BOOST_REQUIRE_EQUAL(floor_subtract(minimum64, maximum64), minimum64);
+    BOOST_REQUIRE_EQUAL(floor_subtract(min_uint64, max_uint64), min_uint64);
 }
 
-BOOST_AUTO_TEST_CASE(limit__floor_subtract__half64_minus_maximum64__minimum64)
+BOOST_AUTO_TEST_CASE(limit__floor_subtract__half_uint64_minus_max_uint64__min_uint64)
 {
-    BOOST_REQUIRE_EQUAL(floor_subtract(half64, maximum64), minimum64);
+    BOOST_REQUIRE_EQUAL(floor_subtract(half_uint64, max_uint64), min_uint64);
+}
+
+// safe_add
+//-----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(limit__safe_add__size_t_minimum_plus_minimum__minimum)
+{
+    BOOST_REQUIRE_EQUAL(safe_add(minimum, minimum), minimum);
+}
+
+BOOST_AUTO_TEST_CASE(limit__safe_add__size_t_maximum_plus_maximum__throws_overflow)
+{
+    BOOST_REQUIRE_THROW(safe_add(maximum, maximum), std::overflow_error);
+}
+
+BOOST_AUTO_TEST_CASE(limit__safe_add__size_t_minimum_plus_maximum__maximum)
+{
+    BOOST_REQUIRE_EQUAL(safe_add(minimum, maximum), maximum);
+}
+
+BOOST_AUTO_TEST_CASE(limit__safe_add__size_t_maximum_plus_minimum__maximum)
+{
+    BOOST_REQUIRE_EQUAL(safe_add(maximum, minimum), maximum);
+}
+
+BOOST_AUTO_TEST_CASE(limit__safe_add__size_t_half_plus_maximum__throws_overflow)
+{
+    BOOST_REQUIRE_THROW(safe_add(half, maximum), std::overflow_error);
+}
+
+// safe_subtract
+//-----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(limit__safe_subtract__size_t_minimum_minus_minimum__minimum)
+{
+    BOOST_REQUIRE_EQUAL(safe_subtract(minimum, minimum), minimum);
+}
+
+BOOST_AUTO_TEST_CASE(limit__safe_subtract__size_t_maximum_minus_maximum__minimum)
+{
+    BOOST_REQUIRE_EQUAL(safe_subtract(maximum, maximum), minimum);
+}
+
+BOOST_AUTO_TEST_CASE(limit__safe_subtract__size_t_maximum_minus_minimum__maximum)
+{
+    BOOST_REQUIRE_EQUAL(safe_subtract(maximum, minimum), maximum);
+}
+
+BOOST_AUTO_TEST_CASE(limit__safe_subtract__size_t_minimum_minus_maximum__throws_underflow)
+{
+    BOOST_REQUIRE_THROW(safe_subtract(minimum, maximum), std::underflow_error);
+}
+
+BOOST_AUTO_TEST_CASE(limit__safe_subtract__size_t_half_minus_maximum__throws_underflow)
+{
+    BOOST_REQUIRE_THROW(safe_subtract(half, maximum), std::underflow_error);
+}
+
+// safe_assign
+//-----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(limit__safe_assign__size_t_minimum_to_size_t__minimum)
+{
+    BOOST_REQUIRE_EQUAL(safe_assign<size_t>(minimum), minimum);
+}
+
+BOOST_AUTO_TEST_CASE(limit__safe_assign__size_t_maximum_to_size_t_maximum)
+{
+    BOOST_REQUIRE_EQUAL(safe_assign<size_t>(maximum), maximum);
+}
+
+BOOST_AUTO_TEST_CASE(limit__safe_assign__min_uint64_to_uint32__min_uint32)
+{
+    BOOST_REQUIRE_EQUAL(safe_assign<uint32_t>(min_uint64), min_uint32);
+}
+
+BOOST_AUTO_TEST_CASE(limit__safe_assign__max_uint32_to_uint64__max_uint32)
+{
+    BOOST_REQUIRE_EQUAL(safe_assign<uint64_t>(min_uint32), min_uint32);
+}
+
+BOOST_AUTO_TEST_CASE(limit__safe_assign__max_uint64_to_uint32__throws_range)
+{
+    BOOST_REQUIRE_THROW(safe_assign<uint32_t>(max_uint64), std::range_error);
+}
+
+BOOST_AUTO_TEST_CASE(limit__safe_assign__min_int64_to_uint32__min_uint32)
+{
+    BOOST_REQUIRE_THROW(safe_assign<uint32_t>(min_int64), std::range_error);
+}
+
+BOOST_AUTO_TEST_CASE(limit__safe_assign__max_int64_to_uint32__throws_range)
+{
+    BOOST_REQUIRE_THROW(safe_assign<uint32_t>(max_int64), std::range_error);
+}
+
+BOOST_AUTO_TEST_CASE(limit__safe_assign__min_uint64_to_int32__min_int32)
+{
+    BOOST_REQUIRE_THROW(safe_assign<int32_t>(min_uint64), std::range_error);
+}
+
+BOOST_AUTO_TEST_CASE(limit__safe_assign__max_uint64_to_int32__throws_range)
+{
+    BOOST_REQUIRE_THROW(safe_assign<int32_t>(max_uint64), std::range_error);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
