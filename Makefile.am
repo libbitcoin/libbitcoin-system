@@ -245,6 +245,7 @@ test_libbitcoin_test_SOURCES = \
     test/math/hash.cpp \
     test/math/hash.hpp \
     test/math/hash_number.cpp \
+    test/math/limits.cpp \
     test/math/script_number.cpp \
     test/math/script_number.hpp \
     test/math/stealth.cpp \
@@ -406,6 +407,7 @@ include_bitcoin_bitcoin_math_HEADERS = \
     include/bitcoin/bitcoin/math/elliptic_curve.hpp \
     include/bitcoin/bitcoin/math/hash.hpp \
     include/bitcoin/bitcoin/math/hash_number.hpp \
+    include/bitcoin/bitcoin/math/limits.hpp \
     include/bitcoin/bitcoin/math/script_number.hpp \
     include/bitcoin/bitcoin/math/stealth.hpp \
     include/bitcoin/bitcoin/math/uint256.hpp

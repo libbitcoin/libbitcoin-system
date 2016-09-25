@@ -103,6 +103,7 @@ BC_CONSTEXPR size_t testnet_bip30_exception_height2 = 0;
 
 // Network protocol constants.
 BC_CONSTEXPR size_t command_size = 12;
+BC_CONSTEXPR size_t max_inventory_count = 50000;
 
 BC_CONSTFUNC uint64_t max_money_recursive(uint64_t current)
 {

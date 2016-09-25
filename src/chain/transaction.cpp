@@ -28,6 +28,7 @@
 #include <sstream>
 #include <utility>
 #include <vector>
+#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/chain/input.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
@@ -36,7 +37,7 @@
 #include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -44,22 +45,6 @@
 
 namespace libbitcoin {
 namespace chain {
-    
-// TODO: centralize without exposing numeric_limits to headers :/.
-template <typename Integer,
-    typename = std::enable_if<std::is_unsigned<Integer>::value>>
-Integer ceiling_add(Integer left, Integer right)
-{
-    static const auto ceiling = std::numeric_limits<Integer>::max();
-    return left > ceiling - right ? ceiling : left + right;
-}
-
-template <typename Integer,
-    typename = std::enable_if<std::is_unsigned<Integer>::value>>
-Integer floor_subtract(Integer left, Integer right)
-{
-    return right >= left ? 0 : left - right;
-}
 
 // Read a length-prefixed collection of inputs or outputs from the source.
 template<class Source, class Put>

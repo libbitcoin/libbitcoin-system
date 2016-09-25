@@ -36,6 +36,7 @@
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/hash_number.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/math/script_number.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -47,22 +48,6 @@ namespace libbitcoin {
 namespace chain {
 
 using namespace bc::config;
-
-// TODO: centralize without exposing numeric_limits to headers :/.
-template <typename Integer,
-    typename = std::enable_if<std::is_unsigned<Integer>::value>>
-Integer ceiling_add(Integer left, Integer right)
-{
-    static const auto ceiling = std::numeric_limits<Integer>::max();
-    return left > ceiling - right ? ceiling : left + right;
-}
-
-template <typename Integer,
-    typename = std::enable_if<std::is_unsigned<Integer>::value>>
-Integer floor_subtract(Integer left, Integer right)
-{
-    return right >= left ? 0 : left - right;
-}
 
 const size_t block::metadata::orphan_height = 0;
 
