@@ -245,6 +245,7 @@ test_libbitcoin_test_SOURCES = \
     test/math/hash.cpp \
     test/math/hash.hpp \
     test/math/hash_number.cpp \
+    test/math/limits.cpp \
     test/math/script_number.cpp \
     test/math/script_number.hpp \
     test/math/stealth.cpp \

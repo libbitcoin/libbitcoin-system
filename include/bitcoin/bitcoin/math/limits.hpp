@@ -21,21 +21,16 @@
 #define LIBBITCOIN_LIMITS_HPP
 
 #include <algorithm>
+#include <limits>
 #include <bitcoin/bitcoin/constants.hpp>
 
 namespace libbitcoin {
 
-// This is a big ugly but it avoids exposing numeric_limits to headers.
-
-inline uint64_t ceiling_add(uint64_t left, uint64_t right)
+template <typename Integer,
+    typename = std::enable_if<std::is_unsigned<Integer>::value>>
+Integer ceiling_add(Integer left, Integer right)
 {
-    static const auto ceiling = max_uint64;
-    return left > ceiling - right ? ceiling : left + right;
-}
-
-inline uint64_t ceiling_add(uint32_t left, uint32_t right)
-{
-    static const auto ceiling = max_uint32;
+    static const auto ceiling = std::numeric_limits<Integer>::max();
     return left > ceiling - right ? ceiling : left + right;
 }
 
@@ -43,7 +38,8 @@ template <typename Integer,
     typename = std::enable_if<std::is_unsigned<Integer>::value>>
 Integer floor_subtract(Integer left, Integer right)
 {
-    return right >= left ? 0 : left - right;
+    static const auto floor = std::numeric_limits<Integer>::min();
+    return right >= left ? floor : left - right;
 }
 
 } // namespace libbitcoin
