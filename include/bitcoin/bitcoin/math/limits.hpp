@@ -28,7 +28,16 @@
 
 namespace libbitcoin {
 
-#define UNSIGNED(T) std::enable_if<std::is_unsigned<T>::value>
+#define IF(T) std::enable_if<T>
+#define SIGN(T) std::is_signed<T>::value
+#define UNSIGN(T) std::is_unsigned<T>::value
+
+#define SIGNED(A) IF(SIGN(A))
+#define UNSIGNED(A) IF(UNSIGN(A))
+#define SIGNED_SIGNED(A, B) IF(SIGN(A) && SIGN(B))
+#define SIGNED_UNSIGNED(A, B) IF(SIGN(A) && UNSIGN(B))
+#define UNSIGNED_SIGNED(A, B) IF(UNSIGN(A) && SIGN(B))
+#define UNSIGNED_UNSIGNED(A, B) IF(UNSIGN(A) && UNSIGN(B))
 
 template <typename Integer, typename = UNSIGNED(Integer)>
 Integer ceiling_add(Integer left, Integer right)
@@ -82,17 +91,53 @@ Integer& safe_decrement(Integer& value)
     return value;
 }
 
-template <typename To, typename From>
-To safe_assign(From value)
+template <typename To, typename From, typename = SIGNED_SIGNED(To, From)>
+To safe_signed(From signed_value)
 {
-    static const auto maximum = std::numeric_limits<To>::max();
-    static const auto minimum = std::numeric_limits<To>::min();
+    static const auto signed_minimum = std::numeric_limits<To>::min();
+    static const auto signed_maximum = std::numeric_limits<To>::max();
 
-    if (value < minimum || value > maximum)
-        throw std::range_error("assignment out of range");
+    if (signed_value < signed_minimum || signed_value > signed_maximum)
+        throw std::range_error("signed assignment out of range");
 
-    // This should be the only integer cast in the codebase.
-    return static_cast<To>(value);
+    return static_cast<To>(signed_value);
+}
+
+template <typename To, typename From, typename = UNSIGNED_UNSIGNED(To, From)>
+To safe_unsigned(From unsigned_value)
+{
+    static const auto unsigned_minimum = std::numeric_limits<To>::min();
+    static const auto unsigned_maximum = std::numeric_limits<To>::max();
+
+    if (unsigned_value < unsigned_minimum || unsigned_value > unsigned_maximum)
+        throw std::range_error("unsigned assignment out of range");
+
+    return static_cast<To>(unsigned_value);
+}
+
+template <typename To, typename From, typename = SIGNED_UNSIGNED(To, From)>
+To safe_to_signed(From unsigned_value)
+{
+    static_assert(sizeof(uint64_t) >= sizeof(To), "safe_assign out of range");
+    static const auto signed_maximum = std::numeric_limits<To>::max();
+
+    if (unsigned_value > static_cast<uint64_t>(signed_maximum))
+        throw std::range_error("to signed assignment out of range");
+
+    return static_cast<To>(unsigned_value);
+}
+
+template <typename To, typename From, typename = UNSIGNED_SIGNED(To, From)>
+To safe_to_unsigned(From signed_value)
+{
+    static_assert(sizeof(uint64_t) >= sizeof(To), "safe_assign out of range");
+    static const auto unsigned_maximum = std::numeric_limits<To>::max();
+
+    if (signed_value < 0 || 
+        static_cast<uint64_t>(signed_value) > unsigned_maximum)
+        throw std::range_error("to unsigned assignment out of range");
+
+    return static_cast<To>(signed_value);
 }
 
 /// Constrain a numeric value within a given range.
@@ -105,10 +150,18 @@ Bound range_constrain(Value value, Bound minimum, Bound maximum)
     if (value > maximum)
         return maximum;
 
-    return safe_assign<Bound>(value);
+    return static_cast<Bound>(value);
 }
 
+#undef IF
+#undef SIGN
+#undef UNSIGN
+#undef SIGNED
 #undef UNSIGNED
+#undef SIGNED_SIGNED
+#undef SIGNED_UNSIGNED
+#undef UNSIGNED_SIGNED
+#undef UNSIGNED_UNSIGNED
 
 } // namespace libbitcoin
 
