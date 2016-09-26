@@ -98,6 +98,45 @@ script script::factory_from_data(reader& source, bool prefix, parse_mode mode)
     return instance;
 }
 
+script::script()
+  : operations(), is_raw_(false)
+{
+}
+
+script::script(const operation::stack& operations)
+  : operations(operations), is_raw_(false)
+{
+}
+
+script::script(operation::stack&& operations)
+  : operations(std::forward<operation::stack>(operations)), is_raw_(false)
+{
+}
+
+script::script(const script& other)
+  : operations(other.operations), is_raw_(other.is_raw_)
+{
+}
+
+script::script(script&& other)
+  : operations(std::forward<operation::stack>(other.operations)), is_raw_(other.is_raw_)
+{
+}
+
+script& script::operator=(script&& other)
+{
+    operations = std::move(other.operations);
+    is_raw_ = other.is_raw_;
+    return *this;
+}
+
+script& script::operator=(const script& other)
+{
+    operations = other.operations;
+    is_raw_ = other.is_raw_;
+    return *this;
+}
+
 script_pattern script::pattern() const
 {
     if (operation::is_null_data_pattern(operations))
@@ -132,8 +171,7 @@ script_pattern script::pattern() const
 
 bool script::is_raw_data() const
 {
-    return (operations.size() == 1) &&
-        (operations[0].code == opcode::raw_data);
+    return (operations.size() == 1) && is_raw_;
 }
 
 bool script::is_valid() const
@@ -147,6 +185,7 @@ bool script::is_valid() const
 void script::reset()
 {
     operations.clear();
+    is_raw_ = false;
 }
 
 bool script::from_data(const data_chunk& data, bool prefix, parse_mode mode)
@@ -231,8 +270,8 @@ void script::to_data(writer& sink, bool prefix) const
     if (prefix)
         sink.write_variable_uint_little_endian(satoshi_content_size());
 
-    if ((operations.size() > 0) && (operations[0].code == opcode::raw_data))
-        operations[0].to_data(sink);
+    if (is_raw_data())
+        sink.write_data(operations[0].data);
     else
         for (const auto& op: operations)
             op.to_data(sink);
@@ -240,8 +279,8 @@ void script::to_data(writer& sink, bool prefix) const
 
 uint64_t script::satoshi_content_size() const
 {
-    if (operations.size() > 0 && (operations[0].code == opcode::raw_data))
-        return operations[0].serialized_size();
+    if (is_raw_data())
+        return (operations[0].serialized_size() - 1);
 
     const auto value = [](uint64_t total, const operation& op)
     {
@@ -397,6 +436,7 @@ bool script::deserialize(const data_chunk& raw_script, parse_mode mode)
 
         operations.clear();
         operations.push_back(std::move(op));
+        is_raw_ = true;
     }
 
     return result;

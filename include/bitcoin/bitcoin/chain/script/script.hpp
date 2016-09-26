@@ -118,6 +118,12 @@ public:
     static code verify(const transaction& tx, uint32_t input_index,
         const script& prevout_script, uint32_t flags);
 
+    script();
+    script(const operation::stack& operations);
+    script(operation::stack&& operations);
+    script(const script& other);
+    script(script&& other);
+
     script_pattern pattern() const;
     bool is_raw_data() const;
     bool from_data(const data_chunk& data, bool prefix, parse_mode mode);
@@ -138,9 +144,14 @@ public:
 
     operation::stack operations;
 
+    script& operator=(script&& other);
+    script& operator=(const script& other);
+
 private:
     bool deserialize(const data_chunk& raw_script, parse_mode mode);
     bool parse(const data_chunk& raw_script);
+
+    bool is_raw_;
 };
 
 } // namespace chain

@@ -313,9 +313,11 @@ BOOST_AUTO_TEST_CASE(script__is_raw_data_code_not_equal_raw_data_returns_false)
 
 BOOST_AUTO_TEST_CASE(script__is_raw_data_returns_true)
 {
-    script instance;
-    instance.operations.emplace_back();
-    instance.operations.back().code = opcode::raw_data;
+    const auto data = to_chunk(base16_literal("0ac12ca4e"));
+
+    auto instance = script::factory_from_data(data, false,
+        script::parse_mode::raw_data);
+
     BOOST_REQUIRE_EQUAL(true, instance.is_raw_data());
 }
 
@@ -341,6 +343,32 @@ BOOST_AUTO_TEST_CASE(script__factory_from_data_reader_test)
     istream_reader source(istream);
     auto instance = script::factory_from_data(source, false, script::parse_mode::strict);
     BOOST_REQUIRE(instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(script__from_data__roundtrip_first_byte_code_collision_with_raw_data__success)
+{
+    const auto raw = to_chunk(base16_literal(
+        "bb566a54e38193e381aee4b896e7958ce381afe496e4babae381abe38288e381"
+        "a3e381a6e7ac91e9a194e38292e5a5aae3828fe3828ce3828be7bea9e58b99e3"
+        "8292e8a8ade38191e381a6e381afe38184e381aae38184"));
+
+    script instance;
+    BOOST_REQUIRE_EQUAL(true, instance.from_data(raw, false, script::parse_mode::strict));
+    const auto reserialized = instance.to_data(false);
+    BOOST_REQUIRE_EQUAL(true, raw == reserialized);
+}
+
+BOOST_AUTO_TEST_CASE(script__from_data__roundtrip_code_collision_with_raw_data__success)
+{
+    const auto raw = to_chunk(base16_literal(
+        "566a54e38193e381aee4b896e7958ce381afe4bb96e4babae381abe38288e381"
+        "a3e381a6e7ac91e9a194e38292e5a5aae3828fe3828ce3828be7bea9e58b99e3"
+        "8292e8a8ade38191e381a6e381afe38184e381aae38184"));
+
+    script instance;
+    BOOST_REQUIRE_EQUAL(true, instance.from_data(raw, false, script::parse_mode::strict));
+    const auto reserialized = instance.to_data(false);
+    BOOST_REQUIRE_EQUAL(true, raw == reserialized);
 }
 
 // Valid pay-to-script-hash scripts are valid regardless of context,
