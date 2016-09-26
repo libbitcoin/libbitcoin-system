@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/block_transactions.hpp>
 
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -94,7 +95,7 @@ bool block_transactions::from_data(uint32_t version, reader& source)
 
     if (result)
     {
-        transactions.resize(count);
+        transactions.resize(safe_unsigned<size_t>(count));
 
         for (auto& transaction: transactions)
         {

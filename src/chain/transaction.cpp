@@ -55,7 +55,7 @@ bool read(Source& source, std::vector<Put>& puts)
     if (!source)
         return false;
 
-    puts.resize(put_count);
+    puts.resize(safe_unsigned<size_t>(put_count));
     auto from = [&source](Put& put) { return put.from_data(source); };
     return std::all_of(puts.begin(), puts.end(), from);
 }
@@ -356,9 +356,8 @@ bool transaction::is_final(size_t block_height, uint32_t block_time) const
     if (locktime == 0)
         return true;
 
-    BITCOIN_ASSERT(block_height <= max_uint32);
     const auto max_locktime = locktime < locktime_threshold ?
-        static_cast<uint32_t>(block_height) : block_time;
+        safe_unsigned<uint32_t>(block_height) : block_time;
 
     if (locktime < max_locktime)
         return true;
@@ -455,12 +454,11 @@ bool transaction::is_missing_inputs() const
 point::indexes transaction::missing_inputs() const
 {
     point::indexes missing;
-    BITCOIN_ASSERT(inputs.size() <= max_uint32);
 
     // The cache value is set to not_found if the output doesn't exist.
     for (size_t in = 0; in < inputs.size(); ++in)
         if (inputs[in].previous_output.cache.value == output::not_found)
-            missing.push_back(static_cast<uint32_t>(in));
+            missing.push_back(safe_unsigned<uint32_t>(in));
 
     return missing;
 }
@@ -480,12 +478,11 @@ bool transaction::is_double_spend(bool include_unconfirmed) const
 point::indexes transaction::double_spends(bool include_unconfirmed) const
 {
     point::indexes spends;
-    BITCOIN_ASSERT(inputs.size() <= max_uint32);
 
     for (size_t in = 0; in < inputs.size(); ++in)
         if (inputs[in].previous_output.spent && (include_unconfirmed ||
             inputs[in].previous_output.confirmed))
-            spends.push_back(static_cast<uint32_t>(in));
+            spends.push_back(safe_unsigned<uint32_t>(in));
 
     return spends;
 }
@@ -504,11 +501,10 @@ bool transaction::is_immature(size_t target_height) const
 point::indexes transaction::immature_inputs(size_t target_height) const
 {
     point::indexes immatures;
-    BITCOIN_ASSERT(inputs.size() <= max_uint32);
 
     for (size_t in = 0; in < inputs.size(); ++in)
         if (!inputs[in].previous_output.is_mature(target_height))
-            immatures.push_back(static_cast<uint32_t>(in));
+            immatures.push_back(safe_unsigned<uint32_t>(in));
 
     return immatures;
 }
@@ -578,10 +574,9 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
 code transaction::connect(const chain_state& state) const
 {
     code ec;
-    BITCOIN_ASSERT(inputs.size() <= max_uint32);
 
     ////for (size_t in = 0; in < inputs.size(); ++in)
-    ////    if ((ec = connect_input(state, static_cast<uint32_t>(in))))
+    ////    if ((ec = connect_input(state, safe_unsigned<uint32_t>(in))))
     ////        return ec;
 
     return error::success;

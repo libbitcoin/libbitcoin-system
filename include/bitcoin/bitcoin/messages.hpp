@@ -21,6 +21,7 @@
 #define LIBBITCOIN_MESSAGES_HPP
 
 #include <cstdint>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
 #include <bitcoin/bitcoin/message/alert.hpp>
 #include <bitcoin/bitcoin/message/alert_payload.hpp>
@@ -116,7 +117,7 @@ data_chunk serialize(uint32_t version, const Message& packet,
     heading head;
     head.magic = magic;
     head.command = Message::command;
-    head.payload_size = static_cast<uint32_t>(payload.size());
+    head.payload_size = safe_unsigned<uint32_t>(payload.size());
     head.checksum = bitcoin_checksum(payload);
 
     // Serialize header and copy the payload into a single message buffer.

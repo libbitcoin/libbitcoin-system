@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <boost/asio/streambuf.hpp>
 #include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/exceptions.hpp>
@@ -233,9 +234,7 @@ template <typename Iterator, bool SafeCheckLast>
 std::string deserializer<Iterator, SafeCheckLast>::read_string()
 {
     const auto size = read_variable_uint_little_endian();
-
-    // Warning: conversion from uint64_t to size_t, possible loss of data.
-    return read_fixed_string(static_cast<size_t>(size));
+    return read_fixed_string(safe_unsigned<size_t>(size));
 }
 
 template <typename Iterator, bool SafeCheckLast>

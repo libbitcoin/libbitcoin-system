@@ -23,6 +23,7 @@
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include "../math/external/lax_der_parsing.h"
@@ -95,7 +96,7 @@ bool recover_public(const secp256k1_context* context, byte_array<Size>& out,
 {
     secp256k1_pubkey pubkey;
     secp256k1_ecdsa_recoverable_signature sign;
-    const auto recovery_id = static_cast<int>(recoverable.recovery_id);
+    const auto recovery_id = safe_to_signed<int>(recoverable.recovery_id);
     return
         secp256k1_ecdsa_recoverable_signature_parse_compact(context,
             &sign, recoverable.signature.data(), recovery_id) == 1 &&
@@ -356,7 +357,7 @@ bool sign_recoverable(recoverable_signature& out, const ec_secret& secret,
             out.signature.data(), &recovery_id, &signature) == 1;
 
     BITCOIN_ASSERT(recovery_id >= 0 && recovery_id <= 3);
-    out.recovery_id = static_cast<uint8_t>(recovery_id);
+    out.recovery_id = safe_to_unsigned<uint8_t>(recovery_id);
     return result;
 }
 

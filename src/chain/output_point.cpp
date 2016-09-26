@@ -68,7 +68,7 @@ void output_point::reset()
     confirmed = false;
     cache.value = output::not_found;
     cache.script.reset();
-    static_cast<point>(*this).reset();
+    point::reset();
 }
 
 bool output_point::is_cached() const

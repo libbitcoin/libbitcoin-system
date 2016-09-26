@@ -258,7 +258,7 @@ std::string opcode_to_string(opcode value, uint32_t flags)
         default:
         {
             std::ostringstream ss;
-            ss << "<none " << static_cast<int>(value) << ">";
+            ss << "<none " << static_cast<uint16_t>(value) << ">";
             return ss.str();
         }
     }

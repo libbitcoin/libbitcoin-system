@@ -28,6 +28,7 @@
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/deserializer.hpp>
@@ -252,7 +253,7 @@ hd_private hd_private::derive_private(uint32_t index) const
     const hd_lineage lineage
     {
         lineage_.prefixes,
-        static_cast<uint8_t>(lineage_.depth + 1),
+        safe_add(lineage_.depth, uint8_t(1)),
         fingerprint(),
         index
     };

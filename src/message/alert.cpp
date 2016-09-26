@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/alert.hpp>
 
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -85,8 +86,7 @@ bool alert::from_data(uint32_t version, reader& source)
     reset();
 
     auto size = source.read_variable_uint_little_endian();
-    BITCOIN_ASSERT(size <= bc::max_size_t);
-    const auto payload_size = static_cast<size_t>(size);
+    const auto payload_size = safe_unsigned<size_t>(size);
     size_t signature_size = 0;
     auto result = static_cast<bool>(source);
 
@@ -99,8 +99,7 @@ bool alert::from_data(uint32_t version, reader& source)
     if (result)
     {
         size = source.read_variable_uint_little_endian();
-        BITCOIN_ASSERT(size <= bc::max_size_t);
-        signature_size = static_cast<size_t>(size);
+        signature_size = safe_unsigned<size_t>(size);
         result = source;
     }
 

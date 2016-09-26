@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
@@ -77,8 +78,7 @@ void select_outputs::select(points_info& out, output_info::list unspent,
 
     for (auto it = lesser_begin; it != lesser_end; ++it)
     {
-        BITCOIN_ASSERT(out.change <= max_uint64 - it->value);
-        out.change += it->value;
+        out.change = safe_add(out.change, it->value);
         out.points.push_back(it->point);
 
         if (out.change >= minimum_value)

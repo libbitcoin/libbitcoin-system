@@ -21,6 +21,7 @@
 
 #include <initializer_list>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -96,7 +97,7 @@ bool compact_block::from_data(uint32_t version, reader& source)
     result &= static_cast<bool>(source);
 
     if (result)
-        short_ids.reserve(short_ids_count);
+        short_ids.reserve(safe_unsigned<size_t>(short_ids_count));
 
     for (uint64_t i = 0; (i < short_ids_count) && result; ++i)
     {
@@ -109,7 +110,7 @@ bool compact_block::from_data(uint32_t version, reader& source)
 
     if (result)
     {
-        transactions.resize(transaction_count);
+        transactions.resize(safe_unsigned<size_t>(transaction_count));
 
         for (auto& transaction: transactions)
         {

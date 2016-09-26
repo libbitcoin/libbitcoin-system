@@ -25,6 +25,7 @@
 #include <istream>
 #include <utility>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/inventory.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
@@ -113,7 +114,7 @@ bool headers::from_data(uint32_t version, reader& source)
 
     if (result)
     {
-        elements.resize(count);
+        elements.resize(safe_unsigned<size_t>(count));
 
         for (auto& element: elements)
         {

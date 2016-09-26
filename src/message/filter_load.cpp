@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/filter_load.hpp>
 
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -93,8 +94,7 @@ bool filter_load::from_data(uint32_t version, reader& source)
 
     const auto  insufficent_version = (version < filter_load::version_minimum);
     const auto size = source.read_variable_uint_little_endian();
-    BITCOIN_ASSERT(size <= bc::max_size_t);
-    const auto filter_size = static_cast<size_t>(size);
+    const auto filter_size = safe_unsigned<size_t>(size);
     bool result = static_cast<bool>(source);
 
     if (result)

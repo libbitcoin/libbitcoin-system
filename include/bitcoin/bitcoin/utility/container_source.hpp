@@ -21,10 +21,11 @@
 #define LIBBITCOIN_CONTAINER_SOURCE_HPP
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <boost/iostreams/categories.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 
 namespace libbitcoin {
 
@@ -45,21 +46,15 @@ public:
 
     std::streamsize read(char_type* buffer, std::streamsize size)
     {
-        const auto amount = container_.size() - position_;
-        const auto result = std::min(size,
-            static_cast<std::streamsize>(amount));
+        auto amount = safe_subtract(container_.size(), position_);
+        auto result = std::min(size, static_cast<std::streamsize>(amount));
 
         // TODO: use ios eof symbol (template-based).
         if (result <= 0)
             return -1;
 
         const auto value = static_cast<typename Container::size_type>(result);
-        DEBUG_ONLY(const auto maximum = 
-            std::numeric_limits<typename Container::size_type>::max());
-        BITCOIN_ASSERT(value < maximum);
-        BITCOIN_ASSERT(position_ + value < maximum);
-
-        const auto limit = position_ + value;
+        const auto limit = safe_add(position_, value);
         const auto start = container_.begin() + position_;
         const auto end = container_.begin() + limit;
         std::copy(start, end, buffer);

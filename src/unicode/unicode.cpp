@@ -28,6 +28,7 @@
 #include <string>
 #include <boost/locale.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/unicode/console_streambuf.hpp>
 #include <bitcoin/bitcoin/unicode/unicode_istream.hpp>
 #include <bitcoin/bitcoin/unicode/unicode_ostream.hpp>
@@ -103,6 +104,7 @@ static void validate_localization()
     const auto ascii_space = "> <";
     const auto ideographic_space = ">　<";
     const auto normal = normal_form(ideographic_space, norm_type::norm_nfkd);
+
     if (normal != ascii_space)
         throw std::runtime_error(
             "Unicode normalization test failed, a dependency may be missing.");
@@ -135,22 +137,24 @@ data_chunk to_utf8(wchar_t* environment[])
 // Convert wmain parameters to utf8 main parameters.
 data_chunk to_utf8(int argc, wchar_t* argv[])
 {
-    auto arg_count = static_cast<size_t>(argc);
+    auto arg_count = safe_to_unsigned<size_t>(argc);
 
     // Convert each arg and determine the payload size.
     size_t payload_size = 0;
     std::vector<std::string> collection(arg_count + 1);
+
     for (size_t arg = 0; arg < arg_count; arg++)
     {
         collection[arg] = to_utf8(argv[arg]);
         payload_size += collection[arg].size() + 1;
     }
 
+    // TODO: unsafe_math.
     // Determine the index size.
-    auto index_size = static_cast<size_t>((arg_count + 1)* sizeof(void*));
+    auto index_size = safe_add(arg_count, size_t(1)) * sizeof(void*);
 
     // Allocate the new buffer.
-    auto buffer_size = index_size + payload_size;
+    auto buffer_size = safe_add(index_size, payload_size);
     data_chunk buffer(buffer_size, 0x00);
     buffer.resize(buffer_size);
 
@@ -163,7 +167,9 @@ data_chunk to_utf8(int argc, wchar_t* argv[])
     {
         index[arg] = arguments;
         std::copy(collection[arg].begin(), collection[arg].end(), index[arg]);
-        arguments += collection[arg].size() + 1;
+
+        // TODO: unsafe math.
+        arguments += safe_add(collection[arg].size(), size_t(1));
     }
 
     return buffer;

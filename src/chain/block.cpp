@@ -244,7 +244,7 @@ bool block::from_data(reader& source, bool with_transaction_count)
     if (!header.from_data(source, with_transaction_count))
         return false;
 
-    transactions.resize(header.transaction_count);
+    transactions.resize(safe_unsigned<size_t>(header.transaction_count));
     auto from = [&source](transaction& tx) { return tx.from_data(source); };
     auto result = std::all_of(transactions.begin(), transactions.end(), from);
 

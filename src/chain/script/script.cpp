@@ -187,11 +187,10 @@ bool script::from_data(reader& source, bool prefix, parse_mode mode)
     {
         const auto script_size = source.read_variable_uint_little_endian();
         result = source;
-        BITCOIN_ASSERT(script_size <= max_size_t);
 
         if (result)
         {
-            const auto size = static_cast<size_t>(script_size);
+            const auto size = safe_unsigned<size_t>(script_size);
             raw_script = source.read_data(size);
             result = source && (raw_script.size() == size);
         }
@@ -246,9 +245,7 @@ uint64_t script::satoshi_content_size() const
 
     const auto value = [](uint64_t total, const operation& op)
     {
-        const auto op_size = op.serialized_size();
-        BITCOIN_ASSERT(total <= max_uint64 - op_size);
-        return total + op_size;
+        return safe_add(total, op.serialized_size());
     };
 
     return std::accumulate(operations.begin(), operations.end(), uint64_t(0),

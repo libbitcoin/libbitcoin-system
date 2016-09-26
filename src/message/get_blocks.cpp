@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/get_blocks.hpp>
 
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -105,7 +106,7 @@ bool get_blocks::from_data(uint32_t version, reader& source)
     source.read_4_bytes_little_endian();
 
     const auto count = source.read_variable_uint_little_endian();
-    start_hashes.reserve(count);
+    start_hashes.reserve(safe_unsigned<size_t>(count));
 
     for (uint64_t i = 0; i < count && source; ++i)
         start_hashes.push_back(source.read_hash());

@@ -22,6 +22,7 @@
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 #include <bitcoin/bitcoin/wallet/ec_private.hpp>
@@ -109,7 +110,7 @@ bool magic_to_recovery_id(uint8_t& out_recovery_id, bool& out_compressed,
     if (out_compressed)
         recovery_id -= magic_differential;
 
-    out_recovery_id = static_cast<uint8_t>(recovery_id);
+    out_recovery_id = safe_to_unsigned<uint8_t>(recovery_id);
     return true;
 }
 
