@@ -64,8 +64,8 @@ BC_CONSTEXPR size_t max_block_sigops = max_block_size / 50;
 BC_CONSTEXPR size_t reward_interval = 210000;
 BC_CONSTEXPR size_t coinbase_maturity = 100;
 BC_CONSTEXPR size_t time_stamp_future_hours = 2;
-BC_CONSTEXPR size_t locktime_threshold = 500000000;
 BC_CONSTEXPR size_t max_work_bits = 0x1d00ffff;
+BC_CONSTEXPR size_t locktime_threshold = 500000000;
 
 // Timespan constants.
 //-----------------------------------------------------------------------------

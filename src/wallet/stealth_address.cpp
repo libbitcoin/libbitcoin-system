@@ -198,7 +198,7 @@ stealth_address stealth_address::from_stealth(const binary& filter,
         return stealth_address();
 
     // Guard against prefix too long.
-    auto prefix_number_bits = static_cast<uint8_t>(filter.size());
+    auto prefix_number_bits = filter.size();
     if (prefix_number_bits > max_filter_bits)
         return stealth_address();
 

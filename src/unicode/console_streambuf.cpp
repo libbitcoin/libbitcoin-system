@@ -23,6 +23,7 @@
 #include <iostream>
 #include <new>
 #include <streambuf>
+#include <bitcoin/bitcoin/math/limits.hpp>
 
 #ifdef _MSC_VER
 #include <windows.h>

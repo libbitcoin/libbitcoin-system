@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <boost/asio/streambuf.hpp>
 #include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
 
@@ -70,9 +71,7 @@ void serializer<Iterator>::write_data(const uint8_t* data, size_t size)
 template <typename Iterator>
 void serializer<Iterator>::write_error_code(const code& ec)
 {
-    const auto value = ec.value();
-    BITCOIN_ASSERT(value >= 0 && value <= max_uint32);
-    write_4_bytes_little_endian(static_cast<uint32_t>(value));
+    write_4_bytes_little_endian(safe_to_unsigned<uint32_t>(ec.value()));
 }
 
 template <typename Iterator>

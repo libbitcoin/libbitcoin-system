@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/merkle_block.hpp>
 
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -112,8 +113,7 @@ bool merkle_block::from_data(uint32_t version, reader& source)
     if (result)
     {
         const auto size = source.read_variable_uint_little_endian();
-        BITCOIN_ASSERT(size <= bc::max_size_t);
-        const auto flag_count = static_cast<size_t>(size);
+        const auto flag_count = safe_unsigned<size_t>(size);
         flags = source.read_data(flag_count);
         result = source && (flags.size() == flag_count);
     }
