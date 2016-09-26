@@ -67,17 +67,19 @@ Integer safe_subtract(Integer left, Integer right)
 }
 
 template <typename Integer>
-Integer safe_increment(Integer value)
+Integer& safe_increment(Integer& value)
 {
     static BC_CONSTEXPR auto one = Integer{ 1 };
-    return safe_add(value, one);
+    value = safe_add(value, one);
+    return value;
 }
 
 template <typename Integer>
-Integer safe_decrement(Integer value)
+Integer& safe_decrement(Integer& value)
 {
     static BC_CONSTEXPR auto one = Integer{ 1 };
-    return safe_subtract(value, one);
+    value = safe_subtract(value, one);
+    return value;
 }
 
 template <typename To, typename From>
