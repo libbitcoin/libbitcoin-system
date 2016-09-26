@@ -266,35 +266,49 @@ BOOST_AUTO_TEST_CASE(limit__safe_subtract__size_t_half_minus_maximum__throws_und
 
 BOOST_AUTO_TEST_CASE(limit__safe_increment__size_t_minimum__expected)
 {
-    BOOST_REQUIRE_EQUAL(safe_increment(minimum), minimum + 1u);
-}
-
-BOOST_AUTO_TEST_CASE(limit__safe_increment__size_t_maximum__throws_overflow)
-{
-    BOOST_REQUIRE_THROW(safe_increment(maximum), std::overflow_error);
+    auto value = minimum;
+    static const auto expected = minimum + 1u;
+    BOOST_REQUIRE_EQUAL(safe_increment(value), expected);
+    BOOST_REQUIRE_EQUAL(value, expected);
 }
 
 BOOST_AUTO_TEST_CASE(limit__safe_increment__size_t_half__expected)
 {
-    BOOST_REQUIRE_EQUAL(safe_increment(half), half + 1u);
+    auto value = half;
+    static const auto expected = half + 1u;
+    BOOST_REQUIRE_EQUAL(safe_increment(value), expected);
+    BOOST_REQUIRE_EQUAL(value, expected);
+}
+
+BOOST_AUTO_TEST_CASE(limit__safe_increment__size_t_maximum__throws_overflow)
+{
+    auto value = maximum;
+    BOOST_REQUIRE_THROW(safe_increment(value), std::overflow_error);
 }
 
 // safe_decrement
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(limit__safe_decrement__size_t_minimum__throws_underflow)
-{
-    BOOST_REQUIRE_THROW(safe_decrement(minimum), std::underflow_error);
-}
-
 BOOST_AUTO_TEST_CASE(limit__safe_decrement__size_t_maximum__expected)
 {
-    BOOST_REQUIRE_EQUAL(safe_decrement(maximum), maximum - 1u);
+    auto value = maximum;
+    static const auto expected = maximum - 1u;
+    BOOST_REQUIRE_EQUAL(safe_decrement(value), expected);
+    BOOST_REQUIRE_EQUAL(value, expected);
 }
 
 BOOST_AUTO_TEST_CASE(limit__safe_decrement__size_t_half__expected)
 {
-    BOOST_REQUIRE_EQUAL(safe_decrement(half), half - 1u);
+    auto value = half;
+    static const auto expected = half - 1u;
+    BOOST_REQUIRE_EQUAL(safe_decrement(value), expected);
+    BOOST_REQUIRE_EQUAL(value, expected);
+}
+
+BOOST_AUTO_TEST_CASE(limit__safe_decrement__size_t_minimum__throws_underflow)
+{
+    auto value = minimum;
+    BOOST_REQUIRE_THROW(safe_decrement(value), std::underflow_error);
 }
 
 // safe_assign
