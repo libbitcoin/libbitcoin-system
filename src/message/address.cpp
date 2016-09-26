@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/address.hpp>
 
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -81,12 +82,12 @@ bool address::from_data(uint32_t version, reader& source)
 {
     reset();
 
-    uint64_t count = source.read_variable_uint_little_endian();
+    const auto count = source.read_variable_uint_little_endian();
     auto result = static_cast<bool>(source);
 
     if (result)
     {
-        addresses.resize(count);
+        addresses.resize(safe_unsigned<size_t>(count));
 
         for (auto& address: addresses)
         {

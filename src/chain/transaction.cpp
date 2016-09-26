@@ -55,7 +55,7 @@ bool read(Source& source, std::vector<Put>& puts)
     if (!source)
         return false;
 
-    puts.resize(put_count);
+    puts.resize(safe_unsigned<size_t>(put_count));
     auto from = [&source](Put& put) { return put.from_data(source); };
     return std::all_of(puts.begin(), puts.end(), from);
 }

@@ -102,7 +102,7 @@ bool merkle_block::from_data(uint32_t version, reader& source)
     }
 
     if (result)
-        hashes.reserve(hash_count);
+        hashes.reserve(safe_unsigned<size_t>(hash_count));
 
     for (uint64_t i = 0; (i < hash_count) && result; ++i)
     {

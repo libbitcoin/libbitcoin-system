@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/alert_payload.hpp>
 
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -126,7 +127,7 @@ bool alert_payload::from_data(uint32_t version, reader& source)
     id = source.read_4_bytes_little_endian();
     cancel = source.read_4_bytes_little_endian();
     const auto cancel_size = source.read_variable_uint_little_endian();
-    set_cancel.reserve(cancel_size);
+    set_cancel.reserve(safe_unsigned<size_t>(cancel_size));
 
     for (uint64_t i = 0; i < cancel_size && source; i++)
         set_cancel.push_back(source.read_4_bytes_little_endian());
@@ -134,7 +135,7 @@ bool alert_payload::from_data(uint32_t version, reader& source)
     min_version = source.read_4_bytes_little_endian();
     max_version = source.read_4_bytes_little_endian();
     const auto sub_version_size = source.read_variable_uint_little_endian();
-    set_sub_version.reserve(sub_version_size);
+    set_sub_version.reserve(safe_unsigned<size_t>(sub_version_size));
 
     for (uint64_t i = 0; i < sub_version_size && source; i++)
         set_sub_version.push_back(source.read_string());

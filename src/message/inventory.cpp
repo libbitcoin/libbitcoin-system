@@ -25,6 +25,7 @@
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/message/inventory.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -118,7 +119,7 @@ bool inventory::from_data(uint32_t version, reader& source)
 
     if (result)
     {
-        inventories.resize(count);
+        inventories.resize(safe_unsigned<size_t>(count));
 
         for (auto& inventory: inventories)
         {

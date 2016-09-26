@@ -21,6 +21,7 @@
 
 #include <initializer_list>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -95,7 +96,7 @@ bool get_block_transactions::from_data(uint32_t version,
     result &= static_cast<bool>(source);
 
     if (result)
-        indexes.reserve(count);
+        indexes.reserve(safe_unsigned<size_t>(count));
 
     for (uint64_t i = 0; (i < count) && result; ++i)
     {
