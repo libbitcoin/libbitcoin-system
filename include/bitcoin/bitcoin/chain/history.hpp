@@ -37,7 +37,6 @@ enum class point_kind : uint32_t
 };
 
 /// This structure models the client-server protocol in v1/v2/v3.
-/// The height value here is 64 bit, but 32 bits on the wire.
 struct BC_API history_compact
 {
     typedef std::vector<history_compact> list;
@@ -49,7 +48,7 @@ struct BC_API history_compact
     chain::point point;
 
     /// The height of the point.
-    uint64_t height;
+    uint32_t height;
 
     union
     {

@@ -120,8 +120,8 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         // check_block()
         case error::size_limits:
             return "size limits failed";
-        case error::proof_of_work:
-            return "proof of work failed";
+        case error::invalid_proof_of_work:
+            return "proof of work is invalid";
         case error::futuristic_timestamp:
             return "timestamp too far in the future";
         case error::first_not_coinbase:
@@ -171,9 +171,11 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         case error::coinbase_maturity:
             return "immature coinbase spent";
 
-            // check_transaction() (more)
+        // check_block() (more)
         case error::empty_block:
             return "block has no transactions";
+        case error::insufficient_work:
+            return "insufficient work to reorganize";
 
         // unknown errors
         case error::unknown:

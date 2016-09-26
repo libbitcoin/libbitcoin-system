@@ -21,26 +21,79 @@
 #define LIBBITCOIN_LIMITS_HPP
 
 #include <algorithm>
+#include <stdexcept>
 #include <limits>
-#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/compat.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
 
-template <typename Integer,
-    typename = std::enable_if<std::is_unsigned<Integer>::value>>
+#define UNSIGNED(T) std::enable_if<std::is_unsigned<T>::value>
+
+template <typename Integer, typename = UNSIGNED(Integer)>
 Integer ceiling_add(Integer left, Integer right)
 {
     static const auto ceiling = std::numeric_limits<Integer>::max();
     return left > ceiling - right ? ceiling : left + right;
 }
 
-template <typename Integer,
-    typename = std::enable_if<std::is_unsigned<Integer>::value>>
+template <typename Integer, typename = UNSIGNED(Integer)>
 Integer floor_subtract(Integer left, Integer right)
 {
     static const auto floor = std::numeric_limits<Integer>::min();
     return right >= left ? floor : left - right;
 }
+
+template <typename Integer, typename = UNSIGNED(Integer)>
+Integer safe_add(Integer left, Integer right)
+{
+    static const auto maximum = std::numeric_limits<Integer>::max();
+
+    if (left > maximum - right)
+        throw std::overflow_error("addition overflow");
+
+    return left + right;
+}
+
+template <typename Integer, typename = UNSIGNED(Integer)>
+Integer safe_subtract(Integer left, Integer right)
+{
+    static const auto minimum = std::numeric_limits<Integer>::min();
+
+    if (left < minimum + right)
+        throw std::underflow_error("subtraction underflow");
+
+    return left - right;
+}
+
+template <typename Integer>
+Integer safe_increment(Integer value)
+{
+    static BC_CONSTEXPR auto one = Integer{ 1 };
+    return safe_add(value, one);
+}
+
+template <typename Integer>
+Integer safe_decrement(Integer value)
+{
+    static BC_CONSTEXPR auto one = Integer{ 1 };
+    return safe_subtract(value, one);
+}
+
+template <typename To, typename From>
+To safe_assign(From value)
+{
+    static const auto maximum = std::numeric_limits<To>::max();
+    static const auto minimum = std::numeric_limits<To>::min();
+
+    if (value < minimum || value > maximum)
+        throw std::range_error("assignment out of range");
+
+    // This should be the only integer cast in the codebase.
+    return static_cast<To>(value);
+}
+
+#undef UNSIGNED
 
 } // namespace libbitcoin
 

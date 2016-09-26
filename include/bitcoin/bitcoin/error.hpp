@@ -88,7 +88,7 @@ enum error_code_t
 
     // check_block()
     size_limits,
-    proof_of_work,
+    invalid_proof_of_work,
     futuristic_timestamp,
     first_not_coinbase,
     extra_coinbases,
@@ -123,7 +123,8 @@ enum error_code_t
     coinbase_maturity,
 
     // check_block() (more)
-    empty_block
+    empty_block,
+    insufficient_work
 };
 
 enum error_condition_t
