@@ -261,6 +261,42 @@ BOOST_AUTO_TEST_CASE(limit__safe_subtract__size_t_half_minus_maximum__throws_und
     BOOST_REQUIRE_THROW(safe_subtract(half, maximum), std::underflow_error);
 }
 
+// safe_increment
+//-----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(limit__safe_increment__size_t_minimum__expected)
+{
+    BOOST_REQUIRE_EQUAL(safe_increment(minimum), minimum + 1u);
+}
+
+BOOST_AUTO_TEST_CASE(limit__safe_increment__size_t_maximum__throws_overflow)
+{
+    BOOST_REQUIRE_THROW(safe_increment(maximum), std::overflow_error);
+}
+
+BOOST_AUTO_TEST_CASE(limit__safe_increment__size_t_half__expected)
+{
+    BOOST_REQUIRE_EQUAL(safe_increment(half), half + 1u);
+}
+
+// safe_decrement
+//-----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(limit__safe_decrement__size_t_minimum__throws_underflow)
+{
+    BOOST_REQUIRE_THROW(safe_decrement(minimum), std::underflow_error);
+}
+
+BOOST_AUTO_TEST_CASE(limit__safe_decrement__size_t_maximum__expected)
+{
+    BOOST_REQUIRE_EQUAL(safe_decrement(maximum), maximum - 1u);
+}
+
+BOOST_AUTO_TEST_CASE(limit__safe_decrement__size_t_half__expected)
+{
+    BOOST_REQUIRE_EQUAL(safe_decrement(half), half - 1u);
+}
+
 // safe_assign
 //-----------------------------------------------------------------------------
 

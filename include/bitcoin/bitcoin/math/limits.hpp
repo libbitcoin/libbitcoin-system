@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <limits>
+#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
@@ -65,13 +66,27 @@ Integer safe_subtract(Integer left, Integer right)
     return left - right;
 }
 
+template <typename Integer>
+Integer safe_increment(Integer value)
+{
+    static BC_CONSTEXPR auto one = Integer{ 1 };
+    return safe_add(value, one);
+}
+
+template <typename Integer>
+Integer safe_decrement(Integer value)
+{
+    static BC_CONSTEXPR auto one = Integer{ 1 };
+    return safe_subtract(value, one);
+}
+
 template <typename To, typename From>
 To safe_assign(From value)
 {
     static const auto maximum = std::numeric_limits<To>::max();
     static const auto minimum = std::numeric_limits<To>::min();
 
-    if (value > maximum || value < minimum)
+    if (value < minimum || value > maximum)
         throw std::range_error("assignment out of range");
 
     // This should be the only integer cast in the codebase.
