@@ -77,18 +77,6 @@ void extend_data(Target& bytes, const Extension& other)
     bytes.insert(std::end(bytes), std::begin(other), std::end(other));
 }
 
-template <typename Value, typename Bound>
-Bound range_constrain(Value value, Bound minimum, Bound maximum)
-{
-    if (value < minimum)
-        return minimum;
-
-    if (value > maximum)
-        return maximum;
-
-    return static_cast<Bound>(value);
-}
-
 // std::array<> is used in place of byte_array<> to enable Size deduction.
 template <size_t Start, size_t End, size_t Size>
 byte_array<End - Start> slice(const std::array<uint8_t, Size>& bytes)

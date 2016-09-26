@@ -95,6 +95,19 @@ To safe_assign(From value)
     return static_cast<To>(value);
 }
 
+/// Constrain a numeric value within a given range.
+template <typename Value, typename Bound>
+Bound range_constrain(Value value, Bound minimum, Bound maximum)
+{
+    if (value < minimum)
+        return minimum;
+
+    if (value > maximum)
+        return maximum;
+
+    return safe_assign<Bound>(value);
+}
+
 #undef UNSIGNED
 
 } // namespace libbitcoin
