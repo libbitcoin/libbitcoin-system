@@ -156,27 +156,6 @@ BOOST_AUTO_TEST_CASE(data__extend_data__twice__expected)
     BOOST_REQUIRE_EQUAL(buffer1[hash_size + 1], expected);
 }
 
-BOOST_AUTO_TEST_CASE(data__range_constrain__over__max)
-{
-    const size_t expected = 10;
-    const auto result = range_constrain(size_t(42), size_t(1), expected);
-    BOOST_REQUIRE_EQUAL(result, expected);
-}
-
-BOOST_AUTO_TEST_CASE(data__range_constrain__under__min)
-{
-    const size_t expected = 50;
-    const auto result = range_constrain(size_t(42), expected, size_t(100));
-    BOOST_REQUIRE_EQUAL(result, expected);
-}
-
-BOOST_AUTO_TEST_CASE(data__range_constrain__internal__unchanged)
-{
-    const size_t expected = 42;
-    const auto result = range_constrain(expected, size_t(10), size_t(100));
-    BOOST_REQUIRE_EQUAL(result, expected);
-}
-
 BOOST_AUTO_TEST_CASE(data__slice__empty_selection__compiles)
 {
     const byte_array<3> source

@@ -365,6 +365,7 @@ include_bitcoin_bitcoin_config_HEADERS = \
     include/bitcoin/bitcoin/config/parameter.hpp \
     include/bitcoin/bitcoin/config/parser.hpp \
     include/bitcoin/bitcoin/config/printer.hpp \
+    include/bitcoin/bitcoin/config/settings.hpp \
     include/bitcoin/bitcoin/config/sodium.hpp
 
 include_bitcoin_bitcoin_formatsdir = ${includedir}/bitcoin/bitcoin/formats
