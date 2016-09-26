@@ -63,31 +63,39 @@ public:
         output cache = output{ output::not_found, script{} };
     };
 
+    static output_point factory_from_data(const data_chunk& data);
+    static output_point factory_from_data(std::istream& stream);
+    static output_point factory_from_data(reader& source);
+
     output_point();
-    output_point(const output_point& other);
-    output_point(const chain::point& value);
+    output_point(const point& value);
+    output_point(point&& other);
     output_point(const hash_digest& hash, uint32_t index);
-
-    output_point(output_point&& other);
-    output_point(chain::point&& value);
     output_point(hash_digest&& hash, uint32_t index);
-
-    /// This class is move assignable and  copy assignable.
-    output_point& operator=(output_point&& other);
-    output_point& operator=(const output_point& other);
-
-    bool operator==(const output_point& other) const;
-    bool operator!=(const output_point& other) const;
-
-    void reset();
+    output_point(const output_point& other);
+    output_point(output_point&& other);
 
     /// False if previous output is not cached.
     /// True if the previous output is mature enough to spend from target.
     bool is_mature(size_t target_height) const;
 
+    // virtual void reset() override;
+
+    /// This class is move assignable and copy assignable.
+    output_point& operator=(output_point&& other);
+    output_point& operator=(const output_point&);
+
+    output_point& operator=(point&& other);
+    output_point& operator=(const point&);
+
+    bool operator==(const output_point& other) const;
+    bool operator!=(const output_point& other) const;
+
+    bool operator==(const point& other) const;
+    bool operator!=(const point& other) const;
+
     // These fields do not participate in serialization or comparison.
     //-------------------------------------------------------------------------
-
     mutable validation validation;
 };
 

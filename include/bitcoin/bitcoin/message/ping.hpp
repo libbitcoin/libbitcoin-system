@@ -45,9 +45,10 @@ public:
 
     ping();
     ping(uint64_t nonce);
+    ping(const ping& other);
 
-    bool operator==(const ping& other) const;
-    bool operator!=(const ping& other) const;
+    uint64_t nonce() const;
+    void set_nonce(uint64_t value);
 
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
@@ -60,14 +61,21 @@ public:
     void reset();
     uint64_t serialized_size(uint32_t version) const;
 
+    // This class is move assignable but not copy assignable.
+    ping& operator=(ping&& other);
+    void operator=(const ping&) = delete;
+
+    bool operator==(const ping& other) const;
+    bool operator!=(const ping& other) const;
+
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
-    uint64_t nonce;
-
 private:
-    bool valid_;
+    uint64_t nonce_;
+    bool deserialized_nonceless_;
+    bool deserialized_valid_;
 };
 
 } // namespace message

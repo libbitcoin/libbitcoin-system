@@ -57,6 +57,10 @@ verack verack::factory_from_data(uint32_t version,
     return instance;
 }
 
+verack::verack()
+{
+}
+
 bool verack::is_valid() const
 {
     return true;

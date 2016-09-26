@@ -54,16 +54,41 @@ output output::factory_from_data(reader& source)
     return instance;
 }
 
+output::output()
+  : value_(not_found), script_()
+{
+}
+
+output::output(uint64_t value, const chain::script& script)
+  : value_(value), script_(script)
+{
+}
+
+output::output(uint64_t value, chain::script&& script)
+  : value_(value), script_(std::forward<chain::script>(script))
+{
+}
+
+output::output(const output& other)
+  : output(other.value_, other.script_)
+{
+}
+
+output::output(output&& other)
+  : output(other.value_, std::forward<chain::script>(other.script_))
+{
+}
+
 // Empty scripts are valid, validation relies on not_found only.
 bool output::is_valid() const
 {
-    return value != output::not_found;
+    return value_ != output::not_found;
 }
 
 void output::reset()
 {
-    value = output::not_found;
-    script.reset();
+    value_ = output::not_found;
+    script_.reset();
 }
 
 bool output::from_data(const data_chunk& data)
@@ -82,14 +107,14 @@ bool output::from_data(reader& source)
 {
     reset();
 
-    value = source.read_8_bytes_little_endian();
+    value_ = source.read_8_bytes_little_endian();
     auto result = static_cast<bool>(source);
 
     if (result)
     {
         // Always parse non-coinbase input/output scripts as fallback.
         static const auto mode = script::parse_mode::raw_data_fallback;
-        result = script.from_data(source, true, mode);
+        result = script_.from_data(source, true, mode);
     }
 
     if (!result)
@@ -116,28 +141,82 @@ void output::to_data(std::ostream& stream) const
 
 void output::to_data(writer& sink) const
 {
-    sink.write_8_bytes_little_endian(value);
-    script.to_data(sink, true);
+    sink.write_8_bytes_little_endian(value_);
+    script_.to_data(sink, true);
 }
 
 uint64_t output::serialized_size() const
 {
-    return 8 + script.serialized_size(true);
+    return 8 + script_.serialized_size(true);
 }
 
 size_t output::signature_operations() const
 {
-    return script.sigops(false);
+    return script_.sigops(false);
 }
 
 std::string output::to_string(uint32_t flags) const
 {
     std::ostringstream ss;
 
-    ss << "\tvalue = " << value << "\n"
-        << "\t" << script.to_string(flags) << "\n";
+    ss << "\tvalue = " << value_ << "\n"
+        << "\t" << script_.to_string(flags) << "\n";
 
     return ss.str();
+}
+
+uint64_t output::value() const
+{
+    return value_;
+}
+
+void output::set_value(uint64_t value)
+{
+    value_ = value;
+}
+
+chain::script& output::script()
+{
+    return script_;
+}
+
+const chain::script& output::script() const
+{
+    return script_;
+}
+
+void output::set_script(const chain::script& value)
+{
+    script_ = value;
+}
+
+void output::set_script(chain::script&& value)
+{
+    script_ = std::move(value);
+}
+
+output& output::operator=(output&& other)
+{
+    value_ = other.value_;
+    script_ = std::move(other.script_);
+    return *this;
+}
+
+output& output::operator=(const output& other)
+{
+    value_ = other.value_;
+    script_ = other.script_;
+    return *this;
+}
+
+bool output::operator==(const output& other) const
+{
+    return (value_ == other.value_) && (script_ == other.script_);
+}
+
+bool output::operator!=(const output& other) const
+{
+    return !(*this == other);
 }
 
 } // namespace chain

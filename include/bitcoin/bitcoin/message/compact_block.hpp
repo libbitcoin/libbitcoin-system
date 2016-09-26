@@ -47,6 +47,34 @@ public:
     static compact_block factory_from_data(uint32_t version,
         reader& source);
 
+    compact_block();
+    compact_block(const chain::header& header, uint64_t nonce,
+        const short_id_list& short_ids,
+        const prefilled_transaction::list& transactions);
+    compact_block(chain::header&& header, uint64_t nonce,
+        short_id_list&& short_ids,
+        prefilled_transaction::list&& transactions);
+    compact_block(const compact_block& other);
+    compact_block(compact_block&& other);
+
+    chain::header& header();
+    const chain::header& header() const;
+    void set_header(const chain::header& value);
+    void set_header(chain::header&& value);
+
+    uint64_t nonce() const;
+    void set_nonce(uint64_t value);
+
+    short_id_list& short_ids();
+    const short_id_list& short_ids() const;
+    void set_short_ids(const short_id_list& value);
+    void set_short_ids(short_id_list&& value);
+
+    prefilled_transaction::list& transactions();
+    const prefilled_transaction::list& transactions() const;
+    void set_transactions(const prefilled_transaction::list& value);
+    void set_transactions(prefilled_transaction::list&& value);
+
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
     bool from_data(uint32_t version, reader& source);
@@ -57,14 +85,22 @@ public:
     void reset();
     uint64_t serialized_size(uint32_t version) const;
 
+    // This class is move assignable but not copy assignable.
+    compact_block& operator=(compact_block&& other);
+    void operator=(const compact_block&) = delete;
+
+    bool operator==(const compact_block& other) const;
+    bool operator!=(const compact_block& other) const;
+
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
-    chain::header header;
-    uint64_t nonce;
-    short_id_list short_ids;
-    prefilled_transaction::list transactions;
+private:
+    chain::header header_;
+    uint64_t nonce_;
+    short_id_list short_ids_;
+    prefilled_transaction::list transactions_;
 };
 
 } // namespace message

@@ -56,7 +56,22 @@ pong pong::factory_from_data(uint32_t version, reader& source)
 
 uint64_t pong::satoshi_fixed_size(uint32_t version)
 {
-    return sizeof(nonce);
+    return sizeof(nonce_);
+}
+
+pong::pong()
+  : nonce_(0)
+{
+}
+
+pong::pong(uint64_t nonce)
+  : nonce_(nonce)
+{
+}
+
+pong::pong(const pong& other)
+  : pong(other.nonce_)
+{
 }
 
 bool pong::from_data(uint32_t version, const data_chunk& data)
@@ -75,7 +90,7 @@ bool pong::from_data(uint32_t version, reader& source)
 {
     reset();
 
-    nonce = source.read_8_bytes_little_endian();
+    nonce_ = source.read_8_bytes_little_endian();
 
     if (!source)
         reset();
@@ -101,17 +116,17 @@ void pong::to_data(uint32_t version, std::ostream& stream) const
 
 void pong::to_data(uint32_t version, writer& sink) const
 {
-    sink.write_8_bytes_little_endian(nonce);
+    sink.write_8_bytes_little_endian(nonce_);
 }
 
 bool pong::is_valid() const
 {
-    return (nonce != 0);
+    return (nonce_ != 0);
 }
 
 void pong::reset()
 {
-    nonce = 0;
+    nonce_ = 0;
 }
 
 uint64_t pong::serialized_size(uint32_t version) const
@@ -119,9 +134,25 @@ uint64_t pong::serialized_size(uint32_t version) const
     return satoshi_fixed_size(version);
 }
 
+uint64_t pong::nonce() const
+{
+    return nonce_;
+}
+
+void pong::set_nonce(uint64_t value)
+{
+    nonce_ = value;
+}
+
+pong& pong::operator=(pong&& other)
+{
+    nonce_ = other.nonce_;
+    return *this;
+}
+
 bool pong::operator==(const pong& other) const
 {
-    return (nonce == other.nonce);
+    return (nonce_ == other.nonce_);
 }
 
 bool pong::operator!=(const pong& other) const

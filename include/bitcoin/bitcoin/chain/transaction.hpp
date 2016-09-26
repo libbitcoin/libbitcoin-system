@@ -75,26 +75,28 @@ public:
     static transaction factory_from_data(reader& source, bool satoshi=true);
 
     transaction();
-    transaction(const transaction& other);
     transaction(uint32_t version, uint32_t locktime, const input::list& inputs,
         const output::list& outputs);
-
-    transaction(transaction&& other);
     transaction(uint32_t version, uint32_t locktime, input::list&& inputs,
         output::list&& outputs);
+    transaction(const transaction& other);
+    transaction(transaction&& other);
 
-    /// This class is move assignable [but not copy assignable].
-    transaction& operator=(transaction&& other);
-    transaction& operator=(const transaction& other) /* = delete */;
+    uint32_t version() const;
+    void set_version(uint32_t value);
 
-    bool from_data(const data_chunk& data, bool satoshi=true);
-    bool from_data(std::istream& stream, bool satoshi=true);
-    bool from_data(reader& source, bool satoshi=true);
+    uint32_t locktime() const;
+    void set_locktime(uint32_t value);
 
-    data_chunk to_data(bool satoshi=true) const;
-    void to_data(std::ostream& stream, bool satoshi=true) const;
-    void to_data(writer& sink, bool satoshi=true) const;
-    std::string to_string(uint32_t flags) const;
+    input::list& inputs();
+    const input::list& inputs() const;
+    void set_inputs(const input::list& value);
+    void set_inputs(input::list&& value);
+
+    output::list& outputs();
+    const output::list& outputs() const;
+    void set_outputs(const output::list& value);
+    void set_outputs(output::list&& value);
 
     bool is_valid() const;
     bool is_coinbase() const;
@@ -107,13 +109,11 @@ public:
     bool is_immature(size_t target_height) const;
     bool is_double_spend(bool include_unconfirmed) const;
 
-    void reset();
     code check(bool transaction_pool = true) const;
     code accept(const chain_state& state, bool transaction_pool=true) const;
     code connect(const chain_state& state) const;
     code connect_input(const chain_state& state, size_t input_index) const;
 
-    uint64_t serialized_size() const;
     uint64_t total_input_value() const;
     uint64_t total_output_value() const;
     point::indexes missing_inputs() const;
@@ -124,18 +124,35 @@ public:
     hash_digest hash() const;
     uint64_t fees() const;
 
-    uint32_t version;
-    uint32_t locktime;
-    input::list inputs;
-    output::list outputs;
+    std::string to_string(uint32_t flags) const;
+
+    bool from_data(const data_chunk& data, bool satoshi=true);
+    bool from_data(std::istream& stream, bool satoshi=true);
+    bool from_data(reader& source, bool satoshi=true);
+    data_chunk to_data(bool satoshi=true) const;
+    void to_data(std::ostream& stream, bool satoshi=true) const;
+    void to_data(writer& sink, bool satoshi=true) const;
+    void reset();
+    uint64_t serialized_size() const;
+
+    /// This class is move assignable [but not copy assignable].
+    transaction& operator=(transaction&& other);
+    transaction& operator=(const transaction& other) /* = delete */;
+
+    bool operator==(const transaction& other) const;
+    bool operator!=(const transaction& other) const;
 
     // These fields do not participate in serialization or comparison.
     //-------------------------------------------------------------------------
-
     mutable metadata metadata;
     mutable validation validation;
 
 private:
+    uint32_t version_;
+    uint32_t locktime_;
+    input::list inputs_;
+    output::list outputs_;
+
     mutable upgrade_mutex hash_mutex_;
     mutable std::shared_ptr<hash_digest> hash_;
 };

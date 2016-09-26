@@ -78,21 +78,51 @@ heading heading::factory_from_data(reader& source)
     return instance;
 }
 
+heading::heading()
+  : magic_(0), command_(), payload_size_(0), checksum_(0)
+{
+}
+
+heading::heading(uint32_t magic, const std::string& command,
+    uint32_t payload_size, uint32_t checksum)
+  : magic_(magic), command_(command), payload_size_(payload_size),
+    checksum_(checksum)
+{
+}
+
+heading::heading(uint32_t magic, std::string&& command, uint32_t payload_size,
+    uint32_t checksum)
+  : magic_(magic), command_(std::forward<std::string>(command)),
+    payload_size_(payload_size), checksum_(checksum)
+{
+}
+
+heading::heading(const heading& other)
+  : heading(other.magic_, other.command_, other.payload_size_, other.checksum_)
+{
+}
+
+heading::heading(heading&& other)
+  : heading(other.magic_, std::forward<std::string>(other.command_),
+      other.payload_size_, other.checksum_)
+{
+}
+
 bool heading::is_valid() const
 {
-    return (magic != 0)
-        || (payload_size != 0)
-        || (checksum != 0)
-        || !command.empty();
+    return (magic_ != 0)
+        || (payload_size_ != 0)
+        || (checksum_ != 0)
+        || !command_.empty();
 }
 
 void heading::reset()
 {
-    magic = 0;
-    command.clear();
-    command.shrink_to_fit();
-    payload_size = 0;
-    checksum = 0;
+    magic_ = 0;
+    command_.clear();
+    command_.shrink_to_fit();
+    payload_size_ = 0;
+    checksum_ = 0;
 }
 
 bool heading::from_data(const data_chunk& data)
@@ -110,10 +140,10 @@ bool heading::from_data(std::istream& stream)
 bool heading::from_data(reader& source)
 {
     reset();
-    magic = source.read_4_bytes_little_endian();
-    command = source.read_fixed_string(command_size);
-    payload_size = source.read_4_bytes_little_endian();
-    checksum = source.read_4_bytes_little_endian();
+    magic_ = source.read_4_bytes_little_endian();
+    command_ = source.read_fixed_string(command_size);
+    payload_size_ = source.read_4_bytes_little_endian();
+    checksum_ = source.read_4_bytes_little_endian();
 
     if (!source)
         reset();
@@ -139,77 +169,136 @@ void heading::to_data(std::ostream& stream) const
 
 void heading::to_data(writer& sink) const
 {
-    sink.write_4_bytes_little_endian(magic);
-    sink.write_fixed_string(command, command_size);
-    sink.write_4_bytes_little_endian(payload_size);
-    sink.write_4_bytes_little_endian(checksum);
+    sink.write_4_bytes_little_endian(magic_);
+    sink.write_fixed_string(command_, command_size);
+    sink.write_4_bytes_little_endian(payload_size_);
+    sink.write_4_bytes_little_endian(checksum_);
 }
 
 message_type heading::type() const
 {
     // TODO: convert to static map.
-    if (command == address::command)
+    if (command_ == address::command)
         return message_type::address;
-    if (command == alert::command)
+    if (command_ == alert::command)
         return message_type::alert;
-    if (command == block_transactions::command)
+    if (command_ == block_transactions::command)
         return message_type::block_transactions;
-    if (command == block_message::command)
+    if (command_ == block_message::command)
         return message_type::block_message;
-    if (command == compact_block::command)
+    if (command_ == compact_block::command)
         return message_type::compact_block;
-    if (command == filter_add::command)
+    if (command_ == filter_add::command)
         return message_type::filter_add;
-    if (command == filter_clear::command)
+    if (command_ == filter_clear::command)
         return message_type::filter_clear;
-    if (command == filter_load::command)
+    if (command_ == filter_load::command)
         return message_type::filter_load;
-    if (command == get_address::command)
+    if (command_ == get_address::command)
         return message_type::get_address;
-    if (command == get_block_transactions::command)
+    if (command_ == get_block_transactions::command)
         return message_type::get_block_transactions;
-    if (command == get_blocks::command)
+    if (command_ == get_blocks::command)
         return message_type::get_blocks;
-    if (command == get_data::command)
+    if (command_ == get_data::command)
         return message_type::get_data;
-    if (command == get_headers::command)
+    if (command_ == get_headers::command)
         return message_type::get_headers;
-    if (command == headers::command)
+    if (command_ == headers::command)
         return message_type::headers;
-    if (command == inventory::command)
+    if (command_ == inventory::command)
         return message_type::inventory;
-    if (command == memory_pool::command)
+    if (command_ == memory_pool::command)
         return message_type::memory_pool;
-    if (command == merkle_block::command)
+    if (command_ == merkle_block::command)
         return message_type::merkle_block;
-    if (command == not_found::command)
+    if (command_ == not_found::command)
         return message_type::not_found;
-    if (command == ping::command)
+    if (command_ == ping::command)
         return message_type::ping;
-    if (command == pong::command)
+    if (command_ == pong::command)
         return message_type::pong;
-    if (command == reject::command)
+    if (command_ == reject::command)
         return message_type::reject;
-    if (command == send_compact_blocks::command)
+    if (command_ == send_compact_blocks::command)
         return message_type::send_compact_blocks;
-    if (command == send_headers::command)
+    if (command_ == send_headers::command)
         return message_type::send_headers;
-    if (command == transaction_message::command)
+    if (command_ == transaction_message::command)
         return message_type::transaction_message;
-    if (command == verack::command)
+    if (command_ == verack::command)
         return message_type::verack;
-    if (command == version::command)
+    if (command_ == version::command)
         return message_type::version;
 
     return message_type::unknown;
 }
 
+uint32_t heading::magic() const
+{
+    return magic_;
+}
+
+void heading::set_magic(uint32_t value)
+{
+    magic_ = value;
+}
+
+std::string& heading::command()
+{
+    return command_;
+}
+
+const std::string& heading::command() const
+{
+    return command_;
+}
+
+void heading::set_command(const std::string& value)
+{
+    command_ = value;
+}
+
+void heading::set_command(std::string&& value)
+{
+    command_ = std::move(value);
+}
+
+uint32_t heading::payload_size() const
+{
+    return payload_size_;
+}
+
+void heading::set_payload_size(uint32_t value)
+{
+    payload_size_ = value;
+}
+
+uint32_t heading::checksum() const
+{
+    return checksum_;
+}
+
+void heading::set_checksum(uint32_t value)
+{
+    checksum_ = value;
+}
+
+heading& heading::operator=(heading&& other)
+{
+    magic_ = other.magic_;
+    command_ = std::move(other.command_);
+    payload_size_ = other.payload_size_;
+    checksum_ = other.checksum_;
+    return *this;
+}
+
 bool heading::operator==(const heading& other) const
 {
-    return (magic == other.magic)
-        && (command == other.command)
-        && (payload_size == other.payload_size)
-        && (checksum == other.checksum);
+    return (magic_ == other.magic_)
+        && (command_ == other.command_)
+        && (payload_size_ == other.payload_size_)
+        && (checksum_ == other.checksum_);
 }
 
 bool heading::operator!=(const heading& other) const

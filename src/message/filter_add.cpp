@@ -59,15 +59,40 @@ filter_add filter_add::factory_from_data(uint32_t version,
     return instance;
 }
 
+filter_add::filter_add()
+  : data_()
+{
+}
+
+filter_add::filter_add(const data_chunk& data)
+  : data_(data)
+{
+}
+
+filter_add::filter_add(data_chunk&& data)
+  : data_(std::forward<data_chunk>(data))
+{
+}
+
+filter_add::filter_add(const filter_add& other)
+  : filter_add(other.data_)
+{
+}
+
+filter_add::filter_add(filter_add&& other)
+  : filter_add(std::forward<data_chunk>(other.data_))
+{
+}
+
 bool filter_add::is_valid() const
 {
-    return !data.empty();
+    return !data_.empty();
 }
 
 void filter_add::reset()
 {
-    data.clear();
-    data.shrink_to_fit();
+    data_.clear();
+    data_.shrink_to_fit();
 }
 
 bool filter_add::from_data(uint32_t version, const data_chunk& data)
@@ -93,8 +118,8 @@ bool filter_add::from_data(uint32_t version, reader& source)
 
     if (result)
     {
-        data = source.read_data(data_size);
-        result = source && (data.size() == data_size);
+        data_ = source.read_data(data_size);
+        result = source && (data_.size() == data_size);
     }
 
     if (!result || insufficient_version)
@@ -121,23 +146,44 @@ void filter_add::to_data(uint32_t version, std::ostream& stream) const
 
 void filter_add::to_data(uint32_t version, writer& sink) const
 {
-    sink.write_variable_uint_little_endian(data.size());
-    sink.write_data(data);
+    sink.write_variable_uint_little_endian(data_.size());
+    sink.write_data(data_);
 }
 
 uint64_t filter_add::serialized_size(uint32_t version) const
 {
-    return variable_uint_size(data.size()) + data.size();
+    return variable_uint_size(data_.size()) + data_.size();
+}
+
+data_chunk& filter_add::data()
+{
+    return data_;
+}
+
+const data_chunk& filter_add::data() const
+{
+    return data_;
+}
+
+void filter_add::set_data(const data_chunk& value)
+{
+    data_ = value;
+}
+
+void filter_add::set_data(data_chunk&& value)
+{
+    data_ = std::move(value);
+}
+
+filter_add& filter_add::operator=(filter_add&& other)
+{
+    data_ = std::move(other.data_);
+    return *this;
 }
 
 bool filter_add::operator==(const filter_add& other) const
 {
-    auto result = (data.size() == other.data.size());
-
-    for (data_chunk::size_type i = 0; i < data.size() && result; i++)
-        result = (data[i] == other.data[i]);
-
-    return result;
+    return (data_ == other.data_);
 }
 
 bool filter_add::operator!=(const filter_add& other) const

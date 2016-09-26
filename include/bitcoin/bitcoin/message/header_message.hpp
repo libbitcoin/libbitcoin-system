@@ -43,51 +43,55 @@ public:
     typedef std::vector<ptr> ptr_list;
     typedef std::vector<const_ptr> const_ptr_list;
 
-    static header_message factory_from_data(uint32_t version,
-        const data_chunk& data, bool with_transaction_count=true);
-    static header_message factory_from_data(uint32_t version,
-        std::istream& stream, bool with_transaction_count=true);
-    static header_message factory_from_data(uint32_t version,
-        reader& source, bool with_transaction_count=true);
+    static header_message factory_from_data(const uint32_t version,
+        const data_chunk& data);
+    static header_message factory_from_data(const uint32_t version,
+        std::istream& stream);
+    static header_message factory_from_data(const uint32_t version,
+        reader& source);
 
     header_message();
-    header_message(const chain::header& other);
-    header_message(const header_message& other);
     header_message(uint32_t version, const hash_digest& previous_block_hash,
         const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce, uint64_t transaction_count=0);
-
-    header_message(chain::header&& other);
-    header_message(header_message&& other);
+        uint32_t nonce, uint64_t transaction_count, uint64_t originator = 0);
     header_message(uint32_t version, hash_digest&& previous_block_hash,
         hash_digest&& merkle, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce, uint64_t transaction_count = 0);
+        uint32_t nonce, uint64_t transaction_count, uint64_t originator = 0);
+    header_message(const chain::header& other);
+    header_message(chain::header&& other);
+    header_message(const header_message& other);
+    header_message(header_message&& other);
+
+    uint64_t originator() const;
+    void set_originator(uint64_t value) const;
+
+    bool from_data(const uint32_t version, const data_chunk& data);
+    bool from_data(const uint32_t version, std::istream& stream);
+    bool from_data(const uint32_t version, reader& source);
+    data_chunk to_data(const uint32_t version) const;
+    void to_data(const uint32_t version, std::ostream& stream) const;
+    void to_data(const uint32_t version, writer& sink) const;
+    void reset() override;
+    uint64_t serialized_size(const uint32_t version) const;
+
+    header_message& operator=(chain::header&& other);
 
     /// This class is move assignable but not copy assignable.
     header_message& operator=(header_message&& other);
     void operator=(const header_message&) = delete;
 
-    bool from_data(uint32_t version, const data_chunk& data,
-        bool with_transaction_count=true);
-    bool from_data(uint32_t version, std::istream& stream,
-        bool with_transaction_count=true);
-    bool from_data(uint32_t version, reader& source,
-        bool with_transaction_count=true);
-    data_chunk to_data(uint32_t version=version::level::canonical,
-        bool with_transaction_count=true) const;
-    void to_data(uint32_t version, std::ostream& stream,
-        bool with_transaction_count=true) const;
-    void to_data(uint32_t version, writer& sink,
-        bool with_transaction_count=true) const;
-    uint64_t serialized_size(uint32_t version=version::level::canonical,
-        bool with_transaction_count=true) const;
+    bool operator==(const chain::header& other) const;
+    bool operator!=(const chain::header& other) const;
+
+    bool operator==(const header_message& other) const;
+    bool operator!=(const header_message& other) const;
 
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
 private:
-    uint64_t originator_;
+    mutable uint64_t originator_;
 };
 
 } // namespace message

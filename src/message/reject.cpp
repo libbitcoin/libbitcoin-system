@@ -59,22 +59,53 @@ reject reject::factory_from_data(uint32_t version,
     return instance;
 }
 
+reject::reject()
+  : code_(reason_code::undefined), message_(), reason_(), data_(null_hash)
+{
+}
+
+reject::reject(reason_code code, const std::string& message,
+    const std::string& reason, const hash_digest& data)
+  : code_(code), message_(message), reason_(reason), data_(data)
+{
+}
+
+reject::reject(reason_code code, std::string&& message, std::string&& reason,
+    hash_digest&& data)
+  : code_(code), message_(std::forward<std::string>(message)),
+    reason_(std::forward<std::string>(reason)),
+    data_(std::forward<hash_digest>(data))
+{
+}
+
+reject::reject(const reject& other)
+  : reject(other.code_, other.message_, other.reason_, other.data_)
+{
+}
+
+reject::reject(reject&& other)
+  : reject(other.code_, std::forward<std::string>(other.message_),
+      std::forward<std::string>(other.reason_),
+      std::forward<hash_digest>(other.data_))
+{
+}
+
 bool reject::is_valid() const
 {
-    return !message.empty()
-        || (code != reason_code::undefined)
-        || !reason.empty()
-        || (data != null_hash);
+    return !message_.empty()
+        || (code_!= reason_code::undefined)
+        || !reason_.empty()
+        || (data_!= null_hash);
 }
 
 void reject::reset()
 {
-    message.clear();
-    message.shrink_to_fit();
-    code = reason_code::undefined;
-    reason.clear();
-    reason.shrink_to_fit();
-    data.fill(0);
+    message_.clear();
+    message_.shrink_to_fit();
+    code_ = reason_code::undefined;
+    reason_.clear();
+    reason_.shrink_to_fit();
+    data_.fill(0);
 }
 
 bool reject::from_data(uint32_t version, const data_chunk& data)
@@ -95,14 +126,14 @@ bool reject::from_data(uint32_t version, reader& source)
 
     reset();
 
-    message = source.read_string();
-    code = reason_from_byte(source.read_byte());
-    reason = source.read_string();
+    message_ = source.read_string();
+    code_ = reason_from_byte(source.read_byte());
+    reason_ = source.read_string();
 
-    if ((message == block_message::command) ||
-        (message == transaction_message::command))
+    if ((message_ == block_message::command) ||
+        (message_ == transaction_message::command))
     {
-        data = source.read_hash();
+        data_ = source.read_hash();
     }
 
 
@@ -132,29 +163,119 @@ void reject::to_data(uint32_t version, std::ostream& stream) const
 
 void reject::to_data(uint32_t version, writer& sink) const
 {
-    sink.write_string(message);
-    sink.write_byte(reason_to_byte(code));
-    sink.write_string(reason);
+    sink.write_string(message_);
+    sink.write_byte(reason_to_byte(code_));
+    sink.write_string(reason_);
 
-    if ((message == block_message::command) ||
-        (message == transaction_message::command))
+    if ((message_ == block_message::command) ||
+        (message_ == transaction_message::command))
     {
-        sink.write_hash(data);
+        sink.write_hash(data_);
     }
 }
 
 uint64_t reject::serialized_size(uint32_t version) const
 {
-    uint64_t size = 1 + variable_uint_size(message.size()) + message.size() +
-        variable_uint_size(reason.size()) + reason.size();
+    uint64_t size = 1 + variable_uint_size(message_.size()) + message_.size() +
+        variable_uint_size(reason_.size()) + reason_.size();
 
-    if ((message == block_message::command) ||
-        (message == transaction_message::command))
+    if ((message_ == block_message::command) ||
+        (message_ == transaction_message::command))
     {
         size += hash_size;
     }
 
     return size;
+}
+
+reject::reason_code reject::code() const
+{
+    return code_;
+}
+
+void reject::set_code(reason_code value)
+{
+    code_ = value;
+}
+
+std::string& reject::message()
+{
+    return message_;
+}
+
+const std::string& reject::message() const
+{
+    return message_;
+}
+
+void reject::set_message(const std::string& value)
+{
+    message_ = value;
+}
+
+void reject::set_message(std::string&& value)
+{
+    message_ = std::move(value);
+}
+
+std::string& reject::reason()
+{
+    return reason_;
+}
+
+const std::string& reject::reason() const
+{
+    return reason_;
+}
+
+void reject::set_reason(const std::string& value)
+{
+    reason_ = value;
+}
+
+void reject::set_reason(std::string&& value)
+{
+    reason_ = std::move(value);
+}
+
+hash_digest& reject::data()
+{
+    return data_;
+}
+
+const hash_digest& reject::data() const
+{
+    return data_;
+}
+
+void reject::set_data(const hash_digest& value)
+{
+    data_ = value;
+}
+
+void reject::set_data(hash_digest&& value)
+{
+    data_ = std::move(value);
+}
+
+reject& reject::operator=(reject&& other)
+{
+    code_ = other.code_;
+    reason_ = std::move(other.reason_);
+    message_ = std::move(other.message_);
+    data_ = std::move(other.data_);
+    return *this;
+}
+
+bool reject::operator==(const reject& other) const
+{
+    return (code_ == other.code_) && (reason_ == other.reason_)
+        && (message_ == other.message_) && (data_ == other.data_);
+}
+
+bool reject::operator!=(const reject& other) const
+{
+    return !(*this == other);
 }
 
 reject::reason_code reject::reason_from_byte(uint8_t byte)

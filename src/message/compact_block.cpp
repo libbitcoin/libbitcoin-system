@@ -59,19 +59,53 @@ compact_block compact_block::factory_from_data(uint32_t version,
     return instance;
 }
 
+compact_block::compact_block()
+  : header_(), nonce_(0), short_ids_(), transactions_()
+{
+}
+
+compact_block::compact_block(const chain::header& header, uint64_t nonce,
+    const short_id_list& short_ids,
+    const prefilled_transaction::list& transactions)
+  : header_(header), nonce_(nonce), short_ids_(short_ids),
+    transactions_(transactions)
+{
+}
+
+compact_block::compact_block(chain::header&& header, uint64_t nonce,
+    short_id_list&& short_ids, prefilled_transaction::list&& transactions)
+  : header_(std::forward<chain::header>(header)), nonce_(nonce),
+    short_ids_(std::forward<short_id_list>(short_ids)),
+    transactions_(std::forward<prefilled_transaction::list>(transactions))
+{
+}
+
+compact_block::compact_block(const compact_block& other)
+  : compact_block(other.header_, other.nonce_, other.short_ids_,
+      other.transactions_)
+{
+}
+
+compact_block::compact_block(compact_block&& other)
+  : compact_block(std::forward<chain::header>(other.header_), other.nonce_,
+      std::forward<short_id_list>(other.short_ids_),
+      std::forward<prefilled_transaction::list>(other.transactions_))
+{
+}
+
 bool compact_block::is_valid() const
 {
-    return header.is_valid() && !short_ids.empty() && !transactions.empty();
+    return header_.is_valid() && !short_ids_.empty() && !transactions_.empty();
 }
 
 void compact_block::reset()
 {
-    header.reset();
-    nonce = 0;
-    short_ids.clear();
-    short_ids.shrink_to_fit();
-    transactions.clear();
-    transactions.shrink_to_fit();
+    header_.reset();
+    nonce_ = 0;
+    short_ids_.clear();
+    short_ids_.shrink_to_fit();
+    transactions_.clear();
+    transactions_.shrink_to_fit();
 }
 
 bool compact_block::from_data(uint32_t version, const data_chunk& data)
@@ -91,17 +125,17 @@ bool compact_block::from_data(uint32_t version, reader& source)
     reset();
 
     auto insufficient_version = (version < compact_block::version_minimum);
-    auto result = header.from_data(source, false);
-    nonce = source.read_8_bytes_little_endian();
+    auto result = header_.from_data(source, false);
+    nonce_ = source.read_8_bytes_little_endian();
     const auto short_ids_count = source.read_variable_uint_little_endian();
     result &= static_cast<bool>(source);
 
     if (result)
-        short_ids.reserve(safe_unsigned<size_t>(short_ids_count));
+        short_ids_.reserve(safe_unsigned<size_t>(short_ids_count));
 
     for (uint64_t i = 0; (i < short_ids_count) && result; ++i)
     {
-        short_ids.push_back(source.read_mini_hash());
+        short_ids_.push_back(source.read_mini_hash());
         result = static_cast<bool>(source);
     }
 
@@ -110,9 +144,9 @@ bool compact_block::from_data(uint32_t version, reader& source)
 
     if (result)
     {
-        transactions.resize(safe_unsigned<size_t>(transaction_count));
+        transactions_.resize(safe_unsigned<size_t>(transaction_count));
 
-        for (auto& transaction: transactions)
+        for (auto& transaction: transactions_)
         {
             result = transaction.from_data(version, source);
 
@@ -145,27 +179,118 @@ void compact_block::to_data(uint32_t version, std::ostream& stream) const
 
 void compact_block::to_data(uint32_t version, writer& sink) const
 {
-    header.to_data(sink, false);
-    sink.write_8_bytes_little_endian(nonce);
-    sink.write_variable_uint_little_endian(short_ids.size());
-    for (const auto& element: short_ids)
+    header_.to_data(sink, false);
+    sink.write_8_bytes_little_endian(nonce_);
+    sink.write_variable_uint_little_endian(short_ids_.size());
+    for (const auto& element: short_ids_)
         sink.write_mini_hash(element);
 
-    sink.write_variable_uint_little_endian(transactions.size());
-    for (const auto& element: transactions)
+    sink.write_variable_uint_little_endian(transactions_.size());
+    for (const auto& element: transactions_)
         element.to_data(version, sink);
 }
 
 uint64_t compact_block::serialized_size(uint32_t version) const
 {
     uint64_t size = chain::header::satoshi_fixed_size_without_transaction_count() +
-        variable_uint_size(short_ids.size()) + (short_ids.size() * 6) +
-        variable_uint_size(transactions.size()) + 8;
+        variable_uint_size(short_ids_.size()) + (short_ids_.size() * 6) +
+        variable_uint_size(transactions_.size()) + 8;
 
-    for (const auto& tx: transactions)
+    for (const auto& tx: transactions_)
         size += tx.serialized_size(version);
 
     return size;
+}
+
+chain::header& compact_block::header()
+{
+    return header_;
+}
+
+const chain::header& compact_block::header() const
+{
+    return header_;
+}
+
+void compact_block::set_header(const chain::header& value)
+{
+    header_ = value;
+}
+
+void compact_block::set_header(chain::header&& value)
+{
+    header_ = std::move(value);
+}
+
+uint64_t compact_block::nonce() const
+{
+    return nonce_;
+}
+
+void compact_block::set_nonce(uint64_t value)
+{
+    nonce_ = value;
+}
+
+compact_block::short_id_list& compact_block::short_ids()
+{
+    return short_ids_;
+}
+
+const compact_block::short_id_list& compact_block::short_ids() const
+{
+    return short_ids_;
+}
+
+void compact_block::set_short_ids(const short_id_list& value)
+{
+    short_ids_ = value;
+}
+
+void compact_block::set_short_ids(short_id_list&& value)
+{
+    short_ids_ = std::move(value);
+}
+
+prefilled_transaction::list& compact_block::transactions()
+{
+    return transactions_;
+}
+
+const prefilled_transaction::list& compact_block::transactions() const
+{
+    return transactions_;
+}
+
+void compact_block::set_transactions(const prefilled_transaction::list& value)
+{
+    transactions_ = value;
+}
+
+void compact_block::set_transactions(prefilled_transaction::list&& value)
+{
+    transactions_ = std::move(value);
+}
+
+compact_block& compact_block::operator=(compact_block&& other)
+{
+    header_ = std::move(other.header_);
+    nonce_ = other.nonce_;
+    short_ids_ = std::move(other.short_ids_);
+    transactions_ = std::move(other.transactions_);
+    return *this;
+}
+
+bool compact_block::operator==(const compact_block& other) const
+{
+    return (header_ == other.header_) && (nonce_ == other.nonce_)
+        && (short_ids_ == other.short_ids_)
+        && (transactions_ == other.transactions_);
+}
+
+bool compact_block::operator!=(const compact_block& other) const
+{
+    return !(*this == other);
 }
 
 } // namespace message

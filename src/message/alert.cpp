@@ -56,17 +56,44 @@ alert alert::factory_from_data(uint32_t version, reader& source)
     return instance;
 }
 
+alert::alert()
+  : payload_(), signature_()
+{
+}
+
+alert::alert(const data_chunk& payload, const data_chunk& signature)
+  : payload_(payload), signature_(signature)
+{
+}
+
+alert::alert(data_chunk&& payload, data_chunk&& signature)
+  : payload_(std::forward<data_chunk>(payload)),
+    signature_(std::forward<data_chunk>(signature))
+{
+}
+
+alert::alert(const alert& other)
+  : alert(other.payload_, other.signature_)
+{
+}
+
+alert::alert(alert&& other)
+  : alert(std::forward<data_chunk>(other.payload_),
+      std::forward<data_chunk>(other.signature_))
+{
+}
+
 bool alert::is_valid() const
 {
-    return !payload.empty() || !signature.empty();
+    return !payload_.empty() || !signature_.empty();
 }
 
 void alert::reset()
 {
-    payload.clear();
-    payload.shrink_to_fit();
-    signature.clear();
-    signature.shrink_to_fit();
+    payload_.clear();
+    payload_.shrink_to_fit();
+    signature_.clear();
+    signature_.shrink_to_fit();
 }
 
 bool alert::from_data(uint32_t version, const data_chunk& data)
@@ -92,8 +119,8 @@ bool alert::from_data(uint32_t version, reader& source)
 
     if (result)
     {
-        payload = source.read_data(payload_size);
-        result = source && (payload.size() == payload_size);
+        payload_ = source.read_data(payload_size);
+        result = source && (payload_.size() == payload_size);
     }
 
     if (result)
@@ -105,8 +132,8 @@ bool alert::from_data(uint32_t version, reader& source)
 
     if (result)
     {
-        signature = source.read_data(signature_size);
-        result = source && (signature.size() == signature_size);
+        signature_ = source.read_data(signature_size);
+        result = source && (signature_.size() == signature_size);
     }
 
     if (!result)
@@ -133,30 +160,69 @@ void alert::to_data(uint32_t version, std::ostream& stream) const
 
 void alert::to_data(uint32_t version, writer& sink) const
 {
-    sink.write_variable_uint_little_endian(payload.size());
-    sink.write_data(payload);
-    sink.write_variable_uint_little_endian(signature.size());
-    sink.write_data(signature);
+    sink.write_variable_uint_little_endian(payload_.size());
+    sink.write_data(payload_);
+    sink.write_variable_uint_little_endian(signature_.size());
+    sink.write_data(signature_);
 }
 
 uint64_t alert::serialized_size(uint32_t version) const
 {
-    return variable_uint_size(payload.size()) + payload.size() +
-        variable_uint_size(signature.size()) + signature.size();
+    return variable_uint_size(payload_.size()) + payload_.size() +
+        variable_uint_size(signature_.size()) + signature_.size();
+}
+
+data_chunk& alert::payload()
+{
+    return payload_;
+}
+
+const data_chunk& alert::payload() const
+{
+    return payload_;
+}
+
+void alert::set_payload(const data_chunk& value)
+{
+    payload_ = value;
+}
+
+void alert::set_payload(data_chunk&& value)
+{
+    payload_ = std::move(value);
+}
+
+data_chunk& alert::signature()
+{
+    return signature_;
+}
+
+const data_chunk& alert::signature() const
+{
+    return signature_;
+}
+
+void alert::set_signature(const data_chunk& value)
+{
+    signature_ = value;
+}
+
+void alert::set_signature(data_chunk&& value)
+{
+    signature_ = std::move(value);
+}
+
+alert& alert::operator=(alert&& other)
+{
+    payload_ = std::move(other.payload_);
+    signature_ = std::move(other.signature_);
+    return *this;
 }
 
 bool alert::operator==(const alert& other) const
 {
-    bool result = (payload.size() == other.payload.size()) &&
-        (signature.size() == other.signature.size());
-
-    for (size_t i = 0; i < payload.size() && result; i++)
-        result = (payload[i] == other.payload[i]);
-
-    for (size_t i = 0; i < signature.size() && result; i++)
-        result = (signature[i] == other.signature[i]);
-
-    return result;
+    return (payload_ == other.payload_)
+        && (signature_ == other.signature_);
 }
 
 bool alert::operator!=(const alert& other) const

@@ -25,18 +25,62 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(prefilled_transaction_tests)
 
-BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
+BOOST_AUTO_TEST_CASE(prefilled_transaction__constructor_1__always__invalid)
+{
+    message::prefilled_transaction instance;
+    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(prefilled_transaction__constructor_2__always__equals_params)
+{
+    uint64_t index = 125u;
+    chain::transaction tx(1, 0, {}, {});
+    message::prefilled_transaction instance(index, tx);
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(index == instance.index());
+    BOOST_REQUIRE(tx == instance.transaction());
+}
+
+BOOST_AUTO_TEST_CASE(prefilled_transaction__constructor_3__always__equals_params)
+{
+    uint64_t index = 125u;
+    chain::transaction tx(1, 0, {}, {});
+    BOOST_REQUIRE_EQUAL(true, tx.is_valid());
+    message::prefilled_transaction instance(index, std::move(tx));
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(index == instance.index());
+    BOOST_REQUIRE_EQUAL(true, instance.transaction().is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(prefilled_transaction__constructor_4__always__equals_params)
+{
+    const message::prefilled_transaction expected(125u,
+        chain::transaction{1, 0, {}, {} });
+
+    message::prefilled_transaction instance(expected);
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(expected == instance);
+}
+
+BOOST_AUTO_TEST_CASE(prefilled_transaction__constructor_5__always__equals_params)
+{
+    message::prefilled_transaction expected(125u,
+        chain::transaction{1, 0, {}, {} });
+
+    message::prefilled_transaction instance(std::move(expected));
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(prefilled_transaction__from_data__insufficient_bytes__failure)
 {
     const data_chunk raw{ 1 };
     message::prefilled_transaction instance{};
-
     BOOST_REQUIRE_EQUAL(false, instance.from_data(message::version::level::minimum, raw));
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
+BOOST_AUTO_TEST_CASE(prefilled_transaction__factory_from_data_1__valid_input__success)
 {
-    const message::prefilled_transaction expected
-    {
+    const message::prefilled_transaction expected(
         16,
         chain::transaction
         {
@@ -45,24 +89,19 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
             { },
             { }
         }
-    };
+    );
 
     const auto data = expected.to_data(message::version::level::minimum);
     const auto result = message::prefilled_transaction::factory_from_data(
         message::version::level::minimum, data);
 
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE(expected.index == result.index);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(message::version::level::minimum));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum),
-        result.serialized_size(message::version::level::minimum));
+    BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
+BOOST_AUTO_TEST_CASE(prefilled_transaction__factory_from_data_2__valid_input__success)
 {
-    const message::prefilled_transaction expected
-    {
+    const message::prefilled_transaction expected(
         16,
         chain::transaction
         {
@@ -71,7 +110,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
             { },
             { }
         }
-    };
+    );
 
     const auto data = expected.to_data(message::version::level::minimum);
     data_source istream(data);
@@ -79,17 +118,12 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
         message::version::level::minimum, istream);
 
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE(expected.index == result.index);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(message::version::level::minimum));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum),
-        result.serialized_size(message::version::level::minimum));
+    BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
+BOOST_AUTO_TEST_CASE(prefilled_transaction__factory_from_data_3__valid_input__success)
 {
-    const message::prefilled_transaction expected
-    {
+    const message::prefilled_transaction expected(
         16,
         chain::transaction
         {
@@ -98,7 +132,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
             { },
             { }
         }
-    };
+    );
 
     const auto data = expected.to_data(message::version::level::minimum);
     data_source istream(data);
@@ -107,11 +141,137 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
         message::version::level::minimum, source);
 
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE(expected.index == result.index);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(message::version::level::minimum));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum),
-        result.serialized_size(message::version::level::minimum));
+    BOOST_REQUIRE(expected == result);
+}
+
+BOOST_AUTO_TEST_CASE(prefilled_transaction__index_accessor__always__returns_initialized_value)
+{
+    uint64_t index = 634u;
+    chain::transaction tx(5, 23, {}, {});
+    message::prefilled_transaction instance(index, tx);
+    BOOST_REQUIRE(index == instance.index());
+}
+
+BOOST_AUTO_TEST_CASE(prefilled_transaction__index_setter__roundtrip__success)
+{
+    uint64_t index = 634u;
+    message::prefilled_transaction instance;
+    BOOST_REQUIRE(index != instance.index());
+    instance.set_index(index);
+    BOOST_REQUIRE(index == instance.index());
+}
+
+BOOST_AUTO_TEST_CASE(prefilled_transaction__message_accessor_1__always__returns_initialized_value)
+{
+    uint64_t index = 634u;
+    const chain::transaction tx(5, 23, {}, {});
+    message::prefilled_transaction instance(index, tx);
+    BOOST_REQUIRE(tx == instance.transaction());
+}
+
+BOOST_AUTO_TEST_CASE(prefilled_transaction__message_accessor_2__always__returns_initialized_value)
+{
+    uint64_t index = 634u;
+    const chain::transaction tx(5, 23, {}, {});
+    const message::prefilled_transaction instance(index, tx);
+    BOOST_REQUIRE(tx == instance.transaction());
+}
+
+BOOST_AUTO_TEST_CASE(prefilled_transaction__message_setter_1__roundtrip__success)
+{
+    const chain::transaction tx(5, 23, {}, {});
+    message::prefilled_transaction instance;
+    BOOST_REQUIRE(tx != instance.transaction());
+    instance.set_transaction(tx);
+    BOOST_REQUIRE(tx == instance.transaction());
+}
+
+BOOST_AUTO_TEST_CASE(prefilled_transaction__message_setter_2__roundtrip__success)
+{
+    const chain::transaction duplicate(16, 57, {}, {});
+    chain::transaction tx(16, 57, {}, {});
+    message::prefilled_transaction instance;
+    BOOST_REQUIRE(duplicate != instance.transaction());
+    instance.set_transaction(std::move(tx));
+    BOOST_REQUIRE(duplicate == instance.transaction());
+}
+
+BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_assign_equals_1__always__matches_equivalent)
+{
+    message::prefilled_transaction value(
+        1234u,
+        chain::transaction{ 6u, 10u, {}, {} }
+    );
+
+    BOOST_REQUIRE(value.is_valid());
+
+    message::prefilled_transaction instance;
+    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+
+    instance = std::move(value);
+    BOOST_REQUIRE(instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_assign_equals_2__always__matches_equivalent)
+{
+    const message::prefilled_transaction value(
+        1234u,
+        chain::transaction{ 6u, 10u, {}, {} }
+    );
+
+    BOOST_REQUIRE(value.is_valid());
+
+    message::prefilled_transaction instance;
+    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+
+    instance = value;
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(value == instance);
+}
+
+BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_equals__duplicates__returns_true)
+{
+    const message::prefilled_transaction expected(
+        1234u,
+        chain::transaction{ 6u, 10u, {}, {} }
+    );
+
+
+    message::prefilled_transaction instance(expected);
+    BOOST_REQUIRE_EQUAL(true, instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_equals__differs__returns_false)
+{
+    const message::prefilled_transaction expected(
+        1234u,
+        chain::transaction{ 6u, 10u, {}, {} }
+    );
+
+    message::prefilled_transaction instance;
+    BOOST_REQUIRE_EQUAL(false, instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_not_equals__duplicates__returns_false)
+{
+    const message::prefilled_transaction expected(
+        1234u,
+        chain::transaction{ 6u, 10u, {}, {} }
+    );
+
+    message::prefilled_transaction instance(expected);
+    BOOST_REQUIRE_EQUAL(false, instance != expected);
+}
+
+BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_not_equals__differs__returns_true)
+{
+    const message::prefilled_transaction expected(
+        1234u,
+        chain::transaction{ 6u, 10u, {}, {} }
+    );
+
+    message::prefilled_transaction instance;
+    BOOST_REQUIRE_EQUAL(true, instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -88,15 +88,40 @@ inventory_vector inventory_vector::factory_from_data(uint32_t version,
     return instance;
 }
 
+inventory_vector::inventory_vector()
+  : inventory_vector(type_id::error, null_hash)
+{
+}
+
+inventory_vector::inventory_vector(type_id type, const hash_digest& hash)
+  : type_(type), hash_(hash)
+{
+}
+
+inventory_vector::inventory_vector(type_id type, hash_digest&& hash)
+  : type_(type), hash_(std::forward<hash_digest>(hash))
+{
+}
+
+inventory_vector::inventory_vector(const inventory_vector& other)
+  : inventory_vector(other.type_, other.hash_)
+{
+}
+
+inventory_vector::inventory_vector(inventory_vector&& other)
+  : inventory_vector(other.type_, std::forward<hash_digest>(other.hash_))
+{
+}
+
 bool inventory_vector::is_valid() const
 {
-    return (type != inventory::type_id::error) || (hash != null_hash);
+    return (type_ != type_id::error) || (hash_ != null_hash);
 }
 
 void inventory_vector::reset()
 {
-    type = inventory::type_id::error;
-    hash.fill(0);
+    type_ = type_id::error;
+    hash_.fill(0);
 }
 
 bool inventory_vector::from_data(uint32_t version,
@@ -119,8 +144,8 @@ bool inventory_vector::from_data(uint32_t version,
     reset();
 
     uint32_t raw_type = source.read_4_bytes_little_endian();
-    type = inventory_vector::to_type(raw_type);
-    hash = source.read_hash();
+    type_ = inventory_vector::to_type(raw_type);
+    hash_ = source.read_hash();
     bool result = static_cast<bool>(source);
 
     if (!result)
@@ -149,9 +174,9 @@ void inventory_vector::to_data(uint32_t version,
 void inventory_vector::to_data(uint32_t version,
     writer& sink) const
 {
-    const auto raw_type = inventory_vector::to_number(type);
+    const auto raw_type = inventory_vector::to_number(type_);
     sink.write_4_bytes_little_endian(raw_type);
-    sink.write_hash(hash);
+    sink.write_hash(hash_);
 }
 
 uint64_t inventory_vector::serialized_size(uint32_t version) const
@@ -161,25 +186,68 @@ uint64_t inventory_vector::serialized_size(uint32_t version) const
 
 uint64_t inventory_vector::satoshi_fixed_size(uint32_t version)
 {
-    return sizeof(hash) + sizeof(uint32_t);
+    return sizeof(hash_) + sizeof(uint32_t);
 }
 
 bool inventory_vector::is_block_type() const
 {
     return
-        type == inventory::type_id::block ||
-        type == inventory::type_id::compact_block ||
-        type == inventory::type_id::filtered_block;
+        type_ == type_id::block ||
+        type_ == type_id::compact_block ||
+        type_ == type_id::filtered_block;
 }
 
 bool inventory_vector::is_transaction_type() const
 {
-    return type == message::inventory::type_id::transaction;
+    return type_ == type_id::transaction;
+}
+
+inventory_vector::type_id inventory_vector::type() const
+{
+    return type_;
+}
+
+void inventory_vector::set_type(type_id value)
+{
+    type_ = value;
+}
+
+hash_digest& inventory_vector::hash()
+{
+    return hash_;
+}
+
+const hash_digest& inventory_vector::hash() const
+{
+    return hash_;
+}
+
+void inventory_vector::set_hash(const hash_digest& value)
+{
+    hash_ = value;
+}
+
+void inventory_vector::set_hash(hash_digest&& value)
+{
+    hash_ = std::move(value);
+}
+
+inventory_vector& inventory_vector::operator=(inventory_vector&& other)
+{
+    type_ = other.type_;
+    hash_ = std::move(other.hash_);
+    return *this;
+}
+
+void inventory_vector::operator=(const inventory_vector& other)
+{
+    type_ = other.type_;
+    hash_ = other.hash_;
 }
 
 bool inventory_vector::operator==(const inventory_vector& other) const
 {
-    return (hash == other.hash) && (type == other.type);
+    return (hash_ == other.hash_) && (type_ == other.type_);
 }
 
 bool inventory_vector::operator!=(const inventory_vector& other) const

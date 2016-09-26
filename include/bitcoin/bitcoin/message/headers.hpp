@@ -49,10 +49,19 @@ public:
 
     headers();
     headers(const chain::header::list& values);
+    headers(chain::header::list&& values);
     headers(const std::initializer_list<chain::header>& values);
+    headers(const headers& other);
+    headers(headers&& other);
 
-    bool operator==(const headers& other) const;
-    bool operator!=(const headers& other) const;
+    chain::header::list& elements();
+    const chain::header::list& elements() const;
+    void set_elements(const chain::header::list& values);
+    void set_elements(chain::header::list&& values);
+
+    void to_hashes(hash_list& out) const;
+    void to_inventory(inventory_vector::list& out,
+        inventory::type_id type) const;
 
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
@@ -60,18 +69,23 @@ public:
     data_chunk to_data(uint32_t version) const;
     void to_data(uint32_t version, std::ostream& stream) const;
     void to_data(uint32_t version, writer& sink) const;
-    void to_hashes(hash_list& out) const;
-    void to_inventory(inventory_vector::list& out,
-        inventory::type_id type) const;
     bool is_valid() const;
     void reset();
     uint64_t serialized_size(uint32_t version) const;
+
+    // This class is move assignable but not copy assignable.
+    headers& operator=(headers&& other);
+    void operator=(const headers&) = delete;
+
+    bool operator==(const headers& other) const;
+    bool operator!=(const headers& other) const;
 
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
-    chain::header::list elements;
+private:
+    chain::header::list elements_;
 };
 
 } // namespace message

@@ -64,14 +64,12 @@ transaction_message::transaction_message()
 }
 
 transaction_message::transaction_message(const transaction& other)
-  : transaction_message(other.version, other.locktime, other.inputs,
-        other.outputs)
+  : transaction(other), originator_(0)
 {
 }
 
 transaction_message::transaction_message(const transaction_message& other)
-  : transaction_message(other.version, other.locktime, other.inputs,
-        other.outputs)
+  : transaction(other), originator_(other.originator_)
 {
 }
 
@@ -82,16 +80,13 @@ transaction_message::transaction_message(uint32_t version, uint32_t locktime,
 }
 
 transaction_message::transaction_message(transaction&& other)
-  : transaction_message(other.version, other.locktime,
-        std::forward<chain::input::list>(other.inputs),
-        std::forward<chain::output::list>(other.outputs))
+  : transaction(std::forward<chain::transaction>(other)), originator_(0)
 {
 }
 
 transaction_message::transaction_message(transaction_message&& other)
-  : transaction_message(other.version, other.locktime,
-        std::forward<chain::input::list>(other.inputs),
-        std::forward<chain::output::list>(other.outputs))
+  : transaction(std::forward<chain::transaction>(other)),
+    originator_(other.originator_)
 {
 }
 
@@ -101,17 +96,6 @@ transaction_message::transaction_message(uint32_t version, uint32_t locktime,
         std::forward<chain::output::list>(outputs)),
     originator_(0)
 {
-}
-
-transaction_message& transaction_message::operator=(
-    transaction_message&& other)
-{
-    version = other.version;
-    locktime = other.locktime;
-    inputs = std::move(other.inputs);
-    outputs = std::move(other.outputs);
-    originator_ = other.originator_;
-    return *this;
 }
 
 bool transaction_message::from_data(uint32_t, const data_chunk& data)
@@ -157,6 +141,43 @@ uint64_t transaction_message::originator() const
 void transaction_message::set_originator(uint64_t value) const
 {
     originator_ = value;
+}
+
+transaction_message& transaction_message::operator=(
+    chain::transaction&& other)
+{
+    reset();
+    chain::transaction::operator=(std::forward<chain::transaction>(other));
+    return *this;
+}
+
+transaction_message& transaction_message::operator=(
+    transaction_message&& other)
+{
+    chain::transaction::operator=(std::forward<chain::transaction>(other));
+    originator_ = other.originator_;
+    return *this;
+}
+
+bool transaction_message::operator==(const chain::transaction& other) const
+{
+    return chain::transaction::operator==(other);
+}
+
+bool transaction_message::operator!=(const chain::transaction& other) const
+{
+    return chain::transaction::operator!=(other);
+}
+
+bool transaction_message::operator==(const transaction_message& other) const
+{
+    return (originator_ == other.originator_) &&
+        chain::transaction::operator==(other);
+}
+
+bool transaction_message::operator!=(const transaction_message& other) const
+{
+    return !(*this == other);
 }
 
 } // namespace message

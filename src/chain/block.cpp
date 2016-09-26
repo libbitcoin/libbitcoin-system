@@ -51,27 +51,24 @@ using namespace bc::config;
 
 const size_t block::validation::orphan_height = 0;
 
-block block::factory_from_data(const data_chunk& data,
-    bool with_transaction_count)
+block block::factory_from_data(const data_chunk& data)
 {
     block instance;
-    instance.from_data(data, with_transaction_count);
+    instance.from_data(data);
     return instance;
 }
 
-block block::factory_from_data(std::istream& stream,
-    bool with_transaction_count)
+block block::factory_from_data(std::istream& stream)
 {
     block instance;
-    instance.from_data(stream, with_transaction_count);
+    instance.from_data(stream);
     return instance;
 }
 
-block block::factory_from_data(reader& source,
-    bool with_transaction_count)
+block block::factory_from_data(reader& source)
 {
     block instance;
-    instance.from_data(source, with_transaction_count);
+    instance.from_data(source);
     return instance;
 }
 
@@ -141,82 +138,68 @@ uint64_t block::subsidy(size_t height)
 }
 
 block::block()
-{
-}
-
-block::block(const block& other)
-  : block(other.header, other.transactions)
+  : header_(), transactions_()
 {
 }
 
 block::block(const chain::header& header,
     const chain::transaction::list& transactions)
-  : header(header),
-    transactions(transactions)
-{
-}
-
-block::block(block&& other)
-  : block(std::forward<chain::header>(other.header),
-        std::forward<chain::transaction::list>(other.transactions))
+  : header_(header), transactions_(transactions)
 {
 }
 
 block::block(chain::header&& header, chain::transaction::list&& transactions)
-  : header(std::forward<chain::header>(header)),
-    transactions(std::forward<chain::transaction::list>(transactions))
+  : header_(std::forward<chain::header>(header)),
+    transactions_(std::forward<chain::transaction::list>(transactions))
 {
 }
 
-block& block::operator=(block&& other)
+block::block(const block& other)
+  : block(other.header_, other.transactions_)
 {
-    header = std::move(other.header);
-    transactions = std::move(other.transactions);
-    return *this;
 }
 
-block& block::operator=(const block& other)
+block::block(block&& other)
+  : block(std::forward<chain::header>(other.header_),
+        std::forward<chain::transaction::list>(other.transactions_))
 {
-    header = other.header;
-    transactions = other.transactions;
-    return *this;
 }
 
 bool block::is_valid() const
 {
-    return !transactions.empty() || header.is_valid();
+    return !transactions_.empty() || header_.is_valid();
 }
 
 void block::reset()
 {
-    header.reset();
-    transactions.clear();
-    transactions.shrink_to_fit();
+    header_.reset();
+    transactions_.clear();
+    transactions_.shrink_to_fit();
 }
 
-bool block::from_data(const data_chunk& data, bool with_transaction_count)
+bool block::from_data(const data_chunk& data)
 {
     data_source istream(data);
-    return from_data(istream, with_transaction_count);
+    return from_data(istream);
 }
 
-bool block::from_data(std::istream& stream, bool with_transaction_count)
+bool block::from_data(std::istream& stream)
 {
     istream_reader source(stream);
-    return from_data(source, with_transaction_count);
+    return from_data(source);
 }
 
-bool block::from_data(reader& source, bool with_transaction_count)
+bool block::from_data(reader& source)
 {
     reset();
 
-    if (!header.from_data(source, with_transaction_count))
+    if (!header_.from_data(source, true))
         return false;
 
-    transactions.resize(safe_unsigned<size_t>(header.transaction_count));
+    transactions_.resize(safe_unsigned<size_t>(header_.transaction_count()));
 
     // Order is required.
-    for (auto& tx: transactions)
+    for (auto& tx: transactions_)
     {
         if (!tx.from_data(source))
         {
@@ -228,51 +211,52 @@ bool block::from_data(reader& source, bool with_transaction_count)
     return true;
 }
 
-data_chunk block::to_data(bool with_transaction_count) const
+data_chunk block::to_data() const
 {
     data_chunk data;
     data_sink ostream(data);
-    to_data(ostream, with_transaction_count);
+    to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size(with_transaction_count));
+    BITCOIN_ASSERT(data.size() == serialized_size());
     return data;
 }
 
-void block::to_data(std::ostream& stream, bool with_transaction_count) const
+void block::to_data(std::ostream& stream) const
 {
     ostream_writer sink(stream);
-    to_data(sink, with_transaction_count);
+    to_data(sink);
 }
 
-void block::to_data(writer& sink, bool with_transaction_count) const
+void block::to_data(writer& sink) const
 {
-    header.to_data(sink, with_transaction_count);
+    header_.to_data(sink, false);
+    sink.write_variable_uint_little_endian(transactions_.size());
     const auto to = [&sink](const transaction& tx) { tx.to_data(sink); };
-    std::for_each(transactions.begin(), transactions.end(), to);
+    std::for_each(transactions_.begin(), transactions_.end(), to);
 }
 
 // Convenience property.
 hash_digest block::hash() const
 {
-    return header.hash();
+    return header_.hash();
 }
 
 hash_number block::difficulty() const
 {
-    return difficulty(header.bits);
+    return difficulty(header_.bits());
 }
 
 // overflow returns max_uint64
-uint64_t block::serialized_size(bool with_transaction_count) const
+uint64_t block::serialized_size() const
 {
-    const auto block_size = header.serialized_size(with_transaction_count);
+    auto block_size = header_.serialized_size(true);
     const auto value = [](uint64_t total, const transaction& tx)
     {
         const auto size = tx.serialized_size();
         return total >= max_uint64 - size ? max_uint64 : total + size;
     };
 
-    const auto& txs = transactions;
+    const auto& txs = transactions_;
     return std::accumulate(txs.begin(), txs.end(), block_size, value);
     return block_size;
 }
@@ -285,7 +269,7 @@ size_t block::signature_operations(bool bip16_active) const
         return ceiling_add(total, tx.signature_operations(bip16_active));
     };
 
-    const auto& txs = transactions;
+    const auto& txs = transactions_;
     return std::accumulate(txs.begin(), txs.end(), size_t(0), value);
 }
 
@@ -293,10 +277,10 @@ size_t block::total_inputs(bool with_coinbase_transaction) const
 {
     const auto inputs = [](size_t total, const transaction& tx)
     {
-        return ceiling_add(total, tx.inputs.size());
+        return ceiling_add(total, tx.inputs().size());
     };
 
-    const auto& txs = transactions;
+    const auto& txs = transactions_;
     const size_t offset = with_coinbase_transaction ? 0 : 1;
     return std::accumulate(txs.begin() + offset, txs.end(), size_t(0), inputs);
 }
@@ -305,7 +289,7 @@ size_t block::total_inputs(bool with_coinbase_transaction) const
 // No txs or coinbases also returns true.
 bool block::is_extra_coinbases() const
 {
-    if (transactions.empty())
+    if (transactions_.empty())
         return false;
 
     const auto value = [](const transaction& tx)
@@ -313,19 +297,19 @@ bool block::is_extra_coinbases() const
         return tx.is_coinbase();
     };
 
-    const auto& txs = transactions;
+    const auto& txs = transactions_;
     return std::any_of(txs.begin() + 1, txs.end(), value);
 }
 
 bool block::is_final(size_t height) const
 {
-    const auto timestamp = header.timestamp;
+    const auto timestamp = header_.timestamp();
     const auto value = [height, timestamp](const transaction& tx)
     {
         return tx.is_final(height, timestamp);
     };
 
-    const auto& txs = transactions;
+    const auto& txs = transactions_;
     return std::all_of(txs.begin(), txs.end(), value);
 }
 
@@ -337,7 +321,7 @@ bool block::is_distinct_transaction_set() const
         return transaction.hash();
     };
 
-    const auto& txs = transactions;
+    const auto& txs = transactions_;
     hash_list hashes(txs.size());
     std::transform(txs.begin(), txs.end(), hashes.begin(), hasher);
     std::sort(hashes.begin(), hashes.end());
@@ -347,7 +331,7 @@ bool block::is_distinct_transaction_set() const
 
 hash_digest block::generate_merkle_root() const
 {
-    auto merkle = to_hashes(transactions);
+    auto merkle = to_hashes(transactions_);
 
     if (merkle.empty())
         return null_hash;
@@ -376,7 +360,7 @@ hash_digest block::generate_merkle_root() const
 
 bool block::is_valid_merkle_root() const
 {
-    return generate_merkle_root() == header.merkle;
+    return (generate_merkle_root() == header_.merkle());
 }
 
 uint64_t block::fees() const
@@ -386,14 +370,14 @@ uint64_t block::fees() const
         return ceiling_add(total, tx.fees());
     };
 
-    const auto& txs = transactions;
+    const auto& txs = transactions_;
     return std::accumulate(txs.begin(), txs.end(), uint64_t(0), value);
 }
 
 uint64_t block::claim() const
 {
-    return transactions.empty() ? 0 :
-        transactions.front().total_output_value();
+    return transactions_.empty() ? 0 :
+        transactions_.front().total_output_value();
 }
 
 uint64_t block::reward(size_t height) const
@@ -408,18 +392,18 @@ bool block::is_valid_coinbase_claim(size_t height) const
 
 bool block::is_valid_coinbase_script(size_t height) const
 {
-    if (transactions.empty() || transactions.front().inputs.empty())
+    if (transactions_.empty() || transactions_.front().inputs().empty())
         return false;
 
     // Get the serialized coinbase input script as a byte vector.
-    const auto& actual_tx = transactions.front();
-    const auto& actual_script = actual_tx.inputs.front().script;
+    const auto& actual_tx = transactions_.front();
+    const auto& actual_script = actual_tx.inputs().front().script();
     const auto actual = actual_script.to_data(false);
 
     // Create the expected script as a byte vector.
     script expected_script;
     script_number number(height);
-    expected_script.operations.push_back({ opcode::special, number.data() });
+    expected_script.operations().push_back({ opcode::special, number.data() });
     const auto expected = expected_script.to_data(false);
 
     // Require that the coinbase script match the expected coinbase script.
@@ -430,7 +414,7 @@ code block::check_transactions() const
 {
     code ec;
 
-    for (const auto& tx: transactions)
+    for (const auto& tx: transactions_)
         if ((ec = tx.check(false)))
             return ec;
 
@@ -441,7 +425,7 @@ code block::accept_transactions(const chain_state& state) const
 {
     code ec;
 
-    for (const auto& tx: transactions)
+    for (const auto& tx: transactions_)
         if ((ec = tx.accept(state, false)))
             return ec;
 
@@ -452,7 +436,7 @@ code block::connect_transactions(const chain_state& state) const
 {
     code ec;
 
-    for (const auto& tx: transactions)
+    for (const auto& tx: transactions_)
         if ((ec = tx.connect(state)))
             return ec;
 
@@ -465,16 +449,16 @@ code block::check() const
     if (serialized_size() > max_block_size)
         return error::size_limits;
 
-    else if (!header.is_valid_proof_of_work())
+    else if (!header_.is_valid_proof_of_work())
         return error::invalid_proof_of_work;
 
-    else if (!header.is_valid_time_stamp())
+    else if (!header_.is_valid_time_stamp())
         return error::futuristic_timestamp;
 
-    else if (transactions.empty())
+    else if (transactions_.empty())
         return error::empty_block;
 
-    else if (!transactions.front().is_coinbase())
+    else if (!transactions_.front().is_coinbase())
         return error::first_not_coinbase;
 
     else if (is_extra_coinbases())
@@ -516,16 +500,16 @@ code block::accept(const chain_state& state) const
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip34 = state.is_enabled(rule_fork::bip34_rule);
 
-    if (state.is_checkpoint_failure(header))
+    if (state.is_checkpoint_failure(header_))
         return error::checkpoints_failed;
 
-    else if (header.version < state.minimum_version())
+    else if(header_.version() < state.minimum_version())
         return error::old_version_block;
 
-    else if (header.bits != state.work_required())
+    else if (header_.bits() != state.work_required())
         return error::incorrect_proof_of_work;
 
-    else if (header.timestamp <= state.median_time_past())
+    else if (header_.timestamp() <= state.median_time_past())
         return error::timestamp_too_early;
 
     // This recurses txs but is not applied to mempool (timestamp required).
@@ -544,6 +528,111 @@ code block::accept(const chain_state& state) const
 
     else
         return accept_transactions(state);
+}
+
+chain::header& block::header()
+{
+    return header_;
+}
+
+const chain::header& block::header() const
+{
+    return header_;
+}
+
+void block::set_header(const chain::header& value)
+{
+    header_ = value;
+}
+
+void block::set_header(chain::header&& value)
+{
+    header_ = std::move(value);
+}
+
+transaction::list& block::transactions()
+{
+    return transactions_;
+}
+
+const transaction::list& block::transactions() const
+{
+    return transactions_;
+}
+
+void block::set_transactions(const transaction::list& value)
+{
+    transactions_ = value;
+}
+
+void block::set_transactions(transaction::list&& value)
+{
+    transactions_ = std::move(value);
+}
+
+block& block::operator=(block&& other)
+{
+    header_ = std::move(other.header_);
+    transactions_ = std::move(other.transactions_);
+    return *this;
+}
+
+bool block::operator==(const block& other) const
+{
+    return (header_ == other.header_)
+        && (transactions_ == other.transactions_);
+}
+
+bool block::operator!=(const block& other) const
+{
+    return !(*this == other);
+}
+
+hash_digest block::build_merkle_tree(hash_list& merkle)
+{
+    // Stop if hash list is empty.
+    if (merkle.empty())
+        return null_hash;
+
+    // While there is more than 1 hash in the list, keep looping...
+    while (merkle.size() > 1)
+    {
+        // If number of hashes is odd, duplicate last hash in the list.
+        if (merkle.size() % 2 != 0)
+            merkle.push_back(merkle.back());
+
+        // List size is now even.
+        BITCOIN_ASSERT(merkle.size() % 2 == 0);
+
+        // New hash list.
+        hash_list new_merkle;
+
+        // Loop through hashes 2 at a time.
+        for (auto it = merkle.begin(); it != merkle.end(); it += 2)
+        {
+            // Join both current hashes together (concatenate).
+            data_chunk concat_data;
+            data_sink concat_stream(concat_data);
+            ostream_writer concat_sink(concat_stream);
+            concat_sink.write_hash(*it);
+            concat_sink.write_hash(*(it + 1));
+            concat_stream.flush();
+
+            BITCOIN_ASSERT(concat_data.size() == (2 * hash_size));
+
+            // Hash both of the hashes.
+            const auto new_root = bitcoin_hash(concat_data);
+
+            // Add this to the new list.
+            new_merkle.push_back(new_root);
+        }
+
+        // This is the new list.
+        merkle = new_merkle;
+    }
+
+    // Finally we end up with a single item.
+    return merkle[0];
 }
 
 code block::connect() const
@@ -609,8 +698,8 @@ chain::block block::genesis_mainnet()
     const auto genesis = chain::block::factory_from_data(raw_block);
 
     BITCOIN_ASSERT(genesis.is_valid());
-    BITCOIN_ASSERT(genesis.transactions.size() == 1);
-    BITCOIN_ASSERT(genesis.generate_merkle_root() == genesis.header.merkle);
+    BITCOIN_ASSERT(genesis.transactions().size() == 1);
+    BITCOIN_ASSERT(genesis.generate_merkle_root() == genesis.header().merkle());
 
     return genesis;
 }
@@ -622,8 +711,8 @@ chain::block block::genesis_testnet()
     const auto genesis = chain::block::factory_from_data(raw_block);
 
     BITCOIN_ASSERT(genesis.is_valid());
-    BITCOIN_ASSERT(genesis.transactions.size() == 1);
-    BITCOIN_ASSERT(genesis.generate_merkle_root() == genesis.header.merkle);
+    BITCOIN_ASSERT(genesis.transactions().size() == 1);
+    BITCOIN_ASSERT(genesis.generate_merkle_root() == genesis.header().merkle());
 
     return genesis;
 }

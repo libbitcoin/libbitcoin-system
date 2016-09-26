@@ -24,6 +24,7 @@
 namespace libbitcoin {
 
 hash_number::hash_number()
+  : hash_(0)
 {
 }
 

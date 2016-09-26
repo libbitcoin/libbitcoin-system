@@ -45,10 +45,19 @@ public:
     get_headers();
     get_headers(const hash_list& start, const hash_digest& stop);
     get_headers(hash_list&& start, hash_digest&& stop);
+    get_headers(const get_headers& other);
+    get_headers(get_headers&& other);
 
     bool from_data(uint32_t version, const data_chunk& data) override;
     bool from_data(uint32_t version, std::istream& stream) override;
     bool from_data(uint32_t version, reader& source) override;
+
+    // This class is move assignable but not copy assignable.
+    get_headers& operator=(get_headers&& other);
+    void operator=(const get_headers&) = delete;
+
+    bool operator==(const get_headers& other) const;
+    bool operator!=(const get_headers& other) const;
 
     static const std::string command;
     static const uint32_t version_minimum;

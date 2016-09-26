@@ -37,26 +37,26 @@ const uint32_t block_message::version_minimum = version::level::minimum;
 const uint32_t block_message::version_maximum = version::level::maximum;
 
 block_message block_message::factory_from_data(uint32_t version,
-    const data_chunk& data, bool with_transaction_count)
+    const data_chunk& data)
 {
     block_message instance;
-    instance.from_data(version, data, with_transaction_count);
+    instance.from_data(version, data);
     return instance;
 }
 
 block_message block_message::factory_from_data(uint32_t version,
-    std::istream& stream, bool with_transaction_count)
+    std::istream& stream)
 {
     block_message instance;
-    instance.from_data(version, stream, with_transaction_count);
+    instance.from_data(version, stream);
     return instance;
 }
 
 block_message block_message::factory_from_data(uint32_t version,
-    reader& source, bool with_transaction_count)
+    reader& source)
 {
     block_message instance;
-    instance.from_data(version, source, with_transaction_count);
+    instance.from_data(version, source);
     return instance;
 }
 
@@ -65,30 +65,9 @@ block_message::block_message()
 {
 }
 
-block_message::block_message(const block& other)
-  : block(other)
-{
-}
-
-block_message::block_message(const block_message& other)
-  : block_message(other.header, other.transactions)
-{
-}
-
 block_message::block_message(const chain::header& header,
     const chain::transaction::list& transactions)
   : block(header, transactions), originator_(0)
-{
-}
-
-block_message::block_message(block&& other)
-  : block(std::forward<block>(other))
-{
-}
-
-block_message::block_message(block_message&& other)
-  : block_message(std::forward<chain::header>(other.header),
-        std::forward<chain::transaction::list>(other.transactions))
 {
 }
 
@@ -100,54 +79,60 @@ block_message::block_message(chain::header&& header,
 {
 }
 
-block_message& block_message::operator=(block_message&& other)
+block_message::block_message(const block& other)
+  : block(other), originator_(0)
 {
-    header = std::move(other.header);
-    transactions = std::move(other.transactions);
-    originator_ = other.originator_;
-    return *this;
 }
 
-bool block_message::from_data(uint32_t, const data_chunk& data,
-    bool with_transaction_count)
+block_message::block_message(block&& other)
+  : block(std::forward<block>(other)), originator_(0)
 {
-    return block::from_data(data, with_transaction_count);
 }
 
-bool block_message::from_data(uint32_t, std::istream& stream,
-    bool with_transaction_count)
+block_message::block_message(const block_message& other)
+  : block(other), originator_(other.originator_)
 {
-    return block::from_data(stream, with_transaction_count);
 }
 
-bool block_message::from_data(uint32_t, reader& source,
-    bool with_transaction_count)
+block_message::block_message(block_message&& other)
+  : block(std::forward<chain::block>(other)),
+    originator_(other.originator_)
 {
-    return block::from_data(source, with_transaction_count);
 }
 
-data_chunk block_message::to_data(uint32_t version,
-    bool with_transaction_count) const
+bool block_message::from_data(uint32_t, const data_chunk& data)
 {
-    return block::to_data(with_transaction_count);
+    return block::from_data(data);
 }
 
-void block_message::to_data(uint32_t version, std::ostream& stream,
-    bool with_transaction_count) const
+bool block_message::from_data(uint32_t, std::istream& stream)
 {
-    block::to_data(stream, with_transaction_count);
+    return block::from_data(stream);
 }
 
-void block_message::to_data(uint32_t version, writer& sink,
-    bool with_transaction_count) const
+bool block_message::from_data(uint32_t, reader& source)
 {
-    block::to_data(sink, with_transaction_count);
+    return block::from_data(source);
 }
 
-uint64_t block_message::serialized_size(uint32_t version,
-    bool with_transaction_count) const
+data_chunk block_message::to_data(uint32_t) const
 {
-    return block::serialized_size(with_transaction_count);
+    return block::to_data();
+}
+
+void block_message::to_data(uint32_t, std::ostream& stream) const
+{
+    block::to_data(stream);
+}
+
+void block_message::to_data(uint32_t, writer& sink) const
+{
+    block::to_data(sink);
+}
+
+uint64_t block_message::serialized_size(uint32_t) const
+{
+    return block::serialized_size();
 }
 
 uint64_t block_message::originator() const
@@ -158,6 +143,41 @@ uint64_t block_message::originator() const
 void block_message::set_originator(uint64_t value) const
 {
     originator_ = value;
+}
+
+block_message& block_message::operator=(chain::block&& other)
+{
+    reset();
+    chain::block::operator=(std::forward<chain::block>(other));
+    return *this;
+}
+
+block_message& block_message::operator=(block_message&& other)
+{
+    chain::block::operator=(std::forward<chain::block>(other));
+    originator_ = other.originator_;
+    return *this;
+}
+
+bool block_message::operator==(const chain::block& other) const
+{
+    return chain::block::operator==(other);
+}
+
+bool block_message::operator!=(const chain::block& other) const
+{
+    return chain::block::operator!=(other);
+}
+
+bool block_message::operator==(const block_message& other) const
+{
+    return (originator_ == other.originator_)
+        && chain::block::operator==(other);
+}
+
+bool block_message::operator!=(const block_message& other) const
+{
+    return !(*this == other);
 }
 
 } // namespace message

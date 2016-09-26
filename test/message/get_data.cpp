@@ -26,7 +26,108 @@ using namespace bc::message;
 
 BOOST_AUTO_TEST_SUITE(get_data_tests)
 
-BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
+BOOST_AUTO_TEST_CASE(get_data__constructor_1__always__invalid)
+{
+    message::get_data instance;
+    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(get_data__constructor_2__always__equals_params)
+{
+    const message::inventory_vector::list values =
+    {
+        message::inventory_vector(
+            inventory::type_id::error,
+            {
+                {
+                    0x44, 0x9a, 0x0d, 0x24, 0x9a, 0xd5, 0x39, 0x89,
+                    0xbb, 0x85, 0x0a, 0x3d, 0x79, 0x24, 0xed, 0x0f,
+                    0xc3, 0x0d, 0x6f, 0x55, 0x7d, 0x71, 0x12, 0x1a,
+                    0x37, 0xc0, 0xb0, 0x32, 0xf0, 0xd6, 0x6e, 0xdf
+                }
+            }
+        )
+    };
+
+    message::get_data instance(values);
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(values == instance.inventories());
+}
+
+BOOST_AUTO_TEST_CASE(get_data__constructor_3__always__equals_params)
+{
+    message::inventory_vector::type_id type = message::inventory_vector::type_id::error;
+    auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    message::inventory_vector::list values =
+    {
+        message::inventory_vector(type, hash)
+    };
+
+    message::get_data instance(std::move(values));
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    auto inventories = instance.inventories();
+    BOOST_REQUIRE_EQUAL(1u, inventories.size());
+    BOOST_REQUIRE(type == inventories[0].type());
+    BOOST_REQUIRE(hash == inventories[0].hash());
+}
+
+BOOST_AUTO_TEST_CASE(get_data__constructor_4__always__equals_params)
+{
+    message::inventory_vector::type_id type = message::inventory_vector::type_id::error;
+    auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_list hashes = { hash };
+
+    message::get_data instance(hashes, type);
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    auto inventories = instance.inventories();
+    BOOST_REQUIRE_EQUAL(1u, inventories.size());
+    BOOST_REQUIRE(type == inventories[0].type());
+    BOOST_REQUIRE(hash == inventories[0].hash());
+}
+
+BOOST_AUTO_TEST_CASE(get_data__constructor_5__always__equals_params)
+{
+    message::inventory_vector::type_id type = message::inventory_vector::type_id::error;
+    auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+
+    message::get_data instance({ { type, hash } });
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    auto inventories = instance.inventories();
+    BOOST_REQUIRE_EQUAL(1u, inventories.size());
+    BOOST_REQUIRE(type == inventories[0].type());
+    BOOST_REQUIRE(hash == inventories[0].hash());
+}
+
+BOOST_AUTO_TEST_CASE(get_data__constructor_6__always__equals_params)
+{
+    message::inventory_vector::type_id type = message::inventory_vector::type_id::error;
+    auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+
+    const message::get_data value({ { type, hash } });
+    BOOST_REQUIRE_EQUAL(true, value.is_valid());
+    message::get_data instance(value);
+    auto inventories = instance.inventories();
+    BOOST_REQUIRE_EQUAL(1u, inventories.size());
+    BOOST_REQUIRE(type == inventories[0].type());
+    BOOST_REQUIRE(hash == inventories[0].hash());
+    BOOST_REQUIRE(value == instance);
+}
+
+BOOST_AUTO_TEST_CASE(get_data__constructor_7__always__equals_params)
+{
+    message::inventory_vector::type_id type = message::inventory_vector::type_id::error;
+    auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+
+    message::get_data value({ { type, hash } });
+    BOOST_REQUIRE_EQUAL(true, value.is_valid());
+    message::get_data instance(std::move(value));
+    auto inventories = instance.inventories();
+    BOOST_REQUIRE_EQUAL(1u, inventories.size());
+    BOOST_REQUIRE(type == inventories[0].type());
+    BOOST_REQUIRE(hash == inventories[0].hash());
+}
+
+BOOST_AUTO_TEST_CASE(get_data__from_data__insufficient_bytes__failure)
 {
     static const data_chunk raw{ 0xab, 0xcd };
     get_data instance;
@@ -34,24 +135,15 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
     BOOST_REQUIRE_EQUAL(false, instance.from_data(version, raw));
 }
 
-BOOST_AUTO_TEST_CASE(from_data_insufficient_version_failure)
+BOOST_AUTO_TEST_CASE(get_data__from_data__insufficient_version__failure)
 {
-    static const get_data expected
-    {
+    const get_data expected(
         {
             {
                 inventory_vector::type_id::error,
-                {
-                    {
-                        0x44, 0x9a, 0x0d, 0x24, 0x9a, 0xd5, 0x39, 0x89,
-                        0xbb, 0x85, 0x0a, 0x3d, 0x79, 0x24, 0xed, 0x0f,
-                        0xc3, 0x0d, 0x6f, 0x55, 0x7d, 0x71, 0x12, 0x1a,
-                        0x37, 0xc0, 0xb0, 0x32, 0xf0, 0xd6, 0x6e, 0xdf
-                    }
-                }
+                hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
             }
-        }
-    };
+        });
 
     const data_chunk raw = expected.to_data(version::level::maximum);
     get_data instance;
@@ -59,24 +151,15 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_version_failure)
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
+BOOST_AUTO_TEST_CASE(get_data__factory_from_data_1__valid_input__success)
 {
-    static const get_data expected
-    {
+    static const get_data expected(
         {
             {
                 inventory_vector::type_id::error,
-                {
-                    {
-                        0x44, 0x9a, 0x0d, 0x24, 0x9a, 0xd5, 0x39, 0x89,
-                        0xbb, 0x85, 0x0a, 0x3d, 0x79, 0x24, 0xed, 0x0f,
-                        0xc3, 0x0d, 0x6f, 0x55, 0x7d, 0x71, 0x12, 0x1a,
-                        0x37, 0xc0, 0xb0, 0x32, 0xf0, 0xd6, 0x6e, 0xdf
-                    }
-                }
+                hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
             }
-        }
-    };
+        });
 
     static const auto version = version::level::maximum;
     const auto data = expected.to_data(version);
@@ -87,21 +170,14 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(version), result.serialized_size(version));
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
+BOOST_AUTO_TEST_CASE(get_data__factory_from_data_2__valid_input__success)
 {
     static const get_data expected
     {
         {
             {
                 inventory_vector::type_id::transaction,
-                {
-                    {
-                        0x44, 0x9a, 0x0d, 0xee, 0x9a, 0xd5, 0x39, 0xee,
-                        0xee, 0x85, 0x0a, 0x3d, 0xee, 0x24, 0xed, 0x0f,
-                        0xc3, 0xee, 0x6f, 0x55, 0x7d, 0xee, 0x12, 0x1a,
-                        0x37, 0xc0, 0xee, 0x32, 0xf0, 0xd6, 0xee, 0xdf
-                    }
-                }
+                hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
             }
         }
     };
@@ -116,21 +192,14 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(version), result.serialized_size(version));
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
+BOOST_AUTO_TEST_CASE(get_data__factory_from_data_3__valid_input__success)
 {
     static const get_data expected
     {
         {
             {
                 inventory_vector::type_id::block,
-                {
-                    {
-                        0x66, 0x9a, 0x0d, 0x24, 0x66, 0xd5, 0x39, 0x89,
-                        0xbb, 0x66, 0x0a, 0x3d, 0x79, 0x66, 0xed, 0x0f,
-                        0xc3, 0x0d, 0x66, 0x55, 0x7d, 0x71, 0x66, 0x1a,
-                        0x37, 0xc0, 0xb0, 0x66, 0xf0, 0xd6, 0x6e, 0x66
-                    }
-                }
+                hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
             }
         }
     };
@@ -144,6 +213,73 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version));
     BOOST_REQUIRE_EQUAL(expected.serialized_size(version), result.serialized_size(version));
+}
+
+BOOST_AUTO_TEST_CASE(get_data__operator_assign_equals__always__matches_equivalent)
+{
+    const message::inventory_vector::list elements =
+    {
+        message::inventory_vector(message::inventory_vector::type_id::error,
+            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
+    };
+
+    message::get_data value(elements);
+    BOOST_REQUIRE(value.is_valid());
+
+    message::get_data instance;
+    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+
+    instance = std::move(value);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(elements == instance.inventories());
+}
+
+BOOST_AUTO_TEST_CASE(get_data__operator_boolean_equals__duplicates__returns_true)
+{
+    const message::get_data expected(
+    {
+        message::inventory_vector(message::inventory_vector::type_id::error,
+            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
+    });
+
+    message::get_data instance(expected);
+    BOOST_REQUIRE_EQUAL(true, instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(get_data__operator_boolean_equals__differs__returns_false)
+{
+    const message::get_data expected(
+    {
+        message::inventory_vector(message::inventory_vector::type_id::error,
+            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
+    });
+
+    message::get_data instance;
+    BOOST_REQUIRE_EQUAL(false, instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(get_data__operator_boolean_not_equals__duplicates__returns_false)
+{
+    const message::get_data expected(
+    {
+        message::inventory_vector(message::inventory_vector::type_id::error,
+            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
+    });
+
+    message::get_data instance(expected);
+    BOOST_REQUIRE_EQUAL(false, instance != expected);
+}
+
+BOOST_AUTO_TEST_CASE(get_data__operator_boolean_not_equals__differs__returns_true)
+{
+    const message::get_data expected(
+    {
+        message::inventory_vector(message::inventory_vector::type_id::error,
+            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
+    });
+
+    message::get_data instance;
+    BOOST_REQUIRE_EQUAL(true, instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

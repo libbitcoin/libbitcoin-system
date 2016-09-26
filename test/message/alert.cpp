@@ -25,7 +25,66 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(alert_tests)
 
-BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
+BOOST_AUTO_TEST_CASE(alert__constructor_1__always__invalid)
+{
+    message::alert instance;
+    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(alert__constructor_2__always__equals_params)
+{
+    const data_chunk payload = to_chunk(base16_literal("0123456789abcdef"));
+    const data_chunk signature = to_chunk(base16_literal("fedcba9876543210"));
+
+    message::alert instance(payload, signature);
+
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(payload == instance.payload());
+    BOOST_REQUIRE(signature == instance.signature());
+}
+
+BOOST_AUTO_TEST_CASE(alert__constructor_3__always__equals_params)
+{
+    const auto payload = to_chunk(base16_literal("0123456789abcdef"));
+    const auto signature = to_chunk(base16_literal("fedcba9876543210"));
+    auto dup_payload = payload;
+    auto dup_signature = signature;
+
+    message::alert instance(std::move(dup_payload), std::move(dup_signature));
+
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(payload == instance.payload());
+    BOOST_REQUIRE(signature == instance.signature());
+}
+
+BOOST_AUTO_TEST_CASE(alert__constructor_4__always__equals_params)
+{
+    const data_chunk payload = to_chunk(base16_literal("0123456789abcdef"));
+    const data_chunk signature = to_chunk(base16_literal("fedcba9876543210"));
+
+    message::alert value(payload, signature);
+    message::alert instance(value);
+
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(value == instance);
+    BOOST_REQUIRE(payload == instance.payload());
+    BOOST_REQUIRE(signature == instance.signature());
+}
+
+BOOST_AUTO_TEST_CASE(alert__constructor_5__always__equals_params)
+{
+    const data_chunk payload = to_chunk(base16_literal("0123456789abcdef"));
+    const data_chunk signature = to_chunk(base16_literal("fedcba9876543210"));
+
+    message::alert value(payload, signature);
+    message::alert instance(std::move(value));
+
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(payload == instance.payload());
+    BOOST_REQUIRE(signature == instance.signature());
+}
+
+BOOST_AUTO_TEST_CASE(alert__from_data__insufficient_bytes__failure)
 {
     const data_chunk raw{ 0xab, 0x11 };
     message::alert instance;
@@ -34,7 +93,7 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(wiki_sample_test)
+BOOST_AUTO_TEST_CASE(alert__factory_from_data_1__wiki_sample__success)
 {
     const data_chunk raw_payload
     {
@@ -101,7 +160,7 @@ BOOST_AUTO_TEST_CASE(wiki_sample_test)
     BOOST_REQUIRE_EQUAL(data.size(), expected.serialized_size(message::version::level::minimum));
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
+BOOST_AUTO_TEST_CASE(alert__factory_from_data_1__roundtrip__success)
 {
     const message::alert expected
     {
@@ -119,7 +178,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum), result.serialized_size(message::version::level::minimum));
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
+BOOST_AUTO_TEST_CASE(alert__factory_from_data_2__roundtrip__success)
 {
     const message::alert expected
     {
@@ -137,7 +196,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum), result.serialized_size(message::version::level::minimum));
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
+BOOST_AUTO_TEST_CASE(alert__factory_from_data_3__roundtrip__success)
 {
     const message::alert expected
     {
@@ -155,6 +214,138 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(message::version::level::minimum));
     BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum), result.serialized_size(message::version::level::minimum));
+}
+
+BOOST_AUTO_TEST_CASE(alert__payload_accessor_1__always__returns_initialized)
+{
+    const data_chunk payload = to_chunk(base16_literal("0123456789abcdef"));
+    const data_chunk signature = to_chunk(base16_literal("fedcba9876543210"));
+
+    message::alert instance(payload, signature);
+    BOOST_REQUIRE(payload == instance.payload());
+}
+
+BOOST_AUTO_TEST_CASE(alert__payload_accessor_2__always__returns_initialized)
+{
+    const data_chunk payload = to_chunk(base16_literal("0123456789abcdef"));
+    const data_chunk signature = to_chunk(base16_literal("fedcba9876543210"));
+
+    const message::alert instance(payload, signature);
+    BOOST_REQUIRE(payload == instance.payload());
+}
+
+BOOST_AUTO_TEST_CASE(alert__payload_setter_1__roundtrip__success)
+{
+    const auto value = to_chunk(base16_literal("aabbccddeeff"));
+    message::alert instance;
+    BOOST_REQUIRE(instance.payload() != value);
+    instance.set_payload(value);
+    BOOST_REQUIRE(value == instance.payload());
+}
+
+BOOST_AUTO_TEST_CASE(alert__payload_setter_2__roundtrip__success)
+{
+    const auto value = to_chunk(base16_literal("aabbccddeeff"));
+    auto dup_value = value;
+    message::alert instance;
+    BOOST_REQUIRE(instance.payload() != value);
+    instance.set_payload(std::move(dup_value));
+    BOOST_REQUIRE(value == instance.payload());
+}
+
+BOOST_AUTO_TEST_CASE(alert__signature_accessor_1__always__returns_initialized)
+{
+    const data_chunk payload = to_chunk(base16_literal("0123456789abcdef"));
+    const data_chunk signature = to_chunk(base16_literal("fedcba9876543210"));
+
+    message::alert instance(payload, signature);
+    BOOST_REQUIRE(signature == instance.signature());
+}
+
+BOOST_AUTO_TEST_CASE(alert__signature_accessor_2__always__returns_initialized)
+{
+    const data_chunk payload = to_chunk(base16_literal("0123456789abcdef"));
+    const data_chunk signature = to_chunk(base16_literal("fedcba9876543210"));
+
+    const message::alert instance(payload, signature);
+    BOOST_REQUIRE(signature == instance.signature());
+}
+
+BOOST_AUTO_TEST_CASE(alert__signature_setter_1__roundtrip__success)
+{
+    const auto value = to_chunk(base16_literal("aabbccddeeff"));
+    message::alert instance;
+    BOOST_REQUIRE(instance.signature() != value);
+    instance.set_signature(value);
+    BOOST_REQUIRE(value == instance.signature());
+}
+
+BOOST_AUTO_TEST_CASE(alert__signature_setter_2__roundtrip__success)
+{
+    const auto value = to_chunk(base16_literal("aabbccddeeff"));
+    auto dup_value = value;
+    message::alert instance;
+    BOOST_REQUIRE(instance.signature() != value);
+    instance.set_signature(std::move(dup_value));
+    BOOST_REQUIRE(value == instance.signature());
+}
+
+BOOST_AUTO_TEST_CASE(alert__operator_assign_equals__always__matches_equivalent)
+{
+    const data_chunk payload = to_chunk(base16_literal("0123456789abcdef"));
+    const data_chunk signature = to_chunk(base16_literal("fedcba9876543210"));
+
+    message::alert value(payload, signature);
+
+    BOOST_REQUIRE(value.is_valid());
+
+    message::alert instance;
+    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+
+    instance = std::move(value);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(payload == instance.payload());
+    BOOST_REQUIRE(signature == instance.signature());
+}
+
+BOOST_AUTO_TEST_CASE(alert__operator_boolean_equals__duplicates__returns_true)
+{
+    const message::alert expected(
+        to_chunk(base16_literal("0123456789abcdef")),
+        to_chunk(base16_literal("fedcba9876543210")));
+
+    message::alert instance(expected);
+    BOOST_REQUIRE_EQUAL(true, instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(alert__operator_boolean_equals__differs__returns_false)
+{
+    const message::alert expected(
+        to_chunk(base16_literal("0123456789abcdef")),
+        to_chunk(base16_literal("fedcba9876543210")));
+
+    message::alert instance;
+    BOOST_REQUIRE_EQUAL(false, instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(alert__operator_boolean_not_equals__duplicates__returns_false)
+{
+    const message::alert expected(
+        to_chunk(base16_literal("0123456789abcdef")),
+        to_chunk(base16_literal("fedcba9876543210")));
+
+    message::alert instance(expected);
+    BOOST_REQUIRE_EQUAL(false, instance != expected);
+}
+
+BOOST_AUTO_TEST_CASE(alert__operator_boolean_not_equals__differs__returns_true)
+{
+    const message::alert expected(
+        to_chunk(base16_literal("0123456789abcdef")),
+        to_chunk(base16_literal("fedcba9876543210")));
+
+    message::alert instance;
+    BOOST_REQUIRE_EQUAL(true, instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

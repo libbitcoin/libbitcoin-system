@@ -47,6 +47,37 @@ public:
     static uint64_t satoshi_fixed_size(uint32_t version,
         bool with_timestamp);
 
+    network_address();
+
+    BC_CONSTCTOR network_address(uint32_t timestamp, uint64_t services,
+        const ip_address& ip, uint16_t port)
+      : timestamp_(timestamp), services_(services), ip_(ip), port_(port)
+    {}
+
+    BC_CONSTCTOR network_address(uint32_t timestamp, uint64_t services,
+        ip_address&& ip, uint16_t port)
+      : timestamp_(timestamp), services_(services),
+        ip_(std::forward<ip_address>(ip)), port_(port)
+    {}
+
+    network_address(const network_address& other);
+    network_address(network_address&& other);
+
+    // Starting version 31402, addresses are prefixed with a timestamp.
+    uint32_t timestamp() const;
+    void set_timestamp(uint32_t value);
+
+    uint64_t services() const;
+    void set_services(uint64_t value);
+
+    ip_address& ip();
+    const ip_address& ip() const;
+    void set_ip(const ip_address& value);
+    void set_ip(ip_address&& value);
+
+    uint16_t port() const;
+    void set_port(uint16_t value);
+
     bool from_data(uint32_t version, const data_chunk& data,
         bool with_timestamp);
     bool from_data(uint32_t version, std::istream& stream,
@@ -60,11 +91,17 @@ public:
     void reset();
     uint64_t serialized_size(uint32_t version, bool with_timestamp) const;
 
-    // Starting version 31402, addresses are prefixed with a timestamp.
-    uint32_t timestamp;
-    uint64_t services;
-    ip_address ip;
-    uint16_t port;
+    network_address& operator=(network_address&& other);
+    network_address& operator=(const network_address& other);
+
+    bool operator==(const network_address& other) const;
+    bool operator!=(const network_address& other) const;
+
+private:
+    uint32_t timestamp_;
+    uint64_t services_;
+    ip_address ip_;
+    uint16_t port_;
 };
 
 // version::services::none

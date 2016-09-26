@@ -37,8 +37,8 @@ bool is_stealth_script(const script& script)
     if (script.pattern() != chain::script_pattern::null_data)
         return false;
 
-    BITCOIN_ASSERT(script.operations.size() == 2);
-    const auto& data = script.operations[1].data;
+    BITCOIN_ASSERT(script.operations().size() == 2);
+    const auto data = script.operations()[1].data();
     return (data.size() >= hash_size);
 }
 
@@ -157,7 +157,7 @@ bool extract_ephemeral_key(ec_compressed& out_ephemeral_public_key,
     // That requires iteration with probability of 1 in 2 chance of success.
     out_ephemeral_public_key[0] = ephemeral_public_key_sign;
 
-    const auto& data = script.operations[1].data;
+    const auto data = script.operations()[1].data();
     std::copy(data.begin(), data.begin() + hash_size,
         out_ephemeral_public_key.begin() + 1);
 
@@ -170,7 +170,7 @@ bool extract_ephemeral_key(hash_digest& out_unsigned_ephemeral_key,
     if (!is_stealth_script(script))
         return false;
 
-    const auto& data = script.operations[1].data;
+    const auto data = script.operations()[1].data();
     std::copy(data.begin(), data.begin() + hash_size,
         out_unsigned_ephemeral_key.begin());
 

@@ -99,72 +99,55 @@ transaction transaction::factory_from_data(reader& source, bool satoshi)
 // default constructors
 
 transaction::transaction()
-  : version(0), locktime(0)
-{
-}
-
-transaction::transaction(const transaction& other)
-  : transaction(other.version, other.locktime, other.inputs, other.outputs)
+  : version_(0), locktime_(0), inputs_(), outputs_(), hash_(nullptr),
+    metadata(), validation()
 {
 }
 
 transaction::transaction(uint32_t version, uint32_t locktime,
     const input::list& inputs, const output::list& outputs)
-  : version(version),
-    locktime(locktime),
-    inputs(inputs),
-    outputs(outputs)
-{
-}
-
-transaction::transaction(transaction&& other)
-  : transaction(other.version, other.locktime,
-        std::forward<input::list>(other.inputs),
-        std::forward<output::list>(other.outputs))
+  : version_(version), locktime_(locktime), inputs_(inputs), outputs_(outputs),
+    hash_(nullptr), metadata(), validation()
 {
 }
 
 transaction::transaction(uint32_t version, uint32_t locktime,
     input::list&& inputs, output::list&& outputs)
-  : version(version),
-    locktime(locktime),
-    inputs(std::forward<input::list>(inputs)),
-    outputs(std::forward<output::list>(outputs))
+  : version_(version), locktime_(locktime),
+    inputs_(std::forward<input::list>(inputs)),
+    outputs_(std::forward<output::list>(outputs)),
+    hash_(nullptr), metadata(), validation()
 {
 }
 
-transaction& transaction::operator=(transaction&& other)
+transaction::transaction(const transaction& other)
+  : transaction(other.version_, other.locktime_, other.inputs_, other.outputs_)
 {
-    version = other.version;
-    locktime = other.locktime;
-    inputs = std::move(other.inputs);
-    outputs = std::move(other.outputs);
-    return *this;
+    hash_.reset(new hash_digest(other.hash()));
 }
 
-transaction& transaction::operator=(const transaction& other)
+transaction::transaction(transaction&& other)
+  : transaction(other.version_, other.locktime_,
+        std::forward<input::list>(other.inputs_),
+        std::forward<output::list>(other.outputs_))
 {
-    version = other.version;
-    locktime = other.locktime;
-    inputs = other.inputs;
-    outputs = other.outputs;
-    return *this;
+    hash_.reset(new hash_digest(other.hash()));
 }
 
 bool transaction::is_valid() const
 {
-    return (version != 0) || (locktime != 0) || !inputs.empty() ||
-        !outputs.empty();
+    return (version_ != 0) || (locktime_ != 0) || !inputs_.empty()
+        || !outputs_.empty();
 }
 
 void transaction::reset()
 {
-    version = 0;
-    locktime = 0;
-    inputs.clear();
-    inputs.shrink_to_fit();
-    outputs.clear();
-    outputs.shrink_to_fit();
+    version_ = 0;
+    locktime_ = 0;
+    inputs_.clear();
+    inputs_.shrink_to_fit();
+    outputs_.clear();
+    outputs_.shrink_to_fit();
 
     hash_mutex_.lock();
     hash_.reset();
@@ -186,7 +169,7 @@ bool transaction::from_data(std::istream& stream, bool satoshi)
 bool transaction::from_data(reader& source, bool satoshi)
 {
     reset();
-    version = source.read_4_bytes_little_endian();
+    version_ = source.read_4_bytes_little_endian();
     auto result = static_cast<bool>(source);
 
     if (result)
@@ -194,15 +177,15 @@ bool transaction::from_data(reader& source, bool satoshi)
         if (satoshi)
         {
             // Wire (satoshi protocol) deserialization.
-            result = read(source, inputs) && read(source, outputs);
-            locktime = result ? source.read_4_bytes_little_endian() : 0;
+            result = read(source, inputs_) && read(source, outputs_);
+            locktime_ = result ? source.read_4_bytes_little_endian() : 0;
             result &= source;
         }
         else
         {
             // Database serialization (outputs forward).
-            locktime = source.read_4_bytes_little_endian();
-            result = source && read(source, outputs) && read(source, inputs);
+            locktime_ = source.read_4_bytes_little_endian();
+            result = source && read(source, outputs_) && read(source, inputs_);
         }
     }
 
@@ -231,33 +214,33 @@ void transaction::to_data(std::ostream& stream, bool satoshi) const
 
 void transaction::to_data(writer& sink, bool satoshi) const
 {
-    sink.write_4_bytes_little_endian(version);
+    sink.write_4_bytes_little_endian(version_);
 
     if (satoshi)
     {
         // Wire (satoshi protocol) serialization.
-        write(sink, inputs);
-        write(sink, outputs);
-        sink.write_4_bytes_little_endian(locktime);
+        write(sink, inputs_);
+        write(sink, outputs_);
+        sink.write_4_bytes_little_endian(locktime_);
     }
     else
     {
         // Database serialization (outputs forward).
-        sink.write_4_bytes_little_endian(locktime);
-        write(sink, outputs);
-        write(sink, inputs);
+        sink.write_4_bytes_little_endian(locktime_);
+        write(sink, outputs_);
+        write(sink, inputs_);
     }
 }
 
 uint64_t transaction::serialized_size() const
 {
     uint64_t tx_size = 8;
-    tx_size += variable_uint_size(inputs.size());
-    for (const auto& input: inputs)
+    tx_size += variable_uint_size(inputs_.size());
+    for (const auto& input: inputs_)
         tx_size += input.serialized_size();
 
-    tx_size += variable_uint_size(outputs.size());
-    for (const auto& output: outputs)
+    tx_size += variable_uint_size(outputs_.size());
+    for (const auto& output: outputs_)
         tx_size += output.serialized_size();
 
     return tx_size;
@@ -267,15 +250,15 @@ std::string transaction::to_string(uint32_t flags) const
 {
     std::ostringstream value;
     value << "Transaction:\n"
-        << "\tversion = " << version << "\n"
-        << "\tlocktime = " << locktime << "\n"
+        << "\tversion = " << version_ << "\n"
+        << "\tlocktime = " << locktime_ << "\n"
         << "Inputs:\n";
 
-    for (const auto input: inputs)
+    for (const auto input: inputs_)
         value << input.to_string(flags);
 
     value << "Outputs:\n";
-    for (const auto output: outputs)
+    for (const auto output: outputs_)
         value << output.to_string(flags);
 
     value << "\n";
@@ -313,7 +296,7 @@ hash_digest transaction::hash(uint32_t sighash_type) const
 
 bool transaction::is_coinbase() const
 {
-    return inputs.size() == 1 && inputs.front().previous_output.is_null();
+    return (inputs_.size() == 1) && inputs_.front().previous_output().is_null();
 }
 
 // True if coinbase and has invalid input[0] script size.
@@ -322,7 +305,7 @@ bool transaction::is_oversized_coinbase() const
     if (!is_coinbase())
         return false;
 
-    const auto script_size = inputs.front().script.serialized_size(false);
+    const auto script_size = inputs_.front().script().serialized_size(false);
     return script_size < min_coinbase_size || script_size > max_coinbase_size;
 }
 
@@ -334,21 +317,21 @@ bool transaction::is_null_non_coinbase() const
 
     const auto invalid = [](const input& input)
     {
-        return input.previous_output.is_null();
+        return input.previous_output().is_null();
     };
 
-    return std::any_of(inputs.begin(), inputs.end(), invalid);
+    return std::any_of(inputs_.begin(), inputs_.end(), invalid);
 }
 
 bool transaction::is_final(size_t block_height, uint32_t block_time) const
 {
-    if (locktime == 0)
+    if (locktime_ == 0)
         return true;
 
-    const auto max_locktime = locktime < locktime_threshold ?
+    const auto max_locktime = locktime_ < locktime_threshold ?
         safe_unsigned<uint32_t>(block_height) : block_time;
 
-    if (locktime < max_locktime)
+    if (locktime_ < max_locktime)
         return true;
 
     const auto finalized = [](const input& input)
@@ -356,13 +339,13 @@ bool transaction::is_final(size_t block_height, uint32_t block_time) const
         return input.is_final();
     };
 
-    return std::all_of(inputs.begin(), inputs.end(), finalized);
+    return std::all_of(inputs_.begin(), inputs_.end(), finalized);
 }
 
 // This is not a consensus rule, just detection of an irrational use.
 bool transaction::is_locktime_conflict() const
 {
-    if (locktime == 0)
+    if (locktime_ == 0)
         return false;
 
     const auto finalized = [](const input& input)
@@ -370,7 +353,7 @@ bool transaction::is_locktime_conflict() const
         return input.is_final();
     };
 
-    return std::all_of(inputs.begin(), inputs.end(), finalized);
+    return std::all_of(inputs_.begin(), inputs_.end(), finalized);
 }
 
 // Returns max_uint64 in case of overflow.
@@ -378,14 +361,14 @@ uint64_t transaction::total_input_value() const
 {
     const auto value = [](uint64_t total, const input& input)
     {
-        const auto& prevout = input.previous_output.validation.cache;
+        const auto& prevout = input.previous_output().validation.cache;
         const auto missing = !prevout.is_valid();
 
         // Treat missing previous outputs as zero-valued, no math on sentinel.
-        return ceiling_add(total, missing ? 0 : prevout.value);
+        return ceiling_add(total, missing ? 0 : prevout.value());
     };
 
-    return std::accumulate(inputs.begin(), inputs.end(), uint64_t(0), value);
+    return std::accumulate(inputs_.begin(), inputs_.end(), uint64_t(0), value);
 }
 
 // Returns max_uint64 in case of overflow.
@@ -393,10 +376,70 @@ uint64_t transaction::total_output_value() const
 {
     const auto value = [](uint64_t total, const output& output)
     {
-        return ceiling_add(total, output.value);
+        return ceiling_add(total, output.value());
     };
 
-    return std::accumulate(outputs.begin(), outputs.end(), uint64_t(0), value);
+    return std::accumulate(outputs_.begin(), outputs_.end(), uint64_t(0), value);
+}
+
+uint32_t transaction::version() const
+{
+    return version_;
+}
+
+void transaction::set_version(uint32_t value)
+{
+    version_ = value;
+}
+
+uint32_t transaction::locktime() const
+{
+    return locktime_;
+}
+
+void transaction::set_locktime(uint32_t value)
+{
+    locktime_ = value;
+}
+
+input::list& transaction::inputs()
+{
+    return inputs_;
+}
+
+const input::list& transaction::inputs() const
+{
+    return inputs_;
+}
+
+void transaction::set_inputs(const input::list& value)
+{
+    inputs_ = value;
+}
+
+void transaction::set_inputs(input::list&& value)
+{
+    inputs_ = std::move(value);
+}
+
+output::list& transaction::outputs()
+{
+    return outputs_;
+}
+
+const output::list& transaction::outputs() const
+{
+    return outputs_;
+}
+
+void transaction::set_outputs(const output::list& value)
+{
+    outputs_ = value;
+}
+
+void transaction::set_outputs(output::list&& value)
+{
+    outputs_ = std::move(value);
 }
 
 uint64_t transaction::fees() const
@@ -424,8 +467,8 @@ size_t transaction::signature_operations(bool bip16_active) const
     };
 
     size_t sigops = 0;
-    sigops += std::accumulate(inputs.begin(), inputs.end(), sigops, in);
-    sigops += std::accumulate(outputs.begin(), outputs.end(), sigops, out);
+    sigops += std::accumulate(inputs_.begin(), inputs_.end(), sigops, in);
+    sigops += std::accumulate(outputs_.begin(), outputs_.end(), sigops, out);
     return sigops;
 }
 
@@ -433,22 +476,22 @@ bool transaction::is_missing_inputs() const
 {
     const auto missing = [](const input& input)
     {
-        const auto& prevout = input.previous_output;
+        const auto& prevout = input.previous_output();
         auto missing = !prevout.validation.cache.is_valid();
         return missing && !prevout.is_null();
     };
 
     // This is an optimization of !missing_inputs().empty();
-    return std::any_of(inputs.begin(), inputs.end(), missing);
+    return std::any_of(inputs_.begin(), inputs_.end(), missing);
 }
 
 point::indexes transaction::missing_inputs() const
 {
     point::indexes indexes;
 
-    for (size_t in = 0; in < inputs.size(); ++in)
+    for (size_t in = 0; in < inputs_.size(); ++in)
     {
-        const auto& prevout = inputs[in].previous_output;
+        const auto& prevout = inputs_[in].previous_output();
         auto missing = !prevout.validation.cache.is_valid();
 
         if (missing && !prevout.is_null())
@@ -462,21 +505,21 @@ bool transaction::is_double_spend(bool include_unconfirmed) const
 {
     const auto spent = [include_unconfirmed](const input& input)
     {
-        const auto& prevout = input.previous_output.validation;
+        const auto& prevout = input.previous_output().validation;
         return prevout.spent && (include_unconfirmed || prevout.confirmed);
     };
 
     // This is an optimization of !double_spends().empty();
-    return std::any_of(inputs.begin(), inputs.end(), spent);
+    return std::any_of(inputs_.begin(), inputs_.end(), spent);
 }
 
 point::indexes transaction::double_spends(bool include_unconfirmed) const
 {
     point::indexes spends;
 
-    for (size_t in = 0; in < inputs.size(); ++in)
+    for (size_t in = 0; in < inputs_.size(); ++in)
     {
-        const auto& prevout = inputs[in].previous_output.validation;
+        const auto& prevout = inputs_[in].previous_output().validation;
 
         if (prevout.spent && (include_unconfirmed || prevout.confirmed))
             spends.push_back(safe_unsigned<uint32_t>(in));
@@ -489,20 +532,20 @@ bool transaction::is_immature(size_t target_height) const
 {
     const auto immature = [target_height](const input& input)
     {
-        return !input.previous_output.is_mature(target_height);
+        return !input.previous_output().is_mature(target_height);
     };
 
     // This is an optimization of !immature_inputs().empty();
-    return std::any_of(inputs.begin(), inputs.end(), immature);
+    return std::any_of(inputs_.begin(), inputs_.end(), immature);
 }
 
 point::indexes transaction::immature_inputs(size_t target_height) const
 {
     point::indexes immatures;
 
-    for (size_t in = 0; in < inputs.size(); ++in)
+    for (size_t in = 0; in < inputs_.size(); ++in)
     {
-        const auto& prevout = inputs[in].previous_output;
+        const auto& prevout = inputs_[in].previous_output();
 
         if (!prevout.is_mature(target_height))
             immatures.push_back(safe_unsigned<uint32_t>(in));
@@ -514,7 +557,7 @@ point::indexes transaction::immature_inputs(size_t target_height) const
 // These checks are self-contained; blockchain (and so version) independent.
 code transaction::check(bool transaction_pool) const
 {
-    if (inputs.empty() || outputs.empty())
+    if (inputs_.empty() || outputs_.empty())
         return error::empty_transaction;
 
     else if (is_null_non_coinbase())
@@ -577,7 +620,7 @@ code transaction::connect(const chain_state& state) const
 {
     code ec;
 
-    for (size_t in = 0; in < inputs.size(); ++in)
+    for (size_t in = 0; in < inputs_.size(); ++in)
         if ((ec = connect_input(state, in)))
             return ec;
 
@@ -591,11 +634,11 @@ code transaction::connect_input(const chain_state& state,
     if (is_coinbase())
         return error::success;
 
-    if (input_index >= inputs.size())
+    if (input_index >= inputs_.size())
         return error::operation_failed;
 
     const auto index32 = static_cast<uint32_t>(input_index);
-    const auto& prevout = inputs[index32].previous_output.validation;
+    const auto& prevout = inputs_[index32].previous_output().validation;
 
     // Verify that the previous output cache has been populated.
     if (!prevout.cache.is_valid())
@@ -604,6 +647,36 @@ code transaction::connect_input(const chain_state& state,
     const auto flags = state.enabled_forks();
     const auto valid = script::verify(*this, index32, flags);
     return valid ? error::success : error::validate_inputs_failed;
+}
+
+transaction& transaction::operator=(transaction&& other)
+{
+    version_ = other.version_;
+    locktime_ = other.locktime_;
+    inputs_ = std::move(other.inputs_);
+    outputs_ = std::move(other.outputs_);
+    return *this;
+}
+
+// TODO: eliminate blockchain transaction copies and then delete this.
+transaction& transaction::operator=(const transaction& other)
+{
+    version_ = other.version_;
+    locktime_ = other.locktime_;
+    inputs_ = other.inputs_;
+    outputs_ = other.outputs_;
+    return *this;
+}
+
+bool transaction::operator==(const transaction& other) const
+{
+    return (version_ == other.version_) && (locktime_ == other.locktime_)
+        && (inputs_ == other.inputs_) && (outputs_ == other.outputs_);
+}
+
+bool transaction::operator!=(const transaction& other) const
+{
+    return !(*this == other);
 }
 
 } // namespace chain

@@ -124,8 +124,20 @@ public:
     script(const script& other);
     script(script&& other);
 
+    operation::stack& operations();
+    const operation::stack& operations() const;
+    void set_operations(const operation::stack& value);
+    void set_operations(operation::stack&& value);
+
     script_pattern pattern() const;
     bool is_raw_data() const;
+
+    size_t pay_script_hash_sigops(const script& prevout) const;
+    size_t sigops(bool serialized_script) const;
+
+    bool from_string(const std::string& human_readable);
+    std::string to_string(uint32_t flags) const;
+
     bool from_data(const data_chunk& data, bool prefix, parse_mode mode);
     bool from_data(std::istream& stream, bool prefix, parse_mode mode);
     bool from_data(reader& source, bool prefix, parse_mode mode);
@@ -133,27 +145,23 @@ public:
     void to_data(std::ostream& stream, bool prefix) const;
     void to_data(writer& sink, bool prefix) const;
 
-    bool from_string(const std::string& human_readable);
-    std::string to_string(uint32_t flags) const;
-
     // BUGBUG: An empty script is valid.
     bool is_valid() const;
     void reset();
-
-    size_t pay_script_hash_sigops(const script& prevout) const;
-    size_t sigops(bool serialized_script) const;
     uint64_t satoshi_content_size() const;
     uint64_t serialized_size(bool prefix) const;
 
-    operation::stack operations;
-
     script& operator=(script&& other);
     script& operator=(const script& other);
+
+    bool operator==(const script& other) const;
+    bool operator!=(const script& other) const;
 
 private:
     bool deserialize(const data_chunk& raw_script, parse_mode mode);
     bool parse(const data_chunk& raw_script);
 
+    operation::stack operations_;
     bool is_raw_;
 };
 

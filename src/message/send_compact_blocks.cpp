@@ -57,15 +57,41 @@ send_compact_blocks send_compact_blocks::factory_from_data(
     return instance;
 }
 
+uint64_t send_compact_blocks::satoshi_fixed_size(uint32_t version)
+{
+    return 9;
+}
+
+send_compact_blocks::send_compact_blocks()
+  : high_bandwidth_mode_(false), version_(0)
+{
+}
+
+send_compact_blocks::send_compact_blocks(bool high_bandwidth_mode,
+    uint64_t version)
+  : high_bandwidth_mode_(high_bandwidth_mode), version_(version)
+{
+}
+
+send_compact_blocks::send_compact_blocks(const send_compact_blocks& other)
+  : send_compact_blocks(other.high_bandwidth_mode_, other.version_)
+{
+}
+
+send_compact_blocks::send_compact_blocks(send_compact_blocks&& other)
+  : send_compact_blocks(other.high_bandwidth_mode_, other.version_)
+{
+}
+
 bool send_compact_blocks::is_valid() const
 {
-    return true;
+    return (version_ != 0);
 }
 
 void send_compact_blocks::reset()
 {
-    high_bandwidth_mode = false;
-    version = 0;
+    high_bandwidth_mode_ = false;
+    version_ = 0;
 }
 
 bool send_compact_blocks::from_data(uint32_t version,
@@ -94,9 +120,9 @@ bool send_compact_blocks::from_data(uint32_t version,
     if (mode > 1)
         result &= false;
 
-    high_bandwidth_mode = (mode == 1);
+    high_bandwidth_mode_ = (mode == 1);
 
-    this->version = source.read_8_bytes_little_endian();
+    this->version_ = source.read_8_bytes_little_endian();
     result &= static_cast<bool>(source);
 
     if (!result || insufficient_version)
@@ -125,8 +151,8 @@ void send_compact_blocks::to_data(uint32_t version,
 void send_compact_blocks::to_data(uint32_t version,
     writer& sink) const
 {
-    sink.write_byte(high_bandwidth_mode ? 1 : 0);
-    sink.write_8_bytes_little_endian(this->version);
+    sink.write_byte(high_bandwidth_mode_ ? 1 : 0);
+    sink.write_8_bytes_little_endian(this->version_);
 }
 
 uint64_t send_compact_blocks::serialized_size(uint32_t version) const
@@ -134,10 +160,42 @@ uint64_t send_compact_blocks::serialized_size(uint32_t version) const
     return send_compact_blocks::satoshi_fixed_size(version);
 }
 
-
-uint64_t send_compact_blocks::satoshi_fixed_size(uint32_t version)
+bool send_compact_blocks::high_bandwidth_mode() const
 {
-    return 9;
+    return high_bandwidth_mode_;
+}
+
+void send_compact_blocks::set_high_bandwidth_mode(bool mode)
+{
+    high_bandwidth_mode_ = mode;
+}
+
+uint64_t send_compact_blocks::version() const
+{
+    return version_;
+}
+
+void send_compact_blocks::set_version(uint64_t version)
+{
+    version_ = version;
+}
+
+send_compact_blocks& send_compact_blocks::operator=(send_compact_blocks&& other)
+{
+    high_bandwidth_mode_ = other.high_bandwidth_mode_;
+    version_ = other.version_;
+    return *this;
+}
+
+bool send_compact_blocks::operator==(const send_compact_blocks& other) const
+{
+    return (high_bandwidth_mode_ == other.high_bandwidth_mode_) &&
+        (version_ == other.version_);
+}
+
+bool send_compact_blocks::operator!=(const send_compact_blocks& other) const
+{
+    return !(*this == other);
 }
 
 } // namespace message

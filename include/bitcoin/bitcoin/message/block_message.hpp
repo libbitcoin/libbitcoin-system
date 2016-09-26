@@ -45,46 +45,46 @@ public:
     typedef std::vector<const_ptr> const_ptr_list;
 
     static block_message factory_from_data(uint32_t version,
-        const data_chunk& data, bool with_transaction_count=true);
+        const data_chunk& data);
     static block_message factory_from_data(uint32_t version,
-        std::istream& stream, bool with_transaction_count=true);
+        std::istream& stream);
     static block_message factory_from_data(uint32_t version,
-        reader& source, bool with_transaction_count=true);
+        reader& source);
 
     block_message();
-    block_message(const chain::block& other);
-    block_message(const block_message& other);
     block_message(const chain::header& header,
         const chain::transaction::list& transactions);
-
-    block_message(chain::block&& other);
-    block_message(block_message&& other);
     block_message(chain::header&& header,
         chain::transaction::list&& transactions);
-
-    /// This class is move assignable but not copy assignable.
-    block_message& operator=(block_message&& other);
-    void operator=(const block_message&) = delete;
-
-    bool from_data(uint32_t version, const data_chunk& data,
-        bool with_transaction_count=true);
-    bool from_data(uint32_t version, std::istream& stream,
-        bool with_transaction_count=true);
-    bool from_data(uint32_t version, reader& source,
-        bool with_transaction_count=true);
-    data_chunk to_data(uint32_t version=version::level::canonical,
-        bool with_transaction_count=true) const;
-    void to_data(uint32_t version, std::ostream& stream,
-        bool with_transaction_count=true) const;
-    void to_data(uint32_t version, writer& sink,
-        bool with_transaction_count=true) const;
-    uint64_t serialized_size(uint32_t version=version::level::canonical,
-        bool with_transaction_count=true) const;
+    block_message(const chain::block& other);
+    block_message(chain::block&& other);
+    block_message(const block_message& other);
+    block_message(block_message&& other);
 
     uint64_t originator() const;
 
     // HACK: The fact that this is const makes it unsafe.
     void set_originator(uint64_t value) const;
+
+    bool from_data(uint32_t version, const data_chunk& data);
+    bool from_data(uint32_t version, std::istream& stream);
+    bool from_data(uint32_t version, reader& source);
+    data_chunk to_data(uint32_t version) const;
+    void to_data(uint32_t version, std::ostream& stream) const;
+    void to_data(uint32_t version, writer& sink) const;
+    uint64_t serialized_size(uint32_t version) const;
+
+    block_message& operator=(chain::block&& other);
+
+    // This class is move assignable but not copy assignable.
+    block_message& operator=(block_message&& other);
+    void operator=(const block_message&) = delete;
+
+    bool operator==(const chain::block& other) const;
+    bool operator!=(const chain::block& other) const;
+
+    bool operator==(const block_message& other) const;
+    bool operator!=(const block_message& other) const;
 
     static const std::string command;
     static const uint32_t version_minimum;

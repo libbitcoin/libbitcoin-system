@@ -59,16 +59,46 @@ get_block_transactions get_block_transactions::factory_from_data(
     return instance;
 }
 
+get_block_transactions::get_block_transactions()
+  : block_hash_(null_hash), indexes_()
+{
+}
+
+get_block_transactions::get_block_transactions(const hash_digest& block_hash,
+    const std::vector<uint64_t>& indexes)
+  : block_hash_(block_hash), indexes_(indexes)
+{
+}
+
+get_block_transactions::get_block_transactions(hash_digest&& block_hash,
+    std::vector<uint64_t>&& indexes)
+  : block_hash_(std::forward<hash_digest>(block_hash)),
+    indexes_(std::forward<std::vector<uint64_t>>(indexes))
+{
+}
+
+get_block_transactions::get_block_transactions(
+    const get_block_transactions& other)
+  : get_block_transactions(other.block_hash_, other.indexes_)
+{
+}
+
+get_block_transactions::get_block_transactions(get_block_transactions&& other)
+  : get_block_transactions(std::forward<hash_digest>(other.block_hash_),
+      std::forward<std::vector<uint64_t>>(other.indexes_))
+{
+}
+
 bool get_block_transactions::is_valid() const
 {
-    return (block_hash != null_hash);
+    return (block_hash_ != null_hash);
 }
 
 void get_block_transactions::reset()
 {
-    block_hash = null_hash;
-    indexes.clear();
-    indexes.shrink_to_fit();
+    block_hash_ = null_hash;
+    indexes_.clear();
+    indexes_.shrink_to_fit();
 }
 
 bool get_block_transactions::from_data(uint32_t version,
@@ -89,18 +119,18 @@ bool get_block_transactions::from_data(uint32_t version,
     reader& source)
 {
     reset();
-    block_hash = source.read_hash();
+    block_hash_ = source.read_hash();
     auto result = static_cast<bool>(source);
 
     const auto count = source.read_variable_uint_little_endian();
     result &= static_cast<bool>(source);
 
     if (result)
-        indexes.reserve(safe_unsigned<size_t>(count));
+        indexes_.reserve(safe_unsigned<size_t>(count));
 
     for (uint64_t i = 0; (i < count) && result; ++i)
     {
-        indexes.push_back(source.read_variable_uint_little_endian());
+        indexes_.push_back(source.read_variable_uint_little_endian());
         result = static_cast<bool>(source);
     }
 
@@ -130,20 +160,81 @@ void get_block_transactions::to_data(uint32_t version,
 void get_block_transactions::to_data(uint32_t version,
     writer& sink) const
 {
-    sink.write_hash(block_hash);
-    sink.write_variable_uint_little_endian(indexes.size());
-    for (const auto& element: indexes)
+    sink.write_hash(block_hash_);
+    sink.write_variable_uint_little_endian(indexes_.size());
+    for (const auto& element: indexes_)
         sink.write_variable_uint_little_endian(element);
 }
 
 uint64_t get_block_transactions::serialized_size(uint32_t version) const
 {
-    uint64_t size = hash_size + variable_uint_size(indexes.size());
+    uint64_t size = hash_size + variable_uint_size(indexes_.size());
 
-    for (const auto& element: indexes)
+    for (const auto& element: indexes_)
         size += variable_uint_size(element);
 
     return size;
+}
+
+hash_digest& get_block_transactions::block_hash()
+{
+    return block_hash_;
+}
+
+const hash_digest& get_block_transactions::block_hash() const
+{
+    return block_hash_;
+}
+
+void get_block_transactions::set_block_hash(const hash_digest& value)
+{
+    block_hash_ = value;
+}
+
+void get_block_transactions::set_block_hash(hash_digest&& value)
+{
+    block_hash_ = std::move(value);
+}
+
+std::vector<uint64_t>& get_block_transactions::indexes()
+{
+    return indexes_;
+}
+
+const std::vector<uint64_t>& get_block_transactions::indexes() const
+{
+    return indexes_;
+}
+
+void get_block_transactions::set_indexes(const std::vector<uint64_t>& values)
+{
+    indexes_ = values;
+}
+
+void get_block_transactions::set_indexes(std::vector<uint64_t>&& values)
+{
+    indexes_ = values;
+}
+
+get_block_transactions& get_block_transactions::operator=(
+    get_block_transactions&& other)
+{
+    block_hash_ = other.block_hash_;
+    indexes_ = other.indexes_;
+    return *this;
+}
+
+bool get_block_transactions::operator==(
+    const get_block_transactions& other) const
+{
+    return (block_hash_ == other.block_hash_)
+        && (indexes_ == other.indexes_);
+}
+
+bool get_block_transactions::operator!=(
+    const get_block_transactions& other) const
+{
+    return !(*this == other);
 }
 
 } // namespace message

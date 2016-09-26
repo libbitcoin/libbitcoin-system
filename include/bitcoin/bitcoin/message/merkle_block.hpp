@@ -45,8 +45,27 @@ public:
         std::istream& stream);
     static merkle_block factory_from_data(uint32_t version, reader& source);
 
-    bool operator==(const merkle_block& other) const;
-    bool operator!=(const merkle_block& other) const;
+    merkle_block();
+    merkle_block(const chain::header& header, const hash_list& hashes,
+        const data_chunk& flags);
+    merkle_block(chain::header&& header, hash_list&& hashes, data_chunk&& flags);
+    merkle_block(const merkle_block& other);
+    merkle_block(merkle_block&& other);
+
+    chain::header& header();
+    const chain::header& header() const;
+    void set_header(const chain::header& value);
+    void set_header(chain::header&& value);
+
+    hash_list& hashes();
+    const hash_list& hashes() const;
+    void set_hashes(const hash_list& value);
+    void set_hashes(hash_list&& value);
+
+    data_chunk& flags();
+    const data_chunk& flags() const;
+    void set_flags(const data_chunk& value);
+    void set_flags(data_chunk&& value);
 
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
@@ -58,16 +77,24 @@ public:
     void reset();
     uint64_t serialized_size(uint32_t version) const;
 
+    // This class is move assignable but not copy assignable.
+    merkle_block& operator=(merkle_block&& other);
+    void operator=(const merkle_block&) = delete;
+
+    bool operator==(const merkle_block& other) const;
+    bool operator!=(const merkle_block& other) const;
+
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
-    chain::header header;
-    hash_list hashes;
+private:
+    chain::header header_;
+    hash_list hashes_;
 
     // TODO: provide utility to compute this from the list of hashes based on
     // the assumption that the hash list represents that of a complete block.
-    data_chunk flags;
+    data_chunk flags_;
 };
 
 } // end message

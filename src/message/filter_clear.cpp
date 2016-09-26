@@ -58,8 +58,8 @@ filter_clear filter_clear::factory_from_data(uint32_t version,
 }
 
 filter_clear::filter_clear()
+  : insufficient_version_(false)
 {
-    reset();
 }
 
 bool filter_clear::is_valid() const

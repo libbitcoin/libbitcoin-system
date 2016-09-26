@@ -57,20 +57,36 @@ network_address network_address::factory_from_data(uint32_t version,
     return instance;
 }
 
+network_address::network_address()
+  : network_address(0, 0, null_address, 0)
+{
+}
+
+network_address::network_address(const network_address& other)
+  : network_address(other.timestamp_, other.services_, other.ip_, other.port_)
+{
+}
+
+network_address::network_address(network_address&& other)
+  : network_address(other.timestamp_, other.services_,
+      std::forward<ip_address>(other.ip_), other.port_)
+{
+}
+
 bool network_address::is_valid() const
 {
-    return (timestamp != 0)
-        || (services != 0)
-        || (port != 0)
-        || (ip != null_address);
+    return (timestamp_ != 0)
+        || (services_ != 0)
+        || (port_ != 0)
+        || (ip_ != null_address);
 }
 
 void network_address::reset()
 {
-    timestamp = 0;
-    services = 0;
-    ip.fill(0);
-    port = 0;
+    timestamp_ = 0;
+    services_ = 0;
+    ip_.fill(0);
+    port_ = 0;
 }
 
 bool network_address::from_data(uint32_t version,
@@ -95,12 +111,12 @@ bool network_address::from_data(uint32_t version,
     reset();
 
     if (with_timestamp)
-        timestamp = source.read_4_bytes_little_endian();
+        timestamp_ = source.read_4_bytes_little_endian();
 
-    services = source.read_8_bytes_little_endian();
-    const auto ip_size = source.read_data(ip.data(), ip.size());
-    port = source.read_2_bytes_big_endian();
-    result = source && (ip.size() == ip_size);
+    services_ = source.read_8_bytes_little_endian();
+    const auto ip_size = source.read_data(ip_.data(), ip_.size());
+    port_ = source.read_2_bytes_big_endian();
+    result = source && (ip_.size() == ip_size);
 
     if (!result)
         reset();
@@ -130,11 +146,11 @@ void network_address::to_data(uint32_t version,
     writer& sink, bool with_timestamp) const
 {
     if (with_timestamp)
-        sink.write_4_bytes_little_endian(timestamp);
+        sink.write_4_bytes_little_endian(timestamp_);
 
-    sink.write_8_bytes_little_endian(services);
-    sink.write_data(ip.data(), ip.size());
-    sink.write_2_bytes_big_endian(port);
+    sink.write_8_bytes_little_endian(services_);
+    sink.write_data(ip_.data(), ip_.size());
+    sink.write_2_bytes_big_endian(port_);
 }
 
 uint64_t network_address::serialized_size(uint32_t version,
@@ -152,6 +168,85 @@ uint64_t network_address::satoshi_fixed_size(uint32_t version,
         result += 4;
 
     return result;
+}
+
+uint32_t network_address::timestamp() const
+{
+    return timestamp_;
+}
+
+void network_address::set_timestamp(uint32_t value)
+{
+    timestamp_ = value;
+}
+
+uint64_t network_address::services() const
+{
+    return services_;
+}
+
+void network_address::set_services(uint64_t value)
+{
+    services_ = value;
+}
+
+ip_address& network_address::ip()
+{
+    return ip_;
+}
+
+const ip_address& network_address::ip() const
+{
+    return ip_;
+}
+
+void network_address::set_ip(const ip_address& value)
+{
+    ip_ = value;
+}
+
+void network_address::set_ip(ip_address&& value)
+{
+    ip_ = std::move(value);
+}
+
+uint16_t network_address::port() const
+{
+    return port_;
+}
+
+void network_address::set_port(uint16_t value)
+{
+    port_ = value;
+}
+
+network_address& network_address::operator=(network_address&& other)
+{
+    timestamp_ = other.timestamp_;
+    services_ = other.services_;
+    ip_ = std::move(other.ip_);
+    port_ = other.port_;
+    return *this;
+}
+
+network_address& network_address::operator=(const network_address& other)
+{
+    timestamp_ = other.timestamp_;
+    services_ = other.services_;
+    ip_ = other.ip_;
+    port_ = other.port_;
+    return *this;
+}
+
+bool network_address::operator==(const network_address& other) const
+{
+    return (services_ == other.services_) && (port_ == other.port_)
+        && (ip_ == other.ip_);
+}
+
+bool network_address::operator!=(const network_address& other) const
+{
+    return !(*this == other);
 }
 
 } // namespace message

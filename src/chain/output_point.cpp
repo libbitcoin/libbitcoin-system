@@ -30,62 +30,63 @@ namespace chain {
 
 const size_t output_point::validation::not_specified = max_size_t;
 
-// The validation properties are not configured for initializer syntax.
-
-output_point::output_point()
+output_point output_point::factory_from_data(const data_chunk& data)
 {
+    output_point instance;
+    instance.from_data(data);
+    return instance;
 }
 
-output_point::output_point(const output_point& other)
-  : point(other),
-    validation(other.validation)
+output_point output_point::factory_from_data(std::istream& stream)
+{
+    output_point instance;
+    instance.from_data(stream);
+    return instance;
+}
+
+output_point output_point::factory_from_data(reader& source)
+{
+    output_point instance;
+    instance.from_data(source);
+    return instance;
+}
+
+// The validation properties are not configured for initializer syntax.
+output_point::output_point()
+  : point(), validation()
 {
 }
 
 output_point::output_point(const point& value)
-  : point(value)
-{
-}
-
-output_point::output_point(const hash_digest& hash, uint32_t index)
-  : point({ hash, index })
-{
-}
-
-output_point::output_point(output_point&& other)
-  : point(std::forward<point>(other)),
-    validation(other.validation)
+  : point(value), validation()
 {
 }
 
 output_point::output_point(point&& value)
-  : point(std::forward<chain::point>(value))
+  : point(std::forward<point>(value)), validation()
+{
+}
+
+output_point::output_point(const hash_digest& hash, uint32_t index)
+  : point(hash, index), validation()
 {
 }
 
 output_point::output_point(hash_digest&& hash, uint32_t index)
-  : point({ hash, index })
+  : point({ std::forward<hash_digest>(hash), index }), validation()
 {
 }
 
-output_point& output_point::operator=(output_point&& other)
+output_point::output_point(const output_point& other)
+  : point(other), validation(other.validation)
 {
-    static_cast<point>(*this) = std::forward<point>(other);
-    validation = other.validation;
-    return *this;
 }
 
-output_point& output_point::operator=(const output_point& other)
+output_point::output_point(output_point&& other)
+  : point(std::forward<point>(other)), validation(other.validation)
 {
-    static_cast<point>(*this) = static_cast<point>(other);
-    validation = other.validation;
-    return *this;
 }
 
-void output_point::reset()
-{
-    point::reset();
-}
 
 // For tx pool validation target_height is that of the *next* block.
 // For block validation target_height is that for which block is considered.
@@ -98,10 +99,48 @@ bool output_point::is_mature(size_t target_height) const
     return (target_height - validation.height) >= coinbase_maturity;
 }
 
+output_point& output_point::operator=(point&& other)
+{
+    reset();
+    point::operator=(std::forward<point>(other));
+    return *this;
+}
+
+output_point& output_point::operator=(const point& other)
+{
+    reset();
+    point::operator=(other);
+    return *this;
+}
+
+output_point& output_point::operator=(output_point&& other)
+{
+    validation = other.validation;
+    point::operator=(std::forward<point>(other));
+    return *this;
+}
+
+output_point& output_point::operator=(const output_point& other)
+{
+    validation = other.validation;
+    point::operator=(other);
+    return *this;
+}
+
+bool output_point::operator==(const point& other) const
+{
+    return point::operator==(other);
+}
+
+bool output_point::operator!=(const point& other) const
+{
+    return point::operator!=(other);
+}
+
 bool output_point::operator==(const output_point& other) const
 {
     // Cash is not considered in comparisons.
-    return static_cast<point>(*this) == static_cast<point>(other);
+    return point::operator==(other);
 }
 
 bool output_point::operator!=(const output_point& other) const

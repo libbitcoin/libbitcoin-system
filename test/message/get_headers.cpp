@@ -25,45 +25,101 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(get_headers_tests)
 
-BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
+BOOST_AUTO_TEST_CASE(get_headers__constructor_1__always__invalid)
 {
-    const data_chunk raw = { 0xab, 0xcd };
-    message::get_headers instance{};
+    message::get_headers instance;
+    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(get_headers__constructor_2__always__equals_params)
+{
+    hash_list starts = {
+        hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+        hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+    };
+
+    hash_digest stop = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+
+    message::get_headers instance(starts, stop);
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(starts == instance.start_hashes());
+    BOOST_REQUIRE(stop == instance.stop_hash());
+}
+
+BOOST_AUTO_TEST_CASE(get_headers__constructor_3__always__equals_params)
+{
+    hash_list starts = {
+        hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+        hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+    };
+    hash_list starts_duplicate = starts;
+
+    hash_digest stop = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+
+    message::get_headers instance(std::move(starts_duplicate), std::move(stop));
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(starts == instance.start_hashes());
+    BOOST_REQUIRE(stop == instance.stop_hash());
+}
+
+BOOST_AUTO_TEST_CASE(get_headers__constructor_4__always__equals_params)
+{
+    hash_list starts = {
+        hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+        hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+    };
+
+    hash_digest stop = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+
+    const message::get_headers expected(starts, stop);
+    message::get_headers instance(expected);
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(expected == instance);
+    BOOST_REQUIRE(starts == instance.start_hashes());
+    BOOST_REQUIRE(stop == instance.stop_hash());
+}
+
+BOOST_AUTO_TEST_CASE(get_headers__constructor_5__always__equals_params)
+{
+    hash_list starts = {
+        hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+        hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+    };
+
+    hash_digest stop = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+
+    message::get_headers expected(starts, stop);
+    message::get_headers instance(std::move(expected));
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(starts == instance.start_hashes());
+    BOOST_REQUIRE(stop == instance.stop_hash());
+}
+
+BOOST_AUTO_TEST_CASE(get_headers__from_data__insufficient_bytes__failure)
+{
+    const data_chunk raw{ 0xab, 0xcd };
+    message::get_headers instance;
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(
         message::get_headers::version_minimum, raw));
 }
 
-BOOST_AUTO_TEST_CASE(from_data_insufficient_version_failure)
+BOOST_AUTO_TEST_CASE(get_headers__from_data__insufficient_version__failure)
 {
     const message::get_headers expected
     {
         {
-            {
-                {
-                    0x78, 0x51, 0x04, 0xa9, 0xcb, 0x52, 0xb3, 0x77,
-                    0x53, 0x9c, 0x8a, 0x27, 0x02, 0xab, 0x70, 0xc7,
-                    0xc2, 0x04, 0xee, 0xb5, 0xd2, 0x78, 0x2e, 0x04,
-                    0x76, 0xef, 0xb9, 0x9d, 0xc7, 0x5c, 0xda, 0x82
-                }
-            },
-            {
-                {
-                    0xda, 0x23, 0x97, 0x09, 0x59, 0x09, 0x9b, 0x46,
-                    0x42, 0x69, 0x72, 0x7b, 0x72, 0x20, 0x7b, 0xcc,
-                    0xc0, 0xf7, 0x80, 0xf4, 0x2d, 0xef, 0x0f, 0x79,
-                    0x7c, 0x1f, 0x89, 0xab, 0xac, 0x92, 0x0b, 0x90
-                }
-            }
+            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         },
-        {
-            {
-                0x79, 0x22, 0x6e, 0x0a, 0xf7, 0x86, 0xaa, 0x71,
-                0x6d, 0x31, 0x0c, 0x84, 0xc4, 0x8b, 0x6f, 0x62,
-                0xb1, 0x20, 0xa6, 0x78, 0x2a, 0x98, 0x99, 0x93,
-                0xc4, 0xc6, 0x16, 0x31, 0xe2, 0x40, 0x1d, 0xf5
-            }
-        }
+        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
     };
 
     const auto data = expected.to_data(message::get_headers::version_minimum);
@@ -73,36 +129,18 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_version_failure)
         message::get_headers::version_minimum - 1, data));
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
+BOOST_AUTO_TEST_CASE(get_headers__factory_from_data_1__valid_input__success)
 {
     const message::get_headers expected
     {
         {
-            {
-                {
-                    0x78, 0x51, 0x04, 0xa9, 0xcb, 0x52, 0xb3, 0x77,
-                    0x53, 0x9c, 0x8a, 0x27, 0x02, 0xab, 0x70, 0xc7,
-                    0xc2, 0x04, 0xee, 0xb5, 0xd2, 0x78, 0x2e, 0x04,
-                    0x76, 0xef, 0xb9, 0x9d, 0xc7, 0x5c, 0xda, 0x82
-                }
-            },
-            {
-                {
-                    0xda, 0x23, 0x97, 0x09, 0x59, 0x09, 0x9b, 0x46,
-                    0x42, 0x69, 0x72, 0x7b, 0x72, 0x20, 0x7b, 0xcc,
-                    0xc0, 0xf7, 0x80, 0xf4, 0x2d, 0xef, 0x0f, 0x79,
-                    0x7c, 0x1f, 0x89, 0xab, 0xac, 0x92, 0x0b, 0x90
-                }
-            }
+            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         },
-        {
-            {
-                0x79, 0x22, 0x6e, 0x0a, 0xf7, 0x86, 0xaa, 0x71,
-                0x6d, 0x31, 0x0c, 0x84, 0xc4, 0x8b, 0x6f, 0x62,
-                0xb1, 0x20, 0xa6, 0x78, 0x2a, 0x98, 0x99, 0x93,
-                0xc4, 0xc6, 0x16, 0x31, 0xe2, 0x40, 0x1d, 0xf5
-            }
-        }
+        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
     };
 
     const auto data = expected.to_data(message::get_headers::version_minimum);
@@ -118,36 +156,18 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
         result.serialized_size(message::get_headers::version_minimum));
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
+BOOST_AUTO_TEST_CASE(get_headers__factory_from_data_2__valid_input__success)
 {
     const message::get_headers expected
     {
         {
-            {
-                {
-                    0x78, 0x51, 0x04, 0xa9, 0xcb, 0x52, 0xb3, 0x77,
-                    0x53, 0x9c, 0x8a, 0x27, 0x02, 0xab, 0x70, 0xc7,
-                    0xc2, 0x04, 0xee, 0xb5, 0xd2, 0x78, 0x2e, 0x04,
-                    0x76, 0xef, 0xb9, 0x9d, 0xc7, 0x5c, 0xda, 0x82
-                }
-            },
-            {
-                {
-                    0xda, 0x23, 0x97, 0x09, 0x59, 0x09, 0x9b, 0x46,
-                    0x42, 0x69, 0x72, 0x7b, 0x72, 0x20, 0x7b, 0xcc,
-                    0xc0, 0xf7, 0x80, 0xf4, 0x2d, 0xef, 0x0f, 0x79,
-                    0x7c, 0x1f, 0x89, 0xab, 0xac, 0x92, 0x0b, 0x90
-                }
-            }
+            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         },
-        {
-            {
-                0x79, 0x22, 0x6e, 0x0a, 0xf7, 0x86, 0xaa, 0x71,
-                0x6d, 0x31, 0x0c, 0x84, 0xc4, 0x8b, 0x6f, 0x62,
-                0xb1, 0x20, 0xa6, 0x78, 0x2a, 0x98, 0x99, 0x93,
-                0xc4, 0xc6, 0x16, 0x31, 0xe2, 0x40, 0x1d, 0xf5
-            }
-        }
+        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
     };
 
     const auto data = expected.to_data(message::get_headers::version_minimum);
@@ -164,36 +184,18 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
         result.serialized_size(message::get_headers::version_minimum));
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
+BOOST_AUTO_TEST_CASE(get_headers__factory_from_data_3__valid_input__success)
 {
     const message::get_headers expected
     {
         {
-            {
-                {
-                    0x78, 0x51, 0x04, 0xa9, 0xcb, 0x52, 0xb3, 0x77,
-                    0x53, 0x9c, 0x8a, 0x27, 0x02, 0xab, 0x70, 0xc7,
-                    0xc2, 0x04, 0xee, 0xb5, 0xd2, 0x78, 0x2e, 0x04,
-                    0x76, 0xef, 0xb9, 0x9d, 0xc7, 0x5c, 0xda, 0x82,
-                }
-            },
-            {
-                {
-                    0xda, 0x23, 0x97, 0x09, 0x59, 0x09, 0x9b, 0x46,
-                    0x42, 0x69, 0x72, 0x7b, 0x72, 0x20, 0x7b, 0xcc,
-                    0xc0, 0xf7, 0x80, 0xf4, 0x2d, 0xef, 0x0f, 0x79,
-                    0x7c, 0x1f, 0x89, 0xab, 0xac, 0x92, 0x0b, 0x90
-                }
-            }
+            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         },
-        {
-            {
-                0x79, 0x22, 0x6e, 0x0a, 0xf7, 0x86, 0xaa, 0x71,
-                0x6d, 0x31, 0x0c, 0x84, 0xc4, 0x8b, 0x6f, 0x62,
-                0xb1, 0x20, 0xa6, 0x78, 0x2a, 0x98, 0x99, 0x93,
-                0xc4, 0xc6, 0x16, 0x31, 0xe2, 0x40, 0x1d, 0xf5
-            }
-        }
+        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
     };
 
     const auto data = expected.to_data(message::get_headers::version_minimum);
@@ -209,6 +211,103 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
     BOOST_REQUIRE_EQUAL(
         expected.serialized_size(message::get_headers::version_minimum),
         result.serialized_size(message::get_headers::version_minimum));
+}
+
+BOOST_AUTO_TEST_CASE(get_headers__operator_assign_equals__always__matches_equivalent)
+{
+    hash_list start = {
+        hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+        hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+        hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+        hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+    };
+
+    hash_digest stop = hash_literal("7777777777777777777777777777777777777777777777777777777777777777");
+
+    message::get_headers value{ start, stop };
+
+    BOOST_REQUIRE(value.is_valid());
+
+    message::get_headers instance;
+    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+
+    instance = std::move(value);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(start == instance.start_hashes());
+    BOOST_REQUIRE(stop == instance.stop_hash());
+}
+
+BOOST_AUTO_TEST_CASE(get_headers__operator_boolean_equals__duplicates__returns_true)
+{
+    const message::get_headers expected
+    {
+        {
+            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        },
+        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
+    };
+
+    message::get_headers instance(expected);
+    BOOST_REQUIRE_EQUAL(true, instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(get_headers__operator_boolean_equals__differs__returns_false)
+{
+    const message::get_headers expected
+    {
+        {
+            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        },
+        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
+    };
+
+    message::get_headers instance;
+    BOOST_REQUIRE_EQUAL(false, instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(get_headers__operator_boolean_not_equals__duplicates__returns_false)
+{
+    const message::get_headers expected
+    {
+        {
+            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        },
+        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
+    };
+
+    message::get_headers instance(expected);
+    BOOST_REQUIRE_EQUAL(false, instance != expected);
+}
+
+BOOST_AUTO_TEST_CASE(get_headers__operator_boolean_not_equals__differs__returns_true)
+{
+    const message::get_headers expected
+    {
+        {
+            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        },
+        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
+    };
+
+    message::get_headers instance;
+    BOOST_REQUIRE_EQUAL(true, instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

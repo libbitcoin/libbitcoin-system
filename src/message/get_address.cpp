@@ -57,6 +57,10 @@ get_address get_address::factory_from_data(uint32_t version,
     return instance;
 }
 
+get_address::get_address()
+{
+}
+
 bool get_address::is_valid() const
 {
     return true;

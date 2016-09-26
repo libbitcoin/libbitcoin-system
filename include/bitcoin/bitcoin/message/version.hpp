@@ -109,6 +109,53 @@ public:
     static version factory_from_data(uint32_t version, std::istream& stream);
     static version factory_from_data(uint32_t version, reader& source);
 
+    version();
+    version(uint32_t value, uint64_t services, uint64_t timestamp,
+        const network_address& address_receiver,
+        const network_address& address_sender,
+        uint64_t nonce, const std::string& user_agent, uint32_t start_height,
+        bool relay);
+    version(uint32_t value, uint64_t services, uint64_t timestamp,
+        network_address&& address_receiver, network_address&& address_sender,
+        uint64_t nonce, std::string&& user_agent, uint32_t start_height,
+        bool relay);
+    version(const version& other);
+    version(version&& other);
+
+    uint32_t value() const;
+    void set_value(uint32_t value);
+
+    uint64_t services() const;
+    void set_services(uint64_t services);
+
+    uint64_t timestamp() const;
+    void set_timestamp(uint64_t timestamp);
+
+    network_address& address_receiver();
+    const network_address& address_receiver() const;
+//    void set_address_receiver(const network_address& address);
+    void set_address_receiver(network_address&& address);
+
+    network_address& address_sender();
+    const network_address& address_sender() const;
+//    void set_address_sender(const network_address& address);
+    void set_address_sender(network_address&& address);
+
+    uint64_t nonce() const;
+    void set_nonce(uint64_t nonce);
+
+    std::string& user_agent();
+    const std::string& user_agent() const;
+    void set_user_agent(const std::string& agent);
+    void set_user_agent(std::string&& agent);
+
+    uint32_t start_height() const;
+    void set_start_height(uint32_t height);
+
+    // version >= 70001
+    bool relay() const;
+    void set_relay(bool relay);
+
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
     bool from_data(uint32_t version, reader& source);
@@ -119,21 +166,30 @@ public:
     void reset();
     uint64_t serialized_size(uint32_t version) const;
 
+    // This class is move assignable but not copy assignable.
+    version& operator=(version&& other);
+    void operator=(const version&) = delete;
+
+    bool operator==(const version& other) const;
+    bool operator!=(const version& other) const;
+
     static const std::string command;
+//    static const bounds version;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
-    uint32_t value;
-    uint64_t services;
-    uint64_t timestamp;
-    network_address address_recevier;
-    network_address address_sender;
-    uint64_t nonce;
-    std::string user_agent;
-    uint32_t start_height;
+private:
+    uint32_t value_;
+    uint64_t services_;
+    uint64_t timestamp_;
+    network_address address_receiver_;
+    network_address address_sender_;
+    uint64_t nonce_;
+    std::string user_agent_;
+    uint32_t start_height_;
 
-    // version >= level::bip61
-    bool relay;
+    // version >= 70001
+    bool relay_;
 };
 
 } // namespace message

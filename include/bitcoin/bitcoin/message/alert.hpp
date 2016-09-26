@@ -41,8 +41,21 @@ public:
     static alert factory_from_data(uint32_t version, std::istream& stream);
     static alert factory_from_data(uint32_t version, reader& source);
 
-    bool operator==(const alert& other) const;
-    bool operator!=(const alert& other) const;
+    alert();
+    alert(const data_chunk& payload, const data_chunk& signature);
+    alert(data_chunk&& payload, data_chunk&& signature);
+    alert(const alert& other);
+    alert(alert&& other);
+
+    data_chunk& payload();
+    const data_chunk& payload() const;
+    void set_payload(const data_chunk& value);
+    void set_payload(data_chunk&& value);
+
+    data_chunk& signature();
+    const  data_chunk& signature() const;
+    void set_signature(const data_chunk& value);
+    void set_signature(data_chunk&& value);
 
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
@@ -54,12 +67,20 @@ public:
     void reset();
     uint64_t serialized_size(uint32_t version) const;
 
+    /// This class is move assignable but not copy assignable.
+    alert& operator=(alert&& other);
+    void operator=(const alert&) = delete;
+
+    bool operator==(const alert& other) const;
+    bool operator!=(const alert& other) const;
+
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
-    data_chunk payload;
-    data_chunk signature;
+private:
+    data_chunk payload_;
+    data_chunk signature_;
 };
 
 } // end message

@@ -45,6 +45,17 @@ public:
         reader& source);
     static uint64_t satoshi_fixed_size(uint32_t version);
 
+    send_compact_blocks();
+    send_compact_blocks(bool high_bandwidth_mode, uint64_t version);
+    send_compact_blocks(const send_compact_blocks& other);
+    send_compact_blocks(send_compact_blocks&& other);
+
+    bool high_bandwidth_mode() const;
+    void set_high_bandwidth_mode(bool mode);
+
+    uint64_t version() const;
+    void set_version(uint64_t version);
+
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
     bool from_data(uint32_t version, reader& source);
@@ -55,12 +66,20 @@ public:
     void reset();
     uint64_t serialized_size(uint32_t version) const;
 
+    /// This class is move assignable but not copy assignable.
+    send_compact_blocks& operator=(send_compact_blocks&& other);
+    void operator=(const send_compact_blocks&) = delete;
+
+    bool operator==(const send_compact_blocks& other) const;
+    bool operator!=(const send_compact_blocks& other) const;
+
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
-    bool high_bandwidth_mode;
-    uint64_t version;
+private:
+    bool high_bandwidth_mode_;
+    uint64_t version_;
 };
 
 } // namespace message

@@ -54,6 +54,32 @@ public:
     static reject factory_from_data(uint32_t version, std::istream& stream);
     static reject factory_from_data(uint32_t version, reader& source);
 
+    reject();
+    reject(reason_code code, const std::string& message,
+        const std::string& reason, const hash_digest& data);
+    reject(reason_code code, std::string&& message, std::string&& reason,
+        hash_digest&& data);
+    reject(const reject& other);
+    reject(reject&& other);
+
+    reason_code code() const;
+    void set_code(reason_code value);
+
+    std::string& message();
+    const std::string& message() const;
+    void set_message(const std::string& value);
+    void set_message(std::string&& value);
+
+    std::string& reason();
+    const std::string& reason() const;
+    void set_reason(const std::string& value);
+    void set_reason(std::string&& value);
+
+    hash_digest& data();
+    const hash_digest& data() const;
+    void set_data(const hash_digest& value);
+    void set_data(hash_digest&& value);
+
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
     bool from_data(uint32_t version, reader& source);
@@ -64,18 +90,25 @@ public:
     void reset();
     uint64_t serialized_size(uint32_t version) const;
 
+    // This class is move assignable but not copy assignable.
+    reject& operator=(reject&& other);
+    void operator=(const reject&) = delete;
+
+    bool operator==(const reject& other) const;
+    bool operator!=(const reject& other) const;
+
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
-    std::string message;
-    reason_code code;
-    std::string reason;
-    hash_digest data;
-
 private:
     static reason_code reason_from_byte(uint8_t byte);
     static uint8_t reason_to_byte(reason_code value);
+
+    reason_code code_;
+    std::string message_;
+    std::string reason_;
+    hash_digest data_;
 };
 
 } // end message

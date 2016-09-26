@@ -56,7 +56,7 @@ ping ping::factory_from_data(uint32_t version, reader& source)
 
 uint64_t ping::satoshi_fixed_size(uint32_t version)
 {
-    return version < version::level::bip31 ? 0 : sizeof(nonce);
+    return version < version::level::bip31 ? 0 : sizeof(nonce_);
 }
 
 ping::ping()
@@ -65,7 +65,12 @@ ping::ping()
 }
 
 ping::ping(uint64_t nonce)
-  : nonce(nonce), valid_(nonce != 0)
+  : nonce_(nonce), deserialized_nonceless_(false), deserialized_valid_(true)
+{
+}
+
+ping::ping(const ping& other)
+  : ping(other.nonce_)
 {
 }
 
@@ -85,17 +90,18 @@ bool ping::from_data(uint32_t version, reader& source)
 {
     reset();
 
-    if (version >= version::level::bip31)
-        nonce = source.read_8_bytes_little_endian();
+    deserialized_nonceless_ = !(version >= version::level::bip31);
+    if (!deserialized_nonceless_)
+        nonce_ = source.read_8_bytes_little_endian();
 
     // Must track valid because is_valid doesn't include version parameter.
     // Otherwise when below bip31 then the object would always be invalid.
-    valid_ = source;
+    deserialized_valid_ = source;
 
-    if (!valid_)
+    if (!deserialized_valid_)
         reset();
 
-    return valid_;
+    return deserialized_valid_;
 }
 
 data_chunk ping::to_data(uint32_t version) const
@@ -117,17 +123,19 @@ void ping::to_data(uint32_t version, std::ostream& stream) const
 void ping::to_data(uint32_t version, writer& sink) const
 {
     if (version >= version::level::bip31)
-        sink.write_8_bytes_little_endian(nonce);
+        sink.write_8_bytes_little_endian(nonce_);
 }
 
 bool ping::is_valid() const
 {
-    return valid_;
+    return deserialized_valid_ && (deserialized_nonceless_ || (nonce_ != 0));
 }
 
 void ping::reset()
 {
-    nonce = 0;
+    nonce_ = 0;
+    deserialized_nonceless_ = false;
+    deserialized_valid_ = true;
 }
 
 uint64_t ping::serialized_size(uint32_t version) const
@@ -135,10 +143,26 @@ uint64_t ping::serialized_size(uint32_t version) const
     return satoshi_fixed_size(version);
 }
 
+uint64_t ping::nonce() const
+{
+    return nonce_;
+}
+
+void ping::set_nonce(uint64_t value)
+{
+    nonce_ = value;
+}
+
+ping& ping::operator=(ping&& other)
+{
+    nonce_ = other.nonce_;
+    return *this;
+}
+
 bool ping::operator==(const ping& other) const
 {
     // Nonce should be zero if not used.
-    return (nonce == other.nonce);
+    return (nonce_ == other.nonce_);
 }
 
 bool ping::operator!=(const ping& other) const

@@ -77,8 +77,29 @@ public:
     static heading factory_from_data(std::istream& stream);
     static heading factory_from_data(reader& source);
 
-    bool operator==(const heading& other) const;
-    bool operator!=(const heading& other) const;
+    heading();
+    heading(uint32_t magic, const std::string& command, uint32_t payload_size,
+        uint32_t checksum);
+    heading(uint32_t magic, std::string&& command, uint32_t payload_size,
+            uint32_t checksum);
+    heading(const heading& other);
+    heading(heading&& other);
+
+    uint32_t magic() const;
+    void set_magic(uint32_t value);
+
+    std::string& command();
+    const std::string& command() const;
+    void set_command(const std::string& value);
+    void set_command(std::string&& value);
+
+    uint32_t payload_size() const;
+    void set_payload_size(uint32_t value);
+
+    uint32_t checksum() const;
+    void set_checksum(uint32_t value);
+
+    message_type type() const;
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
@@ -88,12 +109,19 @@ public:
     void to_data(writer& sink) const;
     bool is_valid() const;
     void reset();
-    message_type type() const;
 
-    uint32_t magic;
-    std::string command;
-    uint32_t payload_size;
-    uint32_t checksum;
+    // This class is move assignable but not copy assignable.
+    heading& operator=(heading&& other);
+    void operator=(const heading&) = delete;
+
+    bool operator==(const heading& other) const;
+    bool operator!=(const heading& other) const;
+
+private:
+    uint32_t magic_;
+    std::string command_;
+    uint32_t payload_size_;
+    uint32_t checksum_;
 };
 
 } // namespace message

@@ -55,15 +55,40 @@ address address::factory_from_data(uint32_t version, reader& source)
     return instance;
 }
 
+address::address()
+  : addresses_()
+{
+}
+
+address::address(const network_address::list& addresses)
+  : addresses_(addresses)
+{
+}
+
+address::address(network_address::list&& addresses)
+  : addresses_(std::forward<network_address::list>(addresses))
+{
+}
+
+address::address(const address& other)
+  : address(other.addresses_)
+{
+}
+
+address::address(address&& other)
+  : address(std::forward<network_address::list>(other.addresses_))
+{
+}
+
 bool address::is_valid() const
 {
-    return !addresses.empty();
+    return !addresses_.empty();
 }
 
 void address::reset()
 {
-    addresses.clear();
-    addresses.shrink_to_fit();
+    addresses_.clear();
+    addresses_.shrink_to_fit();
 }
 
 bool address::from_data(uint32_t version, const data_chunk& data)
@@ -87,9 +112,9 @@ bool address::from_data(uint32_t version, reader& source)
 
     if (result)
     {
-        addresses.resize(safe_unsigned<size_t>(count));
+        addresses_.resize(safe_unsigned<size_t>(count));
 
-        for (auto& address: addresses)
+        for (auto& address: addresses_)
         {
             result = address.from_data(version, source, true);
 
@@ -122,15 +147,51 @@ void address::to_data(uint32_t version, std::ostream& stream) const
 
 void address::to_data(uint32_t version, writer& sink) const
 {
-    sink.write_variable_uint_little_endian(addresses.size());
-    for (const network_address& net_address : addresses)
+    sink.write_variable_uint_little_endian(addresses_.size());
+    for (const network_address& net_address : addresses_)
         net_address.to_data(version, sink, true);
 }
 
 uint64_t address::serialized_size(uint32_t version) const
 {
-    return variable_uint_size(addresses.size()) + 
-        (addresses.size() * network_address::satoshi_fixed_size(version, true));
+    return variable_uint_size(addresses_.size()) +
+        (addresses_.size() * network_address::satoshi_fixed_size(version, true));
+}
+
+network_address::list& address::addresses()
+{
+    return addresses_;
+}
+
+const network_address::list& address::addresses() const
+{
+    return addresses_;
+}
+
+void address::set_addresses(const network_address::list& value)
+{
+    addresses_ = value;
+}
+
+void address::set_addresses(network_address::list&& value)
+{
+    addresses_ = std::move(value);
+}
+
+address& address::operator=(address&& other)
+{
+    addresses_ = std::move(other.addresses_);
+    return *this;
+}
+
+bool address::operator==(const address& other) const
+{
+    return (addresses_ == other.addresses_);
+}
+
+bool address::operator!=(const address& other) const
+{
+    return !(*this == other);
 }
 
 } // namespace message

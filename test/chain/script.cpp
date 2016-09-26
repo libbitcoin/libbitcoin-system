@@ -127,7 +127,7 @@ void push_data(data_chunk& raw_script, const data_chunk& data)
     }
 
     script tmp_script;
-    tmp_script.operations.push_back(operation{ code, data });
+    tmp_script.operations().push_back(operation{ code, data });
     data_chunk raw_tmp_script = tmp_script.to_data(false);
     extend_data(raw_script, raw_tmp_script);
 }
@@ -214,7 +214,7 @@ bool parse(script& result_script, std::string format)
         script::parse_mode::strict))
         return false;
 
-    if (result_script.operations.empty())
+    if (result_script.operations().empty())
         return false;
 
     return true;
@@ -232,11 +232,11 @@ transaction new_tx(const script_test& test)
         return{};
 
     input input;
-    input.script = std::move(input_script);
-    input.previous_output.validation.cache.script = std::move(output_script);
+    input.set_script(std::move(input_script));
+    input.previous_output().validation.cache.set_script(std::move(output_script));
 
     transaction tx;
-    tx.inputs.push_back(std::move(input));
+    tx.inputs().push_back(std::move(input));
     return tx;
 }
 
@@ -306,8 +306,8 @@ BOOST_AUTO_TEST_CASE(script__is_raw_data_operations_size_not_equal_one_returns_f
 BOOST_AUTO_TEST_CASE(script__is_raw_data_code_not_equal_raw_data_returns_false)
 {
     script instance;
-    instance.operations.emplace_back();
-    instance.operations.back().code = opcode::vernotif;
+    instance.operations().emplace_back();
+    instance.operations().back().set_code(opcode::vernotif);
     BOOST_REQUIRE_EQUAL(false, instance.is_raw_data());
 }
 
@@ -378,7 +378,7 @@ BOOST_AUTO_TEST_CASE(script__bip16__valid)
     for (const auto& test: valid_bip16_scripts)
     {
         const auto tx = new_tx(test);
-        BOOST_CHECK_MESSAGE(!tx.inputs.empty(), test.description);
+        BOOST_CHECK_MESSAGE(!tx.inputs().empty(), test.description);
 
         // These are valid prior to and after BIP16 activation.
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) == error::success, test.description);
@@ -392,7 +392,7 @@ BOOST_AUTO_TEST_CASE(script__bip16__invalidated)
     for (const auto& test: invalidated_bip16_scripts)
     {
         const auto tx = new_tx(test);
-        BOOST_CHECK_MESSAGE(!tx.inputs.empty(), test.description);
+        BOOST_CHECK_MESSAGE(!tx.inputs().empty(), test.description);
 
         // These are valid prior to BIP16 activation and invalid after.
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) == error::success, test.description);
@@ -407,10 +407,10 @@ BOOST_AUTO_TEST_CASE(script__bip65__valid)
     for (const auto& test: valid_bip65_scripts)
     {
         auto tx = new_tx(test);
-        BOOST_CHECK_MESSAGE(!tx.inputs.empty(), test.description);
+        BOOST_CHECK_MESSAGE(!tx.inputs().empty(), test.description);
 
-        tx.locktime = 500000042;
-        tx.inputs[0].sequence = 42;
+        tx.set_locktime(500000042);
+        tx.inputs()[0].set_sequence(42);
 
         // These are valid prior to and after BIP65 activation.
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) == error::success, test.description);
@@ -424,10 +424,10 @@ BOOST_AUTO_TEST_CASE(script__bip65__invalid)
     for (const auto& test: invalid_bip65_scripts)
     {
         auto tx = new_tx(test);
-        BOOST_CHECK_MESSAGE(!tx.inputs.empty(), test.description);
+        BOOST_CHECK_MESSAGE(!tx.inputs().empty(), test.description);
 
-        tx.locktime = 99;
-        tx.inputs[0].sequence = 42;
+        tx.set_locktime(99);
+        tx.inputs()[0].set_sequence(42);
 
         // These are invalid prior to and after BIP65 activation.
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) != error::success, test.description);
@@ -441,10 +441,10 @@ BOOST_AUTO_TEST_CASE(script__bip65__invalidated)
     for (const auto& test: invalidated_bip65_scripts)
     {
         auto tx = new_tx(test);
-        BOOST_CHECK_MESSAGE(!tx.inputs.empty(), test.description);
+        BOOST_CHECK_MESSAGE(!tx.inputs().empty(), test.description);
 
-        tx.locktime = 99;
-        tx.inputs[0].sequence = 42;
+        tx.set_locktime(99);
+        tx.inputs()[0].set_sequence(42);
 
         // These are valid prior to BIP65 activation and invalid after.
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) == error::success, test.description);
@@ -459,7 +459,7 @@ BOOST_AUTO_TEST_CASE(script__multisig__valid)
     for (const auto& test: valid_multisig_scripts)
     {
         const auto tx = new_tx(test);
-        BOOST_CHECK_MESSAGE(!tx.inputs.empty(), test.description);
+        BOOST_CHECK_MESSAGE(!tx.inputs().empty(), test.description);
 
         // These are always valid.
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) == error::success, test.description);
@@ -474,7 +474,7 @@ BOOST_AUTO_TEST_CASE(script__multisig__invalid)
     for (const auto& test: invalid_multisig_scripts)
     {
         const auto tx = new_tx(test);
-        BOOST_CHECK_MESSAGE(!tx.inputs.empty(), test.description);
+        BOOST_CHECK_MESSAGE(!tx.inputs().empty(), test.description);
 
         // These are always invalid.
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) != error::success, test.description);
@@ -488,7 +488,7 @@ BOOST_AUTO_TEST_CASE(script__context_free__valid)
     for (const auto& test: valid_context_free_scripts)
     {
         const auto tx = new_tx(test);
-        BOOST_CHECK_MESSAGE(!tx.inputs.empty(), test.description);
+        BOOST_CHECK_MESSAGE(!tx.inputs().empty(), test.description);
 
         // These are always valid.
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) == error::success, test.description);
@@ -501,7 +501,7 @@ BOOST_AUTO_TEST_CASE(script__context_free__invalid)
     for (const auto& test: invalid_context_free_scripts)
     {
         const auto tx = new_tx(test);
-        BOOST_CHECK_MESSAGE(!tx.inputs.empty(), test.description);
+        BOOST_CHECK_MESSAGE(!tx.inputs().empty(), test.description);
 
         // These are always invalid.
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) != error::success, test.description);
@@ -514,7 +514,7 @@ BOOST_AUTO_TEST_CASE(script__invalid_parse__empty_inputs)
     for (const auto& test: invalid_parse_scripts)
     {
         const auto tx = new_tx(test);
-        BOOST_CHECK_MESSAGE(tx.inputs.empty(), test.description);
+        BOOST_CHECK_MESSAGE(tx.inputs().empty(), test.description);
     }
 }
 

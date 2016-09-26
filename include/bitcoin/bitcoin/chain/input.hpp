@@ -42,6 +42,29 @@ public:
     static input factory_from_data(std::istream& stream);
     static input factory_from_data(reader& source);
 
+    input();
+    input(const output_point& previous_output, const chain::script& script,
+        uint32_t sequence);
+    input(output_point&& previous_output, chain::script&& script,
+        uint32_t sequence);
+    input(const input& other);
+    input(input&& other);
+
+    output_point& previous_output();
+    const output_point& previous_output() const;
+    void set_previous_output(const output_point& value);
+    void set_previous_output(output_point&& value);
+
+    chain::script& script();
+    const chain::script& script() const;
+    void set_script(const chain::script& value);
+    void set_script(chain::script&& value);
+
+    uint32_t sequence() const;
+    void set_sequence(uint32_t value);
+
+    size_t signature_operations(bool bip16_active) const;
+
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
     bool from_data(reader& source);
@@ -54,11 +77,17 @@ public:
     bool is_output_mature(size_t target_height) const;
     void reset();
     uint64_t serialized_size() const;
-    size_t signature_operations(bool bip16_active) const;
 
-    output_point previous_output;
-    chain::script script;
-    uint32_t sequence;
+    input& operator=(const input& other);
+    input& operator=(input&& other);
+
+    bool operator==(const input& other) const;
+    bool operator!=(const input& other) const;
+
+private:
+    output_point previous_output_;
+    chain::script script_;
+    uint32_t sequence_;
 };
 
 } // namespace chain

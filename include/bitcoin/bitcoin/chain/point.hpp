@@ -54,39 +54,50 @@ public:
     static uint64_t satoshi_fixed_size();
 
     point();
-    point(const point& other);
     point(const hash_digest& hash, uint32_t index);
-
-    point(point&& other);
     point(hash_digest&& hash, uint32_t index);
+    point(const point& other);
+    point(point&& other);
 
-    /// This class is move assignable and  copy assignable.
-    point& operator=(point&& other);
-    point& operator=(const point& other);
+    hash_digest& hash();
+    const hash_digest& hash() const;
+    void set_hash(const hash_digest& value);
+    void set_hash(hash_digest&& value);
 
-    bool operator==(const point& other) const;
-    bool operator!=(const point& other) const;
+    uint32_t index() const;
+    void set_index(uint32_t value);
 
     uint64_t checksum() const;
-
     bool is_null() const;
+
+    point_iterator begin() const;
+    point_iterator end() const;
+
+    std::string to_string() const;
+
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
     bool from_data(reader& source);
     data_chunk to_data() const;
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
-    std::string to_string() const;
     bool is_valid() const;
-    void reset();
+    virtual void reset();
     uint64_t serialized_size() const;
 
-    point_iterator begin() const;
-    point_iterator end() const;
+    /// This class is move assignable and copy assignable.
+    point& operator=(point&& other);
+    point& operator=(const point& other);
 
-    hash_digest hash;
-    uint32_t index;
+    bool operator==(const point& other) const;
+    bool operator!=(const point& other) const;
+
+private:
+    hash_digest hash_;
+    uint32_t index_;
 };
+
+typedef point input_point;
 
 } // namespace chain
 } // namespace libbitcoin
@@ -102,8 +113,8 @@ struct hash<bc::chain::point>
     size_t operator()(const bc::chain::point& point) const
     {
         size_t seed = 0;
-        boost::hash_combine(seed, point.hash);
-        boost::hash_combine(seed, point.index);
+        boost::hash_combine(seed, point.hash());
+        boost::hash_combine(seed, point.index());
         return seed;
     }
 };
