@@ -25,7 +25,7 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(limit_tests)
+BOOST_AUTO_TEST_SUITE(limits_tests)
 
 static const size_t minimum = 0;
 static const size_t maximum = max_size_t;
