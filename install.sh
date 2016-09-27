@@ -248,10 +248,6 @@ BITCOIN_OPTIONS=(
 #==============================================================================
 configure_options()
 {
-    if [[ -e "autogen.sh" ]]; then
-        ./autogen.sh
-    fi
-
     echo "configure options:"
     for OPTION in "$@"; do
         if [[ $OPTION ]]; then
@@ -300,6 +296,7 @@ make_current_directory()
     local JOBS=$1
     shift 1
 
+    ./autogen.sh
     configure_options "$@"
     make_jobs $JOBS
     make install
