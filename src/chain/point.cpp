@@ -21,6 +21,7 @@
 
 #include <cstdint>
 #include <sstream>
+#include <utility>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
@@ -35,6 +36,17 @@ namespace chain {
 
 // This sentinel is serialized and defined by consensus, not implementation.
 const uint32_t point::null_index = no_previous_output;
+
+// This is a sentinel used internally to signal invalidity of the point.
+///////////////////////////////////////////////////////////////////////////////
+// Setting a flag only on deserialization failure is insufficient, since
+// default construction yields success, which is not the intended result
+// when returning a failure instance. Apart from restructuring interfaces
+// the only alternative would be a method to explicitly set invalidity,
+// so we've opted for this. This is not a consensus value and is currently
+// outside of the domain of valid values due to the block size limit.
+///////////////////////////////////////////////////////////////////////////////
+const uint32_t point::invalid_point = null_index - 1u;
 
 point point::factory_from_data(const data_chunk& data)
 {
@@ -57,18 +69,58 @@ point point::factory_from_data(reader& source)
     return instance;
 }
 
+// Default construction creates an invalid point, but populating either the
+// index or the hash will make the pont valid.
+point::point()
+  : point(null_hash, invalid_point)
+{
+}
+
+point::point(const point& other)
+  : point(other.hash, other.index)
+{
+}
+
+point::point(const hash_digest& hash, uint32_t index)
+  : hash(hash),
+    index(index)
+{
+}
+
+point::point(point&& other)
+  : point(std::forward<hash_digest>(other.hash), other.index)
+{
+}
+
+point::point(hash_digest&& hash, uint32_t index)
+  : hash(std::forward<hash_digest>(hash)),
+    index(index)
+{
+}
+
+point& point::operator=(point&& other)
+{
+    hash = std::forward<hash_digest>(other.hash);
+    index = other.index;
+    return *this;
+}
+
+point& point::operator=(const point& other)
+{
+    hash = other.hash;
+    index = other.index;
+    return *this;
+}
+
 bool point::is_valid() const
 {
-    // BUGBUG: zero index is valid and non-zero should not override null_hash.
-    ////BITCOIN_ASSERT_MSG(false, "not implemented");
-
-    return (index != 0) || (hash != null_hash);
+    return index != point::invalid_point || hash != null_hash;
 }
 
 void point::reset()
 {
-    hash.fill(0);
-    index = 0;
+    hash = null_hash;
+    index = point::invalid_point;
 }
 
 bool point::from_data(const data_chunk& data)

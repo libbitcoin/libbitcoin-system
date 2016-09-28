@@ -135,8 +135,11 @@ public:
 
     bool from_string(const std::string& human_readable);
     std::string to_string(uint32_t flags) const;
+
+    // BUGBUG: An empty script is valid.
     bool is_valid() const;
     void reset();
+
     size_t pay_script_hash_sigops(const script& prevout) const;
     size_t sigops(bool serialized_script) const;
     uint64_t satoshi_content_size() const;

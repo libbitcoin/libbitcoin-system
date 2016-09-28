@@ -49,7 +49,7 @@ namespace chain {
 
 using namespace bc::config;
 
-const size_t block::metadata::orphan_height = 0;
+const size_t block::validation::orphan_height = 0;
 
 block block::factory_from_data(const data_chunk& data,
     bool with_transaction_count)
@@ -555,8 +555,8 @@ code block::accept(const chain_state& state) const
     else if (signature_operations(bip16) > max_block_sigops)
         return error::too_many_sigs;
 
-    ////else if (!is_valid_coinbase_claim(state.next_height()))
-    ////    return error::coinbase_too_large;
+    else if (!is_valid_coinbase_claim(state.next_height()))
+        return error::coinbase_too_large;
 
     else
         return accept_transactions(state);

@@ -42,6 +42,9 @@ public:
     /// This value is serialized and defined by consensus, not implementation.
     static const uint32_t null_index;
 
+    /// This is a sentinel used internally to signal invalidity of the point.
+    static const uint32_t invalid_point;
+
     typedef std::vector<point> list;
     typedef std::vector<uint32_t> indexes;
 
@@ -49,6 +52,17 @@ public:
     static point factory_from_data(std::istream& stream);
     static point factory_from_data(reader& source);
     static uint64_t satoshi_fixed_size();
+
+    point();
+    point(const point& other);
+    point(const hash_digest& hash, uint32_t index);
+
+    point(point&& other);
+    point(hash_digest&& hash, uint32_t index);
+
+    /// This class is move assignable and  copy assignable.
+    point& operator=(point&& other);
+    point& operator=(const point& other);
 
     bool operator==(const point& other) const;
     bool operator!=(const point& other) const;

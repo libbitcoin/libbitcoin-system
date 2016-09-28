@@ -51,12 +51,9 @@ input input::factory_from_data(reader& source)
     return instance;
 }
 
+// Since empty script and zero sequence are valid this relies othe prevout.
 bool input::is_valid() const
 {
-    // BUGBUG: Currently this indicates invalid as coinbase (null previous output),
-    // when the script is empty; and when the sequence is zero (all are valid).
-    ////BITCOIN_ASSERT_MSG(false, "not implemented");
-
     return (sequence != 0) ||
         previous_output.is_valid() ||
         script.is_valid();
@@ -151,7 +148,8 @@ size_t input::signature_operations(bool bip16_active) const
     if (bip16_active)
     {
         // This cannot overflow because each total is limited by max ops.
-        sigops += script.pay_script_hash_sigops(previous_output.cache.script);
+        const auto& cache = previous_output.validation.cache.script;
+        sigops += script.pay_script_hash_sigops(cache);
     }
 
     return sigops;

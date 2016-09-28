@@ -54,17 +54,15 @@ output output::factory_from_data(reader& source)
     return instance;
 }
 
+// Empty scripts are valid, validation relies on not_found only.
 bool output::is_valid() const
 {
-    // BUGBUG: an empty script is valid but currently reports otherwise.
-    ////BITCOIN_ASSERT_MSG(false, "not implemented");
-
-    return (value != not_found) && script.is_valid();
+    return value != output::not_found;
 }
 
 void output::reset()
 {
-    value = not_found;
+    value = output::not_found;
     script.reset();
 }
 

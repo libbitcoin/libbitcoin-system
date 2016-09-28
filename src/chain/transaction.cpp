@@ -99,7 +99,7 @@ transaction transaction::factory_from_data(reader& source, bool satoshi)
 // default constructors
 
 transaction::transaction()
-  : version(0), locktime(0), duplicate_(false)
+  : version(0), locktime(0)
 {
 }
 
@@ -113,13 +113,12 @@ transaction::transaction(uint32_t version, uint32_t locktime,
   : version(version),
     locktime(locktime),
     inputs(inputs),
-    outputs(outputs),
-    duplicate_(false)
+    outputs(outputs)
 {
 }
 
 transaction::transaction(transaction&& other)
-  : transaction(other.version, other.locktime, 
+  : transaction(other.version, other.locktime,
         std::forward<input::list>(other.inputs),
         std::forward<output::list>(other.outputs))
 {
@@ -130,8 +129,7 @@ transaction::transaction(uint32_t version, uint32_t locktime,
   : version(version),
     locktime(locktime),
     inputs(std::forward<input::list>(inputs)),
-    outputs(std::forward<output::list>(outputs)),
-    duplicate_(false)
+    outputs(std::forward<output::list>(outputs))
 {
 }
 
@@ -171,7 +169,6 @@ void transaction::reset()
     hash_mutex_.lock();
     hash_.reset();
     hash_mutex_.unlock();
-    duplicate_ = false;
 }
 
 bool transaction::from_data(const data_chunk& data, bool satoshi)
@@ -285,19 +282,6 @@ std::string transaction::to_string(uint32_t flags) const
     return value.str();
 }
 
-bool transaction::duplicate() const
-{
-    return duplicate_;
-}
-
-// This may or may not include the transaction pool.
-// When the transaction is within a block this should be populated only from
-// the blockchain and otherwise may (or may not) consider the transaction pool.
-void transaction::set_duplicate()
-{
-    duplicate_ = true;
-}
-
 hash_digest transaction::hash() const
 {
     ///////////////////////////////////////////////////////////////////////////
@@ -333,7 +317,7 @@ bool transaction::is_coinbase() const
 }
 
 // True if coinbase and has invalid input[0] script size.
-bool transaction::is_invalid_coinbase() const
+bool transaction::is_oversized_coinbase() const
 {
     if (!is_coinbase())
         return false;
@@ -343,7 +327,7 @@ bool transaction::is_invalid_coinbase() const
 }
 
 // True if not coinbase but has null previous_output(s).
-bool transaction::is_invalid_non_coinbase() const
+bool transaction::is_null_non_coinbase() const
 {
     if (is_coinbase())
         return false;
@@ -394,10 +378,11 @@ uint64_t transaction::total_input_value() const
 {
     const auto value = [](uint64_t total, const input& input)
     {
+        const auto& prevout = input.previous_output.validation.cache;
+        const auto missing = !prevout.is_valid();
+
         // Treat missing previous outputs as zero-valued, no math on sentinel.
-        const auto value = input.previous_output.cache.value;
-        const auto increment = value == output::not_found ? 0 : value;
-        return ceiling_add(total, increment);
+        return ceiling_add(total, missing ? 0 : prevout.value);
     };
 
     return std::accumulate(inputs.begin(), inputs.end(), uint64_t(0), value);
@@ -421,7 +406,7 @@ uint64_t transaction::fees() const
 
 bool transaction::is_overspent() const
 {
-    return total_output_value() > total_input_value();
+    return !is_coinbase() && total_output_value() > total_input_value();
 }
 
 // Returns max_size_t in case of overflow.
@@ -439,8 +424,8 @@ size_t transaction::signature_operations(bool bip16_active) const
     };
 
     size_t sigops = 0;
-    std::accumulate(inputs.begin(), inputs.end(), sigops, in);
-    std::accumulate(outputs.begin(), outputs.end(), sigops, out);
+    sigops += std::accumulate(inputs.begin(), inputs.end(), sigops, in);
+    sigops += std::accumulate(outputs.begin(), outputs.end(), sigops, out);
     return sigops;
 }
 
@@ -448,8 +433,9 @@ bool transaction::is_missing_inputs() const
 {
     const auto missing = [](const input& input)
     {
-        // The cache value is set to not_found if the output doesn't exist.
-        return input.previous_output.cache.value == output::not_found;
+        const auto& prevout = input.previous_output;
+        auto missing = !prevout.validation.cache.is_valid();
+        return missing && !prevout.is_null();
     };
 
     // This is an optimization of !missing_inputs().empty();
@@ -458,22 +444,26 @@ bool transaction::is_missing_inputs() const
 
 point::indexes transaction::missing_inputs() const
 {
-    point::indexes missing;
+    point::indexes indexes;
 
-    // The cache value is set to not_found if the output doesn't exist.
     for (size_t in = 0; in < inputs.size(); ++in)
-        if (inputs[in].previous_output.cache.value == output::not_found)
-            missing.push_back(safe_unsigned<uint32_t>(in));
+    {
+        const auto& prevout = inputs[in].previous_output;
+        auto missing = !prevout.validation.cache.is_valid();
 
-    return missing;
+        if (missing && !prevout.is_null())
+            indexes.push_back(safe_unsigned<uint32_t>(in));
+    }
+
+    return indexes;
 }
 
 bool transaction::is_double_spend(bool include_unconfirmed) const
 {
     const auto spent = [include_unconfirmed](const input& input)
     {
-        return input.previous_output.spent &&
-            (include_unconfirmed || input.previous_output.confirmed);
+        const auto& prevout = input.previous_output.validation;
+        return prevout.spent && (include_unconfirmed || prevout.confirmed);
     };
 
     // This is an optimization of !double_spends().empty();
@@ -485,9 +475,12 @@ point::indexes transaction::double_spends(bool include_unconfirmed) const
     point::indexes spends;
 
     for (size_t in = 0; in < inputs.size(); ++in)
-        if (inputs[in].previous_output.spent && (include_unconfirmed ||
-            inputs[in].previous_output.confirmed))
+    {
+        const auto& prevout = inputs[in].previous_output.validation;
+
+        if (prevout.spent && (include_unconfirmed || prevout.confirmed))
             spends.push_back(safe_unsigned<uint32_t>(in));
+    }
 
     return spends;
 }
@@ -508,8 +501,12 @@ point::indexes transaction::immature_inputs(size_t target_height) const
     point::indexes immatures;
 
     for (size_t in = 0; in < inputs.size(); ++in)
-        if (!inputs[in].previous_output.is_mature(target_height))
+    {
+        const auto& prevout = inputs[in].previous_output;
+
+        if (!prevout.is_mature(target_height))
             immatures.push_back(safe_unsigned<uint32_t>(in));
+    }
 
     return immatures;
 }
@@ -520,13 +517,13 @@ code transaction::check(bool transaction_pool) const
     if (inputs.empty() || outputs.empty())
         return error::empty_transaction;
 
-    else if (is_invalid_non_coinbase())
+    else if (is_null_non_coinbase())
         return error::previous_output_null;
 
     else if (total_output_value() > max_money())
         return error::spend_overflow;
 
-    else if (!transaction_pool && is_invalid_coinbase())
+    else if (!transaction_pool && is_oversized_coinbase())
         return error::invalid_coinbase_script_size;
 
     else if (transaction_pool && is_coinbase())
@@ -554,20 +551,20 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip30 = state.is_enabled(rule_fork::bip30_rule);
 
-    if (bip30 && duplicate())
+    if (bip30 && validation.duplicate)
         return error::unspent_duplicate;
 
-    ////else if (is_missing_inputs())
-    ////    return error::input_not_found;
+    else if (is_missing_inputs())
+        return error::input_not_found;
 
     else if (is_double_spend(transaction_pool))
         return error::double_spend;
 
-    ////else if (is_immature(state.next_height()))
-    ////    return error::coinbase_maturity;
+    else if (is_immature(state.next_height()))
+        return error::coinbase_maturity;
 
-    ////else if (is_overspent())
-    ////    return error::spend_exceeds_value;
+    else if (is_overspent())
+        return error::spend_exceeds_value;
 
     // This recomputes sigops to include p2sh from prevouts.
     else if (transaction_pool && signature_operations(bip16) > max_block_sigops)
@@ -580,29 +577,32 @@ code transaction::connect(const chain_state& state) const
 {
     code ec;
 
-    ////for (size_t in = 0; in < inputs.size(); ++in)
-    ////    if ((ec = connect_input(state, safe_unsigned<uint32_t>(in))))
-    ////        return ec;
+    for (size_t in = 0; in < inputs.size(); ++in)
+        if ((ec = connect_input(state, in)))
+            return ec;
 
     return error::success;
 }
 
 // Coinbase transactions return success, to simplify iteration.
 code transaction::connect_input(const chain_state& state,
-    uint32_t input_index) const
+    size_t input_index) const
 {
     if (is_coinbase())
         return error::success;
 
     if (input_index >= inputs.size())
-        return error::input_not_found;
+        return error::operation_failed;
+
+    const auto index32 = static_cast<uint32_t>(input_index);
+    const auto& prevout = inputs[index32].previous_output.validation;
 
     // Verify that the previous output cache has been populated.
-    if (inputs[input_index].previous_output.cache.value == output::not_found)
+    if (!prevout.cache.is_valid())
         return error::input_not_found;
 
     const auto flags = state.enabled_forks();
-    const auto valid = script::verify(*this, input_index, flags);
+    const auto valid = script::verify(*this, index32, flags);
     return valid ? error::success : error::validate_inputs_failed;
 }
 
