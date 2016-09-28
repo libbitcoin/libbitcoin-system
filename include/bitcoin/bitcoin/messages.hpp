@@ -114,11 +114,8 @@ data_chunk serialize(uint32_t version, const Message& packet,
     const auto payload = packet.to_data(version);
 
     // Construct the payload header.
-    heading head;
-    head.magic = magic;
-    head.command = Message::command;
-    head.payload_size = safe_unsigned<uint32_t>(payload.size());
-    head.checksum = bitcoin_checksum(payload);
+    heading head(magic, Message::command,
+        safe_unsigned<uint32_t>(payload.size()), bitcoin_checksum(payload));
 
     // Serialize header and copy the payload into a single message buffer.
     auto message = head.to_data();
