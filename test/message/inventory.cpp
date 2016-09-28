@@ -288,7 +288,7 @@ BOOST_AUTO_TEST_CASE(inventory__operator_assign_equals__always__matches_equivale
     message::inventory instance;
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
 
-    instance = std::move(message::inventory(value));
+    instance = message::inventory(value);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(elements == instance.inventories());
 }
