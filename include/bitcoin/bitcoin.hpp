@@ -133,7 +133,6 @@
 #include <bitcoin/bitcoin/utility/png.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
-#include <bitcoin/bitcoin/utility/resource_lock.hpp>
 #include <bitcoin/bitcoin/utility/resubscriber.hpp>
 #include <bitcoin/bitcoin/utility/scope_lock.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
