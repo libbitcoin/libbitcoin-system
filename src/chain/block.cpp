@@ -144,10 +144,7 @@ uint32_t block::work_required(uint64_t timespan, uint32_t bits)
     retarget *= static_cast<uint32_t>(constrained_timespan);
     retarget /= static_cast<uint32_t>(target_timespan_seconds);
 
-    if (retarget > maximum)
-        retarget = maximum;
-
-    return retarget.compact();
+    return retarget > maximum ? maximum.compact() : retarget.compact();
 }
 
 hash_number block::difficulty(uint32_t bits)
