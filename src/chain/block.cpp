@@ -245,13 +245,18 @@ bool block::from_data(reader& source, bool with_transaction_count)
         return false;
 
     transactions.resize(safe_unsigned<size_t>(header.transaction_count));
-    auto from = [&source](transaction& tx) { return tx.from_data(source); };
-    auto result = std::all_of(transactions.begin(), transactions.end(), from);
 
-    if (!result)
-        reset();
+    // Order is required.
+    for (auto& tx: transactions)
+    {
+        if (!tx.from_data(source))
+        {
+            reset();
+            return false;
+        }
+    }
 
-    return result;
+    return true;
 }
 
 data_chunk block::to_data(bool with_transaction_count) const

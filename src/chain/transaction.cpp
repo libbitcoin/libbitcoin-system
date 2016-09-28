@@ -56,8 +56,13 @@ bool read(Source& source, std::vector<Put>& puts)
         return false;
 
     puts.resize(safe_unsigned<size_t>(put_count));
-    auto from = [&source](Put& put) { return put.from_data(source); };
-    return std::all_of(puts.begin(), puts.end(), from);
+
+    // Order is required.
+    for (auto& put: puts)
+        if (!put.from_data(source))
+            return false;
+
+    return true;
 }
 
 // Write a length-prefixed collection of inputs or outputs to the sink.
