@@ -69,7 +69,7 @@ public:
     output_point(const hash_digest& hash, uint32_t index);
 
     output_point(output_point&& other);
-    output_point(chain::point&& point);
+    output_point(chain::point&& value);
     output_point(hash_digest&& hash, uint32_t index);
 
     /// This class is move assignable and  copy assignable.

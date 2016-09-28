@@ -58,8 +58,8 @@ output_point::output_point(output_point&& other)
 {
 }
 
-output_point::output_point(point&& point)
-  : point(std::forward<chain::point>(point))
+output_point::output_point(point&& value)
+  : point(std::forward<chain::point>(value))
 {
 }
 
