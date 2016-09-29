@@ -143,8 +143,8 @@ void chain_state::set_context(size_t height, const versions& history)
         enabled_forks_ |= rule_fork::bip34_rule;
 
     // bip30 applies to all but two mainnet blocks that violate the rule.
-    if ((height != bip30_exception_height1_ &&
-        height != bip30_exception_height2_) || testnet_)
+    if (height != bip30_exception_height1_ &&
+        height != bip30_exception_height2_)
         enabled_forks_ |= rule_fork::bip30_rule;
 
     // bip16 was activated with a one-time test on mainnet/testnet (~55% rule).
