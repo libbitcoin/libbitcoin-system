@@ -524,6 +524,17 @@ code block::check() const
         return check_transactions();
 }
 
+code block::accept() const
+{
+    const auto state = validation.chain_state;
+
+    if (!state)
+        return error::operation_failed;
+
+    return accept(*validation.chain_state);
+}
+
+// Deprecated (?)
 // TODO: implement sigops and total input/output value caching.
 // These checks assume that prevout caching is completed on all tx.inputs.
 // Flags should be based on connecting at the specified blockchain height.
@@ -562,6 +573,17 @@ code block::accept(const chain_state& state) const
         return accept_transactions(state);
 }
 
+code block::connect() const
+{
+    const auto state = validation.chain_state;
+
+    if (!state)
+        return error::operation_failed;
+
+    return connect(*validation.chain_state);
+}
+
+// Deprecated (?)
 code block::connect(const chain_state& state) const
 {
     return connect_transactions(state);

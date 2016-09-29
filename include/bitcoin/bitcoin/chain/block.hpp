@@ -53,6 +53,7 @@ public:
 
         size_t height = validation::orphan_height;
         code result = error::not_found;
+        chain_state::ptr chain_state = nullptr;
     };
 
     static block factory_from_data(const data_chunk& data,
@@ -102,8 +103,10 @@ public:
 
     code check() const;
     code check_transactions() const;
+    code accept() const;
     code accept(const chain_state& state) const;
     code accept_transactions(const chain_state& state) const;
+    code connect() const;
     code connect(const chain_state& state) const;
     code connect_transactions(const chain_state& state) const;
 
