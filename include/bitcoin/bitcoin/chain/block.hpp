@@ -114,10 +114,10 @@ public:
     uint64_t claim() const;
     uint64_t reward(size_t height) const;
 
-    size_t total_inputs() const;
     hash_number difficulty() const;
     hash_digest generate_merkle_root() const;
     uint64_t serialized_size(bool with_transaction_count=true) const;
+    size_t total_inputs(bool with_coinbase_transaction=true) const;
     size_t signature_operations(bool bip16_active) const;
 
     chain::header header;

@@ -317,7 +317,7 @@ size_t block::signature_operations(bool bip16_active) const
     return std::accumulate(txs.begin(), txs.end(), size_t(0), value);
 }
 
-size_t block::total_inputs() const
+size_t block::total_inputs(bool with_coinbase_transaction) const
 {
     const auto inputs = [](size_t total, const transaction& tx)
     {
@@ -325,7 +325,8 @@ size_t block::total_inputs() const
     };
 
     const auto& txs = transactions;
-    return std::accumulate(txs.begin(), txs.end(), size_t(0), inputs);
+    const size_t offset = with_coinbase_transaction ? 0 : 1;
+    return std::accumulate(txs.begin() + offset, txs.end(), size_t(0), inputs);
 }
 
 // True if there is another coinbase other than the first tx.
