@@ -49,10 +49,10 @@ public:
     /// Initialize enabled forks and minimum version for the given context.
     void set_context(size_t height, const versions& history);
 
-    /// Determine it the flag is set in the active_forks member.
+    /// Determine if the flag is set in the active_forks member.
     bool is_enabled(rule_fork flag) const;
 
-    /// Determine it the flag is set and enabled for the given block's version.
+    /// Determine if the flag is set and enabled for the given block's version.
     bool is_enabled(const header& header, rule_fork flag) const;
 
     /// Determine if the block fails a checkpoint at next_height.
