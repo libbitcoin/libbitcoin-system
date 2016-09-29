@@ -48,12 +48,24 @@ class BC_API transaction
 public:
     typedef std::vector<transaction> list;
 
-    // TODO: remove with blockchain redesign.
+    // This metadata is not copied on tx copy.
     // These properties facilitate transaction pool processing.
     struct metadata
     {
         typedef std::function<void(const code&)> confirm_handler;
-        mutable confirm_handler confirm = nullptr;
+
+        confirm_handler confirm = nullptr;
+    };
+
+    // This validation data is not copied on tx copy.
+    // These properties facilitate block and transaction validation.
+    struct validation
+    {
+        /// This does not exclude the two excepted transactions (see BIP30).
+        /// The transaction hash duplicates one in the blockchain. For block
+        /// validation this may be populated only from the blockchain and
+        /// otherwise may (or may not) consider the transaction pool.
+        bool duplicate = false;
     };
 
     static transaction factory_from_data(const data_chunk& data,
@@ -86,8 +98,8 @@ public:
 
     bool is_valid() const;
     bool is_coinbase() const;
-    bool is_invalid_coinbase() const;
-    bool is_invalid_non_coinbase() const;
+    bool is_oversized_coinbase() const;
+    bool is_null_non_coinbase() const;
     bool is_overspent() const;
     bool is_final(size_t block_height, uint32_t block_time) const;
     bool is_locktime_conflict() const;
@@ -99,7 +111,7 @@ public:
     code check(bool transaction_pool = true) const;
     code accept(const chain_state& state, bool transaction_pool=true) const;
     code connect(const chain_state& state) const;
-    code connect_input(const chain_state& state, uint32_t input_index) const;
+    code connect_input(const chain_state& state, size_t input_index) const;
 
     uint64_t serialized_size() const;
     uint64_t total_input_value() const;
@@ -112,23 +124,20 @@ public:
     hash_digest hash() const;
     uint64_t fees() const;
 
-    /// The transaction duplicates another in the blockchain.
-    /// This does not exclude the two excepted transactions (see BIP30).
-    bool duplicate() const;
-    void set_duplicate();
-
     uint32_t version;
     uint32_t locktime;
     input::list inputs;
     output::list outputs;
 
-    /// Pool tracking, does not participate in serialization.
-    metadata metadata;
+    // These fields do not participate in serialization or comparison.
+    //-------------------------------------------------------------------------
+
+    mutable metadata metadata;
+    mutable validation validation;
 
 private:
     mutable upgrade_mutex hash_mutex_;
     mutable std::shared_ptr<hash_digest> hash_;
-    bool duplicate_;
 };
 
 } // namespace chain

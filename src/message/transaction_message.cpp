@@ -71,7 +71,7 @@ transaction_message::transaction_message(const transaction& other)
 
 transaction_message::transaction_message(const transaction_message& other)
   : transaction_message(other.version, other.locktime, other.inputs,
-    other.outputs)
+        other.outputs)
 {
 }
 
@@ -83,15 +83,15 @@ transaction_message::transaction_message(uint32_t version, uint32_t locktime,
 
 transaction_message::transaction_message(transaction&& other)
   : transaction_message(other.version, other.locktime,
-        std::forward<chain::input::list>(inputs),
-        std::forward<chain::output::list>(outputs))
+        std::forward<chain::input::list>(other.inputs),
+        std::forward<chain::output::list>(other.outputs))
 {
 }
 
 transaction_message::transaction_message(transaction_message&& other)
   : transaction_message(other.version, other.locktime,
-        std::forward<chain::input::list>(inputs),
-        std::forward<chain::output::list>(outputs))
+        std::forward<chain::input::list>(other.inputs),
+        std::forward<chain::output::list>(other.outputs))
 {
 }
 

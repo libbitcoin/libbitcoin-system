@@ -21,69 +21,81 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <utility>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/chain/point.hpp>
 
 namespace libbitcoin {
 namespace chain {
 
-const size_t output_point::not_coinbase = max_size_t;
+const size_t output_point::validation::not_specified = max_size_t;
 
-// The metadata properties are not configured for initializer syntax.
+// The validation properties are not configured for initializer syntax.
 
 output_point::output_point()
-  : cache({ output::not_found, {} }),
-    spent(false),
-    confirmed(false)
 {
 }
 
 output_point::output_point(const output_point& other)
   : point(other),
-    cache(other.cache),
-    spent(other.spent),
-    confirmed(other.confirmed)
+    validation(other.validation)
 {
 }
 
-output_point::output_point(const chain::point& value)
-  : point(value),
-    cache({ output::not_found, {} }),
-    spent(false),
-    confirmed(false)
+output_point::output_point(const point& value)
+  : point(value)
 {
 }
 
 output_point::output_point(const hash_digest& hash, uint32_t index)
-  : point({ hash, index }),
-    cache({ output::not_found, {} }),
-    spent(false),
-    confirmed(false)
+  : point({ hash, index })
 {
+}
+
+output_point::output_point(output_point&& other)
+  : point(std::forward<point>(other)),
+    validation(other.validation)
+{
+}
+
+output_point::output_point(point&& value)
+  : point(std::forward<chain::point>(value))
+{
+}
+
+output_point::output_point(hash_digest&& hash, uint32_t index)
+  : point({ hash, index })
+{
+}
+
+output_point& output_point::operator=(output_point&& other)
+{
+    static_cast<point>(*this) = std::forward<point>(other);
+    validation = other.validation;
+    return *this;
+}
+
+output_point& output_point::operator=(const output_point& other)
+{
+    static_cast<point>(*this) = static_cast<point>(other);
+    validation = other.validation;
+    return *this;
 }
 
 void output_point::reset()
 {
-    spent = false;
-    confirmed = false;
-    cache.value = output::not_found;
-    cache.script.reset();
     point::reset();
-}
-
-bool output_point::is_cached() const
-{
-    return cache.value != output::not_found;
 }
 
 // For tx pool validation target_height is that of the *next* block.
 // For block validation target_height is that for which block is considered.
-// Returns true if the previous output is mature enough to spend from height.
 bool output_point::is_mature(size_t target_height) const
 {
-    // If the prevout is not null then it is not from a coinbase transaction.
-    // If the prevout is null and its tx is valid then it must be a coinbase.
-    return !is_null() || ((target_height - 1) - height >= coinbase_maturity);
+    if (validation.height == validation::not_specified)
+        return true;
+
+    // The (non-coinbase) outpoint refers to a coinbase output, measure depth.
+    return ((target_height - 1) - validation.height) >= coinbase_maturity;
 }
 
 bool output_point::operator==(const output_point& other) const

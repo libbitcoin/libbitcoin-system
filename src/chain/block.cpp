@@ -49,7 +49,7 @@ namespace chain {
 
 using namespace bc::config;
 
-const size_t block::metadata::orphan_height = 0;
+const size_t block::validation::orphan_height = 0;
 
 block block::factory_from_data(const data_chunk& data,
     bool with_transaction_count)
@@ -144,10 +144,7 @@ uint32_t block::work_required(uint64_t timespan, uint32_t bits)
     retarget *= static_cast<uint32_t>(constrained_timespan);
     retarget /= static_cast<uint32_t>(target_timespan_seconds);
 
-    if (retarget > maximum)
-        retarget = maximum;
-
-    return retarget.compact();
+    return retarget > maximum ? maximum.compact() : retarget.compact();
 }
 
 hash_number block::difficulty(uint32_t bits)
@@ -245,13 +242,18 @@ bool block::from_data(reader& source, bool with_transaction_count)
         return false;
 
     transactions.resize(safe_unsigned<size_t>(header.transaction_count));
-    auto from = [&source](transaction& tx) { return tx.from_data(source); };
-    auto result = std::all_of(transactions.begin(), transactions.end(), from);
 
-    if (!result)
-        reset();
+    // Order is required.
+    for (auto& tx: transactions)
+    {
+        if (!tx.from_data(source))
+        {
+            reset();
+            return false;
+        }
+    }
 
-    return result;
+    return true;
 }
 
 data_chunk block::to_data(bool with_transaction_count) const
@@ -553,8 +555,8 @@ code block::accept(const chain_state& state) const
     else if (signature_operations(bip16) > max_block_sigops)
         return error::too_many_sigs;
 
-    ////else if (!is_valid_coinbase_claim(state.next_height()))
-    ////    return error::coinbase_too_large;
+    else if (!is_valid_coinbase_claim(state.next_height()))
+        return error::coinbase_too_large;
 
     else
         return accept_transactions(state);

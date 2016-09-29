@@ -174,11 +174,9 @@ bool script::is_raw_data() const
     return (operations.size() == 1) && is_raw_;
 }
 
+// BUGBUG: An empty script is valid.
 bool script::is_valid() const
 {
-    // BUGBUG: An empty script is valid.
-    ////BITCOIN_ASSERT_MSG(false, "not implemented");
-
     return !operations.empty();
 }
 
@@ -1983,11 +1981,11 @@ code script::verify(const transaction& tx, uint32_t input_index,
     uint32_t flags)
 {
     if (input_index >= tx.inputs.size())
-        return error::input_not_found;
+        return error::operation_failed;
 
-    // Obtain the previous script from the cached previous output.
-    const auto& script = tx.inputs[input_index].previous_output.cache.script;
-    return verify(tx, input_index, script, flags);
+    // Obtain the previous output script from the cached previous output.
+    const auto& prevout = tx.inputs[input_index].previous_output.validation;
+    return verify(tx, input_index, prevout.cache.script, flags);
 }
 
 inline bool stack_result(const evaluation_context& context)
@@ -2000,7 +1998,7 @@ code script::verify(const transaction& tx, uint32_t input_index,
     const script& prevout_script, uint32_t flags)
 {
     if (input_index >= tx.inputs.size())
-        return error::input_not_found;
+        return error::operation_failed;
 
     const auto& input_script = tx.inputs[input_index].script;
     evaluation_context in_context(flags);

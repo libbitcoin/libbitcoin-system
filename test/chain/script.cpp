@@ -232,8 +232,8 @@ transaction new_tx(const script_test& test)
         return{};
 
     input input;
-    input.script = input_script;
-    input.previous_output.cache.script = output_script;
+    input.script = std::move(input_script);
+    input.previous_output.validation.cache.script = std::move(output_script);
 
     transaction tx;
     tx.inputs.push_back(std::move(input));

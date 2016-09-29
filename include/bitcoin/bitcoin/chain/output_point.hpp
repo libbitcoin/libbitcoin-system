@@ -25,6 +25,7 @@
 #include <vector>
 #include <bitcoin/bitcoin/chain/output.hpp>
 #include <bitcoin/bitcoin/chain/point.hpp>
+#include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
@@ -34,47 +35,60 @@ class BC_API output_point
   : public point
 {
 public:
-    /// This is a sentinel used in .height to indicate not coinbase.
-    static const size_t not_coinbase;
+
+    // This validation data IS copied on output_point copy.
+    // These properties facilitate block and transaction validation.
+    struct validation
+    {
+        /// This is a .height sentinel.
+        static const size_t not_specified;
+
+        /// An output is spent if a valid transaction has a valid claim on it.
+        /// When validating blocks only long chain blocks can have a claim.
+        /// When validating memory pool tx another mempool tx can have a claim.
+        bool spent = false;
+
+        /// A spend is confirmed if spender is in long chain (not memory pool).
+        bool confirmed = false;
+
+        /// Coinbase prevout height is necessary in determining maturity.
+        /// If this is set to not_specified the input is considered mature.
+        /// This must be set to not_specified if the input is coinbase.
+        /// This must be set to not_specified if the output is non-coinbase.
+        /// This may be set to not_specified if the prevout is spent.
+        size_t height = validation::not_specified;
+
+        /// The output cache contains the output referenced by the input point.
+        /// If the cache.value is not_found then the output has not been found.
+        output cache = output{ output::not_found, script{} };
+    };
 
     output_point();
     output_point(const output_point& other);
     output_point(const chain::point& value);
     output_point(const hash_digest& hash, uint32_t index);
 
-    // TODO: implement move argument constructors.
-    ////output_point(output_point&& other);
-    ////output_point(chain::point&& point);
-    ////output_point(hash_digest&& hash, uint32_t index);
+    output_point(output_point&& other);
+    output_point(chain::point&& value);
+    output_point(hash_digest&& hash, uint32_t index);
+
+    /// This class is move assignable and  copy assignable.
+    output_point& operator=(output_point&& other);
+    output_point& operator=(const output_point& other);
 
     bool operator==(const output_point& other) const;
     bool operator!=(const output_point& other) const;
 
     void reset();
 
-    /// Determine if the previous output cache is populated.
-    bool is_cached() const;
-
-    /// Using .height and the given target height, determine spend maturity.
+    /// False if previous output is not cached.
+    /// True if the previous output is mature enough to spend from target.
     bool is_mature(size_t target_height) const;
 
     // These fields do not participate in serialization or comparison.
+    //-------------------------------------------------------------------------
 
-    /// An output is spent if a valid transaction has a valid claim on it.
-    /// When validating blocks only long chain blocks can have a claim.
-    /// When validating a memory pool tx another mempool tx can have a claim.
-    bool spent;
-
-    /// A spend is confirmed if the spender is long chain (not memory pool).
-    bool confirmed;
-
-    /// The height of a coinbase output is necessary in determining maturity.
-    /// This should be set to not_coinbase if the output is not coinbase.
-    size_t height;
-
-    /// The output cache contains the output referenced by the input point.
-    /// If the cache.value is not_found then the output has not been found.
-    chain::output cache;
+    mutable validation validation;
 };
 
 struct BC_API points_info

@@ -45,15 +45,14 @@ class BC_API block
 public:
     typedef std::vector<size_t> indexes;
 
-    // TODO: remove with blockchain redesign.
-    // These properties facilitate block pool processing.
-    struct metadata
+    // These properties facilitate block validation.
+    // This validation data is not copied on block copy.
+    struct validation
     {
-        /// This is a sentinel used in .validation_height to indicate pool.
         static const size_t orphan_height;
 
-        mutable size_t validation_height = orphan_height;
-        mutable code validation_result = error::not_found;
+        size_t height = validation::orphan_height;
+        code result = error::not_found;
     };
 
     static block factory_from_data(const data_chunk& data,
@@ -121,8 +120,10 @@ public:
     chain::header header;
     transaction::list transactions;
 
-    /// Pool tracking, does not participate in serialization.
-    metadata metadata;
+    // These fields do not participate in serialization or comparison.
+    //-------------------------------------------------------------------------
+
+    mutable validation validation;
 };
 
 } // namespace chain
