@@ -527,12 +527,12 @@ code block::check() const
 
 code block::accept() const
 {
-    const auto state = validation.chain_state;
+    const auto state = validation.state;
 
     if (!state)
         return error::operation_failed;
 
-    return accept(*validation.chain_state);
+    return accept(*validation.state);
 }
 
 // Deprecated (?)
@@ -576,12 +576,12 @@ code block::accept(const chain_state& state) const
 
 code block::connect() const
 {
-    const auto state = validation.chain_state;
+    const auto state = validation.state;
 
     if (!state)
         return error::operation_failed;
 
-    return connect(*validation.chain_state);
+    return connect(*validation.state);
 }
 
 // Deprecated (?)
