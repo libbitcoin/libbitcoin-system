@@ -67,7 +67,7 @@ operation::operation(opcode code, const data_chunk& data)
 }
 
 operation::operation(opcode code, data_chunk&& data)
-  : code_(code), data_(std::forward<data_chunk>(data))
+  : code_(code), data_(std::move(data))
 {
 }
 
@@ -77,7 +77,7 @@ operation::operation(const operation& other)
 }
 
 operation::operation(operation&& other)
-  : operation(other.code_, std::forward<data_chunk>(other.data_))
+  : operation(other.code_, std::move(other.data_))
 {
 }
 

@@ -73,8 +73,7 @@ block_message::block_message(const chain::header& header,
 
 block_message::block_message(chain::header&& header,
     chain::transaction::list&& transactions)
-  : block(std::forward<chain::header>(header),
-        std::forward<chain::transaction::list>(transactions)),
+  : block(std::move(header), std::move(transactions)),
     originator_(0)
 {
 }
@@ -85,7 +84,7 @@ block_message::block_message(const block& other)
 }
 
 block_message::block_message(block&& other)
-  : block(std::forward<block>(other)), originator_(0)
+  : block(std::move(other)), originator_(0)
 {
 }
 
@@ -95,7 +94,7 @@ block_message::block_message(const block_message& other)
 }
 
 block_message::block_message(block_message&& other)
-  : block(std::forward<chain::block>(other)),
+  : block(std::move(other)),
     originator_(other.originator_)
 {
 }
@@ -148,14 +147,14 @@ void block_message::set_originator(uint64_t value) const
 block_message& block_message::operator=(chain::block&& other)
 {
     reset();
-    chain::block::operator=(std::forward<chain::block>(other));
+    chain::block::operator=(std::move(other));
     return *this;
 }
 
 block_message& block_message::operator=(block_message&& other)
 {
-    chain::block::operator=(std::forward<chain::block>(other));
     originator_ = other.originator_;
+    chain::block::operator=(std::move(other));
     return *this;
 }
 

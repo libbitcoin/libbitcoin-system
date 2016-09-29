@@ -94,14 +94,12 @@ alert_payload::alert_payload(uint32_t version, uint64_t relay_until,
     uint32_t priority, std::string&& comment, std::string&& status_bar,
     std::string&& reserved)
   : version_(version), relay_until_(relay_until), expiration_(expiration),
-  id_(id), cancel_(cancel),
-  set_cancel_(std::forward<std::vector<uint32_t>>(set_cancel)),
+  id_(id), cancel_(cancel), set_cancel_(std::move(set_cancel)),
   min_version_(min_version), max_version_(max_version),
-  set_sub_version_(std::forward<std::vector<std::string>>(set_sub_version)),
-  priority_(priority),
-  comment_(std::forward<std::string>(comment)),
-  status_bar_(std::forward<std::string>(status_bar)),
-  reserved_(std::forward<std::string>(reserved))
+  set_sub_version_(std::move(set_sub_version)),
+  priority_(priority), comment_(std::move(comment)),
+  status_bar_(std::move(status_bar)),
+  reserved_(std::move(reserved))
 {
 }
 
@@ -116,13 +114,13 @@ alert_payload::alert_payload(const alert_payload& other)
 alert_payload::alert_payload(alert_payload&& other)
 : alert_payload(other.version_, other.relay_until_, other.expiration_,
     other.id_, other.cancel_,
-    std::forward<std::vector<uint32_t>>(other.set_cancel_),
+    std::move(other.set_cancel_),
     other.min_version_, other.max_version_,
-    std::forward<std::vector<std::string>>(other.set_sub_version_),
+    std::move(other.set_sub_version_),
     other.priority_,
-    std::forward<std::string>(other.comment_),
-    std::forward<std::string>(other.status_bar_),
-    std::forward<std::string>(other.reserved_))
+    std::move(other.comment_),
+    std::move(other.status_bar_),
+    std::move(other.reserved_))
 {
 }
 

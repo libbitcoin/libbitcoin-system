@@ -72,9 +72,8 @@ merkle_block::merkle_block(const chain::header& header,
 
 merkle_block::merkle_block(chain::header&& header, hash_list&& hashes,
     data_chunk&& flags)
-  : header_(std::forward<chain::header>(header)),
-    hashes_(std::forward<hash_list>(hashes)),
-    flags_(std::forward<data_chunk>(flags))
+  : header_(std::move(header)), hashes_(std::move(hashes)),
+    flags_(std::move(flags))
 {
 }
 
@@ -84,9 +83,8 @@ merkle_block::merkle_block(const merkle_block& other)
 }
 
 merkle_block::merkle_block(merkle_block&& other)
-  : merkle_block(std::forward<chain::header>(other.header_),
-      std::forward<hash_list>(other.hashes_),
-      std::forward<data_chunk>(other.flags_))
+  : merkle_block(std::move(other.header_), std::move(other.hashes_),
+      std::move(other.flags_))
 {
 }
 

@@ -72,8 +72,7 @@ get_block_transactions::get_block_transactions(const hash_digest& block_hash,
 
 get_block_transactions::get_block_transactions(hash_digest&& block_hash,
     std::vector<uint64_t>&& indexes)
-  : block_hash_(std::forward<hash_digest>(block_hash)),
-    indexes_(std::forward<std::vector<uint64_t>>(indexes))
+  : block_hash_(std::move(block_hash)), indexes_(std::move(indexes))
 {
 }
 
@@ -84,8 +83,8 @@ get_block_transactions::get_block_transactions(
 }
 
 get_block_transactions::get_block_transactions(get_block_transactions&& other)
-  : get_block_transactions(std::forward<hash_digest>(other.block_hash_),
-      std::forward<std::vector<uint64_t>>(other.indexes_))
+  : get_block_transactions(std::move(other.block_hash_),
+      std::move(other.indexes_))
 {
 }
 

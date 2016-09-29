@@ -73,8 +73,8 @@ filter_load::filter_load(const data_chunk& filter, uint32_t hash_functions,
 
 filter_load::filter_load(data_chunk&& filter, uint32_t hash_functions,
     uint32_t tweak, uint8_t flags)
-  : filter_(std::forward<data_chunk>(filter)), hash_functions_(hash_functions),
-    tweak_(tweak), flags_(flags)
+  : filter_(std::move(filter)), hash_functions_(hash_functions), tweak_(tweak),
+    flags_(flags)
 {
 }
 
@@ -85,8 +85,8 @@ filter_load::filter_load(const filter_load& other)
 }
 
 filter_load::filter_load(filter_load&& other)
-  : filter_load(std::forward<data_chunk>(other.filter_), other.hash_functions_,
-      other.tweak_, other.flags_)
+  : filter_load(std::move(other.filter_), other.hash_functions_, other.tweak_,
+      other.flags_)
 {
 }
 

@@ -81,9 +81,9 @@ version::version(uint32_t value, uint64_t services, uint64_t timestamp,
     uint64_t nonce, std::string&& user_agent, uint32_t start_height,
     bool relay)
   : value_(value), services_(services), timestamp_(timestamp),
-    address_receiver_(std::forward<network_address>(address_receiver)),
-    address_sender_(std::forward<network_address>(address_sender)),
-    nonce_(nonce), user_agent_(std::forward<std::string>(user_agent)),
+    address_receiver_(std::move(address_receiver)),
+    address_sender_(std::move(address_sender)),
+    nonce_(nonce), user_agent_(std::move(user_agent)),
     start_height_(start_height), relay_(relay)
 {
 }
@@ -97,9 +97,9 @@ version::version(const version& other)
 
 version::version(version&& other)
   : version(other.value_, other.services_, other.timestamp_,
-      std::forward<network_address>(other.address_receiver_),
-      std::forward<network_address>(other.address_sender_), other.nonce_,
-      std::forward<std::string>(other.user_agent_), other.start_height_,
+      std::move(other.address_receiver_),
+      std::move(other.address_sender_), other.nonce_,
+      std::move(other.user_agent_), other.start_height_,
       other.relay_)
 {
 }

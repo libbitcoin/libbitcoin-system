@@ -80,20 +80,19 @@ transaction_message::transaction_message(uint32_t version, uint32_t locktime,
 }
 
 transaction_message::transaction_message(transaction&& other)
-  : transaction(std::forward<chain::transaction>(other)), originator_(0)
+  : transaction(std::move(other)), originator_(0)
 {
 }
 
 transaction_message::transaction_message(transaction_message&& other)
-  : transaction(std::forward<chain::transaction>(other)),
+  : transaction(std::move(other)),
     originator_(other.originator_)
 {
 }
 
 transaction_message::transaction_message(uint32_t version, uint32_t locktime,
     chain::input::list&& inputs, chain::output::list&& outputs)
-  : transaction(version, locktime, std::forward<chain::input::list>(inputs),
-        std::forward<chain::output::list>(outputs)),
+  : transaction(version, locktime, std::move(inputs), std::move(outputs)),
     originator_(0)
 {
 }
@@ -147,15 +146,15 @@ transaction_message& transaction_message::operator=(
     chain::transaction&& other)
 {
     reset();
-    chain::transaction::operator=(std::forward<chain::transaction>(other));
+    chain::transaction::operator=(std::move(other));
     return *this;
 }
 
 transaction_message& transaction_message::operator=(
     transaction_message&& other)
 {
-    chain::transaction::operator=(std::forward<chain::transaction>(other));
     originator_ = other.originator_;
+    chain::transaction::operator=(std::move(other));
     return *this;
 }
 

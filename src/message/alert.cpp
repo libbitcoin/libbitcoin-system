@@ -67,8 +67,7 @@ alert::alert(const data_chunk& payload, const data_chunk& signature)
 }
 
 alert::alert(data_chunk&& payload, data_chunk&& signature)
-  : payload_(std::forward<data_chunk>(payload)),
-    signature_(std::forward<data_chunk>(signature))
+  : payload_(std::move(payload)), signature_(std::move(signature))
 {
 }
 
@@ -78,8 +77,7 @@ alert::alert(const alert& other)
 }
 
 alert::alert(alert&& other)
-  : alert(std::forward<data_chunk>(other.payload_),
-      std::forward<data_chunk>(other.signature_))
+  : alert(std::move(other.payload_), std::move(other.signature_))
 {
 }
 

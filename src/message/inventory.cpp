@@ -74,7 +74,7 @@ inventory::inventory(const inventory_vector::list& values)
 }
 
 inventory::inventory(inventory_vector::list&& values)
-  : inventories_(std::forward<inventory_vector::list>(values))
+  : inventories_(std::move(values))
 {
 }
 
@@ -100,7 +100,7 @@ inventory::inventory(const inventory& other)
 }
 
 inventory::inventory(inventory&& other)
-  : inventory(std::forward<inventory_vector::list>(other.inventories_))
+  : inventory(std::move(other.inventories_))
 {
 }
 
@@ -237,6 +237,7 @@ void inventory::set_inventories(inventory_vector::list&& value)
 inventory& inventory::operator=(inventory&& other)
 {
     inventories_ = std::move(other.inventories_);
+    return *this;
 }
 
 bool inventory::operator==(const inventory& other) const

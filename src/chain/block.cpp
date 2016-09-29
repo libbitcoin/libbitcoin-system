@@ -149,8 +149,8 @@ block::block(const chain::header& header,
 }
 
 block::block(chain::header&& header, chain::transaction::list&& transactions)
-  : header_(std::forward<chain::header>(header)),
-    transactions_(std::forward<chain::transaction::list>(transactions))
+  : header_(std::move(header)),
+    transactions_(std::move(transactions))
 {
 }
 
@@ -160,8 +160,7 @@ block::block(const block& other)
 }
 
 block::block(block&& other)
-  : block(std::forward<chain::header>(other.header_),
-        std::forward<chain::transaction::list>(other.transactions_))
+  : block(std::move(other.header_), std::move(other.transactions_))
 {
 }
 

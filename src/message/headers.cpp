@@ -77,7 +77,7 @@ headers::headers(const chain::header::list& values)
 }
 
 headers::headers(chain::header::list&& values)
-  : elements_(std::forward<chain::header::list>(values))
+  : elements_(std::move(values))
 {
 }
 
@@ -92,7 +92,7 @@ headers::headers(const headers& other)
 }
 
 headers::headers(headers&& other)
-  : headers(std::forward<chain::header::list>(other.elements_))
+  : headers(std::move(other.elements_))
 {
 }
 

@@ -69,7 +69,7 @@ network_address::network_address(const network_address& other)
 
 network_address::network_address(network_address&& other)
   : network_address(other.timestamp_, other.services_,
-      std::forward<ip_address>(other.ip_), other.port_)
+      std::move(other.ip_), other.port_)
 {
 }
 

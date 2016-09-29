@@ -92,8 +92,8 @@ heading::heading(uint32_t magic, const std::string& command,
 
 heading::heading(uint32_t magic, std::string&& command, uint32_t payload_size,
     uint32_t checksum)
-  : magic_(magic), command_(std::forward<std::string>(command)),
-    payload_size_(payload_size), checksum_(checksum)
+  : magic_(magic), command_(std::move(command)), payload_size_(payload_size),
+    checksum_(checksum)
 {
 }
 
@@ -103,8 +103,8 @@ heading::heading(const heading& other)
 }
 
 heading::heading(heading&& other)
-  : heading(other.magic_, std::forward<std::string>(other.command_),
-      other.payload_size_, other.checksum_)
+  : heading(other.magic_, std::move(other.command_), other.payload_size_,
+      other.checksum_)
 {
 }
 

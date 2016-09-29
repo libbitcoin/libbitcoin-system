@@ -64,8 +64,8 @@ input::input(const output_point& previous_output, const chain::script& script,
 
 input::input(output_point&& previous_output, chain::script&& script,
     uint32_t sequence)
-: previous_output_(std::forward<output_point>(previous_output)),
-  script_(std::forward<chain::script>(script)), sequence_(sequence)
+  : previous_output_(std::move(previous_output)), script_(std::move(script)),
+    sequence_(sequence)
 {
 }
 
@@ -75,8 +75,8 @@ input::input(const input& other)
 }
 
 input::input(input&& other)
-  : input(std::forward<output_point>(other.previous_output_),
-      std::forward<chain::script>(other.script_), other.sequence_)
+  : input(std::move(other.previous_output_), std::move(other.script_),
+      other.sequence_)
 {
 }
 

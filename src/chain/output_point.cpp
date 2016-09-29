@@ -63,7 +63,7 @@ output_point::output_point(const point& value)
 }
 
 output_point::output_point(point&& value)
-  : point(std::forward<point>(value)), validation()
+  : point(std::move(value)), validation()
 {
 }
 
@@ -73,7 +73,7 @@ output_point::output_point(const hash_digest& hash, uint32_t index)
 }
 
 output_point::output_point(hash_digest&& hash, uint32_t index)
-  : point({ std::forward<hash_digest>(hash), index }), validation()
+  : point({ std::move(hash), index }), validation()
 {
 }
 
@@ -83,7 +83,7 @@ output_point::output_point(const output_point& other)
 }
 
 output_point::output_point(output_point&& other)
-  : point(std::forward<point>(other)), validation(other.validation)
+  : point(std::move(other)), validation(other.validation)
 {
 }
 
@@ -102,7 +102,7 @@ bool output_point::is_mature(size_t target_height) const
 output_point& output_point::operator=(point&& other)
 {
     reset();
-    point::operator=(std::forward<point>(other));
+    point::operator=(std::move(other));
     return *this;
 }
 
@@ -116,7 +116,7 @@ output_point& output_point::operator=(const point& other)
 output_point& output_point::operator=(output_point&& other)
 {
     validation = other.validation;
-    point::operator=(std::forward<point>(other));
+    point::operator=(std::move(other));
     return *this;
 }
 

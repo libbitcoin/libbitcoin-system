@@ -66,7 +66,7 @@ prefilled_transaction::prefilled_transaction(uint64_t index,
 
 prefilled_transaction::prefilled_transaction(uint64_t index,
     chain::transaction&& tx)
-  : index_(index), transaction_(std::forward<chain::transaction>(tx))
+  : index_(index), transaction_(std::move(tx))
 {
 }
 
@@ -76,8 +76,7 @@ prefilled_transaction::prefilled_transaction(const prefilled_transaction& other)
 }
 
 prefilled_transaction::prefilled_transaction(prefilled_transaction&& other)
-  : prefilled_transaction(other.index_,
-      std::forward<chain::transaction>(other.transaction_))
+  : prefilled_transaction(other.index_, std::move(other.transaction_))
 {
 }
 

@@ -78,9 +78,8 @@ header_message::header_message(uint32_t version,
     hash_digest&& previous_block_hash, hash_digest&& merkle,
     uint32_t timestamp, uint32_t bits, uint32_t nonce,
     uint64_t transaction_count, uint64_t originator)
-  : header(version, std::forward<hash_digest>(previous_block_hash),
-      std::forward<hash_digest>(merkle), timestamp, bits, nonce,
-      transaction_count), originator_(originator)
+  : header(version, std::move(previous_block_hash), std::move(merkle),
+      timestamp, bits, nonce, transaction_count), originator_(originator)
 {
 }
 
@@ -90,7 +89,7 @@ header_message::header_message(const chain::header& other)
 }
 
 header_message::header_message(chain::header&& other)
-  : header(std::forward<header>(other)), originator_(0u)
+  : header(std::move(other)), originator_(0u)
 {
 }
 
@@ -160,14 +159,14 @@ void header_message::set_originator(uint64_t value) const
 
 header_message& header_message::operator=(chain::header&& other)
 {
-    chain::header::operator=(std::forward<chain::header>(other));
+    chain::header::operator=(std::move(other));
     return *this;
 }
 
 header_message& header_message::operator=(header_message&& other)
 {
-    chain::header::operator=(std::forward<chain::header>(other));
     originator_ = other.originator_;
+    chain::header::operator=(std::move(other));
     return *this;
 }
 

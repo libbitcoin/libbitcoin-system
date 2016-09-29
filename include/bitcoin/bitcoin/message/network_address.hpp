@@ -57,7 +57,7 @@ public:
     BC_CONSTCTOR network_address(uint32_t timestamp, uint64_t services,
         ip_address&& ip, uint16_t port)
       : timestamp_(timestamp), services_(services),
-        ip_(std::forward<ip_address>(ip)), port_(port)
+        ip_(std::move(ip)), port_(port)
     {}
 
     network_address(const network_address& other);

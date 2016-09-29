@@ -80,7 +80,7 @@ point::point(const hash_digest& hash, uint32_t index)
 }
 
 point::point(hash_digest&& hash, uint32_t index)
-  : hash_(std::forward<hash_digest>(hash)), index_(index)
+  : hash_(std::move(hash)), index_(index)
 {
 }
 
@@ -90,7 +90,7 @@ point::point(const point& other)
 }
 
 point::point(point&& other)
-  : point(std::forward<hash_digest>(other.hash_), other.index_)
+  : point(std::move(other.hash_), other.index_)
 {
 }
 

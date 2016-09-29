@@ -70,7 +70,7 @@ filter_add::filter_add(const data_chunk& data)
 }
 
 filter_add::filter_add(data_chunk&& data)
-  : data_(std::forward<data_chunk>(data))
+  : data_(std::move(data))
 {
 }
 
@@ -80,7 +80,7 @@ filter_add::filter_add(const filter_add& other)
 }
 
 filter_add::filter_add(filter_add&& other)
-  : filter_add(std::forward<data_chunk>(other.data_))
+  : filter_add(std::move(other.data_))
 {
 }
 

@@ -113,10 +113,8 @@ transaction::transaction(uint32_t version, uint32_t locktime,
 
 transaction::transaction(uint32_t version, uint32_t locktime,
     input::list&& inputs, output::list&& outputs)
-  : version_(version), locktime_(locktime),
-    inputs_(std::forward<input::list>(inputs)),
-    outputs_(std::forward<output::list>(outputs)),
-    hash_(nullptr), metadata(), validation()
+  : version_(version), locktime_(locktime), inputs_(std::move(inputs)),
+    outputs_(std::move(outputs)), hash_(nullptr), metadata(), validation()
 {
 }
 
@@ -127,9 +125,8 @@ transaction::transaction(const transaction& other)
 }
 
 transaction::transaction(transaction&& other)
-  : transaction(other.version_, other.locktime_,
-        std::forward<input::list>(other.inputs_),
-        std::forward<output::list>(other.outputs_))
+  : transaction(other.version_, other.locktime_, std::move(other.inputs_),
+      std::move(other.outputs_))
 {
     hash_.reset(new hash_digest(other.hash()));
 }

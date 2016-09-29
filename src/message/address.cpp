@@ -66,7 +66,7 @@ address::address(const network_address::list& addresses)
 }
 
 address::address(network_address::list&& addresses)
-  : addresses_(std::forward<network_address::list>(addresses))
+  : addresses_(std::move(addresses))
 {
 }
 
@@ -76,7 +76,7 @@ address::address(const address& other)
 }
 
 address::address(address&& other)
-  : address(std::forward<network_address::list>(other.addresses_))
+  : address(std::move(other.addresses_))
 {
 }
 

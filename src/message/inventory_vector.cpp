@@ -99,7 +99,7 @@ inventory_vector::inventory_vector(type_id type, const hash_digest& hash)
 }
 
 inventory_vector::inventory_vector(type_id type, hash_digest&& hash)
-  : type_(type), hash_(std::forward<hash_digest>(hash))
+  : type_(type), hash_(std::move(hash))
 {
 }
 
@@ -109,7 +109,7 @@ inventory_vector::inventory_vector(const inventory_vector& other)
 }
 
 inventory_vector::inventory_vector(inventory_vector&& other)
-  : inventory_vector(other.type_, std::forward<hash_digest>(other.hash_))
+  : inventory_vector(other.type_, std::move(other.hash_))
 {
 }
 

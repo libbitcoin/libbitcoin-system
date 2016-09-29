@@ -282,13 +282,10 @@ BOOST_AUTO_TEST_CASE(inventory__operator_assign_equals__always__matches_equivale
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     };
 
-    message::inventory value(elements);
-    BOOST_REQUIRE(value.is_valid());
-
     message::inventory instance;
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
 
-    instance = message::inventory(value);
+    instance = message::inventory(elements);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(elements == instance.inventories());
 }

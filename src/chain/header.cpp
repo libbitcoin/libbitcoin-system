@@ -78,11 +78,9 @@ header::header(uint32_t version, const hash_digest& previous_block_hash,
 header::header(uint32_t version, hash_digest&& previous_block_hash,
     hash_digest&& merkle, uint32_t timestamp, uint32_t bits, uint32_t nonce,
     uint64_t transaction_count)
-  : version_(version),
-    previous_block_hash_(std::forward<hash_digest>(previous_block_hash)),
-    merkle_(std::forward<hash_digest>(merkle)),
-    timestamp_(timestamp), bits_(bits), nonce_(nonce),
-    transaction_count_(transaction_count), hash_(nullptr)
+  : version_(version), previous_block_hash_(std::move(previous_block_hash)),
+    merkle_(std::move(merkle)), timestamp_(timestamp), bits_(bits),
+    nonce_(nonce), transaction_count_(transaction_count), hash_(nullptr)
 {
 }
 
@@ -93,9 +91,9 @@ header::header(const header& other)
 }
 
 header::header(header&& other)
-  : header(other.version_, std::forward<hash_digest>(other.previous_block_hash_),
-        std::forward<hash_digest>(other.merkle_), other.timestamp_, other.bits_,
-        other.nonce_, other.transaction_count_)
+  : header(other.version_, std::move(other.previous_block_hash_),
+      std::move(other.merkle_), other.timestamp_, other.bits_, other.nonce_,
+      other.transaction_count_)
 {
 }
 

@@ -69,8 +69,7 @@ get_blocks::get_blocks(const hash_list& start, const hash_digest& stop)
 }
 
 get_blocks::get_blocks(hash_list&& start, hash_digest&& stop)
-  : start_hashes_(std::forward<hash_list>(start)),
-    stop_hash_(std::forward<hash_digest>(stop))
+  : start_hashes_(std::move(start)), stop_hash_(std::move(stop))
 {
 }
 
@@ -80,8 +79,7 @@ get_blocks::get_blocks(const get_blocks& other)
 }
 
 get_blocks::get_blocks(get_blocks&& other)
-  : get_blocks(std::forward<hash_list>(other.start_hashes_),
-      std::forward<hash_digest>(other.stop_hash_))
+  : get_blocks(std::move(other.start_hashes_), std::move(other.stop_hash_))
 {
 }
 

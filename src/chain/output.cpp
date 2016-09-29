@@ -65,7 +65,7 @@ output::output(uint64_t value, const chain::script& script)
 }
 
 output::output(uint64_t value, chain::script&& script)
-  : value_(value), script_(std::forward<chain::script>(script))
+  : value_(value), script_(std::move(script))
 {
 }
 
@@ -75,7 +75,7 @@ output::output(const output& other)
 }
 
 output::output(output&& other)
-  : output(other.value_, std::forward<chain::script>(other.script_))
+  : output(other.value_, std::move(other.script_))
 {
 }
 

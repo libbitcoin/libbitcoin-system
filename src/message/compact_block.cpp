@@ -74,9 +74,8 @@ compact_block::compact_block(const chain::header& header, uint64_t nonce,
 
 compact_block::compact_block(chain::header&& header, uint64_t nonce,
     short_id_list&& short_ids, prefilled_transaction::list&& transactions)
-  : header_(std::forward<chain::header>(header)), nonce_(nonce),
-    short_ids_(std::forward<short_id_list>(short_ids)),
-    transactions_(std::forward<prefilled_transaction::list>(transactions))
+  : header_(std::move(header)), nonce_(nonce), short_ids_(std::move(short_ids)),
+    transactions_(std::move(transactions))
 {
 }
 
@@ -87,9 +86,8 @@ compact_block::compact_block(const compact_block& other)
 }
 
 compact_block::compact_block(compact_block&& other)
-  : compact_block(std::forward<chain::header>(other.header_), other.nonce_,
-      std::forward<short_id_list>(other.short_ids_),
-      std::forward<prefilled_transaction::list>(other.transactions_))
+  : compact_block(std::move(other.header_), other.nonce_,
+      std::move(other.short_ids_), std::move(other.transactions_))
 {
 }
 

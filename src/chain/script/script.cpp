@@ -109,7 +109,7 @@ script::script(const operation::stack& operations)
 }
 
 script::script(operation::stack&& operations)
-  : operations_(std::forward<operation::stack>(operations)), is_raw_(false)
+  : operations_(std::move(operations)), is_raw_(false)
 {
 }
 
@@ -119,7 +119,7 @@ script::script(const script& other)
 }
 
 script::script(script&& other)
-  : operations_(std::forward<operation::stack>(other.operations_)),
+  : operations_(std::move(other.operations_)),
     is_raw_(other.is_raw_)
 {
 }

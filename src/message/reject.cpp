@@ -72,9 +72,8 @@ reject::reject(reason_code code, const std::string& message,
 
 reject::reject(reason_code code, std::string&& message, std::string&& reason,
     hash_digest&& data)
-  : code_(code), message_(std::forward<std::string>(message)),
-    reason_(std::forward<std::string>(reason)),
-    data_(std::forward<hash_digest>(data))
+  : code_(code), message_(std::move(message)), reason_(std::move(reason)),
+    data_(std::move(data))
 {
 }
 
@@ -84,9 +83,8 @@ reject::reject(const reject& other)
 }
 
 reject::reject(reject&& other)
-  : reject(other.code_, std::forward<std::string>(other.message_),
-      std::forward<std::string>(other.reason_),
-      std::forward<hash_digest>(other.data_))
+  : reject(other.code_, std::move(other.message_), std::move(other.reason_),
+      std::move(other.data_))
 {
 }
 

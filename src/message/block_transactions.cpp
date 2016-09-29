@@ -71,8 +71,7 @@ block_transactions::block_transactions(const hash_digest& block_hash,
 
 block_transactions::block_transactions(hash_digest&& block_hash,
     chain::transaction::list&& transactions)
-  : block_hash_(std::forward<hash_digest>(block_hash)),
-    transactions_(std::forward<chain::transaction::list>(transactions))
+  : block_hash_(std::move(block_hash)), transactions_(std::move(transactions))
 {
 }
 
@@ -82,8 +81,8 @@ block_transactions::block_transactions(const block_transactions& other)
 }
 
 block_transactions::block_transactions(block_transactions&& other)
-  : block_transactions(std::forward<hash_digest>(other.block_hash_),
-      std::forward<chain::transaction::list>(other.transactions_))
+  : block_transactions(std::move(other.block_hash_),
+      std::move(other.transactions_))
 {
 }
 
