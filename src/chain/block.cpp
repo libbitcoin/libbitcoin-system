@@ -317,7 +317,7 @@ size_t block::signature_operations(bool bip16_active) const
     return std::accumulate(txs.begin(), txs.end(), size_t(0), value);
 }
 
-size_t block::total_inputs() const
+size_t block::total_inputs(bool with_coinbase_transaction) const
 {
     const auto inputs = [](size_t total, const transaction& tx)
     {
@@ -325,7 +325,8 @@ size_t block::total_inputs() const
     };
 
     const auto& txs = transactions;
-    return std::accumulate(txs.begin(), txs.end(), size_t(0), inputs);
+    const size_t offset = with_coinbase_transaction ? 0 : 1;
+    return std::accumulate(txs.begin() + offset, txs.end(), size_t(0), inputs);
 }
 
 // True if there is another coinbase other than the first tx.
@@ -524,6 +525,17 @@ code block::check() const
         return check_transactions();
 }
 
+code block::accept() const
+{
+    const auto state = validation.state;
+
+    if (!state)
+        return error::operation_failed;
+
+    return accept(*validation.state);
+}
+
+// Deprecated (?)
 // TODO: implement sigops and total input/output value caching.
 // These checks assume that prevout caching is completed on all tx.inputs.
 // Flags should be based on connecting at the specified blockchain height.
@@ -562,6 +574,17 @@ code block::accept(const chain_state& state) const
         return accept_transactions(state);
 }
 
+code block::connect() const
+{
+    const auto state = validation.state;
+
+    if (!state)
+        return error::operation_failed;
+
+    return connect(*validation.state);
+}
+
+// Deprecated (?)
 code block::connect(const chain_state& state) const
 {
     return connect_transactions(state);

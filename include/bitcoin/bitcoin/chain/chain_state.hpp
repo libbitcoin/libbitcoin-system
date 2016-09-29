@@ -22,6 +22,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/config/checkpoint.hpp>
@@ -34,6 +35,7 @@ class BC_API chain_state
 {
 public:
     typedef std::vector<uint8_t> versions;
+    typedef std::shared_ptr<chain_state> ptr;
 
     chain_state(bool testnet, const config::checkpoint::list& checkpoints);
 
