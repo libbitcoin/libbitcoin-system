@@ -54,7 +54,8 @@ public:
       : timestamp_(timestamp), services_(services), ip_(ip), port_(port)
     {}
 
-    BC_CONSTCTOR network_address(uint32_t timestamp, uint64_t services,
+    // Disabled BC_CONSTCTOR due to C++14 dependence on std::move constexpr.
+    /*BC_CONSTCTOR*/ network_address(uint32_t timestamp, uint64_t services,
         ip_address&& ip, uint16_t port)
       : timestamp_(timestamp), services_(services),
         ip_(std::move(ip)), port_(port)
