@@ -58,31 +58,32 @@ BC_CONSTEXPR uint32_t max_input_sequence = max_uint32;
 
 BC_CONSTEXPR size_t min_coinbase_size = 2;
 BC_CONSTEXPR size_t max_coinbase_size = 100;
-BC_CONSTEXPR size_t median_time_past_blocks = 11;
+BC_CONSTEXPR size_t median_time_past_interval = 11;
 BC_CONSTEXPR size_t max_block_size = 1000000;
 BC_CONSTEXPR size_t max_block_sigops = max_block_size / 50;
 BC_CONSTEXPR size_t reward_interval = 210000;
 BC_CONSTEXPR size_t coinbase_maturity = 100;
 BC_CONSTEXPR size_t time_stamp_future_hours = 2;
-BC_CONSTEXPR size_t max_work_bits = 0x1d00ffff;
 BC_CONSTEXPR size_t locktime_threshold = 500000000;
+BC_CONSTEXPR size_t max_work_bits = 0x1d00ffff;
 
 // Timespan constants.
 //-----------------------------------------------------------------------------
 
-BC_CONSTEXPR size_t retargeting_factor = 4;
-BC_CONSTEXPR size_t target_spacing_seconds = 10 * 60;
-BC_CONSTEXPR size_t target_timespan_seconds = 2 * 7 * 24 * 60 * 60;
-
-// The target number of blocks for 2 weeks of work (2016 blocks).
-BC_CONSTEXPR size_t retargeting_interval = 
-    target_timespan_seconds / target_spacing_seconds;
+BC_CONSTEXPR uint32_t retargeting_factor = 4;
+BC_CONSTEXPR uint32_t target_spacing_seconds = 10 * 60;
+BC_CONSTEXPR uint32_t double_spacing_seconds = 2 * target_spacing_seconds;
+BC_CONSTEXPR uint32_t target_timespan_seconds = 2 * 7 * 24 * 60 * 60;
 
 // The upper and lower bounds for the retargeting timespan.
-BC_CONSTEXPR size_t timespan_lower_bound =
+BC_CONSTEXPR uint32_t min_timespan =
     target_timespan_seconds / retargeting_factor;
-BC_CONSTEXPR size_t timespan_upper_bound = 
+BC_CONSTEXPR uint32_t max_timespan =
     target_timespan_seconds * retargeting_factor;
+
+// The target number of blocks for 2 weeks of work (2016 blocks).
+BC_CONSTEXPR uint32_t retargeting_interval =
+    target_timespan_seconds / target_spacing_seconds;
 
 // Fork constants.
 //-----------------------------------------------------------------------------
@@ -113,6 +114,10 @@ BC_CONSTEXPR size_t mainnet_bip30_exception_height1 = 91842;
 BC_CONSTEXPR size_t mainnet_bip30_exception_height2 = 91880;
 BC_CONSTEXPR size_t testnet_bip30_exception_height1 = 0;
 BC_CONSTEXPR size_t testnet_bip30_exception_height2 = 0;
+
+// The larger of mainnet and testnet sameple sizes.
+BC_CONSTEXPR size_t max_version_sample_size = mainnet_sample >
+    testnet_sample ? mainnet_sample : testnet_sample;
 
 // Network protocol constants.
 //-----------------------------------------------------------------------------

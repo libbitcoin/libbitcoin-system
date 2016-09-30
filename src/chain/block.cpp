@@ -119,34 +119,6 @@ block::indexes block::locator_heights(size_t top)
     return heights;
 }
 
-bool block::is_retarget_height(size_t height)
-{
-    return height % retargeting_interval == 0;
-}
-
-uint32_t block::work_required(uint64_t timespan, uint32_t bits)
-{
-    // Limit the actual timespan to the specified 32 bit range.
-    const auto constrained_timespan = bc::range_constrain(timespan,
-        timespan_lower_bound, timespan_upper_bound);
-
-    ///////////////////////////////////////////////////////////////////////////
-    // TODO: set_compact can fail but this was ungaurded in our implementation.
-    // Verify consensus behavior across full domain.
-    hash_number retarget;
-    retarget.set_compact(bits);
-    ///////////////////////////////////////////////////////////////////////////
-
-    hash_number maximum;
-    maximum.set_compact(max_work_bits);
-
-    // Be explicit about targeting uint32_t cast operator here.
-    retarget *= static_cast<uint32_t>(constrained_timespan);
-    retarget /= static_cast<uint32_t>(target_timespan_seconds);
-
-    return retarget > maximum ? maximum.compact() : retarget.compact();
-}
-
 hash_number block::difficulty(uint32_t bits)
 {
     hash_number target;
@@ -550,24 +522,24 @@ code block::accept(const chain_state& state) const
     else if (header.version < state.minimum_version())
         return error::old_version_block;
 
-    ////else if (header.bits != state.work_required())
-    ////    return error::incorrect_proof_of_work;
+    else if (header.bits != state.work_required())
+        return error::incorrect_proof_of_work;
 
-    ////else if (header.timestamp <= state.median_time_past())
-    ////    return error::timestamp_too_early;
+    else if (header.timestamp <= state.median_time_past())
+        return error::timestamp_too_early;
 
     // This recurses txs but is not applied to mempool (timestamp required).
-    else if (!is_final(state.next_height()))
+    else if (!is_final(state.height()))
         return error::non_final_transaction;
 
-    else if (bip34 && !is_valid_coinbase_script(state.next_height()))
+    else if (bip34 && !is_valid_coinbase_script(state.height()))
         return error::coinbase_height_mismatch;
 
     // This recomputes sigops to include p2sh from prevouts.
     else if (signature_operations(bip16) > max_block_sigops)
         return error::too_many_sigs;
 
-    else if (!is_valid_coinbase_claim(state.next_height()))
+    else if (!is_valid_coinbase_claim(state.height()))
         return error::coinbase_too_large;
 
     else
