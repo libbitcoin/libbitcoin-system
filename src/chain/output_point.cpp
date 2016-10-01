@@ -145,7 +145,7 @@ bool output_point::operator==(const output_point& other) const
 
 bool output_point::operator!=(const output_point& other) const
 {
-    // Cash is not considered in comparisons.
+    // Cache is not considered in comparisons.
     return !(*this == other);
 }
 
