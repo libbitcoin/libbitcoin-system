@@ -94,7 +94,7 @@ inline uint32_t retarget_timespan(const chain_state::data& values)
 {
     // Subtract 32 bit numbers in 64 bit space and constrain result to 32 bits.
     const uint64_t high = timestamp_high(values);
-    const uint64_t retarget = values.timestamp_retarget;
+    const uint64_t retarget = values.timestamp.retarget;
 
     //*************************************************************************
     // CONSENSUS: subtraction underflow potential (retarget > high).
@@ -221,7 +221,7 @@ uint32_t chain_state::work_required_testnet(const data& values)
     //*************************************************************************
     const auto max_time_gap = timestamp_high(values) + double_spacing_seconds;
 
-    if (values.timestamp_self > max_time_gap)
+    if (values.timestamp.self > max_time_gap)
         return max_work_bits;
 
     auto height = values.height;
@@ -258,7 +258,8 @@ uint32_t chain_state::work_required(const data& values)
 //-----------------------------------------------------------------------------
 
 // static
-chain_state::map chain_state::get_map(size_t height, bool testnet)
+chain_state::map chain_state::get_map(size_t height, bool activated,
+    bool testnet)
 {
     // Invalid parameter in public interface, defaults indicate failure.
     if (height == 0)
@@ -299,7 +300,8 @@ chain_state::map chain_state::get_map(size_t height, bool testnet)
     // The height range of the version sample.
     // If too small to activate set low to high to avoid unnecessary queries.
     map.version.high = height - max_version_past;
-    map.version.low = floor_subtract(map.version.high, min_version_past);
+    map.version.low = activated ?
+        floor_subtract(map.version.high, min_version_past) : map.version.high;
     map.version.low = is_active(map.version.high - map.version.low, testnet) ?
         map.version.low : map.version.high;
 

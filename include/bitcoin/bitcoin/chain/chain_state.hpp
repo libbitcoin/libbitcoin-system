@@ -73,6 +73,9 @@ public:
         /// Header values are based on a testnet map.
         bool testnet;
 
+        /// All forks are activated at the corresponding height (from cache).
+        bool activated;
+
         /// Header values are based on this height.
         size_t height;
 
@@ -83,14 +86,16 @@ public:
         struct { versions unordered; } version;
 
         /// Values must be ordered by height with high (block - 1) last.
-        struct { timestamps ordered; } timestamp;
-
-        uint32_t timestamp_self;
-        uint32_t timestamp_retarget;
+        struct
+        {
+            uint32_t self;
+            uint32_t retarget;
+            timestamps ordered;
+        } timestamp;
     };
 
     // Compute the height map from any height and testnet flag.
-    static map get_map(size_t height, bool testnet);
+    static map get_map(size_t height, bool activated, bool testnet);
 
     /// Checkpoints must be ordered by height with greatest at back.
     chain_state(data&& values, const checkpoints& checkpoints);
