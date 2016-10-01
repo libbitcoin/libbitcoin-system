@@ -560,7 +560,7 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     else if (is_double_spend(transaction_pool))
         return error::double_spend;
 
-    else if (is_immature(state.next_height()))
+    else if (is_immature(state.height()))
         return error::coinbase_maturity;
 
     else if (is_overspent())
