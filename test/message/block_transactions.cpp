@@ -26,10 +26,10 @@ using namespace bc;
 bool operator==(const message::block_transactions& left,
     const message::block_transactions& right)
 {
-    bool result = (left.block_hash == right.block_hash) &&
+    auto result = (left.block_hash == right.block_hash) &&
         (left.transactions.size() == right.transactions.size());
 
-    for (uint64_t i = 0; (i < left.transactions.size()) && result; ++i)
+    for (size_t i = 0; (i < left.transactions.size()) && result; ++i)
     {
         auto left_raw = left.transactions[i].to_data();
         auto right_raw = right.transactions[i].to_data();

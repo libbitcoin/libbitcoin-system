@@ -89,12 +89,6 @@ inline uint32_t bits_high(const chain_state::data& values)
     return values.bits.ordered.back();
 }
 
-// Get the bits of the low height block.
-inline uint32_t bits_low(const chain_state::data& values)
-{
-    return values.bits.ordered.front();
-}
-
 // Get the bounded total time spanning the highest 2016 blocks.
 inline uint32_t retarget_timespan(const chain_state::data& values)
 {
@@ -106,7 +100,7 @@ inline uint32_t retarget_timespan(const chain_state::data& values)
     // CONSENSUS: subtraction underflow potential (retarget > high).
     //*************************************************************************
     const uint64_t timespan = high - retarget;
-    return range_constrain(timespan, max_timespan, min_timespan);
+    return range_constrain(timespan, min_timespan, max_timespan);
 }
 
 // Determine if height is a multiple of retargeting_interval.
@@ -238,11 +232,10 @@ uint32_t chain_state::work_required_testnet(const data& values)
         if (is_retarget_or_nonmax(--height, *bit))
             return *bit;
 
-    // The loop reached the genesis block, so height should be underflowed.
-    BITCOIN_ASSERT(height == max_size_t);
-
-    // Return genesis bits.
-    return bits_low(values);
+    // Since the set of heights is either a full retarget range or ends at
+    // zero this is not reachable unless the data set is invalid.
+    BITCOIN_ASSERT(false);
+    return max_work_bits;
 }
 
 // protected
@@ -258,7 +251,7 @@ uint32_t chain_state::work_required(const data& values)
     if (values.testnet)
         return work_required_testnet(values);
 
-    return bits_low(values);
+    return bits_high(values);
 }
 
 // Publics.

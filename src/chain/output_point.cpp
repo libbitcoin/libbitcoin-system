@@ -95,7 +95,7 @@ bool output_point::is_mature(size_t target_height) const
         return true;
 
     // The (non-coinbase) outpoint refers to a coinbase output, measure depth.
-    return ((target_height - 1) - validation.height) >= coinbase_maturity;
+    return (target_height - validation.height) >= coinbase_maturity;
 }
 
 bool output_point::operator==(const output_point& other) const

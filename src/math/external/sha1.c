@@ -215,7 +215,7 @@ void SHA1PadMessage(SHA1CTX* context)
     }
 
     lo_length = (uint32_t)(context->length);
-    hi_length = (uint32_t)(context->length >> 32);
+    hi_length = (uint32_t)(((uint64_t)context->length) >> 32);
 
     context->block[56] = hi_length >> 24;
     context->block[57] = hi_length >> 16;
