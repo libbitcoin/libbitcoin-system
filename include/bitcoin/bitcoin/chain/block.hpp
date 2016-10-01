@@ -109,6 +109,7 @@ public:
     hash_digest generate_merkle_root() const;
     size_t total_inputs(bool with_coinbase_transaction=true) const;
     size_t signature_operations(bool bip16_active) const;
+    size_t signature_operations() const;
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);

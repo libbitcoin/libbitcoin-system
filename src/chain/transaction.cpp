@@ -367,6 +367,7 @@ bool transaction::is_locktime_conflict() const
 // Returns max_uint64 in case of overflow.
 uint64_t transaction::total_input_value() const
 {
+    ////static_assert(max_money() < max_uint64, "overflow sentinel invalid");
     const auto value = [](uint64_t total, const input& input)
     {
         const auto& prevout = input.previous_output().validation.cache;
@@ -382,6 +383,7 @@ uint64_t transaction::total_input_value() const
 // Returns max_uint64 in case of overflow.
 uint64_t transaction::total_output_value() const
 {
+    ////static_assert(max_money() < max_uint64, "overflow sentinel invalid");
     const auto value = [](uint64_t total, const output& output)
     {
         return ceiling_add(total, output.value());
@@ -460,18 +462,17 @@ bool transaction::is_overspent() const
     return !is_coinbase() && total_output_value() > total_input_value();
 }
 
-// Returns max_size_t in case of overflow.
 size_t transaction::signature_operations(bool bip16_active) const
 {
     const auto in = [bip16_active](size_t total, const input& input)
     {
         // This includes BIP16 p2sh additional sigops if prevout is cached.
-        return ceiling_add(total, input.signature_operations(bip16_active));
+        return safe_add(total, input.signature_operations(bip16_active));
     };
 
     const auto out = [](size_t total, const output& output)
     {
-        return ceiling_add(total, output.signature_operations());
+        return safe_add(total, output.signature_operations());
     };
 
     size_t sigops = 0;

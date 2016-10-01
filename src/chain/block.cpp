@@ -252,7 +252,7 @@ uint64_t block::serialized_size() const
     const auto value = [](uint64_t total, const transaction& tx)
     {
         const auto size = tx.serialized_size();
-        return total >= max_uint64 - size ? max_uint64 : total + size;
+        return safe_add(total, size);
     };
 
     const auto& txs = transactions_;
@@ -260,12 +260,22 @@ uint64_t block::serialized_size() const
     return block_size;
 }
 
-// overflow returns max_size_t
+// Unpopulated chain state returns max_size_t.
+size_t block::signature_operations() const
+{
+    const auto state = validation.state;
+
+    if (!state)
+        return max_size_t;
+
+    return signature_operations(state->is_enabled(rule_fork::bip16_rule));
+}
+
 size_t block::signature_operations(bool bip16_active) const
 {
     const auto value = [bip16_active](size_t total, const transaction& tx)
     {
-        return ceiling_add(total, tx.signature_operations(bip16_active));
+        return safe_add(total, tx.signature_operations(bip16_active));
     };
 
     const auto& txs = transactions_;
@@ -276,7 +286,7 @@ size_t block::total_inputs(bool with_coinbase_transaction) const
 {
     const auto inputs = [](size_t total, const transaction& tx)
     {
-        return ceiling_add(total, tx.inputs().size());
+        return safe_add(total, tx.inputs.size());
     };
 
     const auto& txs = transactions_;
@@ -362,8 +372,10 @@ bool block::is_valid_merkle_root() const
     return (generate_merkle_root() == header_.merkle());
 }
 
+// Overflow returns max_uint64.
 uint64_t block::fees() const
 {
+    ////static_assert(max_money() < max_uint64, "overflow sentinel invalid");
     const auto value = [](uint64_t total, const transaction& tx)
     {
         return ceiling_add(total, tx.fees());
@@ -379,8 +391,10 @@ uint64_t block::claim() const
         transactions_.front().total_output_value();
 }
 
+// Overflow returns max_uint64.
 uint64_t block::reward(size_t height) const
 {
+    ////static_assert(max_money() < max_uint64, "overflow sentinel invalid");
     return ceiling_add(fees(), subsidy(height));
 }
 
