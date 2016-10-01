@@ -356,7 +356,7 @@ void RMDfinish(RMD160CTX* context, const uint8_t* message, size_t length)
     uint32_t i;
     uint32_t* chunk = context->chunk;
     const uint32_t lo_length = (uint32_t)length;
-    const uint32_t hi_length = (uint32_t)(length >> 32);
+    const uint32_t hi_length = (uint32_t)(((uint64_t)length) >> 32);
 
     zeroize(chunk, RMD160_CHUNK_LENGTH * sizeof(uint32_t));
 
