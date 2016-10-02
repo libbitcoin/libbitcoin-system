@@ -23,6 +23,7 @@
 #include <cstddef>
 #include <limits>
 #include <cmath>
+#include <memory>
 #include <numeric>
 #include <type_traits>
 #include <utility>
@@ -232,6 +233,30 @@ void block::to_data(writer& sink) const
     sink.write_variable_uint_little_endian(transactions_.size());
     const auto to = [&sink](const transaction& tx) { tx.to_data(sink); };
     std::for_each(transactions_.begin(), transactions_.end(), to);
+}
+
+// TODO: provide optimization option to balance total sigops across buckets.
+// Disperse the inputs of the block evenly to the specified number of buckets.
+transaction::sets_const_ptr block::to_input_sets(size_t fanout,
+    bool with_coinbase_transaction) const
+{
+    const auto total = total_inputs(with_coinbase_transaction);
+    const auto buckets = transaction::reserve_buckets(total, fanout);
+
+    // Guard against division by zero.
+    if (!buckets->empty())
+    {
+        size_t count = 0;
+        const auto& txs = transactions;
+        const auto start = with_coinbase_transaction ? 0 : 1;
+
+        // Populate each bucket with either full (or full-1) input references.
+        for (auto& tx = txs.begin() + start; tx != txs.end(); ++tx)
+            for (size_t index = 0; index < tx->inputs.size(); ++index)
+                (*buckets)[count++ % fanout].push_back({ *tx, index });
+    }
+
+    return std::const_pointer_cast<const transaction::sets>(buckets);
 }
 
 // Convenience property.

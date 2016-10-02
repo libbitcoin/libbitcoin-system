@@ -48,14 +48,12 @@ class BC_API transaction
 public:
     typedef std::vector<transaction> list;
 
-    // This metadata is not copied on tx copy.
-    // These properties facilitate transaction pool processing.
-    struct metadata
-    {
-        typedef std::function<void(const code&)> confirm_handler;
-
-        confirm_handler confirm = nullptr;
-    };
+    typedef struct { const transaction& tx; size_t input_index; } element;
+    typedef std::vector<element> set;
+    typedef std::vector<set> sets;
+    typedef std::shared_ptr<sets> sets_ptr;
+    typedef std::shared_ptr<const sets> sets_const_ptr;
+    typedef std::function<void(const code&)> confirm_handler;
 
     // This validation data is not copied on tx copy.
     // These properties facilitate block and transaction validation.
@@ -66,6 +64,8 @@ public:
         /// validation this may be populated only from the blockchain and
         /// otherwise may (or may not) consider the transaction pool.
         bool duplicate = false;
+        sets_const_ptr sets = nullptr;
+        confirm_handler confirm = nullptr;
     };
 
     static transaction factory_from_data(const data_chunk& data,
@@ -73,6 +73,7 @@ public:
     static transaction factory_from_data(std::istream& stream,
         bool satoshi=true);
     static transaction factory_from_data(reader& source, bool satoshi=true);
+    static sets_ptr reserve_buckets(size_t total, size_t fanout);
 
     transaction();
     transaction(uint32_t version, uint32_t locktime, const input::list& inputs,
@@ -145,8 +146,6 @@ public:
     bool operator!=(const transaction& other) const;
 
     // These fields do not participate in serialization or comparison.
-    //-------------------------------------------------------------------------
-    mutable metadata metadata;
     mutable validation validation;
 
 private:

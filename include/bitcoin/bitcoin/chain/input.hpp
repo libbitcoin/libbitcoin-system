@@ -23,6 +23,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <istream>
+#include <vector>
 #include <bitcoin/bitcoin/chain/output_point.hpp>
 #include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/define.hpp>

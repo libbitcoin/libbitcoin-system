@@ -54,6 +54,7 @@ public:
         size_t height = validation::orphan_height;
         code result = error::not_found;
         chain_state::ptr state = nullptr;
+        transaction::sets_const_ptr sets = nullptr;
     };
 
     static block factory_from_data(const data_chunk& data);
@@ -129,7 +130,6 @@ public:
     bool operator!=(const block& other) const;
 
     // These fields do not participate in serialization or comparison.
-    //-------------------------------------------------------------------------
     mutable validation validation;
 
 private:

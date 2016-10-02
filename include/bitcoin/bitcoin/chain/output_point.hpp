@@ -95,7 +95,6 @@ public:
     bool operator!=(const point& other) const;
 
     // These fields do not participate in serialization or comparison.
-    //-------------------------------------------------------------------------
     mutable validation validation;
 };
 

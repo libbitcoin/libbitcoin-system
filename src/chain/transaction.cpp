@@ -240,6 +240,47 @@ void transaction::to_data(writer& sink, bool satoshi) const
     }
 }
 
+// Reserve uniform buckets of minimum size and full distribution.
+transaction::sets_ptr transaction::reserve_buckets(size_t total, size_t fanout)
+{
+    // Guard against division by zero.
+    if (fanout == 0)
+        return std::make_shared<transaction::sets>(0);
+
+    const auto quotient = total / fanout;
+    const auto remainder = total % fanout;
+    const auto capacity = quotient + (remainder == 0 ? 0 : 1);
+    const auto quantity = quotient == 0 ? remainder : fanout;
+    const auto buckets = std::make_shared<transaction::sets>(quantity);
+    const auto reserve = [capacity](transaction::set& set)
+    {
+        set.reserve(capacity);
+    };
+
+    std::for_each(buckets->begin(), buckets->end(), reserve);
+    return buckets;
+}
+
+// TODO: provide optimization option to balance total sigops across buckets.
+// Disperse the inputs of the tx evenly to the specified number of buckets.
+transaction::sets_const_ptr transaction::to_input_sets(size_t fanout) const
+{
+    const auto total = inputs.size();
+    const auto buckets = reserve_buckets(total, fanout);
+
+    // Guard against division by zero.
+    if (!buckets->empty())
+    {
+        size_t count = 0;
+
+        // Populate each bucket with either full (or full-1) input references.
+        for (size_t index = 0; index < inputs.size(); ++index)
+            (*buckets)[count++ % fanout].push_back({ *this, index });
+    }
+
+    return std::const_pointer_cast<const sets>(buckets);
+}
+
 uint64_t transaction::serialized_size() const
 {
     uint64_t tx_size = 8;
