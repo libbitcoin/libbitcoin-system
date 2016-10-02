@@ -120,6 +120,51 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_5__valid_input__returns_input_init
     BOOST_REQUIRE_EQUAL(true, instance.is_valid());
 }
 
+BOOST_AUTO_TEST_CASE(transaction__constructor_6__valid_input__returns_input_initialized)
+{
+    data_chunk raw_tx = to_chunk(base16_literal(
+        "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
+        "4de65310fc010000006a473044022050d8368cacf9bf1b8fb1f7cfd9aff63294"
+        "789eb1760139e7ef41f083726dadc4022067796354aba8f2e02363c5e510aa7e"
+        "2830b115472fb31de67d16972867f13945012103e589480b2f746381fca01a9b"
+        "12c517b7a482a203c8b2742985da0ac72cc078f2ffffffff02f0c9c467000000"
+        "001976a914d9d78e26df4e4601cf9b26d09c7b280ee764469f88ac80c4600f00"
+        "0000001976a9141ee32412020a324b93b1a1acfdfff6ab9ca8fac288ac000000"
+        "00"));
+
+    chain::transaction expected;
+    BOOST_REQUIRE(expected.from_data(raw_tx));
+    const hash_digest expected_hash = hash_literal(
+        "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
+
+    chain::transaction instance(expected, expected_hash);
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(expected == instance);
+    BOOST_REQUIRE(expected_hash == instance.hash());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__constructor_7__valid_input__returns_input_initialized)
+{
+    data_chunk raw_tx = to_chunk(base16_literal(
+        "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
+        "4de65310fc010000006a473044022050d8368cacf9bf1b8fb1f7cfd9aff63294"
+        "789eb1760139e7ef41f083726dadc4022067796354aba8f2e02363c5e510aa7e"
+        "2830b115472fb31de67d16972867f13945012103e589480b2f746381fca01a9b"
+        "12c517b7a482a203c8b2742985da0ac72cc078f2ffffffff02f0c9c467000000"
+        "001976a914d9d78e26df4e4601cf9b26d09c7b280ee764469f88ac80c4600f00"
+        "0000001976a9141ee32412020a324b93b1a1acfdfff6ab9ca8fac288ac000000"
+        "00"));
+
+    chain::transaction expected;
+    BOOST_REQUIRE(expected.from_data(raw_tx));
+    const hash_digest expected_hash = hash_literal(
+        "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
+
+    chain::transaction instance(std::move(expected), expected_hash);
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(expected_hash == instance.hash());
+}
+
 BOOST_AUTO_TEST_CASE(transaction__is_coinbase__empty_inputs__returns_false)
 {
     chain::transaction instance;
