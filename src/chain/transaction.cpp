@@ -121,14 +121,14 @@ transaction::transaction(uint32_t version, uint32_t locktime,
 transaction::transaction(const transaction& other)
   : transaction(other.version_, other.locktime_, other.inputs_, other.outputs_)
 {
-    hash_.reset(new hash_digest(other.hash()));
+    // hash_.reset(new hash_digest(other.hash()));
 }
 
 transaction::transaction(transaction&& other)
   : transaction(other.version_, other.locktime_, std::move(other.inputs_),
       std::move(other.outputs_))
 {
-    hash_.reset(new hash_digest(other.hash()));
+    // hash_.reset(new hash_digest(other.hash()));
 }
 
 bool transaction::is_valid() const
