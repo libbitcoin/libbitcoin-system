@@ -56,8 +56,22 @@ public:
         reader& source);
     static uint64_t satoshi_fixed_size(uint32_t version);
 
-    bool operator==(const inventory_vector& other) const;
-    bool operator!=(const inventory_vector& other) const;
+    inventory_vector();
+    inventory_vector(type_id type, const hash_digest& hash);
+    inventory_vector(type_id type, hash_digest&& hash);
+    inventory_vector(const inventory_vector& other);
+    inventory_vector(inventory_vector&& other);
+
+    type_id type() const;
+    void set_type(type_id value);
+
+    hash_digest& hash();
+    const hash_digest& hash() const;
+    void set_hash(const hash_digest& value);
+    void set_hash(hash_digest&& value);
+
+    bool is_block_type() const;
+    bool is_transaction_type() const;
 
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
@@ -68,11 +82,17 @@ public:
     bool is_valid() const;
     void reset();
     uint64_t serialized_size(uint32_t version) const;
-    bool is_block_type() const;
-    bool is_transaction_type() const;
 
-    type_id type;
-    hash_digest hash;
+    // This class is move assignable but not copy assignable.
+    inventory_vector& operator=(inventory_vector&& other);
+    void operator=(const inventory_vector& other);
+
+    bool operator==(const inventory_vector& other) const;
+    bool operator!=(const inventory_vector& other) const;
+
+private:
+    type_id type_;
+    hash_digest hash_;
 };
 
 } // namespace message

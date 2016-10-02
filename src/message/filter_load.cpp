@@ -59,21 +59,52 @@ filter_load filter_load::factory_from_data(uint32_t version,
     return instance;
 }
 
+filter_load::filter_load()
+  : filter_(), hash_functions_(0), tweak_(0), flags_(0x00)
+{
+}
+
+filter_load::filter_load(const data_chunk& filter, uint32_t hash_functions,
+    uint32_t tweak, uint8_t flags)
+  : filter_(filter), hash_functions_(hash_functions), tweak_(tweak),
+    flags_(flags)
+{
+}
+
+filter_load::filter_load(data_chunk&& filter, uint32_t hash_functions,
+    uint32_t tweak, uint8_t flags)
+  : filter_(std::move(filter)), hash_functions_(hash_functions), tweak_(tweak),
+    flags_(flags)
+{
+}
+
+filter_load::filter_load(const filter_load& other)
+  : filter_load(other.filter_, other.hash_functions_,
+      other.tweak_, other.flags_)
+{
+}
+
+filter_load::filter_load(filter_load&& other)
+  : filter_load(std::move(other.filter_), other.hash_functions_, other.tweak_,
+      other.flags_)
+{
+}
+
 bool filter_load::is_valid() const
 {
-    return !filter.empty()
-        || (hash_functions != 0)
-        || (tweak != 0)
-        || (flags != 0x00);
+    return !filter_.empty()
+        || (hash_functions_ != 0)
+        || (tweak_ != 0)
+        || (flags_ != 0x00);
 }
 
 void filter_load::reset()
 {
-    filter.clear();
-    filter.shrink_to_fit();
-    hash_functions = 0;
-    tweak = 0;
-    flags = 0x00;
+    filter_.clear();
+    filter_.shrink_to_fit();
+    hash_functions_ = 0;
+    tweak_ = 0;
+    flags_ = 0x00;
 }
 
 bool filter_load::from_data(uint32_t version, const data_chunk& data)
@@ -99,11 +130,11 @@ bool filter_load::from_data(uint32_t version, reader& source)
 
     if (result)
     {
-        filter = source.read_data(filter_size);
-        hash_functions = source.read_4_bytes_little_endian();
-        tweak = source.read_4_bytes_little_endian();
-        flags = source.read_byte();
-        result = source && (filter.size() == filter_size);
+        filter_ = source.read_data(filter_size);
+        hash_functions_ = source.read_4_bytes_little_endian();
+        tweak_ = source.read_4_bytes_little_endian();
+        flags_ = source.read_byte();
+        result = source && (filter_.size() == filter_size);
     }
 
     if (!result || insufficent_version)
@@ -130,29 +161,83 @@ void filter_load::to_data(uint32_t version, std::ostream& stream) const
 
 void filter_load::to_data(uint32_t version, writer& sink) const
 {
-    sink.write_variable_uint_little_endian(filter.size());
-    sink.write_data(filter);
-    sink.write_4_bytes_little_endian(hash_functions);
-    sink.write_4_bytes_little_endian(tweak);
-    sink.write_byte(flags);
+    sink.write_variable_uint_little_endian(filter_.size());
+    sink.write_data(filter_);
+    sink.write_4_bytes_little_endian(hash_functions_);
+    sink.write_4_bytes_little_endian(tweak_);
+    sink.write_byte(flags_);
 }
 
 uint64_t filter_load::serialized_size(uint32_t version) const
 {
-    return 1 + 4 + 4 + variable_uint_size(filter.size()) + filter.size();
+    return 1 + 4 + 4 + variable_uint_size(filter_.size()) + filter_.size();
+}
+
+data_chunk& filter_load::filter()
+{
+    return filter_;
+}
+
+const data_chunk& filter_load::filter() const
+{
+    return filter_;
+}
+
+void filter_load::set_filter(const data_chunk& value)
+{
+    filter_ = value;
+}
+
+void filter_load::set_filter(data_chunk&& value)
+{
+    filter_ = std::move(value);
+}
+
+uint32_t filter_load::hash_functions() const
+{
+    return hash_functions_;
+}
+
+void filter_load::set_hash_functions(uint32_t value)
+{
+    hash_functions_ = value;
+}
+
+uint32_t filter_load::tweak() const
+{
+    return tweak_;
+}
+
+void filter_load::set_tweak(uint32_t value)
+{
+    tweak_ = value;
+}
+
+uint8_t filter_load::flags() const
+{
+    return flags_;
+}
+
+void filter_load::set_flags(uint8_t value)
+{
+    flags_ = value;
+}
+
+filter_load& filter_load::operator=(filter_load&& other)
+{
+    filter_ = std::move(other.filter_);
+    hash_functions_ = other.hash_functions_;
+    tweak_ = other.tweak_;
+    flags_ = other.flags_;
+    return *this;
 }
 
 bool filter_load::operator==(const filter_load& other) const
 {
-    auto result = (filter.size() == other.filter.size()) &&
-        (hash_functions == other.hash_functions) &&
-        (tweak == other.tweak) &&
-        (flags == other.flags);
-
-    for (data_chunk::size_type i = 0; i < filter.size() && result; i++)
-        result = (filter[i] == other.filter[i]);
-
-    return result;
+    return (filter_ == other.filter_)
+        && (hash_functions_ == other.hash_functions_)
+        && (tweak_ == other.tweak_)
+        && (flags_ == other.flags_);
 }
 
 bool filter_load::operator!=(const filter_load& other) const

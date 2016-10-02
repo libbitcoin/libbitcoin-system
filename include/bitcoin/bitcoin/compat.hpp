@@ -29,10 +29,12 @@
     #define BC_NOEXCEPT _NOEXCEPT
     #define BC_CONSTEXPR const
     #define BC_CONSTFUNC inline
+    #define BC_CONSTCTOR
 #else
     #define BC_NOEXCEPT noexcept
     #define BC_CONSTEXPR constexpr
     #define BC_CONSTFUNC constexpr
+    #define BC_CONSTCTOR constexpr
 #endif
 
 // TODO: prefix names with BC_

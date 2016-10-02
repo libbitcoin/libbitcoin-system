@@ -68,6 +68,16 @@ get_headers::get_headers(hash_list&& start, hash_digest&& stop)
 {
 }
 
+get_headers::get_headers(const get_headers& other)
+  : get_blocks(other)
+{
+}
+
+get_headers::get_headers(get_headers&& other)
+  : get_blocks(other)
+{
+}
+
 bool get_headers::from_data(uint32_t version, const data_chunk& data)
 {
     return get_blocks::from_data(version, data);
@@ -88,6 +98,23 @@ bool get_headers::from_data(uint32_t version, reader& source)
         reset();
 
     return result;
+}
+
+get_headers& get_headers::operator=(get_headers&& other)
+{
+    set_start_hashes(other.start_hashes());
+    set_stop_hash(other.stop_hash());
+    return *this;
+}
+
+bool get_headers::operator==(const get_headers& other) const
+{
+    return (static_cast<get_blocks>(*this) == static_cast<get_blocks>(other));
+}
+
+bool get_headers::operator!=(const get_headers& other) const
+{
+    return (static_cast<get_blocks>(*this) != static_cast<get_blocks>(other));
 }
 
 } // end message

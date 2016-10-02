@@ -51,19 +51,47 @@ input input::factory_from_data(reader& source)
     return instance;
 }
 
+input::input()
+  : previous_output_(), script_(), sequence_(0)
+{
+}
+
+input::input(const output_point& previous_output, const chain::script& script,
+    uint32_t sequence)
+  : previous_output_(previous_output), script_(script), sequence_(sequence)
+{
+}
+
+input::input(output_point&& previous_output, chain::script&& script,
+    uint32_t sequence)
+  : previous_output_(std::move(previous_output)), script_(std::move(script)),
+    sequence_(sequence)
+{
+}
+
+input::input(const input& other)
+  : input(other.previous_output_, other.script_, other.sequence_)
+{
+}
+
+input::input(input&& other)
+  : input(std::move(other.previous_output_), std::move(other.script_),
+      other.sequence_)
+{
+}
+
 // Since empty script and zero sequence are valid this relies othe prevout.
 bool input::is_valid() const
 {
-    return (sequence != 0) ||
-        previous_output.is_valid() ||
-        script.is_valid();
+    return (sequence_ != 0) || previous_output_.is_valid()
+        || script_.is_valid();
 }
 
 void input::reset()
 {
-    previous_output.reset();
-    script.reset();
-    sequence = 0;
+    previous_output_.reset();
+    script_.reset();
+    sequence_ = 0;
 }
 
 bool input::from_data(const data_chunk& data)
@@ -82,22 +110,22 @@ bool input::from_data(reader& source)
 {
     reset();
 
-    auto result = previous_output.from_data(source);
+    auto result = previous_output_.from_data(source);
 
     if (result)
     {
         // Parse the coinbase tx as raw data.
         // Always parse non-coinbase input/output scripts as fallback.
-        const auto mode = previous_output.is_null() ?
+        const auto mode = previous_output_.is_null() ?
             script::parse_mode::raw_data : 
             script::parse_mode::raw_data_fallback;
 
-        result = script.from_data(source, true, mode);
+        result = script_.from_data(source, true, mode);
     }
 
     if (result)
     {
-        sequence = source.read_4_bytes_little_endian();
+        sequence_ = source.read_4_bytes_little_endian();
         result = source;
     }
 
@@ -125,31 +153,26 @@ void input::to_data(std::ostream& stream) const
 
 void input::to_data(writer& sink) const
 {
-    previous_output.to_data(sink);
-    script.to_data(sink, true);
-    sink.write_4_bytes_little_endian(sequence);
+    previous_output_.to_data(sink);
+    script_.to_data(sink, true);
+    sink.write_4_bytes_little_endian(sequence_);
 }
 
 uint64_t input::serialized_size() const
 {
-    const auto script_size = script.serialized_size(true);
-    return 4 + previous_output.serialized_size() + script_size;
-}
-
-bool input::is_final() const
-{
-    return (sequence == max_input_sequence);
+    const auto script_size = script_.serialized_size(true);
+    return 4 + previous_output_.serialized_size() + script_size;
 }
 
 size_t input::signature_operations(bool bip16_active) const
 {
-    auto sigops = script.sigops(false);
+    auto sigops = script_.sigops(false);
 
     if (bip16_active)
     {
         // This cannot overflow because each total is limited by max ops.
-        const auto& cache = previous_output.validation.cache.script;
-        sigops += script.pay_script_hash_sigops(cache);
+        const auto& cache = previous_output_.validation.cache.script();
+        sigops += script_.pay_script_hash_sigops(cache);
     }
 
     return sigops;
@@ -159,11 +182,94 @@ std::string input::to_string(uint32_t flags) const
 {
     std::ostringstream ss;
 
-    ss << previous_output.to_string() << "\n"
-        << "\t" << script.to_string(flags) << "\n"
-        << "\tsequence = " << sequence << "\n";
+    ss << previous_output_.to_string() << "\n"
+        << "\t" << script_.to_string(flags) << "\n"
+        << "\tsequence = " << sequence_ << "\n";
 
     return ss.str();
+}
+
+bool input::is_final() const
+{
+    return (sequence_ == max_input_sequence);
+}
+
+output_point& input::previous_output()
+{
+    return previous_output_;
+}
+
+const output_point& input::previous_output() const
+{
+    return previous_output_;
+}
+
+void input::set_previous_output(const output_point& value)
+{
+    previous_output_ = value;
+}
+
+void input::set_previous_output(output_point&& value)
+{
+    previous_output_ = std::move(value);
+}
+
+chain::script& input::script()
+{
+    return script_;
+}
+
+const chain::script& input::script() const
+{
+    return script_;
+}
+
+void input::set_script(const chain::script& value)
+{
+    script_ = value;
+}
+
+void input::set_script(chain::script&& value)
+{
+    script_ = std::move(value);
+}
+
+uint32_t input::sequence() const
+{
+    return sequence_;
+}
+
+void input::set_sequence(uint32_t value)
+{
+    sequence_ = value;
+}
+
+input& input::operator=(const input& other)
+{
+    previous_output_ = other.previous_output_;
+    script_ = other.script_;
+    sequence_ = other.sequence_;
+    return *this;
+}
+
+input& input::operator=(input&& other)
+{
+    previous_output_ = std::move(other.previous_output_);
+    script_ = std::move(other.script_);
+    sequence_ = other.sequence_;
+    return *this;
+}
+
+bool input::operator==(const input& other) const
+{
+    return (sequence_ == other.sequence_)
+        && (previous_output_ == other.previous_output_)
+        && (script_ == other.script_);
+}
+
+bool input::operator!=(const input& other) const
+{
+    return !(*this == other);
 }
 
 } // namespace chain

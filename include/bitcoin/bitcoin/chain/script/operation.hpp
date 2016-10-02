@@ -117,25 +117,46 @@ public:
     static stack to_pay_key_hash_pattern(const short_hash& hash);
     static stack to_pay_script_hash_pattern(const short_hash& hash);
 
+    operation();
+    operation(opcode code, const data_chunk& data);
+    operation(opcode code, data_chunk&& data);
+    operation(const operation& other);
+    operation(operation&& other);
+
+    opcode code() const;
+    void set_code(opcode code);
+
+    data_chunk& data();
+    const data_chunk& data() const;
+    void set_data(const data_chunk& data);
+    void set_data(data_chunk&& data);
+
+    std::string to_string(uint32_t flags) const;
+
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
     bool from_data(reader& source);
     data_chunk to_data() const;
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
-    std::string to_string(uint32_t flags) const;
     bool is_valid() const;
     void reset();
     uint64_t serialized_size() const;
 
-    opcode code;
-    data_chunk data;
+    operation& operator=(operation&& other);
+    operation& operator=(const operation& other);
+
+    bool operator==(const operation& other) const;
+    bool operator!=(const operation& other) const;
 
 private:
     static bool is_push(const opcode code);
     static bool must_read_data(opcode code);
-    static bool read_opcode_data_size(uint32_t& count, opcode code,
-        uint8_t byte, reader& source);
+    static uint32_t read_opcode_data_size(opcode code, uint8_t byte,
+        reader& source);
+
+    opcode code_;
+    data_chunk data_;
 };
 
 } // end chain

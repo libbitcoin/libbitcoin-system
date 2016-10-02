@@ -65,6 +65,11 @@ not_found::not_found(const inventory_vector::list& values)
 {
 }
 
+not_found::not_found(inventory_vector::list&& values)
+  : inventory(values)
+{
+}
+
 not_found::not_found(const hash_list& hashes, inventory::type_id type)
   : inventory(hashes, type)
 {
@@ -72,6 +77,16 @@ not_found::not_found(const hash_list& hashes, inventory::type_id type)
 
 not_found::not_found(const std::initializer_list<inventory_vector>& values)
   : inventory(values)
+{
+}
+
+not_found::not_found(const not_found& other)
+  : inventory(other)
+{
+}
+
+not_found::not_found(not_found&& other)
+  : inventory(other)
 {
 }
 
@@ -96,6 +111,22 @@ bool not_found::from_data(uint32_t version, reader& source)
         reset();
 
     return result;
+}
+
+not_found& not_found::operator=(not_found&& other)
+{
+    set_inventories(other.inventories());
+    return *this;
+}
+
+bool not_found::operator==(const not_found& other) const
+{
+    return (static_cast<inventory>(*this) == static_cast<inventory>(other));
+}
+
+bool not_found::operator!=(const not_found& other) const
+{
+    return (static_cast<inventory>(*this) != static_cast<inventory>(other));
 }
 
 } // namespace message

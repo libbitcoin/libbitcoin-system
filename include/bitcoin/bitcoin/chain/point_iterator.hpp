@@ -46,6 +46,7 @@ public:
     point_iterator(const point& value);
     point_iterator(const point& value, bool end);
     point_iterator(const point& value, uint8_t offset);
+    point_iterator(const point_iterator& other);
 
     operator bool() const;
 

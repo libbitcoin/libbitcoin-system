@@ -69,58 +69,40 @@ point point::factory_from_data(reader& source)
     return instance;
 }
 
-// Default construction creates an invalid point, but populating either the
-// index or the hash will make the pont valid.
 point::point()
-  : point(null_hash, invalid_point)
-{
-}
-
-point::point(const point& other)
-  : point(other.hash, other.index)
+  : hash_(null_hash), index_(invalid_point)
 {
 }
 
 point::point(const hash_digest& hash, uint32_t index)
-  : hash(hash),
-    index(index)
-{
-}
-
-point::point(point&& other)
-  : point(std::forward<hash_digest>(other.hash), other.index)
+  : hash_(hash), index_(index)
 {
 }
 
 point::point(hash_digest&& hash, uint32_t index)
-  : hash(std::forward<hash_digest>(hash)),
-    index(index)
+  : hash_(std::move(hash)), index_(index)
 {
 }
 
-point& point::operator=(point&& other)
+point::point(const point& other)
+  : point(other.hash_, other.index_)
 {
-    hash = std::forward<hash_digest>(other.hash);
-    index = other.index;
-    return *this;
 }
 
-point& point::operator=(const point& other)
+point::point(point&& other)
+  : point(std::move(other.hash_), other.index_)
 {
-    hash = other.hash;
-    index = other.index;
-    return *this;
 }
 
 bool point::is_valid() const
 {
-    return index != point::invalid_point || hash != null_hash;
+    return (index_ != point::invalid_point) || (hash_ != null_hash);
 }
 
 void point::reset()
 {
-    hash = null_hash;
-    index = point::invalid_point;
+    hash_ = null_hash;
+    index_ = point::invalid_point;
 }
 
 bool point::from_data(const data_chunk& data)
@@ -139,8 +121,8 @@ bool point::from_data(reader& source)
 {
     reset();
 
-    hash = source.read_hash();
-    index = source.read_4_bytes_little_endian();
+    hash_ = source.read_hash();
+    index_ = source.read_4_bytes_little_endian();
     const auto result = static_cast<bool>(source);
 
     if (!result)
@@ -167,8 +149,8 @@ void point::to_data(std::ostream& stream) const
 
 void point::to_data(writer& sink) const
 {
-    sink.write_hash(hash);
-    sink.write_4_bytes_little_endian(index);
+    sink.write_hash(hash_);
+    sink.write_4_bytes_little_endian(index_);
 }
 
 uint64_t point::serialized_size() const
@@ -194,13 +176,13 @@ point_iterator point::end() const
 std::string point::to_string() const
 {
     std::ostringstream value;
-    value << "\thash = " << encode_hash(hash) << "\n\tindex = " << index;
+    value << "\thash = " << encode_hash(hash_) << "\n\tindex = " << index_;
     return value.str();
 }
 
 bool point::is_null() const
 {
-    return index == null_index && hash == null_hash;
+    return (index_ == null_index) && (hash_ == null_hash);
 }
 
 // This is used with output_point identification within a set of history rows
@@ -212,9 +194,9 @@ uint64_t point::checksum() const
     static_assert(divisor == 9223372036854775808ull, "Wrong divisor value.");
 
     // Write index onto a copy of the outpoint hash.
-    auto copy = hash;
+    auto copy = hash_;
     auto serial = make_serializer(copy.begin());
-    serial.write_4_bytes_little_endian(index);
+    serial.write_4_bytes_little_endian(index_);
     const auto hash_value = from_little_endian_unsafe<uint64_t>(copy.begin());
 
     // x mod 2**n == x & (2**n - 1)
@@ -225,9 +207,53 @@ uint64_t point::checksum() const
     // return std::hash<point>()(*this);
 }
 
+hash_digest& point::hash()
+{
+    return hash_;
+}
+
+const hash_digest& point::hash() const
+{
+    return hash_;
+}
+
+void point::set_hash(const hash_digest& value)
+{
+    hash_ = value;
+}
+
+void point::set_hash(hash_digest&& value)
+{
+    hash_ = std::move(value);
+}
+
+uint32_t point::index() const
+{
+    return index_;
+}
+
+void point::set_index(uint32_t value)
+{
+    index_ = value;
+}
+
+point& point::operator=(point&& other)
+{
+    hash_ = std::move(other.hash_);
+    index_ = other.index_;
+    return *this;
+}
+
+point& point::operator=(const point& other)
+{
+    hash_ = other.hash_;
+    index_ = other.index_;
+    return *this;
+}
+
 bool point::operator==(const point& other) const
 {
-    return hash == other.hash && index == other.index;
+    return (hash_ == other.hash_) && (index_ == other.index_);
 }
 
 bool point::operator!=(const point& other) const

@@ -41,6 +41,17 @@ public:
     static address factory_from_data(uint32_t version, std::istream& stream);
     static address factory_from_data(uint32_t version, reader& source);
 
+    address();
+    address(const network_address::list& addresses);
+    address(network_address::list&& addresses);
+    address(const address& other);
+    address(address&& other);
+
+    network_address::list& addresses();
+    const network_address::list& addresses() const;
+    void set_addresses(const network_address::list& value);
+    void set_addresses(network_address::list&& value);
+
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
     bool from_data(uint32_t version, reader& source);
@@ -51,11 +62,19 @@ public:
     void reset();
     uint64_t serialized_size(uint32_t version) const;
 
+    /// This class is move assignable but not copy assignable.
+    address& operator=(address&& other);
+    void operator=(const address&) = delete;
+
+    bool operator==(const address& other) const;
+    bool operator!=(const address& other) const;
+
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
-    network_address::list addresses;
+private:
+    network_address::list addresses_;
 };
 
 } // namespace message

@@ -47,12 +47,22 @@ public:
 
     get_data();
     get_data(const inventory_vector::list& list);
+    get_data(inventory_vector::list&& list);
     get_data(const hash_list& hashes, type_id type);
     get_data(const std::initializer_list<inventory_vector>& elements);
+    get_data(const get_data& other);
+    get_data(get_data&& other);
 
     bool from_data(uint32_t version, const data_chunk& data) override;
     bool from_data(uint32_t version, std::istream& stream) override;
     bool from_data(uint32_t version, reader& source) override;
+
+    // This class is move assignable but not copy assignable.
+    get_data& operator=(get_data&& other);
+    void operator=(const get_data&) = delete;
+
+    bool operator==(const get_data& other) const;
+    bool operator!=(const get_data& other) const;
 
     static const std::string command;
     static const uint32_t version_minimum;

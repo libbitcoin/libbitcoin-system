@@ -58,8 +58,8 @@ memory_pool memory_pool::factory_from_data(uint32_t version,
 }
 
 memory_pool::memory_pool()
+  : insufficient_version_(false)
 {
-    reset();
 }
 
 bool memory_pool::is_valid() const

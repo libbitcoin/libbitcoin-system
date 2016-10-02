@@ -66,30 +66,45 @@ headers headers::factory_from_data(uint32_t version,
 }
 
 headers::headers()
+  : elements_()
 {
 }
 
 headers::headers(const chain::header::list& values)
 {
     // Uses headers copy assignment.
-    elements.insert(elements.end(), values.begin(), values.end());
+    elements_.insert(elements_.end(), values.begin(), values.end());
+}
+
+headers::headers(chain::header::list&& values)
+  : elements_(std::move(values))
+{
 }
 
 headers::headers(const std::initializer_list<chain::header>& values)
+  : elements_(values)
 {
-    // Uses headers copy assignment.
-    elements.insert(elements.end(), values.begin(), values.end());
+}
+
+headers::headers(const headers& other)
+  : headers(other.elements_)
+{
+}
+
+headers::headers(headers&& other)
+  : headers(std::move(other.elements_))
+{
 }
 
 bool headers::is_valid() const
 {
-    return !elements.empty();
+    return !elements_.empty();
 }
 
 void headers::reset()
 {
-    elements.clear();
-    elements.shrink_to_fit();
+    elements_.clear();
+    elements_.shrink_to_fit();
 }
 
 bool headers::from_data(uint32_t version, const data_chunk& data)
@@ -114,9 +129,9 @@ bool headers::from_data(uint32_t version, reader& source)
 
     if (result)
     {
-        elements.resize(safe_unsigned<size_t>(count));
+        elements_.resize(safe_unsigned<size_t>(count));
 
-        for (auto& element: elements)
+        for (auto& element: elements_)
         {
             result = element.from_data(source, true);
 
@@ -149,9 +164,9 @@ void headers::to_data(uint32_t version, std::ostream& stream) const
 
 void headers::to_data(uint32_t version, writer& sink) const
 {
-    sink.write_variable_uint_little_endian(elements.size());
+    sink.write_variable_uint_little_endian(elements_.size());
 
-    for (const auto& element: elements)
+    for (const auto& element: elements_)
         element.to_data(sink, true);
 }
 
@@ -162,8 +177,8 @@ void headers::to_hashes(hash_list& out) const
         return header.hash();
     };
 
-    out.resize(elements.size());
-    std::transform(elements.begin(), elements.end(), out.begin(), map);
+    out.resize(elements_.size());
+    std::transform(elements_.begin(), elements_.end(), out.begin(), map);
 }
 
 void headers::to_inventory(inventory_vector::list& out,
@@ -174,23 +189,48 @@ void headers::to_inventory(inventory_vector::list& out,
         return inventory_vector{ type, header.hash() };
     };
 
-    out.resize(elements.size());
-    std::transform(elements.begin(), elements.end(), out.begin(), map);
+    std::transform(elements_.begin(), elements_.end(), std::back_inserter(out), map);
 }
 
 uint64_t headers::serialized_size(uint32_t version) const
 {
-    uint64_t size = variable_uint_size(elements.size());
+    uint64_t size = variable_uint_size(elements_.size());
 
-    for (const auto& element: elements)
+    for (const auto& element: elements_)
         size += element.serialized_size(true);
 
     return size;
 }
 
+chain::header::list& headers::elements()
+{
+    return elements_;
+}
+
+const chain::header::list& headers::elements() const
+{
+    return elements_;
+}
+
+void headers::set_elements(const chain::header::list& values)
+{
+    elements_ = values;
+}
+
+void headers::set_elements(chain::header::list&& values)
+{
+    elements_ = std::move(values);
+}
+
+headers& headers::operator=(headers&& other)
+{
+    elements_ = std::move(other.elements_);
+    return *this;
+}
+
 bool headers::operator==(const headers& other) const
 {
-    return elements == other.elements;
+    return (elements_ == other.elements_);
 }
 
 bool headers::operator!=(const headers& other) const

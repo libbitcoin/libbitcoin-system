@@ -41,6 +41,11 @@ point_iterator::point_iterator(const point& value, uint8_t offset)
 {
 }
 
+point_iterator::point_iterator(const point_iterator& other)
+  : point_iterator(other.point_, other.offset_)
+{
+}
+
 point_iterator::operator bool() const
 {
     return (offset_ < max_offset);
@@ -49,11 +54,11 @@ point_iterator::operator bool() const
 point_iterator::reference point_iterator::operator*() const
 {
     if (offset_ < hash_size)
-        return point_.hash[offset_];
+        return point_.hash()[offset_];
 
     // TODO: optimize by indexing directly into point_.index bytes.
     if (offset_ - hash_size < sizeof(uint32_t))
-        return to_little_endian(point_.index)[offset_ - hash_size];
+        return to_little_endian(point_.index())[offset_ - hash_size];
 
     return 0;
 }
@@ -61,11 +66,11 @@ point_iterator::reference point_iterator::operator*() const
 point_iterator::pointer point_iterator::operator->() const
 {
     if (offset_ < hash_size)
-        return point_.hash[offset_];
+        return point_.hash()[offset_];
 
     // TODO: optimize by indexing directly into point_.index bytes.
     if (offset_ - hash_size < sizeof(uint32_t))
-        return to_little_endian(point_.index)[offset_ - hash_size];
+        return to_little_endian(point_.index())[offset_ - hash_size];
 
     return 0;
 }

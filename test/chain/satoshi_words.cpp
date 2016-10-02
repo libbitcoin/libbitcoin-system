@@ -27,19 +27,21 @@ BOOST_AUTO_TEST_CASE(satoshi_words_mainnet)
 {
     // Create mainnet genesis block.
     const auto block = bc::chain::block::genesis_mainnet();
+    const auto transactions = block.transactions();
 
     // Genesis block contains a single coinbase transaction.
-    BOOST_REQUIRE_EQUAL(block.transactions.size(), 1u);
+    BOOST_REQUIRE_EQUAL(transactions.size(), 1u);
 
     // Get first transaction in block (coinbase).
-    const bc::chain::transaction& coinbase_tx = block.transactions[0];
+    const bc::chain::transaction& coinbase_tx = transactions[0];
 
     // Coinbase tx has a single input.
-    BOOST_REQUIRE_EQUAL(coinbase_tx.inputs.size(), 1u);
-    const bc::chain::input& coinbase_input = coinbase_tx.inputs[0];
+    const auto coinbase_inputs = coinbase_tx.inputs();
+    BOOST_REQUIRE_EQUAL(coinbase_inputs.size(), 1u);
+    const bc::chain::input& coinbase_input = coinbase_inputs[0];
 
     // Convert the input script to its raw format.
-    const bc::data_chunk raw_message = coinbase_input.script.to_data(false);
+    const bc::data_chunk raw_message = coinbase_input.script().to_data(false);
 
     // Convert to a string after removing the 8 byte checksum.
     BOOST_REQUIRE_GT(raw_message.size(), 8u);

@@ -44,8 +44,27 @@ public:
     static filter_load factory_from_data(uint32_t version,
         reader& source);
 
-    bool operator==(const filter_load& other) const;
-    bool operator!=(const filter_load& other) const;
+    filter_load();
+    filter_load(const data_chunk& filter, uint32_t hash_functions,
+        uint32_t tweak, uint8_t flags);
+    filter_load(data_chunk&& filter, uint32_t hash_functions,
+        uint32_t tweak, uint8_t flags);
+    filter_load(const filter_load& other);
+    filter_load(filter_load&& other);
+
+    data_chunk& filter();
+    const data_chunk& filter() const;
+    void set_filter(const data_chunk& value);
+    void set_filter(data_chunk&& value);
+
+    uint32_t hash_functions() const;
+    void set_hash_functions(uint32_t value);
+
+    uint32_t tweak() const;
+    void set_tweak(uint32_t value);
+
+    uint8_t flags() const;
+    void set_flags(uint8_t value);
 
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
@@ -57,14 +76,22 @@ public:
     void reset();
     uint64_t serialized_size(uint32_t version) const;
 
+    // This class is move assignable but not copy assignable.
+    filter_load& operator=(filter_load&& other);
+    void operator=(const filter_load&) = delete;
+
+    bool operator==(const filter_load& other) const;
+    bool operator!=(const filter_load& other) const;
+
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
-    data_chunk filter;
-    uint32_t hash_functions;
-    uint32_t tweak;
-    uint8_t flags;
+private:
+    data_chunk filter_;
+    uint32_t hash_functions_;
+    uint32_t tweak_;
+    uint8_t flags_;
 };
 
 } // end message

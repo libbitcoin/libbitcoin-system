@@ -59,31 +59,40 @@ get_blocks get_blocks::factory_from_data(uint32_t version,
 }
 
 get_blocks::get_blocks()
-  : start_hashes(), stop_hash()
+  : start_hashes_(), stop_hash_(null_hash)
 {
 }
 
 get_blocks::get_blocks(const hash_list& start, const hash_digest& stop)
-  : start_hashes(start), stop_hash(stop)
+  : start_hashes_(start), stop_hash_(stop)
 {
 }
 
 get_blocks::get_blocks(hash_list&& start, hash_digest&& stop)
-  : start_hashes(std::forward<hash_list>(start)),
-    stop_hash(std::forward<hash_digest>(stop))
+  : start_hashes_(std::move(start)), stop_hash_(std::move(stop))
+{
+}
+
+get_blocks::get_blocks(const get_blocks& other)
+  : get_blocks(other.start_hashes_, other.stop_hash_)
+{
+}
+
+get_blocks::get_blocks(get_blocks&& other)
+  : get_blocks(std::move(other.start_hashes_), std::move(other.stop_hash_))
 {
 }
 
 bool get_blocks::is_valid() const
 {
-    return !start_hashes.empty() || (stop_hash != null_hash);
+    return !start_hashes_.empty() || (stop_hash_ != null_hash);
 }
 
 void get_blocks::reset()
 {
-    start_hashes.clear();
-    start_hashes.shrink_to_fit();
-    stop_hash.fill(0);
+    start_hashes_.clear();
+    start_hashes_.shrink_to_fit();
+    stop_hash_.fill(0);
 }
 
 bool get_blocks::from_data(uint32_t version, const data_chunk& data)
@@ -106,14 +115,15 @@ bool get_blocks::from_data(uint32_t version, reader& source)
     source.read_4_bytes_little_endian();
 
     const auto count = source.read_variable_uint_little_endian();
-    start_hashes.reserve(safe_unsigned<size_t>(count));
+    start_hashes_.reserve(safe_unsigned<size_t>(count));
 
     for (uint64_t i = 0; i < count && source; ++i)
-        start_hashes.push_back(source.read_hash());
+        start_hashes_.push_back(source.read_hash());
 
     if (source)
-        stop_hash = source.read_hash();
-    else
+        stop_hash_ = source.read_hash();
+
+    if (!source)
         reset();
 
     return source;
@@ -138,27 +148,74 @@ void get_blocks::to_data(uint32_t version, std::ostream& stream) const
 void get_blocks::to_data(uint32_t version, writer& sink) const
 {
     sink.write_4_bytes_little_endian(version);
-    sink.write_variable_uint_little_endian(start_hashes.size());
+    sink.write_variable_uint_little_endian(start_hashes_.size());
 
-    for (const auto& start_hash: start_hashes)
+    for (const auto& start_hash: start_hashes_)
         sink.write_hash(start_hash);
 
-    sink.write_hash(stop_hash);
+    sink.write_hash(stop_hash_);
 }
 
 uint64_t get_blocks::serialized_size(uint32_t version) const
 {
-    return 36 + variable_uint_size(start_hashes.size()) +
-        hash_size * start_hashes.size();
+    return 36 + variable_uint_size(start_hashes_.size()) +
+        hash_size * start_hashes_.size();
+}
+
+hash_list& get_blocks::start_hashes()
+{
+    return start_hashes_;
+}
+
+const hash_list& get_blocks::start_hashes() const
+{
+    return start_hashes_;
+}
+
+void get_blocks::set_start_hashes(const hash_list& value)
+{
+    start_hashes_ = value;
+}
+
+void get_blocks::set_start_hashes(hash_list&& value)
+{
+    start_hashes_ = std::move(value);
+}
+
+hash_digest& get_blocks::stop_hash()
+{
+    return stop_hash_;
+}
+
+const hash_digest& get_blocks::stop_hash() const
+{
+    return stop_hash_;
+}
+
+void get_blocks::set_stop_hash(const hash_digest& value)
+{
+    stop_hash_ = value;
+}
+
+void get_blocks::set_stop_hash(hash_digest&& value)
+{
+    stop_hash_ = std::move(value);
+}
+
+get_blocks& get_blocks::operator=(get_blocks&& other)
+{
+    start_hashes_ = std::move(other.start_hashes_);
+    stop_hash_ = std::move(other.stop_hash_);
+    return *this;
 }
 
 bool get_blocks::operator==(const get_blocks& other) const
 {
-    auto result = (start_hashes.size() == other.start_hashes.size()) &&
-        stop_hash == other.stop_hash;
+    auto result = (start_hashes_.size() == other.start_hashes_.size())
+        && (stop_hash_ == other.stop_hash_);
 
-    for (size_t i = 0; i < start_hashes.size() && result; i++)
-        result = (start_hashes[i] == other.start_hashes[i]);
+    for (size_t i = 0; i < start_hashes_.size() && result; i++)
+        result = (start_hashes_[i] == other.start_hashes_[i]);
 
     return result;
 }

@@ -366,9 +366,9 @@ bool chain_state::is_enabled(rule_fork flag) const
 bool chain_state::is_enabled(const header& header, rule_fork flag) const
 {
     return (is_enabled(flag)) &&
-       ((flag == rule_fork::bip65_rule && header.version >= bip65_version) ||
-        (flag == rule_fork::bip66_rule && header.version >= bip66_version) ||
-        (flag == rule_fork::bip34_rule && header.version >= bip34_version));
+       ((flag == rule_fork::bip65_rule && header.version() >= bip65_version) ||
+        (flag == rule_fork::bip66_rule && header.version() >= bip66_version) ||
+        (flag == rule_fork::bip34_rule && header.version() >= bip34_version));
 }
 
 bool chain_state::is_checkpoint_failure(const header& header) const

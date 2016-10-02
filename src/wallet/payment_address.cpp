@@ -236,7 +236,7 @@ payment_address payment_address::extract(const chain::script& script,
         return payment_address();
 
     short_hash hash;
-    const auto& ops = script.operations;
+    const auto& ops = script.operations();
 
     // Split out the assertions for readability.
     // We know that the script is valid and can therefore rely on these.
@@ -249,16 +249,16 @@ payment_address payment_address::extract(const chain::script& script,
         case chain::script_pattern::pay_public_key:
             BITCOIN_ASSERT(ops.size() == 2);
             BITCOIN_ASSERT(
-                ops[0].data.size() == ec_compressed_size ||
-                ops[0].data.size() == ec_uncompressed_size);
+                ops[0].data().size() == ec_compressed_size ||
+                ops[0].data().size() == ec_uncompressed_size);
             break;
         case chain::script_pattern::pay_key_hash:
             BITCOIN_ASSERT(ops.size() == 5);
-            BITCOIN_ASSERT(ops[2].data.size() == short_hash_size);
+            BITCOIN_ASSERT(ops[2].data().size() == short_hash_size);
             break;
         case chain::script_pattern::pay_script_hash:
             BITCOIN_ASSERT(ops.size() == 3);
-            BITCOIN_ASSERT(ops[1].data.size() == short_hash_size);
+            BITCOIN_ASSERT(ops[1].data().size() == short_hash_size);
             break;
 
         // sign
@@ -270,8 +270,8 @@ payment_address payment_address::extract(const chain::script& script,
         case chain::script_pattern::sign_key_hash:
             BITCOIN_ASSERT(ops.size() == 2);
             BITCOIN_ASSERT(
-                ops[1].data.size() == ec_compressed_size ||
-                ops[1].data.size() == ec_uncompressed_size);
+                ops[1].data().size() == ec_compressed_size ||
+                ops[1].data().size() == ec_uncompressed_size);
             break;
         case chain::script_pattern::sign_script_hash:
             BITCOIN_ASSERT(ops.size() > 1);
@@ -291,7 +291,7 @@ payment_address payment_address::extract(const chain::script& script,
 
         case chain::script_pattern::pay_public_key:
         {
-            const auto& data = ops[0].data;
+            const auto data = ops[0].data();
             if (data.size() == ec_compressed_size)
             {
                 const auto point = to_array<ec_compressed_size>(data);
@@ -303,11 +303,11 @@ payment_address payment_address::extract(const chain::script& script,
         }
 
         case chain::script_pattern::pay_key_hash:
-            hash = to_array<short_hash_size>(ops[2].data);
+            hash = to_array<short_hash_size>(ops[2].data());
             return payment_address(hash, p2kh_version);
 
         case chain::script_pattern::pay_script_hash:
-            hash = to_array<short_hash_size>(ops[1].data);
+            hash = to_array<short_hash_size>(ops[1].data());
             return payment_address(hash, p2sh_version);
             
         // sign
@@ -321,7 +321,7 @@ payment_address payment_address::extract(const chain::script& script,
 
         case chain::script_pattern::sign_key_hash:
         {
-            const auto& data = ops[1].data;
+            const auto data = ops[1].data();
             if (data.size() == ec_compressed_size)
             {
                 const auto point = to_array<ec_compressed_size>(data);
@@ -333,7 +333,7 @@ payment_address payment_address::extract(const chain::script& script,
         }
 
         case chain::script_pattern::sign_script_hash:
-            hash = bitcoin_short_hash(ops.back().data);
+            hash = bitcoin_short_hash(ops.back().data());
             return payment_address(hash, p2sh_version);
 
         case chain::script_pattern::non_standard:

@@ -43,6 +43,24 @@ public:
     static block_transactions factory_from_data(uint32_t version,
         reader& source);
 
+    block_transactions();
+    block_transactions(const hash_digest& block_hash,
+        const chain::transaction::list& transactions);
+    block_transactions(hash_digest&& block_hash,
+        chain::transaction::list&& transactions);
+    block_transactions(const block_transactions& other);
+    block_transactions(block_transactions&& other);
+
+    hash_digest& block_hash();
+    const hash_digest& block_hash() const;
+    void set_block_hash(const hash_digest& value);
+    void set_block_hash(hash_digest&& value);
+
+    chain::transaction::list& transactions();
+    const chain::transaction::list& transactions() const;
+    void set_transactions(const chain::transaction::list& other);
+    void set_transactions(chain::transaction::list&& other);
+
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
     bool from_data(uint32_t version, reader& source);
@@ -53,12 +71,20 @@ public:
     void reset();
     uint64_t serialized_size(uint32_t version) const;
 
+    // This class is move assignable but not copy assignable.
+    block_transactions& operator=(block_transactions&& other);
+    void operator=(const block_transactions&) = delete;
+
+    bool operator==(const block_transactions& other) const;
+    bool operator!=(const block_transactions& other) const;
+
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
-    hash_digest block_hash;
-    chain::transaction::list transactions;
+private:
+    hash_digest block_hash_;
+    chain::transaction::list transactions_;
 };
 
 } // namespace message

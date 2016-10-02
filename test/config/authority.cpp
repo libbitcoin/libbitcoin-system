@@ -73,7 +73,7 @@ static bool ip_equal(const message::ip_address& left,
 static bool net_equal(const message::network_address& left,
     const message::network_address& right)
 {
-    return ip_equal(left.ip, right.ip) && (left.port == right.port);
+    return ip_equal(left.ip(), right.ip()) && (left.port() == right.port());
 }
 
 // ------------------------------------------------------------------------- //
@@ -310,7 +310,7 @@ BOOST_AUTO_TEST_CASE(authority__to_network_address__ipv4_mapped_ip_address__ipv4
         0, 0, test_mapped_ip_address, 42,
     };
 
-    const authority host(expected_address.ip, expected_address.port);
+    const authority host(expected_address.ip(), expected_address.port());
     BOOST_REQUIRE(net_equal(host.to_network_address(), expected_address));
 }
 
@@ -321,7 +321,7 @@ BOOST_AUTO_TEST_CASE(authority__to_network_address__ipv4_compatible_ip_address__
         0, 0, test_compatible_ip_address, 42,
     };
 
-    const authority host(expected_address.ip, expected_address.port);
+    const authority host(expected_address.ip(), expected_address.port());
     BOOST_REQUIRE(net_equal(host.to_network_address(), expected_address));
 }
 
@@ -332,7 +332,7 @@ BOOST_AUTO_TEST_CASE(authority__to_network_address__ipv6_address__ipv6_compresse
         0, 0, test_ipv6_address, 42,
     };
 
-    const authority host(expected_address.ip, expected_address.port);
+    const authority host(expected_address.ip(), expected_address.port());
     BOOST_REQUIRE(net_equal(host.to_network_address(), expected_address));
 }
 

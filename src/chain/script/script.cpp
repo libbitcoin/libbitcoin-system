@@ -99,71 +99,58 @@ script script::factory_from_data(reader& source, bool prefix, parse_mode mode)
 }
 
 script::script()
-  : operations(), is_raw_(false)
+  : operations_(), is_raw_(false)
 {
 }
 
 script::script(const operation::stack& operations)
-  : operations(operations), is_raw_(false)
+  : operations_(operations), is_raw_(false)
 {
 }
 
 script::script(operation::stack&& operations)
-  : operations(std::forward<operation::stack>(operations)), is_raw_(false)
+  : operations_(std::move(operations)), is_raw_(false)
 {
 }
 
 script::script(const script& other)
-  : operations(other.operations), is_raw_(other.is_raw_)
+  : operations_(other.operations_), is_raw_(other.is_raw_)
 {
 }
 
 script::script(script&& other)
-  : operations(std::forward<operation::stack>(other.operations)), is_raw_(other.is_raw_)
+  : operations_(std::move(other.operations_)),
+    is_raw_(other.is_raw_)
 {
-}
-
-script& script::operator=(script&& other)
-{
-    operations = std::move(other.operations);
-    is_raw_ = other.is_raw_;
-    return *this;
-}
-
-script& script::operator=(const script& other)
-{
-    operations = other.operations;
-    is_raw_ = other.is_raw_;
-    return *this;
 }
 
 script_pattern script::pattern() const
 {
-    if (operation::is_null_data_pattern(operations))
+    if (operation::is_null_data_pattern(operations_))
         return script_pattern::null_data;
 
-    if (operation::is_pay_multisig_pattern(operations))
+    if (operation::is_pay_multisig_pattern(operations_))
         return script_pattern::pay_multisig;
 
-    if (operation::is_pay_public_key_pattern(operations))
+    if (operation::is_pay_public_key_pattern(operations_))
         return script_pattern::pay_public_key;
 
-    if (operation::is_pay_key_hash_pattern(operations))
+    if (operation::is_pay_key_hash_pattern(operations_))
         return script_pattern::pay_key_hash;
 
-    if (operation::is_pay_script_hash_pattern(operations))
+    if (operation::is_pay_script_hash_pattern(operations_))
         return script_pattern::pay_script_hash;
 
-    if (operation::is_sign_multisig_pattern(operations))
+    if (operation::is_sign_multisig_pattern(operations_))
         return script_pattern::sign_multisig;
 
-    if (operation::is_sign_public_key_pattern(operations))
+    if (operation::is_sign_public_key_pattern(operations_))
         return script_pattern::sign_public_key;
 
-    if (operation::is_sign_key_hash_pattern(operations))
+    if (operation::is_sign_key_hash_pattern(operations_))
         return script_pattern::sign_key_hash;
 
-    if (operation::is_sign_script_hash_pattern(operations))
+    if (operation::is_sign_script_hash_pattern(operations_))
         return script_pattern::sign_script_hash;
 
     return script_pattern::non_standard;
@@ -171,18 +158,19 @@ script_pattern script::pattern() const
 
 bool script::is_raw_data() const
 {
-    return (operations.size() == 1) && is_raw_;
+    return (operations_.size() == 1) && is_raw_;
 }
 
 // BUGBUG: An empty script is valid.
 bool script::is_valid() const
 {
-    return !operations.empty();
+    return !operations_.empty();
 }
 
 void script::reset()
 {
-    operations.clear();
+    operations_.clear();
+    operations_.shrink_to_fit();
     is_raw_ = false;
 }
 
@@ -269,23 +257,23 @@ void script::to_data(writer& sink, bool prefix) const
         sink.write_variable_uint_little_endian(satoshi_content_size());
 
     if (is_raw_data())
-        sink.write_data(operations[0].data);
+        sink.write_data(operations_[0].data());
     else
-        for (const auto& op: operations)
+        for (const auto& op: operations_)
             op.to_data(sink);
 }
 
 uint64_t script::satoshi_content_size() const
 {
     if (is_raw_data())
-        return (operations[0].serialized_size() - 1);
+        return operations_[0].data().size();
 
     const auto value = [](uint64_t total, const operation& op)
     {
         return safe_add(total, op.serialized_size());
     };
 
-    return std::accumulate(operations.begin(), operations.end(), uint64_t(0),
+    return std::accumulate(operations_.begin(), operations_.end(), uint64_t(0),
         value);
 }
 
@@ -302,7 +290,7 @@ uint64_t script::serialized_size(bool prefix) const
 bool script::from_string(const std::string& human_readable)
 {
     // clear current contents
-    operations.clear();
+    operations_.clear();
     const auto tokens = split(human_readable);
     auto clear = false;
 
@@ -340,12 +328,12 @@ bool script::from_string(const std::string& human_readable)
             break;
         }
 
-        operations.push_back({ code, data });
+        operations_.push_back({ code, data });
     }
 
     // empty invalid/failed parse content
     if (clear)
-        operations.clear();
+        operations_.clear();
 
     return !clear;
 }
@@ -354,9 +342,9 @@ std::string script::to_string(uint32_t flags) const
 {
     std::ostringstream value;
 
-    for (auto it = operations.begin(); it != operations.end(); ++it)
+    for (auto it = operations_.begin(); it != operations_.end(); ++it)
     {
-        if (it != operations.begin())
+        if (it != operations_.begin())
             value << " ";
 
         value << it->to_string(flags);
@@ -371,22 +359,22 @@ size_t script::sigops(bool serialized_script) const
     size_t total = 0;
     opcode last_opcode = opcode::bad_operation;
 
-    for (const auto& op: operations)
+    for (const auto& op: operations_)
     {
-        if (op.code == opcode::checksig ||
-            op.code == opcode::checksigverify)
+        if (op.code() == opcode::checksig ||
+            op.code() == opcode::checksigverify)
         {
             total++;
         }
         else if (
-            op.code == opcode::checkmultisig ||
-            op.code == opcode::checkmultisigverify)
+            op.code() == opcode::checkmultisig ||
+            op.code() == opcode::checkmultisigverify)
         {
             total += serialized_script && within_op_n(last_opcode) ?
                 decode_op_n(last_opcode) : multisig_default_signature_ops;
         }
 
-        last_opcode = op.code;
+        last_opcode = op.code();
     }
 
     return total;
@@ -401,13 +389,13 @@ size_t script::pay_script_hash_sigops(const script& prevout) const
 
     // Conditions added by EKV on 2016.09.15 for safety and BIP16 consistency.
     // Only push data operations allowed in script, so no signature increment.
-    if (operations.empty() || !operation::is_push_only(operations))
+    if (operations_.empty() || !operation::is_push_only(operations_))
         return 0;
 
     script eval;
 
     // We can be strict here and treat failure as zero signatures (data).
-    if (!eval.from_data(operations.back().data, false, parse_mode::strict))
+    if (!eval.from_data(operations_.back().data(), false, parse_mode::strict))
         return 0;
 
     // Count the sigops in the serialized script using BIP16 rules.
@@ -425,15 +413,15 @@ bool script::deserialize(const data_chunk& raw_script, parse_mode mode)
     {
         result = true;
 
-        // recognize as raw data
+        // opcode ignored thanks to is_raw_ in this script
         const auto op = operation
         {
             opcode::raw_data,
             to_chunk(raw_script)
         };
 
-        operations.clear();
-        operations.push_back(std::move(op));
+        operations_.clear();
+        operations_.push_back(std::move(op));
         is_raw_ = true;
     }
 
@@ -451,8 +439,8 @@ bool script::parse(const data_chunk& raw_script)
         while (result && istream &&
             (istream.peek() != std::istream::traits_type::eof()))
         {
-            operations.emplace_back();
-            result = operations.back().from_data(istream);
+            operations_.emplace_back();
+            result = operations_.back().from_data(istream);
         }
     }
 
@@ -464,7 +452,7 @@ inline void zeroize_input_sequences(input::list& inputs,
 {
     for (size_t in = 0; in < inputs.size(); ++in)
         if (in != except_input)
-            inputs[in].sequence = 0;
+            inputs[in].set_sequence(0);
 }
 
 inline uint8_t is_sighash_enum(uint8_t sighash_type,
@@ -494,16 +482,16 @@ hash_digest script::generate_signature_hash(const transaction& tx,
 
     // This is NOT considered an error result and callers should not test
     // for one_hash. This is a bitcoind behavior we necessarily perpetuate.
-    if (input_index >= tx.inputs.size())
+    if (input_index >= tx.inputs().size())
         return one_hash;
 
     // FindAndDelete(OP_CODESEPARATOR) done in op_checksigverify(...)
 
     // Blank all other inputs' signatures
-    for (auto& input: parent.inputs)
-        input.script.reset();
+    for (auto& input: parent.inputs())
+        input.script().reset();
 
-    parent.inputs[input_index].script = script_code;
+    parent.inputs()[input_index].set_script(script_code);
 
     // The default sighash::all signs all outputs, and the current input.
     // Transaction cannot be updated without resigning the input.
@@ -512,15 +500,15 @@ hash_digest script::generate_signature_hash(const transaction& tx,
     if (is_sighash_enum(sighash_type, signature_hash_algorithm::none))
     {
         // Sign no outputs, so they can be changed.
-        parent.outputs.clear();
-        zeroize_input_sequences(parent.inputs, input_index);
+        parent.outputs().clear();
+        zeroize_input_sequences(parent.inputs(), input_index);
     }
     else if (is_sighash_enum(sighash_type, signature_hash_algorithm::single))
     {
 
         // Sign the single output corresponding to our index.
         // We don't care about additional inputs or outputs to the tx.
-        auto& outputs = parent.outputs;
+        auto& outputs = parent.outputs();
         uint32_t output_index = input_index;
 
         // This is NOT considered an error result and callers should not test
@@ -533,19 +521,19 @@ hash_digest script::generate_signature_hash(const transaction& tx,
         // Loop through outputs except the last one.
         for (auto it = outputs.begin(); it != outputs.end() - 1; ++it)
         {
-            it->value = std::numeric_limits<uint64_t>::max();
-            it->script.reset();
+            it->set_value(std::numeric_limits<uint64_t>::max());
+            it->script().reset();
         }
 
-        zeroize_input_sequences(parent.inputs, input_index);
+        zeroize_input_sequences(parent.inputs(), input_index);
     }
 
     // Flag to ignore the other inputs except our own.
     if (is_sighash_flag(sighash_type,
         signature_hash_algorithm::anyone_can_pay))
     {
-        parent.inputs[0] = parent.inputs[input_index];
-        parent.inputs.resize(1);
+        parent.inputs()[0] = parent.inputs()[input_index];
+        parent.inputs().resize(1);
     }
 
     return parent.hash(sighash_type);
@@ -1348,9 +1336,9 @@ static signature_parse_result op_checksigverify(evaluation_context& context,
 
     chain::script script_code;
 
-    for (auto it = context.code_begin; it != script.operations.end(); ++it)
-        if (it->data != endorsement && it->code != opcode::codeseparator)
-            script_code.operations.push_back(*it);
+    for (auto it = context.code_begin; it != script.operations().end(); ++it)
+        if (it->data() != endorsement && it->code() != opcode::codeseparator)
+            script_code.operations().push_back(*it);
 
     if (!strict && !parse_signature(signature, distinguished, false))
         return signature_parse_result::invalid;
@@ -1440,9 +1428,9 @@ static signature_parse_result op_checkmultisigverify(
 
     chain::script script_code;
 
-    for (auto it = context.code_begin; it != script.operations.end(); ++it)
-        if (it->code != opcode::codeseparator && !is_endorsement(it->data))
-            script_code.operations.push_back(*it);
+    for (auto it = context.code_begin; it != script.operations().end(); ++it)
+        if (it->code() != opcode::codeseparator && !is_endorsement(it->data()))
+            script_code.operations().push_back(*it);
 
     // The exact number of signatures are required and must be in order.
     // One key can validate more than one script. So we always advance 
@@ -1507,11 +1495,11 @@ static bool is_locktime_type_match(int64_t left, int64_t right)
 static bool op_checklocktimeverify(evaluation_context& context,
     const script& script, const transaction& tx, uint32_t input_index)
 {
-    if (input_index >= tx.inputs.size())
+    if (input_index >= tx.inputs().size())
         return false;
 
     // BIP65: the nSequence field of the txin is 0xffffffff.
-    if (tx.inputs[input_index].is_final())
+    if (tx.inputs()[input_index].is_final())
         return false;
 
     // BIP65: the stack is empty.
@@ -1529,7 +1517,7 @@ static bool op_checklocktimeverify(evaluation_context& context,
         return false;
 
     const auto stack = number.int64();
-    const auto transaction = static_cast<int64_t>(tx.locktime);
+    const auto transaction = static_cast<int64_t>(tx.locktime());
 
     // BIP65: the stack lock-time type differs from that of tx nLockTime.
     if (!is_locktime_type_match(stack, transaction))
@@ -1557,7 +1545,7 @@ static bool run_operation(const operation& op, const transaction& tx,
     uint32_t input_index, const script& script, evaluation_context& context,
     uint32_t flags)
 {
-    switch (op.code)
+    switch (op.code())
     {
         case opcode::zero:
         case opcode::special:
@@ -1589,7 +1577,7 @@ static bool run_operation(const operation& op, const transaction& tx,
         case opcode::op_14:
         case opcode::op_15:
         case opcode::op_16:
-            return op_x(context, op.code);
+            return op_x(context, op.code());
 
         case opcode::nop:
             return true;
@@ -1923,30 +1911,30 @@ static bool next_step(const transaction& tx, uint32_t input_index,
     const auto& op = *it;
 
     // See BIP16
-    if (op.data.size() > max_data_script_size)
+    if (op.data().size() > max_data_script_size)
         return false;
 
-    if (!increment_op_counter(op.code, context))
+    if (!increment_op_counter(op.code(), context))
         return false;
 
-    if (opcode_is_disabled(op.code))
+    if (opcode_is_disabled(op.code()))
         return false;
 
-    if (!context.conditional.succeeded() && !is_condition_opcode(op.code))
+    if (!context.conditional.succeeded() && !is_condition_opcode(op.code()))
         return true;
 
     // push data to the stack
-    if (op.code == opcode::zero)
+    if (op.code() == opcode::zero)
     {
         context.stack.push_back(data_chunk{});
     }
-    else if (op.code == opcode::codeseparator)
+    else if (op.code() == opcode::codeseparator)
     {
         context.code_begin = it;
     }
-    else if (opcode_is_empty_pusher(op.code))
+    else if (opcode_is_empty_pusher(op.code()))
     {
-        context.stack.push_back(op.data);
+        context.stack.push_back(op.data());
     }
     else if (!run_operation(op, tx, input_index, script, context, flags))
     {
@@ -1967,9 +1955,9 @@ static bool evaluate(const transaction& tx, uint32_t input_index,
         return false;
 
     context.operation_counter = 0;
-    context.code_begin = script.operations.begin();
+    context.code_begin = script.operations().begin();
 
-    for (auto it = script.operations.begin(); it != script.operations.end(); ++it)
+    for (auto it = script.operations().begin(); it != script.operations().end(); ++it)
         if (!next_step(tx, input_index, it, script, context, flags))
             return false;
 
@@ -1980,12 +1968,12 @@ static bool evaluate(const transaction& tx, uint32_t input_index,
 code script::verify(const transaction& tx, uint32_t input_index,
     uint32_t flags)
 {
-    if (input_index >= tx.inputs.size())
+    if (input_index >= tx.inputs().size())
         return error::operation_failed;
 
     // Obtain the previous output script from the cached previous output.
-    const auto& prevout = tx.inputs[input_index].previous_output.validation;
-    return verify(tx, input_index, prevout.cache.script, flags);
+    const auto& prevout = tx.inputs()[input_index].previous_output().validation;
+    return verify(tx, input_index, prevout.cache.script(), flags);
 }
 
 inline bool stack_result(const evaluation_context& context)
@@ -1997,10 +1985,10 @@ inline bool stack_result(const evaluation_context& context)
 code script::verify(const transaction& tx, uint32_t input_index,
     const script& prevout_script, uint32_t flags)
 {
-    if (input_index >= tx.inputs.size())
+    if (input_index >= tx.inputs().size())
         return error::operation_failed;
 
-    const auto& input_script = tx.inputs[input_index].script;
+    const auto& input_script = tx.inputs()[input_index].script();
     evaluation_context in_context(flags);
 
     // Evaluate the input script.
@@ -2022,7 +2010,7 @@ code script::verify(const transaction& tx, uint32_t input_index,
         (prevout_script.pattern() == script_pattern::pay_script_hash))
     {
         // Only push data operations allowed in script.
-        if (!operation::is_push_only(input_script.operations))
+        if (!operation::is_push_only(input_script.operations()))
             return error::validate_inputs_failed;
 
         // Use the last stack item as the serialized script.
@@ -2048,6 +2036,55 @@ code script::verify(const transaction& tx, uint32_t input_index,
     }
 
     return error::success;
+}
+
+operation::stack& script::operations()
+{
+    return operations_;
+}
+
+const operation::stack& script::operations() const
+{
+    return operations_;
+}
+
+void script::set_operations(const operation::stack& value)
+{
+    operations_ = value;
+}
+
+void script::set_operations(operation::stack&& value)
+{
+    operations_ = std::move(value);
+}
+
+script& script::operator=(script&& other)
+{
+    operations_ = std::move(other.operations_);
+    is_raw_ = other.is_raw_;
+    return *this;
+}
+
+script& script::operator=(const script& other)
+{
+    operations_ = other.operations_;
+    is_raw_ = other.is_raw_;
+    return *this;
+}
+
+bool script::operator==(const script& other) const
+{
+    bool result = (operations_.size() == other.operations_.size());
+
+    for (operation::stack::size_type i = 0; (i < operations_.size()) && result; ++i)
+        result = (operations_[i] == other.operations_[i]);
+
+    return result;
+}
+
+bool script::operator!=(const script& other) const
+{
+    return !(*this == other);
 }
 
 } // namespace chain

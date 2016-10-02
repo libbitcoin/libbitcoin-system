@@ -28,7 +28,62 @@ data_chunk valid_raw_output = to_chunk(base16_literal(
 
 BOOST_AUTO_TEST_SUITE(output_tests)
 
-BOOST_AUTO_TEST_CASE(from_data_fails)
+BOOST_AUTO_TEST_CASE(output__constructor_1__always__returns_default_initialized)
+{
+    chain::output instance;
+    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(output__constructor_2__valid_input__returns_input_initialized)
+{
+    uint64_t value = 643u;
+    chain::script script;
+    BOOST_REQUIRE(script.from_data(
+        to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1")),
+        false, chain::script::parse_mode::raw_data));
+
+    chain::output instance(value, script);
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(script == instance.script());
+    BOOST_REQUIRE_EQUAL(value, instance.value());
+}
+
+BOOST_AUTO_TEST_CASE(output__constructor_3__valid_input__returns_input_initialized)
+{
+    uint64_t value = 643u;
+    chain::script script;
+    BOOST_REQUIRE(script.from_data(
+        to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1")),
+        false, chain::script::parse_mode::raw_data));
+
+    auto dup_script = script;
+    chain::output instance(value, std::move(dup_script));
+
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(script == instance.script());
+    BOOST_REQUIRE_EQUAL(value, instance.value());
+}
+
+BOOST_AUTO_TEST_CASE(output__constructor_4__valid_input__returns_input_initialized)
+{
+    chain::output expected;
+    BOOST_REQUIRE(expected.from_data(valid_raw_output));
+
+    chain::output instance(expected);
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(expected == instance);
+}
+
+BOOST_AUTO_TEST_CASE(output__constructor_5__valid_input__returns_input_initialized)
+{
+    chain::output expected;
+    BOOST_REQUIRE(expected.from_data(valid_raw_output));
+
+    chain::output instance(std::move(expected));
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(output__from_data__insufficient_bytes__failure)
 {
     data_chunk data(2);
 
@@ -38,7 +93,7 @@ BOOST_AUTO_TEST_CASE(from_data_fails)
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(factory_data_chunk_success)
+BOOST_AUTO_TEST_CASE(output__factory_from_data_1__valid_input_success)
 {
     auto instance = chain::output::factory_from_data(valid_raw_output);
     BOOST_REQUIRE(instance.is_valid());
@@ -50,7 +105,7 @@ BOOST_AUTO_TEST_CASE(factory_data_chunk_success)
     BOOST_REQUIRE(resave == valid_raw_output);
 }
 
-BOOST_AUTO_TEST_CASE(factory_stream_success)
+BOOST_AUTO_TEST_CASE(output__factory_from_data_2__valid_input_success)
 {
     data_source stream(valid_raw_output);
     auto instance = chain::output::factory_from_data(stream);
@@ -63,7 +118,7 @@ BOOST_AUTO_TEST_CASE(factory_stream_success)
     BOOST_REQUIRE(resave == valid_raw_output);
 }
 
-BOOST_AUTO_TEST_CASE(factory_reader_success)
+BOOST_AUTO_TEST_CASE(output__factory_from_data_3__valid_input_success)
 {
     data_source stream(valid_raw_output);
     istream_reader source(stream);
@@ -75,6 +130,104 @@ BOOST_AUTO_TEST_CASE(factory_reader_success)
     data_chunk resave = instance.to_data();
     BOOST_REQUIRE_EQUAL(resave.size(), valid_raw_output.size());
     BOOST_REQUIRE(resave == valid_raw_output);
+}
+
+BOOST_AUTO_TEST_CASE(output__signature_operations__always__returns_script_sigops_false)
+{
+    chain::output instance;
+    BOOST_REQUIRE_EQUAL(instance.script().sigops(false), instance.signature_operations());
+}
+
+BOOST_AUTO_TEST_CASE(output__value__roundtrip__success)
+{
+    uint64_t expected = 523542u;
+    chain::output instance;
+    BOOST_REQUIRE_EQUAL(false, expected == instance.value());
+    instance.set_value(expected);
+    BOOST_REQUIRE_EQUAL(expected, instance.value());
+}
+
+BOOST_AUTO_TEST_CASE(output__script_setter_1__roundtrip__success)
+{
+     chain::script value;
+     BOOST_REQUIRE(value.from_data(
+         to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1")),
+         false, chain::script::parse_mode::raw_data));
+
+    chain::output instance;
+    BOOST_REQUIRE(value != instance.script());
+    instance.set_script(value);
+    BOOST_REQUIRE(value == instance.script());
+    const auto& restricted = instance;
+    BOOST_REQUIRE(value == instance.script());
+}
+
+BOOST_AUTO_TEST_CASE(output__script_setter_2__roundtrip__success)
+{
+    chain::script value;
+    BOOST_REQUIRE(value.from_data(
+        to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1")),
+        false, chain::script::parse_mode::raw_data));
+
+    auto dup_value = value;
+   chain::output instance;
+   BOOST_REQUIRE(value != instance.script());
+   instance.set_script(std::move(dup_value));
+   BOOST_REQUIRE(value == instance.script());
+   const auto& restricted = instance;
+   BOOST_REQUIRE(value == instance.script());
+}
+
+BOOST_AUTO_TEST_CASE(output__operator_assign_equals_1__always__matches_equivalent)
+{
+    chain::output expected;
+    BOOST_REQUIRE(expected.from_data(valid_raw_output));
+    chain::output instance;
+    instance = chain::output::factory_from_data(valid_raw_output);
+    BOOST_REQUIRE(instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(output__operator_assign_equals_2__always__matches_equivalent)
+{
+    chain::output expected;
+    BOOST_REQUIRE(expected.from_data(valid_raw_output));
+    chain::output instance;
+    instance = expected;
+    BOOST_REQUIRE(instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(output__operator_boolean_equals__duplicates__returns_true)
+{
+    chain::output alpha;
+    chain::output beta;
+    BOOST_REQUIRE(alpha.from_data(valid_raw_output));
+    BOOST_REQUIRE(beta.from_data(valid_raw_output));
+    BOOST_REQUIRE(alpha == beta);
+}
+
+BOOST_AUTO_TEST_CASE(output__operator_boolean_equals__differs__returns_false)
+{
+    chain::output alpha;
+    chain::output beta;
+    BOOST_REQUIRE(alpha.from_data(valid_raw_output));
+    BOOST_REQUIRE_EQUAL(false, alpha == beta);
+}
+
+BOOST_AUTO_TEST_CASE(output__operator_boolean_not_equals__duplicates__returns_false)
+{
+    chain::output alpha;
+    chain::output beta;
+    BOOST_REQUIRE(alpha.from_data(valid_raw_output));
+    BOOST_REQUIRE(beta.from_data(valid_raw_output));
+    BOOST_REQUIRE_EQUAL(false, alpha != beta);
+}
+
+BOOST_AUTO_TEST_CASE(output__operator_boolean_not_equals__differs__returns_true)
+{
+    chain::output alpha;
+    chain::output beta;
+    BOOST_REQUIRE(alpha.from_data(valid_raw_output));
+    BOOST_REQUIRE(alpha != beta);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

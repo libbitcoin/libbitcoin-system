@@ -56,16 +56,26 @@ fee_filter fee_filter::factory_from_data(uint32_t version, reader& source)
 
 uint64_t fee_filter::satoshi_fixed_size(uint32_t version)
 {
-    return sizeof(minimum_fee);
+    return sizeof(minimum_fee_);
 }
 
 fee_filter::fee_filter()
-  : minimum_fee(0), valid_(false)
+  : minimum_fee_(0u), valid_(false)
 {
 }
 
 fee_filter::fee_filter(uint64_t minimum)
-  : minimum_fee(minimum), valid_(true)
+  : minimum_fee_(minimum), valid_(true)
+{
+}
+
+fee_filter::fee_filter(const fee_filter& other)
+  : fee_filter(other.minimum_fee_)
+{
+}
+
+fee_filter::fee_filter(fee_filter&& other)
+  : fee_filter(other.minimum_fee_)
 {
 }
 
@@ -86,7 +96,7 @@ bool fee_filter::from_data(uint32_t version, reader& source)
     reset();
 
     valid_ = !(version < fee_filter::version_minimum);
-    minimum_fee = source.read_8_bytes_little_endian();
+    minimum_fee_ = source.read_8_bytes_little_endian();
     valid_ &= static_cast<bool>(source);
 
     if (!valid_)
@@ -113,18 +123,18 @@ void fee_filter::to_data(uint32_t version, std::ostream& stream) const
 
 void fee_filter::to_data(uint32_t version, writer& sink) const
 {
-    sink.write_8_bytes_little_endian(minimum_fee);
+    sink.write_8_bytes_little_endian(minimum_fee_);
 }
 
 bool fee_filter::is_valid() const
 {
-    return valid_;
+    return valid_ || (minimum_fee_ > 0u);
 }
 
 void fee_filter::reset()
 {
     valid_ = false;
-    minimum_fee = 0;
+    minimum_fee_ = 0u;
 }
 
 uint64_t fee_filter::serialized_size(uint32_t version) const
@@ -132,9 +142,26 @@ uint64_t fee_filter::serialized_size(uint32_t version) const
     return satoshi_fixed_size(version);
 }
 
+uint64_t fee_filter::minimum_fee() const
+{
+    return minimum_fee_;
+}
+
+void fee_filter::set_minimum_fee(uint64_t value)
+{
+    minimum_fee_ = value;
+}
+
+fee_filter& fee_filter::operator=(fee_filter&& other)
+{
+    minimum_fee_ = other.minimum_fee_;
+    valid_ = other.valid_;
+    return *this;
+}
+
 bool fee_filter::operator==(const fee_filter& other) const
 {
-    return (minimum_fee == other.minimum_fee);
+    return (minimum_fee_ == other.minimum_fee_);
 }
 
 bool fee_filter::operator!=(const fee_filter& other) const

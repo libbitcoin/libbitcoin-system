@@ -62,92 +62,60 @@ uint64_t header::satoshi_fixed_size_without_transaction_count()
 }
 
 header::header()
-{
-}
-
-header::header(const header& other)
-  : header(other.version, other.previous_block_hash, other.merkle,
-        other.timestamp, other.bits, other.nonce, other.transaction_count)
+  : header(0, null_hash, null_hash, 0, 0, 0, 0)
 {
 }
 
 header::header(uint32_t version, const hash_digest& previous_block_hash,
     const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
     uint32_t nonce, uint64_t transaction_count)
-  : version(version),
-    previous_block_hash(previous_block_hash),
-    merkle(merkle),
-    timestamp(timestamp),
-    bits(bits),
-    nonce(nonce),
-    transaction_count(transaction_count),
-    hash_(nullptr)
-{
-}
-
-header::header(header&& other)
-  : header(other.version, std::forward<hash_digest>(other.previous_block_hash),
-        std::forward<hash_digest>(other.merkle), other.timestamp, other.bits,
-        other.nonce, other.transaction_count)
+  : version_(version), previous_block_hash_(previous_block_hash),
+    merkle_(merkle), timestamp_(timestamp), bits_(bits), nonce_(nonce),
+    transaction_count_(transaction_count), hash_(nullptr)
 {
 }
 
 header::header(uint32_t version, hash_digest&& previous_block_hash,
     hash_digest&& merkle, uint32_t timestamp, uint32_t bits, uint32_t nonce,
     uint64_t transaction_count)
-  : version(version),
-    previous_block_hash(std::forward<hash_digest>(previous_block_hash)),
-    merkle(std::forward<hash_digest>(merkle)),
-    timestamp(timestamp),
-    bits(bits),
-    nonce(nonce),
-    transaction_count(transaction_count)
+  : version_(version), previous_block_hash_(std::move(previous_block_hash)),
+    merkle_(std::move(merkle)), timestamp_(timestamp), bits_(bits),
+    nonce_(nonce), transaction_count_(transaction_count), hash_(nullptr)
 {
 }
 
-header& header::operator=(header&& other)
+header::header(const header& other)
+  : header(other.version_, other.previous_block_hash_, other.merkle_,
+        other.timestamp_, other.bits_, other.nonce_, other.transaction_count_)
 {
-    version = other.version;
-    previous_block_hash = std::move(other.previous_block_hash);
-    merkle = std::move(other.merkle);
-    timestamp = other.timestamp;
-    bits = other.bits;
-    nonce = other.nonce;
-    transaction_count = other.transaction_count;
-    return *this;
 }
 
-header& header::operator=(const header& other)
+header::header(header&& other)
+  : header(other.version_, std::move(other.previous_block_hash_),
+      std::move(other.merkle_), other.timestamp_, other.bits_, other.nonce_,
+      other.transaction_count_)
 {
-    version = other.version;
-    previous_block_hash = other.previous_block_hash;
-    merkle = other.merkle;
-    timestamp = other.timestamp;
-    bits = other.bits;
-    nonce = other.nonce;
-    transaction_count = other.transaction_count;
-    return *this;
 }
 
 bool header::is_valid() const
 {
-    return (version != 0) ||
-        (previous_block_hash != null_hash) ||
-        (merkle != null_hash) ||
-        (timestamp != 0) ||
-        (bits != 0) ||
-        (nonce != 0);
+    return (version_ != 0) ||
+        (previous_block_hash_ != null_hash) ||
+        (merkle_ != null_hash) ||
+        (timestamp_ != 0) ||
+        (bits_ != 0) ||
+        (nonce_ != 0);
 }
 
 void header::reset()
 {
-    version = 0;
-    previous_block_hash.fill(0);
-    merkle.fill(0);
-    timestamp = 0;
-    bits = 0;
-    nonce = 0;
-    transaction_count = 0;
+    version_ = 0;
+    previous_block_hash_.fill(0);
+    merkle_.fill(0);
+    timestamp_ = 0;
+    bits_ = 0;
+    nonce_ = 0;
+    transaction_count_ = 0;
 
     mutex_.lock();
     hash_.reset();
@@ -171,15 +139,14 @@ bool header::from_data(reader& source, bool with_transaction_count)
 {
     reset();
 
-    version = source.read_4_bytes_little_endian();
-    previous_block_hash = source.read_hash();
-    merkle = source.read_hash();
-    timestamp = source.read_4_bytes_little_endian();
-    bits = source.read_4_bytes_little_endian();
-    nonce = source.read_4_bytes_little_endian();
-    transaction_count = 0;
+    version_ = source.read_4_bytes_little_endian();
+    previous_block_hash_ = source.read_hash();
+    merkle_ = source.read_hash();
+    timestamp_ = source.read_4_bytes_little_endian();
+    bits_ = source.read_4_bytes_little_endian();
+    nonce_ = source.read_4_bytes_little_endian();
     if (with_transaction_count)
-        transaction_count = source.read_variable_uint_little_endian();
+        transaction_count_ = source.read_variable_uint_little_endian();
 
     const auto result = static_cast<bool>(source);
 
@@ -208,15 +175,15 @@ void header::to_data(std::ostream& stream,
 
 void header::to_data(writer& sink, bool with_transaction_count) const
 {
-    sink.write_4_bytes_little_endian(version);
-    sink.write_hash(previous_block_hash);
-    sink.write_hash(merkle);
-    sink.write_4_bytes_little_endian(timestamp);
-    sink.write_4_bytes_little_endian(bits);
-    sink.write_4_bytes_little_endian(nonce);
+    sink.write_4_bytes_little_endian(version_);
+    sink.write_hash(previous_block_hash_);
+    sink.write_hash(merkle_);
+    sink.write_4_bytes_little_endian(timestamp_);
+    sink.write_4_bytes_little_endian(bits_);
+    sink.write_4_bytes_little_endian(nonce_);
 
     if (with_transaction_count)
-        sink.write_variable_uint_little_endian(transaction_count);
+        sink.write_variable_uint_little_endian(transaction_count_);
 }
 
 uint64_t header::serialized_size(bool with_transaction_count) const
@@ -224,9 +191,99 @@ uint64_t header::serialized_size(bool with_transaction_count) const
     auto size = satoshi_fixed_size_without_transaction_count();
 
     if (with_transaction_count)
-        size += variable_uint_size(transaction_count);
+        size += variable_uint_size(transaction_count_);
 
     return size;
+}
+
+uint32_t header::version() const
+{
+    return version_;
+}
+
+void header::set_version(uint32_t value)
+{
+    version_ = value;
+}
+
+hash_digest& header::previous_block_hash()
+{
+    return previous_block_hash_;
+}
+
+const hash_digest& header::previous_block_hash() const
+{
+    return previous_block_hash_;
+}
+
+void header::set_previous_block_hash(const hash_digest& value)
+{
+    previous_block_hash_ = value;
+}
+
+void header::set_previous_block_hash(hash_digest&& value)
+{
+    previous_block_hash_ = std::move(value);
+}
+
+hash_digest& header::merkle()
+{
+    return merkle_;
+}
+
+const hash_digest& header::merkle() const
+{
+    return merkle_;
+}
+
+void header::set_merkle(const hash_digest& value)
+{
+    merkle_ = value;
+}
+
+void header::set_merkle(hash_digest&& value)
+{
+    merkle_ = std::move(value);
+}
+
+uint32_t header::timestamp() const
+{
+    return timestamp_;
+}
+
+void header::set_timestamp(uint32_t value)
+{
+    timestamp_ = value;
+}
+
+uint32_t header::bits() const
+{
+    return bits_;
+}
+
+void header::set_bits(uint32_t value)
+{
+    bits_ = value;
+}
+
+uint32_t header::nonce() const
+{
+    return nonce_;
+}
+
+void header::set_nonce(uint32_t value)
+{
+    nonce_ = value;
+}
+
+uint64_t header::transaction_count() const
+{
+    return transaction_count_;
+}
+
+void header::set_transaction_count(uint64_t value)
+{
+    transaction_count_ = value;
 }
 
 hash_digest header::hash() const
@@ -256,7 +313,7 @@ bool header::is_valid_time_stamp() const
     // Use system clock because we require accurate time of day.
     typedef std::chrono::system_clock wall_clock;
     static const auto two_hours = std::chrono::hours(time_stamp_future_hours);
-    const auto time = wall_clock::from_time_t(timestamp);
+    const auto time = wall_clock::from_time_t(timestamp_);
     const auto future = wall_clock::now() + two_hours;
     return time <= future;
 }
@@ -269,22 +326,47 @@ bool header::is_valid_proof_of_work() const
         return false;
 
     hash_number target;
-    if (!target.set_compact(bits) || target > maximum)
+    if (!target.set_compact(bits_) || target > maximum)
         return false;
 
     hash_number value(hash());
     return value <= target;
 }
 
+header& header::operator=(header&& other)
+{
+    version_ = other.version_;
+    previous_block_hash_ = std::move(other.previous_block_hash_);
+    merkle_ = std::move(other.merkle_);
+    timestamp_ = other.timestamp_;
+    bits_ = other.bits_;
+    nonce_ = other.nonce_;
+    transaction_count_ = other.transaction_count_;
+    return *this;
+}
+
+// TODO: eliminate header copies and then delete this.
+header& header::operator=(const header& other)
+{
+    version_ = other.version_;
+    previous_block_hash_ = other.previous_block_hash_;
+    merkle_ = other.merkle_;
+    timestamp_ = other.timestamp_;
+    bits_ = other.bits_;
+    nonce_ = other.nonce_;
+    transaction_count_ = other.transaction_count_;
+    return *this;
+}
+
 bool header::operator==(const header& other) const
 {
-    return (version == other.version)
-        && (previous_block_hash == other.previous_block_hash)
-        && (merkle == other.merkle)
-        && (timestamp == other.timestamp)
-        && (bits == other.bits)
-        && (nonce == other.nonce)
-        && (transaction_count == other.transaction_count);
+    return (version_ == other.version_)
+        && (previous_block_hash_ == other.previous_block_hash_)
+        && (merkle_ == other.merkle_)
+        && (timestamp_ == other.timestamp_)
+        && (bits_ == other.bits_)
+        && (nonce_ == other.nonce_)
+        && (transaction_count_ == other.transaction_count_);
 }
 
 bool header::operator!=(const header& other) const

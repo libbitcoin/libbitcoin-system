@@ -27,17 +27,80 @@ bool equal(const message::network_address& left,
     const message::network_address& right, bool with_timestamp)
 {
     bool matches_timestamp = with_timestamp ? 
-        (left.timestamp == right.timestamp) : true;
+        (left.timestamp() == right.timestamp()) : true;
 
-    return matches_timestamp
-        && (left.services == right.services)
-        && (left.ip == right.ip)
-        && (left.port == right.port);
+    return matches_timestamp && (left == right);
 }
 
 BOOST_AUTO_TEST_SUITE(network_address_tests)
 
-BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
+BOOST_AUTO_TEST_CASE(network_address__constructor_1__always__invalid)
+{
+    message::network_address instance;
+    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(network_address__constructor_2__always__equals_params)
+{
+    uint32_t timestamp = 734678u;
+    uint64_t services = 5357534u;
+    uint16_t port = 123u;
+    const message::ip_address ip = base16_literal("127544abcdefa7b6d3e91486c57000aa");
+
+    message::network_address instance(timestamp, services, ip, port);
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(ip == instance.ip());
+    BOOST_REQUIRE_EQUAL(port, instance.port());
+    BOOST_REQUIRE_EQUAL(services, instance.services());
+    BOOST_REQUIRE_EQUAL(timestamp, instance.timestamp());
+}
+
+BOOST_AUTO_TEST_CASE(network_address__constructor_3__always__equals_params)
+{
+    uint32_t timestamp = 734678u;
+    uint64_t services = 5357534u;
+    uint16_t port = 123u;
+
+    message::network_address instance(timestamp, services,
+        base16_literal("127544abcdefa7b6d3e91486c57000aa"), port);
+
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(network_address__constructor_4__always__equals_params)
+{
+    const message::network_address expected
+    {
+        734678u,
+        5357534u,
+        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        123u
+    };
+
+    BOOST_REQUIRE_EQUAL(true, expected.is_valid());
+
+    message::network_address instance(expected);
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE_EQUAL(true, expected == instance);
+}
+
+BOOST_AUTO_TEST_CASE(network_address__constructor_5__always__equals_params)
+{
+    message::network_address expected
+    {
+        734678u,
+        5357534u,
+        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        123u
+    };
+
+    BOOST_REQUIRE_EQUAL(true, expected.is_valid());
+
+    message::network_address instance(std::move(expected));
+    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(network_address__from_data__insufficient_bytes__failure)
 {
     const data_chunk raw{ 1 };
     message::network_address instance{};
@@ -46,18 +109,13 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
         message::version::level::minimum, raw, false));
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk_without_timestamp)
+BOOST_AUTO_TEST_CASE(network_address__factory_from_data_1__without_timestamp__success)
 {
     const message::network_address expected
     {
         734678u,
         5357534u,
-        {
-            {
-                0x47, 0x81, 0x6a, 0x40, 0xbb, 0x92, 0xbd, 0xb4,
-                0xe0, 0xb8, 0x25, 0x68, 0x61, 0xf9, 0x6a, 0x55
-            }
-        },
+        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
         123u
     };
 
@@ -73,18 +131,13 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk_without_timestamp
         result.serialized_size(message::version::level::minimum, false));
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream_without_timestamp)
+BOOST_AUTO_TEST_CASE(network_address__factory_from_data_2__without_timestamp__success)
 {
     const message::network_address expected
     {
         734678u,
         5357534u,
-        {
-            {
-                0x47, 0x81, 0x6a, 0x40, 0xbb, 0x92, 0xbd, 0xb4,
-                0xe0, 0xb8, 0x25, 0x68, 0x61, 0xf9, 0x6a, 0x55
-            }
-        },
+        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
         123u
     };
 
@@ -101,18 +154,13 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream_without_timestam
         result.serialized_size(message::version::level::minimum, false));
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_without_timestamp)
+BOOST_AUTO_TEST_CASE(network_address__factory_from_data_3__without_timestamp__success)
 {
     const message::network_address expected
     {
         734678u,
         5357534u,
-        {
-            {
-                0x47, 0x81, 0x6a, 0x40, 0xbb, 0x92, 0xbd, 0xb4,
-                0xe0, 0xb8, 0x25, 0x68, 0x61, 0xf9, 0x6a, 0x55
-            }
-        },
+        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
         123u
     };
 
@@ -130,18 +178,13 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_without_timestam
         result.serialized_size(message::version::level::minimum, false));
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk_with_timestamp)
+BOOST_AUTO_TEST_CASE(network_address__factory_from_data_1__with_timestamp__success)
 {
     const message::network_address expected
     {
         734678u,
         5357534u,
-        {
-            {
-                0x47, 0x81, 0x6a, 0x40, 0xbb, 0x92, 0xbd, 0xb4,
-                0xe0, 0xb8, 0x25, 0x68, 0x61, 0xf9, 0x6a, 0x55
-            }
-        },
+        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
         123u
     };
 
@@ -157,18 +200,13 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk_with_timestamp)
         result.serialized_size(message::version::level::minimum, true));
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream_with_timestamp)
+BOOST_AUTO_TEST_CASE(network_address__factory_from_data_2__with_timestamp__success)
 {
     const message::network_address expected
     {
         734678u,
         5357534u,
-        {
-            {
-                0x47, 0x81, 0x6a, 0x40, 0xbb, 0x92, 0xbd, 0xb4,
-                0xe0, 0xb8, 0x25, 0x68, 0x61, 0xf9, 0x6a, 0x55
-            }
-        },
+        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
         123u
     };
 
@@ -185,18 +223,13 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream_with_timestamp)
         result.serialized_size(message::version::level::minimum, true));
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_with_timestamp)
+BOOST_AUTO_TEST_CASE(network_address__factory_from_data_3__with_timestamp__success)
 {
     const message::network_address expected
     {
         734678u,
         5357534u,
-        {
-            {
-                0x47, 0x81, 0x6a, 0x40, 0xbb, 0x92, 0xbd, 0xb4,
-                0xe0, 0xb8, 0x25, 0x68, 0x61, 0xf9, 0x6a, 0x55
-            }
-        },
+        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
         123u
     };
 
@@ -212,6 +245,223 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_with_timestamp)
         result.serialized_size(message::version::level::minimum, true));
     BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum, true),
         result.serialized_size(message::version::level::minimum, true));
+}
+
+BOOST_AUTO_TEST_CASE(network_address__timestamp_accessor__always__returns_initialized_value)
+{
+    const uint32_t timestamp = 734678u;
+    message::network_address instance(
+        timestamp,
+        5357534u,
+        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        123u
+    );
+
+    BOOST_REQUIRE(timestamp == instance.timestamp());
+}
+
+BOOST_AUTO_TEST_CASE(network_address__timestamp_setter__roundtrip__success)
+{
+    const uint32_t timestamp = 734678u;
+    message::network_address instance;
+    BOOST_REQUIRE(timestamp != instance.timestamp());
+    instance.set_timestamp(timestamp);
+    BOOST_REQUIRE(timestamp == instance.timestamp());
+}
+
+BOOST_AUTO_TEST_CASE(network_address__services_accessor__always__returns_initialized_value)
+{
+    const uint32_t services = 5357534u;
+    message::network_address instance(
+        734678u,
+        services,
+        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        123u
+    );
+
+    BOOST_REQUIRE(services == instance.services());
+}
+
+BOOST_AUTO_TEST_CASE(network_address__services_setter__roundtrip__success)
+{
+    const uint64_t services = 6842368u;
+    message::network_address instance;
+    BOOST_REQUIRE(services != instance.services());
+    instance.set_services(services);
+    BOOST_REQUIRE(services == instance.services());
+}
+
+BOOST_AUTO_TEST_CASE(network_address__ip_accessor__always__returns_initialized_value)
+{
+    const message::ip_address ip = base16_literal("127544abcdefa7b6d3e91486c57000aa");
+
+    message::network_address instance(
+        734678u,
+        5357534u,
+        ip,
+        123u
+    );
+
+    BOOST_REQUIRE(ip == instance.ip());
+}
+
+BOOST_AUTO_TEST_CASE(network_address__ip_setter_1__roundtrip__success)
+{
+    const message::ip_address ip = base16_literal("127544abcdefa7b6d3e91486c57000aa");
+
+    message::network_address instance;
+    BOOST_REQUIRE(ip != instance.ip());
+    instance.set_ip(ip);
+    BOOST_REQUIRE(ip == instance.ip());
+}
+
+BOOST_AUTO_TEST_CASE(network_address__ip_setter_2__roundtrip__success)
+{
+    const message::ip_address ip = base16_literal("127544abcdefa7b6d3e91486c57000aa");
+
+    message::network_address instance;
+    BOOST_REQUIRE(ip != instance.ip());
+    instance.set_ip(base16_literal("127544abcdefa7b6d3e91486c57000aa"));
+    BOOST_REQUIRE(ip == instance.ip());
+}
+
+BOOST_AUTO_TEST_CASE(network_address__port_accessor__always__returns_initialized_value)
+{
+    const uint16_t port = 123u;
+    message::network_address instance(
+        734678u,
+        5357534u,
+        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        port
+    );
+
+    BOOST_REQUIRE(port == instance.port());
+}
+
+BOOST_AUTO_TEST_CASE(network_address__port_setter__roundtrip__success)
+{
+    const uint16_t port = 853u;
+    message::network_address instance;
+    BOOST_REQUIRE(port != instance.port());
+    instance.set_port(port);
+    BOOST_REQUIRE(port == instance.port());
+}
+
+BOOST_AUTO_TEST_CASE(network_address__operator_assign_equals_1__always__matches_equivalent)
+{
+    message::network_address value(
+        14356u,
+        54676843u,
+        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        1500u
+    );
+
+    BOOST_REQUIRE(value.is_valid());
+
+    message::network_address instance;
+    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+
+    instance = std::move(value);
+    BOOST_REQUIRE(instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(network_address__operator_assign_equals_2__always__matches_equivalent)
+{
+    const message::network_address value(
+        14356u,
+        54676843u,
+        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        1500u
+    );
+
+    BOOST_REQUIRE(value.is_valid());
+
+    message::network_address instance;
+    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+
+    instance = value;
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(value == instance);
+}
+
+BOOST_AUTO_TEST_CASE(network_address__operator_boolean_equals__duplicates__returns_true)
+{
+    const message::network_address expected(
+        14356u,
+        54676843u,
+        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        1500u
+    );
+
+    message::network_address instance(expected);
+    BOOST_REQUIRE_EQUAL(true, instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(network_address__operator_boolean_equals__differs_timestamp__returns_true)
+{
+    const message::network_address expected(
+        14356u,
+        54676843u,
+        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        1500u
+    );
+
+    message::network_address instance(643u, expected.services(),
+        expected.ip(), expected.port());
+    BOOST_REQUIRE_EQUAL(true, instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(network_address__operator_boolean_equals__differs__returns_false)
+{
+    const message::network_address expected(
+        14356u,
+        54676843u,
+        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        1500u
+    );
+
+    message::network_address instance;
+    BOOST_REQUIRE_EQUAL(false, instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(network_address__operator_boolean_not_equals__duplicates__returns_false)
+{
+    const message::network_address expected(
+        14356u,
+        54676843u,
+        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        1500u
+    );
+
+    message::network_address instance(expected);
+    BOOST_REQUIRE_EQUAL(false, instance != expected);
+}
+
+BOOST_AUTO_TEST_CASE(network_address__operator_boolean_not_equals__differs_timestamp__returns_false)
+{
+    const message::network_address expected(
+        14356u,
+        54676843u,
+        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        1500u
+    );
+
+    message::network_address instance(643u, expected.services(),
+        expected.ip(), expected.port());
+    BOOST_REQUIRE_EQUAL(false, instance != expected);
+}
+
+BOOST_AUTO_TEST_CASE(network_address__operator_boolean_not_equals__differs__returns_true)
+{
+    const message::network_address expected(
+        14356u,
+        54676843u,
+        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        1500u
+    );
+
+    message::network_address instance;
+    BOOST_REQUIRE_EQUAL(true, instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

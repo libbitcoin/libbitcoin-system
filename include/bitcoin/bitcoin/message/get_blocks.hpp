@@ -48,9 +48,18 @@ public:
     get_blocks();
     get_blocks(const hash_list& start, const hash_digest& stop);
     get_blocks(hash_list&& start, hash_digest&& stop);
+    get_blocks(const get_blocks& other);
+    get_blocks(get_blocks&& other);
 
-    bool operator==(const get_blocks& other) const;
-    bool operator!=(const get_blocks& other) const;
+    hash_list& start_hashes();
+    const hash_list& start_hashes() const;
+    void set_start_hashes(const hash_list& value);
+    void set_start_hashes(hash_list&& value);
+
+    hash_digest& stop_hash();
+    const hash_digest& stop_hash() const;
+    void set_stop_hash(const hash_digest& value);
+    void set_stop_hash(hash_digest&& value);
 
     virtual bool from_data(uint32_t version, const data_chunk& data);
     virtual bool from_data(uint32_t version, std::istream& stream);
@@ -62,13 +71,21 @@ public:
     void reset();
     uint64_t serialized_size(uint32_t version) const;
 
+    // This class is move assignable but not copy assignable.
+    get_blocks& operator=(get_blocks&& other);
+    void operator=(const get_blocks&) = delete;
+
+    bool operator==(const get_blocks& other) const;
+    bool operator!=(const get_blocks& other) const;
+
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
+private:
     // 10 sequential hashes, then exponential samples until reaching genesis.
-    hash_list start_hashes;
-    hash_digest stop_hash;
+    hash_list start_hashes_;
+    hash_digest stop_hash_;
 };
 
 } // namespace message

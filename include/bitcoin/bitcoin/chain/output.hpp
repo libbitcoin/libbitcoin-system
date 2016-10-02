@@ -45,6 +45,22 @@ public:
     static output factory_from_data(std::istream& stream);
     static output factory_from_data(reader& source);
 
+    output();
+    output(uint64_t value, const chain::script& script);
+    output(uint64_t value, chain::script&& script);
+    output(const output& other);
+    output(output&& other);
+
+    uint64_t value() const;
+    void set_value(uint64_t value);
+
+    chain::script& script();
+    const chain::script& script() const;
+    void set_script(const chain::script& value);
+    void set_script(chain::script&& value);
+
+    size_t signature_operations() const;
+
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
     bool from_data(reader& source);
@@ -55,10 +71,16 @@ public:
     bool is_valid() const;
     void reset();
     uint64_t serialized_size() const;
-    size_t signature_operations() const;
 
-    uint64_t value;
-    chain::script script;
+    output& operator=(output&& other);
+    output& operator=(const output& other);
+
+    bool operator==(const output& other) const;
+    bool operator!=(const output& other) const;
+
+private:
+    uint64_t value_;
+    chain::script script_;
 };
 
 } // namespace chain

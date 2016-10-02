@@ -25,7 +25,42 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(send_compact_blocks_tests)
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
+BOOST_AUTO_TEST_CASE(send_compact_blocks__constructor_1__always__invalid)
+{
+    message::send_compact_blocks instance;
+    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(send_compact_blocks__constructor_2__always__equals_params)
+{
+    bool mode = true;
+    uint64_t version = 1245436u;
+    message::send_compact_blocks instance(mode, version);
+    BOOST_REQUIRE_EQUAL(mode, instance.high_bandwidth_mode());
+    BOOST_REQUIRE_EQUAL(version, instance.version());
+}
+
+BOOST_AUTO_TEST_CASE(send_compact_blocks__constructor_3__always__equals_params)
+{
+    const message::send_compact_blocks expected(true, 1245436u);
+    message::send_compact_blocks instance(expected);
+    BOOST_REQUIRE(expected == instance);
+}
+
+BOOST_AUTO_TEST_CASE(send_compact_blocks__constructor_4__always__equals_params)
+{
+    bool mode = true;
+    uint64_t version = 1245436u;
+    message::send_compact_blocks expected(mode, version);
+    BOOST_REQUIRE(expected.is_valid());
+
+    message::send_compact_blocks instance(std::move(expected));
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE_EQUAL(mode, instance.high_bandwidth_mode());
+    BOOST_REQUIRE_EQUAL(version, instance.version());
+}
+
+BOOST_AUTO_TEST_CASE(send_compact_blocks__factory_from_data_1__valid_input__success)
 {
     const message::send_compact_blocks expected{ true, 164 };
     const auto data = expected.to_data(message::send_compact_blocks::version_minimum);
@@ -37,11 +72,10 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
             message::send_compact_blocks::version_minimum),
         data.size());
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(expected.high_bandwidth_mode, result.high_bandwidth_mode);
-    BOOST_REQUIRE_EQUAL(expected.version, result.version);
+    BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
+BOOST_AUTO_TEST_CASE(send_compact_blocks__factory_from_data_2__valid_input__success)
 {
     const message::send_compact_blocks expected{ false, 5 };
     const auto data = expected.to_data(message::send_compact_blocks::version_minimum);
@@ -54,11 +88,10 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
             message::send_compact_blocks::version_minimum),
         data.size());
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(expected.high_bandwidth_mode, result.high_bandwidth_mode);
-    BOOST_REQUIRE_EQUAL(expected.version, result.version);
+    BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
+BOOST_AUTO_TEST_CASE(send_compact_blocks__factory_from_data_3__valid_input__success)
 {
     const message::send_compact_blocks expected{ true, 257 };
     const auto data = expected.to_data(message::send_compact_blocks::version_minimum);
@@ -72,11 +105,10 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
             message::send_compact_blocks::version_minimum),
         data.size());
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(expected.high_bandwidth_mode, result.high_bandwidth_mode);
-    BOOST_REQUIRE_EQUAL(expected.version, result.version);
+    BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(from_data_reader_invalid_mode_byte)
+BOOST_AUTO_TEST_CASE(send_compact_blocks__from_data_1__invalid_mode_byte__failure)
 {
     data_chunk raw_data{ 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 };
     message::send_compact_blocks msg;
@@ -84,13 +116,87 @@ BOOST_AUTO_TEST_CASE(from_data_reader_invalid_mode_byte)
     BOOST_REQUIRE(!result);
 }
 
-BOOST_AUTO_TEST_CASE(from_data_reader_insufficient_version_failure)
+BOOST_AUTO_TEST_CASE(send_compact_blocks__from_data_1__insufficient_version__failure)
 {
     const message::send_compact_blocks expected{ true, 257 };
     data_chunk raw_data = expected.to_data(message::send_compact_blocks::version_minimum);
     message::send_compact_blocks msg;
     bool result = msg.from_data(message::send_compact_blocks::version_minimum - 1, raw_data);
     BOOST_REQUIRE(!result);
+}
+
+BOOST_AUTO_TEST_CASE(send_compact_blocks__high_bandwidth_mode_accessor__always__returns_initialized_value)
+{
+    const bool expected = true;
+    const message::send_compact_blocks instance(expected, 210u);
+    BOOST_REQUIRE_EQUAL(expected, instance.high_bandwidth_mode());
+}
+
+BOOST_AUTO_TEST_CASE(send_compact_blocks__high_bandwidth_mode_setter__roundtrip__success)
+{
+    const bool expected = true;
+    message::send_compact_blocks instance;
+    BOOST_REQUIRE(expected != instance.high_bandwidth_mode());
+    instance.set_high_bandwidth_mode(expected);
+    BOOST_REQUIRE_EQUAL(expected, instance.high_bandwidth_mode());
+}
+
+BOOST_AUTO_TEST_CASE(send_compact_blocks__version_accessor__always__returns_initialized_value)
+{
+    const uint64_t expected = 6548u;
+    const message::send_compact_blocks instance(false, expected);
+    BOOST_REQUIRE_EQUAL(expected, instance.version());
+}
+
+BOOST_AUTO_TEST_CASE(send_compact_blocks__version_setter__roundtrip__success)
+{
+    const uint64_t expected = 6548u;
+    message::send_compact_blocks instance;
+    BOOST_REQUIRE(expected != instance.version());
+    instance.set_version(expected);
+    BOOST_REQUIRE_EQUAL(expected, instance.version());
+}
+
+BOOST_AUTO_TEST_CASE(send_compact_blocks__operator_assign_equals__always__matches_equivalent)
+{
+    bool mode = false;
+    uint64_t version = 210u;
+    message::send_compact_blocks value(mode, version);
+    BOOST_REQUIRE(value.is_valid());
+
+    message::send_compact_blocks instance;
+    instance = std::move(value);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE_EQUAL(mode, instance.high_bandwidth_mode());
+    BOOST_REQUIRE_EQUAL(version, instance.version());
+}
+
+BOOST_AUTO_TEST_CASE(send_compact_blocks__operator_boolean_equals__duplicates__returns_true)
+{
+    const message::send_compact_blocks expected(false, 15234u);
+    message::send_compact_blocks instance(expected);
+    BOOST_REQUIRE_EQUAL(true, instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(send_compact_blocks__operator_boolean_equals__differs__returns_false)
+{
+    const message::send_compact_blocks expected(true, 979797u);
+    message::send_compact_blocks instance;
+    BOOST_REQUIRE_EQUAL(false, instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(send_compact_blocks__operator_boolean_not_equals__duplicates__returns_false)
+{
+    const message::send_compact_blocks expected(true, 734678u);
+    message::send_compact_blocks instance(expected);
+    BOOST_REQUIRE_EQUAL(false, instance != expected);
+}
+
+BOOST_AUTO_TEST_CASE(send_compact_blocks__operator_boolean_not_equals__differs__returns_true)
+{
+    const message::send_compact_blocks expected(false, 5357534u);
+    message::send_compact_blocks instance;
+    BOOST_REQUIRE_EQUAL(true, instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

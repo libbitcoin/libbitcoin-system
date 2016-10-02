@@ -49,22 +49,39 @@ public:
     static uint64_t satoshi_fixed_size_without_transaction_count();
 
     header();
-    header(const header& other);
     header(uint32_t version, const hash_digest& previous_block_hash,
         const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
         uint32_t nonce, uint64_t transaction_count=0);
-
-    header(header&& other);
     header(uint32_t version, hash_digest&& previous_block_hash,
         hash_digest&& merkle, uint32_t timestamp, uint32_t bits,
         uint32_t nonce, uint64_t transaction_count=0);
+    header(const header& other);
+    header(header&& other);
 
-    /// This class is move assignable [but not copy assignable].
-    header& operator=(header&& other);
-    header& operator=(const header& other) /* = delete */;
+    uint32_t version() const;
+    void set_version(uint32_t value);
 
-    bool operator==(const header& other) const;
-    bool operator!=(const header& other) const;
+    hash_digest& previous_block_hash();
+    const hash_digest& previous_block_hash() const;
+    void set_previous_block_hash(const hash_digest& value);
+    void set_previous_block_hash(hash_digest&& value);
+
+    hash_digest& merkle();
+    const hash_digest& merkle() const;
+    void set_merkle(const hash_digest& value);
+    void set_merkle(hash_digest&& value);
+
+    uint32_t timestamp() const;
+    void set_timestamp(uint32_t value);
+
+    uint32_t bits() const;
+    void set_bits(uint32_t value);
+
+    uint32_t nonce() const;
+    void set_nonce(uint32_t value);
+
+    uint64_t transaction_count() const;
+    void set_transaction_count(uint64_t value);
 
     bool from_data(const data_chunk& data, bool with_transaction_count=true);
     bool from_data(std::istream& stream, bool with_transaction_count=true);
@@ -76,23 +93,30 @@ public:
     bool is_valid() const;
     bool is_valid_time_stamp() const;
     bool is_valid_proof_of_work() const;
-    void reset();
+    virtual void reset();
     uint64_t serialized_size(bool with_transaction_count=true) const;
 
-    uint32_t version;
-    hash_digest previous_block_hash;
-    hash_digest merkle;
-    uint32_t timestamp;
-    uint32_t bits;
-    uint32_t nonce;
+    /// This class is move assignable [but not copy assignable].
+    header& operator=(header&& other);
+    header& operator=(const header& other) /* = delete */;
 
-    // The longest size (64) of a protocol variable int is deserialized here.
-    // When writing a block the size of the transaction collection is used.
-    uint64_t transaction_count;
+    bool operator==(const header& other) const;
+    bool operator!=(const header& other) const;
 
 private:
     mutable upgrade_mutex mutex_;
     mutable std::shared_ptr<hash_digest> hash_;
+
+    uint32_t version_;
+    hash_digest previous_block_hash_;
+    hash_digest merkle_;
+    uint32_t timestamp_;
+    uint32_t bits_;
+    uint32_t nonce_;
+
+    // The longest size (64) of a protocol variable int is deserialized here.
+    // When writing a block the size of the transaction collection is used.
+    uint64_t transaction_count_;
 };
 
 } // namespace chain

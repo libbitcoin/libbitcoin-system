@@ -58,16 +58,44 @@ block_transactions block_transactions::factory_from_data(
     return instance;
 }
 
+block_transactions::block_transactions()
+  : block_hash_(null_hash), transactions_()
+{
+}
+
+block_transactions::block_transactions(const hash_digest& block_hash,
+    const chain::transaction::list& transactions)
+  : block_hash_(block_hash), transactions_(transactions)
+{
+}
+
+block_transactions::block_transactions(hash_digest&& block_hash,
+    chain::transaction::list&& transactions)
+  : block_hash_(std::move(block_hash)), transactions_(std::move(transactions))
+{
+}
+
+block_transactions::block_transactions(const block_transactions& other)
+  : block_transactions(other.block_hash_, other.transactions_)
+{
+}
+
+block_transactions::block_transactions(block_transactions&& other)
+  : block_transactions(std::move(other.block_hash_),
+      std::move(other.transactions_))
+{
+}
+
 bool block_transactions::is_valid() const
 {
-    return (block_hash != null_hash);
+    return (block_hash_ != null_hash);
 }
 
 void block_transactions::reset()
 {
-    block_hash = null_hash;
-    transactions.clear();
-    transactions.shrink_to_fit();
+    block_hash_ = null_hash;
+    transactions_.clear();
+    transactions_.shrink_to_fit();
 }
 
 bool block_transactions::from_data(uint32_t version,
@@ -88,16 +116,16 @@ bool block_transactions::from_data(uint32_t version, reader& source)
 {
     reset();
     auto result = !(version < block_transactions::version_minimum);
-    block_hash = source.read_hash();
+    block_hash_ = source.read_hash();
     result &= static_cast<bool>(source);
     const auto count = source.read_variable_uint_little_endian();
     result &= static_cast<bool>(source);
 
     if (result)
     {
-        transactions.resize(safe_unsigned<size_t>(count));
+        transactions_.resize(safe_unsigned<size_t>(count));
 
-        for (auto& transaction: transactions)
+        for (auto& transaction: transactions_)
         {
             result = transaction.from_data(source);
 
@@ -131,21 +159,79 @@ void block_transactions::to_data(uint32_t version,
 
 void block_transactions::to_data(uint32_t version, writer& sink) const
 {
-    sink.write_hash(block_hash);
-    sink.write_variable_uint_little_endian(transactions.size());
+    sink.write_hash(block_hash_);
+    sink.write_variable_uint_little_endian(transactions_.size());
 
-    for (const auto& element: transactions)
+    for (const auto& element: transactions_)
         element.to_data(sink);
 }
 
 uint64_t block_transactions::serialized_size(uint32_t version) const
 {
-    uint64_t size = hash_size + variable_uint_size(transactions.size());
+    uint64_t size = hash_size + variable_uint_size(transactions_.size());
 
-    for (const auto& element: transactions)
+    for (const auto& element: transactions_)
         size += element.serialized_size();
 
     return size;
+}
+
+hash_digest& block_transactions::block_hash()
+{
+    return block_hash_;
+}
+
+const hash_digest& block_transactions::block_hash() const
+{
+    return block_hash_;
+}
+
+void block_transactions::set_block_hash(const hash_digest& value)
+{
+    block_hash_ = value;
+}
+
+void block_transactions::set_block_hash(hash_digest&& value)
+{
+    block_hash_ = std::move(value);
+}
+
+chain::transaction::list& block_transactions::transactions()
+{
+    return transactions_;
+}
+
+const chain::transaction::list& block_transactions::transactions() const
+{
+    return transactions_;
+}
+
+void block_transactions::set_transactions(const chain::transaction::list& value)
+{
+    transactions_ = value;
+}
+
+void block_transactions::set_transactions(chain::transaction::list&& value)
+{
+    transactions_ = std::move(value);
+}
+
+block_transactions& block_transactions::operator=(block_transactions&& other)
+{
+    block_hash_ = std::move(other.block_hash_);
+    transactions_ = std::move(other.transactions_);
+    return *this;
+}
+
+bool block_transactions::operator==(const block_transactions& other) const
+{
+    return (block_hash_ == other.block_hash_)
+        && (transactions_ == other.transactions_);
+}
+
+bool block_transactions::operator!=(const block_transactions& other) const
+{
+    return !(*this == other);
 }
 
 } // namespace message

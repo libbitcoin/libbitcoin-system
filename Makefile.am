@@ -220,11 +220,14 @@ test_libbitcoin_test_SOURCES = \
     test/chain/header.cpp \
     test/chain/input.cpp \
     test/chain/output.cpp \
+    test/chain/output_point.cpp \
     test/chain/point.cpp \
+    test/chain/point_iterator.cpp \
     test/chain/satoshi_words.cpp \
     test/chain/script.cpp \
     test/chain/script.hpp \
     test/chain/transaction.cpp \
+    test/chain/script/operation.cpp \
     test/config/authority.cpp \
     test/config/base58.cpp \
     test/config/checkpoint.cpp \
@@ -263,6 +266,7 @@ test_libbitcoin_test_SOURCES = \
     test/message/get_blocks.cpp \
     test/message/get_data.cpp \
     test/message/get_headers.cpp \
+    test/message/header_message.cpp \
     test/message/headers.cpp \
     test/message/heading.cpp \
     test/message/inventory.cpp \
