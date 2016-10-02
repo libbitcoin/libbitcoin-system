@@ -38,18 +38,43 @@ threadpool::~threadpool()
     join();
 }
 
+// Should not be called during spawn.
+size_t threadpool::size() const
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    shared_lock(threads_mutex);
+
+    return threads_.size();
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+// Not thread safe.
 void threadpool::spawn(size_t number_threads, thread_priority priority)
 {
     for (size_t i = 0; i < number_threads; ++i)
         spawn_once(priority);
 }
 
+// Not thread safe.
 void threadpool::spawn_once(thread_priority priority)
 {
-    // In C++14 work should use a unique_ptr.
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    work_mutex_.lock_upgrade();
+
     // Work prevents the service from running out of work and terminating.
     if (!work_)
+    {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        work_mutex_.unlock_upgrade_and_lock();
         work_ = std::make_shared<asio::service::work>(service_);
+        work_mutex_.unlock_and_lock_upgrade();
+        //-----------------------------------------------------------------
+    }
+
+    work_mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
 
     const auto action = [this, priority]
     {
@@ -57,7 +82,12 @@ void threadpool::spawn_once(thread_priority priority)
         service_.run();
     };
 
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    unique_lock(threads_mutex);
+
     threads_.push_back(asio::thread(action));
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 void threadpool::abort()
@@ -67,18 +97,39 @@ void threadpool::abort()
 
 void threadpool::shutdown()
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    unique_lock lock(work_mutex_);
+
     work_ = nullptr;
+    ///////////////////////////////////////////////////////////////////////////
 }
 
+// Not thread safe.
 void threadpool::join()
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    threads_mutex_.lock_upgrade();
+
     for (auto& thread: threads_)
+    {
         if (thread.joinable())
+        {
+            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            threads_mutex_.unlock_upgrade_and_lock();
             thread.join();
+            threads_mutex_.unlock_and_lock_upgrade();
+            //-----------------------------------------------------------------
+        }
+    }
 
     // This allows the pool to be cleanly restarted by calling spawn.
     threads_.clear();
     service_.reset();
+
+    threads_mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 asio::service& threadpool::service()

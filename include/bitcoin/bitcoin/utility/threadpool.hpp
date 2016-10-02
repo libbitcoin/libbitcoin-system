@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_THREADPOOL_HPP
 #define LIBBITCOIN_THREADPOOL_HPP
 
+#include <cstddef>
 #include <memory>
 #include <functional>
 #include <thread>
@@ -30,6 +31,7 @@
 namespace libbitcoin {
 
 /**
+ * This class and the asio service it exposes are thread safe.
  * A collection of threads which can be passed operations through io_service.
  */
 class BC_API threadpool
@@ -37,7 +39,7 @@ class BC_API threadpool
 public:
 
     /**
-     * Threadpool constructor. spawn()s number_threads threads.
+     * Threadpool constructor, spawns the specified number of threads.
      * @param[in]   number_threads  Number of threads to spawn.
      * @param[in]   priority        Priority of threads to spawn.
      */
@@ -50,7 +52,12 @@ public:
     void operator=(const threadpool&) = delete;
 
     /**
-     * Add n threads to this threadpool.
+     * The number of threads in the ppol.
+     */
+    size_t size() const;
+
+    /**
+     * Add the specified number of threads to this threadpool.
      * @param[in]   number_threads  Number of threads to add.
      * @param[in]   priority        Priority of threads to add.
      */
@@ -98,9 +105,16 @@ public:
 private:
     void spawn_once(thread_priority priority=thread_priority::normal);
 
+    // This is thread safe.
     asio::service service_;
+
+    // These are protected by mutex.
+
     std::vector<asio::thread> threads_;
+    mutable upgrade_mutex threads_mutex_;
+
     std::shared_ptr<asio::service::work> work_;
+    mutable upgrade_mutex work_mutex_;
 };
 
 } // namespace libbitcoin
