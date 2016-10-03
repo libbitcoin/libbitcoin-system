@@ -43,6 +43,7 @@ namespace chain {
 class BC_API block
 {
 public:
+    typedef std::vector<block> list;
     typedef std::vector<size_t> indexes;
 
     // These properties facilitate block validation.
