@@ -38,6 +38,16 @@ threadpool::~threadpool()
     join();
 }
 
+bool threadpool::empty() const
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    shared_lock(threads_mutex);
+
+    return threads_.size() != 0;
+    ///////////////////////////////////////////////////////////////////////////
+}
+
 // Should not be called during spawn.
 size_t threadpool::size() const
 {

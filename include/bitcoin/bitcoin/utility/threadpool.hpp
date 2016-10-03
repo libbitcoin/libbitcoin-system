@@ -52,7 +52,12 @@ public:
     void operator=(const threadpool&) = delete;
 
     /**
-     * The number of threads in the ppol.
+     * There are no threads configured in the threadpool.
+     */
+    bool empty() const;
+
+    /**
+     * The number of threads configured in the threadpool.
      */
     size_t size() const;
 
