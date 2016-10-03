@@ -81,6 +81,8 @@ public:
         output::list&& outputs);
     transaction(const transaction& other);
     transaction(transaction&& other);
+    transaction(const transaction& other, const hash_digest& hash);
+    transaction(transaction&& other, const hash_digest& hash);
 
     uint32_t version() const;
     void set_version(uint32_t value);
