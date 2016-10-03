@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <limits>
+#include <cfenv>
 #include <cmath>
 #include <memory>
 #include <numeric>
@@ -85,10 +86,14 @@ inline hash_list to_hashes(const transaction::list& transactions)
 
 size_t block::locator_size(size_t top)
 {
+    // Thread side effect :<
+    std::fesetround(FE_UPWARD);
+
     const auto first_ten_or_top = std::min(size_t(10), top);
     const auto remaining = top - first_ten_or_top;
     const auto back_off = remaining == 0 ? 0.0 : std::log2(remaining);
-    return first_ten_or_top + static_cast<size_t>(back_off) + size_t(1);
+    const auto rounded_up_log = static_cast<size_t>(std::nearbyint(back_off));
+    return first_ten_or_top + rounded_up_log + size_t(1);
 }
 
 // This algorithm is a network best practice, not a consensus rule.
@@ -113,7 +118,7 @@ block::indexes block::locator_heights(size_t top)
     heights.push_back(0);
 
     // Validate the reservation computation.
-    BITCOIN_ASSERT(heights.size() == reservation);
+    BITCOIN_ASSERT(heights.size() <= reservation);
     return heights;
 }
 
