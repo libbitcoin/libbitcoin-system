@@ -79,8 +79,6 @@ public:
     /// True if the previous output is mature enough to spend from target.
     bool is_mature(size_t target_height) const;
 
-    // virtual void reset() override;
-
     /// This class is move assignable and copy assignable.
     output_point& operator=(output_point&& other);
     output_point& operator=(const output_point&);

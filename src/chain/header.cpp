@@ -355,7 +355,7 @@ code header::accept(const chain_state& state) const
     else if (version_ < state.minimum_version())
         return error::old_version_block;
 
-    else if (bits != state.work_required())
+    else if (bits_ != state.work_required())
         return error::incorrect_proof_of_work;
 
     else if (timestamp_ <= state.median_time_past())

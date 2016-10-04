@@ -73,7 +73,6 @@ public:
     data_chunk to_data() const;
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
-    std::string to_string() const;
 
     void reset();
     bool is_valid() const;
@@ -81,6 +80,10 @@ public:
 
     uint64_t checksum() const;
     uint64_t serialized_size() const;
+    std::string to_string() const;
+
+    point_iterator begin() const;
+    point_iterator end() const;
 
     /// This class is move assignable and copy assignable.
     point& operator=(point&& other);

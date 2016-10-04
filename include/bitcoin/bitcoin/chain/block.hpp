@@ -92,8 +92,6 @@ public:
     bool is_valid_coinbase_claim(size_t height) const;
     bool is_valid_coinbase_script(size_t height) const;
 
-    hash_digest hash() const;
-
     code check() const;
     code check_transactions() const;
     code accept() const;
@@ -108,9 +106,12 @@ public:
     uint64_t reward(size_t height) const;
     hash_number difficulty() const;
     hash_digest generate_merkle_root() const;
-    size_t total_inputs(bool with_coinbase_transaction=true) const;
-    size_t signature_operations(bool bip16_active) const;
+    hash_digest hash() const;
     size_t signature_operations() const;
+    size_t signature_operations(bool bip16_active) const;
+    size_t total_inputs(bool with_coinbase_transaction=true) const;
+    transaction::sets_const_ptr to_input_sets(size_t fanout,
+        bool with_coinbase_transaction=true) const;
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);

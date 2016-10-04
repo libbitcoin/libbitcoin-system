@@ -128,7 +128,7 @@ public:
     point::indexes immature_inputs(size_t target_height) const;
     point::indexes double_spends(bool include_unconfirmed) const;
     size_t signature_operations(bool bip16_active) const;
-
+    sets_const_ptr to_input_sets(size_t fanout) const;
     std::string to_string(uint32_t flags) const;
 
     bool from_data(const data_chunk& data, bool satoshi=true);
@@ -137,8 +137,6 @@ public:
     data_chunk to_data(bool satoshi=true) const;
     void to_data(std::ostream& stream, bool satoshi=true) const;
     void to_data(writer& sink, bool satoshi=true) const;
-    void reset();
-    uint64_t serialized_size() const;
 
     /// This class is move assignable [but not copy assignable].
     transaction& operator=(transaction&& other);

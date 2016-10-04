@@ -100,21 +100,21 @@ transaction transaction::factory_from_data(reader& source, bool satoshi)
 
 transaction::transaction()
   : version_(0), locktime_(0), inputs_(), outputs_(), hash_(nullptr),
-    metadata(), validation()
+    validation()
 {
 }
 
 transaction::transaction(uint32_t version, uint32_t locktime,
     const input::list& inputs, const output::list& outputs)
   : version_(version), locktime_(locktime), inputs_(inputs), outputs_(outputs),
-    hash_(nullptr), metadata(), validation()
+    hash_(nullptr), validation()
 {
 }
 
 transaction::transaction(uint32_t version, uint32_t locktime,
     input::list&& inputs, output::list&& outputs)
   : version_(version), locktime_(locktime), inputs_(std::move(inputs)),
-    outputs_(std::move(outputs)), hash_(nullptr), metadata(), validation()
+    outputs_(std::move(outputs)), hash_(nullptr), validation()
 {
 }
 
@@ -265,7 +265,7 @@ transaction::sets_ptr transaction::reserve_buckets(size_t total, size_t fanout)
 // Disperse the inputs of the tx evenly to the specified number of buckets.
 transaction::sets_const_ptr transaction::to_input_sets(size_t fanout) const
 {
-    const auto total = inputs.size();
+    const auto total = inputs_.size();
     const auto buckets = reserve_buckets(total, fanout);
 
     // Guard against division by zero.
@@ -274,7 +274,7 @@ transaction::sets_const_ptr transaction::to_input_sets(size_t fanout) const
         size_t count = 0;
 
         // Populate each bucket with either full (or full-1) input references.
-        for (size_t index = 0; index < inputs.size(); ++index)
+        for (size_t index = 0; index < inputs_.size(); ++index)
             (*buckets)[count++ % fanout].push_back({ *this, index });
     }
 
