@@ -71,8 +71,10 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_3__valid_input__returns_input_init
     BOOST_REQUIRE(outputs.back().from_data(to_chunk(base16_literal(
         "f0c9c467000000001976a914d9d78e26df4e4601cf9b26d09c7b280ee764469f88ac"))));
 
+    // These must be non-const.
     auto dup_inputs = inputs;
     auto dup_outputs = outputs;
+
     chain::transaction instance(version, locktime, std::move(dup_inputs), std::move(dup_outputs));
     BOOST_REQUIRE_EQUAL(true, instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
@@ -113,6 +115,7 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_5__valid_input__returns_input_init
         "0000001976a9141ee32412020a324b93b1a1acfdfff6ab9ca8fac288ac000000"
         "00"));
 
+    // This must be non-const.
     chain::transaction expected;
     BOOST_REQUIRE(expected.from_data(raw_tx));
 
@@ -155,7 +158,9 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_7__valid_input__returns_input_init
         "0000001976a9141ee32412020a324b93b1a1acfdfff6ab9ca8fac288ac000000"
         "00"));
 
+    // This must be non-const.
     chain::transaction expected;
+
     BOOST_REQUIRE(expected.from_data(raw_tx));
     const hash_digest expected_hash = hash_literal(
         "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
@@ -252,7 +257,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_locktime_conflict__no_inputs__returns_true)
 
 BOOST_AUTO_TEST_CASE(transaction__is_locktime_conflict__input_max_sequence__returns_true)
 {
+    // This must be non-const.
     chain::input::list inputs;
+
     inputs.emplace_back();
     inputs.back().set_sequence(max_input_sequence);
     chain::transaction instance(0, 2143u, std::move(inputs), {});
@@ -607,6 +614,7 @@ BOOST_AUTO_TEST_CASE(transaction__inputs_setter_2__roundtrip__success)
         "6354aba8f2e02363c5e510aa7e2830b115472fb31de67d16972867f13945012103e589480b2f74"
         "6381fca01a9b12c517b7a482a203c8b2742985da0ac72cc078f2ffffffff"))));
 
+    // This must be non-const.
     auto dup_inputs = inputs;
 
     chain::transaction instance;
@@ -635,6 +643,7 @@ BOOST_AUTO_TEST_CASE(transaction__outputs_setter_2__roundtrip__success)
     BOOST_REQUIRE(outputs.back().from_data(to_chunk(base16_literal(
         "f0c9c467000000001976a914d9d78e26df4e4601cf9b26d09c7b280ee764469f88ac"))));
 
+    // This must be non-const.
     auto dup_outputs = outputs;
 
     chain::transaction instance;
@@ -765,7 +774,10 @@ BOOST_AUTO_TEST_CASE(transaction__total_output_value__non_empty_outputs__returns
 {
     uint64_t expected = 1234;
     chain::transaction instance;
+
+    // This must be non-const.
     chain::output::list outputs;
+
     outputs.emplace_back();
     outputs.back().set_value(1200);
     outputs.emplace_back();

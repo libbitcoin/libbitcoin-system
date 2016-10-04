@@ -23,8 +23,7 @@
 
 using namespace bc;
 
-data_chunk valid_raw_output = to_chunk(base16_literal(
-    "20300500000000001976a914905f933de850988603aafeeb2fd7fce61e66fe5d88ac"));
+data_chunk valid_raw_output = to_chunk(base16_literal("20300500000000001976a914905f933de850988603aafeeb2fd7fce61e66fe5d88ac"));
 
 BOOST_AUTO_TEST_SUITE(output_tests)
 
@@ -38,9 +37,8 @@ BOOST_AUTO_TEST_CASE(output__constructor_2__valid_input__returns_input_initializ
 {
     uint64_t value = 643u;
     chain::script script;
-    BOOST_REQUIRE(script.from_data(
-        to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1")),
-        false, chain::script::parse_mode::raw_data));
+    const auto data = to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1"));
+    BOOST_REQUIRE(script.from_data(data, false, chain::script::parse_mode::raw_data));
 
     chain::output instance(value, script);
     BOOST_REQUIRE_EQUAL(true, instance.is_valid());
@@ -52,11 +50,12 @@ BOOST_AUTO_TEST_CASE(output__constructor_3__valid_input__returns_input_initializ
 {
     uint64_t value = 643u;
     chain::script script;
-    BOOST_REQUIRE(script.from_data(
-        to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1")),
-        false, chain::script::parse_mode::raw_data));
+    const auto data = to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1"));
+    BOOST_REQUIRE(script.from_data(data, false, chain::script::parse_mode::raw_data));
 
+    // This must be non-const.
     auto dup_script = script;
+
     chain::output instance(value, std::move(dup_script));
 
     BOOST_REQUIRE_EQUAL(true, instance.is_valid());
@@ -76,6 +75,7 @@ BOOST_AUTO_TEST_CASE(output__constructor_4__valid_input__returns_input_initializ
 
 BOOST_AUTO_TEST_CASE(output__constructor_5__valid_input__returns_input_initialized)
 {
+    // This must be non-const.
     chain::output expected;
     BOOST_REQUIRE(expected.from_data(valid_raw_output));
 
@@ -149,10 +149,9 @@ BOOST_AUTO_TEST_CASE(output__value__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(output__script_setter_1__roundtrip__success)
 {
-     chain::script value;
-     BOOST_REQUIRE(value.from_data(
-         to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1")),
-         false, chain::script::parse_mode::raw_data));
+    chain::script value;
+    const auto data = to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1"));
+     BOOST_REQUIRE(value.from_data(data, false, chain::script::parse_mode::raw_data));
 
     chain::output instance;
     BOOST_REQUIRE(value != instance.script());
@@ -165,17 +164,18 @@ BOOST_AUTO_TEST_CASE(output__script_setter_1__roundtrip__success)
 BOOST_AUTO_TEST_CASE(output__script_setter_2__roundtrip__success)
 {
     chain::script value;
-    BOOST_REQUIRE(value.from_data(
-        to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1")),
-        false, chain::script::parse_mode::raw_data));
+    const auto data = to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1"));
+    BOOST_REQUIRE(value.from_data(data, false, chain::script::parse_mode::raw_data));
 
+    // This must be non-const.
     auto dup_value = value;
-   chain::output instance;
-   BOOST_REQUIRE(value != instance.script());
-   instance.set_script(std::move(dup_value));
-   BOOST_REQUIRE(value == instance.script());
-   const auto& restricted = instance;
-   BOOST_REQUIRE(value == instance.script());
+
+    chain::output instance;
+    BOOST_REQUIRE(value != instance.script());
+    instance.set_script(std::move(dup_value));
+    BOOST_REQUIRE(value == instance.script());
+    const auto& restricted = instance;
+    BOOST_REQUIRE(value == instance.script());
 }
 
 BOOST_AUTO_TEST_CASE(output__operator_assign_equals_1__always__matches_equivalent)

@@ -23,17 +23,32 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(block_tests)
+// Test helper.
+static bool all_valid(const chain::transaction::list& transactions)
+{
+    auto valid = true;
 
-//BOOST_AUTO_TEST_CASE(block__is_retarget_height__height_mod_retargeting_interval_nonzero__returns_false)
-//{
-//    BOOST_REQUIRE_EQUAL(false, chain::block::is_retarget_height(retargeting_interval - 1));
-//}
-//
-//BOOST_AUTO_TEST_CASE(block__is_retarget_height__height_mod_retargeting_interval_zero__returns_true)
-//{
-//    BOOST_REQUIRE_EQUAL(true, chain::block::is_retarget_height(retargeting_interval * 2));
-//}
+    for (const auto& tx : transactions)
+    {
+        valid &= tx.is_valid();
+
+        for (const auto& input : tx.inputs())
+        {
+            valid &= input.is_valid();
+            valid &= input.script().is_valid();
+        }
+
+        for (const auto& output : tx.outputs())
+        {
+            valid &= output.is_valid();
+            valid &= output.script().is_valid();
+        }
+    }
+
+    return valid;
+}
+
+BOOST_AUTO_TEST_SUITE(block_tests)
 
 BOOST_AUTO_TEST_CASE(block__locator_size__zero_backoff__returns_top_plus_one)
 {
@@ -49,7 +64,7 @@ BOOST_AUTO_TEST_CASE(block__locator_size__positive_backoff__returns_log_plus_ele
 
 BOOST_AUTO_TEST_CASE(block__locator_heights__zero_backoff__returns_top_to_zero)
 {
-    const chain::block::indexes expected = { 7u, 6u, 5u, 4u, 3u, 2u, 1u, 0u };
+    const chain::block::indexes expected{ 7u, 6u, 5u, 4u, 3u, 2u, 1u, 0u };
     size_t top = 7u;
     auto result = chain::block::locator_heights(top);
     BOOST_REQUIRE_EQUAL(expected.size(), result.size());
@@ -58,7 +73,8 @@ BOOST_AUTO_TEST_CASE(block__locator_heights__zero_backoff__returns_top_to_zero)
 
 BOOST_AUTO_TEST_CASE(block__locator_heights__positive_backoff__returns_top_plus_log_offset_to_zero)
 {
-    const chain::block::indexes expected = {
+    const chain::block::indexes expected
+    {
         138u, 137u, 136u, 135u, 134u, 133u, 132u, 131u, 130u,
         129u, 128u, 126u, 122u, 114u,  98u,  66u,   2u,   0u
     };
@@ -84,7 +100,8 @@ BOOST_AUTO_TEST_CASE(block__constructor_2__always__equals_params)
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions = {
+    const chain::transaction::list transactions
+    {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
         chain::transaction(4, 16, {}, {})
@@ -105,14 +122,17 @@ BOOST_AUTO_TEST_CASE(block__constructor_3__always__equals_params)
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions = {
+    const chain::transaction::list transactions
+    {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
         chain::transaction(4, 16, {}, {})
     };
 
+    // These must be non-const.
     chain::header dup_header(header);
-    chain::transaction::list dup_transactions = transactions;
+    chain::transaction::list dup_transactions(transactions);
+
     chain::block instance(std::move(dup_header), std::move(dup_transactions));
     BOOST_REQUIRE_EQUAL(true, instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
@@ -129,7 +149,8 @@ BOOST_AUTO_TEST_CASE(block__constructor_4__always__equals_params)
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions = {
+    const chain::transaction::list transactions
+    {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
         chain::transaction(4, 16, {}, {})
@@ -152,13 +173,16 @@ BOOST_AUTO_TEST_CASE(block__constructor_5__always__equals_params)
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions = {
+    const chain::transaction::list transactions
+    {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
         chain::transaction(4, 16, {}, {})
     };
 
+    // This must be non-const.
     chain::block value(header, transactions);
+
     chain::block instance(std::move(value));
     BOOST_REQUIRE_EQUAL(true, instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
@@ -368,24 +392,7 @@ BOOST_AUTO_TEST_CASE(block__generate_merkle_root__block_with_multiple_transactio
 
     const auto header = block100k.header();
     const auto transactions = block100k.transactions();
-
-    for (const auto& tx: transactions)
-    {
-        BOOST_REQUIRE(tx.is_valid());
-
-        for (const auto& input: tx.inputs())
-        {
-            BOOST_REQUIRE(input.is_valid());
-            BOOST_REQUIRE(input.script().is_valid());
-        }
-
-        for (const auto& output: tx.outputs())
-        {
-            BOOST_REQUIRE(output.is_valid());
-            BOOST_REQUIRE(output.script().is_valid());
-        }
-    }
-
+    BOOST_REQUIRE(all_valid(transactions));
     BOOST_REQUIRE(header.merkle() == block100k.generate_merkle_root());
 }
 
@@ -398,7 +405,8 @@ BOOST_AUTO_TEST_CASE(block__header_accessor__always__returns_initialized_value)
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions = {
+    const chain::transaction::list transactions
+    {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
         chain::transaction(4, 16, {}, {})
@@ -432,7 +440,9 @@ BOOST_AUTO_TEST_CASE(block__header_setter_2__roundtrip__success)
         6523454u,
         68644u);
 
+    // This must be non-const.
     chain::header dup_header(header);
+
     chain::block instance;
     BOOST_REQUIRE(header != instance.header());
     instance.set_header(std::move(dup_header));
@@ -448,7 +458,8 @@ BOOST_AUTO_TEST_CASE(block__transactions_accessor__always__returns_initialized_v
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions = {
+    const chain::transaction::list transactions
+    {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
         chain::transaction(4, 16, {}, {})
@@ -460,7 +471,8 @@ BOOST_AUTO_TEST_CASE(block__transactions_accessor__always__returns_initialized_v
 
 BOOST_AUTO_TEST_CASE(block__transactions_setter_1__roundtrip__success)
 {
-    const chain::transaction::list transactions = {
+    const chain::transaction::list transactions
+    {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
         chain::transaction(4, 16, {}, {})
@@ -474,13 +486,16 @@ BOOST_AUTO_TEST_CASE(block__transactions_setter_1__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(block__transactions_setter_2__roundtrip__success)
 {
-    const chain::transaction::list transactions = {
+    const chain::transaction::list transactions
+    {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
         chain::transaction(4, 16, {}, {})
     };
 
-    chain::transaction::list dup_transactions = transactions;
+    // This must be non-const.
+    chain::transaction::list dup_transactions(transactions);
+
     chain::block instance;
     BOOST_REQUIRE(transactions != instance.transactions());
     instance.set_transactions(std::move(dup_transactions));
@@ -496,13 +511,16 @@ BOOST_AUTO_TEST_CASE(block__operator_assign_equals__always__matches_equivalent)
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions = {
+    const chain::transaction::list transactions
+    {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
         chain::transaction(4, 16, {}, {})
     };
 
+    // This must be non-const.
     chain::block value(header, transactions);
+
     BOOST_REQUIRE(value.is_valid());
     chain::block instance;
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());

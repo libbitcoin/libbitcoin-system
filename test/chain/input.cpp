@@ -42,9 +42,7 @@ BOOST_AUTO_TEST_CASE(input__constructor_2__valid_input__returns_input_initialize
 {
     const chain::output_point previous_output{ null_hash, 5434u };
     chain::script script;
-    BOOST_REQUIRE(script.from_data(
-        to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1")),
-        false, chain::script::parse_mode::raw_data));
+    BOOST_REQUIRE(script.from_data(to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1")), false, chain::script::parse_mode::raw_data));
 
     uint32_t sequence = 4568656u;
 
@@ -59,16 +57,13 @@ BOOST_AUTO_TEST_CASE(input__constructor_3__valid_input__returns_input_initialize
 {
     chain::output_point previous_output{ null_hash, 5434u };
     chain::script script;
-    BOOST_REQUIRE(script.from_data(
-        to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1")),
-        false, chain::script::parse_mode::raw_data));
+    BOOST_REQUIRE(script.from_data(to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1")), false, chain::script::parse_mode::raw_data));
 
     uint32_t sequence = 4568656u;
 
     auto dup_previous_output = previous_output;
     auto dup_script = script;
-    chain::input instance(std::move(dup_previous_output),
-        std::move(dup_script), sequence);
+    chain::input instance(std::move(dup_previous_output), std::move(dup_script), sequence);
 
     BOOST_REQUIRE_EQUAL(true, instance.is_valid());
     BOOST_REQUIRE(previous_output == instance.previous_output());
@@ -107,9 +102,7 @@ BOOST_AUTO_TEST_CASE(input__from_data__insufficient_data__failure)
 
 BOOST_AUTO_TEST_CASE(input__from_data__valid_data__success)
 {
-    auto junk = base16_literal(
-        "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0"
-        "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0");
+    const auto junk = base16_literal("000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0");
     // data_chunk_stream_host host(junk);
     byte_source<std::array<uint8_t, 64>> source(junk);
     boost::iostreams::stream<byte_source<std::array<uint8_t, 64>>> stream(source);
@@ -179,9 +172,10 @@ BOOST_AUTO_TEST_CASE(input__signature_operations__bip16_active_cache_empty__retu
 
 BOOST_AUTO_TEST_CASE(input__previous_output_setter_1__roundtrip__success)
 {
-    const chain::output_point value{
+    const chain::output_point value
+    {
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-            5434u
+        5434u
     };
 
     chain::input instance;
@@ -194,9 +188,10 @@ BOOST_AUTO_TEST_CASE(input__previous_output_setter_1__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(input__previous_output_setter_2__roundtrip__success)
 {
-    const chain::output_point value{
+    const chain::output_point value
+    {
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-            5434u
+        5434u
     };
 
     auto dup_value = value;
@@ -212,9 +207,8 @@ BOOST_AUTO_TEST_CASE(input__previous_output_setter_2__roundtrip__success)
 BOOST_AUTO_TEST_CASE(input__script_setter_1__roundtrip__success)
 {
      chain::script value;
-     BOOST_REQUIRE(value.from_data(
-         to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1")),
-         false, chain::script::parse_mode::raw_data));
+     const auto data = to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1"));
+     BOOST_REQUIRE(value.from_data(data, false, chain::script::parse_mode::raw_data));
 
     chain::input instance;
     BOOST_REQUIRE(value != instance.script());
@@ -227,9 +221,8 @@ BOOST_AUTO_TEST_CASE(input__script_setter_1__roundtrip__success)
 BOOST_AUTO_TEST_CASE(input__script_setter_2__roundtrip__success)
 {
     chain::script value;
-    BOOST_REQUIRE(value.from_data(
-        to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1")),
-        false, chain::script::parse_mode::raw_data));
+    const auto data = to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1"));
+    BOOST_REQUIRE(value.from_data(data, false, chain::script::parse_mode::raw_data));
 
     auto dup_value = value;
    chain::input instance;
