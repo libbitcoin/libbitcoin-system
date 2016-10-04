@@ -89,8 +89,19 @@ inline uint32_t bits_high(const chain_state::data& values)
     return values.bits.ordered.back();
 }
 
+// Statics.
+//-----------------------------------------------------------------------------
+
+// private
+// Determine if height is a multiple of retargeting_interval.
+bool chain_state::is_retarget_height(size_t height)
+{
+    return height % retargeting_interval == 0;
+}
+
+// private
 // Get the bounded total time spanning the highest 2016 blocks.
-inline uint32_t retarget_timespan(const chain_state::data& values)
+uint32_t chain_state::retarget_timespan(const chain_state::data& values)
 {
     // Subtract 32 bit numbers in 64 bit space and constrain result to 32 bits.
     const uint64_t high = timestamp_high(values);
@@ -102,15 +113,6 @@ inline uint32_t retarget_timespan(const chain_state::data& values)
     const uint64_t timespan = high - retarget;
     return range_constrain(timespan, min_timespan, max_timespan);
 }
-
-// Determine if height is a multiple of retargeting_interval.
-inline bool is_retarget_height(size_t height)
-{
-    return height % retargeting_interval == 0;
-}
-
-// Statics.
-//-----------------------------------------------------------------------------
 
 // protected
 chain_state::activations chain_state::activation(const data& values)
@@ -201,8 +203,9 @@ uint32_t chain_state::work_required_retarget(const data& values)
     return retarget > maximum ? maximum.compact() : retarget.compact();
 }
 
+// private
 // A retarget point, or a block that does not have max_bits (is not special).
-inline bool is_retarget_or_nonmax(size_t height, uint32_t bits)
+bool chain_state::is_retarget_or_nonmax(size_t height, uint32_t bits)
 {
     // Zero is a retarget height, ensuring termination before height underflow.
     // This is guaranteed, just asserting here to document the safeguard.
