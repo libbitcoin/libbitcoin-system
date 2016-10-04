@@ -1442,6 +1442,9 @@ static signature_parse_result op_checkmultisigverify(
 
     for (const auto& endorsement: endorsements)
     {
+        if (endorsement.empty())
+            return signature_parse_result::invalid;
+
         const auto sighash_type = endorsement.back();
         auto distinguished = endorsement;
         distinguished.pop_back();
