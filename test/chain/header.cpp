@@ -34,13 +34,13 @@ BOOST_AUTO_TEST_CASE(header__constructor_1__always__initialized_invalid)
 
 BOOST_AUTO_TEST_CASE(header__constructor_2__always__equals_params)
 {
-    uint32_t version = 10u;
-    hash_digest previous = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    hash_digest merkle = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    uint32_t timestamp = 531234u;
-    uint32_t bits = 6523454u;
-    uint32_t nonce = 68644u;
-    uint64_t tx_count = 0u;
+    const uint32_t version = 10u;
+    const auto previous = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
+    const auto merkle = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const uint32_t timestamp = 531234u;
+    const uint32_t bits = 6523454u;
+    const uint32_t nonce = 68644u;
+    const uint64_t tx_count = 0u;
 
     chain::header instance(version, previous, merkle, timestamp, bits, nonce, tx_count);
     BOOST_REQUIRE_EQUAL(true, instance.is_valid());
@@ -55,16 +55,17 @@ BOOST_AUTO_TEST_CASE(header__constructor_2__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(header__constructor_3__always__equals_params)
 {
-    uint32_t version = 10u;
-    hash_digest previous = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    hash_digest merkle = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    uint32_t timestamp = 531234u;
-    uint32_t bits = 6523454u;
-    uint32_t nonce = 68644u;
-    uint64_t tx_count = 0u;
+    const uint32_t version = 10u;
+    const uint32_t timestamp = 531234u;
+    const uint32_t bits = 6523454u;
+    const uint32_t nonce = 68644u;
+    const uint64_t tx_count = 0u;
 
-    chain::header instance(version, std::move(previous), std::move(merkle),
-        timestamp, bits, nonce, tx_count);
+    // These must be non-const.
+    auto previous = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
+    auto merkle = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+
+    chain::header instance(version, std::move(previous), std::move(merkle), timestamp, bits, nonce, tx_count);
     BOOST_REQUIRE_EQUAL(true, instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(timestamp, instance.timestamp());
@@ -92,6 +93,7 @@ BOOST_AUTO_TEST_CASE(header__constructor_4__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(header__constructor_5__always__equals_params)
 {
+    // This must be non-const.
     chain::header expected(
         10u,
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
@@ -127,9 +129,9 @@ BOOST_AUTO_TEST_CASE(header__factory_from_data_1__valid_input__success)
         68644
     };
 
-    data_chunk data = expected.to_data(false);
+    const auto data = expected.to_data(false);
 
-    auto result = chain::header::factory_from_data(data, false);
+    const auto result = chain::header::factory_from_data(data, false);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -147,10 +149,10 @@ BOOST_AUTO_TEST_CASE(header__factory_from_data_2__valid_input__success)
         68644
     };
 
-    data_chunk data = expected.to_data(false);
+    const auto data = expected.to_data(false);
     data_source istream(data);
 
-    auto result = chain::header::factory_from_data(istream, false);
+    const auto result = chain::header::factory_from_data(istream, false);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -158,7 +160,7 @@ BOOST_AUTO_TEST_CASE(header__factory_from_data_2__valid_input__success)
 
 BOOST_AUTO_TEST_CASE(header__factory_from_data_3__valid_input__success)
 {
-    chain::header expected
+    const chain::header expected
     {
         10,
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
@@ -168,11 +170,11 @@ BOOST_AUTO_TEST_CASE(header__factory_from_data_3__valid_input__success)
         68644
     };
 
-    data_chunk data = expected.to_data(false);
+    const auto data = expected.to_data(false);
     data_source istream(data);
     istream_reader source(istream);
 
-    auto result = chain::header::factory_from_data(source, false);
+    const auto result = chain::header::factory_from_data(source, false);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -180,7 +182,7 @@ BOOST_AUTO_TEST_CASE(header__factory_from_data_3__valid_input__success)
 
 BOOST_AUTO_TEST_CASE(header__factory_from_data_3__without_transaction_count__does_not_match)
 {
-    chain::header expected
+    const chain::header expected
     {
         10,
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
@@ -191,11 +193,11 @@ BOOST_AUTO_TEST_CASE(header__factory_from_data_3__without_transaction_count__doe
         1234
     };
 
-    data_chunk data = expected.to_data(false);
+    const auto data = expected.to_data(false);
     data_source istream(data);
     istream_reader source(istream);
 
-    auto result = chain::header::factory_from_data(source, false);
+    const auto result = chain::header::factory_from_data(source, false);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected != result);
@@ -203,7 +205,7 @@ BOOST_AUTO_TEST_CASE(header__factory_from_data_3__without_transaction_count__doe
 
 BOOST_AUTO_TEST_CASE(header__factory_from_data_3__with_transaction_count__matches)
 {
-    chain::header expected
+    const chain::header expected
     {
         10,
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
@@ -214,11 +216,11 @@ BOOST_AUTO_TEST_CASE(header__factory_from_data_3__with_transaction_count__matche
         123544
     };
 
-    data_chunk data = expected.to_data(true);
+    const auto data = expected.to_data(true);
     data_source istream(data);
     istream_reader source(istream);
 
-    auto result = chain::header::factory_from_data(source, true);
+    const auto result = chain::header::factory_from_data(source, true);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -226,8 +228,8 @@ BOOST_AUTO_TEST_CASE(header__factory_from_data_3__with_transaction_count__matche
 
 BOOST_AUTO_TEST_CASE(header__version_accessor__always__returns_initialized_value)
 {
-    uint32_t value = 11234u;
-    chain::header instance(
+    const uint32_t value = 11234u;
+    const chain::header instance(
         value,
         hash_literal("abababababababababababababababababababababababababababababababab"),
         hash_literal("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe"),
@@ -249,7 +251,7 @@ BOOST_AUTO_TEST_CASE(header__version_setter__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(header__previous_block_hash_accessor_1__always__returns_initialized_value)
 {
-    hash_digest value = hash_literal("abababababababababababababababababababababababababababababababab");
+    const auto value = hash_literal("abababababababababababababababababababababababababababababababab");
     chain::header instance(
         11234u,
         value,
@@ -263,7 +265,7 @@ BOOST_AUTO_TEST_CASE(header__previous_block_hash_accessor_1__always__returns_ini
 
 BOOST_AUTO_TEST_CASE(header__previous_block_hash_accessor_2__always__returns_initialized_value)
 {
-    hash_digest value = hash_literal("abababababababababababababababababababababababababababababababab");
+    const auto value = hash_literal("abababababababababababababababababababababababababababababababab");
     const chain::header instance(
         11234u,
         value,
@@ -277,7 +279,7 @@ BOOST_AUTO_TEST_CASE(header__previous_block_hash_accessor_2__always__returns_ini
 
 BOOST_AUTO_TEST_CASE(header__previous_block_hash_setter_1__roundtrip__success)
 {
-    hash_digest expected = hash_literal("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe");
+    const auto expected = hash_literal("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe");
     chain::header instance;
     BOOST_REQUIRE(expected != instance.previous_block_hash());
     instance.set_previous_block_hash(expected);
@@ -286,8 +288,11 @@ BOOST_AUTO_TEST_CASE(header__previous_block_hash_setter_1__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(header__previous_block_hash_setter_2__roundtrip__success)
 {
-    hash_digest expected = hash_literal("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe");
-    hash_digest duplicate = expected;
+    const auto expected = hash_literal("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe");
+
+    // This must be non-const.
+    auto duplicate = expected;
+
     chain::header instance;
     BOOST_REQUIRE(expected != instance.previous_block_hash());
     instance.set_previous_block_hash(std::move(duplicate));
@@ -296,7 +301,7 @@ BOOST_AUTO_TEST_CASE(header__previous_block_hash_setter_2__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(header__merkle_accessor_1__always__returns_initialized_value)
 {
-    hash_digest value = hash_literal("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe");
+    const auto value = hash_literal("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe");
     chain::header instance(
         11234u,
         hash_literal("abababababababababababababababababababababababababababababababab"),
@@ -310,7 +315,7 @@ BOOST_AUTO_TEST_CASE(header__merkle_accessor_1__always__returns_initialized_valu
 
 BOOST_AUTO_TEST_CASE(header__merkle_accessor_2__always__returns_initialized_value)
 {
-    hash_digest value = hash_literal("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe");
+    const auto value = hash_literal("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe");
     const chain::header instance(
         11234u,
         hash_literal("abababababababababababababababababababababababababababababababab"),
@@ -324,7 +329,7 @@ BOOST_AUTO_TEST_CASE(header__merkle_accessor_2__always__returns_initialized_valu
 
 BOOST_AUTO_TEST_CASE(header__merkle_setter_1__roundtrip__success)
 {
-    hash_digest expected = hash_literal("abababababababababababababababababababababababababababababababab");
+    const auto expected = hash_literal("abababababababababababababababababababababababababababababababab");
     chain::header instance;
     BOOST_REQUIRE(expected != instance.merkle());
     instance.set_merkle(expected);
@@ -333,8 +338,11 @@ BOOST_AUTO_TEST_CASE(header__merkle_setter_1__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(header__merkle_setter_2__roundtrip__success)
 {
-    hash_digest expected = hash_literal("abababababababababababababababababababababababababababababababab");
+    const auto expected = hash_literal("abababababababababababababababababababababababababababababababab");
+
+    // This must be non-const.
     hash_digest duplicate = expected;
+
     chain::header instance;
     BOOST_REQUIRE(expected != instance.merkle());
     instance.set_merkle(std::move(duplicate));
@@ -462,7 +470,7 @@ BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__bits_exceeds_maximum__retur
 
 BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_greater_bits__returns_false)
 {
-    chain::header instance(
+    const chain::header instance(
         11234u,
         hash_literal("abababababababababababababababababababababababababababababababab"),
         hash_literal("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe"),
@@ -475,7 +483,7 @@ BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_greater_bits__returns_
 
 BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_less_than_bits__returns_true)
 {
-    chain::header instance(
+    const chain::header instance(
         4u,
         hash_literal("000000000000000003ddc1e929e2944b8b0039af9aa0d826c480a83d8b39c373"),
         hash_literal("a6cb0b0d6531a71abe2daaa4a991e5498e1b6b0b51549568d0f9d55329b905df"),
@@ -488,6 +496,7 @@ BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_less_than_bits__return
 
 BOOST_AUTO_TEST_CASE(header__operator_assign_equals__always__matches_equivalent)
 {
+    // This must be non-const.
     chain::header value(
         10u,
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),

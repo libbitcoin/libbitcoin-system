@@ -77,20 +77,28 @@ inline size_t bip16_activation_height(bool testnet)
         mainnet_bip16_activation_height;
 }
 
-// Get the timestamp of the high height block.
 inline uint32_t timestamp_high(const chain_state::data& values)
 {
     return values.timestamp.ordered.back();
 }
 
-// Get the bits of the high height block.
 inline uint32_t bits_high(const chain_state::data& values)
 {
     return values.bits.ordered.back();
 }
 
+// Statics.
+//-----------------------------------------------------------------------------
+// non-public
+
+// Determine if height is a multiple of retargeting_interval.
+bool chain_state::is_retarget_height(size_t height)
+{
+    return height % retargeting_interval == 0;
+}
+
 // Get the bounded total time spanning the highest 2016 blocks.
-inline uint32_t retarget_timespan(const chain_state::data& values)
+uint32_t chain_state::retarget_timespan(const chain_state::data& values)
 {
     // Subtract 32 bit numbers in 64 bit space and constrain result to 32 bits.
     const uint64_t high = timestamp_high(values);
@@ -103,16 +111,6 @@ inline uint32_t retarget_timespan(const chain_state::data& values)
     return range_constrain(timespan, min_timespan, max_timespan);
 }
 
-// Determine if height is a multiple of retargeting_interval.
-inline bool is_retarget_height(size_t height)
-{
-    return height % retargeting_interval == 0;
-}
-
-// Statics.
-//-----------------------------------------------------------------------------
-
-// protected
 chain_state::activations chain_state::activation(const data& values)
 {
     const auto height = values.height;
@@ -166,7 +164,6 @@ chain_state::activations chain_state::activation(const data& values)
     return result;
 }
 
-// protected
 uint32_t chain_state::median_time_past(const data& values)
 {
     // Create a copy for the in-place sort.
@@ -180,7 +177,6 @@ uint32_t chain_state::median_time_past(const data& values)
     return times.empty() ? 0 : times[times.size() / 2];
 }
 
-// private
 uint32_t chain_state::work_required_retarget(const data& values)
 {
     //*************************************************************************
@@ -202,7 +198,7 @@ uint32_t chain_state::work_required_retarget(const data& values)
 }
 
 // A retarget point, or a block that does not have max_bits (is not special).
-inline bool is_retarget_or_nonmax(size_t height, uint32_t bits)
+bool chain_state::is_retarget_or_nonmax(size_t height, uint32_t bits)
 {
     // Zero is a retarget height, ensuring termination before height underflow.
     // This is guaranteed, just asserting here to document the safeguard.
@@ -211,7 +207,6 @@ inline bool is_retarget_or_nonmax(size_t height, uint32_t bits)
     return bits != max_work_bits || is_retarget_height(height);
 }
 
-// private
 uint32_t chain_state::work_required_testnet(const data& values)
 {
     BITCOIN_ASSERT(values.height != 0);
@@ -238,7 +233,6 @@ uint32_t chain_state::work_required_testnet(const data& values)
     return max_work_bits;
 }
 
-// protected
 uint32_t chain_state::work_required(const data& values)
 {
     // Invalid parameter via public interface, test is_valid for results.
