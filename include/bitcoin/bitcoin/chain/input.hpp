@@ -73,10 +73,12 @@ public:
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
     std::string to_string(uint32_t flags) const;
+
+    void reset();
     bool is_valid() const;
     bool is_final() const;
     bool is_output_mature(size_t target_height) const;
-    void reset();
+
     uint64_t serialized_size() const;
 
     input& operator=(const input& other);

@@ -294,11 +294,8 @@ uint64_t block::serialized_size() const
 size_t block::signature_operations() const
 {
     const auto state = validation.state;
-
-    if (!state)
-        return max_size_t;
-
-    return signature_operations(state->is_enabled(rule_fork::bip16_rule));
+    return state ? signature_operations(
+        state->is_enabled(rule_fork::bip16_rule)) : max_size_t;
 }
 
 size_t block::signature_operations(bool bip16_active) const
@@ -355,11 +352,7 @@ bool block::is_final(size_t height) const
 // Distinctness is defined by transaction hash.
 bool block::is_distinct_transaction_set() const
 {
-    const auto hasher = [](const transaction& transaction)
-    {
-        return transaction.hash();
-    };
-
+    const auto hasher = [](const transaction& tx) { return tx.hash(); };
     const auto& txs = transactions_;
     hash_list hashes(txs.size());
     std::transform(txs.begin(), txs.end(), hashes.begin(), hasher);
@@ -489,14 +482,13 @@ code block::connect_transactions(const chain_state& state) const
 // These checks are self-contained; blockchain (and so version) independent.
 code block::check() const
 {
-    if (serialized_size() > max_block_size)
+    code ec;
+
+    if ((ec = header_.check()))
+        return ec;
+
+    else if (serialized_size() > max_block_size)
         return error::size_limits;
-
-    else if (!header_.is_valid_proof_of_work())
-        return error::invalid_proof_of_work;
-
-    else if (!header_.is_valid_time_stamp())
-        return error::futuristic_timestamp;
 
     else if (transactions_.empty())
         return error::empty_block;
@@ -527,11 +519,7 @@ code block::check() const
 code block::accept() const
 {
     const auto state = validation.state;
-
-    if (!state)
-        return error::operation_failed;
-
-    return accept(*validation.state);
+    return state ? accept(*state) : error::operation_failed;
 }
 
 // Deprecated (?)
@@ -540,20 +528,12 @@ code block::accept() const
 // Flags should be based on connecting at the specified blockchain height.
 code block::accept(const chain_state& state) const
 {
+    code ec;
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip34 = state.is_enabled(rule_fork::bip34_rule);
 
-    if (state.is_checkpoint_failure(header_))
-        return error::checkpoints_failed;
-
-    else if(header_.version() < state.minimum_version())
-        return error::old_version_block;
-
-    else if (header_.bits() != state.work_required())
-        return error::incorrect_proof_of_work;
-
-    else if (header_.timestamp() <= state.median_time_past())
-        return error::timestamp_too_early;
+    if ((ec = header_.accept(state)))
+        return ec;
 
     // This recurses txs but is not applied to mempool (timestamp required).
     else if (!is_final(state.height()))
@@ -681,11 +661,7 @@ hash_digest block::build_merkle_tree(hash_list& merkle)
 code block::connect() const
 {
     const auto state = validation.state;
-
-    if (!state)
-        return error::operation_failed;
-
-    return connect(*validation.state);
+    return state ? connect(*state) : error::operation_failed;
 }
 
 // Deprecated (?)

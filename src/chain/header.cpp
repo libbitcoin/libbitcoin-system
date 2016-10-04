@@ -22,7 +22,9 @@
 #include <chrono>
 #include <utility>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/hash_number.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -331,6 +333,36 @@ bool header::is_valid_proof_of_work() const
 
     hash_number value(hash());
     return value <= target;
+}
+
+code header::check() const
+{
+    if (!is_valid_proof_of_work())
+        return error::invalid_proof_of_work;
+
+    else if (!is_valid_time_stamp())
+        return error::futuristic_timestamp;
+
+    else
+        return error::success;
+}
+
+code header::accept(const chain_state& state) const
+{
+    if (state.is_checkpoint_failure(hash()))
+        return error::checkpoints_failed;
+
+    else if (version_ < state.minimum_version())
+        return error::old_version_block;
+
+    else if (bits != state.work_required())
+        return error::incorrect_proof_of_work;
+
+    else if (timestamp_ <= state.median_time_past())
+        return error::timestamp_too_early;
+
+    else
+        return error::success;
 }
 
 header& header::operator=(header&& other)

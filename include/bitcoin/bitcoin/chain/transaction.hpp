@@ -101,6 +101,7 @@ public:
     void set_outputs(const output::list& value);
     void set_outputs(output::list&& value);
 
+    void reset();
     bool is_valid() const;
     bool is_coinbase() const;
     bool is_oversized_coinbase() const;
@@ -117,15 +118,16 @@ public:
     code connect(const chain_state& state) const;
     code connect_input(const chain_state& state, size_t input_index) const;
 
+    uint64_t fees() const;
+    hash_digest hash() const;
+    hash_digest hash(uint32_t sighash_type) const;
+    uint64_t serialized_size() const;
     uint64_t total_input_value() const;
     uint64_t total_output_value() const;
     point::indexes missing_inputs() const;
     point::indexes immature_inputs(size_t target_height) const;
     point::indexes double_spends(bool include_unconfirmed) const;
     size_t signature_operations(bool bip16_active) const;
-    hash_digest hash(uint32_t sighash_type) const;
-    hash_digest hash() const;
-    uint64_t fees() const;
 
     std::string to_string(uint32_t flags) const;
 

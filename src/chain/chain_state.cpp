@@ -365,18 +365,18 @@ bool chain_state::is_enabled(rule_fork flag) const
     return script::is_enabled(active_.forks, flag);
 }
 
-bool chain_state::is_enabled(const header& header, rule_fork flag) const
+bool chain_state::is_enabled(uint32_t block_version, rule_fork flag) const
 {
     return (is_enabled(flag)) &&
-       ((flag == rule_fork::bip65_rule && header.version() >= bip65_version) ||
-        (flag == rule_fork::bip66_rule && header.version() >= bip66_version) ||
-        (flag == rule_fork::bip34_rule && header.version() >= bip34_version));
+       ((flag == rule_fork::bip65_rule && block_version >= bip65_version) ||
+        (flag == rule_fork::bip66_rule && block_version >= bip66_version) ||
+        (flag == rule_fork::bip34_rule && block_version >= bip34_version));
 }
 
-bool chain_state::is_checkpoint_failure(const header& header) const
+bool chain_state::is_checkpoint_failure(const hash_digest& hash) const
 {
     using namespace bc::config;
-    return !checkpoint::validate(header.hash(), data_.height, checkpoints_);
+    return !checkpoint::validate(hash, data_.height, checkpoints_);
 }
 
 bool chain_state::use_full_validation() const

@@ -106,7 +106,6 @@ public:
     uint64_t fees() const;
     uint64_t claim() const;
     uint64_t reward(size_t height) const;
-
     hash_number difficulty() const;
     hash_digest generate_merkle_root() const;
     size_t total_inputs(bool with_coinbase_transaction=true) const;

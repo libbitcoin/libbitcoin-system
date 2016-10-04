@@ -663,7 +663,8 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     else if (transaction_pool && signature_operations(bip16) > max_block_sigops)
         return error::too_many_sigs;
 
-    return error::success;
+    else
+        return error::success;
 }
 
 code transaction::connect(const chain_state& state) const
