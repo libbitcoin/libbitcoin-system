@@ -256,7 +256,7 @@ transaction::sets_const_ptr block::to_input_sets(size_t fanout,
         const auto start = with_coinbase_transaction ? 0 : 1;
 
         // Populate each bucket with either full (or full-1) input references.
-        for (auto& tx = txs.begin() + start; tx != txs.end(); ++tx)
+        for (auto tx = txs.begin() + start; tx != txs.end(); ++tx)
             for (size_t index = 0; index < tx->inputs().size(); ++index)
                 (*buckets)[count++ % fanout].push_back({ *tx, index });
     }
