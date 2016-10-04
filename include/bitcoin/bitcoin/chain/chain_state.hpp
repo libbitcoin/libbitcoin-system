@@ -73,8 +73,8 @@ public:
         /// Header values are based on a testnet map.
         bool testnet;
 
-        /// All forks are activated at the corresponding height (from cache).
-        bool activated;
+        /// All forks are enabled at the corresponding height (from cache).
+        bool enabled;
 
         /// Header values are based on this height.
         size_t height;
@@ -95,7 +95,7 @@ public:
     };
 
     // Compute the height map from any height and testnet flag.
-    static map get_map(size_t height, bool activated, bool testnet);
+    static map get_map(size_t height, bool enabled, bool testnet);
 
     /// Checkpoints must be ordered by height with greatest at back.
     chain_state(data&& values, const checkpoints& checkpoints);
@@ -109,6 +109,9 @@ public:
 
     /// Construction with zero height or any empty array causes invalid state.
     bool is_valid() const;
+
+    /// Determine if all forks are enabled (cache for next height construct).
+    bool is_enabled() const;
 
     /// Determine if the flag is set in the active_forks member.
     bool is_enabled(rule_fork flag) const;

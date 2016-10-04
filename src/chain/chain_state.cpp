@@ -258,7 +258,7 @@ uint32_t chain_state::work_required(const data& values)
 //-----------------------------------------------------------------------------
 
 // static
-chain_state::map chain_state::get_map(size_t height, bool activated,
+chain_state::map chain_state::get_map(size_t height, bool enabled,
     bool testnet)
 {
     // Invalid parameter in public interface, defaults indicate failure.
@@ -300,7 +300,7 @@ chain_state::map chain_state::get_map(size_t height, bool activated,
     // The height range of the version sample.
     // If too small to activate set low to high to avoid unnecessary queries.
     map.version.high = height - max_version_past;
-    map.version.low = activated ?
+    map.version.low = enabled ?
         floor_subtract(map.version.high, min_version_past) : map.version.high;
     map.version.low = is_active(map.version.high - map.version.low, testnet) ?
         map.version.low : map.version.high;
@@ -331,6 +331,11 @@ bool chain_state::is_valid() const
 
 // Properties.
 //-----------------------------------------------------------------------------
+
+bool chain_state::is_enabled() const
+{
+    return is_enabled(rule_fork::bip65_rule);
+}
 
 size_t chain_state::height() const
 {
