@@ -53,6 +53,46 @@ using namespace bc::config;
 
 const size_t block::validation::orphan_height = 0;
 
+static const std::string encoded_mainnet_genesis_block =
+    "01000000"
+    "0000000000000000000000000000000000000000000000000000000000000000"
+    "3ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"
+    "29ab5f49"
+    "ffff001d"
+    "1dac2b7c"
+    "01"
+    "01000000"
+    "01"
+    "0000000000000000000000000000000000000000000000000000000000000000ffffffff"
+    "4d"
+    "04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73"
+    "ffffffff"
+    "01"
+    "00f2052a01000000"
+    "43"
+    "4104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac"
+    "00000000";
+
+static const std::string encoded_testnet_genesis_block =
+    "01000000"
+    "0000000000000000000000000000000000000000000000000000000000000000"
+    "3ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"
+    "dae5494d"
+    "ffff001d"
+    "1aa4ae18"
+    "01"
+    "01000000"
+    "01"
+    "0000000000000000000000000000000000000000000000000000000000000000ffffffff"
+    "4d"
+    "04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73"
+    "ffffffff"
+    "01"
+    "00f2052a01000000"
+    "43"
+    "4104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac"
+    "00000000";
+
 block block::factory_from_data(const data_chunk& data)
 {
     block instance;
@@ -74,14 +114,77 @@ block block::factory_from_data(reader& source)
     return instance;
 }
 
-// Hash ordering matters, don't use std::transform here.
-inline hash_list to_hashes(const transaction::list& transactions)
+chain::block block::genesis_mainnet()
 {
-    hash_list out;
-    out.reserve(transactions.size());
-    auto hasher = [&out](const transaction& tx) { out.push_back(tx.hash()); };
-    std::for_each(transactions.begin(), transactions.end(), hasher);
-    return out;
+    data_chunk raw_block;
+    decode_base16(raw_block, encoded_mainnet_genesis_block);
+    const auto genesis = chain::block::factory_from_data(raw_block);
+
+    BITCOIN_ASSERT(genesis.is_valid());
+    BITCOIN_ASSERT(genesis.transactions().size() == 1);
+    BITCOIN_ASSERT(genesis.generate_merkle_root() == genesis.header().merkle());
+
+    return genesis;
+}
+
+chain::block block::genesis_testnet()
+{
+    data_chunk raw_block;
+    decode_base16(raw_block, encoded_testnet_genesis_block);
+    const auto genesis = chain::block::factory_from_data(raw_block);
+
+    BITCOIN_ASSERT(genesis.is_valid());
+    BITCOIN_ASSERT(genesis.transactions().size() == 1);
+    BITCOIN_ASSERT(genesis.generate_merkle_root() == genesis.header().merkle());
+
+    return genesis;
+}
+
+hash_digest block::build_merkle_tree(hash_list& merkle)
+{
+    // Stop if hash list is empty.
+    if (merkle.empty())
+        return null_hash;
+
+    // While there is more than 1 hash in the list, keep looping...
+    while (merkle.size() > 1)
+    {
+        // If number of hashes is odd, duplicate last hash in the list.
+        if (merkle.size() % 2 != 0)
+            merkle.push_back(merkle.back());
+
+        // List size is now even.
+        BITCOIN_ASSERT(merkle.size() % 2 == 0);
+
+        // New hash list.
+        hash_list new_merkle;
+
+        // Loop through hashes 2 at a time.
+        for (auto it = merkle.begin(); it != merkle.end(); it += 2)
+        {
+            // Join both current hashes together (concatenate).
+            data_chunk concat_data;
+            data_sink concat_stream(concat_data);
+            ostream_writer concat_sink(concat_stream);
+            concat_sink.write_hash(*it);
+            concat_sink.write_hash(*(it + 1));
+            concat_stream.flush();
+
+            BITCOIN_ASSERT(concat_data.size() == (2 * hash_size));
+
+            // Hash both of the hashes.
+            const auto new_root = bitcoin_hash(concat_data);
+
+            // Add this to the new list.
+            new_merkle.push_back(new_root);
+        }
+
+        // This is the new list.
+        merkle = new_merkle;
+    }
+
+    // Finally we end up with a single item.
+    return merkle[0];
 }
 
 size_t block::locator_size(size_t top)
@@ -143,18 +246,28 @@ uint64_t block::subsidy(size_t height)
     return subsidy;
 }
 
+// Hash ordering matters, don't use std::transform here.
+inline hash_list to_hashes(const transaction::list& transactions)
+{
+    hash_list out;
+    out.reserve(transactions.size());
+    auto hasher = [&out](const transaction& tx) { out.push_back(tx.hash()); };
+    std::for_each(transactions.begin(), transactions.end(), hasher);
+    return out;
+}
+
 block::block()
   : header_(), transactions_()
 {
 }
 
 block::block(const chain::header& header,
-    const chain::transaction::list& transactions)
+    const transaction::list& transactions)
   : header_(header), transactions_(transactions)
 {
 }
 
-block::block(chain::header&& header, chain::transaction::list&& transactions)
+block::block(chain::header&& header, transaction::list&& transactions)
   : header_(std::move(header)),
     transactions_(std::move(transactions))
 {
@@ -168,6 +281,64 @@ block::block(const block& other)
 block::block(block&& other)
   : block(std::move(other.header_), std::move(other.transactions_))
 {
+}
+
+chain::header& block::header()
+{
+    return header_;
+}
+
+const chain::header& block::header() const
+{
+    return header_;
+}
+
+void block::set_header(const chain::header& value)
+{
+    header_ = value;
+}
+
+void block::set_header(chain::header&& value)
+{
+    header_ = std::move(value);
+}
+
+transaction::list& block::transactions()
+{
+    return transactions_;
+}
+
+const transaction::list& block::transactions() const
+{
+    return transactions_;
+}
+
+void block::set_transactions(const transaction::list& value)
+{
+    transactions_ = value;
+}
+
+void block::set_transactions(transaction::list&& value)
+{
+    transactions_ = std::move(value);
+}
+
+block& block::operator=(block&& other)
+{
+    header_ = std::move(other.header_);
+    transactions_ = std::move(other.transactions_);
+    return *this;
+}
+
+bool block::operator==(const block& other) const
+{
+    return (header_ == other.header_)
+        && (transactions_ == other.transactions_);
+}
+
+bool block::operator!=(const block& other) const
+{
+    return !(*this == other);
 }
 
 bool block::is_valid() const
@@ -553,111 +724,6 @@ code block::accept(const chain_state& state) const
         return accept_transactions(state);
 }
 
-chain::header& block::header()
-{
-    return header_;
-}
-
-const chain::header& block::header() const
-{
-    return header_;
-}
-
-void block::set_header(const chain::header& value)
-{
-    header_ = value;
-}
-
-void block::set_header(chain::header&& value)
-{
-    header_ = std::move(value);
-}
-
-transaction::list& block::transactions()
-{
-    return transactions_;
-}
-
-const transaction::list& block::transactions() const
-{
-    return transactions_;
-}
-
-void block::set_transactions(const transaction::list& value)
-{
-    transactions_ = value;
-}
-
-void block::set_transactions(transaction::list&& value)
-{
-    transactions_ = std::move(value);
-}
-
-block& block::operator=(block&& other)
-{
-    header_ = std::move(other.header_);
-    transactions_ = std::move(other.transactions_);
-    return *this;
-}
-
-bool block::operator==(const block& other) const
-{
-    return (header_ == other.header_)
-        && (transactions_ == other.transactions_);
-}
-
-bool block::operator!=(const block& other) const
-{
-    return !(*this == other);
-}
-
-hash_digest block::build_merkle_tree(hash_list& merkle)
-{
-    // Stop if hash list is empty.
-    if (merkle.empty())
-        return null_hash;
-
-    // While there is more than 1 hash in the list, keep looping...
-    while (merkle.size() > 1)
-    {
-        // If number of hashes is odd, duplicate last hash in the list.
-        if (merkle.size() % 2 != 0)
-            merkle.push_back(merkle.back());
-
-        // List size is now even.
-        BITCOIN_ASSERT(merkle.size() % 2 == 0);
-
-        // New hash list.
-        hash_list new_merkle;
-
-        // Loop through hashes 2 at a time.
-        for (auto it = merkle.begin(); it != merkle.end(); it += 2)
-        {
-            // Join both current hashes together (concatenate).
-            data_chunk concat_data;
-            data_sink concat_stream(concat_data);
-            ostream_writer concat_sink(concat_stream);
-            concat_sink.write_hash(*it);
-            concat_sink.write_hash(*(it + 1));
-            concat_stream.flush();
-
-            BITCOIN_ASSERT(concat_data.size() == (2 * hash_size));
-
-            // Hash both of the hashes.
-            const auto new_root = bitcoin_hash(concat_data);
-
-            // Add this to the new list.
-            new_merkle.push_back(new_root);
-        }
-
-        // This is the new list.
-        merkle = new_merkle;
-    }
-
-    // Finally we end up with a single item.
-    return merkle[0];
-}
-
 code block::connect() const
 {
     const auto state = validation.state;
@@ -668,72 +734,6 @@ code block::connect() const
 code block::connect(const chain_state& state) const
 {
     return connect_transactions(state);
-}
-
-static const std::string encoded_mainnet_genesis_block =
-    "01000000"
-    "0000000000000000000000000000000000000000000000000000000000000000"
-    "3ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"
-    "29ab5f49"
-    "ffff001d"
-    "1dac2b7c"
-    "01"
-    "01000000"
-    "01"
-    "0000000000000000000000000000000000000000000000000000000000000000ffffffff"
-    "4d"
-    "04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73"
-    "ffffffff"
-    "01"
-    "00f2052a01000000"
-    "43"
-    "4104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac"
-    "00000000";
-
-static const std::string encoded_testnet_genesis_block =
-    "01000000"
-    "0000000000000000000000000000000000000000000000000000000000000000"
-    "3ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"
-    "dae5494d"
-    "ffff001d"
-    "1aa4ae18"
-    "01"
-    "01000000"
-    "01"
-    "0000000000000000000000000000000000000000000000000000000000000000ffffffff"
-    "4d"
-    "04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73"
-    "ffffffff"
-    "01"
-    "00f2052a01000000"
-    "43"
-    "4104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac"
-    "00000000";
-
-chain::block block::genesis_mainnet()
-{
-    data_chunk raw_block;
-    decode_base16(raw_block, encoded_mainnet_genesis_block);
-    const auto genesis = chain::block::factory_from_data(raw_block);
-
-    BITCOIN_ASSERT(genesis.is_valid());
-    BITCOIN_ASSERT(genesis.transactions().size() == 1);
-    BITCOIN_ASSERT(genesis.generate_merkle_root() == genesis.header().merkle());
-
-    return genesis;
-}
-
-chain::block block::genesis_testnet()
-{
-    data_chunk raw_block;
-    decode_base16(raw_block, encoded_testnet_genesis_block);
-    const auto genesis = chain::block::factory_from_data(raw_block);
-
-    BITCOIN_ASSERT(genesis.is_valid());
-    BITCOIN_ASSERT(genesis.transactions().size() == 1);
-    BITCOIN_ASSERT(genesis.generate_merkle_root() == genesis.header().merkle());
-
-    return genesis;
 }
 
 } // namespace chain

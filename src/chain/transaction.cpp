@@ -96,6 +96,27 @@ transaction transaction::factory_from_data(reader& source, bool satoshi)
     return instance;
 }
 
+// Reserve uniform buckets of minimum size and full distribution.
+transaction::sets_ptr transaction::reserve_buckets(size_t total, size_t fanout)
+{
+    // Guard against division by zero.
+    if (fanout == 0)
+        return std::make_shared<transaction::sets>(0);
+
+    const auto quotient = total / fanout;
+    const auto remainder = total % fanout;
+    const auto capacity = quotient + (remainder == 0 ? 0 : 1);
+    const auto quantity = quotient == 0 ? remainder : fanout;
+    const auto buckets = std::make_shared<transaction::sets>(quantity);
+    const auto reserve = [capacity](transaction::set& set)
+    {
+        set.reserve(capacity);
+    };
+
+    std::for_each(buckets->begin(), buckets->end(), reserve);
+    return buckets;
+}
+
 // default constructors
 
 transaction::transaction()
@@ -142,24 +163,94 @@ transaction::transaction(transaction&& other, const hash_digest& hash)
     hash_.reset(new hash_digest(hash));
 }
 
-bool transaction::is_valid() const
+uint32_t transaction::version() const
 {
-    return (version_ != 0) || (locktime_ != 0) || !inputs_.empty()
-        || !outputs_.empty();
+    return version_;
 }
 
-void transaction::reset()
+void transaction::set_version(uint32_t value)
 {
-    version_ = 0;
-    locktime_ = 0;
-    inputs_.clear();
-    inputs_.shrink_to_fit();
-    outputs_.clear();
-    outputs_.shrink_to_fit();
+    version_ = value;
+}
 
-    hash_mutex_.lock();
-    hash_.reset();
-    hash_mutex_.unlock();
+uint32_t transaction::locktime() const
+{
+    return locktime_;
+}
+
+void transaction::set_locktime(uint32_t value)
+{
+    locktime_ = value;
+}
+
+input::list& transaction::inputs()
+{
+    return inputs_;
+}
+
+const input::list& transaction::inputs() const
+{
+    return inputs_;
+}
+
+void transaction::set_inputs(const input::list& value)
+{
+    inputs_ = value;
+}
+
+void transaction::set_inputs(input::list&& value)
+{
+    inputs_ = std::move(value);
+}
+
+output::list& transaction::outputs()
+{
+    return outputs_;
+}
+
+const output::list& transaction::outputs() const
+{
+    return outputs_;
+}
+
+void transaction::set_outputs(const output::list& value)
+{
+    outputs_ = value;
+}
+
+void transaction::set_outputs(output::list&& value)
+{
+    outputs_ = std::move(value);
+}
+
+transaction& transaction::operator=(transaction&& other)
+{
+    version_ = other.version_;
+    locktime_ = other.locktime_;
+    inputs_ = std::move(other.inputs_);
+    outputs_ = std::move(other.outputs_);
+    return *this;
+}
+
+// TODO: eliminate blockchain transaction copies and then delete this.
+transaction& transaction::operator=(const transaction& other)
+{
+    version_ = other.version_;
+    locktime_ = other.locktime_;
+    inputs_ = other.inputs_;
+    outputs_ = other.outputs_;
+    return *this;
+}
+
+bool transaction::operator==(const transaction& other) const
+{
+    return (version_ == other.version_) && (locktime_ == other.locktime_)
+        && (inputs_ == other.inputs_) && (outputs_ == other.outputs_);
+}
+
+bool transaction::operator!=(const transaction& other) const
+{
+    return !(*this == other);
 }
 
 bool transaction::from_data(const data_chunk& data, bool satoshi)
@@ -240,25 +331,38 @@ void transaction::to_data(writer& sink, bool satoshi) const
     }
 }
 
-// Reserve uniform buckets of minimum size and full distribution.
-transaction::sets_ptr transaction::reserve_buckets(size_t total, size_t fanout)
+bool transaction::is_valid() const
 {
-    // Guard against division by zero.
-    if (fanout == 0)
-        return std::make_shared<transaction::sets>(0);
+    return (version_ != 0) || (locktime_ != 0) || !inputs_.empty() ||
+        !outputs_.empty();
+}
 
-    const auto quotient = total / fanout;
-    const auto remainder = total % fanout;
-    const auto capacity = quotient + (remainder == 0 ? 0 : 1);
-    const auto quantity = quotient == 0 ? remainder : fanout;
-    const auto buckets = std::make_shared<transaction::sets>(quantity);
-    const auto reserve = [capacity](transaction::set& set)
-    {
-        set.reserve(capacity);
-    };
+void transaction::reset()
+{
+    version_ = 0;
+    locktime_ = 0;
+    inputs_.clear();
+    inputs_.shrink_to_fit();
+    outputs_.clear();
+    outputs_.shrink_to_fit();
 
-    std::for_each(buckets->begin(), buckets->end(), reserve);
-    return buckets;
+    hash_mutex_.lock();
+    hash_.reset();
+    hash_mutex_.unlock();
+}
+
+uint64_t transaction::serialized_size() const
+{
+    uint64_t tx_size = 8;
+    tx_size += variable_uint_size(inputs_.size());
+    for (const auto& input : inputs_)
+        tx_size += input.serialized_size();
+
+    tx_size += variable_uint_size(outputs_.size());
+    for (const auto& output : outputs_)
+        tx_size += output.serialized_size();
+
+    return tx_size;
 }
 
 // TODO: provide optimization option to balance total sigops across buckets.
@@ -279,20 +383,6 @@ transaction::sets_const_ptr transaction::to_input_sets(size_t fanout) const
     }
 
     return std::const_pointer_cast<const sets>(buckets);
-}
-
-uint64_t transaction::serialized_size() const
-{
-    uint64_t tx_size = 8;
-    tx_size += variable_uint_size(inputs_.size());
-    for (const auto& input: inputs_)
-        tx_size += input.serialized_size();
-
-    tx_size += variable_uint_size(outputs_.size());
-    for (const auto& output: outputs_)
-        tx_size += output.serialized_size();
-
-    return tx_size;
 }
 
 std::string transaction::to_string(uint32_t flags) const
@@ -431,66 +521,6 @@ uint64_t transaction::total_output_value() const
     };
 
     return std::accumulate(outputs_.begin(), outputs_.end(), uint64_t(0), value);
-}
-
-uint32_t transaction::version() const
-{
-    return version_;
-}
-
-void transaction::set_version(uint32_t value)
-{
-    version_ = value;
-}
-
-uint32_t transaction::locktime() const
-{
-    return locktime_;
-}
-
-void transaction::set_locktime(uint32_t value)
-{
-    locktime_ = value;
-}
-
-input::list& transaction::inputs()
-{
-    return inputs_;
-}
-
-const input::list& transaction::inputs() const
-{
-    return inputs_;
-}
-
-void transaction::set_inputs(const input::list& value)
-{
-    inputs_ = value;
-}
-
-void transaction::set_inputs(input::list&& value)
-{
-    inputs_ = std::move(value);
-}
-
-output::list& transaction::outputs()
-{
-    return outputs_;
-}
-
-const output::list& transaction::outputs() const
-{
-    return outputs_;
-}
-
-void transaction::set_outputs(const output::list& value)
-{
-    outputs_ = value;
-}
-
-void transaction::set_outputs(output::list&& value)
-{
-    outputs_ = std::move(value);
 }
 
 uint64_t transaction::fees() const
@@ -698,36 +728,6 @@ code transaction::connect_input(const chain_state& state,
     const auto flags = state.enabled_forks();
     const auto valid = script::verify(*this, index32, flags);
     return valid ? error::success : error::validate_inputs_failed;
-}
-
-transaction& transaction::operator=(transaction&& other)
-{
-    version_ = other.version_;
-    locktime_ = other.locktime_;
-    inputs_ = std::move(other.inputs_);
-    outputs_ = std::move(other.outputs_);
-    return *this;
-}
-
-// TODO: eliminate blockchain transaction copies and then delete this.
-transaction& transaction::operator=(const transaction& other)
-{
-    version_ = other.version_;
-    locktime_ = other.locktime_;
-    inputs_ = other.inputs_;
-    outputs_ = other.outputs_;
-    return *this;
-}
-
-bool transaction::operator==(const transaction& other) const
-{
-    return (version_ == other.version_) && (locktime_ == other.locktime_)
-        && (inputs_ == other.inputs_) && (outputs_ == other.outputs_);
-}
-
-bool transaction::operator!=(const transaction& other) const
-{
-    return !(*this == other);
 }
 
 } // namespace chain
