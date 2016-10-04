@@ -1325,10 +1325,13 @@ static signature_parse_result op_checksigverify(evaluation_context& context,
 
     const auto pubkey = context.pop_stack();
     auto endorsement = context.pop_stack();
+
+    if (endorsement.empty())
+        return signature_parse_result::invalid;
+
     const auto sighash_type = endorsement.back();
     auto& distinguished = endorsement;
     distinguished.pop_back();
-
     ec_signature signature;
 
     if (strict && !parse_signature(signature, distinguished, true))
