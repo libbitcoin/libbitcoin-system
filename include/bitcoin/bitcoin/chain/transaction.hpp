@@ -48,14 +48,12 @@ class BC_API transaction
 public:
     typedef std::vector<transaction> list;
 
-    // This metadata is not copied on tx copy.
-    // These properties facilitate transaction pool processing.
-    struct metadata
-    {
-        typedef std::function<void(const code&)> confirm_handler;
-
-        confirm_handler confirm = nullptr;
-    };
+    typedef struct { const transaction& tx; size_t input_index; } element;
+    typedef std::vector<element> set;
+    typedef std::vector<set> sets;
+    typedef std::shared_ptr<sets> sets_ptr;
+    typedef std::shared_ptr<const sets> sets_const_ptr;
+    typedef std::function<void(const code&)> confirm_handler;
 
     // This validation data is not copied on tx copy.
     // These properties facilitate block and transaction validation.
@@ -66,6 +64,8 @@ public:
         /// validation this may be populated only from the blockchain and
         /// otherwise may (or may not) consider the transaction pool.
         bool duplicate = false;
+        sets_const_ptr sets = nullptr;
+        confirm_handler confirm = nullptr;
     };
 
     static transaction factory_from_data(const data_chunk& data,
@@ -73,6 +73,7 @@ public:
     static transaction factory_from_data(std::istream& stream,
         bool satoshi=true);
     static transaction factory_from_data(reader& source, bool satoshi=true);
+    static sets_ptr reserve_buckets(size_t total, size_t fanout);
 
     transaction();
     transaction(uint32_t version, uint32_t locktime, const input::list& inputs,
@@ -100,6 +101,7 @@ public:
     void set_outputs(const output::list& value);
     void set_outputs(output::list&& value);
 
+    void reset();
     bool is_valid() const;
     bool is_coinbase() const;
     bool is_oversized_coinbase() const;
@@ -116,16 +118,17 @@ public:
     code connect(const chain_state& state) const;
     code connect_input(const chain_state& state, size_t input_index) const;
 
+    uint64_t fees() const;
+    hash_digest hash() const;
+    hash_digest hash(uint32_t sighash_type) const;
+    uint64_t serialized_size() const;
     uint64_t total_input_value() const;
     uint64_t total_output_value() const;
     point::indexes missing_inputs() const;
     point::indexes immature_inputs(size_t target_height) const;
     point::indexes double_spends(bool include_unconfirmed) const;
     size_t signature_operations(bool bip16_active) const;
-    hash_digest hash(uint32_t sighash_type) const;
-    hash_digest hash() const;
-    uint64_t fees() const;
-
+    sets_const_ptr to_input_sets(size_t fanout) const;
     std::string to_string(uint32_t flags) const;
 
     bool from_data(const data_chunk& data, bool satoshi=true);
@@ -134,8 +137,6 @@ public:
     data_chunk to_data(bool satoshi=true) const;
     void to_data(std::ostream& stream, bool satoshi=true) const;
     void to_data(writer& sink, bool satoshi=true) const;
-    void reset();
-    uint64_t serialized_size() const;
 
     /// This class is move assignable [but not copy assignable].
     transaction& operator=(transaction&& other);
@@ -145,8 +146,6 @@ public:
     bool operator!=(const transaction& other) const;
 
     // These fields do not participate in serialization or comparison.
-    //-------------------------------------------------------------------------
-    mutable metadata metadata;
     mutable validation validation;
 
 private:

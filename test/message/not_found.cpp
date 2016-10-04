@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(not_found__constructor_5__always__equals_params)
     message::inventory_vector::type_id type = message::inventory_vector::type_id::error;
     auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
-    message::not_found instance({ { type, hash } });
+    message::not_found instance{ { type, hash } };
     BOOST_REQUIRE_EQUAL(true, instance.is_valid());
     auto inventories = instance.inventories();
     BOOST_REQUIRE_EQUAL(1u, inventories.size());
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(not_found__constructor_6__always__equals_params)
     message::inventory_vector::type_id type = message::inventory_vector::type_id::error;
     auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
-    const message::not_found value({ { type, hash } });
+    const message::not_found value{ { type, hash } };
     BOOST_REQUIRE_EQUAL(true, value.is_valid());
     message::not_found instance(value);
     auto inventories = instance.inventories();
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(not_found__constructor_7__always__equals_params)
     message::inventory_vector::type_id type = message::inventory_vector::type_id::error;
     auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
-    message::not_found value({ { type, hash } });
+    message::not_found value{ { type, hash } };
     BOOST_REQUIRE_EQUAL(true, value.is_valid());
     message::not_found instance(std::move(value));
     auto inventories = instance.inventories();

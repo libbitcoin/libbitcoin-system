@@ -43,6 +43,7 @@ namespace chain {
 class BC_API block
 {
 public:
+    typedef std::vector<block> list;
     typedef std::vector<size_t> indexes;
 
     // These properties facilitate block validation.
@@ -54,6 +55,7 @@ public:
         size_t height = validation::orphan_height;
         code result = error::not_found;
         chain_state::ptr state = nullptr;
+        transaction::sets_const_ptr sets = nullptr;
     };
 
     static block factory_from_data(const data_chunk& data);
@@ -90,8 +92,6 @@ public:
     bool is_valid_coinbase_claim(size_t height) const;
     bool is_valid_coinbase_script(size_t height) const;
 
-    hash_digest hash() const;
-
     code check() const;
     code check_transactions() const;
     code accept() const;
@@ -104,11 +104,14 @@ public:
     uint64_t fees() const;
     uint64_t claim() const;
     uint64_t reward(size_t height) const;
-
     hash_number difficulty() const;
     hash_digest generate_merkle_root() const;
-    size_t total_inputs(bool with_coinbase_transaction=true) const;
+    hash_digest hash() const;
+    size_t signature_operations() const;
     size_t signature_operations(bool bip16_active) const;
+    size_t total_inputs(bool with_coinbase_transaction=true) const;
+    transaction::sets_const_ptr to_input_sets(size_t fanout,
+        bool with_coinbase_transaction=true) const;
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
@@ -128,7 +131,6 @@ public:
     bool operator!=(const block& other) const;
 
     // These fields do not participate in serialization or comparison.
-    //-------------------------------------------------------------------------
     mutable validation validation;
 
 private:

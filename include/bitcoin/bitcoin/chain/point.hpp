@@ -67,23 +67,23 @@ public:
     uint32_t index() const;
     void set_index(uint32_t value);
 
-    uint64_t checksum() const;
-    bool is_null() const;
-
-    point_iterator begin() const;
-    point_iterator end() const;
-
-    std::string to_string() const;
-
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
     bool from_data(reader& source);
     data_chunk to_data() const;
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
+
+    void reset();
     bool is_valid() const;
-    virtual void reset();
+    bool is_null() const;
+
+    uint64_t checksum() const;
     uint64_t serialized_size() const;
+    std::string to_string() const;
+
+    point_iterator begin() const;
+    point_iterator end() const;
 
     /// This class is move assignable and copy assignable.
     point& operator=(point&& other);

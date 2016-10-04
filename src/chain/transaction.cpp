@@ -100,21 +100,21 @@ transaction transaction::factory_from_data(reader& source, bool satoshi)
 
 transaction::transaction()
   : version_(0), locktime_(0), inputs_(), outputs_(), hash_(nullptr),
-    metadata(), validation()
+    validation()
 {
 }
 
 transaction::transaction(uint32_t version, uint32_t locktime,
     const input::list& inputs, const output::list& outputs)
   : version_(version), locktime_(locktime), inputs_(inputs), outputs_(outputs),
-    hash_(nullptr), metadata(), validation()
+    hash_(nullptr), validation()
 {
 }
 
 transaction::transaction(uint32_t version, uint32_t locktime,
     input::list&& inputs, output::list&& outputs)
   : version_(version), locktime_(locktime), inputs_(std::move(inputs)),
-    outputs_(std::move(outputs)), hash_(nullptr), metadata(), validation()
+    outputs_(std::move(outputs)), hash_(nullptr), validation()
 {
 }
 
@@ -238,6 +238,47 @@ void transaction::to_data(writer& sink, bool satoshi) const
         write(sink, outputs_);
         write(sink, inputs_);
     }
+}
+
+// Reserve uniform buckets of minimum size and full distribution.
+transaction::sets_ptr transaction::reserve_buckets(size_t total, size_t fanout)
+{
+    // Guard against division by zero.
+    if (fanout == 0)
+        return std::make_shared<transaction::sets>(0);
+
+    const auto quotient = total / fanout;
+    const auto remainder = total % fanout;
+    const auto capacity = quotient + (remainder == 0 ? 0 : 1);
+    const auto quantity = quotient == 0 ? remainder : fanout;
+    const auto buckets = std::make_shared<transaction::sets>(quantity);
+    const auto reserve = [capacity](transaction::set& set)
+    {
+        set.reserve(capacity);
+    };
+
+    std::for_each(buckets->begin(), buckets->end(), reserve);
+    return buckets;
+}
+
+// TODO: provide optimization option to balance total sigops across buckets.
+// Disperse the inputs of the tx evenly to the specified number of buckets.
+transaction::sets_const_ptr transaction::to_input_sets(size_t fanout) const
+{
+    const auto total = inputs_.size();
+    const auto buckets = reserve_buckets(total, fanout);
+
+    // Guard against division by zero.
+    if (!buckets->empty())
+    {
+        size_t count = 0;
+
+        // Populate each bucket with either full (or full-1) input references.
+        for (size_t index = 0; index < inputs_.size(); ++index)
+            (*buckets)[count++ % fanout].push_back({ *this, index });
+    }
+
+    return std::const_pointer_cast<const sets>(buckets);
 }
 
 uint64_t transaction::serialized_size() const
@@ -367,6 +408,7 @@ bool transaction::is_locktime_conflict() const
 // Returns max_uint64 in case of overflow.
 uint64_t transaction::total_input_value() const
 {
+    ////static_assert(max_money() < max_uint64, "overflow sentinel invalid");
     const auto value = [](uint64_t total, const input& input)
     {
         const auto& prevout = input.previous_output().validation.cache;
@@ -382,6 +424,7 @@ uint64_t transaction::total_input_value() const
 // Returns max_uint64 in case of overflow.
 uint64_t transaction::total_output_value() const
 {
+    ////static_assert(max_money() < max_uint64, "overflow sentinel invalid");
     const auto value = [](uint64_t total, const output& output)
     {
         return ceiling_add(total, output.value());
@@ -460,18 +503,17 @@ bool transaction::is_overspent() const
     return !is_coinbase() && total_output_value() > total_input_value();
 }
 
-// Returns max_size_t in case of overflow.
 size_t transaction::signature_operations(bool bip16_active) const
 {
     const auto in = [bip16_active](size_t total, const input& input)
     {
         // This includes BIP16 p2sh additional sigops if prevout is cached.
-        return ceiling_add(total, input.signature_operations(bip16_active));
+        return safe_add(total, input.signature_operations(bip16_active));
     };
 
     const auto out = [](size_t total, const output& output)
     {
-        return ceiling_add(total, output.signature_operations());
+        return safe_add(total, output.signature_operations());
     };
 
     size_t sigops = 0;
@@ -621,7 +663,8 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     else if (transaction_pool && signature_operations(bip16) > max_block_sigops)
         return error::too_many_sigs;
 
-    return error::success;
+    else
+        return error::success;
 }
 
 code transaction::connect(const chain_state& state) const

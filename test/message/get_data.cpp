@@ -28,15 +28,16 @@ BOOST_AUTO_TEST_SUITE(get_data_tests)
 
 BOOST_AUTO_TEST_CASE(get_data__constructor_1__always__invalid)
 {
-    message::get_data instance;
+    const message::get_data instance;
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(get_data__constructor_2__always__equals_params)
 {
-    const message::inventory_vector::list values =
+    static const message::inventory_vector::list values =
     {
-        message::inventory_vector(
+        message::inventory_vector
+        {
             inventory::type_id::error,
             {
                 {
@@ -46,26 +47,26 @@ BOOST_AUTO_TEST_CASE(get_data__constructor_2__always__equals_params)
                     0x37, 0xc0, 0xb0, 0x32, 0xf0, 0xd6, 0x6e, 0xdf
                 }
             }
-        )
+        }
     };
 
-    message::get_data instance(values);
+    const message::get_data instance(values);
     BOOST_REQUIRE_EQUAL(true, instance.is_valid());
     BOOST_REQUIRE(values == instance.inventories());
 }
 
 BOOST_AUTO_TEST_CASE(get_data__constructor_3__always__equals_params)
 {
-    message::inventory_vector::type_id type = message::inventory_vector::type_id::error;
-    auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    message::inventory_vector::list values =
+    static const auto type = message::inventory_vector::type_id::error;
+    static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const message::inventory_vector::list values
     {
         message::inventory_vector(type, hash)
     };
 
-    message::get_data instance(std::move(values));
+    const message::get_data instance(std::move(values));
     BOOST_REQUIRE_EQUAL(true, instance.is_valid());
-    auto inventories = instance.inventories();
+    const auto inventories = instance.inventories();
     BOOST_REQUIRE_EQUAL(1u, inventories.size());
     BOOST_REQUIRE(type == inventories[0].type());
     BOOST_REQUIRE(hash == inventories[0].hash());
@@ -73,11 +74,11 @@ BOOST_AUTO_TEST_CASE(get_data__constructor_3__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(get_data__constructor_4__always__equals_params)
 {
-    message::inventory_vector::type_id type = message::inventory_vector::type_id::error;
-    auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    const hash_list hashes = { hash };
+    static const auto type = message::inventory_vector::type_id::error;
+    static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    static const hash_list hashes{ hash };
 
-    message::get_data instance(hashes, type);
+    const message::get_data instance(hashes, type);
     BOOST_REQUIRE_EQUAL(true, instance.is_valid());
     auto inventories = instance.inventories();
     BOOST_REQUIRE_EQUAL(1u, inventories.size());
@@ -87,10 +88,10 @@ BOOST_AUTO_TEST_CASE(get_data__constructor_4__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(get_data__constructor_5__always__equals_params)
 {
-    message::inventory_vector::type_id type = message::inventory_vector::type_id::error;
-    auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    static const auto type = message::inventory_vector::type_id::error;
+    static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
-    message::get_data instance({ { type, hash } });
+    const message::get_data instance{ { type, hash } };
     BOOST_REQUIRE_EQUAL(true, instance.is_valid());
     auto inventories = instance.inventories();
     BOOST_REQUIRE_EQUAL(1u, inventories.size());
@@ -100,13 +101,13 @@ BOOST_AUTO_TEST_CASE(get_data__constructor_5__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(get_data__constructor_6__always__equals_params)
 {
-    message::inventory_vector::type_id type = message::inventory_vector::type_id::error;
-    auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    static const auto type = message::inventory_vector::type_id::error;
+    static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
-    const message::get_data value({ { type, hash } });
+    const message::get_data value{ { type, hash } };
     BOOST_REQUIRE_EQUAL(true, value.is_valid());
-    message::get_data instance(value);
-    auto inventories = instance.inventories();
+    const message::get_data instance(value);
+    const auto inventories = instance.inventories();
     BOOST_REQUIRE_EQUAL(1u, inventories.size());
     BOOST_REQUIRE(type == inventories[0].type());
     BOOST_REQUIRE(hash == inventories[0].hash());
@@ -115,13 +116,13 @@ BOOST_AUTO_TEST_CASE(get_data__constructor_6__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(get_data__constructor_7__always__equals_params)
 {
-    message::inventory_vector::type_id type = message::inventory_vector::type_id::error;
-    auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    static const auto type = message::inventory_vector::type_id::error;
+    static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
-    message::get_data value({ { type, hash } });
+    const message::get_data value{ { type, hash } };
     BOOST_REQUIRE_EQUAL(true, value.is_valid());
-    message::get_data instance(std::move(value));
-    auto inventories = instance.inventories();
+    const message::get_data instance(std::move(value));
+    const auto inventories = instance.inventories();
     BOOST_REQUIRE_EQUAL(1u, inventories.size());
     BOOST_REQUIRE(type == inventories[0].type());
     BOOST_REQUIRE(hash == inventories[0].hash());
@@ -137,15 +138,15 @@ BOOST_AUTO_TEST_CASE(get_data__from_data__insufficient_bytes__failure)
 
 BOOST_AUTO_TEST_CASE(get_data__from_data__insufficient_version__failure)
 {
-    const get_data expected(
+    static const get_data expected
+    {
         {
-            {
-                inventory_vector::type_id::error,
-                hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
-            }
-        });
+            inventory_vector::type_id::error,
+            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
+        }
+    };
 
-    const data_chunk raw = expected.to_data(version::level::maximum);
+    const auto raw = expected.to_data(version::level::maximum);
     get_data instance;
     BOOST_REQUIRE_EQUAL(false, instance.from_data(get_data::version_minimum - 1, raw));
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
@@ -153,13 +154,13 @@ BOOST_AUTO_TEST_CASE(get_data__from_data__insufficient_version__failure)
 
 BOOST_AUTO_TEST_CASE(get_data__factory_from_data_1__valid_input__success)
 {
-    static const get_data expected(
+    static const get_data expected
+    {
         {
-            {
-                inventory_vector::type_id::error,
-                hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
-            }
-        });
+            inventory_vector::type_id::error,
+            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
+        }
+    };
 
     static const auto version = version::level::maximum;
     const auto data = expected.to_data(version);
@@ -217,10 +218,10 @@ BOOST_AUTO_TEST_CASE(get_data__factory_from_data_3__valid_input__success)
 
 BOOST_AUTO_TEST_CASE(get_data__operator_assign_equals__always__matches_equivalent)
 {
-    const message::inventory_vector::list elements =
+    static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    static const message::inventory_vector::list elements
     {
-        message::inventory_vector(message::inventory_vector::type_id::error,
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
+        message::inventory_vector(message::inventory_vector::type_id::error, hash)
     };
 
     message::get_data value(elements);
@@ -236,49 +237,49 @@ BOOST_AUTO_TEST_CASE(get_data__operator_assign_equals__always__matches_equivalen
 
 BOOST_AUTO_TEST_CASE(get_data__operator_boolean_equals__duplicates__returns_true)
 {
-    const message::get_data expected(
+    static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const message::get_data expected
     {
-        message::inventory_vector(message::inventory_vector::type_id::error,
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
-    });
+        message::inventory_vector(message::inventory_vector::type_id::error, hash)
+    };
 
-    message::get_data instance(expected);
+    const message::get_data instance(expected);
     BOOST_REQUIRE_EQUAL(true, instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(get_data__operator_boolean_equals__differs__returns_false)
 {
-    const message::get_data expected(
+    static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const message::get_data expected
     {
-        message::inventory_vector(message::inventory_vector::type_id::error,
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
-    });
+        message::inventory_vector(message::inventory_vector::type_id::error, hash)
+    };
 
-    message::get_data instance;
+    const message::get_data instance;
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(get_data__operator_boolean_not_equals__duplicates__returns_false)
 {
-    const message::get_data expected(
+    static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const message::get_data expected
     {
-        message::inventory_vector(message::inventory_vector::type_id::error,
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
-    });
+        message::inventory_vector(message::inventory_vector::type_id::error, hash)
+    };
 
-    message::get_data instance(expected);
+    const  message::get_data instance(expected);
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
 BOOST_AUTO_TEST_CASE(get_data__operator_boolean_not_equals__differs__returns_true)
 {
-    const message::get_data expected(
+    static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const message::get_data expected
     {
-        message::inventory_vector(message::inventory_vector::type_id::error,
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
-    });
+        message::inventory_vector(message::inventory_vector::type_id::error, hash)
+    };
 
-    message::get_data instance;
+    const message::get_data instance;
     BOOST_REQUIRE_EQUAL(true, instance != expected);
 }
 

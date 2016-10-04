@@ -68,8 +68,10 @@ public:
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
     std::string to_string(uint32_t flags) const;
-    bool is_valid() const;
+
     void reset();
+    bool is_valid() const;
+
     uint64_t serialized_size() const;
 
     output& operator=(output&& other);

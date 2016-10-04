@@ -71,7 +71,7 @@ public:
     data_chunk to_data(const uint32_t version) const;
     void to_data(const uint32_t version, std::ostream& stream) const;
     void to_data(const uint32_t version, writer& sink) const;
-    void reset() override;
+    void reset();
     uint64_t serialized_size(const uint32_t version) const;
 
     header_message& operator=(chain::header&& other);

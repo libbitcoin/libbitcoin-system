@@ -22,7 +22,9 @@
 #include <algorithm>
 #include <cstddef>
 #include <limits>
+#include <cfenv>
 #include <cmath>
+#include <memory>
 #include <numeric>
 #include <type_traits>
 #include <utility>
@@ -84,10 +86,14 @@ inline hash_list to_hashes(const transaction::list& transactions)
 
 size_t block::locator_size(size_t top)
 {
+    // Thread side effect :<
+    std::fesetround(FE_UPWARD);
+
     const auto first_ten_or_top = std::min(size_t(10), top);
     const auto remaining = top - first_ten_or_top;
     const auto back_off = remaining == 0 ? 0.0 : std::log2(remaining);
-    return first_ten_or_top + static_cast<size_t>(back_off) + size_t(1);
+    const auto rounded_up_log = static_cast<size_t>(std::nearbyint(back_off));
+    return first_ten_or_top + rounded_up_log + size_t(1);
 }
 
 // This algorithm is a network best practice, not a consensus rule.
@@ -112,7 +118,7 @@ block::indexes block::locator_heights(size_t top)
     heights.push_back(0);
 
     // Validate the reservation computation.
-    BITCOIN_ASSERT(heights.size() == reservation);
+    BITCOIN_ASSERT(heights.size() <= reservation);
     return heights;
 }
 
@@ -234,6 +240,30 @@ void block::to_data(writer& sink) const
     std::for_each(transactions_.begin(), transactions_.end(), to);
 }
 
+// TODO: provide optimization option to balance total sigops across buckets.
+// Disperse the inputs of the block evenly to the specified number of buckets.
+transaction::sets_const_ptr block::to_input_sets(size_t fanout,
+    bool with_coinbase_transaction) const
+{
+    const auto total = total_inputs(with_coinbase_transaction);
+    const auto buckets = transaction::reserve_buckets(total, fanout);
+
+    // Guard against division by zero.
+    if (!buckets->empty())
+    {
+        size_t count = 0;
+        const auto& txs = transactions_;
+        const auto start = with_coinbase_transaction ? 0 : 1;
+
+        // Populate each bucket with either full (or full-1) input references.
+        for (auto tx = txs.begin() + start; tx != txs.end(); ++tx)
+            for (size_t index = 0; index < tx->inputs().size(); ++index)
+                (*buckets)[count++ % fanout].push_back({ *tx, index });
+    }
+
+    return std::const_pointer_cast<const transaction::sets>(buckets);
+}
+
 // Convenience property.
 hash_digest block::hash() const
 {
@@ -252,7 +282,7 @@ uint64_t block::serialized_size() const
     const auto value = [](uint64_t total, const transaction& tx)
     {
         const auto size = tx.serialized_size();
-        return total >= max_uint64 - size ? max_uint64 : total + size;
+        return safe_add(total, size);
     };
 
     const auto& txs = transactions_;
@@ -260,12 +290,19 @@ uint64_t block::serialized_size() const
     return block_size;
 }
 
-// overflow returns max_size_t
+// Unpopulated chain state returns max_size_t.
+size_t block::signature_operations() const
+{
+    const auto state = validation.state;
+    return state ? signature_operations(
+        state->is_enabled(rule_fork::bip16_rule)) : max_size_t;
+}
+
 size_t block::signature_operations(bool bip16_active) const
 {
     const auto value = [bip16_active](size_t total, const transaction& tx)
     {
-        return ceiling_add(total, tx.signature_operations(bip16_active));
+        return safe_add(total, tx.signature_operations(bip16_active));
     };
 
     const auto& txs = transactions_;
@@ -276,7 +313,7 @@ size_t block::total_inputs(bool with_coinbase_transaction) const
 {
     const auto inputs = [](size_t total, const transaction& tx)
     {
-        return ceiling_add(total, tx.inputs().size());
+        return safe_add(total, tx.inputs().size());
     };
 
     const auto& txs = transactions_;
@@ -315,11 +352,7 @@ bool block::is_final(size_t height) const
 // Distinctness is defined by transaction hash.
 bool block::is_distinct_transaction_set() const
 {
-    const auto hasher = [](const transaction& transaction)
-    {
-        return transaction.hash();
-    };
-
+    const auto hasher = [](const transaction& tx) { return tx.hash(); };
     const auto& txs = transactions_;
     hash_list hashes(txs.size());
     std::transform(txs.begin(), txs.end(), hashes.begin(), hasher);
@@ -362,8 +395,10 @@ bool block::is_valid_merkle_root() const
     return (generate_merkle_root() == header_.merkle());
 }
 
+// Overflow returns max_uint64.
 uint64_t block::fees() const
 {
+    ////static_assert(max_money() < max_uint64, "overflow sentinel invalid");
     const auto value = [](uint64_t total, const transaction& tx)
     {
         return ceiling_add(total, tx.fees());
@@ -379,8 +414,10 @@ uint64_t block::claim() const
         transactions_.front().total_output_value();
 }
 
+// Overflow returns max_uint64.
 uint64_t block::reward(size_t height) const
 {
+    ////static_assert(max_money() < max_uint64, "overflow sentinel invalid");
     return ceiling_add(fees(), subsidy(height));
 }
 
@@ -445,14 +482,13 @@ code block::connect_transactions(const chain_state& state) const
 // These checks are self-contained; blockchain (and so version) independent.
 code block::check() const
 {
-    if (serialized_size() > max_block_size)
+    code ec;
+
+    if ((ec = header_.check()))
+        return ec;
+
+    else if (serialized_size() > max_block_size)
         return error::size_limits;
-
-    else if (!header_.is_valid_proof_of_work())
-        return error::invalid_proof_of_work;
-
-    else if (!header_.is_valid_time_stamp())
-        return error::futuristic_timestamp;
 
     else if (transactions_.empty())
         return error::empty_block;
@@ -483,11 +519,7 @@ code block::check() const
 code block::accept() const
 {
     const auto state = validation.state;
-
-    if (!state)
-        return error::operation_failed;
-
-    return accept(*validation.state);
+    return state ? accept(*state) : error::operation_failed;
 }
 
 // Deprecated (?)
@@ -496,20 +528,12 @@ code block::accept() const
 // Flags should be based on connecting at the specified blockchain height.
 code block::accept(const chain_state& state) const
 {
+    code ec;
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip34 = state.is_enabled(rule_fork::bip34_rule);
 
-    if (state.is_checkpoint_failure(header_))
-        return error::checkpoints_failed;
-
-    else if(header_.version() < state.minimum_version())
-        return error::old_version_block;
-
-    else if (header_.bits() != state.work_required())
-        return error::incorrect_proof_of_work;
-
-    else if (header_.timestamp() <= state.median_time_past())
-        return error::timestamp_too_early;
+    if ((ec = header_.accept(state)))
+        return ec;
 
     // This recurses txs but is not applied to mempool (timestamp required).
     else if (!is_final(state.height()))
@@ -637,11 +661,7 @@ hash_digest block::build_merkle_tree(hash_list& merkle)
 code block::connect() const
 {
     const auto state = validation.state;
-
-    if (!state)
-        return error::operation_failed;
-
-    return connect(*validation.state);
+    return state ? connect(*state) : error::operation_failed;
 }
 
 // Deprecated (?)

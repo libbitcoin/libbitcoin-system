@@ -24,11 +24,11 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
-#include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/config/checkpoint.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -73,6 +73,9 @@ public:
         /// Header values are based on a testnet map.
         bool testnet;
 
+        /// All forks are enabled at the corresponding height (from cache).
+        bool enabled;
+
         /// Header values are based on this height.
         size_t height;
 
@@ -83,14 +86,16 @@ public:
         struct { versions unordered; } version;
 
         /// Values must be ordered by height with high (block - 1) last.
-        struct { timestamps ordered; } timestamp;
-
-        uint32_t timestamp_self;
-        uint32_t timestamp_retarget;
+        struct
+        {
+            uint32_t self;
+            uint32_t retarget;
+            timestamps ordered;
+        } timestamp;
     };
 
     // Compute the height map from any height and testnet flag.
-    static map get_map(size_t height, bool testnet);
+    static map get_map(size_t height, bool enabled, bool testnet);
 
     /// Checkpoints must be ordered by height with greatest at back.
     chain_state(data&& values, const checkpoints& checkpoints);
@@ -105,14 +110,17 @@ public:
     /// Construction with zero height or any empty array causes invalid state.
     bool is_valid() const;
 
+    /// Determine if all forks are enabled (cache for next height construct).
+    bool is_enabled() const;
+
     /// Determine if the flag is set in the active_forks member.
     bool is_enabled(rule_fork flag) const;
 
-    /// Determine if the flag is set and enabled for the given block's version.
-    bool is_enabled(const header& header, rule_fork flag) const;
+    /// Determine if the flag is set and enabled for a given block's version.
+    bool is_enabled(uint32_t block_version, rule_fork flag) const;
 
-    /// Determine if the block header fails a checkpoint at this height.
-    bool is_checkpoint_failure(const header& header) const;
+    /// Determine if the block hash fails a checkpoint at this height.
+    bool is_checkpoint_failure(const hash_digest& hash) const;
 
     /// This height requires full validation due to no checkpoint coverage.
     bool use_full_validation() const;

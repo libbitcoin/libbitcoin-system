@@ -94,7 +94,7 @@ inline uint32_t retarget_timespan(const chain_state::data& values)
 {
     // Subtract 32 bit numbers in 64 bit space and constrain result to 32 bits.
     const uint64_t high = timestamp_high(values);
-    const uint64_t retarget = values.timestamp_retarget;
+    const uint64_t retarget = values.timestamp.retarget;
 
     //*************************************************************************
     // CONSENSUS: subtraction underflow potential (retarget > high).
@@ -221,7 +221,7 @@ uint32_t chain_state::work_required_testnet(const data& values)
     //*************************************************************************
     const auto max_time_gap = timestamp_high(values) + double_spacing_seconds;
 
-    if (values.timestamp_self > max_time_gap)
+    if (values.timestamp.self > max_time_gap)
         return max_work_bits;
 
     auto height = values.height;
@@ -258,7 +258,8 @@ uint32_t chain_state::work_required(const data& values)
 //-----------------------------------------------------------------------------
 
 // static
-chain_state::map chain_state::get_map(size_t height, bool testnet)
+chain_state::map chain_state::get_map(size_t height, bool enabled,
+    bool testnet)
 {
     // Invalid parameter in public interface, defaults indicate failure.
     if (height == 0)
@@ -299,7 +300,8 @@ chain_state::map chain_state::get_map(size_t height, bool testnet)
     // The height range of the version sample.
     // If too small to activate set low to high to avoid unnecessary queries.
     map.version.high = height - max_version_past;
-    map.version.low = floor_subtract(map.version.high, min_version_past);
+    map.version.low = enabled ?
+        floor_subtract(map.version.high, min_version_past) : map.version.high;
     map.version.low = is_active(map.version.high - map.version.low, testnet) ?
         map.version.low : map.version.high;
 
@@ -329,6 +331,11 @@ bool chain_state::is_valid() const
 
 // Properties.
 //-----------------------------------------------------------------------------
+
+bool chain_state::is_enabled() const
+{
+    return is_enabled(rule_fork::bip65_rule);
+}
 
 size_t chain_state::height() const
 {
@@ -363,18 +370,18 @@ bool chain_state::is_enabled(rule_fork flag) const
     return script::is_enabled(active_.forks, flag);
 }
 
-bool chain_state::is_enabled(const header& header, rule_fork flag) const
+bool chain_state::is_enabled(uint32_t block_version, rule_fork flag) const
 {
     return (is_enabled(flag)) &&
-       ((flag == rule_fork::bip65_rule && header.version() >= bip65_version) ||
-        (flag == rule_fork::bip66_rule && header.version() >= bip66_version) ||
-        (flag == rule_fork::bip34_rule && header.version() >= bip34_version));
+       ((flag == rule_fork::bip65_rule && block_version >= bip65_version) ||
+        (flag == rule_fork::bip66_rule && block_version >= bip66_version) ||
+        (flag == rule_fork::bip34_rule && block_version >= bip34_version));
 }
 
-bool chain_state::is_checkpoint_failure(const header& header) const
+bool chain_state::is_checkpoint_failure(const hash_digest& hash) const
 {
     using namespace bc::config;
-    return !checkpoint::validate(header.hash(), data_.height, checkpoints_);
+    return !checkpoint::validate(hash, data_.height, checkpoints_);
 }
 
 bool chain_state::use_full_validation() const

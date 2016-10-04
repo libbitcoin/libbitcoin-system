@@ -25,7 +25,9 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -89,11 +91,16 @@ public:
     data_chunk to_data(bool with_transaction_count=true) const;
     void to_data(std::ostream& stream, bool with_transaction_count=true) const;
     void to_data(writer& sink, bool with_transaction_count=true) const;
-    hash_digest hash() const;
+
+    void reset();
     bool is_valid() const;
     bool is_valid_time_stamp() const;
     bool is_valid_proof_of_work() const;
-    virtual void reset();
+
+    code check() const;
+    code accept(const chain_state& state) const;
+
+    hash_digest hash() const;
     uint64_t serialized_size(bool with_transaction_count=true) const;
 
     /// This class is move assignable [but not copy assignable].
