@@ -46,6 +46,8 @@
 namespace libbitcoin {
 namespace chain {
 
+const size_t transaction::validation::unspecified_height = 0;
+
 // Read a length-prefixed collection of inputs or outputs from the source.
 template<class Source, class Put>
 bool read(Source& source, std::vector<Put>& puts)

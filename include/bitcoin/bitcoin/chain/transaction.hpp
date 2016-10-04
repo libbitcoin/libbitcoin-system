@@ -55,17 +55,25 @@ public:
     typedef std::shared_ptr<const sets> sets_const_ptr;
     typedef std::function<void(const code&)> confirm_handler;
 
-    // This validation data is not copied on tx copy.
     // These properties facilitate block and transaction validation.
+    // This validation data is not copied on block or transaction copy.
     struct validation
     {
-        /// This does not exclude the two excepted transactions (see BIP30).
-        /// The transaction hash duplicates one in the blockchain. For block
-        /// validation this may be populated only from the blockchain and
-        /// otherwise may (or may not) consider the transaction pool.
-        bool duplicate = false;
+        static const size_t unspecified_height;
+
+        // These are used for transaction pool validation only.
+        size_t height = validation::unspecified_height;
+        code result = error::not_found;
+        chain_state::ptr state = nullptr;
         sets_const_ptr sets = nullptr;
+
+        /// The handler to invoke when the tx clears the pool.
         confirm_handler confirm = nullptr;
+
+        /// This does not exclude the two excepted transactions (see BIP30).
+        /// The transaction hash duplicates one in the blockchain (only).
+        /// This is for block validation, pool validation uses the result code.
+        bool duplicate = false;
     };
 
     static transaction factory_from_data(const data_chunk& data,
