@@ -437,16 +437,19 @@ BOOST_AUTO_TEST_CASE(header__transaction_count_setter__roundtrip__success)
 BOOST_AUTO_TEST_CASE(header__is_valid_time_stamp__timestamp_less_than_2_hours_from_now__returns_true)
 {
     chain::header instance;
-    instance.set_timestamp(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
+    const auto now = std::chrono::system_clock::now();
+    const auto now_time = std::chrono::system_clock::to_time_t(now);
+    instance.set_timestamp(static_cast<uint32_t>(now_time));
     BOOST_REQUIRE_EQUAL(true, instance.is_valid_time_stamp());
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_time_stamp__timestamp_greater_than_2_hours_from_now__returns_false)
 {
     chain::header instance;
-    auto value = std::chrono::system_clock::now();
-    auto duration = std::chrono::hours(3);
-    instance.set_timestamp(std::chrono::system_clock::to_time_t(value + duration));
+    const auto now = std::chrono::system_clock::now();
+    const auto duration = std::chrono::hours(3);
+    const auto future = std::chrono::system_clock::to_time_t(now + duration);
+    instance.set_timestamp(static_cast<uint32_t>(future));
     BOOST_REQUIRE_EQUAL(false, instance.is_valid_time_stamp());
 }
 
