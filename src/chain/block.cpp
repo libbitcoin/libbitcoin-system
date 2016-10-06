@@ -241,7 +241,7 @@ hash_number block::difficulty(uint32_t bits)
 
 uint64_t block::subsidy(size_t height)
 {
-    auto subsidy = bitcoin_to_satoshi(initial_block_reward);
+    auto subsidy = initial_block_reward_satoshi();
     subsidy >>= (height / reward_interval);
     return subsidy;
 }

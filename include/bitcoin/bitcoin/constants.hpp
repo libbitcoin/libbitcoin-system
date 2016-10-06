@@ -63,7 +63,6 @@ BC_CONSTEXPR size_t max_coinbase_size = 100;
 BC_CONSTEXPR size_t median_time_past_interval = 11;
 BC_CONSTEXPR size_t max_block_size = 1000000;
 BC_CONSTEXPR size_t max_block_sigops = max_block_size / 50;
-BC_CONSTEXPR size_t reward_interval = 210000;
 BC_CONSTEXPR size_t coinbase_maturity = 100;
 BC_CONSTEXPR size_t time_stamp_future_hours = 2;
 BC_CONSTEXPR size_t locktime_threshold = 500000000;
@@ -129,23 +128,32 @@ BC_CONSTEXPR size_t max_inventory_count = 50000;
 // Currency unit constants (uint64_t).
 //-----------------------------------------------------------------------------
 
-BC_CONSTEXPR uint64_t initial_block_reward = 50;
-BC_CONSTEXPR uint64_t satoshi_per_bitcoin = 100000000;
-
-BC_CONSTFUNC uint64_t max_money_recursive(uint64_t current)
+BC_CONSTFUNC uint64_t max_money_recursive(uint64_t money)
 {
-    return (current > 0) ? current + max_money_recursive(current >> 1) : 0;
+    return money > 0 ? money + max_money_recursive(money >> 1) : 0;
 }
 
+BC_CONSTEXPR uint64_t satoshi_per_bitcoin = 100000000;
 BC_CONSTFUNC uint64_t bitcoin_to_satoshi(uint64_t bitcoin_uints=1)
 {
     return bitcoin_uints * satoshi_per_bitcoin;
 }
 
+BC_CONSTEXPR uint64_t initial_block_reward_bitcoin = 50;
+BC_CONSTFUNC uint64_t initial_block_reward_satoshi()
+{
+    return bitcoin_to_satoshi(initial_block_reward_bitcoin);
+}
+
+BC_CONSTEXPR uint64_t reward_interval = 210000;
+BC_CONSTEXPR uint64_t recursive_money = 0x00000002540be3f5;
 BC_CONSTFUNC uint64_t max_money()
 {
-    return reward_interval * max_money_recursive(
-        bitcoin_to_satoshi(initial_block_reward));
+    // Optimize out the derivation of recursive_money, verify in debug builds.
+    BITCOIN_ASSERT(recursive_money == max_money_recursive(
+        initial_block_reward_satoshi()));
+
+    return reward_interval * recursive_money;
 }
 
 } // namespace libbitcoin
