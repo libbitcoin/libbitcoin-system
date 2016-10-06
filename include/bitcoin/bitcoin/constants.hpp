@@ -111,18 +111,14 @@ BC_CONSTEXPR size_t mainnet_sample = 1000;
 BC_CONSTEXPR uint32_t bip16_activation_time = 0x4F779A80;
 
 // github.com/bitcoin/bips/blob/master/bip-0030.mediawiki#specification
-static const config::checkpoint mainnet_bip30_exception_checkpoint1(
+static const config::checkpoint mainnet_bip30_exception_checkpoint1
 {
     "00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec", 91842
-});
-static const config::checkpoint mainnet_bip30_exception_checkpoint2(
+};
+static const config::checkpoint mainnet_bip30_exception_checkpoint2
 {
     "00000000000743f190a18c5577a3c2d2a1f610ae9601ac046a38084ccb7cd721", 91880
-});
-
-////// The larger of mainnet and testnet sameple sizes.
-////BC_CONSTEXPR size_t max_version_sample_size = mainnet_sample >
-////    testnet_sample ? mainnet_sample : testnet_sample;
+};
 
 // Network protocol constants.
 //-----------------------------------------------------------------------------

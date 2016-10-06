@@ -45,7 +45,7 @@ void conditional_stack::open(bool value)
     stack_.push_back(value);
 }
 
-void conditional_stack::else_()
+void conditional_stack::negate()
 {
     stack_.back() = !stack_.back();
 }

@@ -32,7 +32,7 @@ public:
     bool succeeded() const;
     void clear();
     void open(bool value);
-    void else_();
+    void negate();
     void close();
 
 private:

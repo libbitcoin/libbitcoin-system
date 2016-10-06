@@ -47,7 +47,6 @@
 namespace libbitcoin {
 namespace chain {
 
-// False is an empty stack.
 static constexpr size_t op_counter_limit = 201;
 static constexpr size_t max_number_size = 4;
 static constexpr size_t max_cltv_number_size = 5;
@@ -58,13 +57,6 @@ static constexpr size_t max_script_public_key_count = 20;
 static constexpr size_t multisig_default_signature_ops = 20;
 static constexpr uint8_t negative_mask = 0x80;
 static constexpr uint8_t negative_1 = 0x81;
-
-// Convert opcode to its actual numeric value.
-template <typename OpCode>
-auto base_value(OpCode code) -> typename std::underlying_type<OpCode>::type
-{
-    return static_cast<typename std::underlying_type<OpCode>::type>(code);
-}
 
 // bit.ly/2cPazSa
 static const hash_digest one_hash
@@ -432,7 +424,7 @@ bool script::deserialize(const data_chunk& raw_script, parse_mode mode)
         };
 
         operations_.clear();
-        operations_.push_back(std::move(op));
+        operations_.emplace_back(std::move(op));
         is_raw_ = true;
     }
 
@@ -547,72 +539,53 @@ inline void stack_swap(evaluation_context& context, size_t left, size_t right)
     std::swap(*(context.stack.end() - left), *(context.stack.end() - right));
 }
 
-inline bool pop_number(evaluation_context& context, script_number& out_number)
+inline bool pop_unary(evaluation_context& context, script_number& out_number,
+    size_t maxiumum_size=max_number_size)
 {
     return !context.stack.empty() &&
-        out_number.set_data(context.pop_stack(), max_number_size);
+        out_number.set_data(context.pop_stack(), maxiumum_size);
 }
 
-inline bool pop_cltv_number(evaluation_context& context,
-    script_number& out_number)
-{
-    return !context.stack.empty() &&
-        out_number.set_data(context.pop_stack(), max_cltv_number_size);
-}
-
-static bool pop_number(evaluation_context& context, int32_t& out_value)
+static bool pop_unary(evaluation_context& context, int32_t& out_value)
 {
     script_number middle;
-    if (!pop_number(context, middle))
+    if (!pop_unary(context, middle))
         return false;
 
     out_value = middle.int32();
     return true;
 }
 
-static bool pop_numbers(evaluation_context& context,
+static bool pop_binary(evaluation_context& context,
     script_number& left, script_number& right)
 {
-    if (context.stack.size() < 2)
-        return false;
-
     // The right hand side number is at the top of the stack.
-    return pop_number(context, right) && pop_number(context, left);
+    return pop_unary(context, right) && pop_unary(context, left);
 }
 
-static bool pop_numbers(evaluation_context& context,
+static bool pop_ternary(evaluation_context& context,
     script_number& upper, script_number& lower, script_number& value)
 {
-    if (context.stack.size() < 3)
-        return false;
-
     // The upper bound is at the top of the stack and the lower bound next.
-    return pop_number(context, upper) && pop_number(context, lower) &&
-        pop_number(context, value);
+    return pop_unary(context, upper) && pop_unary(context, lower) &&
+        pop_unary(context, value);
 }
 
-static bool pick_roll_impl(evaluation_context& context, bool is_roll)
+// Determines if the value is a valid stack index and returns the index.
+inline bool pop_stack_index(evaluation_context& context, size_t& out_index)
 {
-    if (context.stack.size() < 2)
+    int32_t reverse_index;
+    if (!pop_unary(context, reverse_index))
         return false;
 
-    int32_t value;
-    if (!pop_number(context, value))
+    // Ensure the index is within bounds.
+    const auto size = context.stack.size();
+    if (reverse_index < 0 || reverse_index >= size)
         return false;
 
-    const auto stack_size = context.stack.size();
-
-    if (value < 0 || static_cast<size_t>(value) >= stack_size)
-        return false;
-
-    const auto slice_iterator = context.stack.end() - value - 1;
-    const auto item = *slice_iterator;
-
-    if (is_roll)
-        context.stack.erase(slice_iterator);
-
-    context.stack.push_back(std::move(item));
-    return true;
+    // Convert to a forward index.
+    out_index = (size - 1) - static_cast<size_t>(reverse_index);
+    return out_index < size;
 }
 
 inline void copy_item_over_stack(evaluation_context& context, size_t index)
@@ -647,9 +620,14 @@ inline bool is_condition_opcode(opcode code)
         || code == opcode::endif;
 }
 
+inline uint8_t to_byte_code(opcode code)
+{
+    return static_cast<uint8_t>(code);
+}
+
 inline bool greater_op_16(opcode code)
 {
-    return base_value(code) > base_value(opcode::op_16);
+    return to_byte_code(code) > to_byte_code(opcode::op_16);
 }
 
 inline bool op_negative_1(evaluation_context& context)
@@ -660,12 +638,9 @@ inline bool op_negative_1(evaluation_context& context)
 
 static bool op_x(evaluation_context& context, opcode code)
 {
-    const auto difference =
-        static_cast<uint8_t>(code) -
-        static_cast<uint8_t>(opcode::op_1) + 1;
-
-    const script_number value(difference);
-    context.stack.push_back(value.data());
+    static const auto byte_code_0 = to_byte_code(opcode::op_1) - 1;
+    const auto span = to_byte_code(code) - byte_code_0;
+    context.stack.push_back(script_number(span).data());
     return true;
 }
 
@@ -691,7 +666,7 @@ static bool op_notif(evaluation_context& context)
     if (!op_if(context))
         return false;
 
-    context.conditional.else_();
+    context.conditional.negate();
     return true;
 }
 
@@ -700,7 +675,7 @@ static bool op_else(evaluation_context& context)
     if (context.conditional.closed())
         return false;
 
-    context.conditional.else_();
+    context.conditional.negate();
     return true;
 }
 
@@ -886,12 +861,25 @@ static bool op_over(evaluation_context& context)
 
 static bool op_pick(evaluation_context& context)
 {
-    return pick_roll_impl(context, false);
+    size_t index;
+    if (!pop_stack_index(context, index))
+        return false;
+
+    context.stack.push_back(context.stack[index]);
+    return true;
 }
 
 static bool op_roll(evaluation_context& context)
 {
-    return pick_roll_impl(context, true);
+    size_t index;
+    if (!pop_stack_index(context, index))
+        return false;
+
+    const auto it = context.stack.begin() + index;
+    const auto dup = *it;
+    context.stack.erase(it);
+    context.stack.emplace_back(std::move(dup));
+    return true;
 }
 
 static bool op_rot(evaluation_context& context)
@@ -962,7 +950,7 @@ static bool op_equalverify(evaluation_context& context)
 static bool op_1add(evaluation_context& context)
 {
     script_number number;
-    if (!pop_number(context, number))
+    if (!pop_unary(context, number))
         return false;
 
     number += 1;
@@ -973,7 +961,7 @@ static bool op_1add(evaluation_context& context)
 static bool op_1sub(evaluation_context& context)
 {
     script_number number;
-    if (!pop_number(context, number))
+    if (!pop_unary(context, number))
         return false;
 
     number -= 1;
@@ -984,7 +972,7 @@ static bool op_1sub(evaluation_context& context)
 static bool op_negate(evaluation_context& context)
 {
     script_number number;
-    if (!pop_number(context, number))
+    if (!pop_unary(context, number))
         return false;
 
     number = -number;
@@ -995,7 +983,7 @@ static bool op_negate(evaluation_context& context)
 static bool op_abs(evaluation_context& context)
 {
     script_number number;
-    if (!pop_number(context, number))
+    if (!pop_unary(context, number))
         return false;
 
     if (number < 0)
@@ -1008,7 +996,7 @@ static bool op_abs(evaluation_context& context)
 static bool op_not(evaluation_context& context)
 {
     script_number number;
-    if (!pop_number(context, number))
+    if (!pop_unary(context, number))
         return false;
 
     context.stack.push_back(bool_to_stack(number == 0));
@@ -1018,7 +1006,7 @@ static bool op_not(evaluation_context& context)
 static bool op_0notequal(evaluation_context& context)
 {
     script_number number;
-    if (!pop_number(context, number))
+    if (!pop_unary(context, number))
         return false;
 
     context.stack.push_back(bool_to_stack(number != 0));
@@ -1028,7 +1016,7 @@ static bool op_0notequal(evaluation_context& context)
 static bool op_add(evaluation_context& context)
 {
     script_number left, right;
-    if (!pop_numbers(context, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
     const auto result = left + right;
@@ -1039,7 +1027,7 @@ static bool op_add(evaluation_context& context)
 static bool op_sub(evaluation_context& context)
 {
     script_number left, right;
-    if (!pop_numbers(context, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
     const auto result = left - right;
@@ -1050,7 +1038,7 @@ static bool op_sub(evaluation_context& context)
 static bool op_booland(evaluation_context& context)
 {
     script_number left, right;
-    if (!pop_numbers(context, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
     context.stack.push_back(bool_to_stack(left != 0 && right != 0));
@@ -1060,7 +1048,7 @@ static bool op_booland(evaluation_context& context)
 static bool op_boolor(evaluation_context& context)
 {
     script_number left, right;
-    if (!pop_numbers(context, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
     context.stack.push_back(bool_to_stack(left != 0 || right != 0));
@@ -1070,7 +1058,7 @@ static bool op_boolor(evaluation_context& context)
 static bool op_numequal(evaluation_context& context)
 {
     script_number left, right;
-    if (!pop_numbers(context, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
     context.stack.push_back(bool_to_stack(left == right));
@@ -1080,7 +1068,7 @@ static bool op_numequal(evaluation_context& context)
 static bool op_numequalverify(evaluation_context& context)
 {
     script_number left, right;
-    if (!pop_numbers(context, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
     return left == right;
@@ -1089,7 +1077,7 @@ static bool op_numequalverify(evaluation_context& context)
 static bool op_numnotequal(evaluation_context& context)
 {
     script_number left, right;
-    if (!pop_numbers(context, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
     context.stack.push_back(bool_to_stack(left != right));
@@ -1099,7 +1087,7 @@ static bool op_numnotequal(evaluation_context& context)
 static bool op_lessthan(evaluation_context& context)
 {
     script_number left, right;
-    if (!pop_numbers(context, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
     context.stack.push_back(bool_to_stack(left < right));
@@ -1109,7 +1097,7 @@ static bool op_lessthan(evaluation_context& context)
 static bool op_greaterthan(evaluation_context& context)
 {
     script_number left, right;
-    if (!pop_numbers(context, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
     context.stack.push_back(bool_to_stack(left > right));
@@ -1119,7 +1107,7 @@ static bool op_greaterthan(evaluation_context& context)
 static bool op_lessthanorequal(evaluation_context& context)
 {
     script_number left, right;
-    if (!pop_numbers(context, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
     context.stack.push_back(bool_to_stack(left <= right));
@@ -1129,7 +1117,7 @@ static bool op_lessthanorequal(evaluation_context& context)
 static bool op_greaterthanorequal(evaluation_context& context)
 {
     script_number left, right;
-    if (!pop_numbers(context, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
     context.stack.push_back(bool_to_stack(left >= right));
@@ -1139,7 +1127,7 @@ static bool op_greaterthanorequal(evaluation_context& context)
 static bool op_min(evaluation_context& context)
 {
     script_number left, right;
-    if (!pop_numbers(context, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
     if (left < right)
@@ -1153,21 +1141,18 @@ static bool op_min(evaluation_context& context)
 static bool op_max(evaluation_context& context)
 {
     script_number left, right;
-    if (!pop_numbers(context, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
-    if (left < right)
-        context.stack.push_back(right.data());
-    else
-        context.stack.push_back(left.data());
-
+    const auto greater = left > right ? left.data() : right.data();
+    context.stack.emplace_back(std::move(greater));
     return true;
 }
 
 static bool op_within(evaluation_context& context)
 {
     script_number upper, lower, value;
-    if (!pop_numbers(context, upper, lower, value))
+    if (!pop_ternary(context, upper, lower, value))
         return false;
 
     context.stack.push_back(bool_to_stack(lower <= value && value < upper));
@@ -1327,7 +1312,7 @@ static signature_parse_result op_checkmultisigverify(
     uint32_t input_index, bool strict)
 {
     int32_t pubkeys_count;
-    if (!pop_number(context, pubkeys_count))
+    if (!pop_unary(context, pubkeys_count))
         return signature_parse_result::invalid;
 
     // bit.ly/2d1bsdB
@@ -1344,7 +1329,7 @@ static signature_parse_result op_checkmultisigverify(
         return signature_parse_result::invalid;
 
     int32_t sigs_count;
-    if (!pop_number(context, sigs_count))
+    if (!pop_unary(context, sigs_count))
         return signature_parse_result::invalid;
 
     if (sigs_count < 0 || sigs_count > pubkeys_count)
@@ -1448,7 +1433,7 @@ static bool op_checklocktimeverify(evaluation_context& context,
     // BIP65: We extend the (signed) CLTV script number range to 5 bytes in
     // order to reach the domain of the (unsigned) tx.locktime field.
     script_number number;
-    if (!pop_cltv_number(context, number))
+    if (!pop_unary(context, number, max_cltv_number_size))
         return false;
 
     // BIP65: the top item on the stack is less than 0.
@@ -1457,7 +1442,7 @@ static bool op_checklocktimeverify(evaluation_context& context,
 
     // TODO: confirm the domain of context.pop_stack() above is uint32_t.
     // If so there is no reason to cast into 64 bit here, just use uint32_t.
-    // The value is positive, so safe to use uint64_t.
+    // The value is positive, so it is safe to cast to uint64_t.
     const auto stack = static_cast<uint64_t>(number.int64());
 
     // BIP65: the stack lock-time type differs from that of tx nLockTime.
@@ -1892,10 +1877,12 @@ static bool evaluate(const transaction& tx, uint32_t input_index,
     if (script.satoshi_content_size() > max_script_size)
         return false;
 
+    auto& ops = script.operations();
     context.operation_counter = 0;
-    context.code_begin = script.operations().begin();
+    context.code_begin = ops.begin();
 
-    for (auto it = script.operations().begin(); it != script.operations().end(); ++it)
+    // If any op returns false the script terminates and is false.
+    for (auto it = ops.begin(); it != ops.end(); ++it)
         if (!next_step(tx, input_index, it, script, context, flags))
             return false;
 
@@ -1910,7 +1897,7 @@ code script::verify(const transaction& tx, uint32_t input_index,
         return error::operation_failed;
 
     // Obtain the previous output script from the cached previous output.
-    const auto& prevout = tx.inputs()[input_index].previous_output().validation;
+    auto& prevout = tx.inputs()[input_index].previous_output().validation;
     return verify(tx, input_index, prevout.cache.script(), flags);
 }
 
