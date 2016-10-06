@@ -23,6 +23,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <bitcoin/bitcoin/compat.hpp>
+#include <bitcoin/bitcoin/config/checkpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/math/hash_number.hpp>
@@ -52,6 +53,7 @@ BC_CONSTEXPR uint8_t byte_bits = 8;
 
 BC_CONSTEXPR uint32_t no_previous_output = max_uint32;
 BC_CONSTEXPR uint32_t max_input_sequence = max_uint32;
+BC_CONSTEXPR uint64_t sighash_null_value = max_uint64;
 
 // Various consensus constants.
 //-----------------------------------------------------------------------------
@@ -104,20 +106,23 @@ BC_CONSTEXPR size_t mainnet_active = 750;
 BC_CONSTEXPR size_t mainnet_enforce = 950;
 BC_CONSTEXPR size_t mainnet_sample = 1000;
 
-// Block 173805 is the first mainnet block after date-based activation.
 // Block 514 is the first testnet block after date-based activation.
-BC_CONSTEXPR size_t mainnet_bip16_activation_height = 173805;
-BC_CONSTEXPR size_t testnet_bip16_activation_height = 514;
+// Block 173805 is the first mainnet block after date-based activation.
+BC_CONSTEXPR uint32_t bip16_activation_time = 0x4F779A80;
 
 // github.com/bitcoin/bips/blob/master/bip-0030.mediawiki#specification
-BC_CONSTEXPR size_t mainnet_bip30_exception_height1 = 91842;
-BC_CONSTEXPR size_t mainnet_bip30_exception_height2 = 91880;
-BC_CONSTEXPR size_t testnet_bip30_exception_height1 = 0;
-BC_CONSTEXPR size_t testnet_bip30_exception_height2 = 0;
+static const config::checkpoint mainnet_bip30_exception_checkpoint1(
+{
+    "00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec", 91842
+});
+static const config::checkpoint mainnet_bip30_exception_checkpoint2(
+{
+    "00000000000743f190a18c5577a3c2d2a1f610ae9601ac046a38084ccb7cd721", 91880
+});
 
-// The larger of mainnet and testnet sameple sizes.
-BC_CONSTEXPR size_t max_version_sample_size = mainnet_sample >
-    testnet_sample ? mainnet_sample : testnet_sample;
+////// The larger of mainnet and testnet sameple sizes.
+////BC_CONSTEXPR size_t max_version_sample_size = mainnet_sample >
+////    testnet_sample ? mainnet_sample : testnet_sample;
 
 // Network protocol constants.
 //-----------------------------------------------------------------------------
