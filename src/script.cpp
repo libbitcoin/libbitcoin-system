@@ -1088,6 +1088,10 @@ script_type::result script_type::op_checksigverify(
 
     const auto pubkey = pop_stack();
     auto endorsement = pop_stack();
+
+    if (endorsement.empty())
+        return result::invalid;
+
     const auto hash_type = endorsement.back();
     auto& distinguished = endorsement;
     distinguished.pop_back();
@@ -1187,6 +1191,9 @@ script_type::result script_type::op_checkmultisigverify(
     auto pubkey = pubkeys.begin();
     for (const auto& endorsement: endorsements)
     {
+        if (endorsement.empty())
+            return result::invalid;
+
         const auto hash_type = endorsement.back();
         auto distinguished = endorsement;
         distinguished.pop_back();
