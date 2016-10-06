@@ -140,18 +140,19 @@ bool operation::from_data(reader& source)
 
     const auto byte = source.read_byte();
     auto result = static_cast<bool>(source);
-    auto op_code = static_cast<opcode>(byte);
+    const auto op_code = static_cast<opcode>(byte);
 
-    if (byte == 0 && op_code != opcode::zero)
-        return false;
+    // This looks like dead code.
+    ////if (byte == 0 && op_code != opcode::zero)
+    ////    return false;
 
-    code_ = ((0 < byte && byte <= 75) ? opcode::special : op_code);
+    code_ = ((1 <= byte && byte <= 75) ? opcode::special : op_code);
 
     if (operation::must_read_data(code_))
     {
-        uint32_t size = read_opcode_data_size(code_, byte, source);
+        const auto size = read_opcode_data_size(code_, byte, source);
         data_ = source.read_data(size);
-        result = (source && (data_.size() == size));
+        result &= (source && (data_.size() == size));
     }
 
     if (!result)

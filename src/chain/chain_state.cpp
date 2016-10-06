@@ -59,22 +59,14 @@ inline bool is_enforced(size_t count, bool testnet)
     return count >= (testnet ? testnet_enforce : mainnet_enforce);
 }
 
-inline size_t bip30_exception_height1(bool testnet)
+inline bool is_bip30_exception(size_t height, const hash_digest& hash,
+    bool testnet)
 {
-    return testnet ? testnet_bip30_exception_height1 :
-        mainnet_bip30_exception_height1;
-}
-
-inline size_t bip30_exception_height2(bool testnet)
-{
-    return testnet ? testnet_bip30_exception_height2 :
-        mainnet_bip30_exception_height2;
-}
-
-inline size_t bip16_activation_height(bool testnet)
-{
-    return testnet ? testnet_bip16_activation_height :
-        mainnet_bip16_activation_height;
+    return !testnet &&
+        (height == mainnet_bip30_exception_checkpoint1.height() &&
+         hash == mainnet_bip30_exception_checkpoint1.hash()) ||
+        (height == mainnet_bip30_exception_checkpoint2.height() &&
+         hash == mainnet_bip30_exception_checkpoint2.hash());
 }
 
 inline uint32_t timestamp_high(const chain_state::data& values)
@@ -113,7 +105,6 @@ uint32_t chain_state::retarget_timespan(const chain_state::data& values)
 
 chain_state::activations chain_state::activation(const data& values)
 {
-    const auto height = values.height;
     const auto testnet = values.testnet;
     const auto& history = values.version.unordered;
 
@@ -142,13 +133,12 @@ chain_state::activations chain_state::activation(const data& values)
     if (is_active(count_2, testnet))
         result.forks |= rule_fork::bip34_rule;
 
-    // bip30 applies to all but two mainnet blocks that violate the rule.
-    if (height != bip30_exception_height1(testnet) &&
-        height != bip30_exception_height2(testnet))
+    // bip30 is active for all but two mainnet blocks that violate the rule.
+    if (!is_bip30_exception(values.height, values.hash, testnet))
         result.forks |= rule_fork::bip30_rule;
 
-    // bip16 was activated with a one-time test on mainnet/testnet (~55% rule).
-    if (height >= bip16_activation_height(testnet))
+    // bip16 is activated with a one-time test on mainnet/testnet (~55% rule).
+    if (values.timestamp.self >= bip16_activation_time)
         result.forks |= rule_fork::bip16_rule;
 
     // version 4/3/2 enforced based on 95% of preceding 1000 mainnet blocks.
@@ -285,7 +275,7 @@ chain_state::map chain_state::get_map(size_t height, bool enabled,
     // Height must be a positive multiple of interval, so underflow safe.
     map.timestamp.high = height - max_time_past;
     map.timestamp.low = floor_subtract(map.timestamp.high, min_time_past);
-    map.timestamp_self = testnet ? height : map.timestamp.high;
+    map.timestamp_self = height;
     map.timestamp_retarget = is_retarget_height(height) ?
         height - retargeting_interval : map.timestamp.high;
 

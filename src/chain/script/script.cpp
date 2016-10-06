@@ -47,17 +47,16 @@
 namespace libbitcoin {
 namespace chain {
 
-// False is an empty stack.
-static const data_chunk stack_false_value{};
-static const data_chunk stack_true_value{ 1 };
 static constexpr size_t op_counter_limit = 201;
 static constexpr size_t max_number_size = 4;
+static constexpr size_t max_cltv_number_size = 5;
 static constexpr size_t max_stack_size = 1000;
 static constexpr size_t max_script_size = 10000;
-static constexpr size_t cltv_max_number_size = 5;
 static constexpr size_t max_data_script_size = 520;
 static constexpr size_t max_script_public_key_count = 20;
 static constexpr size_t multisig_default_signature_ops = 20;
+static constexpr uint8_t negative_mask = 0x80;
+static constexpr uint8_t negative_1 = 0x81;
 
 // bit.ly/2cPazSa
 static const hash_digest one_hash
@@ -124,6 +123,7 @@ script::script(script&& other)
 {
 }
 
+// TODO: cache.
 script_pattern script::pattern() const
 {
     if (operation::is_null_data_pattern(operations_))
@@ -263,6 +263,7 @@ void script::to_data(writer& sink, bool prefix) const
             op.to_data(sink);
 }
 
+// TODO: cache.
 uint64_t script::satoshi_content_size() const
 {
     if (is_raw_data())
@@ -354,6 +355,7 @@ std::string script::to_string(uint32_t flags) const
 }
 
 // See BIP16.
+// TODO: distinct cache property for serialized_script total.
 size_t script::sigops(bool serialized_script) const
 {
     size_t total = 0;
@@ -381,6 +383,7 @@ size_t script::sigops(bool serialized_script) const
 }
 
 // See BIP16.
+// TODO: cache (default to max_size_t sentinel).
 size_t script::pay_script_hash_sigops(const script& prevout) const
 {
     // The prevout script is not p2sh, so no signature increment.
@@ -421,7 +424,7 @@ bool script::deserialize(const data_chunk& raw_script, parse_mode mode)
         };
 
         operations_.clear();
-        operations_.push_back(std::move(op));
+        operations_.emplace_back(std::move(op));
         is_raw_ = true;
     }
 
@@ -467,31 +470,27 @@ inline uint8_t is_sighash_flag(uint8_t sighash_type,
     return (sighash_type & value) != 0;
 }
 
-////inline hash_digest hash(const transaction& tx, uint8_t sighash_type)
-////{
-////    auto serialized = tx.to_data();
-////    extend_data(serialized, to_little_endian(sighash_type));
-////    return bitcoin_hash(serialized);
-////}
-
+// FindAndDelete(OP_CODESEPARATOR) done in op_checksigverify(...)
 hash_digest script::generate_signature_hash(const transaction& tx,
     uint32_t input_index, const script& script_code, uint8_t sighash_type)
 {
-    // Copy the parent transaction.
-    transaction parent(tx);
-
     // This is NOT considered an error result and callers should not test
     // for one_hash. This is a bitcoind behavior we necessarily perpetuate.
     if (input_index >= tx.inputs().size())
         return one_hash;
 
-    // FindAndDelete(OP_CODESEPARATOR) done in op_checksigverify(...)
+    // Copy the copy transaction.
+    transaction copy(tx);
 
-    // Blank all other inputs' signatures
-    for (auto& input: parent.inputs())
+    ///////////////////////////////////////////////////////////////////////////
+    // TODO: create a tx copy method that does not copy scripts.
+    ///////////////////////////////////////////////////////////////////////////
+    // Blank all of the inputs' scripts.
+    for (auto& input: copy.inputs())
         input.script().reset();
 
-    parent.inputs()[input_index].set_script(script_code);
+    // Assign the script code to the copy's specified input.
+    copy.inputs()[input_index].set_script(script_code);
 
     // The default sighash::all signs all outputs, and the current input.
     // Transaction cannot be updated without resigning the input.
@@ -500,16 +499,15 @@ hash_digest script::generate_signature_hash(const transaction& tx,
     if (is_sighash_enum(sighash_type, signature_hash_algorithm::none))
     {
         // Sign no outputs, so they can be changed.
-        parent.outputs().clear();
-        zeroize_input_sequences(parent.inputs(), input_index);
+        copy.outputs().clear();
+        zeroize_input_sequences(copy.inputs(), input_index);
     }
     else if (is_sighash_enum(sighash_type, signature_hash_algorithm::single))
     {
-
         // Sign the single output corresponding to our index.
         // We don't care about additional inputs or outputs to the tx.
-        auto& outputs = parent.outputs();
-        uint32_t output_index = input_index;
+        auto& outputs = copy.outputs();
+        const auto output_index = input_index;
 
         // This is NOT considered an error result and callers should not test
         // for one_hash. This is a bitcoind behavior we necessarily perpetuate.
@@ -520,138 +518,101 @@ hash_digest script::generate_signature_hash(const transaction& tx,
 
         // Loop through outputs except the last one.
         for (auto it = outputs.begin(); it != outputs.end() - 1; ++it)
-        {
-            it->set_value(std::numeric_limits<uint64_t>::max());
-            it->script().reset();
-        }
+            it->reset();
 
-        zeroize_input_sequences(parent.inputs(), input_index);
+        zeroize_input_sequences(copy.inputs(), input_index);
     }
 
     // Flag to ignore the other inputs except our own.
     if (is_sighash_flag(sighash_type,
         signature_hash_algorithm::anyone_can_pay))
     {
-        parent.inputs()[0] = parent.inputs()[input_index];
-        parent.inputs().resize(1);
+        copy.inputs()[0] = copy.inputs()[input_index];
+        copy.inputs().resize(1);
     }
 
-    return parent.hash(sighash_type);
+    return copy.hash(sighash_type);
 }
 
-inline bool cast_to_bool(const data_chunk& values)
+inline void stack_swap(evaluation_context& context, size_t left, size_t right)
 {
-    for (auto it = values.begin(); it != values.end(); ++it)
-    {
-        if (*it != 0)
-        {
-            // Can be negative zero
-            if (it == values.end() - 1 && *it == 0x80)
-                return false;
+    std::swap(*(context.stack.end() - left), *(context.stack.end() - right));
+}
 
-            return true;
-        }
-    }
+inline bool pop_unary(evaluation_context& context, script_number& out_number,
+    size_t maxiumum_size=max_number_size)
+{
+    return !context.stack.empty() &&
+        out_number.set_data(context.pop_stack(), maxiumum_size);
+}
+
+static bool pop_unary(evaluation_context& context, int32_t& out_value)
+{
+    script_number middle;
+    if (!pop_unary(context, middle))
+        return false;
+
+    out_value = middle.int32();
+    return true;
+}
+
+static bool pop_binary(evaluation_context& context,
+    script_number& left, script_number& right)
+{
+    // The right hand side number is at the top of the stack.
+    return pop_unary(context, right) && pop_unary(context, left);
+}
+
+static bool pop_ternary(evaluation_context& context,
+    script_number& upper, script_number& lower, script_number& value)
+{
+    // The upper bound is at the top of the stack and the lower bound next.
+    return pop_unary(context, upper) && pop_unary(context, lower) &&
+        pop_unary(context, value);
+}
+
+// Determines if the value is a valid stack index and returns the index.
+inline bool pop_stack_index(evaluation_context& context, size_t& out_index)
+{
+    int32_t reverse_index;
+    if (!pop_unary(context, reverse_index))
+        return false;
+
+    // Ensure the index is within bounds.
+    const auto size = context.stack.size();
+    if (reverse_index < 0 || reverse_index >= size)
+        return false;
+
+    // Convert to a forward index.
+    out_index = (size - 1) - static_cast<size_t>(reverse_index);
+    return out_index < size;
+}
+
+inline void copy_item_over_stack(evaluation_context& context, size_t index)
+{
+    const auto dup = *(context.stack.end() - index);
+    context.stack.emplace_back(std::move(dup));
+}
+
+inline data_chunk bool_to_stack(bool value)
+{
+    return value ? data_chunk{ 1 } : data_chunk{};
+}
+
+inline bool stack_to_bool(const data_chunk& values)
+{
+    if (values.empty())
+        return false;
+
+    const auto last_position = values.end() - 1;
+    for (auto it = values.begin(); it != values.end(); ++it)
+        if (*it != 0)
+            return !(it == last_position && *it == negative_mask);
 
     return false;
 }
 
-inline uint8_t cast_to_number(bool value)
-{
-    return value ? 1 : 0;
-}
-
-template <typename DataStack>
-void stack_swap(DataStack& stack, size_t index_a, size_t index_b)
-{
-    std::swap(*(stack.end() - index_a), *(stack.end() - index_b));
-}
-
-template <typename DataStack>
-data_chunk pop_item(DataStack& stack)
-{
-    const auto value = stack.back();
-    stack.pop_back();
-    return value;
-}
-
-// Used by pick, roll and checkmultisig*
-template <typename DataStack>
-bool read_value(DataStack& stack, int32_t& value)
-{
-    if (stack.empty())
-        return false;
-
-    script_number middle;
-    if (!middle.set_data(pop_item(stack), max_number_size))
-        return false;
-
-    value = middle.int32();
-    return true;
-}
-
-template <typename DataStack>
-bool pick_roll_impl(DataStack& stack, bool is_roll)
-{
-    if (stack.size() < 2)
-        return false;
-
-    int32_t value;
-
-    if (!read_value(stack, value))
-        return false;
-
-    const auto stack_size = static_cast<int32_t>(stack.size());
-
-    if (value < 0 || value >= stack_size)
-        return false;
-
-    const auto slice_iterator = stack.end() - value - 1;
-    const auto item = *slice_iterator;
-
-    if (is_roll)
-        stack.erase(slice_iterator);
-
-    stack.push_back(std::move(item));
-    return true;
-}
-
-// Used by add, sub, mul, div, mod, lshift, rshift, booland, boolor,
-// numequal, numequalverify, numnotequal, lessthan, greaterthan,
-// lessthanorequal, greaterthanorequal, min, max
-template <typename DataStack>
-bool arithmetic_start_new(DataStack& stack, script_number& left,
-    script_number& right)
-{
-    if (stack.size() < 2)
-        return false;
-
-    // The second number is at the top of the stack.
-    if (!right.set_data(pop_item(stack), max_number_size))
-        return false;
-
-    // The first is at the second position.
-    if (!left.set_data(pop_item(stack), max_number_size))
-        return false;
-
-    return true;
-}
-
-// Convert opcode to its actual numeric value.
-template <typename OpCode>
-auto base_value(OpCode code) -> typename std::underlying_type<OpCode>::type
-{
-    return static_cast<typename std::underlying_type<OpCode>::type>(code);
-}
-
-template <typename DataStack>
-void copy_item_over_stack(DataStack& stack, size_t index)
-{
-    const auto dup = *(stack.end() - index);
-    stack.emplace_back(std::move(dup));
-}
-
-static bool is_condition_opcode(opcode code)
+inline bool is_condition_opcode(opcode code)
 {
     return code == opcode::if_
         || code == opcode::notif
@@ -659,25 +620,27 @@ static bool is_condition_opcode(opcode code)
         || code == opcode::endif;
 }
 
-static bool greater_op_16(opcode code)
+inline uint8_t to_byte_code(opcode code)
 {
-    return base_value(code) > base_value(opcode::op_16);
+    return static_cast<uint8_t>(code);
 }
 
-static bool op_negative_1(evaluation_context& context)
+inline bool greater_op_16(opcode code)
 {
-    static const script_number negative_1(-1);
-    context.stack.push_back(negative_1.data());
+    return to_byte_code(code) > to_byte_code(opcode::op_16);
+}
+
+inline bool op_negative_1(evaluation_context& context)
+{
+    context.stack.push_back({ negative_1 });
     return true;
 }
 
 static bool op_x(evaluation_context& context, opcode code)
 {
-    const auto difference = static_cast<uint8_t>(code) -
-        static_cast<uint8_t>(opcode::op_1) + 1;
-
-    const script_number value(difference);
-    context.stack.push_back(value.data());
+    static const auto byte_code_0 = to_byte_code(opcode::op_1) - 1;
+    const auto span = to_byte_code(code) - byte_code_0;
+    context.stack.push_back(script_number(span).data());
     return true;
 }
 
@@ -689,7 +652,7 @@ static bool op_if(evaluation_context& context)
         if (context.stack.empty())
             return false;
 
-        value = cast_to_bool(context.pop_stack());
+        value = stack_to_bool(context.pop_stack());
     }
 
     context.conditional.open(value);
@@ -703,7 +666,7 @@ static bool op_notif(evaluation_context& context)
     if (!op_if(context))
         return false;
 
-    context.conditional.else_();
+    context.conditional.negate();
     return true;
 }
 
@@ -712,7 +675,7 @@ static bool op_else(evaluation_context& context)
     if (context.conditional.closed())
         return false;
 
-    context.conditional.else_();
+    context.conditional.negate();
     return true;
 }
 
@@ -730,7 +693,7 @@ static bool op_verify(evaluation_context& context)
     if (context.stack.empty())
         return false;
 
-    if (!cast_to_bool(context.stack.back()))
+    if (!stack_to_bool(context.stack.back()))
         return false;
 
     context.pop_stack();
@@ -799,10 +762,10 @@ static bool op_2over(evaluation_context& context)
     if (context.stack.size() < 4)
         return false;
 
-    copy_item_over_stack(context.stack, 4);
+    copy_item_over_stack(context, 4);
 
     // Item -3 now becomes -4 because of last push
-    copy_item_over_stack(context.stack, 4);
+    copy_item_over_stack(context, 4);
     return true;
 }
 
@@ -831,8 +794,8 @@ static bool op_2swap(evaluation_context& context)
 
     // Before: x1 x2 x3 x4
     // After:  x3 x4 x1 x2
-    stack_swap(context.stack, 4, 2);
-    stack_swap(context.stack, 3, 1);
+    stack_swap(context, 4, 2);
+    stack_swap(context, 3, 1);
     return true;
 }
 
@@ -841,7 +804,7 @@ static bool op_ifdup(evaluation_context& context)
     if (context.stack.empty())
         return false;
 
-    if (cast_to_bool(context.stack.back()))
+    if (stack_to_bool(context.stack.back()))
         context.stack.push_back(context.stack.back());
 
     return true;
@@ -851,8 +814,8 @@ static bool op_depth(evaluation_context& context)
 {
     const auto size = context.stack.size();
 
-    // Condition added by EKV on 2016.09.06.
-    if (size > max_int32)
+    // Condition added by EKV on 2016.10.06.
+    if (size > max_int64)
         return false;
 
     const script_number stack_size(size);
@@ -892,18 +855,31 @@ static bool op_over(evaluation_context& context)
     if (context.stack.size() < 2)
         return false;
 
-    copy_item_over_stack(context.stack, 2);
+    copy_item_over_stack(context, 2);
     return true;
 }
 
 static bool op_pick(evaluation_context& context)
 {
-    return pick_roll_impl(context.stack, false);
+    size_t index;
+    if (!pop_stack_index(context, index))
+        return false;
+
+    context.stack.push_back(context.stack[index]);
+    return true;
 }
 
 static bool op_roll(evaluation_context& context)
 {
-    return pick_roll_impl(context.stack, true);
+    size_t index;
+    if (!pop_stack_index(context, index))
+        return false;
+
+    const auto it = context.stack.begin() + index;
+    const auto dup = *it;
+    context.stack.erase(it);
+    context.stack.emplace_back(std::move(dup));
+    return true;
 }
 
 static bool op_rot(evaluation_context& context)
@@ -914,8 +890,8 @@ static bool op_rot(evaluation_context& context)
     if (context.stack.size() < 3)
         return false;
 
-    stack_swap(context.stack, 3, 2);
-    stack_swap(context.stack, 2, 1);
+    stack_swap(context, 3, 2);
+    stack_swap(context, 2, 1);
     return true;
 }
 
@@ -924,7 +900,7 @@ static bool op_swap(evaluation_context& context)
     if (context.stack.size() < 2)
         return false;
 
-    stack_swap(context.stack, 2, 1);
+    stack_swap(context, 2, 1);
     return true;
 }
 
@@ -945,7 +921,7 @@ static bool op_size(evaluation_context& context)
     const auto size = context.stack.back().size();
 
     // Condition added by EKV on 2016.09.06.
-    if (size > max_int32)
+    if (size > max_int64)
         return false;
 
     const script_number top_item_size(size);
@@ -958,11 +934,8 @@ static bool op_equal(evaluation_context& context)
     if (context.stack.size() < 2)
         return false;
 
-    if (context.pop_stack() == context.pop_stack())
-        context.stack.push_back(stack_true_value);
-    else
-        context.stack.push_back(stack_false_value);
-
+    const auto value = context.pop_stack() == context.pop_stack();
+    context.stack.push_back(bool_to_stack(value));
     return true;
 }
 
@@ -976,11 +949,8 @@ static bool op_equalverify(evaluation_context& context)
 
 static bool op_1add(evaluation_context& context)
 {
-    if (context.stack.empty())
-        return false;
-
     script_number number;
-    if (!number.set_data(context.pop_stack(), max_number_size))
+    if (!pop_unary(context, number))
         return false;
 
     number += 1;
@@ -990,11 +960,8 @@ static bool op_1add(evaluation_context& context)
 
 static bool op_1sub(evaluation_context& context)
 {
-    if (context.stack.empty())
-        return false;
-
     script_number number;
-    if (!number.set_data(context.pop_stack(), max_number_size))
+    if (!pop_unary(context, number))
         return false;
 
     number -= 1;
@@ -1004,11 +971,8 @@ static bool op_1sub(evaluation_context& context)
 
 static bool op_negate(evaluation_context& context)
 {
-    if (context.stack.empty())
-        return false;
-
     script_number number;
-    if (!number.set_data(context.pop_stack(), max_number_size))
+    if (!pop_unary(context, number))
         return false;
 
     number = -number;
@@ -1018,11 +982,8 @@ static bool op_negate(evaluation_context& context)
 
 static bool op_abs(evaluation_context& context)
 {
-    if (context.stack.empty())
-        return false;
-
     script_number number;
-    if (!number.set_data(context.pop_stack(), max_number_size))
+    if (!pop_unary(context, number))
         return false;
 
     if (number < 0)
@@ -1034,34 +995,28 @@ static bool op_abs(evaluation_context& context)
 
 static bool op_not(evaluation_context& context)
 {
-    if (context.stack.empty())
-        return false;
-
     script_number number;
-    if (!number.set_data(context.pop_stack(), max_number_size))
+    if (!pop_unary(context, number))
         return false;
 
-    context.stack.push_back(script_number(cast_to_number(number == 0)).data());
+    context.stack.push_back(bool_to_stack(number == 0));
     return true;
 }
 
 static bool op_0notequal(evaluation_context& context)
 {
-    if (context.stack.empty())
-        return false;
-
     script_number number;
-    if (!number.set_data(context.pop_stack(), max_number_size))
+    if (!pop_unary(context, number))
         return false;
 
-    context.stack.push_back(script_number(cast_to_number(number != 0)).data());
+    context.stack.push_back(bool_to_stack(number != 0));
     return true;
 }
 
 static bool op_add(evaluation_context& context)
 {
     script_number left, right;
-    if (!arithmetic_start_new(context.stack, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
     const auto result = left + right;
@@ -1072,7 +1027,7 @@ static bool op_add(evaluation_context& context)
 static bool op_sub(evaluation_context& context)
 {
     script_number left, right;
-    if (!arithmetic_start_new(context.stack, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
     const auto result = left - right;
@@ -1083,41 +1038,37 @@ static bool op_sub(evaluation_context& context)
 static bool op_booland(evaluation_context& context)
 {
     script_number left, right;
-    if (!arithmetic_start_new(context.stack, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
-    const script_number result(cast_to_number(left != 0 && right != 0));
-    context.stack.push_back(result.data());
+    context.stack.push_back(bool_to_stack(left != 0 && right != 0));
     return true;
 }
 
 static bool op_boolor(evaluation_context& context)
 {
     script_number left, right;
-    if (!arithmetic_start_new(context.stack, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
-    const script_number result(cast_to_number(left != 0 || right != 0));
-    context.stack.push_back(result.data());
+    context.stack.push_back(bool_to_stack(left != 0 || right != 0));
     return true;
 }
 
 static bool op_numequal(evaluation_context& context)
 {
     script_number left, right;
-    if (!arithmetic_start_new(context.stack, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
-    const auto value = left == right;
-    const script_number result(cast_to_number(value));
-    context.stack.push_back(result.data());
+    context.stack.push_back(bool_to_stack(left == right));
     return true;
 }
 
 static bool op_numequalverify(evaluation_context& context)
 {
     script_number left, right;
-    if (!arithmetic_start_new(context.stack, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
     return left == right;
@@ -1126,64 +1077,57 @@ static bool op_numequalverify(evaluation_context& context)
 static bool op_numnotequal(evaluation_context& context)
 {
     script_number left, right;
-    if (!arithmetic_start_new(context.stack, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
-    const script_number result(cast_to_number(left != right));
-    context.stack.push_back(result.data());
+    context.stack.push_back(bool_to_stack(left != right));
     return true;
 }
 
 static bool op_lessthan(evaluation_context& context)
 {
     script_number left, right;
-    if (!arithmetic_start_new(context.stack, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
-    const script_number result(cast_to_number(left < right));
-    context.stack.push_back(result.data());
+    context.stack.push_back(bool_to_stack(left < right));
     return true;
 }
 
 static bool op_greaterthan(evaluation_context& context)
 {
     script_number left, right;
-    if (!arithmetic_start_new(context.stack, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
-    const script_number result(cast_to_number(left > right));
-    context.stack.push_back(result.data());
+    context.stack.push_back(bool_to_stack(left > right));
     return true;
 }
 
 static bool op_lessthanorequal(evaluation_context& context)
 {
     script_number left, right;
-
-    if (!arithmetic_start_new(context.stack, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
-    const script_number result(cast_to_number(left <= right));
-    context.stack.push_back(result.data());
-
+    context.stack.push_back(bool_to_stack(left <= right));
     return true;
 }
 
 static bool op_greaterthanorequal(evaluation_context& context)
 {
     script_number left, right;
-    if (!arithmetic_start_new(context.stack, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
-    const script_number result(cast_to_number(left >= right));
-    context.stack.push_back(result.data());
+    context.stack.push_back(bool_to_stack(left >= right));
     return true;
 }
 
 static bool op_min(evaluation_context& context)
 {
     script_number left, right;
-    if (!arithmetic_start_new(context.stack, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
     if (left < right)
@@ -1197,39 +1141,21 @@ static bool op_min(evaluation_context& context)
 static bool op_max(evaluation_context& context)
 {
     script_number left, right;
-    if (!arithmetic_start_new(context.stack, left, right))
+    if (!pop_binary(context, left, right))
         return false;
 
-    if (left < right)
-        context.stack.push_back(right.data());
-    else
-        context.stack.push_back(left.data());
-
+    const auto greater = left > right ? left.data() : right.data();
+    context.stack.emplace_back(std::move(greater));
     return true;
 }
 
 static bool op_within(evaluation_context& context)
 {
-    if (context.stack.size() < 3)
+    script_number upper, lower, value;
+    if (!pop_ternary(context, upper, lower, value))
         return false;
 
-    script_number upper;
-    if (!upper.set_data(context.pop_stack(), max_number_size))
-        return false;
-
-    script_number lower;
-    if (!lower.set_data(context.pop_stack(), max_number_size))
-        return false;
-
-    script_number value;
-    if (!value.set_data(context.pop_stack(), max_number_size))
-        return false;
-
-    if ((lower <= value) && (value < upper))
-        context.stack.push_back(stack_true_value);
-    else
-        context.stack.push_back(stack_false_value);
-
+    context.stack.push_back(bool_to_stack(lower <= value && value < upper));
     return true;
 }
 
@@ -1357,10 +1283,10 @@ static bool op_checksig(evaluation_context& context, const script& script,
     switch (op_checksigverify(context, script, tx, input_index, strict))
     {
         case signature_parse_result::valid:
-            context.stack.push_back(stack_true_value);
+            context.stack.push_back(bool_to_stack(true));
             break;
         case signature_parse_result::invalid:
-            context.stack.push_back(stack_false_value);
+            context.stack.push_back(bool_to_stack(false));
             break;
         case signature_parse_result::lax_encoding:
             return false;
@@ -1386,8 +1312,7 @@ static signature_parse_result op_checkmultisigverify(
     uint32_t input_index, bool strict)
 {
     int32_t pubkeys_count;
-
-    if (!read_value(context.stack, pubkeys_count))
+    if (!pop_unary(context, pubkeys_count))
         return signature_parse_result::invalid;
 
     // bit.ly/2d1bsdB
@@ -1400,20 +1325,17 @@ static signature_parse_result op_checkmultisigverify(
         return signature_parse_result::invalid;
 
     data_stack pubkeys;
-
     if (!read_section(context, pubkeys, pubkeys_count))
         return signature_parse_result::invalid;
 
     int32_t sigs_count;
-
-    if (!read_value(context.stack, sigs_count))
+    if (!pop_unary(context, sigs_count))
         return signature_parse_result::invalid;
 
     if (sigs_count < 0 || sigs_count > pubkeys_count)
         return signature_parse_result::invalid;
 
     data_stack endorsements;
-
     if (!read_section(context, endorsements, sigs_count))
         return signature_parse_result::invalid;
 
@@ -1480,10 +1402,10 @@ static bool op_checkmultisig(evaluation_context& context, const script& script,
     switch (op_checkmultisigverify(context, script, tx, input_index, strict))
     {
         case signature_parse_result::valid:
-            context.stack.push_back(stack_true_value);
+            context.stack.push_back(bool_to_stack(true));
             break;
         case signature_parse_result::invalid:
-            context.stack.push_back(stack_false_value);
+            context.stack.push_back(bool_to_stack(false));
             break;
         case signature_parse_result::lax_encoding:
             return false;
@@ -1492,10 +1414,9 @@ static bool op_checkmultisig(evaluation_context& context, const script& script,
     return true;
 }
 
-static bool is_locktime_type_match(int64_t left, int64_t right)
+static bool is_locktime_type_match(uint64_t left, uint64_t right)
 {
-    const auto threshold = static_cast<int64_t>(locktime_threshold);
-    return (left < threshold) == (right < threshold);
+    return (left < locktime_threshold) == (right < locktime_threshold);
 }
 
 static bool op_checklocktimeverify(evaluation_context& context,
@@ -1509,28 +1430,27 @@ static bool op_checklocktimeverify(evaluation_context& context,
         return false;
 
     // BIP65: the stack is empty.
-    if (context.stack.empty())
-        return false;
-
     // BIP65: We extend the (signed) CLTV script number range to 5 bytes in
     // order to reach the domain of the (unsigned) tx.locktime field.
     script_number number;
-    if (!number.set_data(context.pop_stack(), cltv_max_number_size))
+    if (!pop_unary(context, number, max_cltv_number_size))
         return false;
 
     // BIP65: the top item on the stack is less than 0.
     if (number < 0)
         return false;
 
-    const auto stack = number.int64();
-    const auto transaction = static_cast<int64_t>(tx.locktime());
+    // TODO: confirm the domain of context.pop_stack() above is uint32_t.
+    // If so there is no reason to cast into 64 bit here, just use uint32_t.
+    // The value is positive, so it is safe to cast to uint64_t.
+    const auto stack = static_cast<uint64_t>(number.int64());
 
     // BIP65: the stack lock-time type differs from that of tx nLockTime.
-    if (!is_locktime_type_match(stack, transaction))
+    if (!is_locktime_type_match(stack, tx.locktime()))
         return false;
 
     // BIP65: the top stack item is greater than the tx's nLockTime.
-    return stack <= transaction;
+    return stack <= tx.locktime();
 }
 
 // Test rule_fork flag for a given context.
@@ -1855,10 +1775,7 @@ static bool increment_op_counter(opcode code, evaluation_context& context)
     if (greater_op_16(code))
         ++context.operation_counter;
 
-    if (context.operation_counter > op_counter_limit)
-        return false;
-
-    return true;
+    return context.operation_counter <= op_counter_limit;
 }
 
 static bool opcode_is_disabled(opcode code)
@@ -1960,10 +1877,12 @@ static bool evaluate(const transaction& tx, uint32_t input_index,
     if (script.satoshi_content_size() > max_script_size)
         return false;
 
+    auto& ops = script.operations();
     context.operation_counter = 0;
-    context.code_begin = script.operations().begin();
+    context.code_begin = ops.begin();
 
-    for (auto it = script.operations().begin(); it != script.operations().end(); ++it)
+    // If any op returns false the script terminates and is false.
+    for (auto it = ops.begin(); it != ops.end(); ++it)
         if (!next_step(tx, input_index, it, script, context, flags))
             return false;
 
@@ -1978,13 +1897,13 @@ code script::verify(const transaction& tx, uint32_t input_index,
         return error::operation_failed;
 
     // Obtain the previous output script from the cached previous output.
-    const auto& prevout = tx.inputs()[input_index].previous_output().validation;
+    auto& prevout = tx.inputs()[input_index].previous_output().validation;
     return verify(tx, input_index, prevout.cache.script(), flags);
 }
 
 inline bool stack_result(const evaluation_context& context)
 {
-    return !context.stack.empty() && cast_to_bool(context.stack.back());
+    return !context.stack.empty() && stack_to_bool(context.stack.back());
 }
 
 // TODO: return detailed result code indicating failure condition.
@@ -2080,12 +1999,14 @@ script& script::operator=(const script& other)
 
 bool script::operator==(const script& other) const
 {
-    bool result = (operations_.size() == other.operations_.size());
+    if (operations_.size() != other.operations_.size())
+        return false;
 
-    for (operation::stack::size_type i = 0; (i < operations_.size()) && result; ++i)
-        result = (operations_[i] == other.operations_[i]);
+    for (size_t op = 0; op < operations_.size(); ++op)
+        if (operations_[op] != other.operations_[op])
+            return false;
 
-    return result;
+    return true;
 }
 
 bool script::operator!=(const script& other) const

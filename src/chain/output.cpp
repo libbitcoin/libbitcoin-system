@@ -31,7 +31,8 @@
 namespace libbitcoin {
 namespace chain {
 
-const uint64_t output::not_found = max_uint64;
+// This is a consensus critical value that must be set on reset.
+const uint64_t output::not_found = sighash_null_value;
 
 output output::factory_from_data(const data_chunk& data)
 {

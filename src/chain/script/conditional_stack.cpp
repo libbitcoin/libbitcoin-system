@@ -31,7 +31,8 @@ bool conditional_stack::closed() const
 
 bool conditional_stack::succeeded() const
 {
-    return std::count(stack_.begin(), stack_.end(), false) == 0;
+    const auto is_true = [](bool value) { return value; };
+    return std::all_of(stack_.begin(), stack_.end(), is_true);
 }
 
 void conditional_stack::clear()
@@ -44,7 +45,7 @@ void conditional_stack::open(bool value)
     stack_.push_back(value);
 }
 
-void conditional_stack::else_()
+void conditional_stack::negate()
 {
     stack_.back() = !stack_.back();
 }

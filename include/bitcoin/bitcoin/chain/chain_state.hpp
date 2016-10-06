@@ -79,6 +79,9 @@ public:
         /// Header values are based on this height.
         size_t height;
 
+        /// Hash of the candidate block or null_hash for memory pool.
+        hash_digest hash;
+
         /// Values must be ordered by height with high (block - 1) last.
         struct { bitss ordered; } bits;
 

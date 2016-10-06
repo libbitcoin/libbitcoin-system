@@ -140,9 +140,25 @@ To safe_to_unsigned(From signed_value)
     return static_cast<To>(signed_value);
 }
 
+/// Constrain a numeric value within a given type domain.
+template <typename To, typename From>
+To domain_constrain(From value)
+{
+    static const auto minimum = std::numeric_limits<To>::min();
+    static const auto maximum = std::numeric_limits<To>::max();
+
+    if (value < minimum)
+        return minimum;
+
+    if (value > maximum)
+        return maximum;
+
+    return static_cast<To>(value);
+}
+
 /// Constrain a numeric value within a given range.
-template <typename Value, typename Bound>
-Bound range_constrain(Value value, Bound minimum, Bound maximum)
+template <typename To, typename From>
+To range_constrain(From value, To minimum, To maximum)
 {
     if (value < minimum)
         return minimum;
@@ -150,7 +166,7 @@ Bound range_constrain(Value value, Bound minimum, Bound maximum)
     if (value > maximum)
         return maximum;
 
-    return static_cast<Bound>(value);
+    return static_cast<To>(value);
 }
 
 #undef IF
