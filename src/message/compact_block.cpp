@@ -210,11 +210,6 @@ const chain::header& compact_block::header() const
     return header_;
 }
 
-void compact_block::set_header(const chain::header& value)
-{
-    header_ = value;
-}
-
 void compact_block::set_header(chain::header&& value)
 {
     header_ = std::move(value);

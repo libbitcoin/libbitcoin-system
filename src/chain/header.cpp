@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/chain/header.hpp>
 
+#include <cstddef>
 #include <chrono>
 #include <utility>
 #include <boost/iostreams/stream.hpp>
@@ -33,6 +34,8 @@
 
 namespace libbitcoin {
 namespace chain {
+
+const size_t header::validation::orphan_height = 0;
 
 header header::factory_from_data(const data_chunk& data,
     bool with_transaction_count)
@@ -97,6 +100,34 @@ header::header(header&& other)
       std::move(other.merkle_), other.timestamp_, other.bits_, other.nonce_,
       other.transaction_count_)
 {
+}
+
+header& header::operator=(header&& other)
+{
+    version_ = other.version_;
+    previous_block_hash_ = std::move(other.previous_block_hash_);
+    merkle_ = std::move(other.merkle_);
+    timestamp_ = other.timestamp_;
+    bits_ = other.bits_;
+    nonce_ = other.nonce_;
+    transaction_count_ = other.transaction_count_;
+    return *this;
+}
+
+bool header::operator==(const header& other) const
+{
+    return (version_ == other.version_)
+        && (previous_block_hash_ == other.previous_block_hash_)
+        && (merkle_ == other.merkle_)
+        && (timestamp_ == other.timestamp_)
+        && (bits_ == other.bits_)
+        && (nonce_ == other.nonce_)
+        && (transaction_count_ == other.transaction_count_);
+}
+
+bool header::operator!=(const header& other) const
+{
+    return !(*this == other);
 }
 
 bool header::is_valid() const
@@ -363,47 +394,6 @@ code header::accept(const chain_state& state) const
 
     else
         return error::success;
-}
-
-header& header::operator=(header&& other)
-{
-    version_ = other.version_;
-    previous_block_hash_ = std::move(other.previous_block_hash_);
-    merkle_ = std::move(other.merkle_);
-    timestamp_ = other.timestamp_;
-    bits_ = other.bits_;
-    nonce_ = other.nonce_;
-    transaction_count_ = other.transaction_count_;
-    return *this;
-}
-
-// TODO: eliminate header copies and then delete this.
-header& header::operator=(const header& other)
-{
-    version_ = other.version_;
-    previous_block_hash_ = other.previous_block_hash_;
-    merkle_ = other.merkle_;
-    timestamp_ = other.timestamp_;
-    bits_ = other.bits_;
-    nonce_ = other.nonce_;
-    transaction_count_ = other.transaction_count_;
-    return *this;
-}
-
-bool header::operator==(const header& other) const
-{
-    return (version_ == other.version_)
-        && (previous_block_hash_ == other.previous_block_hash_)
-        && (merkle_ == other.merkle_)
-        && (timestamp_ == other.timestamp_)
-        && (bits_ == other.bits_)
-        && (nonce_ == other.nonce_)
-        && (transaction_count_ == other.transaction_count_);
-}
-
-bool header::operator!=(const header& other) const
-{
-    return !(*this == other);
 }
 
 } // namespace chain

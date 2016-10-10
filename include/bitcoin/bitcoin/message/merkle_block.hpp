@@ -54,7 +54,6 @@ public:
 
     chain::header& header();
     const chain::header& header() const;
-    void set_header(const chain::header& value);
     void set_header(chain::header&& value);
 
     hash_list& hashes();
