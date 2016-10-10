@@ -51,8 +51,6 @@ namespace chain {
 
 using namespace bc::config;
 
-const size_t block::validation::orphan_height = 0;
-
 static const std::string encoded_mainnet_genesis_block =
     "01000000"
     "0000000000000000000000000000000000000000000000000000000000000000"
@@ -291,11 +289,6 @@ chain::header& block::header()
 const chain::header& block::header() const
 {
     return header_;
-}
-
-void block::set_header(const chain::header& value)
-{
-    header_ = value;
 }
 
 void block::set_header(chain::header&& value)

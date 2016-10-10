@@ -212,11 +212,6 @@ const chain::header::list& headers::elements() const
     return elements_;
 }
 
-void headers::set_elements(const chain::header::list& values)
-{
-    elements_ = values;
-}
-
 void headers::set_elements(chain::header::list&& values)
 {
     elements_ = std::move(values);

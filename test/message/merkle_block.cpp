@@ -303,24 +303,6 @@ BOOST_AUTO_TEST_CASE(merkle_block__header_accessor_2__always__returns_initialize
     BOOST_REQUIRE(expected == instance.header());
 }
 
-BOOST_AUTO_TEST_CASE(merkle_block__header_setter_1__roundtrip__success)
-{
-    chain::header expected
-    {
-        10,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234,
-        6523454,
-        68644
-    };
-
-    message::merkle_block instance;
-    BOOST_REQUIRE(expected != instance.header());
-    instance.set_header(expected);
-    BOOST_REQUIRE(expected == instance.header());
-}
-
 BOOST_AUTO_TEST_CASE(merkle_block__header_setter_2__roundtrip__success)
 {
     message::merkle_block instance;

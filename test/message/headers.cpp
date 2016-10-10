@@ -315,31 +315,6 @@ BOOST_AUTO_TEST_CASE(headers__elements_accessor_2__always__returns_initialized_v
     BOOST_REQUIRE(expected == instance.elements());
 }
 
-BOOST_AUTO_TEST_CASE(headers__command_setter_1__roundtrip__success)
-{
-    const chain::header::list expected = {
-        chain::header(
-            10u,
-            hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-            531234u,
-            6523454u,
-            68644u),
-        chain::header(
-            11234u,
-            hash_literal("abababababababababababababababababababababababababababababababab"),
-            hash_literal("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe"),
-            753234u,
-            4356344u,
-            34564u)
-    };
-
-    message::headers instance;
-    BOOST_REQUIRE(expected != instance.elements());
-    instance.set_elements(expected);
-    BOOST_REQUIRE(expected == instance.elements());
-}
-
 BOOST_AUTO_TEST_CASE(headers__command_setter_2__roundtrip__success)
 {
     chain::header::list values = {

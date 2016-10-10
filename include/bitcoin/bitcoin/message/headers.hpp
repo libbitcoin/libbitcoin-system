@@ -56,7 +56,7 @@ public:
 
     chain::header::list& elements();
     const chain::header::list& elements() const;
-    void set_elements(const chain::header::list& values);
+    ////void set_elements(const chain::header::list& values);
     void set_elements(chain::header::list&& values);
 
     void to_hashes(hash_list& out) const;

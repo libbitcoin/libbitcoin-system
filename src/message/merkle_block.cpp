@@ -199,11 +199,6 @@ const chain::header& merkle_block::header() const
     return header_;
 }
 
-void merkle_block::set_header(const chain::header& value)
-{
-    header_ = value;
-}
-
 void merkle_block::set_header(chain::header&& value)
 {
     header_ = std::move(value);

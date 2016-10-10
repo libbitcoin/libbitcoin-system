@@ -87,9 +87,7 @@ output_point::output_point(output_point&& other)
 {
 }
 
-
-// For tx pool validation target_height is that of the *next* block.
-// For block validation target_height is that for which block is considered.
+// For tx pool validation target_height is that of any candidate block.
 bool output_point::is_mature(size_t target_height) const
 {
     if (validation.height == validation::not_specified)
