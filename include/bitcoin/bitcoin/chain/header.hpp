@@ -41,6 +41,19 @@ class BC_API header
 {
 public:
     typedef std::vector<header> list;
+    typedef std::shared_ptr<header> ptr;
+    typedef std::shared_ptr<const header> const_ptr;
+    typedef std::vector<header> ptr_list;
+    typedef std::vector<const_ptr> const_ptr_list;
+
+    // These properties facilitate block validation.
+    // This validation data is not copied on block/header copy.
+    struct validation
+    {
+        static const size_t orphan_height;
+
+        size_t height = validation::orphan_height;
+    };
 
     static header factory_from_data(const data_chunk& data,
         bool with_transaction_count=true);
@@ -109,6 +122,9 @@ public:
 
     bool operator==(const header& other) const;
     bool operator!=(const header& other) const;
+
+    // These fields do not participate in serialization or comparison.
+    mutable validation validation;
 
 private:
     mutable upgrade_mutex mutex_;

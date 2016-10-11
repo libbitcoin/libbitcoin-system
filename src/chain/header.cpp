@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/chain/header.hpp>
 
+#include <cstddef>
 #include <chrono>
 #include <utility>
 #include <boost/iostreams/stream.hpp>
@@ -33,6 +34,8 @@
 
 namespace libbitcoin {
 namespace chain {
+
+const size_t header::validation::orphan_height = 0;
 
 header header::factory_from_data(const data_chunk& data,
     bool with_transaction_count)
