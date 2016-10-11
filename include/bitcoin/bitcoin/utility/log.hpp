@@ -26,77 +26,66 @@
 #include <sstream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
+#include <boost/log/attributes/clock.hpp>
+#include <boost/log/expressions/keyword.hpp>
+#include <boost/log/sources/global_logger_storage.hpp>
+#include <boost/log/sources/record_ostream.hpp>
+#include <boost/log/sources/severity_channel_logger.hpp>
 
 // libbitcoin defines the log and tracking but does not use them.
 // These are defined in bc so that they can be used in network and blockchain.
 
 namespace libbitcoin {
+namespace log {
 
-class BC_API log
+enum class severity
 {
-public:
-    enum class level
-    {
-        debug,
-        info,
-        warning,
-        error,
-        fatal,
-        null
-    };
-
-    typedef std::function<void(level, const std::string&, const std::string&)>
-        functor;
-
-    static const std::ios_base::openmode append;
-
-    log(level value, const std::string& domain);
-    log(log&& other);
-    ~log();
-
-    /// Clear all log configuration.
-    static void clear();
-
-    /// Convert the log level value to English text.
-    static std::string to_text(level value);
-
-    // Stream to these functions.
-    static log debug(const std::string& domain);
-    static log info(const std::string& domain);
-    static log warning(const std::string& domain);
-    static log error(const std::string& domain);
-    static log fatal(const std::string& domain);
-
-    template <typename Type>
-    log& operator<<(Type const& value)
-    {
-        stream_ << value;
-        return *this;
-    }
-
-    /// Set the output functor for this log instance.
-    void set_output_function(functor value);
-
-private:
-    typedef std::map<level, functor> destinations;
-
-    static void output_ignore(level value, const std::string& domain,
-        const std::string& body);
-    static void output_cout(level value, const std::string& domain,
-        const std::string& body);
-    static void output_cerr(level value, const std::string& domain,
-        const std::string& body);
-
-    static void to_stream(std::ostream& out, level value,
-        const std::string& domain, const std::string& body);
-
-    static destinations destinations_;
-
-    level level_;
-    std::string domain_;
-    std::ostringstream stream_;
+    debug,
+    info,
+    warning,
+    error,
+    fatal
 };
 
+boost::log::formatting_ostream::ostream_type& operator<<(
+    boost::log::formatting_ostream::ostream_type& stream,
+    const severity level);
+
+namespace attributes {
+
+BOOST_LOG_ATTRIBUTE_KEYWORD(timestamp, "Timestamp", boost::posix_time::ptime)
+BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", libbitcoin::log::severity)
+BOOST_LOG_ATTRIBUTE_KEYWORD(channel, "Channel", std::string)
+
+}
+
+typedef boost::log::sources::severity_channel_logger_mt<
+    severity, std::string> severity_channel_source_mt;
+
+BOOST_LOG_INLINE_GLOBAL_LOGGER_INIT(source, severity_channel_source_mt)
+{
+    severity_channel_source_mt logger;
+    logger.add_attribute(libbitcoin::log::attributes::timestamp.get_name(),
+        boost::log::attributes::utc_clock());
+    return logger;
+}
+
+#define LOG_DEBUG(module) \
+    BOOST_LOG_CHANNEL_SEV(libbitcoin::log::source::get(), module, libbitcoin::log::severity::debug)
+
+#define LOG_INFO(module) \
+    BOOST_LOG_CHANNEL_SEV(libbitcoin::log::source::get(), module, libbitcoin::log::severity::info)
+
+#define LOG_WARNING(module) \
+    BOOST_LOG_CHANNEL_SEV(libbitcoin::log::source::get(), module, libbitcoin::log::severity::warning)
+
+#define LOG_ERROR(module) \
+    BOOST_LOG_CHANNEL_SEV(libbitcoin::log::source::get(), module, libbitcoin::log::severity::error)
+
+#define LOG_FATAL(module) \
+    BOOST_LOG_CHANNEL_SEV(libbitcoin::log::source::get(), module, libbitcoin::log::severity::fatal)
+
+} // namespace log
 } // namespace libbitcoin
 
 #endif

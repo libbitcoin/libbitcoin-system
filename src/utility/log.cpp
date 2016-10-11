@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,138 +19,24 @@
  */
 #include <bitcoin/bitcoin/utility/log.hpp>
 
-#include <iostream>
-#include <utility>
-#include <sstream>
-#include <string>
-#include <boost/date_time.hpp>
-#include <boost/format.hpp>
-#include <bitcoin/bitcoin/unicode/unicode.hpp>
-
-// libbitcoin defines the log and tracking but does not use them.
-// These are defined in bc so that they can be used in network and blockchain.
-
 namespace libbitcoin {
+namespace log {
 
-const std::ios_base::openmode log::append = std::ofstream::out |
-    std::ofstream::app;
-
-log::log(level value, const std::string& domain)
-  : level_(value), domain_(domain)
-{
-}
-
-log::log(log&& other)
-  : level_(other.level_),
-    domain_(std::move(other.domain_)),
-    stream_(other.stream_.str())
-{
-}
-
-log::~log()
-{
-    if (destinations_.count(level_) != 0)
-        destinations_[level_](level_, domain_, stream_.str());
-}
-
-void log::set_output_function(functor value)
-{
-    destinations_[level_] = value;
-}
-
-void log::clear()
-{
-    destinations_.clear();
-}
-
-log log::debug(const std::string& domain)
-{
-    return log(level::debug, domain);
-}
-
-log log::info(const std::string& domain)
-{
-    return log(level::info, domain);
-}
-
-log log::warning(const std::string& domain)
-{
-    return log(level::warning, domain);
-}
-
-log log::error(const std::string& domain)
-{
-    return log(level::error, domain);
-}
-
-log log::fatal(const std::string& domain)
-{
-    return log(level::fatal, domain);
-}
-
-std::string log::to_text(level value)
-{
-    switch (value)
-    {
-        case level::debug:
-            return "DEBUG";
-        case level::info:
-            return "INFO";
-        case level::warning:
-            return "WARNING";
-        case level::error:
-            return "ERROR";
-        case level::fatal:
-            return "FATAL";
-        case level::null:
-            return "NULL";
-        default:
-            return "";
-    }
-}
-
-void log::to_stream(std::ostream& out, level value, const std::string& domain,
-    const std::string& body)
-{
-    std::ostringstream buffer;
-    buffer << to_text(value);
-    if (!domain.empty())
-        buffer << " [" << domain << "]";
-
-    buffer << ": " << body << std::endl;
-
-    // Buffering prevents line interleaving across threads.
-    out << buffer.str();
-    out.flush();
-}
-
-void log::output_ignore(level, const std::string&, const std::string&)
-{
-}
-
-void log::output_cout(level value, const std::string& domain,
-    const std::string& body)
-{
-    to_stream(bc::cout, value, domain, body);
-}
-
-void log::output_cerr(level value, const std::string& domain,
-    const std::string& body)
-{
-    to_stream(bc::cerr, value, domain, body);
-}
-
-log::destinations log::destinations_
-{
-#ifdef NDEBUG
-    std::make_pair(level::debug, output_ignore),
-#else
-    std::make_pair(level::debug, output_cout),
-#endif
-    std::make_pair(level::info, output_cout),
-    std::make_pair(level::warning, output_cerr),
-    std::make_pair(level::error, output_cerr),
-    std::make_pair(level::fatal, output_cerr)
+static std::map<libbitcoin::log::severity, std::string> severity_mapping = {
+    { libbitcoin::log::severity::debug,   "DEBUG"   },
+    { libbitcoin::log::severity::info,    "INFO"    },
+    { libbitcoin::log::severity::warning, "WARNING" },
+    { libbitcoin::log::severity::error,   "ERROR"   },
+    { libbitcoin::log::severity::fatal,   "FATAL"   }
 };
 
+boost::log::formatting_ostream::ostream_type& operator<<(
+    boost::log::formatting_ostream::ostream_type& stream,
+    const severity level)
+{
+    stream << severity_mapping[level];
+    return stream;
+}
+
+} // namespace log
 } // namespace libbitcoin
