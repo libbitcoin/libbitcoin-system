@@ -30,13 +30,13 @@ BOOST_AUTO_TEST_SUITE(point_iterator_tests)
 
 BOOST_AUTO_TEST_CASE(point_iterator__operator_bool__not_at_end__returns_true)
 {
-    chain::point_iterator instance(chain::point());
+    chain::point_iterator instance(chain::point{});
     BOOST_REQUIRE_EQUAL(true, (bool)instance);
 }
 
 BOOST_AUTO_TEST_CASE(point_iterator__operator_bool_at_end__returns_false)
 {
-    chain::point_iterator instance(chain::point(), true);
+    chain::point_iterator instance(chain::point{}, true);
     BOOST_REQUIRE_EQUAL(false, (bool)instance);
 }
 
