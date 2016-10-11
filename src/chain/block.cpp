@@ -51,8 +51,6 @@ namespace chain {
 
 using namespace bc::config;
 
-const size_t block::validation::orphan_height = 0;
-
 static const std::string encoded_mainnet_genesis_block =
     "01000000"
     "0000000000000000000000000000000000000000000000000000000000000000"

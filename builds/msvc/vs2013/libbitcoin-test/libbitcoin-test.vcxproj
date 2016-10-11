@@ -80,9 +80,12 @@
     <ClCompile Include="..\..\..\..\test\chain\header.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\input.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\output.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\output_point.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\point.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\point_iterator.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\satoshi_words.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\script.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\script\operation.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp" />
     <ClCompile Include="..\..\..\..\test\config\authority.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base58.cpp" />
@@ -118,6 +121,7 @@
     <ClCompile Include="..\..\..\..\test\message\get_block_transactions.cpp" />
     <ClCompile Include="..\..\..\..\test\message\get_headers.cpp" />
     <ClCompile Include="..\..\..\..\test\message\headers.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\header_message.cpp" />
     <ClCompile Include="..\..\..\..\test\message\memory_pool.cpp" />
     <ClCompile Include="..\..\..\..\test\message\merkle_block.cpp" />
     <ClCompile Include="..\..\..\..\test\message\pong.cpp" />

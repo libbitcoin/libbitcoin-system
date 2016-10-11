@@ -50,9 +50,6 @@ public:
     // This validation data is not copied on block copy.
     struct validation
     {
-        static const size_t orphan_height;
-
-        size_t height = validation::orphan_height;
         code result = error::not_found;
         chain_state::ptr state = nullptr;
         transaction::sets_const_ptr sets = nullptr;

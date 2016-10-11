@@ -63,10 +63,10 @@ inline bool is_bip30_exception(size_t height, const hash_digest& hash,
     bool testnet)
 {
     return !testnet &&
-        (height == mainnet_bip30_exception_checkpoint1.height() &&
-         hash == mainnet_bip30_exception_checkpoint1.hash()) ||
+        ((height == mainnet_bip30_exception_checkpoint1.height() &&
+        hash == mainnet_bip30_exception_checkpoint1.hash()) ||
         (height == mainnet_bip30_exception_checkpoint2.height() &&
-         hash == mainnet_bip30_exception_checkpoint2.hash());
+        hash == mainnet_bip30_exception_checkpoint2.hash()));
 }
 
 inline uint32_t timestamp_high(const chain_state::data& values)
