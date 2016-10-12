@@ -55,6 +55,9 @@ public:
 
     operator bool() const;
     bool operator!() const;
+
+    void skip_bytes(size_t size);
+
     void write_byte(uint8_t value);
     void write_data(const data_chunk& data);
     void write_data(const uint8_t* data, size_t size);
@@ -113,16 +116,16 @@ public:
      */
     void write_string(const std::string& value);
 
-    /**
-     * Returns underlying iterator.
-     */
-    Iterator iterator();
+    /////**
+    //// * Returns underlying iterator.
+    //// */
+    ////Iterator iterator();
 
-    /**
-     * Useful if you want to serialize some data using another
-     * routine and then continue with this serializer.
-     */
-    void set_iterator(Iterator iterator);
+    /////**
+    //// * Useful if you want to serialize some data using another
+    //// * routine and then continue with this serializer.
+    //// */
+    ////void set_iterator(Iterator iterator);
 
 private:
     template <typename T>

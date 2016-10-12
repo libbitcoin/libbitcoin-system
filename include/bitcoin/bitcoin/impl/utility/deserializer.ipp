@@ -259,25 +259,25 @@ byte_array<N> deserializer<Iterator, SafeCheckLast>::read_bytes_reverse()
     return out;
 }
 
-/**
- * Returns underlying iterator.
- */
-template <typename Iterator, bool SafeCheckLast>
-Iterator deserializer<Iterator, SafeCheckLast>::iterator() const
-{
-    return iterator_;
-}
-
-/**
- * Useful if you advance the iterator using other serialization
- * methods or objects.
- */
-template <typename Iterator, bool SafeCheckLast>
-void deserializer<Iterator, SafeCheckLast>::set_iterator(
-    const Iterator iterator)
-{
-    iterator_ = iterator;
-}
+/////**
+//// * Returns underlying iterator.
+//// */
+////template <typename Iterator, bool SafeCheckLast>
+////Iterator deserializer<Iterator, SafeCheckLast>::iterator() const
+////{
+////    return iterator_;
+////}
+////
+/////**
+//// * Useful if you advance the iterator using other serialization
+//// * methods or objects.
+//// */
+////template <typename Iterator, bool SafeCheckLast>
+////void deserializer<Iterator, SafeCheckLast>::set_iterator(
+////    const Iterator iterator)
+////{
+////    iterator_ = iterator;
+////}
 
 // Try to advance iterator 'distance' increments forwards.
 // Throw if we prematurely reach the end.

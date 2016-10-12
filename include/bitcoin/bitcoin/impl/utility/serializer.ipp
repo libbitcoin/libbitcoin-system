@@ -57,6 +57,13 @@ void serializer<Iterator>::write_byte(uint8_t value)
 }
 
 template <typename Iterator>
+void serializer<Iterator>::skip_bytes(size_t size)
+{
+    iterator_ += size;
+}
+
+
+template <typename Iterator>
 void serializer<Iterator>::write_data(const data_chunk& data)
 {
     write_data<const data_chunk>(data);
@@ -216,24 +223,24 @@ void serializer<Iterator>::write_string(const std::string& value)
     write_data(value);
 }
 
-/**
- * Returns underlying iterator.
- */
-template <typename Iterator>
-Iterator serializer<Iterator>::iterator()
-{
-    return iterator_;
-}
+/////**
+//// * Returns underlying iterator.
+//// */
+////template <typename Iterator>
+////Iterator serializer<Iterator>::iterator()
+////{
+////    return iterator_;
+////}
 
-/**
- * Useful if you want to serialize some data using another
- * routine and then continue with this serializer.
- */
-template <typename Iterator>
-void serializer<Iterator>::set_iterator(Iterator iterator)
-{
-    iterator_ = iterator;
-}
+/////**
+//// * Useful if you want to serialize some data using another
+//// * routine and then continue with this serializer.
+//// */
+////template <typename Iterator>
+////void serializer<Iterator>::set_iterator(Iterator iterator)
+////{
+////    iterator_ = iterator;
+////}
 
 template <typename Iterator>
 template <typename T>

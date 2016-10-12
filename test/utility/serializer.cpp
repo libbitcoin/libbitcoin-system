@@ -36,16 +36,16 @@ BOOST_AUTO_TEST_CASE(roundtrip_serialize_deserialize)
     s.write_variable_uint_little_endian(1234);
     s.write_data(to_chunk(to_little_endian<uint32_t>(0xbadf00d)));
     s.write_string("hello");
-    auto ds = make_deserializer(data.begin(), s.iterator());
+    auto ds = make_deserializer(data.begin(), data.end());
     BOOST_REQUIRE_EQUAL(ds.read_byte(), 0x80u);
     BOOST_REQUIRE_EQUAL(ds.read_2_bytes_little_endian(), 0x8040u);
     BOOST_REQUIRE_EQUAL(ds.read_4_bytes_little_endian(), 0x80402010u);
     BOOST_REQUIRE_EQUAL(ds.read_8_bytes_little_endian(), 0x8040201011223344u);
     BOOST_REQUIRE_EQUAL(ds.read_big_endian<uint32_t>(),  0x80402010u);
     BOOST_REQUIRE_EQUAL(ds.read_variable_uint_little_endian(), 1234u);
-    BOOST_REQUIRE_EQUAL(from_little_endian_unsafe<uint32_t>(
-        ds.read_data(4).begin()), 0xbadf00du);
+    BOOST_REQUIRE_EQUAL(from_little_endian_unsafe<uint32_t>(ds.read_data(4).begin()), 0xbadf00du);
     BOOST_REQUIRE_EQUAL(ds.read_string(), "hello");
+    BOOST_REQUIRE_EQUAL(ds.read_byte(), 0u);
     BOOST_REQUIRE_THROW(ds.read_byte(), end_of_stream);
 }
 
