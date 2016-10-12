@@ -87,7 +87,7 @@ AC_DEFUN([AX_BOOST_LOG],
 					ax_lib=${libextension}
 					AC_CHECK_LIB($ax_lib, exit,
 						[BOOST_LOG_LIB="-l$ax_lib"; AC_SUBST(BOOST_LOG_LIB) link_log="yes"; break],
-					[link_log="no"])
+					[link_log="no"],[$BOOST_ICU_LIBS])
 				done
 
 				if test "x$link_log" != "xyes"; then
@@ -95,7 +95,7 @@ AC_DEFUN([AX_BOOST_LOG],
 						ax_lib=${libextension}
 						AC_CHECK_LIB($ax_lib, exit,
 							[BOOST_LOG_LIB="-l$ax_lib"; AC_SUBST(BOOST_LOG_LIB) link_log="yes"; break],
-							[link_log="no"])
+							[link_log="no"],[$BOOST_ICU_LIBS])
 					done
 				fi
 
@@ -103,7 +103,7 @@ AC_DEFUN([AX_BOOST_LOG],
 				for ax_lib in $ax_boost_user_log_lib boost_log-$ax_boost_user_log_lib; do
 					AC_CHECK_LIB($ax_lib, exit,
 						[BOOST_LOG_LIB="-l$ax_lib"; AC_SUBST(BOOST_LOG_LIB) link_log="yes"; break],
-						[link_log="no"])
+						[link_log="no"],[$BOOST_ICU_LIBS])
 				done
 			fi
 
