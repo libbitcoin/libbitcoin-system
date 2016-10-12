@@ -34,7 +34,6 @@ enum class thread_priority
     lowest
 };
 
-typedef boost::mutex unique_mutex;
 typedef boost::shared_mutex shared_mutex;
 typedef boost::upgrade_mutex upgrade_mutex;
 

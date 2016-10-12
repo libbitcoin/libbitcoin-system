@@ -123,24 +123,24 @@ public:
     template <unsigned N>
     byte_array<N> read_bytes_reverse();
 
-    /**
-     * Returns underlying iterator.
-     */
-    Iterator iterator() const;
+    /////**
+    //// * Returns underlying iterator.
+    //// */
+    ////Iterator iterator() const;
 
-    /**
-     * Useful if you advance the iterator using other serialization
-     * methods or objects.
-     */
-    void set_iterator(const Iterator iterator);
+    /////**
+    //// * Useful if you advance the iterator using other serialization
+    //// * methods or objects.
+    //// */
+    ////void set_iterator(const Iterator iterator);
 
-    /**
-     * Returns underlying iterator end.
-     */
-    Iterator end() const
-    {
-        return end_;
-    }
+    /////**
+    //// * Returns underlying iterator end.
+    //// */
+    ////Iterator end() const
+    ////{
+    ////    return end_;
+    ////}
 
 private:
     // The compiler will optimise out calls to this function if !SafeCheckLast.
