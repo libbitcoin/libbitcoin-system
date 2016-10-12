@@ -155,14 +155,14 @@ transaction::transaction(transaction&& other)
 transaction::transaction(const transaction& other, const hash_digest& hash)
   : transaction(other.version_, other.locktime_, other.inputs_, other.outputs_)
 {
-    hash_.reset(new hash_digest(hash));
+    hash_ = std::make_shared<hash_digest>(hash);
 }
 
 transaction::transaction(transaction&& other, const hash_digest& hash)
   : transaction(other.version_, other.locktime_, std::move(other.inputs_),
     std::move(other.outputs_))
 {
-    hash_.reset(new hash_digest(hash));
+    hash_ = std::make_shared<hash_digest>(hash);
 }
 
 uint32_t transaction::version() const
@@ -416,7 +416,7 @@ hash_digest transaction::hash() const
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         hash_mutex_.unlock_upgrade_and_lock();
-        hash_.reset(new hash_digest(bitcoin_hash(to_data())));
+        hash_ = std::make_shared<hash_digest>(bitcoin_hash(to_data()));
         hash_mutex_.unlock_and_lock_upgrade();
         //---------------------------------------------------------------------
     }
