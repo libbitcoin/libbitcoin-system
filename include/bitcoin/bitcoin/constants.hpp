@@ -107,7 +107,7 @@ BC_CONSTEXPR size_t mainnet_sample = 1000;
 
 // Block 514 is the first testnet block after date-based activation.
 // Block 173805 is the first mainnet block after date-based activation.
-BC_CONSTEXPR uint32_t bip16_activation_time = 0x4F779A80;
+BC_CONSTEXPR uint32_t bip16_activation_time = 0x4f779a80;
 
 // github.com/bitcoin/bips/blob/master/bip-0030.mediawiki#specification
 static const config::checkpoint mainnet_bip30_exception_checkpoint1
@@ -146,12 +146,12 @@ BC_CONSTFUNC uint64_t initial_block_reward_satoshi()
 }
 
 BC_CONSTEXPR uint64_t reward_interval = 210000;
-BC_CONSTEXPR uint64_t recursive_money = 0x00000002540be3f5;
+BC_CONSTEXPR uint64_t recursive_money = 0x02540be3f5;
 BC_CONSTFUNC uint64_t max_money()
 {
-    // Optimize out the derivation of recursive_money, verify in debug builds.
-    BITCOIN_ASSERT(recursive_money == max_money_recursive(
-        initial_block_reward_satoshi()));
+    ////// Optimize out the derivation of recursive_money.
+    ////BITCOIN_ASSERT(recursive_money == max_money_recursive(
+    ////    initial_block_reward_satoshi()));
 
     return reward_interval * recursive_money;
 }
