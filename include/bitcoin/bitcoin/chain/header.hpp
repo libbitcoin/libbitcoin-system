@@ -73,6 +73,8 @@ public:
         uint32_t nonce, size_t transaction_count=0);
     header(const header& other);
     header(header&& other);
+    header(const header& other, const hash_digest& hash);
+    header(header&& other, const hash_digest& hash);
 
     uint32_t version() const;
     void set_version(uint32_t value);

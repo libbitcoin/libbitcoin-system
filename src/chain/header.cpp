@@ -102,6 +102,21 @@ header::header(header&& other)
 {
 }
 
+header::header(const header& other, const hash_digest& hash)
+  : header(other.version_, other.previous_block_hash_, other.merkle_,
+        other.timestamp_, other.bits_, other.nonce_, other.transaction_count_)
+{
+    hash_ = std::make_shared<hash_digest>(hash);
+}
+
+header::header(header&& other, const hash_digest& hash)
+  : header(other.version_, std::move(other.previous_block_hash_),
+      std::move(other.merkle_), other.timestamp_, other.bits_, other.nonce_,
+      other.transaction_count_)
+{
+    hash_ = std::make_shared<hash_digest>(hash);
+}
+
 bool header::is_valid() const
 {
     return (version_ != 0) ||
@@ -313,7 +328,7 @@ hash_digest header::hash() const
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_.unlock_upgrade_and_lock();
-        hash_.reset(new hash_digest(bitcoin_hash(to_data(false))));
+        hash_ = std::make_shared<hash_digest>(bitcoin_hash(to_data(false)));
         mutex_.unlock_and_lock_upgrade();
         //---------------------------------------------------------------------
     }
