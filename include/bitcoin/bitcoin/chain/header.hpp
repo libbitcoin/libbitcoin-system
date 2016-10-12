@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_CHAIN_HEADER_HPP
 #define LIBBITCOIN_CHAIN_HEADER_HPP
 
+#include <cstddef>
 #include <cstdint>
 #include <istream>
 #include <string>
@@ -66,10 +67,10 @@ public:
     header();
     header(uint32_t version, const hash_digest& previous_block_hash,
         const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce, uint64_t transaction_count=0);
+        uint32_t nonce, size_t transaction_count = 0);
     header(uint32_t version, hash_digest&& previous_block_hash,
         hash_digest&& merkle, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce, uint64_t transaction_count=0);
+        uint32_t nonce, size_t transaction_count=0);
     header(const header& other);
     header(header&& other);
 
@@ -95,8 +96,8 @@ public:
     uint32_t nonce() const;
     void set_nonce(uint32_t value);
 
-    uint64_t transaction_count() const;
-    void set_transaction_count(uint64_t value);
+    size_t transaction_count() const;
+    void set_transaction_count(size_t value);
 
     bool from_data(const data_chunk& data, bool with_transaction_count=true);
     bool from_data(std::istream& stream, bool with_transaction_count=true);
@@ -137,9 +138,8 @@ private:
     uint32_t bits_;
     uint32_t nonce_;
 
-    // The longest size (64) of a protocol variable int is deserialized here.
-    // When writing a block the size of the transaction collection is used.
-    uint64_t transaction_count_;
+    // TODO: move to message::header_message.
+    size_t transaction_count_;
 };
 
 } // namespace chain
