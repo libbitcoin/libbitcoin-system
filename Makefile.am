@@ -150,8 +150,8 @@ src_libbitcoin_la_SOURCES = \
     src/utility/conditional_lock.cpp \
     src/utility/deadline.cpp \
     src/utility/dispatcher.cpp \
-    src/utility/log.cpp \
     src/utility/istream_reader.cpp \
+    src/utility/log.cpp \
     src/utility/monitor.cpp \
     src/utility/ostream_writer.cpp \
     src/utility/png.cpp \
