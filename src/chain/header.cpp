@@ -73,7 +73,7 @@ header::header()
 
 header::header(uint32_t version, const hash_digest& previous_block_hash,
     const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
-    uint32_t nonce, uint64_t transaction_count)
+    uint32_t nonce, size_t transaction_count)
   : version_(version), previous_block_hash_(previous_block_hash),
     merkle_(merkle), timestamp_(timestamp), bits_(bits), nonce_(nonce),
     transaction_count_(transaction_count), hash_(nullptr)
@@ -82,7 +82,7 @@ header::header(uint32_t version, const hash_digest& previous_block_hash,
 
 header::header(uint32_t version, hash_digest&& previous_block_hash,
     hash_digest&& merkle, uint32_t timestamp, uint32_t bits, uint32_t nonce,
-    uint64_t transaction_count)
+    size_t transaction_count)
   : version_(version), previous_block_hash_(std::move(previous_block_hash)),
     merkle_(std::move(merkle)), timestamp_(timestamp), bits_(bits),
     nonce_(nonce), transaction_count_(transaction_count), hash_(nullptr)
@@ -150,8 +150,20 @@ bool header::from_data(reader& source, bool with_transaction_count)
     timestamp_ = source.read_4_bytes_little_endian();
     bits_ = source.read_4_bytes_little_endian();
     nonce_ = source.read_4_bytes_little_endian();
+
     if (with_transaction_count)
-        transaction_count_ = source.read_variable_uint_little_endian();
+    {
+        const auto count = source.read_variable_uint_little_endian();
+
+        // Treat size_t (32 or 64 bit) as limit so that we can cast to size_t.
+        if (count > max_size_t)
+        {
+            reset();
+            return false;
+        }
+
+        transaction_count_ = static_cast<size_t>(count);
+    }
 
     const auto result = static_cast<bool>(source);
 
@@ -281,12 +293,12 @@ void header::set_nonce(uint32_t value)
     nonce_ = value;
 }
 
-uint64_t header::transaction_count() const
+size_t header::transaction_count() const
 {
     return transaction_count_;
 }
 
-void header::set_transaction_count(uint64_t value)
+void header::set_transaction_count(size_t value)
 {
     transaction_count_ = value;
 }
