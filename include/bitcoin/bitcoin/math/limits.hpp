@@ -118,7 +118,7 @@ To safe_unsigned(From unsigned_value)
 template <typename To, typename From, typename = SIGNED_UNSIGNED(To, From)>
 To safe_to_signed(From unsigned_value)
 {
-    static_assert(sizeof(uint64_t) >= sizeof(To), "safe_assign out of range");
+    static_assert(sizeof(uint64_t) >= sizeof(To), "safe assign out of range");
     static const auto signed_maximum = std::numeric_limits<To>::max();
 
     if (unsigned_value > static_cast<uint64_t>(signed_maximum))
@@ -130,7 +130,7 @@ To safe_to_signed(From unsigned_value)
 template <typename To, typename From, typename = UNSIGNED_SIGNED(To, From)>
 To safe_to_unsigned(From signed_value)
 {
-    static_assert(sizeof(uint64_t) >= sizeof(To), "safe_assign out of range");
+    static_assert(sizeof(uint64_t) >= sizeof(To), "safe assign out of range");
     static const auto unsigned_maximum = std::numeric_limits<To>::max();
 
     if (signed_value < 0 || 
