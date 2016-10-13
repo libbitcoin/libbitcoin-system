@@ -26,8 +26,8 @@
 #include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/message/header_message.hpp>
 #include <bitcoin/bitcoin/message/inventory.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -48,16 +48,16 @@ public:
     static headers factory_from_data(uint32_t version, reader& source);
 
     headers();
-    headers(const chain::header::list& values);
-    headers(chain::header::list&& values);
-    headers(const std::initializer_list<chain::header>& values);
+    headers(const header_message::list& values);
+    headers(header_message::list&& values);
+    headers(const std::initializer_list<header_message>& values);
     headers(const headers& other);
     headers(headers&& other);
 
-    chain::header::list& elements();
-    const chain::header::list& elements() const;
-    void set_elements(const chain::header::list& values);
-    void set_elements(chain::header::list&& values);
+    header_message::list& elements();
+    const header_message::list& elements() const;
+    void set_elements(const header_message::list& values);
+    void set_elements(header_message::list&& values);
 
     void to_hashes(hash_list& out) const;
     void to_inventory(inventory_vector::list& out,
@@ -85,7 +85,7 @@ public:
     static const uint32_t version_maximum;
 
 private:
-    chain::header::list elements_;
+    header_message::list elements_;
 };
 
 } // namespace message

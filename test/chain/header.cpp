@@ -40,15 +40,13 @@ BOOST_AUTO_TEST_CASE(header__constructor_2__always__equals_params)
     const uint32_t timestamp = 531234u;
     const uint32_t bits = 6523454u;
     const uint32_t nonce = 68644u;
-    const uint64_t tx_count = 0u;
 
-    chain::header instance(version, previous, merkle, timestamp, bits, nonce, tx_count);
+    chain::header instance(version, previous, merkle, timestamp, bits, nonce);
     BOOST_REQUIRE_EQUAL(true, instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(timestamp, instance.timestamp());
     BOOST_REQUIRE_EQUAL(bits, instance.bits());
     BOOST_REQUIRE_EQUAL(nonce, instance.nonce());
-    BOOST_REQUIRE_EQUAL(tx_count, instance.transaction_count());
     BOOST_REQUIRE(previous == instance.previous_block_hash());
     BOOST_REQUIRE(merkle == instance.merkle());
 }
@@ -59,19 +57,17 @@ BOOST_AUTO_TEST_CASE(header__constructor_3__always__equals_params)
     const uint32_t timestamp = 531234u;
     const uint32_t bits = 6523454u;
     const uint32_t nonce = 68644u;
-    const uint64_t tx_count = 0u;
 
     // These must be non-const.
     auto previous = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     auto merkle = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
-    chain::header instance(version, std::move(previous), std::move(merkle), timestamp, bits, nonce, tx_count);
+    chain::header instance(version, std::move(previous), std::move(merkle), timestamp, bits, nonce);
     BOOST_REQUIRE_EQUAL(true, instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(timestamp, instance.timestamp());
     BOOST_REQUIRE_EQUAL(bits, instance.bits());
     BOOST_REQUIRE_EQUAL(nonce, instance.nonce());
-    BOOST_REQUIRE_EQUAL(tx_count, instance.transaction_count());
     BOOST_REQUIRE(previous == instance.previous_block_hash());
     BOOST_REQUIRE(merkle == instance.merkle());
 }
@@ -113,7 +109,7 @@ BOOST_AUTO_TEST_CASE(header__from_data__insufficient_bytes__failure)
 
     chain::header header;
 
-    BOOST_REQUIRE_EQUAL(false, header.from_data(data, false));
+    BOOST_REQUIRE_EQUAL(false, header.from_data(data));
     BOOST_REQUIRE_EQUAL(false, header.is_valid());
 }
 
@@ -129,9 +125,9 @@ BOOST_AUTO_TEST_CASE(header__factory_from_data_1__valid_input__success)
         68644
     };
 
-    const auto data = expected.to_data(false);
+    const auto data = expected.to_data();
 
-    const auto result = chain::header::factory_from_data(data, false);
+    const auto result = chain::header::factory_from_data(data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -149,10 +145,10 @@ BOOST_AUTO_TEST_CASE(header__factory_from_data_2__valid_input__success)
         68644
     };
 
-    const auto data = expected.to_data(false);
+    const auto data = expected.to_data();
     data_source istream(data);
 
-    const auto result = chain::header::factory_from_data(istream, false);
+    const auto result = chain::header::factory_from_data(istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -170,57 +166,11 @@ BOOST_AUTO_TEST_CASE(header__factory_from_data_3__valid_input__success)
         68644
     };
 
-    const auto data = expected.to_data(false);
+    const auto data = expected.to_data();
     data_source istream(data);
     istream_reader source(istream);
 
-    const auto result = chain::header::factory_from_data(source, false);
-
-    BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE(expected == result);
-}
-
-BOOST_AUTO_TEST_CASE(header__factory_from_data_3__without_transaction_count__does_not_match)
-{
-    const chain::header expected
-    {
-        10,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234,
-        6523454,
-        68644,
-        1234
-    };
-
-    const auto data = expected.to_data(false);
-    data_source istream(data);
-    istream_reader source(istream);
-
-    const auto result = chain::header::factory_from_data(source, false);
-
-    BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE(expected != result);
-}
-
-BOOST_AUTO_TEST_CASE(header__factory_from_data_3__with_transaction_count__matches)
-{
-    const chain::header expected
-    {
-        10,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234,
-        6523454,
-        68644,
-        123544
-    };
-
-    const auto data = expected.to_data(true);
-    data_source istream(data);
-    istream_reader source(istream);
-
-    const auto result = chain::header::factory_from_data(source, true);
+    const auto result = chain::header::factory_from_data(source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -416,30 +366,6 @@ BOOST_AUTO_TEST_CASE(header__nonce_setter__roundtrip__success)
     BOOST_REQUIRE(expected != instance.nonce());
     instance.set_nonce(expected);
     BOOST_REQUIRE(expected == instance.nonce());
-}
-
-BOOST_AUTO_TEST_CASE(header__transaction_count_accessor__always__returns_initialized_value)
-{
-    uint64_t value = 684553u;
-    chain::header instance(
-        11234u,
-        hash_literal("abababababababababababababababababababababababababababababababab"),
-        hash_literal("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe"),
-        753234u,
-        4356344u,
-        34564u,
-        value);
-
-    BOOST_REQUIRE_EQUAL(value, instance.transaction_count());
-}
-
-BOOST_AUTO_TEST_CASE(header__transaction_count_setter__roundtrip__success)
-{
-    uint64_t expected = 985721u;
-    chain::header instance;
-    BOOST_REQUIRE(expected != instance.transaction_count());
-    instance.set_transaction_count(expected);
-    BOOST_REQUIRE(expected == instance.transaction_count());
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_time_stamp__timestamp_less_than_2_hours_from_now__returns_true)

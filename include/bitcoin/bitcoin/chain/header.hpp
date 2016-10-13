@@ -56,21 +56,18 @@ public:
         size_t height = validation::orphan_height;
     };
 
-    static header factory_from_data(const data_chunk& data,
-        bool with_transaction_count=true);
-    static header factory_from_data(std::istream& stream,
-        bool with_transaction_count=true);
-    static header factory_from_data(reader& source,
-        bool with_transaction_count=true);
-    static uint64_t satoshi_fixed_size_without_transaction_count();
+    static header factory_from_data(const data_chunk& data);
+    static header factory_from_data(std::istream& stream);
+    static header factory_from_data(reader& source);
+    static uint64_t satoshi_fixed_size();
 
     header();
     header(uint32_t version, const hash_digest& previous_block_hash,
         const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce, size_t transaction_count = 0);
+        uint32_t nonce);
     header(uint32_t version, hash_digest&& previous_block_hash,
         hash_digest&& merkle, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce, size_t transaction_count=0);
+        uint32_t nonce);
     header(const header& other);
     header(header&& other);
     header(const header& other, const hash_digest& hash);
@@ -98,15 +95,12 @@ public:
     uint32_t nonce() const;
     void set_nonce(uint32_t value);
 
-    size_t transaction_count() const;
-    void set_transaction_count(size_t value);
-
-    bool from_data(const data_chunk& data, bool with_transaction_count=true);
-    bool from_data(std::istream& stream, bool with_transaction_count=true);
-    bool from_data(reader& source, bool with_transaction_count=true);
-    data_chunk to_data(bool with_transaction_count=true) const;
-    void to_data(std::ostream& stream, bool with_transaction_count=true) const;
-    void to_data(writer& sink, bool with_transaction_count=true) const;
+    bool from_data(const data_chunk& data);
+    bool from_data(std::istream& stream);
+    bool from_data(reader& source);
+    data_chunk to_data() const;
+    void to_data(std::ostream& stream) const;
+    void to_data(writer& sink) const;
 
     void reset();
     bool is_valid() const;
@@ -117,7 +111,7 @@ public:
     code accept(const chain_state& state) const;
 
     hash_digest hash() const;
-    uint64_t serialized_size(bool with_transaction_count=true) const;
+    uint64_t serialized_size() const;
 
     /// This class is move assignable [but not copy assignable].
     header& operator=(header&& other);
@@ -139,9 +133,6 @@ private:
     uint32_t timestamp_;
     uint32_t bits_;
     uint32_t nonce_;
-
-    // TODO: move to message::header_message.
-    size_t transaction_count_;
 };
 
 } // namespace chain

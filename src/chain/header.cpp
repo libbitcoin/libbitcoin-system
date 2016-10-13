@@ -37,82 +37,76 @@ namespace chain {
 
 const size_t header::validation::orphan_height = 0;
 
-header header::factory_from_data(const data_chunk& data,
-    bool with_transaction_count)
+header header::factory_from_data(const data_chunk& data)
 {
     header instance;
-    instance.from_data(data, with_transaction_count);
+    instance.from_data(data);
     return instance;
 }
 
-header header::factory_from_data(std::istream& stream,
-    bool with_transaction_count)
+header header::factory_from_data(std::istream& stream)
 {
     header instance;
-    instance.from_data(stream, with_transaction_count);
+    instance.from_data(stream);
     return instance;
 }
 
-header header::factory_from_data(reader& source,
-    bool with_transaction_count)
+header header::factory_from_data(reader& source)
 {
     header instance;
-    instance.from_data(source, with_transaction_count);
+    instance.from_data(source);
     return instance;
 }
 
-uint64_t header::satoshi_fixed_size_without_transaction_count()
+uint64_t header::satoshi_fixed_size()
 {
     return 80;
 }
 
 header::header()
-  : header(0, null_hash, null_hash, 0, 0, 0, 0)
+  : header(0, null_hash, null_hash, 0, 0, 0)
 {
 }
 
 header::header(uint32_t version, const hash_digest& previous_block_hash,
     const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
-    uint32_t nonce, size_t transaction_count)
+    uint32_t nonce)
   : version_(version), previous_block_hash_(previous_block_hash),
     merkle_(merkle), timestamp_(timestamp), bits_(bits), nonce_(nonce),
-    transaction_count_(transaction_count), hash_(nullptr)
+    hash_(nullptr)
 {
 }
 
 header::header(uint32_t version, hash_digest&& previous_block_hash,
-    hash_digest&& merkle, uint32_t timestamp, uint32_t bits, uint32_t nonce,
-    size_t transaction_count)
+    hash_digest&& merkle, uint32_t timestamp, uint32_t bits, uint32_t nonce)
   : version_(version), previous_block_hash_(std::move(previous_block_hash)),
     merkle_(std::move(merkle)), timestamp_(timestamp), bits_(bits),
-    nonce_(nonce), transaction_count_(transaction_count), hash_(nullptr)
+    nonce_(nonce), hash_(nullptr)
 {
 }
 
 header::header(const header& other)
   : header(other.version_, other.previous_block_hash_, other.merkle_,
-        other.timestamp_, other.bits_, other.nonce_, other.transaction_count_)
+        other.timestamp_, other.bits_, other.nonce_)
 {
 }
 
 header::header(header&& other)
   : header(other.version_, std::move(other.previous_block_hash_),
-      std::move(other.merkle_), other.timestamp_, other.bits_, other.nonce_,
-      other.transaction_count_)
+      std::move(other.merkle_), other.timestamp_, other.bits_, other.nonce_)
 {
 }
 
 header::header(const header& other, const hash_digest& hash)
   : header(other.version_, other.previous_block_hash_, other.merkle_,
-        other.timestamp_, other.bits_, other.nonce_, other.transaction_count_)
+        other.timestamp_, other.bits_, other.nonce_)
 {
     hash_ = std::make_shared<hash_digest>(hash);
 }
 
 header::header(header&& other, const hash_digest& hash)
   : header(other.version_, std::move(other.previous_block_hash_),
-      std::move(other.merkle_), other.timestamp_, other.bits_, other.nonce_,
-      other.transaction_count_)
+      std::move(other.merkle_), other.timestamp_, other.bits_, other.nonce_)
 {
     hash_ = std::make_shared<hash_digest>(hash);
 }
@@ -135,27 +129,25 @@ void header::reset()
     timestamp_ = 0;
     bits_ = 0;
     nonce_ = 0;
-    transaction_count_ = 0;
 
     mutex_.lock();
     hash_.reset();
     mutex_.unlock();
 }
 
-bool header::from_data(const data_chunk& data,
-    bool with_transaction_count)
+bool header::from_data(const data_chunk& data)
 {
     data_source istream(data);
-    return from_data(istream, with_transaction_count);
+    return from_data(istream);
 }
 
-bool header::from_data(std::istream& stream, bool with_transaction_count)
+bool header::from_data(std::istream& stream)
 {
     istream_reader source(stream);
-    return from_data(source, with_transaction_count);
+    return from_data(source);
 }
 
-bool header::from_data(reader& source, bool with_transaction_count)
+bool header::from_data(reader& source)
 {
     reset();
 
@@ -166,19 +158,19 @@ bool header::from_data(reader& source, bool with_transaction_count)
     bits_ = source.read_4_bytes_little_endian();
     nonce_ = source.read_4_bytes_little_endian();
 
-    if (with_transaction_count)
-    {
-        const auto count = source.read_variable_uint_little_endian();
-
-        // Treat size_t (32 or 64 bit) as limit so that we can cast to size_t.
-        if (count > max_size_t)
-        {
-            reset();
-            return false;
-        }
-
-        transaction_count_ = static_cast<size_t>(count);
-    }
+//    if (with_transaction_count)
+//    {
+//        const auto count = source.read_variable_uint_little_endian();
+//
+//        // Treat size_t (32 or 64 bit) as limit so that we can cast to size_t.
+//        if (count > max_size_t)
+//        {
+//            reset();
+//            return false;
+//        }
+//
+//        transaction_count_ = static_cast<size_t>(count);
+//    }
 
     const auto result = static_cast<bool>(source);
 
@@ -188,24 +180,23 @@ bool header::from_data(reader& source, bool with_transaction_count)
     return result;
 }
 
-data_chunk header::to_data(bool with_transaction_count) const
+data_chunk header::to_data() const
 {
     data_chunk data;
     data_sink ostream(data);
-    to_data(ostream, with_transaction_count);
+    to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size(with_transaction_count));
+    BITCOIN_ASSERT(data.size() == serialized_size());
     return data;
 }
 
-void header::to_data(std::ostream& stream,
-    bool with_transaction_count) const
+void header::to_data(std::ostream& stream) const
 {
     ostream_writer sink(stream);
-    to_data(sink, with_transaction_count);
+    to_data(sink);
 }
 
-void header::to_data(writer& sink, bool with_transaction_count) const
+void header::to_data(writer& sink) const
 {
     sink.write_4_bytes_little_endian(version_);
     sink.write_hash(previous_block_hash_);
@@ -214,18 +205,13 @@ void header::to_data(writer& sink, bool with_transaction_count) const
     sink.write_4_bytes_little_endian(bits_);
     sink.write_4_bytes_little_endian(nonce_);
 
-    if (with_transaction_count)
-        sink.write_variable_uint_little_endian(transaction_count_);
+//    if (with_transaction_count)
+//        sink.write_variable_uint_little_endian(transaction_count_);
 }
 
-uint64_t header::serialized_size(bool with_transaction_count) const
+uint64_t header::serialized_size() const
 {
-    auto size = satoshi_fixed_size_without_transaction_count();
-
-    if (with_transaction_count)
-        size += variable_uint_size(transaction_count_);
-
-    return size;
+    return satoshi_fixed_size();
 }
 
 uint32_t header::version() const
@@ -308,16 +294,6 @@ void header::set_nonce(uint32_t value)
     nonce_ = value;
 }
 
-size_t header::transaction_count() const
-{
-    return transaction_count_;
-}
-
-void header::set_transaction_count(size_t value)
-{
-    transaction_count_ = value;
-}
-
 hash_digest header::hash() const
 {
     ///////////////////////////////////////////////////////////////////////////
@@ -328,7 +304,7 @@ hash_digest header::hash() const
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_.unlock_upgrade_and_lock();
-        hash_ = std::make_shared<hash_digest>(bitcoin_hash(to_data(false)));
+        hash_ = std::make_shared<hash_digest>(bitcoin_hash(to_data()));
         mutex_.unlock_and_lock_upgrade();
         //---------------------------------------------------------------------
     }
@@ -403,7 +379,6 @@ header& header::operator=(header&& other)
     timestamp_ = other.timestamp_;
     bits_ = other.bits_;
     nonce_ = other.nonce_;
-    transaction_count_ = other.transaction_count_;
     return *this;
 }
 
@@ -416,7 +391,6 @@ header& header::operator=(const header& other)
     timestamp_ = other.timestamp_;
     bits_ = other.bits_;
     nonce_ = other.nonce_;
-    transaction_count_ = other.transaction_count_;
     return *this;
 }
 
@@ -427,8 +401,7 @@ bool header::operator==(const header& other) const
         && (merkle_ == other.merkle_)
         && (timestamp_ == other.timestamp_)
         && (bits_ == other.bits_)
-        && (nonce_ == other.nonce_)
-        && (transaction_count_ == other.transaction_count_);
+        && (nonce_ == other.nonce_);
 }
 
 bool header::operator!=(const header& other) const
