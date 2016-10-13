@@ -19,20 +19,101 @@
  */
 #include <bitcoin/bitcoin/utility/log.hpp>
 
+#include <string>
+#include <boost/log/attributes.hpp>
+#include <boost/log/common.hpp>
+#include <boost/log/core.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/sinks.hpp>
+#include <boost/log/support/date_time.hpp>
+#include <boost/smart_ptr/make_shared.hpp>
+#include <bitcoin/bitcoin/unicode/ofstream.hpp>
+
 namespace libbitcoin {
 namespace log {
 
-static std::map<libbitcoin::log::severity, std::string> severity_mapping = {
-    { libbitcoin::log::severity::debug,   "DEBUG"   },
-    { libbitcoin::log::severity::info,    "INFO"    },
-    { libbitcoin::log::severity::warning, "WARNING" },
-    { libbitcoin::log::severity::error,   "ERROR"   },
-    { libbitcoin::log::severity::fatal,   "FATAL"   }
+using namespace boost::log::expressions;
+using namespace boost::log::sinks;
+using namespace boost::posix_time;
+
+#define TIME_FORMAT "%H:%M:%S.%f"
+#define TIME_STAMP log::attributes::timestamp.get_name()
+#define TIME_FORMATTER format_date_time<ptime, char>(TIME_STAMP, TIME_FORMAT)
+#define SEVERITY_FORMATTER log::attributes::severity
+#define CHANNEL_FORMATTER "[" << log::attributes::channel << "]"
+#define MESSAGE_FORMATTER smessage
+
+#define LINE_FORMATTER boost::log::expressions::stream \
+    << TIME_FORMATTER << " " \
+    << SEVERITY_FORMATTER << " " \
+    << CHANNEL_FORMATTER << " " \
+    << MESSAGE_FORMATTER
+
+typedef synchronous_sink<text_ostream_backend> text_sink;
+
+static std::map<bc::log::severity, std::string> severity_mapping
+{
+    { bc::log::severity::debug, "DEBUG" },
+    { bc::log::severity::info, "INFO" },
+    { bc::log::severity::warning, "WARNING" },
+    { bc::log::severity::error, "ERROR" },
+    { bc::log::severity::fatal, "FATAL" }
 };
 
-boost::log::formatting_ostream::ostream_type& operator<<(
-    boost::log::formatting_ostream::ostream_type& stream,
-    const severity level)
+template<typename Stream>
+static void add_text_sink(boost::shared_ptr<Stream>& stream)
+{
+    // Construct the sink.
+    const auto sink = boost::make_shared<text_sink>();
+
+    // Add a stream to write log to.
+    sink->locked_backend()->add_stream(stream);
+
+    // Add the formatter.
+    sink->set_formatter(LINE_FORMATTER);
+
+    // Register the sink in the logging core.
+    boost::log::core::get()->add_sink(sink);
+}
+
+template<typename Stream, typename Filter>
+static void add_text_sink(boost::shared_ptr<Stream>& stream,
+    Filter const& filter)
+{
+    // Construct the sink.
+    const auto sink = boost::make_shared<text_sink>();
+
+    // Add a stream to write log to.
+    sink->locked_backend()->add_stream(stream);
+
+    // Add the filter.
+    sink->set_filter(filter);
+
+    // Add the formatter.
+    sink->set_formatter(LINE_FORMATTER);
+
+    // Register the sink in the logging core.
+    boost::log::core::get()->add_sink(sink);
+}
+
+void initialize(log::file& debug_file, log::file& error_file,
+    log::stream& output_stream, log::stream& error_stream)
+{
+    const auto error_filter =
+        (log::attributes::severity == log::severity::warning) ||
+        (log::attributes::severity == log::severity::error) ||
+        (log::attributes::severity == log::severity::fatal);
+
+    const auto info_filter =
+        (log::attributes::severity == log::severity::info);
+
+    add_text_sink(debug_file);
+    add_text_sink(error_file, error_filter);
+    add_text_sink(output_stream, info_filter);
+    add_text_sink(error_stream, error_filter);
+}
+
+formatter& operator<<(formatter& stream, severity level)
 {
     stream << severity_mapping[level];
     return stream;
