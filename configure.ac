@@ -144,9 +144,9 @@ AC_ARG_ENABLE([ndebug],
 AC_MSG_RESULT([$enable_ndebug])
 AS_CASE([${enable_ndebug}], [yes], AC_DEFINE([NDEBUG]))
 
-# Inherit --enable-shared and define BOOST_TEST_DYN_LINK.
+# Inherit --enable-shared and define BOOST_ALL_DYN_LINK.
 #------------------------------------------------------------------------------
-AS_CASE([${enable_shared}], [yes], AC_DEFINE([BOOST_TEST_DYN_LINK]))
+AS_CASE([${enable_shared}], [yes], AC_DEFINE([BOOST_ALL_DYN_LINK]))
 
 
 # Check dependencies.
@@ -180,6 +180,10 @@ AC_MSG_NOTICE([boost_iostreams_LIBS : ${boost_iostreams_LIBS}])
 AX_BOOST_LOCALE
 AC_SUBST([boost_locale_LIBS], [${BOOST_LOCALE_LIB}])
 AC_MSG_NOTICE([boost_locale_LIBS : ${boost_locale_LIBS}])
+
+AX_BOOST_LOG
+AC_SUBST([boost_log_LIBS], [${BOOST_LOG_LIB}])
+AC_MSG_NOTICE([boost_log_LIBS : ${boost_log_LIBS}])
 
 AX_BOOST_PROGRAM_OPTIONS
 AC_SUBST([boost_program_options_LIBS], [${BOOST_PROGRAM_OPTIONS_LIB}])

@@ -225,6 +225,7 @@ BOOST_OPTIONS=(
 "--with-filesystem" \
 "--with-iostreams" \
 "--with-locale" \
+"--with-log" \
 "--with-program_options" \
 "--with-regex" \
 "--with-system" \
