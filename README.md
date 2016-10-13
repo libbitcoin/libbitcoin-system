@@ -214,6 +214,7 @@ The required set of NuGet packages can be viewed using the [NuGet package manage
  * [boost\_filesystem-vc120](http://www.nuget.org/packages/boost_filesystem-vc120)
  * [boost\_iostreams-vc120](http://www.nuget.org/packages/boost_iostreams-vc120)
  * [boost\_locale-vc120](http://www.nuget.org/packages/boost_locale-vc120)
+ * [boost\_log-vc120](http://www.nuget.org/packages/boost_log-vc120)
  * [boost\_program\_options-vc120](http://www.nuget.org/packages/boost_program_options-vc120)
  * [boost\_regex-vc120](http://www.nuget.org/packages/boost_regex-vc120)
  * [boost\_system-vc120](http://www.nuget.org/packages/boost_system-vc120)
