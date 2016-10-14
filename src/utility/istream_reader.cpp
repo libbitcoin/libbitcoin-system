@@ -40,6 +40,11 @@ bool istream_reader::operator!() const
     return !stream_;
 }
 
+void istream_reader::invalidate()
+{
+    stream_.setstate(std::istream::failbit);
+}
+
 bool istream_reader::is_exhausted() const
 {
     return stream_ && (stream_.peek() == std::istream::traits_type::eof());
@@ -118,14 +123,12 @@ data_chunk istream_reader::read_data(size_t size)
     if (size > 0)
     {
         stream_.read(reinterpret_cast<char*>(raw_bytes.data()), size);
-        auto size = stream_.gcount();
-        BITCOIN_ASSERT(size <= bc::max_size_t);
-        const auto read_size = static_cast<size_t>(size);
 
-        if (size != read_size)
-//          throw std::ios_base::failure(
-//              "read_data failed to read requested number of bytes");
-            raw_bytes.resize(read_size);
+        if (size != stream_.gcount())
+        {
+            invalidate();
+            return{};
+        }
     }
 
     return raw_bytes;
@@ -138,9 +141,9 @@ size_t istream_reader::read_data(uint8_t* data, size_t size)
     if (size > 0)
     {
         stream_.read(reinterpret_cast<char*>(data), size);
-        auto size = stream_.gcount();
-        BITCOIN_ASSERT(size <= bc::max_size_t);
-        read_size = static_cast<size_t>(size);
+        const auto count = stream_.gcount();
+        static_assert(sizeof(count) <= sizeof(size_t), "unexpected stream");
+        read_size = static_cast<size_t>(count);
     }
 
     return read_size;
@@ -149,6 +152,7 @@ size_t istream_reader::read_data(uint8_t* data, size_t size)
 data_chunk istream_reader::read_data_to_eof()
 {
     data_chunk raw_bytes;
+
     while (stream_ && (stream_.peek() != std::istream::traits_type::eof()))
         raw_bytes.push_back(read_byte());
 
@@ -172,7 +176,7 @@ mini_hash istream_reader::read_mini_hash()
 
 std::string istream_reader::read_fixed_string(size_t length)
 {
-    auto string_bytes = read_data(length);
+    const auto string_bytes = read_data(length);
     std::string result(string_bytes.begin(), string_bytes.end());
 
     // Removes trailing 0s... Needed for string comparisons
@@ -182,9 +186,14 @@ std::string istream_reader::read_fixed_string(size_t length)
 std::string istream_reader::read_string()
 {
     const auto size = read_variable_uint_little_endian();
-    BITCOIN_ASSERT(size <= bc::max_size_t);
-    const auto read_size = static_cast<size_t>(size);
-    return read_fixed_string(read_size);
+
+    if (size >= max_size_t)
+    {
+        invalidate();
+        return{};
+    }
+
+    return read_fixed_string(static_cast<size_t>(size));
 }
 
 } // namespace libbitcoin

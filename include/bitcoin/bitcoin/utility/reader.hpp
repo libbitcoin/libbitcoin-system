@@ -32,7 +32,9 @@ public:
     virtual operator bool() const = 0;
     virtual bool operator!() const = 0;
 
+    virtual void invalidate() = 0;
     virtual bool is_exhausted() const = 0;
+
     virtual uint8_t read_byte() = 0;
     virtual data_chunk read_data(size_t size) = 0;
     virtual size_t read_data(uint8_t* data, size_t size) = 0;

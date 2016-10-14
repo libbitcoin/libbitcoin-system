@@ -35,7 +35,9 @@ public:
     operator bool() const;
     bool operator!() const;
 
+    void invalidate();
     bool is_exhausted() const;
+
     uint8_t read_byte();
     data_chunk read_data(size_t size);
     size_t read_data(uint8_t* data, size_t size);

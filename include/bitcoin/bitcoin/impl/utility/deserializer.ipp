@@ -41,20 +41,26 @@ namespace libbitcoin {
 template <typename Iterator, bool SafeCheckLast>
 deserializer<Iterator, SafeCheckLast>::deserializer(const Iterator begin,
     const Iterator end)
-  : iterator_(begin), end_(end)
+  : iterator_(begin), end_(end), valid_(true)
 {
 }
 
 template <typename Iterator, bool SafeCheckLast>
 deserializer<Iterator, SafeCheckLast>::operator bool() const
 {
-    return true;
+    return valid_;
 }
 
 template <typename Iterator, bool SafeCheckLast>
 bool deserializer<Iterator, SafeCheckLast>::operator!() const
 {
-    return false;
+    return !valid_;
+}
+
+template <typename Iterator, bool SafeCheckLast>
+void deserializer<Iterator, SafeCheckLast>::invalidate()
+{
+    valid_ = false;
 }
 
 template <typename Iterator, bool SafeCheckLast>

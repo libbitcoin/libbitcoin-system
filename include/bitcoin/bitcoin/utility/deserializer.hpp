@@ -59,7 +59,9 @@ public:
     operator bool() const;
     bool operator!() const;
 
+    void invalidate();
     bool is_exhausted() const;
+
     void skip_bytes(size_t size);
     uint8_t read_byte();
     data_chunk read_data(size_t size);
@@ -146,7 +148,8 @@ private:
     // The compiler will optimise out calls to this function if !SafeCheckLast.
     static void check_distance(Iterator it, const Iterator end,
         size_t distance);
-
+    
+    bool valid_;
     Iterator iterator_;
     const Iterator end_;
 };
