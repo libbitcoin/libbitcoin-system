@@ -60,31 +60,34 @@ merkle_block merkle_block::factory_from_data(uint32_t version,
 }
 
 merkle_block::merkle_block()
-  : header_(), hashes_(), flags_()
+  : header_(), total_transactions_(0), hashes_(), flags_()
 {
 }
 
 merkle_block::merkle_block(const chain::header& header,
-    const hash_list& hashes, const data_chunk& flags)
-  : header_(header), hashes_(hashes), flags_(flags)
+    uint32_t total_transactions, const hash_list& hashes,
+    const data_chunk& flags)
+  : header_(header), total_transactions_(total_transactions), hashes_(hashes),
+    flags_(flags)
 {
 }
 
-merkle_block::merkle_block(chain::header&& header, hash_list&& hashes,
-    data_chunk&& flags)
-  : header_(std::move(header)), hashes_(std::move(hashes)),
-    flags_(std::move(flags))
+merkle_block::merkle_block(chain::header&& header, uint32_t total_transactions,
+    hash_list&& hashes, data_chunk&& flags)
+  : header_(std::move(header)), total_transactions_(total_transactions),
+    hashes_(std::move(hashes)), flags_(std::move(flags))
 {
 }
 
 merkle_block::merkle_block(const merkle_block& other)
-  : merkle_block(other.header_, other.hashes_, other.flags_)
+  : merkle_block(other.header_, other.total_transactions_, other.hashes_,
+      other.flags_)
 {
 }
 
 merkle_block::merkle_block(merkle_block&& other)
-  : merkle_block(std::move(other.header_), std::move(other.hashes_),
-      std::move(other.flags_))
+  : merkle_block(std::move(other.header_), other.total_transactions_,
+      std::move(other.hashes_), std::move(other.flags_))
 {
 }
 
@@ -96,6 +99,7 @@ bool merkle_block::is_valid() const
 void merkle_block::reset()
 {
     header_.reset();
+    total_transactions_ = 0;
     hashes_.clear();
     hashes_.shrink_to_fit();
     flags_.clear();
@@ -122,12 +126,13 @@ bool merkle_block::from_data(uint32_t version, reader& source)
     uint64_t hash_count = 0;
 
     if (result)
-        result = header_.from_data(source, true);
+        result = header_.from_data(source);
 
     if (result)
     {
+        total_transactions_ = source.read_4_bytes_little_endian();
         hash_count = source.read_variable_uint_little_endian();
-        result = source;
+        result = static_cast<bool>(source);
     }
 
     if (result)
@@ -171,8 +176,9 @@ void merkle_block::to_data(uint32_t version, std::ostream& stream) const
 
 void merkle_block::to_data(uint32_t version, writer& sink) const
 {
-    header_.to_data(sink, true);
+    header_.to_data(sink);
 
+    sink.write_4_bytes_little_endian(total_transactions_);
     sink.write_variable_uint_little_endian(hashes_.size());
 
     for (const auto& hash : hashes_)
@@ -184,7 +190,7 @@ void merkle_block::to_data(uint32_t version, writer& sink) const
 
 uint64_t merkle_block::serialized_size(uint32_t version) const
 {
-    return header_.serialized_size(true) +
+    return header_.serialized_size() + 4 +
         variable_uint_size(hashes_.size()) + (hash_size * hashes_.size()) +
         variable_uint_size(flags_.size()) + flags_.size();
 }
@@ -207,6 +213,16 @@ void merkle_block::set_header(const chain::header& value)
 void merkle_block::set_header(chain::header&& value)
 {
     header_ = std::move(value);
+}
+
+uint32_t merkle_block::total_transactions() const
+{
+    return total_transactions_;
+}
+
+void merkle_block::set_total_transactions(uint32_t value)
+{
+    total_transactions_ = value;
 }
 
 hash_list& merkle_block::hashes()

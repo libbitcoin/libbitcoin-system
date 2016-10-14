@@ -49,14 +49,15 @@ public:
         std::istream& stream);
     static header_message factory_from_data(const uint32_t version,
         reader& source);
+    static uint64_t satoshi_fixed_size(const uint32_t version);
 
     header_message();
     header_message(uint32_t version, const hash_digest& previous_block_hash,
         const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce, uint64_t transaction_count, uint64_t originator = 0);
+        uint32_t nonce, uint64_t originator = 0);
     header_message(uint32_t version, hash_digest&& previous_block_hash,
         hash_digest&& merkle, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce, uint64_t transaction_count, uint64_t originator = 0);
+        uint32_t nonce, uint64_t originator = 0);
     header_message(const chain::header& other);
     header_message(chain::header&& other);
     header_message(const header_message& other);
@@ -78,7 +79,7 @@ public:
 
     /// This class is move assignable but not copy assignable.
     header_message& operator=(header_message&& other);
-    void operator=(const header_message&) = delete;
+    header_message& operator=(const header_message&) /*= delete*/;
 
     bool operator==(const chain::header& other) const;
     bool operator!=(const chain::header& other) const;

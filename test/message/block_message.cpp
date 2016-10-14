@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE(block_message__factory_data_1__genesis_mainnet__success)
 {
     const auto genesis = chain::block::genesis_mainnet();
     BOOST_REQUIRE_EQUAL(genesis.serialized_size(), 285u);
-    BOOST_REQUIRE_EQUAL(genesis.header().serialized_size(false), 80u);
+    BOOST_REQUIRE_EQUAL(genesis.header().serialized_size(), 80u);
 
     // Save genesis block.
     auto raw_block_message = genesis.to_data();
@@ -209,7 +209,7 @@ BOOST_AUTO_TEST_CASE(block_message__factory_data_2__genesis_mainnet__success)
 {
     const auto genesis = chain::block::genesis_mainnet();
     BOOST_REQUIRE_EQUAL(genesis.serialized_size(), 285u);
-    BOOST_REQUIRE_EQUAL(genesis.header().serialized_size(false), 80u);
+    BOOST_REQUIRE_EQUAL(genesis.header().serialized_size(), 80u);
 
     // Save genesis block.
     auto raw_block_message = genesis.to_data();
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(block_message__factory_data_3__genesis_mainnet__success)
 {
     const auto genesis = chain::block::genesis_mainnet();
     BOOST_REQUIRE_EQUAL(genesis.serialized_size(), 285u);
-    BOOST_REQUIRE_EQUAL(genesis.header().serialized_size(false), 80u);
+    BOOST_REQUIRE_EQUAL(genesis.header().serialized_size(), 80u);
 
     // Save genesis block.
     auto raw_block_message = genesis.to_data();

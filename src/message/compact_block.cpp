@@ -123,7 +123,7 @@ bool compact_block::from_data(uint32_t version, reader& source)
     reset();
 
     auto insufficient_version = (version < compact_block::version_minimum);
-    auto result = header_.from_data(source, false);
+    auto result = header_.from_data(source);
     nonce_ = source.read_8_bytes_little_endian();
     const auto short_ids_count = source.read_variable_uint_little_endian();
     result &= static_cast<bool>(source);
@@ -177,7 +177,7 @@ void compact_block::to_data(uint32_t version, std::ostream& stream) const
 
 void compact_block::to_data(uint32_t version, writer& sink) const
 {
-    header_.to_data(sink, false);
+    header_.to_data(sink);
     sink.write_8_bytes_little_endian(nonce_);
     sink.write_variable_uint_little_endian(short_ids_.size());
     for (const auto& element: short_ids_)
@@ -190,7 +190,7 @@ void compact_block::to_data(uint32_t version, writer& sink) const
 
 uint64_t compact_block::serialized_size(uint32_t version) const
 {
-    uint64_t size = chain::header::satoshi_fixed_size_without_transaction_count() +
+    uint64_t size = chain::header::satoshi_fixed_size() +
         variable_uint_size(short_ids_.size()) + (short_ids_.size() * 6) +
         variable_uint_size(transactions_.size()) + 8;
 

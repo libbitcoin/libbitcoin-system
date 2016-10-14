@@ -367,10 +367,19 @@ bool block::from_data(reader& source)
 {
     reset();
 
-    if (!header_.from_data(source, true))
+    if (!header_.from_data(source))
         return false;
 
-    transactions_.resize(safe_unsigned<size_t>(header_.transaction_count()));
+    const auto count = source.read_variable_uint_little_endian();
+
+    // Treat size_t (32 or 64 bit) as limit so that we can cast to size_t.
+    if (count > max_size_t)
+    {
+        reset();
+        return false;
+    }
+
+    transactions_.resize(safe_unsigned<size_t>(count));
 
     // Order is required.
     for (auto& tx: transactions_)
@@ -403,7 +412,7 @@ void block::to_data(std::ostream& stream) const
 
 void block::to_data(writer& sink) const
 {
-    header_.to_data(sink, false);
+    header_.to_data(sink);
     sink.write_variable_uint_little_endian(transactions_.size());
     const auto to = [&sink](const transaction& tx) { tx.to_data(sink); };
     std::for_each(transactions_.begin(), transactions_.end(), to);
@@ -447,7 +456,9 @@ hash_number block::difficulty() const
 // overflow returns max_uint64
 uint64_t block::serialized_size() const
 {
-    auto block_size = header_.serialized_size(true);
+    auto block_size = header_.serialized_size() +
+        variable_uint_size(transactions_.size());
+
     const auto value = [](uint64_t total, const transaction& tx)
     {
         const auto size = tx.serialized_size();

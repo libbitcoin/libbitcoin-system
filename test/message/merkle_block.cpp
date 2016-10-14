@@ -42,6 +42,8 @@ BOOST_AUTO_TEST_CASE(merkle_block__constructor_2__always__equals_params)
         68644
     );
 
+    uint32_t count = 1234u;
+
     hash_list hashes = {
         hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaffffffffffffffffffffffffffffffff"),
         hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
@@ -49,9 +51,10 @@ BOOST_AUTO_TEST_CASE(merkle_block__constructor_2__always__equals_params)
     };
     data_chunk flags = { 0xae, 0x56, 0x0f };
 
-    message::merkle_block instance(header, hashes, flags);
+    message::merkle_block instance(header, count, hashes, flags);
     BOOST_REQUIRE_EQUAL(true, instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
+    BOOST_REQUIRE_EQUAL(count, instance.total_transactions());
     BOOST_REQUIRE(hashes == instance.hashes());
     BOOST_REQUIRE(flags ==  instance.flags());
 }
@@ -67,6 +70,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__constructor_3__always__equals_params)
             6523454,
             68644
         },
+        1234u,
         {
             hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaffffffffffffffffffffffffffffffff"),
             hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
@@ -88,6 +92,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__constructor_4__always__equals_params)
             6523454,
             68644
         },
+        4321234u,
         {
             hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaffffffffffffffffffffffffffffffff"),
             hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
@@ -112,6 +117,8 @@ BOOST_AUTO_TEST_CASE(merkle_block__constructor_5__always__equals_params)
         68644
     );
 
+    uint32_t count = 654576u;
+
     hash_list hashes = {
         hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaffffffffffffffffffffffffffffffff"),
         hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
@@ -119,10 +126,11 @@ BOOST_AUTO_TEST_CASE(merkle_block__constructor_5__always__equals_params)
     };
     data_chunk flags = { 0xae, 0x56, 0x0f };
 
-    message::merkle_block expected(header, hashes, flags);
+    message::merkle_block expected(header, count, hashes, flags);
     message::merkle_block instance(std::move(expected));
     BOOST_REQUIRE_EQUAL(true, instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
+    BOOST_REQUIRE_EQUAL(count, instance.total_transactions());
     BOOST_REQUIRE(hashes == instance.hashes());
     BOOST_REQUIRE(flags == instance.flags());
 }
@@ -146,9 +154,9 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_version_fails)
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
             531234,
             6523454,
-            68644,
-            1
+            68644
         },
+        34523u,
         {
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
         },
@@ -175,9 +183,9 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
             531234,
             6523454,
-            68644,
-            1
+            68644
         },
+        45633u,
         {
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
         },
@@ -204,9 +212,9 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
             531234,
             6523454,
-            68644,
-            1
+            68644
         },
+        543563u,
         {
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
         },
@@ -234,9 +242,9 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
             531234,
             6523454,
-            68644,
-            1
+            68644
         },
+        5324u,
         {
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
         },
@@ -268,7 +276,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__header_accessor_1__always__returns_initialize
     };
 
     message::merkle_block instance(
-        expected,
+        expected, 753u,
         {
             hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaffffffffffffffffffffffffffffffff"),
             hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
@@ -292,7 +300,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__header_accessor_2__always__returns_initialize
     };
 
     const message::merkle_block instance(
-        expected,
+        expected, 9542u,
         {
             hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaffffffffffffffffffffffffffffffff"),
             hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
@@ -355,6 +363,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__hashes_accessor_1__always__returns_initialize
             6523454,
             68644
         },
+        2456u,
         expected,
         { 0xae, 0x56, 0x0f });
 
@@ -379,6 +388,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__hashes_accessor_2__always__returns_initialize
             6523454,
             68644
         },
+        9137u,
         expected,
         { 0xae, 0x56, 0x0f });
 
@@ -426,6 +436,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__flags_accessor_1__always__returns_initialized
             6523454,
             68644
         },
+        8264u,
         {
             hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaffffffffffffffffffffffffffffffff"),
             hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
@@ -449,6 +460,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__flags_accessor_2__always__returns_initialized
             6523454,
             68644
         },
+        6428u,
         {
             hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaffffffffffffffffffffffffffffffff"),
             hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
@@ -487,6 +499,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__operator_assign_equals__always__matches_equiv
             6523454,
             68644
         },
+        3197u,
         {
             hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaffffffffffffffffffffffffffffffff"),
             hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
@@ -515,6 +528,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__operator_boolean_equals__duplicates__returns_
             6523454,
             68644
         },
+        9821u,
         {
             hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaffffffffffffffffffffffffffffffff"),
             hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
@@ -538,6 +552,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__operator_boolean_equals__differs__returns_fal
             6523454,
             68644
         },
+        1469u,
         {
             hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaffffffffffffffffffffffffffffffff"),
             hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
@@ -561,6 +576,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__operator_boolean_not_equals__duplicates__retu
             6523454,
             68644
         },
+        3524u,
         {
             hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaffffffffffffffffffffffffffffffff"),
             hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
@@ -584,6 +600,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__operator_boolean_not_equals__differs__returns
             6523454,
             68644
         },
+        8642u,
         {
             hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaffffffffffffffffffffffffffffffff"),
             hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
