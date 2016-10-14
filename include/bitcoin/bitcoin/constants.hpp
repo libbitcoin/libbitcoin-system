@@ -109,6 +109,13 @@ BC_CONSTEXPR size_t mainnet_sample = 1000;
 // Block 173805 is the first mainnet block after date-based activation.
 BC_CONSTEXPR uint32_t bip16_activation_time = 0x4f779a80;
 
+// Block 170060 was mined with an invalid p2sh (code shipped late).
+// bitcointalk.org/index.php?topic=63165.msg788832#msg788832
+static const config::checkpoint mainnet_bip16_exception_checkpoint
+{
+    "00000000000002dc756eebf4f49723ed8d30cc28a5f108eb94b1ba88ac4f9c22", 170060
+};
+
 // github.com/bitcoin/bips/blob/master/bip-0030.mediawiki#specification
 static const config::checkpoint mainnet_bip30_exception_checkpoint1
 {

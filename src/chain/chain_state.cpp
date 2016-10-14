@@ -69,6 +69,14 @@ inline bool is_bip30_exception(size_t height, const hash_digest& hash,
         hash == mainnet_bip30_exception_checkpoint2.hash()));
 }
 
+inline bool is_bip16_exception(size_t height, const hash_digest& hash,
+    bool testnet)
+{
+    return !testnet &&
+        height == mainnet_bip16_exception_checkpoint.height() &&
+        hash == mainnet_bip16_exception_checkpoint.hash();
+}
+
 inline uint32_t timestamp_high(const chain_state::data& values)
 {
     return values.timestamp.ordered.back();
@@ -138,7 +146,9 @@ chain_state::activations chain_state::activation(const data& values)
         result.forks |= rule_fork::bip30_rule;
 
     // bip16 is activated with a one-time test on mainnet/testnet (~55% rule).
-    if (values.timestamp.self >= bip16_activation_time)
+    // There was one invalid p2sh tx mined after that time (code shipped late).
+    if (values.timestamp.self >= bip16_activation_time &&
+        !is_bip16_exception(values.height, values.hash, testnet))
         result.forks |= rule_fork::bip16_rule;
 
     // version 4/3/2 enforced based on 95% of preceding 1000 mainnet blocks.
