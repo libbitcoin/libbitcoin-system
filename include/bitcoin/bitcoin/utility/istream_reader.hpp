@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_ISTREAM_READER_HPP
 #define LIBBITCOIN_ISTREAM_READER_HPP
 
+#include <cstddef>
 #include <cstdint>
 #include <istream>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -51,12 +52,14 @@ public:
     uint32_t read_4_bytes_little_endian();
     uint64_t read_8_bytes_little_endian();
     uint64_t read_variable_uint_little_endian();
+    uint64_t read_size_little_endian();
 
     // These read data in big endian format:
     uint16_t read_2_bytes_big_endian();
     uint32_t read_4_bytes_big_endian();
     uint64_t read_8_bytes_big_endian();
     uint64_t read_variable_uint_big_endian();
+    uint64_t read_size_big_endian();
 
     /**
      * Read a fixed size string padded with zeroes.

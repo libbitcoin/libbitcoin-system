@@ -20,6 +20,8 @@
 #ifndef LIBBITCOIN_READER_HPP
 #define LIBBITCOIN_READER_HPP
 
+#include <cstddef>
+#include <cstdint>
 #include <string>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
@@ -48,12 +50,14 @@ public:
     virtual uint32_t read_4_bytes_little_endian() = 0;
     virtual uint64_t read_8_bytes_little_endian() = 0;
     virtual uint64_t read_variable_uint_little_endian() = 0;
+    virtual size_t read_size_little_endian() = 0;
 
     // These read data in big endian format:
     virtual uint16_t read_2_bytes_big_endian() = 0;
     virtual uint32_t read_4_bytes_big_endian() = 0;
     virtual uint64_t read_8_bytes_big_endian() = 0;
     virtual uint64_t read_variable_uint_big_endian() = 0;
+    virtual size_t read_size_big_endian() = 0;
 
     /**
      * Read a fixed size string padded with zeroes.

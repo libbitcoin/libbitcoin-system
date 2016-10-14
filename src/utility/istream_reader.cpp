@@ -86,6 +86,16 @@ uint64_t istream_reader::read_variable_uint_little_endian()
     return read_8_bytes_little_endian();
 }
 
+size_t istream_reader::read_size_little_endian()
+{
+    const auto size = read_variable_uint_little_endian();
+
+    if (size > max_size_t)
+        invalidate();
+
+    return static_cast<size_t>(size);
+}
+
 uint16_t istream_reader::read_2_bytes_big_endian()
 {
     return read_big_endian<uint16_t>();
@@ -114,6 +124,16 @@ uint64_t istream_reader::read_variable_uint_big_endian()
 
     // length should be 0xff
     return read_8_bytes_big_endian();
+}
+
+size_t istream_reader::read_size_big_endian()
+{
+    const auto size = read_variable_uint_big_endian();
+
+    if (size > max_size_t)
+        invalidate();
+
+    return static_cast<size_t>(size);
 }
 
 data_chunk istream_reader::read_data(size_t size)
@@ -185,15 +205,7 @@ std::string istream_reader::read_fixed_string(size_t length)
 
 std::string istream_reader::read_string()
 {
-    const auto size = read_variable_uint_little_endian();
-
-    if (size >= max_size_t)
-    {
-        invalidate();
-        return{};
-    }
-
-    return read_fixed_string(static_cast<size_t>(size));
+    return read_fixed_string(read_size_little_endian());
 }
 
 } // namespace libbitcoin

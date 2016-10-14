@@ -72,99 +72,59 @@ public:
     short_hash read_short_hash();
     mini_hash read_mini_hash();
 
-    // These read data in little endian format:
+    // Read data in little endian format:
     uint16_t read_2_bytes_little_endian();
     uint32_t read_4_bytes_little_endian();
     uint64_t read_8_bytes_little_endian();
-
-    /**
-     * Variable uints are usually used for sizes.
-     * They're encoded using fewer bytes depending on the value itself.
-     */
     uint64_t read_variable_uint_little_endian();
+    size_t read_size_little_endian();
 
-    // These read data in big endian format:
+    // Read data in big endian format:
     uint16_t read_2_bytes_big_endian();
     uint32_t read_4_bytes_big_endian();
     uint64_t read_8_bytes_big_endian();
-
-    /**
-     * Variable uints are usually used for sizes.
-     * They're encoded using fewer bytes depending on the value itself.
-     */
     uint64_t read_variable_uint_big_endian();
+    size_t read_size_big_endian();
 
-    /**
-     * Reads an unsigned integer that has been encoded in big endian format.
-     */
-    template <typename T>
-    T read_big_endian();
+    /// Read an unsigned integer that has been encoded in big endian format.
+    template <typename Integer>
+    Integer read_big_endian();
 
-    /**
-     * Reads an unsigned integer that has been encoded in little endian format.
-     */
-    template <typename T>
-    T read_little_endian();
+    /// Read an unsigned integer that has been encoded in little endian format.
+    template <typename Integer>
+    Integer read_little_endian();
 
-    /**
-     * Read a fixed size string padded with zeroes.
-     */
+    /// Read a fixed size string padded with zeroes.
     std::string read_fixed_string(size_t length);
 
-    /**
-     * Read a variable length string.
-     */
+    /// Read a variable length string.
     std::string read_string();
 
-    /**
-     * Read a fixed-length data block.
-     */
-    template <unsigned N>
-    byte_array<N> read_bytes();
+    /// Read a fixed-length data block.
+    template <unsigned Value>
+    byte_array<Value> read_bytes();
 
-    template <unsigned N>
-    byte_array<N> read_bytes_reverse();
-
-    /////**
-    //// * Returns underlying iterator.
-    //// */
-    ////Iterator iterator() const;
-
-    /////**
-    //// * Useful if you advance the iterator using other serialization
-    //// * methods or objects.
-    //// */
-    ////void set_iterator(const Iterator iterator);
-
-    /////**
-    //// * Returns underlying iterator end.
-    //// */
-    ////Iterator end() const
-    ////{
-    ////    return end_;
-    ////}
+    template <unsigned Value>
+    byte_array<Value> read_bytes_reverse();
 
 private:
     // The compiler will optimise out calls to this function if !SafeCheckLast.
     static void check_distance(Iterator it, const Iterator end,
         size_t distance);
-    
+
     bool valid_;
     Iterator iterator_;
     const Iterator end_;
 };
 
-/**
- * Deserializer which performs bounds checking and throws end_of_stream
- * if the iterator exceeds 'end'.
- */
+
+/// Deserializer which performs bounds checking and throws end_of_stream if the
+/// iterator exceeds 'end'.
 template <typename Iterator>
 deserializer<Iterator, true> make_deserializer(const Iterator begin,
     const Iterator end);
 
-/**
- * Faster deserializer with no bounds checking.
- */
+/// Faster deserializer with no bounds checking.
 template <typename Iterator>
 deserializer<Iterator, false> make_deserializer_unsafe(const Iterator begin);
 
@@ -173,4 +133,3 @@ deserializer<Iterator, false> make_deserializer_unsafe(const Iterator begin);
 #include <bitcoin/bitcoin/impl/utility/deserializer.ipp>
 
 #endif
-
