@@ -61,39 +61,25 @@ static std::map<bc::log::severity, std::string> severity_mapping
 };
 
 template<typename Stream>
-static void add_text_sink(boost::shared_ptr<Stream>& stream)
+static boost::shared_ptr<text_sink> add_text_sink(
+    boost::shared_ptr<Stream>& stream)
 {
-    // Construct the sink.
+    // Construct a log sink.
     const auto sink = boost::make_shared<text_sink>();
 
-    // Add a stream to write log to.
+    // Register the sink with the logging core.
+    boost::log::core::get()->add_sink(sink);
+
+    // Add a stream for the sink to write to.
     sink->locked_backend()->add_stream(stream);
 
-    // Add the formatter.
+    // Flush the sink after each logical line.
+    sink->locked_backend()->auto_flush(true);
+
+    // Add the formatter to the sink.
     sink->set_formatter(LINE_FORMATTER);
 
-    // Register the sink in the logging core.
-    boost::log::core::get()->add_sink(sink);
-}
-
-template<typename Stream, typename Filter>
-static void add_text_sink(boost::shared_ptr<Stream>& stream,
-    Filter const& filter)
-{
-    // Construct the sink.
-    const auto sink = boost::make_shared<text_sink>();
-
-    // Add a stream to write log to.
-    sink->locked_backend()->add_stream(stream);
-
-    // Add the filter.
-    sink->set_filter(filter);
-
-    // Add the formatter.
-    sink->set_formatter(LINE_FORMATTER);
-
-    // Register the sink in the logging core.
-    boost::log::core::get()->add_sink(sink);
+    return sink;
 }
 
 void initialize(log::file& debug_file, log::file& error_file,
@@ -108,9 +94,9 @@ void initialize(log::file& debug_file, log::file& error_file,
         (log::attributes::severity == log::severity::info);
 
     add_text_sink(debug_file);
-    add_text_sink(error_file, error_filter);
-    add_text_sink(output_stream, info_filter);
-    add_text_sink(error_stream, error_filter);
+    add_text_sink(error_file)->set_filter(error_filter);
+    add_text_sink(output_stream)->set_filter(info_filter);
+    add_text_sink(error_stream)->set_filter(error_filter);
 }
 
 formatter& operator<<(formatter& stream, severity level)
