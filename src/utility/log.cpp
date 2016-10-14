@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/utility/log.hpp>
 
+#include <map>
 #include <string>
 #include <boost/log/attributes.hpp>
 #include <boost/log/common.hpp>
@@ -37,10 +38,10 @@ using namespace boost::log::sinks;
 using namespace boost::posix_time;
 
 #define TIME_FORMAT "%H:%M:%S.%f"
-#define TIME_STAMP log::attributes::timestamp.get_name()
+#define TIME_STAMP attributes::timestamp.get_name()
 #define TIME_FORMATTER format_date_time<ptime, char>(TIME_STAMP, TIME_FORMAT)
-#define SEVERITY_FORMATTER log::attributes::severity
-#define CHANNEL_FORMATTER "[" << log::attributes::channel << "]"
+#define SEVERITY_FORMATTER attributes::severity
+#define CHANNEL_FORMATTER "[" << attributes::channel << "]"
 #define MESSAGE_FORMATTER smessage
 
 #define LINE_FORMATTER boost::log::expressions::stream \
@@ -51,13 +52,13 @@ using namespace boost::posix_time;
 
 typedef synchronous_sink<text_ostream_backend> text_sink;
 
-static std::map<bc::log::severity, std::string> severity_mapping
+static std::map<severity, std::string> severity_mapping
 {
-    { bc::log::severity::debug, "DEBUG" },
-    { bc::log::severity::info, "INFO" },
-    { bc::log::severity::warning, "WARNING" },
-    { bc::log::severity::error, "ERROR" },
-    { bc::log::severity::fatal, "FATAL" }
+    { severity::debug, "DEBUG" },
+    { severity::info, "INFO" },
+    { severity::warning, "WARNING" },
+    { severity::error, "ERROR" },
+    { severity::fatal, "FATAL" }
 };
 
 template<typename Stream>
@@ -86,9 +87,9 @@ void initialize(log::file& debug_file, log::file& error_file,
     log::stream& output_stream, log::stream& error_stream)
 {
     const auto error_filter =
-        (log::attributes::severity == log::severity::warning) ||
-        (log::attributes::severity == log::severity::error) ||
-        (log::attributes::severity == log::severity::fatal);
+        (attributes::severity == severity::warning) ||
+        (attributes::severity == severity::error) ||
+        (attributes::severity == severity::fatal);
 
     const auto info_filter =
         (log::attributes::severity == log::severity::info);

@@ -55,14 +55,14 @@ typedef boost::log::sources::severity_channel_logger_mt<severity, std::string>
 namespace attributes {
 
 BOOST_LOG_ATTRIBUTE_KEYWORD(timestamp, "Timestamp", boost::posix_time::ptime)
-BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", log::severity)
+BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", bc::log::severity)
 BOOST_LOG_ATTRIBUTE_KEYWORD(channel, "Channel", std::string)
 
 }
 
 BOOST_LOG_INLINE_GLOBAL_LOGGER_INIT(source, severity_source)
 {
-    static const auto name = log::attributes::timestamp.get_name();
+    static const auto name = attributes::timestamp.get_name();
     severity_source logger;
     logger.add_attribute(name, boost::log::attributes::utc_clock());
     return logger;
@@ -83,7 +83,6 @@ void initialize(log::file& debug_file, log::file& error_file,
 
 /// Log stream operator.
 formatter& operator<<(formatter& stream, severity level);
-
 
 } // namespace log
 } // namespace libbitcoin
