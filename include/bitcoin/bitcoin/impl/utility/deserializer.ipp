@@ -24,6 +24,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
@@ -55,6 +56,7 @@ bool deserializer<Iterator, CheckSafe>::operator!() const
 template <typename Iterator, bool CheckSafe>
 bool deserializer<Iterator, CheckSafe>::is_exhausted() const
 {
+    // This is always true in an unsafe reader.
     return remaining() == 0;
 }
 
@@ -214,7 +216,7 @@ uint8_t deserializer<Iterator, CheckSafe>::read_byte()
 template <typename Iterator, bool CheckSafe>
 data_chunk deserializer<Iterator, CheckSafe>::read_bytes()
 {
-    // This read is always safe.
+    // This read is always safe but always reads zero bytes in unsafe reader.
     return read_bytes(remaining());
 }
 
@@ -381,8 +383,8 @@ deserializer<Iterator, true> make_safe_deserializer(const Iterator begin,
 template <typename Iterator>
 deserializer<Iterator, false> make_unsafe_deserializer(const Iterator begin)
 {
-    // The end_ member will only be used by read_bytes() method.
-    return deserializer<Iterator, false>(begin, Iterator.end());
+    // Since the end is not used just use begin.
+    return deserializer<Iterator, false>(begin, begin);
 }
 
 } // namespace libbitcoin
