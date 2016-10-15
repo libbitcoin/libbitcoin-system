@@ -125,7 +125,7 @@ uint64_t deserializer<Iterator, CheckSafe>::read_variable_big_endian()
 }
 
 template <typename Iterator, bool CheckSafe>
-uint64_t deserializer<Iterator, CheckSafe>::read_size_big_endian()
+size_t deserializer<Iterator, CheckSafe>::read_size_big_endian()
 {
     auto size = read_variable_big_endian();
 
@@ -187,7 +187,7 @@ uint64_t deserializer<Iterator, CheckSafe>::read_variable_little_endian()
 }
 
 template <typename Iterator, bool CheckSafe>
-uint64_t deserializer<Iterator, CheckSafe>::read_size_little_endian()
+size_t deserializer<Iterator, CheckSafe>::read_size_little_endian()
 {
     auto size = read_variable_little_endian();
 
