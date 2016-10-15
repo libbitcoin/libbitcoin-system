@@ -96,11 +96,11 @@ uint64_t istream_reader::read_variable_big_endian()
 
     switch (value)
     {
-        case eight_bytes:
+        case varint_eight_bytes:
             return read_8_bytes_big_endian();
-        case four_bytes:
+        case varint_four_bytes:
             return read_4_bytes_big_endian();
-        case two_bytes:
+        case varint_two_bytes:
             return read_2_bytes_big_endian();
         default:
             return value;
@@ -152,11 +152,11 @@ uint64_t istream_reader::read_variable_little_endian()
 
     switch (value)
     {
-        case eight_bytes:
+        case varint_eight_bytes:
             return read_8_bytes_little_endian();
-        case four_bytes:
+        case varint_four_bytes:
             return read_4_bytes_little_endian();
-        case two_bytes:
+        case varint_two_bytes:
             return read_2_bytes_little_endian();
         default:
             return value;
@@ -230,7 +230,7 @@ std::string istream_reader::read_string(size_t size)
     for (auto index = 0; index < size && !empty(); ++index)
     {
         const auto character = read_byte();
-        terminated |= (character == terminator);
+        terminated |= (character == string_terminator);
 
         // Stop pushing characters at the first null.
         if (!terminated)

@@ -132,6 +132,14 @@ static const config::checkpoint mainnet_bip30_exception_checkpoint2
 BC_CONSTEXPR size_t command_size = 12;
 BC_CONSTEXPR size_t max_inventory_count = 50000;
 
+/// Variable integer prefix sentinels.
+BC_CONSTEXPR uint8_t varint_two_bytes = 0xfd;
+BC_CONSTEXPR uint8_t varint_four_bytes = 0xfe;
+BC_CONSTEXPR uint8_t varint_eight_bytes = 0xff;
+
+// String padding sentinel.
+BC_CONSTEXPR uint8_t string_terminator = 0x00;
+
 // Currency unit constants (uint64_t).
 //-----------------------------------------------------------------------------
 

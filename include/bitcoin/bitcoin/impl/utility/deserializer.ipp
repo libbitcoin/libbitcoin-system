@@ -115,11 +115,11 @@ uint64_t deserializer<Iterator, CheckSafe>::read_variable_big_endian()
 
     switch (value)
     {
-        case eight_bytes:
+        case varint_eight_bytes:
             return read_8_bytes_big_endian();
-        case four_bytes:
+        case varint_four_bytes:
             return read_4_bytes_big_endian();
-        case two_bytes:
+        case varint_two_bytes:
             return read_2_bytes_big_endian();
         default:
             return value;
@@ -177,11 +177,11 @@ uint64_t deserializer<Iterator, CheckSafe>::read_variable_little_endian()
 
     switch (value)
     {
-        case eight_bytes:
+        case varint_eight_bytes:
             return read_8_bytes_little_endian();
-        case four_bytes:
+        case varint_four_bytes:
             return read_4_bytes_little_endian();
-        case two_bytes:
+        case varint_two_bytes:
             return read_2_bytes_little_endian();
         default:
             return value;
@@ -262,7 +262,7 @@ std::string deserializer<Iterator, CheckSafe>::read_string(size_t size)
     {
         const auto character = iterator_[index];
 
-        if (character == terminator)
+        if (character == string_terminator)
             break;
 
         out.push_back(character);

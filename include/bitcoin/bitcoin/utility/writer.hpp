@@ -34,14 +34,6 @@ namespace libbitcoin {
 class BC_API writer
 {
 public:
-    /// Variable integer prefix sentinels.
-    static const uint8_t two_bytes = 0xfd;
-    static const uint8_t four_bytes = 0xfe;
-    static const uint8_t eight_bytes = 0xff;
-
-    // String terminator sentinel.
-    static const uint8_t terminator = 0x00;
-
     /// Context.
     virtual operator bool() const = 0;
     virtual bool operator!() const = 0;

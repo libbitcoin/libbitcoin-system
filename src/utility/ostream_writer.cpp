@@ -84,23 +84,23 @@ void ostream_writer::write_8_bytes_big_endian(uint64_t value)
 
 void ostream_writer::write_variable_big_endian(uint64_t value)
 {
-    if (value < reader::two_bytes)
+    if (value < varint_two_bytes)
     {
         write_byte(static_cast<uint8_t>(value));
     }
     else if (value <= max_uint16)
     {
-        write_byte(reader::two_bytes);
+        write_byte(varint_two_bytes);
         write_2_bytes_big_endian(static_cast<uint16_t>(value));
     }
     else if (value <= max_uint32)
     {
-        write_byte(reader::four_bytes);
+        write_byte(varint_four_bytes);
         write_4_bytes_big_endian(static_cast<uint32_t>(value));
     }
     else
     {
-        write_byte(reader::eight_bytes);
+        write_byte(varint_eight_bytes);
         write_8_bytes_big_endian(value);
     }
 }
@@ -130,23 +130,23 @@ void ostream_writer::write_8_bytes_little_endian(uint64_t value)
 
 void ostream_writer::write_variable_little_endian(uint64_t value)
 {
-    if (value < reader::two_bytes)
+    if (value < varint_two_bytes)
     {
         write_byte(static_cast<uint8_t>(value));
     }
     else if (value <= max_uint16)
     {
-        write_byte(reader::two_bytes);
+        write_byte(varint_two_bytes);
         write_2_bytes_little_endian(static_cast<uint16_t>(value));
     }
     else if (value <= max_uint32)
     {
-        write_byte(reader::four_bytes);
+        write_byte(varint_four_bytes);
         write_4_bytes_little_endian(static_cast<uint32_t>(value));
     }
     else
     {
-        write_byte(reader::eight_bytes);
+        write_byte(varint_eight_bytes);
         write_8_bytes_little_endian(value);
     }
 }
@@ -177,7 +177,7 @@ void ostream_writer::write_string(const std::string& value, size_t size)
 {
     const auto length = std::min(size, value.size());
     write_bytes(reinterpret_cast<const uint8_t*>(value.data()), length);
-    data_chunk padding(floor_subtract(size, length), terminator);
+    data_chunk padding(floor_subtract(size, length), string_terminator);
     write_bytes(padding);
 }
 
