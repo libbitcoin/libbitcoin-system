@@ -36,17 +36,6 @@ namespace chain {
 // This sentinel is serialized and defined by consensus, not implementation.
 const uint32_t point::null_index = no_previous_output;
 
-// This is a sentinel used internally to signal invalidity of the point.
-///////////////////////////////////////////////////////////////////////////////
-// Setting a flag only on deserialization failure is insufficient, since
-// default construction yields success, which is not the intended result
-// when returning a failure instance. Apart from restructuring interfaces
-// the only alternative would be a method to explicitly set invalidity,
-// so we've opted for this. This is not a consensus value and is currently
-// outside of the domain of valid values due to the block size limit.
-///////////////////////////////////////////////////////////////////////////////
-const uint32_t point::invalid_point = null_index - 1u;
-
 point point::factory_from_data(const data_chunk& data)
 {
     point instance;
@@ -68,18 +57,19 @@ point point::factory_from_data(reader& source)
     return instance;
 }
 
+// A default instance is invalid (until modified).
 point::point()
-  : hash_(null_hash), index_(invalid_point)
+  : hash_(null_hash), valid_(false)
 {
 }
 
 point::point(const hash_digest& hash, uint32_t index)
-  : hash_(hash), index_(index)
+  : hash_(hash), index_(index), valid_(true)
 {
 }
 
 point::point(hash_digest&& hash, uint32_t index)
-  : hash_(std::move(hash)), index_(index)
+  : hash_(std::move(hash)), index_(index), valid_(true)
 {
 }
 
@@ -95,13 +85,14 @@ point::point(point&& other)
 
 bool point::is_valid() const
 {
-    return (index_ != point::invalid_point) || (hash_ != null_hash);
+    return valid_ || (hash_ != null_hash) || (index_ != 0);
 }
 
 void point::reset()
 {
+    valid_ = false;
     hash_ = null_hash;
-    index_ = point::invalid_point;
+    index_ = 0;
 }
 
 bool point::from_data(const data_chunk& data)
@@ -120,6 +111,7 @@ bool point::from_data(reader& source)
 {
     reset();
 
+    valid_ = true;
     hash_ = source.read_hash();
     index_ = source.read_4_bytes_little_endian();
 
@@ -213,11 +205,15 @@ const hash_digest& point::hash() const
 
 void point::set_hash(const hash_digest& value)
 {
+    // This is no longer a default instance, so valid.
+    valid_ = true;
     hash_ = value;
 }
 
 void point::set_hash(hash_digest&& value)
 {
+    // This is no longer a default instance, so valid.
+    valid_ = true;
     hash_ = std::move(value);
 }
 
@@ -228,6 +224,8 @@ uint32_t point::index() const
 
 void point::set_index(uint32_t value)
 {
+    // This is no longer a default instance, so valid.
+    valid_ = true;
     index_ = value;
 }
 

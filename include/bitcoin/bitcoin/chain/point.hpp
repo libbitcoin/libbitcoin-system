@@ -42,9 +42,6 @@ public:
     /// This value is serialized and defined by consensus, not implementation.
     static const uint32_t null_index;
 
-    /// This is a sentinel used internally to signal invalidity of the point.
-    static const uint32_t invalid_point;
-
     typedef std::vector<point> list;
     typedef std::vector<uint32_t> indexes;
 
@@ -95,6 +92,7 @@ public:
 private:
     hash_digest hash_;
     uint32_t index_;
+    bool valid_;
 };
 
 typedef point input_point;
