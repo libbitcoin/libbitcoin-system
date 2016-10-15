@@ -82,7 +82,7 @@ void binary::resize(size_type size)
     if (offset > 0)
     {
         // This subtraction is guarded above.
-        final_block_excess_ = safe_unsigned<uint8_t>(bits_per_block - offset);
+        final_block_excess_ = static_cast<uint8_t>(bits_per_block - offset);
         const auto last = safe_subtract(blocks_.size(), size_t(1));
         uint8_t mask = 0xFF << final_block_excess_;
         blocks_[last] &= mask;

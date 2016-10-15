@@ -21,7 +21,6 @@
 
 #include <algorithm>
 #include <sstream>
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
@@ -139,26 +138,19 @@ bool operation::from_data(reader& source)
     reset();
 
     const auto byte = source.read_byte();
-    auto result = static_cast<bool>(source);
     const auto op_code = static_cast<opcode>(byte);
-
-    // This looks like dead code.
-    ////if (byte == 0 && op_code != opcode::zero)
-    ////    return false;
-
     code_ = ((1 <= byte && byte <= 75) ? opcode::special : op_code);
 
     if (operation::must_read_data(code_))
     {
-        const auto size = read_opcode_data_size(code_, byte, source);
-        data_ = source.read_data(size);
-        result &= (source && (data_.size() == size));
+        const auto data_size = read_opcode_data_size(code_, byte, source);
+        data_ = source.read_bytes(data_size);
     }
 
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 data_chunk operation::to_data() const
@@ -179,53 +171,47 @@ void operation::to_data(std::ostream& stream) const
 
 void operation::to_data(writer& sink) const
 {
-    auto raw_byte = static_cast<uint8_t>(code_);
-    if (code_ == opcode::special)
-        raw_byte = static_cast<uint8_t>(data_.size());
+    const auto size = data_.size();
+    auto byte = static_cast<uint8_t>(code_);
 
-    sink.write_byte(raw_byte);
+    if (code_ == opcode::special)
+        byte = safe_unsigned<uint8_t>(size);
+
+    sink.write_byte(byte);
 
     switch (code_)
     {
         case opcode::pushdata1:
-            sink.write_byte(static_cast<uint8_t>(data_.size()));
+            sink.write_byte(safe_unsigned<uint8_t>(size));
             break;
-
         case opcode::pushdata2:
-            sink.write_2_bytes_little_endian(
-                static_cast<uint16_t>(data_.size()));
+            sink.write_2_bytes_little_endian(safe_unsigned<uint16_t>(size));
             break;
-
         case opcode::pushdata4:
-            sink.write_4_bytes_little_endian(
-                static_cast<uint32_t>(data_.size()));
+            sink.write_4_bytes_little_endian(safe_unsigned<uint32_t>(size));
             break;
-
         default:
             break;
     }
 
-    sink.write_data(data_);
+    sink.write_bytes(data_);
 }
 
 uint64_t operation::serialized_size() const
 {
-    uint64_t size = 1 + data_.size();
+    uint64_t size = 1u + data_.size();
 
     switch (code_)
     {
         case opcode::pushdata1:
             size += sizeof(uint8_t);
             break;
-
         case opcode::pushdata2:
             size += sizeof(uint16_t);
             break;
-
         case opcode::pushdata4:
             size += sizeof(uint32_t);
             break;
-
         default:
             break;
     }
@@ -248,27 +234,19 @@ std::string operation::to_string(uint32_t flags) const
 uint32_t operation::read_opcode_data_size(opcode code, uint8_t raw_byte,
     reader& source)
 {
-    uint32_t count = 0u;
-
     switch (code)
     {
         case opcode::special:
-            count = static_cast<uint32_t>(raw_byte);
-            break;
+            return static_cast<uint32_t>(raw_byte);
         case opcode::pushdata1:
-            count = source.read_byte();
-            break;
+            return source.read_byte();
         case opcode::pushdata2:
-            count = source.read_2_bytes_little_endian();
-            break;
+            return source.read_2_bytes_little_endian();
         case opcode::pushdata4:
-            count = source.read_4_bytes_little_endian();
-            break;
+            return source.read_4_bytes_little_endian();;
         default:
-            break;
+            return 0;
     }
-
-    return count;
 }
 
 bool operation::must_read_data(opcode code)

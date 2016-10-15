@@ -102,15 +102,16 @@ bool not_found::from_data(uint32_t version, std::istream& stream)
 
 bool not_found::from_data(uint32_t version, reader& source)
 {
-    bool result = !(version < not_found::version_minimum);
+    if (!inventory::from_data(version, source))
+        return false;
 
-    if (result)
-        result = inventory::from_data(version, source);
+    if (version < not_found::version_minimum)
+        source.invalidate();
 
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 not_found& not_found::operator=(not_found&& other)

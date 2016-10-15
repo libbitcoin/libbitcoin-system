@@ -102,15 +102,16 @@ bool get_data::from_data(uint32_t version, std::istream& stream)
 
 bool get_data::from_data(uint32_t version, reader& source)
 {
-    bool result = !(version < get_data::version_minimum);
+    if (!inventory::from_data(version, source))
+        return false;
 
-    if (result)
-        result = inventory::from_data(version, source);
+    if (version < get_data::version_minimum)
+        source.invalidate();
 
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 get_data& get_data::operator=(get_data&& other)

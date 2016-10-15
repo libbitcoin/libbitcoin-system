@@ -19,7 +19,6 @@
  */
 #include <bitcoin/bitcoin/message/filter_add.hpp>
 
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -97,7 +96,7 @@ void filter_add::reset()
 
 bool filter_add::from_data(uint32_t version, const data_chunk& data)
 {
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     return from_data(version, istream);
 }
 
@@ -111,21 +110,15 @@ bool filter_add::from_data(uint32_t version, reader& source)
 {
     reset();
 
-    const auto insufficient_version = (version < filter_add::version_minimum);
-    const auto size = source.read_variable_uint_little_endian();
-    const auto data_size = safe_unsigned<size_t>(size);
-    bool result = static_cast<bool>(source);
+    data_ = source.read_bytes(source.read_size_little_endian());
 
-    if (result)
-    {
-        data_ = source.read_data(data_size);
-        result = source && (data_.size() == data_size);
-    }
+    if (version < filter_add::version_minimum)
+        source.invalidate();
 
-    if (!result || insufficient_version)
+    if (!source)
         reset();
 
-    return result && !insufficient_version;
+    return source;
 }
 
 data_chunk filter_add::to_data(uint32_t version) const
@@ -146,8 +139,8 @@ void filter_add::to_data(uint32_t version, std::ostream& stream) const
 
 void filter_add::to_data(uint32_t version, writer& sink) const
 {
-    sink.write_variable_uint_little_endian(data_.size());
-    sink.write_data(data_);
+    sink.write_variable_little_endian(data_.size());
+    sink.write_bytes(data_);
 }
 
 uint64_t filter_add::serialized_size(uint32_t version) const

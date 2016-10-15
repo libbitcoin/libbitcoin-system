@@ -19,7 +19,6 @@
  */
 #include <bitcoin/bitcoin/message/alert.hpp>
 
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -96,7 +95,7 @@ void alert::reset()
 
 bool alert::from_data(uint32_t version, const data_chunk& data)
 {
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     return from_data(version, istream);
 }
 
@@ -110,34 +109,13 @@ bool alert::from_data(uint32_t version, reader& source)
 {
     reset();
 
-    auto size = source.read_variable_uint_little_endian();
-    const auto payload_size = safe_unsigned<size_t>(size);
-    size_t signature_size = 0;
-    auto result = static_cast<bool>(source);
+    payload_ = source.read_bytes(source.read_size_little_endian());
+    signature_ = source.read_bytes(source.read_size_little_endian());
 
-    if (result)
-    {
-        payload_ = source.read_data(payload_size);
-        result = source && (payload_.size() == payload_size);
-    }
-
-    if (result)
-    {
-        size = source.read_variable_uint_little_endian();
-        signature_size = safe_unsigned<size_t>(size);
-        result = source;
-    }
-
-    if (result)
-    {
-        signature_ = source.read_data(signature_size);
-        result = source && (signature_.size() == signature_size);
-    }
-
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 data_chunk alert::to_data(uint32_t version) const
@@ -158,10 +136,10 @@ void alert::to_data(uint32_t version, std::ostream& stream) const
 
 void alert::to_data(uint32_t version, writer& sink) const
 {
-    sink.write_variable_uint_little_endian(payload_.size());
-    sink.write_data(payload_);
-    sink.write_variable_uint_little_endian(signature_.size());
-    sink.write_data(signature_);
+    sink.write_variable_little_endian(payload_.size());
+    sink.write_bytes(payload_);
+    sink.write_variable_little_endian(signature_.size());
+    sink.write_bytes(signature_);
 }
 
 uint64_t alert::serialized_size(uint32_t version) const

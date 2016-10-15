@@ -30,9 +30,10 @@
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/deserializer.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
+#include <bitcoin/bitcoin/utility/istream_reader.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/wallet/ec_private.hpp>
 #include <bitcoin/bitcoin/wallet/ec_public.hpp>
@@ -113,7 +114,7 @@ hd_private hd_private::from_seed(data_slice seed, uint64_t prefixes)
 
     // The key is invalid if parse256(IL) >= n or 0:
     if (!verify(intermediate.left))
-        return hd_private();
+        return{};
 
     const auto master = hd_lineage
     {
@@ -134,19 +135,20 @@ hd_private hd_private::from_key(const hd_key& key, uint32_t public_prefix)
 
 hd_private hd_private::from_key(const hd_key& key, uint64_t prefixes)
 {
-    // TODO: convert to istream_reader
-    auto stream = make_deserializer(key.begin(), key.end());
-    const auto prefix = stream.read_big_endian<uint32_t>();
-    const auto depth = stream.read_big_endian<uint8_t>();
-    const auto parent = stream.read_big_endian<uint32_t>();
-    const auto child = stream.read_big_endian<uint32_t>();
-    const auto chain = stream.read_bytes<hd_chain_code_size>();
-    /*const auto padding =*/ stream.read_big_endian<uint8_t>();
-    const auto secret = stream.read_bytes<ec_secret_size>();
+    stream_source<hd_key> istream(key);
+    istream_reader reader(istream);
+
+    const auto prefix = reader.read_4_bytes_big_endian();
+    const auto depth = reader.read_byte();
+    const auto parent = reader.read_4_bytes_big_endian();
+    const auto child = reader.read_4_bytes_big_endian();
+    const auto chain = reader.read_forward<hd_chain_code_size>();
+    reader.read_byte();
+    const auto secret = reader.read_forward<ec_secret_size>();
 
     // Validate the prefix against the provided value.
     if (prefix != to_prefix(prefixes))
-        return hd_private();
+        return{};
 
     const hd_lineage lineage
     {
@@ -164,7 +166,7 @@ hd_private hd_private::from_string(const std::string& encoded,
 {
     hd_key key;
     if (!decode_base58(key, encoded))
-        return hd_private();
+        return{};
 
     return hd_private(from_key(key, public_prefix));
 }
@@ -174,7 +176,7 @@ hd_private hd_private::from_string(const std::string& encoded,
 {
     hd_key key;
     return decode_base58(key, encoded) ? hd_private(key, prefixes) :
-        hd_private();
+        hd_private{};
 }
 
 // Cast operators.
@@ -245,10 +247,10 @@ hd_private hd_private::derive_private(uint32_t index) const
     // The child key ki is (parse256(IL) + kpar) mod n:
     auto child = secret_;
     if (!ec_add(child, intermediate.left))
-        return hd_private();
+        return{};
 
     if (lineage_.depth == max_uint8)
-        return hd_private();
+        return{};
 
     const hd_lineage lineage
     {

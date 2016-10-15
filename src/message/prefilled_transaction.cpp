@@ -19,7 +19,6 @@
  */
 #include <bitcoin/bitcoin/message/prefilled_transaction.hpp>
 
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -110,16 +109,13 @@ bool prefilled_transaction::from_data(uint32_t version,
 {
     reset();
 
-    index_ = source.read_variable_uint_little_endian();
-    auto result = static_cast<bool>(source);
+    index_ = source.read_variable_little_endian();
+    transaction_.from_data(source);
 
-    if (result)
-        result = transaction_.from_data(source);
-
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 data_chunk prefilled_transaction::to_data(uint32_t version) const
@@ -142,7 +138,7 @@ void prefilled_transaction::to_data(uint32_t version,
 void prefilled_transaction::to_data(uint32_t version,
     writer& sink) const
 {
-    sink.write_variable_uint_little_endian(index_);
+    sink.write_variable_little_endian(index_);
     transaction_.to_data(sink);
 }
 

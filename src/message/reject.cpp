@@ -19,7 +19,6 @@
  */
 #include <bitcoin/bitcoin/message/reject.hpp>
 
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/message/block_message.hpp>
 #include <bitcoin/bitcoin/message/transaction_message.hpp>
@@ -108,7 +107,7 @@ void reject::reset()
 
 bool reject::from_data(uint32_t version, const data_chunk& data)
 {
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     return from_data(version, istream);
 }
 
@@ -120,8 +119,6 @@ bool reject::from_data(uint32_t version, std::istream& stream)
 
 bool reject::from_data(uint32_t version, reader& source)
 {
-    const auto insufficient_version = (version < reject::version_minimum);
-
     reset();
 
     message_ = source.read_string();
@@ -134,13 +131,13 @@ bool reject::from_data(uint32_t version, reader& source)
         data_ = source.read_hash();
     }
 
+    if (version < reject::version_minimum)
+        source.invalidate();
 
-    const auto result = source && !insufficient_version;
-
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 data_chunk reject::to_data(uint32_t version) const

@@ -170,8 +170,7 @@ bool block_message::operator!=(const chain::block& other) const
 
 bool block_message::operator==(const block_message& other) const
 {
-    return (originator_ == other.originator_)
-        && chain::block::operator==(other);
+    return chain::block::operator==(other);
 }
 
 bool block_message::operator!=(const block_message& other) const

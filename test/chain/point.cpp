@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/iostreams/stream.hpp>
 #include <boost/test/unit_test.hpp>
 #include <bitcoin/bitcoin.hpp>
 
@@ -289,7 +288,7 @@ BOOST_AUTO_TEST_CASE(point__checksum__initialized__returns_expected)
 {
     chain::point instance;
     BOOST_REQUIRE(instance.from_data(valid_raw_point));
-    BOOST_REQUIRE_EQUAL(7554252913103601664u, instance.checksum());
+    BOOST_REQUIRE_EQUAL(0x68d6190015000000, instance.checksum());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

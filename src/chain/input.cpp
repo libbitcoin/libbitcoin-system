@@ -20,7 +20,6 @@
 #include <bitcoin/bitcoin/chain/input.hpp>
 
 #include <sstream>
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -80,11 +79,10 @@ input::input(input&& other)
 {
 }
 
-// Since empty script and zero sequence are valid this relies othe prevout.
+// Since empty script and zero sequence are valid this relies on the prevout.
 bool input::is_valid() const
 {
-    return (sequence_ != 0) || previous_output_.is_valid()
-        || script_.is_valid();
+    return sequence_ != 0 || previous_output_.is_valid() || script_.is_valid();
 }
 
 void input::reset()
@@ -110,29 +108,22 @@ bool input::from_data(reader& source)
 {
     reset();
 
-    auto result = previous_output_.from_data(source);
+    if (!previous_output_.from_data(source))
+        return false;
 
-    if (result)
-    {
-        // Parse the coinbase tx as raw data.
-        // Always parse non-coinbase input/output scripts as fallback.
-        const auto mode = previous_output_.is_null() ?
-            script::parse_mode::raw_data : 
-            script::parse_mode::raw_data_fallback;
+    // Parse the coinbase tx as raw data.
+    // Always parse non-coinbase input/output scripts as fallback.
+    const auto mode = previous_output_.is_null() ?
+        script::parse_mode::raw_data : 
+        script::parse_mode::raw_data_fallback;
 
-        result = script_.from_data(source, true, mode);
-    }
+    script_.from_data(source, true, mode);
+    sequence_ = source.read_4_bytes_little_endian();
 
-    if (result)
-    {
-        sequence_ = source.read_4_bytes_little_endian();
-        result = source;
-    }
-
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 data_chunk input::to_data() const

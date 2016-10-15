@@ -28,7 +28,6 @@
 #include <numeric>
 #include <type_traits>
 #include <utility>
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/script/script.hpp>
@@ -370,28 +369,17 @@ bool block::from_data(reader& source)
     if (!header_.from_data(source))
         return false;
 
-    const auto count = source.read_variable_uint_little_endian();
-
-    // Treat size_t (32 or 64 bit) as limit so that we can cast to size_t.
-    if (count > max_size_t)
-    {
-        reset();
-        return false;
-    }
-
-    transactions_.resize(safe_unsigned<size_t>(count));
+    transactions_.resize(source.read_size_little_endian());
 
     // Order is required.
     for (auto& tx: transactions_)
-    {
         if (!tx.from_data(source))
-        {
-            reset();
-            return false;
-        }
-    }
+            break;
 
-    return true;
+    if (!source)
+        reset();
+
+    return source;
 }
 
 data_chunk block::to_data() const
@@ -413,7 +401,7 @@ void block::to_data(std::ostream& stream) const
 void block::to_data(writer& sink) const
 {
     header_.to_data(sink);
-    sink.write_variable_uint_little_endian(transactions_.size());
+    sink.write_variable_little_endian(transactions_.size());
     const auto to = [&sink](const transaction& tx) { tx.to_data(sink); };
     std::for_each(transactions_.begin(), transactions_.end(), to);
 }

@@ -74,8 +74,8 @@ public:
 
 private:
     uint64_t nonce_;
-    bool deserialized_nonceless_;
-    bool deserialized_valid_;
+    bool nonceless_;
+    bool valid_;
 };
 
 } // namespace message

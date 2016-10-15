@@ -29,10 +29,10 @@
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
+#include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/deserializer.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
-#include <bitcoin/bitcoin/utility/serializer.hpp>
+#include <bitcoin/bitcoin/utility/istream_reader.hpp>
 #include <bitcoin/bitcoin/wallet/ec_public.hpp>
 #include <bitcoin/bitcoin/wallet/hd_private.hpp>
 
@@ -94,7 +94,7 @@ hd_public hd_public::from_secret(const ec_secret& secret,
 {
     ec_compressed point;
     return secret_to_public(point, secret) ? 
-        hd_public(point, chain_code, lineage) : hd_public();
+        hd_public(point, chain_code, lineage) : hd_public{};
 }
 
 hd_public hd_public::from_key(const hd_key& key)
@@ -107,26 +107,27 @@ hd_public hd_public::from_string(const std::string& encoded)
 {
     hd_key key;
     if (!decode_base58(key, encoded))
-        return hd_public();
+        return{};
 
     return hd_public(from_key(key));
 }
 
 hd_public hd_public::from_key(const hd_key& key, uint32_t prefix)
 {
-    // TODO: convert to istream_reader
-    auto stream = make_deserializer(key.begin(), key.end());
-    const auto actual_prefix = stream.read_big_endian<uint32_t>();
-    const auto depth = stream.read_big_endian<uint8_t>();
-    const auto parent = stream.read_big_endian<uint32_t>();
-    const auto child = stream.read_big_endian<uint32_t>();
-    const auto chain = stream.read_bytes<hd_chain_code_size>();
-    const auto compressed = stream.read_bytes<ec_compressed_size>();
+    stream_source<hd_key> istream(key);
+    istream_reader reader(istream);
+
+    const auto actual_prefix = reader.read_4_bytes_big_endian();
+    const auto depth = reader.read_byte();
+    const auto parent = reader.read_4_bytes_big_endian();
+    const auto child = reader.read_4_bytes_big_endian();
+    const auto chain = reader.read_forward<hd_chain_code_size>();
+    const auto compressed = reader.read_forward<ec_compressed_size>();
     const auto point = to_array<ec_compressed_size>(compressed);
 
     // Validate the prefix against the provided value.
     if (actual_prefix != prefix)
-        return hd_public();
+        return{};
 
     // The private prefix will be zero'd here, but there's no way to access it.
     const hd_lineage lineage
@@ -145,7 +146,7 @@ hd_public hd_public::from_string(const std::string& encoded,
 {
     hd_key key;
     if (!decode_base58(key, encoded))
-        return hd_public();
+        return{};
 
     return hd_public(from_key(key, prefix));
 }
@@ -214,7 +215,7 @@ hd_key hd_public::to_hd_key() const
 hd_public hd_public::derive_public(uint32_t index) const
 {
     if (index >= hd_first_hardened_key)
-        return hd_public();
+        return{};
 
     const auto data = splice(point_, to_big_endian(index));
     const auto intermediate = split(hmac_sha512_hash(data, chain_));
@@ -222,10 +223,10 @@ hd_public hd_public::derive_public(uint32_t index) const
     // The returned child key Ki is point(parse256(IL)) + Kpar.
     auto combined = point_;
     if (!ec_add(combined, intermediate.left))
-        return hd_public();
+        return{};
 
     if (lineage_.depth == max_uint8)
-        return hd_public();
+        return{};
 
     const hd_lineage lineage
     {

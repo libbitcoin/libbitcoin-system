@@ -30,144 +30,98 @@
 
 namespace libbitcoin {
 
-/**
- * Deserializer that uses iterators and is oblivious to the underlying
- * container type. Is not threadsafe.
- *
- * Use the helper make_deserializer() to construct a deserializer without
- * needing to specify the Iterator type.
- *
- * Throws end_of_stream exception upon early termination during deserialize.
- * For example, calling read_8_bytes() with only 5 bytes remaining will throw.
- *
- * @code
- *  auto deserial = make_deserializer(data.begin(), data.end());
- *  try {
- *    uint64_t value = deserial.read_8_bytes();
- *  } catch (end_of_stream) {
- *    // ...
- *  }
- * @endcode
- */
-template <typename Iterator, bool SafeCheckLast>
+/// Reader to wrap arbitrary iterator.
+template <typename Iterator, bool CheckSafe>
 class deserializer
   : public reader
 {
 public:
     deserializer(const Iterator begin, const Iterator end);
 
+    template <unsigned Size>
+    byte_array<Size> read_forward();
+
+    template <unsigned Size>
+    byte_array<Size> read_reverse();
+
+    template <typename Integer>
+    Integer read_big_endian();
+
+    template <typename Integer>
+    Integer read_little_endian();
+
+    /// Context.
     operator bool() const;
     bool operator!() const;
-
     bool is_exhausted() const;
-    void skip_bytes(size_t size);
-    uint8_t read_byte();
-    data_chunk read_data(size_t size);
-    size_t read_data(uint8_t* data, size_t size);
-    code read_error_code();
-    data_chunk read_data_to_eof();
+    void invalidate();
+
+    /// Read hashes.
     hash_digest read_hash();
     short_hash read_short_hash();
     mini_hash read_mini_hash();
 
-    // These read data in little endian format:
-    uint16_t read_2_bytes_little_endian();
-    uint32_t read_4_bytes_little_endian();
-    uint64_t read_8_bytes_little_endian();
-
-    /**
-     * Variable uints are usually used for sizes.
-     * They're encoded using fewer bytes depending on the value itself.
-     */
-    uint64_t read_variable_uint_little_endian();
-
-    // These read data in big endian format:
+    /// Read big endian integers.
     uint16_t read_2_bytes_big_endian();
     uint32_t read_4_bytes_big_endian();
     uint64_t read_8_bytes_big_endian();
+    uint64_t read_variable_big_endian();
+    size_t read_size_big_endian();
 
-    /**
-     * Variable uints are usually used for sizes.
-     * They're encoded using fewer bytes depending on the value itself.
-     */
-    uint64_t read_variable_uint_big_endian();
+    /// Read little endian integers.
+    code read_error_code();
+    uint16_t read_2_bytes_little_endian();
+    uint32_t read_4_bytes_little_endian();
+    uint64_t read_8_bytes_little_endian();
+    uint64_t read_variable_little_endian();
+    size_t read_size_little_endian();
 
-    /**
-     * Reads an unsigned integer that has been encoded in big endian format.
-     */
-    template <typename T>
-    T read_big_endian();
+    /// Read one byte.
+    uint8_t read_byte();
 
-    /**
-     * Reads an unsigned integer that has been encoded in little endian format.
-     */
-    template <typename T>
-    T read_little_endian();
+    /// Read all remaining bytes (always safe).
+    data_chunk read_bytes();
 
-    /**
-     * Read a fixed size string padded with zeroes.
-     */
-    std::string read_fixed_string(size_t length);
+    /// Read required size buffer.
+    data_chunk read_bytes(size_t size);
 
-    /**
-     * Read a variable length string.
-     */
+    /// Read variable length string.
     std::string read_string();
 
-    /**
-     * Read a fixed-length data block.
-     */
-    template <unsigned N>
-    byte_array<N> read_bytes();
+    /// Read required size string and trim nulls.
+    std::string read_string(size_t size);
 
-    template <unsigned N>
-    byte_array<N> read_bytes_reverse();
-
-    /////**
-    //// * Returns underlying iterator.
-    //// */
-    ////Iterator iterator() const;
-
-    /////**
-    //// * Useful if you advance the iterator using other serialization
-    //// * methods or objects.
-    //// */
-    ////void set_iterator(const Iterator iterator);
-
-    /////**
-    //// * Returns underlying iterator end.
-    //// */
-    ////Iterator end() const
-    ////{
-    ////    return end_;
-    ////}
+    /// Advance iterator without reading.
+    void skip(size_t size);
 
 private:
-    // The compiler will optimise out calls to this function if !SafeCheckLast.
-    static void check_distance(Iterator it, const Iterator end,
-        size_t distance);
+    // True if is a safe deserializer and size does not exceed remaining bytes.
+    bool safe(size_t size) const;
 
+    // The number of bytes remaining in the buffer.
+    size_t remaining() const;
+
+    bool valid_;
     Iterator iterator_;
     const Iterator end_;
 };
 
-/**
- * Deserializer which performs bounds checking and throws end_of_stream
- * if the iterator exceeds 'end'.
- */
+// Factories.
+//-----------------------------------------------------------------------------
+
+/// Slower deserializer (with bounds checking).
+/// Safe for use with public data, caller should check object state.
 template <typename Iterator>
-deserializer<Iterator, true> make_deserializer(const Iterator begin,
+deserializer<Iterator, true> make_safe_deserializer(const Iterator begin,
     const Iterator end);
 
-/**
- * Faster deserializer with no bounds checking.
- */
+/// Faster deserializer (without bounds checking).
+/// Intended for use with internal/protected buffers only.
 template <typename Iterator>
-deserializer<Iterator, false> make_deserializer_unsafe(const Iterator begin);
+deserializer<Iterator, false> make_unsafe_deserializer(const Iterator begin);
 
 } // namespace libbitcoin
 
 #include <bitcoin/bitcoin/impl/utility/deserializer.ipp>
 
 #endif
-

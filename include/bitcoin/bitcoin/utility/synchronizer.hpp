@@ -148,6 +148,6 @@ synchronizer<Handler> synchronize(Handler handler, size_t clearance_count,
     return synchronizer<Handler>(handler, clearance_count, name, mode);
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif

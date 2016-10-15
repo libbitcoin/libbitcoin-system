@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <boost/test/unit_test.hpp>
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
@@ -52,7 +51,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
     const message::memory_pool expected{};
     const auto data = expected.to_data(message::version::level::maximum);
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     const auto result = message::memory_pool::factory_from_data(
         message::version::level::maximum, istream);
 
@@ -65,7 +64,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
     const message::memory_pool expected{};
     const auto data = expected.to_data(message::version::level::maximum);
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     istream_reader source(istream);
     const auto result = message::memory_pool::factory_from_data(
         message::version::level::maximum, source);

@@ -74,7 +74,7 @@ public:
 
 private:
     uint64_t minimum_fee_;
-    bool valid_;
+    bool insufficient_version_;
 };
 
 } // end message

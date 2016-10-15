@@ -22,7 +22,6 @@
 #include <cstdint>
 #include <sstream>
 #include <utility>
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -36,17 +35,6 @@ namespace chain {
 
 // This sentinel is serialized and defined by consensus, not implementation.
 const uint32_t point::null_index = no_previous_output;
-
-// This is a sentinel used internally to signal invalidity of the point.
-///////////////////////////////////////////////////////////////////////////////
-// Setting a flag only on deserialization failure is insufficient, since
-// default construction yields success, which is not the intended result
-// when returning a failure instance. Apart from restructuring interfaces
-// the only alternative would be a method to explicitly set invalidity,
-// so we've opted for this. This is not a consensus value and is currently
-// outside of the domain of valid values due to the block size limit.
-///////////////////////////////////////////////////////////////////////////////
-const uint32_t point::invalid_point = null_index - 1u;
 
 point point::factory_from_data(const data_chunk& data)
 {
@@ -69,18 +57,19 @@ point point::factory_from_data(reader& source)
     return instance;
 }
 
+// A default instance is invalid (until modified).
 point::point()
-  : hash_(null_hash), index_(invalid_point)
+  : hash_(null_hash), index_(0), valid_(false)
 {
 }
 
 point::point(const hash_digest& hash, uint32_t index)
-  : hash_(hash), index_(index)
+  : hash_(hash), index_(index), valid_(true)
 {
 }
 
 point::point(hash_digest&& hash, uint32_t index)
-  : hash_(std::move(hash)), index_(index)
+  : hash_(std::move(hash)), index_(index), valid_(true)
 {
 }
 
@@ -96,13 +85,14 @@ point::point(point&& other)
 
 bool point::is_valid() const
 {
-    return (index_ != point::invalid_point) || (hash_ != null_hash);
+    return valid_ || (hash_ != null_hash) || (index_ != 0);
 }
 
 void point::reset()
 {
+    valid_ = false;
     hash_ = null_hash;
-    index_ = point::invalid_point;
+    index_ = 0;
 }
 
 bool point::from_data(const data_chunk& data)
@@ -121,14 +111,14 @@ bool point::from_data(reader& source)
 {
     reset();
 
+    valid_ = true;
     hash_ = source.read_hash();
     index_ = source.read_4_bytes_little_endian();
-    const auto result = static_cast<bool>(source);
 
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 data_chunk point::to_data() const
@@ -190,17 +180,13 @@ bool point::is_null() const
 // client callers. This is NOT a bitcoin checksum.
 uint64_t point::checksum() const
 {
-    static constexpr uint64_t divisor = uint64_t{ 1 } << 63;
-    static_assert(divisor == 9223372036854775808ull, "Wrong divisor value.");
-
-    // Write index onto a copy of the outpoint hash.
-    auto copy = hash_;
-    auto serial = make_serializer(copy.begin());
-    serial.write_4_bytes_little_endian(index_);
-    const auto hash_value = from_little_endian_unsafe<uint64_t>(copy.begin());
+    const auto hash64 = from_little_endian_unsafe<uint64_t>(hash_.begin());
+    const auto index_hash = (hash64 & 0xffffffff00000000) | index_;
 
     // x mod 2**n == x & (2**n - 1)
-    return hash_value & (divisor - 1);
+    static constexpr uint64_t divisor = uint64_t{ 1 } << 63;
+    static_assert(divisor == 9223372036854775808ull, "Wrong divisor value.");
+    return index_hash & (divisor - 1);
 
     // Above usually provides only 32 bits of entropy, so below is preferred.
     // But this is stored in the database. Change requires server API change.
@@ -219,11 +205,15 @@ const hash_digest& point::hash() const
 
 void point::set_hash(const hash_digest& value)
 {
+    // This is no longer a default instance, so valid.
+    valid_ = true;
     hash_ = value;
 }
 
 void point::set_hash(hash_digest&& value)
 {
+    // This is no longer a default instance, so valid.
+    valid_ = true;
     hash_ = std::move(value);
 }
 
@@ -234,6 +224,8 @@ uint32_t point::index() const
 
 void point::set_index(uint32_t value)
 {
+    // This is no longer a default instance, so valid.
+    valid_ = true;
     index_ = value;
 }
 

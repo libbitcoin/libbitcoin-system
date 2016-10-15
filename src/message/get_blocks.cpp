@@ -19,7 +19,6 @@
  */
 #include <bitcoin/bitcoin/message/get_blocks.hpp>
 
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -114,14 +113,12 @@ bool get_blocks::from_data(uint32_t version, reader& source)
     // Discard protocol version because it is stupid.
     source.read_4_bytes_little_endian();
 
-    const auto count = source.read_variable_uint_little_endian();
-    start_hashes_.reserve(safe_unsigned<size_t>(count));
+    start_hashes_.reserve(source.read_size_little_endian());
 
-    for (uint64_t i = 0; i < count && source; ++i)
+    for (size_t i = 0; i < start_hashes_.capacity() && source; ++i)
         start_hashes_.push_back(source.read_hash());
 
-    if (source)
-        stop_hash_ = source.read_hash();
+    stop_hash_ = source.read_hash();
 
     if (!source)
         reset();
@@ -148,7 +145,7 @@ void get_blocks::to_data(uint32_t version, std::ostream& stream) const
 void get_blocks::to_data(uint32_t version, writer& sink) const
 {
     sink.write_4_bytes_little_endian(version);
-    sink.write_variable_uint_little_endian(start_hashes_.size());
+    sink.write_variable_little_endian(start_hashes_.size());
 
     for (const auto& start_hash: start_hashes_)
         sink.write_hash(start_hash);
@@ -211,8 +208,8 @@ get_blocks& get_blocks::operator=(get_blocks&& other)
 
 bool get_blocks::operator==(const get_blocks& other) const
 {
-    auto result = (start_hashes_.size() == other.start_hashes_.size())
-        && (stop_hash_ == other.stop_hash_);
+    auto result = (start_hashes_.size() == other.start_hashes_.size()) &&
+        (stop_hash_ == other.stop_hash_);
 
     for (size_t i = 0; i < start_hashes_.size() && result; i++)
         result = (start_hashes_[i] == other.start_hashes_[i]);

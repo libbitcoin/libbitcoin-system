@@ -20,28 +20,13 @@
 #ifndef LIBBITCOIN_ISTREAM_READER_IPP
 #define LIBBITCOIN_ISTREAM_READER_IPP
 
-#include <algorithm>
-#include <boost/asio/streambuf.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
-#include <bitcoin/bitcoin/utility/exceptions.hpp>
 
 namespace libbitcoin {
 
-template <typename T>
-T istream_reader::read_big_endian()
-{
-    return from_big_endian_stream_unsafe<T>(stream_);
-}
-
-template <typename T>
-T istream_reader::read_little_endian()
-{
-    return from_little_endian_stream_unsafe<T>(stream_);
-}
-
 template <unsigned Size>
-byte_array<Size> istream_reader::read_bytes()
+byte_array<Size> istream_reader::read_forward()
 {
     byte_array<Size> out;
 
@@ -52,7 +37,7 @@ byte_array<Size> istream_reader::read_bytes()
 }
 
 template <unsigned Size>
-byte_array<Size> istream_reader::read_bytes_reverse()
+byte_array<Size> istream_reader::read_reverse()
 {
     byte_array<Size> out;
 
@@ -60,6 +45,18 @@ byte_array<Size> istream_reader::read_bytes_reverse()
         out[Size - (i + 1)] = read_byte();
 
     return out;
+}
+
+template <typename Integer>
+Integer istream_reader::read_big_endian()
+{
+    return from_big_endian_stream_unsafe<Integer>(stream_);
+}
+
+template <typename Integer>
+Integer istream_reader::read_little_endian()
+{
+    return from_little_endian_stream_unsafe<Integer>(stream_);
 }
 
 } // libbitcoin

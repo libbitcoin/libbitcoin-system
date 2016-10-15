@@ -19,7 +19,7 @@
  */
 #include <bitcoin/bitcoin/message/send_compact_blocks.hpp>
 
-#include <boost/iostreams/stream.hpp>
+#include <cstdint>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -69,7 +69,8 @@ send_compact_blocks::send_compact_blocks()
 
 send_compact_blocks::send_compact_blocks(bool high_bandwidth_mode,
     uint64_t version)
-  : high_bandwidth_mode_(high_bandwidth_mode), version_(version)
+  : high_bandwidth_mode_(high_bandwidth_mode),
+    version_(version)
 {
 }
 
@@ -112,23 +113,22 @@ bool send_compact_blocks::from_data(uint32_t version,
     reader& source)
 {
     reset();
-    const auto insufficient_version = (version < send_compact_blocks::version_minimum);
 
     const auto mode = source.read_byte();
-    auto result = static_cast<bool>(source);
 
     if (mode > 1)
-        result &= false;
+        source.invalidate();
 
     high_bandwidth_mode_ = (mode == 1);
-
     this->version_ = source.read_8_bytes_little_endian();
-    result &= static_cast<bool>(source);
 
-    if (!result || insufficient_version)
+    if (version < send_compact_blocks::version_minimum)
+        source.invalidate();
+
+    if (!source)
         reset();
 
-    return result && !insufficient_version;
+    return source;
 }
 
 data_chunk send_compact_blocks::to_data(uint32_t version) const
@@ -151,7 +151,7 @@ void send_compact_blocks::to_data(uint32_t version,
 void send_compact_blocks::to_data(uint32_t version,
     writer& sink) const
 {
-    sink.write_byte(high_bandwidth_mode_ ? 1 : 0);
+    sink.write_byte(static_cast<uint8_t>(high_bandwidth_mode_));
     sink.write_8_bytes_little_endian(this->version_);
 }
 
