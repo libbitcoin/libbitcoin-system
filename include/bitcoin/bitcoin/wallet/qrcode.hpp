@@ -35,10 +35,10 @@ namespace wallet {
 
 class BC_API qr
 {
+public:
     typedef QRencodeMode encode_mode;
     typedef QRecLevel error_recovery_level;
 
-  public:
     static BC_CONSTEXPR uint32_t version = 0;
     static BC_CONSTEXPR bool case_sensitive = true;
     static BC_CONSTEXPR encode_mode mode = QR_MODE_8;
