@@ -59,7 +59,7 @@ point point::factory_from_data(reader& source)
 
 // A default instance is invalid (until modified).
 point::point()
-  : hash_(null_hash), valid_(false)
+  : hash_(null_hash), index_(0), valid_(false)
 {
 }
 
