@@ -176,7 +176,7 @@ void ostream_writer::write_bytes(const uint8_t* data, size_t size)
 void ostream_writer::write_string(const std::string& value, size_t size)
 {
     const auto length = std::min(size, value.size());
-    stream_.write(reinterpret_cast<const char*>(value.data()), length);
+    write_bytes(reinterpret_cast<const uint8_t*>(value.data()), length);
     data_chunk padding(floor_subtract(size, length), terminator);
     write_bytes(padding);
 }

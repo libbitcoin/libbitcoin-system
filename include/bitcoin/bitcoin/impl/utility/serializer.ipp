@@ -200,10 +200,10 @@ void serializer<Iterator>::write_string(const std::string& value)
 template <typename Iterator>
 void serializer<Iterator>::write_string(const std::string& value, size_t size)
 {
-    data_chunk text(size, terminator);
     const auto length = std::min(size, value.size());
-    std::copy_n(value.begin(), length, text.begin());
-    write_forward(text);
+    write_bytes(reinterpret_cast<const uint8_t*>(value.data()), length);
+    data_chunk padding(floor_subtract(size, length), terminator);
+    write_bytes(padding);
 }
 
 template <typename Iterator>
@@ -216,16 +216,14 @@ template <typename Iterator>
 template <typename Buffer>
 void serializer<Iterator>::write_forward(const Buffer& data)
 {
-    std::copy(data.begin(), data.end(), iterator_);
-    skip(data.size());
+    iterator_ = std::copy(data.begin(), data.end(), iterator_);
 }
 
 template <typename Iterator>
 template <typename Buffer>
 void serializer<Iterator>::write_reverse(const Buffer& data)
 {
-    std::reverse_copy(data.begin(), data.end(), iterator_);
-    skip(data.size());
+    iterator_ = std::reverse_copy(data.begin(), data.end(), iterator_);
 }
 
 template <typename Iterator>
