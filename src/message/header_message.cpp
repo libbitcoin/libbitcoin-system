@@ -122,21 +122,18 @@ bool header_message::from_data(const uint32_t version, std::istream& stream)
 
 bool header_message::from_data(const uint32_t version, reader& source)
 {
-    auto result = header::from_data(source);
-    originator_ = version;
+    if (!header::from_data(source))
+        return false;
 
-    if (result)
-    {
-        const auto count = source.read_variable_uint_little_endian();
+    // The header message must trail a zero byte (yes, it's stoopid).
+    // bitcoin.org/en/developer-reference#headers
+    if (source.read_byte() != 0x00)
+        source.invalidate();
 
-        // Treat size_t (32 or 64 bit) as limit so that we can cast to size_t.
-        result = !(count > max_size_t) && static_cast<bool>(source);
-    }
-
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 data_chunk header_message::to_data(const uint32_t version) const
@@ -158,7 +155,7 @@ void header_message::to_data(const uint32_t version, std::ostream& stream) const
 void header_message::to_data(const uint32_t version, writer& sink) const
 {
     header::to_data(sink);
-    sink.write_variable_uint_little_endian(0);
+    sink.write_variable_little_endian(0);
 }
 
 void header_message::reset()

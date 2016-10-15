@@ -21,7 +21,6 @@
 
 #include <cstdint>
 #include <sstream>
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -109,19 +108,14 @@ bool output::from_data(reader& source)
     reset();
 
     value_ = source.read_8_bytes_little_endian();
-    auto result = static_cast<bool>(source);
 
-    if (result)
-    {
-        // Always parse non-coinbase input/output scripts as fallback.
-        static const auto mode = script::parse_mode::raw_data_fallback;
-        result = script_.from_data(source, true, mode);
-    }
+    // Always parse non-coinbase input/output scripts as fallback.
+    script_.from_data(source, true, script::parse_mode::raw_data_fallback);
 
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 data_chunk output::to_data() const

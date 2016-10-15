@@ -20,7 +20,6 @@
 #include <bitcoin/bitcoin/message/compact_block.hpp>
 
 #include <initializer_list>
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -122,41 +121,28 @@ bool compact_block::from_data(uint32_t version, reader& source)
 {
     reset();
 
-    auto insufficient_version = (version < compact_block::version_minimum);
-    auto result = header_.from_data(source);
+    if (!header_.from_data(source))
+        return false;
+
     nonce_ = source.read_8_bytes_little_endian();
-    const auto short_ids_count = source.read_variable_uint_little_endian();
-    result &= static_cast<bool>(source);
+    short_ids_.reserve(source.read_size_little_endian());
 
-    if (result)
-        short_ids_.reserve(safe_unsigned<size_t>(short_ids_count));
-
-    for (uint64_t i = 0; (i < short_ids_count) && result; ++i)
-    {
+    for (size_t i = 0; i < short_ids_.capacity() && source; ++i)
         short_ids_.push_back(source.read_mini_hash());
-        result = static_cast<bool>(source);
-    }
 
-    const auto transaction_count = source.read_variable_uint_little_endian();
-    result &= static_cast<bool>(source);
+    transactions_.resize(source.read_size_little_endian());
 
-    if (result)
-    {
-        transactions_.resize(safe_unsigned<size_t>(transaction_count));
+    for (auto& transaction: transactions_)
+        if (!transaction.from_data(version, source))
+            break;
 
-        for (auto& transaction: transactions_)
-        {
-            result = transaction.from_data(version, source);
+    if (version < compact_block::version_minimum)
+        source.invalidate();
 
-            if (!result)
-                break;
-        }
-    }
-
-    if (!result || insufficient_version)
+    if (!source)
         reset();
 
-    return result && !insufficient_version;
+    return source;
 }
 
 data_chunk compact_block::to_data(uint32_t version) const
@@ -179,11 +165,13 @@ void compact_block::to_data(uint32_t version, writer& sink) const
 {
     header_.to_data(sink);
     sink.write_8_bytes_little_endian(nonce_);
-    sink.write_variable_uint_little_endian(short_ids_.size());
+    sink.write_variable_little_endian(short_ids_.size());
+
     for (const auto& element: short_ids_)
         sink.write_mini_hash(element);
 
-    sink.write_variable_uint_little_endian(transactions_.size());
+    sink.write_variable_little_endian(transactions_.size());
+
     for (const auto& element: transactions_)
         element.to_data(version, sink);
 }

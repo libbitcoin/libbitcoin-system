@@ -21,7 +21,6 @@
 
 #include <algorithm>
 #include <initializer_list>
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/message/inventory.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
@@ -130,26 +129,17 @@ bool inventory::from_data(uint32_t version, std::istream& stream)
 bool inventory::from_data(uint32_t version, reader& source)
 {
     reset();
-    const auto count = source.read_variable_uint_little_endian();
-    auto result = static_cast<bool>(source);
 
-    if (result)
-    {
-        inventories_.resize(safe_unsigned<size_t>(count));
+    inventories_.resize(source.read_size_little_endian());
 
-        for (auto& inventory: inventories_)
-        {
-            result = inventory.from_data(version, source);
+    for (auto& inventory: inventories_)
+        if (!inventory.from_data(version, source))
+            break;
 
-            if (!result)
-                break;
-        }
-    }
-
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 data_chunk inventory::to_data(uint32_t version) const
@@ -170,7 +160,7 @@ void inventory::to_data(uint32_t version, std::ostream& stream) const
 
 void inventory::to_data(uint32_t version, writer& sink) const
 {
-    sink.write_variable_uint_little_endian(inventories_.size());
+    sink.write_variable_little_endian(inventories_.size());
 
     for (const auto& inventory: inventories_)
         inventory.to_data(version, sink);

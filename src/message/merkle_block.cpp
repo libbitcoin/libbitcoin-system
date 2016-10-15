@@ -19,7 +19,6 @@
  */
 #include <bitcoin/bitcoin/message/merkle_block.hpp>
 
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -108,7 +107,7 @@ void merkle_block::reset()
 
 bool merkle_block::from_data(uint32_t version, const data_chunk& data)
 {
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     return from_data(version, istream);
 }
 
@@ -122,40 +121,24 @@ bool merkle_block::from_data(uint32_t version, reader& source)
 {
     reset();
 
-    bool result = !(version < merkle_block::version_minimum);
-    uint64_t hash_count = 0;
+    if (!header_.from_data(source))
+        return false;
 
-    if (result)
-        result = header_.from_data(source);
+    total_transactions_ = source.read_4_bytes_little_endian();
+    hashes_.reserve(source.read_size_little_endian());
 
-    if (result)
-    {
-        total_transactions_ = source.read_4_bytes_little_endian();
-        hash_count = source.read_variable_uint_little_endian();
-        result = static_cast<bool>(source);
-    }
-
-    if (result)
-        hashes_.reserve(safe_unsigned<size_t>(hash_count));
-
-    for (uint64_t i = 0; (i < hash_count) && result; ++i)
-    {
+    for (size_t i = 0; i < hashes_.capacity() && source; ++i)
         hashes_.push_back(source.read_hash());
-        result = source;
-    }
 
-    if (result)
-    {
-        const auto size = source.read_variable_uint_little_endian();
-        const auto flag_count = safe_unsigned<size_t>(size);
-        flags_ = source.read_data(flag_count);
-        result = source && (flags_.size() == flag_count);
-    }
+    flags_ = source.read_bytes(source.read_size_little_endian());
 
-    if (!result)
+    if (version < merkle_block::version_minimum)
+        source.invalidate();
+
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 data_chunk merkle_block::to_data(uint32_t version) const
@@ -179,13 +162,13 @@ void merkle_block::to_data(uint32_t version, writer& sink) const
     header_.to_data(sink);
 
     sink.write_4_bytes_little_endian(total_transactions_);
-    sink.write_variable_uint_little_endian(hashes_.size());
+    sink.write_variable_little_endian(hashes_.size());
 
     for (const auto& hash : hashes_)
         sink.write_hash(hash);
 
-    sink.write_variable_uint_little_endian(flags_.size());
-    sink.write_data(flags_);
+    sink.write_variable_little_endian(flags_.size());
+    sink.write_bytes(flags_);
 }
 
 uint64_t merkle_block::serialized_size(uint32_t version) const

@@ -62,7 +62,7 @@ public:
     static const uint32_t version_maximum;
 
 private:
-    bool version_unsupported_;
+    bool insufficient_version_;
 };
 
 } // namespace message

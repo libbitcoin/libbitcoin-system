@@ -20,7 +20,6 @@
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
 
 #include <cstdint>
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/message/inventory.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -34,16 +33,16 @@ uint32_t inventory_vector::to_number(type_id inventory_type)
 {
     switch (inventory_type)
     {
+        case type_id::compact_block:
+            return 4;
+        case type_id::block:
+            return 2;
+        case type_id::transaction:
+            return 1;
         case type_id::error:
         case type_id::none:
         default:
             return 0;
-        case type_id::transaction:
-            return 1;
-        case type_id::block:
-            return 2;
-        case type_id::compact_block:
-            return 4;
     }
 }
 

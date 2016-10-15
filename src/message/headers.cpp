@@ -24,7 +24,6 @@
 #include <initializer_list>
 #include <istream>
 #include <utility>
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/inventory.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
@@ -123,27 +122,19 @@ bool headers::from_data(uint32_t version, reader& source)
 {
     reset();
 
-    auto result = !(version < version_minimum);
-    const auto count = source.read_variable_uint_little_endian();
-    result &= static_cast<bool>(source);
+    elements_.resize(source.read_size_little_endian());
 
-    if (result)
-    {
-        elements_.resize(safe_unsigned<size_t>(count));
+    for (auto& element: elements_)
+        if (!element.from_data(version, source))
+            break;
 
-        for (auto& element: elements_)
-        {
-            result = element.from_data(version, source);
+    if (version < headers::version_minimum)
+        source.invalidate();
 
-            if (!result)
-                break;
-        }
-    }
-
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 data_chunk headers::to_data(uint32_t version) const
@@ -164,7 +155,7 @@ void headers::to_data(uint32_t version, std::ostream& stream) const
 
 void headers::to_data(uint32_t version, writer& sink) const
 {
-    sink.write_variable_uint_little_endian(elements_.size());
+    sink.write_variable_little_endian(elements_.size());
 
     for (const auto& element: elements_)
         element.to_data(version, sink);

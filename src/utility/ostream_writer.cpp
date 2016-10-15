@@ -19,12 +19,22 @@
  */
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 
+#include <algorithm>
+#include <iostream>
+#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
+#include <bitcoin/bitcoin/utility/endian.hpp>
+#include <bitcoin/bitcoin/utility/reader.hpp>
+
 namespace libbitcoin {
 
 ostream_writer::ostream_writer(std::ostream& stream)
   : stream_(stream)
 {
 }
+
+// Context.
+//-----------------------------------------------------------------------------
 
 ostream_writer::operator bool() const
 {
@@ -36,9 +46,71 @@ bool ostream_writer::operator!() const
     return !stream_;
 }
 
-void ostream_writer::write_byte(uint8_t value)
+// Hashes.
+//-----------------------------------------------------------------------------
+
+void ostream_writer::write_hash(const hash_digest& value)
 {
-    stream_.put(value);
+    stream_.write(reinterpret_cast<const char*>(value.data()), value.size());
+}
+
+void ostream_writer::write_short_hash(const short_hash& value)
+{
+    stream_.write(reinterpret_cast<const char*>(value.data()), value.size());
+}
+
+void ostream_writer::write_mini_hash(const mini_hash& value)
+{
+    stream_.write(reinterpret_cast<const char*>(value.data()), value.size());
+}
+
+// Big Endian Integers.
+//-----------------------------------------------------------------------------
+
+void ostream_writer::write_2_bytes_big_endian(uint16_t value)
+{
+    write_big_endian<uint16_t>(value);
+}
+
+void ostream_writer::write_4_bytes_big_endian(uint32_t value)
+{
+    write_big_endian<uint32_t>(value);
+}
+
+void ostream_writer::write_8_bytes_big_endian(uint64_t value)
+{
+    write_big_endian<uint64_t>(value);
+}
+
+void ostream_writer::write_variable_big_endian(uint64_t value)
+{
+    if (value < reader::two_bytes)
+    {
+        write_byte(static_cast<uint8_t>(value));
+    }
+    else if (value <= max_uint16)
+    {
+        write_byte(reader::two_bytes);
+        write_2_bytes_big_endian(static_cast<uint16_t>(value));
+    }
+    else if (value <= max_uint32)
+    {
+        write_byte(reader::four_bytes);
+        write_4_bytes_big_endian(static_cast<uint32_t>(value));
+    }
+    else
+    {
+        write_byte(reader::eight_bytes);
+        write_8_bytes_big_endian(value);
+    }
+}
+
+// Little Endian Integers.
+//-----------------------------------------------------------------------------
+
+void ostream_writer::write_error_code(const code& ec)
+{
+    write_4_bytes_little_endian(static_cast<uint32_t>(ec.value()));
 }
 
 void ostream_writer::write_2_bytes_little_endian(uint16_t value)
@@ -56,104 +128,69 @@ void ostream_writer::write_8_bytes_little_endian(uint64_t value)
     write_little_endian<uint64_t>(value);
 }
 
-void ostream_writer::write_variable_uint_little_endian(uint64_t value)
+void ostream_writer::write_variable_little_endian(uint64_t value)
 {
-    if (value < 0xfd)
+    if (value < reader::two_bytes)
     {
-        write_byte((uint8_t)value);
+        write_byte(static_cast<uint8_t>(value));
     }
-    else if (value <= 0xffff)
+    else if (value <= max_uint16)
     {
-        write_byte(0xfd);
-        write_2_bytes_little_endian((uint16_t)value);
+        write_byte(reader::two_bytes);
+        write_2_bytes_little_endian(static_cast<uint16_t>(value));
     }
-    else if (value <= 0xffffffff)
+    else if (value <= max_uint32)
     {
-        write_byte(0xfe);
-        write_4_bytes_little_endian((uint32_t)value);
+        write_byte(reader::four_bytes);
+        write_4_bytes_little_endian(static_cast<uint32_t>(value));
     }
     else
     {
-        write_byte(0xff);
+        write_byte(reader::eight_bytes);
         write_8_bytes_little_endian(value);
     }
 }
 
-void ostream_writer::write_2_bytes_big_endian(uint16_t value)
+// Bytes.
+//-----------------------------------------------------------------------------
+
+void ostream_writer::write_byte(uint8_t value)
 {
-    write_big_endian<uint16_t>(value);
+    stream_.put(value);
 }
 
-void ostream_writer::write_4_bytes_big_endian(uint32_t value)
+void ostream_writer::write_bytes(const data_chunk& data)
 {
-    write_big_endian<uint32_t>(value);
+    const auto size = data.size();
+
+    if (size > 0)
+        stream_.write(reinterpret_cast<const char*>(data.data()), size);
 }
 
-void ostream_writer::write_8_bytes_big_endian(uint64_t value)
+void ostream_writer::write_bytes(const uint8_t* data, size_t size)
 {
-    write_big_endian<uint64_t>(value);
+    auto buffer = reinterpret_cast<const char*>(data);
+    stream_.write(buffer, size);
 }
 
-void ostream_writer::write_variable_uint_big_endian(uint64_t value)
+void ostream_writer::write_string(const std::string& value, size_t size)
 {
-    if (value < 0xfd)
-    {
-        write_byte((uint8_t)value);
-    }
-    else if (value <= 0xffff)
-    {
-        write_byte(0xfd);
-        write_2_bytes_big_endian((uint16_t)value);
-    }
-    else if (value <= 0xffffffff)
-    {
-        write_byte(0xfe);
-        write_4_bytes_big_endian((uint32_t)value);
-    }
-    else
-    {
-        write_byte(0xff);
-        write_8_bytes_big_endian(value);
-    }
-}
-
-void ostream_writer::write_data(const data_chunk& data)
-{
-    write_data<const data_chunk>(data);
-}
-
-void ostream_writer::write_data(const uint8_t* data, size_t size)
-{
-    stream_.write(reinterpret_cast<const char*>(data), size);
-}
-
-void ostream_writer::write_hash(const hash_digest& value)
-{
-    stream_.write(reinterpret_cast<const char*>(value.data()), value.size());
-}
-
-void ostream_writer::write_short_hash(const short_hash& value)
-{
-    stream_.write(reinterpret_cast<const char*>(value.data()), value.size());
-}
-
-void ostream_writer::write_mini_hash(const mini_hash& value)
-{
-    stream_.write(reinterpret_cast<const char*>(value.data()), value.size());
-}
-
-void ostream_writer::write_fixed_string(const std::string& value, size_t size)
-{
-    const auto min_size = std::min(size, value.size());
-    data_chunk raw_string(size, 0);
-    std::copy_n(value.begin(), min_size, raw_string.begin());
-    write_data(raw_string);
+    const auto length = std::min(size, value.size());
+    stream_.write(reinterpret_cast<const char*>(value.data()), length);
+    data_chunk padding(floor_subtract(size, length), terminator);
+    write_bytes(padding);
 }
 
 void ostream_writer::write_string(const std::string& value)
 {
-    write_variable_uint_little_endian(value.size());
+    write_variable_little_endian(value.size());
     stream_.write(value.data(), value.size());
+}
+
+void ostream_writer::skip(size_t size)
+{
+    // TODO: verify.
+    stream_.seekp(size, std::ios_base::cur);
 }
 
 } // namespace libbitcoin

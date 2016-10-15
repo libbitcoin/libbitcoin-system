@@ -21,6 +21,7 @@
 #define LIBBITCOIN_OSTREAM_WRITER_HPP
 
 #include <ostream>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
@@ -31,64 +32,59 @@ class BC_API ostream_writer
 public:
     ostream_writer(std::ostream& stream);
 
+    template <unsigned Size>
+    void write_forward(const byte_array<Size>& value);
+
+    template <unsigned Size>
+    void write_reverse(const byte_array<Size>& value);
+
+    template <typename Integer>
+    void write_big_endian(Integer value);
+
+    template <typename Integer>
+    void write_little_endian(Integer value);
+
+    /// Context.
     operator bool() const;
     bool operator!() const;
 
-    void write_byte(uint8_t value);
-    void write_data(const data_chunk& data);
-    void write_data(const uint8_t* data, size_t size);
+    /// Write hashes.
     void write_hash(const hash_digest& value);
     void write_short_hash(const short_hash& value);
     void write_mini_hash(const mini_hash& value);
 
-    // These write data in little endian format:
-    void write_2_bytes_little_endian(uint16_t value);
-    void write_4_bytes_little_endian(uint32_t value);
-    void write_8_bytes_little_endian(uint64_t value);
-    void write_variable_uint_little_endian(uint64_t value);
-
-    // These write data in big endian format:
+    /// Write big endian integers.
     void write_2_bytes_big_endian(uint16_t value);
     void write_4_bytes_big_endian(uint32_t value);
     void write_8_bytes_big_endian(uint64_t value);
-    void write_variable_uint_big_endian(uint64_t value);
+    void write_variable_big_endian(uint64_t value);
 
-    /**
-     * Write a fixed size string padded with zeroes.
-     */
-    void write_fixed_string(const std::string& value, size_t size);
+    /// Write little endian integers.
+    void write_error_code(const code& ec);
+    void write_2_bytes_little_endian(uint16_t value);
+    void write_4_bytes_little_endian(uint32_t value);
+    void write_8_bytes_little_endian(uint64_t value);
+    void write_variable_little_endian(uint64_t value);
 
-    /**
-     * Write a variable length string.
-     */
+    /// Write one byte.
+    void write_byte(uint8_t value);
+
+    /// Write all bytes.
+    void write_bytes(const data_chunk& data);
+
+    /// Write required size buffer.
+    void write_bytes(const uint8_t* data, size_t size);
+
+    /// Write variable length string.
+    void write_string(const std::string& value, size_t size);
+
+    /// Write required length string, padded with nulls.
     void write_string(const std::string& value);
 
-    /**
-     * Writes an unsigned integer that has been encoded in big endian format.
-     */
-    template <typename T>
-    void write_big_endian(T value);
-
-    /**
-     * Reads an unsigned integer that has been encoded in little endian format.
-     */
-    template <typename T>
-    void write_little_endian(T value);
-
-    template <typename T>
-    void write_data(T& value);
-
-    /**
-     * Write a fixed-length data block.
-     */
-    template <unsigned Size>
-    void write_bytes(const byte_array<Size>& value);
-
-    template <unsigned Size>
-    void write_bytes_reverse(const byte_array<Size>& value);
+    /// Advance iterator without writing.
+    void skip(size_t size);
 
 private:
-
     std::ostream& stream_;
 };
 

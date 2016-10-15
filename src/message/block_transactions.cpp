@@ -19,7 +19,6 @@
  */
 #include <bitcoin/bitcoin/message/block_transactions.hpp>
 
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -115,29 +114,21 @@ bool block_transactions::from_data(uint32_t version,
 bool block_transactions::from_data(uint32_t version, reader& source)
 {
     reset();
-    auto result = !(version < block_transactions::version_minimum);
+
     block_hash_ = source.read_hash();
-    result &= static_cast<bool>(source);
-    const auto count = source.read_variable_uint_little_endian();
-    result &= static_cast<bool>(source);
+    transactions_.resize(source.read_size_little_endian());
 
-    if (result)
-    {
-        transactions_.resize(safe_unsigned<size_t>(count));
+    for (auto& transaction: transactions_)
+        if (!transaction.from_data(source))
+            break;
 
-        for (auto& transaction: transactions_)
-        {
-            result = transaction.from_data(source);
+    if (version < block_transactions::version_minimum)
+        source.invalidate();
 
-            if (!result)
-                break;
-        }
-    }
-
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 data_chunk block_transactions::to_data(uint32_t version) const
@@ -160,7 +151,7 @@ void block_transactions::to_data(uint32_t version,
 void block_transactions::to_data(uint32_t version, writer& sink) const
 {
     sink.write_hash(block_hash_);
-    sink.write_variable_uint_little_endian(transactions_.size());
+    sink.write_variable_little_endian(transactions_.size());
 
     for (const auto& element: transactions_)
         element.to_data(sink);

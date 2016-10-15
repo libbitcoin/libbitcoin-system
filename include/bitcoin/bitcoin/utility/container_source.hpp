@@ -23,7 +23,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <boost/iostreams/categories.hpp>
+#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 
@@ -70,7 +70,10 @@ private:
 template <typename Container>
 using byte_source = container_source<Container, uint8_t, char>;
 
-using data_source = boost::iostreams::stream<byte_source<data_chunk>>;
+template <typename Container>
+using stream_source = boost::iostreams::stream<byte_source<Container>>;
+
+using data_source = stream_source<data_chunk>;
 
 } // namespace libbitcoin
 

@@ -170,8 +170,7 @@ bool transaction_message::operator!=(const chain::transaction& other) const
 
 bool transaction_message::operator==(const transaction_message& other) const
 {
-    return (originator_ == other.originator_) &&
-        chain::transaction::operator==(other);
+    return chain::transaction::operator==(other);
 }
 
 bool transaction_message::operator!=(const transaction_message& other) const

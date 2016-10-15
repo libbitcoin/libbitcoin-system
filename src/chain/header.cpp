@@ -22,7 +22,6 @@
 #include <cstddef>
 #include <chrono>
 #include <utility>
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/error.hpp>
@@ -158,26 +157,10 @@ bool header::from_data(reader& source)
     bits_ = source.read_4_bytes_little_endian();
     nonce_ = source.read_4_bytes_little_endian();
 
-//    if (with_transaction_count)
-//    {
-//        const auto count = source.read_variable_uint_little_endian();
-//
-//        // Treat size_t (32 or 64 bit) as limit so that we can cast to size_t.
-//        if (count > max_size_t)
-//        {
-//            reset();
-//            return false;
-//        }
-//
-//        transaction_count_ = static_cast<size_t>(count);
-//    }
-
-    const auto result = static_cast<bool>(source);
-
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 data_chunk header::to_data() const
@@ -204,9 +187,6 @@ void header::to_data(writer& sink) const
     sink.write_4_bytes_little_endian(timestamp_);
     sink.write_4_bytes_little_endian(bits_);
     sink.write_4_bytes_little_endian(nonce_);
-
-//    if (with_transaction_count)
-//        sink.write_variable_uint_little_endian(transaction_count_);
 }
 
 uint64_t header::serialized_size() const

@@ -19,7 +19,8 @@
  */
 #include <bitcoin/bitcoin/message/network_address.hpp>
 
-#include <boost/iostreams/stream.hpp>
+#include <algorithm>
+#include <cstdint>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -28,10 +29,16 @@
 namespace libbitcoin {
 namespace message {
 
-ip_address null_address =
+static const ip_address null_address
 {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 };
+
+network_address::network_address(uint32_t timestamp, uint64_t services,
+    ip_address&& ip, uint16_t port)
+  : timestamp_(timestamp), services_(services), ip_(std::move(ip)), port_(port)
+{
+}
 
 network_address network_address::factory_from_data(uint32_t version,
     const data_chunk& data, bool with_timestamp)
@@ -103,25 +110,26 @@ bool network_address::from_data(uint32_t version,
     return from_data(version, source, with_timestamp);
 }
 
-bool network_address::from_data(uint32_t version,
-    reader& source, bool with_timestamp)
+bool network_address::from_data(uint32_t version, reader& source,
+    bool with_timestamp)
 {
-    auto result = false;
-
     reset();
 
     if (with_timestamp)
         timestamp_ = source.read_4_bytes_little_endian();
 
     services_ = source.read_8_bytes_little_endian();
-    const auto ip_size = source.read_data(ip_.data(), ip_.size());
-    port_ = source.read_2_bytes_big_endian();
-    result = source && (ip_.size() == ip_size);
 
-    if (!result)
+    // TODO: add to readre interface (can't use template).
+    auto ip = source.read_bytes(ip_.size());
+    std::move(ip.begin(), ip.end(), ip_.data());
+
+    port_ = source.read_2_bytes_big_endian();
+
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 data_chunk network_address::to_data(uint32_t version,
@@ -149,7 +157,7 @@ void network_address::to_data(uint32_t version,
         sink.write_4_bytes_little_endian(timestamp_);
 
     sink.write_8_bytes_little_endian(services_);
-    sink.write_data(ip_.data(), ip_.size());
+    sink.write_bytes(ip_.data(), ip_.size());
     sink.write_2_bytes_big_endian(port_);
 }
 

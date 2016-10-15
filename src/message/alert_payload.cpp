@@ -19,8 +19,7 @@
  */
 #include <bitcoin/bitcoin/message/alert_payload.hpp>
 
-#include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/math/limits.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -165,7 +164,7 @@ void alert_payload::reset()
 
 bool alert_payload::from_data(uint32_t version, const data_chunk& data)
 {
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     return from_data(version, istream);
 }
 
@@ -184,18 +183,16 @@ bool alert_payload::from_data(uint32_t version, reader& source)
     expiration_ = source.read_8_bytes_little_endian();
     id_ = source.read_4_bytes_little_endian();
     cancel_ = source.read_4_bytes_little_endian();
-    const auto cancel_size = source.read_variable_uint_little_endian();
-    set_cancel_.reserve(safe_unsigned<size_t>(cancel_size));
+    set_cancel_.reserve(source.read_size_little_endian());
 
-    for (uint64_t i = 0; i < cancel_size && source; i++)
+    for (size_t i = 0; i < set_cancel_.capacity() && source; i++)
         set_cancel_.push_back(source.read_4_bytes_little_endian());
 
     min_version_ = source.read_4_bytes_little_endian();
     max_version_ = source.read_4_bytes_little_endian();
-    const auto sub_version_size = source.read_variable_uint_little_endian();
-    set_sub_version_.reserve(safe_unsigned<size_t>(sub_version_size));
+    set_sub_version_.reserve(source.read_size_little_endian());
 
-    for (uint64_t i = 0; i < sub_version_size && source; i++)
+    for (size_t i = 0; i < set_sub_version_.capacity() && source; i++)
         set_sub_version_.push_back(source.read_string());
 
     priority_ = source.read_4_bytes_little_endian();
@@ -232,14 +229,14 @@ void alert_payload::to_data(uint32_t version, writer& sink) const
     sink.write_8_bytes_little_endian(expiration_);
     sink.write_4_bytes_little_endian(id_);
     sink.write_4_bytes_little_endian(cancel_);
-    sink.write_variable_uint_little_endian(set_cancel_.size());
+    sink.write_variable_little_endian(set_cancel_.size());
 
     for (const auto& entry: set_cancel_)
         sink.write_4_bytes_little_endian(entry);
 
     sink.write_4_bytes_little_endian(min_version_);
     sink.write_4_bytes_little_endian(max_version_);
-    sink.write_variable_uint_little_endian(set_sub_version_.size());
+    sink.write_variable_little_endian(set_sub_version_.size());
 
     for (const auto& entry: set_sub_version_)
         sink.write_string(entry);

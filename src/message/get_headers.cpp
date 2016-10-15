@@ -90,14 +90,16 @@ bool get_headers::from_data(uint32_t version, std::istream& stream)
 
 bool get_headers::from_data(uint32_t version, reader& source)
 {
-    bool result = !(version < version_minimum);
+    if (!get_blocks::from_data(version, source))
+        return false;
 
-    if (result)
-        result = get_blocks::from_data(version, source);
-    else
+    if (version < get_headers::version_minimum)
+        source.invalidate();
+
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 get_headers& get_headers::operator=(get_headers&& other)

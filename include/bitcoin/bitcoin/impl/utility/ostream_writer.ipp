@@ -20,30 +20,13 @@
 #ifndef LIBBITCOIN_OSTREAM_WRITER_IPP
 #define LIBBITCOIN_OSTREAM_WRITER_IPP
 
-#include <algorithm>
-#include <boost/asio/streambuf.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
-#include <bitcoin/bitcoin/utility/exceptions.hpp>
 
 namespace libbitcoin {
 
-template <typename T>
-void ostream_writer::write_big_endian(T value)
-{
-    byte_array<sizeof(T)> bytes = to_big_endian(value);
-    write_bytes<sizeof(T)>(bytes);
-}
-
-template <typename T>
-void ostream_writer::write_little_endian(T value)
-{
-    byte_array<sizeof(T)> bytes = to_little_endian(value);
-    write_bytes<sizeof(T)>(bytes);
-}
-
-template <typename T>
-void ostream_writer::write_data(T& value)
+template <unsigned Size>
+void ostream_writer::write_forward(const byte_array<Size>& value)
 {
     const auto size = value.size();
     if (size > 0)
@@ -51,18 +34,24 @@ void ostream_writer::write_data(T& value)
 }
 
 template <unsigned Size>
-void ostream_writer::write_bytes(const byte_array<Size>& value)
-{
-    const auto size = value.size();
-    if (size > 0)
-        stream_.write(reinterpret_cast<const char*>(value.data()), size);
-}
-
-template <unsigned Size>
-void ostream_writer::write_bytes_reverse(const byte_array<Size>& value)
+void ostream_writer::write_reverse(const byte_array<Size>& value)
 {
     for (unsigned i = 0; i < Size; i++)
         write_byte(value[Size - (i + 1)]);
+}
+
+template <typename Integer>
+void ostream_writer::write_big_endian(Integer value)
+{
+    byte_array<sizeof(Integer)> bytes = to_big_endian(value);
+    write_forward<sizeof(Integer)>(bytes);
+}
+
+template <typename Integer>
+void ostream_writer::write_little_endian(Integer value)
+{
+    byte_array<sizeof(Integer)> bytes = to_little_endian(value);
+    write_forward<sizeof(Integer)>(bytes);
 }
 
 } // libbitcoin

@@ -19,7 +19,6 @@
  */
 #include <bitcoin/bitcoin/message/address.hpp>
 
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -107,26 +106,16 @@ bool address::from_data(uint32_t version, reader& source)
 {
     reset();
 
-    const auto count = source.read_variable_uint_little_endian();
-    auto result = static_cast<bool>(source);
+    addresses_.resize(source.read_size_little_endian());
 
-    if (result)
-    {
-        addresses_.resize(safe_unsigned<size_t>(count));
+    for (auto& address: addresses_)
+        if (!address.from_data(version, source, true))
+            break;
 
-        for (auto& address: addresses_)
-        {
-            result = address.from_data(version, source, true);
-
-            if (!result)
-                break;
-        }
-    }
-
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 data_chunk address::to_data(uint32_t version) const
@@ -147,8 +136,9 @@ void address::to_data(uint32_t version, std::ostream& stream) const
 
 void address::to_data(uint32_t version, writer& sink) const
 {
-    sink.write_variable_uint_little_endian(addresses_.size());
-    for (const network_address& net_address : addresses_)
+    sink.write_variable_little_endian(addresses_.size());
+
+    for (const auto& net_address: addresses_)
         net_address.to_data(version, sink, true);
 }
 

@@ -20,7 +20,6 @@
 #include <bitcoin/bitcoin/message/version.hpp>
 
 #include <algorithm>
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -148,16 +147,15 @@ bool version::from_data(uint32_t version, reader& source)
     reset();
 
     value_ = source.read_4_bytes_little_endian();
-    const auto effective_version = std::min(version, value_);
     services_ = source.read_8_bytes_little_endian();
     timestamp_ = source.read_8_bytes_little_endian();
-    auto result = static_cast<bool>(source);
-    result &= address_receiver_.from_data(version, source, false);
-    result &= result && address_sender_.from_data(version, source, false);
+    address_receiver_.from_data(version, source, false);
+    address_sender_.from_data(version, source, false);
     nonce_ = source.read_8_bytes_little_endian();
     user_agent_ = source.read_string();
     start_height_ = source.read_4_bytes_little_endian();
 
+    const auto effective_version = std::min(version, value_);
     const auto before_relay = (effective_version < level::bip37);
 
     // Versions of /Satoshi:0.8.x/ parse but do not send the relay byte.
@@ -169,16 +167,16 @@ bool version::from_data(uint32_t version, reader& source)
     const auto buggy2 = (value_ == 70006 && source.is_exhausted());
 
     relay_ = (buggy1 || buggy2 || before_relay || (source.read_byte() != 0));
-    result &= source;
 
     // HACK: disabled check due to inconsistent node implementation.
     // The protocol expects duplication of the sender's services.
-    result &= (source /*&& services_ == address_sender_.services()*/);
+    ////if (services_ != address_sender_.services())
+    ////    source.invalidate();
 
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 data_chunk version::to_data(uint32_t version) const

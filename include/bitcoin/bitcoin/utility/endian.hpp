@@ -26,29 +26,29 @@
 
 namespace libbitcoin {
 
-template <typename T, typename Iterator>
-T from_big_endian(Iterator start, Iterator end);
+template <typename Integer, typename Iterator>
+Integer from_big_endian(Iterator start, Iterator end);
 
-template <typename T, typename Iterator>
-T from_little_endian(Iterator start, Iterator end);
+template <typename Integer, typename Iterator>
+Integer from_little_endian(Iterator start, Iterator end);
 
-template <typename T, typename Iterator>
-T from_big_endian_unsafe(Iterator in);
+template <typename Integer, typename Iterator>
+Integer from_big_endian_unsafe(Iterator start);
 
-template <typename T, typename Iterator>
-T from_little_endian_unsafe(Iterator in);
+template <typename Integer, typename Iterator>
+Integer from_little_endian_unsafe(Iterator start);
 
-template <typename T>
-T from_big_endian_stream_unsafe(std::istream& stream);
+template <typename Integer>
+Integer from_big_endian_stream_unsafe(std::istream& stream);
 
-template <typename T>
-T from_little_endian_stream_unsafe(std::istream& stream);
+template <typename Integer>
+Integer from_little_endian_stream_unsafe(std::istream& stream);
 
-template <typename T>
-byte_array<sizeof(T)> to_big_endian(T n);
+template <typename Integer>
+byte_array<sizeof(Integer)> to_big_endian(Integer value);
 
-template <typename T>
-byte_array<sizeof(T)> to_little_endian(T n);
+template <typename Integer>
+byte_array<sizeof(Integer)> to_little_endian(Integer value);
 
 } // namespace libbitcoin
 

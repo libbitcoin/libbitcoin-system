@@ -27,106 +27,115 @@ namespace libbitcoin {
 #define VERIFY_UNSIGNED(T) static_assert(std::is_unsigned<T>::value, \
     "The endian functions only work on unsigned types")
 
-template <typename T, typename Iterator>
-T from_big_endian(Iterator start, const Iterator end)
+template <typename Integer, typename Iterator>
+Integer from_big_endian(Iterator start, const Iterator end)
 {
-    VERIFY_UNSIGNED(T);
-    T out = 0;
-    size_t i = sizeof(T);
+    VERIFY_UNSIGNED(Integer);
+    Integer out = 0;
+    size_t i = sizeof(Integer);
+
     while (0 < i && start != end)
-        out |= static_cast<T>(*start++) << (8 * --i);
+        out |= static_cast<Integer>(*start++) << (8 * --i);
 
     return out;
 }
 
-template <typename T, typename Iterator>
-T from_little_endian(Iterator start, const Iterator end)
+template <typename Integer, typename Iterator>
+Integer from_little_endian(Iterator start, const Iterator end)
 {
-    VERIFY_UNSIGNED(T);
-    T out = 0;
+    VERIFY_UNSIGNED(Integer);
+    Integer out = 0;
     size_t i = 0;
-    while (i < sizeof(T) && start != end)
-        out |= static_cast<T>(*start++) << (8 * i++);
+
+    while (i < sizeof(Integer) && start != end)
+        out |= static_cast<Integer>(*start++) << (8 * i++);
 
     return out;
 }
 
-template <typename T, typename Iterator>
-T from_big_endian_unsafe(Iterator in)
+template <typename Integer, typename Iterator>
+Integer from_big_endian_unsafe(Iterator start)
 {
-    VERIFY_UNSIGNED(T);
-    T out = 0;
-    size_t i = sizeof(T);
+    VERIFY_UNSIGNED(Integer);
+    Integer out = 0;
+    size_t i = sizeof(Integer);
+
     while (0 < i)
-        out |= static_cast<T>(*in++) << (8 * --i);
+        out |= static_cast<Integer>(*start++) << (8 * --i);
+
     return out;
 }
 
-template <typename T, typename Iterator>
-T from_little_endian_unsafe(Iterator in)
+template <typename Integer, typename Iterator>
+Integer from_little_endian_unsafe(Iterator start)
 {
-    VERIFY_UNSIGNED(T);
-    T out = 0;
+    VERIFY_UNSIGNED(Integer);
+    Integer out = 0;
     size_t i = 0;
-    while (i < sizeof(T))
-        out |= static_cast<T>(*in++) << (8 * i++);
+
+    while (i < sizeof(Integer))
+        out |= static_cast<Integer>(*start++) << (8 * i++);
 
     return out;
 }
 
-template <typename T>
-T from_big_endian_stream_unsafe(std::istream& stream)
+template <typename Integer>
+Integer from_big_endian_stream_unsafe(std::istream& stream)
 {
-    VERIFY_UNSIGNED(T);
-    T out = 0;
-    for (size_t i = sizeof(T); (i > 0) && stream; i--)
+    VERIFY_UNSIGNED(Integer);
+    Integer out = 0;
+
+    for (size_t i = sizeof(Integer); (i > 0) && stream; i--)
     {
         uint8_t value = 0;
         stream.read(reinterpret_cast<char*>(&value), sizeof value);
-        out |= static_cast<T>(value) << (8 * (i - 1));
+        out |= static_cast<Integer>(value) << (8 * (i - 1));
     }
 
     return out;
 }
 
-template <typename T>
-T from_little_endian_stream_unsafe(std::istream& stream)
+template <typename Integer>
+Integer from_little_endian_stream_unsafe(std::istream& stream)
 {
-    VERIFY_UNSIGNED(T);
-    T out = 0;
-    for (size_t i = 0; (i < sizeof(T)) && stream; i++)
+    VERIFY_UNSIGNED(Integer);
+    Integer out = 0;
+
+    for (size_t i = 0; (i < sizeof(Integer)) && stream; i++)
     {
         uint8_t value = 0;
         stream.read(reinterpret_cast<char*>(&value), sizeof value);
-        out |= static_cast<T>(value) << (8 * i);
+        out |= static_cast<Integer>(value) << (8 * i);
     }
 
     return out;
 }
 
-template <typename T>
-byte_array<sizeof(T)> to_big_endian(T n)
+template <typename Integer>
+byte_array<sizeof(Integer)> to_big_endian(Integer value)
 {
-    VERIFY_UNSIGNED(T);
-    byte_array<sizeof(T)> out;
-    for (auto i = out.rbegin(); i != out.rend(); ++i)
+    VERIFY_UNSIGNED(Integer);
+    byte_array<sizeof(Integer)> out;
+
+    for (auto it = out.rbegin(); it != out.rend(); ++it)
     {
-        *i = static_cast<uint8_t>(n);
-        n >>= 8;
+        *it = static_cast<uint8_t>(value);
+        value >>= 8;
     }
 
     return out;
 }
 
-template <typename T>
-byte_array<sizeof(T)> to_little_endian(T n)
+template <typename Integer>
+byte_array<sizeof(Integer)> to_little_endian(Integer value)
 {
-    VERIFY_UNSIGNED(T);
-    byte_array<sizeof(T)> out;
-    for (auto i = out.begin(); i != out.end(); ++i)
+    VERIFY_UNSIGNED(Integer);
+    byte_array<sizeof(Integer)> out;
+
+    for (auto it = out.begin(); it != out.end(); ++it)
     {
-        *i = static_cast<uint8_t>(n);
-        n >>= 8;
+        *it = static_cast<uint8_t>(value);
+        value >>= 8;
     }
 
     return out;

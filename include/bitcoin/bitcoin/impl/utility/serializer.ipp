@@ -23,10 +23,8 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <boost/asio/streambuf.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/math/limits.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
 
 namespace libbitcoin {
@@ -36,6 +34,9 @@ serializer<Iterator>::serializer(const Iterator begin)
   : iterator_(begin)
 {
 }
+
+// Context.
+//-----------------------------------------------------------------------------
 
 template <typename Iterator>
 serializer<Iterator>::operator bool() const
@@ -49,36 +50,79 @@ bool serializer<Iterator>::operator!() const
     return false;
 }
 
+// Hashes.
+//-----------------------------------------------------------------------------
+
 template <typename Iterator>
-void serializer<Iterator>::write_byte(uint8_t value)
+void serializer<Iterator>::write_hash(const hash_digest& hash)
 {
-    *iterator_ = value;
-    ++iterator_;
+    write_forward(hash);
 }
 
 template <typename Iterator>
-void serializer<Iterator>::skip_bytes(size_t size)
+void serializer<Iterator>::write_short_hash(const short_hash& hash)
 {
-    iterator_ += size;
-}
-
-
-template <typename Iterator>
-void serializer<Iterator>::write_data(const data_chunk& data)
-{
-    write_data<const data_chunk>(data);
+    write_forward(hash);
 }
 
 template <typename Iterator>
-void serializer<Iterator>::write_data(const uint8_t* data, size_t size)
+void serializer<Iterator>::write_mini_hash(const mini_hash& hash)
 {
-    iterator_ = std::copy(data, (data + size), iterator_);
+    write_forward(hash);
 }
+
+// Big Endian Integers.
+//-----------------------------------------------------------------------------
+
+template <typename Iterator>
+void serializer<Iterator>::write_2_bytes_big_endian(uint16_t value)
+{
+    write_big_endian(value);
+}
+
+template <typename Iterator>
+void serializer<Iterator>::write_4_bytes_big_endian(uint32_t value)
+{
+    write_big_endian(value);
+}
+
+template <typename Iterator>
+void serializer<Iterator>::write_8_bytes_big_endian(uint64_t value)
+{
+    write_big_endian(value);
+}
+
+template <typename Iterator>
+void serializer<Iterator>::write_variable_big_endian(uint64_t value)
+{
+    if (value < two_bytes)
+    {
+        write_byte(static_cast<uint8_t>(value));
+    }
+    else if (value <= max_uint16)
+    {
+        write_byte(two_bytes);
+        write_2_bytes_big_endian(static_cast<uint16_t>(value));
+    }
+    else if (value <= max_uint32)
+    {
+        write_byte(four_bytes);
+        write_4_bytes_big_endian(static_cast<uint32_t>(value));
+    }
+    else
+    {
+        write_byte(eight_bytes);
+        write_8_bytes_big_endian(value);
+    }
+}
+
+// Little Endian Integers.
+//-----------------------------------------------------------------------------
 
 template <typename Iterator>
 void serializer<Iterator>::write_error_code(const code& ec)
 {
-    write_4_bytes_little_endian(safe_to_unsigned<uint32_t>(ec.value()));
+    write_4_bytes_little_endian(static_cast<uint32_t>(ec.value()));
 }
 
 template <typename Iterator>
@@ -100,157 +144,109 @@ void serializer<Iterator>::write_8_bytes_little_endian(uint64_t value)
 }
 
 template <typename Iterator>
-void serializer<Iterator>::write_2_bytes_big_endian(uint16_t value)
+void serializer<Iterator>::write_variable_little_endian(uint64_t value)
 {
-    write_big_endian(value);
-}
-
-template <typename Iterator>
-void serializer<Iterator>::write_4_bytes_big_endian(uint32_t value)
-{
-    write_big_endian(value);
-}
-
-template <typename Iterator>
-void serializer<Iterator>::write_8_bytes_big_endian(uint64_t value)
-{
-    write_big_endian(value);
-}
-
-template <typename Iterator>
-template <typename T>
-void serializer<Iterator>::write_big_endian(T n)
-{
-    return write_data(to_big_endian(n));
-}
-
-template <typename Iterator>
-template <typename T>
-void serializer<Iterator>::write_little_endian(T n)
-{
-    return write_data(to_little_endian(n));
-}
-
-template <typename Iterator>
-void serializer<Iterator>::write_variable_uint_little_endian(uint64_t value)
-{
-    if (value < 0xfd)
+    if (value < two_bytes)
     {
-        write_byte((uint8_t)value);
+        write_byte(static_cast<uint8_t>(value));
     }
-    else if (value <= 0xffff)
+    else if (value <= max_uint16)
     {
-        write_byte(0xfd);
-        write_2_bytes_little_endian((uint16_t)value);
+        write_byte(two_bytes);
+        write_2_bytes_little_endian(static_cast<uint16_t>(value));
     }
-    else if (value <= 0xffffffff)
+    else if (value <= max_uint32)
     {
-        write_byte(0xfe);
-        write_4_bytes_little_endian((uint32_t)value);
+        write_byte(four_bytes);
+        write_4_bytes_little_endian(static_cast<uint32_t>(value));
     }
     else
     {
-        write_byte(0xff);
+        write_byte(eight_bytes);
         write_8_bytes_little_endian(value);
     }
 }
 
+// Bytes (unchecked).
+//-----------------------------------------------------------------------------
+
 template <typename Iterator>
-void serializer<Iterator>::write_variable_uint_big_endian(uint64_t value)
+void serializer<Iterator>::write_byte(uint8_t value)
 {
-    if (value < 0xfd)
-    {
-        write_byte((uint8_t)value);
-    }
-    else if (value <= 0xffff)
-    {
-        write_byte(0xfd);
-        write_2_bytes_big_endian((uint16_t)value);
-    }
-    else if (value <= 0xffffffff)
-    {
-        write_byte(0xfe);
-        write_4_bytes_big_endian((uint32_t)value);
-    }
-    else
-    {
-        write_byte(0xff);
-        write_8_bytes_big_endian(value);
-    }
+    *iterator_ = value;
+    skip(1);
 }
 
 template <typename Iterator>
-template <typename T>
-void serializer<Iterator>::write_data(const T& data)
+void serializer<Iterator>::write_bytes(const data_chunk& data)
 {
-    iterator_ = std::copy(data.begin(), data.end(), iterator_);
+    write_forward(data);
 }
 
 template <typename Iterator>
-void serializer<Iterator>::write_hash(const hash_digest& hash)
+void serializer<Iterator>::write_bytes(const uint8_t* data, size_t size)
 {
-    write_data(hash);
-}
-
-template <typename Iterator>
-void serializer<Iterator>::write_short_hash(const short_hash& hash)
-{
-    write_data(hash);
-}
-
-template <typename Iterator>
-void serializer<Iterator>::write_mini_hash(
-    const mini_hash& hash)
-{
-    write_data(hash);
-}
-
-template <typename Iterator>
-void serializer<Iterator>::write_fixed_string(const std::string& value,
-    size_t size)
-{
-    const auto min_size = std::min(size, value.size());
-    data_chunk raw_string(size, 0);
-
-    std::copy_n(value.begin(), min_size, raw_string.begin());
-    write_data(raw_string);
+    std::copy_n(data, size, iterator_);
+    skip(size);
 }
 
 template <typename Iterator>
 void serializer<Iterator>::write_string(const std::string& value)
 {
-    write_variable_uint_little_endian(value.size());
-    write_data(value);
+    write_variable_little_endian(value.size());
+    write_forward(value);
 }
 
-/////**
-//// * Returns underlying iterator.
-//// */
-////template <typename Iterator>
-////Iterator serializer<Iterator>::iterator()
-////{
-////    return iterator_;
-////}
-
-/////**
-//// * Useful if you want to serialize some data using another
-//// * routine and then continue with this serializer.
-//// */
-////template <typename Iterator>
-////void serializer<Iterator>::set_iterator(Iterator iterator)
-////{
-////    iterator_ = iterator;
-////}
-
 template <typename Iterator>
-template <typename T>
-void serializer<Iterator>::write_data_reverse(const T& data)
+void serializer<Iterator>::write_string(const std::string& value, size_t size)
 {
-    iterator_ = std::reverse_copy(data.begin(), data.end(), iterator_);
+    data_chunk text(size, terminator);
+    const auto length = std::min(size, value.size());
+    std::copy_n(value.begin(), length, text.begin());
+    write_forward(text);
 }
 
 template <typename Iterator>
-serializer<Iterator> make_serializer(Iterator begin)
+void serializer<Iterator>::skip(size_t size)
+{
+    iterator_ += size;
+}
+
+template <typename Iterator>
+template <typename Buffer>
+void serializer<Iterator>::write_forward(const Buffer& data)
+{
+    std::copy(data.begin(), data.end(), iterator_);
+    skip(data.size());
+}
+
+template <typename Iterator>
+template <typename Buffer>
+void serializer<Iterator>::write_reverse(const Buffer& data)
+{
+    std::reverse_copy(data.begin(), data.end(), iterator_);
+    skip(data.size());
+}
+
+template <typename Iterator>
+template <typename Integer>
+void serializer<Iterator>::write_big_endian(Integer value)
+{
+    return write_forward(to_big_endian(value));
+}
+
+template <typename Iterator>
+template <typename Integer>
+void serializer<Iterator>::write_little_endian(Integer value)
+{
+    return write_forward(to_little_endian(value));
+}
+
+// Factories.
+//-----------------------------------------------------------------------------
+
+template <typename Iterator>
+serializer<Iterator> make_unsafe_serializer(Iterator begin)
 {
     return serializer<Iterator>(begin);
 }

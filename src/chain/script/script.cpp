@@ -23,8 +23,6 @@
 #include <cstdint>
 #include <numeric>
 #include <sstream>
-#include <boost/algorithm/string.hpp>
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
@@ -205,34 +203,17 @@ bool script::from_data(reader& source, bool prefix, parse_mode mode)
 {
     reset();
 
-    auto result = true;
-    data_chunk raw_script;
+    const auto bytes = prefix ? 
+        source.read_bytes(source.read_size_little_endian()) :
+        source.read_bytes();
 
-    if (prefix)
-    {
-        const auto script_size = source.read_variable_uint_little_endian();
-        result = source;
+    if (source && !deserialize(bytes, mode))
+        source.invalidate();
 
-        if (result)
-        {
-            const auto size = safe_unsigned<size_t>(script_size);
-            raw_script = source.read_data(size);
-            result = source && (raw_script.size() == size);
-        }
-    }
-    else
-    {
-        raw_script = source.read_data_to_eof();
-        result = source;
-    }
-
-    if (result)
-        result = deserialize(raw_script, mode);
-
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 data_chunk script::to_data(bool prefix) const
@@ -254,10 +235,10 @@ void script::to_data(std::ostream& stream, bool prefix) const
 void script::to_data(writer& sink, bool prefix) const
 {
     if (prefix)
-        sink.write_variable_uint_little_endian(satoshi_content_size());
+        sink.write_variable_little_endian(satoshi_content_size());
 
     if (is_raw_data())
-        sink.write_data(operations_[0].data());
+        sink.write_bytes(operations_[0].data());
     else
         for (const auto& op: operations_)
             op.to_data(sink);

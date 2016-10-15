@@ -33,66 +33,66 @@ class BC_API istream_reader
 public:
     istream_reader(std::istream& stream);
 
+    template <unsigned Size>
+    byte_array<Size> read_forward();
+
+    template <unsigned Size>
+    byte_array<Size> read_reverse();
+
+    template <typename Integer>
+    Integer read_big_endian();
+
+    template <typename Integer>
+    Integer read_little_endian();
+
+    /// Context.
     operator bool() const;
     bool operator!() const;
-
-    void invalidate();
     bool is_exhausted() const;
+    void invalidate();
 
-    uint8_t read_byte();
-    data_chunk read_data(size_t size);
-    size_t read_data(uint8_t* data, size_t size);
-    data_chunk read_data_to_eof();
+    /// Read hashes.
     hash_digest read_hash();
     short_hash read_short_hash();
     mini_hash read_mini_hash();
 
-    // These read data in little endian format: 
-    uint16_t read_2_bytes_little_endian();
-    uint32_t read_4_bytes_little_endian();
-    uint64_t read_8_bytes_little_endian();
-    uint64_t read_variable_uint_little_endian();
-    uint64_t read_size_little_endian();
-
-    // These read data in big endian format:
+    /// Read big endian integers.
     uint16_t read_2_bytes_big_endian();
     uint32_t read_4_bytes_big_endian();
     uint64_t read_8_bytes_big_endian();
-    uint64_t read_variable_uint_big_endian();
-    uint64_t read_size_big_endian();
+    uint64_t read_variable_big_endian();
+    size_t read_size_big_endian();
 
-    /**
-     * Read a fixed size string padded with zeroes.
-     */
-    std::string read_fixed_string(size_t length);
+    /// Read little endian integers.
+    code read_error_code();
+    uint16_t read_2_bytes_little_endian();
+    uint32_t read_4_bytes_little_endian();
+    uint64_t read_8_bytes_little_endian();
+    uint64_t read_variable_little_endian();
+    size_t read_size_little_endian();
 
-    /**
-     * Read a variable length string.
-     */
+    /// Read one byte.
+    uint8_t read_byte();
+
+    /// Read all remaining bytes.
+    data_chunk read_bytes();
+
+    /// Read required size buffer.
+    data_chunk read_bytes(size_t size);
+
+    /// Read variable length string.
     std::string read_string();
 
-    /**
-     * Reads an unsigned integer that has been encoded in big endian format.
-     */
-    template <typename T>
-    T read_big_endian();
+    /// Read required size string and trim nulls.
+    std::string read_string(size_t size);
 
-    /**
-     * Reads an unsigned integer that has been encoded in little endian format.
-     */
-    template <typename T>
-    T read_little_endian();
-
-    /**
-     * Read a fixed-length data block.
-     */
-    template <unsigned Size>
-    byte_array<Size> read_bytes();
-
-    template <unsigned Size>
-    byte_array<Size> read_bytes_reverse();
+    /// Advance iterator without reading.
+    void skip(size_t size);
 
 private:
+    // The buffer is faulted or at eof.
+    bool empty() const;
+
     std::istream& stream_;
 };
 

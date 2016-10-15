@@ -22,7 +22,6 @@
 #include <cstdint>
 #include <sstream>
 #include <utility>
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -123,12 +122,11 @@ bool point::from_data(reader& source)
 
     hash_ = source.read_hash();
     index_ = source.read_4_bytes_little_endian();
-    const auto result = static_cast<bool>(source);
 
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 data_chunk point::to_data() const
@@ -190,17 +188,13 @@ bool point::is_null() const
 // client callers. This is NOT a bitcoin checksum.
 uint64_t point::checksum() const
 {
-    static constexpr uint64_t divisor = uint64_t{ 1 } << 63;
-    static_assert(divisor == 9223372036854775808ull, "Wrong divisor value.");
-
-    // Write index onto a copy of the outpoint hash.
-    auto copy = hash_;
-    auto serial = make_serializer(copy.begin());
-    serial.write_4_bytes_little_endian(index_);
-    const auto hash_value = from_little_endian_unsafe<uint64_t>(copy.begin());
+    const auto hash64 = from_little_endian_unsafe<uint64_t>(hash_.begin());
+    const auto index_hash = (hash64 & 0xffffffff00000000) | index_;
 
     // x mod 2**n == x & (2**n - 1)
-    return hash_value & (divisor - 1);
+    static constexpr uint64_t divisor = uint64_t{ 1 } << 63;
+    static_assert(divisor == 9223372036854775808ull, "Wrong divisor value.");
+    return index_hash & (divisor - 1);
 
     // Above usually provides only 32 bits of entropy, so below is preferred.
     // But this is stored in the database. Change requires server API change.

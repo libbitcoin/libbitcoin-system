@@ -19,7 +19,6 @@
  */
 #include <bitcoin/bitcoin/message/fee_filter.hpp>
 
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -59,13 +58,15 @@ uint64_t fee_filter::satoshi_fixed_size(uint32_t version)
     return sizeof(minimum_fee_);
 }
 
+// This is a default instance so is invalid.
 fee_filter::fee_filter()
-  : minimum_fee_(0u), valid_(false)
+  : minimum_fee_(0u), insufficient_version_(true)
 {
 }
 
+// This is not a default instance so is valid.
 fee_filter::fee_filter(uint64_t minimum)
-  : minimum_fee_(minimum), valid_(true)
+  : minimum_fee_(minimum), insufficient_version_(false)
 {
 }
 
@@ -95,14 +96,18 @@ bool fee_filter::from_data(uint32_t version, reader& source)
 {
     reset();
 
-    valid_ = !(version < fee_filter::version_minimum);
-    minimum_fee_ = source.read_8_bytes_little_endian();
-    valid_ &= static_cast<bool>(source);
+    // Initialize as valid from deserialization.
+    insufficient_version_ = false;
 
-    if (!valid_)
+    minimum_fee_ = source.read_8_bytes_little_endian();
+
+    if (version < fee_filter::version_minimum)
+        source.invalidate();
+
+    if (!source)
         reset();
 
-    return valid_;
+    return source;
 }
 
 data_chunk fee_filter::to_data(uint32_t version) const
@@ -128,12 +133,13 @@ void fee_filter::to_data(uint32_t version, writer& sink) const
 
 bool fee_filter::is_valid() const
 {
-    return valid_ || (minimum_fee_ > 0u);
+    return !insufficient_version_ || (minimum_fee_ > 0u);
 }
 
+// This is again a default instance so is invalid.
 void fee_filter::reset()
 {
-    valid_ = false;
+    insufficient_version_ = true;
     minimum_fee_ = 0u;
 }
 
@@ -150,12 +156,15 @@ uint64_t fee_filter::minimum_fee() const
 void fee_filter::set_minimum_fee(uint64_t value)
 {
     minimum_fee_ = value;
+
+    // This is no longer a default instance, so is valid.
+    insufficient_version_ = false;
 }
 
 fee_filter& fee_filter::operator=(fee_filter&& other)
 {
     minimum_fee_ = other.minimum_fee_;
-    valid_ = other.valid_;
+    insufficient_version_ = other.insufficient_version_;
     return *this;
 }
 

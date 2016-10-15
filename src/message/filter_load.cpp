@@ -19,7 +19,6 @@
  */
 #include <bitcoin/bitcoin/message/filter_load.hpp>
 
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -109,7 +108,7 @@ void filter_load::reset()
 
 bool filter_load::from_data(uint32_t version, const data_chunk& data)
 {
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     return from_data(version, istream);
 }
 
@@ -123,24 +122,18 @@ bool filter_load::from_data(uint32_t version, reader& source)
 {
     reset();
 
-    const auto  insufficent_version = (version < filter_load::version_minimum);
-    const auto size = source.read_variable_uint_little_endian();
-    const auto filter_size = safe_unsigned<size_t>(size);
-    bool result = static_cast<bool>(source);
+    filter_ = source.read_bytes(source.read_size_little_endian());
+    hash_functions_ = source.read_4_bytes_little_endian();
+    tweak_ = source.read_4_bytes_little_endian();
+    flags_ = source.read_byte();
 
-    if (result)
-    {
-        filter_ = source.read_data(filter_size);
-        hash_functions_ = source.read_4_bytes_little_endian();
-        tweak_ = source.read_4_bytes_little_endian();
-        flags_ = source.read_byte();
-        result = source && (filter_.size() == filter_size);
-    }
+    if (version < filter_load::version_minimum)
+        source.invalidate();
 
-    if (!result || insufficent_version)
+    if (!source)
         reset();
 
-    return result && !insufficent_version;
+    return source;
 }
 
 data_chunk filter_load::to_data(uint32_t version) const
@@ -161,8 +154,8 @@ void filter_load::to_data(uint32_t version, std::ostream& stream) const
 
 void filter_load::to_data(uint32_t version, writer& sink) const
 {
-    sink.write_variable_uint_little_endian(filter_.size());
-    sink.write_data(filter_);
+    sink.write_variable_little_endian(filter_.size());
+    sink.write_bytes(filter_);
     sink.write_4_bytes_little_endian(hash_functions_);
     sink.write_4_bytes_little_endian(tweak_);
     sink.write_byte(flags_);

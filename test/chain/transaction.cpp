@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/iostreams/stream.hpp>
 #include <boost/test/unit_test.hpp>
 #include <bitcoin/bitcoin.hpp>
 
@@ -322,11 +321,11 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__valid_input__roundtrip_success)
         "748dd1f8ab822df542427e49d6012102a17da2659b6149fb281a675519b5fd64"
         "dd80699dccd509f76e655699f2f625efffffffff"));
 
-    boost::iostreams::stream<byte_source<data_chunk>> satoshi_stream(data_satoshi);
+    data_source satoshi_stream(data_satoshi);
     chain::transaction satoshi_tx;
     BOOST_REQUIRE(satoshi_tx.from_data(satoshi_stream, true));
     BOOST_REQUIRE(data_satoshi == satoshi_tx.to_data(true));
-    boost::iostreams::stream<byte_source<data_chunk>> other_stream(data_other);
+    data_source other_stream(data_other);
     chain::transaction other_tx;
     BOOST_REQUIRE(other_tx.from_data(other_stream, false));
     BOOST_REQUIRE(data_other == other_tx.to_data(false));

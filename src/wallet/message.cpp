@@ -19,7 +19,6 @@
  */
 #include <bitcoin/bitcoin/wallet/message.hpp>
 
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
@@ -46,8 +45,8 @@ hash_digest hash_message(data_slice message)
     data_sink ostream(data);
     ostream_writer sink(ostream);
     sink.write_string(prefix);
-    sink.write_variable_uint_little_endian(message.size());
-    sink.write_data(message);
+    sink.write_variable_little_endian(message.size());
+    sink.write_bytes(message.begin(), message.size());
     ostream.flush();
     return bitcoin_hash(data);
 }

@@ -19,7 +19,6 @@
  */
 #include <bitcoin/bitcoin/message/heading.hpp>
 
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/messages.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
@@ -141,7 +140,7 @@ bool heading::from_data(reader& source)
 {
     reset();
     magic_ = source.read_4_bytes_little_endian();
-    command_ = source.read_fixed_string(command_size);
+    command_ = source.read_string(command_size);
     payload_size_ = source.read_4_bytes_little_endian();
     checksum_ = source.read_4_bytes_little_endian();
 
@@ -170,7 +169,7 @@ void heading::to_data(std::ostream& stream) const
 void heading::to_data(writer& sink) const
 {
     sink.write_4_bytes_little_endian(magic_);
-    sink.write_fixed_string(command_, command_size);
+    sink.write_string(command_, command_size);
     sink.write_4_bytes_little_endian(payload_size_);
     sink.write_4_bytes_little_endian(checksum_);
 }

@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <boost/test/unit_test.hpp>
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
@@ -171,7 +170,7 @@ BOOST_AUTO_TEST_CASE(get_headers__factory_from_data_2__valid_input__success)
     };
 
     const auto data = expected.to_data(message::get_headers::version_minimum);
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     const auto result = message::get_headers::factory_from_data(
         message::get_headers::version_minimum, istream);
 
@@ -199,7 +198,7 @@ BOOST_AUTO_TEST_CASE(get_headers__factory_from_data_3__valid_input__success)
     };
 
     const auto data = expected.to_data(message::get_headers::version_minimum);
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     istream_reader source(istream);
     const auto result = message::get_headers::factory_from_data(
         message::get_headers::version_minimum, source);

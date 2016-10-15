@@ -28,7 +28,6 @@
 #include <sstream>
 #include <utility>
 #include <vector>
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/chain/input.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
@@ -40,6 +39,7 @@
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
+#include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 
@@ -52,12 +52,7 @@ const size_t transaction::validation::unspecified_height = 0;
 template<class Source, class Put>
 bool read(Source& source, std::vector<Put>& puts)
 {
-    const auto put_count = source.read_variable_uint_little_endian();
-
-    if (!source)
-        return false;
-
-    puts.resize(safe_unsigned<size_t>(put_count));
+    puts.resize(source.read_size_little_endian());
 
     // Order is required.
     for (auto& put: puts)
@@ -71,7 +66,7 @@ bool read(Source& source, std::vector<Put>& puts)
 template<class Sink, class Put>
 void write(Sink& sink, const std::vector<Put>& puts)
 {
-    sink.write_variable_uint_little_endian(puts.size());
+    sink.write_variable_little_endian(puts.size());
     auto to = [&sink](const Put& put) { put.to_data(sink); };
     std::for_each(puts.begin(), puts.end(), to);
 }
@@ -270,30 +265,26 @@ bool transaction::from_data(std::istream& stream, bool satoshi)
 bool transaction::from_data(reader& source, bool satoshi)
 {
     reset();
-    version_ = source.read_4_bytes_little_endian();
-    auto result = static_cast<bool>(source);
 
-    if (result)
+    version_ = source.read_4_bytes_little_endian();
+
+    if (satoshi)
     {
-        if (satoshi)
-        {
-            // Wire (satoshi protocol) deserialization.
-            result = read(source, inputs_) && read(source, outputs_);
-            locktime_ = result ? source.read_4_bytes_little_endian() : 0;
-            result &= source;
-        }
-        else
-        {
-            // Database serialization (outputs forward).
-            locktime_ = source.read_4_bytes_little_endian();
-            result = source && read(source, outputs_) && read(source, inputs_);
-        }
+        // Wire (satoshi protocol) deserialization.
+        read(source, inputs_) && read(source, outputs_);
+        locktime_ = source.read_4_bytes_little_endian();
+    }
+    else
+    {
+        // Database serialization (outputs forward).
+        locktime_ = source.read_4_bytes_little_endian();
+        read(source, outputs_) && read(source, inputs_);
     }
 
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 data_chunk transaction::to_data(bool satoshi) const

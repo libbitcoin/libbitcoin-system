@@ -23,51 +23,67 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {
 
+/// Reader interface.
 class BC_API reader
 {
 public:
+    /// Variable integer prefix sentinels.
+    static const uint8_t two_bytes = 0xfd;
+    static const uint8_t four_bytes = 0xfe;
+    static const uint8_t eight_bytes = 0xff;
+
+    // String terminator sentinel.
+    static const uint8_t terminator = 0x00;
+
+    /// Context.
     virtual operator bool() const = 0;
     virtual bool operator!() const = 0;
-
-    virtual void invalidate() = 0;
     virtual bool is_exhausted() const = 0;
+    virtual void invalidate() = 0;
 
-    virtual uint8_t read_byte() = 0;
-    virtual data_chunk read_data(size_t size) = 0;
-    virtual size_t read_data(uint8_t* data, size_t size) = 0;
-    virtual data_chunk read_data_to_eof() = 0;
+    /// Read hashes.
     virtual hash_digest read_hash() = 0;
     virtual short_hash read_short_hash() = 0;
     virtual mini_hash read_mini_hash() = 0;
 
-    // These read data in little endian format:
-    virtual uint16_t read_2_bytes_little_endian() = 0;
-    virtual uint32_t read_4_bytes_little_endian() = 0;
-    virtual uint64_t read_8_bytes_little_endian() = 0;
-    virtual uint64_t read_variable_uint_little_endian() = 0;
-    virtual size_t read_size_little_endian() = 0;
-
-    // These read data in big endian format:
+    /// Read big endian integers.
     virtual uint16_t read_2_bytes_big_endian() = 0;
     virtual uint32_t read_4_bytes_big_endian() = 0;
     virtual uint64_t read_8_bytes_big_endian() = 0;
-    virtual uint64_t read_variable_uint_big_endian() = 0;
+    virtual uint64_t read_variable_big_endian() = 0;
     virtual size_t read_size_big_endian() = 0;
 
-    /**
-     * Read a fixed size string padded with zeroes.
-     */
-    virtual std::string read_fixed_string(size_t length) = 0;
+    /// Read little endian integers.
+    virtual code read_error_code() = 0;
+    virtual uint16_t read_2_bytes_little_endian() = 0;
+    virtual uint32_t read_4_bytes_little_endian() = 0;
+    virtual uint64_t read_8_bytes_little_endian() = 0;
+    virtual uint64_t read_variable_little_endian() = 0;
+    virtual size_t read_size_little_endian() = 0;
 
-    /**
-     * Read a variable length string.
-     */
+    /// Read one byte.
+    virtual uint8_t read_byte() = 0;
+
+    /// Read all remaining bytes.
+    virtual data_chunk read_bytes() = 0;
+
+    /// Read required size buffer.
+    virtual data_chunk read_bytes(size_t size) = 0;
+
+    /// Read variable length string.
     virtual std::string read_string() = 0;
+
+    /// Read required length string and trim nulls.
+    virtual std::string read_string(size_t size) = 0;
+
+    /// Advance iterator without reading.
+    virtual void skip(size_t size) = 0;
 };
 
 } // namespace libbitcoin

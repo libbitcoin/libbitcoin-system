@@ -21,7 +21,6 @@
 
 #include <iostream>
 #include <string>
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -83,9 +82,9 @@ bool qr::encode(std::istream& in, uint32_t version, error_recovery_level level,
     // uint32_t width
     // unsigned char* data (of width^2 length)
     ostream_writer sink(out);
-    sink.write_data(version_ptr, sizeof(uint32_t));
-    sink.write_data(width_ptr, sizeof(uint32_t));
-    sink.write_data(qrcode->data, area);
+    sink.write_bytes(version_ptr, sizeof(uint32_t));
+    sink.write_bytes(width_ptr, sizeof(uint32_t));
+    sink.write_bytes(qrcode->data, area);
     out.flush();
 
     return true;

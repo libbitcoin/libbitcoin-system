@@ -18,9 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <boost/test/unit_test.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin.hpp>
 #include <chrono>
+#include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
 
