@@ -434,88 +434,164 @@ bool script::parse(const data_chunk& raw_script)
     return result;
 }
 
-inline void zeroize_input_sequences(input::list& inputs,
-    uint32_t except_input)
+inline signature_hash_algorithm to_sighash_enum(uint8_t sighash_type)
 {
-    for (size_t in = 0; in < inputs.size(); ++in)
-        if (in != except_input)
-            inputs[in].set_sequence(0);
+    return static_cast<signature_hash_algorithm>(
+        sighash_type & signature_hash_algorithm::mask);
 }
 
 inline uint8_t is_sighash_enum(uint8_t sighash_type,
     signature_hash_algorithm value)
 {
-    return (sighash_type & signature_hash_algorithm::mask) == value;
+    return to_sighash_enum(sighash_type) == value;
 }
 
-inline uint8_t is_sighash_flag(uint8_t sighash_type,
+inline bool is_sighash_flag(uint8_t sighash_type,
     signature_hash_algorithm value)
 {
     return (sighash_type & value) != 0;
+}
+
+static transaction sign_none(const transaction& tx, uint32_t input_index,
+    const script& script_code, bool anyone)
+{
+    input::list ins;
+    const auto& inputs = tx.inputs();
+    ins.reserve(anyone ? 1 : inputs.size());
+
+    BITCOIN_ASSERT(input_index < inputs.size());
+    const auto& self = inputs[input_index];
+
+    if (anyone)
+    {
+        // Retain only self.
+        ins.emplace_back(self.previous_output(), script_code, self.sequence());
+    }
+    else
+    {
+        // Erase all input scripts and sequences.
+        for (const auto& input: inputs)
+            ins.emplace_back(input.previous_output(), script{}, 0);
+
+        // Replace self that is lost in the loop.
+        ins[input_index].set_script(script_code);
+        ins[input_index].set_sequence(self.sequence());
+        ////ins[input_index].set_script(self.previous_output());
+    }
+
+    // Move new inputs to new transaction and drop outputs.
+    return transaction(tx.version(), tx.locktime(), std::move(ins),
+        output::list{});
+}
+
+static transaction sign_single(const transaction& tx, uint32_t input_index,
+    const script& script_code, bool anyone)
+{
+    input::list ins;
+    const auto& inputs = tx.inputs();
+    ins.reserve(anyone ? 1 : inputs.size());
+
+    BITCOIN_ASSERT(input_index < inputs.size());
+    const auto& self = inputs[input_index];
+
+    if (anyone)
+    {
+        // Retain only self.
+        ins.emplace_back(self.previous_output(), script_code, self.sequence());
+    }
+    else
+    {
+        // Erase all input scripts and sequences.
+        for (const auto& input: inputs)
+            ins.emplace_back(input.previous_output(), script{}, 0);
+
+        // Replace self that is lost in the loop.
+        ins[input_index].set_script(script_code);
+        ins[input_index].set_sequence(self.sequence());
+        ////ins[input_index].set_script(self.previous_output());
+    }
+
+    // Trim and clear outputs except that of specified input index.
+    const auto& outputs = tx.outputs();
+    output::list outs(input_index + 1);
+
+    BITCOIN_ASSERT(input_index < outputs.size());
+    outs.back() = outputs[input_index];
+
+    // Move new inputs and new outputs to new transaction.
+    return transaction(tx.version(), tx.locktime(), std::move(ins),
+        std::move(outs));
+}
+
+static transaction sign_all(const transaction& tx, uint32_t input_index,
+    const script& script_code, bool anyone)
+{
+    input::list ins;
+    const auto& inputs = tx.inputs();
+    ins.reserve(anyone ? 1 : inputs.size());
+
+    BITCOIN_ASSERT(input_index < inputs.size());
+    const auto& self = inputs[input_index];
+
+    if (anyone)
+    {
+        // Retain only self.
+        ins.emplace_back(self.previous_output(), script_code, self.sequence());
+    }
+    else
+    {
+        // Erase all input scripts.
+        for (const auto& input: inputs)
+            ins.emplace_back(input.previous_output(), script{},
+                input.sequence());
+
+        // Replace self that is lost in the loop.
+        ins[input_index].set_script(script_code);
+        ////ins[input_index].set_sequence(self.sequence());
+        ////ins[input_index].set_script(self.previous_output());
+    }
+
+    // Move new inputs and copy outputs to new transaction.
+    transaction out(tx.version(), tx.locktime(), input::list{}, tx.outputs());
+    out.set_inputs(std::move(ins));
+    return out;
 }
 
 // FindAndDelete(OP_CODESEPARATOR) done in op_checksigverify(...)
 hash_digest script::generate_signature_hash(const transaction& tx,
     uint32_t input_index, const script& script_code, uint8_t sighash_type)
 {
-    // This is NOT considered an error result and callers should not test
-    // for one_hash. This is a bitcoind behavior we necessarily perpetuate.
-    if (input_index >= tx.inputs().size())
+    const auto sighash_all = signature_hash_algorithm::all;
+    const auto sighash_none = signature_hash_algorithm::none;
+    const auto sighash_single = signature_hash_algorithm::single;
+    const auto anyone_flag = signature_hash_algorithm::anyone_can_pay;
+
+    const auto single = is_sighash_enum(sighash_type, sighash_single);
+    const auto anyone = is_sighash_flag(sighash_type, anyone_flag);
+
+    // These are verified here and therefore only asserted in the helpers.
+    if (input_index >= tx.inputs().size() || 
+        (input_index >= tx.outputs().size() && single))
+    {
+        // This is a bitcoind behavior we necessarily perpetuate.
         return one_hash;
-
-    // Copy the copy transaction.
-    transaction copy(tx);
-
-    ///////////////////////////////////////////////////////////////////////////
-    // TODO: create a tx copy method that does not copy scripts.
-    ///////////////////////////////////////////////////////////////////////////
-    // Blank all of the inputs' scripts.
-    for (auto& input: copy.inputs())
-        input.script().reset();
-
-    // Assign the script code to the copy's specified input.
-    copy.inputs()[input_index].set_script(script_code);
-
-    // The default sighash::all signs all outputs, and the current input.
-    // Transaction cannot be updated without resigning the input.
-    // (note the lack of zeroize_input_sequences() call)
-
-    if (is_sighash_enum(sighash_type, signature_hash_algorithm::none))
-    {
-        // Sign no outputs, so they can be changed.
-        copy.outputs().clear();
-        zeroize_input_sequences(copy.inputs(), input_index);
-    }
-    else if (is_sighash_enum(sighash_type, signature_hash_algorithm::single))
-    {
-        // Sign the single output corresponding to our index.
-        // We don't care about additional inputs or outputs to the tx.
-        auto& outputs = copy.outputs();
-        const auto output_index = input_index;
-
-        // This is NOT considered an error result and callers should not test
-        // for one_hash. This is a bitcoind behavior we necessarily perpetuate.
-        if (output_index >= outputs.size())
-            return one_hash;
-
-        outputs.resize(output_index + 1);
-
-        // Loop through outputs except the last one.
-        for (auto it = outputs.begin(); it != outputs.end() - 1; ++it)
-            it->reset();
-
-        zeroize_input_sequences(copy.inputs(), input_index);
     }
 
-    // Flag to ignore the other inputs except our own.
-    if (is_sighash_flag(sighash_type,
-        signature_hash_algorithm::anyone_can_pay))
+    switch (to_sighash_enum(sighash_type))
     {
-        copy.inputs()[0] = copy.inputs()[input_index];
-        copy.inputs().resize(1);
-    }
+        case sighash_none:
+            return sign_none(tx, input_index, script_code, anyone)
+                .hash(sighash_type);
 
-    return copy.hash(sighash_type);
+        case sighash_single:
+            return sign_single(tx, input_index, script_code, anyone)
+                .hash(sighash_type);
+
+        default:
+        case sighash_all:
+            return sign_all(tx, input_index, script_code, anyone)
+                .hash(sighash_type);
+    }
 }
 
 inline void stack_swap(evaluation_context& context, size_t left, size_t right)
