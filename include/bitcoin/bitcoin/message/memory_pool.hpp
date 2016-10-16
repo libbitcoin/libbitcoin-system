@@ -45,6 +45,8 @@ public:
     static uint64_t satoshi_fixed_size(uint32_t version);
 
     memory_pool();
+    memory_pool(const memory_pool& other);
+    memory_pool(memory_pool&& other);
 
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
@@ -59,6 +61,9 @@ public:
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
+
+protected:
+    memory_pool(bool insufficient_version);
 
 private:
     bool insufficient_version_;

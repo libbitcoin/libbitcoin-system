@@ -63,6 +63,23 @@ filter_clear::filter_clear()
 {
 }
 
+// protected
+filter_clear::filter_clear(bool insufficient_version)
+  : insufficient_version_(insufficient_version)
+{
+}
+
+filter_clear::filter_clear(const filter_clear& other)
+  : filter_clear(other.insufficient_version_)
+{
+}
+
+filter_clear::filter_clear(filter_clear&& other)
+  : filter_clear(other.insufficient_version_)
+{
+}
+
+
 bool filter_clear::is_valid() const
 {
     return !insufficient_version_;

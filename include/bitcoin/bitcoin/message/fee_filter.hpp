@@ -71,6 +71,8 @@ public:
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
+protected:
+    fee_filter(uint64_t minimum, bool insufficient_version);
 
 private:
     uint64_t minimum_fee_;

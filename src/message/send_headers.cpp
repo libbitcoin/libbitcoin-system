@@ -68,6 +68,22 @@ send_headers::send_headers()
 {
 }
 
+// protected
+send_headers::send_headers(bool insufficient_version)
+  : insufficient_version_(insufficient_version)
+{
+}
+
+send_headers::send_headers(const send_headers& other)
+  : send_headers(other.insufficient_version_)
+{
+}
+
+send_headers::send_headers(send_headers&& other)
+  : send_headers(other.insufficient_version_)
+{
+}
+
 bool send_headers::is_valid() const
 {
     return !insufficient_version_;

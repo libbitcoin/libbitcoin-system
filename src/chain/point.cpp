@@ -73,13 +73,25 @@ point::point(hash_digest&& hash, uint32_t index)
 {
 }
 
+// protected
+point::point(const hash_digest& hash, uint32_t index, bool valid)
+  : hash_(hash), index_(index), valid_(valid)
+{
+}
+
+// protected
+point::point(hash_digest&& hash, uint32_t index, bool valid)
+  : hash_(std::move(hash)), index_(index), valid_(valid)
+{
+}
+
 point::point(const point& other)
-  : point(other.hash_, other.index_)
+  : point(other.hash_, other.index_, other.valid_)
 {
 }
 
 point::point(point&& other)
-  : point(std::move(other.hash_), other.index_)
+  : point(std::move(other.hash_), other.index_, other.valid_)
 {
 }
 
