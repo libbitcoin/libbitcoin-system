@@ -32,14 +32,16 @@ const std::string fee_filter::command = "feefilter";
 const uint32_t fee_filter::version_minimum = version::level::bip133;
 const uint32_t fee_filter::version_maximum = version::level::bip133;
 
-fee_filter fee_filter::factory_from_data(uint32_t version, const data_chunk& data)
+fee_filter fee_filter::factory_from_data(uint32_t version,
+    const data_chunk& data)
 {
     fee_filter instance;
     instance.from_data(version, data);
     return instance;
 }
 
-fee_filter fee_filter::factory_from_data(uint32_t version, std::istream& stream)
+fee_filter fee_filter::factory_from_data(uint32_t version,
+    std::istream& stream)
 {
     fee_filter instance;
     instance.from_data(version, stream);
@@ -60,7 +62,7 @@ uint64_t fee_filter::satoshi_fixed_size(uint32_t version)
 
 // This is a default instance so is invalid.
 fee_filter::fee_filter()
-  : minimum_fee_(0u), insufficient_version_(true)
+  : minimum_fee_(0), insufficient_version_(true)
 {
 }
 
@@ -70,13 +72,19 @@ fee_filter::fee_filter(uint64_t minimum)
 {
 }
 
+// protected
+fee_filter::fee_filter(uint64_t minimum, bool insufficient_version)
+  : minimum_fee_(minimum), insufficient_version_(insufficient_version)
+{
+}
+
 fee_filter::fee_filter(const fee_filter& other)
-  : fee_filter(other.minimum_fee_)
+  : fee_filter(other.minimum_fee_, other.insufficient_version_)
 {
 }
 
 fee_filter::fee_filter(fee_filter&& other)
-  : fee_filter(other.minimum_fee_)
+  : fee_filter(other.minimum_fee_, other.insufficient_version_)
 {
 }
 
@@ -133,14 +141,14 @@ void fee_filter::to_data(uint32_t version, writer& sink) const
 
 bool fee_filter::is_valid() const
 {
-    return !insufficient_version_ || (minimum_fee_ > 0u);
+    return !insufficient_version_ || (minimum_fee_ > 0);
 }
 
 // This is again a default instance so is invalid.
 void fee_filter::reset()
 {
     insufficient_version_ = true;
-    minimum_fee_ = 0u;
+    minimum_fee_ = 0;
 }
 
 uint64_t fee_filter::serialized_size(uint32_t version) const

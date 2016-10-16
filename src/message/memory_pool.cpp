@@ -63,6 +63,22 @@ memory_pool::memory_pool()
 {
 }
 
+// protected
+memory_pool::memory_pool(bool insufficient_version)
+  : insufficient_version_(insufficient_version)
+{
+}
+
+memory_pool::memory_pool(const memory_pool& other)
+  : memory_pool(other.insufficient_version_)
+{
+}
+
+memory_pool::memory_pool(memory_pool&& other)
+  : memory_pool(other.insufficient_version_)
+{
+}
+
 bool memory_pool::is_valid() const
 {
     return !insufficient_version_;

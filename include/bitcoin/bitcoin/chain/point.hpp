@@ -89,6 +89,10 @@ public:
     bool operator==(const point& other) const;
     bool operator!=(const point& other) const;
 
+protected:
+    point(const hash_digest& hash, uint32_t index, bool valid);
+    point(hash_digest&& hash, uint32_t index, bool valid);
+
 private:
     hash_digest hash_;
     uint32_t index_;
