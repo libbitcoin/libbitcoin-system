@@ -238,10 +238,13 @@ void script::to_data(writer& sink, bool prefix) const
         sink.write_variable_little_endian(satoshi_content_size());
 
     if (is_raw_data())
+    {
         sink.write_bytes(operations_[0].data());
-    else
-        for (const auto& op: operations_)
-            op.to_data(sink);
+        return;
+    }
+
+    for (const auto& op: operations_)
+        op.to_data(sink);
 }
 
 // TODO: cache.
@@ -255,7 +258,7 @@ uint64_t script::satoshi_content_size() const
         return safe_add(total, op.serialized_size());
     };
 
-    return std::accumulate(operations_.begin(), operations_.end(), uint64_t(0),
+    return std::accumulate(operations_.begin(), operations_.end(), uint64_t{0},
         value);
 }
 
@@ -577,7 +580,7 @@ inline void copy_item_over_stack(evaluation_context& context, size_t index)
 
 inline data_chunk bool_to_stack(bool value)
 {
-    return value ? data_chunk{ 1 } : data_chunk{};
+    return value ? data_chunk{1} : data_chunk{};
 }
 
 inline bool stack_to_bool(const data_chunk& values)

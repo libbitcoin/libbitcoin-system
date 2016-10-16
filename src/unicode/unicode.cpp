@@ -137,7 +137,7 @@ data_chunk to_utf8(wchar_t* environment[])
 // Convert wmain parameters to utf8 main parameters.
 data_chunk to_utf8(int argc, wchar_t* argv[])
 {
-    auto arg_count = safe_to_unsigned<size_t>(argc);
+    const auto arg_count = safe_to_unsigned<size_t>(argc);
 
     // Convert each arg and determine the payload size.
     size_t payload_size = 0;
@@ -149,12 +149,12 @@ data_chunk to_utf8(int argc, wchar_t* argv[])
         payload_size += collection[arg].size() + 1;
     }
 
-    // TODO: unsafe_math.
+    // TODO: unsafe multiplication.
     // Determine the index size.
-    auto index_size = safe_add(arg_count, size_t(1)) * sizeof(void*);
+    const auto index_size = safe_add(arg_count, size_t{1}) * sizeof(void*);
 
     // Allocate the new buffer.
-    auto buffer_size = safe_add(index_size, payload_size);
+    const auto buffer_size = safe_add(index_size, payload_size);
     data_chunk buffer(buffer_size, 0x00);
     buffer.resize(buffer_size);
 
@@ -167,9 +167,7 @@ data_chunk to_utf8(int argc, wchar_t* argv[])
     {
         index[arg] = arguments;
         std::copy(collection[arg].begin(), collection[arg].end(), index[arg]);
-
-        // TODO: unsafe math.
-        arguments += safe_add(collection[arg].size(), size_t(1));
+        arguments += safe_add(collection[arg].size(), size_t{1});
     }
 
     return buffer;
