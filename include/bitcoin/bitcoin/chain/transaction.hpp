@@ -48,6 +48,7 @@ class BC_API transaction
 public:
     typedef std::vector<transaction> list;
 
+    // validation-related
     typedef struct { const transaction& tx; size_t input_index; } element;
     typedef std::vector<element> set;
     typedef std::vector<set> sets;
@@ -76,75 +77,26 @@ public:
         bool duplicate = false;
     };
 
-    static transaction factory_from_data(const data_chunk& data,
-        bool satoshi=true);
-    static transaction factory_from_data(std::istream& stream,
-        bool satoshi=true);
-    static transaction factory_from_data(reader& source, bool satoshi=true);
     static sets_ptr reserve_buckets(size_t total, size_t fanout);
 
+    // Constructors.
+    //-----------------------------------------------------------------------------
+
     transaction();
-    transaction(uint32_t version, uint32_t locktime, const input::list& inputs,
-        const output::list& outputs);
+
+    transaction(transaction&& other);
+    transaction(const transaction& other);
+
+    transaction(transaction&& other, hash_digest&& hash);
+    transaction(const transaction& other, const hash_digest& hash);
+
     transaction(uint32_t version, uint32_t locktime, input::list&& inputs,
         output::list&& outputs);
-    transaction(const transaction& other);
-    transaction(transaction&& other);
-    transaction(const transaction& other, const hash_digest& hash);
-    transaction(transaction&& other, const hash_digest& hash);
+    transaction(uint32_t version, uint32_t locktime, const input::list& inputs,
+        const output::list& outputs);
 
-    uint32_t version() const;
-    void set_version(uint32_t value);
-
-    uint32_t locktime() const;
-    void set_locktime(uint32_t value);
-
-    input::list& inputs();
-    const input::list& inputs() const;
-    void set_inputs(const input::list& value);
-    void set_inputs(input::list&& value);
-
-    output::list& outputs();
-    const output::list& outputs() const;
-    void set_outputs(const output::list& value);
-    void set_outputs(output::list&& value);
-
-    void reset();
-    bool is_valid() const;
-    bool is_coinbase() const;
-    bool is_oversized_coinbase() const;
-    bool is_null_non_coinbase() const;
-    bool is_overspent() const;
-    bool is_final(size_t block_height, uint32_t block_time) const;
-    bool is_locktime_conflict() const;
-    bool is_missing_inputs() const;
-    bool is_immature(size_t target_height) const;
-    bool is_double_spend(bool include_unconfirmed) const;
-
-    code check(bool transaction_pool = true) const;
-    code accept(const chain_state& state, bool transaction_pool=true) const;
-    code connect(const chain_state& state) const;
-    code connect_input(const chain_state& state, size_t input_index) const;
-
-    uint64_t fees() const;
-    hash_digest hash() const;
-    hash_digest hash(uint32_t sighash_type) const;
-    uint64_t serialized_size() const;
-    uint64_t total_input_value() const;
-    uint64_t total_output_value() const;
-    point::indexes missing_inputs() const;
-    point::indexes immature_inputs(size_t target_height) const;
-    point::indexes double_spends(bool include_unconfirmed) const;
-    size_t signature_operations(bool bip16_active) const;
-    sets_const_ptr to_input_sets(size_t fanout) const;
-    std::string to_string(uint32_t flags) const;
-
-    bool from_data(const data_chunk& data, bool satoshi=true);
-    bool from_data(std::istream& stream, bool satoshi=true);
-    bool from_data(reader& source, bool satoshi=true);
-    data_chunk to_data(bool satoshi=true) const;
-    void to_data(std::ostream& stream, bool satoshi=true) const;
-    void to_data(writer& sink, bool satoshi=true) const;
+    // Operators.
+    //-----------------------------------------------------------------------------
 
     /// This class is move assignable [but not copy assignable].
     transaction& operator=(transaction&& other);
@@ -153,8 +105,89 @@ public:
     bool operator==(const transaction& other) const;
     bool operator!=(const transaction& other) const;
 
+    // Deserialization.
+    //-----------------------------------------------------------------------------
+
+    static transaction factory_from_data(const data_chunk& data, bool wire=true);
+    static transaction factory_from_data(std::istream& stream, bool wire=true);
+    static transaction factory_from_data(reader& source, bool wire=true);
+
+    bool from_data(const data_chunk& data, bool satoshi = true);
+    bool from_data(std::istream& stream, bool satoshi = true);
+    bool from_data(reader& source, bool satoshi = true);
+
+    bool is_valid() const;
+
+    // Serialization.
+    //-----------------------------------------------------------------------------
+
+    data_chunk to_data(bool wire=true) const;
+    void to_data(std::ostream& stream, bool wire=true) const;
+    void to_data(writer& sink, bool wire = true) const;
+
+    std::string to_string(uint32_t flags) const;
+    sets_const_ptr to_input_sets(size_t fanout) const;
+
+    // Properties (size, accessors, cache).
+    //-----------------------------------------------------------------------------
+
+    uint64_t serialized_size() const;
+
+    uint32_t version() const;
+    void set_version(uint32_t value);
+
+    uint32_t locktime() const;
+    void set_locktime(uint32_t value);
+
+    // Deprecated (unsafe).
+    input::list& inputs();
+
+    const input::list& inputs() const;
+    void set_inputs(const input::list& value);
+    void set_inputs(input::list&& value);
+
+    // Deprecated (unsafe).
+    output::list& outputs();
+
+    const output::list& outputs() const;
+    void set_outputs(const output::list& value);
+    void set_outputs(output::list&& value);
+
+    hash_digest hash() const;
+    hash_digest hash(uint32_t sighash_type) const;
+
+    // Validation.
+    //-----------------------------------------------------------------------------
+
+    uint64_t fees() const;
+    point::indexes double_spends(bool include_unconfirmed) const;
+    point::indexes immature_inputs(size_t target_height) const;
+    point::indexes missing_inputs() const;
+    uint64_t total_input_value() const;
+    uint64_t total_output_value() const;
+    size_t signature_operations(bool bip16_active) const;
+
+    bool is_coinbase() const;
+    bool is_null_non_coinbase() const;
+    bool is_oversized_coinbase() const;
+    bool is_immature(size_t target_height) const;
+    bool is_overspent() const;
+    bool is_double_spend(bool include_unconfirmed) const;
+    bool is_missing_inputs() const;
+    bool is_final(size_t block_height, uint32_t block_time) const;
+    bool is_locktime_conflict() const;
+
+    code check(bool transaction_pool = true) const;
+    code accept(const chain_state& state, bool transaction_pool=true) const;
+    code connect(const chain_state& state) const;
+    code connect_input(const chain_state& state, size_t input_index) const;
+
     // These fields do not participate in serialization or comparison.
     mutable validation validation;
+
+protected:
+    void reset();
+    void invalidate_cache() const;
 
 private:
     uint32_t version_;
@@ -162,7 +195,7 @@ private:
     input::list inputs_;
     output::list outputs_;
 
-    mutable upgrade_mutex hash_mutex_;
+    mutable upgrade_mutex mutex_;
     mutable std::shared_ptr<hash_digest> hash_;
 };
 

@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/message/merkle_block.hpp>
 
+#include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -97,7 +98,7 @@ bool merkle_block::is_valid() const
 
 void merkle_block::reset()
 {
-    header_.reset();
+    header_ = chain::header{};
     total_transactions_ = 0;
     hashes_.clear();
     hashes_.shrink_to_fit();

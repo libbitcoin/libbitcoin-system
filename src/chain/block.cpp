@@ -90,6 +90,62 @@ static const std::string encoded_testnet_genesis_block =
     "4104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac"
     "00000000";
 
+// Constructors.
+//-----------------------------------------------------------------------------
+
+block::block()
+  : header_(), transactions_()
+{
+}
+
+block::block(const block& other)
+  : block(other.header_, other.transactions_)
+{
+}
+
+block::block(block&& other)
+  : block(std::move(other.header_), std::move(other.transactions_))
+{
+}
+
+// TODO: deal with possibility of inconsistent merkle root in relation to txs.
+block::block(const chain::header& header,
+    const transaction::list& transactions)
+  : header_(header), transactions_(transactions)
+{
+}
+
+// TODO: deal with possibility of inconsistent merkle root in relation to txs.
+block::block(chain::header&& header, transaction::list&& transactions)
+  : header_(std::move(header)), transactions_(std::move(transactions))
+{
+}
+
+// Operators.
+//-----------------------------------------------------------------------------
+
+block& block::operator=(block&& other)
+{
+    header_ = std::move(other.header_);
+    transactions_ = std::move(other.transactions_);
+    return *this;
+}
+
+bool block::operator==(const block& other) const
+{
+    return (header_ == other.header_)
+        && (transactions_ == other.transactions_);
+}
+
+bool block::operator!=(const block& other) const
+{
+    return !(*this == other);
+}
+
+// Deserialization.
+//-----------------------------------------------------------------------------
+
+// static
 block block::factory_from_data(const data_chunk& data)
 {
     block instance;
@@ -97,6 +153,7 @@ block block::factory_from_data(const data_chunk& data)
     return instance;
 }
 
+// static
 block block::factory_from_data(std::istream& stream)
 {
     block instance;
@@ -104,6 +161,7 @@ block block::factory_from_data(std::istream& stream)
     return instance;
 }
 
+// static
 block block::factory_from_data(reader& source)
 {
     block instance;
@@ -111,82 +169,201 @@ block block::factory_from_data(reader& source)
     return instance;
 }
 
+bool block::from_data(const data_chunk& data)
+{
+    data_source istream(data);
+    return from_data(istream);
+}
+
+bool block::from_data(std::istream& stream)
+{
+    istream_reader source(stream);
+    return from_data(source);
+}
+
+bool block::from_data(reader& source)
+{
+    reset();
+
+    if (!header_.from_data(source))
+        return false;
+
+    transactions_.resize(source.read_size_little_endian());
+
+    // Order is required.
+    for (auto& tx: transactions_)
+        if (!tx.from_data(source))
+            break;
+
+    if (!source)
+        reset();
+
+    return source;
+}
+
+// private
+void block::reset()
+{
+    header_ = chain::header{};
+    transactions_.clear();
+    transactions_.shrink_to_fit();
+}
+
+bool block::is_valid() const
+{
+    return !transactions_.empty() || header_.is_valid();
+}
+
+// Serialization.
+//-----------------------------------------------------------------------------
+
+data_chunk block::to_data() const
+{
+    data_chunk data;
+    data_sink ostream(data);
+    to_data(ostream);
+    ostream.flush();
+    BITCOIN_ASSERT(data.size() == serialized_size());
+    return data;
+}
+
+void block::to_data(std::ostream& stream) const
+{
+    ostream_writer sink(stream);
+    to_data(sink);
+}
+
+void block::to_data(writer& sink) const
+{
+    header_.to_data(sink);
+    sink.write_variable_little_endian(transactions_.size());
+    const auto to = [&sink](const transaction& tx) { tx.to_data(sink); };
+    std::for_each(transactions_.begin(), transactions_.end(), to);
+}
+
+// TODO: provide optimization option to balance total sigops across buckets.
+// Disperse the inputs of the block evenly to the specified number of buckets.
+transaction::sets_const_ptr block::to_input_sets(size_t fanout,
+    bool with_coinbase) const
+{
+    const auto total = total_inputs(with_coinbase);
+    const auto buckets = transaction::reserve_buckets(total, fanout);
+
+    // Guard against division by zero.
+    if (!buckets->empty())
+    {
+        size_t count = 0;
+        const auto& txs = transactions_;
+        const auto start = with_coinbase ? 0 : 1;
+
+        // Populate each bucket with full (or full-1) input references.
+        for (auto tx = txs.begin() + start; tx != txs.end(); ++tx)
+            for (size_t index = 0; index < tx->inputs().size(); ++index)
+                (*buckets)[count++ % fanout].push_back({ *tx, index });
+    }
+
+    return std::const_pointer_cast<const transaction::sets>(buckets);
+}
+
+// Properties (size, accessors, cache).
+//-----------------------------------------------------------------------------
+
+uint64_t block::serialized_size() const
+{
+    const auto sum = [](uint64_t total, const transaction& tx)
+    {
+        return safe_add(total, tx.serialized_size());
+    };
+
+    const auto& txs = transactions_;
+
+    return header_.serialized_size()
+        + variable_uint_size(transactions_.size())
+        + std::accumulate(txs.begin(), txs.end(), size_t{0}, sum);
+}
+
+chain::header& block::header()
+{
+    return header_;
+}
+
+const chain::header& block::header() const
+{
+    return header_;
+}
+
+// TODO: must call header.set_merkle(generate_merkle_root()) though this may
+// be very suboptimal if the block is being constructed. First verify that all
+// current uses will not be impacted and if so change them to use constructor.
+void block::set_header(const chain::header& value)
+{
+    header_ = value;
+}
+
+// TODO: see set_header comments.
+void block::set_header(chain::header&& value)
+{
+    header_ = std::move(value);
+}
+
+transaction::list& block::transactions()
+{
+    return transactions_;
+}
+
+const transaction::list& block::transactions() const
+{
+    return transactions_;
+}
+
+// TODO: see set_header comments.
+void block::set_transactions(const transaction::list& value)
+{
+    transactions_ = value;
+}
+
+// TODO: see set_header comments.
+void block::set_transactions(transaction::list&& value)
+{
+    transactions_ = std::move(value);
+}
+
+// Convenience property.
+hash_digest block::hash() const
+{
+    return header_.hash();
+}
+
+// Utilities.
+//-----------------------------------------------------------------------------
+
 chain::block block::genesis_mainnet()
 {
-    data_chunk raw_block;
-    decode_base16(raw_block, encoded_mainnet_genesis_block);
-    const auto genesis = chain::block::factory_from_data(raw_block);
+    data_chunk data;
+    decode_base16(data, encoded_mainnet_genesis_block);
+    const auto genesis = chain::block::factory_from_data(data);
 
     BITCOIN_ASSERT(genesis.is_valid());
     BITCOIN_ASSERT(genesis.transactions().size() == 1);
     BITCOIN_ASSERT(genesis.generate_merkle_root() == genesis.header().merkle());
-
     return genesis;
 }
 
 chain::block block::genesis_testnet()
 {
-    data_chunk raw_block;
-    decode_base16(raw_block, encoded_testnet_genesis_block);
-    const auto genesis = chain::block::factory_from_data(raw_block);
+    data_chunk data;
+    decode_base16(data, encoded_testnet_genesis_block);
+    const auto genesis = chain::block::factory_from_data(data);
 
     BITCOIN_ASSERT(genesis.is_valid());
     BITCOIN_ASSERT(genesis.transactions().size() == 1);
     BITCOIN_ASSERT(genesis.generate_merkle_root() == genesis.header().merkle());
-
     return genesis;
-}
-
-hash_digest block::build_merkle_tree(hash_list& merkle)
-{
-    // Stop if hash list is empty.
-    if (merkle.empty())
-        return null_hash;
-
-    // While there is more than 1 hash in the list, keep looping...
-    while (merkle.size() > 1)
-    {
-        // If number of hashes is odd, duplicate last hash in the list.
-        if (merkle.size() % 2 != 0)
-            merkle.push_back(merkle.back());
-
-        // List size is now even.
-        BITCOIN_ASSERT(merkle.size() % 2 == 0);
-
-        // New hash list.
-        hash_list new_merkle;
-
-        // Loop through hashes 2 at a time.
-        for (auto it = merkle.begin(); it != merkle.end(); it += 2)
-        {
-            // Join both current hashes together (concatenate).
-            data_chunk concat_data;
-            data_sink concat_stream(concat_data);
-            ostream_writer concat_sink(concat_stream);
-            concat_sink.write_hash(*it);
-            concat_sink.write_hash(*(it + 1));
-            concat_stream.flush();
-
-            BITCOIN_ASSERT(concat_data.size() == (2 * hash_size));
-
-            // Hash both of the hashes.
-            const auto new_root = bitcoin_hash(concat_data);
-
-            // Add this to the new list.
-            new_merkle.push_back(new_root);
-        }
-
-        // This is the new list.
-        merkle = new_merkle;
-    }
-
-    // Finally we end up with a single item.
-    return merkle[0];
 }
 
 size_t block::locator_size(size_t top)
 {
-    // Thread side effect :<
+    // Set rounding behavior, not consensus-related, thread side effect :<.
     std::fesetround(FE_UPWARD);
 
     const auto first_ten_or_top = std::min(size_t(10), top);
@@ -222,6 +399,10 @@ block::indexes block::locator_heights(size_t top)
     return heights;
 }
 
+// Validation helpers.
+//-----------------------------------------------------------------------------
+
+// static
 hash_number block::difficulty(uint32_t bits)
 {
     hash_number target;
@@ -236,6 +417,11 @@ hash_number block::difficulty(uint32_t bits)
     return (~target / (target + 1)) + 1;
 }
 
+hash_number block::difficulty() const
+{
+    return difficulty(header_.bits());
+}
+
 uint64_t block::subsidy(size_t height)
 {
     auto subsidy = initial_block_reward_satoshi();
@@ -243,222 +429,7 @@ uint64_t block::subsidy(size_t height)
     return subsidy;
 }
 
-// Hash ordering matters, don't use std::transform here.
-inline hash_list to_hashes(const transaction::list& transactions)
-{
-    hash_list out;
-    out.reserve(transactions.size());
-    auto hasher = [&out](const transaction& tx) { out.push_back(tx.hash()); };
-    std::for_each(transactions.begin(), transactions.end(), hasher);
-    return out;
-}
-
-block::block()
-  : header_(), transactions_()
-{
-}
-
-block::block(const chain::header& header,
-    const transaction::list& transactions)
-  : header_(header), transactions_(transactions)
-{
-}
-
-block::block(chain::header&& header, transaction::list&& transactions)
-  : header_(std::move(header)),
-    transactions_(std::move(transactions))
-{
-}
-
-block::block(const block& other)
-  : block(other.header_, other.transactions_)
-{
-}
-
-block::block(block&& other)
-  : block(std::move(other.header_), std::move(other.transactions_))
-{
-}
-
-chain::header& block::header()
-{
-    return header_;
-}
-
-const chain::header& block::header() const
-{
-    return header_;
-}
-
-void block::set_header(const chain::header& value)
-{
-    header_ = value;
-}
-
-void block::set_header(chain::header&& value)
-{
-    header_ = std::move(value);
-}
-
-transaction::list& block::transactions()
-{
-    return transactions_;
-}
-
-const transaction::list& block::transactions() const
-{
-    return transactions_;
-}
-
-void block::set_transactions(const transaction::list& value)
-{
-    transactions_ = value;
-}
-
-void block::set_transactions(transaction::list&& value)
-{
-    transactions_ = std::move(value);
-}
-
-block& block::operator=(block&& other)
-{
-    header_ = std::move(other.header_);
-    transactions_ = std::move(other.transactions_);
-    return *this;
-}
-
-bool block::operator==(const block& other) const
-{
-    return (header_ == other.header_)
-        && (transactions_ == other.transactions_);
-}
-
-bool block::operator!=(const block& other) const
-{
-    return !(*this == other);
-}
-
-bool block::is_valid() const
-{
-    return !transactions_.empty() || header_.is_valid();
-}
-
-void block::reset()
-{
-    header_.reset();
-    transactions_.clear();
-    transactions_.shrink_to_fit();
-}
-
-bool block::from_data(const data_chunk& data)
-{
-    data_source istream(data);
-    return from_data(istream);
-}
-
-bool block::from_data(std::istream& stream)
-{
-    istream_reader source(stream);
-    return from_data(source);
-}
-
-bool block::from_data(reader& source)
-{
-    reset();
-
-    if (!header_.from_data(source))
-        return false;
-
-    transactions_.resize(source.read_size_little_endian());
-
-    // Order is required.
-    for (auto& tx: transactions_)
-        if (!tx.from_data(source))
-            break;
-
-    if (!source)
-        reset();
-
-    return source;
-}
-
-data_chunk block::to_data() const
-{
-    data_chunk data;
-    data_sink ostream(data);
-    to_data(ostream);
-    ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
-    return data;
-}
-
-void block::to_data(std::ostream& stream) const
-{
-    ostream_writer sink(stream);
-    to_data(sink);
-}
-
-void block::to_data(writer& sink) const
-{
-    header_.to_data(sink);
-    sink.write_variable_little_endian(transactions_.size());
-    const auto to = [&sink](const transaction& tx) { tx.to_data(sink); };
-    std::for_each(transactions_.begin(), transactions_.end(), to);
-}
-
-// TODO: provide optimization option to balance total sigops across buckets.
-// Disperse the inputs of the block evenly to the specified number of buckets.
-transaction::sets_const_ptr block::to_input_sets(size_t fanout,
-    bool with_coinbase_transaction) const
-{
-    const auto total = total_inputs(with_coinbase_transaction);
-    const auto buckets = transaction::reserve_buckets(total, fanout);
-
-    // Guard against division by zero.
-    if (!buckets->empty())
-    {
-        size_t count = 0;
-        const auto& txs = transactions_;
-        const auto start = with_coinbase_transaction ? 0 : 1;
-
-        // Populate each bucket with full (or full-1) input references.
-        for (auto tx = txs.begin() + start; tx != txs.end(); ++tx)
-            for (size_t index = 0; index < tx->inputs().size(); ++index)
-                (*buckets)[count++ % fanout].push_back({ *tx, index });
-    }
-
-    return std::const_pointer_cast<const transaction::sets>(buckets);
-}
-
-// Convenience property.
-hash_digest block::hash() const
-{
-    return header_.hash();
-}
-
-hash_number block::difficulty() const
-{
-    return difficulty(header_.bits());
-}
-
-// overflow returns max_uint64
-uint64_t block::serialized_size() const
-{
-    auto block_size = header_.serialized_size() +
-        variable_uint_size(transactions_.size());
-
-    const auto value = [](uint64_t total, const transaction& tx)
-    {
-        const auto size = tx.serialized_size();
-        return safe_add(total, size);
-    };
-
-    const auto& txs = transactions_;
-    return std::accumulate(txs.begin(), txs.end(), block_size, value);
-    return block_size;
-}
-
-// Unpopulated chain state returns max_size_t.
+// Returns max_size_t in case of overflow or unpopulated chain state.
 size_t block::signature_operations() const
 {
     const auto state = validation.state;
@@ -466,18 +437,19 @@ size_t block::signature_operations() const
         state->is_enabled(rule_fork::bip16_rule)) : max_size_t;
 }
 
+// Returns max_size_t in case of overflow.
 size_t block::signature_operations(bool bip16_active) const
 {
     const auto value = [bip16_active](size_t total, const transaction& tx)
     {
-        return safe_add(total, tx.signature_operations(bip16_active));
+        return ceiling_add(total, tx.signature_operations(bip16_active));
     };
 
     const auto& txs = transactions_;
-    return std::accumulate(txs.begin(), txs.end(), size_t(0), value);
+    return std::accumulate(txs.begin(), txs.end(), size_t{0}, value);
 }
 
-size_t block::total_inputs(bool with_coinbase_transaction) const
+size_t block::total_inputs(bool with_coinbase) const
 {
     const auto inputs = [](size_t total, const transaction& tx)
     {
@@ -485,8 +457,8 @@ size_t block::total_inputs(bool with_coinbase_transaction) const
     };
 
     const auto& txs = transactions_;
-    const size_t offset = with_coinbase_transaction ? 0 : 1;
-    return std::accumulate(txs.begin() + offset, txs.end(), size_t(0), inputs);
+    const size_t offset = with_coinbase ? 0 : 1;
+    return std::accumulate(txs.begin() + offset, txs.end(), size_t{0}, inputs);
 }
 
 // True if there is another coinbase other than the first tx.
@@ -531,12 +503,18 @@ bool block::is_distinct_transaction_set() const
 
 hash_digest block::generate_merkle_root() const
 {
-    auto merkle = to_hashes(transactions_);
-
-    if (merkle.empty())
+    if (transactions_.empty())
         return null_hash;
 
-    hash_list update;
+    hash_list merkle, update;
+
+    auto hasher = [&merkle](const transaction& tx)
+    {
+        merkle.push_back(tx.hash());
+    };
+
+    // Hash ordering matters, don't use std::transform here.
+    std::for_each(transactions_.begin(), transactions_.end(), hasher);
 
     // Initial capacity is half of the original list (clear doesn't reset).
     update.reserve((merkle.size() + 1) / 2);
@@ -573,7 +551,7 @@ uint64_t block::fees() const
     };
 
     const auto& txs = transactions_;
-    return std::accumulate(txs.begin(), txs.end(), uint64_t(0), value);
+    return std::accumulate(txs.begin(), txs.end(), uint64_t{0}, value);
 }
 
 uint64_t block::claim() const
@@ -647,6 +625,9 @@ code block::connect_transactions(const chain_state& state) const
     return error::success;
 }
 
+// Validation.
+//-----------------------------------------------------------------------------
+
 // These checks are self-contained; blockchain (and so version) independent.
 code block::check() const
 {
@@ -690,7 +671,6 @@ code block::accept() const
     return state ? accept(*state) : error::operation_failed;
 }
 
-// Deprecated (?)
 // TODO: implement sigops and total input/output value caching.
 // These checks assume that prevout caching is completed on all tx.inputs.
 // Flags should be based on connecting at the specified blockchain height.
@@ -727,7 +707,6 @@ code block::connect() const
     return state ? connect(*state) : error::operation_failed;
 }
 
-// Deprecated (?)
 code block::connect(const chain_state& state) const
 {
     return connect_transactions(state);

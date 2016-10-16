@@ -97,7 +97,7 @@ bool compact_block::is_valid() const
 
 void compact_block::reset()
 {
-    header_.reset();
+    header_ = chain::header{};
     nonce_ = 0;
     short_ids_.clear();
     short_ids_.shrink_to_fit();
