@@ -46,6 +46,8 @@ namespace chain {
 class BC_API transaction
 {
 public:
+    typedef input::list ins;
+    typedef output::list outs;
     typedef std::vector<transaction> list;
 
     // validation-related
@@ -90,10 +92,9 @@ public:
     transaction(transaction&& other, hash_digest&& hash);
     transaction(const transaction& other, const hash_digest& hash);
 
-    transaction(uint32_t version, uint32_t locktime, input::list&& inputs,
-        output::list&& outputs);
-    transaction(uint32_t version, uint32_t locktime, const input::list& inputs,
-        const output::list& outputs);
+    transaction(uint32_t version, uint32_t locktime, ins&& inputs, outs&& outputs);
+    transaction(uint32_t version, uint32_t locktime, const ins& inputs,
+        const outs& outputs);
 
     // Operators.
     //-----------------------------------------------------------------------------
@@ -140,18 +141,18 @@ public:
     void set_locktime(uint32_t value);
 
     // Deprecated (unsafe).
-    input::list& inputs();
+    ins& inputs();
 
     const input::list& inputs() const;
-    void set_inputs(const input::list& value);
-    void set_inputs(input::list&& value);
+    void set_inputs(const ins& value);
+    void set_inputs(ins&& value);
 
     // Deprecated (unsafe).
-    output::list& outputs();
+    outs& outputs();
 
-    const output::list& outputs() const;
-    void set_outputs(const output::list& value);
-    void set_outputs(output::list&& value);
+    const outs& outputs() const;
+    void set_outputs(const outs& value);
+    void set_outputs(outs&& value);
 
     hash_digest hash() const;
     hash_digest hash(uint32_t sighash_type) const;
