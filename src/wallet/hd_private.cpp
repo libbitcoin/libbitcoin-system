@@ -255,7 +255,7 @@ hd_private hd_private::derive_private(uint32_t index) const
     const hd_lineage lineage
     {
         lineage_.prefixes,
-        lineage_.depth + 1u,
+        static_cast<uint8_t>(lineage_.depth + 1),
         fingerprint(),
         index
     };
