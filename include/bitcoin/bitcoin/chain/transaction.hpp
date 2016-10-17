@@ -113,9 +113,9 @@ public:
     static transaction factory_from_data(std::istream& stream, bool wire=true);
     static transaction factory_from_data(reader& source, bool wire=true);
 
-    bool from_data(const data_chunk& data, bool satoshi = true);
-    bool from_data(std::istream& stream, bool satoshi = true);
-    bool from_data(reader& source, bool satoshi = true);
+    bool from_data(const data_chunk& data, bool wire=true);
+    bool from_data(std::istream& stream, bool wire=true);
+    bool from_data(reader& source, bool wire=true);
 
     bool is_valid() const;
 
@@ -124,7 +124,7 @@ public:
 
     data_chunk to_data(bool wire=true) const;
     void to_data(std::ostream& stream, bool wire=true) const;
-    void to_data(writer& sink, bool wire = true) const;
+    void to_data(writer& sink, bool wire=true) const;
 
     std::string to_string(uint32_t flags) const;
     sets_const_ptr to_input_sets(size_t fanout) const;
@@ -132,7 +132,7 @@ public:
     // Properties (size, accessors, cache).
     //-----------------------------------------------------------------------------
 
-    uint64_t serialized_size() const;
+    uint64_t serialized_size(bool wire=true) const;
 
     uint32_t version() const;
     void set_version(uint32_t value);

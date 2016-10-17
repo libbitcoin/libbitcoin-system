@@ -50,13 +50,13 @@ const size_t transaction::validation::unspecified_height = 0;
 
 // Read a length-prefixed collection of inputs or outputs from the source.
 template<class Source, class Put>
-bool read(Source& source, std::vector<Put>& puts)
+bool read(Source& source, std::vector<Put>& puts, bool wire)
 {
     puts.resize(source.read_size_little_endian());
 
     // Order is required.
     for (auto& put: puts)
-        if (!put.from_data(source))
+        if (!put.from_data(source, wire))
             return false;
 
     return true;
@@ -64,11 +64,16 @@ bool read(Source& source, std::vector<Put>& puts)
 
 // Write a length-prefixed collection of inputs or outputs to the sink.
 template<class Sink, class Put>
-void write(Sink& sink, const std::vector<Put>& puts)
+void write(Sink& sink, const std::vector<Put>& puts, bool wire)
 {
     sink.write_variable_little_endian(puts.size());
-    auto to = [&sink](const Put& put) { put.to_data(sink); };
-    std::for_each(puts.begin(), puts.end(), to);
+
+    const auto serialize = [&sink, wire](const Put& put)
+    {
+        put.to_data(sink, wire);
+    };
+
+    std::for_each(puts.begin(), puts.end(), serialize);
 }
 
 // Reserve uniform buckets of minimum size and full distribution.
@@ -127,14 +132,14 @@ transaction::transaction(const transaction& other, const hash_digest& hash)
 transaction::transaction(uint32_t version, uint32_t locktime,
     const input::list& inputs, const output::list& outputs)
   : version_(version), locktime_(locktime), inputs_(inputs), outputs_(outputs),
-    validation()
+    validation{}
 {
 }
 
 transaction::transaction(uint32_t version, uint32_t locktime,
     input::list&& inputs, output::list&& outputs)
   : version_(version), locktime_(locktime), inputs_(std::move(inputs)),
-    outputs_(std::move(outputs)), validation()
+    outputs_(std::move(outputs)), validation{}
 {
 }
 
@@ -200,35 +205,35 @@ transaction transaction::factory_from_data(reader& source, bool wire)
     return instance;
 }
 
-bool transaction::from_data(const data_chunk& data, bool satoshi)
+bool transaction::from_data(const data_chunk& data, bool wire)
 {
     data_source istream(data);
-    return from_data(istream, satoshi);
+    return from_data(istream, wire);
 }
 
-bool transaction::from_data(std::istream& stream, bool satoshi)
+bool transaction::from_data(std::istream& stream, bool wire)
 {
     istream_reader source(stream);
-    return from_data(source, satoshi);
+    return from_data(source, wire);
 }
 
-bool transaction::from_data(reader& source, bool satoshi)
+bool transaction::from_data(reader& source, bool wire)
 {
     reset();
 
     version_ = source.read_4_bytes_little_endian();
 
-    if (satoshi)
+    if (wire)
     {
         // Wire (satoshi protocol) deserialization.
-        read(source, inputs_) && read(source, outputs_);
+        read(source, inputs_, wire) && read(source, outputs_, wire);
         locktime_ = source.read_4_bytes_little_endian();
     }
     else
     {
         // Database serialization (outputs forward).
         locktime_ = source.read_4_bytes_little_endian();
-        read(source, outputs_) && read(source, inputs_);
+        read(source, outputs_, wire) && read(source, inputs_, wire);
     }
 
     if (!source)
@@ -264,7 +269,7 @@ data_chunk transaction::to_data(bool wire) const
     data_sink ostream(data);
     to_data(ostream, wire);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == serialized_size(wire));
 
     return data;
 }
@@ -282,16 +287,16 @@ void transaction::to_data(writer& sink, bool wire) const
     if (wire)
     {
         // Wire (satoshi protocol) serialization.
-        write(sink, inputs_);
-        write(sink, outputs_);
+        write(sink, inputs_, wire);
+        write(sink, outputs_, wire);
         sink.write_4_bytes_little_endian(locktime_);
     }
     else
     {
         // Database serialization (outputs forward).
         sink.write_4_bytes_little_endian(locktime_);
-        write(sink, outputs_);
-        write(sink, inputs_);
+        write(sink, outputs_, wire);
+        write(sink, inputs_, wire);
     }
 }
 
@@ -338,16 +343,16 @@ transaction::sets_const_ptr transaction::to_input_sets(size_t fanout) const
 // Size.
 //-----------------------------------------------------------------------------
 
-uint64_t transaction::serialized_size() const
+uint64_t transaction::serialized_size(bool wire) const
 {
-    const auto ins = [](size_t size, const input& input)
+    const auto ins = [wire](size_t size, const input& input)
     {
-        return size + input.serialized_size();
+        return size + input.serialized_size(wire);
     };
 
-    const auto outs = [](size_t size, const output& output)
+    const auto outs = [wire](size_t size, const output& output)
     {
-        return size + output.serialized_size();
+        return size + output.serialized_size(wire);
     };
 
     return sizeof(version_) 
