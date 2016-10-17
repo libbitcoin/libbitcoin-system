@@ -105,6 +105,11 @@ void ostream_writer::write_variable_big_endian(uint64_t value)
     }
 }
 
+void ostream_writer::write_size_big_endian(size_t value)
+{
+    write_variable_big_endian(value);
+}
+
 // Little Endian Integers.
 //-----------------------------------------------------------------------------
 
@@ -149,6 +154,11 @@ void ostream_writer::write_variable_little_endian(uint64_t value)
         write_byte(varint_eight_bytes);
         write_8_bytes_little_endian(value);
     }
+}
+
+void ostream_writer::write_size_little_endian(size_t value)
+{
+    write_variable_little_endian(value);
 }
 
 // Bytes.

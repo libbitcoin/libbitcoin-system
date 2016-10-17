@@ -48,12 +48,14 @@ public:
     virtual void write_4_bytes_big_endian(uint32_t value) = 0;
     virtual void write_8_bytes_big_endian(uint64_t value) = 0;
     virtual void write_variable_big_endian(uint64_t value) = 0;
+    virtual void write_size_big_endian(size_t value) = 0;
 
     /// Write little endian integers.
     virtual void write_2_bytes_little_endian(uint16_t value) = 0;
     virtual void write_4_bytes_little_endian(uint32_t value) = 0;
     virtual void write_8_bytes_little_endian(uint64_t value) = 0;
     virtual void write_variable_little_endian(uint64_t value) = 0;
+    virtual void write_size_little_endian(size_t value) = 0;
 
     /// Write one byte.
     virtual void write_byte(uint8_t value) = 0;
