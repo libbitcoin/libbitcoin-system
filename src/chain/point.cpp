@@ -196,7 +196,7 @@ uint64_t point::checksum() const
     const auto index_hash = (hash64 & 0xffffffff00000000) | index_;
 
     // x mod 2**n == x & (2**n - 1)
-    static constexpr uint64_t divisor = uint64_t{ 1 } << 63;
+    static constexpr uint64_t divisor = uint64_t{1} << 63;
     static_assert(divisor == 9223372036854775808ull, "Wrong divisor value.");
     return index_hash & (divisor - 1);
 

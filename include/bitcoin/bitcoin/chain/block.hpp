@@ -46,6 +46,9 @@ public:
     typedef std::vector<block> list;
     typedef std::vector<size_t> indexes;
 
+    // validation-related
+    typedef transaction::sets_const_ptr input_sets;
+
     // These properties facilitate block validation.
     // This validation data is not copied on block copy.
     struct validation
@@ -55,39 +58,99 @@ public:
         transaction::sets_const_ptr sets = nullptr;
     };
 
+    // Constructors.
+    //-----------------------------------------------------------------------------
+
+    block();
+
+    block(block&& other);
+    block(const block& other);
+
+    block(chain::header&& header, transaction::list&& transactions);
+    block(const chain::header& header, const transaction::list& transactions);
+
+    // Operators.
+    //-----------------------------------------------------------------------------
+
+    /// This class is move assignable [but not copy assignable].
+    block& operator=(block&& other);
+    block& operator=(const block& other) /* = delete */;
+
+    bool operator==(const block& other) const;
+    bool operator!=(const block& other) const;
+
+    // Deserialization.
+    //-----------------------------------------------------------------------------
+
     static block factory_from_data(const data_chunk& data);
     static block factory_from_data(std::istream& stream);
     static block factory_from_data(reader& source);
 
-    static hash_number difficulty(uint32_t bits);
-    static uint64_t subsidy(size_t height);
-    static size_t locator_size(size_t top);
-    static indexes locator_heights(size_t top);
-    static block genesis_mainnet();
-    static block genesis_testnet();
+    bool from_data(const data_chunk& data);
+    bool from_data(std::istream& stream);
+    bool from_data(reader& source);
 
-    block();
-    block(const chain::header& header, const transaction::list& transactions);
-    block(chain::header&& header, transaction::list&& transactions);
-    block(const block& other);
-    block(block&& other);
+    bool is_valid() const;
 
+    // Serialization.
+    //-----------------------------------------------------------------------------
+
+    data_chunk to_data() const;
+    void to_data(std::ostream& stream) const;
+    void to_data(writer& sink) const;
+
+    input_sets to_input_sets(size_t fanout, bool with_coinbase=true) const;
+
+    // Properties (size, accessors, cache).
+    //-----------------------------------------------------------------------------
+
+    uint64_t serialized_size() const;
+
+    // deprecated (unsafe)
     chain::header& header();
+
     const chain::header& header() const;
     void set_header(const chain::header& value);
     void set_header(chain::header&& value);
 
+    // deprecated (unsafe)
     transaction::list& transactions();
+
     const transaction::list& transactions() const;
     void set_transactions(const transaction::list& value);
     void set_transactions(transaction::list&& value);
 
+    hash_digest hash() const;
+
+    // Utilities.
+    //-----------------------------------------------------------------------------
+
+    static block genesis_mainnet();
+    static block genesis_testnet();
+    static size_t locator_size(size_t top);
+    static indexes locator_heights(size_t top);
+
+    // Validation.
+    //-----------------------------------------------------------------------------
+
+    static uint64_t subsidy(size_t height);
+    static hash_number difficulty(uint32_t bits);
+
+    uint64_t fees() const;
+    uint64_t claim() const;
+    uint64_t reward(size_t height) const;
+    hash_number difficulty() const;
+    hash_digest generate_merkle_root() const;
+    size_t signature_operations() const;
+    size_t signature_operations(bool bip16_active) const;
+    size_t total_inputs(bool with_coinbase=true) const;
+
     bool is_extra_coinbases() const;
     bool is_final(size_t height) const;
-    bool is_valid_merkle_root() const;
     bool is_distinct_transaction_set() const;
     bool is_valid_coinbase_claim(size_t height) const;
     bool is_valid_coinbase_script(size_t height) const;
+    bool is_valid_merkle_root() const;
 
     code check() const;
     code check_transactions() const;
@@ -98,41 +161,13 @@ public:
     code connect(const chain_state& state) const;
     code connect_transactions(const chain_state& state) const;
 
-    uint64_t fees() const;
-    uint64_t claim() const;
-    uint64_t reward(size_t height) const;
-    hash_number difficulty() const;
-    hash_digest generate_merkle_root() const;
-    hash_digest hash() const;
-    size_t signature_operations() const;
-    size_t signature_operations(bool bip16_active) const;
-    size_t total_inputs(bool with_coinbase_transaction=true) const;
-    transaction::sets_const_ptr to_input_sets(size_t fanout,
-        bool with_coinbase_transaction=true) const;
-
-    bool from_data(const data_chunk& data);
-    bool from_data(std::istream& stream);
-    bool from_data(reader& source);
-    data_chunk to_data() const;
-    void to_data(std::ostream& stream) const;
-    void to_data(writer& sink) const;
-    bool is_valid() const;
-    void reset();
-    uint64_t serialized_size() const;
-
-    /// This class is move assignable [but not copy assignable].
-    block& operator=(block&& other);
-    block& operator=(const block& other) /* = delete */;
-
-    bool operator==(const block& other) const;
-    bool operator!=(const block& other) const;
-
     // These fields do not participate in serialization or comparison.
     mutable validation validation;
 
-private:
-    static hash_digest build_merkle_tree(hash_list& merkle);
+protected:
+    void reset();
 
+private:
     chain::header header_;
     transaction::list transactions_;
 };

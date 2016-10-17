@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/message/prefilled_transaction.hpp>
 
+#include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -87,7 +88,7 @@ bool prefilled_transaction::is_valid() const
 void prefilled_transaction::reset()
 {
     index_ = max_uint16;
-    transaction_.reset();
+    transaction_ = chain::transaction{};
 }
 
 bool prefilled_transaction::from_data(uint32_t version,

@@ -78,7 +78,7 @@ Integer safe_subtract(Integer left, Integer right)
 template <typename Integer>
 Integer& safe_increment(Integer& value)
 {
-    static BC_CONSTEXPR auto one = Integer{ 1 };
+    static BC_CONSTEXPR auto one = Integer{1};
     value = safe_add(value, one);
     return value;
 }
@@ -86,7 +86,7 @@ Integer& safe_increment(Integer& value)
 template <typename Integer>
 Integer& safe_decrement(Integer& value)
 {
-    static BC_CONSTEXPR auto one = Integer{ 1 };
+    static BC_CONSTEXPR auto one = Integer{1};
     value = safe_subtract(value, one);
     return value;
 }

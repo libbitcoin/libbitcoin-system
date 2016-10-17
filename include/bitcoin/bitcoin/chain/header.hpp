@@ -56,32 +56,72 @@ public:
         size_t height = validation::orphan_height;
     };
 
-    static header factory_from_data(const data_chunk& data);
-    static header factory_from_data(std::istream& stream);
-    static header factory_from_data(reader& source);
-    static uint64_t satoshi_fixed_size();
+    // Constructors.
+    //-----------------------------------------------------------------------------
 
     header();
+
+    header(header&& other);
+    header(const header& other);
+
+    header(header&& other, hash_digest&& hash);
+    header(const header& other, const hash_digest& hash);
+
     header(uint32_t version, const hash_digest& previous_block_hash,
         const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
         uint32_t nonce);
     header(uint32_t version, hash_digest&& previous_block_hash,
-        hash_digest&& merkle, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce);
-    header(const header& other);
-    header(header&& other);
-    header(const header& other, const hash_digest& hash);
-    header(header&& other, const hash_digest& hash);
+        hash_digest&& merkle, uint32_t timestamp, uint32_t bits, uint32_t nonce);
+
+    // Operators.
+    //-----------------------------------------------------------------------------
+
+    /// This class is move assignable [but not copy assignable].
+    header& operator=(header&& other);
+    header& operator=(const header& other) /* = delete */;
+
+    bool operator==(const header& other) const;
+    bool operator!=(const header& other) const;
+
+    // Deserialization.
+    //-----------------------------------------------------------------------------
+
+    static header factory_from_data(const data_chunk& data);
+    static header factory_from_data(std::istream& stream);
+    static header factory_from_data(reader& source);
+
+    bool from_data(const data_chunk& data);
+    bool from_data(std::istream& stream);
+    bool from_data(reader& source);
+
+    bool is_valid() const;
+
+    // Serialization.
+    //-----------------------------------------------------------------------------
+
+    data_chunk to_data() const;
+    void to_data(std::ostream& stream) const;
+    void to_data(writer& sink) const;
+
+    // Properties (size, accessors, cache).
+    //-----------------------------------------------------------------------------
+
+    static uint64_t satoshi_fixed_size();
+    uint64_t serialized_size() const;
 
     uint32_t version() const;
     void set_version(uint32_t value);
 
+    // Deprecated (unsafe).
     hash_digest& previous_block_hash();
+
     const hash_digest& previous_block_hash() const;
     void set_previous_block_hash(const hash_digest& value);
     void set_previous_block_hash(hash_digest&& value);
 
+    // Deprecated (unsafe).
     hash_digest& merkle();
+
     const hash_digest& merkle() const;
     void set_merkle(const hash_digest& value);
     void set_merkle(hash_digest&& value);
@@ -95,33 +135,23 @@ public:
     uint32_t nonce() const;
     void set_nonce(uint32_t value);
 
-    bool from_data(const data_chunk& data);
-    bool from_data(std::istream& stream);
-    bool from_data(reader& source);
-    data_chunk to_data() const;
-    void to_data(std::ostream& stream) const;
-    void to_data(writer& sink) const;
+    hash_digest hash() const;
 
-    void reset();
-    bool is_valid() const;
+    // Validation.
+    //-----------------------------------------------------------------------------
+
     bool is_valid_time_stamp() const;
     bool is_valid_proof_of_work() const;
 
     code check() const;
     code accept(const chain_state& state) const;
 
-    hash_digest hash() const;
-    uint64_t serialized_size() const;
-
-    /// This class is move assignable [but not copy assignable].
-    header& operator=(header&& other);
-    header& operator=(const header& other) /* = delete */;
-
-    bool operator==(const header& other) const;
-    bool operator!=(const header& other) const;
-
     // These fields do not participate in serialization or comparison.
     mutable validation validation;
+
+protected:
+    void reset();
+    void invalidate_cache() const;
 
 private:
     mutable upgrade_mutex mutex_;

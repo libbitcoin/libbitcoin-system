@@ -71,28 +71,6 @@ void write(Sink& sink, const std::vector<Put>& puts)
     std::for_each(puts.begin(), puts.end(), to);
 }
 
-transaction transaction::factory_from_data(const data_chunk& data,
-    bool satoshi)
-{
-    transaction instance;
-    instance.from_data(data, satoshi);
-    return instance;
-}
-
-transaction transaction::factory_from_data(std::istream& stream, bool satoshi)
-{
-    transaction instance;
-    instance.from_data(stream, satoshi);
-    return instance;
-}
-
-transaction transaction::factory_from_data(reader& source, bool satoshi)
-{
-    transaction instance;
-    instance.from_data(source, satoshi);
-    return instance;
-}
-
 // Reserve uniform buckets of minimum size and full distribution.
 transaction::sets_ptr transaction::reserve_buckets(size_t total, size_t fanout)
 {
@@ -114,30 +92,11 @@ transaction::sets_ptr transaction::reserve_buckets(size_t total, size_t fanout)
     return buckets;
 }
 
-// default constructors
+// Constructors.
+//-----------------------------------------------------------------------------
 
 transaction::transaction()
-  : version_(0), locktime_(0), inputs_(), outputs_(), hash_(nullptr),
-    validation()
-{
-}
-
-transaction::transaction(uint32_t version, uint32_t locktime,
-    const input::list& inputs, const output::list& outputs)
-  : version_(version), locktime_(locktime), inputs_(inputs), outputs_(outputs),
-    hash_(nullptr), validation()
-{
-}
-
-transaction::transaction(uint32_t version, uint32_t locktime,
-    input::list&& inputs, output::list&& outputs)
-  : version_(version), locktime_(locktime), inputs_(std::move(inputs)),
-    outputs_(std::move(outputs)), hash_(nullptr), validation()
-{
-}
-
-transaction::transaction(const transaction& other)
-  : transaction(other.version_, other.locktime_, other.inputs_, other.outputs_)
+    : version_{0}, locktime_{0}, validation{}
 {
 }
 
@@ -147,78 +106,40 @@ transaction::transaction(transaction&& other)
 {
 }
 
+transaction::transaction(const transaction& other)
+  : transaction(other.version_, other.locktime_, other.inputs_, other.outputs_)
+{
+}
+
+transaction::transaction(transaction&& other, hash_digest&& hash)
+  : transaction(other.version_, other.locktime_, std::move(other.inputs_),
+    std::move(other.outputs_))
+{
+    hash_ = std::make_shared<hash_digest>(std::move(hash));
+}
+
 transaction::transaction(const transaction& other, const hash_digest& hash)
   : transaction(other.version_, other.locktime_, other.inputs_, other.outputs_)
 {
     hash_ = std::make_shared<hash_digest>(hash);
 }
 
-transaction::transaction(transaction&& other, const hash_digest& hash)
-  : transaction(other.version_, other.locktime_, std::move(other.inputs_),
-    std::move(other.outputs_))
+transaction::transaction(uint32_t version, uint32_t locktime,
+    const input::list& inputs, const output::list& outputs)
+  : version_(version), locktime_(locktime), inputs_(inputs), outputs_(outputs),
+    validation()
 {
-    hash_ = std::make_shared<hash_digest>(hash);
 }
 
-uint32_t transaction::version() const
+transaction::transaction(uint32_t version, uint32_t locktime,
+    input::list&& inputs, output::list&& outputs)
+  : version_(version), locktime_(locktime), inputs_(std::move(inputs)),
+    outputs_(std::move(outputs)), validation()
 {
-    return version_;
 }
 
-void transaction::set_version(uint32_t value)
-{
-    version_ = value;
-}
-
-uint32_t transaction::locktime() const
-{
-    return locktime_;
-}
-
-void transaction::set_locktime(uint32_t value)
-{
-    locktime_ = value;
-}
-
-input::list& transaction::inputs()
-{
-    return inputs_;
-}
-
-const input::list& transaction::inputs() const
-{
-    return inputs_;
-}
-
-void transaction::set_inputs(const input::list& value)
-{
-    inputs_ = value;
-}
-
-void transaction::set_inputs(input::list&& value)
-{
-    inputs_ = std::move(value);
-}
-
-output::list& transaction::outputs()
-{
-    return outputs_;
-}
-
-const output::list& transaction::outputs() const
-{
-    return outputs_;
-}
-
-void transaction::set_outputs(const output::list& value)
-{
-    outputs_ = value;
-}
-
-void transaction::set_outputs(output::list&& value)
-{
-    outputs_ = std::move(value);
-}
+// Operators.
+//-----------------------------------------------------------------------------
 
 transaction& transaction::operator=(transaction&& other)
 {
@@ -241,13 +162,42 @@ transaction& transaction::operator=(const transaction& other)
 
 bool transaction::operator==(const transaction& other) const
 {
-    return (version_ == other.version_) && (locktime_ == other.locktime_)
-        && (inputs_ == other.inputs_) && (outputs_ == other.outputs_);
+    return (version_ == other.version_)
+        && (locktime_ == other.locktime_)
+        && (inputs_ == other.inputs_)
+        && (outputs_ == other.outputs_);
 }
 
 bool transaction::operator!=(const transaction& other) const
 {
     return !(*this == other);
+}
+
+// Deserialization.
+//-----------------------------------------------------------------------------
+
+// static
+transaction transaction::factory_from_data(const data_chunk& data, bool wire)
+{
+    transaction instance;
+    instance.from_data(data, wire);
+    return instance;
+}
+
+// static
+transaction transaction::factory_from_data(std::istream& stream, bool wire)
+{
+    transaction instance;
+    instance.from_data(stream, wire);
+    return instance;
+}
+
+// static
+transaction transaction::factory_from_data(reader& source, bool wire)
+{
+    transaction instance;
+    instance.from_data(source, wire);
+    return instance;
 }
 
 bool transaction::from_data(const data_chunk& data, bool satoshi)
@@ -287,28 +237,49 @@ bool transaction::from_data(reader& source, bool satoshi)
     return source;
 }
 
-data_chunk transaction::to_data(bool satoshi) const
+// protected
+void transaction::reset()
+{
+    version_ = 0;
+    locktime_ = 0;
+    inputs_.clear();
+    inputs_.shrink_to_fit();
+    outputs_.clear();
+    outputs_.shrink_to_fit();
+    invalidate_cache();
+}
+
+bool transaction::is_valid() const
+{
+    return (version_ != 0) || (locktime_ != 0) || !inputs_.empty() ||
+        !outputs_.empty();
+}
+
+// Serialization.
+//-----------------------------------------------------------------------------
+
+data_chunk transaction::to_data(bool wire) const
 {
     data_chunk data;
     data_sink ostream(data);
-    to_data(ostream, satoshi);
+    to_data(ostream, wire);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == serialized_size());
 
     return data;
 }
 
-void transaction::to_data(std::ostream& stream, bool satoshi) const
+void transaction::to_data(std::ostream& stream, bool wire) const
 {
     ostream_writer sink(stream);
-    to_data(sink, satoshi);
+    to_data(sink, wire);
 }
 
-void transaction::to_data(writer& sink, bool satoshi) const
+void transaction::to_data(writer& sink, bool wire) const
 {
     sink.write_4_bytes_little_endian(version_);
 
-    if (satoshi)
+    if (wire)
     {
         // Wire (satoshi protocol) serialization.
         write(sink, inputs_);
@@ -324,38 +295,23 @@ void transaction::to_data(writer& sink, bool satoshi) const
     }
 }
 
-bool transaction::is_valid() const
+std::string transaction::to_string(uint32_t flags) const
 {
-    return (version_ != 0) || (locktime_ != 0) || !inputs_.empty() ||
-        !outputs_.empty();
-}
+    std::ostringstream value;
+    value << "Transaction:\n"
+        << "\tversion = " << version_ << "\n"
+        << "\tlocktime = " << locktime_ << "\n"
+        << "Inputs:\n";
 
-void transaction::reset()
-{
-    version_ = 0;
-    locktime_ = 0;
-    inputs_.clear();
-    inputs_.shrink_to_fit();
-    outputs_.clear();
-    outputs_.shrink_to_fit();
+    for (const auto input: inputs_)
+        value << input.to_string(flags);
 
-    hash_mutex_.lock();
-    hash_.reset();
-    hash_mutex_.unlock();
-}
+    value << "Outputs:\n";
+    for (const auto output: outputs_)
+        value << output.to_string(flags);
 
-uint64_t transaction::serialized_size() const
-{
-    uint64_t tx_size = 8;
-    tx_size += variable_uint_size(inputs_.size());
-    for (const auto& input : inputs_)
-        tx_size += input.serialized_size();
-
-    tx_size += variable_uint_size(outputs_.size());
-    for (const auto& output : outputs_)
-        tx_size += output.serialized_size();
-
-    return tx_size;
+    value << "\n";
+    return value.str();
 }
 
 // TODO: provide optimization option to balance total sigops across buckets.
@@ -378,42 +334,138 @@ transaction::sets_const_ptr transaction::to_input_sets(size_t fanout) const
     return std::const_pointer_cast<const sets>(buckets);
 }
 
-std::string transaction::to_string(uint32_t flags) const
+
+// Size.
+//-----------------------------------------------------------------------------
+
+uint64_t transaction::serialized_size() const
 {
-    std::ostringstream value;
-    value << "Transaction:\n"
-        << "\tversion = " << version_ << "\n"
-        << "\tlocktime = " << locktime_ << "\n"
-        << "Inputs:\n";
+    const auto ins = [](size_t size, const input& input)
+    {
+        return size + input.serialized_size();
+    };
 
-    for (const auto input: inputs_)
-        value << input.to_string(flags);
+    const auto outs = [](size_t size, const output& output)
+    {
+        return size + output.serialized_size();
+    };
 
-    value << "Outputs:\n";
-    for (const auto output: outputs_)
-        value << output.to_string(flags);
+    return sizeof(version_) 
+        + sizeof(locktime_) 
+        + variable_uint_size(inputs_.size())
+        + variable_uint_size(outputs_.size())
+        + std::accumulate(inputs_.begin(), inputs_.end(), size_t{0}, ins)
+        + std::accumulate(outputs_.begin(), outputs_.end(), size_t{0}, outs);
+}
 
-    value << "\n";
-    return value.str();
+// Accessors.
+//-----------------------------------------------------------------------------
+
+uint32_t transaction::version() const
+{
+    return version_;
+}
+
+void transaction::set_version(uint32_t value)
+{
+    version_ = value;
+    invalidate_cache();
+}
+
+uint32_t transaction::locktime() const
+{
+    return locktime_;
+}
+
+void transaction::set_locktime(uint32_t value)
+{
+    locktime_ = value;
+    invalidate_cache();
+}
+
+input::list& transaction::inputs()
+{
+    return inputs_;
+}
+
+const input::list& transaction::inputs() const
+{
+    return inputs_;
+}
+
+void transaction::set_inputs(const input::list& value)
+{
+    inputs_ = value;
+    invalidate_cache();
+}
+
+void transaction::set_inputs(input::list&& value)
+{
+    inputs_ = std::move(value);
+    invalidate_cache();
+}
+
+output::list& transaction::outputs()
+{
+    return outputs_;
+}
+
+const output::list& transaction::outputs() const
+{
+    return outputs_;
+}
+
+void transaction::set_outputs(const output::list& value)
+{
+    outputs_ = value;
+    invalidate_cache();
+}
+
+void transaction::set_outputs(output::list&& value)
+{
+    outputs_ = std::move(value);
+    invalidate_cache();
+}
+
+// Cache.
+//-----------------------------------------------------------------------------
+
+void transaction::invalidate_cache() const
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    mutex_.lock_upgrade();
+
+    if (hash_)
+    {
+        mutex_.unlock_upgrade_and_lock();
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        hash_.reset();
+        //---------------------------------------------------------------------
+        mutex_.unlock_and_lock_upgrade();
+    }
+
+    mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 hash_digest transaction::hash() const
 {
     ///////////////////////////////////////////////////////////////////////////
     // Critical Section
-    hash_mutex_.lock_upgrade();
+    mutex_.lock_upgrade();
 
     if (!hash_)
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        hash_mutex_.unlock_upgrade_and_lock();
+        mutex_.unlock_upgrade_and_lock();
         hash_ = std::make_shared<hash_digest>(bitcoin_hash(to_data()));
-        hash_mutex_.unlock_and_lock_upgrade();
+        mutex_.unlock_and_lock_upgrade();
         //---------------------------------------------------------------------
     }
 
     const auto hash = *hash_;
-    hash_mutex_.unlock_upgrade();
+    mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 
     return hash;
@@ -426,9 +478,13 @@ hash_digest transaction::hash(uint32_t sighash_type) const
     return bitcoin_hash(serialized);
 }
 
+// Validation helpers.
+//-----------------------------------------------------------------------------
+
 bool transaction::is_coinbase() const
 {
-    return (inputs_.size() == 1) && inputs_.front().previous_output().is_null();
+    const auto& prevout = inputs_.front().previous_output();
+    return (inputs_.size() == 1) && prevout.is_null();
 }
 
 // True if coinbase and has invalid input[0] script size.
@@ -492,7 +548,7 @@ bool transaction::is_locktime_conflict() const
 uint64_t transaction::total_input_value() const
 {
     ////static_assert(max_money() < max_uint64, "overflow sentinel invalid");
-    const auto value = [](uint64_t total, const input& input)
+    const auto sum = [](uint64_t total, const input& input)
     {
         const auto& prevout = input.previous_output().validation.cache;
         const auto missing = !prevout.is_valid();
@@ -501,19 +557,19 @@ uint64_t transaction::total_input_value() const
         return ceiling_add(total, missing ? 0 : prevout.value());
     };
 
-    return std::accumulate(inputs_.begin(), inputs_.end(), uint64_t(0), value);
+    return std::accumulate(inputs_.begin(), inputs_.end(), uint64_t{0}, sum);
 }
 
 // Returns max_uint64 in case of overflow.
 uint64_t transaction::total_output_value() const
 {
     ////static_assert(max_money() < max_uint64, "overflow sentinel invalid");
-    const auto value = [](uint64_t total, const output& output)
+    const auto sum = [](uint64_t total, const output& output)
     {
         return ceiling_add(total, output.value());
     };
 
-    return std::accumulate(outputs_.begin(), outputs_.end(), uint64_t(0), value);
+    return std::accumulate(outputs_.begin(), outputs_.end(), uint64_t{0}, sum);
 }
 
 uint64_t transaction::fees() const
@@ -526,23 +582,22 @@ bool transaction::is_overspent() const
     return !is_coinbase() && total_output_value() > total_input_value();
 }
 
+// Returns max_size_t in case of overflow.
 size_t transaction::signature_operations(bool bip16_active) const
 {
     const auto in = [bip16_active](size_t total, const input& input)
     {
         // This includes BIP16 p2sh additional sigops if prevout is cached.
-        return safe_add(total, input.signature_operations(bip16_active));
+        return ceiling_add(total, input.signature_operations(bip16_active));
     };
 
     const auto out = [](size_t total, const output& output)
     {
-        return safe_add(total, output.signature_operations());
+        return ceiling_add(total, output.signature_operations());
     };
 
-    size_t sigops = 0;
-    sigops += std::accumulate(inputs_.begin(), inputs_.end(), sigops, in);
-    sigops += std::accumulate(outputs_.begin(), outputs_.end(), sigops, out);
-    return sigops;
+    return std::accumulate(inputs_.begin(), inputs_.end(), size_t{0}, in) +
+        std::accumulate(outputs_.begin(), outputs_.end(), size_t{0}, out);
 }
 
 bool transaction::is_missing_inputs() const
@@ -627,6 +682,33 @@ point::indexes transaction::immature_inputs(size_t target_height) const
     return immatures;
 }
 
+// Coinbase transactions return success, to simplify iteration.
+code transaction::connect_input(const chain_state& state,
+    size_t input_index) const
+{
+    if (is_coinbase())
+        return error::success;
+
+    if (input_index >= inputs_.size())
+        return error::operation_failed;
+
+    const auto& prevout = inputs_[input_index].previous_output().validation;
+
+    // Verify that the previous output cache has been populated.
+    if (!prevout.cache.is_valid())
+        return error::input_not_found;
+
+    const auto flags = state.enabled_forks();
+    const auto index32 = static_cast<uint32_t>(input_index);
+
+    // Validate the transaction input.
+    const auto valid = script::verify(*this, index32, flags);
+    return valid ? error::success : error::validate_inputs_failed;
+}
+
+// Validation.
+//-----------------------------------------------------------------------------
+
 // These checks are self-contained; blockchain (and so version) independent.
 code transaction::check(bool transaction_pool) const
 {
@@ -694,33 +776,11 @@ code transaction::connect(const chain_state& state) const
 {
     code ec;
 
-    for (size_t in = 0; in < inputs_.size(); ++in)
-        if ((ec = connect_input(state, in)))
+    for (size_t input = 0; input < inputs_.size(); ++input)
+        if ((ec = connect_input(state, input)))
             return ec;
 
     return error::success;
-}
-
-// Coinbase transactions return success, to simplify iteration.
-code transaction::connect_input(const chain_state& state,
-    size_t input_index) const
-{
-    if (is_coinbase())
-        return error::success;
-
-    if (input_index >= inputs_.size())
-        return error::operation_failed;
-
-    const auto index32 = static_cast<uint32_t>(input_index);
-    const auto& prevout = inputs_[index32].previous_output().validation;
-
-    // Verify that the previous output cache has been populated.
-    if (!prevout.cache.is_valid())
-        return error::input_not_found;
-
-    const auto flags = state.enabled_forks();
-    const auto valid = script::verify(*this, index32, flags);
-    return valid ? error::success : error::validate_inputs_failed;
 }
 
 } // namespace chain
