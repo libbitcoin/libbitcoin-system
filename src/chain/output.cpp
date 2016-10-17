@@ -30,53 +30,146 @@
 namespace libbitcoin {
 namespace chain {
 
+static constexpr auto use_length_prefix = true;
+
 // This is a consensus critical value that must be set on reset.
 const uint64_t output::not_found = sighash_null_value;
 
-output output::factory_from_data(const data_chunk& data)
-{
-    output instance;
-    instance.from_data(data);
-    return instance;
-}
+// This is a non-consensus sentinel used to indicate an output is unspent.
+const uint32_t output::validation::not_spent = max_uint32;
 
-output output::factory_from_data(std::istream& stream)
-{
-    output instance;
-    instance.from_data(stream);
-    return instance;
-}
-
-output output::factory_from_data(reader& source)
-{
-    output instance;
-    instance.from_data(source);
-    return instance;
-}
+// Constructors.
+//-----------------------------------------------------------------------------
 
 output::output()
-  : value_(not_found), script_()
-{
-}
-
-output::output(uint64_t value, const chain::script& script)
-  : value_(value), script_(script)
-{
-}
-
-output::output(uint64_t value, chain::script&& script)
-  : value_(value), script_(std::move(script))
-{
-}
-
-output::output(const output& other)
-  : output(other.value_, other.script_)
+  : value_(not_found), validation{}
 {
 }
 
 output::output(output&& other)
-  : output(other.value_, std::move(other.script_))
+  : output(other.value_, std::move(other.script_),
+        other.validation.spender_height)
 {
+}
+
+output::output(const output& other)
+  : output(other.value_, other.script_, other.validation.spender_height)
+{
+}
+
+// protected
+output::output(uint64_t value, chain::script&& script, size_t spender_height)
+  : value_(value), script_(std::move(script))
+{
+    validation.spender_height = spender_height;
+}
+
+// protected
+output::output(uint64_t value, const chain::script& script,
+    size_t spender_height)
+  : value_(value), script_(script)
+{
+    validation.spender_height = spender_height;
+}
+
+output::output(uint64_t value, chain::script&& script)
+  : value_(value), script_(std::move(script)), validation{}
+{
+}
+
+output::output(uint64_t value, const chain::script& script)
+  : value_(value), script_(script), validation{}
+{
+}
+
+// Operators.
+//-----------------------------------------------------------------------------
+
+output& output::operator=(output&& other)
+{
+    value_ = other.value_;
+    script_ = std::move(other.script_);
+    return *this;
+}
+
+output& output::operator=(const output& other)
+{
+    value_ = other.value_;
+    script_ = other.script_;
+    return *this;
+}
+
+bool output::operator==(const output& other) const
+{
+    return (value_ == other.value_) && (script_ == other.script_);
+}
+
+bool output::operator!=(const output& other) const
+{
+    return !(*this == other);
+}
+
+// Deserialization.
+//-----------------------------------------------------------------------------
+
+output output::factory_from_data(const data_chunk& data, bool wire)
+{
+    output instance;
+    instance.from_data(data, wire);
+    return instance;
+}
+
+output output::factory_from_data(std::istream& stream, bool wire)
+{
+    output instance;
+    instance.from_data(stream, wire);
+    return instance;
+}
+
+output output::factory_from_data(reader& source, bool wire)
+{
+    output instance;
+    instance.from_data(source, wire);
+    return instance;
+}
+
+bool output::from_data(const data_chunk& data, bool wire)
+{
+    data_source istream(data);
+    return from_data(istream, wire);
+}
+
+bool output::from_data(std::istream& stream, bool wire)
+{
+    istream_reader source(stream);
+    return from_data(source, wire);
+}
+
+bool output::from_data(reader& source, bool wire)
+{
+    static const auto parse_mode = script::parse_mode::raw_data_fallback;
+
+    reset();
+
+    if (!wire)
+        validation.spender_height = source.read_4_bytes_little_endian();
+
+    value_ = source.read_8_bytes_little_endian();
+
+    // Always parse non-coinbase input/output scripts as fallback.
+    script_.from_data(source, use_length_prefix, parse_mode);
+
+    if (!source)
+        reset();
+
+    return source;
+}
+
+// protected
+void output::reset()
+{
+    value_ = output::not_found;
+    script_ = chain::script{};
 }
 
 // Empty scripts are valid, validation relies on not_found only.
@@ -85,80 +178,59 @@ bool output::is_valid() const
     return value_ != output::not_found;
 }
 
-void output::reset()
-{
-    value_ = output::not_found;
-    script_.reset();
-}
+// Serialization.
+//-----------------------------------------------------------------------------
 
-bool output::from_data(const data_chunk& data)
-{
-    data_source istream(data);
-    return from_data(istream);
-}
-
-bool output::from_data(std::istream& stream)
-{
-    istream_reader source(stream);
-    return from_data(source);
-}
-
-bool output::from_data(reader& source)
-{
-    reset();
-
-    value_ = source.read_8_bytes_little_endian();
-
-    // Always parse non-coinbase input/output scripts as fallback.
-    script_.from_data(source, true, script::parse_mode::raw_data_fallback);
-
-    if (!source)
-        reset();
-
-    return source;
-}
-
-data_chunk output::to_data() const
+data_chunk output::to_data(bool wire) const
 {
     data_chunk data;
     data_sink ostream(data);
-    to_data(ostream);
+    to_data(ostream, wire);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == serialized_size(wire));
     return data;
 }
 
-void output::to_data(std::ostream& stream) const
+void output::to_data(std::ostream& stream, bool wire) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(sink, wire);
 }
 
-void output::to_data(writer& sink) const
+void output::to_data(writer& sink, bool wire) const
 {
+    if (!wire)
+    {
+        auto height32 = safe_unsigned<uint32_t>(validation.spender_height);
+        sink.write_4_bytes_little_endian(height32);
+    }
+
     sink.write_8_bytes_little_endian(value_);
-    script_.to_data(sink, true);
-}
-
-uint64_t output::serialized_size() const
-{
-    return 8 + script_.serialized_size(true);
-}
-
-size_t output::signature_operations() const
-{
-    return script_.sigops(false);
+    script_.to_data(sink, use_length_prefix);
 }
 
 std::string output::to_string(uint32_t flags) const
 {
-    std::ostringstream ss;
+    std::ostringstream text;
 
-    ss << "\tvalue = " << value_ << "\n"
+    text << "\tvalue = " << value_ << "\n"
         << "\t" << script_.to_string(flags) << "\n";
 
-    return ss.str();
+    return text.str();
 }
+
+// Size.
+//-----------------------------------------------------------------------------
+
+uint64_t output::serialized_size(bool wire) const
+{
+    // validation.spender_height is size_t stored as uint32_t.
+    return (wire ? 0 : sizeof(uint32_t)) + sizeof(value_) +
+        script_.serialized_size(use_length_prefix);
+}
+
+// Accessors.
+//-----------------------------------------------------------------------------
 
 uint64_t output::value() const
 {
@@ -190,28 +262,12 @@ void output::set_script(chain::script&& value)
     script_ = std::move(value);
 }
 
-output& output::operator=(output&& other)
-{
-    value_ = other.value_;
-    script_ = std::move(other.script_);
-    return *this;
-}
+// Validation helpers.
+//-----------------------------------------------------------------------------
 
-output& output::operator=(const output& other)
+size_t output::signature_operations() const
 {
-    value_ = other.value_;
-    script_ = other.script_;
-    return *this;
-}
-
-bool output::operator==(const output& other) const
-{
-    return (value_ == other.value_) && (script_ == other.script_);
-}
-
-bool output::operator!=(const output& other) const
-{
-    return !(*this == other);
+    return script_.sigops(false);
 }
 
 } // namespace chain

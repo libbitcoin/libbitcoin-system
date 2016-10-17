@@ -72,26 +72,27 @@ enum class signature_parse_result
     lax_encoding
 };
 
-script script::factory_from_data(const data_chunk& data, bool prefix,
+script script::factory_from_data(const data_chunk& data, bool length_prefix,
     parse_mode mode)
 {
     script instance;
-    instance.from_data(data, prefix, mode);
+    instance.from_data(data, length_prefix, mode);
     return instance;
 }
 
-script script::factory_from_data(std::istream& stream, bool prefix,
+script script::factory_from_data(std::istream& stream, bool length_prefix,
     parse_mode mode)
 {
     script instance;
-    instance.from_data(stream, prefix, mode);
+    instance.from_data(stream, length_prefix, mode);
     return instance;
 }
 
-script script::factory_from_data(reader& source, bool prefix, parse_mode mode)
+script script::factory_from_data(reader& source, bool length_prefix,
+    parse_mode mode)
 {
     script instance;
-    instance.from_data(source, prefix, mode);
+    instance.from_data(source, length_prefix, mode);
     return instance;
 }
 
@@ -172,11 +173,12 @@ void script::reset()
     is_raw_ = false;
 }
 
-bool script::from_data(const data_chunk& data, bool prefix, parse_mode mode)
+bool script::from_data(const data_chunk& data, bool length_prefix,
+    parse_mode mode)
 {
     auto result = true;
 
-    if (prefix)
+    if (length_prefix)
     {
         data_source istream(data);
         result = from_data(istream, true, mode);
@@ -193,17 +195,18 @@ bool script::from_data(const data_chunk& data, bool prefix, parse_mode mode)
     return result;
 }
 
-bool script::from_data(std::istream& stream, bool prefix, parse_mode mode)
+bool script::from_data(std::istream& stream, bool length_prefix,
+    parse_mode mode)
 {
     istream_reader source(stream);
-    return from_data(source, prefix, mode);
+    return from_data(source, length_prefix, mode);
 }
 
-bool script::from_data(reader& source, bool prefix, parse_mode mode)
+bool script::from_data(reader& source, bool length_prefix, parse_mode mode)
 {
     reset();
 
-    const auto bytes = prefix ? 
+    const auto bytes = length_prefix ?
         source.read_bytes(source.read_size_little_endian()) :
         source.read_bytes();
 
@@ -325,17 +328,17 @@ bool script::from_string(const std::string& human_readable)
 
 std::string script::to_string(uint32_t flags) const
 {
-    std::ostringstream value;
+    std::ostringstream text;
 
     for (auto it = operations_.begin(); it != operations_.end(); ++it)
     {
         if (it != operations_.begin())
-            value << " ";
+            text << " ";
 
-        value << it->to_string(flags);
+        text << it->to_string(flags);
     }
 
-    return value.str();
+    return text.str();
 }
 
 // See BIP16.
@@ -391,47 +394,39 @@ size_t script::pay_script_hash_sigops(const script& prevout) const
 
 bool script::deserialize(const data_chunk& raw_script, parse_mode mode)
 {
-    auto result = false;
+    if (mode != parse_mode::raw_data && parse(raw_script))
+        return true;
 
-    if (mode != parse_mode::raw_data)
-        result = parse(raw_script);
+    if (mode != parse_mode::strict && emplace(raw_script))
+        return true;
 
-    if (!result && (mode != parse_mode::strict))
-    {
-        result = true;
+    return false;
+}
 
-        // opcode ignored thanks to is_raw_ in this script
-        const auto op = operation
-        {
-            opcode::raw_data,
-            to_chunk(raw_script)
-        };
+bool script::emplace(const data_chunk& raw_script)
+{
+    is_raw_ = true;
+    operations_.clear();
 
-        operations_.clear();
-        operations_.emplace_back(std::move(op));
-        is_raw_ = true;
-    }
-
-    return result;
+    // The opcode is ignored thanks to is_raw_ in the script.
+    operations_.emplace_back(opcode::raw_data, to_chunk(raw_script));
+    return true;
 }
 
 bool script::parse(const data_chunk& raw_script)
 {
-    auto result = true;
+    data_source istream(raw_script);
+    istream_reader source(istream);
 
-    if (raw_script.begin() != raw_script.end())
+    while (!source.is_exhausted())
     {
-        data_source istream(raw_script);
+        operations_.emplace_back();
 
-        while (result && istream &&
-            (istream.peek() != std::istream::traits_type::eof()))
-        {
-            operations_.emplace_back();
-            result = operations_.back().from_data(istream);
-        }
+        if (!operations_.back().from_data(source))
+            return false;
     }
 
-    return result;
+    return true;
 }
 
 inline signature_hash_algorithm to_sighash_enum(uint8_t sighash_type)

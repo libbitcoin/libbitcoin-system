@@ -36,7 +36,7 @@ class BC_API output_point
 {
 public:
 
-    // This validation data IS copied on output_point copy.
+    // This validation data IS copied on output_point copy/move.
     // These properties facilitate block and transaction validation.
     struct validation
     {
@@ -63,34 +63,47 @@ public:
         output cache = output{ output::not_found, script{} };
     };
 
+    // Constructors.
+    //-----------------------------------------------------------------------------
+
+    output_point();
+
+    output_point(point&& other);
+    output_point(const point& value);
+
+    output_point(output_point&& other);
+    output_point(const output_point& other);
+
+    output_point(hash_digest&& hash, uint32_t index);
+    output_point(const hash_digest& hash, uint32_t index);
+
+    // Operators.
+    //-----------------------------------------------------------------------------
+    // This class is move assignable and copy assignable.
+
+    output_point& operator=(point&& other);
+    output_point& operator=(const point&);
+    output_point& operator=(output_point&& other);
+    output_point& operator=(const output_point&);
+
+    bool operator==(const point& other) const;
+    bool operator!=(const point& other) const;
+    bool operator==(const output_point& other) const;
+    bool operator!=(const output_point& other) const;
+
+    // Deserialization.
+    //-----------------------------------------------------------------------------
+
     static output_point factory_from_data(const data_chunk& data);
     static output_point factory_from_data(std::istream& stream);
     static output_point factory_from_data(reader& source);
 
-    output_point();
-    output_point(const point& value);
-    output_point(point&& other);
-    output_point(const hash_digest& hash, uint32_t index);
-    output_point(hash_digest&& hash, uint32_t index);
-    output_point(const output_point& other);
-    output_point(output_point&& other);
+    // Validation.
+    //-----------------------------------------------------------------------------
 
     /// False if previous output is not cached.
     /// True if the previous output is mature enough to spend from target.
     bool is_mature(size_t target_height) const;
-
-    /// This class is move assignable and copy assignable.
-    output_point& operator=(output_point&& other);
-    output_point& operator=(const output_point&);
-
-    output_point& operator=(point&& other);
-    output_point& operator=(const point&);
-
-    bool operator==(const output_point& other) const;
-    bool operator!=(const output_point& other) const;
-
-    bool operator==(const point& other) const;
-    bool operator!=(const point& other) const;
 
     // These fields do not participate in serialization or comparison.
     mutable validation validation;

@@ -39,24 +39,65 @@ class BC_API input
 public:
     typedef std::vector<input> list;
 
-    static input factory_from_data(const data_chunk& data);
-    static input factory_from_data(std::istream& stream);
-    static input factory_from_data(reader& source);
+    // Constructors.
+    //-----------------------------------------------------------------------------
 
     input();
-    input(const output_point& previous_output, const chain::script& script,
-        uint32_t sequence);
+
+    input(input&& other);
+    input(const input& other);
+
     input(output_point&& previous_output, chain::script&& script,
         uint32_t sequence);
-    input(const input& other);
-    input(input&& other);
+    input(const output_point& previous_output, const chain::script& script,
+        uint32_t sequence);
 
+    // Operators.
+    //-----------------------------------------------------------------------------
+
+    input& operator=(const input& other);
+    input& operator=(input&& other);
+
+    bool operator==(const input& other) const;
+    bool operator!=(const input& other) const;
+
+    // Deserialization.
+    //-----------------------------------------------------------------------------
+
+    static input factory_from_data(const data_chunk& data, bool wire=true);
+    static input factory_from_data(std::istream& stream, bool wire=true);
+    static input factory_from_data(reader& source, bool wire=true);
+
+    bool from_data(const data_chunk& data, bool wire=true);
+    bool from_data(std::istream& stream, bool wire=true);
+    bool from_data(reader& source, bool wire=true);
+
+    bool is_valid() const;
+
+    // Serialization.
+    //-----------------------------------------------------------------------------
+
+    data_chunk to_data(bool wire=true) const;
+    void to_data(std::ostream& stream, bool wire=true) const;
+    void to_data(writer& sink, bool wire=true) const;
+
+    std::string to_string(uint32_t flags) const;
+
+    // Properties (size, accessors, cache).
+    //-----------------------------------------------------------------------------
+
+    uint64_t serialized_size(bool wire=true) const;
+
+    // Deprecated (unsafe).
     output_point& previous_output();
+
     const output_point& previous_output() const;
     void set_previous_output(const output_point& value);
     void set_previous_output(output_point&& value);
 
+    // Deprecated (unsafe).
     chain::script& script();
+
     const chain::script& script() const;
     void set_script(const chain::script& value);
     void set_script(chain::script&& value);
@@ -64,28 +105,14 @@ public:
     uint32_t sequence() const;
     void set_sequence(uint32_t value);
 
+    // Validation.
+    //-----------------------------------------------------------------------------
+
+    bool is_final() const;
     size_t signature_operations(bool bip16_active) const;
 
-    bool from_data(const data_chunk& data);
-    bool from_data(std::istream& stream);
-    bool from_data(reader& source);
-    data_chunk to_data() const;
-    void to_data(std::ostream& stream) const;
-    void to_data(writer& sink) const;
-    std::string to_string(uint32_t flags) const;
-
+protected:
     void reset();
-    bool is_valid() const;
-    bool is_final() const;
-    bool is_output_mature(size_t target_height) const;
-
-    uint64_t serialized_size() const;
-
-    input& operator=(const input& other);
-    input& operator=(input&& other);
-
-    bool operator==(const input& other) const;
-    bool operator!=(const input& other) const;
 
 private:
     output_point previous_output_;

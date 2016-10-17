@@ -29,35 +29,24 @@
 namespace libbitcoin {
 namespace chain {
 
-input input::factory_from_data(const data_chunk& data)
-{
-    input instance;
-    instance.from_data(data);
-    return instance;
-}
+static constexpr auto use_length_prefix = true;
 
-input input::factory_from_data(std::istream& stream)
-{
-    input instance;
-    instance.from_data(stream);
-    return instance;
-}
-
-input input::factory_from_data(reader& source)
-{
-    input instance;
-    instance.from_data(source);
-    return instance;
-}
+// Constructors.
+//-----------------------------------------------------------------------------
 
 input::input()
-  : previous_output_(), script_(), sequence_(0)
+  : previous_output_(), sequence_{0}
 {
 }
 
-input::input(const output_point& previous_output, const chain::script& script,
-    uint32_t sequence)
-  : previous_output_(previous_output), script_(script), sequence_(sequence)
+input::input(input&& other)
+  : input(std::move(other.previous_output_), std::move(other.script_),
+      other.sequence_)
+{
+}
+
+input::input(const input& other)
+  : input(other.previous_output_, other.script_, other.sequence_)
 {
 }
 
@@ -68,43 +57,80 @@ input::input(output_point&& previous_output, chain::script&& script,
 {
 }
 
-input::input(const input& other)
-  : input(other.previous_output_, other.script_, other.sequence_)
+input::input(const output_point& previous_output, const chain::script& script,
+    uint32_t sequence)
+  : previous_output_(previous_output), script_(script), sequence_(sequence)
 {
 }
 
-input::input(input&& other)
-  : input(std::move(other.previous_output_), std::move(other.script_),
-      other.sequence_)
+// Operators.
+//-----------------------------------------------------------------------------
+
+input& input::operator=(const input& other)
 {
+    previous_output_ = other.previous_output_;
+    script_ = other.script_;
+    sequence_ = other.sequence_;
+    return *this;
 }
 
-// Since empty script and zero sequence are valid this relies on the prevout.
-bool input::is_valid() const
+input& input::operator=(input&& other)
 {
-    return sequence_ != 0 || previous_output_.is_valid() || script_.is_valid();
+    previous_output_ = std::move(other.previous_output_);
+    script_ = std::move(other.script_);
+    sequence_ = other.sequence_;
+    return *this;
 }
 
-void input::reset()
+bool input::operator==(const input& other) const
 {
-    previous_output_.reset();
-    script_.reset();
-    sequence_ = 0;
+    return (sequence_ == other.sequence_)
+        && (previous_output_ == other.previous_output_)
+        && (script_ == other.script_);
 }
 
-bool input::from_data(const data_chunk& data)
+bool input::operator!=(const input& other) const
+{
+    return !(*this == other);
+}
+
+// Deserialization.
+//-----------------------------------------------------------------------------
+
+input input::factory_from_data(const data_chunk& data, bool wire)
+{
+    input instance;
+    instance.from_data(data, wire);
+    return instance;
+}
+
+input input::factory_from_data(std::istream& stream, bool wire)
+{
+    input instance;
+    instance.from_data(stream, wire);
+    return instance;
+}
+
+input input::factory_from_data(reader& source, bool wire)
+{
+    input instance;
+    instance.from_data(source, wire);
+    return instance;
+}
+
+bool input::from_data(const data_chunk& data, bool wire)
 {
     data_source istream(data);
-    return from_data(istream);
+    return from_data(istream, wire);
 }
 
-bool input::from_data(std::istream& stream)
+bool input::from_data(std::istream& stream, bool wire)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(source, wire);
 }
 
-bool input::from_data(reader& source)
+bool input::from_data(reader& source, bool)
 {
     reset();
 
@@ -113,11 +139,10 @@ bool input::from_data(reader& source)
 
     // Parse the coinbase tx as raw data.
     // Always parse non-coinbase input/output scripts as fallback.
-    const auto mode = previous_output_.is_null() ?
-        script::parse_mode::raw_data : 
-        script::parse_mode::raw_data_fallback;
+    const auto parse_mode = previous_output_.is_null() ?
+        script::parse_mode::raw_data : script::parse_mode::raw_data_fallback;
 
-    script_.from_data(source, true, mode);
+    script_.from_data(source, use_length_prefix, parse_mode);
     sequence_ = source.read_4_bytes_little_endian();
 
     if (!source)
@@ -126,64 +151,67 @@ bool input::from_data(reader& source)
     return source;
 }
 
-data_chunk input::to_data() const
+void input::reset()
+{
+    previous_output_ = chain::output_point{};
+    script_ = chain::script{};
+    sequence_ = 0;
+}
+
+// Since empty script and zero sequence are valid this relies on the prevout.
+bool input::is_valid() const
+{
+    return sequence_ != 0 || previous_output_.is_valid() || script_.is_valid();
+}
+
+// Serialization.
+//-----------------------------------------------------------------------------
+
+data_chunk input::to_data(bool wire) const
 {
     data_chunk data;
     data_sink ostream(data);
-    to_data(ostream);
+    to_data(ostream, wire);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == serialized_size(wire));
     return data;
 }
 
-void input::to_data(std::ostream& stream) const
+void input::to_data(std::ostream& stream, bool wire) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(sink, wire);
 }
 
-void input::to_data(writer& sink) const
+void input::to_data(writer& sink, bool) const
 {
     previous_output_.to_data(sink);
-    script_.to_data(sink, true);
+    script_.to_data(sink, use_length_prefix);
     sink.write_4_bytes_little_endian(sequence_);
-}
-
-uint64_t input::serialized_size() const
-{
-    const auto script_size = script_.serialized_size(true);
-    return 4 + previous_output_.serialized_size() + script_size;
-}
-
-size_t input::signature_operations(bool bip16_active) const
-{
-    auto sigops = script_.sigops(false);
-
-    if (bip16_active)
-    {
-        // This cannot overflow because each total is limited by max ops.
-        const auto& cache = previous_output_.validation.cache.script();
-        sigops += script_.pay_script_hash_sigops(cache);
-    }
-
-    return sigops;
 }
 
 std::string input::to_string(uint32_t flags) const
 {
-    std::ostringstream ss;
+    std::ostringstream text;
 
-    ss << previous_output_.to_string() << "\n"
+    text << previous_output_.to_string() << "\n"
         << "\t" << script_.to_string(flags) << "\n"
         << "\tsequence = " << sequence_ << "\n";
 
-    return ss.str();
+    return text.str();
 }
 
-bool input::is_final() const
+// Size.
+//-----------------------------------------------------------------------------
+
+uint64_t input::serialized_size(bool) const
 {
-    return (sequence_ == max_input_sequence);
+    return previous_output_.serialized_size() +
+        script_.serialized_size(use_length_prefix) + sizeof(sequence_);
 }
+
+// Accessors.
+//-----------------------------------------------------------------------------
 
 output_point& input::previous_output()
 {
@@ -235,32 +263,26 @@ void input::set_sequence(uint32_t value)
     sequence_ = value;
 }
 
-input& input::operator=(const input& other)
+// Validation helpers.
+//-----------------------------------------------------------------------------
+
+bool input::is_final() const
 {
-    previous_output_ = other.previous_output_;
-    script_ = other.script_;
-    sequence_ = other.sequence_;
-    return *this;
+    return sequence_ == max_input_sequence;
 }
 
-input& input::operator=(input&& other)
+size_t input::signature_operations(bool bip16_active) const
 {
-    previous_output_ = std::move(other.previous_output_);
-    script_ = std::move(other.script_);
-    sequence_ = other.sequence_;
-    return *this;
-}
+    auto sigops = script_.sigops(false);
 
-bool input::operator==(const input& other) const
-{
-    return (sequence_ == other.sequence_)
-        && (previous_output_ == other.previous_output_)
-        && (script_ == other.script_);
-}
+    if (bip16_active)
+    {
+        // This cannot overflow because each total is limited by max ops.
+        const auto& cache = previous_output_.validation.cache.script();
+        sigops += script_.pay_script_hash_sigops(cache);
+    }
 
-bool input::operator!=(const input& other) const
-{
-    return !(*this == other);
+    return sigops;
 }
 
 } // namespace chain

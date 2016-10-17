@@ -96,11 +96,11 @@ public:
         raw_data_fallback
     };
 
-    static script factory_from_data(const data_chunk& data, bool prefix,
+    static script factory_from_data(const data_chunk& data, bool length_prefix,
         parse_mode mode);
-    static script factory_from_data(std::istream& stream, bool prefix,
+    static script factory_from_data(std::istream& stream, bool length_prefix,
         parse_mode mode);
-    static script factory_from_data(reader& source, bool prefix,
+    static script factory_from_data(reader& source, bool length_prefix,
         parse_mode mode);
 
     static bool is_enabled(uint32_t active_forks, rule_fork flag);
@@ -138,18 +138,18 @@ public:
     bool from_string(const std::string& human_readable);
     std::string to_string(uint32_t flags) const;
 
-    bool from_data(const data_chunk& data, bool prefix, parse_mode mode);
-    bool from_data(std::istream& stream, bool prefix, parse_mode mode);
-    bool from_data(reader& source, bool prefix, parse_mode mode);
-    data_chunk to_data(bool prefix) const;
-    void to_data(std::ostream& stream, bool prefix) const;
-    void to_data(writer& sink, bool prefix) const;
+    bool from_data(const data_chunk& data, bool length_prefix, parse_mode mode);
+    bool from_data(std::istream& stream, bool length_prefix, parse_mode mode);
+    bool from_data(reader& source, bool length_prefix, parse_mode mode);
+    data_chunk to_data(bool length_prefix) const;
+    void to_data(std::ostream& stream, bool length_prefix) const;
+    void to_data(writer& sink, bool length_prefix) const;
 
     // BUGBUG: An empty script is valid.
     bool is_valid() const;
     void reset();
     uint64_t satoshi_content_size() const;
-    uint64_t serialized_size(bool prefix) const;
+    uint64_t serialized_size(bool length_prefix) const;
 
     script& operator=(script&& other);
     script& operator=(const script& other);
@@ -159,6 +159,7 @@ public:
 
 private:
     bool deserialize(const data_chunk& raw_script, parse_mode mode);
+    bool emplace(const data_chunk& raw_script);
     bool parse(const data_chunk& raw_script);
 
     operation::stack operations_;
