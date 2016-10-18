@@ -51,7 +51,6 @@ bool istream_reader::is_exhausted() const
 void istream_reader::invalidate()
 {
     stream_.setstate(std::istream::failbit);
-    BITCOIN_ASSERT(is_exhausted() && !(*this));
 }
 
 // Hashes.
@@ -109,17 +108,15 @@ uint64_t istream_reader::read_variable_big_endian()
 
 size_t istream_reader::read_size_big_endian()
 {
-    auto size = read_variable_big_endian();
+    const auto size = read_variable_big_endian();
 
     // This facilitates safely passing the size into a follow-on reader.
     // Return zero allows follow-on use before testing reader state.
-    if (size > max_size_t)
-    {
-        invalidate();
-        size = 0;
-    }
+    if (size <= max_size_t)
+        return static_cast<size_t>(size);
 
-    return static_cast<size_t>(size);
+    invalidate();
+    return 0;
 }
 
 // Little Endian Integers.
@@ -165,17 +162,15 @@ uint64_t istream_reader::read_variable_little_endian()
 
 size_t istream_reader::read_size_little_endian()
 {
-    auto size = read_variable_little_endian();
+    const auto size = read_variable_little_endian();
 
     // This facilitates safely passing the size into a follow-on reader.
     // Return zero allows follow-on use before testing reader state.
-    if (size > max_size_t)
-    {
-        invalidate();
-        size = 0;
-    }
+    if (size <= max_size_t)
+        return static_cast<size_t>(size);
 
-    return static_cast<size_t>(size);
+    invalidate();
+    return 0;
 }
 
 // Bytes.
@@ -183,7 +178,8 @@ size_t istream_reader::read_size_little_endian()
 
 uint8_t istream_reader::read_byte()
 {
-    return read_bytes(1)[0];
+    //// return read_bytes(1)[0];
+    return stream_.get();
 }
 
 data_chunk istream_reader::read_bytes()
@@ -204,11 +200,7 @@ data_chunk istream_reader::read_bytes(size_t size)
     if (size > 0)
     {
         auto buffer = reinterpret_cast<char*>(out.data());
-
         stream_.read(buffer, size);
-
-        if (size != stream_.gcount())
-            invalidate();
     }
 
     return out;

@@ -92,7 +92,12 @@ public:
     /// Advance iterator without writing.
     void skip(size_t size);
 
+    /// Not part of writer interface, used for variable skipping of writer.
+    size_t read_size_big_endian();
+    size_t read_size_little_endian();
+
 private:
+    bool valid_;
     Iterator iterator_;
 };
 

@@ -57,7 +57,7 @@ template <typename Iterator, bool CheckSafe>
 bool deserializer<Iterator, CheckSafe>::is_exhausted() const
 {
     // This is always true in an unsafe reader.
-    return remaining() == 0;
+    return !valid_ || remaining() == 0;
 }
 
 template <typename Iterator, bool CheckSafe>
@@ -129,17 +129,15 @@ uint64_t deserializer<Iterator, CheckSafe>::read_variable_big_endian()
 template <typename Iterator, bool CheckSafe>
 size_t deserializer<Iterator, CheckSafe>::read_size_big_endian()
 {
-    auto size = read_variable_big_endian();
+    const auto size = read_variable_big_endian();
 
     // This facilitates safely passing the size into a follow-on reader.
     // Return zero allows follow-on use before testing reader state.
-    if (size > max_size_t)
-    {
-        invalidate();
-        size = 0;
-    }
+    if (size <= max_size_t)
+        return static_cast<size_t>(size);
 
-    return static_cast<size_t>(size);
+    invalidate();
+    return 0;
 }
 
 // Little Endian Integers.
@@ -191,17 +189,15 @@ uint64_t deserializer<Iterator, CheckSafe>::read_variable_little_endian()
 template <typename Iterator, bool CheckSafe>
 size_t deserializer<Iterator, CheckSafe>::read_size_little_endian()
 {
-    auto size = read_variable_little_endian();
+    const auto size = read_variable_little_endian();
 
     // This facilitates safely passing the size into a follow-on reader.
     // Return zero allows follow-on use before testing reader state.
-    if (size > max_size_t)
-    {
-        invalidate();
-        size = 0;
-    }
+    if (size <= max_size_t)
+        return static_cast<size_t>(size);
 
-    return static_cast<size_t>(size);
+    invalidate();
+    return 0;
 }
 
 // Bytes.
@@ -210,7 +206,12 @@ size_t deserializer<Iterator, CheckSafe>::read_size_little_endian()
 template <typename Iterator, bool CheckSafe>
 uint8_t deserializer<Iterator, CheckSafe>::read_byte()
 {
-    return read_forward<1>()[0];
+    ////return read_forward<1>()[0];
+
+    if (!safe(1))
+        invalidate();
+
+    return valid_ ? *iterator_++ : 0;
 }
 
 template <typename Iterator, bool CheckSafe>
@@ -225,15 +226,15 @@ template <typename Iterator, bool CheckSafe>
 data_chunk deserializer<Iterator, CheckSafe>::read_bytes(size_t size)
 {
     data_chunk out(size);
-    if (!safe(size))
 
+    if (!safe(size))
         invalidate();
 
     if (!valid_)
         return out;
 
     const auto begin = iterator_;
-    skip(size);
+    iterator_ += size;
     std::copy(begin, iterator_, out.begin());
     return out;
 }
@@ -269,7 +270,7 @@ std::string deserializer<Iterator, CheckSafe>::read_string(size_t size)
     }
 
     // Consume all size characters from the buffer.
-    skip(size);
+    iterator_ += size;
 
     // Reduce the allocation to the number of characters pushed.
     out.shrink_to_fit();
@@ -300,7 +301,7 @@ byte_array<Size> deserializer<Iterator, CheckSafe>::read_forward()
 
     byte_array<Size> out;
     const auto begin = iterator_;
-    skip(Size);
+    iterator_ += Size;
     std::copy(begin, iterator_, out.begin());
     return out;
 }
@@ -317,7 +318,7 @@ byte_array<Size> deserializer<Iterator, CheckSafe>::read_reverse()
 
     byte_array<Size> out;
     const auto begin = iterator_;
-    skip(Size);
+    iterator_ += Size;
     std::reverse_copy(begin, iterator_, out.begin());
     return out;
 }
@@ -333,7 +334,7 @@ Integer deserializer<Iterator, CheckSafe>::read_big_endian()
         return{};
 
     const auto begin = iterator_;
-    skip(sizeof(Integer));
+    iterator_ += sizeof(Integer);
     return from_big_endian_unsafe<Integer>(begin);
 }
 
@@ -348,7 +349,7 @@ Integer deserializer<Iterator, CheckSafe>::read_little_endian()
         return{};
 
     const auto begin = iterator_;
-    skip(sizeof(Integer));
+    iterator_ += sizeof(Integer);
     return from_little_endian_unsafe<Integer>(begin);
 }
 
