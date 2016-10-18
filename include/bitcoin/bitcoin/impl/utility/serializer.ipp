@@ -31,7 +31,7 @@ namespace libbitcoin {
 
 template <typename Iterator>
 serializer<Iterator>::serializer(const Iterator begin)
-  : iterator_(begin)
+  : iterator_(begin), valid_(true)
 {
 }
 
@@ -41,13 +41,13 @@ serializer<Iterator>::serializer(const Iterator begin)
 template <typename Iterator>
 serializer<Iterator>::operator bool() const
 {
-    return true;
+    return valid_;
 }
 
 template <typename Iterator>
 bool serializer<Iterator>::operator!() const
 {
-    return false;
+    return !valid_;
 }
 
 // Hashes.
@@ -185,8 +185,7 @@ void serializer<Iterator>::write_size_little_endian(size_t value)
 template <typename Iterator>
 void serializer<Iterator>::write_byte(uint8_t value)
 {
-    *iterator_ = value;
-    skip(1);
+    *iterator_++ = value;
 }
 
 template <typename Iterator>
@@ -198,8 +197,7 @@ void serializer<Iterator>::write_bytes(const data_chunk& data)
 template <typename Iterator>
 void serializer<Iterator>::write_bytes(const uint8_t* data, size_t size)
 {
-    std::copy_n(data, size, iterator_);
-    skip(size);
+    iterator_ = std::copy_n(data, size, iterator_);
 }
 
 template <typename Iterator>
@@ -250,6 +248,73 @@ template <typename Integer>
 void serializer<Iterator>::write_little_endian(Integer value)
 {
     return write_forward(to_little_endian(value));
+}
+
+// Not part of writer interface, used for variable skipping of writer.
+//-----------------------------------------------------------------------------
+
+template <typename Iterator>
+size_t serializer<Iterator>::read_size_big_endian()
+{
+    static_assert(sizeof(size_t) >= sizeof(uint32_t), "unexpected size");
+    const auto prefix = *iterator_++;
+    const auto begin = iterator_;
+    uint64_t size;
+
+    switch (prefix)
+    {
+        case varint_eight_bytes:
+            iterator_ += sizeof(uint64_t);
+            size = from_big_endian_unsafe<uint64_t>(begin);
+        case varint_four_bytes:
+            iterator_ += sizeof(uint32_t);
+            return from_big_endian_unsafe<uint32_t>(begin);
+        case varint_two_bytes:
+            iterator_ += sizeof(uint16_t);
+            return from_big_endian_unsafe<uint16_t>(begin);
+        default:
+            return prefix;
+    }
+
+    // This facilitates safely passing the size into a follow-on writer.
+    // Return zero allows follow-on use before testing reader state.
+    if (size <= max_size_t)
+        return static_cast<size_t>(size);
+
+    valid_ = false;
+    return 0;
+}
+
+template <typename Iterator>
+size_t serializer<Iterator>::read_size_little_endian()
+{
+    static_assert(sizeof(size_t) >= sizeof(uint32_t), "unexpected size");
+    const auto prefix = *iterator_++;
+    const auto begin = iterator_;
+    uint64_t size;
+
+    switch (prefix)
+    {
+        case varint_eight_bytes:
+            iterator_ += sizeof(uint64_t);
+            size = from_little_endian_unsafe<uint64_t>(begin);
+        case varint_four_bytes:
+            iterator_ += sizeof(uint32_t);
+            return from_little_endian_unsafe<uint32_t>(begin);
+        case varint_two_bytes:
+            iterator_ += sizeof(uint16_t);
+            return from_little_endian_unsafe<uint16_t>(begin);
+        default:
+            return prefix;
+    }
+
+    // This facilitates safely passing the size into a follow-on writer.
+    // Return zero allows follow-on use before testing reader state.
+    if (size <= max_size_t)
+        return static_cast<size_t>(size);
+
+    valid_ = false;
+    return 0;
 }
 
 // Factories.

@@ -29,10 +29,8 @@ template <unsigned Size>
 byte_array<Size> istream_reader::read_forward()
 {
     byte_array<Size> out;
-
-    for (unsigned i = 0; i < Size; i++)
-        out[i] = read_byte();
-
+    auto buffer = reinterpret_cast<char*>(out.data());
+    stream_.read(buffer, Size);
     return out;
 }
 
