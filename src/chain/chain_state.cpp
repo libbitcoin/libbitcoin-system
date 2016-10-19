@@ -59,15 +59,15 @@ inline bool is_enforced(size_t count, bool testnet)
     return count >= (testnet ? testnet_enforce : mainnet_enforce);
 }
 
-inline bool is_bip30_exception(size_t height, const hash_digest& hash,
-    bool testnet)
-{
-    return !testnet &&
-        ((height == mainnet_bip30_exception_checkpoint1.height() &&
-        hash == mainnet_bip30_exception_checkpoint1.hash()) ||
-        (height == mainnet_bip30_exception_checkpoint2.height() &&
-        hash == mainnet_bip30_exception_checkpoint2.hash()));
-}
+////inline bool is_bip30_exception(size_t height, const hash_digest& hash,
+////    bool testnet)
+////{
+////    return !testnet &&
+////        ((height == mainnet_bip30_exception_checkpoint1.height() &&
+////        hash == mainnet_bip30_exception_checkpoint1.hash()) ||
+////        (height == mainnet_bip30_exception_checkpoint2.height() &&
+////        hash == mainnet_bip30_exception_checkpoint2.hash()));
+////}
 
 inline bool is_bip16_exception(size_t height, const hash_digest& hash,
     bool testnet)
@@ -141,9 +141,8 @@ chain_state::activations chain_state::activation(const data& values)
     if (is_active(count_2, testnet))
         result.forks |= rule_fork::bip34_rule;
 
-    // bip30 is active for all but two mainnet blocks that violate the rule.
-    if (!is_bip30_exception(values.height, values.hash, testnet))
-        result.forks |= rule_fork::bip30_rule;
+    // BIP30 requires no exceptions, we properly handle duplicates of spent txs.
+    result.forks |= rule_fork::bip30_rule;
 
     // bip16 is activated with a one-time test on mainnet/testnet (~55% rule).
     // There was one invalid p2sh tx mined after that time (code shipped late).
