@@ -40,9 +40,12 @@
 
 namespace libbitcoin {
 namespace wallet {
-    
+
 const uint64_t hd_private::mainnet = to_prefixes(76066276,
     hd_public::mainnet);
+
+const uint64_t hd_private::testnet = to_prefixes(70615956,
+    hd_public::testnet);
 
 hd_private::hd_private()
   : hd_public(), secret_(null_hash)

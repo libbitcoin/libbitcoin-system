@@ -40,6 +40,7 @@ namespace libbitcoin {
 namespace wallet {
 
 const uint32_t hd_public::mainnet = 76067358;
+const uint32_t hd_public::testnet = 70617039;
 
 // hd_public
 // ----------------------------------------------------------------------------

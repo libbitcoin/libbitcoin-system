@@ -38,6 +38,7 @@ class BC_API hd_private
 {
 public:
     static const uint64_t mainnet;
+    static const uint64_t testnet;
 
     static inline uint32_t to_prefix(uint64_t prefixes)
     {

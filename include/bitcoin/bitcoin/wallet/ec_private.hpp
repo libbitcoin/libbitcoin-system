@@ -45,14 +45,19 @@ typedef byte_array<wif_compressed_size> wif_compressed;
 class BC_API ec_private
 {
 public:
+    static const uint8_t compressed_sentinel;
+
     // WIF carries a compression flag for payment address generation but
     // assumes a mapping to payment address version. This is insufficient
     // as a parameterized mapping is required, so we use the same technique as
     // with hd keys, merging the two necessary values into one version.
-    static const uint8_t wif;
+    static const uint8_t mainnet_wif;
     static const uint8_t mainnet_p2kh;
     static const uint16_t mainnet;
-    static const uint8_t compressed_sentinel;
+
+    static const uint8_t testnet_wif;
+    static const uint8_t testnet_p2kh;
+    static const uint16_t testnet;
 
     static inline uint8_t to_address_prefix(uint16_t version)
     {
