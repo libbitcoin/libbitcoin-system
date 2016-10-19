@@ -33,10 +33,15 @@
 namespace libbitcoin {
 namespace wallet {
 
-const uint8_t ec_private::wif = 0x80;
-const uint8_t ec_private::mainnet_p2kh = 0x00;
-const uint16_t ec_private::mainnet = uint8_t(wif) << 8 | mainnet_p2kh;
 const uint8_t ec_private::compressed_sentinel = 0x01;
+
+const uint8_t ec_private::mainnet_wif = 0x80;
+const uint8_t ec_private::mainnet_p2kh = 0x00;
+const uint16_t ec_private::mainnet = to_version(mainnet_p2kh, mainnet_wif);
+
+const uint8_t ec_private::testnet_wif = 0xef;
+const uint8_t ec_private::testnet_p2kh = 0x6f;
+const uint16_t ec_private::testnet = to_version(testnet_p2kh, testnet_wif);
 
 ec_private::ec_private()
   : valid_(false), compress_(true), version_(0), secret_(null_hash)
