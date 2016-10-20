@@ -26,7 +26,8 @@
 
 namespace libbitcoin {
 
-// This is just unique_lock with a ptr member type, for convenience.
+/// This class is thread safe.
+/// Reserve exclusive access to a resource while this object is in scope.
 class BC_API scope_lock
 {
 public:

@@ -17,38 +17,34 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_INTERPROCESS_LOCK_HPP
-#define LIBBITCOIN_INTERPROCESS_LOCK_HPP
+#ifndef LIBBITCOIN_CRASH_LOCK_HPP
+#define LIBBITCOIN_CRASH_LOCK_HPP
 
 #include <memory>
-#include <string>
 #include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/unicode/file_lock.hpp>
 
 namespace libbitcoin {
-
+    
 /// This class is not thread safe.
-/// Guard a resource againt concurrent use by another instance of this app.
-class BC_API interprocess_lock
+/// Guard a resource that may be corrupted due to an interrupted write.
+class BC_API crash_lock
 {
 public:
     typedef boost::filesystem::path path;
 
-    interprocess_lock(const path& file);
-    ~interprocess_lock();
+    crash_lock(const path& file);
 
-    bool lock();
-    bool unlock();
+    bool try_lock();
+    bool lock_shared();
+    bool unlock_shared();
 
 private:
-    typedef interprocess::file_lock lock_file;
-    typedef std::shared_ptr<lock_file> lock_ptr;
-
     static bool create(const std::string& file);
+    static bool exists(const std::string& file);
     static bool destroy(const std::string& file);
 
-    lock_ptr lock_;
     const std::string file_;
 };
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2016 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,41 +17,56 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_INTERPROCESS_LOCK_HPP
-#define LIBBITCOIN_INTERPROCESS_LOCK_HPP
+#include <bitcoin/bitcoin/utility/crash_lock.hpp>
 
 #include <memory>
-#include <string>
 #include <boost/filesystem.hpp>
-#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/unicode/file_lock.hpp>
+#include <bitcoin/bitcoin/unicode/ifstream.hpp>
+#include <bitcoin/bitcoin/unicode/ofstream.hpp>
 
 namespace libbitcoin {
-
-/// This class is not thread safe.
-/// Guard a resource againt concurrent use by another instance of this app.
-class BC_API interprocess_lock
+    
+// static
+bool crash_lock::create(const std::string& file)
 {
-public:
-    typedef boost::filesystem::path path;
+    bc::ofstream stream(file);
+    return stream.good();
+}
 
-    interprocess_lock(const path& file);
-    ~interprocess_lock();
+// static
+bool crash_lock::exists(const std::string& file)
+{
+    bc::ifstream stream(file);
+    return stream.bad();
+    ////return boost::filesystem::exists(file);
+}
 
-    bool lock();
-    bool unlock();
+// static
+bool crash_lock::destroy(const std::string& file)
+{
+    return boost::filesystem::remove(file);
+    ////std::remove(file.c_str());
+}
 
-private:
-    typedef interprocess::file_lock lock_file;
-    typedef std::shared_ptr<lock_file> lock_ptr;
+crash_lock::crash_lock(const path& file)
+  : file_(file.string())
+{
+}
 
-    static bool create(const std::string& file);
-    static bool destroy(const std::string& file);
+bool crash_lock::try_lock()
+{
+    return !exists(file_);
+}
 
-    lock_ptr lock_;
-    const std::string file_;
-};
+bool crash_lock::lock_shared()
+{
+    return create(file_);
+}
+
+bool crash_lock::unlock_shared()
+{
+    return destroy(file_);
+}
 
 } // namespace libbitcoin
-
-#endif

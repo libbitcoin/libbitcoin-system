@@ -27,6 +27,7 @@
 namespace libbitcoin {
 
 /// This class is thread safe.
+/// Encapsulation of sequential locking conditions.
 class BC_API sequential_lock
 {
 public:
@@ -41,7 +42,7 @@ public:
     sequential_lock();
 
     handle begin_read() const;
-    bool is_read_valid(handle handle) const;
+    bool is_read_valid(handle value) const;
 
     bool begin_write();
     bool end_write();
