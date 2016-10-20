@@ -1,0 +1,55 @@
+/**
+ * Copyright (c) 2011-2016 libbitcoin developers (see AUTHORS)
+ *
+ * This file is part of libbitcoin.
+ *
+ * libbitcoin is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License with
+ * additional permissions to the one published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option)
+ * any later version. For more information see LICENSE.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+#ifndef LIBBITCOIN_SEQUENTIAL_LOCK_HPP
+#define LIBBITCOIN_SEQUENTIAL_LOCK_HPP
+
+#include <atomic>
+#include <cstddef>
+#include <bitcoin/bitcoin/define.hpp>
+
+namespace libbitcoin {
+
+/// This class is thread safe.
+class BC_API sequential_lock
+{
+public:
+    typedef size_t handle;
+
+    /// Determine if the given handle is a write-locked handle.
+    static inline bool is_write_locked(handle value)
+    {
+        return (value % 2) == 1;
+    }
+
+    sequential_lock();
+
+    handle begin_read() const;
+    bool is_read_valid(handle handle) const;
+
+    bool begin_write();
+    bool end_write();
+
+private:
+    std::atomic<size_t> sequence_;
+};
+
+} // namespace libbitcoin
+
+#endif
