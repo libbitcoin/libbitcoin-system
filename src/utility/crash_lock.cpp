@@ -38,7 +38,7 @@ bool crash_lock::create(const std::string& file)
 bool crash_lock::exists(const std::string& file)
 {
     bc::ifstream stream(file);
-    return stream.bad();
+    return stream.good();
     ////return boost::filesystem::exists(file);
 }
 

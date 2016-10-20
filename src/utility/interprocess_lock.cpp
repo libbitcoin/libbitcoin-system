@@ -28,7 +28,7 @@
 namespace libbitcoin {
 
 // static
-    bool interprocess_lock::create(const std::string& file)
+bool interprocess_lock::create(const std::string& file)
 {
     bc::ofstream stream(file);
     return stream.good();
