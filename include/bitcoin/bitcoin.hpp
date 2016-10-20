@@ -117,6 +117,7 @@
 #include <bitcoin/bitcoin/utility/conditional_lock.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
+#include <bitcoin/bitcoin/utility/crash_lock.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/decorator.hpp>

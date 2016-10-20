@@ -148,6 +148,7 @@ src_libbitcoin_la_SOURCES = \
     src/unicode/unicode_streambuf.cpp \
     src/utility/binary.cpp \
     src/utility/conditional_lock.cpp \
+    src/utility/crash_lock.cpp \
     src/utility/deadline.cpp \
     src/utility/dispatcher.cpp \
     src/utility/interprocess_lock.cpp \
@@ -476,6 +477,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/conditional_lock.hpp \
     include/bitcoin/bitcoin/utility/container_sink.hpp \
     include/bitcoin/bitcoin/utility/container_source.hpp \
+    include/bitcoin/bitcoin/utility/crash_lock.hpp \
     include/bitcoin/bitcoin/utility/data.hpp \
     include/bitcoin/bitcoin/utility/deadline.hpp \
     include/bitcoin/bitcoin/utility/decorator.hpp \

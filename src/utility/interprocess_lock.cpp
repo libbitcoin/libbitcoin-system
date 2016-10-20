@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/utility/interprocess_lock.hpp>
 
 #include <memory>
+#include <string>
 #include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/unicode/file_lock.hpp>
 #include <bitcoin/bitcoin/unicode/ofstream.hpp>
@@ -27,20 +28,21 @@
 namespace libbitcoin {
 
 // static
-bool interprocess_lock::create(const path& file)
+    bool interprocess_lock::create(const std::string& file)
 {
-    bc::ofstream stream(file.string());
-    return !stream.bad();
+    bc::ofstream stream(file);
+    return stream.good();
 }
 
 // static
-bool interprocess_lock::destroy(const path& file)
+bool interprocess_lock::destroy(const std::string& file)
 {
     return boost::filesystem::remove(file);
+    ////std::remove(file.c_str());
 }
 
-interprocess_lock::interprocess_lock(const path& file, bool exclusive)
-  : file_(file), exclusive_(exclusive)
+interprocess_lock::interprocess_lock(const path& file)
+  : file_(file.string())
 {
 }
 
@@ -50,22 +52,19 @@ interprocess_lock::~interprocess_lock()
 }
 
 //  This succeeds if no other process has exclusive or sharable ownership.
-bool interprocess_lock::try_lock()
+bool interprocess_lock::lock()
 {
     if (!create(file_))
         return false;
 
-    if (!exclusive_)
-        return true;
-
-    lock_ = std::make_shared<lock>(file_.string());
+    lock_ = std::make_shared<lock_file>(file_);
     return lock_->try_lock();
 }
 
 // This may leave the lock file behind, which is not a problem.
 bool interprocess_lock::unlock()
 {
-    if (exclusive_ && !lock_)
+    if (!lock_)
         return false;
 
     lock_.reset();

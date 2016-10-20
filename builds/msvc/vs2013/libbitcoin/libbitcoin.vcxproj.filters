@@ -554,6 +554,9 @@
     <ClCompile Include="..\..\..\..\src\utility\interprocess_lock.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\crash_lock.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -1082,6 +1085,9 @@
       <Filter>include\bitcoin\unicode</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\interprocess_lock.hpp">
+      <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\crash_lock.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
   </ItemGroup>
