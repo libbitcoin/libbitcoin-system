@@ -100,6 +100,7 @@
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/unicode/console_streambuf.hpp>
+#include <bitcoin/bitcoin/unicode/file_lock.hpp>
 #include <bitcoin/bitcoin/unicode/ifstream.hpp>
 #include <bitcoin/bitcoin/unicode/ofstream.hpp>
 #include <bitcoin/bitcoin/unicode/unicode.hpp>
@@ -125,6 +126,7 @@
 #include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/exceptions.hpp>
+#include <bitcoin/bitcoin/utility/interprocess_lock.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
 #include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/monitor.hpp>
@@ -135,6 +137,7 @@
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/resubscriber.hpp>
 #include <bitcoin/bitcoin/utility/scope_lock.hpp>
+#include <bitcoin/bitcoin/utility/sequential_lock.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>

@@ -169,6 +169,7 @@
     <ClCompile Include="..\..\..\..\src\utility\deadline.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\dispatcher.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\interprocess_lock.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\istream_reader.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\monitor.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\png.cpp" />
@@ -177,6 +178,7 @@
     <ClCompile Include="..\..\..\..\src\utility\ostream_writer.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\conditional_lock.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\scope_lock.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\sequential_lock.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\string.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\thread.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\threadpool.cpp" />
@@ -292,6 +294,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\verack.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\console_streambuf.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\ifstream.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\file_lock.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\ofstream.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\unicode.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\unicode_istream.hpp" />
@@ -305,12 +308,14 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\deadline.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\delegates.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\enable_shared_from_base.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\interprocess_lock.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\monitor.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\notifier.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\png.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\resubscriber.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\conditional_lock.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\scope_lock.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\sequential_lock.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\synchronizer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\dispatcher.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\binary.hpp" />
