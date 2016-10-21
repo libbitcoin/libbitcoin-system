@@ -40,18 +40,6 @@ BC_API uint64_t pseudo_random();
 BC_API uint64_t pseudo_random(uint64_t begin, uint64_t end);
 
 /**
- * Generate a non-zero pseudo random number within the domain.
- * @return  The 64 bit number.
- */
-BC_API uint64_t nonzero_pseudo_random();
-
-/**
- * Generate a non-zero pseudo random number within (0, end].
- * @return  The 64 bit number.
- */
-BC_API uint64_t nonzero_pseudo_random(uint64_t end);
-
-/**
  * Fill a buffer with randomness using the default random engine.
  * @param[in]  chunk  The buffer to fill with randomness.
  */

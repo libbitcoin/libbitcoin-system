@@ -21,19 +21,47 @@
 
 #include <chrono>
 #include <cstdint>
-#include <stdexcept>
 #include <random>
-#include <thread>
+#include <boost/thread.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 
 namespace libbitcoin {
+    
+using namespace bc::asio;
+using namespace std::chrono;
 
 // DO NOT USE srand() and rand() on MSVC as srand must be called per thread.
 // Values may be truly random depending on the underlying device.
-// TODO: convert pseudo_random/nonzero_pseudo_random methods to templates.
+
+static uint32_t get_clock_seed()
+{
+    const auto now = high_resolution_clock::now();
+    return static_cast<uint32_t>(now.time_since_epoch().count());
+}
+
+static std::mt19937& get_twister()
+{
+    // Boost.thread will clean up the thread statics using this function.
+    const auto deleter = [](std::mt19937* twister)
+    {
+        delete twister;
+    };
+
+    // Maintain thread static state space.
+    static boost::thread_specific_ptr<std::mt19937> twister(deleter);
+
+    // This is thread safe because the instance is static.
+    if (twister.get() == nullptr)
+    {
+        // Seed with high resolution clock.
+        twister.reset(new std::mt19937(get_clock_seed()));
+    }
+
+    return *twister;
+}
 
 uint64_t pseudo_random()
 {
@@ -43,28 +71,16 @@ uint64_t pseudo_random()
 uint64_t pseudo_random(uint64_t begin, uint64_t end)
 {
     std::uniform_int_distribution<uint64_t> distribution(begin, end);
-    std::random_device device;
-    return distribution(device);
-}
-
-uint64_t nonzero_pseudo_random()
-{
-    return pseudo_random(1, max_uint64);
-}
-
-uint64_t nonzero_pseudo_random(uint64_t end)
-{
-    return pseudo_random(1, end);
+    return distribution(get_twister());
 }
 
 void pseudo_random_fill(data_chunk& chunk)
 {
     // uniform_int_distribution is undefined for sizes < 16 bits.
     std::uniform_int_distribution<uint16_t> distribution(0, max_uint8);
-    std::random_device device;
 
     for (auto& byte: chunk)
-        byte = static_cast<uint8_t>(distribution(device));
+        byte = static_cast<uint8_t>(distribution(get_twister()));
 }
 
 // Randomly select a time duration in the range:
@@ -73,9 +89,6 @@ void pseudo_random_fill(data_chunk& chunk)
 asio::duration pseudo_randomize(const asio::duration& expiration,
     uint8_t ratio)
 {
-    using namespace bc::asio;
-    using namespace std::chrono;
-
     if (ratio == 0)
         return expiration;
 
