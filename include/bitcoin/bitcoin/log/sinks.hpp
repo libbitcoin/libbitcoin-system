@@ -46,10 +46,10 @@ struct file_sink_configuration
 {
     std::string name_pattern;
     std::string rotation_path;
-    uintmax_t rotation_size;
-    uintmax_t rotation_max_files;
-    uintmax_t rotation_max_files_size;
-    uintmax_t rotation_min_free_space;
+    size_t rotation_size;
+//    size_t rotation_max_files;
+    size_t rotation_max_files_size;
+    size_t rotation_min_free_space;
 };
 
 /// Initializes default libbitcoin logging sinks and formats.
