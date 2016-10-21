@@ -59,7 +59,8 @@ typedef tcp::resolver resolver;
 typedef tcp::resolver::query query;
 typedef tcp::resolver::iterator iterator;
 
-// This is used because of thread_specific_ptr limitation.
+// Boost thread is used because of thread_specific_ptr limitation:
+// stackoverflow.com/q/22448022/1172329
 typedef boost::thread thread;
 
 typedef std::shared_ptr<socket> socket_ptr;
