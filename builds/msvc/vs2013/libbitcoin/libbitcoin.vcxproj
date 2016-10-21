@@ -166,7 +166,7 @@
     <ClCompile Include="..\..\..\..\src\unicode\unicode_istream.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\unicode_ostream.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\unicode_streambuf.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\crash_lock.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\flush_lock.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\deadline.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\dispatcher.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp" />
@@ -306,7 +306,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\assert.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\atomic.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\color.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\crash_lock.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\flush_lock.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\deadline.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\delegates.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\enable_shared_from_base.hpp" />
