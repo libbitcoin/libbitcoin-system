@@ -45,6 +45,7 @@ private:
     static bool exists(const std::string& file);
     static bool destroy(const std::string& file);
 
+    bool locked_;
     const std::string file_;
 };
 

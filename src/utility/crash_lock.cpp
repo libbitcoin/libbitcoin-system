@@ -50,7 +50,7 @@ bool crash_lock::destroy(const std::string& file)
 }
 
 crash_lock::crash_lock(const path& file)
-  : file_(file.string())
+  : file_(file.string()), locked_(false)
 {
 }
 
@@ -59,14 +59,24 @@ bool crash_lock::try_lock()
     return !exists(file_);
 }
 
+// Lock is idempotent, returns true if locked on return.
 bool crash_lock::lock_shared()
 {
-    return create(file_);
+    if (locked_)
+        return true;
+
+    locked_ = create(file_);
+    return locked_;
 }
 
+// Unlock is idempotent, returns true if unlocked on return.
 bool crash_lock::unlock_shared()
 {
-    return destroy(file_);
+    if (!locked_)
+        return true;
+
+    locked_ = !destroy(file_);
+    return !locked_;
 }
 
 } // namespace libbitcoin
