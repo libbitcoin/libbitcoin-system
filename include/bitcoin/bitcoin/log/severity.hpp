@@ -17,33 +17,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/monitor.hpp>
+#ifndef LIBBITCOIN_LOG_SEVERITY_HPP
+#define LIBBITCOIN_LOG_SEVERITY_HPP
 
-#include <cstddef>
-#include <string>
-////#include <bitcoin/bitcoin/log/sources.hpp>
-
-// libbitcoin defines the log and tracking but does not use them.
-// These are defined in bc so that they can be used in network and blockchain.
+#include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
+namespace log {
 
-monitor::monitor(count_ptr counter, const std::string& name)
-  : counter_(counter), name_(name)
+enum class severity
 {
-    trace(++(*counter_), "+");
-}
+    debug,
+    info,
+    warning,
+    error,
+    fatal
+};
 
-monitor::~monitor()
-{
-    trace(--(*counter_), "-");
-}
-
-void monitor::trace(size_t count, const std::string& action) const
-{
-////#ifndef NDEBUG
-////    LOG_DEBUG(LOG_SYSTEM) << action << " " << name_ << " {" << count << "}";
-////#endif
-}
-
+} // namespace log
 } // namespace libbitcoin
+
+#endif

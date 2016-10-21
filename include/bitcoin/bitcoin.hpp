@@ -57,6 +57,10 @@
 #include <bitcoin/bitcoin/formats/base_58.hpp>
 #include <bitcoin/bitcoin/formats/base_64.hpp>
 #include <bitcoin/bitcoin/formats/base_85.hpp>
+#include <bitcoin/bitcoin/log/attributes.hpp>
+#include <bitcoin/bitcoin/log/severity.hpp>
+#include <bitcoin/bitcoin/log/sinks.hpp>
+#include <bitcoin/bitcoin/log/sources.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/crypto.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
@@ -129,7 +133,6 @@
 #include <bitcoin/bitcoin/utility/flush_lock.hpp>
 #include <bitcoin/bitcoin/utility/interprocess_lock.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
-#include <bitcoin/bitcoin/utility/log.hpp>
 #include <bitcoin/bitcoin/utility/monitor.hpp>
 #include <bitcoin/bitcoin/utility/notifier.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
