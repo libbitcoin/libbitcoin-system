@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/crash_lock.hpp>
+#include <bitcoin/bitcoin/utility/flush_lock.hpp>
 
 #include <memory>
 #include <boost/filesystem.hpp>
@@ -28,14 +28,14 @@
 namespace libbitcoin {
     
 // static
-bool crash_lock::create(const std::string& file)
+bool flush_lock::create(const std::string& file)
 {
     bc::ofstream stream(file);
     return stream.good();
 }
 
 // static
-bool crash_lock::exists(const std::string& file)
+bool flush_lock::exists(const std::string& file)
 {
     bc::ifstream stream(file);
     return stream.good();
@@ -43,24 +43,24 @@ bool crash_lock::exists(const std::string& file)
 }
 
 // static
-bool crash_lock::destroy(const std::string& file)
+bool flush_lock::destroy(const std::string& file)
 {
     return boost::filesystem::remove(file);
     ////std::remove(file.c_str());
 }
 
-crash_lock::crash_lock(const path& file)
+flush_lock::flush_lock(const path& file)
   : file_(file.string()), locked_(false)
 {
 }
 
-bool crash_lock::try_lock()
+bool flush_lock::try_lock()
 {
     return !exists(file_);
 }
 
 // Lock is idempotent, returns true if locked on return.
-bool crash_lock::lock_shared()
+bool flush_lock::lock_shared()
 {
     if (locked_)
         return true;
@@ -70,7 +70,7 @@ bool crash_lock::lock_shared()
 }
 
 // Unlock is idempotent, returns true if unlocked on return.
-bool crash_lock::unlock_shared()
+bool flush_lock::unlock_shared()
 {
     if (!locked_)
         return true;

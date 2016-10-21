@@ -148,9 +148,9 @@ src_libbitcoin_la_SOURCES = \
     src/unicode/unicode_streambuf.cpp \
     src/utility/binary.cpp \
     src/utility/conditional_lock.cpp \
-    src/utility/crash_lock.cpp \
     src/utility/deadline.cpp \
     src/utility/dispatcher.cpp \
+    src/utility/flush_lock.cpp \
     src/utility/interprocess_lock.cpp \
     src/utility/istream_reader.cpp \
     src/utility/log.cpp \
@@ -477,7 +477,6 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/conditional_lock.hpp \
     include/bitcoin/bitcoin/utility/container_sink.hpp \
     include/bitcoin/bitcoin/utility/container_source.hpp \
-    include/bitcoin/bitcoin/utility/crash_lock.hpp \
     include/bitcoin/bitcoin/utility/data.hpp \
     include/bitcoin/bitcoin/utility/deadline.hpp \
     include/bitcoin/bitcoin/utility/decorator.hpp \
@@ -487,6 +486,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/enable_shared_from_base.hpp \
     include/bitcoin/bitcoin/utility/endian.hpp \
     include/bitcoin/bitcoin/utility/exceptions.hpp \
+    include/bitcoin/bitcoin/utility/flush_lock.hpp \
     include/bitcoin/bitcoin/utility/interprocess_lock.hpp \
     include/bitcoin/bitcoin/utility/istream_reader.hpp \
     include/bitcoin/bitcoin/utility/log.hpp \
