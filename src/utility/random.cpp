@@ -23,79 +23,79 @@
 #include <cstdint>
 #include <stdexcept>
 #include <random>
+#include <thread>
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 
 namespace libbitcoin {
 
 // DO NOT USE srand() and rand() on MSVC as srand must be called per thread.
-// As a result it is difficult to use safely.
+// Values may be truly random depending on the underlying device.
+// TODO: convert pseudo_random/nonzero_pseudo_random methods to templates.
 
-// Not fully testable due to lack of random engine injection.
-// This may be truly random depending on the underlying device.
 uint64_t pseudo_random()
 {
+    return pseudo_random(0, max_uint64);
+}
+
+uint64_t pseudo_random(uint64_t begin, uint64_t end)
+{
+    std::uniform_int_distribution<uint64_t> distribution(begin, end);
     std::random_device device;
-    std::uniform_int_distribution<uint64_t> distribution;
     return distribution(device);
 }
 
-// Not fully testable due to lack of random engine injection.
-// This may be truly random depending on the underlying device.
 uint64_t nonzero_pseudo_random()
 {
-    for (auto index = 0; index < 100; ++index)
-    {
-        const auto value = pseudo_random();
-        if (value > 0)
-            return value;
-    }
-
-    // If above doesn't return something is seriously wrong with the RNG.
-    throw std::runtime_error("The RNG produces 100 consecutive zero values.");
+    return pseudo_random(1, max_uint64);
 }
 
-// Not fully testable due to lack of random engine injection.
-// This may be truly random depending on the underlying device.
+uint64_t nonzero_pseudo_random(uint64_t end)
+{
+    return pseudo_random(1, end);
+}
+
 void pseudo_random_fill(data_chunk& chunk)
 {
+    // uniform_int_distribution is undefined for sizes < 16 bits.
+    std::uniform_int_distribution<uint16_t> distribution(0, max_uint8);
     std::random_device device;
-    std::uniform_int_distribution<uint16_t> distribution;
-    for (uint8_t& byte: chunk)
-    {
-        // uniform_int_distribution is undefined for sizes < 16 bits,
-        // so we generate a 16 bit value and reduce it to 8 bits.
-        byte = distribution(device) % std::numeric_limits<uint8_t>::max();
-    }
+
+    for (auto& byte: chunk)
+        byte = static_cast<uint8_t>(distribution(device));
 }
 
 // Randomly select a time duration in the range:
 // [(expiration - expiration / ratio) .. expiration]
 // Not fully testable due to lack of random engine injection.
-asio::duration pseudo_randomize(const asio::duration& expiration, uint8_t ratio)
+asio::duration pseudo_randomize(const asio::duration& expiration,
+    uint8_t ratio)
 {
+    using namespace bc::asio;
+    using namespace std::chrono;
+
     if (ratio == 0)
         return expiration;
 
     // Uses milliseconds level resolution.
-    const auto max_expire = std::chrono::duration_cast<asio::milliseconds>(
-        expiration).count();
+    const auto max_expire = duration_cast<milliseconds>(expiration).count();
 
     // [10 secs, 4] => 10000 / 4 => 2500
-    const auto divisor = max_expire / ratio;
+    const auto limit = max_expire / ratio;
 
-    if (divisor == 0)
+    if (limit == 0)
         return expiration;
 
     // [0..2^64) % 2500 => [0..2500]
-    const auto random_offset = static_cast<int>(bc::pseudo_random() % divisor);
+    const auto random_offset = static_cast<int>(pseudo_random(0, limit));
 
     // (10000 - [0..2500]) => [7500..10000]
     const auto expires = max_expire - random_offset;
 
     // [7.5..10] second duration.
-    return asio::milliseconds(expires);
+    return milliseconds(expires);
 }
 
 } // namespace libbitcoin
