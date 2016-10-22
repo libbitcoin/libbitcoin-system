@@ -17,33 +17,25 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/monitor.hpp>
+#ifndef LIBBITCOIN_LOG_ATTRIBUTES_HPP
+#define LIBBITCOIN_LOG_ATTRIBUTES_HPP
 
-#include <cstddef>
 #include <string>
-////#include <bitcoin/bitcoin/log/sources.hpp>
-
-// libbitcoin defines the log and tracking but does not use them.
-// These are defined in bc so that they can be used in network and blockchain.
+#include <boost/log/attributes/clock.hpp>
+#include <boost/log/expressions/keyword.hpp>
+#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/log/severity.hpp>
 
 namespace libbitcoin {
+namespace log {
+namespace attributes {
 
-monitor::monitor(count_ptr counter, const std::string& name)
-  : counter_(counter), name_(name)
-{
-    trace(++(*counter_), "+");
-}
+BOOST_LOG_ATTRIBUTE_KEYWORD(timestamp, "Timestamp", boost::posix_time::ptime)
+BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", libbitcoin::log::severity)
+BOOST_LOG_ATTRIBUTE_KEYWORD(channel, "Channel", std::string)
 
-monitor::~monitor()
-{
-    trace(--(*counter_), "-");
-}
-
-void monitor::trace(size_t count, const std::string& action) const
-{
-////#ifndef NDEBUG
-////    LOG_DEBUG(LOG_SYSTEM) << action << " " << name_ << " {" << count << "}";
-////#endif
-}
-
+} // namespace attributes
+} // namespace log
 } // namespace libbitcoin
+
+#endif

@@ -72,6 +72,7 @@ src_libbitcoin_la_SOURCES = \
     src/formats/base_58.cpp \
     src/formats/base_64.cpp \
     src/formats/base_85.cpp \
+    src/log/sinks.cpp \
     src/math/checksum.cpp \
     src/math/crypto.cpp \
     src/math/elliptic_curve.cpp \
@@ -153,7 +154,6 @@ src_libbitcoin_la_SOURCES = \
     src/utility/flush_lock.cpp \
     src/utility/interprocess_lock.cpp \
     src/utility/istream_reader.cpp \
-    src/utility/log.cpp \
     src/utility/monitor.cpp \
     src/utility/ostream_writer.cpp \
     src/utility/png.cpp \
@@ -406,6 +406,13 @@ include_bitcoin_bitcoin_impl_utility_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/subscriber.ipp \
     include/bitcoin/bitcoin/impl/utility/track.ipp
 
+include_bitcoin_bitcoin_logdir = ${includedir}/bitcoin/bitcoin/log
+include_bitcoin_bitcoin_log_HEADERS = \
+    include/bitcoin/bitcoin/log/attributes.hpp \
+    include/bitcoin/bitcoin/log/severity.hpp \
+    include/bitcoin/bitcoin/log/sinks.hpp \
+    include/bitcoin/bitcoin/log/sources.hpp
+
 include_bitcoin_bitcoin_mathdir = ${includedir}/bitcoin/bitcoin/math
 include_bitcoin_bitcoin_math_HEADERS = \
     include/bitcoin/bitcoin/math/checksum.hpp \
@@ -489,7 +496,6 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/flush_lock.hpp \
     include/bitcoin/bitcoin/utility/interprocess_lock.hpp \
     include/bitcoin/bitcoin/utility/istream_reader.hpp \
-    include/bitcoin/bitcoin/utility/log.hpp \
     include/bitcoin/bitcoin/utility/monitor.hpp \
     include/bitcoin/bitcoin/utility/notifier.hpp \
     include/bitcoin/bitcoin/utility/ostream_writer.hpp \
