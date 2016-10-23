@@ -707,8 +707,7 @@ code transaction::connect_input(const chain_state& state,
     const auto index32 = static_cast<uint32_t>(input_index);
 
     // Validate the transaction input.
-    const auto valid = script::verify(*this, index32, flags);
-    return valid ? error::success : error::validate_inputs_failed;
+    return script::verify(*this, index32, flags);
 }
 
 // Validation.
