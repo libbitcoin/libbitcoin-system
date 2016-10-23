@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <string>
+#include <boost/filesystem.hpp>
 #include <boost/log/attributes/clock.hpp>
 #include <boost/log/expressions/keyword.hpp>
 #include <boost/log/sources/global_logger_storage.hpp>
@@ -38,26 +39,28 @@
 namespace libbitcoin {
 namespace log {
 
-typedef boost::shared_ptr<bc::ofstream> file;
+using namespace boost::filesystem;
+
+////typedef boost::shared_ptr<bc::ofstream> file;
 typedef boost::shared_ptr<std::ostream> stream;
 typedef boost::log::formatting_ostream::ostream_type formatter;
 
-struct file_sink_configuration
+struct rotable_file
 {
-    std::string name_pattern;
-    std::string rotation_path;
+    path original_log;
+    path archive_directory;
     size_t rotation_size;
-//    size_t rotation_max_files;
-    size_t rotation_max_files_size;
-    size_t rotation_min_free_space;
+    size_t maximum_files_size;
+    size_t minimum_free_space;
+    ////size_t maximum_files;
 };
 
-/// Initializes default libbitcoin logging sinks and formats.
-void initialize(log::file& debug_file, log::file& error_file,
-    log::stream& output_stream, log::stream& error_stream);
+/////// Initializes default libbitcoin logging sinks and formats.
+////void initialize(log::file& debug_file, log::file& error_file,
+////    log::stream& output_stream, log::stream& error_stream);
 
-void initialize(const file_sink_configuration& debug_file,
-    const file_sink_configuration& error_file,
+/// Initializes default libbitcoin logging sinks and formats.
+void initialize(const rotable_file& debug_file, const rotable_file& error_file,
     log::stream& output_stream, log::stream& error_stream);
 
 /// Log stream operator.
