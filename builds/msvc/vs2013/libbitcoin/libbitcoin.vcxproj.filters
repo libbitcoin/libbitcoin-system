@@ -90,6 +90,12 @@
     <Filter Include="src\message">
       <UniqueIdentifier>{919f9823-945e-4ab1-82ab-2c7ba85502ed}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\bitcoin\log">
+      <UniqueIdentifier>{db2cabaf-f23d-4994-925f-2b2405b1d68a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\log">
+      <UniqueIdentifier>{f048519d-2af9-4dd9-a4a3-a78e380720ac}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -425,9 +431,6 @@
     <ClCompile Include="..\..\..\..\src\wallet\ek_private.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\log.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\headers.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
@@ -556,6 +559,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\flush_lock.cpp">
       <Filter>src\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\log\sinks.cpp">
+      <Filter>src\log</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -916,9 +922,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\handlers.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\log.hpp">
-      <Filter>include\bitcoin\utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\headers.hpp">
       <Filter>include\bitcoin\message</Filter>
     </ClInclude>
@@ -1089,6 +1092,18 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\flush_lock.hpp">
       <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\severity.hpp">
+      <Filter>include\bitcoin\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\sinks.hpp">
+      <Filter>include\bitcoin\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\sources.hpp">
+      <Filter>include\bitcoin\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\attributes.hpp">
+      <Filter>include\bitcoin\log</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
