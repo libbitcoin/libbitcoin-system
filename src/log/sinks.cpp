@@ -38,6 +38,7 @@ namespace log {
 using namespace boost::log::expressions;
 using namespace boost::log::keywords;
 using namespace boost::log::sinks;
+using namespace boost::log::sinks::file;
 using namespace boost::posix_time;
 
 #define TIME_FORMAT "%H:%M:%S.%f"
@@ -64,8 +65,6 @@ const auto error_filter =
 const auto info_filter =
     (attributes::severity == severity::info);
 
-const auto mode = std::ofstream::out | std::ofstream::app;
-
 static std::map<severity, std::string> severity_mapping
 {
     { severity::debug, "DEBUG" },
@@ -81,45 +80,41 @@ formatter& operator<<(formatter& stream, severity level)
     return stream;
 }
 
+static boost::shared_ptr<collector> file_collector(
+    const rotable_file& rotation)
+{
+    return make_collector(
+        target = rotation.archive_directory,
+        max_size = rotation.maximum_files_size,
+        min_free_space = rotation.minimum_free_space
+        /*max_files = rotation.maximum_files*/);
+}
+
 static boost::shared_ptr<text_file_sink> add_text_file_sink(
-    const file_sink_configuration& config)
+    const rotable_file& rotation)
 {
     // Construct a log sink.
     const auto sink = boost::make_shared<text_file_sink>();
+    const auto backend = sink->locked_backend();
 
-//    sink->locked_backend()->set_open_mode(mode);
+    // Add a file stream for the sink to write to.
+    backend->set_file_name_pattern(rotation.original_log);
 
-    // Add a stream for the sink to write to.
-#ifdef _MSC_VER
-    sink->locked_backend()->set_file_name_pattern(bc::to_utf16(config.name_pattern));
-#else
-    sink->locked_backend()->set_file_name_pattern(config.name_pattern);
-#endif
-
-    if (config.rotation_size > 0)
-        sink->locked_backend()->set_rotation_size(config.rotation_size);
+    // Set archival parameters.
+    if (rotation.rotation_size != 0)
+    {
+        backend->set_rotation_size(rotation.rotation_size);
+        backend->set_file_collector(file_collector(rotation));
+    }
 
     // Flush the sink after each logical line.
-    sink->locked_backend()->auto_flush(true);
+    backend->auto_flush(true);
 
     // Add the formatter to the sink.
     sink->set_formatter(LINE_FORMATTER);
 
-    sink->locked_backend()->set_file_collector(
-        boost::log::sinks::file::make_collector(
-#ifdef _MSC_VER
-            target = bc::to_utf16(config.rotation_path),
-#else
-            target = config.rotation_path,
-#endif
-//            max_files = config.rotation_max_files,
-            max_size = config.rotation_max_files_size,
-            min_free_space = config.rotation_min_free_space
-        ));
-
     // Register the sink with the logging core.
     boost::log::core::get()->add_sink(sink);
-
     return sink;
 }
 
@@ -129,33 +124,32 @@ static boost::shared_ptr<text_stream_sink> add_text_stream_sink(
 {
     // Construct a log sink.
     const auto sink = boost::make_shared<text_stream_sink>();
+    const auto backend = sink->locked_backend();
 
     // Add a stream for the sink to write to.
-    sink->locked_backend()->add_stream(stream);
+    backend->add_stream(stream);
 
     // Flush the sink after each logical line.
-    sink->locked_backend()->auto_flush(true);
+    backend->auto_flush(true);
 
     // Add the formatter to the sink.
     sink->set_formatter(LINE_FORMATTER);
 
     // Register the sink with the logging core.
     boost::log::core::get()->add_sink(sink);
-
     return sink;
 }
 
-void initialize(log::file& debug_file, log::file& error_file,
-    log::stream& output_stream, log::stream& error_stream)
-{
-    add_text_stream_sink(debug_file);
-    add_text_stream_sink(error_file)->set_filter(error_filter);
-    add_text_stream_sink(output_stream)->set_filter(info_filter);
-    add_text_stream_sink(error_stream)->set_filter(error_filter);
-}
+////void initialize(log::file& debug_file, log::file& error_file,
+////    log::stream& output_stream, log::stream& error_stream)
+////{
+////    add_text_stream_sink(debug_file);
+////    add_text_stream_sink(error_file)->set_filter(error_filter);
+////    add_text_stream_sink(output_stream)->set_filter(info_filter);
+////    add_text_stream_sink(error_stream)->set_filter(error_filter);
+////}
 
-void initialize(const file_sink_configuration& debug_file,
-    const file_sink_configuration& error_file,
+void initialize(const rotable_file& debug_file, const rotable_file& error_file,
     log::stream& output_stream, log::stream& error_stream)
 {
     add_text_file_sink(debug_file);
