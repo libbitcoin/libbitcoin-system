@@ -57,6 +57,11 @@ static constexpr size_t multisig_default_signature_ops = 20;
 static constexpr uint8_t negative_mask = 0x80;
 static constexpr uint8_t negative_1 = 0x81;
 
+static const auto sighash_all = signature_hash_algorithm::all;
+static const auto sighash_none = signature_hash_algorithm::none;
+static const auto sighash_single = signature_hash_algorithm::single;
+static const auto anyone_flag = signature_hash_algorithm::anyone_can_pay;
+
 // bit.ly/2cPazSa
 static const hash_digest one_hash
 {
@@ -432,7 +437,7 @@ bool script::check_signature(const ec_signature& signature,
     if (public_key.empty())
         return false;
 
-    // This always produces a valid signature hash.
+    // This always produces a valid signature hash, including one_hash.
     const auto sighash = script::generate_signature_hash(tx, input_index,
         script_code, sighash_type);
 
@@ -445,7 +450,7 @@ bool script::create_endorsement(endorsement& out, const ec_secret& secret,
     const script& prevout_script, const transaction& tx, uint32_t input_index,
     uint8_t sighash_type)
 {
-    // This always produces a valid signature hash.
+    // This always produces a valid signature hash, including one_hash.
     const auto sighash = script::generate_signature_hash(tx, input_index,
         prevout_script, sighash_type);
 
@@ -564,8 +569,8 @@ inline bool is_sighash_flag(uint8_t sighash_type,
     return (sighash_type & value) != 0;
 }
 
-static transaction sign_none(const transaction& tx, uint32_t input_index,
-    const script& script_code, bool anyone)
+static hash_digest sign_none(const transaction& tx, uint32_t input_index,
+    const script& script_code, uint8_t sighash_type, bool anyone)
 {
     input::list ins;
     const auto& inputs = tx.inputs();
@@ -592,11 +597,11 @@ static transaction sign_none(const transaction& tx, uint32_t input_index,
 
     // Move new inputs to new transaction and drop outputs.
     return transaction(tx.version(), tx.locktime(), std::move(ins),
-        output::list{});
+        output::list{}).hash(sighash_type);
 }
 
-static transaction sign_single(const transaction& tx, uint32_t input_index,
-    const script& script_code, bool anyone)
+static hash_digest sign_single(const transaction& tx, uint32_t input_index,
+    const script& script_code, uint8_t sighash_type, bool anyone)
 {
     input::list ins;
     const auto& inputs = tx.inputs();
@@ -630,11 +635,11 @@ static transaction sign_single(const transaction& tx, uint32_t input_index,
 
     // Move new inputs and new outputs to new transaction.
     return transaction(tx.version(), tx.locktime(), std::move(ins),
-        std::move(outs));
+        std::move(outs)).hash(sighash_type);
 }
 
-static transaction sign_all(const transaction& tx, uint32_t input_index,
-    const script& script_code, bool anyone)
+static hash_digest sign_all(const transaction& tx, uint32_t input_index,
+    const script& script_code, uint8_t sighash_type, bool anyone)
 {
     input::list ins;
     const auto& inputs = tx.inputs();
@@ -663,42 +668,35 @@ static transaction sign_all(const transaction& tx, uint32_t input_index,
     // Move new inputs and copy outputs to new transaction.
     transaction out(tx.version(), tx.locktime(), input::list{}, tx.outputs());
     out.set_inputs(std::move(ins));
-    return out;
+    return out.hash(sighash_type);
 }
 
+// static
 hash_digest script::generate_signature_hash(const transaction& tx,
     uint32_t input_index, const script& script_code, uint8_t sighash_type)
 {
-    const auto sighash_all = signature_hash_algorithm::all;
-    const auto sighash_none = signature_hash_algorithm::none;
-    const auto sighash_single = signature_hash_algorithm::single;
-    const auto anyone_flag = signature_hash_algorithm::anyone_can_pay;
-
+    const auto any = is_sighash_flag(sighash_type, anyone_flag);
     const auto single = is_sighash_enum(sighash_type, sighash_single);
-    const auto anyone = is_sighash_flag(sighash_type, anyone_flag);
 
-    // These are verified here and therefore only asserted in the helpers.
+    // Bounds are verified here and therefore only asserted in the helpers.
     if (input_index >= tx.inputs().size() || 
         (input_index >= tx.outputs().size() && single))
     {
-        // This is a bitcoind behavior we necessarily perpetuate.
+        // This is a wacky bitcoind behavior we necessarily perpetuate.
         return one_hash;
     }
 
     switch (to_sighash_enum(sighash_type))
     {
         case sighash_none:
-            return sign_none(tx, input_index, script_code, anyone)
-                .hash(sighash_type);
+            return sign_none(tx, input_index, script_code, sighash_type, any);
 
         case sighash_single:
-            return sign_single(tx, input_index, script_code, anyone)
-                .hash(sighash_type);
+            return sign_single(tx, input_index, script_code, sighash_type, any);
 
         default:
         case sighash_all:
-            return sign_all(tx, input_index, script_code, anyone)
-                .hash(sighash_type);
+            return sign_all(tx, input_index, script_code, sighash_type, any);
     }
 }
 
@@ -1976,6 +1974,7 @@ static bool evaluate(const transaction& tx, uint32_t input_index,
     return context.conditional.closed();
 }
 
+// static
 // TODO: return detailed result code indicating failure condition.
 code script::verify(const transaction& tx, uint32_t input_index,
     uint32_t flags)
@@ -1988,6 +1987,7 @@ code script::verify(const transaction& tx, uint32_t input_index,
     return verify(tx, input_index, prevout.cache.script(), flags);
 }
 
+// static
 // TODO: return detailed result code indicating failure condition.
 code script::verify(const transaction& tx, uint32_t input_index,
     const script& prevout_script, uint32_t flags)
