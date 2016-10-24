@@ -96,66 +96,101 @@ public:
         raw_data_fallback
     };
 
-    static script factory_from_data(const data_chunk& data, bool length_prefix,
-        parse_mode mode);
-    static script factory_from_data(std::istream& stream, bool length_prefix,
-        parse_mode mode);
-    static script factory_from_data(reader& source, bool length_prefix,
-        parse_mode mode);
-
-    static bool is_enabled(uint32_t active_forks, rule_fork flag);
-    static hash_digest generate_signature_hash(const transaction& tx,
-        uint32_t input_index, const script& script_code, uint8_t sighash_type);
-    static bool create_endorsement(endorsement& out, const ec_secret& secret,
-        const script& prevout_script, const transaction& tx,
-        uint32_t input_index, uint8_t sighash_type);
-    static bool check_signature(const ec_signature& signature,
-        uint8_t sighash_type, const data_chunk& public_key,
-        const script& script_code, const transaction& tx,
-        uint32_t input_index);
-    static code verify(const transaction& tx, uint32_t input_index,
-        uint32_t flags);
-    static code verify(const transaction& tx, uint32_t input_index,
-        const script& prevout_script, uint32_t flags);
+    // Constructors.
+    //-------------------------------------------------------------------------
 
     script();
-    script(const operation::stack& operations);
-    script(operation::stack&& operations);
-    script(const script& other);
+
     script(script&& other);
+    script(const script& other);
 
-    operation::stack& operations();
-    const operation::stack& operations() const;
-    void set_operations(const operation::stack& value);
-    void set_operations(operation::stack&& value);
+    script(operation::stack&& operations);
+    script(const operation::stack& operations);
 
-    script_pattern pattern() const;
-    bool is_raw_data() const;
-
-    size_t pay_script_hash_sigops(const script& prevout) const;
-    size_t sigops(bool serialized_script) const;
-
-    bool from_string(const std::string& human_readable);
-    std::string to_string(uint32_t flags) const;
-
-    bool from_data(const data_chunk& data, bool length_prefix, parse_mode mode);
-    bool from_data(std::istream& stream, bool length_prefix, parse_mode mode);
-    bool from_data(reader& source, bool length_prefix, parse_mode mode);
-    data_chunk to_data(bool length_prefix) const;
-    void to_data(std::ostream& stream, bool length_prefix) const;
-    void to_data(writer& sink, bool length_prefix) const;
-
-    // BUGBUG: An empty script is valid.
-    bool is_valid() const;
-    void reset();
-    uint64_t satoshi_content_size() const;
-    uint64_t serialized_size(bool length_prefix) const;
+    // Operators.
+    //-------------------------------------------------------------------------
 
     script& operator=(script&& other);
     script& operator=(const script& other);
 
     bool operator==(const script& other) const;
     bool operator!=(const script& other) const;
+
+    // Deserialization.
+    //-------------------------------------------------------------------------
+
+    static script factory_from_data(const data_chunk& data, bool prefix,
+        parse_mode mode);
+    static script factory_from_data(std::istream& stream, bool prefix,
+        parse_mode mode);
+    static script factory_from_data(reader& source, bool prefix, parse_mode mode);
+
+    bool from_data(const data_chunk& data, bool prefix, parse_mode mode);
+    bool from_data(std::istream& stream, bool prefix, parse_mode mode);
+    bool from_data(reader& source, bool prefix, parse_mode mode);
+
+    bool from_string(const std::string& mnemonic);
+
+    bool is_valid() const;
+
+    // Serialization.
+    //-------------------------------------------------------------------------
+
+    data_chunk to_data(bool prefix) const;
+    void to_data(std::ostream& stream, bool prefix) const;
+    void to_data(writer& sink, bool prefix) const;
+
+    std::string to_string(uint32_t flags) const;
+
+    // Properties (size, accessors, cache).
+    //-------------------------------------------------------------------------
+
+    uint64_t satoshi_content_size() const;
+    uint64_t serialized_size(bool prefix) const;
+
+    // deprecated (unsafe)
+    operation::stack& operations();
+
+    const operation::stack& operations() const;
+
+    void set_operations(operation::stack&& value);
+    void set_operations(const operation::stack& value);
+
+    // Utilities.
+    //-------------------------------------------------------------------------
+
+    static bool is_enabled(uint32_t active_forks, rule_fork flag);
+
+    static hash_digest generate_signature_hash(const transaction& tx,
+        uint32_t input_index, const script& script_code, uint8_t sighash_type);
+
+    static bool check_signature(const ec_signature& signature,
+        uint8_t sighash_type, const data_chunk& public_key,
+        const script& script_code, const transaction& tx,
+        uint32_t input_index);
+
+    static bool create_endorsement(endorsement& out, const ec_secret& secret,
+        const script& prevout_script, const transaction& tx,
+        uint32_t input_index, uint8_t sighash_type);
+
+    // TODO: hide this as protected after changing tests.
+    bool is_raw_data() const;
+
+    script_pattern pattern() const;
+    size_t sigops(bool serialized_script) const;
+    size_t pay_script_hash_sigops(const script& prevout) const;
+
+    // Validation.
+    //-------------------------------------------------------------------------
+
+    static code verify(const transaction& tx, uint32_t input_index,
+        uint32_t flags);
+
+    static code verify(const transaction& tx, uint32_t input_index,
+        const script& prevout_script, uint32_t flags);
+
+protected:
+    void reset();
 
 private:
     bool deserialize(const data_chunk& raw_script, parse_mode mode);
@@ -164,6 +199,7 @@ private:
 
     operation::stack operations_;
     bool is_raw_;
+    bool valid_;
 };
 
 } // namespace chain

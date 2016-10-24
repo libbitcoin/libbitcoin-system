@@ -501,35 +501,80 @@ opcode string_to_opcode(const std::string& value)
 
 opcode data_to_opcode(const data_chunk& value)
 {
-    static constexpr size_t limit = 76;
-    opcode code;
-    if (value.size() < limit)
-        code = opcode::special;
+    static constexpr size_t opcode_limit = 76;
+
+    if (value.size() < opcode_limit)
+        return opcode::special;
     else if (value.size() < max_uint8)
-        code = opcode::pushdata1;
+        return opcode::pushdata1;
     else if (value.size() < max_uint16)
-        code = opcode::pushdata2;
+        return opcode::pushdata2;
     else if (value.size() < max_uint32)
-        code = opcode::pushdata4;
-    else
-        code = opcode::bad_operation;
-    return code;
+        return opcode::pushdata4;
+
+    return opcode::bad_operation;
 }
 
-bool within_op_n(opcode code)
+bool opcode_is_disabled(opcode code)
 {
-    const auto value = static_cast<uint8_t>(code);
-    constexpr auto op_1 = static_cast<uint8_t>(opcode::op_1);
-    constexpr auto op_16 = static_cast<uint8_t>(opcode::op_16);
-    return op_1 <= value && value <= op_16;
+    switch (code)
+    {
+        case opcode::cat:
+        case opcode::substr:
+        case opcode::left:
+        case opcode::right:
+        case opcode::invert:
+        case opcode::and_:
+        case opcode::or_:
+        case opcode::xor_:
+        case opcode::op_2mul:
+        case opcode::op_2div:
+        case opcode::mul:
+        case opcode::div:
+        case opcode::mod:
+        case opcode::lshift:
+        case opcode::rshift:
+            return true;
+
+        // These opcodes aren't in the main Satoshi EvalScript
+        // switch-case so the script loop always fails regardless of
+        // whether these are executed or not.
+        case opcode::verif:
+        case opcode::vernotif:
+            return true;
+
+        default:
+            return false;
+    }
 }
 
-uint8_t decode_op_n(opcode code)
+bool opcode_is_empty_pusher(opcode code)
 {
-    BITCOIN_ASSERT(within_op_n(code));
-    const auto value = static_cast<uint8_t>(code);
-    constexpr auto op_0 = static_cast<uint8_t>(opcode::op_1) - 1;
-    return value - op_0;
+    switch (code)
+    {
+        // These operations may push empty data (opcode zero).
+        case opcode::special:
+        case opcode::pushdata1:
+        case opcode::pushdata2:
+        case opcode::pushdata4:
+            return true;
+
+        default:
+            return false;
+    }
+}
+
+bool opcode_is_condition(opcode code)
+{
+    return code == opcode::if_
+        || code == opcode::notif
+        || code == opcode::else_
+        || code == opcode::endif;
+}
+
+bool opcode_is_operation(opcode code)
+{
+    return to_byte_code(code) > to_byte_code(opcode::op_16);
 }
 
 } // namespace chain
