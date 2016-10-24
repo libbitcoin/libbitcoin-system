@@ -217,10 +217,9 @@ bool script::from_data(reader& source, bool prefix, parse_mode mode)
 // private
 bool script::emplace(data_chunk&& raw_script)
 {
+    // The raw_data opcode is ignored thanks to the is_raw_ flag.
     is_raw_ = true;
-
-    // The opcode is ignored thanks to is_raw_ in the script.
-    operations_.emplace_back(opcode::raw_data, to_chunk(raw_script));
+    operations_.push_back({ opcode::raw_data, std::move(raw_script) });
     return true;
 }
 
