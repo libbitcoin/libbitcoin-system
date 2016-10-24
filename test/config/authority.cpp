@@ -161,6 +161,30 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(authority__ip)
 
+BOOST_AUTO_TEST_CASE(authority__bool__default__false)
+{
+    const authority host;
+    BOOST_REQUIRE(!host);
+}
+
+BOOST_AUTO_TEST_CASE(authority__bool__zero_port__false)
+{
+    const authority host(test_ipv6_address, 0);
+    BOOST_REQUIRE(!host);
+}
+
+BOOST_AUTO_TEST_CASE(authority__bool__nonzero_port__true)
+{
+    const authority host(test_ipv6_address, 42);
+    BOOST_REQUIRE(host);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+// ------------------------------------------------------------------------- //
+
+BOOST_AUTO_TEST_SUITE(authority__ip)
+
 BOOST_AUTO_TEST_CASE(authority__ip__default__unspecified)
 {
     const authority host;
