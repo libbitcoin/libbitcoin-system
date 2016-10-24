@@ -52,26 +52,25 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
     // This text mapping may change without notice.
     switch (ev)
     {
+        // general codes
         case error::success:
             return "success";
+        case error::deprecated:
+            return "deprecated";
+        case error::unknown:
+            return "unknown error";
+        case error::not_found:
+            return "object does not exist";
+        case error::file_system:
+            return "file system error";
+        case error::non_standard:
+            return "transaction is not standard";
 
-        // network errors
+        // network
         case error::service_stopped:
             return "service is stopped";
         case error::operation_failed:
             return "operation failed";
-
-        // blockchain errors
-        case error::not_found:
-            return "object does not exist";
-        case error::duplicate:
-            return "matching previous object found";
-        case error::orphan:
-            return "missing block parent";
-        case error::unsupported_script_pattern:
-            return "unsupport script pattern";
-
-        // network errors (more)
         case error::resolve_failed:
             return "resolving hostname failed";
         case error::network_unreachable:
@@ -86,101 +85,100 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "bad data stream";
         case error::channel_timeout:
             return "connection timed out";
-
-        // transaction pool
-        case error::blockchain_reorganized:
-            return "transactions invalidated by blockchain reorganization";
-        case error::pool_filled:
-            return "forced removal of old transaction from pool overflow";
-
-        // validate tx
-        case error::coinbase_transaction:
-            return "coinbase transaction disallowed in memory pool";
-        case error::is_not_standard:
-            return "transaction is not standard";
-        case error::double_spend:
-            return "double spend of input";
-        case error::input_not_found:
-            return "input not found";
-
-        // check_transaction()
-        case error::empty_transaction:
-            return "transaction inputs or outputs are empty";
-        case error::spend_overflow:
-            return "spend outside valid range";
-        case error::invalid_coinbase_script_size:
-            return "coinbase script is too small or large";
-        case error::previous_output_null:
-            return "non-coinbase transaction has input with null previous output";
-
-        // validate block
-        case error::previous_block_invalid:
-            return "previous block failed to validate";
-
-        // check_block()
-        case error::size_limits:
-            return "size limits failed";
-        case error::invalid_proof_of_work:
-            return "proof of work is invalid";
-        case error::futuristic_timestamp:
-            return "timestamp too far in the future";
-        case error::first_not_coinbase:
-            return "first transaction is not a coinbase";
-        case error::extra_coinbases:
-            return "more than one coinbase";
-        case error::too_many_sigs:
-            return "too many script signatures";
-        case error::merkle_mismatch:
-            return "merkle root mismatch";
-
-        // accept_block()
-        case error::incorrect_proof_of_work:
-            return "proof of work does not match bits field";
-        case error::timestamp_too_early:
-            return "block timestamp is too early";
-        case error::non_final_transaction:
-            return "block contains a non-final transaction";
-        case error::checkpoints_failed:
-            return "block hash rejected by checkpoint";
-        case error::old_version_block:
-            return "block version rejected at current height";
-        case error::coinbase_height_mismatch:
-            return "block height mismatch in coinbase";
-
-        // connect_block()
-        case error::unspent_duplicate:
-            return "duplicate id of transaction with unspent outputs";
-        case error::validate_inputs_failed:
-            return "validation of inputs failed";
-        case error::spend_exceeds_value:
-            return "spend exceeds value of inputs";
-        case error::coinbase_too_large:
-            return "coinbase value is too large";
-
-        // file system errors
-        case error::file_system:
-            return "file system error";
-
-        // network errors
         case error::address_blocked:
             return "address is blocked by policy";
         case error::channel_stopped:
             return "channel is stopped";
 
-        // check_transaction() (more)
-        case error::coinbase_maturity:
-            return "immature coinbase spent";
+        // block pool
+        case error::duplicate_block:
+            return "duplicate block";
+        case error::orphan_block:
+            return "missing block parent";
+        case error::invalid_previous_block:
+            return "previous block failed to validate";
 
-        // check_block() (more)
+        // transaction pool
+        case error::blockchain_reorganized:
+            return "transactions invalidated by blockchain reorganization";
+        case error::transaction_pool_filled:
+            return "forced removal of old transaction from pool overflow";
+        case error::duplicate_pool_transaction:
+            return "transaction with same hash already exists in pool";
+
+        // check header
+        case error::invalid_proof_of_work:
+            return "proof of work is invalid";
+        case error::futuristic_timestamp:
+            return "timestamp too far in the future";
+
+        // accept header
+        case error::checkpoints_failed:
+            return "block hash rejected by checkpoint";
+        case error::old_version_block:
+            return "block version rejected at current height";
+        case error::incorrect_proof_of_work:
+            return "proof of work does not match bits field";
+        case error::timestamp_too_early:
+            return "block timestamp is too early";
+
+        // check block
+        case error::block_size_limit:
+            return "block size limit exceeded";
         case error::empty_block:
             return "block has no transactions";
+        case error::first_not_coinbase:
+            return "first transaction is not a coinbase";
+        case error::extra_coinbases:
+            return "more than one coinbase";
+        case error::internal_duplicate:
+            return "matching transaction hashes in block";
+        case error::merkle_mismatch:
+            return "merkle root mismatch";
         case error::insufficient_work:
             return "insufficient work to reorganize";
+        case error::too_many_sigops:
+            return "too many signature operations";
 
-        // unknown errors
-        case error::unknown:
+        // accept block
+        case error::non_final_transaction:
+            return "block contains a non-final transaction";
+        case error::coinbase_height_mismatch:
+            return "block height mismatch in coinbase";
+        case error::coinbase_too_large:
+            return "coinbase value is too large";
+
+        // check transaction
+        case error::empty_transaction:
+            return "transaction inputs or outputs are empty";
+        case error::previous_output_null:
+            return "non-coinbase transaction has input with null previous output";
+        case error::spend_overflow:
+            return "spend outside valid range";
+        case error::invalid_coinbase_script_size:
+            return "coinbase script is too small or large";
+        case error::coinbase_transaction:
+            return "coinbase transaction disallowed in memory pool";
+
+        // accept transaction
+        case error::unspent_duplicate:
+            return "matching transaction with unspent outputs";
+        case error::missing_input:
+            return "input not found";
+        case error::double_spend:
+            return "double spend of input";
+        case error::coinbase_maturity:
+            return "immature coinbase spent";
+        case error::spend_exceeds_value:
+            return "spend exceeds value of inputs";
+
+        // connect input
+        case error::validate_inputs_failed:
+            return "validation of inputs failed";
+
+        // invalid codes
         default:
-            return "unknown error";
+            return "invalid code";
     }
 }
 

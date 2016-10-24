@@ -140,14 +140,14 @@ static boost::shared_ptr<text_stream_sink> add_text_stream_sink(
     return sink;
 }
 
-////void initialize(log::file& debug_file, log::file& error_file,
-////    log::stream& output_stream, log::stream& error_stream)
-////{
-////    add_text_stream_sink(debug_file);
-////    add_text_stream_sink(error_file)->set_filter(error_filter);
-////    add_text_stream_sink(output_stream)->set_filter(info_filter);
-////    add_text_stream_sink(error_stream)->set_filter(error_filter);
-////}
+void initialize(log::file& debug_file, log::file& error_file,
+    log::stream& output_stream, log::stream& error_stream)
+{
+    add_text_stream_sink(debug_file);
+    add_text_stream_sink(error_file)->set_filter(error_filter);
+    add_text_stream_sink(output_stream)->set_filter(info_filter);
+    add_text_stream_sink(error_stream)->set_filter(error_filter);
+}
 
 void initialize(const rotable_file& debug_file, const rotable_file& error_file,
     log::stream& output_stream, log::stream& error_stream)

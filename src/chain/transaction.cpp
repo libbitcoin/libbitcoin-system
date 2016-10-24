@@ -701,14 +701,13 @@ code transaction::connect_input(const chain_state& state,
 
     // Verify that the previous output cache has been populated.
     if (!prevout.cache.is_valid())
-        return error::input_not_found;
+        return error::missing_input;
 
     const auto flags = state.enabled_forks();
     const auto index32 = static_cast<uint32_t>(input_index);
 
     // Validate the transaction input.
-    const auto valid = script::verify(*this, index32, flags);
-    return valid ? error::success : error::validate_inputs_failed;
+    return script::verify(*this, index32, flags);
 }
 
 // Validation.
@@ -733,14 +732,14 @@ code transaction::check(bool transaction_pool) const
         return error::coinbase_transaction;
 
     else if (transaction_pool && serialized_size() >= max_block_size)
-        return error::size_limits;
+        return error::block_size_limit;
 
     // We cannot know if bip16 is enabled at this point so we disable it.
     // This will not make a difference unless prevouts are populated, in which
     // case they are ignored. This means that p2sh sigops are not counted here.
     // This is a preliminary check, the final count must come from connect().
     else if (transaction_pool && signature_operations(false) > max_block_sigops)
-        return error::too_many_sigs;
+        return error::too_many_sigops;
 
     else
         return error::success;
@@ -758,7 +757,7 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
         return error::unspent_duplicate;
 
     else if (is_missing_inputs())
-        return error::input_not_found;
+        return error::missing_input;
 
     else if (is_double_spend(transaction_pool))
         return error::double_spend;
@@ -771,7 +770,7 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
 
     // This recomputes sigops to include p2sh from prevouts.
     else if (transaction_pool && signature_operations(bip16) > max_block_sigops)
-        return error::too_many_sigs;
+        return error::too_many_sigops;
 
     else
         return error::success;

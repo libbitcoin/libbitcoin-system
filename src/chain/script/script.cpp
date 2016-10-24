@@ -471,7 +471,6 @@ static transaction sign_none(const transaction& tx, uint32_t input_index,
         // Replace self that is lost in the loop.
         ins[input_index].set_script(script_code);
         ins[input_index].set_sequence(self.sequence());
-        ////ins[input_index].set_script(self.previous_output());
     }
 
     // Move new inputs to new transaction and drop outputs.
@@ -503,7 +502,6 @@ static transaction sign_single(const transaction& tx, uint32_t input_index,
         // Replace self that is lost in the loop.
         ins[input_index].set_script(script_code);
         ins[input_index].set_sequence(self.sequence());
-        ////ins[input_index].set_script(self.previous_output());
     }
 
     // Trim and clear outputs except that of specified input index.
@@ -543,7 +541,6 @@ static transaction sign_all(const transaction& tx, uint32_t input_index,
         // Replace self that is lost in the loop.
         ins[input_index].set_script(script_code);
         ////ins[input_index].set_sequence(self.sequence());
-        ////ins[input_index].set_script(self.previous_output());
     }
 
     // Move new inputs and copy outputs to new transaction.

@@ -637,7 +637,7 @@ code block::check() const
         return ec;
 
     else if (serialized_size() > max_block_size)
-        return error::size_limits;
+        return error::block_size_limit;
 
     else if (transactions_.empty())
         return error::empty_block;
@@ -649,17 +649,17 @@ code block::check() const
         return error::extra_coinbases;
 
     else if (!is_distinct_transaction_set())
-        return error::duplicate;
+        return error::internal_duplicate;
+
+    else if (!is_valid_merkle_root())
+        return error::merkle_mismatch;
 
     // We cannot know if bip16 is enabled at this point so we disable it.
     // This will not make a difference unless prevouts are populated, in which
     // case they are ignored. This means that p2sh sigops are not counted here.
     // This is a preliminary check, the final count must come from connect().
     else if (signature_operations(false) > max_block_sigops)
-        return error::too_many_sigs;
-
-    else if (!is_valid_merkle_root())
-        return error::merkle_mismatch;
+        return error::too_many_sigops;
 
     else
         return check_transactions();
@@ -690,12 +690,12 @@ code block::accept(const chain_state& state) const
     else if (bip34 && !is_valid_coinbase_script(state.height()))
         return error::coinbase_height_mismatch;
 
-    // This recomputes sigops to include p2sh from prevouts.
-    else if (signature_operations(bip16) > max_block_sigops)
-        return error::too_many_sigs;
-
     else if (!is_valid_coinbase_claim(state.height()))
         return error::coinbase_too_large;
+
+    // This recomputes sigops to include p2sh from prevouts.
+    else if (signature_operations(bip16) > max_block_sigops)
+        return error::too_many_sigops;
 
     else
         return accept_transactions(state);

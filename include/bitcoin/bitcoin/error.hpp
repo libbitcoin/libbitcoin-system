@@ -46,85 +46,83 @@ namespace error {
 // The numeric values of these codes may change without notice.
 enum error_code_t
 {
+    // general codes
     success = 0,
+    deprecated = 6,
+    unknown = 43,
+    not_found = 3,
+    file_system = 42,
+    non_standard = 17,
 
-    // network errors
-    service_stopped,
-    operation_failed,
+    // network
+    service_stopped = 1,
+    operation_failed = 2,
+    resolve_failed = 7,
+    network_unreachable = 8,
+    address_in_use = 9,
+    listen_failed = 10,
+    accept_failed = 11,
+    bad_stream = 12,
+    channel_timeout = 13,
+    address_blocked = 44,
+    channel_stopped = 45,
 
-    // blockchain errors
-    not_found,
-    duplicate,
-    orphan,
-    unsupported_script_pattern,
-
-    // network errors (more)
-    resolve_failed,
-    network_unreachable,
-    address_in_use,
-    listen_failed,
-    accept_failed,
-    bad_stream,
-    channel_timeout,
+    // block pool
+    duplicate_block = 4,
+    orphan_block = 5,
+    invalid_previous_block = 24,
+    //// TODO: block_pool_filled,
 
     // transaction pool
-    blockchain_reorganized,
-    pool_filled,
+    blockchain_reorganized = 14,
+    transaction_pool_filled = 15,
+    duplicate_pool_transaction = 51,
 
-    // validate tx
-    coinbase_transaction,
-    is_not_standard,
-    double_spend,
-    input_not_found,
+    // check header
+    invalid_proof_of_work = 26,
+    futuristic_timestamp = 27,
 
-    // check_transaction()
-    empty_transaction,
-    spend_overflow,
-    invalid_coinbase_script_size,
-    previous_output_null,
+    // accept header
+    checkpoints_failed = 35,
+    old_version_block = 36,
+    incorrect_proof_of_work = 32,
+    timestamp_too_early = 33,
 
-    // validate block
-    previous_block_invalid,
+    // check block
+    block_size_limit = 50,
+    empty_block = 47,
+    first_not_coinbase = 28,
+    extra_coinbases = 29,
+    internal_duplicate = 49,
+    merkle_mismatch = 31,
+    insufficient_work = 48,
+    too_many_sigops = 30,
 
-    // check_block()
-    size_limits,
-    invalid_proof_of_work,
-    futuristic_timestamp,
-    first_not_coinbase,
-    extra_coinbases,
-    too_many_sigs,
-    merkle_mismatch,
+    // accept block
+    non_final_transaction = 34,
+    coinbase_height_mismatch = 37,
+    coinbase_too_large = 41,
+    ////too_many_sigops
 
-    // accept_block()
-    incorrect_proof_of_work,
-    timestamp_too_early,
-    non_final_transaction,
-    checkpoints_failed,
-    old_version_block,
-    coinbase_height_mismatch,
+    // check transaction
+    empty_transaction = 20,
+    previous_output_null = 23,
+    spend_overflow = 21,
+    invalid_coinbase_script_size = 22,
+    coinbase_transaction = 16,
+    ////block_size_limit
+    ////too_many_sigops
 
-    // connect_block()
-    unspent_duplicate,
-    validate_inputs_failed,
-    spend_exceeds_value,
-    coinbase_too_large,
+    // accept transaction
+    unspent_duplicate = 38,
+    missing_input = 19,
+    double_spend = 18,
+    coinbase_maturity = 46,
+    spend_exceeds_value = 40,
+    ////too_many_sigops
 
-    // file system errors
-    file_system,
-
-    // unknown errors
-    unknown,
-
-    // network errors (more)
-    address_blocked,
-    channel_stopped,
-
-    // check_transaction() (more)
-    coinbase_maturity,
-
-    // check_block() (more)
-    empty_block,
-    insufficient_work
+    // connect input
+    validate_inputs_failed = 39
 };
 
 enum error_condition_t
