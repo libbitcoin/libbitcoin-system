@@ -59,7 +59,7 @@ public:
     };
 
     // Constructors.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     block();
 
@@ -70,7 +70,7 @@ public:
     block(const chain::header& header, const transaction::list& transactions);
 
     // Operators.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     /// This class is move assignable [but not copy assignable].
     block& operator=(block&& other);
@@ -80,7 +80,7 @@ public:
     bool operator!=(const block& other) const;
 
     // Deserialization.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     static block factory_from_data(const data_chunk& data);
     static block factory_from_data(std::istream& stream);
@@ -93,7 +93,7 @@ public:
     bool is_valid() const;
 
     // Serialization.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     data_chunk to_data() const;
     void to_data(std::ostream& stream) const;
@@ -102,7 +102,7 @@ public:
     input_sets to_input_sets(size_t fanout, bool with_coinbase=true) const;
 
     // Properties (size, accessors, cache).
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     uint64_t serialized_size() const;
 
@@ -123,7 +123,7 @@ public:
     hash_digest hash() const;
 
     // Utilities.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     static block genesis_mainnet();
     static block genesis_testnet();
@@ -131,7 +131,7 @@ public:
     static indexes locator_heights(size_t top);
 
     // Validation.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     static uint64_t subsidy(size_t height);
     static hash_number difficulty(uint32_t bits);

@@ -36,7 +36,7 @@ enum class opcode : uint8_t
     pushdata2 = 77,
     pushdata4 = 78,
     negative_1 = 79,
-    reserved = 80,  // does nothing
+    reserved = 80,      // does nothing
     op_1 = 81,
     op_2 = 82,
     op_3 = 83,
@@ -52,7 +52,7 @@ enum class opcode : uint8_t
     op_13 = 93,
     op_14 = 94,
     op_15 = 95,
-    op_16 = 96,
+    op_16 = 96,         // all after are counted operations
     nop = 97,
     ver = 98,
     if_ = 99,
@@ -173,19 +173,49 @@ enum rule_fork : uint32_t
 };
 
 /// Determine if code is in the op_n range.
-BC_API bool within_op_n(opcode code);
+inline bool within_op_n(opcode code)
+{
+    static const auto op_1 = static_cast<uint8_t>(opcode::op_1);
+    static const auto op_16 = static_cast<uint8_t>(opcode::op_16);
+    const auto value = static_cast<uint8_t>(code);
+    return op_1 <= value && value <= op_16;
+}
 
 /// Return the op_n index (i.e. value of n).
-BC_API uint8_t decode_op_n(opcode code);
+inline uint8_t decode_op_n(opcode code)
+{
+    static const auto op_0 = static_cast<uint8_t>(opcode::op_1) - 1;
+    BITCOIN_ASSERT(within_op_n(code));
+    const auto value = static_cast<uint8_t>(code);
+    return value - op_0;
+}
 
-/// Convert data to an opcode.
-BC_API opcode data_to_opcode(const data_chunk& value);
+/// Convert an opcode to a byte.
+inline uint8_t to_byte_code(opcode code)
+{
+    return static_cast<uint8_t>(code);
+}
+
+/// Conver the opcode to a mnemonic string.
+BC_API std::string opcode_to_string(opcode value, uint32_t flags);
 
 /// Convert a string to an opcode.
 BC_API opcode string_to_opcode(const std::string& value);
 
-/// Convert an opcode to a string.
-BC_API std::string opcode_to_string(opcode value, uint32_t flags);
+/// Convert data to an opcode.
+BC_API opcode data_to_opcode(const data_chunk& value);
+
+/// Determine if the opcode is disabled (not actually an opcode).
+BC_API bool opcode_is_disabled(opcode code);
+
+/// Determine if the opcode pushes empty data.
+BC_API bool opcode_is_empty_pusher(opcode code);
+
+/// Determine if the opcode is a conditional.
+BC_API bool opcode_is_condition(opcode code);
+
+/// Determine if the opcode is a counted operation.
+BC_API bool opcode_is_operation(opcode code);
 
 } // namespace chain
 } // namespace libbitcoin
