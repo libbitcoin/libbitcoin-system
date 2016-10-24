@@ -193,12 +193,19 @@ bool script::from_data(reader& source, bool prefix, parse_mode mode)
     reset();
 
     valid_ = true;
-    const auto bytes = prefix ?
+    auto bytes = prefix ?
         source.read_bytes(source.read_size_little_endian()) :
         source.read_bytes();
 
-    if (source && !deserialize(bytes, mode))
-        source.invalidate();
+    if (source)
+    {
+        const auto deserialize =
+            (mode != parse_mode::raw_data && parse(bytes)) ||
+            (mode != parse_mode::strict && emplace(std::move(bytes)));
+
+        if (!deserialize)
+            source.invalidate();
+    }
 
     if (!source)
         reset();
@@ -207,19 +214,7 @@ bool script::from_data(reader& source, bool prefix, parse_mode mode)
 }
 
 // private
-bool script::deserialize(const data_chunk& raw_script, parse_mode mode)
-{
-    if (mode != parse_mode::raw_data && parse(raw_script))
-        return true;
-
-    if (mode != parse_mode::strict && emplace(raw_script))
-        return true;
-
-    return false;
-}
-
-// private
-bool script::emplace(const data_chunk& raw_script)
+bool script::emplace(data_chunk&& raw_script)
 {
     is_raw_ = true;
 
@@ -239,7 +234,10 @@ bool script::parse(const data_chunk& raw_script)
         operations_.emplace_back();
 
         if (!operations_.back().from_data(source))
+        {
+            operations_.clear();
             return false;
+        }
     }
 
     return true;
