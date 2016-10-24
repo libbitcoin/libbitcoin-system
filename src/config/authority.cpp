@@ -163,6 +163,11 @@ authority::authority(const asio::endpoint& endpoint)
 {
 }
 
+authority::operator const bool() const
+{
+    return port_ != 0;
+}
+
 message::ip_address authority::ip() const
 {
     return to_bc_address(ip_);

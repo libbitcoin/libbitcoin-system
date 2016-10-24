@@ -101,6 +101,12 @@ public:
 
     /**
      * Getter.
+     * @return True if the post is non-zero.
+     */
+    operator const bool() const;
+
+    /**
+     * Getter.
      * @return The ip address of the authority.
      */
     message::ip_address ip() const;
