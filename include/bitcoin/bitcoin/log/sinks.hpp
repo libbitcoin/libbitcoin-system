@@ -41,7 +41,7 @@ namespace log {
 
 using namespace boost::filesystem;
 
-////typedef boost::shared_ptr<bc::ofstream> file;
+typedef boost::shared_ptr<bc::ofstream> file;
 typedef boost::shared_ptr<std::ostream> stream;
 typedef boost::log::formatting_ostream::ostream_type formatter;
 
@@ -55,11 +55,11 @@ struct rotable_file
     ////size_t maximum_files;
 };
 
-/////// Initializes default libbitcoin logging sinks and formats.
-////void initialize(log::file& debug_file, log::file& error_file,
-////    log::stream& output_stream, log::stream& error_stream);
+/// Initializes default non-rotable libbitcoin logging sinks and formats.
+void initialize(log::file& debug_file, log::file& error_file,
+    log::stream& output_stream, log::stream& error_stream);
 
-/// Initializes default libbitcoin logging sinks and formats.
+/// Initializes default rotable libbitcoin logging sinks and formats.
 void initialize(const rotable_file& debug_file, const rotable_file& error_file,
     log::stream& output_stream, log::stream& error_stream);
 
