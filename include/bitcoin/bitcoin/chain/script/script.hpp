@@ -193,8 +193,7 @@ protected:
     void reset();
 
 private:
-    bool deserialize(const data_chunk& raw_script, parse_mode mode);
-    bool emplace(const data_chunk& raw_script);
+    bool emplace(data_chunk&& raw_script);
     bool parse(const data_chunk& raw_script);
 
     operation::stack operations_;
