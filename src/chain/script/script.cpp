@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <numeric>
 #include <sstream>
+#include <utility>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
