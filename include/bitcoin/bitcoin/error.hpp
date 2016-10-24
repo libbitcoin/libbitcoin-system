@@ -68,7 +68,7 @@ enum error_code_t
     channel_stopped = 45,
 
     // block pool
-    duplicate_block = 4,
+    duplicate_block = 51,
     orphan_block = 5,
     invalid_previous_block = 24,
     //// TODO: block_pool_filled,
@@ -76,7 +76,7 @@ enum error_code_t
     // transaction pool
     blockchain_reorganized = 14,
     transaction_pool_filled = 15,
-    duplicate_pool_transaction = 51,
+    duplicate_pool_transaction = 4,
 
     // check header
     invalid_proof_of_work = 26,
