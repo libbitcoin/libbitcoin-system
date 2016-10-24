@@ -458,9 +458,6 @@
     <ClCompile Include="..\..\..\..\src\chain\script\script.cpp">
       <Filter>src\chain\script</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\script\conditional_stack.cpp">
-      <Filter>src\chain\script</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\script\evaluation_context.cpp">
       <Filter>src\chain\script</Filter>
     </ClCompile>
@@ -562,6 +559,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\log\sinks.cpp">
       <Filter>src\log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\script\interpreter.cpp">
+      <Filter>src\chain\script</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\script\conditional_stack.cpp">
+      <Filter>src\chain\script</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -976,12 +979,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\opcode.hpp">
       <Filter>include\bitcoin\chain\script</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\chain\script\evaluation_context.hpp">
-      <Filter>src\chain\script</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\chain\script\conditional_stack.hpp">
-      <Filter>src\chain\script</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\conditional_lock.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
@@ -1104,6 +1101,18 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\attributes.hpp">
       <Filter>include\bitcoin\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\interpreter.hpp">
+      <Filter>include\bitcoin\chain\script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\evaluation_context.hpp">
+      <Filter>include\bitcoin\chain\script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\conditional_stack.hpp">
+      <Filter>include\bitcoin\chain\script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\sighash_algorithm.hpp">
+      <Filter>include\bitcoin\chain\script</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

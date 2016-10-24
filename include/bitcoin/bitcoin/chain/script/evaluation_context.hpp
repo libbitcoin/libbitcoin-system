@@ -17,29 +17,35 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/chain/script/evaluation_context.hpp>
+#ifndef LIBBITCOIN_CHAIN_EVALUATION_CONTEXT_HPP
+#define LIBBITCOIN_CHAIN_EVALUATION_CONTEXT_HPP
 
+#include <cstdint>
+#include <bitcoin/bitcoin/chain/script/conditional_stack.hpp>
+#include <bitcoin/bitcoin/chain/script/operation.hpp>
+#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 namespace chain {
 
-evaluation_context::evaluation_context(uint32_t flags)
-  : flags(flags)
+class evaluation_context
 {
-}
+public:
+    evaluation_context(uint32_t flags);
+    evaluation_context(uint32_t flags, const data_stack& stack);
 
-evaluation_context::evaluation_context(uint32_t flags, const data_stack& stack)
-  : flags(flags), stack(stack)
-{
-}
+    data_chunk pop_stack();
 
-data_chunk evaluation_context::pop_stack()
-{
-    const auto value = stack.back();
-    stack.pop_back();
-    return value;
-}
+    operation::stack::const_iterator code_begin;
+    uint64_t operation_counter;
+    data_stack stack;
+    data_stack alternate;
+    conditional_stack conditional;
+    uint32_t flags;
+};
 
 } // namespace chain
 } // namespace libbitcoin
+
+#endif

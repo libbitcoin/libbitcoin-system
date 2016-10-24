@@ -28,13 +28,14 @@
 
 namespace libbitcoin {
 
-static constexpr uint64_t byte_mask = 0xff;
-static constexpr uint8_t negative_mask = 0x80;
+const uint8_t script_number::negative_mask = 0x80;
+const uint8_t script_number::negative_1 = negative_mask | 0x01;
+
 static constexpr auto unsigned_max_int64 = static_cast<uint64_t>(max_int64);
 static constexpr auto absolute_min_int64 = static_cast<uint64_t>(min_int64);
 
 // The result is always LSB first.
-data_chunk script_number_serialize(int64_t value)
+static data_chunk script_number_serialize(int64_t value)
 {
     if (value == 0)
         return{};
@@ -48,17 +49,18 @@ data_chunk script_number_serialize(int64_t value)
 
     while (absolute_value != 0)
     {
+        static constexpr uint64_t byte_mask = 0xff;
         result.push_back(absolute_value & byte_mask);
         absolute_value >>= byte_bits;
     }
 
-    const auto negative_masked = (result.back() & negative_mask) != 0;
+    auto negative_masked = (result.back() & script_number::negative_mask) != 0;
 
     // If the most significant byte is >= 0x80 and the value is negative,
     // push a new 0x80 byte that will be popped off when converting to
     // an integral.
     if (negative_masked && negative)
-        result.push_back(negative_mask);
+        result.push_back(script_number::negative_mask);
 
     // If the most significant byte is >= 0x80 and the value is positive,
     // push a new zero-byte to make the significant byte < 0x80 again.
@@ -69,24 +71,24 @@ data_chunk script_number_serialize(int64_t value)
     // add 0x80 to it, since it will be subtracted and interpreted as
     // a negative when converting to an integral.
     else if (negative)
-        result.back() |= negative_mask;
+        result.back() |= script_number::negative_mask;
 
     return result;
 }
 
 // The parameter is assumed to be LSB first.
-int64_t script_number_deserialize(const data_chunk& data)
+static int64_t script_number_deserialize(const data_chunk& data)
 {
     if (data.empty())
         return 0;
 
-    const auto consume_last_byte = data.back() != negative_mask;
+    const auto consume_last_byte = data.back() != script_number::negative_mask;
     const auto value_size = consume_last_byte ? data.size() : data.size() - 1;
 
     // This is guarded by set_data().
     BITCOIN_ASSERT(value_size <= sizeof(uint64_t));
 
-    const auto negative = data.back() & negative_mask;
+    const auto negative = data.back() & script_number::negative_mask;
     const auto mask_last_byte = negative && consume_last_byte;
     uint64_t absolute_value = 0;
 
@@ -95,7 +97,7 @@ int64_t script_number_deserialize(const data_chunk& data)
         const auto shift = byte_bits * byte;
         const auto last_byte = byte + 1 == value_size;
         const auto value = mask_last_byte && last_byte ?
-            data[byte] & ~negative_mask : data[byte];
+            data[byte] & ~script_number::negative_mask : data[byte];
 
         absolute_value |= static_cast<uint64_t>(value) << shift;
     }
