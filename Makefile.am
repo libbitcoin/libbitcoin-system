@@ -47,9 +47,8 @@ src_libbitcoin_la_SOURCES = \
     src/chain/point_iterator.cpp \
     src/chain/transaction.cpp \
     src/chain/script/conditional_stack.cpp \
-    src/chain/script/conditional_stack.hpp \
     src/chain/script/evaluation_context.cpp \
-    src/chain/script/evaluation_context.hpp \
+    src/chain/script/interpreter.cpp \
     src/chain/script/opcode.cpp \
     src/chain/script/operation.cpp \
     src/chain/script/script.cpp \
@@ -351,9 +350,13 @@ include_bitcoin_bitcoin_chain_HEADERS = \
 
 include_bitcoin_bitcoin_chain_scriptdir = ${includedir}/bitcoin/bitcoin/chain/script
 include_bitcoin_bitcoin_chain_script_HEADERS = \
+    include/bitcoin/bitcoin/chain/script/conditional_stack.hpp \
+    include/bitcoin/bitcoin/chain/script/evaluation_context.hpp \
+    include/bitcoin/bitcoin/chain/script/interpreter.hpp \
     include/bitcoin/bitcoin/chain/script/opcode.hpp \
     include/bitcoin/bitcoin/chain/script/operation.hpp \
-    include/bitcoin/bitcoin/chain/script/script.hpp
+    include/bitcoin/bitcoin/chain/script/script.hpp \
+    include/bitcoin/bitcoin/chain/script/sighash_algorithm.hpp
 
 include_bitcoin_bitcoin_configdir = ${includedir}/bitcoin/bitcoin/config
 include_bitcoin_bitcoin_config_HEADERS = \

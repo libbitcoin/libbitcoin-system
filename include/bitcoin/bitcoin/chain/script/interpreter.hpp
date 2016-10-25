@@ -17,34 +17,42 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CHAIN_EVALUATION_CONTEXT_HPP
-#define LIBBITCOIN_CHAIN_EVALUATION_CONTEXT_HPP
+#ifndef LIBBITCOIN_CHAIN_INTERPRETER_HPP
+#define LIBBITCOIN_CHAIN_INTERPRETER_HPP
 
-#include <algorithm>
 #include <cstdint>
+#include <bitcoin/bitcoin/chain/script/evaluation_context.hpp>
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
+#include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include "conditional_stack.hpp"
 
 namespace libbitcoin {
 namespace chain {
 
-class evaluation_context
+class BC_API transaction;
+
+class BC_API interpreter
 {
 public:
-    evaluation_context(uint32_t flags);
-    evaluation_context(uint32_t flags, const data_stack& stack);
+    static bool run(const transaction& tx, uint32_t input_index,
+        const script& script, evaluation_context& context, uint32_t flags);
 
-    data_chunk pop_stack();
+private:
+    static bool next_operation(const transaction& tx, uint32_t input_index,
+        operation::stack::const_iterator it, const script& script,
+        evaluation_context& context, uint32_t flags);
 
-    operation::stack::const_iterator code_begin;
-    uint64_t operation_counter;
-    data_stack stack;
-    data_stack alternate;
-    conditional_stack conditional;
-    uint32_t flags;
+    static bool run_operation(const operation& op, const transaction& tx,
+        uint32_t input_index, const script& script,
+        evaluation_context& context, uint32_t flags);
 };
+
+data_chunk bool_to_stack(bool value);
+bool stack_to_bool(const data_chunk& values);
+bool stack_result(const evaluation_context& context);
 
 } // namespace chain
 } // namespace libbitcoin

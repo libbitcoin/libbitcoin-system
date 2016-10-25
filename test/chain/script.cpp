@@ -241,6 +241,13 @@ transaction new_tx(const script_test& test)
 
 BOOST_AUTO_TEST_SUITE(script_tests)
 
+BOOST_AUTO_TEST_CASE(script__one_hash__literal__same)
+{
+    static const auto hash_one = hash_literal("0000000000000000000000000000000000000000000000000000000000000001");
+    static const hash_digest one_hash{ { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } };
+    BOOST_REQUIRE(one_hash == hash_one);
+}
+
 BOOST_AUTO_TEST_CASE(script__from_data__testnet_119058_non_parseable__fallback)
 {
     const auto raw_script = to_chunk(base16_literal("0130323066643366303435313438356531306633383837363437356630643265396130393739343332353534313766653139316438623963623230653430643863333030326431373463336539306366323433393231383761313037623634373337633937333135633932393264653431373731636565613062323563633534353732653302ae"));
@@ -543,7 +550,7 @@ BOOST_AUTO_TEST_CASE(script__checksig__uses_one_hash)
     static const auto strict = true;
     static const uint32_t input_index = 1;
     BOOST_REQUIRE(parse_signature(signature, distinguished, strict));
-    BOOST_REQUIRE(script::check_signature(signature, signature_hash_algorithm::single, pubkey, script_code, parent_tx, input_index));
+    BOOST_REQUIRE(script::check_signature(signature, sighash_algorithm::single, pubkey, script_code, parent_tx, input_index));
 }
 
 BOOST_AUTO_TEST_CASE(script__checksig__normal)
@@ -571,7 +578,7 @@ BOOST_AUTO_TEST_CASE(script__checksig__normal)
     static const auto strict = true;
     static const uint32_t input_index = 0;
     BOOST_REQUIRE(parse_signature(signature, distinguished, strict));
-    BOOST_REQUIRE(script::check_signature(signature, signature_hash_algorithm::single, pubkey, script_code, parent_tx, input_index));
+    BOOST_REQUIRE(script::check_signature(signature, sighash_algorithm::single, pubkey, script_code, parent_tx, input_index));
 }
 
 BOOST_AUTO_TEST_CASE(script__create_endorsement__single_input_single_output__expected)
@@ -588,7 +595,7 @@ BOOST_AUTO_TEST_CASE(script__create_endorsement__single_input_single_output__exp
 
     endorsement out;
     const uint32_t input_index = 0;
-    const uint8_t sighash_type = signature_hash_algorithm::all;
+    const uint8_t sighash_type = sighash_algorithm::all;
     BOOST_REQUIRE(script::create_endorsement(out, secret, prevout_script, new_tx, input_index, sighash_type));
 
     const auto result = encode_base16(out);
@@ -610,7 +617,7 @@ BOOST_AUTO_TEST_CASE(script__create_endorsement__single_input_no_output__expecte
 
     endorsement out;
     const uint32_t input_index = 0;
-    const uint8_t sighash_type = signature_hash_algorithm::all;
+    const uint8_t sighash_type = sighash_algorithm::all;
     BOOST_REQUIRE(script::create_endorsement(out, secret, prevout_script, new_tx, input_index, sighash_type));
 
     const auto result = encode_base16(out);
@@ -630,7 +637,7 @@ BOOST_AUTO_TEST_CASE(script__generate_signature_hash__all__expected)
 
     endorsement out;
     const uint32_t input_index = 0;
-    const uint8_t sighash_type = signature_hash_algorithm::all;
+    const uint8_t sighash_type = sighash_algorithm::all;
     const auto sighash = script::generate_signature_hash(new_tx, input_index, prevout_script, sighash_type);
     const auto result = encode_base16(sighash);
     const auto expected = "f89572635651b2e4f89778350616989183c98d1a721c911324bf9f17a0cf5bf0";

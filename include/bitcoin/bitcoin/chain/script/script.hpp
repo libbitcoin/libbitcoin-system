@@ -23,7 +23,6 @@
 #include <cstdint>
 #include <istream>
 #include <string>
-#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
@@ -36,55 +35,6 @@ namespace libbitcoin {
 namespace chain {
 
 class BC_API transaction;
-
-/// Signature hash types.
-/// Comments from: bitcoin.org/en/developer-guide#standard-transactions
-enum signature_hash_algorithm : uint32_t
-{
-    /// The default, signs all the inputs and outputs, protecting everything
-    /// except the signature scripts against modification.
-    all = 0x01,
-
-    /// Signs all of the inputs but none of the outputs, allowing anyone to
-    /// change where the satoshis are going unless other signatures using 
-    /// other signature hash flags protect the outputs.
-    none = 0x02,
-
-    /// The only output signed is the one corresponding to this input (the
-    /// output with the same output index number as this input), ensuring
-    /// nobody can change your part of the transaction but allowing other 
-    /// signers to change their part of the transaction. The corresponding 
-    /// output must exist or the value '1' will be signed, breaking the
-    /// security scheme. This input, as well as other inputs, are included
-    /// in the signature. The sequence numbers of other inputs are not
-    /// included in the signature, and can be updated.
-    single = 0x03,
-
-    /// The above types can be modified with this flag, creating three new
-    /// combined types.
-    anyone_can_pay = 0x80,
-
-    /// Signs all of the outputs but only this one input, and it also allows
-    /// anyone to add or remove other inputs, so anyone can contribute
-    /// additional satoshis but they cannot change how many satoshis are
-    /// sent nor where they go.
-    all_anyone_can_pay = all | anyone_can_pay,
-
-    /// Signs only this one input and allows anyone to add or remove other
-    /// inputs or outputs, so anyone who gets a copy of this input can spend
-    /// it however they'd like.
-    none_anyone_can_pay = none | anyone_can_pay,
-
-    /// Signs this one input and its corresponding output. Allows anyone to
-    /// add or remove other inputs.
-    single_anyone_can_pay = single | anyone_can_pay,
-
-    /// Used to mask off the anyone_can_pay flag to access the enumeration.
-    mask = ~anyone_can_pay
-};
-
-// All prefix = true
-// All parse_mode = script::parse_mode::strict
 
 class BC_API script
 {
@@ -156,10 +106,8 @@ public:
     void set_operations(operation::stack&& value);
     void set_operations(const operation::stack& value);
 
-    // Utilities.
+    // Signing.
     //-------------------------------------------------------------------------
-
-    static bool is_enabled(uint32_t active_forks, rule_fork flag);
 
     static hash_digest generate_signature_hash(const transaction& tx,
         uint32_t input_index, const script& script_code, uint8_t sighash_type);
@@ -173,12 +121,17 @@ public:
         const script& prevout_script, const transaction& tx,
         uint32_t input_index, uint8_t sighash_type);
 
-    // TODO: hide this as protected after changing tests.
-    bool is_raw_data() const;
+    // Utilities.
+    //-------------------------------------------------------------------------
+
+    static bool is_enabled(uint32_t active_forks, rule_fork flag);
 
     script_pattern pattern() const;
     size_t sigops(bool serialized_script) const;
     size_t pay_script_hash_sigops(const script& prevout) const;
+
+    // TODO: hide this as protected after changing tests.
+    bool is_raw_data() const;
 
     // Validation.
     //-------------------------------------------------------------------------

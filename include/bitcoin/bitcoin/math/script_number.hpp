@@ -21,7 +21,6 @@
 #define LIBBITCOIN_SCRIPT_NUMBER_HPP
 
 #include <cstddef>
-#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
@@ -41,6 +40,9 @@ namespace libbitcoin {
 class BC_API script_number
 {
 public:
+    static const uint8_t negative_mask;
+    static const uint8_t negative_1;
+
     /// Construct with zero value, may call set_data() after.
     script_number();
 

@@ -79,6 +79,7 @@
     <ClCompile Include="..\..\..\..\src\chain\point_iterator.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\script\conditional_stack.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\script\evaluation_context.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\script\interpreter.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\script\opcode.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\script\operation.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\script\script.cpp" />
@@ -217,9 +218,13 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\output_point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point_iterator.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\conditional_stack.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\evaluation_context.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\interpreter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\opcode.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\operation.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\script.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\sighash_algorithm.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\stealth.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\input.hpp" />
@@ -367,8 +372,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\select_outputs.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\stealth_address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\uri.hpp" />
-    <ClInclude Include="..\..\..\..\src\chain\script\conditional_stack.hpp" />
-    <ClInclude Include="..\..\..\..\src\chain\script\evaluation_context.hpp" />
     <ClInclude Include="..\..\..\..\src\math\external\aes256.h" />
     <ClInclude Include="..\..\..\..\src\math\external\crypto_scrypt.h" />
     <ClInclude Include="..\..\..\..\src\math\external\hmac_sha256.h" />
