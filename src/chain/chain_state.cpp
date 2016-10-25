@@ -22,8 +22,8 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <bitcoin/bitcoin/unicode/unicode.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
-#include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/config/checkpoint.hpp>
@@ -59,16 +59,6 @@ inline bool is_enforced(size_t count, bool testnet)
     return count >= (testnet ? testnet_enforce : mainnet_enforce);
 }
 
-////inline bool is_bip30_exception(size_t height, const hash_digest& hash,
-////    bool testnet)
-////{
-////    return !testnet &&
-////        ((height == mainnet_bip30_exception_checkpoint1.height() &&
-////        hash == mainnet_bip30_exception_checkpoint1.hash()) ||
-////        (height == mainnet_bip30_exception_checkpoint2.height() &&
-////        hash == mainnet_bip30_exception_checkpoint2.hash()));
-////}
-
 inline bool is_bip16_exception(size_t height, const hash_digest& hash,
     bool testnet)
 {
@@ -90,26 +80,6 @@ inline uint32_t bits_high(const chain_state::data& values)
 // Statics.
 //-----------------------------------------------------------------------------
 // non-public
-
-// Determine if height is a multiple of retargeting_interval.
-bool chain_state::is_retarget_height(size_t height)
-{
-    return height % retargeting_interval == 0;
-}
-
-// Get the bounded total time spanning the highest 2016 blocks.
-uint32_t chain_state::retarget_timespan(const chain_state::data& values)
-{
-    // Subtract 32 bit numbers in 64 bit space and constrain result to 32 bits.
-    const uint64_t high = timestamp_high(values);
-    const uint64_t retarget = values.timestamp.retarget;
-
-    //*************************************************************************
-    // CONSENSUS: subtraction underflow potential (retarget > high).
-    //*************************************************************************
-    const uint64_t timespan = high - retarget;
-    return range_constrain(timespan, min_timespan, max_timespan);
-}
 
 chain_state::activations chain_state::activation(const data& values)
 {
@@ -141,7 +111,7 @@ chain_state::activations chain_state::activation(const data& values)
     if (is_active(count_2, testnet))
         result.forks |= rule_fork::bip34_rule;
 
-    // BIP30 requires no exceptions, we properly handle duplicates of spent txs.
+    // bip30 was applied retroactively to all blocks in both chains.
     result.forks |= rule_fork::bip30_rule;
 
     // bip16 is activated with a one-time test on mainnet/testnet (~55% rule).
@@ -176,6 +146,21 @@ uint32_t chain_state::median_time_past(const data& values)
     return times.empty() ? 0 : times[times.size() / 2];
 }
 
+uint32_t chain_state::work_required(const data& values)
+{
+    // Invalid parameter via public interface, test is_valid for results.
+    if (values.height == 0)
+        return{};
+
+    if (is_retarget_height(values.height))
+        return work_required_retarget(values);
+
+    if (values.testnet)
+        return work_required_testnet(values);
+
+    return bits_high(values);
+}
+
 uint32_t chain_state::work_required_retarget(const data& values)
 {
     //*************************************************************************
@@ -196,14 +181,18 @@ uint32_t chain_state::work_required_retarget(const data& values)
     return retarget > maximum ? maximum.compact() : retarget.compact();
 }
 
-// A retarget point, or a block that does not have max_bits (is not special).
-bool chain_state::is_retarget_or_nonmax(size_t height, uint32_t bits)
+// Get the bounded total time spanning the highest 2016 blocks.
+uint32_t chain_state::retarget_timespan(const chain_state::data& values)
 {
-    // Zero is a retarget height, ensuring termination before height underflow.
-    // This is guaranteed, just asserting here to document the safeguard.
-    BITCOIN_ASSERT_MSG(is_retarget_height(0), "loop overflow potential");
+    // Subtract 32 bit numbers in 64 bit space and constrain result to 32 bits.
+    const uint64_t high = timestamp_high(values);
+    const uint64_t retarget = values.timestamp.retarget;
 
-    return bits != max_work_bits || is_retarget_height(height);
+    //*************************************************************************
+    // CONSENSUS: subtraction underflow potential (retarget > high).
+    //*************************************************************************
+    const uint64_t timespan = high - retarget;
+    return range_constrain(timespan, min_timespan, max_timespan);
 }
 
 uint32_t chain_state::work_required_testnet(const data& values)
@@ -232,19 +221,20 @@ uint32_t chain_state::work_required_testnet(const data& values)
     return max_work_bits;
 }
 
-uint32_t chain_state::work_required(const data& values)
+// A retarget point, or a block that does not have max_bits (is not special).
+bool chain_state::is_retarget_or_nonmax(size_t height, uint32_t bits)
 {
-    // Invalid parameter via public interface, test is_valid for results.
-    if (values.height == 0)
-        return{};
+    // Zero is a retarget height, ensuring termination before height underflow.
+    // This is guaranteed, just asserting here to document the safeguard.
+    BITCOIN_ASSERT_MSG(is_retarget_height(0), "loop overflow potential");
 
-    if (is_retarget_height(values.height))
-        return work_required_retarget(values);
+    return bits != max_work_bits || is_retarget_height(height);
+}
 
-    if (values.testnet)
-        return work_required_testnet(values);
-
-    return bits_high(values);
+// Determine if height is a multiple of retargeting_interval.
+bool chain_state::is_retarget_height(size_t height)
+{
+    return (height % retargeting_interval) == 0;
 }
 
 // Publics.
@@ -258,11 +248,6 @@ chain_state::map chain_state::get_map(size_t height, bool enabled,
     if (height == 0)
         return{};
 
-    // These all refer to the block preceding this block (i.e. top).
-    static const size_t max_bits_past = 1;
-    static const size_t max_time_past = 1;
-    static const size_t max_version_past = 1;
-
     // Compute the set upper bound from the size of the set (i.e. size - 1).
     const size_t min_retarget = retargeting_interval - 1;
     const size_t min_time_past = median_time_past_interval - 1;
@@ -274,7 +259,7 @@ chain_state::map chain_state::get_map(size_t height, bool enabled,
     //-------------------------------------------------------------------------
     // The height range of the reverse (high to low) retarget search.
     // Mainnet doesn't do retarget search, so use high to make redundant.
-    map.bits.high = height - max_bits_past;
+    map.bits.high = height - 1;
     map.bits.low = testnet ? floor_subtract(map.bits.high, min_retarget) :
         map.bits.high;
 
@@ -282,7 +267,7 @@ chain_state::map chain_state::get_map(size_t height, bool enabled,
     //-------------------------------------------------------------------------
     // The height range of the median time past, and retarget/self blocks.
     // Height must be a positive multiple of interval, so underflow safe.
-    map.timestamp.high = height - max_time_past;
+    map.timestamp.high = height - 1;
     map.timestamp.low = floor_subtract(map.timestamp.high, min_time_past);
     map.timestamp_self = height;
     map.timestamp_retarget = is_retarget_height(height) ?
@@ -292,7 +277,7 @@ chain_state::map chain_state::get_map(size_t height, bool enabled,
     //-------------------------------------------------------------------------
     // The height range of the version sample.
     // If too small to activate set low to high to avoid unnecessary queries.
-    map.version.high = height - max_version_past;
+    map.version.high = height - 1;
     map.version.low = enabled ?
         floor_subtract(map.version.high, min_version_past) : map.version.high;
     map.version.low = is_active(map.version.high - map.version.low, testnet) ?
@@ -316,10 +301,7 @@ chain_state::chain_state(data&& values, const checkpoints& checkpoints)
 // These are the conditions that would cause exception during execution.
 bool chain_state::is_valid() const
 {
-    return data_.height == 0
-        || data_.bits.ordered.empty()
-        || data_.timestamp.ordered.empty()
-        || data_.version.unordered.empty();
+    return data_.height != 0;
 }
 
 // Properties.

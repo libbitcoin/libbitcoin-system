@@ -143,11 +143,11 @@ protected:
     static uint32_t work_required(const data& values);
 
 private:
-    static bool is_retarget_height(size_t height);
-    static bool is_retarget_or_nonmax(size_t height, uint32_t bits);
-    static uint32_t retarget_timespan(const chain_state::data& values);
     static uint32_t work_required_retarget(const data& values);
+    static uint32_t retarget_timespan(const chain_state::data& values);
     static uint32_t work_required_testnet(const data& values);
+    static bool is_retarget_or_nonmax(size_t height, uint32_t bits);
+    static bool is_retarget_height(size_t height);
 
     // This is retained as an optimization for other constructions.
     // A similar height clone can be partially computed, reducing query cost.
