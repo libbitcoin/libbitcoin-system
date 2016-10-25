@@ -95,7 +95,7 @@ BC_CONSTEXPR uint32_t max_timespan =
     target_timespan_seconds * retargeting_factor;
 
 // The target number of blocks for 2 weeks of work (2016 blocks).
-BC_CONSTEXPR uint32_t retargeting_interval =
+BC_CONSTEXPR size_t retargeting_interval =
     target_timespan_seconds / target_spacing_seconds;
 
 // Fork constants.
