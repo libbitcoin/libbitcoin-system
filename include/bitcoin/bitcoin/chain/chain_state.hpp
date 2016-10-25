@@ -39,7 +39,7 @@ public:
     typedef std::vector<uint32_t> bitss;
     typedef std::vector<uint32_t> versions;
     typedef std::vector<uint32_t> timestamps;
-    typedef struct { size_t high; size_t low; } range;
+    typedef struct { size_t count; size_t high; } range;
 
     typedef std::shared_ptr<chain_state> ptr;
     typedef config::checkpoint::list checkpoints;

@@ -248,40 +248,40 @@ chain_state::map chain_state::get_map(size_t height, bool enabled,
     if (height == 0)
         return{};
 
-    // Compute the set upper bound from the size of the set (i.e. size - 1).
-    const size_t min_retarget = retargeting_interval - 1;
-    const size_t min_time_past = median_time_past_interval - 1;
-    const size_t min_version_past = version_sample_size(testnet) - 1;
-
     map map;
 
     // Bits.
     //-------------------------------------------------------------------------
-    // The height range of the reverse (high to low) retarget search.
-    // Mainnet doesn't do retarget search, so use high to make redundant.
+    // The height bound of the reverse (high to low) retarget search.
     map.bits.high = height - 1;
-    map.bits.low = testnet ? floor_subtract(map.bits.high, min_retarget) :
-        map.bits.high;
+
+    // Mainnet doesn't do retarget search.
+    map.bits.count = testnet ? 
+        std::min(map.bits.high, retargeting_interval) : 0;
 
     // Timestamp.
     //-------------------------------------------------------------------------
-    // The height range of the median time past, and retarget/self blocks.
+    // The height bound of the median time past function.
     // Height must be a positive multiple of interval, so underflow safe.
     map.timestamp.high = height - 1;
-    map.timestamp.low = floor_subtract(map.timestamp.high, min_time_past);
+    map.timestamp.count = 
+        std::min(map.timestamp.high, median_time_past_interval);
+
+    // Additional timestamps required (or zero for not).
     map.timestamp_self = height;
     map.timestamp_retarget = is_retarget_height(height) ?
-        height - retargeting_interval : map.timestamp.high;
+        height - retargeting_interval : 0;
 
     // Version.
     //-------------------------------------------------------------------------
-    // The height range of the version sample.
-    // If too small to activate set low to high to avoid unnecessary queries.
+    // The height bound of the version sample for activations.
     map.version.high = height - 1;
-    map.version.low = enabled ?
-        floor_subtract(map.version.high, min_version_past) : map.version.high;
-    map.version.low = is_active(map.version.high - map.version.low, testnet) ?
-        map.version.low : map.version.high;
+    map.version.count = enabled ? 
+        std::min(map.version.high, version_sample_size(testnet)) : 0;
+
+    // If too small to activate set count to zero to avoid unnecessary queries.
+    map.version.count = is_active(map.version.count, testnet) ?
+        map.version.count : 0;
 
     return map;
 }
