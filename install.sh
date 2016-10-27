@@ -34,6 +34,10 @@
 #------------------------------------------------------------------------------
 BUILD_DIR="build-libbitcoin"
 
+# The default object directory.
+#------------------------------------------------------------------------------
+OBJECT_DIR="bin-objects"
+
 # ICU archive.
 #------------------------------------------------------------------------------
 ICU_URL="http://download.icu-project.org/files/icu4c/55.1/icu4c-55_1-src.tgz"
@@ -56,8 +60,8 @@ QRENCODE_ARCHIVE="qrencode-3.4.4.tar.bz2"
 
 # Boost archive.
 #------------------------------------------------------------------------------
-BOOST_URL="http://downloads.sourceforge.net/project/boost/boost/1.56.0/boost_1_56_0.tar.bz2"
-BOOST_ARCHIVE="boost_1_56_0.tar.bz2"
+BOOST_URL="http://downloads.sourceforge.net/project/boost/boost/1.57.0/boost_1_57_0.tar.bz2"
+BOOST_ARCHIVE="boost_1_57_0.tar.bz2"
 
 
 # Initialize the build environment.
@@ -259,6 +263,18 @@ configure_options()
     ./configure "$@"
 }
 
+configure_options_object_dir()
+{
+    echo "configure options:"
+    for OPTION in "$@"; do
+        if [[ $OPTION ]]; then
+            echo $OPTION
+        fi
+    done
+
+    ../configure "$@"
+}
+
 configure_links()
 {
     # Configure dynamic linker run-time bindings when installing to system.
@@ -297,11 +313,14 @@ make_current_directory()
     local JOBS=$1
     shift 1
 
+    create_directory "$OBJECT_DIR"
     ./autogen.sh
-    configure_options "$@"
+    push_directory "$OBJECT_DIR"
+    configure_options_object_dir "$@"
     make_jobs $JOBS
     make install
     configure_links
+    pop_directory
 }
 
 # make_jobs jobs [make_options]
@@ -435,6 +454,7 @@ build_from_tarball()
 
     # Use the suffixed archive name as the extraction directory.
     local EXTRACT="build-$ARCHIVE"
+    push_directory "$BUILD_DIR"
     create_directory $EXTRACT
     push_directory $EXTRACT
 
@@ -467,6 +487,8 @@ build_from_tarball()
     # Restore flags to prevent side effects.
     export LDFLAGS=$SAVE_LDFLAGS
     export CPPFLAGS=$SAVE_LCPPFLAGS
+
+    pop_directory
 }
 
 # Because boost ICU detection assumes in incorrect ICU path.
@@ -552,6 +574,7 @@ build_from_tarball_boost()
 
     # Use the suffixed archive name as the extraction directory.
     local EXTRACT="build-$ARCHIVE"
+    push_directory "$BUILD_DIR"
     create_directory $EXTRACT
     push_directory $EXTRACT
 
@@ -617,11 +640,14 @@ build_from_tarball_boost()
         "$@"
 
     pop_directory
+    pop_directory
 }
 
 # Standard build from github.
 build_from_github()
 {
+    push_directory "$BUILD_DIR"
+
     local ACCOUNT=$1
     local REPO=$2
     local BRANCH=$3
@@ -641,6 +667,7 @@ build_from_github()
     # Build the local repository clone.
     push_directory $REPO
     make_current_directory $JOBS "${CONFIGURATION[@]}"
+    pop_directory
     pop_directory
 }
 
@@ -673,8 +700,8 @@ build_from_travis()
 
     # The primary build is not downloaded if we are running in Travis.
     if [[ $TRAVIS == true ]]; then
-        push_directory ".."
         build_from_local "Local $TRAVIS_REPO_SLUG" $JOBS "${OPTIONS[@]}" "$@"
+        push_directory "$OBJECT_DIR"
         make_tests $JOBS
         pop_directory
     else
@@ -705,5 +732,5 @@ build_all()
 create_directory "$BUILD_DIR"
 push_directory "$BUILD_DIR"
 initialize_git
-time build_all "${CONFIGURE_OPTIONS[@]}"
 pop_directory
+time build_all "${CONFIGURE_OPTIONS[@]}"

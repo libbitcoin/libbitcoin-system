@@ -62,6 +62,10 @@
 #include <bitcoin/bitcoin/formats/base_64.hpp>
 #include <bitcoin/bitcoin/formats/base_85.hpp>
 #include <bitcoin/bitcoin/log/attributes.hpp>
+#include <bitcoin/bitcoin/log/file_char_traits.hpp>
+#include <bitcoin/bitcoin/log/file_collector.hpp>
+#include <bitcoin/bitcoin/log/file_collector_repository.hpp>
+#include <bitcoin/bitcoin/log/file_counter_formatter.hpp>
 #include <bitcoin/bitcoin/log/severity.hpp>
 #include <bitcoin/bitcoin/log/sinks.hpp>
 #include <bitcoin/bitcoin/log/sources.hpp>
