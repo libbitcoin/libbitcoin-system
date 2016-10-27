@@ -71,6 +71,9 @@ src_libbitcoin_la_SOURCES = \
     src/formats/base_58.cpp \
     src/formats/base_64.cpp \
     src/formats/base_85.cpp \
+    src/log/file_collector.cpp \
+    src/log/file_collector_repository.cpp \
+    src/log/file_counter_formatter.cpp \
     src/log/sinks.cpp \
     src/math/checksum.cpp \
     src/math/crypto.cpp \
@@ -412,6 +415,10 @@ include_bitcoin_bitcoin_impl_utility_HEADERS = \
 include_bitcoin_bitcoin_logdir = ${includedir}/bitcoin/bitcoin/log
 include_bitcoin_bitcoin_log_HEADERS = \
     include/bitcoin/bitcoin/log/attributes.hpp \
+    include/bitcoin/bitcoin/log/file_char_traits.hpp \
+    include/bitcoin/bitcoin/log/file_collector.hpp \
+    include/bitcoin/bitcoin/log/file_collector_repository.hpp \
+    include/bitcoin/bitcoin/log/file_counter_formatter.hpp \
     include/bitcoin/bitcoin/log/severity.hpp \
     include/bitcoin/bitcoin/log/sinks.hpp \
     include/bitcoin/bitcoin/log/sources.hpp

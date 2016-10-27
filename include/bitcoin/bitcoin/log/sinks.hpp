@@ -52,7 +52,7 @@ struct rotable_file
     size_t rotation_size;
     size_t maximum_files_size;
     size_t minimum_free_space;
-    ////size_t maximum_files;
+    size_t maximum_files;
 };
 
 /// Initializes default non-rotable libbitcoin logging sinks and formats.

@@ -29,6 +29,7 @@
 #include <boost/log/support/date_time.hpp>
 #include <boost/smart_ptr/make_shared.hpp>
 #include <bitcoin/bitcoin/log/attributes.hpp>
+#include <bitcoin/bitcoin/log/file_collector_repository.hpp>
 #include <bitcoin/bitcoin/log/severity.hpp>
 #include <bitcoin/bitcoin/unicode/ofstream.hpp>
 
@@ -83,11 +84,11 @@ formatter& operator<<(formatter& stream, severity level)
 static boost::shared_ptr<collector> file_collector(
     const rotable_file& rotation)
 {
-    return make_collector(
-        target = rotation.archive_directory,
-        max_size = rotation.maximum_files_size,
-        min_free_space = rotation.minimum_free_space
-        /*max_files = rotation.maximum_files*/);
+    return bc::log::make_collector(
+        rotation.archive_directory,
+        rotation.maximum_files_size,
+        rotation.minimum_free_space,
+        rotation.maximum_files);
 }
 
 static boost::shared_ptr<text_file_sink> add_text_file_sink(

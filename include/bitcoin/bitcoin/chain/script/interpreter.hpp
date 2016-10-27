@@ -32,7 +32,7 @@
 namespace libbitcoin {
 namespace chain {
 
-class BC_API transaction;
+class transaction;
 
 class BC_API interpreter
 {
