@@ -4,79 +4,88 @@
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
 ###############################################################################
+sudo:
+    - false
 
 language:
     - cpp
 
-os:
-    - osx
-    - linux
-
-compiler:
-    - clang
-    - gcc
-
-env:
-    - LINK=static
-    - LINK=dynamic
+addons:
+    apt:
+        sources:
+            - boost-latest
+            - ubuntu-toolchain-r-test
+        packages:
+            - g++-4.8
 
 matrix:
-    exclude:
-        - os: osx
+    include:
+        - os: linux
+          compiler: clang
+          env: LINK=dynamic
+          apt:
+            sources:
+                - sourceline: 'ppa:h-rayflood/llvm'
+            packages:
+                - clang-3.4
+        - os: linux
+          compiler: clang
+          env: LINK=static
+          apt:
+            sources:
+                - sourceline: 'ppa:h-rayflood/llvm'
+            packages:
+                - clang-3.4
+        - os: linux
           compiler: gcc
+          env: LINK=dynamic
+          apt:
+        - os: linux
+          compiler: gcc
+          env: LINK=static
+          apt:
+            packages:
+                - lcov
+        - os: osx
+          compiler: clang
+          env: LINK=dynamic
+        - os: osx
+          compiler: clang
+          env: LINK=static
     fast_finish:
         - true
 
 before_install:
 
     # Set aliases for readability.
-    - if [[ $CC             == gcc     ]]; then GCC=true; fi
+    - if [[ $CC             == gcc     ]]; then
+        GCC=true;
+        export CC=gcc-4.8;
+        export CXX=g++-4.8;
+      fi
     - if [[ $CC             == clang   ]]; then CLANG=true; fi
     - if [[ $LINK           == static  ]]; then STATIC=true; fi
     - if [[ $LINK           == dynamic ]]; then DYNAMIC=true; fi
     - if [[ $TRAVIS_OS_NAME == osx     ]]; then OSX=true; fi
     - if [[ $TRAVIS_OS_NAME == linux   ]]; then LINUX=true; fi
 
-    # Set package repository.
-    - if [[ $LINUX           ]]; then sudo add-apt-repository -y ppa:boost-latest/ppa; fi
-    - if [[ $LINUX           ]]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
-    - if [[ $LINUX && $CLANG ]]; then sudo add-apt-repository -y ppa:h-rayflood/llvm; fi
-
-    # Update the system.
-    - if [[ $LINUX           ]]; then sudo apt-get -qq update; fi
-
 install:
-
-    # Install g++ 4.8
-    - if [[ $LINUX           ]]; then sudo apt-get install -qq g++-4.8 --allow-unauthenticated; fi
-    - if [[ $LINUX           ]]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50; fi
-    - if [[ $LINUX           ]]; then sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50; fi
-    - if [[ $LINUX           ]]; then sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-4.8 50; fi
-
-    # Install clang++ 3.4
-    - if [[ $LINUX && $CLANG ]]; then sudo apt-get install -qq clang-3.4 --allow-unauthenticated; fi
-    - if [[ $LINUX && $CLANG ]]; then sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.4 50; fi
-    - if [[ $LINUX && $CLANG ]]; then sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.4 50; fi
 
     # Download and install packages for osx/clang/dynamic.
     - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then brew unlink boost; brew install boost; fi
-
 script:
 
     # Download and build libbitcoin and all dependencies.
-    - if [[ $OSX   && $CLANG && $STATIC  ]]; then ./install.sh --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --disable-shared --prefix=$TRAVIS_BUILD_DIR/my-prefix; fi
-    - if [[ $LINUX && $CLANG && $STATIC  ]]; then ./install.sh --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --disable-shared --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os' CXXFLAGS='-Os'; fi
-    - if [[ $LINUX && $GCC   && $STATIC  ]]; then ./install.sh --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --disable-shared --build-dir=my-build --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-O0 -g --coverage' CXXFLAGS='-O0 -g --coverage'; fi
-    - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then ./install.sh ; fi
-    - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then sudo CXX=$CXX CC=$CC ./install.sh --with-icu --build-icu --build-boost --disable-ndebug --disable-static CFLAGS='-Os' CXXFLAGS='-Os'; fi
-    - if [[ $LINUX && $GCC   && $DYNAMIC ]]; then sudo CXX=$CXX CC=$CC ./install.sh --without-consensus --disable-static --build-boost CFLAGS='-Os -s' CXXFLAGS='-Os -s'; fi
+    - if [[ $OSX   && $CLANG && $STATIC  ]]; then CC=$CC CXX=$CXX ./install.sh --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --disable-shared --prefix=$TRAVIS_BUILD_DIR/my-prefix; fi
+    - if [[ $LINUX && $CLANG && $STATIC  ]]; then CC=$CC CXX=$CXX ./install.sh --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --disable-shared --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os' CXXFLAGS='-Os'; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then CC=$CC CXX=$CXX ./install.sh --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --disable-shared --build-dir=my-build --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-O3 -g --coverage' CXXFLAGS='-O3 -g --coverage'; fi
+    - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then CC=$CC CXX=$CXX ./install.sh ; fi
+    - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then CC=$CC CXX=$CXX ./install.sh --with-icu --build-icu --build-boost --disable-ndebug --disable-static --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os' CXXFLAGS='-Os'; fi
+    - if [[ $LINUX && $GCC   && $DYNAMIC ]]; then CC=$CC CXX=$CXX ./install.sh --without-consensus --disable-static --build-boost --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-O3 -g' CXXFLAGS='-O3 -g'; fi
 
 after_success:
 
     # Install coveralls and current lcov.
-    - if [[ $LINUX && $GCC   && $STATIC  ]]; then wget http://ftp.de.debian.org/debian/pool/main/l/lcov/lcov_1.11.orig.tar.gz; fi
-    - if [[ $LINUX && $GCC   && $STATIC  ]]; then tar xf lcov_1.11.orig.tar.gz; fi
-    - if [[ $LINUX && $GCC   && $STATIC  ]]; then sudo make -C lcov-1.11 install; fi
     - if [[ $LINUX && $GCC   && $STATIC  ]]; then gem install coveralls-lcov; fi
 
     # Capture coverage info, filter out system and test code, and debug before upload.
@@ -86,3 +95,4 @@ after_success:
 
     # Upload coverage info to coveralls service (--repo-token <private coveralls repo token>).
     - if [[ $LINUX && $GCC   && $STATIC  ]]; then coveralls-lcov coverage.info; fi
+
