@@ -30,13 +30,17 @@ BOOST_AUTO_TEST_SUITE(operation_tests)
 BOOST_AUTO_TEST_CASE(operation__constructor_1__always__returns_default_initialized)
 {
     operation instance;
+
     BOOST_REQUIRE(!instance.is_valid());
+    BOOST_REQUIRE(instance.data().empty());
+    BOOST_REQUIRE(instance.code() == opcode::disabled_xor);
 }
 
 BOOST_AUTO_TEST_CASE(operation__constructor_2__valid_input__returns_input_initialized)
 {
     const auto data = to_chunk(base16_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"));
-    operation instance(data);
+    auto dup_data = data;
+    operation instance(std::move(dup_data));
 
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance.code() == opcode::push_size_32);
@@ -46,8 +50,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_2__valid_input__returns_input_initia
 BOOST_AUTO_TEST_CASE(operation__constructor_3__valid_input__returns_input_initialized)
 {
     const auto data = to_chunk(base16_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"));
-    auto dup_data = data;
-    operation instance(std::move(dup_data));
+    operation instance(data);
 
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance.code() == opcode::push_size_32);
@@ -73,7 +76,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_5__valid_input__returns_input_initia
 
 BOOST_AUTO_TEST_CASE(operation__from_data__insufficient_bytes__failure)
 {
-    data_chunk data(0);
+    const data_chunk data;
     operation instance;
 
     BOOST_REQUIRE(!instance.from_data(data));
@@ -114,6 +117,72 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_size_75__success)
 
     BOOST_REQUIRE(instance.code() == opcode::push_size_75);
     BOOST_REQUIRE(instance.data() == data75);
+}
+
+BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_negative_1__success)
+{
+    static const auto op_79 = static_cast<uint8_t>(opcode::push_negative_1);
+    const auto data1 = data_chunk{ op_79 };
+    const auto raw_operation = data1;
+    operation instance;
+
+    // This is read as an encoded operation, not as data.
+    // Constructors read (unencoded) data and can select minimal encoding.
+    BOOST_REQUIRE(instance.from_data(raw_operation));
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(raw_operation == instance.to_data());
+
+    operation duplicate;
+    BOOST_REQUIRE(duplicate.from_data(instance.to_data()));
+    BOOST_REQUIRE(instance == duplicate);
+
+    // The code is the data for numeric push codes.
+    BOOST_REQUIRE(instance.code() == opcode::push_negative_1);
+    BOOST_REQUIRE(instance.data() == data_chunk{});
+}
+
+BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_positive_1__success)
+{
+    static const auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
+    const auto data1 = data_chunk{ op_81 };
+    const auto raw_operation = data1;
+    operation instance;
+
+    // This is read as an encoded operation, not as data.
+    // Constructors read (unencoded) data and can select minimal encoding.
+    BOOST_REQUIRE(instance.from_data(raw_operation));
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(raw_operation == instance.to_data());
+
+    operation duplicate;
+    BOOST_REQUIRE(duplicate.from_data(instance.to_data()));
+    BOOST_REQUIRE(instance == duplicate);
+
+    // The code is the data for numeric push codes.
+    BOOST_REQUIRE(instance.code() == opcode::push_positive_1);
+    BOOST_REQUIRE(instance.data() == data_chunk{});
+}
+
+BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_positive_16__success)
+{
+    static const auto op_96 = static_cast<uint8_t>(opcode::push_positive_16);
+    const auto data1 = data_chunk{ op_96 };
+    const auto raw_operation = data1;
+    operation instance;
+
+    // This is read as an encoded operation, not as data.
+    // Constructors read (unencoded) data and can select minimal encoding.
+    BOOST_REQUIRE(instance.from_data(raw_operation));
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(raw_operation == instance.to_data());
+
+    operation duplicate;
+    BOOST_REQUIRE(duplicate.from_data(instance.to_data()));
+    BOOST_REQUIRE(instance == duplicate);
+
+    // The code is the data for numeric push codes.
+    BOOST_REQUIRE(instance.code() == opcode::push_positive_16);
+    BOOST_REQUIRE(instance.data() == data_chunk{});
 }
 
 BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_one_size__success)
@@ -199,38 +268,6 @@ BOOST_AUTO_TEST_CASE(operation__factory_from_data_3__roundtrip__success)
     data_chunk output = operation.to_data();
     BOOST_REQUIRE(output == valid_raw_operation);
 }
-
-BOOST_AUTO_TEST_CASE(operation__code__roundtrip__success)
-{
-    const auto value = opcode::push_size_42;
-    operation instance;
-    BOOST_REQUIRE(instance.code() != value);
-    instance.set_code(value);
-    BOOST_REQUIRE(instance.code() == value);
-}
-
-BOOST_AUTO_TEST_CASE(operation__data_setter_1__roundtrip__success)
-{
-     const data_chunk value = to_chunk(base16_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"));
-
-    operation instance;
-    BOOST_REQUIRE(value != instance.data());
-    instance.set_data(value);
-    BOOST_REQUIRE(value == instance.data());
-}
-
-BOOST_AUTO_TEST_CASE(operation__data_setter_2__roundtrip__success)
-{
-    const data_chunk value = to_chunk(base16_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"));
-
-    data_chunk dup_value = value;
-    operation instance;
-    BOOST_REQUIRE(value != instance.data());
-    instance.set_data(std::move(dup_value));
-    BOOST_REQUIRE(value == instance.data());
-}
-
-//BOOST_AUTO_TEST_CASE(operation__is_pay_multisig_pattern__checkmultisig)
 
 BOOST_AUTO_TEST_CASE(operation__operator_assign_equals_1__always__matches_equivalent)
 {

@@ -113,24 +113,24 @@ enum class opcode : uint8_t
     push_one_size = 76,
     push_two_size = 77,
     push_four_size = 78,
-    push_negative_1 = 79,
+    push_negative_1 = 79,   // is_numeric
     reserved_80 = 80,       // [reserved]
-    push_positive_1 = 81,   // is_positive
-    push_positive_2 = 82,   // is_positive
-    push_positive_3 = 83,   // is_positive
-    push_positive_4 = 84,   // is_positive
-    push_positive_5 = 85,   // is_positive
-    push_positive_6 = 86,   // is_positive
-    push_positive_7 = 87,   // is_positive
-    push_positive_8 = 88,   // is_positive
-    push_positive_9 = 89,   // is_positive
-    push_positive_10 = 90,  // is_positive
-    push_positive_11 = 91,  // is_positive
-    push_positive_12 = 92,  // is_positive
-    push_positive_13 = 93,  // is_positive
-    push_positive_14 = 94,  // is_positive
-    push_positive_15 = 95,  // is_positive
-    push_positive_16 = 96,  // is_positive
+    push_positive_1 = 81,   // is_numeric, is_positive
+    push_positive_2 = 82,   // is_numeric, is_positive
+    push_positive_3 = 83,   // is_numeric, is_positive
+    push_positive_4 = 84,   // is_numeric, is_positive
+    push_positive_5 = 85,   // is_numeric, is_positive
+    push_positive_6 = 86,   // is_numeric, is_positive
+    push_positive_7 = 87,   // is_numeric, is_positive
+    push_positive_8 = 88,   // is_numeric, is_positive
+    push_positive_9 = 89,   // is_numeric, is_positive
+    push_positive_10 = 90,  // is_numeric, is_positive
+    push_positive_11 = 91,  // is_numeric, is_positive
+    push_positive_12 = 92,  // is_numeric, is_positive
+    push_positive_13 = 93,  // is_numeric, is_positive
+    push_positive_14 = 94,  // is_numeric, is_positive
+    push_positive_15 = 95,  // is_numeric, is_positive
+    push_positive_16 = 96,  // is_numeric, is_positive
 
     //-------------------------------------------------------------------------
     // is_counted

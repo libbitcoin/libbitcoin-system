@@ -50,8 +50,8 @@ public:
 
     operation(opcode code);
 
-    operation(data_chunk&& data);
-    operation(const data_chunk& data);
+    operation(data_chunk&& uncoded, bool minimal=true);
+    operation(const data_chunk& uncoded, bool minimal=true);
 
     // Operators.
     //-------------------------------------------------------------------------
@@ -65,11 +65,11 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static operation factory_from_data(const data_chunk& data);
+    static operation factory_from_data(const data_chunk& encoded);
     static operation factory_from_data(std::istream& stream);
     static operation factory_from_data(reader& source);
 
-    bool from_data(const data_chunk& data);
+    bool from_data(const data_chunk& encoded);
     bool from_data(std::istream& stream);
     bool from_data(reader& source);
 
@@ -94,28 +94,29 @@ public:
     /// Get the op code [0..255], if is_valid is consistent with data.
     opcode code() const;
 
-    /// This should not be used to set a data code (as it will set invalid).
-    void set_code(opcode code);
-
     /// Get the data, empty if not a push code or if invalid.
     const data_chunk& data() const;
-
-    /// These select the minimal code for the data (sets invalid on overflow).
-    void set_data(data_chunk&& data);
-    void set_data(const data_chunk& data);
 
     // Utilities.
     //-------------------------------------------------------------------------
 
-    /// Compute the minimal data opcode for a given size.
+    /// Compute the minimal data opcode based on size alone.
     static opcode opcode_from_size(size_t size);
 
-    /// Convert the opcode to a number (or max_uint8 if not nonnegative number).
+    /// Compute the minimal data opcode for a given chunk of data.
+    /// If a numeric code is used then corresponding data must be set to empty.
+    static opcode opcode_from_data(const data_chunk& data);
+
+    /// Convert the [1..16] value to the corresponding opcode (or undefined).
+    static opcode opcode_from_positive(uint8_t value);
+
+    /// Convert the opcode to the corresponding [1..16] value (or undefined).
     static uint8_t opcode_to_positive(opcode code);
 
     /// Types of opcodes.
     static bool is_push(opcode code);
     static bool is_counted(opcode code);
+    static bool is_numeric(opcode code);
     static bool is_positive(opcode code);
     static bool is_disabled(opcode code);
     static bool is_conditional(opcode code);

@@ -64,15 +64,38 @@ operation::operation(opcode code)
 {
 }
 
-operation::operation(data_chunk&& data)
-  : code_(opcode_from_size(data.size())), data_(std::move(data)),
+operation::operation(data_chunk&& uncoded, bool minimal)
+  : code_(minimal ? opcode_from_data(uncoded) :
+        opcode_from_size(uncoded.size())),
+    data_(std::move(uncoded)),
     valid_(!is_oversized())
 {
+    if (!valid_)
+        reset();
+
+    // Revert data if opcode_from_data produced a numeric encoding.
+    if (minimal && is_numeric(code_))
+    {
+        data_.clear();
+        data_.shrink_to_fit();
+    }
 }
 
-operation::operation(const data_chunk& data)
-  : code_(opcode_from_size(data.size())), data_(data), valid_(!is_oversized())
+operation::operation(const data_chunk& uncoded, bool minimal)
+  : code_(minimal ? opcode_from_data(uncoded) :
+        opcode_from_size(uncoded.size())),
+    data_(uncoded),
+    valid_(!is_oversized())
 {
+    if (!valid_)
+        reset();
+
+    // Revert data if opcode_from_data produced a numeric encoding.
+    if (minimal && is_numeric(code_))
+    {
+        data_.clear();
+        data_.shrink_to_fit();
+    }
 }
 
 // protected
@@ -120,10 +143,10 @@ bool operation::operator!=(const operation& other) const
 //-----------------------------------------------------------------------------
 
 // static
-operation operation::factory_from_data(const data_chunk& data)
+operation operation::factory_from_data(const data_chunk& encoded)
 {
     operation instance;
-    instance.from_data(data);
+    instance.from_data(encoded);
     return instance;
 }
 
@@ -143,9 +166,9 @@ operation operation::factory_from_data(reader& source)
     return instance;
 }
 
-bool operation::from_data(const data_chunk& data)
+bool operation::from_data(const data_chunk& encoded)
 {
-    data_source istream(data);
+    data_source istream(encoded);
     return from_data(istream);
 }
 
@@ -188,19 +211,30 @@ static std::string trim_push(const std::string& token)
 bool operation::from_string(const std::string& mnemonic)
 {
     reset();
-    valid_ = true;
 
-    if (is_push_token(mnemonic) && decode_base16(data_, trim_push(mnemonic)))
+    if (is_push_token(mnemonic))
     {
-        if (is_oversized())
-            reset();
-        else
-            code_ = opcode_from_size(data_.size());
+        if (decode_base16(data_, trim_push(mnemonic)) && !is_oversized())
+        {
+            // The produces the minimal data encoding.
+            code_ = opcode_from_data(data_);
+            valid_ = true;
+
+            // Revert data if opcode_from_data produced a numeric encoding.
+            if (is_numeric(code_))
+            {
+                data_.clear();
+                data_.shrink_to_fit();
+            }
+        }
     }
-    else if (!opcode_from_string(code_, mnemonic))
+    else if (opcode_from_string(code_, mnemonic))
     {
+        valid_ = true;
+    }
+
+    if (!valid_)
         reset();
-    }
 
     return valid_;
 }
@@ -241,7 +275,6 @@ void operation::to_data(std::ostream& stream) const
 void operation::to_data(writer& sink) const
 {
     static constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
-
     const auto size = data_.size();
     const auto code = static_cast<uint8_t>(code_);
     sink.write_byte(code);
@@ -302,27 +335,9 @@ opcode operation::code() const
     return code_;
 }
 
-void operation::set_code(opcode code)
-{
-    valid_ = true;
-    code_ = code;
-}
-
 const data_chunk& operation::data() const
 {
     return data_;
-}
-
-void operation::set_data(data_chunk&& data)
-{
-    valid_ = true;
-    data_ = std::move(data);
-}
-
-void operation::set_data(const data_chunk& data)
-{
-    valid_ = true;
-    data_ = data;
 }
 
 // Utilities.
@@ -349,14 +364,11 @@ uint32_t operation::read_data_size(opcode code, reader& source)
 }
 
 //*****************************************************************************
-// CONSENSUS: minimal encoding is consensus critical due to find_and_delete.
+// CONSENSUS: this encoding is consensus critical due to find_and_delete.
 //*****************************************************************************
 opcode operation::opcode_from_size(size_t size)
 {
-    // Satoshi simply casts size to 4 bytes but writes size bytes.
-    // Any difference is not a potential issue, due to script size limits.
     BITCOIN_ASSERT(size <= max_uint32);
-
     static constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
 
     if (size <= op_75)
@@ -369,6 +381,25 @@ opcode operation::opcode_from_size(size_t size)
         return opcode::push_four_size;
 }
 
+opcode operation::opcode_from_data(const data_chunk& data)
+{
+    const auto size = data.size();
+
+    if (size != 1)
+        return opcode_from_size(size);
+
+    const auto code = static_cast<opcode>(data.front());
+    return is_numeric(code) ? code : opcode_from_size(size);
+}
+
+opcode operation::opcode_from_positive(uint8_t value)
+{
+    BITCOIN_ASSERT(value >= script_number::positive_1);
+    BITCOIN_ASSERT(value <= script_number::positive_16);
+    static constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
+    return static_cast<opcode>(value + op_81 - 1);
+}
+
 uint8_t operation::opcode_to_positive(opcode code)
 {
     BITCOIN_ASSERT(is_positive(code));
@@ -376,6 +407,7 @@ uint8_t operation::opcode_to_positive(opcode code)
     return static_cast<uint8_t>(code)-op_81 - 1;
 }
 
+// [0..79, 81..96]
 bool operation::is_push(opcode code)
 {
     static constexpr auto op_80 = static_cast<uint8_t>(opcode::reserved_80);
@@ -384,6 +416,7 @@ bool operation::is_push(opcode code)
     return value <= op_96 && value != op_80;
 }
 
+// [97..255]
 bool operation::is_counted(opcode code)
 {
     static constexpr auto op_97 = static_cast<uint8_t>(opcode::nop);
@@ -391,6 +424,13 @@ bool operation::is_counted(opcode code)
     return value >= op_97;
 }
 
+// [-1, 1..16]
+bool operation::is_numeric(opcode code)
+{
+    return is_positive(code) || code == opcode::push_negative_1;
+}
+
+// [1..16]
 bool operation::is_positive(opcode code)
 {
     static constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);

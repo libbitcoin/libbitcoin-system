@@ -90,22 +90,22 @@ script::script(operation_stack&& ops)
     from_stack(ops);
 }
 
-script::script(data_chunk&& bytes, bool prefix)
+script::script(data_chunk&& encoded, bool prefix)
 {
+    // TODO: store prefix in bytes_ to simplify and optimize this.
     if (prefix)
     {
-        // TODO: store prefix in bytes_ to simplify and optimize this.
-        valid_ = from_data(bytes, prefix);
+        valid_ = from_data(encoded, prefix);
         return;
     }
 
-    bytes_ = std::move(bytes);
+    bytes_ = std::move(encoded);
     valid_ = true;
 }
 
-script::script(const data_chunk& bytes, bool prefix)
+script::script(const data_chunk& encoded, bool prefix)
 {
-    valid_ = from_data(bytes, prefix);
+    valid_ = from_data(encoded, prefix);
 }
 
 // Operators.
@@ -116,7 +116,6 @@ script& script::operator=(script&& other)
 {
     // TODO: implement safe private accessor for conditional cache transfer.
     reset();
-
     bytes_ = std::move(other.bytes_);
     valid_ = other.valid_;
     return *this;
@@ -146,10 +145,10 @@ bool script::operator!=(const script& other) const
 //-----------------------------------------------------------------------------
 
 // static
-script script::factory_from_data(const data_chunk& data, bool prefix)
+script script::factory_from_data(const data_chunk& encoded, bool prefix)
 {
     script instance;
-    instance.from_data(data, prefix);
+    instance.from_data(encoded, prefix);
     return instance;
 }
 
@@ -169,9 +168,9 @@ script script::factory_from_data(reader& source, bool prefix)
     return instance;
 }
 
-bool script::from_data(const data_chunk& data, bool prefix)
+bool script::from_data(const data_chunk& encoded, bool prefix)
 {
-    data_source istream(data);
+    data_source istream(encoded);
     return from_data(istream, prefix);
 }
 
@@ -768,9 +767,9 @@ void script::find_and_delete(const data_chunk& endorsement)
     if (endorsement.empty())
         return;
 
-    // The value must be serialized to script using minimal encoding.
+    // The value must be serialized to script using non-minimal encoding.
     // Non-minimally-encoded target values will therefore not match.
-    const auto value = operation(endorsement).to_data();
+    const auto value = operation(endorsement, false).to_data();
 
     // No copying occurs below. If a match is found the remainder is shifted
     // into its place (erase). No memory allocation is caused by the shift.

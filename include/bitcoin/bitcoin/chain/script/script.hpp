@@ -57,8 +57,8 @@ public:
     script(operation_stack&& ops);
     script(const operation_stack& ops);
 
-    script(data_chunk&& bytes, bool prefix);
-    script(const data_chunk& bytes, bool prefix);
+    script(data_chunk&& encoded, bool prefix);
+    script(const data_chunk& encoded, bool prefix);
 
     // Operators.
     //-------------------------------------------------------------------------
@@ -73,12 +73,12 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static script factory_from_data(const data_chunk& data, bool prefix);
+    static script factory_from_data(const data_chunk& encoded, bool prefix);
     static script factory_from_data(std::istream& stream, bool prefix);
     static script factory_from_data(reader& source, bool prefix);
 
     /// Deserialization invalidates the iterator.
-    bool from_data(const data_chunk& data, bool prefix);
+    bool from_data(const data_chunk& encoded, bool prefix);
     bool from_data(std::istream& stream, bool prefix);
     bool from_data(reader& source, bool prefix);
 
