@@ -85,6 +85,7 @@
     <ClCompile Include="..\..\..\..\test\chain\point_iterator.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\satoshi_words.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\script.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\script\opcode.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\script\operation.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp" />
     <ClCompile Include="..\..\..\..\test\config\authority.cpp" />
@@ -204,6 +205,9 @@
   </Target>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSEXE|x64'">
     <PostBuildEvent />
+    <PostBuildEvent>
+      <Command>"$(TargetPath)" --run_test=* --show_progress=no --result_code=no --detect_memory_leak=0 --report_level=no --build_info=yes</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ProjectReference Include="..\libbitcoin\libbitcoin.vcxproj">

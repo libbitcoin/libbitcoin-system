@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__constructor_2__always__equals_param
     const std::vector<uint64_t> indexes = { 1u, 3454u, 4234u, 75123u, 455323u };
 
     message::get_block_transactions instance(hash, indexes);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(hash == instance.block_hash());
     BOOST_REQUIRE(indexes == instance.indexes());
 }
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__constructor_3__always__equals_param
     auto indexes_dup = indexes;
 
     message::get_block_transactions instance(std::move(hash_dup), std::move(indexes_dup));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(hash == instance.block_hash());
     BOOST_REQUIRE(indexes == instance.indexes());
 }
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__constructor_4__always__equals_param
         { 1u, 3454u, 4234u, 75123u, 455323u });
 
     message::get_block_transactions instance(value);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(value == instance);
 }
 
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__constructor_5__always__equals_param
 
     message::get_block_transactions value(hash, indexes);
     message::get_block_transactions instance(std::move(value));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(hash == instance.block_hash());
     BOOST_REQUIRE(indexes == instance.indexes());
 }
@@ -257,7 +257,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__operator_boolean_equals__duplicates
         { 1u, 3454u, 4234u, 75123u, 455323u });
 
     message::get_block_transactions instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(get_block_transactions__operator_boolean_equals__differs__returns_false)
@@ -287,7 +287,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__operator_boolean_not_equals__differ
         { 1u, 3454u, 4234u, 75123u, 455323u });
 
     message::get_block_transactions instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

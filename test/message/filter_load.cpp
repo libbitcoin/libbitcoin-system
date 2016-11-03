@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(filter_load__constructor_2__always__equals_params)
     uint8_t flags = 0xae;
 
     message::filter_load instance(filter, hash_functions, tweak, flags);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(filter == instance.filter());
     BOOST_REQUIRE_EQUAL(hash_functions, instance.hash_functions());
     BOOST_REQUIRE_EQUAL(tweak, instance.tweak());
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(filter_load__constructor_3__always__equals_params)
     uint8_t flags = 0xae;
 
     message::filter_load instance(std::move(dup_filter), hash_functions, tweak, flags);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(filter == instance.filter());
     BOOST_REQUIRE_EQUAL(hash_functions, instance.hash_functions());
     BOOST_REQUIRE_EQUAL(tweak, instance.tweak());
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(filter_load__constructor_4__always__equals_params)
 
     const message::filter_load value(filter, hash_functions, tweak, flags);
     message::filter_load instance(value);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(value == instance);
     BOOST_REQUIRE(filter == instance.filter());
     BOOST_REQUIRE_EQUAL(hash_functions, instance.hash_functions());
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(filter_load__constructor_5__always__equals_params)
 
     message::filter_load value(filter, hash_functions, tweak, flags);
     message::filter_load instance(std::move(value));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(filter == instance.filter());
     BOOST_REQUIRE_EQUAL(hash_functions, instance.hash_functions());
     BOOST_REQUIRE_EQUAL(tweak, instance.tweak());
@@ -317,7 +317,7 @@ BOOST_AUTO_TEST_CASE(filter_load__operator_boolean_equals__duplicates__returns_t
         { 0x0f, 0xf0, 0x55, 0xaa }, 643u, 575u, 0xaa);
 
     message::filter_load instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(filter_load__operator_boolean_equals__differs__returns_false)
@@ -344,7 +344,7 @@ BOOST_AUTO_TEST_CASE(filter_load__operator_boolean_not_equals__differs__returns_
         { 0x0f, 0xf0, 0x55, 0xaa }, 643u, 575u, 0xaa);
 
     message::filter_load instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

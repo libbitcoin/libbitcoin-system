@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(version__constructor_2__always__equals_params)
     message::version instance(value, services, timestamp, receiver, sender,
         nonce, agent, height, relay);
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(value, instance.value());
     BOOST_REQUIRE_EQUAL(services, instance.services());
     BOOST_REQUIRE_EQUAL(timestamp, instance.timestamp());
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(version__constructor_3__always__equals_params)
     message::version instance(value, services, timestamp, std::move(receiver),
         std::move(sender), nonce, agent, height, relay);
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(version__constructor_4__always__equals_params)
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(version__constructor_4__always__equals_params)
     message::version alpha(value, services, timestamp, receiver, sender,
         nonce, agent, height, relay);
 
-    BOOST_REQUIRE_EQUAL(true, alpha.is_valid());
+    BOOST_REQUIRE(alpha.is_valid());
 
     message::version beta(alpha);
 
@@ -223,11 +223,11 @@ BOOST_AUTO_TEST_CASE(version__constructor_5__always__equals_params)
     message::version alpha(value, services, timestamp, receiver, sender,
         nonce, agent, height, relay);
 
-    BOOST_REQUIRE_EQUAL(true, alpha.is_valid());
+    BOOST_REQUIRE(alpha.is_valid());
 
     message::version beta(std::move(alpha));
 
-    BOOST_REQUIRE_EQUAL(true, beta.is_valid());
+    BOOST_REQUIRE(beta.is_valid());
     BOOST_REQUIRE_EQUAL(value, beta.value());
     BOOST_REQUIRE_EQUAL(services, beta.services());
     BOOST_REQUIRE_EQUAL(timestamp, beta.timestamp());
@@ -900,7 +900,7 @@ BOOST_AUTO_TEST_CASE(version__user_agent_setter_2__roundtrip__success)
 {
     std::string expected = "MyUseRAgenT";
     message::version instance;
-    BOOST_REQUIRE_EQUAL(true, instance.user_agent().empty());
+    BOOST_REQUIRE(instance.user_agent().empty());
     instance.set_user_agent(std::move(expected));
     BOOST_REQUIRE_EQUAL(false, instance.user_agent().empty());
 }
@@ -1081,7 +1081,7 @@ BOOST_AUTO_TEST_CASE(version__operator_boolean_equals__duplicates__returns_true)
     );
 
     message::version instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(version__operator_boolean_equals__differs__returns_false)
@@ -1204,7 +1204,7 @@ BOOST_AUTO_TEST_CASE(version__operator_boolean_not_equals__differs__returns_true
     );
 
     message::version instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

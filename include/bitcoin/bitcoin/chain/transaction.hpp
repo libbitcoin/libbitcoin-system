@@ -99,9 +99,9 @@ public:
     // Operators.
     //-----------------------------------------------------------------------------
 
-    /// This class is move assignable [but not copy assignable].
+    /// This class is move assignable and copy assignable [TODO: remove copy].
     transaction& operator=(transaction&& other);
-    transaction& operator=(const transaction& other) /* = delete */;
+    transaction& operator=(const transaction& other);
 
     bool operator==(const transaction& other) const;
     bool operator!=(const transaction& other) const;

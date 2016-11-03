@@ -136,6 +136,7 @@ bool point::from_data(reader& source)
 data_chunk point::to_data() const
 {
     data_chunk data;
+    data.reserve(serialized_size());
     data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
@@ -172,7 +173,7 @@ point_iterator point::begin() const
 
 point_iterator point::end() const
 {
-    return point_iterator(*this, true);
+    return point_iterator(*this, static_cast<unsigned>(satoshi_fixed_size()));
 }
 
 std::string point::to_string() const

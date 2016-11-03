@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(transaction_message__constructor_2__always__equals_transact
     chain::transaction tx;
     BOOST_REQUIRE(tx.from_data(raw_tx));
     transaction_message instance(tx);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(0u, instance.originator());
     BOOST_REQUIRE(instance == tx);
 }
@@ -67,13 +67,13 @@ BOOST_AUTO_TEST_CASE(transaction_message__constructor_3__always__equals_param)
     chain::transaction tx;
     BOOST_REQUIRE(tx.from_data(raw_tx));
     transaction_message alpha(tx);
-    BOOST_REQUIRE_EQUAL(true, alpha.is_valid());
+    BOOST_REQUIRE(alpha.is_valid());
     BOOST_REQUIRE_EQUAL(0u, alpha.originator());
     BOOST_REQUIRE(alpha == tx);
 
     alpha.set_originator(15u);
     transaction_message beta(alpha);
-    BOOST_REQUIRE_EQUAL(true, beta.is_valid());
+    BOOST_REQUIRE(beta.is_valid());
     BOOST_REQUIRE(beta == alpha);
     BOOST_REQUIRE_EQUAL(15u, beta.originator());
 }
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(transaction_message__constructor_4__always__equals_equivale
     const auto inputs = tx.inputs();
     const auto outputs = tx.outputs();
     transaction_message instance(tx.version(), tx.locktime(), inputs, outputs);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(0u, instance.originator());
     BOOST_REQUIRE(instance == tx);
 }
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(transaction_message__constructor_5__always__equals_equivale
     chain::transaction tx;
     BOOST_REQUIRE(tx.from_data(raw_tx));
     transaction_message instance(chain::transaction::factory_from_data(raw_tx));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(0u, instance.originator());
     BOOST_REQUIRE(instance == tx);
 }
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(transaction_message__constructor_6__always__equals_equivale
     chain::transaction tx;
     BOOST_REQUIRE(tx.from_data(raw_tx));
     transaction_message instance(std::move(value));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(0u, instance.originator());
     BOOST_REQUIRE(instance == tx);
 }
@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE(transaction_message__constructor_7__always__equals_equivale
 {
     transaction_message instance(15u, 1234u, chain::input::list{ {}, {} },
         chain::output::list{ {}, {}, {} });
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(0u, instance.originator());
     BOOST_REQUIRE(instance.version() == 15u);
     BOOST_REQUIRE(instance.locktime() == 1234u);

@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_CHAIN_CONDITIONAL_STACK_HPP
 #define LIBBITCOIN_CHAIN_CONDITIONAL_STACK_HPP
 
+#include <cstddef>
 #include <vector>
 
 namespace libbitcoin {
@@ -28,10 +29,15 @@ namespace chain {
 class conditional_stack
 {
 public:
+    conditional_stack(size_t initial_capacity);
+
+    /// Conditions.
     bool closed() const;
     bool succeeded() const;
-    void clear();
+
+    /// Operations.
     void open(bool value);
+    void clear();
     void negate();
     void close();
 

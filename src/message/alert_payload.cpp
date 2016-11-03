@@ -66,60 +66,110 @@ alert_payload alert_payload::factory_from_data(uint32_t version,
 }
 
 alert_payload::alert_payload()
-  : version_(0u), relay_until_(0u), expiration_(0u), id_(0u), cancel_(0u),
-    set_cancel_(), min_version_(0u), max_version_(0u), set_sub_version_(),
-    priority_(0u), comment_(), status_bar_(), reserved_()
+  : version_(0),
+    relay_until_(0),
+    expiration_(0),
+    id_(0),
+    cancel_(0),
+    min_version_(0),
+    max_version_(0),
+    priority_(0)
 {
 }
 
-alert_payload::alert_payload(uint32_t version, uint64_t relay_until,
-    uint64_t expiration, uint32_t id, uint32_t cancel,
-    const std::vector<uint32_t>& set_cancel, uint32_t min_version,
-    uint32_t max_version, const std::vector<std::string>& set_sub_version,
-    uint32_t priority, const std::string& comment,
-    const std::string& status_bar, const std::string& reserved)
-  : version_(version), relay_until_(relay_until), expiration_(expiration),
-    id_(id), cancel_(cancel), set_cancel_(set_cancel),
-    min_version_(min_version), max_version_(max_version),
-    set_sub_version_(set_sub_version), priority_(priority), comment_(comment),
-    status_bar_(status_bar), reserved_(reserved)
+alert_payload::alert_payload(
+    uint32_t version,
+    uint64_t relay_until,
+    uint64_t expiration,
+    uint32_t id,
+    uint32_t cancel,
+    const std::vector<uint32_t>& set_cancel,
+    uint32_t min_version,
+    uint32_t max_version,
+    const std::vector<std::string>& set_sub_version,
+    uint32_t priority,
+    const std::string& comment,
+    const std::string& status_bar,
+    const std::string& reserved)
+  : version_(version),
+    relay_until_(relay_until),
+    expiration_(expiration),
+    id_(id),
+    cancel_(cancel),
+    set_cancel_(set_cancel),
+    min_version_(min_version),
+    max_version_(max_version),
+    set_sub_version_(set_sub_version),
+    priority_(priority),
+    comment_(comment),
+    status_bar_(status_bar),
+    reserved_(reserved)
 {
 }
 
-alert_payload::alert_payload(uint32_t version, uint64_t relay_until,
-    uint64_t expiration, uint32_t id, uint32_t cancel,
-    std::vector<uint32_t>&& set_cancel, uint32_t min_version,
-    uint32_t max_version, std::vector<std::string>&& set_sub_version,
-    uint32_t priority, std::string&& comment, std::string&& status_bar,
+alert_payload::alert_payload(
+    uint32_t version,
+    uint64_t relay_until,
+    uint64_t expiration,
+    uint32_t id,
+    uint32_t cancel,
+    std::vector<uint32_t>&& set_cancel,
+    uint32_t min_version,
+    uint32_t max_version,
+    std::vector<std::string>&& set_sub_version,
+    uint32_t priority,
+    std::string&& comment,
+    std::string&& status_bar,
     std::string&& reserved)
-  : version_(version), relay_until_(relay_until), expiration_(expiration),
-  id_(id), cancel_(cancel), set_cancel_(std::move(set_cancel)),
-  min_version_(min_version), max_version_(max_version),
-  set_sub_version_(std::move(set_sub_version)),
-  priority_(priority), comment_(std::move(comment)),
-  status_bar_(std::move(status_bar)),
-  reserved_(std::move(reserved))
+  : version_(version),
+    relay_until_(relay_until),
+    expiration_(expiration),
+    id_(id),
+    cancel_(cancel),
+    set_cancel_(std::move(set_cancel)),
+    min_version_(min_version),
+    max_version_(max_version),
+    set_sub_version_(std::move(set_sub_version)),
+    priority_(priority),
+    comment_(std::move(comment)),
+    status_bar_(std::move(status_bar)),
+    reserved_(std::move(reserved))
 {
 }
 
 alert_payload::alert_payload(const alert_payload& other)
-  : alert_payload(other.version_, other.relay_until_, other.expiration_,
-      other.id_, other.cancel_, other.set_cancel_, other.min_version_,
-      other.max_version_, other.set_sub_version_, other.priority_,
-      other.comment_, other.status_bar_, other.reserved_)
+  : alert_payload(
+        other.version_,
+        other.relay_until_,
+        other.expiration_,
+        other.id_,
+        other.cancel_,
+        other.set_cancel_,
+        other.min_version_,
+        other.max_version_,
+        other.set_sub_version_,
+        other.priority_,
+        other.comment_,
+        other.status_bar_,
+        other.reserved_)
 {
 }
 
 alert_payload::alert_payload(alert_payload&& other)
-: alert_payload(other.version_, other.relay_until_, other.expiration_,
-    other.id_, other.cancel_,
-    std::move(other.set_cancel_),
-    other.min_version_, other.max_version_,
-    std::move(other.set_sub_version_),
-    other.priority_,
-    std::move(other.comment_),
-    std::move(other.status_bar_),
-    std::move(other.reserved_))
+  : alert_payload(
+        other.version_,
+        other.relay_until_,
+        other.expiration_,
+        other.id_,
+        other.cancel_,
+        std::move(other.set_cancel_),
+        other.min_version_,
+        other.max_version_,
+        std::move(other.set_sub_version_),
+        other.priority_,
+        std::move(other.comment_),
+        std::move(other.status_bar_),
+        std::move(other.reserved_))
 {
 }
 
@@ -209,7 +259,8 @@ bool alert_payload::from_data(uint32_t version, reader& source)
 data_chunk alert_payload::to_data(uint32_t version) const
 {
     data_chunk data;
-    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    data.reserve(serialized_size(version));
+    data_sink ostream(data);
     to_data(version, ostream);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == serialized_size(version));

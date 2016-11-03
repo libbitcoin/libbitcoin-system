@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(inventory_vector__constructor_2__always__equals_params)
     inventory_vector::type_id type = inventory_vector::type_id::block;
     hash_digest hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     inventory_vector instance(type, hash);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(type == instance.type());
     BOOST_REQUIRE(hash == instance.hash());
 }
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(inventory_vector__constructor_3__always__equals_params)
     inventory_vector::type_id type = inventory_vector::type_id::block;
     hash_digest hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     inventory_vector instance(type, std::move(hash));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(inventory_vector__constructor_4__always__equals_params)
@@ -104,9 +104,9 @@ BOOST_AUTO_TEST_CASE(inventory_vector__constructor_4__always__equals_params)
     inventory_vector::type_id type = inventory_vector::type_id::block;
     hash_digest hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const inventory_vector expected(type, hash);
-    BOOST_REQUIRE_EQUAL(true, expected.is_valid());
+    BOOST_REQUIRE(expected.is_valid());
     inventory_vector instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(expected == instance);
 }
 
@@ -115,9 +115,9 @@ BOOST_AUTO_TEST_CASE(inventory_vector__constructor_5__always__equals_params)
     inventory_vector::type_id type = inventory_vector::type_id::block;
     hash_digest hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     inventory_vector expected(type, hash);
-    BOOST_REQUIRE_EQUAL(true, expected.is_valid());
+    BOOST_REQUIRE(expected.is_valid());
     inventory_vector instance(std::move(expected));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(type == instance.type());
     BOOST_REQUIRE(hash == instance.hash());
 }
@@ -208,21 +208,21 @@ BOOST_AUTO_TEST_CASE(inventory_vector__is_block_type__block__returns_true)
 {
     message::inventory_vector instance;
     instance.set_type(message::inventory_vector::type_id::block);
-    BOOST_REQUIRE_EQUAL(true, instance.is_block_type());
+    BOOST_REQUIRE(instance.is_block_type());
 }
 
 BOOST_AUTO_TEST_CASE(inventory_vector__is_block_type__compact_block__returns_true)
 {
     message::inventory_vector instance;
     instance.set_type(message::inventory_vector::type_id::compact_block);
-    BOOST_REQUIRE_EQUAL(true, instance.is_block_type());
+    BOOST_REQUIRE(instance.is_block_type());
 }
 
 BOOST_AUTO_TEST_CASE(inventory_vector__is_block_type__filtered_block__returns_true)
 {
     message::inventory_vector instance;
     instance.set_type(message::inventory_vector::type_id::filtered_block);
-    BOOST_REQUIRE_EQUAL(true, instance.is_block_type());
+    BOOST_REQUIRE(instance.is_block_type());
 }
 
 BOOST_AUTO_TEST_CASE(inventory_vector__is_block_type__non_block_type__returns_false)
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(inventory_vector__is_transaction_type__transaction__returns
 {
     message::inventory_vector instance;
     instance.set_type(message::inventory_vector::type_id::transaction);
-    BOOST_REQUIRE_EQUAL(true, instance.is_transaction_type());
+    BOOST_REQUIRE(instance.is_transaction_type());
 }
 
 BOOST_AUTO_TEST_CASE(inventory_vector__is_transaction_type__non_transaction_type__returns_false)
@@ -331,7 +331,7 @@ BOOST_AUTO_TEST_CASE(inventory_vector__operator_boolean_equals__duplicates__retu
     );
 
     message::inventory_vector instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(inventory_vector__operator_boolean_equals__differs__returns_false)
@@ -364,7 +364,7 @@ BOOST_AUTO_TEST_CASE(reject__operator_boolean_not_equals__differs__returns_true)
     );
 
     message::inventory_vector instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

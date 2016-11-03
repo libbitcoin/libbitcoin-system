@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(headers__constructor_2__always__equals_params)
     };
 
     headers instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(expected == instance.elements());
 }
 
@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(headers__constructor_3__always__equals_params)
     };
 
     headers instance(std::move(expected));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(2, instance.elements().size());
 }
 
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(headers__constructor_4__always__equals_params)
             )
     });
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(2, instance.elements().size());
 }
 
@@ -430,7 +430,7 @@ BOOST_AUTO_TEST_CASE(headers__operator_boolean_equals__duplicates__returns_true)
     });
 
     message::headers instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(headers__operator_boolean_equals__differs__returns_false)
@@ -529,7 +529,7 @@ BOOST_AUTO_TEST_CASE(headers__operator_boolean_not_equals__differs__returns_true
     });
 
     message::headers instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_CASE(headers__to_hashes__empty__returns_empty_list)

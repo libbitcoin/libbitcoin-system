@@ -48,12 +48,14 @@ header::header(header&& other)
   : header(other.version_, std::move(other.previous_block_hash_),
       std::move(other.merkle_), other.timestamp_, other.bits_, other.nonce_)
 {
+    // TODO: implement safe private accessor for conditional cache transfer.
 }
 
 header::header(const header& other)
   : header(other.version_, other.previous_block_hash_, other.merkle_,
         other.timestamp_, other.bits_, other.nonce_)
 {
+    // TODO: implement safe private accessor for conditional cache transfer.
 }
 
 header::header(header&& other, hash_digest&& hash)
@@ -72,8 +74,11 @@ header::header(const header& other, const hash_digest& hash)
 
 header::header(uint32_t version, hash_digest&& previous_block_hash,
     hash_digest&& merkle, uint32_t timestamp, uint32_t bits, uint32_t nonce)
-  : version_(version), previous_block_hash_(std::move(previous_block_hash)),
-    merkle_(std::move(merkle)), timestamp_(timestamp), bits_(bits),
+  : version_(version),
+    previous_block_hash_(std::move(previous_block_hash)),
+    merkle_(std::move(merkle)),
+    timestamp_(timestamp),
+    bits_(bits),
     nonce_(nonce)
 {
 }
@@ -81,8 +86,12 @@ header::header(uint32_t version, hash_digest&& previous_block_hash,
 header::header(uint32_t version, const hash_digest& previous_block_hash,
     const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
     uint32_t nonce)
-  : version_(version), previous_block_hash_(previous_block_hash),
-    merkle_(merkle), timestamp_(timestamp), bits_(bits), nonce_(nonce)
+  : version_(version),
+    previous_block_hash_(previous_block_hash),
+    merkle_(merkle),
+    timestamp_(timestamp),
+    bits_(bits),
+    nonce_(nonce)
 {
 }
 
@@ -91,6 +100,7 @@ header::header(uint32_t version, const hash_digest& previous_block_hash,
 
 header& header::operator=(header&& other)
 {
+    // TODO: implement safe private accessor for conditional cache transfer.
     version_ = other.version_;
     previous_block_hash_ = std::move(other.previous_block_hash_);
     merkle_ = std::move(other.merkle_);
@@ -100,9 +110,9 @@ header& header::operator=(header&& other)
     return *this;
 }
 
-// TODO: eliminate header copies and then delete this.
 header& header::operator=(const header& other)
 {
+    // TODO: implement safe private accessor for conditional cache transfer.
     version_ = other.version_;
     previous_block_hash_ = other.previous_block_hash_;
     merkle_ = other.merkle_;
@@ -168,7 +178,7 @@ bool header::from_data(std::istream& stream)
 
 bool header::from_data(reader& source)
 {
-    reset();
+    ////reset();
 
     version_ = source.read_4_bytes_little_endian();
     previous_block_hash_ = source.read_hash();
@@ -211,6 +221,7 @@ bool header::is_valid() const
 data_chunk header::to_data() const
 {
     data_chunk data;
+    data.reserve(serialized_size());
     data_sink ostream(data);
     to_data(ostream);
     ostream.flush();

@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__constructor_2__always__equals_params)
     data_chunk flags = { 0xae, 0x56, 0x0f };
 
     message::merkle_block instance(header, count, hashes, flags);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE_EQUAL(count, instance.total_transactions());
     BOOST_REQUIRE(hashes == instance.hashes());
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__constructor_3__always__equals_params)
         },
         { 0xae, 0x56, 0x0f });
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(merkle_block__constructor_4__always__equals_params)
@@ -101,8 +101,8 @@ BOOST_AUTO_TEST_CASE(merkle_block__constructor_4__always__equals_params)
     );
 
     message::merkle_block instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
-    BOOST_REQUIRE_EQUAL(true, expected == instance);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(expected == instance);
 }
 
 BOOST_AUTO_TEST_CASE(merkle_block__constructor_5__always__equals_params)
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__constructor_5__always__equals_params)
 
     message::merkle_block expected(header, count, hashes, flags);
     message::merkle_block instance(std::move(expected));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE_EQUAL(count, instance.total_transactions());
     BOOST_REQUIRE(hashes == instance.hashes());
@@ -341,7 +341,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__header_setter_2__roundtrip__success)
         68644
     });
 
-    BOOST_REQUIRE_EQUAL(true, instance.header().is_valid());
+    BOOST_REQUIRE(instance.header().is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(merkle_block__hashes_accessor_1__always__returns_initialized_value)
@@ -412,7 +412,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__hashes_setter_1__roundtrip__success)
 BOOST_AUTO_TEST_CASE(merkle_block__hashes_setter_2__roundtrip__success)
 {
     message::merkle_block instance;
-    BOOST_REQUIRE_EQUAL(true, instance.hashes().empty());
+    BOOST_REQUIRE(instance.hashes().empty());
     instance.set_hashes(hash_list{
         hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaffffffffffffffffffffffffffffffff"),
         hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
@@ -482,7 +482,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__flags_setter_1__roundtrip__success)
 BOOST_AUTO_TEST_CASE(merkle_block__flags_setter_2__roundtrip__success)
 {
     message::merkle_block instance;
-    BOOST_REQUIRE_EQUAL(true, instance.flags().empty());
+    BOOST_REQUIRE(instance.flags().empty());
     instance.set_flags(data_chunk{ 0xae, 0x56, 0x0f });
     BOOST_REQUIRE_EQUAL(false, instance.flags().empty());
 }
@@ -537,7 +537,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__operator_boolean_equals__duplicates__returns_
     );
 
     message::merkle_block instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(merkle_block__operator_boolean_equals__differs__returns_false)
@@ -609,7 +609,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__operator_boolean_not_equals__differs__returns
     );
 
     message::merkle_block instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

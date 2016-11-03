@@ -20,32 +20,32 @@
 #ifndef LIBBITCOIN_CHAIN_SCRIPT_HPP
 #define LIBBITCOIN_CHAIN_SCRIPT_HPP
 
+#include <cstddef>
 #include <cstdint>
 #include <istream>
+#include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/chain/script/evaluation_context.hpp>
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
+#include <bitcoin/bitcoin/chain/script/operation_stack.hpp>
+#include <bitcoin/bitcoin/chain/script/rule_fork.hpp>
+#include <bitcoin/bitcoin/chain/script/script_pattern.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
 namespace chain {
 
-class BC_API transaction;
+class transaction;
 
 class BC_API script
 {
 public:
-    enum class parse_mode
-    {
-        strict,
-        raw_data,
-        raw_data_fallback
-    };
-
     // Constructors.
     //-------------------------------------------------------------------------
 
@@ -54,12 +54,16 @@ public:
     script(script&& other);
     script(const script& other);
 
-    script(operation::stack&& operations);
-    script(const operation::stack& operations);
+    script(operation_stack&& ops);
+    script(const operation_stack& ops);
+
+    script(data_chunk&& bytes, bool prefix);
+    script(const data_chunk& bytes, bool prefix);
 
     // Operators.
     //-------------------------------------------------------------------------
 
+    /// This class is move assignable and copy assignable.
     script& operator=(script&& other);
     script& operator=(const script& other);
 
@@ -69,19 +73,24 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static script factory_from_data(const data_chunk& data, bool prefix,
-        parse_mode mode);
-    static script factory_from_data(std::istream& stream, bool prefix,
-        parse_mode mode);
-    static script factory_from_data(reader& source, bool prefix, parse_mode mode);
+    static script factory_from_data(const data_chunk& data, bool prefix);
+    static script factory_from_data(std::istream& stream, bool prefix);
+    static script factory_from_data(reader& source, bool prefix);
 
-    bool from_data(const data_chunk& data, bool prefix, parse_mode mode);
-    bool from_data(std::istream& stream, bool prefix, parse_mode mode);
-    bool from_data(reader& source, bool prefix, parse_mode mode);
+    /// Deserialization invalidates the iterator.
+    bool from_data(const data_chunk& data, bool prefix);
+    bool from_data(std::istream& stream, bool prefix);
+    bool from_data(reader& source, bool prefix);
 
+    /// Deserialization invalidates the iterator.
+    void from_stack(const operation_stack& ops);
     bool from_string(const std::string& mnemonic);
 
+    /// A script object is valid if the byte count matches the prefix.
     bool is_valid() const;
+
+    /// A script stack is valid if all push ops have the predicated size.
+    bool is_valid_stack() const;
 
     // Serialization.
     //-------------------------------------------------------------------------
@@ -90,21 +99,24 @@ public:
     void to_data(std::ostream& stream, bool prefix) const;
     void to_data(writer& sink, bool prefix) const;
 
-    std::string to_string(uint32_t flags) const;
+    std::string to_string(uint32_t active_forks) const;
+
+    // Iteration.
+    //-------------------------------------------------------------------------
+
+    bool empty() const;
+    size_t size() const;
+    const operation& front() const;
+    const operation& back() const;
+    operation::const_iterator begin() const;
+    operation::const_iterator end() const;
+    const operation& operator[](std::size_t index) const;
 
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------
 
     uint64_t satoshi_content_size() const;
     uint64_t serialized_size(bool prefix) const;
-
-    // deprecated (unsafe)
-    operation::stack& operations();
-
-    const operation::stack& operations() const;
-
-    void set_operations(operation::stack&& value);
-    void set_operations(const operation::stack& value);
 
     // Signing.
     //-------------------------------------------------------------------------
@@ -127,11 +139,11 @@ public:
     static bool is_enabled(uint32_t active_forks, rule_fork flag);
 
     script_pattern pattern() const;
-    size_t sigops(bool serialized_script) const;
-    size_t pay_script_hash_sigops(const script& prevout) const;
+    size_t sigops(bool embedded) const;
+    size_t pay_script_hash_sigops(const script& prevout_script) const;
 
-    // TODO: hide this as protected after changing tests.
-    bool is_raw_data() const;
+    // Remove values from the stack using satoshi's awful find_and_delete.
+    void purge(const data_stack& endorsements);
 
     // Validation.
     //-------------------------------------------------------------------------
@@ -143,15 +155,30 @@ public:
         const script& prevout_script, uint32_t flags);
 
 protected:
+    // So that input and output may call reset from their own.
+    friend class input;
+    friend class output;
+
     void reset();
+    bool is_relaxed_push_data_only() const;
+    bool is_relaxed_push_data(opcode code) const;
+    bool is_pay_to_script_hash(uint32_t flags) const;
+    const operation_stack& stack() const;
+    void find_and_delete(const data_chunk& endorsement);
 
 private:
-    bool emplace(data_chunk&& raw_script);
-    bool parse(const data_chunk& raw_script);
+    static size_t serialized_size(const operation_stack& ops);
+    static data_chunk stack_to_data(const operation_stack& ops);
+    static code pay_hash(const transaction& tx, uint32_t input_index,
+        const script& input_script, evaluation_context& input_context);
 
-    operation::stack operations_;
-    bool is_raw_;
+    data_chunk bytes_;
     bool valid_;
+
+    // These are protected by mutex.
+    mutable bool cached_;
+    mutable operation_stack stack_;
+    mutable upgrade_mutex mutex_;
 };
 
 } // namespace chain

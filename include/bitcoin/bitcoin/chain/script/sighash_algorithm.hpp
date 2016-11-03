@@ -21,7 +21,6 @@
 #define LIBBITCOIN_CHAIN_SIGHASH_ALGORITHM_HPP
 
 #include <cstdint>
-#include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
 namespace chain {

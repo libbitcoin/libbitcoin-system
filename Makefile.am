@@ -51,6 +51,7 @@ src_libbitcoin_la_SOURCES = \
     src/chain/script/interpreter.cpp \
     src/chain/script/opcode.cpp \
     src/chain/script/operation.cpp \
+    src/chain/script/operation_stack.cpp \
     src/chain/script/script.cpp \
     src/config/authority.cpp \
     src/config/base16.cpp \
@@ -232,6 +233,7 @@ test_libbitcoin_test_SOURCES = \
     test/chain/script.cpp \
     test/chain/script.hpp \
     test/chain/transaction.cpp \
+    test/chain/script/opcode.cpp \
     test/chain/script/operation.cpp \
     test/config/authority.cpp \
     test/config/base58.cpp \
@@ -358,7 +360,10 @@ include_bitcoin_bitcoin_chain_script_HEADERS = \
     include/bitcoin/bitcoin/chain/script/interpreter.hpp \
     include/bitcoin/bitcoin/chain/script/opcode.hpp \
     include/bitcoin/bitcoin/chain/script/operation.hpp \
+    include/bitcoin/bitcoin/chain/script/operation_stack.hpp \
+    include/bitcoin/bitcoin/chain/script/rule_fork.hpp \
     include/bitcoin/bitcoin/chain/script/script.hpp \
+    include/bitcoin/bitcoin/chain/script/script_pattern.hpp \
     include/bitcoin/bitcoin/chain/script/sighash_algorithm.hpp
 
 include_bitcoin_bitcoin_configdir = ${includedir}/bitcoin/bitcoin/config

@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(reject__constructor_2__always__equals_params)
     std::string reason = "Gamma Delta";
     hash_digest data = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     message::reject instance(code, message, reason, data);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(code == instance.code());
     BOOST_REQUIRE_EQUAL(message, instance.message());
     BOOST_REQUIRE_EQUAL(reason, instance.reason());
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(reject__constructor_3__always__equals_params)
     std::string reason = "jgfghkggfsr";
     hash_digest data = hash_literal("ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333");
     message::reject instance(code, std::move(message), std::move(reason), std::move(data));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(reject__constructor_4__always__equals_params)
@@ -74,8 +74,8 @@ BOOST_AUTO_TEST_CASE(reject__constructor_4__always__equals_params)
     hash_digest data = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     message::reject expected(code, message, reason, data);
     message::reject instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
-    BOOST_REQUIRE_EQUAL(true, expected == instance);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(expected == instance);
     BOOST_REQUIRE(code == instance.code());
     BOOST_REQUIRE_EQUAL(message, instance.message());
     BOOST_REQUIRE_EQUAL(reason, instance.reason());
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(reject__constructor_5__always__equals_params)
     hash_digest data = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     message::reject expected(code, message, reason, data);
     message::reject instance(std::move(expected));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(code == instance.code());
     BOOST_REQUIRE_EQUAL(message, instance.message());
     BOOST_REQUIRE_EQUAL(reason, instance.reason());
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(reject__from_data__code_malformed__success)
     const data_chunk raw = expected.to_data(message::version::level::maximum);
     message::reject instance{};
 
-    BOOST_REQUIRE_EQUAL(true, instance.from_data(
+    BOOST_REQUIRE(instance.from_data(
         message::reject::version_minimum, raw));
 
     BOOST_REQUIRE(expected == instance);
@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(reject__from_data__code_invalid__success)
     const data_chunk raw = expected.to_data(message::version::level::maximum);
     message::reject instance{};
 
-    BOOST_REQUIRE_EQUAL(true, instance.from_data(
+    BOOST_REQUIRE(instance.from_data(
         message::reject::version_minimum, raw));
 
     BOOST_REQUIRE(expected == instance);
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE(reject__from_data__code_obsolete__success)
     const data_chunk raw = expected.to_data(message::version::level::maximum);
     message::reject instance{};
 
-    BOOST_REQUIRE_EQUAL(true, instance.from_data(
+    BOOST_REQUIRE(instance.from_data(
         message::reject::version_minimum, raw));
 
     BOOST_REQUIRE(expected == instance);
@@ -187,7 +187,7 @@ BOOST_AUTO_TEST_CASE(reject__from_data__code_duplicate__success)
     const data_chunk raw = expected.to_data(message::version::level::maximum);
     message::reject instance{};
 
-    BOOST_REQUIRE_EQUAL(true, instance.from_data(
+    BOOST_REQUIRE(instance.from_data(
         message::reject::version_minimum, raw));
 
     BOOST_REQUIRE(expected == instance);
@@ -205,7 +205,7 @@ BOOST_AUTO_TEST_CASE(reject__from_data__code_nonstandard__success)
     const data_chunk raw = expected.to_data(message::version::level::maximum);
     message::reject instance{};
 
-    BOOST_REQUIRE_EQUAL(true, instance.from_data(
+    BOOST_REQUIRE(instance.from_data(
         message::reject::version_minimum, raw));
 
     BOOST_REQUIRE(expected == instance);
@@ -223,7 +223,7 @@ BOOST_AUTO_TEST_CASE(reject__from_data__code_dust__success)
     const data_chunk raw = expected.to_data(message::version::level::maximum);
     message::reject instance{};
 
-    BOOST_REQUIRE_EQUAL(true, instance.from_data(
+    BOOST_REQUIRE(instance.from_data(
         message::reject::version_minimum, raw));
 
     BOOST_REQUIRE(expected == instance);
@@ -241,7 +241,7 @@ BOOST_AUTO_TEST_CASE(reject__from_data__code_insufficient_fee__success)
     const data_chunk raw = expected.to_data(message::version::level::maximum);
     message::reject instance{};
 
-    BOOST_REQUIRE_EQUAL(true, instance.from_data(
+    BOOST_REQUIRE(instance.from_data(
         message::reject::version_minimum, raw));
 
     BOOST_REQUIRE(expected == instance);
@@ -259,7 +259,7 @@ BOOST_AUTO_TEST_CASE(reject__from_data__code_checkpoint__success)
     const data_chunk raw = expected.to_data(message::version::level::maximum);
     message::reject instance{};
 
-    BOOST_REQUIRE_EQUAL(true, instance.from_data(
+    BOOST_REQUIRE(instance.from_data(
         message::reject::version_minimum, raw));
 
     BOOST_REQUIRE(expected == instance);
@@ -277,7 +277,7 @@ BOOST_AUTO_TEST_CASE(reject__from_data__code_undefined__success)
     const data_chunk raw = expected.to_data(message::version::level::maximum);
     message::reject instance{};
 
-    BOOST_REQUIRE_EQUAL(true, instance.from_data(
+    BOOST_REQUIRE(instance.from_data(
         message::reject::version_minimum, raw));
 
     BOOST_REQUIRE(expected == instance);
@@ -516,7 +516,7 @@ BOOST_AUTO_TEST_CASE(reject__operator_boolean_equals__duplicates__returns_true)
     );
 
     message::reject instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(reject__operator_boolean_equals__differs__returns_false)
@@ -555,7 +555,7 @@ BOOST_AUTO_TEST_CASE(reject__operator_boolean_not_equals__differs__returns_true)
     );
 
     message::reject instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

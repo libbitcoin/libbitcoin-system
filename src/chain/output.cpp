@@ -30,8 +30,6 @@
 namespace libbitcoin {
 namespace chain {
 
-static constexpr auto use_length_prefix = true;
-
 // This is a consensus critical value that must be set on reset.
 const uint64_t output::not_found = sighash_null_value;
 
@@ -147,17 +145,13 @@ bool output::from_data(std::istream& stream, bool wire)
 
 bool output::from_data(reader& source, bool wire)
 {
-    static const auto parse_mode = script::parse_mode::raw_data_fallback;
-
     reset();
 
     if (!wire)
         validation.spender_height = source.read_4_bytes_little_endian();
 
     value_ = source.read_8_bytes_little_endian();
-
-    // Always parse non-coinbase input/output scripts as fallback.
-    script_.from_data(source, use_length_prefix, parse_mode);
+    script_.from_data(source, true);
 
     if (!source)
         reset();
@@ -169,7 +163,7 @@ bool output::from_data(reader& source, bool wire)
 void output::reset()
 {
     value_ = output::not_found;
-    script_ = chain::script{};
+    script_.reset();
 }
 
 // Empty scripts are valid, validation relies on not_found only.
@@ -184,6 +178,7 @@ bool output::is_valid() const
 data_chunk output::to_data(bool wire) const
 {
     data_chunk data;
+    data.reserve(serialized_size(wire));
     data_sink ostream(data);
     to_data(ostream, wire);
     ostream.flush();
@@ -206,7 +201,7 @@ void output::to_data(writer& sink, bool wire) const
     }
 
     sink.write_8_bytes_little_endian(value_);
-    script_.to_data(sink, use_length_prefix);
+    script_.to_data(sink, true);
 }
 
 std::string output::to_string(uint32_t flags) const
@@ -226,7 +221,7 @@ uint64_t output::serialized_size(bool wire) const
 {
     // validation.spender_height is size_t stored as uint32_t.
     return (wire ? 0 : sizeof(uint32_t)) + sizeof(value_) +
-        script_.serialized_size(use_length_prefix);
+        script_.serialized_size(true);
 }
 
 // Accessors.

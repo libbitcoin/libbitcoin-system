@@ -68,8 +68,8 @@ inventory::inventory()
 }
 
 inventory::inventory(const inventory_vector::list& values)
+  : inventories_(values)
 {
-    inventories_.insert(inventories_.end(), values.begin(), values.end());
 }
 
 inventory::inventory(inventory_vector::list&& values)
@@ -89,8 +89,8 @@ inventory::inventory(const hash_list& hashes, type_id type)
 }
 
 inventory::inventory(const std::initializer_list<inventory_vector>& values)
+  : inventories_(values)
 {
-    inventories_.insert(inventories_.end(), values.begin(), values.end());
 }
 
 inventory::inventory(const inventory& other)
@@ -145,6 +145,7 @@ bool inventory::from_data(uint32_t version, reader& source)
 data_chunk inventory::to_data(uint32_t version) const
 {
     data_chunk data;
+    data.reserve(serialized_size(version));
     data_sink ostream(data);
     to_data(version, ostream);
     ostream.flush();

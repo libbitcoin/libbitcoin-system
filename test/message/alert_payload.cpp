@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(alert_payload_tests)
 BOOST_AUTO_TEST_CASE(alert_payload__constructor_1__always__invalid)
 {
     message::alert_payload instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(alert_payload__constructor_2__always__equals_params)
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__constructor_2__always__equals_params)
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(relay_until, instance.relay_until());
     BOOST_REQUIRE_EQUAL(expiration, instance.expiration());
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__constructor_3__always__equals_params)
         std::move(dup_set_sub_version), priority, std::move(dup_comment),
         std::move(dup_status_bar), std::move(dup_reserved));
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(relay_until, instance.relay_until());
     BOOST_REQUIRE_EQUAL(expiration, instance.expiration());
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__constructor_4__always__equals_params)
 
     message::alert_payload instance(value);
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(relay_until, instance.relay_until());
     BOOST_REQUIRE_EQUAL(expiration, instance.expiration());
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__constructor_5__always__equals_params)
 
     message::alert_payload instance(std::move(value));
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(relay_until, instance.relay_until());
     BOOST_REQUIRE_EQUAL(expiration, instance.expiration());
@@ -190,8 +190,8 @@ BOOST_AUTO_TEST_CASE(alert_payload__from_data__insufficient_bytes__failure)
     data_chunk raw{ 0xab, 0x11 };
     message::alert_payload instance;
 
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(message::version::level::minimum, raw));
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.from_data(message::version::level::minimum, raw));
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(alert_payload__factory_from_data_1__wiki_sample_test__success)
@@ -409,7 +409,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__set_cancel_accessor_1__always__returns_initi
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(set_cancel == instance.set_cancel());
 }
 
@@ -433,7 +433,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__set_cancel_accessor_2__always__returns_initi
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(set_cancel == instance.set_cancel());
 }
 
@@ -494,7 +494,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__set_sub_version_accessor_1__always__returns_
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(set_sub_version == instance.set_sub_version());
 }
 
@@ -518,7 +518,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__set_sub_version_accessor_2__always__returns_
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(set_sub_version == instance.set_sub_version());
 }
 
@@ -570,7 +570,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__comment_accessor_1__always__returns_initiali
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(comment, instance.comment());
 }
 
@@ -594,7 +594,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__comment_accessor_2__always__returns_initiali
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(comment, instance.comment());
 }
 
@@ -637,7 +637,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__status_bar_accessor_1__always__returns_initi
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(status_bar, instance.status_bar());
 }
 
@@ -661,7 +661,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__status_bar_accessor_2__always__returns_initi
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(status_bar, instance.status_bar());
 }
 
@@ -704,7 +704,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__reserved_accessor_1__always__returns_initial
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(reserved, instance.reserved());
 }
 
@@ -728,7 +728,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__reserved_accessor_2__always__returns_initial
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(reserved, instance.reserved());
 }
 
@@ -774,7 +774,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__operator_assign_equals__always__matches_equi
     BOOST_REQUIRE(value.is_valid());
 
     message::alert_payload instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.is_valid());
 
     instance = std::move(value);
     BOOST_REQUIRE(instance.is_valid());
@@ -800,7 +800,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__operator_boolean_equals__duplicates__returns
         { "foo", "bar", "baz" }, 34323u, "asfgsddsa", "fgjdfhjg", "utyurtevc");
 
     message::alert_payload instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(alert_payload__operator_boolean_equals__differs__returns_false)
@@ -830,7 +830,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__operator_boolean_not_equals__differs__return
         { "foo", "bar", "baz" }, 34323u, "asfgsddsa", "fgjdfhjg", "utyurtevc");
 
     message::alert_payload instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

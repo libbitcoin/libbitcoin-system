@@ -22,27 +22,83 @@
 
 #include <cstdint>
 #include <bitcoin/bitcoin/chain/script/conditional_stack.hpp>
+#include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/math/script_number.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 namespace chain {
 
+// All index parameters are zero-based and relative to stack top.
+class BC_API script;
+
 class evaluation_context
 {
 public:
+    typedef script_number number;
+    typedef data_stack::value_type value_type;
+    typedef operation::const_iterator op_iterator;
+    typedef data_stack::const_iterator stack_iterator;
+
+    /// Constructors.
     evaluation_context(uint32_t flags);
-    evaluation_context(uint32_t flags, const data_stack& stack);
+    evaluation_context(uint32_t flags, data_stack&& value);
+    evaluation_context(uint32_t flags, const data_stack& value);
 
-    data_chunk pop_stack();
+    /// Instructions.
+    bool set_script(const script& script);
+    void set_jump(op_iterator instruction);
 
-    operation::stack::const_iterator code_begin;
-    uint64_t operation_counter;
+    /// Operation count.
+    bool update_operation_count(const operation& op);
+    bool update_pubkey_count(int32_t multisig_pubkeys);
+
+    /// Properties.
+    op_iterator begin() const;
+    op_iterator jump() const;
+    op_iterator end() const;
+    uint32_t flags() const;
+
+    /// Stack info.
+    script subscript() const;
+    const value_type& item(size_t index) const;
+    stack_iterator position(size_t index) const;
+    bool is_short_circuited(const operation& op) const;
+    bool is_stack_overflow() const;
+    bool stack_state() const;
+    bool stack_result() const;
+
+    /// Stack pop.
+    data_chunk pop();
+    bool pop(data_stack& section, size_t count);
+    bool pop(int32_t& out_value);
+    bool pop(number& out_number, size_t maxiumum_size=max_number_size);
+    bool pop_binary(number& first, number& second);
+    bool pop_ternary(number& first, number& second, number& third);
+    bool pop_position(stack_iterator& out_position);
+
+    /// Stack push.
+    void push(bool value);
+    void duplicate(size_t index);
+    void swap(size_t index_left, size_t index_right);
+
+    /// Stacks.
+    /// TODO: make private.
     data_stack stack;
     data_stack alternate;
-    conditional_stack conditional;
-    uint32_t flags;
+    conditional_stack condition;
+
+private:
+    bool stack_to_bool() const;
+
+    size_t op_count_;
+    const uint32_t flags_;
+    operation::const_iterator begin_;
+    operation::const_iterator jump_;
+    operation::const_iterator end_;
 };
 
 } // namespace chain

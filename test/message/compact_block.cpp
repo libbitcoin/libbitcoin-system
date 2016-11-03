@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(compact_block__constructor_2__always__equals_params)
     };
 
     message::compact_block instance(header, nonce, short_ids, transactions);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(nonce == instance.nonce());
     BOOST_REQUIRE(short_ids == instance.short_ids());
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(compact_block__constructor_3__always__equals_params)
     message::compact_block instance(std::move(dup_header), nonce,
         std::move(dup_short_ids), std::move(dup_transactions));
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(nonce == instance.nonce());
     BOOST_REQUIRE(short_ids == instance.short_ids());
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(compact_block__constructor_4__always__equals_params)
     const message::compact_block value(header, nonce, short_ids, transactions);
 
     message::compact_block instance(value);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(value == instance);
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(nonce == instance.nonce());
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(compact_block__constructor_5__always__equals_params)
     message::compact_block value(header, nonce, short_ids, transactions);
 
     message::compact_block instance(std::move(value));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(nonce == instance.nonce());
     BOOST_REQUIRE(short_ids == instance.short_ids());
@@ -627,7 +627,7 @@ BOOST_AUTO_TEST_CASE(compact_block__operator_boolean_equals__duplicates__returns
         });
 
     message::compact_block instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__operator_boolean_equals__differs__returns_false)
@@ -705,7 +705,7 @@ BOOST_AUTO_TEST_CASE(compact_block__operator_boolean_not_equals__differs__return
         });
 
     message::compact_block instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

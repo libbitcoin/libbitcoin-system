@@ -55,8 +55,9 @@ public:
     // Operators.
     //-----------------------------------------------------------------------------
 
-    input& operator=(const input& other);
+    /// This class is move assignable and copy assignable.
     input& operator=(input&& other);
+    input& operator=(const input& other);
 
     bool operator==(const input& other) const;
     bool operator!=(const input& other) const;

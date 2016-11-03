@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(network_address__constructor_2__always__equals_params)
     const message::ip_address ip = base16_literal("127544abcdefa7b6d3e91486c57000aa");
 
     message::network_address instance(timestamp, services, ip, port);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(ip == instance.ip());
     BOOST_REQUIRE_EQUAL(port, instance.port());
     BOOST_REQUIRE_EQUAL(services, instance.services());
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(network_address__constructor_3__always__equals_params)
     message::network_address instance(timestamp, services,
         base16_literal("127544abcdefa7b6d3e91486c57000aa"), port);
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(network_address__constructor_4__always__equals_params)
@@ -76,11 +76,11 @@ BOOST_AUTO_TEST_CASE(network_address__constructor_4__always__equals_params)
         123u
     };
 
-    BOOST_REQUIRE_EQUAL(true, expected.is_valid());
+    BOOST_REQUIRE(expected.is_valid());
 
     message::network_address instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
-    BOOST_REQUIRE_EQUAL(true, expected == instance);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(expected == instance);
 }
 
 BOOST_AUTO_TEST_CASE(network_address__constructor_5__always__equals_params)
@@ -93,10 +93,10 @@ BOOST_AUTO_TEST_CASE(network_address__constructor_5__always__equals_params)
         123u
     };
 
-    BOOST_REQUIRE_EQUAL(true, expected.is_valid());
+    BOOST_REQUIRE(expected.is_valid());
 
     message::network_address instance(std::move(expected));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(network_address__from_data__insufficient_bytes__failure)
@@ -393,7 +393,7 @@ BOOST_AUTO_TEST_CASE(network_address__operator_boolean_equals__duplicates__retur
     );
 
     message::network_address instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(network_address__operator_boolean_equals__differs_timestamp__returns_true)
@@ -407,7 +407,7 @@ BOOST_AUTO_TEST_CASE(network_address__operator_boolean_equals__differs_timestamp
 
     message::network_address instance(643u, expected.services(),
         expected.ip(), expected.port());
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(network_address__operator_boolean_equals__differs__returns_false)
@@ -460,7 +460,7 @@ BOOST_AUTO_TEST_CASE(network_address__operator_boolean_not_equals__differs__retu
     );
 
     message::network_address instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

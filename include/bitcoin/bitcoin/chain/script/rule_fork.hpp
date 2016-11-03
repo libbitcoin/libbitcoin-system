@@ -17,51 +17,37 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/chain/script/conditional_stack.hpp>
+#ifndef LIBBITCOIN_CHAIN_RULE_FORK_HPP
+#define LIBBITCOIN_CHAIN_RULE_FORK_HPP
 
-#include <algorithm>
-#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <cstdint>
 
 namespace libbitcoin {
 namespace chain {
 
-conditional_stack::conditional_stack(size_t initial_capacity)
+enum rule_fork : uint32_t
 {
-    stack_.reserve(initial_capacity);
-}
+    no_rules = 0,
 
-bool conditional_stack::closed() const
-{
-    return stack_.empty();
-}
+    /// pay-to-script-hash enabled
+    bip16_rule = 1 << 0,
 
-bool conditional_stack::succeeded() const
-{
-    const auto is_true = [](bool value) { return value; };
-    return std::all_of(stack_.begin(), stack_.end(), is_true);
-}
+    /// no duplicated unspent transaction ids
+    bip30_rule = 1 << 1,
 
-void conditional_stack::open(bool value)
-{
-    stack_.push_back(value);
-}
+    /// coinbase must include height
+    bip34_rule = 1 << 2,
 
-void conditional_stack::clear()
-{
-    stack_.clear();
-}
+    /// strict DER signatures required
+    bip66_rule = 1 << 3,
 
-void conditional_stack::negate()
-{
-    BITCOIN_ASSERT(!stack_.empty());
-    stack_.back() = !stack_.back();
-}
+    /// nop2 becomes check locktime verify
+    bip65_rule = 1 << 4,
 
-void conditional_stack::close()
-{
-    BITCOIN_ASSERT(!stack_.empty());
-    stack_.pop_back();
-}
+    all_rules = 0xffffffff
+};
 
 } // namespace chain
 } // namespace libbitcoin
+
+#endif

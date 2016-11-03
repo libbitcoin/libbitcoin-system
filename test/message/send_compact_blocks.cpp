@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(send_compact_blocks__operator_boolean_equals__duplicates__r
 {
     const message::send_compact_blocks expected(false, 15234u);
     message::send_compact_blocks instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(send_compact_blocks__operator_boolean_equals__differs__returns_false)
@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE(send_compact_blocks__operator_boolean_not_equals__differs__
 {
     const message::send_compact_blocks expected(false, 5357534u);
     message::send_compact_blocks instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

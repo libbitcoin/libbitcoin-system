@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(alert_tests)
 BOOST_AUTO_TEST_CASE(alert__constructor_1__always__invalid)
 {
     message::alert instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(alert__constructor_2__always__equals_params)
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(alert__constructor_2__always__equals_params)
 
     message::alert instance(payload, signature);
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(payload == instance.payload());
     BOOST_REQUIRE(signature == instance.signature());
 }
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(alert__constructor_3__always__equals_params)
 
     message::alert instance(std::move(dup_payload), std::move(dup_signature));
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(payload == instance.payload());
     BOOST_REQUIRE(signature == instance.signature());
 }
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(alert__constructor_4__always__equals_params)
     message::alert value(payload, signature);
     message::alert instance(value);
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(value == instance);
     BOOST_REQUIRE(payload == instance.payload());
     BOOST_REQUIRE(signature == instance.signature());
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(alert__constructor_5__always__equals_params)
     message::alert value(payload, signature);
     message::alert instance(std::move(value));
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(payload == instance.payload());
     BOOST_REQUIRE(signature == instance.signature());
 }
@@ -88,8 +88,8 @@ BOOST_AUTO_TEST_CASE(alert__from_data__insufficient_bytes__failure)
     const data_chunk raw{ 0xab, 0x11 };
     message::alert instance;
 
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(message::version::level::minimum, raw));
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.from_data(message::version::level::minimum, raw));
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(alert__factory_from_data_1__wiki_sample__success)
@@ -299,7 +299,7 @@ BOOST_AUTO_TEST_CASE(alert__operator_assign_equals__always__matches_equivalent)
     BOOST_REQUIRE(value.is_valid());
 
     message::alert instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.is_valid());
 
     instance = std::move(value);
     BOOST_REQUIRE(instance.is_valid());
@@ -314,7 +314,7 @@ BOOST_AUTO_TEST_CASE(alert__operator_boolean_equals__duplicates__returns_true)
         to_chunk(base16_literal("fedcba9876543210")));
 
     message::alert instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(alert__operator_boolean_equals__differs__returns_false)
@@ -344,7 +344,7 @@ BOOST_AUTO_TEST_CASE(alert__operator_boolean_not_equals__differs__returns_true)
         to_chunk(base16_literal("fedcba9876543210")));
 
     message::alert instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -321,5 +321,8 @@
     <ClCompile Include="..\..\..\..\test\message\header_message.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\script\opcode.cpp">
+      <Filter>src\chain\script</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

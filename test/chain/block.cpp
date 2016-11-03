@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(block__locator_heights__positive_backoff__returns_top_plus_
 BOOST_AUTO_TEST_CASE(block__constructor_1__always__invalid)
 {
     chain::block instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(block__constructor_2__always__equals_params)
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(block__constructor_2__always__equals_params)
     };
 
     chain::block instance(header, transactions);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(transactions == instance.transactions());
 }
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(block__constructor_3__always__equals_params)
     chain::transaction::list dup_transactions(transactions);
 
     chain::block instance(std::move(dup_header), std::move(dup_transactions));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(transactions == instance.transactions());
 
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(block__constructor_4__always__equals_params)
 
     chain::block value(header, transactions);
     chain::block instance(value);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(value == instance);
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(transactions == instance.transactions());
@@ -183,7 +183,7 @@ BOOST_AUTO_TEST_CASE(block__constructor_5__always__equals_params)
     chain::block value(header, transactions);
 
     chain::block instance(std::move(value));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(transactions == instance.transactions());
 }
@@ -197,14 +197,14 @@ BOOST_AUTO_TEST_CASE(block__hash__always__returns_header_hash)
 BOOST_AUTO_TEST_CASE(block__is_valid_merkle_root__uninitialized__returns_true)
 {
     chain::block instance;
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid_merkle_root());
+    BOOST_REQUIRE(instance.is_valid_merkle_root());
 }
 
 BOOST_AUTO_TEST_CASE(block__is_valid_merkle_root__non_empty_tx_invalid_block__returns_false)
 {
     chain::block instance;
     instance.transactions().emplace_back();
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid_merkle_root());
+    BOOST_REQUIRE(!instance.is_valid_merkle_root());
 }
 
 BOOST_AUTO_TEST_CASE(block__is_valid_merkle_root__valid__returns_true)
@@ -235,7 +235,7 @@ BOOST_AUTO_TEST_CASE(block__is_valid_merkle_root__valid__returns_true)
 
     chain::block instance;
     BOOST_REQUIRE(instance.from_data(raw_block));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid_merkle_root());
+    BOOST_REQUIRE(instance.is_valid_merkle_root());
 }
 
 BOOST_AUTO_TEST_SUITE(block_serialization_tests)
@@ -244,8 +244,8 @@ BOOST_AUTO_TEST_CASE(block__from_data__insufficient_bytes__failure)
 {
     data_chunk data(10);
     chain::block instance;
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(data));
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.from_data(data));
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(block__from_data__insufficient_transaction_bytes__failure)
@@ -258,8 +258,8 @@ BOOST_AUTO_TEST_CASE(block__from_data__insufficient_transaction_bytes__failure)
         "0114ffffffff0100f2052a0100000043410437b36a7221bc977dce712728a954"));
 
     chain::block instance;
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(data));
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.from_data(data));
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(block__genesis__mainnet__valid_structure)
@@ -286,7 +286,6 @@ BOOST_AUTO_TEST_CASE(block__factory_from_data_1__genesis_mainnet__success)
 
     // Save genesis block.
     auto raw_block = genesis.to_data();
-    BOOST_REQUIRE_EQUAL(std::distance(raw_block.begin(), raw_block.end()), 285u);
     BOOST_REQUIRE_EQUAL(raw_block.size(), 285u);
 
     // Reload genesis block.
@@ -307,7 +306,6 @@ BOOST_AUTO_TEST_CASE(block__factory_from_data_2__genesis_mainnet__success)
 
     // Save genesis block.
     auto raw_block = genesis.to_data();
-    BOOST_REQUIRE_EQUAL(std::distance(raw_block.begin(), raw_block.end()), 285u);
     BOOST_REQUIRE_EQUAL(raw_block.size(), 285u);
 
     // Reload genesis block.
@@ -329,7 +327,6 @@ BOOST_AUTO_TEST_CASE(block__factory_from_data_3__genesis_mainnet__success)
 
     // Save genesis block.
     data_chunk raw_block = genesis.to_data();
-    BOOST_REQUIRE_EQUAL(std::distance(raw_block.begin(), raw_block.end()), 285u);
     BOOST_REQUIRE_EQUAL(raw_block.size(), 285u);
 
     // Reload genesis block.
@@ -522,7 +519,7 @@ BOOST_AUTO_TEST_CASE(block__operator_assign_equals__always__matches_equivalent)
 
     BOOST_REQUIRE(value.is_valid());
     chain::block instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.is_valid());
     instance = std::move(value);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
@@ -545,7 +542,7 @@ BOOST_AUTO_TEST_CASE(block__operator_boolean_equals__duplicates__returns_true)
         });
 
     chain::block instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(block__operator_boolean_equals__differs__returns_false)
@@ -565,7 +562,7 @@ BOOST_AUTO_TEST_CASE(block__operator_boolean_equals__differs__returns_false)
 
 
     chain::block instance;
-    BOOST_REQUIRE_EQUAL(false, instance == expected);
+    BOOST_REQUIRE(!(instance == expected));
 }
 
 BOOST_AUTO_TEST_CASE(block__operator_boolean_not_equals__duplicates__returns_false)
@@ -584,7 +581,7 @@ BOOST_AUTO_TEST_CASE(block__operator_boolean_not_equals__duplicates__returns_fal
         });
 
     chain::block instance(expected);
-    BOOST_REQUIRE_EQUAL(false, instance != expected);
+    BOOST_REQUIRE(!(instance != expected));
 }
 
 BOOST_AUTO_TEST_CASE(block__operator_boolean_not_equals__differs__returns_true)
@@ -603,7 +600,7 @@ BOOST_AUTO_TEST_CASE(block__operator_boolean_not_equals__differs__returns_true)
         });
 
     chain::block instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(header_message__constructor_2__always__equals_params)
 
     message::header_message instance(version, previous, merkle, timestamp,
         bits, nonce, originator);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(timestamp, instance.timestamp());
     BOOST_REQUIRE_EQUAL(bits, instance.bits());
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(header_message__constructor_3__always__equals_params)
 
     message::header_message instance(version, std::move(previous), std::move(merkle),
         timestamp, bits, nonce, originator);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(timestamp, instance.timestamp());
     BOOST_REQUIRE_EQUAL(bits, instance.bits());
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(header_message__constructor_4__always__equals_params)
         1234u);
 
     message::header_message instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(expected == instance);
     BOOST_REQUIRE_EQUAL(0u, instance.originator());
 }
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(header_message__constructor_5__always__equals_params)
         123u);
 
     message::header_message instance(std::move(expected));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(expected == instance);
     BOOST_REQUIRE_EQUAL(0u, instance.originator());
 }
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(header_message__constructor_6__always__equals_params)
         5555u);
 
     message::header_message instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(expected == instance);
     BOOST_REQUIRE_EQUAL(expected.originator(), instance.originator());
 }
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(header_message__constructor_7__always__equals_params)
         4444u);
 
     message::header_message instance(std::move(expected));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(expected == instance);
     BOOST_REQUIRE_EQUAL(expected.originator(), instance.originator());
 }
@@ -300,7 +300,7 @@ BOOST_AUTO_TEST_CASE(header_message__operator_boolean_equals_1__duplicates__retu
         3565u);
 
     message::header_message instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(header_message__operator_boolean_equals_1__differs__returns_false)
@@ -342,7 +342,7 @@ BOOST_AUTO_TEST_CASE(header_message__operator_boolean_not_equals_1__differs__ret
         47476u);
 
     message::header_message instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_CASE(header_message__operator_boolean_equals_2__duplicates__returns_true)
@@ -357,7 +357,7 @@ BOOST_AUTO_TEST_CASE(header_message__operator_boolean_equals_2__duplicates__retu
         3565u);
 
     message::header_message instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(header_message__operator_boolean_equals_2__differs__returns_false)
@@ -402,7 +402,7 @@ BOOST_AUTO_TEST_CASE(header_message__operator_boolean_not_equals_2__differs__ret
         47476u);
 
     message::header_message instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

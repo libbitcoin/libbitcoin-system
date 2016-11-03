@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__constructor_2__always__equals_params
     uint64_t index = 125u;
     chain::transaction tx(1, 0, {}, {});
     message::prefilled_transaction instance(index, tx);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(index == instance.index());
     BOOST_REQUIRE(tx == instance.transaction());
 }
@@ -44,11 +44,11 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__constructor_3__always__equals_params
 {
     uint64_t index = 125u;
     chain::transaction tx(1, 0, {}, {});
-    BOOST_REQUIRE_EQUAL(true, tx.is_valid());
+    BOOST_REQUIRE(tx.is_valid());
     message::prefilled_transaction instance(index, std::move(tx));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(index == instance.index());
-    BOOST_REQUIRE_EQUAL(true, instance.transaction().is_valid());
+    BOOST_REQUIRE(instance.transaction().is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(prefilled_transaction__constructor_4__always__equals_params)
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__constructor_4__always__equals_params
         chain::transaction{1, 0, {}, {} });
 
     message::prefilled_transaction instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(expected == instance);
 }
 
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__constructor_5__always__equals_params
         chain::transaction{1, 0, {}, {} });
 
     message::prefilled_transaction instance(std::move(expected));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(prefilled_transaction__from_data__insufficient_bytes__failure)
@@ -237,7 +237,7 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_equals__duplicates_
 
 
     message::prefilled_transaction instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_equals__differs__returns_false)
@@ -270,7 +270,7 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_not_equals__differs
     );
 
     message::prefilled_transaction instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

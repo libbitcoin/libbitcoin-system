@@ -25,6 +25,7 @@
 #include <memory>
 #include <vector>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
+#include <bitcoin/bitcoin/chain/script/rule_fork.hpp>
 #include <bitcoin/bitcoin/config/checkpoint.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>

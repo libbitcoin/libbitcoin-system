@@ -76,9 +76,9 @@ public:
     // Operators.
     //-----------------------------------------------------------------------------
 
-    /// This class is move assignable [but not copy assignable].
+    /// This class is move and copy assignable.
     header& operator=(header&& other);
-    header& operator=(const header& other) /* = delete */;
+    header& operator=(const header& other);
 
     bool operator==(const header& other) const;
     bool operator!=(const header& other) const;
@@ -150,6 +150,9 @@ public:
     mutable validation validation;
 
 protected:
+    // So that block may call reset from its own.
+    friend class block;
+
     void reset();
     void invalidate_cache() const;
 

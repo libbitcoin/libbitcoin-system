@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(get_data__constructor_2__always__equals_params)
     };
 
     const message::get_data instance(values);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(values == instance.inventories());
 }
 
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(get_data__constructor_3__always__equals_params)
     };
 
     const message::get_data instance(std::move(values));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     const auto inventories = instance.inventories();
     BOOST_REQUIRE_EQUAL(1u, inventories.size());
     BOOST_REQUIRE(type == inventories[0].type());
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(get_data__constructor_4__always__equals_params)
     static const hash_list hashes{ hash };
 
     const message::get_data instance(hashes, type);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     auto inventories = instance.inventories();
     BOOST_REQUIRE_EQUAL(1u, inventories.size());
     BOOST_REQUIRE(type == inventories[0].type());
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(get_data__constructor_5__always__equals_params)
     static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     const message::get_data instance{ { type, hash } };
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     auto inventories = instance.inventories();
     BOOST_REQUIRE_EQUAL(1u, inventories.size());
     BOOST_REQUIRE(type == inventories[0].type());
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(get_data__constructor_6__always__equals_params)
     static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     const message::get_data value{ { type, hash } };
-    BOOST_REQUIRE_EQUAL(true, value.is_valid());
+    BOOST_REQUIRE(value.is_valid());
     const message::get_data instance(value);
     const auto inventories = instance.inventories();
     BOOST_REQUIRE_EQUAL(1u, inventories.size());
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(get_data__constructor_7__always__equals_params)
     static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     const message::get_data value{ { type, hash } };
-    BOOST_REQUIRE_EQUAL(true, value.is_valid());
+    BOOST_REQUIRE(value.is_valid());
     const message::get_data instance(std::move(value));
     const auto inventories = instance.inventories();
     BOOST_REQUIRE_EQUAL(1u, inventories.size());
@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE(get_data__operator_boolean_equals__duplicates__returns_true
     };
 
     const message::get_data instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(get_data__operator_boolean_equals__differs__returns_false)
@@ -279,7 +279,7 @@ BOOST_AUTO_TEST_CASE(get_data__operator_boolean_not_equals__differs__returns_tru
     };
 
     const message::get_data instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

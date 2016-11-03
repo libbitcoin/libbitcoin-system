@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_SUITE(output_point_tests)
 BOOST_AUTO_TEST_CASE(output_point__constructor_1__always__returns_default_initialized)
 {
     chain::point instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(output_point__constructor_2__valid_input__returns_input_initialized)
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(output_point__constructor_2__valid_input__returns_input_ini
 
     const chain::point value(hash, index);
     chain::output_point instance(value);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(value == instance);
     BOOST_REQUIRE(hash == instance.hash());
     BOOST_REQUIRE_EQUAL(index, instance.index());
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(output_point__constructor_3__valid_input__returns_input_ini
 
     chain::point value(hash, index);
     chain::output_point instance(std::move(value));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(hash == instance.hash());
     BOOST_REQUIRE_EQUAL(index, instance.index());
 }
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(output_point__constructor_4__valid_input__returns_input_ini
     uint32_t index = 1234u;
 
     chain::output_point instance(hash, index);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(hash == instance.hash());
     BOOST_REQUIRE_EQUAL(index, instance.index());
 }
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(output_point__constructor_5__valid_input__returns_input_ini
     auto dup_hash = hash;
 
     chain::output_point instance(std::move(dup_hash), index);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(hash == instance.hash());
     BOOST_REQUIRE_EQUAL(index, instance.index());
 }
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(output_point__constructor_6__valid_input__returns_input_ini
         524342u);
 
     chain::output_point instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(expected == instance);
 }
 
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(output_point__constructor_7__valid_input__returns_input_ini
         524342u);
 
     chain::output_point instance(std::move(expected));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(output_point__begin_end__initialized__begin_not_equal_end)
@@ -118,8 +118,8 @@ BOOST_AUTO_TEST_CASE(output_point__from_data__insufficient_bytes__failure)
     data_chunk data(10);
     chain::output_point instance;
 
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(data));
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.from_data(data));
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(output_point__from_data__roundtrip__success)
@@ -226,8 +226,8 @@ BOOST_AUTO_TEST_CASE(output_point__is_mature__target_height_exceeds_height_by_ma
     size_t target_height = 162u;
     chain::output_point instance(null_hash, chain::point::null_index);
     instance.validation.height = 50u;
-    BOOST_REQUIRE_EQUAL(true, instance.is_null());
-    BOOST_REQUIRE_EQUAL(true, instance.is_mature(target_height));
+    BOOST_REQUIRE(instance.is_null());
+    BOOST_REQUIRE(instance.is_mature(target_height));
 }
 
 BOOST_AUTO_TEST_CASE(output_point__is_mature__target_height_does_not_exceed_height_by_maturity___returns_false)
@@ -235,8 +235,8 @@ BOOST_AUTO_TEST_CASE(output_point__is_mature__target_height_does_not_exceed_heig
     size_t target_height = 162u;
     chain::output_point instance(null_hash, chain::point::null_index);
     instance.validation.height = 100u;
-    BOOST_REQUIRE_EQUAL(true, instance.is_null());
-    BOOST_REQUIRE_EQUAL(false, instance.is_mature(target_height));
+    BOOST_REQUIRE(instance.is_null());
+    BOOST_REQUIRE(!instance.is_mature(target_height));
 }
 
 BOOST_AUTO_TEST_CASE(output_point__operator_assign_equals_1__always__matches_equivalent)

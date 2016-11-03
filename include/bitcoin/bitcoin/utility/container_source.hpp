@@ -26,6 +26,7 @@
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 

@@ -30,6 +30,7 @@
 #include <utility>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
+#include <bitcoin/bitcoin/chain/script/rule_fork.hpp>
 #include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/config/checkpoint.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
@@ -204,7 +205,7 @@ bool block::from_data(reader& source)
 // private
 void block::reset()
 {
-    header_ = chain::header{};
+    header_.reset();
     transactions_.clear();
     transactions_.shrink_to_fit();
 }
@@ -220,6 +221,7 @@ bool block::is_valid() const
 data_chunk block::to_data() const
 {
     data_chunk data;
+    data.reserve(serialized_size());
     data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
@@ -445,6 +447,11 @@ size_t block::signature_operations(bool bip16_active) const
         return ceiling_add(total, tx.signature_operations(bip16_active));
     };
 
+    //*************************************************************************
+    // CONSENSUS: Legacy sigops are counted in coinbase scripts despite the
+    // fact that coinbase input scripts are never executed. There is no need
+    // to exclude p2sh coinbsae sigops since there is never a script to count.
+    //*************************************************************************
     const auto& txs = transactions_;
     return std::accumulate(txs.begin(), txs.end(), size_t{0}, value);
 }
@@ -583,9 +590,8 @@ bool block::is_valid_coinbase_script(size_t height) const
     const auto actual = actual_script.to_data(false);
 
     // Create the expected script as a byte vector.
-    script expected_script;
     script_number number(height);
-    expected_script.operations().push_back({ opcode::special, number.data() });
+    script expected_script(operation_stack{ operation{ number.data() } });
     const auto expected = expected_script.to_data(false);
 
     // Require that the coinbase script match the expected coinbase script.

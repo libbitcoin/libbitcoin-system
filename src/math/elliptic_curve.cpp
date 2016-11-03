@@ -243,6 +243,18 @@ bool is_public_key(data_slice point)
 // DER parse/encode
 // ----------------------------------------------------------------------------
 
+bool parse_endorsement(uint8_t& sighash_type, der_signature& der_signature,
+    const endorsement& endorsement)
+{
+    if (endorsement.empty())
+        return false;
+
+    sighash_type = endorsement.back();
+    der_signature = endorsement;
+    der_signature.pop_back();
+    return true;
+}
+
 bool parse_signature(ec_signature& out, const der_signature& der_signature,
     bool strict)
 {
