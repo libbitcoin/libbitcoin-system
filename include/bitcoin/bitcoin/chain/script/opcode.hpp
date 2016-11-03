@@ -183,7 +183,7 @@ enum class opcode : uint8_t
     disabled_div2 = 142,    // is_disabled
     negate = 143,
     abs = 144,
-    not = 145,
+    not_ = 145,
     nonzero = 146,
     add = 147,
     sub = 148,

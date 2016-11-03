@@ -244,7 +244,7 @@ std::string opcode_to_string(opcode value, uint32_t active_forks)
             return "negate";
         case opcode::abs:
             return "abs";
-        case opcode::not:
+        case opcode::not_:
             return "not";
         case opcode::nonzero:
             return "nonzero";
@@ -556,7 +556,7 @@ bool opcode_from_string(opcode& out_code, const std::string& value)
     RETURN_IF_OPCODE_OR_ALIAS("div2", "2div", disabled_div2);
     RETURN_IF_OPCODE("negate", negate);
     RETURN_IF_OPCODE("abs", abs);
-    RETURN_IF_OPCODE("not", not);
+    RETURN_IF_OPCODE("not", not_);
     RETURN_IF_OPCODE_OR_ALIAS("nonzero", "0notequal", nonzero);
     RETURN_IF_OPCODE("add", add);
     RETURN_IF_OPCODE("sub", sub);

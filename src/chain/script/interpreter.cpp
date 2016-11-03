@@ -1148,7 +1148,7 @@ bool interpreter::run_op(operation::const_iterator pc, const transaction& tx,
             return op_negate(context);
         case opcode::abs:
             return op_abs(context);
-        case opcode::not:
+        case opcode::not_:
             return op_not(context);
         case opcode::nonzero:
             return op_nonzero(context);
