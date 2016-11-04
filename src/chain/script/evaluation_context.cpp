@@ -44,7 +44,7 @@ static constexpr size_t condition_capactity = max_stack_size;
 evaluation_context::evaluation_context(const chain::transaction& transaction,
     uint32_t input_index, uint32_t flags)
   : condition_(condition_capactity),
-    op_count_{0},
+    operation_count_{0},
     flags_(flags),
     input_index_(input_index),
     transaction_(transaction)
@@ -53,36 +53,30 @@ evaluation_context::evaluation_context(const chain::transaction& transaction,
     alternate_.reserve(alternate_capactity);
 }
 
-// Condition, alternate jump and op_count are not moved.
-evaluation_context::evaluation_context(evaluation_context&& other)
-  : begin_(other.begin_),
-    jump_(begin_),
-    end_(other.end_),
-    stack_(std::move(other.stack_)),
-    condition_(condition_capactity),
-    op_count_{0},
-    flags_(other.flags_),
-    input_index_(other.input_index_),
-    transaction_(other.transaction_)
-{
-    // Regarding capacity preservation on move assignment: bit.ly/2eFbXHF
-    stack_.reserve(stack_capactity);
-    alternate_.reserve(alternate_capactity);
-}
-
 // Condition, alternate jump and op_count are not coppied.
 evaluation_context::evaluation_context(const evaluation_context& other)
-  : begin_(other.begin_),
-    jump_(begin_),
-    end_(other.end_),
-    stack_(other.stack_),
+  : stack_(other.stack_),
     condition_(condition_capactity),
-    op_count_{0},
+    operation_count_{0},
     flags_(other.flags_),
     input_index_(other.input_index_),
     transaction_(other.transaction_)
 {
     // Regarding capacity preservation on copy assignment: bit.ly/2eFbXHF
+    stack_.reserve(stack_capactity);
+    alternate_.reserve(alternate_capactity);
+}
+
+// Condition, alternate jump and op_count are not moved.
+evaluation_context::evaluation_context(evaluation_context&& other, bool)
+  : stack_(std::move(other.stack_)),
+    condition_(condition_capactity),
+    operation_count_{0},
+    flags_(other.flags_),
+    input_index_(other.input_index_),
+    transaction_(other.transaction_)
+{
+    // Regarding capacity preservation on move assignment: bit.ly/2eFbXHF
     stack_.reserve(stack_capactity);
     alternate_.reserve(alternate_capactity);
 }
@@ -108,7 +102,7 @@ evaluation_context::op_iterator evaluation_context::end() const
 // Instructions.
 //-----------------------------------------------------------------------------
 
-// This does not clear the stacks.
+// This is just deferred construction, call only once.
 bool evaluation_context::set_script(const script& script)
 {
     // bit.ly/2c9HzmN
@@ -118,7 +112,6 @@ bool evaluation_context::set_script(const script& script)
     begin_ = script.begin();
     jump_ = script.begin();
     end_ = script.end();
-    op_count_ = 0;
     return true;
 }
 
@@ -141,9 +134,9 @@ bool evaluation_context::update_operation_count(const operation& op)
 {
     // Addition is safe due to script size validation.
     if (operation::is_counted(op.code()))
-        ++op_count_;
+        ++operation_count_;
 
-    return !operation_overflow(op_count_);
+    return !operation_overflow(operation_count_);
 }
 
 bool evaluation_context::update_pubkey_count(int32_t multisig_pubkeys)
@@ -153,8 +146,8 @@ bool evaluation_context::update_pubkey_count(int32_t multisig_pubkeys)
         return false;
 
     // Addition is safe due to script size validation.
-    op_count_ += multisig_pubkeys;
-    return !operation_overflow(op_count_);
+    operation_count_ += multisig_pubkeys;
+    return !operation_overflow(operation_count_);
 }
 
 /// Properties.
@@ -178,7 +171,7 @@ const chain::transaction& evaluation_context::transaction() const
 /// Stack info.
 //-----------------------------------------------------------------------------
 
-// pop jump-to-end, push all back, use to construct a script
+// Pop jump-to-end, push all back, use to construct a script.
 script evaluation_context::subscript() const
 {
     operation_stack ops;
@@ -234,11 +227,17 @@ bool evaluation_context::stack_to_bool() const
     return false;
 }
 
-// This call must be guarded.
+// This call must be guarded (do not return false if empty, for op handlers).
 bool evaluation_context::stack_true() const
 {
     BITCOIN_ASSERT(!stack_.empty());
     return stack_to_bool();
+}
+
+// This is safe to call when empty (for completion handlers).
+bool evaluation_context::stack_false() const
+{
+    return empty() || !stack_true();
 }
 
 bool evaluation_context::empty() const

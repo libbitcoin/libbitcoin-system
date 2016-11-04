@@ -53,11 +53,11 @@ public:
     evaluation_context(const chain::transaction& transaction,
         uint32_t input_index, uint32_t flags);
 
-    /// Create using copied flags and moved stack (only).
-    evaluation_context(evaluation_context&& other);
-
     /// Create using copied flags and copied stack (only).
     evaluation_context(const evaluation_context& other);
+
+    /// Create using copied flags and moved stack (only).
+    evaluation_context(evaluation_context&& other, bool move);
 
     /// Program counter.
     op_iterator begin() const;
@@ -84,6 +84,7 @@ public:
     bool is_short_circuited(const operation& op) const;
     bool is_stack_overflow() const;
     bool stack_true() const;
+    bool stack_false() const;
     bool empty() const;
     size_t size() const;
 
@@ -127,7 +128,7 @@ private:
     data_stack stack_;
     data_stack alternate_;
     conditional_stack condition_;
-    size_t op_count_;
+    size_t operation_count_;
 
     const uint32_t flags_;
     const uint32_t input_index_;

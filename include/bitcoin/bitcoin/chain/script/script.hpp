@@ -152,7 +152,8 @@ public:
         uint32_t flags);
 
     static code verify(const transaction& tx, uint32_t input_index,
-        const script& prevout_script, uint32_t flags);
+        uint32_t flags, const script& input_script,
+        const script& prevout_script);
 
 protected:
     // So that input and output may call reset from their own.
@@ -169,7 +170,6 @@ protected:
 private:
     static size_t serialized_size(const operation_stack& ops);
     static data_chunk stack_to_data(const operation_stack& ops);
-    static code pay_to_script_hash(evaluation_context& input_context);
 
     data_chunk bytes_;
     bool valid_;

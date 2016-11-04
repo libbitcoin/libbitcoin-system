@@ -93,8 +93,8 @@ static bool op_push_size(evaluation_context& context, const data_chunk& data,
 // shared handler
 static bool op_push_number(evaluation_context& context, uint8_t value)
 {
-    // This handles positive_0 identically to op_push_size with empty data.
-    BITCOIN_ASSERT(value == script_number::negative_1 || 
+    BITCOIN_ASSERT(
+        value == script_number::negative_1 || 
         value <= script_number::positive_16);
     context.push_move({ value });
     return true;
@@ -166,7 +166,6 @@ static bool op_verify(evaluation_context& context)
 
 static bool op_return(evaluation_context& context)
 {
-    // In terms of validation this behaves identically to reserved opcodes.
     return false;
 }
 
@@ -409,9 +408,6 @@ static bool op_add1(evaluation_context& context)
     if (!context.pop(number))
         return false;
 
-    //*************************************************************************
-    // CONSENSUS: overflow potential.
-    //*************************************************************************
     number += 1;
     context.push_move(number.data());
     return true;
@@ -423,9 +419,6 @@ static bool op_sub1(evaluation_context& context)
     if (!context.pop(number))
         return false;
 
-    //*************************************************************************
-    // CONSENSUS: underflow potential.
-    //*************************************************************************
     number -= 1;
     context.push_move(number.data());
     return true;
@@ -437,9 +430,6 @@ static bool op_negate(evaluation_context& context)
     if (!context.pop(number))
         return false;
 
-    //*************************************************************************
-    // CONSENSUS: overflow potential.
-    //*************************************************************************
     number = -number;
     context.push_move(number.data());
     return true;
@@ -451,9 +441,6 @@ static bool op_abs(evaluation_context& context)
     if (!context.pop(number))
         return false;
 
-    //*************************************************************************
-    // CONSENSUS: overflow potential.
-    //*************************************************************************
     if (number < 0)
         number = -number;
 
@@ -487,9 +474,6 @@ static bool op_add(evaluation_context& context)
     if (!context.pop_binary(first, second))
         return false;
 
-    //*************************************************************************
-    // CONSENSUS: overflow potential.
-    //*************************************************************************
     const auto result = first + second;
     context.push_move(result.data());
     return true;
@@ -501,9 +485,6 @@ static bool op_sub(evaluation_context& context)
     if (!context.pop_binary(first, second))
         return false;
 
-    //*************************************************************************
-    // CONSENSUS: underflow potential.
-    //*************************************************************************
     const auto result = second - first;
     context.push_move(result.data());
     return true;

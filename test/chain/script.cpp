@@ -325,8 +325,6 @@ BOOST_AUTO_TEST_CASE(script__from_data__internal_invalid_wire_code__success)
     BOOST_REQUIRE(instance.from_data(raw, false));
 }
 
-// Valid pay-to-script-hash scripts are valid regardless of context,
-// however after bip16 activation the scripts have additional constraints.
 BOOST_AUTO_TEST_CASE(script__bip16__valid)
 {
     for (const auto& test: valid_bip16_scripts)
@@ -357,7 +355,6 @@ BOOST_AUTO_TEST_CASE(script__bip16__invalidated)
     }
 }
 
-// Prior to bip65 activation nop2 always returns true, but after it becomes a locktime comparer.
 BOOST_AUTO_TEST_CASE(script__bip65__valid)
 {
     for (const auto& test: valid_bip65_scripts)
@@ -412,7 +409,6 @@ BOOST_AUTO_TEST_CASE(script__bip65__invalidated)
     }
 }
 
-// These are scripts potentially affected by bip66 (but should not be).
 BOOST_AUTO_TEST_CASE(script__multisig__valid)
 {
     for (const auto& test: valid_multisig_scripts)
@@ -422,13 +418,13 @@ BOOST_AUTO_TEST_CASE(script__multisig__valid)
         BOOST_REQUIRE_MESSAGE(!tx.inputs().empty(), test.input + " : " + test.output);
 
         // These are always valid.
+        // These are scripts potentially affected by bip66 (but should not be).
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) == error::success, test.input + " : " + test.output);
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::bip66_rule) == error::success, test.input + " : " + test.output);
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules) == error::success, test.input + " : " + test.output);
     }
 }
 
-// These are scripts potentially affected by bip66 (but should not be).
 BOOST_AUTO_TEST_CASE(script__multisig__invalid)
 {
     for (const auto& test: invalid_multisig_scripts)
@@ -438,6 +434,7 @@ BOOST_AUTO_TEST_CASE(script__multisig__invalid)
         BOOST_REQUIRE_MESSAGE(!tx.inputs().empty(), test.input + " : " + test.output);
 
         // These are always invalid.
+        // These are scripts potentially affected by bip66 (but should not be).
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) != error::success, test.input + " : " + test.output);
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::bip66_rule) != error::success, test.input + " : " + test.output);
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules) != error::success, test.input + " : " + test.output);

@@ -816,64 +816,52 @@ code script::verify(const transaction& tx, uint32_t input_index,
     if (input_index >= tx.inputs().size())
         return error::operation_failed;
 
-    // Obtain the previous output script from the cached previous output.
-    auto& prevout = tx.inputs()[input_index].previous_output().validation;
-    return verify(tx, input_index, prevout.cache.script(), flags);
+    const auto& input = tx.inputs()[input_index];
+    const auto& prevout = input.previous_output().validation.cache;
+
+    return verify(tx, input_index, flags, input.script(), prevout.script());
 }
 
-// TODO: return detailed result code indicating failure condition.
 code script::verify(const transaction& tx, uint32_t input_index,
-    const script& prevout_script, uint32_t flags)
+    uint32_t flags, const script& input_script,
+    const script& prevout_script)
 {
-    if (input_index >= tx.inputs().size())
-        return error::operation_failed;
+    code ec(error::validate_inputs_failed);
 
-    // Create a context for evaluation of the input script.
+    // Create an empty context for evaluation of the input script.
     evaluation_context input_context(tx, input_index, flags);
-    const auto& input_script = tx.inputs()[input_index].script();
 
-    // Evaluate the input script against an empty stack.
+    // Evaluate the input script against an empty stack (no stack check here).
     if (!interpreter::run(input_script, input_context))
-        return error::validate_inputs_failed;
+        return ec;
 
     // COPY input context stack (only) and flags for eval of prevout script.
-    evaluation_context out_context(input_context);
+    evaluation_context prevout_context(input_context);
 
     // Evaluate the prevout script against the input result stack.
-    if (!interpreter::run(prevout_script, out_context))
-        return error::validate_inputs_failed;
+    if (!interpreter::run(prevout_script, prevout_context) ||
+        prevout_context.stack_false())
+        return ec;
 
-    if (out_context.empty() || !out_context.stack_true())
-        return error::validate_inputs_failed;
-
-    // More validation is required if prevout is pay-to-script-hash (bip16).
     if (prevout_script.is_pay_to_script_hash(flags))
-        return input_script.is_relaxed_push_data_only() ?
-            pay_to_script_hash(input_context) : error::validate_inputs_failed;
+    {
+        if (!input_script.is_relaxed_push_data_only())
+            return ec;
+
+        // Stack top is the embedded script (input_context is not empty).
+        script embedded(input_context.pop(), false);
+        if (!embedded.is_valid())
+            return ec;
+
+        // MOVE popped stack (only) and flags for eval of embedded script.
+        evaluation_context context(std::move(input_context), true);
+
+        // Evaluate the embedded script against the input result stack.
+        if (!interpreter::run(embedded, context) || context.stack_false())
+            return ec;
+    }
 
     return error::success;
-}
-
-// private
-code script::pay_to_script_hash(evaluation_context& input_context)
-{
-    // The input_context cannot be empty because out_context was not.
-    BITCOIN_ASSERT(!input_context.empty());
-
-    // The stack top item is the embedded script.
-    script embedded(input_context.pop(), false);
-    if (!embedded.is_valid())
-        return error::validate_inputs_failed;
-
-    // MOVE popped stack (only) and flags for eval of embedded script.
-    evaluation_context context(std::move(input_context));
-
-    // Evaluate the embedded script against the input result stack.
-    if (!interpreter::run(embedded, context))
-        return error::validate_inputs_failed;
-
-    return (context.empty() || !context.stack_true()) ?
-        error::validate_inputs_failed : error::success;
 }
 
 } // namespace chain
