@@ -24,6 +24,7 @@
 #include <utility>
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
 #include <bitcoin/bitcoin/chain/script/script.hpp>
+#include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/math/script_number.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -40,35 +41,68 @@ static constexpr size_t condition_capactity = max_stack_size;
 //-----------------------------------------------------------------------------
 
 // Iterators must be set by set_script.
-evaluation_context::evaluation_context(uint32_t flags)
-  : op_count_(0), flags_(flags), condition_(condition_capactity)
+evaluation_context::evaluation_context(const chain::transaction& transaction,
+    uint32_t input_index, uint32_t flags)
+  : condition_(condition_capactity),
+    op_count_{0},
+    flags_(flags),
+    input_index_(input_index),
+    transaction_(transaction)
 {
     stack_.reserve(stack_capactity);
     alternate_.reserve(alternate_capactity);
 }
 
-// Iterators must be set by set_script, condition and alternate are not moved.
+// Condition, alternate jump and op_count are not moved.
 evaluation_context::evaluation_context(evaluation_context&& other)
-  : stack_(std::move(other.stack_)),
+  : begin_(other.begin_),
+    jump_(begin_),
+    end_(other.end_),
+    stack_(std::move(other.stack_)),
     condition_(condition_capactity),
+    op_count_{0},
     flags_(other.flags_),
-    op_count_(0)
+    input_index_(other.input_index_),
+    transaction_(other.transaction_)
 {
     // Regarding capacity preservation on move assignment: bit.ly/2eFbXHF
     stack_.reserve(stack_capactity);
     alternate_.reserve(alternate_capactity);
 }
 
-// Iterators must be set by set_script, condition and alternate are not copied.
+// Condition, alternate jump and op_count are not coppied.
 evaluation_context::evaluation_context(const evaluation_context& other)
-  : stack_(other.stack_),
+  : begin_(other.begin_),
+    jump_(begin_),
+    end_(other.end_),
+    stack_(other.stack_),
     condition_(condition_capactity),
+    op_count_{0},
     flags_(other.flags_),
-    op_count_(0)
+    input_index_(other.input_index_),
+    transaction_(other.transaction_)
 {
     // Regarding capacity preservation on copy assignment: bit.ly/2eFbXHF
     stack_.reserve(stack_capactity);
     alternate_.reserve(alternate_capactity);
+}
+
+// Program counter.
+//-----------------------------------------------------------------------------
+
+evaluation_context::op_iterator evaluation_context::begin() const
+{
+    return begin_;
+}
+
+evaluation_context::op_iterator evaluation_context::jump() const
+{
+    return jump_;
+}
+
+evaluation_context::op_iterator evaluation_context::end() const
+{
+    return end_;
 }
 
 // Instructions.
@@ -123,27 +157,22 @@ bool evaluation_context::update_pubkey_count(int32_t multisig_pubkeys)
     return !operation_overflow(op_count_);
 }
 
-// Properties.
+/// Properties.
 //-----------------------------------------------------------------------------
-
-evaluation_context::op_iterator evaluation_context::begin() const
-{
-    return begin_;
-}
-
-evaluation_context::op_iterator evaluation_context::jump() const
-{
-    return jump_;
-}
-
-evaluation_context::op_iterator evaluation_context::end() const
-{
-    return end_;
-}
 
 uint32_t evaluation_context::flags() const
 {
     return flags_;
+}
+
+uint32_t evaluation_context::input_index() const
+{
+    return input_index_;
+}
+
+const chain::transaction& evaluation_context::transaction() const
+{
+    return transaction_;
 }
 
 /// Stack info.

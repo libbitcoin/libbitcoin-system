@@ -829,56 +829,50 @@ code script::verify(const transaction& tx, uint32_t input_index,
         return error::operation_failed;
 
     // Create a context for evaluation of the input script.
-    evaluation_context input_context(flags);
+    evaluation_context input_context(tx, input_index, flags);
     const auto& input_script = tx.inputs()[input_index].script();
 
-    // Evaluate the input script.
-    if (!interpreter::run(tx, input_index, input_script, input_context))
+    // Evaluate the input script against an empty stack.
+    if (!interpreter::run(input_script, input_context))
         return error::validate_inputs_failed;
-    
-    // We need to preserve the input stack for potential p2sh evaluation.
+
     // COPY input context stack (only) and flags for eval of prevout script.
     evaluation_context out_context(input_context);
 
-    // Evaluate the prevout script against the input stack.
-    if (!interpreter::run(tx, input_index, prevout_script, out_context))
+    // Evaluate the prevout script against the input result stack.
+    if (!interpreter::run(prevout_script, out_context))
         return error::validate_inputs_failed;
 
-    // Return invalid if stack is not true.
     if (out_context.empty() || !out_context.stack_true())
         return error::validate_inputs_failed;
 
-    // If the previout script is not p2sh with bip16 enabled we are done.
-    if (!prevout_script.is_pay_to_script_hash(flags))
-        return error::success;
+    // More validation is required if prevout is pay-to-script-hash (bip16).
+    if (prevout_script.is_pay_to_script_hash(flags))
+        return input_script.is_relaxed_push_data_only() ?
+            pay_to_script_hash(input_context) : error::validate_inputs_failed;
 
-    // Additional validation for bip16 pay-to-script-hash script.
-    return pay_hash(tx, input_index, input_script, input_context);
+    return error::success;
 }
 
 // private
-code script::pay_hash(const transaction& tx, uint32_t input_index,
-    const script& input_script, evaluation_context& input_context)
+code script::pay_to_script_hash(evaluation_context& input_context)
 {
-    if (!input_script.is_relaxed_push_data_only())
+    // The input_context cannot be empty because out_context was not.
+    BITCOIN_ASSERT(!input_context.empty());
+
+    // The stack top item is the embedded script.
+    script embedded(input_context.pop(), false);
+    if (!embedded.is_valid())
         return error::validate_inputs_failed;
 
-    script embedded;
-
-    // The last stack item is the embedded script.
-    // input_context.stack cannot be empty here because out_context was true.
-    if (!embedded.from_data(input_context.pop(), false))
-        return error::validate_inputs_failed;
-
-    // MOVE popped stack (only) and flags for evaluation of eval script.
+    // MOVE popped stack (only) and flags for eval of embedded script.
     evaluation_context context(std::move(input_context));
 
-    // Evaluate the embedded script.
-    if (!interpreter::run(tx, input_index, embedded, context))
+    // Evaluate the embedded script against the input result stack.
+    if (!interpreter::run(embedded, context))
         return error::validate_inputs_failed;
 
-    // Return invalid if stack is not true, otherwise valid.
-    return context.empty() || !context.stack_true() ?
+    return (context.empty() || !context.stack_true()) ?
         error::validate_inputs_failed : error::success;
 }
 

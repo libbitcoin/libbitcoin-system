@@ -22,11 +22,12 @@
 
 #include <cstddef>
 #include <vector>
+#include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
 namespace chain {
 
-class conditional_stack
+class BC_API conditional_stack
 {
 public:
     conditional_stack(size_t initial_capacity);

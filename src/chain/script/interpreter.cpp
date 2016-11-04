@@ -692,7 +692,7 @@ static bool op_code_seperator(evaluation_context& context,
 }
 
 static signature_parse_result op_check_sig_verify(evaluation_context& context,
-    const script& script, const transaction& tx, uint32_t input_index)
+    const script& script)
 {
     if (context.size() < 2)
         return signature_parse_result::invalid;
@@ -714,19 +714,19 @@ static signature_parse_result op_check_sig_verify(evaluation_context& context,
         return strict ? signature_parse_result::lax_encoding :
             signature_parse_result::invalid;
 
-    // Create a subscript with endorsements stripped.
+    // Create a subscript with endorsements stripped (sort of).
     auto script_code = context.subscript();
     script_code.purge({ endorsement });
 
     return script::check_signature(signature, sighash_type, pubkey,
-        script_code, tx, input_index) ? signature_parse_result::valid :
+        script_code, context.transaction(), context.input_index()) ?
+        signature_parse_result::valid :
         signature_parse_result::invalid;
 }
 
-static bool op_check_sig(evaluation_context& context, const script& script,
-    const transaction& tx, uint32_t input_index)
+static bool op_check_sig(evaluation_context& context, const script& script)
 {
-    switch (op_check_sig_verify(context, script, tx, input_index))
+    switch (op_check_sig_verify(context, script))
     {
         case signature_parse_result::valid:
             context.push(true);
@@ -742,8 +742,7 @@ static bool op_check_sig(evaluation_context& context, const script& script,
 }
 
 static signature_parse_result op_check_multisig_verify(
-    evaluation_context& context, const script& script, const transaction& tx,
-    uint32_t input_index)
+    evaluation_context& context, const script& script)
 {
     int32_t pubkeys_count;
     if (!context.pop(pubkeys_count))
@@ -782,7 +781,7 @@ static signature_parse_result op_check_multisig_verify(
     auto public_key = public_keys.begin();
     auto strict = script::is_enabled(context.flags(), rule_fork::bip66_rule);
 
-    // Before entering the loop create a subscript with all endorsements stripped.
+    // Before looping create subscript with endorsements stripped (sort of).
     auto script_code = context.subscript();
     script_code.purge(endorsements);
 
@@ -803,7 +802,7 @@ static signature_parse_result op_check_multisig_verify(
         while (true)
         {
             if (script::check_signature(signature, sighash_type, *public_key,
-                script_code, tx, input_index))
+                script_code, context.transaction(), context.input_index()))
                 break;
 
             if (++public_key == public_keys.end())
@@ -814,10 +813,10 @@ static signature_parse_result op_check_multisig_verify(
     return signature_parse_result::valid;
 }
 
-static bool op_check_multisig(evaluation_context& context, const script& script,
-    const transaction& tx, uint32_t input_index)
+static bool op_check_multisig(evaluation_context& context,
+    const script& script)
 {
-    switch (op_check_multisig_verify(context, script, tx, input_index))
+    switch (op_check_multisig_verify(context, script))
     {
         case signature_parse_result::valid:
             context.push(true);
@@ -833,11 +832,14 @@ static bool op_check_multisig(evaluation_context& context, const script& script,
 }
 
 static bool op_check_locktime_verify(evaluation_context& context,
-    const script& script, const transaction& tx, uint32_t input_index)
+    const script& script)
 {
     // nop2 is subsumed by checklocktimeverify when bip65 fork is active.
     if (!script::is_enabled(context.flags(), rule_fork::bip65_rule))
         return op_nop(opcode::nop2);
+
+    const auto& tx = context.transaction();
+    const auto input_index = context.input_index();
 
     if (input_index >= tx.inputs().size())
         return false;
@@ -856,9 +858,7 @@ static bool op_check_locktime_verify(evaluation_context& context,
     if (number < 0)
         return false;
 
-    // TODO: confirm the domain of context.pop_stack() above is uint32_t.
-    // If so there is no reason to cast into 64 bit here, just use uint32_t.
-    // The value is positive, so it is safe to cast to uint64_t.
+    // The value is positive, so cast is safe.
     const auto stack = static_cast<uint64_t>(number.int64());
 
     // BIP65: the stack lock-time type differs from that of tx nLockTime.
@@ -884,13 +884,8 @@ static bool op_check_locktime_verify(evaluation_context& context,
 //_____________________________________________________________________________
 
 // The script paramter is NOT always tx.indexes[input_index].script.
-bool interpreter::run(const transaction& tx, uint32_t input_index,
-    const script& script, evaluation_context& context)
+bool interpreter::run(const script& script, evaluation_context& context)
 {
-    // SCRIPT_VERIFY_SIGPUSHONLY
-    ////if (!script.is_relaxed_push_data_only())
-    ////    return false;
-
     if (!context.set_script(script))
         return false;
 
@@ -902,28 +897,22 @@ bool interpreter::run(const transaction& tx, uint32_t input_index,
         if (!context.update_operation_count(*pc))
             return false;
 
-        // Reserved codes may be skipped (allowed) so can't handle prior.
-        // Disabled codes can't be skipped so they must be handled prior.
         if (context.is_short_circuited(*pc))
             continue;
 
-        if (!run_op(pc, tx, input_index, script, context))
+        if (!run_op(pc, script, context))
             return false;
 
         if (context.is_stack_overflow())
             return false;
     }
 
-    // SCRIPT_VERIFY_CLEANSTACK
-    ////if (!context.empty())
-    ////    return false;
-
     // Confirm that scopes are paired.
     return context.closed();
 }
 
-bool interpreter::run_op(operation::const_iterator pc, const transaction& tx,
-    uint32_t input_index, const script& script, evaluation_context& context)
+bool interpreter::run_op(operation::const_iterator pc, const script& script,
+    evaluation_context& context)
 {
     const auto code = pc->code();
     const auto data = pc->data();
@@ -1201,19 +1190,19 @@ bool interpreter::run_op(operation::const_iterator pc, const transaction& tx,
         case opcode::codeseparator:
             return op_code_seperator(context, pc);
         case opcode::checksig:
-            return op_check_sig(context, script, tx, input_index);
+            return op_check_sig(context, script);
         case opcode::checksigverify:
-            return op_check_sig_verify(context, script, tx, input_index) ==
+            return op_check_sig_verify(context, script) ==
                 signature_parse_result::valid;
         case opcode::checkmultisig:
-            return op_check_multisig(context, script, tx, input_index);
+            return op_check_multisig(context, script);
         case opcode::checkmultisigverify:
-            return op_check_multisig_verify(context, script, tx, input_index) ==
+            return op_check_multisig_verify(context, script) ==
                 signature_parse_result::valid;
         case opcode::nop1:
             return op_nop(code);
         case opcode::checklocktimeverify:
-            return op_check_locktime_verify(context, script, tx, input_index);
+            return op_check_locktime_verify(context, script);
         case opcode::nop3:
         case opcode::nop4:
         case opcode::nop5:

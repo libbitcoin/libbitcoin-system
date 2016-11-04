@@ -169,8 +169,7 @@ protected:
 private:
     static size_t serialized_size(const operation_stack& ops);
     static data_chunk stack_to_data(const operation_stack& ops);
-    static code pay_hash(const transaction& tx, uint32_t input_index,
-        const script& input_script, evaluation_context& input_context);
+    static code pay_to_script_hash(evaluation_context& input_context);
 
     data_chunk bytes_;
     bool valid_;

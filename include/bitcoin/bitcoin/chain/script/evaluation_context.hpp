@@ -33,9 +33,10 @@ namespace libbitcoin {
 namespace chain {
 
 // All index parameters are zero-based and relative to stack top.
-class BC_API script;
+class script;
+class transaction;
 
-class evaluation_context
+class BC_API evaluation_context
 {
 public:
     typedef script_number number;
@@ -49,13 +50,19 @@ public:
     typedef data_stack::iterator stack_iterator;
 
     /// Create an instance with empty stacks.
-    evaluation_context(uint32_t flags);
+    evaluation_context(const chain::transaction& transaction,
+        uint32_t input_index, uint32_t flags);
 
     /// Create using copied flags and moved stack (only).
     evaluation_context(evaluation_context&& other);
 
     /// Create using copied flags and copied stack (only).
     evaluation_context(const evaluation_context& other);
+
+    /// Program counter.
+    op_iterator begin() const;
+    op_iterator jump() const;
+    op_iterator end() const;
 
     /// Instructions.
     bool set_script(const script& script);
@@ -66,10 +73,9 @@ public:
     bool update_pubkey_count(int32_t multisig_pubkeys);
 
     /// Properties.
-    op_iterator begin() const;
-    op_iterator jump() const;
-    op_iterator end() const;
     uint32_t flags() const;
+    uint32_t input_index() const;
+    const chain::transaction& transaction() const;
 
     /// Stack info.
     script subscript() const;
@@ -114,16 +120,18 @@ public:
 private:
     bool stack_to_bool() const;
 
-    data_stack stack_;
-    data_stack alternate_;
-    conditional_stack condition_;
-
     op_iterator begin_;
     op_iterator jump_;
     op_iterator end_;
 
-    const uint32_t flags_;
+    data_stack stack_;
+    data_stack alternate_;
+    conditional_stack condition_;
     size_t op_count_;
+
+    const uint32_t flags_;
+    const uint32_t input_index_;
+    const chain::transaction& transaction_;
 };
 
 } // namespace chain

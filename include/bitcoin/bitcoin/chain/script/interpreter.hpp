@@ -37,12 +37,10 @@ class transaction;
 class BC_API interpreter
 {
 public:
-    static bool run(const transaction& tx, uint32_t input_index,
-        const script& script, evaluation_context& context);
+    static bool run(const script& script, evaluation_context& context);
 
 private:
-    static bool run_op(operation::const_iterator pc, const transaction& tx,
-        uint32_t input_index, const script& script,
+    static bool run_op(operation::const_iterator pc, const script& script,
         evaluation_context& context);
 };
 
