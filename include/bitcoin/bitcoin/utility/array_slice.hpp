@@ -28,31 +28,28 @@ namespace libbitcoin {
  * An read-only STL-style wrapper for array-style collections.
  *
  * This class allows std::array, std::vector, std::string, and c-style arrays
- * to be used interchangeably in functions that expect raw data.
+ * to be used interchangeably in functions that expect an iterable container.
+ * This is not a substitute for move overloads. Consider also that a contiguous
+ * buffer (c-style array) is more performant than the iterator abstraction.
  */
-template <typename T>
+template <typename Iterable>
 class array_slice
 {
 public:
     template <typename Container>
     array_slice(const Container& container);
 
-    // TODO: reliance this class causes unnecessary copying in cases where move
-    // arguments are not defined. This cannot itself be converted to move.
-    ////template <typename Container>
-    ////array_slice(Container&& container);
+    array_slice(const Iterable* begin, const Iterable* end);
 
-    array_slice(const T* begin, const T* end);
-
-    const T* begin() const;
-    const T* end() const;
-    const T* data() const;
+    const Iterable* begin() const;
+    const Iterable* end() const;
+    const Iterable* data() const;
     std::size_t size() const;
     bool empty() const;
 
 private:
-    const T* begin_;
-    const T* end_;
+    const Iterable* begin_;
+    const Iterable* end_;
 };
 
 } // namespace libbitcoin
