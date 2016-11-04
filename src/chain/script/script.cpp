@@ -100,6 +100,7 @@ script::script(data_chunk&& encoded, bool prefix)
     }
 
     bytes_ = std::move(encoded);
+    cached_ = false;
     valid_ = true;
 }
 
