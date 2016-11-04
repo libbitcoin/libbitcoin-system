@@ -691,7 +691,8 @@ static bool op_code_seperator(evaluation_context& context,
     return true;
 }
 
-static signature_parse_result op_check_sig_verify(evaluation_context& context,
+// utility
+static signature_parse_result check_sig_verify(evaluation_context& context,
     const script& script)
 {
     if (context.size() < 2)
@@ -724,9 +725,15 @@ static signature_parse_result op_check_sig_verify(evaluation_context& context,
         signature_parse_result::invalid;
 }
 
+static bool op_check_sig_verify(evaluation_context& context,
+    const script& script)
+{
+    return check_sig_verify(context, script) == signature_parse_result::valid;
+}
+
 static bool op_check_sig(evaluation_context& context, const script& script)
 {
-    switch (op_check_sig_verify(context, script))
+    switch (check_sig_verify(context, script))
     {
         case signature_parse_result::valid:
             context.push(true);
@@ -741,8 +748,9 @@ static bool op_check_sig(evaluation_context& context, const script& script)
     return true;
 }
 
-static signature_parse_result op_check_multisig_verify(
-    evaluation_context& context, const script& script)
+// utility
+static signature_parse_result check_multisig_verify(evaluation_context& context,
+    const script& script)
 {
     int32_t pubkeys_count;
     if (!context.pop(pubkeys_count))
@@ -813,10 +821,17 @@ static signature_parse_result op_check_multisig_verify(
     return signature_parse_result::valid;
 }
 
+static bool op_check_multisig_verify(evaluation_context& context,
+    const script& script)
+{
+    return check_multisig_verify(context, script) == 
+        signature_parse_result::valid;
+}
+
 static bool op_check_multisig(evaluation_context& context,
     const script& script)
 {
-    switch (op_check_multisig_verify(context, script))
+    switch (check_multisig_verify(context, script))
     {
         case signature_parse_result::valid:
             context.push(true);
@@ -1192,13 +1207,11 @@ bool interpreter::run_op(operation::const_iterator pc, const script& script,
         case opcode::checksig:
             return op_check_sig(context, script);
         case opcode::checksigverify:
-            return op_check_sig_verify(context, script) ==
-                signature_parse_result::valid;
+            return op_check_sig_verify(context, script);
         case opcode::checkmultisig:
             return op_check_multisig(context, script);
         case opcode::checkmultisigverify:
-            return op_check_multisig_verify(context, script) ==
-                signature_parse_result::valid;
+            return op_check_multisig_verify(context, script);
         case opcode::nop1:
             return op_nop(code);
         case opcode::checklocktimeverify:
