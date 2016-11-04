@@ -34,7 +34,6 @@
 #include <bitcoin/bitcoin/chain/point_iterator.hpp>
 #include <bitcoin/bitcoin/chain/stealth.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
-#include <bitcoin/bitcoin/chain/script/conditional_stack.hpp>
 #include <bitcoin/bitcoin/chain/script/evaluation_context.hpp>
 #include <bitcoin/bitcoin/chain/script/interpreter.hpp>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>

@@ -21,7 +21,6 @@
 #define LIBBITCOIN_CHAIN_EVALUATION_CONTEXT_HPP
 
 #include <cstdint>
-#include <bitcoin/bitcoin/chain/script/conditional_stack.hpp>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
@@ -65,69 +64,80 @@ public:
     op_iterator end() const;
 
     /// Instructions.
-    bool set_script(const script& script);
-    void set_jump(op_iterator instruction);
+    bool set_program_counter(const script& script);
+    void set_jump_register(op_iterator instruction);
 
     /// Operation count.
     bool update_operation_count(const operation& op);
-    bool update_pubkey_count(int32_t multisig_pubkeys);
+    bool update_multisig_public_key_count(int32_t count);
 
     /// Properties.
     uint32_t flags() const;
     uint32_t input_index() const;
     const chain::transaction& transaction() const;
 
-    /// Stack info.
-    script subscript() const;
-    const value_type& item(size_t index) /*const*/;
-    stack_iterator position(size_t index) /*const*/;
-    bool is_short_circuited(const operation& op) const;
-    bool is_stack_overflow() const;
-    bool stack_true() const;
-    bool stack_false() const;
-    bool empty() const;
-    size_t size() const;
+    // Primary stack.
+    //-------------------------------------------------------------------------
 
-    /// Stack pop.
+    /// Primary push.
+    void push(bool value);
+    void push_move(value_type&& item);
+    void push_copy(const value_type& item);
+
+    /// Primary pop.
     data_chunk pop();
-    bool pop(data_stack& section, size_t count);
     bool pop(int32_t& out_value);
     bool pop(number& out_number, size_t maxiumum_size=max_number_size);
     bool pop_binary(number& first, number& second);
     bool pop_ternary(number& first, number& second, number& third);
     bool pop_position(stack_iterator& out_position);
+    bool pop(data_stack& section, size_t count);
+
+    /// Primary push/pop optimizations (active).
+    void duplicate(size_t index);
+    void swap(size_t index_left, size_t index_right);
     void erase(const stack_iterator& position);
     void erase(const stack_iterator& first, const stack_iterator& last);
 
-    /// Stack push.
-    void push(bool value);
-    void push_move(value_type&& item);
-    void push_copy(const value_type& item);
-    void duplicate(size_t index);
-    void swap(size_t index_left, size_t index_right);
+    /// Primary push/pop optimizations (passive).
+    bool empty() const;
+    bool stack_true() const;
+    bool stack_false() const;
+    bool is_stack_overflow() const;
+    bool is_short_circuited(const operation& op) const;
+    const value_type& item(size_t index) /*const*/;
+    stack_iterator position(size_t index) /*const*/;
+    script subscript() const;
+    size_t size() const;
 
-    /// Alternate stack.
+    // Alternate stack.
+    //-------------------------------------------------------------------------
+
     bool empty_alternate() const;
-    value_type pop_alternate();
     void push_alternate(value_type&& value);
+    value_type pop_alternate();
 
-    /// Conditional stack.
-    void close();
-    void negate();
+    // Conditional stack.
+    //-------------------------------------------------------------------------
+
     void open(bool value);
+    void negate();
+    void close();
     bool closed() const;
     bool succeeded() const;
 
 private:
+    typedef std::vector<bool> bool_stack;
+
     bool stack_to_bool() const;
 
     op_iterator begin_;
     op_iterator jump_;
     op_iterator end_;
 
-    data_stack stack_;
+    data_stack primary_;
     data_stack alternate_;
-    conditional_stack condition_;
+    bool_stack condition_;
     size_t operation_count_;
 
     const uint32_t flags_;

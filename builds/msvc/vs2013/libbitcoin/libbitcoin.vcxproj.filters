@@ -563,9 +563,6 @@
     <ClCompile Include="..\..\..\..\src\chain\script\interpreter.cpp">
       <Filter>src\chain\script</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\script\conditional_stack.cpp">
-      <Filter>src\chain\script</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\script\operation_stack.cpp">
       <Filter>src\chain\script</Filter>
     </ClCompile>
@@ -1109,9 +1106,6 @@
       <Filter>include\bitcoin\chain\script</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\evaluation_context.hpp">
-      <Filter>include\bitcoin\chain\script</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\conditional_stack.hpp">
       <Filter>include\bitcoin\chain\script</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\sighash_algorithm.hpp">

@@ -668,7 +668,7 @@ static bool op_hash256(evaluation_context& context)
 static bool op_code_seperator(evaluation_context& context,
     const operation::const_iterator program_counter)
 {
-    context.set_jump(program_counter + 1);
+    context.set_jump_register(program_counter + 1);
     return true;
 }
 
@@ -733,26 +733,26 @@ static bool op_check_sig(evaluation_context& context, const script& script)
 static signature_parse_result check_multisig_verify(evaluation_context& context,
     const script& script)
 {
-    int32_t pubkeys_count;
-    if (!context.pop(pubkeys_count))
+    int32_t key_count;
+    if (!context.pop(key_count))
         return signature_parse_result::invalid;
 
-    if (!context.update_pubkey_count(pubkeys_count))
+    if (!context.update_multisig_public_key_count(key_count))
         return signature_parse_result::invalid;
 
     data_stack public_keys;
-    if (!context.pop(public_keys, pubkeys_count))
+    if (!context.pop(public_keys, key_count))
         return signature_parse_result::invalid;
 
-    int32_t sigs_count;
-    if (!context.pop(sigs_count))
+    int32_t signature_count;
+    if (!context.pop(signature_count))
         return signature_parse_result::invalid;
 
-    if (sigs_count < 0 || sigs_count > pubkeys_count)
+    if (signature_count < 0 || signature_count > key_count)
         return signature_parse_result::invalid;
 
     data_stack endorsements;
-    if (!context.pop(endorsements, sigs_count))
+    if (!context.pop(endorsements, signature_count))
         return signature_parse_result::invalid;
 
     if (context.empty())
@@ -879,7 +879,7 @@ static bool op_check_locktime_verify(evaluation_context& context,
 
 bool interpreter::run(const script& script, evaluation_context& context)
 {
-    if (!context.set_script(script))
+    if (!context.set_program_counter(script))
         return false;
 
     for (auto pc = context.begin(); pc != context.end(); ++pc)
