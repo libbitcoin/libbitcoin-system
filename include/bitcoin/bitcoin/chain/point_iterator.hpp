@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_CHAIN_POINT_ITERATOR_HPP
 #define LIBBITCOIN_CHAIN_POINT_ITERATOR_HPP
 
+#include <cstddef>
 #include <cstdint>
 #include <iterator>
 #include <bitcoin/bitcoin/define.hpp>
