@@ -106,7 +106,7 @@ static bool op_if(evaluation_context& context)
 
     if (context.condition.succeeded())
     {
-        if (context.stack.empty())
+        if (context.empty())
             return false;
 
         value = context.stack_state();
@@ -123,7 +123,7 @@ static bool op_notif(evaluation_context& context)
 
     if (context.condition.succeeded())
     {
-        if (context.stack.empty())
+        if (context.empty())
             return false;
 
         value = !context.stack_state();
@@ -154,7 +154,7 @@ static bool op_endif(evaluation_context& context)
 
 static bool op_verify(evaluation_context& context)
 {
-    if (context.stack.empty())
+    if (context.empty())
         return false;
 
     if (!context.stack_state())
@@ -172,7 +172,7 @@ static bool op_return(evaluation_context& context)
 
 static bool op_to_alt_stack(evaluation_context& context)
 {
-    if (context.stack.empty())
+    if (context.empty())
         return false;
 
     context.alternate.push_back(context.pop());
@@ -191,7 +191,7 @@ static bool op_from_alt_stack(evaluation_context& context)
 
 static bool op_drop2(evaluation_context& context)
 {
-    if (context.stack.size() < 2)
+    if (context.size() < 2)
         return false;
 
     context.stack.pop_back();
@@ -201,7 +201,7 @@ static bool op_drop2(evaluation_context& context)
 
 static bool op_dup2(evaluation_context& context)
 {
-    if (context.stack.size() < 2)
+    if (context.size() < 2)
         return false;
 
     auto item1 = context.item(1);
@@ -214,7 +214,7 @@ static bool op_dup2(evaluation_context& context)
 
 static bool op_dup3(evaluation_context& context)
 {
-    if (context.stack.size() < 3)
+    if (context.size() < 3)
         return false;
 
     auto item2 = context.item(2);
@@ -229,7 +229,7 @@ static bool op_dup3(evaluation_context& context)
 
 static bool op_over2(evaluation_context& context)
 {
-    if (context.stack.size() < 4)
+    if (context.size() < 4)
         return false;
 
     auto item3 = context.item(3);
@@ -242,7 +242,7 @@ static bool op_over2(evaluation_context& context)
 
 static bool op_rot2(evaluation_context& context)
 {
-    if (context.stack.size() < 6)
+    if (context.size() < 6)
         return false;
 
     const auto position_5 = context.position(5);
@@ -251,7 +251,7 @@ static bool op_rot2(evaluation_context& context)
     auto copy_5 = *position_5;
     auto copy_4 = *position_4;
 
-    context.stack.erase(position_5, position_4 + 1);
+    context.erase(position_5, position_4 + 1);
     context.stack.emplace_back(std::move(copy_5));
     context.stack.emplace_back(std::move(copy_4));
     return true;
@@ -259,7 +259,7 @@ static bool op_rot2(evaluation_context& context)
 
 static bool op_swap2(evaluation_context& context)
 {
-    if (context.stack.size() < 4)
+    if (context.size() < 4)
         return false;
 
     context.swap(3, 1);
@@ -269,7 +269,7 @@ static bool op_swap2(evaluation_context& context)
 
 static bool op_if_dup(evaluation_context& context)
 {
-    if (context.stack.empty())
+    if (context.empty())
         return false;
 
     if (context.stack_state())
@@ -283,14 +283,14 @@ static bool op_depth(evaluation_context& context)
     //*************************************************************************
     // CONSENSUS: overflow potential (size_t > max_uint64).
     //*************************************************************************
-    const script_number stack_size(context.stack.size());
+    const script_number stack_size(context.size());
     context.stack.push_back(stack_size.data());
     return true;
 }
 
 static bool op_drop(evaluation_context& context)
 {
-    if (context.stack.empty())
+    if (context.empty())
         return false;
 
     context.pop();
@@ -299,7 +299,7 @@ static bool op_drop(evaluation_context& context)
 
 static bool op_dup(evaluation_context& context)
 {
-    if (context.stack.empty())
+    if (context.empty())
         return false;
 
     context.duplicate(0);
@@ -308,16 +308,16 @@ static bool op_dup(evaluation_context& context)
 
 static bool op_nip(evaluation_context& context)
 {
-    if (context.stack.size() < 2)
+    if (context.size() < 2)
         return false;
 
-    context.stack.erase(context.position(1));
+    context.erase(context.position(1));
     return true;
 }
 
 static bool op_over(evaluation_context& context)
 {
-    if (context.stack.size() < 2)
+    if (context.size() < 2)
         return false;
 
     context.duplicate(1);
@@ -341,14 +341,14 @@ static bool op_roll(evaluation_context& context)
         return false;
 
     auto copy = *position;
-    context.stack.erase(position);
+    context.erase(position);
     context.stack.emplace_back(std::move(copy));
     return true;
 }
 
 static bool op_rot(evaluation_context& context)
 {
-    if (context.stack.size() < 3)
+    if (context.size() < 3)
         return false;
 
     context.swap(2, 1);
@@ -358,7 +358,7 @@ static bool op_rot(evaluation_context& context)
 
 static bool op_swap(evaluation_context& context)
 {
-    if (context.stack.size() < 2)
+    if (context.size() < 2)
         return false;
 
     context.swap(1, 0);
@@ -367,7 +367,7 @@ static bool op_swap(evaluation_context& context)
 
 static bool op_tuck(evaluation_context& context)
 {
-    if (context.stack.size() < 2)
+    if (context.size() < 2)
         return false;
 
     context.stack.insert(context.position(1), context.stack.back());
@@ -376,7 +376,7 @@ static bool op_tuck(evaluation_context& context)
 
 static bool op_size(evaluation_context& context)
 {
-    if (context.stack.empty())
+    if (context.empty())
         return false;
 
     //*************************************************************************
@@ -389,7 +389,7 @@ static bool op_size(evaluation_context& context)
 
 static bool op_equal(evaluation_context& context)
 {
-    if (context.stack.size() < 2)
+    if (context.size() < 2)
         return false;
 
     context.push(context.pop() == context.pop());
@@ -398,7 +398,7 @@ static bool op_equal(evaluation_context& context)
 
 static bool op_equal_verify(evaluation_context& context)
 {
-    if (context.stack.size() < 2)
+    if (context.size() < 2)
         return false;
 
     return context.pop() == context.pop();
@@ -636,7 +636,7 @@ static bool op_within(evaluation_context& context)
 
 static bool op_ripemd160(evaluation_context& context)
 {
-    if (context.stack.empty())
+    if (context.empty())
         return false;
 
     // TODO: move array buffer into vector.
@@ -647,7 +647,7 @@ static bool op_ripemd160(evaluation_context& context)
 
 static bool op_sha1(evaluation_context& context)
 {
-    if (context.stack.empty())
+    if (context.empty())
         return false;
 
     // TODO: move array buffer into vector.
@@ -657,7 +657,7 @@ static bool op_sha1(evaluation_context& context)
 
 static bool op_sha256(evaluation_context& context)
 {
-    if (context.stack.empty())
+    if (context.empty())
         return false;
 
     // TODO: move array buffer into vector.
@@ -667,7 +667,7 @@ static bool op_sha256(evaluation_context& context)
 
 static bool op_hash160(evaluation_context& context)
 {
-    if (context.stack.empty())
+    if (context.empty())
         return false;
 
     // TODO: move array buffer into vector.
@@ -677,7 +677,7 @@ static bool op_hash160(evaluation_context& context)
 
 static bool op_hash256(evaluation_context& context)
 {
-    if (context.stack.empty())
+    if (context.empty())
         return false;
 
     // TODO: move array buffer into vector.
@@ -696,7 +696,7 @@ static bool op_code_seperator(evaluation_context& context,
 static signature_parse_result op_check_sig_verify(evaluation_context& context,
     const script& script, const transaction& tx, uint32_t input_index)
 {
-    if (context.stack.size() < 2)
+    if (context.size() < 2)
         return signature_parse_result::invalid;
 
     const auto pubkey = context.pop();
@@ -769,7 +769,7 @@ static signature_parse_result op_check_multisig_verify(
     if (!context.pop(endorsements, sigs_count))
         return signature_parse_result::invalid;
 
-    if (context.stack.empty())
+    if (context.empty())
         return signature_parse_result::invalid;
 
     //*****************************************************************************
@@ -917,7 +917,7 @@ bool interpreter::run(const transaction& tx, uint32_t input_index,
     }
 
     // SCRIPT_VERIFY_CLEANSTACK
-    ////if (!context.stack.empty())
+    ////if (!context.empty())
     ////    return false;
 
     // Confirm that scopes are paired.

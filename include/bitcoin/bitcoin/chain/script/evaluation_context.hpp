@@ -41,7 +41,12 @@ public:
     typedef script_number number;
     typedef data_stack::value_type value_type;
     typedef operation::const_iterator op_iterator;
-    typedef data_stack::const_iterator stack_iterator;
+
+    // Older libstdc++ does not allow erase with const iterator.
+    // This is a bug that requires we up the minimum compiler version.
+    // So presently stack_iterator is a non-const iterator.
+    ////typedef data_stack::const_iterator stack_iterator;
+    typedef data_stack::iterator stack_iterator;
 
     /// Constructors.
     evaluation_context(uint32_t flags);
@@ -64,12 +69,14 @@ public:
 
     /// Stack info.
     script subscript() const;
-    const value_type& item(size_t index) const;
-    stack_iterator position(size_t index) const;
+    const value_type& item(size_t index) /*const*/;
+    stack_iterator position(size_t index) /*const*/;
     bool is_short_circuited(const operation& op) const;
     bool is_stack_overflow() const;
     bool stack_state() const;
     bool stack_result() const;
+    bool empty() const;
+    size_t size() const;
 
     /// Stack pop.
     data_chunk pop();
@@ -79,6 +86,8 @@ public:
     bool pop_binary(number& first, number& second);
     bool pop_ternary(number& first, number& second, number& third);
     bool pop_position(stack_iterator& out_position);
+    void erase(const stack_iterator& position);
+    void erase(const stack_iterator& first, const stack_iterator& last);
 
     /// Stack push.
     void push(bool value);
@@ -96,9 +105,9 @@ private:
 
     size_t op_count_;
     const uint32_t flags_;
-    operation::const_iterator begin_;
-    operation::const_iterator jump_;
-    operation::const_iterator end_;
+    op_iterator begin_;
+    op_iterator jump_;
+    op_iterator end_;
 };
 
 } // namespace chain

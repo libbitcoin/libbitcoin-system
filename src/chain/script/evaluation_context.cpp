@@ -82,7 +82,7 @@ bool evaluation_context::set_script(const script& script)
     return true;
 }
 
-void evaluation_context::set_jump(operation::const_iterator instruction)
+void evaluation_context::set_jump(op_iterator instruction)
 {
     // The begin_ member could be overloaded for this since it is never reused.
     // But the cost of the proper abstraction is just a few bytes.
@@ -120,17 +120,17 @@ bool evaluation_context::update_pubkey_count(int32_t multisig_pubkeys)
 // Properties.
 //-----------------------------------------------------------------------------
 
-operation::const_iterator evaluation_context::begin() const
+evaluation_context::op_iterator evaluation_context::begin() const
 {
     return begin_;
 }
 
-operation::const_iterator evaluation_context::jump() const
+evaluation_context::op_iterator evaluation_context::jump() const
 {
     return jump_;
 }
 
-operation::const_iterator evaluation_context::end() const
+evaluation_context::op_iterator evaluation_context::end() const
 {
     return end_;
 }
@@ -154,12 +154,13 @@ script evaluation_context::subscript() const
     return script(std::move(ops));
 }
 
-const data_stack::value_type& evaluation_context::item(size_t index) const
+const data_stack::value_type& evaluation_context::item(size_t index) /*const*/
 {
     return *position(index);
 }
 
-data_stack::const_iterator evaluation_context::position(size_t index) const
+evaluation_context::stack_iterator evaluation_context::position(
+    size_t index) /*const*/
 {
     // Subtracting 1 makes the stack indexes zero-based (unlike satoshi).
     BITCOIN_ASSERT(index < stack.size());
@@ -211,6 +212,16 @@ bool evaluation_context::stack_result() const
     return !stack.empty() && stack_to_bool();
 }
 
+bool evaluation_context::empty() const
+{
+    return stack.empty();
+}
+
+size_t evaluation_context::size() const
+{
+    return stack.size();
+}
+
 /// Stack pop.
 //-----------------------------------------------------------------------------
 
@@ -252,7 +263,7 @@ bool evaluation_context::pop_ternary(number& first, number& second,
 }
 
 // Determines if popped value is valid post-pop stack index and returns index.
-bool evaluation_context::pop_position(data_stack::const_iterator& out_position)
+bool evaluation_context::pop_position(stack_iterator& out_position)
 {
     int32_t index;
     if (!pop(index))
@@ -267,7 +278,7 @@ bool evaluation_context::pop_position(data_stack::const_iterator& out_position)
     return true;
 }
 
-// pop1/pop2/.../popi
+// pop1/pop2/.../pop[count]
 bool evaluation_context::pop(data_stack& section, size_t count)
 {
     if (stack.size() < count)
@@ -277,6 +288,19 @@ bool evaluation_context::pop(data_stack& section, size_t count)
         section.push_back(pop());
 
     return true;
+}
+
+// pop1/pop2/.../pop[pos-1]/pop[pos]/push[pos-1]/.../push2/push1
+void evaluation_context::erase(const stack_iterator& position)
+{
+    stack.erase(position);
+}
+
+// pop1/pop2/.../pop[i]/pop[first]/.../pop[last]/push[i]/.../push2/push1
+void evaluation_context::erase(const stack_iterator& first,
+    const stack_iterator& last)
+{
+    stack.erase(first, last);
 }
 
 /// Stack push.
@@ -291,7 +315,7 @@ void evaluation_context::push(bool value)
         stack.push_back({});
 }
 
-// pop1/pop2/.../popi/pushi/.../push2/push1/pushi
+// pop1/pop2/.../pop[index]/push[index]/.../push2/push1/push[index]
 void evaluation_context::duplicate(size_t index)
 {
     stack.push_back(item(index));
