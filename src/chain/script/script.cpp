@@ -844,8 +844,8 @@ code script::verify(const transaction& tx, uint32_t input_index,
     if (!interpreter::run(tx, input_index, prevout_script, out_context))
         return error::validate_inputs_failed;
 
-    // Return if stack is false.
-    if (!out_context.stack_result())
+    // Return invalid if stack is not true.
+    if (out_context.empty() || !out_context.stack_true())
         return error::validate_inputs_failed;
 
     // If the previout script is not p2sh with bip16 enabled we are done.
@@ -877,9 +877,9 @@ code script::pay_hash(const transaction& tx, uint32_t input_index,
     if (!interpreter::run(tx, input_index, embedded, context))
         return error::validate_inputs_failed;
 
-    // Return the stack state.
-    return context.stack_result() ? error::success :
-        error::validate_inputs_failed;
+    // Return invalid if stack is not true, otherwise valid.
+    return context.empty() || !context.stack_true() ?
+        error::validate_inputs_failed : error::success;
 }
 
 } // namespace chain

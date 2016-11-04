@@ -109,7 +109,7 @@ static bool op_if(evaluation_context& context)
         if (context.empty())
             return false;
 
-        value = context.stack_state();
+        value = context.stack_true();
         context.pop();
     }
 
@@ -126,7 +126,7 @@ static bool op_notif(evaluation_context& context)
         if (context.empty())
             return false;
 
-        value = !context.stack_state();
+        value = !context.stack_true();
         context.pop();
     }
 
@@ -157,7 +157,7 @@ static bool op_verify(evaluation_context& context)
     if (context.empty())
         return false;
 
-    if (!context.stack_state())
+    if (!context.stack_true())
         return false;
 
     context.pop();
@@ -271,7 +271,7 @@ static bool op_if_dup(evaluation_context& context)
     if (context.empty())
         return false;
 
-    if (context.stack_state())
+    if (context.stack_true())
         context.duplicate(0);
 
     return true;

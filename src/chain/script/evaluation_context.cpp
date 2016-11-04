@@ -206,16 +206,10 @@ bool evaluation_context::stack_to_bool() const
 }
 
 // This call must be guarded.
-bool evaluation_context::stack_state() const
+bool evaluation_context::stack_true() const
 {
     BITCOIN_ASSERT(!stack_.empty());
     return stack_to_bool();
-}
-
-// This call is safe.
-bool evaluation_context::stack_result() const
-{
-    return !stack_.empty() && stack_to_bool();
 }
 
 bool evaluation_context::empty() const

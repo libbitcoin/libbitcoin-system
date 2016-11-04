@@ -77,8 +77,7 @@ public:
     stack_iterator position(size_t index) /*const*/;
     bool is_short_circuited(const operation& op) const;
     bool is_stack_overflow() const;
-    bool stack_state() const;
-    bool stack_result() const;
+    bool stack_true() const;
     bool empty() const;
     size_t size() const;
 
