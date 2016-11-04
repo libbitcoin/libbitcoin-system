@@ -39,30 +39,36 @@ static constexpr size_t condition_capactity = max_stack_size;
 // Constructors.
 //-----------------------------------------------------------------------------
 
-// Iterators must be set via run.
+// Iterators must be set by set_script.
 evaluation_context::evaluation_context(uint32_t flags)
-  : op_count_(0), flags_(flags), condition(condition_capactity)
+  : op_count_(0), flags_(flags), condition_(condition_capactity)
 {
-    alternate.reserve(alternate_capactity);
-    stack.reserve(stack_capactity);
+    stack_.reserve(stack_capactity);
+    alternate_.reserve(alternate_capactity);
 }
 
-// Iterators must be set via set_script.
-evaluation_context::evaluation_context(uint32_t flags, data_stack&& value)
-  : op_count_(0), flags_(flags), condition(condition_capactity)
+// Iterators must be set by set_script, condition and alternate are not moved.
+evaluation_context::evaluation_context(evaluation_context&& other)
+  : stack_(std::move(other.stack_)),
+    condition_(condition_capactity),
+    flags_(other.flags_),
+    op_count_(0)
 {
-    stack = std::move(value);
-    stack.reserve(stack_capactity);
-    alternate.reserve(alternate_capactity);
+    // Regarding capacity preservation on move assignment: bit.ly/2eFbXHF
+    stack_.reserve(stack_capactity);
+    alternate_.reserve(alternate_capactity);
 }
 
-// Iterators must be set via set_script.
-evaluation_context::evaluation_context(uint32_t flags, const data_stack& value)
-  : op_count_(0), flags_(flags), condition(condition_capactity)
+// Iterators must be set by set_script, condition and alternate are not copied.
+evaluation_context::evaluation_context(const evaluation_context& other)
+  : stack_(other.stack_),
+    condition_(condition_capactity),
+    flags_(other.flags_),
+    op_count_(0)
 {
-    stack = value;
-    stack.reserve(stack_capactity);
-    alternate.reserve(alternate_capactity);
+    // Regarding capacity preservation on copy assignment: bit.ly/2eFbXHF
+    stack_.reserve(stack_capactity);
+    alternate_.reserve(alternate_capactity);
 }
 
 // Instructions.
@@ -163,26 +169,26 @@ evaluation_context::stack_iterator evaluation_context::position(
     size_t index) /*const*/
 {
     // Subtracting 1 makes the stack indexes zero-based (unlike satoshi).
-    BITCOIN_ASSERT(index < stack.size());
-    return (stack.end() - 1) - index;
+    BITCOIN_ASSERT(index < stack_.size());
+    return (stack_.end() - 1) - index;
 }
 
 bool evaluation_context::is_short_circuited(const operation& op) const
 {
-    return !(operation::is_conditional(op.code()) || condition.succeeded());
+    return !(operation::is_conditional(op.code()) || condition_.succeeded());
 }
 
 bool evaluation_context::is_stack_overflow() const
 {
     // bit.ly/2cowHlP
     // Addition is safe due to script size validation.
-    return stack.size() + alternate.size() > max_stack_size;
+    return stack_.size() + alternate_.size() > max_stack_size;
 }
 
 // private
 bool evaluation_context::stack_to_bool() const
 {
-    const auto& back = stack.back();
+    const auto& back = stack_.back();
     if (back.empty())
         return false;
 
@@ -202,24 +208,24 @@ bool evaluation_context::stack_to_bool() const
 // This call must be guarded.
 bool evaluation_context::stack_state() const
 {
-    BITCOIN_ASSERT(!stack.empty());
+    BITCOIN_ASSERT(!stack_.empty());
     return stack_to_bool();
 }
 
 // This call is safe.
 bool evaluation_context::stack_result() const
 {
-    return !stack.empty() && stack_to_bool();
+    return !stack_.empty() && stack_to_bool();
 }
 
 bool evaluation_context::empty() const
 {
-    return stack.empty();
+    return stack_.empty();
 }
 
 size_t evaluation_context::size() const
 {
-    return stack.size();
+    return stack_.size();
 }
 
 /// Stack pop.
@@ -228,25 +234,25 @@ size_t evaluation_context::size() const
 // This call must be guarded.
 data_chunk evaluation_context::pop()
 {
-    BITCOIN_ASSERT(!stack.empty());
-    const auto value = stack.back();
-    stack.pop_back();
+    BITCOIN_ASSERT(!stack_.empty());
+    const auto value = stack_.back();
+    stack_.pop_back();
     return value;
 }
 
 bool evaluation_context::pop(int32_t& out_value)
 {
-    number middle;
-    if (!pop(middle))
+    number value;
+    if (!pop(value))
         return false;
 
-    out_value = middle.int32();
+    out_value = value.int32();
     return true;
 }
 
 bool evaluation_context::pop(number& out_number, size_t maxiumum_size)
 {
-    return !stack.empty() && out_number.set_data(pop(), maxiumum_size);
+    return !stack_.empty() && out_number.set_data(pop(), maxiumum_size);
 }
 
 bool evaluation_context::pop_binary(number& first, number& second)
@@ -270,7 +276,7 @@ bool evaluation_context::pop_position(stack_iterator& out_position)
         return false;
 
     // Ensure the index is within bounds.
-    const auto size = stack.size();
+    const auto size = stack_.size();
     if (index < 0 || index >= size)
         return false;
 
@@ -281,11 +287,11 @@ bool evaluation_context::pop_position(stack_iterator& out_position)
 // pop1/pop2/.../pop[count]
 bool evaluation_context::pop(data_stack& section, size_t count)
 {
-    if (stack.size() < count)
+    if (stack_.size() < count)
         return false;
 
     for (size_t i = 0; i < count; ++i)
-        section.push_back(pop());
+        section.emplace_back(pop());
 
     return true;
 }
@@ -293,14 +299,14 @@ bool evaluation_context::pop(data_stack& section, size_t count)
 // pop1/pop2/.../pop[pos-1]/pop[pos]/push[pos-1]/.../push2/push1
 void evaluation_context::erase(const stack_iterator& position)
 {
-    stack.erase(position);
+    stack_.erase(position);
 }
 
 // pop1/pop2/.../pop[i]/pop[first]/.../pop[last]/push[i]/.../push2/push1
 void evaluation_context::erase(const stack_iterator& first,
     const stack_iterator& last)
 {
-    stack.erase(first, last);
+    stack_.erase(first, last);
 }
 
 /// Stack push.
@@ -310,15 +316,27 @@ void evaluation_context::erase(const stack_iterator& first,
 void evaluation_context::push(bool value)
 {
     if (value)
-        stack.push_back({ number::positive_1 });
+        push_move({ number::positive_1 });
     else
-        stack.push_back({});
+        push_move({});
+}
+
+// Be explicit about the intent to move or copy, to get compiler help.
+void evaluation_context::push_move(value_type&& item)
+{
+    stack_.emplace_back(std::move(item));
+}
+
+// Be explicit about the intent to move or copy, to get compiler help.
+void evaluation_context::push_copy(const value_type& item)
+{
+    stack_.emplace_back(item);
 }
 
 // pop1/pop2/.../pop[index]/push[index]/.../push2/push1/push[index]
 void evaluation_context::duplicate(size_t index)
 {
-    stack.push_back(item(index));
+    push_copy(item(index));
 }
 
 // pop1/pop2/push1/push2
@@ -328,6 +346,55 @@ void evaluation_context::swap(size_t index_left, size_t index_right)
     std::swap(
         const_cast<data_stack::value_type&>(item(index_left)),
         const_cast<data_stack::value_type&>(item(index_right)));
+}
+
+/// Alternate stack.
+//-----------------------------------------------------------------------------
+
+bool evaluation_context::empty_alternate() const
+{
+    return alternate_.empty();
+}
+
+evaluation_context::value_type evaluation_context::pop_alternate()
+{
+    BITCOIN_ASSERT(!alternate_.empty());
+    const auto value = alternate_.back();
+    alternate_.pop_back();
+    return value;
+}
+
+void evaluation_context::push_alternate(value_type&& value)
+{
+    alternate_.emplace_back(std::move(value));
+}
+
+/// Conditional stack.
+//-----------------------------------------------------------------------------
+
+void evaluation_context::close()
+{
+    condition_.close();
+}
+
+void evaluation_context::negate()
+{
+    condition_.negate();
+}
+
+void evaluation_context::open(bool value)
+{
+    return condition_.open(value);
+}
+
+bool evaluation_context::closed() const
+{
+    return condition_.closed();
+}
+
+bool evaluation_context::succeeded() const
+{
+    return condition_.succeeded();
 }
 
 } // namespace chain

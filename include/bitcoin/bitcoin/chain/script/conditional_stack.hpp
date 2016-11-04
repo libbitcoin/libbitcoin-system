@@ -31,6 +31,10 @@ class conditional_stack
 public:
     conditional_stack(size_t initial_capacity);
 
+    // This prevents inadvertent copy or move of the full evaluation context.
+    conditional_stack& operator=(conditional_stack&& other) = delete;
+    conditional_stack& operator=(const conditional_stack& other) = delete;
+
     /// Conditions.
     bool closed() const;
     bool succeeded() const;

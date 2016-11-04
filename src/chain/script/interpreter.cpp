@@ -77,7 +77,7 @@ static bool op_push_size(evaluation_context& context, const operation& op)
     static constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
     const auto size = op.code();
     BITCOIN_ASSERT(op.data().size() <= op_75);
-    context.stack.push_back(op.data());
+    context.push_copy(op.data());
     return true;
 }
 
@@ -86,7 +86,7 @@ static bool op_push_size(evaluation_context& context, const data_chunk& data,
     uint32_t DEBUG_ONLY(size_limit))
 {
     BITCOIN_ASSERT(data.size() <= size_limit);
-    context.stack.push_back(data);
+    context.push_copy(data);
     return true;
 }
 
@@ -96,7 +96,7 @@ static bool op_push_number(evaluation_context& context, uint8_t value)
     // This handles positive_0 identically to op_push_size with empty data.
     BITCOIN_ASSERT(value == script_number::negative_1 || 
         value <= script_number::positive_16);
-    context.stack.push_back({ value });
+    context.push_move({ value });
     return true;
 }
 
@@ -104,7 +104,7 @@ static bool op_if(evaluation_context& context)
 {
     auto value = false;
 
-    if (context.condition.succeeded())
+    if (context.succeeded())
     {
         if (context.empty())
             return false;
@@ -113,7 +113,7 @@ static bool op_if(evaluation_context& context)
         context.pop();
     }
 
-    context.condition.open(value);
+    context.open(value);
     return true;
 }
 
@@ -121,7 +121,7 @@ static bool op_notif(evaluation_context& context)
 {
     auto value = false;
 
-    if (context.condition.succeeded())
+    if (context.succeeded())
     {
         if (context.empty())
             return false;
@@ -130,25 +130,25 @@ static bool op_notif(evaluation_context& context)
         context.pop();
     }
 
-    context.condition.open(value);
+    context.open(value);
     return true;
 }
 
 static bool op_else(evaluation_context& context)
 {
-    if (context.condition.closed())
+    if (context.closed())
         return false;
 
-    context.condition.negate();
+    context.negate();
     return true;
 }
 
 static bool op_endif(evaluation_context& context)
 {
-    if (context.condition.closed())
+    if (context.closed())
         return false;
 
-    context.condition.close();
+    context.close();
     return true;
 }
 
@@ -166,7 +166,7 @@ static bool op_verify(evaluation_context& context)
 
 static bool op_return(evaluation_context& context)
 {
-    // In terms of validation op_return behaves identical to reserved opcodes.
+    // In terms of validation this behaves identically to reserved opcodes.
     return false;
 }
 
@@ -175,17 +175,16 @@ static bool op_to_alt_stack(evaluation_context& context)
     if (context.empty())
         return false;
 
-    context.alternate.push_back(context.pop());
+    context.push_alternate(context.pop());
     return true;
 }
 
 static bool op_from_alt_stack(evaluation_context& context)
 {
-    if (context.alternate.empty())
+    if (context.empty_alternate())
         return false;
 
-    context.stack.push_back(context.alternate.back());
-    context.alternate.pop_back();
+    context.push_move(context.pop_alternate());
     return true;
 }
 
@@ -194,8 +193,8 @@ static bool op_drop2(evaluation_context& context)
     if (context.size() < 2)
         return false;
 
-    context.stack.pop_back();
-    context.stack.pop_back();
+    context.pop();
+    context.pop();
     return true;
 }
 
@@ -207,8 +206,8 @@ static bool op_dup2(evaluation_context& context)
     auto item1 = context.item(1);
     auto item0 = context.item(0);
 
-    context.stack.emplace_back(std::move(item1));
-    context.stack.emplace_back(std::move(item0));
+    context.push_move(std::move(item1));
+    context.push_move(std::move(item0));
     return true;
 }
 
@@ -221,9 +220,9 @@ static bool op_dup3(evaluation_context& context)
     auto item1 = context.item(1);
     auto item0 = context.item(0);
 
-    context.stack.emplace_back(std::move(item2));
-    context.stack.emplace_back(std::move(item1));
-    context.stack.emplace_back(std::move(item0));
+    context.push_move(std::move(item2));
+    context.push_move(std::move(item1));
+    context.push_move(std::move(item0));
     return true;
 }
 
@@ -235,8 +234,8 @@ static bool op_over2(evaluation_context& context)
     auto item3 = context.item(3);
     auto item2 = context.item(2);
 
-    context.stack.emplace_back(std::move(item3));
-    context.stack.emplace_back(std::move(item2));
+    context.push_move(std::move(item3));
+    context.push_move(std::move(item2));
     return true;
 }
 
@@ -252,8 +251,8 @@ static bool op_rot2(evaluation_context& context)
     auto copy_4 = *position_4;
 
     context.erase(position_5, position_4 + 1);
-    context.stack.emplace_back(std::move(copy_5));
-    context.stack.emplace_back(std::move(copy_4));
+    context.push_move(std::move(copy_5));
+    context.push_move(std::move(copy_4));
     return true;
 }
 
@@ -280,11 +279,8 @@ static bool op_if_dup(evaluation_context& context)
 
 static bool op_depth(evaluation_context& context)
 {
-    //*************************************************************************
-    // CONSENSUS: overflow potential (size_t > max_uint64).
-    //*************************************************************************
     const script_number stack_size(context.size());
-    context.stack.push_back(stack_size.data());
+    context.push_move(stack_size.data());
     return true;
 }
 
@@ -330,7 +326,7 @@ static bool op_pick(evaluation_context& context)
     if (!context.pop_position(position))
         return false;
 
-    context.stack.push_back(*position);
+    context.push_copy(*position);
     return true;
 }
 
@@ -342,7 +338,7 @@ static bool op_roll(evaluation_context& context)
 
     auto copy = *position;
     context.erase(position);
-    context.stack.emplace_back(std::move(copy));
+    context.push_move(std::move(copy));
     return true;
 }
 
@@ -370,7 +366,11 @@ static bool op_tuck(evaluation_context& context)
     if (context.size() < 2)
         return false;
 
-    context.stack.insert(context.position(1), context.stack.back());
+    auto first = context.pop();
+    auto second = context.pop();
+    context.push_copy(first);
+    context.push_move(std::move(second));
+    context.push_move(std::move(first));
     return true;
 }
 
@@ -379,11 +379,10 @@ static bool op_size(evaluation_context& context)
     if (context.empty())
         return false;
 
-    //*************************************************************************
-    // CONSENSUS: overflow potential (size_t > max_uint64).
-    //*************************************************************************
-    const script_number top_size(context.stack.back().size());
-    context.stack.push_back(top_size.data());
+    auto top = context.pop();
+    const auto size = top.size();
+    context.push_move(std::move(top));
+    context.push_move(script_number(size).data());
     return true;
 }
 
@@ -414,7 +413,7 @@ static bool op_add1(evaluation_context& context)
     // CONSENSUS: overflow potential.
     //*************************************************************************
     number += 1;
-    context.stack.push_back(number.data());
+    context.push_move(number.data());
     return true;
 }
 
@@ -428,7 +427,7 @@ static bool op_sub1(evaluation_context& context)
     // CONSENSUS: underflow potential.
     //*************************************************************************
     number -= 1;
-    context.stack.push_back(number.data());
+    context.push_move(number.data());
     return true;
 }
 
@@ -442,7 +441,7 @@ static bool op_negate(evaluation_context& context)
     // CONSENSUS: overflow potential.
     //*************************************************************************
     number = -number;
-    context.stack.push_back(number.data());
+    context.push_move(number.data());
     return true;
 }
 
@@ -458,7 +457,7 @@ static bool op_abs(evaluation_context& context)
     if (number < 0)
         number = -number;
 
-    context.stack.push_back(number.data());
+    context.push_move(number.data());
     return true;
 }
 
@@ -492,7 +491,7 @@ static bool op_add(evaluation_context& context)
     // CONSENSUS: overflow potential.
     //*************************************************************************
     const auto result = first + second;
-    context.stack.push_back(result.data());
+    context.push_move(result.data());
     return true;
 }
 
@@ -506,7 +505,7 @@ static bool op_sub(evaluation_context& context)
     // CONSENSUS: underflow potential.
     //*************************************************************************
     const auto result = second - first;
-    context.stack.push_back(result.data());
+    context.push_move(result.data());
     return true;
 }
 
@@ -606,9 +605,9 @@ static bool op_min(evaluation_context& context)
         return false;
 
     if (second < first)
-        context.stack.push_back(second.data());
+        context.push_move(second.data());
     else
-        context.stack.push_back(first.data());
+        context.push_move(first.data());
 
     return true;
 }
@@ -620,7 +619,7 @@ static bool op_max(evaluation_context& context)
         return false;
 
     auto greater = second > first ? second.data() : first.data();
-    context.stack.emplace_back(std::move(greater));
+    context.push_move(std::move(greater));
     return true;
 }
 
@@ -641,7 +640,7 @@ static bool op_ripemd160(evaluation_context& context)
 
     // TODO: move array buffer into vector.
     const auto hash = ripemd160_hash(context.pop());
-    context.stack.push_back(to_chunk(hash));
+    context.push_move(to_chunk(hash));
     return true;
 }
 
@@ -650,8 +649,8 @@ static bool op_sha1(evaluation_context& context)
     if (context.empty())
         return false;
 
-    // TODO: move array buffer into vector.
-    context.stack.push_back(to_chunk(sha1_hash(context.pop())));
+    // TODO: create sha1_hash overload that emits to data_chunk.
+    context.push_move(to_chunk(sha1_hash(context.pop())));
     return true;
 }
 
@@ -660,8 +659,8 @@ static bool op_sha256(evaluation_context& context)
     if (context.empty())
         return false;
 
-    // TODO: move array buffer into vector.
-    context.stack.push_back(to_chunk(sha256_hash(context.pop())));
+    // TODO: create sha256_hash overload that emits to data_chunk.
+    context.push_move(to_chunk(sha256_hash(context.pop())));
     return true;
 }
 
@@ -670,8 +669,8 @@ static bool op_hash160(evaluation_context& context)
     if (context.empty())
         return false;
 
-    // TODO: move array buffer into vector.
-    context.stack.push_back(to_chunk(bitcoin_short_hash(context.pop())));
+    // TODO: create bitcoin_short_hash overload that emits to data_chunk.
+    context.push_move(to_chunk(bitcoin_short_hash(context.pop())));
     return true;
 }
 
@@ -680,15 +679,14 @@ static bool op_hash256(evaluation_context& context)
     if (context.empty())
         return false;
 
-    // TODO: move array buffer into vector.
-    context.stack.push_back(to_chunk(bitcoin_hash(context.pop())));
+    // TODO: create bitcoin_hash overload that emits to data_chunk.
+    context.push_move(to_chunk(bitcoin_hash(context.pop())));
     return true;
 }
 
 static bool op_code_seperator(evaluation_context& context,
     const operation::const_iterator program_counter)
 {
-    // Modify context.begin() for the next op_check_[multi_]sig_verify call.
     context.set_jump(program_counter + 1);
     return true;
 }
@@ -921,7 +919,7 @@ bool interpreter::run(const transaction& tx, uint32_t input_index,
     ////    return false;
 
     // Confirm that scopes are paired.
-    return context.condition.closed();
+    return context.closed();
 }
 
 bool interpreter::run_op(operation::const_iterator pc, const transaction& tx,

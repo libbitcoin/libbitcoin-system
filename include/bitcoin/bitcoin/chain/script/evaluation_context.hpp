@@ -48,10 +48,14 @@ public:
     ////typedef data_stack::const_iterator stack_iterator;
     typedef data_stack::iterator stack_iterator;
 
-    /// Constructors.
+    /// Create an instance with empty stacks.
     evaluation_context(uint32_t flags);
-    evaluation_context(uint32_t flags, data_stack&& value);
-    evaluation_context(uint32_t flags, const data_stack& value);
+
+    /// Create using copied flags and moved stack (only).
+    evaluation_context(evaluation_context&& other);
+
+    /// Create using copied flags and copied stack (only).
+    evaluation_context(const evaluation_context& other);
 
     /// Instructions.
     bool set_script(const script& script);
@@ -91,23 +95,36 @@ public:
 
     /// Stack push.
     void push(bool value);
+    void push_move(value_type&& item);
+    void push_copy(const value_type& item);
     void duplicate(size_t index);
     void swap(size_t index_left, size_t index_right);
 
-    /// Stacks.
-    /// TODO: make private.
-    data_stack stack;
-    data_stack alternate;
-    conditional_stack condition;
+    /// Alternate stack.
+    bool empty_alternate() const;
+    value_type pop_alternate();
+    void push_alternate(value_type&& value);
+
+    /// Conditional stack.
+    void close();
+    void negate();
+    void open(bool value);
+    bool closed() const;
+    bool succeeded() const;
 
 private:
     bool stack_to_bool() const;
 
-    size_t op_count_;
-    const uint32_t flags_;
+    data_stack stack_;
+    data_stack alternate_;
+    conditional_stack condition_;
+
     op_iterator begin_;
     op_iterator jump_;
     op_iterator end_;
+
+    const uint32_t flags_;
+    size_t op_count_;
 };
 
 } // namespace chain

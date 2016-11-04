@@ -835,10 +835,10 @@ code script::verify(const transaction& tx, uint32_t input_index,
     // Evaluate the input script.
     if (!interpreter::run(tx, input_index, input_script, input_context))
         return error::validate_inputs_failed;
-
-    // Copy the input context stack for evaluation of the prevout script.
+    
     // We need to preserve the input stack for potential p2sh evaluation.
-    evaluation_context out_context(flags, input_context.stack);
+    // COPY input context stack (only) and flags for eval of prevout script.
+    evaluation_context out_context(input_context);
 
     // Evaluate the prevout script against the input stack.
     if (!interpreter::run(tx, input_index, prevout_script, out_context))
@@ -870,9 +870,8 @@ code script::pay_hash(const transaction& tx, uint32_t input_index,
     if (!embedded.from_data(input_context.pop(), false))
         return error::validate_inputs_failed;
 
-    // Use popped stack for evaluation of the eval script.
-    evaluation_context context(input_context.flags(),
-        std::move(input_context.stack));
+    // MOVE popped stack (only) and flags for evaluation of eval script.
+    evaluation_context context(std::move(input_context));
 
     // Evaluate the embedded script.
     if (!interpreter::run(tx, input_index, embedded, context))
