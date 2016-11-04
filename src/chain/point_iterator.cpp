@@ -65,10 +65,8 @@ uint8_t point_iterator::current() const
     if (current_ < hash_size)
         return point_.hash()[current_];
 
+    // TODO: move the little-endian iterator into endian.hpp.
     const auto position = current_ - hash_size;
-    BITCOIN_ASSERT_MSG(position < sizeof(uint32_t), "increment failure");
-
-    // TODO: move this little-endian iterator into endian.hpp.
     return static_cast<uint8_t>(point_.index() >> (position * byte_bits));
 }
 
