@@ -890,15 +890,12 @@ static bool op_check_locktime_verify(evaluation_context& context,
 //
 // TODO:
 // Refactor context to allow simple: script.run(context)
-// * remove script from context and directly use script iterator for ops.
-// * keep jump on context.
-// * optionally capture tx/input_index on context (only required for sigs).
+// * make tx/input_index optional on context (only required for sigs).
+// * fail signature check if there is no context.transaction/input_index.
 // * expose context signature checker that invokes jump script on tx/input
 //   given inputs parsed from the current stack.
-// * fail signature check if there is no context.transaction/input_index.
 //_____________________________________________________________________________
 
-// The script paramter is NOT always tx.indexes[input_index].script.
 bool interpreter::run(const script& script, evaluation_context& context)
 {
     if (!context.set_script(script))
@@ -922,7 +919,6 @@ bool interpreter::run(const script& script, evaluation_context& context)
             return false;
     }
 
-    // Confirm that scopes are paired.
     return context.closed();
 }
 
