@@ -137,16 +137,18 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "merkle root mismatch";
         case error::insufficient_work:
             return "insufficient work to reorganize";
-        case error::too_many_sigops:
-            return "too many signature operations";
+        case error::block_legacy_sigop_limit:
+            return "too many block legacy signature operations";
 
         // accept block
         case error::non_final_transaction:
             return "block contains a non-final transaction";
         case error::coinbase_height_mismatch:
             return "block height mismatch in coinbase";
-        case error::coinbase_too_large:
-            return "coinbase value is too large";
+        case error::coinbase_value_limit:
+            return "coinbase value is too high";
+        case error::block_embedded_sigop_limit:
+            return "too many block embedded signature operations";
 
         // check transaction
         case error::empty_transaction:
@@ -159,6 +161,8 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "coinbase script is too small or large";
         case error::coinbase_transaction:
             return "coinbase transaction disallowed in memory pool";
+        case error::transaction_legacy_sigop_limit:
+            return "too many transaction legacy signature operations";
 
         // accept transaction
         case error::unspent_duplicate:
@@ -171,6 +175,8 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "immature coinbase spent";
         case error::spend_exceeds_value:
             return "spend exceeds value of inputs";
+        case error::transaction_embedded_sigop_limit:
+            return "too many transaction embedded signature operations";
 
         // connect input
         case error::invalid_script:

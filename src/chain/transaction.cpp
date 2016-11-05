@@ -747,14 +747,14 @@ code transaction::check(bool transaction_pool) const
         return error::coinbase_transaction;
 
     else if (transaction_pool && serialized_size() >= max_block_size)
-        return error::block_size_limit;
+        return error::transction_size_limit;
 
     // We cannot know if bip16 is enabled at this point so we disable it.
     // This will not make a difference unless prevouts are populated, in which
     // case they are ignored. This means that p2sh sigops are not counted here.
     // This is a preliminary check, the final count must come from connect().
     else if (transaction_pool && signature_operations(false) > max_block_sigops)
-        return error::too_many_sigops;
+        return error::transaction_legacy_sigop_limit;
 
     else
         return error::success;
@@ -785,7 +785,7 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
 
     // This recomputes sigops to include p2sh from prevouts.
     else if (transaction_pool && signature_operations(bip16) > max_block_sigops)
-        return error::too_many_sigops;
+        return error::transaction_embedded_sigop_limit;
 
     else
         return error::success;
