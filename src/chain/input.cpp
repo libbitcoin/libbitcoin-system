@@ -271,6 +271,8 @@ size_t input::signature_operations(bool bip16_active) const
 
     if (bip16_active)
     {
+        BITCOIN_ASSERT(previous_output_.is_valid());
+
         // This cannot overflow because each total is limited by max ops.
         const auto& cache = previous_output_.validation.cache.script();
         sigops += script_.pay_script_hash_sigops(cache);
