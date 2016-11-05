@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(filter_add__constructor_2__always__equals_params)
 {
     const data_chunk data = { 0x0f, 0xf0, 0x55, 0xaa };
     message::filter_add instance(data);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(data == instance.data());
 }
 
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(filter_add__constructor_3__always__equals_params)
     const data_chunk data = { 0x0f, 0xf0, 0x55, 0xaa };
     auto dup = data;
     message::filter_add instance(std::move(dup));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(data == instance.data());
 }
 
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(filter_add__constructor_4__always__equals_params)
     const data_chunk data = { 0x0f, 0xf0, 0x55, 0xaa };
     const message::filter_add value(data);
     message::filter_add instance(value);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(value == instance);
     BOOST_REQUIRE(data == instance.data());
 }
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(filter_add__constructor_5__always__equals_params)
     const data_chunk data = { 0x0f, 0xf0, 0x55, 0xaa };
     message::filter_add value(data);
     message::filter_add instance(std::move(value));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(data == instance.data());
 }
 
@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE(filter_add__operator_boolean_equals__duplicates__returns_tr
 {
     const message::filter_add expected({ 0x0f, 0xf0, 0x55, 0xaa });
     message::filter_add instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(filter_add__operator_boolean_equals__differs__returns_false)
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(filter_add__operator_boolean_not_equals__differs__returns_t
 {
     const message::filter_add expected({ 0x0f, 0xf0, 0x55, 0xaa });
     message::filter_add instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

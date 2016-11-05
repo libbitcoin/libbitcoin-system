@@ -45,42 +45,19 @@ public:
     typedef std::vector<point> list;
     typedef std::vector<uint32_t> indexes;
 
-    static point factory_from_data(const data_chunk& data);
-    static point factory_from_data(std::istream& stream);
-    static point factory_from_data(reader& source);
-    static uint64_t satoshi_fixed_size();
+    // Constructors.
+    //-------------------------------------------------------------------------
 
     point();
-    point(const hash_digest& hash, uint32_t index);
-    point(hash_digest&& hash, uint32_t index);
-    point(const point& other);
+
     point(point&& other);
+    point(const point& other);
 
-    hash_digest& hash();
-    const hash_digest& hash() const;
-    void set_hash(const hash_digest& value);
-    void set_hash(hash_digest&& value);
+    point(hash_digest&& hash, uint32_t index);
+    point(const hash_digest& hash, uint32_t index);
 
-    uint32_t index() const;
-    void set_index(uint32_t value);
-
-    bool from_data(const data_chunk& data);
-    bool from_data(std::istream& stream);
-    bool from_data(reader& source);
-    data_chunk to_data() const;
-    void to_data(std::ostream& stream) const;
-    void to_data(writer& sink) const;
-
-    void reset();
-    bool is_valid() const;
-    bool is_null() const;
-
-    uint64_t checksum() const;
-    uint64_t serialized_size() const;
-    std::string to_string() const;
-
-    point_iterator begin() const;
-    point_iterator end() const;
+    // Operators.
+    //-------------------------------------------------------------------------
 
     /// This class is move assignable and copy assignable.
     point& operator=(point&& other);
@@ -89,9 +66,64 @@ public:
     bool operator==(const point& other) const;
     bool operator!=(const point& other) const;
 
+    // Deserialization.
+    //-------------------------------------------------------------------------
+
+    static point factory_from_data(const data_chunk& data);
+    static point factory_from_data(std::istream& stream);
+    static point factory_from_data(reader& source);
+
+    bool from_data(const data_chunk& data);
+    bool from_data(std::istream& stream);
+    bool from_data(reader& source);
+
+    bool is_valid() const;
+
+    // Serialization.
+    //-------------------------------------------------------------------------
+
+    data_chunk to_data() const;
+    void to_data(std::ostream& stream) const;
+    void to_data(writer& sink) const;
+
+    std::string to_string() const;
+
+    // Iteration.
+    //-------------------------------------------------------------------------
+
+    point_iterator begin() const;
+    point_iterator end() const;
+
+    // Properties (size, accessors, cache).
+    //-------------------------------------------------------------------------
+
+    static uint64_t satoshi_fixed_size();
+    uint64_t serialized_size() const;
+
+    // deprecated (unsafe)
+    hash_digest& hash();
+
+    const hash_digest& hash() const;
+    void set_hash(hash_digest&& value);
+    void set_hash(const hash_digest& value);
+
+    uint32_t index() const;
+    void set_index(uint32_t value);
+
+    // Utilities.
+    //-------------------------------------------------------------------------
+
+    uint64_t checksum() const;
+
+    // Validation.
+    //-------------------------------------------------------------------------
+
+    bool is_null() const;
+
 protected:
-    point(const hash_digest& hash, uint32_t index, bool valid);
     point(hash_digest&& hash, uint32_t index, bool valid);
+    point(const hash_digest& hash, uint32_t index, bool valid);
+    void reset();
 
 private:
     hash_digest hash_;
@@ -103,6 +135,10 @@ typedef point input_point;
 
 } // namespace chain
 } // namespace libbitcoin
+
+
+// Standard hash.
+//-----------------------------------------------------------------------------
 
 namespace std
 {

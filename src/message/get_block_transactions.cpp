@@ -133,6 +133,7 @@ bool get_block_transactions::from_data(uint32_t version,
 data_chunk get_block_transactions::to_data(uint32_t version) const
 {
     data_chunk data;
+    data.reserve(serialized_size(version));
     data_sink ostream(data);
     to_data(version, ostream);
     ostream.flush();

@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__constructor_2__always__equals_params)
     };
 
     message::block_transactions instance(hash, transactions);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(hash == instance.block_hash());
     BOOST_REQUIRE(transactions == instance.transactions());
 }
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__constructor_3__always__equals_params)
     message::block_transactions instance(std::move(dup_hash),
         std::move(dup_transactions));
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(hash == instance.block_hash());
     BOOST_REQUIRE(transactions == instance.transactions());
 }
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__constructor_4__always__equals_params)
     message::block_transactions value(hash, transactions);
     message::block_transactions instance(value);
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(value == instance);
     BOOST_REQUIRE(hash == instance.block_hash());
     BOOST_REQUIRE(transactions == instance.transactions());
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__constructor_5__always__equals_params)
     message::block_transactions value(hash, transactions);
     message::block_transactions instance(std::move(value));
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(hash == instance.block_hash());
     BOOST_REQUIRE(transactions == instance.transactions());
 }
@@ -482,7 +482,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__operator_boolean_equals__duplicates__re
         });
 
     message::block_transactions instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__operator_boolean_equals__differs__returns_false)
@@ -524,7 +524,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__operator_boolean_not_equals__differs__r
         });
 
     message::block_transactions instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

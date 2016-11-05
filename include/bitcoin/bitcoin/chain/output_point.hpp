@@ -107,6 +107,10 @@ public:
 
     // These fields do not participate in serialization or comparison.
     mutable validation validation;
+
+protected:
+    // So that input may call reset from its own.
+    friend class input;
 };
 
 struct BC_API points_info

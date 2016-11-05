@@ -29,8 +29,6 @@
 namespace libbitcoin {
 namespace chain {
 
-static constexpr auto use_length_prefix = true;
-
 // Constructors.
 //-----------------------------------------------------------------------------
 
@@ -66,18 +64,18 @@ input::input(const output_point& previous_output, const chain::script& script,
 // Operators.
 //-----------------------------------------------------------------------------
 
-input& input::operator=(const input& other)
-{
-    previous_output_ = other.previous_output_;
-    script_ = other.script_;
-    sequence_ = other.sequence_;
-    return *this;
-}
-
 input& input::operator=(input&& other)
 {
     previous_output_ = std::move(other.previous_output_);
     script_ = std::move(other.script_);
+    sequence_ = other.sequence_;
+    return *this;
+}
+
+input& input::operator=(const input& other)
+{
+    previous_output_ = other.previous_output_;
+    script_ = other.script_;
     sequence_ = other.sequence_;
     return *this;
 }
@@ -137,12 +135,7 @@ bool input::from_data(reader& source, bool)
     if (!previous_output_.from_data(source))
         return false;
 
-    // Parse the coinbase tx as raw data.
-    // Always parse non-coinbase input/output scripts as fallback.
-    const auto parse_mode = previous_output_.is_null() ?
-        script::parse_mode::raw_data : script::parse_mode::raw_data_fallback;
-
-    script_.from_data(source, use_length_prefix, parse_mode);
+    script_.from_data(source, true);
     sequence_ = source.read_4_bytes_little_endian();
 
     if (!source)
@@ -153,8 +146,8 @@ bool input::from_data(reader& source, bool)
 
 void input::reset()
 {
-    previous_output_ = chain::output_point{};
-    script_ = chain::script{};
+    previous_output_.reset();
+    script_.reset();
     sequence_ = 0;
 }
 
@@ -170,6 +163,7 @@ bool input::is_valid() const
 data_chunk input::to_data(bool wire) const
 {
     data_chunk data;
+    data.reserve(serialized_size(wire));
     data_sink ostream(data);
     to_data(ostream, wire);
     ostream.flush();
@@ -186,7 +180,7 @@ void input::to_data(std::ostream& stream, bool wire) const
 void input::to_data(writer& sink, bool) const
 {
     previous_output_.to_data(sink);
-    script_.to_data(sink, use_length_prefix);
+    script_.to_data(sink, true);
     sink.write_4_bytes_little_endian(sequence_);
 }
 
@@ -207,7 +201,7 @@ std::string input::to_string(uint32_t flags) const
 uint64_t input::serialized_size(bool) const
 {
     return previous_output_.serialized_size() +
-        script_.serialized_size(use_length_prefix) + sizeof(sequence_);
+        script_.serialized_size(true) + sizeof(sequence_);
 }
 
 // Accessors.

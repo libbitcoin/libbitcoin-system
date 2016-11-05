@@ -34,16 +34,16 @@ BOOST_AUTO_TEST_CASE(ping__constructor_2__always__equals_params)
 {
     uint64_t nonce = 462434u;
     message::ping instance(nonce);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(nonce, instance.nonce());
 }
 
 BOOST_AUTO_TEST_CASE(ping__constructor_3__always__equals_params)
 {
     message::ping expected(24235u);
-    BOOST_REQUIRE_EQUAL(true, expected.is_valid());
+    BOOST_REQUIRE(expected.is_valid());
     message::ping instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(expected == instance);
 }
 
@@ -229,7 +229,7 @@ BOOST_AUTO_TEST_CASE(ping__operator_boolean_equals__duplicates__returns_true)
 {
     const message::ping expected(4543234u);
     message::ping instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(ping__operator_boolean_equals__differs__returns_false)
@@ -250,7 +250,7 @@ BOOST_AUTO_TEST_CASE(ping__operator_boolean_not_equals__differs__returns_true)
 {
     const message::ping expected(89764u);
     message::ping instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

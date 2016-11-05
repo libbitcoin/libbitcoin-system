@@ -17,29 +17,37 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/chain/script/evaluation_context.hpp>
+#ifndef LIBBITCOIN_CHAIN_RULE_FORK_HPP
+#define LIBBITCOIN_CHAIN_RULE_FORK_HPP
 
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <cstdint>
 
 namespace libbitcoin {
 namespace chain {
 
-evaluation_context::evaluation_context(uint32_t flags)
-  : flags(flags)
+enum rule_fork : uint32_t
 {
-}
+    no_rules = 0,
 
-evaluation_context::evaluation_context(uint32_t flags, const data_stack& stack)
-  : flags(flags), stack(stack)
-{
-}
+    /// pay-to-script-hash enabled
+    bip16_rule = 1 << 0,
 
-data_chunk evaluation_context::pop_stack()
-{
-    const auto value = stack.back();
-    stack.pop_back();
-    return value;
-}
+    /// no duplicated unspent transaction ids
+    bip30_rule = 1 << 1,
+
+    /// coinbase must include height
+    bip34_rule = 1 << 2,
+
+    /// strict DER signatures required
+    bip66_rule = 1 << 3,
+
+    /// nop2 becomes check locktime verify
+    bip65_rule = 1 << 4,
+
+    all_rules = 0xffffffff
+};
 
 } // namespace chain
 } // namespace libbitcoin
+
+#endif

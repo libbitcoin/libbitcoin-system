@@ -72,9 +72,9 @@ public:
     // Operators.
     //-------------------------------------------------------------------------
 
-    /// This class is move assignable [but not copy assignable].
+    /// This class is move assignable but NOT copy assignable.
     block& operator=(block&& other);
-    block& operator=(const block& other) /* = delete */;
+    block& operator=(const block& other) = delete;
 
     bool operator==(const block& other) const;
     bool operator!=(const block& other) const;

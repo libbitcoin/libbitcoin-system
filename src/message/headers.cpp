@@ -69,10 +69,10 @@ headers::headers()
 {
 }
 
+// Uses headers copy assignment.
 headers::headers(const header_message::list& values)
+  : elements_(values)
 {
-    // Uses headers copy assignment.
-    elements_.insert(elements_.end(), values.begin(), values.end());
 }
 
 headers::headers(header_message::list&& values)
@@ -140,6 +140,7 @@ bool headers::from_data(uint32_t version, reader& source)
 data_chunk headers::to_data(uint32_t version) const
 {
     data_chunk data;
+    data.reserve(serialized_size(version));
     data_sink ostream(data);
     to_data(version, ostream);
     ostream.flush();

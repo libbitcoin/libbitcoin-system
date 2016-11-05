@@ -21,11 +21,12 @@
 #define LIBBITCOIN_CHAIN_OPERATION_HPP
 
 #include <cstddef>
+#include <cstdint>
 #include <iostream>
 #include <vector>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
+#include <bitcoin/bitcoin/chain/script/script_pattern.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
@@ -33,115 +34,27 @@
 namespace libbitcoin {
 namespace chain {
 
-/// Script patterms.
-/// Comments from: bitcoin.org/en/developer-guide#signature-hash-types
-enum class script_pattern
-{
-    /// Null Data
-    /// Pubkey Script: OP_RETURN <0 to 80 bytes of data> (formerly 40 bytes)
-    /// Null data scripts cannot be spent, so there's no signature script.
-    null_data,
-
-    /// Pay to Multisig [BIP11]
-    /// Pubkey script: <m> <A pubkey>[B pubkey][C pubkey...] <n> OP_CHECKMULTISIG
-    /// Signature script: OP_0 <A sig>[B sig][C sig...]
-    pay_multisig,
-
-    /// Pay to Public Key (obsolete)
-    pay_public_key,
-
-    /// Pay to Public Key Hash [P2PKH]
-    /// Pubkey script: OP_DUP OP_HASH160 <PubKeyHash> OP_EQUALVERIFY OP_CHECKSIG
-    /// Signature script: <sig> <pubkey>
-    pay_key_hash,
-
-    /// Pay to Script Hash [P2SH/BIP16]
-    /// The redeem script may be any pay type, but only multisig makes sense.
-    /// Pubkey script: OP_HASH160 <Hash160(redeemScript)> OP_EQUAL
-    /// Signature script: <sig>[sig][sig...] <redeemScript>
-    pay_script_hash,
-
-    /// Sign Multisig script [BIP11]
-    sign_multisig,
-
-    /// Sign Public Key (obsolete)
-    sign_public_key,
-
-    /// Sign Public Key Hash [P2PKH]
-    sign_key_hash,
-
-    /// Sign Script Hash [P2SH/BIP16]
-    sign_script_hash,
-
-    /// The script is valid but does not conform to the standard templates.
-    /// Such scripts are always accepted if they are mined into blocks, but
-    /// transactions with non-standard scripts may not be forwarded by peers.
-    non_standard
-};
-
 class BC_API operation
 {
 public:
-    typedef std::vector<operation> stack;
+    typedef std::vector<operation> sequence;
+    typedef std::vector<operation>::const_iterator const_iterator;
 
-    static const size_t max_null_data_size;
-
-    static operation factory_from_data(const data_chunk& data);
-    static operation factory_from_data(std::istream& stream);
-    static operation factory_from_data(reader& source);
-
-    static bool is_push_only(const operation::stack& operations);
-
-    /// unspendable pattern (standard)
-    static bool is_null_data_pattern(const operation::stack& ops);
-
-    /// payment script patterns (standard)
-    static bool is_pay_multisig_pattern(const operation::stack& ops);
-    static bool is_pay_public_key_pattern(const operation::stack& ops);
-    static bool is_pay_key_hash_pattern(const operation::stack& ops);
-    static bool is_pay_script_hash_pattern(const operation::stack& ops);
-
-    /// signature script patterns (standard)
-    static bool is_sign_multisig_pattern(const operation::stack& ops);
-    static bool is_sign_public_key_pattern(const operation::stack& ops);
-    static bool is_sign_key_hash_pattern(const operation::stack& ops);
-    static bool is_sign_script_hash_pattern(const operation::stack& ops);
-
-    /// stack factories
-    static stack to_null_data_pattern(data_slice data);
-    static stack to_pay_multisig_pattern(uint8_t signatures,
-        const point_list& points);
-    static stack to_pay_multisig_pattern(uint8_t signatures,
-        const data_stack& points);
-    static stack to_pay_public_key_pattern(data_slice point);
-    static stack to_pay_key_hash_pattern(const short_hash& hash);
-    static stack to_pay_script_hash_pattern(const short_hash& hash);
+    // Constructors.
+    //-------------------------------------------------------------------------
 
     operation();
-    operation(opcode code, const data_chunk& data);
-    operation(opcode code, data_chunk&& data);
-    operation(const operation& other);
+
     operation(operation&& other);
+    operation(const operation& other);
 
-    opcode code() const;
-    void set_code(opcode code);
+    operation(opcode code);
 
-    data_chunk& data();
-    const data_chunk& data() const;
-    void set_data(const data_chunk& data);
-    void set_data(data_chunk&& data);
+    operation(data_chunk&& uncoded, bool minimal=true);
+    operation(const data_chunk& uncoded, bool minimal=true);
 
-    std::string to_string(uint32_t flags) const;
-
-    bool from_data(const data_chunk& data);
-    bool from_data(std::istream& stream);
-    bool from_data(reader& source);
-    data_chunk to_data() const;
-    void to_data(std::ostream& stream) const;
-    void to_data(writer& sink) const;
-    bool is_valid() const;
-    void reset();
-    uint64_t serialized_size() const;
+    // Operators.
+    //-------------------------------------------------------------------------
 
     operation& operator=(operation&& other);
     operation& operator=(const operation& other);
@@ -149,14 +62,85 @@ public:
     bool operator==(const operation& other) const;
     bool operator!=(const operation& other) const;
 
-private:
-    static bool is_push(const opcode code);
-    static bool must_read_data(opcode code);
-    static uint32_t read_opcode_data_size(opcode code, uint8_t byte,
-        reader& source);
+    // Deserialization.
+    //-------------------------------------------------------------------------
 
+    static operation factory_from_data(const data_chunk& encoded);
+    static operation factory_from_data(std::istream& stream);
+    static operation factory_from_data(reader& source);
+
+    bool from_data(const data_chunk& encoded);
+    bool from_data(std::istream& stream);
+    bool from_data(reader& source);
+
+    bool from_string(const std::string& mnemonic);
+
+    bool is_valid() const;
+
+    // Serialization.
+    //-------------------------------------------------------------------------
+
+    void to_data(std::ostream& stream) const;
+    void to_data(writer& sink) const;
+    data_chunk to_data() const;
+
+    std::string to_string(uint32_t active_forks) const;
+
+    // Properties (size, accessors, cache).
+    //-------------------------------------------------------------------------
+
+    uint64_t serialized_size() const;
+
+    /// Get the op code [0..255], if is_valid is consistent with data.
+    opcode code() const;
+
+    /// Get the data, empty if not a push code or if invalid.
+    const data_chunk& data() const;
+
+    // Utilities.
+    //-------------------------------------------------------------------------
+
+    /// Compute the minimal data opcode based on size alone.
+    static opcode opcode_from_size(size_t size);
+
+    /// Compute the minimal data opcode for a given chunk of data.
+    /// If a numeric code is used then corresponding data must be set to empty.
+    static opcode opcode_from_data(const data_chunk& data);
+
+    /// Convert the [1..16] value to the corresponding opcode (or undefined).
+    static opcode opcode_from_positive(uint8_t value);
+
+    /// Convert the opcode to the corresponding [1..16] value (or undefined).
+    static uint8_t opcode_to_positive(opcode code);
+
+    /// Types of opcodes.
+    static bool is_push(opcode code);
+    static bool is_counted(opcode code);
+    static bool is_numeric(opcode code);
+    static bool is_positive(opcode code);
+    static bool is_disabled(opcode code);
+    static bool is_conditional(opcode code);
+
+    // Validation.
+    //-------------------------------------------------------------------------
+
+    bool is_push() const;
+    bool is_counted() const;
+    bool is_positive() const;
+    bool is_disabled() const;
+    bool is_conditional() const;
+    bool is_oversized() const;
+
+protected:
+    operation(opcode code, data_chunk&& data, bool valid);
+    operation(opcode code, const data_chunk& data, bool valid);
+    static uint32_t read_data_size(opcode code, reader& source);
+    void reset();
+
+private:
     opcode code_;
     data_chunk data_;
+    bool valid_;
 };
 
 } // end chain

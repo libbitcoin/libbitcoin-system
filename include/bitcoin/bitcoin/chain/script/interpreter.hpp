@@ -21,40 +21,109 @@
 #define LIBBITCOIN_CHAIN_INTERPRETER_HPP
 
 #include <cstdint>
-#include <bitcoin/bitcoin/chain/script/evaluation_context.hpp>
+#include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
-#include <bitcoin/bitcoin/chain/script/script.hpp>
+#include <bitcoin/bitcoin/chain/script/program.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 namespace chain {
 
-class transaction;
-
 class BC_API interpreter
 {
 public:
-    static bool run(const transaction& tx, uint32_t input_index,
-        const script& script, evaluation_context& context, uint32_t flags);
+    typedef error::error_code_t result;
+
+    // Operations (shared).
+    //-----------------------------------------------------------------------------
+
+    static inline result op_nop(opcode);
+    static inline result op_disabled(opcode);
+    static inline result op_reserved(opcode);
+    static inline result op_push_number(program& program, uint8_t value);
+    static inline result op_push_size(program& program, const operation& op);
+    static inline result op_push_data(program& program, const data_chunk& data,
+        uint32_t size_limit);
+
+    // Operations (not shared).
+    //-----------------------------------------------------------------------------
+
+    static inline result op_if(program& program);
+    static inline result op_notif(program& program);
+    static inline result op_else(program& program);
+    static inline result op_endif(program& program);
+    static inline result op_verify(program& program);
+    static inline result op_return(program& program);
+    static inline result op_to_alt_stack(program& program);
+    static inline result op_from_alt_stack(program& program);
+    static inline result op_drop2(program& program);
+    static inline result op_dup2(program& program);
+    static inline result op_dup3(program& program);
+    static inline result op_over2(program& program);
+    static inline result op_rot2(program& program);
+    static inline result op_swap2(program& program);
+    static inline result op_if_dup(program& program);
+    static inline result op_depth(program& program);
+    static inline result op_drop(program& program);
+    static inline result op_dup(program& program);
+    static inline result op_nip(program& program);
+    static inline result op_over(program& program);
+    static inline result op_pick(program& program);
+    static inline result op_roll(program& program);
+    static inline result op_rot(program& program);
+    static inline result op_swap(program& program);
+    static inline result op_tuck(program& program);
+    static inline result op_size(program& program);
+    static inline result op_equal(program& program);
+    static inline result op_equal_verify(program& program);
+    static inline result op_add1(program& program);
+    static inline result op_sub1(program& program);
+    static inline result op_negate(program& program);
+    static inline result op_abs(program& program);
+    static inline result op_not(program& program);
+    static inline result op_nonzero(program& program);
+    static inline result op_add(program& program);
+    static inline result op_sub(program& program);
+    static inline result op_bool_and(program& program);
+    static inline result op_bool_or(program& program);
+    static inline result op_num_equal(program& program);
+    static inline result op_num_equal_verify(program& program);
+    static inline result op_num_not_equal(program& program);
+    static inline result op_less_than(program& program);
+    static inline result op_greater_than(program& program);
+    static inline result op_less_than_or_equal(program& program);
+    static inline result op_greater_than_or_equal(program& program);
+    static inline result op_min(program& program);
+    static inline result op_max(program& program);
+    static inline result op_within(program& program);
+    static inline result op_ripemd160(program& program);
+    static inline result op_sha1(program& program);
+    static inline result op_sha256(program& program);
+    static inline result op_hash160(program& program);
+    static inline result op_hash256(program& program);
+    static inline result op_codeseparator(program& program, const operation& op);
+    static inline result op_check_sig_verify(program& program);
+    static inline result op_check_sig(program& program);
+    static inline result op_check_multisig_verify(program& program);
+    static inline result op_check_multisig(program& program);
+    static inline result op_check_locktime_verify(program& program);
+
+    /// Run program (script, tx, index, flags, ) here.
+    static code run(program& program);
+
+    /// Run individual operations in program (idependent of its script).
+    /// For best performance use script runner for multiple operations.
+    static code run(const operation& op, program& program);
 
 private:
-    static bool next_operation(const transaction& tx, uint32_t input_index,
-        operation::stack::const_iterator it, const script& script,
-        evaluation_context& context, uint32_t flags);
-
-    static bool run_operation(const operation& op, const transaction& tx,
-        uint32_t input_index, const script& script,
-        evaluation_context& context, uint32_t flags);
+    static inline result run_op(const operation& op, program& program);
 };
-
-data_chunk bool_to_stack(bool value);
-bool stack_to_bool(const data_chunk& values);
-bool stack_result(const evaluation_context& context);
 
 } // namespace chain
 } // namespace libbitcoin
+
+#include <bitcoin/bitcoin/impl/script/interpreter.ipp>
 
 #endif

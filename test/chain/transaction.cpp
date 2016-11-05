@@ -110,21 +110,21 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_1__always__returns_default_initial
 "Inputs:\n" \
 "\thash = 5c9ecfefa5d14815922778a32d9b01b3a6e7761795aefeba1796f237d82ae664\n" \
 "\tindex = 1\n" \
-"\t[ 304502204df0dc9b7f61fbb2e4c8b0e09f3426d625a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb59901a34c40f1127e96adc31fac6ae6b11fb401 ] [ 03893d5a06201d5cf61400e96fa4a7514fc12ab45166ace618d68b8066c9c585f9 ]\n" \
+"\t[304502204df0dc9b7f61fbb2e4c8b0e09f3426d625a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb59901a34c40f1127e96adc31fac6ae6b11fb401] [03893d5a06201d5cf61400e96fa4a7514fc12ab45166ace618d68b8066c9c585f9]\n" \
 "\tsequence = 4294967295\n" \
 "\thash = 1b681f50d71834c294e8959ce3666f1c6a44942cd1a896fd43d40792c355b754\n" \
 "\tindex = 1\n" \
-"\t[ 304502203267910f55f2297360198fff57a3631be850965344370f732950b47795737875022100f7da90b82d24e6e957264b17d3e5042bab8946ee5fc676d15d915da450151d3601 ] [ 03893d5a06201d5cf61400e96fa4a7514fc12ab45166ace618d68b8066c9c585f9 ]\n" \
+"\t[304502203267910f55f2297360198fff57a3631be850965344370f732950b47795737875022100f7da90b82d24e6e957264b17d3e5042bab8946ee5fc676d15d915da450151d3601] [03893d5a06201d5cf61400e96fa4a7514fc12ab45166ace618d68b8066c9c585f9]\n" \
 "\tsequence = 4294967295\n" \
 "\thash = 9ccc48b734c7cc8f305fcb6ae263966d24b98a7f5396440caf0e1f4a394da10a\n" \
 "\tindex = 1\n" \
-"\t[ 3046022100d64ace8ec2d5feeb3e868e82b894202db8cb683c414d806b343d02b7ac679de7022100a2dcd39940dd28d4e22cce417a0829c1b516c471a3d64d11f2c5d754108bdc0b01 ] [ 03893d5a06201d5cf61400e96fa4a7514fc12ab45166ace618d68b8066c9c585f9 ]\n" \
+"\t[3046022100d64ace8ec2d5feeb3e868e82b894202db8cb683c414d806b343d02b7ac679de7022100a2dcd39940dd28d4e22cce417a0829c1b516c471a3d64d11f2c5d754108bdc0b01] [03893d5a06201d5cf61400e96fa4a7514fc12ab45166ace618d68b8066c9c585f9]\n" \
 "\tsequence = 4294967295\n" \
 "Outputs:\n" \
 "\tvalue = 15000000\n" \
-"\tdup hash160 [ 884c09d7e1f6420976c40e040c30b2b62210c3d4 ] equalverify checksig\n" \
+"\tdup hash160 [884c09d7e1f6420976c40e040c30b2b62210c3d4] equalverify checksig\n" \
 "\tvalue = 340000\n" \
-"\tdup hash160 [ 905f933de850988603aafeeb2fd7fce61e66fe5d ] equalverify checksig\n\n"
+"\tdup hash160 [905f933de850988603aafeeb2fd7fce61e66fe5d] equalverify checksig\n\n"
 
 #define TX5 \
 "01000000023562c207a2a505820324aa03b769ee9c04a221eff59fdab6d52c312544a" \
@@ -514,7 +514,7 @@ BOOST_AUTO_TEST_CASE(transaction__version__roundtrip__success)
 {
     uint32_t version = 1254u;
     chain::transaction instance;
-    BOOST_REQUIRE(instance.version() == !version);
+    BOOST_REQUIRE(version != instance.version());
     instance.set_version(version);
     BOOST_REQUIRE_EQUAL(version, instance.version());
 }
@@ -523,7 +523,7 @@ BOOST_AUTO_TEST_CASE(transaction__locktime__roundtrip__success)
 {
     uint32_t locktime = 1254u;
     chain::transaction instance;
-    BOOST_REQUIRE(instance.locktime() == !locktime);
+    BOOST_REQUIRE(locktime != instance.locktime());
     instance.set_locktime(locktime);
     BOOST_REQUIRE_EQUAL(locktime, instance.locktime());
 }
@@ -604,13 +604,12 @@ BOOST_AUTO_TEST_CASE(transaction__is_oversized_coinbase__script_size_below_min__
 
 BOOST_AUTO_TEST_CASE(transaction__is_oversized_coinbase__script_size_above_max__returns_true)
 {
-    static const auto parse_mode = chain::script::parse_mode::raw_data;
     chain::transaction instance;
     auto& inputs = instance.inputs();
     inputs.emplace_back();
     inputs.back().previous_output().set_index(chain::point::null_index);
     inputs.back().previous_output().set_hash(null_hash);
-    BOOST_REQUIRE(inputs.back().script().from_data(data_chunk(max_coinbase_size + 10), false, parse_mode));
+    BOOST_REQUIRE(inputs.back().script().from_data(data_chunk(max_coinbase_size + 10), false));
     BOOST_REQUIRE(instance.is_coinbase());
     BOOST_REQUIRE(inputs.back().script().serialized_size(false) > max_coinbase_size);
     BOOST_REQUIRE(instance.is_oversized_coinbase());
@@ -618,13 +617,12 @@ BOOST_AUTO_TEST_CASE(transaction__is_oversized_coinbase__script_size_above_max__
 
 BOOST_AUTO_TEST_CASE(transaction__is_oversized_coinbase__script_size_within_bounds__returns_false)
 {
-    static const auto parse_mode = chain::script::parse_mode::raw_data;
     chain::transaction instance;
     auto& inputs = instance.inputs();
     inputs.emplace_back();
     inputs.back().previous_output().set_index(chain::point::null_index);
     inputs.back().previous_output().set_hash(null_hash);
-    BOOST_REQUIRE(inputs.back().script().from_data(data_chunk(50), false, parse_mode));
+    BOOST_REQUIRE(inputs.back().script().from_data(data_chunk(50), false));
     BOOST_REQUIRE(instance.is_coinbase());
     BOOST_REQUIRE(inputs.back().script().serialized_size(false) >= min_coinbase_size);
     BOOST_REQUIRE(inputs.back().script().serialized_size(false) <= max_coinbase_size);
@@ -973,8 +971,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals__differs__returns_
 
 BOOST_AUTO_TEST_CASE(transaction__hash__block320670__success)
 {
-    // This is a garbage output script containing a collision with the
-    // opcode::raw_data extended opcode (nonstandard, should be removed).
+    // This is a garbage script that collides with the former opcode::raw_data sentinel.
     static const auto expected = hash_literal(TX7_HASH);
     static const auto data = to_chunk(base16_literal(TX7));
     chain::transaction instance;

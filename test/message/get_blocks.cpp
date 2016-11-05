@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__constructor_2__always__equals_params)
     hash_digest stop = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     message::get_blocks instance(starts, stop);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(starts == instance.start_hashes());
     BOOST_REQUIRE(stop == instance.stop_hash());
 }
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__constructor_3__always__equals_params)
     hash_digest stop = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     message::get_blocks instance(std::move(starts_duplicate), std::move(stop));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(starts == instance.start_hashes());
     BOOST_REQUIRE(stop == instance.stop_hash());
 }
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__constructor_4__always__equals_params)
 
     const message::get_blocks expected(starts, stop);
     message::get_blocks instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(expected == instance);
     BOOST_REQUIRE(starts == instance.start_hashes());
     BOOST_REQUIRE(stop == instance.stop_hash());
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__constructor_5__always__equals_params)
 
     message::get_blocks expected(starts, stop);
     message::get_blocks instance(std::move(expected));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(starts == instance.start_hashes());
     BOOST_REQUIRE(stop == instance.stop_hash());
 }
@@ -357,7 +357,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__operator_boolean_equals__duplicates__returns_tr
     };
 
     message::get_blocks instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(get_blocks__operator_boolean_equals__differs__returns_false)
@@ -411,7 +411,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__operator_boolean_not_equals__differs__returns_t
     };
 
     message::get_blocks instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

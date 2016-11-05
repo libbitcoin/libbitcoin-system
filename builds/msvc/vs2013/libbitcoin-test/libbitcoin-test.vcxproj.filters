@@ -36,9 +36,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\test\chain\script.hpp">
-      <Filter>src\chain</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\test\math\hash.hpp">
       <Filter>src\math</Filter>
     </ClInclude>
@@ -50,6 +47,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\wallet\mnemonic.hpp">
       <Filter>src\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\chain\script\script.hpp">
+      <Filter>src\chain\script</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -126,9 +126,6 @@
       <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\satoshi_words.cpp">
-      <Filter>src\chain</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\script.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp">
@@ -320,6 +317,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\header_message.cpp">
       <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\script\opcode.cpp">
+      <Filter>src\chain\script</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\script\script.cpp">
+      <Filter>src\chain\script</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

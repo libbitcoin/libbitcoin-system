@@ -58,14 +58,17 @@ BC_CONSTEXPR uint64_t sighash_null_value = max_uint64;
 // Script/interpreter constants.
 //-----------------------------------------------------------------------------
 
-BC_CONSTEXPR size_t op_counter_limit = 201;
 BC_CONSTEXPR size_t max_number_size = 4;
 BC_CONSTEXPR size_t max_cltv_number_size = 5;
+BC_CONSTEXPR size_t max_counted_ops = 201;
 BC_CONSTEXPR size_t max_stack_size = 1000;
 BC_CONSTEXPR size_t max_script_size = 10000;
-BC_CONSTEXPR size_t max_data_script_size = 520;
+BC_CONSTEXPR size_t max_push_data_size = 520;
 BC_CONSTEXPR size_t max_script_public_key_count = 20;
-BC_CONSTEXPR size_t multisig_default_signature_ops = 20;
+BC_CONSTEXPR size_t multisig_default_sigops = 20;
+
+// This is policy, not consensus.
+BC_CONSTEXPR size_t max_null_data_size = 80;
 
 // Various validation constants.
 //-----------------------------------------------------------------------------

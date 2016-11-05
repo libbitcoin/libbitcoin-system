@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_SUITE(point_tests)
 BOOST_AUTO_TEST_CASE(point__constructor_1__always__returns_default_initialized)
 {
     chain::point instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(point__constructor_2__valid_input__returns_input_initialized)
@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(point__constructor_2__valid_input__returns_input_initialize
     uint32_t index = 1234u;
 
     chain::point instance(hash, index);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(hash == instance.hash());
     BOOST_REQUIRE_EQUAL(index, instance.index());
 }
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(point__constructor_3__valid_input__returns_input_initialize
     auto dup_hash = hash;
 
     chain::point instance(std::move(dup_hash), index);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(hash == instance.hash());
     BOOST_REQUIRE_EQUAL(index, instance.index());
 }
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(point__constructor_4__valid_input__returns_input_initialize
     };
 
     chain::point instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(expected == instance);
 }
 
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(point__constructor_5__valid_input__returns_input_initialize
     };
 
     chain::point instance(std::move(expected));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(point__begin_end__initialized__begin_not_equal_end)
@@ -95,8 +95,8 @@ BOOST_AUTO_TEST_CASE(point__from_data__insufficient_bytes__failure)
     data_chunk data(10);
     chain::point instance;
 
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(data));
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.from_data(data));
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(point__from_data__roundtrip__success)
@@ -222,7 +222,7 @@ BOOST_AUTO_TEST_CASE(point__index__roundtrip__success)
 {
     uint32_t value = 1254u;
     chain::point instance;
-    BOOST_REQUIRE_EQUAL(false, value == instance.index());
+    BOOST_REQUIRE(value != instance.index());
     instance.set_index(value);
     BOOST_REQUIRE_EQUAL(value, instance.index());
 }

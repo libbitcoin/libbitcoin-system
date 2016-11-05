@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_SUITE(header_tests)
 BOOST_AUTO_TEST_CASE(header__constructor_1__always__initialized_invalid)
 {
     chain::header instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(header__constructor_2__always__equals_params)
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(header__constructor_2__always__equals_params)
     const uint32_t nonce = 68644u;
 
     chain::header instance(version, previous, merkle, timestamp, bits, nonce);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(timestamp, instance.timestamp());
     BOOST_REQUIRE_EQUAL(bits, instance.bits());
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(header__constructor_3__always__equals_params)
     auto merkle = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     chain::header instance(version, std::move(previous), std::move(merkle), timestamp, bits, nonce);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(timestamp, instance.timestamp());
     BOOST_REQUIRE_EQUAL(bits, instance.bits());
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(header__constructor_4__always__equals_params)
         68644u);
 
     chain::header instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(expected == instance);
 }
 
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(header__constructor_5__always__equals_params)
         68644u);
 
     chain::header instance(std::move(expected));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(expected == instance);
 }
 
@@ -108,8 +108,8 @@ BOOST_AUTO_TEST_CASE(header__from_data__insufficient_bytes__failure)
 
     chain::header header;
 
-    BOOST_REQUIRE_EQUAL(false, header.from_data(data));
-    BOOST_REQUIRE_EQUAL(false, header.is_valid());
+    BOOST_REQUIRE(!header.from_data(data));
+    BOOST_REQUIRE(!header.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(header__factory_from_data_1__valid_input__success)
@@ -373,7 +373,7 @@ BOOST_AUTO_TEST_CASE(header__is_valid_time_stamp__timestamp_less_than_2_hours_fr
     const auto now = std::chrono::system_clock::now();
     const auto now_time = std::chrono::system_clock::to_time_t(now);
     instance.set_timestamp(static_cast<uint32_t>(now_time));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid_time_stamp());
+    BOOST_REQUIRE(instance.is_valid_time_stamp());
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_time_stamp__timestamp_greater_than_2_hours_from_now__returns_false)
@@ -383,14 +383,14 @@ BOOST_AUTO_TEST_CASE(header__is_valid_time_stamp__timestamp_greater_than_2_hours
     const auto duration = std::chrono::hours(3);
     const auto future = std::chrono::system_clock::to_time_t(now + duration);
     instance.set_timestamp(static_cast<uint32_t>(future));
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid_time_stamp());
+    BOOST_REQUIRE(!instance.is_valid_time_stamp());
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__bits_exceeds_maximum__returns_false)
 {
     chain::header instance;
     instance.set_bits(max_work_bits + 1);
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid_proof_of_work());
+    BOOST_REQUIRE(!instance.is_valid_proof_of_work());
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_greater_bits__returns_false)
@@ -403,7 +403,7 @@ BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_greater_bits__returns_
         0u,
         34564u);
 
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid_proof_of_work());
+    BOOST_REQUIRE(!instance.is_valid_proof_of_work());
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_less_than_bits__returns_true)
@@ -416,7 +416,7 @@ BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_less_than_bits__return
         402972254u,
         2842832236u);
 
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid_proof_of_work());
+    BOOST_REQUIRE(instance.is_valid_proof_of_work());
 }
 
 BOOST_AUTO_TEST_CASE(header__operator_assign_equals__always__matches_equivalent)
@@ -433,7 +433,7 @@ BOOST_AUTO_TEST_CASE(header__operator_assign_equals__always__matches_equivalent)
     BOOST_REQUIRE(value.is_valid());
 
     chain::header instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.is_valid());
 
     instance = std::move(value);
     BOOST_REQUIRE(instance.is_valid());
@@ -450,7 +450,7 @@ BOOST_AUTO_TEST_CASE(header__operator_boolean_equals__duplicates__returns_true)
         68644u);
 
     chain::header instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(header__operator_boolean_equals__differs__returns_false)
@@ -492,7 +492,7 @@ BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals__differs__returns_true)
         68644u);
 
     chain::header instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

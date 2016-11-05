@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(heading__constructor_2__always__equals_params)
     uint32_t payload_size = 3454u;
     uint32_t checksum = 35746u;
     heading instance(magic, command, payload_size, checksum);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(magic, instance.magic());
     BOOST_REQUIRE_EQUAL(command, instance.command());
     BOOST_REQUIRE_EQUAL(payload_size, instance.payload_size());
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(heading__constructor_3__always__equals_params)
     uint32_t payload_size = 3454u;
     uint32_t checksum = 35746u;
     heading instance(magic, "foo", payload_size, checksum);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(magic, instance.magic());
     BOOST_REQUIRE_EQUAL(command, instance.command());
     BOOST_REQUIRE_EQUAL(payload_size, instance.payload_size());
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(heading__constructor_4__always__equals_params)
 {
     heading expected(453u, "bar", 436u, 5743u);
     heading instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(expected == instance);
 }
 
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(heading__constructor_5__always__equals_params)
     uint32_t checksum = 35746u;
     heading value(magic, command, payload_size, checksum);
     heading instance(std::move(value));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(magic, instance.magic());
     BOOST_REQUIRE_EQUAL(command, instance.command());
     BOOST_REQUIRE_EQUAL(payload_size, instance.payload_size());
@@ -259,7 +259,7 @@ BOOST_AUTO_TEST_CASE(heading__operator_boolean_equals__duplicates__returns_true)
 {
     const message::heading expected(1u, "foobar", 2u, 3u);
     message::heading instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(heading__operator_boolean_equals__differs__returns_false)
@@ -280,7 +280,7 @@ BOOST_AUTO_TEST_CASE(heading__operator_boolean_not_equals__differs__returns_true
 {
     const message::heading expected(1u, "foobar", 2u, 3u);
     message::heading instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_CASE(heading__type__all_cases__match_expected)

@@ -33,6 +33,7 @@
 #include <bitcoin/bitcoin/chain/output.hpp>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
+#include <bitcoin/bitcoin/chain/script/rule_fork.hpp>
 #include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/error.hpp>
@@ -52,14 +53,15 @@ const size_t transaction::validation::unspecified_height = 0;
 template<class Source, class Put>
 bool read(Source& source, std::vector<Put>& puts, bool wire)
 {
+    auto result = true;
     puts.resize(source.read_size_little_endian());
+    const auto deserialize = [&result, &source, wire](Put& put)
+    {
+        result &= put.from_data(source, wire);
+    };
 
-    // Order is required.
-    for (auto& put: puts)
-        if (!put.from_data(source, wire))
-            return false;
-
-    return true;
+    std::for_each(puts.begin(), puts.end(), deserialize);
+    return result;
 }
 
 // Write a length-prefixed collection of inputs or outputs to the sink.
@@ -109,11 +111,13 @@ transaction::transaction(transaction&& other)
   : transaction(other.version_, other.locktime_, std::move(other.inputs_),
       std::move(other.outputs_))
 {
+    // TODO: implement safe private accessor for conditional cache transfer.
 }
 
 transaction::transaction(const transaction& other)
   : transaction(other.version_, other.locktime_, other.inputs_, other.outputs_)
 {
+    // TODO: implement safe private accessor for conditional cache transfer.
 }
 
 transaction::transaction(transaction&& other, hash_digest&& hash)
@@ -131,15 +135,21 @@ transaction::transaction(const transaction& other, const hash_digest& hash)
 
 transaction::transaction(uint32_t version, uint32_t locktime,
     const input::list& inputs, const output::list& outputs)
-  : version_(version), locktime_(locktime), inputs_(inputs), outputs_(outputs),
+  : version_(version),
+    locktime_(locktime),
+    inputs_(inputs),
+    outputs_(outputs),
     validation{}
 {
 }
 
 transaction::transaction(uint32_t version, uint32_t locktime,
     input::list&& inputs, output::list&& outputs)
-  : version_(version), locktime_(locktime), inputs_(std::move(inputs)),
-    outputs_(std::move(outputs)), validation{}
+  : version_(version),
+    locktime_(locktime),
+    inputs_(std::move(inputs)),
+    outputs_(std::move(outputs)),
+    validation{}
 {
 }
 
@@ -148,6 +158,7 @@ transaction::transaction(uint32_t version, uint32_t locktime,
 
 transaction& transaction::operator=(transaction&& other)
 {
+    // TODO: implement safe private accessor for conditional cache transfer.
     version_ = other.version_;
     locktime_ = other.locktime_;
     inputs_ = std::move(other.inputs_);
@@ -266,11 +277,15 @@ bool transaction::is_valid() const
 data_chunk transaction::to_data(bool wire) const
 {
     data_chunk data;
+
+    // Reserve an extra byte to prevent full reallocation in the case of
+    // generate_signature_hash extension by addition of the sighash_type.
+    data.reserve(serialized_size(wire) + sizeof(uint8_t));
+
     data_sink ostream(data);
     to_data(ostream, wire);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == serialized_size(wire));
-
     return data;
 }
 
@@ -703,11 +718,11 @@ code transaction::connect_input(const chain_state& state,
     if (!prevout.cache.is_valid())
         return error::missing_input;
 
-    const auto flags = state.enabled_forks();
+    const auto forks = state.enabled_forks();
     const auto index32 = static_cast<uint32_t>(input_index);
 
-    // Validate the transaction input.
-    return script::verify(*this, index32, flags);
+    // Verify the transaction input script against the previous output.
+    return script::verify(*this, index32, forks);
 }
 
 // Validation.

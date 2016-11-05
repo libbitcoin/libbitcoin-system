@@ -22,6 +22,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <iterator>
 #include <initializer_list>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
@@ -131,6 +132,15 @@ template <typename Source>
 data_chunk to_chunk(const Source& bytes)
 {
     return data_chunk(std::begin(bytes), std::end(bytes));
+}
+
+template <typename Source>
+bool starts_with(const typename Source::const_iterator& begin,
+    const typename Source::const_iterator& end, const Source& value)
+{
+    const auto length = std::distance(begin, end);
+    return length >= 0 && static_cast<size_t>(length) >= value.size() &&
+        std::equal(value.begin(), value.end(), begin);
 }
 
 // unsafe

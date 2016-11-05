@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(block_message__constructor_2__always__equals_params)
     };
 
     block_message instance(header, transactions);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(transactions == instance.transactions());
     BOOST_REQUIRE_EQUAL(0u, instance.originator());
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(block_message__constructor_3__always__equals_params)
     chain::header dup_header(header);
     chain::transaction::list dup_transactions = transactions;
     block_message instance(std::move(dup_header), std::move(dup_transactions));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(transactions == instance.transactions());
     BOOST_REQUIRE_EQUAL(0u, instance.originator());
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(block_message__constructor_4__always__equals_params)
 
     chain::block value(header, transactions);
     block_message instance(value);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance == value);
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(transactions == instance.transactions());
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(block_message__constructor_5__always__equals_params)
 
     chain::block value(header, transactions);
     block_message instance(std::move(value));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(transactions == instance.transactions());
     BOOST_REQUIRE_EQUAL(0u, instance.originator());
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(block_message__constructor_6__always__equals_params)
     block_message value(header, transactions);
     value.set_originator(originator);
     block_message instance(value);
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(value == instance);
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(transactions == instance.transactions());
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(block_message__constructor_7__always__equals_params)
     block_message value(header, transactions);
     value.set_originator(originator);
     block_message instance(std::move(value));
-    BOOST_REQUIRE_EQUAL(true, instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(transactions == instance.transactions());
     BOOST_REQUIRE_EQUAL(originator, instance.originator());
@@ -351,7 +351,7 @@ BOOST_AUTO_TEST_CASE(block_message__operator_boolean_equals_1__duplicates__retur
         });
 
     message::block_message instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(block_message__operator_boolean_equals_1__differs__returns_false)
@@ -410,7 +410,7 @@ BOOST_AUTO_TEST_CASE(block_message__operator_boolean_not_equals_1__differs__retu
 
 
     chain::block instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_CASE(block_message__operator_boolean_equals_2__duplicates__returns_true)
@@ -429,7 +429,7 @@ BOOST_AUTO_TEST_CASE(block_message__operator_boolean_equals_2__duplicates__retur
         });
 
     message::block_message instance(expected);
-    BOOST_REQUIRE_EQUAL(true, instance == expected);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(block_message__operator_boolean_equals_2__differs__returns_false)
@@ -488,7 +488,7 @@ BOOST_AUTO_TEST_CASE(block_message__operator_boolean_not_equals_2__differs__retu
 
 
     message::block_message instance;
-    BOOST_REQUIRE_EQUAL(true, instance != expected);
+    BOOST_REQUIRE(instance != expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

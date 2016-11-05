@@ -20,27 +20,137 @@
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
 
 #include <algorithm>
-#include <sstream>
+#include <numeric>
+#include <bitcoin/bitcoin/chain/script/rule_fork.hpp>
+#include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/script/script.hpp>
+#include <bitcoin/bitcoin/chain/script/script_pattern.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/bitcoin/utility/string.hpp>
 
 namespace libbitcoin {
 namespace chain {
 
-const size_t operation::max_null_data_size = 80;
+static constexpr auto invalid_code = opcode::disabled_xor;
 
-operation operation::factory_from_data(const data_chunk& data)
+// Constructors.
+//-----------------------------------------------------------------------------
+
+operation::operation()
+  : code_(invalid_code), valid_(false)
+{
+    // The failed-state code must not pass evaluation, so it must be 'disabled'.
+    BITCOIN_ASSERT(is_disabled());
+}
+
+operation::operation(operation&& other)
+  : operation(other.code_, std::move(other.data_), other.valid_)
+{
+}
+
+operation::operation(const operation& other)
+  : operation(other.code_, other.data_, other.valid_)
+{
+}
+
+operation::operation(opcode code)
+  : code_(code), valid_(true)
+{
+}
+
+operation::operation(data_chunk&& uncoded, bool minimal)
+  : code_(minimal ? opcode_from_data(uncoded) :
+        opcode_from_size(uncoded.size())),
+    data_(std::move(uncoded)),
+    valid_(!is_oversized())
+{
+    if (!valid_)
+        reset();
+
+    // Revert data if opcode_from_data produced a numeric encoding.
+    if (minimal && is_numeric(code_))
+    {
+        data_.clear();
+        data_.shrink_to_fit();
+    }
+}
+
+operation::operation(const data_chunk& uncoded, bool minimal)
+  : code_(minimal ? opcode_from_data(uncoded) :
+        opcode_from_size(uncoded.size())),
+    data_(uncoded),
+    valid_(!is_oversized())
+{
+    if (!valid_)
+        reset();
+
+    // Revert data if opcode_from_data produced a numeric encoding.
+    if (minimal && is_numeric(code_))
+    {
+        data_.clear();
+        data_.shrink_to_fit();
+    }
+}
+
+// protected
+operation::operation(opcode code, data_chunk&& data, bool valid)
+  : code_(code), data_(std::move(data)), valid_(valid)
+{
+}
+
+// protected
+operation::operation(opcode code, const data_chunk& data, bool valid)
+  : code_(code), data_(data), valid_(valid)
+{
+}
+
+// Operators.
+//-----------------------------------------------------------------------------
+
+operation& operation::operator=(operation&& other)
+{
+    code_ = other.code_;
+    data_ = std::move(other.data_);
+    valid_ = other.valid_;
+    return *this;
+}
+
+operation& operation::operator=(const operation& other)
+{
+    code_ = other.code_;
+    data_ = other.data_;
+    valid_ = other.valid_;
+    return *this;
+}
+
+bool operation::operator==(const operation& other) const
+{
+    return (code_ == other.code_) && (data_ == other.data_);
+}
+
+bool operation::operator!=(const operation& other) const
+{
+    return !(*this == other);
+}
+
+// Deserialization.
+//-----------------------------------------------------------------------------
+
+// static
+operation operation::factory_from_data(const data_chunk& encoded)
 {
     operation instance;
-    instance.from_data(data);
+    instance.from_data(encoded);
     return instance;
 }
 
+// static
 operation operation::factory_from_data(std::istream& stream)
 {
     operation instance;
@@ -48,6 +158,7 @@ operation operation::factory_from_data(std::istream& stream)
     return instance;
 }
 
+// static
 operation operation::factory_from_data(reader& source)
 {
     operation instance;
@@ -55,75 +166,9 @@ operation operation::factory_from_data(reader& source)
     return instance;
 }
 
-operation::operation()
-  : code_(opcode::zero), data_()
+bool operation::from_data(const data_chunk& encoded)
 {
-}
-
-operation::operation(opcode code, const data_chunk& data)
-  : code_(code), data_(data)
-{
-}
-
-operation::operation(opcode code, data_chunk&& data)
-  : code_(code), data_(std::move(data))
-{
-}
-
-operation::operation(const operation& other)
-  : operation(other.code_, other.data_)
-{
-}
-
-operation::operation(operation&& other)
-  : operation(other.code_, std::move(other.data_))
-{
-}
-
-opcode operation::code() const
-{
-    return code_;
-}
-
-void operation::set_code(opcode code)
-{
-    code_ = code;
-}
-
-data_chunk& operation::data()
-{
-    return data_;
-}
-
-const data_chunk& operation::data() const
-{
-    return data_;
-}
-
-void operation::set_data(const data_chunk& data)
-{
-    data_ = data;
-}
-
-void operation::set_data(data_chunk&& data)
-{
-    data_ = std::move(data);
-}
-
-bool operation::is_valid() const
-{
-    return (code_ != opcode::zero) || !data_.empty();
-}
-
-void operation::reset()
-{
-    code_ = opcode::zero;
-    data_.clear();
-}
-
-bool operation::from_data(const data_chunk& data)
-{
-    data_source istream(data);
+    data_source istream(encoded);
     return from_data(istream);
 }
 
@@ -133,29 +178,87 @@ bool operation::from_data(std::istream& stream)
     return from_data(source);
 }
 
+// The iterator requires that the opcode read is the opcode written.
 bool operation::from_data(reader& source)
 {
     reset();
 
-    const auto byte = source.read_byte();
-    const auto op_code = static_cast<opcode>(byte);
-    code_ = ((1 <= byte && byte <= 75) ? opcode::special : op_code);
+    valid_ = true;
+    code_ = static_cast<opcode>(source.read_byte());
+    const auto size = read_data_size(code_, source);
 
-    if (operation::must_read_data(code_))
-    {
-        const auto data_size = read_opcode_data_size(code_, byte, source);
-        data_ = source.read_bytes(data_size);
-    }
+    // It is slightly more performant to skip a zero byte read and assignment.
+    if (size != 0)
+        data_ = source.read_bytes(size);
 
     if (!source)
         reset();
 
-    return source;
+    return valid_;
 }
+
+static bool is_push_token(const std::string& token)
+{
+    return token.size() > 1 && token.front() == '[' && token.back() == ']';
+}
+
+// The removal of spaces inside of data is a compatability break with v2.
+static std::string trim_push(const std::string& token)
+{
+    return std::string(token.begin() + 1, token.end() - 1);
+}
+
+bool operation::from_string(const std::string& mnemonic)
+{
+    reset();
+
+    if (is_push_token(mnemonic))
+    {
+        if (decode_base16(data_, trim_push(mnemonic)) && !is_oversized())
+        {
+            // The produces the minimal data encoding.
+            code_ = opcode_from_data(data_);
+            valid_ = true;
+
+            // Revert data if opcode_from_data produced a numeric encoding.
+            if (is_numeric(code_))
+            {
+                data_.clear();
+                data_.shrink_to_fit();
+            }
+        }
+    }
+    else if (opcode_from_string(code_, mnemonic))
+    {
+        valid_ = true;
+    }
+
+    if (!valid_)
+        reset();
+
+    return valid_;
+}
+
+bool operation::is_valid() const
+{
+    return valid_;
+}
+
+// protected
+void operation::reset()
+{
+    code_ = invalid_code;
+    data_.clear();
+    valid_ = false;
+}
+
+// Serialization.
+//-----------------------------------------------------------------------------
 
 data_chunk operation::to_data() const
 {
     data_chunk data;
+    data.reserve(serialized_size());
     data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
@@ -171,24 +274,21 @@ void operation::to_data(std::ostream& stream) const
 
 void operation::to_data(writer& sink) const
 {
+    static constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
     const auto size = data_.size();
-    auto byte = static_cast<uint8_t>(code_);
-
-    if (code_ == opcode::special)
-        byte = safe_unsigned<uint8_t>(size);
-
-    sink.write_byte(byte);
+    const auto code = static_cast<uint8_t>(code_);
+    sink.write_byte(code);
 
     switch (code_)
     {
-        case opcode::pushdata1:
-            sink.write_byte(safe_unsigned<uint8_t>(size));
+        case opcode::push_one_size:
+            sink.write_byte(static_cast<uint8_t>(size));
             break;
-        case opcode::pushdata2:
-            sink.write_2_bytes_little_endian(safe_unsigned<uint16_t>(size));
+        case opcode::push_two_size:
+            sink.write_2_bytes_little_endian(static_cast<uint16_t>(size));
             break;
-        case opcode::pushdata4:
-            sink.write_4_bytes_little_endian(safe_unsigned<uint32_t>(size));
+        case opcode::push_four_size:
+            sink.write_4_bytes_little_endian(static_cast<uint32_t>(size));
             break;
         default:
             break;
@@ -197,333 +297,229 @@ void operation::to_data(writer& sink) const
     sink.write_bytes(data_);
 }
 
+// The removal of spaces inside of data is a compatability break with v2.
+std::string operation::to_string(uint32_t active_forks) const
+{
+    if (!valid_)
+        return "<invalid>";
+
+    if (data_.empty())
+        return opcode_to_string(code_, active_forks);
+
+    return "[" + encode_base16(data_) + "]";
+}
+
+// Properties (size, accessors, cache).
+//-----------------------------------------------------------------------------
+
 uint64_t operation::serialized_size() const
 {
-    uint64_t size = 1u + data_.size();
+    const auto size = sizeof(uint8_t) + data_.size();
 
     switch (code_)
     {
-        case opcode::pushdata1:
-            size += sizeof(uint8_t);
-            break;
-        case opcode::pushdata2:
-            size += sizeof(uint16_t);
-            break;
-        case opcode::pushdata4:
-            size += sizeof(uint32_t);
-            break;
+        case opcode::push_one_size:
+            return sizeof(uint8_t) + size;
+        case opcode::push_two_size:
+            return sizeof(uint16_t) + size;
+        case opcode::push_four_size:
+            return sizeof(uint32_t) + size;
         default:
-            break;
+            return size;
+
     }
-
-    return size;
 }
 
-std::string operation::to_string(uint32_t flags) const
+opcode operation::code() const
 {
-    std::ostringstream ss;
-
-    if (data_.empty())
-        ss << opcode_to_string(code_, flags);
-    else
-        ss << "[ " << encode_base16(data_) << " ]";
-
-    return ss.str();
+    return code_;
 }
 
-uint32_t operation::read_opcode_data_size(opcode code, uint8_t raw_byte,
-    reader& source)
+const data_chunk& operation::data() const
+{
+    return data_;
+}
+
+// Utilities.
+//-------------------------------------------------------------------------
+// static
+
+// private
+uint32_t operation::read_data_size(opcode code, reader& source)
+{
+    static constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
+
+    switch (code)
+    {
+        case opcode::push_one_size:
+            return source.read_byte();
+        case opcode::push_two_size:
+            return source.read_2_bytes_little_endian();
+        case opcode::push_four_size:
+            return source.read_4_bytes_little_endian();
+        default:
+            const auto byte = static_cast<uint8_t>(code);
+            return byte <= op_75 ? byte : 0;
+    }
+}
+
+//*****************************************************************************
+// CONSENSUS: this encoding is consensus critical due to find_and_delete.
+//*****************************************************************************
+opcode operation::opcode_from_size(size_t size)
+{
+    BITCOIN_ASSERT(size <= max_uint32);
+    static constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
+
+    if (size <= op_75)
+        return static_cast<opcode>(size);
+    else if (size <= max_uint8)
+        return opcode::push_one_size;
+    else if(size <= max_uint16)
+        return opcode::push_two_size;
+    else
+        return opcode::push_four_size;
+}
+
+opcode operation::opcode_from_data(const data_chunk& data)
+{
+    const auto size = data.size();
+
+    if (size != 1)
+        return opcode_from_size(size);
+
+    const auto code = static_cast<opcode>(data.front());
+    return is_numeric(code) ? code : opcode_from_size(size);
+}
+
+opcode operation::opcode_from_positive(uint8_t value)
+{
+    BITCOIN_ASSERT(value >= script_number::positive_1);
+    BITCOIN_ASSERT(value <= script_number::positive_16);
+    static constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
+    return static_cast<opcode>(value + op_81 - 1);
+}
+
+uint8_t operation::opcode_to_positive(opcode code)
+{
+    BITCOIN_ASSERT(is_positive(code));
+    static constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
+    return static_cast<uint8_t>(code)-op_81 - 1;
+}
+
+// [0..79, 81..96]
+bool operation::is_push(opcode code)
+{
+    static constexpr auto op_80 = static_cast<uint8_t>(opcode::reserved_80);
+    static constexpr auto op_96 = static_cast<uint8_t>(opcode::push_positive_16);
+    const auto value = static_cast<uint8_t>(code);
+    return value <= op_96 && value != op_80;
+}
+
+// [97..255]
+bool operation::is_counted(opcode code)
+{
+    static constexpr auto op_97 = static_cast<uint8_t>(opcode::nop);
+    const auto value = static_cast<uint8_t>(code);
+    return value >= op_97;
+}
+
+// [-1, 1..16]
+bool operation::is_numeric(opcode code)
+{
+    return is_positive(code) || code == opcode::push_negative_1;
+}
+
+// [1..16]
+bool operation::is_positive(opcode code)
+{
+    static constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
+    static constexpr auto op_96 = static_cast<uint8_t>(opcode::push_positive_16);
+    const auto value = static_cast<uint8_t>(code);
+    return value >= op_81 && value <= op_96;
+}
+
+bool operation::is_conditional(opcode code)
 {
     switch (code)
     {
-        case opcode::special:
-            return static_cast<uint32_t>(raw_byte);
-        case opcode::pushdata1:
-            return source.read_byte();
-        case opcode::pushdata2:
-            return source.read_2_bytes_little_endian();
-        case opcode::pushdata4:
-            return source.read_4_bytes_little_endian();;
+        case opcode::if_:
+        case opcode::notif:
+        case opcode::else_:
+        case opcode::endif:
+            return true;
         default:
-            return 0;
-    }
-}
-
-bool operation::must_read_data(opcode code)
-{
-    return code == opcode::special
-        || code == opcode::pushdata1
-        || code == opcode::pushdata2
-        || code == opcode::pushdata4;
-}
-
-bool operation::is_push(const opcode code)
-{
-    return code == opcode::zero
-        || code == opcode::special
-        || code == opcode::pushdata1
-        || code == opcode::pushdata2
-        || code == opcode::pushdata4
-        || code == opcode::negative_1
-        || code == opcode::op_1
-        || code == opcode::op_2
-        || code == opcode::op_3
-        || code == opcode::op_4
-        || code == opcode::op_5
-        || code == opcode::op_6
-        || code == opcode::op_7
-        || code == opcode::op_8
-        || code == opcode::op_9
-        || code == opcode::op_10
-        || code == opcode::op_11
-        || code == opcode::op_12
-        || code == opcode::op_13
-        || code == opcode::op_14
-        || code == opcode::op_15
-        || code == opcode::op_16;
-}
-
-bool operation::is_push_only(const operation::stack& ops)
-{
-    const auto push = [](const operation& op)
-    {
-        return is_push(op.code());
-    };
-
-    return std::all_of(ops.begin(), ops.end(), push);
-}
-
-// pattern comparisons
-// ----------------------------------------------------------------------------
-
-bool operation::is_null_data_pattern(const operation::stack& ops)
-{
-    return ops.size() == 2
-        && ops[0].code() == opcode::return_
-        && ops[1].code() == opcode::special
-        && ops[1].data().size() <= max_null_data_size;
-}
-
-bool operation::is_pay_multisig_pattern(const operation::stack& ops)
-{
-    static constexpr size_t op_1 = static_cast<uint8_t>(opcode::op_1);
-    static constexpr size_t op_16 = static_cast<uint8_t>(opcode::op_16);
-
-    const auto op_count = ops.size();
-
-    if (op_count < 4 || ops[op_count - 1].code() != opcode::checkmultisig)
-        return false;
-
-    const auto op_m = static_cast<uint8_t>(ops[0].code());
-    const auto op_n = static_cast<uint8_t>(ops[op_count - 2].code());
-
-    if (op_m < op_1 || op_m > op_n || op_n < op_1 || op_n > op_16)
-        return false;
-
-    const auto n = op_n - op_1;
-    const auto points = op_count - 3u;
-
-    if (n != points)
-        return false;
-
-    for (auto op = ops.begin() + 1; op != ops.end() - 2; ++op)
-        if (!is_public_key(op->data()))
             return false;
-
-    return true;
-}
-
-bool operation::is_pay_public_key_pattern(const operation::stack& ops)
-{
-    return ops.size() == 2
-        && ops[0].code() == opcode::special
-        && is_public_key(ops[0].data())
-        && ops[1].code() == opcode::checksig;
-}
-
-bool operation::is_pay_key_hash_pattern(const operation::stack& ops)
-{
-    return ops.size() == 5
-        && ops[0].code() == opcode::dup
-        && ops[1].code() == opcode::hash160
-        && ops[2].code() == opcode::special
-        && ops[2].data().size() == short_hash_size
-        && ops[3].code() == opcode::equalverify
-        && ops[4].code() == opcode::checksig;
-}
-
-bool operation::is_pay_script_hash_pattern(const operation::stack& ops)
-{
-    return ops.size() == 3
-        && ops[0].code() == opcode::hash160
-        && ops[1].code() == opcode::special
-        && ops[1].data().size() == short_hash_size
-        && ops[2].code() == opcode::equal;
-}
-
-bool operation::is_sign_multisig_pattern(const operation::stack& ops)
-{
-    if (ops.size() < 2 || !is_push_only(ops))
-        return false;
-
-    if (ops.front().code() != opcode::zero)
-        return false;
-
-    return true;
-}
-
-bool operation::is_sign_public_key_pattern(const operation::stack& ops)
-{
-    return ops.size() == 1 && is_push_only(ops);
-}
-
-bool operation::is_sign_key_hash_pattern(const operation::stack& ops)
-{
-    return ops.size() == 2 && is_push_only(ops) &&
-        is_public_key(ops.back().data());
-}
-
-bool operation::is_sign_script_hash_pattern(const operation::stack& ops)
-{
-    if (ops.size() < 2 || !is_push_only(ops))
-        return false;
-
-    const auto& redeem_data = ops.back().data();
-
-    if (redeem_data.empty())
-        return false;
-
-    script redeem_script;
-
-    if (!redeem_script.from_data(redeem_data, false, script::parse_mode::strict))
-        return false;
-
-    // Is the redeem script a standard pay (output) script?
-    const auto redeem_script_pattern = redeem_script.pattern();
-    return redeem_script_pattern == script_pattern::pay_multisig
-        || redeem_script_pattern == script_pattern::pay_public_key
-        || redeem_script_pattern == script_pattern::pay_key_hash
-        || redeem_script_pattern == script_pattern::pay_script_hash
-        || redeem_script_pattern == script_pattern::null_data;
-}
-
-// pattern templates
-// ----------------------------------------------------------------------------
-
-operation::stack operation::to_null_data_pattern(data_slice data)
-{
-    if (data.size() > max_null_data_size)
-        return{};
-
-    return operation::stack
-    {
-        { opcode::return_, {} },
-        { opcode::special, to_chunk(data) }
-    };
-}
-
-operation::stack operation::to_pay_public_key_pattern(data_slice point)
-{
-    if (!is_public_key(point))
-        return{};
-
-    return operation::stack
-    {
-        { opcode::special, to_chunk(point) },
-        { opcode::checksig, {} }
-    };
-}
-
-operation::stack operation::to_pay_multisig_pattern(uint8_t signatures,
-    const point_list& points)
-{
-    const auto conversion = [](const ec_compressed& point)
-    {
-        return to_chunk(point);
-    };
-
-    data_stack chunks(points.size());
-    std::transform(points.begin(), points.end(), chunks.begin(), conversion);
-    return to_pay_multisig_pattern(signatures, chunks);
-}
-
-operation::stack operation::to_pay_multisig_pattern(uint8_t signatures,
-    const data_stack& points)
-{
-    static constexpr size_t op_1 = static_cast<uint8_t>(opcode::op_1);
-    static constexpr size_t op_16 = static_cast<uint8_t>(opcode::op_16);
-    static constexpr size_t zero = op_1 - 1;
-    static constexpr size_t max = op_16 - zero;
-
-    const auto m = signatures;
-    const auto n = points.size();
-
-    if (m < 1 || m > n || n < 1 || n > max)
-        return operation::stack();
-
-    const auto op_m = static_cast<opcode>(m + zero);
-    const auto op_n = static_cast<opcode>(points.size() + zero);
-
-    operation::stack ops(points.size() + 3);
-    ops.push_back({ op_m, {} });
-
-    for (const auto point: points)
-    {
-        if (!is_public_key(point))
-            return{};
-
-        ops.push_back(operation(opcode::special, point));
     }
-
-    ops.push_back({ op_n, {} });
-    ops.push_back({ opcode::checkmultisig, {} });
-    return ops;
 }
 
-operation::stack operation::to_pay_key_hash_pattern(const short_hash& hash)
+bool operation::is_disabled(opcode code)
 {
-    return operation::stack
+    switch (code)
     {
-        { opcode::dup, {} },
-        { opcode::hash160, {} },
-        { opcode::special, to_chunk(hash) },
-        { opcode::equalverify, {} },
-        { opcode::checksig, {} }
-    };
+        case opcode::disabled_cat:
+        case opcode::disabled_substr:
+        case opcode::disabled_left:
+        case opcode::disabled_right:
+        case opcode::disabled_invert:
+        case opcode::disabled_and:
+        case opcode::disabled_or:
+        case opcode::disabled_xor:
+        case opcode::disabled_mul2:
+        case opcode::disabled_div2:
+        case opcode::disabled_mul:
+        case opcode::disabled_div:
+        case opcode::disabled_mod:
+        case opcode::disabled_lshift:
+        case opcode::disabled_rshift:
+
+        //*********************************************************************
+        // CONSENSUS: reserved conditionals are effectively disabled.
+        // These are in the conditional range yet are not handled.
+        // as a result satoshi always processes them in the op swtich.
+        // This causes them to always fail as unhandled. "VER" is outside the
+        // satoshi conditional range test so it does not exhibit this behavior.
+        //*********************************************************************
+        case opcode::disabled_verif:
+        case opcode::disabled_vernotif:
+            return true;
+        default:
+            return false;
+    }
 }
 
-operation::stack operation::to_pay_script_hash_pattern(const short_hash& hash)
+// Validation.
+//-------------------------------------------------------------------------
+
+bool operation::is_push() const
 {
-    return operation::stack
-    {
-        { opcode::hash160, {} },
-        { opcode::special, to_chunk(hash) },
-        { opcode::equal, {} }
-    };
+    return is_push(code_);
 }
 
-operation& operation::operator=(operation&& other)
+bool operation::is_counted() const
 {
-    code_ = other.code_;
-    data_ = std::move(other.data_);
-    return *this;
+    return is_counted(code_);
 }
 
-operation& operation::operator=(const operation& other)
+bool operation::is_positive() const
 {
-    code_ = other.code_;
-    data_ = other.data_;
-    return *this;
+    return is_positive(code_);
 }
 
-bool operation::operator==(const operation& other) const
+bool operation::is_disabled() const
 {
-    return (code_ == other.code_) && (data_ == other.data_);
+    return is_disabled(code_);
 }
 
-bool operation::operator!=(const operation& other) const
+bool operation::is_conditional() const
 {
-    return !(*this == other);
+    return is_conditional(code_);
+}
+
+bool operation::is_oversized() const
+{
+    // bit.ly/2eSDkOJ
+    return data_.size() > max_push_data_size;
 }
 
 } // namespace chain
