@@ -28,7 +28,11 @@ namespace log {
 // modified from class extracted from boost/log/sinks/text_file_backend.*pp
 struct BC_API file_char_traits
 {
+#ifdef _MSC_VER
+    typedef wchar_t char_type;
+#else
     typedef char char_type;
+#endif
 
     static const char_type percent = '%';
     static const char_type number_placeholder = 'N';
@@ -47,7 +51,7 @@ struct BC_API file_char_traits
     static const char_type dot = '.';
     static const char_type newline = '\n';
 
-    static bool is_digit(char c)
+    static bool is_digit(char_type c)
     {
         return (std::isdigit(c) != 0);
     }

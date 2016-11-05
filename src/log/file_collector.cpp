@@ -286,8 +286,14 @@ void file_collector::store_file(filesystem::path const& src_path)
     info.timestamp = filesystem::last_write_time(src_path);
     info.size = filesystem::file_size(src_path);
 
+#ifdef _MSC_VER
+    path_string_type stem = src_path.stem().wstring();
+    path_string_type extension = src_path.extension().wstring();
+#else
     path_string_type stem = src_path.stem().string();
     path_string_type extension = src_path.extension().string();
+#endif
+
 //    info.path = storage_dir_ / file_name_path;
 
     // If the file already exists, try to mangle the file name
