@@ -173,8 +173,8 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "spend exceeds value of inputs";
 
         // connect input
-        case error::validate_inputs_failed:
-            return "validation of inputs failed";
+        case error::invalid_script:
+            return "invalid script";
 
         // invalid codes
         default:

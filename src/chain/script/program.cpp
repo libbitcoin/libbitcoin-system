@@ -17,17 +17,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/chain/script/evaluation_context.hpp>
+#include <bitcoin/bitcoin/chain/script/program.hpp>
 
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <utility>
+#include <bitcoin/bitcoin/chain/script/interpreter.hpp>
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
 #include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/math/script_number.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
@@ -36,99 +38,146 @@ namespace chain {
 // Fixed tuning parameters, max_stack_size ensures no reallocation.
 static constexpr size_t stack_capactity = max_stack_size;
 static constexpr size_t condition_capactity = max_counted_ops;
+static const transaction default_tx_;
+static const script default_script_;
+
+void program::reserve_stacks()
+{
+    primary_.reserve(stack_capactity);
+    alternate_.reserve(stack_capactity);
+    condition_.reserve(condition_capactity);
+}
 
 // Constructors.
 //-----------------------------------------------------------------------------
 
-// Iterators must be set by set_script.
-evaluation_context::evaluation_context(const chain::transaction& transaction,
-    uint32_t input_index, uint32_t flags)
-  : operation_count_{0},
-    flags_(flags),
+program::program()
+  : script_(default_script_),
+    transaction_(default_tx_), 
+    forks_(0),
+    input_index_(0),
+    operation_count_(0),
+    jump_(script_.begin())
+{
+    reserve_stacks();
+}
+
+program::program(const script& script)
+  : script_(script),
+    transaction_(default_tx_),
+    forks_(0),
+    input_index_(0),
+    operation_count_(0),
+    jump_(script_.begin())
+{
+    reserve_stacks();
+}
+
+program::program(const script& script, const chain::transaction& transaction,
+    uint32_t input_index, uint32_t forks)
+  : script_(script),
+    transaction_(transaction),
+    forks_(forks),
     input_index_(input_index),
-    transaction_(transaction)
+    operation_count_(0),
+    jump_(script_.begin())
 {
-    primary_.reserve(stack_capactity);
-    alternate_.reserve(stack_capactity);
-    condition_.reserve(condition_capactity);
+    reserve_stacks();
 }
 
-// Condition, alternate jump and op_count are not coppied.
-evaluation_context::evaluation_context(const evaluation_context& other)
-  : primary_(other.primary_),
-    operation_count_{0},
-    flags_(other.flags_),
+// Condition, alternate, jump and operation_count are not coppied.
+program::program(const script& script, const program& other)
+  : script_(script),
+    transaction_(other.transaction_), 
+    forks_(other.forks_),
     input_index_(other.input_index_),
-    transaction_(other.transaction_)
+    operation_count_(0),
+    jump_(script_.begin()),
+    primary_(other.primary_)
 {
-    primary_.reserve(stack_capactity);
-    alternate_.reserve(stack_capactity);
-    condition_.reserve(condition_capactity);
+    reserve_stacks();
 }
 
-// Condition, alternate jump and op_count are not moved.
-evaluation_context::evaluation_context(evaluation_context&& other, bool)
-  : primary_(std::move(other.primary_)),
-    operation_count_{0},
-    flags_(other.flags_),
+// Condition, alternate, jump and operation_count are not moved.
+program::program(const script& script, program&& other, bool)
+  : script_(script),
+    transaction_(other.transaction_), 
+    forks_(other.forks_),
     input_index_(other.input_index_),
-    transaction_(other.transaction_)
+    operation_count_(0),
+    jump_(script_.begin()),
+    primary_(std::move(other.primary_))
 {
-    primary_.reserve(stack_capactity);
-    alternate_.reserve(stack_capactity);
-    condition_.reserve(condition_capactity);
+    reserve_stacks();
 }
 
-// Program counter.
+// Constant registers.
 //-----------------------------------------------------------------------------
 
-evaluation_context::op_iterator evaluation_context::begin() const
+bool program::is_valid() const
 {
-    return begin_;
+    // An invalid sequence indicates a failure deserializing operations.
+    return script_.is_valid_sequence() &&
+        (script_.satoshi_content_size() <= max_script_size);
 }
 
-evaluation_context::op_iterator evaluation_context::jump() const
+uint32_t program::forks() const
+{
+    return forks_;
+}
+
+uint32_t program::input_index() const
+{
+    return input_index_;
+}
+
+const chain::transaction& program::transaction() const
+{
+    return transaction_;
+}
+
+// Program registers.
+//-----------------------------------------------------------------------------
+
+program::op_iterator program::begin() const
+{
+    return script_.begin();
+}
+
+program::op_iterator program::jump() const
 {
     return jump_;
 }
 
-evaluation_context::op_iterator evaluation_context::end() const
+program::op_iterator program::end() const
 {
-    return end_;
+    return script_.end();
+}
+
+size_t program::operation_count() const
+{
+    return operation_count_;
 }
 
 // Instructions.
 //-----------------------------------------------------------------------------
 
-// This is just deferred construction, call only once.
-bool evaluation_context::set_program_counter(const script& script)
+code program::evaluate()
 {
-    // bit.ly/2c9HzmN
-    if (script.satoshi_content_size() > max_script_size)
-        return false;
-
-    begin_ = script.begin();
-    jump_ = script.begin();
-    end_ = script.end();
-    return true;
+    return interpreter::run(*this);
 }
 
-void evaluation_context::set_jump_register(op_iterator instruction)
+code program::evaluate(const operation& op)
 {
-    // The begin_ member could be overloaded for this since it is never reused.
-    // But the cost of the proper abstraction is just a few bytes.
-    jump_ = instruction;
+    return interpreter::run(op, *this);
 }
-
-// Operation count.
-//-----------------------------------------------------------------------------
 
 inline bool operation_overflow(size_t count)
 {
     return count > max_counted_ops;
 }
 
-bool evaluation_context::update_operation_count(const operation& op)
+bool program::increment_operation_count(const operation& op)
 {
     // Addition is safe due to script size validation.
     if (operation::is_counted(op.code()))
@@ -137,7 +186,7 @@ bool evaluation_context::update_operation_count(const operation& op)
     return !operation_overflow(operation_count_);
 }
 
-bool evaluation_context::update_multisig_public_key_count(int32_t count)
+bool program::increment_multisig_public_key_count(int32_t count)
 {
     // bit.ly/2d1bsdB
     if (count < 0 || count > max_script_public_key_count)
@@ -148,41 +197,48 @@ bool evaluation_context::update_multisig_public_key_count(int32_t count)
     return !operation_overflow(operation_count_);
 }
 
-// Properties.
-//-----------------------------------------------------------------------------
-
-uint32_t evaluation_context::flags() const
+bool program::set_jump_register(const operation& op, int32_t offset)
 {
-    return flags_;
-}
+    if (script_.empty())
+        return false;
 
-uint32_t evaluation_context::input_index() const
-{
-    return input_index_;
-}
+    const auto finder = [&op](const operation& operation)
+    {
+        return &operation == &op;
+    };
 
-const chain::transaction& evaluation_context::transaction() const
-{
-    return transaction_;
+    // This is not efficient but is simplifying and subscript is rarely used.
+    // Otherwise we must track the program counter through each evaluation.
+    jump_ = std::find_if(script_.begin(), script_.end(), finder);
+
+    if (jump_ == script_.end())
+        return false;
+
+    // This does not require a guard because op_codeseparator can only increment.
+    // Even if the opcode is last in the sequnce the increment is valid (end).
+    BITCOIN_ASSERT_MSG(offset == 1, "unguarded jump offset");
+
+    jump_ += offset;
+    return true;
 }
 
 // Primary stack (push).
 //-----------------------------------------------------------------------------
 
 // push
-void evaluation_context::push(bool value)
+void program::push(bool value)
 {
     push_move(value ? value_type{ number::positive_1 } : value_type{});
 }
 
 // Be explicit about the intent to move or copy, to get compiler help.
-void evaluation_context::push_move(value_type&& item)
+void program::push_move(value_type&& item)
 {
     primary_.emplace_back(std::move(item));
 }
 
 // Be explicit about the intent to move or copy, to get compiler help.
-void evaluation_context::push_copy(const value_type& item)
+void program::push_copy(const value_type& item)
 {
     primary_.emplace_back(item);
 }
@@ -191,7 +247,7 @@ void evaluation_context::push_copy(const value_type& item)
 //-----------------------------------------------------------------------------
 
 // This must be guarded.
-data_chunk evaluation_context::pop()
+data_chunk program::pop()
 {
     BITCOIN_ASSERT(!empty());
     const auto value = primary_.back();
@@ -199,7 +255,7 @@ data_chunk evaluation_context::pop()
     return value;
 }
 
-bool evaluation_context::pop(int32_t& out_value)
+bool program::pop(int32_t& out_value)
 {
     number value;
     if (!pop(value))
@@ -209,18 +265,18 @@ bool evaluation_context::pop(int32_t& out_value)
     return true;
 }
 
-bool evaluation_context::pop(number& out_number, size_t maxiumum_size)
+bool program::pop(number& out_number, size_t maxiumum_size)
 {
     return !empty() && out_number.set_data(pop(), maxiumum_size);
 }
 
-bool evaluation_context::pop_binary(number& first, number& second)
+bool program::pop_binary(number& first, number& second)
 {
     // The right hand side number is at the top of the stack.
     return pop(first) && pop(second);
 }
 
-bool evaluation_context::pop_ternary(number& first, number& second,
+bool program::pop_ternary(number& first, number& second,
     number& third)
 {
     // The upper bound is at stack top, lower bound next, value next.
@@ -228,7 +284,7 @@ bool evaluation_context::pop_ternary(number& first, number& second,
 }
 
 // Determines if popped value is valid post-pop stack index and returns index.
-bool evaluation_context::pop_position(stack_iterator& out_position)
+bool program::pop_position(stack_iterator& out_position)
 {
     int32_t index;
     if (!pop(index))
@@ -243,7 +299,7 @@ bool evaluation_context::pop_position(stack_iterator& out_position)
 }
 
 // pop1/pop2/.../pop[count]
-bool evaluation_context::pop(data_stack& section, size_t count)
+bool program::pop(data_stack& section, size_t count)
 {
     if (size() < count)
         return false;
@@ -258,13 +314,13 @@ bool evaluation_context::pop(data_stack& section, size_t count)
 //-----------------------------------------------------------------------------
 
 // pop1/pop2/.../pop[index]/push[index]/.../push2/push1/push[index]
-void evaluation_context::duplicate(size_t index)
+void program::duplicate(size_t index)
 {
     push_copy(item(index));
 }
 
 // pop1/pop2/push1/push2
-void evaluation_context::swap(size_t index_left, size_t index_right)
+void program::swap(size_t index_left, size_t index_right)
 {
     // TODO: refactor to allow DRY without const_cast here.
     std::swap(
@@ -273,13 +329,13 @@ void evaluation_context::swap(size_t index_left, size_t index_right)
 }
 
 // pop1/pop2/.../pop[pos-1]/pop[pos]/push[pos-1]/.../push2/push1
-void evaluation_context::erase(const stack_iterator& position)
+void program::erase(const stack_iterator& position)
 {
     primary_.erase(position);
 }
 
 // pop1/pop2/.../pop[i]/pop[first]/.../pop[last]/push[i]/.../push2/push1
-void evaluation_context::erase(const stack_iterator& first,
+void program::erase(const stack_iterator& first,
     const stack_iterator& last)
 {
     primary_.erase(first, last);
@@ -289,7 +345,7 @@ void evaluation_context::erase(const stack_iterator& first,
 //-----------------------------------------------------------------------------
 
 // private
-bool evaluation_context::stack_to_bool() const
+bool program::stack_to_bool() const
 {
     const auto& back = primary_.back();
     if (back.empty())
@@ -308,43 +364,43 @@ bool evaluation_context::stack_to_bool() const
     return false;
 }
 
-bool evaluation_context::empty() const
+bool program::empty() const
 {
     return primary_.empty();
 }
 
 // This must be guarded (for operation handlers only).
-bool evaluation_context::stack_true() const
+bool program::stack_true() const
 {
     BITCOIN_ASSERT(!empty());
     return stack_to_bool();
 }
 
 // This is safe to call when empty (for completion handlers only).
-bool evaluation_context::stack_false() const
+bool program::stack_false() const
 {
     return empty() || !stack_true();
 }
 
-bool evaluation_context::is_stack_overflow() const
+bool program::is_stack_overflow() const
 {
     // bit.ly/2cowHlP
     // Addition is safe due to script size validation.
     return size() + alternate_.size() > max_stack_size;
 }
 
-bool evaluation_context::is_short_circuited(const operation& op) const
+bool program::if_(const operation& op) const
 {
     // Skip operation if failed and the operator is unconditional.
-    return !(op.is_conditional() || succeeded());
+    return op.is_conditional() || succeeded();
 }
 
-const data_stack::value_type& evaluation_context::item(size_t index) /*const*/
+const data_stack::value_type& program::item(size_t index) /*const*/
 {
     return *position(index);
 }
 
-evaluation_context::stack_iterator evaluation_context::position(
+program::stack_iterator program::position(
     size_t index) /*const*/
 {
     // Subtracting 1 makes the stack indexes zero-based (unlike satoshi).
@@ -353,9 +409,9 @@ evaluation_context::stack_iterator evaluation_context::position(
 }
 
 // Pop jump-to-end, push all back, use to construct a script.
-script evaluation_context::subscript() const
+script program::subscript() const
 {
-    operation_stack ops;
+    sequence ops;
 
     for (auto op = jump(); op != end(); ++op)
         ops.push_back(*op);
@@ -363,7 +419,7 @@ script evaluation_context::subscript() const
     return script(std::move(ops));
 }
 
-size_t evaluation_context::size() const
+size_t program::size() const
 {
     return primary_.size();
 }
@@ -371,18 +427,18 @@ size_t evaluation_context::size() const
 // Alternate stack.
 //-----------------------------------------------------------------------------
 
-bool evaluation_context::empty_alternate() const
+bool program::empty_alternate() const
 {
     return alternate_.empty();
 }
 
-void evaluation_context::push_alternate(value_type&& value)
+void program::push_alternate(value_type&& value)
 {
     alternate_.emplace_back(std::move(value));
 }
 
 // This must be guarded.
-evaluation_context::value_type evaluation_context::pop_alternate()
+program::value_type program::pop_alternate()
 {
     BITCOIN_ASSERT(!alternate_.empty());
     const auto value = alternate_.back();
@@ -393,31 +449,31 @@ evaluation_context::value_type evaluation_context::pop_alternate()
 // Conditional stack.
 //-----------------------------------------------------------------------------
 
-void evaluation_context::open(bool value)
+void program::open(bool value)
 {
     condition_.push_back(value);
 }
 
 // This must be guarded.
-void evaluation_context::negate()
+void program::negate()
 {
     BITCOIN_ASSERT(!closed());
     condition_.back() = !condition_.back();
 }
 
 // This must be guarded.
-void evaluation_context::close()
+void program::close()
 {
     BITCOIN_ASSERT(!closed());
     condition_.pop_back();
 }
 
-bool evaluation_context::closed() const
+bool program::closed() const
 {
     return condition_.empty();
 }
 
-bool evaluation_context::succeeded() const
+bool program::succeeded() const
 {
     const auto is_true = [](bool value) { return value; };
     return std::all_of(condition_.begin(), condition_.end(), is_true);

@@ -69,7 +69,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\test\chain\script.hpp" />
+    <ClInclude Include="..\..\..\..\test\chain\script\script.hpp" />
     <ClInclude Include="..\..\..\..\test\math\big_number.hpp" />
     <ClInclude Include="..\..\..\..\test\math\hash.hpp" />
     <ClInclude Include="..\..\..\..\test\math\script_number.hpp" />
@@ -84,9 +84,9 @@
     <ClCompile Include="..\..\..\..\test\chain\point.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\point_iterator.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\satoshi_words.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\script.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\script\opcode.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\script\operation.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\script\script.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp" />
     <ClCompile Include="..\..\..\..\test\config\authority.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base58.cpp" />

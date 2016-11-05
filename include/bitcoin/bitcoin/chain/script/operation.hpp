@@ -37,7 +37,7 @@ namespace chain {
 class BC_API operation
 {
 public:
-    typedef std::vector<operation> list;
+    typedef std::vector<operation> sequence;
     typedef std::vector<operation>::const_iterator const_iterator;
 
     // Constructors.

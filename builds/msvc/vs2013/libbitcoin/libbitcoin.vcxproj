@@ -77,11 +77,11 @@
     <ClCompile Include="..\..\..\..\src\chain\output_point.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\point.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\point_iterator.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\script\evaluation_context.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\script\program.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\script\interpreter.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\script\opcode.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\script\operation.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\script\operation_stack.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\script\sequence.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\script\script.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\transaction.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\input.cpp" />
@@ -218,11 +218,11 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\output_point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point_iterator.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\evaluation_context.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\program.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\interpreter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\opcode.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\operation.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\operation_stack.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\sequence.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\rule_fork.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\script.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\script_pattern.hpp" />
@@ -399,6 +399,7 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\formats\base_58.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\math\checksum.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\math\hash.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\script\interpreter.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\array_slice.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\collection.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\data.ipp" />

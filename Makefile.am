@@ -46,12 +46,12 @@ src_libbitcoin_la_SOURCES = \
     src/chain/point.cpp \
     src/chain/point_iterator.cpp \
     src/chain/transaction.cpp \
-    src/chain/script/evaluation_context.cpp \
     src/chain/script/interpreter.cpp \
     src/chain/script/opcode.cpp \
     src/chain/script/operation.cpp \
-    src/chain/script/operation_stack.cpp \
+    src/chain/script/program.cpp \
     src/chain/script/script.cpp \
+    src/chain/script/sequence.cpp \
     src/config/authority.cpp \
     src/config/base16.cpp \
     src/config/base2.cpp \
@@ -229,11 +229,11 @@ test_libbitcoin_test_SOURCES = \
     test/chain/point.cpp \
     test/chain/point_iterator.cpp \
     test/chain/satoshi_words.cpp \
-    test/chain/script.cpp \
-    test/chain/script.hpp \
     test/chain/transaction.cpp \
     test/chain/script/opcode.cpp \
     test/chain/script/operation.cpp \
+    test/chain/script/script.cpp \
+    test/chain/script/script.hpp \
     test/config/authority.cpp \
     test/config/base58.cpp \
     test/config/checkpoint.cpp \
@@ -354,14 +354,14 @@ include_bitcoin_bitcoin_chain_HEADERS = \
 
 include_bitcoin_bitcoin_chain_scriptdir = ${includedir}/bitcoin/bitcoin/chain/script
 include_bitcoin_bitcoin_chain_script_HEADERS = \
-    include/bitcoin/bitcoin/chain/script/evaluation_context.hpp \
     include/bitcoin/bitcoin/chain/script/interpreter.hpp \
     include/bitcoin/bitcoin/chain/script/opcode.hpp \
     include/bitcoin/bitcoin/chain/script/operation.hpp \
-    include/bitcoin/bitcoin/chain/script/operation_stack.hpp \
+    include/bitcoin/bitcoin/chain/script/program.hpp \
     include/bitcoin/bitcoin/chain/script/rule_fork.hpp \
     include/bitcoin/bitcoin/chain/script/script.hpp \
     include/bitcoin/bitcoin/chain/script/script_pattern.hpp \
+    include/bitcoin/bitcoin/chain/script/sequence.hpp \
     include/bitcoin/bitcoin/chain/script/sighash_algorithm.hpp
 
 include_bitcoin_bitcoin_configdir = ${includedir}/bitcoin/bitcoin/config
@@ -399,6 +399,10 @@ include_bitcoin_bitcoin_impl_mathdir = ${includedir}/bitcoin/bitcoin/impl/math
 include_bitcoin_bitcoin_impl_math_HEADERS = \
     include/bitcoin/bitcoin/impl/math/checksum.ipp \
     include/bitcoin/bitcoin/impl/math/hash.ipp
+
+include_bitcoin_bitcoin_impl_scriptdir = ${includedir}/bitcoin/bitcoin/impl/script
+include_bitcoin_bitcoin_impl_script_HEADERS = \
+    include/bitcoin/bitcoin/impl/script/interpreter.ipp
 
 include_bitcoin_bitcoin_impl_utilitydir = ${includedir}/bitcoin/bitcoin/impl/utility
 include_bitcoin_bitcoin_impl_utility_HEADERS = \

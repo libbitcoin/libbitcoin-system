@@ -34,10 +34,6 @@
 #------------------------------------------------------------------------------
 BUILD_DIR="build-libbitcoin"
 
-# The default object directory.
-#------------------------------------------------------------------------------
-OBJECT_DIR="bin-objects"
-
 # ICU archive.
 #------------------------------------------------------------------------------
 ICU_URL="http://download.icu-project.org/files/icu4c/55.1/icu4c-55_1-src.tgz"
@@ -261,18 +257,6 @@ configure_options()
     ./configure "$@"
 }
 
-configure_options_object_dir()
-{
-    echo "configure options:"
-    for OPTION in "$@"; do
-        if [[ $OPTION ]]; then
-            echo $OPTION
-        fi
-    done
-
-    ../configure "$@"
-}
-
 configure_links()
 {
     # Configure dynamic linker run-time bindings when installing to system.
@@ -311,14 +295,11 @@ make_current_directory()
     local JOBS=$1
     shift 1
 
-    create_directory "$OBJECT_DIR"
     ./autogen.sh
-    push_directory "$OBJECT_DIR"
-    configure_options_object_dir "$@"
+    configure_options "$@"
     make_jobs $JOBS
     make install
     configure_links
-    pop_directory
 }
 
 # make_jobs jobs [make_options]
@@ -699,7 +680,6 @@ build_from_travis()
     # The primary build is not downloaded if we are running in Travis.
     if [[ $TRAVIS == true ]]; then
         build_from_local "Local $TRAVIS_REPO_SLUG" $JOBS "${OPTIONS[@]}" "$@"
-        push_directory "$OBJECT_DIR"
         make_tests $JOBS
     else
         build_from_github $ACCOUNT $REPO $BRANCH $JOBS "${OPTIONS[@]}" "$@"

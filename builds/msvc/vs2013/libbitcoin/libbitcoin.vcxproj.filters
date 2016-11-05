@@ -96,6 +96,9 @@
     <Filter Include="src\log">
       <UniqueIdentifier>{f048519d-2af9-4dd9-a4a3-a78e380720ac}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\bitcoin\impl\script">
+      <UniqueIdentifier>{f6bee0f3-f8ee-40d8-8fbe-cd4a2687018f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -152,6 +155,9 @@
     </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\notifier.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\script\interpreter.ipp">
+      <Filter>include\bitcoin\impl\script</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -458,9 +464,6 @@
     <ClCompile Include="..\..\..\..\src\chain\script\script.cpp">
       <Filter>src\chain\script</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\script\evaluation_context.cpp">
-      <Filter>src\chain\script</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\script\opcode.cpp">
       <Filter>src\chain\script</Filter>
     </ClCompile>
@@ -563,7 +566,10 @@
     <ClCompile Include="..\..\..\..\src\chain\script\interpreter.cpp">
       <Filter>src\chain\script</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\script\operation_stack.cpp">
+    <ClCompile Include="..\..\..\..\src\chain\script\program.cpp">
+      <Filter>src\chain\script</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\script\sequence.cpp">
       <Filter>src\chain\script</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1105,9 +1111,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\interpreter.hpp">
       <Filter>include\bitcoin\chain\script</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\evaluation_context.hpp">
-      <Filter>include\bitcoin\chain\script</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\sighash_algorithm.hpp">
       <Filter>include\bitcoin\chain\script</Filter>
     </ClInclude>
@@ -1117,7 +1120,10 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\script_pattern.hpp">
       <Filter>include\bitcoin\chain\script</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\operation_stack.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\program.hpp">
+      <Filter>include\bitcoin\chain\script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\sequence.hpp">
       <Filter>include\bitcoin\chain\script</Filter>
     </ClInclude>
   </ItemGroup>

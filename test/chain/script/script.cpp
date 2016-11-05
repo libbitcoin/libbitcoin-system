@@ -413,6 +413,8 @@ BOOST_AUTO_TEST_CASE(script__multisig__valid)
 {
     for (const auto& test: valid_multisig_scripts)
     {
+        //// std::cout << test.input << " : " << test.output << std::endl;
+
         const auto tx = new_tx(test);
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), test.input + " : " + test.output);
         BOOST_REQUIRE_MESSAGE(!tx.inputs().empty(), test.input + " : " + test.output);

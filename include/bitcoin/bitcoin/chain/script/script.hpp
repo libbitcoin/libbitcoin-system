@@ -27,11 +27,11 @@
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/chain/script/evaluation_context.hpp>
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
-#include <bitcoin/bitcoin/chain/script/operation_stack.hpp>
+#include <bitcoin/bitcoin/chain/script/program.hpp>
 #include <bitcoin/bitcoin/chain/script/rule_fork.hpp>
 #include <bitcoin/bitcoin/chain/script/script_pattern.hpp>
+#include <bitcoin/bitcoin/chain/script/sequence.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -54,8 +54,8 @@ public:
     script(script&& other);
     script(const script& other);
 
-    script(operation_stack&& ops);
-    script(const operation_stack& ops);
+    script(sequence&& ops);
+    script(const sequence& ops);
 
     script(data_chunk&& encoded, bool prefix);
     script(const data_chunk& encoded, bool prefix);
@@ -83,14 +83,14 @@ public:
     bool from_data(reader& source, bool prefix);
 
     /// Deserialization invalidates the iterator.
-    void from_stack(const operation_stack& ops);
+    void from_sequence(const sequence& ops);
     bool from_string(const std::string& mnemonic);
 
     /// A script object is valid if the byte count matches the prefix.
     bool is_valid() const;
 
-    /// A script stack is valid if all push ops have the predicated size.
-    bool is_valid_stack() const;
+    /// A script sequence is valid if all push ops have the predicated size.
+    bool is_valid_sequence() const;
 
     // Serialization.
     //-------------------------------------------------------------------------
@@ -136,49 +136,54 @@ public:
     // Utilities.
     //-------------------------------------------------------------------------
 
-    static bool is_enabled(uint32_t active_forks, rule_fork flag);
+    static inline bool is_enabled(uint32_t active_forks, rule_fork fork);
 
     script_pattern pattern() const;
     size_t sigops(bool embedded) const;
     size_t pay_script_hash_sigops(const script& prevout_script) const;
 
-    // Remove values from the stack using satoshi's awful find_and_delete.
+    // Remove values from the sequence using satoshi's awful find_and_delete.
     void purge(const data_stack& endorsements);
 
     // Validation.
     //-------------------------------------------------------------------------
 
-    static code verify(const transaction& tx, uint32_t input_index,
-        uint32_t flags);
-
-    static code verify(const transaction& tx, uint32_t input_index,
-        uint32_t flags, const script& input_script,
-        const script& prevout_script);
+    static code verify(const transaction& tx, uint32_t input, uint32_t forks);
 
 protected:
+
     // So that input and output may call reset from their own.
     friend class input;
     friend class output;
 
     void reset();
+    const sequence& operations() const;
     bool is_relaxed_push_data_only() const;
     bool is_relaxed_push_data(opcode code) const;
-    bool is_pay_to_script_hash(uint32_t flags) const;
-    const operation_stack& stack() const;
+    bool is_pay_to_script_hash(uint32_t forks) const;
     void find_and_delete(const data_chunk& endorsement);
 
 private:
-    static size_t serialized_size(const operation_stack& ops);
-    static data_chunk stack_to_data(const operation_stack& ops);
+    static size_t serialized_size(const sequence& ops);
+    static data_chunk sequence_to_data(const sequence& ops);
+    static code verify(const transaction& tx, uint32_t input_index,
+        uint32_t forks, const script& input_script,
+        const script& prevout_script);
 
     data_chunk bytes_;
     bool valid_;
 
     // These are protected by mutex.
     mutable bool cached_;
-    mutable operation_stack stack_;
+    mutable sequence sequence_;
     mutable upgrade_mutex mutex_;
 };
+
+// inline
+bool script::is_enabled(uint32_t active_forks, rule_fork fork)
+{
+    return (fork & active_forks) != 0;
+}
 
 } // namespace chain
 } // namespace libbitcoin

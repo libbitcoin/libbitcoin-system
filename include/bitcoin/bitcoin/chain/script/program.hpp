@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CHAIN_EVALUATION_CONTEXT_HPP
-#define LIBBITCOIN_CHAIN_EVALUATION_CONTEXT_HPP
+#ifndef LIBBITCOIN_CHAIN_PROGRAM_HPP
+#define LIBBITCOIN_CHAIN_PROGRAM_HPP
 
 #include <cstdint>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
@@ -35,7 +35,7 @@ namespace chain {
 class script;
 class transaction;
 
-class BC_API evaluation_context
+class BC_API program
 {
 public:
     typedef script_number number;
@@ -48,33 +48,44 @@ public:
     ////typedef data_stack::const_iterator stack_iterator;
     typedef data_stack::iterator stack_iterator;
 
-    /// Create an instance with empty stacks.
-    evaluation_context(const chain::transaction& transaction,
-        uint32_t input_index, uint32_t flags);
+    /// Create an instance that does not expect to verify signatures.
+    /// This is useful for script utilities but not with input validation.
+    /// This can only run individual operations via run(op, program).
+    program();
 
-    /// Create using copied flags and copied stack (only).
-    evaluation_context(const evaluation_context& other);
+    /// Create an instance that does not expect to verify signatures.
+    /// This is useful for script utilities but not with input validation.
+    /// This can run ops via run(op, program) or the script via run(program).
+    program(const script& script);
 
-    /// Create using copied flags and moved stack (only).
-    evaluation_context(evaluation_context&& other, bool move);
+    /// Create an instance with empty stacks (input run).
+    program(const script& script, const chain::transaction& transaction,
+        uint32_t input_index, uint32_t forks);
 
-    /// Program counter.
+    /// Create using copied forks and copied stack (prevout run).
+    program(const script& script, const program& other);
+
+    /// Create using copied forks and moved stack (p2sh run).
+    program(const script& script, program&& other, bool move);
+
+    /// Constant registers.
+    bool is_valid() const;
+    uint32_t forks() const;
+    uint32_t input_index() const;
+    const chain::transaction& transaction() const;
+
+    /// Program registers.
     op_iterator begin() const;
     op_iterator jump() const;
     op_iterator end() const;
+    size_t operation_count() const;
 
     /// Instructions.
-    bool set_program_counter(const script& script);
-    void set_jump_register(op_iterator instruction);
-
-    /// Operation count.
-    bool update_operation_count(const operation& op);
-    bool update_multisig_public_key_count(int32_t count);
-
-    /// Properties.
-    uint32_t flags() const;
-    uint32_t input_index() const;
-    const chain::transaction& transaction() const;
+    code evaluate();
+    code evaluate(const operation& op);
+    bool increment_operation_count(const operation& op);
+    bool increment_multisig_public_key_count(int32_t count);
+    bool set_jump_register(const operation& op, int32_t offset);
 
     // Primary stack.
     //-------------------------------------------------------------------------
@@ -104,7 +115,7 @@ public:
     bool stack_true() const;
     bool stack_false() const;
     bool is_stack_overflow() const;
-    bool is_short_circuited(const operation& op) const;
+    bool if_(const operation& op) const;
     const value_type& item(size_t index) /*const*/;
     stack_iterator position(size_t index) /*const*/;
     script subscript() const;
@@ -127,22 +138,22 @@ public:
     bool succeeded() const;
 
 private:
+    // A space-efficient dynamic bitset (specialized).
     typedef std::vector<bool> bool_stack;
 
+    void reserve_stacks();
     bool stack_to_bool() const;
 
-    op_iterator begin_;
-    op_iterator jump_;
-    op_iterator end_;
+    const script& script_;
+    const chain::transaction& transaction_;
+    const uint32_t input_index_;
+    const uint32_t forks_;
 
+    size_t operation_count_;
+    op_iterator jump_;
     data_stack primary_;
     data_stack alternate_;
     bool_stack condition_;
-    size_t operation_count_;
-
-    const uint32_t flags_;
-    const uint32_t input_index_;
-    const chain::transaction& transaction_;
 };
 
 } // namespace chain

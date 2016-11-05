@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/chain/script/operation_stack.hpp>
+#include <bitcoin/bitcoin/chain/script/sequence.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -30,7 +30,7 @@
 namespace libbitcoin {
 namespace chain {
 
-bool is_push_only(const operation_stack& ops)
+bool is_push_only(const sequence& ops)
 {
     const auto push = [](const operation& op)
     {
@@ -40,7 +40,7 @@ bool is_push_only(const operation_stack& ops)
     return std::all_of(ops.begin(), ops.end(), push);
 }
 
-bool is_null_data_pattern(const operation_stack& ops)
+bool is_null_data_pattern(const sequence& ops)
 {
     return ops.size() == 2
         && ops[0].code() == opcode::return_
@@ -48,7 +48,7 @@ bool is_null_data_pattern(const operation_stack& ops)
         && ops[1].data().size() <= max_null_data_size;
 }
 
-bool is_pay_multisig_pattern(const operation_stack& ops)
+bool is_pay_multisig_pattern(const sequence& ops)
 {
     static constexpr size_t op_1 = static_cast<uint8_t>(opcode::push_positive_1);
     static constexpr size_t op_16 = static_cast<uint8_t>(opcode::push_positive_16);
@@ -77,7 +77,7 @@ bool is_pay_multisig_pattern(const operation_stack& ops)
     return true;
 }
 
-bool is_pay_public_key_pattern(const operation_stack& ops)
+bool is_pay_public_key_pattern(const sequence& ops)
 {
     return ops.size() == 2
         && ops[0].is_push()
@@ -85,7 +85,7 @@ bool is_pay_public_key_pattern(const operation_stack& ops)
         && ops[1].code() == opcode::checksig;
 }
 
-bool is_pay_key_hash_pattern(const operation_stack& ops)
+bool is_pay_key_hash_pattern(const sequence& ops)
 {
     return ops.size() == 5
         && ops[0].code() == opcode::dup
@@ -99,7 +99,7 @@ bool is_pay_key_hash_pattern(const operation_stack& ops)
 //*****************************************************************************
 // CONSENSUS: this pattern is used to activate bip16 validation rules.
 //*****************************************************************************
-bool is_pay_script_hash_pattern(const operation_stack& ops)
+bool is_pay_script_hash_pattern(const sequence& ops)
 {
     return ops.size() == 3
         && ops[0].code() == opcode::hash160
@@ -108,7 +108,7 @@ bool is_pay_script_hash_pattern(const operation_stack& ops)
         && ops[2].code() == opcode::equal;
 }
 
-bool is_sign_multisig_pattern(const operation_stack& ops)
+bool is_sign_multisig_pattern(const sequence& ops)
 {
     if (ops.size() < 2 || !is_push_only(ops))
         return false;
@@ -119,18 +119,18 @@ bool is_sign_multisig_pattern(const operation_stack& ops)
     return true;
 }
 
-bool is_sign_public_key_pattern(const operation_stack& ops)
+bool is_sign_public_key_pattern(const sequence& ops)
 {
     return ops.size() == 1 && is_push_only(ops);
 }
 
-bool is_sign_key_hash_pattern(const operation_stack& ops)
+bool is_sign_key_hash_pattern(const sequence& ops)
 {
     return ops.size() == 2 && is_push_only(ops) &&
         is_public_key(ops.back().data());
 }
 
-bool is_sign_script_hash_pattern(const operation_stack& ops)
+bool is_sign_script_hash_pattern(const sequence& ops)
 {
     if (ops.size() < 2 || !is_push_only(ops))
         return false;
@@ -154,33 +154,33 @@ bool is_sign_script_hash_pattern(const operation_stack& ops)
         || redeem_script_pattern == script_pattern::null_data;
 }
     
-operation_stack to_null_data_pattern(data_slice data)
+sequence to_null_data_pattern(data_slice data)
 {
     if (data.size() > max_null_data_size)
         return{};
 
-    return operation_stack
+    return sequence
     {
         operation{ opcode::return_ },
         operation{ to_chunk(data) }
     };
 }
 
-operation_stack to_pay_public_key_pattern(data_slice point)
+sequence to_pay_public_key_pattern(data_slice point)
 {
     if (!is_public_key(point))
         return{};
 
-    return operation_stack
+    return sequence
     {
         { to_chunk(point) },
         { opcode::checksig }
     };
 }
 
-operation_stack to_pay_key_hash_pattern(const short_hash& hash)
+sequence to_pay_key_hash_pattern(const short_hash& hash)
 {
-    return operation_stack
+    return sequence
     {
         { opcode::dup },
         { opcode::hash160 },
@@ -190,9 +190,9 @@ operation_stack to_pay_key_hash_pattern(const short_hash& hash)
     };
 }
 
-operation_stack to_pay_script_hash_pattern(const short_hash& hash)
+sequence to_pay_script_hash_pattern(const short_hash& hash)
 {
-    return operation_stack
+    return sequence
     {
         { opcode::hash160 },
         { to_chunk(hash) },
@@ -200,7 +200,7 @@ operation_stack to_pay_script_hash_pattern(const short_hash& hash)
     };
 }
 
-operation_stack to_pay_multisig_pattern(uint8_t signatures,
+sequence to_pay_multisig_pattern(uint8_t signatures,
     const point_list& points)
 {
     const auto conversion = [](const ec_compressed& point)
@@ -213,7 +213,7 @@ operation_stack to_pay_multisig_pattern(uint8_t signatures,
     return to_pay_multisig_pattern(signatures, chunks);
 }
 
-operation_stack to_pay_multisig_pattern(uint8_t signatures,
+sequence to_pay_multisig_pattern(uint8_t signatures,
     const data_stack& points)
 {
     static constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
@@ -225,12 +225,12 @@ operation_stack to_pay_multisig_pattern(uint8_t signatures,
     const auto n = points.size();
 
     if (m < 1 || m > n || n < 1 || n > max)
-        return operation_stack();
+        return sequence();
 
     const auto op_m = static_cast<opcode>(m + zero);
     const auto op_n = static_cast<opcode>(points.size() + zero);
 
-    operation_stack ops;
+    sequence ops;
     ops.reserve(points.size() + 3);
     ops.push_back({ op_m });
 

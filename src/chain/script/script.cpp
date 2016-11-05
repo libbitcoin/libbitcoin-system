@@ -80,14 +80,14 @@ script::script(const script& other)
     // TODO: implement safe private accessor for conditional cache transfer.
 }
 
-script::script(const operation_stack& ops)
+script::script(const sequence& ops)
 {
-    from_stack(ops);
+    from_sequence(ops);
 }
 
-script::script(operation_stack&& ops)
+script::script(sequence&& ops)
 {
-    from_stack(ops);
+    from_sequence(ops);
 }
 
 script::script(data_chunk&& encoded, bool prefix)
@@ -204,30 +204,30 @@ bool script::from_string(const std::string& mnemonic)
 
     // There is strictly one operation per string token.
     const auto tokens = split(mnemonic);
-    operation_stack ops;
+    sequence ops;
     ops.resize(tokens.size());
 
-    // Create an op stack from the split tokens, one operation per token.
+    // Create an op sequence from the split tokens, one operation per token.
     for (size_t index = 0; index < ops.size(); ++index)
         if (!ops[index].from_string(tokens[index]))
             return false;
 
-    from_stack(ops);
+    from_sequence(ops);
     return true;
 }
 
 // Concurrent read/write is not supported, so no critical section.
-void script::from_stack(const operation_stack& ops)
+void script::from_sequence(const sequence& ops)
 {
     reset();
     valid_ = true;
-    bytes_ = stack_to_data(ops);
-    stack_ = ops;
+    bytes_ = sequence_to_data(ops);
+    sequence_ = ops;
     cached_ = true;
 }
 
 // private/static
-data_chunk script::stack_to_data(const operation_stack& ops)
+data_chunk script::sequence_to_data(const sequence& ops)
 {
     data_chunk out;
     out.reserve(serialized_size(ops));
@@ -244,7 +244,7 @@ data_chunk script::stack_to_data(const operation_stack& ops)
 }
 
 // private/static
-size_t script::serialized_size(const operation_stack& ops)
+size_t script::serialized_size(const sequence& ops)
 {
     const auto op_size = [](size_t total, const operation& op)
     {
@@ -262,8 +262,8 @@ void script::reset()
     bytes_.shrink_to_fit();
     valid_ = false;
     cached_ = false;
-    stack_.clear();
-    stack_.shrink_to_fit();
+    sequence_.clear();
+    sequence_.shrink_to_fit();
 }
 
 bool script::is_valid() const
@@ -273,11 +273,11 @@ bool script::is_valid() const
     return valid_;
 }
 
-bool script::is_valid_stack() const
+bool script::is_valid_sequence() const
 {
     // Script validity is independent of individual operation validity.
     // There is a trailing invalid/default op if a push op had a size mismatch.
-    return stack().empty() || stack_.back().is_valid();
+    return sequence().empty() || sequence_.back().is_valid();
 }
 
 // Serialization.
@@ -314,7 +314,7 @@ std::string script::to_string(uint32_t active_forks) const
     auto first = true;
     std::ostringstream text;
 
-    for (const auto& op: stack())
+    for (const auto& op: operations())
     {
         text << (first ? "" : " ") << op.to_string(active_forks);
         first = false;
@@ -326,44 +326,44 @@ std::string script::to_string(uint32_t active_forks) const
 
 // Iteration.
 //-----------------------------------------------------------------------------
-// The first stack access must be method-based to guarantee the cache.
+// The first sequence access must be method-based to guarantee the cache.
 
 bool script::empty() const
 {
-    return stack().empty();
+    return operations().empty();
 }
 
 size_t script::size() const
 {
-    return stack().size();
+    return operations().size();
 }
 
 const operation& script::front() const
 {
-    BITCOIN_ASSERT(!stack().empty());
-    return stack().front();
+    BITCOIN_ASSERT(!operations().empty());
+    return operations().front();
 }
 
 const operation& script::back() const
 {
-    BITCOIN_ASSERT(!stack().empty());
-    return stack().back();
+    BITCOIN_ASSERT(!operations().empty());
+    return operations().back();
 }
 
 const operation& script::operator[](std::size_t index) const
 {
-    BITCOIN_ASSERT(index < stack().size());
-    return stack()[index];
+    BITCOIN_ASSERT(index < operations().size());
+    return operations()[index];
 }
 
 operation::const_iterator script::begin() const
 {
-    return stack().begin();
+    return operations().begin();
 }
 
 operation::const_iterator script::end() const
 {
-    return stack().end();
+    return operations().end();
 }
 
 // Properties (size, accessors, cache).
@@ -385,7 +385,7 @@ uint64_t script::serialized_size(bool prefix) const
 }
 
 // protected
-const operation_stack& script::stack() const
+const sequence& script::operations() const
 {
     ///////////////////////////////////////////////////////////////////////////
     // Critical Section
@@ -395,7 +395,7 @@ const operation_stack& script::stack() const
     {
         mutex_.unlock_upgrade();
         //---------------------------------------------------------------------
-        return stack_;
+        return sequence_;
     }
 
     operation op;
@@ -407,24 +407,24 @@ const operation_stack& script::stack() const
     mutex_.unlock_upgrade_and_lock();
 
     // One operation per byte is the upper limit of operations.
-    stack_.reserve(size);
+    sequence_.reserve(size);
 
-    // If an op fails it is placed on the stack and the loop terminates.
+    // If an op fails it is placed on the sequence and the loop terminates.
     // To validate the ops the caller must test the last op.is_valid().
     // This is not necessary during script validation as it is autmoatic.
     while (!source.is_exhausted())
     {
         op.from_data(source);
-        stack_.push_back(std::move(op));
+        sequence_.push_back(std::move(op));
     }
 
-    stack_.shrink_to_fit();
+    sequence_.shrink_to_fit();
     cached_ = true;
 
     mutex_.unlock();
     ///////////////////////////////////////////////////////////////////////////
 
-    return stack_;
+    return sequence_;
 }
 
 // Signing.
@@ -552,7 +552,7 @@ static hash_digest sign_all(const transaction& tx, uint32_t input_index,
 
 static script strip_code_seperators(const script& script_code)
 {
-    operation_stack ops;
+    sequence ops;
 
     for (auto op = script_code.begin(); op != script_code.end(); ++op)
         if (op->code() != opcode::codeseparator)
@@ -632,12 +632,6 @@ bool script::create_endorsement(endorsement& out, const ec_secret& secret,
 // Utilities.
 //-----------------------------------------------------------------------------
 
-// static
-bool script::is_enabled(uint32_t flags, rule_fork flag)
-{
-    return (flag & flags) != 0;
-}
-
 //*****************************************************************************
 // CONSENSUS: this includes opcode::reserved_80 despite it being reserved.
 // This affects the operation count in p2sh script evaluation.
@@ -656,37 +650,37 @@ bool script::is_relaxed_push_data_only() const
         return is_relaxed_push_data(op.code());
     };
 
-    return std::all_of(stack().begin(), stack().end(), push);
+    return std::all_of(operations().begin(), operations().end(), push);
 }
 
 script_pattern script::pattern() const
 {
-    // The first stack access must be method-based to guarantee the cache.
-    if (is_null_data_pattern(stack()))
+    // The first sequence access must be method-based to guarantee the cache.
+    if (is_null_data_pattern(sequence()))
         return script_pattern::null_data;
 
-    if (is_pay_multisig_pattern(stack_))
+    if (is_pay_multisig_pattern(sequence_))
         return script_pattern::pay_multisig;
 
-    if (is_pay_public_key_pattern(stack_))
+    if (is_pay_public_key_pattern(sequence_))
         return script_pattern::pay_public_key;
 
-    if (is_pay_key_hash_pattern(stack_))
+    if (is_pay_key_hash_pattern(sequence_))
         return script_pattern::pay_key_hash;
 
-    if (is_pay_script_hash_pattern(stack_))
+    if (is_pay_script_hash_pattern(sequence_))
         return script_pattern::pay_script_hash;
 
-    if (is_sign_multisig_pattern(stack_))
+    if (is_sign_multisig_pattern(sequence_))
         return script_pattern::sign_multisig;
 
-    if (is_sign_public_key_pattern(stack_))
+    if (is_sign_public_key_pattern(sequence_))
         return script_pattern::sign_public_key;
 
-    if (is_sign_key_hash_pattern(stack_))
+    if (is_sign_key_hash_pattern(sequence_))
         return script_pattern::sign_key_hash;
 
-    if (is_sign_script_hash_pattern(stack_))
+    if (is_sign_script_hash_pattern(sequence_))
         return script_pattern::sign_script_hash;
 
     return script_pattern::non_standard;
@@ -699,17 +693,14 @@ size_t script::sigops(bool embedded) const
     auto preceding = opcode::reserved_255;
 
     //*************************************************************************
-    // CONSENSUS: this short-circuits sigop counting but ultimately has no
-    // effect since p2sh sigops are not counted for coinbase txs and that
-    // would be the only case in which a non-push-data p2sh input script would
-    // not invalidate the block, due to the p2sh push data check. So we avoid
-    // the check here as a sigop count optimization.
+    // CONSENSUS: this would short-circuit sigop counting but has no effect
+    // since either this is coinbase (not counted) or it will fail validation.
     //*************************************************************************
     ////if (embedded && !is_relaxed_push_data_only())
     ////    return total;
 
-    // The first stack access must be method-based to guarantee the cache.
-    for (const auto& op: stack())
+    // The first sequence access must be method-based to guarantee the cache.
+    for (const auto& op: operations())
     {
         const auto code = op.code();
 
@@ -733,11 +724,11 @@ size_t script::sigops(bool embedded) const
 }
 
 // This is used internally as an optimization over using script::pattern.
-bool script::is_pay_to_script_hash(uint32_t flags) const
+bool script::is_pay_to_script_hash(uint32_t forks) const
 {
-    // The prevout stack access must be method-based to guarantee the cache.
-    return is_enabled(flags, rule_fork::bip16_rule) &&
-        is_pay_script_hash_pattern(stack());
+    // The prevout sequence access must be method-based to guarantee the cache.
+    return is_enabled(forks, rule_fork::bip16_rule) &&
+        is_pay_script_hash_pattern(operations());
 }
 
 // TODO: cache (default to max_size_t sentinel).
@@ -750,8 +741,12 @@ size_t script::pay_script_hash_sigops(const script& prevout_script) const
     // Obtain the embedded script from the last input script item (data).
     script embedded;
 
-    // The first stack access must be method-based to guarantee the cache.
-    if (stack().empty() || !embedded.from_data(stack_.back().data(), false))
+    // The first sequence access must be method-based to guarantee the cache.
+    if (operations().empty())
+        return 0;
+
+    // This can't actually fail for a non-prefix deserialization.
+    if (!embedded.from_data(sequence_.back().data(), false))
         return 0;
 
     // Count the sigops in the embedded script using BIP16 rules.
@@ -801,8 +796,8 @@ void script::purge(const data_stack& endorsements)
     for (auto& endorsement: endorsements)
         find_and_delete(endorsement);
 
-    // Invalidate the cache so that the op stack may be regenerated.
-    stack_.clear();
+    // Invalidate the cache so that the op sequence may be regenerated.
+    sequence_.clear();
     cached_ = false;
     bytes_.shrink_to_fit();
 }
@@ -811,55 +806,48 @@ void script::purge(const data_stack& endorsements)
 //-----------------------------------------------------------------------------
 // static
 
-code script::verify(const transaction& tx, uint32_t input_index,
-    uint32_t flags)
+code script::verify(const transaction& tx, uint32_t input, uint32_t forks)
 {
-    if (input_index >= tx.inputs().size())
+    if (input >= tx.inputs().size())
         return error::operation_failed;
 
-    const auto& input = tx.inputs()[input_index];
-    const auto& prevout = input.previous_output().validation.cache;
-
-    return verify(tx, input_index, flags, input.script(), prevout.script());
+    const auto& in = tx.inputs()[input];
+    const auto& prevout = in.previous_output().validation.cache;
+    return verify(tx, input, forks, in.script(), prevout.script());
 }
 
+// private
 code script::verify(const transaction& tx, uint32_t input_index,
-    uint32_t flags, const script& input_script,
+    uint32_t forks, const script& input_script,
     const script& prevout_script)
 {
-    code ec(error::validate_inputs_failed);
+    code error;
 
-    // Create an empty context for evaluation of the input script.
-    evaluation_context input_context(tx, input_index, flags);
+    program input(input_script, tx, input_index, forks);
+    if ((error = input.evaluate()))
+        return error;
 
-    // Evaluate the input script against an empty stack (no stack check here).
-    if (!interpreter::run(input_script, input_context))
-        return ec;
+    program prevout(prevout_script, input);
+    if ((error = prevout.evaluate()))
+        return error;
 
-    // COPY input context stack (only) and flags for eval of prevout script.
-    evaluation_context prevout_context(input_context);
+    if (prevout.stack_false())
+        return error::stack_false;
 
-    // Evaluate the prevout script against the input result stack.
-    if (!interpreter::run(prevout_script, prevout_context) ||
-        prevout_context.stack_false())
-        return ec;
-
-    if (prevout_script.is_pay_to_script_hash(flags))
+    if (prevout_script.is_pay_to_script_hash(forks))
     {
         if (!input_script.is_relaxed_push_data_only())
-            return ec;
+            return error::invalid_script_embed;
 
-        // Stack top is the embedded script (input_context is not empty).
-        script embedded(input_context.pop(), false);
-        if (!embedded.is_valid())
-            return ec;
+        // The embedded p2sh script is at the top of the stack.
+        script embedded_script(input.pop(), false);
 
-        // MOVE popped stack (only) and flags for eval of embedded script.
-        evaluation_context context(std::move(input_context), true);
+        program embedded(embedded_script, std::move(input), true);
+        if ((error = embedded.evaluate()))
+            return error;
 
-        // Evaluate the embedded script against the input result stack.
-        if (!interpreter::run(embedded, context) || context.stack_false())
-            return ec;
+        if (embedded.stack_false())
+            return error::stack_false;
     }
 
     return error::success;

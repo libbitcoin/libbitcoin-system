@@ -718,11 +718,11 @@ code transaction::connect_input(const chain_state& state,
     if (!prevout.cache.is_valid())
         return error::missing_input;
 
-    const auto flags = state.enabled_forks();
+    const auto forks = state.enabled_forks();
     const auto index32 = static_cast<uint32_t>(input_index);
 
-    // Validate the transaction input.
-    return script::verify(*this, index32, flags);
+    // Verify the transaction input script against the previous output.
+    return script::verify(*this, index32, forks);
 }
 
 // Validation.
