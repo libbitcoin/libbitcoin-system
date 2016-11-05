@@ -140,7 +140,7 @@ public:
 
     script_pattern pattern() const;
     size_t sigops(bool embedded) const;
-    size_t pay_script_hash_sigops(const script& prevout_script) const;
+    size_t embedded_sigops(const script& prevout_script) const;
 
     // Remove values from the sequence using satoshi's awful find_and_delete.
     void purge(const data_stack& endorsements);
@@ -158,8 +158,8 @@ protected:
 
     void reset();
     const sequence& operations() const;
-    bool is_relaxed_push_data_only() const;
-    bool is_relaxed_push_data(opcode code) const;
+    bool is_relaxed_push() const;
+    bool is_relaxed_push(opcode code) const;
     bool is_pay_to_script_hash(uint32_t forks) const;
     void find_and_delete(const data_chunk& endorsement);
 

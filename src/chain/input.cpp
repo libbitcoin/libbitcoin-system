@@ -275,7 +275,7 @@ size_t input::signature_operations(bool bip16_active) const
 
         // This cannot overflow because each total is limited by max ops.
         const auto& cache = previous_output_.validation.cache.script();
-        sigops += script_.pay_script_hash_sigops(cache);
+        sigops += script_.embedded_sigops(cache);
     }
 
     return sigops;
