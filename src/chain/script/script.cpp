@@ -632,25 +632,33 @@ bool script::create_endorsement(endorsement& out, const ec_secret& secret,
 // Utilities.
 //-----------------------------------------------------------------------------
 
+bool script::is_relaxed_push() const
+{
+    const auto push = [&](const operation& op)
+    {
+        return is_relaxed_push(op.code());
+    };
+
+    return std::all_of(operations().begin(), operations().end(), push);
+}
+
 //*****************************************************************************
 // CONSENSUS: this includes opcode::reserved_80 despite it being reserved.
 // This affects the operation count in p2sh script evaluation.
 //*****************************************************************************
-bool script::is_relaxed_push_data(opcode code) const
+bool script::is_relaxed_push(opcode code) const
 {
     static constexpr auto op_96 = static_cast<uint8_t>(opcode::push_positive_16);
     const auto value = static_cast<uint8_t>(code);
     return value <= op_96;
 }
 
-bool script::is_relaxed_push_data_only() const
+// This is used internally as an optimization over using script::pattern.
+bool script::is_pay_to_script_hash(uint32_t forks) const
 {
-    const auto push = [&](const operation& op)
-    {
-        return is_relaxed_push_data(op.code());
-    };
-
-    return std::all_of(operations().begin(), operations().end(), push);
+    // The prevout sequence access must be method-based to guarantee the cache.
+    return is_enabled(forks, rule_fork::bip16_rule) &&
+        is_pay_script_hash_pattern(operations());
 }
 
 script_pattern script::pattern() const
@@ -692,13 +700,6 @@ size_t script::sigops(bool embedded) const
     size_t total = 0;
     auto preceding = opcode::reserved_255;
 
-    //*************************************************************************
-    // CONSENSUS: this would short-circuit sigop counting but has no effect
-    // since either this is coinbase (not counted) or it will fail validation.
-    //*************************************************************************
-    ////if (embedded && !is_relaxed_push_data_only())
-    ////    return total;
-
     // The first sequence access must be method-based to guarantee the cache.
     for (const auto& op: operations())
     {
@@ -709,7 +710,8 @@ size_t script::sigops(bool embedded) const
         {
             total++;
         }
-        else if (code == opcode::checkmultisig ||
+        else if (
+            code == opcode::checkmultisig ||
             code == opcode::checkmultisigverify)
         {
             total += embedded && operation::is_positive(preceding) ?
@@ -723,31 +725,24 @@ size_t script::sigops(bool embedded) const
     return total;
 }
 
-// This is used internally as an optimization over using script::pattern.
-bool script::is_pay_to_script_hash(uint32_t forks) const
-{
-    // The prevout sequence access must be method-based to guarantee the cache.
-    return is_enabled(forks, rule_fork::bip16_rule) &&
-        is_pay_script_hash_pattern(operations());
-}
-
 // TODO: cache (default to max_size_t sentinel).
-size_t script::pay_script_hash_sigops(const script& prevout_script) const
+size_t script::embedded_sigops(const script& prevout_script) const
 {
-    // We count p2sh sigops when the previout script is p2sh.
+    // There are no embedded sigops when the prevout script is not p2sh.
     if (!prevout_script.is_pay_to_script_hash(rule_fork::bip16_rule))
         return 0;
-
-    // Obtain the embedded script from the last input script item (data).
-    script embedded;
 
     // The first sequence access must be method-based to guarantee the cache.
     if (operations().empty())
         return 0;
 
-    // This can't actually fail for a non-prefix deserialization.
-    if (!embedded.from_data(sequence_.back().data(), false))
+    // There are no embedded sigops when the input script is not push only.
+    if (!is_relaxed_push())
         return 0;
+
+    // Parse the embedded script from the last input script item (data).
+    // This never fails because there is no prefix to validate the length.
+    script embedded(sequence_.back().data(), false);
 
     // Count the sigops in the embedded script using BIP16 rules.
     return embedded.sigops(true);
@@ -836,7 +831,7 @@ code script::verify(const transaction& tx, uint32_t input_index,
 
     if (prevout_script.is_pay_to_script_hash(forks))
     {
-        if (!input_script.is_relaxed_push_data_only())
+        if (!input_script.is_relaxed_push())
             return error::invalid_script_embed;
 
         // The embedded p2sh script is at the top of the stack.
