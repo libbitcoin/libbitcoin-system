@@ -664,8 +664,9 @@ code block::check() const
     // This will not make a difference unless prevouts are populated, in which
     // case they are ignored. This means that p2sh sigops are not counted here.
     // This is a preliminary check, the final count must come from connect().
-    else if (signature_operations(false) > max_block_sigops)
-        return error::too_many_sigops;
+    // Reenable once sigop caching is implemented, otherwise is deoptimization.
+    ////else if (signature_operations(false) > max_block_sigops)
+    ////    return error::block_legacy_sigop_limit;
 
     else
         return check_transactions();
@@ -697,11 +698,11 @@ code block::accept(const chain_state& state) const
         return error::coinbase_height_mismatch;
 
     else if (!is_valid_coinbase_claim(state.height()))
-        return error::coinbase_too_large;
+        return error::coinbase_value_limit;
 
     // This recomputes sigops to include p2sh from prevouts.
     else if (signature_operations(bip16) > max_block_sigops)
-        return error::too_many_sigops;
+        return error::block_embedded_sigop_limit;
 
     else
         return accept_transactions(state);

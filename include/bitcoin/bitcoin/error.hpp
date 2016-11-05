@@ -96,13 +96,13 @@ enum error_code_t
     internal_duplicate = 49,
     merkle_mismatch = 31,
     insufficient_work = 48,
-    too_many_sigops = 30,
+    block_legacy_sigop_limit = 30,
 
     // accept block
     non_final_transaction = 34,
     coinbase_height_mismatch = 37,
-    coinbase_too_large = 41,
-    ////too_many_sigops
+    coinbase_value_limit = 41,
+    block_embedded_sigop_limit = 52,
 
     // check transaction
     empty_transaction = 20,
@@ -110,8 +110,8 @@ enum error_code_t
     spend_overflow = 21,
     invalid_coinbase_script_size = 22,
     coinbase_transaction = 16,
-    ////block_size_limit
-    ////too_many_sigops
+    transction_size_limit = 53,
+    transaction_legacy_sigop_limit = 54,
 
     // accept transaction
     unspent_duplicate = 38,
@@ -119,20 +119,20 @@ enum error_code_t
     double_spend = 18,
     coinbase_maturity = 46,
     spend_exceeds_value = 40,
-    ////too_many_sigops
+    transaction_embedded_sigop_limit = 55,
 
     // script verify / interpreter run
     invalid_script = 39,
-    invalid_script_size = 52,
-    invalid_push_data_size = 53,
-    invalid_operation_count = 54,
-    invalid_stack_size = 55,
-    invalid_stack_scope = 56,
-    invalid_script_embed = 57,
-    invalid_signature_encoding = 58,
-    invalid_signature_lax_encoding = 59,
-    incorrect_signature = 60,
-    stack_false = 61,
+    invalid_script_size = 56,
+    invalid_push_data_size = 57,
+    invalid_operation_count = 58,
+    invalid_stack_size = 59,
+    invalid_stack_scope = 60,
+    invalid_script_embed = 61,
+    invalid_signature_encoding = 62,
+    invalid_signature_lax_encoding = 63,
+    incorrect_signature = 64,
+    stack_false = 65,
 
     // op eval
     op_disabled = 100,
