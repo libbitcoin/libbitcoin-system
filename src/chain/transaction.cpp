@@ -753,8 +753,9 @@ code transaction::check(bool transaction_pool) const
     // This will not make a difference unless prevouts are populated, in which
     // case they are ignored. This means that p2sh sigops are not counted here.
     // This is a preliminary check, the final count must come from connect().
-    else if (transaction_pool && signature_operations(false) > max_block_sigops)
-        return error::transaction_legacy_sigop_limit;
+    // Reenable once sigop caching is implemented, otherwise is deoptimization.
+    ////else if (transaction_pool && signature_operations(false) > max_block_sigops)
+    ////    return error::transaction_legacy_sigop_limit;
 
     else
         return error::success;
