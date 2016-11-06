@@ -36,9 +36,26 @@
 
 namespace libbitcoin {
 
+hash_digest bitcoin_hash(data_slice data)
+{
+    return sha256_hash(sha256_hash(data));
+}
+
+short_hash bitcoin_short_hash(data_slice data)
+{
+    return ripemd160_hash(sha256_hash(data));
+}
+
 short_hash ripemd160_hash(data_slice data)
 {
     short_hash hash;
+    RMD160(data.data(), data.size(), hash.data());
+    return hash;
+}
+
+data_chunk ripemd160_hash_chunk(data_slice data)
+{
+    data_chunk hash(short_hash_size);
     RMD160(data.data(), data.size(), hash.data());
     return hash;
 }
@@ -50,9 +67,23 @@ short_hash sha1_hash(data_slice data)
     return hash;
 }
 
+data_chunk sha1_hash_chunk(data_slice data)
+{
+    data_chunk hash(short_hash_size);
+    SHA1_(data.data(), data.size(), hash.data());
+    return hash;
+}
+
 hash_digest sha256_hash(data_slice data)
 {
     hash_digest hash;
+    SHA256_(data.data(), data.size(), hash.data());
+    return hash;
+}
+
+data_chunk sha256_hash_chunk(data_slice data)
+{
+    data_chunk hash(hash_size);
     SHA256_(data.data(), data.size(), hash.data());
     return hash;
 }
@@ -100,16 +131,6 @@ long_hash pkcs5_pbkdf2_hmac_sha512(data_slice passphrase,
         throw std::bad_alloc();
 
     return hash;
-}
-
-hash_digest bitcoin_hash(data_slice data)
-{
-    return sha256_hash(sha256_hash(data));
-}
-
-short_hash bitcoin_short_hash(data_slice data)
-{
-    return ripemd160_hash(sha256_hash(data));
 }
 
 static void handle_script_result(int result)

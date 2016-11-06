@@ -578,11 +578,7 @@ interpreter::result interpreter::op_min(program& program)
     if (!program.pop_binary(first, second))
         return error::op_min;
 
-    if (second < first)
-        program.push_move(second.data());
-    else
-        program.push_move(first.data());
-
+    program.push_move(second < first ? second.data() : first.data());
     return error::success;
 }
 
@@ -592,8 +588,7 @@ interpreter::result interpreter::op_max(program& program)
     if (!program.pop_binary(first, second))
         return error::op_max;
 
-    auto greater = second > first ? second.data() : first.data();
-    program.push_move(std::move(greater));
+    program.push_move(second > first ? second.data() : first.data());
     return error::success;
 }
 
@@ -612,9 +607,7 @@ interpreter::result interpreter::op_ripemd160(program& program)
     if (program.empty())
         return error::op_ripemd160;
 
-    // TODO: create ripemd160_hash overload that emits to data_chunk.
-    const auto hash = ripemd160_hash(program.pop());
-    program.push_move(to_chunk(hash));
+    program.push_move(ripemd160_hash_chunk(program.pop()));
     return error::success;
 }
 
@@ -623,8 +616,7 @@ interpreter::result interpreter::op_sha1(program& program)
     if (program.empty())
         return error::op_sha1;
 
-    // TODO: create sha1_hash overload that emits to data_chunk.
-    program.push_move(to_chunk(sha1_hash(program.pop())));
+    program.push_move(sha1_hash_chunk(program.pop()));
     return error::success;
 }
 
@@ -633,8 +625,7 @@ interpreter::result interpreter::op_sha256(program& program)
     if (program.empty())
         return error::op_sha256;
 
-    // TODO: create sha256_hash overload that emits to data_chunk.
-    program.push_move(to_chunk(sha256_hash(program.pop())));
+    program.push_move(sha256_hash_chunk(program.pop()));
     return error::success;
 }
 
@@ -643,8 +634,7 @@ interpreter::result interpreter::op_hash160(program& program)
     if (program.empty())
         return error::op_hash160;
 
-    // TODO: create bitcoin_short_hash overload that emits to data_chunk.
-    program.push_move(to_chunk(bitcoin_short_hash(program.pop())));
+    program.push_move(ripemd160_hash_chunk(sha256_hash(program.pop())));
     return error::success;
 }
 
@@ -653,8 +643,7 @@ interpreter::result interpreter::op_hash256(program& program)
     if (program.empty())
         return error::op_hash256;
 
-    // TODO: create bitcoin_hash overload that emits to data_chunk.
-    program.push_move(to_chunk(bitcoin_hash(program.pop())));
+    program.push_move(sha256_hash_chunk(sha256_hash(program.pop())));
     return error::success;
 }
 
