@@ -80,25 +80,25 @@ script::script(const script& other)
     // TODO: implement safe private accessor for conditional cache transfer.
 }
 
-script::script(const sequence& ops)
+script::script(const operation::list& ops)
 {
-    from_sequence(ops);
+    from_operations(ops);
 }
 
-script::script(sequence&& ops)
+script::script(operation::list&& ops)
 {
-    from_sequence(ops);
+    from_operations(ops);
 }
 
 script::script(data_chunk&& encoded, bool prefix)
 {
-    // TODO: store prefix in bytes_ to simplify and optimize this.
     if (prefix)
     {
         valid_ = from_data(encoded, prefix);
         return;
     }
 
+    // This is an optimization that avoids streaming the encode bytes.
     bytes_ = std::move(encoded);
     cached_ = false;
     valid_ = true;
@@ -204,34 +204,33 @@ bool script::from_string(const std::string& mnemonic)
 
     // There is strictly one operation per string token.
     const auto tokens = split(mnemonic);
-    sequence ops;
+    operation::list ops;
     ops.resize(tokens.size());
 
-    // Create an op sequence from the split tokens, one operation per token.
+    // Create an op list from the split tokens, one operation per token.
     for (size_t index = 0; index < ops.size(); ++index)
         if (!ops[index].from_string(tokens[index]))
             return false;
 
-    from_sequence(ops);
+    from_operations(ops);
     return true;
 }
 
 // Concurrent read/write is not supported, so no critical section.
-void script::from_sequence(const sequence& ops)
+void script::from_operations(const operation::list& ops)
 {
     reset();
     valid_ = true;
-    bytes_ = sequence_to_data(ops);
-    sequence_ = ops;
+    bytes_ = operations_to_data(ops);
+    operations_ = ops;
     cached_ = true;
 }
 
 // private/static
-data_chunk script::sequence_to_data(const sequence& ops)
+data_chunk script::operations_to_data(const operation::list& ops)
 {
     data_chunk out;
     out.reserve(serialized_size(ops));
-
     const auto concatenate = [&out](const operation& op)
     {
         auto bytes = op.to_data();
@@ -244,7 +243,7 @@ data_chunk script::sequence_to_data(const sequence& ops)
 }
 
 // private/static
-size_t script::serialized_size(const sequence& ops)
+size_t script::serialized_size(const operation::list& ops)
 {
     const auto op_size = [](size_t total, const operation& op)
     {
@@ -262,8 +261,8 @@ void script::reset()
     bytes_.shrink_to_fit();
     valid_ = false;
     cached_ = false;
-    sequence_.clear();
-    sequence_.shrink_to_fit();
+    operations_.clear();
+    operations_.shrink_to_fit();
 }
 
 bool script::is_valid() const
@@ -273,11 +272,11 @@ bool script::is_valid() const
     return valid_;
 }
 
-bool script::is_valid_sequence() const
+bool script::is_valid_operations() const
 {
     // Script validity is independent of individual operation validity.
     // There is a trailing invalid/default op if a push op had a size mismatch.
-    return sequence().empty() || sequence_.back().is_valid();
+    return operations().empty() || operations_.back().is_valid();
 }
 
 // Serialization.
@@ -326,7 +325,8 @@ std::string script::to_string(uint32_t active_forks) const
 
 // Iteration.
 //-----------------------------------------------------------------------------
-// The first sequence access must be method-based to guarantee the cache.
+// These are syntactic sugar that allow the caller to iterate ops directly.
+// The first operations access must be method-based to guarantee the cache.
 
 bool script::empty() const
 {
@@ -356,12 +356,12 @@ const operation& script::operator[](std::size_t index) const
     return operations()[index];
 }
 
-operation::const_iterator script::begin() const
+operation::iterator script::begin() const
 {
     return operations().begin();
 }
 
-operation::const_iterator script::end() const
+operation::iterator script::end() const
 {
     return operations().end();
 }
@@ -385,7 +385,7 @@ uint64_t script::serialized_size(bool prefix) const
 }
 
 // protected
-const sequence& script::operations() const
+const operation::list& script::operations() const
 {
     ///////////////////////////////////////////////////////////////////////////
     // Critical Section
@@ -395,7 +395,7 @@ const sequence& script::operations() const
     {
         mutex_.unlock_upgrade();
         //---------------------------------------------------------------------
-        return sequence_;
+        return operations_;
     }
 
     operation op;
@@ -407,24 +407,24 @@ const sequence& script::operations() const
     mutex_.unlock_upgrade_and_lock();
 
     // One operation per byte is the upper limit of operations.
-    sequence_.reserve(size);
+    operations_.reserve(size);
 
-    // If an op fails it is placed on the sequence and the loop terminates.
+    // If an op fails it is pushed to operations and the loop terminates.
     // To validate the ops the caller must test the last op.is_valid().
     // This is not necessary during script validation as it is autmoatic.
     while (!source.is_exhausted())
     {
         op.from_data(source);
-        sequence_.push_back(std::move(op));
+        operations_.push_back(std::move(op));
     }
 
-    sequence_.shrink_to_fit();
+    operations_.shrink_to_fit();
     cached_ = true;
 
     mutex_.unlock();
     ///////////////////////////////////////////////////////////////////////////
 
-    return sequence_;
+    return operations_;
 }
 
 // Signing.
@@ -436,14 +436,12 @@ inline sighash_algorithm to_sighash_enum(uint8_t sighash_type)
         sighash_type & sighash_algorithm::mask);
 }
 
-inline uint8_t is_sighash_enum(uint8_t sighash_type,
-    sighash_algorithm value)
+inline uint8_t is_sighash_enum(uint8_t sighash_type, sighash_algorithm value)
 {
     return to_sighash_enum(sighash_type) == value;
 }
 
-inline bool is_sighash_flag(uint8_t sighash_type,
-    sighash_algorithm value)
+inline bool is_sighash_flag(uint8_t sighash_type, sighash_algorithm value)
 {
     return (sighash_type & value) != 0;
 }
@@ -552,7 +550,7 @@ static hash_digest sign_all(const transaction& tx, uint32_t input_index,
 
 static script strip_code_seperators(const script& script_code)
 {
-    sequence ops;
+    operation::list ops;
 
     for (auto op = script_code.begin(); op != script_code.end(); ++op)
         if (op->code() != opcode::codeseparator)
@@ -582,6 +580,7 @@ hash_digest script::generate_signature_hash(const transaction& tx,
     //*************************************************************************
     const auto stripped = strip_code_seperators(script_code);
 
+    // The sighash serializations are isolated for clarity and optimization.
     switch (to_sighash_enum(sighash_type))
     {
         case sighash_none:
@@ -629,78 +628,289 @@ bool script::create_endorsement(endorsement& out, const ec_secret& secret,
     return true;
 }
 
-// Utilities.
+// Utilities (static).
 //-----------------------------------------------------------------------------
 
-bool script::is_relaxed_push() const
+bool script::is_push_only(const operation::list& ops)
 {
-    const auto push = [&](const operation& op)
+    const auto push = [](const operation& op)
     {
-        return is_relaxed_push(op.code());
+        return op.is_push();
     };
 
-    return std::all_of(operations().begin(), operations().end(), push);
+    return std::all_of(ops.begin(), ops.end(), push);
+}
+
+bool script::is_null_data_pattern(const operation::list& ops)
+{
+    return ops.size() == 2
+        && ops[0].code() == opcode::return_
+        && ops[1].is_push()
+        && ops[1].data().size() <= max_null_data_size;
+}
+
+bool script::is_pay_multisig_pattern(const operation::list& ops)
+{
+    static constexpr size_t op_1 = static_cast<uint8_t>(opcode::push_positive_1);
+    static constexpr size_t op_16 = static_cast<uint8_t>(opcode::push_positive_16);
+
+    const auto op_count = ops.size();
+
+    if (op_count < 4 || ops[op_count - 1].code() != opcode::checkmultisig)
+        return false;
+
+    const auto op_m = static_cast<uint8_t>(ops[0].code());
+    const auto op_n = static_cast<uint8_t>(ops[op_count - 2].code());
+
+    if (op_m < op_1 || op_m > op_n || op_n < op_1 || op_n > op_16)
+        return false;
+
+    const auto number = op_n - op_1;
+    const auto points = op_count - 3u;
+
+    if (number != points)
+        return false;
+
+    for (auto op = ops.begin() + 1; op != ops.end() - 2; ++op)
+        if (!is_public_key(op->data()))
+            return false;
+
+    return true;
+}
+
+bool script::is_pay_public_key_pattern(const operation::list& ops)
+{
+    return ops.size() == 2
+        && ops[0].is_push()
+        && is_public_key(ops[0].data())
+        && ops[1].code() == opcode::checksig;
+}
+
+bool script::is_pay_key_hash_pattern(const operation::list& ops)
+{
+    return ops.size() == 5
+        && ops[0].code() == opcode::dup
+        && ops[1].code() == opcode::hash160
+        && ops[2].is_push()
+        && ops[2].data().size() == short_hash_size
+        && ops[3].code() == opcode::equalverify
+        && ops[4].code() == opcode::checksig;
 }
 
 //*****************************************************************************
-// CONSENSUS: this includes opcode::reserved_80 despite it being reserved.
-// This affects the operation count in p2sh script evaluation.
+// CONSENSUS: this pattern is used to activate bip16 validation rules.
 //*****************************************************************************
-bool script::is_relaxed_push(opcode code) const
+bool script::is_pay_script_hash_pattern(const operation::list& ops)
 {
+    return ops.size() == 3
+        && ops[0].code() == opcode::hash160
+        && ops[1].code() == opcode::push_size_20
+        && ops[1].data().size() == short_hash_size
+        && ops[2].code() == opcode::equal;
+}
+
+bool script::is_sign_multisig_pattern(const operation::list& ops)
+{
+    if (ops.size() < 2 || !is_push_only(ops))
+        return false;
+
+    if (ops.front().code() != opcode::push_size_0)
+        return false;
+
+    return true;
+}
+
+bool script::is_sign_public_key_pattern(const operation::list& ops)
+{
+    return ops.size() == 1 && is_push_only(ops);
+}
+
+bool script::is_sign_key_hash_pattern(const operation::list& ops)
+{
+    return ops.size() == 2 && is_push_only(ops) &&
+        is_public_key(ops.back().data());
+}
+
+bool script::is_sign_script_hash_pattern(const operation::list& ops)
+{
+    if (ops.size() < 2 || !is_push_only(ops))
+        return false;
+
+    const auto& redeem_data = ops.back().data();
+
+    if (redeem_data.empty())
+        return false;
+
+    script redeem;
+
+    if (!redeem.from_data(redeem_data, false))
+        return false;
+
+    // Is the redeem script a standard pay (output) script?
+    const auto redeem_script_pattern = redeem.pattern();
+    return redeem_script_pattern == script_pattern::pay_multisig
+        || redeem_script_pattern == script_pattern::pay_public_key
+        || redeem_script_pattern == script_pattern::pay_key_hash
+        || redeem_script_pattern == script_pattern::pay_script_hash
+        || redeem_script_pattern == script_pattern::null_data;
+}
+    
+operation::list script::to_null_data_pattern(data_slice data)
+{
+    if (data.size() > max_null_data_size)
+        return{};
+
+    return operation::list
+    {
+        operation{ opcode::return_ },
+        operation{ to_chunk(data) }
+    };
+}
+
+operation::list script::to_pay_public_key_pattern(data_slice point)
+{
+    if (!is_public_key(point))
+        return{};
+
+    return operation::list
+    {
+        { to_chunk(point) },
+        { opcode::checksig }
+    };
+}
+
+operation::list script::to_pay_key_hash_pattern(const short_hash& hash)
+{
+    return operation::list
+    {
+        { opcode::dup },
+        { opcode::hash160 },
+        { to_chunk(hash) },
+        { opcode::equalverify },
+        { opcode::checksig }
+    };
+}
+
+operation::list script::to_pay_script_hash_pattern(const short_hash& hash)
+{
+    return operation::list
+    {
+        { opcode::hash160 },
+        { to_chunk(hash) },
+        { opcode::equal }
+    };
+}
+
+operation::list script::to_pay_multisig_pattern(uint8_t signatures,
+    const point_list& points)
+{
+    const auto conversion = [](const ec_compressed& point)
+    {
+        return to_chunk(point);
+    };
+
+    data_stack chunks(points.size());
+    std::transform(points.begin(), points.end(), chunks.begin(), conversion);
+    return to_pay_multisig_pattern(signatures, chunks);
+}
+
+operation::list script::to_pay_multisig_pattern(uint8_t signatures,
+    const data_stack& points)
+{
+    static constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
     static constexpr auto op_96 = static_cast<uint8_t>(opcode::push_positive_16);
-    const auto value = static_cast<uint8_t>(code);
-    return value <= op_96;
+    static constexpr auto zero = op_81 - 1;
+    static constexpr auto max = op_96 - zero;
+
+    const auto m = signatures;
+    const auto n = points.size();
+
+    if (m < 1 || m > n || n < 1 || n > max)
+        return operation::list();
+
+    const auto op_m = static_cast<opcode>(m + zero);
+    const auto op_n = static_cast<opcode>(points.size() + zero);
+
+    operation::list ops;
+    ops.reserve(points.size() + 3);
+    ops.push_back({ op_m });
+
+    for (const auto point: points)
+    {
+        if (!is_public_key(point))
+            return{};
+
+        ops.push_back(point);
+    }
+
+    ops.push_back({ op_n });
+    ops.push_back({ opcode::checkmultisig });
+    return ops;
 }
 
-// This is used internally as an optimization over using script::pattern.
-bool script::is_pay_to_script_hash(uint32_t forks) const
-{
-    // The prevout sequence access must be method-based to guarantee the cache.
-    return is_enabled(forks, rule_fork::bip16_rule) &&
-        is_pay_script_hash_pattern(operations());
-}
+// Utilities (non-static).
+//-----------------------------------------------------------------------------
 
 script_pattern script::pattern() const
 {
-    // The first sequence access must be method-based to guarantee the cache.
-    if (is_null_data_pattern(sequence()))
+    // The first operations access must be method-based to guarantee the cache.
+    if (is_null_data_pattern(operation::list()))
         return script_pattern::null_data;
 
-    if (is_pay_multisig_pattern(sequence_))
+    if (is_pay_multisig_pattern(operations_))
         return script_pattern::pay_multisig;
 
-    if (is_pay_public_key_pattern(sequence_))
+    if (is_pay_public_key_pattern(operations_))
         return script_pattern::pay_public_key;
 
-    if (is_pay_key_hash_pattern(sequence_))
+    if (is_pay_key_hash_pattern(operations_))
         return script_pattern::pay_key_hash;
 
-    if (is_pay_script_hash_pattern(sequence_))
+    if (is_pay_script_hash_pattern(operations_))
         return script_pattern::pay_script_hash;
 
-    if (is_sign_multisig_pattern(sequence_))
+    if (is_sign_multisig_pattern(operations_))
         return script_pattern::sign_multisig;
 
-    if (is_sign_public_key_pattern(sequence_))
+    if (is_sign_public_key_pattern(operations_))
         return script_pattern::sign_public_key;
 
-    if (is_sign_key_hash_pattern(sequence_))
+    if (is_sign_key_hash_pattern(operations_))
         return script_pattern::sign_key_hash;
 
-    if (is_sign_script_hash_pattern(sequence_))
+    if (is_sign_script_hash_pattern(operations_))
         return script_pattern::sign_script_hash;
 
     return script_pattern::non_standard;
 }
 
-// TODO: distinct cache property for serialized_script total.
+//*****************************************************************************
+// CONSENSUS: this pattern is used to activate bip16 validation rules.
+//*****************************************************************************
+bool script::is_relaxed_push() const
+{
+    const auto push = [&](const operation& op)
+    {
+        return op.is_relaxed_push();
+    };
+
+    return std::all_of(operations().begin(), operations().end(), push);
+}
+
+bool script::is_pay_to_script_hash(uint32_t forks) const
+{
+    // This is used internally as an optimization over using script::pattern.
+    // The prevout operations access must be method-based to guarantee the cache.
+    return is_enabled(forks, rule_fork::bip16_rule) &&
+        is_pay_script_hash_pattern(operations());
+}
+
 size_t script::sigops(bool embedded) const
 {
     size_t total = 0;
     auto preceding = opcode::reserved_255;
 
-    // The first sequence access must be method-based to guarantee the cache.
+    // The first operations access must be method-based to guarantee the cache.
     for (const auto& op: operations())
     {
         const auto code = op.code();
@@ -725,14 +935,13 @@ size_t script::sigops(bool embedded) const
     return total;
 }
 
-// TODO: cache (default to max_size_t sentinel).
 size_t script::embedded_sigops(const script& prevout_script) const
 {
     // There are no embedded sigops when the prevout script is not p2sh.
     if (!prevout_script.is_pay_to_script_hash(rule_fork::bip16_rule))
         return 0;
 
-    // The first sequence access must be method-based to guarantee the cache.
+    // The first operations access must be method-based to guarantee the cache.
     if (operations().empty())
         return 0;
 
@@ -742,7 +951,7 @@ size_t script::embedded_sigops(const script& prevout_script) const
 
     // Parse the embedded script from the last input script item (data).
     // This never fails because there is no prefix to validate the length.
-    script embedded(sequence_.back().data(), false);
+    script embedded(operations_.back().data(), false);
 
     // Count the sigops in the embedded script using BIP16 rules.
     return embedded.sigops(true);
@@ -751,7 +960,7 @@ size_t script::embedded_sigops(const script& prevout_script) const
 //*****************************************************************************
 // CONSENSUS: this is a pointless, broken, premature optimization attempt.
 //*****************************************************************************
-void script::find_and_delete(const data_chunk& endorsement)
+void script::find_and_delete_(const data_chunk& endorsement)
 {
     // If this is empty it would produce an empty script but not operation.
     // So we test it for empty prior to operation reserialization.
@@ -786,32 +995,20 @@ void script::find_and_delete(const data_chunk& endorsement)
 }
 
 // Concurrent read/write is not supported, so no critical section.
-void script::purge(const data_stack& endorsements)
+void script::find_and_delete(const data_stack& endorsements)
 {
     for (auto& endorsement: endorsements)
-        find_and_delete(endorsement);
+        find_and_delete_(endorsement);
 
-    // Invalidate the cache so that the op sequence may be regenerated.
-    sequence_.clear();
+    // Invalidate the cache so that the operations may be regenerated.
+    operations_.clear();
     cached_ = false;
     bytes_.shrink_to_fit();
 }
 
 // Validation.
 //-----------------------------------------------------------------------------
-// static
 
-code script::verify(const transaction& tx, uint32_t input, uint32_t forks)
-{
-    if (input >= tx.inputs().size())
-        return error::operation_failed;
-
-    const auto& in = tx.inputs()[input];
-    const auto& prevout = in.previous_output().validation.cache;
-    return verify(tx, input, forks, in.script(), prevout.script());
-}
-
-// private
 code script::verify(const transaction& tx, uint32_t input_index,
     uint32_t forks, const script& input_script,
     const script& prevout_script)
@@ -846,6 +1043,16 @@ code script::verify(const transaction& tx, uint32_t input_index,
     }
 
     return error::success;
+}
+
+code script::verify(const transaction& tx, uint32_t input, uint32_t forks)
+{
+    if (input >= tx.inputs().size())
+        return error::operation_failed;
+
+    const auto& in = tx.inputs()[input];
+    const auto& prevout = in.previous_output().validation.cache;
+    return verify(tx, input, forks, in.script(), prevout.script());
 }
 
 } // namespace chain

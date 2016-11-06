@@ -89,6 +89,7 @@ interpreter::result interpreter::op_push_data(program& program,
 
 // Operations (not shared).
 //-----------------------------------------------------------------------------
+// All index parameters are zero-based and relative to stack top.
 
 interpreter::result interpreter::op_if(program& program)
 {
@@ -688,7 +689,7 @@ interpreter::result interpreter::op_check_sig_verify(program& program)
 
     // Create a subscript with endorsements stripped (sort of).
     auto script_code = program.subscript();
-    script_code.purge({ endorsement });
+    script_code.find_and_delete({ endorsement });
 
     return script::check_signature(signature, sighash_type, pubkey,
         script_code, program.transaction(), program.input_index()) ?
@@ -747,7 +748,7 @@ interpreter::result interpreter::op_check_multisig_verify(program& program)
 
     // Before looping create subscript with endorsements stripped (sort of).
     auto script_code = program.subscript();
-    script_code.purge(endorsements);
+    script_code.find_and_delete(endorsements);
 
     // The exact number of signatures are required and must be in order.
     // One key can validate more than one script. So we always advance 

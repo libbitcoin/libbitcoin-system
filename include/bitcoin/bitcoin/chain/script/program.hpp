@@ -31,7 +31,6 @@
 namespace libbitcoin {
 namespace chain {
 
-// All index parameters are zero-based and relative to stack top.
 class script;
 class transaction;
 
@@ -40,7 +39,7 @@ class BC_API program
 public:
     typedef script_number number;
     typedef data_stack::value_type value_type;
-    typedef operation::const_iterator op_iterator;
+    typedef operation::iterator op_iterator;
 
     // Older libstdc++ does not allow erase with const iterator.
     // This is a bug that requires we up the minimum compiler version.

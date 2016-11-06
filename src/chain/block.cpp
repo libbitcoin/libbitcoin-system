@@ -591,7 +591,7 @@ bool block::is_valid_coinbase_script(size_t height) const
 
     // Create the expected script as a byte vector.
     script_number number(height);
-    script expected_script(sequence{ operation{ number.data() } });
+    script expected_script(operation::list{ { number.data() } });
     const auto expected = expected_script.to_data(false);
 
     // Require that the coinbase script match the expected coinbase script.

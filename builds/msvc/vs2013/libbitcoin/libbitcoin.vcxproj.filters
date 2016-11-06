@@ -569,9 +569,6 @@
     <ClCompile Include="..\..\..\..\src\chain\script\program.cpp">
       <Filter>src\chain\script</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\script\sequence.cpp">
-      <Filter>src\chain\script</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\log\file_collector_repository.cpp">
       <Filter>src\log</Filter>
     </ClCompile>
@@ -1130,9 +1127,6 @@
       <Filter>include\bitcoin\chain\script</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\program.hpp">
-      <Filter>include\bitcoin\chain\script</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\sequence.hpp">
       <Filter>include\bitcoin\chain\script</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\file_collector.hpp">

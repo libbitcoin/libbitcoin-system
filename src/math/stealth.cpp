@@ -23,7 +23,6 @@
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
 #include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/chain/script/script_pattern.hpp>
-#include <bitcoin/bitcoin/chain/script/sequence.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/binary.hpp>
@@ -136,7 +135,7 @@ bool create_stealth_data(data_chunk& out_stealth_data, ec_secret& out_secret,
         std::copy(fill.begin(), fill.end(), data.end() - sizeof(nonce));
 
         // Create the stealth script with the current data.
-        const auto ops = to_null_data_pattern(data);
+        const auto ops = script::to_null_data_pattern(data);
         const auto stealth_script = script(std::move(ops));
 
         // Test for match of filter to stealth script hash prefix.
