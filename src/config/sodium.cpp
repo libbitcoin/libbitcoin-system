@@ -84,7 +84,7 @@ std::istream& operator>>(std::istream& input, sodium& argument)
         BOOST_THROW_EXCEPTION(invalid_option_value(base85));
     }
 
-    std::copy(out_value.begin(), out_value.end(), argument.value_.begin());
+    std::copy_n(out_value.begin(), hash_size, argument.value_.begin());
     return input;
 }
 

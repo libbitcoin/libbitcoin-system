@@ -307,7 +307,8 @@ BC_API bool opcode_from_string(opcode& out_code, const std::string& value);
 BC_API std::string opcode_to_hexadecimal(opcode code);
 
 /// Convert any hexadecimal byte to an opcode.
-BC_API bool opcode_from_hexadecimal(opcode& out_code, const std::string& value);
+BC_API bool opcode_from_hexadecimal(opcode& out_code,
+    const std::string& value);
 
 } // namespace chain
 } // namespace libbitcoin

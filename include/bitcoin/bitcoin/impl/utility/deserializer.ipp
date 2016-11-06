@@ -235,7 +235,7 @@ data_chunk deserializer<Iterator, CheckSafe>::read_bytes(size_t size)
 
     const auto begin = iterator_;
     iterator_ += size;
-    std::copy(begin, iterator_, out.begin());
+    std::copy_n(begin, size, out.begin());
     return out;
 }
 
@@ -302,7 +302,7 @@ byte_array<Size> deserializer<Iterator, CheckSafe>::read_forward()
     byte_array<Size> out;
     const auto begin = iterator_;
     iterator_ += Size;
-    std::copy(begin, iterator_, out.begin());
+    std::copy_n(begin, Size, out.begin());
     return out;
 }
 

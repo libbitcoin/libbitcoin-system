@@ -132,7 +132,7 @@ stealth_address stealth_address::from_stealth(const data_chunk& decoded)
     auto scan_key_begin = iterator;
     iterator += ec_compressed_size;
     ec_compressed scan_key;
-    std::copy(scan_key_begin, iterator, scan_key.begin());
+    std::copy_n(scan_key_begin, ec_compressed_size, scan_key.begin());
 
     // [N:1]
     auto number_spend_pubkeys = *iterator;
@@ -154,7 +154,7 @@ stealth_address stealth_address::from_stealth(const data_chunk& decoded)
         auto spend_key_begin = iterator;
         iterator += ec_compressed_size;
         ec_compressed point;
-        std::copy(spend_key_begin, iterator, point.begin());
+        std::copy_n(spend_key_begin, ec_compressed_size, point.begin());
         spend_keys.emplace_back(point);
     }
 

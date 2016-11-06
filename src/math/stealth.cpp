@@ -116,11 +116,11 @@ bool create_stealth_data(data_chunk& out_stealth_data, ec_secret& out_secret,
     data_chunk data(hash_size + pad_size + sizeof(uint32_t));
 
     // Copy the unsigned portion of the ephemeral public key into data.
-    std::copy(point.begin() + 1, point.end(), data.begin());
+    std::copy_n(point.begin() + 1, ec_compressed_size - 1, data.begin());
 
     // Copy arbitrary pad bytes into data.
     const auto pad_begin = data.begin() + hash_size;
-    std::copy(bytes.begin(), bytes.begin() + pad_size, pad_begin);
+    std::copy_n(bytes.begin(), pad_size, pad_begin);
 
     // Create an initial 32 bit nonce value from last word (avoiding pad).
     const auto start = from_little_endian_unsafe<uint32_t>(bytes.begin() +
@@ -132,7 +132,7 @@ bool create_stealth_data(data_chunk& out_stealth_data, ec_secret& out_secret,
     {
         // Fill the nonce into the data buffer.
         const auto fill = to_little_endian(nonce);
-        std::copy(fill.begin(), fill.end(), data.end() - sizeof(nonce));
+        std::copy_n(fill.begin(), sizeof(nonce), data.end() - sizeof(nonce));
 
         // Create the stealth script with the current data.
         const auto ops = script::to_null_data_pattern(data);
@@ -164,8 +164,7 @@ bool extract_ephemeral_key(ec_compressed& out_ephemeral_public_key,
     out_ephemeral_public_key[0] = ephemeral_public_key_sign;
 
     const auto& data = script[1].data();
-    std::copy(data.begin(), data.begin() + hash_size,
-        out_ephemeral_public_key.begin() + 1);
+    std::copy_n(data.begin(), hash_size, out_ephemeral_public_key.begin() + 1);
 
     return true;
 }
@@ -177,8 +176,7 @@ bool extract_ephemeral_key(hash_digest& out_unsigned_ephemeral_key,
         return false;
 
     const auto& data = script[1].data();
-    std::copy(data.begin(), data.begin() + hash_size,
-        out_unsigned_ephemeral_key.begin());
+    std::copy_n(data.begin(), hash_size, out_unsigned_ephemeral_key.begin());
 
     return true;
 }

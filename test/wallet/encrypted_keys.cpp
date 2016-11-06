@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(encrypted__fixture__unicode_passphrase__matches_encrypted_t
     // This confirms that the passphrase decodes as expected in BIP38.
     const auto normal = to_normal_nfc_form(passphrase);
     data_chunk normalized(normal.size());
-    std::copy(normal.begin(), normal.end(), normalized.begin());
+    std::copy_n(normal.begin(), normal.size(), normalized.begin());
     BOOST_REQUIRE_EQUAL(encode_base16(normalized), "cf9300f0909080f09f92a9");
 }
 

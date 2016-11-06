@@ -35,7 +35,7 @@ hash_number::hash_number(uint64_t value)
 
 hash_number::hash_number(const hash_digest& value)
 {
-    std::copy(value.begin(), value.end(), hash_.begin());
+    std::copy_n(value.begin(), hash_size, hash_.begin());
 }
 
 bool hash_number::set_compact(uint32_t value)
@@ -53,12 +53,12 @@ uint32_t hash_number::compact() const
 
 hash_digest hash_number::hash() const
 {
-    hash_digest value;
-    std::copy(hash_.begin(), hash_.end(), value.begin());
-    return value;
+    hash_digest out;
+    std::copy_n(hash_.begin(), hash_size, out.begin());
+    return out;
 }
 
-/// Copy Operators.
+// Copy Operators.
 
 hash_number hash_number::operator~() const
 {

@@ -44,7 +44,7 @@ bool insert_checksum(byte_array<Size>& out)
 
     data_chunk body(out.begin(), out.end() - checksum_size);
     const auto checksum = to_little_endian(bitcoin_checksum(body));
-    std::copy(checksum.begin(), checksum.end(), out.end() - checksum_size);
+    std::copy_n(checksum.begin(), checksum_size, out.end() - checksum_size);
     return true;
 }
 

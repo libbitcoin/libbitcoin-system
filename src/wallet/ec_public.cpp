@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/wallet/ec_public.hpp>
 
+#include <algorithm>
 #include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
@@ -172,7 +173,7 @@ bool ec_public::to_data(data_chunk& out) const
     if (compressed())
     {
         out.resize(ec_compressed_size);
-        std::copy(point_.begin(), point_.end(), out.begin());
+        std::copy_n(point_.begin(), ec_compressed_size, out.begin());
         return true;
     }
 
@@ -180,7 +181,7 @@ bool ec_public::to_data(data_chunk& out) const
     if (to_uncompressed(uncompressed))
     {
         out.resize(ec_uncompressed_size);
-        std::copy(uncompressed.begin(), uncompressed.end(), out.begin());
+        std::copy_n(uncompressed.begin(), ec_uncompressed_size, out.begin());
         return true;
     }
 

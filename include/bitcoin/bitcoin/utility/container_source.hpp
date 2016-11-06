@@ -55,11 +55,8 @@ public:
             return -1;
 
         const auto value = static_cast<typename Container::size_type>(result);
-        const auto limit = safe_add(position_, value);
-        const auto start = container_.begin() + position_;
-        const auto end = container_.begin() + limit;
-        std::copy(start, end, buffer);
-        position_ = limit;
+        std::copy_n(container_.begin() + position_, value, buffer);
+        position_ += value;
         return result;
     }
 

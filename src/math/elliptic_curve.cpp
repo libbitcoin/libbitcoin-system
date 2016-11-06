@@ -111,7 +111,7 @@ bool verify_signature(const secp256k1_context* context,
 {
     // Copy to avoid exposing external types.
     secp256k1_ecdsa_signature parsed;
-    std::copy(signature.begin(), signature.end(), std::begin(parsed.data));
+    std::copy_n(signature.begin(), ec_signature_size, std::begin(parsed.data));
 
     // secp256k1_ecdsa_verify rejects non-normalized (low-s) signatures, but
     // bitcoin does not have such a limitation, so we always normalize.
@@ -274,7 +274,7 @@ bool parse_signature(ec_signature& out, const der_signature& der_signature,
             der_signature.data(), der_signature.size()) == 1;
 
     if (valid)
-        std::copy(std::begin(parsed.data), std::end(parsed.data), out.begin());
+        std::copy_n(std::begin(parsed.data), ec_signature_size, out.begin());
 
     return valid;
 }
@@ -283,7 +283,7 @@ bool encode_signature(der_signature& out, const ec_signature& signature)
 {
     // Copy to avoid exposing external types.
     secp256k1_ecdsa_signature sign;
-    std::copy(signature.begin(), signature.end(), std::begin(sign.data));
+    std::copy_n(signature.begin(), ec_signature_size, std::begin(sign.data));
 
     const auto context = signing.context();
     auto size = max_der_signature_size;
@@ -336,7 +336,7 @@ bool verify_signature(data_slice point, const hash_digest& hash,
 {
     // Copy to avoid exposing external types.
     secp256k1_ecdsa_signature parsed;
-    std::copy(signature.begin(), signature.end(), std::begin(parsed.data));
+    std::copy_n(signature.begin(), ec_signature_size, std::begin(parsed.data));
 
     // secp256k1_ecdsa_verify rejects non-normalized (low-s) signatures, but
     // bitcoin does not have such a limitation, so we always normalize.

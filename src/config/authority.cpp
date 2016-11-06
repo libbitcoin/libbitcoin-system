@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/config/authority.hpp>
 
+#include <algorithm>
 #include <sstream>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
@@ -128,7 +129,7 @@ static asio::ipv6 to_boost_address(const message::ip_address& in)
 {
     asio::ipv6::bytes_type bytes;
     BITCOIN_ASSERT(bytes.size() == in.size());
-    std::copy(in.begin(), in.end(), bytes.begin());
+    std::copy_n(in.begin(), in.size(), bytes.begin());
     const asio::ipv6 out(bytes);
     return out;
 }
@@ -138,7 +139,7 @@ static message::ip_address to_bc_address(const asio::ipv6& in)
     message::ip_address out;
     const auto bytes = in.to_bytes();
     BITCOIN_ASSERT(bytes.size() == out.size());
-    std::copy(bytes.begin(), bytes.end(), out.begin());
+    std::copy_n(bytes.begin(), bytes.size(), out.begin());
     return out;
 }
 
