@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 
 #include <algorithm>
+#include <utility>
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
 #include <bitcoin/bitcoin/math/hash.hpp>
@@ -244,14 +245,14 @@ bool is_public_key(data_slice point)
 // ----------------------------------------------------------------------------
 
 bool parse_endorsement(uint8_t& sighash_type, der_signature& der_signature,
-    const endorsement& endorsement)
+    endorsement&& endorsement)
 {
     if (endorsement.empty())
         return false;
 
     sighash_type = endorsement.back();
-    der_signature = endorsement;
-    der_signature.pop_back();
+    endorsement.pop_back();
+    der_signature = std::move(endorsement);
     return true;
 }
 

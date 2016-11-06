@@ -76,8 +76,14 @@ public:
     /// Return the value bounded by the limits of int32.
     int32_t int32() const;
 
-    /// Return the value.
+    /// Return the unbounded value.
     int64_t int64() const;
+
+    /// Return value as stack boolean (nonzero is true).
+    bool is_true() const;
+
+    /// Return value as stack boolean (zero is false).
+    bool is_false() const;
 
     /// Arithmetic with a number (throws on overflow).
     script_number operator+(int64_t value) const;
