@@ -37,8 +37,8 @@ namespace chain {
 class BC_API operation
 {
 public:
-    typedef std::vector<operation> sequence;
-    typedef std::vector<operation>::const_iterator const_iterator;
+    typedef std::vector<operation> list;
+    typedef std::vector<operation>::const_iterator iterator;
 
     // Constructors.
     //-------------------------------------------------------------------------
@@ -113,28 +113,34 @@ public:
     /// Convert the opcode to the corresponding [1..16] value (or undefined).
     static uint8_t opcode_to_positive(opcode code);
 
-    /// Types of opcodes.
+    /// Categories of opcodes.
     static bool is_push(opcode code);
     static bool is_counted(opcode code);
     static bool is_numeric(opcode code);
     static bool is_positive(opcode code);
     static bool is_disabled(opcode code);
     static bool is_conditional(opcode code);
+    static bool is_relaxed_push(opcode code);
 
     // Validation.
     //-------------------------------------------------------------------------
 
+    /// Categories of opcodes.
     bool is_push() const;
     bool is_counted() const;
     bool is_positive() const;
     bool is_disabled() const;
     bool is_conditional() const;
+    bool is_relaxed_push() const;
+
+    /// Validate the data against the code.
     bool is_oversized() const;
 
 protected:
     operation(opcode code, data_chunk&& data, bool valid);
     operation(opcode code, const data_chunk& data, bool valid);
     static uint32_t read_data_size(opcode code, reader& source);
+    opcode opcode_from_data(const data_chunk& uncoded, bool minimal);
     void reset();
 
 private:

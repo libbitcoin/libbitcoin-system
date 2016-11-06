@@ -27,22 +27,24 @@
 namespace libbitcoin {
 namespace chain {
 
+// TODO: inline all program methods.
+// TODO: inline all script_number methods.
+// TODO: inline operation methods used by interpreter and program.
 code interpreter::run(program& program)
 {
     result error(error::invalid_script);
+
     if (!program.is_valid())
         return error;
 
-    // TODO: inline all program methods.
     for (const auto& op: program)
     {
-        // TODO: inline op methods used by interpreter and program.
         if (op.is_oversized())
             return error::invalid_push_data_size;
-            
+
         if (op.is_disabled())
             return run(op, program);
-        
+
         if (!program.increment_operation_count(op))
             return error::invalid_operation_count;
 

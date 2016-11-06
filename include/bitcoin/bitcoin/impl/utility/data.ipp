@@ -113,8 +113,8 @@ byte_array_parts<Size / 2> split(const byte_array<Size>& bytes)
     static_assert(Size % 2 == 0, "Split requires an even length parameter.");
     static const size_t half = Size / 2;
     byte_array_parts<half> out;
-    std::copy(std::begin(bytes), std::begin(bytes) + half, out.left.begin());
-    std::copy(std::begin(bytes) + half, std::end(bytes), out.right.begin());
+    std::copy_n(std::begin(bytes), half, out.left.begin());
+    std::copy_n(std::begin(bytes) + half, half, out.right.begin());
     return out;
 }
 

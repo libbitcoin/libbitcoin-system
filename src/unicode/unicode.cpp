@@ -166,8 +166,9 @@ data_chunk to_utf8(int argc, wchar_t* argv[])
     for (size_t arg = 0; arg < arg_count; arg++)
     {
         index[arg] = arguments;
-        std::copy(collection[arg].begin(), collection[arg].end(), index[arg]);
-        arguments += safe_add(collection[arg].size(), size_t{1});
+        const auto size = collection[arg].size();
+        std::copy_n(collection[arg].begin(), size, index[arg]);
+        arguments += safe_add(size, size_t{ 1 });
     }
 
     return buffer;

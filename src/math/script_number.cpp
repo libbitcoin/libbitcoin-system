@@ -176,6 +176,16 @@ int64_t script_number::int64() const
     return value_;
 }
 
+bool script_number::is_true() const
+{
+    return value_ != 0;
+}
+
+bool script_number::is_false() const
+{
+    return value_ == 0;
+}
+
 bool script_number::operator==(int64_t value) const
 {
     return value_ == value;

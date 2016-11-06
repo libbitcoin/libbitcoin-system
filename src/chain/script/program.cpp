@@ -117,7 +117,7 @@ program::program(const script& script, program&& other, bool)
 bool program::is_valid() const
 {
     // An invalid sequence indicates a failure deserializing operations.
-    return script_.is_valid_sequence() &&
+    return script_.is_valid_operations() &&
         (script_.satoshi_content_size() <= max_script_size);
 }
 
@@ -276,8 +276,7 @@ bool program::pop_binary(number& first, number& second)
     return pop(first) && pop(second);
 }
 
-bool program::pop_ternary(number& first, number& second,
-    number& third)
+bool program::pop_ternary(number& first, number& second, number& third)
 {
     // The upper bound is at stack top, lower bound next, value next.
     return pop(first) && pop(second) && pop(third);
@@ -344,7 +343,6 @@ void program::erase(const stack_iterator& first,
 // Primary push/pop optimizations (passive).
 //-----------------------------------------------------------------------------
 
-// private
 bool program::stack_to_bool() const
 {
     const auto& back = primary_.back();
@@ -400,8 +398,7 @@ const data_stack::value_type& program::item(size_t index) /*const*/
     return *position(index);
 }
 
-program::stack_iterator program::position(
-    size_t index) /*const*/
+program::stack_iterator program::position(size_t index) /*const*/
 {
     // Subtracting 1 makes the stack indexes zero-based (unlike satoshi).
     BITCOIN_ASSERT(index < size());
@@ -411,7 +408,7 @@ program::stack_iterator program::position(
 // Pop jump-to-end, push all back, use to construct a script.
 script program::subscript() const
 {
-    sequence ops;
+    operation::list ops;
 
     for (auto op = jump(); op != end(); ++op)
         ops.push_back(*op);

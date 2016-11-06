@@ -110,11 +110,11 @@ public:
     static inline result op_check_multisig(program& program);
     static inline result op_check_locktime_verify(program& program);
 
-    /// Run program (script, tx, index, flags, ) here.
+    /// Run program script.
     static code run(program& program);
 
-    /// Run individual operations in program (idependent of its script).
-    /// For best performance use script runner for multiple operations.
+    /// Run individual operations (idependent of the script).
+    /// For best performance use script runner for a sequence of operations.
     static code run(const operation& op, program& program);
 
 private:

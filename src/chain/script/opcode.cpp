@@ -35,7 +35,7 @@ if (norm == text) { out_code = opcode::code; return true; }
 #define RETURN_IF_OPCODE_OR_ALIAS(text, alias, code) \
 if (norm == text || norm == alias) { out_code = opcode::code; return true; }
 
-// TODO: convert this to a static bimap (with exception for nop2).
+// TODO: convert this to a static map (with exception for nop2).
 std::string opcode_to_string(opcode value, uint32_t active_forks)
 {
     static const auto push_zero = static_cast<uint8_t>(opcode::reserved_80);
@@ -402,8 +402,7 @@ std::string opcode_to_string(opcode value, uint32_t active_forks)
     }
 }
 
-// Zero accepted as either "0", "zero" or "push_0".
-// TODO: convert this to a static bimap.
+// TODO: convert this to a static map.
 bool opcode_from_string(opcode& out_code, const std::string& value)
 {
     // Normalize to ASCII lower case.

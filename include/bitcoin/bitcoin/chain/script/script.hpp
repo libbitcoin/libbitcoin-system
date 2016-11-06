@@ -31,7 +31,6 @@
 #include <bitcoin/bitcoin/chain/script/program.hpp>
 #include <bitcoin/bitcoin/chain/script/rule_fork.hpp>
 #include <bitcoin/bitcoin/chain/script/script_pattern.hpp>
-#include <bitcoin/bitcoin/chain/script/sequence.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -54,8 +53,8 @@ public:
     script(script&& other);
     script(const script& other);
 
-    script(sequence&& ops);
-    script(const sequence& ops);
+    script(operation::list&& ops);
+    script(const operation::list& ops);
 
     script(data_chunk&& encoded, bool prefix);
     script(const data_chunk& encoded, bool prefix);
@@ -83,14 +82,14 @@ public:
     bool from_data(reader& source, bool prefix);
 
     /// Deserialization invalidates the iterator.
-    void from_sequence(const sequence& ops);
+    void from_operations(const operation::list& ops);
     bool from_string(const std::string& mnemonic);
 
     /// A script object is valid if the byte count matches the prefix.
     bool is_valid() const;
 
-    /// A script sequence is valid if all push ops have the predicated size.
-    bool is_valid_sequence() const;
+    /// Script operations is valid if all push ops have the predicated size.
+    bool is_valid_operations() const;
 
     // Serialization.
     //-------------------------------------------------------------------------
@@ -108,8 +107,8 @@ public:
     size_t size() const;
     const operation& front() const;
     const operation& back() const;
-    operation::const_iterator begin() const;
-    operation::const_iterator end() const;
+    operation::iterator begin() const;
+    operation::iterator end() const;
     const operation& operator[](std::size_t index) const;
 
     // Properties (size, accessors, cache).
@@ -117,6 +116,7 @@ public:
 
     uint64_t satoshi_content_size() const;
     uint64_t serialized_size(bool prefix) const;
+    const operation::list& operations() const;
 
     // Signing.
     //-------------------------------------------------------------------------
@@ -133,17 +133,48 @@ public:
         const script& prevout_script, const transaction& tx,
         uint32_t input_index, uint8_t sighash_type);
 
-    // Utilities.
+    // Utilities (static).
     //-------------------------------------------------------------------------
 
+    /// Determine if the fork is enabled in the active forks set.
     static inline bool is_enabled(uint32_t active_forks, rule_fork fork);
+
+    /// No-code patterns.
+    static bool is_push_only(const operation::list& ops);
+    static bool is_relaxed_push_only(const operation::list& ops);
+
+    /// Unspendable pattern (standard).
+    static bool is_null_data_pattern(const operation::list& ops);
+
+    /// Payment script patterns (standard).
+    static bool is_pay_multisig_pattern(const operation::list& ops);
+    static bool is_pay_public_key_pattern(const operation::list& ops);
+    static bool is_pay_key_hash_pattern(const operation::list& ops);
+    static bool is_pay_script_hash_pattern(const operation::list& ops);
+
+    /// Signature script patterns (standard).
+    static bool is_sign_multisig_pattern(const operation::list& ops);
+    static bool is_sign_public_key_pattern(const operation::list& ops);
+    static bool is_sign_key_hash_pattern(const operation::list& ops);
+    static bool is_sign_script_hash_pattern(const operation::list& ops);
+
+    /// Stack factories (standard).
+    static operation::list to_null_data_pattern(data_slice data);
+    static operation::list to_pay_public_key_pattern(data_slice point);
+    static operation::list to_pay_key_hash_pattern(const short_hash& hash);
+    static operation::list to_pay_script_hash_pattern(const short_hash& hash);
+    static operation::list to_pay_multisig_pattern(uint8_t signatures,
+        const point_list& points);
+    static operation::list to_pay_multisig_pattern(uint8_t signatures,
+        const data_stack& points);
+
+    // Utilities (non-static).
+    //-------------------------------------------------------------------------
 
     script_pattern pattern() const;
     size_t sigops(bool embedded) const;
     size_t embedded_sigops(const script& prevout_script) const;
-
-    // Remove values from the sequence using satoshi's awful find_and_delete.
-    void purge(const data_stack& endorsements);
+    void find_and_delete(const data_stack& endorsements);
 
     // Validation.
     //-------------------------------------------------------------------------
@@ -151,21 +182,18 @@ public:
     static code verify(const transaction& tx, uint32_t input, uint32_t forks);
 
 protected:
-
     // So that input and output may call reset from their own.
     friend class input;
     friend class output;
 
     void reset();
-    const sequence& operations() const;
     bool is_relaxed_push() const;
-    bool is_relaxed_push(opcode code) const;
     bool is_pay_to_script_hash(uint32_t forks) const;
-    void find_and_delete(const data_chunk& endorsement);
+    void find_and_delete_(const data_chunk& endorsement);
 
 private:
-    static size_t serialized_size(const sequence& ops);
-    static data_chunk sequence_to_data(const sequence& ops);
+    static size_t serialized_size(const operation::list& ops);
+    static data_chunk operations_to_data(const operation::list& ops);
     static code verify(const transaction& tx, uint32_t input_index,
         uint32_t forks, const script& input_script,
         const script& prevout_script);
@@ -175,7 +203,7 @@ private:
 
     // These are protected by mutex.
     mutable bool cached_;
-    mutable sequence sequence_;
+    mutable operation::list operations_;
     mutable upgrade_mutex mutex_;
 };
 

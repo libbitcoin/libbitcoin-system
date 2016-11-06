@@ -60,7 +60,6 @@ interpreter::result interpreter::op_reserved(opcode)
 interpreter::result interpreter::op_push_number(program& program,
     uint8_t value)
 {
-    // Range is controlled by the run.op switch so no need to revalidate here.
     program.push_move({ value });
     return error::success;
 }
@@ -89,6 +88,7 @@ interpreter::result interpreter::op_push_data(program& program,
 
 // Operations (not shared).
 //-----------------------------------------------------------------------------
+// All index parameters are zero-based and relative to stack top.
 
 interpreter::result interpreter::op_if(program& program)
 {
@@ -445,7 +445,7 @@ interpreter::result interpreter::op_not(program& program)
     if (!program.pop(number))
         return error::op_not;
 
-    program.push(number == 0);
+    program.push(number.is_false());
     return error::success;
 }
 
@@ -455,7 +455,7 @@ interpreter::result interpreter::op_nonzero(program& program)
     if (!program.pop(number))
         return error::op_nonzero;
 
-    program.push(number != 0);
+    program.push(number.is_true());
     return error::success;
 }
 
@@ -487,7 +487,7 @@ interpreter::result interpreter::op_bool_and(program& program)
     if (!program.pop_binary(first, second))
         return error::op_bool_and;
 
-    program.push(first != 0 && second != 0);
+    program.push(first.is_true() && second.is_true());
     return error::success;
 }
 
@@ -497,7 +497,7 @@ interpreter::result interpreter::op_bool_or(program& program)
     if (!program.pop_binary(first, second))
         return error::op_bool_or;
 
-    program.push(first != 0 || second != 0);
+    program.push(first.is_true() || second.is_true());
     return error::success;
 }
 
@@ -577,11 +577,7 @@ interpreter::result interpreter::op_min(program& program)
     if (!program.pop_binary(first, second))
         return error::op_min;
 
-    if (second < first)
-        program.push_move(second.data());
-    else
-        program.push_move(first.data());
-
+    program.push_move(second < first ? second.data() : first.data());
     return error::success;
 }
 
@@ -591,8 +587,7 @@ interpreter::result interpreter::op_max(program& program)
     if (!program.pop_binary(first, second))
         return error::op_max;
 
-    auto greater = second > first ? second.data() : first.data();
-    program.push_move(std::move(greater));
+    program.push_move(second > first ? second.data() : first.data());
     return error::success;
 }
 
@@ -611,9 +606,7 @@ interpreter::result interpreter::op_ripemd160(program& program)
     if (program.empty())
         return error::op_ripemd160;
 
-    // TODO: create ripemd160_hash overload that emits to data_chunk.
-    const auto hash = ripemd160_hash(program.pop());
-    program.push_move(to_chunk(hash));
+    program.push_move(ripemd160_hash_chunk(program.pop()));
     return error::success;
 }
 
@@ -622,8 +615,7 @@ interpreter::result interpreter::op_sha1(program& program)
     if (program.empty())
         return error::op_sha1;
 
-    // TODO: create sha1_hash overload that emits to data_chunk.
-    program.push_move(to_chunk(sha1_hash(program.pop())));
+    program.push_move(sha1_hash_chunk(program.pop()));
     return error::success;
 }
 
@@ -632,8 +624,7 @@ interpreter::result interpreter::op_sha256(program& program)
     if (program.empty())
         return error::op_sha256;
 
-    // TODO: create sha256_hash overload that emits to data_chunk.
-    program.push_move(to_chunk(sha256_hash(program.pop())));
+    program.push_move(sha256_hash_chunk(program.pop()));
     return error::success;
 }
 
@@ -642,8 +633,7 @@ interpreter::result interpreter::op_hash160(program& program)
     if (program.empty())
         return error::op_hash160;
 
-    // TODO: create bitcoin_short_hash overload that emits to data_chunk.
-    program.push_move(to_chunk(bitcoin_short_hash(program.pop())));
+    program.push_move(ripemd160_hash_chunk(sha256_hash(program.pop())));
     return error::success;
 }
 
@@ -652,8 +642,7 @@ interpreter::result interpreter::op_hash256(program& program)
     if (program.empty())
         return error::op_hash256;
 
-    // TODO: create bitcoin_hash overload that emits to data_chunk.
-    program.push_move(to_chunk(bitcoin_hash(program.pop())));
+    program.push_move(sha256_hash_chunk(sha256_hash(program.pop())));
     return error::success;
 }
 
@@ -669,16 +658,20 @@ interpreter::result interpreter::op_check_sig_verify(program& program)
     if (program.size() < 2)
         return error::op_check_sig_verify1;
 
-    const auto pubkey = program.pop();
-    const auto endorsement = program.pop();
-
-    uint8_t sighash_type;
+    uint8_t sighash;
     ec_signature signature;
     der_signature distinguished;
+
     auto strict = script::is_enabled(program.forks(), rule_fork::bip66_rule);
+    const auto public_key = program.pop();
+    auto endorsement = program.pop();
+
+    // Create a subscript with endorsements stripped (sort of).
+    auto script_code = program.subscript();
+    script_code.find_and_delete({ endorsement });
 
     // BIP62: An empty endorsement is not considered lax encoding.
-    if (!parse_endorsement(sighash_type, distinguished, endorsement))
+    if (!parse_endorsement(sighash, distinguished, std::move(endorsement)))
         return error::invalid_signature_encoding;
 
     // Parse DER signature into an EC signature.
@@ -686,11 +679,7 @@ interpreter::result interpreter::op_check_sig_verify(program& program)
         return strict ? error::invalid_signature_lax_encoding :
             error::invalid_signature_encoding;
 
-    // Create a subscript with endorsements stripped (sort of).
-    auto script_code = program.subscript();
-    script_code.purge({ endorsement });
-
-    return script::check_signature(signature, sighash_type, pubkey,
+    return script::check_signature(signature, sighash, public_key,
         script_code, program.transaction(), program.input_index()) ?
             error::success : error::incorrect_signature;
 }
@@ -739,7 +728,7 @@ interpreter::result interpreter::op_check_multisig_verify(program& program)
     //*****************************************************************************
     program.pop();
 
-    uint8_t sighash_type;
+    uint8_t sighash;
     ec_signature signature;
     der_signature distinguished;
     auto public_key = public_keys.begin();
@@ -747,15 +736,15 @@ interpreter::result interpreter::op_check_multisig_verify(program& program)
 
     // Before looping create subscript with endorsements stripped (sort of).
     auto script_code = program.subscript();
-    script_code.purge(endorsements);
+    script_code.find_and_delete(endorsements);
 
     // The exact number of signatures are required and must be in order.
     // One key can validate more than one script. So we always advance 
     // until we exhaust either pubkeys (fail) or signatures (pass).
-    for (const auto& endorsement: endorsements)
+    for (auto& endorsement: endorsements)
     {
         // BIP62: An empty endorsement is not considered lax encoding.
-        if (!parse_endorsement(sighash_type, distinguished, endorsement))
+        if (!parse_endorsement(sighash, distinguished, std::move(endorsement)))
             return error::invalid_signature_encoding;
 
         // Parse DER signature into an EC signature.
@@ -765,7 +754,7 @@ interpreter::result interpreter::op_check_multisig_verify(program& program)
 
         while (true)
         {
-            if (script::check_signature(signature, sighash_type, *public_key,
+            if (script::check_signature(signature, sighash, *public_key,
                 script_code, program.transaction(), program.input_index()))
                 break;
 

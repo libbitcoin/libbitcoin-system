@@ -65,8 +65,7 @@ operation::operation(opcode code)
 }
 
 operation::operation(data_chunk&& uncoded, bool minimal)
-  : code_(minimal ? opcode_from_data(uncoded) :
-        opcode_from_size(uncoded.size())),
+  : code_(opcode_from_data(uncoded, minimal)),
     data_(std::move(uncoded)),
     valid_(!is_oversized())
 {
@@ -82,8 +81,7 @@ operation::operation(data_chunk&& uncoded, bool minimal)
 }
 
 operation::operation(const data_chunk& uncoded, bool minimal)
-  : code_(minimal ? opcode_from_data(uncoded) :
-        opcode_from_size(uncoded.size())),
+  : code_(opcode_from_data(uncoded, minimal)),
     data_(uncoded),
     valid_(!is_oversized())
 {
@@ -178,7 +176,6 @@ bool operation::from_data(std::istream& stream)
     return from_data(source);
 }
 
-// The iterator requires that the opcode read is the opcode written.
 bool operation::from_data(reader& source)
 {
     reset();
@@ -197,14 +194,16 @@ bool operation::from_data(reader& source)
     return valid_;
 }
 
-static bool is_push_token(const std::string& token)
+inline bool is_push_token(const std::string& token)
 {
     return token.size() > 1 && token.front() == '[' && token.back() == ']';
 }
 
-// The removal of spaces inside of data is a compatability break with v2.
-static std::string trim_push(const std::string& token)
+inline std::string trim_push(const std::string& token)
 {
+    BITCOIN_ASSERT(token.size() > 1);
+
+    // The removal of spaces in data is a compatability break with our v2.
     return std::string(token.begin() + 1, token.end() - 1);
 }
 
@@ -297,9 +296,9 @@ void operation::to_data(writer& sink) const
     sink.write_bytes(data_);
 }
 
-// The removal of spaces inside of data is a compatability break with v2.
 std::string operation::to_string(uint32_t active_forks) const
 {
+    // The removal of spaces in data is a compatability break with our v2.
     if (!valid_)
         return "<invalid>";
 
@@ -342,7 +341,6 @@ const data_chunk& operation::data() const
 
 // Utilities.
 //-------------------------------------------------------------------------
-// static
 
 // private
 uint32_t operation::read_data_size(opcode code, reader& source)
@@ -364,7 +362,8 @@ uint32_t operation::read_data_size(opcode code, reader& source)
 }
 
 //*****************************************************************************
-// CONSENSUS: this encoding is consensus critical due to find_and_delete.
+// CONSENSUS: this is non-minial but consensus critical due to find_and_delete.
+// Presumably this was just an oversight in the original script encoding.
 //*****************************************************************************
 opcode operation::opcode_from_size(size_t size)
 {
@@ -383,6 +382,7 @@ opcode operation::opcode_from_size(size_t size)
 
 opcode operation::opcode_from_data(const data_chunk& data)
 {
+    // Unlike opcode_from_size, this produces the minimal data encoding.
     const auto size = data.size();
 
     if (size != 1)
@@ -390,6 +390,12 @@ opcode operation::opcode_from_data(const data_chunk& data)
 
     const auto code = static_cast<opcode>(data.front());
     return is_numeric(code) ? code : opcode_from_size(size);
+}
+
+opcode operation::opcode_from_data(const data_chunk& uncoded, bool minimal)
+{
+    return minimal ? opcode_from_data(uncoded) :
+        opcode_from_size(uncoded.size());
 }
 
 opcode operation::opcode_from_positive(uint8_t value)
@@ -439,20 +445,15 @@ bool operation::is_positive(opcode code)
     return value >= op_81 && value <= op_96;
 }
 
-bool operation::is_conditional(opcode code)
-{
-    switch (code)
-    {
-        case opcode::if_:
-        case opcode::notif:
-        case opcode::else_:
-        case opcode::endif:
-            return true;
-        default:
-            return false;
-    }
-}
-
+//*****************************************************************************
+// CONSENSUS: the codes VERIF and VERNOTIF are in the conditional range yet are
+// not handled. As a result satoshi always processes them in the op swtich.
+// This causes them to always fail as unhandled. It is misleading that the
+// satoshi test cases refer to these as reserved codes. These two codes are
+// behave exactly as the explicitly disabled code. On the other hand VER is not
+// within the satoshi conditional range test so it is in fact reserved.
+// Presumably this was an unintended consequence of range testing enums.
+//*****************************************************************************
 bool operation::is_disabled(opcode code)
 {
     switch (code)
@@ -472,20 +473,42 @@ bool operation::is_disabled(opcode code)
         case opcode::disabled_mod:
         case opcode::disabled_lshift:
         case opcode::disabled_rshift:
-
-        //*********************************************************************
-        // CONSENSUS: reserved conditionals are effectively disabled.
-        // These are in the conditional range yet are not handled.
-        // as a result satoshi always processes them in the op swtich.
-        // This causes them to always fail as unhandled. "VER" is outside the
-        // satoshi conditional range test so it does not exhibit this behavior.
-        //*********************************************************************
         case opcode::disabled_verif:
         case opcode::disabled_vernotif:
             return true;
         default:
             return false;
     }
+}
+
+//*****************************************************************************
+// CONSENSUS: in order to properly treat VERIF and VERNOTIF as disabled (see
+// is_disabled comments) those codes must not be included here.
+//*****************************************************************************
+bool operation::is_conditional(opcode code)
+{
+    switch (code)
+    {
+        case opcode::if_:
+        case opcode::notif:
+        case opcode::else_:
+        case opcode::endif:
+            return true;
+        default:
+            return false;
+    }
+}
+
+//*****************************************************************************
+// CONSENSUS: this test includes the satoshi 'reserved' code.
+// This affects the operation count in p2sh script evaluation.
+// Presumably this was an unintended consequence of range testing enums.
+//*****************************************************************************
+bool operation::is_relaxed_push(opcode code)
+{
+    static constexpr auto op_96 = static_cast<uint8_t>(opcode::push_positive_16);
+    const auto value = static_cast<uint8_t>(code);
+    return value <= op_96;
 }
 
 // Validation.
@@ -514,6 +537,11 @@ bool operation::is_disabled() const
 bool operation::is_conditional() const
 {
     return is_conditional(code_);
+}
+
+bool operation::is_relaxed_push() const
+{
+    return is_relaxed_push(code_);
 }
 
 bool operation::is_oversized() const
