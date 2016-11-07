@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/math/script_number.hpp>
+#include <bitcoin/bitcoin/chain/script/number.hpp>
 
 #include <cstdint>
 #include <cstdlib>
@@ -27,33 +27,34 @@
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
+namespace chain {
     
-const uint8_t script_number::negative_1 = negative_mask | positive_1;
-const uint8_t script_number::negative_0 = negative_mask | positive_0;
-const uint8_t script_number::positive_0 = 0;
-const uint8_t script_number::positive_1 = 1;
-const uint8_t script_number::positive_2 = 2;
-const uint8_t script_number::positive_3 = 3;
-const uint8_t script_number::positive_4 = 4;
-const uint8_t script_number::positive_5 = 5;
-const uint8_t script_number::positive_6 = 6;
-const uint8_t script_number::positive_7 = 7;
-const uint8_t script_number::positive_8 = 8;
-const uint8_t script_number::positive_9 = 9;
-const uint8_t script_number::positive_10 = 10;
-const uint8_t script_number::positive_11 = 11;
-const uint8_t script_number::positive_12 = 12;
-const uint8_t script_number::positive_13 = 13;
-const uint8_t script_number::positive_14 = 14;
-const uint8_t script_number::positive_15 = 15;
-const uint8_t script_number::positive_16 = 16;
-const uint8_t script_number::negative_mask = 0x80;
+const uint8_t number::negative_1 = negative_mask | positive_1;
+const uint8_t number::negative_0 = negative_mask | positive_0;
+const uint8_t number::positive_0 = 0;
+const uint8_t number::positive_1 = 1;
+const uint8_t number::positive_2 = 2;
+const uint8_t number::positive_3 = 3;
+const uint8_t number::positive_4 = 4;
+const uint8_t number::positive_5 = 5;
+const uint8_t number::positive_6 = 6;
+const uint8_t number::positive_7 = 7;
+const uint8_t number::positive_8 = 8;
+const uint8_t number::positive_9 = 9;
+const uint8_t number::positive_10 = 10;
+const uint8_t number::positive_11 = 11;
+const uint8_t number::positive_12 = 12;
+const uint8_t number::positive_13 = 13;
+const uint8_t number::positive_14 = 14;
+const uint8_t number::positive_15 = 15;
+const uint8_t number::positive_16 = 16;
+const uint8_t number::negative_mask = 0x80;
 
 static constexpr auto unsigned_max_int64 = static_cast<uint64_t>(max_int64);
 static constexpr auto absolute_min_int64 = static_cast<uint64_t>(min_int64);
 
 // The result is always LSB first.
-static data_chunk script_number_serialize(int64_t value)
+static data_chunk number_serialize(int64_t value)
 {
     if (value == 0)
         return{};
@@ -72,13 +73,13 @@ static data_chunk script_number_serialize(int64_t value)
         absolute_value >>= byte_bits;
     }
 
-    auto negative_masked = (result.back() & script_number::negative_mask) != 0;
+    auto negative_masked = (result.back() & number::negative_mask) != 0;
 
     // If the most significant byte is >= 0x80 and the value is negative,
     // push a new 0x80 byte that will be popped off when converting to
     // an integral.
     if (negative_masked && negative)
-        result.push_back(script_number::negative_mask);
+        result.push_back(number::negative_mask);
 
     // If the most significant byte is >= 0x80 and the value is positive,
     // push a new zero-byte to make the significant byte < 0x80 again.
@@ -89,24 +90,24 @@ static data_chunk script_number_serialize(int64_t value)
     // add 0x80 to it, since it will be subtracted and interpreted as
     // a negative when converting to an integral.
     else if (negative)
-        result.back() |= script_number::negative_mask;
+        result.back() |= number::negative_mask;
 
     return result;
 }
 
 // The parameter is assumed to be LSB first.
-static int64_t script_number_deserialize(const data_chunk& data)
+static int64_t number_deserialize(const data_chunk& data)
 {
     if (data.empty())
         return 0;
 
-    const auto consume_last_byte = data.back() != script_number::negative_mask;
+    const auto consume_last_byte = data.back() != number::negative_mask;
     const auto value_size = consume_last_byte ? data.size() : data.size() - 1;
 
     // This is guarded by set_data().
     BITCOIN_ASSERT(value_size <= sizeof(uint64_t));
 
-    const auto negative = data.back() & script_number::negative_mask;
+    const auto negative = data.back() & number::negative_mask;
     const auto mask_last_byte = negative && consume_last_byte;
     uint64_t absolute_value = 0;
 
@@ -115,7 +116,7 @@ static int64_t script_number_deserialize(const data_chunk& data)
         const auto shift = byte_bits * byte;
         const auto last_byte = byte + 1 == value_size;
         const auto value = mask_last_byte && last_byte ?
-            data[byte] & ~script_number::negative_mask : data[byte];
+            data[byte] & ~number::negative_mask : data[byte];
 
         absolute_value |= static_cast<uint64_t>(value) << shift;
     }
@@ -134,17 +135,17 @@ static int64_t script_number_deserialize(const data_chunk& data)
         static_cast<int64_t>(absolute_value);
 }
 
-script_number::script_number()
-  : script_number(0)
+number::number()
+  : number(0)
 {
 }
 
-script_number::script_number(int64_t value)
+number::number(int64_t value)
   : value_(value)
 {
 }
 
-bool script_number::set_data(const data_chunk& data, size_t max_size)
+bool number::set_data(const data_chunk& data, size_t max_size)
 {
     const auto size = data.size();
 
@@ -157,96 +158,96 @@ bool script_number::set_data(const data_chunk& data, size_t max_size)
     if (value_size > sizeof(uint64_t))
         return false;
 
-    value_ = script_number_deserialize(data);
+    value_ = number_deserialize(data);
     return true;
 }
 
-data_chunk script_number::data() const
+data_chunk number::data() const
 {
-    return script_number_serialize(value_);
+    return number_serialize(value_);
 }
 
-int32_t script_number::int32() const
+int32_t number::int32() const
 {
     return domain_constrain<int32_t>(value_);
 }
 
-int64_t script_number::int64() const
+int64_t number::int64() const
 {
     return value_;
 }
 
-bool script_number::is_true() const
+bool number::is_true() const
 {
     return value_ != 0;
 }
 
-bool script_number::is_false() const
+bool number::is_false() const
 {
     return value_ == 0;
 }
 
-bool script_number::operator==(int64_t value) const
+bool number::operator==(int64_t value) const
 {
     return value_ == value;
 }
 
-bool script_number::operator!=(int64_t value) const
+bool number::operator!=(int64_t value) const
 {
     return value_ != value;
 }
 
-bool script_number::operator<=(int64_t value) const
+bool number::operator<=(int64_t value) const
 {
     return value_ <= value;
 }
 
-bool script_number::operator<(int64_t value) const
+bool number::operator<(int64_t value) const
 {
     return value_ < value;
 }
 
-bool script_number::operator>=(int64_t value) const
+bool number::operator>=(int64_t value) const
 {
     return value_ >= value;
 }
 
-bool script_number::operator>(int64_t value) const
+bool number::operator>(int64_t value) const
 {
     return value_ > value;
 }
 
-bool script_number::operator==(const script_number& other) const
+bool number::operator==(const number& other) const
 {
     return operator==(other.value_);
 }
 
-bool script_number::operator!=(const script_number& other) const
+bool number::operator!=(const number& other) const
 {
     return operator!=(other.value_);
 }
 
-bool script_number::operator<=(const script_number& other) const
+bool number::operator<=(const number& other) const
 {
     return operator<=(other.value_);
 }
 
-bool script_number::operator<(const script_number& other) const
+bool number::operator<(const number& other) const
 {
     return operator<(other.value_);
 }
 
-bool script_number::operator>=(const script_number& other) const
+bool number::operator>=(const number& other) const
 {
     return operator>=(other.value_);
 }
 
-bool script_number::operator>(const script_number& other) const
+bool number::operator>(const number& other) const
 {
     return operator>(other.value_);
 }
 
-script_number script_number::operator+(int64_t value) const
+number number::operator+(int64_t value) const
 {
     if ((value > 0 && (value_ >= max_int64 - value)) ||
         (value < 0 && (value_ <= min_int64 - value)))
@@ -254,10 +255,10 @@ script_number script_number::operator+(int64_t value) const
         throw std::overflow_error("integer overflow");
     }
 
-    return script_number(value_ + value);
+    return number(value_ + value);
 }
 
-script_number script_number::operator-(int64_t value) const
+number number::operator-(int64_t value) const
 {
     if ((value > 0 && (value_ <= min_int64 + value)) ||
         (value < 0 && (value_ >= max_int64 + value)))
@@ -265,33 +266,33 @@ script_number script_number::operator-(int64_t value) const
         throw std::overflow_error("integer underflow");
     }
 
-    return script_number(value_ - value);
+    return number(value_ - value);
 }
 
-script_number script_number::operator+(const script_number& other) const
+number number::operator+(const number& other) const
 {
     return operator+(other.value_);
 }
 
-script_number script_number::operator-(const script_number& other) const
+number number::operator-(const number& other) const
 {
     return operator-(other.value_);
 }
 
-script_number script_number::operator+() const
+number number::operator+() const
 {
     return *this;
 }
 
-script_number script_number::operator-() const
+number number::operator-() const
 {
     if (value_ == min_int64)
         throw std::out_of_range("negation would be out of range");
 
-    return script_number(-value_);
+    return number(-value_);
 }
 
-script_number& script_number::operator+=(int64_t value)
+number& number::operator+=(int64_t value)
 {
     if ((value > 0 && (value_ >= max_int64 - value)) ||
         (value < 0 && (value_ <= min_int64 - value)))
@@ -303,7 +304,7 @@ script_number& script_number::operator+=(int64_t value)
     return *this;
 }
 
-script_number& script_number::operator-=(int64_t value)
+number& number::operator-=(int64_t value)
 {
     if ((value > 0 && (value_ <= min_int64 + value)) ||
         (value < 0 && (value_ >= max_int64 + value)))
@@ -315,15 +316,15 @@ script_number& script_number::operator-=(int64_t value)
     return *this;
 }
 
-script_number& script_number::operator+=(const script_number& other)
+number& number::operator+=(const number& other)
 {
     return operator+=(other.value_);
 }
 
-script_number& script_number::operator-=(const script_number& other)
+number& number::operator-=(const number& other)
 {
     return operator-=(other.value_);
 }
 
+} // namespace chain
 } // namespace libbitcoin
-

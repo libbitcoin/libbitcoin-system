@@ -39,9 +39,6 @@
     <ClInclude Include="..\..\..\..\test\math\hash.hpp">
       <Filter>src\math</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\test\math\script_number.hpp">
-      <Filter>src\math</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\test\math\big_number.hpp">
       <Filter>src\math</Filter>
     </ClInclude>
@@ -49,6 +46,9 @@
       <Filter>src\wallet</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\chain\script\script.hpp">
+      <Filter>src\chain\script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\chain\script\number.hpp">
       <Filter>src\chain\script</Filter>
     </ClInclude>
   </ItemGroup>
@@ -156,12 +156,6 @@
       <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\hash.cpp">
-      <Filter>src\math</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\math\hash_number.cpp">
-      <Filter>src\math</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\math\script_number.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\big_number.cpp">
@@ -322,6 +316,12 @@
       <Filter>src\chain\script</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\script\script.cpp">
+      <Filter>src\chain\script</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\math\uint256.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\script\number.cpp">
       <Filter>src\chain\script</Filter>
     </ClCompile>
   </ItemGroup>

@@ -26,7 +26,7 @@
 #include <bitcoin/bitcoin/config/checkpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
-#include <bitcoin/bitcoin/math/hash_number.hpp>
+#include <bitcoin/bitcoin/math/uint256.hpp>
 #include <bitcoin/bitcoin/version.hpp>
 
 namespace libbitcoin {
@@ -81,11 +81,11 @@ BC_CONSTEXPR size_t max_block_sigops = max_block_size / 50;
 BC_CONSTEXPR size_t coinbase_maturity = 100;
 BC_CONSTEXPR size_t time_stamp_future_hours = 2;
 BC_CONSTEXPR size_t locktime_threshold = 500000000;
-BC_CONSTEXPR size_t max_work_bits = 0x1d00ffff;
 
 // Timespan constants.
 //-----------------------------------------------------------------------------
 
+BC_CONSTEXPR uint32_t max_work_bits = 0x1d00ffff;
 BC_CONSTEXPR uint32_t retargeting_factor = 4;
 BC_CONSTEXPR uint32_t target_spacing_seconds = 10 * 60;
 BC_CONSTEXPR uint32_t double_spacing_seconds = 2 * target_spacing_seconds;
@@ -100,6 +100,13 @@ BC_CONSTEXPR uint32_t max_timespan =
 // The target number of blocks for 2 weeks of work (2016 blocks).
 BC_CONSTEXPR size_t retargeting_interval =
     target_timespan_seconds / target_spacing_seconds;
+
+// Avoid static initialization ordering by using two instances.
+static const uint256_t max_work_target(compact_number{ max_work_bits });
+
+// TODO: precalculate this value and use constant here.
+static const uint32_t max_work_compact = 
+    uint256_t(compact_number{ max_work_bits }).to_compact().value();
 
 // Fork constants.
 //-----------------------------------------------------------------------------

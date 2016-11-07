@@ -17,22 +17,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#include <boost/test/unit_test.hpp>
+
 #include <cstdint>
 #include <iostream>
 #include <limits>
 #include <sstream>
 #include <string>
 #include <boost/format.hpp>
-#include <boost/test/unit_test.hpp>
 #include <bitcoin/bitcoin.hpp>
-#include "script_number.hpp"
+#include "number.hpp"
 #ifdef ENABLE_DATAGEN
 #include "big_number.hpp"
 #endif
 
-using namespace bc;
+BOOST_AUTO_TEST_SUITE(number_tests)
 
-BOOST_AUTO_TEST_SUITE(script_number_tests)
+using namespace bc;
+using namespace bc::chain;
 
 // Helpers
 // ----------------------------------------------------------------------------
@@ -71,10 +73,10 @@ static bool negate_overflow64(const int64_t number)
 // ----------------------------------------------------------------------------
 
 static void CheckAdd(const int64_t num1, const int64_t num2,
-    const script_number_buffer& add)
+    const number_buffer& add)
 {
-    const script_number scriptnum1(num1);
-    const script_number scriptnum2(num2);
+    const number scriptnum1(num1);
+    const number scriptnum2(num2);
 
     if (!add_overflow64(num1, num2))
     {
@@ -84,22 +86,21 @@ static void CheckAdd(const int64_t num1, const int64_t num2,
     }
 }
 
-static void CheckNegate(const int64_t number,
-    const script_number_buffer& negated)
+static void CheckNegate(const int64_t num, const number_buffer& negated)
 {
-    const script_number scriptnum(number);
+    const number scriptnum(num);
 
-    if (!negate_overflow64(number))
+    if (!negate_overflow64(num))
     {
         BC_SCRIPT_NUMBER_CHECK_EQ(negated, -scriptnum);
     }
 }
 
 static void CheckSubtract(const int64_t num1, const int64_t num2,
-    const script_number_subtract& subtract)
+    const number_subtract& subtract)
 {
-    const script_number scriptnum1(num1);
-    const script_number scriptnum2(num2);
+    const number scriptnum1(num1);
+    const number scriptnum2(num2);
 
     if (!subtract_overflow64(num1, num2))
     {
@@ -115,10 +116,10 @@ static void CheckSubtract(const int64_t num1, const int64_t num2,
 }
 
 static void CheckCompare(const int64_t num1, const int64_t num2,
-    const script_number_compare& compare)
+    const number_compare& compare)
 {
-    const script_number scriptnum1(num1);
-    const script_number scriptnum2(num2);
+    const number scriptnum1(num1);
+    const number scriptnum2(num2);
 
     BOOST_CHECK(scriptnum1 == scriptnum1);
     BOOST_CHECK(scriptnum1 >= scriptnum1);
@@ -164,20 +165,20 @@ static void RunOperators(const int64_t num1, int64_t num2, size_t value,
     //    % num1 % num2 % value % offset % test;
     //BOOST_MESSAGE(message.str());
 
-    CheckAdd(num1, num2, script_number_adds[value][offset][test]);
-    CheckNegate(num1, script_number_negates[value][offset][test]);
-    CheckSubtract(num1, num2, script_number_subtracts[value][offset][test]);
-    CheckCompare(num1, num2, script_number_compares[value][offset][test]);
+    CheckAdd(num1, num2, number_adds[value][offset][test]);
+    CheckNegate(num1, number_negates[value][offset][test]);
+    CheckSubtract(num1, num2, number_subtracts[value][offset][test]);
+    CheckCompare(num1, num2, number_compares[value][offset][test]);
 }
 
 BOOST_AUTO_TEST_CASE(check_operators)
 {
-    for (size_t i = 0; i < script_number_values_count; ++i)
+    for (size_t i = 0; i < number_values_count; ++i)
     {
-        for (size_t j = 0; j < script_number_offsets_count; ++j)
+        for (size_t j = 0; j < number_offsets_count; ++j)
         {
-            auto a = script_number_values[i];
-            auto b = script_number_offsets[j];
+            auto a = number_values[i];
+            auto b = number_offsets[j];
 
             RunOperators(a, +a,         i, j, 0);
             RunOperators(a, -a,         i, j, 1);
@@ -200,10 +201,10 @@ BOOST_AUTO_TEST_CASE(check_operators)
 // big_number value generators
 // ----------------------------------------------------------------------------
 
-static script_number_buffer MakeAdd(const int64_t num1, const int64_t num2)
+static number_buffer MakeAdd(const int64_t num1, const int64_t num2)
 {
     if (add_overflow64(num1, num2))
-        return script_number_buffer();
+        return number_buffer();
 
     big_number bignum1;
     bignum1.set_int64(num1);
@@ -211,7 +212,7 @@ static script_number_buffer MakeAdd(const int64_t num1, const int64_t num2)
     bignum2.set_int64(num2);
 
     auto sum = bignum1 + bignum2;
-    const script_number_buffer add
+    const number_buffer add
     {
         sum.int32(),
         sum.data()
@@ -220,16 +221,16 @@ static script_number_buffer MakeAdd(const int64_t num1, const int64_t num2)
     return add;
 }
 
-static script_number_buffer MakeNegate(const int64_t number)
+static number_buffer MakeNegate(const int64_t num)
 {
-    if (negate_overflow64(number))
-        return script_number_buffer();
+    if (negate_overflow64(num))
+        return number_buffer();
 
     big_number bignum;
-    bignum.set_int64(number);
+    bignum.set_int64(num);
 
     auto negative = -bignum;
-    const script_number_buffer negated
+    const number_buffer negated
     {
         negative.int32(),
         negative.data()
@@ -238,8 +239,7 @@ static script_number_buffer MakeNegate(const int64_t number)
     return negated;
 }
 
-static script_number_subtract MakeSubtract(const int64_t num1,
-    const int64_t num2)
+static number_subtract MakeSubtract(const int64_t num1, const int64_t num2)
 {
     big_number bignum1;
     bignum1.set_int64(num1);
@@ -254,7 +254,7 @@ static script_number_subtract MakeSubtract(const int64_t num1,
     if (!subtract_overflow64(num2, num1))
         reverse = bignum2 - bignum1;
 
-    const script_number_subtract subtract
+    const number_subtract subtract
     {
         { forward.int32(), forward.data() },
         { reverse.int32(), reverse.data() }
@@ -263,15 +263,14 @@ static script_number_subtract MakeSubtract(const int64_t num1,
     return subtract;
 }
 
-static script_number_compare MakeCompare(const int64_t num1,
-    const int64_t num2)
+static number_compare MakeCompare(const int64_t num1, const int64_t num2)
 {
     big_number bignum1;
     bignum1.set_int64(num1);
     big_number bignum2;
     bignum2.set_int64(num2);
 
-    script_number_compare compare
+    number_compare compare
     {
         bignum1 == bignum2,
         bignum1 != bignum2,
@@ -293,20 +292,20 @@ static void write_bytes(bc::data_chunk chunk, std::ostream& out)
         out << (boost::format(" 0x%02x, ") % static_cast<uint16_t>(byte));
 }
 
-static void write_buffer(script_number_buffer buffer, std::ostream& out)
+static void write_buffer(number_buffer buffer, std::ostream& out)
 {
     out << boost::format("{ %1%, {") % buffer.number;
     write_bytes(buffer.bytes, out);
     out << "} }, ";
 }
 
-static void write_compare(script_number_compare compare, std::ostream& out)
+static void write_compare(number_compare compare, std::ostream& out)
 {
     out << boost::format("{ %1%, %2%, %3%, %4%, %5%, %6% }, ") % compare.eq %
         compare.ne % compare.lt % compare.gt % compare.le % compare.ge;
 }
 
-static void write_subtract(script_number_subtract subtract, std::ostream& out)
+static void write_subtract(number_subtract subtract, std::ostream& out)
 {
     out << "{ ";
     write_buffer(subtract.forward, out);
@@ -318,7 +317,7 @@ static void write_names(const std::string& name, size_t count,
     std::ostream& out)
 {
     out << boost::format("const %1%[%2%][%3%][%4%]=\n{\n") % name %
-        script_number_values_count % script_number_offsets_count % count;
+        number_values_count % number_offsets_count % count;
 }
 
 static void write(const std::string& text, std::ostream& add_out,
@@ -374,21 +373,21 @@ BOOST_AUTO_TEST_CASE(make_operator_expectations)
     std::stringstream sub_out;
     std::stringstream cmp_out;
 
-    write_names("script_number_buffer script_number_adds", 12, add_out);
-    write_names("script_number_buffer script_number_negates", 12, neg_out);
-    write_names("script_number_subtract script_number_subtracts", 12, sub_out);
-    write_names("script_number_compare script_number_compares", 12, cmp_out);
+    write_names("number_buffer number_adds", 12, add_out);
+    write_names("number_buffer number_negates", 12, neg_out);
+    write_names("number_subtract number_subtracts", 12, sub_out);
+    write_names("number_compare number_compares", 12, cmp_out);
 
-    for (size_t i = 0; i < script_number_values_count; ++i)
+    for (size_t i = 0; i < number_values_count; ++i)
     {
         write("    {\n", add_out, neg_out, sub_out, cmp_out);
 
-        for (size_t j = 0; j < script_number_offsets_count; ++j)
+        for (size_t j = 0; j < number_offsets_count; ++j)
         {
             write("        {", add_out, neg_out, sub_out, cmp_out);
 
-            auto a = script_number_values[i];
-            auto b = script_number_offsets[j];
+            auto a = number_values[i];
+            auto b = number_offsets[j];
 
             MakeOperators(a, +a, add_out, neg_out, sub_out, cmp_out);
             MakeOperators(a, -a, add_out, neg_out, sub_out, cmp_out);

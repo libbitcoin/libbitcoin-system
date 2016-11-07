@@ -194,12 +194,6 @@
     <ClCompile Include="..\..\..\..\src\math\hash.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\math\hash_number.cpp">
-      <Filter>src\math</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\math\script_number.cpp">
-      <Filter>src\math</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
@@ -578,6 +572,9 @@
     <ClCompile Include="..\..\..\..\src\log\file_collector.cpp">
       <Filter>src\log</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\script\number.cpp">
+      <Filter>src\chain\script</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -608,12 +605,6 @@
       <Filter>include\bitcoin\math</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\hash.hpp">
-      <Filter>include\bitcoin\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\hash_number.hpp">
-      <Filter>include\bitcoin\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\script_number.hpp">
       <Filter>include\bitcoin\math</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\assert.hpp">
@@ -1140,6 +1131,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\file_char_traits.hpp">
       <Filter>include\bitcoin\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\number.hpp">
+      <Filter>include\bitcoin\chain\script</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

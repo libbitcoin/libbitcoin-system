@@ -29,6 +29,7 @@
 #include <type_traits>
 #include <utility>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
+#include <bitcoin/bitcoin/chain/script/number.hpp>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/script/rule_fork.hpp>
 #include <bitcoin/bitcoin/chain/script/script.hpp>
@@ -37,9 +38,8 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/math/hash_number.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
-#include <bitcoin/bitcoin/math/script_number.hpp>
+#include <bitcoin/bitcoin/math/uint256.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -405,21 +405,21 @@ block::indexes block::locator_heights(size_t top)
 //-----------------------------------------------------------------------------
 
 // static
-hash_number block::difficulty(uint32_t bits)
+uint256_t block::difficulty(uint32_t bits)
 {
-    hash_number target;
+    uint256_t target(compact_number{ bits });
 
-    if (!target.set_compact(bits) || target == 0)
-        return 0;
+    if (target.overflow() || target == 0)
+        return{};
 
     // We need to compute 2**256 / (target+1), but we can't represent 2**256
     // as it's too large for uint256. However as 2**256 is at least as large as
     // target+1, it is equal to ((2**256 - target - 1) / (target+1)) + 1, or 
-    // ~target / (target+1) + 1.
+    // (~target / (target+1)) + 1.
     return (~target / (target + 1)) + 1;
 }
 
-hash_number block::difficulty() const
+uint256_t block::difficulty() const
 {
     return difficulty(header_.bits());
 }
@@ -590,8 +590,7 @@ bool block::is_valid_coinbase_script(size_t height) const
     const auto actual = actual_script.to_data(false);
 
     // Create the expected script as a byte vector.
-    script_number number(height);
-    script expected_script(operation::list{ { number.data() } });
+    script expected_script(operation::list{ { number(height).data() } });
     const auto expected = expected_script.to_data(false);
 
     // Require that the coinbase script match the expected coinbase script.

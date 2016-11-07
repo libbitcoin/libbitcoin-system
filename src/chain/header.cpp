@@ -25,7 +25,7 @@
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/math/hash_number.hpp>
+#include <bitcoin/bitcoin/math/uint256.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -415,17 +415,12 @@ bool header::is_valid_time_stamp() const
 
 bool header::is_valid_proof_of_work() const
 {
-    // TODO: This should be statically-initialized (optimization).
-    hash_number maximum;
-    if (!maximum.set_compact(max_work_bits))
+    uint256_t target(compact_number{ bits_ });
+
+    if (target.overflow() || target > max_work_target)
         return false;
 
-    hash_number target;
-    if (!target.set_compact(bits_) || target > maximum)
-        return false;
-
-    hash_number value(hash());
-    return value <= target;
+    return uint256_t(hash()) <= target;
 }
 
 // Validation.

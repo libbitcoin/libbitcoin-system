@@ -29,8 +29,8 @@
 #include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/config/checkpoint.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/math/hash_number.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
+#include <bitcoin/bitcoin/math/uint256.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -165,13 +165,10 @@ uint32_t chain_state::work_required(const data& values)
 uint32_t chain_state::work_required_retarget(const data& values)
 {
     //*************************************************************************
-    // CONSENSUS: set_compact can fail but this is unguarded.
+    // CONSENSUS: construct from compact can fail but retarget is unguarded.
     //*************************************************************************
-    hash_number retarget;
-    retarget.set_compact(bits_high(values));
-
-    hash_number maximum;
-    maximum.set_compact(max_work_bits);
+    uint256_t retarget(compact_number{ bits_high(values) });
+    ////BITCOIN_ASSERT(retarget.overflow());
 
     //*************************************************************************
     // CONSENSUS: multiplication overflow potential.
@@ -179,7 +176,8 @@ uint32_t chain_state::work_required_retarget(const data& values)
     retarget *= retarget_timespan(values);
     retarget /= target_timespan_seconds;
 
-    return retarget > maximum ? maximum.compact() : retarget.compact();
+    return retarget > max_work_target ? max_work_compact :
+        retarget.to_compact().value();
 }
 
 // Get the bounded total time spanning the highest 2016 blocks.
