@@ -389,7 +389,7 @@ BOOST_AUTO_TEST_CASE(header__is_valid_time_stamp__timestamp_greater_than_2_hours
 BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__bits_exceeds_maximum__returns_false)
 {
     chain::header instance;
-    instance.set_bits(max_work_bits + 1);
+    instance.set_bits(proof_of_work_limit + 1);
     BOOST_REQUIRE(!instance.is_valid_proof_of_work());
 }
 

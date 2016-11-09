@@ -575,6 +575,9 @@
     <ClCompile Include="..\..\..\..\src\chain\script\number.cpp">
       <Filter>src\chain\script</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\compact_number.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -1134,6 +1137,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\number.hpp">
       <Filter>include\bitcoin\chain\script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\compact_number.hpp">
+      <Filter>include\bitcoin\chain</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

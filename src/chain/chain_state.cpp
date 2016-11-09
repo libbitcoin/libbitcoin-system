@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <bitcoin/bitcoin/unicode/unicode.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
+#include <bitcoin/bitcoin/chain/compact_number.hpp>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/script/rule_fork.hpp>
 #include <bitcoin/bitcoin/chain/script/script.hpp>
@@ -34,13 +35,6 @@
 
 namespace libbitcoin {
 namespace chain {
-
-//*************************************************************************
-// CONSENSUS: Potential overflows/underflows that would affect consensus
-// are marked inline below. These should not be modified without verifying
-// changes against other implementations. Other conditions that would not
-// affect consensus are strictly guarded.
-//*************************************************************************
 
 // Inlines.
 //-----------------------------------------------------------------------------
@@ -162,72 +156,77 @@ uint32_t chain_state::work_required(const data& values)
     return bits_high(values);
 }
 
+// [CalculateNextWorkRequired]
 uint32_t chain_state::work_required_retarget(const data& values)
 {
-    //*************************************************************************
-    // CONSENSUS: construct from compact can fail but retarget is unguarded.
-    //*************************************************************************
-    uint256_t retarget(compact_number{ bits_high(values) });
-    ////BITCOIN_ASSERT(retarget.overflow());
+    static const uint256_t pow_limit(compact_number{ proof_of_work_limit });
+    const auto compact = compact_number(bits_high(values));
 
-    //*************************************************************************
-    // CONSENSUS: multiplication overflow potential.
-    //*************************************************************************
-    retarget *= retarget_timespan(values);
-    retarget /= target_timespan_seconds;
+    BITCOIN_ASSERT_MSG(!compact.is_overflowed(), "previous block bad bits");
 
-    return retarget > max_work_target ? max_work_compact :
-        retarget.to_compact().value();
+    uint256_t target(compact);
+    target *= retarget_timespan(values);
+    target /= target_timespan_seconds;
+
+    return target > pow_limit ? proof_of_work_limit : 
+        compact_number(target).normal();
 }
 
 // Get the bounded total time spanning the highest 2016 blocks.
 uint32_t chain_state::retarget_timespan(const chain_state::data& values)
 {
-    // Subtract 32 bit numbers in 64 bit space and constrain result to 32 bits.
-    const uint64_t high = timestamp_high(values);
-    const uint64_t retarget = values.timestamp.retarget;
-
     //*************************************************************************
-    // CONSENSUS: subtraction underflow potential (retarget > high).
+    // CONSENSUS: subtract unsigned 32 bit numbers in signed 64 bit space in
+    // order to prevent underflow before applying the range constraint.
     //*************************************************************************
-    const uint64_t timespan = high - retarget;
+    const int64_t high = timestamp_high(values);
+    const int64_t retarget = values.timestamp.retarget;
+    const int64_t timespan = high - retarget;
     return range_constrain(timespan, min_timespan, max_timespan);
 }
 
+// [GetNextWorkRequired::fPowAllowMinDifficultyBlocks]
 uint32_t chain_state::work_required_testnet(const data& values)
 {
     BITCOIN_ASSERT(values.height != 0);
 
-    //*************************************************************************
-    // CONSENSUS: addition overflow potential.
-    //*************************************************************************
-    const auto max_time_gap = timestamp_high(values) + double_spacing_seconds;
-
-    if (values.timestamp.self > max_time_gap)
-        return max_work_bits;
+    // If the time limit has passed allow a minimum difficulty block.
+    if (values.timestamp.self > elapsed_time_limit(values))
+        return proof_of_work_limit;
 
     auto height = values.height;
     auto& bits = values.bits.ordered;
 
     // Reverse iterate the ordered-by-height list of header bits.
     for (auto bit = bits.rbegin(); bit != bits.rend(); ++bit)
-        if (is_retarget_or_nonmax(--height, *bit))
+        if (is_retarget_or_non_limit(--height, *bit))
             return *bit;
 
     // Since the set of heights is either a full retarget range or ends at
     // zero this is not reachable unless the data set is invalid.
     BITCOIN_ASSERT(false);
-    return max_work_bits;
+    return proof_of_work_limit;
 }
 
-// A retarget point, or a block that does not have max_bits (is not special).
-bool chain_state::is_retarget_or_nonmax(size_t height, uint32_t bits)
+uint32_t chain_state::elapsed_time_limit(const chain_state::data& values)
+{
+    //*************************************************************************
+    // CONSENSUS: add unsigned 32 bit numbers in signed 64 bit space in
+    // order to prevent overflow before applying the domain constraint.
+    //*************************************************************************
+    const int64_t high = timestamp_high(values);
+    const int64_t spacing = double_spacing_seconds;
+    return domain_constrain<uint32_t>(high + spacing);
+}
+
+// A retarget height, or a block that does not have proof_of_work_limit bits.
+bool chain_state::is_retarget_or_non_limit(size_t height, uint32_t bits)
 {
     // Zero is a retarget height, ensuring termination before height underflow.
     // This is guaranteed, just asserting here to document the safeguard.
     BITCOIN_ASSERT_MSG(is_retarget_height(0), "loop overflow potential");
 
-    return bits != max_work_bits || is_retarget_height(height);
+    return bits != proof_of_work_limit || is_retarget_height(height);
 }
 
 // Determine if height is a multiple of retargeting_interval.

@@ -109,7 +109,7 @@ public:
     const operation& back() const;
     operation::iterator begin() const;
     operation::iterator end() const;
-    const operation& operator[](std::size_t index) const;
+    const operation& operator[](size_t index) const;
 
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------

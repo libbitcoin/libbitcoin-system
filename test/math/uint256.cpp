@@ -19,25 +19,36 @@
  */
 #include <boost/test/unit_test.hpp>
 
-#include <utility>
 #include <bitcoin/bitcoin.hpp>
 
-using namespace libbitcoin;
+using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(uint256_tests)
 
-BOOST_AUTO_TEST_CASE(uint256__constructor__simple__test)
+BOOST_AUTO_TEST_CASE(uint256__constructor1__always__equals_zero)
 {
-    uint256_t target(hash_literal("00000000b873e79784647a6c82962c70d228557d24a747ea4d1b8bbe878e1206"));
-    BOOST_REQUIRE(!target.overflow());
+    uint256_t minimum;
 
-    uint256_t maximum(compact_number{ max_work_bits });
-    BOOST_REQUIRE(!maximum.overflow());
+    // All boolean operators.
+    BOOST_REQUIRE_EQUAL(minimum > 0, false);
+    BOOST_REQUIRE_EQUAL(minimum < 0, false);
+    BOOST_REQUIRE_EQUAL(minimum >= 0, true);
+    BOOST_REQUIRE_EQUAL(minimum <= 0, true);
+    BOOST_REQUIRE_EQUAL(minimum == 0, true);
+    BOOST_REQUIRE_EQUAL(minimum != 0, false);
 
-    uint256_t check(compact_number{ 486604799 });
-    BOOST_REQUIRE(!check.overflow());
-    BOOST_REQUIRE(check <= target);
-    BOOST_REQUIRE(check <= maximum);
+    BOOST_REQUIRE_EQUAL(minimum > 42, false);
+    BOOST_REQUIRE_EQUAL(minimum < 42, true);
+    BOOST_REQUIRE_EQUAL(minimum >= 42, false);
+    BOOST_REQUIRE_EQUAL(minimum <= 42, true);
+    BOOST_REQUIRE_EQUAL(minimum == 42, false);
+    BOOST_REQUIRE_EQUAL(minimum != 42, true);
+}
+
+BOOST_AUTO_TEST_CASE(uint256__constructor2__zero__equals_zero)
+{
+    uint256_t minimum{ 0 };
+    BOOST_REQUIRE(minimum == 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

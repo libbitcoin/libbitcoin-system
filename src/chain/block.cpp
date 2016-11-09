@@ -29,6 +29,7 @@
 #include <type_traits>
 #include <utility>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
+#include <bitcoin/bitcoin/chain/compact_number.hpp>
 #include <bitcoin/bitcoin/chain/script/number.hpp>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/script/rule_fork.hpp>
@@ -407,18 +408,21 @@ block::indexes block::locator_heights(size_t top)
 // static
 uint256_t block::difficulty(uint32_t bits)
 {
-    uint256_t target(compact_number{ bits });
+    const auto compact = compact_number(bits);
 
-    if (target.overflow() || target == 0)
-        return{};
+    if (compact.is_overflowed())
+        return false;
 
-    // We need to compute 2**256 / (target+1), but we can't represent 2**256
+    uint256_t target(compact);
+
+    // We need to compute 2**256 / (target + 1), but we can't represent 2**256
     // as it's too large for uint256. However as 2**256 is at least as large as
-    // target+1, it is equal to ((2**256 - target - 1) / (target+1)) + 1, or 
-    // (~target / (target+1)) + 1.
-    return (~target / (target + 1)) + 1;
+    // target + 1, it is equal to ((2**256 - target - 1) / (target + 1)) + 1, or 
+    // (~target / (target + 1)) + 1.
+    return (target < 1) ? 0 : (~target / (target + 1)) + 1;
 }
 
+// [GetBlockProof]
 uint256_t block::difficulty() const
 {
     return difficulty(header_.bits());

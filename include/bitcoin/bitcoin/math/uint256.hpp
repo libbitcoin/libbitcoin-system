@@ -13,16 +13,8 @@
 
 namespace libbitcoin {
 
-class BC_API compact_number
-{
-public:
-    compact_number(uint32_t value);
-    uint32_t value() const;
-
-private:
-    const uint32_t value_;
-};
-
+/// A general purpose big number class with a subset of common operators.
+//// Only operators for work computation are implemented (and assign/identity).
 class BC_API uint256_t
 {
 public:
@@ -33,56 +25,59 @@ public:
     uint256_t();
     uint256_t(uint256_t&& other);
     uint256_t(const uint256_t& other);
-    uint256_t(hash_digest&& hash);
     uint256_t(const hash_digest& hash);
-    uint256_t(const compact_number& compact);
     uint256_t(uint32_t value);
 
     // Properties.
     //-------------------------------------------------------------------------
 
-    bool overflow() const;
+    /// The logical bit length of the number.
     uint32_t bits() const;
-    compact_number to_compact() const;
+
+    /// Get a 32 bit segment of the 256 bit number [0..7].
+    uint32_t word(size_t index) const;
 
     // Operators.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
-    bool operator>(const uint256_t& other) const;
-    bool operator<(const uint256_t& other) const;
-    bool operator>=(const uint256_t& other) const;
-    bool operator<=(const uint256_t& other) const;
-    bool operator==(const uint256_t& other) const;
+    //************************************************************************
+    // CONSENSUS: uint256_t implements consensus critical overflow behavior
+    // for all operators, specifically [~, -, *, +, ++, +=, *=, -=].
+    //*************************************************************************
 
-    const uint256_t operator~() const;
-    const uint256_t operator-() const;
-    const uint256_t operator>>(int shift) const;
-    const uint256_t operator+(const uint256_t& other) const;
-    const uint256_t operator/(const uint256_t& other) const;
+    bool operator>(const uint256_t& other) const;       // bc::chain
+    bool operator<(const uint256_t& other) const;       // bc::chain
+    bool operator>=(const uint256_t& other) const;      // bc::chain
+    bool operator<=(const uint256_t& other) const;      // bc::chain
+    bool operator==(const uint256_t& other) const;      // test (trivial)
+    bool operator!=(const uint256_t& other) const;      // test (trivial)
 
-    uint256_t& operator++();
-    uint256_t& operator<<=(int32_t shift);
-    uint256_t& operator>>=(int32_t shift);
-    uint256_t& operator=(uint32_t value);
-    uint256_t& operator*=(uint32_t value);
-    uint256_t& operator/=(uint32_t value);
-    uint256_t& operator+=(const uint256_t& other);
-    uint256_t& operator-=(const uint256_t& other);
-    uint256_t& operator/=(const uint256_t& other);
+    uint256_t operator~() const;                        // bc::chain
+    uint256_t operator-() const;                        // internal
+    uint256_t operator>>(uint32_t shift) const;         // bc::chain
+    uint256_t operator+(const uint256_t& other) const;  // bc::chain
+    uint256_t operator/(const uint256_t& other) const;  // bc::chain
+    
+    uint256_t& operator++();                            // internal
+    uint256_t& operator<<=(uint32_t shift);             // internal
+    uint256_t& operator>>=(uint32_t shift);             // internal
+    uint256_t& operator*=(uint32_t value);              // bc::chain
+    uint256_t& operator/=(uint32_t value);              // bc::chain
+    uint256_t& operator=(uint32_t value);               // bc::blockchain
+    uint256_t& operator=(uint256_t&& other);            // test (trivial)
+    uint256_t& operator=(const uint256_t& other);       // test (trivial)
+    uint256_t& operator+=(const uint256_t& other);      // bc::blockchain
+    uint256_t& operator-=(const uint256_t& other);      // internal
+    uint256_t& operator/=(const uint256_t& other);      // internal
 
 protected:
-    static bool from_compact(uint256_t& out, const compact_number& compact);
-
     bool equals(uint32_t value) const;
     int compare(const uint256_t& other) const;
 
-protected:
-    static const uint32_t full_bits_ = 256;
-    static const uint32_t word_bits_ = sizeof(uint32_t) * 8;
-    static const uint32_t width_ = full_bits_ / word_bits_;
+private:
+    typedef std::array<uint32_t, 8> big_number;
 
-    const bool overflow_;
-    uint32_t buffer_[width_];
+    big_number words_;
 };
 
 } // namespace libbitcoin
