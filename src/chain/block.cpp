@@ -280,9 +280,9 @@ uint64_t block::serialized_size() const
 
     const auto& txs = transactions_;
 
-    return header_.serialized_size()
-        + variable_uint_size(transactions_.size())
-        + std::accumulate(txs.begin(), txs.end(), size_t{0}, sum);
+    return header_.serialized_size() +
+        variable_uint_size(transactions_.size()) +
+        std::accumulate(txs.begin(), txs.end(), size_t{0}, sum);
 }
 
 chain::header& block::header()
@@ -411,7 +411,7 @@ uint256_t block::difficulty(uint32_t bits)
     const auto compact = compact_number(bits);
 
     if (compact.is_overflowed())
-        return false;
+        return 0;
 
     uint256_t target(compact);
 
