@@ -175,13 +175,14 @@ uint32_t chain_state::work_required_retarget(const data& values)
 // Get the bounded total time spanning the highest 2016 blocks.
 uint32_t chain_state::retarget_timespan(const chain_state::data& values)
 {
+    const auto high = timestamp_high(values);
+    const auto retarget = values.timestamp.retarget;
+
     //*************************************************************************
     // CONSENSUS: subtract unsigned 32 bit numbers in signed 64 bit space in
     // order to prevent underflow before applying the range constraint.
     //*************************************************************************
-    const int64_t high = timestamp_high(values);
-    const int64_t retarget = values.timestamp.retarget;
-    const int64_t timespan = high - retarget;
+    const auto timespan = cast_subtract<int64_t>(high, retarget);
     return range_constrain(timespan, min_timespan, max_timespan);
 }
 
@@ -210,13 +211,14 @@ uint32_t chain_state::work_required_testnet(const data& values)
 
 uint32_t chain_state::elapsed_time_limit(const chain_state::data& values)
 {
+    const int64_t high = timestamp_high(values);
+    const int64_t spacing = double_spacing_seconds;
+
     //*************************************************************************
     // CONSENSUS: add unsigned 32 bit numbers in signed 64 bit space in
     // order to prevent overflow before applying the domain constraint.
     //*************************************************************************
-    const int64_t high = timestamp_high(values);
-    const int64_t spacing = double_spacing_seconds;
-    return domain_constrain<uint32_t>(high + spacing);
+    return domain_constrain<uint32_t>(cast_add<int64_t>(high, spacing));
 }
 
 // A retarget height, or a block that does not have proof_of_work_limit bits.
