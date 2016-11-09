@@ -86,9 +86,9 @@ bool uint256_t::equals(uint32_t value) const
     if (words_.front() != value)
         return false;
 
-    const auto is_zero = [](uint32_t value)
+    const auto is_zero = [](uint32_t word)
     {
-        return value == 0;
+        return word == 0;
     };
 
     return std::all_of(words_.begin() + 1, words_.end(), is_zero);
@@ -193,48 +193,6 @@ uint256_t& uint256_t::operator++()
     return *this;
 }
 
-uint256_t& uint256_t::operator<<=(uint32_t shift)
-{
-    uint256_t copy(*this);
-    const auto quotient = shift / word_bits;
-    const auto remainder = shift % word_bits;
-    words_.fill(0);
-
-    for (size_t i = 0; i < words_.size(); ++i)
-    {
-        if ((i < words_.size() - quotient - 1) && remainder != 0)
-            words_[i + quotient + 1] |= 
-                (copy.words_[i] >> (word_bits - remainder));
-
-        if (i < words_.size() - quotient)
-            words_[i + quotient] |= 
-                (copy.words_[i] << remainder);
-    }
-
-    return *this;
-}
-
-uint256_t& uint256_t::operator>>=(uint32_t shift)
-{
-    uint256_t copy(*this);
-    const auto quotient = shift / word_bits;
-    const auto remainder = shift % word_bits;
-    words_.fill(0);
-
-    for (size_t i = 0; i < words_.size(); ++i)
-    {
-        if ((i >= quotient + 1) && remainder != 0)
-            words_[i - quotient - 1] |=
-                (copy.words_[i] << (word_bits - remainder));
-
-        if (i >= quotient)
-            words_[i - quotient] |=
-                (copy.words_[i] >> remainder);
-    }
-
-    return *this;
-}
-
 uint256_t& uint256_t::operator=(uint32_t value)
 {
     words_.fill(0);
@@ -242,14 +200,42 @@ uint256_t& uint256_t::operator=(uint32_t value)
     return *this;
 }
 
-uint256_t& uint256_t::operator=(uint256_t&& other)
+uint256_t& uint256_t::operator>>=(uint32_t shift)
 {
-    words_ = std::move(other.words_);
+    uint256_t copy(*this);
+    const auto value = shift / word_bits;
+    const auto remain = shift % word_bits;
+    words_.fill(0);
+
+    for (size_t i = 0; i < words_.size(); ++i)
+    {
+        if (i >= value + 1 && remain != 0)
+            words_[i - value - 1] |= copy.words_[i] << (word_bits - remain);
+
+        if (i >= value)
+            words_[i - value - 0] |= copy.words_[i] >> remain;
+    }
+
+    return *this;
 }
 
-uint256_t& uint256_t::operator=(const uint256_t& other)
+uint256_t& uint256_t::operator<<=(uint32_t shift)
 {
-    words_ = other.words_;
+    uint256_t copy(*this);
+    const auto value = shift / word_bits;
+    const auto remain = shift % word_bits;
+    words_.fill(0);
+
+    for (size_t i = 0; i < words_.size(); ++i)
+    {
+        if (i < words_.size() - value - 1 && remain != 0)
+            words_[i + value + 1] |= copy.words_[i] >> (word_bits - remain);
+
+        if (i < words_.size() - value)
+            words_[i + value + 0] |= copy.words_[i] << remain;
+    }
+
+    return *this;
 }
 
 // overflows

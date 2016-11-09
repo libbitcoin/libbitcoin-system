@@ -14,7 +14,7 @@
 namespace libbitcoin {
 
 /// A general purpose big number class with a subset of common operators.
-//// Only operators for work computation are implemented (and assign/identity).
+//// Only operators for work computation are implemented (and identity).
 class BC_API uint256_t
 {
 public:
@@ -49,8 +49,8 @@ public:
     bool operator<(const uint256_t& other) const;       // bc::chain
     bool operator>=(const uint256_t& other) const;      // bc::chain
     bool operator<=(const uint256_t& other) const;      // bc::chain
-    bool operator==(const uint256_t& other) const;      // test (trivial)
-    bool operator!=(const uint256_t& other) const;      // test (trivial)
+    bool operator==(const uint256_t& other) const;      // test
+    bool operator!=(const uint256_t& other) const;      // test
 
     uint256_t operator~() const;                        // bc::chain
     uint256_t operator-() const;                        // internal
@@ -59,13 +59,11 @@ public:
     uint256_t operator/(const uint256_t& other) const;  // bc::chain
     
     uint256_t& operator++();                            // internal
-    uint256_t& operator<<=(uint32_t shift);             // internal
+    uint256_t& operator=(uint32_t value);               // bc::blockchain
     uint256_t& operator>>=(uint32_t shift);             // internal
+    uint256_t& operator<<=(uint32_t shift);             // internal
     uint256_t& operator*=(uint32_t value);              // bc::chain
     uint256_t& operator/=(uint32_t value);              // bc::chain
-    uint256_t& operator=(uint32_t value);               // bc::blockchain
-    uint256_t& operator=(uint256_t&& other);            // test (trivial)
-    uint256_t& operator=(const uint256_t& other);       // test (trivial)
     uint256_t& operator+=(const uint256_t& other);      // bc::blockchain
     uint256_t& operator-=(const uint256_t& other);      // internal
     uint256_t& operator/=(const uint256_t& other);      // internal

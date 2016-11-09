@@ -62,14 +62,17 @@ public:
     static const uint8_t positive_16;
     static const uint8_t negative_mask;
 
-    /// Construct with zero value, may call set_data() after.
+    /// Construct with zero value.
     number();
 
     /// Construct with specified value.
     explicit number(int64_t value);
 
-    /// Set the value from a byte vector with LSB first ordering.
+    /// Replace the value derived from a byte vector with LSB first ordering.
     bool set_data(const data_chunk& data, size_t max_size);
+
+    // Properties
+    //-----------------------------------------------------------------------------
 
     /// Return the value as a byte vector with LSB first ordering.
     data_chunk data() const;
@@ -80,45 +83,48 @@ public:
     /// Return the unbounded value.
     int64_t int64() const;
 
+    // Stack Helpers
+    //-----------------------------------------------------------------------------
+
     /// Return value as stack boolean (nonzero is true).
     bool is_true() const;
 
     /// Return value as stack boolean (zero is false).
     bool is_false() const;
 
-    /// Arithmetic with a number (throws on overflow).
-    number operator+(int64_t value) const;
-    number operator-(int64_t value) const;
-    number& operator+=(int64_t value);
-    number& operator-=(int64_t value);
+    // Operators
+    //-----------------------------------------------------------------------------
 
-    /// Arithmetic with another number (throws on overflow).
-    number operator+(const number& other) const;
-    number operator-(const number& other) const;
-    number& operator+=(const number& other);
-    number& operator-=(const number& other);
+    //************************************************************************
+    // CONSENSUS: script::number implements consensus critical overflow
+    // behavior for all operators, specifically [-, +, +=, -=].
+    //*************************************************************************
 
-    /// This number.
-    number operator+() const;
-
-    /// Math-negated copy of this number (throws on minimum value).
-    number operator-() const;
-
-    /// Comparison operators with a number.
-    bool operator==(int64_t value) const;
-    bool operator!=(int64_t value) const;
-    bool operator<=(int64_t value) const;
+    bool operator>(int64_t value) const;
     bool operator<(int64_t value) const;
     bool operator>=(int64_t value) const;
-    bool operator>(int64_t value) const;
+    bool operator<=(int64_t value) const;
+    bool operator==(int64_t value) const;
+    bool operator!=(int64_t value) const;
 
-    /// Comparison operators with another number.
-    bool operator==(const number& other) const;
-    bool operator!=(const number& other) const;
-    bool operator<=(const number& other) const;
+    bool operator>(const number& other) const;
     bool operator<(const number& other) const;
     bool operator>=(const number& other) const;
-    bool operator>(const number& other) const;
+    bool operator<=(const number& other) const;
+    bool operator==(const number& other) const;
+    bool operator!=(const number& other) const;
+
+    number operator+() const;
+    number operator-() const;
+    number operator+(int64_t value) const;
+    number operator-(int64_t value) const;
+    number operator+(const number& other) const;
+    number operator-(const number& other) const;
+
+    number& operator+=(int64_t value);
+    number& operator-=(int64_t value);
+    number& operator+=(const number& other);
+    number& operator-=(const number& other);
 
 private:
     int64_t value_;

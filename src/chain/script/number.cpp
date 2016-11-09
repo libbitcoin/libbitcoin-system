@@ -29,6 +29,7 @@
 namespace libbitcoin {
 namespace chain {
     
+// members
 const uint8_t number::negative_1 = negative_mask | positive_1;
 const uint8_t number::negative_0 = negative_mask | positive_0;
 const uint8_t number::positive_0 = 0;
@@ -50,89 +51,14 @@ const uint8_t number::positive_15 = 15;
 const uint8_t number::positive_16 = 16;
 const uint8_t number::negative_mask = 0x80;
 
-static constexpr auto unsigned_max_int64 = static_cast<uint64_t>(max_int64);
-static constexpr auto absolute_min_int64 = static_cast<uint64_t>(min_int64);
+// locals
+static constexpr uint64_t negative_bit = number::negative_mask;
+static constexpr uint64_t unsigned_max_int64 = bc::max_int64;
+static constexpr uint64_t absolute_min_int64 = bc::min_int64;
 
-// The result is always LSB first.
-static data_chunk number_serialize(int64_t value)
+inline bool is_negative(const data_chunk& data)
 {
-    if (value == 0)
-        return{};
-
-    data_chunk result;
-    const auto negative = value < 0;
-
-    // std::abs cannot handle min_int64, so we use a special case.
-    auto absolute_value = value == min_int64 ? absolute_min_int64 :
-        static_cast<uint64_t>(std::abs(value));
-
-    while (absolute_value != 0)
-    {
-        static constexpr uint64_t byte_mask = 0xff;
-        result.push_back(absolute_value & byte_mask);
-        absolute_value >>= byte_bits;
-    }
-
-    auto negative_masked = (result.back() & number::negative_mask) != 0;
-
-    // If the most significant byte is >= 0x80 and the value is negative,
-    // push a new 0x80 byte that will be popped off when converting to
-    // an integral.
-    if (negative_masked && negative)
-        result.push_back(number::negative_mask);
-
-    // If the most significant byte is >= 0x80 and the value is positive,
-    // push a new zero-byte to make the significant byte < 0x80 again.
-    else if (negative_masked)
-        result.push_back(0);
-
-    // If the most significant byte is < 0x80 and the value is negative,
-    // add 0x80 to it, since it will be subtracted and interpreted as
-    // a negative when converting to an integral.
-    else if (negative)
-        result.back() |= number::negative_mask;
-
-    return result;
-}
-
-// The parameter is assumed to be LSB first.
-static int64_t number_deserialize(const data_chunk& data)
-{
-    if (data.empty())
-        return 0;
-
-    const auto consume_last_byte = data.back() != number::negative_mask;
-    const auto value_size = consume_last_byte ? data.size() : data.size() - 1;
-
-    // This is guarded by set_data().
-    BITCOIN_ASSERT(value_size <= sizeof(uint64_t));
-
-    const auto negative = data.back() & number::negative_mask;
-    const auto mask_last_byte = negative && consume_last_byte;
-    uint64_t absolute_value = 0;
-
-    for (size_t byte = 0; byte < value_size; ++byte)
-    {
-        const auto shift = byte_bits * byte;
-        const auto last_byte = byte + 1 == value_size;
-        const auto value = mask_last_byte && last_byte ?
-            data[byte] & ~number::negative_mask : data[byte];
-
-        absolute_value |= static_cast<uint64_t>(value) << shift;
-    }
-
-    if ((!negative && absolute_value > unsigned_max_int64) ||
-        (negative && absolute_value > absolute_min_int64))
-        throw std::out_of_range("the data value is out of range");
-
-    // Cannot assign absolute_min_int64 to int64, so we use a special case.
-    if (negative && absolute_value == absolute_min_int64)
-        return min_int64;
-
-    // If the input vector's most significant byte is 0x80 return a negative.
-    return negative ?
-        static_cast<int64_t>(absolute_value) * -1 :
-        static_cast<int64_t>(absolute_value);
+    return (data.back() & number::negative_mask) != 0;
 }
 
 number::number()
@@ -145,26 +71,69 @@ number::number(int64_t value)
 {
 }
 
+// Properties
+//-----------------------------------------------------------------------------
+
+// The parameter is assumed to be LSB first.
 bool number::set_data(const data_chunk& data, size_t max_size)
 {
-    const auto size = data.size();
-
-    if (size > max_size)
+    if (data.size() > max_size)
         return false;
 
-    const auto negative_byte = !data.empty() && data.back() == negative_mask;
-    const auto value_size = negative_byte ? size - 1 : size;
+    value_ = 0;
 
-    if (value_size > sizeof(uint64_t))
-        return false;
+    if (data.empty())
+        return true;
 
-    value_ = number_deserialize(data);
+    for (size_t i = 0; i != data.size(); ++i)
+        value_ |= static_cast<int64_t>(data[i]) << 8 * i;
+
+    if (is_negative(data))
+    {
+        const auto last_shift = 8 * (data.size() - 1);
+        const auto mask = ~(negative_bit << last_shift);
+        value_ = -1 * (static_cast<int64_t>(value_ & mask));
+    }
+
     return true;
 }
 
+// The result is always LSB first.
 data_chunk number::data() const
 {
-    return number_serialize(value_);
+    if (value_ == 0)
+        return{};
+
+    data_chunk data;
+    const bool negative = value_ < 0;
+    uint64_t absolute = negative ? -value_ : value_;
+
+    while (absolute != 0)
+    {
+        data.push_back(static_cast<uint8_t>(absolute));
+        absolute >>= 8;
+    }
+
+    const auto negative_bit_set = is_negative(data);
+
+    // If the most significant byte is >= 0x80 and the value is negative,
+    // push a new 0x80 byte that will be popped off when converting to
+    // an integral.
+    if (negative_bit_set && negative)
+        data.push_back(number::negative_mask);
+
+    // If the most significant byte is >= 0x80 and the value is positive,
+    // push a new zero-byte to make the significant byte < 0x80 again.
+    else if (negative_bit_set)
+        data.push_back(0);
+
+    // If the most significant byte is < 0x80 and the value is negative,
+    // add 0x80 to it, since it will be subtracted and interpreted as
+    // a negative when converting to an integral.
+    else if (negative)
+        data.back() |= number::negative_mask;
+
+    return data;
 }
 
 int32_t number::int32() const
@@ -177,6 +146,9 @@ int64_t number::int64() const
     return value_;
 }
 
+// Stack Helpers
+//-----------------------------------------------------------------------------
+
 bool number::is_true() const
 {
     return value_ != 0;
@@ -187,19 +159,12 @@ bool number::is_false() const
     return value_ == 0;
 }
 
-bool number::operator==(int64_t value) const
-{
-    return value_ == value;
-}
+// Operators
+//-----------------------------------------------------------------------------
 
-bool number::operator!=(int64_t value) const
+bool number::operator>(int64_t value) const
 {
-    return value_ != value;
-}
-
-bool number::operator<=(int64_t value) const
-{
-    return value_ <= value;
+    return value_ > value;
 }
 
 bool number::operator<(int64_t value) const
@@ -212,24 +177,24 @@ bool number::operator>=(int64_t value) const
     return value_ >= value;
 }
 
-bool number::operator>(int64_t value) const
+bool number::operator<=(int64_t value) const
 {
-    return value_ > value;
+    return value_ <= value;
 }
 
-bool number::operator==(const number& other) const
+bool number::operator==(int64_t value) const
 {
-    return operator==(other.value_);
+    return value_ == value;
 }
 
-bool number::operator!=(const number& other) const
+bool number::operator!=(int64_t value) const
 {
-    return operator!=(other.value_);
+    return value_ != value;
 }
 
-bool number::operator<=(const number& other) const
+bool number::operator>(const number& other) const
 {
-    return operator<=(other.value_);
+    return operator>(other.value_);
 }
 
 bool number::operator<(const number& other) const
@@ -242,29 +207,35 @@ bool number::operator>=(const number& other) const
     return operator>=(other.value_);
 }
 
-bool number::operator>(const number& other) const
+bool number::operator<=(const number& other) const
 {
-    return operator>(other.value_);
+    return operator<=(other.value_);
+}
+
+bool number::operator==(const number& other) const
+{
+    return operator==(other.value_);
+}
+
+bool number::operator!=(const number& other) const
+{
+    return operator!=(other.value_);
 }
 
 number number::operator+(int64_t value) const
 {
-    if ((value > 0 && (value_ >= max_int64 - value)) ||
-        (value < 0 && (value_ <= min_int64 - value)))
-    {
-        throw std::overflow_error("integer overflow");
-    }
+    BITCOIN_ASSERT_MSG(value == 0 ||
+        (value > 0 && value_ <= max_int64 - value) ||
+        (value < 0 && value_ >= min_int64 - value), "overflow");
 
     return number(value_ + value);
 }
 
 number number::operator-(int64_t value) const
 {
-    if ((value > 0 && (value_ <= min_int64 + value)) ||
-        (value < 0 && (value_ >= max_int64 + value)))
-    {
-        throw std::overflow_error("integer underflow");
-    }
+    BITCOIN_ASSERT_MSG(value == 0 ||
+        (value > 0 && value_ >= min_int64 + value) ||
+        (value < 0 && value_ <= max_int64 + value), "underflow");
 
     return number(value_ - value);
 }
@@ -286,34 +257,9 @@ number number::operator+() const
 
 number number::operator-() const
 {
-    if (value_ == min_int64)
-        throw std::out_of_range("negation would be out of range");
+    BITCOIN_ASSERT_MSG(value_ != min_int64, "out of range");
 
     return number(-value_);
-}
-
-number& number::operator+=(int64_t value)
-{
-    if ((value > 0 && (value_ >= max_int64 - value)) ||
-        (value < 0 && (value_ <= min_int64 - value)))
-    {
-        throw std::overflow_error("integer increment overflow");
-    }
-
-    value_ += value;
-    return *this;
-}
-
-number& number::operator-=(int64_t value)
-{
-    if ((value > 0 && (value_ <= min_int64 + value)) ||
-        (value < 0 && (value_ >= max_int64 + value)))
-    {
-        throw std::overflow_error("integer decrement underflow");
-    }
-
-    value_ -= value;
-    return *this;
 }
 
 number& number::operator+=(const number& other)
@@ -324,6 +270,26 @@ number& number::operator+=(const number& other)
 number& number::operator-=(const number& other)
 {
     return operator-=(other.value_);
+}
+
+number& number::operator+=(int64_t value)
+{
+    BITCOIN_ASSERT_MSG(value == 0 ||
+        (value > 0 && value_ <= max_int64 - value) ||
+        (value < 0 && value_ >= min_int64 - value), "overflow");
+
+    value_ += value;
+    return *this;
+}
+
+number& number::operator-=(int64_t value)
+{
+    BITCOIN_ASSERT_MSG(value == 0 ||
+        (value > 0 && value_ >= min_int64 + value) ||
+        (value < 0 && value_ <= max_int64 + value), "underflow");
+
+    value_ -= value;
+    return *this;
 }
 
 } // namespace chain

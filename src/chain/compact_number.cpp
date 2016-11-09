@@ -24,6 +24,9 @@
 namespace libbitcoin {
 namespace chain {
 
+// Bitcoin compact for represents a value in base 256 notation as follows:
+// value = (-1^sign) * mantissa * 256^(exponent-3)
+
 // [exponent:8 | sign:1 | mantissa:31]
 static constexpr uint32_t exp_byte = 0xff000000;
 static constexpr uint32_t sign_bit = 0x00800000;
@@ -68,7 +71,7 @@ inline uint32_t round_up(uint32_t bits)
 inline uint32_t shift_low(uint32_t exponent)
 {
     BITCOIN_ASSERT(exponent <= 3);
-    return  8 * (3u - exponent);
+    return  8 * (3 - exponent);
 }
 
 inline uint32_t shift_high(uint32_t exponent)
@@ -76,11 +79,6 @@ inline uint32_t shift_high(uint32_t exponent)
     BITCOIN_ASSERT(exponent > 3);
     return  8 * (exponent - 3);
 }
-
-////inline uint32_t sign(uint32_t mantissa, bool negative)
-////{
-////    return (negative && mantissa != 0) ? sign_bit : 0;
-////}
 
 inline uint64_t lower64(const uint256_t& big)
 {
@@ -96,16 +94,11 @@ compact_number::compact_number(uint32_t compact)
     normal_ = to_compact(big_ /*, false*/);
 }
 
-compact_number::compact_number(const uint256_t& big)
-  : valid_(true), big_(big)
+compact_number::compact_number(const uint256_t& value)
+  : valid_(true), big_(value)
 {
-    normal_ = to_compact(big_ /*, false*/);
+    normal_ = to_compact(big_);
 }
-
-////bool compact_number::is_negative() const
-////{
-////    return is_negated(compact_);
-////}
 
 bool compact_number::is_overflowed() const
 {
@@ -136,9 +129,8 @@ bool compact_number::from_compact(uint256_t& out, uint32_t compact)
     }
 
     // Shift off the mantissa (and dead sign bit) to get the exponent byte.
-    const auto exponent = compact >> mantissa_bits;
-
     // Mask off the exponent byte and the sign bit to get the mantissa.
+    const auto exponent = compact >> mantissa_bits;
     auto mantissa = compact & mantissa_max;
 
     // Shift the mantissa into the big number.
@@ -164,12 +156,10 @@ bool compact_number::from_compact(uint256_t& out, uint32_t compact)
     return true;
 }
 
-uint32_t compact_number::to_compact(const uint256_t& big /*, bool negative*/)
+uint32_t compact_number::to_compact(const uint256_t& big)
 {
-    // The bits() range is [0..256], round to the next byte boundary.
-    auto exponent = round_up(big.bits());
-
     uint32_t mantissa = 0;
+    uint32_t exponent = round_up(big.bits());
 
     // Shift the big number significant digits into the mantissa.
     if (exponent <= 3)
@@ -192,7 +182,7 @@ uint32_t compact_number::to_compact(const uint256_t& big /*, bool negative*/)
     BITCOIN_ASSERT_MSG((mantissa & mantissa_mask) == 0, "value exceess");
 
     // Assemble the compact notation.
-    return (exponent << mantissa_bits) | 0 /*sign(mantissa, negative)*/ | mantissa;
+    return (exponent << mantissa_bits) | mantissa;
 }
 
 } // namespace chain

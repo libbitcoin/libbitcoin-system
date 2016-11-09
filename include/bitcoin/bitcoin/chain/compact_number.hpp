@@ -43,8 +43,6 @@ public:
     /// Copy constructor.
     compact_number(const compact_number& other);
 
-    ////bool is_negative() const;
-
     /// True if construction overflowed.
     bool is_overflowed() const;
 
@@ -58,7 +56,7 @@ public:
 
 private:
     static bool from_compact(uint256_t& out, uint32_t compact);
-    static uint32_t to_compact(const uint256_t& big /*, bool negative*/);
+    static uint32_t to_compact(const uint256_t& value);
 
     bool valid_;
     uint256_t big_;
