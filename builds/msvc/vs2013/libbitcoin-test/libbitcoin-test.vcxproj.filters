@@ -39,9 +39,6 @@
     <ClInclude Include="..\..\..\..\test\math\hash.hpp">
       <Filter>src\math</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\test\math\big_number.hpp">
-      <Filter>src\math</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\test\wallet\mnemonic.hpp">
       <Filter>src\wallet</Filter>
     </ClInclude>
@@ -156,9 +153,6 @@
       <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\hash.cpp">
-      <Filter>src\math</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\math\big_number.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\checksum.cpp">
@@ -323,6 +317,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\script\number.cpp">
       <Filter>src\chain\script</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\compact_number.cpp">
+      <Filter>src\chain</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

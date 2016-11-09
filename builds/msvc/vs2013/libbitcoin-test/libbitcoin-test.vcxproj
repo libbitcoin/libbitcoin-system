@@ -71,12 +71,12 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\..\test\chain\script\number.hpp" />
     <ClInclude Include="..\..\..\..\test\chain\script\script.hpp" />
-    <ClInclude Include="..\..\..\..\test\math\big_number.hpp" />
     <ClInclude Include="..\..\..\..\test\math\hash.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonic.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\test\chain\block.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\compact_number.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\header.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\input.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\output.cpp" />
@@ -102,7 +102,6 @@
     <ClCompile Include="..\..\..\..\test\formats\base_64.cpp" />
     <ClCompile Include="..\..\..\..\test\formats\base_85.cpp" />
     <ClCompile Include="..\..\..\..\test\main.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\big_number.cpp" />
     <ClCompile Include="..\..\..\..\test\math\checksum.cpp" />
     <ClCompile Include="..\..\..\..\test\math\elliptic_curve.cpp" />
     <ClCompile Include="..\..\..\..\test\math\hash.cpp" />
@@ -206,7 +205,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSEXE|x64'">
     <PostBuildEvent />
     <PostBuildEvent>
-      <Command>"$(TargetPath)" --run_test=* --show_progress=no --result_code=no --detect_memory_leak=0 --report_level=no --build_info=yes</Command>
+      <Command>"$(TargetPath)" --run_test=compact_number_tests --show_progress=no --result_code=no --detect_memory_leak=0 --report_level=no --build_info=yes</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
