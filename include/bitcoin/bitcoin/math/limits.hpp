@@ -39,6 +39,18 @@ namespace libbitcoin {
 #define UNSIGNED_SIGNED(A, B) IF(UNSIGN(A) && SIGN(B))
 #define UNSIGNED_UNSIGNED(A, B) IF(UNSIGN(A) && UNSIGN(B))
 
+template <typename Space, typename Integer>
+Space cast_add(Integer left, Integer right)
+{
+    return static_cast<Space>(left) + static_cast<Space>(right);
+}
+
+template <typename Space, typename Integer>
+Space cast_subtract(Integer left, Integer right)
+{
+    return static_cast<Space>(left) - static_cast<Space>(right);
+}
+
 template <typename Integer, typename = UNSIGNED(Integer)>
 Integer ceiling_add(Integer left, Integer right)
 {
