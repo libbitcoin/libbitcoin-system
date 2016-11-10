@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/chain/compact_number.hpp>
 
+#include <cstdint>
 #include <bitcoin/bitcoin/math/uint256.hpp>
 
 namespace libbitcoin {
@@ -32,11 +33,6 @@ static constexpr uint32_t exp_byte = 0xff000000;
 static constexpr uint32_t sign_bit = 0x00800000;
 static constexpr uint32_t mantissa_max = ~(exp_byte | sign_bit);
 static constexpr uint32_t mantissa_bits = (sizeof(uint32_t) - 1) * 8;
-
-// overflow
-static constexpr uint32_t two_byte = 0x0000ffff;
-static constexpr uint32_t one_byte = 0x000000ff;
-static constexpr uint32_t non_byte = 0x00000000;
 
 // assertions
 static constexpr uint32_t mantissa_mask = ~mantissa_max;
@@ -55,16 +51,25 @@ inline bool is_nonzero(uint32_t compact)
     return (compact & mantissa_max) != 0;
 }
 
-inline bool is_overflow(uint32_t exponent, uint32_t shifted)
+inline uint8_t log_256(uint32_t mantissa)
 {
+    BITCOIN_ASSERT_MSG(mantissa <= 0x00ffffff, "mantissa log256 is 4");
+
     return
-        (shifted > two_byte && exponent > (32 + 0)) ||
-        (shifted > one_byte && exponent > (32 + 1)) ||
-        (shifted > non_byte && exponent > (32 + 2));
+        (mantissa > 0x0000ffff ? 3 :
+        (mantissa > 0x000000ff ? 2 : 
+        (mantissa > 0x00000000 ? 1 : 0)));
 }
 
-inline uint32_t round_up(uint32_t bits)
+inline bool is_overflow(uint8_t exponent, uint32_t mantissa)
 {
+    // Overflow if exponent would shift the mantissa more than 32 bytes.
+    return (mantissa > 0) && (exponent > 32 + 3 - log_256(mantissa));
+}
+
+inline uint32_t bits_to_exponent(uint32_t bits)
+{
+    // Round up to the nearest multiple of eight, because 256/8=32.
     return (bits + 7) / 8;
 }
 
@@ -82,7 +87,8 @@ inline uint32_t shift_high(uint32_t exponent)
 
 inline uint64_t lower64(const uint256_t& big)
 {
-    return big.word(0) | (static_cast<uint64_t>(big.word(1)) << 32);
+    const auto words = big.words();
+    return words[0] | (static_cast<uint64_t>(words[1]) << 32);
 }
 
 // Constructors
@@ -90,19 +96,19 @@ inline uint64_t lower64(const uint256_t& big)
 
 compact_number::compact_number(uint32_t compact)
 {
-    valid_ = from_compact(big_, compact);
-    normal_ = to_compact(big_ /*, false*/);
+    overflowed_ = from_compact(big_, compact);
+    normal_ = from_big(big_);
 }
 
 compact_number::compact_number(const uint256_t& value)
-  : valid_(true), big_(value)
+  : big_(value), overflowed_(true)
 {
-    normal_ = to_compact(big_);
+    normal_ = from_big(big_);
 }
 
 bool compact_number::is_overflowed() const
 {
-    return !valid_;
+    return !overflowed_;
 }
 
 uint32_t compact_number::normal() const
@@ -115,7 +121,7 @@ compact_number::operator const uint256_t&() const
     return big_;
 }
 
-// Returns false on overflow, negative is converted to zero.
+// Returns false on overflow, negatives are converted to zero.
 bool compact_number::from_compact(uint256_t& out, uint32_t compact)
 {
     //*************************************************************************
@@ -128,10 +134,11 @@ bool compact_number::from_compact(uint256_t& out, uint32_t compact)
         return true;
     }
 
-    // Shift off the mantissa (and dead sign bit) to get the exponent byte.
-    // Mask off the exponent byte and the sign bit to get the mantissa.
-    const auto exponent = compact >> mantissa_bits;
+    // Mask off the exponent byte and sign to get the mantissa.
     auto mantissa = compact & mantissa_max;
+
+    // Shift off the mantissa and sign to get the exponent byte.
+    const auto exponent = static_cast<uint8_t>(compact >> mantissa_bits);
 
     // Shift the mantissa into the big number.
     if (exponent <= 3)
@@ -141,25 +148,20 @@ bool compact_number::from_compact(uint256_t& out, uint32_t compact)
     }
     else 
     {
+        if (is_overflow(exponent, mantissa))
+            return false;
+
         out = mantissa;
         out <<= shift_high(exponent);
-    }
-
-    // Note that the mantissa has been shifed in the low condition above.
-    // There is no consensus expectation of a value in the case of overflow.
-    if (is_overflow(exponent, mantissa))
-    {
-        out = 0;
-        return false;
     }
 
     return true;
 }
 
-uint32_t compact_number::to_compact(const uint256_t& big)
+uint32_t compact_number::from_big(const uint256_t& big)
 {
+    uint32_t exponent = bits_to_exponent(big.bits());
     uint32_t mantissa = 0;
-    uint32_t exponent = round_up(big.bits());
 
     // Shift the big number significant digits into the mantissa.
     if (exponent <= 3)
@@ -174,8 +176,9 @@ uint32_t compact_number::to_compact(const uint256_t& big)
     //*************************************************************************
     if (is_negated(mantissa))
     {
-        mantissa >>= 8;
+        BITCOIN_ASSERT(exponent < 0xff);
         exponent++;
+        mantissa >>= 8;
     }
 
     BITCOIN_ASSERT_MSG((exponent & first_byte_mask) == 0, "size exceess");

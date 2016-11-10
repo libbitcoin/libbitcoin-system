@@ -72,10 +72,9 @@ uint32_t uint256_t::bits() const
 }
 
 // This is used to efficiently generate a compact number (otherwise shift).
-uint32_t uint256_t::word(size_t index) const
+const uint256_t::segments& uint256_t::words() const
 {
-    BITCOIN_ASSERT(index < words_.size());
-    return words_[index];
+    return words_;
 }
 
 // Helpers.
@@ -202,18 +201,18 @@ uint256_t& uint256_t::operator=(uint32_t value)
 
 uint256_t& uint256_t::operator>>=(uint32_t shift)
 {
-    uint256_t copy(*this);
     const auto value = shift / word_bits;
-    const auto remain = shift % word_bits;
+    const auto remainder = shift % word_bits;
+    uint256_t copy(*this);
     words_.fill(0);
 
     for (size_t i = 0; i < words_.size(); ++i)
     {
-        if (i >= value + 1 && remain != 0)
-            words_[i - value - 1] |= copy.words_[i] << (word_bits - remain);
+        if (i >= value + 1 && remainder != 0)
+            words_[i - value - 1] |= copy.words_[i] << (word_bits - remainder);
 
-        if (i >= value)
-            words_[i - value - 0] |= copy.words_[i] >> remain;
+        if (i >= value + 0)
+            words_[i - value - 0] |= copy.words_[i] >> remainder;
     }
 
     return *this;
@@ -221,18 +220,18 @@ uint256_t& uint256_t::operator>>=(uint32_t shift)
 
 uint256_t& uint256_t::operator<<=(uint32_t shift)
 {
-    uint256_t copy(*this);
     const auto value = shift / word_bits;
-    const auto remain = shift % word_bits;
+    const auto remainder = shift % word_bits;
+    uint256_t copy(*this);
     words_.fill(0);
 
     for (size_t i = 0; i < words_.size(); ++i)
     {
-        if (i < words_.size() - value - 1 && remain != 0)
-            words_[i + value + 1] |= copy.words_[i] >> (word_bits - remain);
+        if (i + value + 1 < words_.size() && remainder != 0)
+            words_[i + value + 1] |= copy.words_[i] >> (word_bits - remainder);
 
-        if (i < words_.size() - value)
-            words_[i + value + 0] |= copy.words_[i] << remain;
+        if (i + value + 0 < words_.size())
+            words_[i + value + 0] |= copy.words_[i] << remainder;
     }
 
     return *this;

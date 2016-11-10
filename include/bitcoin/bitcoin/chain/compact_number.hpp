@@ -56,11 +56,11 @@ public:
 
 private:
     static bool from_compact(uint256_t& out, uint32_t compact);
-    static uint32_t to_compact(const uint256_t& value);
+    static uint32_t from_big(const uint256_t& big);
 
-    bool valid_;
     uint256_t big_;
     uint32_t normal_;
+    bool overflowed_;
 };
 
 } // namespace chain
