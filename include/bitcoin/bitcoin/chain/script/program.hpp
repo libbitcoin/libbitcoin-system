@@ -37,7 +37,6 @@ class transaction;
 class BC_API program
 {
 public:
-    typedef number number;
     typedef data_stack::value_type value_type;
     typedef operation::iterator op_iterator;
 
