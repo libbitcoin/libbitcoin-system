@@ -18,7 +18,6 @@ namespace libbitcoin {
 class BC_API uint256_t
 {
 public:
-    typedef std::array<uint32_t, 8> segments;
 
     // Constructors.
     //-------------------------------------------------------------------------
@@ -32,11 +31,14 @@ public:
     // Properties.
     //-------------------------------------------------------------------------
 
-    /// The logical bit length of the number.
-    uint32_t bits() const;
+    /// The minimum bit length of the number.
+    size_t bit_length() const;
 
-    /// Get the internal representation.
-    const segments& words() const;
+    /// The minimum byte length of the number.
+    size_t byte_length() const;
+
+    /// Get one of four 64 bit segments of the number.
+    uint64_t operator[](size_t index) const;
 
     // Operators.
     //-------------------------------------------------------------------------
@@ -74,7 +76,9 @@ protected:
     int compare(const uint256_t& other) const;
 
 private:
-    segments words_;
+    typedef std::array<uint32_t, 8> words;
+
+    words words_;
 };
 
 } // namespace libbitcoin

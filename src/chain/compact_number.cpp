@@ -67,28 +67,16 @@ inline bool is_overflow(uint8_t exponent, uint32_t mantissa)
     return (mantissa > 0) && (exponent > 32 + 3 - log_256(mantissa));
 }
 
-inline uint32_t bits_to_exponent(uint32_t bits)
-{
-    // Round up to the nearest multiple of eight, because 256/8=32.
-    return (bits + 7) / 8;
-}
-
-inline uint32_t shift_low(uint32_t exponent)
+inline uint32_t shift_low(uint8_t exponent)
 {
     BITCOIN_ASSERT(exponent <= 3);
     return  8 * (3 - exponent);
 }
 
-inline uint32_t shift_high(uint32_t exponent)
+inline uint32_t shift_high(uint8_t exponent)
 {
     BITCOIN_ASSERT(exponent > 3);
     return  8 * (exponent - 3);
-}
-
-inline uint64_t lower64(const uint256_t& big)
-{
-    const auto words = big.words();
-    return words[0] | (static_cast<uint64_t>(words[1]) << 32);
 }
 
 // Constructors
@@ -145,29 +133,30 @@ bool compact_number::from_compact(uint256_t& out, uint32_t compact)
     {
         mantissa >>= shift_low(exponent);
         out = mantissa;
-    }
-    else 
-    {
-        if (is_overflow(exponent, mantissa))
-            return false;
-
-        out = mantissa;
-        out <<= shift_high(exponent);
+        return true;
     }
 
+    // Compact has space for more exponent bits than can be represnted in a base
+    // base 256 number represented in 32 bytes, so we trap overflow here.
+    if (is_overflow(exponent, mantissa))
+        return false;
+
+    out = mantissa;
+    out <<= shift_high(exponent);
     return true;
 }
 
 uint32_t compact_number::from_big(const uint256_t& big)
 {
-    uint32_t exponent = bits_to_exponent(big.bits());
+    // This value is limited to 32, so exponent cannot overflow.
+    auto exponent = static_cast<uint8_t>(big.byte_length());
     uint32_t mantissa = 0;
 
     // Shift the big number significant digits into the mantissa.
     if (exponent <= 3)
-        mantissa = static_cast<uint32_t>(lower64(big) << shift_low(exponent));
+        mantissa = static_cast<uint32_t>(big[0] << shift_low(exponent));
     else
-        mantissa = static_cast<uint32_t>(lower64(big >> shift_high(exponent)));
+        mantissa = static_cast<uint32_t>((big >> shift_high(exponent))[0]);
 
     //*************************************************************************
     // CONSENSUS: Satoshi used a signed implementation to represent unsigned.
@@ -176,7 +165,6 @@ uint32_t compact_number::from_big(const uint256_t& big)
     //*************************************************************************
     if (is_negated(mantissa))
     {
-        BITCOIN_ASSERT(exponent < 0xff);
         exponent++;
         mantissa >>= 8;
     }

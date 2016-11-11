@@ -55,14 +55,14 @@ uint256_t::uint256_t(uint32_t value)
 //-----------------------------------------------------------------------------
 
 // Determine the logical bit length of the big number [0..256].
-uint32_t uint256_t::bits() const
+size_t uint256_t::bit_length() const
 {
-    auto word = static_cast<uint32_t>(words_.size() - 1);
+    auto word = static_cast<size_t>(words_.size() - 1);
     for (auto it = words_.rbegin(); it != words_.rend(); ++it, --word)
     {
         if (*it != 0)
         {
-            uint32_t bit = word_bits - 1;
+            size_t bit = word_bits - 1;
             for (; (bit != 0) && (*it & (1 << bit)) == 0; --bit);
             return word_bits * word + bit + 1;
         }
@@ -71,10 +71,20 @@ uint32_t uint256_t::bits() const
     return 0;
 }
 
-// This is used to efficiently generate a compact number (otherwise shift).
-const uint256_t::segments& uint256_t::words() const
+// Determine the logical byte length of the big number [0..32].
+size_t uint256_t::byte_length() const
 {
-    return words_;
+    return (bit_length() + 7) / 8;
+}
+
+// This is used to efficiently generate a compact number (otherwise shift).
+uint64_t uint256_t::operator[](size_t index) const
+{
+    BITCOIN_ASSERT_MSG(index < 4, "index out of range");
+
+    return
+        (static_cast<uint64_t>(words_[index + 0]) << 0 * word_bits) |
+        (static_cast<uint64_t>(words_[index + 1]) << 1 * word_bits);
 }
 
 // Helpers.
@@ -243,6 +253,8 @@ uint256_t& uint256_t::operator*=(uint32_t value)
     uint64_t carry = 0;
     for (auto i = 0; i < words_.size(); ++i)
     {
+        // The reason we use 32 bit words is so that we can take advantage of
+        // integral addition and multiplication while capturing the overflow.
         auto product = carry + (uint64_t)value * words_[i];
         words_[i] = static_cast<uint32_t>(product);
         carry = product >> word_bits;
@@ -264,6 +276,8 @@ uint256_t& uint256_t::operator+=(const uint256_t& other)
     uint64_t carry = 0;
     for (auto i = 0; i < words_.size(); ++i)
     {
+        // The reason we use 32 bit words is so that we can take advantage of
+        // integral addition and multiplication while capturing the overflow.
         auto sum = carry + (uint64_t)words_[i] + other.words_[i];
         words_[i] = static_cast<uint32_t>(sum);
         carry = sum >> word_bits;
@@ -284,11 +298,11 @@ uint256_t& uint256_t::operator/=(const uint256_t& other)
 {
     // Make a copy, so we can shift.
     uint256_t divisor(other);
-    auto divisor_bits = divisor.bits();
+    auto divisor_bits = divisor.bit_length();
 
     // Make a copy, so we can subtract.
     uint256_t dividend(*this);
-    auto dividend_bits = dividend.bits();
+    auto dividend_bits = dividend.bit_length();
 
     // Initialize the quotient.
     words_.fill(0);
@@ -300,14 +314,14 @@ uint256_t& uint256_t::operator/=(const uint256_t& other)
     if (divisor_bits > dividend_bits)
         return *this;
 
-    // The number of bits to shift.
-    const auto difference = dividend_bits - divisor_bits;
+    // The number of bits to shift (both values are limited to 256).
+    const auto difference = static_cast<int32_t>(dividend_bits - divisor_bits);
 
     // Shift so that divisor and dividend align.
     divisor <<= difference;
 
     // Reverse loop with zero lower bound requires signed index.
-    for (int32_t shift = difference; shift >= 0; --shift, divisor >>= 1)
+    for (auto shift = difference; shift >= 0; --shift, divisor >>= 1)
     {
         if (dividend >= divisor)
         {
