@@ -88,6 +88,8 @@ protected:
 private:
     typedef std::array<uint32_t, 8> words;
 
+    // We use a 32 bit words member so we can take advantage of integral
+    // addition and multiplication while capturing the overflow.
     words words_;
 };
 

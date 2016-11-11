@@ -283,14 +283,11 @@ uint256_t& uint256_t::operator*=(uint32_t value)
     uint64_t carry = 0;
     for (auto i = 0; i < words_.size(); ++i)
     {
-        // The reason we use 32 bit words is so that we can take advantage of
-        // integral addition and multiplication while capturing the overflow.
         auto product = carry + static_cast<uint64_t>(value) * words_[i];
         words_[i] = static_cast<uint32_t>(product);
         carry = product >> word_bits;
     }
 
-    // carry is the overflow.
     return *this;
 }
 
@@ -304,14 +301,11 @@ uint256_t& uint256_t::operator+=(const uint256_t& other)
     uint64_t carry = 0;
     for (auto i = 0; i < words_.size(); ++i)
     {
-        // The reason we use 32 bit words is so that we can take advantage of
-        // integral addition and multiplication while capturing the overflow.
         auto sum = carry + words_[i] + other.words_[i];
         words_[i] = static_cast<uint32_t>(sum);
         carry = sum >> word_bits;
     }
 
-    // carry is the overflow.
     return *this;
 }
 
