@@ -5,9 +5,12 @@
 
 #include <bitcoin/bitcoin/math/uint256.hpp>
 
-#include <cstring>
+#include <string>
 #include <stdexcept>
+#include <string>
 #include <utility>
+#include <boost/program_options.hpp>
+#include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
@@ -37,12 +40,15 @@ uint256_t::uint256_t(const uint256_t& other)
 
 uint256_t::uint256_t(const hash_digest& hash)
 {
-    auto offset = hash.begin();
-    for (auto& word: words_)
-    {
-        word = from_little_endian_unsafe<uint32_t>(offset);
-        offset += sizeof(uint32_t);
-    }
+    const auto size = sizeof(uint32_t);
+    words_[0] = from_little_endian_unsafe<uint32_t>(&hash[0 * size]);
+    words_[1] = from_little_endian_unsafe<uint32_t>(&hash[1 * size]);
+    words_[2] = from_little_endian_unsafe<uint32_t>(&hash[2 * size]);
+    words_[3] = from_little_endian_unsafe<uint32_t>(&hash[3 * size]);
+    words_[4] = from_little_endian_unsafe<uint32_t>(&hash[4 * size]);
+    words_[5] = from_little_endian_unsafe<uint32_t>(&hash[5 * size]);
+    words_[6] = from_little_endian_unsafe<uint32_t>(&hash[6 * size]);
+    words_[7] = from_little_endian_unsafe<uint32_t>(&hash[7 * size]);
 }
 
 uint256_t::uint256_t(uint32_t value)
@@ -54,19 +60,22 @@ uint256_t::uint256_t(uint32_t value)
 // Properties.
 //-----------------------------------------------------------------------------
 
+inline size_t high_bit(uint32_t value)
+{
+    size_t bit = 0;
+    for (; value != 0 && bit < word_bits; ++bit, value >>= 1);
+    return bit;
+}
+
 // Determine the logical bit length of the big number [0..256].
 size_t uint256_t::bit_length() const
 {
-    auto word = static_cast<size_t>(words_.size() - 1);
-    for (auto it = words_.rbegin(); it != words_.rend(); ++it, --word)
-    {
-        if (*it != 0)
-        {
-            size_t bit = word_bits - 1;
-            for (; (bit != 0) && (*it & (1 << bit)) == 0; --bit);
-            return word_bits * word + bit + 1;
-        }
-    }
+    // Reverse loop with zero lower bound requires signed index.
+    const auto last = static_cast<int8_t>(words_.size() - 1);
+
+    for (auto i = last; i >= 0; --i)
+        if (words_[i] != 0)
+            return i * word_bits + high_bit(words_[i]);
 
     return 0;
 }
@@ -77,14 +86,37 @@ size_t uint256_t::byte_length() const
     return (bit_length() + 7) / 8;
 }
 
+hash_digest uint256_t::hash() const
+{
+    hash_digest hash;
+
+    /* safe to ignore */ build_array<hash_size>
+    (
+        hash,
+        {
+            to_little_endian(words_[0]),
+            to_little_endian(words_[1]),
+            to_little_endian(words_[2]),
+            to_little_endian(words_[3]),
+            to_little_endian(words_[4]),
+            to_little_endian(words_[5]),
+            to_little_endian(words_[6]),
+            to_little_endian(words_[7])
+        }
+    );
+
+    return hash;
+}
+
 // This is used to efficiently generate a compact number (otherwise shift).
 uint64_t uint256_t::operator[](size_t index) const
 {
     BITCOIN_ASSERT_MSG(index < 4, "index out of range");
 
+    const auto offset = 2 * index;
     return
-        (static_cast<uint64_t>(words_[index + 0]) << 0 * word_bits) |
-        (static_cast<uint64_t>(words_[index + 1]) << 1 * word_bits);
+        (static_cast<uint64_t>(words_[offset + 0]) << 0 * word_bits) |
+        (static_cast<uint64_t>(words_[offset + 1]) << 1 * word_bits);
 }
 
 // Helpers.
@@ -92,21 +124,21 @@ uint64_t uint256_t::operator[](size_t index) const
 
 bool uint256_t::equals(uint32_t value) const
 {
-    if (words_.front() != value)
-        return false;
-
-    const auto is_zero = [](uint32_t word)
-    {
-        return word == 0;
-    };
-
-    return std::all_of(words_.begin() + 1, words_.end(), is_zero);
+    return
+        words_[0] == value &&
+        words_[1] == 0 &&
+        words_[2] == 0 &&
+        words_[3] == 0 &&
+        words_[4] == 0 &&
+        words_[5] == 0 &&
+        words_[6] == 0 &&
+        words_[7] == 0;
 }
 
 int uint256_t::compare(const uint256_t& other) const
 {
     // Reverse loop with zero lower bound requires signed index.
-    const auto last = static_cast<int32_t>(words_.size() - 1);
+    const auto last = static_cast<int8_t>(words_.size() - 1);
 
     for (auto i = last; i >= 0; i--)
     {
@@ -156,20 +188,21 @@ bool uint256_t::operator!=(const uint256_t& other) const
 uint256_t uint256_t::operator~() const
 {
     uint256_t result;
-    for (auto i = 0; i < words_.size(); ++i)
-        result.words_[i] = ~words_[i];
-
+    result.words_[0] = ~words_[0];
+    result.words_[1] = ~words_[1];
+    result.words_[2] = ~words_[2];
+    result.words_[3] = ~words_[3];
+    result.words_[4] = ~words_[4];
+    result.words_[5] = ~words_[5];
+    result.words_[6] = ~words_[6];
+    result.words_[7] = ~words_[7];
     return result;
 }
 
-// overflows
 uint256_t uint256_t::operator-() const
 {
-    uint256_t result;
-    for (auto i = 0; i < words_.size(); ++i)
-        result.words_[i] = ~words_[i];
-
-    return ++result;
+    // two's compliment
+    return ++(~(*this));
 }
 
 uint256_t uint256_t::operator>>(uint32_t shift) const
@@ -177,26 +210,24 @@ uint256_t uint256_t::operator>>(uint32_t shift) const
     return uint256_t(*this) >>= shift;
 }
 
-// overflows
 uint256_t uint256_t::operator+(const uint256_t& other) const
 {
-    uint256_t result(*this);
-    result += other;
-    return result;
+    uint256_t copy(*this);
+    copy += other;
+    return copy;
 }
 
 uint256_t uint256_t::operator/(const uint256_t& other) const
 {
-    uint256_t result(*this);
-    result /= other;
-    return result;
+    uint256_t copy(*this);
+    copy /= other;
+    return copy;
 }
 
-// overflows
 uint256_t& uint256_t::operator++()
 {
-    for (auto it = words_.begin(); it != words_.end() - 1; ++it)
-        if (++(*it) != 0)
+    for (auto& word: words_)
+        if (++word != 0)
             break;
 
     return *this;
@@ -247,7 +278,6 @@ uint256_t& uint256_t::operator<<=(uint32_t shift)
     return *this;
 }
 
-// overflows
 uint256_t& uint256_t::operator*=(uint32_t value)
 {
     uint64_t carry = 0;
@@ -255,7 +285,7 @@ uint256_t& uint256_t::operator*=(uint32_t value)
     {
         // The reason we use 32 bit words is so that we can take advantage of
         // integral addition and multiplication while capturing the overflow.
-        auto product = carry + (uint64_t)value * words_[i];
+        auto product = carry + static_cast<uint64_t>(value) * words_[i];
         words_[i] = static_cast<uint32_t>(product);
         carry = product >> word_bits;
     }
@@ -266,11 +296,9 @@ uint256_t& uint256_t::operator*=(uint32_t value)
 
 uint256_t& uint256_t::operator/=(uint32_t value)
 {
-    // This results in an extra copy but simplifies reuse.
     return (*this) /= uint256_t(value);
 }
 
-// overflows
 uint256_t& uint256_t::operator+=(const uint256_t& other)
 {
     uint64_t carry = 0;
@@ -278,7 +306,7 @@ uint256_t& uint256_t::operator+=(const uint256_t& other)
     {
         // The reason we use 32 bit words is so that we can take advantage of
         // integral addition and multiplication while capturing the overflow.
-        auto sum = carry + (uint64_t)words_[i] + other.words_[i];
+        auto sum = carry + words_[i] + other.words_[i];
         words_[i] = static_cast<uint32_t>(sum);
         carry = sum >> word_bits;
     }
@@ -287,7 +315,6 @@ uint256_t& uint256_t::operator+=(const uint256_t& other)
     return *this;
 }
 
-// underflows
 uint256_t& uint256_t::operator-=(const uint256_t& other)
 {
     *this += -other;
@@ -335,6 +362,31 @@ uint256_t& uint256_t::operator/=(const uint256_t& other)
 
     // The dividend contains the remainder.
     return *this;
+}
+
+// Serialization.
+//-----------------------------------------------------------------------------
+
+std::istream& operator>>(std::istream& input, uint256_t& argument)
+{
+    std::string hexcode;
+    input >> hexcode;
+
+    hash_digest hash;
+
+    if (!decode_hash(hash, hexcode))
+    {
+        using namespace boost::program_options;
+        BOOST_THROW_EXCEPTION(invalid_option_value(hexcode));
+    }
+
+    return input;
+}
+
+std::ostream& operator<<(std::ostream& output, const uint256_t& argument)
+{
+    output << encode_hash(argument.hash());
+    return output;
 }
 
 } // namespace libbitcoin

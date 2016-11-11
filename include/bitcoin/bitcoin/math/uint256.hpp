@@ -7,14 +7,14 @@
 #define LIBBBITCOIN_UINT256_HPP
 
 #include <cstdint>
-#include <cstring>
+#include <iostream>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {
 
 /// A general purpose big number class with a subset of common operators.
-//// Only operators for work computation are implemented (and identity).
+/// Only operators for work computation are implemented (and identity).
 class BC_API uint256_t
 {
 public:
@@ -36,6 +36,9 @@ public:
 
     /// The minimum byte length of the number.
     size_t byte_length() const;
+
+    /// The 256 bit hash corresponding to the value.
+    hash_digest hash() const;
 
     /// Get one of four 64 bit segments of the number.
     uint64_t operator[](size_t index) const;
@@ -70,6 +73,13 @@ public:
     uint256_t& operator+=(const uint256_t& other);      // bc::blockchain
     uint256_t& operator-=(const uint256_t& other);      // internal
     uint256_t& operator/=(const uint256_t& other);      // internal
+
+    // Serialization.
+    //-------------------------------------------------------------------------
+
+    friend std::istream& operator>>(std::istream& input, uint256_t& argument);
+    friend std::ostream& operator<<(std::ostream& output, 
+        const uint256_t& argument);
 
 protected:
     bool equals(uint32_t value) const;
