@@ -298,7 +298,7 @@ void operation::to_data(writer& sink) const
 
 std::string operation::to_string(uint32_t active_forks) const
 {
-    // The removal of spaces in data is a compatability break with our v2.
+    // The removal of spaces in data is a compatibility break with our v2.
     if (!valid_)
         return "<invalid>";
 

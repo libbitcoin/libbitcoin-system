@@ -854,7 +854,7 @@ operation::list script::to_pay_multisig_pattern(uint8_t signatures,
 script_pattern script::pattern() const
 {
     // The first operations access must be method-based to guarantee the cache.
-    if (is_null_data_pattern(operation::list()))
+    if (is_null_data_pattern(operations()))
         return script_pattern::null_data;
 
     if (is_pay_multisig_pattern(operations_))
