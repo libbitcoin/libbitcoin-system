@@ -213,12 +213,12 @@ BOOST_AUTO_TEST_CASE(compact_number__constructor2__big_value__round_trips)
 
 BOOST_AUTO_TEST_CASE(compact_number__constructor2__hash_big_zero__round_trips)
 {
-    BOOST_REQUIRE(uint256_t(null_hash) == compact_number({ null_hash }));
+    BOOST_REQUIRE(uint256_t(null_hash) == compact_number(uint256_t(null_hash)));
 }
 
 BOOST_AUTO_TEST_CASE(compact_number__constructor2__hash__round_trips)
 {
-    BOOST_REQUIRE(uint256_t(primes) == compact_number({ primes }));
+    BOOST_REQUIRE(uint256_t(primes) == compact_number(uint256_t(primes)));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
