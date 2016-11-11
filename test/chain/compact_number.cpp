@@ -27,21 +27,14 @@ BOOST_AUTO_TEST_SUITE(compact_number_tests)
 using namespace bc;
 using namespace bc::chain;
 
-static const hash_digest primes
-{
-    {
-        0x02, 0x03, 0x05, 0x07, 0x0b, 0x0d, 0x11, 0x13,
-        0x17, 0x1d, 0x1f, 0x25, 0x29, 0x2b, 0x2f, 0x35,
-        0x3b, 0x3d, 0x43, 0x47, 0x49, 0x4f, 0x53, 0x59,
-        0x61, 0x65, 0x67, 0x6b, 0x6d, 0x71, 0x7f, 0x83
-    }
-};
+#define PRIMES "020305070b0d1113171d1f25292b2f353b3d4347494f53596165676b6d717f83"
+static const auto primes = hash_literal(PRIMES);
 
 static uint32_t compact(int32_t logical_exponent, bool negative, uint32_t mantissa)
 {
     // The exponent of a non-zero mantissa is valid from -3 to +29.
     BITCOIN_ASSERT(logical_exponent >= -3 && logical_exponent <= 252);
-    
+
     // The mantissa may not intrude on the sign bit or the exponent.
     BITCOIN_ASSERT((mantissa & 0xff800000) == 0);
 
@@ -50,6 +43,11 @@ static uint32_t compact(int32_t logical_exponent, bool negative, uint32_t mantis
 
     // Construct the non-normalized compact value.
     return exponent << 24 | (negative ? 1 : 0) << 23 | mantissa;
+}
+
+BOOST_AUTO_TEST_CASE(compact_number__constructor1__proof_of_work_limit__normalizes_unchanged)
+{
+    BOOST_REQUIRE_EQUAL(compact_number(proof_of_work_limit).normal(), proof_of_work_limit);
 }
 
 // constructor1/normal
