@@ -62,6 +62,16 @@ inline bool is_bip16_exception(size_t height, const hash_digest& hash,
         hash == mainnet_bip16_exception_checkpoint.hash();
 }
 
+inline bool is_bip30_exception(size_t height, const hash_digest& hash,
+    bool testnet)
+{
+    return !testnet &&
+        ((height == mainnet_bip30_exception_checkpoint1.height() &&
+        hash == mainnet_bip30_exception_checkpoint1.hash()) ||
+        (height == mainnet_bip30_exception_checkpoint2.height() &&
+        hash == mainnet_bip30_exception_checkpoint2.hash()));
+}
+
 inline uint32_t timestamp_high(const chain_state::data& values)
 {
     return values.timestamp.ordered.back();
@@ -106,8 +116,11 @@ chain_state::activations chain_state::activation(const data& values)
     if (is_active(count_2, testnet))
         result.forks |= rule_fork::bip34_rule;
 
-    // bip30 was applied retroactively to all blocks in both chains.
-    result.forks |= rule_fork::bip30_rule;
+    // bip30 is active for all but two mainnet blocks that violate the rule.
+    // These two blocks each have a coinbase transaction that exctly duplicates
+    // another that is not spent by the arrival of the corresponding duplicate.
+    if (!is_bip30_exception(values.height, values.hash, testnet))
+        result.forks |= rule_fork::bip30_rule;
 
     // bip16 is activated with a one-time test on mainnet/testnet (~55% rule).
     // There was one invalid p2sh tx mined after that time (code shipped late).
