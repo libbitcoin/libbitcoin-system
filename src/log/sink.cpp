@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/log/sinks.hpp>
+#include <bitcoin/bitcoin/log/sink.hpp>
 
 #include <map>
 #include <string>
@@ -58,12 +58,17 @@ using namespace boost::posix_time;
 typedef synchronous_sink<text_file_backend> text_file_sink;
 typedef synchronous_sink<text_ostream_backend> text_stream_sink;
 
-const auto error_filter =
+const auto base_filter = (
+    has_attr(attributes::channel) &&
+    has_attr(attributes::severity) &&
+    has_attr(attributes::timestamp));
+
+const auto error_filter = base_filter && (
     (attributes::severity == severity::warning) ||
     (attributes::severity == severity::error) ||
-    (attributes::severity == severity::fatal);
+    (attributes::severity == severity::fatal));
 
-const auto info_filter =
+const auto info_filter =base_filter &&
     (attributes::severity == severity::info);
 
 static std::map<severity, std::string> severity_mapping
@@ -75,9 +80,9 @@ static std::map<severity, std::string> severity_mapping
     { severity::fatal, "FATAL" }
 };
 
-formatter& operator<<(formatter& stream, severity level)
+formatter& operator<<(formatter& stream, severity value)
 {
-    stream << severity_mapping[level];
+    stream << severity_mapping[value];
     return stream;
 }
 
@@ -144,7 +149,7 @@ static boost::shared_ptr<text_stream_sink> add_text_stream_sink(
 void initialize(log::file& debug_file, log::file& error_file,
     log::stream& output_stream, log::stream& error_stream)
 {
-    add_text_stream_sink(debug_file);
+    add_text_stream_sink(debug_file)->set_filter(base_filter);
     add_text_stream_sink(error_file)->set_filter(error_filter);
     add_text_stream_sink(output_stream)->set_filter(info_filter);
     add_text_stream_sink(error_stream)->set_filter(error_filter);
@@ -153,7 +158,7 @@ void initialize(log::file& debug_file, log::file& error_file,
 void initialize(const rotable_file& debug_file, const rotable_file& error_file,
     log::stream& output_stream, log::stream& error_stream)
 {
-    add_text_file_sink(debug_file);
+    add_text_file_sink(debug_file)->set_filter(base_filter);
     add_text_file_sink(error_file)->set_filter(error_filter);
     add_text_stream_sink(output_stream)->set_filter(info_filter);
     add_text_stream_sink(error_stream)->set_filter(error_filter);

@@ -17,25 +17,32 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_LOG_ATTRIBUTES_HPP
-#define LIBBITCOIN_LOG_ATTRIBUTES_HPP
+#ifndef LIBBITCOIN_LOG_SINK_HPP
+#define LIBBITCOIN_LOG_SINK_HPP
 
-#include <string>
-#include <boost/log/attributes/clock.hpp>
-#include <boost/log/expressions/keyword.hpp>
+#include <iostream>
+#include <boost/smart_ptr.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/log/rotable_file.hpp>
 #include <bitcoin/bitcoin/log/severity.hpp>
+#include <bitcoin/bitcoin/unicode/ofstream.hpp>
 
 namespace libbitcoin {
 namespace log {
-namespace attributes {
 
-// severity/channel/timestamp/message log entries
-BOOST_LOG_ATTRIBUTE_KEYWORD(timestamp, "Timestamp", boost::posix_time::ptime)
-BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", libbitcoin::log::severity)
-BOOST_LOG_ATTRIBUTE_KEYWORD(channel, "Channel", std::string)
+typedef boost::shared_ptr<bc::ofstream> file;
 
-} // namespace attributes
+/// Initializes default non-rotable libbitcoin logging sinks and formats.
+void initialize(log::file& debug_file, log::file& error_file,
+    log::stream& output_stream, log::stream& error_stream);
+
+/// Initializes default rotable libbitcoin logging sinks and formats.
+void initialize(const rotable_file& debug_file, const rotable_file& error_file,
+    log::stream& output_stream, log::stream& error_stream);
+
+/// Log stream operator.
+formatter& operator<<(formatter& stream, severity value);
+
 } // namespace log
 } // namespace libbitcoin
 

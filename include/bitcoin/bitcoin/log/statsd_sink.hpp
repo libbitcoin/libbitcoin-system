@@ -17,25 +17,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_LOG_ATTRIBUTES_HPP
-#define LIBBITCOIN_LOG_ATTRIBUTES_HPP
+#ifndef LIBBITCOIN_LOG_STATSD_SINK_HPP
+#define LIBBITCOIN_LOG_STATSD_SINK_HPP
 
-#include <string>
-#include <boost/log/attributes/clock.hpp>
-#include <boost/log/expressions/keyword.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/log/severity.hpp>
+#include <bitcoin/bitcoin/log/rotable_file.hpp>
 
 namespace libbitcoin {
 namespace log {
-namespace attributes {
 
-// severity/channel/timestamp/message log entries
-BOOST_LOG_ATTRIBUTE_KEYWORD(timestamp, "Timestamp", boost::posix_time::ptime)
-BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", libbitcoin::log::severity)
-BOOST_LOG_ATTRIBUTE_KEYWORD(channel, "Channel", std::string)
+//void statsd_formatter(boost::log::record_view const& record,
+//    boost::log::formatting_ostream& stream);
 
-} // namespace attributes
+/// Initializes default rotable libbitcoin logging sinks and formats.
+void initialize_statsd(const rotable_file& file);
+
 } // namespace log
 } // namespace libbitcoin
 

@@ -70,7 +70,9 @@ src_libbitcoin_la_SOURCES = \
     src/log/file_collector.cpp \
     src/log/file_collector_repository.cpp \
     src/log/file_counter_formatter.cpp \
-    src/log/sinks.cpp \
+    src/log/sink.cpp \
+    src/log/statsd_sink.cpp \
+    src/log/udp_client_sink.cpp \
     src/machine/interpreter.cpp \
     src/machine/number.cpp \
     src/machine/opcode.cpp \
@@ -383,6 +385,14 @@ include_bitcoin_bitcoin_impl_formats_HEADERS = \
     include/bitcoin/bitcoin/impl/formats/base_16.ipp \
     include/bitcoin/bitcoin/impl/formats/base_58.ipp
 
+include_bitcoin_bitcoin_impl_log_featuresdir = ${includedir}/bitcoin/bitcoin/impl/log/features
+include_bitcoin_bitcoin_impl_log_features_HEADERS = \
+    include/bitcoin/bitcoin/impl/log/features/counter.ipp \
+    include/bitcoin/bitcoin/impl/log/features/gauge.ipp \
+    include/bitcoin/bitcoin/impl/log/features/metric.ipp \
+    include/bitcoin/bitcoin/impl/log/features/rate.ipp \
+    include/bitcoin/bitcoin/impl/log/features/timer.ipp
+
 include_bitcoin_bitcoin_impl_mathdir = ${includedir}/bitcoin/bitcoin/impl/math
 include_bitcoin_bitcoin_impl_math_HEADERS = \
     include/bitcoin/bitcoin/impl/math/checksum.ipp \
@@ -414,9 +424,21 @@ include_bitcoin_bitcoin_log_HEADERS = \
     include/bitcoin/bitcoin/log/file_collector.hpp \
     include/bitcoin/bitcoin/log/file_collector_repository.hpp \
     include/bitcoin/bitcoin/log/file_counter_formatter.hpp \
+    include/bitcoin/bitcoin/log/rotable_file.hpp \
     include/bitcoin/bitcoin/log/severity.hpp \
-    include/bitcoin/bitcoin/log/sinks.hpp \
-    include/bitcoin/bitcoin/log/sources.hpp
+    include/bitcoin/bitcoin/log/sink.hpp \
+    include/bitcoin/bitcoin/log/source.hpp \
+    include/bitcoin/bitcoin/log/statsd_sink.hpp \
+    include/bitcoin/bitcoin/log/statsd_source.hpp \
+    include/bitcoin/bitcoin/log/udp_client_sink.hpp
+
+include_bitcoin_bitcoin_log_featuresdir = ${includedir}/bitcoin/bitcoin/log/features
+include_bitcoin_bitcoin_log_features_HEADERS = \
+    include/bitcoin/bitcoin/log/features/counter.hpp \
+    include/bitcoin/bitcoin/log/features/gauge.hpp \
+    include/bitcoin/bitcoin/log/features/metric.hpp \
+    include/bitcoin/bitcoin/log/features/rate.hpp \
+    include/bitcoin/bitcoin/log/features/timer.hpp
 
 include_bitcoin_bitcoin_machinedir = ${includedir}/bitcoin/bitcoin/machine
 include_bitcoin_bitcoin_machine_HEADERS = \
