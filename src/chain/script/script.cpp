@@ -905,6 +905,12 @@ bool script::is_pay_to_script_hash(uint32_t forks) const
         is_pay_script_hash_pattern(operations());
 }
 
+inline size_t ops(bool embedded, opcode code)
+{
+    return embedded && operation::is_positive(code) ?
+        operation::opcode_to_positive(code) : multisig_default_sigops;
+}
+
 size_t script::sigops(bool embedded) const
 {
     size_t total = 0;
@@ -920,13 +926,10 @@ size_t script::sigops(bool embedded) const
         {
             total++;
         }
-        else if (
-            code == opcode::checkmultisig ||
+        else if (code == opcode::checkmultisig ||
             code == opcode::checkmultisigverify)
         {
-            total += embedded && operation::is_positive(preceding) ?
-                operation::opcode_to_positive(preceding) :
-                multisig_default_sigops;
+            total += ops(embedded, preceding);
         }
 
         preceding = code;
