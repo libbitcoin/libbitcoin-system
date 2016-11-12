@@ -22,16 +22,16 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <bitcoin/bitcoin/unicode/unicode.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/chain/compact.hpp>
-#include <bitcoin/bitcoin/chain/script/opcode.hpp>
-#include <bitcoin/bitcoin/chain/script/rule_fork.hpp>
-#include <bitcoin/bitcoin/chain/script/script.hpp>
+#include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/config/checkpoint.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/math/uint256.hpp>
+#include <bitcoin/bitcoin/script/opcode.hpp>
+#include <bitcoin/bitcoin/script/rule_fork.hpp>
+#include <bitcoin/bitcoin/unicode/unicode.hpp>
 
 namespace libbitcoin {
 namespace chain {

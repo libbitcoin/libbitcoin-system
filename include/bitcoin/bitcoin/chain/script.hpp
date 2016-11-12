@@ -27,11 +27,11 @@
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/chain/script/operation.hpp>
-#include <bitcoin/bitcoin/chain/script/program.hpp>
-#include <bitcoin/bitcoin/chain/script/rule_fork.hpp>
-#include <bitcoin/bitcoin/chain/script/script_pattern.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
+#include <bitcoin/bitcoin/script/operation.hpp>
+#include <bitcoin/bitcoin/script/program.hpp>
+#include <bitcoin/bitcoin/script/rule_fork.hpp>
+#include <bitcoin/bitcoin/script/script_pattern.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>

@@ -17,16 +17,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CHAIN_OPERATION_HPP
-#define LIBBITCOIN_CHAIN_OPERATION_HPP
+#ifndef LIBBITCOIN_SCRIPT_OPERATION_HPP
+#define LIBBITCOIN_SCRIPT_OPERATION_HPP
 
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <vector>
-#include <bitcoin/bitcoin/chain/script/opcode.hpp>
-#include <bitcoin/bitcoin/chain/script/script_pattern.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/script/opcode.hpp>
+#include <bitcoin/bitcoin/script/script_pattern.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>

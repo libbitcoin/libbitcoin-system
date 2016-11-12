@@ -22,15 +22,15 @@
 
 #include <cstdint>
 #include <utility>
-#include <bitcoin/bitcoin/chain/script/number.hpp>
-#include <bitcoin/bitcoin/chain/script/opcode.hpp>
-#include <bitcoin/bitcoin/chain/script/operation.hpp>
-#include <bitcoin/bitcoin/chain/script/program.hpp>
-#include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
-#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
+#include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
+#include <bitcoin/bitcoin/script/number.hpp>
+#include <bitcoin/bitcoin/script/opcode.hpp>
+#include <bitcoin/bitcoin/script/operation.hpp>
+#include <bitcoin/bitcoin/script/program.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 

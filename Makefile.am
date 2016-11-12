@@ -46,13 +46,8 @@ src_libbitcoin_la_SOURCES = \
     src/chain/output_point.cpp \
     src/chain/point.cpp \
     src/chain/point_iterator.cpp \
+    src/chain/script.cpp \
     src/chain/transaction.cpp \
-    src/chain/script/interpreter.cpp \
-    src/chain/script/number.cpp \
-    src/chain/script/opcode.cpp \
-    src/chain/script/operation.cpp \
-    src/chain/script/program.cpp \
-    src/chain/script/script.cpp \
     src/config/authority.cpp \
     src/config/base16.cpp \
     src/config/base2.cpp \
@@ -141,6 +136,11 @@ src_libbitcoin_la_SOURCES = \
     src/message/transaction.cpp \
     src/message/verack.cpp \
     src/message/version.cpp \
+    src/script/interpreter.cpp \
+    src/script/number.cpp \
+    src/script/opcode.cpp \
+    src/script/operation.cpp \
+    src/script/program.cpp \
     src/unicode/console_streambuf.cpp \
     src/unicode/ifstream.cpp \
     src/unicode/ofstream.cpp \
@@ -229,13 +229,9 @@ test_libbitcoin_test_SOURCES = \
     test/chain/point.cpp \
     test/chain/point_iterator.cpp \
     test/chain/satoshi_words.cpp \
+    test/chain/script.cpp \
+    test/chain/script.hpp \
     test/chain/transaction.cpp \
-    test/chain/script/number.cpp \
-    test/chain/script/number.hpp \
-    test/chain/script/opcode.cpp \
-    test/chain/script/operation.cpp \
-    test/chain/script/script.cpp \
-    test/chain/script/script.hpp \
     test/config/authority.cpp \
     test/config/base58.cpp \
     test/config/checkpoint.cpp \
@@ -288,6 +284,10 @@ test_libbitcoin_test_SOURCES = \
     test/message/transaction.cpp \
     test/message/verack.cpp \
     test/message/version.cpp \
+    test/script/number.cpp \
+    test/script/number.hpp \
+    test/script/opcode.cpp \
+    test/script/operation.cpp \
     test/unicode/unicode.cpp \
     test/unicode/unicode_istream.cpp \
     test/unicode/unicode_ostream.cpp \
@@ -348,20 +348,9 @@ include_bitcoin_bitcoin_chain_HEADERS = \
     include/bitcoin/bitcoin/chain/output_point.hpp \
     include/bitcoin/bitcoin/chain/point.hpp \
     include/bitcoin/bitcoin/chain/point_iterator.hpp \
+    include/bitcoin/bitcoin/chain/script.hpp \
     include/bitcoin/bitcoin/chain/stealth.hpp \
     include/bitcoin/bitcoin/chain/transaction.hpp
-
-include_bitcoin_bitcoin_chain_scriptdir = ${includedir}/bitcoin/bitcoin/chain/script
-include_bitcoin_bitcoin_chain_script_HEADERS = \
-    include/bitcoin/bitcoin/chain/script/interpreter.hpp \
-    include/bitcoin/bitcoin/chain/script/number.hpp \
-    include/bitcoin/bitcoin/chain/script/opcode.hpp \
-    include/bitcoin/bitcoin/chain/script/operation.hpp \
-    include/bitcoin/bitcoin/chain/script/program.hpp \
-    include/bitcoin/bitcoin/chain/script/rule_fork.hpp \
-    include/bitcoin/bitcoin/chain/script/script.hpp \
-    include/bitcoin/bitcoin/chain/script/script_pattern.hpp \
-    include/bitcoin/bitcoin/chain/script/sighash_algorithm.hpp
 
 include_bitcoin_bitcoin_configdir = ${includedir}/bitcoin/bitcoin/config
 include_bitcoin_bitcoin_config_HEADERS = \
@@ -474,6 +463,17 @@ include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/transaction.hpp \
     include/bitcoin/bitcoin/message/verack.hpp \
     include/bitcoin/bitcoin/message/version.hpp
+
+include_bitcoin_bitcoin_scriptdir = ${includedir}/bitcoin/bitcoin/script
+include_bitcoin_bitcoin_script_HEADERS = \
+    include/bitcoin/bitcoin/script/interpreter.hpp \
+    include/bitcoin/bitcoin/script/number.hpp \
+    include/bitcoin/bitcoin/script/opcode.hpp \
+    include/bitcoin/bitcoin/script/operation.hpp \
+    include/bitcoin/bitcoin/script/program.hpp \
+    include/bitcoin/bitcoin/script/rule_fork.hpp \
+    include/bitcoin/bitcoin/script/script_pattern.hpp \
+    include/bitcoin/bitcoin/script/sighash_algorithm.hpp
 
 include_bitcoin_bitcoin_unicodedir = ${includedir}/bitcoin/bitcoin/unicode
 include_bitcoin_bitcoin_unicode_HEADERS = \

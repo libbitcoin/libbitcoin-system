@@ -17,18 +17,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/chain/script/program.hpp>
+#include <bitcoin/bitcoin/script/program.hpp>
 
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <utility>
-#include <bitcoin/bitcoin/chain/script/interpreter.hpp>
-#include <bitcoin/bitcoin/chain/script/number.hpp>
-#include <bitcoin/bitcoin/chain/script/operation.hpp>
-#include <bitcoin/bitcoin/chain/script/script.hpp>
+#include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/script/interpreter.hpp>
+#include <bitcoin/bitcoin/script/number.hpp>
+#include <bitcoin/bitcoin/script/operation.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 

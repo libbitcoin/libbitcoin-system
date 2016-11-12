@@ -22,7 +22,7 @@
 
 #include <cstdint>
 #include <vector>
-#include <bitcoin/bitcoin/chain/script/script.hpp>
+#include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>

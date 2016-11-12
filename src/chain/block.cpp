@@ -30,10 +30,7 @@
 #include <utility>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/chain/compact.hpp>
-#include <bitcoin/bitcoin/chain/script/number.hpp>
-#include <bitcoin/bitcoin/chain/script/opcode.hpp>
-#include <bitcoin/bitcoin/chain/script/rule_fork.hpp>
-#include <bitcoin/bitcoin/chain/script/script.hpp>
+#include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/config/checkpoint.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/error.hpp>
@@ -42,6 +39,9 @@
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/math/uint256.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/script/number.hpp>
+#include <bitcoin/bitcoin/script/opcode.hpp>
+#include <bitcoin/bitcoin/script/rule_fork.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>

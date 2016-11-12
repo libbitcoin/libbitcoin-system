@@ -28,8 +28,8 @@
     <Filter Include="src\utility">
       <UniqueIdentifier>{63815092-ade6-4e7d-8078-cf178f62dadc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\chain\script">
-      <UniqueIdentifier>{f7fb33e4-97ed-4b09-97f5-ad007380988e}</UniqueIdentifier>
+    <Filter Include="src\script">
+      <UniqueIdentifier>{0311c112-53de-4f7c-a2e1-30f8076d011b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -42,11 +42,11 @@
     <ClInclude Include="..\..\..\..\test\wallet\mnemonic.hpp">
       <Filter>src\wallet</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\test\chain\script\script.hpp">
-      <Filter>src\chain\script</Filter>
+    <ClInclude Include="..\..\..\..\test\chain\script.hpp">
+      <Filter>src\chain</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\test\chain\script\number.hpp">
-      <Filter>src\chain\script</Filter>
+    <ClInclude Include="..\..\..\..\test\script\number.hpp">
+      <Filter>src\script</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -288,9 +288,6 @@
     <ClCompile Include="..\..\..\..\test\math\limits.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\script\operation.cpp">
-      <Filter>src\chain\script</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\output_point.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
@@ -300,17 +297,8 @@
     <ClCompile Include="..\..\..\..\test\message\header_message.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\script\opcode.cpp">
-      <Filter>src\chain\script</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\script\script.cpp">
-      <Filter>src\chain\script</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\uint256.cpp">
       <Filter>src\math</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\script\number.cpp">
-      <Filter>src\chain\script</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\block.cpp">
       <Filter>src\message</Filter>
@@ -320,6 +308,18 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\compact_.cpp">
       <Filter>src\chain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\script.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\script\opcode.cpp">
+      <Filter>src\script</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\script\operation.cpp">
+      <Filter>src\script</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\script\number.cpp">
+      <Filter>src\script</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

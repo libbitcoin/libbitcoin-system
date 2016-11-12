@@ -21,7 +21,7 @@
 #define LIBBITCOIN_STEALTH_HPP
 
 #include <cstdint>
-#include <bitcoin/bitcoin/chain/script/script.hpp>
+#include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>

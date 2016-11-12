@@ -17,15 +17,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CHAIN_INTERPRETER_HPP
-#define LIBBITCOIN_CHAIN_INTERPRETER_HPP
+#ifndef LIBBITCOIN_SCRIPT_INTERPRETER_HPP
+#define LIBBITCOIN_SCRIPT_INTERPRETER_HPP
 
 #include <cstdint>
-#include <bitcoin/bitcoin/chain/script/opcode.hpp>
-#include <bitcoin/bitcoin/chain/script/operation.hpp>
-#include <bitcoin/bitcoin/chain/script/program.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/script/opcode.hpp>
+#include <bitcoin/bitcoin/script/operation.hpp>
+#include <bitcoin/bitcoin/script/program.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
