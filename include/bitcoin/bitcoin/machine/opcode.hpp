@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SCRIPT_OPCODE_HPP
-#define LIBBITCOIN_SCRIPT_OPCODE_HPP
+#ifndef LIBBITCOIN_MACHINE_OPCODE_HPP
+#define LIBBITCOIN_MACHINE_OPCODE_HPP
 
 #include <cstdint>
 #include <string>
@@ -27,7 +27,7 @@
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
-namespace chain {
+namespace machine {
 
 enum class opcode : uint8_t
 {
@@ -310,7 +310,7 @@ BC_API std::string opcode_to_hexadecimal(opcode code);
 BC_API bool opcode_from_hexadecimal(opcode& out_code,
     const std::string& value);
 
-} // namespace chain
+} // namespace machine
 } // namespace libbitcoin
 
 #endif

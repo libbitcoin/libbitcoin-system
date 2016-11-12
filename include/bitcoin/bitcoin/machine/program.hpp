@@ -17,22 +17,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SCRIPT_PROGRAM_HPP
-#define LIBBITCOIN_SCRIPT_PROGRAM_HPP
+#ifndef LIBBITCOIN_MACHINE_PROGRAM_HPP
+#define LIBBITCOIN_MACHINE_PROGRAM_HPP
 
 #include <cstdint>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/script/number.hpp>
-#include <bitcoin/bitcoin/script/opcode.hpp>
-#include <bitcoin/bitcoin/script/operation.hpp>
+#include <bitcoin/bitcoin/machine/number.hpp>
+#include <bitcoin/bitcoin/machine/opcode.hpp>
+#include <bitcoin/bitcoin/machine/operation.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
-namespace chain {
 
-class script;
-class transaction;
+// Forward declarations from a sibling namespace.
+namespace chain { class script; class transaction; }
+
+namespace machine {
 
 class BC_API program
 {
@@ -54,17 +55,17 @@ public:
     /// Create an instance that does not expect to verify signatures.
     /// This is useful for script utilities but not with input validation.
     /// This can run ops via run(op, program) or the script via run(program).
-    program(const script& script);
+    program(const chain::script& script);
 
     /// Create an instance with empty stacks (input run).
-    program(const script& script, const chain::transaction& transaction,
+    program(const chain::script& script, const chain::transaction& transaction,
         uint32_t input_index, uint32_t forks);
 
     /// Create using copied forks and copied stack (prevout run).
-    program(const script& script, const program& other);
+    program(const chain::script& script, const program& other);
 
     /// Create using copied forks and moved stack (p2sh run).
-    program(const script& script, program&& other, bool move);
+    program(const chain::script& script, program&& other, bool move);
 
     /// Constant registers.
     bool is_valid() const;
@@ -116,7 +117,7 @@ public:
     bool if_(const operation& op) const;
     const value_type& item(size_t index) /*const*/;
     stack_iterator position(size_t index) /*const*/;
-    script subscript() const;
+    chain::script subscript() const;
     size_t size() const;
 
     // Alternate stack.
@@ -142,7 +143,7 @@ private:
     void reserve_stacks();
     bool stack_to_bool() const;
 
-    const script& script_;
+    const chain::script& script_;
     const chain::transaction& transaction_;
     const uint32_t input_index_;
     const uint32_t forks_;
@@ -154,7 +155,7 @@ private:
     bool_stack condition_;
 };
 
-} // namespace chain
+} // namespace machine
 } // namespace libbitcoin
 
 #endif

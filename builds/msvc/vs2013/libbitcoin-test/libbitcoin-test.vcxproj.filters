@@ -28,8 +28,8 @@
     <Filter Include="src\utility">
       <UniqueIdentifier>{63815092-ade6-4e7d-8078-cf178f62dadc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\script">
-      <UniqueIdentifier>{0311c112-53de-4f7c-a2e1-30f8076d011b}</UniqueIdentifier>
+    <Filter Include="src\machine">
+      <UniqueIdentifier>{f116ee8e-0147-4399-8647-af72384ef6f7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -45,8 +45,8 @@
     <ClInclude Include="..\..\..\..\test\chain\script.hpp">
       <Filter>src\chain</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\test\script\number.hpp">
-      <Filter>src\script</Filter>
+    <ClInclude Include="..\..\..\..\test\machine\number.hpp">
+      <Filter>src\machine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -312,14 +312,14 @@
     <ClCompile Include="..\..\..\..\test\chain\script.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\script\opcode.cpp">
-      <Filter>src\script</Filter>
+    <ClCompile Include="..\..\..\..\test\machine\opcode.cpp">
+      <Filter>src\machine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\script\operation.cpp">
-      <Filter>src\script</Filter>
+    <ClCompile Include="..\..\..\..\test\machine\operation.cpp">
+      <Filter>src\machine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\script\number.cpp">
-      <Filter>src\script</Filter>
+    <ClCompile Include="..\..\..\..\test\machine\number.cpp">
+      <Filter>src\machine</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

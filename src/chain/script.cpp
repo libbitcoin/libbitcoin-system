@@ -33,12 +33,12 @@
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/script/interpreter.hpp>
-#include <bitcoin/bitcoin/script/opcode.hpp>
-#include <bitcoin/bitcoin/script/operation.hpp>
-#include <bitcoin/bitcoin/script/rule_fork.hpp>
-#include <bitcoin/bitcoin/script/script_pattern.hpp>
-#include <bitcoin/bitcoin/script/sighash_algorithm.hpp>
+#include <bitcoin/bitcoin/machine/interpreter.hpp>
+#include <bitcoin/bitcoin/machine/opcode.hpp>
+#include <bitcoin/bitcoin/machine/operation.hpp>
+#include <bitcoin/bitcoin/machine/rule_fork.hpp>
+#include <bitcoin/bitcoin/machine/script_pattern.hpp>
+#include <bitcoin/bitcoin/machine/sighash_algorithm.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -49,6 +49,8 @@
 
 namespace libbitcoin {
 namespace chain {
+
+using namespace bc::machine;
 
 static const auto sighash_all = sighash_algorithm::all;
 static const auto sighash_none = sighash_algorithm::none;

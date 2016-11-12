@@ -71,6 +71,11 @@ src_libbitcoin_la_SOURCES = \
     src/log/file_collector_repository.cpp \
     src/log/file_counter_formatter.cpp \
     src/log/sinks.cpp \
+    src/machine/interpreter.cpp \
+    src/machine/number.cpp \
+    src/machine/opcode.cpp \
+    src/machine/operation.cpp \
+    src/machine/program.cpp \
     src/math/checksum.cpp \
     src/math/crypto.cpp \
     src/math/elliptic_curve.cpp \
@@ -136,11 +141,6 @@ src_libbitcoin_la_SOURCES = \
     src/message/transaction.cpp \
     src/message/verack.cpp \
     src/message/version.cpp \
-    src/script/interpreter.cpp \
-    src/script/number.cpp \
-    src/script/opcode.cpp \
-    src/script/operation.cpp \
-    src/script/program.cpp \
     src/unicode/console_streambuf.cpp \
     src/unicode/ifstream.cpp \
     src/unicode/ofstream.cpp \
@@ -244,6 +244,10 @@ test_libbitcoin_test_SOURCES = \
     test/formats/base_58.cpp \
     test/formats/base_64.cpp \
     test/formats/base_85.cpp \
+    test/machine/number.cpp \
+    test/machine/number.hpp \
+    test/machine/opcode.cpp \
+    test/machine/operation.cpp \
     test/math/checksum.cpp \
     test/math/elliptic_curve.cpp \
     test/math/hash.cpp \
@@ -284,10 +288,6 @@ test_libbitcoin_test_SOURCES = \
     test/message/transaction.cpp \
     test/message/verack.cpp \
     test/message/version.cpp \
-    test/script/number.cpp \
-    test/script/number.hpp \
-    test/script/opcode.cpp \
-    test/script/operation.cpp \
     test/unicode/unicode.cpp \
     test/unicode/unicode_istream.cpp \
     test/unicode/unicode_ostream.cpp \
@@ -418,6 +418,17 @@ include_bitcoin_bitcoin_log_HEADERS = \
     include/bitcoin/bitcoin/log/sinks.hpp \
     include/bitcoin/bitcoin/log/sources.hpp
 
+include_bitcoin_bitcoin_machinedir = ${includedir}/bitcoin/bitcoin/machine
+include_bitcoin_bitcoin_machine_HEADERS = \
+    include/bitcoin/bitcoin/machine/interpreter.hpp \
+    include/bitcoin/bitcoin/machine/number.hpp \
+    include/bitcoin/bitcoin/machine/opcode.hpp \
+    include/bitcoin/bitcoin/machine/operation.hpp \
+    include/bitcoin/bitcoin/machine/program.hpp \
+    include/bitcoin/bitcoin/machine/rule_fork.hpp \
+    include/bitcoin/bitcoin/machine/script_pattern.hpp \
+    include/bitcoin/bitcoin/machine/sighash_algorithm.hpp
+
 include_bitcoin_bitcoin_mathdir = ${includedir}/bitcoin/bitcoin/math
 include_bitcoin_bitcoin_math_HEADERS = \
     include/bitcoin/bitcoin/math/checksum.hpp \
@@ -463,17 +474,6 @@ include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/transaction.hpp \
     include/bitcoin/bitcoin/message/verack.hpp \
     include/bitcoin/bitcoin/message/version.hpp
-
-include_bitcoin_bitcoin_scriptdir = ${includedir}/bitcoin/bitcoin/script
-include_bitcoin_bitcoin_script_HEADERS = \
-    include/bitcoin/bitcoin/script/interpreter.hpp \
-    include/bitcoin/bitcoin/script/number.hpp \
-    include/bitcoin/bitcoin/script/opcode.hpp \
-    include/bitcoin/bitcoin/script/operation.hpp \
-    include/bitcoin/bitcoin/script/program.hpp \
-    include/bitcoin/bitcoin/script/rule_fork.hpp \
-    include/bitcoin/bitcoin/script/script_pattern.hpp \
-    include/bitcoin/bitcoin/script/sighash_algorithm.hpp
 
 include_bitcoin_bitcoin_unicodedir = ${includedir}/bitcoin/bitcoin/unicode
 include_bitcoin_bitcoin_unicode_HEADERS = \

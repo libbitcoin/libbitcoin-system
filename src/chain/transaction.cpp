@@ -35,9 +35,9 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
-#include <bitcoin/bitcoin/script/opcode.hpp>
-#include <bitcoin/bitcoin/script/operation.hpp>
-#include <bitcoin/bitcoin/script/rule_fork.hpp>
+#include <bitcoin/bitcoin/machine/opcode.hpp>
+#include <bitcoin/bitcoin/machine/operation.hpp>
+#include <bitcoin/bitcoin/machine/rule_fork.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
@@ -46,6 +46,8 @@
 
 namespace libbitcoin {
 namespace chain {
+
+using namespace bc::machine;
 
 const size_t transaction::validation::unspecified_height = 0;
 

@@ -17,15 +17,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SCRIPT_NUMBER_HPP
-#define LIBBITCOIN_SCRIPT_NUMBER_HPP
+#ifndef LIBBITCOIN_MACHINE_NUMBER_HPP
+#define LIBBITCOIN_MACHINE_NUMBER_HPP
 
 #include <cstddef>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
-namespace chain {
+namespace machine {
 
 /**
  * Numeric opcodes (OP_1ADD, etc) are restricted to operating on
@@ -130,7 +130,7 @@ private:
     int64_t value_;
 };
 
-} // namespace chain
+} // namespace machine
 } // namespace libbitcoin
 
 #endif

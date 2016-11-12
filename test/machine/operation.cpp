@@ -21,7 +21,7 @@
 #include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
-using namespace bc::chain;
+using namespace bc::machine;
 
 data_chunk valid_raw_operation = to_chunk(base16_literal("0900ff11ee22bb33aa44"));
 

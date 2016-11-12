@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SCRIPT_RULE_FORK_HPP
-#define LIBBITCOIN_SCRIPT_RULE_FORK_HPP
+#ifndef LIBBITCOIN_MACHINE_RULE_FORK_HPP
+#define LIBBITCOIN_MACHINE_RULE_FORK_HPP
 
 #include <cstdint>
 
 namespace libbitcoin {
-namespace chain {
+namespace machine {
 
 enum rule_fork : uint32_t
 {
@@ -47,7 +47,7 @@ enum rule_fork : uint32_t
     all_rules = 0xffffffff
 };
 
-} // namespace chain
+} // namespace machine
 } // namespace libbitcoin
 
 #endif

@@ -17,11 +17,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SCRIPT_SCRIPT_PATTERN_HPP
-#define LIBBITCOIN_SCRIPT_SCRIPT_PATTERN_HPP
+#ifndef LIBBITCOIN_MACHINE_SCRIPT_PATTERN_HPP
+#define LIBBITCOIN_MACHINE_SCRIPT_PATTERN_HPP
 
 namespace libbitcoin {
-namespace chain {
+namespace machine {
 
 /// Script patterms.
 /// Comments from: bitcoin.org/en/developer-guide#signature-hash-types
@@ -69,7 +69,7 @@ enum class script_pattern
     non_standard
 };
 
-} // end chain
-} // end libbitcoin
+} // namespace machine
+} // namespace libbitcoin
 
 #endif

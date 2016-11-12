@@ -70,8 +70,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\test\chain\script.hpp" />
+    <ClInclude Include="..\..\..\..\test\machine\number.hpp" />
     <ClInclude Include="..\..\..\..\test\math\hash.hpp" />
-    <ClInclude Include="..\..\..\..\test\script\number.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonic.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -98,6 +98,9 @@
     <ClCompile Include="..\..\..\..\test\formats\base_58.cpp" />
     <ClCompile Include="..\..\..\..\test\formats\base_64.cpp" />
     <ClCompile Include="..\..\..\..\test\formats\base_85.cpp" />
+    <ClCompile Include="..\..\..\..\test\machine\number.cpp" />
+    <ClCompile Include="..\..\..\..\test\machine\opcode.cpp" />
+    <ClCompile Include="..\..\..\..\test\machine\operation.cpp" />
     <ClCompile Include="..\..\..\..\test\main.cpp" />
     <ClCompile Include="..\..\..\..\test\math\checksum.cpp" />
     <ClCompile Include="..\..\..\..\test\math\elliptic_curve.cpp" />
@@ -142,9 +145,6 @@
     <ClCompile Include="..\..\..\..\test\message\ping.cpp" />
     <ClCompile Include="..\..\..\..\test\message\not_found.cpp" />
     <ClCompile Include="..\..\..\..\test\message\verack.cpp" />
-    <ClCompile Include="..\..\..\..\test\script\number.cpp" />
-    <ClCompile Include="..\..\..\..\test\script\opcode.cpp" />
-    <ClCompile Include="..\..\..\..\test\script\operation.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\unicode.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\unicode_istream.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\unicode_ostream.cpp" />

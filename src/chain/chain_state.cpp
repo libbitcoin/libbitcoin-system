@@ -29,12 +29,14 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/math/uint256.hpp>
-#include <bitcoin/bitcoin/script/opcode.hpp>
-#include <bitcoin/bitcoin/script/rule_fork.hpp>
+#include <bitcoin/bitcoin/machine/opcode.hpp>
+#include <bitcoin/bitcoin/machine/rule_fork.hpp>
 #include <bitcoin/bitcoin/unicode/unicode.hpp>
 
 namespace libbitcoin {
 namespace chain {
+
+using namespace bc::machine;
 
 // Inlines.
 //-----------------------------------------------------------------------------

@@ -17,19 +17,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SCRIPT_INTERPRETER_HPP
-#define LIBBITCOIN_SCRIPT_INTERPRETER_HPP
+#ifndef LIBBITCOIN_MACHINE_INTERPRETER_HPP
+#define LIBBITCOIN_MACHINE_INTERPRETER_HPP
 
 #include <cstdint>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/script/opcode.hpp>
-#include <bitcoin/bitcoin/script/operation.hpp>
-#include <bitcoin/bitcoin/script/program.hpp>
+#include <bitcoin/bitcoin/machine/opcode.hpp>
+#include <bitcoin/bitcoin/machine/operation.hpp>
+#include <bitcoin/bitcoin/machine/program.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
-namespace chain {
+namespace machine {
 
 class BC_API interpreter
 {
@@ -121,7 +121,7 @@ private:
     static inline result run_op(const operation& op, program& program);
 };
 
-} // namespace chain
+} // namespace machine
 } // namespace libbitcoin
 
 #include <bitcoin/bitcoin/impl/script/interpreter.ipp>

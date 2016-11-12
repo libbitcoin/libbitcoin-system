@@ -94,7 +94,7 @@ private:
     uint8_t flags_;
 };
 
-} // end message
-} // end libbitcoin
+} // namespace message
+} // namespace libbitcoin
 
 #endif

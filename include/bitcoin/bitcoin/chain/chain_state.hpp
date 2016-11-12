@@ -28,8 +28,8 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/script/opcode.hpp>
-#include <bitcoin/bitcoin/script/rule_fork.hpp>
+#include <bitcoin/bitcoin/machine/opcode.hpp>
+#include <bitcoin/bitcoin/machine/rule_fork.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -121,10 +121,10 @@ public:
     bool is_enabled() const;
 
     /// Determine if the flag is set in the active_forks member.
-    bool is_enabled(rule_fork flag) const;
+    bool is_enabled(machine::rule_fork flag) const;
 
     /// Determine if the flag is set and enabled for a given block's version.
-    bool is_enabled(uint32_t block_version, rule_fork flag) const;
+    bool is_enabled(uint32_t block_version, machine::rule_fork flag) const;
 
     /// Determine if the block hash fails a checkpoint at this height.
     bool is_checkpoint_failure(const hash_digest& hash) const;

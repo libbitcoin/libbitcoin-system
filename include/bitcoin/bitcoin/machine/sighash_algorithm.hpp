@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SCRIPT_SIGHASH_ALGORITHM_HPP
-#define LIBBITCOIN_SCRIPT_SIGHASH_ALGORITHM_HPP
+#ifndef LIBBITCOIN_MACHINE_SIGHASH_ALGORITHM_HPP
+#define LIBBITCOIN_MACHINE_SIGHASH_ALGORITHM_HPP
 
 #include <cstdint>
 
 namespace libbitcoin {
-namespace chain {
+namespace machine {
 
 /// Signature hash types.
 /// Comments from: bitcoin.org/en/developer-guide#standard-transactions
@@ -71,7 +71,7 @@ enum sighash_algorithm : uint32_t
     mask = ~anyone_can_pay
 };
 
-} // namespace chain
+} // namespace machine
 } // namespace libbitcoin
 
 #endif

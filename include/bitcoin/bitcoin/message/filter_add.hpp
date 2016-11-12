@@ -79,7 +79,7 @@ private:
     data_chunk data_;
 };
 
-} // end message
-} // end libbitcoin
+} // namespace message
+} // namespace libbitcoin
 
 #endif

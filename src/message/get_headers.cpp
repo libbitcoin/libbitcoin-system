@@ -119,5 +119,5 @@ bool get_headers::operator!=(const get_headers& other) const
     return (static_cast<get_blocks>(*this) != static_cast<get_blocks>(other));
 }
 
-} // end message
-} // end libbitcoin
+} // namespace message
+} // namespace libbitcoin

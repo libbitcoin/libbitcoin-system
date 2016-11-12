@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/script/number.hpp>
+#include <bitcoin/bitcoin/machine/number.hpp>
 
 #include <cstdint>
 #include <cstdlib>
@@ -27,7 +27,7 @@
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
-namespace chain {
+namespace machine {
     
 // members
 const uint8_t number::negative_1 = negative_mask | positive_1;
@@ -292,5 +292,5 @@ number& number::operator-=(int64_t value)
     return *this;
 }
 
-} // namespace chain
+} // namespace machine
 } // namespace libbitcoin

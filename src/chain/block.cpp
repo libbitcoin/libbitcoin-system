@@ -39,9 +39,9 @@
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/math/uint256.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/script/number.hpp>
-#include <bitcoin/bitcoin/script/opcode.hpp>
-#include <bitcoin/bitcoin/script/rule_fork.hpp>
+#include <bitcoin/bitcoin/machine/number.hpp>
+#include <bitcoin/bitcoin/machine/opcode.hpp>
+#include <bitcoin/bitcoin/machine/rule_fork.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -49,8 +49,9 @@
 
 namespace libbitcoin {
 namespace chain {
-
+    
 using namespace bc::config;
+using namespace bc::machine;
 
 static const std::string encoded_mainnet_genesis_block =
     "01000000"

@@ -141,7 +141,7 @@ private:
     std::string reserved_;
 };
 
-} // end message
-} // end libbitcoin
+} // namespace message
+} // namespace libbitcoin
 
 #endif

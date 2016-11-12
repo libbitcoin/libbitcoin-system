@@ -93,11 +93,11 @@
     <Filter Include="include\bitcoin\impl\script">
       <UniqueIdentifier>{f6bee0f3-f8ee-40d8-8fbe-cd4a2687018f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\script">
-      <UniqueIdentifier>{5f1f341d-7b74-43a8-aa7b-7b04ca6f60ac}</UniqueIdentifier>
+    <Filter Include="include\bitcoin\machine">
+      <UniqueIdentifier>{ad6cb820-0a54-48c3-9c0b-6649c0cdfa70}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\script">
-      <UniqueIdentifier>{0e33224f-8810-4c6b-b7a7-c7b53e42ea41}</UniqueIdentifier>
+    <Filter Include="src\machine">
+      <UniqueIdentifier>{d1c09f97-cfb7-445e-afbd-c64174ddd709}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -563,20 +563,20 @@
     <ClCompile Include="..\..\..\..\src\chain\script.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\script\opcode.cpp">
-      <Filter>src\script</Filter>
+    <ClCompile Include="..\..\..\..\src\machine\opcode.cpp">
+      <Filter>src\machine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\script\operation.cpp">
-      <Filter>src\script</Filter>
+    <ClCompile Include="..\..\..\..\src\machine\operation.cpp">
+      <Filter>src\machine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\script\program.cpp">
-      <Filter>src\script</Filter>
+    <ClCompile Include="..\..\..\..\src\machine\program.cpp">
+      <Filter>src\machine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\script\interpreter.cpp">
-      <Filter>src\script</Filter>
+    <ClCompile Include="..\..\..\..\src\machine\interpreter.cpp">
+      <Filter>src\machine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\script\number.cpp">
-      <Filter>src\script</Filter>
+    <ClCompile Include="..\..\..\..\src\machine\number.cpp">
+      <Filter>src\machine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1117,29 +1117,29 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script.hpp">
       <Filter>include\bitcoin\chain</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\script\operation.hpp">
-      <Filter>include\bitcoin\script</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\program.hpp">
+      <Filter>include\bitcoin\machine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\script\program.hpp">
-      <Filter>include\bitcoin\script</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\rule_fork.hpp">
+      <Filter>include\bitcoin\machine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\script\rule_fork.hpp">
-      <Filter>include\bitcoin\script</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\script_pattern.hpp">
+      <Filter>include\bitcoin\machine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\script\script_pattern.hpp">
-      <Filter>include\bitcoin\script</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\sighash_algorithm.hpp">
+      <Filter>include\bitcoin\machine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\script\sighash_algorithm.hpp">
-      <Filter>include\bitcoin\script</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\interpreter.hpp">
+      <Filter>include\bitcoin\machine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\script\interpreter.hpp">
-      <Filter>include\bitcoin\script</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\number.hpp">
+      <Filter>include\bitcoin\machine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\script\number.hpp">
-      <Filter>include\bitcoin\script</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\opcode.hpp">
+      <Filter>include\bitcoin\machine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\script\opcode.hpp">
-      <Filter>include\bitcoin\script</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\operation.hpp">
+      <Filter>include\bitcoin\machine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

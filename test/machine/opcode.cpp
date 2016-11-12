@@ -21,7 +21,7 @@
 #include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
-using namespace bc::chain;
+using namespace bc::machine;
 
 BOOST_AUTO_TEST_SUITE(opcode_tests)
 

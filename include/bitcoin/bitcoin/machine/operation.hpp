@@ -17,22 +17,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SCRIPT_OPERATION_HPP
-#define LIBBITCOIN_SCRIPT_OPERATION_HPP
+#ifndef LIBBITCOIN_MACHINE_OPERATION_HPP
+#define LIBBITCOIN_MACHINE_OPERATION_HPP
 
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/script/opcode.hpp>
-#include <bitcoin/bitcoin/script/script_pattern.hpp>
+#include <bitcoin/bitcoin/machine/opcode.hpp>
+#include <bitcoin/bitcoin/machine/script_pattern.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
-namespace chain {
+namespace machine {
 
 class BC_API operation
 {
@@ -149,7 +149,7 @@ private:
     bool valid_;
 };
 
-} // end chain
-} // end libbitcoin
+} // namespace machine
+} // namespace libbitcoin
 
 #endif

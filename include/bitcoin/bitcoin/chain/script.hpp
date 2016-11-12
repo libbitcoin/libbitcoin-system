@@ -28,10 +28,10 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <bitcoin/bitcoin/script/operation.hpp>
-#include <bitcoin/bitcoin/script/program.hpp>
-#include <bitcoin/bitcoin/script/rule_fork.hpp>
-#include <bitcoin/bitcoin/script/script_pattern.hpp>
+#include <bitcoin/bitcoin/machine/operation.hpp>
+#include <bitcoin/bitcoin/machine/program.hpp>
+#include <bitcoin/bitcoin/machine/rule_fork.hpp>
+#include <bitcoin/bitcoin/machine/script_pattern.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
@@ -45,6 +45,8 @@ class transaction;
 class BC_API script
 {
 public:
+    typedef machine::operation operation;
+
     // Constructors.
     //-------------------------------------------------------------------------
 
@@ -137,7 +139,8 @@ public:
     //-------------------------------------------------------------------------
 
     /// Determine if the fork is enabled in the active forks set.
-    static inline bool is_enabled(uint32_t active_forks, rule_fork fork);
+    static inline bool is_enabled(uint32_t active_forks,
+        machine::rule_fork fork);
 
     /// No-code patterns.
     static bool is_push_only(const operation::list& ops);
@@ -171,7 +174,7 @@ public:
     // Utilities (non-static).
     //-------------------------------------------------------------------------
 
-    script_pattern pattern() const;
+    machine::script_pattern pattern() const;
     size_t sigops(bool embedded) const;
     size_t embedded_sigops(const script& prevout_script) const;
     void find_and_delete(const data_stack& endorsements);
@@ -208,7 +211,7 @@ private:
 };
 
 // inline
-bool script::is_enabled(uint32_t active_forks, rule_fork fork)
+bool script::is_enabled(uint32_t active_forks, machine::rule_fork fork)
 {
     return (fork & active_forks) != 0;
 }

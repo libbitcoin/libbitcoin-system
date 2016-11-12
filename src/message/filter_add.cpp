@@ -185,5 +185,5 @@ bool filter_add::operator!=(const filter_add& other) const
     return !(*this == other);
 }
 
-} // end message
-} // end libbitcoin
+} // namespace message
+} // namespace libbitcoin

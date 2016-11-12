@@ -239,5 +239,5 @@ bool filter_load::operator!=(const filter_load& other) const
     return !(*this == other);
 }
 
-} // end message
-} // end libbitcoin
+} // namespace message
+} // namespace libbitcoin

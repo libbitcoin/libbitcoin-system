@@ -23,19 +23,20 @@
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/script/operation.hpp>
-#include <bitcoin/bitcoin/script/script_pattern.hpp>
+#include <bitcoin/bitcoin/machine/operation.hpp>
+#include <bitcoin/bitcoin/machine/script_pattern.hpp>
 #include <bitcoin/bitcoin/utility/binary.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
 
 namespace libbitcoin {
 
-using namespace chain;
+using namespace bc::chain;
+using namespace bc::machine;
 
 bool is_stealth_script(const script& script)
 {
-    if (script.pattern() != chain::script_pattern::null_data)
+    if (script.pattern() != script_pattern::null_data)
         return false;
 
     BITCOIN_ASSERT(script.size() == 2);

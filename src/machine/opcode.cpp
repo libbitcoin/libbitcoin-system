@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/script/opcode.hpp>
+#include <bitcoin/bitcoin/machine/opcode.hpp>
 
 #include <cstdint>
 #include <string>
@@ -27,7 +27,9 @@
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 
 namespace libbitcoin {
-namespace chain {
+namespace machine {
+
+using namespace bc::chain;
 
 #define RETURN_IF_OPCODE(text, code) \
 if (norm == text) { out_code = opcode::code; return true; }
@@ -689,5 +691,5 @@ bool opcode_from_hexadecimal(opcode& out_code, const std::string& value)
     return true;
 }
 
-} // namespace chain
+} // namespace machine
 } // namespace libbitcoin

@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CHAIN_INTERPRETER_IPP
-#define LIBBITCOIN_CHAIN_INTERPRETER_IPP
+#ifndef LIBBITCOIN_MACHINE_INTERPRETER_IPP
+#define LIBBITCOIN_MACHINE_INTERPRETER_IPP
 
 #include <cstdint>
 #include <utility>
@@ -27,15 +27,15 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <bitcoin/bitcoin/script/number.hpp>
-#include <bitcoin/bitcoin/script/opcode.hpp>
-#include <bitcoin/bitcoin/script/operation.hpp>
-#include <bitcoin/bitcoin/script/program.hpp>
+#include <bitcoin/bitcoin/machine/number.hpp>
+#include <bitcoin/bitcoin/machine/opcode.hpp>
+#include <bitcoin/bitcoin/machine/operation.hpp>
+#include <bitcoin/bitcoin/machine/program.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
-namespace chain {
+namespace machine {
 
 static BC_CONSTEXPR auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
 
@@ -660,8 +660,9 @@ interpreter::result interpreter::op_check_sig_verify(program& program)
     uint8_t sighash;
     ec_signature signature;
     der_signature distinguished;
+    const auto strict = chain::script::is_enabled(program.forks(),
+        rule_fork::bip66_rule);
 
-    auto strict = script::is_enabled(program.forks(), rule_fork::bip66_rule);
     const auto public_key = program.pop();
     auto endorsement = program.pop();
 
@@ -678,7 +679,7 @@ interpreter::result interpreter::op_check_sig_verify(program& program)
         return strict ? error::invalid_signature_lax_encoding :
             error::invalid_signature_encoding;
 
-    return script::check_signature(signature, sighash, public_key,
+    return chain::script::check_signature(signature, sighash, public_key,
         script_code, program.transaction(), program.input_index()) ?
             error::success : error::incorrect_signature;
 }
@@ -731,7 +732,8 @@ interpreter::result interpreter::op_check_multisig_verify(program& program)
     ec_signature signature;
     der_signature distinguished;
     auto public_key = public_keys.begin();
-    auto strict = script::is_enabled(program.forks(), rule_fork::bip66_rule);
+    const auto strict = chain::script::is_enabled(program.forks(),
+        rule_fork::bip66_rule);
 
     // Before looping create subscript with endorsements stripped (sort of).
     auto script_code = program.subscript();
@@ -753,7 +755,7 @@ interpreter::result interpreter::op_check_multisig_verify(program& program)
 
         while (true)
         {
-            if (script::check_signature(signature, sighash, *public_key,
+            if (chain::script::check_signature(signature, sighash, *public_key,
                 script_code, program.transaction(), program.input_index()))
                 break;
 
@@ -780,7 +782,7 @@ interpreter::result interpreter::op_check_multisig(program& program)
 interpreter::result interpreter::op_check_locktime_verify(program& program)
 {
     // nop2 is subsumed by checklocktimeverify when bip65 fork is active.
-    if (!script::is_enabled(program.forks(), rule_fork::bip65_rule))
+    if (!chain::script::is_enabled(program.forks(), rule_fork::bip65_rule))
         return op_nop(opcode::nop2);
 
     const auto& tx = program.transaction();
@@ -1187,7 +1189,7 @@ interpreter::result interpreter::run_op(const operation& op, program& program)
     }
 }
 
-} // namespace chain
+} // namespace machine
 } // namespace libbitcoin
 
 #endif

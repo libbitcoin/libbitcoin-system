@@ -324,5 +324,5 @@ uint8_t reject::reason_to_byte(reason_code value)
     }
 }
 
-} // end message
-} // end libbitcoin
+} // namespace message
+} // namespace libbitcoin

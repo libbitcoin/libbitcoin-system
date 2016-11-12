@@ -25,6 +25,7 @@
 
 using namespace bc;
 using namespace bc::chain;
+using namespace bc::machine;
 
 bool is_number(const std::string& token)
 {

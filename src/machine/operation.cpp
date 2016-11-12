@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/script/operation.hpp>
+#include <bitcoin/bitcoin/machine/operation.hpp>
 
 #include <algorithm>
 #include <numeric>
@@ -25,9 +25,9 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <bitcoin/bitcoin/script/rule_fork.hpp>
-#include <bitcoin/bitcoin/script/opcode.hpp>
-#include <bitcoin/bitcoin/script/script_pattern.hpp>
+#include <bitcoin/bitcoin/machine/rule_fork.hpp>
+#include <bitcoin/bitcoin/machine/opcode.hpp>
+#include <bitcoin/bitcoin/machine/script_pattern.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -35,7 +35,7 @@
 #include <bitcoin/bitcoin/utility/string.hpp>
 
 namespace libbitcoin {
-namespace chain {
+namespace machine {
 
 static constexpr auto invalid_code = opcode::disabled_xor;
 
@@ -449,10 +449,10 @@ bool operation::is_positive(opcode code)
 // CONSENSUS: the codes VERIF and VERNOTIF are in the conditional range yet are
 // not handled. As a result satoshi always processes them in the op swtich.
 // This causes them to always fail as unhandled. It is misleading that the
-// satoshi test cases refer to these as reserved codes. These two codes are
-// behave exactly as the explicitly disabled code. On the other hand VER is not
-// within the satoshi conditional range test so it is in fact reserved.
-// Presumably this was an unintended consequence of range testing enums.
+// satoshi test cases refer to these as reserved codes. These two codes behave
+// exactly as the explicitly disabled code. On the other hand VER is not within
+// the satoshi conditional range test so it is in fact reserved. Presumably
+// this was an unintended consequence of range testing enums.
 //*****************************************************************************
 bool operation::is_disabled(opcode code)
 {
@@ -550,5 +550,5 @@ bool operation::is_oversized() const
     return data_.size() > max_push_data_size;
 }
 
-} // namespace chain
+} // namespace machine
 } // namespace libbitcoin

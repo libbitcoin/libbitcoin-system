@@ -34,7 +34,7 @@
 BOOST_AUTO_TEST_SUITE(number_tests)
 
 using namespace bc;
-using namespace bc::chain;
+using namespace bc::machine;
 
 // Helpers
 // ----------------------------------------------------------------------------
