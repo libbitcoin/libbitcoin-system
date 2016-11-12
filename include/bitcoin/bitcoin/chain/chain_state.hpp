@@ -52,6 +52,9 @@ public:
     /// minimizing overall querying.
     struct map
     {
+        // This sentinel indicates that the value was not requested.
+        static const size_t timestamp_unrequested = max_size_t;
+
         /// [block - 1, floor(block - 2016, 0)] mainnet: low == high (unused)
         range bits;
 

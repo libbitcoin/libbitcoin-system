@@ -160,15 +160,16 @@ uint32_t chain_state::work_required(const data& values)
 uint32_t chain_state::work_required_retarget(const data& values)
 {
     static const uint256_t pow_limit(compact_number{ proof_of_work_limit });
-    const auto compact = compact_number(bits_high(values));
 
-    BITCOIN_ASSERT_MSG(!compact.is_overflowed(), "previous block bad bits");
+    const compact_number bits(bits_high(values));
+    BITCOIN_ASSERT_MSG(!bits.is_overflowed(), "previous block has bad bits");
 
-    uint256_t target(compact);
+    uint256_t target(bits);
     target *= retarget_timespan(values);
     target /= target_timespan_seconds;
 
-    return target > pow_limit ? proof_of_work_limit : 
+    // The proof_of_work_limit constant is pre-normalized.
+    return target > pow_limit ? proof_of_work_limit :
         compact_number(target).normal();
 }
 
@@ -177,6 +178,7 @@ uint32_t chain_state::retarget_timespan(const chain_state::data& values)
 {
     const auto high = timestamp_high(values);
     const auto retarget = values.timestamp.retarget;
+    BITCOIN_ASSERT_MSG(retarget != 0xbaadf00d, "retarget time is unpopulated");
 
     //*************************************************************************
     // CONSENSUS: subtract unsigned 32 bit numbers in signed 64 bit space in
@@ -265,10 +267,10 @@ chain_state::map chain_state::get_map(size_t height, bool enabled,
     map.timestamp.high = height - 1;
     map.timestamp.count = std::min(height, median_time_past_interval);
 
-    // Additional timestamps required (or zero for not).
+    // Additional timestamps required (or timestamp_unrequested for not).
     map.timestamp_self = height;
     map.timestamp_retarget = is_retarget_height(height) ?
-        height - retargeting_interval : 0;
+        height - retargeting_interval : map::timestamp_unrequested;
 
     // Version.
     //-------------------------------------------------------------------------
