@@ -132,11 +132,11 @@ static const config::checkpoint mainnet_bip16_exception_checkpoint
 };
 
 // github.com/bitcoin/bips/blob/master/bip-0030.mediawiki#specification
-static const config::checkpoint mainnet_bip30_exception_checkpoint1
-{
-    "00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec", 91842
-};
-
+////static const config::checkpoint mainnet_bip30_exception_checkpoint1
+////{
+////    // This block validates witout an exception, meaning that the tx was spent.
+////    "00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec", 91842
+////};
 static const config::checkpoint mainnet_bip30_exception_checkpoint2
 {
     "00000000000743f190a18c5577a3c2d2a1f610ae9601ac046a38084ccb7cd721", 91880
