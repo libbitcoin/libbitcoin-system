@@ -73,17 +73,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\block.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\chain_state.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\compact_number.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\compact.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\header.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\output_point.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\point.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\point_iterator.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\script\number.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\script\program.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\script\interpreter.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\script\opcode.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\script\operation.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\script\script.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\script.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\transaction.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\input.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\output.cpp" />
@@ -111,6 +106,11 @@
     <ClCompile Include="..\..\..\..\src\log\file_collector_repository.cpp" />
     <ClCompile Include="..\..\..\..\src\log\file_counter_formatter.cpp" />
     <ClCompile Include="..\..\..\..\src\log\sinks.cpp" />
+    <ClCompile Include="..\..\..\..\src\machine\interpreter.cpp" />
+    <ClCompile Include="..\..\..\..\src\machine\number.cpp" />
+    <ClCompile Include="..\..\..\..\src\machine\opcode.cpp" />
+    <ClCompile Include="..\..\..\..\src\machine\operation.cpp" />
+    <ClCompile Include="..\..\..\..\src\machine\program.cpp" />
     <ClCompile Include="..\..\..\..\src\math\checksum.cpp" />
     <ClCompile Include="..\..\..\..\src\math\crypto.cpp" />
     <ClCompile Include="..\..\..\..\src\math\elliptic_curve.cpp" />
@@ -133,7 +133,9 @@
     <ClCompile Include="..\..\..\..\src\message\address.cpp" />
     <ClCompile Include="..\..\..\..\src\message\alert.cpp" />
     <ClCompile Include="..\..\..\..\src\message\alert_payload.cpp" />
-    <ClCompile Include="..\..\..\..\src\message\block_message.cpp" />
+    <ClCompile Include="..\..\..\..\src\message\block.cpp">
+      <ObjectFileName>$(IntDir)block_message.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\block_transactions.cpp" />
     <ClCompile Include="..\..\..\..\src\message\compact_block.cpp" />
     <ClCompile Include="..\..\..\..\src\message\fee_filter.cpp" />
@@ -151,7 +153,9 @@
     <ClCompile Include="..\..\..\..\src\message\reject.cpp" />
     <ClCompile Include="..\..\..\..\src\message\send_compact_blocks.cpp" />
     <ClCompile Include="..\..\..\..\src\message\send_headers.cpp" />
-    <ClCompile Include="..\..\..\..\src\message\transaction_message.cpp" />
+    <ClCompile Include="..\..\..\..\src\message\transaction.cpp">
+      <ObjectFileName>$(IntDir)transaction_message.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\version.cpp" />
     <ClCompile Include="..\..\..\..\src\message\get_address.cpp" />
     <ClCompile Include="..\..\..\..\src\message\get_blocks.cpp" />
@@ -214,22 +218,14 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\chain_state.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\compact_number.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\compact.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\header.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\history.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\input_point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\output_point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point_iterator.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\number.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\program.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\interpreter.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\opcode.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\operation.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\rule_fork.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\script.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\script_pattern.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script\sighash_algorithm.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\stealth.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\input.hpp" />
@@ -268,6 +264,14 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\severity.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\sinks.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\sources.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\interpreter.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\number.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\opcode.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\operation.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\program.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\rule_fork.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\script_pattern.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\sighash_algorithm.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\checksum.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\crypto.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\elliptic_curve.hpp" />
@@ -279,7 +283,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\alert.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\alert_payload.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\block_message.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\block_transactions.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\compact_block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\fee_filter.hpp" />
@@ -298,7 +302,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\reject.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\send_compact_blocks.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\send_headers.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\transaction_message.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\version.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\get_address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\get_blocks.hpp" />

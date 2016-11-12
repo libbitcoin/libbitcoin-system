@@ -183,8 +183,8 @@ message_type heading::type() const
         return message_type::alert;
     if (command_ == block_transactions::command)
         return message_type::block_transactions;
-    if (command_ == block_message::command)
-        return message_type::block_message;
+    if (command_ == block::command)
+        return message_type::block;
     if (command_ == compact_block::command)
         return message_type::compact_block;
     if (command_ == filter_add::command)
@@ -223,8 +223,8 @@ message_type heading::type() const
         return message_type::send_compact_blocks;
     if (command_ == send_headers::command)
         return message_type::send_headers;
-    if (command_ == transaction_message::command)
-        return message_type::transaction_message;
+    if (command_ == transaction::command)
+        return message_type::transaction;
     if (command_ == verack::command)
         return message_type::verack;
     if (command_ == version::command)

@@ -207,5 +207,5 @@ bool alert::operator!=(const alert& other) const
     return !(*this == other);
 }
 
-} // end message
-} // end libbitcoin
+} // namespace message
+} // namespace libbitcoin

@@ -20,8 +20,8 @@
 #include <bitcoin/bitcoin/message/reject.hpp>
 
 #include <bitcoin/bitcoin/message/version.hpp>
-#include <bitcoin/bitcoin/message/block_message.hpp>
-#include <bitcoin/bitcoin/message/transaction_message.hpp>
+#include <bitcoin/bitcoin/message/block.hpp>
+#include <bitcoin/bitcoin/message/transaction.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -125,8 +125,8 @@ bool reject::from_data(uint32_t version, reader& source)
     code_ = reason_from_byte(source.read_byte());
     reason_ = source.read_string();
 
-    if ((message_ == block_message::command) ||
-        (message_ == transaction_message::command))
+    if ((message_ == block::command) ||
+        (message_ == transaction::command))
     {
         data_ = source.read_hash();
     }
@@ -163,8 +163,8 @@ void reject::to_data(uint32_t version, writer& sink) const
     sink.write_byte(reason_to_byte(code_));
     sink.write_string(reason_);
 
-    if ((message_ == block_message::command) ||
-        (message_ == transaction_message::command))
+    if ((message_ == block::command) ||
+        (message_ == transaction::command))
     {
         sink.write_hash(data_);
     }
@@ -175,8 +175,8 @@ uint64_t reject::serialized_size(uint32_t version) const
     uint64_t size = 1 + variable_uint_size(message_.size()) + message_.size() +
         variable_uint_size(reason_.size()) + reason_.size();
 
-    if ((message_ == block_message::command) ||
-        (message_ == transaction_message::command))
+    if ((message_ == block::command) ||
+        (message_ == transaction::command))
     {
         size += hash_size;
     }
@@ -324,5 +324,5 @@ uint8_t reject::reason_to_byte(reason_code value)
     }
 }
 
-} // end message
-} // end libbitcoin
+} // namespace message
+} // namespace libbitcoin

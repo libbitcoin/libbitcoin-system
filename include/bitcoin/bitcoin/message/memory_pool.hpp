@@ -69,7 +69,7 @@ private:
     bool insufficient_version_;
 };
 
-} // end message
-} // end libbitcoin
+} // namespace message
+} // namespace libbitcoin
 
 #endif

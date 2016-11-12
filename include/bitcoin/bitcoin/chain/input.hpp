@@ -25,7 +25,7 @@
 #include <istream>
 #include <vector>
 #include <bitcoin/bitcoin/chain/output_point.hpp>
-#include <bitcoin/bitcoin/chain/script/script.hpp>
+#include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>

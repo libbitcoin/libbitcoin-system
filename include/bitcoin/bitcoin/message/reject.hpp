@@ -111,7 +111,7 @@ private:
     hash_digest data_;
 };
 
-} // end message
-} // end libbitcoin
+} // namespace message
+} // namespace libbitcoin
 
 #endif

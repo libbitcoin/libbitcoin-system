@@ -39,20 +39,15 @@ src_libbitcoin_la_SOURCES = \
     src/error.cpp \
     src/chain/block.cpp \
     src/chain/chain_state.cpp \
-    src/chain/compact_number.cpp \
+    src/chain/compact.cpp \
     src/chain/header.cpp \
     src/chain/input.cpp \
     src/chain/output.cpp \
     src/chain/output_point.cpp \
     src/chain/point.cpp \
     src/chain/point_iterator.cpp \
+    src/chain/script.cpp \
     src/chain/transaction.cpp \
-    src/chain/script/interpreter.cpp \
-    src/chain/script/number.cpp \
-    src/chain/script/opcode.cpp \
-    src/chain/script/operation.cpp \
-    src/chain/script/program.cpp \
-    src/chain/script/script.cpp \
     src/config/authority.cpp \
     src/config/base16.cpp \
     src/config/base2.cpp \
@@ -76,6 +71,11 @@ src_libbitcoin_la_SOURCES = \
     src/log/file_collector_repository.cpp \
     src/log/file_counter_formatter.cpp \
     src/log/sinks.cpp \
+    src/machine/interpreter.cpp \
+    src/machine/number.cpp \
+    src/machine/opcode.cpp \
+    src/machine/operation.cpp \
+    src/machine/program.cpp \
     src/math/checksum.cpp \
     src/math/crypto.cpp \
     src/math/elliptic_curve.cpp \
@@ -111,7 +111,7 @@ src_libbitcoin_la_SOURCES = \
     src/message/address.cpp \
     src/message/alert.cpp \
     src/message/alert_payload.cpp \
-    src/message/block_message.cpp \
+    src/message/block.cpp \
     src/message/block_transactions.cpp \
     src/message/compact_block.cpp \
     src/message/fee_filter.cpp \
@@ -138,7 +138,7 @@ src_libbitcoin_la_SOURCES = \
     src/message/reject.cpp \
     src/message/send_compact_blocks.cpp \
     src/message/send_headers.cpp \
-    src/message/transaction_message.cpp \
+    src/message/transaction.cpp \
     src/message/verack.cpp \
     src/message/version.cpp \
     src/unicode/console_streambuf.cpp \
@@ -221,7 +221,7 @@ test_libbitcoin_test_LDADD = src/libbitcoin.la ${boost_unit_test_framework_LIBS}
 test_libbitcoin_test_SOURCES = \
     test/main.cpp \
     test/chain/block.cpp \
-    test/chain/compact_number.cpp \
+    test/chain/compact_.cpp \
     test/chain/header.cpp \
     test/chain/input.cpp \
     test/chain/output.cpp \
@@ -229,13 +229,9 @@ test_libbitcoin_test_SOURCES = \
     test/chain/point.cpp \
     test/chain/point_iterator.cpp \
     test/chain/satoshi_words.cpp \
+    test/chain/script.cpp \
+    test/chain/script.hpp \
     test/chain/transaction.cpp \
-    test/chain/script/number.cpp \
-    test/chain/script/number.hpp \
-    test/chain/script/opcode.cpp \
-    test/chain/script/operation.cpp \
-    test/chain/script/script.cpp \
-    test/chain/script/script.hpp \
     test/config/authority.cpp \
     test/config/base58.cpp \
     test/config/checkpoint.cpp \
@@ -248,6 +244,10 @@ test_libbitcoin_test_SOURCES = \
     test/formats/base_58.cpp \
     test/formats/base_64.cpp \
     test/formats/base_85.cpp \
+    test/machine/number.cpp \
+    test/machine/number.hpp \
+    test/machine/opcode.cpp \
+    test/machine/operation.cpp \
     test/math/checksum.cpp \
     test/math/elliptic_curve.cpp \
     test/math/hash.cpp \
@@ -258,7 +258,7 @@ test_libbitcoin_test_SOURCES = \
     test/message/address.cpp \
     test/message/alert.cpp \
     test/message/alert_payload.cpp \
-    test/message/block_message.cpp \
+    test/message/block.cpp \
     test/message/block_transactions.cpp \
     test/message/compact_block.cpp \
     test/message/fee_filter.cpp \
@@ -285,7 +285,7 @@ test_libbitcoin_test_SOURCES = \
     test/message/reject.cpp \
     test/message/send_compact_blocks.cpp \
     test/message/send_headers.cpp \
-    test/message/transaction_message.cpp \
+    test/message/transaction.cpp \
     test/message/verack.cpp \
     test/message/version.cpp \
     test/unicode/unicode.cpp \
@@ -339,7 +339,7 @@ include_bitcoin_bitcoin_chaindir = ${includedir}/bitcoin/bitcoin/chain
 include_bitcoin_bitcoin_chain_HEADERS = \
     include/bitcoin/bitcoin/chain/block.hpp \
     include/bitcoin/bitcoin/chain/chain_state.hpp \
-    include/bitcoin/bitcoin/chain/compact_number.hpp \
+    include/bitcoin/bitcoin/chain/compact.hpp \
     include/bitcoin/bitcoin/chain/header.hpp \
     include/bitcoin/bitcoin/chain/history.hpp \
     include/bitcoin/bitcoin/chain/input.hpp \
@@ -348,20 +348,9 @@ include_bitcoin_bitcoin_chain_HEADERS = \
     include/bitcoin/bitcoin/chain/output_point.hpp \
     include/bitcoin/bitcoin/chain/point.hpp \
     include/bitcoin/bitcoin/chain/point_iterator.hpp \
+    include/bitcoin/bitcoin/chain/script.hpp \
     include/bitcoin/bitcoin/chain/stealth.hpp \
     include/bitcoin/bitcoin/chain/transaction.hpp
-
-include_bitcoin_bitcoin_chain_scriptdir = ${includedir}/bitcoin/bitcoin/chain/script
-include_bitcoin_bitcoin_chain_script_HEADERS = \
-    include/bitcoin/bitcoin/chain/script/interpreter.hpp \
-    include/bitcoin/bitcoin/chain/script/number.hpp \
-    include/bitcoin/bitcoin/chain/script/opcode.hpp \
-    include/bitcoin/bitcoin/chain/script/operation.hpp \
-    include/bitcoin/bitcoin/chain/script/program.hpp \
-    include/bitcoin/bitcoin/chain/script/rule_fork.hpp \
-    include/bitcoin/bitcoin/chain/script/script.hpp \
-    include/bitcoin/bitcoin/chain/script/script_pattern.hpp \
-    include/bitcoin/bitcoin/chain/script/sighash_algorithm.hpp
 
 include_bitcoin_bitcoin_configdir = ${includedir}/bitcoin/bitcoin/config
 include_bitcoin_bitcoin_config_HEADERS = \
@@ -429,6 +418,17 @@ include_bitcoin_bitcoin_log_HEADERS = \
     include/bitcoin/bitcoin/log/sinks.hpp \
     include/bitcoin/bitcoin/log/sources.hpp
 
+include_bitcoin_bitcoin_machinedir = ${includedir}/bitcoin/bitcoin/machine
+include_bitcoin_bitcoin_machine_HEADERS = \
+    include/bitcoin/bitcoin/machine/interpreter.hpp \
+    include/bitcoin/bitcoin/machine/number.hpp \
+    include/bitcoin/bitcoin/machine/opcode.hpp \
+    include/bitcoin/bitcoin/machine/operation.hpp \
+    include/bitcoin/bitcoin/machine/program.hpp \
+    include/bitcoin/bitcoin/machine/rule_fork.hpp \
+    include/bitcoin/bitcoin/machine/script_pattern.hpp \
+    include/bitcoin/bitcoin/machine/sighash_algorithm.hpp
+
 include_bitcoin_bitcoin_mathdir = ${includedir}/bitcoin/bitcoin/math
 include_bitcoin_bitcoin_math_HEADERS = \
     include/bitcoin/bitcoin/math/checksum.hpp \
@@ -444,7 +444,7 @@ include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/address.hpp \
     include/bitcoin/bitcoin/message/alert.hpp \
     include/bitcoin/bitcoin/message/alert_payload.hpp \
-    include/bitcoin/bitcoin/message/block_message.hpp \
+    include/bitcoin/bitcoin/message/block.hpp \
     include/bitcoin/bitcoin/message/block_transactions.hpp \
     include/bitcoin/bitcoin/message/compact_block.hpp \
     include/bitcoin/bitcoin/message/fee_filter.hpp \
@@ -471,7 +471,7 @@ include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/reject.hpp \
     include/bitcoin/bitcoin/message/send_compact_blocks.hpp \
     include/bitcoin/bitcoin/message/send_headers.hpp \
-    include/bitcoin/bitcoin/message/transaction_message.hpp \
+    include/bitcoin/bitcoin/message/transaction.hpp \
     include/bitcoin/bitcoin/message/verack.hpp \
     include/bitcoin/bitcoin/message/version.hpp
 

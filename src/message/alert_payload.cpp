@@ -532,5 +532,5 @@ bool alert_payload::operator!=(const alert_payload& other) const
     return !(*this == other);
 }
 
-} // end message
-} // end libbitcoin
+} // namespace message
+} // namespace libbitcoin

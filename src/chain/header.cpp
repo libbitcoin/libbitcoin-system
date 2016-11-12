@@ -23,7 +23,7 @@
 #include <chrono>
 #include <utility>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
-#include <bitcoin/bitcoin/chain/compact_number.hpp>
+#include <bitcoin/bitcoin/chain/compact.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/uint256.hpp>
@@ -417,13 +417,13 @@ bool header::is_valid_time_stamp() const
 // [CheckProofOfWork]
 bool header::is_valid_proof_of_work() const
 {
-    static const uint256_t pow_limit(compact_number{ proof_of_work_limit });
-    const auto compact = compact_number(bits_);
+    static const uint256_t pow_limit(compact{ proof_of_work_limit });
+    const auto bits = compact(bits_);
 
-    if (compact.is_overflowed())
+    if (bits.is_overflowed())
         return false;
 
-    uint256_t target(compact);
+    uint256_t target(bits);
 
     // Ensure claimed work is within limits.
     if (target < 1 || target > pow_limit)

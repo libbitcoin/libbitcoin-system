@@ -150,5 +150,5 @@ uint64_t filter_clear::satoshi_fixed_size(uint32_t version)
     return 0;
 }
 
-} // end message
-} // end libbitcoin
+} // namespace message
+} // namespace libbitcoin
