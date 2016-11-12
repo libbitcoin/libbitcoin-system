@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_COMPACT_NUMBER_HPP
-#define LIBBITCOIN_COMPACT_NUMBER_HPP
+#ifndef LIBBITCOIN_COMPACT_HPP
+#define LIBBITCOIN_COMPACT_HPP
 
 #include <cstdint>
 #include <bitcoin/bitcoin/define.hpp>
@@ -28,20 +28,20 @@ namespace libbitcoin {
 namespace chain {
 
 /// A signed but zero-floored scientific notation in 32 bits.
-class BC_API compact_number
+class BC_API compact
 {
 public:
     /// Construct a normal form compact number from a 32 bit compact number.
-    explicit compact_number(uint32_t compact);
+    explicit compact(uint32_t compact);
 
     /// Construct a normal form compact number from a 256 bit number
-    explicit compact_number(const uint256_t& big);
+    explicit compact(const uint256_t& big);
 
     /// Move constructor.
-    compact_number(compact_number&& other);
+    compact(compact&& other);
 
     /// Copy constructor.
-    compact_number(const compact_number& other);
+    compact(const compact& other);
 
     /// True if construction overflowed.
     bool is_overflowed() const;

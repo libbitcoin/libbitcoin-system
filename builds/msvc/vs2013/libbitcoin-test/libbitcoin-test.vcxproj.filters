@@ -312,14 +312,14 @@
     <ClCompile Include="..\..\..\..\test\chain\script\number.cpp">
       <Filter>src\chain\script</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\compact_number.cpp">
-      <Filter>src\chain</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\block.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\transaction.cpp">
       <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\compact_.cpp">
+      <Filter>src\chain</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

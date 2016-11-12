@@ -29,7 +29,7 @@
 #include <type_traits>
 #include <utility>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
-#include <bitcoin/bitcoin/chain/compact_number.hpp>
+#include <bitcoin/bitcoin/chain/compact.hpp>
 #include <bitcoin/bitcoin/chain/script/number.hpp>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/script/rule_fork.hpp>
@@ -408,12 +408,12 @@ block::indexes block::locator_heights(size_t top)
 // static
 uint256_t block::difficulty(uint32_t bits)
 {
-    const auto compact = compact_number(bits);
+    const auto header_bits = compact(bits);
 
-    if (compact.is_overflowed())
+    if (header_bits.is_overflowed())
         return 0;
 
-    uint256_t target(compact);
+    uint256_t target(header_bits);
 
     // We need to compute 2**256 / (target + 1), but we can't represent 2**256
     // as it's too large for uint256. However as 2**256 is at least as large as

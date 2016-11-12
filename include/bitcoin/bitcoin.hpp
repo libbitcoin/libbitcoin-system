@@ -24,7 +24,7 @@
 #include <bitcoin/bitcoin/version.hpp>
 #include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
-#include <bitcoin/bitcoin/chain/compact_number.hpp>
+#include <bitcoin/bitcoin/chain/compact.hpp>
 #include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/chain/history.hpp>
 #include <bitcoin/bitcoin/chain/input.hpp>

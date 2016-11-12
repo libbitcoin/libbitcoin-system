@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/chain/compact_number.hpp>
+#include <bitcoin/bitcoin/chain/compact.hpp>
 
 #include <cstdint>
 #include <bitcoin/bitcoin/math/uint256.hpp>
@@ -82,35 +82,35 @@ inline uint32_t shift_high(uint8_t exponent)
 // Constructors
 //-----------------------------------------------------------------------------
 
-compact_number::compact_number(uint32_t compact)
+compact::compact(uint32_t compact)
 {
     overflowed_ = from_compact(big_, compact);
     normal_ = from_big(big_);
 }
 
-compact_number::compact_number(const uint256_t& value)
+compact::compact(const uint256_t& value)
   : big_(value), overflowed_(true)
 {
     normal_ = from_big(big_);
 }
 
-bool compact_number::is_overflowed() const
+bool compact::is_overflowed() const
 {
     return !overflowed_;
 }
 
-uint32_t compact_number::normal() const
+uint32_t compact::normal() const
 {
     return normal_;
 }
 
-compact_number::operator const uint256_t&() const
+compact::operator const uint256_t&() const
 {
     return big_;
 }
 
 // Returns false on overflow, negatives are converted to zero.
-bool compact_number::from_compact(uint256_t& out, uint32_t compact)
+bool compact::from_compact(uint256_t& out, uint32_t compact)
 {
     //*************************************************************************
     // CONSENSUS: The sign bit is not honored and is instead produces zero.
@@ -146,7 +146,7 @@ bool compact_number::from_compact(uint256_t& out, uint32_t compact)
     return true;
 }
 
-uint32_t compact_number::from_big(const uint256_t& big)
+uint32_t compact::from_big(const uint256_t& big)
 {
     // This value is limited to 32, so exponent cannot overflow.
     auto exponent = static_cast<uint8_t>(big.byte_length());

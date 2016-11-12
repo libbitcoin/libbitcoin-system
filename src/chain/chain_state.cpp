@@ -24,7 +24,7 @@
 #include <cstdint>
 #include <bitcoin/bitcoin/unicode/unicode.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
-#include <bitcoin/bitcoin/chain/compact_number.hpp>
+#include <bitcoin/bitcoin/chain/compact.hpp>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/script/rule_fork.hpp>
 #include <bitcoin/bitcoin/chain/script/script.hpp>
@@ -172,9 +172,9 @@ uint32_t chain_state::work_required(const data& values)
 // [CalculateNextWorkRequired]
 uint32_t chain_state::work_required_retarget(const data& values)
 {
-    static const uint256_t pow_limit(compact_number{ proof_of_work_limit });
+    static const uint256_t pow_limit(compact{ proof_of_work_limit });
 
-    const compact_number bits(bits_high(values));
+    const compact bits(bits_high(values));
     BITCOIN_ASSERT_MSG(!bits.is_overflowed(), "previous block has bad bits");
 
     uint256_t target(bits);
@@ -182,8 +182,7 @@ uint32_t chain_state::work_required_retarget(const data& values)
     target /= target_timespan_seconds;
 
     // The proof_of_work_limit constant is pre-normalized.
-    return target > pow_limit ? proof_of_work_limit :
-        compact_number(target).normal();
+    return target > pow_limit ? proof_of_work_limit : compact(target).normal();
 }
 
 // Get the bounded total time spanning the highest 2016 blocks.
