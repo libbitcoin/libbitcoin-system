@@ -410,7 +410,7 @@ uint8_t operation::opcode_to_positive(opcode code)
 {
     BITCOIN_ASSERT(is_positive(code));
     static constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
-    return static_cast<uint8_t>(code)-op_81 - 1;
+    return static_cast<uint8_t>(code)-op_81 + 1;
 }
 
 // [0..79, 81..96]
