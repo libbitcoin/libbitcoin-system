@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_MESSAGE_BLOCK_MESSAGE_HPP
-#define LIBBITCOIN_MESSAGE_BLOCK_MESSAGE_HPP
+#ifndef LIBBITCOIN_MESSAGE_BLOCK_HPP
+#define LIBBITCOIN_MESSAGE_BLOCK_HPP
 
 #include <cstdint>
 #include <cstddef>
@@ -35,31 +35,29 @@
 namespace libbitcoin {
 namespace message {
 
-class BC_API block_message
+class BC_API block
   : public chain::block
 {
 public:
-    typedef std::shared_ptr<block_message> ptr;
-    typedef std::shared_ptr<const block_message> const_ptr;
+    typedef std::shared_ptr<block> ptr;
+    typedef std::shared_ptr<const block> const_ptr;
     typedef std::vector<ptr> ptr_list;
     typedef std::vector<const_ptr> const_ptr_list;
 
-    static block_message factory_from_data(uint32_t version,
-        const data_chunk& data);
-    static block_message factory_from_data(uint32_t version,
-        std::istream& stream);
-    static block_message factory_from_data(uint32_t version,
-        reader& source);
+    static block factory_from_data(uint32_t version, const data_chunk& data);
+    static block factory_from_data(uint32_t version, std::istream& stream);
+    static block factory_from_data(uint32_t version, reader& source);
 
-    block_message();
-    block_message(const chain::header& header,
-        const chain::transaction::list& transactions);
-    block_message(chain::header&& header,
-        chain::transaction::list&& transactions);
-    block_message(const chain::block& other);
-    block_message(chain::block&& other);
-    block_message(const block_message& other);
-    block_message(block_message&& other);
+    block();
+
+    block(block&& other);
+    block(const block& other);
+
+    block(chain::block&& other);
+    block(const chain::block& other);
+
+    block(chain::header&& header, chain::transaction::list&& transactions);
+    block(const chain::header& header, const chain::transaction::list& transactions);
 
     uint64_t originator() const;
 
@@ -74,17 +72,17 @@ public:
     void to_data(uint32_t version, writer& sink) const;
     uint64_t serialized_size(uint32_t version) const;
 
-    block_message& operator=(chain::block&& other);
+    block& operator=(chain::block&& other);
 
     // This class is move assignable but not copy assignable.
-    block_message& operator=(block_message&& other);
-    void operator=(const block_message&) = delete;
+    block& operator=(block&& other);
+    void operator=(const block&) = delete;
 
     bool operator==(const chain::block& other) const;
     bool operator!=(const chain::block& other) const;
 
-    bool operator==(const block_message& other) const;
-    bool operator!=(const block_message& other) const;
+    bool operator==(const block& other) const;
+    bool operator!=(const block& other) const;
 
     static const std::string command;
     static const uint32_t version_minimum;

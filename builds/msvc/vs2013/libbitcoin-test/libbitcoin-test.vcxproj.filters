@@ -279,12 +279,6 @@
     <ClCompile Include="..\..\..\..\test\message\prefilled_transaction.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\message\block_message.cpp">
-      <Filter>src\message</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\message\transaction_message.cpp">
-      <Filter>src\message</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\headers.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
@@ -320,6 +314,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\compact_number.cpp">
       <Filter>src\chain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\block.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\transaction.cpp">
+      <Filter>src\message</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

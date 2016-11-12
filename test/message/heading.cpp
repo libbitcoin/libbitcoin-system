@@ -291,8 +291,8 @@ BOOST_AUTO_TEST_CASE(heading__type__all_cases__match_expected)
     BOOST_REQUIRE(message::message_type::address == instance.type());
     instance.set_command(message::alert::command);
     BOOST_REQUIRE(message::message_type::alert == instance.type());
-    instance.set_command(message::block_message::command);
-    BOOST_REQUIRE(message::message_type::block_message == instance.type());
+    instance.set_command(message::block::command);
+    BOOST_REQUIRE(message::message_type::block == instance.type());
     instance.set_command(message::block_transactions::command);
     BOOST_REQUIRE(message::message_type::block_transactions == instance.type());
     instance.set_command(message::compact_block::command);
@@ -333,8 +333,8 @@ BOOST_AUTO_TEST_CASE(heading__type__all_cases__match_expected)
     BOOST_REQUIRE(message::message_type::send_compact_blocks == instance.type());
     instance.set_command(message::send_headers::command);
     BOOST_REQUIRE(message::message_type::send_headers == instance.type());
-    instance.set_command(message::transaction_message::command);
-    BOOST_REQUIRE(message::message_type::transaction_message == instance.type());
+    instance.set_command(message::transaction::command);
+    BOOST_REQUIRE(message::message_type::transaction == instance.type());
     instance.set_command(message::verack::command);
     BOOST_REQUIRE(message::message_type::verack == instance.type());
     instance.set_command(message::version::command);

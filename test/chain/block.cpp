@@ -47,7 +47,7 @@ static bool all_valid(const chain::transaction::list& transactions)
     return valid;
 }
 
-BOOST_AUTO_TEST_SUITE(block_tests)
+BOOST_AUTO_TEST_SUITE(chain_block_tests)
 
 BOOST_AUTO_TEST_CASE(block__locator_size__zero_backoff__returns_top_plus_one)
 {

@@ -111,7 +111,7 @@ src_libbitcoin_la_SOURCES = \
     src/message/address.cpp \
     src/message/alert.cpp \
     src/message/alert_payload.cpp \
-    src/message/block_message.cpp \
+    src/message/block.cpp \
     src/message/block_transactions.cpp \
     src/message/compact_block.cpp \
     src/message/fee_filter.cpp \
@@ -138,7 +138,7 @@ src_libbitcoin_la_SOURCES = \
     src/message/reject.cpp \
     src/message/send_compact_blocks.cpp \
     src/message/send_headers.cpp \
-    src/message/transaction_message.cpp \
+    src/message/transaction.cpp \
     src/message/verack.cpp \
     src/message/version.cpp \
     src/unicode/console_streambuf.cpp \
@@ -258,7 +258,7 @@ test_libbitcoin_test_SOURCES = \
     test/message/address.cpp \
     test/message/alert.cpp \
     test/message/alert_payload.cpp \
-    test/message/block_message.cpp \
+    test/message/block.cpp \
     test/message/block_transactions.cpp \
     test/message/compact_block.cpp \
     test/message/fee_filter.cpp \
@@ -285,7 +285,7 @@ test_libbitcoin_test_SOURCES = \
     test/message/reject.cpp \
     test/message/send_compact_blocks.cpp \
     test/message/send_headers.cpp \
-    test/message/transaction_message.cpp \
+    test/message/transaction.cpp \
     test/message/verack.cpp \
     test/message/version.cpp \
     test/unicode/unicode.cpp \
@@ -444,7 +444,7 @@ include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/address.hpp \
     include/bitcoin/bitcoin/message/alert.hpp \
     include/bitcoin/bitcoin/message/alert_payload.hpp \
-    include/bitcoin/bitcoin/message/block_message.hpp \
+    include/bitcoin/bitcoin/message/block.hpp \
     include/bitcoin/bitcoin/message/block_transactions.hpp \
     include/bitcoin/bitcoin/message/compact_block.hpp \
     include/bitcoin/bitcoin/message/fee_filter.hpp \
@@ -471,7 +471,7 @@ include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/reject.hpp \
     include/bitcoin/bitcoin/message/send_compact_blocks.hpp \
     include/bitcoin/bitcoin/message/send_headers.hpp \
-    include/bitcoin/bitcoin/message/transaction_message.hpp \
+    include/bitcoin/bitcoin/message/transaction.hpp \
     include/bitcoin/bitcoin/message/verack.hpp \
     include/bitcoin/bitcoin/message/version.hpp
 

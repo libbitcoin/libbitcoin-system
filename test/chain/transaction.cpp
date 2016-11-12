@@ -22,7 +22,7 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(transaction_tests)
+BOOST_AUTO_TEST_SUITE(chain_transaction_tests)
 
 BOOST_AUTO_TEST_CASE(transaction__constructor_1__always__returns_default_initialized)
 {

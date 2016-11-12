@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_MESSAGE_TRANSACTION_MESSAGE_HPP
-#define LIBBITCOIN_MESSAGE_TRANSACTION_MESSAGE_HPP
+#ifndef LIBBITCOIN_MESSAGE_TRANSACTION_HPP
+#define LIBBITCOIN_MESSAGE_TRANSACTION_HPP
 
 #include <cstdint>
 #include <cstddef>
@@ -35,32 +35,34 @@
 namespace libbitcoin {
 namespace message {
 
-class BC_API transaction_message
+class BC_API transaction
   : public chain::transaction
 {
 public:
-    typedef std::shared_ptr<transaction_message> ptr;
-    typedef std::shared_ptr<const transaction_message> const_ptr;
+    typedef std::shared_ptr<transaction> ptr;
+    typedef std::shared_ptr<const transaction> const_ptr;
     typedef std::vector<ptr> ptr_list;
     typedef std::vector<const_ptr> const_ptr_list;
 
-    static transaction_message factory_from_data(uint32_t version,
+    static transaction factory_from_data(uint32_t version,
         const data_chunk& data);
-    static transaction_message factory_from_data(uint32_t version,
+    static transaction factory_from_data(uint32_t version,
         std::istream& stream);
-    static transaction_message factory_from_data(uint32_t version,
+    static transaction factory_from_data(uint32_t version,
         reader& source);
 
-    transaction_message();
-    transaction_message(const transaction& other);
-    transaction_message(const transaction_message& other);
-    transaction_message(uint32_t version, uint32_t locktime,
-        const chain::input::list& inputs, const chain::output::list& outputs);
+    transaction();
 
-    transaction_message(transaction&& other);
-    transaction_message(transaction_message&& other);
-    transaction_message(uint32_t version, uint32_t locktime,
+    transaction(transaction&& other);
+    transaction(chain::transaction&& other);
+
+    transaction(const transaction& other);
+    transaction(const chain::transaction& other);
+
+    transaction(uint32_t version, uint32_t locktime,
         chain::input::list&& inputs, chain::output::list&& outputs);
+    transaction(uint32_t version, uint32_t locktime,
+        const chain::input::list& inputs, const chain::output::list& outputs);
 
     uint64_t originator() const;
 
@@ -75,17 +77,17 @@ public:
     void to_data(uint32_t version, writer& sink) const;
     uint64_t serialized_size(uint32_t version) const;
 
-    transaction_message& operator=(chain::transaction&& other);
+    transaction& operator=(chain::transaction&& other);
 
     /// This class is move assignable but not copy assignable.
-    transaction_message& operator=(transaction_message&& other);
-    void operator=(const transaction_message&) = delete;
+    transaction& operator=(transaction&& other);
+    void operator=(const transaction&) = delete;
 
     bool operator==(const chain::transaction& other) const;
     bool operator!=(const chain::transaction& other) const;
 
-    bool operator==(const transaction_message& other) const;
-    bool operator!=(const transaction_message& other) const;
+    bool operator==(const transaction& other) const;
+    bool operator!=(const transaction& other) const;
 
     static const std::string command;
     static const uint32_t version_minimum;

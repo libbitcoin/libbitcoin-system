@@ -23,16 +23,16 @@
 using namespace bc;
 using namespace bc::message;
 
-BOOST_AUTO_TEST_SUITE(transaction_message_tests)
+BOOST_AUTO_TEST_SUITE(message_transaction_tests)
 
-BOOST_AUTO_TEST_CASE(transaction_message__constructor_1__always__initialized_invalid)
+BOOST_AUTO_TEST_CASE(transaction__constructor_1__always__initialized_invalid)
 {
-    transaction_message instance;
+    transaction instance;
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
     BOOST_REQUIRE_EQUAL(0u, instance.originator());
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__constructor_2__always__equals_transaction)
+BOOST_AUTO_TEST_CASE(transaction__constructor_2__always__equals_transaction)
 {
     data_chunk raw_tx = to_chunk(base16_literal(
         "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
@@ -46,13 +46,13 @@ BOOST_AUTO_TEST_CASE(transaction_message__constructor_2__always__equals_transact
 
     chain::transaction tx;
     BOOST_REQUIRE(tx.from_data(raw_tx));
-    transaction_message instance(tx);
+    transaction instance(tx);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(0u, instance.originator());
     BOOST_REQUIRE(instance == tx);
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__constructor_3__always__equals_param)
+BOOST_AUTO_TEST_CASE(transaction__constructor_3__always__equals_param)
 {
     data_chunk raw_tx = to_chunk(base16_literal(
         "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
@@ -66,19 +66,19 @@ BOOST_AUTO_TEST_CASE(transaction_message__constructor_3__always__equals_param)
 
     chain::transaction tx;
     BOOST_REQUIRE(tx.from_data(raw_tx));
-    transaction_message alpha(tx);
+    transaction alpha(tx);
     BOOST_REQUIRE(alpha.is_valid());
     BOOST_REQUIRE_EQUAL(0u, alpha.originator());
     BOOST_REQUIRE(alpha == tx);
 
     alpha.set_originator(15u);
-    transaction_message beta(alpha);
+    transaction beta(alpha);
     BOOST_REQUIRE(beta.is_valid());
     BOOST_REQUIRE(beta == alpha);
     BOOST_REQUIRE_EQUAL(15u, beta.originator());
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__constructor_4__always__equals_equivalent_tx)
+BOOST_AUTO_TEST_CASE(transaction__constructor_4__always__equals_equivalent_tx)
 {
     data_chunk raw_tx = to_chunk(base16_literal(
         "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
@@ -94,13 +94,13 @@ BOOST_AUTO_TEST_CASE(transaction_message__constructor_4__always__equals_equivale
     BOOST_REQUIRE(tx.from_data(raw_tx));
     const auto inputs = tx.inputs();
     const auto outputs = tx.outputs();
-    transaction_message instance(tx.version(), tx.locktime(), inputs, outputs);
+    transaction instance(tx.version(), tx.locktime(), inputs, outputs);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(0u, instance.originator());
     BOOST_REQUIRE(instance == tx);
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__constructor_5__always__equals_equivalent_tx)
+BOOST_AUTO_TEST_CASE(transaction__constructor_5__always__equals_equivalent_tx)
 {
     data_chunk raw_tx = to_chunk(base16_literal(
         "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
@@ -114,13 +114,13 @@ BOOST_AUTO_TEST_CASE(transaction_message__constructor_5__always__equals_equivale
 
     chain::transaction tx;
     BOOST_REQUIRE(tx.from_data(raw_tx));
-    transaction_message instance(chain::transaction::factory_from_data(raw_tx));
+    transaction instance(chain::transaction::factory_from_data(raw_tx));
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(0u, instance.originator());
     BOOST_REQUIRE(instance == tx);
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__constructor_6__always__equals_equivalent_tx)
+BOOST_AUTO_TEST_CASE(transaction__constructor_6__always__equals_equivalent_tx)
 {
     data_chunk raw_tx = to_chunk(base16_literal(
         "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
@@ -132,20 +132,20 @@ BOOST_AUTO_TEST_CASE(transaction_message__constructor_6__always__equals_equivale
         "0000001976a9141ee32412020a324b93b1a1acfdfff6ab9ca8fac288ac000000"
         "00"));
 
-    transaction_message value = transaction_message::factory_from_data(
-        transaction_message::version_minimum, raw_tx);
+    transaction value = transaction::factory_from_data(
+        transaction::version_minimum, raw_tx);
 
     chain::transaction tx;
     BOOST_REQUIRE(tx.from_data(raw_tx));
-    transaction_message instance(std::move(value));
+    transaction instance(std::move(value));
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(0u, instance.originator());
     BOOST_REQUIRE(instance == tx);
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__constructor_7__always__equals_equivalent_tx)
+BOOST_AUTO_TEST_CASE(transaction__constructor_7__always__equals_equivalent_tx)
 {
-    transaction_message instance(15u, 1234u, chain::input::list{ {}, {} },
+    transaction instance(15u, 1234u, chain::input::list{ {}, {} },
         chain::output::list{ {}, {}, {} });
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(0u, instance.originator());
@@ -155,15 +155,15 @@ BOOST_AUTO_TEST_CASE(transaction_message__constructor_7__always__equals_equivale
     BOOST_REQUIRE(instance.outputs().size() == 3);
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__from_data__insufficient_data__failure)
+BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_data__failure)
 {
     data_chunk data(2);
-    transaction_message instance;
+    transaction instance;
     BOOST_REQUIRE_EQUAL(false, instance.from_data(version::level::minimum, data));
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__from_data__valid_junk__success)
+BOOST_AUTO_TEST_CASE(transaction__from_data__valid_junk__success)
 {
     auto junk = base16_literal(
         "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0"
@@ -172,11 +172,11 @@ BOOST_AUTO_TEST_CASE(transaction_message__from_data__valid_junk__success)
     byte_source<std::array<uint8_t, 64>> source(junk);
     boost::iostreams::stream<byte_source<std::array<uint8_t, 64>>> stream(source);
 
-    transaction_message tx;
+    transaction tx;
     BOOST_REQUIRE(tx.from_data(version::level::minimum, stream));
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__factory_from_data_1__case_1_valid_data__success)
+BOOST_AUTO_TEST_CASE(transaction__factory_from_data_1__case_1_valid_data__success)
 {
     hash_digest tx_hash = hash_literal(
         "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
@@ -191,7 +191,7 @@ BOOST_AUTO_TEST_CASE(transaction_message__factory_from_data_1__case_1_valid_data
         "00"));
     BOOST_REQUIRE_EQUAL(raw_tx.size(), 225u);
 
-    const auto tx = transaction_message::factory_from_data(version::level::minimum, raw_tx);
+    const auto tx = transaction::factory_from_data(version::level::minimum, raw_tx);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), 225u);
     BOOST_REQUIRE(tx.hash() == tx_hash);
@@ -202,7 +202,7 @@ BOOST_AUTO_TEST_CASE(transaction_message__factory_from_data_1__case_1_valid_data
     BOOST_REQUIRE(resave == raw_tx);
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__factory_from_data_1__case_2_valid_data__success)
+BOOST_AUTO_TEST_CASE(transaction__factory_from_data_1__case_2_valid_data__success)
 {
     hash_digest tx_hash = hash_literal(
         "8a6d9302fbe24f0ec756a94ecfc837eaffe16c43d1e68c62dfe980d99eea556f");
@@ -226,7 +226,7 @@ BOOST_AUTO_TEST_CASE(transaction_message__factory_from_data_1__case_2_valid_data
         "e61e66fe5d88ac00000000"));
     BOOST_REQUIRE_EQUAL(raw_tx.size(), 523u);
 
-    const auto tx = transaction_message::factory_from_data(version::level::minimum, raw_tx);
+    const auto tx = transaction::factory_from_data(version::level::minimum, raw_tx);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE(tx.hash() == tx_hash);
 
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(transaction_message__factory_from_data_1__case_2_valid_data
     BOOST_REQUIRE(resave == raw_tx);
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__factory_from_data_2__case_1_valid_data__success)
+BOOST_AUTO_TEST_CASE(transaction__factory_from_data_2__case_1_valid_data__success)
 {
     hash_digest tx_hash = hash_literal(
         "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
@@ -252,7 +252,7 @@ BOOST_AUTO_TEST_CASE(transaction_message__factory_from_data_2__case_1_valid_data
     BOOST_REQUIRE_EQUAL(raw_tx.size(), 225u);
 
     data_source stream(raw_tx);
-    const auto tx = transaction_message::factory_from_data(version::level::minimum, stream);
+    const auto tx = transaction::factory_from_data(version::level::minimum, stream);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), 225u);
     BOOST_REQUIRE(tx.hash() == tx_hash);
@@ -266,7 +266,7 @@ BOOST_AUTO_TEST_CASE(transaction_message__factory_from_data_2__case_1_valid_data
     BOOST_REQUIRE(resave == raw_tx);
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__factory_from_data_2__case_2_valid_data__success)
+BOOST_AUTO_TEST_CASE(transaction__factory_from_data_2__case_2_valid_data__success)
 {
     hash_digest tx_hash = hash_literal(
         "8a6d9302fbe24f0ec756a94ecfc837eaffe16c43d1e68c62dfe980d99eea556f");
@@ -291,7 +291,7 @@ BOOST_AUTO_TEST_CASE(transaction_message__factory_from_data_2__case_2_valid_data
     BOOST_REQUIRE_EQUAL(raw_tx.size(), 523u);
 
     data_source stream(raw_tx);
-    const auto tx = transaction_message::factory_from_data(version::level::minimum, stream);
+    const auto tx = transaction::factory_from_data(version::level::minimum, stream);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE(tx.hash() == tx_hash);
 
@@ -304,7 +304,7 @@ BOOST_AUTO_TEST_CASE(transaction_message__factory_from_data_2__case_2_valid_data
     BOOST_REQUIRE(resave == raw_tx);
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__factory_from_data_3__case_1_valid_data__success)
+BOOST_AUTO_TEST_CASE(transaction__factory_from_data_3__case_1_valid_data__success)
 {
     hash_digest tx_hash = hash_literal(
         "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
@@ -321,7 +321,7 @@ BOOST_AUTO_TEST_CASE(transaction_message__factory_from_data_3__case_1_valid_data
 
     data_source stream(raw_tx);
     istream_reader source(stream);
-    const auto tx = transaction_message::factory_from_data(version::level::minimum, source);
+    const auto tx = transaction::factory_from_data(version::level::minimum, source);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), 225u);
     BOOST_REQUIRE(tx.hash() == tx_hash);
@@ -336,7 +336,7 @@ BOOST_AUTO_TEST_CASE(transaction_message__factory_from_data_3__case_1_valid_data
     BOOST_REQUIRE(resave == raw_tx);
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__factory_from_data_3__case_2_valid_data__success)
+BOOST_AUTO_TEST_CASE(transaction__factory_from_data_3__case_2_valid_data__success)
 {
     hash_digest tx_hash = hash_literal(
         "8a6d9302fbe24f0ec756a94ecfc837eaffe16c43d1e68c62dfe980d99eea556f");
@@ -362,7 +362,7 @@ BOOST_AUTO_TEST_CASE(transaction_message__factory_from_data_3__case_2_valid_data
 
     data_source stream(raw_tx);
     istream_reader source(stream);
-    const auto tx = transaction_message::factory_from_data(version::level::minimum, source);
+    const auto tx = transaction::factory_from_data(version::level::minimum, source);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE(tx.hash() == tx_hash);
 
@@ -376,15 +376,15 @@ BOOST_AUTO_TEST_CASE(transaction_message__factory_from_data_3__case_2_valid_data
     BOOST_REQUIRE(resave == raw_tx);
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__originator__always__expected)
+BOOST_AUTO_TEST_CASE(transaction__originator__always__expected)
 {
-    transaction_message transaction;
+    transaction transaction;
     static const auto originator = 42u;
     transaction.set_originator(originator);
     BOOST_REQUIRE_EQUAL(transaction.originator(), originator);
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__operator_assign_equals_1__always__matches_equivalent)
+BOOST_AUTO_TEST_CASE(transaction__operator_assign_equals_1__always__matches_equivalent)
 {
     data_chunk raw_tx = to_chunk(base16_literal(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
@@ -407,12 +407,12 @@ BOOST_AUTO_TEST_CASE(transaction_message__operator_assign_equals_1__always__matc
 
     chain::transaction expected;
     BOOST_REQUIRE(expected.from_data(raw_tx));
-    transaction_message instance;
+    transaction instance;
     instance = chain::transaction::factory_from_data(raw_tx);
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__operator_assign_equals_2__always__matches_equivalent)
+BOOST_AUTO_TEST_CASE(transaction__operator_assign_equals_2__always__matches_equivalent)
 {
     data_chunk raw_tx = to_chunk(base16_literal(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
@@ -433,14 +433,14 @@ BOOST_AUTO_TEST_CASE(transaction_message__operator_assign_equals_2__always__matc
         "10c3d488ac20300500000000001976a914905f933de850988603aafeeb2fd7fc"
         "e61e66fe5d88ac00000000"));
 
-    transaction_message expected;
-    BOOST_REQUIRE(expected.from_data(transaction_message::version_minimum, raw_tx));
-    transaction_message instance;
-    instance = transaction_message::factory_from_data(transaction_message::version_minimum, raw_tx);
+    transaction expected;
+    BOOST_REQUIRE(expected.from_data(transaction::version_minimum, raw_tx));
+    transaction instance;
+    instance = transaction::factory_from_data(transaction::version_minimum, raw_tx);
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__operator_boolean_equals_1__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_1__duplicates__returns_true)
 {
     data_chunk raw_tx = to_chunk(base16_literal(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
@@ -461,14 +461,14 @@ BOOST_AUTO_TEST_CASE(transaction_message__operator_boolean_equals_1__duplicates_
         "10c3d488ac20300500000000001976a914905f933de850988603aafeeb2fd7fc"
         "e61e66fe5d88ac00000000"));
 
-    transaction_message alpha;
+    transaction alpha;
     chain::transaction beta;
-    BOOST_REQUIRE(alpha.from_data(transaction_message::version_minimum, raw_tx));
+    BOOST_REQUIRE(alpha.from_data(transaction::version_minimum, raw_tx));
     BOOST_REQUIRE(beta.from_data(raw_tx));
     BOOST_REQUIRE(alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__operator_boolean_equals_1__differs__returns_false)
+BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_1__differs__returns_false)
 {
     data_chunk raw_tx = to_chunk(base16_literal(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
@@ -489,13 +489,13 @@ BOOST_AUTO_TEST_CASE(transaction_message__operator_boolean_equals_1__differs__re
         "10c3d488ac20300500000000001976a914905f933de850988603aafeeb2fd7fc"
         "e61e66fe5d88ac00000000"));
 
-    transaction_message alpha;
+    transaction alpha;
     chain::transaction beta;
-    BOOST_REQUIRE(alpha.from_data(transaction_message::version_minimum, raw_tx));
+    BOOST_REQUIRE(alpha.from_data(transaction::version_minimum, raw_tx));
     BOOST_REQUIRE_EQUAL(false, alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__operator_boolean_not_equals_1__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_1__duplicates__returns_false)
 {
     data_chunk raw_tx = to_chunk(base16_literal(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
@@ -516,14 +516,14 @@ BOOST_AUTO_TEST_CASE(transaction_message__operator_boolean_not_equals_1__duplica
         "10c3d488ac20300500000000001976a914905f933de850988603aafeeb2fd7fc"
         "e61e66fe5d88ac00000000"));
 
-    transaction_message alpha;
+    transaction alpha;
     chain::transaction beta;
-    BOOST_REQUIRE(alpha.from_data(transaction_message::version_minimum, raw_tx));
+    BOOST_REQUIRE(alpha.from_data(transaction::version_minimum, raw_tx));
     BOOST_REQUIRE(beta.from_data(raw_tx));
     BOOST_REQUIRE_EQUAL(false, alpha != beta);
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__operator_boolean_not_equals_1__differs__returns_true)
+BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_1__differs__returns_true)
 {
     data_chunk raw_tx = to_chunk(base16_literal(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
@@ -544,13 +544,13 @@ BOOST_AUTO_TEST_CASE(transaction_message__operator_boolean_not_equals_1__differs
         "10c3d488ac20300500000000001976a914905f933de850988603aafeeb2fd7fc"
         "e61e66fe5d88ac00000000"));
 
-    transaction_message alpha;
+    transaction alpha;
     chain::transaction beta;
-    BOOST_REQUIRE(alpha.from_data(transaction_message::version_minimum, raw_tx));
+    BOOST_REQUIRE(alpha.from_data(transaction::version_minimum, raw_tx));
     BOOST_REQUIRE(alpha != beta);
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__operator_boolean_equals_2__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_2__duplicates__returns_true)
 {
     data_chunk raw_tx = to_chunk(base16_literal(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
@@ -571,14 +571,14 @@ BOOST_AUTO_TEST_CASE(transaction_message__operator_boolean_equals_2__duplicates_
         "10c3d488ac20300500000000001976a914905f933de850988603aafeeb2fd7fc"
         "e61e66fe5d88ac00000000"));
 
-    transaction_message alpha;
-    transaction_message beta;
-    BOOST_REQUIRE(alpha.from_data(transaction_message::version_minimum, raw_tx));
-    BOOST_REQUIRE(beta.from_data(transaction_message::version_minimum, raw_tx));
+    transaction alpha;
+    transaction beta;
+    BOOST_REQUIRE(alpha.from_data(transaction::version_minimum, raw_tx));
+    BOOST_REQUIRE(beta.from_data(transaction::version_minimum, raw_tx));
     BOOST_REQUIRE(alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__operator_boolean_equals_2__differs__returns_false)
+BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_2__differs__returns_false)
 {
     data_chunk raw_tx = to_chunk(base16_literal(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
@@ -599,13 +599,13 @@ BOOST_AUTO_TEST_CASE(transaction_message__operator_boolean_equals_2__differs__re
         "10c3d488ac20300500000000001976a914905f933de850988603aafeeb2fd7fc"
         "e61e66fe5d88ac00000000"));
 
-    transaction_message alpha;
-    transaction_message beta;
-    BOOST_REQUIRE(alpha.from_data(transaction_message::version_minimum, raw_tx));
+    transaction alpha;
+    transaction beta;
+    BOOST_REQUIRE(alpha.from_data(transaction::version_minimum, raw_tx));
     BOOST_REQUIRE_EQUAL(false, alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__operator_boolean_not_equals_2__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_2__duplicates__returns_false)
 {
     data_chunk raw_tx = to_chunk(base16_literal(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
@@ -626,14 +626,14 @@ BOOST_AUTO_TEST_CASE(transaction_message__operator_boolean_not_equals_2__duplica
         "10c3d488ac20300500000000001976a914905f933de850988603aafeeb2fd7fc"
         "e61e66fe5d88ac00000000"));
 
-    transaction_message alpha;
-    transaction_message beta;
-    BOOST_REQUIRE(alpha.from_data(transaction_message::version_minimum, raw_tx));
-    BOOST_REQUIRE(beta.from_data(transaction_message::version_minimum, raw_tx));
+    transaction alpha;
+    transaction beta;
+    BOOST_REQUIRE(alpha.from_data(transaction::version_minimum, raw_tx));
+    BOOST_REQUIRE(beta.from_data(transaction::version_minimum, raw_tx));
     BOOST_REQUIRE_EQUAL(false, alpha != beta);
 }
 
-BOOST_AUTO_TEST_CASE(transaction_message__operator_boolean_not_equals_2__differs__returns_true)
+BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_2__differs__returns_true)
 {
     data_chunk raw_tx = to_chunk(base16_literal(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
@@ -654,9 +654,9 @@ BOOST_AUTO_TEST_CASE(transaction_message__operator_boolean_not_equals_2__differs
         "10c3d488ac20300500000000001976a914905f933de850988603aafeeb2fd7fc"
         "e61e66fe5d88ac00000000"));
 
-    transaction_message alpha;
-    transaction_message beta;
-    BOOST_REQUIRE(alpha.from_data(transaction_message::version_minimum, raw_tx));
+    transaction alpha;
+    transaction beta;
+    BOOST_REQUIRE(alpha.from_data(transaction::version_minimum, raw_tx));
     BOOST_REQUIRE(alpha != beta);
 }
 

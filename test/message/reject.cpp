@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(reject__from_data__insufficient_version__failure)
 {
     const message::reject expected(
         message::reject::reason_code::dust,
-        message::block_message::command,
+        message::block::command,
         reason_text,
         data
     );
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(reject__from_data__code_malformed__success)
 {
     const message::reject expected(
         message::reject::reason_code::malformed,
-        message::block_message::command,
+        message::block::command,
         reason_text,
         data
     );
@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE(reject__from_data__code_invalid__success)
 {
     const message::reject expected(
         message::reject::reason_code::invalid,
-        message::block_message::command,
+        message::block::command,
         reason_text,
         data
     );
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(reject__from_data__code_obsolete__success)
 {
     const message::reject expected(
         message::reject::reason_code::obsolete,
-        message::block_message::command,
+        message::block::command,
         reason_text,
         data
     );
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(reject__from_data__code_duplicate__success)
 {
     const message::reject expected(
         message::reject::reason_code::duplicate,
-        message::block_message::command,
+        message::block::command,
         reason_text,
         data
     );
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE(reject__from_data__code_nonstandard__success)
 {
     const message::reject expected(
         message::reject::reason_code::nonstandard,
-        message::block_message::command,
+        message::block::command,
         reason_text,
         data
     );
@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE(reject__from_data__code_dust__success)
 {
     const message::reject expected(
         message::reject::reason_code::dust,
-        message::block_message::command,
+        message::block::command,
         reason_text,
         data
     );
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE(reject__from_data__code_insufficient_fee__success)
 {
     const message::reject expected(
         message::reject::reason_code::insufficient_fee,
-        message::block_message::command,
+        message::block::command,
         reason_text,
         data
     );
@@ -251,7 +251,7 @@ BOOST_AUTO_TEST_CASE(reject__from_data__code_checkpoint__success)
 {
     const message::reject expected(
         message::reject::reason_code::checkpoint,
-        message::block_message::command,
+        message::block::command,
         reason_text,
         data
     );
@@ -269,7 +269,7 @@ BOOST_AUTO_TEST_CASE(reject__from_data__code_undefined__success)
 {
     const message::reject expected(
         message::reject::reason_code::undefined,
-        message::block_message::command,
+        message::block::command,
         reason_text,
         data
     );
@@ -287,7 +287,7 @@ BOOST_AUTO_TEST_CASE(reject__factory_from_data_1__valid_input__success)
 {
     const message::reject expected(
         message::reject::reason_code::dust,
-        message::block_message::command,
+        message::block::command,
         reason_text,
         data
     );
@@ -308,7 +308,7 @@ BOOST_AUTO_TEST_CASE(reject__factory_from_data_2__valid_input__success)
 {
     const message::reject expected(
         message::reject::reason_code::insufficient_fee,
-        message::block_message::command,
+        message::block::command,
         reason_text,
         data
     );
@@ -330,7 +330,7 @@ BOOST_AUTO_TEST_CASE(reject__factory_from_data_3__valid_input__success)
 {
     const message::reject expected(
         message::reject::reason_code::duplicate,
-        message::transaction_message::command,
+        message::transaction::command,
         reason_text,
         data
     );
