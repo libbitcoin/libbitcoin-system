@@ -52,6 +52,9 @@ public:
     /// minimizing overall querying.
     struct map
     {
+        // This sentinel indicates that the value was not requested.
+        static const size_t timestamp_unrequested = max_size_t;
+
         /// [block - 1, floor(block - 2016, 0)] mainnet: low == high (unused)
         range bits;
 
@@ -144,10 +147,14 @@ protected:
     static uint32_t work_required(const data& values);
 
 private:
+    // mainnet and testnet
     static uint32_t work_required_retarget(const data& values);
     static uint32_t retarget_timespan(const chain_state::data& values);
+
+    // testnet only
     static uint32_t work_required_testnet(const data& values);
-    static bool is_retarget_or_nonmax(size_t height, uint32_t bits);
+    static uint32_t elapsed_time_limit(const chain_state::data& values);
+    static bool is_retarget_or_non_limit(size_t height, uint32_t bits);
     static bool is_retarget_height(size_t height);
 
     // This is retained as an optimization for other constructions.

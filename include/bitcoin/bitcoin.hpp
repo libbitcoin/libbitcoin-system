@@ -24,6 +24,7 @@
 #include <bitcoin/bitcoin/version.hpp>
 #include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
+#include <bitcoin/bitcoin/chain/compact_number.hpp>
 #include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/chain/history.hpp>
 #include <bitcoin/bitcoin/chain/input.hpp>
@@ -35,6 +36,7 @@
 #include <bitcoin/bitcoin/chain/stealth.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/chain/script/interpreter.hpp>
+#include <bitcoin/bitcoin/chain/script/number.hpp>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
 #include <bitcoin/bitcoin/chain/script/program.hpp>
@@ -74,9 +76,7 @@
 #include <bitcoin/bitcoin/math/crypto.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/math/hash_number.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
-#include <bitcoin/bitcoin/math/script_number.hpp>
 #include <bitcoin/bitcoin/math/stealth.hpp>
 #include <bitcoin/bitcoin/math/uint256.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>

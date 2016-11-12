@@ -350,7 +350,7 @@ const operation& script::back() const
     return operations().back();
 }
 
-const operation& script::operator[](std::size_t index) const
+const operation& script::operator[](size_t index) const
 {
     BITCOIN_ASSERT(index < operations().size());
     return operations()[index];

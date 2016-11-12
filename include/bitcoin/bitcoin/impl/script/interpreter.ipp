@@ -22,13 +22,13 @@
 
 #include <cstdint>
 #include <utility>
+#include <bitcoin/bitcoin/chain/script/number.hpp>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
 #include <bitcoin/bitcoin/chain/script/program.hpp>
 #include <bitcoin/bitcoin/chain/script/script.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <bitcoin/bitcoin/math/script_number.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -268,8 +268,7 @@ interpreter::result interpreter::op_if_dup(program& program)
 
 interpreter::result interpreter::op_depth(program& program)
 {
-    const script_number stack_size(program.size());
-    program.push_move(stack_size.data());
+    program.push_move(number(program.size()).data());
     return error::success;
 }
 
@@ -371,7 +370,7 @@ interpreter::result interpreter::op_size(program& program)
     auto top = program.pop();
     const auto size = top.size();
     program.push_move(std::move(top));
-    program.push_move(script_number(size).data());
+    program.push_move(number(size).data());
     return error::success;
 }
 
@@ -395,7 +394,7 @@ interpreter::result interpreter::op_equal_verify(program& program)
 
 interpreter::result interpreter::op_add1(program& program)
 {
-    script_number number;
+    number number;
     if (!program.pop(number))
         return error::op_add1;
 
@@ -406,7 +405,7 @@ interpreter::result interpreter::op_add1(program& program)
 
 interpreter::result interpreter::op_sub1(program& program)
 {
-    script_number number;
+    number number;
     if (!program.pop(number))
         return error::op_sub1;
 
@@ -417,7 +416,7 @@ interpreter::result interpreter::op_sub1(program& program)
 
 interpreter::result interpreter::op_negate(program& program)
 {
-    script_number number;
+    number number;
     if (!program.pop(number))
         return error::op_negate;
 
@@ -428,7 +427,7 @@ interpreter::result interpreter::op_negate(program& program)
 
 interpreter::result interpreter::op_abs(program& program)
 {
-    script_number number;
+    number number;
     if (!program.pop(number))
         return error::op_abs;
 
@@ -441,7 +440,7 @@ interpreter::result interpreter::op_abs(program& program)
 
 interpreter::result interpreter::op_not(program& program)
 {
-    script_number number;
+    number number;
     if (!program.pop(number))
         return error::op_not;
 
@@ -451,7 +450,7 @@ interpreter::result interpreter::op_not(program& program)
 
 interpreter::result interpreter::op_nonzero(program& program)
 {
-    script_number number;
+    number number;
     if (!program.pop(number))
         return error::op_nonzero;
 
@@ -461,7 +460,7 @@ interpreter::result interpreter::op_nonzero(program& program)
 
 interpreter::result interpreter::op_add(program& program)
 {
-    script_number first, second;
+    number first, second;
     if (!program.pop_binary(first, second))
         return error::op_add;
 
@@ -472,7 +471,7 @@ interpreter::result interpreter::op_add(program& program)
 
 interpreter::result interpreter::op_sub(program& program)
 {
-    script_number first, second;
+    number first, second;
     if (!program.pop_binary(first, second))
         return error::op_sub;
 
@@ -483,7 +482,7 @@ interpreter::result interpreter::op_sub(program& program)
 
 interpreter::result interpreter::op_bool_and(program& program)
 {
-    script_number first, second;
+    number first, second;
     if (!program.pop_binary(first, second))
         return error::op_bool_and;
 
@@ -493,7 +492,7 @@ interpreter::result interpreter::op_bool_and(program& program)
 
 interpreter::result interpreter::op_bool_or(program& program)
 {
-    script_number first, second;
+    number first, second;
     if (!program.pop_binary(first, second))
         return error::op_bool_or;
 
@@ -503,7 +502,7 @@ interpreter::result interpreter::op_bool_or(program& program)
 
 interpreter::result interpreter::op_num_equal(program& program)
 {
-    script_number first, second;
+    number first, second;
     if (!program.pop_binary(first, second))
         return error::op_num_equal;
 
@@ -513,7 +512,7 @@ interpreter::result interpreter::op_num_equal(program& program)
 
 interpreter::result interpreter::op_num_equal_verify(program& program)
 {
-    script_number first, second;
+    number first, second;
     if (!program.pop_binary(first, second))
         return error::op_num_equal_verify1;
 
@@ -523,7 +522,7 @@ interpreter::result interpreter::op_num_equal_verify(program& program)
 
 interpreter::result interpreter::op_num_not_equal(program& program)
 {
-    script_number first, second;
+    number first, second;
     if (!program.pop_binary(first, second))
         return error::op_num_not_equal;
 
@@ -533,7 +532,7 @@ interpreter::result interpreter::op_num_not_equal(program& program)
 
 interpreter::result interpreter::op_less_than(program& program)
 {
-    script_number first, second;
+    number first, second;
     if (!program.pop_binary(first, second))
         return error::op_less_than;
 
@@ -543,7 +542,7 @@ interpreter::result interpreter::op_less_than(program& program)
 
 interpreter::result interpreter::op_greater_than(program& program)
 {
-    script_number first, second;
+    number first, second;
     if (!program.pop_binary(first, second))
         return error::op_greater_than;
 
@@ -553,7 +552,7 @@ interpreter::result interpreter::op_greater_than(program& program)
 
 interpreter::result interpreter::op_less_than_or_equal(program& program)
 {
-    script_number first, second;
+    number first, second;
     if (!program.pop_binary(first, second))
         return error::op_less_than_or_equal;
 
@@ -563,7 +562,7 @@ interpreter::result interpreter::op_less_than_or_equal(program& program)
 
 interpreter::result interpreter::op_greater_than_or_equal(program& program)
 {
-    script_number first, second;
+    number first, second;
     if (!program.pop_binary(first, second))
         return error::op_greater_than_or_equal;
 
@@ -573,7 +572,7 @@ interpreter::result interpreter::op_greater_than_or_equal(program& program)
 
 interpreter::result interpreter::op_min(program& program)
 {
-    script_number first, second;
+    number first, second;
     if (!program.pop_binary(first, second))
         return error::op_min;
 
@@ -583,7 +582,7 @@ interpreter::result interpreter::op_min(program& program)
 
 interpreter::result interpreter::op_max(program& program)
 {
-    script_number first, second;
+    number first, second;
     if (!program.pop_binary(first, second))
         return error::op_max;
 
@@ -593,7 +592,7 @@ interpreter::result interpreter::op_max(program& program)
 
 interpreter::result interpreter::op_within(program& program)
 {
-    script_number first, second, third;
+    number first, second, third;
     if (!program.pop_ternary(first, second, third))
         return error::op_within;
 
@@ -796,16 +795,16 @@ interpreter::result interpreter::op_check_locktime_verify(program& program)
 
     // BIP65: the stack is empty.
     // BIP65: extend the (signed) CLTV script number range to 5 bytes.
-    script_number number;
-    if (!program.pop(number, max_cltv_number_size))
+    number locktime;
+    if (!program.pop(locktime, max_cltv_number_size))
         return error::op_check_locktime_verify3;
 
     // BIP65: the top item on the stack is less than 0.
-    if (number < 0)
+    if (locktime < 0)
         return error::op_check_locktime_verify4;
 
     // The value is positive, so cast is safe.
-    const auto stack = static_cast<uint64_t>(number.int64());
+    const auto stack = static_cast<uint64_t>(locktime.int64());
 
     // BIP65: the stack lock-time type differs from that of tx nLockTime.
     if ((stack < locktime_threshold) != (tx.locktime() < locktime_threshold))
@@ -907,41 +906,41 @@ interpreter::result interpreter::run_op(const operation& op, program& program)
         case opcode::push_four_size:
             return op_push_data(program, op.data(), max_uint32);
         case opcode::push_negative_1:
-            return op_push_number(program, script_number::negative_1);
+            return op_push_number(program, number::negative_1);
         case opcode::reserved_80:
             return op_reserved(code);
         case opcode::push_positive_1:
-            return op_push_number(program, script_number::positive_1);
+            return op_push_number(program, number::positive_1);
         case opcode::push_positive_2:
-            return op_push_number(program, script_number::positive_2);
+            return op_push_number(program, number::positive_2);
         case opcode::push_positive_3:
-            return op_push_number(program, script_number::positive_3);
+            return op_push_number(program, number::positive_3);
         case opcode::push_positive_4:
-            return op_push_number(program, script_number::positive_4);
+            return op_push_number(program, number::positive_4);
         case opcode::push_positive_5:
-            return op_push_number(program, script_number::positive_5);
+            return op_push_number(program, number::positive_5);
         case opcode::push_positive_6:
-            return op_push_number(program, script_number::positive_6);
+            return op_push_number(program, number::positive_6);
         case opcode::push_positive_7:
-            return op_push_number(program, script_number::positive_7);
+            return op_push_number(program, number::positive_7);
         case opcode::push_positive_8:
-            return op_push_number(program, script_number::positive_8);
+            return op_push_number(program, number::positive_8);
         case opcode::push_positive_9:
-            return op_push_number(program, script_number::positive_9);
+            return op_push_number(program, number::positive_9);
         case opcode::push_positive_10:
-            return op_push_number(program, script_number::positive_10);
+            return op_push_number(program, number::positive_10);
         case opcode::push_positive_11:
-            return op_push_number(program, script_number::positive_11);
+            return op_push_number(program, number::positive_11);
         case opcode::push_positive_12:
-            return op_push_number(program, script_number::positive_12);
+            return op_push_number(program, number::positive_12);
         case opcode::push_positive_13:
-            return op_push_number(program, script_number::positive_13);
+            return op_push_number(program, number::positive_13);
         case opcode::push_positive_14:
-            return op_push_number(program, script_number::positive_14);
+            return op_push_number(program, number::positive_14);
         case opcode::push_positive_15:
-            return op_push_number(program, script_number::positive_15);
+            return op_push_number(program, number::positive_15);
         case opcode::push_positive_16:
-            return op_push_number(program, script_number::positive_16);
+            return op_push_number(program, number::positive_16);
         case opcode::nop:
             return op_nop(code);
         case opcode::reserved_98:

@@ -23,9 +23,10 @@
 #include <chrono>
 #include <utility>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
+#include <bitcoin/bitcoin/chain/compact_number.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/math/hash_number.hpp>
+#include <bitcoin/bitcoin/math/uint256.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -413,19 +414,23 @@ bool header::is_valid_time_stamp() const
     return time <= future;
 }
 
+// [CheckProofOfWork]
 bool header::is_valid_proof_of_work() const
 {
-    // TODO: This should be statically-initialized (optimization).
-    hash_number maximum;
-    if (!maximum.set_compact(max_work_bits))
+    static const uint256_t pow_limit(compact_number{ proof_of_work_limit });
+    const auto compact = compact_number(bits_);
+
+    if (compact.is_overflowed())
         return false;
 
-    hash_number target;
-    if (!target.set_compact(bits_) || target > maximum)
+    uint256_t target(compact);
+
+    // Ensure claimed work is within limits.
+    if (target < 1 || target > pow_limit)
         return false;
 
-    hash_number value(hash());
-    return value <= target;
+    // Ensure actual work does not exceed claimed amount.
+    return uint256_t(hash()) <= target;
 }
 
 // Validation.

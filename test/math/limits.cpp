@@ -27,6 +27,48 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(limits_tests)
 
+// cast_add
+//-----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(limits__cast_add__uint32_to_int64_0__returns_0)
+{
+    static const int64_t expected = 0;
+    BOOST_REQUIRE_EQUAL(cast_add<int64_t>(0u, 0u), expected);
+}
+
+BOOST_AUTO_TEST_CASE(limits__cast_add__uint32_to_int64_maximum_plus_0__returns_maximum)
+{
+    static const int64_t expected = max_uint32;
+    BOOST_REQUIRE_EQUAL(cast_add<int64_t>(max_uint32, uint32_t{ 0 }), expected);
+}
+
+BOOST_AUTO_TEST_CASE(limits__cast_add__uint32_to_int64_maximum_plus_maximum__returns_twice_maximum)
+{
+    static const int64_t expected = 2 * static_cast<int64_t>(max_uint32);
+    BOOST_REQUIRE_EQUAL(cast_add<int64_t>(max_uint32, max_uint32), expected);
+}
+
+// cast_subtract
+//-----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(limits__cast_subtract__uint32_to_int64_0__returns_0)
+{
+    static const int64_t expected = 0;
+    BOOST_REQUIRE_EQUAL(cast_subtract<int64_t>(0u, 0u), expected);
+}
+
+BOOST_AUTO_TEST_CASE(limits__cast_subtract__uint32_to_int64_0_minus_maximum__returns_negtive_maximum)
+{
+    static const int64_t expected = -1 * static_cast<int64_t>(max_uint32);
+    BOOST_REQUIRE_EQUAL(cast_subtract<int64_t>(uint32_t{ 0 }, max_uint32), expected);
+}
+
+BOOST_AUTO_TEST_CASE(limits__cast_subtract__uint32_to_int64_maximum_minus_maximum__returns_0)
+{
+    static const int64_t expected = 0;
+    BOOST_REQUIRE_EQUAL(cast_subtract<int64_t>(max_uint32, max_uint32), expected);
+}
+
 static const size_t minimum = 0;
 static const size_t maximum = max_size_t;
 static const size_t half = maximum / 2;

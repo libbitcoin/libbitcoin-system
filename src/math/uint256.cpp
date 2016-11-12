@@ -5,259 +5,382 @@
 
 #include <bitcoin/bitcoin/math/uint256.hpp>
 
-#include <stdio.h>
-#include <string.h>
+#include <string>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <boost/program_options.hpp>
+#include <bitcoin/bitcoin/formats/base_16.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/endian.hpp>
 
 namespace libbitcoin {
 
-template <unsigned int BITS>
-base_uint<BITS>::base_uint(const std::vector<unsigned char>& vch)
-{
-    if (vch.size() != sizeof(pn))
-        throw uint_error("Converting vector of wrong size to base_uint");
+// The number of bits in a word of the big number buffer.
+static const uint32_t word_bits = sizeof(uint32_t) * 8;
 
-    memcpy(pn, &vch[0], sizeof(pn));
+// Constructors.
+//-----------------------------------------------------------------------------
+
+uint256_t::uint256_t()
+{
+    words_.fill(0);
 }
 
-template <unsigned int BITS>
-base_uint<BITS>& base_uint<BITS>::operator<<=(unsigned int shift)
+uint256_t::uint256_t(uint256_t&& other)
 {
-    base_uint<BITS> a(*this);
-    for (int i = 0; i < WIDTH; i++)
-        pn[i] = 0;
-
-    int k = shift / 32;
-    shift = shift % 32;
-    for (int i = 0; i < WIDTH; i++)
-    {
-        if (i + k + 1 < WIDTH && shift != 0)
-            pn[i + k + 1] |= (a.pn[i] >> (32 - shift));
-
-        if (i + k < WIDTH)
-            pn[i + k] |= (a.pn[i] << shift);
-    }
-
-    return *this;
+    std::swap(words_, other.words_);
 }
 
-template <unsigned int BITS>
-base_uint<BITS>& base_uint<BITS>::operator>>=(unsigned int shift)
+uint256_t::uint256_t(const uint256_t& other)
 {
-    base_uint<BITS> a(*this);
-    for (int i = 0; i < WIDTH; i++)
-        pn[i] = 0;
-
-    int k = shift / 32;
-    shift = shift % 32;
-    for (int i = 0; i < WIDTH; i++)
-    {
-        if (i - k - 1 >= 0 && shift != 0)
-            pn[i - k - 1] |= (a.pn[i] << (32 - shift));
-
-        if (i - k >= 0)
-            pn[i - k] |= (a.pn[i] >> shift);
-    }
-
-    return *this;
+    words_ = other.words_;
 }
 
-template <unsigned int BITS>
-base_uint<BITS>& base_uint<BITS>::operator*=(uint32_t b32)
+uint256_t::uint256_t(const hash_digest& hash)
 {
-    uint64_t carry = 0;
-    for (int i = 0; i < WIDTH; i++)
-    {
-        uint64_t n = carry + (uint64_t)b32 * pn[i];
-        pn[i] = n & 0xffffffff;
-        carry = n >> 32;
-    }
-
-    return *this;
+    const auto size = sizeof(uint32_t);
+    words_[0] = from_little_endian_unsafe<uint32_t>(&hash[0 * size]);
+    words_[1] = from_little_endian_unsafe<uint32_t>(&hash[1 * size]);
+    words_[2] = from_little_endian_unsafe<uint32_t>(&hash[2 * size]);
+    words_[3] = from_little_endian_unsafe<uint32_t>(&hash[3 * size]);
+    words_[4] = from_little_endian_unsafe<uint32_t>(&hash[4 * size]);
+    words_[5] = from_little_endian_unsafe<uint32_t>(&hash[5 * size]);
+    words_[6] = from_little_endian_unsafe<uint32_t>(&hash[6 * size]);
+    words_[7] = from_little_endian_unsafe<uint32_t>(&hash[7 * size]);
 }
 
-template <unsigned int BITS>
-base_uint<BITS>& base_uint<BITS>::operator*=(const base_uint& b)
+uint256_t::uint256_t(uint32_t value)
 {
-    base_uint<BITS> a = *this;
-    *this = 0;
-    for (int j = 0; j < WIDTH; j++)
-    {
-        uint64_t carry = 0;
-        for (int i = 0; i + j < WIDTH; i++)
+    words_.fill(0);
+    words_[0] = value;
+}
+
+// Properties.
+//-----------------------------------------------------------------------------
+
+inline size_t high_bit(uint32_t value)
+{
+    size_t bit = 0;
+    for (; value != 0 && bit < word_bits; ++bit, value >>= 1);
+    return bit;
+}
+
+// Determine the logical bit length of the big number [0..256].
+size_t uint256_t::bit_length() const
+{
+    // Reverse loop with zero lower bound requires signed index.
+    const auto last = static_cast<int8_t>(words_.size() - 1);
+
+    for (auto i = last; i >= 0; --i)
+        if (words_[i] != 0)
+            return i * word_bits + high_bit(words_[i]);
+
+    return 0;
+}
+
+// Determine the logical byte length of the big number [0..32].
+size_t uint256_t::byte_length() const
+{
+    return (bit_length() + 7) / 8;
+}
+
+hash_digest uint256_t::hash() const
+{
+    hash_digest hash;
+
+    /* safe to ignore */ build_array<hash_size>
+    (
+        hash,
         {
-            uint64_t n = carry + pn[i + j] + (uint64_t)a.pn[j] * b.pn[i];
-            pn[i + j] = n & 0xffffffff;
-            carry = n >> 32;
+            to_little_endian(words_[0]),
+            to_little_endian(words_[1]),
+            to_little_endian(words_[2]),
+            to_little_endian(words_[3]),
+            to_little_endian(words_[4]),
+            to_little_endian(words_[5]),
+            to_little_endian(words_[6]),
+            to_little_endian(words_[7])
         }
-    }
+    );
 
-    return *this;
+    return hash;
 }
 
-template <unsigned int BITS>
-base_uint<BITS>& base_uint<BITS>::operator/=(const base_uint& b)
+// This is used to efficiently generate a compact number (otherwise shift).
+uint64_t uint256_t::operator[](size_t index) const
 {
-    // make a copy, so we can shift.
-    base_uint<BITS> div = b;
+    BITCOIN_ASSERT_MSG(index < 4, "index out of range");
 
-    // make a copy, so we can subtract.
-    base_uint<BITS> num = *this; 
-
-    // the quotient.
-    *this = 0;
-
-    int num_bits = num.bits();
-    int div_bits = div.bits();
-    if (div_bits == 0)
-        throw uint_error("Division by zero");
-
-    // the result is certainly 0.
-    if (div_bits > num_bits)
-        return *this;
-
-    int shift = num_bits - div_bits;
-
-    // shift so that div and nun align.
-    div <<= shift;
-
-    while (shift >= 0)
-    {
-        if (num >= div)
-        {
-            num -= div;
-
-            // set a bit of the result.
-            pn[shift / 32] |= (1 << (shift & 31));
-        }
-
-        // shift back.
-        div >>= 1;
-        shift--;
-    }
-
-    // num now contains the remainder of the division.
-    return *this;
+    const auto offset = 2 * index;
+    return
+        (static_cast<uint64_t>(words_[offset + 0]) << 0 * word_bits) |
+        (static_cast<uint64_t>(words_[offset + 1]) << 1 * word_bits);
 }
 
-template <unsigned int BITS>
-int base_uint<BITS>::CompareTo(const base_uint<BITS>& b) const
+// Helpers.
+//-----------------------------------------------------------------------------
+
+bool uint256_t::equals(uint32_t value) const
 {
-    for (int i = WIDTH - 1; i >= 0; i--)
+    return
+        words_[0] == value &&
+        words_[1] == 0 &&
+        words_[2] == 0 &&
+        words_[3] == 0 &&
+        words_[4] == 0 &&
+        words_[5] == 0 &&
+        words_[6] == 0 &&
+        words_[7] == 0;
+}
+
+int uint256_t::compare(const uint256_t& other) const
+{
+    // Reverse loop with zero lower bound requires signed index.
+    const auto last = static_cast<int8_t>(words_.size() - 1);
+
+    for (auto i = last; i >= 0; i--)
     {
-        if (pn[i] < b.pn[i])
+        if (words_[i] < other.words_[i])
             return -1;
 
-        if (pn[i] > b.pn[i])
+        if (words_[i] > other.words_[i])
             return 1;
     }
 
     return 0;
 }
 
-template <unsigned int BITS>
-bool base_uint<BITS>::EqualTo(uint64_t b) const
+// Operators.
+//-----------------------------------------------------------------------------
+
+bool uint256_t::operator>(const uint256_t& other) const
 {
-    for (int i = WIDTH - 1; i >= 2; i--)
-        if (pn[i] != 0)
-            return false;
-
-    if (pn[1] != (b >> 32))
-        return false;
-
-    if (pn[0] != (b & 0xfffffffful))
-        return false;
-
-    return true;
+    return compare(other) > 0;
 }
 
-template <unsigned int BITS>
-unsigned int base_uint<BITS>::bits() const
+bool uint256_t::operator<(const uint256_t& other) const
 {
-    for (int pos = WIDTH - 1; pos >= 0; pos--)
-    {
-        if (pn[pos] != 0)
-        {
-            for (int bits = 31; bits > 0; bits--)
-                if ((pn[pos] & 1 << bits) != 0)
-                    return 32 * pos + bits + 1;
+    return compare(other) < 0;
+}
 
-            return 32 * pos + 1;
+bool uint256_t::operator>=(const uint256_t& other) const
+{
+    return compare(other) >= 0;
+}
+
+bool uint256_t::operator<=(const uint256_t& other) const
+{
+    return compare(other) <= 0;
+}
+
+bool uint256_t::operator==(const uint256_t& other) const
+{
+    return compare(other) == 0;
+}
+
+bool uint256_t::operator!=(const uint256_t& other) const
+{
+    return compare(other) != 0;
+}
+
+uint256_t uint256_t::operator~() const
+{
+    uint256_t result;
+    result.words_[0] = ~words_[0];
+    result.words_[1] = ~words_[1];
+    result.words_[2] = ~words_[2];
+    result.words_[3] = ~words_[3];
+    result.words_[4] = ~words_[4];
+    result.words_[5] = ~words_[5];
+    result.words_[6] = ~words_[6];
+    result.words_[7] = ~words_[7];
+    return result;
+}
+
+uint256_t uint256_t::operator-() const
+{
+    // two's compliment
+    return ++(~(*this));
+}
+
+uint256_t uint256_t::operator>>(uint32_t shift) const
+{
+    return uint256_t(*this) >>= shift;
+}
+
+uint256_t uint256_t::operator+(const uint256_t& other) const
+{
+    uint256_t copy(*this);
+    copy += other;
+    return copy;
+}
+
+uint256_t uint256_t::operator/(const uint256_t& other) const
+{
+    uint256_t copy(*this);
+    copy /= other;
+    return copy;
+}
+
+uint256_t& uint256_t::operator++()
+{
+    for (auto& word: words_)
+        if (++word != 0)
+            break;
+
+    return *this;
+}
+
+uint256_t& uint256_t::operator=(uint32_t value)
+{
+    words_.fill(0);
+    words_[0] = value;
+    return *this;
+}
+
+uint256_t& uint256_t::operator>>=(uint32_t shift)
+{
+    const auto value = shift / word_bits;
+    const auto remainder = shift % word_bits;
+    uint256_t copy(*this);
+    words_.fill(0);
+
+    for (size_t i = 0; i < words_.size(); ++i)
+    {
+        if (i >= value + 1 && remainder != 0)
+            words_[i - value - 1] |= copy.words_[i] << (word_bits - remainder);
+
+        if (i >= value + 0)
+            words_[i - value - 0] |= copy.words_[i] >> remainder;
+    }
+
+    return *this;
+}
+
+uint256_t& uint256_t::operator<<=(uint32_t shift)
+{
+    const auto value = shift / word_bits;
+    const auto remainder = shift % word_bits;
+    uint256_t copy(*this);
+    words_.fill(0);
+
+    for (size_t i = 0; i < words_.size(); ++i)
+    {
+        if (i + value + 1 < words_.size() && remainder != 0)
+            words_[i + value + 1] |= copy.words_[i] >> (word_bits - remainder);
+
+        if (i + value + 0 < words_.size())
+            words_[i + value + 0] |= copy.words_[i] << remainder;
+    }
+
+    return *this;
+}
+
+uint256_t& uint256_t::operator*=(uint32_t value)
+{
+    uint64_t carry = 0;
+    for (auto i = 0; i < words_.size(); ++i)
+    {
+        auto product = carry + static_cast<uint64_t>(value) * words_[i];
+        words_[i] = static_cast<uint32_t>(product);
+        carry = product >> word_bits;
+    }
+
+    return *this;
+}
+
+uint256_t& uint256_t::operator/=(uint32_t value)
+{
+    return (*this) /= uint256_t(value);
+}
+
+uint256_t& uint256_t::operator+=(const uint256_t& other)
+{
+    uint64_t carry = 0;
+    for (auto i = 0; i < words_.size(); ++i)
+    {
+        auto sum = carry + words_[i] + other.words_[i];
+        words_[i] = static_cast<uint32_t>(sum);
+        carry = sum >> word_bits;
+    }
+
+    return *this;
+}
+
+uint256_t& uint256_t::operator-=(const uint256_t& other)
+{
+    *this += -other;
+    return *this;
+}
+
+uint256_t& uint256_t::operator/=(const uint256_t& other)
+{
+    // Make a copy, so we can shift.
+    uint256_t divisor(other);
+    auto divisor_bits = divisor.bit_length();
+
+    // Make a copy, so we can subtract.
+    uint256_t dividend(*this);
+    auto dividend_bits = dividend.bit_length();
+
+    // Initialize the quotient.
+    words_.fill(0);
+
+    if (divisor_bits == 0)
+        throw std::overflow_error("division by zero");
+
+    // The result is zero if the divisor exceeds the dividend.
+    if (divisor_bits > dividend_bits)
+        return *this;
+
+    // The number of bits to shift (both values are limited to 256).
+    const auto difference = static_cast<int32_t>(dividend_bits - divisor_bits);
+
+    // Shift so that divisor and dividend align.
+    divisor <<= difference;
+
+    // Reverse loop with zero lower bound requires signed index.
+    for (auto shift = difference; shift >= 0; --shift, divisor >>= 1)
+    {
+        if (dividend >= divisor)
+        {
+            // Set a bit of the result.
+            words_[shift / word_bits] |= (1 << (shift & (word_bits - 1)));
+
+            // Subtract out one instance of the divisor.
+            dividend -= divisor;
         }
     }
 
-    return 0;
-}
-
-// Explicit instantiations for base_uint<256>
-template base_uint<256>::base_uint(const std::vector<unsigned char>&);
-template base_uint<256>& base_uint<256>::operator<<=(unsigned int);
-template base_uint<256>& base_uint<256>::operator>>=(unsigned int);
-template base_uint<256>& base_uint<256>::operator*=(uint32_t b32);
-template base_uint<256>& base_uint<256>::operator*=(const base_uint<256>& b);
-template base_uint<256>& base_uint<256>::operator/=(const base_uint<256>& b);
-template int base_uint<256>::CompareTo(const base_uint<256>&) const;
-template bool base_uint<256>::EqualTo(uint64_t) const;
-template unsigned int base_uint<256>::bits() const;
-
-uint32_t uint256_t::GetCompact(bool fNegative) const
-{
-    int nSize = (bits() + 7) / 8;
-    uint32_t nCompact = 0;
-
-    if (nSize <= 3)
-    {
-        nCompact = (uint32_t)(GetLow64() << 8 * (3 - nSize));
-    }
-    else
-    {
-        uint256_t bn = *this >> 8 * (nSize - 3);
-        nCompact = (uint32_t)(bn.GetLow64());
-    }
-
-    // The 0x00800000 bit denotes the sign. Thus, if it is already set,
-    // divide the mantissa by 256 and increase the exponent.
-    if (nCompact & 0x00800000)
-    {
-        nCompact >>= 8;
-        nSize++;
-    }
-
-    BITCOIN_ASSERT((nCompact & ~0x007fffff) == 0);
-    BITCOIN_ASSERT(nSize < 256);
-    nCompact |= nSize << 24;
-    nCompact |= (fNegative && (nCompact & 0x007fffff) ? 0x00800000 : 0);
-    return nCompact;
-}
-
-// This implementation directly uses shifts instead of going
-// through an intermediate MPI representation.
-uint256_t& uint256_t::SetCompact(uint32_t nCompact, bool* pfNegative, 
-    bool* pfOverflow)
-{
-    int nSize = nCompact >> 24;
-    uint32_t nWord = nCompact & 0x007fffff;
-
-    if (nSize <= 3) 
-    {
-        nWord >>= 8 * (3 - nSize);
-        *this = nWord;
-    }
-    else 
-    {
-        *this = nWord;
-        *this <<= 8 * (nSize - 3);
-    }
-
-    if (pfNegative != nullptr)
-        *pfNegative = nWord != 0 && (nCompact & 0x00800000) != 0;
-
-    if (pfOverflow != nullptr)
-        *pfOverflow = nWord != 0 && ((nSize > 34) ||
-        (nWord > 0xff && nSize > 33) ||
-        (nWord > 0xffff && nSize > 32));
-
+    // The dividend contains the remainder.
     return *this;
+}
+
+// Serialization.
+//-----------------------------------------------------------------------------
+
+std::istream& operator>>(std::istream& input, uint256_t& argument)
+{
+    std::string hexcode;
+    input >> hexcode;
+
+    hash_digest hash;
+
+    if (!decode_hash(hash, hexcode))
+    {
+        using namespace boost::program_options;
+        BOOST_THROW_EXCEPTION(invalid_option_value(hexcode));
+    }
+
+    return input;
+}
+
+std::ostream& operator<<(std::ostream& output, const uint256_t& argument)
+{
+    output << encode_hash(argument.hash());
+    return output;
 }
 
 } // namespace libbitcoin

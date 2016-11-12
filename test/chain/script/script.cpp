@@ -135,7 +135,7 @@ bool parse_token(data_chunk& raw_script, data_chunk& raw_hex, std::string token)
         }
         else
         {
-            script_number bignum(value);
+            number bignum(value);
             push_data(raw_script, bignum.data());
         }
     }

@@ -28,7 +28,7 @@ namespace libbitcoin {
 namespace chain {
 
 // TODO: inline all program methods.
-// TODO: inline all script_number methods.
+// TODO: inline all number methods.
 // TODO: inline operation methods used by interpreter and program.
 code interpreter::run(program& program)
 {

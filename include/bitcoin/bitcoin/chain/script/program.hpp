@@ -21,11 +21,11 @@
 #define LIBBITCOIN_CHAIN_PROGRAM_HPP
 
 #include <cstdint>
+#include <bitcoin/bitcoin/chain/script/number.hpp>
 #include <bitcoin/bitcoin/chain/script/opcode.hpp>
 #include <bitcoin/bitcoin/chain/script/operation.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/math/script_number.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
@@ -37,7 +37,6 @@ class transaction;
 class BC_API program
 {
 public:
-    typedef script_number number;
     typedef data_stack::value_type value_type;
     typedef operation::iterator op_iterator;
 

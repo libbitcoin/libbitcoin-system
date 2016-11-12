@@ -26,7 +26,7 @@
 #include <bitcoin/bitcoin/config/checkpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
-#include <bitcoin/bitcoin/math/hash_number.hpp>
+#include <bitcoin/bitcoin/math/uint256.hpp>
 #include <bitcoin/bitcoin/version.hpp>
 
 namespace libbitcoin {
@@ -81,11 +81,11 @@ BC_CONSTEXPR size_t max_block_sigops = max_block_size / 50;
 BC_CONSTEXPR size_t coinbase_maturity = 100;
 BC_CONSTEXPR size_t time_stamp_future_hours = 2;
 BC_CONSTEXPR size_t locktime_threshold = 500000000;
-BC_CONSTEXPR size_t max_work_bits = 0x1d00ffff;
 
 // Timespan constants.
 //-----------------------------------------------------------------------------
 
+BC_CONSTEXPR uint32_t proof_of_work_limit = 0x1d00ffff;
 BC_CONSTEXPR uint32_t retargeting_factor = 4;
 BC_CONSTEXPR uint32_t target_spacing_seconds = 10 * 60;
 BC_CONSTEXPR uint32_t double_spacing_seconds = 2 * target_spacing_seconds;
@@ -131,15 +131,16 @@ static const config::checkpoint mainnet_bip16_exception_checkpoint
     "00000000000002dc756eebf4f49723ed8d30cc28a5f108eb94b1ba88ac4f9c22", 170060
 };
 
-////// github.com/bitcoin/bips/blob/master/bip-0030.mediawiki#specification
+// github.com/bitcoin/bips/blob/master/bip-0030.mediawiki#specification
 ////static const config::checkpoint mainnet_bip30_exception_checkpoint1
 ////{
+////    // This block validates witout an exception, meaning that the tx was spent.
 ////    "00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec", 91842
 ////};
-////static const config::checkpoint mainnet_bip30_exception_checkpoint2
-////{
-////    "00000000000743f190a18c5577a3c2d2a1f610ae9601ac046a38084ccb7cd721", 91880
-////};
+static const config::checkpoint mainnet_bip30_exception_checkpoint2
+{
+    "00000000000743f190a18c5577a3c2d2a1f610ae9601ac046a38084ccb7cd721", 91880
+};
 
 // Network protocol constants.
 //-----------------------------------------------------------------------------

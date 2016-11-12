@@ -39,6 +39,7 @@ src_libbitcoin_la_SOURCES = \
     src/error.cpp \
     src/chain/block.cpp \
     src/chain/chain_state.cpp \
+    src/chain/compact_number.cpp \
     src/chain/header.cpp \
     src/chain/input.cpp \
     src/chain/output.cpp \
@@ -47,6 +48,7 @@ src_libbitcoin_la_SOURCES = \
     src/chain/point_iterator.cpp \
     src/chain/transaction.cpp \
     src/chain/script/interpreter.cpp \
+    src/chain/script/number.cpp \
     src/chain/script/opcode.cpp \
     src/chain/script/operation.cpp \
     src/chain/script/program.cpp \
@@ -78,8 +80,6 @@ src_libbitcoin_la_SOURCES = \
     src/math/crypto.cpp \
     src/math/elliptic_curve.cpp \
     src/math/hash.cpp \
-    src/math/hash_number.cpp \
-    src/math/script_number.cpp \
     src/math/secp256k1_initializer.cpp \
     src/math/secp256k1_initializer.hpp \
     src/math/stealth.cpp \
@@ -221,6 +221,7 @@ test_libbitcoin_test_LDADD = src/libbitcoin.la ${boost_unit_test_framework_LIBS}
 test_libbitcoin_test_SOURCES = \
     test/main.cpp \
     test/chain/block.cpp \
+    test/chain/compact_number.cpp \
     test/chain/header.cpp \
     test/chain/input.cpp \
     test/chain/output.cpp \
@@ -229,6 +230,8 @@ test_libbitcoin_test_SOURCES = \
     test/chain/point_iterator.cpp \
     test/chain/satoshi_words.cpp \
     test/chain/transaction.cpp \
+    test/chain/script/number.cpp \
+    test/chain/script/number.hpp \
     test/chain/script/opcode.cpp \
     test/chain/script/operation.cpp \
     test/chain/script/script.cpp \
@@ -245,17 +248,13 @@ test_libbitcoin_test_SOURCES = \
     test/formats/base_58.cpp \
     test/formats/base_64.cpp \
     test/formats/base_85.cpp \
-    test/math/big_number.cpp \
-    test/math/big_number.hpp \
     test/math/checksum.cpp \
     test/math/elliptic_curve.cpp \
     test/math/hash.cpp \
     test/math/hash.hpp \
-    test/math/hash_number.cpp \
     test/math/limits.cpp \
-    test/math/script_number.cpp \
-    test/math/script_number.hpp \
     test/math/stealth.cpp \
+    test/math/uint256.cpp \
     test/message/address.cpp \
     test/message/alert.cpp \
     test/message/alert_payload.cpp \
@@ -340,6 +339,7 @@ include_bitcoin_bitcoin_chaindir = ${includedir}/bitcoin/bitcoin/chain
 include_bitcoin_bitcoin_chain_HEADERS = \
     include/bitcoin/bitcoin/chain/block.hpp \
     include/bitcoin/bitcoin/chain/chain_state.hpp \
+    include/bitcoin/bitcoin/chain/compact_number.hpp \
     include/bitcoin/bitcoin/chain/header.hpp \
     include/bitcoin/bitcoin/chain/history.hpp \
     include/bitcoin/bitcoin/chain/input.hpp \
@@ -354,6 +354,7 @@ include_bitcoin_bitcoin_chain_HEADERS = \
 include_bitcoin_bitcoin_chain_scriptdir = ${includedir}/bitcoin/bitcoin/chain/script
 include_bitcoin_bitcoin_chain_script_HEADERS = \
     include/bitcoin/bitcoin/chain/script/interpreter.hpp \
+    include/bitcoin/bitcoin/chain/script/number.hpp \
     include/bitcoin/bitcoin/chain/script/opcode.hpp \
     include/bitcoin/bitcoin/chain/script/operation.hpp \
     include/bitcoin/bitcoin/chain/script/program.hpp \
@@ -434,9 +435,7 @@ include_bitcoin_bitcoin_math_HEADERS = \
     include/bitcoin/bitcoin/math/crypto.hpp \
     include/bitcoin/bitcoin/math/elliptic_curve.hpp \
     include/bitcoin/bitcoin/math/hash.hpp \
-    include/bitcoin/bitcoin/math/hash_number.hpp \
     include/bitcoin/bitcoin/math/limits.hpp \
-    include/bitcoin/bitcoin/math/script_number.hpp \
     include/bitcoin/bitcoin/math/stealth.hpp \
     include/bitcoin/bitcoin/math/uint256.hpp
 

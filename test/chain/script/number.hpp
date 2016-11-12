@@ -28,7 +28,7 @@
 
 // DO NOT TEST WITH MACRO VALUES BELOW THAT VARY BY PLATFORM,
 // SUCH AS LONG_MIN, LONG_MAX.
-const int64_t script_number_values[] =
+const int64_t number_values[] =
 {
     0,
     1,
@@ -45,7 +45,7 @@ const int64_t script_number_values[] =
     ////LLONG_MAX
 };
 
-const int64_t script_number_offsets[] =
+const int64_t number_offsets[] =
 {
     1,
     0x79,
@@ -58,25 +58,25 @@ const int64_t script_number_offsets[] =
     0x10000
 };
 
-BC_CONSTEXPR size_t script_number_values_count =
-sizeof(script_number_values) / sizeof(script_number_values[0]);
+BC_CONSTEXPR size_t number_values_count =
+sizeof(number_values) / sizeof(number_values[0]);
 
-BC_CONSTEXPR size_t script_number_offsets_count =
-sizeof(script_number_offsets) / sizeof(script_number_offsets[0]);
+BC_CONSTEXPR size_t number_offsets_count =
+sizeof(number_offsets) / sizeof(number_offsets[0]);
 
-struct script_number_buffer
+struct number_buffer
 {
     int32_t number;
     bc::data_chunk bytes;
 };
 
-struct script_number_subtract
+struct number_subtract
 {
-    script_number_buffer forward;
-    script_number_buffer reverse;
+    number_buffer forward;
+    number_buffer reverse;
 };
 
-struct script_number_compare
+struct number_compare
 {
     bool eq;
     bool ne;
@@ -86,7 +86,7 @@ struct script_number_compare
     bool ge;
 };
 
-const script_number_buffer script_number_adds[11][9][12] =
+const number_buffer number_adds[11][9][12] =
 {
     {
         {
@@ -1754,7 +1754,7 @@ const script_number_buffer script_number_adds[11][9][12] =
     ////},
 };
 
-const script_number_buffer script_number_negates[11][9][12] =
+const number_buffer number_negates[11][9][12] =
 {
     {
         {
@@ -3422,7 +3422,7 @@ const script_number_buffer script_number_negates[11][9][12] =
     ////},
 };
 
-const script_number_subtract script_number_subtracts[11][9][12] =
+const number_subtract number_subtracts[11][9][12] =
 {
     {
         {
@@ -5090,7 +5090,7 @@ const script_number_subtract script_number_subtracts[11][9][12] =
     ////},
 };
 
-const script_number_compare script_number_compares[11][9][12] =
+const number_compare number_compares[11][9][12] =
 {
     {
         {

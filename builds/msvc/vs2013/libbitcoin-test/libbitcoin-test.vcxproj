@@ -69,14 +69,14 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\test\chain\script\number.hpp" />
     <ClInclude Include="..\..\..\..\test\chain\script\script.hpp" />
-    <ClInclude Include="..\..\..\..\test\math\big_number.hpp" />
     <ClInclude Include="..\..\..\..\test\math\hash.hpp" />
-    <ClInclude Include="..\..\..\..\test\math\script_number.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonic.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\test\chain\block.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\compact_number.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\header.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\input.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\output.cpp" />
@@ -84,6 +84,7 @@
     <ClCompile Include="..\..\..\..\test\chain\point.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\point_iterator.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\satoshi_words.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\script\number.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\script\opcode.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\script\operation.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\script\script.cpp" />
@@ -101,13 +102,11 @@
     <ClCompile Include="..\..\..\..\test\formats\base_64.cpp" />
     <ClCompile Include="..\..\..\..\test\formats\base_85.cpp" />
     <ClCompile Include="..\..\..\..\test\main.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\big_number.cpp" />
     <ClCompile Include="..\..\..\..\test\math\checksum.cpp" />
     <ClCompile Include="..\..\..\..\test\math\elliptic_curve.cpp" />
     <ClCompile Include="..\..\..\..\test\math\hash.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\hash_number.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\uint256.cpp" />
     <ClCompile Include="..\..\..\..\test\math\limits.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\script_number.cpp" />
     <ClCompile Include="..\..\..\..\test\math\stealth.cpp" />
     <ClCompile Include="..\..\..\..\test\message\address.cpp" />
     <ClCompile Include="..\..\..\..\test\message\alert.cpp" />

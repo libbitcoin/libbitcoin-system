@@ -17,14 +17,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SCRIPT_NUMBER_HPP
-#define LIBBITCOIN_SCRIPT_NUMBER_HPP
+#ifndef LIBBITCOIN_CHAIN_NUMBER_HPP
+#define LIBBITCOIN_CHAIN_NUMBER_HPP
 
 #include <cstddef>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
+namespace chain {
 
 /**
  * Numeric opcodes (OP_1ADD, etc) are restricted to operating on
@@ -32,12 +33,12 @@ namespace libbitcoin {
  * in the range [-2^31 +1...2^31 -1], but results may overflow (and are
  * valid as long as they are not used in a subsequent numeric operation).
  *
- * script_number enforces those semantics by storing results as
+ * number enforces those semantics by storing results as
  * an int64 and allowing out-of-range values to be returned as a vector of
  * bytes but throwing an exception if arithmetic is done or the result is
  * interpreted as an integer.
  */
-class BC_API script_number
+class BC_API number
 {
 public:
     static const uint8_t negative_1;
@@ -61,14 +62,17 @@ public:
     static const uint8_t positive_16;
     static const uint8_t negative_mask;
 
-    /// Construct with zero value, may call set_data() after.
-    script_number();
+    /// Construct with zero value.
+    number();
 
     /// Construct with specified value.
-    explicit script_number(int64_t value);
+    explicit number(int64_t value);
 
-    /// Set the value from a byte vector with LSB first ordering.
+    /// Replace the value derived from a byte vector with LSB first ordering.
     bool set_data(const data_chunk& data, size_t max_size);
+
+    // Properties
+    //-----------------------------------------------------------------------------
 
     /// Return the value as a byte vector with LSB first ordering.
     data_chunk data() const;
@@ -79,51 +83,54 @@ public:
     /// Return the unbounded value.
     int64_t int64() const;
 
+    // Stack Helpers
+    //-----------------------------------------------------------------------------
+
     /// Return value as stack boolean (nonzero is true).
     bool is_true() const;
 
     /// Return value as stack boolean (zero is false).
     bool is_false() const;
 
-    /// Arithmetic with a number (throws on overflow).
-    script_number operator+(int64_t value) const;
-    script_number operator-(int64_t value) const;
-    script_number& operator+=(int64_t value);
-    script_number& operator-=(int64_t value);
+    // Operators
+    //-----------------------------------------------------------------------------
 
-    /// Arithmetic with another script_number (throws on overflow).
-    script_number operator+(const script_number& other) const;
-    script_number operator-(const script_number& other) const;
-    script_number& operator+=(const script_number& other);
-    script_number& operator-=(const script_number& other);
+    //************************************************************************
+    // CONSENSUS: script::number implements consensus critical overflow
+    // behavior for all operators, specifically [-, +, +=, -=].
+    //*************************************************************************
 
-    /// This script_number.
-    script_number operator+() const;
-
-    /// Math-negated copy of this script_number (throws on minimum value).
-    script_number operator-() const;
-
-    /// Comparison operators with a number.
-    bool operator==(int64_t value) const;
-    bool operator!=(int64_t value) const;
-    bool operator<=(int64_t value) const;
+    bool operator>(int64_t value) const;
     bool operator<(int64_t value) const;
     bool operator>=(int64_t value) const;
-    bool operator>(int64_t value) const;
+    bool operator<=(int64_t value) const;
+    bool operator==(int64_t value) const;
+    bool operator!=(int64_t value) const;
 
-    /// Comparison operators with another script_number.
-    bool operator==(const script_number& other) const;
-    bool operator!=(const script_number& other) const;
-    bool operator<=(const script_number& other) const;
-    bool operator<(const script_number& other) const;
-    bool operator>=(const script_number& other) const;
-    bool operator>(const script_number& other) const;
+    bool operator>(const number& other) const;
+    bool operator<(const number& other) const;
+    bool operator>=(const number& other) const;
+    bool operator<=(const number& other) const;
+    bool operator==(const number& other) const;
+    bool operator!=(const number& other) const;
+
+    number operator+() const;
+    number operator-() const;
+    number operator+(int64_t value) const;
+    number operator-(int64_t value) const;
+    number operator+(const number& other) const;
+    number operator-(const number& other) const;
+
+    number& operator+=(int64_t value);
+    number& operator-=(int64_t value);
+    number& operator+=(const number& other);
+    number& operator-=(const number& other);
 
 private:
     int64_t value_;
 };
 
+} // namespace chain
 } // namespace libbitcoin
 
 #endif
-
