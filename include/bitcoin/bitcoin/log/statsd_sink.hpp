@@ -20,17 +20,18 @@
 #ifndef LIBBITCOIN_LOG_STATSD_SINK_HPP
 #define LIBBITCOIN_LOG_STATSD_SINK_HPP
 
+#include <boost/asio.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/log/rotable_file.hpp>
 
 namespace libbitcoin {
 namespace log {
 
-//void statsd_formatter(boost::log::record_view const& record,
-//    boost::log::formatting_ostream& stream);
-
-/// Initializes default rotable libbitcoin logging sinks and formats.
 void initialize_statsd(const rotable_file& file);
+
+void initialize_statsd(boost::asio::io_service& service,
+    const bc::config::authority& server);
 
 } // namespace log
 } // namespace libbitcoin

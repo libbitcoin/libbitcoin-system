@@ -95,7 +95,7 @@ public:
     
     /**
      * Initialization constructor.
-     * @param[in]  endpoint  The boost endpoint addresss to initialize with.
+     * @param[in]  endpoint  The boost endpoint address to initialize with.
      */
     authority(const asio::endpoint& endpoint);
 
@@ -104,6 +104,12 @@ public:
      * @return True if the post is non-zero.
      */
     operator const bool() const;
+
+    /**
+     * Getter.
+     * @return The ip address of the authority.
+     */
+    asio::ipv6 asio_ip() const;
 
     /**
      * Getter.

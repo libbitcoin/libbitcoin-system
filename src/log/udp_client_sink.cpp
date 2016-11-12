@@ -23,13 +23,6 @@
 namespace libbitcoin {
 namespace log {
 
-const std::string counter_symbol = "c";
-const std::string gauge_symbol = "g";
-const std::string timer_symbol = "ms";
-
-const std::string simple_format = "%1s:%2%|%3s\n";
-const std::string sampled_format = "%1s:%2%|%3s|@|%4f\n";
-
 udp_client_sink::udp_client_sink(
     boost::shared_ptr<boost::asio::ip::udp::socket>& socket,
     boost::shared_ptr<boost::asio::ip::udp::endpoint>& endpoint)
@@ -43,55 +36,6 @@ void udp_client_sink::consume(boost::log::record_view const& record,
     send(message);
 }
 
-//void udp_client_sink::counter(std::string& metric,
-//    int64_t value)
-//{
-//    auto message = boost::format(simple_format);
-//    return send((message % metric % value % counter_symbol));
-//}
-//
-//void udp_client_sink::counter(std::string& metric,
-//    int64_t value, float rate)
-//{
-//    auto message = boost::format(sampled_format);
-//    return send((message % metric % value % counter_symbol % rate));
-//}
-//
-//void udp_client_sink::gauge(std::string& metric,
-//    uint64_t value)
-//{
-//    auto message = boost::format(simple_format);
-//    return send((message % metric % value % gauge_symbol));
-//}
-//
-//void udp_client_sink::gauge(std::string& metric,
-//    uint64_t value, float rate)
-//{
-//    auto message = boost::format(sampled_format);
-//    return send((message % metric % value % gauge_symbol % rate));
-//}
-//
-//void udp_client_sink::timer(std::string& metric,
-//    std::chrono::milliseconds value)
-//{
-//    auto message = boost::format(simple_format);
-//    return send((message % metric % value.count() % timer_symbol));
-//}
-//
-//void udp_client_sink::timer(std::string& metric,
-//    std::chrono::milliseconds value,
-//    float rate)
-//{
-//    auto message = boost::format(sampled_format);
-//    return send((message % metric % value.count() % timer_symbol % rate));
-//}
-//
-//void udp_client_sink::send(boost::format& message)
-//{
-//    auto raw_message = message.str();
-//    send(raw_message);
-//}
-
 void udp_client_sink::send(const std::string& message)
 {
     auto data = boost::make_shared<std::string>(message);
@@ -101,6 +45,9 @@ void udp_client_sink::send(const std::string& message)
         socket_->async_send_to(boost::asio::buffer(*data), *endpoint_,
             [](const boost_code& error, std::size_t bytes_transferred)
             {
+                // success, failure; it's all the same
+                // I assume logging failure would be more costly than its worth,
+                // though maybe a single log on first failure would be nice.
             });
     }
 }

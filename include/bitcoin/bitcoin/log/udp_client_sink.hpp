@@ -21,13 +21,9 @@
 #define LIBBITCOIN_LOG_UDP_CLIENT_SINK_HPP
 
 #include <boost/asio.hpp>
-//#include <boost/format.hpp>
 #include <boost/log/sinks/basic_sink_backend.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-//#include <bitcoin/bitcoin/config/authority.hpp>
-//#include <bitcoin/bitcoin/log/statistics.hpp>
-//#include <bitcoin/bitcoin/log/metrics.hpp>
 
 namespace libbitcoin {
 namespace log {
@@ -42,18 +38,6 @@ public:
 
     void consume(boost::log::record_view const& record,
         const std::string& message);
-
-//    // counter reported statistics
-//    void counter(std::string& metric, int64_t value);
-//    void counter(std::string& metric, int64_t value, float rate);
-//
-//    // gauge reported statistics
-//    void gauge(std::string& metric, uint64_t value);
-//    void gauge(std::string& metric, uint64_t value, float rate);
-//
-//    // timer reported statistics
-//    void timer(std::string& metric, std::chrono::milliseconds value);
-//    void timer(std::string& metric, std::chrono::milliseconds value, float rate);
 
 protected:
 //    void send(boost::format& message);

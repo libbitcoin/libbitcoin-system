@@ -36,6 +36,7 @@
 #include <bitcoin/bitcoin/log/features/timer.hpp>
 #include <bitcoin/bitcoin/log/file_collector_repository.hpp>
 #include <bitcoin/bitcoin/log/severity.hpp>
+#include <bitcoin/bitcoin/log/udp_client_sink.hpp>
 #include <bitcoin/bitcoin/unicode/ofstream.hpp>
 
 namespace libbitcoin {
@@ -45,6 +46,7 @@ namespace expr = boost::log::expressions;
 namespace sinks = boost::log::sinks;
 
 typedef sinks::synchronous_sink<sinks::text_file_backend> text_file_sink;
+typedef sinks::synchronous_sink<udp_client_sink> text_udp_sink;
 
 const auto statsd_filter = expr::has_attr(attributes::metric) &&
     (expr::has_attr(attributes::counter) ||
@@ -114,6 +116,34 @@ static boost::shared_ptr<text_file_sink> add_text_file_sink(
 void initialize_statsd(const rotable_file& file)
 {
     add_text_file_sink(file)->set_filter(statsd_filter);
+}
+
+
+static boost::shared_ptr<text_udp_sink> add_udp_sink(
+    boost::asio::io_service& service, const bc::config::authority& server)
+{
+    auto socket = boost::make_shared<boost::asio::ip::udp::socket>(service);
+    socket->open(boost::asio::ip::udp::v6());
+
+    auto endpoint = boost::make_shared<boost::asio::ip::udp::endpoint>(
+        server.asio_ip(), server.port());
+
+    // Construct a log sink.
+    const auto backend = boost::make_shared<udp_client_sink>(socket, endpoint);
+    const auto sink = boost::make_shared<text_udp_sink>(backend);
+
+    // Add the formatter to the sink.
+    sink->set_formatter(&statsd_formatter);
+
+    // Register the sink with the logging core.
+    boost::log::core::get()->add_sink(sink);
+    return sink;
+}
+
+void initialize_statsd(boost::asio::io_service& service,
+    const bc::config::authority& server)
+{
+    add_udp_sink(service, server)->set_filter(statsd_filter);
 }
 
 } // namespace log

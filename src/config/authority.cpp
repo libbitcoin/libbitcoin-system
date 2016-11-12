@@ -169,6 +169,11 @@ authority::operator const bool() const
     return port_ != 0;
 }
 
+asio::ipv6 authority::asio_ip() const
+{
+    return ip_;
+}
+
 message::ip_address authority::ip() const
 {
     return to_bc_address(ip_);
