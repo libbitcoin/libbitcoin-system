@@ -52,7 +52,7 @@ boost::log::record counter_feature<BaseType>::open_record_unlocked(
     const Arguments& arguments)
 {
     auto& set = BaseType::attributes();
-    auto tag = add_counter_unlocked(attributes, 
+    auto tag = add_counter_unlocked(set, 
         arguments[keywords::counter | boost::parameter::void_()]);
 
     BOOST_SCOPE_EXIT_TPL((&tag)(&set))

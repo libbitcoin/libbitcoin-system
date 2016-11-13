@@ -70,7 +70,7 @@ void metric_feature<BaseType>::metric(const metric_type& value)
 }
 
 template<typename BaseType>
-typename const metric_feature<BaseType>::metric_attribute&
+const typename metric_feature<BaseType>::metric_attribute&
     metric_feature<BaseType>::get_metric_attribute() const
 {
     return metric_attribute_;
@@ -81,7 +81,7 @@ template<typename Arguments>
 boost::log::record metric_feature<BaseType>::open_record_unlocked(
     const Arguments& arguments)
 {
-    return open_record_with_metric_unlocked(args,
+    return open_record_with_metric_unlocked(arguments,
         arguments[keywords::metric | boost::parameter::void_()]);
 }
 

@@ -61,7 +61,7 @@ boost::log::record timer_feature<BaseType>::open_record_unlocked(
     }
     BOOST_SCOPE_EXIT_END
 
-    return BaseType::open_record_unlocked(args);
+    return BaseType::open_record_unlocked(arguments);
 }
 
 template<typename BaseType>

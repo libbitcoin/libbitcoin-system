@@ -52,7 +52,7 @@ boost::log::record gauge_feature<BaseType>::open_record_unlocked(
     const Arguments& arguments)
 {
     auto& set = BaseType::attributes();
-    auto tag = add_gauge_unlocked(attributes,
+    auto tag = add_gauge_unlocked(set,
         arguments[keywords::gauge | boost::parameter::void_()]);
 
     BOOST_SCOPE_EXIT_TPL((&tag)(&set))
@@ -62,7 +62,7 @@ boost::log::record gauge_feature<BaseType>::open_record_unlocked(
     }
     BOOST_SCOPE_EXIT_END
 
-    return BaseType::open_record_unlocked(args);
+    return BaseType::open_record_unlocked(arguments);
 }
 
 template<typename BaseType>
