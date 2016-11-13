@@ -62,7 +62,7 @@ void console_streambuf::initialize(size_t size)
 }
 
 console_streambuf::console_streambuf(
-    std::wstreambuf const& stream_buffer, size_t size)
+    const std::wstreambuf& stream_buffer, size_t size)
 #ifdef _MSC_VER
   : buffer_size_(size), buffer_(new wchar_t[buffer_size_]),
     std::wstreambuf(stream_buffer)

@@ -105,7 +105,9 @@
     <ClCompile Include="..\..\..\..\src\log\file_collector.cpp" />
     <ClCompile Include="..\..\..\..\src\log\file_collector_repository.cpp" />
     <ClCompile Include="..\..\..\..\src\log\file_counter_formatter.cpp" />
-    <ClCompile Include="..\..\..\..\src\log\sinks.cpp" />
+    <ClCompile Include="..\..\..\..\src\log\sink.cpp" />
+    <ClCompile Include="..\..\..\..\src\log\statsd_sink.cpp" />
+    <ClCompile Include="..\..\..\..\src\log\udp_client_sink.cpp" />
     <ClCompile Include="..\..\..\..\src\machine\interpreter.cpp" />
     <ClCompile Include="..\..\..\..\src\machine\number.cpp" />
     <ClCompile Include="..\..\..\..\src\machine\opcode.cpp" />
@@ -257,13 +259,22 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base_85.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\handlers.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\attributes.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\features\counter.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\features\gauge.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\features\metric.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\features\rate.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\features\timer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\file_char_traits.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\file_collector.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\file_collector_repository.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\file_counter_formatter.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\rotable_file.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\severity.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\sinks.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\sources.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\sink.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\source.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\statsd_sink.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\statsd_source.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\udp_client_sink.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\interpreter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\number.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\opcode.hpp" />
@@ -406,6 +417,11 @@
   <ItemGroup>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\formats\base_16.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\formats\base_58.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\log\features\counter.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\log\features\gauge.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\log\features\metric.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\log\features\rate.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\log\features\timer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\math\checksum.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\math\hash.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\script\interpreter.ipp" />

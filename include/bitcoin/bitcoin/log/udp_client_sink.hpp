@@ -20,8 +20,10 @@
 #ifndef LIBBITCOIN_LOG_UDP_CLIENT_SINK_HPP
 #define LIBBITCOIN_LOG_UDP_CLIENT_SINK_HPP
 
+#include <string>
 #include <boost/asio.hpp>
 #include <boost/log/sinks/basic_sink_backend.hpp>
+#include <boost/shared_ptr.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 
@@ -29,14 +31,17 @@ namespace libbitcoin {
 namespace log {
 
 class BC_API udp_client_sink
-  : public boost::log::sinks::basic_formatted_sink_backend<
-    char, boost::log::sinks::synchronized_feeding>
+  : public boost::log::sinks::basic_formatted_sink_backend<char,
+        boost::log::sinks::synchronized_feeding>
 {
 public:
-    udp_client_sink(boost::shared_ptr<boost::asio::ip::udp::socket>& socket,
-        boost::shared_ptr<boost::asio::ip::udp::endpoint>& endpoint);
+    using udp = boost::asio::ip::udp;
+    typedef boost::shared_ptr<udp::socket> socket_ptr;
+    typedef boost::shared_ptr<udp::endpoint> endpoint_ptr;
 
-    void consume(boost::log::record_view const& record,
+    udp_client_sink(socket_ptr socket, endpoint_ptr endpoint);
+
+    void consume(const boost::log::record_view& record,
         const std::string& message);
 
 protected:
@@ -44,8 +49,8 @@ protected:
     void send(const std::string& message);
 
 private:
-    boost::shared_ptr<boost::asio::ip::udp::socket> socket_;
-    boost::shared_ptr<boost::asio::ip::udp::endpoint> endpoint_;
+    socket_ptr socket_;
+    endpoint_ptr endpoint_;
 };
 
 } // namespace log

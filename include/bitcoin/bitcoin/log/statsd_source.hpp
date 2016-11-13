@@ -23,6 +23,8 @@
 #include <chrono>
 #include <boost/log/sources/basic_logger.hpp>
 #include <boost/log/sources/features.hpp>
+#include <boost/log/sources/global_logger_storage.hpp>
+#include <boost/log/sources/threading_models.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/log/features/counter.hpp>
 #include <bitcoin/bitcoin/log/features/gauge.hpp>
@@ -34,29 +36,23 @@ namespace libbitcoin {
 namespace log {
 
 class BC_API statsd_source :
-    public boost::log::sources::basic_composite_logger<
-        char,
-        statsd_source,
+    public boost::log::sources::basic_composite_logger<char, statsd_source,
         boost::log::sources::multi_thread_model<boost::log::aux::light_rw_mutex>,
-        boost::log::sources::features<
-            features::metric,
-            features::counter,
-            features::gauge,
-            features::timer,
-            features::rate
-        >
-    >
+        boost::log::sources::features<features::metric, features::counter,
+            features::gauge, features::timer, features::rate>>
 {
-    BOOST_LOG_FORWARD_LOGGER_MEMBERS_TEMPLATE(statsd_source)
+    BOOST_LOG_FORWARD_LOGGER_MEMBERS(statsd_source)
 };
 
 BOOST_LOG_INLINE_GLOBAL_LOGGER_DEFAULT(stats, statsd_source);
 
 #define BC_STATS_SIMPLE(name, params_seq) \
-    BOOST_LOG_WITH_PARAMS(bc::log::stats::get(), (bc::log::keywords::metric = (name))params_seq)
+    BOOST_LOG_WITH_PARAMS(bc::log::stats::get(), \
+        (bc::log::keywords::metric = (name))params_seq)
 
 #define BC_STATS_WITH_RATE(name, rate, params_seq) \
-    BOOST_LOG_WITH_PARAMS(bc::log::stats::get(), (bc::log::keywords::metric = (name))(bc::log::keywords::rate = (rate))params_seq)
+    BOOST_LOG_WITH_PARAMS(bc::log::stats::get(), \
+        (bc::log::keywords::metric = (name))(bc::log::keywords::rate = (rate))params_seq)
 
 #define BC_STATS_COUNTER(name, value) \
     BC_STATS_SIMPLE(name, (bc::log::keywords::counter = (value)))

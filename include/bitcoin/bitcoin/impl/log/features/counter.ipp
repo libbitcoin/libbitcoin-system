@@ -20,7 +20,7 @@
 #ifndef LIBBITCOIN_LOG_FEATURES_COUNTER_IPP
 #define LIBBITCOIN_LOG_FEATURES_COUNTER_IPP
 
-#include <bitcoin/bitcoin/log/features/counter.hpp>
+#include <cstdint>
 #include <boost/log/attributes.hpp>
 #include <boost/scope_exit.hpp>
 
@@ -34,51 +34,50 @@ counter_feature<BaseType>::counter_feature()
 }
 
 template<typename BaseType>
-counter_feature<BaseType>::counter_feature(counter_feature const& that)
-  : BaseType(static_cast<BaseType const&>(that))
+counter_feature<BaseType>::counter_feature(const counter_feature& other)
+  : BaseType(static_cast<const BaseType&>(other))
 {
 }
 
 template<typename BaseType>
-template<typename ArgsT>
-counter_feature<BaseType>::counter_feature(ArgsT const& args)
-  : BaseType(args)
+template<typename Arguments>
+counter_feature<BaseType>::counter_feature(const Arguments& arguments)
+  : BaseType(arguments)
 {
 }
 
 template<typename BaseType>
-template<typename ArgsT>
+template<typename Arguments>
 boost::log::record counter_feature<BaseType>::open_record_unlocked(
-    ArgsT const& args)
+    const Arguments& arguments)
 {
-    boost::log::attribute_set& attrs = BaseType::attributes();
-    boost::log::attribute_set::iterator tag = add_counter_unlocked(
-        attrs, args[keywords::counter | boost::parameter::void_()]);
+    auto& set = BaseType::attributes();
+    auto tag = add_counter_unlocked(set, 
+        arguments[keywords::counter | boost::parameter::void_()]);
 
-    BOOST_SCOPE_EXIT_TPL((&tag)(&attrs))
+    BOOST_SCOPE_EXIT_TPL((&tag)(&set))
     {
-        if (tag != attrs.end())
-            attrs.erase(tag);
+        if (tag != set.end())
+            set.erase(tag);
     }
     BOOST_SCOPE_EXIT_END
 
-    return BaseType::open_record_unlocked(args);
+    return BaseType::open_record_unlocked(arguments);
 }
 
 template<typename BaseType>
-template<typename T>
+template<typename Value>
 boost::log::attribute_set::iterator
     counter_feature<BaseType>::add_counter_unlocked(
-        boost::log::attribute_set& attrs, T const& value)
+        boost::log::attribute_set& set, const Value& value)
 {
-    boost::log::attribute_set::iterator tag = attrs.end();
+    auto tag = set.end();
+    auto pair = BaseType::add_attribute_unlocked(
+        attributes::counter.get_name(),
+        boost::log::attributes::constant<int64_t>(value));
 
-    std::pair<boost::log::attribute_set::iterator, bool> res =
-        BaseType::add_attribute_unlocked(attributes::counter.get_name(),
-            boost::log::attributes::constant<int64_t>(value));
-
-    if (res.second)
-        tag = res.first;
+    if (pair.second)
+        tag = pair.first;
 
     return tag;
 }
@@ -86,9 +85,9 @@ boost::log::attribute_set::iterator
 template<typename BaseType>
 boost::log::attribute_set::iterator
     counter_feature<BaseType>::add_counter_unlocked(
-        boost::log::attribute_set& attrs, boost::parameter::void_)
+        boost::log::attribute_set& set, boost::parameter::void_)
 {
-    return attrs.end();
+    return set.end();
 }
 
 } // namespace features

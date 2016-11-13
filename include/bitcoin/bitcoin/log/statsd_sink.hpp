@@ -24,13 +24,14 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/log/rotable_file.hpp>
+#include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace log {
 
 void initialize_statsd(const rotable_file& file);
 
-void initialize_statsd(boost::asio::io_service& service,
+void initialize_statsd(threadpool& pool,
     const bc::config::authority& server);
 
 } // namespace log

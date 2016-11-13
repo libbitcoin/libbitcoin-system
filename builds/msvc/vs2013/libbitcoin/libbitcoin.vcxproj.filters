@@ -99,6 +99,15 @@
     <Filter Include="src\machine">
       <UniqueIdentifier>{d1c09f97-cfb7-445e-afbd-c64174ddd709}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\bitcoin\log\features">
+      <UniqueIdentifier>{11f68df3-24b9-4a6c-9c7c-3e3d30b17d4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\impl\log">
+      <UniqueIdentifier>{469dfa1e-920a-4370-851f-526f1ffb9d8f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\impl\log\features">
+      <UniqueIdentifier>{ab0470c3-b65b-4eeb-8fc8-e2e27a05256e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -158,6 +167,21 @@
     </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\script\interpreter.ipp">
       <Filter>include\bitcoin\impl\script</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\log\features\metric.ipp">
+      <Filter>include\bitcoin\impl\log\features</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\log\features\rate.ipp">
+      <Filter>include\bitcoin\impl\log\features</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\log\features\timer.ipp">
+      <Filter>include\bitcoin\impl\log\features</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\log\features\counter.ipp">
+      <Filter>include\bitcoin\impl\log\features</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\log\features\gauge.ipp">
+      <Filter>include\bitcoin\impl\log\features</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -539,9 +563,6 @@
     <ClCompile Include="..\..\..\..\src\utility\flush_lock.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\log\sinks.cpp">
-      <Filter>src\log</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\log\file_collector_repository.cpp">
       <Filter>src\log</Filter>
     </ClCompile>
@@ -577,6 +598,15 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\machine\number.cpp">
       <Filter>src\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\log\statsd_sink.cpp">
+      <Filter>src\log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\log\udp_client_sink.cpp">
+      <Filter>src\log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\log\sink.cpp">
+      <Filter>src\log</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1081,30 +1111,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\flush_lock.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\severity.hpp">
-      <Filter>include\bitcoin\log</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\sinks.hpp">
-      <Filter>include\bitcoin\log</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\sources.hpp">
-      <Filter>include\bitcoin\log</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\attributes.hpp">
-      <Filter>include\bitcoin\log</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\file_collector.hpp">
-      <Filter>include\bitcoin\log</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\file_collector_repository.hpp">
-      <Filter>include\bitcoin\log</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\file_counter_formatter.hpp">
-      <Filter>include\bitcoin\log</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\file_char_traits.hpp">
-      <Filter>include\bitcoin\log</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\block.hpp">
       <Filter>include\bitcoin\message</Filter>
     </ClInclude>
@@ -1140,6 +1146,57 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\operation.hpp">
       <Filter>include\bitcoin\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\rotable_file.hpp">
+      <Filter>include\bitcoin\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\severity.hpp">
+      <Filter>include\bitcoin\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\sink.hpp">
+      <Filter>include\bitcoin\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\source.hpp">
+      <Filter>include\bitcoin\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\statsd_sink.hpp">
+      <Filter>include\bitcoin\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\statsd_source.hpp">
+      <Filter>include\bitcoin\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\udp_client_sink.hpp">
+      <Filter>include\bitcoin\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\attributes.hpp">
+      <Filter>include\bitcoin\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\file_char_traits.hpp">
+      <Filter>include\bitcoin\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\file_collector.hpp">
+      <Filter>include\bitcoin\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\file_collector_repository.hpp">
+      <Filter>include\bitcoin\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\file_counter_formatter.hpp">
+      <Filter>include\bitcoin\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\features\metric.hpp">
+      <Filter>include\bitcoin\log\features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\features\rate.hpp">
+      <Filter>include\bitcoin\log\features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\features\timer.hpp">
+      <Filter>include\bitcoin\log\features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\features\counter.hpp">
+      <Filter>include\bitcoin\log\features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\features\gauge.hpp">
+      <Filter>include\bitcoin\log\features</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
