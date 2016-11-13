@@ -422,9 +422,12 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\log\features\metric.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\log\features\rate.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\log\features\timer.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\machine\interpreter.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\machine\number.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\machine\operation.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\machine\program.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\math\checksum.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\math\hash.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\script\interpreter.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\array_slice.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\collection.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\data.ipp" />

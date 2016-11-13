@@ -101,7 +101,7 @@ public:
 
     /**
      * Getter.
-     * @return True if the post is non-zero.
+     * @return True if the port is non-zero.
      */
     operator const bool() const;
 

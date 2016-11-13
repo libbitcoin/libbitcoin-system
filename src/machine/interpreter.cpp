@@ -27,9 +27,6 @@
 namespace libbitcoin {
 namespace machine {
 
-// TODO: inline all program methods.
-// TODO: inline all number methods.
-// TODO: inline operation methods used by interpreter and program.
 code interpreter::run(program& program)
 {
     result error(error::invalid_script);

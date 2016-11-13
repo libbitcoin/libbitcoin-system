@@ -1028,7 +1028,7 @@ code script::verify(const transaction& tx, uint32_t input_index,
     if ((error = prevout.evaluate()))
         return error;
 
-    if (prevout.stack_false())
+    if (!prevout.stack_result())
         return error::stack_false;
 
     if (prevout_script.is_pay_to_script_hash(forks))
@@ -1043,7 +1043,7 @@ code script::verify(const transaction& tx, uint32_t input_index,
         if ((error = embedded.evaluate()))
             return error;
 
-        if (embedded.stack_false())
+        if (!embedded.stack_result())
             return error::stack_false;
     }
 

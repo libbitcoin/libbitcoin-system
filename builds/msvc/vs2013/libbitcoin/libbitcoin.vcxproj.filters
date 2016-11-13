@@ -90,9 +90,6 @@
     <Filter Include="src\log">
       <UniqueIdentifier>{f048519d-2af9-4dd9-a4a3-a78e380720ac}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\impl\script">
-      <UniqueIdentifier>{f6bee0f3-f8ee-40d8-8fbe-cd4a2687018f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="include\bitcoin\machine">
       <UniqueIdentifier>{ad6cb820-0a54-48c3-9c0b-6649c0cdfa70}</UniqueIdentifier>
     </Filter>
@@ -107,6 +104,9 @@
     </Filter>
     <Filter Include="include\bitcoin\impl\log\features">
       <UniqueIdentifier>{ab0470c3-b65b-4eeb-8fc8-e2e27a05256e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\impl\machine">
+      <UniqueIdentifier>{59e57ba8-c358-4a8f-8aa4-ca1edb943be6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -165,9 +165,6 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\notifier.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\script\interpreter.ipp">
-      <Filter>include\bitcoin\impl\script</Filter>
-    </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\log\features\metric.ipp">
       <Filter>include\bitcoin\impl\log\features</Filter>
     </None>
@@ -182,6 +179,18 @@
     </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\log\features\gauge.ipp">
       <Filter>include\bitcoin\impl\log\features</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\machine\interpreter.ipp">
+      <Filter>include\bitcoin\impl\machine</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\machine\operation.ipp">
+      <Filter>include\bitcoin\impl\machine</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\machine\program.ipp">
+      <Filter>include\bitcoin\impl\machine</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\machine\number.ipp">
+      <Filter>include\bitcoin\impl\machine</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -596,9 +605,6 @@
     <ClCompile Include="..\..\..\..\src\machine\interpreter.cpp">
       <Filter>src\machine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\machine\number.cpp">
-      <Filter>src\machine</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\log\statsd_sink.cpp">
       <Filter>src\log</Filter>
     </ClCompile>
@@ -607,6 +613,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\log\sink.cpp">
       <Filter>src\log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\machine\number.cpp">
+      <Filter>src\machine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

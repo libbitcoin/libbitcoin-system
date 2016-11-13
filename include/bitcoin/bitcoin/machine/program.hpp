@@ -21,6 +21,8 @@
 #define LIBBITCOIN_MACHINE_PROGRAM_HPP
 
 #include <cstdint>
+#include <bitcoin/bitcoin/chain/script.hpp>
+#include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/machine/number.hpp>
@@ -29,10 +31,6 @@
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
-
-// Forward declarations from a sibling namespace.
-namespace chain { class script; class transaction; }
-
 namespace machine {
 
 class BC_API program
@@ -68,80 +66,80 @@ public:
     program(const chain::script& script, program&& other, bool move);
 
     /// Constant registers.
-    bool is_valid() const;
-    uint32_t forks() const;
-    uint32_t input_index() const;
-    const chain::transaction& transaction() const;
+    inline bool is_valid() const;
+    inline uint32_t forks() const;
+    inline uint32_t input_index() const;
+    inline const chain::transaction& transaction() const;
 
     /// Program registers.
-    op_iterator begin() const;
-    op_iterator jump() const;
-    op_iterator end() const;
-    size_t operation_count() const;
+    inline op_iterator begin() const;
+    inline op_iterator jump() const;
+    inline op_iterator end() const;
+    inline size_t operation_count() const;
 
     /// Instructions.
     code evaluate();
     code evaluate(const operation& op);
-    bool increment_operation_count(const operation& op);
-    bool increment_multisig_public_key_count(int32_t count);
-    bool set_jump_register(const operation& op, int32_t offset);
+    inline bool increment_operation_count(const operation& op);
+    inline bool increment_multisig_public_key_count(int32_t count);
+    inline bool set_jump_register(const operation& op, int32_t offset);
 
     // Primary stack.
     //-------------------------------------------------------------------------
 
     /// Primary push.
-    void push(bool value);
-    void push_move(value_type&& item);
-    void push_copy(const value_type& item);
+    inline void push(bool value);
+    inline void push_move(value_type&& item);
+    inline void push_copy(const value_type& item);
 
     /// Primary pop.
-    data_chunk pop();
-    bool pop(int32_t& out_value);
-    bool pop(number& out_number, size_t maxiumum_size=max_number_size);
-    bool pop_binary(number& first, number& second);
-    bool pop_ternary(number& first, number& second, number& third);
-    bool pop_position(stack_iterator& out_position);
-    bool pop(data_stack& section, size_t count);
+    inline data_chunk pop();
+    inline bool pop(int32_t& out_value);
+    inline bool pop(number& out_number, size_t maxiumum_size = max_number_size);
+    inline bool pop_binary(number& first, number& second);
+    inline bool pop_ternary(number& first, number& second, number& third);
+    inline bool pop_position(stack_iterator& out_position);
+    inline bool pop(data_stack& section, size_t count);
 
     /// Primary push/pop optimizations (active).
-    void duplicate(size_t index);
-    void swap(size_t index_left, size_t index_right);
-    void erase(const stack_iterator& position);
-    void erase(const stack_iterator& first, const stack_iterator& last);
+    inline void duplicate(size_t index);
+    inline void swap(size_t index_left, size_t index_right);
+    inline void erase(const stack_iterator& position);
+    inline void erase(const stack_iterator& first, const stack_iterator& last);
 
     /// Primary push/pop optimizations (passive).
-    bool empty() const;
-    bool stack_true() const;
-    bool stack_false() const;
-    bool is_stack_overflow() const;
-    bool if_(const operation& op) const;
-    const value_type& item(size_t index) /*const*/;
-    stack_iterator position(size_t index) /*const*/;
-    chain::script subscript() const;
-    size_t size() const;
+    inline bool empty() const;
+    inline bool stack_true() const;
+    inline bool stack_result() const;
+    inline bool is_stack_overflow() const;
+    inline bool if_(const operation& op) const;
+    inline const value_type& item(size_t index) /*const*/;
+    inline stack_iterator position(size_t index) /*const*/;
+    inline operation::list subscript() const;
+    inline size_t size() const;
 
     // Alternate stack.
     //-------------------------------------------------------------------------
 
-    bool empty_alternate() const;
-    void push_alternate(value_type&& value);
-    value_type pop_alternate();
+    inline bool empty_alternate() const;
+    inline void push_alternate(value_type&& value);
+    inline value_type pop_alternate();
 
     // Conditional stack.
     //-------------------------------------------------------------------------
 
-    void open(bool value);
-    void negate();
-    void close();
-    bool closed() const;
-    bool succeeded() const;
+    inline void open(bool value);
+    inline void negate();
+    inline void close();
+    inline bool closed() const;
+    inline bool succeeded() const;
 
 private:
     // A space-efficient dynamic bitset (specialized).
     typedef std::vector<bool> bool_stack;
 
     void reserve_stacks();
-    bool stack_to_bool() const;
+    inline bool stack_to_bool() const;
 
     const chain::script& script_;
     const chain::transaction& transaction_;
@@ -157,5 +155,8 @@ private:
 
 } // namespace machine
 } // namespace libbitcoin
+
+
+#include <bitcoin/bitcoin/impl/machine/program.ipp>
 
 #endif
