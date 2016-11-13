@@ -141,7 +141,8 @@ static boost::shared_ptr<text_udp_sink> add_udp_sink(threadpool& pool,
 
 void initialize_statsd(threadpool& pool, const authority& server)
 {
-    add_udp_sink(pool, server)->set_filter(statsd_filter);
+    if (server)
+        add_udp_sink(pool, server)->set_filter(statsd_filter);
 }
 
 } // namespace log
