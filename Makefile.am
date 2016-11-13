@@ -393,14 +393,14 @@ include_bitcoin_bitcoin_impl_log_features_HEADERS = \
     include/bitcoin/bitcoin/impl/log/features/rate.ipp \
     include/bitcoin/bitcoin/impl/log/features/timer.ipp
 
+include_bitcoin_bitcoin_impl_machinedir = ${includedir}/bitcoin/bitcoin/impl/machine
+include_bitcoin_bitcoin_impl_machine_HEADERS = \
+    include/bitcoin/bitcoin/impl/machine/interpreter.ipp
+
 include_bitcoin_bitcoin_impl_mathdir = ${includedir}/bitcoin/bitcoin/impl/math
 include_bitcoin_bitcoin_impl_math_HEADERS = \
     include/bitcoin/bitcoin/impl/math/checksum.ipp \
     include/bitcoin/bitcoin/impl/math/hash.ipp
-
-include_bitcoin_bitcoin_impl_scriptdir = ${includedir}/bitcoin/bitcoin/impl/script
-include_bitcoin_bitcoin_impl_script_HEADERS = \
-    include/bitcoin/bitcoin/impl/script/interpreter.ipp
 
 include_bitcoin_bitcoin_impl_utilitydir = ${includedir}/bitcoin/bitcoin/impl/utility
 include_bitcoin_bitcoin_impl_utility_HEADERS = \

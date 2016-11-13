@@ -124,6 +124,6 @@ private:
 } // namespace machine
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/script/interpreter.ipp>
+#include <bitcoin/bitcoin/impl/machine/interpreter.ipp>
 
 #endif
