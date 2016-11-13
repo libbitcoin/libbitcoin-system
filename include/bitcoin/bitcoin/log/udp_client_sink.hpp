@@ -17,25 +17,37 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_LOG_ATTRIBUTES_HPP
-#define LIBBITCOIN_LOG_ATTRIBUTES_HPP
+#ifndef LIBBITCOIN_LOG_UDP_CLIENT_SINK_HPP
+#define LIBBITCOIN_LOG_UDP_CLIENT_SINK_HPP
 
-#include <string>
-#include <boost/log/attributes/clock.hpp>
-#include <boost/log/expressions/keyword.hpp>
+#include <boost/asio.hpp>
+#include <boost/log/sinks/basic_sink_backend.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/log/severity.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 
 namespace libbitcoin {
 namespace log {
-namespace attributes {
 
-// severity/channel/timestamp/message log entries
-BOOST_LOG_ATTRIBUTE_KEYWORD(timestamp, "Timestamp", boost::posix_time::ptime)
-BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", libbitcoin::log::severity)
-BOOST_LOG_ATTRIBUTE_KEYWORD(channel, "Channel", std::string)
+class BC_API udp_client_sink
+  : public boost::log::sinks::basic_formatted_sink_backend<
+    char, boost::log::sinks::synchronized_feeding>
+{
+public:
+    udp_client_sink(boost::shared_ptr<boost::asio::ip::udp::socket>& socket,
+        boost::shared_ptr<boost::asio::ip::udp::endpoint>& endpoint);
 
-} // namespace attributes
+    void consume(boost::log::record_view const& record,
+        const std::string& message);
+
+protected:
+//    void send(boost::format& message);
+    void send(const std::string& message);
+
+private:
+    boost::shared_ptr<boost::asio::ip::udp::socket> socket_;
+    boost::shared_ptr<boost::asio::ip::udp::endpoint> endpoint_;
+};
+
 } // namespace log
 } // namespace libbitcoin
 
