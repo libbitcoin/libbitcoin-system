@@ -20,92 +20,93 @@
 #ifndef LIBBITCOIN_LOG_FEATURES_METRIC_IPP
 #define LIBBITCOIN_LOG_FEATURES_METRIC_IPP
 
-#include <bitcoin/bitcoin/log/features/metric.hpp>
-
 namespace libbitcoin {
 namespace log {
 namespace features {
 
 template<typename BaseType>
 metric_feature<BaseType>::metric_feature()
-  : BaseType(), metric_attr_(metric_type())
+  : BaseType(), metric_attribute_(metric_type())
 {
-    BaseType::add_attribute_unlocked(attributes::metric.get_name(), metric_attr_);
+    BaseType::add_attribute_unlocked(attributes::metric.get_name(),
+        metric_attribute_);
 }
 
 template<typename BaseType>
-metric_feature<BaseType>::metric_feature(
-    metric_feature const& that)
-  : BaseType(static_cast<BaseType const&>(that)), metric_attr_(that.metric_attr_)
+metric_feature<BaseType>::metric_feature(const metric_feature& other)
+  : BaseType(static_cast<const BaseType&>(other)),
+    metric_attribute_(other.metric_attribute_)
 {
-    BaseType::attributes()[attributes::metric.get_name()] = metric_attr_;
+    BaseType::attributes()[attributes::metric.get_name()] = metric_attribute_;
 }
 
 template<typename BaseType>
-template<typename ArgsT>
-metric_feature<BaseType>::metric_feature(
-    ArgsT const& args)
-  : BaseType(args), metric_attr_(args[keywords::metric || metric_type()])
+template<typename Arguments>
+metric_feature<BaseType>::metric_feature(const Arguments& arguments)
+  : BaseType(arguments),
+    metric_attribute_(arguments[keywords::metric || metric_type()])
 {
-    BaseType::add_attribute_unlocked(attributes::metric.get_name(), metric_attr_);
+    BaseType::add_attribute_unlocked(attributes::metric.get_name(),
+        metric_attribute_);
 }
 
 template<typename BaseType>
 typename metric_feature<BaseType>::metric_type
     metric_feature<BaseType>::metric() const
 {
-    BOOST_LOG_EXPR_IF_MT(boost::log::aux::shared_lock_guard<const threading_model> lock(this->get_threading_model());)
-    return metric_attr_.get();
+    BOOST_LOG_EXPR_IF_MT(boost::log::aux::shared_lock_guard<
+        const threading_model> lock(this->get_threading_model());)
+
+    return metric_attribute_.get();
 }
 
 template<typename BaseType>
-void metric_feature<BaseType>::metric(metric_type const& ch)
+void metric_feature<BaseType>::metric(const metric_type& value)
 {
-    BOOST_LOG_EXPR_IF_MT(boost::log::aux::exclusive_lock_guard<threading_model> lock(this->get_threading_model());)
-    metric_attr_.set(ch);
+    BOOST_LOG_EXPR_IF_MT(boost::log::aux::exclusive_lock_guard<threading_model>
+        lock(this->get_threading_model());)
+
+    metric_attribute_.set(value);
 }
 
 template<typename BaseType>
-typename metric_feature<BaseType>::metric_attribute const&
+typename const metric_feature<BaseType>::metric_attribute&
     metric_feature<BaseType>::get_metric_attribute() const
 {
-    return metric_attr_;
+    return metric_attribute_;
 }
 
 template<typename BaseType>
-template<typename ArgsT>
-boost::log::record
-    metric_feature<BaseType>::open_record_unlocked(
-        ArgsT const& args)
+template<typename Arguments>
+boost::log::record metric_feature<BaseType>::open_record_unlocked(
+    const Arguments& arguments)
 {
-    return open_record_with_metric_unlocked(args, args[keywords::metric | boost::parameter::void_()]);
+    return open_record_with_metric_unlocked(args,
+        arguments[keywords::metric | boost::parameter::void_()]);
 }
 
 template<typename BaseType>
-void metric_feature<BaseType>::swap_unlocked(
-    metric_feature& that)
+void metric_feature<BaseType>::swap_unlocked(metric_feature& other)
 {
-    BaseType::swap_unlocked(static_cast<BaseType&>(that));
-    metric_attr_.swap(that.metric_attr_);
+    BaseType::swap_unlocked(static_cast<BaseType&>(other));
+    metric_attribute_.swap(other.metric_attribute_);
 }
 
 template<typename BaseType>
-template<typename ArgsT, typename T>
-boost::log::record
-    metric_feature<BaseType>::open_record_with_metric_unlocked(
-        ArgsT const& args, T const& ch)
+template<typename Arguments, typename Value>
+boost::log::record metric_feature<BaseType>::open_record_with_metric_unlocked(
+    const Arguments& arguments, const Value& value)
 {
-    metric_attr_.set(ch);
-    return BaseType::open_record_unlocked(args);
+    metric_attribute_.set(value);
+    return BaseType::open_record_unlocked(arguments);
 }
 
 template<typename BaseType>
-template<typename ArgsT>
-boost::log::record
-    metric_feature<BaseType>::open_record_with_metric_unlocked(
-        ArgsT const& args, boost::parameter::void_)
+template<typename Arguments>
+boost::log::record metric_feature<BaseType>::open_record_with_metric_unlocked(
+    const Arguments& arguments, boost::parameter::void_)
 {
-    return BaseType::open_record_unlocked(args);
+    return BaseType::open_record_unlocked(arguments);
 }
 
 } // namespace features

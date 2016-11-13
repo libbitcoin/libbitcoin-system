@@ -18,19 +18,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/log/udp_client_sink.hpp>
+
+#include <cstddef>
+#include <string>
 #include <boost/make_shared.hpp>
 
 namespace libbitcoin {
 namespace log {
 
-udp_client_sink::udp_client_sink(
-    boost::shared_ptr<boost::asio::ip::udp::socket> socket,
-    boost::shared_ptr<boost::asio::ip::udp::endpoint> endpoint)
+using namespace boost::asio;
+using namespace boost::log;
+
+udp_client_sink::udp_client_sink(socket_ptr socket, endpoint_ptr endpoint)
   : socket_(socket), endpoint_(endpoint)
 {
 }
 
-void udp_client_sink::consume(boost::log::record_view const& record,
+void udp_client_sink::consume(const record_view& record,
     const std::string& message)
 {
     send(message);
@@ -41,13 +45,12 @@ void udp_client_sink::send(const std::string& message)
     if (socket_ && endpoint_)
     {
         const auto message_ptr = boost::make_shared<std::string>(message);
-        const auto ignore = [message_ptr](const boost_code&, size_t)
+        const auto handler = [message_ptr](const boost_code&, size_t)
         {
             // This holds the message in scope until the send is completed.
         };
 
-        socket_->async_send_to(boost::asio::buffer(*message_ptr), *endpoint_,
-            ignore);
+        socket_->async_send_to(buffer(*message_ptr), *endpoint_, handler);
     }
 }
 

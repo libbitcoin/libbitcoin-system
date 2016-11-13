@@ -28,7 +28,6 @@
 #include <boost/log/sinks.hpp>
 #include <boost/log/support/date_time.hpp>
 #include <boost/log/utility/setup/formatter_parser.hpp>
-#include <boost/smart_ptr/make_shared.hpp>
 #include <bitcoin/bitcoin/log/features/counter.hpp>
 #include <bitcoin/bitcoin/log/features/gauge.hpp>
 #include <bitcoin/bitcoin/log/features/metric.hpp>
@@ -38,44 +37,45 @@
 #include <bitcoin/bitcoin/log/severity.hpp>
 #include <bitcoin/bitcoin/log/udp_client_sink.hpp>
 #include <bitcoin/bitcoin/unicode/ofstream.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
+#include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace log {
 
-namespace expr = boost::log::expressions;
-namespace sinks = boost::log::sinks;
+using namespace bc::config;
+using namespace boost::asio::ip;
+using namespace boost::log;
+using namespace boost::log::expressions;
+using namespace boost::log::sinks;
+using namespace boost::log::sinks::file;
 
-typedef sinks::synchronous_sink<sinks::text_file_backend> text_file_sink;
-typedef sinks::synchronous_sink<udp_client_sink> text_udp_sink;
+typedef synchronous_sink<text_file_backend> text_file_sink;
+typedef synchronous_sink<udp_client_sink> text_udp_sink;
 
-const auto statsd_filter = expr::has_attr(attributes::metric) &&
-    (expr::has_attr(attributes::counter) ||
-        expr::has_attr(attributes::gauge) ||
-        expr::has_attr(attributes::timer));
+static const auto statsd_filter = has_attr(attributes::metric) &&
+    (has_attr(attributes::counter) || has_attr(attributes::gauge) ||
+        has_attr(attributes::timer));
 
-void statsd_formatter(boost::log::record_view const& record,
-    boost::log::formatting_ostream& stream)
+void statsd_formatter(const record_view& record, formatting_ostream& stream)
 {
-    // Get the LineID attribute value and put it into the stream
+    // Get the LineID attribute value and put it into the stream.
     stream << record[attributes::metric] << ":";
 
-    if (expr::has_attribute<int64_t>(attributes::counter.get_name())(record))
+    if (has_attribute<int64_t>(attributes::counter.get_name())(record))
         stream << record[attributes::counter] << "|c";
 
-    if (expr::has_attribute<uint64_t>(attributes::gauge.get_name())(record))
+    if (has_attribute<uint64_t>(attributes::gauge.get_name())(record))
         stream << record[attributes::gauge] << "|g";
 
-    if (expr::has_attribute<std::chrono::milliseconds>(attributes::timer.get_name())(record))
-    {
-        auto value = record[attributes::timer].get().count();
-        stream << value << "|ms";
-    }
+    if (has_attribute<asio::milliseconds>(attributes::timer.get_name())(record))
+        stream << record[attributes::timer].get().count() << "|ms";
 
-    if (expr::has_attribute<float>(attributes::rate.get_name())(record))
+    if (has_attribute<float>(attributes::rate.get_name())(record))
         stream << "|@" << record[attributes::rate];
 }
 
-static boost::shared_ptr<sinks::file::collector> file_collector(
+static boost::shared_ptr<collector> file_collector(
     const rotable_file& rotation)
 {
     return bc::log::make_collector(
@@ -109,7 +109,7 @@ static boost::shared_ptr<text_file_sink> add_text_file_sink(
     sink->set_formatter(&statsd_formatter);
 
     // Register the sink with the logging core.
-    boost::log::core::get()->add_sink(sink);
+    core::get()->add_sink(sink);
     return sink;
 }
 
@@ -118,15 +118,14 @@ void initialize_statsd(const rotable_file& file)
     add_text_file_sink(file)->set_filter(statsd_filter);
 }
 
-
-static boost::shared_ptr<text_udp_sink> add_udp_sink(
-    boost::asio::io_service& service, const bc::config::authority& server)
+static boost::shared_ptr<text_udp_sink> add_udp_sink(threadpool& pool,
+    const authority& server)
 {
-    auto socket = boost::make_shared<boost::asio::ip::udp::socket>(service);
-    socket->open(boost::asio::ip::udp::v6());
+    auto socket = boost::make_shared<udp::socket>(pool.service());
+    socket->open(udp::v6());
 
-    auto endpoint = boost::make_shared<boost::asio::ip::udp::endpoint>(
-        server.asio_ip(), server.port());
+    auto endpoint = boost::make_shared<udp::endpoint>(server.asio_ip(),
+        server.port());
 
     // Construct a log sink.
     const auto backend = boost::make_shared<udp_client_sink>(socket, endpoint);
@@ -136,14 +135,13 @@ static boost::shared_ptr<text_udp_sink> add_udp_sink(
     sink->set_formatter(&statsd_formatter);
 
     // Register the sink with the logging core.
-    boost::log::core::get()->add_sink(sink);
+    core::get()->add_sink(sink);
     return sink;
 }
 
-void initialize_statsd(boost::asio::io_service& service,
-    const bc::config::authority& server)
+void initialize_statsd(threadpool& pool, const authority& server)
 {
-    add_udp_sink(service, server)->set_filter(statsd_filter);
+    add_udp_sink(pool, server)->set_filter(statsd_filter);
 }
 
 } // namespace log

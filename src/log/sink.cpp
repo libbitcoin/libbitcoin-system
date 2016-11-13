@@ -36,6 +36,7 @@
 namespace libbitcoin {
 namespace log {
 
+using namespace boost::log;
 using namespace boost::log::expressions;
 using namespace boost::log::keywords;
 using namespace boost::log::sinks;
@@ -58,17 +59,17 @@ using namespace boost::posix_time;
 typedef synchronous_sink<text_file_backend> text_file_sink;
 typedef synchronous_sink<text_ostream_backend> text_stream_sink;
 
-const auto base_filter = (
+static const auto base_filter =
     has_attr(attributes::channel) &&
     has_attr(attributes::severity) &&
-    has_attr(attributes::timestamp));
+    has_attr(attributes::timestamp);
 
-const auto error_filter = base_filter && (
+static const auto error_filter = base_filter && (
     (attributes::severity == severity::warning) ||
     (attributes::severity == severity::error) ||
     (attributes::severity == severity::fatal));
 
-const auto info_filter =base_filter &&
+static const auto info_filter = base_filter &&
     (attributes::severity == severity::info);
 
 static std::map<severity, std::string> severity_mapping
@@ -120,7 +121,7 @@ static boost::shared_ptr<text_file_sink> add_text_file_sink(
     sink->set_formatter(LINE_FORMATTER);
 
     // Register the sink with the logging core.
-    boost::log::core::get()->add_sink(sink);
+    core::get()->add_sink(sink);
     return sink;
 }
 
@@ -142,7 +143,7 @@ static boost::shared_ptr<text_stream_sink> add_text_stream_sink(
     sink->set_formatter(LINE_FORMATTER);
 
     // Register the sink with the logging core.
-    boost::log::core::get()->add_sink(sink);
+    core::get()->add_sink(sink);
     return sink;
 }
 
