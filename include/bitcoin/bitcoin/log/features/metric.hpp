@@ -21,8 +21,8 @@
 #define LIBBITCOIN_LOG_FEATURES_METRIC_HPP
 
 #include <boost/log/sources/features.hpp>
+#include <boost/log/sources/threading_models.hpp>
 #include <boost/log/utility/strictest_lock.hpp>
-#include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
 namespace log {
@@ -36,14 +36,16 @@ BOOST_LOG_ATTRIBUTE_KEYWORD(metric, "Metric", std::string)
 namespace features {
 
 template<typename BaseType>
-class metric_feature : public BaseType
+class metric_feature
+  : public BaseType
 {
 public:
     typedef typename BaseType::char_type char_type;
     typedef typename BaseType::threading_model threading_model;
 
     typedef std::string metric_type;
-    typedef boost::log::attributes::mutable_constant<metric_type> metric_attribute;
+    typedef boost::log::attributes::mutable_constant<metric_type>
+        metric_attribute;
 
     typedef typename boost::log::strictest_lock<
         boost::lock_guard<threading_model>
@@ -56,32 +58,33 @@ public:
 
 public:
     metric_feature();
-    metric_feature(metric_feature const& that);
-    template<typename ArgsT>
-    metric_feature(ArgsT const& args);
+    metric_feature(const metric_feature& other);
+
+    template<typename Arguments>
+    metric_feature(const Arguments& arguments);
 
     metric_type metric() const;
-    void metric(metric_type const& ch);
+    void metric(const metric_type& value);
 
 protected:
-    metric_attribute const& get_metric_attribute() const;
+    const metric_attribute& get_metric_attribute() const;
 
-    template<typename ArgsT>
-    boost::log::record open_record_unlocked(ArgsT const& args);
+    template<typename Arguments>
+    boost::log::record open_record_unlocked(const Arguments& arguments);
 
-    void swap_unlocked(metric_feature& that);
-
-private:
-    template<typename ArgsT, typename T>
-    boost::log::record open_record_with_metric_unlocked(ArgsT const& args,
-        T const& ch);
-
-    template<typename ArgsT>
-    boost::log::record open_record_with_metric_unlocked(ArgsT const& args,
-        boost::parameter::void_);
+    void swap_unlocked(metric_feature& other);
 
 private:
-    metric_attribute metric_attr_;
+    template<typename Arguments, typename Value>
+    boost::log::record open_record_with_metric_unlocked(
+        const Arguments& arguments, const Value& value);
+
+    template<typename Arguments>
+    boost::log::record open_record_with_metric_unlocked(
+        const Arguments& arguments, boost::parameter::void_);
+
+private:
+    metric_attribute metric_attribute_;
 };
 
 struct metric

@@ -23,7 +23,7 @@
 #include <boost/log/sources/basic_logger.hpp>
 #include <boost/log/sources/features.hpp>
 #include <boost/log/utility/strictest_lock.hpp>
-#include <bitcoin/bitcoin/define.hpp>
+#include <boost/log/sources/threading_models.hpp>
 
 namespace libbitcoin {
 namespace log {
@@ -37,7 +37,8 @@ BOOST_LOG_ATTRIBUTE_KEYWORD(gauge, "Gauge", uint64_t)
 namespace features {
 
 template<typename BaseType>
-class gauge_feature : public BaseType
+class gauge_feature
+  : public BaseType
 {
 public:
     typedef typename BaseType::char_type char_type;
@@ -45,9 +46,10 @@ public:
 
 public:
     gauge_feature();
-    gauge_feature(gauge_feature const& that);
-    template<typename ArgsT>
-    gauge_feature(ArgsT const& args);
+    gauge_feature(const gauge_feature& other);
+
+    template<typename Arguments>
+    gauge_feature(const Arguments& arguments);
 
     typedef typename boost::log::strictest_lock<
         boost::lock_guard<threading_model>,
@@ -57,18 +59,16 @@ public:
     >::type open_record_lock;
 
 protected:
-    template<typename ArgsT>
-    boost::log::record open_record_unlocked(ArgsT const& args);
+    template<typename Arguments>
+    boost::log::record open_record_unlocked(const Arguments& arguments);
 
 private:
-    template<typename T>
+    template<typename Value>
     boost::log::attribute_set::iterator add_gauge_unlocked(
-        boost::log::attribute_set& attrs,
-        T const& value);
+        boost::log::attribute_set& set, const Value& value);
 
     boost::log::attribute_set::iterator add_gauge_unlocked(
-        boost::log::attribute_set& attrs,
-        boost::parameter::void_);
+        boost::log::attribute_set& set, boost::parameter::void_);
 };
 
 struct gauge

@@ -21,8 +21,8 @@
 #define LIBBITCOIN_LOG_FEATURES_COUNTER_HPP
 
 #include <boost/log/sources/features.hpp>
+#include <boost/log/sources/threading_models.hpp>
 #include <boost/log/utility/strictest_lock.hpp>
-#include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
 namespace log {
@@ -36,7 +36,8 @@ BOOST_LOG_ATTRIBUTE_KEYWORD(counter, "Counter", int64_t)
 namespace features {
 
 template<typename BaseType>
-class counter_feature : public BaseType
+class counter_feature
+  : public BaseType
 {
 public:
     typedef typename BaseType::char_type char_type;
@@ -44,9 +45,10 @@ public:
 
 public:
     counter_feature();
-    counter_feature(counter_feature const& that);
-    template<typename ArgsT>
-    counter_feature(ArgsT const& args);
+    counter_feature(const counter_feature& other);
+
+    template<typename Arguments>
+    counter_feature(const Arguments& arguments);
 
     typedef typename boost::log::strictest_lock<
         boost::lock_guard<threading_model>,
@@ -56,18 +58,16 @@ public:
     >::type open_record_lock;
 
 protected:
-    template<typename ArgsT>
-    boost::log::record open_record_unlocked(ArgsT const& args);
+    template<typename Arguments>
+    boost::log::record open_record_unlocked(const Arguments& arguments);
 
 private:
-    template<typename T>
+    template<typename Value>
     boost::log::attribute_set::iterator add_counter_unlocked(
-        boost::log::attribute_set& attrs,
-        T const& value);
+        boost::log::attribute_set& set, const Value& value);
 
     boost::log::attribute_set::iterator add_counter_unlocked(
-        boost::log::attribute_set& attrs,
-        boost::parameter::void_);
+        boost::log::attribute_set& set, boost::parameter::void_);
 };
 
 struct counter

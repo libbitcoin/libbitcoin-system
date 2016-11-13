@@ -46,7 +46,7 @@ protected:
      * @param[in]  stream_buffer  The stream buffer to patch.
      * @param[in]  size           The stream buffer size.
      */
-    console_streambuf(std::wstreambuf const& stream_buffer, size_t size);
+    console_streambuf(const std::wstreambuf& stream_buffer, size_t size);
 
     /**
      * Delete stream buffer.
