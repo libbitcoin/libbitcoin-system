@@ -33,8 +33,8 @@ class BC_API udp_client_sink
     char, boost::log::sinks::synchronized_feeding>
 {
 public:
-    udp_client_sink(boost::shared_ptr<boost::asio::ip::udp::socket>& socket,
-        boost::shared_ptr<boost::asio::ip::udp::endpoint>& endpoint);
+    udp_client_sink(boost::shared_ptr<boost::asio::ip::udp::socket> socket,
+        boost::shared_ptr<boost::asio::ip::udp::endpoint> endpoint);
 
     void consume(boost::log::record_view const& record,
         const std::string& message);
