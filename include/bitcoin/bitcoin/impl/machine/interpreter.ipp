@@ -667,7 +667,7 @@ interpreter::result interpreter::op_check_sig_verify(program& program)
     auto endorsement = program.pop();
 
     // Create a subscript with endorsements stripped (sort of).
-    auto script_code = program.subscript();
+    chain::script script_code(program.subscript());
     script_code.find_and_delete({ endorsement });
 
     // BIP62: An empty endorsement is not considered lax encoding.
@@ -736,7 +736,7 @@ interpreter::result interpreter::op_check_multisig_verify(program& program)
         rule_fork::bip66_rule);
 
     // Before looping create subscript with endorsements stripped (sort of).
-    auto script_code = program.subscript();
+    chain::script script_code(program.subscript());
     script_code.find_and_delete(endorsements);
 
     // The exact number of signatures are required and must be in order.

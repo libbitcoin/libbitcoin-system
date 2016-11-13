@@ -29,7 +29,6 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/machine/operation.hpp>
-#include <bitcoin/bitcoin/machine/program.hpp>
 #include <bitcoin/bitcoin/machine/rule_fork.hpp>
 #include <bitcoin/bitcoin/machine/script_pattern.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>

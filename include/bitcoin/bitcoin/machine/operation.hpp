@@ -43,24 +43,24 @@ public:
     // Constructors.
     //-------------------------------------------------------------------------
 
-    operation();
+    inline operation();
 
-    operation(operation&& other);
-    operation(const operation& other);
+    inline operation(operation&& other);
+    inline operation(const operation& other);
 
-    operation(opcode code);
+    inline operation(data_chunk&& uncoded, bool minimal = true);
+    inline operation(const data_chunk& uncoded, bool minimal = true);
 
-    operation(data_chunk&& uncoded, bool minimal=true);
-    operation(const data_chunk& uncoded, bool minimal=true);
+    inline operation(opcode code);
 
     // Operators.
     //-------------------------------------------------------------------------
 
-    operation& operator=(operation&& other);
-    operation& operator=(const operation& other);
+    inline operation& operator=(operation&& other);
+    inline operation& operator=(const operation& other);
 
-    bool operator==(const operation& other) const;
-    bool operator!=(const operation& other) const;
+    inline bool operator==(const operation& other) const;
+    inline bool operator!=(const operation& other) const;
 
     // Deserialization.
     //-------------------------------------------------------------------------
@@ -89,58 +89,58 @@ public:
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------
 
-    uint64_t serialized_size() const;
+    inline uint64_t serialized_size() const;
 
     /// Get the op code [0..255], if is_valid is consistent with data.
-    opcode code() const;
+    inline opcode code() const;
 
     /// Get the data, empty if not a push code or if invalid.
-    const data_chunk& data() const;
+    inline const data_chunk& data() const;
 
     // Utilities.
     //-------------------------------------------------------------------------
 
     /// Compute the minimal data opcode based on size alone.
-    static opcode opcode_from_size(size_t size);
+    static inline opcode opcode_from_size(size_t size);
 
     /// Compute the minimal data opcode for a given chunk of data.
     /// If a numeric code is used then corresponding data must be set to empty.
-    static opcode opcode_from_data(const data_chunk& data);
+    static inline opcode opcode_from_data(const data_chunk& data);
 
     /// Convert the [1..16] value to the corresponding opcode (or undefined).
-    static opcode opcode_from_positive(uint8_t value);
+    static inline opcode opcode_from_positive(uint8_t value);
 
     /// Convert the opcode to the corresponding [1..16] value (or undefined).
-    static uint8_t opcode_to_positive(opcode code);
+    static inline uint8_t opcode_to_positive(opcode code);
 
     /// Categories of opcodes.
-    static bool is_push(opcode code);
-    static bool is_counted(opcode code);
-    static bool is_numeric(opcode code);
-    static bool is_positive(opcode code);
-    static bool is_disabled(opcode code);
-    static bool is_conditional(opcode code);
-    static bool is_relaxed_push(opcode code);
+    static inline bool is_push(opcode code);
+    static inline bool is_counted(opcode code);
+    static inline bool is_numeric(opcode code);
+    static inline bool is_positive(opcode code);
+    static inline bool is_disabled(opcode code);
+    static inline bool is_conditional(opcode code);
+    static inline bool is_relaxed_push(opcode code);
 
     // Validation.
     //-------------------------------------------------------------------------
 
     /// Categories of opcodes.
-    bool is_push() const;
-    bool is_counted() const;
-    bool is_positive() const;
-    bool is_disabled() const;
-    bool is_conditional() const;
-    bool is_relaxed_push() const;
+    inline bool is_push() const;
+    inline bool is_counted() const;
+    inline bool is_positive() const;
+    inline bool is_disabled() const;
+    inline bool is_conditional() const;
+    inline bool is_relaxed_push() const;
 
     /// Validate the data against the code.
-    bool is_oversized() const;
+    inline bool is_oversized() const;
 
 protected:
-    operation(opcode code, data_chunk&& data, bool valid);
-    operation(opcode code, const data_chunk& data, bool valid);
-    static uint32_t read_data_size(opcode code, reader& source);
-    opcode opcode_from_data(const data_chunk& uncoded, bool minimal);
+    inline operation(opcode code, data_chunk&& data, bool valid);
+    inline operation(opcode code, const data_chunk& data, bool valid);
+    inline static uint32_t read_data_size(opcode code, reader& source);
+    inline opcode opcode_from_data(const data_chunk& uncoded, bool minimal);
     void reset();
 
 private:
@@ -151,5 +151,7 @@ private:
 
 } // namespace machine
 } // namespace libbitcoin
+
+#include <bitcoin/bitcoin/impl/machine/operation.ipp>
 
 #endif

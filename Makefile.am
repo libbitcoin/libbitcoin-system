@@ -395,7 +395,10 @@ include_bitcoin_bitcoin_impl_log_features_HEADERS = \
 
 include_bitcoin_bitcoin_impl_machinedir = ${includedir}/bitcoin/bitcoin/impl/machine
 include_bitcoin_bitcoin_impl_machine_HEADERS = \
-    include/bitcoin/bitcoin/impl/machine/interpreter.ipp
+    include/bitcoin/bitcoin/impl/machine/interpreter.ipp \
+    include/bitcoin/bitcoin/impl/machine/number.ipp \
+    include/bitcoin/bitcoin/impl/machine/operation.ipp \
+    include/bitcoin/bitcoin/impl/machine/program.ipp
 
 include_bitcoin_bitcoin_impl_mathdir = ${includedir}/bitcoin/bitcoin/impl/math
 include_bitcoin_bitcoin_impl_math_HEADERS = \

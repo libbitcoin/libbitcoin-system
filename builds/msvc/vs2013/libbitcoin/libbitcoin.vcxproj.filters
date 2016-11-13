@@ -183,6 +183,15 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\machine\interpreter.ipp">
       <Filter>include\bitcoin\impl\machine</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\machine\operation.ipp">
+      <Filter>include\bitcoin\impl\machine</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\machine\program.ipp">
+      <Filter>include\bitcoin\impl\machine</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\machine\number.ipp">
+      <Filter>include\bitcoin\impl\machine</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\error.cpp">
@@ -596,9 +605,6 @@
     <ClCompile Include="..\..\..\..\src\machine\interpreter.cpp">
       <Filter>src\machine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\machine\number.cpp">
-      <Filter>src\machine</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\log\statsd_sink.cpp">
       <Filter>src\log</Filter>
     </ClCompile>
@@ -607,6 +613,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\log\sink.cpp">
       <Filter>src\log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\machine\number.cpp">
+      <Filter>src\machine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
