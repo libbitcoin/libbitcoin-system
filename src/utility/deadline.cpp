@@ -54,7 +54,9 @@ void deadline::start(handler handle, const asio::duration duration)
     ///////////////////////////////////////////////////////////////////////////
     unique_lock lock(mutex_);
 
-    timer_.cancel();
+    // Handling socket error codes creates exception safety.
+    boost_code ignore;
+    timer_.cancel(ignore);
     timer_.expires_from_now(duration);
 
     // async_wait will not invoke the handler within this function.
@@ -72,7 +74,9 @@ void deadline::stop()
     ///////////////////////////////////////////////////////////////////////////
     unique_lock lock(mutex_);
 
-    timer_.cancel();
+    // Handling socket error codes creates exception safety.
+    boost_code ignore;
+    timer_.cancel(ignore);
     ///////////////////////////////////////////////////////////////////////////
 }
 
