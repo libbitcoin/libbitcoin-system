@@ -111,15 +111,14 @@ void threadpool::shutdown()
     // Critical Section
     unique_lock lock(work_mutex_);
 
-    work_ = nullptr;
+    work_.reset();
     ///////////////////////////////////////////////////////////////////////////
 }
 
-// As a rule this should not be necessary.
-////inline bool self(asio::thread& thread)
-////{
-////    return boost::this_thread::get_id() == thread.get_id();
-////}
+inline bool self(asio::thread& thread)
+{
+    return boost::this_thread::get_id() == thread.get_id();
+}
 
 // Not thread safe.
 void threadpool::join()
@@ -130,7 +129,7 @@ void threadpool::join()
 
     for (auto& thread: threads_)
     {
-        if (thread.joinable() /*&& !self(thread)*/)
+        if (thread.joinable() && !self(thread))
         {
             //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             threads_mutex_.unlock_upgrade_and_lock();

@@ -1213,6 +1213,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\socket.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\noncopyable.hpp">
+      <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\resource.rc">
