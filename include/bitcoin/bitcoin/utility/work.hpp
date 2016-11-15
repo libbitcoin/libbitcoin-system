@@ -26,6 +26,7 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/monitor.hpp>
+#include <bitcoin/bitcoin/utility/noncopyable.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -44,6 +45,7 @@ namespace libbitcoin {
 /// This  class is thread safe.
 /// boost asio class wrapper to enable work heap management.
 class BC_API work
+  : noncopyable
 {
 public:
     /// Create an instance.

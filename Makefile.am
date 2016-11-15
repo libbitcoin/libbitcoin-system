@@ -537,6 +537,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/interprocess_lock.hpp \
     include/bitcoin/bitcoin/utility/istream_reader.hpp \
     include/bitcoin/bitcoin/utility/monitor.hpp \
+    include/bitcoin/bitcoin/utility/noncopyable.hpp \
     include/bitcoin/bitcoin/utility/notifier.hpp \
     include/bitcoin/bitcoin/utility/ostream_writer.hpp \
     include/bitcoin/bitcoin/utility/png.hpp \

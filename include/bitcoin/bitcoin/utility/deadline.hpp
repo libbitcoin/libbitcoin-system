@@ -26,6 +26,7 @@
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/noncopyable.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 ////#include <bitcoin/bitcoin/utility/track.hpp>
@@ -38,7 +39,9 @@ namespace libbitcoin {
  * makes timer firing and cancellation conditions safer.
  */
 class BC_API deadline
-  : public enable_shared_from_base<deadline> /*, track<deadline>*/
+  : public enable_shared_from_base<deadline>,
+    noncopyable
+    /*, track<deadline>*/
 {
 public:
     typedef std::shared_ptr<deadline> ptr;
@@ -50,10 +53,6 @@ public:
      * @param[in]  duration  The default time period from start to expiration.
      */
     deadline(threadpool& pool, const asio::duration duration);
-
-    /// This class is not copyable.
-    deadline(const deadline&) = delete;
-    void operator=(const deadline&) = delete;
 
     /**
      * Start or restart the timer.
