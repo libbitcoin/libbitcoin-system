@@ -24,42 +24,38 @@
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
-////#include <bitcoin/bitcoin/utility/thread.hpp>
+#include <bitcoin/bitcoin/utility/noncopyable.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 
-/// The underlying socket is not thread safe and can fail if used concurrently
-/// for any combination of concurrent read/write calls. All calls to async_read
-/// and async_write must be guarded to ensure non-concurrent execution only.
-/// A concurrent write may become interleaved with another by asio due to the
-/// manner in which it breaks up messages. By passing a lock to the write 
-/// completion handler other writes on the socket are blocked until all message
-/// parts have been sent.
 class BC_API socket
-    /*: public track<socket>*/
+  : noncopyable
+    /*, public track<socket>*/
 {
 public:
     typedef std::shared_ptr<socket> ptr;
 
     /// Construct an instance.
-    socket(threadpool& threadpool);
+    socket();
 
-    /// This class is not copyable.
-    socket(const socket&) = delete;
-    void operator=(const socket&) = delete;
+    /// Stop work and join the thread.
+    ~socket();
+
+    /// Obtain the authority of the remote endpoint.
+    config::authority authority() const;
 
     /// The underlying socket.
     asio::socket& get();
 
-    /// Obtain the authority of the remote endpoint.
-    config::authority get_authority() const;
+    /// The threadpool managed by this socket.
+    threadpool& thread();
 
     /// Signal cancel of all outstanding work on the socket.
     virtual void stop();
 
 private:
-    // This is partially protected by mutex.
+    threadpool thread_;
     asio::socket socket_;
 };
 

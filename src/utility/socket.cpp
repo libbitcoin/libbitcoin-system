@@ -26,23 +26,39 @@
 
 namespace libbitcoin {
 
-socket::socket(threadpool& threadpool)
-  : socket_(threadpool.service())
+socket::socket()
+  : thread_(1),
+    socket_(thread_.service())
     /*, CONSTRUCT_TRACK(socket) */
 {
 }
 
-config::authority socket::get_authority() const
+socket::~socket()
+{
+    stop();
+
+    // Handling socket error codes creates exception safety.
+    boost_code ignore;
+    socket_.close(ignore);
+
+    thread_.join();
+}
+
+config::authority socket::authority() const
 {
     boost_code ec;
     const auto endpoint = socket_.remote_endpoint(ec);
     return ec ? config::authority() : config::authority(endpoint);
 }
 
-// This should be used for async reading, as there is no interleaving.
 asio::socket& socket::get()
 {
     return socket_;
+}
+
+threadpool& socket::thread()
+{
+    return thread_;
 }
 
 void socket::stop()
@@ -55,6 +71,9 @@ void socket::stop()
 
     // BUGBUG: this is documented to fail on Windows XP and Server 2003.
     socket_.cancel(ignore);
+
+    // Signal the end of oustanding work and no new work.
+    thread_.shutdown();
 }
 
 } // namespace libbitcoin
