@@ -50,6 +50,7 @@ void udp_client_sink::send(const std::string& message)
 
     const auto payload = boost::make_shared<std::string>(message);
 
+    // This is not guarded against interleaving of messages that exceed 64k.
     socket_->async_send_to(buffer(*payload), *endpoint_,
         std::bind(&udp_client_sink::handle_send,
             this, _1, _2, payload));
