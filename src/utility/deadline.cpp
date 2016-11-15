@@ -67,7 +67,6 @@ void deadline::start(handler handle, const asio::duration duration)
 // Cancellation calls handle_timer with asio::error::operation_aborted.
 // We do not handle the cancelation result code, which will return success
 // in the case of a race in which the timer is already canceled.
-// We don't use strand because cancel must not change context.
 void deadline::stop()
 {
     // Critical Section
