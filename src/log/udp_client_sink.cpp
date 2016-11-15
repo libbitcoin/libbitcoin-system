@@ -20,12 +20,15 @@
 #include <bitcoin/bitcoin/log/udp_client_sink.hpp>
 
 #include <cstddef>
+#include <functional>
 #include <string>
 #include <boost/make_shared.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 
 namespace libbitcoin {
 namespace log {
 
+using namespace std::placeholders;
 using namespace boost::asio;
 using namespace boost::log;
 
@@ -42,16 +45,20 @@ void udp_client_sink::consume(const record_view& record,
 
 void udp_client_sink::send(const std::string& message)
 {
-    if (socket_ && endpoint_)
-    {
-        const auto message_ptr = boost::make_shared<std::string>(message);
-        const auto handler = [message_ptr](const boost_code&, size_t)
-        {
-            // This holds the message in scope until the send is completed.
-        };
+    if (!socket_ || !endpoint_)
+        return;
 
-        socket_->async_send_to(buffer(*message_ptr), *endpoint_, handler);
-    }
+    const auto payload = boost::make_shared<std::string>(message);
+
+    // This is not guarded against interleaving of messages that exceed 64k.
+    socket_->async_send_to(buffer(*payload), *endpoint_,
+        std::bind(&udp_client_sink::handle_send,
+            this, _1, _2, payload));
+}
+
+void udp_client_sink::handle_send(const boost_code&, size_t, message_ptr)
+{
+    // This holds the message in scope until the send is completed.
 }
 
 } // namespace log

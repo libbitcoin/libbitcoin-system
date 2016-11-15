@@ -45,7 +45,6 @@ typedef steady_clock::duration duration;
 typedef steady_clock::time_point time_point;
 typedef boost::asio::basic_waitable_timer<steady_clock> timer;
 
-typedef boost::asio::const_buffer const_buffer;
 typedef boost::asio::io_service service;
 typedef boost::asio::ip::address address;
 typedef boost::asio::ip::address_v4 ipv4;

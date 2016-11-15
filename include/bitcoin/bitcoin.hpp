@@ -161,6 +161,7 @@
 #include <bitcoin/bitcoin/utility/scope_lock.hpp>
 #include <bitcoin/bitcoin/utility/sequential_lock.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
+#include <bitcoin/bitcoin/utility/socket.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
