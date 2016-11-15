@@ -163,6 +163,7 @@ src_libbitcoin_la_SOURCES = \
     src/utility/random.cpp \
     src/utility/scope_lock.cpp \
     src/utility/sequential_lock.cpp \
+    src/utility/socket.cpp \
     src/utility/string.cpp \
     src/utility/thread.cpp \
     src/utility/threadpool.cpp \
@@ -545,6 +546,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/scope_lock.hpp \
     include/bitcoin/bitcoin/utility/sequential_lock.hpp \
     include/bitcoin/bitcoin/utility/serializer.hpp \
+    include/bitcoin/bitcoin/utility/socket.hpp \
     include/bitcoin/bitcoin/utility/string.hpp \
     include/bitcoin/bitcoin/utility/subscriber.hpp \
     include/bitcoin/bitcoin/utility/synchronizer.hpp \

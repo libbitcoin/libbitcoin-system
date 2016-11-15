@@ -617,6 +617,9 @@
     <ClCompile Include="..\..\..\..\src\machine\number.cpp">
       <Filter>src\machine</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\socket.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -1206,6 +1209,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\features\gauge.hpp">
       <Filter>include\bitcoin\log\features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\socket.hpp">
+      <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
