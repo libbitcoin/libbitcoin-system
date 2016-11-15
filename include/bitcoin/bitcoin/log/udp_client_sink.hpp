@@ -42,15 +42,17 @@ public:
     udp_client_sink(socket_ptr socket, endpoint_ptr endpoint);
 
     void consume(const boost::log::record_view& record,
-        const std::string& message);
+        const std::string& messag);
 
 protected:
-//    void send(boost::format& message);
-    void send(const std::string& message);
+    typedef boost::shared_ptr<std::string> message_ptr;
+
+    void send(const std::string& messag);
+    void handle_send(const boost_code&, size_t, message_ptr message);
 
 private:
     socket_ptr socket_;
-    endpoint_ptr endpoint_;
+    const endpoint_ptr endpoint_;
 };
 
 } // namespace log
