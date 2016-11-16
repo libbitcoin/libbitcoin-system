@@ -95,15 +95,11 @@ bool ping::from_data(uint32_t version, reader& source)
 {
     reset();
 
-    // All nonce values are valid so we cannot use a sentinel value.
+    valid_ = true;
     nonceless_ = (version < version::level::bip31);
 
     if (!nonceless_)
         nonce_ = source.read_8_bytes_little_endian();
-
-    // Must track valid because is_valid doesn't include version parameter.
-    // Otherwise when below bip31 then the object would always be invalid.
-    valid_ = source;
 
     if (!source)
         reset();
