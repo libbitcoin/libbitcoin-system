@@ -26,7 +26,9 @@
 #include <boost/functional/hash_fwd.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/math/uint256.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/utility/endian.hpp>
 
 namespace libbitcoin {
 
@@ -102,6 +104,11 @@ BC_CONSTEXPR mini_hash null_mini_hash
         0, 0, 0, 0, 0, 0
     }
 };
+
+inline uint256_t to_uint256(const hash_digest& hash)
+{
+    return from_little_endian<uint256_t>(hash.begin(), hash.end());
+}
 
 /// Generate a scrypt hash to fill a byte array.
 template <size_t Size>

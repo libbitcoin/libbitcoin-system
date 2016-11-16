@@ -204,19 +204,19 @@ BOOST_AUTO_TEST_CASE(compact__constructor1__positive252_exponent__normalizes_as_
 
 // constructor2/uint256_t
 
+BOOST_AUTO_TEST_CASE(compact__constructor2__zero__round_trips)
+{
+    BOOST_REQUIRE(uint256_t(0) == compact(uint256_t(0)));
+}
+
 BOOST_AUTO_TEST_CASE(compact__constructor2__big_value__round_trips)
 {
     BOOST_REQUIRE(uint256_t(42) == compact(uint256_t(42)));
 }
 
-BOOST_AUTO_TEST_CASE(compact__constructor2__hash_big_zero__round_trips)
-{
-    BOOST_REQUIRE(uint256_t(null_hash) == compact(uint256_t(null_hash)));
-}
-
 BOOST_AUTO_TEST_CASE(compact__constructor2__hash__round_trips)
 {
-    BOOST_REQUIRE(uint256_t(primes) == compact(uint256_t(primes)));
+    BOOST_REQUIRE(to_uint256(primes) == compact(to_uint256(primes)));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

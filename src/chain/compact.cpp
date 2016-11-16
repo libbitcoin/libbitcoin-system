@@ -21,6 +21,7 @@
 
 #include <cstdint>
 #include <bitcoin/bitcoin/math/uint256.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -79,24 +80,34 @@ inline uint32_t shift_high(uint8_t exponent)
     return  8 * (exponent - 3);
 }
 
+inline size_t logical_size(uint256_t value)
+{
+    auto byte = 0;
+
+    for (; value != 0; ++byte)
+        value >>= 8;
+
+    return byte;
+}
+
 // Constructors
 //-----------------------------------------------------------------------------
 
 compact::compact(uint32_t compact)
 {
-    overflowed_ = from_compact(big_, compact);
+    overflowed_ = !from_compact(big_, compact);
     normal_ = from_big(big_);
 }
 
 compact::compact(const uint256_t& value)
-  : big_(value), overflowed_(true)
+  : big_(value), overflowed_(false)
 {
     normal_ = from_big(big_);
 }
 
 bool compact::is_overflowed() const
 {
-    return !overflowed_;
+    return overflowed_;
 }
 
 uint32_t compact::normal() const
@@ -136,7 +147,7 @@ bool compact::from_compact(uint256_t& out, uint32_t compact)
         return true;
     }
 
-    // Compact has space for more exponent bits than can be represnted in a base
+    // Compact has space for more exponent bits than can be represented in a
     // base 256 number represented in 32 bytes, so we trap overflow here.
     if (is_overflow(exponent, mantissa))
         return false;
@@ -149,14 +160,14 @@ bool compact::from_compact(uint256_t& out, uint32_t compact)
 uint32_t compact::from_big(const uint256_t& big)
 {
     // This value is limited to 32, so exponent cannot overflow.
-    auto exponent = static_cast<uint8_t>(big.byte_length());
-    uint32_t mantissa = 0;
+    auto exponent = static_cast<uint8_t>(logical_size(big));
 
     // Shift the big number significant digits into the mantissa.
-    if (exponent <= 3)
-        mantissa = static_cast<uint32_t>(big[0] << shift_low(exponent));
-    else
-        mantissa = static_cast<uint32_t>((big >> shift_high(exponent))[0]);
+    const auto mantissa64 = exponent <= 3 ?
+        static_cast<uint64_t>(big) << shift_low(exponent) :
+        static_cast<uint64_t>(big >> shift_high(exponent));
+
+    auto mantissa = static_cast<uint32_t>(mantissa64);
 
     //*************************************************************************
     // CONSENSUS: Satoshi used a signed implementation to represent unsigned.
