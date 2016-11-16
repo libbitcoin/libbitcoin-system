@@ -53,8 +53,8 @@ BOOST_AUTO_TEST_SUITE(binary__shift_left)
 BOOST_AUTO_TEST_CASE(shift_left_by_zero)
 {
     binary::size_type distance = 0;
-    binary instance(16, data_chunk { 0xAA, 0xAA, 0xAA });
-    binary expected(16, data_chunk { 0xAA, 0xAA });
+    binary instance(16, data_chunk{ 0xAA, 0xAA, 0xAA });
+    binary expected(16, data_chunk{ 0xAA, 0xAA });
     instance.shift_left(distance);
     BOOST_REQUIRE(expected == instance);
 }
@@ -62,8 +62,8 @@ BOOST_AUTO_TEST_CASE(shift_left_by_zero)
 BOOST_AUTO_TEST_CASE(shift_left_alternate_initial)
 {
     binary::size_type distance = 16;
-    binary instance(24, data_chunk { 0xAB, 0xCD, 0xEF });
-    binary expected(8, data_chunk { 0xEF });
+    binary instance(24, data_chunk{ 0xAB, 0xCD, 0xEF });
+    binary expected(8, data_chunk{ 0xEF });
     instance.shift_left(distance);
     BOOST_REQUIRE(expected == instance);
 }
@@ -71,8 +71,8 @@ BOOST_AUTO_TEST_CASE(shift_left_alternate_initial)
 BOOST_AUTO_TEST_CASE(shift_left_by_less_than_byte)
 {
     binary::size_type distance = 5;
-    binary instance(24, data_chunk { 0xAA, 0xAA, 0xAA });
-    binary expected(19, data_chunk { 0x55, 0x55, 0x40});
+    binary instance(24, data_chunk{ 0xAA, 0xAA, 0xAA });
+    binary expected(19, data_chunk{ 0x55, 0x55, 0x40});
     instance.shift_left(distance);
     BOOST_REQUIRE(expected == instance);
 }
@@ -80,8 +80,8 @@ BOOST_AUTO_TEST_CASE(shift_left_by_less_than_byte)
 BOOST_AUTO_TEST_CASE(shift_left_by_less_than_byte_to_byte_align)
 {
     binary::size_type distance = 5;
-    binary instance(21, data_chunk { 0xAA, 0xAA, 0xAA });
-    binary expected(16, data_chunk { 0x55, 0x55 });
+    binary instance(21, data_chunk{ 0xAA, 0xAA, 0xAA });
+    binary expected(16, data_chunk{ 0x55, 0x55 });
     instance.shift_left(distance);
     BOOST_REQUIRE(expected == instance);
 }
@@ -89,8 +89,8 @@ BOOST_AUTO_TEST_CASE(shift_left_by_less_than_byte_to_byte_align)
 BOOST_AUTO_TEST_CASE(shift_left_by_byte_single)
 {
     binary::size_type distance = 8;
-    binary instance(24, data_chunk { 0xAA, 0xAA, 0xAA });
-    binary expected(16, data_chunk { 0xAA, 0xAA });
+    binary instance(24, data_chunk{ 0xAA, 0xAA, 0xAA });
+    binary expected(16, data_chunk{ 0xAA, 0xAA });
     instance.shift_left(distance);
     BOOST_REQUIRE(expected == instance);
 }
@@ -98,8 +98,8 @@ BOOST_AUTO_TEST_CASE(shift_left_by_byte_single)
 BOOST_AUTO_TEST_CASE(shift_left_by_greater_than_byte)
 {
     binary::size_type distance = 13;
-    binary instance(24, data_chunk { 0xAA, 0xAA, 0xAA });
-    binary expected(11, data_chunk { 0x55, 0x40 });
+    binary instance(24, data_chunk{ 0xAA, 0xAA, 0xAA });
+    binary expected(11, data_chunk{ 0x55, 0x40 });
     instance.shift_left(distance);
     BOOST_REQUIRE(expected == instance);
 }
@@ -107,8 +107,8 @@ BOOST_AUTO_TEST_CASE(shift_left_by_greater_than_byte)
 BOOST_AUTO_TEST_CASE(shift_left_by_greater_than_byte_not_initially_aligned)
 {
     binary::size_type distance = 13;
-    binary instance(18, data_chunk { 0xAA, 0xAA, 0xAA });
-    binary expected(5, data_chunk { 0x50 });
+    binary instance(18, data_chunk{ 0xAA, 0xAA, 0xAA });
+    binary expected(5, data_chunk{ 0x50 });
     instance.shift_left(distance);
     BOOST_REQUIRE(expected == instance);
 }
@@ -116,8 +116,8 @@ BOOST_AUTO_TEST_CASE(shift_left_by_greater_than_byte_not_initially_aligned)
 BOOST_AUTO_TEST_CASE(shift_left_by_byte_multiple)
 {
     binary::size_type distance = 16;
-    binary instance(24, data_chunk { 0xAA, 0xAA, 0xAA });
-    binary expected(8, data_chunk { 0xAA });
+    binary instance(24, data_chunk{ 0xAA, 0xAA, 0xAA });
+    binary expected(8, data_chunk{ 0xAA });
     instance.shift_left(distance);
     BOOST_REQUIRE(expected == instance);
 }
@@ -125,8 +125,8 @@ BOOST_AUTO_TEST_CASE(shift_left_by_byte_multiple)
 BOOST_AUTO_TEST_CASE(shift_left_by_size)
 {
     binary::size_type distance = 24;
-    binary instance(24, data_chunk { 0xAA, 0xAA, 0xAA });
-    binary expected(0, data_chunk { });
+    binary instance(24, data_chunk{ 0xAA, 0xAA, 0xAA });
+    binary expected(0, data_chunk{});
     instance.shift_left(distance);
     BOOST_REQUIRE(expected == instance);
 }
@@ -134,8 +134,8 @@ BOOST_AUTO_TEST_CASE(shift_left_by_size)
 BOOST_AUTO_TEST_CASE(shift_left_by_greater_than_size)
 {
     binary::size_type distance = 30;
-    binary instance(24, data_chunk { 0xAA, 0xAA, 0xAA });
-    binary expected(0, data_chunk { });
+    binary instance(24, data_chunk{ 0xAA, 0xAA, 0xAA });
+    binary expected(0, data_chunk{});
     instance.shift_left(distance);
     BOOST_REQUIRE(expected == instance);
 }
@@ -147,8 +147,8 @@ BOOST_AUTO_TEST_SUITE(binary__shift_right)
 BOOST_AUTO_TEST_CASE(shift_right_by_zero)
 {
     binary::size_type distance = 0;
-    binary instance(16, data_chunk { 0xAA, 0xAA, 0xAA });
-    binary expected(16, data_chunk { 0xAA, 0xAA });
+    binary instance(16, data_chunk{ 0xAA, 0xAA, 0xAA });
+    binary expected(16, data_chunk{ 0xAA, 0xAA });
     instance.shift_right(distance);
     BOOST_REQUIRE(expected == instance);
 }
@@ -156,8 +156,8 @@ BOOST_AUTO_TEST_CASE(shift_right_by_zero)
 BOOST_AUTO_TEST_CASE(shift_right_by_less_than_byte)
 {
     binary::size_type distance = 5;
-    binary instance(24, data_chunk { 0xAA, 0xAA, 0xAA });
-    binary expected(29, data_chunk { 0x05, 0x55, 0x55, 0x50});
+    binary instance(24, data_chunk{ 0xAA, 0xAA, 0xAA });
+    binary expected(29, data_chunk{ 0x05, 0x55, 0x55, 0x50});
     instance.shift_right(distance);
     BOOST_REQUIRE(expected == instance);
 }
@@ -165,8 +165,8 @@ BOOST_AUTO_TEST_CASE(shift_right_by_less_than_byte)
 BOOST_AUTO_TEST_CASE(shift_right_by_less_than_byte_to_byte_align)
 {
     binary::size_type distance = 3;
-    binary instance(21, data_chunk { 0xAA, 0xAA, 0xAA });
-    binary expected(24, data_chunk { 0x15, 0x55, 0x55 });
+    binary instance(21, data_chunk{ 0xAA, 0xAA, 0xAA });
+    binary expected(24, data_chunk{ 0x15, 0x55, 0x55 });
     instance.shift_right(distance);
     BOOST_REQUIRE(expected == instance);
 }
@@ -174,8 +174,8 @@ BOOST_AUTO_TEST_CASE(shift_right_by_less_than_byte_to_byte_align)
 BOOST_AUTO_TEST_CASE(shift_right_by_byte_single)
 {
     binary::size_type distance = 8;
-    binary instance(24, data_chunk { 0xAA, 0xAA, 0xAA });
-    binary expected(32, data_chunk { 0x00, 0xAA, 0xAA, 0xAA });
+    binary instance(24, data_chunk{ 0xAA, 0xAA, 0xAA });
+    binary expected(32, data_chunk{ 0x00, 0xAA, 0xAA, 0xAA });
     instance.shift_right(distance);
     BOOST_REQUIRE(expected == instance);
 }
@@ -183,8 +183,8 @@ BOOST_AUTO_TEST_CASE(shift_right_by_byte_single)
 BOOST_AUTO_TEST_CASE(shift_right_by_greater_than_byte)
 {
     binary::size_type distance = 13;
-    binary instance(24, data_chunk { 0xAA, 0xAA, 0xAA });
-    binary expected(37, data_chunk { 0x00, 0x05, 0x55, 0x55, 0x50 });
+    binary instance(24, data_chunk{ 0xAA, 0xAA, 0xAA });
+    binary expected(37, data_chunk{ 0x00, 0x05, 0x55, 0x55, 0x50 });
     instance.shift_right(distance);
     BOOST_REQUIRE(expected == instance);
 }
@@ -192,8 +192,8 @@ BOOST_AUTO_TEST_CASE(shift_right_by_greater_than_byte)
 BOOST_AUTO_TEST_CASE(shift_right_by_greater_than_byte_not_initially_aligned)
 {
     binary::size_type distance = 13;
-    binary instance(18, data_chunk { 0xAA, 0xAA, 0xAA });
-    binary expected(31, data_chunk { 0x00, 0x05, 0x55, 0x54 });
+    binary instance(18, data_chunk{ 0xAA, 0xAA, 0xAA });
+    binary expected(31, data_chunk{ 0x00, 0x05, 0x55, 0x54 });
     instance.shift_right(distance);
     BOOST_REQUIRE(expected == instance);
 }
@@ -201,8 +201,8 @@ BOOST_AUTO_TEST_CASE(shift_right_by_greater_than_byte_not_initially_aligned)
 BOOST_AUTO_TEST_CASE(shift_right_by_byte_multiple)
 {
     binary::size_type distance = 16;
-    binary instance(24, data_chunk { 0xAA, 0xAA, 0xAA });
-    binary expected(40, data_chunk { 0x00, 0x00, 0xAA, 0xAA, 0xAA });
+    binary instance(24, data_chunk{ 0xAA, 0xAA, 0xAA });
+    binary expected(40, data_chunk{ 0x00, 0x00, 0xAA, 0xAA, 0xAA });
     instance.shift_right(distance);
     BOOST_REQUIRE(expected == instance);
 }
@@ -210,8 +210,8 @@ BOOST_AUTO_TEST_CASE(shift_right_by_byte_multiple)
 BOOST_AUTO_TEST_CASE(shift_right_by_size)
 {
     binary::size_type distance = 24;
-    binary instance(24, data_chunk { 0xAA, 0xAA, 0xAA });
-    binary expected(48, data_chunk { 0x00, 0x00, 0x00, 0xAA, 0xAA, 0xAA });
+    binary instance(24, data_chunk{ 0xAA, 0xAA, 0xAA });
+    binary expected(48, data_chunk{ 0x00, 0x00, 0x00, 0xAA, 0xAA, 0xAA });
     instance.shift_right(distance);
     BOOST_REQUIRE(expected == instance);
 }
@@ -219,8 +219,8 @@ BOOST_AUTO_TEST_CASE(shift_right_by_size)
 BOOST_AUTO_TEST_CASE(shift_right_by_greater_than_size)
 {
     binary::size_type distance = 30;
-    binary instance(24, data_chunk { 0xAA, 0xAA, 0xAA });
-    binary expected(54, data_chunk { 0x00, 0x00, 0x00, 0x02, 0xAA, 0xAA, 0xA8 });
+    binary instance(24, data_chunk{ 0xAA, 0xAA, 0xAA });
+    binary expected(54, data_chunk{ 0x00, 0x00, 0x00, 0x02, 0xAA, 0xAA, 0xA8 });
     instance.shift_right(distance);
     BOOST_REQUIRE(expected == instance);
 }
@@ -231,36 +231,36 @@ BOOST_AUTO_TEST_SUITE(binary__append)
 
 BOOST_AUTO_TEST_CASE(append_to_zero_length)
 {
-    binary instance(0, data_chunk { 0x00 });
-    binary augment(24, data_chunk { 0xAA, 0xBB, 0xCC });
-    binary expected(24, data_chunk { 0xAA, 0xBB, 0xCC });
+    binary instance(0, data_chunk{ 0x00 });
+    binary augment(24, data_chunk{ 0xAA, 0xBB, 0xCC });
+    binary expected(24, data_chunk{ 0xAA, 0xBB, 0xCC });
     instance.append(augment);
     BOOST_REQUIRE(expected == instance);
 }
 
 BOOST_AUTO_TEST_CASE(append_zero_length_to_content)
 {
-    binary instance(24, data_chunk { 0xAA, 0xBB, 0xCC });
-    binary augment(0, data_chunk { });
-    binary expected(24, data_chunk { 0xAA, 0xBB, 0xCC });
+    binary instance(24, data_chunk{ 0xAA, 0xBB, 0xCC });
+    binary augment(0, data_chunk{});
+    binary expected(24, data_chunk{ 0xAA, 0xBB, 0xCC });
     instance.append(augment);
     BOOST_REQUIRE(expected == instance);
 }
 
 BOOST_AUTO_TEST_CASE(append_byte_aligned_instances)
 {
-    binary instance(24, data_chunk { 0xAA, 0xBB, 0xCC });
-    binary augment(24, data_chunk { 0xDD, 0xEE, 0xFF });
-    binary expected(48, data_chunk { 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF });
+    binary instance(24, data_chunk{ 0xAA, 0xBB, 0xCC });
+    binary augment(24, data_chunk{ 0xDD, 0xEE, 0xFF });
+    binary expected(48, data_chunk{ 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF });
     instance.append(augment);
     BOOST_REQUIRE(expected == instance);
 }
 
 BOOST_AUTO_TEST_CASE(append_byte_nonaligned_instances)
 {
-    binary instance(20, data_chunk { 0xAA, 0xBB, 0xCC });
-    binary augment(13, data_chunk { 0xDD, 0xEE });
-    binary expected(33, data_chunk { 0xAA, 0xBB, 0xCD, 0xDE, 0x80 });
+    binary instance(20, data_chunk{ 0xAA, 0xBB, 0xCC });
+    binary augment(13, data_chunk{ 0xDD, 0xEE });
+    binary expected(33, data_chunk{ 0xAA, 0xBB, 0xCD, 0xDE, 0x80 });
     instance.append(augment);
     BOOST_REQUIRE(expected == instance);
 }
@@ -270,36 +270,36 @@ BOOST_AUTO_TEST_CASE(append_byte_nonaligned_instances)
 //
 BOOST_AUTO_TEST_CASE(prepend_to_zero_length)
 {
-    binary instance(0, data_chunk { 0x00 });
-    binary augment(24, data_chunk { 0xAA, 0xBB, 0xCC });
-    binary expected(24, data_chunk { 0xAA, 0xBB, 0xCC });
+    binary instance(0, data_chunk{ 0x00 });
+    binary augment(24, data_chunk{ 0xAA, 0xBB, 0xCC });
+    binary expected(24, data_chunk{ 0xAA, 0xBB, 0xCC });
     instance.prepend(augment);
     BOOST_REQUIRE(expected == instance);
 }
 
 BOOST_AUTO_TEST_CASE(prepend_zero_length_to_content)
 {
-    binary instance(24, data_chunk { 0xAA, 0xBB, 0xCC });
-    binary augment(0, data_chunk { });
-    binary expected(24, data_chunk { 0xAA, 0xBB, 0xCC });
+    binary instance(24, data_chunk{ 0xAA, 0xBB, 0xCC });
+    binary augment(0, data_chunk{});
+    binary expected(24, data_chunk{ 0xAA, 0xBB, 0xCC });
     instance.prepend(augment);
     BOOST_REQUIRE(expected == instance);
 }
 
 BOOST_AUTO_TEST_CASE(prepend_byte_aligned_instances)
 {
-    binary instance(24, data_chunk { 0xAA, 0xBB, 0xCC });
-    binary augment(24, data_chunk { 0xDD, 0xEE, 0xFF });
-    binary expected(48, data_chunk { 0xDD, 0xEE, 0xFF, 0xAA, 0xBB, 0xCC });
+    binary instance(24, data_chunk{ 0xAA, 0xBB, 0xCC });
+    binary augment(24, data_chunk{ 0xDD, 0xEE, 0xFF });
+    binary expected(48, data_chunk{ 0xDD, 0xEE, 0xFF, 0xAA, 0xBB, 0xCC });
     instance.prepend(augment);
     BOOST_REQUIRE(expected == instance);
 }
 
 BOOST_AUTO_TEST_CASE(prepend_byte_nonaligned_instances)
 {
-    binary instance(20, data_chunk { 0xAA, 0xBB, 0xCC });
-    binary augment(13, data_chunk { 0xDD, 0xEE });
-    binary expected(33, data_chunk { 0xDD, 0xED, 0x55, 0xDE, 0x00 });
+    binary instance(20, data_chunk{ 0xAA, 0xBB, 0xCC });
+    binary augment(13, data_chunk{ 0xDD, 0xEE });
+    binary expected(33, data_chunk{ 0xDD, 0xED, 0x55, 0xDE, 0x00 });
     instance.prepend(augment);
     BOOST_REQUIRE(expected == instance);
 }
@@ -310,59 +310,59 @@ BOOST_AUTO_TEST_SUITE(binary__substring)
 
 BOOST_AUTO_TEST_CASE(substring_start_after_end)
 {
-    binary instance(20, data_chunk { 0xAA, 0xBB, 0xCC });
+    binary instance(20, data_chunk{ 0xAA, 0xBB, 0xCC });
     binary::size_type start = 21;
     binary::size_type length = 10;
-    binary expected(0, data_chunk {});
+    binary expected(0, data_chunk{});
     binary result = instance.substring(start, length);
     BOOST_REQUIRE(expected == result);
 }
 
 BOOST_AUTO_TEST_CASE(substring_length_zero)
 {
-    binary instance(20, data_chunk { 0xAA, 0xBB, 0xCC });
+    binary instance(20, data_chunk{ 0xAA, 0xBB, 0xCC });
     binary::size_type start = 5;
     binary::size_type length = 0;
-    binary expected(0, data_chunk {});
+    binary expected(0, data_chunk{});
     binary result = instance.substring(start, length);
     BOOST_REQUIRE(expected == result);
 }
 
 BOOST_AUTO_TEST_CASE(substring_byte_aligned_start)
 {
-    binary instance(20, data_chunk { 0xAA, 0xBB, 0xCC });
+    binary instance(20, data_chunk{ 0xAA, 0xBB, 0xCC });
     binary::size_type start = 8;
     binary::size_type length = 10;
-    binary expected(10, data_chunk { 0xBB, 0xC0 });
+    binary expected(10, data_chunk{ 0xBB, 0xC0 });
     binary result = instance.substring(start, length);
     BOOST_REQUIRE(expected == result);
 }
 
 BOOST_AUTO_TEST_CASE(substring_byte_nonaligned_start)
 {
-    binary instance(20, data_chunk { 0xAA, 0xBB, 0xCC });
+    binary instance(20, data_chunk{ 0xAA, 0xBB, 0xCC });
     binary::size_type start = 10;
     binary::size_type length = 10;
-    binary expected(10, data_chunk { 0xEF, 0x00 });
+    binary expected(10, data_chunk{ 0xEF, 0x00 });
     binary result = instance.substring(start, length);
     BOOST_REQUIRE(expected == result);
 }
 
 BOOST_AUTO_TEST_CASE(substring_request_exceeds_string)
 {
-    binary instance(20, data_chunk { 0xAA, 0xBB, 0xCC });
+    binary instance(20, data_chunk{ 0xAA, 0xBB, 0xCC });
     binary::size_type start = 10;
     binary::size_type length = 15;
-    binary expected(10, data_chunk { 0xEF, 0x00 });
+    binary expected(10, data_chunk{ 0xEF, 0x00 });
     binary result = instance.substring(start, length);
     BOOST_REQUIRE(expected == result);
 }
 
 BOOST_AUTO_TEST_CASE(substring_implicit_length)
 {
-    binary instance(20, data_chunk { 0xAA, 0xBB, 0xCC });
+    binary instance(20, data_chunk{ 0xAA, 0xBB, 0xCC });
     binary::size_type start = 10;
-    binary expected(10, data_chunk { 0xEF, 0x00 });
+    binary expected(10, data_chunk{ 0xEF, 0x00 });
     binary result = instance.substring(start);
     BOOST_REQUIRE(expected == result);
 }
