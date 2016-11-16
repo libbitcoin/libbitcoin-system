@@ -306,9 +306,6 @@
     <ClCompile Include="..\..\..\..\test\message\transaction.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\compact_.cpp">
-      <Filter>src\chain</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\script.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
@@ -320,6 +317,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\machine\number.cpp">
       <Filter>src\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\compact.cpp">
+      <Filter>src\chain</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

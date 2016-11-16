@@ -43,7 +43,8 @@ Integer from_big_endian(Iterator start, const Iterator end)
 template <typename Integer, typename Iterator>
 Integer from_little_endian(Iterator start, const Iterator end)
 {
-    VERIFY_UNSIGNED(Integer);
+    //// TODO: Type traits does not work for uint256_t.
+    ////VERIFY_UNSIGNED(Integer);
     Integer out = 0;
     size_t i = 0;
 

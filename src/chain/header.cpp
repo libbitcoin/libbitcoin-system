@@ -430,7 +430,7 @@ bool header::is_valid_proof_of_work() const
         return false;
 
     // Ensure actual work does not exceed claimed amount.
-    return uint256_t(hash()) <= target;
+    return to_uint256(hash()) <= target;
 }
 
 // Validation.
