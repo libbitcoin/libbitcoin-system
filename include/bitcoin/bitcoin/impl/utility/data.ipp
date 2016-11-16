@@ -110,6 +110,7 @@ byte_array<Left + Middle + Right> splice(const std::array<uint8_t, Left>& left,
 template <size_t Size>
 byte_array_parts<Size / 2> split(const byte_array<Size>& bytes)
 {
+    static_assert(Size != 0, "Split requires a non-zero parameter.");
     static_assert(Size % 2 == 0, "Split requires an even length parameter.");
     static const size_t half = Size / 2;
     byte_array_parts<half> out;

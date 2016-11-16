@@ -64,6 +64,10 @@ binary::binary(size_type size, data_slice blocks)
 {
     // Copy blocks
     blocks_.resize(blocks.size());
+
+    if (blocks_.empty())
+        return;
+
     std::copy_n(blocks.begin(), blocks.size(), blocks_.begin());
 
     // Pad with 00 for safety.
