@@ -230,7 +230,7 @@ data_chunk deserializer<Iterator, CheckSafe>::read_bytes(size_t size)
     if (!safe(size))
         invalidate();
 
-    if (!valid_)
+    if (!valid_ || size == 0)
         return out;
 
     const auto begin = iterator_;
@@ -296,7 +296,7 @@ byte_array<Size> deserializer<Iterator, CheckSafe>::read_forward()
     if (!safe(Size))
         invalidate();
 
-    if (!valid_)
+    if (!valid_ || Size == 0)
         return{};
 
     byte_array<Size> out;

@@ -47,13 +47,13 @@ BOOST_AUTO_TEST_CASE(pong__constructor_3__always__equals_params)
     BOOST_REQUIRE(expected == instance);
 }
 
-BOOST_AUTO_TEST_CASE(pong__satoshi_fixed_size__minimum__sizeof_uint64_t)
+BOOST_AUTO_TEST_CASE(pong__satoshi_fixed_size__minimum_version__returns_8)
 {
-    BOOST_REQUIRE_EQUAL(sizeof(uint64_t),
-        message::pong::satoshi_fixed_size(message::version::level::minimum));
+    const auto size = message::pong::satoshi_fixed_size(message::version::level::minimum);
+    BOOST_REQUIRE_EQUAL(size, 8u);
 }
 
-BOOST_AUTO_TEST_CASE(pong__factory_from_data_1__empty_data__invalid)
+BOOST_AUTO_TEST_CASE(pong__factory_from_data_1__minimum_version_empty_data__invalid)
 {
     static const auto version = message::version::level::minimum;
     const auto result = message::pong::factory_from_data(version, data_chunk{});

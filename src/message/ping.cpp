@@ -59,7 +59,7 @@ uint64_t ping::satoshi_fixed_size(uint32_t version)
 }
 
 ping::ping()
-  : ping(0)
+  : nonce_(0), nonceless_(false), valid_(false)
 {
 }
 
@@ -95,15 +95,11 @@ bool ping::from_data(uint32_t version, reader& source)
 {
     reset();
 
-    // All nonce values are valid so we cannot use a sentinel value.
+    valid_ = true;
     nonceless_ = (version < version::level::bip31);
 
     if (!nonceless_)
         nonce_ = source.read_8_bytes_little_endian();
-
-    // Must track valid because is_valid doesn't include version parameter.
-    // Otherwise when below bip31 then the object would always be invalid.
-    valid_ = source;
 
     if (!source)
         reset();
@@ -136,14 +132,14 @@ void ping::to_data(uint32_t version, writer& sink) const
 
 bool ping::is_valid() const
 {
-    return valid_ && (nonceless_ || nonce_ != 0);
+    return valid_ || nonceless_ || nonce_ != 0;
 }
 
 void ping::reset()
 {
     nonce_ = 0;
     nonceless_ = false;
-    valid_ = true;
+    valid_ = false;
 }
 
 uint64_t ping::serialized_size(uint32_t version) const

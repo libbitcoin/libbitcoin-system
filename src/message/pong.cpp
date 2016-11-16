@@ -59,12 +59,12 @@ uint64_t pong::satoshi_fixed_size(uint32_t version)
 }
 
 pong::pong()
-  : nonce_(0)
+  : nonce_(0), valid_(false)
 {
 }
 
 pong::pong(uint64_t nonce)
-  : nonce_(nonce)
+  : nonce_(nonce), valid_(true)
 {
 }
 
@@ -89,6 +89,7 @@ bool pong::from_data(uint32_t version, reader& source)
 {
     reset();
 
+    valid_ = true;
     nonce_ = source.read_8_bytes_little_endian();
 
     if (!source)
@@ -121,12 +122,13 @@ void pong::to_data(uint32_t version, writer& sink) const
 
 bool pong::is_valid() const
 {
-    return (nonce_ != 0);
+    return valid_ || (nonce_ != 0);
 }
 
 void pong::reset()
 {
     nonce_ = 0;
+    valid_ = false;
 }
 
 uint64_t pong::serialized_size(uint32_t version) const
