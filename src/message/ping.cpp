@@ -143,7 +143,7 @@ void ping::reset()
 {
     nonce_ = 0;
     nonceless_ = false;
-    valid_ = true;
+    valid_ = false;
 }
 
 uint64_t ping::serialized_size(uint32_t version) const
