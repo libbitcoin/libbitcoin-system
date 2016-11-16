@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(ping_tests)
 BOOST_AUTO_TEST_CASE(ping__constructor_1__always__invalid)
 {
     message::ping instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(ping__constructor_2__always__equals_params)
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE(ping__operator_assign_equals__always__matches_equivalent)
     message::ping value(356234u);
     BOOST_REQUIRE(value.is_valid());
     message::ping instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.is_valid());
     instance = std::move(value);
     BOOST_REQUIRE(instance.is_valid());
 }
