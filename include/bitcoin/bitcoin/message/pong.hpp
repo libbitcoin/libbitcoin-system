@@ -74,6 +74,7 @@ public:
 
 private:
     uint64_t nonce_;
+    bool valid_;
 };
 
 } // namespace message
