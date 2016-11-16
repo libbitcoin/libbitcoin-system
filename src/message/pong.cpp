@@ -64,7 +64,7 @@ pong::pong()
 }
 
 pong::pong(uint64_t nonce)
-  : nonce_(nonce), valid_(false)
+  : nonce_(nonce), valid_(true)
 {
 }
 
