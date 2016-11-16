@@ -59,7 +59,7 @@ uint64_t ping::satoshi_fixed_size(uint32_t version)
 }
 
 ping::ping()
-  : ping(0)
+  : nonce_(0), nonceless_(false), valid_(false)
 {
 }
 
@@ -132,7 +132,7 @@ void ping::to_data(uint32_t version, writer& sink) const
 
 bool ping::is_valid() const
 {
-    return valid_ && (nonceless_ || nonce_ != 0);
+    return valid_ || nonceless_ || nonce_ != 0;
 }
 
 void ping::reset()
