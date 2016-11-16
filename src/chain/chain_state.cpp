@@ -269,10 +269,10 @@ chain_state::map chain_state::get_map(size_t height, bool enabled,
     // Bits.
     //-------------------------------------------------------------------------
     // The height bound of the reverse (high to low) retarget search.
+    // Retarget search applies only to testnet on a retarget height.
     map.bits.high = height - 1;
-
-    // Mainnet doesn't do retarget search.
-    map.bits.count = testnet ? std::min(height, retargeting_interval) : 1;
+    map.bits.count = testnet && !is_retarget_height(height) ?
+        std::min(height, retargeting_interval) : 1;
 
     // Timestamp.
     //-------------------------------------------------------------------------
