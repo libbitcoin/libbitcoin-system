@@ -224,7 +224,7 @@ test_libbitcoin_test_LDADD = src/libbitcoin.la ${boost_unit_test_framework_LIBS}
 test_libbitcoin_test_SOURCES = \
     test/main.cpp \
     test/chain/block.cpp \
-    test/chain/compact_.cpp \
+    test/chain/compact.cpp \
     test/chain/header.cpp \
     test/chain/input.cpp \
     test/chain/output.cpp \
