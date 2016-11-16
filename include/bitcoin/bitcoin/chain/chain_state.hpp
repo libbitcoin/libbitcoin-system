@@ -55,19 +55,19 @@ public:
         // This sentinel indicates that the value was not requested.
         static const size_t timestamp_unrequested = max_size_t;
 
-        /// [block - 1, floor(block - 2016, 0)] mainnet: low == high (unused)
+        /// [block - 1, floor(block - 2016, 0)] mainnet: 1, testnet: 2016|0
         range bits;
 
-        /// [block - 1, floor(block - 1000, 0)] testnet: 100 (vs. 1000)
+        /// [block - 1, floor(block - 1000, 0)] mainnet: 1000, testnet: 100
         range version;
 
-        /// [block - 1, floor(block - 11 ,0)]
+        /// [block - 1, floor(block - 11, 0)]
         range timestamp;
 
-        /// block - 0 [mainnet: high (unused)]
+        /// (block - 0)
         size_t timestamp_self;
 
-        /// block - 2016 [or high (unused)]
+        /// (block - 2016) | map::timestamp_unrequested
         size_t timestamp_retarget;
     };
 
