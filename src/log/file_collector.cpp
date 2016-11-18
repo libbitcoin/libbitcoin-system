@@ -357,11 +357,11 @@ void file_collector::store_file(filesystem::path const& src_path)
 
 
 //! Scans the target directory for the files that have already been stored
-size_t file_collector::scan_for_files(
+uintmax_t file_collector::scan_for_files(
     boost::log::sinks::file::scan_method method,
     filesystem::path const& pattern, unsigned int* counter)
 {
-    size_t file_count = 0;
+    uintmax_t file_count = 0;
     if (method != boost::log::sinks::file::no_scan)
     {
         filesystem::path dir = storage_dir_;

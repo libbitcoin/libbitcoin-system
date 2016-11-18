@@ -68,7 +68,7 @@ public:
     void store_file(boost::filesystem::path const& src_path);
 
     //! Scans the target directory for the files that have already been stored
-    size_t scan_for_files(boost::log::sinks::file::scan_method method,
+    uintmax_t scan_for_files(boost::log::sinks::file::scan_method method,
         boost::filesystem::path const& pattern, unsigned int* counter);
 
     //! The function updates storage restrictions
