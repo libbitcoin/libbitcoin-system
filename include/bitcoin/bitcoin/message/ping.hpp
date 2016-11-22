@@ -72,9 +72,6 @@ public:
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
-protected:
-    ping(uint64_t nonce, bool valid);
-
 private:
     uint64_t nonce_;
     bool nonceless_;

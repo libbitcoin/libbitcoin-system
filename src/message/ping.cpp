@@ -68,14 +68,8 @@ ping::ping(uint64_t nonce)
 {
 }
 
-// protected
-ping::ping(uint64_t nonce, bool valid)
-  : nonce_(nonce), nonceless_(false), valid_(valid)
-{
-}
-
 ping::ping(const ping& other)
-  : ping(other.nonce_, other.valid_)
+  : nonce_(other.nonce_), nonceless_(other.nonceless_), valid_(other.valid_)
 {
 }
 

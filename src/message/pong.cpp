@@ -69,7 +69,7 @@ pong::pong(uint64_t nonce)
 }
 
 pong::pong(const pong& other)
-  : pong(other.nonce_)
+  : nonce_(other.nonce_), valid_(other.valid_)
 {
 }
 
