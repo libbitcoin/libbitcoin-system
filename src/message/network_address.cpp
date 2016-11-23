@@ -161,13 +161,13 @@ void network_address::to_data(uint32_t version,
     sink.write_2_bytes_big_endian(port_);
 }
 
-uint64_t network_address::serialized_size(uint32_t version,
+size_t network_address::serialized_size(uint32_t version,
     bool with_timestamp) const
 {
     return network_address::satoshi_fixed_size(version, with_timestamp);
 }
 
-uint64_t network_address::satoshi_fixed_size(uint32_t version,
+size_t network_address::satoshi_fixed_size(uint32_t version,
     bool with_timestamp)
 {
     uint64_t result = 26;

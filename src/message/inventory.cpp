@@ -189,7 +189,7 @@ void inventory::reduce(inventory_vector::list& out, type_id type) const
     out.shrink_to_fit();
 }
 
-uint64_t inventory::serialized_size(uint32_t version) const
+size_t inventory::serialized_size(uint32_t version) const
 {
     return variable_uint_size(inventories_.size()) + inventories_.size() *
         inventory_vector::satoshi_fixed_size(version);

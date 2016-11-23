@@ -198,15 +198,21 @@ bool program::pop_ternary(number& first, number& second, number& third)
 // Determines if popped value is valid post-pop stack index and returns index.
 bool program::pop_position(stack_iterator& out_position)
 {
-    int32_t index;
-    if (!pop(index))
+    int32_t signed_index;
+    if (!pop(signed_index))
         return false;
 
     // Ensure the index is within bounds.
-    if (index < 0 || index >= size())
+
+    if (signed_index < 0)
         return false;
 
-    out_position = position(static_cast<size_t>(index));
+    const auto index = static_cast<uint32_t>(signed_index);
+
+    if (index >= size())
+        return false;
+
+    out_position = position(index);
     return true;
 }
 

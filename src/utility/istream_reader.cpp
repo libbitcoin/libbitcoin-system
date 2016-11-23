@@ -219,7 +219,7 @@ std::string istream_reader::read_string(size_t size)
     auto terminated = false;
 
     // Read all size characters, pushing all non-null (may be many).
-    for (auto index = 0; index < size && !empty(); ++index)
+    for (size_t index = 0; index < size && !empty(); ++index)
     {
         const auto character = read_byte();
         terminated |= (character == string_terminator);

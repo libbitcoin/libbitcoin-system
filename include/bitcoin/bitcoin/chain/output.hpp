@@ -99,7 +99,7 @@ public:
     // Properties (size, accessors, cache).
     //-----------------------------------------------------------------------------
 
-    uint64_t serialized_size(bool wire=true) const;
+    size_t serialized_size(bool wire=true) const;
 
     uint64_t value() const;
     void set_value(uint64_t value);

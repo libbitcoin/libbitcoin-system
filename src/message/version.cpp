@@ -212,7 +212,7 @@ void version::to_data(uint32_t version, writer& sink) const
         sink.write_byte(relay_ ? 1 : 0);
 }
 
-uint64_t version::serialized_size(uint32_t version) const
+size_t version::serialized_size(uint32_t version) const
 {
     auto size = 
         sizeof(value_) +

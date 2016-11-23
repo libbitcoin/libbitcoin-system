@@ -259,7 +259,7 @@ std::string deserializer<Iterator, CheckSafe>::read_string(size_t size)
     out.reserve(size);
 
     // Read up to size characters, stopping at the first null (may be many).
-    for (auto index = 0; index < size; ++index)
+    for (size_t index = 0; index < size; ++index)
     {
         const auto character = iterator_[index];
 

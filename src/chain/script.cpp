@@ -371,12 +371,12 @@ operation::iterator script::end() const
 // Properties (size, accessors, cache).
 //-----------------------------------------------------------------------------
 
-uint64_t script::satoshi_content_size() const
+size_t script::satoshi_content_size() const
 {
     return bytes_.size();
 }
 
-uint64_t script::serialized_size(bool prefix) const
+size_t script::serialized_size(bool prefix) const
 {
     auto size = satoshi_content_size();
 

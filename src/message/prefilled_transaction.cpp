@@ -144,7 +144,7 @@ void prefilled_transaction::to_data(uint32_t version,
     transaction_.to_data(sink);
 }
 
-uint64_t prefilled_transaction::serialized_size(uint32_t version) const
+size_t prefilled_transaction::serialized_size(uint32_t version) const
 {
     return variable_uint_size(index_) + transaction_.serialized_size();
 }

@@ -62,7 +62,7 @@ header_message header_message::factory_from_data(const uint32_t version,
     return instance;
 }
 
-uint64_t header_message::satoshi_fixed_size(const uint32_t version)
+size_t header_message::satoshi_fixed_size(const uint32_t version)
 {
     return chain::header::satoshi_fixed_size() + variable_uint_size(0);
 }
@@ -164,7 +164,7 @@ void header_message::reset()
     originator_ = 0u;
 }
 
-uint64_t header_message::serialized_size(const uint32_t version) const
+size_t header_message::serialized_size(const uint32_t version) const
 {
     return satoshi_fixed_size(version);
 }

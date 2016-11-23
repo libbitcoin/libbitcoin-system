@@ -125,7 +125,7 @@ void block::to_data(uint32_t, writer& sink) const
     chain::block::to_data(sink);
 }
 
-uint64_t block::serialized_size(uint32_t) const
+size_t block::serialized_size(uint32_t) const
 {
     return chain::block::serialized_size();
 }

@@ -162,7 +162,7 @@ void filter_load::to_data(uint32_t version, writer& sink) const
     sink.write_byte(flags_);
 }
 
-uint64_t filter_load::serialized_size(uint32_t version) const
+size_t filter_load::serialized_size(uint32_t version) const
 {
     return 1 + 4 + 4 + variable_uint_size(filter_.size()) + filter_.size();
 }

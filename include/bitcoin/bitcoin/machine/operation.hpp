@@ -89,7 +89,7 @@ public:
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------
 
-    inline uint64_t serialized_size() const;
+    inline size_t serialized_size() const;
 
     /// Get the op code [0..255], if is_valid is consistent with data.
     inline opcode code() const;

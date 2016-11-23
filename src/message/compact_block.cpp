@@ -177,9 +177,9 @@ void compact_block::to_data(uint32_t version, writer& sink) const
         element.to_data(version, sink);
 }
 
-uint64_t compact_block::serialized_size(uint32_t version) const
+size_t compact_block::serialized_size(uint32_t version) const
 {
-    uint64_t size = chain::header::satoshi_fixed_size() +
+    auto size = chain::header::satoshi_fixed_size() +
         variable_uint_size(short_ids_.size()) + (short_ids_.size() * 6) +
         variable_uint_size(transactions_.size()) + 8;
 

@@ -106,8 +106,8 @@ public:
     // Properties (size, accessors, cache).
     //-----------------------------------------------------------------------------
 
-    static uint64_t satoshi_fixed_size();
-    uint64_t serialized_size() const;
+    static size_t satoshi_fixed_size();
+    size_t serialized_size() const;
 
     uint32_t version() const;
     void set_version(uint32_t value);

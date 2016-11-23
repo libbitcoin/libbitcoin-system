@@ -115,8 +115,8 @@ public:
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------
 
-    uint64_t satoshi_content_size() const;
-    uint64_t serialized_size(bool prefix) const;
+    size_t satoshi_content_size() const;
+    size_t serialized_size(bool prefix) const;
     const operation::list& operations() const;
 
     // Signing.

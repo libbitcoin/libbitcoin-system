@@ -184,7 +184,7 @@ void headers::to_inventory(inventory_vector::list& out,
     std::transform(elements_.begin(), elements_.end(), std::back_inserter(out), map);
 }
 
-uint64_t headers::serialized_size(uint32_t version) const
+size_t headers::serialized_size(uint32_t version) const
 {
     return variable_uint_size(elements_.size()) +
         (elements_.size() * header_message::satoshi_fixed_size(version));

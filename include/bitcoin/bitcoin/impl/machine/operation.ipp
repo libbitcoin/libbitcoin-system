@@ -132,7 +132,7 @@ bool operation::operator!=(const operation& other) const
 // Properties (size, accessors, cache).
 //-----------------------------------------------------------------------------
 
-uint64_t operation::serialized_size() const
+size_t operation::serialized_size() const
 {
     const auto size = sizeof(uint8_t) + data_.size();
 

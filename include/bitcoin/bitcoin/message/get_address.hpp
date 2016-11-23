@@ -42,7 +42,7 @@ public:
     static get_address factory_from_data(uint32_t version,
         std::istream& stream);
     static get_address factory_from_data(uint32_t version, reader& source);
-    static uint64_t satoshi_fixed_size(uint32_t version);
+    static size_t satoshi_fixed_size(uint32_t version);
 
     get_address();
 
@@ -54,7 +54,7 @@ public:
     void to_data(uint32_t version, writer& sink) const;
     bool is_valid() const;
     void reset();
-    uint64_t serialized_size(uint32_t version) const;
+    size_t serialized_size(uint32_t version) const;
 
     static const std::string command;
     static const uint32_t version_minimum;

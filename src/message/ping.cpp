@@ -53,7 +53,7 @@ ping ping::factory_from_data(uint32_t version, reader& source)
     return instance;
 }
 
-uint64_t ping::satoshi_fixed_size(uint32_t version)
+size_t ping::satoshi_fixed_size(uint32_t version)
 {
     return version < version::level::bip31 ? 0 : sizeof(nonce_);
 }
@@ -136,7 +136,7 @@ void ping::reset()
     valid_ = false;
 }
 
-uint64_t ping::serialized_size(uint32_t version) const
+size_t ping::serialized_size(uint32_t version) const
 {
     return satoshi_fixed_size(version);
 }

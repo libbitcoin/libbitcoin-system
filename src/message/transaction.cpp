@@ -128,7 +128,7 @@ void transaction::to_data(uint32_t, writer& sink) const
     chain::transaction::to_data(sink);
 }
 
-uint64_t transaction::serialized_size(uint32_t) const
+size_t transaction::serialized_size(uint32_t) const
 {
     return chain::transaction::serialized_size();
 }
@@ -150,8 +150,7 @@ transaction& transaction::operator=(chain::transaction&& other)
     return *this;
 }
 
-transaction& transaction::operator=(
-    transaction&& other)
+transaction& transaction::operator=(transaction&& other)
 {
     originator_ = other.originator_;
     chain::transaction::operator=(std::move(other));

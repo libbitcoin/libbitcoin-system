@@ -43,7 +43,7 @@ public:
         std::istream& stream);
     static send_compact_blocks factory_from_data(uint32_t version,
         reader& source);
-    static uint64_t satoshi_fixed_size(uint32_t version);
+    static size_t satoshi_fixed_size(uint32_t version);
 
     send_compact_blocks();
     send_compact_blocks(bool high_bandwidth_mode, uint64_t version);
@@ -64,7 +64,7 @@ public:
     void to_data(uint32_t version, writer& sink) const;
     bool is_valid() const;
     void reset();
-    uint64_t serialized_size(uint32_t version) const;
+    size_t serialized_size(uint32_t version) const;
 
     /// This class is move assignable but not copy assignable.
     send_compact_blocks& operator=(send_compact_blocks&& other);

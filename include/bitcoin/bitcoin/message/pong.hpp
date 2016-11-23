@@ -41,7 +41,7 @@ public:
     static pong factory_from_data(uint32_t version, const data_chunk& data);
     static pong factory_from_data(uint32_t version, std::istream& stream);
     static pong factory_from_data(uint32_t version, reader& source);
-    static uint64_t satoshi_fixed_size(uint32_t version);
+    static size_t satoshi_fixed_size(uint32_t version);
 
     pong();
     pong(uint64_t nonce);
@@ -59,7 +59,7 @@ public:
     void to_data(uint32_t version, writer& sink) const;
     bool is_valid() const;
     void reset();
-    uint64_t serialized_size(uint32_t version) const;
+    size_t serialized_size(uint32_t version) const;
 
     // This class is move assignable but not copy assignable.
     pong& operator=(pong&& other);

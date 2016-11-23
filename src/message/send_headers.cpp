@@ -56,7 +56,7 @@ send_headers send_headers::factory_from_data(uint32_t version,
     return instance;
 }
 
-uint64_t send_headers::satoshi_fixed_size(uint32_t version)
+size_t send_headers::satoshi_fixed_size(uint32_t version)
 {
     return 0;
 }
@@ -141,7 +141,7 @@ void send_headers::to_data(uint32_t version, std::ostream& stream) const
 {
 }
 
-uint64_t send_headers::serialized_size(uint32_t version) const
+size_t send_headers::serialized_size(uint32_t version) const
 {
     return send_headers::satoshi_fixed_size(version);
 }

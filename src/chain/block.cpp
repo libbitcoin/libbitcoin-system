@@ -272,9 +272,9 @@ transaction::sets_const_ptr block::to_input_sets(size_t fanout,
 // Properties (size, accessors, cache).
 //-----------------------------------------------------------------------------
 
-uint64_t block::serialized_size() const
+size_t block::serialized_size() const
 {
-    const auto sum = [](uint64_t total, const transaction& tx)
+    const auto sum = [](size_t total, const transaction& tx)
     {
         return safe_add(total, tx.serialized_size());
     };

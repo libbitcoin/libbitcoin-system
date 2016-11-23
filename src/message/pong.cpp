@@ -53,7 +53,7 @@ pong pong::factory_from_data(uint32_t version, reader& source)
     return instance;
 }
 
-uint64_t pong::satoshi_fixed_size(uint32_t version)
+size_t pong::satoshi_fixed_size(uint32_t version)
 {
     return sizeof(nonce_);
 }
@@ -131,7 +131,7 @@ void pong::reset()
     valid_ = false;
 }
 
-uint64_t pong::serialized_size(uint32_t version) const
+size_t pong::serialized_size(uint32_t version) const
 {
     return satoshi_fixed_size(version);
 }

@@ -360,7 +360,7 @@ transaction::sets_const_ptr transaction::to_input_sets(size_t fanout) const
 // Size.
 //-----------------------------------------------------------------------------
 
-uint64_t transaction::serialized_size(bool wire) const
+size_t transaction::serialized_size(bool wire) const
 {
     const auto ins = [wire](size_t size, const input& input)
     {
