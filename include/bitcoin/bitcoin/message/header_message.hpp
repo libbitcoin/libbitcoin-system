@@ -49,7 +49,7 @@ public:
         std::istream& stream);
     static header_message factory_from_data(const uint32_t version,
         reader& source);
-    static uint64_t satoshi_fixed_size(const uint32_t version);
+    static size_t satoshi_fixed_size(const uint32_t version);
 
     header_message();
     header_message(uint32_t version, const hash_digest& previous_block_hash,
@@ -73,7 +73,7 @@ public:
     void to_data(const uint32_t version, std::ostream& stream) const;
     void to_data(const uint32_t version, writer& sink) const;
     void reset();
-    uint64_t serialized_size(const uint32_t version) const;
+    size_t serialized_size(const uint32_t version) const;
 
     header_message& operator=(chain::header&& other);
 

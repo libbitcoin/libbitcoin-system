@@ -143,7 +143,7 @@ void alert::to_data(uint32_t version, writer& sink) const
     sink.write_bytes(signature_);
 }
 
-uint64_t alert::serialized_size(uint32_t version) const
+size_t alert::serialized_size(uint32_t version) const
 {
     return variable_uint_size(payload_.size()) + payload_.size() +
         variable_uint_size(signature_.size()) + signature_.size();

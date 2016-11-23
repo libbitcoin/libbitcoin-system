@@ -40,7 +40,7 @@ public:
     static fee_filter factory_from_data(uint32_t version, const data_chunk& data);
     static fee_filter factory_from_data(uint32_t version, std::istream& stream);
     static fee_filter factory_from_data(uint32_t version, reader& source);
-    static uint64_t satoshi_fixed_size(uint32_t version);
+    static size_t satoshi_fixed_size(uint32_t version);
 
     fee_filter();
     fee_filter(uint64_t minimum);
@@ -58,7 +58,7 @@ public:
     void to_data(uint32_t version, writer& sink) const;
     bool is_valid() const;
     void reset();
-    uint64_t serialized_size(uint32_t version) const;
+    size_t serialized_size(uint32_t version) const;
 
     // This class is move assignable but not copy assignable.
     fee_filter& operator=(fee_filter&& other);

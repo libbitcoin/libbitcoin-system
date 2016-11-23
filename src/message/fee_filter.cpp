@@ -55,7 +55,7 @@ fee_filter fee_filter::factory_from_data(uint32_t version, reader& source)
     return instance;
 }
 
-uint64_t fee_filter::satoshi_fixed_size(uint32_t version)
+size_t fee_filter::satoshi_fixed_size(uint32_t version)
 {
     return sizeof(minimum_fee_);
 }
@@ -152,7 +152,7 @@ void fee_filter::reset()
     minimum_fee_ = 0;
 }
 
-uint64_t fee_filter::serialized_size(uint32_t version) const
+size_t fee_filter::serialized_size(uint32_t version) const
 {
     return satoshi_fixed_size(version);
 }

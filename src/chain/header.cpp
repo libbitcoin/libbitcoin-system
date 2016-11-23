@@ -250,7 +250,7 @@ void header::to_data(writer& sink) const
 //-----------------------------------------------------------------------------
 
 // static
-uint64_t header::satoshi_fixed_size()
+size_t header::satoshi_fixed_size()
 {
     return sizeof(version_)
         + hash_size
@@ -260,7 +260,7 @@ uint64_t header::satoshi_fixed_size()
         + sizeof(nonce_);
 }
 
-uint64_t header::serialized_size() const
+size_t header::serialized_size() const
 {
     return satoshi_fixed_size();
 }

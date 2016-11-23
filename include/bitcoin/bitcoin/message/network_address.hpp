@@ -44,7 +44,7 @@ public:
         std::istream& stream, bool with_timestamp);
     static network_address factory_from_data(uint32_t version,
         reader& source, bool with_timestamp);
-    static uint64_t satoshi_fixed_size(uint32_t version,
+    static size_t satoshi_fixed_size(uint32_t version,
         bool with_timestamp);
 
     network_address();
@@ -88,7 +88,7 @@ public:
     void to_data(uint32_t version, writer& sink, bool with_timestamp) const;
     bool is_valid() const;
     void reset();
-    uint64_t serialized_size(uint32_t version, bool with_timestamp) const;
+    size_t serialized_size(uint32_t version, bool with_timestamp) const;
 
     network_address& operator=(network_address&& other);
     network_address& operator=(const network_address& other);

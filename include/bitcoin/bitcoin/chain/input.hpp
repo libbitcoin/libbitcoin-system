@@ -87,7 +87,7 @@ public:
     // Properties (size, accessors, cache).
     //-----------------------------------------------------------------------------
 
-    uint64_t serialized_size(bool wire=true) const;
+    size_t serialized_size(bool wire = true) const;
 
     // Deprecated (unsafe).
     output_point& previous_output();

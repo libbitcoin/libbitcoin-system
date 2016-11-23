@@ -157,9 +157,9 @@ void get_block_transactions::to_data(uint32_t version,
         sink.write_variable_little_endian(element);
 }
 
-uint64_t get_block_transactions::serialized_size(uint32_t version) const
+size_t get_block_transactions::serialized_size(uint32_t version) const
 {
-    uint64_t size = hash_size + variable_uint_size(indexes_.size());
+    auto size = hash_size + variable_uint_size(indexes_.size());
 
     for (const auto& element: indexes_)
         size += variable_uint_size(element);

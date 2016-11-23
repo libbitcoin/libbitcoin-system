@@ -156,12 +156,12 @@ void point::to_data(writer& sink) const
     sink.write_4_bytes_little_endian(index_);
 }
 
-uint64_t point::serialized_size() const
+size_t point::serialized_size() const
 {
     return point::satoshi_fixed_size();
 }
 
-uint64_t point::satoshi_fixed_size()
+size_t point::satoshi_fixed_size()
 {
     return hash_size + sizeof(uint32_t);
 }

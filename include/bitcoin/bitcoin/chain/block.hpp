@@ -104,7 +104,7 @@ public:
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------
 
-    uint64_t serialized_size() const;
+    size_t serialized_size() const;
 
     // deprecated (unsafe)
     chain::header& header();

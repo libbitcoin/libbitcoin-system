@@ -198,7 +198,7 @@ std::string input::to_string(uint32_t flags) const
 // Size.
 //-----------------------------------------------------------------------------
 
-uint64_t input::serialized_size(bool) const
+size_t input::serialized_size(bool) const
 {
     return previous_output_.serialized_size() +
         script_.serialized_size(true) + sizeof(sequence_);

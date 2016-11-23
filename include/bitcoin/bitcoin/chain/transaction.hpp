@@ -132,7 +132,7 @@ public:
     // Properties (size, accessors, cache).
     //-----------------------------------------------------------------------------
 
-    uint64_t serialized_size(bool wire=true) const;
+    size_t serialized_size(bool wire=true) const;
 
     uint32_t version() const;
     void set_version(uint32_t value);

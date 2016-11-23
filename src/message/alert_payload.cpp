@@ -298,9 +298,9 @@ void alert_payload::to_data(uint32_t version, writer& sink) const
     sink.write_string(reserved_);
 }
 
-uint64_t alert_payload::serialized_size(uint32_t version) const
+size_t alert_payload::serialized_size(uint32_t version) const
 {
-    uint64_t size = 40 + variable_uint_size(comment_.size()) + comment_.size() +
+    size_t size = 40 + variable_uint_size(comment_.size()) + comment_.size() +
         variable_uint_size(status_bar_.size()) + status_bar_.size() +
         variable_uint_size(reserved_.size()) + reserved_.size() +
         variable_uint_size(set_cancel_.size()) + (4 * set_cancel_.size()) +

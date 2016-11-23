@@ -57,7 +57,7 @@ send_compact_blocks send_compact_blocks::factory_from_data(
     return instance;
 }
 
-uint64_t send_compact_blocks::satoshi_fixed_size(uint32_t version)
+size_t send_compact_blocks::satoshi_fixed_size(uint32_t version)
 {
     return 9;
 }
@@ -156,7 +156,7 @@ void send_compact_blocks::to_data(uint32_t version,
     sink.write_8_bytes_little_endian(this->version_);
 }
 
-uint64_t send_compact_blocks::serialized_size(uint32_t version) const
+size_t send_compact_blocks::serialized_size(uint32_t version) const
 {
     return send_compact_blocks::satoshi_fixed_size(version);
 }

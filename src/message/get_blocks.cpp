@@ -154,9 +154,9 @@ void get_blocks::to_data(uint32_t version, writer& sink) const
     sink.write_hash(stop_hash_);
 }
 
-uint64_t get_blocks::serialized_size(uint32_t version) const
+size_t get_blocks::serialized_size(uint32_t version) const
 {
-    return 36 + variable_uint_size(start_hashes_.size()) +
+    return size_t(36) + variable_uint_size(start_hashes_.size()) +
         hash_size * start_hashes_.size();
 }
 

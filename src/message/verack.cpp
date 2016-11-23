@@ -102,13 +102,13 @@ void verack::to_data(uint32_t version, std::ostream& stream) const
 {
 }
 
-uint64_t verack::serialized_size(uint32_t version) const
+size_t verack::serialized_size(uint32_t version) const
 {
     return verack::satoshi_fixed_size(version);
 }
 
 
-uint64_t verack::satoshi_fixed_size(uint32_t version)
+size_t verack::satoshi_fixed_size(uint32_t version)
 {
     return 0;
 }
