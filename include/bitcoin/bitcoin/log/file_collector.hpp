@@ -65,11 +65,11 @@ public:
     ~file_collector();
 
     //! The function stores the specified file in the storage
-    void store_file(boost::filesystem::path const& src_path);
+    void store_file(boost::filesystem::path const& src_path) override;
 
     //! Scans the target directory for the files that have already been stored
     uintmax_t scan_for_files(boost::log::sinks::file::scan_method method,
-        boost::filesystem::path const& pattern, unsigned int* counter);
+        boost::filesystem::path const& pattern, unsigned int* counter) override;
 
     //! The function updates storage restrictions
     void update(size_t max_size, size_t min_free_space, size_t max_files);
@@ -81,7 +81,7 @@ private:
     //! Information about a single stored file
     struct file_info
     {
-        size_t size;
+        uintmax_t size;
         std::time_t timestamp;
         boost::filesystem::path path;
     };
@@ -124,7 +124,7 @@ private:
     //! The list of stored files
     file_list files_;
     //! Total size of the stored files
-    size_t total_size_;
+    uintmax_t total_size_;
 };
 
 } // namespace log
