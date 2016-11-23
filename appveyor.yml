@@ -15,17 +15,17 @@ matrix:
   fast_finish: true
   
 skip_tags: true
-clone_folder: c:\projects\bc
+clone_folder: c:\git\libbitcoin
 
 before_build:
-  - cd c:\projects\bc\builds\msvc\vs2013
-  - nuget restore
-  
+  - mkdir c:\nuget
+  - nuget restore c:\git\libbitcoin\builds\msvc\vs2013\libbitcoin.sln -Outputdir c:\nuget
+  - powershell c:\git\libbitcoin\prebuild_ctp_install.ps1
+
 build:
   parallel: true
-  project: c:\projects\bc\builds\msvc\vs2013\libbitcoin.sln
+  project: c:\git\libbitcoin\builds\msvc\vs2013\libbitcoin.sln
   
 test_script:
-  - c:\projects\bc\bin\x64\Release\v120\static\libbitcoin-test.exe
-  
+  - powershell c:\git\libbitcoin\libbitcoin_test_runner.ps1
 
