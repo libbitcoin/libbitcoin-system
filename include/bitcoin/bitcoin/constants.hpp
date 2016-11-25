@@ -110,15 +110,25 @@ BC_CONSTEXPR size_t bip66_version = 3;
 BC_CONSTEXPR size_t bip34_version = 2;
 BC_CONSTEXPR size_t first_version = 1;
 
-// Testnet activation parameters.
+// Mainnet activation parameters (bip34-style activations).
+BC_CONSTEXPR size_t mainnet_active = 750;
+BC_CONSTEXPR size_t mainnet_enforce = 950;
+BC_CONSTEXPR size_t mainnet_sample = 1000;
+
+// Testnet activation parameters (bip34-style activations).
 BC_CONSTEXPR size_t testnet_active = 51;
 BC_CONSTEXPR size_t testnet_enforce = 75;
 BC_CONSTEXPR size_t testnet_sample = 100;
 
-// Mainnet activation parameters.
-BC_CONSTEXPR size_t mainnet_active = 750;
-BC_CONSTEXPR size_t mainnet_enforce = 950;
-BC_CONSTEXPR size_t mainnet_sample = 1000;
+// Mainnet frozen activation heights (frozen_activations).
+BC_CONSTEXPR size_t mainnet_bip65_freeze = 388381;
+BC_CONSTEXPR size_t mainnet_bip66_freeze = 363725;
+BC_CONSTEXPR size_t mainnet_bip34_freeze = 227931;
+
+// Testnet frozen activation heights (frozen_activations).
+BC_CONSTEXPR size_t testnet_bip65_freeze = 581885;
+BC_CONSTEXPR size_t testnet_bip66_freeze = 330776;
+BC_CONSTEXPR size_t testnet_bip34_freeze = 21111;
 
 // Block 514 is the first testnet block after date-based activation.
 // Block 173805 is the first mainnet block after date-based activation.
@@ -132,14 +142,24 @@ static const config::checkpoint mainnet_bip16_exception_checkpoint
 };
 
 // github.com/bitcoin/bips/blob/master/bip-0030.mediawiki#specification
-////static const config::checkpoint mainnet_bip30_exception_checkpoint1
-////{
-////    // This block validates witout an exception, meaning that the tx was spent.
-////    "00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec", 91842
-////};
+static const config::checkpoint mainnet_bip30_exception_checkpoint1
+{
+    // TODO: figure out why this block validates without an exception.
+    "00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec", 91842
+};
 static const config::checkpoint mainnet_bip30_exception_checkpoint2
 {
     "00000000000743f190a18c5577a3c2d2a1f610ae9601ac046a38084ccb7cd721", 91880
+};
+
+// Hard fork to stop checking unspent duplicates above fixed bip34 activation.
+static const config::checkpoint mainnet_allowed_duplicates_checkpoint
+{
+    "000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8", 227931
+};
+static const config::checkpoint testnet_allowed_duplicates_checkpoint
+{
+    "0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8", 21111
 };
 
 // Network protocol constants.

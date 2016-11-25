@@ -53,7 +53,7 @@ public:
     struct map
     {
         // This sentinel indicates that the value was not requested.
-        static const size_t timestamp_unrequested = max_size_t;
+        static const size_t unrequested = max_size_t;
 
         /// [block - 1, floor(block - 2016, 0)] mainnet: 1, testnet: 2016|0
         range bits;
@@ -67,24 +67,24 @@ public:
         /// (block - 0)
         size_t timestamp_self;
 
-        /// (block - 2016) | map::timestamp_unrequested
+        /// (block - 2016) | map::unrequested
         size_t timestamp_retarget;
+
+        /// mainnet: 227931, testnet: 21111 (or map::unrequested)
+        size_t allowed_duplicates_height;
     };
 
     /// Values used to populate chain state at the target height.
     struct data
     {
-        /// Header values are based on a testnet map.
-        bool testnet;
-
-        /// All forks are enabled at the corresponding height (from cache).
-        bool enabled;
-
         /// Header values are based on this height.
         size_t height;
 
         /// Hash of the candidate block or null_hash for memory pool.
         hash_digest hash;
+
+        /// Hash of the allowed_duplicates block or null_hash if unrequested.
+        hash_digest allowed_duplicates_hash;
 
         /// Values must be ordered by height with high (block - 1) last.
         struct { bitss ordered; } bits;
@@ -101,11 +101,13 @@ public:
         } timestamp;
     };
 
-    // Compute the height map from any height and testnet flag.
-    static map get_map(size_t height, bool enabled, bool testnet);
+    /// Checkpoints must be ordered by height with greatest at back.
+    static map get_map(size_t height, const checkpoints& checkpoints,
+        uint32_t forks);
 
     /// Checkpoints must be ordered by height with greatest at back.
-    chain_state(data&& values, const checkpoints& checkpoints);
+    chain_state(data&& values, const checkpoints& checkpoints,
+        uint32_t forks);
 
     /// Properties.
     size_t height() const;
@@ -117,20 +119,17 @@ public:
     /// Construction with zero height or any empty array causes invalid state.
     bool is_valid() const;
 
-    /// Determine if all forks are enabled (cache for next height construct).
-    bool is_enabled() const;
-
-    /// Determine if the flag is set in the active_forks member.
-    bool is_enabled(machine::rule_fork flag) const;
+    /// Determine if the fork is set in the active_forks member.
+    bool is_enabled(machine::rule_fork fork) const;
 
     /// Determine if the flag is set and enabled for a given block's version.
-    bool is_enabled(uint32_t block_version, machine::rule_fork flag) const;
+    bool is_enabled(uint32_t block_version, machine::rule_fork fork) const;
 
     /// Determine if the block hash fails a checkpoint at this height.
-    bool is_checkpoint_failure(const hash_digest& hash) const;
+    bool is_checkpoint_conflict(const hash_digest& hash) const;
 
-    /// This height requires full validation due to no checkpoint coverage.
-    bool use_full_validation() const;
+    /// The height is less than or equal to that of the top checkpoint.
+    bool is_under_checkpoint() const;
 
 protected:
     struct activations
@@ -142,17 +141,16 @@ protected:
         uint32_t minimum_version;
     };
 
-    static activations activation(const data& values);
-    static uint32_t median_time_past(const data& values);
-    static uint32_t work_required(const data& values);
+    static activations activation(const data& values, uint32_t forks);
+    static uint32_t median_time_past(const data& values, uint32_t forks);
+    static uint32_t work_required(const data& values, uint32_t forks);
 
 private:
-    // mainnet and testnet
     static uint32_t work_required_retarget(const data& values);
     static uint32_t retarget_timespan(const chain_state::data& values);
 
-    // testnet only
-    static uint32_t work_required_testnet(const data& values);
+    // easy blocks
+    static uint32_t work_required_easy(const data& values);
     static uint32_t elapsed_time_limit(const chain_state::data& values);
     static bool is_retarget_or_non_limit(size_t height, uint32_t bits);
     static bool is_retarget_height(size_t height);
