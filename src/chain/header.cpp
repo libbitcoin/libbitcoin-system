@@ -448,8 +448,6 @@ code header::check() const
         return error::success;
 }
 
-// State may not be populated for validation of minimum_version or
-// median_time_past when checkpointed (optimization) so exit prior.
 code header::accept(const chain_state& state) const
 {
     if (bits_ != state.work_required())
