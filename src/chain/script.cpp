@@ -643,6 +643,24 @@ bool script::is_push_only(const operation::list& ops)
     return std::all_of(ops.begin(), ops.end(), push);
 }
 
+//*****************************************************************************
+// CONSENSUS: this pattern is used to activate bip16 validation rules.
+//*****************************************************************************
+bool script::is_relaxed_push(const operation::list& ops)
+{
+    const auto push = [&](const operation& op)
+    {
+        return op.is_relaxed_push();
+    };
+
+    return std::all_of(ops.begin(), ops.end(), push);
+}
+
+bool script::is_coinbase_pattern(const operation::list& ops, size_t height)
+{
+    return ops.size() == 1 && ops.back().data() == number(height).data();
+}
+
 bool script::is_null_data_pattern(const operation::list& ops)
 {
     return ops.size() == 2
@@ -853,6 +871,7 @@ operation::list script::to_pay_multisig_pattern(uint8_t signatures,
 // Utilities (non-static).
 //-----------------------------------------------------------------------------
 
+// This excludes the bip34 coinbase pattern as it is not "standard".
 script_pattern script::pattern() const
 {
     // The first operations access must be method-based to guarantee the cache.
@@ -884,19 +903,6 @@ script_pattern script::pattern() const
         return script_pattern::sign_script_hash;
 
     return script_pattern::non_standard;
-}
-
-//*****************************************************************************
-// CONSENSUS: this pattern is used to activate bip16 validation rules.
-//*****************************************************************************
-bool script::is_relaxed_push() const
-{
-    const auto push = [&](const operation& op)
-    {
-        return op.is_relaxed_push();
-    };
-
-    return std::all_of(operations().begin(), operations().end(), push);
 }
 
 bool script::is_pay_to_script_hash(uint32_t forks) const
@@ -951,7 +957,7 @@ size_t script::embedded_sigops(const script& prevout_script) const
         return 0;
 
     // There are no embedded sigops when the input script is not push only.
-    if (!is_relaxed_push())
+    if (!is_relaxed_push(operations_))
         return 0;
 
     // Parse the embedded script from the last input script item (data).
@@ -1033,7 +1039,7 @@ code script::verify(const transaction& tx, uint32_t input_index,
 
     if (prevout_script.is_pay_to_script_hash(forks))
     {
-        if (!input_script.is_relaxed_push())
+        if (!is_relaxed_push(input_script.operations()))
             return error::invalid_script_embed;
 
         // The embedded p2sh script is at the top of the stack.

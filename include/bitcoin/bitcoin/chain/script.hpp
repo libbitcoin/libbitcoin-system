@@ -141,14 +141,15 @@ public:
     static inline bool is_enabled(uint32_t active_forks,
         machine::rule_fork fork);
 
-    /// No-code patterns.
+    /// No-code patterns (consensus).
     static bool is_push_only(const operation::list& ops);
-    static bool is_relaxed_push_only(const operation::list& ops);
+    static bool is_relaxed_push(const operation::list& ops);
+    static bool is_coinbase_pattern(const operation::list& ops, size_t height);
 
     /// Unspendable pattern (standard).
     static bool is_null_data_pattern(const operation::list& ops);
 
-    /// Payment script patterns (standard).
+    /// Payment script patterns (standard, psh is also consensus).
     static bool is_pay_multisig_pattern(const operation::list& ops);
     static bool is_pay_public_key_pattern(const operation::list& ops);
     static bool is_pay_key_hash_pattern(const operation::list& ops);
@@ -189,7 +190,6 @@ protected:
     friend class output;
 
     void reset();
-    bool is_relaxed_push() const;
     bool is_pay_to_script_hash(uint32_t forks) const;
     void find_and_delete_(const data_chunk& endorsement);
 
