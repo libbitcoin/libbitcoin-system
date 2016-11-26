@@ -21,6 +21,7 @@
 
 #include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
+#include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -176,8 +177,8 @@ void merkle_block::to_data(uint32_t version, writer& sink) const
 size_t merkle_block::serialized_size(uint32_t version) const
 {
     return header_.serialized_size() + 4u +
-        variable_uint_size(hashes_.size()) + (hash_size * hashes_.size()) +
-        variable_uint_size(flags_.size()) + flags_.size();
+        message::variable_uint_size(hashes_.size()) + (hash_size * hashes_.size()) +
+        message::variable_uint_size(flags_.size()) + flags_.size();
 }
 
 chain::header& merkle_block::header()

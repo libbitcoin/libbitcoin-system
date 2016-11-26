@@ -21,6 +21,7 @@
 
 #include <initializer_list>
 #include <bitcoin/bitcoin/math/limits.hpp>
+#include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -159,10 +160,10 @@ void get_block_transactions::to_data(uint32_t version,
 
 size_t get_block_transactions::serialized_size(uint32_t version) const
 {
-    auto size = hash_size + variable_uint_size(indexes_.size());
+    auto size = hash_size + message::variable_uint_size(indexes_.size());
 
     for (const auto& element: indexes_)
-        size += variable_uint_size(element);
+        size += message::variable_uint_size(element);
 
     return size;
 }

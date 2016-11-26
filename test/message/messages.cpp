@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2016 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -22,30 +22,30 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(variable_uint_size_tests)
+BOOST_AUTO_TEST_SUITE(messages_tests)
 
-BOOST_AUTO_TEST_CASE(single_byte_value)
+BOOST_AUTO_TEST_CASE(messages__variable_uint_size__one_byte__expected)
 {
-    uint64_t value = 1;
-    BOOST_REQUIRE_EQUAL(1u, variable_uint_size(value));
+    static const uint64_t value = 1;
+    BOOST_REQUIRE_EQUAL(message::variable_uint_size(value), 1u);
 }
 
-BOOST_AUTO_TEST_CASE(two_byte_value)
+BOOST_AUTO_TEST_CASE(messages__variable_uint_size__two_byte__expected)
 {
-    uint64_t value = 0xfe;
-    BOOST_REQUIRE_EQUAL(3u, variable_uint_size(value));
+    static const uint64_t value = 0xfe;
+    BOOST_REQUIRE_EQUAL(message::variable_uint_size(value), 3u);
 }
 
-BOOST_AUTO_TEST_CASE(four_byte_value)
+BOOST_AUTO_TEST_CASE(messages__variable_uint_size__four_byte__expected)
 {
-    uint64_t value = 0x10000;
-    BOOST_REQUIRE_EQUAL(5u, variable_uint_size(value));
+    static const uint64_t value = 0x10000;
+    BOOST_REQUIRE_EQUAL(message::variable_uint_size(value), 5u);
 }
 
-BOOST_AUTO_TEST_CASE(eight_byte_value)
+BOOST_AUTO_TEST_CASE(messages__variable_uint_size__eight_byte__expected)
 {
-    uint64_t value = 0x100000000;
-    BOOST_REQUIRE_EQUAL(9u, variable_uint_size(value));
+    static const uint64_t value = 0x100000000;
+    BOOST_REQUIRE_EQUAL(message::variable_uint_size(value), 9u);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

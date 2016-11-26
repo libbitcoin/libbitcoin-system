@@ -39,6 +39,7 @@
 #include <bitcoin/bitcoin/machine/rule_fork.hpp>
 #include <bitcoin/bitcoin/machine/script_pattern.hpp>
 #include <bitcoin/bitcoin/machine/sighash_algorithm.hpp>
+#include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -381,7 +382,7 @@ size_t script::serialized_size(bool prefix) const
     auto size = satoshi_content_size();
 
     if (prefix)
-        size += variable_uint_size(size);
+        size += message::variable_uint_size(size);
 
     return size;
 }

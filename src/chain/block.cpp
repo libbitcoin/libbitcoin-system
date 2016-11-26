@@ -38,10 +38,11 @@
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/math/uint256.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/machine/number.hpp>
 #include <bitcoin/bitcoin/machine/opcode.hpp>
 #include <bitcoin/bitcoin/machine/rule_fork.hpp>
+#include <bitcoin/bitcoin/message/messages.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -282,7 +283,7 @@ size_t block::serialized_size() const
     const auto& txs = transactions_;
 
     return header_.serialized_size() +
-        variable_uint_size(transactions_.size()) +
+        message::variable_uint_size(transactions_.size()) +
         std::accumulate(txs.begin(), txs.end(), size_t{0}, sum);
 }
 

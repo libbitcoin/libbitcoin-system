@@ -313,9 +313,7 @@ AS_CASE([${CC}], [*],
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*],
     [AX_CHECK_COMPILE_FLAG([-Wno-long-long],
-        [CFLAGS="$CFLAGS -Wno-long-long"],
-        [AX_CHECK_COMPILE_FLAG([-pedantic],
-            [CFLAGS="$CFLAGS -pedantic"])])])
+        [CFLAGS="$CFLAGS -Wno-long-long"])])
 
 # Conform to style.
 #------------------------------------------------------------------------------

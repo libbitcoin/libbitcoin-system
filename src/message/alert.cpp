@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/alert.hpp>
 
 #include <bitcoin/bitcoin/math/limits.hpp>
+#include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -145,8 +146,8 @@ void alert::to_data(uint32_t version, writer& sink) const
 
 size_t alert::serialized_size(uint32_t version) const
 {
-    return variable_uint_size(payload_.size()) + payload_.size() +
-        variable_uint_size(signature_.size()) + signature_.size();
+    return message::variable_uint_size(payload_.size()) + payload_.size() +
+        message::variable_uint_size(signature_.size()) + signature_.size();
 }
 
 data_chunk& alert::payload()

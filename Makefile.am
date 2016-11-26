@@ -132,6 +132,7 @@ src_libbitcoin_la_SOURCES = \
     src/message/inventory_vector.cpp \
     src/message/memory_pool.cpp \
     src/message/merkle_block.cpp \
+    src/message/messages.cpp \
     src/message/network_address.cpp \
     src/message/not_found.cpp \
     src/message/ping.cpp \
@@ -167,7 +168,6 @@ src_libbitcoin_la_SOURCES = \
     src/utility/string.cpp \
     src/utility/thread.cpp \
     src/utility/threadpool.cpp \
-    src/utility/variable_uint_size.cpp \
     src/utility/work.cpp \
     src/wallet/bitcoin_uri.cpp \
     src/wallet/dictionary.cpp \
@@ -280,6 +280,7 @@ test_libbitcoin_test_SOURCES = \
     test/message/inventory_vector.cpp \
     test/message/memory_pool.cpp \
     test/message/merkle_block.cpp \
+    test/message/messages.cpp \
     test/message/network_address.cpp \
     test/message/not_found.cpp \
     test/message/ping.cpp \
@@ -303,7 +304,6 @@ test_libbitcoin_test_SOURCES = \
     test/utility/serializer.cpp \
     test/utility/stream.cpp \
     test/utility/thread.cpp \
-    test/utility/variable_uint_size.cpp \
     test/wallet/bitcoin_uri.cpp \
     test/wallet/ec_private.cpp \
     test/wallet/ec_public.cpp \
@@ -335,7 +335,6 @@ include_bitcoin_bitcoin_HEADERS = \
     include/bitcoin/bitcoin/define.hpp \
     include/bitcoin/bitcoin/error.hpp \
     include/bitcoin/bitcoin/handlers.hpp \
-    include/bitcoin/bitcoin/messages.hpp \
     include/bitcoin/bitcoin/version.hpp
 
 include_bitcoin_bitcoin_chaindir = ${includedir}/bitcoin/bitcoin/chain
@@ -489,6 +488,7 @@ include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/inventory_vector.hpp \
     include/bitcoin/bitcoin/message/memory_pool.hpp \
     include/bitcoin/bitcoin/message/merkle_block.hpp \
+    include/bitcoin/bitcoin/message/messages.hpp \
     include/bitcoin/bitcoin/message/network_address.hpp \
     include/bitcoin/bitcoin/message/not_found.hpp \
     include/bitcoin/bitcoin/message/ping.hpp \

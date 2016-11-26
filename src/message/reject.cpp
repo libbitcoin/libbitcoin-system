@@ -19,9 +19,10 @@
  */
 #include <bitcoin/bitcoin/message/reject.hpp>
 
-#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/message/block.hpp>
+#include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/message/transaction.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -172,8 +173,9 @@ void reject::to_data(uint32_t version, writer& sink) const
 
 size_t reject::serialized_size(uint32_t version) const
 {
-    auto size = size_t(1) + variable_uint_size(message_.size()) +
-        message_.size() + variable_uint_size(reason_.size()) + reason_.size();
+    size_t size = 1u + message::variable_uint_size(message_.size()) +
+        message_.size() + message::variable_uint_size(reason_.size()) +
+        reason_.size();
 
     if ((message_ == block::command) ||
         (message_ == transaction::command))

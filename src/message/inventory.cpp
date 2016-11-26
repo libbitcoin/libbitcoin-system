@@ -22,9 +22,10 @@
 #include <algorithm>
 #include <initializer_list>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/inventory.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
-#include <bitcoin/bitcoin/math/limits.hpp>
+#include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -191,8 +192,8 @@ void inventory::reduce(inventory_vector::list& out, type_id type) const
 
 size_t inventory::serialized_size(uint32_t version) const
 {
-    return variable_uint_size(inventories_.size()) + inventories_.size() *
-        inventory_vector::satoshi_fixed_size(version);
+    return message::variable_uint_size(inventories_.size()) +
+        inventories_.size() * inventory_vector::satoshi_fixed_size(version);
 }
 
 size_t inventory::count(type_id type) const

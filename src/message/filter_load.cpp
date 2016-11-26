@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/filter_load.hpp>
 
 #include <bitcoin/bitcoin/math/limits.hpp>
+#include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -164,7 +165,8 @@ void filter_load::to_data(uint32_t version, writer& sink) const
 
 size_t filter_load::serialized_size(uint32_t version) const
 {
-    return 1 + 4 + 4 + variable_uint_size(filter_.size()) + filter_.size();
+    return 1u + 4u + 4u + message::variable_uint_size(filter_.size()) +
+        filter_.size();
 }
 
 data_chunk& filter_load::filter()
