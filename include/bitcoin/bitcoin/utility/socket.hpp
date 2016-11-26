@@ -25,10 +25,12 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/noncopyable.hpp>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 
+/// This class is thread safe but the socket may not be used concurrently.
 class BC_API socket
   : noncopyable
     /*, public track<socket>*/
@@ -39,7 +41,7 @@ public:
     /// Construct an instance.
     socket();
 
-    /// Stop work and join the thread.
+    /// Validate socket stopped.
     ~socket();
 
     /// Obtain the authority of the remote endpoint.
@@ -54,9 +56,16 @@ public:
     /// Signal cancel of all outstanding work on the socket.
     virtual void stop();
 
+    /// Wait on stop of all outstanding work on the socket.
+    virtual void close();
+
 private:
+    // This is thread safe.
     threadpool thread_;
+
+    // This is protected by mutex.
     asio::socket socket_;
+    mutable  shared_mutex mutex_;
 };
 
 } // namespace libbitcoin

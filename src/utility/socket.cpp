@@ -22,6 +22,7 @@
 #include <memory>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -35,25 +36,33 @@ socket::socket()
 
 socket::~socket()
 {
-    stop();
-
-    // Handling socket error codes creates exception safety.
-    boost_code ignore;
-    socket_.close(ignore);
-
-    thread_.join();
+    BITCOIN_ASSERT_MSG(stopped(), "The socket was not stopped.");
 }
 
 config::authority socket::authority() const
 {
     boost_code ec;
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section.
+    mutex_.lock_shared();
+
     const auto endpoint = socket_.remote_endpoint(ec);
+
+    mutex_.unlock_shared();
+    ///////////////////////////////////////////////////////////////////////////
+
     return ec ? config::authority() : config::authority(endpoint);
 }
 
 asio::socket& socket::get()
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section.
+    shared_lock lock(mutex_);
+
     return socket_;
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 threadpool& socket::thread()
@@ -66,14 +75,40 @@ void socket::stop()
     // Handling socket error codes creates exception safety.
     boost_code ignore;
 
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section.
+    mutex_.lock();
+
     // Signal the end of oustanding async socket functions (read).
     socket_.shutdown(asio::socket::shutdown_both, ignore);
 
     // BUGBUG: this is documented to fail on Windows XP and Server 2003.
     socket_.cancel(ignore);
 
+    mutex_.unlock();
+    ///////////////////////////////////////////////////////////////////////////
+
     // Signal the end of oustanding work and no new work.
     thread_.shutdown();
+}
+
+void socket::close()
+{
+    stop();
+
+    // Handling socket error codes creates exception safety.
+    boost_code ignore;
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section.
+    mutex_.lock();
+
+    socket_.close(ignore);
+
+    mutex_.unlock();
+    ///////////////////////////////////////////////////////////////////////////
+
+    thread_.join();
 }
 
 } // namespace libbitcoin
