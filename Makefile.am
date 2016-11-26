@@ -415,6 +415,7 @@ include_bitcoin_bitcoin_impl_utility_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/istream_reader.ipp \
     include/bitcoin/bitcoin/impl/utility/notifier.ipp \
     include/bitcoin/bitcoin/impl/utility/ostream_writer.ipp \
+    include/bitcoin/bitcoin/impl/utility/pending.ipp \
     include/bitcoin/bitcoin/impl/utility/resubscriber.ipp \
     include/bitcoin/bitcoin/impl/utility/serializer.ipp \
     include/bitcoin/bitcoin/impl/utility/subscriber.ipp \
@@ -540,6 +541,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/noncopyable.hpp \
     include/bitcoin/bitcoin/utility/notifier.hpp \
     include/bitcoin/bitcoin/utility/ostream_writer.hpp \
+    include/bitcoin/bitcoin/utility/pending.hpp \
     include/bitcoin/bitcoin/utility/png.hpp \
     include/bitcoin/bitcoin/utility/random.hpp \
     include/bitcoin/bitcoin/utility/reader.hpp \

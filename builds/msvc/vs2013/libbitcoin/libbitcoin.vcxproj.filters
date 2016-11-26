@@ -192,6 +192,9 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\machine\number.ipp">
       <Filter>include\bitcoin\impl\machine</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\pending.ipp">
+      <Filter>include\bitcoin\impl\utility</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\error.cpp">
@@ -1212,6 +1215,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\messages.hpp">
       <Filter>include\bitcoin\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\pending.hpp">
+      <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
