@@ -659,7 +659,7 @@ bool script::is_relaxed_push(const operation::list& ops)
 
 bool script::is_coinbase_pattern(const operation::list& ops, size_t height)
 {
-    return ops.size() == 1 && ops.back().data() == number(height).data();
+    return !ops.empty() && ops.front().data() == number(height).data();
 }
 
 bool script::is_null_data_pattern(const operation::list& ops)
@@ -1017,6 +1017,20 @@ void script::find_and_delete(const data_stack& endorsements)
     cached_ = false;
     bytes_.shrink_to_fit();
 }
+
+////// This is slightly more efficient becuase the script does not get parsed,
+////// but the static template implementation is more self-explanatory.
+////bool script::is_coinbase_pattern(size_t height) const
+////{
+////    const auto actual = to_data(false);
+////
+////    // Create the expected script as a byte vector.
+////    script expected_script(operation::list{ { number(height).data() } });
+////    const auto expected = expected_script.to_data(false);
+////
+////    // Require that the actual script start wtih the expected coinbase script.
+////    return std::equal(expected.begin(), expected.end(), actual.begin());
+////}
 
 // Validation.
 //-----------------------------------------------------------------------------

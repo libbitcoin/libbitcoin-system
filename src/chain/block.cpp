@@ -590,10 +590,8 @@ bool block::is_valid_coinbase_script(size_t height) const
     if (transactions_.empty() || transactions_.front().inputs().empty())
         return false;
 
-    // Get the serialized coinbase input script as a byte vector.
-    const auto& actual_tx = transactions_.front();
-    const auto& operations = actual_tx.inputs().front().script().operations();
-    return script::is_coinbase_pattern(operations, height);
+    const auto& script = transactions_.front().inputs().front().script();
+    return script::is_coinbase_pattern(script.operations(), height);
 }
 
 code block::check_transactions() const

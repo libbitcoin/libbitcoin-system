@@ -178,6 +178,7 @@ public:
     size_t sigops(bool embedded) const;
     size_t embedded_sigops(const script& prevout_script) const;
     void find_and_delete(const data_stack& endorsements);
+    ////bool is_coinbase_pattern(size_t height) const;
 
     // Validation.
     //-------------------------------------------------------------------------
