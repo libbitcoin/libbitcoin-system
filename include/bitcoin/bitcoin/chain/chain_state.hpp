@@ -61,6 +61,9 @@ public:
         /// [block - 1, floor(block - 1000, 0)] mainnet: 1000, testnet: 100
         range version;
 
+        /// (block - 0)
+        size_t version_self;
+
         /// [block - 1, floor(block - 11, 0)]
         range timestamp;
 
@@ -87,10 +90,17 @@ public:
         hash_digest allowed_duplicates_hash;
 
         /// Values must be ordered by height with high (block - 1) last.
-        struct { bitss ordered; } bits;
+        struct
+        {
+            bitss ordered;
+        } bits;
 
         /// Values are unordered.
-        struct { versions unordered; } version;
+        struct
+        {
+            uint32_t self;
+            versions unordered;
+        } version;
 
         /// Values must be ordered by height with high (block - 1) last.
         struct
@@ -119,16 +129,13 @@ public:
     /// Construction with zero height or any empty array causes invalid state.
     bool is_valid() const;
 
-    /// Determine if the fork is set in the active_forks member.
+    /// Determine if the fork is set for this block.
     bool is_enabled(machine::rule_fork fork) const;
 
-    /// Determine if the flag is set and enabled for a given block's version.
-    bool is_enabled(uint32_t block_version, machine::rule_fork fork) const;
-
-    /// Determine if the block hash fails a checkpoint at this height.
+    /// Determine if this block hash fails a checkpoint at this height.
     bool is_checkpoint_conflict(const hash_digest& hash) const;
 
-    /// The height is less than or equal to that of the top checkpoint.
+    /// This block height is less than or equal to that of the top checkpoint.
     bool is_under_checkpoint() const;
 
 protected:

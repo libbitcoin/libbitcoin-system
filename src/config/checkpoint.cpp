@@ -96,6 +96,11 @@ config::checkpoint::list checkpoint::sort(const list& checks)
     return copy;
 }
 
+bool checkpoint::covered(size_t height, const list& checks)
+{
+    return !checks.empty() && height <= checks.back().height();
+}
+
 bool checkpoint::validate(const hash_digest& hash, size_t height,
     const list& checks)
 {

@@ -120,9 +120,10 @@ chain_state::activations chain_state::activation(const data& values,
     uint32_t forks)
 {
     const auto height = values.height;
+    const auto version = values.version.self;
     const auto& history = values.version.unordered;
+    const auto frozen = script::is_enabled(forks, rule_fork::deep_freeze);
     const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
-    const auto iced = script::is_enabled(forks, rule_fork::frozen_activations);
 
     // Declare version predicates.
     const auto ge_2 = [](uint32_t version) { return version >= bip34_version; };
@@ -134,52 +135,77 @@ chain_state::activations chain_state::activation(const data& values,
     const auto count_3 = std::count_if(history.begin(), history.end(), ge_3);
     const auto count_4 = std::count_if(history.begin(), history.end(), ge_4);
 
+    // Frozen activations (require version and enforce above freeze height).
+    const auto bip34_ice = bip34(height, frozen, testnet);
+    const auto bip66_ice = bip66(height, frozen, testnet);
+    const auto bip65_ice = bip65(height, frozen, testnet);
+
     // Initialize activation results with genesis values.
     activations result{ rule_fork::no_rules, first_version };
 
     // testnet is activated based on configuration alone.
     result.forks |= (rule_fork::easy_blocks & forks);
 
+    // deep_freeze is activated based on configuration alone.
+    result.forks |= (rule_fork::deep_freeze & forks);
+
     // bip16 is activated with a one-time test on mainnet/testnet (~55% rule).
     // There was one invalid p2sh tx mined after that time (code shipped late).
     if (values.timestamp.self >= bip16_activation_time &&
         !is_bip16_exception({ values.hash, height }, testnet))
+    {
         result.forks |= (rule_fork::bip16_rule & forks);
+    }
 
     // bip30 is active for all but two mainnet blocks that violate the rule.
     // These two blocks each have a coinbase transaction that exctly duplicates
     // another that is not spent by the arrival of the corresponding duplicate.
     if (!is_bip30_exception({ values.hash, height }, testnet))
+    {
         result.forks |= (rule_fork::bip30_rule & forks);
+    }
 
     // bip34 is activated based on 75% of preceding 1000 mainnet blocks.
-    if (bip34(height, iced, testnet) || is_active(count_2, testnet))
+    if (bip34_ice || (is_active(count_2, testnet) && version >= bip34_version))
+    {
         result.forks |= (rule_fork::bip34_rule & forks);
+    }
 
     // bip66 is activated based on 75% of preceding 1000 mainnet blocks.
-    if (bip66(height, iced, testnet) || is_active(count_3, testnet))
+    if (bip66_ice || (is_active(count_3, testnet) && version >= bip66_version))
+    {
         result.forks |= (rule_fork::bip66_rule & forks);
+    }
 
     // bip65 is activated based on 75% of preceding 1000 mainnet blocks.
-    if (bip65(height, iced, testnet) || is_active(count_4, testnet))
+    if (bip65_ice || (is_active(count_4, testnet) && version >= bip65_version))
+    {
         result.forks |= (rule_fork::bip65_rule & forks);
+    }
 
     // allowed_duplicates is activated at and above the bip34 checkpoint.
     if (allow_duplicates({ values.allowed_duplicates_hash, height }, testnet))
+    {
         result.forks |= (rule_fork::allowed_duplicates & forks);
-
-    // frozen_activations is activated based on configuration alone.
-    result.forks |= (rule_fork::frozen_activations & forks);
+    }
 
     // version 4/3/2 enforced based on 95% of preceding 1000 mainnet blocks.
-    if (bip65(height, iced, testnet) || is_enforced(count_4, testnet))
+    if (bip65_ice || is_enforced(count_4, testnet))
+    {
         result.minimum_version = bip65_version;
-    else if (bip66(height, iced, testnet) || is_enforced(count_3, testnet))
+    }
+    else if (bip66_ice || is_enforced(count_3, testnet))
+    {
         result.minimum_version = bip66_version;
-    else if (bip34(height, iced, testnet) || is_enforced(count_2, testnet))
+    }
+    else if (bip34_ice || is_enforced(count_2, testnet))
+    {
         result.minimum_version = bip34_version;
+    }
     else
+    {
         result.minimum_version = first_version;
+    }
 
     return result;
 }
@@ -321,18 +347,19 @@ chain_state::map chain_state::get_map(size_t height,
     //-------------------------------------------------------------------------
     // The height bound of the median time past function.
     // Height must be a positive multiple of interval, so underflow safe.
+    map.timestamp_self = height;
     map.timestamp.high = height - 1;
     map.timestamp.count = checked ? 1 :
         std::min(height, median_time_past_interval);
 
     // Additional timestamps required (or map::unrequested for not).
-    map.timestamp_self = height;
     map.timestamp_retarget = is_retarget_height(height) ?
         height - retargeting_interval : map::unrequested;
 
     // Version.
     //-------------------------------------------------------------------------
     // The height bound of the version sample for activations.
+    map.version_self = height;
     map.version.high = height - 1;
     map.version.count = activate && !checked ?
         std::min(height, version_sample_size(testnet)) : 0;
@@ -410,24 +437,15 @@ bool chain_state::is_enabled(rule_fork fork) const
     return script::is_enabled(active_.forks, fork);
 }
 
-bool chain_state::is_enabled(uint32_t block_version, rule_fork fork) const
-{
-    return (is_enabled(fork)) &&
-       ((fork == rule_fork::bip65_rule && block_version >= bip65_version) ||
-        (fork == rule_fork::bip66_rule && block_version >= bip66_version) ||
-        (fork == rule_fork::bip34_rule && block_version >= bip34_version));
-}
-
 bool chain_state::is_checkpoint_conflict(const hash_digest& hash) const
 {
-    return !config::checkpoint::validate(hash, data_.height, checkpoints_);
+    return !checkpoint::validate(hash, data_.height, checkpoints_);
 }
 
 bool chain_state::is_under_checkpoint() const
 {
-    // This assumes that checkpoints are sorted.
-    return !checkpoints_.empty() && 
-        data_.height <= checkpoints_.back().height();
+    // This assumes that the checkpoints are sorted.
+    return checkpoint::covered(data_.height, checkpoints_);
 }
 
 } // namespace chain

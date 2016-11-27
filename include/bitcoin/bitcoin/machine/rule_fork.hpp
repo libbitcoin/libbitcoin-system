@@ -51,7 +51,7 @@ enum rule_fork : uint32_t
     allowed_duplicates = 1 << 6,
 
     /// hard code activation heights (hard fork, unnecessary)
-    frozen_activations = 1 << 7,
+    deep_freeze = 1 << 7,
 
     /// rules that require bip34 style activation
     activations =
