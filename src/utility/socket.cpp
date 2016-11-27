@@ -36,7 +36,7 @@ socket::socket()
 
 socket::~socket()
 {
-    BITCOIN_ASSERT_MSG(stopped(), "The socket was not stopped.");
+    close();
 }
 
 config::authority socket::authority() const
