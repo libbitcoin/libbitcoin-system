@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/prefilled_transaction.hpp>
 
 #include <bitcoin/bitcoin/chain/transaction.hpp>
+#include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -70,7 +71,8 @@ prefilled_transaction::prefilled_transaction(uint64_t index,
 {
 }
 
-prefilled_transaction::prefilled_transaction(const prefilled_transaction& other)
+prefilled_transaction::prefilled_transaction(
+    const prefilled_transaction& other)
   : prefilled_transaction(other.index_, other.transaction_)
 {
 }
@@ -146,7 +148,8 @@ void prefilled_transaction::to_data(uint32_t version,
 
 size_t prefilled_transaction::serialized_size(uint32_t version) const
 {
-    return variable_uint_size(index_) + transaction_.serialized_size();
+    return message::variable_uint_size(index_) +
+        transaction_.serialized_size();
 }
 
 uint64_t prefilled_transaction::index() const

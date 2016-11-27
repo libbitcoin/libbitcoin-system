@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/version.hpp>
 
 #include <algorithm>
+#include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -221,7 +222,7 @@ size_t version::serialized_size(uint32_t version) const
         address_receiver_.serialized_size(version, false) +
         address_sender_.serialized_size(version, false) +
         sizeof(nonce_) +
-        variable_uint_size(user_agent_.size()) + user_agent_.size() +
+        message::variable_uint_size(user_agent_.size()) + user_agent_.size() +
         sizeof(start_height_);
 
     if (value_ >= level::bip37)

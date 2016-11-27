@@ -150,6 +150,7 @@
     <ClCompile Include="..\..\..\..\src\message\header_message.cpp" />
     <ClCompile Include="..\..\..\..\src\message\memory_pool.cpp" />
     <ClCompile Include="..\..\..\..\src\message\merkle_block.cpp" />
+    <ClCompile Include="..\..\..\..\src\message\messages.cpp" />
     <ClCompile Include="..\..\..\..\src\message\pong.cpp" />
     <ClCompile Include="..\..\..\..\src\message\prefilled_transaction.cpp" />
     <ClCompile Include="..\..\..\..\src\message\reject.cpp" />
@@ -193,7 +194,6 @@
     <ClCompile Include="..\..\..\..\src\utility\string.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\thread.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\threadpool.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\variable_uint_size.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\work.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\dictionary.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\ec_public.cpp" />
@@ -291,7 +291,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\limits.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\stealth.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\uint256.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\messages.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\alert.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\alert_payload.hpp" />
@@ -308,6 +307,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\header_message.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\memory_pool.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\merkle_block.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\messages.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\ping.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\pong.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\prefilled_transaction.hpp" />
@@ -346,6 +346,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\monitor.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\noncopyable.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\notifier.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\pending.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\png.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\resubscriber.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\conditional_lock.hpp" />
@@ -374,7 +375,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\threadpool.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\timer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\track.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\variable_uint_size.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\work.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\writer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\version.hpp" />
@@ -439,6 +439,7 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\istream_reader.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\notifier.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\ostream_writer.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\pending.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\resubscriber.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\serializer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\subscriber.ipp" />

@@ -21,6 +21,7 @@
 
 #include <initializer_list>
 #include <bitcoin/bitcoin/math/limits.hpp>
+#include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -66,14 +67,18 @@ compact_block::compact_block()
 compact_block::compact_block(const chain::header& header, uint64_t nonce,
     const short_id_list& short_ids,
     const prefilled_transaction::list& transactions)
-  : header_(header), nonce_(nonce), short_ids_(short_ids),
+  : header_(header),
+    nonce_(nonce),
+    short_ids_(short_ids),
     transactions_(transactions)
 {
 }
 
 compact_block::compact_block(chain::header&& header, uint64_t nonce,
     short_id_list&& short_ids, prefilled_transaction::list&& transactions)
-  : header_(std::move(header)), nonce_(nonce), short_ids_(std::move(short_ids)),
+  : header_(std::move(header)),
+    nonce_(nonce),
+    short_ids_(std::move(short_ids)),
     transactions_(std::move(transactions))
 {
 }
@@ -180,8 +185,9 @@ void compact_block::to_data(uint32_t version, writer& sink) const
 size_t compact_block::serialized_size(uint32_t version) const
 {
     auto size = chain::header::satoshi_fixed_size() +
-        variable_uint_size(short_ids_.size()) + (short_ids_.size() * 6) +
-        variable_uint_size(transactions_.size()) + 8;
+        message::variable_uint_size(short_ids_.size()) +
+        (short_ids_.size() * 6u) +
+        message::variable_uint_size(transactions_.size()) + 8u;
 
     for (const auto& tx: transactions_)
         size += tx.serialized_size(version);

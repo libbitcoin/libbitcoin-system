@@ -25,6 +25,7 @@
 #include <utility>
 #include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
+#include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -64,7 +65,8 @@ header_message header_message::factory_from_data(const uint32_t version,
 
 size_t header_message::satoshi_fixed_size(const uint32_t version)
 {
-    return chain::header::satoshi_fixed_size() + variable_uint_size(0);
+    return chain::header::satoshi_fixed_size() +
+        message::variable_uint_size(0);
 }
 
 header_message::header_message()

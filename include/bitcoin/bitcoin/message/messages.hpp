@@ -17,10 +17,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_MESSAGES_HPP
-#define LIBBITCOIN_MESSAGES_HPP
+#ifndef LIBBITCOIN_MESSAGE_MESSAGES_HPP
+#define LIBBITCOIN_MESSAGE_MESSAGES_HPP
 
 #include <cstdint>
+#include <cstddef>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
 #include <bitcoin/bitcoin/message/alert.hpp>
@@ -103,9 +104,7 @@
 namespace libbitcoin {
 namespace message {
 
-/**
-* Serialize a message object to the Bitcoin wire protocol encoding.
-*/
+/// Serialize a message object to the Bitcoin wire protocol encoding.
 template <typename Message>
 data_chunk serialize(uint32_t version, const Message& packet,
     uint32_t magic)
@@ -122,6 +121,8 @@ data_chunk serialize(uint32_t version, const Message& packet,
     extend_data(message, payload);
     return message;
 }
+
+BC_API size_t variable_uint_size(uint64_t value);
 
 } // namespace message
 } // namespace libbitcoin

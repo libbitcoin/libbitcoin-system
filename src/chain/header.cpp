@@ -429,7 +429,7 @@ bool header::is_valid_proof_of_work() const
     if (target < 1 || target > pow_limit)
         return false;
 
-    // Ensure actual work does not exceed claimed amount.
+    // Ensure actual work is at least claimed amount (smaller is more work).
     return to_uint256(hash()) <= target;
 }
 
@@ -450,14 +450,17 @@ code header::check() const
 
 code header::accept(const chain_state& state) const
 {
-    if (state.is_checkpoint_failure(hash()))
+    if (bits_ != state.work_required())
+        return error::incorrect_proof_of_work;
+
+    else if (state.is_checkpoint_conflict(hash()))
         return error::checkpoints_failed;
+
+    else if (state.is_under_checkpoint())
+        return error::success;
 
     else if (version_ < state.minimum_version())
         return error::old_version_block;
-
-    else if (bits_ != state.work_required())
-        return error::incorrect_proof_of_work;
 
     else if (timestamp_ <= state.median_time_past())
         return error::timestamp_too_early;

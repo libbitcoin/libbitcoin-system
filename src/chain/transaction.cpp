@@ -38,6 +38,7 @@
 #include <bitcoin/bitcoin/machine/opcode.hpp>
 #include <bitcoin/bitcoin/machine/operation.hpp>
 #include <bitcoin/bitcoin/machine/rule_fork.hpp>
+#include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
@@ -374,8 +375,8 @@ size_t transaction::serialized_size(bool wire) const
 
     return sizeof(version_) 
         + sizeof(locktime_) 
-        + variable_uint_size(inputs_.size())
-        + variable_uint_size(outputs_.size())
+        + message::variable_uint_size(inputs_.size())
+        + message::variable_uint_size(outputs_.size())
         + std::accumulate(inputs_.begin(), inputs_.end(), size_t{0}, ins)
         + std::accumulate(outputs_.begin(), outputs_.end(), size_t{0}, outs);
 }

@@ -38,10 +38,11 @@
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/math/uint256.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/machine/number.hpp>
 #include <bitcoin/bitcoin/machine/opcode.hpp>
 #include <bitcoin/bitcoin/machine/rule_fork.hpp>
+#include <bitcoin/bitcoin/message/messages.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -282,7 +283,7 @@ size_t block::serialized_size() const
     const auto& txs = transactions_;
 
     return header_.serialized_size() +
-        variable_uint_size(transactions_.size()) +
+        message::variable_uint_size(transactions_.size()) +
         std::accumulate(txs.begin(), txs.end(), size_t{0}, sum);
 }
 
@@ -589,17 +590,8 @@ bool block::is_valid_coinbase_script(size_t height) const
     if (transactions_.empty() || transactions_.front().inputs().empty())
         return false;
 
-    // Get the serialized coinbase input script as a byte vector.
-    const auto& actual_tx = transactions_.front();
-    const auto& actual_script = actual_tx.inputs().front().script();
-    const auto actual = actual_script.to_data(false);
-
-    // Create the expected script as a byte vector.
-    script expected_script(operation::list{ { number(height).data() } });
-    const auto expected = expected_script.to_data(false);
-
-    // Require that the coinbase script match the expected coinbase script.
-    return std::equal(expected.begin(), expected.end(), actual.begin());
+    const auto& script = transactions_.front().inputs().front().script();
+    return script::is_coinbase_pattern(script.operations(), height);
 }
 
 code block::check_transactions() const
@@ -682,9 +674,7 @@ code block::accept() const
     return state ? accept(*state) : error::operation_failed;
 }
 
-// TODO: implement sigops and total input/output value caching.
 // These checks assume that prevout caching is completed on all tx.inputs.
-// Flags should be based on connecting at the specified blockchain height.
 code block::accept(const chain_state& state) const
 {
     code ec;
@@ -694,7 +684,10 @@ code block::accept(const chain_state& state) const
     if ((ec = header_.accept(state)))
         return ec;
 
-    // This recurses txs but is not applied to mempool (timestamp required).
+    else if (state.is_under_checkpoint())
+        return error::success;
+
+    // This recurses txs but is not applied via mempool (timestamp required).
     else if (!is_final(state.height()))
         return error::non_final_transaction;
 
@@ -720,7 +713,11 @@ code block::connect() const
 
 code block::connect(const chain_state& state) const
 {
-    return connect_transactions(state);
+    if (state.is_under_checkpoint())
+        return error::success;
+
+    else
+        return connect_transactions(state);
 }
 
 } // namespace chain

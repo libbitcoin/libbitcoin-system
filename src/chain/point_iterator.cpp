@@ -27,8 +27,8 @@
 #include <utility>
 #include <bitcoin/bitcoin/chain/point.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
-////#include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+////#include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 
 

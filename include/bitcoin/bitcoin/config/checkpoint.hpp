@@ -50,12 +50,19 @@ public:
      * @return             The sorted list of checkpoints.
      */
     static list sort(const list& checks);
-    
+
     /**
-     * Validate a checkpoint against a list of checkpoints.
-     * @param[in]  hash    The hash of the checkpoint.
+     * Confirm a checkpoint is in the range of a sorted list of checkpoints.
      * @param[in]  height  The height of checkpoint.
      * @param[in]  checks  The list of checkpoints.
+     */
+    static bool covered(size_t height, const list& checks);
+    
+    /**
+     * Validate a checkpoint against a set of checkpoints.
+     * @param[in]  hash    The hash of the checkpoint.
+     * @param[in]  height  The height of checkpoint.
+     * @param[in]  checks  The set of checkpoints.
      */
     static bool validate(const hash_digest& hash, size_t height,
         const list& checks);

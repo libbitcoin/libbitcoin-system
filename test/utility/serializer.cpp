@@ -458,7 +458,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_string)
 {
     const std::string expected = "my string data";
 
-    data_chunk data((expected.length() + variable_uint_size(expected.length())));
+    data_chunk data((expected.length() + message::variable_uint_size(expected.length())));
     auto source = make_safe_deserializer(data.begin(), data.end());
     auto sink = make_unsafe_serializer(data.begin());
 

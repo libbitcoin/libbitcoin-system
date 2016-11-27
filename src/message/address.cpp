@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/address.hpp>
 
 #include <bitcoin/bitcoin/math/limits.hpp>
+#include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -145,7 +146,7 @@ void address::to_data(uint32_t version, writer& sink) const
 
 size_t address::serialized_size(uint32_t version) const
 {
-    return variable_uint_size(addresses_.size()) +
+    return message::variable_uint_size(addresses_.size()) +
         (addresses_.size() * network_address::satoshi_fixed_size(version, true));
 }
 

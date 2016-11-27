@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/filter_add.hpp>
 
 #include <bitcoin/bitcoin/math/limits.hpp>
+#include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -146,7 +147,7 @@ void filter_add::to_data(uint32_t version, writer& sink) const
 
 size_t filter_add::serialized_size(uint32_t version) const
 {
-    return variable_uint_size(data_.size()) + data_.size();
+    return message::variable_uint_size(data_.size()) + data_.size();
 }
 
 data_chunk& filter_add::data()

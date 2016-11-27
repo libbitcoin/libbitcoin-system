@@ -437,7 +437,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_string)
     istream_reader source(stream);
     sink.write_string(expected);
 
-    BOOST_REQUIRE_EQUAL(stream.str().length(), (expected.length() + variable_uint_size(expected.length())));
+    BOOST_REQUIRE_EQUAL(stream.str().length(), (expected.length() + message::variable_uint_size(expected.length())));
 
     const auto result = source.read_string();
 

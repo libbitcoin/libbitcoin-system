@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/alert_payload.hpp>
 
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -300,14 +301,15 @@ void alert_payload::to_data(uint32_t version, writer& sink) const
 
 size_t alert_payload::serialized_size(uint32_t version) const
 {
-    size_t size = 40 + variable_uint_size(comment_.size()) + comment_.size() +
-        variable_uint_size(status_bar_.size()) + status_bar_.size() +
-        variable_uint_size(reserved_.size()) + reserved_.size() +
-        variable_uint_size(set_cancel_.size()) + (4 * set_cancel_.size()) +
-        variable_uint_size(set_sub_version_.size());
+    size_t size = 40u + 
+        message::variable_uint_size(comment_.size()) + comment_.size() +
+        message::variable_uint_size(status_bar_.size()) + status_bar_.size() +
+        message::variable_uint_size(reserved_.size()) + reserved_.size() +
+        message::variable_uint_size(set_cancel_.size()) + (4 * set_cancel_.size()) +
+        message::variable_uint_size(set_sub_version_.size());
 
     for (const auto& sub_version : set_sub_version_)
-        size += variable_uint_size(sub_version.size()) + sub_version.size();
+        size += message::variable_uint_size(sub_version.size()) + sub_version.size();
 
     return size;
 }
