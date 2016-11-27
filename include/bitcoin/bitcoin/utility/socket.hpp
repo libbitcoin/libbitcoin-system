@@ -23,6 +23,7 @@
 #include <memory>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/noncopyable.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
