@@ -406,7 +406,7 @@ BOOST_AUTO_TEST_CASE(script__bip65__valid)
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), test.input + " : " + test.output);
         BOOST_REQUIRE_MESSAGE(!tx.inputs().empty(), test.input + " : " + test.output);
 
-        tx.set_locktime(500000042);
+        tx.set_locktime(99);
         tx.inputs()[0].set_sequence(42);
 
         // These are valid prior to and after BIP65 activation.
