@@ -95,7 +95,7 @@ public:
     /// Primary pop.
     inline data_chunk pop();
     inline bool pop(int32_t& out_value);
-    inline bool pop(number& out_number, size_t maxiumum_size = max_number_size);
+    inline bool pop(number& out_number, size_t maxiumum_size=max_number_size);
     inline bool pop_binary(number& first, number& second);
     inline bool pop_ternary(number& first, number& second, number& third);
     inline bool pop_position(stack_iterator& out_position);
@@ -114,6 +114,7 @@ public:
     inline bool is_stack_overflow() const;
     inline bool if_(const operation& op) const;
     inline const value_type& item(size_t index) /*const*/;
+    inline bool top(number& out_number, size_t maxiumum_size=max_number_size) /*const*/;
     inline stack_iterator position(size_t index) /*const*/;
     inline operation::list subscript() const;
     inline size_t size() const;

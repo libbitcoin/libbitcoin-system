@@ -798,7 +798,7 @@ interpreter::result interpreter::op_check_locktime_verify(program& program)
     // BIP65: the stack is empty.
     // BIP65: extend the (signed) CLTV script number range to 5 bytes.
     number locktime;
-    if (!program.pop(locktime, max_cltv_number_size))
+    if (!program.top(locktime, max_cltv_number_size))
         return error::op_check_locktime_verify3;
 
     // BIP65: the top item on the stack is less than 0.
