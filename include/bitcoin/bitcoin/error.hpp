@@ -121,7 +121,7 @@ enum error_code_t
     spend_exceeds_value = 40,
     transaction_embedded_sigop_limit = 55,
 
-    // script verify / interpreter run
+    // connect input
     invalid_script = 39,
     invalid_script_size = 56,
     invalid_push_data_size = 57,
@@ -210,7 +210,7 @@ enum error_code_t
     op_check_locktime_verify3,
     op_check_locktime_verify4,
     op_check_locktime_verify5,
-    op_check_locktime_verify6,
+    op_check_locktime_verify6
 };
 
 enum error_condition_t
