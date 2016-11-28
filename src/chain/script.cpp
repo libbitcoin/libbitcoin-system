@@ -1036,18 +1036,17 @@ void script::find_and_delete(const data_stack& endorsements)
 //-----------------------------------------------------------------------------
 
 code script::verify(const transaction& tx, uint32_t input_index,
-    uint32_t forks, const script& input_script,
-    const script& prevout_script)
+    uint32_t forks, const script& input_script, const script& prevout_script)
 {
-    code error;
+    code ec;
 
     program input(input_script, tx, input_index, forks);
-    if ((error = input.evaluate()))
-        return error;
+    if ((ec = input.evaluate()))
+        return ec;
 
     program prevout(prevout_script, input);
-    if ((error = prevout.evaluate()))
-        return error;
+    if ((ec = prevout.evaluate()))
+        return ec;
 
     if (!prevout.stack_result())
         return error::stack_false;
@@ -1061,8 +1060,8 @@ code script::verify(const transaction& tx, uint32_t input_index,
         script embedded_script(input.pop(), false);
 
         program embedded(embedded_script, std::move(input), true);
-        if ((error = embedded.evaluate()))
-            return error;
+        if ((ec = embedded.evaluate()))
+            return ec;
 
         if (!embedded.stack_result())
             return error::stack_false;

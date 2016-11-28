@@ -29,10 +29,10 @@ namespace machine {
 
 code interpreter::run(program& program)
 {
-    result error(error::invalid_script);
+    code ec(error::invalid_script);
 
     if (!program.is_valid())
-        return error;
+        return ec;
 
     for (const auto& op: program)
     {
@@ -47,8 +47,8 @@ code interpreter::run(program& program)
 
         if (program.if_(op))
         {
-            if ((error = run_op(op, program)))
-                return error;
+            if ((ec = run_op(op, program)))
+                return ec;
 
             if (program.is_stack_overflow())
                 return error::invalid_stack_size;

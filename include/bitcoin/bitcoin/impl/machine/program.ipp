@@ -317,6 +317,11 @@ const data_stack::value_type& program::item(size_t index) /*const*/
     return *position(index);
 }
 
+bool program::top(number& out_number, size_t maxiumum_size)
+{
+    return !empty() && out_number.set_data(item(0), maxiumum_size);
+}
+
 program::stack_iterator program::position(size_t index) /*const*/
 {
     // Subtracting 1 makes the stack indexes zero-based (unlike satoshi).
