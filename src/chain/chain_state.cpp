@@ -332,7 +332,8 @@ chain_state::map chain_state::get_map(size_t height,
 
     map map;
     const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
-    const auto activate = script::is_enabled(forks, rule_fork::activations);
+    const auto activation = script::is_enabled(forks, rule_fork::activations);
+    const auto frozen = script::is_enabled(forks, rule_fork::deep_freeze);
     const auto checked = is_checkpointed(height, checkpoints);
 
     // Bits.
@@ -361,7 +362,7 @@ chain_state::map chain_state::get_map(size_t height,
     // The height bound of the version sample for activations.
     map.version_self = height;
     map.version.high = height - 1;
-    map.version.count = activate && !checked ?
+    map.version.count = activation && !frozen && !checked ?
         std::min(height, version_sample_size(testnet)) : 0;
 
     // If too small to activate set count to zero to avoid unnecessary queries.
