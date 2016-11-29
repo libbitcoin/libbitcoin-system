@@ -154,8 +154,8 @@ public:
 
     code check() const;
     code check_transactions() const;
-    code accept() const;
-    code accept(const chain_state& state) const;
+    code accept(bool transactions=true) const;
+    code accept(const chain_state& state, bool transactions=true) const;
     code accept_transactions(const chain_state& state) const;
     code connect() const;
     code connect(const chain_state& state) const;
