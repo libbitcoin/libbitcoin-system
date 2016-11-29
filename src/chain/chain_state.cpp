@@ -69,11 +69,11 @@ inline bool is_bip30_exception(const checkpoint& check, bool testnet)
          (check == mainnet_bip30_exception_checkpoint2));
 }
 
-inline bool allow_duplicates(const checkpoint& check, bool testnet)
+inline bool allow_duplicates(const hash_digest& hash, bool testnet)
 {
     return
-        (testnet && check == testnet_allowed_duplicates_checkpoint) ||
-        (!testnet && check == mainnet_allowed_duplicates_checkpoint);
+        (testnet && hash == testnet_allowed_duplicates_checkpoint.hash()) ||
+        (!testnet && hash == mainnet_allowed_duplicates_checkpoint.hash());
 }
 
 inline bool bip34(size_t height, bool frozen, bool testnet)
@@ -184,7 +184,7 @@ chain_state::activations chain_state::activation(const data& values,
     }
 
     // allowed_duplicates is activated at and above the bip34 checkpoint.
-    if (allow_duplicates({ values.allowed_duplicates_hash, height }, testnet))
+    if (allow_duplicates(values.allowed_duplicates_hash, testnet))
     {
         result.forks |= (rule_fork::allowed_duplicates & forks);
     }
