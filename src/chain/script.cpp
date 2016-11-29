@@ -1018,7 +1018,7 @@ void script::find_and_delete(const data_stack& endorsements)
     bytes_.shrink_to_fit();
 }
 
-////// This is slightly more efficient becuase the script does not get parsed,
+////// This is slightly more efficient because the script does not get parsed,
 ////// but the static template implementation is more self-explanatory.
 ////bool script::is_coinbase_pattern(size_t height) const
 ////{
