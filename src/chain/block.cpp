@@ -668,14 +668,14 @@ code block::check() const
         return check_transactions();
 }
 
-code block::accept() const
+code block::accept(bool transactions) const
 {
     const auto state = validation.state;
-    return state ? accept(*state) : error::operation_failed;
+    return state ? accept(*state, transactions) : error::operation_failed;
 }
 
 // These checks assume that prevout caching is completed on all tx.inputs.
-code block::accept(const chain_state& state) const
+code block::accept(const chain_state& state, bool transactions) const
 {
     code ec;
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
@@ -698,11 +698,14 @@ code block::accept(const chain_state& state) const
         return error::coinbase_value_limit;
 
     // This recomputes sigops to include p2sh from prevouts.
-    else if (signature_operations(bip16) > max_block_sigops)
+    else if (transactions && (signature_operations(bip16) > max_block_sigops))
         return error::block_embedded_sigop_limit;
 
-    else
+    else if (transactions)
         return accept_transactions(state);
+
+    else
+        return ec;
 }
 
 code block::connect() const
