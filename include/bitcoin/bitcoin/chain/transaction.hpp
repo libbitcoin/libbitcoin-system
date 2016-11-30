@@ -51,11 +51,6 @@ public:
     typedef std::vector<transaction> list;
 
     // validation-related
-    typedef struct { const transaction& tx; size_t input_index; } element;
-    typedef std::vector<element> set;
-    typedef std::vector<set> sets;
-    typedef std::shared_ptr<sets> sets_ptr;
-    typedef std::shared_ptr<const sets> sets_const_ptr;
     typedef std::function<void(const code&)> confirm_handler;
 
     // These properties facilitate block and transaction validation.
@@ -68,7 +63,6 @@ public:
         size_t height = validation::unspecified_height;
         code result = error::not_found;
         chain_state::ptr state = nullptr;
-        sets_const_ptr sets = nullptr;
 
         /// The handler to invoke when the tx clears the pool.
         confirm_handler confirm = nullptr;
@@ -78,8 +72,6 @@ public:
         /// This is for block validation, pool validation uses the result code.
         bool duplicate = false;
     };
-
-    static sets_ptr reserve_buckets(size_t total, size_t fanout);
 
     // Constructors.
     //-----------------------------------------------------------------------------
@@ -127,7 +119,6 @@ public:
     void to_data(writer& sink, bool wire=true) const;
 
     std::string to_string(uint32_t flags) const;
-    sets_const_ptr to_input_sets(size_t fanout) const;
 
     // Properties (size, accessors, cache).
     //-----------------------------------------------------------------------------

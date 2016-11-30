@@ -46,16 +46,12 @@ public:
     typedef std::vector<block> list;
     typedef std::vector<size_t> indexes;
 
-    // validation-related
-    typedef transaction::sets_const_ptr input_sets;
-
     // These properties facilitate block validation.
     // This validation data is not copied on block copy.
     struct validation
     {
         code result = error::not_found;
         chain_state::ptr state = nullptr;
-        transaction::sets_const_ptr sets = nullptr;
     };
 
     // Constructors.
@@ -98,8 +94,6 @@ public:
     data_chunk to_data() const;
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
-
-    input_sets to_input_sets(size_t fanout, bool with_coinbase=true) const;
 
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------

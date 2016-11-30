@@ -81,27 +81,6 @@ void write(Sink& sink, const std::vector<Put>& puts, bool wire)
     std::for_each(puts.begin(), puts.end(), serialize);
 }
 
-// Reserve uniform buckets of minimum size and full distribution.
-transaction::sets_ptr transaction::reserve_buckets(size_t total, size_t fanout)
-{
-    // Guard against division by zero.
-    if (fanout == 0)
-        return std::make_shared<transaction::sets>(0);
-
-    const auto quotient = total / fanout;
-    const auto remainder = total % fanout;
-    const auto capacity = quotient + (remainder == 0 ? 0 : 1);
-    const auto quantity = quotient == 0 ? remainder : fanout;
-    const auto buckets = std::make_shared<transaction::sets>(quantity);
-    const auto reserve = [capacity](transaction::set& set)
-    {
-        set.reserve(capacity);
-    };
-
-    std::for_each(buckets->begin(), buckets->end(), reserve);
-    return buckets;
-}
-
 // Constructors.
 //-----------------------------------------------------------------------------
 
@@ -336,27 +315,6 @@ std::string transaction::to_string(uint32_t flags) const
     value << "\n";
     return value.str();
 }
-
-// TODO: provide optimization option to balance total sigops across buckets.
-// Disperse the inputs of the tx evenly to the specified number of buckets.
-transaction::sets_const_ptr transaction::to_input_sets(size_t fanout) const
-{
-    const auto total = inputs_.size();
-    const auto buckets = reserve_buckets(total, fanout);
-
-    // Guard against division by zero.
-    if (!buckets->empty())
-    {
-        size_t count = 0;
-
-        // Populate each bucket with either full (or full-1) input references.
-        for (size_t index = 0; index < inputs_.size(); ++index)
-            (*buckets)[count++ % fanout].push_back({ *this, index });
-    }
-
-    return std::const_pointer_cast<const sets>(buckets);
-}
-
 
 // Size.
 //-----------------------------------------------------------------------------
