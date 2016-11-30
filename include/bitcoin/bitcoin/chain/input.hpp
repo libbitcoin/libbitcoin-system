@@ -82,8 +82,6 @@ public:
     void to_data(std::ostream& stream, bool wire=true) const;
     void to_data(writer& sink, bool wire=true) const;
 
-    std::string to_string(uint32_t flags) const;
-
     // Properties (size, accessors, cache).
     //-----------------------------------------------------------------------------
 

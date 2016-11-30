@@ -184,17 +184,6 @@ void input::to_data(writer& sink, bool) const
     sink.write_4_bytes_little_endian(sequence_);
 }
 
-std::string input::to_string(uint32_t flags) const
-{
-    std::ostringstream text;
-
-    text << previous_output_.to_string() << "\n"
-        << "\t" << script_.to_string(flags) << "\n"
-        << "\tsequence = " << sequence_ << "\n";
-
-    return text.str();
-}
-
 // Size.
 //-----------------------------------------------------------------------------
 

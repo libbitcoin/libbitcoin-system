@@ -26,6 +26,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <boost/optional.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
@@ -35,6 +36,7 @@
 #include <bitcoin/bitcoin/math/uint256.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
@@ -164,6 +166,9 @@ protected:
 private:
     chain::header header_;
     transaction::list transactions_;
+
+    mutable boost::optional<size_t> total_inputs_;
+    mutable upgrade_mutex mutex_;
 };
 
 } // namespace chain

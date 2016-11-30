@@ -167,8 +167,8 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         // accept transaction
         case error::unspent_duplicate:
             return "matching transaction with unspent outputs";
-        case error::missing_input:
-            return "input not found";
+        case error::missing_previous_output:
+            return "previous output not found";
         case error::double_spend:
             return "double spend of input";
         case error::coinbase_maturity:

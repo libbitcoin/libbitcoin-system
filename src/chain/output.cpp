@@ -204,16 +204,6 @@ void output::to_data(writer& sink, bool wire) const
     script_.to_data(sink, true);
 }
 
-std::string output::to_string(uint32_t flags) const
-{
-    std::ostringstream text;
-
-    text << "\tvalue = " << value_ << "\n"
-        << "\t" << script_.to_string(flags) << "\n";
-
-    return text.str();
-}
-
 // Size.
 //-----------------------------------------------------------------------------
 

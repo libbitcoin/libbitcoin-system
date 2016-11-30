@@ -301,12 +301,14 @@ const transaction::list& block::transactions() const
 void block::set_transactions(const transaction::list& value)
 {
     transactions_ = value;
+    total_inputs_ = boost::none;
 }
 
 // TODO: see set_header comments.
 void block::set_transactions(transaction::list&& value)
 {
     transactions_ = std::move(value);
+    total_inputs_ = boost::none;
 }
 
 // Convenience property.
@@ -440,6 +442,23 @@ size_t block::signature_operations(bool bip16_active) const
 
 size_t block::total_inputs(bool with_coinbase) const
 {
+    size_t value;
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    mutex_.lock_upgrade();
+
+    if (total_inputs_ != boost::none)
+    {
+        value = total_inputs_.get();
+        mutex_.unlock_upgrade();
+        //---------------------------------------------------------------------
+        return value;
+    }
+
+    mutex_.unlock_upgrade_and_lock();
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
     const auto inputs = [](size_t total, const transaction& tx)
     {
         return safe_add(total, tx.inputs().size());
@@ -447,7 +466,12 @@ size_t block::total_inputs(bool with_coinbase) const
 
     const auto& txs = transactions_;
     const size_t offset = with_coinbase ? 0 : 1;
-    return std::accumulate(txs.begin() + offset, txs.end(), size_t{0}, inputs);
+    value = std::accumulate(txs.begin() + offset, txs.end(), size_t(0), inputs);
+    total_inputs_ = value;
+    mutex_.unlock();
+    ///////////////////////////////////////////////////////////////////////////
+
+    return value;
 }
 
 // True if there is another coinbase other than the first tx.
