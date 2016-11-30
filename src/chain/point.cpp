@@ -176,13 +176,6 @@ point_iterator point::end() const
     return point_iterator(*this, static_cast<unsigned>(satoshi_fixed_size()));
 }
 
-std::string point::to_string() const
-{
-    std::ostringstream value;
-    value << "\thash = " << encode_hash(hash_) << "\n\tindex = " << index_;
-    return value.str();
-}
-
 bool point::is_null() const
 {
     return (index_ == null_index) && (hash_ == null_hash);

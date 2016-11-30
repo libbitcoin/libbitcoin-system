@@ -498,18 +498,6 @@ BOOST_AUTO_TEST_CASE(transaction__factory_data_3__case_2__success)
     BOOST_REQUIRE(resave == raw_tx);
 }
 
-BOOST_AUTO_TEST_CASE(transaction__to_string__valid_data__success)
-{
-    static const uint32_t flags = 0;
-    static const std::string expected = TX4_TEXT;
-    static const auto raw_tx = to_chunk(base16_literal(TX4));
-    BOOST_REQUIRE_EQUAL(raw_tx.size(), 523u);
-
-    chain::transaction instance;
-    BOOST_REQUIRE(instance.from_data(raw_tx));
-    BOOST_REQUIRE_EQUAL(expected, instance.to_string(flags));
-}
-
 BOOST_AUTO_TEST_CASE(transaction__version__roundtrip__success)
 {
     uint32_t version = 1254u;
@@ -662,7 +650,7 @@ BOOST_AUTO_TEST_CASE(transaction__total_input_value__no_cache__returns_zero)
     chain::transaction instance;
     instance.inputs().emplace_back();
     instance.inputs().emplace_back();
-    BOOST_REQUIRE_EQUAL(0u, instance.total_input_value());
+    BOOST_REQUIRE_EQUAL(instance.total_input_value(), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__total_input_value__cache__returns_cache_value_sum)
@@ -673,18 +661,17 @@ BOOST_AUTO_TEST_CASE(transaction__total_input_value__cache__returns_cache_value_
     inputs.back().previous_output().validation.cache.set_value(123u);
     inputs.emplace_back();
     inputs.back().previous_output().validation.cache.set_value(321u);
-    BOOST_REQUIRE_EQUAL(444u, instance.total_input_value());
+    BOOST_REQUIRE_EQUAL(instance.total_input_value(), 444u);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__total_output_value__empty_outputs__returns_zero)
 {
     chain::transaction instance;
-    BOOST_REQUIRE_EQUAL(0u, instance.total_output_value());
+    BOOST_REQUIRE_EQUAL(instance.total_output_value(), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__total_output_value__non_empty_outputs__returns_sum)
 {
-    static const uint64_t expected = 1234;
     chain::transaction instance;
 
     // This must be non-const.
@@ -695,7 +682,7 @@ BOOST_AUTO_TEST_CASE(transaction__total_output_value__non_empty_outputs__returns
     outputs.emplace_back();
     outputs.back().set_value(34);
     instance.set_outputs(std::move(outputs));
-    BOOST_REQUIRE_EQUAL(expected, instance.total_output_value());
+    BOOST_REQUIRE_EQUAL(instance.total_output_value(), 1234u);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__fees__nonempty__returns_outputs_minus_inputs)
@@ -708,7 +695,7 @@ BOOST_AUTO_TEST_CASE(transaction__fees__nonempty__returns_outputs_minus_inputs)
     inputs.back().previous_output().validation.cache.set_value(321u);
     instance.outputs().emplace_back();
     instance.outputs().back().set_value(44u);
-    BOOST_REQUIRE_EQUAL(400u, instance.fees());
+    BOOST_REQUIRE_EQUAL(instance.fees(), 400u);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_overspent__output_does_not_exceed_input__returns_false)

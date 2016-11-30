@@ -203,7 +203,7 @@ BOOST_AUTO_TEST_CASE(block__is_valid_merkle_root__uninitialized__returns_true)
 BOOST_AUTO_TEST_CASE(block__is_valid_merkle_root__non_empty_tx_invalid_block__returns_false)
 {
     chain::block instance;
-    instance.transactions().emplace_back();
+    instance.set_transactions(chain::transaction::list{ chain::transaction{} });
     BOOST_REQUIRE(!instance.is_valid_merkle_root());
 }
 

@@ -27,6 +27,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <boost/optional.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/chain/input.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
@@ -118,8 +119,6 @@ public:
     void to_data(std::ostream& stream, bool wire=true) const;
     void to_data(writer& sink, bool wire=true) const;
 
-    std::string to_string(uint32_t flags) const;
-
     // Properties (size, accessors, cache).
     //-----------------------------------------------------------------------------
 
@@ -180,6 +179,7 @@ public:
 protected:
     void reset();
     void invalidate_cache() const;
+    bool all_inputs_final() const;
 
 private:
     uint32_t version_;
@@ -187,8 +187,11 @@ private:
     input::list inputs_;
     output::list outputs_;
 
-    mutable upgrade_mutex mutex_;
+    // These share a mutex as they are not expected to conflict.
+    mutable boost::optional<size_t> total_input_value_;
+    mutable boost::optional<size_t> total_output_value_;
     mutable std::shared_ptr<hash_digest> hash_;
+    mutable upgrade_mutex mutex_;
 };
 
 } // namespace chain

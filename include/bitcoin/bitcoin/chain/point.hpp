@@ -86,8 +86,6 @@ public:
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
 
-    std::string to_string() const;
-
     // Iteration.
     //-------------------------------------------------------------------------
 

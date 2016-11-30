@@ -28,6 +28,7 @@
 #include <sstream>
 #include <utility>
 #include <vector>
+#include <boost/optional.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/chain/input.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
@@ -245,6 +246,8 @@ void transaction::reset()
     outputs_.clear();
     outputs_.shrink_to_fit();
     invalidate_cache();
+    total_input_value_ = boost::none;
+    total_output_value_ = boost::none;
 }
 
 bool transaction::is_valid() const
@@ -295,25 +298,6 @@ void transaction::to_data(writer& sink, bool wire) const
         write(sink, outputs_, wire);
         write(sink, inputs_, wire);
     }
-}
-
-std::string transaction::to_string(uint32_t flags) const
-{
-    std::ostringstream value;
-    value << "Transaction:\n"
-        << "\tversion = " << version_ << "\n"
-        << "\tlocktime = " << locktime_ << "\n"
-        << "Inputs:\n";
-
-    for (const auto input: inputs_)
-        value << input.to_string(flags);
-
-    value << "Outputs:\n";
-    for (const auto output: outputs_)
-        value << output.to_string(flags);
-
-    value << "\n";
-    return value.str();
 }
 
 // Size.
@@ -378,12 +362,14 @@ void transaction::set_inputs(const input::list& value)
 {
     inputs_ = value;
     invalidate_cache();
+    total_input_value_ = boost::none;
 }
 
 void transaction::set_inputs(input::list&& value)
 {
     inputs_ = std::move(value);
     invalidate_cache();
+    total_input_value_ = boost::none;
 }
 
 output::list& transaction::outputs()
@@ -400,12 +386,14 @@ void transaction::set_outputs(const output::list& value)
 {
     outputs_ = value;
     invalidate_cache();
+    total_output_value_ = boost::none;
 }
 
 void transaction::set_outputs(output::list&& value)
 {
     outputs_ = std::move(value);
     invalidate_cache();
+    total_output_value_ = boost::none;
 }
 
 // Cache.
@@ -495,47 +483,57 @@ bool transaction::is_null_non_coinbase() const
     return std::any_of(inputs_.begin(), inputs_.end(), invalid);
 }
 
-bool transaction::is_final(size_t block_height, uint32_t block_time) const
+// private
+bool transaction::all_inputs_final() const
 {
-    if (locktime_ == 0)
-        return true;
-
-    const auto max_locktime = locktime_ < locktime_threshold ?
-        safe_unsigned<uint32_t>(block_height) : block_time;
-
-    if (locktime_ < max_locktime)
-        return true;
-
     const auto finalized = [](const input& input)
     {
         return input.is_final();
     };
 
     return std::all_of(inputs_.begin(), inputs_.end(), finalized);
+}
+
+bool transaction::is_final(size_t block_height, uint32_t block_time) const
+{
+    const auto max_locktime = [=]()
+    {
+        return locktime_ < locktime_threshold ?
+            safe_unsigned<uint32_t>(block_height) : block_time;
+    };
+    
+    return locktime_ == 0 || locktime_ < max_locktime() || all_inputs_final();
 }
 
 // This is not a consensus rule, just detection of an irrational use.
 bool transaction::is_locktime_conflict() const
 {
-    if (locktime_ == 0)
-        return false;
-
-    const auto finalized = [](const input& input)
-    {
-        return input.is_final();
-    };
-
-    return std::all_of(inputs_.begin(), inputs_.end(), finalized);
+    return locktime_ != 0 && all_inputs_final();
 }
 
 // Returns max_uint64 in case of overflow.
 uint64_t transaction::total_input_value() const
 {
+    uint64_t value;
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    mutex_.lock_upgrade();
+
+    if (total_input_value_ != boost::none)
+    {
+        value = total_input_value_.get();
+        mutex_.unlock_upgrade();
+        //---------------------------------------------------------------------
+        return value;
+    }
+
+    mutex_.unlock_upgrade_and_lock();
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
     ////static_assert(max_money() < max_uint64, "overflow sentinel invalid");
     const auto sum = [](uint64_t total, const input& input)
     {
-        // Breaks debug build unit testing.
-        ////BITCOIN_ASSERT(input.previous_output().is_valid());
         const auto& prevout = input.previous_output().validation.cache;
         const auto missing = !prevout.is_valid();
 
@@ -543,19 +541,46 @@ uint64_t transaction::total_input_value() const
         return ceiling_add(total, missing ? 0 : prevout.value());
     };
 
-    return std::accumulate(inputs_.begin(), inputs_.end(), uint64_t{0}, sum);
+    value = std::accumulate(inputs_.begin(), inputs_.end(), uint64_t(0), sum);
+    total_input_value_ = value;
+    mutex_.unlock();
+    ///////////////////////////////////////////////////////////////////////////
+
+    return value;
 }
 
 // Returns max_uint64 in case of overflow.
 uint64_t transaction::total_output_value() const
 {
+    uint64_t value;
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    mutex_.lock_upgrade();
+
+    if (total_output_value_ != boost::none)
+    {
+        value = total_output_value_.get();
+        mutex_.unlock_upgrade();
+        //---------------------------------------------------------------------
+        return value;
+    }
+
+    mutex_.unlock_upgrade_and_lock();
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
     ////static_assert(max_money() < max_uint64, "overflow sentinel invalid");
     const auto sum = [](uint64_t total, const output& output)
     {
         return ceiling_add(total, output.value());
     };
 
-    return std::accumulate(outputs_.begin(), outputs_.end(), uint64_t{0}, sum);
+    value = std::accumulate(outputs_.begin(), outputs_.end(), uint64_t(0), sum);
+    total_output_value_ = value;
+    mutex_.unlock();
+    ///////////////////////////////////////////////////////////////////////////
+
+    return value;
 }
 
 uint64_t transaction::fees() const
@@ -727,7 +752,6 @@ code transaction::check(bool transaction_pool) const
         return error::success;
 }
 
-// TODO: implement sigops and total input/output value caching.
 // These checks assume that prevout caching is completed on all tx.inputs.
 // Flags for tx pool calls should be based on the current blockchain height.
 code transaction::accept(const chain_state& state, bool transaction_pool) const
