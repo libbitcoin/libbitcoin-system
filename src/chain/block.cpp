@@ -246,30 +246,6 @@ void block::to_data(writer& sink) const
     std::for_each(transactions_.begin(), transactions_.end(), to);
 }
 
-// TODO: provide optimization option to balance total sigops across buckets.
-// Disperse the inputs of the block evenly to the specified number of buckets.
-transaction::sets_const_ptr block::to_input_sets(size_t fanout,
-    bool with_coinbase) const
-{
-    const auto total = total_inputs(with_coinbase);
-    const auto buckets = transaction::reserve_buckets(total, fanout);
-
-    // Guard against division by zero.
-    if (!buckets->empty())
-    {
-        size_t count = 0;
-        const auto& txs = transactions_;
-        const auto start = with_coinbase ? 0 : 1;
-
-        // Populate each bucket with full (or full-1) input references.
-        for (auto tx = txs.begin() + start; tx != txs.end(); ++tx)
-            for (size_t index = 0; index < tx->inputs().size(); ++index)
-                (*buckets)[count++ % fanout].push_back({ *tx, index });
-    }
-
-    return std::const_pointer_cast<const transaction::sets>(buckets);
-}
-
 // Properties (size, accessors, cache).
 //-----------------------------------------------------------------------------
 
