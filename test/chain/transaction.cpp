@@ -724,48 +724,48 @@ BOOST_AUTO_TEST_CASE(transaction__signature_operations_single_input_output_unini
     BOOST_REQUIRE_EQUAL(instance.signature_operations(false), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_missing_inputs__empty_inputs__returns_false)
+BOOST_AUTO_TEST_CASE(transaction__is_missing_previous_outputs__empty_inputs__returns_false)
 {
     chain::transaction instance;
-    BOOST_REQUIRE(!instance.is_missing_inputs());
+    BOOST_REQUIRE(!instance.is_missing_previous_outputs());
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_missing_inputs__inputs_without_cache_value__returns_true)
-{
-    chain::transaction instance;
-    instance.inputs().emplace_back();
-    BOOST_REQUIRE(instance.is_missing_inputs());
-}
-
-BOOST_AUTO_TEST_CASE(transaction__is_missing_inputs__inputs_with_cache_value__returns_false)
+BOOST_AUTO_TEST_CASE(transaction__is_missing_previous_outputs__inputs_without_cache_value__returns_true)
 {
     chain::transaction instance;
     instance.inputs().emplace_back();
-    instance.inputs().back().previous_output().validation.cache.set_value(123u);
-    BOOST_REQUIRE(!instance.is_missing_inputs());
+    BOOST_REQUIRE(instance.is_missing_previous_outputs());
 }
 
-BOOST_AUTO_TEST_CASE(transaction__missing_inputs__empty_inputs__returns_empty)
-{
-    chain::transaction instance;
-    BOOST_REQUIRE_EQUAL(0u, instance.missing_inputs().size());
-}
-
-BOOST_AUTO_TEST_CASE(transaction__missing_inputs__inputs_without_cache_value__returns_single_index)
-{
-    chain::transaction instance;
-    instance.inputs().emplace_back();
-    auto result = instance.missing_inputs();
-    BOOST_REQUIRE_EQUAL(1u, result.size());
-    BOOST_REQUIRE_EQUAL(0u, result.back());
-}
-
-BOOST_AUTO_TEST_CASE(transaction__missing_inputs__inputs_with_cache_value__returns_empty)
+BOOST_AUTO_TEST_CASE(transaction__is_missing_previous_outputs__inputs_with_cache_value__returns_false)
 {
     chain::transaction instance;
     instance.inputs().emplace_back();
     instance.inputs().back().previous_output().validation.cache.set_value(123u);
-    BOOST_REQUIRE_EQUAL(0u, instance.missing_inputs().size());
+    BOOST_REQUIRE(!instance.is_missing_previous_outputs());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__missing_previous_outputs__empty_inputs__returns_empty)
+{
+    chain::transaction instance;
+    BOOST_REQUIRE_EQUAL(instance.missing_previous_outputs().size(), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__missing_previous_outputs__inputs_without_cache_value__returns_single_index)
+{
+    chain::transaction instance;
+    instance.inputs().emplace_back();
+    auto result = instance.missing_previous_outputs();
+    BOOST_REQUIRE_EQUAL(result.size(), 1u);
+    BOOST_REQUIRE_EQUAL(result.back(), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__missing_previous_outputs__inputs_with_cache_value__returns_empty)
+{
+    chain::transaction instance;
+    instance.inputs().emplace_back();
+    instance.inputs().back().previous_output().validation.cache.set_value(123u);
+    BOOST_REQUIRE_EQUAL(instance.missing_previous_outputs().size(), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_double_spend__empty_inputs__returns_false)

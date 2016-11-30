@@ -115,7 +115,7 @@ enum error_code_t
 
     // accept transaction
     unspent_duplicate = 38,
-    missing_input = 19,
+    missing_previous_output = 19,
     double_spend = 18,
     coinbase_maturity = 46,
     spend_exceeds_value = 40,

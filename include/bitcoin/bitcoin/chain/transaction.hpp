@@ -153,7 +153,7 @@ public:
     uint64_t fees() const;
     point::indexes double_spends(bool include_unconfirmed) const;
     point::indexes immature_inputs(size_t target_height) const;
-    point::indexes missing_inputs() const;
+    point::indexes missing_previous_outputs() const;
     uint64_t total_input_value() const;
     uint64_t total_output_value() const;
     size_t signature_operations(bool bip16_active) const;
@@ -164,7 +164,7 @@ public:
     bool is_immature(size_t target_height) const;
     bool is_overspent() const;
     bool is_double_spend(bool include_unconfirmed) const;
-    bool is_missing_inputs() const;
+    bool is_missing_previous_outputs() const;
     bool is_final(size_t block_height, uint32_t block_time) const;
     bool is_locktime_conflict() const;
 

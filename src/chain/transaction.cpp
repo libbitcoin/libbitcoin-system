@@ -611,7 +611,7 @@ size_t transaction::signature_operations(bool bip16_active) const
         std::accumulate(outputs_.begin(), outputs_.end(), size_t{0}, out);
 }
 
-bool transaction::is_missing_inputs() const
+bool transaction::is_missing_previous_outputs() const
 {
     const auto missing = [](const input& input)
     {
@@ -624,7 +624,7 @@ bool transaction::is_missing_inputs() const
     return std::any_of(inputs_.begin(), inputs_.end(), missing);
 }
 
-point::indexes transaction::missing_inputs() const
+point::indexes transaction::missing_previous_outputs() const
 {
     point::indexes indexes;
 
@@ -707,7 +707,7 @@ code transaction::connect_input(const chain_state& state,
 
     // Verify that the previous output cache has been populated.
     if (!prevout.cache.is_valid())
-        return error::missing_input;
+        return error::missing_previous_output;
 
     const auto forks = state.enabled_forks();
     const auto index32 = static_cast<uint32_t>(input_index);
@@ -762,8 +762,8 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     if (bip30 && validation.duplicate)
         return error::unspent_duplicate;
 
-    else if (is_missing_inputs())
-        return error::missing_input;
+    else if (is_missing_previous_outputs())
+        return error::missing_previous_output;
 
     else if (is_double_spend(transaction_pool))
         return error::double_spend;
