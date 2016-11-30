@@ -702,7 +702,7 @@ bool script::is_pay_multisig_pattern(const operation::list& ops)
 bool script::is_pay_public_key_pattern(const operation::list& ops)
 {
     return ops.size() == 2
-        && ops[0].is_push()
+        ////&& ops[0].is_push()
         && is_public_key(ops[0].data())
         && ops[1].code() == opcode::checksig;
 }
@@ -712,7 +712,7 @@ bool script::is_pay_key_hash_pattern(const operation::list& ops)
     return ops.size() == 5
         && ops[0].code() == opcode::dup
         && ops[1].code() == opcode::hash160
-        && ops[2].is_push()
+        ////&& ops[2].is_push()
         && ops[2].data().size() == short_hash_size
         && ops[3].code() == opcode::equalverify
         && ops[4].code() == opcode::checksig;
