@@ -70,14 +70,14 @@ public:
     template <typename... Args>
     void concurrent(Args&&... args)
     {
-        heap_.concurrent(BIND_ARGS(args));
+        heap_->concurrent(BIND_ARGS(args));
     }
 
     /// Post a job to the strand. Ordered and not concurrent.
     template <typename... Args>
     void ordered(Args&&... args)
     {
-        heap_.ordered(BIND_ARGS(args));
+        heap_->ordered(BIND_ARGS(args));
     }
 
     /// Posts a strand-wrapped job to the service. Not ordered or concurrent.
@@ -85,7 +85,7 @@ public:
     template <typename... Args>
     void unordered(Args&&... args)
     {
-        heap_.unordered(BIND_ARGS(args));
+        heap_->unordered(BIND_ARGS(args));
     }
 
     /// Returns a delegate that will execute the job on the current thread.
@@ -191,7 +191,7 @@ public:
 private:
 
     // This is thread safe.
-    work heap_;
+    work::ptr heap_;
 };
 
 #undef FORWARD_ARGS

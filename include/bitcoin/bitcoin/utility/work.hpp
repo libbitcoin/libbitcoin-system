@@ -22,6 +22,7 @@
 
 #include <functional>
 #include <string>
+#include <memory>
 #include <utility>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
@@ -48,6 +49,8 @@ class BC_API work
   : noncopyable
 {
 public:
+    typedef std::shared_ptr<work> ptr;
+
     /// Create an instance.
     work(threadpool& pool, const std::string& name);
 
