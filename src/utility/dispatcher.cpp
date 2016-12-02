@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 
+#include <memory>
 #include <string>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 #include <bitcoin/bitcoin/utility/work.hpp>
@@ -26,28 +27,28 @@
 namespace libbitcoin {
 
 dispatcher::dispatcher(threadpool& pool, const std::string& name)
-  : heap_(pool, name)
+  : heap_(std::make_shared<work>(pool, name))
 {
 }
 
 size_t dispatcher::ordered_backlog()
 {
-    return heap_.ordered_backlog();
+    return heap_->ordered_backlog();
 }
 
 size_t dispatcher::unordered_backlog()
 {
-    return heap_.unordered_backlog();
+    return heap_->unordered_backlog();
 }
 
 size_t dispatcher::concurrent_backlog()
 {
-    return heap_.concurrent_backlog();
+    return heap_->concurrent_backlog();
 }
 
 size_t dispatcher::combined_backlog()
 {
-    return heap_.combined_backlog();
+    return heap_->combined_backlog();
 }
 
 } // namespace libbitcoin
