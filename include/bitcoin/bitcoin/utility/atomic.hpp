@@ -43,7 +43,7 @@ public:
 
     /// Create an atomically-accessible moved instance of the type.
     atomic(Type&& instance)
-      : instance_(std::forward<Type>(instance))
+      : instance_(std::move(instance))
     {
     }
 
@@ -73,7 +73,7 @@ public:
         ///////////////////////////////////////////////////////////////////////
         unique_lock lock(mutex_);
 
-        instance_ = std::forward<Type>(instance);
+        instance_ = std::move(instance);
         ///////////////////////////////////////////////////////////////////////
     }
 
