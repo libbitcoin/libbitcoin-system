@@ -66,6 +66,14 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         case error::non_standard:
             return "transaction is not standard";
 
+        // database
+        case error::store_block_invalid_height:
+            return "block out of order";
+        case error::store_block_missing_parent:
+            return "block missing parent";
+        case error::store_block_duplicate:
+            return "block duplicate";
+
         // network
         case error::service_stopped:
             return "service is stopped";

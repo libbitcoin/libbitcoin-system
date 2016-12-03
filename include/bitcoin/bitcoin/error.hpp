@@ -67,6 +67,11 @@ enum error_code_t
     address_blocked = 44,
     channel_stopped = 45,
 
+    // database
+    store_block_duplicate = 66,
+    store_block_invalid_height = 67,
+    store_block_missing_parent = 68,
+
     // block pool
     duplicate_block = 51,
     orphan_block = 5,
