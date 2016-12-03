@@ -185,6 +185,11 @@ public:
 
     static code verify(const transaction& tx, uint32_t input, uint32_t forks);
 
+    // TOD: move back to private.
+    static code verify(const transaction& tx, uint32_t input_index,
+        uint32_t forks, const script& input_script,
+        const script& prevout_script);
+
 protected:
     // So that input and output may call reset from their own.
     friend class input;
@@ -197,9 +202,9 @@ protected:
 private:
     static size_t serialized_size(const operation::list& ops);
     static data_chunk operations_to_data(const operation::list& ops);
-    static code verify(const transaction& tx, uint32_t input_index,
-        uint32_t forks, const script& input_script,
-        const script& prevout_script);
+    ////static code verify(const transaction& tx, uint32_t input_index,
+    ////    uint32_t forks, const script& input_script,
+    ////    const script& prevout_script);
 
     data_chunk bytes_;
     bool valid_;
