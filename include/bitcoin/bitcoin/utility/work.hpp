@@ -35,7 +35,7 @@ namespace libbitcoin {
 #define ORDERED "ordered"
 #define UNORDERED "unordered"
 #define CONCURRENT "concurrent"
-    
+
 #define FORWARD_ARGS(args) \
     std::forward<Args>(args)...
 #define FORWARD_HANDLER(handler) \
@@ -53,10 +53,6 @@ public:
 
     /// Create an instance.
     work(threadpool& pool, const std::string& name);
-
-    /// This class is not copyable.
-    work(const work&) = delete;
-    void operator=(const work&) = delete;
 
     /// Execute the job on the current thread.
     template <typename Handler, typename... Args>
