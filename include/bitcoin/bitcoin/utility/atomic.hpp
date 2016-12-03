@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_ATOMIC_POINTER_HPP
 #define LIBBITCOIN_ATOMIC_POINTER_HPP
 
+#include <type_traits>
 #include <utility>
 #include <bitcoin/bitcoin/utility/thread.hpp>
 
@@ -43,7 +44,7 @@ public:
 
     /// Create an atomically-accessible moved instance of the type.
     atomic(Type&& instance)
-      : instance_(std::move(instance))
+      : instance_(std::forward<Type>(instance))
     {
     }
 
@@ -73,12 +74,14 @@ public:
         ///////////////////////////////////////////////////////////////////////
         unique_lock lock(mutex_);
 
-        instance_ = std::move(instance);
+        instance_ = std::forward<Type>(instance);
         ///////////////////////////////////////////////////////////////////////
     }
 
 private:
-    Type instance_;
+    typedef typename std::decay<Type>::type decay_type;
+
+    decay_type instance_;
     mutable shared_mutex mutex_;
 };
 

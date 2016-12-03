@@ -24,6 +24,8 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
+#include <utility>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
@@ -49,9 +51,9 @@ template <typename Handler>
 class synchronizer
 {
 public:
-    synchronizer(Handler handler, size_t clearance_count,
+    synchronizer(Handler&& handler, size_t clearance_count,
         const std::string& name, synchronizer_terminate mode)
-      : handler_(handler),
+      : handler_(std::forward<Handler>(handler)),
         name_(name),
         clearance_count_(clearance_count),
         counter_(std::make_shared<size_t>(0)),
@@ -67,13 +69,10 @@ public:
         {
             case synchronizer_terminate::on_error:
                 return !!ec;
-
             case synchronizer_terminate::on_success:
                 return !ec;
-
             case synchronizer_terminate::on_count:
                 return false;
-
             default:
                 throw std::invalid_argument("mode");
         }
@@ -86,13 +85,10 @@ public:
         {
             case synchronizer_terminate::on_error:
                 return ec ? ec : error::success;
-
             case synchronizer_terminate::on_success:
                 return !ec ? ec : error::operation_failed;
-
             case synchronizer_terminate::on_count:
                 return error::success;
-
             default:
                 throw std::invalid_argument("mode");
         }
@@ -130,7 +126,9 @@ public:
     }
 
 private:
-    Handler handler_;
+    typedef typename std::decay<Handler>::type decay_handler;
+
+    decay_handler handler_;
     const std::string name_;
     const size_t clearance_count_;
     const synchronizer_terminate terminate_;
@@ -141,11 +139,12 @@ private:
 };
 
 template <typename Handler>
-synchronizer<Handler> synchronize(Handler handler, size_t clearance_count,
+synchronizer<Handler> synchronize(Handler&& handler,size_t clearance_count,
     const std::string& name, synchronizer_terminate mode=
     synchronizer_terminate::on_error)
 {
-    return synchronizer<Handler>(handler, clearance_count, name, mode);
+    return synchronizer<Handler>(std::forward<Handler>(handler),
+        clearance_count, name, mode);
 }
 
 } // namespace libbitcoin

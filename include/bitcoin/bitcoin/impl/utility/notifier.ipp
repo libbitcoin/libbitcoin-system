@@ -100,7 +100,7 @@ void notifier<Key, Args...>::stop()
 }
 
 template <typename Key, typename... Args>
-void notifier<Key, Args...>::subscribe(handler handler, const Key& key,
+void notifier<Key, Args...>::subscribe(handler&& handler, const Key& key,
     const asio::duration& duration, Args... stopped_args)
 {
     // Critical Section
@@ -113,21 +113,26 @@ void notifier<Key, Args...>::subscribe(handler handler, const Key& key,
 
         if (it != subscriptions_.end())
         {
-            const auto expires = asio::steady_clock::now() + duration;
+            // Do not make const as that voids the move.
+            auto expires = asio::steady_clock::now() + duration;
             //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             subscribe_mutex_.unlock_upgrade_and_lock();
-            it->second.expires = expires;
+            it->second.expires = std::move(expires);
             subscribe_mutex_.unlock();
             //---------------------------------------------------------------------
             return;
         }
         else if (limit_ == 0 || subscriptions_.size() < limit_)
         {
-            const auto expires = asio::steady_clock::now() + duration;
+            // Do not make const as that voids the move.
+            auto std::make_pair(key, value
+            {
+                std::forward<handler>(handler),
+                asio::steady_clock::now() + duration
+            });
             //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             subscribe_mutex_.unlock_upgrade_and_lock();
-            subscriptions_.emplace(
-                std::make_pair(key, value{ handler, expires }));
+            subscriptions_.emplace(std::move(pair));
             subscribe_mutex_.unlock();
             //---------------------------------------------------------------------
             return;
