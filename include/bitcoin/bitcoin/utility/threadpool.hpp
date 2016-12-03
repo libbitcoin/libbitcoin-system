@@ -26,6 +26,7 @@
 #include <thread>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
+#include <bitcoin/bitcoin/utility/noncopyable.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
 
 namespace libbitcoin {
@@ -35,6 +36,7 @@ namespace libbitcoin {
  * A collection of threads which can be passed operations through io_service.
  */
 class BC_API threadpool
+  : noncopyable
 {
 public:
 
@@ -47,9 +49,6 @@ public:
         thread_priority priority=thread_priority::normal);
 
     ~threadpool();
-
-    threadpool(const threadpool&) = delete;
-    void operator=(const threadpool&) = delete;
 
     /**
      * There are no threads configured in the threadpool.
