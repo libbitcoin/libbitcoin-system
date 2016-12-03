@@ -52,7 +52,7 @@ public:
     void stop();
 
     /// Subscribe to notifications (for one invocation only).
-    void subscribe(handler handler, Args... stopped_args);
+    void subscribe(handler&& notify, Args... stopped_args);
 
     /// Invoke and clear all handlers sequentially (blocking).
     void invoke(Args... args);

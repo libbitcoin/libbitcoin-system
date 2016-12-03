@@ -24,6 +24,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -60,7 +61,7 @@ public:
     /// Return true from the handler to resubscribe to notifications.
     /// If key is matched the existing subscription is extended by duration.
     /// If stopped this will invoke the hander with the specified arguments.
-    void subscribe(handler handler, const Key& key,
+    void subscribe(handler&& notify, const Key& key,
         const asio::duration& duration, Args... stopped_args);
 
     /// Remove the subscription matching the specified key.
@@ -78,7 +79,13 @@ public:
     void relay(Args... args);
 
 private:
-    typedef struct { handler notify; asio::time_point expires; } value;
+    typedef typename std::decay<handler>::type decay_handler;
+    typedef struct
+    {
+        decay_handler notify;
+        asio::time_point expires;
+    } value;
+
     typedef std::unordered_map<Key, value> map;
 
     void do_invoke(Args... args);

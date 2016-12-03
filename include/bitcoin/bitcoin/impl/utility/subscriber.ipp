@@ -23,6 +23,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <utility>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
@@ -88,7 +89,7 @@ void subscriber<Args...>::stop()
 }
 
 template <typename... Args>
-void subscriber<Args...>::subscribe(handler handler, Args... stopped_args)
+void subscriber<Args...>::subscribe(handler&& notify, Args... stopped_args)
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
@@ -98,7 +99,7 @@ void subscriber<Args...>::subscribe(handler handler, Args... stopped_args)
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         subscribe_mutex_.unlock_upgrade_and_lock();
-        subscriptions_.emplace_back(handler);
+        subscriptions_.emplace_back(std::forward<handler>(notify));
         subscribe_mutex_.unlock();
         //---------------------------------------------------------------------
         return;
@@ -107,7 +108,7 @@ void subscriber<Args...>::subscribe(handler handler, Args... stopped_args)
     subscribe_mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 
-    handler(stopped_args...);
+    notify(stopped_args...);
 }
 
 template <typename... Args>

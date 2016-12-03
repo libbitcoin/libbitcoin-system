@@ -21,6 +21,7 @@
 
 #include <cstddef>
 #include <string>
+#include <utility>
 ////#include <bitcoin/bitcoin/log/sources.hpp>
 
 // libbitcoin defines the log and tracking but does not use them.
@@ -28,8 +29,8 @@
 
 namespace libbitcoin {
 
-monitor::monitor(count_ptr counter, const std::string& name)
-  : counter_(counter), name_(name)
+monitor::monitor(count_ptr counter, std::string&& name)
+  : counter_(counter), name_(std::move(name))
 {
     trace(++(*counter_), "+");
 }
@@ -37,13 +38,6 @@ monitor::monitor(count_ptr counter, const std::string& name)
 monitor::~monitor()
 {
     trace(--(*counter_), "-");
-}
-
-void monitor::trace(size_t count, const std::string& action) const
-{
-////#ifndef NDEBUG
-////    LOG_DEBUG(LOG_SYSTEM) << action << " " << name_ << " {" << count << "}";
-////#endif
 }
 
 } // namespace libbitcoin

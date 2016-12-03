@@ -24,6 +24,7 @@
 #include <cstddef>
 #include <memory>
 #include <string>
+#include <utility>
 #include <bitcoin/bitcoin/define.hpp>
 
 // libbitcoin defines the log and tracking but does not use them.
@@ -38,7 +39,7 @@ public:
     typedef std::atomic<size_t> count;
     typedef std::shared_ptr<count> count_ptr;
 
-    monitor(count_ptr counter, const std::string& name);
+    monitor(count_ptr counter, std::string&& name);
     ~monitor();
 
     template <typename Handler>
@@ -48,7 +49,13 @@ public:
         handler();
     }
 
-    void trace(size_t count, const std::string& action) const;
+    inline void trace(size_t, const std::string&) const
+    {
+        ////#ifndef NDEBUG
+        ////    LOG_DEBUG(LOG_SYSTEM)
+        ////        << action << " " << name_ << " {" << count << "}";
+        ////#endif
+    }
 
 private:
     count_ptr counter_;
