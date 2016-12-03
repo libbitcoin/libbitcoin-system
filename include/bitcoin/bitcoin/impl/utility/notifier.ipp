@@ -100,7 +100,7 @@ void notifier<Key, Args...>::stop()
 }
 
 template <typename Key, typename... Args>
-void notifier<Key, Args...>::subscribe(handler&& handler, const Key& key,
+void notifier<Key, Args...>::subscribe(handler&& notify, const Key& key,
     const asio::duration& duration, Args... stopped_args)
 {
     // Critical Section
@@ -124,12 +124,14 @@ void notifier<Key, Args...>::subscribe(handler&& handler, const Key& key,
         }
         else if (limit_ == 0 || subscriptions_.size() < limit_)
         {
-            // Do not make const as that voids the move.
-            auto std::make_pair(key, value
+            auto value = notifier<Key, Args...>::value
             {
-                std::forward<handler>(handler),
+                std::forward<handler>(notify),
                 asio::steady_clock::now() + duration
-            });
+            };
+
+            // Do not make const as that voids the move.
+            auto pair = std::make_pair(key, std::move(value));
             //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             subscribe_mutex_.unlock_upgrade_and_lock();
             subscriptions_.emplace(std::move(pair));
@@ -143,7 +145,7 @@ void notifier<Key, Args...>::subscribe(handler&& handler, const Key& key,
     ///////////////////////////////////////////////////////////////////////////
 
     // Limit exceeded and stopped share the same return arguments.
-    handler(stopped_args...);
+    notify(stopped_args...);
 }
 
 template <typename Key, typename... Args>
