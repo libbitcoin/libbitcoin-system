@@ -27,33 +27,33 @@
 namespace libbitcoin {
 
 work::work(threadpool& pool, const std::string& name)
-  : ordered_(std::make_shared<monitor::count>(0)),
-    unordered_(std::make_shared<monitor::count>(0)),
-    concurrent_(std::make_shared<monitor::count>(0)),
+  : name_(name),
+    ////ordered_(std::make_shared<monitor::count>(0)),
+    ////unordered_(std::make_shared<monitor::count>(0)),
+    ////concurrent_(std::make_shared<monitor::count>(0)),
     service_(pool.service()),
-    strand_(service_),
-    name_(name)
+    strand_(service_)
 {
 }
 
-size_t work::ordered_backlog()
-{
-    return ordered_->load();
-}
-
-size_t work::unordered_backlog()
-{
-    return unordered_->load();
-}
-
-size_t work::concurrent_backlog()
-{
-    return concurrent_->load();
-}
-
-size_t work::combined_backlog()
-{
-    return ordered_backlog() + unordered_backlog() + concurrent_backlog();
-}
+////size_t work::ordered_backlog()
+////{
+////    return ordered_->load();
+////}
+////
+////size_t work::unordered_backlog()
+////{
+////    return unordered_->load();
+////}
+////
+////size_t work::concurrent_backlog()
+////{
+////    return concurrent_->load();
+////}
+////
+////size_t work::combined_backlog()
+////{
+////    return ordered_backlog() + unordered_backlog() + concurrent_backlog();
+////}
 
 } // namespace libbitcoin

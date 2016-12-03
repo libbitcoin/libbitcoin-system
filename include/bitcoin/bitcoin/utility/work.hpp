@@ -65,8 +65,9 @@ public:
     template <typename Handler, typename... Args>
     void concurrent(Handler&& handler, Args&&... args)
     {
-        service_.post(inject(BIND_HANDLER(handler, args), CONCURRENT,
-            concurrent_));
+        service_.post(BIND_HANDLER(handler, args));
+        ////service_.post(inject(BIND_HANDLER(handler, args), CONCURRENT,
+        ////    concurrent_));
     }
 
     /// Use a strand to prevent concurrency and post vs. dispatch to
@@ -74,7 +75,8 @@ public:
     template <typename Handler, typename... Args>
     void ordered(Handler&& handler, Args&&... args)
     {
-        strand_.post(inject(BIND_HANDLER(handler, args), ORDERED, ordered_));
+        strand_.post(BIND_HANDLER(handler, args));
+        ////strand_.post(inject(BIND_HANDLER(handler, args), ORDERED, ordered_));
     }
 
     /// Use a strand wrapper to prevent concurrency and a service post
@@ -82,35 +84,37 @@ public:
     template <typename Handler, typename... Args>
     void unordered(Handler&& handler, Args&&... args)
     {
-        service_.post(strand_.wrap(inject(BIND_HANDLER(handler, args),
-            UNORDERED, unordered_)));
+        service_.post(strand_.wrap(BIND_HANDLER(handler, args)));
+        ////service_.post(strand_.wrap(inject(BIND_HANDLER(handler, args),
+        ////    UNORDERED, unordered_)));
     }
 
-    size_t ordered_backlog();
-    size_t unordered_backlog();
-    size_t concurrent_backlog();
-    size_t combined_backlog();
+    ////size_t ordered_backlog();
+    ////size_t unordered_backlog();
+    ////size_t concurrent_backlog();
+    ////size_t combined_backlog();
 
 private:
-    template <typename Handler>
-    auto inject(Handler handler, const std::string& context,
-        monitor::count_ptr counter) -> std::function<void()>
-    {
-        const auto label = name_ + "_" + context;
-        const auto capture = std::make_shared<monitor>(counter, label);
-        return [=]() { capture->invoke(handler); };
+    ////template <typename Handler>
+    ////auto inject(Handler&& handler, const std::string& context,
+    ////    monitor::count_ptr counter) -> std::function<void()>
+    ////{
+    ////    auto label = name_ + "_" + context;
+    ////    auto capture = std::make_shared<monitor>(counter, std::move(label));
+    ////    return [=]() { capture->invoke(handler); };
 
-        //// TODO: determine how to define return type across platforms.
-        ////return std::bind(&monitor::invoke<Handler>, capture, handler);
-    }
+    ////    //// TODO: use this to prevent handler copy into closure.
+    ////    ////return std::bind(&monitor::invoke<Handler>, capture,
+    ////    ////    std::forward<Handler>(handler));
+    ////}
 
     // These are thread safe.
-    monitor::count_ptr ordered_;
-    monitor::count_ptr unordered_;
-    monitor::count_ptr concurrent_;
+    const std::string name_;
+    ////monitor::count_ptr ordered_;
+    ////monitor::count_ptr unordered_;
+    ////monitor::count_ptr concurrent_;
     asio::service& service_;
     asio::service::strand strand_;
-    const std::string name_;
 };
 
 #undef FORWARD_ARGS
