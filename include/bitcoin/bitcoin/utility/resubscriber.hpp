@@ -54,7 +54,7 @@ public:
 
     /// Subscribe to notifications with an option to resubscribe.
     /// Return true from the handler to resubscribe to notifications.
-    void subscribe(handler handler, Args... stopped_args);
+    void subscribe(handler&& notify, Args... stopped_args);
 
     /// Invoke all handlers sequentially (blocking).
     void invoke(Args... args);

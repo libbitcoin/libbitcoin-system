@@ -89,7 +89,7 @@ void resubscriber<Args...>::stop()
 }
 
 template <typename... Args>
-void resubscriber<Args...>::subscribe(handler handler, Args... stopped_args)
+void resubscriber<Args...>::subscribe(handler&& notify, Args... stopped_args)
 {
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
@@ -99,7 +99,7 @@ void resubscriber<Args...>::subscribe(handler handler, Args... stopped_args)
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         subscribe_mutex_.unlock_upgrade_and_lock();
-        subscriptions_.emplace_back(handler);
+        subscriptions_.emplace_back(std::forward<handler>(notify));
         subscribe_mutex_.unlock();
         //---------------------------------------------------------------------
         return;
@@ -108,7 +108,7 @@ void resubscriber<Args...>::subscribe(handler handler, Args... stopped_args)
     subscribe_mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 
-    handler(stopped_args...);
+    notify(stopped_args...);
 }
 
 template <typename... Args>
