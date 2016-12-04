@@ -22,7 +22,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <istream>
 #include <memory>
 #include <string>

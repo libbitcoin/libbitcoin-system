@@ -23,9 +23,11 @@
 
 void zeroize(void* const buffer, size_t length)
 {
-////#ifdef HAVE_SECUREZEROMEMORY
-////    SecureZeroMemory(buffer, length);
-////#elif defined(HAVE_MEMSET_S)
+/*
+#ifdef HAVE_SECUREZEROMEMORY
+    SecureZeroMemory(buffer, length);
+#elif defined(HAVE_MEMSET_S)
+*/
 #if defined(HAVE_MEMSET_S)
     if (memset_s(buffer, (rsize_t)length, 0, (rsize_t)length) != 0) 
         abort();
