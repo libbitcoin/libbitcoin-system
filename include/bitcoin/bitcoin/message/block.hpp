@@ -43,6 +43,7 @@ public:
     typedef std::shared_ptr<const block> const_ptr;
     typedef std::vector<ptr> ptr_list;
     typedef std::vector<const_ptr> const_ptr_list;
+    typedef std::shared_ptr<const_ptr_list> const_ptr_list_ptr;
 
     static block factory_from_data(uint32_t version, const data_chunk& data);
     static block factory_from_data(uint32_t version, std::istream& stream);
