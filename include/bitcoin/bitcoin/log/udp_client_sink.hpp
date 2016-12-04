@@ -42,13 +42,13 @@ public:
     udp_client_sink(socket_ptr socket, endpoint_ptr endpoint);
 
     void consume(const boost::log::record_view& record,
-        const std::string& messag);
+        const std::string& message);
 
 protected:
     typedef boost::shared_ptr<std::string> message_ptr;
 
-    void send(const std::string& messag);
-    void handle_send(const boost_code&, size_t, message_ptr message);
+    void send(const std::string& message);
+    void handle_send(const boost_code&, size_t, message_ptr payload);
 
 private:
     socket_ptr socket_;
