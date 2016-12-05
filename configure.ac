@@ -54,6 +54,18 @@ AC_ARG_WITH([pkgconfigdir], AS_HELP_STRING([--with-pkgconfigdir=PATH],
     [pkgconfigdir="$withval"], [pkgconfigdir='${libdir}/pkgconfig'])
 AC_SUBST([pkgconfigdir])
 
+# Allow libsecp256k1 to be installed in a custom path:
+AC_ARG_WITH([libsecp256k1],
+            AS_HELP_STRING([--with-libsecp256k1],
+                            [Specify libsecp256k1 prefix]))
+
+if test "x$with_libsecp256k1" != "x"; then
+    if test -r "${with_libsecp256k1}/include/secp256k1.h"; then
+        CPPFLAGS="-I${with_libsecp256k1}/include ${CPPFLAGS}"
+        LDFLAGS="-L${with_libsecp256k1}/lib ${LDFLAGS}"
+    fi
+fi
+
 AC_CONFIG_FILES([Makefile include/bitcoin/Makefile src/Makefile libbitcoin.pc])
 AC_OUTPUT
 
