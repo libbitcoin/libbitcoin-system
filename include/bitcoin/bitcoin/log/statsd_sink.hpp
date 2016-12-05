@@ -31,8 +31,7 @@ namespace log {
 
 void initialize_statsd(const rotable_file& file);
 
-void initialize_statsd(threadpool& pool,
-    const bc::config::authority& server);
+void initialize_statsd(threadpool& pool, const config::authority& server);
 
 } // namespace log
 } // namespace libbitcoin

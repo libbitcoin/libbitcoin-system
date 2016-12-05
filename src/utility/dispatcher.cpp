@@ -27,7 +27,7 @@
 namespace libbitcoin {
 
 dispatcher::dispatcher(threadpool& pool, const std::string& name)
-  : heap_(std::make_shared<work>(pool, name))
+  : heap_(std::make_shared<work>(pool, name)), size_(pool.size())
 {
 }
 

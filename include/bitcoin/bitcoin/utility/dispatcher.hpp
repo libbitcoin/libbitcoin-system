@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_DISPATCHER_HPP
 #define LIBBITCOIN_DISPATCHER_HPP
 
+#include <cstddef>
 #include <functional>
 #include <string>
 #include <utility>
@@ -188,10 +189,16 @@ public:
             ordered(BIND_ELEMENT(args, element, call));
     }
 
+    size_t size() const
+    {
+        return size_;
+    }
+
 private:
 
     // This is thread safe.
     work::ptr heap_;
+    const size_t size_;
 };
 
 #undef FORWARD_ARGS
