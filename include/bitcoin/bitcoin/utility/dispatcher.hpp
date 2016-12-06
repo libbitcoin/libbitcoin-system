@@ -27,6 +27,7 @@
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/delegates.hpp>
+#include <bitcoin/bitcoin/utility/noncopyable.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 #include <bitcoin/bitcoin/utility/work.hpp>
@@ -51,6 +52,7 @@ namespace libbitcoin {
 /// This  class is thread safe.
 /// If the ios service is stopped jobs will not be dispatched.
 class BC_API dispatcher
+  : noncopyable
 {
 public:
     dispatcher(threadpool& pool, const std::string& name);
