@@ -22,6 +22,7 @@
 #include <memory>
 #include <new>
 #include <thread>
+#include <utility>
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
 
@@ -86,7 +87,7 @@ void threadpool::spawn_once(thread_priority priority)
     work_mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 
-    const auto action = [this, priority]
+    auto action = [this, priority]()
     {
         set_thread_priority(priority);
         service_.run();
@@ -94,9 +95,9 @@ void threadpool::spawn_once(thread_priority priority)
 
     ///////////////////////////////////////////////////////////////////////////
     // Critical Section
-    unique_lock(threads_mutex);
+    unique_lock lock(threads_mutex_);
 
-    threads_.push_back(asio::thread(action));
+    threads_.push_back(asio::thread(std::move(action)));
     ///////////////////////////////////////////////////////////////////////////
 }
 
