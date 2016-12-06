@@ -115,9 +115,10 @@ public:
         const auto count = complete(ec) ? clearance_count_ : initial_count + 1;
         const auto cleared = count == clearance_count_;
 
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_->unlock_upgrade_and_lock();
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         (*counter_) = count;
+
         mutex_->unlock();
         ///////////////////////////////////////////////////////////////////////
 
