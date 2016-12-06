@@ -63,6 +63,9 @@ size_t threadpool::size() const
 // Not thread safe.
 void threadpool::spawn(size_t number_threads, thread_priority priority)
 {
+    // This allows the pool to be restarted.
+    service_.reset();
+
     for (size_t i = 0; i < number_threads; ++i)
         spawn_once(priority);
 }
@@ -77,9 +80,10 @@ void threadpool::spawn_once(thread_priority priority)
     // Work prevents the service from running out of work and terminating.
     if (!work_)
     {
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         work_mutex_.unlock_upgrade_and_lock();
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         work_ = std::make_shared<asio::service::work>(service_);
+
         work_mutex_.unlock_and_lock_upgrade();
         //-----------------------------------------------------------------
     }
@@ -129,22 +133,14 @@ void threadpool::join()
     threads_mutex_.lock_upgrade();
 
     for (auto& thread: threads_)
-    {
         if (thread.joinable() && !self(thread))
-        {
-            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            threads_mutex_.unlock_upgrade_and_lock();
             thread.join();
-            threads_mutex_.unlock_and_lock_upgrade();
-            //-----------------------------------------------------------------
-        }
-    }
 
-    // This allows the pool to be cleanly restarted by calling spawn.
+    threads_mutex_.unlock_upgrade_and_lock();
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     threads_.clear();
-    service_.reset();
 
-    threads_mutex_.unlock_upgrade();
+    threads_mutex_.unlock();
     ///////////////////////////////////////////////////////////////////////////
 }
 

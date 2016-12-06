@@ -73,9 +73,6 @@ public:
      * Terminate threads once work is complete.
      * Prevents the enqueuing of new handlers.
      * Caller should next call join, which will block until complete.
-     *
-     * WARNING: This can result in leaks in the case of heap allocated objects
-     * referenced captured in handlers that may not execute.
      */
     void abort();
 
