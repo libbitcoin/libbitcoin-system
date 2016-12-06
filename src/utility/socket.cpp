@@ -97,9 +97,9 @@ void socket::close()
     stop();
 
     // Handling socket error codes creates exception safety.
-    boost_code ignore;
+    ////boost_code ignore;
 
-    // DO NOT CLOSE THE SOCKET, IT TERMINATES WORK IMMEDIATELY REUSLTING IN LEAKS
+    // DO NOT CLOSE THE SOCKET, IT TERMINATES WORK IMMEDIATELY RESULTING IN LEAKS
     ///////////////////////////////////////////////////////////////////////////////
     ////// Critical Section.
     ////mutex_.lock();
