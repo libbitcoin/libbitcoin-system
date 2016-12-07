@@ -549,6 +549,14 @@ hash_digest block::generate_merkle_root() const
     return merkle.front();
 }
 
+bool block::is_internal_double_spend() const
+{
+    // TODO: check all inputs for duplicate reference to an output.
+    // It is not necessary to confirm the output is within the block.
+    // This is an early check that is redundant with orphan pool accept checks.
+    return false;
+}
+
 bool block::is_valid_merkle_root() const
 {
     return (generate_merkle_root() == header_.merkle());
@@ -652,6 +660,9 @@ code block::check() const
 
     else if (!is_distinct_transaction_set())
         return error::internal_duplicate;
+
+    else if (is_internal_double_spend())
+        return error::internal_double_spend;
 
     else if (!is_valid_merkle_root())
         return error::merkle_mismatch;

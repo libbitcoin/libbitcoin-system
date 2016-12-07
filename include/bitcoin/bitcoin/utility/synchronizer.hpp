@@ -86,7 +86,7 @@ public:
             case synchronizer_terminate::on_error:
                 return ec ? ec : error::success;
             case synchronizer_terminate::on_success:
-                return !ec ? ec : error::operation_failed;
+                return !ec ? error::success : ec;
             case synchronizer_terminate::on_count:
                 return error::success;
             default:

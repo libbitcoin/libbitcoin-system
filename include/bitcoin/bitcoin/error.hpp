@@ -76,6 +76,7 @@ enum error_code_t
     duplicate_block = 51,
     orphan_block = 5,
     invalid_previous_block = 24,
+    insufficient_work = 48,
     //// TODO: block_pool_filled,
 
     // transaction pool
@@ -99,8 +100,8 @@ enum error_code_t
     first_not_coinbase = 28,
     extra_coinbases = 29,
     internal_duplicate = 49,
+    internal_double_spend = 69,
     merkle_mismatch = 31,
-    insufficient_work = 48,
     block_legacy_sigop_limit = 30,
 
     // accept block
