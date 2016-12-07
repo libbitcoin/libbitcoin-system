@@ -105,6 +105,8 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "missing block parent";
         case error::invalid_previous_block:
             return "previous block failed to validate";
+        case error::insufficient_work:
+            return "insufficient work to reorganize";
 
         // transaction pool
         case error::blockchain_reorganized:
@@ -141,10 +143,10 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "more than one coinbase";
         case error::internal_duplicate:
             return "matching transaction hashes in block";
+        case error::internal_double_spend:
+            return "double spend internal to block";
         case error::merkle_mismatch:
             return "merkle root mismatch";
-        case error::insufficient_work:
-            return "insufficient work to reorganize";
         case error::block_legacy_sigop_limit:
             return "too many block legacy signature operations";
 
