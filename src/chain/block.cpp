@@ -42,6 +42,7 @@
 #include <bitcoin/bitcoin/machine/opcode.hpp>
 #include <bitcoin/bitcoin/machine/rule_fork.hpp>
 #include <bitcoin/bitcoin/message/messages.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -187,6 +188,7 @@ bool block::from_data(std::istream& stream)
 
 bool block::from_data(reader& source)
 {
+    validation.start_deserialize = asio::steady_clock::now();
     reset();
 
     if (!header_.from_data(source))
@@ -202,6 +204,7 @@ bool block::from_data(reader& source)
     if (!source)
         reset();
 
+    validation.end_deserialize = asio::steady_clock::now();
     return source;
 }
 
@@ -641,6 +644,8 @@ code block::connect_transactions(const chain_state& state) const
 // These checks are self-contained; blockchain (and so version) independent.
 code block::check() const
 {
+    validation.start_check = asio::steady_clock::now();
+
     code ec;
 
     if ((ec = header_.check()))
@@ -688,6 +693,8 @@ code block::accept(bool transactions) const
 // These checks assume that prevout caching is completed on all tx.inputs.
 code block::accept(const chain_state& state, bool transactions) const
 {
+    validation.start_accept = asio::steady_clock::now();
+
     code ec;
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip34 = state.is_enabled(rule_fork::bip34_rule);
@@ -727,6 +734,8 @@ code block::connect() const
 
 code block::connect(const chain_state& state) const
 {
+    validation.start_connect = asio::steady_clock::now();
+
     if (state.is_under_checkpoint())
         return error::success;
 
