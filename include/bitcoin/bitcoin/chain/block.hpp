@@ -34,6 +34,7 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/uint256.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
@@ -54,6 +55,17 @@ public:
     {
         code result = error::not_found;
         chain_state::ptr state = nullptr;
+
+        asio::time_point start_deserialize;
+        asio::time_point end_deserialize;
+        asio::time_point start_check;
+        asio::time_point start_populate;
+        asio::time_point start_accept;
+        asio::time_point start_connect;
+        asio::time_point start_notify;
+        asio::time_point start_pop;
+        asio::time_point start_push;
+        asio::time_point end_push;
     };
 
     // Constructors.
