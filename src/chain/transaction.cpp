@@ -95,6 +95,8 @@ transaction::transaction(transaction&& other)
       std::move(other.outputs_))
 {
     // TODO: implement safe private accessor for conditional cache transfer.
+
+    validation = std::move(other.validation);
 }
 
 transaction::transaction(const transaction& other)
@@ -146,6 +148,7 @@ transaction& transaction::operator=(transaction&& other)
     locktime_ = other.locktime_;
     inputs_ = std::move(other.inputs_);
     outputs_ = std::move(other.outputs_);
+    validation = std::move(other.validation);
     return *this;
 }
 

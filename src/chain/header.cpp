@@ -57,6 +57,8 @@ header::header(const header& other)
         other.timestamp_, other.bits_, other.nonce_)
 {
     // TODO: implement safe private accessor for conditional cache transfer.
+
+    validation = std::move(other.validation);
 }
 
 header::header(header&& other, hash_digest&& hash)
@@ -108,6 +110,7 @@ header& header::operator=(header&& other)
     timestamp_ = other.timestamp_;
     bits_ = other.bits_;
     nonce_ = other.nonce_;
+    validation = std::move(other.validation);
     return *this;
 }
 
