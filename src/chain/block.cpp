@@ -111,6 +111,7 @@ block::block(const block& other)
 block::block(block&& other)
   : block(std::move(other.header_), std::move(other.transactions_))
 {
+    validation = std::move(other.validation);
 }
 
 // TODO: deal with possibility of inconsistent merkle root in relation to txs.
@@ -133,6 +134,7 @@ block& block::operator=(block&& other)
 {
     header_ = std::move(other.header_);
     transactions_ = std::move(other.transactions_);
+    validation = std::move(other.validation);
     return *this;
 }
 
