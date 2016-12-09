@@ -26,6 +26,7 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+////#include <bitcoin/bitcoin/utility/noncopyable.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 
 namespace libbitcoin {
@@ -33,9 +34,10 @@ namespace libbitcoin {
 /// Reader to wrap arbitrary iterator.
 template <typename Iterator, bool CheckSafe>
 class deserializer
-  : public reader
+  : public reader/*, noncopyable*/
 {
 public:
+    deserializer(const Iterator begin);
     deserializer(const Iterator begin, const Iterator end);
 
     template <unsigned Size>

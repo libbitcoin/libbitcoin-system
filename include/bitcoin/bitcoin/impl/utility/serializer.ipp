@@ -222,6 +222,15 @@ void serializer<Iterator>::skip(size_t size)
     iterator_ += size;
 }
 
+// non-interface
+//-------------------------------------------------------------------------
+
+template <typename Iterator>
+void serializer<Iterator>::write_delegated(functor write)
+{
+    write(*this);
+}
+
 template <typename Iterator>
 template <typename Buffer>
 void serializer<Iterator>::write_forward(const Buffer& data)
@@ -249,9 +258,6 @@ void serializer<Iterator>::write_little_endian(Integer value)
 {
     return write_forward(to_little_endian(value));
 }
-
-// Not part of writer interface, used for variable skipping of writer.
-//-----------------------------------------------------------------------------
 
 template <typename Iterator>
 size_t serializer<Iterator>::read_size_big_endian()

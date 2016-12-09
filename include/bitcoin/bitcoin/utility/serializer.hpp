@@ -26,6 +26,7 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+////#include <bitcoin/bitcoin/utility/noncopyable.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
@@ -33,9 +34,11 @@ namespace libbitcoin {
 /// Writer to wrap arbitrary iterator.
 template <typename Iterator>
 class serializer
-  : public writer
+  : public writer/*, noncopyable*/
 {
 public:
+    typedef std::function<void(serializer<Iterator>&)> functor;
+
     serializer(const Iterator begin);
 
     template <typename Buffer>
@@ -92,8 +95,16 @@ public:
     /// Advance iterator without writing.
     void skip(size_t size);
 
-    /// Not part of writer interface, used for variable skipping of writer.
+    // non-interface
+    //-------------------------------------------------------------------------
+
+    /// Delegate write to a write function.
+    void write_delegated(functor write);
+
+    /// Utility for variable skipping of writer.
     size_t read_size_big_endian();
+
+    /// Utility for variable skipping of writer.
     size_t read_size_little_endian();
 
 private:
