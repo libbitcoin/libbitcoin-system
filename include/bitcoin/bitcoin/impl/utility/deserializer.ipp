@@ -30,6 +30,13 @@
 #include <bitcoin/bitcoin/utility/endian.hpp>
 
 namespace libbitcoin {
+    
+// Since the end is not used just use begin.
+template <typename Iterator, bool CheckSafe>
+deserializer<Iterator, CheckSafe>::deserializer(const Iterator begin)
+  : iterator_(begin), end_(begin), valid_(true)
+{
+}
 
 template <typename Iterator, bool CheckSafe>
 deserializer<Iterator, CheckSafe>::deserializer(const Iterator begin,
@@ -384,8 +391,7 @@ deserializer<Iterator, true> make_safe_deserializer(const Iterator begin,
 template <typename Iterator>
 deserializer<Iterator, false> make_unsafe_deserializer(const Iterator begin)
 {
-    // Since the end is not used just use begin.
-    return deserializer<Iterator, false>(begin, begin);
+    return deserializer<Iterator, false>(begin);
 }
 
 } // namespace libbitcoin
