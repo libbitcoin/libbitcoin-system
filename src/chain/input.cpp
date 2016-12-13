@@ -25,9 +25,12 @@
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/bitcoin/wallet/payment_address.hpp>
 
 namespace libbitcoin {
 namespace chain {
+
+using namespace bc::wallet;
 
 // Constructors.
 //-----------------------------------------------------------------------------
@@ -244,6 +247,12 @@ uint32_t input::sequence() const
 void input::set_sequence(uint32_t value)
 {
     sequence_ = value;
+}
+
+payment_address input::address() const
+{
+    // TODO: cache.
+    return payment_address::extract(script_);
 }
 
 // Validation helpers.

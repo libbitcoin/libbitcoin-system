@@ -28,6 +28,7 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
+#include <bitcoin/bitcoin/wallet/payment_address.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -108,6 +109,9 @@ public:
     const chain::script& script() const;
     void set_script(const chain::script& value);
     void set_script(chain::script&& value);
+
+    /// The payment address extracted from this output as a standard script.
+    wallet::payment_address address() const;
 
     // Validation.
     //-----------------------------------------------------------------------------

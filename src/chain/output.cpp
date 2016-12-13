@@ -26,9 +26,12 @@
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/bitcoin/wallet/payment_address.hpp>
 
 namespace libbitcoin {
 namespace chain {
+
+using namespace bc::wallet;
 
 // This is a consensus critical value that must be set on reset.
 const uint64_t output::not_found = sighash_null_value;
@@ -246,6 +249,13 @@ void output::set_script(chain::script&& value)
 {
     script_ = std::move(value);
 }
+
+payment_address output::address() const
+{
+    // TODO: cache.
+    return payment_address::extract(script_);
+}
+
 
 // Validation helpers.
 //-----------------------------------------------------------------------------

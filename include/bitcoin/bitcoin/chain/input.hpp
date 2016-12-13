@@ -30,6 +30,7 @@
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
+#include <bitcoin/bitcoin/wallet/payment_address.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -103,6 +104,9 @@ public:
 
     uint32_t sequence() const;
     void set_sequence(uint32_t value);
+
+    /// The payment address extraxcted from this input as a standard script.
+    wallet::payment_address address() const;
 
     // Validation.
     //-----------------------------------------------------------------------------
