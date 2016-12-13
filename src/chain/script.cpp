@@ -190,9 +190,10 @@ bool script::from_data(reader& source, bool prefix)
     reset();
     valid_ = true;
 
-    bytes_ = prefix ?
-        source.read_bytes(source.read_size_little_endian()) :
-        source.read_bytes();
+    if (prefix)
+        bytes_ = source.read_bytes(source.read_size_little_endian());
+    else
+        bytes_ = source.read_bytes();
 
     if (!source)
         reset();

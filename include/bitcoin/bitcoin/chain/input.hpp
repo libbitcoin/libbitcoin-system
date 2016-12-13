@@ -29,7 +29,9 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
+#include <bitcoin/bitcoin/wallet/payment_address.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -104,6 +106,9 @@ public:
     uint32_t sequence() const;
     void set_sequence(uint32_t value);
 
+    /// The payment address extraxcted from this input as a standard script.
+    wallet::payment_address address() const;
+
     // Validation.
     //-----------------------------------------------------------------------------
 
@@ -112,8 +117,12 @@ public:
 
 protected:
     void reset();
+    void invalidate_cache() const;
 
 private:
+    mutable upgrade_mutex mutex_;
+    mutable wallet::payment_address::ptr address_;
+
     output_point previous_output_;
     chain::script script_;
     uint32_t sequence_;

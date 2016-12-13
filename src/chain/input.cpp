@@ -25,9 +25,12 @@
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/bitcoin/wallet/payment_address.hpp>
 
 namespace libbitcoin {
 namespace chain {
+
+using namespace bc::wallet;
 
 // Constructors.
 //-----------------------------------------------------------------------------
@@ -229,11 +232,13 @@ const chain::script& input::script() const
 void input::set_script(const chain::script& value)
 {
     script_ = value;
+    invalidate_cache();
 }
 
 void input::set_script(chain::script&& value)
 {
     script_ = std::move(value);
+    invalidate_cache();
 }
 
 uint32_t input::sequence() const
@@ -244,6 +249,49 @@ uint32_t input::sequence() const
 void input::set_sequence(uint32_t value)
 {
     sequence_ = value;
+}
+
+// protected
+void input::invalidate_cache() const
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    mutex_.lock_upgrade();
+
+    if (address_)
+    {
+        mutex_.unlock_upgrade_and_lock();
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        address_.reset();
+        //---------------------------------------------------------------------
+        mutex_.unlock_and_lock_upgrade();
+    }
+
+    mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+payment_address input::address() const
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    mutex_.lock_upgrade();
+
+    if (!address_)
+    {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        mutex_.unlock_upgrade_and_lock();
+        address_ = std::make_shared<payment_address>(
+            payment_address::extract(script_));
+        mutex_.unlock_and_lock_upgrade();
+        //---------------------------------------------------------------------
+    }
+
+    const auto address = *address_;
+    mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
+
+    return address;
 }
 
 // Validation helpers.

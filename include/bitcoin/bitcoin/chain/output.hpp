@@ -27,7 +27,9 @@
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
+#include <bitcoin/bitcoin/wallet/payment_address.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -109,6 +111,9 @@ public:
     void set_script(const chain::script& value);
     void set_script(chain::script&& value);
 
+    /// The payment address extracted from this output as a standard script.
+    wallet::payment_address address() const;
+
     // Validation.
     //-----------------------------------------------------------------------------
 
@@ -122,8 +127,12 @@ protected:
     output(uint64_t value, const chain::script& script, size_t spender_height);
 
     void reset();
+    void invalidate_cache() const;
 
 private:
+    mutable upgrade_mutex mutex_;
+    mutable wallet::payment_address::ptr address_;
+
     uint64_t value_;
     chain::script script_;
 };

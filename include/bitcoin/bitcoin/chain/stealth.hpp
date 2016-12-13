@@ -29,17 +29,6 @@
 namespace libbitcoin {
 namespace chain {
 
-/// Differentiate subscription to payment address or stealth address.
-/// v2 (deprecated) requires an explicit subscription type.
-/// v3 eliminates the subscription type, which we map to 'unspecified'.
-enum class subscribe_type : uint8_t
-{
-    payment = 0,
-    stealth = 1,
-    unspecified = 2,
-    unsubscribe = 3
-};
-
 /// This structure is used in the client-server protocol in v2/v3.
 /// The stealth row excludes the sign byte (0x02) of the ephemeral public key.
 struct BC_API stealth_compact

@@ -22,6 +22,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
@@ -45,6 +46,8 @@ class BC_API payment_address
 public:
     static const uint8_t mainnet_p2kh;
     static const uint8_t mainnet_p2sh;
+
+    typedef std::shared_ptr<payment_address> ptr;
 
     /// Extract a payment address from an input or output script.
     /// The address will be invalid if and only if the script type is not
