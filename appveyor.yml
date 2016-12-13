@@ -30,6 +30,9 @@ environment:
 matrix:
   fast_finish: true
 
+init:
+  - git config --global core.autocrlf true
+
 before_build:
   - ps: >-
       $BASE_KEY = "HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall";
