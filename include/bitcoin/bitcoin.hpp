@@ -171,7 +171,6 @@
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 #include <bitcoin/bitcoin/utility/timer.hpp>
 #include <bitcoin/bitcoin/utility/track.hpp>
-#include <bitcoin/bitcoin/utility/variable_uint_size.hpp>
 #include <bitcoin/bitcoin/utility/work.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
 #include <bitcoin/bitcoin/wallet/bitcoin_uri.hpp>
