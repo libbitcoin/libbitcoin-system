@@ -46,7 +46,6 @@
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
-#include <bitcoin/bitcoin/utility/variable_uint_size.hpp>
 
 namespace libbitcoin {
 namespace chain {
