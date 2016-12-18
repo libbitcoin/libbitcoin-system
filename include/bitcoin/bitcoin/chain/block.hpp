@@ -53,7 +53,7 @@ public:
     // This validation data is not copied on block copy.
     struct validation
     {
-        code result = error::not_found;
+        code error = error::not_found;
         chain_state::ptr state = nullptr;
 
         asio::time_point start_deserialize;
