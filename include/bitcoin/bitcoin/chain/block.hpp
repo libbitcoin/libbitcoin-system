@@ -50,7 +50,6 @@ public:
     typedef std::vector<size_t> indexes;
 
     // These properties facilitate block validation.
-    // This validation data is not copied on block copy.
     struct validation
     {
         code error = error::not_found;

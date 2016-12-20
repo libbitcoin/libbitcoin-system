@@ -54,7 +54,6 @@ public:
     typedef std::function<void(const code&)> confirm_handler;
 
     // These properties facilitate block and transaction validation.
-    // This validation data is not copied on block or transaction copy.
     struct validation
     {
         static const size_t unspecified_height;

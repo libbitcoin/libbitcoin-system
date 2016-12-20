@@ -48,29 +48,15 @@ output::output()
 }
 
 output::output(output&& other)
-  : output(other.value_, std::move(other.script_),
-        other.validation.spender_height)
+  : output(other.value_, std::move(other.script_))
 {
+    validation = std::move(other.validation);
 }
 
 output::output(const output& other)
-  : output(other.value_, other.script_, other.validation.spender_height)
+  : output(other.value_, other.script_)
 {
-}
-
-// protected
-output::output(uint64_t value, chain::script&& script, size_t spender_height)
-  : value_(value), script_(std::move(script))
-{
-    validation.spender_height = spender_height;
-}
-
-// protected
-output::output(uint64_t value, const chain::script& script,
-    size_t spender_height)
-  : value_(value), script_(script)
-{
-    validation.spender_height = spender_height;
+    validation = other.validation;
 }
 
 output::output(uint64_t value, chain::script&& script)
@@ -90,6 +76,7 @@ output& output::operator=(output&& other)
 {
     value_ = other.value_;
     script_ = std::move(other.script_);
+    validation = std::move(other.validation);
     return *this;
 }
 
@@ -97,6 +84,7 @@ output& output::operator=(const output& other)
 {
     value_ = other.value_;
     script_ = other.script_;
+    validation = other.validation;
     return *this;
 }
 

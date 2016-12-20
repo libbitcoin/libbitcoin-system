@@ -36,7 +36,7 @@ using namespace bc::wallet;
 //-----------------------------------------------------------------------------
 
 input::input()
-  : previous_output_(), sequence_{0}
+  : previous_output_{}, sequence_(0)
 {
 }
 

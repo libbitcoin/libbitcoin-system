@@ -45,7 +45,6 @@ public:
     static const uint64_t not_found;
 
     // These properties facilitate block and transaction validation.
-    // This validation data IS copied on output copy/move.
     struct validation
     {
         // This is a non-consensus sentinel used to indicate an output is unspent.
@@ -123,9 +122,6 @@ public:
     mutable validation validation;
 
 protected:
-    output(uint64_t value, chain::script&& script, size_t spender_height);
-    output(uint64_t value, const chain::script& script, size_t spender_height);
-
     void reset();
     void invalidate_cache() const;
 

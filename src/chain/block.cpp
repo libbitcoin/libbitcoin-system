@@ -99,13 +99,14 @@ static const std::string encoded_testnet_genesis_block =
 //-----------------------------------------------------------------------------
 
 block::block()
-  : header_(), transactions_()
+  : header_{}, validation{}
 {
 }
 
 block::block(const block& other)
   : block(other.header_, other.transactions_)
 {
+    validation = other.validation;
 }
 
 block::block(block&& other)
@@ -117,13 +118,14 @@ block::block(block&& other)
 // TODO: deal with possibility of inconsistent merkle root in relation to txs.
 block::block(const chain::header& header,
     const transaction::list& transactions)
-  : header_(header), transactions_(transactions)
+  : header_(header), transactions_(transactions), validation{}
 {
 }
 
 // TODO: deal with possibility of inconsistent merkle root in relation to txs.
 block::block(chain::header&& header, transaction::list&& transactions)
-  : header_(std::move(header)), transactions_(std::move(transactions))
+  : header_(std::move(header)), transactions_(std::move(transactions)),
+    validation(std::move(validation))
 {
 }
 
@@ -140,8 +142,7 @@ block& block::operator=(block&& other)
 
 bool block::operator==(const block& other) const
 {
-    return (header_ == other.header_)
-        && (transactions_ == other.transactions_);
+    return (header_ == other.header_) && (transactions_ == other.transactions_);
 }
 
 bool block::operator!=(const block& other) const

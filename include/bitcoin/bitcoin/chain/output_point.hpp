@@ -36,7 +36,6 @@ class BC_API output_point
 {
 public:
 
-    // This validation data IS copied on output_point copy/move.
     // These properties facilitate block and transaction validation.
     struct validation
     {

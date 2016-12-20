@@ -48,7 +48,6 @@ public:
     typedef std::vector<const_ptr> const_ptr_list;
 
     // These properties facilitate block validation.
-    // This validation data is not copied on block/header copy.
     struct validation
     {
         static const size_t orphan_height;
