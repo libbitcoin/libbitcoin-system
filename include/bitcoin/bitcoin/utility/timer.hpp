@@ -21,11 +21,30 @@
 #define LIBBITCOIN_TIMER_HPP
 
 #include <chrono>
+#include <cstddef>
+#include <ctime>
+#include <string>
+#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
 
 // boost::timer::auto_cpu_timer requires the boost timer lib dependency.
 
 namespace libbitcoin {
+
+/// Standard date-time string, e.g. Sun Oct 17 04:41:13 2010, locale dependent.
+inline std::string local_time()
+{
+    static BC_CONSTEXPR size_t size = 24;
+    char buffer[size];
+    const auto time = std::time(nullptr);
+
+    // std::strftime is required because gcc doesn't implement std::put_time.
+    auto result = std::strftime(buffer, size, "%c", std::localtime(&time));
+
+    // If count was reached before the entire string could be stored, zero is
+    // returned and contents are undefined, so do not return result.
+    return result == 0 ? "" : buffer;
+};
 
 // From: github.com/picanumber/bureaucrat/blob/master/time_lapse.h
 
