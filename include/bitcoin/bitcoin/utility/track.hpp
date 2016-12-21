@@ -37,7 +37,7 @@ public:
     static std::atomic<size_t> instances;
 
 protected:
-    track(std::string&& class_name);
+    track(const std::string& class_name);
     ~track();
 
 private:

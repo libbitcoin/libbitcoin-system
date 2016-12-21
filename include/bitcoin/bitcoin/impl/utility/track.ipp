@@ -23,7 +23,6 @@
 #include <atomic>
 #include <cstddef>
 #include <string>
-#include <utility>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/log/source.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -38,9 +37,9 @@ template <class Shared>
 std::atomic<size_t> track<Shared>::instances(0);
 
 template <class Shared>
-track<Shared>::track(std::string&& DEBUG_ONLY(class_name))
+track<Shared>::track(const std::string& DEBUG_ONLY(class_name))
 #ifndef NDEBUG
-  : class_(std::move(class_name))
+  : class_(class_name)
 #endif
 {
 #ifndef NDEBUG
