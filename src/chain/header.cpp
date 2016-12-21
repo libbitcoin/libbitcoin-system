@@ -50,6 +50,7 @@ header::header(header&& other)
       std::move(other.merkle_), other.timestamp_, other.bits_, other.nonce_)
 {
     // TODO: implement safe private accessor for conditional cache transfer.
+    validation = std::move(other.validation);
 }
 
 header::header(const header& other)
@@ -57,8 +58,7 @@ header::header(const header& other)
         other.timestamp_, other.bits_, other.nonce_)
 {
     // TODO: implement safe private accessor for conditional cache transfer.
-
-    validation = std::move(other.validation);
+    validation = other.validation;
 }
 
 header::header(header&& other, hash_digest&& hash)
@@ -66,6 +66,7 @@ header::header(header&& other, hash_digest&& hash)
       std::move(other.merkle_), other.timestamp_, other.bits_, other.nonce_)
 {
     hash_ = std::make_shared<hash_digest>(std::move(hash));
+    validation = std::move(other.validation);
 }
 
 header::header(const header& other, const hash_digest& hash)
@@ -73,6 +74,7 @@ header::header(const header& other, const hash_digest& hash)
         other.timestamp_, other.bits_, other.nonce_)
 {
     hash_ = std::make_shared<hash_digest>(hash);
+    validation = other.validation;
 }
 
 header::header(uint32_t version, hash_digest&& previous_block_hash,
@@ -82,7 +84,8 @@ header::header(uint32_t version, hash_digest&& previous_block_hash,
     merkle_(std::move(merkle)),
     timestamp_(timestamp),
     bits_(bits),
-    nonce_(nonce)
+    nonce_(nonce),
+    validation{}
 {
 }
 
@@ -94,7 +97,8 @@ header::header(uint32_t version, const hash_digest& previous_block_hash,
     merkle_(merkle),
     timestamp_(timestamp),
     bits_(bits),
-    nonce_(nonce)
+    nonce_(nonce),
+    validation{}
 {
 }
 
@@ -123,6 +127,7 @@ header& header::operator=(const header& other)
     timestamp_ = other.timestamp_;
     bits_ = other.bits_;
     nonce_ = other.nonce_;
+    validation = other.validation;
     return *this;
 }
 

@@ -86,7 +86,7 @@ void write(Sink& sink, const std::vector<Put>& puts, bool wire)
 //-----------------------------------------------------------------------------
 
 transaction::transaction()
-    : version_{0}, locktime_{0}, validation{}
+  : version_(0), locktime_(0), validation{}
 {
 }
 
@@ -95,7 +95,6 @@ transaction::transaction(transaction&& other)
       std::move(other.outputs_))
 {
     // TODO: implement safe private accessor for conditional cache transfer.
-
     validation = std::move(other.validation);
 }
 
@@ -103,19 +102,22 @@ transaction::transaction(const transaction& other)
   : transaction(other.version_, other.locktime_, other.inputs_, other.outputs_)
 {
     // TODO: implement safe private accessor for conditional cache transfer.
+    validation = other.validation;
 }
 
 transaction::transaction(transaction&& other, hash_digest&& hash)
   : transaction(other.version_, other.locktime_, std::move(other.inputs_),
-    std::move(other.outputs_))
+        std::move(other.outputs_))
 {
     hash_ = std::make_shared<hash_digest>(std::move(hash));
+    validation = std::move(other.validation);
 }
 
 transaction::transaction(const transaction& other, const hash_digest& hash)
   : transaction(other.version_, other.locktime_, other.inputs_, other.outputs_)
 {
     hash_ = std::make_shared<hash_digest>(hash);
+    validation = other.validation;
 }
 
 transaction::transaction(uint32_t version, uint32_t locktime,
@@ -159,6 +161,7 @@ transaction& transaction::operator=(const transaction& other)
     locktime_ = other.locktime_;
     inputs_ = other.inputs_;
     outputs_ = other.outputs_;
+    validation = other.validation;
     return *this;
 }
 

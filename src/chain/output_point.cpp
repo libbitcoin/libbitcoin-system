@@ -34,7 +34,7 @@ const size_t output_point::validation::not_specified = max_size_t;
 //-----------------------------------------------------------------------------
 
 output_point::output_point()
-  : point(), validation{}
+  : point{}, validation{}
 {
 }
 
@@ -54,7 +54,7 @@ output_point::output_point(const output_point& other)
 }
 
 output_point::output_point(output_point&& other)
-  : point(std::move(other)), validation(other.validation)
+  : point(std::move(other)), validation(std::move(other.validation))
 {
 }
 
@@ -87,15 +87,15 @@ output_point& output_point::operator=(const point& other)
 
 output_point& output_point::operator=(output_point&& other)
 {
-    validation = other.validation;
     point::operator=(std::move(other));
+    validation = std::move(other.validation);
     return *this;
 }
 
 output_point& output_point::operator=(const output_point& other)
 {
-    validation = other.validation;
     point::operator=(other);
+    validation = other.validation;
     return *this;
 }
 
