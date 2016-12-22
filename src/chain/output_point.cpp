@@ -28,7 +28,7 @@
 namespace libbitcoin {
 namespace chain {
 
-const size_t output_point::validation::not_specified = max_size_t;
+const size_t output_point::validation_type::not_specified = max_size_t;
 
 // Constructors.
 //-----------------------------------------------------------------------------
@@ -149,7 +149,7 @@ output_point output_point::factory_from_data(reader& source)
 // For tx pool validation target_height is that of any candidate block.
 bool output_point::is_mature(size_t target_height) const
 {
-    if (validation.height == validation::not_specified)
+    if (validation.height == validation_type::not_specified)
         return true;
 
     // The (non-coinbase) outpoint refers to a coinbase output, measure depth.
