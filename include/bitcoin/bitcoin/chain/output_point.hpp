@@ -37,7 +37,7 @@ class BC_API output_point
 public:
 
     // These properties facilitate block and transaction validation.
-    struct validation
+    struct validation_type
     {
         /// This is a .height sentinel.
         static const size_t not_specified;
@@ -55,7 +55,7 @@ public:
         /// This must be set to not_specified if the input is coinbase.
         /// This must be set to not_specified if the output is non-coinbase.
         /// This may be set to not_specified if the prevout is spent.
-        size_t height = validation::not_specified;
+        size_t height = validation_type::not_specified;
 
         /// The output cache contains the output referenced by the input point.
         /// If the cache.value is not_found then the output has not been found.
@@ -105,7 +105,7 @@ public:
     bool is_mature(size_t target_height) const;
 
     // These fields do not participate in serialization or comparison.
-    mutable validation validation;
+    mutable validation_type validation;
 
 protected:
     // So that input may call reset from its own.
