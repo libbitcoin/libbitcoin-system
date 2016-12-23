@@ -2,6 +2,8 @@
 
 [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin)
 
+Rowan
+
 # Libbitcoin
 
 *The Bitcoin Development Library*
