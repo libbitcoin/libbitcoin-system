@@ -47,6 +47,9 @@ public:
     static const uint8_t mainnet_p2kh;
     static const uint8_t mainnet_p2sh;
 
+    static const uint8_t testnet_p2kh;
+    static const uint8_t testnet_p2sh;
+
     typedef std::shared_ptr<payment_address> ptr;
 
     /// Extract a payment address from an input or output script.
