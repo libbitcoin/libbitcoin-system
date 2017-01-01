@@ -77,6 +77,8 @@ public:
     friend std::ostream& operator<<(std::ostream& out,
         const payment_address& of);
 
+    bool is_valid() const;
+
     /// Cast operators.
     operator const bool() const;
     operator const short_hash&() const;
