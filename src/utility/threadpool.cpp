@@ -19,14 +19,15 @@
  */
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
+#include <algorithm>
 #include <memory>
 #include <new>
-#include <stdexcept>
 #include <thread>
 #include <utility>
 #include <bitcoin/bitcoin/log/sink.hpp>
 #include <bitcoin/bitcoin/log/source.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
 
 namespace libbitcoin {
@@ -65,7 +66,7 @@ size_t threadpool::size() const
     ///////////////////////////////////////////////////////////////////////////
 }
 
-// TODO: not thread safe.
+// This is not thread safe.
 void threadpool::spawn(size_t number_threads, thread_priority priority)
 {
     // This allows the pool to be restarted.
@@ -99,15 +100,8 @@ void threadpool::spawn_once(thread_priority priority)
     // Critical Section
     unique_lock lock(threads_mutex_);
 
-    const auto creator = boost::this_thread::get_id();
-
-    threads_.push_back(asio::thread([this, priority, creator]()
+    threads_.push_back(asio::thread([this, priority]()
     {
-        LOG_FATAL(LOG_SYSTEM)
-            << "creating thread: "
-            << "caller (" << creator << ") "
-            << "current (" << boost::this_thread::get_id() << ")";
-
         set_thread_priority(priority);
         service_.run();
     }));
@@ -129,39 +123,46 @@ void threadpool::shutdown()
     ///////////////////////////////////////////////////////////////////////////
 }
 
-inline bool self(asio::thread& thread)
-{
-    return boost::this_thread::get_id() == thread.get_id();
-}
-
 void threadpool::join()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Critical Section
     unique_lock lock(threads_mutex_);
 
-    for (auto& thread: threads_)
+    const auto joiner = [this]()
     {
-        if (self(thread))
+        for (auto& thread: threads_)
         {
-            LOG_FATAL(LOG_SYSTEM)
-                << "cannot join self: "
-                << "caller (" << boost::this_thread::get_id() << ") "
-                << "current (" << thread.get_id() << ")";
-            ////throw std::runtime_error("cannot join self");
-        }
+            // Since we do not use default thread construction only joined
+            // threads will be non-joinable. But we always clear after joining
+            // so should not be possible to observe a non-joinable thread here.
+            BITCOIN_ASSERT(thread.joinable());
 
-        if (!thread.joinable())
-        {
-            LOG_FATAL(LOG_SYSTEM)
-                << "thread not joinable: "
-                << "caller (" << boost::this_thread::get_id() << ") "
-                << "current (" << thread.get_id() << ")";
-            ////throw std::runtime_error("thread not joinable");
-        }
-
-        if (!self(thread) && thread.joinable())
             thread.join();
+        }
+    };
+
+    const auto id = boost::this_thread::get_id();
+    const auto self = [id](const asio::thread& thread)
+    {
+        return id == thread.get_id();
+    };
+
+    // Deadlock would occur if we attempted to join our own thread. However if
+    // we do not block until each thread join we will allow a thread to
+    // continue after this call, allowing the caller to terminate process or
+    // free resources still in use by the thread. Also, when threads_ is
+    // deleted it terminates all executing threads.
+    const auto any_self = std::any_of(threads_.begin(), threads_.end(), self);
+
+    if (any_self)
+    {
+        asio::thread dispatch(joiner);
+        dispatch.join();
+    }
+    else
+    {
+        joiner();
     }
 
     threads_.clear();
