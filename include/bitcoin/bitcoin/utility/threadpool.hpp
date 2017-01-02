@@ -86,7 +86,6 @@ public:
 
     /**
      * Wait for all threads in the pool to terminate.
-     *
      * WARNING: Do not call this within any of the threads owned by this
      * threadpool. Doing so would cause a resource deadlock and as a result
      * std::runtime_error exception will be thrown.

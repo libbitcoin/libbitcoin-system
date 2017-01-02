@@ -65,7 +65,7 @@ size_t threadpool::size() const
     ///////////////////////////////////////////////////////////////////////////
 }
 
-// Not thread safe.
+// TODO: not thread safe.
 void threadpool::spawn(size_t number_threads, thread_priority priority)
 {
     // This allows the pool to be restarted.
