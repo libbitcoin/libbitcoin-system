@@ -38,15 +38,14 @@ stealth_receiver::stealth_receiver(
   : scan_private_(scan_private), spend_private_(spend_private),
     version_(version)
 {
+    DEBUG_ONLY(bool success =) secret_to_public(spend_public_, spend_private_);
+    BITCOIN_ASSERT(success);
 }
 
 const stealth_address stealth_receiver::generate_stealth_address()
 {
     ec_compressed scan_public;
     DEBUG_ONLY(bool success =) secret_to_public(scan_public, scan_private_);
-    BITCOIN_ASSERT(success);
-
-    DEBUG_ONLY(bool success =) secret_to_public(spend_public_, spend_private_);
     BITCOIN_ASSERT(success);
 
     const binary empty;
