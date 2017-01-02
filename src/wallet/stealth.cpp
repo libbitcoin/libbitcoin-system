@@ -115,7 +115,7 @@ void stealth_sender::send_to_stealth_address(const stealth_address& stealth_addr
     data_chunk output_data(
         ephemeral_public.begin() + 1, ephemeral_public.end());
     BITCOIN_ASSERT(output_data.size() == 32);
-    data_chunk random_padding(4);
+    data_chunk random_padding(8);
     pseudo_random_fill(random_padding);
     extend_data(output_data, random_padding);
     BITCOIN_ASSERT(output_data.size() == 40);
