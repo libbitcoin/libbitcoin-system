@@ -21,12 +21,17 @@
 
 #include <memory>
 #include <new>
+#include <stdexcept>
 #include <thread>
 #include <utility>
+#include <bitcoin/bitcoin/log/sink.hpp>
+#include <bitcoin/bitcoin/log/source.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
 
 namespace libbitcoin {
+
+#define LOG_SYSTEM "system"
 
 threadpool::threadpool(size_t number_threads, thread_priority priority)
 {
@@ -70,7 +75,6 @@ void threadpool::spawn(size_t number_threads, thread_priority priority)
         spawn_once(priority);
 }
 
-// Not thread safe.
 void threadpool::spawn_once(thread_priority priority)
 {
     ///////////////////////////////////////////////////////////////////////////
@@ -91,17 +95,15 @@ void threadpool::spawn_once(thread_priority priority)
     work_mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 
-    auto action = [this, priority]()
-    {
-        set_thread_priority(priority);
-        service_.run();
-    };
-
     ///////////////////////////////////////////////////////////////////////////
     // Critical Section
     unique_lock lock(threads_mutex_);
 
-    threads_.push_back(asio::thread(std::move(action)));
+    threads_.push_back(asio::thread([this, priority]()
+    {
+        set_thread_priority(priority);
+        service_.run();
+    }));
     ///////////////////////////////////////////////////////////////////////////
 }
 
@@ -125,22 +127,31 @@ inline bool self(asio::thread& thread)
     return boost::this_thread::get_id() == thread.get_id();
 }
 
-// Not thread safe.
 void threadpool::join()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Critical Section
-    threads_mutex_.lock_upgrade();
+    unique_lock lock(threads_mutex_);
 
     for (auto& thread: threads_)
-        if (thread.joinable() && !self(thread))
+    {
+        if (self(thread))
+        {
+            LOG_FATAL(LOG_SYSTEM) << "cannot join self";
+            ////throw std::runtime_error("cannot join self");
+        }
+
+        if (!thread.joinable())
+        {
+            LOG_FATAL(LOG_SYSTEM) << "thread not joinable";
+            ////throw std::runtime_error("thread not joinable");
+        }
+
+        if (!self(thread) && thread.joinable())
             thread.join();
+    }
 
-    threads_mutex_.unlock_upgrade_and_lock();
-    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     threads_.clear();
-
-    threads_mutex_.unlock();
     ///////////////////////////////////////////////////////////////////////////
 }
 
