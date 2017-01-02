@@ -34,11 +34,6 @@ socket::socket()
 {
 }
 
-socket::~socket()
-{
-    close();
-}
-
 config::authority socket::authority() const
 {
     boost_code ec;
@@ -83,6 +78,7 @@ void socket::stop()
     socket_.shutdown(asio::socket::shutdown_both, ignore);
 
     // BUGBUG: this is documented to fail on Windows XP and Server 2003.
+    // DO NOT CLOSE SOCKET, IT TERMINATES WORK IMMEDIATELY RESULTING IN LEAKS
     socket_.cancel(ignore);
 
     mutex_.unlock();
@@ -90,24 +86,6 @@ void socket::stop()
 
     // Signal the end of oustanding work and no new work.
     thread_.shutdown();
-}
-
-void socket::close()
-{
-    stop();
-
-    // Handling socket error codes creates exception safety.
-    ////boost_code ignore;
-
-    // DO NOT CLOSE THE SOCKET, IT TERMINATES WORK IMMEDIATELY RESULTING IN LEAKS
-    ///////////////////////////////////////////////////////////////////////////////
-    ////// Critical Section.
-    ////mutex_.lock();
-    ////socket_.close(ignore);
-    ////mutex_.unlock();
-    ///////////////////////////////////////////////////////////////////////////////
-
-    thread_.join();
 }
 
 } // namespace libbitcoin

@@ -42,9 +42,6 @@ public:
     /// Construct an instance.
     socket();
 
-    /// Validate socket stopped.
-    ~socket();
-
     /// Obtain the authority of the remote endpoint.
     config::authority authority() const;
 
@@ -56,9 +53,6 @@ public:
 
     /// Signal cancel of all outstanding work on the socket.
     virtual void stop();
-
-    /// Wait on stop of all outstanding work on the socket.
-    virtual void close();
 
 private:
     // This is thread safe.
