@@ -70,25 +70,19 @@ public:
 
     /**
      * Abandon outstanding operations without dispatching handlers.
-     * Terminate threads once work is complete.
-     * Prevents the enqueuing of new handlers.
-     * Caller should next call join, which will block until complete.
+     * WARNING: This call is unsave and should be avoided.
      */
     void abort();
 
     /**
-     * Allow outstanding operations and handlers to finish normally.
-     * Terminate threads once work is complete.
-     * Allows the enqueuing of new handlers.
-     * Caller should next call join, which will block until complete.
+     * Destroy the work keep alive, allowing threads be joined.
+     * Caller should next call join.
      */
     void shutdown();
 
     /**
      * Wait for all threads in the pool to terminate.
-     * WARNING: Do not call this within any of the threads owned by this
-     * threadpool. Doing so would cause a resource deadlock and as a result
-     * std::runtime_error exception will be thrown.
+     * This is safe to call from any thread in the threadpool or otherwise.
      */
     void join();
 
