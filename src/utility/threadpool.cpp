@@ -65,7 +65,7 @@ size_t threadpool::size() const
     ///////////////////////////////////////////////////////////////////////////
 }
 
-// Not thread safe.
+// TODO: not thread safe.
 void threadpool::spawn(size_t number_threads, thread_priority priority)
 {
     // This allows the pool to be restarted.
@@ -99,8 +99,15 @@ void threadpool::spawn_once(thread_priority priority)
     // Critical Section
     unique_lock lock(threads_mutex_);
 
-    threads_.push_back(asio::thread([this, priority]()
+    const auto creator = boost::this_thread::get_id();
+
+    threads_.push_back(asio::thread([this, priority, creator]()
     {
+        LOG_FATAL(LOG_SYSTEM)
+            << "creating thread: "
+            << "caller (" << creator << ") "
+            << "current (" << boost::this_thread::get_id() << ")";
+
         set_thread_priority(priority);
         service_.run();
     }));
@@ -137,13 +144,19 @@ void threadpool::join()
     {
         if (self(thread))
         {
-            LOG_FATAL(LOG_SYSTEM) << "cannot join self";
+            LOG_FATAL(LOG_SYSTEM)
+                << "cannot join self: "
+                << "caller (" << boost::this_thread::get_id() << ") "
+                << "current (" << thread.get_id() << ")";
             ////throw std::runtime_error("cannot join self");
         }
 
         if (!thread.joinable())
         {
-            LOG_FATAL(LOG_SYSTEM) << "thread not joinable";
+            LOG_FATAL(LOG_SYSTEM)
+                << "thread not joinable: "
+                << "caller (" << boost::this_thread::get_id() << ") "
+                << "current (" << thread.get_id() << ")";
             ////throw std::runtime_error("thread not joinable");
         }
 
