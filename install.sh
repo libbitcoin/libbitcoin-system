@@ -41,8 +41,8 @@ ICU_ARCHIVE="icu4c-55_1-src.tgz"
 
 # ZLib archive.
 #------------------------------------------------------------------------------
-ZLIB_URL="http://zlib.net/zlib-1.2.9.tar.xz"
-ZLIB_ARCHIVE="zlib-1.2.9.tar.xz"
+ZLIB_URL="https://github.com/madler/zlib/archive/v1.2.9.tar.gz"
+ZLIB_ARCHIVE="v1.2.9.tar.gz"
 
 # PNG archive.
 #------------------------------------------------------------------------------
@@ -697,7 +697,7 @@ build_from_travis()
 build_all()
 {
     build_from_tarball $ICU_URL $ICU_ARCHIVE gzip source $PARALLEL "$BUILD_ICU" "${ICU_OPTIONS[@]}" "$@"
-    build_from_tarball $ZLIB_URL $ZLIB_ARCHIVE xz . $PARALLEL "$BUILD_ZLIB" "${ZLIB_OPTIONS[@]}" "$@"
+    build_from_tarball $ZLIB_URL $ZLIB_ARCHIVE gzip . $PARALLEL "$BUILD_ZLIB" "${ZLIB_OPTIONS[@]}" "$@"
     build_from_tarball $PNG_URL $PNG_ARCHIVE xz . $PARALLEL "$BUILD_PNG" "${PNG_OPTIONS[@]}" "$@"
     build_from_tarball $QRENCODE_URL $QRENCODE_ARCHIVE bzip2 . $PARALLEL "$BUILD_QRENCODE" "${QRENCODE_OPTIONS[@]}" "$@"
     build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE bzip2 . $PARALLEL "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
