@@ -125,7 +125,7 @@ block::block(const chain::header& header,
 // TODO: deal with possibility of inconsistent merkle root in relation to txs.
 block::block(chain::header&& header, transaction::list&& transactions)
   : header_(std::move(header)), transactions_(std::move(transactions)),
-    validation(std::move(validation))
+    validation{}
 {
 }
 
