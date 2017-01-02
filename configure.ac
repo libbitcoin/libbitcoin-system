@@ -246,11 +246,11 @@ AS_CASE([${host_os}], [*linux*],
         [AC_MSG_ERROR([dl library is required but was not found.])])],
     [AC_SUBST([dl_LIBS], [])])
 
-# Require png of at least version 1.6.25 and output ${png_CPPFLAGS/LIBS/PKG}.
+# Require png of at least version 1.6.27 and output ${png_CPPFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
 AS_CASE([${with_png}], [yes],
-    [PKG_CHECK_MODULES([png], [libpng >= 1.6.25])
-     AC_SUBST([png_PKG], ['libpng >= 1.6.25'])
+    [PKG_CHECK_MODULES([png], [libpng >= 1.6.27])
+     AC_SUBST([png_PKG], ['libpng >= 1.6.27'])
      AC_SUBST([png_CPPFLAGS], [${png_CFLAGS}])
      AC_MSG_NOTICE([png_CPPFLAGS : ${png_CPPFLAGS}])
      AC_MSG_NOTICE([png_LIBS : ${png_LIBS}])],

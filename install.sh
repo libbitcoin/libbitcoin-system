@@ -41,13 +41,13 @@ ICU_ARCHIVE="icu4c-55_1-src.tgz"
 
 # ZLib archive.
 #------------------------------------------------------------------------------
-ZLIB_URL="http://zlib.net/zlib-1.2.8.tar.xz"
-ZLIB_ARCHIVE="zlib-1.2.8.tar.xz"
+ZLIB_URL="http://zlib.net/zlib-1.2.9.tar.xz"
+ZLIB_ARCHIVE="zlib-1.2.9.tar.xz"
 
 # PNG archive.
 #------------------------------------------------------------------------------
-PNG_URL="http://downloads.sourceforge.net/project/libpng/libpng16/1.6.25/libpng-1.6.25.tar.xz"
-PNG_ARCHIVE="libpng-1.6.25.tar.xz"
+PNG_URL="http://downloads.sourceforge.net/project/libpng/libpng16/1.6.27/libpng-1.6.27.tar.xz"
+PNG_ARCHIVE="libpng-1.6.27.tar.xz"
 
 # QREncode archive.
 #------------------------------------------------------------------------------
