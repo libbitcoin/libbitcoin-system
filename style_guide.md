@@ -8,7 +8,7 @@ If you're nesting more than 3 levels deep then generally you are doing something
 
 Use `_` as opposed to `-` in source file names.
 
-Variables, functions, `class`, `enum`, and `typedef` are lower case, `define` (macros) upper case, [camel case](http://en.wikipedia.org/wiki/CamelCase) identifiers for `template` types, no other mixed case.
+Variables, functions, `class`, `enum`, and `typedef` are lower case, `define` (macros) upper case, [CamelCase](http://en.wikipedia.org/wiki/CamelCase) identifiers for `template` types, no other mixed case.
 
 Write self-documenting code. Names should be explanatory, not cryptic or ambiguous. Avoid abbreviations and acronyms.
 
