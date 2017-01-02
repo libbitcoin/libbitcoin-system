@@ -114,6 +114,8 @@ Follow the closing of a scope with a blank line before a subsequent statement.
 
 Precede comments with a blank line.
 
+Define only one class or struct per file and match the file name to the object.
+
 Use the following source file layouts.
 
 ### IPP Format
