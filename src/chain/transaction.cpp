@@ -764,8 +764,16 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
 {
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip30 = state.is_enabled(rule_fork::bip30_rule);
+    const auto allow_collide = state.is_enabled(rule_fork::allowed_duplicates);
 
-    if (bip30 && validation.duplicate)
+    //*************************************************************************
+    // CONSENSUS:
+    // A transaction hash that exists in the chain is not acceptable even if
+    // the original is spent in the new block. This is not necessary nor is it
+    // described by BIP30, but it is in the code referenced by BIP30. As such
+    // the tx pool need only test against the chain, skipping the pool.
+    //*************************************************************************
+    if (!allow_collide && bip30 && validation.duplicate)
         return error::unspent_duplicate;
 
     else if (is_missing_previous_outputs())
