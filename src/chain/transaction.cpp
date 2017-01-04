@@ -51,7 +51,7 @@ namespace chain {
 
 using namespace bc::machine;
 
-const size_t transaction::validation::unspecified_height = 0;
+////const size_t transaction::validation::unspecified_height = 0;
 
 // Read a length-prefixed collection of inputs or outputs from the source.
 template<class Source, class Put>
@@ -749,7 +749,7 @@ code transaction::check(bool transaction_pool) const
     // We cannot know if bip16 is enabled at this point so we disable it.
     // This will not make a difference unless prevouts are populated, in which
     // case they are ignored. This means that p2sh sigops are not counted here.
-    // This is a preliminary check, the final count must come from connect().
+    // This is a preliminary check, the final count must come from accept().
     // Reenable once sigop caching is implemented, otherwise is deoptimization.
     ////else if (transaction_pool && signature_operations(false) > max_block_sigops)
     ////    return error::transaction_legacy_sigop_limit;
@@ -758,14 +758,28 @@ code transaction::check(bool transaction_pool) const
         return error::success;
 }
 
+code transaction::accept(bool transaction_pool) const
+{
+    const auto state = validation.state;
+    return state ? accept(*state, transaction_pool) : error::operation_failed;
+}
+
 // These checks assume that prevout caching is completed on all tx.inputs.
 // Flags for tx pool calls should be based on the current blockchain height.
 code transaction::accept(const chain_state& state, bool transaction_pool) const
 {
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip30 = state.is_enabled(rule_fork::bip30_rule);
+    const auto duplicates = state.is_enabled(rule_fork::allowed_duplicates);
 
-    if (bip30 && validation.duplicate)
+    //*************************************************************************
+    // CONSENSUS:
+    // A transaction hash that exists in the chain is not acceptable even if
+    // the original is spent in the new block. This is not necessary nor is it
+    // described by BIP30, but it is in the code referenced by BIP30. As such
+    // the tx pool need only test against the chain, skipping the pool.
+    //*************************************************************************
+    if (!duplicates && bip30 && validation.duplicate)
         return error::unspent_duplicate;
 
     else if (is_missing_previous_outputs())
@@ -786,6 +800,12 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
 
     else
         return error::success;
+}
+
+code transaction::connect() const
+{
+    const auto state = validation.state;
+    return state ? connect(*state) : error::operation_failed;
 }
 
 code transaction::connect(const chain_state& state) const

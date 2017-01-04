@@ -56,19 +56,17 @@ public:
     // These properties facilitate block and transaction validation.
     struct validation
     {
-        static const size_t unspecified_height;
+        ////static const size_t unspecified_height;
 
         // These are used for transaction pool validation only.
-        size_t height = validation::unspecified_height;
-        code result = error::not_found;
+        code error = error::not_found;
         chain_state::ptr state = nullptr;
-
-        /// The handler to invoke when the tx clears the pool.
-        confirm_handler confirm = nullptr;
+        ////size_t height = validation::unspecified_height;
+        /////// The handler to invoke when the tx clears the pool.
+        ////confirm_handler confirm = nullptr;
 
         /// This does not exclude the two excepted transactions (see BIP30).
         /// The transaction hash duplicates one in the blockchain (only).
-        /// This is for block validation, pool validation uses the result code.
         bool duplicate = false;
     };
 
@@ -166,8 +164,10 @@ public:
     bool is_final(size_t block_height, uint32_t block_time) const;
     bool is_locktime_conflict() const;
 
-    code check(bool transaction_pool = true) const;
+    code check(bool transaction_pool=true) const;
+    code accept(bool transaction_pool=true) const;
     code accept(const chain_state& state, bool transaction_pool=true) const;
+    code connect() const;
     code connect(const chain_state& state) const;
     code connect_input(const chain_state& state, size_t input_index) const;
 
