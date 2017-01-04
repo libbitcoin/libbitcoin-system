@@ -40,7 +40,7 @@ public:
     typedef std::shared_ptr<socket> ptr;
 
     /// Construct an instance.
-    socket();
+    socket(threadpool& thread);
 
     /// Obtain the authority of the remote endpoint.
     config::authority authority() const;
@@ -48,19 +48,16 @@ public:
     /// The underlying socket.
     asio::socket& get();
 
-    /// The threadpool managed by this socket.
-    threadpool& thread();
-
     /// Signal cancel of all outstanding work on the socket.
     virtual void stop();
 
 private:
     // This is thread safe.
-    threadpool thread_;
+    threadpool& thread_;
 
     // This is protected by mutex.
     asio::socket socket_;
-    mutable  shared_mutex mutex_;
+    mutable shared_mutex mutex_;
 };
 
 } // namespace libbitcoin

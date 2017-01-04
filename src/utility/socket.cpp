@@ -27,8 +27,8 @@
 
 namespace libbitcoin {
 
-socket::socket()
-  : thread_(1),
+socket::socket(threadpool& thread)
+  : thread_(thread),
     socket_(thread_.service())
     /*, CONSTRUCT_TRACK(socket) */
 {
@@ -60,11 +60,6 @@ asio::socket& socket::get()
     ///////////////////////////////////////////////////////////////////////////
 }
 
-threadpool& socket::thread()
-{
-    return thread_;
-}
-
 void socket::stop()
 {
     // Handling socket error codes creates exception safety.
@@ -72,7 +67,7 @@ void socket::stop()
 
     ///////////////////////////////////////////////////////////////////////////
     // Critical Section.
-    mutex_.lock();
+    unique_lock lock(mutex_);
 
     // Signal the end of oustanding async socket functions (read).
     socket_.shutdown(asio::socket::shutdown_both, ignore);
@@ -80,12 +75,7 @@ void socket::stop()
     // BUGBUG: this is documented to fail on Windows XP and Server 2003.
     // DO NOT CLOSE SOCKET, IT TERMINATES WORK IMMEDIATELY RESULTING IN LEAKS
     socket_.cancel(ignore);
-
-    mutex_.unlock();
     ///////////////////////////////////////////////////////////////////////////
-
-    // Signal the end of oustanding work and no new work.
-    thread_.shutdown();
 }
 
 } // namespace libbitcoin
