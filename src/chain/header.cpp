@@ -19,8 +19,8 @@
  */
 #include <bitcoin/bitcoin/chain/header.hpp>
 
-#include <cstddef>
 #include <chrono>
+#include <cstddef>
 #include <utility>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/chain/compact.hpp>
@@ -34,6 +34,9 @@
 
 namespace libbitcoin {
 namespace chain {
+
+// Use system clock because we require accurate time of day.
+using wall_clock = std::chrono::system_clock;
 
 const size_t header::validation::orphan_height = 0;
 
@@ -414,8 +417,6 @@ hash_digest header::hash() const
 
 bool header::is_valid_time_stamp() const
 {
-    // Use system clock because we require accurate time of day.
-    typedef std::chrono::system_clock wall_clock;
     static const auto two_hours = std::chrono::hours(time_stamp_future_hours);
     const auto time = wall_clock::from_time_t(timestamp_);
     const auto future = wall_clock::now() + two_hours;
