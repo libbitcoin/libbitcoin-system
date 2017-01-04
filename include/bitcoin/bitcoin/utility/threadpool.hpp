@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_THREADPOOL_HPP
 #define LIBBITCOIN_THREADPOOL_HPP
 
+#include <atomic>
 #include <cstddef>
 #include <memory>
 #include <functional>
@@ -104,6 +105,7 @@ private:
 
     // These are protected by mutex.
 
+    std::atomic<size_t> size_;
     std::vector<asio::thread> threads_;
     mutable upgrade_mutex threads_mutex_;
 
