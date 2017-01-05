@@ -163,6 +163,7 @@ src_libbitcoin_la_SOURCES = \
     src/utility/png.cpp \
     src/utility/random.cpp \
     src/utility/scope_lock.cpp \
+    src/utility/sequencer.cpp \
     src/utility/sequential_lock.cpp \
     src/utility/socket.cpp \
     src/utility/string.cpp \

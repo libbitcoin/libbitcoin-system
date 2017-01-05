@@ -189,6 +189,7 @@
     <ClCompile Include="..\..\..\..\src\utility\ostream_writer.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\conditional_lock.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\scope_lock.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\sequencer.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\sequential_lock.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\socket.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\string.cpp" />
