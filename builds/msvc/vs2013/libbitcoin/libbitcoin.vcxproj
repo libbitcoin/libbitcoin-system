@@ -351,6 +351,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\resubscriber.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\conditional_lock.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\scope_lock.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\sequencer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\sequential_lock.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\socket.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\synchronizer.hpp" />

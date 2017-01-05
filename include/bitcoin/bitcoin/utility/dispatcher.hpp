@@ -62,7 +62,7 @@ public:
     ////size_t concurrent_backlog();
     ////size_t combined_backlog();
 
-    /// Invokes a job on the current thread.
+    /// Invokes a job on the current thread. Equivalent to invoking std::bind.
     template <typename... Args>
     static void bound(Args&&... args)
     {
@@ -89,6 +89,20 @@ public:
     void unordered(Args&&... args)
     {
         heap_->unordered(BIND_ARGS(args));
+    }
+
+    /// Posts an asynchronous job to the sequencer. Ordered and not concurrent.
+    /// The sequencer provides both non-concurrency and ordered execution.
+    template <typename... Args>
+    void lock(Args&&... args)
+    {
+        heap_->lock(BIND_ARGS(args));
+    }
+
+    /// Complete sequential execution.
+    void unlock()
+    {
+        heap_->unlock();
     }
 
     /// Returns a delegate that will execute the job on the current thread.
@@ -130,6 +144,18 @@ public:
     template <typename... Args>
     auto unordered_delegate(Args&&... args) ->
         delegates::unordered<decltype(BIND_ARGS(args))>
+    {
+        return
+        {
+            BIND_ARGS(args),
+            heap_
+        };
+    }
+
+    /// Returns a delegate that will post a job via the sequencer.
+    template <typename... Args>
+    auto sequence_delegate(Args&&... args) ->
+        delegates::sequence<decltype(BIND_ARGS(args))>
     {
         return
         {
@@ -191,6 +217,20 @@ public:
             ordered(BIND_ELEMENT(args, element, call));
     }
 
+    /// Sequences the job against each member of a collection with order.
+    template <typename Element, typename Handler, typename... Args>
+    void sequential(const std::vector<Element>& collection,
+        const std::string& name, Handler&& handler, Args... args)
+    {
+        // Failures are suppressed, success always returned to handler.
+        const auto call = synchronize(FORWARD_HANDLER(handler),
+            collection.size(), name, true);
+
+        for (const auto& element: collection)
+            sequence(BIND_ELEMENT(args, element, call));
+    }
+
+    /// The size of the dispatcher's threadpool at its time of construction.
     size_t size() const
     {
         return size_;
