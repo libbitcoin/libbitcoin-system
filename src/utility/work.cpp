@@ -31,8 +31,10 @@ work::work(threadpool& pool, const std::string& name)
     ////ordered_(std::make_shared<monitor::count>(0)),
     ////unordered_(std::make_shared<monitor::count>(0)),
     ////concurrent_(std::make_shared<monitor::count>(0)),
+    ////sequential_(std::make_shared<monitor::count>(0)),
     service_(pool.service()),
-    strand_(service_)
+    strand_(service_),
+    sequence_(service_)
 {
 }
 
@@ -49,6 +51,11 @@ work::work(threadpool& pool, const std::string& name)
 ////size_t work::concurrent_backlog()
 ////{
 ////    return concurrent_->load();
+////}
+////
+////size_t work::sequential_backlog()
+////{
+////    return sequential_->load();
 ////}
 ////
 ////size_t work::combined_backlog()

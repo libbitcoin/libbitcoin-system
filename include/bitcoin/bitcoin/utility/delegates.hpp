@@ -88,6 +88,20 @@ struct unordered
     work::ptr heap;
 };
 
+/// Sequence ordering delegate.
+template <typename Handler>
+struct sequence
+{
+    template <typename... Args>
+    void operator()(Args&&... args)
+    {
+        heap->lock(BIND_HANDLER(handler, args));
+    }
+
+    Handler handler;
+    work::ptr heap;
+};
+
 #undef FORWARD_ARGS
 #undef FORWARD_HANDLER
 #undef BIND_HANDLER
