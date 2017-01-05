@@ -20,6 +20,8 @@
 #ifndef LIBBITCOIN_THREAD_HPP
 #define LIBBITCOIN_THREAD_HPP
 
+#include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <boost/thread.hpp>
 #include <bitcoin/bitcoin/define.hpp>
@@ -53,6 +55,8 @@ typedef boost::upgrade_mutex upgrade_mutex;
 typedef boost::unique_lock<shared_mutex> unique_lock;
 typedef boost::shared_lock<shared_mutex> shared_lock;
 
+BC_API size_t threads(uint32_t configured);
+BC_API thread_priority priority(bool priority);
 BC_API void set_thread_priority(thread_priority priority);
 
 } // namespace libbitcoin
