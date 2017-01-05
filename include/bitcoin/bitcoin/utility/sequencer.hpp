@@ -23,9 +23,7 @@
 #include <functional>
 #include <memory>
 #include <queue>
-#include <utility>
 #include <bitcoin/bitcoin/utility/asio.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
 ////#include <bitcoin/bitcoin/utility/track.hpp>
@@ -40,70 +38,11 @@ public:
     typedef std::shared_ptr<sequencer> ptr;
     typedef std::function<void()> action;
 
-    sequencer(asio::service& service)
-      : service_(service), executing_(false)
-    {
-    }
+    sequencer(asio::service& service);
+    ~sequencer();
 
-    ~sequencer()
-    {
-        BITCOIN_ASSERT_MSG(actions_.empty(), "sequencer not cleared");
-    }
-
-    void lock(action&& handler)
-    {
-        auto post = false;
-
-        // Critical Section
-        ///////////////////////////////////////////////////////////////////////
-        mutex_.lock();
-
-        if (executing_)
-        {
-            actions_.emplace(std::move(handler));
-        }
-        else
-        {
-            post = true;
-            executing_ = true;
-        }
-
-        mutex_.unlock();
-        ///////////////////////////////////////////////////////////////////////
-
-        if (post)
-            service_.post(std::move(handler));
-    }
-
-    void unlock()
-    {
-        action handler;
-
-        // Critical Section
-        ///////////////////////////////////////////////////////////////////////
-        mutex_.lock();
-
-        DEBUG_ONLY(const auto executing = executing_;)
-
-        if (actions_.empty())
-        {
-            executing_ = false;
-        }
-        else
-        {
-            executing_ = true;
-            std::swap(handler, actions_.front());
-            actions_.pop();
-        }
-
-        mutex_.unlock();
-        ///////////////////////////////////////////////////////////////////////
-
-        BITCOIN_ASSERT_MSG(executing, "called unlock but sequence not locked");
-
-        if (handler)
-            service_.post(std::move(handler));
-    }
+    void lock(action&& handler);
+    void unlock();
 
 private:
     // This is thread safe.
@@ -112,11 +51,9 @@ private:
     // These are protected by mutex.
     bool executing_;
     std::queue<action> actions_;
-    mutable upgrade_mutex mutex_;
+    mutable shared_mutex mutex_;
 };
 
 } // namespace libbitcoin
-
-////#include <bitcoin/bitcoin/impl/utility/sequencer.ipp>
 
 #endif
