@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef  LIBBITCOIN_NOTIFIER_HPP
-#define  LIBBITCOIN_NOTIFIER_HPP
+#ifndef LIBBITCOIN_NOTIFIER_HPP
+#define LIBBITCOIN_NOTIFIER_HPP
 
 #include <cstddef>
 #include <functional>
@@ -27,7 +27,6 @@
 #include <type_traits>
 #include <unordered_map>
 #include <bitcoin/bitcoin/utility/asio.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>

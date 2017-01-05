@@ -140,7 +140,7 @@ private:
 };
 
 template <typename Handler>
-synchronizer<Handler> synchronize(Handler&& handler,size_t clearance_count,
+synchronizer<Handler> synchronize(Handler&& handler, size_t clearance_count,
     const std::string& name, synchronizer_terminate mode=
     synchronizer_terminate::on_error)
 {

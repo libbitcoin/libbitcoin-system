@@ -17,14 +17,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef  LIBBITCOIN_SUBSCRIBER_HPP
-#define  LIBBITCOIN_SUBSCRIBER_HPP
+#ifndef LIBBITCOIN_SUBSCRIBER_HPP
+#define LIBBITCOIN_SUBSCRIBER_HPP
 
 #include <functional>
 #include <memory>
 #include <string>
 #include <vector>
-#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
