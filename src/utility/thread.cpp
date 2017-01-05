@@ -19,7 +19,11 @@
  */
 #include <bitcoin/bitcoin/utility/thread.hpp>
 
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <stdexcept>
+#include <thread>
 
 #ifdef _MSC_VER
     #include <windows.h>
@@ -69,6 +73,17 @@ void set_thread_priority(thread_priority priority)
 #else
     setpriority(PRIO_PROCESS, getpid(), prioritization);
 #endif
+}
+
+size_t threads(uint32_t configured)
+{
+    const auto hardware = std::max(std::thread::hardware_concurrency(), 1u);
+    return configured == 0 ? hardware : std::min(configured, hardware);
+}
+
+thread_priority priority(bool priority)
+{
+    return priority ? thread_priority::high : thread_priority::normal;
 }
 
 } // namespace libbitcoin
