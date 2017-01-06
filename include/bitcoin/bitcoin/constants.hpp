@@ -166,7 +166,10 @@ static const config::checkpoint testnet_allowed_duplicates_checkpoint
 //-----------------------------------------------------------------------------
 
 BC_CONSTEXPR size_t command_size = 12;
-BC_CONSTEXPR size_t max_inventory_count = 50000;
+BC_CONSTEXPR size_t max_get_blocks = 500;
+BC_CONSTEXPR size_t max_get_headers = 2000;
+BC_CONSTEXPR size_t max_get_data = 50000;
+BC_CONSTEXPR size_t max_inventory = 50000;
 
 /// Variable integer prefix sentinels.
 BC_CONSTEXPR uint8_t varint_two_bytes = 0xfd;
