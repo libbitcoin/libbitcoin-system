@@ -53,6 +53,7 @@ enum error_code_t
     not_found = 3,
     file_system = 42,
     non_standard = 17,
+    not_implemented = 70,
 
     // network
     service_stopped = 1,
