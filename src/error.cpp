@@ -111,12 +111,8 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "insufficient work to reorganize";
 
         // transaction pool
-        case error::blockchain_reorganized:
-            return "transactions invalidated by blockchain reorganization";
-        case error::transaction_pool_filled:
-            return "forced removal of old transaction from pool overflow";
-        case error::duplicate_pool_transaction:
-            return "transaction with same hash already exists in pool";
+        case error::orphan_transaction:
+            return "missing transaction parent";
 
         // check header
         case error::invalid_proof_of_work:

@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_byte)
 
 BOOST_AUTO_TEST_CASE(roundtrip_error_code)
 {
-    const code expected(error::blockchain_reorganized);
+    const code expected(error::futuristic_timestamp);
     data_chunk data(4);
     auto source = make_safe_deserializer(data.begin(), data.end());
     auto sink = make_unsafe_serializer(data.begin());

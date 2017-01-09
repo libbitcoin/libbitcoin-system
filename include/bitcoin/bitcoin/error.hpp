@@ -53,7 +53,7 @@ enum error_code_t
     not_found = 3,
     file_system = 42,
     non_standard = 17,
-    not_implemented = 70,
+    not_implemented = 4,
 
     // network
     service_stopped = 1,
@@ -78,12 +78,9 @@ enum error_code_t
     orphan_block = 5,
     invalid_previous_block = 24,
     insufficient_work = 48,
-    //// TODO: block_pool_filled,
 
     // transaction pool
-    blockchain_reorganized = 14,
-    transaction_pool_filled = 15,
-    duplicate_pool_transaction = 4,
+    orphan_transaction = 14,
 
     // check header
     invalid_proof_of_work = 26,
@@ -101,7 +98,7 @@ enum error_code_t
     first_not_coinbase = 28,
     extra_coinbases = 29,
     internal_duplicate = 49,
-    internal_double_spend = 69,
+    internal_double_spend = 15,
     merkle_mismatch = 31,
     block_legacy_sigop_limit = 30,
 
