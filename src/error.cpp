@@ -64,7 +64,9 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         case error::file_system:
             return "file system error";
         case error::non_standard:
-            return "transaction is not standard";
+            return "transaction not standard";
+        case error::not_implemented:
+            return "featre not implemented";
 
         // database
         case error::store_block_invalid_height:
@@ -76,7 +78,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
 
         // network
         case error::service_stopped:
-            return "service is stopped";
+            return "service stopped";
         case error::operation_failed:
             return "operation failed";
         case error::resolve_failed:
@@ -94,9 +96,9 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         case error::channel_timeout:
             return "connection timed out";
         case error::address_blocked:
-            return "address is blocked by policy";
+            return "address blocked by policy";
         case error::channel_stopped:
-            return "channel is stopped";
+            return "channel stopped";
 
         // block pool
         case error::duplicate_block:
@@ -118,7 +120,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
 
         // check header
         case error::invalid_proof_of_work:
-            return "proof of work is invalid";
+            return "proof of work invalid";
         case error::futuristic_timestamp:
             return "timestamp too far in the future";
 
@@ -138,7 +140,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         case error::empty_block:
             return "block has no transactions";
         case error::first_not_coinbase:
-            return "first transaction is not a coinbase";
+            return "first transaction not a coinbase";
         case error::extra_coinbases:
             return "more than one coinbase";
         case error::internal_duplicate:
@@ -156,19 +158,19 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         case error::coinbase_height_mismatch:
             return "block height mismatch in coinbase";
         case error::coinbase_value_limit:
-            return "coinbase value is too high";
+            return "coinbase value too high";
         case error::block_embedded_sigop_limit:
             return "too many block embedded signature operations";
 
         // check transaction
         case error::empty_transaction:
-            return "transaction inputs or outputs are empty";
+            return "transaction inputs or outputs empty";
         case error::previous_output_null:
             return "non-coinbase transaction has input with null previous output";
         case error::spend_overflow:
             return "spend outside valid range";
         case error::invalid_coinbase_script_size:
-            return "coinbase script is too small or large";
+            return "coinbase script too small or large";
         case error::coinbase_transaction:
             return "coinbase transaction disallowed in memory pool";
         case error::transaction_legacy_sigop_limit:
