@@ -51,8 +51,6 @@ namespace chain {
 
 using namespace bc::machine;
 
-////const size_t transaction::validation::unspecified_height = 0;
-
 // Read a length-prefixed collection of inputs or outputs from the source.
 template<class Source, class Put>
 bool read(Source& source, std::vector<Put>& puts, bool wire)
@@ -622,28 +620,39 @@ bool transaction::is_missing_previous_outputs() const
     const auto missing = [](const input& input)
     {
         const auto& prevout = input.previous_output();
-        auto missing = !prevout.validation.cache.is_valid();
-        return missing && !prevout.is_null();
+        const auto coinbase = prevout.is_null();
+        const auto missing = !prevout.validation.cache.is_valid();
+        return missing && !coinbase;
     };
 
     // This is an optimization of !missing_inputs().empty();
     return std::any_of(inputs_.begin(), inputs_.end(), missing);
 }
 
-point::indexes transaction::missing_previous_outputs() const
+output_point::list transaction::missing_previous_outputs() const
 {
-    point::indexes indexes;
+    output_point::list out;
 
-    for (size_t in = 0; in < inputs_.size(); ++in)
+    for (auto& input: inputs_)
     {
-        const auto& prevout = inputs_[in].previous_output();
-        auto missing = !prevout.validation.cache.is_valid();
+        const auto& prevout = input.previous_output();
+        const auto coinbase = prevout.is_null();
+        const auto missing = !prevout.validation.cache.is_valid();
 
-        if (missing && !prevout.is_null())
-            indexes.push_back(safe_unsigned<uint32_t>(in));
+        if (missing && !coinbase)
+            out.push_back(prevout);
     }
 
-    return indexes;
+    return out;
+}
+
+hash_list transaction::missing_previous_transactions() const
+{
+    const auto points = missing_previous_outputs();
+    hash_list out(points.size());
+    const auto hasher = [](const output_point& point) { return point.hash(); };
+    std::transform(points.begin(), points.end(), out.begin(), hasher);
+    return out;
 }
 
 bool transaction::is_double_spend(bool include_unconfirmed) const
@@ -658,20 +667,20 @@ bool transaction::is_double_spend(bool include_unconfirmed) const
     return std::any_of(inputs_.begin(), inputs_.end(), spent);
 }
 
-point::indexes transaction::double_spends(bool include_unconfirmed) const
-{
-    point::indexes spends;
-
-    for (size_t in = 0; in < inputs_.size(); ++in)
-    {
-        const auto& prevout = inputs_[in].previous_output().validation;
-
-        if (prevout.spent && (include_unconfirmed || prevout.confirmed))
-            spends.push_back(safe_unsigned<uint32_t>(in));
-    }
-
-    return spends;
-}
+////point::indexes transaction::double_spends(bool include_unconfirmed) const
+////{
+////    point::indexes spends;
+////
+////    for (size_t in = 0; in < inputs_.size(); ++in)
+////    {
+////        const auto& prevout = inputs_[in].previous_output().validation;
+////
+////        if (prevout.spent && (include_unconfirmed || prevout.confirmed))
+////            spends.push_back(safe_unsigned<uint32_t>(in));
+////    }
+////
+////    return spends;
+////}
 
 bool transaction::is_immature(size_t target_height) const
 {
@@ -684,20 +693,20 @@ bool transaction::is_immature(size_t target_height) const
     return std::any_of(inputs_.begin(), inputs_.end(), immature);
 }
 
-point::indexes transaction::immature_inputs(size_t target_height) const
-{
-    point::indexes immatures;
-
-    for (size_t in = 0; in < inputs_.size(); ++in)
-    {
-        const auto& prevout = inputs_[in].previous_output();
-
-        if (!prevout.is_mature(target_height))
-            immatures.push_back(safe_unsigned<uint32_t>(in));
-    }
-
-    return immatures;
-}
+////point::indexes transaction::immature_inputs(size_t target_height) const
+////{
+////    point::indexes immatures;
+////
+////    for (size_t in = 0; in < inputs_.size(); ++in)
+////    {
+////        const auto& prevout = inputs_[in].previous_output();
+////
+////        if (!prevout.is_mature(target_height))
+////            immatures.push_back(safe_unsigned<uint32_t>(in));
+////    }
+////
+////    return immatures;
+////}
 
 // Coinbase transactions return success, to simplify iteration.
 code transaction::connect_input(const chain_state& state,

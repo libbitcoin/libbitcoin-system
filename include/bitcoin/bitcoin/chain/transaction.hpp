@@ -56,14 +56,9 @@ public:
     // These properties facilitate block and transaction validation.
     struct validation
     {
-        ////static const size_t unspecified_height;
-
         // These are used for transaction pool validation only.
         code error = error::not_found;
         chain_state::ptr state = nullptr;
-        ////size_t height = validation::unspecified_height;
-        /////// The handler to invoke when the tx clears the pool.
-        ////confirm_handler confirm = nullptr;
 
         /// This does not exclude the two excepted transactions (see BIP30).
         /// The transaction hash duplicates one in the blockchain (only).
@@ -147,9 +142,10 @@ public:
     //-----------------------------------------------------------------------------
 
     uint64_t fees() const;
-    point::indexes double_spends(bool include_unconfirmed) const;
-    point::indexes immature_inputs(size_t target_height) const;
-    point::indexes missing_previous_outputs() const;
+    ////point::indexes double_spends(bool include_unconfirmed) const;
+    ////point::indexes immature_inputs(size_t target_height) const;
+    output_point::list missing_previous_outputs() const;
+    hash_list missing_previous_transactions() const;
     uint64_t total_input_value() const;
     uint64_t total_output_value() const;
     size_t signature_operations(bool bip16_active) const;
