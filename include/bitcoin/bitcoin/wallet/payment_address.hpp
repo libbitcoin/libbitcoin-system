@@ -21,6 +21,7 @@
 #define LIBBITCOIN_WALLET_PAYMENT_ADDRESS_HPP
 
 #include <algorithm>
+#include <iostream>
 #include <cstdint>
 #include <memory>
 #include <string>

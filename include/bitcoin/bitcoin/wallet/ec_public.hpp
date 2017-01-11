@@ -21,6 +21,7 @@
 #define LIBBITCOIN_EC_PUBLIC_HPP
 
 #include <cstdint>
+#include <iostream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>

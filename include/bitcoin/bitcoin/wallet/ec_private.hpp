@@ -21,6 +21,7 @@
 #define LIBBITCOIN_EC_PRIVATE_HPP
 
 #include <cstdint>
+#include <iostream>
 #include <string>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>

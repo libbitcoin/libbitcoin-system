@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/wallet/ec_public.hpp>
 
 #include <algorithm>
+#include <iostream>
 #include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
