@@ -21,6 +21,7 @@
 #define LIBBITCOIN_WALLET_STEALTH_ADDRESS_HPP
 
 #include <cstdint>
+#include <iostream>
 #include <vector>
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/constants.hpp>

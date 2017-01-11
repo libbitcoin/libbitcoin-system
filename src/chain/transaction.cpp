@@ -40,6 +40,7 @@
 #include <bitcoin/bitcoin/machine/operation.hpp>
 #include <bitcoin/bitcoin/machine/rule_fork.hpp>
 #include <bitcoin/bitcoin/message/messages.hpp>
+#include <bitcoin/bitcoin/utility/collection.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
@@ -649,10 +650,10 @@ output_point::list transaction::missing_previous_outputs() const
 hash_list transaction::missing_previous_transactions() const
 {
     const auto points = missing_previous_outputs();
-    hash_list out(points.size());
+    hash_list hashes(points.size());
     const auto hasher = [](const output_point& point) { return point.hash(); };
-    std::transform(points.begin(), points.end(), out.begin(), hasher);
-    return out;
+    std::transform(points.begin(), points.end(), hashes.begin(), hasher);
+    return distinct(hashes);
 }
 
 bool transaction::is_double_spend(bool include_unconfirmed) const

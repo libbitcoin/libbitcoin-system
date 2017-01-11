@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/wallet/ec_private.hpp>
 
 #include <cstdint>
+#include <iostream>
 #include <string>
 #include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/formats/base_58.hpp>

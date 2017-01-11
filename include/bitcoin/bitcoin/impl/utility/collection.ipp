@@ -25,6 +25,7 @@
 #include <cstddef>
 #include <iterator>
 #include <iostream>
+#include <type_traits>
 #include <vector>
 
 namespace libbitcoin {
@@ -35,6 +36,15 @@ std::vector<Target> cast(const std::vector<Source>& source)
     std::vector<Target> target(source.size());
     target.assign(source.begin(), source.end());
     return target;
+}
+
+template <typename Element>
+std::vector<Element>& distinct(std::vector<Element>& list)
+{
+    std::sort(list.begin(), list.end());
+    list.erase(std::unique(list.begin(), list.end()), list.end());
+    list.shrink_to_fit();
+    return list;
 }
 
 template <typename Pair, typename Key>

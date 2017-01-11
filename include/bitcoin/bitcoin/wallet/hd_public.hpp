@@ -21,6 +21,7 @@
 #define LIBBITCOIN_WALLET_HD_PUBLIC_KEY_HPP
 
 #include <cstdint>
+#include <iostream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
