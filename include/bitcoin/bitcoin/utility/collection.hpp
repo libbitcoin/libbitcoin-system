@@ -42,6 +42,15 @@ template <typename Source, typename Target>
 std::vector<Target> cast(const std::vector<Source>& source);
 
 /**
+ * Obtain the sorted distinct elements of the list.
+ * @param      <Element>  The list element type.
+ * @param[in]  list       The list.
+ * @return                The sorted list reduced to its distinct elements.
+ */
+template <typename Element>
+std::vector<Element>& distinct(std::vector<Element>& list);
+
+/**
  * Find the position of a pair in an ordered list.
  * @param      <Pair>  The type of list member elements.
  * @param[in]  list    The list to search.
@@ -82,15 +91,6 @@ typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,
  */
 template <typename Type>
 void move_append(std::vector<Type>& target, std::vector<Type>& source);
-
-/////**
-//// * Reverse a list, returning the new list.
-//// * @param      <Collection> The type of list.
-//// * @param[in]  list         The target list.
-//// * @returns                 The new reversed list
-//// */
-////template <typename Collection>
-////Collection reverse(const std::vector<Collection>& list);
 
 } // namespace libbitcoin
 
