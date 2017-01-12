@@ -350,6 +350,8 @@ chain::block block::genesis_testnet()
     return genesis;
 }
 
+// With a 32 bit chain the size of the result should not exceed 43 and with a
+// 64 bit chain should not exceed 75, using a limit of: 10 + log2(height) + 1.
 size_t block::locator_size(size_t top)
 {
     // Set rounding behavior, not consensus-related, thread side effect :<.
