@@ -41,7 +41,10 @@ const size_t heading::maximum_size()
 // The variable integer portion is maximum 3 bytes (with a count of 50,000).
 // According to protocol documentation get_blocks is limited only by the
 // general maximum payload size of 0x02000000 (33,554,432). But this is an
-// absurd limit for a message that should always be very small.
+// absurd limit for a message that is properly [10 + log2(height) + 1]. Since
+// protocol limits height to 2^32 this is 43. Even with expansion to 2^62
+// this is limited to 75. So we limit payloads to the maximum inventory
+// payload size.
 const size_t heading::maximum_payload_size(uint32_t)
 {
     static constexpr size_t vector = sizeof(uint32_t) + hash_size;

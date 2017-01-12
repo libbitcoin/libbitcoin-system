@@ -165,11 +165,17 @@ static const config::checkpoint testnet_allowed_duplicates_checkpoint
 // Network protocol constants.
 //-----------------------------------------------------------------------------
 
+// Explicit size.
 BC_CONSTEXPR size_t command_size = 12;
+
+// Explicit limits.
 BC_CONSTEXPR size_t max_get_blocks = 500;
 BC_CONSTEXPR size_t max_get_headers = 2000;
 BC_CONSTEXPR size_t max_get_data = 50000;
 BC_CONSTEXPR size_t max_inventory = 50000;
+
+// Effective limit given a 32 bit chain height boundary: 10 + log2(2^32) + 1.
+BC_CONSTEXPR size_t max_locator = 43;
 
 /// Variable integer prefix sentinels.
 BC_CONSTEXPR uint8_t varint_two_bytes = 0xfd;
