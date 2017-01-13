@@ -74,7 +74,7 @@ public:
         size_t timestamp_retarget;
 
         /// mainnet: 227931, testnet: 21111 (or map::unrequested)
-        size_t allowed_duplicates_height;
+        size_t allow_collisions_height;
     };
 
     /// Values used to populate chain state at the target height.
@@ -86,8 +86,8 @@ public:
         /// Hash of the candidate block or null_hash for memory pool.
         hash_digest hash;
 
-        /// Hash of the allowed_duplicates block or null_hash if unrequested.
-        hash_digest allowed_duplicates_hash;
+        /// Hash of the allow_collisions block or null_hash if unrequested.
+        hash_digest allow_collisions_hash;
 
         /// Values must be ordered by height with high (block - 1) last.
         struct

@@ -780,7 +780,7 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
 {
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip30 = state.is_enabled(rule_fork::bip30_rule);
-    const auto duplicates = state.is_enabled(rule_fork::allowed_duplicates);
+    const auto duplicates = state.is_enabled(rule_fork::allow_collisions);
 
     //*************************************************************************
     // CONSENSUS:

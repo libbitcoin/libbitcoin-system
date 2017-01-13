@@ -153,11 +153,11 @@ static const config::checkpoint mainnet_bip30_exception_checkpoint2
 };
 
 // Hard fork to stop checking unspent duplicates above fixed bip34 activation.
-static const config::checkpoint mainnet_allowed_duplicates_checkpoint
+static const config::checkpoint mainnet_allow_collisions_checkpoint
 {
     "000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8", 227931
 };
-static const config::checkpoint testnet_allowed_duplicates_checkpoint
+static const config::checkpoint testnet_allow_collisions_checkpoint
 {
     "0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8", 21111
 };

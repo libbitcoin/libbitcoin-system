@@ -92,9 +92,9 @@ static boost::shared_ptr<collector> file_collector(
 {
     return bc::log::make_collector(
         rotation.archive_directory,
-        rotation.maximum_files_size,
+        rotation.maximum_archive_size,
         rotation.minimum_free_space,
-        rotation.maximum_files);
+        rotation.maximum_archive_files);
 }
 
 static boost::shared_ptr<text_file_sink> add_text_file_sink(

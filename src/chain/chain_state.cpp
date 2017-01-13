@@ -72,8 +72,8 @@ inline bool is_bip30_exception(const checkpoint& check, bool testnet)
 inline bool allow_duplicates(const hash_digest& hash, bool testnet)
 {
     return
-        (testnet && hash == testnet_allowed_duplicates_checkpoint.hash()) ||
-        (!testnet && hash == mainnet_allowed_duplicates_checkpoint.hash());
+        (testnet && hash == testnet_allow_collisions_checkpoint.hash()) ||
+        (!testnet && hash == mainnet_allow_collisions_checkpoint.hash());
 }
 
 inline bool bip34(size_t height, bool frozen, bool testnet)
@@ -183,10 +183,10 @@ chain_state::activations chain_state::activation(const data& values,
         result.forks |= (rule_fork::bip65_rule & forks);
     }
 
-    // allowed_duplicates is activated at and above the bip34 checkpoint.
-    if (allow_duplicates(values.allowed_duplicates_hash, testnet))
+    // allow_collisions is activated at and above the bip34 checkpoint.
+    if (allow_duplicates(values.allow_collisions_hash, testnet))
     {
-        result.forks |= (rule_fork::allowed_duplicates & forks);
+        result.forks |= (rule_fork::allow_collisions & forks);
     }
 
     // version 4/3/2 enforced based on 95% of preceding 1000 mainnet blocks.
@@ -371,14 +371,14 @@ chain_state::map chain_state::get_map(size_t height,
 
     // Allowed Duplicates.
     //-------------------------------------------------------------------------
-    map.allowed_duplicates_height = testnet ?
-        testnet_allowed_duplicates_checkpoint.height() :
-        mainnet_allowed_duplicates_checkpoint.height();
+    map.allow_collisions_height = testnet ?
+        testnet_allow_collisions_checkpoint.height() :
+        mainnet_allow_collisions_checkpoint.height();
 
-    // Don't attempt match if checked or height is below allowed duplicates height.
-    map.allowed_duplicates_height = checked ||
-        height < map.allowed_duplicates_height ?  map::unrequested :
-        map.allowed_duplicates_height;
+    // Don't attempt match if checked or height below allow collisions height.
+    map.allow_collisions_height = checked ||
+        height < map.allow_collisions_height ?  map::unrequested :
+        map.allow_collisions_height;
 
     return map;
 }

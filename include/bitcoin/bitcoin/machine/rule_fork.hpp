@@ -35,7 +35,7 @@ enum rule_fork : uint32_t
     /// pay-to-script-hash enabled (soft fork)
     bip16_rule = 1 << 1,
 
-    /// no duplicated unspent transaction ids (hard fork, necessary)
+    /// no duplicated unspent transaction ids (hard fork, security)
     bip30_rule = 1 << 2,
 
     /// coinbase must include height (soft fork)
@@ -47,10 +47,10 @@ enum rule_fork : uint32_t
     /// nop2 becomes check locktime verify (soft fork)
     bip65_rule = 1 << 5,
 
-    /// assume hash collisions cannot happen (hard fork, invalid)
-    allowed_duplicates = 1 << 6,
+    /// assume hash collisions cannot happen (hard fork, optimization)
+    allow_collisions = 1 << 6,
 
-    /// hard code activation heights (hard fork, unnecessary)
+    /// hard code activation heights (hard fork, optimization)
     deep_freeze = 1 << 7,
 
     /// rules that require bip34 style activation
@@ -59,13 +59,13 @@ enum rule_fork : uint32_t
         rule_fork::bip65_rule |
         rule_fork::bip66_rule,
 
-    /// the valid set of changes to the original rule set
-    consensus =
-        rule_fork::bip16_rule |
-        rule_fork::bip30_rule |
-        rule_fork::bip34_rule |
-        rule_fork::bip65_rule |
-        rule_fork::bip66_rule,
+    /////// the valid set of changes to the original rule set
+    ////consensus =
+    ////    rule_fork::bip16_rule |
+    ////    rule_fork::bip30_rule |
+    ////    rule_fork::bip34_rule |
+    ////    rule_fork::bip65_rule |
+    ////    rule_fork::bip66_rule,
 
     all_rules = 0xffffffff
 };
