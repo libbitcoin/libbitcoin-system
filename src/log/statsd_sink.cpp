@@ -28,6 +28,7 @@
 #include <boost/log/sinks.hpp>
 #include <boost/log/support/date_time.hpp>
 #include <boost/log/utility/setup/formatter_parser.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/log/features/counter.hpp>
 #include <bitcoin/bitcoin/log/features/gauge.hpp>
 #include <bitcoin/bitcoin/log/features/metric.hpp>
@@ -78,11 +79,14 @@ void statsd_formatter(const record_view& record, formatting_ostream& stream)
 static boost::shared_ptr<collector> file_collector(
     const rotable_file& rotation)
 {
+    // rotation_size controls enable/disable so use zero as max sentinel.
     return bc::log::make_collector(
         rotation.archive_directory,
-        rotation.maximum_files_size,
+        rotation.maximum_archive_size == 0 ? max_size_t :
+            rotation.maximum_archive_size,
         rotation.minimum_free_space,
-        rotation.maximum_files);
+        rotation.maximum_archive_files == 0 ? max_size_t :
+            rotation.maximum_archive_files);
 }
 
 static boost::shared_ptr<text_file_sink> add_text_file_sink(

@@ -35,9 +35,9 @@ struct rotable_file
     boost::filesystem::path original_log;
     boost::filesystem::path archive_directory;
     size_t rotation_size;
-    size_t maximum_files_size;
     size_t minimum_free_space;
-    size_t maximum_files;
+    size_t maximum_archive_size;
+    size_t maximum_archive_files;
 };
 
 } // namespace log
