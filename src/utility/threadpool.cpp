@@ -19,20 +19,12 @@
  */
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
-#include <algorithm>
-#include <memory>
-#include <new>
 #include <thread>
-#include <utility>
-#include <bitcoin/bitcoin/log/sink.hpp>
-#include <bitcoin/bitcoin/log/source.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
 
 namespace libbitcoin {
-
-#define LOG_SYSTEM "system"
 
 threadpool::threadpool(size_t number_threads, thread_priority priority)
   : size_(0)
