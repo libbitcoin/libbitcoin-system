@@ -75,9 +75,10 @@ void set_thread_priority(thread_priority priority)
 #endif
 }
 
-size_t threads(uint32_t configured)
+size_t threads(size_t configured, size_t minimum)
 {
-    const auto hardware = std::max(std::thread::hardware_concurrency(), 1u);
+    const size_t cores = std::thread::hardware_concurrency();
+    const auto hardware = std::max(cores, minimum);
     return configured == 0 ? hardware : std::min(configured, hardware);
 }
 

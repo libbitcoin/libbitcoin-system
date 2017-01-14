@@ -55,7 +55,7 @@ typedef boost::upgrade_mutex upgrade_mutex;
 typedef boost::unique_lock<shared_mutex> unique_lock;
 typedef boost::shared_lock<shared_mutex> shared_lock;
 
-BC_API size_t threads(uint32_t configured);
+BC_API size_t threads(size_t configured, size_t minimum);
 BC_API thread_priority priority(bool priority);
 BC_API void set_thread_priority(thread_priority priority);
 
