@@ -59,42 +59,40 @@ transaction transaction::factory_from_data(const uint32_t version,
 }
 
 transaction::transaction()
-  : chain::transaction(), originator_(0)
+  : chain::transaction()
 {
 }
 
 transaction::transaction(transaction&& other)
-  : chain::transaction(std::move(other)),
-    originator_(other.originator_)
+  : chain::transaction(std::move(other))
 {
 }
 
 transaction::transaction(const transaction& other)
-  : chain::transaction(other), originator_(other.originator_)
+  : chain::transaction(other)
 {
 }
 
 transaction::transaction(chain::transaction&& other)
-  : chain::transaction(std::move(other)), originator_(0)
+  : chain::transaction(std::move(other))
 {
 }
 
 transaction::transaction(const chain::transaction& other)
-  : chain::transaction(other), originator_(0)
+  : chain::transaction(other)
 {
 }
 
 transaction::transaction(uint32_t version, uint32_t locktime,
     chain::input::list&& inputs, chain::output::list&& outputs)
   : chain::transaction(version, locktime, std::move(inputs),
-        std::move(outputs)),
-    originator_(0)
+        std::move(outputs))
 {
 }
 
 transaction::transaction(uint32_t version, uint32_t locktime,
     const chain::input::list& inputs, const chain::output::list& outputs)
-  : chain::transaction(version, locktime, inputs, outputs), originator_(0)
+  : chain::transaction(version, locktime, inputs, outputs)
 {
 }
 
@@ -133,16 +131,6 @@ size_t transaction::serialized_size(uint32_t) const
     return chain::transaction::serialized_size();
 }
 
-uint64_t transaction::originator() const
-{
-    return originator_;
-}
-
-void transaction::set_originator(uint64_t value) const
-{
-    originator_ = value;
-}
-
 transaction& transaction::operator=(chain::transaction&& other)
 {
     reset();
@@ -152,7 +140,6 @@ transaction& transaction::operator=(chain::transaction&& other)
 
 transaction& transaction::operator=(transaction&& other)
 {
-    originator_ = other.originator_;
     chain::transaction::operator=(std::move(other));
     return *this;
 }

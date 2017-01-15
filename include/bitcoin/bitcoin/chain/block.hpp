@@ -49,9 +49,10 @@ public:
     typedef std::vector<block> list;
     typedef std::vector<size_t> indexes;
 
-    // These properties facilitate block validation.
+    // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
+        uint64_t originator;
         code error = error::not_found;
         chain_state::ptr state = nullptr;
 
@@ -169,7 +170,7 @@ public:
     code connect(const chain_state& state) const;
     code connect_transactions(const chain_state& state) const;
 
-    // These fields do not participate in serialization or comparison.
+    // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     mutable validation validation;
 
 protected:

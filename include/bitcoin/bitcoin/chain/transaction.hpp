@@ -50,18 +50,13 @@ public:
     typedef output::list outs;
     typedef std::vector<transaction> list;
 
-    // validation-related
-    typedef std::function<void(const code&)> confirm_handler;
-
-    // These properties facilitate block and transaction validation.
+    // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
-        // These are used for transaction pool validation only.
+        uint64_t originator;
         code error = error::not_found;
         chain_state::ptr state = nullptr;
 
-        /// This does not exclude the two excepted transactions (see BIP30).
-        /// The transaction hash duplicates one in the blockchain (only).
         bool duplicate = false;
     };
 
@@ -167,7 +162,7 @@ public:
     code connect(const chain_state& state) const;
     code connect_input(const chain_state& state, size_t input_index) const;
 
-    // These fields do not participate in serialization or comparison.
+    // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     mutable validation validation;
 
 protected:

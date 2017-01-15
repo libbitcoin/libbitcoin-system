@@ -44,13 +44,12 @@ public:
     /// This is a consensus value used in script::generate_signature_hash.
     static const uint64_t not_found;
 
-    // These properties facilitate block and transaction validation.
+    // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
-        // This is a non-consensus sentinel used to indicate an output is unspent.
+        /// This is a non-consensus sentinel used to indicate an output is unspent.
         static const uint32_t not_spent;
 
-        // These are used by database only.
         size_t spender_height = validation::not_spent;
     };
 
@@ -118,7 +117,7 @@ public:
 
     size_t signature_operations() const;
 
-    // These fields do not participate in wire serialization or comparison.
+    // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     mutable validation validation;
 
 protected:

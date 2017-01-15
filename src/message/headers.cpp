@@ -71,17 +71,17 @@ headers::headers()
 }
 
 // Uses headers copy assignment.
-headers::headers(const header_message::list& values)
+headers::headers(const header::list& values)
   : elements_(values)
 {
 }
 
-headers::headers(header_message::list&& values)
+headers::headers(header::list&& values)
   : elements_(std::move(values))
 {
 }
 
-headers::headers(const std::initializer_list<header_message>& values)
+headers::headers(const std::initializer_list<header>& values)
   : elements_(values)
 {
 }
@@ -165,7 +165,7 @@ void headers::to_data(uint32_t version, writer& sink) const
 
 void headers::to_hashes(hash_list& out) const
 {
-    const auto map = [](const header_message& header)
+    const auto map = [](const header& header)
     {
         return header.hash();
     };
@@ -177,7 +177,7 @@ void headers::to_hashes(hash_list& out) const
 void headers::to_inventory(inventory_vector::list& out,
     inventory::type_id type) const
 {
-    const auto map = [type](const header_message& header)
+    const auto map = [type](const header& header)
     {
         return inventory_vector{ type, header.hash() };
     };
@@ -188,25 +188,25 @@ void headers::to_inventory(inventory_vector::list& out,
 size_t headers::serialized_size(uint32_t version) const
 {
     return message::variable_uint_size(elements_.size()) +
-        (elements_.size() * header_message::satoshi_fixed_size(version));
+        (elements_.size() * header::satoshi_fixed_size(version));
 }
 
-header_message::list& headers::elements()
+header::list& headers::elements()
 {
     return elements_;
 }
 
-const header_message::list& headers::elements() const
+const header::list& headers::elements() const
 {
     return elements_;
 }
 
-void headers::set_elements(const header_message::list& values)
+void headers::set_elements(const header::list& values)
 {
     elements_ = values;
 }
 
-void headers::set_elements(header_message::list&& values)
+void headers::set_elements(header::list&& values)
 {
     elements_ = std::move(values);
 }

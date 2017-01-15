@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/message/header_message.hpp>
+#include <bitcoin/bitcoin/message/header.hpp>
 
 #include <cstdint>
 #include <cstddef>
@@ -35,96 +35,95 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string header_message::command = "headers";
-const uint32_t header_message::version_minimum = version::level::minimum;
-const uint32_t header_message::version_maximum = version::level::maximum;
+const std::string header::command = "headers";
+const uint32_t header::version_minimum = version::level::minimum;
+const uint32_t header::version_maximum = version::level::maximum;
 
-header_message header_message::factory_from_data(const uint32_t version,
+header header::factory_from_data(const uint32_t version,
     const data_chunk& data)
 {
-    header_message instance;
+    header instance;
     instance.from_data(version, data);
     return instance;
 }
 
-header_message header_message::factory_from_data(const uint32_t version,
+header header::factory_from_data(const uint32_t version,
     std::istream& stream)
 {
-    header_message instance;
+    header instance;
     instance.from_data(version, stream);
     return instance;
 }
 
-header_message header_message::factory_from_data(const uint32_t version,
+header header::factory_from_data(const uint32_t version,
     reader& source)
 {
-    header_message instance;
+    header instance;
     instance.from_data(version, source);
     return instance;
 }
 
-size_t header_message::satoshi_fixed_size(const uint32_t version)
+size_t header::satoshi_fixed_size(const uint32_t version)
 {
     return chain::header::satoshi_fixed_size() +
         message::variable_uint_size(0);
 }
 
-header_message::header_message()
-  : header(), originator_(0u)
+header::header()
+  : chain::header()
 {
 }
 
-header_message::header_message(uint32_t version,
+header::header(uint32_t version,
     const hash_digest& previous_block_hash, const hash_digest& merkle,
-    uint32_t timestamp, uint32_t bits, uint32_t nonce, uint64_t originator)
-  : header(version, previous_block_hash, merkle, timestamp, bits, nonce),
-    originator_(originator)
+    uint32_t timestamp, uint32_t bits, uint32_t nonce)
+  : chain::header(version, previous_block_hash, merkle, timestamp, bits, nonce)
 {
 }
 
-header_message::header_message(uint32_t version,
+header::header(uint32_t version,
     hash_digest&& previous_block_hash, hash_digest&& merkle,
-    uint32_t timestamp, uint32_t bits, uint32_t nonce, uint64_t originator)
-  : header(version, std::move(previous_block_hash), std::move(merkle),
-      timestamp, bits, nonce), originator_(originator)
+    uint32_t timestamp, uint32_t bits, uint32_t nonce)
+  : chain::header(version, std::move(previous_block_hash), std::move(merkle),
+      timestamp, bits, nonce)
 {
 }
 
-header_message::header_message(const chain::header& other)
-  : header(other), originator_(0u)
+header::header(const chain::header& other)
+  : chain::header(other)
 {
 }
 
-header_message::header_message(chain::header&& other)
-  : header(std::move(other)), originator_(0u)
+header::header(chain::header&& other)
+  : chain::header(std::move(other))
 {
 }
 
-header_message::header_message(const header_message& other)
-: header(other), originator_(other.originator_)
+header::header(const header& other)
+  : chain::header(other)
 {
 }
 
-header_message::header_message(header_message&& other)
-  : header(other), originator_(other.originator_)
+header::header(header&& other)
+  : chain::header(std::move(other))
 {
 }
 
-bool header_message::from_data(const uint32_t version, const data_chunk& data)
+bool header::from_data(const uint32_t version, const data_chunk& data)
 {
     data_source istream(data);
     return from_data(version, istream);
 }
 
-bool header_message::from_data(const uint32_t version, std::istream& stream)
+bool header::from_data(const uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(version, source);
 }
 
-bool header_message::from_data(const uint32_t version, reader& source)
+bool header::from_data(const uint32_t version, reader& source)
 {
-    if (!header::from_data(source))
+    if (!chain::header::from_data(source))
         return false;
 
     // The header message must trail a zero byte (yes, it's stoopid).
@@ -138,7 +137,7 @@ bool header_message::from_data(const uint32_t version, reader& source)
     return source;
 }
 
-data_chunk header_message::to_data(const uint32_t version) const
+data_chunk header::to_data(const uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
@@ -148,75 +147,62 @@ data_chunk header_message::to_data(const uint32_t version) const
     return data;
 }
 
-void header_message::to_data(const uint32_t version, std::ostream& stream) const
+void header::to_data(const uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
     to_data(version, sink);
 }
 
-void header_message::to_data(const uint32_t version, writer& sink) const
+void header::to_data(const uint32_t version, writer& sink) const
 {
-    header::to_data(sink);
+    chain::header::to_data(sink);
     sink.write_variable_little_endian(0);
 }
 
-void header_message::reset()
+void header::reset()
 {
-    header::reset();
-    originator_ = 0u;
+    chain::header::reset();
 }
 
-size_t header_message::serialized_size(const uint32_t version) const
+size_t header::serialized_size(const uint32_t version) const
 {
     return satoshi_fixed_size(version);
 }
 
-uint64_t header_message::originator() const
-{
-    return originator_;
-}
-
-void header_message::set_originator(uint64_t value) const
-{
-    originator_ = value;
-}
-
-header_message& header_message::operator=(chain::header&& other)
+header& header::operator=(chain::header&& other)
 {
     chain::header::operator=(std::move(other));
     return *this;
 }
 
-header_message& header_message::operator=(header_message&& other)
+header& header::operator=(header&& other)
 {
-    originator_ = other.originator_;
     chain::header::operator=(std::move(other));
     return *this;
 }
 
-header_message& header_message::operator=(const header_message& other)
+header& header::operator=(const header& other)
 {
-    originator_ = other.originator_;
     chain::header::operator=(other);
     return *this;
 }
 
-bool header_message::operator==(const chain::header& other) const
+bool header::operator==(const chain::header& other) const
 {
     return chain::header::operator==(other);
 }
 
-bool header_message::operator!=(const chain::header& other) const
+bool header::operator!=(const chain::header& other) const
 {
     return chain::header::operator!=(other);
 }
 
-bool header_message::operator==(const header_message& other) const
+bool header::operator==(const header& other) const
 {
     return chain::header::operator==(other);
 }
 
-bool header_message::operator!=(const header_message& other) const
+bool header::operator!=(const header& other) const
 {
     return chain::header::operator!=(other);
 }

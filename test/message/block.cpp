@@ -29,7 +29,6 @@ BOOST_AUTO_TEST_CASE(block__constructor_1__always__invalid)
 {
     block instance;
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, instance.originator());
 }
 
 BOOST_AUTO_TEST_CASE(block__constructor_2__always__equals_params)
@@ -41,7 +40,8 @@ BOOST_AUTO_TEST_CASE(block__constructor_2__always__equals_params)
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions = {
+    const chain::transaction::list transactions
+    {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
         chain::transaction(4, 16, {}, {})
@@ -51,7 +51,6 @@ BOOST_AUTO_TEST_CASE(block__constructor_2__always__equals_params)
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(transactions == instance.transactions());
-    BOOST_REQUIRE_EQUAL(0u, instance.originator());
 }
 
 BOOST_AUTO_TEST_CASE(block__constructor_3__always__equals_params)
@@ -63,7 +62,8 @@ BOOST_AUTO_TEST_CASE(block__constructor_3__always__equals_params)
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions = {
+    const chain::transaction::list transactions
+    {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
         chain::transaction(4, 16, {}, {})
@@ -75,7 +75,6 @@ BOOST_AUTO_TEST_CASE(block__constructor_3__always__equals_params)
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(transactions == instance.transactions());
-    BOOST_REQUIRE_EQUAL(0u, instance.originator());
 
 }
 
@@ -88,7 +87,8 @@ BOOST_AUTO_TEST_CASE(block__constructor_4__always__equals_params)
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions = {
+    const chain::transaction::list transactions
+    {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
         chain::transaction(4, 16, {}, {})
@@ -100,7 +100,6 @@ BOOST_AUTO_TEST_CASE(block__constructor_4__always__equals_params)
     BOOST_REQUIRE(instance == value);
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(transactions == instance.transactions());
-    BOOST_REQUIRE_EQUAL(0u, instance.originator());
 }
 
 BOOST_AUTO_TEST_CASE(block__constructor_5__always__equals_params)
@@ -112,7 +111,8 @@ BOOST_AUTO_TEST_CASE(block__constructor_5__always__equals_params)
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions = {
+    const chain::transaction::list transactions
+    {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
         chain::transaction(4, 16, {}, {})
@@ -123,7 +123,6 @@ BOOST_AUTO_TEST_CASE(block__constructor_5__always__equals_params)
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(transactions == instance.transactions());
-    BOOST_REQUIRE_EQUAL(0u, instance.originator());
 }
 
 BOOST_AUTO_TEST_CASE(block__constructor_6__always__equals_params)
@@ -135,22 +134,19 @@ BOOST_AUTO_TEST_CASE(block__constructor_6__always__equals_params)
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions = {
+    const chain::transaction::list transactions 
+    {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
         chain::transaction(4, 16, {}, {})
     };
-
-    const uint64_t originator = 352345u;
-
+    
     block value(header, transactions);
-    value.set_originator(originator);
     block instance(value);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(value == instance);
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(transactions == instance.transactions());
-    BOOST_REQUIRE_EQUAL(originator, instance.originator());
 }
 
 BOOST_AUTO_TEST_CASE(block__constructor_7__always__equals_params)
@@ -162,21 +158,18 @@ BOOST_AUTO_TEST_CASE(block__constructor_7__always__equals_params)
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions = {
+    const chain::transaction::list transactions
+    {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
         chain::transaction(4, 16, {}, {})
     };
-
-    const uint64_t originator = 352345u;
-
+    
     block value(header, transactions);
-    value.set_originator(originator);
     block instance(std::move(value));
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(transactions == instance.transactions());
-    BOOST_REQUIRE_EQUAL(originator, instance.originator());
 }
 
 BOOST_AUTO_TEST_CASE(block__factory_data_1__genesis_mainnet__success)
@@ -200,8 +193,7 @@ BOOST_AUTO_TEST_CASE(block__factory_data_1__genesis_mainnet__success)
 
     auto raw_reserialization = block.to_data(version::level::minimum);
     BOOST_REQUIRE(raw_reserialization == raw_block);
-    BOOST_REQUIRE_EQUAL(raw_reserialization.size(),
-        block.serialized_size(version::level::minimum));
+    BOOST_REQUIRE_EQUAL(raw_reserialization.size(), block.serialized_size(version::level::minimum));
 }
 
 BOOST_AUTO_TEST_CASE(block__factory_data_2__genesis_mainnet__success)
@@ -229,8 +221,7 @@ BOOST_AUTO_TEST_CASE(block__factory_data_2__genesis_mainnet__success)
     block.to_data(version::level::minimum, sink);
     sink.flush();
     BOOST_REQUIRE(raw_reserialization == raw_block);
-    BOOST_REQUIRE_EQUAL(raw_reserialization.size(),
-        block.serialized_size(version::level::minimum));
+    BOOST_REQUIRE_EQUAL(raw_reserialization.size(), block.serialized_size(version::level::minimum));
 }
 
 BOOST_AUTO_TEST_CASE(block__factory_data_3__genesis_mainnet__success)
@@ -260,17 +251,7 @@ BOOST_AUTO_TEST_CASE(block__factory_data_3__genesis_mainnet__success)
     block.to_data(version::level::minimum, writer);
     sink.flush();
     BOOST_REQUIRE(raw_reserialization == raw_block);
-    BOOST_REQUIRE_EQUAL(raw_reserialization.size(),
-        block.serialized_size(version::level::minimum));
-}
-
-BOOST_AUTO_TEST_CASE(block__originator__roundtrip__success)
-{
-    block block;
-    static const auto originator = 42u;
-    BOOST_REQUIRE(block.originator() != originator);
-    block.set_originator(originator);
-    BOOST_REQUIRE_EQUAL(block.originator(), originator);
+    BOOST_REQUIRE_EQUAL(raw_reserialization.size(), block.serialized_size(version::level::minimum));
 }
 
 BOOST_AUTO_TEST_CASE(block__operator_assign_equals_1__always__matches_equivalent)
@@ -282,13 +263,12 @@ BOOST_AUTO_TEST_CASE(block__operator_assign_equals_1__always__matches_equivalent
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions = {
+    const chain::transaction::list transactions
+    {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
         chain::transaction(4, 16, {}, {})
     };
-
-    const uint64_t originator = 23465u;
 
     chain::block value(header, transactions);
     BOOST_REQUIRE(value.is_valid());
@@ -300,7 +280,6 @@ BOOST_AUTO_TEST_CASE(block__operator_assign_equals_1__always__matches_equivalent
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance.header() == header);
     BOOST_REQUIRE(instance.transactions() == transactions);
-    BOOST_REQUIRE_EQUAL(0u, instance.originator());
 }
 
 BOOST_AUTO_TEST_CASE(block__operator_assign_equals_2__always__matches_equivalent)
@@ -312,16 +291,14 @@ BOOST_AUTO_TEST_CASE(block__operator_assign_equals_2__always__matches_equivalent
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions = {
+    const chain::transaction::list transactions
+    {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
         chain::transaction(4, 16, {}, {})
     };
 
-    const uint64_t originator = 23465u;
-
     message::block value(header, transactions);
-    value.set_originator(originator);
 
     BOOST_REQUIRE(value.is_valid());
 
@@ -332,7 +309,6 @@ BOOST_AUTO_TEST_CASE(block__operator_assign_equals_2__always__matches_equivalent
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance.header() == header);
     BOOST_REQUIRE(instance.transactions() == transactions);
-    BOOST_REQUIRE_EQUAL(originator, instance.originator());
 }
 
 BOOST_AUTO_TEST_CASE(block__operator_boolean_equals_1__duplicates__returns_true)

@@ -123,7 +123,9 @@
     <ClCompile Include="..\..\..\..\test\message\get_block_transactions.cpp" />
     <ClCompile Include="..\..\..\..\test\message\get_headers.cpp" />
     <ClCompile Include="..\..\..\..\test\message\headers.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\header_message.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\header.cpp">
+      <ObjectFileName>$(IntDir)header_message.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\memory_pool.cpp" />
     <ClCompile Include="..\..\..\..\test\message\merkle_block.cpp" />
     <ClCompile Include="..\..\..\..\test\message\messages.cpp" />

@@ -102,7 +102,7 @@
 #include <bitcoin/bitcoin/message/get_blocks.hpp>
 #include <bitcoin/bitcoin/message/get_data.hpp>
 #include <bitcoin/bitcoin/message/get_headers.hpp>
-#include <bitcoin/bitcoin/message/header_message.hpp>
+#include <bitcoin/bitcoin/message/header.hpp>
 #include <bitcoin/bitcoin/message/headers.hpp>
 #include <bitcoin/bitcoin/message/heading.hpp>
 #include <bitcoin/bitcoin/message/inventory.hpp>

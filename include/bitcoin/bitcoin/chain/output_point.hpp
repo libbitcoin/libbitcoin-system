@@ -36,7 +36,7 @@ class BC_API output_point
 {
 public:
 
-    // These properties facilitate block and transaction validation.
+    // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation_type
     {
         /// This is a .height sentinel.
@@ -104,7 +104,7 @@ public:
     /// True if the previous output is mature enough to spend from target.
     bool is_mature(size_t target_height) const;
 
-    // These fields do not participate in serialization or comparison.
+    // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     mutable validation_type validation;
 
 protected:

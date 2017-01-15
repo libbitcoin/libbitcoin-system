@@ -23,7 +23,7 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(header_tests)
+BOOST_AUTO_TEST_SUITE(chain_header_tests)
 
 BOOST_AUTO_TEST_CASE(header__constructor_1__always__initialized_invalid)
 {

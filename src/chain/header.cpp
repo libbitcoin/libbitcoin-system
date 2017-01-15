@@ -38,7 +38,7 @@ namespace chain {
 // Use system clock because we require accurate time of day.
 using wall_clock = std::chrono::system_clock;
 
-const size_t header::validation::orphan_height = 0;
+const size_t header::validation::undetermined_height = 0;
 
 // Constructors.
 //-----------------------------------------------------------------------------
