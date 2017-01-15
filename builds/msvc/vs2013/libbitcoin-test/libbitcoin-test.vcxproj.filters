@@ -294,9 +294,6 @@
     <ClCompile Include="..\..\..\..\test\chain\point_iterator.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\message\header_message.cpp">
-      <Filter>src\message</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\uint256.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
@@ -322,6 +319,9 @@
       <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\messages.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\header.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
   </ItemGroup>

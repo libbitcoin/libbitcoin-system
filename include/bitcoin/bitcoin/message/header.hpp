@@ -33,35 +33,35 @@
 namespace libbitcoin {
 namespace message {
 
-class BC_API header_message
+class BC_API header
   : public chain::header
 {
 public:
-    typedef std::vector<header_message> list;
-    typedef std::shared_ptr<header_message> ptr;
-    typedef std::shared_ptr<const header_message> const_ptr;
+    typedef std::vector<header> list;
+    typedef std::shared_ptr<header> ptr;
+    typedef std::shared_ptr<const header> const_ptr;
     typedef std::vector<ptr> ptr_list;
     typedef std::vector<const_ptr> const_ptr_list;
 
-    static header_message factory_from_data(const uint32_t version,
+    static header factory_from_data(const uint32_t version,
         const data_chunk& data);
-    static header_message factory_from_data(const uint32_t version,
+    static header factory_from_data(const uint32_t version,
         std::istream& stream);
-    static header_message factory_from_data(const uint32_t version,
+    static header factory_from_data(const uint32_t version,
         reader& source);
     static size_t satoshi_fixed_size(const uint32_t version);
 
-    header_message();
-    header_message(uint32_t version, const hash_digest& previous_block_hash,
+    header();
+    header(uint32_t version, const hash_digest& previous_block_hash,
         const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
         uint32_t nonce);
-    header_message(uint32_t version, hash_digest&& previous_block_hash,
+    header(uint32_t version, hash_digest&& previous_block_hash,
         hash_digest&& merkle, uint32_t timestamp, uint32_t bits,
         uint32_t nonce);
-    header_message(const chain::header& other);
-    header_message(chain::header&& other);
-    header_message(const header_message& other);
-    header_message(header_message&& other);
+    header(const chain::header& other);
+    header(chain::header&& other);
+    header(const header& other);
+    header(header&& other);
 
     bool from_data(const uint32_t version, const data_chunk& data);
     bool from_data(const uint32_t version, std::istream& stream);
@@ -72,17 +72,17 @@ public:
     void reset();
     size_t serialized_size(const uint32_t version) const;
 
-    header_message& operator=(chain::header&& other);
+    header& operator=(chain::header&& other);
 
     /// This class is move assignable but not copy assignable.
-    header_message& operator=(header_message&& other);
-    header_message& operator=(const header_message&) /*= delete*/;
+    header& operator=(header&& other);
+    header& operator=(const header&) /*= delete*/;
 
     bool operator==(const chain::header& other) const;
     bool operator!=(const chain::header& other) const;
 
-    bool operator==(const header_message& other) const;
-    bool operator!=(const header_message& other) const;
+    bool operator==(const header& other) const;
+    bool operator!=(const header& other) const;
 
     static const std::string command;
     static const uint32_t version_minimum;

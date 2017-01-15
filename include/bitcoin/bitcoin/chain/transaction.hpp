@@ -53,7 +53,7 @@ public:
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
-        uint64_t originator_;
+        uint64_t originator;
         code error = error::not_found;
         chain_state::ptr state = nullptr;
 

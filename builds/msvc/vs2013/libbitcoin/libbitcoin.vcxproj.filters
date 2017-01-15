@@ -548,9 +548,6 @@
     <ClCompile Include="..\..\..\..\src\message\send_headers.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\header_message.cpp">
-      <Filter>src\message</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\point_iterator.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
@@ -625,6 +622,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\sequencer.cpp">
       <Filter>src\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\message\header.cpp">
+      <Filter>src\message</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1087,9 +1087,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\block_transactions.hpp">
       <Filter>include\bitcoin\message</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\header_message.hpp">
-      <Filter>include\bitcoin\message</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point_iterator.hpp">
       <Filter>include\bitcoin\chain</Filter>
     </ClInclude>
@@ -1224,6 +1221,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\sequencer.hpp">
       <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\header.hpp">
+      <Filter>include\bitcoin\message</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
