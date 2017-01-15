@@ -38,16 +38,13 @@ BOOST_AUTO_TEST_CASE(header_message__constructor_2__always__equals_params)
     uint32_t timestamp = 531234u;
     uint32_t bits = 6523454u;
     uint32_t nonce = 68644u;
-    uint64_t originator = 2343u;
 
-    message::header_message instance(version, previous, merkle, timestamp,
-        bits, nonce, originator);
+    message::header_message instance(version, previous, merkle, timestamp, bits, nonce);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(timestamp, instance.timestamp());
     BOOST_REQUIRE_EQUAL(bits, instance.bits());
     BOOST_REQUIRE_EQUAL(nonce, instance.nonce());
-    BOOST_REQUIRE_EQUAL(originator, instance.originator());
     BOOST_REQUIRE(previous == instance.previous_block_hash());
     BOOST_REQUIRE(merkle == instance.merkle());
 }
@@ -60,16 +57,13 @@ BOOST_AUTO_TEST_CASE(header_message__constructor_3__always__equals_params)
     uint32_t timestamp = 531234u;
     uint32_t bits = 6523454u;
     uint32_t nonce = 68644u;
-    uint64_t originator = 2343u;
 
-    message::header_message instance(version, std::move(previous), std::move(merkle),
-        timestamp, bits, nonce, originator);
+    message::header_message instance(version, std::move(previous), std::move(merkle), timestamp, bits, nonce);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(timestamp, instance.timestamp());
     BOOST_REQUIRE_EQUAL(bits, instance.bits());
     BOOST_REQUIRE_EQUAL(nonce, instance.nonce());
-    BOOST_REQUIRE_EQUAL(originator, instance.originator());
     BOOST_REQUIRE(previous == instance.previous_block_hash());
     BOOST_REQUIRE(merkle == instance.merkle());
 }
@@ -87,7 +81,6 @@ BOOST_AUTO_TEST_CASE(header_message__constructor_4__always__equals_params)
     message::header_message instance(expected);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(expected == instance);
-    BOOST_REQUIRE_EQUAL(0u, instance.originator());
 }
 
 BOOST_AUTO_TEST_CASE(header_message__constructor_5__always__equals_params)
@@ -103,7 +96,6 @@ BOOST_AUTO_TEST_CASE(header_message__constructor_5__always__equals_params)
     message::header_message instance(std::move(expected));
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(expected == instance);
-    BOOST_REQUIRE_EQUAL(0u, instance.originator());
 }
 
 BOOST_AUTO_TEST_CASE(header_message__constructor_6__always__equals_params)
@@ -114,13 +106,11 @@ BOOST_AUTO_TEST_CASE(header_message__constructor_6__always__equals_params)
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        68644u,
-        5555u);
+        68644u);
 
     message::header_message instance(expected);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(expected == instance);
-    BOOST_REQUIRE_EQUAL(expected.originator(), instance.originator());
 }
 
 BOOST_AUTO_TEST_CASE(header_message__constructor_7__always__equals_params)
@@ -131,21 +121,18 @@ BOOST_AUTO_TEST_CASE(header_message__constructor_7__always__equals_params)
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        68644u,
-        4444u);
+        68644u);
 
     message::header_message instance(std::move(expected));
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(expected == instance);
-    BOOST_REQUIRE_EQUAL(expected.originator(), instance.originator());
 }
 
 BOOST_AUTO_TEST_CASE(header_message__from_data__insufficient_bytes__failure)
 {
     data_chunk data(10);
     message::header_message header;
-    BOOST_REQUIRE_EQUAL(false, header.from_data(
-        message::header_message::version_maximum, data));
+    BOOST_REQUIRE_EQUAL(false, header.from_data(message::header_message::version_maximum, data));
     BOOST_REQUIRE_EQUAL(false, header.is_valid());
 }
 
@@ -159,8 +146,7 @@ BOOST_AUTO_TEST_CASE(header_message__factory_from_data_1__valid_input__success)
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        68644u,
-        333u
+        68644u
     };
 
     data_chunk data = expected.to_data(version);
@@ -183,8 +169,7 @@ BOOST_AUTO_TEST_CASE(header_message__factory_from_data_2__valid_input__success)
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        68644u,
-        222u
+        68644u
     };
 
     data_chunk data = expected.to_data(version);
@@ -208,8 +193,7 @@ BOOST_AUTO_TEST_CASE(header_message__factory_from_data_3__valid_input__success)
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        68644u,
-        111u
+        68644u
     };
 
     data_chunk data = expected.to_data(version);
@@ -222,30 +206,6 @@ BOOST_AUTO_TEST_CASE(header_message__factory_from_data_3__valid_input__success)
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version));
     BOOST_REQUIRE_EQUAL(expected.serialized_size(version), result.serialized_size(version));
-}
-
-BOOST_AUTO_TEST_CASE(header_message__originator_accessor__always__returns_initialized_value)
-{
-    uint64_t value = 54345436u;
-    message::header_message instance(
-        11234u,
-        hash_literal("abababababababababababababababababababababababababababababababab"),
-        hash_literal("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe"),
-        753234u,
-        4356344u,
-        34564u,
-        value);
-
-    BOOST_REQUIRE_EQUAL(value, instance.originator());
-}
-
-BOOST_AUTO_TEST_CASE(header_message__originator_setter__roundtrip__success)
-{
-    uint64_t expected = 54345436u;
-    const message::header_message instance;
-    BOOST_REQUIRE(expected != instance.originator());
-    instance.set_originator(expected);
-    BOOST_REQUIRE(expected == instance.originator());
 }
 
 BOOST_AUTO_TEST_CASE(header_message__operator_assign_equals_1__always__matches_equivalent)
@@ -276,8 +236,7 @@ BOOST_AUTO_TEST_CASE(header_message__operator_assign_equals_2__always__matches_e
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        68644u,
-        4345u);
+        68644u);
 
     BOOST_REQUIRE(value.is_valid());
 
@@ -353,8 +312,7 @@ BOOST_AUTO_TEST_CASE(header_message__operator_boolean_equals_2__duplicates__retu
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        68644u,
-        3565u);
+        68644u);
 
     message::header_message instance(expected);
     BOOST_REQUIRE(instance == expected);
@@ -368,8 +326,7 @@ BOOST_AUTO_TEST_CASE(header_message__operator_boolean_equals_2__differs__returns
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        68644u,
-        4453u);
+        68644u);
 
     message::header_message instance;
     BOOST_REQUIRE_EQUAL(false, instance == expected);
@@ -383,8 +340,7 @@ BOOST_AUTO_TEST_CASE(header_message__operator_boolean_not_equals_2__duplicates__
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        68644u,
-        2345u);
+        68644u);
 
     message::header_message instance(expected);
     BOOST_REQUIRE_EQUAL(false, instance != expected);
@@ -398,8 +354,7 @@ BOOST_AUTO_TEST_CASE(header_message__operator_boolean_not_equals_2__differs__ret
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        68644u,
-        47476u);
+        68644u);
 
     message::header_message instance;
     BOOST_REQUIRE(instance != expected);

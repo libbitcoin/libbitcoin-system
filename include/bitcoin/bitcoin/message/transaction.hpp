@@ -66,11 +66,6 @@ public:
     transaction(uint32_t version, uint32_t locktime,
         const chain::input::list& inputs, const chain::output::list& outputs);
 
-    uint64_t originator() const;
-
-    // HACK: The fact that this is const makes it unsafe.
-    void set_originator(uint64_t value) const;
-
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
     bool from_data(uint32_t version, reader& source);
@@ -94,9 +89,6 @@ public:
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
-
-private:
-    mutable uint64_t originator_;
 };
 
 } // namespace message

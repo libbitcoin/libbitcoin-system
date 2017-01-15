@@ -54,17 +54,14 @@ public:
     header_message();
     header_message(uint32_t version, const hash_digest& previous_block_hash,
         const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce, uint64_t originator = 0);
+        uint32_t nonce);
     header_message(uint32_t version, hash_digest&& previous_block_hash,
         hash_digest&& merkle, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce, uint64_t originator = 0);
+        uint32_t nonce);
     header_message(const chain::header& other);
     header_message(chain::header&& other);
     header_message(const header_message& other);
     header_message(header_message&& other);
-
-    uint64_t originator() const;
-    void set_originator(uint64_t value) const;
 
     bool from_data(const uint32_t version, const data_chunk& data);
     bool from_data(const uint32_t version, std::istream& stream);
@@ -90,9 +87,6 @@ public:
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
-
-private:
-    mutable uint64_t originator_;
 };
 
 } // namespace message

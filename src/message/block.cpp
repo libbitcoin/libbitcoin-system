@@ -58,40 +58,38 @@ block block::factory_from_data(uint32_t version, reader& source)
 }
 
 block::block()
-  : chain::block(), originator_(0)
+  : chain::block()
 {
 }
 
 block::block(block&& other)
-  : chain::block(std::move(other)),
-    originator_(other.originator_)
+  : chain::block(std::move(other))
 {
 }
 
 block::block(const block& other)
-  : chain::block(other), originator_(other.originator_)
+  : chain::block(other)
 {
 }
 
 block::block(chain::block&& other)
-  : chain::block(std::move(other)), originator_(0)
+  : chain::block(std::move(other))
 {
 }
 
 block::block(const chain::block& other)
-  : chain::block(other), originator_(0)
+  : chain::block(other)
 {
 }
 
 block::block(chain::header&& header, chain::transaction::list&& transactions)
-  : chain::block(std::move(header), std::move(transactions)),
-    originator_(0)
+  : chain::block(std::move(header), std::move(transactions))
 {
 }
 
 block::block(const chain::header& header,
     const chain::transaction::list& transactions)
-  : chain::block(header, transactions), originator_(0)
+  : chain::block(header, transactions)
 {
 }
 
@@ -130,16 +128,6 @@ size_t block::serialized_size(uint32_t) const
     return chain::block::serialized_size();
 }
 
-uint64_t block::originator() const
-{
-    return originator_;
-}
-
-void block::set_originator(uint64_t value) const
-{
-    originator_ = value;
-}
-
 block& block::operator=(chain::block&& other)
 {
     reset();
@@ -149,7 +137,6 @@ block& block::operator=(chain::block&& other)
 
 block& block::operator=(block&& other)
 {
-    originator_ = other.originator_;
     chain::block::operator=(std::move(other));
     return *this;
 }

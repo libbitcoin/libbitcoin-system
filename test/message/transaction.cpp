@@ -29,7 +29,6 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_1__always__initialized_invalid)
 {
     transaction instance;
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, instance.originator());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__constructor_2__always__equals_transaction)
@@ -48,7 +47,6 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_2__always__equals_transaction)
     BOOST_REQUIRE(tx.from_data(raw_tx));
     transaction instance(tx);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, instance.originator());
     BOOST_REQUIRE(instance == tx);
 }
 
@@ -68,14 +66,11 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_3__always__equals_param)
     BOOST_REQUIRE(tx.from_data(raw_tx));
     transaction alpha(tx);
     BOOST_REQUIRE(alpha.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, alpha.originator());
     BOOST_REQUIRE(alpha == tx);
 
-    alpha.set_originator(15u);
     transaction beta(alpha);
     BOOST_REQUIRE(beta.is_valid());
     BOOST_REQUIRE(beta == alpha);
-    BOOST_REQUIRE_EQUAL(15u, beta.originator());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__constructor_4__always__equals_equivalent_tx)
@@ -96,7 +91,6 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_4__always__equals_equivalent_tx)
     const auto outputs = tx.outputs();
     transaction instance(tx.version(), tx.locktime(), inputs, outputs);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, instance.originator());
     BOOST_REQUIRE(instance == tx);
 }
 
@@ -116,7 +110,6 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_5__always__equals_equivalent_tx)
     BOOST_REQUIRE(tx.from_data(raw_tx));
     transaction instance(chain::transaction::factory_from_data(raw_tx));
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, instance.originator());
     BOOST_REQUIRE(instance == tx);
 }
 
@@ -139,16 +132,13 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_6__always__equals_equivalent_tx)
     BOOST_REQUIRE(tx.from_data(raw_tx));
     transaction instance(std::move(value));
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, instance.originator());
     BOOST_REQUIRE(instance == tx);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__constructor_7__always__equals_equivalent_tx)
 {
-    transaction instance(15u, 1234u, chain::input::list{ {}, {} },
-        chain::output::list{ {}, {}, {} });
+    transaction instance(15u, 1234u, chain::input::list{ {}, {} }, chain::output::list{ {}, {}, {} });
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, instance.originator());
     BOOST_REQUIRE(instance.version() == 15u);
     BOOST_REQUIRE(instance.locktime() == 1234u);
     BOOST_REQUIRE(instance.inputs().size() == 2);
@@ -168,6 +158,7 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__valid_junk__success)
     auto junk = base16_literal(
         "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0"
         "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0");
+
     // data_chunk_stream_host host(junk);
     byte_source<std::array<uint8_t, 64>> source(junk);
     boost::iostreams::stream<byte_source<std::array<uint8_t, 64>>> stream(source);
@@ -374,14 +365,6 @@ BOOST_AUTO_TEST_CASE(transaction__factory_from_data_3__case_2_valid_data__succes
     tx.to_data(version::level::minimum, sink);
     ostream.flush();
     BOOST_REQUIRE(resave == raw_tx);
-}
-
-BOOST_AUTO_TEST_CASE(transaction__originator__always__expected)
-{
-    transaction transaction;
-    static const auto originator = 42u;
-    transaction.set_originator(originator);
-    BOOST_REQUIRE_EQUAL(transaction.originator(), originator);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__operator_assign_equals_1__always__matches_equivalent)

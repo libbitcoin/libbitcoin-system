@@ -70,43 +70,42 @@ size_t header_message::satoshi_fixed_size(const uint32_t version)
 }
 
 header_message::header_message()
-  : header(), originator_(0u)
+  : header()
 {
 }
 
 header_message::header_message(uint32_t version,
     const hash_digest& previous_block_hash, const hash_digest& merkle,
-    uint32_t timestamp, uint32_t bits, uint32_t nonce, uint64_t originator)
-  : header(version, previous_block_hash, merkle, timestamp, bits, nonce),
-    originator_(originator)
+    uint32_t timestamp, uint32_t bits, uint32_t nonce)
+  : header(version, previous_block_hash, merkle, timestamp, bits, nonce)
 {
 }
 
 header_message::header_message(uint32_t version,
     hash_digest&& previous_block_hash, hash_digest&& merkle,
-    uint32_t timestamp, uint32_t bits, uint32_t nonce, uint64_t originator)
+    uint32_t timestamp, uint32_t bits, uint32_t nonce)
   : header(version, std::move(previous_block_hash), std::move(merkle),
-      timestamp, bits, nonce), originator_(originator)
+      timestamp, bits, nonce)
 {
 }
 
 header_message::header_message(const chain::header& other)
-  : header(other), originator_(0u)
+  : header(other)
 {
 }
 
 header_message::header_message(chain::header&& other)
-  : header(std::move(other)), originator_(0u)
+  : header(std::move(other))
 {
 }
 
 header_message::header_message(const header_message& other)
-: header(other), originator_(other.originator_)
+  : header(other)
 {
 }
 
 header_message::header_message(header_message&& other)
-  : header(other), originator_(other.originator_)
+  : header(std::move(other))
 {
 }
 
@@ -163,22 +162,11 @@ void header_message::to_data(const uint32_t version, writer& sink) const
 void header_message::reset()
 {
     header::reset();
-    originator_ = 0u;
 }
 
 size_t header_message::serialized_size(const uint32_t version) const
 {
     return satoshi_fixed_size(version);
-}
-
-uint64_t header_message::originator() const
-{
-    return originator_;
-}
-
-void header_message::set_originator(uint64_t value) const
-{
-    originator_ = value;
 }
 
 header_message& header_message::operator=(chain::header&& other)
@@ -189,14 +177,12 @@ header_message& header_message::operator=(chain::header&& other)
 
 header_message& header_message::operator=(header_message&& other)
 {
-    originator_ = other.originator_;
     chain::header::operator=(std::move(other));
     return *this;
 }
 
 header_message& header_message::operator=(const header_message& other)
 {
-    originator_ = other.originator_;
     chain::header::operator=(other);
     return *this;
 }

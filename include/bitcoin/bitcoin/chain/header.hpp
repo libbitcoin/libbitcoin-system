@@ -47,12 +47,12 @@ public:
     typedef std::vector<header> ptr_list;
     typedef std::vector<const_ptr> const_ptr_list;
 
-    // These properties facilitate block validation.
+    // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
-        static const size_t orphan_height;
+        static const size_t undetermined_height;
 
-        size_t height = validation::orphan_height;
+        size_t height = validation::undetermined_height;
     };
 
     // Constructors.
@@ -145,7 +145,7 @@ public:
     code check() const;
     code accept(const chain_state& state) const;
 
-    // These fields do not participate in serialization or comparison.
+    // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     mutable validation validation;
 
 protected:
