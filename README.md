@@ -63,7 +63,8 @@ $ sudo apt-get install libboost-all-dev
 ```
 Run the [install script](https://github.com/libbitcoin/libbitcoin/blob/version2/install.sh):
 ```sh
-$ wget -q -O - https://raw.githubusercontent.com/libbitcoin/libbitcoin/version2/install.sh | sudo bash
+$ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version2/install.sh
+$ sudo bash install.sh
 ```
 Libbitcoin is now installed in `/usr/local/`.
 
