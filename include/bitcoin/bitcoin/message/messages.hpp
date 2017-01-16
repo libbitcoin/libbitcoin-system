@@ -102,6 +102,43 @@
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 namespace libbitcoin {
+
+#define DECLARE_MESSAGE_POINTER_TYPES(type) \
+typedef message::type::ptr type##_ptr; \
+typedef message::type::const_ptr type##_const_ptr
+
+#define DECLARE_MESSAGE_POINTER_LIST_POINTER_TYPES(type) \
+typedef message::type::ptr_list type##_ptr_list; \
+typedef message::type::const_ptr_list type##_const_ptr_list; \
+typedef message::type::const_ptr_list_ptr type##_const_ptr_list_ptr; \
+typedef message::type::const_ptr_list_const_ptr type##_const_ptr_list_const_ptr
+
+// HACK: declare these in bc namespace to reduce length.
+DECLARE_MESSAGE_POINTER_TYPES(address);
+DECLARE_MESSAGE_POINTER_TYPES(block);
+DECLARE_MESSAGE_POINTER_TYPES(get_address);
+DECLARE_MESSAGE_POINTER_TYPES(fee_filter);
+DECLARE_MESSAGE_POINTER_TYPES(get_blocks);
+DECLARE_MESSAGE_POINTER_TYPES(get_data);
+DECLARE_MESSAGE_POINTER_TYPES(get_headers);
+DECLARE_MESSAGE_POINTER_TYPES(header);
+DECLARE_MESSAGE_POINTER_TYPES(headers);
+DECLARE_MESSAGE_POINTER_TYPES(inventory);
+DECLARE_MESSAGE_POINTER_TYPES(memory_pool);
+DECLARE_MESSAGE_POINTER_TYPES(merkle_block);
+DECLARE_MESSAGE_POINTER_TYPES(not_found);
+DECLARE_MESSAGE_POINTER_TYPES(ping);
+DECLARE_MESSAGE_POINTER_TYPES(pong);
+DECLARE_MESSAGE_POINTER_TYPES(send_headers);
+DECLARE_MESSAGE_POINTER_TYPES(transaction);
+DECLARE_MESSAGE_POINTER_TYPES(verack);
+DECLARE_MESSAGE_POINTER_TYPES(version);
+DECLARE_MESSAGE_POINTER_LIST_POINTER_TYPES(block);
+DECLARE_MESSAGE_POINTER_LIST_POINTER_TYPES(transaction);
+
+#undef DECLARE_MESSAGE_POINTER_TYPES
+#undef DECLARE_MESSAGE_POINTER_LIST_POINTER_TYPES
+
 namespace message {
 
 /// Serialize a message object to the Bitcoin wire protocol encoding.
