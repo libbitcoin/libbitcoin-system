@@ -65,10 +65,7 @@ enum sighash_algorithm : uint32_t
 
     /// Signs this one input and its corresponding output. Allows anyone to
     /// add or remove other inputs.
-    single_anyone_can_pay = single | anyone_can_pay,
-
-    /// Used to mask off the anyone_can_pay flag to access the enumeration.
-    mask = ~anyone_can_pay
+    single_anyone_can_pay = single | anyone_can_pay
 };
 
 } // namespace machine
