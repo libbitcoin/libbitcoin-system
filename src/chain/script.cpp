@@ -436,7 +436,7 @@ const operation::list& script::operations() const
 inline sighash_algorithm to_sighash_enum(uint8_t sighash_type)
 {
     return static_cast<sighash_algorithm>(
-        sighash_type & sighash_algorithm::mask);
+        sighash_type & ~sighash_algorithm::anyone_can_pay);
 }
 
 inline uint8_t is_sighash_enum(uint8_t sighash_type, sighash_algorithm value)

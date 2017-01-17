@@ -170,10 +170,10 @@ size_t network_address::serialized_size(uint32_t version,
 size_t network_address::satoshi_fixed_size(uint32_t version,
     bool with_timestamp)
 {
-    uint64_t result = 26;
+    size_t result = 26;
 
     if (with_timestamp)
-        result += 4;
+        result += 4u;
 
     return result;
 }
