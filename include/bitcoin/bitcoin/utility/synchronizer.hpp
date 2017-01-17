@@ -24,6 +24,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <thread>
 #include <type_traits>
 #include <utility>
 #include <bitcoin/bitcoin/error.hpp>
@@ -136,7 +137,7 @@ private:
 
     // We use pointer to reference the same value/mutex across instance copies.
     std::shared_ptr<size_t> counter_;
-    std::shared_ptr<upgrade_mutex> mutex_;
+    upgrade_mutex_ptr mutex_;
 };
 
 template <typename Handler>
