@@ -403,11 +403,19 @@ uint256_t block::difficulty(uint32_t bits)
 
     uint256_t target(header_bits);
 
+    //*************************************************************************
+    // CONSENSUS: satoshi will throw division by zero in the case where the
+    // target is (2^256)-1 as the overflow will result in a zero divisor.
+    // While actually achieving this difficulty is improbable, this method
+    // operates on user data method and therefore must be guarded.
+    //*************************************************************************
+    const auto divisor = target + 1;
+
     // We need to compute 2**256 / (target + 1), but we can't represent 2**256
     // as it's too large for uint256. However as 2**256 is at least as large as
     // target + 1, it is equal to ((2**256 - target - 1) / (target + 1)) + 1, or 
     // (~target / (target + 1)) + 1.
-    return (target < 1) ? 0 : (~target / (target + 1)) + 1;
+    return (divisor == 0) ? 0 : (~target / divisor) + 1;
 }
 
 // [GetBlockProof]
