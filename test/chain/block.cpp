@@ -27,17 +27,17 @@ static bool all_valid(const chain::transaction::list& transactions)
 {
     auto valid = true;
 
-    for (const auto& tx : transactions)
+    for (const auto& tx: transactions)
     {
         valid &= tx.is_valid();
 
-        for (const auto& input : tx.inputs())
+        for (const auto& input: tx.inputs())
         {
             valid &= input.is_valid();
             valid &= input.script().is_valid();
         }
 
-        for (const auto& output : tx.outputs())
+        for (const auto& output: tx.outputs())
         {
             valid &= output.is_valid();
             valid &= output.script().is_valid();
@@ -48,6 +48,17 @@ static bool all_valid(const chain::transaction::list& transactions)
 }
 
 BOOST_AUTO_TEST_SUITE(chain_block_tests)
+
+BOOST_AUTO_TEST_CASE(block__proof1__genesis_mainnet__expected)
+{
+    BOOST_REQUIRE_EQUAL(chain::block::proof(0x1d00ffff), 0x0000000100010001);
+}
+
+BOOST_AUTO_TEST_CASE(block__proof2__genesis_mainnet__expected)
+{
+    const auto block = chain::block::genesis_mainnet();
+    BOOST_REQUIRE_EQUAL(block.proof(), 0x0000000100010001);
+}
 
 BOOST_AUTO_TEST_CASE(block__locator_size__zero_backoff__returns_top_plus_one)
 {

@@ -394,7 +394,7 @@ block::indexes block::locator_heights(size_t top)
 //-----------------------------------------------------------------------------
 
 // static
-uint256_t block::difficulty(uint32_t bits)
+uint256_t block::proof(uint32_t bits)
 {
     const auto header_bits = compact(bits);
 
@@ -406,8 +406,8 @@ uint256_t block::difficulty(uint32_t bits)
     //*************************************************************************
     // CONSENSUS: satoshi will throw division by zero in the case where the
     // target is (2^256)-1 as the overflow will result in a zero divisor.
-    // While actually achieving this difficulty is improbable, this method
-    // operates on user data method and therefore must be guarded.
+    // While actually achieving this work is improbable, this method operates
+    // on user data method and therefore must be guarded.
     //*************************************************************************
     const auto divisor = target + 1;
 
@@ -419,9 +419,9 @@ uint256_t block::difficulty(uint32_t bits)
 }
 
 // [GetBlockProof]
-uint256_t block::difficulty() const
+uint256_t block::proof() const
 {
-    return difficulty(header_.bits());
+    return proof(header_.bits());
 }
 
 uint64_t block::subsidy(size_t height)

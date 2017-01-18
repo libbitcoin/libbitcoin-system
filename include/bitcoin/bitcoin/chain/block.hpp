@@ -142,12 +142,12 @@ public:
     //-------------------------------------------------------------------------
 
     static uint64_t subsidy(size_t height);
-    static uint256_t difficulty(uint32_t bits);
+    static uint256_t proof(uint32_t bits);
 
     uint64_t fees() const;
     uint64_t claim() const;
     uint64_t reward(size_t height) const;
-    uint256_t difficulty() const;
+    uint256_t proof() const;
     hash_digest generate_merkle_root() const;
     size_t signature_operations() const;
     size_t signature_operations(bool bip16_active) const;
