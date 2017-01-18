@@ -124,7 +124,7 @@ compact::operator const uint256_t&() const
 bool compact::from_compact(uint256_t& out, uint32_t compact)
 {
     //*************************************************************************
-    // CONSENSUS: The sign bit is not honored and is instead produces zero.
+    // CONSENSUS: The sign bit is not honored and it instead produces zero.
     // This results from having used a signed data structure for unsigned data.
     //*************************************************************************
     if (is_negated(compact))
