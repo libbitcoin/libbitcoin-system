@@ -80,6 +80,15 @@ merkle_block::merkle_block(chain::header&& header, uint32_t total_transactions,
 {
 }
 
+// Hack: use of safe_unsigned here isn't great. We should consider using size_t
+// for the transaction count and invalidating on deserialization and construct.
+merkle_block::merkle_block(const chain::block& block)
+  : merkle_block(block.header(),
+        safe_unsigned<uint32_t>(block.transactions().size()),
+        block.to_hashes(), {})
+{
+}
+
 merkle_block::merkle_block(const merkle_block& other)
   : merkle_block(other.header_, other.total_transactions_, other.hashes_,
       other.flags_)

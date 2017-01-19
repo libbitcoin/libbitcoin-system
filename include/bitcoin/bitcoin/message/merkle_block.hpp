@@ -50,6 +50,7 @@ public:
         const hash_list& hashes, const data_chunk& flags);
     merkle_block(chain::header&& header, uint32_t total_transactions,
         hash_list&& hashes, data_chunk&& flags);
+    merkle_block(const chain::block& block);
     merkle_block(const merkle_block& other);
     merkle_block(merkle_block&& other);
 
