@@ -186,6 +186,7 @@ src_libbitcoin_la_SOURCES = \
     src/wallet/payment_address.cpp \
     src/wallet/qrcode.cpp \
     src/wallet/select_outputs.cpp \
+    src/wallet/stealth.cpp \
     src/wallet/stealth_address.cpp \
     src/wallet/uri.cpp \
     src/wallet/parse_encrypted_keys/parse_encrypted_key.hpp \
@@ -317,6 +318,7 @@ test_libbitcoin_test_SOURCES = \
     test/wallet/payment_address.cpp \
     test/wallet/qrcode.cpp \
     test/wallet/stealth_address.cpp \
+    test/wallet/stealth.cpp \
     test/wallet/uri.cpp \
     test/wallet/uri_reader.cpp
 
@@ -580,6 +582,7 @@ include_bitcoin_bitcoin_wallet_HEADERS = \
     include/bitcoin/bitcoin/wallet/payment_address.hpp \
     include/bitcoin/bitcoin/wallet/qrcode.hpp \
     include/bitcoin/bitcoin/wallet/select_outputs.hpp \
+    include/bitcoin/bitcoin/wallet/stealth.hpp \
     include/bitcoin/bitcoin/wallet/stealth_address.hpp \
     include/bitcoin/bitcoin/wallet/uri.hpp \
     include/bitcoin/bitcoin/wallet/uri_reader.hpp

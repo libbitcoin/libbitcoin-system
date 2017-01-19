@@ -191,6 +191,7 @@
 #include <bitcoin/bitcoin/wallet/qrcode.hpp>
 #include <bitcoin/bitcoin/wallet/select_outputs.hpp>
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
+#include <bitcoin/bitcoin/wallet/stealth.hpp>
 #include <bitcoin/bitcoin/wallet/uri.hpp>
 #include <bitcoin/bitcoin/wallet/uri_reader.hpp>
 
