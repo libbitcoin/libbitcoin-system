@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/message/merkle_block.hpp>
 
+#include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/messages.hpp>

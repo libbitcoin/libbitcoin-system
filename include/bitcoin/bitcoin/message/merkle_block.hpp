@@ -24,6 +24,7 @@
 #include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
