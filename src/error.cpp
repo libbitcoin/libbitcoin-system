@@ -48,326 +48,181 @@ const char* error_category_impl::name() const BC_NOEXCEPT
 
 std::string error_category_impl::message(int ev) const BC_NOEXCEPT
 {
-    // TODO: use a static map (hash table)
-    // This text mapping may change without notice.
-    switch (ev)
+    static const std::unordered_map<int, std::string> messages =
     {
         // general codes
-        case error::success:
-            return "success";
-        case error::deprecated:
-            return "deprecated";
-        case error::unknown:
-            return "unknown error";
-        case error::not_found:
-            return "object does not exist";
-        case error::file_system:
-            return "file system error";
-        case error::non_standard:
-            return "transaction not standard";
-        case error::not_implemented:
-            return "featre not implemented";
+        { error::success, "success" },
+        { error::deprecated, "deprecated" },
+        { error::unknown, "unknown error" },
+        { error::not_found, "object does not exist" },
+        { error::file_system, "file system error" },
+        { error::non_standard, "transaction not standard" },
+        { error::not_implemented, "feature not implemented" },
 
         // database
-        case error::store_block_invalid_height:
-            return "block out of order";
-        case error::store_block_missing_parent:
-            return "block missing parent";
-        case error::store_block_duplicate:
-            return "block duplicate";
+        { error::store_block_invalid_height, "block out of order" },
+        { error::store_block_missing_parent, "block missing parent" },
+        { error::store_block_duplicate, "block duplicate" },
 
         // network
-        case error::service_stopped:
-            return "service stopped";
-        case error::operation_failed:
-            return "operation failed";
-        case error::resolve_failed:
-            return "resolving hostname failed";
-        case error::network_unreachable:
-            return "unable to reach remote host";
-        case error::address_in_use:
-            return "address already in use";
-        case error::listen_failed:
-            return "incoming connection failed";
-        case error::accept_failed:
-            return "connection acceptance failed";
-        case error::bad_stream:
-            return "bad data stream";
-        case error::channel_timeout:
-            return "connection timed out";
-        case error::address_blocked:
-            return "address blocked by policy";
-        case error::channel_stopped:
-            return "channel stopped";
+        { error::service_stopped, "service stopped" },
+        { error::operation_failed, "operation failed" },
+        { error::resolve_failed, "resolving hostname failed" },
+        { error::network_unreachable, "unable to reach remote host" },
+        { error::address_in_use, "address already in use" },
+        { error::listen_failed, "incoming connection failed" },
+        { error::accept_failed, "connection acceptance failed" },
+        { error::bad_stream, "bad data stream" },
+        { error::channel_timeout, "connection timed out" },
+        { error::address_blocked, "address blocked by policy" },
+        { error::channel_stopped, "channel stopped" },
 
         // block pool
-        case error::duplicate_block:
-            return "duplicate block";
-        case error::orphan_block:
-            return "missing block parent";
-        case error::invalid_previous_block:
-            return "previous block failed to validate";
-        case error::insufficient_work:
-            return "insufficient work to reorganize";
+        { error::duplicate_block, "duplicate block" },
+        { error::orphan_block, "missing block parent" },
+        { error::invalid_previous_block, "previous block failed to validate" },
+        { error::insufficient_work, "insufficient work to reorganize" },
 
         // transaction pool
-        case error::orphan_transaction:
-            return "missing transaction parent";
+        { error::orphan_transaction, "missing transaction parent" },
 
         // check header
-        case error::invalid_proof_of_work:
-            return "proof of work invalid";
-        case error::futuristic_timestamp:
-            return "timestamp too far in the future";
+        { error::invalid_proof_of_work, "proof of work invalid" },
+        { error::futuristic_timestamp, "timestamp too far in the future" },
 
         // accept header
-        case error::checkpoints_failed:
-            return "block hash rejected by checkpoint";
-        case error::old_version_block:
-            return "block version rejected at current height";
-        case error::incorrect_proof_of_work:
-            return "proof of work does not match bits field";
-        case error::timestamp_too_early:
-            return "block timestamp is too early";
+        { error::checkpoints_failed, "block hash rejected by checkpoint" },
+        { error::old_version_block, "block version rejected at current height" },
+        { error::incorrect_proof_of_work, "proof of work does not match bits field" },
+        { error::timestamp_too_early, "block timestamp is too early" },
 
         // check block
-        case error::block_size_limit:
-            return "block size limit exceeded";
-        case error::empty_block:
-            return "block has no transactions";
-        case error::first_not_coinbase:
-            return "first transaction not a coinbase";
-        case error::extra_coinbases:
-            return "more than one coinbase";
-        case error::internal_duplicate:
-            return "matching transaction hashes in block";
-        case error::internal_double_spend:
-            return "double spend internal to block";
-        case error::merkle_mismatch:
-            return "merkle root mismatch";
-        case error::block_legacy_sigop_limit:
-            return "too many block legacy signature operations";
+        { error::block_size_limit, "block size limit exceeded" },
+        { error::empty_block, "block has no transactions" },
+        { error::first_not_coinbase, "first transaction not a coinbase" },
+        { error::extra_coinbases, "more than one coinbase" },
+        { error::internal_duplicate, "matching transaction hashes in block" },
+        { error::internal_double_spend, "double spend internal to block" },
+        { error::merkle_mismatch, "merkle root mismatch" },
+        { error::block_legacy_sigop_limit, "too many block legacy signature operations" },
 
         // accept block
-        case error::non_final_transaction:
-            return "block contains a non-final transaction";
-        case error::coinbase_height_mismatch:
-            return "block height mismatch in coinbase";
-        case error::coinbase_value_limit:
-            return "coinbase value too high";
-        case error::block_embedded_sigop_limit:
-            return "too many block embedded signature operations";
+        { error::non_final_transaction, "block contains a non-final transaction" },
+        { error::coinbase_height_mismatch, "block height mismatch in coinbase" },
+        { error::coinbase_value_limit, "coinbase value too high" },
+        { error::block_embedded_sigop_limit, "too many block embedded signature operations" },
 
         // check transaction
-        case error::empty_transaction:
-            return "transaction inputs or outputs empty";
-        case error::previous_output_null:
-            return "non-coinbase transaction has input with null previous output";
-        case error::spend_overflow:
-            return "spend outside valid range";
-        case error::invalid_coinbase_script_size:
-            return "coinbase script too small or large";
-        case error::coinbase_transaction:
-            return "coinbase transaction disallowed in memory pool";
-        case error::transaction_legacy_sigop_limit:
-            return "too many transaction legacy signature operations";
+        { error::empty_transaction, "transaction inputs or outputs empty" },
+        { error::previous_output_null, "non-coinbase transaction has input with null previous output" },
+        { error::spend_overflow, "spend outside valid range" },
+        { error::invalid_coinbase_script_size, "coinbase script too small or large" },
+        { error::coinbase_transaction, "coinbase transaction disallowed in memory pool" },
+        { error::transaction_legacy_sigop_limit, "too many transaction legacy signature operations" },
 
         // accept transaction
-        case error::unspent_duplicate:
-            return "matching transaction with unspent outputs";
-        case error::missing_previous_output:
-            return "previous output not found";
-        case error::double_spend:
-            return "double spend of input";
-        case error::coinbase_maturity:
-            return "immature coinbase spent";
-        case error::spend_exceeds_value:
-            return "spend exceeds value of inputs";
-        case error::transaction_embedded_sigop_limit:
-            return "too many transaction embedded signature operations";
+        { error::unspent_duplicate, "matching transaction with unspent outputs" },
+        { error::missing_previous_output, "previous output not found" },
+        { error::double_spend, "double spend of input" },
+        { error::coinbase_maturity, "immature coinbase spent" },
+        { error::spend_exceeds_value, "spend exceeds value of inputs" },
+        { error::transaction_embedded_sigop_limit, "too many transaction embedded signature operations" },
 
         // connect input
-        case error::invalid_script:
-            return "invalid script";
-        case error::invalid_script_size:
-            return "invalid script size";
-        case error::invalid_push_data_size:
-            return "invalid push data size";
-        case error::invalid_operation_count:
-            return "invalid operation count";
-        case error::invalid_stack_size:
-            return "invalid stack size";
-        case error::invalid_stack_scope:
-            return "invalid stack scope";
-        case error::invalid_script_embed:
-            return "invalid script embed";
-        case error::invalid_signature_encoding:
-            return "invalid signature encoding";
-        case error::invalid_signature_lax_encoding:
-            return "invalid signature lax encoding";
-        case error::incorrect_signature:
-            return "incorrect signature";
-        case error::stack_false:
-            return "stack false";
+        { error::invalid_script, "invalid script" },
+        { error::invalid_script_size, "invalid script size" },
+        { error::invalid_push_data_size, "invalid push data size" },
+        { error::invalid_operation_count, "invalid operation count" },
+        { error::invalid_stack_size, "invalid stack size" },
+        { error::invalid_stack_scope, "invalid stack scope" },
+        { error::invalid_script_embed, "invalid script embed" },
+        { error::invalid_signature_encoding, "invalid signature encoding" },
+        { error::invalid_signature_lax_encoding, "invalid signature lax encoding" },
+        { error::incorrect_signature, "incorrect signature" },
+        { error::stack_false, "stack false" },
 
         // op eval
-        case error::op_disabled:
-            return "op_disabled";
-        case error::op_reserved:
-            return "op_reserved";
-        case error::op_push_size:
-            return "op_push_size";
-        case error::op_push_data:
-            return "op_push_data";
-        case error::op_if:
-            return "op_if";
-        case error::op_notif:
-            return "op_notif";
-        case error::op_else:
-            return "op_else";
-        case error::op_endif:
-            return "op_endif";
-        case error::op_verify1:
-            return "op_verify1";
-        case error::op_verify2:
-            return "op_verify2";
-        case error::op_return:
-            return "op_return";
-        case error::op_to_alt_stack:
-            return "op_to_alt_stack";
-        case error::op_from_alt_stack:
-            return "op_from_alt_stack";
-        case error::op_drop2:
-            return "op_drop2";
-        case error::op_dup2:
-            return "op_dup2";
-        case error::op_dup3:
-            return "op_dup3";
-        case error::op_over2:
-            return "op_over2";
-        case error::op_rot2:
-            return "op_rot2";
-        case error::op_swap2:
-            return "op_swap2";
-        case error::op_if_dup:
-            return "op_if_dup";
-        case error::op_drop:
-            return "op_drop";
-        case error::op_dup:
-            return "op_dup";
-        case error::op_nip:
-            return "op_nip";
-        case error::op_over:
-            return "op_over";
-        case error::op_pick:
-            return "op_pick";
-        case error::op_roll:
-            return "op_roll";
-        case error::op_rot:
-            return "op_rot";
-        case error::op_swap:
-            return "op_swap";
-        case error::op_tuck:
-            return "op_tuck";
-        case error::op_size:
-            return "op_size";
-        case error::op_equal:
-            return "op_equal";
-        case error::op_equal_verify1:
-            return "op_equal_verify1";
-        case error::op_equal_verify2:
-            return "op_equal_verify2";
-        case error::op_add1:
-            return "op_add1";
-        case error::op_sub1:
-            return "op_sub1";
-        case error::op_negate:
-            return "op_negate";
-        case error::op_abs:
-            return "op_abs";
-        case error::op_not:
-            return "op_not";
-        case error::op_nonzero:
-            return "op_nonzero";
-        case error::op_add:
-            return "op_add";
-        case error::op_sub:
-            return "op_sub";
-        case error::op_bool_and:
-            return "op_bool_and";
-        case error::op_bool_or:
-            return "op_bool_or";
-        case error::op_num_equal:
-            return "op_num_equal";
-        case error::op_num_equal_verify1:
-            return "op_num_equal_verify1";
-        case error::op_num_equal_verify2:
-            return "op_num_equal_verify2";
-        case error::op_num_not_equal:
-            return "op_num_not_equal";
-        case error::op_less_than:
-            return "op_less_than";
-        case error::op_greater_than:
-            return "op_greater_than";
-        case error::op_less_than_or_equal:
-            return "op_less_than_or_equal";
-        case error::op_greater_than_or_equal:
-            return "op_greater_than_or_equal";
-        case error::op_min:
-            return "op_min";
-        case error::op_max:
-            return "op_max";
-        case error::op_within:
-            return "op_within";
-        case error::op_ripemd160:
-            return "op_ripemd160";
-        case error::op_sha1:
-            return "op_sha1";
-        case error::op_sha256:
-            return "op_sha256";
-        case error::op_hash160:
-            return "op_hash160";
-        case error::op_hash256:
-            return "op_hash256";
-        case error::op_code_seperator:
-            return "op_code_seperator";
-        case error::op_check_sig_verify1:
-            return "op_check_sig_verify1";
-        case error::op_check_sig:
-            return "op_check_sig";
-        case error::op_check_multisig_verify1:
-            return "op_check_multisig_verify1";
-        case error::op_check_multisig_verify2:
-            return "op_check_multisig_verify2";
-        case error::op_check_multisig_verify3:
-            return "op_check_multisig_verify3";
-        case error::op_check_multisig_verify4:
-            return "op_check_multisig_verify4";
-        case error::op_check_multisig_verify5:
-            return "op_check_multisig_verify5";
-        case error::op_check_multisig_verify6:
-            return "op_check_multisig_verify6";
-        case error::op_check_multisig_verify7:
-            return "op_check_multisig_verify7";
-        case error::op_check_multisig:
-            return "op_check_multisig";
-        case error::op_check_locktime_verify1:
-            return "op_check_locktime_verify1";
-        case error::op_check_locktime_verify2:
-            return "op_check_locktime_verify2";
-        case error::op_check_locktime_verify3:
-            return "op_check_locktime_verify3";
-        case error::op_check_locktime_verify4:
-            return "op_check_locktime_verify4";
-        case error::op_check_locktime_verify5:
-            return "op_check_locktime_verify5";
-        case error::op_check_locktime_verify6:
-            return "op_check_locktime_verify6";
+        { error::op_disabled, "op_disabled" },
+        { error::op_reserved, "op_reserved" },
+        { error::op_push_size, "op_push_size" },
+        { error::op_push_data, "op_push_data" },
+        { error::op_if, "op_if" },
+        { error::op_notif, "op_notif" },
+        { error::op_else, "op_else" },
+        { error::op_endif, "op_endif" },
+        { error::op_verify1, "op_verify1" },
+        { error::op_verify2, "op_verify2" },
+        { error::op_return, "op_return" },
+        { error::op_to_alt_stack, "op_to_alt_stack" },
+        { error::op_from_alt_stack, "op_from_alt_stack" },
+        { error::op_drop2, "op_drop2" },
+        { error::op_dup2, "op_dup2" },
+        { error::op_dup3, "op_dup3" },
+        { error::op_over2, "op_over2" },
+        { error::op_rot2, "op_rot2" },
+        { error::op_swap2, "op_swap2" },
+        { error::op_if_dup, "op_if_dup" },
+        { error::op_drop, "op_drop" },
+        { error::op_dup, "op_dup" },
+        { error::op_nip, "op_nip" },
+        { error::op_over, "op_over" },
+        { error::op_pick, "op_pick" },
+        { error::op_roll, "op_roll" },
+        { error::op_rot, "op_rot" },
+        { error::op_swap, "op_swap" },
+        { error::op_tuck, "op_tuck" },
+        { error::op_size, "op_size" },
+        { error::op_equal, "op_equal" },
+        { error::op_equal_verify1, "op_equal_verify1" },
+        { error::op_equal_verify2, "op_equal_verify2" },
+        { error::op_add1, "op_add1" },
+        { error::op_sub1, "op_sub1" },
+        { error::op_negate, "op_negate" },
+        { error::op_abs, "op_abs" },
+        { error::op_not, "op_not" },
+        { error::op_nonzero, "op_nonzero" },
+        { error::op_add, "op_add" },
+        { error::op_sub, "op_sub" },
+        { error::op_bool_and, "op_bool_and" },
+        { error::op_bool_or, "op_bool_or" },
+        { error::op_num_equal, "op_num_equal" },
+        { error::op_num_equal_verify1, "op_num_equal_verify1" },
+        { error::op_num_equal_verify2, "op_num_equal_verify2" },
+        { error::op_num_not_equal, "op_num_not_equal" },
+        { error::op_less_than, "op_less_than" },
+        { error::op_greater_than, "op_greater_than" },
+        { error::op_less_than_or_equal, "op_less_than_or_equal" },
+        { error::op_greater_than_or_equal, "op_greater_than_or_equal" },
+        { error::op_min, "op_min" },
+        { error::op_max, "op_max" },
+        { error::op_within, "op_within" },
+        { error::op_ripemd160, "op_ripemd160" },
+        { error::op_sha1, "op_sha1" },
+        { error::op_sha256, "op_sha256" },
+        { error::op_hash160, "op_hash160" },
+        { error::op_hash256, "op_hash256" },
+        { error::op_code_seperator, "op_code_seperator" },
+        { error::op_check_sig_verify1, "op_check_sig_verify1" },
+        { error::op_check_sig, "op_check_sig" },
+        { error::op_check_multisig_verify1, "op_check_multisig_verify1" },
+        { error::op_check_multisig_verify2, "op_check_multisig_verify2" },
+        { error::op_check_multisig_verify3, "op_check_multisig_verify3" },
+        { error::op_check_multisig_verify4, "op_check_multisig_verify4" },
+        { error::op_check_multisig_verify5, "op_check_multisig_verify5" },
+        { error::op_check_multisig_verify6, "op_check_multisig_verify6" },
+        { error::op_check_multisig_verify7, "op_check_multisig_verify7" },
+        { error::op_check_multisig, "op_check_multisig" },
+        { error::op_check_locktime_verify1, "op_check_locktime_verify1" },
+        { error::op_check_locktime_verify2, "op_check_locktime_verify2" },
+        { error::op_check_locktime_verify3, "op_check_locktime_verify3" },
+        { error::op_check_locktime_verify4, "op_check_locktime_verify4" },
+        { error::op_check_locktime_verify5, "op_check_locktime_verify5" },
+        { error::op_check_locktime_verify6, "op_check_locktime_verify6" }
+    };
 
-        // invalid codes
-        default:
-            return "invalid code";
-    }
+    const auto message_iter = messages.find(ev);
+    return ((message_iter != messages.end()) ?
+        message_iter->second : "invalid code");
 }
 
 // We are not currently using this.
