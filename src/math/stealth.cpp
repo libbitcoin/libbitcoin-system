@@ -23,7 +23,6 @@
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/machine/operation.hpp>
 #include <bitcoin/bitcoin/machine/script_pattern.hpp>
 #include <bitcoin/bitcoin/utility/binary.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -40,8 +39,7 @@ bool is_stealth_script(const script& script)
         return false;
 
     BITCOIN_ASSERT(script.size() == 2);
-    const auto& data = script[1].data();
-    return (data.size() >= hash_size);
+    return (script[1].data().size() >= hash_size);
 }
 
 bool to_stealth_prefix(uint32_t& out_prefix, const script& script)
@@ -51,7 +49,7 @@ bool to_stealth_prefix(uint32_t& out_prefix, const script& script)
 
     // A stealth prefix is the full 32 bits (prefix to the hash).
     // A stealth filter is a leftmost substring of the stealth prefix.
-    constexpr size_t size = binary::bits_per_block * sizeof(uint32_t);
+    ////constexpr size_t size = binary::bits_per_block * sizeof(uint32_t);
 
     const auto script_hash = bitcoin_hash(script.to_data(false));
     out_prefix = from_little_endian_unsafe<uint32_t>(script_hash.begin());
@@ -66,14 +64,14 @@ static bool create_ephemeral_keys(ec_secret& out_secret,
     auto nonced_seed = build_chunk({ to_array(0), seed });
 
     // TODO: this can be implemented using libsecp256k1 without iteration.
-    // Iterate up to 256 times before giving up on finding a valid key pair.
+    // Iterate up to 255 times before giving up on finding a valid key pair.
     // This gives extremely high success probability given even distribution.
-    for (uint8_t nonce = 0; nonce <= max_uint8; ++nonce)
+    for (uint8_t nonce = 0; nonce < max_uint8; ++nonce)
     {
         nonced_seed[0] = nonce;
         const auto secret = hmac_sha256_hash(nonced_seed, magic);
-
         ec_compressed point;
+
         if (secret_to_public(point, secret) &&
             point.front() == ephemeral_public_key_sign)
         {
@@ -136,8 +134,7 @@ bool create_stealth_data(data_chunk& out_stealth_data, ec_secret& out_secret,
         std::copy_n(fill.begin(), sizeof(nonce), data.end() - sizeof(nonce));
 
         // Create the stealth script with the current data.
-        const auto ops = script::to_null_data_pattern(data);
-        const auto stealth_script = script(std::move(ops));
+        const auto stealth_script = script(script::to_null_data_pattern(data));
 
         // Test for match of filter to stealth script hash prefix.
         uint32_t field;
@@ -166,7 +163,6 @@ bool extract_ephemeral_key(ec_compressed& out_ephemeral_public_key,
 
     const auto& data = script[1].data();
     std::copy_n(data.begin(), hash_size, out_ephemeral_public_key.begin() + 1);
-
     return true;
 }
 
@@ -178,7 +174,6 @@ bool extract_ephemeral_key(hash_digest& out_unsigned_ephemeral_key,
 
     const auto& data = script[1].data();
     std::copy_n(data.begin(), hash_size, out_unsigned_ephemeral_key.begin());
-
     return true;
 }
 
