@@ -626,6 +626,12 @@
     <ClCompile Include="..\..\..\..\src\message\header.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\stealth_sender.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\stealth_receiver.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -1224,6 +1230,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\header.hpp">
       <Filter>include\bitcoin\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\stealth_sender.hpp">
+      <Filter>include\bitcoin\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\stealth_receiver.hpp">
+      <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
