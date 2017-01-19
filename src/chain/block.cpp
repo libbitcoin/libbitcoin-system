@@ -252,6 +252,17 @@ void block::to_data(writer& sink) const
     std::for_each(transactions_.begin(), transactions_.end(), to);
 }
 
+hash_list block::to_hashes() const
+{
+    const auto to_hash = [](const transaction& tx) { return tx.hash(); };
+
+    hash_list out;
+    const auto& txs = transactions();
+    out.resize(txs.size());
+    std::transform(txs.begin(), txs.end(), out.begin(), to_hash);
+    return out;
+}
+
 // Properties (size, accessors, cache).
 //-----------------------------------------------------------------------------
 

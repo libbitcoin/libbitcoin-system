@@ -108,6 +108,7 @@ public:
     data_chunk to_data() const;
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
+    hash_list to_hashes() const;
 
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------
