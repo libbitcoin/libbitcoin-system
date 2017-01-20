@@ -29,7 +29,8 @@
 
 namespace libbitcoin {
 namespace wallet {
-
+    
+/// Experimental.
 class BC_API stealth_sender
 {
 public:
