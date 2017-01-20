@@ -22,54 +22,53 @@
 #include <cstdint>
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/math/stealth.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/binary.hpp>
 
 namespace libbitcoin {
 namespace wallet {
-
-// BUGBUG: this assumes a single spender.
+    
+// TODO: use to factory and make address_ and spend_public_ const.
 stealth_receiver::stealth_receiver(const ec_secret& scan_private,
-    const ec_secret& spend_private, uint8_t version)
-  : scan_private_(scan_private), spend_private_(spend_private),
-    version_(version)
+    const ec_secret& spend_private, const binary& filter, uint8_t version)
+  : version_(version), scan_private_(scan_private),
+    spend_private_(spend_private)
 {
-    // BUGBUG: error suppression.
-    DEBUG_ONLY(auto success =) secret_to_public(spend_public_, spend_private_);
-    BITCOIN_ASSERT(success);
-}
-
-wallet::stealth_address stealth_receiver::stealth_address() const
-{
-    // BUGBUG: error suppression.
     ec_compressed scan_public;
-    DEBUG_ONLY(auto success =) secret_to_public(scan_public, scan_private_);
-    BITCOIN_ASSERT(success);
-
-    // BUGBUG: constrained to using only the first spend key.
-    // BUGBUG: no filter (must test all stealth outputs in blockchain).
-    return{ {}, scan_public, { spend_public_ } };
+    if (secret_to_public(scan_public, scan_private_) &&
+        secret_to_public(spend_public_, spend_private_))
+    {
+        address_ = { filter, scan_public, { spend_public_ } };
+    }
 }
 
-payment_address stealth_receiver::derive_address(
+stealth_receiver::operator const bool() const
+{
+    return address_;
+}
+
+// Will be invalid if construct fails.
+const wallet::stealth_address&  stealth_receiver::stealth_address() const
+{
+    return address_;
+}
+
+bool stealth_receiver::derive_address(payment_address& out_address,
     const ec_compressed& ephemeral_public) const
 {
-    // BUGBUG: error suppression.
     ec_compressed receiver_public;
-    DEBUG_ONLY(auto success =) uncover_stealth(receiver_public,
-        ephemeral_public, scan_private_, spend_public_);
-    BITCOIN_ASSERT(success);
-    return{ receiver_public, version_ };
+    if (!uncover_stealth(receiver_public, ephemeral_public, scan_private_,
+        spend_public_))
+        return false;
+    
+    out_address = { receiver_public, version_ };
+    return true;
 }
 
-ec_secret stealth_receiver::derive_private(
+bool stealth_receiver::derive_private(ec_secret& out_private,
     const ec_compressed& ephemeral_public) const
 {
-    // BUGBUG: error suppression.
-    ec_secret receiver_private;
-    DEBUG_ONLY(auto success =) uncover_stealth(receiver_private,
-        ephemeral_public, scan_private_, spend_private_);
-    BITCOIN_ASSERT(success);
-    return receiver_private;
+    return uncover_stealth(out_private, ephemeral_public, scan_private_,
+        spend_private_);
 }
 
 } // namespace wallet

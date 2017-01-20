@@ -24,39 +24,45 @@
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
+#include <bitcoin/bitcoin/utility/binary.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/payment_address.hpp>
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 
 namespace libbitcoin {
 namespace wallet {
-    
-/// Experimental.
+
+/// This class does not support multisignature stealth addresses.
 class BC_API stealth_sender
 {
 public:
     /// Constructors.
     /// Generate a send address from the stealth address.
-    stealth_sender(const stealth_address& address,
-        uint8_t version=payment_address::mainnet_p2kh);
+    stealth_sender(const stealth_address& address, const data_chunk& seed,
+        const binary& filter, uint8_t version=payment_address::mainnet_p2kh);
 
     /// Generate a send address from the stealth address.
-    stealth_sender(const stealth_address& address,
-        const ec_secret& ephemeral_private,
-        uint8_t version=payment_address::mainnet_p2kh);
+    stealth_sender(const ec_secret& ephemeral_private,
+        const stealth_address& address, const data_chunk& seed,
+        const binary& filter, uint8_t version=payment_address::mainnet_p2kh);
+
+    /// Caller must test after construct.
+    operator const bool() const;
 
     /// Attach this script to the output before the send output.
     const chain::script& stealth_script() const;
 
     /// The bitcoin payment address to which the payment will be made.
-    const payment_address& send_address() const;
+    const wallet::payment_address& payment_address() const;
 
 private:
-    void initialize(const stealth_address& address,
-        const ec_secret& ephemeral_private);
+    void initialize(const ec_secret& ephemeral_private,
+        const stealth_address& address, const data_chunk& seed,
+        const binary& filter);
 
     const uint8_t version_;
-    chain::script stealth_script_;
-    payment_address send_address_;
+    chain::script script_;
+    wallet::payment_address address_;
 };
     
 } // namespace wallet

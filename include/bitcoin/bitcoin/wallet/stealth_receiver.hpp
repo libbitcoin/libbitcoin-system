@@ -23,36 +23,42 @@
 #include <cstdint>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
+#include <bitcoin/bitcoin/utility/binary.hpp>
 #include <bitcoin/bitcoin/wallet/payment_address.hpp>
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 
 namespace libbitcoin {
 namespace wallet {
 
-/// Experimental.
+/// This class does not support multisignature stealth addresses.
 class BC_API stealth_receiver
 {
 public:
     /// Constructors.
     stealth_receiver(const ec_secret& scan_private,
-        const ec_secret& spend_private,
+        const ec_secret& spend_private, const binary& filter,
         uint8_t version=payment_address::mainnet_p2kh);
 
+    /// Caller must test after construct.
+    operator const bool() const;
+
     /// Get the stealth address.
-    wallet::stealth_address stealth_address() const;
+    const wallet::stealth_address& stealth_address() const;
 
     /// Derive a payment address to compare against the blockchain.
-    payment_address derive_address(
+    bool derive_address(payment_address& out_address,
         const ec_compressed& ephemeral_public) const;
 
     /// Once address is discovered, derive the private spend key.
-    ec_secret derive_private(const ec_compressed& ephemeral_public) const;
+    bool derive_private(ec_secret& out_private,
+        const ec_compressed& ephemeral_public) const;
 
 private:
-    const ec_secret& scan_private_;
-    const ec_secret& spend_private_;
     const uint8_t version_;
+    const ec_secret scan_private_;
+    const ec_secret spend_private_;
     ec_compressed spend_public_;
+    wallet::stealth_address address_;
 };
     
 } // namespace wallet
