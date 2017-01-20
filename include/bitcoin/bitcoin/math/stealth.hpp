@@ -42,7 +42,7 @@ BC_API bool create_ephemeral_key(ec_secret& out_secret,
 
 /// Create a stealth null data script the specified filter prefix.
 /// Create an ephemeral secret key generated from the seed.
-BC_API bool create_stealth_script(chain::script& out_null_data,
+BC_API bool create_stealth_data(chain::script& out_null_data,
     ec_secret& out_secret, const binary& filter, const data_chunk& seed);
 
 /// Create a stealth null data script the specified filter prefix.
