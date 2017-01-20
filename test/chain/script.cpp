@@ -329,6 +329,33 @@ BOOST_AUTO_TEST_CASE(script__from_data__internal_invalid_wire_code__success)
     BOOST_REQUIRE(instance.from_data(raw, false));
 }
 
+BOOST_AUTO_TEST_CASE(script__empty__default__true)
+{
+    script instance;
+    BOOST_REQUIRE(instance.empty());
+}
+
+BOOST_AUTO_TEST_CASE(script__empty__empty_operations__true)
+{
+    script instance(operation::list{});
+    BOOST_REQUIRE(instance.empty());
+}
+
+BOOST_AUTO_TEST_CASE(script__empty__non_empty__false)
+{
+    script instance(script::to_null_data_pattern(data_chunk{ 42u }));
+    BOOST_REQUIRE(!instance.empty());
+}
+
+BOOST_AUTO_TEST_CASE(script__clear__non_empty__empty)
+{
+    script instance(script::to_null_data_pattern(data_chunk{ 42u }));
+    BOOST_REQUIRE(!instance.empty());
+
+    instance.clear();
+    BOOST_REQUIRE(instance.empty());
+}
+
 BOOST_AUTO_TEST_CASE(script__native__block_438513_tx__valid)
 {
     ////06:21:05.532171 DEBUG [blockchain] Input validation failed (stack false)

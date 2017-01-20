@@ -104,6 +104,7 @@ public:
     // Iteration.
     //-------------------------------------------------------------------------
 
+    void clear();
     bool empty() const;
     size_t size() const;
     const operation& front() const;
