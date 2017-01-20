@@ -83,6 +83,7 @@ public:
     bool from_data(reader& source, bool prefix);
 
     /// Deserialization invalidates the iterator.
+    void from_operations(operation::list&& ops);
     void from_operations(const operation::list& ops);
     bool from_string(const std::string& mnemonic);
 

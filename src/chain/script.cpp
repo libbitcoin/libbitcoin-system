@@ -89,7 +89,7 @@ script::script(const operation::list& ops)
 
 script::script(operation::list&& ops)
 {
-    from_operations(ops);
+    from_operations(std::move(ops));
 }
 
 script::script(data_chunk&& encoded, bool prefix)
@@ -217,6 +217,16 @@ bool script::from_string(const std::string& mnemonic)
 
     from_operations(ops);
     return true;
+}
+
+// Concurrent read/write is not supported, so no critical section.
+void script::from_operations(operation::list&& ops)
+{
+    reset();
+    valid_ = true;
+    bytes_ = operations_to_data(ops);
+    operations_ = std::move(ops);
+    cached_ = true;
 }
 
 // Concurrent read/write is not supported, so no critical section.
