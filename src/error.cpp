@@ -220,9 +220,8 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::op_check_locktime_verify6, "op_check_locktime_verify6" }
     };
 
-    const auto message_iter = messages.find(ev);
-    return ((message_iter != messages.end()) ?
-        message_iter->second : "invalid code");
+    const auto message = messages.find(ev);
+    return message != messages.end() ? message->second : "invalid code";
 }
 
 // We are not currently using this.
