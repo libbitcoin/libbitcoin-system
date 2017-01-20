@@ -43,8 +43,10 @@ BOOST_AUTO_TEST_CASE(stealth_receiver__exchange_between_sender_and_receiver__alw
     const auto& scan_private = scan_key.secret();
     const auto& spend_private = spend_key.secret();
 
-    const stealth_receiver receiver(scan_private, spend_private, version);
-    const auto address = receiver.stealth_address();
+    const stealth_receiver receiver(scan_private, spend_private, binary{}, version);
+    BOOST_REQUIRE(receiver);
+
+    const auto& address = receiver.stealth_address();
     BOOST_REQUIRE_EQUAL(address.encoded(), STEALTH_ADDRESS);
 
     // Instead of generating a random ephemeral_private, use this one.
@@ -52,9 +54,12 @@ BOOST_AUTO_TEST_CASE(stealth_receiver__exchange_between_sender_and_receiver__alw
     BOOST_REQUIRE(decode_base16(ephemeral_private, EPHEMERAL_PRIVATE));
 
     // Sender sends BTC to send_address and the preceding output is
-    // ephemeral_public right-padded to 40 bytes.
-    stealth_sender sender(address, ephemeral_private, version);
-    BOOST_REQUIRE_EQUAL(sender.send_address().encoded(), DERIVED_ADDRESS);
+    // ephemeral_public right-padded up to 80 bytes total (max standard op_return).
+    const stealth_sender sender(ephemeral_private, address, data_chunk{}, binary{}, version);
+    BOOST_REQUIRE(sender);
+
+    const auto& payment = sender.payment_address();
+    BOOST_REQUIRE_EQUAL(payment.encoded(), DERIVED_ADDRESS);
 
     // Receiver scans blockchain to get a list of potentially-matching values.
     // client.fetch_stealth() will yield rows of: 
@@ -64,12 +69,14 @@ BOOST_AUTO_TEST_CASE(stealth_receiver__exchange_between_sender_and_receiver__alw
     BOOST_REQUIRE(extract_ephemeral_key(ephemeral_public, sender.stealth_script()));
 
     // The receiver can regenerate send_address using just ephemeral_public.
-    const auto derived_address = receiver.derive_address(ephemeral_public);
-    BOOST_REQUIRE_EQUAL(derived_address, sender.send_address());
+    payment_address derived_address;
+    BOOST_REQUIRE(receiver.derive_address(derived_address, ephemeral_public));
+    BOOST_REQUIRE_EQUAL(derived_address, sender.payment_address());
 
     // Only reciever can derive stealth private, as it requires both scan and
     // spend private keys.
-    const auto receiver_private = receiver.derive_private(ephemeral_public);
+    ec_secret receiver_private;
+    BOOST_REQUIRE(receiver.derive_private(receiver_private, ephemeral_public));
 
     ec_compressed receiver_public;
     BOOST_REQUIRE(secret_to_public(receiver_public, receiver_private));
@@ -80,4 +87,3 @@ BOOST_AUTO_TEST_CASE(stealth_receiver__exchange_between_sender_and_receiver__alw
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-
