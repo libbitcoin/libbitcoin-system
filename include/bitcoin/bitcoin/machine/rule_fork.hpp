@@ -51,21 +51,13 @@ enum rule_fork : uint32_t
     allow_collisions = 1 << 6,
 
     /// hard code activation heights (hard fork, optimization)
-    deep_freeze = 1 << 7,
+    bip90_rule = 1 << 7,
 
     /// rules that require bip34 style activation
     activations =
         rule_fork::bip34_rule |
         rule_fork::bip65_rule |
         rule_fork::bip66_rule,
-
-    /////// the valid set of changes to the original rule set
-    ////consensus =
-    ////    rule_fork::bip16_rule |
-    ////    rule_fork::bip30_rule |
-    ////    rule_fork::bip34_rule |
-    ////    rule_fork::bip65_rule |
-    ////    rule_fork::bip66_rule,
 
     all_rules = 0xffffffff
 };

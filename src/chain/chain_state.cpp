@@ -122,7 +122,7 @@ chain_state::activations chain_state::activation(const data& values,
     const auto height = values.height;
     const auto version = values.version.self;
     const auto& history = values.version.unordered;
-    const auto frozen = script::is_enabled(forks, rule_fork::deep_freeze);
+    const auto frozen = script::is_enabled(forks, rule_fork::bip90_rule);
     const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
 
     // Declare version predicates.
@@ -146,8 +146,8 @@ chain_state::activations chain_state::activation(const data& values,
     // testnet is activated based on configuration alone.
     result.forks |= (rule_fork::easy_blocks & forks);
 
-    // deep_freeze is activated based on configuration alone.
-    result.forks |= (rule_fork::deep_freeze & forks);
+    // bip90 is activated based on configuration alone.
+    result.forks |= (rule_fork::bip90_rule & forks);
 
     // bip16 is activated with a one-time test on mainnet/testnet (~55% rule).
     // There was one invalid p2sh tx mined after that time (code shipped late).
@@ -333,7 +333,7 @@ chain_state::map chain_state::get_map(size_t height,
     map map;
     const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
     const auto activation = script::is_enabled(forks, rule_fork::activations);
-    const auto frozen = script::is_enabled(forks, rule_fork::deep_freeze);
+    const auto frozen = script::is_enabled(forks, rule_fork::bip90_rule);
     const auto checked = is_checkpointed(height, checkpoints);
 
     // Bits.
