@@ -38,7 +38,7 @@ stealth_receiver::stealth_receiver(const ec_secret& scan_private,
     BITCOIN_ASSERT(success);
 }
 
-stealth_address stealth_receiver::stealth_address() const
+wallet::stealth_address stealth_receiver::stealth_address() const
 {
     // BUGBUG: error suppression.
     ec_compressed scan_public;
