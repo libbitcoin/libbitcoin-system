@@ -28,30 +28,33 @@
 
 namespace libbitcoin {
 
+/// The sign byte value for an even (y-valued) key.
+static BC_CONSTEXPR uint8_t ec_even_sign = 2;
+
 /// Private key:
-BC_CONSTEXPR size_t ec_secret_size = 32;
+static BC_CONSTEXPR size_t ec_secret_size = 32;
 typedef byte_array<ec_secret_size> ec_secret;
 
 /// Compressed public key:
-BC_CONSTEXPR size_t ec_compressed_size = 33;
+static BC_CONSTEXPR size_t ec_compressed_size = 33;
 typedef byte_array<ec_compressed_size> ec_compressed;
 
 typedef std::vector<ec_compressed> point_list;
 
 /// Uncompressed public key:
-BC_CONSTEXPR size_t ec_uncompressed_size = 65;
+static BC_CONSTEXPR size_t ec_uncompressed_size = 65;
 typedef byte_array<ec_uncompressed_size> ec_uncompressed;
 
 // Parsed ECDSA signature:
-BC_CONSTEXPR size_t ec_signature_size = 64;
+static BC_CONSTEXPR size_t ec_signature_size = 64;
 typedef byte_array<ec_signature_size> ec_signature;
 
 // DER encoded signature:
-BC_CONSTEXPR size_t max_der_signature_size = 72;
+static BC_CONSTEXPR size_t max_der_signature_size = 72;
 typedef data_chunk der_signature;
 
 /// DER encoded signature with sighash byte for input endorsement:
-BC_CONSTEXPR size_t max_endorsement_size = 73;
+static BC_CONSTEXPR size_t max_endorsement_size = 73;
 typedef data_chunk endorsement;
 
 /// Recoverable ecdsa signature for message signing:
@@ -61,13 +64,13 @@ struct BC_API recoverable_signature
     uint8_t recovery_id;
 };
 
-BC_CONSTEXPR ec_compressed null_compressed_point =
+static BC_CONSTEXPR ec_compressed null_compressed_point =
 {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-BC_CONSTEXPR ec_uncompressed null_uncompressed_point =
+static BC_CONSTEXPR ec_uncompressed null_uncompressed_point =
 {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -131,6 +134,9 @@ BC_API bool verify(const ec_uncompressed& point);
 
 // Detect public keys
 // ----------------------------------------------------------------------------
+
+/// Determine if the compressed public key is even (y-valued).
+bool is_even_key(const ec_compressed& point);
 
 /// Fast detection of compressed public key structure.
 bool is_compressed_key(data_slice point);

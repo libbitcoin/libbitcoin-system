@@ -241,6 +241,11 @@ bool is_public_key(data_slice point)
     return is_compressed_key(point) || is_uncompressed_key(point);
 }
 
+bool is_even_key(const ec_compressed& point)
+{
+    return point.front() == ec_even_sign;
+}
+
 // DER parse/encode
 // ----------------------------------------------------------------------------
 
