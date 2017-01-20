@@ -85,10 +85,8 @@ bool create_ephemeral_key(ec_secret& out_secret, const data_chunk& seed)
 bool create_stealth_data(script& out_null_data, ec_secret& out_secret,
     const binary& filter, const data_chunk& seed)
 {
-    ec_secret secret;
-
     // Create a valid ephemeral key pair using the seed and then the script.
-    return create_ephemeral_key(secret, seed) &&
+    return create_ephemeral_key(out_secret, seed) &&
         create_stealth_script(out_null_data, out_secret, filter, seed);
 }
 
