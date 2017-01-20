@@ -28,11 +28,12 @@
 namespace libbitcoin {
 namespace wallet {
 
-stealth_sender::stealth_sender(const stealth_address& address, uint8_t version)
+stealth_sender::stealth_sender(const stealth_address& address,
+    uint8_t version)
   : version_(version)
 {
-    // BUGBUG: hardwired security RNG.
-    data_chunk seed(12);
+    // BUGBUG: hardwired security RNG (generation of ephemeral private key).
+    data_chunk seed(32);
     pseudo_random_fill(seed);
 
     // BUGBUG: error suppression.
@@ -60,27 +61,30 @@ void stealth_sender::initialize(const stealth_address& address,
         ephemeral_private);
     BITCOIN_ASSERT(success);
 
-    // BUGBUG: error suppression.
+    // Safe as spend_keys is guaranteed non-empty by stealth_address construct.
     const auto& spend_keys = address.spend_keys();
     BITCOIN_ASSERT(!spend_keys.empty());
 
     // BUGBUG: error suppression.
-    // BUGBUG: ignores all but first spender key.
+    // BUGBUG: constrained to using only the first spend key.
     ec_compressed sender_public;
     DEBUG_ONLY(success =) uncover_stealth(sender_public, address.scan_key(),
         ephemeral_private, spend_keys.front());
     BITCOIN_ASSERT(success);
 
     send_address_ = payment_address(sender_public, version_);
-    data_chunk null_data(ephemeral_public.begin() + 1, ephemeral_public.end());
 
-    // Stealth null data size is >= 32 and <= 80, this hardwires 32 + 8 = 40.
-    data_chunk random_padding(8);
+    // BUGBUG: no filter (must test all stealth outputs in blockchain).
+    binary filter;
 
-    // BUGBUG: hardwired security RNG.
-    pseudo_random_fill(random_padding);
-    extend_data(null_data, random_padding);
-    stealth_script_ = chain::script::to_null_data_pattern(null_data);
+    // BUGBUG: hardwired privacy RNG (gneration of stealth script padding).
+    data_chunk seed(32);
+    pseudo_random_fill(seed);
+
+    // BUGBUG: error suppression.
+    DEBUG_ONLY(success =) create_stealth_script(stealth_script_,
+        ephemeral_private, filter, seed);
+    BITCOIN_ASSERT(success);
 }
 
 const chain::script& stealth_sender::stealth_script() const

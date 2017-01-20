@@ -40,22 +40,21 @@ stealth_receiver::stealth_receiver(const ec_secret& scan_private,
 
 stealth_address stealth_receiver::generate_stealth_address() const
 {
-    ec_compressed scan_public;
-
     // BUGBUG: error suppression.
+    ec_compressed scan_public;
     DEBUG_ONLY(auto success =) secret_to_public(scan_public, scan_private_);
     BITCOIN_ASSERT(success);
 
-    // BUGBUG: assumes a default filter and single spender.
+    // BUGBUG: constrained to using only the first spend key.
+    // BUGBUG: no filter (must test all stealth outputs in blockchain).
     return{ {}, scan_public, { spend_public_ } };
 }
 
 payment_address stealth_receiver::derive_address(
     const ec_compressed& ephemeral_public) const
 {
-    ec_compressed receiver_public;
-
     // BUGBUG: error suppression.
+    ec_compressed receiver_public;
     DEBUG_ONLY(auto success =) uncover_stealth(receiver_public,
         ephemeral_public, scan_private_, spend_public_);
     BITCOIN_ASSERT(success);
@@ -65,10 +64,9 @@ payment_address stealth_receiver::derive_address(
 ec_secret stealth_receiver::derive_private(
     const ec_compressed& ephemeral_public) const
 {
-    ec_secret receiver_private;
-
     // BUGBUG: error suppression.
-    DEBUG_ONLY(auto success =) uncover_stealth(receiver_private,
+    ec_secret receiver_private;
+    DEBUG_ONLY(success =) uncover_stealth(receiver_private,
         ephemeral_public, scan_private_, spend_private_);
     BITCOIN_ASSERT(success);
     return receiver_private;
