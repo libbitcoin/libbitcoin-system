@@ -66,7 +66,7 @@ ec_secret stealth_receiver::derive_private(
 {
     // BUGBUG: error suppression.
     ec_secret receiver_private;
-    DEBUG_ONLY(success =) uncover_stealth(receiver_private,
+    DEBUG_ONLY(auto success =) uncover_stealth(receiver_private,
         ephemeral_public, scan_private_, spend_private_);
     BITCOIN_ASSERT(success);
     return receiver_private;
