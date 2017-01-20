@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(stealth_receiver__exchange_between_sender_and_receiver__alw
     const auto& spend_private = spend_key.secret();
 
     const stealth_receiver receiver(scan_private, spend_private, version);
-    const auto address = receiver.generate_stealth_address();
+    const auto address = receiver.stealth_address();
     BOOST_REQUIRE_EQUAL(address.encoded(), STEALTH_ADDRESS);
 
     // Instead of generating a random ephemeral_private, use this one.

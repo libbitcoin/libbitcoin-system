@@ -38,8 +38,8 @@ public:
         const ec_secret& spend_private,
         uint8_t version=payment_address::mainnet_p2kh);
 
-    /// Create a stealth address.
-    stealth_address generate_stealth_address() const;
+    /// Get the stealth address.
+    stealth_address stealth_address() const;
 
     /// Derive a payment address to compare against the blockchain.
     payment_address derive_address(
