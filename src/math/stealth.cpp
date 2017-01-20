@@ -82,7 +82,7 @@ bool create_ephemeral_key(ec_secret& out_secret, const data_chunk& seed)
 }
 
 // Mine a filter into the leftmost bytes of sha256(sha256(output-script)).
-bool create_stealth_script(script& out_null_data, ec_secret& out_secret,
+bool create_stealth_data(script& out_null_data, ec_secret& out_secret,
     const binary& filter, const data_chunk& seed)
 {
     ec_secret secret;
