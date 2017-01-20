@@ -22,6 +22,7 @@
 
 using namespace bc;
 
+// TODO: split out individual functions and standardize test names.
 BOOST_AUTO_TEST_SUITE(stealth_tests)
 
 #define SCAN_PRIVATE "fa63521e333e4b9f6a98a142680d3aef4d8e7f79723ce0043691db55c36bd905"

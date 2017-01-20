@@ -331,6 +331,11 @@ std::string script::to_string(uint32_t active_forks) const
 // These are syntactic sugar that allow the caller to iterate ops directly.
 // The first operations access must be method-based to guarantee the cache.
 
+void script::clear()
+{
+    reset();
+}
+
 bool script::empty() const
 {
     return operations().empty();

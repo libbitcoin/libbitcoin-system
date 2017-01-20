@@ -217,6 +217,8 @@
     <ClCompile Include="..\..\..\..\src\wallet\payment_address.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\qrcode.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\select_outputs.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\stealth_receiver.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\stealth_sender.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\stealth_address.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\uri.cpp" />
   </ItemGroup>
@@ -388,6 +390,8 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\ek_public.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\ek_token.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\qrcode.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\stealth_receiver.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\stealth_sender.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\uri_reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\encrypted_keys.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\dictionary.hpp" />

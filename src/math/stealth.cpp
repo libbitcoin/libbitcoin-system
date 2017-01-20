@@ -20,10 +20,11 @@
 #include <bitcoin/bitcoin/math/stealth.hpp>
 
 #include <algorithm>
+#include <utility>
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/machine/operation.hpp>
 #include <bitcoin/bitcoin/machine/script_pattern.hpp>
 #include <bitcoin/bitcoin/utility/binary.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -40,8 +41,7 @@ bool is_stealth_script(const script& script)
         return false;
 
     BITCOIN_ASSERT(script.size() == 2);
-    const auto& data = script[1].data();
-    return (data.size() >= hash_size);
+    return (script[1].data().size() >= hash_size);
 }
 
 bool to_stealth_prefix(uint32_t& out_prefix, const script& script)
@@ -51,61 +51,54 @@ bool to_stealth_prefix(uint32_t& out_prefix, const script& script)
 
     // A stealth prefix is the full 32 bits (prefix to the hash).
     // A stealth filter is a leftmost substring of the stealth prefix.
-    constexpr size_t size = binary::bits_per_block * sizeof(uint32_t);
+    ////constexpr size_t size = binary::bits_per_block * sizeof(uint32_t);
 
     const auto script_hash = bitcoin_hash(script.to_data(false));
     out_prefix = from_little_endian_unsafe<uint32_t>(script_hash.begin());
     return true;
 }
 
+// TODO: this can be implemented using libsecp256k1 without iteration.
 // The public key must have a sign value of 0x02 (i.e. must be even y-valued).
-static bool create_ephemeral_keys(ec_secret& out_secret,
-    ec_compressed& out_point, const data_chunk& seed)
+bool create_ephemeral_key(ec_secret& out_secret, const data_chunk& seed)
 {
     static const data_chunk magic(to_chunk("Stealth seed"));
     auto nonced_seed = build_chunk({ to_array(0), seed });
+    ec_compressed point;
 
-    // TODO: this can be implemented using libsecp256k1 without iteration.
-    // Iterate up to 256 times before giving up on finding a valid key pair.
+    // Iterate up to 255 times before giving up on finding a valid key pair.
     // This gives extremely high success probability given even distribution.
-    for (uint8_t nonce = 0; nonce <= max_uint8; ++nonce)
+    for (uint8_t nonce = 0; nonce < max_uint8; ++nonce)
     {
         nonced_seed[0] = nonce;
-        const auto secret = hmac_sha256_hash(nonced_seed, magic);
+        out_secret = hmac_sha256_hash(nonced_seed, magic);
 
-        ec_compressed point;
-        if (secret_to_public(point, secret) &&
-            point.front() == ephemeral_public_key_sign)
-        {
-            out_point = point;
-            out_secret = secret;
+        if (secret_to_public(point, out_secret) && is_even_key(point))
             return true;
-        }
     }
 
+    out_secret = null_hash;
     return false;
 }
 
-// No reason to return the public key (except our internal optimization).
-bool create_ephemeral_key(ec_secret& out_secret, const data_chunk& seed)
+// Mine a filter into the leftmost bytes of sha256(sha256(output-script)).
+bool create_stealth_script(script& out_null_data, ec_secret& out_secret,
+    const binary& filter, const data_chunk& seed)
 {
-    ec_compressed unused;
-    return create_ephemeral_keys(out_secret, unused, seed);
+    ec_secret secret;
+
+    // Create a valid ephemeral key pair using the seed and then the script.
+    return create_ephemeral_key(secret, seed) &&
+        create_stealth_script(out_null_data, out_secret, filter, seed);
 }
 
 // Mine a filter into the leftmost bytes of sha256(sha256(output-script)).
-bool create_stealth_data(data_chunk& out_stealth_data, ec_secret& out_secret,
+bool create_stealth_script(script& out_null_data, const ec_secret& secret,
     const binary& filter, const data_chunk& seed)
 {
-    // Create a valid ephemeral key pair.
-    ec_secret secret;
-    ec_compressed point;
-    if (!create_ephemeral_keys(secret, point, seed))
-        return false;
-
     // [ephemeral-public-key-hash:32][pad:0-44][nonce:4]
-    static const size_t max_pad_size = max_null_data_size -
-        hash_size - sizeof(uint32_t);
+    static constexpr size_t max_pad_size = max_null_data_size - hash_size -
+        sizeof(uint32_t);
 
     // Derive our initial nonce and pad from the provided seed.
     const auto bytes = sha512_hash(seed);
@@ -115,6 +108,11 @@ bool create_stealth_data(data_chunk& out_stealth_data, ec_secret& out_secret,
 
     // Allocate data of target size (36-80 bytes)
     data_chunk data(hash_size + pad_size + sizeof(uint32_t));
+
+    // Obtain the ephemeral public key from the provided ephemeral secret key.
+    ec_compressed point;
+    if (!secret_to_public(point, secret) || !is_even_key(point))
+        return false;
 
     // Copy the unsigned portion of the ephemeral public key into data.
     std::copy_n(point.begin() + 1, ec_compressed_size - 1, data.begin());
@@ -129,6 +127,7 @@ bool create_stealth_data(data_chunk& out_stealth_data, ec_secret& out_secret,
 
     // Mine a prefix into the double sha256 hash of the stealth script.
     // This will iterate up to 2^32 times before giving up.
+    uint32_t field;
     for (uint32_t nonce = start + 1; nonce != start; ++nonce)
     {
         // Fill the nonce into the data buffer.
@@ -136,20 +135,17 @@ bool create_stealth_data(data_chunk& out_stealth_data, ec_secret& out_secret,
         std::copy_n(fill.begin(), sizeof(nonce), data.end() - sizeof(nonce));
 
         // Create the stealth script with the current data.
-        const auto ops = script::to_null_data_pattern(data);
-        const auto stealth_script = script(std::move(ops));
+        out_null_data = script(script::to_null_data_pattern(data));
 
         // Test for match of filter to stealth script hash prefix.
-        uint32_t field;
-        if (to_stealth_prefix(field, stealth_script) &&
+        if (to_stealth_prefix(field, out_null_data) &&
             filter.is_prefix_of(field))
         {
-            out_stealth_data = data;
-            out_secret = secret;
             return true;
         }
     }
 
+    out_null_data.clear();
     return false;
 }
 
@@ -162,11 +158,10 @@ bool extract_ephemeral_key(ec_compressed& out_ephemeral_public_key,
     // The sign of the ephemeral public key is fixed by convention.
     // This requires the spender to generate a compliant (y-even) key.
     // That requires iteration with probability of 1 in 2 chance of success.
-    out_ephemeral_public_key[0] = ephemeral_public_key_sign;
+    out_ephemeral_public_key[0] = ec_even_sign;
 
     const auto& data = script[1].data();
     std::copy_n(data.begin(), hash_size, out_ephemeral_public_key.begin() + 1);
-
     return true;
 }
 
@@ -178,7 +173,6 @@ bool extract_ephemeral_key(hash_digest& out_unsigned_ephemeral_key,
 
     const auto& data = script[1].data();
     std::copy_n(data.begin(), hash_size, out_unsigned_ephemeral_key.begin());
-
     return true;
 }
 
