@@ -60,7 +60,7 @@ enum class message_type
     ping,
     pong,
     reject,
-    send_compact_blocks,
+    send_compact,
     send_headers,
     transaction,
     verack,
