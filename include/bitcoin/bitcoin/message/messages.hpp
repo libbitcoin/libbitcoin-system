@@ -49,7 +49,7 @@
 #include <bitcoin/bitcoin/message/ping.hpp>
 #include <bitcoin/bitcoin/message/pong.hpp>
 #include <bitcoin/bitcoin/message/reject.hpp>
-#include <bitcoin/bitcoin/message/send_compact_blocks.hpp>
+#include <bitcoin/bitcoin/message/send_compact.hpp>
 #include <bitcoin/bitcoin/message/send_headers.hpp>
 #include <bitcoin/bitcoin/message/transaction.hpp>
 #include <bitcoin/bitcoin/message/verack.hpp>
@@ -130,6 +130,7 @@ DECLARE_MESSAGE_POINTER_TYPES(merkle_block);
 DECLARE_MESSAGE_POINTER_TYPES(not_found);
 DECLARE_MESSAGE_POINTER_TYPES(ping);
 DECLARE_MESSAGE_POINTER_TYPES(pong);
+DECLARE_MESSAGE_POINTER_TYPES(send_compact);
 DECLARE_MESSAGE_POINTER_TYPES(send_headers);
 DECLARE_MESSAGE_POINTER_TYPES(transaction);
 DECLARE_MESSAGE_POINTER_TYPES(verack);

@@ -31,24 +31,24 @@
 namespace libbitcoin {
 namespace message {
 
-class BC_API send_compact_blocks
+class BC_API send_compact
 {
 public:
-    typedef std::shared_ptr<send_compact_blocks> ptr;
-    typedef std::shared_ptr<const send_compact_blocks> const_ptr;
+    typedef std::shared_ptr<send_compact> ptr;
+    typedef std::shared_ptr<const send_compact> const_ptr;
 
-    static send_compact_blocks factory_from_data(uint32_t version,
+    static send_compact factory_from_data(uint32_t version,
         const data_chunk& data);
-    static send_compact_blocks factory_from_data(uint32_t version,
+    static send_compact factory_from_data(uint32_t version,
         std::istream& stream);
-    static send_compact_blocks factory_from_data(uint32_t version,
+    static send_compact factory_from_data(uint32_t version,
         reader& source);
     static size_t satoshi_fixed_size(uint32_t version);
 
-    send_compact_blocks();
-    send_compact_blocks(bool high_bandwidth_mode, uint64_t version);
-    send_compact_blocks(const send_compact_blocks& other);
-    send_compact_blocks(send_compact_blocks&& other);
+    send_compact();
+    send_compact(bool high_bandwidth_mode, uint64_t version);
+    send_compact(const send_compact& other);
+    send_compact(send_compact&& other);
 
     bool high_bandwidth_mode() const;
     void set_high_bandwidth_mode(bool mode);
@@ -67,11 +67,11 @@ public:
     size_t serialized_size(uint32_t version) const;
 
     /// This class is move assignable but not copy assignable.
-    send_compact_blocks& operator=(send_compact_blocks&& other);
-    void operator=(const send_compact_blocks&) = delete;
+    send_compact& operator=(send_compact&& other);
+    void operator=(const send_compact&) = delete;
 
-    bool operator==(const send_compact_blocks& other) const;
-    bool operator!=(const send_compact_blocks& other) const;
+    bool operator==(const send_compact& other) const;
+    bool operator!=(const send_compact& other) const;
 
     static const std::string command;
     static const uint32_t version_minimum;

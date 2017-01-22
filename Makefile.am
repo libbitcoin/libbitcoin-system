@@ -139,7 +139,7 @@ src_libbitcoin_la_SOURCES = \
     src/message/pong.cpp \
     src/message/prefilled_transaction.cpp \
     src/message/reject.cpp \
-    src/message/send_compact_blocks.cpp \
+    src/message/send_compact.cpp \
     src/message/send_headers.cpp \
     src/message/transaction.cpp \
     src/message/verack.cpp \
@@ -290,7 +290,7 @@ test_libbitcoin_test_SOURCES = \
     test/message/pong.cpp \
     test/message/prefilled_transaction.cpp \
     test/message/reject.cpp \
-    test/message/send_compact_blocks.cpp \
+    test/message/send_compact.cpp \
     test/message/send_headers.cpp \
     test/message/transaction.cpp \
     test/message/verack.cpp \
@@ -501,7 +501,7 @@ include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/pong.hpp \
     include/bitcoin/bitcoin/message/prefilled_transaction.hpp \
     include/bitcoin/bitcoin/message/reject.hpp \
-    include/bitcoin/bitcoin/message/send_compact_blocks.hpp \
+    include/bitcoin/bitcoin/message/send_compact.hpp \
     include/bitcoin/bitcoin/message/send_headers.hpp \
     include/bitcoin/bitcoin/message/transaction.hpp \
     include/bitcoin/bitcoin/message/verack.hpp \

@@ -329,8 +329,8 @@ BOOST_AUTO_TEST_CASE(heading__type__all_cases__match_expected)
     BOOST_REQUIRE(message::message_type::pong == instance.type());
     instance.set_command(message::reject::command);
     BOOST_REQUIRE(message::message_type::reject == instance.type());
-    instance.set_command(message::send_compact_blocks::command);
-    BOOST_REQUIRE(message::message_type::send_compact_blocks == instance.type());
+    instance.set_command(message::send_compact::command);
+    BOOST_REQUIRE(message::message_type::send_compact == instance.type());
     instance.set_command(message::send_headers::command);
     BOOST_REQUIRE(message::message_type::send_headers == instance.type());
     instance.set_command(message::transaction::command);

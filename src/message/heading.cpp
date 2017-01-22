@@ -224,8 +224,8 @@ message_type heading::type() const
         return message_type::pong;
     if (command_ == reject::command)
         return message_type::reject;
-    if (command_ == send_compact_blocks::command)
-        return message_type::send_compact_blocks;
+    if (command_ == send_compact::command)
+        return message_type::send_compact;
     if (command_ == send_headers::command)
         return message_type::send_headers;
     if (command_ == transaction::command)

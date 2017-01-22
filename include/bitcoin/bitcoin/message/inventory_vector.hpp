@@ -20,7 +20,9 @@
 #ifndef LIBBITCOIN_MESSAGE_INVENTORY_VECTOR_HPP
 #define LIBBITCOIN_MESSAGE_INVENTORY_VECTOR_HPP
 
+#include <cstdint>
 #include <istream>
+#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -37,16 +39,16 @@ public:
 
     enum class type_id
     {
-        error,
-        transaction,
-        block,
-        filtered_block,
-        compact_block,
-        none
+        error = 0,
+        transaction = 1,
+        block = 2,
+        filtered_block = 3,
+        compact_block = 4
     };
 
     static type_id to_type(uint32_t value);
     static uint32_t to_number(type_id type);
+    static std::string to_string(type_id type);
 
     static inventory_vector factory_from_data(uint32_t version,
         const data_chunk& data);

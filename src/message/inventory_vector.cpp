@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
 
 #include <cstdint>
+#include <string>
 #include <bitcoin/bitcoin/message/inventory.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -37,10 +38,11 @@ uint32_t inventory_vector::to_number(type_id inventory_type)
             return 4;
         case type_id::block:
             return 2;
+        case type_id::filtered_block:
+            return 3;
         case type_id::transaction:
             return 1;
         case type_id::error:
-        case type_id::none:
         default:
             return 0;
     }
@@ -50,16 +52,35 @@ inventory_vector::type_id inventory_vector::to_type(uint32_t value)
 {
     switch (value)
     {
-        case 0:
-            return type_id::error;
-        case 1:
-            return type_id::transaction;
-        case 2:
-            return type_id::block;
         case 4:
             return type_id::compact_block;
+        case 3:
+            return type_id::filtered_block;
+        case 2:
+            return type_id::block;
+        case 1:
+            return type_id::transaction;
+        case 0:
         default:
-            return type_id::none;
+            return type_id::error;
+    }
+}
+
+std::string inventory_vector::to_string(type_id inventory_type)
+{
+        switch (inventory_type)
+    {
+        case type_id::compact_block:
+            return "compact_block";
+        case type_id::block:
+            return "block";
+        case type_id::filtered_block:
+            return "filtered_block";
+        case type_id::transaction:
+            return "transaction";
+        case type_id::error:
+        default:
+            return "error";
     }
 }
 

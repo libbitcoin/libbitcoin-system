@@ -132,7 +132,7 @@
     <ClCompile Include="..\..\..\..\test\message\pong.cpp" />
     <ClCompile Include="..\..\..\..\test\message\prefilled_transaction.cpp" />
     <ClCompile Include="..\..\..\..\test\message\reject.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\send_compact_blocks.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\send_compact.cpp" />
     <ClCompile Include="..\..\..\..\test\message\send_headers.cpp" />
     <ClCompile Include="..\..\..\..\test\message\transaction.cpp">
       <ObjectFileName>$(IntDir)transaction_message.obj</ObjectFileName>

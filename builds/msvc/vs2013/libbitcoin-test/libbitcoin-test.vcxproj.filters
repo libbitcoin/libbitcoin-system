@@ -261,9 +261,6 @@
     <ClCompile Include="..\..\..\..\test\config\hash256.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\message\send_compact_blocks.cpp">
-      <Filter>src\message</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\send_headers.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
@@ -329,6 +326,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\stealth_receiver.cpp">
       <Filter>src\wallet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\send_compact.cpp">
+      <Filter>src\message</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

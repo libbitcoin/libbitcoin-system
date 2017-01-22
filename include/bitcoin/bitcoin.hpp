@@ -116,7 +116,7 @@
 #include <bitcoin/bitcoin/message/pong.hpp>
 #include <bitcoin/bitcoin/message/prefilled_transaction.hpp>
 #include <bitcoin/bitcoin/message/reject.hpp>
-#include <bitcoin/bitcoin/message/send_compact_blocks.hpp>
+#include <bitcoin/bitcoin/message/send_compact.hpp>
 #include <bitcoin/bitcoin/message/send_headers.hpp>
 #include <bitcoin/bitcoin/message/transaction.hpp>
 #include <bitcoin/bitcoin/message/verack.hpp>
