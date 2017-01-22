@@ -38,12 +38,14 @@ bool sequential_lock::is_read_valid(handle value) const
     return value == sequence_.load();
 }
 
+// Failure does not prevent a subsequent begin or end resetting the lock state.
 bool sequential_lock::begin_write()
 {
     // Start write lock.
     return is_write_locked(++sequence_);
 }
 
+// Failure does not prevent a subsequent begin or end resetting the lock state.
 bool sequential_lock::end_write()
 {
     // End write lock.

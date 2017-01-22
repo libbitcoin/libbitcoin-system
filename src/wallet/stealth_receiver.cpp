@@ -20,9 +20,11 @@
 #include <bitcoin/bitcoin/wallet/stealth_receiver.hpp>
 
 #include <cstdint>
-#include <bitcoin/bitcoin/chain/script.hpp>
+#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/stealth.hpp>
 #include <bitcoin/bitcoin/utility/binary.hpp>
+#include <bitcoin/bitcoin/wallet/payment_address.hpp>
+#include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 
 namespace libbitcoin {
 namespace wallet {
