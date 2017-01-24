@@ -143,6 +143,7 @@ public:
     hash_list missing_previous_transactions() const;
     uint64_t total_input_value() const;
     uint64_t total_output_value() const;
+    size_t signature_operations() const;
     size_t signature_operations(bool bip16_active) const;
 
     bool is_coinbase() const;

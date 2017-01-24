@@ -599,6 +599,14 @@ bool transaction::is_overspent() const
 }
 
 // Returns max_size_t in case of overflow.
+size_t transaction::signature_operations() const
+{
+    const auto state = validation.state;
+    return state ? signature_operations(
+        state->is_enabled(rule_fork::bip16_rule)) : max_size_t;
+}
+
+// Returns max_size_t in case of overflow.
 size_t transaction::signature_operations(bool bip16_active) const
 {
     const auto in = [bip16_active](size_t total, const input& input)
