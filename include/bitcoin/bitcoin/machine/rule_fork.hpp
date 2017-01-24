@@ -29,36 +29,43 @@ enum rule_fork : uint32_t
 {
     no_rules = 0,
 
-    /// allow minimum difficulty blocks (hard fork, testnet)
-    easy_blocks = 1 << 0,
+    /// Allow minimum difficulty blocks (hard fork, testnet)
+    easy_blocks = 1u << 0,
 
-    /// pay-to-script-hash enabled (soft fork)
-    bip16_rule = 1 << 1,
+    /// Pay-to-script-hash enabled (soft fork)
+    bip16_rule = 1u << 1,
 
-    /// no duplicated unspent transaction ids (hard fork, security)
-    bip30_rule = 1 << 2,
+    /// No duplicated unspent transaction ids (hard fork, security)
+    bip30_rule = 1u << 2,
 
-    /// coinbase must include height (soft fork)
-    bip34_rule = 1 << 3,
+    /// Coinbase must include height (soft fork)
+    bip34_rule = 1u << 3,
 
-    /// strict DER signatures required (soft fork)
-    bip66_rule = 1 << 4,
+    /// Strict DER signatures required (soft fork)
+    bip66_rule = 1u << 4,
 
-    /// nop2 becomes check locktime verify (soft fork)
-    bip65_rule = 1 << 5,
+    /// Operation nop2 becomes check locktime verify (soft fork)
+    bip65_rule = 1u << 5,
 
-    /// assume hash collisions cannot happen (hard fork, optimization)
-    allow_collisions = 1 << 6,
+    /// Assume hash collisions cannot happen (hard fork, optimization)
+    allow_collisions = 1u << 6,
 
-    /// hard code activation heights (hard fork, optimization)
-    bip90_rule = 1 << 7,
+    /// Hard code activation heights (hard fork, optimization)
+    bip90_rule = 1u << 7,
 
-    /// rules that require bip34 style activation
+    /// Sentinel bit to indicate tx was validated under a checkpoint.
+    checkpointed = 1u << 30,
+
+    /// Sentinel bit to indicate tx has not been validated.
+    unverified = 1u << 31,
+
+    /// Rules that require bip34 style activation
     activations =
         rule_fork::bip34_rule |
         rule_fork::bip65_rule |
         rule_fork::bip66_rule,
 
+    /// Simple mask to set all bits.
     all_rules = 0xffffffff
 };
 
