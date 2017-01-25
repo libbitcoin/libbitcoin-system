@@ -39,7 +39,7 @@ public:
     typedef std::function<void()> action;
 
     sequencer(asio::service& service);
-    ~sequencer();
+    virtual ~sequencer();
 
     void lock(action&& handler);
     void unlock();

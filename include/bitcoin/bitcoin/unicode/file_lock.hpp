@@ -75,7 +75,7 @@ class file_lock
    }
 
    //!Closes a file lock. Does not throw.
-   ~file_lock();
+   virtual ~file_lock();
 
    //!Swaps two file_locks.
    //!Does not throw.

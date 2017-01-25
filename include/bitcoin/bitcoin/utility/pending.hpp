@@ -42,7 +42,7 @@ public:
     using finder = std::function<bool(const element_ptr& element)>;
 
     pending(size_t initial_capacity);
-    ~pending();
+    virtual ~pending();
 
     /// Safely copy the member collection.
     elements collection() const;

@@ -42,11 +42,11 @@ public:
      */
     unicode_istream(std::istream& narrow_stream, std::wistream& wide_stream,
         size_t size);
-    
+
     /**
      * Delete the unicode_streambuf that wraps wide_stream.
      */
-    ~unicode_istream();
+    virtual ~unicode_istream();
 };
 
 } // namespace libbitcoin

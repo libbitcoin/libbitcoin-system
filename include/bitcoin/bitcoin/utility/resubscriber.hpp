@@ -43,7 +43,7 @@ public:
 
     /// Construct an instance. The class_name is for debugging.
     resubscriber(threadpool& pool, const std::string& class_name);
-    ~resubscriber();
+    virtual ~resubscriber();
 
     /// Enable new subscriptions.
     void start();
