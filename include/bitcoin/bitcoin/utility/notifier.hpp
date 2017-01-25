@@ -48,7 +48,7 @@ public:
     /// A limit of zero is unlimited, the class_name is for debugging.
     notifier(threadpool& pool, size_t limit, const std::string& class_name);
     notifier(threadpool& pool, const std::string& class_name);
-    ~notifier();
+    virtual ~notifier();
 
     /// Enable new subscriptions.
     void start();

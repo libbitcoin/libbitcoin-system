@@ -36,7 +36,7 @@ public:
     typedef boost::filesystem::path path;
 
     interprocess_lock(const path& file);
-    ~interprocess_lock();
+    virtual ~interprocess_lock();
 
     bool lock();
     bool unlock();

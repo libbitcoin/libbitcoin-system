@@ -40,7 +40,7 @@ public:
     typedef std::shared_ptr<count> count_ptr;
 
     monitor(count_ptr counter, std::string&& name);
-    ~monitor();
+    virtual ~monitor();
 
     template <typename Handler>
     void invoke(Handler handler) const

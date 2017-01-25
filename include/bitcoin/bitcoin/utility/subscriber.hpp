@@ -42,7 +42,7 @@ public:
     typedef std::shared_ptr<subscriber<Args...>> ptr;
 
     subscriber(threadpool& pool, const std::string& class_name);
-    ~subscriber();
+    virtual ~subscriber();
 
     /// Enable new subscriptions.
     void start();
