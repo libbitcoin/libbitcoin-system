@@ -264,50 +264,18 @@ bool transaction::is_valid() const
 // Serialization.
 //-----------------------------------------------------------------------------
 
-// private (call under mutex only).
-void transaction::set_wire_data() const
+data_chunk transaction::to_data(bool wire) const
 {
-    wire_data_ = std::make_shared<data_chunk>();
-    to_data(*wire_data_, true);
-}
+    data_chunk data;
 
-// private
-void transaction::to_data(data_chunk& data, bool wire) const
-{
-    // Reserve an extra byte to prevent reallocation for signature hashes.
+    // Reserve an extra byte to prevent full reallocation in the case of
+    // generate_signature_hash extension by addition of the sighash_type.
     data.reserve(serialized_size(wire) + sizeof(uint8_t));
+
     data_sink ostream(data);
     to_data(ostream, wire);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == serialized_size(wire));
-}
-
-data_chunk transaction::to_data(bool wire) const
-{
-    if (!wire)
-    {
-        data_chunk data;
-        to_data(data, wire);
-        return data;
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Critical Section
-    mutex_.lock_upgrade();
-
-    if (!wire_data_)
-    {
-        mutex_.unlock_upgrade_and_lock();
-        //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        set_wire_data();
-        //-----------------------------------------------------------------
-        mutex_.unlock_and_lock_upgrade();
-    }
-
-    const auto data = *wire_data_;
-    mutex_.unlock_upgrade();
-    ///////////////////////////////////////////////////////////////////////////
-
     return data;
 }
 
@@ -442,12 +410,11 @@ void transaction::invalidate_cache() const
     // Critical Section
     mutex_.lock_upgrade();
 
-    if (hash_ || wire_data_)
+    if (hash_)
     {
         mutex_.unlock_upgrade_and_lock();
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         hash_.reset();
-        wire_data_.reset();
         //---------------------------------------------------------------------
         mutex_.unlock_and_lock_upgrade();
     }
@@ -466,11 +433,7 @@ hash_digest transaction::hash() const
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_.unlock_upgrade_and_lock();
-
-        if (!wire_data_)
-            set_wire_data();
-
-        hash_ = std::make_shared<hash_digest>(bitcoin_hash(*wire_data_));
+        hash_ = std::make_shared<hash_digest>(bitcoin_hash(to_data()));
         mutex_.unlock_and_lock_upgrade();
         //---------------------------------------------------------------------
     }

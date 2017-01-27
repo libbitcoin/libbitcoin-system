@@ -178,14 +178,9 @@ private:
     input::list inputs_;
     output::list outputs_;
 
-    // Utilities for managing data cache.
-    void set_wire_data() const;
-    void to_data(data_chunk& data, bool wire) const;
-
     // These share a mutex as they are not expected to conflict.
     mutable boost::optional<size_t> total_input_value_;
     mutable boost::optional<size_t> total_output_value_;
-    mutable std::shared_ptr<data_chunk> wire_data_;
     mutable std::shared_ptr<hash_digest> hash_;
     mutable upgrade_mutex mutex_;
 };
