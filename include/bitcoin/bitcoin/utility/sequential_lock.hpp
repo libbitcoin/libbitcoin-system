@@ -34,7 +34,7 @@ public:
     typedef size_t handle;
 
     /// Determine if the given handle is a write-locked handle.
-    static inline bool is_write_locked(handle value)
+    static bool is_write_locked(handle value)
     {
         return (value % 2) == 1;
     }

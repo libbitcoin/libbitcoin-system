@@ -63,7 +63,7 @@ public:
     static const uint32_t mainnet;
     static const uint32_t testnet;
 
-    static inline uint32_t to_prefix(uint64_t prefixes)
+    static uint32_t to_prefix(uint64_t prefixes)
     {
         return prefixes & 0x00000000FFFFFFFF;
     }

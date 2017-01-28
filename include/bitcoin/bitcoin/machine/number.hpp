@@ -63,68 +63,68 @@ public:
     static const uint8_t negative_mask;
 
     /// Construct with zero value.
-    inline number();
+    number();
 
     /// Construct with specified value.
-    inline explicit number(int64_t value);
+    explicit number(int64_t value);
 
     /// Replace the value derived from a byte vector with LSB first ordering.
-    inline bool set_data(const data_chunk& data, size_t max_size);
+    bool set_data(const data_chunk& data, size_t max_size);
 
     // Properties
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     /// Return the value as a byte vector with LSB first ordering.
-    inline data_chunk data() const;
+    data_chunk data() const;
 
     /// Return the value bounded by the limits of int32.
-    inline int32_t int32() const;
+    int32_t int32() const;
 
     /// Return the unbounded value.
-    inline int64_t int64() const;
+    int64_t int64() const;
 
     // Stack Helpers
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     /// Return value as stack boolean (nonzero is true).
-    inline bool is_true() const;
+    bool is_true() const;
 
     /// Return value as stack boolean (zero is false).
-    inline bool is_false() const;
+    bool is_false() const;
 
     // Operators
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
-    //************************************************************************
+    //*************************************************************************
     // CONSENSUS: script::number implements consensus critical overflow
     // behavior for all operators, specifically [-, +, +=, -=].
     //*************************************************************************
 
-    inline bool operator>(int64_t value) const;
-    inline bool operator<(int64_t value) const;
-    inline bool operator>=(int64_t value) const;
-    inline bool operator<=(int64_t value) const;
-    inline bool operator==(int64_t value) const;
-    inline bool operator!=(int64_t value) const;
+    bool operator>(int64_t value) const;
+    bool operator<(int64_t value) const;
+    bool operator>=(int64_t value) const;
+    bool operator<=(int64_t value) const;
+    bool operator==(int64_t value) const;
+    bool operator!=(int64_t value) const;
 
-    inline bool operator>(const number& other) const;
-    inline bool operator<(const number& other) const;
-    inline bool operator>=(const number& other) const;
-    inline bool operator<=(const number& other) const;
-    inline bool operator==(const number& other) const;
-    inline bool operator!=(const number& other) const;
+    bool operator>(const number& other) const;
+    bool operator<(const number& other) const;
+    bool operator>=(const number& other) const;
+    bool operator<=(const number& other) const;
+    bool operator==(const number& other) const;
+    bool operator!=(const number& other) const;
 
-    inline number operator+() const;
-    inline number operator-() const;
-    inline number operator+(int64_t value) const;
-    inline number operator-(int64_t value) const;
-    inline number operator+(const number& other) const;
-    inline number operator-(const number& other) const;
+    number operator+() const;
+    number operator-() const;
+    number operator+(int64_t value) const;
+    number operator-(int64_t value) const;
+    number operator+(const number& other) const;
+    number operator-(const number& other) const;
 
-    inline number& operator+=(int64_t value);
-    inline number& operator-=(int64_t value);
-    inline number& operator+=(const number& other);
-    inline number& operator-=(const number& other);
+    number& operator+=(int64_t value);
+    number& operator-=(int64_t value);
+    number& operator+=(const number& other);
+    number& operator-=(const number& other);
 
 private:
     int64_t value_;

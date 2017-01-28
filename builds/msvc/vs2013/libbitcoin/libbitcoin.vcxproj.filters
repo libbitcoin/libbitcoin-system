@@ -287,9 +287,6 @@
     <ClCompile Include="..\..\..\..\src\unicode\ofstream.cpp">
       <Filter>src\unicode</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\math\uint256.cpp">
-      <Filter>src\math</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\secp256k1_initializer.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
@@ -738,9 +735,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\sha256.h">
       <Filter>src\math\external</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\uint256.hpp">
-      <Filter>include\bitcoin\math</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\string.hpp">
       <Filter>include\bitcoin\utility</Filter>

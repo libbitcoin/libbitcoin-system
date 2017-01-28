@@ -85,7 +85,6 @@ src_libbitcoin_la_SOURCES = \
     src/math/secp256k1_initializer.cpp \
     src/math/secp256k1_initializer.hpp \
     src/math/stealth.cpp \
-    src/math/uint256.cpp \
     src/math/external/aes256.c \
     src/math/external/aes256.h \
     src/math/external/crypto_scrypt.c \

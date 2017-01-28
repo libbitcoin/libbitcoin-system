@@ -60,18 +60,18 @@ public:
     static const uint8_t testnet_p2kh;
     static const uint16_t testnet;
 
-    static inline uint8_t to_address_prefix(uint16_t version)
+    static uint8_t to_address_prefix(uint16_t version)
     {
         return version & 0x00FF;
     }
 
-    static inline uint8_t to_wif_prefix(uint16_t version)
+    static uint8_t to_wif_prefix(uint16_t version)
     {
         return version >> 8;
     }
 
     // Unfortunately can't use this below to define mainnet (MSVC).
-    static inline uint16_t to_version(uint8_t address, uint8_t wif)
+    static uint16_t to_version(uint8_t address, uint8_t wif)
     {
         return uint16_t(wif) << 8 | address;
     }
