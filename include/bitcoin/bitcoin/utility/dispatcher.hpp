@@ -230,17 +230,17 @@ public:
             sequence(BIND_ELEMENT(args, element, call));
     }
 
-    /// The size of the dispatcher's threadpool at its time of construction.
+    /// The size of the dispatcher's threadpool at the time of calling.
     size_t size() const
     {
-        return size_;
+        return pool_.size();
     }
 
 private:
 
     // This is thread safe.
     work::ptr heap_;
-    const size_t size_;
+    const threadpool& pool_;
 };
 
 #undef FORWARD_ARGS
