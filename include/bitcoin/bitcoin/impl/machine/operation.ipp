@@ -34,24 +34,24 @@ static BC_CONSTEXPR auto invalid_code = opcode::disabled_xor;
 // Constructors.
 //-----------------------------------------------------------------------------
 
-operation::operation()
+inline operation::operation()
   : code_(invalid_code), valid_(false)
 {
     // The failed-state code must be disabled so it will never pass evaluation.
     BITCOIN_ASSERT(is_disabled());
 }
 
-operation::operation(operation&& other)
+inline operation::operation(operation&& other)
   : operation(other.code_, std::move(other.data_), other.valid_)
 {
 }
 
-operation::operation(const operation& other)
+inline operation::operation(const operation& other)
   : operation(other.code_, other.data_, other.valid_)
 {
 }
 
-operation::operation(data_chunk&& uncoded, bool minimal)
+inline operation::operation(data_chunk&& uncoded, bool minimal)
   : code_(opcode_from_data(uncoded, minimal)),
     data_(std::move(uncoded)),
     valid_(!is_oversized())
@@ -67,7 +67,7 @@ operation::operation(data_chunk&& uncoded, bool minimal)
     }
 }
 
-operation::operation(const data_chunk& uncoded, bool minimal)
+inline operation::operation(const data_chunk& uncoded, bool minimal)
   : code_(opcode_from_data(uncoded, minimal)),
     data_(uncoded),
     valid_(!is_oversized())
@@ -83,19 +83,19 @@ operation::operation(const data_chunk& uncoded, bool minimal)
     }
 }
 
-operation::operation(opcode code)
+inline operation::operation(opcode code)
   : code_(code), valid_(true)
 {
 }
 
 // protected
-operation::operation(opcode code, data_chunk&& data, bool valid)
+inline operation::operation(opcode code, data_chunk&& data, bool valid)
   : code_(code), data_(std::move(data)), valid_(valid)
 {
 }
 
 // protected
-operation::operation(opcode code, const data_chunk& data, bool valid)
+inline operation::operation(opcode code, const data_chunk& data, bool valid)
   : code_(code), data_(data), valid_(valid)
 {
 }
@@ -103,7 +103,7 @@ operation::operation(opcode code, const data_chunk& data, bool valid)
 // Operators.
 //-----------------------------------------------------------------------------
 
-operation& operation::operator=(operation&& other)
+inline operation& operation::operator=(operation&& other)
 {
     code_ = other.code_;
     data_ = std::move(other.data_);
@@ -111,7 +111,7 @@ operation& operation::operator=(operation&& other)
     return *this;
 }
 
-operation& operation::operator=(const operation& other)
+inline operation& operation::operator=(const operation& other)
 {
     code_ = other.code_;
     data_ = other.data_;
@@ -119,12 +119,12 @@ operation& operation::operator=(const operation& other)
     return *this;
 }
 
-bool operation::operator==(const operation& other) const
+inline bool operation::operator==(const operation& other) const
 {
     return (code_ == other.code_) && (data_ == other.data_);
 }
 
-bool operation::operator!=(const operation& other) const
+inline bool operation::operator!=(const operation& other) const
 {
     return !(*this == other);
 }
@@ -132,7 +132,7 @@ bool operation::operator!=(const operation& other) const
 // Properties (size, accessors, cache).
 //-----------------------------------------------------------------------------
 
-size_t operation::serialized_size() const
+inline size_t operation::serialized_size() const
 {
     const auto size = sizeof(uint8_t) + data_.size();
 
@@ -150,12 +150,12 @@ size_t operation::serialized_size() const
     }
 }
 
-opcode operation::code() const
+inline opcode operation::code() const
 {
     return code_;
 }
 
-const data_chunk& operation::data() const
+inline const data_chunk& operation::data() const
 {
     return data_;
 }
@@ -164,7 +164,7 @@ const data_chunk& operation::data() const
 //-------------------------------------------------------------------------
 
 // private
-uint32_t operation::read_data_size(opcode code, reader& source)
+inline uint32_t operation::read_data_size(opcode code, reader& source)
 {
     BC_CONSTEXPR auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
 
@@ -186,7 +186,7 @@ uint32_t operation::read_data_size(opcode code, reader& source)
 // CONSENSUS: this is non-minial but consensus critical due to find_and_delete.
 // Presumably this was just an oversight in the original script encoding.
 //*****************************************************************************
-opcode operation::opcode_from_size(size_t size)
+inline opcode operation::opcode_from_size(size_t size)
 {
     BITCOIN_ASSERT(size <= max_uint32);
     BC_CONSTEXPR auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
@@ -201,7 +201,7 @@ opcode operation::opcode_from_size(size_t size)
         return opcode::push_four_size;
 }
 
-opcode operation::opcode_from_data(const data_chunk& data)
+inline opcode operation::opcode_from_data(const data_chunk& data)
 {
     // Unlike opcode_from_size, this produces the minimal data encoding.
     const auto size = data.size();
@@ -213,13 +213,14 @@ opcode operation::opcode_from_data(const data_chunk& data)
     return is_numeric(code) ? code : opcode_from_size(size);
 }
 
-opcode operation::opcode_from_data(const data_chunk& uncoded, bool minimal)
+inline opcode operation::opcode_from_data(const data_chunk& uncoded,
+    bool minimal)
 {
     return minimal ? opcode_from_data(uncoded) :
         opcode_from_size(uncoded.size());
 }
 
-opcode operation::opcode_from_positive(uint8_t value)
+inline opcode operation::opcode_from_positive(uint8_t value)
 {
     BITCOIN_ASSERT(value >= number::positive_1);
     BITCOIN_ASSERT(value <= number::positive_16);
@@ -227,7 +228,7 @@ opcode operation::opcode_from_positive(uint8_t value)
     return static_cast<opcode>(value + op_81 - 1);
 }
 
-uint8_t operation::opcode_to_positive(opcode code)
+inline uint8_t operation::opcode_to_positive(opcode code)
 {
     BITCOIN_ASSERT(is_positive(code));
     BC_CONSTEXPR auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
@@ -235,7 +236,7 @@ uint8_t operation::opcode_to_positive(opcode code)
 }
 
 // [0..79, 81..96]
-bool operation::is_push(opcode code)
+inline bool operation::is_push(opcode code)
 {
     BC_CONSTEXPR auto op_80 = static_cast<uint8_t>(opcode::reserved_80);
     BC_CONSTEXPR auto op_96 = static_cast<uint8_t>(opcode::push_positive_16);
@@ -244,7 +245,7 @@ bool operation::is_push(opcode code)
 }
 
 // [97..255]
-bool operation::is_counted(opcode code)
+inline bool operation::is_counted(opcode code)
 {
     BC_CONSTEXPR auto op_97 = static_cast<uint8_t>(opcode::nop);
     const auto value = static_cast<uint8_t>(code);
@@ -252,13 +253,13 @@ bool operation::is_counted(opcode code)
 }
 
 // [-1, 1..16]
-bool operation::is_numeric(opcode code)
+inline bool operation::is_numeric(opcode code)
 {
     return is_positive(code) || code == opcode::push_negative_1;
 }
 
 // [1..16]
-bool operation::is_positive(opcode code)
+inline bool operation::is_positive(opcode code)
 {
     BC_CONSTEXPR auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
     BC_CONSTEXPR auto op_96 = static_cast<uint8_t>(opcode::push_positive_16);
@@ -275,7 +276,7 @@ bool operation::is_positive(opcode code)
 // the satoshi conditional range test so it is in fact reserved. Presumably
 // this was an unintended consequence of range testing enums.
 //*****************************************************************************
-bool operation::is_disabled(opcode code)
+inline bool operation::is_disabled(opcode code)
 {
     switch (code)
     {
@@ -306,7 +307,7 @@ bool operation::is_disabled(opcode code)
 // CONSENSUS: in order to properly treat VERIF and VERNOTIF as disabled (see
 // is_disabled comments) those codes must not be included here.
 //*****************************************************************************
-bool operation::is_conditional(opcode code)
+inline bool operation::is_conditional(opcode code)
 {
     switch (code)
     {
@@ -325,7 +326,7 @@ bool operation::is_conditional(opcode code)
 // This affects the operation count in p2sh script evaluation.
 // Presumably this was an unintended consequence of range testing enums.
 //*****************************************************************************
-bool operation::is_relaxed_push(opcode code)
+inline bool operation::is_relaxed_push(opcode code)
 {
     BC_CONSTEXPR auto op_96 = static_cast<uint8_t>(opcode::push_positive_16);
     const auto value = static_cast<uint8_t>(code);
@@ -335,37 +336,37 @@ bool operation::is_relaxed_push(opcode code)
 // Validation.
 //-------------------------------------------------------------------------
 
-bool operation::is_push() const
+inline bool operation::is_push() const
 {
     return is_push(code_);
 }
 
-bool operation::is_counted() const
+inline bool operation::is_counted() const
 {
     return is_counted(code_);
 }
 
-bool operation::is_positive() const
+inline bool operation::is_positive() const
 {
     return is_positive(code_);
 }
 
-bool operation::is_disabled() const
+inline bool operation::is_disabled() const
 {
     return is_disabled(code_);
 }
 
-bool operation::is_conditional() const
+inline bool operation::is_conditional() const
 {
     return is_conditional(code_);
 }
 
-bool operation::is_relaxed_push() const
+inline bool operation::is_relaxed_push() const
 {
     return is_relaxed_push(code_);
 }
 
-bool operation::is_oversized() const
+inline bool operation::is_oversized() const
 {
     // bit.ly/2eSDkOJ
     return data_.size() > max_push_data_size;

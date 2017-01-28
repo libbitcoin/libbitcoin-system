@@ -66,81 +66,81 @@ public:
     program(const chain::script& script, program&& other, bool move);
 
     /// Constant registers.
-    inline bool is_valid() const;
-    inline uint32_t forks() const;
-    inline uint32_t input_index() const;
-    inline const chain::transaction& transaction() const;
+    bool is_valid() const;
+    uint32_t forks() const;
+    uint32_t input_index() const;
+    const chain::transaction& transaction() const;
 
     /// Program registers.
-    inline op_iterator begin() const;
-    inline op_iterator jump() const;
-    inline op_iterator end() const;
-    inline size_t operation_count() const;
+    op_iterator begin() const;
+    op_iterator jump() const;
+    op_iterator end() const;
+    size_t operation_count() const;
 
     /// Instructions.
     code evaluate();
     code evaluate(const operation& op);
-    inline bool increment_operation_count(const operation& op);
-    inline bool increment_multisig_public_key_count(int32_t count);
-    inline bool set_jump_register(const operation& op, int32_t offset);
+    bool increment_operation_count(const operation& op);
+    bool increment_multisig_public_key_count(int32_t count);
+    bool set_jump_register(const operation& op, int32_t offset);
 
     // Primary stack.
     //-------------------------------------------------------------------------
 
     /// Primary push.
-    inline void push(bool value);
-    inline void push_move(value_type&& item);
-    inline void push_copy(const value_type& item);
+    void push(bool value);
+    void push_move(value_type&& item);
+    void push_copy(const value_type& item);
 
     /// Primary pop.
-    inline data_chunk pop();
-    inline bool pop(int32_t& out_value);
-    inline bool pop(number& out_number, size_t maxiumum_size=max_number_size);
-    inline bool pop_binary(number& first, number& second);
-    inline bool pop_ternary(number& first, number& second, number& third);
-    inline bool pop_position(stack_iterator& out_position);
-    inline bool pop(data_stack& section, size_t count);
+    data_chunk pop();
+    bool pop(int32_t& out_value);
+    bool pop(number& out_number, size_t maxiumum_size=max_number_size);
+    bool pop_binary(number& first, number& second);
+    bool pop_ternary(number& first, number& second, number& third);
+    bool pop_position(stack_iterator& out_position);
+    bool pop(data_stack& section, size_t count);
 
     /// Primary push/pop optimizations (active).
-    inline void duplicate(size_t index);
-    inline void swap(size_t index_left, size_t index_right);
-    inline void erase(const stack_iterator& position);
-    inline void erase(const stack_iterator& first, const stack_iterator& last);
+    void duplicate(size_t index);
+    void swap(size_t index_left, size_t index_right);
+    void erase(const stack_iterator& position);
+    void erase(const stack_iterator& first, const stack_iterator& last);
 
     /// Primary push/pop optimizations (passive).
-    inline bool empty() const;
-    inline bool stack_true() const;
-    inline bool stack_result() const;
-    inline bool is_stack_overflow() const;
-    inline bool if_(const operation& op) const;
-    inline const value_type& item(size_t index) /*const*/;
-    inline bool top(number& out_number, size_t maxiumum_size=max_number_size) /*const*/;
-    inline stack_iterator position(size_t index) /*const*/;
-    inline operation::list subscript() const;
-    inline size_t size() const;
+    bool empty() const;
+    bool stack_true() const;
+    bool stack_result() const;
+    bool is_stack_overflow() const;
+    bool if_(const operation& op) const;
+    const value_type& item(size_t index) /*const*/;
+    bool top(number& out_number, size_t maxiumum_size=max_number_size) /*const*/;
+    stack_iterator position(size_t index) /*const*/;
+    operation::list subscript() const;
+    size_t size() const;
 
     // Alternate stack.
     //-------------------------------------------------------------------------
 
-    inline bool empty_alternate() const;
-    inline void push_alternate(value_type&& value);
-    inline value_type pop_alternate();
+    bool empty_alternate() const;
+    void push_alternate(value_type&& value);
+    value_type pop_alternate();
 
     // Conditional stack.
     //-------------------------------------------------------------------------
 
-    inline void open(bool value);
-    inline void negate();
-    inline void close();
-    inline bool closed() const;
-    inline bool succeeded() const;
+    void open(bool value);
+    void negate();
+    void close();
+    bool closed() const;
+    bool succeeded() const;
 
 private:
     // A space-efficient dynamic bitset (specialized).
     typedef std::vector<bool> bool_stack;
 
     void reserve_stacks();
-    inline bool stack_to_bool() const;
+    bool stack_to_bool() const;
 
     const chain::script& script_;
     const chain::transaction& transaction_;

@@ -40,12 +40,12 @@ inline bool is_negative(const data_chunk& data)
     return (data.back() & number::negative_mask) != 0;
 }
 
-number::number()
+inline number::number()
   : number(0)
 {
 }
 
-number::number(int64_t value)
+inline number::number(int64_t value)
   : value_(value)
 {
 }
@@ -54,7 +54,7 @@ number::number(int64_t value)
 //-----------------------------------------------------------------------------
 
 // The data is interpreted as little-endian.
-bool number::set_data(const data_chunk& data, size_t max_size)
+inline bool number::set_data(const data_chunk& data, size_t max_size)
 {
     if (data.size() > max_size)
         return false;
@@ -79,7 +79,7 @@ bool number::set_data(const data_chunk& data, size_t max_size)
 }
 
 // The result is little-endian.
-data_chunk number::data() const
+inline data_chunk number::data() const
 {
     if (value_ == 0)
         return{};
@@ -117,12 +117,12 @@ data_chunk number::data() const
     return data;
 }
 
-int32_t number::int32() const
+inline int32_t number::int32() const
 {
     return domain_constrain<int32_t>(value_);
 }
 
-int64_t number::int64() const
+inline int64_t number::int64() const
 {
     return value_;
 }
@@ -130,12 +130,12 @@ int64_t number::int64() const
 // Stack Helpers
 //-----------------------------------------------------------------------------
 
-bool number::is_true() const
+inline bool number::is_true() const
 {
     return value_ != 0;
 }
 
-bool number::is_false() const
+inline bool number::is_false() const
 {
     return value_ == 0;
 }
@@ -143,67 +143,67 @@ bool number::is_false() const
 // Operators
 //-----------------------------------------------------------------------------
 
-bool number::operator>(int64_t value) const
+inline bool number::operator>(int64_t value) const
 {
     return value_ > value;
 }
 
-bool number::operator<(int64_t value) const
+inline bool number::operator<(int64_t value) const
 {
     return value_ < value;
 }
 
-bool number::operator>=(int64_t value) const
+inline bool number::operator>=(int64_t value) const
 {
     return value_ >= value;
 }
 
-bool number::operator<=(int64_t value) const
+inline bool number::operator<=(int64_t value) const
 {
     return value_ <= value;
 }
 
-bool number::operator==(int64_t value) const
+inline bool number::operator==(int64_t value) const
 {
     return value_ == value;
 }
 
-bool number::operator!=(int64_t value) const
+inline bool number::operator!=(int64_t value) const
 {
     return value_ != value;
 }
 
-bool number::operator>(const number& other) const
+inline bool number::operator>(const number& other) const
 {
     return operator>(other.value_);
 }
 
-bool number::operator<(const number& other) const
+inline bool number::operator<(const number& other) const
 {
     return operator<(other.value_);
 }
 
-bool number::operator>=(const number& other) const
+inline bool number::operator>=(const number& other) const
 {
     return operator>=(other.value_);
 }
 
-bool number::operator<=(const number& other) const
+inline bool number::operator<=(const number& other) const
 {
     return operator<=(other.value_);
 }
 
-bool number::operator==(const number& other) const
+inline bool number::operator==(const number& other) const
 {
     return operator==(other.value_);
 }
 
-bool number::operator!=(const number& other) const
+inline bool number::operator!=(const number& other) const
 {
     return operator!=(other.value_);
 }
 
-number number::operator+(int64_t value) const
+inline number number::operator+(int64_t value) const
 {
     BITCOIN_ASSERT_MSG(value == 0 ||
         (value > 0 && value_ <= max_int64 - value) ||
@@ -212,7 +212,7 @@ number number::operator+(int64_t value) const
     return number(value_ + value);
 }
 
-number number::operator-(int64_t value) const
+inline number number::operator-(int64_t value) const
 {
     BITCOIN_ASSERT_MSG(value == 0 ||
         (value > 0 && value_ >= min_int64 + value) ||
@@ -221,39 +221,39 @@ number number::operator-(int64_t value) const
     return number(value_ - value);
 }
 
-number number::operator+(const number& other) const
+inline number number::operator+(const number& other) const
 {
     return operator+(other.value_);
 }
 
-number number::operator-(const number& other) const
+inline number number::operator-(const number& other) const
 {
     return operator-(other.value_);
 }
 
-number number::operator+() const
+inline number number::operator+() const
 {
     return *this;
 }
 
-number number::operator-() const
+inline number number::operator-() const
 {
     BITCOIN_ASSERT_MSG(value_ != min_int64, "out of range");
 
     return number(-value_);
 }
 
-number& number::operator+=(const number& other)
+inline number& number::operator+=(const number& other)
 {
     return operator+=(other.value_);
 }
 
-number& number::operator-=(const number& other)
+inline number& number::operator-=(const number& other)
 {
     return operator-=(other.value_);
 }
 
-number& number::operator+=(int64_t value)
+inline number& number::operator+=(int64_t value)
 {
     BITCOIN_ASSERT_MSG(value == 0 ||
         (value > 0 && value_ <= max_int64 - value) ||
@@ -263,7 +263,7 @@ number& number::operator+=(int64_t value)
     return *this;
 }
 
-number& number::operator-=(int64_t value)
+inline number& number::operator-=(int64_t value)
 {
     BITCOIN_ASSERT_MSG(value == 0 ||
         (value > 0 && value_ >= min_int64 + value) ||
