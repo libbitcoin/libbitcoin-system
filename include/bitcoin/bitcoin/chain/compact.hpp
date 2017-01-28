@@ -22,7 +22,7 @@
 
 #include <cstdint>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/math/uint256.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {
 namespace chain {

@@ -41,12 +41,12 @@ public:
     static const uint64_t mainnet;
     static const uint64_t testnet;
 
-    static inline uint32_t to_prefix(uint64_t prefixes)
+    static uint32_t to_prefix(uint64_t prefixes)
     {
         return prefixes >> 32;
     }
 
-    static inline uint64_t to_prefixes(uint32_t private_prefix,
+    static uint64_t to_prefixes(uint32_t private_prefix,
         uint32_t public_prefix)
     {
         return uint64_t(private_prefix) << 32 | public_prefix;

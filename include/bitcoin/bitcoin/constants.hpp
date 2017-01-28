@@ -25,8 +25,8 @@
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/config/checkpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
-#include <bitcoin/bitcoin/math/uint256.hpp>
 #include <bitcoin/bitcoin/version.hpp>
 
 namespace libbitcoin {

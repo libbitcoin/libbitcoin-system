@@ -24,9 +24,9 @@
 #include <string>
 #include <vector>
 #include <boost/functional/hash_fwd.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/math/uint256.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
 
@@ -55,6 +55,9 @@ typedef std::vector<quarter_hash> quarter_hash_list;
 typedef std::vector<long_hash> long_hash_list;
 typedef std::vector<short_hash> short_hash_list;
 typedef std::vector<mini_hash> mini_hash_list;
+
+// Alias for boost big integer type.
+typedef boost::multiprecision::uint256_t uint256_t;
 
 // Null-valued common bitcoin hashes.
 

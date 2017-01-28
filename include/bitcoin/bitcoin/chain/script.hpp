@@ -140,8 +140,10 @@ public:
     //-------------------------------------------------------------------------
 
     /// Determine if the fork is enabled in the active forks set.
-    static inline bool is_enabled(uint32_t active_forks,
-        machine::rule_fork fork);
+    static bool is_enabled(uint32_t active_forks, machine::rule_fork fork)
+    {
+        return (fork & active_forks) != 0;
+    }
 
     /// No-code patterns (consensus).
     static bool is_push_only(const operation::list& ops);
@@ -216,11 +218,6 @@ private:
     mutable operation::list operations_;
     mutable upgrade_mutex mutex_;
 };
-
-inline bool script::is_enabled(uint32_t active_forks, machine::rule_fork fork)
-{
-    return (fork & active_forks) != 0;
-}
 
 } // namespace chain
 } // namespace libbitcoin
