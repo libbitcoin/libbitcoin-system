@@ -121,6 +121,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::transaction_legacy_sigop_limit, "too many transaction legacy signature operations" },
 
         // accept transaction
+        { error::premature_validation, "transaction validation under checkpoint" },
         { error::unspent_duplicate, "matching transaction with unspent outputs" },
         { error::missing_previous_output, "previous output not found" },
         { error::double_spend, "double spend of input" },

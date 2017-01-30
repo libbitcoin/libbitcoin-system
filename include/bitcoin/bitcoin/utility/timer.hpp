@@ -30,6 +30,7 @@
 namespace libbitcoin {
 
 /// Current zulu (utc) time using the wall clock.
+/// BUGBUG: en.wikipedia.org/wiki/Year_2038_problem
 inline std::time_t zulu_time()
 {
     using wall_clock = std::chrono::system_clock;

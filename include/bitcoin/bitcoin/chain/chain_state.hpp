@@ -23,7 +23,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
-#include <vector>
+#include <deque>
 #include <bitcoin/bitcoin/config/checkpoint.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
@@ -34,12 +34,14 @@
 namespace libbitcoin {
 namespace chain {
 
+class block;
+
 class BC_API chain_state
 {
 public:
-    typedef std::vector<uint32_t> bitss;
-    typedef std::vector<uint32_t> versions;
-    typedef std::vector<uint32_t> timestamps;
+    typedef std::deque<uint32_t> bitss;
+    typedef std::deque<uint32_t> versions;
+    typedef std::deque<uint32_t> timestamps;
     typedef struct { size_t count; size_t high; } range;
 
     typedef std::shared_ptr<chain_state> ptr;
@@ -57,6 +59,9 @@ public:
 
         /// [block - 1, floor(block - 2016, 0)] mainnet: 1, testnet: 2016|0
         range bits;
+
+        /// (block - 0), used only for populating bits.ordered on increment.
+        size_t bits_self;
 
         /// [block - 1, floor(block - 1000, 0)] mainnet: 1000, testnet: 100
         range version;
@@ -92,14 +97,15 @@ public:
         /// Values must be ordered by height with high (block - 1) last.
         struct
         {
+            uint32_t self;
             bitss ordered;
         } bits;
 
-        /// Values are unordered.
+        /// Values must be ordered by height with high (block - 1) last.
         struct
         {
             uint32_t self;
-            versions unordered;
+            versions ordered;
         } version;
 
         /// Values must be ordered by height with high (block - 1) last.
@@ -115,9 +121,15 @@ public:
     static map get_map(size_t height, const checkpoints& checkpoints,
         uint32_t forks);
 
+    /// Create pool state from top block chain state.
+    chain_state(const chain_state& top, uint32_t version);
+
+    /// Create block state from pool chain state of same height.
+    chain_state(const chain_state& pool, const chain::block& block);
+
     /// Checkpoints must be ordered by height with greatest at back.
-    chain_state(data&& values, const checkpoints& checkpoints,
-        uint32_t forks);
+    /// Forks and checkpoints must match those provided for map creation.
+    chain_state(data&& values, const checkpoints& checkpoints, uint32_t forks);
 
     /// Properties.
     size_t height() const;
@@ -153,6 +165,15 @@ protected:
     static uint32_t work_required(const data& values, uint32_t forks);
 
 private:
+    static size_t bits_count(size_t height, uint32_t forks);
+    static size_t version_count(size_t height, uint32_t forks,
+        const checkpoints& checkpoints);
+    static size_t timestamp_count(size_t height,
+        const checkpoints& checkpoints);
+
+    static data to_pool(const chain_state& top, uint32_t version);
+    static data to_block(const chain_state& pool_state, const block& block);
+
     static uint32_t work_required_retarget(const data& values);
     static uint32_t retarget_timespan(const chain_state::data& values);
 
@@ -166,13 +187,16 @@ private:
     // A similar height clone can be partially computed, reducing query cost.
     const data data_;
 
+    // Forks are saved for state transitions.
+    const uint32_t forks_;
+
+    // Configured checkpoints are used to answer is_checkpoint_failure.
+    const config::checkpoint::list& checkpoints_;
+
     // These are computed on construct from sample and checkpoints.
     const activations active_;
     const uint32_t median_time_past_;
     const uint32_t work_required_;
-
-    // Configured checkpoints are used to answer is_checkpoint_failure.
-    const config::checkpoint::list& checkpoints_;
 };
 
 } // namespace chain

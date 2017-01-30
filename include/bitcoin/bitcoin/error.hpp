@@ -119,6 +119,7 @@ enum error_code_t
     transaction_legacy_sigop_limit = 54,
 
     // accept transaction
+    premature_validation = 69,
     unspent_duplicate = 38,
     missing_previous_output = 19,
     double_spend = 18,

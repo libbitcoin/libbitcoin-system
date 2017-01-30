@@ -415,6 +415,7 @@ hash_digest header::hash() const
 // Validation helpers.
 //-----------------------------------------------------------------------------
 
+/// BUGBUG: bitcoin 32bit unix time: en.wikipedia.org/wiki/Year_2038_problem
 bool header::is_valid_time_stamp() const
 {
     static const auto two_hours = std::chrono::hours(time_stamp_future_hours);

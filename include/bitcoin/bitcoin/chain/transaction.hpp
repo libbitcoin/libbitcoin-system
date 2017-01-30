@@ -138,8 +138,6 @@ public:
     //-----------------------------------------------------------------------------
 
     uint64_t fees() const;
-    ////point::indexes double_spends(bool include_unconfirmed) const;
-    ////point::indexes immature_inputs(size_t target_height) const;
     output_point::list missing_previous_outputs() const;
     hash_list missing_previous_transactions() const;
     uint64_t total_input_value() const;
