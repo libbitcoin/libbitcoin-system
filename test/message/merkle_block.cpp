@@ -26,13 +26,13 @@ BOOST_AUTO_TEST_SUITE(merkle_block_tests)
 
 BOOST_AUTO_TEST_CASE(merkle_block__constructor_1__always__invalid)
 {
-    message::merkle_block instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    const message::merkle_block instance;
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(merkle_block__constructor_2__always__equals_params)
 {
-    chain::header header(
+    const chain::header header(
         10,
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
@@ -41,27 +41,29 @@ BOOST_AUTO_TEST_CASE(merkle_block__constructor_2__always__equals_params)
         68644
     );
 
-    uint32_t count = 1234u;
+    const size_t count = 1234u;
 
-    hash_list hashes = {
+    const hash_list hashes
+    {
         hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaffffffffffffffffffffffffffffffff"),
         hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
         hash_literal("ccccccccccccccccccccccccccccccccdddddddddddddddddddddddddddddddd"),
     };
-    data_chunk flags = { 0xae, 0x56, 0x0f };
+    const data_chunk flags{ 0xae, 0x56, 0x0f };
 
     message::merkle_block instance(header, count, hashes, flags);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
-    BOOST_REQUIRE_EQUAL(count, instance.total_transactions());
+    BOOST_REQUIRE_EQUAL(instance.total_transactions(), count);
     BOOST_REQUIRE(hashes == instance.hashes());
-    BOOST_REQUIRE(flags ==  instance.flags());
+    BOOST_REQUIRE(flags == instance.flags());
 }
 
 BOOST_AUTO_TEST_CASE(merkle_block__constructor_3__always__equals_params)
 {
-    message::merkle_block instance(
-        chain::header{
+    const message::merkle_block instance(
+        chain::header
+        {
             10,
             hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
@@ -82,8 +84,9 @@ BOOST_AUTO_TEST_CASE(merkle_block__constructor_3__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(merkle_block__constructor_4__always__equals_params)
 {
-    message::merkle_block expected(
-        chain::header{
+    const message::merkle_block expected(
+        chain::header
+        {
             10,
             hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
@@ -107,7 +110,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__constructor_4__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(merkle_block__constructor_5__always__equals_params)
 {
-    chain::header header(
+    const chain::header header(
         10,
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
@@ -116,20 +119,21 @@ BOOST_AUTO_TEST_CASE(merkle_block__constructor_5__always__equals_params)
         68644
     );
 
-    uint32_t count = 654576u;
+    const size_t count = 654576u;
 
-    hash_list hashes = {
+    const hash_list hashes
+    {
         hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaffffffffffffffffffffffffffffffff"),
         hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
         hash_literal("ccccccccccccccccccccccccccccccccdddddddddddddddddddddddddddddddd"),
     };
-    data_chunk flags = { 0xae, 0x56, 0x0f };
+    const data_chunk flags{ 0xae, 0x56, 0x0f };
 
     message::merkle_block expected(header, count, hashes, flags);
     message::merkle_block instance(std::move(expected));
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
-    BOOST_REQUIRE_EQUAL(count, instance.total_transactions());
+    BOOST_REQUIRE_EQUAL(instance.total_transactions(), count);
     BOOST_REQUIRE(hashes == instance.hashes());
     BOOST_REQUIRE(flags == instance.flags());
 }
@@ -139,8 +143,8 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_data_fails)
     const data_chunk data{ 10 };
     message::merkle_block instance{};
 
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(message::version::level::maximum, data));
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.from_data(message::version::level::maximum, data));
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(from_data_insufficient_version_fails)
@@ -167,9 +171,8 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_version_fails)
     const auto data = expected.to_data(message::version::level::maximum);
     message::merkle_block instance{};
 
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(
-        message::merkle_block::version_minimum - 1, data));
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.from_data(message::merkle_block::version_minimum - 1, data));
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
@@ -194,8 +197,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
     };
 
     const auto data = expected.to_data(message::version::level::maximum);
-    const auto result = message::merkle_block::factory_from_data(
-        message::version::level::maximum, data);
+    const auto result = message::merkle_block::factory_from_data(message::version::level::maximum, data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -224,8 +226,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 
     const auto data = expected.to_data(message::version::level::maximum);
     data_source istream(data);
-    const auto result = message::merkle_block::factory_from_data(
-        message::version::level::maximum, istream);
+    const auto result = message::merkle_block::factory_from_data(message::version::level::maximum, istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -255,8 +256,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
     const auto data = expected.to_data(message::version::level::maximum);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = message::merkle_block::factory_from_data(
-        message::version::level::maximum, source);
+    const auto result = message::merkle_block::factory_from_data(message::version::level::maximum, source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -264,7 +264,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 
 BOOST_AUTO_TEST_CASE(merkle_block__header_accessor_1__always__returns_initialized_value)
 {
-    chain::header expected
+    const chain::header expected
     {
         10,
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
@@ -274,8 +274,9 @@ BOOST_AUTO_TEST_CASE(merkle_block__header_accessor_1__always__returns_initialize
         68644
     };
 
-    message::merkle_block instance(
-        expected, 753u,
+    const message::merkle_block instance(
+        expected,
+        753u,
         {
             hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaffffffffffffffffffffffffffffffff"),
             hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
@@ -288,7 +289,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__header_accessor_1__always__returns_initialize
 
 BOOST_AUTO_TEST_CASE(merkle_block__header_accessor_2__always__returns_initialized_value)
 {
-    chain::header expected
+    const chain::header expected
     {
         10,
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
@@ -299,7 +300,8 @@ BOOST_AUTO_TEST_CASE(merkle_block__header_accessor_2__always__returns_initialize
     };
 
     const message::merkle_block instance(
-        expected, 9542u,
+        expected,
+        9542u,
         {
             hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaffffffffffffffffffffffffffffffff"),
             hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
@@ -312,7 +314,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__header_accessor_2__always__returns_initialize
 
 BOOST_AUTO_TEST_CASE(merkle_block__header_setter_1__roundtrip__success)
 {
-    chain::header expected
+    const chain::header expected
     {
         10,
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
@@ -331,30 +333,33 @@ BOOST_AUTO_TEST_CASE(merkle_block__header_setter_1__roundtrip__success)
 BOOST_AUTO_TEST_CASE(merkle_block__header_setter_2__roundtrip__success)
 {
     message::merkle_block instance;
-    BOOST_REQUIRE_EQUAL(false, instance.header().is_valid());
-    instance.set_header(chain::header{
-        10,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234,
-        6523454,
-        68644
-    });
+    BOOST_REQUIRE(!instance.header().is_valid());
+    instance.set_header(
+        chain::header
+        {
+            10,
+            hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+            531234,
+            6523454,
+            68644
+        });
 
     BOOST_REQUIRE(instance.header().is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(merkle_block__hashes_accessor_1__always__returns_initialized_value)
 {
-    hash_list expected
+    const hash_list expected
     {
         hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaffffffffffffffffffffffffffffffff"),
         hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
         hash_literal("ccccccccccccccccccccccccccccccccdddddddddddddddddddddddddddddddd"),
     };
 
-    message::merkle_block instance(
-        chain::header{
+    const message::merkle_block instance(
+        chain::header
+        {
             10,
             hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
@@ -371,7 +376,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__hashes_accessor_1__always__returns_initialize
 
 BOOST_AUTO_TEST_CASE(merkle_block__hashes_accessor_2__always__returns_initialized_value)
 {
-    hash_list expected
+    const hash_list expected
     {
         hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaffffffffffffffffffffffffffffffff"),
         hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
@@ -379,7 +384,8 @@ BOOST_AUTO_TEST_CASE(merkle_block__hashes_accessor_2__always__returns_initialize
     };
 
     const message::merkle_block instance(
-        chain::header{
+        chain::header
+        {
             10,
             hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
@@ -413,21 +419,23 @@ BOOST_AUTO_TEST_CASE(merkle_block__hashes_setter_2__roundtrip__success)
 {
     message::merkle_block instance;
     BOOST_REQUIRE(instance.hashes().empty());
-    instance.set_hashes(hash_list{
+    instance.set_hashes(hash_list
+    {
         hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaffffffffffffffffffffffffffffffff"),
         hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
         hash_literal("ccccccccccccccccccccccccccccccccdddddddddddddddddddddddddddddddd"),
     });
 
-    BOOST_REQUIRE_EQUAL(false, instance.hashes().empty());
+    BOOST_REQUIRE(!instance.hashes().empty());
 }
 
 BOOST_AUTO_TEST_CASE(merkle_block__flags_accessor_1__always__returns_initialized_value)
 {
-    data_chunk expected = { 0xae, 0x56, 0x0f };
+    const data_chunk expected{ 0xae, 0x56, 0x0f };
 
-    message::merkle_block instance(
-        chain::header{
+    const message::merkle_block instance(
+        chain::header
+        {
             10,
             hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
@@ -448,7 +456,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__flags_accessor_1__always__returns_initialized
 
 BOOST_AUTO_TEST_CASE(merkle_block__flags_accessor_2__always__returns_initialized_value)
 {
-    data_chunk expected = { 0xae, 0x56, 0x0f };
+    const data_chunk expected{ 0xae, 0x56, 0x0f };
 
     const message::merkle_block instance(
         chain::header{
@@ -472,7 +480,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__flags_accessor_2__always__returns_initialized
 
 BOOST_AUTO_TEST_CASE(merkle_block__flags_setter_1__roundtrip__success)
 {
-    data_chunk expected = { 0xae, 0x56, 0x0f };
+    const data_chunk expected{ 0xae, 0x56, 0x0f };
     message::merkle_block instance;
     BOOST_REQUIRE(expected != instance.flags());
     instance.set_flags(expected);
@@ -484,13 +492,14 @@ BOOST_AUTO_TEST_CASE(merkle_block__flags_setter_2__roundtrip__success)
     message::merkle_block instance;
     BOOST_REQUIRE(instance.flags().empty());
     instance.set_flags(data_chunk{ 0xae, 0x56, 0x0f });
-    BOOST_REQUIRE_EQUAL(false, instance.flags().empty());
+    BOOST_REQUIRE(!instance.flags().empty());
 }
 
 BOOST_AUTO_TEST_CASE(merkle_block__operator_assign_equals__always__matches_equivalent)
 {
     message::merkle_block value(
-        chain::header{
+        chain::header
+        {
             10,
             hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
@@ -510,7 +519,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__operator_assign_equals__always__matches_equiv
     BOOST_REQUIRE(value.is_valid());
 
     message::merkle_block instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.is_valid());
 
     instance = std::move(value);
     BOOST_REQUIRE(instance.is_valid());
@@ -519,7 +528,8 @@ BOOST_AUTO_TEST_CASE(merkle_block__operator_assign_equals__always__matches_equiv
 BOOST_AUTO_TEST_CASE(merkle_block__operator_boolean_equals__duplicates__returns_true)
 {
     const message::merkle_block expected(
-        chain::header{
+        chain::header
+        {
             10,
             hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
@@ -543,7 +553,8 @@ BOOST_AUTO_TEST_CASE(merkle_block__operator_boolean_equals__duplicates__returns_
 BOOST_AUTO_TEST_CASE(merkle_block__operator_boolean_equals__differs__returns_false)
 {
     const message::merkle_block expected(
-        chain::header{
+        chain::header
+        {
             10,
             hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
@@ -561,13 +572,14 @@ BOOST_AUTO_TEST_CASE(merkle_block__operator_boolean_equals__differs__returns_fal
     );
 
     message::merkle_block instance;
-    BOOST_REQUIRE_EQUAL(false, instance == expected);
+    BOOST_REQUIRE(!(instance == expected));
 }
 
 BOOST_AUTO_TEST_CASE(merkle_block__operator_boolean_not_equals__duplicates__returns_false)
 {
     const message::merkle_block expected(
-        chain::header{
+        chain::header
+        {
             10,
             hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
@@ -585,13 +597,14 @@ BOOST_AUTO_TEST_CASE(merkle_block__operator_boolean_not_equals__duplicates__retu
     );
 
     message::merkle_block instance(expected);
-    BOOST_REQUIRE_EQUAL(false, instance != expected);
+    BOOST_REQUIRE(!(instance != expected));
 }
 
 BOOST_AUTO_TEST_CASE(merkle_block__operator_boolean_not_equals__differs__returns_true)
 {
     const message::merkle_block expected(
-        chain::header{
+        chain::header
+        {
             10,
             hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),

@@ -47,9 +47,9 @@ public:
     static merkle_block factory_from_data(uint32_t version, reader& source);
 
     merkle_block();
-    merkle_block(const chain::header& header, uint32_t total_transactions,
+    merkle_block(const chain::header& header, size_t total_transactions,
         const hash_list& hashes, const data_chunk& flags);
-    merkle_block(chain::header&& header, uint32_t total_transactions,
+    merkle_block(chain::header&& header, size_t total_transactions,
         hash_list&& hashes, data_chunk&& flags);
     merkle_block(const chain::block& block);
     merkle_block(const merkle_block& other);
@@ -60,8 +60,8 @@ public:
     void set_header(const chain::header& value);
     void set_header(chain::header&& value);
 
-    uint32_t total_transactions() const;
-    void set_total_transactions(uint32_t value);
+    size_t total_transactions() const;
+    void set_total_transactions(size_t value);
 
     hash_list& hashes();
     const hash_list& hashes() const;
@@ -96,11 +96,8 @@ public:
 
 private:
     chain::header header_;
-    uint32_t total_transactions_;
+    size_t total_transactions_;
     hash_list hashes_;
-
-    // TODO: provide utility to compute this from the list of hashes based on
-    // the assumption that the hash list represents that of a complete block.
     data_chunk flags_;
 };
 
