@@ -67,14 +67,14 @@ merkle_block::merkle_block()
 }
 
 merkle_block::merkle_block(const chain::header& header,
-    uint32_t total_transactions, const hash_list& hashes,
+    size_t total_transactions, const hash_list& hashes,
     const data_chunk& flags)
   : header_(header), total_transactions_(total_transactions), hashes_(hashes),
     flags_(flags)
 {
 }
 
-merkle_block::merkle_block(chain::header&& header, uint32_t total_transactions,
+merkle_block::merkle_block(chain::header&& header, size_t total_transactions,
     hash_list&& hashes, data_chunk&& flags)
   : header_(std::move(header)), total_transactions_(total_transactions),
     hashes_(std::move(hashes)), flags_(std::move(flags))
@@ -174,7 +174,8 @@ void merkle_block::to_data(uint32_t version, writer& sink) const
 {
     header_.to_data(sink);
 
-    sink.write_4_bytes_little_endian(total_transactions_);
+    const auto total32 = safe_unsigned<uint32_t>(total_transactions_);
+    sink.write_4_bytes_little_endian(total32);
     sink.write_variable_little_endian(hashes_.size());
 
     for (const auto& hash : hashes_)
@@ -211,12 +212,12 @@ void merkle_block::set_header(chain::header&& value)
     header_ = std::move(value);
 }
 
-uint32_t merkle_block::total_transactions() const
+size_t merkle_block::total_transactions() const
 {
     return total_transactions_;
 }
 
-void merkle_block::set_total_transactions(uint32_t value)
+void merkle_block::set_total_transactions(size_t value)
 {
     total_transactions_ = value;
 }
@@ -275,10 +276,10 @@ bool merkle_block::operator==(const merkle_block& other) const
         (hashes_.size() == other.hashes_.size()) &&
         (flags_.size() == other.flags_.size());
 
-    for (hash_list::size_type i = 0; i < hashes_.size() && result; i++)
+    for (size_t i = 0; i < hashes_.size() && result; i++)
         result = (hashes_[i] == other.hashes_[i]);
 
-    for (data_chunk::size_type i = 0; i < flags_.size() && result; i++)
+    for (size_t i = 0; i < flags_.size() && result; i++)
         result = (flags_[i] == other.flags_[i]);
 
     return result;
