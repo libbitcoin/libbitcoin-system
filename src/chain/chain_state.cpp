@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/chain/compact.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
@@ -32,6 +33,7 @@
 #include <bitcoin/bitcoin/machine/opcode.hpp>
 #include <bitcoin/bitcoin/machine/rule_fork.hpp>
 #include <bitcoin/bitcoin/unicode/unicode.hpp>
+#include <bitcoin/bitcoin/utility/timer.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -41,6 +43,11 @@ using namespace bc::machine;
 
 // Inlines.
 //-----------------------------------------------------------------------------
+
+inline uint32_t now()
+{
+    return static_cast<uint32_t>(zulu_time());
+}
 
 inline size_t version_sample_size(bool testnet)
 {
@@ -121,7 +128,7 @@ chain_state::activations chain_state::activation(const data& values,
 {
     const auto height = values.height;
     const auto version = values.version.self;
-    const auto& history = values.version.unordered;
+    const auto& history = values.version.ordered;
     const auto frozen = script::is_enabled(forks, rule_fork::bip90_rule);
     const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
 
@@ -208,6 +215,37 @@ chain_state::activations chain_state::activation(const data& values,
     }
 
     return result;
+}
+
+size_t chain_state::bits_count(size_t height, uint32_t forks)
+{
+    const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
+
+    // Easy work required applies only to testnet not on a retarget height.
+    return testnet && !is_retarget_height(height) ?
+        std::min(height, retargeting_interval) : 1;
+}
+
+size_t chain_state::version_count(size_t height, uint32_t forks,
+    const checkpoints& checkpoints)
+{
+    const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
+    const auto activation = script::is_enabled(forks, rule_fork::activations);
+    const auto frozen = script::is_enabled(forks, rule_fork::bip90_rule);
+    const auto checked = is_checkpointed(height, checkpoints);
+
+    const auto count = activation && !frozen && !checked ?
+        std::min(height, version_sample_size(testnet)) : 0;
+
+    // If too small to activate set count to zero to avoid unnecessary queries.
+    return is_active(count, testnet) ? count : 0;
+}
+
+size_t chain_state::timestamp_count(size_t height,
+    const checkpoints& checkpoints)
+{
+    const auto checked = is_checkpointed(height, checkpoints);
+    return checked ? 1 : std::min(height, median_time_past_interval);
 }
 
 uint32_t chain_state::median_time_past(const data& values, uint32_t)
@@ -332,17 +370,14 @@ chain_state::map chain_state::get_map(size_t height,
 
     map map;
     const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
-    const auto activation = script::is_enabled(forks, rule_fork::activations);
-    const auto frozen = script::is_enabled(forks, rule_fork::bip90_rule);
     const auto checked = is_checkpointed(height, checkpoints);
 
     // Bits.
     //-------------------------------------------------------------------------
     // The height bound of the reverse (high to low) retarget search.
-    // Retarget search applies only to testnet on a retarget height.
+    map.bits_self = height;
     map.bits.high = height - 1;
-    map.bits.count = testnet && !is_retarget_height(height) ?
-        std::min(height, retargeting_interval) : 1;
+    map.bits.count = bits_count(height, forks);
 
     // Timestamp.
     //-------------------------------------------------------------------------
@@ -350,24 +385,18 @@ chain_state::map chain_state::get_map(size_t height,
     // Height must be a positive multiple of interval, so underflow safe.
     map.timestamp_self = height;
     map.timestamp.high = height - 1;
-    map.timestamp.count = checked ? 1 :
-        std::min(height, median_time_past_interval);
+    map.timestamp.count = timestamp_count(height, checkpoints);
 
     // Additional timestamps required (or map::unrequested for not).
     map.timestamp_retarget = is_retarget_height(height) ?
-        height - retargeting_interval : map::unrequested;
+        (height - retargeting_interval) : map::unrequested;
 
     // Version.
     //-------------------------------------------------------------------------
     // The height bound of the version sample for activations.
     map.version_self = height;
     map.version.high = height - 1;
-    map.version.count = activation && !frozen && !checked ?
-        std::min(height, version_sample_size(testnet)) : 0;
-
-    // If too small to activate set count to zero to avoid unnecessary queries.
-    map.version.count = is_active(map.version.count, testnet) ?
-        map.version.count : 0;
+    map.version.count = version_count(height, forks, checkpoints);
 
     // Allowed Duplicates.
     //-------------------------------------------------------------------------
@@ -376,21 +405,106 @@ chain_state::map chain_state::get_map(size_t height,
         mainnet_allow_collisions_checkpoint.height();
 
     // Don't attempt match if checked or height below allow collisions height.
-    map.allow_collisions_height = checked ||
-        height < map.allow_collisions_height ?  map::unrequested :
+    map.allow_collisions_height = (is_checkpointed(height, checkpoints) ||
+        height < map.allow_collisions_height) ? map::unrequested :
         map.allow_collisions_height;
 
     return map;
 }
 
-// Constructor.
+chain_state::data chain_state::to_pool(const chain_state& top,
+    uint32_t version)
+{
+    // Copy data from presumed previous-height block state.
+    auto data = top.data_;
+
+    // If this overflows height is zero and data is both retarget and invalid. 
+    const auto height = data.height + 1u;
+
+    // Set invalid if we need to query for retarget height.
+    if (is_retarget_height(height))
+    {
+        data.height = 0;
+        return data;
+    }
+
+    // Enqueue previous block values to collections.
+    data.bits.ordered.push_back(data.bits.self);
+    data.version.ordered.push_back(data.version.self);
+    data.timestamp.ordered.push_back(data.timestamp.self);
+
+    // Set aliases for convenience.
+    const auto forks = top.forks_;
+    const auto& checks = top.checkpoints_;
+
+    // If bits collection overflows, dequeue oldest member.
+    if (data.bits.ordered.size() > bits_count(height, forks))
+        data.bits.ordered.pop_front();
+
+    // If version collection overflows, dequeue oldest member.
+    if (data.version.ordered.size() > version_count(height, forks, checks))
+        data.version.ordered.pop_front();
+
+    // If timestamp collection overflows, dequeue oldest member.
+    if (data.timestamp.ordered.size() > timestamp_count(height, checks))
+        data.timestamp.ordered.pop_front();
+
+    // Replace previous block state with pool chain state for next height.
+    data.height = height;
+    data.hash = null_hash;
+    data.bits.self = proof_of_work_limit;
+    data.version.self = version;
+    data.timestamp.self = now();
+    return data;
+}
+
+// Constructor (top to pool).
+chain_state::chain_state(const chain_state& top, uint32_t version)
+  : data_(to_pool(top, version)),
+    forks_(top.forks_),
+    checkpoints_(top.checkpoints_),
+    active_(activation(data_, forks_)),
+    work_required_(work_required(data_, forks_)),
+    median_time_past_(median_time_past(data_, forks_))
+{
+}
+
+chain_state::data chain_state::to_block(const chain_state& pool,
+    const block& block)
+{
+    // Copy data from presumed same-height pool state.
+    auto data = pool.data_;
+    const auto& header = block.header();
+
+    // Replace pool chain state with block state at same/next height.
+    ////data.height = data.height;
+    data.hash = header.hash();
+    data.bits.self = header.bits();
+    data.timestamp.self = header.timestamp();
+    data.version.self = header.version();
+    return data;
+}
+
+// Constructor (pool to block).
+chain_state::chain_state(const chain_state& pool, const block& block)
+  : data_(to_block(pool, block)),
+    forks_(pool.forks_),
+    checkpoints_(pool.checkpoints_),
+    active_(activation(data_, forks_)),
+    work_required_(work_required(data_, forks_)),
+    median_time_past_(median_time_past(data_, forks_))
+{
+}
+
+// Constructor (from data).
 chain_state::chain_state(data&& values, const checkpoints& checkpoints,
     uint32_t forks)
   : data_(std::move(values)),
+    forks_(forks),
     checkpoints_(checkpoints),
-    active_(activation(data_, forks)),
-    work_required_(work_required(data_, forks)),
-    median_time_past_(median_time_past(data_, forks))
+    active_(activation(data_, forks_)),
+    work_required_(work_required(data_, forks_)),
+    median_time_past_(median_time_past(data_, forks_))
 {
 }
 

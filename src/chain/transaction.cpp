@@ -676,21 +676,6 @@ bool transaction::is_double_spend(bool include_unconfirmed) const
     return std::any_of(inputs_.begin(), inputs_.end(), spent);
 }
 
-////point::indexes transaction::double_spends(bool include_unconfirmed) const
-////{
-////    point::indexes spends;
-////
-////    for (size_t in = 0; in < inputs_.size(); ++in)
-////    {
-////        const auto& prevout = inputs_[in].previous_output().validation;
-////
-////        if (prevout.spent && (include_unconfirmed || prevout.confirmed))
-////            spends.push_back(safe_unsigned<uint32_t>(in));
-////    }
-////
-////    return spends;
-////}
-
 bool transaction::is_immature(size_t target_height) const
 {
     const auto immature = [target_height](const input& input)
@@ -701,21 +686,6 @@ bool transaction::is_immature(size_t target_height) const
     // This is an optimization of !immature_inputs().empty();
     return std::any_of(inputs_.begin(), inputs_.end(), immature);
 }
-
-////point::indexes transaction::immature_inputs(size_t target_height) const
-////{
-////    point::indexes immatures;
-////
-////    for (size_t in = 0; in < inputs_.size(); ++in)
-////    {
-////        const auto& prevout = inputs_[in].previous_output();
-////
-////        if (!prevout.is_mature(target_height))
-////            immatures.push_back(safe_unsigned<uint32_t>(in));
-////    }
-////
-////    return immatures;
-////}
 
 // Coinbase transactions return success, to simplify iteration.
 code transaction::connect_input(const chain_state& state,
@@ -790,6 +760,9 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     const auto bip30 = state.is_enabled(rule_fork::bip30_rule);
     const auto duplicates = state.is_enabled(rule_fork::allow_collisions);
 
+    if (transaction_pool && state.is_under_checkpoint())
+        return error::premature_validation;
+
     //*************************************************************************
     // CONSENSUS:
     // A transaction hash that exists in the chain is not acceptable even if
@@ -797,7 +770,7 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     // described by BIP30, but it is in the code referenced by BIP30. As such
     // the tx pool need only test against the chain, skipping the pool.
     //*************************************************************************
-    if (!duplicates && bip30 && validation.duplicate)
+    else if (!duplicates && bip30 && validation.duplicate)
         return error::unspent_duplicate;
 
     else if (is_missing_previous_outputs())
