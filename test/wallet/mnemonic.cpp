@@ -131,6 +131,70 @@ BOOST_AUTO_TEST_CASE(mnemonic__dictionary__en_es__no_intersection)
     BOOST_REQUIRE_EQUAL(intersection, 0u);
 }
 
+BOOST_AUTO_TEST_CASE(mnemonic__dictionary__en_it__no_intersection)
+{
+    const auto& english = language::en;
+    const auto& italian = language::it;
+    size_t intersection = 0;
+    for (const auto it: italian)
+    {
+        std::string test(it);
+        const auto iter = std::find(english.begin(), english.end(), test);
+        if (iter != std::end(english))
+            intersection++;
+    }
+
+    BOOST_REQUIRE_EQUAL(intersection, 0u);
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__dictionary__fr_es__no_intersection)
+{
+    const auto& french = language::fr;
+    const auto& spanish = language::es;
+    size_t intersection = 0;
+    for (const auto es: spanish)
+    {
+        std::string test(es);
+        const auto it = std::find(french.begin(), french.end(), test);
+        if (it != std::end(french))
+            intersection++;
+    }
+
+    BOOST_REQUIRE_EQUAL(intersection, 0u);
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__dictionary__it_es__no_intersection)
+{
+    const auto& italian = language::it;
+    const auto& spanish = language::es;
+    size_t intersection = 0;
+    for (const auto es: spanish)
+    {
+        std::string test(es);
+        const auto it = std::find(italian.begin(), italian.end(), test);
+        if (it != std::end(italian))
+            intersection++;
+    }
+
+    BOOST_REQUIRE_EQUAL(intersection, 0u);
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__dictionary__fr_it__no_intersection)
+{
+    const auto& french = language::fr;
+    const auto& italian = language::it;
+    size_t intersection = 0;
+    for (const auto it: italian)
+    {
+        std::string test(it);
+        const auto iter = std::find(french.begin(), french.end(), test);
+        if (iter != std::end(french))
+            intersection++;
+    }
+
+    BOOST_REQUIRE_EQUAL(intersection, 0u);
+}
+
 BOOST_AUTO_TEST_CASE(mnemonic__dictionary__zh_Hans_Hant__intersection)
 {
     const auto& simplified = language::zh_Hans;
