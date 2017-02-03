@@ -779,13 +779,15 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     else if (is_double_spend(transaction_pool))
         return error::double_spend;
 
+    // This relates height to maturity of spent coinbase. Since reorg is the
+    // only way to decrease height and reorg invalidates, this is cache safe.
     else if (is_immature(state.height()))
         return error::coinbase_maturity;
 
     else if (is_overspent())
         return error::spend_exceeds_value;
 
-    // This recomputes sigops to include p2sh from prevouts.
+    // This recomputes sigops to include p2sh from prevouts if bip16 is true.
     else if (transaction_pool && signature_operations(bip16) > max_block_sigops)
         return error::transaction_embedded_sigop_limit;
 

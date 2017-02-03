@@ -728,16 +728,20 @@ code block::accept(const chain_state& state, bool transactions) const
     else if (state.is_under_checkpoint())
         return error::success;
 
+    // TODO: relates timestamp to tx.locktime (pool cache min tx.timestamp).
     // This recurses txs but is not applied via mempool (timestamp required).
     else if (!is_final(state.height()))
         return error::non_final_transaction;
 
+    // The coinbase tx is never seen/cached by the tx pool.
     else if (bip34 && !is_valid_coinbase_script(state.height()))
         return error::coinbase_height_mismatch;
 
+    // TODO: relates height to total of tx.fee (pool cache tx.fee).
     else if (!is_valid_coinbase_claim(state.height()))
         return error::coinbase_value_limit;
 
+    // TODO: relates block limit to total of tx.sigops (pool cache tx.sigops).
     // This recomputes sigops to include p2sh from prevouts.
     else if (transactions && (signature_operations(bip16) > max_block_sigops))
         return error::block_embedded_sigop_limit;
