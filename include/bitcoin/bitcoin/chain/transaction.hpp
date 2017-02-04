@@ -61,8 +61,11 @@ public:
         // The transaction is an unspent duplicate.
         bool duplicate = false;
 
-        // The tx must exists and is validated at the block's fork state.
+        // The unconfirmed tx exists.
         bool pooled = false;
+
+        // The unconfirmed tx is validated at the block's current fork state.
+        bool current = false;
     };
 
     // Constructors.
