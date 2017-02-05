@@ -86,7 +86,7 @@ void threadpool::spawn_once(thread_priority priority)
 
     threads_.push_back(asio::thread([this, priority]()
     {
-        set_thread_priority(priority);
+        set_priority(priority);
         service_.run();
     }));
 
