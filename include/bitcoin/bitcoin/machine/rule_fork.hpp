@@ -48,13 +48,10 @@ enum rule_fork : uint32_t
     bip65_rule = 1u << 5,
 
     /// Hard code activation heights (hard fork, optimization)
-    bip90_rule = 1u << 7,
+    bip90_rule = 1u << 6,
 
     /// Assume hash collisions cannot happen (hard fork, optimization)
-    allow_collisions = 1u << 29,
-
-    /// Sentinel bit to indicate tx was validated under a checkpoint.
-    checkpointed = 1u << 30,
+    allow_collisions = 1u << 7,
 
     /// Sentinel bit to indicate tx has not been validated.
     unverified = 1u << 31,
