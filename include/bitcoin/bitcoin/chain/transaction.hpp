@@ -58,7 +58,14 @@ public:
         code error = error::not_found;
         chain_state::ptr state = nullptr;
 
+        // The transaction is an unspent duplicate.
         bool duplicate = false;
+
+        // The unconfirmed tx exists.
+        bool pooled = false;
+
+        // The unconfirmed tx is validated at the block's current fork state.
+        bool current = false;
     };
 
     // Constructors.

@@ -47,14 +47,11 @@ enum rule_fork : uint32_t
     /// Operation nop2 becomes check locktime verify (soft fork)
     bip65_rule = 1u << 5,
 
-    /// Assume hash collisions cannot happen (hard fork, optimization)
-    allow_collisions = 1u << 6,
-
     /// Hard code activation heights (hard fork, optimization)
-    bip90_rule = 1u << 7,
+    bip90_rule = 1u << 6,
 
-    /// Sentinel bit to indicate tx was validated under a checkpoint.
-    checkpointed = 1u << 30,
+    /// Assume hash collisions cannot happen (hard fork, optimization)
+    allow_collisions = 1u << 7,
 
     /// Sentinel bit to indicate tx has not been validated.
     unverified = 1u << 31,

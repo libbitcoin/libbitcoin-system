@@ -170,6 +170,9 @@ private:
         const checkpoints& checkpoints);
     static size_t timestamp_count(size_t height,
         const checkpoints& checkpoints);
+    static size_t retarget_height(size_t height);
+    static size_t collision_height(size_t height, uint32_t forks,
+        const checkpoints& checkpoints);
 
     static data to_pool(const chain_state& top, uint32_t version);
     static data to_block(const chain_state& pool_state, const block& block);

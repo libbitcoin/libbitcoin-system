@@ -76,7 +76,7 @@ inline bool is_bip30_exception(const checkpoint& check, bool testnet)
          (check == mainnet_bip30_exception_checkpoint2));
 }
 
-inline bool allow_duplicates(const hash_digest& hash, bool testnet)
+inline bool allow_collisions(const hash_digest& hash, bool testnet)
 {
     return
         (testnet && hash == testnet_allow_collisions_checkpoint.hash()) ||
@@ -191,7 +191,7 @@ chain_state::activations chain_state::activation(const data& values,
     }
 
     // allow_collisions is activated at and above the bip34 checkpoint.
-    if (allow_duplicates(values.allow_collisions_hash, testnet))
+    if (allow_collisions(values.allow_collisions_hash, testnet))
     {
         result.forks |= (rule_fork::allow_collisions & forks);
     }
@@ -246,6 +246,28 @@ size_t chain_state::timestamp_count(size_t height,
 {
     const auto checked = is_checkpointed(height, checkpoints);
     return checked ? 1 : std::min(height, median_time_past_interval);
+}
+
+size_t chain_state::retarget_height(size_t height)
+{
+    // Height must be a positive multiple of interval, so underflow safe.
+    return is_retarget_height(height) ? (height - retargeting_interval) :
+        map::unrequested;
+}
+
+size_t chain_state::collision_height(size_t height, uint32_t forks,
+    const checkpoints& checkpoints)
+{
+    if (is_checkpointed(height, checkpoints))
+        return map::unrequested;
+
+    const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
+
+    auto check_height = testnet ?
+        testnet_allow_collisions_checkpoint.height() :
+        mainnet_allow_collisions_checkpoint.height();
+
+    return height < check_height ? map::unrequested : check_height;
 }
 
 uint32_t chain_state::median_time_past(const data& values, uint32_t)
@@ -369,8 +391,6 @@ chain_state::map chain_state::get_map(size_t height,
         return{};
 
     map map;
-    const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
-    const auto checked = is_checkpointed(height, checkpoints);
 
     // Bits.
     //-------------------------------------------------------------------------
@@ -382,14 +402,10 @@ chain_state::map chain_state::get_map(size_t height,
     // Timestamp.
     //-------------------------------------------------------------------------
     // The height bound of the median time past function.
-    // Height must be a positive multiple of interval, so underflow safe.
     map.timestamp_self = height;
     map.timestamp.high = height - 1;
     map.timestamp.count = timestamp_count(height, checkpoints);
-
-    // Additional timestamps required (or map::unrequested for not).
-    map.timestamp_retarget = is_retarget_height(height) ?
-        (height - retargeting_interval) : map::unrequested;
+    map.timestamp_retarget = retarget_height(height);
 
     // Version.
     //-------------------------------------------------------------------------
@@ -398,16 +414,10 @@ chain_state::map chain_state::get_map(size_t height,
     map.version.high = height - 1;
     map.version.count = version_count(height, forks, checkpoints);
 
-    // Allowed Duplicates.
+    // Allowed collisions.
     //-------------------------------------------------------------------------
-    map.allow_collisions_height = testnet ?
-        testnet_allow_collisions_checkpoint.height() :
-        mainnet_allow_collisions_checkpoint.height();
-
-    // Don't attempt match if checked or height below allow collisions height.
-    map.allow_collisions_height = (is_checkpointed(height, checkpoints) ||
-        height < map.allow_collisions_height) ? map::unrequested :
-        map.allow_collisions_height;
+    // The height at which tx hash collisions are allowed to occur.
+    map.allow_collisions_height = collision_height(height, forks, checkpoints);
 
     return map;
 }
@@ -421,8 +431,15 @@ chain_state::data chain_state::to_pool(const chain_state& top,
     // If this overflows height is zero and data is both retarget and invalid. 
     const auto height = data.height + 1u;
 
-    // Set invalid if we need to query for retarget height.
-    if (is_retarget_height(height))
+    // Compute whether the collision height is reached but hash not set.
+    const auto need_collision_hash = [&](size_t height)
+    {
+        return collision_height(height, top.forks_, top.checkpoints_) !=
+            map::unrequested && top.data_.allow_collisions_hash == null_hash;
+    };
+
+    // Set invalid if we need to query for retarget or collision height.
+    if (is_retarget_height(height) || need_collision_hash(height))
     {
         data.height = 0;
         return data;
@@ -497,10 +514,11 @@ chain_state::chain_state(const chain_state& pool, const block& block)
 }
 
 // Constructor (from data).
+// allow_collisions is always activated (no longer configurable).
 chain_state::chain_state(data&& values, const checkpoints& checkpoints,
     uint32_t forks)
   : data_(std::move(values)),
-    forks_(forks),
+    forks_(forks | rule_fork::allow_collisions),
     checkpoints_(checkpoints),
     active_(activation(data_, forks_)),
     work_required_(work_required(data_, forks_)),
