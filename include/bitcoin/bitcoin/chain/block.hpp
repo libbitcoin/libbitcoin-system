@@ -65,6 +65,7 @@ public:
         asio::time_point start_pop;
         asio::time_point start_push;
         asio::time_point end_push;
+        float cache_efficiency;
     };
 
     // Constructors.
