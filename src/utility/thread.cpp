@@ -44,7 +44,7 @@
 namespace libbitcoin {
 
 // Privately map the class enum thread priority value to an interger.
-static int get_thread_priority(thread_priority priority)
+static int get_priority(thread_priority priority)
 {
     switch (priority)
     {
@@ -62,9 +62,9 @@ static int get_thread_priority(thread_priority priority)
 }
 
 // Set the thread priority (or process if thread priority is not avaliable).
-void set_thread_priority(thread_priority priority)
+void set_priority(thread_priority priority)
 {
-    const auto prioritization = get_thread_priority(priority);
+    const auto prioritization = get_priority(priority);
 
 #if defined(_MSC_VER)
     SetThreadPriority(GetCurrentThread(), prioritization);
@@ -75,16 +75,36 @@ void set_thread_priority(thread_priority priority)
 #endif
 }
 
-size_t threads(size_t configured, size_t minimum)
-{
-    const size_t cores = std::thread::hardware_concurrency();
-    const auto hardware = std::max(cores, minimum);
-    return configured == 0 ? hardware : std::min(configured, hardware);
-}
-
 thread_priority priority(bool priority)
 {
     return priority ? thread_priority::high : thread_priority::normal;
+}
+
+inline size_t cores()
+{
+    // Cores must be at least 1 (guards against irrational API return).
+    return std::max(std::thread::hardware_concurrency(), 1u);
+}
+
+// This is used to ensure that threads does not exceed cores in the case of
+// parallel work distribution, while allowing the user to reduce parallelism so
+// as not to monopolize the processor. It also makes optimal config easy (0).
+size_t thread_ceiling(size_t configured)
+{
+    if (configured == 0)
+        return cores();
+
+    // Cores/1 but no more than configured.
+    return std::min(configured, cores());
+}
+
+// This is used to ensure that at least a minimum required number of threads is
+// allocated, so that thread starvation does not occur. It also allows the user
+// to increase threads above minimum. It always ensures at least core threads.
+size_t thread_floor(size_t configured)
+{
+    // Configured but no less than cores/1.
+    return std::max(configured, cores());
 }
 
 } // namespace libbitcoin
