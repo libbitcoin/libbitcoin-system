@@ -22,6 +22,8 @@
 
 using namespace bc;
 
+static const auto version_maximum = message::version::level::maximum;
+
 BOOST_AUTO_TEST_SUITE(version_tests)
 
 BOOST_AUTO_TEST_CASE(version__constructor_1__always__invalid)
@@ -67,10 +69,9 @@ BOOST_AUTO_TEST_CASE(version__constructor_2__always__equals_params)
     uint64_t nonce = 335743u;
     std::string agent = "sdashgdfafh";
     uint32_t height = 1246323u;
-    bool relay = true;
+    const auto relay = true;
 
-    message::version instance(value, services, timestamp, receiver, sender,
-        nonce, agent, height, relay);
+    message::version instance(value, services, timestamp, receiver, sender,  nonce, agent, height, relay);
 
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(value, instance.value());
@@ -119,13 +120,12 @@ BOOST_AUTO_TEST_CASE(version__constructor_3__always__equals_params)
     uint64_t nonce = 335743u;
     std::string agent = "sdashgdfafh";
     uint32_t height = 1246323u;
-    bool relay = true;
+    const auto relay = true;
 
     BOOST_REQUIRE(receiver.is_valid());
     BOOST_REQUIRE(sender.is_valid());
 
-    message::version instance(value, services, timestamp, std::move(receiver),
-        std::move(sender), nonce, agent, height, relay);
+    message::version instance(value, services, timestamp, std::move(receiver), std::move(sender), nonce, agent, height, relay);
 
     BOOST_REQUIRE(instance.is_valid());
 }
@@ -165,18 +165,15 @@ BOOST_AUTO_TEST_CASE(version__constructor_4__always__equals_params)
     uint64_t nonce = 335743u;
     std::string agent = "sdashgdfafh";
     uint32_t height = 1246323u;
-    bool relay = true;
+    const auto relay = true;
 
     BOOST_REQUIRE(receiver.is_valid());
     BOOST_REQUIRE(sender.is_valid());
 
-    message::version alpha(value, services, timestamp, receiver, sender,
-        nonce, agent, height, relay);
-
+    message::version alpha(value, services, timestamp, receiver, sender, nonce, agent, height, relay);
     BOOST_REQUIRE(alpha.is_valid());
 
     message::version beta(alpha);
-
     BOOST_REQUIRE(beta == alpha);
 }
 
@@ -215,18 +212,15 @@ BOOST_AUTO_TEST_CASE(version__constructor_5__always__equals_params)
     uint64_t nonce = 335743u;
     std::string agent = "sdashgdfafh";
     uint32_t height = 1246323u;
-    bool relay = true;
+    const auto relay = true;
 
     BOOST_REQUIRE(receiver.is_valid());
     BOOST_REQUIRE(sender.is_valid());
 
-    message::version alpha(value, services, timestamp, receiver, sender,
-        nonce, agent, height, relay);
-
+    message::version alpha(value, services, timestamp, receiver, sender, nonce, agent, height, relay);
     BOOST_REQUIRE(alpha.is_valid());
 
     message::version beta(std::move(alpha));
-
     BOOST_REQUIRE(beta.is_valid());
     BOOST_REQUIRE_EQUAL(value, beta.value());
     BOOST_REQUIRE_EQUAL(services, beta.services());
@@ -244,7 +238,7 @@ BOOST_AUTO_TEST_CASE(version__from_data__insufficient_bytes__invalid)
     const data_chunk raw{ 0xab };
     message::version instance{};
 
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(message::version::level::maximum, raw));
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(version_maximum, raw));
 }
 
 BOOST_AUTO_TEST_CASE(version__from_data__mismatched_sender_services__invalid)
@@ -285,9 +279,8 @@ BOOST_AUTO_TEST_CASE(version__from_data__mismatched_sender_services__invalid)
         false
     );
 
-    const auto data = expected.to_data(message::version::level::maximum);
-    const auto result = message::version::factory_from_data(
-        message::version::level::maximum, data);
+    const auto data = expected.to_data(version_maximum);
+    const auto result = message::version::factory_from_data(version_maximum, data);
 
     // HACK: disabled check due to inconsistent node implementation.
     BOOST_REQUIRE(/*!*/result.is_valid());
@@ -329,10 +322,8 @@ BOOST_AUTO_TEST_CASE(version__from_data__version_meets_bip37__success)
         true
     };
 
-    const auto data = expected.to_data(message::version::level::maximum);
-    const auto result = message::version::factory_from_data(
-        message::version::level::maximum, data);
-
+    const auto data = expected.to_data(version_maximum);
+    const auto result = message::version::factory_from_data(version_maximum, data);
     BOOST_REQUIRE(result.is_valid());
 }
 
@@ -372,15 +363,11 @@ BOOST_AUTO_TEST_CASE(version__factory_from_data_1__valid_input__success)
         true
     };
 
-    const auto data = expected.to_data(message::version::level::maximum);
-    const auto result = message::version::factory_from_data(
-        message::version::level::maximum, data);
-
+    const auto data = expected.to_data(version_maximum);
+    const auto result = message::version::factory_from_data(version_maximum, data);
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(message::version::level::maximum));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::maximum),
-        result.serialized_size(message::version::level::maximum));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version_maximum));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(version_maximum), result.serialized_size(version_maximum));
     BOOST_REQUIRE(expected == result);
 }
 
@@ -420,16 +407,12 @@ BOOST_AUTO_TEST_CASE(version__factory_from_data_2__valid_input__success)
         true
     );
 
-    const auto data = expected.to_data(message::version::level::maximum);
+    const auto data = expected.to_data(version_maximum);
     data_source istream(data);
-    const auto result = message::version::factory_from_data(
-        message::version::level::maximum, istream);
-
+    const auto result = message::version::factory_from_data(version_maximum, istream);
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(message::version::level::maximum));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::maximum),
-        result.serialized_size(message::version::level::maximum));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version_maximum));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(version_maximum), result.serialized_size(version_maximum));
     BOOST_REQUIRE(expected == result);
 }
 
@@ -470,17 +453,14 @@ BOOST_AUTO_TEST_CASE(version__factory_from_data_3__valid_input__success)
     );
 
 
-    const auto data = expected.to_data(message::version::level::maximum);
+    const auto data = expected.to_data(version_maximum);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = message::version::factory_from_data(
-        message::version::level::maximum, source);
+    const auto result = message::version::factory_from_data(version_maximum, source);
 
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(message::version::level::maximum));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::maximum),
-        result.serialized_size(message::version::level::maximum));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version_maximum));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(version_maximum), result.serialized_size(version_maximum));
     BOOST_REQUIRE_EQUAL(expected.relay(), result.relay());
     BOOST_REQUIRE_EQUAL(expected.value(), result.value());
     BOOST_REQUIRE_EQUAL(expected.services(), result.services());
@@ -636,7 +616,8 @@ BOOST_AUTO_TEST_CASE(version__timestamp_setter__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(version__address_receiver_accessor__always__returns_initialized_value)
 {
-    const message::network_address expected{
+    const message::network_address expected
+    {
         734678u,
         5357534u,
         {
@@ -720,7 +701,8 @@ BOOST_AUTO_TEST_CASE(version__address_receiver_setter_2__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(version__address_sender_accessor__always__returns_initialized_value)
 {
-    const message::network_address expected{
+    const message::network_address expected
+    {
         46324u,
         1515u,
         {
