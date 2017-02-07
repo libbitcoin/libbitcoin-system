@@ -65,14 +65,33 @@ reject::reject()
 }
 
 reject::reject(reason_code code, const std::string& message,
+    const std::string& reason)
+  : reject(code, message, reason, null_hash)
+{
+}
+
+reject::reject(reason_code code, std::string&& message, std::string&& reason)
+  : code_(code),
+    message_(std::move(message)),
+    reason_(std::move(reason)),
+    data_(null_hash)
+{
+}
+
+reject::reject(reason_code code, const std::string& message,
     const std::string& reason, const hash_digest& data)
-  : code_(code), message_(message), reason_(reason), data_(data)
+  : code_(code),
+    message_(message),
+    reason_(reason),
+    data_(data)
 {
 }
 
 reject::reject(reason_code code, std::string&& message, std::string&& reason,
     hash_digest&& data)
-  : code_(code), message_(std::move(message)), reason_(std::move(reason)),
+  : code_(code),
+    message_(std::move(message)),
+    reason_(std::move(reason)),
     data_(std::move(data))
 {
 }
