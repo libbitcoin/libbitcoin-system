@@ -82,6 +82,7 @@ enum error_code_t
 
     // transaction pool
     orphan_transaction = 14,
+    insufficient_fee = 70,
 
     // check header
     invalid_proof_of_work = 26,
