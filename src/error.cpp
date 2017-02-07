@@ -85,6 +85,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
 
         // transaction pool
         { error::orphan_transaction, "missing transaction parent" },
+        { error::insufficient_fee, "insufficient transaction fee" },
 
         // check header
         { error::invalid_proof_of_work, "proof of work invalid" },

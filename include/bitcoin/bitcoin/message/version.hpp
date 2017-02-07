@@ -42,7 +42,7 @@ public:
 
     enum level: uint32_t
     {
-        // This is currently unspecified.
+        // compact blocks protocol
         bip152 = 70014,
 
         // fee_filter
@@ -54,7 +54,7 @@ public:
         // bloom_filters service bit
         bip111 = 70011,
 
-        // node_utxo service bit
+        // node_utxo service bit (draft)
         bip64 = 70004,
 
         // reject (satoshi node writes version.relay starting here)
@@ -82,7 +82,7 @@ public:
         minimum = 31402,
 
         // We support at most this internally (bound to settings default).
-        maximum = bip130,
+        maximum = bip133,
 
         // Used to generate canonical size required by consensus checks.
         canonical = 0
@@ -96,7 +96,7 @@ public:
         // The network is capable of serving the block chain (full node).
         node_network = (1 << 0),
 
-        // Requires version.value >= level::bip64
+        // Requires version.value >= level::bip64 (BIP64 is draft only).
         // The network is capable of responding to the getutxo protocol request.
         node_utxo = (1 << 1),
 
