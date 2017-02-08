@@ -55,10 +55,16 @@ public:
     static reject factory_from_data(uint32_t version, reader& source);
 
     reject();
+
+    reject(reason_code code, const std::string& message,
+        const std::string& reason);
+    reject(reason_code code, std::string&& message, std::string&& reason);
+
     reject(reason_code code, const std::string& message,
         const std::string& reason, const hash_digest& data);
     reject(reason_code code, std::string&& message, std::string&& reason,
         hash_digest&& data);
+
     reject(const reject& other);
     reject(reject&& other);
 

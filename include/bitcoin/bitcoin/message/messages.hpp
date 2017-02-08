@@ -56,7 +56,8 @@
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
-// Minimum conditional protocol version: 31800
+// Minimum current libbitcoin protocol version:     31402
+// Minimum current satoshi client protocol version: 31800
 
 // libbitcoin-network
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -130,6 +131,7 @@ DECLARE_MESSAGE_POINTER_TYPES(merkle_block);
 DECLARE_MESSAGE_POINTER_TYPES(not_found);
 DECLARE_MESSAGE_POINTER_TYPES(ping);
 DECLARE_MESSAGE_POINTER_TYPES(pong);
+DECLARE_MESSAGE_POINTER_TYPES(reject);
 DECLARE_MESSAGE_POINTER_TYPES(send_compact);
 DECLARE_MESSAGE_POINTER_TYPES(send_headers);
 DECLARE_MESSAGE_POINTER_TYPES(transaction);
