@@ -56,7 +56,8 @@
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
-// Minimum conditional protocol version: 31800
+// Minimum current libbitcoin protocol version:     31402
+// Minimum current satoshi client protocol version: 31800
 
 // libbitcoin-network
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
