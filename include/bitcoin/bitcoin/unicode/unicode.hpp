@@ -1,21 +1,20 @@
 /**
- * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2017 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
- * libbitcoin is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License with
- * additional permissions to the one published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version. For more information see LICENSE.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef LIBBITCOIN_UNICODE_HPP
 #define LIBBITCOIN_UNICODE_HPP
@@ -52,9 +51,9 @@
 // Regarding Unicode in console applications:
 //
 // BC_USE_LIBBITCOIN_MAIN should be declared prior to bc::main() in a console
-// application. This enables Unicode argument and environment processing in 
-// Windows. This macro implements main() and forwards to bc::main(), which 
-// should be implemented as if it was main() with the expectation that argv 
+// application. This enables Unicode argument and environment processing in
+// Windows. This macro implements main() and forwards to bc::main(), which
+// should be implemented as if it was main() with the expectation that argv
 // is utf8.
 //
 // Do not use std::cout|std::cerr|std::cin (aborts on assertion):
@@ -71,7 +70,7 @@
 //
 // When working with boost and utf8 narrow characters on Windows the thread
 // must be configured for utf8. When working with boost::filesystem::path the
-// static path object must be imbued with the utf8 locale or paths will be 
+// static path object must be imbued with the utf8 locale or paths will be
 // incorrectly translated.
 
 #define BC_LOCALE_BACKEND "icu"

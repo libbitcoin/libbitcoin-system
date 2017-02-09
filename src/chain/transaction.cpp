@@ -1,21 +1,20 @@
 /**
- * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2017 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
- * libbitcoin is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License with
- * additional permissions to the one published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version. For more information see LICENSE.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 
@@ -320,8 +319,8 @@ size_t transaction::serialized_size(bool wire) const
         return size + output.serialized_size(wire);
     };
 
-    return sizeof(version_) 
-        + sizeof(locktime_) 
+    return sizeof(version_)
+        + sizeof(locktime_)
         + message::variable_uint_size(inputs_.size())
         + message::variable_uint_size(outputs_.size())
         + std::accumulate(inputs_.begin(), inputs_.end(), size_t{0}, ins)
@@ -506,7 +505,7 @@ bool transaction::is_final(size_t block_height, uint32_t block_time) const
         return locktime_ < locktime_threshold ?
             safe_unsigned<uint32_t>(block_height) : block_time;
     };
-    
+
     return locktime_ == 0 || locktime_ < max_locktime() || all_inputs_final();
 }
 

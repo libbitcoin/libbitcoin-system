@@ -1,13 +1,12 @@
-/*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+/**
+ * Copyright (c) 2011-2017 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
- * libbitcoin is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License with
- * additional permissions to the one published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version. For more information see LICENSE.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -15,7 +14,7 @@
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin.hpp>
 using namespace bc;
@@ -32,7 +31,7 @@ bool op_checksig_test()
     // input 0
     // prevout hash
     ss.write_hash(hash_digest{0x04, 0x37, 0xcd, 0x7f, 0x85, 0x25, 0xce, 0xed, 0x23, 0x24, 0x35, 0x9c, 0x2d, 0x0b, 0xa2, 0x60, 0x06, 0xd9, 0x2d, 0x85, 0x6a, 0x9c, 0x20, 0xfa, 0x02, 0x41, 0x10, 0x6e, 0xe5, 0xa5, 0x97, 0xc9});
-    // prevout index 
+    // prevout index
     ss.write_4_bytes(0);
 
     // input script after running OP_CHECKSIG for this tx is a single

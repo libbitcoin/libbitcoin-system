@@ -1,21 +1,20 @@
 /**
- * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2017 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
- * libbitcoin is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License with
- * additional permissions to the one published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version. For more information see LICENSE.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/chain/script.hpp>
 
@@ -584,7 +583,7 @@ hash_digest script::generate_signature_hash(const transaction& tx,
     const auto any = is_sighash_flag(sighash_type, anyone_flag);
     const auto single = is_sighash_enum(sighash_type, sighash_single);
 
-    if (input_index >= tx.inputs().size() || 
+    if (input_index >= tx.inputs().size() ||
         (input_index >= tx.outputs().size() && single))
     {
         //*********************************************************************
@@ -790,7 +789,7 @@ bool script::is_sign_script_hash_pattern(const operation::list& ops)
         || redeem_script_pattern == script_pattern::pay_script_hash
         || redeem_script_pattern == script_pattern::null_data;
 }
-    
+
 operation::list script::to_null_data_pattern(data_slice data)
 {
     if (data.size() > max_null_data_size)

@@ -1,13 +1,12 @@
-/*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+/**
+ * Copyright (c) 2011-2017 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
- * libbitcoin is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License with
- * additional permissions to the one published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version. For more information see LICENSE.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -15,7 +14,7 @@
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/blockchain/bdb_blockchain.hpp>
 #include <bitcoin/transaction.hpp>
@@ -147,9 +146,9 @@ void handle_store(const std::error_code& ec, block_info info,
     else if (info.height == 20)
     {
         chain->fetch_transaction(
-            hash_digest{0xdf, 0x2b, 0x06, 0x0f, 0xa2, 0xe5, 0xe9, 0xc8, 
-                        0xed, 0x5e, 0xaf, 0x6a, 0x45, 0xc1, 0x37, 0x53, 
-                        0xec, 0x8c, 0x63, 0x28, 0x2b, 0x26, 0x88, 0x32, 
+            hash_digest{0xdf, 0x2b, 0x06, 0x0f, 0xa2, 0xe5, 0xe9, 0xc8,
+                        0xed, 0x5e, 0xaf, 0x6a, 0x45, 0xc1, 0x37, 0x53,
+                        0xec, 0x8c, 0x63, 0x28, 0x2b, 0x26, 0x88, 0x32,
                         0x2e, 0xba, 0x40, 0xcd, 0x98, 0xea, 0x06, 0x7a},
             show_tx);
     }
@@ -167,8 +166,8 @@ void handle_store(const std::error_code& ec, block_info info,
         chain->fetch_spend(
             message::output_point{
                 hash_digest{0x04, 0x37, 0xcd, 0x7f, 0x85, 0x25, 0xce, 0xed,
-                            0x23, 0x24, 0x35, 0x9c, 0x2d, 0x0b, 0xa2, 0x60, 
-                            0x06, 0xd9, 0x2d, 0x85, 0x6a, 0x9c, 0x20, 0xfa, 
+                            0x23, 0x24, 0x35, 0x9c, 0x2d, 0x0b, 0xa2, 0x60,
+                            0x06, 0xd9, 0x2d, 0x85, 0x6a, 0x9c, 0x20, 0xfa,
                             0x02, 0x41, 0x10, 0x6e, 0xe5, 0xa5, 0x97, 0xc9},
                 0},
             show_spend);
@@ -259,7 +258,7 @@ int main()
     bdb_blockchain::setup("database/");
     log_debug() << "Setup finished";
     blockchain_ptr store(new bdb_blockchain("database/"));
-    //store->fetch_outputs(short_hash{0x12, 0xab, 0x8d, 0xc5, 0x88, 
+    //store->fetch_outputs(short_hash{0x12, 0xab, 0x8d, 0xc5, 0x88,
     //                                0xca, 0x9d, 0x57, 0x87, 0xdd,
     //                                0xe7, 0xeb, 0x29, 0x56, 0x9d,
     //                                0xa6, 0x3c, 0x3a, 0x23, 0x8c},
@@ -267,9 +266,9 @@ int main()
     log_debug() << "Opened";
     store->fetch_block(0, show_block);
     store->fetch_block(
-        hash_digest{0x00, 0x00, 0x00, 0x00, 0x00, 0x19, 0xd6, 0x68, 
-                    0x9c, 0x08, 0x5a, 0xe1, 0x65, 0x83, 0x1e, 0x93, 
-                    0x4f, 0xf7, 0x63, 0xae, 0x46, 0xa2, 0xa6, 0xc1, 
+        hash_digest{0x00, 0x00, 0x00, 0x00, 0x00, 0x19, 0xd6, 0x68,
+                    0x9c, 0x08, 0x5a, 0xe1, 0x65, 0x83, 0x1e, 0x93,
+                    0x4f, 0xf7, 0x63, 0xae, 0x46, 0xa2, 0xa6, 0xc1,
                     0x72, 0xb3, 0xf1, 0xb6, 0x0a, 0x8c, 0xe2, 0x6f},
         show_block);
     tx_pool = transaction_pool::create(store);

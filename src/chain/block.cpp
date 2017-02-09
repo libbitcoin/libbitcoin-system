@@ -1,21 +1,20 @@
 /**
- * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2017 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
- * libbitcoin is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License with
- * additional permissions to the one published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version. For more information see LICENSE.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/chain/block.hpp>
 
@@ -50,7 +49,7 @@
 
 namespace libbitcoin {
 namespace chain {
-    
+
 using namespace bc::config;
 using namespace bc::machine;
 
@@ -423,7 +422,7 @@ uint256_t block::proof(uint32_t bits)
 
     // We need to compute 2**256 / (target + 1), but we can't represent 2**256
     // as it's too large for uint256. However as 2**256 is at least as large as
-    // target + 1, it is equal to ((2**256 - target - 1) / (target + 1)) + 1, or 
+    // target + 1, it is equal to ((2**256 - target - 1) / (target + 1)) + 1, or
     // (~target / (target + 1)) + 1.
     return (divisor == 0) ? 0 : (~target / divisor) + 1;
 }

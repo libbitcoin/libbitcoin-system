@@ -1,21 +1,20 @@
 /**
- * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2017 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
- * libbitcoin is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License with
- * additional permissions to the one published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version. For more information see LICENSE.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef LIBBITCOIN_CONFIG_PARAMETER_HPP
 #define LIBBITCOIN_CONFIG_PARAMETER_HPP
@@ -105,7 +104,7 @@ public:
         const argument_list& arguments);
 
     /**
-     * Determine if the option is an argument by testing for it by name in the 
+     * Determine if the option is an argument by testing for it by name in the
      * positional options collection and if so return the position.
      * @param[in]  option     The metadata of the option to position.
      * @param[in]  arguments  The list of supported positional arguments.
@@ -122,7 +121,7 @@ public:
      * @param[in]  arguments  The argument names list.
      * @return                The arguments limit value for the option.
      */
-    unsigned arguments_limit(int position, 
+    unsigned arguments_limit(int position,
         const boost::program_options::option_description& option,
         const argument_list& arguments) const;
 
