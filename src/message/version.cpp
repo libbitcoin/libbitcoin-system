@@ -155,26 +155,22 @@ bool version::from_data(uint32_t version, reader& source)
     user_agent_ = source.read_string();
     start_height_ = source.read_4_bytes_little_endian();
 
-    const auto own_bip37 = (version >= level::bip37);
-    const auto peer_bip37 = (value_ >= level::bip37);
-
-    // Need to always read the byte if peer version is at/above bip37.
-    const auto peer_relay = (!peer_bip37 || (source.read_byte() != 0));
-
-    // Versions of /Satoshi:0.8.x/ parse but do not send the relay byte.
-    // This is undocumented and was resolved in /Satoshi:0.9.0/.
-    const auto buggy1 = (value_ == level::bip37 && source.is_exhausted());
-
-    // The /Satoshi:1.1.1/ node appears to be a fork of /Satoshi:0.8.x/.
-    // This presents a protocol version of 70006 while not including relay.
-    const auto buggy2 = (value_ == 70006 && source.is_exhausted());
-
     // Nodes have no way to know if their peers supports relay, so it is always
     // sent based on the version of the sender. This requires older protocols
     // to have clairvoyance, or allow arbitrary extra bytes (bad). So we must
     // read the extra byte even if our protocol level should not understand it.
     // However if we are below bip37 we ignore the peer value and set true.
-    relay_ = (!own_bip37 || peer_relay || buggy1 || buggy2);
+
+    // The /Satoshi:0.8.x/ node (70001) reads (but does not send) the relay byte.
+    // This bug was reported to bitcoin.org for documentation.
+    const auto own_bip37 = (version >= level::bip37);
+
+    // The /Satoshi:0.9.x/ node (70002) sends (and reads) the relay byte.
+    const auto peer_bip37 = (value_ >= level::bip61);
+
+    const auto read_relay = !peer_bip37 || (source.read_byte() != 0);
+
+    relay_ = (!own_bip37 || !peer_bip37 || read_relay);
 
     // HACK: disabled check due to inconsistent node implementation.
     // The protocol expects duplication of the sender's services.

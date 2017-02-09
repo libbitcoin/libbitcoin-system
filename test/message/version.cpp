@@ -23,7 +23,60 @@ using namespace bc;
 
 static const auto version_maximum = message::version::level::maximum;
 
+// "/Satoshi:1.1.1/" (70006) no relay
+// anarchistprime: bitcointalk.org/index.php?topic=1001407
+// This node is identifiable by a different genesis block.
+#define INVALID_ANARCHISTPRIME_1 "761101000100000000000000ae1b9c58000000000100000000000000260106009000d69ee9a999156d2e27fed77d01000000000000002a0104f80160144600000000000000022b2aaf9b8ea1eb14614b0f2f5361746f7368693a312e312e312f64450200"
+#define INVALID_ANARCHISTPRIME_2 "7611010001000000000000005b429c5800000000010000000000000000000000000000000000ffff1813e52e939b010000000000000000000000000000000000ffffd59fd7db200ac7f00f6ee45f1ab30f2f5361746f7368693a312e312e312f66450200"
+
+// "/Cornell-Falcon-Network:0.1.0/" (70014) no relay
+#define INVALID_FALCON_1 "7e11010001000000000000005f429c5800000000010000000000000000000000000000000000ffff000000000000010000000000000000000000000000000000ffff22c06db5208d6241eabdf2d6753c1e2f436f726e656c6c2d46616c636f6e2d4e6574776f726b3a302e312e302f97e60600"
+#define INVALID_FALCON_2 "7e1101000100000000000000ae429c5800000000010000000000000000000000000000000000ffff000000000000010000000000000000000000000000000000ffff23a25ec4208d9ed337a66b411a441e2f436f726e656c6c2d46616c636f6e2d4e6574776f726b3a302e312e302f97e60600"
+
+// "/Satoshi:0.13.0/" (70014) no relay
+#define INVALID_SATOSHI_1 "7e1101000900000000000000ec429c5800000000090000000000000000000000000000000000ffff1813e52e208d090000000000000000000000000000000000ffff97ec0b6d208d7c8c30307127a822102f5361746f7368693a302e31332e302f97e60600"
+
 BOOST_AUTO_TEST_SUITE(version_tests)
+
+BOOST_AUTO_TEST_CASE(version__factory_from_data__anarchistprime1__invalid)
+{
+    data_chunk payload;
+    BOOST_REQUIRE(decode_base16(payload, INVALID_ANARCHISTPRIME_1));
+    const auto version = message::version::factory_from_data(version_maximum, payload);
+    BOOST_REQUIRE(!version.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(version__factory_from_data__anarchistprime2__invalid)
+{
+    data_chunk payload;
+    BOOST_REQUIRE(decode_base16(payload, INVALID_ANARCHISTPRIME_2));
+    const auto version = message::version::factory_from_data(version_maximum, payload);
+    BOOST_REQUIRE(!version.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(version__factory_from_data__falcon1__invalid)
+{
+    data_chunk payload;
+    BOOST_REQUIRE(decode_base16(payload, INVALID_FALCON_1));
+    const auto version = message::version::factory_from_data(version_maximum, payload);
+    BOOST_REQUIRE(!version.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(version__factory_from_data__falcon2__invalid)
+{
+    data_chunk payload;
+    BOOST_REQUIRE(decode_base16(payload, INVALID_FALCON_2));
+    const auto version = message::version::factory_from_data(version_maximum, payload);
+    BOOST_REQUIRE(!version.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(version__factory_from_data__satoshi1__invalid)
+{
+    data_chunk payload;
+    BOOST_REQUIRE(decode_base16(payload, INVALID_SATOSHI_1));
+    const auto version = message::version::factory_from_data(version_maximum, payload);
+    BOOST_REQUIRE(!version.is_valid());
+}
 
 BOOST_AUTO_TEST_CASE(version__constructor_1__always__invalid)
 {
