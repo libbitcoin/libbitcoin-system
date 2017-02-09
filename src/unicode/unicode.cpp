@@ -1,21 +1,20 @@
 /**
- * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2017 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
- * libbitcoin is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License with
- * additional permissions to the one published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version. For more information see LICENSE.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/unicode/unicode.hpp>
 
@@ -96,8 +95,8 @@ static std::string normal_form(const std::string& value, norm_type form)
     return normalize(value, form, locale(BC_LOCALE_UTF8));
 }
 
-// One time verifier of the localization backend manager. This is 
-// necessary because boost::normalize will fail silently to perform 
+// One time verifier of the localization backend manager. This is
+// necessary because boost::normalize will fail silently to perform
 // normalization if the ICU dependency is missing.
 static void validate_localization()
 {
@@ -233,22 +232,22 @@ static bool is_utf8_character_sequence(const char sequence[], uint8_t bytes)
     {
         case 1:
             // 0xxxxxxx
-            return 
+            return
                 ((0x80 & sequence[0]) == 0x00);
         case 2:
             // 110xxxxx 10xxxxxx
-            return 
+            return
                 ((0xE0 & sequence[0]) == 0xC0) &&
                 is_utf8_trailing_byte(sequence[1]);
         case 3:
             // 1110xxxx 10xxxxxx 10xxxxxx
-            return 
+            return
                 ((0xF0 & sequence[0]) == 0xE0) &&
                 is_utf8_trailing_byte(sequence[1]) &&
                 is_utf8_trailing_byte(sequence[2]);
         case 4:
             // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-            return 
+            return
                 ((0xF8 & sequence[0]) == 0xF0) &&
                 is_utf8_trailing_byte(sequence[1]) &&
                 is_utf8_trailing_byte(sequence[2]) &&

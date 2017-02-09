@@ -1,21 +1,20 @@
 /**
- * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2017 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
- * libbitcoin is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License with
- * additional permissions to the one published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version. For more information see LICENSE.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef LIBBITCOIN_ENCRYPTED_KEYS_HPP
 #define LIBBITCOIN_ENCRYPTED_KEYS_HPP
@@ -118,7 +117,7 @@ BC_API bool create_token(encrypted_token& out_token,
 
 /**
  * Create an encrypted private key from an intermediate passphrase.
- * The `out_point` paramter is always compressed, so to use it it should be 
+ * The `out_point` paramter is always compressed, so to use it it should be
  * decompressed as necessary to match the state of the `compressed` parameter.
  * @param[out] out_private  The new encrypted private key.
  * @param[out] out_point    The ec compressed public key of the new key pair.
@@ -135,7 +134,7 @@ BC_API bool create_key_pair(encrypted_private& out_private,
 /**
  * DEPRECATED
  * Create an encrypted key pair from an intermediate passphrase.
- * The `out_point` paramter is always compressed, so to use it it should be 
+ * The `out_point` paramter is always compressed, so to use it it should be
  * decompressed as necessary to match the state of the `compressed` parameter.
  * @param[out] out_private  The new encrypted private key.
  * @param[out] out_public   The new encrypted public key.

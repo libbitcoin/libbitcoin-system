@@ -1,13 +1,12 @@
-/*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+/**
+ * Copyright (c) 2011-2017 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
- * libbitcoin is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License with
- * additional permissions to the one published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version. For more information see LICENSE.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -15,7 +14,7 @@
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../src/storage/postgresql_blockchain.hpp"
 #include <bitcoin/utility/threaded_pool.hpp>
@@ -40,7 +39,7 @@ public:
       : postgresql_organizer(sql)
     {
     }
-    void delete_branch(size_t space, size_t height, 
+    void delete_branch(size_t space, size_t height,
         size_t span_left, size_t span_right)
     {
         postgresql_organizer::delete_branch(
@@ -48,7 +47,7 @@ public:
     }
 };
 
-// Tee hee 
+// Tee hee
 class dummy_psql
  : public threaded_pool
 {
@@ -232,7 +231,7 @@ void dummy_psql::delete_branch(std::string name)
         log_error() << "Bad name for delete_branch()";
         return;
     }
-    size_t space = r.get<size_t>(0), height = r.get<size_t>(1), 
+    size_t space = r.get<size_t>(0), height = r.get<size_t>(1),
         span_left = r.get<size_t>(2), span_right = r.get<size_t>(3);
     log_debug() << "Deleting height of " << height
         << " [" << span_left << ", " << span_right << "]";
@@ -265,7 +264,7 @@ void dummy_psql::fake_verify()
                 height = ? \
             WHERE \
                 chain_id >= ? \
-                AND chain_id <= ?" 
+                AND chain_id <= ?"
             << result.get<size_t>("bits_head")
             << result.get<size_t>("bits_body")
             << result.get<size_t>("height")

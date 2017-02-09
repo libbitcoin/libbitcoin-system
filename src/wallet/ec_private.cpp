@@ -1,21 +1,20 @@
 /**
- * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2017 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
- * libbitcoin is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License with
- * additional permissions to the one published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version. For more information see LICENSE.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/wallet/ec_private.hpp>
 
@@ -87,7 +86,7 @@ bool ec_private::is_wif(data_slice decoded)
     if (!verify_checksum(decoded))
         return false;
 
-    return (size == wif_uncompressed_size) || 
+    return (size == wif_uncompressed_size) ||
         decoded.data()[1 + ec_secret_size] == compressed_sentinel;
 }
 
@@ -199,7 +198,7 @@ const bool ec_private::compressed() const
 ec_public ec_private::to_public() const
 {
     ec_compressed point;
-    return valid_ && secret_to_public(point, secret_) ?  
+    return valid_ && secret_to_public(point, secret_) ?
         ec_public(point, compressed()) : ec_public();
 }
 

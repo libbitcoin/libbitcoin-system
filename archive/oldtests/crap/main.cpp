@@ -1,13 +1,12 @@
-/*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+/**
+ * Copyright (c) 2011-2017 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
- * libbitcoin is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License with
- * additional permissions to the one published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version. For more information see LICENSE.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -15,7 +14,7 @@
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <future>
 
@@ -153,7 +152,7 @@ public:
             {
                 auto outpoint = outpoints.first[i];
                 auto value = outpoints.second[i];
-                std::cout << (i + 1) << ". " 
+                std::cout << (i + 1) << ". "
                     << (selected[i] ? "[X]" : "[ ]") << " "
                     << encode_hex(outpoint.hash) << ":" << outpoint.index
                     << " " << pretty_amount(value) << " BTC" << std::endl;
@@ -290,7 +289,7 @@ public:
         //p_.protocol->subscribe_channel(monitor_tx);
 
         disk_pool_.spawn();
-        p_.blockchain = 
+        p_.blockchain =
             std::make_shared<bdb_blockchain>(disk_pool_, "database");
         p_.poller = std::make_shared<poller>(p_.blockchain);
 
@@ -379,7 +378,7 @@ protected:
             transaction_input_type& input = tx_->inputs[i];
             // Rebuild previous output script
             data_chunk public_key = ec_.public_key();
-            script script_code = 
+            script script_code =
                 build_output_script(generate_ripemd_hash(public_key));
 
             hash_digest tx_hash =

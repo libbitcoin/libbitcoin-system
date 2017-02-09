@@ -3,19 +3,18 @@
  *
  * This file is part of libbitcoin.
  *
- * libbitcoin is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License with
- * additional permissions to the one published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version. For more information see LICENSE.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/wallet/stealth_receiver.hpp>
 
@@ -28,7 +27,7 @@
 
 namespace libbitcoin {
 namespace wallet {
-    
+
 // TODO: use to factory and make address_ and spend_public_ const.
 stealth_receiver::stealth_receiver(const ec_secret& scan_private,
     const ec_secret& spend_private, const binary& filter, uint8_t version)
@@ -61,7 +60,7 @@ bool stealth_receiver::derive_address(payment_address& out_address,
     if (!uncover_stealth(receiver_public, ephemeral_public, scan_private_,
         spend_public_))
         return false;
-    
+
     out_address = { receiver_public, version_ };
     return true;
 }

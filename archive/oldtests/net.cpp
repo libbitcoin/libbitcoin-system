@@ -1,13 +1,12 @@
-/*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+/**
+ * Copyright (c) 2011-2017 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
- * libbitcoin is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License with
- * additional permissions to the one published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version. For more information see LICENSE.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -15,7 +14,7 @@
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/network/handshake.hpp>
@@ -67,9 +66,9 @@ void handle_send_getblock(const std::error_code& ec)
 get_blocks_type create_getblocks_message()
 {
     get_blocks_type packet;
-    hash_digest genesis{0x00, 0x00, 0x00, 0x00, 0x00, 0x19, 0xd6, 0x68, 
-                        0x9c, 0x08, 0x5a, 0xe1, 0x65, 0x83, 0x1e, 0x93, 
-                        0x4f, 0xf7, 0x63, 0xae, 0x46, 0xa2, 0xa6, 0xc1, 
+    hash_digest genesis{0x00, 0x00, 0x00, 0x00, 0x00, 0x19, 0xd6, 0x68,
+                        0x9c, 0x08, 0x5a, 0xe1, 0x65, 0x83, 0x1e, 0x93,
+                        0x4f, 0xf7, 0x63, 0xae, 0x46, 0xa2, 0xa6, 0xc1,
                         0x72, 0xb3, 0xf1, 0xb6, 0x0a, 0x8c, 0xe2, 0x6f};
     packet.start_hashes.push_back(genesis);
     packet.hash_stop.fill(0);
@@ -88,7 +87,7 @@ void handle_handshake(const std::error_code& ec, channel_ptr node,
     if (ec)
         error_exit(ec.message());
     node->subscribe_inventory(std::bind(&receive_inv, _1, _2, node));
-    node->send(create_getblocks_message(), 
+    node->send(create_getblocks_message(),
         std::bind(&handle_send_getblock, _1));
     hs.fetch_network_address(show_ip);
 }

@@ -3,19 +3,18 @@
  *
  * This file is part of libbitcoin.
  *
- * libbitcoin is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License with
- * additional permissions to the one published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version. For more information see LICENSE.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <boost/test/unit_test.hpp>
 
@@ -62,7 +61,7 @@ BOOST_AUTO_TEST_CASE(stealth_receiver__exchange_between_sender_and_receiver__alw
     BOOST_REQUIRE_EQUAL(payment.encoded(), DERIVED_ADDRESS);
 
     // Receiver scans blockchain to get a list of potentially-matching values.
-    // client.fetch_stealth() will yield rows of: 
+    // client.fetch_stealth() will yield rows of:
     // [ephemkey:32] [address:20] [tx_hash:32]
     // Normally this is obtained by the server via client.fetch_stealth.
     ec_compressed ephemeral_public;

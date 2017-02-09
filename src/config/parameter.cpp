@@ -1,21 +1,20 @@
 /**
- * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2017 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
- * libbitcoin is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License with
- * additional permissions to the one published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version. For more information see LICENSE.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/config/parameter.hpp>
 
@@ -65,14 +64,14 @@ char parameter::short_name(const po::option_description& option) const
 
     // This is a substitute that allows us to use boost 1.49 for libbitcoin.
     const auto name = split(option.format_name()).front();
-    auto is_short_name = name[0] == option_prefix_char && 
+    auto is_short_name = name[0] == option_prefix_char &&
         name[1] != option_prefix_char;
 
     return is_short_name ? name[1] : no_short_name;
 }
 
 // 100% component coverage
-unsigned parameter::arguments_limit(int position, 
+unsigned parameter::arguments_limit(int position,
     const po::option_description& option, const argument_list& arguments) const
 {
     if (position == parameter::not_positional)
