@@ -147,7 +147,12 @@ bool reject::from_data(uint32_t version, reader& source)
     if ((message_ == block::command) ||
         (message_ == transaction::command))
     {
-        data_ = source.read_hash();
+        // Some nodes do not follow the documented convention of supplying hash
+        // for tx and block rejects. Use this to prevent error on empty stream.
+        const auto bytes = source.read_bytes();
+
+        if (bytes.size() == hash_size)
+            build_array(data_, { bytes });
     }
 
     if (version < reject::version_minimum)
