@@ -61,9 +61,9 @@ Next install the [Boost](http://www.boost.org) (minimum 1.57.0) development pack
 ```sh
 $ sudo apt-get install libboost-all-dev
 ```
-Next download the [install script](https://github.com/libbitcoin/libbitcoin/blob/version2/install.sh) and enable execution:
+Next download the [install script](https://github.com/libbitcoin/libbitcoin/blob/version3/install.sh) and enable execution:
 ```sh
-$ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version2/install.sh
+$ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version3/install.sh
 $ chmod +x install.sh
 ```
 Finally, install libbitcoin:
@@ -108,9 +108,9 @@ Next install the [Boost](http://www.boost.org) (1.57.0 or newer) development pac
 ```sh
 $ brew install boost
 ```
-Next download the [install script](https://github.com/libbitcoin/libbitcoin/blob/version2/install.sh) and enable execution:
+Next download the [install script](https://github.com/libbitcoin/libbitcoin/blob/version3/install.sh) and enable execution:
 ```sh
-$ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version2/install.sh
+$ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version3/install.sh
 $ chmod +x install.sh
 ```
 Finally install libbitcoin:
@@ -131,9 +131,9 @@ Next install the [Boost](http://www.boost.org) (1.57.0 or newer) development pac
 ```sh
 $ sudo port install boost -no_single -no_static -python27
 ```
-Next download the [install script](https://github.com/libbitcoin/libbitcoin/blob/version2/install.sh) and enable execution:
+Next download the [install script](https://github.com/libbitcoin/libbitcoin/blob/version3/install.sh) and enable execution:
 ```sh
-$ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version2/install.sh
+$ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version3/install.sh
 $ chmod +x install.sh
 ```
 Finally install libbitcoin:
@@ -153,7 +153,7 @@ The build script clones, builds and installs two unpackaged repositories, namely
 - [libbitcoin/secp256k1](https://github.com/libbitcoin/secp256k1)
 - [libbitcoin/libbitcoin](https://github.com/libbitcoin/libbitcoin)
 
-The script builds from the head of their `version4` and `version2` branches respectively. The `master` branch is a staging area for changes. The version branches are considered release quality.
+The script builds from the head of their `version4` and `version3` branches respectively. The `master` branch is a staging area for changes. The version branches are considered release quality.
 
 #### Build Options
 
