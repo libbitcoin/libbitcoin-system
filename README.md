@@ -236,6 +236,6 @@ After cloning the the repository the libbitcoin build can be performed manually 
 
 The secp256k1 package above is maintained using the same [Visual Studio template](https://github.com/evoskuil/visual-studio-template) as all libbitcoin libraries. If so desired it can be built locally, in the same manner as libbitcoin.
 
-* [libbitcoin/secp256k1/version4](https://github.com/libbitcoin/secp256k1/tree/version4)
+* [libbitcoin/secp256k1/version4](https://github.com/libbitcoin/secp256k1/tree/version4/builds/msvc)
 
 This change is properly accomplished by disabling the "NuGet Dependencies" in the Visual Studio properties user interface and then importing `secp256k1.import.props`, which references `secp256k1.import.xml`.
