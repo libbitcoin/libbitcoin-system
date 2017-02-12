@@ -1,3 +1,0 @@
-These directories are not built and currently held for reference purposes.
-
-The examples (tx_radar.cpp and protocol) remain valid but are not yet incorporated into a make target.

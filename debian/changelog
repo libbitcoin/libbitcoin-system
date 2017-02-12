@@ -1,7 +1,0 @@
-libbitcoin0 (2.0.0+nmu1) unstable; urgency=low
-
-  * Non-maintainer upload.
-  * Initial release.
-  Closes: bug#670701
-
- -- Pablo Castellano (Debian packages) <pablo@anche.no>  Sun, 19 Mar 2014 01:44:00 +0100
