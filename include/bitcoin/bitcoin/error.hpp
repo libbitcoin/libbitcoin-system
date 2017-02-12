@@ -115,7 +115,7 @@ enum error_code_t
     spend_overflow = 21,
     invalid_coinbase_script_size = 22,
     coinbase_transaction = 16,
-    transction_size_limit = 53,
+    transaction_size_limit = 53,
     transaction_legacy_sigop_limit = 54,
 
     // accept transaction

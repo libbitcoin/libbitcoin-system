@@ -731,7 +731,7 @@ code transaction::check(bool transaction_pool) const
         return error::coinbase_transaction;
 
     else if (transaction_pool && serialized_size() >= max_block_size)
-        return error::transction_size_limit;
+        return error::transaction_size_limit;
 
     // We cannot know if bip16 is enabled at this point so we disable it.
     // This will not make a difference unless prevouts are populated, in which
