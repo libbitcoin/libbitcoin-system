@@ -1,33 +1,31 @@
-Authors:
-
-* Robert Williamson
-  Development. Added support for testnet.
-
-* Eric Voskuil
-  Windows ports, OpenSSL removal, build and documentation updates.
-
-* William Swanson
-  Android port and wallet code development.
-
-* Amir Taaki (genjix)
-  Development
-  amir@unsystem.net
-
-* Patrick Strateman (phantomcircuit)
-  Development. Early contributor.
-
-* Denis Roio (jaromil)
-  Hosting.
-
-* Neill Miller
-  Bip39, misc.
-
-Thanks:
-
-Kamil Domański (kdomanski)
-Jan Engelhardt (se7) <jengelh@medozas.de>
-
-Aaron Williamson (SFLC) and Richard Stallman (FSF) for the license,
-Luke Dashjr for pointing out OpenSSL license conflict.
-
-Pablo Castellano - Debian packaging
+commits  libbitcoin developers
+--------------------------------------------
+   2572  Eric Voskuil (evoskuil)
+   1256  Amir Taaki (genjix)
+    196  Phillip Mienk (pmienk)
+     90  William Swanson (swansontec)
+     50  Neill Miller (thecodefactory)
+     39  Kamil Domański (kdomanski)
+     26  Patrick Strateman (phantomcircuit)
+     25  Pablo Castellano (pablog)
+     19  Yarvis Hatsa
+     11  Robert Williamson (bobalot)
+      9  RojavaCrypto
+      5  Noel Maersk (veox)
+      4  Jan Engelhardt
+      4  Peter Hille
+      2  Shawn David Pringle
+      2  mlmikael
+      2  Jake Hickey (shunyata)
+      1  Alexander Regueiro
+      1  Andy Weidenbaum
+      1  Bardi Harborow
+      1  Ben Holden-Crowther
+      1  Chang Lan
+      1  Dave Huseby
+      1  Dimitri John Ledkov
+      1  Jaromil
+      1  Kevin Johnson
+      1  Omid Aladini
+      1  Rafał Krupiński
+      1  Lucas Betschart (lclc)
