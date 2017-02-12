@@ -757,7 +757,14 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
 {
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip30 = state.is_enabled(rule_fork::bip30_rule);
-    const auto duplicates = state.is_enabled(rule_fork::allow_collisions);
+
+    //*************************************************************************
+    // CONSENSUS:
+    // We don't need to allow tx pool acceptance of an unspent duplicate
+    // because tx pool validation is not strinctly a matter of consensus.
+    //*************************************************************************
+    const auto duplicates = state.is_enabled(rule_fork::allow_collisions) &&
+        !transaction_pool;
 
     if (transaction_pool && state.is_under_checkpoint())
         return error::premature_validation;
