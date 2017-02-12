@@ -57,8 +57,6 @@ BC_CONSTEXPR uint64_t sighash_null_value = max_uint64;
 // Script/interpreter constants.
 //-----------------------------------------------------------------------------
 
-BC_CONSTEXPR size_t max_number_size = 4;
-BC_CONSTEXPR size_t max_cltv_number_size = 5;
 BC_CONSTEXPR size_t max_counted_ops = 201;
 BC_CONSTEXPR size_t max_stack_size = 1000;
 BC_CONSTEXPR size_t max_script_size = 10000;
@@ -69,6 +67,10 @@ BC_CONSTEXPR size_t multisig_default_sigops = 20;
 // This is policy, not consensus.
 BC_CONSTEXPR size_t max_null_data_size = 80;
 
+// These may not be flexible, keep internal.
+BC_CONSTEXPR size_t max_number_size = 4;
+BC_CONSTEXPR size_t max_cltv_number_size = 5;
+
 // Various validation constants.
 //-----------------------------------------------------------------------------
 
@@ -76,19 +78,27 @@ BC_CONSTEXPR size_t min_coinbase_size = 2;
 BC_CONSTEXPR size_t max_coinbase_size = 100;
 BC_CONSTEXPR size_t median_time_past_interval = 11;
 BC_CONSTEXPR size_t max_block_size = 1000000;
-BC_CONSTEXPR size_t max_block_sigops = max_block_size / 50;
 BC_CONSTEXPR size_t coinbase_maturity = 100;
 BC_CONSTEXPR size_t time_stamp_future_hours = 2;
 BC_CONSTEXPR size_t locktime_threshold = 500000000;
 
+// Derived.
+BC_CONSTEXPR size_t max_block_sigops = max_block_size / 50;
+
 // Timespan constants.
 //-----------------------------------------------------------------------------
 
-BC_CONSTEXPR uint32_t proof_of_work_limit = 0x1d00ffff;
 BC_CONSTEXPR uint32_t retargeting_factor = 4;
+BC_CONSTEXPR uint32_t easy_spacing_factor = 2;
 BC_CONSTEXPR uint32_t target_spacing_seconds = 10 * 60;
-BC_CONSTEXPR uint32_t double_spacing_seconds = 2 * target_spacing_seconds;
 BC_CONSTEXPR uint32_t target_timespan_seconds = 2 * 7 * 24 * 60 * 60;
+
+// This may not be flexible, keep internal.
+BC_CONSTEXPR uint32_t proof_of_work_limit = 0x1d00ffff;
+
+// Derived.
+BC_CONSTEXPR uint32_t double_spacing_seconds =
+    easy_spacing_factor * target_spacing_seconds;
 
 // The upper and lower bounds for the retargeting timespan.
 BC_CONSTEXPR uint32_t min_timespan =
