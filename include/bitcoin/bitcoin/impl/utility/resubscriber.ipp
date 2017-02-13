@@ -147,6 +147,9 @@ void resubscriber<Args...>::do_invoke(Args... args)
     // Invoke subscribers from temporary list and resubscribe as indicated.
     for (const auto& handler: subscriptions)
     {
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // DEADLOCK RISK, handler must not return to invoke.
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         if (handler(args...))
         {
             // Critical Section

@@ -248,6 +248,9 @@ void notifier<Key, Args...>::do_invoke(Args... args)
     // Invoke subscribers from temporary map and resubscribe as indicated.
     for (const auto& entry: subscriptions)
     {
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // DEADLOCK RISK, notify must not return to invoke.
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         if (entry.second.notify(args...))
         {
             // Critical Section
