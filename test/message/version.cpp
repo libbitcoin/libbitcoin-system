@@ -36,7 +36,18 @@ static const auto version_maximum = message::version::level::maximum;
 // "/Satoshi:0.13.0/" (70014) no relay
 #define INVALID_SATOSHI_1 "7e1101000900000000000000ec429c5800000000090000000000000000000000000000000000ffff1813e52e208d090000000000000000000000000000000000ffff97ec0b6d208d7c8c30307127a822102f5361746f7368693a302e31332e302f97e60600"
 
+// "/therealbitcoin.org:0.9.99.99/" (99999) no relay
+#define INVALID_THEREALBITCOIN_1 "9f86010001000000000000002336a15800000000010000000000000000000000000000000000ffff1813e52ebb81010000000000000000000000000000000000ffff6f6f6f6f208db1f33b262e6acb331e2f7468657265616c626974636f696e2e6f72673a302e392e39392e39392fb9e80600"
+
 BOOST_AUTO_TEST_SUITE(version_tests)
+
+BOOST_AUTO_TEST_CASE(version__factory_from_data__therealbitcoin_dot_org__invalid)
+{
+    data_chunk payload;
+    BOOST_REQUIRE(decode_base16(payload, INVALID_THEREALBITCOIN_1));
+    const auto version = message::version::factory_from_data(version_maximum, payload);
+    BOOST_REQUIRE(!version.is_valid());
+}
 
 BOOST_AUTO_TEST_CASE(version__factory_from_data__anarchistprime1__invalid)
 {
