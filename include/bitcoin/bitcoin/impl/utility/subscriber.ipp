@@ -146,7 +146,12 @@ void subscriber<Args...>::do_invoke(Args... args)
     // Subscriptions may be created while this loop is executing.
     // Invoke subscribers from temporary list, without subscription renewal.
     for (const auto& handler: subscriptions)
+    {
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // DEADLOCK RISK, handler must not return to invoke.
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         handler(args...);
+    }
 
     ///////////////////////////////////////////////////////////////////////////
 }

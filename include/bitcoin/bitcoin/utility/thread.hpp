@@ -59,6 +59,7 @@ typedef std::shared_ptr<boost::upgrade_mutex> upgrade_mutex_ptr;
 
 BC_API void set_priority(thread_priority priority);
 BC_API thread_priority priority(bool priority);
+BC_API size_t thread_default(size_t configured);
 BC_API size_t thread_ceiling(size_t configured);
 BC_API size_t thread_floor(size_t configured);
 
