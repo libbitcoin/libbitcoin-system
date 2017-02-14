@@ -85,6 +85,17 @@ inline size_t cores()
     return std::max(std::thread::hardware_concurrency(), 1u);
 }
 
+// This is used to default the number of threads to the number of cores and to
+// ensure that no less than one thread is configured.
+size_t thread_default(size_t configured)
+{
+    if (configured == 0)
+        return cores();
+
+    // Configured but no less than 1.
+    return std::max(configured, size_t(1));
+}
+
 // This is used to ensure that threads does not exceed cores in the case of
 // parallel work distribution, while allowing the user to reduce parallelism so
 // as not to monopolize the processor. It also makes optimal config easy (0).
@@ -102,6 +113,9 @@ size_t thread_ceiling(size_t configured)
 // to increase threads above minimum. It always ensures at least core threads.
 size_t thread_floor(size_t configured)
 {
+    if (configured == 0)
+        return cores();
+
     // Configured but no less than cores/1.
     return std::max(configured, cores());
 }
