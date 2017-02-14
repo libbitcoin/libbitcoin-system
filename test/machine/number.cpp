@@ -38,10 +38,16 @@ using namespace bc::machine;
 // Helpers
 // ----------------------------------------------------------------------------
 
-#define BC_SCRIPT_NUMBER_CHECK_EQ(buffer_num, script_num) \
-    BOOST_CHECK_EQUAL(encode_base16((buffer_num).bytes), \
-        encode_base16((script_num).data())); \
-    BOOST_CHECK_EQUAL((buffer_num).number, (script_num).int32())
+#define BC_SCRIPT_NUMBER_CHECK_EQ(buffer_num, script_num, value, offset, test) \
+    BOOST_CHECK_MESSAGE( \
+    	encode_base16((buffer_num).bytes) == encode_base16((script_num).data()), \
+    	"value:" << value << " offset:" << offset << " test:" << test \
+		<< " | [" << encode_base16((buffer_num).bytes) << " != " << \
+		encode_base16((script_num).data()) << "]"); \
+    BOOST_CHECK_MESSAGE((buffer_num).number == (script_num).int32(), \
+    	"value:" << value << " offset:" << offset << " test:" << test \
+		<< " | [" << (buffer_num).number << " != " << \
+		(script_num).int32() << "]")
 
 static bool is(uint8_t byte)
 {
@@ -71,52 +77,62 @@ static bool negate_overflow64(const int64_t number)
 // Operators
 // ----------------------------------------------------------------------------
 
-static void CheckAdd(const int64_t num1, const int64_t num2,
-    const number_buffer& add)
+static void CheckAdd(const int64_t num1, const int64_t num2, size_t value,
+	size_t offset, size_t test)
 {
+	const number_buffer& add = number_adds[value][offset][test];
     const number scriptnum1(num1);
     const number scriptnum2(num2);
 
     if (!add_overflow64(num1, num2))
     {
-        BC_SCRIPT_NUMBER_CHECK_EQ(add, scriptnum1 + scriptnum2);
-        BC_SCRIPT_NUMBER_CHECK_EQ(add, scriptnum1 + num2);
-        BC_SCRIPT_NUMBER_CHECK_EQ(add, scriptnum2 + num1);
+        BC_SCRIPT_NUMBER_CHECK_EQ(add, scriptnum1 + scriptnum2, value, offset,
+        	test);
+        BC_SCRIPT_NUMBER_CHECK_EQ(add, scriptnum1 + num2, value, offset, test);
+        BC_SCRIPT_NUMBER_CHECK_EQ(add, scriptnum2 + num1, value, offset, test);
     }
 }
 
-static void CheckNegate(const int64_t num, const number_buffer& negated)
+static void CheckNegate(const int64_t num, size_t value,
+	size_t offset, size_t test)
 {
+	const number_buffer& negated = number_negates[value][offset][test];
     const number scriptnum(num);
 
     if (!negate_overflow64(num))
     {
-        BC_SCRIPT_NUMBER_CHECK_EQ(negated, -scriptnum);
+        BC_SCRIPT_NUMBER_CHECK_EQ(negated, -scriptnum, value, offset, test);
     }
 }
 
-static void CheckSubtract(const int64_t num1, const int64_t num2,
-    const number_subtract& subtract)
+static void CheckSubtract(const int64_t num1, const int64_t num2, size_t value,
+	size_t offset, size_t test)
 {
+	const number_subtract& subtract = number_subtracts[value][offset][test];
     const number scriptnum1(num1);
     const number scriptnum2(num2);
 
     if (!subtract_overflow64(num1, num2))
     {
-        BC_SCRIPT_NUMBER_CHECK_EQ(subtract.forward, scriptnum1 - scriptnum2);
-        BC_SCRIPT_NUMBER_CHECK_EQ(subtract.forward, scriptnum1 - num2);
+        BC_SCRIPT_NUMBER_CHECK_EQ(subtract.forward, scriptnum1 - scriptnum2,
+        	value, offset, test);
+        BC_SCRIPT_NUMBER_CHECK_EQ(subtract.forward, scriptnum1 - num2, value,
+        	offset, test);
     }
 
     if (!subtract_overflow64(num2, num1))
     {
-        BC_SCRIPT_NUMBER_CHECK_EQ(subtract.reverse, scriptnum2 - scriptnum1);
-        BC_SCRIPT_NUMBER_CHECK_EQ(subtract.reverse, scriptnum2 - num1);
+        BC_SCRIPT_NUMBER_CHECK_EQ(subtract.reverse, scriptnum2 - scriptnum1,
+        	value, offset, test);
+        BC_SCRIPT_NUMBER_CHECK_EQ(subtract.reverse, scriptnum2 - num1, value,
+        	offset, test);
     }
 }
 
 static void CheckCompare(const int64_t num1, const int64_t num2,
-    const number_compare& compare)
+	size_t value, size_t offset, size_t test)
 {
+    const number_compare& compare = number_compares[value][offset][test];
     const number scriptnum1(num1);
     const number scriptnum2(num2);
 
@@ -164,10 +180,10 @@ static void RunOperators(const int64_t num1, int64_t num2, size_t value,
     //    % num1 % num2 % value % offset % test;
     //BOOST_MESSAGE(message.str());
 
-    CheckAdd(num1, num2, number_adds[value][offset][test]);
-    CheckNegate(num1, number_negates[value][offset][test]);
-    CheckSubtract(num1, num2, number_subtracts[value][offset][test]);
-    CheckCompare(num1, num2, number_compares[value][offset][test]);
+	CheckAdd(num1, num2, value, offset, test);
+	CheckNegate(num1, value, offset, test);
+	CheckSubtract(num1, num2, value, offset, test);
+	CheckCompare(num1, num2, value, offset, test);
 }
 
 BOOST_AUTO_TEST_CASE(check_operators)
