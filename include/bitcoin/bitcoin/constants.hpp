@@ -61,7 +61,7 @@ BC_CONSTEXPR size_t max_counted_ops = 201;
 BC_CONSTEXPR size_t max_stack_size = 1000;
 BC_CONSTEXPR size_t max_script_size = 10000;
 BC_CONSTEXPR size_t max_push_data_size = 520;
-BC_CONSTEXPR size_t max_script_public_key_count = 20;
+BC_CONSTEXPR size_t max_script_public_keys = 20;
 BC_CONSTEXPR size_t multisig_default_sigops = 20;
 
 // This is policy, not consensus.
