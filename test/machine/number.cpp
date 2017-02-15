@@ -41,12 +41,20 @@ using namespace bc::machine;
 #define BC_SCRIPT_NUMBER_CHECK_EQ(buffer_num, script_num, value, offset, test) \
     BOOST_CHECK_MESSAGE( \
     	encode_base16((buffer_num).bytes) == encode_base16((script_num).data()), \
-    	"value:" << value << " offset:" << offset << " test:" << test \
-		<< " | [" << encode_base16((buffer_num).bytes) << " != " << \
+    	"\n\tvalue index : " << value << \
+		"\n\tvalue       : " << number_values[value] << \
+		"\n\toffset index: " << offset << \
+		"\n\toffset      : " << number_offsets[offset] << \
+		"\n\ttest        : " << test << \
+		"\n\tFAILURE     : [" << encode_base16((buffer_num).bytes) << " != " << \
 		encode_base16((script_num).data()) << "]"); \
     BOOST_CHECK_MESSAGE((buffer_num).number == (script_num).int32(), \
-    	"value:" << value << " offset:" << offset << " test:" << test \
-		<< " | [" << (buffer_num).number << " != " << \
+       	"\n\tvalue index : " << value << \
+   		"\n\tvalue       : " << number_values[value] << \
+   		"\n\toffset index: " << offset << \
+    	"\n\toffset      : " << number_offsets[offset] << \
+		"\n\ttest        : " << test << \
+		"\n\tFAILURE     : [" << (buffer_num).number << " != " << \
 		(script_num).int32() << "]")
 
 static bool is(uint8_t byte)
