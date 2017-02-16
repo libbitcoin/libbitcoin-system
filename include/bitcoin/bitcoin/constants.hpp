@@ -92,8 +92,6 @@ BC_CONSTEXPR uint32_t retargeting_factor = 4;
 BC_CONSTEXPR uint32_t easy_spacing_factor = 2;
 BC_CONSTEXPR uint32_t target_spacing_seconds = 10 * 60;
 BC_CONSTEXPR uint32_t target_timespan_seconds = 2 * 7 * 24 * 60 * 60;
-
-// This may not be flexible, keep internal.
 BC_CONSTEXPR uint32_t proof_of_work_limit = 0x1d00ffff;
 
 // Derived.
