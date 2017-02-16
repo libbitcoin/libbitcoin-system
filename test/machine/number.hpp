@@ -31,9 +31,9 @@ const int64_t number_values[] =
 {
     0,
     1,
-    CHAR_MIN,
-    CHAR_MAX,
-    UCHAR_MAX,
+    INT8_MIN,
+    INT8_MAX,
+    UINT8_MAX,
     SHRT_MIN,
     SHRT_MAX,
     USHRT_MAX,
