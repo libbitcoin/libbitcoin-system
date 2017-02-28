@@ -54,6 +54,9 @@ public:
         code error = error::not_found;
         chain_state::ptr state = nullptr;
 
+        // Similate organization and instead just validate the block.
+        bool simulate = false;
+
         asio::time_point start_deserialize;
         asio::time_point end_deserialize;
         asio::time_point start_check;
