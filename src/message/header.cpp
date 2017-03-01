@@ -38,31 +38,28 @@ const std::string header::command = "headers";
 const uint32_t header::version_minimum = version::level::minimum;
 const uint32_t header::version_maximum = version::level::maximum;
 
-header header::factory_from_data(const uint32_t version,
-    const data_chunk& data)
+header header::factory_from_data(uint32_t version, const data_chunk& data)
 {
     header instance;
     instance.from_data(version, data);
     return instance;
 }
 
-header header::factory_from_data(const uint32_t version,
-    std::istream& stream)
+header header::factory_from_data(uint32_t version, std::istream& stream)
 {
     header instance;
     instance.from_data(version, stream);
     return instance;
 }
 
-header header::factory_from_data(const uint32_t version,
-    reader& source)
+header header::factory_from_data(uint32_t version, reader& source)
 {
     header instance;
     instance.from_data(version, source);
     return instance;
 }
 
-size_t header::satoshi_fixed_size(const uint32_t version)
+size_t header::satoshi_fixed_size(uint32_t version)
 {
     return chain::header::satoshi_fixed_size() +
         message::variable_uint_size(0);
@@ -108,19 +105,19 @@ header::header(header&& other)
 {
 }
 
-bool header::from_data(const uint32_t version, const data_chunk& data)
+bool header::from_data(uint32_t version, const data_chunk& data)
 {
     data_source istream(data);
     return from_data(version, istream);
 }
 
-bool header::from_data(const uint32_t version, std::istream& stream)
+bool header::from_data(uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(version, source);
 }
 
-bool header::from_data(const uint32_t version, reader& source)
+bool header::from_data(uint32_t version, reader& source)
 {
     if (!chain::header::from_data(source))
         return false;
@@ -136,7 +133,7 @@ bool header::from_data(const uint32_t version, reader& source)
     return source;
 }
 
-data_chunk header::to_data(const uint32_t version) const
+data_chunk header::to_data(uint32_t version) const
 {
     data_chunk data;
     data_sink ostream(data);
@@ -146,13 +143,13 @@ data_chunk header::to_data(const uint32_t version) const
     return data;
 }
 
-void header::to_data(const uint32_t version, std::ostream& stream) const
+void header::to_data(uint32_t version, std::ostream& stream) const
 {
     ostream_writer sink(stream);
     to_data(version, sink);
 }
 
-void header::to_data(const uint32_t version, writer& sink) const
+void header::to_data(uint32_t version, writer& sink) const
 {
     chain::header::to_data(sink);
     sink.write_variable_little_endian(0);
@@ -163,7 +160,7 @@ void header::reset()
     chain::header::reset();
 }
 
-size_t header::serialized_size(const uint32_t version) const
+size_t header::serialized_size(uint32_t version) const
 {
     return satoshi_fixed_size(version);
 }
