@@ -61,8 +61,9 @@ header header::factory_from_data(uint32_t version, reader& source)
 
 size_t header::satoshi_fixed_size(uint32_t version)
 {
+    const auto canonical = (version == version::level::canonical);
     return chain::header::satoshi_fixed_size() +
-        message::variable_uint_size(0);
+        (canonical ? 0 : message::variable_uint_size(0));
 }
 
 header::header()
@@ -124,7 +125,7 @@ bool header::from_data(uint32_t version, reader& source)
 
     // The header message must trail a zero byte (yes, it's stoopid).
     // bitcoin.org/en/developer-reference#headers
-    if (source.read_byte() != 0x00)
+    if (version != version::level::canonical && source.read_byte() != 0x00)
         source.invalidate();
 
     if (!source)
@@ -152,7 +153,9 @@ void header::to_data(uint32_t version, std::ostream& stream) const
 void header::to_data(uint32_t version, writer& sink) const
 {
     chain::header::to_data(sink);
-    sink.write_variable_little_endian(0);
+
+    if (version != version::level::canonical)
+        sink.write_variable_little_endian(0);
 }
 
 void header::reset()
