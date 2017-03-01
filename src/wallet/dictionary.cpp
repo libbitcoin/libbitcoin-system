@@ -14407,6 +14407,8 @@ const dictionary_list all
     &en,
     &es,
     &ja,
+    &it,
+    &fr,
     &zh_Hans,
     &zh_Hant,
 };

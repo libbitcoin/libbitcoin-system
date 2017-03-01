@@ -155,27 +155,51 @@ bool version::from_data(uint32_t version, reader& source)
     user_agent_ = source.read_string();
     start_height_ = source.read_4_bytes_little_endian();
 
+    // HACK: disabled check due to inconsistent node implementation.
+    // The protocol expects duplication of the sender's services.
+    ////if (services_ != address_sender_.services())
+    ////    source.invalidate();
+    
+    // Abort early in order to simplify bug handling below.
+    if (!source)
+    {
+        reset();
+        return false;
+    }
+
     // Nodes have no way to know if their peers supports relay, so it is always
     // sent based on the version of the sender. This requires older protocols
     // to have clairvoyance, or allow arbitrary extra bytes (bad). So we must
     // read the extra byte even if our protocol level should not understand it.
     // However if we are below bip37 we ignore the peer value and set true.
 
-    // The /Satoshi:0.8.x/ node (70001) reads (but does not send) the relay byte.
-    // This bug was reported to bitcoin.org for documentation.
-    const auto own_bip37 = (version >= level::bip37);
-
+    // The /Satoshi:0.8.x/ node (70001) reads (but does not send) relay byte.
     // The /Satoshi:0.9.x/ node (70002) sends (and reads) the relay byte.
-    const auto peer_bip37 = (value_ >= level::bip61);
+    // This bug was reported to bitcoin.org for documentation.
+    // So we allow the byte to not be set on 70001 (despite documentation).
 
-    const auto read_relay = !peer_bip37 || (source.read_byte() != 0);
+    // The /Snoopy:0.2.1/ node (70001) sends the relay byte.
+    // The /bitcoinj:0.14.4/Bitcoin Wallet:5.14/ node (70001) sends relay byte.
+    // So we allow the byte to be set on 70001 (as it was documented).
 
-    relay_ = (!own_bip37 || !peer_bip37 || read_relay);
+    const auto self_bip37 = (version >= level::bip37);
 
-    // HACK: disabled check due to inconsistent node implementation.
-    // The protocol expects duplication of the sender's services.
-    ////if (services_ != address_sender_.services())
-    ////    source.invalidate();
+    if (value_ == level::bip37)
+    {
+        // Peer is at the buggy level (70001) - read and ignore error.
+        relay_ = (source.read_byte() != 0 || !source) || !self_bip37;
+        return true;
+    }
+    else if (value_ > level::bip37)
+    {
+        // Peer is above the buggy level (> 70001) - read and handle error.
+        relay_ = source.read_byte() != 0 || !self_bip37;
+    }
+    else
+    {
+        // Peer doesn't support relay disable, so it must be enabled.
+        relay_ = true;
+    }
 
     if (!source)
         reset();
