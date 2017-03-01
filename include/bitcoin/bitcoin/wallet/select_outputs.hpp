@@ -28,21 +28,19 @@ namespace wallet {
 
 struct BC_API select_outputs
 {
-    /// Algorithm summary:
-    ///
-    /// greedy: returns the first available unspent output that is the
-    /// minimum greater than the specified amount if any.  if there
-    /// are none, it returns a set of the largest outputs (in desc
-    /// order to minimize the number of inputs) that are smaller than
-    /// the specified amount and the amount of change.
-    ///
-    /// individual: returns a set of individual unspent outputs that
-    /// satisfy the specified amount.  For example, setting amount to
-    /// 0 will return all unspent outputs since any of them can
-    /// satisfy that amount.  The change amount will always be 0.
-    enum class algorithm : uint8_t
+    enum class algorithm
     {
+        /// The first available unspent output that is the minimum greater than
+        /// the specified amount if any. If there are none, it returns a set of
+        /// the largest outputs (in descending order to minimize the number of
+        /// inputs) that are smaller than the specified amount and the amount of
+        /// change.
         greedy,
+
+        /// A set of individual unspent outputs that satisfy the specified
+        /// amount. For example, setting amount to 0 will return all unspent
+        /// outputs since any of them can satisfy that amount. The change
+        /// amount will always be 0.
         individual
     };
 
