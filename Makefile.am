@@ -233,6 +233,8 @@ test_libbitcoin_test_SOURCES = \
     test/chain/output_point.cpp \
     test/chain/point.cpp \
     test/chain/point_iterator.cpp \
+    test/chain/point_value.cpp \
+    test/chain/points_value.cpp \
     test/chain/satoshi_words.cpp \
     test/chain/script.cpp \
     test/chain/script.hpp \
@@ -317,6 +319,7 @@ test_libbitcoin_test_SOURCES = \
     test/wallet/mnemonic.hpp \
     test/wallet/payment_address.cpp \
     test/wallet/qrcode.cpp \
+    test/wallet/select_outputs.cpp \
     test/wallet/stealth_address.cpp \
     test/wallet/stealth_receiver.cpp \
     test/wallet/stealth_sender.cpp \
@@ -354,6 +357,8 @@ include_bitcoin_bitcoin_chain_HEADERS = \
     include/bitcoin/bitcoin/chain/output_point.hpp \
     include/bitcoin/bitcoin/chain/point.hpp \
     include/bitcoin/bitcoin/chain/point_iterator.hpp \
+    include/bitcoin/bitcoin/chain/point_value.hpp \
+    include/bitcoin/bitcoin/chain/points_value.hpp \
     include/bitcoin/bitcoin/chain/script.hpp \
     include/bitcoin/bitcoin/chain/stealth.hpp \
     include/bitcoin/bitcoin/chain/transaction.hpp

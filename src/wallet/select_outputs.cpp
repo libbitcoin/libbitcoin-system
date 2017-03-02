@@ -22,95 +22,114 @@
 #include <cstdint>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/chain/points_value.hpp>
 
 namespace libbitcoin {
 namespace wallet {
 
 using namespace bc::chain;
 
-// unspent list is sorted in this method, so a copied parameter is used
-static void greedy_select(points_info& out, output_info::list unspent,
+void select_outputs::greedy(points_value& out, const points_value& unspent,
     uint64_t minimum_value)
 {
-    const auto below_minimum = [minimum_value](const output_info& out_info)
+    out.points.clear();
+
+    // The minimum required value does not exist.
+    if (unspent.value() < minimum_value)
+        return;
+
+    // Optimization for simple case not requiring search.
+    if (unspent.points.size() == 1)
     {
-        return out_info.value < minimum_value;
-    };
-
-    const auto lesser = [](const output_info& left, const output_info& right)
-    {
-        return left.value < right.value;
-    };
-
-    const auto greater = [](const output_info& left, const output_info& right)
-    {
-        return left.value > right.value;
-    };
-
-    const auto lesser_begin = unspent.begin();
-    const auto lesser_end = std::partition(unspent.begin(), unspent.end(),
-        below_minimum);
-
-    const auto greater_begin = lesser_end;
-    const auto greater_end = unspent.end();
-    const auto minimum_greater = std::min_element(greater_begin, greater_end,
-        lesser);
-
-    if (minimum_greater != greater_end)
-    {
-        BITCOIN_ASSERT(minimum_greater->value >= minimum_value);
-        out.change = minimum_greater->value - minimum_value;
-        out.points.push_back(minimum_greater->point);
+        out.points.push_back(unspent.points.front());
         return;
     }
 
-    // Not found in greaters so try several lessers instead.
-    // Sort descending, to use the fewest inputs possible.
+    // Copy the points list for safe manipulation.
+    auto copy = unspent.points;
+
+    const auto below = [minimum_value](const point_value& point)
+    {
+        return point.value() < minimum_value;
+    };
+
+    // Split the list beteen values that exceed minimum and those that do not.
+    const auto lesser_begin = copy.begin();
+    const auto lesser_end = std::partition(copy.begin(), copy.end(), below);
+
+    const auto lesser = [](const point_value& left, const point_value& right)
+    {
+        return left.value() < right.value();
+    };
+
+    // If there are values large enough to satisfy, return the smallest.
+    const auto greater_begin = lesser_end;
+    const auto greater_end = copy.end();
+    const auto minimum = std::min_element(greater_begin, greater_end, lesser);
+
+    if (minimum != greater_end)
+    {
+        out.points.push_back(*minimum);
+        return;
+    }
+
+    const auto greater = [](const point_value& left, const point_value& right)
+    {
+        return left.value() > right.value();
+    };
+
+    // Sort all by descending value in order to use the fewest inputs possible.
     std::sort(lesser_begin, lesser_end, greater);
 
+    // This is naive, will not necessarily find the smallest combination.
     for (auto it = lesser_begin; it != lesser_end; ++it)
     {
-        out.change = safe_add(out.change, it->value);
-        out.points.push_back(it->point);
+        out.points.push_back(*it);
 
-        if (out.change >= minimum_value)
-        {
-            out.change -= minimum_value;
+        if (out.value() >= minimum_value)
             return;
-        }
     }
 
-    out.change = 0;
-    out.points.clear();
+    BITCOIN_ASSERT_MSG(false, "unreachable code reached");
 }
 
-static void individual_select(points_info& out,
-    const output_info::list& unspent_list, uint64_t minimum_value)
+void select_outputs::individual(points_value& out, const points_value& unspent,
+    uint64_t minimum_value)
 {
-    for (const auto& unspent: unspent_list)
-        if (unspent.value >= minimum_value)
-            out.points.push_back(unspent.point);
+    out.points.clear();
+    out.points.reserve(unspent.points.size());
+
+    // Select all individual points that satisfy the minimum.
+    for (const auto& point: unspent.points)
+        if (point.value() >= minimum_value)
+            out.points.push_back(point);
+
+    const auto lesser = [](const point_value& left, const point_value& right)
+    {
+        return left.value() < right.value();
+    };
+
+    // Return in ascending order by value.
+    out.points.shrink_to_fit();
+    std::sort(out.points.begin(), out.points.end(), lesser);
 }
 
-void select_outputs::select(points_info& out, const output_info::list& unspent,
+void select_outputs::select(points_value& out, const points_value& unspent,
     uint64_t minimum_value, algorithm option)
 {
-    out.change = 0;
-    out.points.clear();
-
-    if (unspent.empty())
-        return;
-
     switch(option)
     {
         case algorithm::individual:
-            individual_select(out, unspent, minimum_value);
+        {
+            individual(out, unspent, minimum_value);
             break;
-
+        }
         case algorithm::greedy:
         default:
-            greedy_select(out, unspent, minimum_value);
+        {
+            greedy(out, unspent, minimum_value);
             break;
+        }
     }
 }
 

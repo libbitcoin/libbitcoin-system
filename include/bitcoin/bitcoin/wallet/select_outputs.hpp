@@ -21,7 +21,7 @@
 
 #include <cstdint>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/chain/output_point.hpp>
+#include <bitcoin/bitcoin/chain/points_value.hpp>
 
 namespace libbitcoin {
 namespace wallet {
@@ -30,25 +30,27 @@ struct BC_API select_outputs
 {
     enum class algorithm
     {
-        /// The first available unspent output that is the minimum greater than
-        /// the specified amount if any. If there are none, it returns a set of
-        /// the largest outputs (in descending order to minimize the number of
-        /// inputs) that are smaller than the specified amount and the amount of
-        /// change.
+        /// The smallest single sufficient unspent output, if one exists, or a
+        /// sufficient set of unspent outputs, if such a set exists. The set is
+        /// minimal by number of outputs but not necessarily by total value.
         greedy,
 
-        /// A set of individual unspent outputs that satisfy the specified
-        /// amount. For example, setting amount to 0 will return all unspent
-        /// outputs since any of them can satisfy that amount. The change
-        /// amount will always be 0.
+        /// A set of individually sufficient unspent outputs. Each individual
+        /// member of the set is sufficient. Return ascending order by value.
         individual
     };
 
-    /// Select optimal outpoints for a spend from unspent outputs list.
-    /// Return includes the amount of change remaining from the spend.
-    static void select(chain::points_info& out,
-        const chain::output_info::list& unspent, uint64_t minimum_value,
+    /// Select outpoints for a spend from a list of unspent outputs.
+    static void select(chain::points_value& out,
+        const chain::points_value& unspent, uint64_t minimum_value,
         algorithm option=algorithm::greedy);
+
+private:
+    static void greedy(chain::points_value& out,
+        const chain::points_value& unspent, uint64_t minimum_value);
+
+    static void individual(chain::points_value& out,
+        const chain::points_value& unspent, uint64_t minimum_value);
 };
 
 } // namespace wallet

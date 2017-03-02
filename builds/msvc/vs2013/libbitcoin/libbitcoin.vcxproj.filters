@@ -1231,6 +1231,12 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\send_compact.hpp">
       <Filter>include\bitcoin\message</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point_value.hpp">
+      <Filter>include\bitcoin\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\points_value.hpp">
+      <Filter>include\bitcoin\chain</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\resource.rc">

@@ -82,7 +82,9 @@
     <ClCompile Include="..\..\..\..\test\chain\output.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\output_point.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\point.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\points_value.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\point_iterator.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\point_value.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\satoshi_words.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\script.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp" />
@@ -164,6 +166,7 @@
     <ClCompile Include="..\..\..\..\test\wallet\hd_private.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\payment_address.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\qrcode.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\select_outputs.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\stealth_receiver.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\stealth_sender.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\uri_reader.cpp" />

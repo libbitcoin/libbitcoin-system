@@ -229,6 +229,8 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\header.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\history.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\input_point.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\points_value.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point_value.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\output_point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point_iterator.hpp" />
