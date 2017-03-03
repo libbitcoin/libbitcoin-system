@@ -53,36 +53,33 @@ void select_outputs::greedy(points_value& out, const points_value& unspent,
         return point.value() < minimum_value;
     };
 
-    // Split the list beteen values that exceed minimum and those that do not.
-    const auto lesser_begin = copy.begin();
-    const auto lesser_end = std::partition(copy.begin(), copy.end(), below);
-
     const auto lesser = [](const point_value& left, const point_value& right)
     {
         return left.value() < right.value();
     };
-
-    // If there are values large enough to satisfy, return the smallest.
-    const auto greater_begin = lesser_end;
-    const auto greater_end = copy.end();
-    const auto minimum = std::min_element(greater_begin, greater_end, lesser);
-
-    if (minimum != greater_end)
-    {
-        out.points.push_back(*minimum);
-        return;
-    }
 
     const auto greater = [](const point_value& left, const point_value& right)
     {
         return left.value() > right.value();
     };
 
+    // Reorder list beteen values that exceed minimum and those that do not.
+    const auto sufficient = std::partition(copy.begin(), copy.end(), below);
+
+    // If there are values large enough, return the smallest (of the largest).
+    const auto minimum = std::min_element(sufficient, copy.end(), lesser);
+
+    if (minimum != copy.end())
+    {
+        out.points.push_back(*minimum);
+        return;
+    }
+
     // Sort all by descending value in order to use the fewest inputs possible.
-    std::sort(lesser_begin, lesser_end, greater);
+    std::sort(copy.begin(), copy.end(), greater);
 
     // This is naive, will not necessarily find the smallest combination.
-    for (auto point = lesser_begin; point != lesser_end; ++point)
+    for (auto point = copy.begin(); point != copy.end(); ++point)
     {
         out.points.push_back(*point);
 
