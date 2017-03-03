@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <cstdint>
+#include <utility>
 #include <vector>
 #include <bitcoin/bitcoin/chain/point.hpp>
 #include <bitcoin/bitcoin/chain/point_value.hpp>
@@ -78,6 +79,16 @@ bool point_value::operator==(const point_value& other) const
 bool point_value::operator!=(const point_value& other) const
 {
     return !(*this == other);
+}
+
+// friend function, see: stackoverflow.com/a/5695855/1172329
+void swap(point_value& left, point_value& right)
+{
+    using std::swap;
+
+    // Must be unqualified (no std namespace).
+    swap(static_cast<point&>(left), static_cast<point&>(right));
+    swap(left.value_, right.value_);
 }
 
 // Properties (accessors).

@@ -17,8 +17,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <boost/test/unit_test.hpp>
-
-#include <utility>
 #include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
@@ -89,6 +87,23 @@ BOOST_AUTO_TEST_CASE(point_value__copy_assign__always__expected)
     BOOST_REQUIRE(instance.hash() == hash1);
     BOOST_REQUIRE_EQUAL(instance.index(), 42u);
     BOOST_REQUIRE_EQUAL(instance.value(), 34u);
+}
+
+BOOST_AUTO_TEST_CASE(point_value__swap__always__expected_reversal)
+{
+    point_value instance1{ { hash1, 42 }, 34 };
+    point_value instance2{ { null_hash, 43 }, 35 };
+
+    // Must be unqualified (no std namespace).
+    swap(instance1, instance2);
+
+    BOOST_CHECK(instance2.hash() == hash1);
+    BOOST_CHECK_EQUAL(instance2.index(), 42u);
+    BOOST_CHECK_EQUAL(instance2.value(), 34u);
+
+    BOOST_CHECK(instance1.hash() == null_hash);
+    BOOST_CHECK_EQUAL(instance1.index(), 43u);
+    BOOST_CHECK_EQUAL(instance1.value(), 35u);
 }
 
 BOOST_AUTO_TEST_CASE(point_value__equality__same__true)
