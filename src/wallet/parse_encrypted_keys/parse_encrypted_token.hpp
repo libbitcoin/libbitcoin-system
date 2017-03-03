@@ -29,6 +29,7 @@
 namespace libbitcoin {
 namespace wallet {
 
+// Swap not defined.
 class parse_encrypted_token
   : public parse_encrypted_prefix<8u>
 {

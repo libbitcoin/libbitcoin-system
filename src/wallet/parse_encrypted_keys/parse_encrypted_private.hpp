@@ -28,6 +28,7 @@
 namespace libbitcoin {
 namespace wallet {
 
+// Swap not defined.
 class parse_encrypted_private
   : public parse_encrypted_key<2u>
 {
