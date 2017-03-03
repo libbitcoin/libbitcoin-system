@@ -71,6 +71,9 @@ public:
     friend std::ostream& operator<<(std::ostream& out,
         const hd_private& of);
 
+    // Swap implementation required to properly handle base class.
+    friend void swap(hd_private& left, hd_private& right);
+
     /// Cast operators.
     operator const ec_secret&() const;
 

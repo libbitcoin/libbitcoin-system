@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
+#include <utility>
 #include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
@@ -323,6 +324,16 @@ std::ostream& operator<<(std::ostream& out, const hd_private& of)
 {
     out << of.encoded();
     return out;
+}
+
+// friend function, see: stackoverflow.com/a/5695855/1172329
+void swap(hd_private& left, hd_private& right)
+{
+    using std::swap;
+
+    // Must be unqualified (no std namespace).
+    swap(static_cast<hd_public&>(left), static_cast<hd_public&>(right));
+    swap(left.secret_, right.secret_);
 }
 
 } // namespace wallet
