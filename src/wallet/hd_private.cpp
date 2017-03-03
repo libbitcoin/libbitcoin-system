@@ -275,13 +275,9 @@ hd_public hd_private::derive_public(uint32_t index) const
 // Operators.
 // ----------------------------------------------------------------------------
 
-hd_private& hd_private::operator=(const hd_private& other)
+hd_private& hd_private::operator=(hd_private other)
 {
-    secret_ = other.secret_;
-    valid_ = other.valid_;
-    chain_ = other.chain_;
-    lineage_ = other.lineage_;
-    point_ = other.point_;
+    swap(*this, other);
     return *this;
 }
 

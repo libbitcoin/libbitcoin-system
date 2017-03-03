@@ -56,17 +56,10 @@ point_value::point_value(const point& instance, uint64_t value)
 // Operators.
 //-------------------------------------------------------------------------
 
-point_value& point_value::operator=(point_value&& other)
+// Copy and swap idiom, see: stackoverflow.com/a/3279550/1172329
+point_value& point_value::operator=(point_value other)
 {
-    static_cast<point>(*this) = std::move(static_cast<point>(other));
-    value_ = other.value_;
-    return *this;
-}
-
-point_value& point_value::operator=(const point_value& other)
-{
-    static_cast<point>(*this) = static_cast<point>(other);
-    value_ = other.value_;
+    swap(*this, other);
     return *this;
 }
 

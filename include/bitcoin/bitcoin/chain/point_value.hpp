@@ -47,8 +47,7 @@ public:
     //-------------------------------------------------------------------------
 
     /// This class is move assignable and copy assignable.
-    point_value& operator=(point_value&& other);
-    point_value& operator=(const point_value& other);
+    point_value& operator=(point_value other);
 
     bool operator==(const point_value& other) const;
     bool operator!=(const point_value& other) const;
