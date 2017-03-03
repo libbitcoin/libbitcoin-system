@@ -21,10 +21,10 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(points_value_tests)
+BOOST_AUTO_TEST_SUITE(point_value_tests)
 
 // TODO:
-////BOOST_AUTO_TEST_CASE(points_value__empty__always__zero)
+////BOOST_AUTO_TEST_CASE(point_value__empty__always__zero)
 ////{
 ////    BOOST_REQUIRE(true);
 ////}
