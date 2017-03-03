@@ -82,9 +82,9 @@ void select_outputs::greedy(points_value& out, const points_value& unspent,
     std::sort(lesser_begin, lesser_end, greater);
 
     // This is naive, will not necessarily find the smallest combination.
-    for (auto it = lesser_begin; it != lesser_end; ++it)
+    for (auto point = lesser_begin; point != lesser_end; ++point)
     {
-        out.points.push_back(*it);
+        out.points.push_back(*point);
 
         if (out.value() >= minimum_value)
             return;
