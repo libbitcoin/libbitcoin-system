@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
+#include <utility>
 #include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
@@ -274,13 +275,9 @@ hd_public hd_private::derive_public(uint32_t index) const
 // Operators.
 // ----------------------------------------------------------------------------
 
-hd_private& hd_private::operator=(const hd_private& other)
+hd_private& hd_private::operator=(hd_private other)
 {
-    secret_ = other.secret_;
-    valid_ = other.valid_;
-    chain_ = other.chain_;
-    lineage_ = other.lineage_;
-    point_ = other.point_;
+    swap(*this, other);
     return *this;
 }
 
@@ -323,6 +320,16 @@ std::ostream& operator<<(std::ostream& out, const hd_private& of)
 {
     out << of.encoded();
     return out;
+}
+
+// friend function, see: stackoverflow.com/a/5695855/1172329
+void swap(hd_private& left, hd_private& right)
+{
+    using std::swap;
+
+    // Must be unqualified (no std namespace).
+    swap(static_cast<hd_public&>(left), static_cast<hd_public&>(right));
+    swap(left.secret_, right.secret_);
 }
 
 } // namespace wallet

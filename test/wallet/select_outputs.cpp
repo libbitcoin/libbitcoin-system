@@ -16,26 +16,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_ENABLE_SHARED_FROM_BASE_HPP
-#define LIBBITCOIN_ENABLE_SHARED_FROM_BASE_HPP
+#include <boost/test/unit_test.hpp>
+#include <bitcoin/bitcoin.hpp>
 
-#include <memory>
+using namespace bc;
+using namespace bc::wallet;
 
-namespace libbitcoin {
+BOOST_AUTO_TEST_SUITE(select_outputs_tests)
 
-/// Because enable_shared_from_this doesn't support inheritance.
-template <class Base>
-class enable_shared_from_base
-  : public std::enable_shared_from_this<Base>
-{
-protected:
-    template <class Derived>
-    std::shared_ptr<Derived> shared_from_base()
-    {
-        return std::static_pointer_cast<Derived>(this->shared_from_this());
-    }
-};
+// TODO:
+////BOOST_AUTO_TEST_CASE(select_outputs__select__empty_greedy_0__expected)
+////{
+////    BOOST_REQUIRE(true);
+////}
 
-} // namespace libbitcoin
-
-#endif
+BOOST_AUTO_TEST_SUITE_END()

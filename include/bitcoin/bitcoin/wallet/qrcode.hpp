@@ -60,8 +60,8 @@ public:
      * a data chunk with the specified parameter values.
      */
     BC_API static data_chunk encode(const data_chunk& data,
-        const uint32_t version, const error_recovery_level level,
-        const encode_mode mode, const bool case_sensitive);
+        uint32_t version, const error_recovery_level level,
+        encode_mode mode, bool case_sensitive);
 
     /**
      * A method that takes an input stream and writes the encoded qr data

@@ -66,10 +66,13 @@ public:
     bool operator<(const hd_private& other) const;
     bool operator==(const hd_private& other) const;
     bool operator!=(const hd_private& other) const;
-    hd_private& operator=(const hd_private& other);
+    hd_private& operator=(hd_private other);
     friend std::istream& operator>>(std::istream& in, hd_private& to);
     friend std::ostream& operator<<(std::ostream& out,
         const hd_private& of);
+
+    // Swap implementation required to properly handle base class.
+    friend void swap(hd_private& left, hd_private& right);
 
     /// Cast operators.
     operator const ec_secret&() const;

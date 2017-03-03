@@ -182,20 +182,10 @@ bool point::is_null() const
 
 // This is used with output_point identification within a set of history rows
 // of the same address. Collision will result in miscorrelation of points by
-// client callers. This is NOT a bitcoin checksum.
+// client callers. This is stoed in database. This is NOT a bitcoin checksum.
 uint64_t point::checksum() const
 {
-    const auto hash64 = from_little_endian_unsafe<uint64_t>(hash_.begin());
-    const auto index_hash = (hash64 & 0xffffffff00000000) | index_;
-
-    // x mod 2**n == x & (2**n - 1)
-    static constexpr uint64_t divisor = uint64_t{1} << 63;
-    static_assert(divisor == 9223372036854775808ull, "Wrong divisor value.");
-    return index_hash & (divisor - 1);
-
-    // Above usually provides only 32 bits of entropy, so below is preferred.
-    // But this is stored in the database. Change requires server API change.
-    // return std::hash<point>()(*this);
+    return std::hash<point>()(*this);
 }
 
 hash_digest& point::hash()

@@ -16,26 +16,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_ENABLE_SHARED_FROM_BASE_HPP
-#define LIBBITCOIN_ENABLE_SHARED_FROM_BASE_HPP
-
-#include <memory>
+#include <numeric>
+#include <cstdint>
+#include <bitcoin/bitcoin/chain/point_value.hpp>
+#include <bitcoin/bitcoin/chain/points_value.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 
 namespace libbitcoin {
+namespace chain {
 
-/// Because enable_shared_from_this doesn't support inheritance.
-template <class Base>
-class enable_shared_from_base
-  : public std::enable_shared_from_this<Base>
+uint64_t points_value::value() const
 {
-protected:
-    template <class Derived>
-    std::shared_ptr<Derived> shared_from_base()
+    const auto sum = [](uint64_t total, const point_value& point)
     {
-        return std::static_pointer_cast<Derived>(this->shared_from_this());
-    }
-};
+        return safe_add(total, point.value());
+    };
 
+    return std::accumulate(points.begin(), points.end(), uint64_t(0), sum);
+}
+
+} // namespace chain
 } // namespace libbitcoin
-
-#endif

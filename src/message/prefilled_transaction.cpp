@@ -30,7 +30,7 @@ namespace libbitcoin {
 namespace message {
 
 prefilled_transaction prefilled_transaction::factory_from_data(
-    const uint32_t version, const data_chunk& data)
+    uint32_t version, const data_chunk& data)
 {
     prefilled_transaction instance;
     instance.from_data(version, data);
@@ -38,7 +38,7 @@ prefilled_transaction prefilled_transaction::factory_from_data(
 }
 
 prefilled_transaction prefilled_transaction::factory_from_data(
-    const uint32_t version, std::istream& stream)
+    uint32_t version, std::istream& stream)
 {
     prefilled_transaction instance;
     instance.from_data(version, stream);
@@ -46,7 +46,7 @@ prefilled_transaction prefilled_transaction::factory_from_data(
 }
 
 prefilled_transaction prefilled_transaction::factory_from_data(
-    const uint32_t version, reader& source)
+    uint32_t version, reader& source)
 {
     prefilled_transaction instance;
     instance.from_data(version, source);

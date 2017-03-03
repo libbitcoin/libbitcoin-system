@@ -128,8 +128,6 @@ private:
     bool valid_;
 };
 
-typedef point input_point;
-
 } // namespace chain
 } // namespace libbitcoin
 

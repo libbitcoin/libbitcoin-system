@@ -34,8 +34,8 @@
 namespace libbitcoin {
 namespace log {
 
-class BC_API statsd_source :
-    public boost::log::sources::basic_composite_logger<char, statsd_source,
+class BC_API statsd_source
+  : public boost::log::sources::basic_composite_logger<char, statsd_source,
         boost::log::sources::multi_thread_model<boost::log::aux::light_rw_mutex>,
         boost::log::sources::features<features::metric, features::counter,
             features::gauge, features::timer, features::rate>>
@@ -45,13 +45,14 @@ class BC_API statsd_source :
 
 BOOST_LOG_INLINE_GLOBAL_LOGGER_DEFAULT(stats, statsd_source);
 
-#define BC_STATS_SIMPLE(name, params_seq) \
+#define BC_STATS_SIMPLE(name, sequence) \
     BOOST_LOG_WITH_PARAMS(bc::log::stats::get(), \
-        (bc::log::keywords::metric = (name))params_seq)
+        (bc::log::keywords::metric = (name))sequence)
 
-#define BC_STATS_WITH_RATE(name, rate, params_seq) \
+#define BC_STATS_WITH_RATE(name, rate, sequence) \
     BOOST_LOG_WITH_PARAMS(bc::log::stats::get(), \
-        (bc::log::keywords::metric = (name))(bc::log::keywords::rate = (rate))params_seq)
+        (bc::log::keywords::metric = (name)) \
+        (bc::log::keywords::rate = (rate))sequence)
 
 #define BC_STATS_COUNTER(name, value) \
     BC_STATS_SIMPLE(name, (bc::log::keywords::counter = (value)))
