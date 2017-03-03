@@ -46,6 +46,8 @@ src_libbitcoin_la_SOURCES = \
     src/chain/output_point.cpp \
     src/chain/point.cpp \
     src/chain/point_iterator.cpp \
+    src/chain/point_value.cpp \
+    src/chain/points_value.cpp \
     src/chain/script.cpp \
     src/chain/transaction.cpp \
     src/config/authority.cpp \

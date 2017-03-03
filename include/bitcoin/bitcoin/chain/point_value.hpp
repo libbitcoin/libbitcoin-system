@@ -37,72 +37,27 @@ public:
     // Constructors.
     //-------------------------------------------------------------------------
 
-    point_value()
-      : point(), value_(0)
-    {
-    }
-
-    point_value(point_value&& other)
-      : point(std::move(other)), value_(other.value_)
-    {
-    }
-
-    point_value(const point_value& other)
-      : point(other), value_(other.value_)
-    {
-    }
-
-    point_value(point&& point, uint64_t value)
-      : point(std::move(point)), value_(value)
-    {
-    }
-
-    point_value(const point& point, uint64_t value)
-      : point(point), value_(value)
-    {
-    }
+    point_value();
+    point_value(point_value&& other);
+    point_value(const point_value& other);
+    point_value(point&& point, uint64_t value);
+    point_value(const point& point, uint64_t value);
 
     // Operators.
     //-------------------------------------------------------------------------
 
     /// This class is move assignable and copy assignable.
-    point_value& operator=(point_value&& other)
-    {
-        static_cast<point>(*this) = std::move(static_cast<point>(other));
-        value_ = other.value_;
-        return *this;
-    }
+    point_value& operator=(point_value&& other);
+    point_value& operator=(const point_value& other);
 
-    point_value& operator=(const point_value& other)
-    {
-        static_cast<point>(*this) = static_cast<point>(other);
-        value_ = other.value_;
-        return *this;
-    }
-
-    bool operator==(const point_value& other) const
-    {
-        return static_cast<point>(*this) == static_cast<point>(other) &&
-            (value_ == other.value_);
-    }
-
-    bool operator!=(const point_value& other) const
-    {
-        return !(*this == other);
-    }
+    bool operator==(const point_value& other) const;
+    bool operator!=(const point_value& other) const;
 
     // Properties (accessors).
     //-------------------------------------------------------------------------
 
-    uint64_t value() const
-    {
-        return value_;
-    }
-
-    void set_value(uint64_t value)
-    {
-        value_ = value;
-    }
+    uint64_t value() const;
+    void set_value(uint64_t value);
 
 private:
     uint64_t value_;

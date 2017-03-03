@@ -77,7 +77,9 @@
     <ClCompile Include="..\..\..\..\src\chain\header.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\output_point.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\point.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\points_value.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\point_iterator.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\point_value.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\script.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\transaction.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\input.cpp" />
