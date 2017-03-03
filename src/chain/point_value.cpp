@@ -42,13 +42,13 @@ point_value::point_value(const point_value& other)
 {
 }
 
-point_value::point_value(point&& point, uint64_t value)
-  : point(std::move(point)), value_(value)
+point_value::point_value(point&& instance, uint64_t value)
+  : point(std::move(instance)), value_(value)
 {
 }
 
-point_value::point_value(const point& point, uint64_t value)
-  : point(point), value_(value)
+point_value::point_value(const point& instance, uint64_t value)
+  : point(instance), value_(value)
 {
 }
 
