@@ -123,6 +123,7 @@ void notifier<Key, Args...>::subscribe(handler&& notify, const Key& key,
         }
         else if (limit_ == 0 || subscriptions_.size() < limit_)
         {
+            auto copy = key;
             auto value = notifier<Key, Args...>::value
             {
                 std::forward<handler>(notify),
@@ -130,7 +131,7 @@ void notifier<Key, Args...>::subscribe(handler&& notify, const Key& key,
             };
 
             // Do not make const as that voids the move.
-            auto pair = std::make_pair(key, std::move(value));
+            auto pair = std::make_pair(std::move(copy), std::move(value));
             //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             subscribe_mutex_.unlock_upgrade_and_lock();
             subscriptions_.emplace(std::move(pair));
@@ -195,7 +196,7 @@ void notifier<Key, Args...>::purge(Args... expired_args)
 
     // Subscriptions may be created while this loop is executing.
     // Invoke and discard expired subscribers from temporary map.
-    for (const auto& entry: subscriptions)
+    for (auto& entry: subscriptions)
     {
         if (now > entry.second.expires)
         {
@@ -246,7 +247,7 @@ void notifier<Key, Args...>::do_invoke(Args... args)
 
     // Subscriptions may be created while this loop is executing.
     // Invoke subscribers from temporary map and resubscribe as indicated.
-    for (const auto& entry: subscriptions)
+    for (auto& entry: subscriptions)
     {
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // DEADLOCK RISK, notify must not return to invoke.
