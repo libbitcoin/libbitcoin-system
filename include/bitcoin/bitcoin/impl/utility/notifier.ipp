@@ -123,6 +123,7 @@ void notifier<Key, Args...>::subscribe(handler&& notify, const Key& key,
         }
         else if (limit_ == 0 || subscriptions_.size() < limit_)
         {
+            // Do not make const as that voids the move.
             auto copy = key;
             auto value = notifier<Key, Args...>::value
             {
@@ -130,11 +131,9 @@ void notifier<Key, Args...>::subscribe(handler&& notify, const Key& key,
                 asio::steady_clock::now() + duration
             };
 
-            // Do not make const as that voids the move.
-            auto pair = std::make_pair(std::move(copy), std::move(value));
             //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             subscribe_mutex_.unlock_upgrade_and_lock();
-            subscriptions_.emplace(std::move(pair));
+            subscriptions_.emplace(std::move(copy), std::move(value));
             subscribe_mutex_.unlock();
             //---------------------------------------------------------------------
             return;
@@ -205,10 +204,12 @@ void notifier<Key, Args...>::purge(Args... expired_args)
         }
 
         // Critical Section
-        ///////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////
         unique_lock lock(subscribe_mutex_);
+
+        // Use emplace vs. insert so that purge notification is accurate.
         subscriptions_.emplace(entry);
-        ///////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////
     }
 }
 
@@ -267,7 +268,9 @@ void notifier<Key, Args...>::do_invoke(Args... args)
 
             subscribe_mutex_.unlock_upgrade_and_lock();
             //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            subscriptions_.emplace(entry);
+
+            // Use insert vs. emplace so that intervening renewal has priority.
+            subscriptions_.insert(std::move(entry));
 
             subscribe_mutex_.unlock();
             ///////////////////////////////////////////////////////////////////
