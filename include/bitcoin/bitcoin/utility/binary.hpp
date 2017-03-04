@@ -77,6 +77,7 @@ private:
 
 namespace std
 {
+
 template<>
 struct hash<bc::binary>
 {
@@ -85,6 +86,7 @@ struct hash<bc::binary>
         return std::hash<std::string>()(value.encoded());
     }
 };
+
 } // namespace std
 
 #endif
