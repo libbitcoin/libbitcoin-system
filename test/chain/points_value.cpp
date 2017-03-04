@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_SUITE(points_value_tests)
 
 BOOST_AUTO_TEST_CASE(points_value__value__default__zero)
 {
-    static const points_value instance;
+    static const points_value instance{};
     BOOST_REQUIRE_EQUAL(instance.value(), 0u);
 }
 
