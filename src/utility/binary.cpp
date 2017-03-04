@@ -116,7 +116,9 @@ std::string binary::encoded() const
 
 binary::size_type binary::size() const
 {
-    return (blocks_.size() * bits_per_block) - final_block_excess_;
+    const size_type base_bit_size = blocks_.size() * bits_per_block;
+    return safe_subtract(base_bit_size,
+        static_cast<size_type>(final_block_excess_));
 }
 
 void binary::append(const binary& post)
@@ -313,13 +315,9 @@ std::istream& operator>>(std::istream& in, binary& to)
 std::ostream& operator<<(std::ostream& out, const binary& of)
 {
     for (binary::size_type i = 0; i < of.size(); ++i)
-        if (of[i])
-            out << '1';
-        else
-            out << '0';
+        out << (of[i] ? '1' : '0');
 
     return out;
 }
 
 } // namespace libbitcoin
-
