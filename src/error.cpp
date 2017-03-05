@@ -57,6 +57,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::file_system, "file system error" },
         { error::non_standard, "transaction not standard" },
         { error::not_implemented, "feature not implemented" },
+        { error::oversubscribed, "service oversubscribed" },
 
         // database
         { error::store_block_invalid_height, "block out of order" },

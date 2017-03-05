@@ -54,6 +54,7 @@ enum error_code_t
     file_system = 42,
     non_standard = 17,
     not_implemented = 4,
+    oversubscribed = 71,
 
     // network
     service_stopped = 1,
