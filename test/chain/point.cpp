@@ -287,10 +287,10 @@ BOOST_AUTO_TEST_CASE(point__checksum__initialized__returns_expected)
 {
     chain::point instance;
     BOOST_REQUIRE(instance.from_data(valid_raw_point));
-    BOOST_REQUIRE_EQUAL(instance.checksum(), 11249749810095131572u);
+    BOOST_REQUIRE_EQUAL(instance.checksum(), 0xae63f74f971e8365);
 
-    // This was the result of the v1/v2 checksum function, changed in v3.
-    ////BOOST_REQUIRE_EQUAL(instance.checksum(), 0x68d6190015000000);
+    // Using combined boot hash checksums.
+    // BOOST_REQUIRE_EQUAL(instance.checksum(), 0x9C1F23D93ABD0BB4);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

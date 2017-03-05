@@ -138,11 +138,11 @@ private:
 namespace std
 {
 
-// Extend std namespace with our hash wrapper, used as database hash.
+// Extend std namespace with our hash wrapper.
 template <>
 struct hash<bc::chain::point>
 {
-    // Changes to this function invalidate existing database files.
+    // This is not used as the database correlation value.
     size_t operator()(const bc::chain::point& point) const
     {
         size_t seed = 0;

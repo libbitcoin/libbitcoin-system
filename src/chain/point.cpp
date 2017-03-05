@@ -182,10 +182,14 @@ bool point::is_null() const
 
 // This is used with output_point identification within a set of history rows
 // of the same address. Collision will result in miscorrelation of points by
-// client callers. This is stoed in database. This is NOT a bitcoin checksum.
+// client callers. This is stored in database. This is NOT a bitcoin checksum.
 uint64_t point::checksum() const
 {
-    return std::hash<point>()(*this);
+    // Use an offset to the middle of the hash to avoid coincidental mining
+    // of values into the front or back of tx hash (not a security feature).
+    // Use most possible bits of tx hash to make intentional collision hard.
+    return from_little_endian_unsafe<uint64_t>(hash_.begin() + 12) |
+        static_cast<uint64_t>(index_);
 }
 
 hash_digest& point::hash()
