@@ -37,15 +37,7 @@ namespace libbitcoin {
 template <typename Key, typename... Args>
 notifier<Key, Args...>::notifier(threadpool& pool,
     const std::string& class_name)
-  : limit_(0), stopped_(true), dispatch_(pool, class_name)
-    /*, track<notifier<Key, Args...>>(class_name)*/
-{
-}
-
-template <typename Key, typename... Args>
-notifier<Key, Args...>::notifier(threadpool& pool, size_t limit,
-    const std::string& class_name)
-  : limit_(limit), stopped_(true), dispatch_(pool, class_name)
+  : stopped_(true), dispatch_(pool, class_name)
     /*, track<notifier<Key, Args...>>(class_name)*/
 {
 }
@@ -99,6 +91,20 @@ void notifier<Key, Args...>::stop()
 }
 
 template <typename Key, typename... Args>
+bool notifier<Key, Args...>::limited(const Key& key, size_t limit) const
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    shared_lock lock(subscribe_mutex_);
+
+    // This test is decoupled from subscribe and therefore creates a race.
+    // This avoids needing to invoke the notification handler when at capacity.
+    return subscriptions_.size() >= limit && 
+        subscriptions_.find(key) == subscriptions_.end();
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+template <typename Key, typename... Args>
 void notifier<Key, Args...>::subscribe(handler&& notify, const Key& key,
     const asio::duration& duration, Args... stopped_args)
 {
@@ -114,36 +120,40 @@ void notifier<Key, Args...>::subscribe(handler&& notify, const Key& key,
         {
             // Do not make const as that voids the move.
             auto expires = asio::steady_clock::now() + duration;
-            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            subscribe_mutex_.unlock_upgrade_and_lock();
-            it->second.expires = std::move(expires);
-            subscribe_mutex_.unlock();
-            //---------------------------------------------------------------------
-            return;
-        }
-        else if (limit_ == 0 || subscriptions_.size() < limit_)
-        {
-            // Do not make const as that voids the move.
-            auto copy = key;
-            auto value = notifier<Key, Args...>::value
-            {
-                std::forward<handler>(notify),
-                asio::steady_clock::now() + duration
-            };
 
             //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             subscribe_mutex_.unlock_upgrade_and_lock();
-            subscriptions_.emplace(std::move(copy), std::move(value));
+
+            // Change the expiration time on the existing handler.
+            it->second.expires = std::move(expires);
+
             subscribe_mutex_.unlock();
             //---------------------------------------------------------------------
             return;
         }
+
+        // Do not make const as that voids the move.
+        auto copy = key;
+        auto value = notifier<Key, Args...>::value
+        {
+            std::forward<handler>(notify),
+            asio::steady_clock::now() + duration
+        };
+
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        subscribe_mutex_.unlock_upgrade_and_lock();
+
+        // Store the new handler.
+        subscriptions_.emplace(std::move(copy), std::move(value));
+
+        subscribe_mutex_.unlock();
+        //---------------------------------------------------------------------
+        return;
     }
 
     subscribe_mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 
-    // Limit exceeded and stopped share the same return arguments.
     notify(stopped_args...);
 }
 
@@ -180,7 +190,9 @@ void notifier<Key, Args...>::unsubscribe(const Key& key,
 template <typename Key, typename... Args>
 void notifier<Key, Args...>::purge(Args... expired_args)
 {
-    const auto now = asio::steady_clock::now();
+    // Critical Section (protect against missed invocations from swap)
+    ///////////////////////////////////////////////////////////////////////////
+    unique_lock lock(invoke_mutex_);
 
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////
@@ -192,6 +204,8 @@ void notifier<Key, Args...>::purge(Args... expired_args)
 
     subscribe_mutex_.unlock();
     ///////////////////////////////////////////////////////////////////////////
+
+    const auto now = asio::steady_clock::now();
 
     // Subscriptions may be created while this loop is executing.
     // Invoke and discard expired subscribers from temporary map.
