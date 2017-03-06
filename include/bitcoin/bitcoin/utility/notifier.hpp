@@ -43,9 +43,7 @@ public:
     typedef std::function<bool (Args...)> handler;
     typedef std::shared_ptr<notifier<Key, Args...>> ptr;
 
-    /// Construct an instance.
-    /// A limit of zero is unlimited, the class_name is for debugging.
-    notifier(threadpool& pool, size_t limit, const std::string& class_name);
+    /// Construct an instance, the class_name is for debugging.
     notifier(threadpool& pool, const std::string& class_name);
     virtual ~notifier();
 
@@ -55,8 +53,10 @@ public:
     /// Prevent new subscriptions.
     void stop();
 
+    /// True if there is not currently space for the subscription/renewal.
+    bool limited(const Key& key, size_t limit) const;
+
     /// Subscribe to notifications for the specified amount of time.
-    /// Return true from the handler to resubscribe to notifications.
     /// If key is matched the existing subscription is extended by duration.
     /// If stopped this will invoke the hander with the specified arguments.
     void subscribe(handler&& notify, const Key& key,
@@ -88,7 +88,6 @@ private:
 
     void do_invoke(Args... args);
 
-    const size_t limit_;
     bool stopped_;
     map subscriptions_;
     dispatcher dispatch_;
