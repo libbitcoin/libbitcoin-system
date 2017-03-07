@@ -113,8 +113,12 @@ public:
     /// The timer cannot be canceled so delay should be within stop criteria.
     inline void delayed(const asio::duration& delay, delay_handler handler)
     {
-        const auto timer = std::make_shared<deadline>(pool_, delay);
-        timer->start([handler, timer](const code& ec) { handler(ec); });
+        auto timer = std::make_shared<deadline>(pool_, delay);
+        timer->start([handler, timer](const code& ec)
+        {
+            handler(ec);
+            timer->stop();
+        });
     }
 
     /// Returns a delegate that will execute the job on the current thread.
