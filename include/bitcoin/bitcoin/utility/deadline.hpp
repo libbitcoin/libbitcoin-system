@@ -47,6 +47,12 @@ public:
     typedef std::function<void(const code&)> handler;
 
     /**
+     * Construct a deadline timer with a zero duration.
+     * @param[in]  pool      The thread pool used by the timer.
+     */
+    deadline(threadpool& pool);
+
+    /**
      * Construct a deadline timer.
      * @param[in]  pool      The thread pool used by the timer.
      * @param[in]  duration  The default time period from start to expiration.

@@ -20,6 +20,7 @@
 
 #include <functional>
 #include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -27,10 +28,16 @@ namespace libbitcoin {
 
 using std::placeholders::_1;
 
-// This protects timer_ against concurrent access with no chance of deadlock.
-// This can be dereferenced with an outstanding callback because the timer
-// closure captures an instance of this class and the callback.
-// This is guaranteed to call handler exactly once unless canceled or reset.
+// The timer closure captures an instance of this class and the callback.
+// Deadline is guaranteed to call handler exactly once unless canceled/reset.
+
+deadline::deadline(threadpool& pool)
+  : duration_(asio::seconds(0)),
+    timer_(pool.service())
+    /*, CONSTRUCT_TRACK(deadline)*/
+{
+}
+
 deadline::deadline(threadpool& pool, const asio::duration duration)
   : duration_(duration),
     timer_(pool.service())
