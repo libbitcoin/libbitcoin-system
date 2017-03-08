@@ -182,7 +182,7 @@ $ ./install.sh --with-png
 
 #### Building ICU, ZLib, PNG, QREncode and/or Boost
 
-The installer can download and install any or all of these dependencies. ICU is a large package that is not typically preinstalled at a sufficient level. Using these builds ensures compiler and configuration compatailbity across all of the build components. It is recommended to use a prefix directory when building these components.
+The installer can download and install any or all of these dependencies. ICU is a large package that is not typically preinstalled at a sufficient level. Using these builds ensures compiler and configuration compatibility across all of the build components. It is recommended to use a prefix directory when building these components.
 ```sh
 $ ./install.sh --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --prefix=/home/me/myprefix
 ```
