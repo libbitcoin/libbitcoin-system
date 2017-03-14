@@ -39,7 +39,6 @@
 #define BC_PRINTER_DESCRIPTION_FORMAT "Info: %1%"
 #define BC_PRINTER_OPTION_TABLE_HEADER "Options (named):"
 #define BC_PRINTER_USAGE_FORMAT "Usage: %1% %2% %3%"
-#define BC_PRINTER_SETTINGS_TABLE_HEADER "Configuration Settings:"
 #define BC_PRINTER_VALUE_TEXT "value"
 
 // Not localizable formatters.
@@ -76,14 +75,14 @@ printer::printer(const po::options_description& options,
     const po::positional_options_description& arguments,
     const std::string& application, const std::string& description,
     const std::string& command)
-    : options_(options), arguments_(arguments), application_(application),
+  : options_(options), arguments_(arguments), application_(application),
     description_(description), command_(command)
 {
 }
 
 printer::printer(const po::options_description& settings,
     const std::string& application, const std::string& description)
-    : options_(settings), application_(application), description_(description)
+  : options_(settings), application_(application), description_(description)
 {
 }
 
@@ -509,9 +508,9 @@ void printer::commandline(std::ostream& output)
 void printer::settings(std::ostream& output)
 {
     const auto& setting_table = format_settings_table();
-    const auto& setting_table_header = BC_PRINTER_SETTINGS_TABLE_HEADER;
 
-    output
-        << std::endl << setting_table_header
-        << std::endl << setting_table;
+    if (!description_.empty())
+        output << std::endl << description_;
+
+    output << std::endl << setting_table;
 }
