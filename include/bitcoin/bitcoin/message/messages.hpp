@@ -96,9 +96,9 @@
 // sendcmpct    v3      70014   BIP152
 // merkleblock  v3      70001   BIP037  no bloom filters so unfiltered only
 // ----------------------------------------------------------------------------
-// filterload   --      70001   BIP037  no intent to support
-// filteradd    --      70001   BIP037  no intent to support
-// filterclear  --      70001   BIP037  no intent to support
+// filterload   --      70001   BIP037  no intent to support, see BIP111
+// filteradd    --      70001   BIP037  no intent to support, see BIP111
+// filterclear  --      70001   BIP037  no intent to support, see BIP111
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 namespace libbitcoin {
