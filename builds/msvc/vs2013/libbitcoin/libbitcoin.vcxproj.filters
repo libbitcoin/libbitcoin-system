@@ -377,9 +377,6 @@
     <ClCompile Include="..\..\..\..\src\message\reject.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\alert.cpp">
-      <Filter>src\message</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\filter_add.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
@@ -399,9 +396,6 @@
       <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\pong.cpp">
-      <Filter>src\message</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\alert_payload.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\input.cpp">
@@ -877,9 +871,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\delegates.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\alert.hpp">
-      <Filter>include\bitcoin\message</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\filter_clear.hpp">
       <Filter>include\bitcoin\message</Filter>
     </ClInclude>
@@ -905,9 +896,6 @@
       <Filter>include\bitcoin\message</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\pong.hpp">
-      <Filter>include\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\alert_payload.hpp">
       <Filter>include\bitcoin\message</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\input.hpp">

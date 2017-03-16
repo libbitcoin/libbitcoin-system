@@ -38,7 +38,6 @@ enum class message_type
 {
     unknown,
     address,
-    alert,
     block,
     block_transactions,
     compact_block,
