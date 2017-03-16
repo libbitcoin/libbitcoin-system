@@ -269,8 +269,12 @@ payment_address output::address() const
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_.unlock_upgrade_and_lock();
+
+        // TODO: limit this to pay script patterns, since it's an output.
+        // This is not limited to pay script patterns (could be a signature).
         address_ = std::make_shared<payment_address>(
             payment_address::extract(script_));
+
         mutex_.unlock_and_lock_upgrade();
         //---------------------------------------------------------------------
     }
