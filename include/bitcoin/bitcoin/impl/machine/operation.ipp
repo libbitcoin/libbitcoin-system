@@ -271,7 +271,7 @@ inline bool operation::is_positive(opcode code)
 // not handled. As a result satoshi always processes them in the op swtich.
 // This causes them to always fail as unhandled. It is misleading that the
 // satoshi test cases refer to these as reserved codes. These two codes behave
-// exactly as the explicitly disabled code. On the other hand VER is not within
+// exactly as the explicitly disabled codes. On the other hand VER is not within
 // the satoshi conditional range test so it is in fact reserved. Presumably
 // this was an unintended consequence of range testing enums.
 //*****************************************************************************
