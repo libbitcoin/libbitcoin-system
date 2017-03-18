@@ -697,11 +697,11 @@ bool transaction::is_immature(size_t target_height) const
 code transaction::connect_input(const chain_state& state,
     size_t input_index) const
 {
-    if (is_coinbase())
-        return error::success;
-
     if (input_index >= inputs_.size())
         return error::operation_failed;
+
+    if (is_coinbase())
+        return error::success;
 
     const auto& prevout = inputs_[input_index].previous_output().validation;
 
