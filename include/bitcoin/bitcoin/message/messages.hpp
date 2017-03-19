@@ -23,8 +23,6 @@
 #include <cstddef>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
-#include <bitcoin/bitcoin/message/alert.hpp>
-#include <bitcoin/bitcoin/message/alert_payload.hpp>
 #include <bitcoin/bitcoin/message/block.hpp>
 #include <bitcoin/bitcoin/message/block_transactions.hpp>
 #include <bitcoin/bitcoin/message/compact_block.hpp>
@@ -69,7 +67,7 @@
 // pong         v1      60001   BIP031
 // reject       v3      70002   BIP061
 // ----------------------------------------------------------------------------
-// alert        --                      no intent to support
+// alert        --                      obsolete
 // checkorder   --                      obsolete
 // reply        --                      obsolete
 // submitorder  --                      obsolete
@@ -96,9 +94,9 @@
 // sendcmpct    v3      70014   BIP152
 // merkleblock  v3      70001   BIP037  no bloom filters so unfiltered only
 // ----------------------------------------------------------------------------
-// filterload   --      70001   BIP037  no intent to support
-// filteradd    --      70001   BIP037  no intent to support
-// filterclear  --      70001   BIP037  no intent to support
+// filterload   --      70001   BIP037  no intent to support, see BIP111
+// filteradd    --      70001   BIP037  no intent to support, see BIP111
+// filterclear  --      70001   BIP037  no intent to support, see BIP111
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 namespace libbitcoin {

@@ -112,8 +112,6 @@ src_libbitcoin_la_SOURCES = \
     src/math/external/zeroize.c \
     src/math/external/zeroize.h \
     src/message/address.cpp \
-    src/message/alert.cpp \
-    src/message/alert_payload.cpp \
     src/message/block.cpp \
     src/message/block_transactions.cpp \
     src/message/compact_block.cpp \
@@ -265,8 +263,6 @@ test_libbitcoin_test_SOURCES = \
     test/math/stealth.cpp \
     test/math/uint256.cpp \
     test/message/address.cpp \
-    test/message/alert.cpp \
-    test/message/alert_payload.cpp \
     test/message/block.cpp \
     test/message/block_transactions.cpp \
     test/message/compact_block.cpp \
@@ -479,8 +475,6 @@ include_bitcoin_bitcoin_math_HEADERS = \
 include_bitcoin_bitcoin_messagedir = ${includedir}/bitcoin/bitcoin/message
 include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/address.hpp \
-    include/bitcoin/bitcoin/message/alert.hpp \
-    include/bitcoin/bitcoin/message/alert_payload.hpp \
     include/bitcoin/bitcoin/message/block.hpp \
     include/bitcoin/bitcoin/message/block_transactions.hpp \
     include/bitcoin/bitcoin/message/compact_block.hpp \

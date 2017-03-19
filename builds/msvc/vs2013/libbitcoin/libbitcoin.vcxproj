@@ -134,8 +134,6 @@
     <ClCompile Include="..\..\..\..\src\math\secp256k1_initializer.cpp" />
     <ClCompile Include="..\..\..\..\src\math\stealth.cpp" />
     <ClCompile Include="..\..\..\..\src\message\address.cpp" />
-    <ClCompile Include="..\..\..\..\src\message\alert.cpp" />
-    <ClCompile Include="..\..\..\..\src\message\alert_payload.cpp" />
     <ClCompile Include="..\..\..\..\src\message\block.cpp">
       <ObjectFileName>$(IntDir)block_message.obj</ObjectFileName>
     </ClCompile>
@@ -299,8 +297,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\limits.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\stealth.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\address.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\alert.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\alert_payload.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\block_transactions.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\compact_block.hpp" />

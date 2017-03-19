@@ -90,8 +90,6 @@
 #include <bitcoin/bitcoin/math/stealth.hpp>
 #include <bitcoin/bitcoin/math/uint256.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
-#include <bitcoin/bitcoin/message/alert.hpp>
-#include <bitcoin/bitcoin/message/alert_payload.hpp>
 #include <bitcoin/bitcoin/message/block.hpp>
 #include <bitcoin/bitcoin/message/block_transactions.hpp>
 #include <bitcoin/bitcoin/message/compact_block.hpp>
