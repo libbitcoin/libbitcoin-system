@@ -192,6 +192,7 @@ data_chunk istream_reader::read_bytes()
 }
 
 // Return size is guaranteed.
+// This is a memory exhaustion risk if caller does not control size.
 data_chunk istream_reader::read_bytes(size_t size)
 {
     data_chunk out(size);
