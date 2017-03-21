@@ -205,9 +205,8 @@ inline opcode operation::opcode_from_size(size_t size)
         return opcode::push_four_size;
 }
 
-inline opcode operation::opcode_from_data(const data_chunk& data)
+inline opcode operation::minimal_opcode_from_data(const data_chunk& data)
 {
-    // Unlike opcode_from_size, this produces the minimal data encoding.
     const auto size = data.size();
 
     if (size != 1)
@@ -217,11 +216,11 @@ inline opcode operation::opcode_from_data(const data_chunk& data)
     return is_numeric(code) ? code : opcode_from_size(size);
 }
 
-inline opcode operation::opcode_from_data(const data_chunk& uncoded,
+inline opcode operation::opcode_from_data(const data_chunk& data,
     bool minimal)
 {
-    return minimal ? opcode_from_data(uncoded) :
-        opcode_from_size(uncoded.size());
+    return minimal ? minimal_opcode_from_data(data) :
+        opcode_from_size(data.size());
 }
 
 inline opcode operation::opcode_from_positive(uint8_t value)
