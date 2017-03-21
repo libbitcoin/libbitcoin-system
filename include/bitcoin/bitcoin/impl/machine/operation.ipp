@@ -163,6 +163,11 @@ inline const data_chunk& operation::data() const
 //-------------------------------------------------------------------------
 
 // private
+//*************************************************************************
+// CONSENSUS: op data size is limited to 520 bytes, which requires no more
+// than two bytes to encode. However the four byte encoding can represent
+// a value of any size, so remains valid despite the data size limit.
+//*************************************************************************
 inline uint32_t operation::read_data_size(opcode code, reader& source)
 {
     BC_CONSTEXPR auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
