@@ -119,7 +119,7 @@ bool network_address::from_data(uint32_t version, reader& source,
 
     services_ = source.read_8_bytes_little_endian();
 
-    // TODO: add to readre interface (can't use template).
+    // TODO: add to reader interface (can't use template).
     auto ip = source.read_bytes(ip_.size());
     std::move(ip.begin(), ip.end(), ip_.data());
 
