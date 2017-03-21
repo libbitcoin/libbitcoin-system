@@ -79,7 +79,7 @@ bool operation::from_data(reader& source)
     code_ = static_cast<opcode>(source.read_byte());
     const auto size = read_data_size(code_, source);
 
-    // Guard against potential for arbitary memory allocation in read_bytes.
+    // Guard against potential for arbitary memory allocation.
     if (size > max_push_data_size)
         source.invalidate();
     else if (size != 0)

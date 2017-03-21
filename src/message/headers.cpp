@@ -122,9 +122,15 @@ bool headers::from_data(uint32_t version, reader& source)
 {
     reset();
 
-    // BUGBUG: allocation of arbitrary size is unsafe.
-    elements_.resize(source.read_size_little_endian());
+    const auto count = source.read_size_little_endian();
 
+    // Guard against potential for arbitary memory allocation.
+    if (count > max_get_headers)
+        source.invalidate();
+    else
+        elements_.resize(count);
+
+    // Order is required.
     for (auto& element: elements_)
         if (!element.from_data(version, source))
             break;

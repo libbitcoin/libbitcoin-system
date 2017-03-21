@@ -136,11 +136,15 @@ bool merkle_block::from_data(uint32_t version, reader& source)
         return false;
 
     total_transactions_ = source.read_4_bytes_little_endian();
+    const auto count = source.read_size_little_endian();
 
-    // BUGBUG: allocation of arbitrary size is unsafe.
-    hashes_.reserve(source.read_size_little_endian());
+    // Guard against potential for arbitary memory allocation.
+    if (count > max_block_size)
+        source.invalidate();
+    else
+        hashes_.reserve(count);
 
-    for (size_t i = 0; i < hashes_.capacity() && source; ++i)
+    for (size_t hash = 0; hash < hashes_.capacity() && source; ++hash)
         hashes_.push_back(source.read_hash());
 
     flags_ = source.read_bytes(source.read_size_little_endian());

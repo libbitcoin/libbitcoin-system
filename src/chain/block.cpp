@@ -195,8 +195,13 @@ bool block::from_data(reader& source)
     if (!header_.from_data(source))
         return false;
 
-    // BUGBUG: allocation of arbitrary size is unsafe.
-    transactions_.resize(source.read_size_little_endian());
+    const auto count = source.read_size_little_endian();
+
+    // Guard against potential for arbitary memory allocation.
+    if (count > max_block_size)
+        source.invalidate();
+    else
+        transactions_.resize(count);
 
     // Order is required.
     for (auto& tx: transactions_)
