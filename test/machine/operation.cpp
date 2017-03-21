@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_positive_16__success)
 
 BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_one_size__success)
 {
-    const auto data255 = data_chunk(0xff, '.');
+    const auto data255 = data_chunk(255, '.');
     const auto raw_operation = build_chunk({ base16_literal("4c" "ff"), data255 });
     operation instance;
 
@@ -204,8 +204,8 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_one_size__success)
 
 BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_two_size__success)
 {
-    const auto data65535 = data_chunk(0xffff, '.');
-    const auto raw_operation = build_chunk({ base16_literal("4d" "ffff"), data65535 });
+    const auto data520 = data_chunk(520, '.');
+    const auto raw_operation = build_chunk({ base16_literal("4d" "0802"), data520 });
     operation instance;
 
     BOOST_REQUIRE(instance.from_data(raw_operation));
@@ -217,13 +217,13 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_two_size__success)
     BOOST_REQUIRE(instance == duplicate);
 
     BOOST_REQUIRE(instance.code() == opcode::push_two_size);
-    BOOST_REQUIRE(instance.data() == data65535);
+    BOOST_REQUIRE(instance.data() == data520);
 }
 
 BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_four_size__success)
 {
-    const auto data65536 = data_chunk(0x00010000, '.');
-    const auto raw_operation = build_chunk({ base16_literal("4e" "00000100"), data65536 });
+    const auto data520 = data_chunk(520, '.');
+    const auto raw_operation = build_chunk({ base16_literal("4e" "08020000"), data520 });
     operation instance;
 
     BOOST_REQUIRE(instance.from_data(raw_operation));
@@ -235,7 +235,7 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_four_size__success)
     BOOST_REQUIRE(instance == duplicate);
 
     BOOST_REQUIRE(instance.code() == opcode::push_four_size);
-    BOOST_REQUIRE(instance.data() == data65536);
+    BOOST_REQUIRE(instance.data() == data520);
 }
 
 BOOST_AUTO_TEST_CASE(operation__factory_from_data_1__roundtrip__success)

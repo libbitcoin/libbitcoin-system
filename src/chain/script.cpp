@@ -189,9 +189,19 @@ bool script::from_data(reader& source, bool prefix)
     valid_ = true;
 
     if (prefix)
-        bytes_ = source.read_bytes(source.read_size_little_endian());
+    {
+        const auto size = source.read_size_little_endian();
+
+        // Guard against potential for arbitary memory allocation.
+        if (size > max_script_size)
+            source.invalidate();
+        else
+            bytes_ = source.read_bytes(size);
+    }
     else
+    {
         bytes_ = source.read_bytes();
+    }
 
     if (!source)
         reset();
@@ -426,9 +436,16 @@ const operation::list& script::operations() const
     // One operation per byte is the upper limit of operations.
     operations_.reserve(size);
 
+    // ************************************************************************
+    // CONSENSUS: In the case of a coinbase script we must parse the entire
+    // script, beyond just the BIP34 requirements, so that sigops can be
+    // calculated from the script. These are counted despite being irrelevant.
+    // In this case an invalid script is parsed to the extent possible.
+    // ************************************************************************
+
     // If an op fails it is pushed to operations and the loop terminates.
-    // To validate the ops the caller must test the last op.is_valid().
-    // This is not necessary during script validation as it is autmoatic.
+    // To validate the ops the caller must test the last op.is_valid(), or may
+    // text script.is_valid_operations(), which is done in script validation.
     while (!source.is_exhausted())
     {
         op.from_data(source);

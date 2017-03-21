@@ -79,8 +79,10 @@ bool operation::from_data(reader& source)
     code_ = static_cast<opcode>(source.read_byte());
     const auto size = read_data_size(code_, source);
 
-    // It is slightly more performant to skip a zero byte read and assignment.
-    if (size != 0)
+    // Guard against potential for arbitary memory allocation.
+    if (size > max_push_data_size)
+        source.invalidate();
+    else if (size != 0)
         data_ = source.read_bytes(size);
 
     if (!source)
@@ -110,8 +112,7 @@ bool operation::from_string(const std::string& mnemonic)
     {
         if (decode_base16(data_, trim_push(mnemonic)) && !is_oversized())
         {
-            // The produces the minimal data encoding.
-            code_ = opcode_from_data(data_);
+            code_ = minimal_opcode_from_data(data_);
             valid_ = true;
 
             // Revert data if opcode_from_data produced a numeric encoding.

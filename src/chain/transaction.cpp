@@ -56,10 +56,17 @@ template<class Source, class Put>
 bool read(Source& source, std::vector<Put>& puts, bool wire)
 {
     auto result = true;
-    puts.resize(source.read_size_little_endian());
+    const auto count = source.read_size_little_endian();
+
+    // Guard against potential for arbitary memory allocation.
+    if (count > max_block_size)
+        source.invalidate();
+    else
+        puts.resize(count);
+
     const auto deserialize = [&result, &source, wire](Put& put)
     {
-        result &= put.from_data(source, wire);
+        result = result && put.from_data(source, wire);
     };
 
     std::for_each(puts.begin(), puts.end(), deserialize);

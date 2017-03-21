@@ -112,10 +112,15 @@ bool get_blocks::from_data(uint32_t version, reader& source)
 
     // Discard protocol version because it is stupid.
     source.read_4_bytes_little_endian();
+    const auto count = source.read_size_little_endian();
 
-    start_hashes_.reserve(source.read_size_little_endian());
+    // Guard against potential for arbitary memory allocation.
+    if (count > max_get_blocks)
+        source.invalidate();
+    else
+        start_hashes_.reserve(count);
 
-    for (size_t i = 0; i < start_hashes_.capacity() && source; ++i)
+    for (size_t hash = 0; hash < count && source; ++hash)
         start_hashes_.push_back(source.read_hash());
 
     stop_hash_ = source.read_hash();
