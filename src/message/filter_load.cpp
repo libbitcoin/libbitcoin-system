@@ -122,7 +122,9 @@ bool filter_load::from_data(uint32_t version, reader& source)
 {
     reset();
 
+    // BUGBUG: allocation of arbitrary size is unsafe.
     filter_ = source.read_bytes(source.read_size_little_endian());
+
     hash_functions_ = source.read_4_bytes_little_endian();
     tweak_ = source.read_4_bytes_little_endian();
     flags_ = source.read_byte();

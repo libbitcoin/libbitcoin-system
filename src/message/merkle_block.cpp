@@ -136,6 +136,8 @@ bool merkle_block::from_data(uint32_t version, reader& source)
         return false;
 
     total_transactions_ = source.read_4_bytes_little_endian();
+
+    // BUGBUG: allocation of arbitrary size is unsafe.
     hashes_.reserve(source.read_size_little_endian());
 
     for (size_t i = 0; i < hashes_.capacity() && source; ++i)

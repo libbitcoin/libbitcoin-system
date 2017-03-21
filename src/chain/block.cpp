@@ -195,6 +195,7 @@ bool block::from_data(reader& source)
     if (!header_.from_data(source))
         return false;
 
+    // BUGBUG: allocation of arbitrary size is unsafe.
     transactions_.resize(source.read_size_little_endian());
 
     // Order is required.

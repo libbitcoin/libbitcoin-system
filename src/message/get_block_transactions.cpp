@@ -119,6 +119,8 @@ bool get_block_transactions::from_data(uint32_t version,
     reset();
 
     block_hash_ = source.read_hash();
+
+    // BUGBUG: allocation of arbitrary size is unsafe.
     indexes_.reserve(source.read_size_little_endian());
 
     for (size_t i = 0; i < indexes_.capacity() && source; ++i)

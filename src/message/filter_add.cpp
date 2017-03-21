@@ -110,6 +110,7 @@ bool filter_add::from_data(uint32_t version, reader& source)
 {
     reset();
 
+    // BUGBUG: allocation of arbitrary size is unsafe.
     data_ = source.read_bytes(source.read_size_little_endian());
 
     if (version < filter_add::version_minimum)

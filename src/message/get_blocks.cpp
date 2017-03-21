@@ -113,6 +113,7 @@ bool get_blocks::from_data(uint32_t version, reader& source)
     // Discard protocol version because it is stupid.
     source.read_4_bytes_little_endian();
 
+    // BUGBUG: allocation of arbitrary size is unsafe.
     start_hashes_.reserve(source.read_size_little_endian());
 
     for (size_t i = 0; i < start_hashes_.capacity() && source; ++i)

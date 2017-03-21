@@ -189,6 +189,7 @@ bool script::from_data(reader& source, bool prefix)
     valid_ = true;
 
     if (prefix)
+        // BUGBUG: allocation of arbitrary size is unsafe.
         bytes_ = source.read_bytes(source.read_size_little_endian());
     else
         bytes_ = source.read_bytes();

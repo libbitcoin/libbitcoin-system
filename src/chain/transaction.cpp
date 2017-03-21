@@ -56,7 +56,10 @@ template<class Source, class Put>
 bool read(Source& source, std::vector<Put>& puts, bool wire)
 {
     auto result = true;
+
+    // BUGBUG: allocation of arbitrary size is unsafe.
     puts.resize(source.read_size_little_endian());
+
     const auto deserialize = [&result, &source, wire](Put& put)
     {
         result &= put.from_data(source, wire);

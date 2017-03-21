@@ -106,6 +106,7 @@ bool address::from_data(uint32_t version, reader& source)
 {
     reset();
 
+    // BUGBUG: allocation of arbitrary size is unsafe.
     addresses_.resize(source.read_size_little_endian());
 
     for (auto& address: addresses_)

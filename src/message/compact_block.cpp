@@ -129,11 +129,14 @@ bool compact_block::from_data(uint32_t version, reader& source)
         return false;
 
     nonce_ = source.read_8_bytes_little_endian();
+
+    // BUGBUG: allocation of arbitrary size is unsafe.
     short_ids_.reserve(source.read_size_little_endian());
 
     for (size_t i = 0; i < short_ids_.capacity() && source; ++i)
         short_ids_.push_back(source.read_mini_hash());
 
+    // BUGBUG: allocation of arbitrary size is unsafe.
     transactions_.resize(source.read_size_little_endian());
 
     for (auto& transaction: transactions_)

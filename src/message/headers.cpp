@@ -122,6 +122,7 @@ bool headers::from_data(uint32_t version, reader& source)
 {
     reset();
 
+    // BUGBUG: allocation of arbitrary size is unsafe.
     elements_.resize(source.read_size_little_endian());
 
     for (auto& element: elements_)
