@@ -162,15 +162,14 @@ bool inventory_vector::from_data(uint32_t version,
 {
     reset();
 
-    uint32_t raw_type = source.read_4_bytes_little_endian();
+    const auto raw_type = source.read_4_bytes_little_endian();
     type_ = inventory_vector::to_type(raw_type);
     hash_ = source.read_hash();
-    bool result = static_cast<bool>(source);
 
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 data_chunk inventory_vector::to_data(uint32_t version) const
