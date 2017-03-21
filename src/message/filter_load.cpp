@@ -122,8 +122,18 @@ bool filter_load::from_data(uint32_t version, reader& source)
 {
     reset();
 
-    filter_ = source.read_bytes(source.read_size_little_endian());
+    const auto size = source.read_size_little_endian();
+
+    if (size > max_filter_load)
+        source.invalidate();
+    else
+        filter_ = source.read_bytes(size);
+
     hash_functions_ = source.read_4_bytes_little_endian();
+
+    if (hash_functions_ > max_filter_functions)
+        source.invalidate();
+
     tweak_ = source.read_4_bytes_little_endian();
     flags_ = source.read_byte();
 

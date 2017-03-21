@@ -116,10 +116,17 @@ bool block_transactions::from_data(uint32_t version, reader& source)
     reset();
 
     block_hash_ = source.read_hash();
-    transactions_.resize(source.read_size_little_endian());
+    const auto count = source.read_size_little_endian();
 
-    for (auto& transaction: transactions_)
-        if (!transaction.from_data(source))
+    // Guard against potential for arbitary memory allocation.
+    if (count > max_block_size)
+        source.invalidate();
+    else
+        transactions_.resize(count);
+
+    // Order is required.
+    for (auto& tx: transactions_)
+        if (!tx.from_data(source))
             break;
 
     if (version < block_transactions::version_minimum)
