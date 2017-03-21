@@ -176,6 +176,10 @@ static const config::checkpoint testnet_allow_collisions_checkpoint
 BC_CONSTEXPR size_t command_size = 12;
 
 // Explicit limits.
+BC_CONSTEXPR size_t max_address = 1000;
+BC_CONSTEXPR size_t max_filter_add = 520;
+BC_CONSTEXPR size_t max_filter_functions = 50;
+BC_CONSTEXPR size_t max_filter_load = 36000;
 BC_CONSTEXPR size_t max_get_blocks = 500;
 BC_CONSTEXPR size_t max_get_headers = 2000;
 BC_CONSTEXPR size_t max_get_data = 50000;
