@@ -90,15 +90,11 @@ BC_CONSTEXPR size_t max_block_sigops = max_block_size / max_sigops_factor;
 //-----------------------------------------------------------------------------
 
 BC_CONSTEXPR uint32_t retargeting_factor = 4;
-BC_CONSTEXPR uint32_t easy_spacing_factor = 2;
+BC_CONSTEXPR uint32_t easy_spacing_seconds = 20 * 60;
 BC_CONSTEXPR uint32_t target_spacing_seconds = 10 * 60;
 BC_CONSTEXPR uint32_t target_timespan_seconds = 2 * 7 * 24 * 60 * 60;
 BC_CONSTEXPR uint32_t timestamp_future_seconds = 2 * 60 * 60;
 BC_CONSTEXPR uint32_t proof_of_work_limit = 0x1d00ffff;
-
-// Derived.
-BC_CONSTEXPR uint32_t double_spacing_seconds =
-    easy_spacing_factor * target_spacing_seconds;
 
 // The upper and lower bounds for the retargeting timespan.
 BC_CONSTEXPR uint32_t min_timespan =
