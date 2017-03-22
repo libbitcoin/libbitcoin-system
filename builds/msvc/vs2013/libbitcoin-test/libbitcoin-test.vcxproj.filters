@@ -80,6 +80,9 @@
     <ClCompile Include="..\..\..\..\test\message\version.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\alert.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\filter_clear.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
@@ -105,6 +108,9 @@
       <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\pong.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\alert_payload.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\heading.cpp">

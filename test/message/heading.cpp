@@ -288,6 +288,8 @@ BOOST_AUTO_TEST_CASE(heading__type__all_cases__match_expected)
     BOOST_REQUIRE(message::message_type::unknown == instance.type());
     instance.set_command(message::address::command);
     BOOST_REQUIRE(message::message_type::address == instance.type());
+    instance.set_command(message::alert::command);
+    BOOST_REQUIRE(message::message_type::alert == instance.type());
     instance.set_command(message::block::command);
     BOOST_REQUIRE(message::message_type::block == instance.type());
     instance.set_command(message::block_transactions::command);
