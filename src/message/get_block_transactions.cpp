@@ -119,9 +119,15 @@ bool get_block_transactions::from_data(uint32_t version,
     reset();
 
     block_hash_ = source.read_hash();
-    indexes_.reserve(source.read_size_little_endian());
+    const auto count = source.read_size_little_endian();
 
-    for (size_t i = 0; i < indexes_.capacity() && source; ++i)
+    // Guard against potential for arbitary memory allocation.
+    if (count > max_block_size)
+        source.invalidate();
+    else
+        indexes_.reserve(count);
+
+    for (size_t position = 0; position < count && source; ++position)
         indexes_.push_back(source.read_size_little_endian());
 
     if (!source)

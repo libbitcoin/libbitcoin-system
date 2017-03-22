@@ -129,15 +129,29 @@ bool compact_block::from_data(uint32_t version, reader& source)
         return false;
 
     nonce_ = source.read_8_bytes_little_endian();
-    short_ids_.reserve(source.read_size_little_endian());
+    auto count = source.read_size_little_endian();
 
-    for (size_t i = 0; i < short_ids_.capacity() && source; ++i)
+    // Guard against potential for arbitary memory allocation.
+    if (count > max_block_size)
+        source.invalidate();
+    else
+        short_ids_.reserve(count);
+
+    // Order is required.
+    for (size_t id = 0; id < count && source; ++id)
         short_ids_.push_back(source.read_mini_hash());
 
-    transactions_.resize(source.read_size_little_endian());
+    count = source.read_size_little_endian();
 
-    for (auto& transaction: transactions_)
-        if (!transaction.from_data(version, source))
+    // Guard against potential for arbitary memory allocation.
+    if (count > max_block_size)
+        source.invalidate();
+    else
+        transactions_.resize(count);
+
+    // Order is required.
+    for (auto& tx : transactions_)
+        if (!tx.from_data(version, source))
             break;
 
     if (version < compact_block::version_minimum)
