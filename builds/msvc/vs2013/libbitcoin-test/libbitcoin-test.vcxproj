@@ -111,6 +111,8 @@
     <ClCompile Include="..\..\..\..\test\math\limits.cpp" />
     <ClCompile Include="..\..\..\..\test\math\stealth.cpp" />
     <ClCompile Include="..\..\..\..\test\message\address.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\alert.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\alert_payload.cpp" />
     <ClCompile Include="..\..\..\..\test\message\block.cpp">
       <ObjectFileName>$(IntDir)block_message.obj</ObjectFileName>
     </ClCompile>

@@ -23,6 +23,8 @@
 #include <cstddef>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
+#include <bitcoin/bitcoin/message/alert.hpp>
+#include <bitcoin/bitcoin/message/alert_payload.hpp>
 #include <bitcoin/bitcoin/message/block.hpp>
 #include <bitcoin/bitcoin/message/block_transactions.hpp>
 #include <bitcoin/bitcoin/message/compact_block.hpp>
@@ -67,7 +69,7 @@
 // pong         v1      60001   BIP031
 // reject       v3      70002   BIP061
 // ----------------------------------------------------------------------------
-// alert        --                      obsolete
+// alert        --                      no intent to support
 // checkorder   --                      obsolete
 // reply        --                      obsolete
 // submitorder  --                      obsolete
