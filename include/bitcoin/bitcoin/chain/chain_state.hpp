@@ -180,8 +180,8 @@ private:
     static uint32_t retarget_timespan(const chain_state::data& values);
 
     // easy blocks
-    static uint32_t work_required_easy(const data& values);
-    static uint32_t elapsed_time_limit(const chain_state::data& values);
+    static uint32_t easy_work_required(const data& values);
+    static uint32_t easy_time_limit(const chain_state::data& values);
     static bool is_retarget_or_non_limit(size_t height, uint32_t bits);
     static bool is_retarget_height(size_t height);
 
