@@ -146,16 +146,16 @@ stealth_address stealth_address::from_stealth(const data_chunk& decoded)
     // We don't explicitly save 'reuse', instead we add to spend_keys_.
     point_list spend_keys;
     if (options == reuse_key_flag)
-        spend_keys.emplace_back(scan_key);
+        spend_keys.push_back(scan_key);
 
     // [spend_pubkey_1:33]..[spend_pubkey_N:33]
+    ec_compressed point;
     for (auto key = 0; key < number_spend_pubkeys; ++key)
     {
         auto spend_key_begin = iterator;
         iterator += ec_compressed_size;
-        ec_compressed point;
         std::copy_n(spend_key_begin, ec_compressed_size, point.begin());
-        spend_keys.emplace_back(point);
+        spend_keys.push_back(point);
     }
 
     // [number_signatures:1]
