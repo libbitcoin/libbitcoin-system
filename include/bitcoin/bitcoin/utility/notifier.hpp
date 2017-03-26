@@ -53,6 +53,9 @@ public:
     /// Prevent new subscriptions.
     void stop();
 
+    /// True if there are no subscriptions.
+    bool empty() const;
+
     /// True if there is not currently space for the subscription/renewal.
     bool limited(const Key& key, size_t limit) const;
 
