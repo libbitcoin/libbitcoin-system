@@ -45,7 +45,7 @@ void sequencer::lock(action&& handler)
 
     if (executing_)
     {
-        actions_.emplace(std::move(handler));
+        actions_.push(std::move(handler));
     }
     else
     {

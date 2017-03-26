@@ -146,13 +146,13 @@ inline void program::push(bool value)
 // Be explicit about the intent to move or copy, to get compiler help.
 inline void program::push_move(value_type&& item)
 {
-    primary_.emplace_back(std::move(item));
+    primary_.push_back(std::move(item));
 }
 
 // Be explicit about the intent to move or copy, to get compiler help.
 inline void program::push_copy(const value_type& item)
 {
-    primary_.emplace_back(item);
+    primary_.push_back(item);
 }
 
 // Primary stack (pop).
@@ -222,7 +222,7 @@ inline bool program::pop(data_stack& section, size_t count)
         return false;
 
     for (size_t i = 0; i < count; ++i)
-        section.emplace_back(pop());
+        section.push_back(pop());
 
     return true;
 }
@@ -354,7 +354,7 @@ inline bool program::empty_alternate() const
 
 inline void program::push_alternate(value_type&& value)
 {
-    alternate_.emplace_back(std::move(value));
+    alternate_.push_back(std::move(value));
 }
 
 // This must be guarded.
