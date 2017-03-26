@@ -91,6 +91,17 @@ void notifier<Key, Args...>::stop()
 }
 
 template <typename Key, typename... Args>
+bool notifier<Key, Args...>::empty() const
+{
+    // Critical Section
+    ///////////////////////////////////////////////////////////////////////////
+    shared_lock lock(subscribe_mutex_);
+
+    return subscriptions_.empty();
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+template <typename Key, typename... Args>
 bool notifier<Key, Args...>::limited(const Key& key, size_t limit) const
 {
     // Critical Section
