@@ -99,10 +99,8 @@ $ xcode-select --install
 
 #### Using Homebrew
 
-First install Homebrew. Installation requires [Ruby](https://www.ruby-lang.org/en) and [cURL](http://curl.haxx.se), which are pre-installed on OSX.
-```sh
-$ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-```
+First install [Homebrew](https://brew.sh). 
+
 Next install the [build system](http://wikipedia.org/wiki/GNU_build_system) (Automake minimum 1.14) and [wget](http://www.gnu.org/software/wget):
 ```sh
 $ brew install autoconf automake libtool pkgconfig wget
