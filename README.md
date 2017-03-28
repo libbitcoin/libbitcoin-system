@@ -66,10 +66,12 @@ Next download the [install script](https://github.com/libbitcoin/libbitcoin/blob
 $ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version3/install.sh
 $ chmod +x install.sh
 ```
-Finally, install libbitcoin:
+Finally, install libbitcoin with default build options:
 ```sh
 $ sudo ./install.sh
 ```
+(See [Build Notes for Linux / OS X](#build-notes-for-linux--os-x) for details on available build options.)
+
 Libbitcoin is now installed in `/usr/local/`.
 
 ### Macintosh
@@ -112,10 +114,12 @@ Next download the [install script](https://github.com/libbitcoin/libbitcoin/blob
 $ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version3/install.sh
 $ chmod +x install.sh
 ```
-Finally install libbitcoin:
+Finally install libbitcoin with default build options:
 ```sh
 $ ./install.sh
 ```
+(See [Build Notes for Linux / OS X](#build-notes-for-linux--os-x) for details on available build options.)
+
 Libbitcoin is now installed in `/usr/local/`.
 
 #### Using MacPorts
@@ -135,15 +139,16 @@ Next download the [install script](https://github.com/libbitcoin/libbitcoin/blob
 $ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version3/install.sh
 $ chmod +x install.sh
 ```
-Finally install libbitcoin:
+Finally install libbitcoin with default build options:
 ```sh
 $ ./install.sh
 ```
+(See [Build Notes for Linux / OS X](#build-notes-for-linux--os-x) for details on available build options.)
+
 Libbitcoin is now installed in `/usr/local/`.
 
-#### Notes
-
-The install script itself is commented so that the manual build steps for each dependency can be inferred by a developer.
+### Build Notes for Linux / OS X
+The [install script](https://github.com/libbitcoin/libbitcoin/blob/version3/install.sh) itself is commented so that the manual build steps for each dependency can be inferred by a developer.
 
 You can run the install script from any directory on your system. By default this will build libbitcoin in a subdirectory named `build-libbitcoin` and install it to `/usr/local/`. The install script requires `sudo` only if you do not have access to the installation location, which you can change using the `--prefix` option on the installer command line.
 
