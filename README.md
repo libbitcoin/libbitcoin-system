@@ -6,6 +6,8 @@
 
 *The Bitcoin Development Library*
 
+[Documentation](https://github.com/libbitcoin/libbitcoin/wiki) is available on the wiki.
+
 **License Overview**
 
 All files in this repository fall under the license specified in [COPYING](COPYING). The project is licensed as [AGPL with a lesser clause](https://wiki.unsystem.net/en/index.php/Libbitcoin/License). It may be used within a proprietary project, but the core library and any changes to it must be published online. Source code for this library must always remain free for everybody to access.
@@ -16,7 +18,7 @@ The libbitcoin toolkit is a set of cross platform C++ libraries for building bit
 
 ## Installation
 
-On Linux and Macintosh libbitcoin is built using Autotools as follows.
+On Linux and macOS libbitcoin is built using Autotools as follows.
 ```sh
 $ ./autogen.sh
 $ ./configure
@@ -66,17 +68,18 @@ Next download the [install script](https://github.com/libbitcoin/libbitcoin/blob
 $ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version3/install.sh
 $ chmod +x install.sh
 ```
-Finally, install libbitcoin:
+Finally install libbitcoin with default [build options](#build-notes-for-linux--macos):
 ```sh
 $ sudo ./install.sh
 ```
+
 Libbitcoin is now installed in `/usr/local/`.
 
 ### Macintosh
 
-The OSX installation differs from Linux in the installation of the compiler and packaged dependencies. Libbitcoin supports both [Homebrew](http://brew.sh) and [MacPorts](https://www.macports.org) package managers. Both require Apple's [Xcode](https://developer.apple.com/xcode) command line tools. Neither requires Xcode as the tools may be installed independently.
+The macOS installation differs from Linux in the installation of the compiler and packaged dependencies. Libbitcoin supports both [Homebrew](http://brew.sh) and [MacPorts](https://www.macports.org) package managers. Both require Apple's [Xcode](https://developer.apple.com/xcode) command line tools. Neither requires Xcode as the tools may be installed independently.
 
-Libbitcoin compiles with Clang on OSX and requires C++11 support. Installation has been verified using Clang based on [LLVM 3.5](http://llvm.org/releases/3.5.0/docs/ReleaseNotes.html). This version or newer should be installed as part of the Xcode command line tools.
+Libbitcoin compiles with Clang on macOS and requires C++11 support. Installation has been verified using Clang based on [LLVM 3.5](http://llvm.org/releases/3.5.0/docs/ReleaseNotes.html). This version or newer should be installed as part of the Xcode command line tools.
 
 To see your Clang/LLVM  version:
 ```sh
@@ -95,10 +98,8 @@ $ xcode-select --install
 
 #### Using Homebrew
 
-First install Homebrew. Installation requires [Ruby](https://www.ruby-lang.org/en) and [cURL](http://curl.haxx.se), which are pre-installed on OSX.
-```sh
-$ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-```
+First install [Homebrew](https://brew.sh). 
+
 Next install the [build system](http://wikipedia.org/wiki/GNU_build_system) (Automake minimum 1.14) and [wget](http://www.gnu.org/software/wget):
 ```sh
 $ brew install autoconf automake libtool pkgconfig wget
@@ -112,10 +113,11 @@ Next download the [install script](https://github.com/libbitcoin/libbitcoin/blob
 $ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version3/install.sh
 $ chmod +x install.sh
 ```
-Finally install libbitcoin:
+Finally install libbitcoin with default [build options](#build-notes-for-linux--macos):
 ```sh
 $ ./install.sh
 ```
+
 Libbitcoin is now installed in `/usr/local/`.
 
 #### Using MacPorts
@@ -135,15 +137,15 @@ Next download the [install script](https://github.com/libbitcoin/libbitcoin/blob
 $ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version3/install.sh
 $ chmod +x install.sh
 ```
-Finally install libbitcoin:
+Finally install libbitcoin with default [build options](#build-notes-for-linux--macos):
 ```sh
 $ ./install.sh
 ```
+
 Libbitcoin is now installed in `/usr/local/`.
 
-#### Notes
-
-The install script itself is commented so that the manual build steps for each dependency can be inferred by a developer.
+### Build Notes for Linux / macOS
+The [install script](https://github.com/libbitcoin/libbitcoin/blob/version3/install.sh) itself is commented so that the manual build steps for each dependency can be inferred by a developer.
 
 You can run the install script from any directory on your system. By default this will build libbitcoin in a subdirectory named `build-libbitcoin` and install it to `/usr/local/`. The install script requires `sudo` only if you do not have access to the installation location, which you can change using the `--prefix` option on the installer command line.
 
