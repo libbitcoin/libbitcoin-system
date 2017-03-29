@@ -18,7 +18,7 @@ The libbitcoin toolkit is a set of cross platform C++ libraries for building bit
 
 ## Installation
 
-On Linux and Macintosh libbitcoin is built using Autotools as follows.
+On Linux and macOS libbitcoin is built using Autotools as follows.
 ```sh
 $ ./autogen.sh
 $ ./configure
@@ -72,15 +72,15 @@ Finally, install libbitcoin with default build options:
 ```sh
 $ sudo ./install.sh
 ```
-(See [Build Notes for Linux / OS X](#build-notes-for-linux--os-x) for details on available build options.)
+(See [Build Notes for Linux / macOS](#build-notes-for-linux--macos) for details on available build options.)
 
 Libbitcoin is now installed in `/usr/local/`.
 
 ### Macintosh
 
-The OSX installation differs from Linux in the installation of the compiler and packaged dependencies. Libbitcoin supports both [Homebrew](http://brew.sh) and [MacPorts](https://www.macports.org) package managers. Both require Apple's [Xcode](https://developer.apple.com/xcode) command line tools. Neither requires Xcode as the tools may be installed independently.
+The macOS (OS X) installation differs from Linux in the installation of the compiler and packaged dependencies. Libbitcoin supports both [Homebrew](http://brew.sh) and [MacPorts](https://www.macports.org) package managers. Both require Apple's [Xcode](https://developer.apple.com/xcode) command line tools. Neither requires Xcode as the tools may be installed independently.
 
-Libbitcoin compiles with Clang on OSX and requires C++11 support. Installation has been verified using Clang based on [LLVM 3.5](http://llvm.org/releases/3.5.0/docs/ReleaseNotes.html). This version or newer should be installed as part of the Xcode command line tools.
+Libbitcoin compiles with Clang on macOS and requires C++11 support. Installation has been verified using Clang based on [LLVM 3.5](http://llvm.org/releases/3.5.0/docs/ReleaseNotes.html). This version or newer should be installed as part of the Xcode command line tools.
 
 To see your Clang/LLVM  version:
 ```sh
@@ -118,7 +118,7 @@ Finally install libbitcoin with default build options:
 ```sh
 $ ./install.sh
 ```
-(See [Build Notes for Linux / OS X](#build-notes-for-linux--os-x) for details on available build options.)
+(See [Build Notes for Linux / macOS](#build-notes-for-linux--macos) for details on available build options.)
 
 Libbitcoin is now installed in `/usr/local/`.
 
@@ -143,11 +143,11 @@ Finally install libbitcoin with default build options:
 ```sh
 $ ./install.sh
 ```
-(See [Build Notes for Linux / OS X](#build-notes-for-linux--os-x) for details on available build options.)
+(See [Build Notes for Linux / macOS](#build-notes-for-linux--macos) for details on available build options.)
 
 Libbitcoin is now installed in `/usr/local/`.
 
-### Build Notes for Linux / OS X
+### Build Notes for Linux / macOS
 The [install script](https://github.com/libbitcoin/libbitcoin/blob/version3/install.sh) itself is commented so that the manual build steps for each dependency can be inferred by a developer.
 
 You can run the install script from any directory on your system. By default this will build libbitcoin in a subdirectory named `build-libbitcoin` and install it to `/usr/local/`. The install script requires `sudo` only if you do not have access to the installation location, which you can change using the `--prefix` option on the installer command line.
