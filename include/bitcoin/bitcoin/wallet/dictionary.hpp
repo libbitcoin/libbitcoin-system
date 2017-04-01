@@ -52,6 +52,9 @@ namespace language
     extern const dictionary ja;
     extern const dictionary it;
     extern const dictionary fr;
+    extern const dictionary cs;
+    extern const dictionary ru;
+    extern const dictionary uk;
     extern const dictionary zh_Hans;
     extern const dictionary zh_Hant;
 
