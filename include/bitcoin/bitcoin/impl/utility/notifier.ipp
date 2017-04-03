@@ -189,6 +189,10 @@ void notifier<Key, Args...>::unsubscribe(const Key& key,
             subscriptions_.erase(it);
             subscribe_mutex_.unlock();
             //-----------------------------------------------------------------
+
+            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            // DEADLOCK RISK, handler must not return to invoke.
+            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             handler(unsubscribed_args...);
             return;
         }
@@ -224,6 +228,9 @@ void notifier<Key, Args...>::purge(Args... expired_args)
     {
         if (now > entry.second.expires)
         {
+            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            // DEADLOCK RISK, handler must not return to invoke.
+            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             entry.second.notify(expired_args...);
             continue;
         }
