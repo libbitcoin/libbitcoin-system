@@ -32,6 +32,17 @@ BOOST_AUTO_TEST_CASE(prefix_encoded__32_bits__expected_value)
     BOOST_REQUIRE_EQUAL(prefix.encoded(), "10111010101011011111000000001101");
 }
 
+BOOST_AUTO_TEST_CASE(prefix_encoded__32_bits_unsigned__expected_value)
+{
+    const binary prefix(32, uint32_t(0x0df0adba));
+    BOOST_REQUIRE_EQUAL(prefix.encoded(), "10111010101011011111000000001101");
+}
+BOOST_AUTO_TEST_CASE(prefix_encoded__8_bits_unsigned__expected_value)
+{
+    const binary prefix(8, uint32_t(0x0df0adba));
+    BOOST_REQUIRE_EQUAL(prefix.encoded(), "10111010");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(binary__to_string)
