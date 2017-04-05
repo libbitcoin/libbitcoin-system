@@ -162,9 +162,6 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\formats\base_58.ipp">
       <Filter>include\bitcoin\impl\formats</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\notifier.ipp">
-      <Filter>include\bitcoin\impl\utility</Filter>
-    </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\log\features\metric.ipp">
       <Filter>include\bitcoin\impl\log\features</Filter>
     </None>
@@ -1071,9 +1068,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\sodium.hpp">
       <Filter>include\bitcoin\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\notifier.hpp">
-      <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\compact_block.hpp">
       <Filter>include\bitcoin\message</Filter>
