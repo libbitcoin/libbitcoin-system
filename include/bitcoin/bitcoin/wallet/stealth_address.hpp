@@ -38,8 +38,15 @@ class BC_API stealth_address
 public:
     /// DEPRECATED: we intend to make p2kh same as payment address versions.
     static const uint8_t mainnet_p2kh;
+
+    /// If set and the spend_keys contains the scan_key then the key is reused.
     static const uint8_t reuse_key_flag;
-    static const uint8_t max_filter_bits;
+
+    /// This is advisory in nature and likely to be enforced by a server.
+    static const size_t min_filter_bits;
+
+    /// This is the protocol limit to the size of a stealth prefix filter.
+    static const size_t max_filter_bits;
 
     /// Constructors.
     stealth_address();

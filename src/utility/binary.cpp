@@ -58,6 +58,11 @@ binary::binary(const std::string& bit_string)
     std::stringstream(bit_string) >> *this;
 }
 
+binary::binary(size_type size, uint32_t number)
+  : binary(size, to_little_endian(number))
+{
+}
+
 binary::binary(size_type size, data_slice blocks)
   : binary()
 {
