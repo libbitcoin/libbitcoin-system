@@ -162,6 +162,7 @@ src_libbitcoin_la_SOURCES = \
     src/utility/monitor.cpp \
     src/utility/ostream_writer.cpp \
     src/utility/png.cpp \
+    src/utility/prioritized_mutex.cpp \
     src/utility/random.cpp \
     src/utility/scope_lock.cpp \
     src/utility/sequencer.cpp \
@@ -552,6 +553,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/ostream_writer.hpp \
     include/bitcoin/bitcoin/utility/pending.hpp \
     include/bitcoin/bitcoin/utility/png.hpp \
+    include/bitcoin/bitcoin/utility/prioritized_mutex.hpp \
     include/bitcoin/bitcoin/utility/random.hpp \
     include/bitcoin/bitcoin/utility/reader.hpp \
     include/bitcoin/bitcoin/utility/resubscriber.hpp \
