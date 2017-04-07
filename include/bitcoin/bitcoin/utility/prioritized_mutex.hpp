@@ -33,6 +33,8 @@ class BC_API prioritized_mutex
 public:
     typedef std::shared_ptr<prioritized_mutex> ptr;
 
+    prioritized_mutex(bool prioritize=true);
+
     void lock_low_priority();
     void unlock_low_priority();
 
@@ -40,6 +42,7 @@ public:
     void unlock_high_priority();
 
 private:
+    const bool prioritize_;
     shared_mutex data_mutex_;
     shared_mutex next_mutex_;
     shared_mutex wait_mutex_;
