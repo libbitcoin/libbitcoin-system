@@ -283,14 +283,32 @@ BOOST_AUTO_TEST_CASE(point__operator_boolean_not_equals__differs__returns_true)
     BOOST_REQUIRE(alpha != beta);
 }
 
-BOOST_AUTO_TEST_CASE(point__checksum__initialized__returns_expected)
+BOOST_AUTO_TEST_CASE(point__checksum__all_ones__returns_all_ones)
 {
-    chain::point instance;
-    BOOST_REQUIRE(instance.from_data(valid_raw_point));
-    BOOST_REQUIRE_EQUAL(instance.checksum(), 0xae63f74f971e8365);
+    static const auto tx_hash = hash_literal("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+    chain::point instance(tx_hash, 0xffffffff);
+    BOOST_REQUIRE_EQUAL(instance.checksum(), 0xffffffffffffffff);
+}
 
-    // Using combined boot hash checksums.
-    // BOOST_REQUIRE_EQUAL(instance.checksum(), 0x9C1F23D93ABD0BB4);
+BOOST_AUTO_TEST_CASE(point__checksum__all_zeroes__returns_all_zeroes)
+{
+    static const auto tx_hash = hash_literal("0000000000000000000000000000000000000000000000000000000000000000");
+    chain::point instance(tx_hash, 0x00000000);
+    BOOST_REQUIRE_EQUAL(instance.checksum(), 0x0000000000000000);
+}
+
+BOOST_AUTO_TEST_CASE(point__checksum__pattern_one__returns_expected)
+{
+    static const auto tx_hash = hash_literal("000000000000000000000000aaaaaaaaaaaaaaaa000000000000000000000000");
+    chain::point instance(tx_hash, 0x00000001);
+    BOOST_REQUIRE_EQUAL(instance.checksum(), 0xaaaaaaaaaaaa8001);
+}
+
+BOOST_AUTO_TEST_CASE(point__checksum__pattern_high__returns_expected)
+{
+    static const auto tx_hash = hash_literal("ffffffffffffffffffffffff01234567aaaaaaaaffffffffffffffffffffffff");
+    chain::point instance(tx_hash, 0x89abcdef);
+    BOOST_REQUIRE_EQUAL(instance.checksum(), 0x1234567aaaacdef);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -180,16 +180,24 @@ bool point::is_null() const
     return (index_ == null_index) && (hash_ == null_hash);
 }
 
+// Changed in v3.0 and again in v3.1 (3.0 was unmasked, lots of collisions).
 // This is used with output_point identification within a set of history rows
 // of the same address. Collision will result in miscorrelation of points by
 // client callers. This is stored in database. This is NOT a bitcoin checksum.
 uint64_t point::checksum() const
 {
+    // Reserve 49 bits for the tx hash and 15 bits (32768) for the input index.
+    static constexpr uint64_t mask = 0xffffffffffff8000;
+
     // Use an offset to the middle of the hash to avoid coincidental mining
     // of values into the front or back of tx hash (not a security feature).
     // Use most possible bits of tx hash to make intentional collision hard.
-    return from_little_endian_unsafe<uint64_t>(hash_.begin() + 12) |
-        static_cast<uint64_t>(index_);
+    const auto tx = from_little_endian_unsafe<uint64_t>(hash_.begin() + 12);
+    const auto index = static_cast<uint64_t>(index_);
+
+    const auto tx_upper_49_bits = tx & mask;
+    const auto index_lower_15_bits = index & ~mask;
+    return tx_upper_49_bits | index_lower_15_bits;
 }
 
 hash_digest& point::hash()
