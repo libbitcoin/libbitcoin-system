@@ -81,7 +81,7 @@ script:
     - if [[ $LINUX && $GCC   && $STATIC  ]]; then CC=$CC CXX=$CXX ./install.sh --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --disable-shared --build-dir=my-build --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Og -g --coverage' CXXFLAGS='-Og -g --coverage'; fi
     - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then CC=$CC CXX=$CXX ./install.sh ; fi
     - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then CC=$CC CXX=$CXX ./install.sh --with-icu --build-icu --build-boost --disable-ndebug --disable-static --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os' CXXFLAGS='-Os'; fi
-    - if [[ $LINUX && $GCC   && $DYNAMIC ]]; then CC=$CC CXX=$CXX ./install.sh --without-consensus --disable-static --build-boost --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os -s' CXXFLAGS='-Os -s'; fi
+    - if [[ $LINUX && $GCC   && $DYNAMIC ]]; then CC=$CC CXX=$CXX ./install.sh --disable-static --build-boost --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os -s' CXXFLAGS='-Os -s'; fi
 
 after_success:
 
