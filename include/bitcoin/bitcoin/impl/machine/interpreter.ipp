@@ -66,8 +66,6 @@ inline interpreter::result interpreter::op_push_number(program& program,
 inline interpreter::result interpreter::op_push_size(program& program,
     const operation& op)
 {
-    const auto size = op.code();
-
     if (op.data().size() > op_75)
         return error::op_push_size;
 
@@ -153,7 +151,7 @@ inline interpreter::result interpreter::op_verify(program& program)
     return error::success;
 }
 
-inline interpreter::result interpreter::op_return(program& program)
+inline interpreter::result interpreter::op_return(program&)
 {
     return error::op_return;
 }
