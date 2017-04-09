@@ -145,14 +145,15 @@ output_point output_point::factory_from_data(reader& source)
 // Validation.
 //-----------------------------------------------------------------------------
 
-// For tx pool validation target_height is that of any candidate block.
-bool output_point::is_mature(size_t target_height) const
+// For tx pool validation height is that of the candidate block.
+bool output_point::is_mature(size_t height) const
 {
+    // validation.height is specified only for coinbase inputs.
     if (validation.height == validation_type::not_specified)
         return true;
 
     // The (non-coinbase) outpoint refers to a coinbase output, measure depth.
-    return (target_height - validation.height) >= coinbase_maturity;
+    return floor_subtract(height, validation.height) >= coinbase_maturity;
 }
 
 } // namespace chain

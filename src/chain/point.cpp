@@ -236,6 +236,14 @@ void point::set_index(uint32_t value)
     index_ = value;
 }
 
+// This arbitrary order is produced to support set uniqueness determinations.
+bool point::operator<(const point& other) const
+{
+    // The index is primary only because its comparisons are simpler.
+    return index_ == other.index_ ? hash_ < other.hash_ :
+        index_ < other.index_;
+}
+
 point& point::operator=(point&& other)
 {
     hash_ = std::move(other.hash_);

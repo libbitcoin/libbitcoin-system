@@ -62,6 +62,7 @@ public:
     point& operator=(point&& other);
     point& operator=(const point& other);
 
+    bool operator<(const point& other) const;
     bool operator==(const point& other) const;
     bool operator!=(const point& other) const;
 

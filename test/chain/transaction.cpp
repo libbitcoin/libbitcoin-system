@@ -807,95 +807,27 @@ BOOST_AUTO_TEST_CASE(transaction__is_double_spend__include_unconfirmed_true_with
     BOOST_REQUIRE(instance.is_double_spend(true));
 }
 
-////BOOST_AUTO_TEST_CASE(transaction__double_spends__empty_inputs__returns_empty)
-////{
-////    chain::transaction instance;
-////    BOOST_REQUIRE(instance.double_spends(false).empty());
-////    BOOST_REQUIRE(instance.double_spends(true).empty());
-////}
-////
-////BOOST_AUTO_TEST_CASE(transaction__double_spends__unspent_inputs__returns_empty)
-////{
-////    chain::transaction instance;
-////    instance.inputs().emplace_back();
-////    BOOST_REQUIRE(instance.double_spends(false).empty());
-////    BOOST_REQUIRE(instance.double_spends(true).empty());
-////}
-////
-////BOOST_AUTO_TEST_CASE(transaction__double_spends__include_unconfirmed_false_with_unconfirmed__returns_empty)
-////{
-////    chain::transaction instance;
-////    instance.inputs().emplace_back();
-////    instance.inputs().back().previous_output().validation.spent = true;
-////    BOOST_REQUIRE(!instance.is_double_spend(false));
-////}
-////
-////BOOST_AUTO_TEST_CASE(transaction__double_spends__include_unconfirmed_false_with_confirmed__returns_expected)
-////{
-////    chain::transaction instance;
-////    instance.inputs().emplace_back();
-////    instance.inputs().back().previous_output().validation.spent = true;
-////    instance.inputs().back().previous_output().validation.confirmed = true;
-////    auto result = instance.double_spends(false);
-////    BOOST_REQUIRE_EQUAL(1u, result.size());
-////    BOOST_REQUIRE_EQUAL(0u, result.back());
-////}
-////
-////BOOST_AUTO_TEST_CASE(transaction__double_spends__include_unconfirmed_true_with_unconfirmed__returns_expected)
-////{
-////    chain::transaction instance;
-////    instance.inputs().emplace_back();
-////    instance.inputs().back().previous_output().validation.spent = true;
-////    auto result = instance.double_spends(true);
-////    BOOST_REQUIRE_EQUAL(1u, result.size());
-////    BOOST_REQUIRE_EQUAL(0u, result.back());
-////}
-
-BOOST_AUTO_TEST_CASE(transaction__is_immature__empty_inputs__returns_false)
+BOOST_AUTO_TEST_CASE(transaction__is_mature__empty_inputs__returns_true)
 {
     chain::transaction instance;
-    BOOST_REQUIRE(!instance.is_immature(453u));
+    BOOST_REQUIRE(instance.is_mature(453u));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_inputs__returns_false)
+BOOST_AUTO_TEST_CASE(transaction__is_mature__mature_inputs__returns_true)
 {
     chain::transaction instance;
     instance.inputs().emplace_back();
     instance.inputs().back().previous_output().set_index(123u);
-    BOOST_REQUIRE(!instance.is_immature(453u));
+    BOOST_REQUIRE(instance.is_mature(453u));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_immature__immature_inputs__returns_true)
+BOOST_AUTO_TEST_CASE(transaction__is_mature__premature_inputs__returns_false)
 {
     chain::transaction instance;
     instance.inputs().emplace_back();
     instance.inputs().back().previous_output().validation.height = 20u;
-    BOOST_REQUIRE(instance.is_immature(50u));
+    BOOST_REQUIRE(!instance.is_mature(50u));
 }
-
-////BOOST_AUTO_TEST_CASE(transaction__immature_inputs__empty_inputs__returns_empty)
-////{
-////    chain::transaction instance;
-////    BOOST_REQUIRE(instance.immature_inputs(453u).empty());
-////}
-////
-////BOOST_AUTO_TEST_CASE(transaction__immature_inputs__mature_inputs__returns_empty)
-////{
-////    chain::transaction instance;
-////    instance.inputs().emplace_back();
-////    instance.inputs().back().previous_output().set_index(123u);
-////    BOOST_REQUIRE(instance.immature_inputs(453u).empty());
-////}
-////
-////BOOST_AUTO_TEST_CASE(transaction__immature_inputs__immature_inputs__returns_input_indexes)
-////{
-////    chain::transaction instance;
-////    instance.inputs().emplace_back();
-////    instance.inputs().back().previous_output().validation.height = 20u;
-////    auto result = instance.immature_inputs(50u);
-////    BOOST_REQUIRE_EQUAL(1u, result.size());
-////    BOOST_REQUIRE_EQUAL(0u, result.back());
-////}
 
 BOOST_AUTO_TEST_CASE(transaction__operator_assign_equals_1__always__matches_equivalent)
 {
