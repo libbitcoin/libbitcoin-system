@@ -103,7 +103,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::first_not_coinbase, "first transaction not a coinbase" },
         { error::extra_coinbases, "more than one coinbase" },
         { error::internal_duplicate, "matching transaction hashes in block" },
-        { error::internal_double_spend, "double spend internal to block" },
+        { error::block_internal_double_spend, "double spend internal to block" },
         { error::merkle_mismatch, "merkle root mismatch" },
         { error::block_legacy_sigop_limit, "too many block legacy signature operations" },
 
@@ -119,6 +119,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::spend_overflow, "spend outside valid range" },
         { error::invalid_coinbase_script_size, "coinbase script too small or large" },
         { error::coinbase_transaction, "coinbase transaction disallowed in memory pool" },
+        { error::transaction_internal_double_spend, "double spend internal to transaction" },
         { error::transaction_legacy_sigop_limit, "too many transaction legacy signature operations" },
 
         // accept transaction
