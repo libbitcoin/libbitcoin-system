@@ -644,21 +644,34 @@ bool transaction::is_missing_previous_outputs() const
     return std::any_of(inputs_.begin(), inputs_.end(), missing);
 }
 
-output_point::list transaction::missing_previous_outputs() const
+point::list transaction::previous_outputs() const
 {
-    output_point::list out;
+    point::list prevouts(inputs_.size());
+
+    const auto pointer = [](const input& input)
+    {
+        return input.previous_output();
+    };
+
+    const auto& ins = inputs_;
+    std::transform(ins.begin(), ins.end(), prevouts.begin(), pointer);
+    return prevouts;
+}
+
+point::list transaction::missing_previous_outputs() const
+{
+    point::list prevouts;
 
     for (auto& input: inputs_)
     {
         const auto& prevout = input.previous_output();
-        const auto coinbase = prevout.is_null();
         const auto missing = !prevout.validation.cache.is_valid();
 
-        if (missing && !coinbase)
-            out.push_back(prevout);
+        if (missing && !prevout.is_null())
+            prevouts.push_back(prevout);
     }
 
-    return out;
+    return prevouts;
 }
 
 hash_list transaction::missing_previous_transactions() const
@@ -670,6 +683,15 @@ hash_list transaction::missing_previous_transactions() const
     return distinct(hashes);
 }
 
+bool transaction::is_internal_double_spend() const
+{
+    auto prevouts = previous_outputs();
+    std::sort(prevouts.begin(), prevouts.end());
+    const auto distinct_end = std::unique(prevouts.begin(), prevouts.end());
+    const auto distinct = (distinct_end == prevouts.end());
+    return !distinct;
+}
+
 bool transaction::is_double_spend(bool include_unconfirmed) const
 {
     const auto spent = [include_unconfirmed](const input& input)
@@ -678,19 +700,17 @@ bool transaction::is_double_spend(bool include_unconfirmed) const
         return prevout.spent && (include_unconfirmed || prevout.confirmed);
     };
 
-    // This is an optimization of !double_spends().empty();
     return std::any_of(inputs_.begin(), inputs_.end(), spent);
 }
 
-bool transaction::is_immature(size_t target_height) const
+bool transaction::is_mature(size_t height) const
 {
-    const auto immature = [target_height](const input& input)
+    const auto mature = [height](const input& input)
     {
-        return !input.previous_output().is_mature(target_height);
+        return input.previous_output().is_mature(height);
     };
 
-    // This is an optimization of !immature_inputs().empty();
-    return std::any_of(inputs_.begin(), inputs_.end(), immature);
+    return std::all_of(inputs_.begin(), inputs_.end(), mature);
 }
 
 // Coinbase transactions return success, to simplify iteration.
@@ -736,6 +756,9 @@ code transaction::check(bool transaction_pool) const
 
     else if (transaction_pool && is_coinbase())
         return error::coinbase_transaction;
+
+    else if (transaction_pool && is_internal_double_spend())
+        return error::transaction_internal_double_spend;
 
     else if (transaction_pool && serialized_size() >= max_block_size)
         return error::transaction_size_limit;
@@ -794,7 +817,7 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
 
     // This relates height to maturity of spent coinbase. Since reorg is the
     // only way to decrease height and reorg invalidates, this is cache safe.
-    else if (is_immature(state.height()))
+    else if (!is_mature(state.height()))
         return error::coinbase_maturity;
 
     else if (is_overspent())
