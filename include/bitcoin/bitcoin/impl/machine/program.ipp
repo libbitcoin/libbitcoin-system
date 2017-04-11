@@ -39,8 +39,7 @@ namespace machine {
 inline bool program::is_valid() const
 {
     // An invalid sequence indicates a failure deserializing operations.
-    return script_.is_valid_operations() &&
-        (script_.satoshi_content_size() <= max_script_size);
+    return script_.is_valid_operations() && !script_.is_unspendable();
 }
 
 inline uint32_t program::forks() const
