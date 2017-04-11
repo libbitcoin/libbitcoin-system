@@ -192,8 +192,9 @@ bool script::from_data(reader& source, bool prefix)
     {
         const auto size = source.read_size_little_endian();
 
-        // Guard against potential for arbitary memory allocation.
-        if (size > max_script_size)
+        // The max_script_size constant limits evaluation, but not all scripts
+        // evaluate, so use max_block_size to guard memory allocation here.
+        if (size > max_block_size)
             source.invalidate();
         else
             bytes_ = source.read_bytes(size);
@@ -1062,6 +1063,12 @@ void script::find_and_delete(const data_stack& endorsements)
 ////    // Require that the actual script start wtih the expected coinbase script.
 ////    return std::equal(expected.begin(), expected.end(), actual.begin());
 ////}
+
+bool script::is_unspendable() const
+{
+    return satoshi_content_size() > max_script_size ||
+        is_null_data_pattern(operations());
+}
 
 // Validation.
 //-----------------------------------------------------------------------------
