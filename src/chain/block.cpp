@@ -722,6 +722,8 @@ code block::check() const
     else if (is_extra_coinbases())
         return error::extra_coinbases;
 
+    // This is a subset of is_internal_double_spend if one assumes that tx
+    // hash collisions cannot happen. But this is not the case, so we keep it.
     else if (!is_distinct_transaction_set())
         return error::internal_duplicate;
 
