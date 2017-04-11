@@ -111,6 +111,7 @@ public:
     // Utilities.
     //-------------------------------------------------------------------------
 
+    /// This is for client-server, not related to consensus or p2p networking.
     uint64_t checksum() const;
 
     // Validation.
