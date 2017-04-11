@@ -1064,6 +1064,12 @@ void script::find_and_delete(const data_stack& endorsements)
 ////    return std::equal(expected.begin(), expected.end(), actual.begin());
 ////}
 
+bool script::is_unspendable() const
+{
+    return satoshi_content_size() > max_script_size ||
+        is_null_data_pattern(operations());
+}
+
 // Validation.
 //-----------------------------------------------------------------------------
 
