@@ -443,8 +443,8 @@ uint256_t block::proof() const
 
 uint64_t block::subsidy(size_t height)
 {
-    auto subsidy = initial_block_reward_satoshi();
-    subsidy >>= (height / reward_interval);
+    auto subsidy = initial_block_subsidy_satoshi();
+    subsidy >>= (height / subsidy_interval);
     return subsidy;
 }
 

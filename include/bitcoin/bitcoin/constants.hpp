@@ -207,21 +207,21 @@ BC_CONSTFUNC uint64_t bitcoin_to_satoshi(uint64_t bitcoin_uints=1)
     return bitcoin_uints * satoshi_per_bitcoin;
 }
 
-BC_CONSTEXPR uint64_t initial_block_reward_bitcoin = 50;
-BC_CONSTFUNC uint64_t initial_block_reward_satoshi()
+BC_CONSTEXPR uint64_t initial_block_subsidy_bitcoin = 50;
+BC_CONSTFUNC uint64_t initial_block_subsidy_satoshi()
 {
-    return bitcoin_to_satoshi(initial_block_reward_bitcoin);
+    return bitcoin_to_satoshi(initial_block_subsidy_bitcoin);
 }
 
-BC_CONSTEXPR uint64_t reward_interval = 210000;
+BC_CONSTEXPR uint64_t subsidy_interval = 210000;
 BC_CONSTEXPR uint64_t recursive_money = 0x02540be3f5;
 BC_CONSTFUNC uint64_t max_money()
 {
     ////// Optimize out the derivation of recursive_money.
     ////BITCOIN_ASSERT(recursive_money == max_money_recursive(
-    ////    initial_block_reward_satoshi()));
+    ////    initial_block_subsidy_satoshi()));
 
-    return reward_interval * recursive_money;
+    return subsidy_interval * recursive_money;
 }
 
 } // namespace libbitcoin
