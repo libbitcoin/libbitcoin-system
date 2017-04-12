@@ -69,22 +69,22 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static point factory_from_data(const data_chunk& data);
-    static point factory_from_data(std::istream& stream);
-    static point factory_from_data(reader& source);
+    static point factory_from_data(const data_chunk& data, bool wire=true);
+    static point factory_from_data(std::istream& stream, bool wire=true);
+    static point factory_from_data(reader& source, bool wire=true);
 
-    bool from_data(const data_chunk& data);
-    bool from_data(std::istream& stream);
-    bool from_data(reader& source);
+    bool from_data(const data_chunk& data, bool wire=true);
+    bool from_data(std::istream& stream, bool wire=true);
+    bool from_data(reader& source, bool wire=true);
 
     bool is_valid() const;
 
     // Serialization.
     //-------------------------------------------------------------------------
 
-    data_chunk to_data() const;
-    void to_data(std::ostream& stream) const;
-    void to_data(writer& sink) const;
+    data_chunk to_data(bool wire=true) const;
+    void to_data(std::ostream& stream, bool wire=true) const;
+    void to_data(writer& sink, bool wire=true) const;
 
     // Iteration.
     //-------------------------------------------------------------------------
@@ -96,7 +96,7 @@ public:
     //-------------------------------------------------------------------------
 
     static size_t satoshi_fixed_size();
-    size_t serialized_size() const;
+    size_t serialized_size(bool wire=true) const;
 
     // deprecated (unsafe)
     hash_digest& hash();
@@ -111,6 +111,7 @@ public:
     // Utilities.
     //-------------------------------------------------------------------------
 
+    /// This is for client-server, not related to consensus or p2p networking.
     uint64_t checksum() const;
 
     // Validation.

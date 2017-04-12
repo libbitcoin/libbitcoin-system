@@ -112,7 +112,7 @@ bool prefilled_transaction::from_data(uint32_t version,
     reset();
 
     index_ = source.read_variable_little_endian();
-    transaction_.from_data(source);
+    transaction_.from_data(source, true);
 
     if (!source)
         reset();
@@ -148,7 +148,7 @@ void prefilled_transaction::to_data(uint32_t version,
 size_t prefilled_transaction::serialized_size(uint32_t version) const
 {
     return message::variable_uint_size(index_) +
-        transaction_.serialized_size();
+        transaction_.serialized_size(true);
 }
 
 uint64_t prefilled_transaction::index() const

@@ -207,7 +207,7 @@ bool block::from_data(reader& source)
 
     // Order is required.
     for (auto& tx: transactions_)
-        if (!tx.from_data(source))
+        if (!tx.from_data(source, true))
             break;
 
     if (!source)
@@ -276,7 +276,7 @@ size_t block::serialized_size() const
 {
     const auto sum = [](size_t total, const transaction& tx)
     {
-        return safe_add(total, tx.serialized_size());
+        return safe_add(total, tx.serialized_size(true));
     };
 
     const auto& txs = transactions_;
@@ -443,8 +443,8 @@ uint256_t block::proof() const
 
 uint64_t block::subsidy(size_t height)
 {
-    auto subsidy = initial_block_reward_satoshi();
-    subsidy >>= (height / reward_interval);
+    auto subsidy = initial_block_subsidy_satoshi();
+    subsidy >>= (height / subsidy_interval);
     return subsidy;
 }
 

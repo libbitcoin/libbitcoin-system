@@ -130,11 +130,11 @@ bool input::from_data(std::istream& stream, bool wire)
     return from_data(source, wire);
 }
 
-bool input::from_data(reader& source, bool)
+bool input::from_data(reader& source, bool wire)
 {
     reset();
 
-    if (!previous_output_.from_data(source))
+    if (!previous_output_.from_data(source, wire))
         return false;
 
     script_.from_data(source, true);
@@ -165,11 +165,12 @@ bool input::is_valid() const
 data_chunk input::to_data(bool wire) const
 {
     data_chunk data;
-    data.reserve(serialized_size(wire));
+    const auto size = serialized_size(wire);
+    data.reserve(size);
     data_sink ostream(data);
     to_data(ostream, wire);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size(wire));
+    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 
@@ -179,9 +180,9 @@ void input::to_data(std::ostream& stream, bool wire) const
     to_data(sink, wire);
 }
 
-void input::to_data(writer& sink, bool) const
+void input::to_data(writer& sink, bool wire) const
 {
-    previous_output_.to_data(sink);
+    previous_output_.to_data(sink, wire);
     script_.to_data(sink, true);
     sink.write_4_bytes_little_endian(sequence_);
 }
@@ -189,9 +190,9 @@ void input::to_data(writer& sink, bool) const
 // Size.
 //-----------------------------------------------------------------------------
 
-size_t input::serialized_size(bool) const
+size_t input::serialized_size(bool wire) const
 {
-    return previous_output_.serialized_size() +
+    return previous_output_.serialized_size(wire) +
         script_.serialized_size(true) + sizeof(sequence_);
 }
 
