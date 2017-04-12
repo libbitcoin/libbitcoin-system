@@ -226,19 +226,24 @@ bool transaction::from_data(reader& source, bool wire)
 {
     reset();
 
-    version_ = source.read_4_bytes_little_endian();
-
     if (wire)
     {
         // Wire (satoshi protocol) deserialization.
+        version_ = source.read_4_bytes_little_endian();
         read(source, inputs_, wire) && read(source, outputs_, wire);
         locktime_ = source.read_4_bytes_little_endian();
     }
     else
     {
-        // Database serialization (outputs forward).
-        locktime_ = source.read_4_bytes_little_endian();
+        // Database (outputs forward) serialization.
         read(source, outputs_, wire) && read(source, inputs_, wire);
+        locktime_ = source.read_4_bytes_little_endian();
+        const auto version = source.read_variable_little_endian();
+
+        if (version > max_uint32)
+            source.invalidate();
+        else
+            version_ = static_cast<uint32_t>(version);
     }
 
     if (!source)
@@ -273,15 +278,16 @@ bool transaction::is_valid() const
 data_chunk transaction::to_data(bool wire) const
 {
     data_chunk data;
+    const auto size = serialized_size(wire);
 
     // Reserve an extra byte to prevent full reallocation in the case of
     // generate_signature_hash extension by addition of the sighash_type.
-    data.reserve(serialized_size(wire) + sizeof(uint8_t));
+    data.reserve(size + sizeof(uint8_t));
 
     data_sink ostream(data);
     to_data(ostream, wire);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size(wire));
+    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 
@@ -293,21 +299,21 @@ void transaction::to_data(std::ostream& stream, bool wire) const
 
 void transaction::to_data(writer& sink, bool wire) const
 {
-    sink.write_4_bytes_little_endian(version_);
-
     if (wire)
     {
         // Wire (satoshi protocol) serialization.
+        sink.write_4_bytes_little_endian(version_);
         write(sink, inputs_, wire);
         write(sink, outputs_, wire);
         sink.write_4_bytes_little_endian(locktime_);
     }
     else
     {
-        // Database serialization (outputs forward).
-        sink.write_4_bytes_little_endian(locktime_);
+        // Database (outputs forward) serialization.
         write(sink, outputs_, wire);
         write(sink, inputs_, wire);
+        sink.write_4_bytes_little_endian(locktime_);
+        sink.write_variable_little_endian(version_);
     }
 }
 
@@ -327,7 +333,7 @@ size_t transaction::serialized_size(bool wire) const
     };
 
     return sizeof(version_)
-        + sizeof(locktime_)
+        + (wire ? sizeof(locktime_) : message::variable_uint_size(locktime_))
         + message::variable_uint_size(inputs_.size())
         + message::variable_uint_size(outputs_.size())
         + std::accumulate(inputs_.begin(), inputs_.end(), size_t{0}, ins)
@@ -439,7 +445,7 @@ hash_digest transaction::hash() const
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_.unlock_upgrade_and_lock();
-        hash_ = std::make_shared<hash_digest>(bitcoin_hash(to_data()));
+        hash_ = std::make_shared<hash_digest>(bitcoin_hash(to_data(true)));
         mutex_.unlock_and_lock_upgrade();
         //---------------------------------------------------------------------
     }
@@ -453,7 +459,7 @@ hash_digest transaction::hash() const
 
 hash_digest transaction::hash(uint32_t sighash_type) const
 {
-    auto serialized = to_data();
+    auto serialized = to_data(true);
     extend_data(serialized, to_little_endian(sighash_type));
     return bitcoin_hash(serialized);
 }
@@ -760,7 +766,7 @@ code transaction::check(bool transaction_pool) const
     else if (transaction_pool && is_internal_double_spend())
         return error::transaction_internal_double_spend;
 
-    else if (transaction_pool && serialized_size() >= max_block_size)
+    else if (transaction_pool && serialized_size(true) >= max_block_size)
         return error::transaction_size_limit;
 
     // We cannot know if bip16 is enabled at this point so we disable it.
