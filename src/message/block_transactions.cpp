@@ -126,7 +126,7 @@ bool block_transactions::from_data(uint32_t version, reader& source)
 
     // Order is required.
     for (auto& tx: transactions_)
-        if (!tx.from_data(source))
+        if (!tx.from_data(source, true))
             break;
 
     if (version < block_transactions::version_minimum)
@@ -170,7 +170,7 @@ size_t block_transactions::serialized_size(uint32_t version) const
     auto size = hash_size + message::variable_uint_size(transactions_.size());
 
     for (const auto& element: transactions_)
-        size += element.serialized_size();
+        size += element.serialized_size(true);
 
     return size;
 }
