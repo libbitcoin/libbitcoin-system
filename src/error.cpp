@@ -377,5 +377,38 @@ namespace error {
         }
     }
 
+    error_code_t posix_to_error_code(int ec)
+    {
+        // TODO: expand mapping for database scenario.
+        switch (ec)
+        {
+            // protocol codes (from zeromq)
+            case ENOBUFS:
+            case ENOTSUP:
+            case EPROTONOSUPPORT:
+                return error::operation_failed;
+            case ENETDOWN:
+                return error::network_unreachable;
+            case EADDRINUSE:
+                return error::address_in_use;
+            case EADDRNOTAVAIL:
+                return error::resolve_failed;
+            case ECONNREFUSED:
+                return error::accept_failed;
+            case EINPROGRESS:
+                return error::channel_timeout;
+                return error::bad_stream;
+            case EAGAIN:
+                return error::channel_timeout;
+            case EFAULT:
+                return error::bad_stream;
+            case EINTR:
+            case ENOTSOCK:
+                return error::service_stopped;
+            default:
+                return error::unknown;
+        }
+    }
+
 } // namespace error
 } // namespace libbitcoin

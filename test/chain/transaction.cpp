@@ -83,15 +83,15 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_1__always__returns_default_initial
 "02ffffffff1dc05c00000000001976a914e785da41a84114af0762c5a6f9e5b7" \
 "8ff730581988acffffffff70e0cf02000000001976a914607a10e5b5f5361034" \
 "1db013e77ba7c317a10c9088ac0209e300a61db28e4fd3562aec52647646fc55" \
-"aa3e3f7d824f20f451a45db8c958016a4730440220364484206d2d3977373a82" \
-"135cbdb78f200e2160ec2636c9f080424a61748d15022056c9729b9fbd5c0417" \
-"0a7bb63b1d1b02da183fa3605864666dba6e216c3ce9270121027d4b693a2851" \
-"541b1e3937320c5e4173ea8ab3f152f7a7fa96dbb936d2cff73dffffffff1cbb" \
-"3eb8553342210c67e27dab3c2e72a9c0937b20dc6fe4d08d209fc4c2f163006a" \
-"47304402207bc1940e12ec94544b7080518f73840f9bd191bd5fcb6b00f69a57" \
-"a5865833bc02201bd759d978305e4346b39a9ee8b38043888621748dd1f8ab82" \
-"2df542427e49d6012102a17da2659b6149fb281a675519b5fd64dd80699dccd5" \
-"09f76e655699f2f625efffffffff0000000001" \
+"aa3e3f7d824f20f451a45db8c95801006a4730440220364484206d2d3977373a" \
+"82135cbdb78f200e2160ec2636c9f080424a61748d15022056c9729b9fbd5c04" \
+"170a7bb63b1d1b02da183fa3605864666dba6e216c3ce9270121027d4b693a28" \
+"51541b1e3937320c5e4173ea8ab3f152f7a7fa96dbb936d2cff73dffffffff1c" \
+"bb3eb8553342210c67e27dab3c2e72a9c0937b20dc6fe4d08d209fc4c2f16300" \
+"006a47304402207bc1940e12ec94544b7080518f73840f9bd191bd5fcb6b00f6" \
+"9a57a5865833bc02201bd759d978305e4346b39a9ee8b38043888621748dd1f8" \
+"ab822df542427e49d6012102a17da2659b6149fb281a675519b5fd64dd80699d" \
+"ccd509f76e655699f2f625efffffffff0001" \
 
 #define TX4 \
 "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1" \
@@ -394,7 +394,8 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__compare_wire_to_store__success)
     BOOST_REQUIRE(wire_tx.from_data(wire_stream, wire));
     BOOST_REQUIRE(data_wire == wire_tx.to_data(wire));
 
-    ////const auto get_store_text = encode_base16(wire_tx.to_data(!wire));
+    const auto get_store_text = encode_base16(wire_tx.to_data(!wire));
+
     const auto data_store = to_chunk(base16_literal(TX3_STORE_SERIALIZED_V3));
     data_source store_stream(data_store);
     chain::transaction store_tx;

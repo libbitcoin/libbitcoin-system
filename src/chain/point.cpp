@@ -24,6 +24,7 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/message/messages.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -32,6 +33,8 @@
 
 namespace libbitcoin {
 namespace chain {
+
+static const auto store_point_size = std::tuple_size<point>::value;
 
 // This sentinel is serialized and defined by consensus, not implementation.
 const uint32_t point::null_index = no_previous_output;
@@ -160,18 +163,14 @@ bool point::from_data(reader& source, bool wire)
 
     if (wire)
     {
-        // Wire (satoshi protocol) deserialization.
         index_ = source.read_4_bytes_little_endian();
     }
     else
     {
-        // Database (compact) serialization.
-        const auto index = source.read_variable_little_endian();
+        index_ = source.read_2_bytes_little_endian();
 
-        if (index > max_uint32)
-            source.invalidate();
-        else
-            index_ = static_cast<uint32_t>(index);
+        if (index_ == max_uint16)
+            index_ = null_index;
     }
 
     if (!source)
@@ -220,13 +219,12 @@ void point::to_data(writer& sink, bool wire) const
 
     if (wire)
     {
-        // Wire (satoshi protocol) serialization.
         sink.write_4_bytes_little_endian(index_);
     }
     else
     {
-        // Database (compact) serialization.
-        sink.write_variable_little_endian(index_);
+        BITCOIN_ASSERT(index_ == null_index || index_ < max_uint16);
+        sink.write_2_bytes_little_endian(static_cast<uint16_t>(index_));
     }
 }
 
@@ -240,7 +238,7 @@ point_iterator point::begin() const
 
 point_iterator point::end() const
 {
-    return point_iterator(*this, static_cast<unsigned>(satoshi_fixed_size()));
+    return point_iterator(*this, static_cast<unsigned>(store_point_size));
 }
 
 // Properties.
@@ -248,8 +246,7 @@ point_iterator point::end() const
 
 size_t point::serialized_size(bool wire) const
 {
-    return wire ? point::satoshi_fixed_size() : 
-        hash_size + message::variable_uint_size(index_);
+    return wire ? point::satoshi_fixed_size() : store_point_size;
 }
 
 size_t point::satoshi_fixed_size()

@@ -86,7 +86,7 @@ public:
     void to_data(std::ostream& stream, bool wire=true) const;
     void to_data(writer& sink, bool wire=true) const;
 
-    // Iteration.
+    // Iteration (limited to store serialization).
     //-------------------------------------------------------------------------
 
     point_iterator begin() const;
@@ -140,11 +140,10 @@ private:
 namespace std
 {
 
-// Extend std namespace with our hash wrapper.
+// Extend std namespace with our hash wrapper (database key, not checksum).
 template <>
 struct hash<bc::chain::point>
 {
-    // This is not used as the database correlation value.
     size_t operator()(const bc::chain::point& point) const
     {
         size_t seed = 0;
@@ -154,12 +153,12 @@ struct hash<bc::chain::point>
     }
 };
 
-// Extend std namespace with the size of our point, used as database key size.
+// Extend std namespace with the non-wire size of point (database key size).
 template <>
 struct tuple_size<bc::chain::point>
 {
-    static const size_t value = std::tuple_size<bc::hash_digest>::value +
-        sizeof(uint32_t);
+    static const auto value = std::tuple_size<bc::hash_digest>::value +
+        sizeof(uint16_t);
 
     operator std::size_t() const
     {
