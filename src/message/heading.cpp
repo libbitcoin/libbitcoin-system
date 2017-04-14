@@ -155,10 +155,12 @@ bool heading::from_data(reader& source)
 data_chunk heading::to_data() const
 {
     data_chunk data;
+    const auto size = serialized_size();
+    data.reserve(size);
     data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == heading::serialized_size());
+    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 
