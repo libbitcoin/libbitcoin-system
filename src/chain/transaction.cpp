@@ -237,13 +237,14 @@ bool transaction::from_data(reader& source, bool wire)
     {
         // Database (outputs forward) serialization.
         read(source, outputs_, wire) && read(source, inputs_, wire);
-        locktime_ = source.read_4_bytes_little_endian();
+        const auto locktime = source.read_variable_little_endian();
         const auto version = source.read_variable_little_endian();
 
-        if (version > max_uint32)
+        if (locktime > max_uint32 || version > max_uint32)
             source.invalidate();
-        else
-            version_ = static_cast<uint32_t>(version);
+
+        locktime_ = static_cast<uint32_t>(locktime);
+        version_ = static_cast<uint32_t>(version);
     }
 
     if (!source)
@@ -312,7 +313,7 @@ void transaction::to_data(writer& sink, bool wire) const
         // Database (outputs forward) serialization.
         write(sink, outputs_, wire);
         write(sink, inputs_, wire);
-        sink.write_4_bytes_little_endian(locktime_);
+        sink.write_variable_little_endian(locktime_);
         sink.write_variable_little_endian(version_);
     }
 }
@@ -332,7 +333,7 @@ size_t transaction::serialized_size(bool wire) const
         return size + output.serialized_size(wire);
     };
 
-    return sizeof(version_)
+    return (wire ? sizeof(version_) : message::variable_uint_size(version_))
         + (wire ? sizeof(locktime_) : message::variable_uint_size(locktime_))
         + message::variable_uint_size(inputs_.size())
         + message::variable_uint_size(outputs_.size())
