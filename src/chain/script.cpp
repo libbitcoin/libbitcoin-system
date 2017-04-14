@@ -253,7 +253,8 @@ void script::from_operations(const operation::list& ops)
 data_chunk script::operations_to_data(const operation::list& ops)
 {
     data_chunk out;
-    out.reserve(serialized_size(ops));
+    const auto size = serialized_size(ops);
+    out.reserve(size);
     const auto concatenate = [&out](const operation& op)
     {
         auto bytes = op.to_data();
@@ -261,7 +262,7 @@ data_chunk script::operations_to_data(const operation::list& ops)
     };
 
     std::for_each(ops.begin(), ops.end(), concatenate);
-    BITCOIN_ASSERT(out.size() == serialized_size(ops));
+    BITCOIN_ASSERT(out.size() == size);
     return out;
 }
 
@@ -308,11 +309,12 @@ bool script::is_valid_operations() const
 data_chunk script::to_data(bool prefix) const
 {
     data_chunk data;
-    data.reserve(serialized_size(prefix));
+    const auto size = serialized_size(prefix);
+    data.reserve(size);
     data_sink ostream(data);
     to_data(ostream, prefix);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size(prefix));
+    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 
