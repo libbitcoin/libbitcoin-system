@@ -41,9 +41,11 @@ bool verify_checksum(data_slice data)
     if (data.size() < checksum_size)
         return false;
 
-    data_slice body(data.begin(), data.end() - checksum_size);
-    auto checksum = from_little_endian_unsafe<uint32_t>(data.end() - checksum_size);
-    return bitcoin_checksum(body) == checksum;
+    // TODO: create a bitcoin_checksum overload that can accept begin/end.
+    const auto checksum_begin = data.end() - checksum_size;
+    data_slice slice(data.begin(), checksum_begin);
+    auto checksum = from_little_endian_unsafe<uint32_t>(checksum_begin);
+    return bitcoin_checksum(slice) == checksum;
 }
 
 } // namespace libbitcoin

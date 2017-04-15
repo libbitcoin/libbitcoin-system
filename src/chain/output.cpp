@@ -168,11 +168,12 @@ bool output::is_valid() const
 data_chunk output::to_data(bool wire) const
 {
     data_chunk data;
-    data.reserve(serialized_size(wire));
+    const auto size = serialized_size(wire);
+    data.reserve(size);
     data_sink ostream(data);
     to_data(ostream, wire);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size(wire));
+    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 

@@ -29,10 +29,10 @@
 namespace libbitcoin {
 namespace message {
 
-const size_t heading::maximum_size()
+size_t heading::maximum_size()
 {
     // This assumes that the heading doesn't shrink in size.
-    return serialized_size();
+    return satoshi_fixed_size();
 }
 
 // A maximal inventory is 50,000 entries, the largest valid message.
@@ -44,7 +44,7 @@ const size_t heading::maximum_size()
 // protocol limits height to 2^32 this is 43. Even with expansion to 2^62
 // this is limited to 75. So we limit payloads to the maximum inventory
 // payload size.
-const size_t heading::maximum_payload_size(uint32_t)
+size_t heading::maximum_payload_size(uint32_t)
 {
     static constexpr size_t vector = sizeof(uint32_t) + hash_size;
     static constexpr size_t maximum = 3u + vector * max_inventory;
@@ -52,7 +52,7 @@ const size_t heading::maximum_payload_size(uint32_t)
     return maximum;
 }
 
-const size_t heading::serialized_size()
+size_t heading::satoshi_fixed_size()
 {
     return sizeof(uint32_t) + command_size + sizeof(uint32_t) +
         sizeof(uint32_t);
@@ -155,10 +155,12 @@ bool heading::from_data(reader& source)
 data_chunk heading::to_data() const
 {
     data_chunk data;
+    const auto size = satoshi_fixed_size();
+    data.reserve(size);
     data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == heading::serialized_size());
+    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 
