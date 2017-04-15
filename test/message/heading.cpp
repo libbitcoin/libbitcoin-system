@@ -92,11 +92,11 @@ BOOST_AUTO_TEST_CASE(heading__to_data__checksum_variations__success)
     };
 
     const auto zero_checksum = instance.to_data();
-    BOOST_REQUIRE_EQUAL(zero_checksum.size(), heading::serialized_size());
+    BOOST_REQUIRE_EQUAL(zero_checksum.size(), heading::satoshi_fixed_size());
 
     instance.set_checksum(123u);
     const auto nonzero_checksum = instance.to_data();
-    BOOST_REQUIRE_EQUAL(nonzero_checksum.size(), heading::serialized_size());
+    BOOST_REQUIRE_EQUAL(nonzero_checksum.size(), heading::satoshi_fixed_size());
 }
 
 BOOST_AUTO_TEST_CASE(heading__from_data__insufficient_bytes__failure)
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(heading__factory_from_data_1__valid_input__success)
     const auto result = heading::factory_from_data(data);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), heading::serialized_size());
+    BOOST_REQUIRE_EQUAL(data.size(), heading::satoshi_fixed_size());
 }
 
 BOOST_AUTO_TEST_CASE(heading__factory_from_data_2__valid_input__success)
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(heading__factory_from_data_2__valid_input__success)
     const auto result = heading::factory_from_data(istream);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), heading::serialized_size());
+    BOOST_REQUIRE_EQUAL(data.size(), heading::satoshi_fixed_size());
 }
 
 BOOST_AUTO_TEST_CASE(heading__factory_from_data_3__valid_input__success)
@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE(heading__factory_from_data_3__valid_input__success)
     data_source istream(data);
     istream_reader source(istream);
     const auto result = heading::factory_from_data(source);
-    BOOST_REQUIRE_EQUAL(data.size(), heading::serialized_size());
+    BOOST_REQUIRE_EQUAL(data.size(), heading::satoshi_fixed_size());
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
 }
@@ -340,9 +340,9 @@ BOOST_AUTO_TEST_CASE(heading__type__all_cases__match_expected)
     BOOST_REQUIRE(message::message_type::version == instance.type());
 }
 
-BOOST_AUTO_TEST_CASE(heading__maximum_size__always__matches_serialized_size)
+BOOST_AUTO_TEST_CASE(heading__maximum_size__always__matches_satoshi_fixed_size)
 {
-    BOOST_REQUIRE_EQUAL(heading::serialized_size(), heading::maximum_size());
+    BOOST_REQUIRE_EQUAL(heading::satoshi_fixed_size(), heading::maximum_size());
 }
 
 BOOST_AUTO_TEST_CASE(heading__maximum_payload_size__always__matches_expected)
