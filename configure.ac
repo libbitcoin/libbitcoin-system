@@ -27,7 +27,7 @@ AC_CONFIG_MACRO_DIR([m4])
 # Run macros for operation of generated Makefiles, enable non-recursive make.
 # Unless [foreign] is specified standard GNU files will be required,
 # specifically: AUTHORS, COPYING, INSTALL, NEWS, README and ChangeLog.
-AM_INIT_AUTOMAKE([subdir-objects])
+AM_INIT_AUTOMAKE([subdir-objects serial-tests])
 
 # Enable C and POSIX extensions that may be disabled on certain platforms.
 AC_USE_SYSTEM_EXTENSIONS
