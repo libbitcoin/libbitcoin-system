@@ -103,7 +103,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::first_not_coinbase, "first transaction not a coinbase" },
         { error::extra_coinbases, "more than one coinbase" },
         { error::internal_duplicate, "matching transaction hashes in block" },
-        { error::internal_double_spend, "double spend internal to block" },
+        { error::block_internal_double_spend, "double spend internal to block" },
         { error::merkle_mismatch, "merkle root mismatch" },
         { error::block_legacy_sigop_limit, "too many block legacy signature operations" },
 
@@ -119,6 +119,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::spend_overflow, "spend outside valid range" },
         { error::invalid_coinbase_script_size, "coinbase script too small or large" },
         { error::coinbase_transaction, "coinbase transaction disallowed in memory pool" },
+        { error::transaction_internal_double_spend, "double spend internal to transaction" },
         { error::transaction_legacy_sigop_limit, "too many transaction legacy signature operations" },
 
         // accept transaction
@@ -371,6 +372,39 @@ namespace error {
             case boost_error::result_out_of_range:
             case boost_error::state_not_recoverable:
             case boost_error::value_too_large:
+            default:
+                return error::unknown;
+        }
+    }
+
+    error_code_t posix_to_error_code(int ec)
+    {
+        // TODO: expand mapping for database scenario.
+        switch (ec)
+        {
+            // protocol codes (from zeromq)
+            case ENOBUFS:
+            case ENOTSUP:
+            case EPROTONOSUPPORT:
+                return error::operation_failed;
+            case ENETDOWN:
+                return error::network_unreachable;
+            case EADDRINUSE:
+                return error::address_in_use;
+            case EADDRNOTAVAIL:
+                return error::resolve_failed;
+            case ECONNREFUSED:
+                return error::accept_failed;
+            case EINPROGRESS:
+                return error::channel_timeout;
+                return error::bad_stream;
+            case EAGAIN:
+                return error::channel_timeout;
+            case EFAULT:
+                return error::bad_stream;
+            case EINTR:
+            case ENOTSOCK:
+                return error::service_stopped;
             default:
                 return error::unknown;
         }

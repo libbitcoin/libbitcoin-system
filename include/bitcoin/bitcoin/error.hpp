@@ -100,7 +100,7 @@ enum error_code_t
     first_not_coinbase = 28,
     extra_coinbases = 29,
     internal_duplicate = 49,
-    internal_double_spend = 15,
+    block_internal_double_spend = 15,
     merkle_mismatch = 31,
     block_legacy_sigop_limit = 30,
 
@@ -116,6 +116,7 @@ enum error_code_t
     spend_overflow = 21,
     invalid_coinbase_script_size = 22,
     coinbase_transaction = 16,
+    transaction_internal_double_spend = 72,
     transaction_size_limit = 53,
     transaction_legacy_sigop_limit = 54,
 
@@ -222,14 +223,12 @@ enum error_code_t
 
 enum error_condition_t
 {
-    //// validate
-    //validate_failed = 1,
-    //forced_removal
 };
 
 BC_API code make_error_code(error_code_t e);
 BC_API std::error_condition make_error_condition(error_condition_t e);
 BC_API error_code_t boost_to_error_code(const boost_code& ec);
+BC_API error_code_t posix_to_error_code(int ec);
 
 } // namespace error
 } // namespace libbitcoin

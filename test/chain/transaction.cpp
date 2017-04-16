@@ -66,19 +66,32 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_1__always__returns_default_initial
 "0762c5a6f9e5b78ff730581988ac70e0cf02000000001976a914607a10e5b5f5" \
 "3610341db013e77ba7c317a10c9088ac00000000"
 
-#define TX3_STORE_SERIALIZED \
-"010000000000000002ffffffff1dc05c00000000001976a914e785da41a84114" \
-"af0762c5a6f9e5b78ff730581988acffffffff70e0cf02000000001976a91460" \
-"7a10e5b5f53610341db013e77ba7c317a10c9088ac0209e300a61db28e4fd356" \
-"2aec52647646fc55aa3e3f7d824f20f451a45db8c958010000006a4730440220" \
-"364484206d2d3977373a82135cbdb78f200e2160ec2636c9f080424a61748d15" \
-"022056c9729b9fbd5c04170a7bb63b1d1b02da183fa3605864666dba6e216c3c" \
-"e9270121027d4b693a2851541b1e3937320c5e4173ea8ab3f152f7a7fa96dbb9" \
-"36d2cff73dffffffff1cbb3eb8553342210c67e27dab3c2e72a9c0937b20dc6f" \
-"e4d08d209fc4c2f163000000006a47304402207bc1940e12ec94544b7080518f" \
-"73840f9bd191bd5fcb6b00f69a57a5865833bc02201bd759d978305e4346b39a" \
-"9ee8b38043888621748dd1f8ab822df542427e49d6012102a17da2659b6149fb" \
-"281a675519b5fd64dd80699dccd509f76e655699f2f625efffffffff"
+////#define TX3_STORE_SERIALIZED_V2 \
+////"af0762c5a6f9e5b78ff730581988acffffffff70e0cf02000000001976a91460" \
+////"7a10e5b5f53610341db013e77ba7c317a10c9088ac0209e300a61db28e4fd356" \
+////"2aec52647646fc55aa3e3f7d824f20f451a45db8c958010000006a4730440220" \
+////"364484206d2d3977373a82135cbdb78f200e2160ec2636c9f080424a61748d15" \
+////"022056c9729b9fbd5c04170a7bb63b1d1b02da183fa3605864666dba6e216c3c" \
+////"e9270121027d4b693a2851541b1e3937320c5e4173ea8ab3f152f7a7fa96dbb9" \
+////"36d2cff73dffffffff1cbb3eb8553342210c67e27dab3c2e72a9c0937b20dc6f" \
+////"e4d08d209fc4c2f163000000006a47304402207bc1940e12ec94544b7080518f" \
+////"73840f9bd191bd5fcb6b00f69a57a5865833bc02201bd759d978305e4346b39a" \
+////"9ee8b38043888621748dd1f8ab822df542427e49d6012102a17da2659b6149fb" \
+////"281a675519b5fd64dd80699dccd509f76e655699f2f625efffffffff"
+
+#define TX3_STORE_SERIALIZED_V3 \
+"02ffffffff1dc05c00000000001976a914e785da41a84114af0762c5a6f9e5b7" \
+"8ff730581988acffffffff70e0cf02000000001976a914607a10e5b5f5361034" \
+"1db013e77ba7c317a10c9088ac0209e300a61db28e4fd3562aec52647646fc55" \
+"aa3e3f7d824f20f451a45db8c95801006a4730440220364484206d2d3977373a" \
+"82135cbdb78f200e2160ec2636c9f080424a61748d15022056c9729b9fbd5c04" \
+"170a7bb63b1d1b02da183fa3605864666dba6e216c3ce9270121027d4b693a28" \
+"51541b1e3937320c5e4173ea8ab3f152f7a7fa96dbb936d2cff73dffffffff1c" \
+"bb3eb8553342210c67e27dab3c2e72a9c0937b20dc6fe4d08d209fc4c2f16300" \
+"006a47304402207bc1940e12ec94544b7080518f73840f9bd191bd5fcb6b00f6" \
+"9a57a5865833bc02201bd759d978305e4346b39a9ee8b38043888621748dd1f8" \
+"ab822df542427e49d6012102a17da2659b6149fb281a675519b5fd64dd80699d" \
+"ccd509f76e655699f2f625efffffffff0001" \
 
 #define TX4 \
 "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1" \
@@ -381,14 +394,13 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__compare_wire_to_store__success)
     BOOST_REQUIRE(wire_tx.from_data(wire_stream, wire));
     BOOST_REQUIRE(data_wire == wire_tx.to_data(wire));
 
-    const auto store_text = encode_base16(wire_tx.to_data(!wire));
+    const auto get_store_text = encode_base16(wire_tx.to_data(!wire));
 
-    const auto data_store = to_chunk(base16_literal(TX3_STORE_SERIALIZED));
+    const auto data_store = to_chunk(base16_literal(TX3_STORE_SERIALIZED_V3));
     data_source store_stream(data_store);
     chain::transaction store_tx;
     BOOST_REQUIRE(store_tx.from_data(store_stream, !wire));
     BOOST_REQUIRE(data_store == store_tx.to_data(!wire));
-
     BOOST_REQUIRE(wire_tx == store_tx);
 }
 
@@ -807,95 +819,27 @@ BOOST_AUTO_TEST_CASE(transaction__is_double_spend__include_unconfirmed_true_with
     BOOST_REQUIRE(instance.is_double_spend(true));
 }
 
-////BOOST_AUTO_TEST_CASE(transaction__double_spends__empty_inputs__returns_empty)
-////{
-////    chain::transaction instance;
-////    BOOST_REQUIRE(instance.double_spends(false).empty());
-////    BOOST_REQUIRE(instance.double_spends(true).empty());
-////}
-////
-////BOOST_AUTO_TEST_CASE(transaction__double_spends__unspent_inputs__returns_empty)
-////{
-////    chain::transaction instance;
-////    instance.inputs().emplace_back();
-////    BOOST_REQUIRE(instance.double_spends(false).empty());
-////    BOOST_REQUIRE(instance.double_spends(true).empty());
-////}
-////
-////BOOST_AUTO_TEST_CASE(transaction__double_spends__include_unconfirmed_false_with_unconfirmed__returns_empty)
-////{
-////    chain::transaction instance;
-////    instance.inputs().emplace_back();
-////    instance.inputs().back().previous_output().validation.spent = true;
-////    BOOST_REQUIRE(!instance.is_double_spend(false));
-////}
-////
-////BOOST_AUTO_TEST_CASE(transaction__double_spends__include_unconfirmed_false_with_confirmed__returns_expected)
-////{
-////    chain::transaction instance;
-////    instance.inputs().emplace_back();
-////    instance.inputs().back().previous_output().validation.spent = true;
-////    instance.inputs().back().previous_output().validation.confirmed = true;
-////    auto result = instance.double_spends(false);
-////    BOOST_REQUIRE_EQUAL(1u, result.size());
-////    BOOST_REQUIRE_EQUAL(0u, result.back());
-////}
-////
-////BOOST_AUTO_TEST_CASE(transaction__double_spends__include_unconfirmed_true_with_unconfirmed__returns_expected)
-////{
-////    chain::transaction instance;
-////    instance.inputs().emplace_back();
-////    instance.inputs().back().previous_output().validation.spent = true;
-////    auto result = instance.double_spends(true);
-////    BOOST_REQUIRE_EQUAL(1u, result.size());
-////    BOOST_REQUIRE_EQUAL(0u, result.back());
-////}
-
-BOOST_AUTO_TEST_CASE(transaction__is_immature__empty_inputs__returns_false)
+BOOST_AUTO_TEST_CASE(transaction__is_mature__empty_inputs__returns_true)
 {
     chain::transaction instance;
-    BOOST_REQUIRE(!instance.is_immature(453u));
+    BOOST_REQUIRE(instance.is_mature(453u));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_inputs__returns_false)
+BOOST_AUTO_TEST_CASE(transaction__is_mature__mature_inputs__returns_true)
 {
     chain::transaction instance;
     instance.inputs().emplace_back();
     instance.inputs().back().previous_output().set_index(123u);
-    BOOST_REQUIRE(!instance.is_immature(453u));
+    BOOST_REQUIRE(instance.is_mature(453u));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_immature__immature_inputs__returns_true)
+BOOST_AUTO_TEST_CASE(transaction__is_mature__premature_inputs__returns_false)
 {
     chain::transaction instance;
     instance.inputs().emplace_back();
     instance.inputs().back().previous_output().validation.height = 20u;
-    BOOST_REQUIRE(instance.is_immature(50u));
+    BOOST_REQUIRE(!instance.is_mature(50u));
 }
-
-////BOOST_AUTO_TEST_CASE(transaction__immature_inputs__empty_inputs__returns_empty)
-////{
-////    chain::transaction instance;
-////    BOOST_REQUIRE(instance.immature_inputs(453u).empty());
-////}
-////
-////BOOST_AUTO_TEST_CASE(transaction__immature_inputs__mature_inputs__returns_empty)
-////{
-////    chain::transaction instance;
-////    instance.inputs().emplace_back();
-////    instance.inputs().back().previous_output().set_index(123u);
-////    BOOST_REQUIRE(instance.immature_inputs(453u).empty());
-////}
-////
-////BOOST_AUTO_TEST_CASE(transaction__immature_inputs__immature_inputs__returns_input_indexes)
-////{
-////    chain::transaction instance;
-////    instance.inputs().emplace_back();
-////    instance.inputs().back().previous_output().validation.height = 20u;
-////    auto result = instance.immature_inputs(50u);
-////    BOOST_REQUIRE_EQUAL(1u, result.size());
-////    BOOST_REQUIRE_EQUAL(0u, result.back());
-////}
 
 BOOST_AUTO_TEST_CASE(transaction__operator_assign_equals_1__always__matches_equivalent)
 {

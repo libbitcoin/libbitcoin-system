@@ -163,6 +163,11 @@ inline const data_chunk& operation::data() const
 //-------------------------------------------------------------------------
 
 // private
+//*************************************************************************
+// CONSENSUS: op data size is limited to 520 bytes, which requires no more
+// than two bytes to encode. However the four byte encoding can represent
+// a value of any size, so remains valid despite the data size limit.
+//*************************************************************************
 inline uint32_t operation::read_data_size(opcode code, reader& source)
 {
     BC_CONSTEXPR auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
@@ -200,9 +205,8 @@ inline opcode operation::opcode_from_size(size_t size)
         return opcode::push_four_size;
 }
 
-inline opcode operation::opcode_from_data(const data_chunk& data)
+inline opcode operation::minimal_opcode_from_data(const data_chunk& data)
 {
-    // Unlike opcode_from_size, this produces the minimal data encoding.
     const auto size = data.size();
 
     if (size != 1)
@@ -212,11 +216,11 @@ inline opcode operation::opcode_from_data(const data_chunk& data)
     return is_numeric(code) ? code : opcode_from_size(size);
 }
 
-inline opcode operation::opcode_from_data(const data_chunk& uncoded,
+inline opcode operation::opcode_from_data(const data_chunk& data,
     bool minimal)
 {
-    return minimal ? opcode_from_data(uncoded) :
-        opcode_from_size(uncoded.size());
+    return minimal ? minimal_opcode_from_data(data) :
+        opcode_from_size(data.size());
 }
 
 inline opcode operation::opcode_from_positive(uint8_t value)
@@ -271,7 +275,7 @@ inline bool operation::is_positive(opcode code)
 // not handled. As a result satoshi always processes them in the op swtich.
 // This causes them to always fail as unhandled. It is misleading that the
 // satoshi test cases refer to these as reserved codes. These two codes behave
-// exactly as the explicitly disabled code. On the other hand VER is not within
+// exactly as the explicitly disabled codes. On the other hand VER is not within
 // the satoshi conditional range test so it is in fact reserved. Presumably
 // this was an unintended consequence of range testing enums.
 //*****************************************************************************

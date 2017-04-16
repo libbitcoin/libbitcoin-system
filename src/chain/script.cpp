@@ -253,7 +253,8 @@ void script::from_operations(const operation::list& ops)
 data_chunk script::operations_to_data(const operation::list& ops)
 {
     data_chunk out;
-    out.reserve(serialized_size(ops));
+    const auto size = serialized_size(ops);
+    out.reserve(size);
     const auto concatenate = [&out](const operation& op)
     {
         auto bytes = op.to_data();
@@ -261,7 +262,7 @@ data_chunk script::operations_to_data(const operation::list& ops)
     };
 
     std::for_each(ops.begin(), ops.end(), concatenate);
-    BITCOIN_ASSERT(out.size() == serialized_size(ops));
+    BITCOIN_ASSERT(out.size() == size);
     return out;
 }
 
@@ -308,11 +309,12 @@ bool script::is_valid_operations() const
 data_chunk script::to_data(bool prefix) const
 {
     data_chunk data;
-    data.reserve(serialized_size(prefix));
+    const auto size = serialized_size(prefix);
+    data.reserve(size);
     data_sink ostream(data);
     to_data(ostream, prefix);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size(prefix));
+    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 
@@ -437,9 +439,16 @@ const operation::list& script::operations() const
     // One operation per byte is the upper limit of operations.
     operations_.reserve(size);
 
+    // ************************************************************************
+    // CONSENSUS: In the case of a coinbase script we must parse the entire
+    // script, beyond just the BIP34 requirements, so that sigops can be
+    // calculated from the script. These are counted despite being irrelevant.
+    // In this case an invalid script is parsed to the extent possible.
+    // ************************************************************************
+
     // If an op fails it is pushed to operations and the loop terminates.
-    // To validate the ops the caller must test the last op.is_valid().
-    // This is not necessary during script validation as it is autmoatic.
+    // To validate the ops the caller must test the last op.is_valid(), or may
+    // text script.is_valid_operations(), which is done in script validation.
     while (!source.is_exhausted())
     {
         op.from_data(source);
@@ -1056,6 +1065,12 @@ void script::find_and_delete(const data_stack& endorsements)
 ////    // Require that the actual script start wtih the expected coinbase script.
 ////    return std::equal(expected.begin(), expected.end(), actual.begin());
 ////}
+
+bool script::is_unspendable() const
+{
+    return satoshi_content_size() > max_script_size ||
+        is_null_data_pattern(operations());
+}
 
 // Validation.
 //-----------------------------------------------------------------------------

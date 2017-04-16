@@ -292,7 +292,7 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks)
         return work_required_retarget(values);
 
     if (script::is_enabled(forks, rule_fork::easy_blocks))
-        return work_required_easy(values);
+        return easy_work_required(values);
 
     return bits_high(values);
 }
@@ -328,12 +328,12 @@ uint32_t chain_state::retarget_timespan(const data& values)
 }
 
 // [GetNextWorkRequired::fPowAllowMinDifficultyBlocks]
-uint32_t chain_state::work_required_easy(const data& values)
+uint32_t chain_state::easy_work_required(const data& values)
 {
     BITCOIN_ASSERT(values.height != 0);
 
     // If the time limit has passed allow a minimum difficulty block.
-    if (values.timestamp.self > elapsed_time_limit(values))
+    if (values.timestamp.self > easy_time_limit(values))
         return proof_of_work_limit;
 
     auto height = values.height;
@@ -350,10 +350,10 @@ uint32_t chain_state::work_required_easy(const data& values)
     return proof_of_work_limit;
 }
 
-uint32_t chain_state::elapsed_time_limit(const chain_state::data& values)
+uint32_t chain_state::easy_time_limit(const chain_state::data& values)
 {
     const int64_t high = timestamp_high(values);
-    const int64_t spacing = double_spacing_seconds;
+    const int64_t spacing = easy_spacing_seconds;
 
     //*************************************************************************
     // CONSENSUS: add unsigned 32 bit numbers in signed 64 bit space in

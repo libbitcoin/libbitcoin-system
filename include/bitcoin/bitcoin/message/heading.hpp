@@ -69,9 +69,9 @@ enum class message_type
 class BC_API heading
 {
 public:
-    static const size_t maximum_size();
-    static const size_t maximum_payload_size(uint32_t version);
-    static const size_t serialized_size();
+    static size_t maximum_size();
+    static size_t maximum_payload_size(uint32_t version);
+    static size_t satoshi_fixed_size();
     static heading factory_from_data(const data_chunk& data);
     static heading factory_from_data(std::istream& stream);
     static heading factory_from_data(reader& source);
@@ -80,7 +80,7 @@ public:
     heading(uint32_t magic, const std::string& command, uint32_t payload_size,
         uint32_t checksum);
     heading(uint32_t magic, std::string&& command, uint32_t payload_size,
-            uint32_t checksum);
+        uint32_t checksum);
     heading(const heading& other);
     heading(heading&& other);
 

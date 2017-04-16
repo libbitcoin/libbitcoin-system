@@ -86,7 +86,7 @@ public:
     // Properties (size, accessors, cache).
     //-----------------------------------------------------------------------------
 
-    size_t serialized_size(bool wire = true) const;
+    size_t serialized_size(bool wire=true) const;
 
     // Deprecated (unsafe).
     output_point& previous_output();
@@ -105,7 +105,7 @@ public:
     uint32_t sequence() const;
     void set_sequence(uint32_t value);
 
-    /// The payment address extraxcted from this input as a standard script.
+    /// The payment address extracted from this input as a standard script.
     wallet::payment_address address() const;
 
     // Validation.

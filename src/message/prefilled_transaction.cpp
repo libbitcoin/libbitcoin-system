@@ -112,7 +112,7 @@ bool prefilled_transaction::from_data(uint32_t version,
     reset();
 
     index_ = source.read_variable_little_endian();
-    transaction_.from_data(source);
+    transaction_.from_data(source, true);
 
     if (!source)
         reset();
@@ -123,11 +123,12 @@ bool prefilled_transaction::from_data(uint32_t version,
 data_chunk prefilled_transaction::to_data(uint32_t version) const
 {
     data_chunk data;
-    data.reserve(serialized_size(version));
+    const auto size = serialized_size(version);
+    data.reserve(size);
     data_sink ostream(data);
     to_data(version, ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size(version));
+    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 
@@ -148,7 +149,7 @@ void prefilled_transaction::to_data(uint32_t version,
 size_t prefilled_transaction::serialized_size(uint32_t version) const
 {
     return message::variable_uint_size(index_) +
-        transaction_.serialized_size();
+        transaction_.serialized_size(true);
 }
 
 uint64_t prefilled_transaction::index() const

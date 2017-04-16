@@ -30,12 +30,11 @@
 ////#include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 
-
 namespace libbitcoin {
 namespace chain {
 
 static const auto point_size = static_cast<unsigned>(
-    point::satoshi_fixed_size());
+    std::tuple_size<point>::value);
 
 // Constructors.
 //-----------------------------------------------------------------------------

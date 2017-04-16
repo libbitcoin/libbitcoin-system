@@ -154,6 +154,7 @@ bool version::from_data(uint32_t version, reader& source)
     nonce_ = source.read_8_bytes_little_endian();
     user_agent_ = source.read_string();
     start_height_ = source.read_4_bytes_little_endian();
+    relay_ = true;
 
     // HACK: disabled check due to inconsistent node implementation.
     // The protocol expects duplication of the sender's services.
@@ -186,19 +187,14 @@ bool version::from_data(uint32_t version, reader& source)
 
     if (value_ == level::bip37)
     {
-        // Peer is at the buggy level (70001) - read and ignore error.
-        relay_ = (source.read_byte() != 0 || !source) || !self_bip37;
-        return true;
+        // Peer is at the buggy level (70001) - read or ignore missing.
+        const auto exhausted = source.is_exhausted();
+        relay_ = exhausted || (source.read_byte() != 0) || !self_bip37;
     }
     else if (value_ > level::bip37)
     {
         // Peer is above the buggy level (> 70001) - read and handle error.
         relay_ = source.read_byte() != 0 || !self_bip37;
-    }
-    else
-    {
-        // Peer doesn't support relay disable, so it must be enabled.
-        relay_ = true;
     }
 
     if (!source)
@@ -210,11 +206,12 @@ bool version::from_data(uint32_t version, reader& source)
 data_chunk version::to_data(uint32_t version) const
 {
     data_chunk data;
-    data.reserve(serialized_size(version));
+    const auto size = serialized_size(version);
+    data.reserve(size);
     data_sink ostream(data);
     to_data(version, ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size(version));
+    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 

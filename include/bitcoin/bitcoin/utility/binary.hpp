@@ -39,6 +39,7 @@ public:
     binary();
     binary(const binary& other);
     binary(const std::string& bit_string);
+    binary(size_type size, uint32_t number);
     binary(size_type size, data_slice blocks);
 
     void resize(size_type size);

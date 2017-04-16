@@ -36,6 +36,8 @@ static_assert(sizeof(size_t) >= sizeof(uint32_t), "unsupported size_t");
 #define BC_USER_AGENT "/libbitcoin:" LIBBITCOIN_VERSION "/"
 
 // Generic constants.
+//-----------------------------------------------------------------------------
+
 BC_CONSTEXPR int64_t min_int64 = MIN_INT64;
 BC_CONSTEXPR int64_t max_int64 = MAX_INT64;
 BC_CONSTEXPR int32_t min_int32 = MIN_INT32;
@@ -57,46 +59,42 @@ BC_CONSTEXPR uint64_t sighash_null_value = max_uint64;
 // Script/interpreter constants.
 //-----------------------------------------------------------------------------
 
+// Consensus
 BC_CONSTEXPR size_t max_counted_ops = 201;
 BC_CONSTEXPR size_t max_stack_size = 1000;
 BC_CONSTEXPR size_t max_script_size = 10000;
 BC_CONSTEXPR size_t max_push_data_size = 520;
 BC_CONSTEXPR size_t max_script_public_keys = 20;
 BC_CONSTEXPR size_t multisig_default_sigops = 20;
-
-// This is policy, not consensus.
-BC_CONSTEXPR size_t max_null_data_size = 80;
-
-// These may not be flexible, keep internal.
 BC_CONSTEXPR size_t max_number_size = 4;
 BC_CONSTEXPR size_t max_cltv_number_size = 5;
+
+// Policy.
+BC_CONSTEXPR size_t max_null_data_size = 80;
 
 // Various validation constants.
 //-----------------------------------------------------------------------------
 
 BC_CONSTEXPR size_t min_coinbase_size = 2;
 BC_CONSTEXPR size_t max_coinbase_size = 100;
-BC_CONSTEXPR size_t median_time_past_interval = 11;
-BC_CONSTEXPR size_t max_block_size = 1000000;
 BC_CONSTEXPR size_t coinbase_maturity = 100;
-BC_CONSTEXPR size_t time_stamp_future_hours = 2;
+BC_CONSTEXPR size_t median_time_past_interval = 11;
 BC_CONSTEXPR size_t locktime_threshold = 500000000;
+BC_CONSTEXPR size_t max_block_size = 1000000;
+BC_CONSTEXPR size_t max_sigops_factor = 50;
 
 // Derived.
-BC_CONSTEXPR size_t max_block_sigops = max_block_size / 50;
+BC_CONSTEXPR size_t max_block_sigops = max_block_size / max_sigops_factor;
 
 // Timespan constants.
 //-----------------------------------------------------------------------------
 
 BC_CONSTEXPR uint32_t retargeting_factor = 4;
-BC_CONSTEXPR uint32_t easy_spacing_factor = 2;
+BC_CONSTEXPR uint32_t easy_spacing_seconds = 20 * 60;
 BC_CONSTEXPR uint32_t target_spacing_seconds = 10 * 60;
 BC_CONSTEXPR uint32_t target_timespan_seconds = 2 * 7 * 24 * 60 * 60;
+BC_CONSTEXPR uint32_t timestamp_future_seconds = 2 * 60 * 60;
 BC_CONSTEXPR uint32_t proof_of_work_limit = 0x1d00ffff;
-
-// Derived.
-BC_CONSTEXPR uint32_t double_spacing_seconds =
-    easy_spacing_factor * target_spacing_seconds;
 
 // The upper and lower bounds for the retargeting timespan.
 BC_CONSTEXPR uint32_t min_timespan =
@@ -151,7 +149,6 @@ static const config::checkpoint mainnet_bip16_exception_checkpoint
 // github.com/bitcoin/bips/blob/master/bip-0030.mediawiki#specification
 static const config::checkpoint mainnet_bip30_exception_checkpoint1
 {
-    // TODO: figure out why this block validates without an exception.
     "00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec", 91842
 };
 static const config::checkpoint mainnet_bip30_exception_checkpoint2
@@ -210,21 +207,21 @@ BC_CONSTFUNC uint64_t bitcoin_to_satoshi(uint64_t bitcoin_uints=1)
     return bitcoin_uints * satoshi_per_bitcoin;
 }
 
-BC_CONSTEXPR uint64_t initial_block_reward_bitcoin = 50;
-BC_CONSTFUNC uint64_t initial_block_reward_satoshi()
+BC_CONSTEXPR uint64_t initial_block_subsidy_bitcoin = 50;
+BC_CONSTFUNC uint64_t initial_block_subsidy_satoshi()
 {
-    return bitcoin_to_satoshi(initial_block_reward_bitcoin);
+    return bitcoin_to_satoshi(initial_block_subsidy_bitcoin);
 }
 
-BC_CONSTEXPR uint64_t reward_interval = 210000;
+BC_CONSTEXPR uint64_t subsidy_interval = 210000;
 BC_CONSTEXPR uint64_t recursive_money = 0x02540be3f5;
 BC_CONSTFUNC uint64_t max_money()
 {
     ////// Optimize out the derivation of recursive_money.
     ////BITCOIN_ASSERT(recursive_money == max_money_recursive(
-    ////    initial_block_reward_satoshi()));
+    ////    initial_block_subsidy_satoshi()));
 
-    return reward_interval * recursive_money;
+    return subsidy_interval * recursive_money;
 }
 
 } // namespace libbitcoin

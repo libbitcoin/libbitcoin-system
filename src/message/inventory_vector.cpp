@@ -162,25 +162,25 @@ bool inventory_vector::from_data(uint32_t version,
 {
     reset();
 
-    uint32_t raw_type = source.read_4_bytes_little_endian();
+    const auto raw_type = source.read_4_bytes_little_endian();
     type_ = inventory_vector::to_type(raw_type);
     hash_ = source.read_hash();
-    bool result = static_cast<bool>(source);
 
-    if (!result)
+    if (!source)
         reset();
 
-    return result;
+    return source;
 }
 
 data_chunk inventory_vector::to_data(uint32_t version) const
 {
     data_chunk data;
-    data.reserve(serialized_size(version));
+    const auto size = serialized_size(version);
+    data.reserve(size);
     data_sink ostream(data);
     to_data(version, ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size(version));
+    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 

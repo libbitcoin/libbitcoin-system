@@ -226,19 +226,25 @@ bool transaction::from_data(reader& source, bool wire)
 {
     reset();
 
-    version_ = source.read_4_bytes_little_endian();
-
     if (wire)
     {
         // Wire (satoshi protocol) deserialization.
+        version_ = source.read_4_bytes_little_endian();
         read(source, inputs_, wire) && read(source, outputs_, wire);
         locktime_ = source.read_4_bytes_little_endian();
     }
     else
     {
-        // Database serialization (outputs forward).
-        locktime_ = source.read_4_bytes_little_endian();
+        // Database (outputs forward) serialization.
         read(source, outputs_, wire) && read(source, inputs_, wire);
+        const auto locktime = source.read_variable_little_endian();
+        const auto version = source.read_variable_little_endian();
+
+        if (locktime > max_uint32 || version > max_uint32)
+            source.invalidate();
+
+        locktime_ = static_cast<uint32_t>(locktime);
+        version_ = static_cast<uint32_t>(version);
     }
 
     if (!source)
@@ -273,15 +279,16 @@ bool transaction::is_valid() const
 data_chunk transaction::to_data(bool wire) const
 {
     data_chunk data;
+    const auto size = serialized_size(wire);
 
     // Reserve an extra byte to prevent full reallocation in the case of
     // generate_signature_hash extension by addition of the sighash_type.
-    data.reserve(serialized_size(wire) + sizeof(uint8_t));
+    data.reserve(size + sizeof(uint8_t));
 
     data_sink ostream(data);
     to_data(ostream, wire);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size(wire));
+    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 
@@ -293,21 +300,21 @@ void transaction::to_data(std::ostream& stream, bool wire) const
 
 void transaction::to_data(writer& sink, bool wire) const
 {
-    sink.write_4_bytes_little_endian(version_);
-
     if (wire)
     {
         // Wire (satoshi protocol) serialization.
+        sink.write_4_bytes_little_endian(version_);
         write(sink, inputs_, wire);
         write(sink, outputs_, wire);
         sink.write_4_bytes_little_endian(locktime_);
     }
     else
     {
-        // Database serialization (outputs forward).
-        sink.write_4_bytes_little_endian(locktime_);
+        // Database (outputs forward) serialization.
         write(sink, outputs_, wire);
         write(sink, inputs_, wire);
+        sink.write_variable_little_endian(locktime_);
+        sink.write_variable_little_endian(version_);
     }
 }
 
@@ -326,8 +333,8 @@ size_t transaction::serialized_size(bool wire) const
         return size + output.serialized_size(wire);
     };
 
-    return sizeof(version_)
-        + sizeof(locktime_)
+    return (wire ? sizeof(version_) : message::variable_uint_size(version_))
+        + (wire ? sizeof(locktime_) : message::variable_uint_size(locktime_))
         + message::variable_uint_size(inputs_.size())
         + message::variable_uint_size(outputs_.size())
         + std::accumulate(inputs_.begin(), inputs_.end(), size_t{0}, ins)
@@ -439,7 +446,7 @@ hash_digest transaction::hash() const
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_.unlock_upgrade_and_lock();
-        hash_ = std::make_shared<hash_digest>(bitcoin_hash(to_data()));
+        hash_ = std::make_shared<hash_digest>(bitcoin_hash(to_data(true)));
         mutex_.unlock_and_lock_upgrade();
         //---------------------------------------------------------------------
     }
@@ -453,7 +460,7 @@ hash_digest transaction::hash() const
 
 hash_digest transaction::hash(uint32_t sighash_type) const
 {
-    auto serialized = to_data();
+    auto serialized = to_data(true);
     extend_data(serialized, to_little_endian(sighash_type));
     return bitcoin_hash(serialized);
 }
@@ -644,21 +651,34 @@ bool transaction::is_missing_previous_outputs() const
     return std::any_of(inputs_.begin(), inputs_.end(), missing);
 }
 
-output_point::list transaction::missing_previous_outputs() const
+point::list transaction::previous_outputs() const
 {
-    output_point::list out;
+    point::list prevouts(inputs_.size());
+
+    const auto pointer = [](const input& input)
+    {
+        return input.previous_output();
+    };
+
+    const auto& ins = inputs_;
+    std::transform(ins.begin(), ins.end(), prevouts.begin(), pointer);
+    return prevouts;
+}
+
+point::list transaction::missing_previous_outputs() const
+{
+    point::list prevouts;
 
     for (auto& input: inputs_)
     {
         const auto& prevout = input.previous_output();
-        const auto coinbase = prevout.is_null();
         const auto missing = !prevout.validation.cache.is_valid();
 
-        if (missing && !coinbase)
-            out.push_back(prevout);
+        if (missing && !prevout.is_null())
+            prevouts.push_back(prevout);
     }
 
-    return out;
+    return prevouts;
 }
 
 hash_list transaction::missing_previous_transactions() const
@@ -670,6 +690,15 @@ hash_list transaction::missing_previous_transactions() const
     return distinct(hashes);
 }
 
+bool transaction::is_internal_double_spend() const
+{
+    auto prevouts = previous_outputs();
+    std::sort(prevouts.begin(), prevouts.end());
+    const auto distinct_end = std::unique(prevouts.begin(), prevouts.end());
+    const auto distinct = (distinct_end == prevouts.end());
+    return !distinct;
+}
+
 bool transaction::is_double_spend(bool include_unconfirmed) const
 {
     const auto spent = [include_unconfirmed](const input& input)
@@ -678,30 +707,28 @@ bool transaction::is_double_spend(bool include_unconfirmed) const
         return prevout.spent && (include_unconfirmed || prevout.confirmed);
     };
 
-    // This is an optimization of !double_spends().empty();
     return std::any_of(inputs_.begin(), inputs_.end(), spent);
 }
 
-bool transaction::is_immature(size_t target_height) const
+bool transaction::is_mature(size_t height) const
 {
-    const auto immature = [target_height](const input& input)
+    const auto mature = [height](const input& input)
     {
-        return !input.previous_output().is_mature(target_height);
+        return input.previous_output().is_mature(height);
     };
 
-    // This is an optimization of !immature_inputs().empty();
-    return std::any_of(inputs_.begin(), inputs_.end(), immature);
+    return std::all_of(inputs_.begin(), inputs_.end(), mature);
 }
 
 // Coinbase transactions return success, to simplify iteration.
 code transaction::connect_input(const chain_state& state,
     size_t input_index) const
 {
-    if (is_coinbase())
-        return error::success;
-
     if (input_index >= inputs_.size())
         return error::operation_failed;
+
+    if (is_coinbase())
+        return error::success;
 
     const auto& prevout = inputs_[input_index].previous_output().validation;
 
@@ -737,7 +764,10 @@ code transaction::check(bool transaction_pool) const
     else if (transaction_pool && is_coinbase())
         return error::coinbase_transaction;
 
-    else if (transaction_pool && serialized_size() >= max_block_size)
+    else if (transaction_pool && is_internal_double_spend())
+        return error::transaction_internal_double_spend;
+
+    else if (transaction_pool && serialized_size(true) >= max_block_size)
         return error::transaction_size_limit;
 
     // We cannot know if bip16 is enabled at this point so we disable it.
@@ -794,7 +824,7 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
 
     // This relates height to maturity of spent coinbase. Since reorg is the
     // only way to decrease height and reorg invalidates, this is cache safe.
-    else if (is_immature(state.height()))
+    else if (!is_mature(state.height()))
         return error::coinbase_maturity;
 
     else if (is_overspent())

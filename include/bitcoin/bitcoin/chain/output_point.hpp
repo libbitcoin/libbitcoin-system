@@ -92,16 +92,15 @@ public:
     // Deserialization.
     //-----------------------------------------------------------------------------
 
-    static output_point factory_from_data(const data_chunk& data);
-    static output_point factory_from_data(std::istream& stream);
-    static output_point factory_from_data(reader& source);
+    static output_point factory_from_data(const data_chunk& data, bool wire=true);
+    static output_point factory_from_data(std::istream& stream, bool wire=true);
+    static output_point factory_from_data(reader& source, bool wire=true);
 
     // Validation.
     //-----------------------------------------------------------------------------
 
-    /// False if previous output is not cached.
-    /// True if the previous output is mature enough to spend from target.
-    bool is_mature(size_t target_height) const;
+    /// True if cached previous output is mature enough to spend from target.
+    bool is_mature(size_t height) const;
 
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     mutable validation_type validation;

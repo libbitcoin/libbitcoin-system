@@ -138,7 +138,7 @@ public:
     // Validation.
     //-----------------------------------------------------------------------------
 
-    bool is_valid_time_stamp() const;
+    bool is_valid_timestamp() const;
     bool is_valid_proof_of_work() const;
 
     code check() const;

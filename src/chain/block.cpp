@@ -23,12 +23,14 @@
 #include <limits>
 #include <cfenv>
 #include <cmath>
+#include <iterator>
 #include <memory>
 #include <numeric>
 #include <type_traits>
 #include <utility>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/chain/compact.hpp>
+#include <bitcoin/bitcoin/chain/input_point.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/config/checkpoint.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
@@ -205,7 +207,7 @@ bool block::from_data(reader& source)
 
     // Order is required.
     for (auto& tx: transactions_)
-        if (!tx.from_data(source))
+        if (!tx.from_data(source, true))
             break;
 
     if (!source)
@@ -234,11 +236,12 @@ bool block::is_valid() const
 data_chunk block::to_data() const
 {
     data_chunk data;
-    data.reserve(serialized_size());
+    const auto size = serialized_size();
+    data.reserve(size);
     data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 
@@ -274,7 +277,7 @@ size_t block::serialized_size() const
 {
     const auto sum = [](size_t total, const transaction& tx)
     {
-        return safe_add(total, tx.serialized_size());
+        return safe_add(total, tx.serialized_size(true));
     };
 
     const auto& txs = transactions_;
@@ -441,8 +444,8 @@ uint256_t block::proof() const
 
 uint64_t block::subsidy(size_t height)
 {
-    auto subsidy = initial_block_reward_satoshi();
-    subsidy >>= (height / reward_interval);
+    auto subsidy = initial_block_subsidy_satoshi();
+    subsidy >>= (height / subsidy_interval);
     return subsidy;
 }
 
@@ -506,7 +509,7 @@ size_t block::total_inputs(bool with_coinbase) const
 }
 
 // True if there is another coinbase other than the first tx.
-// No txs or coinbases also returns true.
+// No txs or coinbases returns false.
 bool block::is_extra_coinbases() const
 {
     if (transactions_.empty())
@@ -580,17 +583,46 @@ hash_digest block::generate_merkle_root() const
     return merkle.front();
 }
 
+size_t block::non_coinbase_input_count() const
+{
+    if (transactions_.empty())
+        return 0;
+
+    const auto counter = [](size_t sum, const transaction& tx)
+    {
+        return sum + tx.inputs().size();
+    };
+
+    const auto& txs = transactions_;
+    return std::accumulate(txs.begin() + 1, txs.end(), size_t(0), counter);
+}
+
+// This is an early check that is redundant with block pool accept checks.
 bool block::is_internal_double_spend() const
 {
-    // TODO: check all inputs for duplicate reference to an output.
-    // It is not necessary to confirm the output is within the block.
-    // This is an early check that is redundant with orphan pool accept checks.
-    return false;
+    if (transactions_.empty())
+        return false;
+
+    point::list outs;
+    outs.reserve(non_coinbase_input_count());
+    const auto& txs = transactions_;
+
+    // Merge the prevouts of all non-coinbase transactions into one set.
+    for (auto tx = txs.begin() + 1; tx != txs.end(); ++tx)
+    {
+        auto out = tx->previous_outputs();
+        std::move(out.begin(), out.end(), std::inserter(outs, outs.end()));
+    }
+
+    std::sort(outs.begin(), outs.end());
+    const auto distinct_end = std::unique(outs.begin(), outs.end());
+    const auto distinct = (distinct_end == outs.end());
+    return !distinct;
 }
 
 bool block::is_valid_merkle_root() const
 {
-    return (generate_merkle_root() == header_.merkle());
+    return generate_merkle_root() == header_.merkle();
 }
 
 // Overflow returns max_uint64.
@@ -691,11 +723,13 @@ code block::check() const
     else if (is_extra_coinbases())
         return error::extra_coinbases;
 
+    // This is a subset of is_internal_double_spend if one assumes that tx
+    // hash collisions cannot happen. But this is not the case, so we keep it.
     else if (!is_distinct_transaction_set())
         return error::internal_duplicate;
 
     else if (is_internal_double_spend())
-        return error::internal_double_spend;
+        return error::block_internal_double_spend;
 
     else if (!is_valid_merkle_root())
         return error::merkle_mismatch;

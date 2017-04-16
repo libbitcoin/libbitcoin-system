@@ -227,7 +227,8 @@ data_chunk deserializer<Iterator, CheckSafe>::read_bytes()
     return read_bytes(remaining());
 }
 
-// Return size is guaraneteed.
+// Return size is guaranteed.
+// This is a memory exhaustion risk if caller does not control size.
 template <typename Iterator, bool CheckSafe>
 data_chunk deserializer<Iterator, CheckSafe>::read_bytes(size_t size)
 {

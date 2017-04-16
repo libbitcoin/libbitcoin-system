@@ -62,30 +62,31 @@ public:
     point& operator=(point&& other);
     point& operator=(const point& other);
 
+    bool operator<(const point& other) const;
     bool operator==(const point& other) const;
     bool operator!=(const point& other) const;
 
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static point factory_from_data(const data_chunk& data);
-    static point factory_from_data(std::istream& stream);
-    static point factory_from_data(reader& source);
+    static point factory_from_data(const data_chunk& data, bool wire=true);
+    static point factory_from_data(std::istream& stream, bool wire=true);
+    static point factory_from_data(reader& source, bool wire=true);
 
-    bool from_data(const data_chunk& data);
-    bool from_data(std::istream& stream);
-    bool from_data(reader& source);
+    bool from_data(const data_chunk& data, bool wire=true);
+    bool from_data(std::istream& stream, bool wire=true);
+    bool from_data(reader& source, bool wire=true);
 
     bool is_valid() const;
 
     // Serialization.
     //-------------------------------------------------------------------------
 
-    data_chunk to_data() const;
-    void to_data(std::ostream& stream) const;
-    void to_data(writer& sink) const;
+    data_chunk to_data(bool wire=true) const;
+    void to_data(std::ostream& stream, bool wire=true) const;
+    void to_data(writer& sink, bool wire=true) const;
 
-    // Iteration.
+    // Iteration (limited to store serialization).
     //-------------------------------------------------------------------------
 
     point_iterator begin() const;
@@ -95,7 +96,7 @@ public:
     //-------------------------------------------------------------------------
 
     static size_t satoshi_fixed_size();
-    size_t serialized_size() const;
+    size_t serialized_size(bool wire=true) const;
 
     // deprecated (unsafe)
     hash_digest& hash();
@@ -110,6 +111,7 @@ public:
     // Utilities.
     //-------------------------------------------------------------------------
 
+    /// This is for client-server, not related to consensus or p2p networking.
     uint64_t checksum() const;
 
     // Validation.
@@ -138,11 +140,10 @@ private:
 namespace std
 {
 
-// Extend std namespace with our hash wrapper.
+// Extend std namespace with our hash wrapper (database key, not checksum).
 template <>
 struct hash<bc::chain::point>
 {
-    // This is not used as the database correlation value.
     size_t operator()(const bc::chain::point& point) const
     {
         size_t seed = 0;
@@ -152,12 +153,12 @@ struct hash<bc::chain::point>
     }
 };
 
-// Extend std namespace with the size of our point, used as database key size.
+// Extend std namespace with the non-wire size of point (database key size).
 template <>
 struct tuple_size<bc::chain::point>
 {
-    static const size_t value = std::tuple_size<bc::hash_digest>::value +
-        sizeof(uint32_t);
+    static const auto value = std::tuple_size<bc::hash_digest>::value +
+        sizeof(uint16_t);
 
     operator std::size_t() const
     {

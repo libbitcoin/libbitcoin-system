@@ -149,7 +149,7 @@ public:
     static bool is_relaxed_push(const operation::list& ops);
     static bool is_coinbase_pattern(const operation::list& ops, size_t height);
 
-    /// Unspendable pattern (standard).
+    /// Null-data pattern (standard).
     static bool is_null_data_pattern(const operation::list& ops);
 
     /// Payment script patterns (standard, psh is also consensus).
@@ -182,6 +182,7 @@ public:
     size_t embedded_sigops(const script& prevout_script) const;
     void find_and_delete(const data_stack& endorsements);
     ////bool is_coinbase_pattern(size_t height) const;
+    bool is_unspendable() const;
 
     // Validation.
     //-------------------------------------------------------------------------

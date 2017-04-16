@@ -33,6 +33,7 @@ static const ip_address null_address
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 };
 
+// TODO: create derived address that adds the timestamp.
 network_address::network_address(uint32_t timestamp, uint64_t services,
     ip_address&& ip, uint16_t port)
   : timestamp_(timestamp), services_(services), ip_(std::move(ip)), port_(port)
@@ -118,16 +119,14 @@ bool network_address::from_data(uint32_t version, reader& source,
         timestamp_ = source.read_4_bytes_little_endian();
 
     services_ = source.read_8_bytes_little_endian();
-
-    // TODO: add to readre interface (can't use template).
     auto ip = source.read_bytes(ip_.size());
-    std::move(ip.begin(), ip.end(), ip_.data());
-
     port_ = source.read_2_bytes_big_endian();
 
     if (!source)
         reset();
 
+    // TODO: add array to reader interface (can't use template).
+    std::move(ip.begin(), ip.end(), ip_.data());
     return source;
 }
 
@@ -135,10 +134,12 @@ data_chunk network_address::to_data(uint32_t version,
     bool with_timestamp) const
 {
     data_chunk data;
+    const auto size = serialized_size(version, with_timestamp);
+    data.reserve(size);
     data_sink ostream(data);
     to_data(version, ostream, with_timestamp);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size(version, with_timestamp));
+    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 

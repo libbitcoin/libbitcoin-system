@@ -126,7 +126,7 @@ bool block_transactions::from_data(uint32_t version, reader& source)
 
     // Order is required.
     for (auto& tx: transactions_)
-        if (!tx.from_data(source))
+        if (!tx.from_data(source, true))
             break;
 
     if (version < block_transactions::version_minimum)
@@ -141,11 +141,12 @@ bool block_transactions::from_data(uint32_t version, reader& source)
 data_chunk block_transactions::to_data(uint32_t version) const
 {
     data_chunk data;
-    data.reserve(serialized_size(version));
+    const auto size = serialized_size(version);
+    data.reserve(size);
     data_sink ostream(data);
     to_data(version, ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size(version));
+    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 
@@ -170,7 +171,7 @@ size_t block_transactions::serialized_size(uint32_t version) const
     auto size = hash_size + message::variable_uint_size(transactions_.size());
 
     for (const auto& element: transactions_)
-        size += element.serialized_size();
+        size += element.serialized_size(true);
 
     return size;
 }

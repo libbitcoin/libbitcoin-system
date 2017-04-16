@@ -232,11 +232,12 @@ bool header::is_valid() const
 data_chunk header::to_data() const
 {
     data_chunk data;
-    data.reserve(serialized_size());
+    const auto size = serialized_size();
+    data.reserve(size);
     data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 
@@ -415,9 +416,10 @@ hash_digest header::hash() const
 //-----------------------------------------------------------------------------
 
 /// BUGBUG: bitcoin 32bit unix time: en.wikipedia.org/wiki/Year_2038_problem
-bool header::is_valid_time_stamp() const
+bool header::is_valid_timestamp() const
 {
-    static const auto two_hours = std::chrono::hours(time_stamp_future_hours);
+    using namespace std::chrono;
+    static const auto two_hours = seconds(timestamp_future_seconds);
     const auto time = wall_clock::from_time_t(timestamp_);
     const auto future = wall_clock::now() + two_hours;
     return time <= future;
@@ -450,7 +452,7 @@ code header::check() const
     if (!is_valid_proof_of_work())
         return error::invalid_proof_of_work;
 
-    else if (!is_valid_time_stamp())
+    else if (!is_valid_timestamp())
         return error::futuristic_timestamp;
 
     else
