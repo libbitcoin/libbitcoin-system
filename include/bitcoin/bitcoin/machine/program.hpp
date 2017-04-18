@@ -146,6 +146,7 @@ private:
     const uint32_t input_index_;
     const uint32_t forks_;
 
+    size_t negative_count_;
     size_t operation_count_;
     op_iterator jump_;
     data_stack primary_;
