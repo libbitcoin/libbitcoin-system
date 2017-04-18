@@ -47,8 +47,8 @@ public:
     operation(operation&& other);
     operation(const operation& other);
 
-    operation(data_chunk&& uncoded, bool minimal = true);
-    operation(const data_chunk& uncoded, bool minimal = true);
+    operation(data_chunk&& uncoded, bool minimal=true);
+    operation(const data_chunk& uncoded, bool minimal=true);
 
     operation(opcode code);
 
