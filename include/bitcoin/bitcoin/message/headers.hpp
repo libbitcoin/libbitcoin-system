@@ -58,6 +58,7 @@ public:
     void set_elements(const header::list& values);
     void set_elements(header::list&& values);
 
+    bool is_sequential() const;
     void to_hashes(hash_list& out) const;
     void to_inventory(inventory_vector::list& out,
         inventory::type_id type) const;

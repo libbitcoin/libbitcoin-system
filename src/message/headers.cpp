@@ -170,6 +170,24 @@ void headers::to_data(uint32_t version, writer& sink) const
         element.to_data(version, sink);
 }
 
+bool headers::is_sequential() const
+{
+    if (elements_.empty())
+        return true;
+
+    auto previous = elements_.front().hash();
+
+    for (auto it = elements_.begin() + 1; it != elements_.end(); ++it)
+    {
+        if (it->previous_block_hash() != previous)
+            return false;
+
+        previous = it->hash();
+    }
+
+    return true;
+}
+
 void headers::to_hashes(hash_list& out) const
 {
     const auto map = [](const header& header)
