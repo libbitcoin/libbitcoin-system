@@ -71,6 +71,8 @@ bool operation::from_data(std::istream& stream)
     return from_data(source);
 }
 
+// TODO: optimize to not store data for op_1 through op_75.
+// TODO: optimize for larger data by using a shared byte array.
 bool operation::from_data(reader& source)
 {
     reset();
@@ -104,6 +106,7 @@ inline std::string trim_push(const std::string& token)
     return std::string(token.begin() + 1, token.end() - 1);
 }
 
+// TODO: optimize to not expect data for op_1 through op_75.
 bool operation::from_string(const std::string& mnemonic)
 {
     reset();
@@ -167,6 +170,7 @@ void operation::to_data(std::ostream& stream) const
     to_data(sink);
 }
 
+// TODO: optimize to not expect data for op_1 through op_75.
 void operation::to_data(writer& sink) const
 {
     static constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
@@ -192,6 +196,7 @@ void operation::to_data(writer& sink) const
     sink.write_bytes(data_);
 }
 
+// TODO: optimize to not expect data for op_1 through op_75.
 std::string operation::to_string(uint32_t active_forks) const
 {
     // The removal of spaces in data is a compatibility break with our v2.
