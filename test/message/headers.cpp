@@ -649,9 +649,97 @@ BOOST_AUTO_TEST_CASE(headers__to_inventory__non_empty__returns_header_hash_inven
 
 BOOST_AUTO_TEST_CASE(headers__is_sequential__empty__true)
 {
-    const headers instance;
-    BOOST_REQUIRE(instance.empty());
+    static const headers instance;
+    BOOST_REQUIRE(instance.elements().empty());
     BOOST_REQUIRE(instance.is_sequential());
+}
+
+BOOST_AUTO_TEST_CASE(headers__is_sequential__single__true)
+{
+    static const header first
+    {
+        1u,
+        hash_literal("f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0"),
+        hash_literal("0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f"),
+        10u,
+        100u,
+        1000u
+    };
+
+    const headers instance({ first });
+    BOOST_REQUIRE(instance.is_sequential());
+}
+
+BOOST_AUTO_TEST_CASE(headers__is_sequential__sequential__true)
+{
+    static const header first
+    {
+        1u,
+        hash_literal("f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0"),
+        hash_literal("0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f"),
+        10u,
+        100u,
+        1000u
+    };
+
+    static const header second
+    {
+        2u,
+        first.hash(),
+        hash_literal("babababababababababababababababababababababababababababababababa"),
+        20u,
+        200u,
+        2000u
+    };
+
+    static const header third
+    {
+        3u,
+        second.hash(),
+        hash_literal("7373737373737373737373737373737373737373737373737373737373737373"),
+        30u,
+        300u,
+        3000u
+    };
+
+    const headers instance({ first, second, third });
+    BOOST_REQUIRE(instance.is_sequential());
+}
+
+BOOST_AUTO_TEST_CASE(headers__is_sequential__disordered__false)
+{
+    static const header first
+    {
+        1u,
+        hash_literal("f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0"),
+        hash_literal("0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f"),
+        10u,
+        100u,
+        1000u
+    };
+
+    static const header second
+    {
+        2u,
+        hash_literal("abababababababababababababababababababababababababababababababab"),
+        hash_literal("babababababababababababababababababababababababababababababababa"),
+        20u,
+        200u,
+        2000u
+    };
+
+    static const header third
+    {
+        3u,
+        hash_literal("e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2"),
+        hash_literal("7373737373737373737373737373737373737373737373737373737373737373"),
+        30u,
+        300u,
+        3000u
+    };
+
+    const headers instance({ first, second, third });
+    BOOST_REQUIRE(!instance.is_sequential());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
