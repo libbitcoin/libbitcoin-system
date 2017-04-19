@@ -232,6 +232,8 @@ data_chunk deserializer<Iterator, CheckSafe>::read_bytes()
 template <typename Iterator, bool CheckSafe>
 data_chunk deserializer<Iterator, CheckSafe>::read_bytes(size_t size)
 {
+    // TODO: avoid unnecessary default zero fill using
+    // the allocator adapter here: stackoverflow.com/a/21028912/1172329.
     data_chunk out(size);
 
     if (!safe(size))

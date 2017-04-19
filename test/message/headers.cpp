@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(headers_tests)
 BOOST_AUTO_TEST_CASE(headers__constructor_1__always__initialized_invalid)
 {
     headers instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(headers__constructor_2__always__equals_params)
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(headers__constructor_2__always__equals_params)
 
     headers instance(expected);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(expected == instance.elements());
+    BOOST_REQUIRE(instance.elements() == expected);
 }
 
 BOOST_AUTO_TEST_CASE(headers__constructor_3__always__equals_params)
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(headers__constructor_3__always__equals_params)
 
     headers instance(std::move(expected));
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(2, instance.elements().size());
+    BOOST_REQUIRE_EQUAL(instance.elements().size(), 2u);
 }
 
 BOOST_AUTO_TEST_CASE(headers__constructor_4__always__equals_params)
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(headers__constructor_4__always__equals_params)
     });
 
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(2, instance.elements().size());
+    BOOST_REQUIRE_EQUAL(instance.elements().size(), 2u);
 }
 
 BOOST_AUTO_TEST_CASE(headers__constructor_5__always__equals_params)
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(headers__constructor_5__always__equals_params)
     });
 
     headers instance(expected);
-    BOOST_REQUIRE(expected == instance);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(headers__constructor_6__always__equals_params)
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(headers__constructor_6__always__equals_params)
     });
 
     headers instance(std::move(expected));
-    BOOST_REQUIRE_EQUAL(2, instance.elements().size());
+    BOOST_REQUIRE_EQUAL(instance.elements().size(), 2u);
 }
 
 BOOST_AUTO_TEST_CASE(headers__from_data__insufficient_bytes__failure)
@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(headers__from_data__insufficient_version__failure)
 
     const data_chunk data = expected.to_data(headers::version_minimum);
     headers instance{};
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(headers::version_minimum - 1, data));
+    BOOST_REQUIRE(!instance.from_data(headers::version_minimum - 1, data));
 }
 
 BOOST_AUTO_TEST_CASE(headers__factory_from_data_1__valid_input__success)
@@ -197,9 +197,9 @@ BOOST_AUTO_TEST_CASE(headers__factory_from_data_1__valid_input__success)
     const auto data = expected.to_data(version);
     const auto result = headers::factory_from_data(version, data);
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(version), result.serialized_size(version));
+    BOOST_REQUIRE(result == expected);
+    BOOST_REQUIRE_EQUAL(result.serialized_size(version), data.size());
+    BOOST_REQUIRE_EQUAL(result.serialized_size(version), expected.serialized_size(version));
 }
 
 BOOST_AUTO_TEST_CASE(headers__factory_from_data_2__valid_input__success)
@@ -221,9 +221,9 @@ BOOST_AUTO_TEST_CASE(headers__factory_from_data_2__valid_input__success)
     data_source istream(data);
     auto result = headers::factory_from_data(version, istream);
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE(expected == result);
+    BOOST_REQUIRE(result == expected);
     BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(version), result.serialized_size(version));
+    BOOST_REQUIRE_EQUAL(result.serialized_size(version), expected.serialized_size(version));
 }
 
 BOOST_AUTO_TEST_CASE(headers__factory_from_data_3__valid_input__success)
@@ -246,9 +246,9 @@ BOOST_AUTO_TEST_CASE(headers__factory_from_data_3__valid_input__success)
     istream_reader source(istream);
     const auto result = headers::factory_from_data(version, source);
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE(expected == result);
+    BOOST_REQUIRE(result == expected);
     BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(version), result.serialized_size(version));
+    BOOST_REQUIRE_EQUAL(result.serialized_size(version), expected.serialized_size(version));
 }
 
 BOOST_AUTO_TEST_CASE(headers__elements_accessor_1__always__returns_initialized_value)
@@ -272,7 +272,7 @@ BOOST_AUTO_TEST_CASE(headers__elements_accessor_1__always__returns_initialized_v
     };
 
     message::headers instance(expected);
-    BOOST_REQUIRE(expected == instance.elements());
+    BOOST_REQUIRE(instance.elements() == expected);
 }
 
 BOOST_AUTO_TEST_CASE(headers__elements_accessor_2__always__returns_initialized_value)
@@ -296,7 +296,7 @@ BOOST_AUTO_TEST_CASE(headers__elements_accessor_2__always__returns_initialized_v
     };
 
     const message::headers instance(expected);
-    BOOST_REQUIRE(expected == instance.elements());
+    BOOST_REQUIRE(instance.elements() == expected);
 }
 
 BOOST_AUTO_TEST_CASE(headers__command_setter_1__roundtrip__success)
@@ -320,9 +320,9 @@ BOOST_AUTO_TEST_CASE(headers__command_setter_1__roundtrip__success)
     };
 
     message::headers instance;
-    BOOST_REQUIRE(expected != instance.elements());
+    BOOST_REQUIRE(instance.elements() != expected);
     instance.set_elements(expected);
-    BOOST_REQUIRE(expected == instance.elements());
+    BOOST_REQUIRE(instance.elements() == expected);
 }
 
 BOOST_AUTO_TEST_CASE(headers__command_setter_2__roundtrip__success)
@@ -346,9 +346,9 @@ BOOST_AUTO_TEST_CASE(headers__command_setter_2__roundtrip__success)
     };
 
     message::headers instance;
-    BOOST_REQUIRE_EQUAL(0, instance.elements().size());
+    BOOST_REQUIRE(instance.elements().empty());
     instance.set_elements(std::move(values));
-    BOOST_REQUIRE_EQUAL(2, instance.elements().size());
+    BOOST_REQUIRE_EQUAL(instance.elements().size(), 2u);
 }
 
 BOOST_AUTO_TEST_CASE(headers__operator_assign_equals__always__matches_equivalent)
@@ -386,7 +386,7 @@ BOOST_AUTO_TEST_CASE(headers__operator_assign_equals__always__matches_equivalent
 
     BOOST_REQUIRE(value.is_valid());
     message::headers instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.is_valid());
     instance = std::move(value);
     BOOST_REQUIRE(instance.is_valid());
 }
@@ -544,7 +544,7 @@ BOOST_AUTO_TEST_CASE(headers__to_hashes__empty__returns_empty_list)
     message::headers instance;
     hash_list result;
     instance.to_hashes(result);
-    BOOST_REQUIRE_EQUAL(0, result.size());
+    BOOST_REQUIRE(result.empty());
 }
 
 BOOST_AUTO_TEST_CASE(headers__to_hashes__non_empty__returns_header_hash_list)
@@ -589,8 +589,8 @@ BOOST_AUTO_TEST_CASE(headers__to_hashes__non_empty__returns_header_hash_list)
 
     hash_list result;
     instance.to_hashes(result);
-    BOOST_REQUIRE_EQUAL(expected.size(), result.size());
-    BOOST_REQUIRE(expected == result);
+    BOOST_REQUIRE_EQUAL(result.size(), expected.size());
+    BOOST_REQUIRE(result == expected);
 }
 
 BOOST_AUTO_TEST_CASE(headers__to_inventory__empty__returns_empty_list)
@@ -643,8 +643,103 @@ BOOST_AUTO_TEST_CASE(headers__to_inventory__non_empty__returns_header_hash_inven
 
     inventory_vector::list result;
     instance.to_inventory(result, inventory_vector::type_id::block);
-    BOOST_REQUIRE_EQUAL(expected.size(), result.size());
-    BOOST_REQUIRE(expected == result);
+    BOOST_REQUIRE_EQUAL(result.size(), expected.size());
+    BOOST_REQUIRE(result == expected);
+}
+
+BOOST_AUTO_TEST_CASE(headers__is_sequential__empty__true)
+{
+    static const headers instance;
+    BOOST_REQUIRE(instance.elements().empty());
+    BOOST_REQUIRE(instance.is_sequential());
+}
+
+BOOST_AUTO_TEST_CASE(headers__is_sequential__single__true)
+{
+    static const header first
+    {
+        1u,
+        hash_literal("f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0"),
+        hash_literal("0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f"),
+        10u,
+        100u,
+        1000u
+    };
+
+    const headers instance({ first });
+    BOOST_REQUIRE(instance.is_sequential());
+}
+
+BOOST_AUTO_TEST_CASE(headers__is_sequential__sequential__true)
+{
+    static const header first
+    {
+        1u,
+        hash_literal("f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0"),
+        hash_literal("0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f"),
+        10u,
+        100u,
+        1000u
+    };
+
+    static const header second
+    {
+        2u,
+        first.hash(),
+        hash_literal("babababababababababababababababababababababababababababababababa"),
+        20u,
+        200u,
+        2000u
+    };
+
+    static const header third
+    {
+        3u,
+        second.hash(),
+        hash_literal("7373737373737373737373737373737373737373737373737373737373737373"),
+        30u,
+        300u,
+        3000u
+    };
+
+    const headers instance({ first, second, third });
+    BOOST_REQUIRE(instance.is_sequential());
+}
+
+BOOST_AUTO_TEST_CASE(headers__is_sequential__disordered__false)
+{
+    static const header first
+    {
+        1u,
+        hash_literal("f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0"),
+        hash_literal("0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f"),
+        10u,
+        100u,
+        1000u
+    };
+
+    static const header second
+    {
+        2u,
+        hash_literal("abababababababababababababababababababababababababababababababab"),
+        hash_literal("babababababababababababababababababababababababababababababababa"),
+        20u,
+        200u,
+        2000u
+    };
+
+    static const header third
+    {
+        3u,
+        hash_literal("e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2"),
+        hash_literal("7373737373737373737373737373737373737373737373737373737373737373"),
+        30u,
+        300u,
+        3000u
+    };
+
+    const headers instance({ first, second, third });
+    BOOST_REQUIRE(!instance.is_sequential());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
