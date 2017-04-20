@@ -68,6 +68,7 @@ enum error_code_t
     channel_timeout = 13,
     address_blocked = 44,
     channel_stopped = 45,
+    peer_throttling = 73,
 
     // database
     store_block_duplicate = 66,
