@@ -370,6 +370,7 @@ inline program::value_type program::pop_alternate()
 
 inline void program::open(bool value)
 {
+    negative_count_ += (value ? 0 : 1);
     condition_.push_back(value);
 }
 
@@ -377,14 +378,26 @@ inline void program::open(bool value)
 inline void program::negate()
 {
     BITCOIN_ASSERT(!closed());
-    condition_.back() = !condition_.back();
+
+    const auto value = condition_.back();
+    negative_count_ += (value ? 1 : -1);
+    condition_.back() = !value;
+
+    // Optimized above to avoid succeeded loop.
+    ////condition_.back() = !condition_.back();
 }
 
 // This must be guarded.
 inline void program::close()
 {
     BITCOIN_ASSERT(!closed());
+
+    const auto value = condition_.back();
+    negative_count_ += (value ? 0 : -1);
     condition_.pop_back();
+
+    // Optimized above to avoid succeeded loop.
+    ////condition_.pop_back();
 }
 
 inline bool program::closed() const
@@ -394,8 +407,11 @@ inline bool program::closed() const
 
 inline bool program::succeeded() const
 {
-    const auto is_true = [](bool value) { return value; };
-    return std::all_of(condition_.begin(), condition_.end(), is_true);
+    return negative_count_ == 0;
+
+    // Optimized above to avoid succeeded loop.
+    ////const auto is_true = [](bool value) { return value; };
+    ////return std::all_of(condition_.begin(), condition_.end(), true);
 }
 
 } // namespace machine
