@@ -76,6 +76,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::channel_timeout, "connection timed out" },
         { error::address_blocked, "address blocked by policy" },
         { error::channel_stopped, "channel stopped" },
+        { error::peer_throttling, "unresponsive peer may be throttling" },
 
         // block pool
         { error::duplicate_block, "duplicate block" },
