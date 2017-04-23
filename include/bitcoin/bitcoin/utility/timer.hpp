@@ -56,7 +56,7 @@ inline std::string local_time()
 // boost::timer::auto_cpu_timer requires the boost timer lib dependency.
 
 /// Class to measure the execution time of a callable.
-template <typename Time = asio::milliseconds, class Clock=asio::steady_clock>
+template <typename Time=asio::milliseconds, class Clock=asio::steady_clock>
 struct timer
 {
     /// Returns the quantity (count) of the elapsed time as TimeT units.
