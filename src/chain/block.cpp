@@ -770,7 +770,7 @@ code block::accept(const chain_state& state, bool transactions) const
     // TODO: relates timestamp to tx.locktime (pool cache min tx.timestamp).
     // This recurses txs but is not applied via mempool (timestamp required).
     else if (!is_final(state.height()))
-        return error::non_final_transaction;
+        return error::block_non_final;
 
     // The coinbase tx is never seen/cached by the tx pool.
     else if (bip34 && !is_valid_coinbase_script(state.height()))

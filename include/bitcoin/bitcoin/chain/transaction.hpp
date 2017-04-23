@@ -163,6 +163,7 @@ public:
     bool is_internal_double_spend() const;
     bool is_double_spend(bool include_unconfirmed) const;
     bool is_missing_previous_outputs() const;
+    bool is_final(size_t block_height) const;
     bool is_final(size_t block_height, uint32_t block_time) const;
     bool is_locktime_conflict() const;
 

@@ -45,6 +45,7 @@
 #include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/bitcoin/utility/timer.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -512,6 +513,12 @@ bool transaction::all_inputs_final() const
     return std::all_of(inputs_.begin(), inputs_.end(), finalized);
 }
 
+bool transaction::is_final(size_t block_height) const
+{
+    const auto next_block_time = static_cast<uint32_t>(zulu_time());
+    return is_final(block_height, next_block_time);
+}
+
 bool transaction::is_final(size_t block_height, uint32_t block_time) const
 {
     const auto max_locktime = [=]()
@@ -805,6 +812,9 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
 
     if (transaction_pool && state.is_under_checkpoint())
         return error::premature_validation;
+
+    if (transaction_pool && !is_final(state.height()))
+        return error::transaction_non_final;
 
     //*************************************************************************
     // CONSENSUS:
