@@ -43,11 +43,6 @@ using namespace bc::machine;
 // Inlines.
 //-----------------------------------------------------------------------------
 
-inline uint32_t now()
-{
-    return static_cast<uint32_t>(zulu_time());
-}
-
 inline size_t version_sample_size(bool testnet)
 {
     return testnet ? testnet_sample : mainnet_sample;
@@ -470,7 +465,9 @@ chain_state::data chain_state::to_pool(const chain_state& top,
     data.hash = null_hash;
     data.bits.self = proof_of_work_limit;
     data.version.self = version;
-    data.timestamp.self = now();
+
+    // This is not usable by the tx pool as the time must move forward.
+    data.timestamp.self = max_uint32;
     return data;
 }
 
