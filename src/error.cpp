@@ -109,7 +109,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::block_legacy_sigop_limit, "too many block legacy signature operations" },
 
         // accept block
-        { error::non_final_transaction, "block contains a non-final transaction" },
+        { error::block_non_final, "block contains a non-final transaction" },
         { error::coinbase_height_mismatch, "block height mismatch in coinbase" },
         { error::coinbase_value_limit, "coinbase value too high" },
         { error::block_embedded_sigop_limit, "too many block embedded signature operations" },
@@ -124,6 +124,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::transaction_legacy_sigop_limit, "too many transaction legacy signature operations" },
 
         // accept transaction
+        { error::transaction_non_final, "transaction currently non-final for next block" },
         { error::premature_validation, "transaction validation under checkpoint" },
         { error::unspent_duplicate, "matching transaction with unspent outputs" },
         { error::missing_previous_output, "previous output not found" },

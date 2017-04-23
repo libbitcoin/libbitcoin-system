@@ -106,7 +106,7 @@ enum error_code_t
     block_legacy_sigop_limit = 30,
 
     // accept block
-    non_final_transaction = 34,
+    block_non_final = 34,
     coinbase_height_mismatch = 37,
     coinbase_value_limit = 41,
     block_embedded_sigop_limit = 52,
@@ -122,6 +122,7 @@ enum error_code_t
     transaction_legacy_sigop_limit = 54,
 
     // accept transaction
+    transaction_non_final = 74,
     premature_validation = 69,
     unspent_duplicate = 38,
     missing_previous_output = 19,
