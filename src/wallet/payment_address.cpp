@@ -291,6 +291,7 @@ payment_address payment_address::extract(const chain::script& script,
         // pay
         // --------------------------------------------------------------------
 
+        // TODO: extract addresses into a vector result.
         case script_pattern::pay_multisig:
             return{};
 
@@ -318,9 +319,11 @@ payment_address payment_address::extract(const chain::script& script,
         // sign
         // --------------------------------------------------------------------
 
+        // TODO: extract addresses into a vector result.
         case script_pattern::sign_multisig:
             return{};
 
+        // There is no address in a sign_public_key script.
         case script_pattern::sign_public_key:
             return{};
 
