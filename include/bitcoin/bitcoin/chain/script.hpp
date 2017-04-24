@@ -144,21 +144,19 @@ public:
         return (fork & active_forks) != 0;
     }
 
-    /// No-code patterns (consensus).
+    /// Consensus data patterns.
     static bool is_push_only(const operation::list& ops);
     static bool is_relaxed_push(const operation::list& ops);
     static bool is_coinbase_pattern(const operation::list& ops, size_t height);
 
-    /// Null-data pattern (standard).
+    /// Standard patterns (standard, psh is also consensus).
     static bool is_null_data_pattern(const operation::list& ops);
-
-    /// Payment script patterns (standard, psh is also consensus).
     static bool is_pay_multisig_pattern(const operation::list& ops);
     static bool is_pay_public_key_pattern(const operation::list& ops);
     static bool is_pay_key_hash_pattern(const operation::list& ops);
     static bool is_pay_script_hash_pattern(const operation::list& ops);
 
-    /// Signature script patterns (standard).
+    /// Signature patterns (standard).
     static bool is_sign_multisig_pattern(const operation::list& ops);
     static bool is_sign_public_key_pattern(const operation::list& ops);
     static bool is_sign_key_hash_pattern(const operation::list& ops);
@@ -177,11 +175,12 @@ public:
     // Utilities (non-static).
     //-------------------------------------------------------------------------
 
+    // Standard pattern detection.
     machine::script_pattern pattern() const;
+
     size_t sigops(bool embedded) const;
     size_t embedded_sigops(const script& prevout_script) const;
     void find_and_delete(const data_stack& endorsements);
-    ////bool is_coinbase_pattern(size_t height) const;
     bool is_unspendable() const;
 
     // Validation.
