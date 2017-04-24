@@ -651,6 +651,8 @@ bool script::create_endorsement(endorsement& out, const ec_secret& secret,
     const script& prevout_script, const transaction& tx, uint32_t input_index,
     uint8_t sighash_type)
 {
+    out.reserve(max_endorsement_size);
+
     // This always produces a valid signature hash, including one_hash.
     const auto sighash = script::generate_signature_hash(tx, input_index,
         prevout_script, sighash_type);
@@ -662,6 +664,7 @@ bool script::create_endorsement(endorsement& out, const ec_secret& secret,
 
     // Add the sighash type to the end of the DER signature -> endorsement.
     out.push_back(sighash_type);
+    out.shrink_to_fit();
     return true;
 }
 
@@ -691,11 +694,13 @@ bool script::is_relaxed_push(const operation::list& ops)
     return std::all_of(ops.begin(), ops.end(), push);
 }
 
+// TODO: confirm that the type of data opcode is unrestricted for policy.
 bool script::is_coinbase_pattern(const operation::list& ops, size_t height)
 {
     return !ops.empty() && ops.front().data() == number(height).data();
 }
 
+// TODO: is_push should be limited to 2 bytes (but not minimal) for policy.
 bool script::is_null_data_pattern(const operation::list& ops)
 {
     return ops.size() == 2
@@ -704,6 +709,7 @@ bool script::is_null_data_pattern(const operation::list& ops)
         && ops[1].data().size() <= max_null_data_size;
 }
 
+// TODO: confirm that the type of data opcode is unrestricted for policy.
 bool script::is_pay_multisig_pattern(const operation::list& ops)
 {
     static constexpr size_t op_1 = static_cast<uint8_t>(opcode::push_positive_1);
@@ -733,6 +739,7 @@ bool script::is_pay_multisig_pattern(const operation::list& ops)
     return true;
 }
 
+// TODO: confirm that the type of data opcode is unrestricted for policy.
 bool script::is_pay_public_key_pattern(const operation::list& ops)
 {
     return ops.size() == 2
@@ -741,6 +748,7 @@ bool script::is_pay_public_key_pattern(const operation::list& ops)
         && ops[1].code() == opcode::checksig;
 }
 
+// TODO: confirm that the type of data opcode is unrestricted for policy.
 bool script::is_pay_key_hash_pattern(const operation::list& ops)
 {
     return ops.size() == 5
@@ -888,18 +896,18 @@ operation::list script::to_pay_multisig_pattern(uint8_t signatures,
 
     operation::list ops;
     ops.reserve(points.size() + 3);
-    ops.push_back({ op_m });
+    ops.emplace_back(op_m);
 
     for (const auto point: points)
     {
         if (!is_public_key(point))
             return{};
 
-        ops.push_back(point);
+        ops.emplace_back(point);
     }
 
-    ops.push_back({ op_n });
-    ops.push_back({ opcode::checkmultisig });
+    ops.emplace_back(op_n);
+    ops.emplace_back(opcode::checkmultisig);
     return ops;
 }
 
