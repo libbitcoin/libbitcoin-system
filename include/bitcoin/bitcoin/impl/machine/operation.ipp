@@ -160,14 +160,14 @@ inline const data_chunk& operation::data() const
 }
 
 // Utilities.
-//-------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 // private
-//*************************************************************************
+//*****************************************************************************
 // CONSENSUS: op data size is limited to 520 bytes, which requires no more
 // than two bytes to encode. However the four byte encoding can represent
 // a value of any size, so remains valid despite the data size limit.
-//*************************************************************************
+//*****************************************************************************
 inline uint32_t operation::read_data_size(opcode code, reader& source)
 {
     BC_CONSTEXPR auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
@@ -235,7 +235,7 @@ inline uint8_t operation::opcode_to_positive(opcode code)
 {
     BITCOIN_ASSERT(is_positive(code));
     BC_CONSTEXPR auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
-    return static_cast<uint8_t>(code)-op_81 + 1;
+    return static_cast<uint8_t>(code) - op_81 + 1;
 }
 
 // [0..79, 81..96]
@@ -270,9 +270,32 @@ inline bool operation::is_positive(opcode code)
     return value >= op_81 && value <= op_96;
 }
 
+inline bool operation::is_evaluable(opcode code)
+{
+    return !is_push(code) && !is_reserved(code) && !is_disabled(code);
+}
+
+inline bool operation::is_reserved(opcode code)
+{
+    BC_CONSTEXPR auto op_186 = static_cast<uint8_t>(opcode::reserved_186);
+    BC_CONSTEXPR auto op_255 = static_cast<uint8_t>(opcode::reserved_255);
+
+    switch (code)
+    {
+        case opcode::reserved_80:
+        case opcode::reserved_98:
+        case opcode::reserved_137:
+        case opcode::reserved_138:
+            return true;
+        default:
+            const auto value = static_cast<uint8_t>(code);
+            return value >= op_186 && value <= op_255;
+    }
+}
+
 //*****************************************************************************
 // CONSENSUS: the codes VERIF and VERNOTIF are in the conditional range yet are
-// not handled. As a result satoshi always processes them in the op swtich.
+// not handled. As a result satoshi always processes them in the op switch.
 // This causes them to always fail as unhandled. It is misleading that the
 // satoshi test cases refer to these as reserved codes. These two codes behave
 // exactly as the explicitly disabled codes. On the other hand VER is not within
@@ -325,7 +348,7 @@ inline bool operation::is_conditional(opcode code)
 }
 
 //*****************************************************************************
-// CONSENSUS: this test includes the satoshi 'reserved' code.
+// CONSENSUS: this test explicitly includes the satoshi 'reserved' code.
 // This affects the operation count in p2sh script evaluation.
 // Presumably this was an unintended consequence of range testing enums.
 //*****************************************************************************
@@ -337,7 +360,7 @@ inline bool operation::is_relaxed_push(opcode code)
 }
 
 // Validation.
-//-------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 inline bool operation::is_push() const
 {
@@ -352,6 +375,11 @@ inline bool operation::is_counted() const
 inline bool operation::is_positive() const
 {
     return is_positive(code_);
+}
+
+inline bool operation::is_evaluable() const
+{
+    return is_evaluable(code_);
 }
 
 inline bool operation::is_disabled() const
@@ -373,6 +401,14 @@ inline bool operation::is_oversized() const
 {
     // bit.ly/2eSDkOJ
     return data_.size() > max_push_data_size;
+}
+
+// Standardness.
+//-----------------------------------------------------------------------------
+
+inline bool operation::is_minimal_push() const
+{
+    return code_ == minimal_opcode_from_data(data_);
 }
 
 } // namespace machine

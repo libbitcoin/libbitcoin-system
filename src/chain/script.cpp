@@ -651,6 +651,8 @@ bool script::create_endorsement(endorsement& out, const ec_secret& secret,
     const script& prevout_script, const transaction& tx, uint32_t input_index,
     uint8_t sighash_type)
 {
+    out.reserve(max_endorsement_size);
+
     // This always produces a valid signature hash, including one_hash.
     const auto sighash = script::generate_signature_hash(tx, input_index,
         prevout_script, sighash_type);
@@ -662,6 +664,7 @@ bool script::create_endorsement(endorsement& out, const ec_secret& secret,
 
     // Add the sighash type to the end of the DER signature -> endorsement.
     out.push_back(sighash_type);
+    out.shrink_to_fit();
     return true;
 }
 
@@ -693,21 +696,36 @@ bool script::is_relaxed_push(const operation::list& ops)
 
 bool script::is_coinbase_pattern(const operation::list& ops, size_t height)
 {
-    return !ops.empty() && ops.front().data() == number(height).data();
+    return !ops.empty()
+        && ops[0].is_minimal_push()
+        && ops[0].data() == number(height).data();
 }
+
+// The satoshi client tests for 83 bytes total. This allows for the waste of
+// one byte to represent up to 75 bytes using the push_one_size opcode.
+////bool script::is_null_data_pattern(const operation::list& ops)
+////{
+////    static constexpr auto op_76 = static_cast<uint8_t>(opcode::push_one_size);
+////
+////    return ops.size() == 2
+////        && ops[0].code() == opcode::return_
+////        && static_cast<uint8_t>(ops[1].code()) <= op_76
+////        && ops[1].data().size() <= max_null_data_size;
+////}
 
 bool script::is_null_data_pattern(const operation::list& ops)
 {
     return ops.size() == 2
         && ops[0].code() == opcode::return_
-        && ops[1].is_push()
+        && ops[1].is_minimal_push()
         && ops[1].data().size() <= max_null_data_size;
 }
 
+// TODO: confirm that the type of data opcode is unrestricted for policy.
 bool script::is_pay_multisig_pattern(const operation::list& ops)
 {
-    static constexpr size_t op_1 = static_cast<uint8_t>(opcode::push_positive_1);
-    static constexpr size_t op_16 = static_cast<uint8_t>(opcode::push_positive_16);
+    static constexpr auto op_1 = static_cast<uint8_t>(opcode::push_positive_1);
+    static constexpr auto op_16 = static_cast<uint8_t>(opcode::push_positive_16);
 
     const auto op_count = ops.size();
 
@@ -733,20 +751,20 @@ bool script::is_pay_multisig_pattern(const operation::list& ops)
     return true;
 }
 
+// TODO: confirm that the type of data opcode is unrestricted for policy.
 bool script::is_pay_public_key_pattern(const operation::list& ops)
 {
     return ops.size() == 2
-        ////&& ops[0].is_push()
         && is_public_key(ops[0].data())
         && ops[1].code() == opcode::checksig;
 }
 
+// TODO: confirm that the type of data opcode is unrestricted for policy.
 bool script::is_pay_key_hash_pattern(const operation::list& ops)
 {
     return ops.size() == 5
         && ops[0].code() == opcode::dup
         && ops[1].code() == opcode::hash160
-        ////&& ops[2].is_push()
         && ops[2].data().size() == short_hash_size
         && ops[3].code() == opcode::equalverify
         && ops[4].code() == opcode::checksig;
@@ -764,26 +782,25 @@ bool script::is_pay_script_hash_pattern(const operation::list& ops)
         && ops[2].code() == opcode::equal;
 }
 
+// The leading zero is wacky satoshi behavior that we must perpetuate.
 bool script::is_sign_multisig_pattern(const operation::list& ops)
 {
-    if (ops.size() < 2 || !is_push_only(ops))
-        return false;
-
-    if (ops.front().code() != opcode::push_size_0)
-        return false;
-
-    return true;
+    return ops.size() >= 2
+        && ops[0].code() == opcode::push_size_0
+        && is_push_only(ops);
 }
 
 bool script::is_sign_public_key_pattern(const operation::list& ops)
 {
-    return ops.size() == 1 && is_push_only(ops);
+    return ops.size() == 1
+        && is_push_only(ops);
 }
 
 bool script::is_sign_key_hash_pattern(const operation::list& ops)
 {
-    return ops.size() == 2 && is_push_only(ops) &&
-        is_public_key(ops.back().data());
+    return ops.size() == 2
+        && is_push_only(ops)
+        && is_public_key(ops.back().data());
 }
 
 bool script::is_sign_script_hash_pattern(const operation::list& ops)
@@ -888,18 +905,18 @@ operation::list script::to_pay_multisig_pattern(uint8_t signatures,
 
     operation::list ops;
     ops.reserve(points.size() + 3);
-    ops.push_back({ op_m });
+    ops.emplace_back(op_m);
 
     for (const auto point: points)
     {
         if (!is_public_key(point))
             return{};
 
-        ops.push_back(point);
+        ops.emplace_back(point);
     }
 
-    ops.push_back({ op_n });
-    ops.push_back({ opcode::checkmultisig });
+    ops.emplace_back(op_n);
+    ops.emplace_back(opcode::checkmultisig);
     return ops;
 }
 
@@ -1068,8 +1085,26 @@ void script::find_and_delete(const data_stack& endorsements)
 
 bool script::is_unspendable() const
 {
-    return satoshi_content_size() > max_script_size ||
-        is_null_data_pattern(operations());
+    if (satoshi_content_size() > max_script_size)
+        return true;
+
+    // The first operations access must be method-based to guarantee the cache.
+    if (operations().empty() || operations_.front().code() != opcode::return_)
+        return false;
+
+    const auto evaluable = [](const operation& op)
+    {
+        return operation::is_evaluable(op.code());
+    };
+
+    //*************************************************************************
+    // CONSENSUS: This is more comprehensive then the satoshi implementation,
+    // which uses is_relaxed_push to text for non-evaluable. That includes the
+    // one reserved code in the push range, but not the 73 others, and it does
+    // not consider any of the 17 disabled codes. It is possible to more
+    // completely statically determine spendability, a future optimization.
+    //*************************************************************************
+    return !std::any_of(operations_.begin(), operations_.end(), evaluable);
 }
 
 // Validation.
