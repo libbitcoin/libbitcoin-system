@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_MESSAGE_MESSAGES_HPP
 #define LIBBITCOIN_MESSAGE_MESSAGES_HPP
 
-#include <algorithm>
 #include <cstdint>
 #include <cstddef>
 #include <bitcoin/bitcoin/math/limits.hpp>
@@ -54,7 +53,6 @@
 #include <bitcoin/bitcoin/message/transaction.hpp>
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
-#include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 // Minimum current libbitcoin protocol version:     31402
@@ -151,39 +149,17 @@ template <typename Message>
 data_chunk serialize(uint32_t version, const Message& packet,
     uint32_t magic)
 {
-    const auto heading_size = heading::satoshi_fixed_size();
-    const auto payload_size = packet.serialized_size(version);
-    const auto message_size = heading_size + payload_size;
+    // Serialize the payload (required for header size).
+    const auto payload = packet.to_data(version);
 
-    // Unfortunately data_sink doesn't support seek, so this is a little ugly.
-    // The header requires payload size and checksum but prepends the payload.
-    // Use a stream to prevent unnecessary copying of the payload.
-    data_chunk data;
+    // Construct the payload header.
+    heading head(magic, Message::command,
+        safe_unsigned<uint32_t>(payload.size()), bitcoin_checksum(payload));
 
-    // Reserve memory for the full message.
-    data.reserve(message_size);
-
-    // Size the vector for the heading so that payload insertion will follow.
-    data.resize(heading_size);
-
-    // Insert the payload after the heading and into the reservation.
-    data_sink ostream(data);
-    packet.to_data(version, ostream);
-    ostream.flush();
-    BITCOIN_ASSERT(data.size() == message_size);
-
-    // Create the payload checksum without copying the buffer.
-    data_slice slice(data.data() + heading_size, data.data() + message_size);
-    const auto check = bitcoin_checksum(slice);
-    const auto payload_size32 = safe_unsigned<uint32_t>(payload_size);
-
-    // Create and serialize the heading to a temporary variable (12 bytes).
-    heading head(magic, Message::command, payload_size32, check);
-    auto heading = head.to_data();
-
-    // Move the heading into the allocated beginning of the message buffer.
-    std::move(heading.begin(), heading.end(), data.begin());
-    return data;
+    // Serialize header and copy the payload into a single message buffer.
+    auto message = head.to_data();
+    extend_data(message, payload);
+    return message;
 }
 
 BC_API size_t variable_uint_size(uint64_t value);
