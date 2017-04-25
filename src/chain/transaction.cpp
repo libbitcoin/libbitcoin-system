@@ -717,6 +717,16 @@ bool transaction::is_double_spend(bool include_unconfirmed) const
     return std::any_of(inputs_.begin(), inputs_.end(), spent);
 }
 
+bool transaction::is_dusty(uint64_t minimum_output_value) const
+{
+    const auto dust = [minimum_output_value](const output& output)
+    {
+        return output.value() < minimum_output_value;
+    };
+
+    return std::any_of(outputs_.begin(), outputs_.end(), dust);
+}
+
 bool transaction::is_mature(size_t height) const
 {
     const auto mature = [height](const input& input)
