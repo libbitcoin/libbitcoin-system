@@ -82,6 +82,7 @@ enum error_code_t
     insufficient_work = 48,
     orphan_transaction = 14,
     insufficient_fee = 70,
+    dusty_transaction = 76,
     stale_chain = 75,
 
     // check header

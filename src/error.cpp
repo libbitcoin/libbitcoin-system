@@ -85,6 +85,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::insufficient_work, "insufficient work to reorganize" },
         { error::orphan_transaction, "missing transaction parent" },
         { error::insufficient_fee, "insufficient transaction fee" },
+        { error::dusty_transaction, "output value too low" },
         { error::stale_chain, "blockchain too far behind" },
 
         // check header
