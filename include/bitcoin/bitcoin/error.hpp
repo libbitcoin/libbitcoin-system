@@ -75,15 +75,14 @@ enum error_code_t
     store_block_invalid_height = 67,
     store_block_missing_parent = 68,
 
-    // block pool
+    // blockchain
     duplicate_block = 51,
     orphan_block = 5,
     invalid_previous_block = 24,
     insufficient_work = 48,
-
-    // transaction pool
     orphan_transaction = 14,
     insufficient_fee = 70,
+    stale_chain = 75,
 
     // check header
     invalid_proof_of_work = 26,
