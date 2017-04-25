@@ -923,6 +923,10 @@ operation::list script::to_pay_multisig_pattern(uint8_t signatures,
 // Utilities (non-static).
 //-----------------------------------------------------------------------------
 
+// TODO: create output_pattern() and input_pattern() so that each can be tested
+// in isolation, reducing wasteful processing of the others.
+// TODO: implement standardness tests in blockchain, not in system.
+
 // This excludes the bip34 coinbase pattern, which can be tested independently.
 script_pattern script::pattern() const
 {
