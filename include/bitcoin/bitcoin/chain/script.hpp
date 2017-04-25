@@ -144,25 +144,25 @@ public:
         return (fork & active_forks) != 0;
     }
 
-    /// Consensus data patterns.
+    /// Consensus patterns.
     static bool is_push_only(const operation::list& ops);
     static bool is_relaxed_push(const operation::list& ops);
     static bool is_coinbase_pattern(const operation::list& ops, size_t height);
 
-    /// Standard patterns (standard, psh is also consensus).
+    /// Common output patterns (psh is also consensus).
     static bool is_null_data_pattern(const operation::list& ops);
     static bool is_pay_multisig_pattern(const operation::list& ops);
     static bool is_pay_public_key_pattern(const operation::list& ops);
     static bool is_pay_key_hash_pattern(const operation::list& ops);
     static bool is_pay_script_hash_pattern(const operation::list& ops);
 
-    /// Signature patterns (standard).
+    /// Common input patterns.
     static bool is_sign_multisig_pattern(const operation::list& ops);
     static bool is_sign_public_key_pattern(const operation::list& ops);
     static bool is_sign_key_hash_pattern(const operation::list& ops);
     static bool is_sign_script_hash_pattern(const operation::list& ops);
 
-    /// Stack factories (standard).
+    /// Stack factories.
     static operation::list to_null_data_pattern(data_slice data);
     static operation::list to_pay_public_key_pattern(data_slice point);
     static operation::list to_pay_key_hash_pattern(const short_hash& hash);
@@ -175,9 +175,10 @@ public:
     // Utilities (non-static).
     //-------------------------------------------------------------------------
 
-    // Standard pattern detection.
+    // Common pattern detection.
     machine::script_pattern pattern() const;
 
+    // Consensus computations.
     size_t sigops(bool embedded) const;
     size_t embedded_sigops(const script& prevout_script) const;
     void find_and_delete(const data_stack& endorsements);
