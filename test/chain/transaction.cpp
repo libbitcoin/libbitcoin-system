@@ -29,14 +29,14 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_1__always__returns_default_initial
     BOOST_REQUIRE(!instance.is_valid());
 }
 
-#define TX0 \
+#define TX0_INPUTS \
 "f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc4de65310fc" \
 "010000006a473044022050d8368cacf9bf1b8fb1f7cfd9aff63294789eb17601" \
 "39e7ef41f083726dadc4022067796354aba8f2e02363c5e510aa7e2830b11547" \
 "2fb31de67d16972867f13945012103e589480b2f746381fca01a9b12c517b7a4" \
 "82a203c8b2742985da0ac72cc078f2ffffffff"
 
-#define TX0_LAST_OUTPUT \
+#define TX0_INPUTS_LAST_OUTPUT \
 "f0c9c467000000001976a914d9d78e26df4e4601cf9b26d09c7b280ee764469f88ac"
 
 #define TX1 \
@@ -175,10 +175,10 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_2__valid_input__returns_input_init
     uint32_t locktime = 4568656u;
     chain::input::list inputs;
     inputs.emplace_back();
-    BOOST_REQUIRE(inputs.back().from_data(to_chunk(base16_literal(TX0))));
+    BOOST_REQUIRE(inputs.back().from_data(to_chunk(base16_literal(TX0_INPUTS))));
     chain::output::list outputs;
     outputs.emplace_back();
-    BOOST_REQUIRE(outputs.back().from_data(to_chunk(base16_literal(TX0_LAST_OUTPUT))));
+    BOOST_REQUIRE(outputs.back().from_data(to_chunk(base16_literal(TX0_INPUTS_LAST_OUTPUT))));
 
     chain::transaction instance(version, locktime, inputs, outputs);
     BOOST_REQUIRE(instance.is_valid());
@@ -194,10 +194,10 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_3__valid_input__returns_input_init
     uint32_t locktime = 4568656u;
     chain::input::list inputs;
     inputs.emplace_back();
-    BOOST_REQUIRE(inputs.back().from_data(to_chunk(base16_literal(TX0))));
+    BOOST_REQUIRE(inputs.back().from_data(to_chunk(base16_literal(TX0_INPUTS))));
     chain::output::list outputs;
     outputs.emplace_back();
-    BOOST_REQUIRE(outputs.back().from_data(to_chunk(base16_literal(TX0_LAST_OUTPUT))));
+    BOOST_REQUIRE(outputs.back().from_data(to_chunk(base16_literal(TX0_INPUTS_LAST_OUTPUT))));
 
     // These must be non-const.
     auto dup_inputs = inputs;
@@ -531,7 +531,7 @@ BOOST_AUTO_TEST_CASE(transaction__inputs_setter_1__roundtrip__success)
 {
     chain::input::list inputs;
     inputs.emplace_back();
-    BOOST_REQUIRE(inputs.back().from_data(to_chunk(base16_literal(TX0))));
+    BOOST_REQUIRE(inputs.back().from_data(to_chunk(base16_literal(TX0_INPUTS))));
 
     chain::transaction instance;
     BOOST_REQUIRE(inputs != instance.inputs());
@@ -543,7 +543,7 @@ BOOST_AUTO_TEST_CASE(transaction__inputs_setter_2__roundtrip__success)
 {
     chain::input::list inputs;
     inputs.emplace_back();
-    BOOST_REQUIRE(inputs.back().from_data(to_chunk(base16_literal(TX0))));
+    BOOST_REQUIRE(inputs.back().from_data(to_chunk(base16_literal(TX0_INPUTS))));
 
     // This must be non-const.
     auto dup_inputs = inputs;
@@ -558,7 +558,7 @@ BOOST_AUTO_TEST_CASE(transaction__outputs_setter_1__roundtrip__success)
 {
     chain::output::list outputs;
     outputs.emplace_back();
-    BOOST_REQUIRE(outputs.back().from_data(to_chunk(base16_literal(TX0_LAST_OUTPUT))));
+    BOOST_REQUIRE(outputs.back().from_data(to_chunk(base16_literal(TX0_INPUTS_LAST_OUTPUT))));
 
     chain::transaction instance;
     BOOST_REQUIRE(outputs != instance.outputs());
@@ -570,7 +570,7 @@ BOOST_AUTO_TEST_CASE(transaction__outputs_setter_2__roundtrip__success)
 {
     chain::output::list outputs;
     outputs.emplace_back();
-    BOOST_REQUIRE(outputs.back().from_data(to_chunk(base16_literal(TX0_LAST_OUTPUT))));
+    BOOST_REQUIRE(outputs.back().from_data(to_chunk(base16_literal(TX0_INPUTS_LAST_OUTPUT))));
 
     // This must be non-const.
     auto dup_outputs = outputs;
@@ -819,7 +819,53 @@ BOOST_AUTO_TEST_CASE(transaction__is_double_spend__include_unconfirmed_true_with
     BOOST_REQUIRE(instance.is_double_spend(true));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_mature__empty_inputs__returns_true)
+BOOST_AUTO_TEST_CASE(transaction__is_dusty__no_outputs_zero__returns_false)
+{
+    chain::transaction instance;
+    BOOST_REQUIRE(!instance.is_dusty(0));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_above_both__returns_true)
+{
+    static const auto raw_tx = to_chunk(base16_literal(TX1));
+    chain::transaction instance;
+    BOOST_REQUIRE(instance.from_data(raw_tx));
+    BOOST_REQUIRE(instance.is_dusty(1740950001));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_below_both__returns_false)
+{
+    static const auto raw_tx = to_chunk(base16_literal(TX1));
+    chain::transaction instance;
+    BOOST_REQUIRE(instance.from_data(raw_tx));
+    BOOST_REQUIRE(!instance.is_dusty(257999999));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_at_upper__returns_true)
+{
+    static const auto raw_tx = to_chunk(base16_literal(TX1));
+    chain::transaction instance;
+    BOOST_REQUIRE(instance.from_data(raw_tx));
+    BOOST_REQUIRE(instance.is_dusty(1740950000));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_at_lower__returns_false)
+{
+    static const auto raw_tx = to_chunk(base16_literal(TX1));
+    chain::transaction instance;
+    BOOST_REQUIRE(instance.from_data(raw_tx));
+    BOOST_REQUIRE(!instance.is_dusty(258000000));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_between_both__returns_true)
+{
+    static const auto raw_tx = to_chunk(base16_literal(TX1));
+    chain::transaction instance;
+    BOOST_REQUIRE(instance.from_data(raw_tx));
+    BOOST_REQUIRE(instance.is_dusty(258000001));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_mature__no_inputs__returns_true)
 {
     chain::transaction instance;
     BOOST_REQUIRE(instance.is_mature(453u));
