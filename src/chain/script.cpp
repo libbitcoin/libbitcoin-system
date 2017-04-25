@@ -818,7 +818,7 @@ bool script::is_sign_script_hash_pattern(const operation::list& ops)
     if (!redeem.from_data(redeem_data, false))
         return false;
 
-    // Is the redeem script a standard pay (output) script?
+    // Is the redeem script a common output script?
     const auto redeem_script_pattern = redeem.pattern();
     return redeem_script_pattern == script_pattern::pay_multisig
         || redeem_script_pattern == script_pattern::pay_public_key
@@ -923,7 +923,7 @@ operation::list script::to_pay_multisig_pattern(uint8_t signatures,
 // Utilities (non-static).
 //-----------------------------------------------------------------------------
 
-// This excludes the bip34 coinbase pattern as it is not "standard".
+// This excludes the bip34 coinbase pattern, which can be tested independently.
 script_pattern script::pattern() const
 {
     // The first operations access must be method-based to guarantee the cache.
