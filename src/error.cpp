@@ -78,15 +78,15 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::channel_stopped, "channel stopped" },
         { error::peer_throttling, "unresponsive peer may be throttling" },
 
-        // block pool
+        // blockchain
         { error::duplicate_block, "duplicate block" },
         { error::orphan_block, "missing block parent" },
         { error::invalid_previous_block, "previous block failed to validate" },
         { error::insufficient_work, "insufficient work to reorganize" },
-
-        // transaction pool
         { error::orphan_transaction, "missing transaction parent" },
         { error::insufficient_fee, "insufficient transaction fee" },
+        { error::dusty_transaction, "output value too low" },
+        { error::stale_chain, "blockchain too far behind" },
 
         // check header
         { error::invalid_proof_of_work, "proof of work invalid" },
