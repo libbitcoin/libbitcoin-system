@@ -123,9 +123,7 @@ public:
     static bool is_conditional(opcode code);
     static bool is_relaxed_push(opcode code);
 
-    // Consensus.
-    //-------------------------------------------------------------------------
-
+    /// Categories of operations.
     bool is_push() const;
     bool is_counted() const;
     bool is_positive() const;
@@ -134,10 +132,6 @@ public:
     bool is_conditional() const;
     bool is_relaxed_push() const;
     bool is_oversized() const;
-
-    // Standardness.
-    //-------------------------------------------------------------------------
-
     bool is_minimal_push() const;
 
 protected:
