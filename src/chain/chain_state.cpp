@@ -292,7 +292,6 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks)
     return bits_high(values);
 }
 
-// [CalculateNextWorkRequired]
 uint32_t chain_state::work_required_retarget(const data& values)
 {
     static const uint256_t pow_limit(compact{ proof_of_work_limit });
@@ -322,7 +321,6 @@ uint32_t chain_state::retarget_timespan(const data& values)
     return range_constrain(timespan, min_timespan, max_timespan);
 }
 
-// [GetNextWorkRequired::fPowAllowMinDifficultyBlocks]
 uint32_t chain_state::easy_work_required(const data& values)
 {
     BITCOIN_ASSERT(values.height != 0);
@@ -416,8 +414,22 @@ chain_state::map chain_state::get_map(size_t height,
     return map;
 }
 
-chain_state::data chain_state::to_pool(const chain_state& top,
-    uint32_t version)
+// static
+uint32_t chain_state::signal_version(uint32_t forks)
+{
+    if (script::is_enabled(forks, rule_fork::bip65_rule))
+        return bip65_version;
+
+    if (script::is_enabled(forks, rule_fork::bip66_rule))
+        return bip66_version;
+
+    if (script::is_enabled(forks, rule_fork::bip34_rule))
+        return bip34_version;
+
+    return first_version;
+}
+
+chain_state::data chain_state::to_pool(const chain_state& top)
 {
     // Copy data from presumed previous-height block state.
     auto data = top.data_;
@@ -461,19 +473,18 @@ chain_state::data chain_state::to_pool(const chain_state& top,
         data.timestamp.ordered.pop_front();
 
     // Replace previous block state with pool chain state for next height.
+    // Only height and version are useful to the tx pool, others are computed.
     data.height = height;
     data.hash = null_hash;
     data.bits.self = proof_of_work_limit;
-    data.version.self = version;
-
-    // This is not usable by the tx pool as the time must move forward.
+    data.version.self = signal_version(forks);
     data.timestamp.self = max_uint32;
     return data;
 }
 
 // Constructor (top to pool).
-chain_state::chain_state(const chain_state& top, uint32_t version)
-  : data_(to_pool(top, version)),
+chain_state::chain_state(const chain_state& top)
+  : data_(to_pool(top)),
     forks_(top.forks_),
     checkpoints_(top.checkpoints_),
     active_(activation(data_, forks_)),
