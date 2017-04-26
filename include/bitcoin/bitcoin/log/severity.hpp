@@ -26,6 +26,7 @@ namespace log {
 
 enum class severity
 {
+    verbose,
     debug,
     info,
     warning,

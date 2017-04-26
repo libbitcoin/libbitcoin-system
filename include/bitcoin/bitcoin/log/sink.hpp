@@ -33,11 +33,11 @@ typedef boost::shared_ptr<bc::ofstream> file;
 
 /// Initializes default non-rotable libbitcoin logging sinks and formats.
 void initialize(log::file& debug_file, log::file& error_file,
-    log::stream& output_stream, log::stream& error_stream);
+    log::stream& output_stream, log::stream& error_stream, bool verbose);
 
 /// Initializes default rotable libbitcoin logging sinks and formats.
 void initialize(const rotable_file& debug_file, const rotable_file& error_file,
-    log::stream& output_stream, log::stream& error_stream);
+    log::stream& output_stream, log::stream& error_stream, bool verbose);
 
 /// Log stream operator.
 formatter& operator<<(formatter& stream, severity value);
