@@ -44,6 +44,7 @@ BOOST_LOG_INLINE_GLOBAL_LOGGER_INIT(source, severity_source)
 #define BC_LOG_SEVERITY(id, level) \
     BOOST_LOG_CHANNEL_SEV(bc::log::source::get(), id, bc::log::severity::level)
 
+#define LOG_VERBOSE(module) BC_LOG_SEVERITY(module, verbose)
 #define LOG_DEBUG(module) BC_LOG_SEVERITY(module, debug)
 #define LOG_INFO(module) BC_LOG_SEVERITY(module, info)
 #define LOG_WARNING(module) BC_LOG_SEVERITY(module, warning)
