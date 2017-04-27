@@ -175,7 +175,6 @@ void initialize(const rotable_file& debug_file, const rotable_file& error_file,
     else
         add_text_file_sink(debug_file)->set_filter(lean_filter);
 
-    add_text_file_sink(debug_file)->set_filter(base_filter);
     add_text_file_sink(error_file)->set_filter(error_filter);
     add_text_stream_sink(output_stream)->set_filter(info_filter);
     add_text_stream_sink(error_stream)->set_filter(error_filter);
