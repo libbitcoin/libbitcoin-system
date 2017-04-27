@@ -240,6 +240,12 @@ void output::set_script(chain::script&& value)
     invalidate_cache();
 }
 
+bool output::is_dust(uint64_t minimum_value) const
+{
+    // If provably unspendable it does not expand the unspent output set.
+    return value_ < minimum_value && !script_.is_unspendable();
+}
+
 // protected
 void output::invalidate_cache() const
 {
