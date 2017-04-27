@@ -721,7 +721,7 @@ bool transaction::is_dusty(uint64_t minimum_output_value) const
 {
     const auto dust = [minimum_output_value](const output& output)
     {
-        return output.value() < minimum_output_value;
+        return output.is_dust(minimum_output_value);
     };
 
     return std::any_of(outputs_.begin(), outputs_.end(), dust);
