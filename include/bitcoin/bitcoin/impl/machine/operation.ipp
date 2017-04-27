@@ -359,9 +359,6 @@ inline bool operation::is_relaxed_push(opcode code)
     return value <= op_96;
 }
 
-// Validation.
-//-----------------------------------------------------------------------------
-
 inline bool operation::is_push() const
 {
     return is_push(code_);
@@ -402,9 +399,6 @@ inline bool operation::is_oversized() const
     // bit.ly/2eSDkOJ
     return data_.size() > max_push_data_size;
 }
-
-// Standardness.
-//-----------------------------------------------------------------------------
 
 inline bool operation::is_minimal_push() const
 {
