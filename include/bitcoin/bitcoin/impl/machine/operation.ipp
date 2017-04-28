@@ -270,11 +270,6 @@ inline bool operation::is_positive(opcode code)
     return value >= op_81 && value <= op_96;
 }
 
-inline bool operation::is_evaluable(opcode code)
-{
-    return !is_push(code) && !is_reserved(code) && !is_disabled(code);
-}
-
 inline bool operation::is_reserved(opcode code)
 {
     BC_CONSTEXPR auto op_186 = static_cast<uint8_t>(opcode::reserved_186);
@@ -372,11 +367,6 @@ inline bool operation::is_counted() const
 inline bool operation::is_positive() const
 {
     return is_positive(code_);
-}
-
-inline bool operation::is_evaluable() const
-{
-    return is_evaluable(code_);
 }
 
 inline bool operation::is_disabled() const

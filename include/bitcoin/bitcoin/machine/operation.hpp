@@ -117,7 +117,6 @@ public:
     static bool is_counted(opcode code);
     static bool is_numeric(opcode code);
     static bool is_positive(opcode code);
-    static bool is_evaluable(opcode code);
     static bool is_reserved(opcode code);
     static bool is_disabled(opcode code);
     static bool is_conditional(opcode code);
@@ -127,7 +126,6 @@ public:
     bool is_push() const;
     bool is_counted() const;
     bool is_positive() const;
-    bool is_evaluable() const;
     bool is_disabled() const;
     bool is_conditional() const;
     bool is_relaxed_push() const;
