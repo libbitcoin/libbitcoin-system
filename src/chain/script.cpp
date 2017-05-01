@@ -1087,28 +1087,14 @@ void script::find_and_delete(const data_stack& endorsements)
 ////    return std::equal(expected.begin(), expected.end(), actual.begin());
 ////}
 
+// An unspendable script is any that can provably not be spent under any
+// circumstance. This allows for exclusion of the output as unspendable.
+// The criteria below are need not be comprehensive but are fast to eval.
 bool script::is_unspendable() const
 {
-    if (satoshi_content_size() > max_script_size)
-        return true;
-
     // The first operations access must be method-based to guarantee the cache.
-    if (operations().empty() || operations_.front().code() != opcode::return_)
-        return false;
-
-    const auto evaluable = [](const operation& op)
-    {
-        return operation::is_evaluable(op.code());
-    };
-
-    //*************************************************************************
-    // CONSENSUS: This is more comprehensive then the satoshi implementation,
-    // which uses is_relaxed_push to text for non-evaluable. That includes the
-    // one reserved code in the push range, but not the 73 others, and it does
-    // not consider any of the 17 disabled codes. It is possible to more
-    // completely statically determine spendability, a future optimization.
-    //*************************************************************************
-    return !std::any_of(operations_.begin(), operations_.end(), evaluable);
+    return (!operations().empty() && operations_[0].code() == opcode::return_)
+        || satoshi_content_size() > max_script_size;
 }
 
 // Validation.
