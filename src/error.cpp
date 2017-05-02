@@ -76,16 +76,17 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::channel_timeout, "connection timed out" },
         { error::address_blocked, "address blocked by policy" },
         { error::channel_stopped, "channel stopped" },
+        { error::peer_throttling, "unresponsive peer may be throttling" },
 
-        // block pool
+        // blockchain
         { error::duplicate_block, "duplicate block" },
         { error::orphan_block, "missing block parent" },
         { error::invalid_previous_block, "previous block failed to validate" },
         { error::insufficient_work, "insufficient work to reorganize" },
-
-        // transaction pool
         { error::orphan_transaction, "missing transaction parent" },
         { error::insufficient_fee, "insufficient transaction fee" },
+        { error::dusty_transaction, "output value too low" },
+        { error::stale_chain, "blockchain too far behind" },
 
         // check header
         { error::invalid_proof_of_work, "proof of work invalid" },
@@ -108,7 +109,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::block_legacy_sigop_limit, "too many block legacy signature operations" },
 
         // accept block
-        { error::non_final_transaction, "block contains a non-final transaction" },
+        { error::block_non_final, "block contains a non-final transaction" },
         { error::coinbase_height_mismatch, "block height mismatch in coinbase" },
         { error::coinbase_value_limit, "coinbase value too high" },
         { error::block_embedded_sigop_limit, "too many block embedded signature operations" },
@@ -123,6 +124,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::transaction_legacy_sigop_limit, "too many transaction legacy signature operations" },
 
         // accept transaction
+        { error::transaction_non_final, "transaction currently non-final for next block" },
         { error::premature_validation, "transaction validation under checkpoint" },
         { error::unspent_duplicate, "matching transaction with unspent outputs" },
         { error::missing_previous_output, "previous output not found" },

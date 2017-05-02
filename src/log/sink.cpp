@@ -72,8 +72,12 @@ static const auto error_filter = base_filter && (
 static const auto info_filter = base_filter &&
     (attributes::severity == severity::info);
 
+static const auto lean_filter = base_filter &&
+    (attributes::severity != severity::verbose);
+
 static std::map<severity, std::string> severity_mapping
 {
+    { severity::verbose, "VERBOSE" },
     { severity::debug, "DEBUG" },
     { severity::info, "INFO" },
     { severity::warning, "WARNING" },
@@ -151,18 +155,26 @@ static boost::shared_ptr<text_stream_sink> add_text_stream_sink(
 }
 
 void initialize(log::file& debug_file, log::file& error_file,
-    log::stream& output_stream, log::stream& error_stream)
+    log::stream& output_stream, log::stream& error_stream, bool verbose)
 {
-    add_text_stream_sink(debug_file)->set_filter(base_filter);
+    if (verbose)
+        add_text_stream_sink(debug_file)->set_filter(base_filter);
+    else
+        add_text_stream_sink(debug_file)->set_filter(lean_filter);
+
     add_text_stream_sink(error_file)->set_filter(error_filter);
     add_text_stream_sink(output_stream)->set_filter(info_filter);
     add_text_stream_sink(error_stream)->set_filter(error_filter);
 }
 
 void initialize(const rotable_file& debug_file, const rotable_file& error_file,
-    log::stream& output_stream, log::stream& error_stream)
+    log::stream& output_stream, log::stream& error_stream, bool verbose)
 {
-    add_text_file_sink(debug_file)->set_filter(base_filter);
+    if (verbose)
+        add_text_file_sink(debug_file)->set_filter(base_filter);
+    else
+        add_text_file_sink(debug_file)->set_filter(lean_filter);
+
     add_text_file_sink(error_file)->set_filter(error_filter);
     add_text_stream_sink(output_stream)->set_filter(info_filter);
     add_text_stream_sink(error_stream)->set_filter(error_filter);

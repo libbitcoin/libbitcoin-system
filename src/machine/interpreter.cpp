@@ -28,10 +28,10 @@ namespace machine {
 
 code interpreter::run(program& program)
 {
-    code ec(error::invalid_script);
+    code ec;
 
     if (!program.is_valid())
-        return ec;
+        return error::invalid_script;
 
     for (const auto& op: program)
     {
@@ -39,7 +39,7 @@ code interpreter::run(program& program)
             return error::invalid_push_data_size;
 
         if (op.is_disabled())
-            return run(op, program);
+            return error::op_disabled;
 
         if (!program.increment_operation_count(op))
             return error::invalid_operation_count;

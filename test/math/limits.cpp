@@ -309,7 +309,7 @@ BOOST_AUTO_TEST_CASE(limits__safe_increment__size_t_minimum__expected)
 {
     auto value = minimum;
     static const auto expected = minimum + 1u;
-    BOOST_REQUIRE_EQUAL(safe_increment(value), expected);
+    safe_increment(value);
     BOOST_REQUIRE_EQUAL(value, expected);
 }
 
@@ -317,7 +317,7 @@ BOOST_AUTO_TEST_CASE(limits__safe_increment__size_t_half__expected)
 {
     auto value = half;
     static const auto expected = half + 1u;
-    BOOST_REQUIRE_EQUAL(safe_increment(value), expected);
+    safe_increment(value);
     BOOST_REQUIRE_EQUAL(value, expected);
 }
 
@@ -334,7 +334,7 @@ BOOST_AUTO_TEST_CASE(limits__safe_decrement__size_t_maximum__expected)
 {
     auto value = maximum;
     static const auto expected = maximum - 1u;
-    BOOST_REQUIRE_EQUAL(safe_decrement(value), expected);
+    safe_decrement(value);
     BOOST_REQUIRE_EQUAL(value, expected);
 }
 
@@ -342,7 +342,7 @@ BOOST_AUTO_TEST_CASE(limits__safe_decrement__size_t_half__expected)
 {
     auto value = half;
     static const auto expected = half - 1u;
-    BOOST_REQUIRE_EQUAL(safe_decrement(value), expected);
+    safe_decrement(value);
     BOOST_REQUIRE_EQUAL(value, expected);
 }
 

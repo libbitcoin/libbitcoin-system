@@ -120,8 +120,10 @@ public:
     static map get_map(size_t height, const checkpoints& checkpoints,
         uint32_t forks);
 
+    static uint32_t signal_version(uint32_t forks);
+
     /// Create pool state from top block chain state.
-    chain_state(const chain_state& top, uint32_t version);
+    chain_state(const chain_state& top);
 
     /// Create block state from pool chain state of same height.
     chain_state(const chain_state& pool, const chain::block& block);
@@ -173,7 +175,7 @@ private:
     static size_t collision_height(size_t height, uint32_t forks,
         const checkpoints& checkpoints);
 
-    static data to_pool(const chain_state& top, uint32_t version);
+    static data to_pool(const chain_state& top);
     static data to_block(const chain_state& pool_state, const block& block);
 
     static uint32_t work_required_retarget(const data& values);

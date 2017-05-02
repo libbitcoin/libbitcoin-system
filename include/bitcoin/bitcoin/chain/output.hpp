@@ -111,6 +111,7 @@ public:
 
     /// The payment address extracted from this output as a standard script.
     wallet::payment_address address() const;
+    bool is_dust(uint64_t minimum_output_value) const;
 
     // Validation.
     //-----------------------------------------------------------------------------

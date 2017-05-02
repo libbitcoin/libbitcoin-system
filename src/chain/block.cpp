@@ -723,10 +723,9 @@ code block::check() const
     else if (is_extra_coinbases())
         return error::extra_coinbases;
 
-    // This is a subset of is_internal_double_spend if one assumes that tx
-    // hash collisions cannot happen. But this is not the case, so we keep it.
-    else if (!is_distinct_transaction_set())
-        return error::internal_duplicate;
+    // This is subset of is_internal_double_spend if collisions cannot happen.
+    ////else if (!is_distinct_transaction_set())
+    ////    return error::internal_duplicate;
 
     else if (is_internal_double_spend())
         return error::block_internal_double_spend;
@@ -738,7 +737,6 @@ code block::check() const
     // This will not make a difference unless prevouts are populated, in which
     // case they are ignored. This means that p2sh sigops are not counted here.
     // This is a preliminary check, the final count must come from connect().
-    // Reenable once sigop caching is implemented, otherwise is deoptimization.
     ////else if (signature_operations(false) > max_block_sigops)
     ////    return error::block_legacy_sigop_limit;
 
@@ -768,11 +766,9 @@ code block::accept(const chain_state& state, bool transactions) const
         return error::success;
 
     // TODO: relates timestamp to tx.locktime (pool cache min tx.timestamp).
-    // This recurses txs but is not applied via mempool (timestamp required).
     else if (!is_final(state.height()))
-        return error::non_final_transaction;
+        return error::block_non_final;
 
-    // The coinbase tx is never seen/cached by the tx pool.
     else if (bip34 && !is_valid_coinbase_script(state.height()))
         return error::coinbase_height_mismatch;
 
@@ -781,7 +777,6 @@ code block::accept(const chain_state& state, bool transactions) const
         return error::coinbase_value_limit;
 
     // TODO: relates block limit to total of tx.sigops (pool cache tx.sigops).
-    // This recomputes sigops to include p2sh from prevouts.
     else if (transactions && (signature_operations(bip16) > max_block_sigops))
         return error::block_embedded_sigop_limit;
 

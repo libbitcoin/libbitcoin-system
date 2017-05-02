@@ -68,21 +68,22 @@ enum error_code_t
     channel_timeout = 13,
     address_blocked = 44,
     channel_stopped = 45,
+    peer_throttling = 73,
 
     // database
     store_block_duplicate = 66,
     store_block_invalid_height = 67,
     store_block_missing_parent = 68,
 
-    // block pool
+    // blockchain
     duplicate_block = 51,
     orphan_block = 5,
     invalid_previous_block = 24,
     insufficient_work = 48,
-
-    // transaction pool
     orphan_transaction = 14,
     insufficient_fee = 70,
+    dusty_transaction = 76,
+    stale_chain = 75,
 
     // check header
     invalid_proof_of_work = 26,
@@ -105,7 +106,7 @@ enum error_code_t
     block_legacy_sigop_limit = 30,
 
     // accept block
-    non_final_transaction = 34,
+    block_non_final = 34,
     coinbase_height_mismatch = 37,
     coinbase_value_limit = 41,
     block_embedded_sigop_limit = 52,
@@ -121,6 +122,7 @@ enum error_code_t
     transaction_legacy_sigop_limit = 54,
 
     // accept transaction
+    transaction_non_final = 74,
     premature_validation = 69,
     unspent_duplicate = 38,
     missing_previous_output = 19,

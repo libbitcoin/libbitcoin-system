@@ -117,23 +117,20 @@ public:
     static bool is_counted(opcode code);
     static bool is_numeric(opcode code);
     static bool is_positive(opcode code);
+    static bool is_reserved(opcode code);
     static bool is_disabled(opcode code);
     static bool is_conditional(opcode code);
     static bool is_relaxed_push(opcode code);
 
-    // Validation.
-    //-------------------------------------------------------------------------
-
-    /// Categories of opcodes.
+    /// Categories of operations.
     bool is_push() const;
     bool is_counted() const;
     bool is_positive() const;
     bool is_disabled() const;
     bool is_conditional() const;
     bool is_relaxed_push() const;
-
-    /// Validate the data against the code.
     bool is_oversized() const;
+    bool is_minimal_push() const;
 
 protected:
     operation(opcode code, data_chunk&& data, bool valid);
