@@ -826,6 +826,9 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     if (transaction_pool && !is_final(state.height()))
         return error::transaction_non_final;
 
+    if (transaction_pool && version() > state.maximum_transaction_version())
+        return error::transaction_version;
+
     //*************************************************************************
     // CONSENSUS:
     // A transaction hash that exists in the chain is not acceptable even if

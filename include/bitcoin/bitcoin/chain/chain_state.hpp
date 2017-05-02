@@ -135,7 +135,8 @@ public:
     /// Properties.
     size_t height() const;
     uint32_t enabled_forks() const;
-    uint32_t minimum_version() const;
+    uint32_t minimum_block_version() const;
+    uint32_t maximum_transaction_version() const;
     uint32_t median_time_past() const;
     uint32_t work_required() const;
 
@@ -158,7 +159,10 @@ protected:
         uint32_t forks;
 
         // The minimum block version required at this height.
-        uint32_t minimum_version;
+        uint32_t minimum_block_version;
+
+        // The maximum transaction version allowed at this height.
+        uint32_t maximum_transaction_version;
     };
 
     static activations activation(const data& values, uint32_t forks);

@@ -193,21 +193,23 @@ chain_state::activations chain_state::activation(const data& values,
     // version 4/3/2 enforced based on 95% of preceding 1000 mainnet blocks.
     if (bip65_ice || is_enforced(count_4, testnet))
     {
-        result.minimum_version = bip65_version;
+        result.minimum_block_version = bip65_version;
     }
     else if (bip66_ice || is_enforced(count_3, testnet))
     {
-        result.minimum_version = bip66_version;
+        result.minimum_block_version = bip66_version;
     }
     else if (bip34_ice || is_enforced(count_2, testnet))
     {
-        result.minimum_version = bip34_version;
+        result.minimum_block_version = bip34_version;
     }
     else
     {
-        result.minimum_version = first_version;
+        result.minimum_block_version = first_version;
     }
 
+    // TODO: add configurable option to apply tx version policy.
+    result.maximum_transaction_version = max_uint32;
     return result;
 }
 
@@ -554,9 +556,14 @@ uint32_t chain_state::enabled_forks() const
     return active_.forks;
 }
 
-uint32_t chain_state::minimum_version() const
+uint32_t chain_state::minimum_block_version() const
 {
-    return active_.minimum_version;
+    return active_.minimum_block_version;
+}
+
+uint32_t chain_state::maximum_transaction_version() const
+{
+    return active_.maximum_transaction_version;
 }
 
 uint32_t chain_state::median_time_past() const
