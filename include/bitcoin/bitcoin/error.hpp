@@ -52,7 +52,6 @@ enum error_code_t
     unknown = 43,
     not_found = 3,
     file_system = 42,
-    non_standard = 17,
     not_implemented = 4,
     oversubscribed = 71,
 
@@ -81,9 +80,10 @@ enum error_code_t
     invalid_previous_block = 24,
     insufficient_work = 48,
     orphan_transaction = 14,
+    transaction_version = 17,
     insufficient_fee = 70,
-    dusty_transaction = 76,
     stale_chain = 75,
+    dusty_transaction = 76,
 
     // check header
     invalid_proof_of_work = 26,
@@ -91,7 +91,7 @@ enum error_code_t
 
     // accept header
     checkpoints_failed = 35,
-    old_version_block = 36,
+    invalid_block_version = 36,
     incorrect_proof_of_work = 32,
     timestamp_too_early = 33,
 
