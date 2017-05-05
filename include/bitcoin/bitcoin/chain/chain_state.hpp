@@ -34,6 +34,7 @@ namespace libbitcoin {
 namespace chain {
 
 class block;
+class header;
 
 class BC_API chain_state
 {
@@ -122,11 +123,14 @@ public:
 
     static uint32_t signal_version(uint32_t forks);
 
-    /// Create pool state from top block chain state.
+    /// Create pool state from top chain top block state.
     chain_state(const chain_state& top);
 
-    /// Create block state from pool chain state of same height.
+    /// Create block state from tx pool chain state of same height.
     chain_state(const chain_state& pool, const chain::block& block);
+
+    /// Create header state from header pool chain state of previous height.
+    chain_state(const chain_state& parent, const chain::header& header);
 
     /// Checkpoints must be ordered by height with greatest at back.
     /// Forks and checkpoints must match those provided for map creation.
@@ -176,7 +180,8 @@ private:
         const checkpoints& checkpoints);
 
     static data to_pool(const chain_state& top);
-    static data to_block(const chain_state& pool_state, const block& block);
+    static data to_block(const chain_state& pool, const block& block);
+    static data to_header(const chain_state& parent, const header& header);
 
     static uint32_t work_required_retarget(const data& values);
     static uint32_t retarget_timespan(const chain_state::data& values);

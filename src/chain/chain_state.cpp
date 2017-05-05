@@ -444,7 +444,7 @@ chain_state::data chain_state::to_pool(const chain_state& top)
             map::unrequested && top.data_.allow_collisions_hash == null_hash;
     };
 
-    // Set invalid if we need to query for retarget or collision height.
+    // Invalid if overflow or need to query for retarget or collision height.
     if (is_retarget_height(height) || need_collision_hash(height))
     {
         data.height = 0;
@@ -504,16 +504,44 @@ chain_state::data chain_state::to_block(const chain_state& pool,
     ////data.height = data.height;
     data.hash = header.hash();
     data.bits.self = header.bits();
-    data.timestamp.self = header.timestamp();
     data.version.self = header.version();
+    data.timestamp.self = header.timestamp();
     return data;
 }
 
-// Constructor (pool to block).
+// Constructor (tx pool to block).
 chain_state::chain_state(const chain_state& pool, const block& block)
   : data_(to_block(pool, block)),
     forks_(pool.forks_),
     checkpoints_(pool.checkpoints_),
+    active_(activation(data_, forks_)),
+    work_required_(work_required(data_, forks_)),
+    median_time_past_(median_time_past(data_, forks_))
+{
+}
+
+chain_state::data chain_state::to_header(const chain_state& parent,
+    const header& header)
+{
+    // Copy and promote data from presumed parent-height header/block state.
+    auto data = to_pool(parent);
+
+    // Invalid if overflow or need to query for retarget or collision height.
+    if (data.height == 0)
+        return data;
+
+    data.hash = header.hash();
+    data.bits.self = header.bits();
+    data.version.self = header.version();
+    data.timestamp.self = header.timestamp();
+    return data;
+}
+
+// Constructor (parent to header).
+chain_state::chain_state(const chain_state& parent, const header& header)
+  : data_(to_header(parent, header)),
+    forks_(parent.forks_),
+    checkpoints_(parent.checkpoints_),
     active_(activation(data_, forks_)),
     work_required_(work_required(data_, forks_)),
     median_time_past_(median_time_past(data_, forks_))
