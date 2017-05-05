@@ -459,6 +459,12 @@ code header::check() const
         return error::success;
 }
 
+code header::accept() const
+{
+    const auto state = validation.state;
+    return state ? accept(*state) : error::operation_failed;
+}
+
 code header::accept(const chain_state& state) const
 {
     if (bits_ != state.work_required())
