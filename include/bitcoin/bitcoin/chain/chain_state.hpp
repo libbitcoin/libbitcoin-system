@@ -75,7 +75,7 @@ public:
         /// (block - 0)
         size_t timestamp_self;
 
-        /// (block - 2016) | map::unrequested
+        /// (block - (block % 2016 == 0 ? 2016 : block % 2016))
         size_t timestamp_retarget;
 
         /// mainnet: 227931, testnet: 21111 (or map::unrequested)
@@ -175,13 +175,10 @@ protected:
 
 private:
     static size_t bits_count(size_t height, uint32_t forks);
-    static size_t version_count(size_t height, uint32_t forks,
-        const checkpoints& checkpoints);
-    static size_t timestamp_count(size_t height,
-        const checkpoints& checkpoints);
-    static size_t retarget_height(size_t height);
-    static size_t collision_height(size_t height, uint32_t forks,
-        const checkpoints& checkpoints);
+    static size_t version_count(size_t height, uint32_t forks);
+    static size_t timestamp_count(size_t height, uint32_t forks);
+    static size_t retarget_height(size_t height, uint32_t forks);
+    static size_t collision_height(size_t height, uint32_t forks);
 
     static data to_pool(const chain_state& top);
     static data to_block(const chain_state& pool, const block& block);
@@ -195,15 +192,16 @@ private:
     static uint32_t easy_time_limit(const chain_state::data& values);
     static bool is_retarget_or_non_limit(size_t height, uint32_t bits);
     static bool is_retarget_height(size_t height);
+    static size_t retarget_distance(size_t height);
 
     // This is retained as an optimization for other constructions.
     // A similar height clone can be partially computed, reducing query cost.
     const data data_;
 
-    // Forks are saved for state transitions.
+    // Configured forks are saved for state transitions.
     const uint32_t forks_;
 
-    // Configured checkpoints are used to answer is_checkpoint_failure.
+    // Checkpoints do not affect the data that is collected or promoted.
     const config::checkpoint::list& checkpoints_;
 
     // These are computed on construct from sample and checkpoints.
