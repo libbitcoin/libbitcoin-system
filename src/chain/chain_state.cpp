@@ -439,8 +439,8 @@ chain_state::data chain_state::to_pool(const chain_state& top)
     // Alias configured forks, these don't change.
     const auto forks = top.forks_;
 
-    // If this overflows height is zero and result is handled as invalid.
-    const auto height = data.height + 1u;
+    // Ppromotion is always valid because we thrown on chain overflow.
+    const auto height = safe_add(data.height, size_t(1));
 
     // Enqueue previous block values to collections.
     data.bits.ordered.push_back(data.bits.self);
