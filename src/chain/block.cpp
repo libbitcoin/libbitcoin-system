@@ -744,14 +744,16 @@ code block::check() const
         return check_transactions();
 }
 
-code block::accept(bool transactions) const
+code block::accept(bool transactions, bool header) const
 {
     const auto state = validation.state;
-    return state ? accept(*state, transactions) : error::operation_failed;
+    return state ? accept(*state, transactions, header) :
+        error::operation_failed;
 }
 
 // These checks assume that prevout caching is completed on all tx.inputs.
-code block::accept(const chain_state& state, bool transactions) const
+code block::accept(const chain_state& state, bool transactions,
+    bool header) const
 {
     validation.start_accept = asio::steady_clock::now();
 
@@ -759,7 +761,7 @@ code block::accept(const chain_state& state, bool transactions) const
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip34 = state.is_enabled(rule_fork::bip34_rule);
 
-    if ((ec = header_.accept(state)))
+    if (header && (ec = header_.accept(state)))
         return ec;
 
     else if (state.is_under_checkpoint())

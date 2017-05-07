@@ -34,6 +34,7 @@ namespace libbitcoin {
 namespace chain {
 
 class block;
+class header;
 
 class BC_API chain_state
 {
@@ -74,7 +75,7 @@ public:
         /// (block - 0)
         size_t timestamp_self;
 
-        /// (block - 2016) | map::unrequested
+        /// (block - (block % 2016 == 0 ? 2016 : block % 2016))
         size_t timestamp_retarget;
 
         /// mainnet: 227931, testnet: 21111 (or map::unrequested)
@@ -122,11 +123,14 @@ public:
 
     static uint32_t signal_version(uint32_t forks);
 
-    /// Create pool state from top block chain state.
+    /// Create pool state from top chain top block state.
     chain_state(const chain_state& top);
 
-    /// Create block state from pool chain state of same height.
+    /// Create block state from tx pool chain state of same height.
     chain_state(const chain_state& pool, const chain::block& block);
+
+    /// Create header state from header pool chain state of previous height.
+    chain_state(const chain_state& parent, const chain::header& header);
 
     /// Checkpoints must be ordered by height with greatest at back.
     /// Forks and checkpoints must match those provided for map creation.
@@ -135,7 +139,8 @@ public:
     /// Properties.
     size_t height() const;
     uint32_t enabled_forks() const;
-    uint32_t minimum_version() const;
+    uint32_t minimum_block_version() const;
+    uint32_t maximum_transaction_version() const;
     uint32_t median_time_past() const;
     uint32_t work_required() const;
 
@@ -158,7 +163,10 @@ protected:
         uint32_t forks;
 
         // The minimum block version required at this height.
-        uint32_t minimum_version;
+        uint32_t minimum_block_version;
+
+        // The maximum transaction version allowed at this height.
+        uint32_t maximum_transaction_version;
     };
 
     static activations activation(const data& values, uint32_t forks);
@@ -167,16 +175,14 @@ protected:
 
 private:
     static size_t bits_count(size_t height, uint32_t forks);
-    static size_t version_count(size_t height, uint32_t forks,
-        const checkpoints& checkpoints);
-    static size_t timestamp_count(size_t height,
-        const checkpoints& checkpoints);
-    static size_t retarget_height(size_t height);
-    static size_t collision_height(size_t height, uint32_t forks,
-        const checkpoints& checkpoints);
+    static size_t version_count(size_t height, uint32_t forks);
+    static size_t timestamp_count(size_t height, uint32_t forks);
+    static size_t retarget_height(size_t height, uint32_t forks);
+    static size_t collision_height(size_t height, uint32_t forks);
 
     static data to_pool(const chain_state& top);
-    static data to_block(const chain_state& pool_state, const block& block);
+    static data to_block(const chain_state& pool, const block& block);
+    static data to_header(const chain_state& parent, const header& header);
 
     static uint32_t work_required_retarget(const data& values);
     static uint32_t retarget_timespan(const chain_state::data& values);
@@ -186,15 +192,16 @@ private:
     static uint32_t easy_time_limit(const chain_state::data& values);
     static bool is_retarget_or_non_limit(size_t height, uint32_t bits);
     static bool is_retarget_height(size_t height);
+    static size_t retarget_distance(size_t height);
 
     // This is retained as an optimization for other constructions.
     // A similar height clone can be partially computed, reducing query cost.
     const data data_;
 
-    // Forks are saved for state transitions.
+    // Configured forks are saved for state transitions.
     const uint32_t forks_;
 
-    // Configured checkpoints are used to answer is_checkpoint_failure.
+    // Checkpoints do not affect the data that is collected or promoted.
     const config::checkpoint::list& checkpoints_;
 
     // These are computed on construct from sample and checkpoints.

@@ -51,6 +51,7 @@ public:
     {
         static const size_t undetermined_height;
 
+        chain_state::ptr state = nullptr;
         size_t height = validation::undetermined_height;
     };
 
@@ -142,6 +143,7 @@ public:
     bool is_valid_proof_of_work() const;
 
     code check() const;
+    code accept() const;
     code accept(const chain_state& state) const;
 
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.

@@ -55,7 +55,6 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::unknown, "unknown error" },
         { error::not_found, "object does not exist" },
         { error::file_system, "file system error" },
-        { error::non_standard, "transaction not standard" },
         { error::not_implemented, "feature not implemented" },
         { error::oversubscribed, "service oversubscribed" },
 
@@ -84,9 +83,10 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::invalid_previous_block, "previous block failed to validate" },
         { error::insufficient_work, "insufficient work to reorganize" },
         { error::orphan_transaction, "missing transaction parent" },
+        { error::transaction_version, "transaction version not standard" },
         { error::insufficient_fee, "insufficient transaction fee" },
-        { error::dusty_transaction, "output value too low" },
         { error::stale_chain, "blockchain too far behind" },
+        { error::dusty_transaction, "output value too low" },
 
         // check header
         { error::invalid_proof_of_work, "proof of work invalid" },
@@ -94,7 +94,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
 
         // accept header
         { error::checkpoints_failed, "block hash rejected by checkpoint" },
-        { error::old_version_block, "block version rejected at current height" },
+        { error::invalid_block_version, "block version rejected at current height" },
         { error::incorrect_proof_of_work, "proof of work does not match bits field" },
         { error::timestamp_too_early, "block timestamp is too early" },
 

@@ -459,6 +459,12 @@ code header::check() const
         return error::success;
 }
 
+code header::accept() const
+{
+    const auto state = validation.state;
+    return state ? accept(*state) : error::operation_failed;
+}
+
 code header::accept(const chain_state& state) const
 {
     if (bits_ != state.work_required())
@@ -470,8 +476,8 @@ code header::accept(const chain_state& state) const
     else if (state.is_under_checkpoint())
         return error::success;
 
-    else if (version_ < state.minimum_version())
-        return error::old_version_block;
+    else if (version_ < state.minimum_block_version())
+        return error::invalid_block_version;
 
     else if (timestamp_ <= state.median_time_past())
         return error::timestamp_too_early;

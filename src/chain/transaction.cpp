@@ -806,7 +806,7 @@ code transaction::accept(bool transaction_pool) const
 }
 
 // These checks assume that prevout caching is completed on all tx.inputs.
-// Flags for tx pool calls should be based on the current blockchain height.
+// Flags for tx pool calls should be based on the next block height.
 code transaction::accept(const chain_state& state, bool transaction_pool) const
 {
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
@@ -815,7 +815,7 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     //*************************************************************************
     // CONSENSUS:
     // We don't need to allow tx pool acceptance of an unspent duplicate
-    // because tx pool validation is not strinctly a matter of consensus.
+    // because tx pool validation is not strictly a matter of consensus.
     //*************************************************************************
     const auto duplicates = state.is_enabled(rule_fork::allow_collisions) &&
         !transaction_pool;
@@ -825,6 +825,9 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
 
     if (transaction_pool && !is_final(state.height()))
         return error::transaction_non_final;
+
+    if (transaction_pool && version() > state.maximum_transaction_version())
+        return error::transaction_version;
 
     //*************************************************************************
     // CONSENSUS:
@@ -850,7 +853,7 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     else if (is_overspent())
         return error::spend_exceeds_value;
 
-    // This recomputes sigops to include p2sh from prevouts if bip16 is true.
+    // This includes sigops from embedded p2sh script if bip16 is true.
     else if (transaction_pool && signature_operations(bip16) > max_block_sigops)
         return error::transaction_embedded_sigop_limit;
 
