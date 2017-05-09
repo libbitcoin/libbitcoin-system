@@ -62,7 +62,7 @@ public:
     };
 
     // Constructors.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     output_point();
 
@@ -76,7 +76,7 @@ public:
     output_point(const hash_digest& hash, uint32_t index);
 
     // Operators.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
     // This class is move assignable and copy assignable.
 
     output_point& operator=(point&& other);
@@ -90,14 +90,14 @@ public:
     bool operator!=(const output_point& other) const;
 
     // Deserialization.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     static output_point factory_from_data(const data_chunk& data, bool wire=true);
     static output_point factory_from_data(std::istream& stream, bool wire=true);
     static output_point factory_from_data(reader& source, bool wire=true);
 
     // Validation.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     /// True if cached previous output is mature enough to spend from target.
     bool is_mature(size_t height) const;

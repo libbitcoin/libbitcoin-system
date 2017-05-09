@@ -36,7 +36,7 @@ public:
     typedef error::error_code_t result;
 
     // Operations (shared).
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     static result op_nop(opcode);
     static result op_disabled(opcode);
@@ -47,7 +47,7 @@ public:
         uint32_t size_limit);
 
     // Operations (not shared).
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     static result op_if(program& program);
     static result op_notif(program& program);

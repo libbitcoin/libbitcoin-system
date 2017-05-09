@@ -234,34 +234,6 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_5__valid_input__returns_input_init
     BOOST_REQUIRE(instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(transaction__constructor_6__valid_input__returns_input_initialized)
-{
-    const auto raw_tx = to_chunk(base16_literal(TX1));
-    chain::transaction expected;
-    BOOST_REQUIRE(expected.from_data(raw_tx));
-    const hash_digest expected_hash = hash_literal(TX1_HASH);
-
-    chain::transaction instance(expected, expected_hash);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(expected == instance);
-    BOOST_REQUIRE(expected_hash == instance.hash());
-}
-
-BOOST_AUTO_TEST_CASE(transaction__constructor_7__valid_input__returns_input_initialized)
-{
-    const auto raw_tx = to_chunk(base16_literal(TX1));
-
-    // This must be non-const.
-    chain::transaction expected;
-
-    BOOST_REQUIRE(expected.from_data(raw_tx));
-    const hash_digest expected_hash = hash_literal(TX1_HASH);
-
-    chain::transaction instance(std::move(expected), expected_hash);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(expected_hash == instance.hash());
-}
-
 BOOST_AUTO_TEST_CASE(transaction__is_coinbase__empty_inputs__returns_false)
 {
     chain::transaction instance;

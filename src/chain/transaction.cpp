@@ -92,38 +92,38 @@ void write(Sink& sink, const std::vector<Put>& puts, bool wire)
 //-----------------------------------------------------------------------------
 
 transaction::transaction()
-  : version_(0), locktime_(0), validation{}
+  : transaction(0, 0, {}, {})
 {
 }
 
 transaction::transaction(transaction&& other)
-  : transaction(other.version_, other.locktime_, std::move(other.inputs_),
-      std::move(other.outputs_))
+  : hash_(other.hash_cache()),
+    version_(other.version_),
+    locktime_(other.locktime_),
+    inputs_(std::move(other.inputs_)),
+    outputs_(std::move(other.outputs_)),
+    validation(std::move(other.validation))
 {
-    // TODO: implement safe private accessor for conditional cache transfer.
-    validation = std::move(other.validation);
 }
 
 transaction::transaction(const transaction& other)
-  : transaction(other.version_, other.locktime_, other.inputs_, other.outputs_)
+  : hash_(other.hash_cache()),
+    version_(other.version_),
+    locktime_(other.locktime_),
+    inputs_(other.inputs_),
+    outputs_(other.outputs_),
+    validation(other.validation)
 {
-    // TODO: implement safe private accessor for conditional cache transfer.
-    validation = other.validation;
 }
 
-transaction::transaction(transaction&& other, hash_digest&& hash)
-  : transaction(other.version_, other.locktime_, std::move(other.inputs_),
-        std::move(other.outputs_))
+transaction::transaction(uint32_t version, uint32_t locktime,
+    input::list&& inputs, output::list&& outputs)
+  : version_(version),
+    locktime_(locktime),
+    inputs_(std::move(inputs)),
+    outputs_(std::move(outputs)),
+    validation{}
 {
-    hash_ = std::make_shared<hash_digest>(std::move(hash));
-    validation = std::move(other.validation);
-}
-
-transaction::transaction(const transaction& other, const hash_digest& hash)
-  : transaction(other.version_, other.locktime_, other.inputs_, other.outputs_)
-{
-    hash_ = std::make_shared<hash_digest>(hash);
-    validation = other.validation;
 }
 
 transaction::transaction(uint32_t version, uint32_t locktime,
@@ -136,14 +136,11 @@ transaction::transaction(uint32_t version, uint32_t locktime,
 {
 }
 
-transaction::transaction(uint32_t version, uint32_t locktime,
-    input::list&& inputs, output::list&& outputs)
-  : version_(version),
-    locktime_(locktime),
-    inputs_(std::move(inputs)),
-    outputs_(std::move(outputs)),
-    validation{}
+// Private cache access for copy/move construction.
+transaction::hash_ptr transaction::hash_cache() const
 {
+    shared_lock lock(mutex_);
+    return hash_;
 }
 
 // Operators.
@@ -211,6 +208,23 @@ transaction transaction::factory_from_data(reader& source, bool wire)
     return instance;
 }
 
+// static
+transaction transaction::factory_from_data(reader& source, hash_digest&& hash)
+{
+    transaction instance;
+    instance.from_data(source, std::move(hash));
+    return instance;
+}
+
+// static
+transaction transaction::factory_from_data(reader& source,
+    const hash_digest& hash)
+{
+    transaction instance;
+    instance.from_data(source, hash);
+    return instance;
+}
+
 bool transaction::from_data(const data_chunk& data, bool wire)
 {
     data_source istream(data);
@@ -252,6 +266,18 @@ bool transaction::from_data(reader& source, bool wire)
         reset();
 
     return source;
+}
+
+bool transaction::from_data(reader& source, hash_digest&& hash)
+{
+    hash_ = std::make_shared<hash_digest>(std::move(hash));
+    return from_data(source, false);
+}
+
+bool transaction::from_data(reader& source, const hash_digest& hash)
+{
+    hash_ = std::make_shared<hash_digest>(hash);
+    return from_data(source, false);
 }
 
 // protected

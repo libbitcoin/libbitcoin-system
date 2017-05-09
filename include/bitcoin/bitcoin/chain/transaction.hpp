@@ -53,6 +53,7 @@ public:
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
+        uint64_t offset = 0;
         uint64_t originator = 0;
         code error = error::not_found;
         chain_state::ptr state = nullptr;
@@ -71,22 +72,20 @@ public:
     };
 
     // Constructors.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     transaction();
 
     transaction(transaction&& other);
     transaction(const transaction& other);
 
-    transaction(transaction&& other, hash_digest&& hash);
-    transaction(const transaction& other, const hash_digest& hash);
-
-    transaction(uint32_t version, uint32_t locktime, ins&& inputs, outs&& outputs);
+    transaction(uint32_t version, uint32_t locktime, ins&& inputs,
+        outs&& outputs);
     transaction(uint32_t version, uint32_t locktime, const ins& inputs,
         const outs& outputs);
 
     // Operators.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     /// This class is move assignable and copy assignable [TODO: remove copy].
     transaction& operator=(transaction&& other);
@@ -96,27 +95,36 @@ public:
     bool operator!=(const transaction& other) const;
 
     // Deserialization.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     static transaction factory_from_data(const data_chunk& data, bool wire=true);
     static transaction factory_from_data(std::istream& stream, bool wire=true);
     static transaction factory_from_data(reader& source, bool wire=true);
 
+    // Non-wire store deserializations to preserve hash.
+    static transaction factory_from_data(reader& source, hash_digest&& hash);
+    static transaction factory_from_data(reader& source,
+        const hash_digest& hash);
+
     bool from_data(const data_chunk& data, bool wire=true);
     bool from_data(std::istream& stream, bool wire=true);
     bool from_data(reader& source, bool wire=true);
 
+    // Non-wire store deserializations to preserve hash.
+    bool from_data(reader& source, hash_digest&& hash);
+    bool from_data(reader& source, const hash_digest& hash);
+
     bool is_valid() const;
 
     // Serialization.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     data_chunk to_data(bool wire=true) const;
     void to_data(std::ostream& stream, bool wire=true) const;
     void to_data(writer& sink, bool wire=true) const;
 
     // Properties (size, accessors, cache).
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     size_t serialized_size(bool wire=true) const;
 
@@ -144,7 +152,7 @@ public:
     hash_digest hash(uint32_t sighash_type) const;
 
     // Validation.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     uint64_t fees() const;
     point::list previous_outputs() const;
@@ -184,6 +192,10 @@ protected:
     bool all_inputs_final() const;
 
 private:
+    typedef std::shared_ptr<hash_digest> hash_ptr;
+
+    hash_ptr hash_cache() const;
+
     uint32_t version_;
     uint32_t locktime_;
     input::list inputs_;
@@ -192,7 +204,7 @@ private:
     // These share a mutex as they are not expected to contend.
     mutable boost::optional<size_t> total_input_value_;
     mutable boost::optional<size_t> total_output_value_;
-    mutable std::shared_ptr<hash_digest> hash_;
+    mutable hash_ptr hash_;
     mutable upgrade_mutex mutex_;
 };
 

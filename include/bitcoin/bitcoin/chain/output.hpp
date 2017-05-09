@@ -47,14 +47,14 @@ public:
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
-        /// This is a non-consensus sentinel used to indicate an output is unspent.
+        /// This is a non-consensus sentinel indicating output is unspent.
         static const uint32_t not_spent;
 
         size_t spender_height = validation::not_spent;
     };
 
     // Constructors.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     output();
 
@@ -65,7 +65,7 @@ public:
     output(uint64_t value, const chain::script& script);
 
     // Operators.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     /// This class is move assignable and copy assignable.
     output& operator=(output&& other);
@@ -75,7 +75,7 @@ public:
     bool operator!=(const output& other) const;
 
     // Deserialization.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     static output factory_from_data(const data_chunk& data, bool wire=true);
     static output factory_from_data(std::istream& stream, bool wire=true);
@@ -88,14 +88,14 @@ public:
     bool is_valid() const;
 
     // Serialization.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     data_chunk to_data(bool wire=true) const;
     void to_data(std::ostream& stream, bool wire=true) const;
     void to_data(writer& sink, bool wire=true) const;
 
     // Properties (size, accessors, cache).
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     size_t serialized_size(bool wire=true) const;
 
@@ -114,7 +114,7 @@ public:
     bool is_dust(uint64_t minimum_output_value) const;
 
     // Validation.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     size_t signature_operations() const;
 

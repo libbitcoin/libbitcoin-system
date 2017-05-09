@@ -56,24 +56,22 @@ public:
     };
 
     // Constructors.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     header();
 
     header(header&& other);
     header(const header& other);
 
-    header(header&& other, hash_digest&& hash);
-    header(const header& other, const hash_digest& hash);
-
     header(uint32_t version, const hash_digest& previous_block_hash,
         const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
         uint32_t nonce);
     header(uint32_t version, hash_digest&& previous_block_hash,
-        hash_digest&& merkle, uint32_t timestamp, uint32_t bits, uint32_t nonce);
+        hash_digest&& merkle, uint32_t timestamp, uint32_t bits,
+        uint32_t nonce);
 
     // Operators.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     /// This class is move and copy assignable.
     header& operator=(header&& other);
@@ -83,27 +81,31 @@ public:
     bool operator!=(const header& other) const;
 
     // Deserialization.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     static header factory_from_data(const data_chunk& data);
     static header factory_from_data(std::istream& stream);
     static header factory_from_data(reader& source);
+    static header factory_from_data(reader& source, hash_digest&& hash);
+    static header factory_from_data(reader& source, const hash_digest& hash);
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
     bool from_data(reader& source);
+    bool from_data(reader& source, hash_digest&& hash);
+    bool from_data(reader& source, const hash_digest& hash);
 
     bool is_valid() const;
 
     // Serialization.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     data_chunk to_data() const;
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
 
     // Properties (size, accessors, cache).
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     static size_t satoshi_fixed_size();
     size_t serialized_size() const;
@@ -137,7 +139,7 @@ public:
     hash_digest hash() const;
 
     // Validation.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     bool is_valid_timestamp() const;
     bool is_valid_proof_of_work() const;
@@ -157,8 +159,12 @@ protected:
     void invalidate_cache() const;
 
 private:
+    typedef std::shared_ptr<hash_digest> hash_ptr;
+
+    hash_ptr hash_cache() const;
+
+    mutable hash_ptr hash_;
     mutable upgrade_mutex mutex_;
-    mutable std::shared_ptr<hash_digest> hash_;
 
     uint32_t version_;
     hash_digest previous_block_hash_;

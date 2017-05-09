@@ -41,7 +41,7 @@ public:
     typedef std::vector<input> list;
 
     // Constructors.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     input();
 
@@ -54,7 +54,7 @@ public:
         uint32_t sequence);
 
     // Operators.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     /// This class is move assignable and copy assignable.
     input& operator=(input&& other);
@@ -64,7 +64,7 @@ public:
     bool operator!=(const input& other) const;
 
     // Deserialization.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     static input factory_from_data(const data_chunk& data, bool wire=true);
     static input factory_from_data(std::istream& stream, bool wire=true);
@@ -77,14 +77,14 @@ public:
     bool is_valid() const;
 
     // Serialization.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     data_chunk to_data(bool wire=true) const;
     void to_data(std::ostream& stream, bool wire=true) const;
     void to_data(writer& sink, bool wire=true) const;
 
     // Properties (size, accessors, cache).
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     size_t serialized_size(bool wire=true) const;
 
@@ -109,7 +109,7 @@ public:
     wallet::payment_address address() const;
 
     // Validation.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     bool is_final() const;
     size_t signature_operations(bool bip16_active) const;
