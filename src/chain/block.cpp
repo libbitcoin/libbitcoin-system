@@ -393,11 +393,11 @@ block::indexes block::locator_heights(size_t top)
     // Start at the top of the chain and work backwards to zero.
     for (auto height = top; height > 0; height = floor_subtract(height, step))
     {
-        // Push top 10 indexes first, then back off exponentially.
-        if (heights.size() >= 10)
-            step <<= 1;
-
         heights.push_back(height);
+
+        // Push top 10 indexes first, then back off exponentially.
+        if (heights.size() > 10)
+            step <<= 1;
     }
 
     // Push the genesis block index.
