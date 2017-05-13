@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <istream>
+#include <memory>
 #include <vector>
 #include <bitcoin/bitcoin/chain/output_point.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
@@ -56,7 +57,6 @@ public:
     // Operators.
     //-------------------------------------------------------------------------
 
-    /// This class is move assignable and copy assignable.
     input& operator=(input&& other);
     input& operator=(const input& other);
 
@@ -88,15 +88,10 @@ public:
 
     size_t serialized_size(bool wire=true) const;
 
-    // Deprecated (unsafe).
     output_point& previous_output();
-
     const output_point& previous_output() const;
     void set_previous_output(const output_point& value);
     void set_previous_output(output_point&& value);
-
-    // Deprecated (unsafe).
-    chain::script& script();
 
     const chain::script& script() const;
     void set_script(const chain::script& value);
@@ -119,6 +114,10 @@ protected:
     void invalidate_cache() const;
 
 private:
+    typedef std::shared_ptr<wallet::payment_address> address_ptr;
+
+    address_ptr address_cache() const;
+
     mutable upgrade_mutex mutex_;
     mutable wallet::payment_address::ptr address_;
 

@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <istream>
+#include <memory>
 #include <string>
 #include <vector>
 #include <bitcoin/bitcoin/chain/script.hpp>
@@ -67,7 +68,6 @@ public:
     // Operators.
     //-------------------------------------------------------------------------
 
-    /// This class is move assignable and copy assignable.
     output& operator=(output&& other);
     output& operator=(const output& other);
 
@@ -102,9 +102,6 @@ public:
     uint64_t value() const;
     void set_value(uint64_t value);
 
-    // Deprecated (unsafe).
-    chain::script& script();
-
     const chain::script& script() const;
     void set_script(const chain::script& value);
     void set_script(chain::script&& value);
@@ -126,6 +123,10 @@ protected:
     void invalidate_cache() const;
 
 private:
+    typedef std::shared_ptr<wallet::payment_address> address_ptr;
+
+    address_ptr address_cache() const;
+
     mutable upgrade_mutex mutex_;
     mutable wallet::payment_address::ptr address_;
 

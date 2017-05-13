@@ -98,6 +98,8 @@ transaction::transaction()
 
 transaction::transaction(transaction&& other)
   : hash_(other.hash_cache()),
+    total_input_value_(other.total_input_value_cache()),
+    total_output_value_(other.total_output_value_cache()),
     version_(other.version_),
     locktime_(other.locktime_),
     inputs_(std::move(other.inputs_)),
@@ -108,6 +110,8 @@ transaction::transaction(transaction&& other)
 
 transaction::transaction(const transaction& other)
   : hash_(other.hash_cache()),
+    total_input_value_(other.total_input_value_cache()),
+    total_output_value_(other.total_output_value_cache()),
     version_(other.version_),
     locktime_(other.locktime_),
     inputs_(other.inputs_),
@@ -143,12 +147,28 @@ transaction::hash_ptr transaction::hash_cache() const
     return hash_;
 }
 
+// Private cache access for copy/move construction.
+transaction::optional_size transaction::total_input_value_cache() const
+{
+    shared_lock lock(mutex_);
+    return total_input_value_;
+}
+
+// Private cache access for copy/move construction.
+transaction::optional_size transaction::total_output_value_cache() const
+{
+    shared_lock lock(mutex_);
+    return total_output_value_;
+}
+
 // Operators.
 //-----------------------------------------------------------------------------
 
 transaction& transaction::operator=(transaction&& other)
 {
-    // TODO: implement safe private accessor for conditional cache transfer.
+    hash_ = other.hash_cache();
+    total_input_value_ = other.total_input_value_cache();
+    total_output_value_ = other.total_output_value_cache();
     version_ = other.version_;
     locktime_ = other.locktime_;
     inputs_ = std::move(other.inputs_);
@@ -157,9 +177,12 @@ transaction& transaction::operator=(transaction&& other)
     return *this;
 }
 
-// TODO: eliminate blockchain transaction copies and then delete this.
+// This can be expensive, try to avoid.
 transaction& transaction::operator=(const transaction& other)
 {
+    hash_ = other.hash_cache();
+    total_input_value_ = other.total_input_value_cache();
+    total_output_value_ = other.total_output_value_cache();
     version_ = other.version_;
     locktime_ = other.locktime_;
     inputs_ = other.inputs_;

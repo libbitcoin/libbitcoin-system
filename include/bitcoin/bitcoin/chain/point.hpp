@@ -98,9 +98,7 @@ public:
     static size_t satoshi_fixed_size();
     size_t serialized_size(bool wire=true) const;
 
-    // deprecated (unsafe)
     hash_digest& hash();
-
     const hash_digest& hash() const;
     void set_hash(hash_digest&& value);
     void set_hash(const hash_digest& value);

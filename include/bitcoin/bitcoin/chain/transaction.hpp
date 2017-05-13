@@ -87,7 +87,6 @@ public:
     // Operators.
     //-------------------------------------------------------------------------
 
-    /// This class is move assignable and copy assignable [TODO: remove copy].
     transaction& operator=(transaction&& other);
     transaction& operator=(const transaction& other);
 
@@ -193,8 +192,11 @@ protected:
 
 private:
     typedef std::shared_ptr<hash_digest> hash_ptr;
+    typedef boost::optional<size_t> optional_size;
 
     hash_ptr hash_cache() const;
+    optional_size total_input_value_cache() const;
+    optional_size total_output_value_cache() const;
 
     uint32_t version_;
     uint32_t locktime_;
@@ -202,9 +204,9 @@ private:
     output::list outputs_;
 
     // These share a mutex as they are not expected to contend.
-    mutable boost::optional<size_t> total_input_value_;
-    mutable boost::optional<size_t> total_output_value_;
     mutable hash_ptr hash_;
+    mutable optional_size total_input_value_;
+    mutable optional_size total_output_value_;
     mutable upgrade_mutex mutex_;
 };
 

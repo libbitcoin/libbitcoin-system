@@ -206,17 +206,17 @@ protected:
 private:
     static size_t serialized_size(const operation::list& ops);
     static data_chunk operations_to_data(const operation::list& ops);
-    ////static code verify(const transaction& tx, uint32_t input_index,
-    ////    uint32_t forks, const script& input_script,
-    ////    const script& prevout_script);
+
+    operation::list& operations_move();
+    const operation::list& operations_copy() const;
+
+    // These are protected by mutex.
+    mutable operation::list operations_;
+    mutable bool cached_;
+    mutable upgrade_mutex mutex_;
 
     data_chunk bytes_;
     bool valid_;
-
-    // These are protected by mutex.
-    mutable bool cached_;
-    mutable operation::list operations_;
-    mutable upgrade_mutex mutex_;
 };
 
 } // namespace chain

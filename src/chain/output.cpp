@@ -42,30 +42,47 @@ const uint32_t output::validation::not_spent = max_uint32;
 //-----------------------------------------------------------------------------
 
 output::output()
-  : value_(not_found), validation{}
+  : value_(not_found),
+    script_{},
+    validation{}
 {
 }
 
 output::output(output&& other)
-  : output(other.value_, std::move(other.script_))
+  : address_(other.address_cache()),
+    value_(other.value_),
+    script_(std::move(other.script_)),
+    validation(other.validation)
 {
-    validation = std::move(other.validation);
 }
 
 output::output(const output& other)
-  : output(other.value_, other.script_)
+  : address_(other.address_cache()),
+    value_(other.value_),
+    script_(other.script_),
+    validation(other.validation)
 {
-    validation = other.validation;
 }
 
 output::output(uint64_t value, chain::script&& script)
-  : value_(value), script_(std::move(script)), validation{}
+  : value_(value),
+    script_(std::move(script)),
+    validation{}
 {
 }
 
 output::output(uint64_t value, const chain::script& script)
-  : value_(value), script_(script), validation{}
+  : value_(value),
+    script_(script),
+    validation{}
 {
+}
+
+// Private cache access for copy/move construction.
+output::address_ptr output::address_cache() const
+{
+    shared_lock lock(mutex_);
+    return address_;
 }
 
 // Operators.
@@ -73,6 +90,7 @@ output::output(uint64_t value, const chain::script& script)
 
 output& output::operator=(output&& other)
 {
+    address_ = other.address_cache();
     value_ = other.value_;
     script_ = std::move(other.script_);
     validation = std::move(other.validation);
@@ -81,6 +99,7 @@ output& output::operator=(output&& other)
 
 output& output::operator=(const output& other)
 {
+    address_ = other.address_cache();
     value_ = other.value_;
     script_ = other.script_;
     validation = other.validation;
@@ -216,11 +235,6 @@ uint64_t output::value() const
 void output::set_value(uint64_t value)
 {
     value_ = value;
-}
-
-chain::script& output::script()
-{
-    return script_;
 }
 
 const chain::script& output::script() const

@@ -99,34 +99,54 @@ static const std::string encoded_testnet_genesis_block =
 //-----------------------------------------------------------------------------
 
 block::block()
-  : header_{}, validation{}
+  : header_{},
+    validation{}
 {
 }
 
 block::block(const block& other)
-  : block(other.header_, other.transactions_)
+  : total_inputs_(other.total_inputs_cache()),
+    non_coinbase_inputs_(other.non_coinbase_inputs_cache()),
+    header_(other.header_),
+    transactions_(other.transactions_),
+    validation(other.validation)
 {
-    validation = other.validation;
 }
 
 block::block(block&& other)
-  : block(std::move(other.header_), std::move(other.transactions_))
+  : total_inputs_(other.total_inputs_cache()),
+    non_coinbase_inputs_(other.non_coinbase_inputs_cache()),
+    header_(std::move(other.header_)),
+    transactions_(std::move(other.transactions_)),
+    validation(other.validation)
 {
-    validation = std::move(other.validation);
 }
 
-// TODO: deal with possibility of inconsistent merkle root in relation to txs.
 block::block(const chain::header& header,
     const transaction::list& transactions)
-  : header_(header), transactions_(transactions), validation{}
+  : header_(header),
+    transactions_(transactions),
+    validation{}
 {
 }
 
-// TODO: deal with possibility of inconsistent merkle root in relation to txs.
 block::block(chain::header&& header, transaction::list&& transactions)
-  : header_(std::move(header)), transactions_(std::move(transactions)),
+  : header_(std::move(header)),
+    transactions_(std::move(transactions)),
     validation{}
 {
+}
+
+block::optional_size block::total_inputs_cache() const
+{
+    shared_lock lock(mutex_);
+    return total_inputs_;
+}
+
+block::optional_size block::non_coinbase_inputs_cache() const
+{
+    shared_lock lock(mutex_);
+    return non_coinbase_inputs_;
 }
 
 // Operators.
@@ -134,6 +154,8 @@ block::block(chain::header&& header, transaction::list&& transactions)
 
 block& block::operator=(block&& other)
 {
+    total_inputs_ = other.total_inputs_cache();
+    non_coinbase_inputs_ = other.non_coinbase_inputs_cache();
     header_ = std::move(other.header_);
     transactions_ = std::move(other.transactions_);
     validation = std::move(other.validation);
@@ -308,11 +330,6 @@ void block::set_header(chain::header&& value)
     header_ = std::move(value);
 }
 
-transaction::list& block::transactions()
-{
-    return transactions_;
-}
-
 const transaction::list& block::transactions() const
 {
     return transactions_;
@@ -322,12 +339,14 @@ void block::set_transactions(const transaction::list& value)
 {
     transactions_ = value;
     total_inputs_ = boost::none;
+    non_coinbase_inputs_ = boost::none;
 }
 
 void block::set_transactions(transaction::list&& value)
 {
     transactions_ = std::move(value);
     total_inputs_ = boost::none;
+    non_coinbase_inputs_ = boost::none;
 }
 
 // Convenience property.
@@ -469,7 +488,41 @@ size_t block::signature_operations(bool bip16_active) const
     return std::accumulate(txs.begin(), txs.end(), size_t{0}, value);
 }
 
-size_t block::total_inputs(bool with_coinbase) const
+size_t block::total_non_coinbase_inputs() const
+{
+    size_t value;
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    mutex_.lock_upgrade();
+
+    if (non_coinbase_inputs_ != boost::none)
+    {
+        value = non_coinbase_inputs_.get();
+        mutex_.unlock_upgrade();
+        //---------------------------------------------------------------------
+        return value;
+    }
+
+    mutex_.unlock_upgrade_and_lock();
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    const auto inputs = [](size_t total, const transaction& tx)
+    {
+        return safe_add(total, tx.inputs().size());
+    };
+
+    const auto& txs = transactions_;
+    value = std::accumulate(txs.begin() + 1, txs.end(), size_t(0), inputs);
+    non_coinbase_inputs_ = value;
+
+    mutex_.unlock();
+    ///////////////////////////////////////////////////////////////////////////
+
+    return value;
+}
+
+size_t block::total_inputs() const
 {
     size_t value;
 
@@ -494,9 +547,9 @@ size_t block::total_inputs(bool with_coinbase) const
     };
 
     const auto& txs = transactions_;
-    const size_t offset = with_coinbase ? 0 : 1;
-    value = std::accumulate(txs.begin() + offset, txs.end(), size_t(0), inputs);
+    value = std::accumulate(txs.begin(), txs.end(), size_t(0), inputs);
     total_inputs_ = value;
+
     mutex_.unlock();
     ///////////////////////////////////////////////////////////////////////////
 
@@ -578,20 +631,6 @@ hash_digest block::generate_merkle_root() const
     return merkle.front();
 }
 
-size_t block::non_coinbase_input_count() const
-{
-    if (transactions_.empty())
-        return 0;
-
-    const auto counter = [](size_t sum, const transaction& tx)
-    {
-        return sum + tx.inputs().size();
-    };
-
-    const auto& txs = transactions_;
-    return std::accumulate(txs.begin() + 1, txs.end(), size_t(0), counter);
-}
-
 // This is an early check that is redundant with block pool accept checks.
 bool block::is_internal_double_spend() const
 {
@@ -599,7 +638,7 @@ bool block::is_internal_double_spend() const
         return false;
 
     point::list outs;
-    outs.reserve(non_coinbase_input_count());
+    outs.reserve(total_non_coinbase_inputs());
     const auto& txs = transactions_;
 
     // Merge the prevouts of all non-coinbase transactions into one set.
@@ -762,18 +801,18 @@ code block::accept(const chain_state& state, bool transactions,
     else if (state.is_under_checkpoint())
         return error::success;
 
-    // TODO: relates timestamp to tx.locktime (pool cache min tx.timestamp).
+    // Relates timestamp to tx.locktime (tx pool rejects all non-final).
     else if (!is_final(state.height()))
         return error::block_non_final;
 
     else if (bip34 && !is_valid_coinbase_script(state.height()))
         return error::coinbase_height_mismatch;
 
-    // TODO: relates height to total of tx.fee (pool cache tx.fee).
+    // Relates height to total of tx.fee (mempool caches tx.fee).
     else if (!is_valid_coinbase_claim(state.height()))
         return error::coinbase_value_limit;
 
-    // TODO: relates block limit to total of tx.sigops (pool cache tx.sigops).
+    // Relates block limit to total of tx.sigops (mempool caches tx.sigops).
     else if (transactions && (signature_operations(bip16) > max_block_sigops))
         return error::block_embedded_sigop_limit;
 

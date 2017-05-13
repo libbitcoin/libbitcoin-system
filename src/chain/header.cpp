@@ -317,11 +317,6 @@ void header::set_version(uint32_t value)
     invalidate_cache();
 }
 
-hash_digest& header::previous_block_hash()
-{
-    return previous_block_hash_;
-}
-
 const hash_digest& header::previous_block_hash() const
 {
     return previous_block_hash_;
@@ -337,11 +332,6 @@ void header::set_previous_block_hash(hash_digest&& value)
 {
     previous_block_hash_ = std::move(value);
     invalidate_cache();
-}
-
-hash_digest& header::merkle()
-{
-    return merkle_;
 }
 
 const hash_digest& header::merkle() const

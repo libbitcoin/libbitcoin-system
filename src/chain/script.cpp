@@ -65,20 +65,25 @@ static const auto one_hash = hash_literal(
 
 // A default instance is invalid (until modified).
 script::script()
-  : valid_(false), cached_(false)
+  : cached_(false),
+    valid_(false)
 {
 }
 
 script::script(script&& other)
-  : bytes_(std::move(other.bytes_)), valid_(other.valid_), cached_(false)
+  : operations_(std::move(other.operations_move())),
+    cached_(!operations_.empty()),
+    bytes_(std::move(other.bytes_)),
+    valid_(other.valid_)
 {
-    // TODO: implement safe private accessor for conditional cache transfer.
 }
 
 script::script(const script& other)
-  : bytes_(other.bytes_), valid_(other.valid_), cached_(false)
+  : operations_(other.operations_copy()),
+    cached_(!operations_.empty()),
+    bytes_(other.bytes_),
+    valid_(other.valid_)
 {
-    // TODO: implement safe private accessor for conditional cache transfer.
 }
 
 script::script(const operation::list& ops)
@@ -99,7 +104,7 @@ script::script(data_chunk&& encoded, bool prefix)
         return;
     }
 
-    // This is an optimization that avoids streaming the encode bytes.
+    // This is an optimization that avoids streaming the encoded bytes.
     bytes_ = std::move(encoded);
     cached_ = false;
     valid_ = true;
@@ -110,14 +115,28 @@ script::script(const data_chunk& encoded, bool prefix)
     valid_ = from_data(encoded, prefix);
 }
 
+// Private cache access for move construction.
+script::operation::list& script::operations_move()
+{
+    shared_lock lock(mutex_);
+    return operations_;
+}
+
+// Private cache access for copy construction.
+const script::operation::list& script::operations_copy() const
+{
+    shared_lock lock(mutex_);
+    return operations_;
+}
+
 // Operators.
 //-----------------------------------------------------------------------------
 
 // Concurrent read/write is not supported, so no critical section.
 script& script::operator=(script&& other)
 {
-    // TODO: implement safe private accessor for conditional cache transfer.
-    reset();
+    operations_ = other.operations_move();
+    cached_ = !operations_.empty();
     bytes_ = std::move(other.bytes_);
     valid_ = other.valid_;
     return *this;
@@ -126,8 +145,8 @@ script& script::operator=(script&& other)
 // Concurrent read/write is not supported, so no critical section.
 script& script::operator=(const script& other)
 {
-    // TODO: implement safe private accessor for conditional cache transfer.
-    reset();
+    operations_ = other.operations_copy();
+    cached_ = !operations_.empty();
     bytes_ = other.bytes_;
     valid_ = other.valid_;
     return *this;
@@ -232,21 +251,21 @@ bool script::from_string(const std::string& mnemonic)
 // Concurrent read/write is not supported, so no critical section.
 void script::from_operations(operation::list&& ops)
 {
-    reset();
-    valid_ = true;
+    ////reset();
     bytes_ = operations_to_data(ops);
     operations_ = std::move(ops);
     cached_ = true;
+    valid_ = true;
 }
 
 // Concurrent read/write is not supported, so no critical section.
 void script::from_operations(const operation::list& ops)
 {
-    reset();
-    valid_ = true;
+    ////reset();
     bytes_ = operations_to_data(ops);
     operations_ = ops;
     cached_ = true;
+    valid_ = true;
 }
 
 // private/static
@@ -834,8 +853,8 @@ operation::list script::to_null_data_pattern(data_slice data)
 
     return operation::list
     {
-        operation{ opcode::return_ },
-        operation{ to_chunk(data) }
+        { opcode::return_ },
+        { to_chunk(data) }
     };
 }
 
@@ -1089,7 +1108,7 @@ void script::find_and_delete(const data_stack& endorsements)
 
 // An unspendable script is any that can provably not be spent under any
 // circumstance. This allows for exclusion of the output as unspendable.
-// The criteria below are need not be comprehensive but are fast to eval.
+// The criteria below are not be comprehensive but are fast to evaluate.
 bool script::is_unspendable() const
 {
     // The first operations access must be method-based to guarantee the cache.

@@ -35,32 +35,49 @@ using namespace bc::wallet;
 //-----------------------------------------------------------------------------
 
 input::input()
-  : previous_output_{}, sequence_(0)
+  : previous_output_{},
+    script_{},
+    sequence_(0)
 {
 }
 
 input::input(input&& other)
-  : input(std::move(other.previous_output_), std::move(other.script_),
-      other.sequence_)
+  : address_(other.address_cache()),
+    previous_output_(std::move(other.previous_output_)),
+    script_(std::move(other.script_)),
+    sequence_(other.sequence_)
 {
 }
 
 input::input(const input& other)
-  : input(other.previous_output_, other.script_, other.sequence_)
+  : address_(other.address_cache()),
+    previous_output_(other.previous_output_),
+    script_(std::move(other.script_)),
+    sequence_(other.sequence_)
 {
 }
 
 input::input(output_point&& previous_output, chain::script&& script,
     uint32_t sequence)
-  : previous_output_(std::move(previous_output)), script_(std::move(script)),
+  : previous_output_(std::move(previous_output)),
+    script_(std::move(script)),
     sequence_(sequence)
 {
 }
 
 input::input(const output_point& previous_output, const chain::script& script,
     uint32_t sequence)
-  : previous_output_(previous_output), script_(script), sequence_(sequence)
+  : previous_output_(previous_output),
+    script_(script),
+    sequence_(sequence)
 {
+}
+
+// Private cache access for copy/move construction.
+input::address_ptr input::address_cache() const
+{
+    shared_lock lock(mutex_);
+    return address_;
 }
 
 // Operators.
@@ -68,6 +85,7 @@ input::input(const output_point& previous_output, const chain::script& script,
 
 input& input::operator=(input&& other)
 {
+    address_ = other.address_cache();
     previous_output_ = std::move(other.previous_output_);
     script_ = std::move(other.script_);
     sequence_ = other.sequence_;
@@ -76,6 +94,7 @@ input& input::operator=(input&& other)
 
 input& input::operator=(const input& other)
 {
+    address_ = other.address_cache();
     previous_output_ = other.previous_output_;
     script_ = other.script_;
     sequence_ = other.sequence_;
@@ -219,11 +238,6 @@ void input::set_previous_output(output_point&& value)
     previous_output_ = std::move(value);
 }
 
-chain::script& input::script()
-{
-    return script_;
-}
-
 const chain::script& input::script() const
 {
     return script_;
@@ -285,6 +299,7 @@ payment_address input::address() const
         // TODO: limit this to input patterns.
         address_ = std::make_shared<payment_address>(
             payment_address::extract(script_));
+
         mutex_.unlock_and_lock_upgrade();
         //---------------------------------------------------------------------
     }

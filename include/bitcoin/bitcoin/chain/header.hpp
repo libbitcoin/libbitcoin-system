@@ -73,7 +73,6 @@ public:
     // Operators.
     //-------------------------------------------------------------------------
 
-    /// This class is move and copy assignable.
     header& operator=(header&& other);
     header& operator=(const header& other);
 
@@ -113,16 +112,11 @@ public:
     uint32_t version() const;
     void set_version(uint32_t value);
 
-    // Deprecated (unsafe).
-    hash_digest& previous_block_hash();
-
     const hash_digest& previous_block_hash() const;
     void set_previous_block_hash(const hash_digest& value);
     void set_previous_block_hash(hash_digest&& value);
 
-    // Deprecated (unsafe).
-    hash_digest& merkle();
-
+    /// This may not match the computed value, validation compares them.
     const hash_digest& merkle() const;
     void set_merkle(const hash_digest& value);
     void set_merkle(hash_digest&& value);
