@@ -35,12 +35,9 @@ public:
     typedef std::shared_ptr<block_transactions> ptr;
     typedef std::shared_ptr<const block_transactions> const_ptr;
 
-    static block_transactions factory(uint32_t version,
-        const data_chunk& data);
-    static block_transactions factory(uint32_t version,
-        std::istream& stream);
-    static block_transactions factory(uint32_t version,
-        reader& source);
+    static block_transactions factory(uint32_t version, const data_chunk& data);
+    static block_transactions factory(uint32_t version, std::istream& stream);
+    static block_transactions factory(uint32_t version, reader& source);
 
     block_transactions();
     block_transactions(const hash_digest& block_hash,

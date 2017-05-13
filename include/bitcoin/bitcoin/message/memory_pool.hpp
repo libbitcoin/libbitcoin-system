@@ -36,10 +36,8 @@ public:
     typedef std::shared_ptr<memory_pool> ptr;
     typedef std::shared_ptr<const memory_pool> const_ptr;
 
-    static memory_pool factory(uint32_t version,
-        const data_chunk& data);
-    static memory_pool factory(uint32_t version,
-        std::istream& stream);
+    static memory_pool factory(uint32_t version, const data_chunk& data);
+    static memory_pool factory(uint32_t version, std::istream& stream);
     static memory_pool factory(uint32_t version, reader& source);
     static size_t satoshi_fixed_size(uint32_t version);
 

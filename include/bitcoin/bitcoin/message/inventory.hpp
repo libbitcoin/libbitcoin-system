@@ -42,8 +42,7 @@ public:
     typedef std::shared_ptr<const inventory> const_ptr;
     typedef inventory_vector::type_id type_id;
 
-    static inventory factory(uint32_t version,
-        const data_chunk& data);
+    static inventory factory(uint32_t version, const data_chunk& data);
     static inventory factory(uint32_t version, std::istream& stream);
     static inventory factory(uint32_t version, reader& source);
 

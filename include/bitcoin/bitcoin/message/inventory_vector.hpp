@@ -49,12 +49,9 @@ public:
     static uint32_t to_number(type_id type);
     static std::string to_string(type_id type);
 
-    static inventory_vector factory(uint32_t version,
-        const data_chunk& data);
-    static inventory_vector factory(uint32_t version,
-        std::istream& stream);
-    static inventory_vector factory(uint32_t version,
-        reader& source);
+    static inventory_vector factory(uint32_t version, const data_chunk& data);
+    static inventory_vector factory(uint32_t version, std::istream& stream);
+    static inventory_vector factory(uint32_t version, reader& source);
     static size_t satoshi_fixed_size(uint32_t version);
 
     inventory_vector();

@@ -39,12 +39,9 @@ public:
     typedef mini_hash short_id;
     typedef mini_hash_list short_id_list;
 
-    static compact_block factory(uint32_t version,
-        const data_chunk& data);
-    static compact_block factory(uint32_t version,
-        std::istream& stream);
-    static compact_block factory(uint32_t version,
-        reader& source);
+    static compact_block factory(uint32_t version, const data_chunk& data);
+    static compact_block factory(uint32_t version, std::istream& stream);
+    static compact_block factory(uint32_t version, reader& source);
 
     compact_block();
     compact_block(const chain::header& header, uint64_t nonce,

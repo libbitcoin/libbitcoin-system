@@ -38,10 +38,8 @@ public:
     typedef std::shared_ptr<get_blocks> ptr;
     typedef std::shared_ptr<const get_blocks> const_ptr;
 
-    static get_blocks factory(uint32_t version,
-        const data_chunk& data);
-    static get_blocks factory(uint32_t version,
-        std::istream& stream);
+    static get_blocks factory(uint32_t version, const data_chunk& data);
+    static get_blocks factory(uint32_t version, std::istream& stream);
     static get_blocks factory(uint32_t version, reader& source);
 
     get_blocks();

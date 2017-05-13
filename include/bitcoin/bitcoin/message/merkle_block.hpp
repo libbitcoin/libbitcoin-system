@@ -39,10 +39,8 @@ public:
     typedef std::shared_ptr<merkle_block> ptr;
     typedef std::shared_ptr<const merkle_block> const_ptr;
 
-    static merkle_block factory(uint32_t version,
-        const data_chunk& data);
-    static merkle_block factory(uint32_t version,
-        std::istream& stream);
+    static merkle_block factory(uint32_t version, const data_chunk& data);
+    static merkle_block factory(uint32_t version, std::istream& stream);
     static merkle_block factory(uint32_t version, reader& source);
 
     merkle_block();
