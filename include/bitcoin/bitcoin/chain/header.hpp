@@ -83,11 +83,11 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static header factory_from_data(const data_chunk& data);
-    static header factory_from_data(std::istream& stream);
-    static header factory_from_data(reader& source);
-    static header factory_from_data(reader& source, hash_digest&& hash);
-    static header factory_from_data(reader& source, const hash_digest& hash);
+    static header factory(const data_chunk& data);
+    static header factory(std::istream& stream);
+    static header factory(reader& source);
+    static header factory(reader& source, hash_digest&& hash);
+    static header factory(reader& source, const hash_digest& hash);
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);

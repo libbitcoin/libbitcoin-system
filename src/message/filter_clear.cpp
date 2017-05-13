@@ -31,7 +31,7 @@ const std::string filter_clear::command = "filterclear";
 const uint32_t filter_clear::version_minimum = version::level::bip37;
 const uint32_t filter_clear::version_maximum = version::level::maximum;
 
-filter_clear filter_clear::factory_from_data(uint32_t version,
+filter_clear filter_clear::factory(uint32_t version,
     const data_chunk& data)
 {
     filter_clear instance;
@@ -39,7 +39,7 @@ filter_clear filter_clear::factory_from_data(uint32_t version,
     return instance;
 }
 
-filter_clear filter_clear::factory_from_data(uint32_t version,
+filter_clear filter_clear::factory(uint32_t version,
     std::istream& stream)
 {
     filter_clear instance;
@@ -47,7 +47,7 @@ filter_clear filter_clear::factory_from_data(uint32_t version,
     return instance;
 }
 
-filter_clear filter_clear::factory_from_data(uint32_t version,
+filter_clear filter_clear::factory(uint32_t version,
     reader& source)
 {
     filter_clear instance;

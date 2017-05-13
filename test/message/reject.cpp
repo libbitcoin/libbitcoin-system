@@ -44,11 +44,11 @@ static const hash_digest data
 
 BOOST_AUTO_TEST_SUITE(reject_tests)
 
-BOOST_AUTO_TEST_CASE(reject__factory_from_data__tx_nonstandard_empty_data__valid)
+BOOST_AUTO_TEST_CASE(reject__factory__tx_nonstandard_empty_data__valid)
 {
     data_chunk payload;
     BOOST_REQUIRE(decode_base16(payload, MALFORMED_REJECT));
-    const auto reject = message::reject::factory_from_data(version_maximum, payload);
+    const auto reject = message::reject::factory(version_maximum, payload);
     BOOST_REQUIRE(reject.is_valid());
 }
 
@@ -273,7 +273,7 @@ BOOST_AUTO_TEST_CASE(reject__from_data__code_undefined__success)
     BOOST_REQUIRE(expected == instance);
 }
 
-BOOST_AUTO_TEST_CASE(reject__factory_from_data_1__valid_input__success)
+BOOST_AUTO_TEST_CASE(reject__factory_1__valid_input__success)
 {
     const message::reject expected(
         message::reject::reason_code::dust,
@@ -283,14 +283,14 @@ BOOST_AUTO_TEST_CASE(reject__factory_from_data_1__valid_input__success)
     );
 
     const auto data = expected.to_data(version_maximum);
-    const auto result = message::reject::factory_from_data(version_maximum, data);
+    const auto result = message::reject::factory(version_maximum, data);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version_maximum));
     BOOST_REQUIRE_EQUAL(expected.serialized_size(version_maximum), result.serialized_size(version_maximum));
 }
 
-BOOST_AUTO_TEST_CASE(reject__factory_from_data_2__valid_input__success)
+BOOST_AUTO_TEST_CASE(reject__factory_2__valid_input__success)
 {
     const message::reject expected(
         message::reject::reason_code::insufficient_fee,
@@ -301,14 +301,14 @@ BOOST_AUTO_TEST_CASE(reject__factory_from_data_2__valid_input__success)
 
     const auto data = expected.to_data(version_maximum);
     data_source istream(data);
-    const auto result = message::reject::factory_from_data(version_maximum, istream);
+    const auto result = message::reject::factory(version_maximum, istream);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version_maximum));
     BOOST_REQUIRE_EQUAL(expected.serialized_size(version_maximum), result.serialized_size(version_maximum));
 }
 
-BOOST_AUTO_TEST_CASE(reject__factory_from_data_3__valid_input__success)
+BOOST_AUTO_TEST_CASE(reject__factory_3__valid_input__success)
 {
     const message::reject expected(
         message::reject::reason_code::duplicate,
@@ -320,7 +320,7 @@ BOOST_AUTO_TEST_CASE(reject__factory_from_data_3__valid_input__success)
     const auto data = expected.to_data(version_maximum);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = message::reject::factory_from_data(version_maximum, source);
+    const auto result = message::reject::factory(version_maximum, source);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version_maximum));

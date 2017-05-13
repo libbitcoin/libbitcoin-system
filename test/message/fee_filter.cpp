@@ -72,11 +72,11 @@ BOOST_AUTO_TEST_CASE(fee_filter__from_data__insufficient_version_failure)
     BOOST_REQUIRE(!instance.from_data(filter_add::version_minimum - 1, data));
 }
 
-BOOST_AUTO_TEST_CASE(fee_filter__factory_from_data_1__roundtrip__success)
+BOOST_AUTO_TEST_CASE(fee_filter__factory_1__roundtrip__success)
 {
     const fee_filter expected{ 123 };
     const auto data = expected.to_data(fee_filter::version_maximum);
-    const auto result = fee_filter::factory_from_data(fee_filter::version_maximum, data);
+    const auto result = fee_filter::factory(fee_filter::version_maximum, data);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
 
@@ -85,12 +85,12 @@ BOOST_AUTO_TEST_CASE(fee_filter__factory_from_data_1__roundtrip__success)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(version::level::maximum), size);
 }
 
-BOOST_AUTO_TEST_CASE(fee_filter__factory_from_data_2__roundtrip__success)
+BOOST_AUTO_TEST_CASE(fee_filter__factory_2__roundtrip__success)
 {
     const fee_filter expected{ 325 };
     const auto data = expected.to_data(fee_filter::version_maximum);
     data_source istream(data);
-    const auto result = fee_filter::factory_from_data(fee_filter::version_maximum, istream);
+    const auto result = fee_filter::factory(fee_filter::version_maximum, istream);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
 
@@ -99,13 +99,13 @@ BOOST_AUTO_TEST_CASE(fee_filter__factory_from_data_2__roundtrip__success)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(version::level::maximum), size);
 }
 
-BOOST_AUTO_TEST_CASE(fee_filter__factory_from_data_3__roundtrip__success)
+BOOST_AUTO_TEST_CASE(fee_filter__factory_3__roundtrip__success)
 {
     const fee_filter expected{ 58246 };
     const auto data = expected.to_data(fee_filter::version_maximum);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = fee_filter::factory_from_data(fee_filter::version_maximum, source);
+    const auto result = fee_filter::factory(fee_filter::version_maximum, source);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
 

@@ -42,9 +42,9 @@ public:
     typedef std::vector<ptr> ptr_list;
     typedef std::vector<const_ptr> const_ptr_list;
 
-    static header factory_from_data(uint32_t version, const data_chunk& data);
-    static header factory_from_data(uint32_t version, std::istream& stream);
-    static header factory_from_data(uint32_t version, reader& source);
+    static header factory(uint32_t version, const data_chunk& data);
+    static header factory(uint32_t version, std::istream& stream);
+    static header factory(uint32_t version, reader& source);
     static size_t satoshi_fixed_size(uint32_t version);
 
     header();

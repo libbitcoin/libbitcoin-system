@@ -41,7 +41,7 @@ const ec_uncompressed alert_payload::satoshi_public_key
     }
 };
 
-alert_payload alert_payload::factory_from_data(uint32_t version,
+alert_payload alert_payload::factory(uint32_t version,
     const data_chunk& data)
 {
     alert_payload instance;
@@ -49,7 +49,7 @@ alert_payload alert_payload::factory_from_data(uint32_t version,
     return instance;
 }
 
-alert_payload alert_payload::factory_from_data(uint32_t version,
+alert_payload alert_payload::factory(uint32_t version,
     std::istream& stream)
 {
     alert_payload instance;
@@ -57,7 +57,7 @@ alert_payload alert_payload::factory_from_data(uint32_t version,
     return instance;
 }
 
-alert_payload alert_payload::factory_from_data(uint32_t version,
+alert_payload alert_payload::factory(uint32_t version,
     reader& source)
 {
     alert_payload instance;

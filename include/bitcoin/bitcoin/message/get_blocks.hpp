@@ -38,11 +38,11 @@ public:
     typedef std::shared_ptr<get_blocks> ptr;
     typedef std::shared_ptr<const get_blocks> const_ptr;
 
-    static get_blocks factory_from_data(uint32_t version,
+    static get_blocks factory(uint32_t version,
         const data_chunk& data);
-    static get_blocks factory_from_data(uint32_t version,
+    static get_blocks factory(uint32_t version,
         std::istream& stream);
-    static get_blocks factory_from_data(uint32_t version, reader& source);
+    static get_blocks factory(uint32_t version, reader& source);
 
     get_blocks();
     get_blocks(const hash_list& start, const hash_digest& stop);

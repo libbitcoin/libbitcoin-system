@@ -151,7 +151,7 @@ bool header::operator!=(const header& other) const
 //-----------------------------------------------------------------------------
 
 // static
-header header::factory_from_data(const data_chunk& data)
+header header::factory(const data_chunk& data)
 {
     header instance;
     instance.from_data(data);
@@ -159,7 +159,7 @@ header header::factory_from_data(const data_chunk& data)
 }
 
 // static
-header header::factory_from_data(std::istream& stream)
+header header::factory(std::istream& stream)
 {
     header instance;
     instance.from_data(stream);
@@ -167,7 +167,7 @@ header header::factory_from_data(std::istream& stream)
 }
 
 // static
-header header::factory_from_data(reader& source)
+header header::factory(reader& source)
 {
     header instance;
     instance.from_data(source);
@@ -175,7 +175,7 @@ header header::factory_from_data(reader& source)
 }
 
 // static
-header header::factory_from_data(reader& source, hash_digest&& hash)
+header header::factory(reader& source, hash_digest&& hash)
 {
     header instance;
     instance.from_data(source, std::move(hash));
@@ -183,7 +183,7 @@ header header::factory_from_data(reader& source, hash_digest&& hash)
 }
 
 // static
-header header::factory_from_data(reader& source, const hash_digest& hash)
+header header::factory(reader& source, const hash_digest& hash)
 {
     header instance;
     instance.from_data(source, hash);

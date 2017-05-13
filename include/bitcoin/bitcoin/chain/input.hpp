@@ -66,9 +66,9 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static input factory_from_data(const data_chunk& data, bool wire=true);
-    static input factory_from_data(std::istream& stream, bool wire=true);
-    static input factory_from_data(reader& source, bool wire=true);
+    static input factory(const data_chunk& data, bool wire=true);
+    static input factory(std::istream& stream, bool wire=true);
+    static input factory(reader& source, bool wire=true);
 
     bool from_data(const data_chunk& data, bool wire=true);
     bool from_data(std::istream& stream, bool wire=true);

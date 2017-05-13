@@ -30,7 +30,7 @@ const std::string not_found::command = "notfound";
 const uint32_t not_found::version_minimum = version::level::bip37;
 const uint32_t not_found::version_maximum = version::level::maximum;
 
-not_found not_found::factory_from_data(uint32_t version,
+not_found not_found::factory(uint32_t version,
     const data_chunk& data)
 {
     not_found instance;
@@ -38,7 +38,7 @@ not_found not_found::factory_from_data(uint32_t version,
     return instance;
 }
 
-not_found not_found::factory_from_data(uint32_t version,
+not_found not_found::factory(uint32_t version,
     std::istream& stream)
 {
     not_found instance;
@@ -46,7 +46,7 @@ not_found not_found::factory_from_data(uint32_t version,
     return instance;
 }
 
-not_found not_found::factory_from_data(uint32_t version,
+not_found not_found::factory(uint32_t version,
     reader& source)
 {
     not_found instance;

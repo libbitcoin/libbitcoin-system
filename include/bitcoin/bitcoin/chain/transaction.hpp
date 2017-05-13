@@ -97,13 +97,13 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static transaction factory_from_data(const data_chunk& data, bool wire=true);
-    static transaction factory_from_data(std::istream& stream, bool wire=true);
-    static transaction factory_from_data(reader& source, bool wire=true);
+    static transaction factory(const data_chunk& data, bool wire=true);
+    static transaction factory(std::istream& stream, bool wire=true);
+    static transaction factory(reader& source, bool wire=true);
 
     // Non-wire store deserializations to preserve hash.
-    static transaction factory_from_data(reader& source, hash_digest&& hash);
-    static transaction factory_from_data(reader& source,
+    static transaction factory(reader& source, hash_digest&& hash);
+    static transaction factory(reader& source,
         const hash_digest& hash);
 
     bool from_data(const data_chunk& data, bool wire=true);

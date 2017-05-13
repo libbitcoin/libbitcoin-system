@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(output_point__from_data__roundtrip__success)
     BOOST_REQUIRE(point == initial);
 }
 
-BOOST_AUTO_TEST_CASE(output_point__factory_from_data_1__roundtrip__success)
+BOOST_AUTO_TEST_CASE(output_point__factory_1__roundtrip__success)
 {
     data_chunk rawdata = to_chunk(base16_literal(
         "46682488f0a721124a3905a1bb72445bf13493e2cd46c5c0c8db1c15afa0d58e00000000"
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(output_point__factory_from_data_1__roundtrip__success)
         0xc8, 0xdb, 0x1c, 0x15, 0xaf, 0xa0, 0xd5, 0x8e, 0x00, 0x00, 0x00, 0x00
     }));
 
-    auto point = chain::output_point::factory_from_data(rawdata);
+    auto point = chain::output_point::factory(rawdata);
 
     BOOST_REQUIRE(point.is_valid());
     BOOST_REQUIRE_EQUAL(encode_hash(point.hash()), "8ed5a0af151cdbc8c0c546cde29334f15b4472bba105394a1221a7f088246846");
@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE(output_point__factory_from_data_1__roundtrip__success)
     BOOST_REQUIRE(output == rawdata);
 }
 
-BOOST_AUTO_TEST_CASE(output_point__factory_from_data_2__roundtrip__success)
+BOOST_AUTO_TEST_CASE(output_point__factory_2__roundtrip__success)
 {
     data_chunk rawdata = to_chunk(base16_literal(
         "46682488f0a721124a3905a1bb72445bf13493e2cd46c5c0c8db1c15afa0d58e00000000"
@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE(output_point__factory_from_data_2__roundtrip__success)
     }));
 
     data_source istream(rawdata);
-    auto point = chain::output_point::factory_from_data(istream);
+    auto point = chain::output_point::factory(istream);
 
     BOOST_REQUIRE(point.is_valid());
     BOOST_REQUIRE_EQUAL(encode_hash(point.hash()), "8ed5a0af151cdbc8c0c546cde29334f15b4472bba105394a1221a7f088246846");
@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE(output_point__factory_from_data_2__roundtrip__success)
     BOOST_REQUIRE(output == rawdata);
 }
 
-BOOST_AUTO_TEST_CASE(output_point__factory_from_data_3__roundtrip__success)
+BOOST_AUTO_TEST_CASE(output_point__factory_3__roundtrip__success)
 {
     data_chunk rawdata = to_chunk(base16_literal(
         "46682488f0a721124a3905a1bb72445bf13493e2cd46c5c0c8db1c15afa0d58e00000000"
@@ -210,7 +210,7 @@ BOOST_AUTO_TEST_CASE(output_point__factory_from_data_3__roundtrip__success)
 
     data_source istream(rawdata);
     istream_reader source(istream);
-    auto point = chain::output_point::factory_from_data(source);
+    auto point = chain::output_point::factory(source);
 
     BOOST_REQUIRE(point.is_valid());
     BOOST_REQUIRE_EQUAL(encode_hash(point.hash()), "8ed5a0af151cdbc8c0c546cde29334f15b4472bba105394a1221a7f088246846");

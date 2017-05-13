@@ -35,21 +35,21 @@ const std::string block::command = "block";
 const uint32_t block::version_minimum = version::level::minimum;
 const uint32_t block::version_maximum = version::level::maximum;
 
-block block::factory_from_data(uint32_t version, const data_chunk& data)
+block block::factory(uint32_t version, const data_chunk& data)
 {
     block instance;
     instance.from_data(version, data);
     return instance;
 }
 
-block block::factory_from_data(uint32_t version, std::istream& stream)
+block block::factory(uint32_t version, std::istream& stream)
 {
     block instance;
     instance.from_data(version, stream);
     return instance;
 }
 
-block block::factory_from_data(uint32_t version, reader& source)
+block block::factory(uint32_t version, reader& source)
 {
     block instance;
     instance.from_data(version, source);

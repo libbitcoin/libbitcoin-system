@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(headers__from_data__insufficient_version__failure)
     BOOST_REQUIRE(!instance.from_data(headers::version_minimum - 1, data));
 }
 
-BOOST_AUTO_TEST_CASE(headers__factory_from_data_1__valid_input__success)
+BOOST_AUTO_TEST_CASE(headers__factory_1__valid_input__success)
 {
     static const headers expected
     {
@@ -195,14 +195,14 @@ BOOST_AUTO_TEST_CASE(headers__factory_from_data_1__valid_input__success)
 
     static const auto version = headers::version_minimum;
     const auto data = expected.to_data(version);
-    const auto result = headers::factory_from_data(version, data);
+    const auto result = headers::factory(version, data);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(result == expected);
     BOOST_REQUIRE_EQUAL(result.serialized_size(version), data.size());
     BOOST_REQUIRE_EQUAL(result.serialized_size(version), expected.serialized_size(version));
 }
 
-BOOST_AUTO_TEST_CASE(headers__factory_from_data_2__valid_input__success)
+BOOST_AUTO_TEST_CASE(headers__factory_2__valid_input__success)
 {
     static const headers expected
     {
@@ -219,14 +219,14 @@ BOOST_AUTO_TEST_CASE(headers__factory_from_data_2__valid_input__success)
     static const auto version = headers::version_minimum;
     const auto data = expected.to_data(version);
     data_source istream(data);
-    auto result = headers::factory_from_data(version, istream);
+    auto result = headers::factory(version, istream);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(result == expected);
     BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version));
     BOOST_REQUIRE_EQUAL(result.serialized_size(version), expected.serialized_size(version));
 }
 
-BOOST_AUTO_TEST_CASE(headers__factory_from_data_3__valid_input__success)
+BOOST_AUTO_TEST_CASE(headers__factory_3__valid_input__success)
 {
     static const headers expected
     {
@@ -244,7 +244,7 @@ BOOST_AUTO_TEST_CASE(headers__factory_from_data_3__valid_input__success)
     const auto data = expected.to_data(version);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = headers::factory_from_data(version, source);
+    const auto result = headers::factory(version, source);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(result == expected);
     BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version));

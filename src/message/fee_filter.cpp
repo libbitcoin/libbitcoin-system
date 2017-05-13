@@ -31,7 +31,7 @@ const std::string fee_filter::command = "feefilter";
 const uint32_t fee_filter::version_minimum = version::level::bip133;
 const uint32_t fee_filter::version_maximum = version::level::bip133;
 
-fee_filter fee_filter::factory_from_data(uint32_t version,
+fee_filter fee_filter::factory(uint32_t version,
     const data_chunk& data)
 {
     fee_filter instance;
@@ -39,7 +39,7 @@ fee_filter fee_filter::factory_from_data(uint32_t version,
     return instance;
 }
 
-fee_filter fee_filter::factory_from_data(uint32_t version,
+fee_filter fee_filter::factory(uint32_t version,
     std::istream& stream)
 {
     fee_filter instance;
@@ -47,7 +47,7 @@ fee_filter fee_filter::factory_from_data(uint32_t version,
     return instance;
 }
 
-fee_filter fee_filter::factory_from_data(uint32_t version, reader& source)
+fee_filter fee_filter::factory(uint32_t version, reader& source)
 {
     fee_filter instance;
     instance.from_data(version, source);

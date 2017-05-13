@@ -238,30 +238,30 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_four_size__success)
     BOOST_REQUIRE(instance.data() == data520);
 }
 
-BOOST_AUTO_TEST_CASE(operation__factory_from_data_1__roundtrip__success)
+BOOST_AUTO_TEST_CASE(operation__factory_1__roundtrip__success)
 {
-    auto operation = operation::factory_from_data(valid_raw_operation);
+    auto operation = operation::factory(valid_raw_operation);
 
     BOOST_REQUIRE(operation.is_valid());
     data_chunk output = operation.to_data();
     BOOST_REQUIRE(output == valid_raw_operation);
 }
 
-BOOST_AUTO_TEST_CASE(operation__factory_from_data_2__roundtrip__success)
+BOOST_AUTO_TEST_CASE(operation__factory_2__roundtrip__success)
 {
     data_source istream(valid_raw_operation);
-    auto operation = operation::factory_from_data(istream);
+    auto operation = operation::factory(istream);
 
     BOOST_REQUIRE(operation.is_valid());
     data_chunk output = operation.to_data();
     BOOST_REQUIRE(output == valid_raw_operation);
 }
 
-BOOST_AUTO_TEST_CASE(operation__factory_from_data_3__roundtrip__success)
+BOOST_AUTO_TEST_CASE(operation__factory_3__roundtrip__success)
 {
     data_source istream(valid_raw_operation);
     istream_reader source(istream);
-    auto operation = operation::factory_from_data(source);
+    auto operation = operation::factory(source);
 
     BOOST_REQUIRE(operation.is_valid());
     data_chunk output = operation.to_data();

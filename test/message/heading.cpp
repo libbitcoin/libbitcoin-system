@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(heading__from_data__insufficient_bytes__failure)
     BOOST_REQUIRE(!instance.from_data(raw));
 }
 
-BOOST_AUTO_TEST_CASE(heading__factory_from_data_1__valid_input__success)
+BOOST_AUTO_TEST_CASE(heading__factory_1__valid_input__success)
 {
     static const heading expected
     {
@@ -121,13 +121,13 @@ BOOST_AUTO_TEST_CASE(heading__factory_from_data_1__valid_input__success)
     };
 
     const auto data = expected.to_data();
-    const auto result = heading::factory_from_data(data);
+    const auto result = heading::factory(data);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE_EQUAL(data.size(), heading::satoshi_fixed_size());
 }
 
-BOOST_AUTO_TEST_CASE(heading__factory_from_data_2__valid_input__success)
+BOOST_AUTO_TEST_CASE(heading__factory_2__valid_input__success)
 {
     static const heading expected
     {
@@ -139,13 +139,13 @@ BOOST_AUTO_TEST_CASE(heading__factory_from_data_2__valid_input__success)
 
     const auto data = expected.to_data();
     data_source istream(data);
-    const auto result = heading::factory_from_data(istream);
+    const auto result = heading::factory(istream);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE_EQUAL(data.size(), heading::satoshi_fixed_size());
 }
 
-BOOST_AUTO_TEST_CASE(heading__factory_from_data_3__valid_input__success)
+BOOST_AUTO_TEST_CASE(heading__factory_3__valid_input__success)
 {
     static const heading expected
     {
@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE(heading__factory_from_data_3__valid_input__success)
     const auto data = expected.to_data();
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = heading::factory_from_data(source);
+    const auto result = heading::factory(source);
     BOOST_REQUIRE_EQUAL(data.size(), heading::satoshi_fixed_size());
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);

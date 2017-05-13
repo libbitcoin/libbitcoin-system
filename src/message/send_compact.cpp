@@ -32,7 +32,7 @@ const std::string send_compact::command = "sendcmpct";
 const uint32_t send_compact::version_minimum = version::level::bip152;
 const uint32_t send_compact::version_maximum = version::level::bip152;
 
-send_compact send_compact::factory_from_data(uint32_t version,
+send_compact send_compact::factory(uint32_t version,
     const data_chunk& data)
 {
     send_compact instance;
@@ -40,7 +40,7 @@ send_compact send_compact::factory_from_data(uint32_t version,
     return instance;
 }
 
-send_compact send_compact::factory_from_data(uint32_t version,
+send_compact send_compact::factory(uint32_t version,
     std::istream& stream)
 {
     send_compact instance;
@@ -48,7 +48,7 @@ send_compact send_compact::factory_from_data(uint32_t version,
     return instance;
 }
 
-send_compact send_compact::factory_from_data(uint32_t version,
+send_compact send_compact::factory(uint32_t version,
     reader& source)
 {
     send_compact instance;

@@ -30,7 +30,7 @@ const std::string get_data::command = "getdata";
 const uint32_t get_data::version_minimum = version::level::minimum;
 const uint32_t get_data::version_maximum = version::level::maximum;
 
-get_data get_data::factory_from_data(uint32_t version,
+get_data get_data::factory(uint32_t version,
     const data_chunk& data)
 {
     get_data instance;
@@ -38,7 +38,7 @@ get_data get_data::factory_from_data(uint32_t version,
     return instance;
 }
 
-get_data get_data::factory_from_data(uint32_t version,
+get_data get_data::factory(uint32_t version,
     std::istream& stream)
 {
     get_data instance;
@@ -46,7 +46,7 @@ get_data get_data::factory_from_data(uint32_t version,
     return instance;
 }
 
-get_data get_data::factory_from_data(uint32_t version,
+get_data get_data::factory(uint32_t version,
     reader& source)
 {
     get_data instance;

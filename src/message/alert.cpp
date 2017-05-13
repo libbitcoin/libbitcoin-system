@@ -34,21 +34,21 @@ const std::string alert::command = "alert";
 const uint32_t alert::version_minimum = version::level::minimum;
 const uint32_t alert::version_maximum = version::level::maximum;
 
-alert alert::factory_from_data(uint32_t version, const data_chunk& data)
+alert alert::factory(uint32_t version, const data_chunk& data)
 {
     alert instance;
     instance.from_data(version, data);
     return instance;
 }
 
-alert alert::factory_from_data(uint32_t version, std::istream& stream)
+alert alert::factory(uint32_t version, std::istream& stream)
 {
     alert instance;
     instance.from_data(version, stream);
     return instance;
 }
 
-alert alert::factory_from_data(uint32_t version, reader& source)
+alert alert::factory(uint32_t version, reader& source)
 {
     alert instance;
     instance.from_data(version, source);

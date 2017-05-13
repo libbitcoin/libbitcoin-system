@@ -147,7 +147,7 @@ bool script::operator!=(const script& other) const
 //-----------------------------------------------------------------------------
 
 // static
-script script::factory_from_data(const data_chunk& encoded, bool prefix)
+script script::factory(const data_chunk& encoded, bool prefix)
 {
     script instance;
     instance.from_data(encoded, prefix);
@@ -155,7 +155,7 @@ script script::factory_from_data(const data_chunk& encoded, bool prefix)
 }
 
 // static
-script script::factory_from_data(std::istream& stream, bool prefix)
+script script::factory(std::istream& stream, bool prefix)
 {
     script instance;
     instance.from_data(stream, prefix);
@@ -163,7 +163,7 @@ script script::factory_from_data(std::istream& stream, bool prefix)
 }
 
 // static
-script script::factory_from_data(reader& source, bool prefix)
+script script::factory(reader& source, bool prefix)
 {
     script instance;
     instance.from_data(source, prefix);

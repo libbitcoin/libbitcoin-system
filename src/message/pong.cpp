@@ -31,21 +31,21 @@ const std::string pong::command = "pong";
 const uint32_t pong::version_minimum = version::level::minimum;
 const uint32_t pong::version_maximum = version::level::maximum;
 
-pong pong::factory_from_data(uint32_t version, const data_chunk& data)
+pong pong::factory(uint32_t version, const data_chunk& data)
 {
     pong instance;
     instance.from_data(version, data);
     return instance;
 }
 
-pong pong::factory_from_data(uint32_t version, std::istream& stream)
+pong pong::factory(uint32_t version, std::istream& stream)
 {
     pong instance;
     instance.from_data(version, stream);
     return instance;
 }
 
-pong pong::factory_from_data(uint32_t version, reader& source)
+pong pong::factory(uint32_t version, reader& source)
 {
     pong instance;
     instance.from_data(version, source);

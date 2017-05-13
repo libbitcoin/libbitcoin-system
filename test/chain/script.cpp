@@ -282,27 +282,27 @@ BOOST_AUTO_TEST_CASE(script__from_data__to_data_weird__roundtrips)
     BOOST_REQUIRE(roundtrip_result == weird_raw_script);
 }
 
-BOOST_AUTO_TEST_CASE(script__factory_from_data_chunk_test)
+BOOST_AUTO_TEST_CASE(script__factory_chunk_test)
 {
     const auto raw = to_chunk(base16_literal("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
-    const auto instance = script::factory_from_data(raw, false);
+    const auto instance = script::factory(raw, false);
     BOOST_REQUIRE(instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(script__factory_from_data_stream_test)
+BOOST_AUTO_TEST_CASE(script__factory_stream_test)
 {
     auto raw = to_chunk(base16_literal("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
     data_source istream(raw);
-    auto instance = script::factory_from_data(istream, false);
+    auto instance = script::factory(istream, false);
     BOOST_REQUIRE(instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(script__factory_from_data_reader_test)
+BOOST_AUTO_TEST_CASE(script__factory_reader_test)
 {
     auto raw = to_chunk(base16_literal("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
     data_source istream(raw);
     istream_reader source(istream);
-    const auto instance = script::factory_from_data(source, false);
+    const auto instance = script::factory(source, false);
     BOOST_REQUIRE(instance.is_valid());
 }
 
@@ -382,7 +382,7 @@ BOOST_AUTO_TEST_CASE(script__native__block_438513_tx__valid)
     auto& input = tx.inputs()[input_index];
     auto& prevout = input.previous_output().validation.cache;
 
-    prevout.set_script(script::factory_from_data(decoded_script, false));
+    prevout.set_script(script::factory(decoded_script, false));
     BOOST_REQUIRE(prevout.script().is_valid());
 
     // [3045022100ba555ac17a084e2a1b621c2171fa563bc4fb75cd5c0968153f44ba7203cb876f022036626f4579de16e3ad160df01f649ffb8dbf47b504ee56dc3ad7260af24ca0db01] [00] [632102768e47607c52e581595711e27faffa7cb646b4f481fe269bd49691b2fbc12106ad6704355e2658b1756821028a5af8284a12848d69a25a0ac5cea20be905848eb645fd03d3b065df88a9117cac]

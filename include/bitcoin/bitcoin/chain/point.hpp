@@ -69,9 +69,9 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static point factory_from_data(const data_chunk& data, bool wire=true);
-    static point factory_from_data(std::istream& stream, bool wire=true);
-    static point factory_from_data(reader& source, bool wire=true);
+    static point factory(const data_chunk& data, bool wire=true);
+    static point factory(std::istream& stream, bool wire=true);
+    static point factory(reader& source, bool wire=true);
 
     bool from_data(const data_chunk& data, bool wire=true);
     bool from_data(std::istream& stream, bool wire=true);

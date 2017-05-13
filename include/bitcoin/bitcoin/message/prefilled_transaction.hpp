@@ -36,11 +36,11 @@ public:
     typedef std::vector<prefilled_transaction> list;
     typedef std::shared_ptr<const prefilled_transaction> const_ptr;
 
-    static prefilled_transaction factory_from_data(uint32_t version,
+    static prefilled_transaction factory(uint32_t version,
         const data_chunk& data);
-    static prefilled_transaction factory_from_data(uint32_t version,
+    static prefilled_transaction factory(uint32_t version,
         std::istream& stream);
-    static prefilled_transaction factory_from_data(uint32_t version,
+    static prefilled_transaction factory(uint32_t version,
         reader& source);
 
     prefilled_transaction();

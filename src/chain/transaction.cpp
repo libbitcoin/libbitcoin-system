@@ -185,7 +185,7 @@ bool transaction::operator!=(const transaction& other) const
 //-----------------------------------------------------------------------------
 
 // static
-transaction transaction::factory_from_data(const data_chunk& data, bool wire)
+transaction transaction::factory(const data_chunk& data, bool wire)
 {
     transaction instance;
     instance.from_data(data, wire);
@@ -193,7 +193,7 @@ transaction transaction::factory_from_data(const data_chunk& data, bool wire)
 }
 
 // static
-transaction transaction::factory_from_data(std::istream& stream, bool wire)
+transaction transaction::factory(std::istream& stream, bool wire)
 {
     transaction instance;
     instance.from_data(stream, wire);
@@ -201,7 +201,7 @@ transaction transaction::factory_from_data(std::istream& stream, bool wire)
 }
 
 // static
-transaction transaction::factory_from_data(reader& source, bool wire)
+transaction transaction::factory(reader& source, bool wire)
 {
     transaction instance;
     instance.from_data(source, wire);
@@ -209,7 +209,7 @@ transaction transaction::factory_from_data(reader& source, bool wire)
 }
 
 // static
-transaction transaction::factory_from_data(reader& source, hash_digest&& hash)
+transaction transaction::factory(reader& source, hash_digest&& hash)
 {
     transaction instance;
     instance.from_data(source, std::move(hash));
@@ -217,7 +217,7 @@ transaction transaction::factory_from_data(reader& source, hash_digest&& hash)
 }
 
 // static
-transaction transaction::factory_from_data(reader& source,
+transaction transaction::factory(reader& source,
     const hash_digest& hash)
 {
     transaction instance;

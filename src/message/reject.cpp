@@ -34,7 +34,7 @@ const std::string reject::command = "reject";
 const uint32_t reject::version_minimum = version::level::bip61;
 const uint32_t reject::version_maximum = version::level::maximum;
 
-reject reject::factory_from_data(uint32_t version,
+reject reject::factory(uint32_t version,
     const data_chunk& data)
 {
     reject instance;
@@ -42,7 +42,7 @@ reject reject::factory_from_data(uint32_t version,
     return instance;
 }
 
-reject reject::factory_from_data(uint32_t version,
+reject reject::factory(uint32_t version,
     std::istream& stream)
 {
     reject instance;
@@ -50,7 +50,7 @@ reject reject::factory_from_data(uint32_t version,
     return instance;
 }
 
-reject reject::factory_from_data(uint32_t version,
+reject reject::factory(uint32_t version,
     reader& source)
 {
     reject instance;

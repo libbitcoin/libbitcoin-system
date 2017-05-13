@@ -83,7 +83,7 @@ std::string inventory_vector::to_string(type_id inventory_type)
     }
 }
 
-inventory_vector inventory_vector::factory_from_data(uint32_t version,
+inventory_vector inventory_vector::factory(uint32_t version,
     const data_chunk& data)
 {
     inventory_vector instance;
@@ -91,7 +91,7 @@ inventory_vector inventory_vector::factory_from_data(uint32_t version,
     return instance;
 }
 
-inventory_vector inventory_vector::factory_from_data(uint32_t version,
+inventory_vector inventory_vector::factory(uint32_t version,
     std::istream& stream)
 {
     inventory_vector instance;
@@ -99,7 +99,7 @@ inventory_vector inventory_vector::factory_from_data(uint32_t version,
     return instance;
 }
 
-inventory_vector inventory_vector::factory_from_data(uint32_t version,
+inventory_vector inventory_vector::factory(uint32_t version,
     reader& source)
 {
     inventory_vector instance;

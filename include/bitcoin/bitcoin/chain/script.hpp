@@ -72,9 +72,9 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static script factory_from_data(const data_chunk& encoded, bool prefix);
-    static script factory_from_data(std::istream& stream, bool prefix);
-    static script factory_from_data(reader& source, bool prefix);
+    static script factory(const data_chunk& encoded, bool prefix);
+    static script factory(std::istream& stream, bool prefix);
+    static script factory(reader& source, bool prefix);
 
     /// Deserialization invalidates the iterator.
     bool from_data(const data_chunk& encoded, bool prefix);

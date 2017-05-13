@@ -36,11 +36,11 @@ public:
     typedef std::shared_ptr<send_headers> ptr;
     typedef std::shared_ptr<const send_headers> const_ptr;
 
-    static send_headers factory_from_data(uint32_t version,
+    static send_headers factory(uint32_t version,
         const data_chunk& data);
-    static send_headers factory_from_data(uint32_t version,
+    static send_headers factory(uint32_t version,
         std::istream& stream);
-    static send_headers factory_from_data(uint32_t version,
+    static send_headers factory(uint32_t version,
         reader& source);
     static size_t satoshi_fixed_size(uint32_t version);
 

@@ -33,7 +33,7 @@ const std::string transaction::command = "tx";
 const uint32_t transaction::version_minimum = version::level::minimum;
 const uint32_t transaction::version_maximum = version::level::maximum;
 
-transaction transaction::factory_from_data(uint32_t version,
+transaction transaction::factory(uint32_t version,
     const data_chunk& data)
 {
     transaction instance;
@@ -41,7 +41,7 @@ transaction transaction::factory_from_data(uint32_t version,
     return instance;
 }
 
-transaction transaction::factory_from_data(uint32_t version,
+transaction transaction::factory(uint32_t version,
     std::istream& stream)
 {
     transaction instance;
@@ -49,7 +49,7 @@ transaction transaction::factory_from_data(uint32_t version,
     return instance;
 }
 
-transaction transaction::factory_from_data(uint32_t version,
+transaction transaction::factory(uint32_t version,
     reader& source)
 {
     transaction instance;

@@ -34,7 +34,7 @@ const std::string filter_load::command = "filterload";
 const uint32_t filter_load::version_minimum = version::level::bip37;
 const uint32_t filter_load::version_maximum = version::level::maximum;
 
-filter_load filter_load::factory_from_data(uint32_t version,
+filter_load filter_load::factory(uint32_t version,
     const data_chunk& data)
 {
     filter_load instance;
@@ -42,7 +42,7 @@ filter_load filter_load::factory_from_data(uint32_t version,
     return instance;
 }
 
-filter_load filter_load::factory_from_data(uint32_t version,
+filter_load filter_load::factory(uint32_t version,
     std::istream& stream)
 {
     filter_load instance;
@@ -50,7 +50,7 @@ filter_load filter_load::factory_from_data(uint32_t version,
     return instance;
 }
 
-filter_load filter_load::factory_from_data(uint32_t version,
+filter_load filter_load::factory(uint32_t version,
     reader& source)
 {
     filter_load instance;

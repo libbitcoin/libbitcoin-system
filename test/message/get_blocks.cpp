@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__from_data__insufficient_bytes__failure)
     BOOST_REQUIRE_EQUAL(false, instance.from_data(message::version::level::minimum, raw));
 }
 
-BOOST_AUTO_TEST_CASE(get_blocks__factory_from_data_1__valid_input__success)
+BOOST_AUTO_TEST_CASE(get_blocks__factory_1__valid_input__success)
 {
     const message::get_blocks expected
     {
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__factory_from_data_1__valid_input__success)
     };
 
     const auto data = expected.to_data(message::version::level::minimum);
-    const auto result = message::get_blocks::factory_from_data(
+    const auto result = message::get_blocks::factory(
         message::version::level::minimum, data);
 
     BOOST_REQUIRE(result.is_valid());
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__factory_from_data_1__valid_input__success)
         result.serialized_size(message::version::level::minimum));
 }
 
-BOOST_AUTO_TEST_CASE(get_blocks__factory_from_data_2__valid_input__success)
+BOOST_AUTO_TEST_CASE(get_blocks__factory_2__valid_input__success)
 {
     const message::get_blocks expected
     {
@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__factory_from_data_2__valid_input__success)
 
     const auto data = expected.to_data(message::version::level::minimum);
     data_source istream(data);
-    const auto result = message::get_blocks::factory_from_data(
+    const auto result = message::get_blocks::factory(
         message::version::level::minimum, istream);
 
     BOOST_REQUIRE(result.is_valid());
@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__factory_from_data_2__valid_input__success)
         result.serialized_size(message::version::level::minimum));
 }
 
-BOOST_AUTO_TEST_CASE(get_blocks__factory_from_data_3__valid_input__success)
+BOOST_AUTO_TEST_CASE(get_blocks__factory_3__valid_input__success)
 {
     const message::get_blocks expected
     {
@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__factory_from_data_3__valid_input__success)
     const auto data = expected.to_data(message::version::level::minimum);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = message::get_blocks::factory_from_data(
+    const auto result = message::get_blocks::factory(
         message::version::level::minimum, source);
 
     BOOST_REQUIRE(result.is_valid());

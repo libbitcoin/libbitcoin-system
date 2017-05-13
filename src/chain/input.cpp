@@ -97,21 +97,21 @@ bool input::operator!=(const input& other) const
 // Deserialization.
 //-----------------------------------------------------------------------------
 
-input input::factory_from_data(const data_chunk& data, bool wire)
+input input::factory(const data_chunk& data, bool wire)
 {
     input instance;
     instance.from_data(data, wire);
     return instance;
 }
 
-input input::factory_from_data(std::istream& stream, bool wire)
+input input::factory(std::istream& stream, bool wire)
 {
     input instance;
     instance.from_data(stream, wire);
     return instance;
 }
 
-input input::factory_from_data(reader& source, bool wire)
+input input::factory(reader& source, bool wire)
 {
     input instance;
     instance.from_data(source, wire);

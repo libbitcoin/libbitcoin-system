@@ -119,7 +119,7 @@ bool point::operator!=(const point& other) const
 //-----------------------------------------------------------------------------
 
 // static
-point point::factory_from_data(const data_chunk& data, bool wire)
+point point::factory(const data_chunk& data, bool wire)
 {
     point instance;
     instance.from_data(data, wire);
@@ -127,7 +127,7 @@ point point::factory_from_data(const data_chunk& data, bool wire)
 }
 
 // static
-point point::factory_from_data(std::istream& stream, bool wire)
+point point::factory(std::istream& stream, bool wire)
 {
     point instance;
     instance.from_data(stream, wire);
@@ -135,7 +135,7 @@ point point::factory_from_data(std::istream& stream, bool wire)
 }
 
 // static
-point point::factory_from_data(reader& source, bool wire)
+point point::factory(reader& source, bool wire)
 {
     point instance;
     instance.from_data(source, wire);

@@ -36,11 +36,11 @@ public:
     typedef std::shared_ptr<get_address> ptr;
     typedef std::shared_ptr<const get_address> const_ptr;
 
-    static get_address factory_from_data(uint32_t version,
+    static get_address factory(uint32_t version,
         const data_chunk& data);
-    static get_address factory_from_data(uint32_t version,
+    static get_address factory(uint32_t version,
         std::istream& stream);
-    static get_address factory_from_data(uint32_t version, reader& source);
+    static get_address factory(uint32_t version, reader& source);
     static size_t satoshi_fixed_size(uint32_t version);
 
     get_address();

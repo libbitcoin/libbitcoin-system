@@ -94,9 +94,9 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static block factory_from_data(const data_chunk& data);
-    static block factory_from_data(std::istream& stream);
-    static block factory_from_data(reader& source);
+    static block factory(const data_chunk& data);
+    static block factory(std::istream& stream);
+    static block factory(reader& source);
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);

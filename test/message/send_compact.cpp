@@ -58,11 +58,11 @@ BOOST_AUTO_TEST_CASE(send_compact__constructor_4__always__equals_params)
     BOOST_REQUIRE_EQUAL(version, instance.version());
 }
 
-BOOST_AUTO_TEST_CASE(send_compact__factory_from_data_1__valid_input__success)
+BOOST_AUTO_TEST_CASE(send_compact__factory_1__valid_input__success)
 {
     const message::send_compact expected{ true, 164 };
     const auto data = expected.to_data(message::send_compact::version_minimum);
-    const auto result = message::send_compact::factory_from_data(
+    const auto result = message::send_compact::factory(
         message::send_compact::version_minimum, data);
 
     BOOST_REQUIRE_EQUAL(
@@ -73,12 +73,12 @@ BOOST_AUTO_TEST_CASE(send_compact__factory_from_data_1__valid_input__success)
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(send_compact__factory_from_data_2__valid_input__success)
+BOOST_AUTO_TEST_CASE(send_compact__factory_2__valid_input__success)
 {
     const message::send_compact expected{ false, 5 };
     const auto data = expected.to_data(message::send_compact::version_minimum);
     data_source istream(data);
-    const auto result = message::send_compact::factory_from_data(
+    const auto result = message::send_compact::factory(
         message::send_compact::version_minimum, istream);
 
     BOOST_REQUIRE_EQUAL(
@@ -89,13 +89,13 @@ BOOST_AUTO_TEST_CASE(send_compact__factory_from_data_2__valid_input__success)
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(send_compact__factory_from_data_3__valid_input__success)
+BOOST_AUTO_TEST_CASE(send_compact__factory_3__valid_input__success)
 {
     const message::send_compact expected{ true, 257 };
     const auto data = expected.to_data(message::send_compact::version_minimum);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = message::send_compact::factory_from_data(
+    const auto result = message::send_compact::factory(
         message::send_compact::version_minimum, source);
 
     BOOST_REQUIRE_EQUAL(

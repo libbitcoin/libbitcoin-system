@@ -154,7 +154,7 @@ bool block::operator!=(const block& other) const
 //-----------------------------------------------------------------------------
 
 // static
-block block::factory_from_data(const data_chunk& data)
+block block::factory(const data_chunk& data)
 {
     block instance;
     instance.from_data(data);
@@ -162,7 +162,7 @@ block block::factory_from_data(const data_chunk& data)
 }
 
 // static
-block block::factory_from_data(std::istream& stream)
+block block::factory(std::istream& stream)
 {
     block instance;
     instance.from_data(stream);
@@ -170,7 +170,7 @@ block block::factory_from_data(std::istream& stream)
 }
 
 // static
-block block::factory_from_data(reader& source)
+block block::factory(reader& source)
 {
     block instance;
     instance.from_data(source);
@@ -297,9 +297,6 @@ const chain::header& block::header() const
     return header_;
 }
 
-// TODO: must call header.set_merkle(generate_merkle_root()) though this may
-// be very suboptimal if the block is being constructed. First verify that all
-// current uses will not be impacted and if so change them to use constructor.
 void block::set_header(const chain::header& value)
 {
     header_ = value;
@@ -321,14 +318,12 @@ const transaction::list& block::transactions() const
     return transactions_;
 }
 
-// TODO: see set_header comments.
 void block::set_transactions(const transaction::list& value)
 {
     transactions_ = value;
     total_inputs_ = boost::none;
 }
 
-// TODO: see set_header comments.
 void block::set_transactions(transaction::list&& value)
 {
     transactions_ = std::move(value);
@@ -348,7 +343,7 @@ chain::block block::genesis_mainnet()
 {
     data_chunk data;
     decode_base16(data, encoded_mainnet_genesis_block);
-    const auto genesis = chain::block::factory_from_data(data);
+    const auto genesis = chain::block::factory(data);
 
     BITCOIN_ASSERT(genesis.is_valid());
     BITCOIN_ASSERT(genesis.transactions().size() == 1);
@@ -360,7 +355,7 @@ chain::block block::genesis_testnet()
 {
     data_chunk data;
     decode_base16(data, encoded_testnet_genesis_block);
-    const auto genesis = chain::block::factory_from_data(data);
+    const auto genesis = chain::block::factory(data);
 
     BITCOIN_ASSERT(genesis.is_valid());
     BITCOIN_ASSERT(genesis.transactions().size() == 1);

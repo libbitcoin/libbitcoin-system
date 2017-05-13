@@ -121,21 +121,21 @@ bool output_point::operator!=(const output_point& other) const
 // Deserialization.
 //-----------------------------------------------------------------------------
 
-output_point output_point::factory_from_data(const data_chunk& data, bool wire)
+output_point output_point::factory(const data_chunk& data, bool wire)
 {
     output_point instance;
     instance.from_data(data, wire);
     return instance;
 }
 
-output_point output_point::factory_from_data(std::istream& stream, bool wire)
+output_point output_point::factory(std::istream& stream, bool wire)
 {
     output_point instance;
     instance.from_data(stream, wire);
     return instance;
 }
 
-output_point output_point::factory_from_data(reader& source, bool wire)
+output_point output_point::factory(reader& source, bool wire)
 {
     output_point instance;
     instance.from_data(source, wire);
