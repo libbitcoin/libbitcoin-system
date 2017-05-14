@@ -26,6 +26,7 @@
 #include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/formats/base_58.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
+#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/wallet/ec_private.hpp>
 #include <bitcoin/bitcoin/wallet/ec_public.hpp>
@@ -243,119 +244,105 @@ std::ostream& operator<<(std::ostream& out, const payment_address& of)
 // Static functions.
 // ----------------------------------------------------------------------------
 
-payment_address payment_address::extract(const chain::script& script,
+// All returned addresses are valid.
+payment_address::list payment_address::extract(const chain::script& script,
     uint8_t p2kh_version, uint8_t p2sh_version)
 {
-    const auto value = extract_input(script, p2kh_version, p2sh_version);
-    return value ? value : extract_output(script, p2kh_version, p2sh_version);
+    const auto input = extract_input(script, p2kh_version, p2sh_version);
+    return input.empty() ? extract_output(script, p2kh_version, p2sh_version) :
+        input;
 }
 
-payment_address payment_address::extract_input(const chain::script& script,
-    uint8_t p2kh_version, uint8_t p2sh_version)
+// All returned addresses are valid.
+payment_address::list payment_address::extract_input(
+    const chain::script& script, uint8_t p2kh_version, uint8_t p2sh_version)
 {
     const auto pattern = script.input_pattern();
 
+    // TODO: Notification/history can use outputs and prevouts only.
     switch (pattern)
     {
         case script_pattern::sign_multisig:
-            break;
-        case script_pattern::sign_public_key:
-            break;
-        case script_pattern::sign_key_hash:
-            BITCOIN_ASSERT(script.size() == 2);
-            BITCOIN_ASSERT(
-                script[1].data().size() == ec_compressed_size ||
-                script[1].data().size() == ec_uncompressed_size);
-            break;
-        case script_pattern::sign_script_hash:
-            BITCOIN_ASSERT(script.size() > 1);
-            break;
-        case script_pattern::non_standard:
-        default:;
-    }
-
-    switch (pattern)
-    {
-        // TODO: extract addresses into a vector result.
-        case script_pattern::sign_multisig:
+        {
+            // There are no addresses in sign_multisig script, signatures only.
+            // Notification/history can use prevout pay_multisig public keys.
             return{};
-
-        // TODO: server can notify on the prevout.
-        // There is no address in a sign_public_key script.
+        }
         case script_pattern::sign_public_key:
+        {
+            // There is no address in sign_public_key script, signature only.
+            // Notification/history can use prevout pay_public_key key.
             return{};
-
+        }
         case script_pattern::sign_key_hash:
         {
-            const auto& data = script[1].data();
-
-            if (data.size() == ec_compressed_size)
-                return{ to_array<ec_compressed_size>(data), p2kh_version };
-            else
-                return{ to_array<ec_uncompressed_size>(data), p2kh_version };
+            return
+            {
+                { ec_public{ script[1].data() }, p2kh_version }
+            };
         }
-
         case script_pattern::sign_script_hash:
-            return{ bitcoin_short_hash(script.back().data()), p2sh_version };
-
+        {
+            return
+            {
+                { bitcoin_short_hash(script.back().data()), p2sh_version }
+            };
+        }
         case script_pattern::non_standard:
         default:
+        {
             return{};
+        }
     }
 }
 
-payment_address payment_address::extract_output(const chain::script& script,
-    uint8_t p2kh_version, uint8_t p2sh_version)
+// All returned addresses are valid.
+payment_address::list payment_address::extract_output(
+    const chain::script& script, uint8_t p2kh_version, uint8_t p2sh_version)
 {
     const auto pattern = script.output_pattern();
 
+    // TODO: Notification/history can use outputs and prevouts only.
     switch (pattern)
     {
+        // TODO: This is disabled for v3 consistency.
         case script_pattern::pay_multisig:
-            break;
-        case script_pattern::pay_public_key:
-            BITCOIN_ASSERT(script.size() == 2);
-            BITCOIN_ASSERT(
-                script[0].data().size() == ec_compressed_size ||
-                script[0].data().size() == ec_uncompressed_size);
-            break;
-        case script_pattern::pay_key_hash:
-            BITCOIN_ASSERT(script.size() == 5);
-            BITCOIN_ASSERT(script[2].data().size() == short_hash_size);
-            break;
-        case script_pattern::pay_script_hash:
-            BITCOIN_ASSERT(script.size() == 3);
-            BITCOIN_ASSERT(script[1].data().size() == short_hash_size);
-            break;
-        case script_pattern::non_standard:
-        default:;
-    }
+        {
+            list addresses;
+            ////const auto& ops = script.operations();
+            ////
+            ////// Push 1 to 16 addresses.
+            ////for (auto op = ops.begin() + 1; op != ops.end() - 2; ++op)
+            ////    addresses.emplace_back(ec_public{ op->data() }, p2kh_version);
 
-    switch (pattern)
-    {
-        // TODO: extract addresses into a vector result.
-        case script_pattern::pay_multisig:
-            return{};
-
+            return addresses;
+        }
         case script_pattern::pay_public_key:
         {
-            const auto& data = script[0].data();
-
-            if (data.size() == ec_compressed_size)
-                return{ to_array<ec_compressed_size>(data), p2kh_version };
-            else
-                return{ to_array<ec_uncompressed_size>(data), p2kh_version };
+            return
+            {
+                { ec_public{ script[0].data() }, p2kh_version }
+            };
         }
-
         case script_pattern::pay_key_hash:
-            return{ to_array<short_hash_size>(script[2].data()), p2kh_version };
-
+        {
+            return
+            {
+                { to_array<short_hash_size>(script[2].data()), p2kh_version }
+            };
+        }
         case script_pattern::pay_script_hash:
-            return{ to_array<short_hash_size>(script[1].data()), p2sh_version };
-
+        {
+            return
+            {
+                { to_array<short_hash_size>(script[1].data()), p2sh_version }
+            };
+        }
         case script_pattern::non_standard:
         default:
+        {
             return{};
+        }
     }
 
 }

@@ -42,7 +42,7 @@ input::input()
 }
 
 input::input(input&& other)
-  : address_(other.address_cache()),
+  : addresses_(other.addresses_cache()),
     previous_output_(std::move(other.previous_output_)),
     script_(std::move(other.script_)),
     sequence_(other.sequence_)
@@ -50,7 +50,7 @@ input::input(input&& other)
 }
 
 input::input(const input& other)
-  : address_(other.address_cache()),
+  : addresses_(other.addresses_cache()),
     previous_output_(other.previous_output_),
     script_(std::move(other.script_)),
     sequence_(other.sequence_)
@@ -74,10 +74,10 @@ input::input(const output_point& previous_output, const chain::script& script,
 }
 
 // Private cache access for copy/move construction.
-input::address_ptr input::address_cache() const
+input::addresses_ptr input::addresses_cache() const
 {
     shared_lock lock(mutex_);
-    return address_;
+    return addresses_;
 }
 
 // Operators.
@@ -85,7 +85,7 @@ input::address_ptr input::address_cache() const
 
 input& input::operator=(input&& other)
 {
-    address_ = other.address_cache();
+    addresses_ = other.addresses_cache();
     previous_output_ = std::move(other.previous_output_);
     script_ = std::move(other.script_);
     sequence_ = other.sequence_;
@@ -94,7 +94,7 @@ input& input::operator=(input&& other)
 
 input& input::operator=(const input& other)
 {
-    address_ = other.address_cache();
+    addresses_ = other.addresses_cache();
     previous_output_ = other.previous_output_;
     script_ = other.script_;
     sequence_ = other.sequence_;
@@ -272,11 +272,11 @@ void input::invalidate_cache() const
     // Critical Section
     mutex_.lock_upgrade();
 
-    if (address_)
+    if (addresses_)
     {
         mutex_.unlock_upgrade_and_lock();
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        address_.reset();
+        addresses_.reset();
         //---------------------------------------------------------------------
         mutex_.unlock_and_lock_upgrade();
     }
@@ -287,28 +287,31 @@ void input::invalidate_cache() const
 
 payment_address input::address() const
 {
+    const auto value = addresses();
+    return value.empty() ? payment_address{} : value.front();
+}
+
+payment_address::list input::addresses() const
+{
     ///////////////////////////////////////////////////////////////////////////
     // Critical Section
     mutex_.lock_upgrade();
 
-    if (!address_)
+    if (!addresses_)
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_.unlock_upgrade_and_lock();
-
-        // TODO: limit this to input patterns.
-        address_ = std::make_shared<payment_address>(
-            payment_address::extract(script_));
-
+        addresses_ = std::make_shared<payment_address::list>(
+            payment_address::extract_input(script_));
         mutex_.unlock_and_lock_upgrade();
         //---------------------------------------------------------------------
     }
 
-    const auto address = *address_;
+    const auto addresses = *addresses_;
     mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 
-    return address;
+    return addresses;
 }
 
 // Validation helpers.

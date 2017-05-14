@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <vector>
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
@@ -50,14 +51,15 @@ public:
     static const uint8_t testnet_p2kh;
     static const uint8_t testnet_p2sh;
 
+    typedef std::vector<payment_address> list;
     typedef std::shared_ptr<payment_address> ptr;
 
-    /// Extract a payment address from an input or output script.
-    static payment_address extract(const chain::script& script,
+    /// Extract a payment address list from an input or output script.
+    static list extract(const chain::script& script,
         uint8_t p2kh_version=mainnet_p2kh, uint8_t p2sh_version=mainnet_p2sh);
-    static payment_address extract_input(const chain::script& script,
+    static list extract_input(const chain::script& script,
         uint8_t p2kh_version=mainnet_p2kh, uint8_t p2sh_version=mainnet_p2sh);
-    static payment_address extract_output(const chain::script& script,
+    static list extract_output(const chain::script& script,
         uint8_t p2kh_version=mainnet_p2kh, uint8_t p2sh_version=mainnet_p2sh);
 
     /// Constructors.

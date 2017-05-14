@@ -942,8 +942,8 @@ operation::list script::to_pay_multisig_pattern(uint8_t signatures,
 
 script_pattern script::pattern() const
 {
-    const auto value = input_pattern();
-    return value == script_pattern::non_standard ? output_pattern() : value;
+    const auto input = input_pattern();
+    return input == script_pattern::non_standard ? output_pattern() : input;
 }
 
 script_pattern script::output_pattern() const

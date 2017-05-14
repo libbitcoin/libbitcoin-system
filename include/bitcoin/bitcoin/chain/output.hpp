@@ -106,14 +106,17 @@ public:
     void set_script(const chain::script& value);
     void set_script(chain::script&& value);
 
-    /// The payment address extracted from this output as a standard script.
+    /// The first payment address extracted (may be invalid).
     wallet::payment_address address() const;
-    bool is_dust(uint64_t minimum_output_value) const;
+
+    /// The payment addresses extracted from this output as a standard script.
+    wallet::payment_address::list addresses() const;
 
     // Validation.
     //-------------------------------------------------------------------------
 
     size_t signature_operations() const;
+    bool is_dust(uint64_t minimum_output_value) const;
 
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     mutable validation validation;
@@ -123,12 +126,12 @@ protected:
     void invalidate_cache() const;
 
 private:
-    typedef std::shared_ptr<wallet::payment_address> address_ptr;
+    typedef std::shared_ptr<wallet::payment_address::list> addresses_ptr;
 
-    address_ptr address_cache() const;
+    addresses_ptr addresses_cache() const;
 
     mutable upgrade_mutex mutex_;
-    mutable wallet::payment_address::ptr address_;
+    mutable addresses_ptr addresses_;
 
     uint64_t value_;
     chain::script script_;

@@ -49,7 +49,7 @@ output::output()
 }
 
 output::output(output&& other)
-  : address_(other.address_cache()),
+  : addresses_(other.addresses_cache()),
     value_(other.value_),
     script_(std::move(other.script_)),
     validation(other.validation)
@@ -57,7 +57,7 @@ output::output(output&& other)
 }
 
 output::output(const output& other)
-  : address_(other.address_cache()),
+  : addresses_(other.addresses_cache()),
     value_(other.value_),
     script_(other.script_),
     validation(other.validation)
@@ -79,10 +79,10 @@ output::output(uint64_t value, const chain::script& script)
 }
 
 // Private cache access for copy/move construction.
-output::address_ptr output::address_cache() const
+output::addresses_ptr output::addresses_cache() const
 {
     shared_lock lock(mutex_);
-    return address_;
+    return addresses_;
 }
 
 // Operators.
@@ -90,7 +90,7 @@ output::address_ptr output::address_cache() const
 
 output& output::operator=(output&& other)
 {
-    address_ = other.address_cache();
+    addresses_ = other.addresses_cache();
     value_ = other.value_;
     script_ = std::move(other.script_);
     validation = std::move(other.validation);
@@ -99,7 +99,7 @@ output& output::operator=(output&& other)
 
 output& output::operator=(const output& other)
 {
-    address_ = other.address_cache();
+    addresses_ = other.addresses_cache();
     value_ = other.value_;
     script_ = other.script_;
     validation = other.validation;
@@ -254,12 +254,6 @@ void output::set_script(chain::script&& value)
     invalidate_cache();
 }
 
-bool output::is_dust(uint64_t minimum_value) const
-{
-    // If provably unspendable it does not expand the unspent output set.
-    return value_ < minimum_value && !script_.is_unspendable();
-}
-
 // protected
 void output::invalidate_cache() const
 {
@@ -267,11 +261,11 @@ void output::invalidate_cache() const
     // Critical Section
     mutex_.lock_upgrade();
 
-    if (address_)
+    if (addresses_)
     {
         mutex_.unlock_upgrade_and_lock();
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        address_.reset();
+        addresses_.reset();
         //---------------------------------------------------------------------
         mutex_.unlock_and_lock_upgrade();
     }
@@ -282,28 +276,31 @@ void output::invalidate_cache() const
 
 payment_address output::address() const
 {
+    const auto value = addresses();
+    return value.empty() ? payment_address{} : value.front();
+}
+
+payment_address::list output::addresses() const
+{
     ///////////////////////////////////////////////////////////////////////////
     // Critical Section
     mutex_.lock_upgrade();
 
-    if (!address_)
+    if (!addresses_)
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_.unlock_upgrade_and_lock();
-
-        // TODO: limit this to output patterns.
-        address_ = std::make_shared<payment_address>(
-            payment_address::extract(script_));
-
+        addresses_ = std::make_shared<payment_address::list>(
+            payment_address::extract_output(script_));
         mutex_.unlock_and_lock_upgrade();
         //---------------------------------------------------------------------
     }
 
-    const auto address = *address_;
+    const auto addresses = *addresses_;
     mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 
-    return address;
+    return addresses;
 }
 
 // Validation helpers.
@@ -312,6 +309,12 @@ payment_address output::address() const
 size_t output::signature_operations() const
 {
     return script_.sigops(false);
+}
+
+bool output::is_dust(uint64_t minimum_value) const
+{
+    // If provably unspendable it does not expand the unspent output set.
+    return value_ < minimum_value && !script_.is_unspendable();
 }
 
 } // namespace chain

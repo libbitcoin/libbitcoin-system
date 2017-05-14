@@ -100,8 +100,11 @@ public:
     uint32_t sequence() const;
     void set_sequence(uint32_t value);
 
-    /// The payment address extracted from this input as a standard script.
+    /// The first payment address extracted (may be invalid).
     wallet::payment_address address() const;
+
+    /// The payment addresses extracted from this input as a standard script.
+    wallet::payment_address::list addresses() const;
 
     // Validation.
     //-------------------------------------------------------------------------
@@ -114,12 +117,12 @@ protected:
     void invalidate_cache() const;
 
 private:
-    typedef std::shared_ptr<wallet::payment_address> address_ptr;
+    typedef std::shared_ptr<wallet::payment_address::list> addresses_ptr;
 
-    address_ptr address_cache() const;
+    addresses_ptr addresses_cache() const;
 
     mutable upgrade_mutex mutex_;
-    mutable wallet::payment_address::ptr address_;
+    mutable addresses_ptr addresses_;
 
     output_point previous_output_;
     chain::script script_;
