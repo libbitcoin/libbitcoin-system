@@ -22,6 +22,7 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
+#include <utility>
 #include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/formats/base_58.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
@@ -45,6 +46,12 @@ payment_address::payment_address()
 {
 }
 
+payment_address::payment_address(payment_address&& other)
+  : valid_(other.valid_), version_(other.version_),
+    hash_(std::move(other.hash_))
+{
+}
+
 payment_address::payment_address(const payment_address& other)
   : valid_(other.valid_), version_(other.version_), hash_(other.hash_)
 {
@@ -60,12 +67,6 @@ payment_address::payment_address(const std::string& address)
 {
 }
 
-// MSVC (CTP) casts this down to 8 bits if a variable is not used:
-// const payment_address address({ ec_secret, 0x806F });
-// Alternatively explicit construction of the ec_private also works.
-// const payment_address address(ec_private(ec_secret, 0x806F));
-// const payment_address address(ec_private{ ec_secret, 0x806F });
-// However this doesn't impact payment_address, since it only uses the LSB.
 payment_address::payment_address(const ec_private& secret)
   : payment_address(from_private(secret))
 {
@@ -78,6 +79,11 @@ payment_address::payment_address(const ec_public& point, uint8_t version)
 
 payment_address::payment_address(const chain::script& script, uint8_t version)
   : payment_address(from_script(script, version))
+{
+}
+
+payment_address::payment_address(short_hash&& hash, uint8_t version)
+  : valid_(true), version_(version), hash_(std::move(hash))
 {
 }
 
@@ -101,44 +107,47 @@ payment_address payment_address::from_string(const std::string& address)
 {
     payment decoded;
     if (!decode_base58(decoded, address) || !is_address(decoded))
-        return payment_address();
+        return{};
 
-    return payment_address(decoded);
+    return{ decoded };
 }
 
 payment_address payment_address::from_payment(const payment& decoded)
 {
     if (!is_address(decoded))
-        return payment_address();
+        return{};
 
     const auto hash = slice<1, short_hash_size + 1>(decoded);
-    return payment_address(hash, decoded.front());
+    return{ hash, decoded.front() };
 }
 
 payment_address payment_address::from_private(const ec_private& secret)
 {
     if (!secret)
-        return payment_address();
+        return{};
 
-    return payment_address(secret.to_public(), secret.payment_version());
+    return{ secret.to_public(), secret.payment_version() };
 }
 
 payment_address payment_address::from_public(const ec_public& point,
     uint8_t version)
 {
     if (!point)
-        return payment_address();
+        return{};
 
     data_chunk data;
-    return point.to_data(data) ?
-        payment_address(bitcoin_short_hash(data), version) :
-        payment_address();
+    if (!point.to_data(data))
+        return{};
+
+    return{ bitcoin_short_hash(data), version };
 }
 
 payment_address payment_address::from_script(const chain::script& script,
     uint8_t version)
 {
-    return payment_address(bitcoin_short_hash(script.to_data(false)), version);
+    // Working around VC++ CTP compiler break here.
+    const auto data = script.to_data(false);
+    return{ bitcoin_short_hash(data), version };
 }
 
 // Cast operators.
@@ -237,37 +246,17 @@ std::ostream& operator<<(std::ostream& out, const payment_address& of)
 payment_address payment_address::extract(const chain::script& script,
     uint8_t p2kh_version, uint8_t p2sh_version)
 {
-    if (!script.is_valid())
-        return{};
+    const auto value = extract_input(script, p2kh_version, p2sh_version);
+    return value ? value : extract_output(script, p2kh_version, p2sh_version);
+}
 
-    short_hash hash;
-    const auto pattern = script.pattern();
+payment_address payment_address::extract_input(const chain::script& script,
+    uint8_t p2kh_version, uint8_t p2sh_version)
+{
+    const auto pattern = script.input_pattern();
 
-    // Split out the assertions for readability.
-    // We know that the script is valid and can therefore rely on these.
     switch (pattern)
     {
-        // pay
-        // --------------------------------------------------------------------
-        case script_pattern::pay_multisig:
-            break;
-        case script_pattern::pay_public_key:
-            BITCOIN_ASSERT(script.size() == 2);
-            BITCOIN_ASSERT(
-                script[0].data().size() == ec_compressed_size ||
-                script[0].data().size() == ec_uncompressed_size);
-            break;
-        case script_pattern::pay_key_hash:
-            BITCOIN_ASSERT(script.size() == 5);
-            BITCOIN_ASSERT(script[2].data().size() == short_hash_size);
-            break;
-        case script_pattern::pay_script_hash:
-            BITCOIN_ASSERT(script.size() == 3);
-            BITCOIN_ASSERT(script[1].data().size() == short_hash_size);
-            break;
-
-        // sign
-        // --------------------------------------------------------------------
         case script_pattern::sign_multisig:
             break;
         case script_pattern::sign_public_key:
@@ -285,44 +274,13 @@ payment_address payment_address::extract(const chain::script& script,
         default:;
     }
 
-    // Convert data to hash or point and construct address.
     switch (pattern)
     {
-        // pay
-        // --------------------------------------------------------------------
-
-        // TODO: extract addresses into a vector result.
-        case script_pattern::pay_multisig:
-            return{};
-
-        case script_pattern::pay_public_key:
-        {
-            const auto& data = script[0].data();
-            if (data.size() == ec_compressed_size)
-            {
-                const auto point = to_array<ec_compressed_size>(data);
-                return payment_address(point, p2kh_version);
-            }
-
-            const auto point = to_array<ec_uncompressed_size>(data);
-            return payment_address(point, p2kh_version);
-        }
-
-        case script_pattern::pay_key_hash:
-            hash = to_array<short_hash_size>(script[2].data());
-            return payment_address(hash, p2kh_version);
-
-        case script_pattern::pay_script_hash:
-            hash = to_array<short_hash_size>(script[1].data());
-            return payment_address(hash, p2sh_version);
-
-        // sign
-        // --------------------------------------------------------------------
-
         // TODO: extract addresses into a vector result.
         case script_pattern::sign_multisig:
             return{};
 
+        // TODO: server can notify on the prevout.
         // There is no address in a sign_public_key script.
         case script_pattern::sign_public_key:
             return{};
@@ -330,24 +288,76 @@ payment_address payment_address::extract(const chain::script& script,
         case script_pattern::sign_key_hash:
         {
             const auto& data = script[1].data();
-            if (data.size() == ec_compressed_size)
-            {
-                const auto point = to_array<ec_compressed_size>(data);
-                return payment_address(point, p2kh_version);
-            }
 
-            const auto point = to_array<ec_uncompressed_size>(data);
-            return payment_address(point, p2kh_version);
+            if (data.size() == ec_compressed_size)
+                return{ to_array<ec_compressed_size>(data), p2kh_version };
+            else
+                return{ to_array<ec_uncompressed_size>(data), p2kh_version };
         }
 
         case script_pattern::sign_script_hash:
-            hash = bitcoin_short_hash(script.back().data());
-            return payment_address(hash, p2sh_version);
+            return{ bitcoin_short_hash(script.back().data()), p2sh_version };
 
         case script_pattern::non_standard:
         default:
             return{};
     }
+}
+
+payment_address payment_address::extract_output(const chain::script& script,
+    uint8_t p2kh_version, uint8_t p2sh_version)
+{
+    const auto pattern = script.output_pattern();
+
+    switch (pattern)
+    {
+        case script_pattern::pay_multisig:
+            break;
+        case script_pattern::pay_public_key:
+            BITCOIN_ASSERT(script.size() == 2);
+            BITCOIN_ASSERT(
+                script[0].data().size() == ec_compressed_size ||
+                script[0].data().size() == ec_uncompressed_size);
+            break;
+        case script_pattern::pay_key_hash:
+            BITCOIN_ASSERT(script.size() == 5);
+            BITCOIN_ASSERT(script[2].data().size() == short_hash_size);
+            break;
+        case script_pattern::pay_script_hash:
+            BITCOIN_ASSERT(script.size() == 3);
+            BITCOIN_ASSERT(script[1].data().size() == short_hash_size);
+            break;
+        case script_pattern::non_standard:
+        default:;
+    }
+
+    switch (pattern)
+    {
+        // TODO: extract addresses into a vector result.
+        case script_pattern::pay_multisig:
+            return{};
+
+        case script_pattern::pay_public_key:
+        {
+            const auto& data = script[0].data();
+
+            if (data.size() == ec_compressed_size)
+                return{ to_array<ec_compressed_size>(data), p2kh_version };
+            else
+                return{ to_array<ec_uncompressed_size>(data), p2kh_version };
+        }
+
+        case script_pattern::pay_key_hash:
+            return{ to_array<short_hash_size>(script[2].data()), p2kh_version };
+
+        case script_pattern::pay_script_hash:
+            return{ to_array<short_hash_size>(script[1].data()), p2sh_version };
+
+        case script_pattern::non_standard:
+        default:
+            return{};
+    }
+
 }
 
 } // namespace wallet

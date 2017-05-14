@@ -53,17 +53,21 @@ public:
     typedef std::shared_ptr<payment_address> ptr;
 
     /// Extract a payment address from an input or output script.
-    /// The address will be invalid if and only if the script type is not
-    /// supported or the script is itself invalid.
     static payment_address extract(const chain::script& script,
+        uint8_t p2kh_version=mainnet_p2kh, uint8_t p2sh_version=mainnet_p2sh);
+    static payment_address extract_input(const chain::script& script,
+        uint8_t p2kh_version=mainnet_p2kh, uint8_t p2sh_version=mainnet_p2sh);
+    static payment_address extract_output(const chain::script& script,
         uint8_t p2kh_version=mainnet_p2kh, uint8_t p2sh_version=mainnet_p2sh);
 
     /// Constructors.
     payment_address();
+    payment_address(payment_address&& other);
+    payment_address(const payment_address& other);
     payment_address(const payment& decoded);
     payment_address(const ec_private& secret);
     payment_address(const std::string& address);
-    payment_address(const payment_address& other);
+    payment_address(short_hash&& hash, uint8_t version=mainnet_p2kh);
     payment_address(const short_hash& hash, uint8_t version=mainnet_p2kh);
     payment_address(const ec_public& point, uint8_t version=mainnet_p2kh);
     payment_address(const chain::script& script, uint8_t version=mainnet_p2sh);
