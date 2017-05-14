@@ -801,7 +801,9 @@ bool script::is_pay_script_hash_pattern(const operation::list& ops)
         && ops[2].code() == opcode::equal;
 }
 
-// The leading zero is wacky satoshi behavior that we must perpetuate.
+//*****************************************************************************
+// CONSENSUS: the push zero is wacky satoshi behavior we must perpetuate.
+//*****************************************************************************
 bool script::is_sign_multisig_pattern(const operation::list& ops)
 {
     return ops.size() >= 2
@@ -838,12 +840,7 @@ bool script::is_sign_script_hash_pattern(const operation::list& ops)
         return false;
 
     // Is the redeem script a common output script?
-    const auto redeem_script_pattern = redeem.pattern();
-    return redeem_script_pattern == script_pattern::pay_multisig
-        || redeem_script_pattern == script_pattern::pay_public_key
-        || redeem_script_pattern == script_pattern::pay_key_hash
-        || redeem_script_pattern == script_pattern::pay_script_hash
-        || redeem_script_pattern == script_pattern::null_data;
+    return redeem.output_pattern() != script_pattern::non_standard;
 }
 
 operation::list script::to_null_data_pattern(data_slice data)
