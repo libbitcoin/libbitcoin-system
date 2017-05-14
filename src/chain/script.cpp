@@ -997,7 +997,7 @@ inline size_t ops(bool embedded, opcode code)
 size_t script::sigops(bool embedded) const
 {
     size_t total = 0;
-    auto preceding = opcode::reserved_255;
+    auto preceding = opcode::push_negative_1;
 
     // The first operations access must be method-based to guarantee the cache.
     for (const auto& op: operations())
@@ -1007,9 +1007,10 @@ size_t script::sigops(bool embedded) const
         if (code == opcode::checksig ||
             code == opcode::checksigverify)
         {
-            total++;
+            ++total;
         }
-        else if (code == opcode::checkmultisig ||
+        else if (
+            code == opcode::checkmultisig ||
             code == opcode::checkmultisigverify)
         {
             total += ops(embedded, preceding);
