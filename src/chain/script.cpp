@@ -941,23 +941,19 @@ operation::list script::to_pay_multisig_pattern(uint8_t signatures,
 
 // Utilities (non-static).
 //-----------------------------------------------------------------------------
+// TODO: implement standardness tests in blockchain (not in system).
 
-// TODO: create output_pattern() and input_pattern() so that each can be tested
-// in isolation, reducing wasteful processing of the others.
-// TODO: implement standardness tests in blockchain, not in system.
-
-// This excludes the bip34 coinbase pattern, which can be tested independently.
 script_pattern script::pattern() const
+{
+    const auto value = input_pattern();
+    return value == script_pattern::non_standard ? output_pattern() : value;
+}
+
+script_pattern script::output_pattern() const
 {
     // The first operations access must be method-based to guarantee the cache.
     if (is_null_data_pattern(operations()))
         return script_pattern::null_data;
-
-    if (is_pay_multisig_pattern(operations_))
-        return script_pattern::pay_multisig;
-
-    if (is_pay_public_key_pattern(operations_))
-        return script_pattern::pay_public_key;
 
     if (is_pay_key_hash_pattern(operations_))
         return script_pattern::pay_key_hash;
@@ -965,17 +961,30 @@ script_pattern script::pattern() const
     if (is_pay_script_hash_pattern(operations_))
         return script_pattern::pay_script_hash;
 
+    if (is_pay_multisig_pattern(operations_))
+        return script_pattern::pay_multisig;
+
+    if (is_pay_public_key_pattern(operations_))
+        return script_pattern::pay_public_key;
+
+    return script_pattern::non_standard;
+}
+
+// This excludes the bip34 coinbase pattern, which can be tested independently.
+script_pattern script::input_pattern() const
+{
+    // The first operations access must be method-based to guarantee the cache.
+    if (is_sign_key_hash_pattern(operations()))
+        return script_pattern::sign_key_hash;
+
+    if (is_sign_script_hash_pattern(operations_))
+        return script_pattern::sign_script_hash;
+
     if (is_sign_multisig_pattern(operations_))
         return script_pattern::sign_multisig;
 
     if (is_sign_public_key_pattern(operations_))
         return script_pattern::sign_public_key;
-
-    if (is_sign_key_hash_pattern(operations_))
-        return script_pattern::sign_key_hash;
-
-    if (is_sign_script_hash_pattern(operations_))
-        return script_pattern::sign_script_hash;
 
     return script_pattern::non_standard;
 }

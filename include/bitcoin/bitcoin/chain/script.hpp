@@ -177,6 +177,8 @@ public:
 
     // Common pattern detection.
     machine::script_pattern pattern() const;
+    machine::script_pattern input_pattern() const;
+    machine::script_pattern output_pattern() const;
 
     // Consensus computations.
     size_t sigops(bool embedded) const;
