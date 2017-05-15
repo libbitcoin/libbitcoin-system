@@ -75,6 +75,7 @@
     <ClCompile Include="..\..\..\..\src\chain\chain_state.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\compact.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\header.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\history.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\output_point.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\point.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\points_value.cpp" />

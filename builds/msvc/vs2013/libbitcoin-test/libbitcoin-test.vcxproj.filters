@@ -339,5 +339,8 @@
     <ClCompile Include="..\..\..\..\test\chain\points_value.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\history.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

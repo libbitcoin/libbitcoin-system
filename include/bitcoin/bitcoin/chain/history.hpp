@@ -35,6 +35,7 @@ enum class point_kind : uint32_t
     spend = 1
 };
 
+// TODO: remane to bc::chain::history.
 /// This structure models the client-server protocol in v1/v2/v3.
 struct BC_API history_compact
 {
@@ -58,33 +59,6 @@ struct BC_API history_compact
         /// To match up this row with the output, recompute the
         /// checksum from the output row with spend_checksum(row.point)
         uint64_t previous_checksum;
-    };
-};
-
-/// This structure is used between client and API callers in v3.
-/// This structure models the client-server protocol in v1/v2.
-/// The height values here are 64 bit, but 32 bits on the wire.
-struct BC_API history
-{
-    typedef std::vector<history> list;
-
-    /// If there is no output this is null_hash:max.
-    output_point output;
-    uint64_t output_height;
-
-    /// The satoshi value of the output.
-    uint64_t value;
-
-    /// If there is no spend this is null_hash:max.
-    input_point spend;
-
-    union
-    {
-        /// The height of the spend or max if no spend.
-        uint64_t spend_height;
-
-        /// During expansion this value temporarily doubles as a checksum.
-        uint64_t temporary_checksum;
     };
 };
 

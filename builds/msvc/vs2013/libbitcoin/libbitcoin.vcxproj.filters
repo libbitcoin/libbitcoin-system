@@ -635,6 +635,9 @@
     <ClCompile Include="..\..\..\..\src\utility\prioritized_mutex.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\history.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">

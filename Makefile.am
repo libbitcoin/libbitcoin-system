@@ -41,6 +41,7 @@ src_libbitcoin_la_SOURCES = \
     src/chain/chain_state.cpp \
     src/chain/compact.cpp \
     src/chain/header.cpp \
+    src/chain/history.cpp \
     src/chain/input.cpp \
     src/chain/output.cpp \
     src/chain/output_point.cpp \
@@ -231,6 +232,7 @@ test_libbitcoin_test_SOURCES = \
     test/chain/block.cpp \
     test/chain/compact.cpp \
     test/chain/header.cpp \
+    test/chain/history.cpp \
     test/chain/input.cpp \
     test/chain/output.cpp \
     test/chain/output_point.cpp \
