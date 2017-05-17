@@ -35,11 +35,6 @@
 namespace libbitcoin {
 namespace chain {
 
-// [ height:4 ]
-// [ kind:1 ]
-// [ data:8 ]
-// [ point:[hash:32][index:2] ]
-
 // Constructors.
 //-----------------------------------------------------------------------------
 

@@ -34,12 +34,6 @@
 namespace libbitcoin {
 namespace chain {
 
-// [ height:4 ]
-// [ prefix:4 ]
-// [ unsigned_ephemeral_public_key:32 ]
-// [ public_key_hash:20 ]
-// [ transaction_hash:32 ]
-
 // The sign byte of the ephmemeral key is fixed (0x02) by convention.
 static const auto sign = to_array(ec_even_sign);
 
