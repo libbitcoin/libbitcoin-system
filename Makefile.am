@@ -65,6 +65,7 @@ src_libbitcoin_la_SOURCES = \
     src/config/parameter.cpp \
     src/config/parser.cpp \
     src/config/printer.cpp \
+    src/config/script.cpp \
     src/config/sodium.cpp \
     src/formats/base_10.cpp \
     src/formats/base_16.cpp \
@@ -385,6 +386,7 @@ include_bitcoin_bitcoin_config_HEADERS = \
     include/bitcoin/bitcoin/config/parameter.hpp \
     include/bitcoin/bitcoin/config/parser.hpp \
     include/bitcoin/bitcoin/config/printer.hpp \
+    include/bitcoin/bitcoin/config/script.hpp \
     include/bitcoin/bitcoin/config/settings.hpp \
     include/bitcoin/bitcoin/config/sodium.hpp
 
