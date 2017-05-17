@@ -78,7 +78,7 @@
     <ClCompile Include="..\..\..\..\test\chain\block.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\compact.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\header.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\history.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\payment_record.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\input.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\output.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\output_point.cpp" />
@@ -88,6 +88,7 @@
     <ClCompile Include="..\..\..\..\test\chain\point_value.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\satoshi_words.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\script.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\stealth_record.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp" />
     <ClCompile Include="..\..\..\..\test\config\authority.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base58.cpp" />

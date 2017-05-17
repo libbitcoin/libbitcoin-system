@@ -16,30 +16,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CHAIN_STEALTH_HPP
-#define LIBBITCOIN_CHAIN_STEALTH_HPP
+#include <boost/test/unit_test.hpp>
+#include <bitcoin/bitcoin.hpp>
 
-#include <cstdint>
-#include <vector>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
+using namespace bc;
 
-namespace libbitcoin {
-namespace chain {
+BOOST_AUTO_TEST_SUITE(stealth_record_tests)
 
-/// This structure is used in the client-server protocol in v2/v3.
-/// The stealth row excludes the sign byte (0x02) of the ephemeral public key.
-struct BC_API stealth_compact
+BOOST_AUTO_TEST_CASE(stealth_record__constructor_1__always__invalid)
 {
-    typedef std::vector<stealth_compact> list;
+}
 
-    hash_digest ephemeral_public_key_hash;
-    short_hash public_key_hash;
-    hash_digest transaction_hash;
-};
-
-} // namespace chain
-} // namespace libbitcoin
-
-#endif
+BOOST_AUTO_TEST_SUITE_END()

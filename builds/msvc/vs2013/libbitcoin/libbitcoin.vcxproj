@@ -75,13 +75,14 @@
     <ClCompile Include="..\..\..\..\src\chain\chain_state.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\compact.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\header.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\history.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\payment_record.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\output_point.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\point.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\points_value.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\point_iterator.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\point_value.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\script.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\stealth_record.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\transaction.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\input.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\output.cpp" />
@@ -231,7 +232,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\chain_state.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\compact.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\header.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\history.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\payment_record.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\input_point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\points_value.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point_value.hpp" />
@@ -239,7 +240,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point_iterator.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\stealth.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\stealth_record.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\input.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\output.hpp" />

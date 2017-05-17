@@ -635,7 +635,10 @@
     <ClCompile Include="..\..\..\..\src\utility\prioritized_mutex.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\history.cpp">
+    <ClCompile Include="..\..\..\..\src\chain\payment_record.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\stealth_record.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1033,12 +1036,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\scope_lock.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\history.hpp">
-      <Filter>include\bitcoin\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\stealth.hpp">
-      <Filter>include\bitcoin\chain</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base58.hpp">
       <Filter>include\bitcoin\config</Filter>
     </ClInclude>
@@ -1245,6 +1242,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\prioritized_mutex.hpp">
       <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\payment_record.hpp">
+      <Filter>include\bitcoin\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\stealth_record.hpp">
+      <Filter>include\bitcoin\chain</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

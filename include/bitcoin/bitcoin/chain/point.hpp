@@ -95,7 +95,7 @@ public:
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------
 
-    static size_t satoshi_fixed_size();
+    static size_t satoshi_fixed_size(bool wire=true);
     size_t serialized_size(bool wire=true) const;
 
     hash_digest& hash();
@@ -118,6 +118,9 @@ public:
     bool is_null() const;
 
 protected:
+    // So that history may call reset from their own.
+    friend class payment_record;
+
     point(hash_digest&& hash, uint32_t index, bool valid);
     point(const hash_digest& hash, uint32_t index, bool valid);
     void reset();

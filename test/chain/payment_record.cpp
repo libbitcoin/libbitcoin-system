@@ -21,12 +21,10 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(history_tests)
+BOOST_AUTO_TEST_SUITE(payment_record_tests)
 
-BOOST_AUTO_TEST_CASE(history__constructor_1__always__invalid)
+BOOST_AUTO_TEST_CASE(payment_record__constructor_1__always__invalid)
 {
-    chain::history_compact instance;
-    ////BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

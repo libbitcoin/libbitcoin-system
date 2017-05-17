@@ -41,15 +41,16 @@ src_libbitcoin_la_SOURCES = \
     src/chain/chain_state.cpp \
     src/chain/compact.cpp \
     src/chain/header.cpp \
-    src/chain/history.cpp \
     src/chain/input.cpp \
     src/chain/output.cpp \
     src/chain/output_point.cpp \
+    src/chain/payment_record.cpp \
     src/chain/point.cpp \
     src/chain/point_iterator.cpp \
     src/chain/point_value.cpp \
     src/chain/points_value.cpp \
     src/chain/script.cpp \
+    src/chain/stealth_record.cpp \
     src/chain/transaction.cpp \
     src/config/authority.cpp \
     src/config/base16.cpp \
@@ -232,10 +233,10 @@ test_libbitcoin_test_SOURCES = \
     test/chain/block.cpp \
     test/chain/compact.cpp \
     test/chain/header.cpp \
-    test/chain/history.cpp \
     test/chain/input.cpp \
     test/chain/output.cpp \
     test/chain/output_point.cpp \
+    test/chain/payment_record.cpp \
     test/chain/point.cpp \
     test/chain/point_iterator.cpp \
     test/chain/point_value.cpp \
@@ -243,6 +244,7 @@ test_libbitcoin_test_SOURCES = \
     test/chain/satoshi_words.cpp \
     test/chain/script.cpp \
     test/chain/script.hpp \
+    test/chain/stealth_record.cpp \
     test/chain/transaction.cpp \
     test/config/authority.cpp \
     test/config/base58.cpp \
@@ -355,17 +357,17 @@ include_bitcoin_bitcoin_chain_HEADERS = \
     include/bitcoin/bitcoin/chain/chain_state.hpp \
     include/bitcoin/bitcoin/chain/compact.hpp \
     include/bitcoin/bitcoin/chain/header.hpp \
-    include/bitcoin/bitcoin/chain/history.hpp \
     include/bitcoin/bitcoin/chain/input.hpp \
     include/bitcoin/bitcoin/chain/input_point.hpp \
     include/bitcoin/bitcoin/chain/output.hpp \
     include/bitcoin/bitcoin/chain/output_point.hpp \
+    include/bitcoin/bitcoin/chain/payment_record.hpp \
     include/bitcoin/bitcoin/chain/point.hpp \
     include/bitcoin/bitcoin/chain/point_iterator.hpp \
     include/bitcoin/bitcoin/chain/point_value.hpp \
     include/bitcoin/bitcoin/chain/points_value.hpp \
     include/bitcoin/bitcoin/chain/script.hpp \
-    include/bitcoin/bitcoin/chain/stealth.hpp \
+    include/bitcoin/bitcoin/chain/stealth_record.hpp \
     include/bitcoin/bitcoin/chain/transaction.hpp
 
 include_bitcoin_bitcoin_configdir = ${includedir}/bitcoin/bitcoin/config
