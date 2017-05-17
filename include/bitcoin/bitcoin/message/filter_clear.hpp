@@ -36,12 +36,9 @@ public:
     typedef std::shared_ptr<filter_clear> ptr;
     typedef std::shared_ptr<const filter_clear> const_ptr;
 
-    static filter_clear factory_from_data(uint32_t version,
-        const data_chunk& data);
-    static filter_clear factory_from_data(uint32_t version,
-        std::istream& stream);
-    static filter_clear factory_from_data(uint32_t version,
-        reader& source);
+    static filter_clear factory(uint32_t version, const data_chunk& data);
+    static filter_clear factory(uint32_t version, std::istream& stream);
+    static filter_clear factory(uint32_t version, reader& source);
     static size_t satoshi_fixed_size(uint32_t version);
 
     filter_clear();

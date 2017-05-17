@@ -52,14 +52,14 @@ BOOST_AUTO_TEST_CASE(pong__satoshi_fixed_size__minimum_version__returns_8)
     BOOST_REQUIRE_EQUAL(size, 8u);
 }
 
-BOOST_AUTO_TEST_CASE(pong__factory_from_data_1__minimum_version_empty_data__invalid)
+BOOST_AUTO_TEST_CASE(pong__factory_1__minimum_version_empty_data__invalid)
 {
     static const auto version = message::version::level::minimum;
-    const auto result = message::pong::factory_from_data(version, data_chunk{});
+    const auto result = message::pong::factory(version, data_chunk{});
     BOOST_REQUIRE(!result.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(pong__factory_from_data_1__round_trip__expected)
+BOOST_AUTO_TEST_CASE(pong__factory_1__round_trip__expected)
 {
     static const message::pong expected
     {
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(pong__factory_from_data_1__round_trip__expected)
 
     static const auto version = message::version::level::minimum;
     const auto data = expected.to_data(version);
-    const auto result = message::pong::factory_from_data(version, data);
+    const auto result = message::pong::factory(version, data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(pong__factory_from_data_1__round_trip__expected)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(version), result.serialized_size(version));
 }
 
-BOOST_AUTO_TEST_CASE(pong__factory_from_data_2__round_trip__expected)
+BOOST_AUTO_TEST_CASE(pong__factory_2__round_trip__expected)
 {
     static const message::pong expected
     {
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(pong__factory_from_data_2__round_trip__expected)
     static const auto version = message::version::level::minimum;
     const auto data = expected.to_data(version);
     data_source istream(data);
-    const auto result = message::pong::factory_from_data(version, istream);
+    const auto result = message::pong::factory(version, istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(pong__factory_from_data_2__round_trip__expected)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(version), result.serialized_size(version));
 }
 
-BOOST_AUTO_TEST_CASE(pong__factory_from_data_3__round_trip__expected)
+BOOST_AUTO_TEST_CASE(pong__factory_3__round_trip__expected)
 {
     static const message::pong expected
     {
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(pong__factory_from_data_3__round_trip__expected)
     const auto data = expected.to_data(version);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = message::pong::factory_from_data(version, source);
+    const auto result = message::pong::factory(version, source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);

@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__from_data__insufficient_version__failur
         message::block_transactions::version_minimum - 1, data));
 }
 
-BOOST_AUTO_TEST_CASE(block_transactions__factory_from_data_1__valid_input__success)
+BOOST_AUTO_TEST_CASE(block_transactions__factory_1__valid_input__success)
 {
     data_chunk raw = to_chunk(base16_literal(
         "3ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a0"
@@ -226,7 +226,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__factory_from_data_1__valid_input__succe
         message::block_transactions::version_minimum);
 
     BOOST_REQUIRE(raw == data);
-    const auto result = message::block_transactions::factory_from_data(
+    const auto result = message::block_transactions::factory(
         message::block_transactions::version_minimum, data);
 
     BOOST_REQUIRE(result.is_valid());
@@ -239,7 +239,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__factory_from_data_1__valid_input__succe
         result.serialized_size(message::block_transactions::version_minimum));
 }
 
-BOOST_AUTO_TEST_CASE(block_transactions__factory_from_data_2__valid_input__success)
+BOOST_AUTO_TEST_CASE(block_transactions__factory_2__valid_input__success)
 {
     data_chunk raw = to_chunk(base16_literal(
         "3ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a0"
@@ -276,7 +276,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__factory_from_data_2__valid_input__succe
 
     BOOST_REQUIRE(raw == data);
     data_source istream(data);
-    auto result = message::block_transactions::factory_from_data(
+    auto result = message::block_transactions::factory(
         message::block_transactions::version_minimum, istream);
 
     BOOST_REQUIRE(result.is_valid());
@@ -288,7 +288,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__factory_from_data_2__valid_input__succe
         result.serialized_size(message::block_transactions::version_minimum));
 }
 
-BOOST_AUTO_TEST_CASE(block_transactions__factory_from_data_3__valid_input__success)
+BOOST_AUTO_TEST_CASE(block_transactions__factory_3__valid_input__success)
 {
     data_chunk raw = to_chunk(base16_literal(
         "3ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a0"
@@ -326,7 +326,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__factory_from_data_3__valid_input__succe
     BOOST_REQUIRE(raw == data);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = message::block_transactions::factory_from_data(
+    const auto result = message::block_transactions::factory(
         message::block_transactions::version_minimum, source);
 
     BOOST_REQUIRE(result.is_valid());

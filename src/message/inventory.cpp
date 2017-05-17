@@ -38,7 +38,7 @@ const std::string inventory::command = "inv";
 const uint32_t inventory::version_minimum = version::level::minimum;
 const uint32_t inventory::version_maximum = version::level::maximum;
 
-inventory inventory::factory_from_data(uint32_t version,
+inventory inventory::factory(uint32_t version,
     const data_chunk& data)
 {
     inventory instance;
@@ -46,7 +46,7 @@ inventory inventory::factory_from_data(uint32_t version,
     return instance;
 }
 
-inventory inventory::factory_from_data(uint32_t version,
+inventory inventory::factory(uint32_t version,
     std::istream& stream)
 {
     inventory instance;
@@ -54,7 +54,7 @@ inventory inventory::factory_from_data(uint32_t version,
     return instance;
 }
 
-inventory inventory::factory_from_data(uint32_t version,
+inventory inventory::factory(uint32_t version,
     reader& source)
 {
     inventory instance;

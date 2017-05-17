@@ -31,7 +31,7 @@ const std::string send_headers::command = "sendheaders";
 const uint32_t send_headers::version_minimum = version::level::bip130;
 const uint32_t send_headers::version_maximum = version::level::maximum;
 
-send_headers send_headers::factory_from_data(uint32_t version,
+send_headers send_headers::factory(uint32_t version,
     const data_chunk& data)
 {
     send_headers instance;
@@ -39,7 +39,7 @@ send_headers send_headers::factory_from_data(uint32_t version,
     return instance;
 }
 
-send_headers send_headers::factory_from_data(uint32_t version,
+send_headers send_headers::factory(uint32_t version,
     std::istream& stream)
 {
     send_headers instance;
@@ -47,7 +47,7 @@ send_headers send_headers::factory_from_data(uint32_t version,
     return instance;
 }
 
-send_headers send_headers::factory_from_data(uint32_t version,
+send_headers send_headers::factory(uint32_t version,
     reader& source)
 {
     send_headers instance;

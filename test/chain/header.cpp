@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(header__from_data__insufficient_bytes__failure)
     BOOST_REQUIRE(!header.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(header__factory_from_data_1__valid_input__success)
+BOOST_AUTO_TEST_CASE(header__factory_1__valid_input__success)
 {
     chain::header expected
     {
@@ -125,13 +125,13 @@ BOOST_AUTO_TEST_CASE(header__factory_from_data_1__valid_input__success)
 
     const auto data = expected.to_data();
 
-    const auto result = chain::header::factory_from_data(data);
+    const auto result = chain::header::factory(data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(header__factory_from_data_2__valid_input__success)
+BOOST_AUTO_TEST_CASE(header__factory_2__valid_input__success)
 {
     chain::header expected
     {
@@ -146,13 +146,13 @@ BOOST_AUTO_TEST_CASE(header__factory_from_data_2__valid_input__success)
     const auto data = expected.to_data();
     data_source istream(data);
 
-    const auto result = chain::header::factory_from_data(istream);
+    const auto result = chain::header::factory(istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(header__factory_from_data_3__valid_input__success)
+BOOST_AUTO_TEST_CASE(header__factory_3__valid_input__success)
 {
     const chain::header expected
     {
@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(header__factory_from_data_3__valid_input__success)
     data_source istream(data);
     istream_reader source(istream);
 
-    const auto result = chain::header::factory_from_data(source);
+    const auto result = chain::header::factory(source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);

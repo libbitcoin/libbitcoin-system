@@ -48,35 +48,27 @@ header::header()
 }
 
 header::header(header&& other)
-  : header(other.version_, std::move(other.previous_block_hash_),
-      std::move(other.merkle_), other.timestamp_, other.bits_, other.nonce_)
+  : hash_(other.hash_cache()),
+    version_(other.version_),
+    previous_block_hash_(std::move(other.previous_block_hash_)),
+    merkle_(std::move(other.merkle_)),
+    timestamp_(other.timestamp_),
+    bits_(other.bits_),
+    nonce_(other.nonce_),
+    validation(std::move(other.validation))
 {
-    // TODO: implement safe private accessor for conditional cache transfer.
-    validation = std::move(other.validation);
 }
 
 header::header(const header& other)
-  : header(other.version_, other.previous_block_hash_, other.merkle_,
-        other.timestamp_, other.bits_, other.nonce_)
+  : hash_(other.hash_cache()),
+    version_(other.version_),
+    previous_block_hash_(other.previous_block_hash_),
+    merkle_(other.merkle_),
+    timestamp_(other.timestamp_),
+    bits_(other.bits_),
+    nonce_(other.nonce_),
+    validation(other.validation)
 {
-    // TODO: implement safe private accessor for conditional cache transfer.
-    validation = other.validation;
-}
-
-header::header(header&& other, hash_digest&& hash)
-  : header(other.version_, std::move(other.previous_block_hash_),
-      std::move(other.merkle_), other.timestamp_, other.bits_, other.nonce_)
-{
-    hash_ = std::make_shared<hash_digest>(std::move(hash));
-    validation = std::move(other.validation);
-}
-
-header::header(const header& other, const hash_digest& hash)
-  : header(other.version_, other.previous_block_hash_, other.merkle_,
-        other.timestamp_, other.bits_, other.nonce_)
-{
-    hash_ = std::make_shared<hash_digest>(hash);
-    validation = other.validation;
 }
 
 header::header(uint32_t version, hash_digest&& previous_block_hash,
@@ -104,12 +96,19 @@ header::header(uint32_t version, const hash_digest& previous_block_hash,
 {
 }
 
+// Private cache access for copy/move construction.
+header::hash_ptr header::hash_cache() const
+{
+    shared_lock lock(mutex_);
+    return hash_;
+}
+
 // Operators.
 //-----------------------------------------------------------------------------
 
 header& header::operator=(header&& other)
 {
-    // TODO: implement safe private accessor for conditional cache transfer.
+    hash_ = other.hash_cache();
     version_ = other.version_;
     previous_block_hash_ = std::move(other.previous_block_hash_);
     merkle_ = std::move(other.merkle_);
@@ -122,7 +121,7 @@ header& header::operator=(header&& other)
 
 header& header::operator=(const header& other)
 {
-    // TODO: implement safe private accessor for conditional cache transfer.
+    hash_ = other.hash_cache();
     version_ = other.version_;
     previous_block_hash_ = other.previous_block_hash_;
     merkle_ = other.merkle_;
@@ -152,7 +151,7 @@ bool header::operator!=(const header& other) const
 //-----------------------------------------------------------------------------
 
 // static
-header header::factory_from_data(const data_chunk& data)
+header header::factory(const data_chunk& data)
 {
     header instance;
     instance.from_data(data);
@@ -160,7 +159,7 @@ header header::factory_from_data(const data_chunk& data)
 }
 
 // static
-header header::factory_from_data(std::istream& stream)
+header header::factory(std::istream& stream)
 {
     header instance;
     instance.from_data(stream);
@@ -168,10 +167,26 @@ header header::factory_from_data(std::istream& stream)
 }
 
 // static
-header header::factory_from_data(reader& source)
+header header::factory(reader& source)
 {
     header instance;
     instance.from_data(source);
+    return instance;
+}
+
+// static
+header header::factory(reader& source, hash_digest&& hash)
+{
+    header instance;
+    instance.from_data(source, std::move(hash));
+    return instance;
+}
+
+// static
+header header::factory(reader& source, const hash_digest& hash)
+{
+    header instance;
+    instance.from_data(source, hash);
     return instance;
 }
 
@@ -202,6 +217,18 @@ bool header::from_data(reader& source)
         reset();
 
     return source;
+}
+
+bool header::from_data(reader& source, hash_digest&& hash)
+{
+    hash_ = std::make_shared<hash_digest>(std::move(hash));
+    return from_data(source);
+}
+
+bool header::from_data(reader& source, const hash_digest& hash)
+{
+    hash_ = std::make_shared<hash_digest>(hash);
+    return from_data(source);
 }
 
 // protected
@@ -290,11 +317,6 @@ void header::set_version(uint32_t value)
     invalidate_cache();
 }
 
-hash_digest& header::previous_block_hash()
-{
-    return previous_block_hash_;
-}
-
 const hash_digest& header::previous_block_hash() const
 {
     return previous_block_hash_;
@@ -310,11 +332,6 @@ void header::set_previous_block_hash(hash_digest&& value)
 {
     previous_block_hash_ = std::move(value);
     invalidate_cache();
-}
-
-hash_digest& header::merkle()
-{
-    return merkle_;
 }
 
 const hash_digest& header::merkle() const

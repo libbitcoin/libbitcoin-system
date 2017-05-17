@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_version_fails)
     BOOST_REQUIRE(!instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
+BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_chunk)
 {
     const message::merkle_block expected
     {
@@ -196,13 +196,13 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
     };
 
     const auto data = expected.to_data(message::version::level::maximum);
-    const auto result = message::merkle_block::factory_from_data(message::version::level::maximum, data);
+    const auto result = message::merkle_block::factory(message::version::level::maximum, data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
+BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_stream)
 {
     const  message::merkle_block expected
     {
@@ -225,13 +225,13 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 
     const auto data = expected.to_data(message::version::level::maximum);
     data_source istream(data);
-    const auto result = message::merkle_block::factory_from_data(message::version::level::maximum, istream);
+    const auto result = message::merkle_block::factory(message::version::level::maximum, istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
+BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_reader)
 {
     const message::merkle_block expected
     {
@@ -255,7 +255,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
     const auto data = expected.to_data(message::version::level::maximum);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = message::merkle_block::factory_from_data(message::version::level::maximum, source);
+    const auto result = message::merkle_block::factory(message::version::level::maximum, source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);

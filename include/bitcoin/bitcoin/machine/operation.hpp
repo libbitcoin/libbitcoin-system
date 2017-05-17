@@ -64,9 +64,9 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static operation factory_from_data(const data_chunk& encoded);
-    static operation factory_from_data(std::istream& stream);
-    static operation factory_from_data(reader& source);
+    static operation factory(const data_chunk& encoded);
+    static operation factory(std::istream& stream);
+    static operation factory(reader& source);
 
     bool from_data(const data_chunk& encoded);
     bool from_data(std::istream& stream);

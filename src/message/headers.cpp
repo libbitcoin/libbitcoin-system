@@ -40,7 +40,7 @@ const std::string headers::command = "headers";
 const uint32_t headers::version_minimum = version::level::headers;
 const uint32_t headers::version_maximum = version::level::maximum;
 
-headers headers::factory_from_data(uint32_t version,
+headers headers::factory(uint32_t version,
     const data_chunk& data)
 {
     headers instance;
@@ -48,7 +48,7 @@ headers headers::factory_from_data(uint32_t version,
     return instance;
 }
 
-headers headers::factory_from_data(uint32_t version,
+headers headers::factory(uint32_t version,
     std::istream& stream)
 {
     headers instance;
@@ -56,7 +56,7 @@ headers headers::factory_from_data(uint32_t version,
     return instance;
 }
 
-headers headers::factory_from_data(uint32_t version,
+headers headers::factory(uint32_t version,
     reader& source)
 {
     headers instance;

@@ -69,9 +69,9 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static point factory_from_data(const data_chunk& data, bool wire=true);
-    static point factory_from_data(std::istream& stream, bool wire=true);
-    static point factory_from_data(reader& source, bool wire=true);
+    static point factory(const data_chunk& data, bool wire=true);
+    static point factory(std::istream& stream, bool wire=true);
+    static point factory(reader& source, bool wire=true);
 
     bool from_data(const data_chunk& data, bool wire=true);
     bool from_data(std::istream& stream, bool wire=true);
@@ -95,12 +95,10 @@ public:
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------
 
-    static size_t satoshi_fixed_size();
+    static size_t satoshi_fixed_size(bool wire=true);
     size_t serialized_size(bool wire=true) const;
 
-    // deprecated (unsafe)
     hash_digest& hash();
-
     const hash_digest& hash() const;
     void set_hash(hash_digest&& value);
     void set_hash(const hash_digest& value);
@@ -120,6 +118,9 @@ public:
     bool is_null() const;
 
 protected:
+    // So that history may call reset from their own.
+    friend class payment_record;
+
     point(hash_digest&& hash, uint32_t index, bool valid);
     point(const hash_digest& hash, uint32_t index, bool valid);
     void reset();

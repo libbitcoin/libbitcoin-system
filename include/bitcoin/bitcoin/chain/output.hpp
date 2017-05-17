@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <istream>
+#include <memory>
 #include <string>
 #include <vector>
 #include <bitcoin/bitcoin/chain/script.hpp>
@@ -47,14 +48,14 @@ public:
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
-        /// This is a non-consensus sentinel used to indicate an output is unspent.
+        /// This is a non-consensus sentinel indicating output is unspent.
         static const uint32_t not_spent;
 
         size_t spender_height = validation::not_spent;
     };
 
     // Constructors.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     output();
 
@@ -65,9 +66,8 @@ public:
     output(uint64_t value, const chain::script& script);
 
     // Operators.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
-    /// This class is move assignable and copy assignable.
     output& operator=(output&& other);
     output& operator=(const output& other);
 
@@ -75,11 +75,11 @@ public:
     bool operator!=(const output& other) const;
 
     // Deserialization.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
-    static output factory_from_data(const data_chunk& data, bool wire=true);
-    static output factory_from_data(std::istream& stream, bool wire=true);
-    static output factory_from_data(reader& source, bool wire=true);
+    static output factory(const data_chunk& data, bool wire=true);
+    static output factory(std::istream& stream, bool wire=true);
+    static output factory(reader& source, bool wire=true);
 
     bool from_data(const data_chunk& data, bool wire=true);
     bool from_data(std::istream& stream, bool wire=true);
@@ -88,35 +88,35 @@ public:
     bool is_valid() const;
 
     // Serialization.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     data_chunk to_data(bool wire=true) const;
     void to_data(std::ostream& stream, bool wire=true) const;
     void to_data(writer& sink, bool wire=true) const;
 
     // Properties (size, accessors, cache).
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     size_t serialized_size(bool wire=true) const;
 
     uint64_t value() const;
     void set_value(uint64_t value);
 
-    // Deprecated (unsafe).
-    chain::script& script();
-
     const chain::script& script() const;
     void set_script(const chain::script& value);
     void set_script(chain::script&& value);
 
-    /// The payment address extracted from this output as a standard script.
+    /// The first payment address extracted (may be invalid).
     wallet::payment_address address() const;
-    bool is_dust(uint64_t minimum_output_value) const;
+
+    /// The payment addresses extracted from this output as a standard script.
+    wallet::payment_address::list addresses() const;
 
     // Validation.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     size_t signature_operations() const;
+    bool is_dust(uint64_t minimum_output_value) const;
 
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     mutable validation validation;
@@ -126,8 +126,12 @@ protected:
     void invalidate_cache() const;
 
 private:
+    typedef std::shared_ptr<wallet::payment_address::list> addresses_ptr;
+
+    addresses_ptr addresses_cache() const;
+
     mutable upgrade_mutex mutex_;
-    mutable wallet::payment_address::ptr address_;
+    mutable addresses_ptr addresses_;
 
     uint64_t value_;
     chain::script script_;

@@ -33,7 +33,7 @@ const std::string version::command = "version";
 const uint32_t message::version::version_minimum = level::minimum;
 const uint32_t message::version::version_maximum = level::maximum;
 
-version version::factory_from_data(uint32_t version,
+version version::factory(uint32_t version,
     const data_chunk& data)
 {
     message::version instance;
@@ -41,7 +41,7 @@ version version::factory_from_data(uint32_t version,
     return instance;
 }
 
-version version::factory_from_data(uint32_t version,
+version version::factory(uint32_t version,
     std::istream& stream)
 {
     message::version instance;
@@ -49,7 +49,7 @@ version version::factory_from_data(uint32_t version,
     return instance;
 }
 
-version version::factory_from_data(uint32_t version,
+version version::factory(uint32_t version,
     reader& source)
 {
     message::version instance;

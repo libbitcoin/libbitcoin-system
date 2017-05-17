@@ -40,10 +40,9 @@ public:
     typedef std::shared_ptr<not_found> ptr;
     typedef std::shared_ptr<const not_found> const_ptr;
 
-    static not_found factory_from_data(uint32_t version,
-        const data_chunk& data);
-    static not_found factory_from_data(uint32_t version, std::istream& stream);
-    static not_found factory_from_data(uint32_t version, reader& source);
+    static not_found factory(uint32_t version,const data_chunk& data);
+    static not_found factory(uint32_t version, std::istream& stream);
+    static not_found factory(uint32_t version, reader& source);
 
     not_found();
     not_found(const inventory_vector::list& values);

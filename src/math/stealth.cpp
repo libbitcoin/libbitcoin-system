@@ -36,7 +36,7 @@ using namespace bc::machine;
 
 bool is_stealth_script(const script& script)
 {
-    if (script.pattern() != script_pattern::null_data)
+    if (!script::is_null_data_pattern(script.operations()))
         return false;
 
     BITCOIN_ASSERT(script.size() == 2);
@@ -61,7 +61,7 @@ bool to_stealth_prefix(uint32_t& out_prefix, const script& script)
 // The public key must have a sign value of 0x02 (i.e. must be even y-valued).
 bool create_ephemeral_key(ec_secret& out_secret, const data_chunk& seed)
 {
-    static const data_chunk magic(to_chunk("Stealth seed"));
+    static const auto magic = to_chunk("Stealth seed");
     auto nonced_seed = build_chunk({ to_array(0), seed });
     ec_compressed point;
 

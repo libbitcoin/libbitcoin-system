@@ -36,7 +36,7 @@ namespace machine {
 //-----------------------------------------------------------------------------
 
 // static
-operation operation::factory_from_data(const data_chunk& encoded)
+operation operation::factory(const data_chunk& encoded)
 {
     operation instance;
     instance.from_data(encoded);
@@ -44,7 +44,7 @@ operation operation::factory_from_data(const data_chunk& encoded)
 }
 
 // static
-operation operation::factory_from_data(std::istream& stream)
+operation operation::factory(std::istream& stream)
 {
     operation instance;
     instance.from_data(stream);
@@ -52,7 +52,7 @@ operation operation::factory_from_data(std::istream& stream)
 }
 
 // static
-operation operation::factory_from_data(reader& source)
+operation operation::factory(reader& source)
 {
     operation instance;
     instance.from_data(source);

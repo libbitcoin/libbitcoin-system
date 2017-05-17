@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <istream>
+#include <memory>
 #include <vector>
 #include <bitcoin/bitcoin/chain/output_point.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
@@ -41,7 +42,7 @@ public:
     typedef std::vector<input> list;
 
     // Constructors.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     input();
 
@@ -54,9 +55,8 @@ public:
         uint32_t sequence);
 
     // Operators.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
-    /// This class is move assignable and copy assignable.
     input& operator=(input&& other);
     input& operator=(const input& other);
 
@@ -64,11 +64,11 @@ public:
     bool operator!=(const input& other) const;
 
     // Deserialization.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
-    static input factory_from_data(const data_chunk& data, bool wire=true);
-    static input factory_from_data(std::istream& stream, bool wire=true);
-    static input factory_from_data(reader& source, bool wire=true);
+    static input factory(const data_chunk& data, bool wire=true);
+    static input factory(std::istream& stream, bool wire=true);
+    static input factory(reader& source, bool wire=true);
 
     bool from_data(const data_chunk& data, bool wire=true);
     bool from_data(std::istream& stream, bool wire=true);
@@ -77,26 +77,21 @@ public:
     bool is_valid() const;
 
     // Serialization.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     data_chunk to_data(bool wire=true) const;
     void to_data(std::ostream& stream, bool wire=true) const;
     void to_data(writer& sink, bool wire=true) const;
 
     // Properties (size, accessors, cache).
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     size_t serialized_size(bool wire=true) const;
 
-    // Deprecated (unsafe).
     output_point& previous_output();
-
     const output_point& previous_output() const;
     void set_previous_output(const output_point& value);
     void set_previous_output(output_point&& value);
-
-    // Deprecated (unsafe).
-    chain::script& script();
 
     const chain::script& script() const;
     void set_script(const chain::script& value);
@@ -105,11 +100,14 @@ public:
     uint32_t sequence() const;
     void set_sequence(uint32_t value);
 
-    /// The payment address extracted from this input as a standard script.
+    /// The first payment address extracted (may be invalid).
     wallet::payment_address address() const;
 
+    /// The payment addresses extracted from this input as a standard script.
+    wallet::payment_address::list addresses() const;
+
     // Validation.
-    //-----------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     bool is_final() const;
     size_t signature_operations(bool bip16_active) const;
@@ -119,8 +117,12 @@ protected:
     void invalidate_cache() const;
 
 private:
+    typedef std::shared_ptr<wallet::payment_address::list> addresses_ptr;
+
+    addresses_ptr addresses_cache() const;
+
     mutable upgrade_mutex mutex_;
-    mutable wallet::payment_address::ptr address_;
+    mutable addresses_ptr addresses_;
 
     output_point previous_output_;
     chain::script script_;

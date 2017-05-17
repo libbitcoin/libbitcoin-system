@@ -41,51 +41,51 @@ static const auto version_maximum = message::version::level::maximum;
 
 BOOST_AUTO_TEST_SUITE(version_tests)
 
-BOOST_AUTO_TEST_CASE(version__factory_from_data__therealbitcoin_dot_org__invalid)
+BOOST_AUTO_TEST_CASE(version__factory__therealbitcoin_dot_org__invalid)
 {
     data_chunk payload;
     BOOST_REQUIRE(decode_base16(payload, INVALID_THEREALBITCOIN_1));
-    const auto version = message::version::factory_from_data(version_maximum, payload);
+    const auto version = message::version::factory(version_maximum, payload);
     BOOST_REQUIRE(!version.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(version__factory_from_data__anarchistprime1__invalid)
+BOOST_AUTO_TEST_CASE(version__factory__anarchistprime1__invalid)
 {
     data_chunk payload;
     BOOST_REQUIRE(decode_base16(payload, INVALID_ANARCHISTPRIME_1));
-    const auto version = message::version::factory_from_data(version_maximum, payload);
+    const auto version = message::version::factory(version_maximum, payload);
     BOOST_REQUIRE(!version.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(version__factory_from_data__anarchistprime2__invalid)
+BOOST_AUTO_TEST_CASE(version__factory__anarchistprime2__invalid)
 {
     data_chunk payload;
     BOOST_REQUIRE(decode_base16(payload, INVALID_ANARCHISTPRIME_2));
-    const auto version = message::version::factory_from_data(version_maximum, payload);
+    const auto version = message::version::factory(version_maximum, payload);
     BOOST_REQUIRE(!version.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(version__factory_from_data__falcon1__invalid)
+BOOST_AUTO_TEST_CASE(version__factory__falcon1__invalid)
 {
     data_chunk payload;
     BOOST_REQUIRE(decode_base16(payload, INVALID_FALCON_1));
-    const auto version = message::version::factory_from_data(version_maximum, payload);
+    const auto version = message::version::factory(version_maximum, payload);
     BOOST_REQUIRE(!version.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(version__factory_from_data__falcon2__invalid)
+BOOST_AUTO_TEST_CASE(version__factory__falcon2__invalid)
 {
     data_chunk payload;
     BOOST_REQUIRE(decode_base16(payload, INVALID_FALCON_2));
-    const auto version = message::version::factory_from_data(version_maximum, payload);
+    const auto version = message::version::factory(version_maximum, payload);
     BOOST_REQUIRE(!version.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(version__factory_from_data__satoshi1__invalid)
+BOOST_AUTO_TEST_CASE(version__factory__satoshi1__invalid)
 {
     data_chunk payload;
     BOOST_REQUIRE(decode_base16(payload, INVALID_SATOSHI_1));
-    const auto version = message::version::factory_from_data(version_maximum, payload);
+    const auto version = message::version::factory(version_maximum, payload);
     BOOST_REQUIRE(!version.is_valid());
 }
 
@@ -343,7 +343,7 @@ BOOST_AUTO_TEST_CASE(version__from_data__mismatched_sender_services__invalid)
     );
 
     const auto data = expected.to_data(version_maximum);
-    const auto result = message::version::factory_from_data(version_maximum, data);
+    const auto result = message::version::factory(version_maximum, data);
 
     // HACK: disabled check due to inconsistent node implementation.
     BOOST_REQUIRE(/*!*/result.is_valid());
@@ -386,11 +386,11 @@ BOOST_AUTO_TEST_CASE(version__from_data__version_meets_bip37__success)
     };
 
     const auto data = expected.to_data(version_maximum);
-    const auto result = message::version::factory_from_data(version_maximum, data);
+    const auto result = message::version::factory(version_maximum, data);
     BOOST_REQUIRE(result.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(version__factory_from_data_1__valid_input__success)
+BOOST_AUTO_TEST_CASE(version__factory_1__valid_input__success)
 {
     const auto sender_services = 1515u;
     const message::version expected
@@ -427,14 +427,14 @@ BOOST_AUTO_TEST_CASE(version__factory_from_data_1__valid_input__success)
     };
 
     const auto data = expected.to_data(version_maximum);
-    const auto result = message::version::factory_from_data(version_maximum, data);
+    const auto result = message::version::factory(version_maximum, data);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version_maximum));
     BOOST_REQUIRE_EQUAL(expected.serialized_size(version_maximum), result.serialized_size(version_maximum));
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(version__factory_from_data_2__valid_input__success)
+BOOST_AUTO_TEST_CASE(version__factory_2__valid_input__success)
 {
     const auto sender_services = 1515u;
     const message::version expected
@@ -472,14 +472,14 @@ BOOST_AUTO_TEST_CASE(version__factory_from_data_2__valid_input__success)
 
     const auto data = expected.to_data(version_maximum);
     data_source istream(data);
-    const auto result = message::version::factory_from_data(version_maximum, istream);
+    const auto result = message::version::factory(version_maximum, istream);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version_maximum));
     BOOST_REQUIRE_EQUAL(expected.serialized_size(version_maximum), result.serialized_size(version_maximum));
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(version__factory_from_data_3__valid_input__success)
+BOOST_AUTO_TEST_CASE(version__factory_3__valid_input__success)
 {
     const auto sender_services = 1515u;
     const message::version expected
@@ -519,7 +519,7 @@ BOOST_AUTO_TEST_CASE(version__factory_from_data_3__valid_input__success)
     const auto data = expected.to_data(version_maximum);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = message::version::factory_from_data(version_maximum, source);
+    const auto result = message::version::factory(version_maximum, source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version_maximum));

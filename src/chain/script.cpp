@@ -65,20 +65,25 @@ static const auto one_hash = hash_literal(
 
 // A default instance is invalid (until modified).
 script::script()
-  : valid_(false), cached_(false)
+  : cached_(false),
+    valid_(false)
 {
 }
 
 script::script(script&& other)
-  : bytes_(std::move(other.bytes_)), valid_(other.valid_), cached_(false)
+  : operations_(std::move(other.operations_move())),
+    cached_(!operations_.empty()),
+    bytes_(std::move(other.bytes_)),
+    valid_(other.valid_)
 {
-    // TODO: implement safe private accessor for conditional cache transfer.
 }
 
 script::script(const script& other)
-  : bytes_(other.bytes_), valid_(other.valid_), cached_(false)
+  : operations_(other.operations_copy()),
+    cached_(!operations_.empty()),
+    bytes_(other.bytes_),
+    valid_(other.valid_)
 {
-    // TODO: implement safe private accessor for conditional cache transfer.
 }
 
 script::script(const operation::list& ops)
@@ -99,7 +104,7 @@ script::script(data_chunk&& encoded, bool prefix)
         return;
     }
 
-    // This is an optimization that avoids streaming the encode bytes.
+    // This is an optimization that avoids streaming the encoded bytes.
     bytes_ = std::move(encoded);
     cached_ = false;
     valid_ = true;
@@ -110,14 +115,28 @@ script::script(const data_chunk& encoded, bool prefix)
     valid_ = from_data(encoded, prefix);
 }
 
+// Private cache access for move construction.
+script::operation::list& script::operations_move()
+{
+    shared_lock lock(mutex_);
+    return operations_;
+}
+
+// Private cache access for copy construction.
+const script::operation::list& script::operations_copy() const
+{
+    shared_lock lock(mutex_);
+    return operations_;
+}
+
 // Operators.
 //-----------------------------------------------------------------------------
 
 // Concurrent read/write is not supported, so no critical section.
 script& script::operator=(script&& other)
 {
-    // TODO: implement safe private accessor for conditional cache transfer.
-    reset();
+    operations_ = other.operations_move();
+    cached_ = !operations_.empty();
     bytes_ = std::move(other.bytes_);
     valid_ = other.valid_;
     return *this;
@@ -126,8 +145,8 @@ script& script::operator=(script&& other)
 // Concurrent read/write is not supported, so no critical section.
 script& script::operator=(const script& other)
 {
-    // TODO: implement safe private accessor for conditional cache transfer.
-    reset();
+    operations_ = other.operations_copy();
+    cached_ = !operations_.empty();
     bytes_ = other.bytes_;
     valid_ = other.valid_;
     return *this;
@@ -147,7 +166,7 @@ bool script::operator!=(const script& other) const
 //-----------------------------------------------------------------------------
 
 // static
-script script::factory_from_data(const data_chunk& encoded, bool prefix)
+script script::factory(const data_chunk& encoded, bool prefix)
 {
     script instance;
     instance.from_data(encoded, prefix);
@@ -155,7 +174,7 @@ script script::factory_from_data(const data_chunk& encoded, bool prefix)
 }
 
 // static
-script script::factory_from_data(std::istream& stream, bool prefix)
+script script::factory(std::istream& stream, bool prefix)
 {
     script instance;
     instance.from_data(stream, prefix);
@@ -163,7 +182,7 @@ script script::factory_from_data(std::istream& stream, bool prefix)
 }
 
 // static
-script script::factory_from_data(reader& source, bool prefix)
+script script::factory(reader& source, bool prefix)
 {
     script instance;
     instance.from_data(source, prefix);
@@ -232,21 +251,21 @@ bool script::from_string(const std::string& mnemonic)
 // Concurrent read/write is not supported, so no critical section.
 void script::from_operations(operation::list&& ops)
 {
-    reset();
-    valid_ = true;
+    ////reset();
     bytes_ = operations_to_data(ops);
     operations_ = std::move(ops);
     cached_ = true;
+    valid_ = true;
 }
 
 // Concurrent read/write is not supported, so no critical section.
 void script::from_operations(const operation::list& ops)
 {
-    reset();
-    valid_ = true;
+    ////reset();
     bytes_ = operations_to_data(ops);
     operations_ = ops;
     cached_ = true;
+    valid_ = true;
 }
 
 // private/static
@@ -782,7 +801,9 @@ bool script::is_pay_script_hash_pattern(const operation::list& ops)
         && ops[2].code() == opcode::equal;
 }
 
-// The leading zero is wacky satoshi behavior that we must perpetuate.
+//*****************************************************************************
+// CONSENSUS: the push zero is wacky satoshi behavior we must perpetuate.
+//*****************************************************************************
 bool script::is_sign_multisig_pattern(const operation::list& ops)
 {
     return ops.size() >= 2
@@ -819,12 +840,7 @@ bool script::is_sign_script_hash_pattern(const operation::list& ops)
         return false;
 
     // Is the redeem script a common output script?
-    const auto redeem_script_pattern = redeem.pattern();
-    return redeem_script_pattern == script_pattern::pay_multisig
-        || redeem_script_pattern == script_pattern::pay_public_key
-        || redeem_script_pattern == script_pattern::pay_key_hash
-        || redeem_script_pattern == script_pattern::pay_script_hash
-        || redeem_script_pattern == script_pattern::null_data;
+    return redeem.output_pattern() != script_pattern::non_standard;
 }
 
 operation::list script::to_null_data_pattern(data_slice data)
@@ -834,8 +850,8 @@ operation::list script::to_null_data_pattern(data_slice data)
 
     return operation::list
     {
-        operation{ opcode::return_ },
-        operation{ to_chunk(data) }
+        { opcode::return_ },
+        { to_chunk(data) }
     };
 }
 
@@ -922,23 +938,19 @@ operation::list script::to_pay_multisig_pattern(uint8_t signatures,
 
 // Utilities (non-static).
 //-----------------------------------------------------------------------------
+// TODO: implement standardness tests in blockchain (not in system).
 
-// TODO: create output_pattern() and input_pattern() so that each can be tested
-// in isolation, reducing wasteful processing of the others.
-// TODO: implement standardness tests in blockchain, not in system.
-
-// This excludes the bip34 coinbase pattern, which can be tested independently.
 script_pattern script::pattern() const
+{
+    const auto input = input_pattern();
+    return input == script_pattern::non_standard ? output_pattern() : input;
+}
+
+script_pattern script::output_pattern() const
 {
     // The first operations access must be method-based to guarantee the cache.
     if (is_null_data_pattern(operations()))
         return script_pattern::null_data;
-
-    if (is_pay_multisig_pattern(operations_))
-        return script_pattern::pay_multisig;
-
-    if (is_pay_public_key_pattern(operations_))
-        return script_pattern::pay_public_key;
 
     if (is_pay_key_hash_pattern(operations_))
         return script_pattern::pay_key_hash;
@@ -946,17 +958,30 @@ script_pattern script::pattern() const
     if (is_pay_script_hash_pattern(operations_))
         return script_pattern::pay_script_hash;
 
+    if (is_pay_multisig_pattern(operations_))
+        return script_pattern::pay_multisig;
+
+    if (is_pay_public_key_pattern(operations_))
+        return script_pattern::pay_public_key;
+
+    return script_pattern::non_standard;
+}
+
+// This excludes the bip34 coinbase pattern, which can be tested independently.
+script_pattern script::input_pattern() const
+{
+    // The first operations access must be method-based to guarantee the cache.
+    if (is_sign_key_hash_pattern(operations()))
+        return script_pattern::sign_key_hash;
+
+    if (is_sign_script_hash_pattern(operations_))
+        return script_pattern::sign_script_hash;
+
     if (is_sign_multisig_pattern(operations_))
         return script_pattern::sign_multisig;
 
     if (is_sign_public_key_pattern(operations_))
         return script_pattern::sign_public_key;
-
-    if (is_sign_key_hash_pattern(operations_))
-        return script_pattern::sign_key_hash;
-
-    if (is_sign_script_hash_pattern(operations_))
-        return script_pattern::sign_script_hash;
 
     return script_pattern::non_standard;
 }
@@ -978,7 +1003,7 @@ inline size_t ops(bool embedded, opcode code)
 size_t script::sigops(bool embedded) const
 {
     size_t total = 0;
-    auto preceding = opcode::reserved_255;
+    auto preceding = opcode::push_negative_1;
 
     // The first operations access must be method-based to guarantee the cache.
     for (const auto& op: operations())
@@ -988,9 +1013,10 @@ size_t script::sigops(bool embedded) const
         if (code == opcode::checksig ||
             code == opcode::checksigverify)
         {
-            total++;
+            ++total;
         }
-        else if (code == opcode::checkmultisig ||
+        else if (
+            code == opcode::checkmultisig ||
             code == opcode::checkmultisigverify)
         {
             total += ops(embedded, preceding);
@@ -1089,7 +1115,7 @@ void script::find_and_delete(const data_stack& endorsements)
 
 // An unspendable script is any that can provably not be spent under any
 // circumstance. This allows for exclusion of the output as unspendable.
-// The criteria below are need not be comprehensive but are fast to eval.
+// The criteria below are not be comprehensive but are fast to evaluate.
 bool script::is_unspendable() const
 {
     // The first operations access must be method-based to guarantee the cache.

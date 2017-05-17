@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <vector>
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
@@ -50,20 +51,25 @@ public:
     static const uint8_t testnet_p2kh;
     static const uint8_t testnet_p2sh;
 
+    typedef std::vector<payment_address> list;
     typedef std::shared_ptr<payment_address> ptr;
 
-    /// Extract a payment address from an input or output script.
-    /// The address will be invalid if and only if the script type is not
-    /// supported or the script is itself invalid.
-    static payment_address extract(const chain::script& script,
+    /// Extract a payment address list from an input or output script.
+    static list extract(const chain::script& script,
+        uint8_t p2kh_version=mainnet_p2kh, uint8_t p2sh_version=mainnet_p2sh);
+    static list extract_input(const chain::script& script,
+        uint8_t p2kh_version=mainnet_p2kh, uint8_t p2sh_version=mainnet_p2sh);
+    static list extract_output(const chain::script& script,
         uint8_t p2kh_version=mainnet_p2kh, uint8_t p2sh_version=mainnet_p2sh);
 
     /// Constructors.
     payment_address();
+    payment_address(payment_address&& other);
+    payment_address(const payment_address& other);
     payment_address(const payment& decoded);
     payment_address(const ec_private& secret);
     payment_address(const std::string& address);
-    payment_address(const payment_address& other);
+    payment_address(short_hash&& hash, uint8_t version=mainnet_p2kh);
     payment_address(const short_hash& hash, uint8_t version=mainnet_p2kh);
     payment_address(const ec_public& point, uint8_t version=mainnet_p2kh);
     payment_address(const chain::script& script, uint8_t version=mainnet_p2sh);

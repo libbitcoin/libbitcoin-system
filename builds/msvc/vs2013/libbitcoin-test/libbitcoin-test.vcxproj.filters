@@ -339,5 +339,11 @@
     <ClCompile Include="..\..\..\..\test\chain\points_value.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\payment_record.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\stealth_record.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

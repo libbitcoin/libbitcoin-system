@@ -193,7 +193,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__from_data__insufficient_bytes__failure)
     BOOST_REQUIRE(!instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__factory_from_data_1__wiki_sample_test__success)
+BOOST_AUTO_TEST_CASE(alert_payload__factory_1__wiki_sample_test__success)
 {
     const data_chunk raw
     {
@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__factory_from_data_1__wiki_sample_test__succe
         ""
     };
 
-    const auto result = message::alert_payload::factory_from_data(
+    const auto result = message::alert_payload::factory(
         message::version::level::minimum, raw);
 
     BOOST_REQUIRE(result.is_valid());
@@ -241,7 +241,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__factory_from_data_1__wiki_sample_test__succe
     BOOST_REQUIRE_EQUAL(data.size(), expected.serialized_size(message::version::level::minimum));
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__factory_from_data_1__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_payload__factory_1__roundtrip__success)
 {
     message::alert_payload expected
     {
@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__factory_from_data_1__roundtrip__success)
     };
 
     const auto data = expected.to_data(message::version::level::minimum);
-    const auto result = message::alert_payload::factory_from_data(
+    const auto result = message::alert_payload::factory(
         message::version::level::minimum, data);
 
     BOOST_REQUIRE(result.is_valid());
@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__factory_from_data_1__roundtrip__success)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum), result.serialized_size(message::version::level::minimum));
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__factory_from_data_2__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_payload__factory_2__roundtrip__success)
 {
     message::alert_payload expected
     {
@@ -299,7 +299,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__factory_from_data_2__roundtrip__success)
 
     const auto data = expected.to_data(message::version::level::minimum);
     data_source istream(data);
-    const auto result = message::alert_payload::factory_from_data(
+    const auto result = message::alert_payload::factory(
         message::version::level::minimum, istream);
 
     BOOST_REQUIRE(result.is_valid());
@@ -308,7 +308,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__factory_from_data_2__roundtrip__success)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(message::version::level::minimum), result.serialized_size(message::version::level::minimum));
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__factory_from_data_3__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_payload__factory_3__roundtrip__success)
 {
     const message::alert_payload expected
     {
@@ -334,7 +334,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__factory_from_data_3__roundtrip__success)
     const auto data = expected.to_data(message::version::level::minimum);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = message::alert_payload::factory_from_data(
+    const auto result = message::alert_payload::factory(
         message::version::level::minimum, source);
 
     BOOST_REQUIRE(result.is_valid());

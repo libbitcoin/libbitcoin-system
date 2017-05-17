@@ -84,7 +84,7 @@ public:
     // Operators.
     //-------------------------------------------------------------------------
 
-    /// This class is move assignable but NOT copy assignable.
+    /// This class is move assignable but NOT copy assignable (performance).
     block& operator=(block&& other);
     block& operator=(const block& other) = delete;
 
@@ -94,9 +94,9 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static block factory_from_data(const data_chunk& data);
-    static block factory_from_data(std::istream& stream);
-    static block factory_from_data(reader& source);
+    static block factory(const data_chunk& data);
+    static block factory(std::istream& stream);
+    static block factory(reader& source);
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
@@ -117,15 +117,10 @@ public:
 
     size_t serialized_size() const;
 
-    // deprecated (unsafe)
     chain::header& header();
-
     const chain::header& header() const;
     void set_header(const chain::header& value);
     void set_header(chain::header&& value);
-
-    // deprecated (unsafe)
-    transaction::list& transactions();
 
     const transaction::list& transactions() const;
     void set_transactions(const transaction::list& value);
@@ -154,7 +149,8 @@ public:
     hash_digest generate_merkle_root() const;
     size_t signature_operations() const;
     size_t signature_operations(bool bip16_active) const;
-    size_t total_inputs(bool with_coinbase=true) const;
+    size_t total_non_coinbase_inputs() const;
+    size_t total_inputs() const;
 
     bool is_extra_coinbases() const;
     bool is_final(size_t height) const;
@@ -179,13 +175,18 @@ public:
 
 protected:
     void reset();
-    size_t non_coinbase_input_count() const;
 
 private:
+    typedef boost::optional<size_t> optional_size;
+
+    optional_size total_inputs_cache() const;
+    optional_size non_coinbase_inputs_cache() const;
+
     chain::header header_;
     transaction::list transactions_;
 
-    mutable boost::optional<size_t> total_inputs_;
+    mutable optional_size total_inputs_;
+    mutable optional_size non_coinbase_inputs_;
     mutable upgrade_mutex mutex_;
 };
 

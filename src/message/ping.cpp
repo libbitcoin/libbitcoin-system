@@ -31,21 +31,21 @@ const std::string ping::command = "ping";
 const uint32_t ping::version_minimum = version::level::minimum;
 const uint32_t ping::version_maximum = version::level::maximum;
 
-ping ping::factory_from_data(uint32_t version, const data_chunk& data)
+ping ping::factory(uint32_t version, const data_chunk& data)
 {
     ping instance;
     instance.from_data(version, data);
     return instance;
 }
 
-ping ping::factory_from_data(uint32_t version, std::istream& stream)
+ping ping::factory(uint32_t version, std::istream& stream)
 {
     ping instance;
     instance.from_data(version, stream);
     return instance;
 }
 
-ping ping::factory_from_data(uint32_t version, reader& source)
+ping ping::factory(uint32_t version, reader& source)
 {
     ping instance;
     instance.from_data(version, source);

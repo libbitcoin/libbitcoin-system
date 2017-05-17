@@ -35,32 +35,49 @@ using namespace bc::wallet;
 //-----------------------------------------------------------------------------
 
 input::input()
-  : previous_output_{}, sequence_(0)
+  : previous_output_{},
+    script_{},
+    sequence_(0)
 {
 }
 
 input::input(input&& other)
-  : input(std::move(other.previous_output_), std::move(other.script_),
-      other.sequence_)
+  : addresses_(other.addresses_cache()),
+    previous_output_(std::move(other.previous_output_)),
+    script_(std::move(other.script_)),
+    sequence_(other.sequence_)
 {
 }
 
 input::input(const input& other)
-  : input(other.previous_output_, other.script_, other.sequence_)
+  : addresses_(other.addresses_cache()),
+    previous_output_(other.previous_output_),
+    script_(std::move(other.script_)),
+    sequence_(other.sequence_)
 {
 }
 
 input::input(output_point&& previous_output, chain::script&& script,
     uint32_t sequence)
-  : previous_output_(std::move(previous_output)), script_(std::move(script)),
+  : previous_output_(std::move(previous_output)),
+    script_(std::move(script)),
     sequence_(sequence)
 {
 }
 
 input::input(const output_point& previous_output, const chain::script& script,
     uint32_t sequence)
-  : previous_output_(previous_output), script_(script), sequence_(sequence)
+  : previous_output_(previous_output),
+    script_(script),
+    sequence_(sequence)
 {
+}
+
+// Private cache access for copy/move construction.
+input::addresses_ptr input::addresses_cache() const
+{
+    shared_lock lock(mutex_);
+    return addresses_;
 }
 
 // Operators.
@@ -68,6 +85,7 @@ input::input(const output_point& previous_output, const chain::script& script,
 
 input& input::operator=(input&& other)
 {
+    addresses_ = other.addresses_cache();
     previous_output_ = std::move(other.previous_output_);
     script_ = std::move(other.script_);
     sequence_ = other.sequence_;
@@ -76,6 +94,7 @@ input& input::operator=(input&& other)
 
 input& input::operator=(const input& other)
 {
+    addresses_ = other.addresses_cache();
     previous_output_ = other.previous_output_;
     script_ = other.script_;
     sequence_ = other.sequence_;
@@ -97,21 +116,21 @@ bool input::operator!=(const input& other) const
 // Deserialization.
 //-----------------------------------------------------------------------------
 
-input input::factory_from_data(const data_chunk& data, bool wire)
+input input::factory(const data_chunk& data, bool wire)
 {
     input instance;
     instance.from_data(data, wire);
     return instance;
 }
 
-input input::factory_from_data(std::istream& stream, bool wire)
+input input::factory(std::istream& stream, bool wire)
 {
     input instance;
     instance.from_data(stream, wire);
     return instance;
 }
 
-input input::factory_from_data(reader& source, bool wire)
+input input::factory(reader& source, bool wire)
 {
     input instance;
     instance.from_data(source, wire);
@@ -219,11 +238,6 @@ void input::set_previous_output(output_point&& value)
     previous_output_ = std::move(value);
 }
 
-chain::script& input::script()
-{
-    return script_;
-}
-
 const chain::script& input::script() const
 {
     return script_;
@@ -258,11 +272,11 @@ void input::invalidate_cache() const
     // Critical Section
     mutex_.lock_upgrade();
 
-    if (address_)
+    if (addresses_)
     {
         mutex_.unlock_upgrade_and_lock();
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        address_.reset();
+        addresses_.reset();
         //---------------------------------------------------------------------
         mutex_.unlock_and_lock_upgrade();
     }
@@ -273,27 +287,31 @@ void input::invalidate_cache() const
 
 payment_address input::address() const
 {
+    const auto value = addresses();
+    return value.empty() ? payment_address{} : value.front();
+}
+
+payment_address::list input::addresses() const
+{
     ///////////////////////////////////////////////////////////////////////////
     // Critical Section
     mutex_.lock_upgrade();
 
-    if (!address_)
+    if (!addresses_)
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_.unlock_upgrade_and_lock();
-
-        // TODO: limit this to input patterns.
-        address_ = std::make_shared<payment_address>(
-            payment_address::extract(script_));
+        addresses_ = std::make_shared<payment_address::list>(
+            payment_address::extract_input(script_));
         mutex_.unlock_and_lock_upgrade();
         //---------------------------------------------------------------------
     }
 
-    const auto address = *address_;
+    const auto addresses = *addresses_;
     mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 
-    return address;
+    return addresses;
 }
 
 // Validation helpers.

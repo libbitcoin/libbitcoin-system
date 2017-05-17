@@ -39,10 +39,9 @@ public:
     typedef std::shared_ptr<get_data> ptr;
     typedef std::shared_ptr<const get_data> const_ptr;
 
-    static get_data factory_from_data(uint32_t version,
-        const data_chunk& data);
-    static get_data factory_from_data(uint32_t version, std::istream& stream);
-    static get_data factory_from_data(uint32_t version, reader& source);
+    static get_data factory(uint32_t version, const data_chunk& data);
+    static get_data factory(uint32_t version, std::istream& stream);
+    static get_data factory(uint32_t version, reader& source);
 
     get_data();
     get_data(const inventory_vector::list& list);

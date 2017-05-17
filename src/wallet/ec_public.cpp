@@ -104,7 +104,7 @@ ec_public ec_public::from_data(const data_chunk& decoded)
     if (!is_point(decoded))
         return ec_public();
 
-    if (decoded.size() == ec_compressed_size)
+    if (is_compressed_key(decoded))
         return ec_public(to_array<ec_compressed_size>(decoded), true);
 
     ec_compressed compressed;

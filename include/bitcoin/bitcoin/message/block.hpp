@@ -45,9 +45,9 @@ public:
     typedef std::shared_ptr<const_ptr_list> const_ptr_list_ptr;
     typedef std::shared_ptr<const const_ptr_list> const_ptr_list_const_ptr;
 
-    static block factory_from_data(uint32_t version, const data_chunk& data);
-    static block factory_from_data(uint32_t version, std::istream& stream);
-    static block factory_from_data(uint32_t version, reader& source);
+    static block factory(uint32_t version, const data_chunk& data);
+    static block factory(uint32_t version, std::istream& stream);
+    static block factory(uint32_t version, reader& source);
 
     block();
 
@@ -58,7 +58,8 @@ public:
     block(const chain::block& other);
 
     block(chain::header&& header, chain::transaction::list&& transactions);
-    block(const chain::header& header, const chain::transaction::list& transactions);
+    block(const chain::header& header,
+        const chain::transaction::list& transactions);
 
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);

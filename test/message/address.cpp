@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE(address__from_data__insufficient_bytes__failure)
     BOOST_REQUIRE(!instance.from_data(version::level::minimum, raw));
 }
 
-BOOST_AUTO_TEST_CASE(address__factory_from_data_1__roundtrip__success)
+BOOST_AUTO_TEST_CASE(address__factory_1__roundtrip__success)
 {
     const address expected(
     {
@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE(address__factory_from_data_1__roundtrip__success)
     });
 
     const auto data = expected.to_data(version::level::minimum);
-    const auto result = address::factory_from_data(version::level::minimum, data);
+    const auto result = address::factory(version::level::minimum, data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result));
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE(address__factory_from_data_1__roundtrip__success)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(version::level::minimum), serialized_size);
 }
 
-BOOST_AUTO_TEST_CASE(address__factory_from_data_2__roundtrip__success)
+BOOST_AUTO_TEST_CASE(address__factory_2__roundtrip__success)
 {
     const address expected(
     {
@@ -203,7 +203,7 @@ BOOST_AUTO_TEST_CASE(address__factory_from_data_2__roundtrip__success)
 
     const auto data = expected.to_data(version::level::minimum);
     data_source istream(data);
-    const auto result = address::factory_from_data(version::level::minimum, istream);
+    const auto result = address::factory(version::level::minimum, istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result));
@@ -212,7 +212,7 @@ BOOST_AUTO_TEST_CASE(address__factory_from_data_2__roundtrip__success)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(version::level::minimum), serialized_size);
 }
 
-BOOST_AUTO_TEST_CASE(address__factory_from_data_3__roundtrip__success)
+BOOST_AUTO_TEST_CASE(address__factory_3__roundtrip__success)
 {
     const address expected(
     {
@@ -227,7 +227,7 @@ BOOST_AUTO_TEST_CASE(address__factory_from_data_3__roundtrip__success)
     const data_chunk data = expected.to_data(version::level::minimum);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = address::factory_from_data(version::level::minimum, source);
+    const auto result = address::factory(version::level::minimum, source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result));

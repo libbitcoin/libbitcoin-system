@@ -104,9 +104,9 @@ public:
         bloom_filters = (1 << 2)
     };
 
-    static version factory_from_data(uint32_t version, const data_chunk& data);
-    static version factory_from_data(uint32_t version, std::istream& stream);
-    static version factory_from_data(uint32_t version, reader& source);
+    static version factory(uint32_t version, const data_chunk& data);
+    static version factory(uint32_t version, std::istream& stream);
+    static version factory(uint32_t version, reader& source);
 
     version();
     version(uint32_t value, uint64_t services, uint64_t timestamp,

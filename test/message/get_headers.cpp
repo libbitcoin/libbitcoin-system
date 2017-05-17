@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(get_headers__from_data__insufficient_version__failure)
         message::get_headers::version_minimum - 1, data));
 }
 
-BOOST_AUTO_TEST_CASE(get_headers__factory_from_data_1__valid_input__success)
+BOOST_AUTO_TEST_CASE(get_headers__factory_1__valid_input__success)
 {
     const message::get_headers expected
     {
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(get_headers__factory_from_data_1__valid_input__success)
     };
 
     const auto data = expected.to_data(message::get_headers::version_minimum);
-    const auto result = message::get_headers::factory_from_data(
+    const auto result = message::get_headers::factory(
         message::get_headers::version_minimum, data);
 
     BOOST_REQUIRE(result.is_valid());
@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE(get_headers__factory_from_data_1__valid_input__success)
         result.serialized_size(message::get_headers::version_minimum));
 }
 
-BOOST_AUTO_TEST_CASE(get_headers__factory_from_data_2__valid_input__success)
+BOOST_AUTO_TEST_CASE(get_headers__factory_2__valid_input__success)
 {
     const message::get_headers expected
     {
@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE(get_headers__factory_from_data_2__valid_input__success)
 
     const auto data = expected.to_data(message::get_headers::version_minimum);
     data_source istream(data);
-    const auto result = message::get_headers::factory_from_data(
+    const auto result = message::get_headers::factory(
         message::get_headers::version_minimum, istream);
 
     BOOST_REQUIRE(result.is_valid());
@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE(get_headers__factory_from_data_2__valid_input__success)
         result.serialized_size(message::get_headers::version_minimum));
 }
 
-BOOST_AUTO_TEST_CASE(get_headers__factory_from_data_3__valid_input__success)
+BOOST_AUTO_TEST_CASE(get_headers__factory_3__valid_input__success)
 {
     const message::get_headers expected
     {
@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE(get_headers__factory_from_data_3__valid_input__success)
     const auto data = expected.to_data(message::get_headers::version_minimum);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = message::get_headers::factory_from_data(
+    const auto result = message::get_headers::factory(
         message::get_headers::version_minimum, source);
 
     BOOST_REQUIRE(result.is_valid());

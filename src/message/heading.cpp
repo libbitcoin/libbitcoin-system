@@ -58,21 +58,21 @@ size_t heading::satoshi_fixed_size()
         sizeof(uint32_t);
 }
 
-heading heading::factory_from_data(const data_chunk& data)
+heading heading::factory(const data_chunk& data)
 {
     heading instance;
     instance.from_data(data);
     return instance;
 }
 
-heading heading::factory_from_data(std::istream& stream)
+heading heading::factory(std::istream& stream)
 {
     heading instance;
     instance.from_data(stream);
     return instance;
 }
 
-heading heading::factory_from_data(reader& source)
+heading heading::factory(reader& source)
 {
     heading instance;
     instance.from_data(source);

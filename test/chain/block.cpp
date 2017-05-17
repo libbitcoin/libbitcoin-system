@@ -288,7 +288,7 @@ BOOST_AUTO_TEST_CASE(block__genesis__testnet__valid_structure)
     BOOST_REQUIRE(genesis.header().merkle() == genesis.generate_merkle_root());
 }
 
-BOOST_AUTO_TEST_CASE(block__factory_from_data_1__genesis_mainnet__success)
+BOOST_AUTO_TEST_CASE(block__factory_1__genesis_mainnet__success)
 {
     const auto genesis = bc::chain::block::genesis_mainnet();
     BOOST_REQUIRE_EQUAL(genesis.serialized_size(), 285u);
@@ -299,7 +299,7 @@ BOOST_AUTO_TEST_CASE(block__factory_from_data_1__genesis_mainnet__success)
     BOOST_REQUIRE_EQUAL(raw_block.size(), 285u);
 
     // Reload genesis block.
-    const auto block = chain::block::factory_from_data(raw_block);
+    const auto block = chain::block::factory(raw_block);
 
     BOOST_REQUIRE(block.is_valid());
     BOOST_REQUIRE(genesis.header() == block.header());
@@ -308,7 +308,7 @@ BOOST_AUTO_TEST_CASE(block__factory_from_data_1__genesis_mainnet__success)
     BOOST_REQUIRE(genesis.header().merkle() == block.generate_merkle_root());
 }
 
-BOOST_AUTO_TEST_CASE(block__factory_from_data_2__genesis_mainnet__success)
+BOOST_AUTO_TEST_CASE(block__factory_2__genesis_mainnet__success)
 {
     const auto genesis = bc::chain::block::genesis_mainnet();
     BOOST_REQUIRE_EQUAL(genesis.serialized_size(), 285u);
@@ -320,7 +320,7 @@ BOOST_AUTO_TEST_CASE(block__factory_from_data_2__genesis_mainnet__success)
 
     // Reload genesis block.
     data_source stream(raw_block);
-    const auto block = chain::block::factory_from_data(stream);
+    const auto block = chain::block::factory(stream);
 
     BOOST_REQUIRE(block.is_valid());
     BOOST_REQUIRE(genesis.header() == block.header());
@@ -329,7 +329,7 @@ BOOST_AUTO_TEST_CASE(block__factory_from_data_2__genesis_mainnet__success)
     BOOST_REQUIRE(genesis.header().merkle() == block.generate_merkle_root());
 }
 
-BOOST_AUTO_TEST_CASE(block__factory_from_data_3__genesis_mainnet__success)
+BOOST_AUTO_TEST_CASE(block__factory_3__genesis_mainnet__success)
 {
     const auto genesis = bc::chain::block::genesis_mainnet();
     BOOST_REQUIRE_EQUAL(genesis.serialized_size(), 285u);
@@ -342,7 +342,7 @@ BOOST_AUTO_TEST_CASE(block__factory_from_data_3__genesis_mainnet__success)
     // Reload genesis block.
     data_source stream(raw_block);
     istream_reader reader(stream);
-    const auto block = chain::block::factory_from_data(reader);
+    const auto block = chain::block::factory(reader);
 
     BOOST_REQUIRE(block.is_valid());
     BOOST_REQUIRE(genesis.header() == block.header());

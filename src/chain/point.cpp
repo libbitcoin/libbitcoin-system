@@ -34,8 +34,6 @@
 namespace libbitcoin {
 namespace chain {
 
-static const auto store_point_size = std::tuple_size<point>::value;
-
 // This sentinel is serialized and defined by consensus, not implementation.
 const uint32_t point::null_index = no_previous_output;
 
@@ -119,7 +117,7 @@ bool point::operator!=(const point& other) const
 //-----------------------------------------------------------------------------
 
 // static
-point point::factory_from_data(const data_chunk& data, bool wire)
+point point::factory(const data_chunk& data, bool wire)
 {
     point instance;
     instance.from_data(data, wire);
@@ -127,7 +125,7 @@ point point::factory_from_data(const data_chunk& data, bool wire)
 }
 
 // static
-point point::factory_from_data(std::istream& stream, bool wire)
+point point::factory(std::istream& stream, bool wire)
 {
     point instance;
     instance.from_data(stream, wire);
@@ -135,7 +133,7 @@ point point::factory_from_data(std::istream& stream, bool wire)
 }
 
 // static
-point point::factory_from_data(reader& source, bool wire)
+point point::factory(reader& source, bool wire)
 {
     point instance;
     instance.from_data(source, wire);
@@ -238,20 +236,21 @@ point_iterator point::begin() const
 
 point_iterator point::end() const
 {
+    static const auto store_point_size = std::tuple_size<point>::value;
     return point_iterator(*this, static_cast<unsigned>(store_point_size));
 }
 
 // Properties.
 //-----------------------------------------------------------------------------
 
-size_t point::serialized_size(bool wire) const
+size_t point::satoshi_fixed_size(bool wire)
 {
-    return wire ? point::satoshi_fixed_size() : store_point_size;
+    return hash_size + (wire ? sizeof(uint32_t) : sizeof(uint16_t));
 }
 
-size_t point::satoshi_fixed_size()
+size_t point::serialized_size(bool wire) const
 {
-    return hash_size + sizeof(index_);
+    return satoshi_fixed_size(wire);
 }
 
 hash_digest& point::hash()

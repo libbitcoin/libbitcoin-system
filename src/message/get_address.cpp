@@ -31,7 +31,7 @@ const std::string get_address::command = "getaddr";
 const uint32_t get_address::version_minimum = version::level::minimum;
 const uint32_t get_address::version_maximum = version::level::maximum;
 
-get_address get_address::factory_from_data(uint32_t version,
+get_address get_address::factory(uint32_t version,
     const data_chunk& data)
 {
     get_address instance;
@@ -39,7 +39,7 @@ get_address get_address::factory_from_data(uint32_t version,
     return instance;
 }
 
-get_address get_address::factory_from_data(uint32_t version,
+get_address get_address::factory(uint32_t version,
     std::istream& stream)
 {
     get_address instance;
@@ -47,7 +47,7 @@ get_address get_address::factory_from_data(uint32_t version,
     return instance;
 }
 
-get_address get_address::factory_from_data(uint32_t version,
+get_address get_address::factory(uint32_t version,
     reader& source)
 {
     get_address instance;

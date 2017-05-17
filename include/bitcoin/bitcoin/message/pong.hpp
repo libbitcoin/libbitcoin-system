@@ -37,9 +37,9 @@ public:
     typedef std::shared_ptr<pong> ptr;
     typedef std::shared_ptr<const pong> const_ptr;
 
-    static pong factory_from_data(uint32_t version, const data_chunk& data);
-    static pong factory_from_data(uint32_t version, std::istream& stream);
-    static pong factory_from_data(uint32_t version, reader& source);
+    static pong factory(uint32_t version, const data_chunk& data);
+    static pong factory(uint32_t version, std::istream& stream);
+    static pong factory(uint32_t version, reader& source);
     static size_t satoshi_fixed_size(uint32_t version);
 
     pong();

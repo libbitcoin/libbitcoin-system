@@ -36,9 +36,9 @@ public:
     typedef std::shared_ptr<alert> ptr;
     typedef std::shared_ptr<const alert> const_ptr;
 
-    static alert factory_from_data(uint32_t version, const data_chunk& data);
-    static alert factory_from_data(uint32_t version, std::istream& stream);
-    static alert factory_from_data(uint32_t version, reader& source);
+    static alert factory(uint32_t version, const data_chunk& data);
+    static alert factory(uint32_t version, std::istream& stream);
+    static alert factory(uint32_t version, reader& source);
 
     alert();
     alert(const data_chunk& payload, const data_chunk& signature);

@@ -34,36 +34,36 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_version_failure)
     BOOST_REQUIRE(!instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
+BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_chunk)
 {
     static const filter_clear expected{};
     const auto data = expected.to_data(version::level::maximum);
-    const auto result = filter_clear::factory_from_data(version::level::maximum, data);
+    const auto result = filter_clear::factory(version::level::maximum, data);
 
     BOOST_REQUIRE_EQUAL(data.size(), 0u);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE_EQUAL(result.serialized_size(version::level::maximum), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
+BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_stream)
 {
     static const filter_clear expected{};
     const auto data = expected.to_data(version::level::maximum);
     data_source istream(data);
-    const auto result = filter_clear::factory_from_data(version::level::maximum, istream);
+    const auto result = filter_clear::factory(version::level::maximum, istream);
 
     BOOST_REQUIRE_EQUAL(data.size(), 0u);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE_EQUAL(result.serialized_size(version::level::maximum), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
+BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_reader)
 {
     static const filter_clear expected{};
     const auto data = expected.to_data(version::level::maximum);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = filter_clear::factory_from_data(version::level::maximum, source);
+    const auto result = filter_clear::factory(version::level::maximum, source);
 
     BOOST_REQUIRE_EQUAL(data.size(), 0u);
     BOOST_REQUIRE(result.is_valid());

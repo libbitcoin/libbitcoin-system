@@ -58,17 +58,17 @@ BOOST_AUTO_TEST_CASE(ping__satoshi_fixed_size__bip31_version__8)
         message::ping::satoshi_fixed_size(message::version::level::bip31));
 }
 
-BOOST_AUTO_TEST_CASE(ping__factory_from_data_1__maximum_version_empty_data__invalid)
+BOOST_AUTO_TEST_CASE(ping__factory_1__maximum_version_empty_data__invalid)
 {
     static const auto version = message::version::level::maximum;
-    const auto result = message::ping::factory_from_data(version, data_chunk{});
+    const auto result = message::ping::factory(version, data_chunk{});
     BOOST_REQUIRE(!result.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(ping__factory_from_data_1__minimum_version_empty_data__valid)
+BOOST_AUTO_TEST_CASE(ping__factory_1__minimum_version_empty_data__valid)
 {
     static const auto version = message::version::level::minimum;
-    const auto result = message::ping::factory_from_data(version, data_chunk{});
+    const auto result = message::ping::factory(version, data_chunk{});
     BOOST_REQUIRE(result.is_valid());
 }
 
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(ping__from_data_1__minimum_version__success_zero_nonce)
     BOOST_REQUIRE_EQUAL(instance.nonce(), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(ping__factory_from_data_1__minimum_version_round_trip__zero_nonce)
+BOOST_AUTO_TEST_CASE(ping__factory_1__minimum_version_round_trip__zero_nonce)
 {
     static const message::ping value
     {
@@ -99,12 +99,12 @@ BOOST_AUTO_TEST_CASE(ping__factory_from_data_1__minimum_version_round_trip__zero
 
     static const auto version = message::version::level::minimum;
     const auto data = value.to_data(version);
-    const auto result = message::ping::factory_from_data(version, data);
+    const auto result = message::ping::factory(version, data);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE_EQUAL(result.nonce(), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(ping__factory_from_data_2__minimum_version_round_trip__zero_nonce)
+BOOST_AUTO_TEST_CASE(ping__factory_2__minimum_version_round_trip__zero_nonce)
 {
     const message::ping value
     {
@@ -114,12 +114,12 @@ BOOST_AUTO_TEST_CASE(ping__factory_from_data_2__minimum_version_round_trip__zero
     static const auto version = message::version::level::minimum;
     const auto data = value.to_data(version);
     data_source istream(data);
-    const auto result = message::ping::factory_from_data(version, istream);
+    const auto result = message::ping::factory(version, istream);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE_EQUAL(result.nonce(), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(ping__factory_from_data_3__minimum_version_round_trip__zero_nonce)
+BOOST_AUTO_TEST_CASE(ping__factory_3__minimum_version_round_trip__zero_nonce)
 {
     static const message::ping value
     {
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(ping__factory_from_data_3__minimum_version_round_trip__zero
     const auto data = value.to_data(version);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = message::ping::factory_from_data(version, source);
+    const auto result = message::ping::factory(version, source);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE_EQUAL(result.nonce(), 0u);
 }
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE(ping__from_data_1__maximum_version__success_expected_nonce)
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(ping__factory_from_data_1__bip31_version_round_trip__expected_nonce)
+BOOST_AUTO_TEST_CASE(ping__factory_1__bip31_version_round_trip__expected_nonce)
 {
     static const message::ping expected
     {
@@ -162,12 +162,12 @@ BOOST_AUTO_TEST_CASE(ping__factory_from_data_1__bip31_version_round_trip__expect
 
     static const auto version = message::version::level::bip31;
     const auto data = expected.to_data(version);
-    const auto result = message::ping::factory_from_data(version, data);
+    const auto result = message::ping::factory(version, data);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(result == expected);
 }
 
-BOOST_AUTO_TEST_CASE(ping__factory_from_data_2__bip31_version_round_trip__expected_nonce)
+BOOST_AUTO_TEST_CASE(ping__factory_2__bip31_version_round_trip__expected_nonce)
 {
     const message::ping expected
     {
@@ -177,12 +177,12 @@ BOOST_AUTO_TEST_CASE(ping__factory_from_data_2__bip31_version_round_trip__expect
     static const auto version = message::version::level::bip31;
     const auto data = expected.to_data(version);
     data_source istream(data);
-    const auto result = message::ping::factory_from_data(version, istream);
+    const auto result = message::ping::factory(version, istream);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(result == expected);
 }
 
-BOOST_AUTO_TEST_CASE(ping__factory_from_data_3__bip31_version_round_trip__expected_nonce)
+BOOST_AUTO_TEST_CASE(ping__factory_3__bip31_version_round_trip__expected_nonce)
 {
     static const message::ping expected
     {
@@ -193,7 +193,7 @@ BOOST_AUTO_TEST_CASE(ping__factory_from_data_3__bip31_version_round_trip__expect
     const auto data = expected.to_data(version);
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = message::ping::factory_from_data(version, source);
+    const auto result = message::ping::factory(version, source);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(result == expected);
 }

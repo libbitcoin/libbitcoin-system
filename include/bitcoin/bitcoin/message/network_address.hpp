@@ -37,14 +37,13 @@ class BC_API network_address
 public:
     typedef std::vector<network_address> list;
 
-    static network_address factory_from_data(uint32_t version,
-        const data_chunk& data, bool with_timestamp);
-    static network_address factory_from_data(uint32_t version,
-        std::istream& stream, bool with_timestamp);
-    static network_address factory_from_data(uint32_t version,
-        reader& source, bool with_timestamp);
-    static size_t satoshi_fixed_size(uint32_t version,
+    static network_address factory(uint32_t version, const data_chunk& data,
         bool with_timestamp);
+    static network_address factory(uint32_t version, std::istream& stream,
+        bool with_timestamp);
+    static network_address factory(uint32_t version, reader& source,
+        bool with_timestamp);
+    static size_t satoshi_fixed_size(uint32_t version, bool with_timestamp);
 
     network_address();
 

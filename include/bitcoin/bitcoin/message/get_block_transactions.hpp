@@ -36,12 +36,9 @@ public:
     typedef std::shared_ptr<get_block_transactions> ptr;
     typedef std::shared_ptr<const get_block_transactions> const_ptr;
 
-    static get_block_transactions factory_from_data(uint32_t version,
-        const data_chunk& data);
-    static get_block_transactions factory_from_data(uint32_t version,
-        std::istream& stream);
-    static get_block_transactions factory_from_data(uint32_t version,
-        reader& source);
+    static get_block_transactions factory(uint32_t version, const data_chunk& data);
+    static get_block_transactions factory(uint32_t version, std::istream& stream);
+    static get_block_transactions factory(uint32_t version, reader& source);
 
     get_block_transactions();
     get_block_transactions(const hash_digest& block_hash,

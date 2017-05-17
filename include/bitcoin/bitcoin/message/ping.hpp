@@ -37,9 +37,9 @@ public:
     typedef std::shared_ptr<ping> ptr;
     typedef std::shared_ptr<const ping> const_ptr;
 
-    static ping factory_from_data(uint32_t version, const data_chunk& data);
-    static ping factory_from_data(uint32_t version, std::istream& stream);
-    static ping factory_from_data(uint32_t version, reader& source);
+    static ping factory(uint32_t version, const data_chunk& data);
+    static ping factory(uint32_t version, std::istream& stream);
+    static ping factory(uint32_t version, reader& source);
     static size_t satoshi_fixed_size(uint32_t version);
 
     ping();
