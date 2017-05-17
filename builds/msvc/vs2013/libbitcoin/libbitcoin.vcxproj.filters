@@ -641,6 +641,9 @@
     <ClCompile Include="..\..\..\..\src\chain\stealth_record.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\script.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -1248,6 +1251,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\stealth_record.hpp">
       <Filter>include\bitcoin\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\script.hpp">
+      <Filter>include\bitcoin\config</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

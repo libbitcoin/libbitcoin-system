@@ -91,6 +91,9 @@
     <ClCompile Include="..\..\..\..\src\config\base2.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base58.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base64.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\script.cpp">
+      <ObjectFileName>$(IntDir)script_config.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\sodium.cpp" />
     <ClCompile Include="..\..\..\..\src\config\hash160.cpp" />
     <ClCompile Include="..\..\..\..\src\config\hash256.cpp" />
@@ -251,6 +254,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base2.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base58.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base64.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\script.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\settings.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\sodium.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\hash160.hpp" />
