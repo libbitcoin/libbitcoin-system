@@ -599,16 +599,16 @@ chain_state::data chain_state::to_pool(const chain_state& top)
     if (retarget && is_retarget_height(height - 1u))
         data.timestamp.retarget = data.timestamp.self;
 
-    // Replace previous block state with tx pool chain state for next height.
-    // Only height and version used by tx pool, others promotable or unused.
+    // Replace previous block state with tx pool chain state for next height
+    // Preserve top block timestamp for use in computation of staleness..
     // Preserve data.allow_collisions_hash promotion.
     // Preserve data.bip9_bit0_hash promotion.
     // Preserve data.bip9_bit1_hash promotion.
+    // Hash and bits.self are unused.
     data.height = height;
     data.hash = null_hash;
     data.bits.self = work_limit(retarget);
     data.version.self = signal_version(forks);
-    data.timestamp.self = max_uint32;
     return data;
 }
 
@@ -617,6 +617,7 @@ chain_state::data chain_state::to_pool(const chain_state& top)
 chain_state::chain_state(const chain_state& top)
   : data_(to_pool(top)),
     forks_(top.forks_),
+    stale_seconds_(top.stale_seconds_),
     checkpoints_(top.checkpoints_),
     active_(activation(data_, forks_)),
     work_required_(work_required(data_, forks_)),
@@ -666,6 +667,7 @@ chain_state::data chain_state::to_block(const chain_state& pool,
 chain_state::chain_state(const chain_state& pool, const block& block)
   : data_(to_block(pool, block)),
     forks_(pool.forks_),
+    stale_seconds_(pool.stale_seconds_),
     checkpoints_(pool.checkpoints_),
     active_(activation(data_, forks_)),
     work_required_(work_required(data_, forks_)),
@@ -714,6 +716,7 @@ chain_state::data chain_state::to_header(const chain_state& parent,
 chain_state::chain_state(const chain_state& parent, const header& header)
   : data_(to_header(parent, header)),
     forks_(parent.forks_),
+    stale_seconds_(parent.stale_seconds_),
     checkpoints_(parent.checkpoints_),
     active_(activation(data_, forks_)),
     work_required_(work_required(data_, forks_)),
@@ -725,9 +728,10 @@ chain_state::chain_state(const chain_state& parent, const header& header)
 // The allow_collisions hard fork is always activated (not configurable).
 // TODO: remove allow_collisions fork by incorporating into bip30 revert.
 chain_state::chain_state(data&& values, const checkpoints& checkpoints,
-    uint32_t forks)
+    uint32_t forks, uint32_t stale_seconds)
   : data_(std::move(values)),
     forks_(forks | rule_fork::allow_collisions),
+    stale_seconds_(stale_seconds),
     checkpoints_(checkpoints),
     active_(activation(data_, forks_)),
     work_required_(work_required(data_, forks_)),
@@ -741,6 +745,13 @@ chain_state::chain_state(data&& values, const checkpoints& checkpoints,
 bool chain_state::is_valid() const
 {
     return data_.height != 0;
+}
+
+// If there is a zero limit then the chain is never considered stale.
+bool chain_state::is_stale() const
+{
+    return stale_seconds_ != 0 && data_.timestamp.self < 
+        floor_subtract(static_cast<uint32_t>(zulu_time()), stale_seconds_);
 }
 
 // Properties.
