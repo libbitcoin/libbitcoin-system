@@ -144,7 +144,6 @@ public:
     //-------------------------------------------------------------------------
 
     static uint64_t subsidy(size_t height, bool retarget=true);
-    static uint256_t proof(uint32_t bits);
 
     uint64_t fees() const;
     uint64_t claim() const;

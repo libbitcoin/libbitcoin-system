@@ -135,6 +135,9 @@ public:
     // Validation.
     //-------------------------------------------------------------------------
 
+    uint256_t proof() const;
+    static uint256_t proof(uint32_t bits);
+
     bool is_valid_timestamp() const;
     bool is_valid_proof_of_work(bool retarget=true) const;
 

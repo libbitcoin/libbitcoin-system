@@ -425,6 +425,17 @@ BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_less_than_bits__return
     BOOST_REQUIRE(instance.is_valid_proof_of_work());
 }
 
+BOOST_AUTO_TEST_CASE(header__proof1__genesis_mainnet__expected)
+{
+    BOOST_REQUIRE_EQUAL(chain::header::proof(0x1d00ffff), 0x0000000100010001);
+}
+
+BOOST_AUTO_TEST_CASE(header__proof2__genesis_mainnet__expected)
+{
+    const auto block = chain::block::genesis_mainnet();
+    BOOST_REQUIRE_EQUAL(block.header().proof(), 0x0000000100010001);
+}
+
 BOOST_AUTO_TEST_CASE(header__operator_assign_equals__always__matches_equivalent)
 {
     // This must be non-const.
