@@ -38,9 +38,11 @@ class BC_API header
 public:
     typedef std::vector<header> list;
     typedef std::shared_ptr<header> ptr;
-    typedef std::shared_ptr<const header> const_ptr;
     typedef std::vector<ptr> ptr_list;
+    typedef std::shared_ptr<const header> const_ptr;
     typedef std::vector<const_ptr> const_ptr_list;
+    typedef std::shared_ptr<const_ptr_list> const_ptr_list_ptr;
+    typedef std::shared_ptr<const const_ptr_list> const_ptr_list_const_ptr;
 
     static header factory(uint32_t version, const data_chunk& data);
     static header factory(uint32_t version, std::istream& stream);
