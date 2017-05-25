@@ -141,7 +141,7 @@ public:
     /// Create block state from tx pool chain state of same height.
     chain_state(const chain_state& pool, const chain::block& block);
 
-    /// Create header state from header pool chain state of previous height.
+    /// Create header state from header pool chain state of parent block.
     chain_state(const chain_state& parent, const chain::header& header);
 
     /// Checkpoints must be ordered by height with greatest at back.
