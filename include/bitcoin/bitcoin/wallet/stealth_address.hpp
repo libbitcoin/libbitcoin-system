@@ -66,6 +66,8 @@ public:
     friend std::ostream& operator<<(std::ostream& out,
         const stealth_address& of);
 
+    bool is_valid() const;
+
     /// Cast operators.
     operator const bool() const;
     operator const data_chunk() const;

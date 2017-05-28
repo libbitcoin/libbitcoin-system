@@ -368,5 +368,10 @@ std::ostream& operator<<(std::ostream& out, const stealth_address& of)
     return out;
 }
 
+bool stealth_address::is_valid() const
+{
+    return valid_;
+}
+
 } // namespace wallet
 } // namespace libbitcoin

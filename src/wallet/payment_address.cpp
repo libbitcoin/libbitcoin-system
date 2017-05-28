@@ -241,6 +241,11 @@ std::ostream& operator<<(std::ostream& out, const payment_address& of)
     return out;
 }
 
+bool payment_address::is_valid() const
+{
+    return valid_;
+}
+
 // Static functions.
 // ----------------------------------------------------------------------------
 

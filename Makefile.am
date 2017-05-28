@@ -175,6 +175,7 @@ src_libbitcoin_la_SOURCES = \
     src/utility/thread.cpp \
     src/utility/threadpool.cpp \
     src/utility/work.cpp \
+    src/wallet/address_status.cpp \
     src/wallet/bitcoin_uri.cpp \
     src/wallet/dictionary.cpp \
     src/wallet/ec_private.cpp \
@@ -580,6 +581,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
 
 include_bitcoin_bitcoin_walletdir = ${includedir}/bitcoin/bitcoin/wallet
 include_bitcoin_bitcoin_wallet_HEADERS = \
+    include/bitcoin/bitcoin/wallet/address_status.hpp \
     include/bitcoin/bitcoin/wallet/bitcoin_uri.hpp \
     include/bitcoin/bitcoin/wallet/dictionary.hpp \
     include/bitcoin/bitcoin/wallet/ec_private.hpp \
