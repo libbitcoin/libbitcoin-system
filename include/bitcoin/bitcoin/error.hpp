@@ -79,6 +79,7 @@ enum error_code_t
     orphan_block = 5,
     invalid_previous_block = 24,
     insufficient_work = 48,
+    duplicate_transaction = 77,
     orphan_transaction = 14,
     transaction_version = 17,
     insufficient_fee = 70,

@@ -82,6 +82,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::orphan_block, "missing block parent" },
         { error::invalid_previous_block, "previous block failed to validate" },
         { error::insufficient_work, "insufficient work to reorganize" },
+        { error::duplicate_transaction, "duplicate transaction" },
         { error::orphan_transaction, "missing transaction parent" },
         { error::transaction_version, "transaction version not standard" },
         { error::insufficient_fee, "insufficient transaction fee" },
