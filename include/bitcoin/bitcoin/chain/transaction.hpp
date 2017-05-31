@@ -124,6 +124,7 @@ public:
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------
 
+    static size_t maximum_size(bool is_coinbase);
     size_t serialized_size(bool wire=true, bool witness=false) const;
 
     uint32_t version() const;

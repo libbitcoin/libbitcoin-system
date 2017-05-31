@@ -29,6 +29,7 @@
 #include <vector>
 #include <boost/optional.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
+#include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/chain/input.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
@@ -458,6 +459,20 @@ void transaction::to_data(writer& sink, bool wire, bool witness) const
 
 // Size.
 //-----------------------------------------------------------------------------
+
+// static
+size_t transaction::maximum_size(bool is_coinbase)
+{
+    // TODO: find smallest spendable coinbase tx with maximal input script.
+    // This is not consensus critical but if too small is a disk fill vector.
+    static const auto min_coinbase_tx = 1024;
+
+    static const auto max_coinbase_tx = max_block_size - (sizeof(uint32_t) +
+        header::satoshi_fixed_size());
+
+    // A pool (non-coinbase) tx must fit into a block with at least a coinbase.
+    return is_coinbase ? max_coinbase_tx : max_coinbase_tx - min_coinbase_tx;
+}
 
 size_t transaction::serialized_size(bool wire, bool witness) const
 {
@@ -1092,7 +1107,8 @@ code transaction::check(bool transaction_pool, bool retarget) const
         return error::transaction_internal_double_spend;
 
     // TODO: reduce by header, txcount and smallest coinbase size for height.
-    else if (transaction_pool && serialized_size(true, false) >= max_block_size)
+    else if (transaction_pool && serialized_size(true, false) >=
+        maximum_size(false))
         return error::transaction_size_limit;
 
     // We cannot know if bip16/bip141 is enabled here so we do not check it.
