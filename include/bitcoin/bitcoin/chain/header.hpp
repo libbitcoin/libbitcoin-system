@@ -51,6 +51,7 @@ public:
     {
         bool simulate = false;
         uint64_t originator = 0;
+        code error = error::success;
         chain_state::ptr state = nullptr;
         uint32_t median_time_past = 0;
         size_t height = 0;
