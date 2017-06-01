@@ -850,44 +850,33 @@ BOOST_AUTO_TEST_CASE(transaction__is_missing_previous_outputs__inputs_with_cache
 ////    BOOST_REQUIRE_EQUAL(instance.missing_previous_outputs().size(), 0u);
 ////}
 
-BOOST_AUTO_TEST_CASE(transaction__is_double_spend__empty_inputs__returns_false)
+BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__empty_inputs__returns_false)
 {
     chain::transaction instance;
-    BOOST_REQUIRE(!instance.is_double_spend(false));
-    BOOST_REQUIRE(!instance.is_double_spend(true));
+    BOOST_REQUIRE(!instance.is_confirmed_double_spend());
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_double_spend__unspent_inputs__returns_false)
-{
-    chain::transaction instance;
-    instance.inputs().emplace_back();
-    BOOST_REQUIRE(!instance.is_double_spend(false));
-    BOOST_REQUIRE(!instance.is_double_spend(true));
-}
-
-BOOST_AUTO_TEST_CASE(transaction__is_double_spend__include_unconfirmed_false_with_unconfirmed__returns_false)
+BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__default_input__returns_false)
 {
     chain::transaction instance;
     instance.inputs().emplace_back();
-    instance.inputs().back().previous_output().validation.spent = true;
-    BOOST_REQUIRE(!instance.is_double_spend(false));
+    BOOST_REQUIRE(!instance.is_confirmed_double_spend());
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_double_spend__include_unconfirmed_false_with_confirmed__returns_true)
+BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__unspent_inputs__returns_false)
+{
+    chain::transaction instance;
+    instance.inputs().emplace_back();
+    instance.inputs().back().previous_output().validation.spent = false;
+    BOOST_REQUIRE(!instance.is_confirmed_double_spend());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__spent_input__returns_true)
 {
     chain::transaction instance;
     instance.inputs().emplace_back();
     instance.inputs().back().previous_output().validation.spent = true;
-    instance.inputs().back().previous_output().validation.confirmed = true;
-    BOOST_REQUIRE(instance.is_double_spend(false));
-}
-
-BOOST_AUTO_TEST_CASE(transaction__is_double_spend__include_unconfirmed_true_with_unconfirmed__returns_true)
-{
-    chain::transaction instance;
-    instance.inputs().emplace_back();
-    instance.inputs().back().previous_output().validation.spent = true;
-    BOOST_REQUIRE(instance.is_double_spend(true));
+    BOOST_REQUIRE(instance.is_confirmed_double_spend());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__no_outputs_zero__returns_false)

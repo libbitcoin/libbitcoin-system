@@ -996,12 +996,11 @@ bool transaction::is_internal_double_spend() const
     return !distinct;
 }
 
-bool transaction::is_double_spend(bool include_unconfirmed) const
+bool transaction::is_confirmed_double_spend() const
 {
-    const auto spent = [include_unconfirmed](const input& input)
+    const auto spent = [](const input& input)
     {
-        const auto& prevout = input.previous_output().validation;
-        return prevout.spent && (include_unconfirmed || prevout.confirmed);
+        return input.previous_output().validation.spent;
     };
 
     return std::any_of(inputs_.begin(), inputs_.end(), spent);
@@ -1167,7 +1166,7 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     else if (is_missing_previous_outputs())
         return error::missing_previous_output;
 
-    else if (is_double_spend(transaction_pool))
+    else if (is_confirmed_double_spend())
         return error::double_spend;
 
     // This relates height to maturity of spent coinbase. Since reorg is the

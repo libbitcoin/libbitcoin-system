@@ -177,7 +177,7 @@ public:
     bool is_mature(size_t height) const;
     bool is_overspent() const;
     bool is_internal_double_spend() const;
-    bool is_double_spend(bool include_unconfirmed) const;
+    bool is_confirmed_double_spend() const;
     bool is_dusty(uint64_t minimum_output_value) const;
     bool is_missing_previous_outputs() const;
     bool is_final(size_t block_height, uint32_t block_time) const;
