@@ -61,13 +61,13 @@ public:
         chain_state::ptr state = nullptr;
         uint64_t offset = undetermined_offset;
 
-        /// The block tx exists in the store.
+        /// The tx exists in the store (don't create it).
         bool exists = false;
 
-        /// The block tx is valid at block's current fork state.
+        /// An existing tx is valid at current fork state (don't validate).
         bool pooled = false;
 
-        /// The block tx is an unspent duplicate in the block's ancestry.
+        /// The block tx is confirmed in ancestry or pool tx pooled (reject).
         bool duplicate = false;
     };
 
