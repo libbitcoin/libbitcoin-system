@@ -63,9 +63,9 @@ public:
             spender_indexed = (value == indexed_true);
         }
 
-        bool spent(size_t fork_height, bool require_confirmed) const
+        bool spent(size_t fork_height, bool allow_indexed) const
         {
-            return (spender_indexed && require_confirmed) ||
+            return (spender_indexed && allow_indexed) ||
                 (spender_height <= fork_height);
         }
 

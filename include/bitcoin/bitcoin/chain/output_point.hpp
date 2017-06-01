@@ -42,7 +42,7 @@ public:
         /// output spender's tx->block is indexed or confirmed not above fork. 
         bool spent = false;
 
-        /// output->tx->block is indexed or confirmed not above fork point.
+        /// The output->tx is confirmed|indexed, fork point dependent.
         bool confirmed = false;
 
         /// The previous output is a coinbase (must verify spender maturity).
