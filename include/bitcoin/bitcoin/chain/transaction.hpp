@@ -59,10 +59,9 @@ public:
         uint64_t originator = 0;
         code error = error::success;
         chain_state::ptr state = nullptr;
-        uint64_t offset = undetermined_offset;
 
-        /// The tx exists in the store (don't create it).
-        bool exists = false;
+        /// The tx exists in the store if not undertermined (don't create it).
+        uint64_t offset = undetermined_offset;
 
         /// An existing tx is valid at current fork state (don't validate).
         bool pooled = false;
