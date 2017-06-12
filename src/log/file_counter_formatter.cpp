@@ -49,5 +49,19 @@ file_counter_formatter::path_string_type file_counter_formatter::operator()(
 
 }
 
+bool file_counter_formatter::scan_seperator(path_string_type::const_iterator& it,
+    path_string_type::const_iterator end)
+{
+    if (it == end)
+        return false;
+
+    path_string_type::value_type c = *it;
+    bool is_seperator = (c == file_char_traits::minus);
+    if (is_seperator)
+        it++;
+
+    return is_seperator;
+}
+
 } // namespace log
 } // namespace libbitcoin

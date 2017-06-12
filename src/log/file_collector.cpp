@@ -25,7 +25,6 @@
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/log/file_char_traits.hpp>
 #include <bitcoin/bitcoin/log/file_collector_repository.hpp>
-#include <bitcoin/bitcoin/log/file_counter_formatter.hpp>
 
 namespace libbitcoin {
 namespace log {
@@ -117,7 +116,7 @@ bool parse_counter_placeholder(path_string_type::const_iterator& it,
 }
 
 //! The function matches the file name and the pattern
-bool match_pattern(path_string_type const& file_name,
+bool file_collector::match_pattern(path_string_type const& file_name,
     path_string_type const& pattern,
     unsigned int& file_counter)
 {
@@ -219,6 +218,10 @@ bool match_pattern(path_string_type const& file_name,
                             "Unsupported placeholder used in pattern for file scanning"));
                     }
 
+                    // Ignore success of scan, use to burn potential
+                    // single-character seperator used by formatter.
+                    formatter_.scan_seperator(f_it, f_end);
+
                     // Find where the file number ends
                     path_string_type::const_iterator f = f_it;
                     if (!local::scan_digits(f, f_end, width))
@@ -244,7 +247,8 @@ bool match_pattern(path_string_type const& file_name,
         {
             // The actual file name may end with an additional counter
             // that is added by the collector in case if file name clash
-            return local::scan_digits(f_it, f_end, std::distance(f_it, f_end));
+            return formatter_.scan_seperator(f_it, f_end) &&
+                local::scan_digits(f_it, f_end, std::distance(f_it, f_end));
         }
         else
             return true;
@@ -261,7 +265,7 @@ file_collector::file_collector(
     size_t max_files)
   : repository_(repo), max_size_(max_size), min_free_space_(min_free_space),
     max_files_(max_files), base_path_(filesystem::current_path()),
-    total_size_(0)
+    total_size_(0), formatter_(5)
 {
     storage_dir_ = make_absolute(target_dir);
     filesystem::create_directories(storage_dir_);
@@ -298,11 +302,10 @@ void file_collector::store_file(filesystem::path const& src_path)
 
     // If the file already exists, try to mangle the file name
     // to ensure there's no conflict. I'll need to make this customizable some day.
-    file_counter_formatter formatter(5);
     unsigned int n = 0;
     do
     {
-        filesystem::path alt_file_name = formatter(stem, extension, n++);
+        filesystem::path alt_file_name = formatter_(stem, extension, n++);
         info.path = storage_dir_ / alt_file_name;
     }
     while (filesystem::exists(info.path) && n < (std::numeric_limits<unsigned int>::max)());

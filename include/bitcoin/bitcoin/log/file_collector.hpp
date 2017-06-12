@@ -35,6 +35,7 @@
 #endif // !defined(BOOST_LOG_NO_THREADS)
 
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/log/file_counter_formatter.hpp>
 
 namespace libbitcoin {
 namespace log {
@@ -96,6 +97,9 @@ private:
     static path_string_type filename_string(
         boost::filesystem::path const& path);
 
+    bool match_pattern(path_string_type const& file_name,
+        path_string_type const& pattern, unsigned int& file_counter);
+
 private:
     //! A reference to the repository this collector belongs to
     boost::shared_ptr<file_collector_repository> repository_;
@@ -125,6 +129,8 @@ private:
     file_list files_;
     //! Total size of the stored files
     uintmax_t total_size_;
+
+    file_counter_formatter formatter_;
 };
 
 } // namespace log
