@@ -44,6 +44,9 @@ public:
     path_string_type operator()(path_string_type const& stem,
         path_string_type const& extension, unsigned int counter) const;
 
+    bool scan_seperator(path_string_type::const_iterator& it,
+        path_string_type::const_iterator end);
+
     BOOST_DELETED_FUNCTION(file_counter_formatter& operator= (file_counter_formatter const&))
 
 private:
