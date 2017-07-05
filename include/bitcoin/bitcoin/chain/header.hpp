@@ -50,6 +50,7 @@ public:
     struct validation
     {
         bool simulate = false;
+        bool duplicate = false;
         uint64_t originator = 0;
         code error = error::success;
         chain_state::ptr state = nullptr;
