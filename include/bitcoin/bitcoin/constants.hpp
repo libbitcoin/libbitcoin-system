@@ -110,10 +110,12 @@ BC_CONSTEXPR size_t retargeting_interval =
 //-----------------------------------------------------------------------------
 
 // Consensus rule change activation and enforcement parameters.
-BC_CONSTEXPR size_t bip65_version = 4;
-BC_CONSTEXPR size_t bip66_version = 3;
-BC_CONSTEXPR size_t bip34_version = 2;
 BC_CONSTEXPR size_t first_version = 1;
+BC_CONSTEXPR size_t bip34_version = 2;
+BC_CONSTEXPR size_t bip66_version = 3;
+BC_CONSTEXPR size_t bip65_version = 4;
+BC_CONSTEXPR uint32_t bip9_version_bit0 = 0x00000001;
+BC_CONSTEXPR uint32_t bip9_version_base = 0x20000000;
 
 // Mainnet activation parameters (bip34-style activations).
 BC_CONSTEXPR size_t mainnet_active = 750;
@@ -139,6 +141,13 @@ BC_CONSTEXPR size_t testnet_bip34_freeze = 21111;
 // Block 173805 is the first mainnet block after date-based activation.
 BC_CONSTEXPR uint32_t bip16_activation_time = 0x4f779a80;
 
+// Block 170060 was mined with an invalid p2sh (code shipped late).
+// bitcointalk.org/index.php?topic=63165.msg788832#msg788832
+static const config::checkpoint mainnet_bip16_exception_checkpoint
+{
+    "00000000000002dc756eebf4f49723ed8d30cc28a5f108eb94b1ba88ac4f9c22", 170060
+};
+
 // github.com/bitcoin/bips/blob/master/bip-0030.mediawiki#specification
 static const config::checkpoint mainnet_bip30_exception_checkpoint1
 {
@@ -149,23 +158,26 @@ static const config::checkpoint mainnet_bip30_exception_checkpoint2
     "00000000000743f190a18c5577a3c2d2a1f610ae9601ac046a38084ccb7cd721", 91880
 };
 
-// This block was mined with an invalid p2sh (code shipped late).
-// bitcointalk.org/index.php?topic=63165.msg788832#msg788832
-static const config::checkpoint mainnet_bip16_exception_checkpoint
-{
-    "00000000000002dc756eebf4f49723ed8d30cc28a5f108eb94b1ba88ac4f9c22", 170060
-};
-
-// Because bip90 stops checking unspent duplicates above this bip34 activation.
-static const config::checkpoint mainnet_bip34_activation_checkpoint
+// bip90 stops checking unspent duplicates above this bip34 activation.
+static const config::checkpoint mainnet_bip34_active_checkpoint
 {
     "000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8",
     mainnet_bip34_freeze
 };
-static const config::checkpoint testnet_bip34_activation_checkpoint
+static const config::checkpoint testnet_bip34_active_checkpoint
 {
     "0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8",
     testnet_bip34_freeze
+};
+
+// These cannot be reactivated in a future branch due to window expiration.
+static const config::checkpoint mainnet_bip9_bit0_active_checkpoint
+{
+    "000000000000000004a1b34462cb8aeebd5799177f7a29cf28f2d1961716b5b5", 419328
+};
+static const config::checkpoint testnet_bip9_bit0_active_checkpoint
+{
+    "00000000025e930139bac5c6c31a403776da130831ab85be56578f3fa75369bb", 770112
 };
 
 // Network protocol constants.
@@ -187,7 +199,7 @@ BC_CONSTEXPR size_t max_inventory = 50000;
 // Effective limit given a 32 bit chain height boundary: 10 + log2(2^32) + 1.
 BC_CONSTEXPR size_t max_locator = 43;
 
-/// Variable integer prefix sentinels.
+// Variable integer prefix sentinels.
 BC_CONSTEXPR uint8_t varint_two_bytes = 0xfd;
 BC_CONSTEXPR uint8_t varint_four_bytes = 0xfe;
 BC_CONSTEXPR uint8_t varint_eight_bytes = 0xff;
