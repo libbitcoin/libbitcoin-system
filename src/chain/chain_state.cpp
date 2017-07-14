@@ -127,12 +127,21 @@ chain_state::activations chain_state::activation(const data& values,
     const auto frozen = script::is_enabled(forks, rule_fork::bip90_rule);
     const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
 
-    // Declare version predicates.
-    const auto ge_2 = [](uint32_t version) { return version >= bip34_version; };
-    const auto ge_3 = [](uint32_t version) { return version >= bip66_version; };
-    const auto ge_4 = [](uint32_t version) { return version >= bip65_version; };
+    //*************************************************************************
+    // CONSENSUS: Though unspecified in bip34, the satoshi implementation
+    // performed this comparison using the signed integer version value.
+    //*************************************************************************
+    const auto ge = [](uint32_t value, size_t version)
+    {
+        return static_cast<int32_t>(value) >= version;
+    };
 
-    // Compute version summaries.
+    // Declare bip34-based version predicates.
+    const auto ge_2 = [=](uint32_t value) { return ge(value, bip34_version); };
+    const auto ge_3 = [=](uint32_t value) { return ge(value, bip66_version); };
+    const auto ge_4 = [=](uint32_t value) { return ge(value, bip65_version); };
+
+    // Compute bip34-based activation version summaries.
     const auto count_2 = std::count_if(history.begin(), history.end(), ge_2);
     const auto count_3 = std::count_if(history.begin(), history.end(), ge_3);
     const auto count_4 = std::count_if(history.begin(), history.end(), ge_4);
