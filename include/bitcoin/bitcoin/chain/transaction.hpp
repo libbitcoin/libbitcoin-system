@@ -205,8 +205,8 @@ private:
 
     // These share a mutex as they are not expected to contend.
     mutable hash_ptr hash_;
-    mutable optional_size total_input_value_;
-    mutable optional_size total_output_value_;
+    mutable boost::optional<uint64_t> total_input_value_;
+    mutable boost::optional<uint64_t> total_output_value_;
     mutable upgrade_mutex mutex_;
 };
 
