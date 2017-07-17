@@ -190,8 +190,8 @@ private:
     output::list outputs_;
 
     // These share a mutex as they are not expected to conflict.
-    mutable boost::optional<size_t> total_input_value_;
-    mutable boost::optional<size_t> total_output_value_;
+    mutable boost::optional<uint64_t> total_input_value_;
+    mutable boost::optional<uint64_t> total_output_value_;
     mutable std::shared_ptr<hash_digest> hash_;
     mutable upgrade_mutex mutex_;
 };
