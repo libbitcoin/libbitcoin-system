@@ -45,7 +45,6 @@
 #include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
-#include <bitcoin/bitcoin/utility/timer.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -562,12 +561,6 @@ bool transaction::all_inputs_final() const
     return std::all_of(inputs_.begin(), inputs_.end(), finalized);
 }
 
-bool transaction::is_final(size_t block_height) const
-{
-    const auto next_block_time = static_cast<uint32_t>(zulu_time());
-    return is_final(block_height, next_block_time);
-}
-
 bool transaction::is_final(size_t block_height, uint32_t block_time) const
 {
     const auto max_locktime = [=]()
@@ -876,18 +869,15 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     const auto bip30 = state.is_enabled(rule_fork::bip30_rule);
     const auto bip68 = state.is_enabled(rule_fork::bip68_rule);
 
-    //*************************************************************************
-    // CONSENSUS:
     // We don't need to allow tx pool acceptance of an unspent duplicate
-    // because tx pool validation is not strictly a matter of consensus.
-    //*************************************************************************
+    // because tx pool inclusion cannot be required by consensus.
     const auto duplicates = state.is_enabled(rule_fork::allow_collisions) &&
         !transaction_pool;
 
     if (transaction_pool && state.is_under_checkpoint())
         return error::premature_validation;
 
-    if (transaction_pool && !is_final(state.height()))
+    if (transaction_pool && !is_final(state.height(), state.median_time_past()))
         return error::transaction_non_final;
 
     if (transaction_pool && version() > state.maximum_transaction_version())
