@@ -157,7 +157,7 @@ public:
     size_t total_inputs(bool with_coinbase=true) const;
 
     bool is_extra_coinbases() const;
-    bool is_final(size_t height) const;
+    bool is_final(size_t height, uint32_t block_time) const;
     bool is_distinct_transaction_set() const;
     bool is_valid_coinbase_claim(size_t height) const;
     bool is_valid_coinbase_script(size_t height) const;
