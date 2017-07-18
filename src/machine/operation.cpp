@@ -166,7 +166,7 @@ bool operation::from_string(const std::string& mnemonic)
             // Extract operation using nominal data encoding.
             if (decode_base16(data_, parts[0]) && !is_oversized())
             {
-                code_ = opcode_from_size(data_.size());
+                code_ = nominal_opcode_from_data(data_);
                 valid_ = true;
             }
         }
@@ -181,7 +181,7 @@ bool operation::from_string(const std::string& mnemonic)
     {
         const auto text = trim_token(mnemonic);
         data_ = data_chunk{ text.begin(), text.end() };
-        code_ = opcode_from_size(data_.size());
+        code_ = nominal_opcode_from_data(data_);
         valid_ = !is_oversized();
     }
     else if (opcode_from_string(code_, mnemonic))
@@ -283,7 +283,7 @@ std::string operation::to_string(uint32_t active_forks) const
     if (data_.empty())
         return opcode_to_string(code_, active_forks);
 
-    // Data encoding uses single token format (with optional non-minimality).
+    // Data encoding uses single token (with optional non-minimality).
     return "[" + opcode_to_prefix(code_, data_) + encode_base16(data_) + "]";
 }
 
