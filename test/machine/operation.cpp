@@ -343,7 +343,6 @@ BOOST_AUTO_TEST_CASE(operation__to_string__push_positive_7__7)
     BOOST_REQUIRE_EQUAL(value.to_string(0), "7");
 }
 
-// Failing due to bug in mininal encoding.
 BOOST_AUTO_TEST_CASE(operation__to_string_minimal__0x07__7)
 {
     operation value({ { 0x07 } }, true);
