@@ -237,7 +237,7 @@ bool script::from_string(const std::string& mnemonic)
     // There is strictly one operation per string token.
     const auto tokens = split(mnemonic);
     operation::list ops;
-    ops.resize(tokens.size());
+    ops.resize(tokens.empty() || tokens.front().empty() ? 0 : tokens.size());
 
     // Create an op list from the split tokens, one operation per token.
     for (size_t index = 0; index < ops.size(); ++index)
