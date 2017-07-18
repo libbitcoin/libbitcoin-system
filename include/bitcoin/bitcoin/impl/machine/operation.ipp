@@ -199,7 +199,7 @@ inline opcode operation::opcode_from_size(size_t size)
         return static_cast<opcode>(size);
     else if (size <= max_uint8)
         return opcode::push_one_size;
-    else if(size <= max_uint16)
+    else if (size <= max_uint16)
         return opcode::push_two_size;
     else
         return opcode::push_four_size;
