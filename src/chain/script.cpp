@@ -713,10 +713,15 @@ bool script::is_relaxed_push(const operation::list& ops)
     return std::all_of(ops.begin(), ops.end(), push);
 }
 
+//*****************************************************************************
+// CONSENSUS: BIP34 requires the coinbase script to begin with one byte that
+// indicates the height size. This is inconsistent with an extreme future where
+// the size byte overflows. However satoshi actually requires nominal encoding.
+//*****************************************************************************
 bool script::is_coinbase_pattern(const operation::list& ops, size_t height)
 {
     return !ops.empty()
-        && ops[0].is_minimal_push()
+        && ops[0].is_nominal_push()
         && ops[0].data() == number(height).data();
 }
 
@@ -1105,11 +1110,11 @@ void script::find_and_delete(const data_stack& endorsements)
 ////{
 ////    const auto actual = to_data(false);
 ////
-////    // Create the expected script as a byte vector.
-////    script expected_script(operation::list{ { number(height).data() } });
-////    const auto expected = expected_script.to_data(false);
+////    // Create the expected script as a non-minimal byte vector.
+////    script compare(operation::list{ { number(height).data(), false } });
+////    const auto expected = compare.to_data(false);
 ////
-////    // Require that the actual script start wtih the expected coinbase script.
+////    // Require the actual script start with the expected coinbase script.
 ////    return std::equal(expected.begin(), expected.end(), actual.begin());
 ////}
 
