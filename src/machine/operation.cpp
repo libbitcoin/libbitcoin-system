@@ -179,7 +179,7 @@ bool operation::from_string(const std::string& mnemonic)
         if (parts.size() == 1)
         {
             // Extract operation using nominal data size encoding.
-            if (decode_base16(data_, parts[0]) && !is_oversized())
+            if (decode_base16(data_, parts[0]))
             {
                 code_ = nominal_opcode_from_data(data_);
                 valid_ = true;
@@ -188,7 +188,7 @@ bool operation::from_string(const std::string& mnemonic)
         else if (parts.size() == 2)
         {
             // Extract operation using explicit data size encoding.
-            valid_ = decode_base16(data_, parts[1]) && !is_oversized() &&
+            valid_ = decode_base16(data_, parts[1]) &&
                 opcode_from_data_prefix(code_, parts[0], data_);
         }
     }
@@ -197,7 +197,7 @@ bool operation::from_string(const std::string& mnemonic)
         const auto text = trim_token(mnemonic);
         data_ = data_chunk{ text.begin(), text.end() };
         code_ = nominal_opcode_from_data(data_);
-        valid_ = !is_oversized();
+        valid_ = true;
     }
     else if (opcode_from_string(code_, mnemonic))
     {
