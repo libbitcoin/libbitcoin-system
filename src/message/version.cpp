@@ -154,48 +154,23 @@ bool version::from_data(uint32_t version, reader& source)
     nonce_ = source.read_8_bytes_little_endian();
     user_agent_ = source.read_string();
     start_height_ = source.read_4_bytes_little_endian();
-    relay_ = true;
 
     // HACK: disabled check due to inconsistent node implementation.
     // The protocol expects duplication of the sender's services.
     ////if (services_ != address_sender_.services())
     ////    source.invalidate();
-    
-    // Abort early in order to simplify bug handling below.
-    if (!source)
-    {
-        reset();
-        return false;
-    }
 
-    // Nodes have no way to know if their peers supports relay, so it is always
-    // sent based on the version of the sender. This requires older protocols
-    // to have clairvoyance, or allow arbitrary extra bytes (bad). So we must
-    // read the extra byte even if our protocol level should not understand it.
-    // However if we are below bip37 we ignore the peer value and set true.
-
-    // The /Satoshi:0.8.x/ node (70001) reads (but does not send) relay byte.
-    // The /Satoshi:0.9.x/ node (70002) sends (and reads) the relay byte.
-    // This bug was reported to bitcoin.org for documentation.
-    // So we allow the byte to not be set on 70001 (despite documentation).
-
-    // The /Snoopy:0.2.1/ node (70001) sends the relay byte.
-    // The /bitcoinj:0.14.4/Bitcoin Wallet:5.14/ node (70001) sends relay byte.
-    // So we allow the byte to be set on 70001 (as it was documented).
-
+    const auto peer_bip37 = (value_ >= level::bip37);
     const auto self_bip37 = (version >= level::bip37);
 
-    if (value_ == level::bip37)
-    {
-        // Peer is at the buggy level (70001) - read or ignore missing.
-        const auto exhausted = source.is_exhausted();
-        relay_ = exhausted || (source.read_byte() != 0) || !self_bip37;
-    }
-    else if (value_ > level::bip37)
-    {
-        // Peer is above the buggy level (> 70001) - read and handle error.
-        relay_ = source.read_byte() != 0 || !self_bip37;
-    }
+    // The relay field is optional at or above version 70001.
+    // But the peer doesn't know our version when it sends its version.
+    // This is a bug in the BIP37 design as it forces older peers to adapt to
+    // the expansion of the version message, which is a clear compat break.
+    // So relay is eabled if either peer is below 70001, it is not set, or
+    // peers are at/above 70001 and the field is set.
+    relay_ = (peer_bip37 != self_bip37) || source.is_exhausted() || 
+        (self_bip37 && source.read_byte() != 0);
 
     if (!source)
         reset();
