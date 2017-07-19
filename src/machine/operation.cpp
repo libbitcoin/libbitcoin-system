@@ -19,6 +19,8 @@
 #include <bitcoin/bitcoin/machine/operation.hpp>
 
 #include <string>
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/machine/opcode.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -102,6 +104,12 @@ inline bool is_text_token(const std::string& token)
     return token.size() > 1 && token.front() == '\'' && token.back() == '\'';
 }
 
+inline bool is_valid_data_size(opcode code, size_t size)
+{
+    BC_CONSTEXPR auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
+    const auto value = static_cast<uint8_t>(code);
+    return value > op_75 || value == size;
+}
 
 inline std::string trim_token(const std::string& token)
 {
@@ -112,13 +120,6 @@ inline std::string trim_token(const std::string& token)
 inline string_list split_push_token(const std::string& token)
 {
     return split(trim_token(token), ".", false);
-}
-
-static bool is_valid_data_size(opcode code, size_t size)
-{
-    BC_CONSTEXPR auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
-    const auto value = static_cast<uint8_t>(code);
-    return value > op_75 || value == size;
 }
 
 static bool opcode_from_data_prefix(opcode& out_code,
@@ -151,6 +152,20 @@ static bool opcode_from_data_prefix(opcode& out_code,
     return false;
 }
 
+static bool data_from_number_token(data_chunk& out_data,
+    const std::string& token)
+{
+    try
+    {
+        out_data = number(boost::lexical_cast<int64_t>(token)).data();
+        return true;
+    }
+    catch (const boost::bad_lexical_cast&)
+    {
+        return false;
+    }
+}
+
 // The removal of spaces in v3 data is a compatability break with our v2.
 bool operation::from_string(const std::string& mnemonic)
 {
@@ -163,7 +178,7 @@ bool operation::from_string(const std::string& mnemonic)
 
         if (parts.size() == 1)
         {
-            // Extract operation using nominal data encoding.
+            // Extract operation using nominal data size encoding.
             if (decode_base16(data_, parts[0]) && !is_oversized())
             {
                 code_ = nominal_opcode_from_data(data_);
@@ -189,6 +204,13 @@ bool operation::from_string(const std::string& mnemonic)
         // push_one_size, push_two_size and push_four_size succeed with empty.
         // push_size_1 through push_size_75 always fail because they are empty.
         valid_ = is_valid_data_size(code_, data_.size());
+    }
+    else if (data_from_number_token(data_, mnemonic))
+    {
+        // [-1, 0, 1..16] integers captured by opcode_from_string, others here.
+        // Otherwise minimal_opcode_from_data could convert integers here.
+        code_ = nominal_opcode_from_data(data_);
+        valid_ = true;
     }
 
     if (!valid_)
@@ -283,7 +305,7 @@ std::string operation::to_string(uint32_t active_forks) const
     if (data_.empty())
         return opcode_to_string(code_, active_forks);
 
-    // Data encoding uses single token (with optional non-minimality).
+    // Data encoding uses single token with explicit size prefix as required.
     return "[" + opcode_to_prefix(code_, data_) + encode_base16(data_) + "]";
 }
 
