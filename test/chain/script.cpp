@@ -18,9 +18,7 @@
  */
 #include <boost/test/unit_test.hpp>
 
-#include <utility>
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
+#include <sstream>
 #include <bitcoin/bitcoin.hpp>
 #include "script.hpp"
 
@@ -28,197 +26,63 @@ using namespace bc;
 using namespace bc::chain;
 using namespace bc::machine;
 
-bool is_number(const std::string& token)
+// Test helpers.
+//------------------------------------------------------------------------------
+
+transaction new_tx(const script_test& test)
 {
-    if (boost::all(token, boost::is_digit()))
-        return true;
-
-    // Now check for negative numbers
-    if (!boost::starts_with(token, "-"))
-        return false;
-
-    std::string numeric_part(token.begin() + 1, token.end());
-    return boost::all(numeric_part, boost::is_digit());
-}
-
-bool is_hex_data(const std::string& token)
-{
-    if (!boost::starts_with(token, "0x"))
-        return false;
-
-    std::string hex_part(token.begin() + 2, token.end());
-    return boost::all(hex_part, [](char c) { return is_base16(c); });
-}
-
-bool is_quoted_string(const std::string& token)
-{
-    if (token.size() < 2)
-        return false;
-
-    return boost::starts_with(token, "'") && boost::ends_with(token, "'");
-}
-
-bool is_opcode(const std::string& token)
-{
-    opcode out_code;
-    return opcode_from_string(out_code, token);
-}
-
-bool is_opx(int64_t value)
-{
-    return value == -1 || (1 <= value && value <= 16);
-}
-
-void push_literal(data_chunk& raw_script, int64_t value)
-{
-    BITCOIN_ASSERT(is_opx(value));
-    switch (value)
-    {
-        case -1:
-            raw_script.push_back(static_cast<uint8_t>(opcode::push_negative_1));
-            return;
-
-#define PUSH_X(n) \
-        case n: \
-            raw_script.push_back(static_cast<uint8_t>(opcode::push_positive_##n)); \
-            return;
-
-        PUSH_X(1);
-        PUSH_X(2);
-        PUSH_X(3);
-        PUSH_X(4);
-        PUSH_X(5);
-        PUSH_X(6);
-        PUSH_X(7);
-        PUSH_X(8);
-        PUSH_X(9);
-        PUSH_X(10);
-        PUSH_X(11);
-        PUSH_X(12);
-        PUSH_X(13);
-        PUSH_X(14);
-        PUSH_X(15);
-        PUSH_X(16);
-    }
-}
-
-void push_data(data_chunk& raw_script, const data_chunk& data)
-{
-    extend_data(raw_script, operation(data).to_data());
-}
-
-static const auto sentinel = "__ENDING__";
-
-bool parse_token(data_chunk& raw_script, data_chunk& raw_hex, std::string token)
-{
-    boost::trim(token);
-
-    if (token.empty())
-        return true;
-
-    if (token == sentinel || !is_hex_data(token))
-    {
-        extend_data(raw_script, raw_hex);
-        raw_hex.clear();
-    }
-
-    if (token == sentinel)
-        return true;
-
-    opcode out_code;
-
-    if (is_number(token))
-    {
-        const auto value = boost::lexical_cast<int64_t>(token);
-
-        if (is_opx(value))
-        {
-            push_literal(raw_script, value);
-        }
-        else
-        {
-            number bignum(value);
-            push_data(raw_script, bignum.data());
-        }
-    }
-    else if (is_hex_data(token))
-    {
-        std::string hex_part(token.begin() + 2, token.end());
-        data_chunk raw_data;
-
-        if (!decode_base16(raw_data, hex_part))
-            return false;
-
-        extend_data(raw_hex, raw_data);
-    }
-    else if (is_quoted_string(token))
-    {
-        data_chunk inner_value(token.begin() + 1, token.end() - 1);
-        push_data(raw_script, inner_value);
-    }
-    else if (opcode_from_string(out_code, token))
-    {
-        // opcode_from_string converts push codes (data) in [hex] format,
-        // but that is not currently expected here.
-        raw_script.push_back(static_cast<uint8_t>(out_code));
-    }
-    else
-    {
-        // see: stackoverflow.com/questions/15192332/boost-message-undefined
-        BOOST_TEST_MESSAGE("Token parsing failed with: " << token);
-        return false;
-    }
-
-    return true;
-}
-
-bool parse(script& result_script, std::string format)
-{
-    boost::trim(format);
-
-    if (format.empty())
-        return true;
-
-    data_chunk raw_hex;
-    data_chunk raw_script;
-    const auto tokens = split(format);
-    for (const auto& token: tokens)
-        if (!parse_token(raw_script, raw_hex, token))
-            return false;
-
-    parse_token(raw_script, raw_hex, sentinel);
-
-    if (!result_script.from_data(raw_script, false))
-        return false;
-
-    if (result_script.empty())
-        return false;
-
-    return true;
-}
-
-transaction new_tx(const script_test& test, uint32_t sequence=0)
-{
+    // Parse input script from string.
     script input_script;
+    if (!input_script.from_string(test.input))
+        return{};
+
+    // Parse output script from string.
     script output_script;
-
-    if (!parse(input_script, test.input))
+    if (!output_script.from_string(test.output))
         return{};
 
-    if (!parse(output_script, test.output))
-        return{};
+    // Assign output script to input's prevout validation metadata.
+    output_point outpoint;
+    outpoint.validation.cache.set_script(std::move(output_script));
 
-    input input;
-    input.set_sequence(sequence);
-    input.set_script(std::move(input_script));
-    input.previous_output().validation.cache.set_script(std::move(output_script));
+    // Cosntruct transaction with one input and no outputs.
+    return transaction
+    {
+        test.version,
+        test.locktime,
+        input::list
+        {
+            input
+            {
+                std::move(outpoint),
+                std::move(input_script),
+                test.input_sequence
+            }
+        },
+        output::list
+        {
+        }
+    };
+}
 
-    transaction tx;
-    tx.set_inputs({ std::move(input) });
-    return tx;
+std::string test_name(const script_test& test)
+{
+    std::stringstream out;
+    out << "input: \"" << test.input << "\" "
+        << "prevout: \"" << test.output << "\" "
+        << "("
+            << test.input_sequence << ", "
+            << test.locktime << ", "
+            << test.version
+        << ")";
+    return out.str();
 }
 
 BOOST_AUTO_TEST_SUITE(script_tests)
+
+// Serialization tests.
+//------------------------------------------------------------------------------
+// TODO: add script parser test cases.
 
 BOOST_AUTO_TEST_CASE(script__one_hash__literal__same)
 {
@@ -355,54 +219,16 @@ BOOST_AUTO_TEST_CASE(script__clear__non_empty__empty)
     BOOST_REQUIRE(instance.empty());
 }
 
-BOOST_AUTO_TEST_CASE(script__native__block_438513_tx__valid)
-{
-    ////06:21:05.532171 DEBUG [blockchain] Input validation failed (stack false)
-    //// lib         : false
-    //// forks       : 62
-    //// outpoint    : 8e51d775e0896e03149d585c0655b3001da0c55068b0885139ac6ec34cf76ba0:0
-    //// script      : a914faa558780a5767f9e3be14992a578fc1cbcf483087
-    //// inpoint     : 6b7f50afb8448c39f4714a73d2b181d3e3233e84670bdfda8f141db668226c54:0
-    //// transaction : 0100000001a06bf74cc36eac395188b06850c5a01d00b355065c589d14036e89e075d7518e000000009d483045022100ba555ac17a084e2a1b621c2171fa563bc4fb75cd5c0968153f44ba7203cb876f022036626f4579de16e3ad160df01f649ffb8dbf47b504ee56dc3ad7260af24ca0db0101004c50632102768e47607c52e581595711e27faffa7cb646b4f481fe269bd49691b2fbc12106ad6704355e2658b1756821028a5af8284a12848d69a25a0ac5cea20be905848eb645fd03d3b065df88a9117cacfeffffff0158920100000000001976a9149d86f66406d316d44d58cbf90d71179dd8162dd388ac355e2658
-
-    static const auto input_index = 0u;
-    static const auto forks = static_cast<rule_fork>(62);
-    static const auto encoded_script = "a914faa558780a5767f9e3be14992a578fc1cbcf483087";
-    static const auto encoded_tx = "0100000001a06bf74cc36eac395188b06850c5a01d00b355065c589d14036e89e075d7518e000000009d483045022100ba555ac17a084e2a1b621c2171fa563bc4fb75cd5c0968153f44ba7203cb876f022036626f4579de16e3ad160df01f649ffb8dbf47b504ee56dc3ad7260af24ca0db0101004c50632102768e47607c52e581595711e27faffa7cb646b4f481fe269bd49691b2fbc12106ad6704355e2658b1756821028a5af8284a12848d69a25a0ac5cea20be905848eb645fd03d3b065df88a9117cacfeffffff0158920100000000001976a9149d86f66406d316d44d58cbf90d71179dd8162dd388ac355e2658";
-
-    data_chunk decoded_tx;
-    BOOST_REQUIRE(decode_base16(decoded_tx, encoded_tx));
-
-    data_chunk decoded_script;
-    BOOST_REQUIRE(decode_base16(decoded_script, encoded_script));
-
-    transaction tx;
-    BOOST_REQUIRE(tx.from_data(decoded_tx));
-
-    auto& input = tx.inputs()[input_index];
-    auto& prevout = input.previous_output().validation.cache;
-
-    prevout.set_script(script::factory_from_data(decoded_script, false));
-    BOOST_REQUIRE(prevout.script().is_valid());
-
-    // [3045022100ba555ac17a084e2a1b621c2171fa563bc4fb75cd5c0968153f44ba7203cb876f022036626f4579de16e3ad160df01f649ffb8dbf47b504ee56dc3ad7260af24ca0db01] [00] [632102768e47607c52e581595711e27faffa7cb646b4f481fe269bd49691b2fbc12106ad6704355e2658b1756821028a5af8284a12848d69a25a0ac5cea20be905848eb645fd03d3b065df88a9117cac]
-    ////std::cout << prevout.script().to_string(forks) << std::endl;
-
-    // hash160 [faa558780a5767f9e3be14992a578fc1cbcf4830] equal
-    ////std::cout << input.script().to_string(forks) << std::endl;
-
-    const auto result = script::verify(tx, input_index, forks);
-    BOOST_REQUIRE_EQUAL(result.value(), error::success);
-}
+// Data-driven test.
+//------------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(script__bip16__valid)
 {
     for (const auto& test: valid_bip16_scripts)
     {
-        std::string name = test.input + " : " + test.output;
         const auto tx = new_tx(test);
+        const auto name = test_name(test);
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
-        BOOST_REQUIRE_MESSAGE(!tx.inputs().empty(), name);
 
         // These are valid prior to and after BIP16 activation.
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) == error::success, name);
@@ -415,10 +241,9 @@ BOOST_AUTO_TEST_CASE(script__bip16__invalidated)
 {
     for (const auto& test: invalidated_bip16_scripts)
     {
-        std::string name = test.input + " : " + test.output;
         const auto tx = new_tx(test);
+        const auto name = test_name(test);
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
-        BOOST_REQUIRE_MESSAGE(!tx.inputs().empty(), name);
 
         // These are valid prior to BIP16 activation and invalid after.
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) == error::success, name);
@@ -431,17 +256,14 @@ BOOST_AUTO_TEST_CASE(script__bip65__valid)
 {
     for (const auto& test: valid_bip65_scripts)
     {
-        std::string name = test.input + " : " + test.output;
-        auto tx = new_tx(test, 42);
+        const auto tx = new_tx(test);
+        const auto name = test_name(test);
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
-        BOOST_REQUIRE_MESSAGE(!tx.inputs().empty(), name);
-
-        tx.set_locktime(99);
 
         // These are valid prior to and after BIP65 activation.
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) == error::success, name);
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::bip65_rule) == error::success, name);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules) == error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules & ~rule_fork::bip112_rule) == error::success, name);
     }
 }
 
@@ -449,17 +271,14 @@ BOOST_AUTO_TEST_CASE(script__bip65__invalid)
 {
     for (const auto& test: invalid_bip65_scripts)
     {
-        std::string name = test.input + " : " + test.output;
-        auto tx = new_tx(test, 42);
+        const auto tx = new_tx(test);
+        const auto name = test_name(test);
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
-        BOOST_REQUIRE_MESSAGE(!tx.inputs().empty(), name);
-
-        tx.set_locktime(99);
 
         // These are invalid prior to and after BIP65 activation.
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) != error::success, name);
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::bip65_rule) != error::success, name);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules) != error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules & ~rule_fork::bip112_rule) != error::success, name);
     }
 }
 
@@ -467,28 +286,26 @@ BOOST_AUTO_TEST_CASE(script__bip65__invalidated)
 {
     for (const auto& test: invalidated_bip65_scripts)
     {
-        std::string name = test.input + " : " + test.output;
-        auto tx = new_tx(test, 42);
+        const auto tx = new_tx(test);
+        const auto name = test_name(test);
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
-        BOOST_REQUIRE_MESSAGE(!tx.inputs().empty(), name);
-
-        tx.set_locktime(99);
 
         // These are valid prior to BIP65 activation and invalid after.
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) == error::success, name);
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::bip65_rule) != error::success, name);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules) != error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules & ~rule_fork::bip112_rule) != error::success, name);
     }
 }
+
+////// TODO: add bip112 test cases.
 
 BOOST_AUTO_TEST_CASE(script__multisig__valid)
 {
     for (const auto& test: valid_multisig_scripts)
     {
-        std::string name = test.input + " : " + test.output;
-        auto tx = new_tx(test, 42);
+        const auto tx = new_tx(test);
+        const auto name = test_name(test);
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
-        BOOST_REQUIRE_MESSAGE(!tx.inputs().empty(), name);
 
         // These are always valid.
         // These are scripts potentially affected by bip66 (but should not be).
@@ -502,10 +319,9 @@ BOOST_AUTO_TEST_CASE(script__multisig__invalid)
 {
     for (const auto& test: invalid_multisig_scripts)
     {
-        std::string name = test.input + " : " + test.output;
         const auto tx = new_tx(test);
+        const auto name = test_name(test);
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
-        BOOST_REQUIRE_MESSAGE(!tx.inputs().empty(), name);
 
         // These are always invalid.
         // These are scripts potentially affected by bip66 (but should not be).
@@ -519,10 +335,9 @@ BOOST_AUTO_TEST_CASE(script__context_free__valid)
 {
     for (const auto& test: valid_context_free_scripts)
     {
-        std::string name = test.input + " : " + test.output;
         const auto tx = new_tx(test);
+        const auto name = test_name(test);
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
-        BOOST_REQUIRE_MESSAGE(!tx.inputs().empty(), name);
 
         // These are always valid.
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) == error::success, name);
@@ -534,10 +349,9 @@ BOOST_AUTO_TEST_CASE(script__context_free__invalid)
 {
     for (const auto& test: invalid_context_free_scripts)
     {
-        std::string name = test.input + " : " + test.output;
         const auto tx = new_tx(test);
+        const auto name = test_name(test);
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
-        BOOST_REQUIRE_MESSAGE(!tx.inputs().empty(), name);
 
         // These are always invalid.
         BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) != error::success, name);
@@ -545,7 +359,9 @@ BOOST_AUTO_TEST_CASE(script__context_free__invalid)
     }
 }
 
-// These are special tests for checksig.
+// Checksig tests.
+//------------------------------------------------------------------------------
+
 BOOST_AUTO_TEST_CASE(script__checksig__single__uses_one_hash)
 {
     // input 315ac7d4c26d69668129cc352851d9389b4a6868f1509c6c8b66bead11e2619f:1
@@ -660,6 +476,49 @@ BOOST_AUTO_TEST_CASE(script__generate_signature_hash__all__expected)
     const auto result = encode_base16(sighash);
     const auto expected = "f89572635651b2e4f89778350616989183c98d1a721c911324bf9f17a0cf5bf0";
     BOOST_REQUIRE_EQUAL(result, expected);
+}
+
+// Ad-hoc test case.
+//-----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(script__native__block_438513_tx__valid)
+{
+    ////06:21:05.532171 DEBUG [blockchain] Input validation failed (stack false)
+    //// lib         : false
+    //// forks       : 62
+    //// outpoint    : 8e51d775e0896e03149d585c0655b3001da0c55068b0885139ac6ec34cf76ba0:0
+    //// script      : a914faa558780a5767f9e3be14992a578fc1cbcf483087
+    //// inpoint     : 6b7f50afb8448c39f4714a73d2b181d3e3233e84670bdfda8f141db668226c54:0
+    //// transaction : 0100000001a06bf74cc36eac395188b06850c5a01d00b355065c589d14036e89e075d7518e000000009d483045022100ba555ac17a084e2a1b621c2171fa563bc4fb75cd5c0968153f44ba7203cb876f022036626f4579de16e3ad160df01f649ffb8dbf47b504ee56dc3ad7260af24ca0db0101004c50632102768e47607c52e581595711e27faffa7cb646b4f481fe269bd49691b2fbc12106ad6704355e2658b1756821028a5af8284a12848d69a25a0ac5cea20be905848eb645fd03d3b065df88a9117cacfeffffff0158920100000000001976a9149d86f66406d316d44d58cbf90d71179dd8162dd388ac355e2658
+
+    static const auto input_index = 0u;
+    static const auto forks = static_cast<rule_fork>(62);
+    static const auto encoded_script = "a914faa558780a5767f9e3be14992a578fc1cbcf483087";
+    static const auto encoded_tx = "0100000001a06bf74cc36eac395188b06850c5a01d00b355065c589d14036e89e075d7518e000000009d483045022100ba555ac17a084e2a1b621c2171fa563bc4fb75cd5c0968153f44ba7203cb876f022036626f4579de16e3ad160df01f649ffb8dbf47b504ee56dc3ad7260af24ca0db0101004c50632102768e47607c52e581595711e27faffa7cb646b4f481fe269bd49691b2fbc12106ad6704355e2658b1756821028a5af8284a12848d69a25a0ac5cea20be905848eb645fd03d3b065df88a9117cacfeffffff0158920100000000001976a9149d86f66406d316d44d58cbf90d71179dd8162dd388ac355e2658";
+
+    data_chunk decoded_tx;
+    BOOST_REQUIRE(decode_base16(decoded_tx, encoded_tx));
+
+    data_chunk decoded_script;
+    BOOST_REQUIRE(decode_base16(decoded_script, encoded_script));
+
+    transaction tx;
+    BOOST_REQUIRE(tx.from_data(decoded_tx));
+
+    auto& input = tx.inputs()[input_index];
+    auto& prevout = input.previous_output().validation.cache;
+
+    prevout.set_script(script::factory_from_data(decoded_script, false));
+    BOOST_REQUIRE(prevout.script().is_valid());
+
+    // [3045022100ba555ac17a084e2a1b621c2171fa563bc4fb75cd5c0968153f44ba7203cb876f022036626f4579de16e3ad160df01f649ffb8dbf47b504ee56dc3ad7260af24ca0db01] [00] [632102768e47607c52e581595711e27faffa7cb646b4f481fe269bd49691b2fbc12106ad6704355e2658b1756821028a5af8284a12848d69a25a0ac5cea20be905848eb645fd03d3b065df88a9117cac]
+    ////std::cout << prevout.script().to_string(forks) << std::endl;
+
+    // hash160 [faa558780a5767f9e3be14992a578fc1cbcf4830] equal
+    ////std::cout << input.script().to_string(forks) << std::endl;
+
+    const auto result = script::verify(tx, input_index, forks);
+    BOOST_REQUIRE_EQUAL(result.value(), error::success);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
