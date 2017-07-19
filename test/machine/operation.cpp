@@ -425,7 +425,84 @@ BOOST_AUTO_TEST_CASE(operation__to_string__nop3_bip112_rule__checksequenceverify
 
 // from_string
 
-BOOST_AUTO_TEST_CASE(operation__from_string__character_a__push_size_1_expected_byte)
+BOOST_AUTO_TEST_CASE(operation__from_string__negative_1__push_negative_1_empty)
+{
+    operation value;
+    BOOST_REQUIRE(value.from_string("-1"));
+    BOOST_REQUIRE(value.code() == opcode::push_negative_1);
+    BOOST_REQUIRE(value.data().empty());
+}
+
+BOOST_AUTO_TEST_CASE(operation__from_string__0__push_size_0_empty)
+{
+    operation value;
+    BOOST_REQUIRE(value.from_string("0"));
+    BOOST_REQUIRE(value.code() == opcode::push_size_0);
+    BOOST_REQUIRE(value.data().empty());
+}
+
+BOOST_AUTO_TEST_CASE(operation__from_string__1__push_positive_1_empty)
+{
+    operation value;
+    BOOST_REQUIRE(value.from_string("1"));
+    BOOST_REQUIRE(value.code() == opcode::push_positive_1);
+    BOOST_REQUIRE(value.data().empty());
+}
+
+BOOST_AUTO_TEST_CASE(operation__from_string__16__push_positive_16_empty)
+{
+    operation value;
+    BOOST_REQUIRE(value.from_string("16"));
+    BOOST_REQUIRE(value.code() == opcode::push_positive_16);
+    BOOST_REQUIRE(value.data().empty());
+}
+
+BOOST_AUTO_TEST_CASE(operation__from_string__17__push_size_1_expected)
+{
+    static const data_chunk expected{ { 0x11 } };
+    operation value;
+    BOOST_REQUIRE(value.from_string("17"));
+    BOOST_REQUIRE(value.code() == opcode::push_size_1);
+    BOOST_REQUIRE_EQUAL(value.data(), expected);
+}
+
+BOOST_AUTO_TEST_CASE(operation__from_string__negative_2__push_size_1_expected)
+{
+    static const data_chunk expected{ { 0x82 } };
+    operation value;
+    BOOST_REQUIRE(value.from_string("-2"));
+    BOOST_REQUIRE(value.code() == opcode::push_size_1);
+    BOOST_REQUIRE_EQUAL(value.data(), expected);
+}
+
+BOOST_AUTO_TEST_CASE(operation__from_string__9223372036854775807__push_size_8_expected)
+{
+    static const data_chunk expected{ { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f } };
+    operation value;
+    BOOST_REQUIRE(value.from_string("9223372036854775807"));
+    BOOST_REQUIRE(value.code() == opcode::push_size_8);
+    BOOST_REQUIRE_EQUAL(value.data(), expected);
+}
+
+BOOST_AUTO_TEST_CASE(operation__from_string__negative_9223372036854775807__push_size_8_expected)
+{
+    static const data_chunk expected{ { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff } };
+    operation value;
+    BOOST_REQUIRE(value.from_string("-9223372036854775807"));
+    BOOST_REQUIRE(value.code() == opcode::push_size_8);
+    BOOST_REQUIRE_EQUAL(value.data(), expected);
+}
+
+BOOST_AUTO_TEST_CASE(operation__from_string__string_empty__push_size_0_empty)
+{
+    static const data_chunk expected{ { 0x61 } };
+    operation value;
+    BOOST_REQUIRE(value.from_string("''"));
+    BOOST_REQUIRE(value.code() == opcode::push_size_0);
+    BOOST_REQUIRE(value.data().empty());
+}
+
+BOOST_AUTO_TEST_CASE(operation__from_string__string_a__push_size_1_expected_byte)
 {
     static const data_chunk expected{ { 0x61 } };
     operation value;
