@@ -35,49 +35,91 @@ struct script_test
 
 typedef std::vector<script_test> script_test_list;
 
+// bip16
+//------------------------------------------------------------------------------
+
 // These are valid prior to and after BIP16 activation.
 const script_test_list valid_bip16_scripts
-{{
+{
     { "0 [51]", "hash160 [da1745e9b549bd0bfa1a569971c77eba30cd5a4b] equal", "trivial p2sh" },
     { "[1.] [0.51]", "hash160 [da1745e9b549bd0bfa1a569971c77eba30cd5a4b] equal", "basic p2sh" }
-}};
+};
+
+// These are invalid prior to and after BIP16 activation.
+const script_test_list invalid_bip16_scripts
+{
+};
 
 // These are valid prior to BIP16 activation and invalid after.
 const script_test_list invalidated_bip16_scripts
-{{
+{
     { "nop [51]", "hash160 [da1745e9b549bd0bfa1a569971c77eba30cd5a4b] equal", "is_push_only fails under bip16" },
     { "nop1 [51]", "hash160 [da1745e9b549bd0bfa1a569971c77eba30cd5a4b] equal", "is_push_only fails under bip16" },
     { "0 [50]", "hash160 [ece424a6bb6ddf4db592c0faed60685047a361b1] equal", "op_reserved as p2sh serialized script fails" },
     { "0 [62]", "hash160 [0f4d7845db968f2a81b530b6f3c1d6246d4c7e01] equal", "op_ver as p2sh serialized script fails" }
-}};
+};
+
+// bip65
+//------------------------------------------------------------------------------
 
 // These are valid prior to and after BIP65 activation.
 const script_test_list valid_bip65_scripts
-{{
+{
     { "42", "checklocktimeverify", "valid cltv, true return", 42, 99 },
-    { "42", "nop1 nop2 nop3 nop4 nop5 nop6 nop7 nop8 nop9 nop10 [2a] equal", "bip112 would fail nop3", 42, 99 }
-}};
+    { "42", "nop1 nop2 nop4 nop5 nop6 nop7 nop8 nop9 nop10 42 equal", "bip112 would fail nop3", 42, 99 }
+};
 
 // These are invalid prior to and after BIP65 activation.
 const script_test_list invalid_bip65_scripts
-{ {
+{
     { "", "nop2", "empty nop2", 42, 99 },
     { "", "checklocktimeverify", "empty cltv", 42, 99 }
-}};
+};
 
 // These are valid prior to BIP65 activation and invalid after.
 const script_test_list invalidated_bip65_scripts
-{{
+{
     { "1 -1", "checklocktimeverify", "negative cltv", 42, 99 },
     { "1 100", "checklocktimeverify", "exceeded cltv", 42, 99 },
     { "1 500000000", "checklocktimeverify", "mismatched cltv", 42, 99 },
-    { "'nop_1_to_10' nop1 nop2 nop3 nop4 nop5 nop6 nop7 nop8 nop9 nop10", "'nop_1_to_10' equal", "bip112 would fail nop3", 42, 99 },
+    { "'nop_1_to_10' nop1 nop2 nop4 nop5 nop6 nop7 nop8 nop9 nop10", "'nop_1_to_10' equal", "bip112 would fail nop3", 42, 99 },
     { "nop", "nop2 1", "", 42, 99 }
-}};
+};
+
+// bip112
+//------------------------------------------------------------------------------
+
+// These are valid prior to and after BIP112 activation.
+const script_test_list valid_bip112_scripts
+{
+    { "[0100408000]", "checksequenceverify", "csv stack disabled, true" },
+    { "[0100400000]", "checksequenceverify", "csv stack enabled, satisfied locktime", 0x00400001, 0, 2 }
+};
+
+// These are invalid prior to and after BIP112 activation.
+const script_test_list invalid_bip112_scripts
+{
+    { "", "nop3", "nop3 empty stack" },
+    { "", "checksequenceverify", "csv empty stack" }
+};
+
+// These are valid prior to BIP112 activation and invalid after.
+const script_test_list invalidated_bip112_scripts
+{
+    { "", "checksequenceverify 42", "csv stack empty" },
+    { "-42", "checksequenceverify", "csv stack top negative" },
+    { "[0100000000]", "checksequenceverify", "csv stack enabled, tx version < 2", 0x00000001, 0, 1 },
+    { "[0100000000]", "checksequenceverify", "csv stack enabled, tx sequence disabled", 0x80000001, 0, 2 },
+    { "[0100400000]", "checksequenceverify", "csv stack enabled, mismatched lock type", 0x00000001, 0, 3 },
+    { "[0100400000]", "checksequenceverify", "csv stack enabled, unsatisfied locktime", 0x00400000, 0, 4 }
+};
+
+// context free: multisig
+//------------------------------------------------------------------------------
 
 // These are always valid.
 const script_test_list valid_multisig_scripts
-{{
+{
     { "", "0 0 0 checkmultisig verify depth 0 equal", "checkmultisig is allowed to have zero keys and/or sigs" },
     { "", "0 0 0 checkmultisigverify depth 0 equal", "" },
     { "", "0 0 0 1 checkmultisig verify depth 0 equal", "zero sigs means no sigs are checked" },
@@ -125,20 +167,23 @@ const script_test_list valid_multisig_scripts
     { "1", "0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify 0 0 0 checkmultisigverify", "" },
     { "", "nop nop nop nop nop nop nop nop nop nop nop nop 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisig 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisig 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisig 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisig 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisig 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisig 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisig 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisig 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisig", "even though there are no signatures being checked nopcount is incremented by the number of keys." },
     { "1", "nop nop nop nop nop nop nop nop nop nop nop nop 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisigverify 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisigverify 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisigverify 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisigverify 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisigverify 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisigverify 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisigverify 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisigverify 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisigverify", "" },
-}};
+};
 
 // These are always invalid.
 const script_test_list invalid_multisig_scripts
-{ {
+{
     { "", "0 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig 0 0 checkmultisig", "202 checkmultisigs, fails due to 201 op limit" },
     { "1", "0 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify 0 0 checkmultisigverify", "" },
     { "", "nop nop nop nop nop nop nop nop nop nop nop nop nop 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisig 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisig 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisig 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisig 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisig 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisig 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisig 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisig 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisig", "fails due to 201 sig op limit" },
     { "1", "nop nop nop nop nop nop nop nop nop nop nop nop nop 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisigverify 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisigverify 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisigverify 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisigverify 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisigverify 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisigverify 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisigverify 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisigverify 0 0 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 20 checkmultisigverify", "" },
-}};
+};
+
+// context free: other
+//------------------------------------------------------------------------------
 
 // These are always valid.
 const script_test_list valid_context_free_scripts
-{{
+{
     { "", "depth 0 equal", "test the test: we should have an empty stack after scriptsig evaluation" },
     { "  ", "depth 0 equal", "and multiple spaces should not change that." },
     { "   ", "depth 0 equal", "" },
@@ -250,6 +295,7 @@ const script_test_list valid_context_free_scripts
     { "-549755813888", "size 6 equal", "" },
     { "-9223372036854775807", "size 8 equal", "" },
     { "'abcdefghijklmnopqrstuvwxyz'", "size 26 equal", "" },
+    { "42", "size 1 equalverify 42 equal", "size does not consume argument" },
     { "2 -2 add", "0 equal", "" },
     { "2147483647 -2147483647 add", "0 equal", "" },
     { "-1 -1 add", "-2 equal", "" },
@@ -519,11 +565,11 @@ const script_test_list valid_context_free_scripts
     { "[42424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242]", "[2.42424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242] equal", "basic push signedness check" },
     { "[1.42424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242]", "[2.42424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242] equal", "basic pushdata1 signedness check" },
     { "0x00", "size 0 equal", "basic op_0 execution" }
-}};
+};
 
 // These are always invalid.
 const script_test_list invalid_context_free_scripts
-{{
+{
     { "", "depth", "test the test: we should have an empty stack after scriptsig evaluation" },
     { "  ", "depth", "and multiple spaces should not change that." },
     { "   ", "depth", "" },
@@ -826,15 +872,15 @@ const script_test_list invalid_context_free_scripts
     { "nop", "hash160 1", "" },
     { "nop", "hash256 1", "" },
     { "0x00", "'00' equal", "basic op_0 execution" }
-}};
+};
 
 ////// TODO: move these to operation tests.
 ////// These are always invalid due to parsing.
 ////const script_test_list invalid_parse_scripts
-////{{
+////{
 ////    { "0x4c01", "0x01 NOP", "PUSHDATA1 with not enough bytes" },
 ////    { "0x4d0200ff", "0x01 NOP", "PUSHDATA2 with not enough bytes" },
 ////    { "0x4e03000000ffff", "0x01 NOP", "PUSHDATA4 with not enough bytes" }
-////}};
+////};
 
 #endif
