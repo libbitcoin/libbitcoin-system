@@ -268,14 +268,84 @@ BOOST_AUTO_TEST_CASE(transaction__is_coinbase__empty_inputs__returns_false)
     BOOST_REQUIRE(!instance.is_coinbase());
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_coinbase__with_coinbase_input__returns_true)
+BOOST_AUTO_TEST_CASE(transaction__is_coinbase__one_null_input__returns_true)
 {
-    chain::input::list inputs;
-    inputs.emplace_back();
-    inputs.back().set_previous_output(chain::point{ null_hash, max_input_sequence });
+    static const chain::input::list inputs
+    {
+        { chain::point{ null_hash, chain::point::null_index }, {}, 0 }
+    };
+
     chain::transaction instance;
     instance.set_inputs(inputs);
     BOOST_REQUIRE(instance.is_coinbase());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_coinbase__one_non_null_input__returns_false)
+{
+    static const chain::input::list inputs
+    {
+        { chain::point{ null_hash, 42 }, {}, 0 }
+    };
+
+    chain::transaction instance;
+    instance.set_inputs(inputs);
+    BOOST_REQUIRE(!instance.is_coinbase());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_coinbase__two_inputs_first_null__returns_false)
+{
+    static const chain::input::list inputs
+    {
+        { chain::point{ null_hash, chain::point::null_index }, {}, 0 },
+        { chain::point{ null_hash, 42 }, {}, 0 }
+    };
+
+    chain::transaction instance;
+    instance.set_inputs(inputs);
+    BOOST_REQUIRE(!instance.is_coinbase());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__empty_inputs__returns_false)
+{
+    chain::transaction instance;
+    BOOST_REQUIRE(!instance.is_null_non_coinbase());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__one_null_input__returns_false)
+{
+    static const chain::input::list inputs
+    {
+        { chain::point{ null_hash, chain::point::null_index }, {}, 0 }
+    };
+
+    chain::transaction instance;
+    instance.set_inputs(inputs);
+    BOOST_REQUIRE(!instance.is_null_non_coinbase());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__one_non_null_input__returns_false)
+{
+    static const chain::input::list inputs
+    {
+        { chain::point{ null_hash, 42 }, {}, 0 }
+    };
+
+    chain::transaction instance;
+    instance.set_inputs(inputs);
+    BOOST_REQUIRE(!instance.is_null_non_coinbase());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__two_inputs_first_null__returns_true)
+{
+    static const chain::input::list inputs
+    {
+        { chain::point{ null_hash, chain::point::null_index }, {}, 0 },
+        { chain::point{ null_hash, 42 }, {}, 0 }
+    };
+
+    chain::transaction instance;
+    instance.set_inputs(inputs);
+    BOOST_REQUIRE(instance.is_null_non_coinbase());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_final__locktime_zero__returns_true)
