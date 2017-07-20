@@ -519,11 +519,7 @@ hash_digest transaction::hash(uint32_t sighash_type) const
 
 bool transaction::is_coinbase() const
 {
-    if (inputs_.empty())
-        return false;
-
-    const auto& prevout = inputs_.front().previous_output();
-    return (inputs_.size() == 1) && prevout.is_null();
+    return inputs_.size() == 1 && inputs_.front().previous_output().is_null();
 }
 
 // True if coinbase and has invalid input[0] script size.
