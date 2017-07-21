@@ -345,19 +345,19 @@ BOOST_AUTO_TEST_CASE(operation__to_string__push_positive_7__7)
 
 BOOST_AUTO_TEST_CASE(operation__to_string_minimal__0x07__7)
 {
-    operation value({ { 0x07 } }, true);
+    operation value({ 0x07 }, true);
     BOOST_REQUIRE_EQUAL(value.to_string(0), "7");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string_nominal__0x07__0x07)
 {
-    operation value({ { 0x07 } }, false);
+    operation value({ 0x07 }, false);
     BOOST_REQUIRE_EQUAL(value.to_string(0), "[07]");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string__0x42__0x42)
 {
-    operation value({ { 0x42 } }, true);
+    operation value({ 0x42 }, true);
     BOOST_REQUIRE_EQUAL(value.to_string(0), "[42]");
 }
 
@@ -459,7 +459,7 @@ BOOST_AUTO_TEST_CASE(operation__from_string__16__push_positive_16_empty)
 
 BOOST_AUTO_TEST_CASE(operation__from_string__17__push_size_1_expected)
 {
-    static const data_chunk expected{ { 0x11 } };
+    static const data_chunk expected{ 0x11 };
     operation value;
     BOOST_REQUIRE(value.from_string("17"));
     BOOST_REQUIRE(value.code() == opcode::push_size_1);
@@ -468,7 +468,7 @@ BOOST_AUTO_TEST_CASE(operation__from_string__17__push_size_1_expected)
 
 BOOST_AUTO_TEST_CASE(operation__from_string__negative_2__push_size_1_expected)
 {
-    static const data_chunk expected{ { 0x82 } };
+    static const data_chunk expected{ 0x82 };
     operation value;
     BOOST_REQUIRE(value.from_string("-2"));
     BOOST_REQUIRE(value.code() == opcode::push_size_1);
@@ -495,7 +495,7 @@ BOOST_AUTO_TEST_CASE(operation__from_string__negative_9223372036854775807__push_
 
 BOOST_AUTO_TEST_CASE(operation__from_string__string_empty__push_size_0_empty)
 {
-    static const data_chunk expected{ { 0x61 } };
+    static const data_chunk expected{ 0x61 };
     operation value;
     BOOST_REQUIRE(value.from_string("''"));
     BOOST_REQUIRE(value.code() == opcode::push_size_0);
@@ -504,7 +504,7 @@ BOOST_AUTO_TEST_CASE(operation__from_string__string_empty__push_size_0_empty)
 
 BOOST_AUTO_TEST_CASE(operation__from_string__string_a__push_size_1_expected_byte)
 {
-    static const data_chunk expected{ { 0x61 } };
+    static const data_chunk expected{ 0x61 };
     operation value;
     BOOST_REQUIRE(value.from_string("'a'"));
     BOOST_REQUIRE(value.code() == opcode::push_size_1);
@@ -522,7 +522,7 @@ BOOST_AUTO_TEST_CASE(operation__from_string__string_abc__push_size_3_expected_by
 
 BOOST_AUTO_TEST_CASE(operation__from_string__negative_1_character__push_size_1_nominal_encoding)
 {
-    static const data_chunk expected{ { 0x4f } };
+    static const data_chunk expected{ 0x4f };
     operation value;
     BOOST_REQUIRE(value.from_string("'O'"));
     BOOST_REQUIRE(value.code() == opcode::push_size_1);
@@ -583,7 +583,7 @@ BOOST_AUTO_TEST_CASE(operation__from_string__7__push_positive_7)
 
 BOOST_AUTO_TEST_CASE(operation__from_string__0x07__push_size_1)
 {
-    static const data_chunk expected{ { 0x07 } };
+    static const data_chunk expected{ 0x07 };
     operation value;
     BOOST_REQUIRE(value.from_string("[07]"));
     BOOST_REQUIRE(value.code() == opcode::push_size_1);
@@ -592,7 +592,7 @@ BOOST_AUTO_TEST_CASE(operation__from_string__0x07__push_size_1)
 
 BOOST_AUTO_TEST_CASE(operation__from_string__0x42__push_size_1)
 {
-    static const data_chunk expected{ { 0x42 } };
+    static const data_chunk expected{ 0x42 };
     operation value;
     BOOST_REQUIRE(value.from_string("[42]"));
     BOOST_REQUIRE(value.code() == opcode::push_size_1);
