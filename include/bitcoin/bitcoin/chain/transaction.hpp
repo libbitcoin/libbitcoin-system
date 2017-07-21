@@ -166,6 +166,7 @@ public:
     bool is_missing_previous_outputs() const;
     bool is_final(size_t block_height) const;
     bool is_final(size_t block_height, uint32_t block_time) const;
+    bool is_locked(size_t block_height, uint32_t median_time_past) const;
     bool is_locktime_conflict() const;
 
     code check(bool transaction_pool=true) const;

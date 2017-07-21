@@ -112,6 +112,7 @@ public:
     //-----------------------------------------------------------------------------
 
     bool is_final() const;
+    bool is_locked(size_t block_height, uint32_t median_time_past) const;
     size_t signature_operations(bool bip16_active) const;
 
 protected:
