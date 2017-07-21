@@ -579,6 +579,21 @@ bool transaction::is_final(size_t block_height, uint32_t block_time) const
     return locktime_ == 0 || locktime_ < max_locktime() || all_inputs_final();
 }
 
+bool transaction::is_locked(size_t block_height,
+    uint32_t median_time_past) const
+{
+    if (version_ < relative_locktime_min_version || is_coinbase())
+        return false;
+
+    const auto locked = [block_height, median_time_past](const input& input)
+    {
+        return input.is_locked(block_height, median_time_past);
+    };
+
+    // If any input is relative time locked the transaction is as well.
+    return std::any_of(inputs_.begin(), inputs_.end(), locked);
+}
+
 // This is not a consensus rule, just detection of an irrational use.
 bool transaction::is_locktime_conflict() const
 {
@@ -855,11 +870,11 @@ code transaction::accept(bool transaction_pool) const
 }
 
 // These checks assume that prevout caching is completed on all tx.inputs.
-// Flags for tx pool calls should be based on the next block height.
 code transaction::accept(const chain_state& state, bool transaction_pool) const
 {
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip30 = state.is_enabled(rule_fork::bip30_rule);
+    const auto bip68 = state.is_enabled(rule_fork::bip68_rule);
 
     //*************************************************************************
     // CONSENSUS:
@@ -901,6 +916,9 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
 
     else if (is_overspent())
         return error::spend_exceeds_value;
+
+    else if (bip68 && is_locked(state.height(), state.median_time_past()))
+        return error::sequence_locked;
 
     // This includes sigops from embedded p2sh script if bip16 is true.
     else if (transaction_pool && signature_operations(bip16) > max_block_sigops)

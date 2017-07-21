@@ -130,6 +130,7 @@ enum error_code_t
     coinbase_maturity = 46,
     spend_exceeds_value = 40,
     transaction_embedded_sigop_limit = 55,
+    sequence_locked = 78,
 
     // connect input
     invalid_script = 39,

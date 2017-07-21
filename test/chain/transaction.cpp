@@ -297,6 +297,36 @@ BOOST_AUTO_TEST_CASE(transaction__is_final__locktime_inputs_final__returns_true)
     BOOST_REQUIRE(instance.is_final(height, time));
 }
 
+BOOST_AUTO_TEST_CASE(transaction__is_locked__version_1_empty__returns_false)
+{
+    chain::transaction instance;
+    instance.set_version(1);
+    BOOST_REQUIRE(!instance.is_locked(0, 0));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_locked__version_2_empty__returns_false)
+{
+    chain::transaction instance;
+    instance.set_version(2);
+    BOOST_REQUIRE(!instance.is_locked(0, 0));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_locked__version_1_one_of_two_locked_locked__returns_false)
+{
+    chain::transaction instance;
+    instance.set_inputs({ { {}, {}, 1 }, { {}, {}, 0 } });
+    instance.set_version(1);
+    BOOST_REQUIRE(!instance.is_locked(0, 0));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_locked__version_4_one_of_two_locked__returns_true)
+{
+    chain::transaction instance;
+    instance.set_inputs({ { {}, {}, 1 }, { {}, {}, 0 } });
+    instance.set_version(4);
+    BOOST_REQUIRE(instance.is_locked(0, 0));
+}
+
 BOOST_AUTO_TEST_CASE(transaction__is_locktime_conflict__locktime_zero__returns_false)
 {
     chain::transaction instance;

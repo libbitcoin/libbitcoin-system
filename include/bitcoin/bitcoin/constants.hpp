@@ -82,9 +82,16 @@ BC_CONSTEXPR size_t median_time_past_interval = 11;
 BC_CONSTEXPR size_t locktime_threshold = 500000000;
 BC_CONSTEXPR size_t max_block_size = 1000000;
 BC_CONSTEXPR size_t max_sigops_factor = 50;
-
-// Derived.
 BC_CONSTEXPR size_t max_block_sigops = max_block_size / max_sigops_factor;
+
+// Relative locktime constants.
+//-----------------------------------------------------------------------------
+
+BC_CONSTEXPR size_t relative_locktime_min_version = 2;
+BC_CONSTEXPR size_t relative_locktime_seconds_shift = 9;
+BC_CONSTEXPR uint32_t relative_locktime_mask = 0x0000ffff;
+BC_CONSTEXPR uint32_t relative_locktime_disabled = 0x80000000;
+BC_CONSTEXPR uint32_t relative_locktime_time_locked = 0x00400000;
 
 // Timespan constants.
 //-----------------------------------------------------------------------------
