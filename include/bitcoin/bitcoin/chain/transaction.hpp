@@ -192,11 +192,11 @@ protected:
 
 private:
     typedef std::shared_ptr<hash_digest> hash_ptr;
-    typedef boost::optional<size_t> optional_size;
+    typedef boost::optional<uint64_t> optional_value;
 
     hash_ptr hash_cache() const;
-    optional_size total_input_value_cache() const;
-    optional_size total_output_value_cache() const;
+    optional_value total_input_value_cache() const;
+    optional_value total_output_value_cache() const;
 
     uint32_t version_;
     uint32_t locktime_;
@@ -205,8 +205,8 @@ private:
 
     // These share a mutex as they are not expected to contend.
     mutable hash_ptr hash_;
-    mutable optional_size total_input_value_;
-    mutable optional_size total_output_value_;
+    mutable optional_value total_input_value_;
+    mutable optional_value total_output_value_;
     mutable upgrade_mutex mutex_;
 };
 

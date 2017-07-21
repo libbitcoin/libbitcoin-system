@@ -147,14 +147,14 @@ transaction::hash_ptr transaction::hash_cache() const
 }
 
 // Private cache access for copy/move construction.
-transaction::optional_size transaction::total_input_value_cache() const
+transaction::optional_value transaction::total_input_value_cache() const
 {
     shared_lock lock(mutex_);
     return total_input_value_;
 }
 
 // Private cache access for copy/move construction.
-transaction::optional_size transaction::total_output_value_cache() const
+transaction::optional_value transaction::total_output_value_cache() const
 {
     shared_lock lock(mutex_);
     return total_output_value_;
