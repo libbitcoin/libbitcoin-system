@@ -37,8 +37,6 @@ namespace chain {
 // Use system clock because we require accurate time of day.
 using wall_clock = std::chrono::system_clock;
 
-const size_t header::validation::undetermined_height = 0;
-
 // Constructors.
 //-----------------------------------------------------------------------------
 
@@ -151,58 +149,58 @@ bool header::operator!=(const header& other) const
 //-----------------------------------------------------------------------------
 
 // static
-header header::factory(const data_chunk& data)
+header header::factory(const data_chunk& data, bool wire)
 {
     header instance;
-    instance.from_data(data);
+    instance.from_data(data, wire);
     return instance;
 }
 
 // static
-header header::factory(std::istream& stream)
+header header::factory(std::istream& stream, bool wire)
 {
     header instance;
-    instance.from_data(stream);
+    instance.from_data(stream, wire);
     return instance;
 }
 
 // static
-header header::factory(reader& source)
+header header::factory(reader& source, bool wire)
 {
     header instance;
-    instance.from_data(source);
+    instance.from_data(source, wire);
     return instance;
 }
 
 // static
-header header::factory(reader& source, hash_digest&& hash)
+header header::factory(reader& source, hash_digest&& hash, bool wire)
 {
     header instance;
-    instance.from_data(source, std::move(hash));
+    instance.from_data(source, std::move(hash), wire);
     return instance;
 }
 
 // static
-header header::factory(reader& source, const hash_digest& hash)
+header header::factory(reader& source, const hash_digest& hash, bool wire)
 {
     header instance;
-    instance.from_data(source, hash);
+    instance.from_data(source, hash, wire);
     return instance;
 }
 
-bool header::from_data(const data_chunk& data)
+bool header::from_data(const data_chunk& data, bool wire)
 {
     data_source istream(data);
-    return from_data(istream);
+    return from_data(istream, wire);
 }
 
-bool header::from_data(std::istream& stream)
+bool header::from_data(std::istream& stream, bool wire)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(source, wire);
 }
 
-bool header::from_data(reader& source)
+bool header::from_data(reader& source, bool wire)
 {
     ////reset();
 
@@ -213,22 +211,25 @@ bool header::from_data(reader& source)
     bits_ = source.read_4_bytes_little_endian();
     nonce_ = source.read_4_bytes_little_endian();
 
+    if (!wire)
+        validation.median_time_past = source.read_4_bytes_little_endian();
+
     if (!source)
         reset();
 
     return source;
 }
 
-bool header::from_data(reader& source, hash_digest&& hash)
+bool header::from_data(reader& source, hash_digest&& hash, bool wire)
 {
     hash_ = std::make_shared<hash_digest>(std::move(hash));
-    return from_data(source);
+    return from_data(source, wire);
 }
 
-bool header::from_data(reader& source, const hash_digest& hash)
+bool header::from_data(reader& source, const hash_digest& hash, bool wire)
 {
     hash_ = std::make_shared<hash_digest>(hash);
-    return from_data(source);
+    return from_data(source, wire);
 }
 
 // protected
@@ -256,25 +257,25 @@ bool header::is_valid() const
 // Serialization.
 //-----------------------------------------------------------------------------
 
-data_chunk header::to_data() const
+data_chunk header::to_data(bool wire) const
 {
     data_chunk data;
-    const auto size = serialized_size();
+    const auto size = serialized_size(wire);
     data.reserve(size);
     data_sink ostream(data);
-    to_data(ostream);
+    to_data(ostream, wire);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 
-void header::to_data(std::ostream& stream) const
+void header::to_data(std::ostream& stream, bool wire) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(sink, wire);
 }
 
-void header::to_data(writer& sink) const
+void header::to_data(writer& sink, bool wire) const
 {
     sink.write_4_bytes_little_endian(version_);
     sink.write_hash(previous_block_hash_);
@@ -282,6 +283,9 @@ void header::to_data(writer& sink) const
     sink.write_4_bytes_little_endian(timestamp_);
     sink.write_4_bytes_little_endian(bits_);
     sink.write_4_bytes_little_endian(nonce_);
+
+    if (!wire)
+        sink.write_4_bytes_little_endian(validation.median_time_past);
 }
 
 // Size.
@@ -298,9 +302,9 @@ size_t header::satoshi_fixed_size()
         + sizeof(nonce_);
 }
 
-size_t header::serialized_size() const
+size_t header::serialized_size(bool wire) const
 {
-    return satoshi_fixed_size();
+    return satoshi_fixed_size() + (wire ? 0 : sizeof(uint32_t));
 }
 
 // Accessors.
