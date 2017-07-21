@@ -67,7 +67,7 @@ BC_CONSTEXPR size_t max_push_data_size = 520;
 BC_CONSTEXPR size_t max_script_public_keys = 20;
 BC_CONSTEXPR size_t multisig_default_sigops = 20;
 BC_CONSTEXPR size_t max_number_size = 4;
-BC_CONSTEXPR size_t max_cltv_number_size = 5;
+BC_CONSTEXPR size_t max_check_locktime_verify_number_size = 5;
 
 // Policy.
 BC_CONSTEXPR size_t max_null_data_size = 80;
