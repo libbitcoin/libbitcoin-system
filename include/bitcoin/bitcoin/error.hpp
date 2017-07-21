@@ -221,7 +221,14 @@ enum error_code_t
     op_check_locktime_verify3,
     op_check_locktime_verify4,
     op_check_locktime_verify5,
-    op_check_locktime_verify6
+    op_check_locktime_verify6,
+    op_check_sequence_verify1,
+    op_check_sequence_verify2,
+    op_check_sequence_verify3,
+    op_check_sequence_verify4,
+    op_check_sequence_verify5,
+    op_check_sequence_verify6,
+    op_check_sequence_verify7
 };
 
 enum error_condition_t
