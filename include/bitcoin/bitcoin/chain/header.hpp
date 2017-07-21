@@ -49,9 +49,8 @@ public:
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
-        static const size_t undetermined_height;
-
-        size_t height = validation::undetermined_height;
+        size_t height = 0;
+        uint32_t median_time_past = 0;
     };
 
     // Constructors.
@@ -84,28 +83,28 @@ public:
     // Deserialization.
     //-----------------------------------------------------------------------------
 
-    static header factory_from_data(const data_chunk& data);
-    static header factory_from_data(std::istream& stream);
-    static header factory_from_data(reader& source);
+    static header factory_from_data(const data_chunk& data, bool wire=true);
+    static header factory_from_data(std::istream& stream, bool wire=true);
+    static header factory_from_data(reader& source, bool wire=true);
 
-    bool from_data(const data_chunk& data);
-    bool from_data(std::istream& stream);
-    bool from_data(reader& source);
+    bool from_data(const data_chunk& data, bool wire=true);
+    bool from_data(std::istream& stream, bool wire=true);
+    bool from_data(reader& source, bool wire=true);
 
     bool is_valid() const;
 
     // Serialization.
     //-----------------------------------------------------------------------------
 
-    data_chunk to_data() const;
-    void to_data(std::ostream& stream) const;
-    void to_data(writer& sink) const;
+    data_chunk to_data(bool wire=true) const;
+    void to_data(std::ostream& stream, bool wire=true) const;
+    void to_data(writer& sink, bool wire=true) const;
 
     // Properties (size, accessors, cache).
     //-----------------------------------------------------------------------------
 
     static size_t satoshi_fixed_size();
-    size_t serialized_size() const;
+    size_t serialized_size(bool wire=true) const;
 
     uint32_t version() const;
     void set_version(uint32_t value);
