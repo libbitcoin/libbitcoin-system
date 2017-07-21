@@ -572,12 +572,11 @@ bool block::is_extra_coinbases() const
     return std::any_of(txs.begin() + 1, txs.end(), value);
 }
 
-bool block::is_final(size_t height) const
+bool block::is_final(size_t height, uint32_t block_time) const
 {
-    const auto timestamp = header_.timestamp();
-    const auto value = [height, timestamp](const transaction& tx)
+    const auto value = [=](const transaction& tx)
     {
-        return tx.is_final(height, timestamp);
+        return tx.is_final(height, block_time);
     };
 
     const auto& txs = transactions_;
@@ -795,15 +794,14 @@ code block::accept(const chain_state& state, bool transactions,
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip34 = state.is_enabled(rule_fork::bip34_rule);
 
+    const auto block_time = state.is_enabled(rule_fork::bip113_rule) ?
+        state.median_time_past() : header_.timestamp();
+
     if (header && (ec = header_.accept(state)))
         return ec;
 
     else if (state.is_under_checkpoint())
         return error::success;
-
-    // Relates timestamp to tx.locktime (tx pool rejects all non-final).
-    else if (!is_final(state.height()))
-        return error::block_non_final;
 
     else if (bip34 && !is_valid_coinbase_script(state.height()))
         return error::coinbase_height_mismatch;
@@ -812,7 +810,12 @@ code block::accept(const chain_state& state, bool transactions,
     else if (!is_valid_coinbase_claim(state.height()))
         return error::coinbase_value_limit;
 
-    // Relates block limit to total of tx.sigops (mempool caches tx.sigops).
+    // TODO: relates median time past to tx.locktime (pool cache min tx.time).
+    else if (!is_final(state.height(), block_time))
+        return error::block_non_final;
+
+    // TODO: determine if performance benefit is worth excluding sigops here.
+    // TODO: relates block limit to total of tx.sigops (pool cache tx.sigops).
     else if (transactions && (signature_operations(bip16) > max_block_sigops))
         return error::block_embedded_sigop_limit;
 

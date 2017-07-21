@@ -38,9 +38,6 @@ public:
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation_type
     {
-        /// This is a .height sentinel.
-        static const size_t not_specified;
-
         /// An output is spent if a valid transaction has a valid claim on it.
         /// When validating blocks only long chain blocks can have a claim.
         /// When validating memory pool tx another mempool tx can have a claim.
@@ -49,16 +46,18 @@ public:
         /// A spend is confirmed if spender is in long chain (not memory pool).
         bool confirmed = false;
 
-        /// Coinbase prevout height is necessary in determining maturity.
-        /// If this is set to not_specified the input is considered mature.
-        /// This must be set to not_specified if the input is coinbase.
-        /// This must be set to not_specified if the output is non-coinbase.
-        /// This may be set to not_specified if the prevout is spent.
-        size_t height = validation_type::not_specified;
+        /// The previous output is a coinbase (must verify spender maturity).
+        bool coinbase = false;
+
+        /// Prevout height is used for coinbase maturity and relative lock time.
+        size_t height = 0;
+
+        /// Median time past is used for relative lock time.
+        uint32_t median_time_past = 0;
 
         /// The output cache contains the output referenced by the input point.
-        /// If the cache.value is not_found then the output has not been found.
-        output cache = output{ output::not_found, script{} };
+        /// If the cache.value is not_found (default) the output is not found.
+        output cache = output{};
     };
 
     // Constructors.
@@ -99,7 +98,7 @@ public:
     // Validation.
     //-------------------------------------------------------------------------
 
-    /// True if cached previous output is mature enough to spend from target.
+    /// True if cached previous output is mature enough to spend from height.
     bool is_mature(size_t height) const;
 
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.

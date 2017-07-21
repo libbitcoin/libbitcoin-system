@@ -162,6 +162,7 @@ BOOST_AUTO_TEST_CASE(opcode__opcode_to_string__nop2_or_checklocktimeverify_any_f
     BOOST_REQUIRE(opcode_to_string(opcode::nop2, rule_fork::bip30_rule) == "nop2");
     BOOST_REQUIRE(opcode_to_string(opcode::nop2, rule_fork::bip34_rule) == "nop2");
     BOOST_REQUIRE(opcode_to_string(opcode::nop2, rule_fork::bip66_rule) == "nop2");
+    BOOST_REQUIRE(opcode_to_string(opcode::nop2, rule_fork::bip112_rule) == "nop2");
 }
 
 // Ensure nop2 and checklocktimeverify serialize as 'checklocktimeverify' with bip65 fork.
@@ -170,6 +171,26 @@ BOOST_AUTO_TEST_CASE(opcode__opcode_to_string__nop2_or_checklocktimeverify_bip65
     static_assert(opcode::checklocktimeverify == opcode::nop2, "nop2 drift");
     BOOST_REQUIRE(opcode_to_string(opcode::nop2, rule_fork::bip65_rule) == "checklocktimeverify");
     BOOST_REQUIRE(opcode_to_string(opcode::nop2, rule_fork::all_rules) == "checklocktimeverify");
+}
+
+// Ensure nop3 still serializes as 'nop3' without bip112 fork.
+BOOST_AUTO_TEST_CASE(opcode__opcode_to_string__nop3_or_checksequenceverify_any_fork_except_bip112__nop3)
+{
+    static_assert(opcode::checksequenceverify == opcode::nop3, "nop3 drift");
+    BOOST_REQUIRE(opcode_to_string(opcode::nop3, rule_fork::no_rules) == "nop3");
+    BOOST_REQUIRE(opcode_to_string(opcode::nop3, rule_fork::bip16_rule) == "nop3");
+    BOOST_REQUIRE(opcode_to_string(opcode::nop3, rule_fork::bip30_rule) == "nop3");
+    BOOST_REQUIRE(opcode_to_string(opcode::nop3, rule_fork::bip34_rule) == "nop3");
+    BOOST_REQUIRE(opcode_to_string(opcode::nop3, rule_fork::bip66_rule) == "nop3");
+    BOOST_REQUIRE(opcode_to_string(opcode::nop3, rule_fork::bip65_rule) == "nop3");
+}
+
+// Ensure nop3 and checksequenceverify serialize as 'checksequenceverify' with bip112 fork.
+BOOST_AUTO_TEST_CASE(opcode__opcode_to_string__nop3_or_checksequenceverify_bip112_fork__checksequenceverify)
+{
+    static_assert(opcode::checksequenceverify == opcode::nop3, "nop3 drift");
+    BOOST_REQUIRE(opcode_to_string(opcode::nop3, rule_fork::bip112_rule) == "checksequenceverify");
+    BOOST_REQUIRE(opcode_to_string(opcode::nop3, rule_fork::all_rules) == "checksequenceverify");
 }
 
 // All codes above 'nop10' serialize as hex.
@@ -545,6 +566,23 @@ BOOST_AUTO_TEST_CASE(opcode__opcode_from_string__checklocktimeverify__nop2_or_ch
     opcode out_code;
     BOOST_REQUIRE(opcode_from_string(out_code, "checklocktimeverify"));
     BOOST_REQUIRE(out_code == opcode::nop2);
+}
+
+// nop3/checksequenceverify
+
+BOOST_AUTO_TEST_CASE(opcode__opcode_from_string__nop3__nop3)
+{
+    opcode out_code;
+    BOOST_REQUIRE(opcode_from_string(out_code, "nop3"));
+    BOOST_REQUIRE(out_code == opcode::nop3);
+}
+
+BOOST_AUTO_TEST_CASE(opcode__opcode_from_string__checksequenceverify__nop3_or_checksequenceverify)
+{
+    static_assert(opcode::checksequenceverify == opcode::nop3, "nop3 drift");
+    opcode out_code;
+    BOOST_REQUIRE(opcode_from_string(out_code, "checksequenceverify"));
+    BOOST_REQUIRE(out_code == opcode::nop3);
 }
 
 // opcode_to_hexadecimal

@@ -59,7 +59,7 @@ inline operation::operation(data_chunk&& uncoded, bool minimal)
         reset();
 
     // Revert data if opcode_from_data produced a numeric encoding.
-    if (minimal && is_numeric(code_))
+    if (minimal && !is_payload(code_))
     {
         data_.clear();
         data_.shrink_to_fit();
@@ -75,7 +75,7 @@ inline operation::operation(const data_chunk& uncoded, bool minimal)
         reset();
 
     // Revert data if opcode_from_data produced a numeric encoding.
-    if (minimal && is_numeric(code_))
+    if (minimal && !is_payload(code_))
     {
         data_.clear();
         data_.shrink_to_fit();
@@ -199,7 +199,7 @@ inline opcode operation::opcode_from_size(size_t size)
         return static_cast<opcode>(size);
     else if (size <= max_uint8)
         return opcode::push_one_size;
-    else if(size <= max_uint16)
+    else if (size <= max_uint16)
         return opcode::push_two_size;
     else
         return opcode::push_four_size;
@@ -209,18 +209,34 @@ inline opcode operation::minimal_opcode_from_data(const data_chunk& data)
 {
     const auto size = data.size();
 
-    if (size != 1)
-        return opcode_from_size(size);
+    if (size == 1)
+    {
+        const auto value = data.front();
 
-    const auto code = static_cast<opcode>(data.front());
-    return is_numeric(code) ? code : opcode_from_size(size);
+        if (value == number::negative_1)
+            return opcode::push_negative_1;
+
+        if (value == number::positive_0)
+            return  opcode::push_size_0;
+
+        if (value >= number::positive_1 && value <= number::positive_16)
+            return opcode_from_positive(value);
+    }
+
+    // Nominal encoding is minimal for multiple bytes and non-numeric values.
+    return opcode_from_size(size);
+}
+
+inline opcode operation::nominal_opcode_from_data(const data_chunk& data)
+{
+    return opcode_from_size(data.size());
 }
 
 inline opcode operation::opcode_from_data(const data_chunk& data,
     bool minimal)
 {
     return minimal ? minimal_opcode_from_data(data) :
-        opcode_from_size(data.size());
+        nominal_opcode_from_data(data);
 }
 
 inline opcode operation::opcode_from_positive(uint8_t value)
@@ -245,6 +261,15 @@ inline bool operation::is_push(opcode code)
     BC_CONSTEXPR auto op_96 = static_cast<uint8_t>(opcode::push_positive_16);
     const auto value = static_cast<uint8_t>(code);
     return value <= op_96 && value != op_80;
+}
+
+// [1..78]
+inline bool operation::is_payload(opcode code)
+{
+    BC_CONSTEXPR auto op_1 = static_cast<uint8_t>(opcode::push_size_1);
+    BC_CONSTEXPR auto op_78 = static_cast<uint8_t>(opcode::push_four_size);
+    const auto value = static_cast<uint8_t>(code);
+    return value >= op_1 && value <= op_78;
 }
 
 // [97..255]
@@ -393,6 +418,11 @@ inline bool operation::is_oversized() const
 inline bool operation::is_minimal_push() const
 {
     return code_ == minimal_opcode_from_data(data_);
+}
+
+inline bool operation::is_nominal_push() const
+{
+    return code_ == nominal_opcode_from_data(data_);
 }
 
 } // namespace machine

@@ -36,7 +36,6 @@ if (norm == text) { out_code = opcode::code; return true; }
 #define RETURN_IF_OPCODE_OR_ALIAS(text, alias, code) \
 if (norm == text || norm == alias) { out_code = opcode::code; return true; }
 
-// TODO: convert this to a static map (with exception for nop2).
 std::string opcode_to_string(opcode value, uint32_t active_forks)
 {
     static const auto push_zero = static_cast<uint8_t>(opcode::reserved_80);
@@ -312,8 +311,9 @@ std::string opcode_to_string(opcode value, uint32_t active_forks)
         case opcode::checklocktimeverify:
             return script::is_enabled(active_forks, rule_fork::bip65_rule) ?
                 "checklocktimeverify" : "nop2";
-        case opcode::nop3:
-            return "nop3";
+        case opcode::checksequenceverify:
+            return script::is_enabled(active_forks, rule_fork::bip112_rule) ?
+                "checksequenceverify" : "nop3";
         case opcode::nop4:
             return "nop4";
         case opcode::nop5:
@@ -403,7 +403,7 @@ std::string opcode_to_string(opcode value, uint32_t active_forks)
     }
 }
 
-// TODO: convert this to a static map.
+// This converts only names, not any data for push codes.
 bool opcode_from_string(opcode& out_code, const std::string& value)
 {
     // Normalize to ASCII lower case.
@@ -589,7 +589,7 @@ bool opcode_from_string(opcode& out_code, const std::string& value)
     RETURN_IF_OPCODE("checkmultisigverify", checkmultisigverify);
     RETURN_IF_OPCODE("nop1", nop1);
     RETURN_IF_OPCODE_OR_ALIAS("checklocktimeverify", "nop2", checklocktimeverify);
-    RETURN_IF_OPCODE("nop3", nop3);
+    RETURN_IF_OPCODE_OR_ALIAS("checksequenceverify", "nop3", checksequenceverify);
     RETURN_IF_OPCODE("nop4", nop4);
     RETURN_IF_OPCODE("nop5", nop5);
     RETURN_IF_OPCODE("nop6", nop6);

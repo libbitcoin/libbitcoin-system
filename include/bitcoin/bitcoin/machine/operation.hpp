@@ -99,12 +99,16 @@ public:
     // Utilities.
     //-------------------------------------------------------------------------
 
-    /// Compute consensus (non-minimal) data opcode based on size alone.
+    /// Compute nominal data opcode based on size alone.
     static opcode opcode_from_size(size_t size);
 
     /// Compute the minimal data opcode for a given chunk of data.
-    /// If a numeric code is used then corresponding data must be set to empty.
+    /// Caller should clear data if converting to non-payload opcode.
     static opcode minimal_opcode_from_data(const data_chunk& data);
+
+    /// Compute the nominal data opcode for a given chunk of data.
+    /// Restricted to sized data, avoids conversion to numeric opcodes.
+    static opcode nominal_opcode_from_data(const data_chunk& data);
 
     /// Convert the [1..16] value to the corresponding opcode (or undefined).
     static opcode opcode_from_positive(uint8_t value);
@@ -114,6 +118,7 @@ public:
 
     /// Categories of opcodes.
     static bool is_push(opcode code);
+    static bool is_payload(opcode code);
     static bool is_counted(opcode code);
     static bool is_numeric(opcode code);
     static bool is_positive(opcode code);
@@ -131,6 +136,7 @@ public:
     bool is_relaxed_push() const;
     bool is_oversized() const;
     bool is_minimal_push() const;
+    bool is_nominal_push() const;
 
 protected:
     operation(opcode code, data_chunk&& data, bool valid);

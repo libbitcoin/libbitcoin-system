@@ -132,6 +132,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::coinbase_maturity, "immature coinbase spent" },
         { error::spend_exceeds_value, "spend exceeds value of inputs" },
         { error::transaction_embedded_sigop_limit, "too many transaction embedded signature operations" },
+        { error::sequence_locked, "transaction currently locked" },
 
         // connect input
         { error::invalid_script, "invalid script" },
@@ -222,7 +223,14 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::op_check_locktime_verify3, "op_check_locktime_verify3" },
         { error::op_check_locktime_verify4, "op_check_locktime_verify4" },
         { error::op_check_locktime_verify5, "op_check_locktime_verify5" },
-        { error::op_check_locktime_verify6, "op_check_locktime_verify6" }
+        { error::op_check_locktime_verify6, "op_check_locktime_verify6" },
+        { error::op_check_sequence_verify1, "op_check_sequence_verify1" },
+        { error::op_check_sequence_verify2, "op_check_sequence_verify2" },
+        { error::op_check_sequence_verify3, "op_check_sequence_verify3" },
+        { error::op_check_sequence_verify4, "op_check_sequence_verify4" },
+        { error::op_check_sequence_verify5, "op_check_sequence_verify5" },
+        { error::op_check_sequence_verify6, "op_check_sequence_verify6" },
+        { error::op_check_sequence_verify7, "op_check_sequence_verify7" }
     };
 
     const auto message = messages.find(ev);

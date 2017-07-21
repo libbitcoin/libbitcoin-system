@@ -19,6 +19,8 @@
 #include <bitcoin/bitcoin/machine/operation.hpp>
 
 #include <string>
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/machine/opcode.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -97,35 +99,117 @@ inline bool is_push_token(const std::string& token)
     return token.size() > 1 && token.front() == '[' && token.back() == ']';
 }
 
-inline std::string trim_push(const std::string& token)
+inline bool is_text_token(const std::string& token)
+{
+    return token.size() > 1 && token.front() == '\'' && token.back() == '\'';
+}
+
+inline bool is_valid_data_size(opcode code, size_t size)
+{
+    BC_CONSTEXPR auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
+    const auto value = static_cast<uint8_t>(code);
+    return value > op_75 || value == size;
+}
+
+inline std::string trim_token(const std::string& token)
 {
     BITCOIN_ASSERT(token.size() > 1);
-
-    // The removal of spaces in data is a compatability break with our v2.
     return std::string(token.begin() + 1, token.end() - 1);
 }
 
+inline string_list split_push_token(const std::string& token)
+{
+    return split(trim_token(token), ".", false);
+}
+
+static bool opcode_from_data_prefix(opcode& out_code,
+    const std::string& prefix, const data_chunk& data)
+{
+    BC_CONSTEXPR auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
+    const auto size = data.size();
+    out_code = operation::opcode_from_size(size);
+
+    if (prefix == "0")
+    {
+        return size <= op_75;
+    }
+    else if (prefix == "1")
+    {
+        out_code = opcode::push_one_size;
+        return size <= max_uint8;
+    }
+    else if (prefix == "2")
+    {
+        out_code = opcode::push_two_size;
+        return size <= max_uint16;
+    }
+    else if (prefix == "4")
+    {
+        out_code = opcode::push_four_size;
+        return size <= max_uint32;
+    }
+
+    return false;
+}
+
+static bool data_from_number_token(data_chunk& out_data,
+    const std::string& token)
+{
+    try
+    {
+        out_data = number(boost::lexical_cast<int64_t>(token)).data();
+        return true;
+    }
+    catch (const boost::bad_lexical_cast&)
+    {
+        return false;
+    }
+}
+
+// The removal of spaces in v3 data is a compatability break with our v2.
 bool operation::from_string(const std::string& mnemonic)
 {
     reset();
 
     if (is_push_token(mnemonic))
     {
-        if (decode_base16(data_, trim_push(mnemonic)) && !is_oversized())
-        {
-            code_ = minimal_opcode_from_data(data_);
-            valid_ = true;
+        // Data encoding uses single token (with optional non-minimality).
+        const auto parts = split_push_token(mnemonic);
 
-            // Revert data if opcode_from_data produced a numeric encoding.
-            if (is_numeric(code_))
+        if (parts.size() == 1)
+        {
+            // Extract operation using nominal data size encoding.
+            if (decode_base16(data_, parts[0]))
             {
-                data_.clear();
-                data_.shrink_to_fit();
+                code_ = nominal_opcode_from_data(data_);
+                valid_ = true;
             }
         }
+        else if (parts.size() == 2)
+        {
+            // Extract operation using explicit data size encoding.
+            valid_ = decode_base16(data_, parts[1]) &&
+                opcode_from_data_prefix(code_, parts[0], data_);
+        }
+    }
+    else if (is_text_token(mnemonic))
+    {
+        const auto text = trim_token(mnemonic);
+        data_ = data_chunk{ text.begin(), text.end() };
+        code_ = nominal_opcode_from_data(data_);
+        valid_ = true;
     }
     else if (opcode_from_string(code_, mnemonic))
     {
+        // push_one_size, push_two_size and push_four_size succeed with empty.
+        // push_size_1 through push_size_75 always fail because they are empty.
+        valid_ = is_valid_data_size(code_, data_.size());
+    }
+    else if (data_from_number_token(data_, mnemonic))
+    {
+        // [-1, 0, 1..16] integers captured by opcode_from_string, others here.
+        // Otherwise minimal_opcode_from_data could convert integers here.
+        code_ = nominal_opcode_from_data(data_);
         valid_ = true;
     }
 
@@ -193,16 +277,36 @@ void operation::to_data(writer& sink) const
     sink.write_bytes(data_);
 }
 
+static std::string opcode_to_prefix(opcode code, const data_chunk& data)
+{
+    // If opcode is minimal for a size-based encoding, do not set a prefix.
+    if (code == operation::opcode_from_size(data.size()))
+        return "";
+
+    switch (code)
+    {
+        case opcode::push_one_size:
+            return "1.";
+        case opcode::push_two_size:
+            return "2.";
+        case opcode::push_four_size:
+            return "4.";
+        default:
+            return "0.";
+    }
+}
+
+// The removal of spaces in v3 data is a compatability break with our v2.
 std::string operation::to_string(uint32_t active_forks) const
 {
-    // The removal of spaces in data is a compatibility break with our v2.
     if (!valid_)
         return "<invalid>";
 
     if (data_.empty())
         return opcode_to_string(code_, active_forks);
 
-    return "[" + encode_base16(data_) + "]";
+    // Data encoding uses single token with explicit size prefix as required.
+    return "[" + opcode_to_prefix(code_, data_) + encode_base16(data_) + "]";
 }
 
 } // namespace machine
