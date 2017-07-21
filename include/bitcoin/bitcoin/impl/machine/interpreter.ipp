@@ -781,7 +781,7 @@ inline interpreter::result interpreter::op_check_multisig(program& program)
 inline interpreter::result interpreter::op_check_locktime_verify(
     program& program)
 {
-    // nop2 is subsumed by checklocktimeverify when bip65 fork is active.
+    // BIP65: nop2 subsumed by checklocktimeverify when bip65 fork is active.
     if (!chain::script::is_enabled(program.forks(), rule_fork::bip65_rule))
         return op_nop(opcode::nop2);
 
@@ -791,29 +791,30 @@ inline interpreter::result interpreter::op_check_locktime_verify(
     if (input_index >= tx.inputs().size())
         return error::op_check_locktime_verify1;
 
-    // BIP65: the nSequence field of the txin is 0xffffffff.
+    // BIP65: the tx sequence is 0xffffffff.
     if (tx.inputs()[input_index].is_final())
         return error::op_check_locktime_verify2;
 
     // BIP65: the stack is empty.
-    // BIP65: extend the (signed) CLTV script number range to 5 bytes.
-    number locktime;
-    if (!program.top(locktime, max_cltv_number_size))
+    // BIP65: extend the (signed) script number range to 5 bytes.
+    number stack;
+    if (!program.top(stack, max_check_locktime_verify_number_size))
         return error::op_check_locktime_verify3;
 
-    // BIP65: the top item on the stack is less than 0.
-    if (locktime < 0)
+    // BIP65: the top stack item is negative.
+    if (stack < 0)
         return error::op_check_locktime_verify4;
 
-    // The value is positive, so cast is safe.
-    const auto stack = static_cast<uint64_t>(locktime.int64());
+    // The top stack item is positive, so cast is safe.
+    const auto locktime = static_cast<uint64_t>(stack.int64());
 
-    // BIP65: the stack lock-time type differs from that of tx nLockTime.
-    if ((stack < locktime_threshold) != (tx.locktime() < locktime_threshold))
+    // BIP65: the stack locktime type differs from that of tx.
+    if ((locktime < locktime_threshold) !=
+        (tx.locktime() < locktime_threshold))
         return error::op_check_locktime_verify5;
 
-    // BIP65: the top stack item is greater than the tx's nLockTime.
-    return stack > tx.locktime() ? error::op_check_locktime_verify6 :
+    // BIP65: the stack locktime is greater than the tx locktime.
+    return (locktime > tx.locktime()) ? error::op_check_locktime_verify6 :
         error::success;
 }
 
