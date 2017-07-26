@@ -45,7 +45,6 @@
 #include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
-#include <bitcoin/bitcoin/utility/timer.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -471,11 +470,7 @@ hash_digest transaction::hash(uint32_t sighash_type) const
 
 bool transaction::is_coinbase() const
 {
-    if (inputs_.empty())
-        return false;
-
-    const auto& prevout = inputs_.front().previous_output();
-    return (inputs_.size() == 1) && prevout.is_null();
+    return inputs_.size() == 1 && inputs_.front().previous_output().is_null();
 }
 
 // True if coinbase and has invalid input[0] script size.
@@ -513,12 +508,6 @@ bool transaction::all_inputs_final() const
     return std::all_of(inputs_.begin(), inputs_.end(), finalized);
 }
 
-bool transaction::is_final(size_t block_height) const
-{
-    const auto next_block_time = static_cast<uint32_t>(zulu_time());
-    return is_final(block_height, next_block_time);
-}
-
 bool transaction::is_final(size_t block_height, uint32_t block_time) const
 {
     const auto max_locktime = [=]()
@@ -528,6 +517,21 @@ bool transaction::is_final(size_t block_height, uint32_t block_time) const
     };
 
     return locktime_ == 0 || locktime_ < max_locktime() || all_inputs_final();
+}
+
+bool transaction::is_locked(size_t block_height,
+    uint32_t median_time_past) const
+{
+    if (version_ < relative_locktime_min_version || is_coinbase())
+        return false;
+
+    const auto locked = [block_height, median_time_past](const input& input)
+    {
+        return input.is_locked(block_height, median_time_past);
+    };
+
+    // If any input is relative time locked the transaction is as well.
+    return std::any_of(inputs_.begin(), inputs_.end(), locked);
 }
 
 // This is not a consensus rule, just detection of an irrational use.
@@ -806,24 +810,21 @@ code transaction::accept(bool transaction_pool) const
 }
 
 // These checks assume that prevout caching is completed on all tx.inputs.
-// Flags for tx pool calls should be based on the current blockchain height.
 code transaction::accept(const chain_state& state, bool transaction_pool) const
 {
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip30 = state.is_enabled(rule_fork::bip30_rule);
+    const auto bip68 = state.is_enabled(rule_fork::bip68_rule);
 
-    //*************************************************************************
-    // CONSENSUS:
     // We don't need to allow tx pool acceptance of an unspent duplicate
-    // because tx pool validation is not strinctly a matter of consensus.
-    //*************************************************************************
+    // because tx pool inclusion cannot be required by consensus.
     const auto duplicates = state.is_enabled(rule_fork::allow_collisions) &&
         !transaction_pool;
 
     if (transaction_pool && state.is_under_checkpoint())
         return error::premature_validation;
 
-    if (transaction_pool && !is_final(state.height()))
+    if (transaction_pool && !is_final(state.height(), state.median_time_past()))
         return error::transaction_non_final;
 
     //*************************************************************************
@@ -849,6 +850,9 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
 
     else if (is_overspent())
         return error::spend_exceeds_value;
+
+    else if (bip68 && is_locked(state.height(), state.median_time_past()))
+        return error::sequence_locked;
 
     // This recomputes sigops to include p2sh from prevouts if bip16 is true.
     else if (transaction_pool && signature_operations(bip16) > max_block_sigops)

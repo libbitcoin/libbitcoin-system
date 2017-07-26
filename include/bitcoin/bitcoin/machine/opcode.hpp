@@ -217,6 +217,7 @@ enum class opcode : uint8_t
     nop2 = 177,
     checklocktimeverify = nop2,
     nop3 = 178,
+    checksequenceverify = nop3,
     nop4 = 179,
     nop5 = 180,
     nop6 = 181,

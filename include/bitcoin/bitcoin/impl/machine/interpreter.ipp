@@ -781,7 +781,7 @@ inline interpreter::result interpreter::op_check_multisig(program& program)
 inline interpreter::result interpreter::op_check_locktime_verify(
     program& program)
 {
-    // nop2 is subsumed by checklocktimeverify when bip65 fork is active.
+    // BIP65: nop2 subsumed by checklocktimeverify when bip65 fork is active.
     if (!chain::script::is_enabled(program.forks(), rule_fork::bip65_rule))
         return op_nop(opcode::nop2);
 
@@ -791,30 +791,82 @@ inline interpreter::result interpreter::op_check_locktime_verify(
     if (input_index >= tx.inputs().size())
         return error::op_check_locktime_verify1;
 
-    // BIP65: the nSequence field of the txin is 0xffffffff.
+    // BIP65: the tx sequence is 0xffffffff.
     if (tx.inputs()[input_index].is_final())
         return error::op_check_locktime_verify2;
 
     // BIP65: the stack is empty.
-    // BIP65: extend the (signed) CLTV script number range to 5 bytes.
-    number locktime;
-    if (!program.top(locktime, max_cltv_number_size))
+    // BIP65: extend the (signed) script number range to 5 bytes.
+    number stack;
+    if (!program.top(stack, max_check_locktime_verify_number_size))
         return error::op_check_locktime_verify3;
 
-    // BIP65: the top item on the stack is less than 0.
-    if (locktime < 0)
+    // BIP65: the top stack item is negative.
+    if (stack < 0)
         return error::op_check_locktime_verify4;
 
-    // The value is positive, so cast is safe.
-    const auto stack = static_cast<uint64_t>(locktime.int64());
+    // The top stack item is positive, so cast is safe.
+    const auto locktime = static_cast<uint64_t>(stack.int64());
 
-    // BIP65: the stack lock-time type differs from that of tx nLockTime.
-    if ((stack < locktime_threshold) != (tx.locktime() < locktime_threshold))
+    // BIP65: the stack locktime type differs from that of tx.
+    if ((locktime < locktime_threshold) !=
+        (tx.locktime() < locktime_threshold))
         return error::op_check_locktime_verify5;
 
-    // BIP65: the top stack item is greater than the tx's nLockTime.
-    return stack > tx.locktime() ? error::op_check_locktime_verify6 :
+    // BIP65: the stack locktime is greater than the tx locktime.
+    return (locktime > tx.locktime()) ? error::op_check_locktime_verify6 :
         error::success;
+}
+
+inline interpreter::result interpreter::op_check_sequence_verify(
+    program& program)
+{
+    // BIP112: nop3 subsumed by checksequenceverify when bip112 fork is active.
+    if (!chain::script::is_enabled(program.forks(), rule_fork::bip112_rule))
+        return op_nop(opcode::nop3);
+
+    const auto& tx = program.transaction();
+    const auto input_index = program.input_index();
+
+    if (input_index >= tx.inputs().size())
+        return error::op_check_sequence_verify1;
+
+    // BIP112: the stack is empty.
+    // BIP112: extend the (signed) script number range to 5 bytes.
+    number stack;
+    if (!program.top(stack, max_check_sequence_verify_number_size))
+        return error::op_check_sequence_verify2;
+
+    // BIP112: the top stack item is negative.
+    if (stack < 0)
+        return error::op_check_sequence_verify3;
+
+    // The top stack item is positive, so cast is safe.
+    const auto sequence = static_cast<uint64_t>(stack.int64());
+
+    // BIP112: the stack sequence is disabled, treat as nop3.
+    if ((sequence & relative_locktime_disabled) != 0)
+        return op_nop(opcode::nop3);
+
+    // BIP112: the stack sequence is enabled and tx version less than 2.
+    if (tx.version() < relative_locktime_min_version)
+        return error::op_check_sequence_verify4;
+
+    const auto tx_sequence = tx.inputs()[input_index].sequence();
+
+    // BIP112: the transaction sequence is disabled.
+    if ((tx_sequence & relative_locktime_disabled) != 0)
+        return error::op_check_sequence_verify5;
+
+    // BIP112: the stack sequence type differs from that of tx input.
+    if ((sequence & relative_locktime_time_locked) !=
+        (tx_sequence & relative_locktime_time_locked))
+        return error::op_check_sequence_verify6;
+
+    // BIP112: the masked stack sequence is greater than the tx sequence.
+    return (sequence & relative_locktime_mask) >
+        (tx_sequence & relative_locktime_mask) ?
+        error::op_check_sequence_verify7 : error::success;
 }
 
 // It is expected that the compiler will produce a very efficient jump table.
@@ -1107,7 +1159,8 @@ inline interpreter::result interpreter::run_op(const operation& op,
             return op_nop(code);
         case opcode::checklocktimeverify:
             return op_check_locktime_verify(program);
-        case opcode::nop3:
+        case opcode::checksequenceverify:
+            return op_check_sequence_verify(program);
         case opcode::nop4:
         case opcode::nop5:
         case opcode::nop6:

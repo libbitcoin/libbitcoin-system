@@ -73,15 +73,29 @@ inline bool is_bip30_exception(const checkpoint& check, bool testnet)
 inline bool allow_collisions(const hash_digest& hash, bool testnet)
 {
     return
-        ((testnet && hash == testnet_bip34_activation_checkpoint.hash()) ||
-        (!testnet && hash == mainnet_bip34_activation_checkpoint.hash()));
+        ((testnet && hash == testnet_bip34_active_checkpoint.hash()) ||
+        (!testnet && hash == mainnet_bip34_active_checkpoint.hash()));
 }
 
 inline bool allow_collisions(size_t height, bool testnet)
 {
     return
-        ((testnet && height == testnet_bip34_activation_checkpoint.height()) ||
-        (!testnet && height == mainnet_bip34_activation_checkpoint.height()));
+        ((testnet && height == testnet_bip34_active_checkpoint.height()) ||
+        (!testnet && height == mainnet_bip34_active_checkpoint.height()));
+}
+
+inline bool bip9_bit0_active(const hash_digest& hash, bool testnet)
+{
+    return
+        ((testnet && hash == testnet_bip9_bit0_active_checkpoint.hash()) ||
+        (!testnet && hash == mainnet_bip9_bit0_active_checkpoint.hash()));
+}
+
+inline bool bip9_bit0_active(size_t height, bool testnet)
+{
+    return
+        ((testnet && height == testnet_bip9_bit0_active_checkpoint.height()) ||
+        (!testnet && height == mainnet_bip9_bit0_active_checkpoint.height()));
 }
 
 inline bool bip34(size_t height, bool frozen, bool testnet)
@@ -127,12 +141,21 @@ chain_state::activations chain_state::activation(const data& values,
     const auto frozen = script::is_enabled(forks, rule_fork::bip90_rule);
     const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
 
-    // Declare version predicates.
-    const auto ge_2 = [](uint32_t version) { return version >= bip34_version; };
-    const auto ge_3 = [](uint32_t version) { return version >= bip66_version; };
-    const auto ge_4 = [](uint32_t version) { return version >= bip65_version; };
+    //*************************************************************************
+    // CONSENSUS: Though unspecified in bip34, the satoshi implementation
+    // performed this comparison using the signed integer version value.
+    //*************************************************************************
+    const auto ge = [](uint32_t value, size_t version)
+    {
+        return static_cast<int32_t>(value) >= version;
+    };
 
-    // Compute version summaries.
+    // Declare bip34-based version predicates.
+    const auto ge_2 = [=](uint32_t value) { return ge(value, bip34_version); };
+    const auto ge_3 = [=](uint32_t value) { return ge(value, bip66_version); };
+    const auto ge_4 = [=](uint32_t value) { return ge(value, bip65_version); };
+
+    // Compute bip34-based activation version summaries.
     const auto count_2 = std::count_if(history.begin(), history.end(), ge_2);
     const auto count_3 = std::count_if(history.begin(), history.end(), ge_3);
     const auto count_4 = std::count_if(history.begin(), history.end(), ge_4);
@@ -185,10 +208,16 @@ chain_state::activations chain_state::activation(const data& values,
         result.forks |= (rule_fork::bip65_rule & forks);
     }
 
-    // allow_collisions is activated above the bip34 checkpoint.
+    // allow_collisions is active above the bip34 checkpoint only.
     if (allow_collisions(values.allow_collisions_hash, testnet))
     {
         result.forks |= (rule_fork::allow_collisions & forks);
+    }
+
+    // bip9_bit0 forks are enforced above the bip9_bit0 checkpoint.
+    if (bip9_bit0_active(values.bip9_bit0_hash, testnet))
+    {
+        result.forks |= (rule_fork::bip9_bit0_group & forks);
     }
 
     // version 4/3/2 enforced based on 95% of preceding 1000 mainnet blocks.
@@ -222,9 +251,7 @@ size_t chain_state::bits_count(size_t height, uint32_t forks)
 size_t chain_state::version_count(size_t height, uint32_t forks)
 {
     if (script::is_enabled(forks, rule_fork::bip90_rule) ||
-        (!script::is_enabled(forks, rule_fork::bip34_rule) &&
-         !script::is_enabled(forks, rule_fork::bip65_rule) &&
-         !script::is_enabled(forks, rule_fork::bip66_rule)))
+        !script::is_enabled(forks, rule_fork::bip34_activations))
     {
         return 0;
     }
@@ -251,11 +278,23 @@ size_t chain_state::collision_height(size_t height, uint32_t forks)
     const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
 
     const auto bip34_height = testnet ?
-        testnet_bip34_activation_checkpoint.height() :
-        mainnet_bip34_activation_checkpoint.height();
+        testnet_bip34_active_checkpoint.height() :
+        mainnet_bip34_active_checkpoint.height();
 
-    // Require collision hash for heights above historical bip34 activation.
+    // Require collision hash at heights above historical bip34 activation.
     return height > bip34_height ? bip34_height : map::unrequested;
+}
+
+size_t chain_state::bip9_bit0_height(size_t height, uint32_t forks)
+{
+    const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
+
+    const auto activation_height = testnet ?
+        testnet_bip9_bit0_active_checkpoint.height() :
+        mainnet_bip9_bit0_active_checkpoint.height();
+
+    // Require bip9_bit0 hash at heights above historical bip9_bit0 activation.
+    return height > activation_height ? activation_height : map::unrequested;
 }
 
 // median_time_past
@@ -410,6 +449,9 @@ chain_state::map chain_state::get_map(size_t height,
     // The checkpoint above which tx hash collisions are allowed to occur.
     map.allow_collisions_height = collision_height(height, forks);
 
+    // The checkpoint above which bip9_bit0 rules are enforced.
+    map.bip9_bit0_height = bip9_bit0_height(height, forks);
+
     return map;
 }
 
@@ -424,6 +466,10 @@ uint32_t chain_state::signal_version(uint32_t forks)
 
     if (script::is_enabled(forks, rule_fork::bip34_rule))
         return bip34_version;
+
+    // Signal bip9 bit0 if any of the group is configured.
+    if (script::is_enabled(forks, rule_fork::bip9_bit0_group))
+        return bip9_version_base | bip9_version_bit0;
 
     return first_version;
 }
@@ -464,6 +510,7 @@ chain_state::data chain_state::to_pool(const chain_state& top)
     // Replace previous block state with tx pool chain state for next height.
     // Only height and version used by tx pool, others promotable or unused.
     // Preserve data.allow_collisions_hash promotion.
+    // Preserve data.bip9_bit0_hash promotion.
     data.height = height;
     data.hash = null_hash;
     data.bits.self = proof_of_work_limit;
@@ -500,9 +547,13 @@ chain_state::data chain_state::to_block(const chain_state& pool,
     data.version.self = header.version();
     data.timestamp.self = header.timestamp();
 
-    // Cache hash of bip34 height block, otherwise just use preceding state.
+    // Cache hash of bip34 height block, otherwise use preceding state.
     if (allow_collisions(data.height, testnet))
         data.allow_collisions_hash = data.hash;
+
+    // Cache hash of bip9 bit0 height block, otherwise use preceding state.
+    if (bip9_bit0_active(data.height, testnet))
+        data.bip9_bit0_hash = data.hash;
 
     return data;
 }
@@ -534,9 +585,13 @@ chain_state::data chain_state::to_header(const chain_state& parent,
     data.version.self = header.version();
     data.timestamp.self = header.timestamp();
 
-    // Cache hash of bip34 height block, otherwise just use preceding state.
+    // Cache hash of bip34 height block, otherwise use preceding state.
     if (allow_collisions(data.height, testnet))
         data.allow_collisions_hash = data.hash;
+
+    // Cache hash of bip9 bit0 height block, otherwise use preceding state.
+    if (bip9_bit0_active(data.height, testnet))
+        data.bip9_bit0_hash = data.hash;
 
     return data;
 }

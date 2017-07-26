@@ -80,6 +80,9 @@ public:
 
         /// mainnet: 227931, testnet: 21111 (or map::unrequested)
         size_t allow_collisions_height;
+
+        /// mainnet: 419328, testnet: 770112 (or map::unrequested)
+        size_t bip9_bit0_height;
     };
 
     /// Values used to populate chain state at the target height.
@@ -93,6 +96,9 @@ public:
 
         /// Hash of the allow_collisions block or null_hash if unrequested.
         hash_digest allow_collisions_hash;
+
+        /// Hash of the bip9_bit0 block or null_hash if unrequested.
+        hash_digest bip9_bit0_hash;
 
         /// Values must be ordered by height with high (block - 1) last.
         struct
@@ -175,6 +181,7 @@ private:
     static size_t timestamp_count(size_t height, uint32_t forks);
     static size_t retarget_height(size_t height, uint32_t forks);
     static size_t collision_height(size_t height, uint32_t forks);
+    static size_t bip9_bit0_height(size_t height, uint32_t forks);
 
     static data to_pool(const chain_state& top);
     static data to_block(const chain_state& pool, const block& block);
