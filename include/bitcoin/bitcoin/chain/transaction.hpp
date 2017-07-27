@@ -171,8 +171,8 @@ public:
     bool is_double_spend(bool include_unconfirmed) const;
     bool is_dusty(uint64_t minimum_output_value) const;
     bool is_missing_previous_outputs() const;
-    bool is_final(size_t block_height) const;
     bool is_final(size_t block_height, uint32_t block_time) const;
+    bool is_locked(size_t block_height, uint32_t median_time_past) const;
     bool is_locktime_conflict() const;
 
     code check(bool transaction_pool=true) const;
@@ -192,11 +192,11 @@ protected:
 
 private:
     typedef std::shared_ptr<hash_digest> hash_ptr;
-    typedef boost::optional<size_t> optional_size;
+    typedef boost::optional<uint64_t> optional_value;
 
     hash_ptr hash_cache() const;
-    optional_size total_input_value_cache() const;
-    optional_size total_output_value_cache() const;
+    optional_value total_input_value_cache() const;
+    optional_value total_output_value_cache() const;
 
     uint32_t version_;
     uint32_t locktime_;
@@ -205,8 +205,8 @@ private:
 
     // These share a mutex as they are not expected to contend.
     mutable hash_ptr hash_;
-    mutable optional_size total_input_value_;
-    mutable optional_size total_output_value_;
+    mutable optional_value total_input_value_;
+    mutable optional_value total_output_value_;
     mutable upgrade_mutex mutex_;
 };
 

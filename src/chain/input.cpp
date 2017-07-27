@@ -322,6 +322,28 @@ bool input::is_final() const
     return sequence_ == max_input_sequence;
 }
 
+bool input::is_locked(size_t block_height, uint32_t median_time_past) const
+{
+    if ((sequence_ & relative_locktime_disabled) != 0)
+        return false;
+
+    // bip68: a minimum block-height constraint over the input's age.
+    const auto minimum = (sequence_ & relative_locktime_mask);
+    const auto& prevout = previous_output_.validation;
+
+    if ((sequence_ & relative_locktime_time_locked) != 0)
+    {
+        // Median time past must be monotonically-increasing by block.
+        BITCOIN_ASSERT(median_time_past >= prevout.median_time_past);
+        const auto age_seconds = median_time_past - prevout.median_time_past;
+        return age_seconds < (minimum << relative_locktime_seconds_shift);
+    }
+
+    BITCOIN_ASSERT(block_height >= prevout.height);
+    const auto age_blocks = block_height - prevout.height;
+    return age_blocks < minimum;
+}
+
 size_t input::signature_operations(bool bip16_active) const
 {
     auto sigops = script_.sigops(false);
