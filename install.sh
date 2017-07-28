@@ -46,7 +46,7 @@ ZLIB_ARCHIVE="v1.2.9.tar.gz"
 
 # PNG archive.
 #------------------------------------------------------------------------------
-PNG_URL="http://downloads.sourceforge.net/project/libpng/libpng16/1.6.29/libpng-1.6.29.tar.xz"
+PNG_URL="http://downloads.sourceforge.net/project/libpng/libpng16/older-releases/1.6.29/libpng-1.6.29.tar.xz"
 PNG_ARCHIVE="libpng-1.6.29.tar.xz"
 
 # QREncode archive.
