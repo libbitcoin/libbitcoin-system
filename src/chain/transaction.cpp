@@ -52,6 +52,8 @@ namespace chain {
 
 using namespace bc::machine;
 
+const uint64_t transaction::validation::undetermined_offset = 0;
+
 // Read a length-prefixed collection of inputs or outputs from the source.
 template<class Source, class Put>
 bool read(Source& source, std::vector<Put>& puts, bool wire, bool witness)

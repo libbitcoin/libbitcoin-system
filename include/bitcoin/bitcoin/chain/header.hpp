@@ -49,9 +49,11 @@ public:
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
-        size_t height = 0;
-        uint32_t median_time_past = 0;
+        bool simulate = false;
+        uint64_t originator = 0;
         chain_state::ptr state = nullptr;
+        uint32_t median_time_past = 0;
+        size_t height = 0;
     };
 
     // Constructors.

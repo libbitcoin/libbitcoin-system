@@ -53,22 +53,22 @@ public:
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
-        uint64_t offset = 0;
+        static const uint64_t undetermined_offset;
+
+        bool simulate = false;
         uint64_t originator = 0;
-        code error = error::not_found;
+        code error = error::success;
         chain_state::ptr state = nullptr;
+        uint64_t offset = undetermined_offset;
 
-        // The transaction is an unspent duplicate.
-        bool duplicate = false;
+        /// The block tx exists in the store.
+        bool exists = false;
 
-        // The unconfirmed tx exists in the store.
+        /// The block tx is valid at block's current fork state.
         bool pooled = false;
 
-        // The unconfirmed tx is validated at the block's current fork state.
-        bool current = false;
-
-        // Similate organization and instead just validate the transaction.
-        bool simulate = false;
+        /// The block tx is an unspent duplicate in the block's ancestry.
+        bool duplicate = false;
     };
 
     // Constructors.

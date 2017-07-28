@@ -36,14 +36,13 @@ class BC_API output_point
 public:
 
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
-    struct validation_type
+    struct validation
     {
-        /// An output is spent if a valid transaction has a valid claim on it.
-        /// When validating blocks only long chain blocks can have a claim.
-        /// When validating memory pool tx another mempool tx can have a claim.
+        /// Must be false if confirmed is false.
+        /// output spender's tx->block is indexed or confirmed not above fork. 
         bool spent = false;
 
-        /// A spend is confirmed if spender is in long chain (not memory pool).
+        /// output->tx->block is indexed or confirmed not above fork point.
         bool confirmed = false;
 
         /// The previous output is a coinbase (must verify spender maturity).
@@ -57,7 +56,7 @@ public:
 
         /// The output cache contains the output referenced by the input point.
         /// If the cache.value is not_found (default) the output is not found.
-        output cache = output{};
+        output cache;
     };
 
     // Constructors.
@@ -102,7 +101,7 @@ public:
     bool is_mature(size_t height) const;
 
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
-    mutable validation_type validation;
+    mutable validation validation;
 
 protected:
     // So that input may call reset from its own.

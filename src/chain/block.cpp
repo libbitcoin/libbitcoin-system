@@ -548,7 +548,7 @@ uint64_t block::subsidy(size_t height, bool retarget)
 // Returns max_size_t in case of overflow or unpopulated chain state.
 size_t block::signature_operations() const
 {
-    const auto state = validation.state;
+    const auto state = header_.validation.state;
     const auto bip16 = state->is_enabled(rule_fork::bip16_rule);
     const auto bip141 = state->is_enabled(rule_fork::bip141_rule);
     return state ? signature_operations(bip16, bip141) : max_size_t;
@@ -944,7 +944,7 @@ code block::check() const
 
 code block::accept(bool transactions, bool header) const
 {
-    const auto state = validation.state;
+    const auto state = header_.validation.state;
     return state ? accept(*state, transactions, header) :
         error::operation_failed;
 }
@@ -1004,7 +1004,7 @@ code block::accept(const chain_state& state, bool transactions,
 
 code block::connect() const
 {
-    const auto state = validation.state;
+    const auto state = header_.validation.state;
     return state ? connect(*state) : error::operation_failed;
 }
 
