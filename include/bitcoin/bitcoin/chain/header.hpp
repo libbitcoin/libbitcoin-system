@@ -49,6 +49,7 @@ public:
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
+        bool pooled = false;
         bool simulate = false;
         bool duplicate = false;
         uint64_t originator = 0;
