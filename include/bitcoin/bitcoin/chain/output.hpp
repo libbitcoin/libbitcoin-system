@@ -63,10 +63,13 @@ public:
             spender_indexed = (value == indexed_true);
         }
 
-        bool spent(size_t fork_height, bool allow_indexed) const
+        /// Set fork_height to max_size_t for tx pool validation.
+        bool spent(size_t fork_height) const
         {
-            return (spender_indexed && allow_indexed) ||
-                (spender_height <= fork_height);
+            const auto relevant = spender_height <= fork_height;
+            const auto for_pool = fork_height == max_size_t;
+            const auto unspent = spender_height != not_spent;
+            return (spender_indexed && !for_pool) || (relevant && !unspent);
         }
 
         // TODO: simplify interface and reduce storage by spender_indexed
