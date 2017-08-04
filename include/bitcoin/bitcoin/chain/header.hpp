@@ -49,14 +49,18 @@ public:
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
-        bool pooled = false;
         bool simulate = false;
-        bool duplicate = false;
+        size_t height = 0;
+        uint32_t median_time_past = 0;
         uint64_t originator = 0;
         code error = error::success;
         chain_state::ptr state = nullptr;
-        uint32_t median_time_past = 0;
-        size_t height = 0;
+
+        /// Existing header, always valid (don't validate, update vs. create).
+        bool pooled = false;
+
+        /// The header is indexed (reject).
+        bool duplicate = false;
     };
 
     // Constructors.

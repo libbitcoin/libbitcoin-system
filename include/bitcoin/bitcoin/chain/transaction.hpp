@@ -60,13 +60,13 @@ public:
         code error = error::success;
         chain_state::ptr state = nullptr;
 
-        /// The tx exists in the store if not undertermined (don't create it).
+        /// The tx exists if not undertermined (used to attach it to a block).
         uint64_t offset = undetermined_offset;
 
-        /// An existing tx is valid at current fork state (don't validate).
+        /// Existing tx is valid for forks (don't validate, update vs. create).
         bool pooled = false;
 
-        /// The block tx is confirmed in ancestry or pool tx pooled (reject).
+        /// The tx is indexed, or pooled (for forks) for pool query, (reject).
         bool duplicate = false;
     };
 
