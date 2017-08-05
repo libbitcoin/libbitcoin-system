@@ -56,6 +56,9 @@ public:
         code error = error::success;
         chain_state::ptr state = nullptr;
 
+        /// Transactions are populated (don't download).
+        bool populated = false;
+
         /// Existing header, always valid (don't validate, update vs. create).
         bool pooled = false;
 
