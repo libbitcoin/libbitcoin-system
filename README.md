@@ -120,6 +120,13 @@ $ ./install.sh
 
 Libbitcoin is now installed in `/usr/local/`.
 
+##### Installing from Formula
+
+Instead of building, libbitcoin can be installed from a formula:
+```sh
+$ brew install libbitcoin
+```
+
 #### Using MacPorts
 
 First install [MacPorts](https://www.macports.org/install.php).
