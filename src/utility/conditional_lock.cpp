@@ -23,6 +23,11 @@
 
 namespace libbitcoin {
 
+conditional_lock::conditional_lock(bool lock)
+  : conditional_lock(lock ? std::make_shared<shared_mutex>() : nullptr)
+{
+}
+
 conditional_lock::conditional_lock(std::shared_ptr<shared_mutex> mutex_ptr)
   : mutex_ptr_(mutex_ptr)
 {
