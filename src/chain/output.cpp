@@ -274,13 +274,13 @@ void output::invalidate_cache() const
     ///////////////////////////////////////////////////////////////////////////
 }
 
-payment_address output::address() const
+payment_address output::address(uint8_t p2kh_version, uint8_t p2sh_version) const
 {
-    const auto value = addresses();
+    const auto value = addresses(p2kh_version, p2sh_version);
     return value.empty() ? payment_address{} : value.front();
 }
 
-payment_address::list output::addresses() const
+payment_address::list output::addresses(uint8_t p2kh_version, uint8_t p2sh_version) const
 {
     ///////////////////////////////////////////////////////////////////////////
     // Critical Section
@@ -291,7 +291,7 @@ payment_address::list output::addresses() const
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_.unlock_upgrade_and_lock();
         addresses_ = std::make_shared<payment_address::list>(
-            payment_address::extract_output(script_));
+            payment_address::extract_output(script_, p2kh_version, p2sh_version));
         mutex_.unlock_and_lock_upgrade();
         //---------------------------------------------------------------------
     }
