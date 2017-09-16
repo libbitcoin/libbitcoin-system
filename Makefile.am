@@ -182,6 +182,8 @@ src_libbitcoin_la_SOURCES = \
     src/wallet/ek_private.cpp \
     src/wallet/ek_public.cpp \
     src/wallet/ek_token.cpp \
+    src/wallet/electrum.cpp \
+    src/wallet/electrum_dictionary.cpp \
     src/wallet/encrypted_keys.cpp \
     src/wallet/hd_private.cpp \
     src/wallet/hd_public.cpp \
@@ -319,6 +321,7 @@ test_libbitcoin_test_SOURCES = \
     test/wallet/bitcoin_uri.cpp \
     test/wallet/ec_private.cpp \
     test/wallet/ec_public.cpp \
+    test/wallet/electrum.cpp \
     test/wallet/encrypted_keys.cpp \
     test/wallet/hd_private.cpp \
     test/wallet/hd_public.cpp \
@@ -587,6 +590,8 @@ include_bitcoin_bitcoin_wallet_HEADERS = \
     include/bitcoin/bitcoin/wallet/ek_private.hpp \
     include/bitcoin/bitcoin/wallet/ek_public.hpp \
     include/bitcoin/bitcoin/wallet/ek_token.hpp \
+    include/bitcoin/bitcoin/wallet/electrum.hpp \
+    include/bitcoin/bitcoin/wallet/electrum_dictionary.hpp \
     include/bitcoin/bitcoin/wallet/encrypted_keys.hpp \
     include/bitcoin/bitcoin/wallet/hd_private.hpp \
     include/bitcoin/bitcoin/wallet/hd_public.hpp \
