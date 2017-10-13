@@ -107,10 +107,14 @@ public:
     void set_script(chain::script&& value);
 
     /// The first payment address extracted (may be invalid).
-    wallet::payment_address address() const;
+    wallet::payment_address address(
+        uint8_t p2kh_version=wallet::payment_address::mainnet_p2kh,
+        uint8_t p2sh_version=wallet::payment_address::mainnet_p2sh) const;
 
     /// The payment addresses extracted from this output as a standard script.
-    wallet::payment_address::list addresses() const;
+    wallet::payment_address::list addresses(
+        uint8_t p2kh_version=wallet::payment_address::mainnet_p2kh,
+        uint8_t p2sh_version=wallet::payment_address::mainnet_p2sh) const;
 
     // Validation.
     //-------------------------------------------------------------------------
