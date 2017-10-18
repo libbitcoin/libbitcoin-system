@@ -65,6 +65,9 @@ before_install:
     - if [[ $TRAVIS_OS_NAME == osx     ]]; then OSX=true; fi
     - if [[ $TRAVIS_OS_NAME == linux   ]]; then LINUX=true; fi
 
+    # Update homebrew.
+    - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then brew update; fi
+
 install:
 
     # Export CC/CXX to control gcc version.
