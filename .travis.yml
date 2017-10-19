@@ -66,7 +66,7 @@ before_install:
     - if [[ $TRAVIS_OS_NAME == linux   ]]; then LINUX=true; fi
 
     # Update homebrew.
-    - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then brew update; fi
+    - if [[ $OSX   && $CLANG             ]]; then brew update; fi
 
 install:
 
