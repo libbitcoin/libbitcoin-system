@@ -588,4 +588,19 @@ BOOST_AUTO_TEST_CASE(script__native__block_438513_tx__valid)
     BOOST_REQUIRE_EQUAL(result.value(), error::success);
 }
 
+BOOST_AUTO_TEST_CASE(script__pattern__multisig_verify_pr811__valid)
+{
+	// generated multisig script
+    static const auto encoded_script = "522103dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac8642102440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c2103624505c6cc3967352cce480d8550490dd68519cd019066a4c302fdfb7d1c993453ae";
+
+    data_chunk decoded_script;
+    BOOST_REQUIRE(decode_base16(decoded_script, encoded_script));
+
+    auto scr = script::factory(decoded_script, false);
+
+    BOOST_REQUIRE(scr.is_valid());
+
+    BOOST_REQUIRE(machine::script_pattern::pay_multisig == scr.pattern());
+}
+
 BOOST_AUTO_TEST_SUITE_END()
