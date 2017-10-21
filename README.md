@@ -55,6 +55,8 @@ $ sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
 $ sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
 $ sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-4.8 50
 ```
+_Note: For ubuntu 16.04 use default g++ compiler (g++-5), avoiding boost incompatibility_
+
 Next install the [build system](http://wikipedia.org/wiki/GNU_build_system) (Automake minimum 1.14) and git:
 ```sh
 $ sudo apt-get install build-essential autoconf automake libtool pkg-config git
