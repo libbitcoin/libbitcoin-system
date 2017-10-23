@@ -309,7 +309,7 @@ payment_address::list payment_address::extract_output(
         {
             list addresses;
             const auto& ops = script.operations();
-            
+
             // Push 1 to 16 addresses.
             for (auto op = ops.begin() + 1; op != ops.end() - 2; ++op)
                 addresses.emplace_back(ec_public{ op->data() }, p2kh_version);
