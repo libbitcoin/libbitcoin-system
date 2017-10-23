@@ -743,7 +743,7 @@ bool script::is_pay_multisig_pattern(const operation::list& ops)
     if (op_m < op_1 || op_m > op_n || op_n < op_1 || op_n > op_16)
         return false;
 
-    const auto number = op_n - op_1 + 1;
+    const auto number = op_n - op_1 + 1u;
     const auto points = op_count - 3u;
 
     if (number != points)
