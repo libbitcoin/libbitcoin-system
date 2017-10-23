@@ -218,6 +218,15 @@ BOOST_AUTO_TEST_CASE(script__clear__non_empty__empty)
     BOOST_REQUIRE(instance.empty());
 }
 
+BOOST_AUTO_TEST_CASE(script__pattern__two_of_three_multisig__match)
+{
+    script instance;
+    instance.from_string("2 [03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864] [02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c] [03624505c6cc3967352cce480d8550490dd68519cd019066a4c302fdfb7d1c9934] 3 checkmultisig");
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(script::is_pay_multisig_pattern(instance.operations()));
+    BOOST_REQUIRE(instance.pattern() == machine::script_pattern::pay_multisig);
+}
+
 // Data-driven test.
 //------------------------------------------------------------------------------
 
