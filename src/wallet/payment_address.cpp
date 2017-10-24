@@ -292,6 +292,7 @@ payment_address payment_address::extract(const chain::script& script,
         // --------------------------------------------------------------------
 
         // TODO: extract addresses into a vector result.
+        // Bare multisig is not tracked in association with any address.
         case script_pattern::pay_multisig:
             return{};
 
@@ -319,11 +320,13 @@ payment_address payment_address::extract(const chain::script& script,
         // sign
         // --------------------------------------------------------------------
 
-        // TODO: extract addresses into a vector result.
+        // There are no addresses in sign_multisig (can get from prevout).
+        // Bare multisig is not tracked in association with any address.
         case script_pattern::sign_multisig:
             return{};
 
-        // There is no address in a sign_public_key script.
+        // There is no address in a sign_public_key (can get from prevout).
+        // TODO: server should extract from prevout and track (legacy).
         case script_pattern::sign_public_key:
             return{};
 
@@ -340,6 +343,7 @@ payment_address payment_address::extract(const chain::script& script,
             return payment_address(point, p2kh_version);
         }
 
+        // All p2sh scripts are tracked using the script hash only.
         case script_pattern::sign_script_hash:
             hash = bitcoin_short_hash(script.back().data());
             return payment_address(hash, p2sh_version);

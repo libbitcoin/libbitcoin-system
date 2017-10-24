@@ -823,8 +823,10 @@ bool script::is_sign_script_hash_pattern(const operation::list& ops)
     if (!redeem.from_data(redeem_data, false))
         return false;
 
-    // Is the redeem script a common output script?
+    // TODO: multiple recursion wouldn't make sense here.
     const auto redeem_script_pattern = redeem.pattern();
+
+    // Is the redeem script a common output script?
     return redeem_script_pattern == script_pattern::pay_multisig
         || redeem_script_pattern == script_pattern::pay_public_key
         || redeem_script_pattern == script_pattern::pay_key_hash
