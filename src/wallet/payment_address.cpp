@@ -259,19 +259,18 @@ payment_address::list payment_address::extract_input(
 {
     const auto pattern = script.input_pattern();
 
-    // TODO: Notification/history can use outputs and prevouts only.
     switch (pattern)
     {
         case script_pattern::sign_multisig:
         {
             // There are no addresses in sign_multisig script, signatures only.
-            // Notification/history can use prevout pay_multisig public keys.
+            // Tracking can obtain addresses by correlating previous output.
             return{};
         }
         case script_pattern::sign_public_key:
         {
             // There is no address in sign_public_key script, signature only.
-            // Notification/history can use prevout pay_public_key key.
+            // Tracking can obtain the address by correlating previous output.
             return{};
         }
         case script_pattern::sign_key_hash:
@@ -283,6 +282,7 @@ payment_address::list payment_address::extract_input(
         }
         case script_pattern::sign_script_hash:
         {
+            // P2SH address only, not addresses within the embedded script.
             return
             {
                 { bitcoin_short_hash(script.back().data()), p2sh_version }
@@ -302,7 +302,6 @@ payment_address::list payment_address::extract_output(
 {
     const auto pattern = script.output_pattern();
 
-    // TODO: Notification/history can use outputs and prevouts only.
     switch (pattern)
     {
         case script_pattern::pay_multisig:
