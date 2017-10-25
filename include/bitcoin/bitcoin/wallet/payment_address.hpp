@@ -57,6 +57,10 @@ public:
     /// supported or the script is itself invalid.
     static payment_address extract(const chain::script& script,
         uint8_t p2kh_version=mainnet_p2kh, uint8_t p2sh_version=mainnet_p2sh);
+    static payment_address extract_input(const chain::script& script,
+        uint8_t p2kh_version=mainnet_p2kh, uint8_t p2sh_version=mainnet_p2sh);
+    static payment_address extract_output(const chain::script& script,
+        uint8_t p2kh_version=mainnet_p2kh, uint8_t p2sh_version=mainnet_p2sh);
 
     /// Constructors.
     payment_address();
