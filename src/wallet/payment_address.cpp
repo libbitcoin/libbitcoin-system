@@ -342,7 +342,6 @@ payment_address::list payment_address::extract_output(
             return{};
         }
     }
-
 }
 
 } // namespace wallet
