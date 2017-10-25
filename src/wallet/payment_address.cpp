@@ -237,120 +237,74 @@ std::ostream& operator<<(std::ostream& out, const payment_address& of)
 payment_address payment_address::extract(const chain::script& script,
     uint8_t p2kh_version, uint8_t p2sh_version)
 {
-    if (!script.is_valid())
-        return{};
+    const auto input = extract_input(script, p2kh_version, p2sh_version);
+    return !input ? extract_output(script, p2kh_version, p2sh_version) : input;
+}
 
-    short_hash hash;
+payment_address payment_address::extract_input(
+    const chain::script& script, uint8_t p2kh_version, uint8_t p2sh_version)
+{
     const auto pattern = script.pattern();
 
-    // Split out the assertions for readability.
-    // We know that the script is valid and can therefore rely on these.
     switch (pattern)
     {
-        // pay
-        // --------------------------------------------------------------------
-        case script_pattern::pay_multisig:
-            break;
-        case script_pattern::pay_public_key:
-            BITCOIN_ASSERT(script.size() == 2);
-            BITCOIN_ASSERT(
-                script[0].data().size() == ec_compressed_size ||
-                script[0].data().size() == ec_uncompressed_size);
-            break;
-        case script_pattern::pay_key_hash:
-            BITCOIN_ASSERT(script.size() == 5);
-            BITCOIN_ASSERT(script[2].data().size() == short_hash_size);
-            break;
-        case script_pattern::pay_script_hash:
-            BITCOIN_ASSERT(script.size() == 3);
-            BITCOIN_ASSERT(script[1].data().size() == short_hash_size);
-            break;
-
-        // sign
-        // --------------------------------------------------------------------
         case script_pattern::sign_multisig:
-            break;
-        case script_pattern::sign_public_key:
-            break;
-        case script_pattern::sign_key_hash:
-            BITCOIN_ASSERT(script.size() == 2);
-            BITCOIN_ASSERT(
-                script[1].data().size() == ec_compressed_size ||
-                script[1].data().size() == ec_uncompressed_size);
-            break;
-        case script_pattern::sign_script_hash:
-            BITCOIN_ASSERT(script.size() > 1);
-            break;
-        case script_pattern::non_standard:
-        default:;
-    }
-
-    // Convert data to hash or point and construct address.
-    switch (pattern)
-    {
-        // pay
-        // --------------------------------------------------------------------
-
-        // TODO: extract addresses into a vector result.
-        // Bare multisig is not tracked in association with any address.
-        case script_pattern::pay_multisig:
-            return{};
-
-        case script_pattern::pay_public_key:
         {
-            const auto& data = script[0].data();
-            if (data.size() == ec_compressed_size)
-            {
-                const auto point = to_array<ec_compressed_size>(data);
-                return payment_address(point, p2kh_version);
-            }
-
-            const auto point = to_array<ec_uncompressed_size>(data);
-            return payment_address(point, p2kh_version);
+            // There are no addresses in sign_multisig script, signatures only.
+            // Tracking can obtain addresses by correlating previous output.
+            return{};
         }
-
-        case script_pattern::pay_key_hash:
-            hash = to_array<short_hash_size>(script[2].data());
-            return payment_address(hash, p2kh_version);
-
-        case script_pattern::pay_script_hash:
-            hash = to_array<short_hash_size>(script[1].data());
-            return payment_address(hash, p2sh_version);
-
-        // sign
-        // --------------------------------------------------------------------
-
-        // There are no addresses in sign_multisig (can get from prevout).
-        // Bare multisig is not tracked in association with any address.
-        case script_pattern::sign_multisig:
-            return{};
-
-        // There is no address in a sign_public_key (can get from prevout).
-        // TODO: server should extract from prevout and track (legacy).
         case script_pattern::sign_public_key:
+        {
+            // There is no address in sign_public_key script, signature only.
+            // Tracking can obtain the address by correlating previous output.
             return{};
-
+        }
         case script_pattern::sign_key_hash:
         {
-            const auto& data = script[1].data();
-            if (data.size() == ec_compressed_size)
-            {
-                const auto point = to_array<ec_compressed_size>(data);
-                return payment_address(point, p2kh_version);
-            }
-
-            const auto point = to_array<ec_uncompressed_size>(data);
-            return payment_address(point, p2kh_version);
+            return{ ec_public{ script[1].data() }, p2kh_version };
         }
-
-        // All p2sh scripts are tracked using the script hash only.
         case script_pattern::sign_script_hash:
-            hash = bitcoin_short_hash(script.back().data());
-            return payment_address(hash, p2sh_version);
-
-        case script_pattern::non_standard:
+        {
+            // P2SH address only, not addresses within the embedded script.
+            return{ bitcoin_short_hash(script.back().data()), p2sh_version };
+        }
         default:
+        {
             return{};
+        }
+    }
+}
+
+payment_address payment_address::extract_output(
+    const chain::script& script, uint8_t p2kh_version, uint8_t p2sh_version)
+{
+    const auto pattern = script.pattern();
+
+    switch (pattern)
+    {
+        case script_pattern::pay_multisig:
+        {
+            // Bare multisig is address-ambiguous and are not tracked.
+            // TODO: return a vector of addresses for full extraction.
+            return{};
+        }
+        case script_pattern::pay_public_key:
+        {
+            return{ ec_public{ script[0].data() }, p2kh_version };
+        }
+        case script_pattern::pay_key_hash:
+        {
+            return{ to_array<short_hash_size>(script[2].data()), p2kh_version };
+        }
+        case script_pattern::pay_script_hash:
+        {
+            return{ to_array<short_hash_size>(script[1].data()), p2sh_version };
+        }
+        default:
+        {
+            return{};
+        }
     }
 }
 

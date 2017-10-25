@@ -282,9 +282,9 @@ payment_address input::address() const
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_.unlock_upgrade_and_lock();
 
-        // TODO: limit this to input patterns.
         address_ = std::make_shared<payment_address>(
-            payment_address::extract(script_));
+            payment_address::extract_input(script_));
+
         mutex_.unlock_and_lock_upgrade();
         //---------------------------------------------------------------------
     }
