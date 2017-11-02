@@ -150,7 +150,7 @@ public:
     static bool is_coinbase_pattern(const operation::list& ops, size_t height);
 
     /// Common output patterns (psh is also consensus).
-    static bool is_null_data_pattern(const operation::list& ops);
+    static bool is_pay_null_data_pattern(const operation::list& ops);
     static bool is_pay_multisig_pattern(const operation::list& ops);
     static bool is_pay_public_key_pattern(const operation::list& ops);
     static bool is_pay_key_hash_pattern(const operation::list& ops);
@@ -163,7 +163,7 @@ public:
     static bool is_sign_script_hash_pattern(const operation::list& ops);
 
     /// Stack factories.
-    static operation::list to_null_data_pattern(data_slice data);
+    static operation::list to_pay_null_data_pattern(data_slice data);
     static operation::list to_pay_public_key_pattern(data_slice point);
     static operation::list to_pay_key_hash_pattern(const short_hash& hash);
     static operation::list to_pay_script_hash_pattern(const short_hash& hash);

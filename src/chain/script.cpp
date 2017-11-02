@@ -732,7 +732,7 @@ bool script::is_coinbase_pattern(const operation::list& ops, size_t height)
 
 // The satoshi client tests for 83 bytes total. This allows for the waste of
 // one byte to represent up to 75 bytes using the push_one_size opcode.
-////bool script::is_null_data_pattern(const operation::list& ops)
+////bool script::is_pay_null_data_pattern(const operation::list& ops)
 ////{
 ////    static constexpr auto op_76 = static_cast<uint8_t>(opcode::push_one_size);
 ////
@@ -743,7 +743,7 @@ bool script::is_coinbase_pattern(const operation::list& ops, size_t height)
 ////}
 
 // The satoshi client enables configurable data size for policy.
-bool script::is_null_data_pattern(const operation::list& ops)
+bool script::is_pay_null_data_pattern(const operation::list& ops)
 {
     return ops.size() == 2
         && ops[0].code() == opcode::return_
@@ -845,7 +845,7 @@ bool script::is_sign_script_hash_pattern(const operation::list& ops)
         && !ops.back().data().empty();
 }
 
-operation::list script::to_null_data_pattern(data_slice data)
+operation::list script::to_pay_null_data_pattern(data_slice data)
 {
     if (data.size() > max_null_data_size)
         return{};
@@ -963,8 +963,8 @@ script_pattern script::output_pattern() const
     if (is_pay_script_hash_pattern(operations_))
         return script_pattern::pay_script_hash;
 
-    if (is_null_data_pattern(operations_))
-        return script_pattern::null_data;
+    if (is_pay_null_data_pattern(operations_))
+        return script_pattern::pay_null_data;
 
     if (is_pay_public_key_pattern(operations_))
         return script_pattern::pay_public_key;

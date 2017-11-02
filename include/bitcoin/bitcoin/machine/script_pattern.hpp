@@ -29,7 +29,7 @@ enum class script_pattern
     /// Null Data
     /// Pubkey Script: OP_RETURN <0 to 80 bytes of data> (formerly 40 bytes)
     /// Null data scripts cannot be spent, so there's no signature script.
-    null_data,
+    pay_null_data,
 
     /// Pay to Multisig [BIP11]
     /// Pubkey script: <m> <A pubkey>[B pubkey][C pubkey...] <n> OP_CHECKMULTISIG

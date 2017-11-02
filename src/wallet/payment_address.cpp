@@ -333,7 +333,7 @@ payment_address::list payment_address::extract_output(
 
         // Bare multisig and null data do not associate a payment address.
         case script_pattern::pay_multisig:
-        case script_pattern::null_data:
+        case script_pattern::pay_null_data:
         case script_pattern::non_standard:
         default:
         {

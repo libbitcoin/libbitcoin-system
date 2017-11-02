@@ -270,7 +270,7 @@ BOOST_AUTO_TEST_CASE(script__empty__default__true)
     BOOST_REQUIRE(instance.empty());
 }
 
-BOOST_AUTO_TEST_CASE(script__empty__empty_operations__true)
+BOOST_AUTO_TEST_CASE(script__empty__no_operations__true)
 {
     script instance(operation::list{});
     BOOST_REQUIRE(instance.empty());
@@ -278,13 +278,13 @@ BOOST_AUTO_TEST_CASE(script__empty__empty_operations__true)
 
 BOOST_AUTO_TEST_CASE(script__empty__non_empty__false)
 {
-    script instance(script::to_null_data_pattern(data_chunk{ 42u }));
+    script instance(script::to_pay_null_data_pattern(data_chunk{ 42u }));
     BOOST_REQUIRE(!instance.empty());
 }
 
 BOOST_AUTO_TEST_CASE(script__clear__non_empty__empty)
 {
-    script instance(script::to_null_data_pattern(data_chunk{ 42u }));
+    script instance(script::to_pay_null_data_pattern(data_chunk{ 42u }));
     BOOST_REQUIRE(!instance.empty());
 
     instance.clear();
@@ -294,9 +294,9 @@ BOOST_AUTO_TEST_CASE(script__clear__non_empty__empty)
 // Pattern matching tests.
 //------------------------------------------------------------------------------
 
-// null_data
+// pay_null_data
 
-BOOST_AUTO_TEST_CASE(script__pattern__null_data_return_only__non_standard)
+BOOST_AUTO_TEST_CASE(script__pattern__pay_null_data_return_only__non_standard)
 {
     script instance;
     instance.from_string(SCRIPT_RETURN);
@@ -306,27 +306,27 @@ BOOST_AUTO_TEST_CASE(script__pattern__null_data_return_only__non_standard)
     BOOST_REQUIRE(instance.pattern() == machine::script_pattern::non_standard);
 }
 
-BOOST_AUTO_TEST_CASE(script__pattern__null_data_empty__null_data)
+BOOST_AUTO_TEST_CASE(script__pattern__pay_null_data_empty__null_data)
 {
     script instance;
     instance.from_string(SCRIPT_RETURN_EMPTY);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance.output_pattern() == machine::script_pattern::null_data);
+    BOOST_REQUIRE(instance.output_pattern() == machine::script_pattern::pay_null_data);
     BOOST_REQUIRE(instance.input_pattern() == machine::script_pattern::non_standard);
-    BOOST_REQUIRE(instance.pattern() == machine::script_pattern::null_data);
+    BOOST_REQUIRE(instance.pattern() == machine::script_pattern::pay_null_data);
 }
 
-BOOST_AUTO_TEST_CASE(script__pattern__null_data_80_bytes__null_data)
+BOOST_AUTO_TEST_CASE(script__pattern__pay_null_data_80_bytes__null_data)
 {
     script instance;
     instance.from_string(SCRIPT_RETURN_80);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance.output_pattern() == machine::script_pattern::null_data);
+    BOOST_REQUIRE(instance.output_pattern() == machine::script_pattern::pay_null_data);
     BOOST_REQUIRE(instance.input_pattern() == machine::script_pattern::non_standard);
-    BOOST_REQUIRE(instance.pattern() == machine::script_pattern::null_data);
+    BOOST_REQUIRE(instance.pattern() == machine::script_pattern::pay_null_data);
 }
 
-BOOST_AUTO_TEST_CASE(script__pattern__null_data_81_bytes__non_standard)
+BOOST_AUTO_TEST_CASE(script__pattern__pay_null_data_81_bytes__non_standard)
 {
     script instance;
     instance.from_string(SCRIPT_RETURN_81);
