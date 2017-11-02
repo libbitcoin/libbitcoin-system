@@ -36,7 +36,7 @@ using namespace bc::machine;
 
 bool is_stealth_script(const script& script)
 {
-    if (!script::is_null_data_pattern(script.operations()))
+    if (!script::is_pay_null_data_pattern(script.operations()))
         return false;
 
     BITCOIN_ASSERT(script.size() == 2);
@@ -132,7 +132,7 @@ bool create_stealth_script(script& out_null_data, const ec_secret& secret,
         std::copy_n(fill.begin(), sizeof(nonce), data.end() - sizeof(nonce));
 
         // Create the stealth script with the current data.
-        out_null_data = script(script::to_null_data_pattern(data));
+        out_null_data = script(script::to_pay_null_data_pattern(data));
 
         // Test for match of filter to stealth script hash prefix.
         if (to_stealth_prefix(field, out_null_data) &&

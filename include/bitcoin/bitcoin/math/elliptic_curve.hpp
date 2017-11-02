@@ -52,7 +52,8 @@ typedef byte_array<ec_signature_size> ec_signature;
 static BC_CONSTEXPR size_t max_der_signature_size = 72;
 typedef data_chunk der_signature;
 
-/// DER encoded signature with sighash byte for input endorsement:
+/// DER encoded signature with sighash byte for contract endorsement:
+static BC_CONSTEXPR size_t min_endorsement_size = 9;
 static BC_CONSTEXPR size_t max_endorsement_size = 73;
 typedef data_chunk endorsement;
 
@@ -145,6 +146,9 @@ bool is_uncompressed_key(data_slice point);
 
 /// Fast detection of compressed or uncompressed public key structure.
 bool is_public_key(data_slice point);
+
+/// Fast detection of endorsement structure (DER with signature hash type).
+bool is_endorsement(const endorsement& endorsement);
 
 // DER parse/encode
 // ----------------------------------------------------------------------------

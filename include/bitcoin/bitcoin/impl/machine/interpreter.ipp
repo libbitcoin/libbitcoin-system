@@ -723,7 +723,7 @@ inline interpreter::result interpreter::op_check_multisig_verify(
         return error::op_check_multisig_verify7;
 
     //*************************************************************************
-    // CONSENSUS: Satoshi bug, discard an extra op/byte, malleability source.
+    // CONSENSUS: Satoshi bug, discard a stack element, malleability source.
     //*************************************************************************
     program.pop();
 
