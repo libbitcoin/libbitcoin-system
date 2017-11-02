@@ -99,7 +99,7 @@ script::script(data_chunk&& encoded, bool prefix)
         return;
     }
 
-    // This is an optimization that avoids streaming the encode bytes.
+    // This is an optimization that avoids streaming the encoded bytes.
     bytes_ = std::move(encoded);
     cached_ = false;
     valid_ = true;
@@ -232,21 +232,21 @@ bool script::from_string(const std::string& mnemonic)
 // Concurrent read/write is not supported, so no critical section.
 void script::from_operations(operation::list&& ops)
 {
-    reset();
-    valid_ = true;
+    ////reset();
     bytes_ = operations_to_data(ops);
     operations_ = std::move(ops);
     cached_ = true;
+    valid_ = true;
 }
 
 // Concurrent read/write is not supported, so no critical section.
 void script::from_operations(const operation::list& ops)
 {
-    reset();
-    valid_ = true;
+    ////reset();
     bytes_ = operations_to_data(ops);
     operations_ = ops;
     cached_ = true;
+    valid_ = true;
 }
 
 // private/static
@@ -671,6 +671,11 @@ bool script::create_endorsement(endorsement& out, const ec_secret& secret,
 // Utilities (static).
 //-----------------------------------------------------------------------------
 
+inline bool endorsed(const operation& op)
+{
+    return is_endorsement(op.data());
+};
+
 bool script::is_push_only(const operation::list& ops)
 {
     const auto push = [](const operation& op)
@@ -718,6 +723,7 @@ bool script::is_coinbase_pattern(const operation::list& ops, size_t height)
 ////        && ops[1].data().size() <= max_null_data_size;
 ////}
 
+// The satoshi client enables configurable data size for policy.
 bool script::is_null_data_pattern(const operation::list& ops)
 {
     return ops.size() == 2
@@ -726,7 +732,10 @@ bool script::is_null_data_pattern(const operation::list& ops)
         && ops[1].data().size() <= max_null_data_size;
 }
 
-// TODO: confirm that the type of data opcode is unrestricted for policy.
+// TODO: expand this to the 20 signature op_check_multisig limit.
+// The current 16 (or 20) limit does not affect server indexing because bare
+// multisig is not indexable and p2sh multisig is byte-limited to 15 sigs.
+// The satoshi client policy limit is 3 signatures for bare multisig.
 bool script::is_pay_multisig_pattern(const operation::list& ops)
 {
     static constexpr auto op_1 = static_cast<uint8_t>(opcode::push_positive_1);
@@ -756,7 +765,7 @@ bool script::is_pay_multisig_pattern(const operation::list& ops)
     return true;
 }
 
-// TODO: confirm that the type of data opcode is unrestricted for policy.
+// The satoshi client considers this non-standard for policy.
 bool script::is_pay_public_key_pattern(const operation::list& ops)
 {
     return ops.size() == 2
@@ -764,7 +773,6 @@ bool script::is_pay_public_key_pattern(const operation::list& ops)
         && ops[1].code() == opcode::checksig;
 }
 
-// TODO: confirm that the type of data opcode is unrestricted for policy.
 bool script::is_pay_key_hash_pattern(const operation::list& ops)
 {
     return ops.size() == 5
@@ -787,51 +795,35 @@ bool script::is_pay_script_hash_pattern(const operation::list& ops)
         && ops[2].code() == opcode::equal;
 }
 
-// The leading zero is wacky satoshi behavior that we must perpetuate.
+// The first push is based on wacky satoshi op_check_multisig behavior that
+// we must perpetuate, though it's appearance here is policy not consensus.
+// Limiting to push_size_0 eliminates pattern ambiguity with little downside.
 bool script::is_sign_multisig_pattern(const operation::list& ops)
 {
     return ops.size() >= 2
         && ops[0].code() == opcode::push_size_0
-        && is_push_only(ops);
+        && std::all_of(ops.begin() + 1, ops.end(), endorsed);
 }
 
 bool script::is_sign_public_key_pattern(const operation::list& ops)
 {
     return ops.size() == 1
-        && is_push_only(ops);
+        && is_endorsement(ops[0].data());
 }
 
 bool script::is_sign_key_hash_pattern(const operation::list& ops)
 {
     return ops.size() == 2
-        && is_push_only(ops)
-        && is_public_key(ops.back().data());
+        && is_endorsement(ops[0].data())
+        && is_public_key(ops[1].data());
 }
 
+// Ambiguous with is_sign_key_hash when second/last op is a valid public key.
 bool script::is_sign_script_hash_pattern(const operation::list& ops)
 {
-    if (ops.size() < 2 || !is_push_only(ops))
-        return false;
-
-    const auto& redeem_data = ops.back().data();
-
-    if (redeem_data.empty())
-        return false;
-
-    script redeem;
-
-    if (!redeem.from_data(redeem_data, false))
-        return false;
-
-    // TODO: multiple recursion wouldn't make sense here.
-    const auto redeem_script_pattern = redeem.pattern();
-
-    // Is the redeem script a common output script?
-    return redeem_script_pattern == script_pattern::pay_multisig
-        || redeem_script_pattern == script_pattern::pay_public_key
-        || redeem_script_pattern == script_pattern::pay_key_hash
-        || redeem_script_pattern == script_pattern::pay_script_hash
-        || redeem_script_pattern == script_pattern::null_data;
+    return ops.size() > 1
+        && std::all_of(ops.begin(), ops.end() - 1, endorsed)
+        && !ops.back().data().empty();
 }
 
 operation::list script::to_null_data_pattern(data_slice data)
@@ -841,8 +833,8 @@ operation::list script::to_null_data_pattern(data_slice data)
 
     return operation::list
     {
-        operation{ opcode::return_ },
-        operation{ to_chunk(data) }
+        { opcode::return_ },
+        { to_chunk(data) }
     };
 }
 
@@ -893,6 +885,10 @@ operation::list script::to_pay_multisig_pattern(uint8_t signatures,
     return to_pay_multisig_pattern(signatures, chunks);
 }
 
+// TODO: expand this to a 20 signature limit.
+// This supports up to 16 signatures, however check_multisig is limited to 20.
+// The embedded script is limited to 520 bytes, an effective limit of 15 for
+// p2sh multisig, which can be as low as 7 when using all uncompressed keys.
 operation::list script::to_pay_multisig_pattern(uint8_t signatures,
     const data_stack& points)
 {
@@ -930,40 +926,53 @@ operation::list script::to_pay_multisig_pattern(uint8_t signatures,
 // Utilities (non-static).
 //-----------------------------------------------------------------------------
 
-// TODO: create output_pattern() and input_pattern() so that each can be tested
-// in isolation, reducing wasteful processing of the others.
-// TODO: implement standardness tests in blockchain, not in system.
-
-// This excludes the bip34 coinbase pattern, which can be tested independently.
+// Caller should test for is_sign_script_hash_pattern when sign_key_hash result
+// as it is possible for an input script to match both patterns.
 script_pattern script::pattern() const
 {
+    const auto input = output_pattern();
+    return input == script_pattern::non_standard ? input_pattern() : input;
+}
+
+// Output patterns are mutually and input unambiguous.
+script_pattern script::output_pattern() const
+{
     // The first operations access must be method-based to guarantee the cache.
-    if (is_null_data_pattern(operations()))
-        return script_pattern::null_data;
-
-    if (is_pay_multisig_pattern(operations_))
-        return script_pattern::pay_multisig;
-
-    if (is_pay_public_key_pattern(operations_))
-        return script_pattern::pay_public_key;
-
-    if (is_pay_key_hash_pattern(operations_))
+    if (is_pay_key_hash_pattern(operations()))
         return script_pattern::pay_key_hash;
 
     if (is_pay_script_hash_pattern(operations_))
         return script_pattern::pay_script_hash;
 
-    if (is_sign_multisig_pattern(operations_))
-        return script_pattern::sign_multisig;
+    if (is_null_data_pattern(operations_))
+        return script_pattern::null_data;
+
+    if (is_pay_public_key_pattern(operations_))
+        return script_pattern::pay_public_key;
+
+    if (is_pay_multisig_pattern(operations_))
+        return script_pattern::pay_multisig;
+
+    return script_pattern::non_standard;
+}
+
+// A sign_key_hash result always implies sign_script_hash as well.
+// The bip34 coinbase pattern is not tested here, must test independently.
+script_pattern script::input_pattern() const
+{
+    // The first operations access must be method-based to guarantee the cache.
+    if (is_sign_key_hash_pattern(operations()))
+        return script_pattern::sign_key_hash;
+
+    // This must follow is_sign_key_hash_pattern for ambiguity comment to hold.
+    if (is_sign_script_hash_pattern(operations_))
+        return script_pattern::sign_script_hash;
 
     if (is_sign_public_key_pattern(operations_))
         return script_pattern::sign_public_key;
 
-    if (is_sign_key_hash_pattern(operations_))
-        return script_pattern::sign_key_hash;
-
-    if (is_sign_script_hash_pattern(operations_))
-        return script_pattern::sign_script_hash;
+    if (is_sign_multisig_pattern(operations_))
+        return script_pattern::sign_multisig;
 
     return script_pattern::non_standard;
 }
@@ -995,7 +1004,7 @@ size_t script::sigops(bool embedded) const
         if (code == opcode::checksig ||
             code == opcode::checksigverify)
         {
-            total++;
+            ++total;
         }
         else if (code == opcode::checkmultisig ||
             code == opcode::checkmultisigverify)
@@ -1096,7 +1105,7 @@ void script::find_and_delete(const data_stack& endorsements)
 
 // An unspendable script is any that can provably not be spent under any
 // circumstance. This allows for exclusion of the output as unspendable.
-// The criteria below are need not be comprehensive but are fast to eval.
+// The criteria below are not be comprehensive but are fast to evaluate.
 bool script::is_unspendable() const
 {
     // The first operations access must be method-based to guarantee the cache.

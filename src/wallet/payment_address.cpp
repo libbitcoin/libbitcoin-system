@@ -234,6 +234,7 @@ std::ostream& operator<<(std::ostream& out, const payment_address& of)
 // Static functions.
 // ----------------------------------------------------------------------------
 
+// Context free input extraction is provably ambiguous (see extract_input).
 payment_address payment_address::extract(const chain::script& script,
     uint8_t p2kh_version, uint8_t p2sh_version)
 {
@@ -241,34 +242,39 @@ payment_address payment_address::extract(const chain::script& script,
     return !input ? extract_output(script, p2kh_version, p2sh_version) : input;
 }
 
+// Context free input extraction is provably ambiguous. See inline comments.
 payment_address payment_address::extract_input(
     const chain::script& script, uint8_t p2kh_version, uint8_t p2sh_version)
 {
-    const auto pattern = script.pattern();
+    // A sign_key_hash result always implies sign_script_hash as well.
+    const auto pattern = script.input_pattern();
 
     switch (pattern)
     {
-        case script_pattern::sign_multisig:
-        {
-            // There are no addresses in sign_multisig script, signatures only.
-            // Tracking can obtain addresses by correlating previous output.
-            return{};
-        }
-        case script_pattern::sign_public_key:
-        {
-            // There is no address in sign_public_key script, signature only.
-            // Tracking can obtain the address by correlating previous output.
-            return{};
-        }
+        // Given lack of context (prevout) sign_key_hash is always ambiguous
+        // with sign_script_hash (though actual conflict seems very unlikely).
+        // A server can differentiate by extracting from the previous output.
         case script_pattern::sign_key_hash:
         {
             return{ ec_public{ script[1].data() }, p2kh_version };
         }
         case script_pattern::sign_script_hash:
         {
-            // P2SH address only, not addresses within the embedded script.
             return{ bitcoin_short_hash(script.back().data()), p2sh_version };
         }
+
+        // There is no address in sign_public_key script (signature only)
+        // and the public key cannot be extracted from the signature.
+        // A server can obtain by extracting from the previous output.
+        case script_pattern::sign_public_key:
+
+        // There are no addresses in sign_multisig script, signatures only.
+        // Nonstandard (non-zero) first op sign_multisig may conflict with
+        // sign_key_hash and/or sign_script_hash (or will be non_standard).
+        // A server can obtain the public keys extracting from the previous
+        // output, but bare multisig does not associate a payment address.
+        case script_pattern::sign_multisig:
+        case script_pattern::non_standard:
         default:
         {
             return{};
@@ -276,23 +282,14 @@ payment_address payment_address::extract_input(
     }
 }
 
+// A server should use this against the prevout instead of using extract_input.
 payment_address payment_address::extract_output(
     const chain::script& script, uint8_t p2kh_version, uint8_t p2sh_version)
 {
-    const auto pattern = script.pattern();
+    const auto pattern = script.output_pattern();
 
     switch (pattern)
     {
-        case script_pattern::pay_multisig:
-        {
-            // Bare multisig is address-ambiguous and are not tracked.
-            // TODO: return a vector of addresses for full extraction.
-            return{};
-        }
-        case script_pattern::pay_public_key:
-        {
-            return{ ec_public{ script[0].data() }, p2kh_version };
-        }
         case script_pattern::pay_key_hash:
         {
             return{ to_array<short_hash_size>(script[2].data()), p2kh_version };
@@ -301,6 +298,16 @@ payment_address payment_address::extract_output(
         {
             return{ to_array<short_hash_size>(script[1].data()), p2sh_version };
         }
+        case script_pattern::pay_public_key:
+        {
+            // pay_public_key is not p2kh but we conflate for tracking.
+            return{ ec_public{ script[0].data() }, p2kh_version };
+        }
+
+        // Bare multisig and null data do not associate a payment address.
+        case script_pattern::pay_multisig:
+        case script_pattern::null_data:
+        case script_pattern::non_standard:
         default:
         {
             return{};

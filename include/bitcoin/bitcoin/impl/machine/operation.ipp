@@ -217,7 +217,7 @@ inline opcode operation::minimal_opcode_from_data(const data_chunk& data)
             return opcode::push_negative_1;
 
         if (value == number::positive_0)
-            return  opcode::push_size_0;
+            return opcode::push_size_0;
 
         if (value >= number::positive_1 && value <= number::positive_16)
             return opcode_from_positive(value);
