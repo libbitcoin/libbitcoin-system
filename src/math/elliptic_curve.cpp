@@ -245,6 +245,12 @@ bool is_even_key(const ec_compressed& point)
     return point.front() == ec_even_sign;
 }
 
+bool is_endorsement(const endorsement& endorsement)
+{
+    const auto size = endorsement.size();
+    return size >= min_endorsement_size && size <= max_endorsement_size;
+}
+
 // DER parse/encode
 // ----------------------------------------------------------------------------
 
