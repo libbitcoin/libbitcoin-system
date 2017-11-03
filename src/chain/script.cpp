@@ -690,11 +690,6 @@ bool script::create_endorsement(endorsement& out, const ec_secret& secret,
 // Utilities (static).
 //-----------------------------------------------------------------------------
 
-inline bool endorsed(const operation& op)
-{
-    return is_endorsement(op.data());
-};
-
 bool script::is_push_only(const operation::list& ops)
 {
     const auto push = [](const operation& op)
@@ -821,7 +816,8 @@ bool script::is_sign_multisig_pattern(const operation::list& ops)
 {
     return ops.size() >= 2
         && ops[0].code() == opcode::push_size_0
-        && std::all_of(ops.begin() + 1, ops.end(), endorsed);
+        && std::all_of(ops.begin() + 1, ops.end(), [](const operation& op)
+            { return is_endorsement(op.data()); });
 }
 
 bool script::is_sign_public_key_pattern(const operation::list& ops)
@@ -837,11 +833,12 @@ bool script::is_sign_key_hash_pattern(const operation::list& ops)
         && is_public_key(ops[1].data());
 }
 
-// Ambiguous with is_sign_key_hash when second/last op is a valid public key.
+// Ambiguous with is_sign_key_hash when second/last op is a public key.
+// Ambiguous with is_sign_public_key_pattern when only op is an endorsement.
 bool script::is_sign_script_hash_pattern(const operation::list& ops)
 {
-    return ops.size() > 1
-        && std::all_of(ops.begin(), ops.end() - 1, endorsed)
+    return !ops.empty()
+        && is_push_only(ops)
         && !ops.back().data().empty();
 }
 

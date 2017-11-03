@@ -283,6 +283,8 @@ payment_address::list payment_address::extract_input(
 
         // There is no address in sign_public_key script (signature only)
         // and the public key cannot be extracted from the signature.
+        // Given lack of context (prevout) sign_public_key is always ambiguous
+        // with sign_script_hash (though actual conflict seems very unlikely).
         // A server can obtain by extracting from the previous output.
         case script_pattern::sign_public_key:
 
