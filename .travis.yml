@@ -29,28 +29,30 @@ matrix:
         - os: linux
           compiler: clang
           env: LINK=dynamic
-          apt:
-            sources:
+          addons:
+            apt:
+              sources:
                 - sourceline: 'ppa:h-rayflood/llvm'
-            packages:
+              packages:
                 - clang-3.4
         - os: linux
           compiler: clang
           env: LINK=static
-          apt:
-            sources:
+          addons:
+            apt:
+              sources:
                 - sourceline: 'ppa:h-rayflood/llvm'
-            packages:
+              packages:
                 - clang-3.4
         - os: linux
           compiler: gcc
           env: LINK=dynamic
-          apt:
         - os: linux
           compiler: gcc
           env: LINK=static
-          apt:
-            packages:
+          addons:
+            apt:
+              packages:
                 - lcov
     fast_finish:
         - true
@@ -72,6 +74,9 @@ install:
 
     # Export CC/CXX to control gcc version.
     - if [[ $GCC                         ]]; then export CC=gcc-4.8; export CXX=g++-4.8; fi
+
+    # Export CC/CXX to control clang version.
+    - if [[ $CLANG                       ]]; then export CC=clang-3.4; export CXX=clang++-3.4; fi
 
     # Download and install packages.
     - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then brew unlink boost; brew install boost; fi
