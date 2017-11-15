@@ -824,7 +824,8 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     if (transaction_pool && state.is_under_checkpoint())
         return error::premature_validation;
 
-    if (transaction_pool && !is_final(state.height(), state.median_time_past()))
+    else if (transaction_pool && !is_final(state.height(),
+        state.median_time_past()))
         return error::transaction_non_final;
 
     //*************************************************************************
