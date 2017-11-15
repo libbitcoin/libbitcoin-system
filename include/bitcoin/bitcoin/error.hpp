@@ -102,6 +102,7 @@ enum error_code_t
     extra_coinbases = 29,
     internal_duplicate = 49,
     block_internal_double_spend = 15,
+    forward_reference = 79,
     merkle_mismatch = 31,
     block_legacy_sigop_limit = 30,
 
