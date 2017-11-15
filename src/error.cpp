@@ -105,6 +105,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::extra_coinbases, "more than one coinbase" },
         { error::internal_duplicate, "matching transaction hashes in block" },
         { error::block_internal_double_spend, "double spend internal to block" },
+        { error::forward_reference, "transactions out of order" },
         { error::merkle_mismatch, "merkle root mismatch" },
         { error::block_legacy_sigop_limit, "too many block legacy signature operations" },
 

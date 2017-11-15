@@ -660,4 +660,54 @@ BOOST_AUTO_TEST_CASE(validate_block__is_distinct_tx_set__partialy_distinct_not_a
 
 BOOST_AUTO_TEST_SUITE_END()
 
+BOOST_AUTO_TEST_SUITE(block_is_forward_reference_tests)
+
+BOOST_AUTO_TEST_CASE(block__is_forward_reference__no_transactions__false)
+{
+    chain::block value;
+    BOOST_REQUIRE(!value.is_forward_reference());
+}
+
+BOOST_AUTO_TEST_CASE(block__is_forward_reference__multiple_empty_transactions__false)
+{
+    chain::block value;
+    value.set_transactions({ { 1, 0, {}, {} }, { 2, 0, {}, {} } });
+    BOOST_REQUIRE(!value.is_forward_reference());
+}
+
+BOOST_AUTO_TEST_CASE(block__is_forward_reference__backward_reference__false)
+{
+    chain::block value;
+    chain::transaction before{ 2, 0, {}, {} };
+    chain::transaction after{ 1, 0, { { { before.hash(), 0 }, {}, 0 } }, {} };
+    value.set_transactions({ before, after });
+    BOOST_REQUIRE(!value.is_forward_reference());
+}
+
+BOOST_AUTO_TEST_CASE(block__is_forward_reference__duplicate_transactions__false)
+{
+    chain::block value;
+    value.set_transactions({ { 1, 0, {}, {} }, { 1, 0, {}, {} } });
+    BOOST_REQUIRE(!value.is_forward_reference());
+}
+
+BOOST_AUTO_TEST_CASE(block__is_forward_reference__coinbase_and_multiple_empty_transactions__false)
+{
+    chain::block value;
+    chain::transaction coinbase{ 1, 0, { { { null_hash, chain::point::null_index }, {}, 0 } }, {} };
+    value.set_transactions({ coinbase, { 2, 0, {}, {} }, { 3, 0, {}, {} } });
+    BOOST_REQUIRE(!value.is_forward_reference());
+}
+
+BOOST_AUTO_TEST_CASE(block__is_forward_reference__forward_reference__true)
+{
+    chain::block value;
+    chain::transaction after{ 2, 0, {}, {} };
+    chain::transaction before{ 1, 0, { { { after.hash(), 0 }, {}, 0 } }, {} };
+    value.set_transactions({ before, after });
+    BOOST_REQUIRE(value.is_forward_reference());
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()
