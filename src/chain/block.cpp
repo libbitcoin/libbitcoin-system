@@ -28,6 +28,8 @@
 #include <numeric>
 #include <type_traits>
 #include <utility>
+#include <unordered_map>
+#include <boost/range/adaptor/reversed.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/chain/compact.hpp>
 #include <bitcoin/bitcoin/chain/input_point.hpp>
@@ -54,6 +56,7 @@ namespace chain {
 
 using namespace bc::config;
 using namespace bc::machine;
+using namespace boost::adaptors;
 
 static const std::string encoded_mainnet_genesis_block =
     "01000000"
@@ -596,6 +599,29 @@ size_t block::non_coinbase_input_count() const
     return std::accumulate(txs.begin() + 1, txs.end(), size_t(0), counter);
 }
 
+//****************************************************************************
+// CONSENSUS: This is only necessary because satoshi stores and queries as it
+// validates, imposing an otherwise unnecessary partial transaction ordering.
+//*****************************************************************************
+bool block::is_forward_reference() const
+{
+    std::unordered_map<hash_digest, bool> hashes(transactions_.size());
+    const auto is_forward = [&hashes](const input& input)
+    {
+        return hashes.count(input.previous_output().hash()) != 0;
+    };
+
+    for (const auto& tx: reverse(transactions_))
+    {
+        hashes.emplace(tx.hash(), true);
+
+        if (std::any_of(tx.inputs().begin(), tx.inputs().end(), is_forward))
+            return true;
+    }
+
+    return false;
+}
+
 // This is an early check that is redundant with block pool accept checks.
 bool block::is_internal_double_spend() const
 {
@@ -721,6 +747,9 @@ code block::check() const
 
     else if (is_extra_coinbases())
         return error::extra_coinbases;
+
+    else if (is_forward_reference())
+        return error::forward_reference;
 
     // This is subset of is_internal_double_spend if collisions cannot happen.
     ////else if (!is_distinct_transaction_set())

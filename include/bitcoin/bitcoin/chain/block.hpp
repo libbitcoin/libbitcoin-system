@@ -161,6 +161,7 @@ public:
     bool is_distinct_transaction_set() const;
     bool is_valid_coinbase_claim(size_t height) const;
     bool is_valid_coinbase_script(size_t height) const;
+    bool is_forward_reference() const;
     bool is_internal_double_spend() const;
     bool is_valid_merkle_root() const;
 
