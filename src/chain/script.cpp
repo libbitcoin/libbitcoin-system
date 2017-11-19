@@ -325,7 +325,7 @@ void script::to_data(writer& sink, bool prefix) const
 {
     // TODO: optimize by always storing the prefixed serialization.
     if (prefix)
-        sink.write_variable_little_endian(satoshi_content_size());
+        sink.write_variable_little_endian(serialized_size(false));
 
     sink.write_bytes(bytes_);
 }
@@ -396,14 +396,9 @@ operation::iterator script::end() const
 // Properties (size, accessors, cache).
 //-----------------------------------------------------------------------------
 
-size_t script::satoshi_content_size() const
-{
-    return bytes_.size();
-}
-
 size_t script::serialized_size(bool prefix) const
 {
-    auto size = satoshi_content_size();
+    auto size = bytes_.size();
 
     if (prefix)
         size += message::variable_uint_size(size);
@@ -1114,7 +1109,7 @@ bool script::is_unspendable() const
 {
     // The first operations access must be method-based to guarantee the cache.
     return (!operations().empty() && operations_[0].code() == opcode::return_)
-        || satoshi_content_size() > max_script_size;
+        || serialized_size(false) > max_script_size;
 }
 
 // Validation.
