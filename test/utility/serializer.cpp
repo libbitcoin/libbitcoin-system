@@ -54,7 +54,6 @@ BOOST_AUTO_TEST_CASE(deserializer_exhaustion)
     data_chunk data(42);
     auto reader = make_safe_deserializer(data.begin(), data.end());
     reader.read_bytes(42);
-
     BOOST_REQUIRE(reader);
     BOOST_REQUIRE(reader.is_exhausted());
     BOOST_REQUIRE_EQUAL(reader.read_byte(), 0u);
@@ -74,9 +73,20 @@ BOOST_AUTO_TEST_CASE(is_exhausted_initialized_nonempty_stream_returns_false)
 {
     data_chunk data(1);
     auto source = make_safe_deserializer(data.begin(), data.end());
-    BOOST_REQUIRE_EQUAL(false, source.is_exhausted());
+    BOOST_REQUIRE(!source.is_exhausted());
     BOOST_REQUIRE((bool)source);
     BOOST_REQUIRE_EQUAL(false, !source);
+}
+
+BOOST_AUTO_TEST_CASE(peek_byte_nonempty_stream_does_not_advance)
+{
+    const uint8_t expected = 0x42;
+    data_chunk data({ expected, 0x00 });
+    auto source = make_safe_deserializer(data.begin(), data.end());
+    BOOST_REQUIRE_EQUAL(source.peek_byte(), expected);
+    BOOST_REQUIRE_EQUAL(source.peek_byte(), expected);
+    BOOST_REQUIRE_EQUAL(source.peek_byte(), expected);
+    BOOST_REQUIRE((bool)source);
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_byte)

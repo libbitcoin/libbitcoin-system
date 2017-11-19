@@ -36,7 +36,18 @@ BOOST_AUTO_TEST_CASE(is_exhausted_initialized_nonempty_stream_returns_false)
 {
     std::stringstream stream("abc");
     istream_reader source(stream);
-    BOOST_REQUIRE_EQUAL(false, source.is_exhausted());
+    BOOST_REQUIRE(!source.is_exhausted());
+}
+
+BOOST_AUTO_TEST_CASE(peek_byte_nonempty_stream_does_not_advance)
+{
+    const uint8_t expected = 'a';
+    std::stringstream stream("ab");
+    istream_reader source(stream);
+    BOOST_REQUIRE_EQUAL(source.peek_byte(), expected);
+    BOOST_REQUIRE_EQUAL(source.peek_byte(), expected);
+    BOOST_REQUIRE_EQUAL(source.peek_byte(), expected);
+    BOOST_REQUIRE((bool)source);
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_byte)
