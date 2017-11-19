@@ -210,6 +210,15 @@ size_t deserializer<Iterator, CheckSafe>::read_size_little_endian()
 //-----------------------------------------------------------------------------
 
 template <typename Iterator, bool CheckSafe>
+uint8_t deserializer<Iterator, CheckSafe>::peek_byte()
+{
+    if (!safe(1))
+        invalidate();
+
+    return valid_ ? *iterator_ : 0;
+}
+
+template <typename Iterator, bool CheckSafe>
 uint8_t deserializer<Iterator, CheckSafe>::read_byte()
 {
     ////return read_forward<1>()[0];
