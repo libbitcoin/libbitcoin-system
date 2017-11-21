@@ -79,13 +79,14 @@ inventory::inventory(inventory_vector::list&& values)
 
 inventory::inventory(const hash_list& hashes, type_id type)
 {
-    const auto map = [type](const hash_digest& hash)
+    inventories_.clear();
+    inventories_.reserve(hashes.size());
+    const auto map = [type, this](const hash_digest& hash)
     {
-        return inventory_vector{ type, hash };
+        inventories_.emplace_back(type, hash);
     };
 
-    inventories_.resize(hashes.size());
-    std::transform(hashes.begin(), hashes.end(), inventories_.begin(), map);
+    std::for_each(hashes.begin(), hashes.end(), map);
 }
 
 inventory::inventory(const std::initializer_list<inventory_vector>& values)

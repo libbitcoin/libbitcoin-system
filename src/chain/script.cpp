@@ -870,13 +870,15 @@ operation::list script::to_pay_script_hash_pattern(const short_hash& hash)
 operation::list script::to_pay_multisig_pattern(uint8_t signatures,
     const point_list& points)
 {
-    const auto conversion = [](const ec_compressed& point)
+    data_stack chunks;
+    chunks.reserve(points.size());
+    const auto conversion = [&chunks](const ec_compressed& point)
     {
-        return to_chunk(point);
+        chunks.push_back(to_chunk(point));
     };
 
-    data_stack chunks(points.size());
-    std::transform(points.begin(), points.end(), chunks.begin(), conversion);
+    // Operation ordering matters, don't use std::transform here.
+    std::for_each(points.begin(), points.end(), conversion);
     return to_pay_multisig_pattern(signatures, chunks);
 }
 

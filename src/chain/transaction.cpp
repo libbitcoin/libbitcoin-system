@@ -756,40 +756,47 @@ bool transaction::is_missing_previous_outputs() const
 
 point::list transaction::previous_outputs() const
 {
-    point::list prevouts(inputs_.size());
-
-    const auto pointer = [](const input& input)
+    point::list prevouts;
+    prevouts.reserve(inputs_.size());
+    const auto pointer = [&prevouts](const input& input)
     {
-        return input.previous_output();
+        prevouts.push_back(input.previous_output());
     };
 
     const auto& ins = inputs_;
-    std::transform(ins.begin(), ins.end(), prevouts.begin(), pointer);
+    std::for_each(ins.begin(), ins.end(), pointer);
     return prevouts;
 }
 
 point::list transaction::missing_previous_outputs() const
 {
     point::list prevouts;
-
-    for (auto& input: inputs_)
+    prevouts.reserve(inputs_.size());
+    const auto accumulator = [&prevouts](const input& input)
     {
         const auto& prevout = input.previous_output();
         const auto missing = !prevout.validation.cache.is_valid();
 
         if (missing && !prevout.is_null())
             prevouts.push_back(prevout);
-    }
+    };
 
+    std::for_each(inputs_.begin(), inputs_.end(), accumulator);
+    prevouts.shrink_to_fit();
     return prevouts;
 }
 
 hash_list transaction::missing_previous_transactions() const
 {
     const auto points = missing_previous_outputs();
-    hash_list hashes(points.size());
-    const auto hasher = [](const output_point& point) { return point.hash(); };
-    std::transform(points.begin(), points.end(), hashes.begin(), hasher);
+    hash_list hashes;
+    hashes.reserve(points.size());
+    const auto hasher = [&hashes](const output_point& point)
+    {
+        return point.hash();
+    };
+
+    std::for_each(points.begin(), points.end(), hasher);
     return distinct(hashes);
 }
 
