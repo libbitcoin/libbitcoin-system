@@ -693,7 +693,7 @@ bool script::is_relaxed_push(const operation::list& ops)
 }
 
 //*****************************************************************************
-// CONSENSUS: BIP34 requires the coinbase script to begin with one byte that
+// CONSENSUS: BIP34 requires coinbase input script to begin with one byte that
 // indicates the height size. This is inconsistent with an extreme future where
 // the size byte overflows. However satoshi actually requires nominal encoding.
 //*****************************************************************************
@@ -704,13 +704,26 @@ bool script::is_coinbase_pattern(const operation::list& ops, size_t height)
         && ops[0].data() == number(height).data();
 }
 
+bool script::is_commitment_pattern(const operation::list& ops)
+{
+    static const auto header = to_big_endian(witness_head);
+
+    // Bytes after commitment are optional with no consensus meaning (bip141).
+    // Commitment is not executable so invalid trailing operations are allowed.
+    return ops.size() > 1
+        && ops[0].code() == opcode::return_
+        && ops[1].code() == opcode::push_size_36
+        && std::equal(header.begin(), header.end(), ops[1].data().begin());
+}
+
 // The satoshi client tests for 83 bytes total. This allows for the waste of
 // one byte to represent up to 75 bytes using the push_one_size opcode.
+// It also allows any number of push ops and limits it to 0 value and 1 per tx.
 ////bool script::is_null_data_pattern(const operation::list& ops)
 ////{
 ////    static constexpr auto op_76 = static_cast<uint8_t>(opcode::push_one_size);
 ////
-////    return ops.size() == 2
+////    return ops.size() >= 2
 ////        && ops[0].code() == opcode::return_
 ////        && static_cast<uint8_t>(ops[1].code()) <= op_76
 ////        && ops[1].data().size() <= max_null_data_size;
@@ -932,6 +945,7 @@ script_pattern script::pattern() const
 }
 
 // Output patterns are mutually and input unambiguous.
+// The bip141 coinbase pattern is not tested here, must test independently.
 script_pattern script::output_pattern() const
 {
     // The first operations access must be method-based to guarantee the cache.

@@ -105,6 +105,16 @@ public:
     size_t serialized_size(bool prefix) const;
     const operation::list& operations() const;
 
+    // Utilities (static).
+    //-------------------------------------------------------------------------
+
+    static bool is_reserved_pattern(const operation::list& ops);
+
+    // Utilities (non-static).
+    //-------------------------------------------------------------------------
+
+    machine::script_pattern pattern() const;
+
 protected:
     // So that input may call reset from its own.
     friend class input;

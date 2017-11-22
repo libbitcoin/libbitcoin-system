@@ -24,6 +24,7 @@
 #include <numeric>
 #include <utility>
 #include <bitcoin/bitcoin/machine/operation.hpp>
+#include <bitcoin/bitcoin/machine/script_pattern.hpp>
 #include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -328,6 +329,29 @@ size_t witness::serialized_size(bool prefix) const
 const operation::list& witness::operations() const
 {
     return operations_;
+}
+
+// Utilities (static).
+//-----------------------------------------------------------------------------
+
+// This applies to a coinbase witness.
+bool witness::is_reserved_pattern(const operation::list& ops)
+{
+    // The (only) coinbase witness must be (arbitrary) 32-byte value (bip141).
+    return ops.size() == 1
+        && ops[0].code() == opcode::push_size_32;
+}
+
+// Utilities (non-static).
+//-----------------------------------------------------------------------------
+
+script_pattern witness::pattern() const
+{
+    // The first operations access must be method-based to guarantee the cache.
+    if (is_reserved_pattern(operations()))
+        return script_pattern::witness_reservation;
+
+    return script_pattern::non_standard;
 }
 
 } // namespace chain

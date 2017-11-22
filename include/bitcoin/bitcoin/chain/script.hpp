@@ -147,6 +147,7 @@ public:
     static bool is_push_only(const operation::list& ops);
     static bool is_relaxed_push(const operation::list& ops);
     static bool is_coinbase_pattern(const operation::list& ops, size_t height);
+    static bool is_commitment_pattern(const operation::list& ops);
 
     /// Common output patterns (psh is also consensus).
     static bool is_null_data_pattern(const operation::list& ops);
