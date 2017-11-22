@@ -299,6 +299,7 @@ bool transaction::from_data(reader& source, bool wire)
         const auto witness = inputs_.size() == witness_marker &&
             source.peek_byte() == witness_flag;
 
+        // This is always enabled so caller should validate with is_segregated.
         if (witness)
         {
             // Skip over the peeked witness flag.
@@ -789,6 +790,13 @@ size_t transaction::signature_operations(bool bip16_active) const
         std::accumulate(outputs_.begin(), outputs_.end(), size_t{0}, out);
 }
 
+size_t transaction::weight() const
+{
+    // Block weight is 3 * Base size * + 1 * Total size (bip141).
+    return base_size_contribution * serialized_size(true, false) +
+        total_size_contribution * serialized_size(true, true);
+}
+
 bool transaction::is_missing_previous_outputs() const
 {
     const auto missing = [](const input& input)
@@ -968,7 +976,8 @@ code transaction::check(bool transaction_pool, bool retarget) const
     else if (transaction_pool && is_internal_double_spend())
         return error::transaction_internal_double_spend;
 
-    else if (transaction_pool && serialized_size(true) >= max_block_size)
+    // TODO: reduce by header, txcount and smallest coinbase size for height.
+    else if (transaction_pool && serialized_size(true, false) >= max_block_size)
         return error::transaction_size_limit;
 
     // We cannot know if bip16 is enabled at this point so we disable it.
@@ -995,10 +1004,15 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip30 = state.is_enabled(rule_fork::bip30_rule);
     const auto bip68 = state.is_enabled(rule_fork::bip68_rule);
+    const auto bip141 = state.is_enabled(rule_fork::bip141_rule);
     const auto revert_bip30 = state.is_enabled(rule_fork::allow_collisions);
 
     if (transaction_pool && state.is_under_checkpoint())
         return error::premature_validation;
+
+    // A segregated tx should appear empty if bip141 is not enabled.
+    if (!bip141 && is_segregated())
+        return error::empty_transaction;
 
     if (transaction_pool && !is_final(state.height(), state.median_time_past()))
         return error::transaction_non_final;
@@ -1035,6 +1049,11 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     // This includes sigops from embedded p2sh script if bip16 is true.
     else if (transaction_pool && signature_operations(bip16) > max_block_sigops)
         return error::transaction_embedded_sigop_limit;
+
+    // This causes second serialized_size(true, false) computation (uncached).
+    // TODO: reduce by header, txcount and smallest coinbase size for height.
+    else if (transaction_pool && bip141 && weight() > max_block_weight)
+        return error::transaction_weight_limit;
 
     else
         return error::success;
