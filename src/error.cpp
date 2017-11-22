@@ -136,6 +136,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::spend_exceeds_value, "spend exceeds value of inputs" },
         { error::transaction_embedded_sigop_limit, "too many transaction embedded signature operations" },
         { error::sequence_locked, "transaction currently locked" },
+        { error::transaction_weight_limit, "transaction weight limit exceeded" },
 
         // connect input
         { error::invalid_script, "invalid script" },
