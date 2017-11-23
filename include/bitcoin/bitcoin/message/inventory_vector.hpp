@@ -36,7 +36,7 @@ class BC_API inventory_vector
 public:
     typedef std::vector<inventory_vector> list;
 
-    enum class type_id : uint64_t
+    enum class type_id : uint32_t
     {
         error = 0,
         transaction = 1,
