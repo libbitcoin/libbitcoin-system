@@ -257,6 +257,10 @@ BC_CONSTEXPR uint8_t string_terminator = 0x00;
 BC_CONSTEXPR uint8_t witness_marker = 0x00;
 BC_CONSTEXPR uint8_t witness_flag = 0x01;
 BC_CONSTEXPR uint32_t witness_head = 0xaa21a9ed;
+BC_CONSTEXPR size_t light_weight_factor = 4;
+BC_CONSTEXPR size_t max_block_weight = light_weight_factor * max_block_size;
+BC_CONSTEXPR size_t base_size_contribution = 3;
+BC_CONSTEXPR size_t total_size_contribution = 1;
 
 // Currency unit constants (uint64_t).
 //-----------------------------------------------------------------------------
