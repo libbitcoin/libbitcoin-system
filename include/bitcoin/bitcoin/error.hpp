@@ -112,6 +112,7 @@ enum error_code_t
     coinbase_value_limit = 41,
     block_embedded_sigop_limit = 52,
     invalid_witness_commitment = 81,
+    block_weight_limit = 82,
 
     // check transaction
     empty_transaction = 20,

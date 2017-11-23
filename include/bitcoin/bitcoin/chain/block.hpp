@@ -155,7 +155,8 @@ public:
     hash_digest generate_merkle_root(bool witness=false) const;
     size_t signature_operations() const;
     size_t signature_operations(bool bip16_active) const;
-    size_t total_inputs(bool with_coinbase=true) const;
+    size_t total_inputs(bool with_coinbase = true) const;
+    size_t weight() const;
 
     bool is_extra_coinbases() const;
     bool is_final(size_t height, uint32_t block_time) const;
@@ -191,6 +192,8 @@ private:
     // These share a mutext as they are not expected to contend.
     mutable boost::optional<bool> segregated_;
     mutable boost::optional<size_t> total_inputs_;
+    mutable boost::optional<size_t> base_size_;
+    mutable boost::optional<size_t> total_size_;
     mutable upgrade_mutex mutex_;
 };
 

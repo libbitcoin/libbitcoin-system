@@ -115,6 +115,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::coinbase_value_limit, "coinbase value too high" },
         { error::block_embedded_sigop_limit, "too many block embedded signature operations" },
         { error::invalid_witness_commitment, "invalid witness commitment" },
+        { error::block_weight_limit, "block weight limit exceeded" },
 
         // check transaction
         { error::empty_transaction, "transaction inputs or outputs empty" },

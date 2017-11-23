@@ -308,16 +308,50 @@ hash_list block::to_hashes(bool witness) const
 // Full block serialization is always canonical encoding.
 size_t block::serialized_size(bool witness) const
 {
+    size_t value;
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    mutex_.lock_upgrade();
+
+    if (witness && total_size_ != boost::none)
+    {
+        value = total_size_.get();
+        mutex_.unlock_upgrade();
+        //---------------------------------------------------------------------
+        return value;
+    }
+
+    if (!witness && base_size_ != boost::none)
+    {
+        value = base_size_.get();
+        mutex_.unlock_upgrade();
+        //---------------------------------------------------------------------
+        return value;
+    }
+
+    mutex_.unlock_upgrade_and_lock();
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
     const auto sum = [witness](size_t total, const transaction& tx)
     {
         return safe_add(total, tx.serialized_size(true, witness));
     };
 
     const auto& txs = transactions_;
-
-    return header_.serialized_size(true) +
+    value = header_.serialized_size(true) +
         message::variable_uint_size(transactions_.size()) +
-        std::accumulate(txs.begin(), txs.end(), size_t{0}, sum);
+        std::accumulate(txs.begin(), txs.end(), size_t(0), sum);
+
+    if (witness)
+        total_size_ = value;
+    else
+        base_size_ = value;
+
+    mutex_.unlock();
+    ///////////////////////////////////////////////////////////////////////////
+
+    return value;
 }
 
 chain::header& block::header()
@@ -360,6 +394,8 @@ void block::set_transactions(const transaction::list& value)
     transactions_ = value;
     segregated_ = boost::none;
     total_inputs_ = boost::none;
+    base_size_ = boost::none;
+    total_size_ = boost::none;
 }
 
 // TODO: see set_header comments.
@@ -368,6 +404,8 @@ void block::set_transactions(transaction::list&& value)
     transactions_ = std::move(value);
     segregated_ = boost::none;
     total_inputs_ = boost::none;
+    base_size_ = boost::none;
+    total_size_ = boost::none;
 }
 
 // Convenience property.
@@ -555,6 +593,13 @@ size_t block::total_inputs(bool with_coinbase) const
     ///////////////////////////////////////////////////////////////////////////
 
     return value;
+}
+
+size_t block::weight() const
+{
+    // Block weight is 3 * Base size * + 1 * Total size (bip141).
+    return base_size_contribution * serialized_size(false) +
+        total_size_contribution * serialized_size(true);
 }
 
 // True if there is another coinbase other than the first tx.
@@ -827,7 +872,8 @@ code block::check() const
     if ((ec = header_.check()))
         return ec;
 
-    else if (serialized_size() > max_block_size)
+    // TODO: relates to total of tx.size(false) (pool cache).
+    else if (serialized_size(false) > max_block_size)
         return error::block_size_limit;
 
     else if (transactions_.empty())
@@ -839,6 +885,7 @@ code block::check() const
     else if (is_extra_coinbases())
         return error::extra_coinbases;
 
+    // TODO: determinable from tx pool graph.
     else if (is_forward_reference())
         return error::forward_reference;
 
@@ -846,9 +893,11 @@ code block::check() const
     ////else if (!is_distinct_transaction_set())
     ////    return error::internal_duplicate;
 
+    // TODO: determinable from tx pool graph.
     else if (is_internal_double_spend())
         return error::block_internal_double_spend;
 
+    // TODO: relates height to tx.hash(false) (pool cache).
     else if (!is_valid_merkle_root())
         return error::merkle_mismatch;
 
@@ -888,10 +937,14 @@ code block::accept(const chain_state& state, bool transactions) const
     else if (state.is_under_checkpoint())
         return error::success;
 
+    // TODO: relates height to total of tx.size(true) (pool cache).
+    else if (bip141 && weight() > max_block_weight)
+        return error::block_weight_limit;
+
     else if (bip34 && !is_valid_coinbase_script(state.height()))
         return error::coinbase_height_mismatch;
 
-    // TODO: relates height to total of tx.fee (pool cache tx.fee).
+    // TODO: relates height to total of tx.fee (pool cach).
     else if (!is_valid_coinbase_claim(state.height()))
         return error::coinbase_value_limit;
 
@@ -899,11 +952,12 @@ code block::accept(const chain_state& state, bool transactions) const
     else if (!is_final(state.height(), block_time))
         return error::block_non_final;
 
+    // TODO: relates height to tx.hash(true) (pool cache).
     else if (bip141 && !is_valid_witness_commitment())
         return error::invalid_witness_commitment;
 
     // TODO: determine if performance benefit is worth excluding sigops here.
-    // TODO: relates block limit to total of tx.sigops (pool cache tx.sigops).
+    // TODO: relates block limit to total of tx.sigops (pool cache).
     else if (transactions && (signature_operations(bip16) > max_block_sigops))
         return error::block_embedded_sigop_limit;
 
