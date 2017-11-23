@@ -273,7 +273,7 @@ inline uint8_t operation::opcode_to_positive(opcode code)
     return static_cast<uint8_t>(code) - op_81 + 1;
 }
 
-// [0..79, 81..96]
+// opcode: [0..79, 81..96]
 inline bool operation::is_push(opcode code)
 {
     BC_CONSTEXPR auto op_80 = static_cast<uint8_t>(opcode::reserved_80);
@@ -282,7 +282,7 @@ inline bool operation::is_push(opcode code)
     return value <= op_96 && value != op_80;
 }
 
-// [1..78]
+// opcode: [1..78]
 inline bool operation::is_payload(opcode code)
 {
     BC_CONSTEXPR auto op_1 = static_cast<uint8_t>(opcode::push_size_1);
@@ -291,7 +291,7 @@ inline bool operation::is_payload(opcode code)
     return value >= op_1 && value <= op_78;
 }
 
-// [97..255]
+// opcode: [97..255]
 inline bool operation::is_counted(opcode code)
 {
     BC_CONSTEXPR auto op_97 = static_cast<uint8_t>(opcode::nop);
@@ -299,13 +299,19 @@ inline bool operation::is_counted(opcode code)
     return value >= op_97;
 }
 
-// [-1, 1..16]
+// stack: [[], 1..16]
+inline bool operation::is_version(opcode code)
+{
+    return code == opcode::push_size_0 || is_positive(code);
+}
+
+// stack: [-1, 1..16]
 inline bool operation::is_numeric(opcode code)
 {
     return is_positive(code) || code == opcode::push_negative_1;
 }
 
-// [1..16]
+// stack: [1..16]
 inline bool operation::is_positive(opcode code)
 {
     BC_CONSTEXPR auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
@@ -314,6 +320,7 @@ inline bool operation::is_positive(opcode code)
     return value >= op_81 && value <= op_96;
 }
 
+// opcode: [80, 98, 137, 138, 186..255]
 inline bool operation::is_reserved(opcode code)
 {
     BC_CONSTEXPR auto op_186 = static_cast<uint8_t>(opcode::reserved_186);
@@ -391,6 +398,7 @@ inline bool operation::is_conditional(opcode code)
 // This affects the operation count in p2sh script evaluation.
 // Presumably this was an unintended consequence of range testing enums.
 //*****************************************************************************
+// opcode: [0..96]
 inline bool operation::is_relaxed_push(opcode code)
 {
     BC_CONSTEXPR auto op_96 = static_cast<uint8_t>(opcode::push_positive_16);
@@ -406,6 +414,11 @@ inline bool operation::is_push() const
 inline bool operation::is_counted() const
 {
     return is_counted(code_);
+}
+
+inline bool operation::is_version() const
+{
+    return is_version(code_);
 }
 
 inline bool operation::is_positive() const

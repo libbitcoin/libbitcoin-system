@@ -31,9 +31,9 @@ namespace machine {
 enum class opcode : uint8_t
 {
     //-------------------------------------------------------------------------
-    // is_push (excluding reserved_80)
+    // is_relaxed_push, is_push (excluding reserved_80)
 
-    push_size_0 = 0,
+    push_size_0 = 0,        // is_version (pushes [] to the stack, not 0)
     push_size_1 = 1,
     push_size_2 = 2,
     push_size_3 = 3,
@@ -114,22 +114,22 @@ enum class opcode : uint8_t
     push_four_size = 78,
     push_negative_1 = 79,   // is_numeric
     reserved_80 = 80,       // [reserved]
-    push_positive_1 = 81,   // is_numeric, is_positive
-    push_positive_2 = 82,   // is_numeric, is_positive
-    push_positive_3 = 83,   // is_numeric, is_positive
-    push_positive_4 = 84,   // is_numeric, is_positive
-    push_positive_5 = 85,   // is_numeric, is_positive
-    push_positive_6 = 86,   // is_numeric, is_positive
-    push_positive_7 = 87,   // is_numeric, is_positive
-    push_positive_8 = 88,   // is_numeric, is_positive
-    push_positive_9 = 89,   // is_numeric, is_positive
-    push_positive_10 = 90,  // is_numeric, is_positive
-    push_positive_11 = 91,  // is_numeric, is_positive
-    push_positive_12 = 92,  // is_numeric, is_positive
-    push_positive_13 = 93,  // is_numeric, is_positive
-    push_positive_14 = 94,  // is_numeric, is_positive
-    push_positive_15 = 95,  // is_numeric, is_positive
-    push_positive_16 = 96,  // is_numeric, is_positive
+    push_positive_1 = 81,   // is_numeric, is_positive, is_version
+    push_positive_2 = 82,   // is_numeric, is_positive, is_version
+    push_positive_3 = 83,   // is_numeric, is_positive, is_version
+    push_positive_4 = 84,   // is_numeric, is_positive, is_version
+    push_positive_5 = 85,   // is_numeric, is_positive, is_version
+    push_positive_6 = 86,   // is_numeric, is_positive, is_version
+    push_positive_7 = 87,   // is_numeric, is_positive, is_version
+    push_positive_8 = 88,   // is_numeric, is_positive, is_version
+    push_positive_9 = 89,   // is_numeric, is_positive, is_version
+    push_positive_10 = 90,  // is_numeric, is_positive, is_version
+    push_positive_11 = 91,  // is_numeric, is_positive, is_version
+    push_positive_12 = 92,  // is_numeric, is_positive, is_version
+    push_positive_13 = 93,  // is_numeric, is_positive, is_version
+    push_positive_14 = 94,  // is_numeric, is_positive, is_version
+    push_positive_15 = 95,  // is_numeric, is_positive, is_version
+    push_positive_16 = 96,  // is_numeric, is_positive, is_version
 
     //-------------------------------------------------------------------------
     // is_counted
