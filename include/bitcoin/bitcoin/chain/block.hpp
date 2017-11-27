@@ -138,6 +138,7 @@ public:
 
     static block genesis_mainnet();
     static block genesis_testnet();
+    static block genesis_regtestnet();
     static size_t locator_size(size_t top);
     static indexes locator_heights(size_t top);
 
