@@ -430,10 +430,10 @@ bool header::is_valid_timestamp() const
 }
 
 // [CheckProofOfWork]
-bool header::is_valid_proof_of_work() const
+bool header::is_valid_proof_of_work(bool retarget) const
 {
-    static const uint256_t pow_limit(compact{ proof_of_work_limit });
     const auto bits = compact(bits_);
+    static const uint256_t pow_limit(compact{ work_limit(retarget) });
 
     if (bits.is_overflowed())
         return false;
@@ -451,9 +451,9 @@ bool header::is_valid_proof_of_work() const
 // Validation.
 //-----------------------------------------------------------------------------
 
-code header::check() const
+code header::check(bool retarget) const
 {
-    if (!is_valid_proof_of_work())
+    if (!is_valid_proof_of_work(retarget))
         return error::invalid_proof_of_work;
 
     else if (!is_valid_timestamp())

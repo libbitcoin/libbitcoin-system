@@ -98,7 +98,7 @@ static const std::string encoded_testnet_genesis_block =
     "4104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac"
     "00000000";
 
-static const std::string encoded_regtestnet_genesis_block =
+static const std::string encoded_regtest_genesis_block =
     "01000000"
     "0000000000000000000000000000000000000000000000000000000000000000"
     "3ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"
@@ -391,10 +391,10 @@ chain::block block::genesis_testnet()
     return genesis;
 }
 
-chain::block block::genesis_regtestnet()
+chain::block block::genesis_regtest()
 {
     data_chunk data;
-    decode_base16(data, encoded_regtestnet_genesis_block);
+    decode_base16(data, encoded_regtest_genesis_block);
     const auto genesis = chain::block::factory_from_data(data);
 
     BITCOIN_ASSERT(genesis.is_valid());
@@ -477,10 +477,12 @@ uint256_t block::proof() const
     return proof(header_.bits());
 }
 
-uint64_t block::subsidy(size_t height)
+uint64_t block::subsidy(size_t height, bool retarget)
 {
+    static const auto overflow = sizeof(uint64_t) * byte_bits;
     auto subsidy = initial_block_subsidy_satoshi();
-    subsidy >>= (height / subsidy_interval);
+    const auto halvings = height / subsidy_interval(retarget);
+    subsidy >>= (halvings >= overflow ? 0 : halvings);
     return subsidy;
 }
 
