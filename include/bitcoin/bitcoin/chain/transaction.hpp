@@ -168,7 +168,7 @@ public:
     bool is_locked(size_t block_height, uint32_t median_time_past) const;
     bool is_locktime_conflict() const;
 
-    code check(bool transaction_pool=true) const;
+    code check(bool transaction_pool=true, bool retarget=true) const;
     code accept(bool transaction_pool=true) const;
     code accept(const chain_state& state, bool transaction_pool=true) const;
     code connect() const;

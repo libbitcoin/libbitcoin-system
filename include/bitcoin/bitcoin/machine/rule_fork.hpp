@@ -61,6 +61,9 @@ enum rule_fork : uint32_t
     /// Use median time past for locktime (soft fork, feature).
     bip113_rule = 1u << 10,
 
+    /// Perform difficulty retargeting (hard fork, regtest).
+    retarget = 1u << 30,
+
     /// Sentinel bit to indicate tx has not been validated.
     unverified = 1u << 31,
 
