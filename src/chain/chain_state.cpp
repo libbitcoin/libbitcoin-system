@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <boost/range/adaptor/reversed.hpp>
 #include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/chain/compact.hpp>
@@ -39,6 +40,7 @@ namespace chain {
 
 using namespace bc::config;
 using namespace bc::machine;
+using namespace boost::adaptors;
 
 // Inlines.
 //-----------------------------------------------------------------------------
@@ -447,9 +449,9 @@ uint32_t chain_state::easy_work_required(const data& values)
     auto& bits = values.bits.ordered;
 
     // Reverse iterate the ordered-by-height list of header bits.
-    for (auto bit = bits.rbegin(); bit != bits.rend(); ++bit)
-        if (is_retarget_or_non_limit(--height, *bit))
-            return *bit;
+    for (auto bit: reverse(bits))
+        if (is_retarget_or_non_limit(--height, bit))
+            return bit;
 
     // Since the set of heights is either a full retarget range or ends at
     // zero this is not reachable unless the data set is invalid.
