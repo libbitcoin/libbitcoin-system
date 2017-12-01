@@ -723,9 +723,11 @@ inline interpreter::result interpreter::op_check_multisig_verify(
         return error::op_check_multisig_verify7;
 
     //*************************************************************************
-    // CONSENSUS: Satoshi bug, discard a stack element, malleability source.
+    // CONSENSUS: Satoshi bug, discard stack element, malleable until bip147.
     //*************************************************************************
-    program.pop();
+    if (!program.pop().empty() && chain::script::is_enabled(program.forks(),
+        rule_fork::bip147_rule))
+        return error::op_check_multisig_verify8;
 
     uint8_t sighash;
     ec_signature signature;

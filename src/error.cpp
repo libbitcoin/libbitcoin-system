@@ -221,6 +221,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::op_check_multisig_verify5, "op_check_multisig_verify5" },
         { error::op_check_multisig_verify6, "op_check_multisig_verify6" },
         { error::op_check_multisig_verify7, "op_check_multisig_verify7" },
+        { error::op_check_multisig_verify8, "op_check_multisig_verify8" },
         { error::op_check_multisig, "op_check_multisig" },
         { error::op_check_locktime_verify1, "op_check_locktime_verify1" },
         { error::op_check_locktime_verify2, "op_check_locktime_verify2" },
