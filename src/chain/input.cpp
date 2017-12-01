@@ -119,40 +119,40 @@ bool input::operator!=(const input& other) const
 // Deserialization.
 //-----------------------------------------------------------------------------
 
-input input::factory_from_data(const data_chunk& data, bool wire)
+input input::factory_from_data(const data_chunk& data, bool wire, bool witness)
 {
     input instance;
-    instance.from_data(data, wire);
+    instance.from_data(data, wire, witness);
     return instance;
 }
 
-input input::factory_from_data(std::istream& stream, bool wire)
+input input::factory_from_data(std::istream& stream, bool wire, bool witness)
 {
     input instance;
-    instance.from_data(stream, wire);
+    instance.from_data(stream, wire, witness);
     return instance;
 }
 
-input input::factory_from_data(reader& source, bool wire)
+input input::factory_from_data(reader& source, bool wire, bool witness)
 {
     input instance;
-    instance.from_data(source, wire);
+    instance.from_data(source, wire, witness);
     return instance;
 }
 
-bool input::from_data(const data_chunk& data, bool wire)
+bool input::from_data(const data_chunk& data, bool wire, bool witness)
 {
     data_source istream(data);
-    return from_data(istream, wire);
+    return from_data(istream, wire, witness);
 }
 
-bool input::from_data(std::istream& stream, bool wire)
+bool input::from_data(std::istream& stream, bool wire, bool witness)
 {
     istream_reader source(stream);
-    return from_data(source, wire);
+    return from_data(source, wire, witness);
 }
 
-bool input::from_data(reader& source, bool wire)
+bool input::from_data(reader& source, bool wire, bool witness)
 {
     reset();
 
@@ -162,7 +162,7 @@ bool input::from_data(reader& source, bool wire)
     script_.from_data(source, true);
 
     // Transaction from_data handles the discontiguous wire witness decoding.
-    if (!wire)
+    if (witness && !wire)
         witness_.from_data(source, true);
 
     sequence_ = source.read_4_bytes_little_endian();
@@ -191,31 +191,31 @@ bool input::is_valid() const
 // Serialization.
 //-----------------------------------------------------------------------------
 
-data_chunk input::to_data(bool wire) const
+data_chunk input::to_data(bool wire, bool witness) const
 {
     data_chunk data;
-    const auto size = serialized_size(wire);
+    const auto size = serialized_size(wire, witness);
     data.reserve(size);
     data_sink ostream(data);
-    to_data(ostream, wire);
+    to_data(ostream, wire, witness);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 
-void input::to_data(std::ostream& stream, bool wire) const
+void input::to_data(std::ostream& stream, bool wire, bool witness) const
 {
     ostream_writer sink(stream);
-    to_data(sink, wire);
+    to_data(sink, wire, witness);
 }
 
-void input::to_data(writer& sink, bool wire) const
+void input::to_data(writer& sink, bool wire, bool witness) const
 {
     previous_output_.to_data(sink, wire);
     script_.to_data(sink, true);
 
     // Transaction to_data handles the discontiguous wire witness encoding.
-    if (!wire)
+    if (witness && !wire)
         witness_.to_data(sink, true);
 
     sink.write_4_bytes_little_endian(sequence_);
@@ -355,6 +355,14 @@ payment_address input::address() const
     ///////////////////////////////////////////////////////////////////////////
 
     return address;
+}
+
+// Utilities.
+//-----------------------------------------------------------------------------
+
+void input::strip_witness()
+{
+    witness_.clear();
 }
 
 // Validation helpers.

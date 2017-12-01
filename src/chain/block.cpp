@@ -177,43 +177,43 @@ bool block::operator!=(const block& other) const
 //-----------------------------------------------------------------------------
 
 // static
-block block::factory_from_data(const data_chunk& data)
+block block::factory_from_data(const data_chunk& data, bool witness)
 {
     block instance;
-    instance.from_data(data);
+    instance.from_data(data, witness);
     return instance;
 }
 
 // static
-block block::factory_from_data(std::istream& stream)
+block block::factory_from_data(std::istream& stream, bool witness)
 {
     block instance;
-    instance.from_data(stream);
+    instance.from_data(stream, witness);
     return instance;
 }
 
 // static
-block block::factory_from_data(reader& source)
+block block::factory_from_data(reader& source, bool witness)
 {
     block instance;
-    instance.from_data(source);
+    instance.from_data(source, witness);
     return instance;
 }
 
-bool block::from_data(const data_chunk& data)
+bool block::from_data(const data_chunk& data, bool witness)
 {
     data_source istream(data);
-    return from_data(istream);
+    return from_data(istream, witness);
 }
 
-bool block::from_data(std::istream& stream)
+bool block::from_data(std::istream& stream, bool witness)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(source, witness);
 }
 
 // Full block deserialization is always canonical encoding.
-bool block::from_data(reader& source)
+bool block::from_data(reader& source, bool witness)
 {
     validation.start_deserialize = asio::steady_clock::now();
     reset();
@@ -229,10 +229,14 @@ bool block::from_data(reader& source)
     else
         transactions_.resize(count);
 
-    // Order is required.
+    // Order is required, explicit loop allows early termination.
     for (auto& tx: transactions_)
         if (!tx.from_data(source, true))
             break;
+
+    // TODO: optimize by having reader skip witness data.
+    if (!witness)
+        strip_witness();
 
     if (!source)
         reset();
@@ -491,6 +495,27 @@ block::indexes block::locator_heights(size_t top)
     // Validate the reservation computation.
     BITCOIN_ASSERT(heights.size() <= reservation);
     return heights;
+}
+
+// Utilities.
+//-----------------------------------------------------------------------------
+
+// Clear witness from all inputs (does not change default transaction hash).
+void block::strip_witness()
+{
+    const auto strip = [](transaction& transaction)
+    {
+        transaction.strip_witness();
+    };
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    unique_lock lock(mutex_);
+
+    segregated_ = false;
+    total_size_ = boost::none;
+    std::for_each(transactions_.begin(), transactions_.end(), strip);
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 // Validation helpers.

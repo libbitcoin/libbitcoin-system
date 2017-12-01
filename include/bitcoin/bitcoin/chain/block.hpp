@@ -94,13 +94,13 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static block factory_from_data(const data_chunk& data);
-    static block factory_from_data(std::istream& stream);
-    static block factory_from_data(reader& source);
+    static block factory_from_data(const data_chunk& data, bool witness=false);
+    static block factory_from_data(std::istream& stream, bool witness=false);
+    static block factory_from_data(reader& source, bool witness=false);
 
-    bool from_data(const data_chunk& data);
-    bool from_data(std::istream& stream);
-    bool from_data(reader& source);
+    bool from_data(const data_chunk& data, bool witness=false);
+    bool from_data(std::istream& stream, bool witness=false);
+    bool from_data(reader& source, bool witness=false);
 
     bool is_valid() const;
 
@@ -141,6 +141,9 @@ public:
     static block genesis_regtest();
     static size_t locator_size(size_t top);
     static indexes locator_heights(size_t top);
+
+    /// Clear witness from all inputs (does not change default hash).
+    void strip_witness();
 
     // Validation.
     //-------------------------------------------------------------------------
