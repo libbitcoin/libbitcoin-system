@@ -295,12 +295,16 @@ payment_address output::address() const
 // Validation helpers.
 //-----------------------------------------------------------------------------
 
-size_t output::signature_operations() const
+size_t output::signature_operations(bool bip141) const
 {
-    return script_.sigops(false);
+    // Penalize quadratic signature operations (bip141).
+    const auto sigops_factor = bip141 ? fast_sigops_factor : 1u;
+
+    // Count heavy sigops in the output script.
+    return script_.sigops(false) * sigops_factor;
 }
 
-bool output::extract_committed(hash_digest& out_value) const
+bool output::extract_committed(hash_digest& out) const
 {
     // The offset for the witness commitment hash (bip141).
     static const auto at = sizeof(witness_head);
@@ -308,6 +312,7 @@ bool output::extract_committed(hash_digest& out_value) const
 
     if (!script::is_commitment_pattern(ops))
         return false;
+
     std::copy_n(ops[1].data().begin() + at, hash_size, out.begin());
     return true;
 }

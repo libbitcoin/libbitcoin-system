@@ -116,8 +116,8 @@ public:
     // Validation.
     //-----------------------------------------------------------------------------
 
-    size_t signature_operations() const;
-    bool extract_committed(hash_digest& out_value) const;
+    size_t signature_operations(bool bip141) const;
+    bool extract_committed(hash_digest& out) const;
 
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     mutable validation validation;

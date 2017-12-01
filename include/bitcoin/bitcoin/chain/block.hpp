@@ -154,8 +154,8 @@ public:
     uint256_t proof() const;
     hash_digest generate_merkle_root(bool witness=false) const;
     size_t signature_operations() const;
-    size_t signature_operations(bool bip16_active) const;
-    size_t total_inputs(bool with_coinbase = true) const;
+    size_t signature_operations(bool bip16, bool bip141) const;
+    size_t total_inputs(bool with_coinbase=true) const;
     size_t weight() const;
 
     bool is_extra_coinbases() const;

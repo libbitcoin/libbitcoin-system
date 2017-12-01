@@ -719,22 +719,23 @@ bool transaction::is_overspent() const
 size_t transaction::signature_operations() const
 {
     const auto state = validation.state;
-    return state ? signature_operations(
-        state->is_enabled(rule_fork::bip16_rule)) : max_size_t;
+    const auto bip16 = state->is_enabled(rule_fork::bip16_rule);
+    const auto bip141 = state->is_enabled(rule_fork::bip141_rule);
+    return state ? signature_operations(bip16, bip141) : max_size_t;
 }
 
 // Returns max_size_t in case of overflow.
-size_t transaction::signature_operations(bool bip16_active) const
+size_t transaction::signature_operations(bool bip16, bool bip141) const
 {
-    const auto in = [bip16_active](size_t total, const input& input)
+    const auto in = [bip16, bip141](size_t total, const input& input)
     {
         // This includes BIP16 p2sh additional sigops if prevout is cached.
-        return ceiling_add(total, input.signature_operations(bip16_active));
+        return ceiling_add(total, input.signature_operations(bip16, bip141));
     };
 
-    const auto out = [](size_t total, const output& output)
+    const auto out = [bip141](size_t total, const output& output)
     {
-        return ceiling_add(total, output.signature_operations());
+        return ceiling_add(total, output.signature_operations(bip141));
     };
 
     return std::accumulate(inputs_.begin(), inputs_.end(), size_t{0}, in) +
@@ -931,12 +932,13 @@ code transaction::check(bool transaction_pool, bool retarget) const
     else if (transaction_pool && serialized_size(true, false) >= max_block_size)
         return error::transaction_size_limit;
 
-    // We cannot know if bip16 is enabled at this point so we disable it.
+    // We cannot know if bip16/bip141 is enabled here so we do not check it.
     // This will not make a difference unless prevouts are populated, in which
     // case they are ignored. This means that p2sh sigops are not counted here.
     // This is a preliminary check, the final count must come from accept().
     // Reenable once sigop caching is implemented, otherwise is deoptimization.
-    ////else if (transaction_pool && signature_operations(false) > max_block_sigops)
+    ////else if (transaction_pool &&
+    ////    signature_operations(false, false) > max_block_sigops)
     ////    return error::transaction_legacy_sigop_limit;
 
     else
@@ -957,6 +959,9 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     const auto bip68 = state.is_enabled(rule_fork::bip68_rule);
     const auto bip141 = state.is_enabled(rule_fork::bip141_rule);
     const auto revert_bip30 = state.is_enabled(rule_fork::allow_collisions);
+
+    // bip141 discounts segwit sigops by increasing limit and legacy weight.
+    const auto max_sigops = bip141 ? max_fast_sigops : max_block_sigops;
 
     if (transaction_pool && state.is_under_checkpoint())
         return error::premature_validation;
@@ -996,7 +1001,7 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
         return error::sequence_locked;
 
     // This recomputes sigops to include p2sh from prevouts if bip16 is true.
-    else if (transaction_pool && signature_operations(bip16) > max_block_sigops)
+    else if (transaction_pool && signature_operations(bip16, bip141) > max_sigops)
         return error::transaction_embedded_sigop_limit;
 
     // This causes second serialized_size(true, false) computation (uncached).
