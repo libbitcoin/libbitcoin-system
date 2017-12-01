@@ -108,6 +108,25 @@ inline bool bip9_bit0_active(size_t height, bool mainnet, bool testnet)
         (regtest && height == regtest_bip9_bit0_active_checkpoint.height());
 }
 
+inline bool bip9_bit1_active(const hash_digest& hash, bool mainnet,
+    bool testnet)
+{
+    const auto regtest = !mainnet && !testnet;
+    return
+        (mainnet && hash == mainnet_bip9_bit1_active_checkpoint.hash()) ||
+        (testnet && hash == testnet_bip9_bit1_active_checkpoint.hash()) ||
+        (regtest && hash == regtest_bip9_bit1_active_checkpoint.hash());
+}
+
+inline bool bip9_bit1_active(size_t height, bool mainnet, bool testnet)
+{
+    const auto regtest = !mainnet && !testnet;
+    return
+        (mainnet && height == mainnet_bip9_bit1_active_checkpoint.height()) ||
+        (testnet && height == testnet_bip9_bit1_active_checkpoint.height()) ||
+        (regtest && height == regtest_bip9_bit1_active_checkpoint.height());
+}
+
 inline bool bip34(size_t height, bool frozen, bool mainnet, bool testnet)
 {
     const auto regtest = !mainnet && !testnet;
@@ -241,6 +260,12 @@ chain_state::activations chain_state::activation(const data& values,
         result.forks |= (rule_fork::bip9_bit0_group & forks);
     }
 
+    // bip9_bit1 forks are enforced above the bip9_bit1 checkpoint.
+    if (bip9_bit1_active(values.bip9_bit1_hash, mainnet, testnet))
+    {
+        result.forks |= (rule_fork::bip9_bit1_group & forks);
+    }
+
     // version 4/3/2 enforced based on 95% of preceding 1000 mainnet blocks.
     if (bip65_ice || is_enforced(count_4, mainnet))
     {
@@ -325,6 +350,18 @@ size_t chain_state::bip9_bit0_height(size_t height, uint32_t forks)
             mainnet_bip9_bit0_active_checkpoint.height();
 
     // Require bip9_bit0 hash at heights above historical bip9_bit0 activation.
+    return height > activation_height ? activation_height : map::unrequested;
+}
+
+size_t chain_state::bip9_bit1_height(size_t height, uint32_t forks)
+{
+    const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
+
+    const auto activation_height = testnet ?
+        testnet_bip9_bit1_active_checkpoint.height() :
+        mainnet_bip9_bit1_active_checkpoint.height();
+
+    // Require bip9_bit1 hash at heights above historical bip9_bit1 activation.
     return height > activation_height ? activation_height : map::unrequested;
 }
 
@@ -488,6 +525,9 @@ chain_state::map chain_state::get_map(size_t height,
     // The checkpoint above which bip9_bit0 rules are enforced.
     map.bip9_bit0_height = bip9_bit0_height(height, forks);
 
+    // The checkpoint above which bip9_bit1 rules are enforced.
+    map.bip9_bit1_height = bip9_bit1_height(height, forks);
+
     return map;
 }
 
@@ -503,9 +543,15 @@ uint32_t chain_state::signal_version(uint32_t forks)
     if (script::is_enabled(forks, rule_fork::bip34_rule))
         return bip34_version;
 
+    // TODO: these can be retired.
     // Signal bip9 bit0 if any of the group is configured.
     if (script::is_enabled(forks, rule_fork::bip9_bit0_group))
         return bip9_version_base | bip9_version_bit0;
+
+    // TODO: these can be retired.
+    // Signal bip9 bit1 if any of the group is configured.
+    if (script::is_enabled(forks, rule_fork::bip9_bit1_group))
+        return bip9_version_base | bip9_version_bit1;
 
     return first_version;
 }
@@ -551,6 +597,7 @@ chain_state::data chain_state::to_pool(const chain_state& top)
     // Only height and version used by tx pool, others promotable or unused.
     // Preserve data.allow_collisions_hash promotion.
     // Preserve data.bip9_bit0_hash promotion.
+    // Preserve data.bip9_bit1_hash promotion.
     data.height = height;
     data.hash = null_hash;
     data.bits.self = work_limit(retarget);
@@ -601,6 +648,10 @@ chain_state::data chain_state::to_block(const chain_state& pool,
     if (bip9_bit0_active(data.height, mainnet, testnet))
         data.bip9_bit0_hash = data.hash;
 
+    // Cache hash of bip9 bit1 height block, otherwise use preceding state.
+    if (bip9_bit1_active(data.height, mainnet, testnet))
+        data.bip9_bit1_hash = data.hash;
+
     return data;
 }
 
@@ -644,6 +695,10 @@ chain_state::data chain_state::to_header(const chain_state& parent,
     // Cache hash of bip9 bit0 height block, otherwise use preceding state.
     if (bip9_bit0_active(data.height, mainnet, testnet))
         data.bip9_bit0_hash = data.hash;
+
+    // Cache hash of bip9 bit1 height block, otherwise use preceding state.
+    if (bip9_bit1_active(data.height, mainnet, testnet))
+        data.bip9_bit1_hash = data.hash;
 
     return data;
 }
