@@ -815,11 +815,7 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip30 = state.is_enabled(rule_fork::bip30_rule);
     const auto bip68 = state.is_enabled(rule_fork::bip68_rule);
-
-    // We don't need to allow tx pool acceptance of an unspent duplicate
-    // because tx pool inclusion cannot be required by consensus.
-    const auto duplicates = state.is_enabled(rule_fork::allow_collisions) &&
-        !transaction_pool;
+    const auto revert_bip30 = state.is_enabled(rule_fork::allow_collisions);
 
     if (transaction_pool && state.is_under_checkpoint())
         return error::premature_validation;
@@ -832,10 +828,9 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     // CONSENSUS:
     // A transaction hash that exists in the chain is not acceptable even if
     // the original is spent in the new block. This is not necessary nor is it
-    // described by BIP30, but it is in the code referenced by BIP30. As such
-    // the tx pool need only test against the chain, skipping the pool.
+    // described by BIP30, but it is in the code referenced by BIP30.
     //*************************************************************************
-    else if (!duplicates && bip30 && validation.duplicate)
+    else if (bip30 && !revert_bip30 && validation.duplicate)
         return error::unspent_duplicate;
 
     else if (is_missing_previous_outputs())
