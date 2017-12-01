@@ -31,52 +31,32 @@ namespace message {
 
 uint32_t inventory_vector::to_number(type_id inventory_type)
 {
-    switch (inventory_type)
-    {
-        case type_id::compact_block:
-            return 4;
-        case type_id::block:
-            return 2;
-        case type_id::filtered_block:
-            return 3;
-        case type_id::transaction:
-            return 1;
-        case type_id::error:
-        default:
-            return 0;
-    }
+    return static_cast<uint32_t>(inventory_type);
 }
 
 inventory_vector::type_id inventory_vector::to_type(uint32_t value)
 {
-    switch (value)
-    {
-        case 4:
-            return type_id::compact_block;
-        case 3:
-            return type_id::filtered_block;
-        case 2:
-            return type_id::block;
-        case 1:
-            return type_id::transaction;
-        case 0:
-        default:
-            return type_id::error;
-    }
+    return static_cast<type_id>(value);
 }
 
 std::string inventory_vector::to_string(type_id inventory_type)
 {
-        switch (inventory_type)
+    switch (inventory_type)
     {
-        case type_id::compact_block:
-            return "compact_block";
+        case type_id::transaction:
+            return "transaction";
         case type_id::block:
             return "block";
         case type_id::filtered_block:
             return "filtered_block";
-        case type_id::transaction:
-            return "transaction";
+        case type_id::compact_block:
+            return "compact_block";
+        case type_id::witness_transaction:
+            return "witness_transaction";
+        case type_id::witness_block:
+            return "witness_block";
+        case type_id::reserved:
+            return "reserved";
         case type_id::error:
         default:
             return "error";
@@ -141,6 +121,12 @@ void inventory_vector::reset()
 {
     type_ = type_id::error;
     hash_.fill(0);
+}
+
+void inventory_vector::to_witness()
+{
+    if (type_ == type_id::block || type_ == type_id::transaction)
+        type_ = to_type(to_number(type_) | to_number(type_id::witness));
 }
 
 bool inventory_vector::from_data(uint32_t version,
@@ -211,15 +197,16 @@ size_t inventory_vector::satoshi_fixed_size(uint32_t version)
 
 bool inventory_vector::is_block_type() const
 {
-    return
-        type_ == type_id::block ||
-        type_ == type_id::compact_block ||
-        type_ == type_id::filtered_block;
+    return type_ == type_id::witness_block
+        || type_ == type_id::block
+        || type_ == type_id::compact_block
+        || type_ == type_id::filtered_block;
 }
 
 bool inventory_vector::is_transaction_type() const
 {
-    return type_ == type_id::transaction;
+    return type_ == type_id::witness_transaction 
+        || type_ == type_id::transaction;
 }
 
 inventory_vector::type_id inventory_vector::type() const
