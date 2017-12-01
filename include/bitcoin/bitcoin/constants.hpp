@@ -127,7 +127,8 @@ BC_CONSTEXPR size_t first_version = 1;
 BC_CONSTEXPR size_t bip34_version = 2;
 BC_CONSTEXPR size_t bip66_version = 3;
 BC_CONSTEXPR size_t bip65_version = 4;
-BC_CONSTEXPR uint32_t bip9_version_bit0 = 0x00000001;
+BC_CONSTEXPR uint32_t bip9_version_bit0 = 1u << 0;
+BC_CONSTEXPR uint32_t bip9_version_bit1 = 1u << 1;
 BC_CONSTEXPR uint32_t bip9_version_base = 0x20000000;
 
 // Mainnet activation parameters (bip34-style activations).
@@ -203,6 +204,21 @@ static const config::checkpoint testnet_bip9_bit0_active_checkpoint
     "00000000025e930139bac5c6c31a403776da130831ab85be56578f3fa75369bb", 770112
 };
 static const config::checkpoint regtest_bip9_bit0_active_checkpoint
+{
+    // The activation window is fixed and closed, so assume genesis activation.
+    "06226e46111a0b59caaf126043eb5bbf28c34f3a5e332a1fc7b2b73cf188910f", 0
+};
+
+// These cannot be reactivated in a future branch due to window expiration.
+static const config::checkpoint mainnet_bip9_bit1_active_checkpoint
+{
+    "0000000000000000001c8018d9cb3b742ef25114f27563e3fc4a1902167f9893", 481824
+};
+static const config::checkpoint testnet_bip9_bit1_active_checkpoint
+{
+    "00000000002b980fcd729daaa248fd9316a5200e9b367f4ff2c42453e84201ca", 834624
+};
+static const config::checkpoint regtest_bip9_bit1_active_checkpoint
 {
     // The activation window is fixed and closed, so assume genesis activation.
     "06226e46111a0b59caaf126043eb5bbf28c34f3a5e332a1fc7b2b73cf188910f", 0

@@ -61,6 +61,15 @@ enum rule_fork : uint32_t
     /// Use median time past for locktime (soft fork, feature).
     bip113_rule = 1u << 10,
 
+    /// Segregated witness consensus layer (soft fork, feature).
+    bip141_rule = 1u << 11,
+
+    /// Segregated witness v0 verification (soft fork, feature).
+    bip143_rule = 1u << 12,
+
+    /// Prevent dummy value malleability (soft fork, feature).
+    bip147_rule = 1u << 13,
+
     /// Perform difficulty retargeting (hard fork, regtest).
     retarget = 1u << 30,
 
@@ -78,6 +87,12 @@ enum rule_fork : uint32_t
         rule_fork::bip68_rule |
         rule_fork::bip112_rule |
         rule_fork::bip113_rule,
+
+    /// Rules that use BIP9 bit one first time activation.
+    bip9_bit1_group =
+        rule_fork::bip141_rule |
+        rule_fork::bip143_rule |
+        rule_fork::bip147_rule,
 
     /// Simple mask to set all bits.
     all_rules = 0xffffffff
