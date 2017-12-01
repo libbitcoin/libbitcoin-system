@@ -232,7 +232,10 @@ enum error_code_t
     op_check_sequence_verify4,
     op_check_sequence_verify5,
     op_check_sequence_verify6,
-    op_check_sequence_verify7
+    op_check_sequence_verify7,
+
+    // Added out of order (bip147).
+    op_check_multisig_verify8
 };
 
 enum error_condition_t
