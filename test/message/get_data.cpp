@@ -26,15 +26,15 @@ BOOST_AUTO_TEST_SUITE(get_data_tests)
 
 BOOST_AUTO_TEST_CASE(get_data__constructor_1__always__invalid)
 {
-    const message::get_data instance;
+    const get_data instance;
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(get_data__constructor_2__always__equals_params)
 {
-    static const message::inventory_vector::list values =
+    static const inventory_vector::list values =
     {
-        message::inventory_vector
+        inventory_vector
         {
             inventory::type_id::error,
             {
@@ -48,21 +48,21 @@ BOOST_AUTO_TEST_CASE(get_data__constructor_2__always__equals_params)
         }
     };
 
-    const message::get_data instance(values);
+    const get_data instance(values);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(values == instance.inventories());
 }
 
 BOOST_AUTO_TEST_CASE(get_data__constructor_3__always__equals_params)
 {
-    static const auto type = message::inventory_vector::type_id::error;
+    static const auto type = inventory_vector::type_id::error;
     static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    const message::inventory_vector::list values
+    const inventory_vector::list values
     {
-        message::inventory_vector(type, hash)
+        inventory_vector(type, hash)
     };
 
-    const message::get_data instance(std::move(values));
+    const get_data instance(std::move(values));
     BOOST_REQUIRE(instance.is_valid());
     const auto inventories = instance.inventories();
     BOOST_REQUIRE_EQUAL(1u, inventories.size());
@@ -72,11 +72,11 @@ BOOST_AUTO_TEST_CASE(get_data__constructor_3__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(get_data__constructor_4__always__equals_params)
 {
-    static const auto type = message::inventory_vector::type_id::error;
+    static const auto type = inventory_vector::type_id::error;
     static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     static const hash_list hashes{ hash };
 
-    const message::get_data instance(hashes, type);
+    const get_data instance(hashes, type);
     BOOST_REQUIRE(instance.is_valid());
     auto inventories = instance.inventories();
     BOOST_REQUIRE_EQUAL(1u, inventories.size());
@@ -86,10 +86,10 @@ BOOST_AUTO_TEST_CASE(get_data__constructor_4__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(get_data__constructor_5__always__equals_params)
 {
-    static const auto type = message::inventory_vector::type_id::error;
+    static const auto type = inventory_vector::type_id::error;
     static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
-    const message::get_data instance{ { type, hash } };
+    const get_data instance{ { type, hash } };
     BOOST_REQUIRE(instance.is_valid());
     auto inventories = instance.inventories();
     BOOST_REQUIRE_EQUAL(1u, inventories.size());
@@ -99,12 +99,12 @@ BOOST_AUTO_TEST_CASE(get_data__constructor_5__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(get_data__constructor_6__always__equals_params)
 {
-    static const auto type = message::inventory_vector::type_id::error;
+    static const auto type = inventory_vector::type_id::error;
     static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
-    const message::get_data value{ { type, hash } };
+    const get_data value{ { type, hash } };
     BOOST_REQUIRE(value.is_valid());
-    const message::get_data instance(value);
+    const get_data instance(value);
     const auto inventories = instance.inventories();
     BOOST_REQUIRE_EQUAL(1u, inventories.size());
     BOOST_REQUIRE(type == inventories[0].type());
@@ -114,12 +114,12 @@ BOOST_AUTO_TEST_CASE(get_data__constructor_6__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(get_data__constructor_7__always__equals_params)
 {
-    static const auto type = message::inventory_vector::type_id::error;
+    static const auto type = inventory_vector::type_id::error;
     static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
-    const message::get_data value{ { type, hash } };
+    const get_data value{ { type, hash } };
     BOOST_REQUIRE(value.is_valid());
-    const message::get_data instance(std::move(value));
+    const get_data instance(std::move(value));
     const auto inventories = instance.inventories();
     BOOST_REQUIRE_EQUAL(1u, inventories.size());
     BOOST_REQUIRE(type == inventories[0].type());
@@ -214,18 +214,86 @@ BOOST_AUTO_TEST_CASE(get_data__factory_from_data_3__valid_input__success)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(version), result.serialized_size(version));
 }
 
+BOOST_AUTO_TEST_CASE(get_data__to_witness__error__unchanged)
+{
+    static const auto expected = inventory_vector::type_id::error;
+    get_data instance{ { expected, {} } };
+    instance.to_witness();
+    BOOST_REQUIRE(instance.inventories()[0].type() == expected);
+}
+
+BOOST_AUTO_TEST_CASE(get_data__to_witness__filtered_block__unchanged)
+{
+    static const auto expected = inventory_vector::type_id::filtered_block;
+    get_data instance{ { expected, {} } };
+    instance.to_witness();
+    BOOST_REQUIRE(instance.inventories()[0].type() == expected);
+}
+
+BOOST_AUTO_TEST_CASE(get_data__to_witness__compact_block__unchanged)
+{
+    static const auto expected = inventory_vector::type_id::compact_block;
+    get_data instance{ { expected, {} } };
+    instance.to_witness();
+    BOOST_REQUIRE(instance.inventories()[0].type() == expected);
+}
+
+BOOST_AUTO_TEST_CASE(get_data__to_witness__witness_transaction__unchanged)
+{
+    static const auto expected = inventory_vector::type_id::witness_transaction;
+    get_data instance{ { expected, {} } };
+    instance.to_witness();
+    BOOST_REQUIRE(instance.inventories()[0].type() == expected);
+}
+
+BOOST_AUTO_TEST_CASE(get_data__to_witness__witness_block__unchanged)
+{
+    static const auto expected = inventory_vector::type_id::witness_block;
+    get_data instance{ { expected, {} } };
+    instance.to_witness();
+    BOOST_REQUIRE(instance.inventories()[0].type() == expected);
+}
+
+BOOST_AUTO_TEST_CASE(get_data__to_witness__block__expected)
+{
+    get_data instance{ { inventory_vector::type_id::block, {} } };
+    instance.to_witness();
+    BOOST_REQUIRE(instance.inventories()[0].type() == inventory_vector::type_id::witness_block);
+}
+
+BOOST_AUTO_TEST_CASE(get_data__to_witness__transaction__expected)
+{
+    get_data instance{ { inventory_vector::type_id::transaction, {} } };
+    instance.to_witness();
+    BOOST_REQUIRE(instance.inventories()[0].type() == inventory_vector::type_id::witness_transaction);
+}
+
+BOOST_AUTO_TEST_CASE(get_data__to_witness__block_error_transaction__expected)
+{
+    get_data instance
+    {
+        { inventory_vector::type_id::block, {} },
+        { inventory_vector::type_id::error, {} },
+        { inventory_vector::type_id::transaction, {} }
+    };
+    instance.to_witness();
+    BOOST_REQUIRE(instance.inventories()[0].type() == inventory_vector::type_id::witness_block);
+    BOOST_REQUIRE(instance.inventories()[1].type() == inventory_vector::type_id::error);
+    BOOST_REQUIRE(instance.inventories()[2].type() == inventory_vector::type_id::witness_transaction);
+}
+
 BOOST_AUTO_TEST_CASE(get_data__operator_assign_equals__always__matches_equivalent)
 {
     static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    static const message::inventory_vector::list elements
+    static const inventory_vector::list elements
     {
-        message::inventory_vector(message::inventory_vector::type_id::error, hash)
+        inventory_vector(inventory_vector::type_id::error, hash)
     };
 
-    message::get_data value(elements);
+    get_data value(elements);
     BOOST_REQUIRE(value.is_valid());
 
-    message::get_data instance;
+    get_data instance;
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
 
     instance = std::move(value);
@@ -236,48 +304,48 @@ BOOST_AUTO_TEST_CASE(get_data__operator_assign_equals__always__matches_equivalen
 BOOST_AUTO_TEST_CASE(get_data__operator_boolean_equals__duplicates__returns_true)
 {
     static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    const message::get_data expected
+    const get_data expected
     {
-        message::inventory_vector(message::inventory_vector::type_id::error, hash)
+        inventory_vector(inventory_vector::type_id::error, hash)
     };
 
-    const message::get_data instance(expected);
+    const get_data instance(expected);
     BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(get_data__operator_boolean_equals__differs__returns_false)
 {
     static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    const message::get_data expected
+    const get_data expected
     {
-        message::inventory_vector(message::inventory_vector::type_id::error, hash)
+        inventory_vector(inventory_vector::type_id::error, hash)
     };
 
-    const message::get_data instance;
+    const get_data instance;
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(get_data__operator_boolean_not_equals__duplicates__returns_false)
 {
     static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    const message::get_data expected
+    const get_data expected
     {
-        message::inventory_vector(message::inventory_vector::type_id::error, hash)
+        inventory_vector(inventory_vector::type_id::error, hash)
     };
 
-    const  message::get_data instance(expected);
+    const  get_data instance(expected);
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
 BOOST_AUTO_TEST_CASE(get_data__operator_boolean_not_equals__differs__returns_true)
 {
     static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    const message::get_data expected
+    const get_data expected
     {
-        message::inventory_vector(message::inventory_vector::type_id::error, hash)
+        inventory_vector(inventory_vector::type_id::error, hash)
     };
 
-    const message::get_data instance;
+    const get_data instance;
     BOOST_REQUIRE(instance != expected);
 }
 

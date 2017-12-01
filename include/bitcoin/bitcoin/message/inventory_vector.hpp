@@ -86,6 +86,7 @@ public:
     void to_data(uint32_t version, writer& sink) const;
     bool is_valid() const;
     void reset();
+    void to_witness();
     size_t serialized_size(uint32_t version) const;
 
     // This class is move assignable but not copy assignable.

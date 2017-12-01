@@ -56,6 +56,9 @@ public:
     bool from_data(uint32_t version, std::istream& stream) override;
     bool from_data(uint32_t version, reader& source) override;
 
+    /// Convert message types to witness types.
+    void to_witness();
+
     // This class is move assignable but not copy assignable.
     get_data& operator=(get_data&& other);
     void operator=(const get_data&) = delete;
