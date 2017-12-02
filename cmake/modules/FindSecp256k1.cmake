@@ -8,21 +8,26 @@
 find_package(PkgConfig)
 pkg_check_modules(PC_SECP256 QUIET sepc256k1)
 
-if(SECP256K1_ROOT)
-  find_path(SECP256K1_INCLUDE_DIR secp256k1.h
-    HINTS ${SECP256K1_ROOT}/include
-            PATH_SUFFIXES secp256k1 )
+if(NOT SECP256K1_ROOT)
+  set(SECP256K1_ROOT /usr/local)
+endif(NOT SECP256K1_ROOT)
 
-  find_library(SECP256K1_LIBRARY_RELEASE NAMES secp256k1.lib
-    PATHS ${SECP256K1_ROOT}/bin/x64/Release/v141/static
-    )
-  find_library(SECP256K1_LIBRARY_DEBUG NAMES secp256k1.lib
-    PATHS ${SECP256K1_ROOT}/bin/x64/Debug/v141/static
-    )
+find_path(SECP256K1_INCLUDE_DIR secp256k1.h
+HINTS ${SECP256K1_ROOT}/include
+    PATH_SUFFIXES secp256k1 )
 
-else(SECP256K1_ROOT)
-  MESSAGE(ERROR "SECP256K1_ROOT is NOT SET")
-endif(SECP256K1_ROOT)
+find_library(SECP256K1_LIBRARY_RELEASE NAMES secp256k1.lib libsecp256k1.so
+   PATHS ${SECP256K1_ROOT}/bin/x64/Release/v141/static
+   ${SECP256K1_ROOT}/.libs/
+   ${SECP256K1_ROOT}/lib
+   ${SECP256K1_ROOT}/
+)
+find_library(SECP256K1_LIBRARY_DEBUG NAMES secp256k1.lib libsecp256k1.so
+   PATHS ${SECP256K1_ROOT}/bin/x64/Debug/v141/static
+   ${SECP256K1_ROOT}/.libs/
+   ${SECP256K1_ROOT}/lib
+   ${SECP256K1_ROOT}/
+)
 
 include(FindPackageHandleStandardArgs)
 # handle the QUIETLY and REQUIRED arguments and set LIBXML2_FOUND to TRUE

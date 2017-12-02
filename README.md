@@ -33,6 +33,7 @@ Detailed instructions are provided below.
   * [Debian/Ubuntu](#debianubuntu)
   * [Macintosh](#macintosh)
   * [Windows](#windows)
+  * [CMake](#cmake)
 
 ### Debian/Ubuntu
 
@@ -201,6 +202,31 @@ $ ./install.sh --with-icu --with-png --with-qrencode --build-icu --build-zlib --
 Visual Studio solutions are maintained for all libbitcoin libraries. NuGet packages exist for dependencies with the exceptions of the optional ZLib, PNG, and QREncode (required for QR code functionality). ICU is integrated into Windows and therefore not required as an additional dependency when using ICU features.
 
 > The libbitcoin execution environment supports `Windows XP Service Pack 2` and newer.
+
+### CMake
+
+CMake has been tested on Visual Studio 2017 and CentOS Linux release 7.4.1708
+
+BOOST_ROOT needs to be set to base dir of compiled dir
+For Windows SECP256K1_ROOT needs to be set to base dir of compiled library
+
+Windows example:
+```sh
+cd libbitcoin
+mkdir build
+cd build
+cmake.exe -G "Visual Studio 15 2017 Win64" -DBOOST_ROOT=/c/builds/boost_1_64_0 -DSECP256K1_ROOT=/c/builds/secp256k1/ ..
+```
+From there you will find a libbitcoin.sln generated from which you can build.
+
+Linux example:
+```sh
+cd libbitcoin
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=/root/builds/boost_1_65_1/ ..
+make
+```
 
 #### Upgrade Compiler
 
