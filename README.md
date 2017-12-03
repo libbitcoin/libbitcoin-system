@@ -207,10 +207,11 @@ Visual Studio solutions are maintained for all libbitcoin libraries. NuGet packa
 
 CMake has been tested on Visual Studio 2017 and CentOS Linux release 7.4.1708
 
-BOOST_ROOT needs to be set to base dir of compiled dir
-For Windows SECP256K1_ROOT needs to be set to base dir of compiled library
+`BOOST_ROOT` needs to be set to base directory of your boost version
+`SECP256K1_ROOT` may be set if the library is in its default `/usr/local` location
 
 Windows example:
+For Windows SECP256K1_ROOT must be set to base dir of compiled library
 ```sh
 cd libbitcoin
 mkdir build

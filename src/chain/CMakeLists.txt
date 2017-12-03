@@ -1,7 +1,7 @@
 
 file(GLOB MY_SOURCES "*.cpp")
 
-ADD_LIBRARY(chain STATIC
+ADD_LIBRARY(chain OBJECT
    ${MY_SOURCES}
    )
 

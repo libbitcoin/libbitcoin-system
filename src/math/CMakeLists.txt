@@ -1,16 +1,12 @@
 
-add_subdirectory(external)
-
 file(GLOB MY_SOURCES "*.cpp")
-ADD_LIBRARY(math STATIC
+file(GLOB EXTERNAL_SOURCES "external/*.c")
+ADD_LIBRARY(math OBJECT
    ${MY_SOURCES}
+   ${EXTERNAL_SOURCES}
    )
 
 set_target_properties (math PROPERTIES
     FOLDER "libs"
 )
 
-target_link_libraries(math
-  math_external
-)
- 

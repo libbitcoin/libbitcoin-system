@@ -1,7 +1,7 @@
 
 file(GLOB MY_SOURCES "*.cpp")
 
-ADD_LIBRARY(machine STATIC
+ADD_LIBRARY(machine OBJECT
    ${MY_SOURCES}
    )
 

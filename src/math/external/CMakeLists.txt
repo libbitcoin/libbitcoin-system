@@ -1,7 +1,7 @@
 
 file(GLOB MY_SOURCES "*.c")
 
-ADD_LIBRARY(math_external STATIC
+ADD_LIBRARY(math_external OBJECT
    ${MY_SOURCES}
    )
 

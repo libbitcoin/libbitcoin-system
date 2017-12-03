@@ -1,7 +1,7 @@
 
 file(GLOB MY_SOURCES "*.cpp")
 
-ADD_LIBRARY(unicode STATIC
+ADD_LIBRARY(unicode OBJECT
    ${MY_SOURCES}
    )
 

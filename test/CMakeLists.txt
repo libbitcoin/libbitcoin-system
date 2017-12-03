@@ -11,7 +11,7 @@ add_subdirectory(unicode)
 add_subdirectory(utility)
 add_subdirectory(wallet)
 
-
+ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK)
 add_executable(unit_tests ${TEST_SOURCES})
 
 set_target_properties (unit_tests PROPERTIES
