@@ -1,8 +1,10 @@
 
-file(GLOB MY_SOURCES "*.cpp")
+file(GLOB SOURCES "*.cpp")
+file(GLOB HEADERS "${LIBBITCOIN_INCLUDE_DIR}/formats/*.hpp")
 
 ADD_LIBRARY(formats OBJECT
-   ${MY_SOURCES}
+   ${SOURCES}
+   ${HEADERS}
    )
 
 set_target_properties (formats PROPERTIES

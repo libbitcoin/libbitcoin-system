@@ -1,8 +1,10 @@
 
-file(GLOB MY_SOURCES "*.cpp")
+file(GLOB SOURCES "*.cpp")
+file(GLOB HEADERS "${LIBBITCOIN_INCLUDE_DIR}/message/*.hpp")
 
 ADD_LIBRARY(message OBJECT
-   ${MY_SOURCES}
+   ${SOURCES}
+   ${HEADERS}
    )
 
 set_target_properties (message PROPERTIES

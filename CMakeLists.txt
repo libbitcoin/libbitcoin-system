@@ -12,6 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
+set(LIBBITCOIN_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include/bitcoin/bitcoin)
 
 # Currently only support building static libraries
 ADD_DEFINITIONS(-DBC_STATIC)
