@@ -234,12 +234,13 @@ bool block::from_data(std::istream& stream)
     return from_data(source);
 }
 
+// Full block deserialization is always canonical encoding.
 bool block::from_data(reader& source)
 {
     validation.start_deserialize = asio::steady_clock::now();
     reset();
 
-    if (!header_.from_data(source))
+    if (!header_.from_data(source, true))
         return false;
 
     const auto count = source.read_size_little_endian();
@@ -278,10 +279,10 @@ bool block::is_valid() const
 // Serialization.
 //-----------------------------------------------------------------------------
 
-data_chunk block::to_data() const
+data_chunk block::to_data(bool witness) const
 {
     data_chunk data;
-    const auto size = serialized_size();
+    const auto size = serialized_size(witness);
     data.reserve(size);
     data_sink ostream(data);
     to_data(ostream);
@@ -290,44 +291,53 @@ data_chunk block::to_data() const
     return data;
 }
 
-void block::to_data(std::ostream& stream) const
+void block::to_data(std::ostream& stream, bool witness) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(sink, witness);
 }
 
-void block::to_data(writer& sink) const
+// Full block serialization is always canonical encoding.
+void block::to_data(writer& sink, bool witness) const
 {
-    header_.to_data(sink);
-    sink.write_variable_little_endian(transactions_.size());
-    const auto to = [&sink](const transaction& tx) { tx.to_data(sink); };
+    header_.to_data(sink, true);
+    sink.write_size_little_endian(transactions_.size());
+    const auto to = [&sink, witness](const transaction& tx)
+    {
+        tx.to_data(sink, true, witness);
+    };
+
     std::for_each(transactions_.begin(), transactions_.end(), to);
 }
 
-hash_list block::to_hashes() const
+hash_list block::to_hashes(bool witness) const
 {
-    const auto to_hash = [](const transaction& tx) { return tx.hash(); };
-
     hash_list out;
-    const auto& txs = transactions();
-    out.resize(txs.size());
-    std::transform(txs.begin(), txs.end(), out.begin(), to_hash);
+    out.reserve(transactions_.size());
+    const auto to_hash = [&out, witness](const transaction& tx)
+    {
+        out.push_back(tx.hash(witness));
+    };
+
+    // Hash ordering matters, don't use std::transform here.
+    std::for_each(transactions_.begin(), transactions_.end(), to_hash);
     return out;
 }
 
 // Properties (size, accessors, cache).
 //-----------------------------------------------------------------------------
 
-size_t block::serialized_size() const
+// Full block serialization is always canonical encoding.
+size_t block::serialized_size(bool witness) const
 {
-    const auto sum = [](size_t total, const transaction& tx)
+    const auto sum = [witness](size_t total, const transaction& tx)
     {
-        return safe_add(total, tx.serialized_size(true));
+        return safe_add(total, tx.serialized_size(true, witness));
     };
 
     const auto& txs = transactions_;
 
-    return header_.serialized_size() +
+    return header_.serialized_size(true) +
         message::variable_uint_size(transactions_.size()) +
         std::accumulate(txs.begin(), txs.end(), size_t{0}, sum);
 }
@@ -361,6 +371,7 @@ const transaction::list& block::transactions() const
 void block::set_transactions(const transaction::list& value)
 {
     transactions_ = value;
+    segregated_ = boost::none;
     total_inputs_ = boost::none;
     non_coinbase_inputs_ = boost::none;
 }
@@ -368,6 +379,7 @@ void block::set_transactions(const transaction::list& value)
 void block::set_transactions(transaction::list&& value)
 {
     transactions_ = std::move(value);
+    segregated_ = boost::none;
     total_inputs_ = boost::none;
     non_coinbase_inputs_ = boost::none;
 }
@@ -632,20 +644,13 @@ bool block::is_distinct_transaction_set() const
     return distinct_end == hashes.end();
 }
 
-hash_digest block::generate_merkle_root() const
+hash_digest block::generate_merkle_root(bool witness) const
 {
     if (transactions_.empty())
         return null_hash;
 
-    hash_list merkle, update;
-
-    auto hasher = [&merkle](const transaction& tx)
-    {
-        merkle.push_back(tx.hash());
-    };
-
-    // Hash ordering matters, don't use std::transform here.
-    std::for_each(transactions_.begin(), transactions_.end(), hasher);
+    hash_list update;
+    auto merkle = to_hashes(witness);
 
     // Initial capacity is half of the original list (clear doesn't reset).
     update.reserve((merkle.size() + 1) / 2);
@@ -756,6 +761,39 @@ bool block::is_valid_coinbase_script(size_t height) const
 
     const auto& script = transactions_.front().inputs().front().script();
     return script::is_coinbase_pattern(script.operations(), height);
+}
+
+bool block::is_segregated() const
+{
+    bool value;
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    mutex_.lock_upgrade();
+
+    if (segregated_ != boost::none)
+    {
+        value = segregated_.get();
+        mutex_.unlock_upgrade();
+        //---------------------------------------------------------------------
+        return value;
+    }
+
+    mutex_.unlock_upgrade_and_lock();
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    const auto segregated = [](const transaction& tx)
+    {
+        return tx.is_segregated();
+    };
+
+    // If no block tx has witness data the commitment is optional (bip141).
+    value = std::any_of(transactions_.begin(), transactions_.end(), segregated);
+
+    mutex_.unlock();
+    ///////////////////////////////////////////////////////////////////////////
+
+    return value;
 }
 
 code block::check_transactions() const

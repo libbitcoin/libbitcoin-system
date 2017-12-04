@@ -109,22 +109,22 @@ bool block::from_data(uint32_t, reader& source)
 
 data_chunk block::to_data(uint32_t) const
 {
-    return chain::block::to_data();
+    return chain::block::to_data(false);
 }
 
 void block::to_data(uint32_t, std::ostream& stream) const
 {
-    chain::block::to_data(stream);
+    chain::block::to_data(stream, false);
 }
 
 void block::to_data(uint32_t, writer& sink) const
 {
-    chain::block::to_data(sink);
+    chain::block::to_data(sink, false);
 }
 
 size_t block::serialized_size(uint32_t) const
 {
-    return chain::block::serialized_size();
+    return chain::block::serialized_size(false);
 }
 
 block& block::operator=(chain::block&& other)
