@@ -294,6 +294,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\program.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\rule_fork.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\script_pattern.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\script_version.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\sighash_algorithm.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\checksum.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\crypto.hpp" />

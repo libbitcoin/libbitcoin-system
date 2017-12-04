@@ -466,6 +466,7 @@ include_bitcoin_bitcoin_machine_HEADERS = \
     include/bitcoin/bitcoin/machine/program.hpp \
     include/bitcoin/bitcoin/machine/rule_fork.hpp \
     include/bitcoin/bitcoin/machine/script_pattern.hpp \
+    include/bitcoin/bitcoin/machine/script_version.hpp \
     include/bitcoin/bitcoin/machine/sighash_algorithm.hpp
 
 include_bitcoin_bitcoin_mathdir = ${includedir}/bitcoin/bitcoin/math
