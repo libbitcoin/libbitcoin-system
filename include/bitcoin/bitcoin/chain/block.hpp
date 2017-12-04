@@ -107,15 +107,15 @@ public:
     // Serialization.
     //-------------------------------------------------------------------------
 
-    data_chunk to_data() const;
-    void to_data(std::ostream& stream) const;
-    void to_data(writer& sink) const;
-    hash_list to_hashes() const;
+    data_chunk to_data(bool witness=false) const;
+    void to_data(std::ostream& stream, bool witness=false) const;
+    void to_data(writer& sink, bool witness=false) const;
+    hash_list to_hashes(bool witness=false) const;
 
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------
 
-    size_t serialized_size() const;
+    size_t serialized_size(bool witness=false) const;
 
     // deprecated (unsafe)
     chain::header& header();
@@ -152,7 +152,7 @@ public:
     uint64_t claim() const;
     uint64_t reward(size_t height) const;
     uint256_t proof() const;
-    hash_digest generate_merkle_root() const;
+    hash_digest generate_merkle_root(bool witness=false) const;
     size_t signature_operations() const;
     size_t signature_operations(bool bip16_active) const;
     size_t total_inputs(bool with_coinbase=true) const;
@@ -165,6 +165,7 @@ public:
     bool is_forward_reference() const;
     bool is_internal_double_spend() const;
     bool is_valid_merkle_root() const;
+    bool is_segregated() const;
 
     code check() const;
     code check_transactions() const;
@@ -186,6 +187,8 @@ private:
     chain::header header_;
     transaction::list transactions_;
 
+    // These share a mutext as they are not expected to contend.
+    mutable boost::optional<bool> segregated_;
     mutable boost::optional<size_t> total_inputs_;
     mutable upgrade_mutex mutex_;
 };
