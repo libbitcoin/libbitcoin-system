@@ -82,6 +82,7 @@
 #include <bitcoin/bitcoin/machine/program.hpp>
 #include <bitcoin/bitcoin/machine/rule_fork.hpp>
 #include <bitcoin/bitcoin/machine/script_pattern.hpp>
+#include <bitcoin/bitcoin/machine/script_version.hpp>
 #include <bitcoin/bitcoin/machine/sighash_algorithm.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/crypto.hpp>
