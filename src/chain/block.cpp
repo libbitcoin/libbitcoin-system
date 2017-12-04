@@ -253,7 +253,7 @@ bool block::from_data(reader& source, bool witness)
 
     // Order is required, explicit loop allows early termination.
     for (auto& tx: transactions_)
-        if (!tx.from_data(source, true))
+        if (!tx.from_data(source, true, witness))
             break;
 
     // TODO: optimize by having reader skip witness data.

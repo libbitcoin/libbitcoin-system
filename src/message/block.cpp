@@ -92,39 +92,45 @@ block::block(const chain::header& header,
 {
 }
 
+// Witness is always deserialized if present.
+
 bool block::from_data(uint32_t, const data_chunk& data)
 {
-    return chain::block::from_data(data);
+    return chain::block::from_data(data, true);
 }
 
 bool block::from_data(uint32_t, std::istream& stream)
 {
-    return chain::block::from_data(stream);
+    return chain::block::from_data(stream, true);
 }
 
 bool block::from_data(uint32_t, reader& source)
 {
-    return chain::block::from_data(source);
+    return chain::block::from_data(source, true);
 }
+
+// Witness is always serialized if present.
 
 data_chunk block::to_data(uint32_t) const
 {
-    return chain::block::to_data(false);
+    return chain::block::to_data(true);
 }
 
 void block::to_data(uint32_t, std::ostream& stream) const
 {
-    chain::block::to_data(stream, false);
+    chain::block::to_data(stream, true);
 }
 
 void block::to_data(uint32_t, writer& sink) const
 {
-    chain::block::to_data(sink, false);
+    chain::block::to_data(sink, true);
 }
+
+// Witness size is always counted if present.
 
 size_t block::serialized_size(uint32_t) const
 {
-    return chain::block::serialized_size(false);
+    return chain::block::serialized_size(true);
 }
 
 block& block::operator=(chain::block&& other)
