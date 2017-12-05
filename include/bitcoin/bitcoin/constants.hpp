@@ -102,7 +102,12 @@ BC_CONSTEXPR uint32_t easy_spacing_seconds = 20 * 60;
 BC_CONSTEXPR uint32_t target_spacing_seconds = 10 * 60;
 BC_CONSTEXPR uint32_t target_timespan_seconds = 2 * 7 * 24 * 60 * 60;
 BC_CONSTEXPR uint32_t timestamp_future_seconds = 2 * 60 * 60;
-BC_CONSTEXPR uint32_t proof_of_work_limit = 0x1d00ffff;
+BC_CONSTEXPR uint32_t retarget_proof_of_work_limit = 0x1d00ffff;
+BC_CONSTEXPR uint32_t no_retarget_proof_of_work_limit = 0x207fffff;
+BC_CONSTFUNC uint32_t work_limit(bool retarget=true)
+{
+    return retarget ? retarget_proof_of_work_limit : no_retarget_proof_of_work_limit;
+}
 
 // The upper and lower bounds for the retargeting timespan.
 BC_CONSTEXPR uint32_t min_timespan =
@@ -145,6 +150,11 @@ BC_CONSTEXPR size_t testnet_bip65_freeze = 581885;
 BC_CONSTEXPR size_t testnet_bip66_freeze = 330776;
 BC_CONSTEXPR size_t testnet_bip34_freeze = 21111;
 
+// Regtest (arbitrary) frozen activation heights (frozen_activations).
+BC_CONSTEXPR size_t regtest_bip65_freeze = 1351;
+BC_CONSTEXPR size_t regtest_bip66_freeze = 1251;
+BC_CONSTEXPR size_t regtest_bip34_freeze = 0;
+
 // Block 514 is the first testnet block after date-based activation.
 // Block 105571 is the first mainnet block after date-based activation.
 BC_CONSTEXPR uint32_t bip16_activation_time = 0x4f288080;
@@ -177,6 +187,11 @@ static const config::checkpoint testnet_bip34_active_checkpoint
     "0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8",
     testnet_bip34_freeze
 };
+static const config::checkpoint regtest_bip34_active_checkpoint
+{
+    // Since bip90 assumes a historical bip34 activation block, use genesis.
+    "06226e46111a0b59caaf126043eb5bbf28c34f3a5e332a1fc7b2b73cf188910f", 0
+};
 
 // These cannot be reactivated in a future branch due to window expiration.
 static const config::checkpoint mainnet_bip9_bit0_active_checkpoint
@@ -186,6 +201,11 @@ static const config::checkpoint mainnet_bip9_bit0_active_checkpoint
 static const config::checkpoint testnet_bip9_bit0_active_checkpoint
 {
     "00000000025e930139bac5c6c31a403776da130831ab85be56578f3fa75369bb", 770112
+};
+static const config::checkpoint regtest_bip9_bit0_active_checkpoint
+{
+    // The activation window is fixed and closed, so assume genesis activation.
+    "06226e46111a0b59caaf126043eb5bbf28c34f3a5e332a1fc7b2b73cf188910f", 0
 };
 
 // Network protocol constants.
@@ -235,15 +255,21 @@ BC_CONSTFUNC uint64_t initial_block_subsidy_satoshi()
     return bitcoin_to_satoshi(initial_block_subsidy_bitcoin);
 }
 
-BC_CONSTEXPR uint64_t subsidy_interval = 210000;
 BC_CONSTEXPR uint64_t recursive_money = 0x02540be3f5;
-BC_CONSTFUNC uint64_t max_money()
+BC_CONSTEXPR uint64_t retarget_subsidy_interval = 210000;
+BC_CONSTEXPR uint64_t no_retarget_subsidy_interval = 150;
+BC_CONSTFUNC uint64_t subsidy_interval(bool retarget=true)
+{
+    return retarget ? retarget_subsidy_interval : no_retarget_subsidy_interval;
+}
+
+BC_CONSTFUNC uint64_t max_money(bool retarget=true)
 {
     ////// Optimize out the derivation of recursive_money.
     ////BITCOIN_ASSERT(recursive_money == max_money_recursive(
     ////    initial_block_subsidy_satoshi()));
 
-    return subsidy_interval * recursive_money;
+    return recursive_money * subsidy_interval(retarget);
 }
 
 } // namespace libbitcoin

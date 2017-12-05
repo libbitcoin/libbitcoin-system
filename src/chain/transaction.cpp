@@ -817,7 +817,7 @@ code transaction::connect_input(const chain_state& state,
 //-----------------------------------------------------------------------------
 
 // These checks are self-contained; blockchain (and so version) independent.
-code transaction::check(bool transaction_pool) const
+code transaction::check(bool transaction_pool, bool retarget) const
 {
     if (inputs_.empty() || outputs_.empty())
         return error::empty_transaction;
@@ -825,7 +825,7 @@ code transaction::check(bool transaction_pool) const
     else if (is_null_non_coinbase())
         return error::previous_output_null;
 
-    else if (total_output_value() > max_money())
+    else if (total_output_value() > max_money(retarget))
         return error::spend_overflow;
 
     else if (!transaction_pool && is_oversized_coinbase())

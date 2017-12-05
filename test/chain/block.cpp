@@ -288,6 +288,15 @@ BOOST_AUTO_TEST_CASE(block__genesis__testnet__valid_structure)
     BOOST_REQUIRE(genesis.header().merkle() == genesis.generate_merkle_root());
 }
 
+BOOST_AUTO_TEST_CASE(block__genesis__regtest__valid_structure)
+{
+    const auto genesis = bc::chain::block::genesis_regtest();
+    BOOST_REQUIRE(genesis.is_valid());
+    BOOST_REQUIRE_EQUAL(genesis.transactions().size(), 1u);
+    BOOST_REQUIRE(genesis.header().merkle() == genesis.generate_merkle_root());
+}
+
+
 BOOST_AUTO_TEST_CASE(block__factory_1__genesis_mainnet__success)
 {
     const auto genesis = bc::chain::block::genesis_mainnet();
