@@ -133,14 +133,14 @@ public:
 
     static block genesis_mainnet();
     static block genesis_testnet();
-    static block genesis_regtestnet();
+    static block genesis_regtest();
     static size_t locator_size(size_t top);
     static indexes locator_heights(size_t top);
 
     // Validation.
     //-------------------------------------------------------------------------
 
-    static uint64_t subsidy(size_t height);
+    static uint64_t subsidy(size_t height, bool retarget=true);
     static uint256_t proof(uint32_t bits);
 
     uint64_t fees() const;

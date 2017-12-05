@@ -27,7 +27,8 @@ enum class settings
 {
     none,
     mainnet,
-    testnet
+    testnet,
+    regtest
 };
 
 } // namespace config

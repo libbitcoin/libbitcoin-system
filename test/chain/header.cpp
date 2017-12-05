@@ -388,8 +388,15 @@ BOOST_AUTO_TEST_CASE(header__is_valid_timestamp__timestamp_greater_than_2_hours_
 BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__bits_exceeds_maximum__returns_false)
 {
     chain::header instance;
-    instance.set_bits(proof_of_work_limit + 1);
+    instance.set_bits(retarget_proof_of_work_limit + 1);
     BOOST_REQUIRE(!instance.is_valid_proof_of_work());
+}
+
+BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__retarget_bits_exceeds_maximum__returns_false)
+{
+    chain::header instance;
+    instance.set_bits(no_retarget_proof_of_work_limit + 1);
+    BOOST_REQUIRE(!instance.is_valid_proof_of_work(false));
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_greater_bits__returns_false)

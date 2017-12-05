@@ -136,9 +136,9 @@ public:
     //-------------------------------------------------------------------------
 
     bool is_valid_timestamp() const;
-    bool is_valid_proof_of_work() const;
+    bool is_valid_proof_of_work(bool retarget=true) const;
 
-    code check() const;
+    code check(bool retarget=false) const;
     code accept() const;
     code accept(const chain_state& state) const;
 
