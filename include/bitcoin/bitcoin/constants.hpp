@@ -102,7 +102,11 @@ BC_CONSTEXPR uint32_t easy_spacing_seconds = 20 * 60;
 BC_CONSTEXPR uint32_t target_spacing_seconds = 10 * 60;
 BC_CONSTEXPR uint32_t target_timespan_seconds = 2 * 7 * 24 * 60 * 60;
 BC_CONSTEXPR uint32_t timestamp_future_seconds = 2 * 60 * 60;
+#ifdef WITH_REGTEST
+BC_CONSTEXPR uint32_t proof_of_work_limit = 0x207fffff;
+#else
 BC_CONSTEXPR uint32_t proof_of_work_limit = 0x1d00ffff;
+#endif
 
 // The upper and lower bounds for the retargeting timespan.
 BC_CONSTEXPR uint32_t min_timespan =

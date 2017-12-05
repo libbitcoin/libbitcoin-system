@@ -318,6 +318,18 @@ uint32_t chain_state::median_time_past(const data& values, uint32_t)
 // work_required
 //-----------------------------------------------------------------------------
 
+#ifdef WITH_REGTEST
+
+uint32_t chain_state::work_required(const data& values, uint32_t forks)
+{
+    if (values.height == 0)
+        return{};
+
+    return bits_high(values);
+}
+
+#else
+
 uint32_t chain_state::work_required(const data& values, uint32_t forks)
 {
     // Invalid parameter via public interface, test is_valid for results.
@@ -332,6 +344,8 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks)
 
     return bits_high(values);
 }
+
+#endif
 
 uint32_t chain_state::work_required_retarget(const data& values)
 {
