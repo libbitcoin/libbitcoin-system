@@ -427,7 +427,7 @@ size_t input::signature_operations(bool bip16, bool bip141) const
 {
     chain::script witness, embedded;
     const auto& prevout = previous_output_.validation.cache.script();
-    BITCOIN_ASSERT_MSG(!bip141 || bip16, "bip141 implies bip16");
+    ////BITCOIN_ASSERT_MSG(!bip141 || bip16, "bip141 implies bip16");
 
     // Penalize quadratic signature operations (bip141).
     const auto sigops_factor = bip141 ? fast_sigops_factor : 1u;
