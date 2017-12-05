@@ -306,14 +306,14 @@ size_t output::signature_operations(bool bip141) const
 
 bool output::extract_committed(hash_digest& out) const
 {
-    // The offset for the witness commitment hash (bip141).
-    static const auto at = sizeof(witness_head);
     const auto& ops = script_.operations();
 
     if (!script::is_commitment_pattern(ops))
         return false;
 
-    std::copy_n(ops[1].data().begin() + at, hash_size, out.begin());
+    // The four byte offset for the witness commitment hash (bip141).
+    const auto start = ops[1].data().begin() + sizeof(witness_head);
+    std::copy_n(start, hash_size, out.begin());
     return true;
 }
 
