@@ -18,6 +18,7 @@
  */
 #include <bitcoin/bitcoin/chain/input.hpp>
 
+#include <algorithm>
 #include <sstream>
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/chain/witness.hpp>
@@ -406,6 +407,17 @@ size_t input::signature_operations(bool bip16_active) const
     }
 
     return sigops;
+}
+
+bool input::extract_reserved(hash_digest& out_value) const
+{
+    const auto& ops = witness_.operations();
+
+    if (!witness::is_reserved_pattern(ops))
+        return false;
+
+    std::copy_n(ops.front().data().begin(), hash_size, out_value.begin());
+    return true;
 }
 
 } // namespace chain

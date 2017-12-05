@@ -18,6 +18,7 @@
  */
 #include <bitcoin/bitcoin/chain/output.hpp>
 
+#include <algorithm>
 #include <cstdint>
 #include <sstream>
 #include <bitcoin/bitcoin/constants.hpp>
@@ -297,6 +298,18 @@ payment_address output::address() const
 size_t output::signature_operations() const
 {
     return script_.sigops(false);
+}
+
+bool output::extract_committed(hash_digest& out_value) const
+{
+    // The offset for the witness commitment hash (bip141).
+    static const auto at = sizeof(witness_head);
+    const auto& ops = script_.operations();
+
+    if (!script::is_commitment_pattern(ops))
+        return false;
+    std::copy_n(ops[1].data().begin() + at, hash_size, out.begin());
+    return true;
 }
 
 } // namespace chain

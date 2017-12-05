@@ -129,6 +129,7 @@ public:
     bool is_segregated() const;
     bool is_locked(size_t block_height, uint32_t median_time_past) const;
     size_t signature_operations(bool bip16_active) const;
+    bool extract_reserved(hash_digest& out_value) const;
 
 protected:
     void reset();
