@@ -260,7 +260,7 @@ inline void program::erase(const stack_iterator& first,
 // Primary push/pop optimizations (passive).
 //-----------------------------------------------------------------------------
 
-// This must be guarded (intended for program internal use).
+// This must be guarded (intended for interpreter internal use).
 inline bool program::stack_to_bool() const
 {
     BITCOIN_ASSERT(!empty());
