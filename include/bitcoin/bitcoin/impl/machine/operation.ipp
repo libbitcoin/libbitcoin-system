@@ -23,6 +23,7 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/machine/number.hpp>
 #include <bitcoin/bitcoin/machine/opcode.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
@@ -131,20 +132,38 @@ inline bool operation::operator!=(const operation& other) const
 // Properties (size, accessors, cache).
 //-----------------------------------------------------------------------------
 
-inline size_t operation::serialized_size() const
+// TODO: consolidate with message implementation into common math utility.
+static size_t variable_uint_size(uint64_t value)
 {
-    const auto size = sizeof(uint8_t) + data_.size();
+    if (value < 0xfd)
+        return 1;
+    else if (value <= 0xffff)
+        return 3;
+    else if (value <= 0xffffffff)
+        return 5;
+    else
+        return 9;
+}
+
+inline size_t operation::serialized_size(bool witness) const
+{
+    static BC_CONSTEXPR auto op_size = sizeof(uint8_t);
+    BITCOIN_ASSERT(!witness || is_push());
+    const auto size = data_.size();
+
+    if (witness)
+        return variable_uint_size(size) + size;
 
     switch (code_)
     {
         case opcode::push_one_size:
-            return sizeof(uint8_t) + size;
+            return op_size + sizeof(uint8_t) + size;
         case opcode::push_two_size:
-            return sizeof(uint16_t) + size;
+            return op_size + sizeof(uint16_t) + size;
         case opcode::push_four_size:
-            return sizeof(uint32_t) + size;
+            return op_size + sizeof(uint32_t) + size;
         default:
-            return size;
+            return op_size + size;
 
     }
 }

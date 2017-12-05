@@ -19,6 +19,8 @@
 #include <bitcoin/bitcoin/chain/input.hpp>
 
 #include <sstream>
+#include <bitcoin/bitcoin/chain/script.hpp>
+#include <bitcoin/bitcoin/chain/witness.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -41,12 +43,13 @@ input::input()
 
 input::input(input&& other)
   : input(std::move(other.previous_output_), std::move(other.script_),
-      other.sequence_)
+        std::move(other.witness_), other.sequence_)
 {
 }
 
 input::input(const input& other)
-  : input(other.previous_output_, other.script_, other.sequence_)
+  : input(other.previous_output_, other.script_, other.witness_,
+        other.sequence_)
 {
 }
 
@@ -63,6 +66,20 @@ input::input(const output_point& previous_output, const chain::script& script,
 {
 }
 
+input::input(output_point&& previous_output, chain::script&& script,
+    chain::witness&& witness, uint32_t sequence)
+  : previous_output_(std::move(previous_output)), script_(std::move(script)),
+    witness_(std::move(witness)), sequence_(sequence)
+{
+}
+
+input::input(const output_point& previous_output, const chain::script& script,
+    const chain::witness& witness, uint32_t sequence)
+  : previous_output_(previous_output), script_(script), witness_(witness),
+    sequence_(sequence)
+{
+}
+
 // Operators.
 //-----------------------------------------------------------------------------
 
@@ -70,6 +87,7 @@ input& input::operator=(input&& other)
 {
     previous_output_ = std::move(other.previous_output_);
     script_ = std::move(other.script_);
+    witness_ = std::move(other.witness_);
     sequence_ = other.sequence_;
     return *this;
 }
@@ -78,6 +96,7 @@ input& input::operator=(const input& other)
 {
     previous_output_ = other.previous_output_;
     script_ = other.script_;
+    witness_ = other.witness_;
     sequence_ = other.sequence_;
     return *this;
 }
@@ -86,7 +105,8 @@ bool input::operator==(const input& other) const
 {
     return (sequence_ == other.sequence_)
         && (previous_output_ == other.previous_output_)
-        && (script_ == other.script_);
+        && (script_ == other.script_)
+        && (witness_ == other.witness_);
 }
 
 bool input::operator!=(const input& other) const
@@ -138,6 +158,11 @@ bool input::from_data(reader& source, bool wire)
         return false;
 
     script_.from_data(source, true);
+
+    // Transaction from_data handles the discontiguous wire witness decoding.
+    if (!wire)
+        witness_.from_data(source, true);
+
     sequence_ = source.read_4_bytes_little_endian();
 
     if (!source)
@@ -150,13 +175,15 @@ void input::reset()
 {
     previous_output_.reset();
     script_.reset();
+    witness_.reset();
     sequence_ = 0;
 }
 
-// Since empty script and zero sequence are valid this relies on the prevout.
+// Since empty scripts and zero sequence are valid this relies on the prevout.
 bool input::is_valid() const
 {
-    return sequence_ != 0 || previous_output_.is_valid() || script_.is_valid();
+    return sequence_ != 0 || previous_output_.is_valid() ||
+        script_.is_valid() || witness_.is_valid();
 }
 
 // Serialization.
@@ -184,16 +211,25 @@ void input::to_data(writer& sink, bool wire) const
 {
     previous_output_.to_data(sink, wire);
     script_.to_data(sink, true);
+
+    // Transaction to_data handles the discontiguous wire witness encoding.
+    if (!wire)
+        witness_.to_data(sink, true);
+
     sink.write_4_bytes_little_endian(sequence_);
 }
 
 // Size.
 //-----------------------------------------------------------------------------
 
-size_t input::serialized_size(bool wire) const
+size_t input::serialized_size(bool wire, bool witness) const
 {
-    return previous_output_.serialized_size(wire) +
-        script_.serialized_size(true) + sizeof(sequence_);
+    // Witness size added in both contexts despite that tx writes wire witness.
+    // Prefix is written for both wire and store/other contexts.
+    return previous_output_.serialized_size(wire)
+        + script_.serialized_size(true)
+        + (witness ? witness_.serialized_size(true) : 0)
+        + sizeof(sequence_);
 }
 
 // Accessors.
@@ -241,6 +277,28 @@ void input::set_script(chain::script&& value)
     invalidate_cache();
 }
 
+chain::witness& input::witness()
+{
+    return witness_;
+}
+
+const chain::witness& input::witness() const
+{
+    return witness_;
+}
+
+void input::set_witness(const chain::witness& value)
+{
+    witness_ = value;
+    invalidate_cache();
+}
+
+void input::set_witness(chain::witness&& value)
+{
+    witness_ = std::move(value);
+    invalidate_cache();
+}
+
 uint32_t input::sequence() const
 {
     return sequence_;
@@ -282,6 +340,7 @@ payment_address input::address() const
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_.unlock_upgrade_and_lock();
 
+        // TODO: expand to include segregated witness address extraction.
         address_ = std::make_shared<payment_address>(
             payment_address::extract_input(script_));
 
@@ -302,6 +361,12 @@ payment_address input::address() const
 bool input::is_final() const
 {
     return sequence_ == max_input_sequence;
+}
+
+bool input::is_segregated() const
+{
+    // If no block tx is has witness data the commitment is optional (bip141).
+    return !witness_.empty();
 }
 
 bool input::is_locked(size_t block_height, uint32_t median_time_past) const

@@ -254,7 +254,7 @@ data_chunk script::operations_to_data(const operation::list& ops)
     out.reserve(size);
     const auto concatenate = [&out](const operation& op)
     {
-        auto bytes = op.to_data();
+        auto bytes = op.to_data(false);
         std::move(bytes.begin(), bytes.end(), std::back_inserter(out));
     };
 
@@ -268,7 +268,7 @@ size_t script::serialized_size(const operation::list& ops)
 {
     const auto op_size = [](size_t total, const operation& op)
     {
-        return total + op.serialized_size();
+        return total + op.serialized_size(false);
     };
 
     return std::accumulate(ops.begin(), ops.end(), size_t{0}, op_size);
@@ -506,7 +506,7 @@ static hash_digest sign_none(const transaction& tx, uint32_t input_index,
 
     // Move new inputs to new transaction and drop outputs.
     return transaction(tx.version(), tx.locktime(), std::move(ins),
-        output::list{}).hash(sighash_type);
+        output::list{}).hash(sighash_type, false);
 }
 
 static hash_digest sign_single(const transaction& tx, uint32_t input_index,
@@ -545,7 +545,7 @@ static hash_digest sign_single(const transaction& tx, uint32_t input_index,
 
     // Move new inputs and new outputs to new transaction.
     return transaction(tx.version(), tx.locktime(), std::move(ins),
-        std::move(outs)).hash(sighash_type);
+        std::move(outs)).hash(sighash_type, false);
 }
 
 static hash_digest sign_all(const transaction& tx, uint32_t input_index,
@@ -579,7 +579,7 @@ static hash_digest sign_all(const transaction& tx, uint32_t input_index,
     // Move new inputs and copy outputs to new transaction.
     transaction out(tx.version(), tx.locktime(), input::list{}, tx.outputs());
     out.set_inputs(std::move(ins));
-    return out.hash(sighash_type);
+    return out.hash(sighash_type, false);
 }
 
 static script strip_code_seperators(const script& script_code)

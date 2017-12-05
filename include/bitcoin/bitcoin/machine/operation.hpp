@@ -64,13 +64,13 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static operation factory_from_data(const data_chunk& encoded);
-    static operation factory_from_data(std::istream& stream);
-    static operation factory_from_data(reader& source);
+    static operation factory_from_data(const data_chunk& encoded, bool witness=false);
+    static operation factory_from_data(std::istream& stream, bool witness=false);
+    static operation factory_from_data(reader& source, bool witness=false);
 
-    bool from_data(const data_chunk& encoded);
-    bool from_data(std::istream& stream);
-    bool from_data(reader& source);
+    bool from_data(const data_chunk& encoded, bool witness=false);
+    bool from_data(std::istream& stream, bool witness=false);
+    bool from_data(reader& source, bool witness=false);
 
     bool from_string(const std::string& mnemonic);
 
@@ -79,16 +79,16 @@ public:
     // Serialization.
     //-------------------------------------------------------------------------
 
-    void to_data(std::ostream& stream) const;
-    void to_data(writer& sink) const;
-    data_chunk to_data() const;
+    data_chunk to_data(bool witness=false) const;
+    void to_data(std::ostream& stream, bool witness=false) const;
+    void to_data(writer& sink, bool witness=false) const;
 
     std::string to_string(uint32_t active_forks) const;
 
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------
 
-    size_t serialized_size() const;
+    size_t serialized_size(bool witness=false) const;
 
     /// Get the op code [0..255], if is_valid is consistent with data.
     opcode code() const;

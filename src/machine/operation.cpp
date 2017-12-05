@@ -38,55 +38,78 @@ namespace machine {
 //-----------------------------------------------------------------------------
 
 // static
-operation operation::factory_from_data(const data_chunk& encoded)
+operation operation::factory_from_data(const data_chunk& encoded, bool witness)
 {
     operation instance;
-    instance.from_data(encoded);
+    instance.from_data(encoded, witness);
     return instance;
 }
 
 // static
-operation operation::factory_from_data(std::istream& stream)
+operation operation::factory_from_data(std::istream& stream, bool witness)
 {
     operation instance;
-    instance.from_data(stream);
+    instance.from_data(stream, witness);
     return instance;
 }
 
 // static
-operation operation::factory_from_data(reader& source)
+operation operation::factory_from_data(reader& source, bool witness)
 {
     operation instance;
-    instance.from_data(source);
+    instance.from_data(source, witness);
     return instance;
 }
 
-bool operation::from_data(const data_chunk& encoded)
+bool operation::from_data(const data_chunk& encoded, bool witness)
 {
     data_source istream(encoded);
-    return from_data(istream);
+    return from_data(istream, witness);
 }
 
-bool operation::from_data(std::istream& stream)
+bool operation::from_data(std::istream& stream, bool witness)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(source, witness);
 }
 
 // TODO: optimize for larger data by using a shared byte array.
-bool operation::from_data(reader& source)
+bool operation::from_data(reader& source, bool witness)
 {
-    reset();
-
+    ////reset();
     valid_ = true;
-    code_ = static_cast<opcode>(source.read_byte());
-    const auto size = read_data_size(code_, source);
 
-    // Guard against potential for arbitary memory allocation.
-    if (size > max_push_data_size)
-        source.invalidate();
-    else if (size != 0)
-        data_ = source.read_bytes(size);
+    if (witness)
+    {
+        // Tokens encoded as variable integer prefixed byte array (bip144).
+        const auto size = source.read_size_little_endian();
+
+        // Guard against potential for arbitary memory allocation.
+        // bip141 removes push limit so restrict using script limit.
+        if (size > max_script_size)
+        {
+            source.invalidate();
+        }
+        else
+        {
+            // Use of minimal data coding optimizes for store space.
+            data_ = source.read_bytes(size);
+            code_ = minimal_opcode_from_data(data_);
+        }
+    }
+    else
+    {
+        code_ = static_cast<opcode>(source.read_byte());
+        const auto size = read_data_size(code_, source);
+
+        // Guard against potential for arbitary memory allocation.
+        if (size > max_push_data_size)
+            source.invalidate();
+        else if (size != 0)
+            data_ = source.read_bytes(size);
+        else
+            data_.clear();
+    }
 
     if (!source)
         reset();
@@ -235,43 +258,51 @@ void operation::reset()
 // Serialization.
 //-----------------------------------------------------------------------------
 
-data_chunk operation::to_data() const
+data_chunk operation::to_data(bool witness) const
 {
     data_chunk data;
-    data.reserve(serialized_size());
+    const auto size = serialized_size(witness);
+    data.reserve(size);
     data_sink ostream(data);
-    to_data(ostream);
+    to_data(ostream, witness);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 
-void operation::to_data(std::ostream& stream) const
+void operation::to_data(std::ostream& stream, bool witness) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(sink, witness);
 }
 
-void operation::to_data(writer& sink) const
+void operation::to_data(writer& sink, bool witness) const
 {
-    static constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
     const auto size = data_.size();
-    const auto code = static_cast<uint8_t>(code_);
-    sink.write_byte(code);
 
-    switch (code_)
+    if (witness)
     {
-        case opcode::push_one_size:
-            sink.write_byte(static_cast<uint8_t>(size));
-            break;
-        case opcode::push_two_size:
-            sink.write_2_bytes_little_endian(static_cast<uint16_t>(size));
-            break;
-        case opcode::push_four_size:
-            sink.write_4_bytes_little_endian(static_cast<uint32_t>(size));
-            break;
-        default:
-            break;
+        // Tokens encoded as variable integer prefixed byte array (bip144).
+        sink.write_size_little_endian(size);
+    }
+    else
+    {
+        sink.write_byte(static_cast<uint8_t>(code_));
+
+        switch (code_)
+        {
+            case opcode::push_one_size:
+                sink.write_byte(static_cast<uint8_t>(size));
+                break;
+            case opcode::push_two_size:
+                sink.write_2_bytes_little_endian(static_cast<uint16_t>(size));
+                break;
+            case opcode::push_four_size:
+                sink.write_4_bytes_little_endian(static_cast<uint32_t>(size));
+                break;
+            default:
+                break;
+        }
     }
 
     sink.write_bytes(data_);
