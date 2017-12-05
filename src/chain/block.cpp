@@ -809,9 +809,9 @@ bool block::is_valid_witness_commitment() const
     const auto& coinbase = transactions_.front();
 
     // Last output of commitment pattern holds committed value (bip141).
-    if (coinbase.inputs().front().extract_reserved(reserved))
+    if (coinbase.inputs().front().extract_reserved_hash(reserved))
         for (const auto& output: reverse(coinbase.outputs()))
-            if (output.extract_committed(committed))
+            if (output.extract_committed_hash(committed))
                 return committed == bitcoin_hash(
                     build_chunk({ generate_merkle_root(true), reserved }));
 

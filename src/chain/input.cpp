@@ -415,15 +415,15 @@ size_t input::signature_operations(bool bip16, bool bip141) const
     // Count heavy sigops in the input script.
     auto sigops = script_.sigops(false) * sigops_factor;
 
-    if (bip141 && extract_witness(witness, prevout))
+    if (bip141 && extract_witness_script(witness, prevout))
     {
         // Add sigops in the witness (bip141).
         return sigops + witness.sigops(true);
     }
 
-    if (bip16 && extract_embedded(embedded))
+    if (bip16 && extract_embedded_script(embedded))
     {
-        if (bip141 && extract_witness(witness, embedded))
+        if (bip141 && extract_witness_script(witness, embedded))
         {
             // Add sigops in the embedded witness (bip141).
             return sigops + witness.sigops(true);
@@ -439,24 +439,24 @@ size_t input::signature_operations(bool bip16, bool bip141) const
 }
 
 // Extract bare (P2WPKH) or embedded (P2WSH) witness script, based on program.
-bool input::extract_witness(chain::script& out,
-    const chain::script& program) const
+bool input::extract_witness_script(chain::script& out,
+    const chain::script& prevout) const
 {
-    switch (program.version())
+    switch (prevout.version())
     {
         case script_version::zero:
         {
             const auto& witness_ops = witness_.operations();
-            const auto token_size = program.witness_token().size();
+            const auto program_size = prevout.witness_program().size();
 
-            if (token_size == hash_size)
+            if (program_size == hash_size)
             {
                 // TODO: It would be nice if witness was derived from script.
                 out.from_operations(witness_ops);
                 return true;
             }
 
-            if (token_size == short_hash_size && !witness_ops.empty())
+            if (program_size == short_hash_size && !witness_ops.empty())
             {
                 // This cannot fail because there is no prefix.
                 return out.from_data(witness_ops.back().data(), false);
@@ -473,7 +473,7 @@ bool input::extract_witness(chain::script& out,
 }
 
 // This requires that previous outputs have been populated.
-bool input::extract_embedded(chain::script& out) const
+bool input::extract_embedded_script(chain::script& out) const
 {
     const auto& ops = script_.operations();
     const auto& prevout_script = previous_output_.validation.cache.script();
@@ -495,7 +495,7 @@ bool input::extract_embedded(chain::script& out) const
     return out.from_data(ops.back().data(), false);
 }
 
-bool input::extract_reserved(hash_digest& out) const
+bool input::extract_reserved_hash(hash_digest& out) const
 {
     const auto& ops = witness_.operations();
 

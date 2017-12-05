@@ -304,7 +304,7 @@ size_t output::signature_operations(bool bip141) const
     return script_.sigops(false) * sigops_factor;
 }
 
-bool output::extract_committed(hash_digest& out) const
+bool output::extract_committed_hash(hash_digest& out) const
 {
     const auto& ops = script_.operations();
 

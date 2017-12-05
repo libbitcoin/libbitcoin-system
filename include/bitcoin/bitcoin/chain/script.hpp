@@ -179,7 +179,7 @@ public:
     //-------------------------------------------------------------------------
 
     /// Common pattern detection.
-    data_chunk witness_token() const;
+    data_chunk witness_program() const;
     machine::script_version version() const;
     machine::script_pattern pattern() const;
     machine::script_pattern output_pattern() const;

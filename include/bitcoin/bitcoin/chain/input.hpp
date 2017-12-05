@@ -135,9 +135,10 @@ public:
     bool is_segregated() const;
     bool is_locked(size_t block_height, uint32_t median_time_past) const;
     size_t signature_operations(bool bip16, bool bip141) const;
-    bool extract_reserved(hash_digest& out) const;
-    bool extract_embedded(chain::script& out) const;
-    bool extract_witness(chain::script& out, const chain::script& program) const;
+    bool extract_reserved_hash(hash_digest& out) const;
+    bool extract_embedded_script(chain::script& out) const;
+    bool extract_witness_script(chain::script& out,
+        const chain::script& prevout) const;
 
 protected:
     void reset();
