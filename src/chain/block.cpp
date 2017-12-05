@@ -763,6 +763,25 @@ bool block::is_valid_coinbase_script(size_t height) const
     return script::is_coinbase_pattern(script.operations(), height);
 }
 
+bool block::is_valid_witness_commitment() const
+{
+    if (transactions_.empty() || transactions_.front().inputs().empty())
+        return false;
+
+    hash_digest reserved, committed;
+    const auto& coinbase = transactions_.front();
+
+    // Last output of commitment pattern holds committed value (bip141).
+    if (coinbase.inputs().front().extract_reserved(reserved))
+        for (const auto& output: reverse(coinbase.outputs()))
+            if (output.extract_committed(committed))
+                return committed == bitcoin_hash(
+                    build_chunk({ generate_merkle_root(true), reserved }));
+
+    // If no txs in block are segregated the commitment is optional (bip141).
+    return !is_segregated();
+}
+
 bool block::is_segregated() const
 {
     bool value;
@@ -894,6 +913,7 @@ code block::accept(const chain_state& state, bool transactions,
     code ec;
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip34 = state.is_enabled(rule_fork::bip34_rule);
+    const auto bip141 = state.is_enabled(rule_fork::bip141_rule);
 
     const auto block_time = state.is_enabled(rule_fork::bip113_rule) ?
         state.median_time_past() : header_.timestamp();
@@ -914,6 +934,9 @@ code block::accept(const chain_state& state, bool transactions,
     // TODO: relates median time past to tx.locktime (pool cache min tx.time).
     else if (!is_final(state.height(), block_time))
         return error::block_non_final;
+
+    else if (bip141 && !is_valid_witness_commitment())
+        return error::invalid_witness_commitment;
 
     // TODO: determine if performance benefit is worth excluding sigops here.
     // TODO: relates block limit to total of tx.sigops (pool cache tx.sigops).

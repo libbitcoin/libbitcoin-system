@@ -18,6 +18,7 @@
  */
 #include <bitcoin/bitcoin/chain/output.hpp>
 
+#include <algorithm>
 #include <cstdint>
 #include <sstream>
 #include <bitcoin/bitcoin/constants.hpp>
@@ -318,6 +319,18 @@ bool output::is_dust(uint64_t minimum_value) const
 {
     // If provably unspendable it does not expand the unspent output set.
     return value_ < minimum_value && !script_.is_unspendable();
+}
+
+bool output::extract_committed(hash_digest& out_value) const
+{
+    // The offset for the witness commitment hash (bip141).
+    static const auto at = sizeof(witness_head);
+    const auto& ops = script_.operations();
+
+    if (!script::is_commitment_pattern(ops))
+        return false;
+    std::copy_n(ops[1].data().begin() + at, hash_size, out.begin());
+    return true;
 }
 
 } // namespace chain

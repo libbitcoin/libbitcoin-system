@@ -111,6 +111,7 @@ enum error_code_t
     coinbase_height_mismatch = 37,
     coinbase_value_limit = 41,
     block_embedded_sigop_limit = 52,
+    invalid_witness_commitment = 81,
 
     // check transaction
     empty_transaction = 20,
