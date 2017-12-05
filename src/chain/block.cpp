@@ -409,7 +409,7 @@ chain::block block::genesis_regtest()
 {
     data_chunk data;
     decode_base16(data, encoded_regtest_genesis_block);
-    const auto genesis = chain::block::factory_from_data(data);
+    const auto genesis = chain::block::factory(data);
 
     BITCOIN_ASSERT(genesis.is_valid());
     BITCOIN_ASSERT(genesis.transactions().size() == 1);
