@@ -146,8 +146,8 @@ BC_CONSTEXPR size_t testnet_bip66_freeze = 330776;
 BC_CONSTEXPR size_t testnet_bip34_freeze = 21111;
 
 // Block 514 is the first testnet block after date-based activation.
-// Block 173805 is the first mainnet block after date-based activation.
-BC_CONSTEXPR uint32_t bip16_activation_time = 0x4f779a80;
+// Block 105571 is the first mainnet block after date-based activation.
+BC_CONSTEXPR uint32_t bip16_activation_time = 0x4f288080;
 
 // Block 170060 was mined with an invalid p2sh (code shipped late).
 // bitcointalk.org/index.php?topic=63165.msg788832#msg788832

@@ -260,21 +260,16 @@ inline void program::erase(const stack_iterator& first,
 // Primary push/pop optimizations (passive).
 //-----------------------------------------------------------------------------
 
+// This must be guarded (intended for program internal use).
 inline bool program::stack_to_bool() const
 {
+    BITCOIN_ASSERT(!empty());
     const auto& back = primary_.back();
-    if (back.empty())
-        return false;
 
-    const auto last = back.end() - 1;
+    // It's not non-zero it's the terminating negative sentinel.
     for (auto it = back.begin(); it != back.end(); ++it)
-    {
         if (*it != 0)
-        {
-            // It's not non-zero it's the terminating negative sentinel.
-            return !(it == last && *it == number::negative_0);
-        }
-    }
+            return !(it == back.end() - 1 && *it == number::negative_0);
 
     return false;
 }
