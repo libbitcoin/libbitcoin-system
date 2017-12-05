@@ -186,6 +186,9 @@ chain_state::activations chain_state::activation(const data& values,
     // Initialize activation results with genesis values.
     activations result{ rule_fork::no_rules, first_version };
 
+    // retarget is only activated via configuration (hard fork).
+    result.forks |= (rule_fork::retarget & forks);
+
     // testnet is activated based on configuration alone (hard fork).
     result.forks |= (rule_fork::easy_blocks & forks);
 
@@ -290,13 +293,13 @@ size_t chain_state::timestamp_count(size_t height, uint32_t)
 
 size_t chain_state::retarget_height(size_t height, uint32_t forks)
 {
-    const auto retarget = script::is_enabled(forks, rule_fork::retarget);
+    if (!script::is_enabled(forks, rule_fork::retarget))
+        return map::unrequested;
 
     // Height must be a positive multiple of interval, so underflow safe.
     // If not retarget height get most recent so that it may be promoted.
-    return retarget ?
-        (height - (is_retarget_height(height) ? retargeting_interval :
-            retarget_distance(height))) : map::unrequested;
+    return height - (is_retarget_height(height) ? retargeting_interval :
+        retarget_distance(height));
 }
 
 size_t chain_state::collision_height(size_t height, uint32_t forks)
@@ -512,16 +515,17 @@ uint32_t chain_state::signal_version(uint32_t forks)
 // This is promotion from a preceding height to the next.
 chain_state::data chain_state::to_pool(const chain_state& top)
 {
-    auto retarget = script::is_enabled(top.forks_, rule_fork::retarget);
+    // Alias configured forks.
+    const auto forks = top.forks_;
+
+    // Retargeting is only activated via configuration.
+    const auto retarget = script::is_enabled(forks, rule_fork::retarget);
 
     // Copy data from presumed previous-height block state.
     auto data = top.data_;
 
-    // Alias configured forks, these don't change.
-    const auto forks = top.forks_;
-
-    // Ppromotion is always valid because we thrown on chain overflow.
-    const auto height = safe_add(data.height, size_t(1));
+    // If this overflows height is zero and result is handled as invalid.
+    const auto height = data.height + 1u;
 
     // Enqueue previous block values to collections.
     data.bits.ordered.push_back(data.bits.self);
@@ -572,9 +576,13 @@ chain_state::chain_state(const chain_state& top)
 chain_state::data chain_state::to_block(const chain_state& pool,
     const block& block)
 {
-    auto testnet = script::is_enabled(pool.forks_, rule_fork::easy_blocks);
-    auto retarget = script::is_enabled(pool.forks_, rule_fork::retarget);
-    auto mainnet = retarget && !testnet;
+    // Alias configured forks.
+    const auto forks = pool.forks_;
+
+    // Retargeting and testnet are only activated via configuration.
+    const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
+    const auto retarget = script::is_enabled(forks, rule_fork::retarget);
+    const auto mainnet = retarget && !testnet;
 
     // Copy data from presumed same-height pool state.
     auto data = pool.data_;
@@ -613,9 +621,13 @@ chain_state::chain_state(const chain_state& pool, const block& block)
 chain_state::data chain_state::to_header(const chain_state& parent,
     const header& header)
 {
-    auto testnet = script::is_enabled(parent.forks_, rule_fork::easy_blocks);
-    auto retarget = script::is_enabled(parent.forks_, rule_fork::retarget);
-    auto mainnet = retarget && !testnet;
+    // Alias configured forks.
+    const auto forks = parent.forks_;
+
+    // Retargeting and testnet are only activated via configuration.
+    const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
+    const auto retarget = script::is_enabled(forks, rule_fork::retarget);
+    const auto mainnet = retarget && !testnet;
 
     // Copy and promote data from presumed parent-height header/block state.
     auto data = to_pool(parent);
@@ -652,6 +664,7 @@ chain_state::chain_state(const chain_state& parent, const header& header)
 
 // Constructor (from raw data).
 // The allow_collisions hard fork is always activated (not configurable).
+// TODO: remove allow_collisions fork by incorporating into bip30 revert.
 chain_state::chain_state(data&& values, const checkpoints& checkpoints,
     uint32_t forks)
   : data_(std::move(values)),
