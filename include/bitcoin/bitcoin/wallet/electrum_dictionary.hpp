@@ -43,14 +43,14 @@ typedef std::array<const char*, dictionary_size_v1> dictionary_v1;
  */
 typedef std::vector<const dictionary*> dictionary_list;
 
-namespace language
-{
-    namespace electrum
-    {
-        // electrum v1 dictionary required for v2 compatibility
-        extern const dictionary_v1 en_v1;
-    }
-}
+namespace language {
+namespace electrum {
+
+// electrum v1 dictionary required for v2 compatibility
+extern const dictionary_v1 en_v1;
+
+} // namespace electrum
+} // namespace language
 
 } // namespace wallet
 } // namespace libbitcoin
