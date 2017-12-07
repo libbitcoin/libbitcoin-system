@@ -26,6 +26,8 @@
 #include <iostream>
 #include <type_traits>
 #include <vector>
+#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
 
@@ -59,6 +61,8 @@ int find_pair_position(const std::vector<Pair>& list, const Key& key)
     if (it == list.end())
         return -1;
 
+    // Unsafe for use with lists greater than max_int32 in size.
+    BITCOIN_ASSERT(list.size() <= max_int32);
     return static_cast<int>(distance(list.begin(), it));
 }
 
@@ -70,6 +74,8 @@ int find_position(const Container& list, const Element& value)
     if (it == std::end(list))
         return -1;
 
+    // Unsafe for use with lists greater than max_int32 in size.
+    BITCOIN_ASSERT(list.size() <= max_int32);
     return static_cast<int>(std::distance(list.begin(), it));
 }
 
