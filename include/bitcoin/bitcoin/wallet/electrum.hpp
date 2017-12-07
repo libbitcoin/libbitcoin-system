@@ -67,9 +67,7 @@ enum class seed : uint8_t
  * Valid seed prefixes.
  */
 static const data_chunk seed_prefix_standard{ 0x01 };
-
 static const data_chunk seed_prefix_witness{ 0x01, 0x00 };
-
 static const data_chunk seed_prefix_two_factor_authentication{ 0x01, 0x01 };
 
 /**
