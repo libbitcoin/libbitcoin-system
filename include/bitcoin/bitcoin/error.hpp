@@ -147,6 +147,8 @@ enum error_code_t
     invalid_signature_encoding = 62,
     invalid_signature_lax_encoding = 63,
     incorrect_signature = 64,
+    unexpected_witness = 77,
+    dirty_witness = 78,
     stack_false = 65,
 
     // op eval

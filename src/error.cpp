@@ -149,6 +149,8 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::invalid_signature_encoding, "invalid signature encoding" },
         { error::invalid_signature_lax_encoding, "invalid signature lax encoding" },
         { error::incorrect_signature, "incorrect signature" },
+        { error::unexpected_witness, "unexpected witness" },
+        { error::dirty_witness, "dirty witness" },
         { error::stack_false, "stack false" },
 
         // op eval
