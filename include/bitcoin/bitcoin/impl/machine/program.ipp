@@ -103,14 +103,16 @@ inline bool program::increment_operation_count(const operation& op)
     return !operation_overflow(operation_count_);
 }
 
-inline bool program::increment_multisig_public_key_count(int32_t count)
+inline bool program::increment_operation_count(int32_t public_keys)
 {
+    static const auto max_keys = static_cast<int32_t>(max_script_public_keys);
+
     // bit.ly/2d1bsdB
-    if (count < 0 || count > static_cast<int32_t>(max_script_public_keys))
+    if (public_keys < 0 || public_keys > max_keys)
         return false;
 
     // Addition is safe due to script size validation.
-    operation_count_ += count;
+    operation_count_ += public_keys;
     return !operation_overflow(operation_count_);
 }
 

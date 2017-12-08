@@ -701,7 +701,8 @@ inline interpreter::result interpreter::op_check_multisig_verify(
     if (!program.pop(key_count))
         return error::op_check_multisig_verify1;
 
-    if (!program.increment_multisig_public_key_count(key_count))
+    // Multisig script public keys are counted as op codes.
+    if (!program.increment_operation_count(key_count))
         return error::op_check_multisig_verify2;
 
     data_stack public_keys;
