@@ -134,7 +134,7 @@ bool output::from_data(std::istream& stream, bool wire)
     return from_data(source, wire);
 }
 
-bool output::from_data(reader& source, bool wire)
+bool output::from_data(reader& source, bool wire, bool)
 {
     reset();
 
@@ -184,7 +184,7 @@ void output::to_data(std::ostream& stream, bool wire) const
     to_data(sink, wire);
 }
 
-void output::to_data(writer& sink, bool wire) const
+void output::to_data(writer& sink, bool wire, bool) const
 {
     if (!wire)
     {
