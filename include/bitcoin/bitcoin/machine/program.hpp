@@ -87,7 +87,7 @@ public:
     code evaluate();
     code evaluate(const operation& op);
     bool increment_operation_count(const operation& op);
-    bool increment_multisig_public_key_count(int32_t count);
+    bool increment_operation_count(int32_t public_keys);
     bool set_jump_register(const operation& op, int32_t offset);
 
     // Primary stack.
