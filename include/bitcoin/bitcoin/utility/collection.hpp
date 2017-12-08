@@ -91,6 +91,14 @@ typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,
 template <typename Type>
 void move_append(std::vector<Type>& target, std::vector<Type>& source);
 
+/**
+ * Pop an element from the stack and return its value.
+ * @param      <Element>  The stack element type.
+ * @param[in]  stack       The stack.
+ */
+template <typename Element>
+Element pop(std::vector<Element>& stack);
+
 } // namespace libbitcoin
 
 namespace std {
