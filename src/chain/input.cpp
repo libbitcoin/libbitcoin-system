@@ -415,7 +415,7 @@ size_t input::signature_operations(bool bip16, bool bip141) const
     // Count heavy sigops in the input script.
     auto sigops = script_.sigops(false) * sigops_factor;
 
-    if (bip141 && extract_witness_script(witness, prevout))
+    if (bip141 && witness_.extract_sigop_script(witness, prevout))
     {
         // Add sigops in the witness (bip141).
         return sigops + witness.sigops(true);
@@ -423,7 +423,7 @@ size_t input::signature_operations(bool bip16, bool bip141) const
 
     if (bip16 && extract_embedded_script(embedded))
     {
-        if (bip141 && extract_witness_script(witness, embedded))
+        if (bip141 && witness_.extract_sigop_script(witness, embedded))
         {
             // Add sigops in the embedded witness (bip141).
             return sigops + witness.sigops(true);
@@ -438,48 +438,12 @@ size_t input::signature_operations(bool bip16, bool bip141) const
     return sigops;
 }
 
-// Extract bare (P2WPKH) or embedded (P2WSH) witness script, based on program.
-bool input::extract_witness_script(chain::script& out,
-    const chain::script& prevout) const
-{
-    switch (prevout.version())
-    {
-        case script_version::zero:
-        {
-            const auto& witness_ops = witness_.operations();
-            const auto program_size = prevout.witness_program().size();
-
-            if (program_size == hash_size)
-            {
-                // TODO: It would be nice if witness was derived from script.
-                out.from_operations(witness_ops);
-                return true;
-            }
-
-            if (program_size == short_hash_size && !witness_ops.empty())
-            {
-                // This cannot fail because there is no prefix.
-                return out.from_data(witness_ops.back().data(), false);
-            }
-
-            return false;
-        }
-
-        case script_version::reserved:
-        case script_version::unversioned:
-        default:
-            return false;
-    }
-}
-
 // This requires that previous outputs have been populated.
 bool input::extract_embedded_script(chain::script& out) const
 {
+    ////BITCOIN_ASSERT(previous_output_.is_valid());
     const auto& ops = script_.operations();
     const auto& prevout_script = previous_output_.validation.cache.script();
-
-    // TODO: prevent unit test case breaks here.
-    ////BITCOIN_ASSERT(previous_output_.is_valid());
 
     // There are no embedded sigops when the prevout script is not p2sh.
     if (!prevout_script.is_pay_to_script_hash(rule_fork::bip16_rule))
@@ -497,12 +461,12 @@ bool input::extract_embedded_script(chain::script& out) const
 
 bool input::extract_reserved_hash(hash_digest& out) const
 {
-    const auto& ops = witness_.operations();
+    const auto& stack = witness_.stack();
 
-    if (!witness::is_reserved_pattern(ops))
+    if (!witness::is_reserved_pattern(stack))
         return false;
 
-    std::copy_n(ops.front().data().begin(), hash_size, out.begin());
+    std::copy_n(stack.front().begin(), hash_size, out.begin());
     return true;
 }
 

@@ -145,14 +145,10 @@ static size_t variable_uint_size(uint64_t value)
         return 9;
 }
 
-inline size_t operation::serialized_size(bool witness) const
+inline size_t operation::serialized_size() const
 {
     static BC_CONSTEXPR auto op_size = sizeof(uint8_t);
-    BITCOIN_ASSERT(!witness || is_push());
     const auto size = data_.size();
-
-    if (witness)
-        return variable_uint_size(size) + size;
 
     switch (code_)
     {

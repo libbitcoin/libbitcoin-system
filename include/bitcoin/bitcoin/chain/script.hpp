@@ -40,6 +40,7 @@ namespace libbitcoin {
 namespace chain {
 
 class transaction;
+class witness;
 
 class BC_API script
 {
@@ -149,7 +150,7 @@ public:
     static bool is_relaxed_push(const operation::list& ops);
     static bool is_coinbase_pattern(const operation::list& ops, size_t height);
     static bool is_commitment_pattern(const operation::list& ops);
-    static bool is_program_pattern(const operation::list& ops);
+    static bool is_witness_program_pattern(const operation::list& ops);
 
     /// Common output patterns (psh and pwsh are also consensus).
     static bool is_null_data_pattern(const operation::list& ops);
@@ -198,7 +199,7 @@ public:
     // TOD: move back to private.
     static code verify(const transaction& tx, uint32_t input_index,
         uint32_t forks, const script& input_script,
-        const script& prevout_script);
+        const witness& input_witness, const script& prevout_script);
 
 protected:
     // So that input and output may call reset from their own.
@@ -206,6 +207,7 @@ protected:
     friend class output;
 
     void reset();
+    bool is_pay_to_witness(uint32_t forks) const;
     bool is_pay_to_script_hash(uint32_t forks) const;
     void find_and_delete_(const data_chunk& endorsement);
 

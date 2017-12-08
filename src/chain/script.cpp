@@ -29,6 +29,7 @@
 #include <boost/range/adaptor/reversed.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
+#include <bitcoin/bitcoin/chain/witness.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
@@ -36,6 +37,7 @@
 #include <bitcoin/bitcoin/machine/interpreter.hpp>
 #include <bitcoin/bitcoin/machine/opcode.hpp>
 #include <bitcoin/bitcoin/machine/operation.hpp>
+#include <bitcoin/bitcoin/machine/program.hpp>
 #include <bitcoin/bitcoin/machine/rule_fork.hpp>
 #include <bitcoin/bitcoin/machine/script_pattern.hpp>
 #include <bitcoin/bitcoin/machine/script_version.hpp>
@@ -44,6 +46,7 @@
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
@@ -255,7 +258,7 @@ data_chunk script::operations_to_data(const operation::list& ops)
     out.reserve(size);
     const auto concatenate = [&out](const operation& op)
     {
-        auto bytes = op.to_data(false);
+        auto bytes = op.to_data();
         std::move(bytes.begin(), bytes.end(), std::back_inserter(out));
     };
 
@@ -269,7 +272,7 @@ size_t script::serialized_size(const operation::list& ops)
 {
     const auto op_size = [](size_t total, const operation& op)
     {
-        return total + op.serialized_size(false);
+        return total + op.serialized_size();
     };
 
     return std::accumulate(ops.begin(), ops.end(), size_t{0}, op_size);
@@ -723,7 +726,7 @@ bool script::is_commitment_pattern(const operation::list& ops)
 //*****************************************************************************
 // CONSENSUS: this pattern is used in bip141 validation rules.
 //*****************************************************************************
-bool script::is_program_pattern(const operation::list& ops)
+bool script::is_witness_program_pattern(const operation::list& ops)
 {
     return ops.size() == 2
         && ops[0].is_version()
@@ -967,7 +970,7 @@ data_chunk script::witness_program() const
 {
     // The first operations access must be method-based to guarantee the cache.
     const auto& ops = operations();
-    return is_program_pattern(ops) ? ops[1].data() : data_chunk{};
+    return is_witness_program_pattern(ops) ? ops[1].data() : data_chunk{};
 }
 
 script_version script::version() const
@@ -975,7 +978,7 @@ script_version script::version() const
     // The first operations access must be method-based to guarantee the cache.
     const auto& ops = operations();
 
-    if (!is_program_pattern(ops))
+    if (!is_witness_program_pattern(ops))
         return script_version::unversioned;
 
     // Version 0 is specified, others are reserved (bip141).
@@ -1033,6 +1036,14 @@ script_pattern script::input_pattern() const
         return script_pattern::sign_multisig;
 
     return script_pattern::non_standard;
+}
+
+bool script::is_pay_to_witness(uint32_t forks) const
+{
+    // This is used internally as an optimization over using script::pattern.
+    // The first operations access must be method-based to guarantee the cache.
+    return is_enabled(forks, rule_fork::bip141_rule) &&
+        is_witness_program_pattern(operations());
 }
 
 bool script::is_pay_to_script_hash(uint32_t forks) const
@@ -1158,36 +1169,73 @@ bool script::is_unspendable() const
 //-----------------------------------------------------------------------------
 
 code script::verify(const transaction& tx, uint32_t input_index,
-    uint32_t forks, const script& input_script, const script& prevout_script)
+    uint32_t forks, const script& input_script, const witness& input_witness,
+    const script& prevout_script)
 {
     code ec;
+    bool witnessed;
 
+    // Evaluate input script.
     program input(input_script, tx, input_index, forks);
     if ((ec = input.evaluate()))
         return ec;
 
+    // Evaluate output script using stack result from input script.
     program prevout(prevout_script, input);
     if ((ec = prevout.evaluate()))
         return ec;
 
-    if (!prevout.stack_result())
+    // This precludes bare witness programs of -0 (undocumented).
+    if (!prevout.stack_result(false))
         return error::stack_false;
 
-    if (prevout_script.is_pay_to_script_hash(forks))
+    // Triggered by output script push of version and witness program (bip141).
+    if ((witnessed = prevout_script.is_pay_to_witness(forks)))
+    {
+        // The input script must be empty (bip141).
+        if (!input_script.empty())
+            return error::dirty_witness;
+
+        // This is a valid witness script so validate it.
+        if ((ec = input_witness.verify(tx, input_index, forks,
+            prevout_script)))
+            return ec;
+    }
+
+    // p2sh and p2w are mutually exclusive.
+    else if (prevout_script.is_pay_to_script_hash(forks))
     {
         if (!is_relaxed_push(input_script.operations()))
             return error::invalid_script_embed;
 
-        // The embedded p2sh script is at the top of the stack (pushed last).
+        // Embedded script must be at the top of the stack (bip16).
         script embedded_script(input.pop(), false);
 
         program embedded(embedded_script, std::move(input), true);
         if ((ec = embedded.evaluate()))
             return ec;
 
-        if (!embedded.stack_result())
+        // This precludes embedded witness programs of -0 (undocumented).
+        if (!embedded.stack_result(false))
             return error::stack_false;
+
+        // Triggered by embedded push of version and witness program (bip141).
+        if ((witnessed = embedded_script.is_pay_to_witness(forks)))
+        {
+            // The input script must be a push of the embedded_script (bip141).
+            if (input_script.size() != 1)
+                return error::dirty_witness;
+
+            // This is a valid embedded witness script so validate it.
+            if ((ec = input_witness.verify(tx, input_index, forks,
+                embedded_script)))
+                return ec;
+        }
     }
+
+    // Witness must be empty if there was no current witness program (bip141).
+    if (!witnessed && !input_witness.empty())
+        return error::unexpected_witness;
 
     return error::success;
 }
@@ -1199,7 +1247,8 @@ code script::verify(const transaction& tx, uint32_t input, uint32_t forks)
 
     const auto& in = tx.inputs()[input];
     const auto& prevout = in.previous_output().validation.cache;
-    return verify(tx, input, forks, in.script(), prevout.script());
+    return verify(tx, input, forks, in.script(), in.witness(),
+        prevout.script());
 }
 
 } // namespace chain
