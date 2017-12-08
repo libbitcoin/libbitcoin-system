@@ -44,23 +44,24 @@ typedef std::array<const char*, dictionary_size> dictionary;
  */
 typedef std::vector<const dictionary*> dictionary_list;
 
-namespace language
-{
-    // Individual built-in languages:
-    extern const dictionary en;
-    extern const dictionary es;
-    extern const dictionary ja;
-    extern const dictionary it;
-    extern const dictionary fr;
-    extern const dictionary cs;
-    extern const dictionary ru;
-    extern const dictionary uk;
-    extern const dictionary zh_Hans;
-    extern const dictionary zh_Hant;
+namespace language {
 
-    // All built-in languages:
-    extern const dictionary_list all;
-}
+// Individual built-in languages:
+extern const dictionary en;
+extern const dictionary es;
+extern const dictionary ja;
+extern const dictionary it;
+extern const dictionary fr;
+extern const dictionary cs;
+extern const dictionary ru;
+extern const dictionary uk;
+extern const dictionary zh_Hans;
+extern const dictionary zh_Hant;
+
+// All built-in languages:
+extern const dictionary_list all;
+
+} // namespace language
 
 } // namespace wallet
 } // namespace libbitcoin

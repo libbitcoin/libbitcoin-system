@@ -45,12 +45,11 @@ static const auto hmac_data = to_chunk("Seed version");
 
 #ifdef WITH_ICU
 
-static uint32_t special_modulo(int index_distance, int dictionary_length)
+static size_t special_modulo(int32_t index_distance, size_t dictionary_length)
 {
-    if (index_distance < 0)
-        return dictionary_length - (-index_distance % dictionary_length);
-
-    return index_distance % dictionary_length;
+    return index_distance < 0 ? 
+        dictionary_length - (-index_distance % dictionary_length) :
+        index_distance % dictionary_length;
 }
 
 static data_chunk old_mnemonic_decode(const word_list& mnemonic)
@@ -59,11 +58,11 @@ static data_chunk old_mnemonic_decode(const word_list& mnemonic)
 
     if ((mnemonic.size() < mnemonic_word_multiple) ||
         (mnemonic.size() % mnemonic_word_multiple) != 0)
-        return {};
+        return{};
 
     const auto& lexicon = language::electrum::en_v1;
-    const auto dictionary_length = lexicon.size();
     const auto seed_size = sizeof(uint32_t) * mnemonic.size() / 3;
+    const auto size = lexicon.size();
 
     data_chunk seed;
     seed.reserve(seed_size);
@@ -72,19 +71,20 @@ static data_chunk old_mnemonic_decode(const word_list& mnemonic)
 
     for (size_t i = 0; i < mnemonic.size() / 3; i += 3)
     {
-        const auto index_1 = find_position(lexicon, mnemonic[i]);
-        const auto index_2 = find_position(lexicon, mnemonic[i+1]);
-        const auto index_3 = find_position(lexicon, mnemonic[i+2]);
+        const auto first = find_position(lexicon, mnemonic[i]);
+        const auto second = find_position(lexicon, mnemonic[i+1]);
+        const auto third = find_position(lexicon, mnemonic[i+2]);
 
-        if ((index_1 == -1) || (index_2 == -1) || (index_3 == -1))
-            return {};
+        if ((first == -1) || (second == -1) || (third == -1))
+            return{};
 
-        const uint32_t value = index_1 + dictionary_length *
-            special_modulo(index_2 - index_1, dictionary_length) +
-            dictionary_length * dictionary_length *
-            special_modulo(index_3 - index_2, dictionary_length);
+        // TODO: prove there is no overflow risk.
+        const auto value = first +
+            size * special_modulo(second - first, size) +
+            size * size * special_modulo(third - second, size);
 
-        sink.write_variable_little_endian(value);
+        BITCOIN_ASSERT(value < max_uint32);
+        sink.write_variable_little_endian(static_cast<uint32_t>(value));
     }
 
     return seed;
@@ -111,9 +111,8 @@ static bool is_old_seed(const word_list& mnemonic)
 
 static bool is_new_seed(const word_list& mnemonic, const data_slice& prefix)
 {
-    const auto seed = hmac_sha512_hash(
-        to_chunk(to_normal_nfkd_form(join(mnemonic))), hmac_data);
-
+    const auto normal = to_chunk(to_normal_nfkd_form(join(mnemonic)));
+    const auto seed = hmac_sha512_hash(normal, hmac_data);
     return std::equal(prefix.begin(), prefix.end(), seed.begin());
 }
 
@@ -122,7 +121,7 @@ static word_list mnemonic_encode(cpp_int entropy, const dictionary& lexicon)
     word_list mnemonic;
     const auto dictionary_length = lexicon.size();
 
-    while (entropy)
+    while (entropy != 0)
     {
         const cpp_int index = entropy % dictionary_length;
         entropy /= dictionary_length;
@@ -138,11 +137,11 @@ static cpp_int mnemonic_decode(const word_list& mnemonic,
     cpp_int entropy = 0;
     const auto dictionary_length = lexicon.size();
 
-    for (const auto& word : boost::adaptors::reverse(mnemonic))
+    for (const auto& word: boost::adaptors::reverse(mnemonic))
     {
         const auto position = find_position(lexicon, word);
         if (position == -1)
-            return cpp_int(1);
+            return{ 1 };
 
         entropy *= dictionary_length + position;
     }
@@ -160,9 +159,9 @@ static data_chunk get_seed_prefix(const seed prefix)
             return seed_prefix_witness;
         case seed::two_factor_authentication:
             return seed_prefix_two_factor_authentication;
+        default:
+            return{};
     }
-
-    return {};
 }
 
 word_list create_mnemonic(const data_chunk& entropy, const dictionary& lexicon,
@@ -170,16 +169,14 @@ word_list create_mnemonic(const data_chunk& entropy, const dictionary& lexicon,
 {
     cpp_int nonce = 0;
     word_list mnemonic;
-
     const auto electrum_prefix = get_seed_prefix(prefix);
 
-    // This usage requires the hex string for arbitrary precision
-    // integer construction
+    // cpp_int requires hex string for arbitrary precision int construction.
     const auto numeric_entropy = cpp_int("0x" + encode_base16(entropy));
 
     do
     {
-        cpp_int current_entropy = numeric_entropy + nonce++;
+        const auto current_entropy = numeric_entropy + nonce++;
         mnemonic = mnemonic_encode(current_entropy, lexicon);
         BITCOIN_ASSERT(mnemonic_decode(mnemonic, lexicon) == 0);
 
@@ -224,7 +221,6 @@ long_hash decode_mnemonic(const word_list& mnemonic)
     return pkcs5_pbkdf2_hmac_sha512(to_chunk(sentence), to_chunk(salt),
         hmac_iterations);
 }
-
 
 } // namespace electrum
 } // namespace wallet

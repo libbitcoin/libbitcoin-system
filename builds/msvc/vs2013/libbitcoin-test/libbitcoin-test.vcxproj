@@ -165,6 +165,7 @@
     <ClCompile Include="..\..\..\..\test\utility\stream.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\thread.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\ec_public.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\electrum.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\hd_private.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\payment_address.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\qrcode.cpp" />
