@@ -27,6 +27,7 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/machine/number.hpp>
 #include <bitcoin/bitcoin/machine/operation.hpp>
+#include <bitcoin/bitcoin/machine/script_version.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
@@ -50,6 +51,11 @@ inline uint32_t program::forks() const
 inline uint32_t program::input_index() const
 {
     return input_index_;
+}
+
+inline script_version program::version() const
+{
+    return version_;
 }
 
 inline const chain::transaction& program::transaction() const
