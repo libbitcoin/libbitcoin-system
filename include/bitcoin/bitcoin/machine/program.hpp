@@ -27,6 +27,7 @@
 #include <bitcoin/bitcoin/machine/number.hpp>
 #include <bitcoin/bitcoin/machine/opcode.hpp>
 #include <bitcoin/bitcoin/machine/operation.hpp>
+#include <bitcoin/bitcoin/machine/script_version.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
@@ -58,9 +59,10 @@ public:
     program(const chain::script& script, const chain::transaction& transaction,
         uint32_t input_index, uint32_t forks);
 
-    /// Create an instance with initialized stack (witness run).
+    /// Create an instance with initialized stack (witness run, v0 by default).
     program(const chain::script& script, const chain::transaction& transaction,
-        uint32_t input_index, uint32_t forks, data_stack&& stack);
+        uint32_t input_index, uint32_t forks, data_stack&& stack,
+        script_version version=script_version::zero);
 
     /// Create using copied tx, input, forks and copied stack (prevout run).
     program(const chain::script& script, const program& other);
@@ -72,6 +74,7 @@ public:
     bool is_valid() const;
     uint32_t forks() const;
     uint32_t input_index() const;
+    script_version version() const;
     const chain::transaction& transaction() const;
 
     /// Program registers.
@@ -150,6 +153,7 @@ private:
     const uint32_t input_index_;
     const uint32_t forks_;
 
+    script_version version_;
     size_t negative_count_;
     size_t operation_count_;
     op_iterator jump_;

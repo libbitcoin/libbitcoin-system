@@ -24,6 +24,7 @@
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/machine/interpreter.hpp>
+#include <bitcoin/bitcoin/machine/script_version.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
@@ -50,8 +51,9 @@ void program::reserve_stacks()
 program::program()
   : script_(default_script_),
     transaction_(default_tx_),
-    forks_(0),
     input_index_(0),
+    forks_(0),
+    version_(script_version::unversioned),
     negative_count_(0),
     operation_count_(0),
     jump_(script_.begin())
@@ -62,8 +64,9 @@ program::program()
 program::program(const script& script)
   : script_(script),
     transaction_(default_tx_),
-    forks_(0),
     input_index_(0),
+    forks_(0),
+    version_(script_version::unversioned),
     negative_count_(0),
     operation_count_(0),
     jump_(script_.begin())
@@ -75,8 +78,9 @@ program::program(const script& script, const chain::transaction& transaction,
     uint32_t input_index, uint32_t forks)
   : script_(script),
     transaction_(transaction),
-    forks_(forks),
     input_index_(input_index),
+    forks_(forks),
+    version_(script_version::unversioned),
     negative_count_(0),
     operation_count_(0),
     jump_(script_.begin())
@@ -86,11 +90,13 @@ program::program(const script& script, const chain::transaction& transaction,
 
 // Condition, alternate, jump and operation_count are not copied.
 program::program(const script& script, const chain::transaction& transaction,
-    uint32_t input_index, uint32_t forks, data_stack&& stack)
+    uint32_t input_index, uint32_t forks, data_stack&& stack,
+    script_version version)
   : script_(script),
     transaction_(transaction),
-    forks_(forks),
     input_index_(input_index),
+    forks_(forks),
+    version_(version),
     negative_count_(0),
     operation_count_(0),
     jump_(script_.begin()),
@@ -104,8 +110,9 @@ program::program(const script& script, const chain::transaction& transaction,
 program::program(const script& script, const program& other)
   : script_(script),
     transaction_(other.transaction_),
-    forks_(other.forks_),
     input_index_(other.input_index_),
+    forks_(other.forks_),
+    version_(script_version::unversioned),
     negative_count_(0),
     operation_count_(0),
     jump_(script_.begin()),
@@ -118,8 +125,9 @@ program::program(const script& script, const program& other)
 program::program(const script& script, program&& other, bool)
   : script_(script),
     transaction_(other.transaction_),
-    forks_(other.forks_),
     input_index_(other.input_index_),
+    forks_(other.forks_),
+    version_(script_version::unversioned),
     negative_count_(0),
     operation_count_(0),
     jump_(script_.begin()),
