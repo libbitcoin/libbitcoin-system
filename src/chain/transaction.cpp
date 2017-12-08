@@ -53,7 +53,7 @@ using namespace bc::machine;
 
 // Read a length-prefixed collection of inputs or outputs from the source.
 template<class Source, class Put>
-bool read(Source& source, std::vector<Put>& puts, bool wire)
+bool read(Source& source, std::vector<Put>& puts, bool wire, bool witness)
 {
     auto result = true;
     const auto count = source.read_size_little_endian();
@@ -64,13 +64,9 @@ bool read(Source& source, std::vector<Put>& puts, bool wire)
     else
         puts.resize(count);
 
-    const auto deserialize = [&result, &source, wire](Put& put)
+    const auto deserialize = [&](Put& put)
     {
-        result = result && put.from_data(source, wire);
-
-#ifndef NDEBUG
-        put.script().operations();
-#endif
+        result = result && put.from_data(source, wire, witness);
     };
 
     std::for_each(puts.begin(), puts.end(), deserialize);
@@ -79,22 +75,22 @@ bool read(Source& source, std::vector<Put>& puts, bool wire)
 
 // Write a length-prefixed collection of inputs or outputs to the sink.
 template<class Sink, class Put>
-void write(Sink& sink, const std::vector<Put>& puts, bool wire)
+void write(Sink& sink, const std::vector<Put>& puts, bool wire, bool witness)
 {
     sink.write_variable_little_endian(puts.size());
 
-    const auto serialize = [&sink, wire](const Put& put)
+    const auto serialize = [&](const Put& put)
     {
-        put.to_data(sink, wire);
+        put.to_data(sink, wire, witness);
     };
 
     std::for_each(puts.begin(), puts.end(), serialize);
 }
 
 // Input list must be pre-populated as it determines witness count.
-inline void read_witness_stack(reader& source, input::list& inputs)
+inline void read_witnesses(reader& source, input::list& inputs)
 {
-    const auto deserialize = [&source](input& input)
+    const auto deserialize = [&](input& input)
     {
         input.witness().from_data(source, true);
     };
@@ -103,7 +99,7 @@ inline void read_witness_stack(reader& source, input::list& inputs)
 }
 
 // Witness count is not written as it is inferred from input count.
-inline void write_witness_stack(writer& sink, const input::list& inputs)
+inline void write_witnesses(writer& sink, const input::list& inputs)
 {
     const auto serialize = [&sink](const input& input)
     {
@@ -286,6 +282,7 @@ bool transaction::from_data(std::istream& stream, bool wire, bool witness)
     return from_data(source, wire, witness);
 }
 
+// Witness is not used by outputs, just for template normalization.
 bool transaction::from_data(reader& source, bool wire, bool witness)
 {
     reset();
@@ -294,7 +291,7 @@ bool transaction::from_data(reader& source, bool wire, bool witness)
     {
         // Wire (satoshi protocol) deserialization.
         version_ = source.read_4_bytes_little_endian();
-        read(source, inputs_, wire);
+        read(source, inputs_, wire, witness);
 
         // Detect witness as no inputs (marker) and expected flag (bip144).
         const auto marker = inputs_.size() == witness_marker &&
@@ -305,13 +302,13 @@ bool transaction::from_data(reader& source, bool wire, bool witness)
         {
             // Skip over the peeked witness flag.
             source.skip(1);
-            read(source, inputs_, wire);
-            read(source, outputs_, wire);
-            read_witness_stack(source, inputs_);
+            read(source, inputs_, wire, witness);
+            read(source, outputs_, wire, witness);
+            read_witnesses(source, inputs_);
         }
         else
         {
-            read(source, outputs_, wire);
+            read(source, outputs_, wire, witness);
         }
 
         locktime_ = source.read_4_bytes_little_endian();
@@ -320,7 +317,8 @@ bool transaction::from_data(reader& source, bool wire, bool witness)
     {
         // Database (outputs forward) serialization.
         // Witness data is managed internal to inputs.
-        read(source, outputs_, wire) && read(source, inputs_, wire);
+        read(source, outputs_, wire, witness);
+        read(source, inputs_, wire, witness);
         const auto locktime = source.read_variable_little_endian();
         const auto version = source.read_variable_little_endian();
 
@@ -407,6 +405,7 @@ void transaction::to_data(std::ostream& stream, bool wire, bool witness) const
     to_data(sink, wire, witness);
 }
 
+// Witness is not used by outputs, just for template normalization.
 void transaction::to_data(writer& sink, bool wire, bool witness) const
 {
     if (wire)
@@ -421,14 +420,14 @@ void transaction::to_data(writer& sink, bool wire, bool witness) const
         {
             sink.write_byte(witness_marker);
             sink.write_byte(witness_flag);
-            write(sink, inputs_, wire);
-            write(sink, outputs_, wire);
-            write_witness_stack(sink, inputs_);
+            write(sink, inputs_, wire, witness);
+            write(sink, outputs_, wire, witness);
+            write_witnesses(sink, inputs_);
         }
         else
         {
-            write(sink, inputs_, wire);
-            write(sink, outputs_, wire);
+            write(sink, inputs_, wire, witness);
+            write(sink, outputs_, wire, witness);
         }
 
         sink.write_4_bytes_little_endian(locktime_);
@@ -437,8 +436,8 @@ void transaction::to_data(writer& sink, bool wire, bool witness) const
     {
         // Database (outputs forward) serialization.
         // Witness data is managed internal to inputs.
-        write(sink, outputs_, wire);
-        write(sink, inputs_, wire);
+        write(sink, outputs_, wire, witness);
+        write(sink, inputs_, wire, witness);
         sink.write_variable_little_endian(locktime_);
         sink.write_variable_little_endian(version_);
     }

@@ -83,7 +83,7 @@ public:
 
     bool from_data(const data_chunk& data, bool wire=true);
     bool from_data(std::istream& stream, bool wire=true);
-    bool from_data(reader& source, bool wire=true);
+    bool from_data(reader& source, bool wire=true, bool unused=false);
 
     bool is_valid() const;
 
@@ -92,7 +92,7 @@ public:
 
     data_chunk to_data(bool wire=true) const;
     void to_data(std::ostream& stream, bool wire=true) const;
-    void to_data(writer& sink, bool wire=true) const;
+    void to_data(writer& sink, bool wire=true, bool unused=false) const;
 
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------
