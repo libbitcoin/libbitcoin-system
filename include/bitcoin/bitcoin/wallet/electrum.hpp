@@ -75,8 +75,6 @@ static const data_chunk seed_prefix_two_factor_authentication{ 0x01, 0x01 };
  */
 typedef string_list word_list;
 
-#ifdef WITH_ICU
-
 /**
  * Create a new mnenomic (list of words) from provided entropy, an
  * optional dictionary selection, and seed prefix, . The mnemonic can
@@ -101,6 +99,8 @@ BC_API bool validate_mnemonic(const word_list& mnemonic,
 BC_API bool validate_mnemonic(const word_list& mnemonic,
     const dictionary_list& lexicons=language::all,
     const seed prefix=electrum::seed::standard);
+
+#ifdef WITH_ICU
 
 /**
  * Convert an electrum mnemonic and passphrase to a wallet-generation

@@ -43,8 +43,6 @@ static const std::string passphrase_prefix = "electrum";
 static constexpr size_t hmac_iterations = 2048;
 static const auto hmac_data = to_chunk("Seed version");
 
-#ifdef WITH_ICU
-
 static size_t special_modulo(int32_t index_distance, size_t dictionary_length)
 {
     return index_distance < 0 ? 
@@ -185,15 +183,6 @@ word_list create_mnemonic(const data_chunk& entropy, const dictionary& lexicon,
     return mnemonic;
 }
 
-long_hash decode_mnemonic(const word_list& mnemonic,
-    const std::string& passphrase)
-{
-    const auto sentence = join(mnemonic);
-    const auto salt = to_normal_nfkd_form(passphrase_prefix + passphrase);
-    return pkcs5_pbkdf2_hmac_sha512(to_chunk(sentence), to_chunk(salt),
-        hmac_iterations);
-}
-
 bool validate_mnemonic(const word_list& mnemonic, const dictionary& lexicon,
     const seed prefix)
 {
@@ -209,6 +198,17 @@ bool validate_mnemonic(const word_list& mnemonic,
             return true;
 
     return false;
+}
+
+#ifdef WITH_ICU
+
+long_hash decode_mnemonic(const word_list& mnemonic,
+    const std::string& passphrase)
+{
+    const auto sentence = join(mnemonic);
+    const auto salt = to_normal_nfkd_form(passphrase_prefix + passphrase);
+    return pkcs5_pbkdf2_hmac_sha512(to_chunk(sentence), to_chunk(salt),
+        hmac_iterations);
 }
 
 #endif
