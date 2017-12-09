@@ -463,6 +463,11 @@ const operation::list& script::operations() const
 // Signing.
 //-----------------------------------------------------------------------------
 
+//*****************************************************************************
+// CONSENSUS: Due to masking of bits 6/7 (8 is the anyone_can_pay flag),
+// there are 4 possible 7 bit values that can set "single" and 4 others that
+// can set none, and yet all other values set "all".
+//*****************************************************************************
 inline sighash_algorithm to_sighash_enum(uint8_t sighash_type)
 {
     switch (sighash_type & sighash_algorithm::mask)
