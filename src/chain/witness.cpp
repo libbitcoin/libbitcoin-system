@@ -384,9 +384,7 @@ bool witness::extract_sigop_script(script& out_script,
     {
         case script_version::zero:
         {
-            auto program = program_script.witness_program();
-
-            switch (program.size())
+            switch (program_script.witness_program().size())
             {
                 case short_hash_size:
                     out_script.from_operations({ { opcode::checksig } });
@@ -491,6 +489,7 @@ code witness::verify(const transaction& tx, uint32_t input_index,
             if (!extract_embedded_script(script, stack, program_script))
                 return error::invalid_witness;
 
+            // script_version::zero
             program witness(script, tx, input_index, forks, std::move(stack));
             if ((ec = witness.evaluate()))
                 return ec;
