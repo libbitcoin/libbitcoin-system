@@ -174,6 +174,9 @@ bool input::from_data(std::istream& stream, bool wire, bool witness)
 
 bool input::from_data(reader& source, bool wire, bool witness)
 {
+    // Always write witness to store so that we know how to read it.
+    witness |= !wire;
+
     reset();
 
     if (!previous_output_.from_data(source, wire))
@@ -231,6 +234,9 @@ void input::to_data(std::ostream& stream, bool wire, bool witness) const
 
 void input::to_data(writer& sink, bool wire, bool witness) const
 {
+    // Always write witness to store so that we know how to read it.
+    witness |= !wire;
+
     previous_output_.to_data(sink, wire);
     script_.to_data(sink, true);
 
@@ -246,6 +252,9 @@ void input::to_data(writer& sink, bool wire, bool witness) const
 
 size_t input::serialized_size(bool wire, bool witness) const
 {
+    // Always write witness to store so that we know how to read it.
+    witness |= !wire;
+
     // Witness size added in both contexts despite that tx writes wire witness.
     // Prefix is written for both wire and store/other contexts.
     return previous_output_.serialized_size(wire)
