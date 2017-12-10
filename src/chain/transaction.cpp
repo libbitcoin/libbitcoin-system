@@ -576,6 +576,7 @@ hash_digest transaction::hash(bool witness) const
     // Witness hashing must be disabled for non-segregated txs.
     witness &= is_segregated();
 
+    // TODO: independently cache the witness hash.
     // The segregated coinbase tx hash is assumed to be null_hash (bip141).
     if (witness)
         return is_coinbase() ? null_hash : bitcoin_hash(to_data(true, true));
@@ -598,17 +599,6 @@ hash_digest transaction::hash(bool witness) const
     ///////////////////////////////////////////////////////////////////////////
 
     return hash;
-}
-
-hash_digest transaction::hash(uint32_t sighash_type, bool witness) const
-{
-    // There is no rational interpretation of a signature hash for a coinbase.
-    BITCOIN_ASSERT(!is_coinbase());
-
-    // Witness encoding is disabled by to_data for non-segregated txs.
-    auto serialized = to_data(true, witness);
-    extend_data(serialized, to_little_endian(sighash_type));
-    return bitcoin_hash(serialized);
 }
 
 // Utilities.
