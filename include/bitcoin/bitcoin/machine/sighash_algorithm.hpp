@@ -64,7 +64,10 @@ enum sighash_algorithm : uint32_t
 
     /// Signs this one input and its corresponding output. Allows anyone to
     /// add or remove other inputs.
-    single_anyone_can_pay = single | anyone_can_pay
+    single_anyone_can_pay = single | anyone_can_pay,
+
+    /// Used to mask unused bits in the signature hash byte.
+    mask = 0x1f
 };
 
 } // namespace machine
