@@ -463,6 +463,16 @@ const operation::list& script::operations() const
 // Signing.
 //-----------------------------------------------------------------------------
 
+inline hash_digest signature_hash(const transaction& tx, uint32_t sighash_type)
+{
+    // There is no rational interpretation of a signature hash for a coinbase.
+    BITCOIN_ASSERT(!tx.is_coinbase());
+
+    auto serialized = tx.to_data(true, false);
+    extend_data(serialized, to_little_endian(sighash_type));
+    return bitcoin_hash(serialized);
+}
+
 //*****************************************************************************
 // CONSENSUS: Due to masking of bits 6/7 (8 is the anyone_can_pay flag),
 // there are 4 possible 7 bit values that can set "single" and 4 others that
@@ -514,8 +524,8 @@ static hash_digest sign_none(const transaction& tx, uint32_t input_index,
     }
 
     // Move new inputs to new transaction and drop outputs.
-    return transaction(tx.version(), tx.locktime(), std::move(ins),
-        output::list{}).hash(sighash_type, false);
+    return signature_hash({ tx.version(), tx.locktime(), std::move(ins), {} },
+        sighash_type);
 }
 
 static hash_digest sign_single(const transaction& tx, uint32_t input_index,
@@ -553,8 +563,8 @@ static hash_digest sign_single(const transaction& tx, uint32_t input_index,
     outs.back() = outputs[input_index];
 
     // Move new inputs and new outputs to new transaction.
-    return transaction(tx.version(), tx.locktime(), std::move(ins),
-        std::move(outs)).hash(sighash_type, false);
+    return signature_hash({ tx.version(), tx.locktime(), std::move(ins),
+        std::move(outs) }, sighash_type);
 }
 
 static hash_digest sign_all(const transaction& tx, uint32_t input_index,
@@ -588,7 +598,7 @@ static hash_digest sign_all(const transaction& tx, uint32_t input_index,
     // Move new inputs and copy outputs to new transaction.
     transaction out(tx.version(), tx.locktime(), input::list{}, tx.outputs());
     out.set_inputs(std::move(ins));
-    return out.hash(sighash_type, false);
+    return signature_hash(out, sighash_type);
 }
 
 static script strip_code_seperators(const script& script_code)

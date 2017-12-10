@@ -141,7 +141,6 @@ public:
     void set_outputs(outs&& value);
 
     hash_digest hash(bool witness=false) const;
-    hash_digest hash(uint32_t sighash_type, bool witness = false) const;
 
     // Utilities.
     //-------------------------------------------------------------------------
