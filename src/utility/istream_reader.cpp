@@ -241,7 +241,7 @@ void istream_reader::skip(size_t size)
     // TODO: investigate failure using seekg.
     // Seek the relative size offset from the current position.
     ////stream_.seekg(size, std::ios_base::cur);
-    read_byte();
+    read_bytes(size);
 }
 
 // private
