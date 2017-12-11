@@ -1161,7 +1161,7 @@ void script::find_and_delete_(const data_chunk& endorsement)
 // Concurrent read/write is not supported, so no critical section.
 void script::find_and_delete(const data_stack& endorsements)
 {
-    for (auto& endorsement: endorsements)
+    for (const auto& endorsement: endorsements)
         find_and_delete_(endorsement);
 
     // Invalidate the cache so that the operations may be regenerated.
