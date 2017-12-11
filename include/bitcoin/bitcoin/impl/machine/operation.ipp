@@ -160,7 +160,6 @@ inline size_t operation::serialized_size() const
             return op_size + sizeof(uint32_t) + size;
         default:
             return op_size + size;
-
     }
 }
 
