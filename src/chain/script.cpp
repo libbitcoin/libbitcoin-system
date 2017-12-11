@@ -26,6 +26,7 @@
 #include <numeric>
 #include <sstream>
 #include <utility>
+#include <boost/range/adaptor/reversed.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/error.hpp>
@@ -50,6 +51,7 @@ namespace libbitcoin {
 namespace chain {
 
 using namespace bc::machine;
+using namespace boost::adaptors;
 
 // bit.ly/2cPazSa
 static const auto one_hash = hash_literal(
@@ -1060,6 +1062,8 @@ size_t script::embedded_sigops(const script& prevout_script) const
 
 //*****************************************************************************
 // CONSENSUS: this is a pointless, broken, premature optimization attempt.
+// The comparison and erase are not limited to a single operation and so can
+// erase arbitrary upstream data from the script.
 //*****************************************************************************
 void script::find_and_delete_(const data_chunk& endorsement)
 {
@@ -1072,27 +1076,29 @@ void script::find_and_delete_(const data_chunk& endorsement)
     // Non-minimally-encoded target values will therefore not match.
     const auto value = operation(endorsement, false).to_data();
 
-    // No copying occurs below. If a match is found the remainder is shifted
-    // into its place (erase). No memory allocation is caused by the shift.
-
     operation op;
     data_source stream(bytes_);
     istream_reader source(stream);
-    auto begin = bytes_.begin();
+    std::vector<data_chunk::iterator> found;
 
-    // This test handles stream end and op deserialization failure.
-    while (!source.is_exhausted())
+    // The exhaustion test handles stream end and op deserialization failure.
+    for (auto it = bytes_.begin(); !source.is_exhausted();
+        it += op.serialized_size())
     {
-        // This is the 'broken' aspect of this method. The comparison and erase
-        // are not limited to a single operation and so can erase arbitrary
-        // upstream data from the script. Unfortunately that is now consensus.
-        while (starts_with(begin, bytes_.end(), value))
-            begin = bytes_.erase(begin, begin + value.size());
+        // Track all found values for later deletion.
+        for (; starts_with(it, bytes_.end(), value); it += value.size())
+        {
+            source.skip(value.size());
+            found.push_back(it);
+        }
 
-        // The source is not affected by changes upstream of its position.
+        // Read the next op code following last found value.
         op.from_data(source);
-        begin += op.serialized_size();
     }
+
+    // Delete any found values, reversed to prevent iterator invalidation.
+    for (const auto it: reverse(found))
+        bytes_.erase(it, it + value.size());
 }
 
 // Concurrent read/write is not supported, so no critical section.
