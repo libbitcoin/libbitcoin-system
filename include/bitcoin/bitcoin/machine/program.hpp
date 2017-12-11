@@ -58,10 +58,14 @@ public:
     program(const chain::script& script, const chain::transaction& transaction,
         uint32_t input_index, uint32_t forks);
 
-    /// Create using copied forks and copied stack (prevout run).
+    /// Create an instance with initialized stack (witness run).
+    program(const chain::script& script, const chain::transaction& transaction,
+        uint32_t input_index, uint32_t forks, data_stack&& stack);
+
+    /// Create using copied tx, input, forks and copied stack (prevout run).
     program(const chain::script& script, const program& other);
 
-    /// Create using copied forks and moved stack (p2sh run).
+    /// Create using copied tx, input, forks and moved stack (p2sh run).
     program(const chain::script& script, program&& other, bool move);
 
     /// Constant registers.
@@ -108,8 +112,8 @@ public:
 
     /// Primary push/pop optimizations (passive).
     bool empty() const;
-    bool stack_true() const;
-    bool stack_result() const;
+    bool stack_true(bool clean) const;
+    bool stack_result(bool clean) const;
     bool is_stack_overflow() const;
     bool if_(const operation& op) const;
     const value_type& item(size_t index) /*const*/;
@@ -139,7 +143,7 @@ private:
     typedef std::vector<bool> bool_stack;
 
     void reserve_stacks();
-    bool stack_to_bool() const;
+    bool stack_to_bool(bool clean) const;
 
     const chain::script& script_;
     const chain::transaction& transaction_;

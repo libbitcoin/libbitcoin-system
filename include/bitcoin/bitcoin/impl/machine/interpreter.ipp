@@ -96,7 +96,7 @@ inline interpreter::result interpreter::op_if(program& program)
         if (program.empty())
             return error::op_if;
 
-        value = program.stack_true();
+        value = program.stack_true(false);
         program.pop();
     }
 
@@ -113,7 +113,7 @@ inline interpreter::result interpreter::op_notif(program& program)
         if (program.empty())
             return error::op_notif;
 
-        value = !program.stack_true();
+        value = !program.stack_true(false);
         program.pop();
     }
 
@@ -144,7 +144,7 @@ inline interpreter::result interpreter::op_verify(program& program)
     if (program.empty())
         return error::op_verify1;
 
-    if (!program.stack_true())
+    if (!program.stack_true(false))
         return error::op_verify2;
 
     program.pop();
@@ -257,7 +257,7 @@ inline interpreter::result interpreter::op_if_dup(program& program)
     if (program.empty())
         return error::op_if_dup;
 
-    if (program.stack_true())
+    if (program.stack_true(false))
         program.duplicate(0);
 
     return error::success;

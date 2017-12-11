@@ -24,6 +24,7 @@
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/machine/interpreter.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 namespace machine {
@@ -82,6 +83,22 @@ program::program(const script& script, const chain::transaction& transaction,
 {
     reserve_stacks();
 }
+
+// Condition, alternate, jump and operation_count are not copied.
+program::program(const script& script, const chain::transaction& transaction,
+    uint32_t input_index, uint32_t forks, data_stack&& stack)
+  : script_(script),
+    transaction_(transaction),
+    forks_(forks),
+    input_index_(input_index),
+    negative_count_(0),
+    operation_count_(0),
+    jump_(script_.begin()),
+    primary_(std::move(stack))
+{
+    reserve_stacks();
+}
+
 
 // Condition, alternate, jump and operation_count are not copied.
 program::program(const script& script, const program& other)

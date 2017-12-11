@@ -260,10 +260,12 @@ inline void program::erase(const stack_iterator& first,
 // Primary push/pop optimizations (passive).
 //-----------------------------------------------------------------------------
 
-// This must be guarded (intended for interpreter internal use).
-inline bool program::stack_to_bool() const
+// private
+inline bool program::stack_to_bool(bool clean) const
 {
-    BITCOIN_ASSERT(!empty());
+    if (clean && primary_.size() != 1)
+        return false;
+
     const auto& back = primary_.back();
 
     // It's not non-zero it's the terminating negative sentinel.
@@ -280,16 +282,16 @@ inline bool program::empty() const
 }
 
 // This must be guarded (intended for interpreter internal use).
-inline bool program::stack_true() const
+inline bool program::stack_true(bool clean) const
 {
     BITCOIN_ASSERT(!empty());
-    return stack_to_bool();
+    return stack_to_bool(clean);
 }
 
 // This is safe to call when empty (intended for completion handlers).
-inline bool program::stack_result() const
+inline bool program::stack_result(bool clean) const
 {
-    return !empty() && stack_true();
+    return !empty() && stack_true(clean);
 }
 
 inline bool program::is_stack_overflow() const
