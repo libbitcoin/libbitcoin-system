@@ -34,6 +34,7 @@
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/machine/opcode.hpp>
 #include <bitcoin/bitcoin/machine/operation.hpp>
@@ -318,6 +319,9 @@ void transaction::reset()
     outputs_.clear();
     outputs_.shrink_to_fit();
     invalidate_cache();
+    outputs_hash_.reset();
+    inpoints_hash_.reset();
+    sequences_hash_.reset();
     segregated_ = boost::none;
     total_input_value_ = boost::none;
     total_output_value_ = boost::none;
@@ -470,6 +474,8 @@ void transaction::set_inputs(const input::list& value)
 {
     inputs_ = value;
     invalidate_cache();
+    inpoints_hash_.reset();
+    sequences_hash_.reset();
     segregated_ = boost::none;
     total_input_value_ = boost::none;
 }
@@ -496,6 +502,7 @@ void transaction::set_outputs(const output::list& value)
 {
     outputs_ = value;
     invalidate_cache();
+    outputs_hash_.reset();
     total_output_value_ = boost::none;
 }
 
@@ -509,17 +516,19 @@ void transaction::set_outputs(output::list&& value)
 // Cache.
 //-----------------------------------------------------------------------------
 
+// protected
 void transaction::invalidate_cache() const
 {
     ///////////////////////////////////////////////////////////////////////////
     // Critical Section
     hash_mutex_.lock_upgrade();
 
-    if (hash_)
+    if (hash_ || witness_hash_)
     {
         hash_mutex_.unlock_upgrade_and_lock();
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         hash_.reset();
+        witness_hash_.reset();
         //---------------------------------------------------------------------
         hash_mutex_.unlock_and_lock_upgrade();
     }
@@ -533,25 +542,107 @@ hash_digest transaction::hash(bool witness) const
     // Witness hashing must be disabled for non-segregated txs.
     witness &= is_segregated();
 
-    // TODO: independently cache the witness hash.
-    // The segregated coinbase tx hash is assumed to be null_hash (bip141).
-    if (witness)
-        return is_coinbase() ? null_hash : bitcoin_hash(to_data(true, true));
-
     ///////////////////////////////////////////////////////////////////////////
     // Critical Section
     hash_mutex_.lock_upgrade();
 
-    if (!hash_)
+    if (witness)
     {
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        hash_mutex_.unlock_upgrade_and_lock();
-        hash_ = std::make_shared<hash_digest>(bitcoin_hash(to_data(true)));
-        hash_mutex_.unlock_and_lock_upgrade();
-        //---------------------------------------------------------------------
+        if (!witness_hash_)
+        {
+            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            hash_mutex_.unlock_upgrade_and_lock();
+
+            // Witness coinbase tx hash is assumed to be null_hash (bip141).
+            witness_hash_ = std::make_shared<hash_digest>(
+                is_coinbase() ? null_hash : bitcoin_hash(to_data(true, true)));
+
+            hash_mutex_.unlock_and_lock_upgrade();
+            //-----------------------------------------------------------------
+        }
+    }
+    else
+    {
+        if (!hash_)
+        {
+            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            hash_mutex_.unlock_upgrade_and_lock();
+            hash_ = std::make_shared<hash_digest>(bitcoin_hash(to_data(true)));
+            hash_mutex_.unlock_and_lock_upgrade();
+            //-----------------------------------------------------------------
+        }
     }
 
-    const auto hash = *hash_;
+    const auto hash = witness ? *witness_hash_ : *hash_;
+    hash_mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
+
+    return hash;
+}
+
+hash_digest transaction::outputs_hash() const
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    hash_mutex_.lock_upgrade();
+
+    if (!outputs_hash_)
+    {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        hash_mutex_.unlock_upgrade_and_lock();
+        outputs_hash_ = std::make_shared<hash_digest>(
+            script::to_outputs(*this));
+        hash_mutex_.unlock_and_lock_upgrade();
+        //-----------------------------------------------------------------
+    }
+
+    const auto hash = *outputs_hash_;
+    hash_mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
+
+    return hash;
+}
+
+hash_digest transaction::inpoints_hash() const
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    hash_mutex_.lock_upgrade();
+
+    if (!inpoints_hash_)
+    {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        hash_mutex_.unlock_upgrade_and_lock();
+        inpoints_hash_ = std::make_shared<hash_digest>(
+            script::to_inpoints(*this));
+        hash_mutex_.unlock_and_lock_upgrade();
+        //-----------------------------------------------------------------
+    }
+
+    const auto hash = *inpoints_hash_;
+    hash_mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
+
+    return hash;
+}
+
+hash_digest transaction::sequences_hash() const
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    hash_mutex_.lock_upgrade();
+
+    if (!sequences_hash_)
+    {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        hash_mutex_.unlock_upgrade_and_lock();
+        sequences_hash_ = std::make_shared<hash_digest>(
+            script::to_sequences(*this));
+        hash_mutex_.unlock_and_lock_upgrade();
+        //-----------------------------------------------------------------
+    }
+
+    const auto hash = *sequences_hash_;
     hash_mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 

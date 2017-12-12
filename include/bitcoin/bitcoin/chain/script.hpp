@@ -148,6 +148,11 @@ public:
     // Utilities (static).
     //-------------------------------------------------------------------------
 
+    /// Transaction helpers.
+    static hash_digest to_outputs(const transaction& tx);
+    static hash_digest to_inpoints(const transaction& tx);
+    static hash_digest to_sequences(const transaction& tx);
+
     /// Determine if the fork is enabled in the active forks set.
     static bool is_enabled(uint32_t active_forks, rule_fork fork)
     {
@@ -223,6 +228,9 @@ protected:
 private:
     static size_t serialized_size(const operation::list& ops);
     static data_chunk operations_to_data(const operation::list& ops);
+    static hash_digest generate_unversioned_signature_hash(
+        const transaction& tx, uint32_t input_index,
+        const script& script_code, uint8_t sighash_type);
     static hash_digest generate_version_0_signature_hash(const transaction& tx,
         uint32_t input_index, const script& script_code, uint64_t value,
         uint8_t sighash_type);
