@@ -59,11 +59,6 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::not_implemented, "feature not implemented" },
         { error::oversubscribed, "service oversubscribed" },
 
-        // database
-        { error::store_block_invalid_height, "block out of order" },
-        { error::store_block_missing_parent, "block missing parent" },
-        { error::store_block_duplicate, "block duplicate" },
-
         // network
         { error::service_stopped, "service stopped" },
         { error::operation_failed, "operation failed" },
@@ -77,6 +72,11 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::address_blocked, "address blocked by policy" },
         { error::channel_stopped, "channel stopped" },
         { error::peer_throttling, "unresponsive peer may be throttling" },
+
+        // database
+        { error::store_block_invalid_height, "block out of order" },
+        { error::store_block_missing_parent, "block missing parent" },
+        { error::store_block_duplicate, "block duplicate" },
 
         // blockchain
         { error::duplicate_block, "duplicate block" },
@@ -114,6 +114,8 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::coinbase_height_mismatch, "block height mismatch in coinbase" },
         { error::coinbase_value_limit, "coinbase value too high" },
         { error::block_embedded_sigop_limit, "too many block embedded signature operations" },
+        { error::invalid_witness_commitment, "invalid witness commitment" },
+        { error::block_weight_limit, "block weight limit exceeded" },
 
         // check transaction
         { error::empty_transaction, "transaction inputs or outputs empty" },
@@ -122,6 +124,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::invalid_coinbase_script_size, "coinbase script too small or large" },
         { error::coinbase_transaction, "coinbase transaction disallowed in memory pool" },
         { error::transaction_internal_double_spend, "double spend internal to transaction" },
+        { error::transaction_size_limit, "transaction size limit exceeded" },
         { error::transaction_legacy_sigop_limit, "too many transaction legacy signature operations" },
 
         // accept transaction
@@ -134,6 +137,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::spend_exceeds_value, "spend exceeds value of inputs" },
         { error::transaction_embedded_sigop_limit, "too many transaction embedded signature operations" },
         { error::sequence_locked, "transaction currently locked" },
+        { error::transaction_weight_limit, "transaction weight limit exceeded" },
 
         // connect input
         { error::invalid_script, "invalid script" },
@@ -146,6 +150,9 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::invalid_signature_encoding, "invalid signature encoding" },
         { error::invalid_signature_lax_encoding, "invalid signature lax encoding" },
         { error::incorrect_signature, "incorrect signature" },
+        { error::unexpected_witness, "unexpected witness" },
+        { error::invalid_witness, "invalid witness" },
+        { error::dirty_witness, "dirty witness" },
         { error::stack_false, "stack false" },
 
         // op eval
@@ -231,7 +238,10 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::op_check_sequence_verify4, "op_check_sequence_verify4" },
         { error::op_check_sequence_verify5, "op_check_sequence_verify5" },
         { error::op_check_sequence_verify6, "op_check_sequence_verify6" },
-        { error::op_check_sequence_verify7, "op_check_sequence_verify7" }
+        { error::op_check_sequence_verify7, "op_check_sequence_verify7" },
+
+        // Added out of order (bip147).
+        { error::op_check_multisig_verify8, "op_check_multisig_verify8" },
     };
 
     const auto message = messages.find(ev);

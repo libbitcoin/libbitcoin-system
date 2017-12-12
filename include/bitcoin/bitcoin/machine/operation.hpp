@@ -37,7 +37,7 @@ class BC_API operation
 {
 public:
     typedef std::vector<operation> list;
-    typedef std::vector<operation>::const_iterator iterator;
+    typedef list::const_iterator iterator;
 
     // Constructors.
     //-------------------------------------------------------------------------
@@ -79,9 +79,9 @@ public:
     // Serialization.
     //-------------------------------------------------------------------------
 
+    data_chunk to_data() const;
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
-    data_chunk to_data() const;
 
     std::string to_string(uint32_t active_forks) const;
 
@@ -120,6 +120,7 @@ public:
     static bool is_push(opcode code);
     static bool is_payload(opcode code);
     static bool is_counted(opcode code);
+    static bool is_version(opcode code);
     static bool is_numeric(opcode code);
     static bool is_positive(opcode code);
     static bool is_reserved(opcode code);
@@ -130,6 +131,7 @@ public:
     /// Categories of operations.
     bool is_push() const;
     bool is_counted() const;
+    bool is_version() const;
     bool is_positive() const;
     bool is_disabled() const;
     bool is_conditional() const;

@@ -36,13 +36,17 @@ class BC_API inventory_vector
 public:
     typedef std::vector<inventory_vector> list;
 
-    enum class type_id
+    enum class type_id : uint32_t
     {
         error = 0,
         transaction = 1,
         block = 2,
         filtered_block = 3,
-        compact_block = 4
+        compact_block = 4,
+        witness = (1u << 30),
+        witness_transaction = witness | transaction,
+        witness_block = witness | block,
+        reserved = witness | filtered_block
     };
 
     static type_id to_type(uint32_t value);
@@ -82,6 +86,7 @@ public:
     void to_data(uint32_t version, writer& sink) const;
     bool is_valid() const;
     void reset();
+    void to_witness();
     size_t serialized_size(uint32_t version) const;
 
     // This class is move assignable but not copy assignable.

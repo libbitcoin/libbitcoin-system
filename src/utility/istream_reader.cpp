@@ -175,11 +175,17 @@ size_t istream_reader::read_size_little_endian()
 // Bytes.
 //-----------------------------------------------------------------------------
 
+uint8_t istream_reader::peek_byte()
+{
+    return stream_.peek();
+}
+
 uint8_t istream_reader::read_byte()
 {
     //// return read_bytes(1)[0];
     return stream_.get();
 }
+
 
 data_chunk istream_reader::read_bytes()
 {

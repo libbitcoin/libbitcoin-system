@@ -25,6 +25,7 @@
 #include <vector>
 #include <bitcoin/bitcoin/chain/output_point.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
+#include <bitcoin/bitcoin/chain/witness.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -53,6 +54,11 @@ public:
     input(const output_point& previous_output, const chain::script& script,
         uint32_t sequence);
 
+    input(output_point&& previous_output, chain::script&& script,
+        chain::witness&& witness, uint32_t sequence);
+    input(const output_point& previous_output, const chain::script& script,
+        const chain::witness& witness, uint32_t sequence);
+
     // Operators.
     //-----------------------------------------------------------------------------
 
@@ -66,27 +72,28 @@ public:
     // Deserialization.
     //-----------------------------------------------------------------------------
 
-    static input factory_from_data(const data_chunk& data, bool wire=true);
-    static input factory_from_data(std::istream& stream, bool wire=true);
-    static input factory_from_data(reader& source, bool wire=true);
+    static input factory_from_data(const data_chunk& data, bool wire=true, bool witness=false);
+    static input factory_from_data(std::istream& stream, bool wire=true, bool witness=false);
+    static input factory_from_data(reader& source, bool wire=true, bool witness=false);
 
-    bool from_data(const data_chunk& data, bool wire=true);
-    bool from_data(std::istream& stream, bool wire=true);
-    bool from_data(reader& source, bool wire=true);
+    bool from_data(const data_chunk& data, bool wire=true, bool witness=false);
+    bool from_data(std::istream& stream, bool wire=true, bool witness=false);
+    bool from_data(reader& source, bool wire=true, bool witness=false);
 
     bool is_valid() const;
 
     // Serialization.
     //-----------------------------------------------------------------------------
 
-    data_chunk to_data(bool wire=true) const;
-    void to_data(std::ostream& stream, bool wire=true) const;
-    void to_data(writer& sink, bool wire=true) const;
+    data_chunk to_data(bool wire=true, bool witness=false) const;
+    void to_data(std::ostream& stream, bool wire=true, bool witness=false) const;
+    void to_data(writer& sink, bool wire=true, bool witness=false) const;
 
     // Properties (size, accessors, cache).
     //-----------------------------------------------------------------------------
 
-    size_t serialized_size(bool wire=true) const;
+    /// This accounts for wire witness, but does not read or write it.
+    size_t serialized_size(bool wire=true, bool witness=false) const;
 
     // Deprecated (unsafe).
     output_point& previous_output();
@@ -102,18 +109,34 @@ public:
     void set_script(const chain::script& value);
     void set_script(chain::script&& value);
 
+    // Deprecated (unsafe).
+    chain::witness& witness();
+
+    const chain::witness& witness() const;
+    void set_witness(const chain::witness& value);
+    void set_witness(chain::witness&& value);
+
     uint32_t sequence() const;
     void set_sequence(uint32_t value);
 
     /// The payment address extracted from this input as a standard script.
     wallet::payment_address address() const;
 
+    // Utilities.
+    //-------------------------------------------------------------------------
+
+    /// Clear witness.
+    void strip_witness();
+
     // Validation.
     //-----------------------------------------------------------------------------
 
     bool is_final() const;
+    bool is_segregated() const;
     bool is_locked(size_t block_height, uint32_t median_time_past) const;
-    size_t signature_operations(bool bip16_active) const;
+    size_t signature_operations(bool bip16, bool bip141) const;
+    bool extract_reserved_hash(hash_digest& out) const;
+    bool extract_embedded_script(chain::script& out) const;
 
 protected:
     void reset();
@@ -125,6 +148,7 @@ private:
 
     output_point previous_output_;
     chain::script script_;
+    chain::witness witness_;
     uint32_t sequence_;
 };
 

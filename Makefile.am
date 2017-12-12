@@ -50,6 +50,7 @@ src_libbitcoin_la_SOURCES = \
     src/chain/points_value.cpp \
     src/chain/script.cpp \
     src/chain/transaction.cpp \
+    src/chain/witness.cpp \
     src/config/authority.cpp \
     src/config/base16.cpp \
     src/config/base2.cpp \
@@ -364,7 +365,8 @@ include_bitcoin_bitcoin_chain_HEADERS = \
     include/bitcoin/bitcoin/chain/points_value.hpp \
     include/bitcoin/bitcoin/chain/script.hpp \
     include/bitcoin/bitcoin/chain/stealth.hpp \
-    include/bitcoin/bitcoin/chain/transaction.hpp
+    include/bitcoin/bitcoin/chain/transaction.hpp \
+    include/bitcoin/bitcoin/chain/witness.hpp
 
 include_bitcoin_bitcoin_configdir = ${includedir}/bitcoin/bitcoin/config
 include_bitcoin_bitcoin_config_HEADERS = \
@@ -464,6 +466,7 @@ include_bitcoin_bitcoin_machine_HEADERS = \
     include/bitcoin/bitcoin/machine/program.hpp \
     include/bitcoin/bitcoin/machine/rule_fork.hpp \
     include/bitcoin/bitcoin/machine/script_pattern.hpp \
+    include/bitcoin/bitcoin/machine/script_version.hpp \
     include/bitcoin/bitcoin/machine/sighash_algorithm.hpp
 
 include_bitcoin_bitcoin_mathdir = ${includedir}/bitcoin/bitcoin/math

@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(output__factory_from_data_3__valid_input_success)
 BOOST_AUTO_TEST_CASE(output__signature_operations__always__returns_script_sigops_false)
 {
     chain::output instance;
-    BOOST_REQUIRE_EQUAL(instance.script().sigops(false), instance.signature_operations());
+    BOOST_REQUIRE_EQUAL(instance.script().sigops(false), instance.signature_operations(false));
 }
 
 BOOST_AUTO_TEST_CASE(output__value__roundtrip__success)

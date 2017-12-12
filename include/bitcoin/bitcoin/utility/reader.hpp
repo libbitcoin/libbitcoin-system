@@ -58,7 +58,8 @@ public:
     virtual uint64_t read_variable_little_endian() = 0;
     virtual size_t read_size_little_endian() = 0;
 
-    /// Read one byte.
+    /// Read/peek one byte.
+    virtual uint8_t peek_byte() = 0;
     virtual uint8_t read_byte() = 0;
 
     /// Read all remaining bytes.
