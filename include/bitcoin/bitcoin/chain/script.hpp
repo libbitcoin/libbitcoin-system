@@ -24,6 +24,7 @@
 #include <istream>
 #include <memory>
 #include <string>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
@@ -46,6 +47,9 @@ class BC_API script
 {
 public:
     typedef machine::operation operation;
+    typedef machine::rule_fork rule_fork;
+    typedef machine::script_pattern script_pattern;
+    typedef machine::script_version script_version;
 
     // Constructors.
     //-------------------------------------------------------------------------
@@ -125,22 +129,27 @@ public:
     //-------------------------------------------------------------------------
 
     static hash_digest generate_signature_hash(const transaction& tx,
-        uint32_t input_index, const script& script_code, uint8_t sighash_type);
+        uint32_t input_index, const script& script_code, uint8_t sighash_type,
+        script_version version=script_version::unversioned,
+        uint64_t value=max_uint64);
 
     static bool check_signature(const ec_signature& signature,
         uint8_t sighash_type, const data_chunk& public_key,
-        const script& script_code, const transaction& tx,
-        uint32_t input_index);
+        const script& script_code, const transaction& tx, uint32_t input_index,
+        script_version version=script_version::unversioned,
+        uint64_t value=max_uint64);
 
     static bool create_endorsement(endorsement& out, const ec_secret& secret,
         const script& prevout_script, const transaction& tx,
-        uint32_t input_index, uint8_t sighash_type);
+        uint32_t input_index, uint8_t sighash_type,
+        script_version version=script_version::unversioned,
+        uint64_t value=max_uint64);
 
     // Utilities (static).
     //-------------------------------------------------------------------------
 
     /// Determine if the fork is enabled in the active forks set.
-    static bool is_enabled(uint32_t active_forks, machine::rule_fork fork)
+    static bool is_enabled(uint32_t active_forks, rule_fork fork)
     {
         return (fork & active_forks) != 0;
     }
@@ -181,10 +190,10 @@ public:
 
     /// Common pattern detection.
     data_chunk witness_program() const;
-    machine::script_version version() const;
-    machine::script_pattern pattern() const;
-    machine::script_pattern output_pattern() const;
-    machine::script_pattern input_pattern() const;
+    script_version version() const;
+    script_pattern pattern() const;
+    script_pattern output_pattern() const;
+    script_pattern input_pattern() const;
 
     /// Consensus computations.
     size_t sigops(bool accurate) const;
@@ -196,10 +205,11 @@ public:
 
     static code verify(const transaction& tx, uint32_t input, uint32_t forks);
 
-    // TOD: move back to private.
+    // TODO: move back to private.
     static code verify(const transaction& tx, uint32_t input_index,
         uint32_t forks, const script& input_script,
-        const witness& input_witness, const script& prevout_script);
+        const witness& input_witness, const script& prevout_script,
+        uint64_t value);
 
 protected:
     // So that input and output may call reset from their own.
@@ -209,14 +219,15 @@ protected:
     void reset();
     bool is_pay_to_witness(uint32_t forks) const;
     bool is_pay_to_script_hash(uint32_t forks) const;
-    void find_and_delete_(const data_chunk& endorsement);
 
 private:
     static size_t serialized_size(const operation::list& ops);
     static data_chunk operations_to_data(const operation::list& ops);
-    ////static code verify(const transaction& tx, uint32_t input_index,
-    ////    uint32_t forks, const script& input_script,
-    ////    const script& prevout_script);
+    static hash_digest generate_version_0_signature_hash(const transaction& tx,
+        uint32_t input_index, const script& script_code, uint64_t value,
+        uint8_t sighash_type);
+
+    void find_and_delete_(const data_chunk& endorsement);
 
     data_chunk bytes_;
     bool valid_;

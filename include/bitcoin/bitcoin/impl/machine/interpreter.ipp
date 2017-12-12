@@ -658,28 +658,35 @@ inline interpreter::result interpreter::op_check_sig_verify(program& program)
     uint8_t sighash;
     ec_signature signature;
     der_signature distinguished;
-    const auto strict = chain::script::is_enabled(program.forks(),
-        rule_fork::bip66_rule);
+    auto bip66 = chain::script::is_enabled(program.forks(), bip66_rule);
+    auto bip143 = chain::script::is_enabled(program.forks(), bip143_rule);
 
     const auto public_key = program.pop();
     auto endorsement = program.pop();
 
     // Create a subscript with endorsements stripped (sort of).
     chain::script script_code(program.subscript());
-    script_code.find_and_delete({ endorsement });
+
+    // BIP143: find and delete of the signature is not applied for v0.
+    if (!(bip143 && program.version() == script_version::zero))
+        script_code.find_and_delete({ endorsement });
 
     // BIP62: An empty endorsement is not considered lax encoding.
     if (!parse_endorsement(sighash, distinguished, std::move(endorsement)))
         return error::invalid_signature_encoding;
 
     // Parse DER signature into an EC signature.
-    if (!parse_signature(signature, distinguished, strict))
-        return strict ? error::invalid_signature_lax_encoding :
+    if (!parse_signature(signature, distinguished, bip66))
+        return bip66 ? error::invalid_signature_lax_encoding :
             error::invalid_signature_encoding;
 
+    // Version condition preserves independence of bip141 and bip143.
+    auto version = bip143 ? program.version() : script_version::unversioned;
+
     return chain::script::check_signature(signature, sighash, public_key,
-        script_code, program.transaction(), program.input_index()) ?
-            error::success : error::incorrect_signature;
+        script_code, program.transaction(), program.input_index(),
+            version, program.value()) ? error::success :
+                error::incorrect_signature;
 }
 
 inline interpreter::result interpreter::op_check_sig(program& program)
@@ -734,12 +741,15 @@ inline interpreter::result interpreter::op_check_multisig_verify(
     ec_signature signature;
     der_signature distinguished;
     auto public_key = public_keys.begin();
-    const auto strict = chain::script::is_enabled(program.forks(),
-        rule_fork::bip66_rule);
+    auto bip66 = chain::script::is_enabled(program.forks(), bip66_rule);
+    auto bip143 = chain::script::is_enabled(program.forks(), bip143_rule);
 
     // Before looping create subscript with endorsements stripped (sort of).
     chain::script script_code(program.subscript());
-    script_code.find_and_delete(endorsements);
+
+    // BIP143: find and delete of the signature is not applied for v0.
+    if (!(bip143 && program.version() == script_version::zero))
+        script_code.find_and_delete(endorsements);
 
     // The exact number of signatures are required and must be in order.
     // One key can validate more than one script. So we always advance
@@ -751,14 +761,19 @@ inline interpreter::result interpreter::op_check_multisig_verify(
             return error::invalid_signature_encoding;
 
         // Parse DER signature into an EC signature.
-        if (!parse_signature(signature, distinguished, strict))
-            return strict ? error::invalid_signature_lax_encoding :
+        if (!parse_signature(signature, distinguished, bip66))
+            return bip66 ? error::invalid_signature_lax_encoding :
                 error::invalid_signature_encoding;
+
+        // Version condition preserves independence of bip141 and bip143.
+        auto version = bip143 ? program.version() : script_version::unversioned;
 
         while (true)
         {
+            // Version condition preserves independence of bip141 and bip143.
             if (chain::script::check_signature(signature, sighash, *public_key,
-                script_code, program.transaction(), program.input_index()))
+                script_code, program.transaction(), program.input_index(),
+                    version, program.value()))
                 break;
 
             if (++public_key == public_keys.end())

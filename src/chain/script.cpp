@@ -598,24 +598,28 @@ static script strip_code_seperators(const script& script_code)
 }
 
 // static
-// Use bool for version && bip143.
 hash_digest script::generate_signature_hash(const transaction& tx,
-    uint32_t input_index, const script& script_code, uint8_t sighash_type)
+    uint32_t input_index, const script& script_code, uint8_t sighash_type,
+    script_version version, uint64_t value)
 {
-    const auto sighash = to_sighash_enum(sighash_type);
+    // The way of serialization is changed (bip143).
+    if (version == script_version::zero)
+        return generate_version_0_signature_hash(tx, input_index, script_code,
+            value, sighash_type);
 
+    const auto sighash = to_sighash_enum(sighash_type);
     if (input_index >= tx.inputs().size() ||
         (input_index >= tx.outputs().size() &&
             sighash == sighash_algorithm::single))
     {
         //*********************************************************************
-        // CONSENSUS: wacky satoshi behavior we must perpetuate.
+        // CONSENSUS: wacky satoshi behavior.
         //*********************************************************************
         return one_hash;
     }
 
     //*************************************************************************
-    // CONSENSUS: more wacky satoshi behavior we must perpetuate.
+    // CONSENSUS: more wacky satoshi behavior.
     //*************************************************************************
     const auto stripped = strip_code_seperators(script_code);
 
@@ -632,17 +636,27 @@ hash_digest script::generate_signature_hash(const transaction& tx,
     }
 }
 
+// private
+hash_digest script::generate_version_0_signature_hash(const transaction& tx,
+    uint32_t input_index, const script& script_code, uint64_t value,
+    uint8_t sighash_type)
+{
+    // TODO: implement bip143 signature hashing.
+    return{};
+}
+
 // static
 bool script::check_signature(const ec_signature& signature,
     uint8_t sighash_type, const data_chunk& public_key,
-    const script& script_code, const transaction& tx, uint32_t input_index)
+    const script& script_code, const transaction& tx, uint32_t input_index,
+    script_version version, uint64_t value)
 {
     if (public_key.empty())
         return false;
 
     // This always produces a valid signature hash, including one_hash.
-    const auto sighash = script::generate_signature_hash(tx, input_index,
-        script_code, sighash_type);
+    const auto sighash = chain::script::generate_signature_hash(tx,
+        input_index, script_code, sighash_type, version, value);
 
     // Validate the EC signature.
     return verify_signature(public_key, sighash, signature);
@@ -651,13 +665,13 @@ bool script::check_signature(const ec_signature& signature,
 // static
 bool script::create_endorsement(endorsement& out, const ec_secret& secret,
     const script& prevout_script, const transaction& tx, uint32_t input_index,
-    uint8_t sighash_type)
+    uint8_t sighash_type, script_version version, uint64_t value)
 {
     out.reserve(max_endorsement_size);
 
     // This always produces a valid signature hash, including one_hash.
-    const auto sighash = script::generate_signature_hash(tx, input_index,
-        prevout_script, sighash_type);
+    const auto sighash = chain::script::generate_signature_hash(tx,
+        input_index, prevout_script, sighash_type, version, value);
 
     // Create the EC signature and encode as DER.
     ec_signature signature;
@@ -1170,7 +1184,7 @@ bool script::is_unspendable() const
 
 code script::verify(const transaction& tx, uint32_t input_index,
     uint32_t forks, const script& input_script, const witness& input_witness,
-    const script& prevout_script)
+    const script& prevout_script, uint64_t value)
 {
     code ec;
     bool witnessed;
@@ -1198,7 +1212,7 @@ code script::verify(const transaction& tx, uint32_t input_index,
 
         // This is a valid witness script so validate it.
         if ((ec = input_witness.verify(tx, input_index, forks,
-            prevout_script)))
+            prevout_script, value)))
             return ec;
     }
 
@@ -1228,7 +1242,7 @@ code script::verify(const transaction& tx, uint32_t input_index,
 
             // This is a valid embedded witness script so validate it.
             if ((ec = input_witness.verify(tx, input_index, forks,
-                embedded_script)))
+                embedded_script, value)))
                 return ec;
         }
     }
@@ -1248,7 +1262,7 @@ code script::verify(const transaction& tx, uint32_t input, uint32_t forks)
     const auto& in = tx.inputs()[input];
     const auto& prevout = in.previous_output().validation.cache;
     return verify(tx, input, forks, in.script(), in.witness(),
-        prevout.script());
+        prevout.script(), prevout.value());
 }
 
 } // namespace chain

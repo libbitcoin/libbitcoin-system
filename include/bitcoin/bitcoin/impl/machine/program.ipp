@@ -39,7 +39,7 @@ namespace machine {
 
 inline bool program::is_valid() const
 {
-    // An invalid sequence indicates a failure deserializing operations.
+    // Invalid operations indicates a failure deserializing individual ops.
     return script_.is_valid_operations() && !script_.is_unspendable();
 }
 
@@ -51,6 +51,11 @@ inline uint32_t program::forks() const
 inline uint32_t program::input_index() const
 {
     return input_index_;
+}
+
+inline uint64_t program::value() const
+{
+    return value_;
 }
 
 inline script_version program::version() const

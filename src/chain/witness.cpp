@@ -19,6 +19,8 @@
 #include <bitcoin/bitcoin/chain/witness.hpp>
 
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <istream>
 #include <iterator>
 #include <numeric>
@@ -474,7 +476,7 @@ bool witness::extract_embedded_script(script& out_script,
 // The program script is either a prevout script or an emedded script.
 // It validates this witness, from which the witness script is derived.
 code witness::verify(const transaction& tx, uint32_t input_index,
-    uint32_t forks, const script& program_script) const
+    uint32_t forks, const script& program_script, uint64_t value) const
 {
     const auto version = program_script.version();
 
@@ -489,8 +491,9 @@ code witness::verify(const transaction& tx, uint32_t input_index,
             if (!extract_embedded_script(script, stack, program_script))
                 return error::invalid_witness;
 
-            // script_version::zero
-            program witness(script, tx, input_index, forks, std::move(stack));
+            program witness(script, tx, input_index, forks, std::move(stack),
+                value, version);
+
             if ((ec = witness.evaluate()))
                 return ec;
 
