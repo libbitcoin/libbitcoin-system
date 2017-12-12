@@ -55,25 +55,26 @@ public:
     /// This can run ops via run(op, program) or the script via run(program).
     program(const chain::script& script);
 
-    /// Create an instance with empty stacks (input run).
+    /// Create an instance with empty stacks, value unused/max (input run).
     program(const chain::script& script, const chain::transaction& transaction,
         uint32_t input_index, uint32_t forks);
 
     /// Create an instance with initialized stack (witness run, v0 by default).
     program(const chain::script& script, const chain::transaction& transaction,
         uint32_t input_index, uint32_t forks, data_stack&& stack,
-        script_version version=script_version::zero);
+        uint64_t value, script_version version=script_version::zero);
 
-    /// Create using copied tx, input, forks and copied stack (prevout run).
+    /// Create using copied tx, input, forks, value, stack (prevout run).
     program(const chain::script& script, const program& other);
 
-    /// Create using copied tx, input, forks and moved stack (p2sh run).
+    /// Create using copied tx, input, forks, value and moved stack (p2sh run).
     program(const chain::script& script, program&& other, bool move);
 
     /// Constant registers.
     bool is_valid() const;
     uint32_t forks() const;
     uint32_t input_index() const;
+    uint64_t value() const;
     script_version version() const;
     const chain::transaction& transaction() const;
 
@@ -152,6 +153,7 @@ private:
     const chain::transaction& transaction_;
     const uint32_t input_index_;
     const uint32_t forks_;
+    const uint64_t value_;
 
     script_version version_;
     size_t negative_count_;

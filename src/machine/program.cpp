@@ -23,6 +23,7 @@
 #include <utility>
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/machine/interpreter.hpp>
 #include <bitcoin/bitcoin/machine/script_version.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -53,6 +54,7 @@ program::program()
     transaction_(default_tx_),
     input_index_(0),
     forks_(0),
+    value_(0),
     version_(script_version::unversioned),
     negative_count_(0),
     operation_count_(0),
@@ -66,6 +68,7 @@ program::program(const script& script)
     transaction_(default_tx_),
     input_index_(0),
     forks_(0),
+    value_(0),
     version_(script_version::unversioned),
     negative_count_(0),
     operation_count_(0),
@@ -80,6 +83,7 @@ program::program(const script& script, const chain::transaction& transaction,
     transaction_(transaction),
     input_index_(input_index),
     forks_(forks),
+    value_(max_uint64),
     version_(script_version::unversioned),
     negative_count_(0),
     operation_count_(0),
@@ -90,12 +94,13 @@ program::program(const script& script, const chain::transaction& transaction,
 
 // Condition, alternate, jump and operation_count are not copied.
 program::program(const script& script, const chain::transaction& transaction,
-    uint32_t input_index, uint32_t forks, data_stack&& stack,
+    uint32_t input_index, uint32_t forks, data_stack&& stack, uint64_t value,
     script_version version)
   : script_(script),
     transaction_(transaction),
     input_index_(input_index),
     forks_(forks),
+    value_(value),
     version_(version),
     negative_count_(0),
     operation_count_(0),
@@ -112,6 +117,7 @@ program::program(const script& script, const program& other)
     transaction_(other.transaction_),
     input_index_(other.input_index_),
     forks_(other.forks_),
+    value_(other.value_),
     version_(script_version::unversioned),
     negative_count_(0),
     operation_count_(0),
@@ -127,6 +133,7 @@ program::program(const script& script, program&& other, bool)
     transaction_(other.transaction_),
     input_index_(other.input_index_),
     forks_(other.forks_),
+    value_(other.value_),
     version_(script_version::unversioned),
     negative_count_(0),
     operation_count_(0),
