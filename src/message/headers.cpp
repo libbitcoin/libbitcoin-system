@@ -190,24 +190,27 @@ bool headers::is_sequential() const
 
 void headers::to_hashes(hash_list& out) const
 {
-    const auto map = [](const header& header)
+    out.clear();
+    out.reserve(elements_.size());
+    const auto map = [&out](const header& header)
     {
-        return header.hash();
+        out.push_back(header.hash());
     };
 
-    out.resize(elements_.size());
-    std::transform(elements_.begin(), elements_.end(), out.begin(), map);
+    std::for_each(elements_.begin(), elements_.end(), map);
 }
 
 void headers::to_inventory(inventory_vector::list& out,
     inventory::type_id type) const
 {
-    const auto map = [type](const header& header)
+    out.clear();
+    out.reserve(elements_.size());
+    const auto map = [&out, type](const header& header)
     {
-        return inventory_vector{ type, header.hash() };
+        out.emplace_back(type, header.hash());
     };
 
-    std::transform(elements_.begin(), elements_.end(), std::back_inserter(out), map);
+    std::for_each(elements_.begin(), elements_.end(), map);
 }
 
 size_t headers::serialized_size(uint32_t version) const
