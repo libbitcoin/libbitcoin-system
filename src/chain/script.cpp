@@ -982,7 +982,7 @@ operation::list script::to_pay_multisig_pattern(uint8_t signatures,
 // Utilities (non-static).
 //-----------------------------------------------------------------------------
 
-data_chunk script::witness_token() const
+data_chunk script::witness_program() const
 {
     // The first operations access must be method-based to guarantee the cache.
     const auto& ops = operations();

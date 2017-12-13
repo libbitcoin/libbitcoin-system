@@ -325,7 +325,7 @@ bool output::is_dust(uint64_t minimum_value) const
     return value_ < minimum_value && !script_.is_unspendable();
 }
 
-bool output::extract_committed(hash_digest& out) const
+bool output::extract_committed_hash(hash_digest& out) const
 {
     const auto& ops = script_.operations();
 

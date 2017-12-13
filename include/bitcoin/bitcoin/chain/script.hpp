@@ -180,7 +180,7 @@ public:
     //-------------------------------------------------------------------------
 
     /// Common pattern detection.
-    data_chunk witness_token() const;
+    data_chunk witness_program() const;
     machine::script_version version() const;
     machine::script_pattern pattern() const;
     machine::script_pattern input_pattern() const;
@@ -207,6 +207,7 @@ protected:
     friend class output;
 
     void reset();
+    bool is_pay_to_witness(uint32_t forks) const;
     bool is_pay_to_script_hash(uint32_t forks) const;
     void find_and_delete_(const data_chunk& endorsement);
 
