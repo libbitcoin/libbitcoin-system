@@ -111,7 +111,7 @@ enum error_code_t
     coinbase_height_mismatch = 37,
     coinbase_value_limit = 41,
     block_embedded_sigop_limit = 52,
-    invalid_witness_commitment = 81,
+    invalid_witness_commitment = 25,
     block_weight_limit = 82,
 
     // check transaction
@@ -148,7 +148,8 @@ enum error_code_t
     invalid_signature_lax_encoding = 63,
     incorrect_signature = 64,
     unexpected_witness = 77,
-    dirty_witness = 78,
+    invalid_witness = 80,
+    dirty_witness = 81,
     stack_false = 65,
 
     // op eval

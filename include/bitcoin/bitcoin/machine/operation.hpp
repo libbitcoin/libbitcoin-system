@@ -37,7 +37,7 @@ class BC_API operation
 {
 public:
     typedef std::vector<operation> list;
-    typedef std::vector<operation>::const_iterator iterator;
+    typedef list::const_iterator iterator;
 
     // Constructors.
     //-------------------------------------------------------------------------
@@ -64,13 +64,13 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static operation factory(const data_chunk& encoded, bool witness=false);
-    static operation factory(std::istream& stream, bool witness=false);
-    static operation factory(reader& source, bool witness=false);
+    static operation factory(const data_chunk& encoded);
+    static operation factory(std::istream& stream);
+    static operation factory(reader& source);
 
-    bool from_data(const data_chunk& encoded, bool witness=false);
-    bool from_data(std::istream& stream, bool witness=false);
-    bool from_data(reader& source, bool witness=false);
+    bool from_data(const data_chunk& encoded);
+    bool from_data(std::istream& stream);
+    bool from_data(reader& source);
 
     bool from_string(const std::string& mnemonic);
 
@@ -79,16 +79,16 @@ public:
     // Serialization.
     //-------------------------------------------------------------------------
 
-    data_chunk to_data(bool witness=false) const;
-    void to_data(std::ostream& stream, bool witness=false) const;
-    void to_data(writer& sink, bool witness=false) const;
+    data_chunk to_data() const;
+    void to_data(std::ostream& stream) const;
+    void to_data(writer& sink) const;
 
     std::string to_string(uint32_t active_forks) const;
 
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------
 
-    size_t serialized_size(bool witness=false) const;
+    size_t serialized_size() const;
 
     /// Get the op code [0..255], if is_valid is consistent with data.
     opcode code() const;

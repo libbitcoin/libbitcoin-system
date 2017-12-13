@@ -21,6 +21,8 @@
 
 #include <cstddef>
 #include <istream>
+#include <string>
+#include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/machine/operation.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -35,6 +37,7 @@ class BC_API witness
 {
 public:
     typedef machine::operation operation;
+    typedef data_stack::const_iterator iterator;
 
     // Constructors.
     //-------------------------------------------------------------------------
@@ -44,8 +47,8 @@ public:
     witness(witness&& other);
     witness(const witness& other);
 
-    witness(operation::list&& ops);
-    witness(const operation::list& ops);
+    witness(data_stack&& stack);
+    witness(const data_stack& stack);
 
     witness(data_chunk&& encoded, bool prefix);
     witness(const data_chunk& encoded, bool prefix);
@@ -73,10 +76,6 @@ public:
     bool from_data(std::istream& stream, bool prefix);
     bool from_data(reader& source, bool prefix);
 
-    /// Deserialization invalidates the iterator.
-    void from_operations(operation::list&& ops);
-    void from_operations(const operation::list& ops);
-
     /// The witness deserialized ccording to count and size prefixing.
     bool is_valid() const;
 
@@ -87,33 +86,42 @@ public:
     void to_data(std::ostream& stream, bool prefix) const;
     void to_data(writer& sink, bool prefix) const;
 
+    std::string to_string() const;
+
     // Iteration.
     //-------------------------------------------------------------------------
 
     void clear();
     bool empty() const;
     size_t size() const;
-    const operation& front() const;
-    const operation& back() const;
-    operation::iterator begin() const;
-    operation::iterator end() const;
-    const operation& operator[](size_t index) const;
+    const data_chunk& front() const;
+    const data_chunk& back() const;
+    iterator begin() const;
+    iterator end() const;
+    const data_chunk& operator[](size_t index) const;
 
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------
 
     size_t serialized_size(bool prefix) const;
-    const operation::list& operations() const;
+    const data_stack& stack() const;
 
-    // Utilities (static).
+    // Utilities.
     //-------------------------------------------------------------------------
 
-    static bool is_reserved_pattern(const operation::list& ops);
+    static bool is_push_size(const data_stack& stack);
+    static bool is_reserved_pattern(const data_stack& stack);
 
-    // Utilities (non-static).
+    bool extract_sigop_script(script& out_script,
+        const script& program_script) const;
+    bool extract_embedded_script(script& out_script, data_stack& out_stack,
+        const script& program_script) const;
+
+    // Validation.
     //-------------------------------------------------------------------------
 
-    machine::script_pattern pattern() const;
+    code verify(const transaction& tx, uint32_t input_index, uint32_t forks,
+        const script& program_script) const;
 
 protected:
     // So that input may call reset from its own.
@@ -122,13 +130,11 @@ protected:
     void reset();
 
 private:
-    static size_t serialized_size(const operation::list& ops);
-    static data_chunk operations_to_data(const operation::list& ops);
+    static size_t serialized_size(const data_stack& stack);
+    static operation::list to_pay_key_hash(data_chunk&& program);
 
-    // These are protected by mutex.
-    mutable bool valid_;
-    mutable operation::list operations_;
-    mutable upgrade_mutex mutex_;
+    bool valid_;
+    data_stack stack_;
 };
 
 } // namespace chain
