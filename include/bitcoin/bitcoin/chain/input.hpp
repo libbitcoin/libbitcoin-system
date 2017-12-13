@@ -26,6 +26,7 @@
 #include <vector>
 #include <bitcoin/bitcoin/chain/output_point.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
+#include <bitcoin/bitcoin/chain/witness.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -53,6 +54,11 @@ public:
         uint32_t sequence);
     input(const output_point& previous_output, const chain::script& script,
         uint32_t sequence);
+
+    input(output_point&& previous_output, chain::script&& script,
+        chain::witness&& witness, uint32_t sequence);
+    input(const output_point& previous_output, const chain::script& script,
+        const chain::witness& witness, uint32_t sequence);
 
     // Operators.
     //-------------------------------------------------------------------------
@@ -86,7 +92,8 @@ public:
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------
 
-    size_t serialized_size(bool wire=true) const;
+    /// This accounts for wire witness, but does not read or write it.
+    size_t serialized_size(bool wire=true, bool witness=false) const;
 
     output_point& previous_output();
     const output_point& previous_output() const;
@@ -96,6 +103,13 @@ public:
     const chain::script& script() const;
     void set_script(const chain::script& value);
     void set_script(chain::script&& value);
+
+    // Deprecated (unsafe).
+    chain::witness& witness();
+
+    const chain::witness& witness() const;
+    void set_witness(const chain::witness& value);
+    void set_witness(chain::witness&& value);
 
     uint32_t sequence() const;
     void set_sequence(uint32_t value);
@@ -110,6 +124,7 @@ public:
     //-------------------------------------------------------------------------
 
     bool is_final() const;
+    bool is_segregated() const;
     bool is_locked(size_t block_height, uint32_t median_time_past) const;
     size_t signature_operations(bool bip16_active) const;
 
@@ -127,6 +142,7 @@ private:
 
     output_point previous_output_;
     chain::script script_;
+    chain::witness witness_;
     uint32_t sequence_;
 };
 

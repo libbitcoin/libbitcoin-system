@@ -118,14 +118,14 @@ public:
     // Serialization.
     //-------------------------------------------------------------------------
 
-    data_chunk to_data(bool wire=true) const;
-    void to_data(std::ostream& stream, bool wire=true) const;
-    void to_data(writer& sink, bool wire=true) const;
+    data_chunk to_data(bool wire=true, bool witness=false) const;
+    void to_data(std::ostream& stream, bool wire=true, bool witness=false) const;
+    void to_data(writer& sink, bool wire=true, bool witness=false) const;
 
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------
 
-    size_t serialized_size(bool wire=true) const;
+    size_t serialized_size(bool wire=true, bool witness=false) const;
 
     uint32_t version() const;
     void set_version(uint32_t value);
@@ -147,8 +147,8 @@ public:
     void set_outputs(const outs& value);
     void set_outputs(outs&& value);
 
-    hash_digest hash() const;
-    hash_digest hash(uint32_t sighash_type) const;
+    hash_digest hash(bool witness=false) const;
+    hash_digest hash(uint32_t sighash_type, bool witness=false) const;
 
     // Validation.
     //-------------------------------------------------------------------------
@@ -174,6 +174,7 @@ public:
     bool is_final(size_t block_height, uint32_t block_time) const;
     bool is_locked(size_t block_height, uint32_t median_time_past) const;
     bool is_locktime_conflict() const;
+    bool is_segregated() const;
 
     code check(bool transaction_pool=true, bool retarget=true) const;
     code accept(bool transaction_pool=true) const;
@@ -203,10 +204,13 @@ private:
     input::list inputs_;
     output::list outputs_;
 
+    mutable std::shared_ptr<hash_digest> hash_;
+    mutable upgrade_mutex hash_mutex_;
+
     // These share a mutex as they are not expected to contend.
-    mutable hash_ptr hash_;
     mutable optional_value total_input_value_;
     mutable optional_value total_output_value_;
+    mutable boost::optional<bool> segregated_;
     mutable upgrade_mutex mutex_;
 };
 

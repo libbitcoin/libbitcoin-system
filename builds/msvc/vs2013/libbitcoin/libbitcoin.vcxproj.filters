@@ -650,6 +650,9 @@
     <ClCompile Include="..\..\..\..\src\wallet\electrum.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\witness.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -1266,6 +1269,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\electrum.hpp">
       <Filter>include\bitcoin\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\witness.hpp">
+      <Filter>include\bitcoin\chain</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

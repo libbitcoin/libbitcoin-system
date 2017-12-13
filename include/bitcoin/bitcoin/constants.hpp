@@ -251,6 +251,13 @@ BC_CONSTEXPR uint8_t varint_eight_bytes = 0xff;
 // String padding sentinel.
 BC_CONSTEXPR uint8_t string_terminator = 0x00;
 
+// Witness serialization values (bip141).
+//-----------------------------------------------------------------------------
+
+BC_CONSTEXPR uint8_t witness_marker = 0x00;
+BC_CONSTEXPR uint8_t witness_flag = 0x01;
+BC_CONSTEXPR uint32_t witness_head = 0xaa21a9ed;
+
 // Currency unit constants (uint64_t).
 //-----------------------------------------------------------------------------
 
