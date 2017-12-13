@@ -101,16 +101,16 @@ public:
     static transaction factory(reader& source, bool wire=true, bool witness=false);
 
     // Non-wire store deserializations to preserve hash.
-    static transaction factory(reader& source, hash_digest&& hash);
-    static transaction factory(reader& source, const hash_digest& hash);
+    static transaction factory(reader& source, hash_digest&& hash, bool wire=true, bool witness=false);
+    static transaction factory(reader& source, const hash_digest& hash, bool wire=true, bool witness=false);
 
     bool from_data(const data_chunk& data, bool wire=true, bool witness=false);
     bool from_data(std::istream& stream, bool wire=true, bool witness=false);
     bool from_data(reader& source, bool wire=true, bool witness=false);
 
     // Non-wire store deserializations to preserve hash.
-    bool from_data(reader& source, hash_digest&& hash);
-    bool from_data(reader& source, const hash_digest& hash);
+    bool from_data(reader& source, hash_digest&& hash, bool wire=true, bool witness=false);
+    bool from_data(reader& source, const hash_digest& hash, bool wire=true, bool witness=false);
 
     bool is_valid() const;
 

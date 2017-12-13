@@ -259,18 +259,20 @@ transaction transaction::factory(reader& source, bool wire, bool witness)
 }
 
 // static
-transaction transaction::factory(reader& source, hash_digest&& hash)
+transaction transaction::factory(reader& source, hash_digest&& hash,
+    bool wire, bool witness)
 {
     transaction instance;
-    instance.from_data(source, std::move(hash));
+    instance.from_data(source, std::move(hash), wire, witness);
     return instance;
 }
 
 // static
-transaction transaction::factory(reader& source, const hash_digest& hash)
+transaction transaction::factory(reader& source, const hash_digest& hash,
+    bool wire, bool witness)
 {
     transaction instance;
-    instance.from_data(source, hash);
+    instance.from_data(source, hash, wire, witness);
     return instance;
 }
 
@@ -343,16 +345,18 @@ bool transaction::from_data(reader& source, bool wire, bool witness)
     return source;
 }
 
-bool transaction::from_data(reader& source, hash_digest&& hash)
+bool transaction::from_data(reader& source, hash_digest&& hash, bool wire,
+    bool witness)
 {
     hash_ = std::make_shared<hash_digest>(std::move(hash));
-    return from_data(source, false);
+    return from_data(source, wire, witness);
 }
 
-bool transaction::from_data(reader& source, const hash_digest& hash)
+bool transaction::from_data(reader& source, const hash_digest& hash, bool wire,
+    bool witness)
 {
     hash_ = std::make_shared<hash_digest>(hash);
-    return from_data(source, false);
+    return from_data(source, wire, witness);
 }
 
 // protected
