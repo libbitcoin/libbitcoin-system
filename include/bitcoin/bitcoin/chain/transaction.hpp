@@ -96,18 +96,17 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static transaction factory(const data_chunk& data, bool wire=true);
-    static transaction factory(std::istream& stream, bool wire=true);
-    static transaction factory(reader& source, bool wire=true);
+    static transaction factory(const data_chunk& data, bool wire=true, bool witness=false);
+    static transaction factory(std::istream& stream, bool wire=true, bool witness=false);
+    static transaction factory(reader& source, bool wire=true, bool witness=false);
 
     // Non-wire store deserializations to preserve hash.
     static transaction factory(reader& source, hash_digest&& hash);
-    static transaction factory(reader& source,
-        const hash_digest& hash);
+    static transaction factory(reader& source, const hash_digest& hash);
 
-    bool from_data(const data_chunk& data, bool wire=true);
-    bool from_data(std::istream& stream, bool wire=true);
-    bool from_data(reader& source, bool wire=true);
+    bool from_data(const data_chunk& data, bool wire=true, bool witness=false);
+    bool from_data(std::istream& stream, bool wire=true, bool witness=false);
+    bool from_data(reader& source, bool wire=true, bool witness=false);
 
     // Non-wire store deserializations to preserve hash.
     bool from_data(reader& source, hash_digest&& hash);
@@ -148,7 +147,13 @@ public:
     void set_outputs(outs&& value);
 
     hash_digest hash(bool witness=false) const;
-    hash_digest hash(uint32_t sighash_type, bool witness=false) const;
+    hash_digest hash(uint32_t sighash_type, bool witness = false) const;
+
+    // Utilities.
+    //-------------------------------------------------------------------------
+
+    /// Clear witness from all inputs (does not change default hash).
+    void strip_witness();
 
     // Validation.
     //-------------------------------------------------------------------------

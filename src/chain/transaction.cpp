@@ -233,26 +233,28 @@ bool transaction::operator!=(const transaction& other) const
 //-----------------------------------------------------------------------------
 
 // static
-transaction transaction::factory(const data_chunk& data, bool wire)
+transaction transaction::factory(const data_chunk& data, bool wire,
+    bool witness)
 {
     transaction instance;
-    instance.from_data(data, wire);
+    instance.from_data(data, wire, witness);
     return instance;
 }
 
 // static
-transaction transaction::factory(std::istream& stream, bool wire)
+transaction transaction::factory(std::istream& stream, bool wire, bool witness)
 {
+
     transaction instance;
-    instance.from_data(stream, wire);
+    instance.from_data(stream, wire, witness);
     return instance;
 }
 
 // static
-transaction transaction::factory(reader& source, bool wire)
+transaction transaction::factory(reader& source, bool wire, bool witness)
 {
     transaction instance;
-    instance.from_data(source, wire);
+    instance.from_data(source, wire, witness);
     return instance;
 }
 
@@ -265,27 +267,26 @@ transaction transaction::factory(reader& source, hash_digest&& hash)
 }
 
 // static
-transaction transaction::factory(reader& source,
-    const hash_digest& hash)
+transaction transaction::factory(reader& source, const hash_digest& hash)
 {
     transaction instance;
     instance.from_data(source, hash);
     return instance;
 }
 
-bool transaction::from_data(const data_chunk& data, bool wire)
+bool transaction::from_data(const data_chunk& data, bool wire, bool witness)
 {
     data_source istream(data);
-    return from_data(istream, wire);
+    return from_data(istream, wire, witness);
 }
 
-bool transaction::from_data(std::istream& stream, bool wire)
+bool transaction::from_data(std::istream& stream, bool wire, bool witness)
 {
     istream_reader source(stream);
-    return from_data(source, wire);
+    return from_data(source, wire, witness);
 }
 
-bool transaction::from_data(reader& source, bool wire)
+bool transaction::from_data(reader& source, bool wire, bool witness)
 {
     reset();
 
@@ -296,11 +297,11 @@ bool transaction::from_data(reader& source, bool wire)
         read(source, inputs_, wire);
 
         // Detect witness as no inputs (marker) and expected flag (bip144).
-        const auto witness = inputs_.size() == witness_marker &&
+        const auto marker = inputs_.size() == witness_marker &&
             source.peek_byte() == witness_flag;
 
         // This is always enabled so caller should validate with is_segregated.
-        if (witness)
+        if (marker)
         {
             // Skip over the peeked witness flag.
             source.skip(1);
@@ -329,6 +330,10 @@ bool transaction::from_data(reader& source, bool wire)
         locktime_ = static_cast<uint32_t>(locktime);
         version_ = static_cast<uint32_t>(version);
     }
+
+    // TODO: optimize by having reader skip witness data.
+    if (!witness)
+        strip_witness();
 
     if (!source)
         reset();
@@ -605,6 +610,26 @@ hash_digest transaction::hash(uint32_t sighash_type, bool witness) const
     auto serialized = to_data(true, witness);
     extend_data(serialized, to_little_endian(sighash_type));
     return bitcoin_hash(serialized);
+}
+
+// Utilities.
+//-----------------------------------------------------------------------------
+
+// Clear witness from all inputs (does not change default transaction hash).
+void transaction::strip_witness()
+{
+    const auto strip = [](input& input)
+    {
+        input.strip_witness();
+    };
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    unique_lock lock(mutex_);
+
+    segregated_ = false;
+    std::for_each(inputs_.begin(), inputs_.end(), strip);
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 // Validation helpers.
