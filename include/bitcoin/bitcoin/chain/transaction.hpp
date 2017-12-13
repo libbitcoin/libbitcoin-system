@@ -160,7 +160,7 @@ public:
     uint64_t total_input_value() const;
     uint64_t total_output_value() const;
     size_t signature_operations() const;
-    size_t signature_operations(bool bip16_active) const;
+    size_t signature_operations(bool bip16, bool bip141) const;
     size_t weight() const;
 
     bool is_coinbase() const;

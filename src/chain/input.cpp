@@ -33,6 +33,7 @@ namespace libbitcoin {
 namespace chain {
 
 using namespace bc::wallet;
+using namespace bc::machine;
 
 // Constructors.
 //-----------------------------------------------------------------------------
@@ -412,28 +413,108 @@ bool input::is_locked(size_t block_height, uint32_t median_time_past) const
     return age_blocks < minimum;
 }
 
-size_t input::signature_operations(bool bip16_active) const
+// This requires that previous outputs have been populated.
+// This cannot overflow because each total is limited by max ops.
+size_t input::signature_operations(bool bip16, bool bip141) const
 {
-    auto sigops = script_.sigops(false);
+    chain::script witness, embedded;
+    const auto& prevout = previous_output_.validation.cache.script();
+    BITCOIN_ASSERT_MSG(!bip141 || bip16, "bip141 implies bip16");
 
-    if (bip16_active)
+    // Penalize quadratic signature operations (bip141).
+    const auto sigops_factor = bip141 ? fast_sigops_factor : 1u;
+
+    // Count heavy sigops in the input script.
+    auto sigops = script_.sigops(false) * sigops_factor;
+
+    if (bip141 && extract_witness(witness, prevout))
     {
-        // This cannot overflow because each total is limited by max ops.
-        const auto& cache = previous_output_.validation.cache.script();
-        sigops += script_.embedded_sigops(cache);
+        // Add sigops in the witness (bip141).
+        return sigops + witness.sigops(true);
+    }
+
+    if (bip16 && extract_embedded(embedded))
+    {
+        if (bip141 && extract_witness(witness, embedded))
+        {
+            // Add sigops in the embedded witness (bip141).
+            return sigops + witness.sigops(true);
+        }
+        else
+        {
+            // Add heavy sigops in the embedded script (bip16).
+            return sigops + embedded.sigops(true) * sigops_factor;
+        }
     }
 
     return sigops;
 }
 
-bool input::extract_reserved(hash_digest& out_value) const
+// Extract bare (P2WPKH) or embedded (P2WSH) witness script, based on program.
+bool input::extract_witness(chain::script& out,
+    const chain::script& program) const
+{
+    switch (program.version())
+    {
+        case script_version::zero:
+        {
+            const auto& witness_ops = witness_.operations();
+            const auto token_size = program.witness_token().size();
+
+            if (token_size == hash_size)
+            {
+                // TODO: It would be nice if witness was derived from script.
+                out.from_operations(witness_ops);
+                return true;
+            }
+
+            if (token_size == short_hash_size && !witness_ops.empty())
+            {
+                // This cannot fail because there is no prefix.
+                return out.from_data(witness_ops.back().data(), false);
+            }
+
+            return false;
+        }
+
+        case script_version::reserved:
+        case script_version::unversioned:
+        default:
+            return false;
+    }
+}
+
+// This requires that previous outputs have been populated.
+bool input::extract_embedded(chain::script& out) const
+{
+    const auto& ops = script_.operations();
+    const auto& prevout_script = previous_output_.validation.cache.script();
+
+    // TODO: prevent unit test case breaks here.
+    ////BITCOIN_ASSERT(previous_output_.is_valid());
+
+    // There are no embedded sigops when the prevout script is not p2sh.
+    if (!prevout_script.is_pay_to_script_hash(rule_fork::bip16_rule))
+        return false;
+
+    // There are no embedded sigops when the input script is not push only.
+    // The first operations access must be method-based to guarantee the cache.
+    if (ops.empty() || !script::is_relaxed_push(ops))
+        return false;
+
+    // Parse the embedded script from the last input script item (data).
+    // This cannot fail because there is no prefix to invalidate the length.
+    return out.from_data(ops.back().data(), false);
+}
+
+bool input::extract_reserved(hash_digest& out) const
 {
     const auto& ops = witness_.operations();
 
     if (!witness::is_reserved_pattern(ops))
         return false;
 
-    std::copy_n(ops.front().data().begin(), hash_size, out_value.begin());
+    std::copy_n(ops.front().data().begin(), hash_size, out.begin());
     return true;
 }
 

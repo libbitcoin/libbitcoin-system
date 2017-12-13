@@ -38,6 +38,7 @@
 #include <bitcoin/bitcoin/machine/operation.hpp>
 #include <bitcoin/bitcoin/machine/rule_fork.hpp>
 #include <bitcoin/bitcoin/machine/script_pattern.hpp>
+#include <bitcoin/bitcoin/machine/script_version.hpp>
 #include <bitcoin/bitcoin/machine/sighash_algorithm.hpp>
 #include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -723,6 +724,9 @@ bool script::is_coinbase_pattern(const operation::list& ops, size_t height)
         && ops[0].data() == number(height).data();
 }
 
+//*****************************************************************************
+// CONSENSUS: this pattern is used to commit to bip141 witness data.
+//*****************************************************************************
 bool script::is_commitment_pattern(const operation::list& ops)
 {
     static const auto header = to_big_endian(witness_head);
@@ -733,6 +737,17 @@ bool script::is_commitment_pattern(const operation::list& ops)
         && ops[0].code() == opcode::return_
         && ops[1].code() == opcode::push_size_36
         && std::equal(header.begin(), header.end(), ops[1].data().begin());
+}
+
+//*****************************************************************************
+// CONSENSUS: this pattern is used in bip141 validation rules.
+//*****************************************************************************
+bool script::is_program_pattern(const operation::list& ops)
+{
+    return ops.size() == 2
+        && ops[0].is_version()
+        && ops[1].data().size() >= min_witness_program
+        && ops[1].data().size() <= max_witness_program;
 }
 
 // The satoshi client tests for 83 bytes total. This allows for the waste of
@@ -816,8 +831,17 @@ bool script::is_pay_script_hash_pattern(const operation::list& ops)
     return ops.size() == 3
         && ops[0].code() == opcode::hash160
         && ops[1].code() == opcode::push_size_20
-        && ops[1].data().size() == short_hash_size
         && ops[2].code() == opcode::equal;
+}
+
+//*****************************************************************************
+// CONSENSUS: this pattern is used to activate bip141 validation rules.
+//*****************************************************************************
+bool script::is_pay_witness_script_hash_pattern(const operation::list& ops)
+{
+    return ops.size() == 2
+        && ops[0].code() == opcode::push_size_0
+        && ops[1].code() == opcode::push_size_32;
 }
 
 // The first push is based on wacky satoshi op_check_multisig behavior that
@@ -837,6 +861,9 @@ bool script::is_sign_public_key_pattern(const operation::list& ops)
         && is_endorsement(ops[0].data());
 }
 
+//*****************************************************************************
+// CONSENSUS: this pattern is used to activate bip141 validation rules.
+//*****************************************************************************
 bool script::is_sign_key_hash_pattern(const operation::list& ops)
 {
     return ops.size() == 2
@@ -955,6 +982,26 @@ operation::list script::to_pay_multisig_pattern(uint8_t signatures,
 // Utilities (non-static).
 //-----------------------------------------------------------------------------
 
+data_chunk script::witness_token() const
+{
+    // The first operations access must be method-based to guarantee the cache.
+    const auto& ops = operations();
+    return is_program_pattern(ops) ? ops[1].data() : data_chunk{};
+}
+
+script_version script::version() const
+{
+    // The first operations access must be method-based to guarantee the cache.
+    const auto& ops = operations();
+
+    if (!is_program_pattern(ops))
+        return script_version::unversioned;
+
+    // Version 0 is specified, others are reserved (bip141).
+    return (ops[0].code() == opcode::push_size_0) ? script_version::zero :
+        script_version::reserved;
+}
+
 // Caller should test for is_sign_script_hash_pattern when sign_key_hash result
 // as it is possible for an input script to match both patterns.
 script_pattern script::pattern() const
@@ -1010,18 +1057,19 @@ script_pattern script::input_pattern() const
 bool script::is_pay_to_script_hash(uint32_t forks) const
 {
     // This is used internally as an optimization over using script::pattern.
-    // The prevout operations access must be method-based to guarantee the cache.
+    // The first operations access must be method-based to guarantee the cache.
     return is_enabled(forks, rule_fork::bip16_rule) &&
         is_pay_script_hash_pattern(operations());
 }
 
-inline size_t ops(bool embedded, opcode code)
+// Count 1..16 multisig accurately for embedded (bip16) and witness (bip141).
+inline size_t multisig_sigops(bool accurate, opcode code)
 {
-    return embedded && operation::is_positive(code) ?
+    return accurate && operation::is_positive(code) ?
         operation::opcode_to_positive(code) : multisig_default_sigops;
 }
 
-size_t script::sigops(bool embedded) const
+size_t script::sigops(bool accurate) const
 {
     size_t total = 0;
     auto preceding = opcode::push_negative_1;
@@ -1040,35 +1088,13 @@ size_t script::sigops(bool embedded) const
             code == opcode::checkmultisig ||
             code == opcode::checkmultisigverify)
         {
-            total += ops(embedded, preceding);
+            total += multisig_sigops(accurate, preceding);
         }
 
         preceding = code;
     }
 
     return total;
-}
-
-size_t script::embedded_sigops(const script& prevout_script) const
-{
-    // There are no embedded sigops when the prevout script is not p2sh.
-    if (!prevout_script.is_pay_to_script_hash(rule_fork::bip16_rule))
-        return 0;
-
-    // The first operations access must be method-based to guarantee the cache.
-    if (operations().empty())
-        return 0;
-
-    // There are no embedded sigops when the input script is not push only.
-    if (!is_relaxed_push(operations_))
-        return 0;
-
-    // Parse the embedded script from the last input script item (data).
-    // This never fails because there is no prefix to validate the length.
-    script embedded(operations_.back().data(), false);
-
-    // Count the sigops in the embedded script using BIP16 rules.
-    return embedded.sigops(true);
 }
 
 //*****************************************************************************
@@ -1172,7 +1198,7 @@ code script::verify(const transaction& tx, uint32_t input_index,
         if (!is_relaxed_push(input_script.operations()))
             return error::invalid_script_embed;
 
-        // The embedded p2sh script is at the top of the stack.
+        // The embedded p2sh script is at the top of the stack (pushed last).
         script embedded_script(input.pop(), false);
 
         program embedded(embedded_script, std::move(input), true);

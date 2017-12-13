@@ -554,16 +554,17 @@ uint64_t block::subsidy(size_t height, bool retarget)
 size_t block::signature_operations() const
 {
     const auto state = validation.state;
-    return state ? signature_operations(
-        state->is_enabled(rule_fork::bip16_rule)) : max_size_t;
+    const auto bip16 = state->is_enabled(rule_fork::bip16_rule);
+    const auto bip141 = state->is_enabled(rule_fork::bip141_rule);
+    return state ? signature_operations(bip16, bip141) : max_size_t;
 }
 
 // Returns max_size_t in case of overflow.
-size_t block::signature_operations(bool bip16_active) const
+size_t block::signature_operations(bool bip16, bool bip141) const
 {
-    const auto value = [bip16_active](size_t total, const transaction& tx)
+    const auto value = [bip16, bip141](size_t total, const transaction& tx)
     {
-        return ceiling_add(total, tx.signature_operations(bip16_active));
+        return ceiling_add(total, tx.signature_operations(bip16, bip141));
     };
 
     //*************************************************************************
@@ -939,7 +940,7 @@ code block::check() const
     // This will not make a difference unless prevouts are populated, in which
     // case they are ignored. This means that p2sh sigops are not counted here.
     // This is a preliminary check, the final count must come from connect().
-    ////else if (signature_operations(false) > max_block_sigops)
+    ////else if (signature_operations(false, false) > max_block_sigops)
     ////    return error::block_legacy_sigop_limit;
 
     else
@@ -962,10 +963,12 @@ code block::accept(const chain_state& state, bool transactions,
     code ec;
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip34 = state.is_enabled(rule_fork::bip34_rule);
+    const auto bip113 = state.is_enabled(rule_fork::bip113_rule);
     const auto bip141 = state.is_enabled(rule_fork::bip141_rule);
 
-    const auto block_time = state.is_enabled(rule_fork::bip113_rule) ?
-        state.median_time_past() : header_.timestamp();
+    const auto max_sigops = bip141 ? max_fast_sigops : max_block_sigops;
+    const auto block_time = bip113 ? state.median_time_past() :
+        header_.timestamp();
 
     if (header && (ec = header_.accept(state)))
         return ec;
@@ -994,7 +997,7 @@ code block::accept(const chain_state& state, bool transactions,
 
     // TODO: determine if performance benefit is worth excluding sigops here.
     // TODO: relates block limit to total of tx.sigops (pool cache).
-    else if (transactions && (signature_operations(bip16) > max_block_sigops))
+    else if (transactions && signature_operations(bip16, bip141) > max_sigops)
         return error::block_embedded_sigop_limit;
 
     else if (transactions)

@@ -805,7 +805,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_operations_single_input_output_unini
     chain::transaction instance;
     instance.inputs().emplace_back();
     instance.outputs().emplace_back();
-    BOOST_REQUIRE_EQUAL(instance.signature_operations(false), 0u);
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(false, false), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_missing_previous_outputs__empty_inputs__returns_false)

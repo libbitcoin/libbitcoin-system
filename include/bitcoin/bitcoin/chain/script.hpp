@@ -30,6 +30,7 @@
 #include <bitcoin/bitcoin/machine/operation.hpp>
 #include <bitcoin/bitcoin/machine/rule_fork.hpp>
 #include <bitcoin/bitcoin/machine/script_pattern.hpp>
+#include <bitcoin/bitcoin/machine/script_version.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
@@ -148,15 +149,18 @@ public:
     static bool is_relaxed_push(const operation::list& ops);
     static bool is_coinbase_pattern(const operation::list& ops, size_t height);
     static bool is_commitment_pattern(const operation::list& ops);
+    static bool is_program_pattern(const operation::list& ops);
 
-    /// Common output patterns (psh is also consensus).
+
+    /// Common output patterns (psh and pwsh are also consensus).
     static bool is_pay_null_data_pattern(const operation::list& ops);
     static bool is_pay_multisig_pattern(const operation::list& ops);
     static bool is_pay_public_key_pattern(const operation::list& ops);
     static bool is_pay_key_hash_pattern(const operation::list& ops);
     static bool is_pay_script_hash_pattern(const operation::list& ops);
+    static bool is_pay_witness_script_hash_pattern(const operation::list& ops);
 
-    /// Common input patterns.
+    /// Common input patterns (skh is also consensus).
     static bool is_sign_multisig_pattern(const operation::list& ops);
     static bool is_sign_public_key_pattern(const operation::list& ops);
     static bool is_sign_key_hash_pattern(const operation::list& ops);
@@ -175,14 +179,15 @@ public:
     // Utilities (non-static).
     //-------------------------------------------------------------------------
 
-    // Common pattern detection.
+    /// Common pattern detection.
+    data_chunk witness_token() const;
+    machine::script_version version() const;
     machine::script_pattern pattern() const;
     machine::script_pattern input_pattern() const;
     machine::script_pattern output_pattern() const;
 
-    // Consensus computations.
-    size_t sigops(bool embedded) const;
-    size_t embedded_sigops(const script& prevout_script) const;
+    /// Consensus computations.
+    size_t sigops(bool accurate) const;
     void find_and_delete(const data_stack& endorsements);
     bool is_unspendable() const;
 
