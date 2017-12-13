@@ -37,6 +37,7 @@
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/chain/stealth.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
+#include <bitcoin/bitcoin/chain/witness.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/config/base16.hpp>
 #include <bitcoin/bitcoin/config/base2.hpp>
