@@ -146,6 +146,9 @@ public:
     void set_outputs(const outs& value);
     void set_outputs(outs&& value);
 
+    hash_digest outputs_hash() const;
+    hash_digest inpoints_hash() const;
+    hash_digest sequences_hash() const;
     hash_digest hash(bool witness=false) const;
 
     // Utilities.
@@ -209,7 +212,12 @@ private:
     input::list inputs_;
     output::list outputs_;
 
-    mutable std::shared_ptr<hash_digest> hash_;
+    // These share a mutex as they are not expected to contend.
+    mutable hash_ptr hash_;
+    mutable hash_ptr witness_hash_;
+    mutable hash_ptr outputs_hash_;
+    mutable hash_ptr inpoints_hash_;
+    mutable hash_ptr sequences_hash_;
     mutable upgrade_mutex hash_mutex_;
 
     // These share a mutex as they are not expected to contend.

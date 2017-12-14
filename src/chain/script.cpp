@@ -479,7 +479,7 @@ const operation::list& script::operations() const
     return operations_;
 }
 
-// Signing.
+// Signing (unversioned).
 //-----------------------------------------------------------------------------
 
 inline hash_digest signature_hash(const transaction& tx, uint32_t sighash_type)
@@ -631,16 +631,10 @@ static script strip_code_seperators(const script& script_code)
     return script(std::move(ops));
 }
 
-// static
-hash_digest script::generate_signature_hash(const transaction& tx,
-    uint32_t input_index, const script& script_code, uint8_t sighash_type,
-    script_version version, uint64_t value)
+// private/static
+hash_digest script::generate_unversioned_signature_hash(const transaction& tx,
+    uint32_t input_index, const script& script_code, uint8_t sighash_type)
 {
-    // The way of serialization is changed (bip143).
-    if (version == script_version::zero)
-        return generate_version_0_signature_hash(tx, input_index, script_code,
-            value, sighash_type);
-
     const auto sighash = to_sighash_enum(sighash_type);
     if (input_index >= tx.inputs().size() ||
         (input_index >= tx.outputs().size() &&
@@ -670,13 +664,179 @@ hash_digest script::generate_signature_hash(const transaction& tx,
     }
 }
 
-// private
+// Signing (version 0).
+//-----------------------------------------------------------------------------
+
+hash_digest script::to_outputs(const transaction& tx)
+{
+    const auto sum = [&](size_t total, const output& output)
+    {
+        return total + output.serialized_size();
+    };
+
+    const auto& outs = tx.outputs();
+    auto size = std::accumulate(outs.begin(), outs.end(), size_t(0), sum);
+    data_chunk data;
+    data.reserve(size);
+    data_sink ostream(data);
+    ostream_writer sink(ostream);
+
+    const auto write = [&](const output& output)
+    {
+        output.to_data(sink, true);
+    };
+
+    std::for_each(outs.begin(), outs.end(), write);
+    ostream.flush();
+    BITCOIN_ASSERT(data.size() == size);
+    return bitcoin_hash(data);
+}
+
+hash_digest script::to_inpoints(const transaction& tx)
+{
+    const auto sum = [&](size_t total, const input& input)
+    {
+        return total + input.previous_output().serialized_size();
+    };
+
+    const auto& ins = tx.inputs();
+    auto size = std::accumulate(ins.begin(), ins.end(), size_t(0), sum);
+    data_chunk data;
+    data.reserve(size);
+    data_sink ostream(data);
+    ostream_writer sink(ostream);
+
+    const auto write = [&](const input& input)
+    {
+        input.previous_output().to_data(sink);
+    };
+
+    std::for_each(ins.begin(), ins.end(), write);
+    ostream.flush();
+    BITCOIN_ASSERT(data.size() == size);
+    return bitcoin_hash(data);
+}
+
+hash_digest script::to_sequences(const transaction& tx)
+{
+    const auto sum = [&](size_t total, const input& input)
+    {
+        return total + sizeof(uint32_t);
+    };
+
+    const auto& ins = tx.inputs();
+    auto size = std::accumulate(ins.begin(), ins.end(), size_t(0), sum);
+    data_chunk data;
+    data.reserve(size);
+    data_sink ostream(data);
+    ostream_writer sink(ostream);
+
+    const auto write = [&](const input& input)
+    {
+        sink.write_4_bytes_little_endian(input.sequence());
+    };
+
+    std::for_each(ins.begin(), ins.end(), write);
+    ostream.flush();
+    BITCOIN_ASSERT(data.size() == size);
+    return bitcoin_hash(data);
+}
+
+static size_t preimage_size(size_t script_size)
+{
+    return sizeof(uint32_t)
+        + hash_size
+        + hash_size
+        + point::satoshi_fixed_size()
+        + script_size
+        + sizeof(uint64_t)
+        + sizeof(uint32_t)
+        + hash_size
+        + sizeof(uint32_t)
+        + sizeof(uint32_t);
+}
+
+// private/static
 hash_digest script::generate_version_0_signature_hash(const transaction& tx,
     uint32_t input_index, const script& script_code, uint64_t value,
     uint8_t sighash_type)
 {
-    // TODO: implement bip143 signature hashing.
-    return{};
+    // Unlike unversioned algorithm this does not allow an invalid input index.
+    BITCOIN_ASSERT(input_index < tx.inputs().size());
+    const auto& input = tx.inputs()[input_index];
+    const auto size = preimage_size(script_code.serialized_size(true));
+
+    data_chunk data;
+    data.reserve(size);
+    data_sink ostream(data);
+    ostream_writer sink(ostream);
+
+    // Flags derived from the signature hash byte.
+    const auto sighash = to_sighash_enum(sighash_type);
+    const auto any = (sighash_type & sighash_algorithm::anyone_can_pay) != 0;
+    const auto single = (sighash == sighash_algorithm::single);
+    const auto none = (sighash == sighash_algorithm::none);
+    const auto all = (sighash == sighash_algorithm::all);
+
+    // 1. transaction version (4-byte little endian).
+    sink.write_little_endian(tx.version());
+
+    // 2. inpoints hash (32-byte hash).
+    sink.write_hash(!any ? tx.inpoints_hash() : null_hash);
+
+    // 3. sequences hash (32-byte hash).
+    sink.write_hash(!any && all ? tx.sequences_hash() : null_hash);
+
+    // 4. outpoint (32-byte hash + 4-byte little endian).
+    input.previous_output().to_data(sink);
+
+    // 5. script of the input (with prefix).
+    script_code.to_data(sink, true);
+
+    // 6. value of the output spent by this input (8-byte little endian).
+    sink.write_little_endian(value);
+
+    // 7. sequence of the input (4-byte little endian).
+    sink.write_little_endian(input.sequence());
+
+    // 8. outputs hash (32-byte hash).
+    sink.write_hash(all ? tx.outputs_hash() :
+        (single && input_index < tx.outputs().size() ?
+            bitcoin_hash(tx.outputs()[input_index].to_data()) : null_hash));
+
+    // 9. transaction locktime (4-byte little endian).
+    sink.write_little_endian(tx.locktime());
+
+    // 10. sighash type of the signature (4-byte [not 1] little endian).
+    sink.write_4_bytes_little_endian(sighash_type);
+
+    ostream.flush();
+    BITCOIN_ASSERT(data.size() == size);
+    return bitcoin_hash(data);
+}
+
+// Signing (common).
+//-----------------------------------------------------------------------------
+
+// static
+hash_digest script::generate_signature_hash(const transaction& tx,
+    uint32_t input_index, const script& script_code, uint8_t sighash_type,
+    script_version version, uint64_t value)
+{
+    // The way of serialization is changed (bip143).
+    switch (version)
+    {
+        case script_version::unversioned:
+            return generate_unversioned_signature_hash(tx, input_index,
+                script_code, sighash_type);
+        case script_version::zero:
+            return generate_version_0_signature_hash(tx, input_index,
+                script_code, value, sighash_type);
+        case script_version::reserved:
+        default:
+            BITCOIN_ASSERT_MSG(false, "invalid script version");
+            return{};
+    }
 }
 
 // static
@@ -1282,7 +1442,7 @@ code script::verify(const transaction& tx, uint32_t input_index,
         }
     }
 
-    // Witness must be empty if there was no current witness program (bip141).
+    // Witness must be empty if no bip141 or valid witness program (bip141).
     if (!witnessed && !input_witness.empty())
         return error::unexpected_witness;
 
