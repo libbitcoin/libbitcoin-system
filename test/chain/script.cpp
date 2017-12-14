@@ -1030,17 +1030,17 @@ BOOST_AUTO_TEST_CASE(script__native__bip143_native_p2wsh_2_tx__valid)
     BOOST_REQUIRE(tx.from_data(decoded_tx, true, true));
     BOOST_REQUIRE_EQUAL(tx.inputs().size(), 2u);
 
-    prevout0 = tx.inputs()[0].previous_output().validation.cache;
+    auto& prevout2 = tx.inputs()[0].previous_output().validation.cache;
     BOOST_REQUIRE(decode_base16(decoded_script, "0020d9bbfbe56af7c4b7f960a70d7ea107156913d9e5a26b0a71429df5e097ca6537"));
-    prevout0.set_script(script::factory_from_data(decoded_script, false));
-    prevout0.set_value(16777215);
-    BOOST_REQUIRE(prevout0.script().is_valid());
+    prevout2.set_script(script::factory_from_data(decoded_script, false));
+    prevout2.set_value(16777215);
+    BOOST_REQUIRE(prevout2.script().is_valid());
 
-    prevout1 = tx.inputs()[1].previous_output().validation.cache;
+    auto& prevout3 = tx.inputs()[1].previous_output().validation.cache;
     BOOST_REQUIRE(decode_base16(decoded_script, "0020ba468eea561b26301e4cf69fa34bde4ad60c81e70f059f045ca9a79931004a4d"));
-    prevout1.set_script(script::factory_from_data(decoded_script, false));
-    prevout1.set_value(16777215);
-    BOOST_REQUIRE(prevout1.script().is_valid());
+    prevout3.set_script(script::factory_from_data(decoded_script, false));
+    prevout3.set_value(16777215);
+    BOOST_REQUIRE(prevout3.script().is_valid());
 
     // native P2WSH witness program.
     result0 = script::verify(tx, 0, rule_fork::bip141_rule | rule_fork::bip143_rule);
