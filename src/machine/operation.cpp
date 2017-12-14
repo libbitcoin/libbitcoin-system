@@ -76,16 +76,17 @@ bool operation::from_data(std::istream& stream)
 // TODO: optimize for larger data by using a shared byte array.
 bool operation::from_data(reader& source)
 {
-    reset();
-
+    ////reset();
     valid_ = true;
     code_ = static_cast<opcode>(source.read_byte());
     const auto size = read_data_size(code_, source);
 
-    // Guard against potential for arbitary memory allocation.
-    if (size > max_push_data_size)
+    // The max_script_size and max_push_data_size constants limit
+    // evaluation, but not all scripts evaluate, so use max_block_size
+    // to guard memory allocation here.
+    if (size > max_block_size)
         source.invalidate();
-    else if (size != 0)
+    else
         data_ = source.read_bytes(size);
 
     if (!source)
@@ -238,11 +239,12 @@ void operation::reset()
 data_chunk operation::to_data() const
 {
     data_chunk data;
-    data.reserve(serialized_size());
+    const auto size = serialized_size();
+    data.reserve(size);
     data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 
@@ -254,10 +256,9 @@ void operation::to_data(std::ostream& stream) const
 
 void operation::to_data(writer& sink) const
 {
-    static constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
     const auto size = data_.size();
-    const auto code = static_cast<uint8_t>(code_);
-    sink.write_byte(code);
+
+    sink.write_byte(static_cast<uint8_t>(code_));
 
     switch (code_)
     {

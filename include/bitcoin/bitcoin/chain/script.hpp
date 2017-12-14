@@ -24,12 +24,14 @@
 #include <istream>
 #include <memory>
 #include <string>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/machine/operation.hpp>
 #include <bitcoin/bitcoin/machine/rule_fork.hpp>
 #include <bitcoin/bitcoin/machine/script_pattern.hpp>
+#include <bitcoin/bitcoin/machine/script_version.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
@@ -39,11 +41,15 @@ namespace libbitcoin {
 namespace chain {
 
 class transaction;
+class witness;
 
 class BC_API script
 {
 public:
     typedef machine::operation operation;
+    typedef machine::rule_fork rule_fork;
+    typedef machine::script_pattern script_pattern;
+    typedef machine::script_version script_version;
 
     // Constructors.
     //-------------------------------------------------------------------------
@@ -116,7 +122,6 @@ public:
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------
 
-    size_t satoshi_content_size() const;
     size_t serialized_size(bool prefix) const;
     const operation::list& operations() const;
 
@@ -124,22 +129,32 @@ public:
     //-------------------------------------------------------------------------
 
     static hash_digest generate_signature_hash(const transaction& tx,
-        uint32_t input_index, const script& script_code, uint8_t sighash_type);
+        uint32_t input_index, const script& script_code, uint8_t sighash_type,
+        script_version version=script_version::unversioned,
+        uint64_t value=max_uint64);
 
     static bool check_signature(const ec_signature& signature,
         uint8_t sighash_type, const data_chunk& public_key,
-        const script& script_code, const transaction& tx,
-        uint32_t input_index);
+        const script& script_code, const transaction& tx, uint32_t input_index,
+        script_version version=script_version::unversioned,
+        uint64_t value=max_uint64);
 
     static bool create_endorsement(endorsement& out, const ec_secret& secret,
         const script& prevout_script, const transaction& tx,
-        uint32_t input_index, uint8_t sighash_type);
+        uint32_t input_index, uint8_t sighash_type,
+        script_version version=script_version::unversioned,
+        uint64_t value=max_uint64);
 
     // Utilities (static).
     //-------------------------------------------------------------------------
 
+    /// Transaction helpers.
+    static hash_digest to_outputs(const transaction& tx);
+    static hash_digest to_inpoints(const transaction& tx);
+    static hash_digest to_sequences(const transaction& tx);
+
     /// Determine if the fork is enabled in the active forks set.
-    static bool is_enabled(uint32_t active_forks, machine::rule_fork fork)
+    static bool is_enabled(uint32_t active_forks, rule_fork fork)
     {
         return (fork & active_forks) != 0;
     }
@@ -148,15 +163,19 @@ public:
     static bool is_push_only(const operation::list& ops);
     static bool is_relaxed_push(const operation::list& ops);
     static bool is_coinbase_pattern(const operation::list& ops, size_t height);
+    static bool is_commitment_pattern(const operation::list& ops);
+    static bool is_witness_program_pattern(const operation::list& ops);
 
-    /// Common output patterns (psh is also consensus).
+
+    /// Common output patterns (psh and pwsh are also consensus).
     static bool is_pay_null_data_pattern(const operation::list& ops);
     static bool is_pay_multisig_pattern(const operation::list& ops);
     static bool is_pay_public_key_pattern(const operation::list& ops);
     static bool is_pay_key_hash_pattern(const operation::list& ops);
     static bool is_pay_script_hash_pattern(const operation::list& ops);
+    static bool is_pay_witness_script_hash_pattern(const operation::list& ops);
 
-    /// Common input patterns.
+    /// Common input patterns (skh is also consensus).
     static bool is_sign_multisig_pattern(const operation::list& ops);
     static bool is_sign_public_key_pattern(const operation::list& ops);
     static bool is_sign_key_hash_pattern(const operation::list& ops);
@@ -175,14 +194,15 @@ public:
     // Utilities (non-static).
     //-------------------------------------------------------------------------
 
-    // Common pattern detection.
-    machine::script_pattern pattern() const;
-    machine::script_pattern input_pattern() const;
-    machine::script_pattern output_pattern() const;
+    /// Common pattern detection.
+    data_chunk witness_program() const;
+    script_version version() const;
+    script_pattern pattern() const;
+    script_pattern input_pattern() const;
+    script_pattern output_pattern() const;
 
-    // Consensus computations.
-    size_t sigops(bool embedded) const;
-    size_t embedded_sigops(const script& prevout_script) const;
+    /// Consensus computations.
+    size_t sigops(bool accurate) const;
     void find_and_delete(const data_stack& endorsements);
     bool is_unspendable() const;
 
@@ -191,10 +211,11 @@ public:
 
     static code verify(const transaction& tx, uint32_t input, uint32_t forks);
 
-    // TOD: move back to private.
+    // TODO: move back to private.
     static code verify(const transaction& tx, uint32_t input_index,
         uint32_t forks, const script& input_script,
-        const script& prevout_script);
+        const witness& input_witness, const script& prevout_script,
+        uint64_t value);
 
 protected:
     // So that input and output may call reset from their own.
@@ -202,12 +223,20 @@ protected:
     friend class output;
 
     void reset();
+    bool is_pay_to_witness(uint32_t forks) const;
     bool is_pay_to_script_hash(uint32_t forks) const;
-    void find_and_delete_(const data_chunk& endorsement);
 
 private:
     static size_t serialized_size(const operation::list& ops);
     static data_chunk operations_to_data(const operation::list& ops);
+    static hash_digest generate_unversioned_signature_hash(
+        const transaction& tx, uint32_t input_index,
+        const script& script_code, uint8_t sighash_type);
+    static hash_digest generate_version_0_signature_hash(const transaction& tx,
+        uint32_t input_index, const script& script_code, uint64_t value,
+        uint8_t sighash_type);
+
+    void find_and_delete_(const data_chunk& endorsement);
 
     operation::list& operations_move();
     const operation::list& operations_copy() const;

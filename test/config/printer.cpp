@@ -345,7 +345,7 @@ BOOST_AUTO_TEST_CASE(printer__generate_argument_names__one_argument_1__one_name_
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(arguments.add("one", 1));
     BX_PRINTER_GENERATE_ARGUMENT_NAMES(1u);
-    auto& names = help.get_argument_names();
+    const auto& names = help.get_argument_names();
     BOOST_REQUIRE_EQUAL(names[0].first, "one");
     BOOST_REQUIRE_EQUAL(names[0].second, 1);
 }
@@ -354,7 +354,7 @@ BOOST_AUTO_TEST_CASE(printer__generate_argument_names__one_argument_42__one_name
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(arguments.add("forty-two", 42));
     BX_PRINTER_GENERATE_ARGUMENT_NAMES(1u);
-    auto& names = help.get_argument_names();
+    const auto& names = help.get_argument_names();
     BOOST_REQUIRE_EQUAL(names[0].first, "forty-two");
     BOOST_REQUIRE_EQUAL(names[0].second, 42);
 }
@@ -363,7 +363,7 @@ BOOST_AUTO_TEST_CASE(printer__generate_argument_names__one_argument_max_argument
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(arguments.add("max_arguments", printer::max_arguments));
     BX_PRINTER_GENERATE_ARGUMENT_NAMES(1u);
-    auto& names = help.get_argument_names();
+    const auto& names = help.get_argument_names();
     BOOST_REQUIRE_EQUAL(names[0].first, "max_arguments");
     BOOST_REQUIRE_EQUAL(names[0].second, printer::max_arguments);
 }
@@ -372,7 +372,7 @@ BOOST_AUTO_TEST_CASE(printer__generate_argument_names__one_argument_max_argument
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(arguments.add("max_arguments+1", printer::max_arguments + 1));
     BX_PRINTER_GENERATE_ARGUMENT_NAMES(1u);
-    auto& names = help.get_argument_names();
+    const auto& names = help.get_argument_names();
     BOOST_REQUIRE_EQUAL(names[0].first, "max_arguments+1");
     BOOST_REQUIRE_EQUAL(names[0].second, -1);
 }
@@ -381,7 +381,7 @@ BOOST_AUTO_TEST_CASE(printer__generate_argument_names__one_argument_negative_1__
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(arguments.add("negative-one", -1));
     BX_PRINTER_GENERATE_ARGUMENT_NAMES(1u);
-    auto& names = help.get_argument_names();
+    const auto& names = help.get_argument_names();
     BOOST_REQUIRE_EQUAL(names[0].first, "negative-one");
     BOOST_REQUIRE_EQUAL(names[0].second, -1);
 }
@@ -392,7 +392,7 @@ BOOST_AUTO_TEST_CASE(printer__generate_argument_names__multiple_arguments__expec
         arguments.add("forty-two", 42);
         arguments.add("max_arguments", printer::max_arguments));
     BX_PRINTER_GENERATE_ARGUMENT_NAMES(2u);
-    auto& names = help.get_argument_names();
+    const auto& names = help.get_argument_names();
     BOOST_REQUIRE_EQUAL(names[0].first, "forty-two");
     BOOST_REQUIRE_EQUAL(names[0].second, 42);
     BOOST_REQUIRE_EQUAL(names[1].first, "max_arguments");
@@ -406,7 +406,7 @@ BOOST_AUTO_TEST_CASE(printer__generate_argument_names__multiple_arguments_negati
         arguments.add("max_arguments", printer::max_arguments);
         arguments.add("negative-one", -1));
     BX_PRINTER_GENERATE_ARGUMENT_NAMES(3u);
-    auto& names = help.get_argument_names();
+    const auto& names = help.get_argument_names();
     BOOST_REQUIRE_EQUAL(names[0].first, "forty-two");
     BOOST_REQUIRE_EQUAL(names[0].second, 42);
     BOOST_REQUIRE_EQUAL(names[1].first, "max_arguments");
@@ -435,7 +435,7 @@ BOOST_AUTO_TEST_CASE(printer__generate_parameters__one_option__expected_paramete
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("foo_bar,f", "Foobar option name."));
     BX_PRINTER_GENERATE_PARAMETERS(1u);
-    auto& parameters = help.get_parameters();
+    const auto& parameters = help.get_parameters();
     BOOST_REQUIRE_EQUAL(parameters[0].get_short_name(), 'f');
 }
 
@@ -446,7 +446,7 @@ BOOST_AUTO_TEST_CASE(printer__generate_parameters__unsorted_three_options__expec
         ("second,x", "Second option description.")
         ("third", "Third option description."));
     BX_PRINTER_GENERATE_PARAMETERS(3u);
-    auto& parameters = help.get_parameters();
+    const auto& parameters = help.get_parameters();
     BOOST_REQUIRE_EQUAL(parameters[0].get_long_name(), "third");
     BOOST_REQUIRE_EQUAL(parameters[1].get_short_name(), 'f');
     BOOST_REQUIRE_EQUAL(parameters[2].get_description(), "Second option description.");
@@ -466,8 +466,8 @@ BOOST_AUTO_TEST_CASE(printer__initialize__unsorted_multitple_options__expected_s
         arguments.add("forty-two", 42);
         arguments.add("negative-one", -1));
     CONFIG_PRINTER_INITIALIZE(3u, 2u);
-    auto& names = help.get_argument_names();
-    auto& parameters = help.get_parameters();
+    const auto& names = help.get_argument_names();
+    const auto& parameters = help.get_parameters();
     BOOST_REQUIRE_EQUAL(names[0].first, "forty-two");
     BOOST_REQUIRE_EQUAL(names[0].second, 42);
     BOOST_REQUIRE_EQUAL(names[1].first, "negative-one");

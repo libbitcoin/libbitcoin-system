@@ -27,6 +27,7 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/machine/number.hpp>
 #include <bitcoin/bitcoin/machine/operation.hpp>
+#include <bitcoin/bitcoin/machine/script_version.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
@@ -38,7 +39,7 @@ namespace machine {
 
 inline bool program::is_valid() const
 {
-    // An invalid sequence indicates a failure deserializing operations.
+    // Invalid operations indicates a failure deserializing individual ops.
     return script_.is_valid_operations() && !script_.is_unspendable();
 }
 
@@ -50,6 +51,16 @@ inline uint32_t program::forks() const
 inline uint32_t program::input_index() const
 {
     return input_index_;
+}
+
+inline uint64_t program::value() const
+{
+    return value_;
+}
+
+inline script_version program::version() const
+{
+    return version_;
 }
 
 inline const chain::transaction& program::transaction() const
@@ -97,14 +108,16 @@ inline bool program::increment_operation_count(const operation& op)
     return !operation_overflow(operation_count_);
 }
 
-inline bool program::increment_multisig_public_key_count(int32_t count)
+inline bool program::increment_operation_count(int32_t public_keys)
 {
+    static const auto max_keys = static_cast<int32_t>(max_script_public_keys);
+
     // bit.ly/2d1bsdB
-    if (count < 0 || count > static_cast<int32_t>(max_script_public_keys))
+    if (public_keys < 0 || public_keys > max_keys)
         return false;
 
     // Addition is safe due to script size validation.
-    operation_count_ += count;
+    operation_count_ += public_keys;
     return !operation_overflow(operation_count_);
 }
 
@@ -260,10 +273,12 @@ inline void program::erase(const stack_iterator& first,
 // Primary push/pop optimizations (passive).
 //-----------------------------------------------------------------------------
 
-// This must be guarded (intended for program internal use).
-inline bool program::stack_to_bool() const
+// private
+inline bool program::stack_to_bool(bool clean) const
 {
-    BITCOIN_ASSERT(!empty());
+    if (clean && primary_.size() != 1)
+        return false;
+
     const auto& back = primary_.back();
 
     // It's not non-zero it's the terminating negative sentinel.
@@ -280,16 +295,16 @@ inline bool program::empty() const
 }
 
 // This must be guarded (intended for interpreter internal use).
-inline bool program::stack_true() const
+inline bool program::stack_true(bool clean) const
 {
     BITCOIN_ASSERT(!empty());
-    return stack_to_bool();
+    return stack_to_bool(clean);
 }
 
 // This is safe to call when empty (intended for completion handlers).
-inline bool program::stack_result() const
+inline bool program::stack_result(bool clean) const
 {
-    return !empty() && stack_true();
+    return !empty() && stack_true(clean);
 }
 
 inline bool program::is_stack_overflow() const

@@ -77,7 +77,8 @@ public:
     uint64_t read_variable_little_endian();
     size_t read_size_little_endian();
 
-    /// Read one byte.
+    /// Read/peek one byte.
+    uint8_t peek_byte();
     uint8_t read_byte();
 
     /// Read all remaining bytes (always safe).

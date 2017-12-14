@@ -94,28 +94,28 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static block factory(const data_chunk& data);
-    static block factory(std::istream& stream);
-    static block factory(reader& source);
+    static block factory(const data_chunk& data, bool witness=false);
+    static block factory(std::istream& stream, bool witness=false);
+    static block factory(reader& source, bool witness=false);
 
-    bool from_data(const data_chunk& data);
-    bool from_data(std::istream& stream);
-    bool from_data(reader& source);
+    bool from_data(const data_chunk& data, bool witness=false);
+    bool from_data(std::istream& stream, bool witness=false);
+    bool from_data(reader& source, bool witness=false);
 
     bool is_valid() const;
 
     // Serialization.
     //-------------------------------------------------------------------------
 
-    data_chunk to_data() const;
-    void to_data(std::ostream& stream) const;
-    void to_data(writer& sink) const;
-    hash_list to_hashes() const;
+    data_chunk to_data(bool witness=false) const;
+    void to_data(std::ostream& stream, bool witness=false) const;
+    void to_data(writer& sink, bool witness=false) const;
+    hash_list to_hashes(bool witness=false) const;
 
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------
 
-    size_t serialized_size() const;
+    size_t serialized_size(bool witness=false) const;
 
     chain::header& header();
     const chain::header& header() const;
@@ -137,6 +137,9 @@ public:
     static size_t locator_size(size_t top);
     static indexes locator_heights(size_t top);
 
+    /// Clear witness from all inputs (does not change default hash).
+    void strip_witness();
+
     // Validation.
     //-------------------------------------------------------------------------
 
@@ -147,20 +150,23 @@ public:
     uint64_t claim() const;
     uint64_t reward(size_t height) const;
     uint256_t proof() const;
-    hash_digest generate_merkle_root() const;
+    hash_digest generate_merkle_root(bool witness=false) const;
     size_t signature_operations() const;
-    size_t signature_operations(bool bip16_active) const;
+    size_t signature_operations(bool bip16, bool bip141) const;
     size_t total_non_coinbase_inputs() const;
     size_t total_inputs() const;
+    size_t weight() const;
 
     bool is_extra_coinbases() const;
     bool is_final(size_t height, uint32_t block_time) const;
     bool is_distinct_transaction_set() const;
     bool is_valid_coinbase_claim(size_t height) const;
     bool is_valid_coinbase_script(size_t height) const;
+    bool is_valid_witness_commitment() const;
     bool is_forward_reference() const;
     bool is_internal_double_spend() const;
     bool is_valid_merkle_root() const;
+    bool is_segregated() const;
 
     code check() const;
     code check_transactions() const;
@@ -187,8 +193,12 @@ private:
     chain::header header_;
     transaction::list transactions_;
 
+    // These share a mutext as they are not expected to contend.
+    mutable boost::optional<bool> segregated_;
     mutable optional_size total_inputs_;
     mutable optional_size non_coinbase_inputs_;
+    mutable boost::optional<size_t> base_size_;
+    mutable boost::optional<size_t> total_size_;
     mutable upgrade_mutex mutex_;
 };
 

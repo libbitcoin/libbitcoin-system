@@ -86,6 +86,7 @@
     <ClCompile Include="..\..\..\..\src\chain\transaction.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\input.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\output.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\witness.cpp" />
     <ClCompile Include="..\..\..\..\src\config\authority.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base16.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base2.cpp" />
@@ -249,6 +250,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\input.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\output.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\witness.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\compat.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\compat.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\authority.hpp" />
@@ -300,6 +302,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\program.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\rule_fork.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\script_pattern.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\script_version.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\sighash_algorithm.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\checksum.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\crypto.hpp" />

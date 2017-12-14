@@ -34,6 +34,7 @@
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/machine/opcode.hpp>
 #include <bitcoin/bitcoin/machine/operation.hpp>
@@ -53,7 +54,7 @@ using namespace bc::machine;
 
 // Read a length-prefixed collection of inputs or outputs from the source.
 template<class Source, class Put>
-bool read(Source& source, std::vector<Put>& puts, bool wire)
+bool read(Source& source, std::vector<Put>& puts, bool wire, bool witness)
 {
     auto result = true;
     const auto count = source.read_size_little_endian();
@@ -64,9 +65,12 @@ bool read(Source& source, std::vector<Put>& puts, bool wire)
     else
         puts.resize(count);
 
-    const auto deserialize = [&result, &source, wire](Put& put)
+    const auto deserialize = [&](Put& put)
     {
-        result = result && put.from_data(source, wire);
+        result = result && put.from_data(source, wire, witness);
+#ifndef NDBEUG
+        put.script().operations();
+#endif
     };
 
     std::for_each(puts.begin(), puts.end(), deserialize);
@@ -75,16 +79,38 @@ bool read(Source& source, std::vector<Put>& puts, bool wire)
 
 // Write a length-prefixed collection of inputs or outputs to the sink.
 template<class Sink, class Put>
-void write(Sink& sink, const std::vector<Put>& puts, bool wire)
+void write(Sink& sink, const std::vector<Put>& puts, bool wire, bool witness)
 {
     sink.write_variable_little_endian(puts.size());
 
-    const auto serialize = [&sink, wire](const Put& put)
+    const auto serialize = [&](const Put& put)
     {
-        put.to_data(sink, wire);
+        put.to_data(sink, wire, witness);
     };
 
     std::for_each(puts.begin(), puts.end(), serialize);
+}
+
+// Input list must be pre-populated as it determines witness count.
+inline void read_witnesses(reader& source, input::list& inputs)
+{
+    const auto deserialize = [&](input& input)
+    {
+        input.witness().from_data(source, true);
+    };
+
+    std::for_each(inputs.begin(), inputs.end(), deserialize);
+}
+
+// Witness count is not written as it is inferred from input count.
+inline void write_witnesses(writer& sink, const input::list& inputs)
+{
+    const auto serialize = [&sink](const input& input)
+    {
+        input.witness().to_data(sink, true);
+    };
+
+    std::for_each(inputs.begin(), inputs.end(), serialize);
 }
 
 // Constructors.
@@ -207,59 +233,63 @@ bool transaction::operator!=(const transaction& other) const
 //-----------------------------------------------------------------------------
 
 // static
-transaction transaction::factory(const data_chunk& data, bool wire)
+transaction transaction::factory(const data_chunk& data, bool wire,
+    bool witness)
 {
     transaction instance;
-    instance.from_data(data, wire);
+    instance.from_data(data, wire, witness);
     return instance;
 }
 
 // static
-transaction transaction::factory(std::istream& stream, bool wire)
+transaction transaction::factory(std::istream& stream, bool wire, bool witness)
 {
+
     transaction instance;
-    instance.from_data(stream, wire);
+    instance.from_data(stream, wire, witness);
     return instance;
 }
 
 // static
-transaction transaction::factory(reader& source, bool wire)
+transaction transaction::factory(reader& source, bool wire, bool witness)
 {
     transaction instance;
-    instance.from_data(source, wire);
+    instance.from_data(source, wire, witness);
     return instance;
 }
 
 // static
-transaction transaction::factory(reader& source, hash_digest&& hash)
+transaction transaction::factory(reader& source, hash_digest&& hash,
+    bool wire, bool witness)
 {
     transaction instance;
-    instance.from_data(source, std::move(hash));
+    instance.from_data(source, std::move(hash), wire, witness);
     return instance;
 }
 
 // static
-transaction transaction::factory(reader& source,
-    const hash_digest& hash)
+transaction transaction::factory(reader& source, const hash_digest& hash,
+    bool wire, bool witness)
 {
     transaction instance;
-    instance.from_data(source, hash);
+    instance.from_data(source, hash, wire, witness);
     return instance;
 }
 
-bool transaction::from_data(const data_chunk& data, bool wire)
+bool transaction::from_data(const data_chunk& data, bool wire, bool witness)
 {
     data_source istream(data);
-    return from_data(istream, wire);
+    return from_data(istream, wire, witness);
 }
 
-bool transaction::from_data(std::istream& stream, bool wire)
+bool transaction::from_data(std::istream& stream, bool wire, bool witness)
 {
     istream_reader source(stream);
-    return from_data(source, wire);
+    return from_data(source, wire, witness);
 }
 
-bool transaction::from_data(reader& source, bool wire)
+// Witness is not used by outputs, just for template normalization.
+bool transaction::from_data(reader& source, bool wire, bool witness)
 {
     reset();
 
@@ -267,13 +297,34 @@ bool transaction::from_data(reader& source, bool wire)
     {
         // Wire (satoshi protocol) deserialization.
         version_ = source.read_4_bytes_little_endian();
-        read(source, inputs_, wire) && read(source, outputs_, wire);
+        read(source, inputs_, wire, witness);
+
+        // Detect witness as no inputs (marker) and expected flag (bip144).
+        const auto marker = inputs_.size() == witness_marker &&
+            source.peek_byte() == witness_flag;
+
+        // This is always enabled so caller should validate with is_segregated.
+        if (marker)
+        {
+            // Skip over the peeked witness flag.
+            source.skip(1);
+            read(source, inputs_, wire, witness);
+            read(source, outputs_, wire, witness);
+            read_witnesses(source, inputs_);
+        }
+        else
+        {
+            read(source, outputs_, wire, witness);
+        }
+
         locktime_ = source.read_4_bytes_little_endian();
     }
     else
     {
         // Database (outputs forward) serialization.
-        read(source, outputs_, wire) && read(source, inputs_, wire);
+        // Witness data is managed internal to inputs.
+        read(source, outputs_, wire, witness);
+        read(source, inputs_, wire, witness);
         const auto locktime = source.read_variable_little_endian();
         const auto version = source.read_variable_little_endian();
 
@@ -284,22 +335,28 @@ bool transaction::from_data(reader& source, bool wire)
         version_ = static_cast<uint32_t>(version);
     }
 
+    // TODO: optimize by having reader skip witness data.
+    if (!witness)
+        strip_witness();
+
     if (!source)
         reset();
 
     return source;
 }
 
-bool transaction::from_data(reader& source, hash_digest&& hash)
+bool transaction::from_data(reader& source, hash_digest&& hash, bool wire,
+    bool witness)
 {
     hash_ = std::make_shared<hash_digest>(std::move(hash));
-    return from_data(source, false);
+    return from_data(source, wire, witness);
 }
 
-bool transaction::from_data(reader& source, const hash_digest& hash)
+bool transaction::from_data(reader& source, const hash_digest& hash, bool wire,
+    bool witness)
 {
     hash_ = std::make_shared<hash_digest>(hash);
-    return from_data(source, false);
+    return from_data(source, wire, witness);
 }
 
 // protected
@@ -312,6 +369,10 @@ void transaction::reset()
     outputs_.clear();
     outputs_.shrink_to_fit();
     invalidate_cache();
+    outputs_hash_.reset();
+    inpoints_hash_.reset();
+    sequences_hash_.reset();
+    segregated_ = boost::none;
     total_input_value_ = boost::none;
     total_output_value_ = boost::none;
 }
@@ -325,43 +386,69 @@ bool transaction::is_valid() const
 // Serialization.
 //-----------------------------------------------------------------------------
 
-data_chunk transaction::to_data(bool wire) const
+// Transactions with empty witnesses always use old serialization (bip144).
+// If no inputs are witness programs then witness hash is tx hash (bip141).
+data_chunk transaction::to_data(bool wire, bool witness) const
 {
+    // Witness handling must be disabled for non-segregated txs.
+    witness &= is_segregated();
+
     data_chunk data;
-    const auto size = serialized_size(wire);
+    const auto size = serialized_size(wire, witness);
 
     // Reserve an extra byte to prevent full reallocation in the case of
     // generate_signature_hash extension by addition of the sighash_type.
     data.reserve(size + sizeof(uint8_t));
 
     data_sink ostream(data);
-    to_data(ostream, wire);
+    to_data(ostream, wire, witness);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 
-void transaction::to_data(std::ostream& stream, bool wire) const
+void transaction::to_data(std::ostream& stream, bool wire, bool witness) const
 {
+    // Witness handling must be disabled for non-segregated txs.
+    witness &= is_segregated();
+
     ostream_writer sink(stream);
-    to_data(sink, wire);
+    to_data(sink, wire, witness);
 }
 
-void transaction::to_data(writer& sink, bool wire) const
+// Witness is not used by outputs, just for template normalization.
+void transaction::to_data(writer& sink, bool wire, bool witness) const
 {
     if (wire)
     {
+        // Witness handling must be disabled for non-segregated txs.
+        witness &= is_segregated();
+
         // Wire (satoshi protocol) serialization.
         sink.write_4_bytes_little_endian(version_);
-        write(sink, inputs_, wire);
-        write(sink, outputs_, wire);
+
+        if (witness)
+        {
+            sink.write_byte(witness_marker);
+            sink.write_byte(witness_flag);
+            write(sink, inputs_, wire, witness);
+            write(sink, outputs_, wire, witness);
+            write_witnesses(sink, inputs_);
+        }
+        else
+        {
+            write(sink, inputs_, wire, witness);
+            write(sink, outputs_, wire, witness);
+        }
+
         sink.write_4_bytes_little_endian(locktime_);
     }
     else
     {
         // Database (outputs forward) serialization.
-        write(sink, outputs_, wire);
-        write(sink, inputs_, wire);
+        // Witness data is managed internal to inputs.
+        write(sink, outputs_, wire, witness);
+        write(sink, inputs_, wire, witness);
         sink.write_variable_little_endian(locktime_);
         sink.write_variable_little_endian(version_);
     }
@@ -370,11 +457,16 @@ void transaction::to_data(writer& sink, bool wire) const
 // Size.
 //-----------------------------------------------------------------------------
 
-size_t transaction::serialized_size(bool wire) const
+size_t transaction::serialized_size(bool wire, bool witness) const
 {
-    const auto ins = [wire](size_t size, const input& input)
+    // The witness parameter must be set to false for non-segregated txs.
+    witness &= is_segregated();
+
+    // Returns space for the witness although not serialized by input.
+    // Returns witness space if specified even if input not segregated.
+    const auto ins = [wire, witness](size_t size, const input& input)
     {
-        return size + input.serialized_size(wire);
+        return size + input.serialized_size(wire, witness);
     };
 
     const auto outs = [wire](size_t size, const output& output)
@@ -382,7 +474,10 @@ size_t transaction::serialized_size(bool wire) const
         return size + output.serialized_size(wire);
     };
 
-    return (wire ? sizeof(version_) : message::variable_uint_size(version_))
+    // Must be both witness and wire encoding for bip144 serialization.
+    return (wire && witness ? sizeof(witness_marker) : 0)
+        + (wire && witness ? sizeof(witness_flag) : 0)
+        + (wire ? sizeof(version_) : message::variable_uint_size(version_))
         + (wire ? sizeof(locktime_) : message::variable_uint_size(locktime_))
         + message::variable_uint_size(inputs_.size())
         + message::variable_uint_size(outputs_.size())
@@ -429,6 +524,9 @@ void transaction::set_inputs(const input::list& value)
 {
     inputs_ = value;
     invalidate_cache();
+    inpoints_hash_.reset();
+    sequences_hash_.reset();
+    segregated_ = boost::none;
     total_input_value_ = boost::none;
 }
 
@@ -436,6 +534,7 @@ void transaction::set_inputs(input::list&& value)
 {
     inputs_ = std::move(value);
     invalidate_cache();
+    segregated_ = boost::none;
     total_input_value_ = boost::none;
 }
 
@@ -453,6 +552,7 @@ void transaction::set_outputs(const output::list& value)
 {
     outputs_ = value;
     invalidate_cache();
+    outputs_hash_.reset();
     total_output_value_ = boost::none;
 }
 
@@ -466,52 +566,157 @@ void transaction::set_outputs(output::list&& value)
 // Cache.
 //-----------------------------------------------------------------------------
 
+// protected
 void transaction::invalidate_cache() const
 {
     ///////////////////////////////////////////////////////////////////////////
     // Critical Section
-    mutex_.lock_upgrade();
+    hash_mutex_.lock_upgrade();
 
-    if (hash_)
+    if (hash_ || witness_hash_)
     {
-        mutex_.unlock_upgrade_and_lock();
+        hash_mutex_.unlock_upgrade_and_lock();
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         hash_.reset();
+        witness_hash_.reset();
         //---------------------------------------------------------------------
-        mutex_.unlock_and_lock_upgrade();
+        hash_mutex_.unlock_and_lock_upgrade();
     }
 
-    mutex_.unlock_upgrade();
+    hash_mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 }
 
-hash_digest transaction::hash() const
+hash_digest transaction::hash(bool witness) const
 {
+    // Witness hashing must be disabled for non-segregated txs.
+    witness &= is_segregated();
+
     ///////////////////////////////////////////////////////////////////////////
     // Critical Section
-    mutex_.lock_upgrade();
+    hash_mutex_.lock_upgrade();
 
-    if (!hash_)
+    if (witness)
     {
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        mutex_.unlock_upgrade_and_lock();
-        hash_ = std::make_shared<hash_digest>(bitcoin_hash(to_data(true)));
-        mutex_.unlock_and_lock_upgrade();
-        //---------------------------------------------------------------------
+        if (!witness_hash_)
+        {
+            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            hash_mutex_.unlock_upgrade_and_lock();
+
+            // Witness coinbase tx hash is assumed to be null_hash (bip141).
+            witness_hash_ = std::make_shared<hash_digest>(
+                is_coinbase() ? null_hash : bitcoin_hash(to_data(true, true)));
+
+            hash_mutex_.unlock_and_lock_upgrade();
+            //-----------------------------------------------------------------
+        }
+    }
+    else
+    {
+        if (!hash_)
+        {
+            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            hash_mutex_.unlock_upgrade_and_lock();
+            hash_ = std::make_shared<hash_digest>(bitcoin_hash(to_data(true)));
+            hash_mutex_.unlock_and_lock_upgrade();
+            //-----------------------------------------------------------------
+        }
     }
 
-    const auto hash = *hash_;
-    mutex_.unlock_upgrade();
+    const auto hash = witness ? *witness_hash_ : *hash_;
+    hash_mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 
     return hash;
 }
 
-hash_digest transaction::hash(uint32_t sighash_type) const
+hash_digest transaction::outputs_hash() const
 {
-    auto serialized = to_data(true);
-    extend_data(serialized, to_little_endian(sighash_type));
-    return bitcoin_hash(serialized);
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    hash_mutex_.lock_upgrade();
+
+    if (!outputs_hash_)
+    {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        hash_mutex_.unlock_upgrade_and_lock();
+        outputs_hash_ = std::make_shared<hash_digest>(
+            script::to_outputs(*this));
+        hash_mutex_.unlock_and_lock_upgrade();
+        //-----------------------------------------------------------------
+    }
+
+    const auto hash = *outputs_hash_;
+    hash_mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
+
+    return hash;
+}
+
+hash_digest transaction::inpoints_hash() const
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    hash_mutex_.lock_upgrade();
+
+    if (!inpoints_hash_)
+    {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        hash_mutex_.unlock_upgrade_and_lock();
+        inpoints_hash_ = std::make_shared<hash_digest>(
+            script::to_inpoints(*this));
+        hash_mutex_.unlock_and_lock_upgrade();
+        //-----------------------------------------------------------------
+    }
+
+    const auto hash = *inpoints_hash_;
+    hash_mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
+
+    return hash;
+}
+
+hash_digest transaction::sequences_hash() const
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    hash_mutex_.lock_upgrade();
+
+    if (!sequences_hash_)
+    {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        hash_mutex_.unlock_upgrade_and_lock();
+        sequences_hash_ = std::make_shared<hash_digest>(
+            script::to_sequences(*this));
+        hash_mutex_.unlock_and_lock_upgrade();
+        //-----------------------------------------------------------------
+    }
+
+    const auto hash = *sequences_hash_;
+    hash_mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
+
+    return hash;
+}
+
+// Utilities.
+//-----------------------------------------------------------------------------
+
+// Clear witness from all inputs (does not change default transaction hash).
+void transaction::strip_witness()
+{
+    const auto strip = [](input& input)
+    {
+        input.strip_witness();
+    };
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    unique_lock lock(mutex_);
+
+    segregated_ = false;
+    std::for_each(inputs_.begin(), inputs_.end(), strip);
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 // Validation helpers.
@@ -675,26 +880,34 @@ bool transaction::is_overspent() const
 size_t transaction::signature_operations() const
 {
     const auto state = validation.state;
-    return state ? signature_operations(
-        state->is_enabled(rule_fork::bip16_rule)) : max_size_t;
+    const auto bip16 = state->is_enabled(rule_fork::bip16_rule);
+    const auto bip141 = state->is_enabled(rule_fork::bip141_rule);
+    return state ? signature_operations(bip16, bip141) : max_size_t;
 }
 
 // Returns max_size_t in case of overflow.
-size_t transaction::signature_operations(bool bip16_active) const
+size_t transaction::signature_operations(bool bip16, bool bip141) const
 {
-    const auto in = [bip16_active](size_t total, const input& input)
+    const auto in = [bip16, bip141](size_t total, const input& input)
     {
         // This includes BIP16 p2sh additional sigops if prevout is cached.
-        return ceiling_add(total, input.signature_operations(bip16_active));
+        return ceiling_add(total, input.signature_operations(bip16, bip141));
     };
 
-    const auto out = [](size_t total, const output& output)
+    const auto out = [bip141](size_t total, const output& output)
     {
-        return ceiling_add(total, output.signature_operations());
+        return ceiling_add(total, output.signature_operations(bip141));
     };
 
     return std::accumulate(inputs_.begin(), inputs_.end(), size_t{0}, in) +
         std::accumulate(outputs_.begin(), outputs_.end(), size_t{0}, out);
+}
+
+size_t transaction::weight() const
+{
+    // Block weight is 3 * Base size * + 1 * Total size (bip141).
+    return base_size_contribution * serialized_size(true, false) +
+        total_size_contribution * serialized_size(true, true);
 }
 
 bool transaction::is_missing_previous_outputs() const
@@ -713,40 +926,47 @@ bool transaction::is_missing_previous_outputs() const
 
 point::list transaction::previous_outputs() const
 {
-    point::list prevouts(inputs_.size());
-
-    const auto pointer = [](const input& input)
+    point::list prevouts;
+    prevouts.reserve(inputs_.size());
+    const auto pointer = [&prevouts](const input& input)
     {
-        return input.previous_output();
+        prevouts.push_back(input.previous_output());
     };
 
     const auto& ins = inputs_;
-    std::transform(ins.begin(), ins.end(), prevouts.begin(), pointer);
+    std::for_each(ins.begin(), ins.end(), pointer);
     return prevouts;
 }
 
 point::list transaction::missing_previous_outputs() const
 {
     point::list prevouts;
-
-    for (auto& input: inputs_)
+    prevouts.reserve(inputs_.size());
+    const auto accumulator = [&prevouts](const input& input)
     {
         const auto& prevout = input.previous_output();
         const auto missing = !prevout.validation.cache.is_valid();
 
         if (missing && !prevout.is_null())
             prevouts.push_back(prevout);
-    }
+    };
 
+    std::for_each(inputs_.begin(), inputs_.end(), accumulator);
+    prevouts.shrink_to_fit();
     return prevouts;
 }
 
 hash_list transaction::missing_previous_transactions() const
 {
     const auto points = missing_previous_outputs();
-    hash_list hashes(points.size());
-    const auto hasher = [](const output_point& point) { return point.hash(); };
-    std::transform(points.begin(), points.end(), hashes.begin(), hasher);
+    hash_list hashes;
+    hashes.reserve(points.size());
+    const auto hasher = [&hashes](const output_point& point)
+    {
+        return point.hash();
+    };
+
+    std::for_each(points.begin(), points.end(), hasher);
     return distinct(hashes);
 }
 
@@ -788,6 +1008,38 @@ bool transaction::is_mature(size_t height) const
     };
 
     return std::all_of(inputs_.begin(), inputs_.end(), mature);
+}
+
+bool transaction::is_segregated() const
+{
+    bool value;
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    mutex_.lock_upgrade();
+
+    if (segregated_ != boost::none)
+    {
+        value = segregated_.get();
+        mutex_.unlock_upgrade();
+        //---------------------------------------------------------------------
+        return value;
+    }
+
+    mutex_.unlock_upgrade_and_lock();
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    const auto segregated = [](const input& input)
+    {
+        return input.is_segregated();
+    };
+
+    // If no block tx is has witness data the commitment is optional (bip141).
+    value = std::any_of(inputs_.begin(), inputs_.end(), segregated);
+    mutex_.unlock();
+    ///////////////////////////////////////////////////////////////////////////
+
+    return value;
 }
 
 // Coinbase transactions return success, to simplify iteration.
@@ -837,15 +1089,17 @@ code transaction::check(bool transaction_pool, bool retarget) const
     else if (transaction_pool && is_internal_double_spend())
         return error::transaction_internal_double_spend;
 
-    else if (transaction_pool && serialized_size(true) >= max_block_size)
+    // TODO: reduce by header, txcount and smallest coinbase size for height.
+    else if (transaction_pool && serialized_size(true, false) >= max_block_size)
         return error::transaction_size_limit;
 
-    // We cannot know if bip16 is enabled at this point so we disable it.
+    // We cannot know if bip16/bip141 is enabled here so we do not check it.
     // This will not make a difference unless prevouts are populated, in which
     // case they are ignored. This means that p2sh sigops are not counted here.
     // This is a preliminary check, the final count must come from accept().
     // Reenable once sigop caching is implemented, otherwise is deoptimization.
-    ////else if (transaction_pool && signature_operations(false) > max_block_sigops)
+    ////else if (transaction_pool &&
+    ////    signature_operations(false, false) > max_block_sigops)
     ////    return error::transaction_legacy_sigop_limit;
 
     else
@@ -864,10 +1118,18 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip30 = state.is_enabled(rule_fork::bip30_rule);
     const auto bip68 = state.is_enabled(rule_fork::bip68_rule);
+    const auto bip141 = state.is_enabled(rule_fork::bip141_rule);
     const auto revert_bip30 = state.is_enabled(rule_fork::allow_collisions);
+
+    // bip141 discounts segwit sigops by increasing limit and legacy weight.
+    const auto max_sigops = bip141 ? max_fast_sigops : max_block_sigops;
 
     if (transaction_pool && state.is_under_checkpoint())
         return error::premature_validation;
+
+    // A segregated tx should appear empty if bip141 is not enabled.
+    if (!bip141 && is_segregated())
+        return error::empty_transaction;
 
     if (transaction_pool && !is_final(state.height(), state.median_time_past()))
         return error::transaction_non_final;
@@ -901,9 +1163,14 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     else if (bip68 && is_locked(state.height(), state.median_time_past()))
         return error::sequence_locked;
 
-    // This includes sigops from embedded p2sh script if bip16 is true.
-    else if (transaction_pool && signature_operations(bip16) > max_block_sigops)
+    // This recomputes sigops to include p2sh from prevouts if bip16 is true.
+    else if (transaction_pool && signature_operations(bip16, bip141) > max_sigops)
         return error::transaction_embedded_sigop_limit;
+
+    // This causes second serialized_size(true, false) computation (uncached).
+    // TODO: reduce by header, txcount and smallest coinbase size for height.
+    else if (transaction_pool && bip141 && weight() > max_block_weight)
+        return error::transaction_weight_limit;
 
     else
         return error::success;

@@ -27,6 +27,7 @@
 #include <bitcoin/bitcoin/machine/number.hpp>
 #include <bitcoin/bitcoin/machine/opcode.hpp>
 #include <bitcoin/bitcoin/machine/operation.hpp>
+#include <bitcoin/bitcoin/machine/script_version.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
@@ -54,20 +55,27 @@ public:
     /// This can run ops via run(op, program) or the script via run(program).
     program(const chain::script& script);
 
-    /// Create an instance with empty stacks (input run).
+    /// Create an instance with empty stacks, value unused/max (input run).
     program(const chain::script& script, const chain::transaction& transaction,
         uint32_t input_index, uint32_t forks);
 
-    /// Create using copied forks and copied stack (prevout run).
+    /// Create an instance with initialized stack (witness run, v0 by default).
+    program(const chain::script& script, const chain::transaction& transaction,
+        uint32_t input_index, uint32_t forks, data_stack&& stack,
+        uint64_t value, script_version version=script_version::zero);
+
+    /// Create using copied tx, input, forks, value, stack (prevout run).
     program(const chain::script& script, const program& other);
 
-    /// Create using copied forks and moved stack (p2sh run).
+    /// Create using copied tx, input, forks, value and moved stack (p2sh run).
     program(const chain::script& script, program&& other, bool move);
 
     /// Constant registers.
     bool is_valid() const;
     uint32_t forks() const;
     uint32_t input_index() const;
+    uint64_t value() const;
+    script_version version() const;
     const chain::transaction& transaction() const;
 
     /// Program registers.
@@ -80,7 +88,7 @@ public:
     code evaluate();
     code evaluate(const operation& op);
     bool increment_operation_count(const operation& op);
-    bool increment_multisig_public_key_count(int32_t count);
+    bool increment_operation_count(int32_t public_keys);
     bool set_jump_register(const operation& op, int32_t offset);
 
     // Primary stack.
@@ -108,8 +116,8 @@ public:
 
     /// Primary push/pop optimizations (passive).
     bool empty() const;
-    bool stack_true() const;
-    bool stack_result() const;
+    bool stack_true(bool clean) const;
+    bool stack_result(bool clean) const;
     bool is_stack_overflow() const;
     bool if_(const operation& op) const;
     const value_type& item(size_t index) /*const*/;
@@ -139,13 +147,15 @@ private:
     typedef std::vector<bool> bool_stack;
 
     void reserve_stacks();
-    bool stack_to_bool() const;
+    bool stack_to_bool(bool clean) const;
 
     const chain::script& script_;
     const chain::transaction& transaction_;
     const uint32_t input_index_;
     const uint32_t forks_;
+    const uint64_t value_;
 
+    script_version version_;
     size_t negative_count_;
     size_t operation_count_;
     op_iterator jump_;

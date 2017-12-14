@@ -95,6 +95,16 @@ void move_append(std::vector<Type>& target, std::vector<Type>& source)
     source.clear();
 }
 
+template <typename Element>
+Element pop(std::vector<Element>& stack)
+{
+    BITCOIN_ASSERT(!stack.empty());
+    const auto element = stack.back();
+    stack.pop_back();
+    ////stack.shrink_to_fit();
+    return element;
+}
+
 ////template <typename Collection>
 ////Collection reverse(const Collection& list)
 ////{

@@ -18,6 +18,7 @@
  */
 #include <bitcoin/bitcoin/chain/output.hpp>
 
+#include <algorithm>
 #include <cstdint>
 #include <sstream>
 #include <bitcoin/bitcoin/constants.hpp>
@@ -152,7 +153,7 @@ bool output::from_data(std::istream& stream, bool wire)
     return from_data(source, wire);
 }
 
-bool output::from_data(reader& source, bool wire)
+bool output::from_data(reader& source, bool wire, bool)
 {
     reset();
 
@@ -202,7 +203,7 @@ void output::to_data(std::ostream& stream, bool wire) const
     to_data(sink, wire);
 }
 
-void output::to_data(writer& sink, bool wire) const
+void output::to_data(writer& sink, bool wire, bool) const
 {
     if (!wire)
     {
@@ -309,15 +310,32 @@ payment_address::list output::addresses(uint8_t p2kh_version,
 // Validation helpers.
 //-----------------------------------------------------------------------------
 
-size_t output::signature_operations() const
+size_t output::signature_operations(bool bip141) const
 {
-    return script_.sigops(false);
+    // Penalize quadratic signature operations (bip141).
+    const auto sigops_factor = bip141 ? fast_sigops_factor : 1u;
+
+    // Count heavy sigops in the output script.
+    return script_.sigops(false) * sigops_factor;
 }
 
 bool output::is_dust(uint64_t minimum_value) const
 {
     // If provably unspendable it does not expand the unspent output set.
     return value_ < minimum_value && !script_.is_unspendable();
+}
+
+bool output::extract_committed_hash(hash_digest& out) const
+{
+    const auto& ops = script_.operations();
+
+    if (!script::is_commitment_pattern(ops))
+        return false;
+
+    // The four byte offset for the witness commitment hash (bip141).
+    const auto start = ops[1].data().begin() + sizeof(witness_head);
+    std::copy_n(start, hash_size, out.begin());
+    return true;
 }
 
 } // namespace chain

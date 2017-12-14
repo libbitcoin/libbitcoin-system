@@ -50,7 +50,7 @@ public:
         // send_headers
         bip130 = 70012,
 
-        // bloom_filters service bit
+        // node_bloom service bit
         bip111 = 70011,
 
         // node_utxo service bit (draft)
@@ -89,19 +89,23 @@ public:
 
     enum service: uint64_t
     {
-        // The network exposes no services.
+        // The node exposes no services.
         none = 0,
 
-        // The network is capable of serving the block chain (full node).
-        node_network = (1 << 0),
+        // The node is capable of serving the block chain (full node).
+        node_network = (1u << 0),
 
         // Requires version.value >= level::bip64 (BIP64 is draft only).
-        // The network is capable of responding to the getutxo protocol request.
-        node_utxo = (1 << 1),
+        // The node is capable of responding to the getutxo protocol request.
+        node_utxo = (1u << 1),
 
         // Requires version.value >= level::bip111
-        // The network is capable and willing to handle bloom-filtered connections.
-        bloom_filters = (1 << 2)
+        // The node is capable and willing to handle bloom-filtered connections.
+        node_bloom = (1u << 2),
+
+        // Independent of network protocol level.
+        // The node is capable of responding to witness inventory requests.
+        node_witness = (1u << 3)
     };
 
     static version factory(uint32_t version, const data_chunk& data);

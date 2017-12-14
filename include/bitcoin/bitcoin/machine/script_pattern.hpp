@@ -62,6 +62,9 @@ enum class script_pattern
     /// Sign Script Hash [P2SH/BIP16]
     sign_script_hash,
 
+    /// Witness coinbase reserved value [BIP141].
+    witness_reservation,
+
     /// The script may be valid but does not conform to the common templates.
     /// Such scripts are always accepted if they are mined into blocks, but
     /// transactions with uncommon scripts may not be forwarded by peers.

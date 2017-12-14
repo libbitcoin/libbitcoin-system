@@ -143,4 +143,26 @@ BOOST_AUTO_TEST_CASE(collection__move_append__neither_empty__moved_in_order)
     BOOST_REQUIRE_EQUAL(target[9], 18u);
 }
 
+BOOST_AUTO_TEST_CASE(collection__pop__single__empty_and_returns_expected)
+{
+    const uint8_t expected = 42u;
+    collection stack{ expected };
+    const auto value = pop(stack);
+    BOOST_REQUIRE(stack.empty());
+    BOOST_REQUIRE_EQUAL(value, expected);
+}
+
+BOOST_AUTO_TEST_CASE(collection__pop__multiple__popped_and_returns_expected)
+{
+    const uint8_t expected = 42u;
+    collection stack{ 0, 1, 2, 3, expected };
+    const auto value = pop(stack);
+    BOOST_REQUIRE_EQUAL(stack.size(), 4u);
+    BOOST_REQUIRE_EQUAL(stack[0], 0u);
+    BOOST_REQUIRE_EQUAL(stack[1], 1u);
+    BOOST_REQUIRE_EQUAL(stack[2], 2u);
+    BOOST_REQUIRE_EQUAL(stack[3], 3u);
+    BOOST_REQUIRE_EQUAL(value, expected);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

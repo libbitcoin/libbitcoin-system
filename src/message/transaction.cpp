@@ -95,39 +95,45 @@ transaction::transaction(uint32_t version, uint32_t locktime,
 {
 }
 
+// Witness is always deserialized if present.
+
 bool transaction::from_data(uint32_t, const data_chunk& data)
 {
-    return chain::transaction::from_data(data, true);
+    return chain::transaction::from_data(data, true, true);
 }
 
 bool transaction::from_data(uint32_t, std::istream& stream)
 {
-    return chain::transaction::from_data(stream, true);
+    return chain::transaction::from_data(stream, true, true);
 }
 
 bool transaction::from_data(uint32_t, reader& source)
 {
-    return chain::transaction::from_data(source, true);
+    return chain::transaction::from_data(source, true, true);
 }
+
+// Witness is always serialized if present.
 
 data_chunk transaction::to_data(uint32_t) const
 {
-    return chain::transaction::to_data(true);
+    return chain::transaction::to_data(true, true);
 }
 
 void transaction::to_data(uint32_t, std::ostream& stream) const
 {
-    chain::transaction::to_data(stream, true);
+    chain::transaction::to_data(stream, true, true);
 }
 
 void transaction::to_data(uint32_t, writer& sink) const
 {
-    chain::transaction::to_data(sink, true);
+    chain::transaction::to_data(sink, true, true);
 }
+
+// Witness size is always counted if present.
 
 size_t transaction::serialized_size(uint32_t) const
 {
-    return chain::transaction::serialized_size(true);
+    return chain::transaction::serialized_size(true, true);
 }
 
 transaction& transaction::operator=(chain::transaction&& other)

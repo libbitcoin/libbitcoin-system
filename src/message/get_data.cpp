@@ -18,9 +18,11 @@
  */
 #include <bitcoin/bitcoin/message/get_data.hpp>
 
+#include <algorithm>
 #include <initializer_list>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/message/inventory.hpp>
+#include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 
 namespace libbitcoin {
@@ -111,6 +113,16 @@ bool get_data::from_data(uint32_t version, reader& source)
         reset();
 
     return source;
+}
+
+void get_data::to_witness()
+{
+    const auto convert = [](inventory_vector& element)
+    {
+        element.to_witness();
+    };
+
+    std::for_each(inventories().begin(), inventories().end(), convert);
 }
 
 get_data& get_data::operator=(get_data&& other)
