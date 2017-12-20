@@ -77,7 +77,6 @@ install:
     - if [[ $LINUX && $GCC   && $DYNAMIC ]]; then export CC=gcc-4.8; export CXX=g++-4.8; fi
 
     # Download and install packages.
-    - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then brew install boost; fi
 
 script:
 
