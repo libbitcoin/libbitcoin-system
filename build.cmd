@@ -6,10 +6,13 @@ REM #
 REM ###########################################################################
 @echo off
 SETLOCAL ENABLEEXTENSIONS
-SET parent=%~dp0
-SET path_base=%~1
-SET nuget_pkg_path=%~1\..\nuget
-SET msbuild_args=/verbosity:minimal /p:Platform=%~2 /p:Configuration=%~3
+SET "parent=%~dp0"
+SET "path_base=%~1"
+SET "nuget_pkg_path=%~1\..\nuget"
+SET "msbuild_args=/verbosity:minimal /p:Platform=%~2 /p:Configuration=%~3"
+SET "proj_version=%~4"
+SET "msbuild_exe=msbuild"
+IF EXIST "%~5" SET "msbuild_exe=%~5"
 
 call :pending "Build initialized..."
 IF NOT EXIST "%nuget_pkg_path%" (
@@ -58,10 +61,10 @@ IF %ERRORLEVEL% NEQ 0 (
   call :failure "Initializing dependencies %~1 failed."
   exit /b 1
 )
-call cd /d "%path_base%\%~1\builds\msvc\vs2013"
-call msbuild %msbuild_args% %~1.sln
+call cd /d "%path_base%\%~1\builds\msvc\%proj_version%"
+call "%msbuild_exe%" %msbuild_args% %~1.sln
 IF %ERRORLEVEL% NEQ 0 (
-  call :failure "msbuild %msbuild_args% %~1.sln failed."
+  call :failure "%msbuild_exe% %msbuild_args% %~1.sln failed."
   exit /b 1
 )
 call :success "Building repository %~1 execution complete."
@@ -75,10 +78,10 @@ IF %ERRORLEVEL% NEQ 0 (
   call :failure "Initializing dependencies %~1 failed."
   exit /b 1
 )
-call cd /d "%path_base%\%~1\builds\msvc\vs2013"
-call msbuild %msbuild_args% /target:%~1:Rebuild %~1.sln
+call cd /d "%path_base%\%~1\builds\msvc\%proj_version%"
+call "%msbuild_exe%" %msbuild_args% /target:%~1:Rebuild %~1.sln
 IF %ERRORLEVEL% NEQ 0 (
-  call :failure "msbuildl %msbuild_args% /target:%~1:Rebuild %~1.sln"
+  call :failure "%msbuild_exe% %msbuild_args% /target:%~1:Rebuild %~1.sln"
   exit /b 1
 )
 call :success "Building repository project %~1 execution complete."
@@ -87,7 +90,7 @@ exit /b 0
 
 :depends
 call :pending "nuget restoring dependencies for %~1..."
-call nuget restore "%path_base%\%~1\builds\msvc\vs2013\%~1.sln" -Outputdir "%nuget_pkg_path%"
+call nuget restore "%path_base%\%~1\builds\msvc\%proj_version%\%~1.sln" -Outputdir "%nuget_pkg_path%"
 IF %ERRORLEVEL% NEQ 0 (
   call :failure "nuget restore failed."
   exit /b 1
