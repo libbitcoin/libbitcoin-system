@@ -222,14 +222,20 @@ bool header::from_data(reader& source, bool wire)
 
 bool header::from_data(reader& source, hash_digest&& hash, bool wire)
 {
+    if (!from_data(source, wire))
+        return false;
+
     hash_ = std::make_shared<hash_digest>(std::move(hash));
-    return from_data(source, wire);
+    return true;
 }
 
 bool header::from_data(reader& source, const hash_digest& hash, bool wire)
 {
+    if (!from_data(source, wire))
+        return false;
+
     hash_ = std::make_shared<hash_digest>(hash);
-    return from_data(source, wire);
+    return true;
 }
 
 // protected
