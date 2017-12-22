@@ -58,6 +58,13 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::not_implemented, "feature not implemented" },
         { error::oversubscribed, "service oversubscribed" },
 
+        // database
+        { error::store_block_invalid_height, "block out of order" },
+        { error::store_block_missing_parent, "block missing parent" },
+        { error::store_block_duplicate, "block duplicate" },
+        { error::store_lock_failure, "lock failure" },
+        { error::store_incorrect_state, "incorrect state" },
+
         // network
         { error::service_stopped, "service stopped" },
         { error::operation_failed, "operation failed" },
@@ -71,11 +78,6 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::address_blocked, "address blocked by policy" },
         { error::channel_stopped, "channel stopped" },
         { error::peer_throttling, "unresponsive peer may be throttling" },
-
-        // database
-        { error::store_block_invalid_height, "block out of order" },
-        { error::store_block_missing_parent, "block missing parent" },
-        { error::store_block_duplicate, "block duplicate" },
 
         // blockchain
         { error::duplicate_block, "duplicate block" },
