@@ -850,6 +850,43 @@ BOOST_AUTO_TEST_CASE(script__native__block_481824_tx__valid)
     BOOST_REQUIRE_EQUAL(result.value(), error::success);
 }
 
+BOOST_AUTO_TEST_CASE(script__native__testnet_block_892321_tx_missing_witness__invalid_witness)
+{
+    //// DEBUG [blockchain] Verify failed [892321] : invalid witness
+    //// libconsensus : false
+    //// forks        : 1073758207
+    //// outpoint     : fca5e8f5d6ce5201f45230268dfe6cbf8472932e63a001216e9002993acd08f5:0
+    //// script       : 0020925fe0a6cde95bdc7a21b08925c246cae17005f8a013efffdb5e5cb7b7f8d0c2
+    //// value        : 194445
+    //// inpoint      : feecd68efcbbf1b81a99ca7b58410aa1477a46b0a03e4cfcea11b9dc538eb713:0
+    //// transaction  : 0200000001f508cd3a9902906e2101a0632e937284bf6cfe8d263052f40152ced6f5e8a5fc0000000000ffffffff0105e4020000000000160014b6aa463696df9140b1191fa2cc1891cf9b5da6d900000000
+    static const auto index = 0u;
+    static const auto value = 194445u;
+    static const auto forks = 1073758207u;
+    static const auto encoded_script = "0020925fe0a6cde95bdc7a21b08925c246cae17005f8a013efffdb5e5cb7b7f8d0c2";
+    static const auto encoded_tx = "0200000001f508cd3a9902906e2101a0632e937284bf6cfe8d263052f40152ced6f5e8a5fc0000000000ffffffff0105e4020000000000160014b6aa463696df9140b1191fa2cc1891cf9b5da6d900000000";
+
+    data_chunk decoded_tx;
+    BOOST_REQUIRE(decode_base16(decoded_tx, encoded_tx));
+
+    data_chunk decoded_script;
+    BOOST_REQUIRE(decode_base16(decoded_script, encoded_script));
+
+    transaction tx;
+    BOOST_REQUIRE(tx.from_data(decoded_tx, true, true));
+    BOOST_REQUIRE_GT(tx.inputs().size(), index);
+
+    const auto& input = tx.inputs()[index];
+    auto& prevout = input.previous_output().validation.cache;
+
+    prevout.set_value(value);
+    prevout.set_script(script::factory_from_data(decoded_script, false));
+    BOOST_REQUIRE(prevout.script().is_valid());
+
+    const auto result = script::verify(tx, index, forks);
+    BOOST_REQUIRE_EQUAL(result.value(), error::invalid_witness);
+}
+
 // bip143 test cases.
 //-----------------------------------------------------------------------------
 
