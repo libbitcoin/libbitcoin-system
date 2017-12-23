@@ -61,7 +61,7 @@ before_build:
       Write-Host "CTP Compiler Installation Complete." -ForegroundColor Green;
 
 build_script:
-  - c:\git\libbitcoin\build.cmd c:\git %PLATFORM% %CONFIGURATION%
+  - c:\git\libbitcoin\build.cmd c:\git %PLATFORM% %CONFIGURATION% vs2013
   - cd /d %APPVEYOR_BUILD_FOLDER%
 
 test_script:
