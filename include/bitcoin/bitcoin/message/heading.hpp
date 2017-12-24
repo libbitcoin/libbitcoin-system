@@ -70,7 +70,7 @@ class BC_API heading
 {
 public:
     static size_t maximum_size();
-    static size_t maximum_payload_size(uint32_t version);
+    static size_t maximum_payload_size(uint32_t version, bool witness);
     static size_t satoshi_fixed_size();
     static heading factory(const data_chunk& data);
     static heading factory(std::istream& stream);
