@@ -4,3 +4,5 @@
 *.log
 *.aps
 *.user
+*.ipch
+*.VC.*
