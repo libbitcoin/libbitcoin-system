@@ -1320,7 +1320,7 @@ void script::find_and_delete_(const data_chunk& endorsement)
 
     // The exhaustion test handles stream end and op deserialization failure.
     for (auto it = bytes_.begin(); !source.is_exhausted();
-        it += op.serialized_size())
+        it += source ? op.serialized_size() : 0)
     {
         // Track all found values for later deletion.
         for (; starts_with(it, bytes_.end(), value); it += value.size())
