@@ -15,8 +15,6 @@ addons:
         sources:
             - boost-latest
             - ubuntu-toolchain-r-test
-        packages:
-            - g++-4.8
 
 matrix:
     include:
@@ -29,28 +27,28 @@ matrix:
         - os: linux
           compiler: clang
           env: LINK=dynamic
-          apt:
-            sources:
-                - sourceline: 'ppa:h-rayflood/llvm'
-            packages:
-                - clang-3.4
         - os: linux
           compiler: clang
           env: LINK=static
-          apt:
-            sources:
+          addons:
+            apt:
+              sources:
                 - sourceline: 'ppa:h-rayflood/llvm'
-            packages:
+              packages:
                 - clang-3.4
         - os: linux
           compiler: gcc
           env: LINK=dynamic
-          apt:
+          addons:
+            apt:
+              packages:
+                - g++-4.8
         - os: linux
           compiler: gcc
           env: LINK=static
-          apt:
-            packages:
+          addons:
+            apt:
+              packages:
                 - lcov
     fast_finish:
         - true
@@ -70,11 +68,15 @@ before_install:
 
 install:
 
-    # Export CC/CXX to control gcc version.
-    - if [[ $GCC                         ]]; then export CC=gcc-4.8; export CXX=g++-4.8; fi
+    # Export CC/CXX to control compiler/version.
+    - if [[ $OSX   && $CLANG && $STATIC  ]]; then export CC=clang; export CXX=clang++; fi
+    - if [[ $LINUX && $CLANG && $STATIC  ]]; then export CC=clang-3.4; export CXX=clang++-3.4; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then export CC=gcc; export CXX=g++; fi
+    - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then export CC=clang; export CXX=clang++; fi
+    - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then export CC=clang; export CXX=clang++; fi
+    - if [[ $LINUX && $GCC   && $DYNAMIC ]]; then export CC=gcc-4.8; export CXX=g++-4.8; fi
 
     # Download and install packages.
-    - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then brew install boost; fi
 
 script:
 
@@ -82,7 +84,7 @@ script:
     - if [[ $OSX   && $CLANG && $STATIC  ]]; then CC=$CC CXX=$CXX ./install.sh --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --disable-shared --prefix=$TRAVIS_BUILD_DIR/my-prefix; fi
     - if [[ $LINUX && $CLANG && $STATIC  ]]; then CC=$CC CXX=$CXX ./install.sh --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --disable-shared --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os' CXXFLAGS='-Os'; fi
     - if [[ $LINUX && $GCC   && $STATIC  ]]; then CC=$CC CXX=$CXX ./install.sh --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --disable-shared --build-dir=my-build --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Og -g --coverage' CXXFLAGS='-Og -g --coverage'; fi
-    - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then CC=$CC CXX=$CXX ./install.sh ; fi
+    - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then CC=$CC CXX=$CXX ./install.sh --disable-static; fi
     - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then CC=$CC CXX=$CXX ./install.sh --with-icu --build-icu --build-boost --disable-ndebug --disable-static --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os' CXXFLAGS='-Os'; fi
     - if [[ $LINUX && $GCC   && $DYNAMIC ]]; then CC=$CC CXX=$CXX ./install.sh --disable-static --build-boost --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os -s' CXXFLAGS='-Os -s'; fi
 

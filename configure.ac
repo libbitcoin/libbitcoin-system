@@ -223,7 +223,7 @@ AC_SUBST([pthread_LIBS], [-lpthread])
 AS_CASE([${host_os}], [*linux*],
     [AC_CHECK_LIB([rt], [clock_gettime],
         [AC_SUBST([rt_LIBS], [-lrt])
-         AC_MSG_NOTICE([rt_LIBS : ${rt_LIBS}])], 
+         AC_MSG_NOTICE([rt_LIBS : ${rt_LIBS}])],
         [AC_MSG_ERROR([rt library is required but was not found.])])],
     [AC_SUBST([rt_LIBS], [])])
 
@@ -242,7 +242,7 @@ AS_CASE([${with_icu}], [yes],
 AS_CASE([${host_os}], [*linux*],
     [AC_CHECK_LIB([dl], [dlopen],
         [AC_SUBST([dl_LIBS], [-ldl])
-         AC_MSG_NOTICE([dl_LIBS : ${dl_LIBS}])], 
+         AC_MSG_NOTICE([dl_LIBS : ${dl_LIBS}])],
         [AC_MSG_ERROR([dl library is required but was not found.])])],
     [AC_SUBST([dl_LIBS], [])])
 
