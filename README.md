@@ -202,13 +202,16 @@ Visual Studio solutions are maintained for all libbitcoin libraries. NuGet packa
 
 > The libbitcoin execution environment supports `Windows XP Service Pack 2` and newer.
 
-#### Upgrade Compiler
+#### Compiler
 
-Libbitcoin requires a C++11 compiler, which means **Visual Studio 2013** minimum. Additionally a pre-release compiler must be installed as an update to Visual Studio. Download and install the following tools as necessary. Both are available free of charge:
+Libbitcoin requires a C++11 compiler, which means at least **Visual Studio 2013** (with a pre-release compiler update). Download and install one of the following free tools as necessary:
 
-* [Visual Studio 2013 Express](https://my.visualstudio.com/Downloads?q=visual%20studio%202013&wt.mc_id=o~msft~vscom~older-downloads)
-* [November 2013 CTP Compiler](http://www.microsoft.com/en-us/download/details.aspx?id=41151)
-* See also: [CTP Compiler installation issue](http://stackoverflow.com/a/34548651/1172329)
+* [Visual Studio 2017 Express](https://www.visualstudio.com/downloads)
+* [Visual Studio 2015 Express](https://www.visualstudio.com/vs/older-downloads)
+* [Visual Studio 2013 Express](https://www.visualstudio.com/vs/older-downloads)
+* [November 2013 CTP Compiler for Visual Studio 2013](http://www.microsoft.com/en-us/download/details.aspx?id=41151)
+* See also: [November 2013 CTP Compiler installation issue](http://stackoverflow.com/a/34548651/1172329)
+
 
 #### Create Local NuGet Repository
 
@@ -218,19 +221,22 @@ The required set of NuGet packages can be viewed using the [NuGet package manage
 
 * Packages maintained by [sergey.shandar](http://www.nuget.org/profiles/sergey.shandar)
  * [boost](http://www.nuget.org/packages/boost)
- * [boost\_chrono-vc120](http://www.nuget.org/packages/boost_chrono-vc120)
- * [boost\_date\_time-vc120](http://www.nuget.org/packages/boost_date_time-vc120)
- * [boost\_filesystem-vc120](http://www.nuget.org/packages/boost_filesystem-vc120)
- * [boost\_iostreams-vc120](http://www.nuget.org/packages/boost_iostreams-vc120)
- * [boost\_locale-vc120](http://www.nuget.org/packages/boost_locale-vc120)
- * [boost\_log-vc120](http://www.nuget.org/packages/boost_log-vc120)
- * [boost\_program\_options-vc120](http://www.nuget.org/packages/boost_program_options-vc120)
- * [boost\_regex-vc120](http://www.nuget.org/packages/boost_regex-vc120)
- * [boost\_system-vc120](http://www.nuget.org/packages/boost_system-vc120)
- * [boost\_thread-vc120](http://www.nuget.org/packages/boost_thread-vc120)
- * [boost\_unit\_test\_framework-vc120](http://www.nuget.org/packages/boost_unit_test_framework-vc120)
+ * [boost\_atomic](http://www.nuget.org/packages/boost_atomic-vc120)
+ * [boost\_chrono](http://www.nuget.org/packages/boost_chrono-vc120)
+ * [boost\_date\_time](http://www.nuget.org/packages/boost_date_time-vc120)
+ * [boost\_filesystem](http://www.nuget.org/packages/boost_filesystem-vc120)
+ * [boost\_iostreams](http://www.nuget.org/packages/boost_iostreams-vc120)
+ * [boost\_locale](http://www.nuget.org/packages/boost_locale-vc120)
+ * [boost\_log](http://www.nuget.org/packages/boost_log-vc120)
+ * [boost\_log_setup](http://www.nuget.org/packages/boost_log_setup-vc120)
+ * [boost\_program\_options](http://www.nuget.org/packages/boost_program_options-vc120)
+ * [boost\_regex](http://www.nuget.org/packages/boost_regex-vc120)
+ * [boost\_system](http://www.nuget.org/packages/boost_system-vc120)
+ * [boost\_thread](http://www.nuget.org/packages/boost_thread-vc120)
+ * [boost\_unit\_test\_framework](http://www.nuget.org/packages/boost_unit_test_framework-vc120)
 * Packages maintained by [evoskuil](http://www.nuget.org/profiles/evoskuil)
- * [secp256k1\_vc120](http://www.nuget.org/packages/secp256k1_vc120)
+ * [secp256k1](http://www.nuget.org/packages/secp256k1_vc120)
+ * [libzmq](http://www.nuget.org/packages/libzmq_vc120) [required for client-server repositories only]
 
 #### Build Libbitcoin Projects
 
@@ -240,10 +246,13 @@ After cloning the the repository the libbitcoin build can be performed manually 
 
 > The libbitcoin dynamic (DLL) build configurations do not compile, as the exports have not yet been fully implemented. These are currently disabled in the build scripts but you will encounter numerous errors if you build then manually.
 
-#### Optional: Building secp256k1
+#### Optional: Building Dependencies
 
-The secp256k1 package above is maintained using the same [Visual Studio template](https://github.com/evoskuil/visual-studio-template) as all libbitcoin libraries. If so desired it can be built locally, in the same manner as libbitcoin.
+The secp256k1 and libzmq package above are maintained using the same [Visual Studio template](https://github.com/evoskuil/visual-studio-template) as all libbitcoin libraries. If so desired these can be built locally, in the same manner as libbitcoin.
 
-* [libbitcoin/secp256k1/version4](https://github.com/libbitcoin/secp256k1/tree/version4/builds/msvc)
+* [libbitcoin/secp256k1](https://github.com/libbitcoin/secp256k1/tree/version5/builds/msvc)
+* [libbitcoin/libzmq](https://github.com/zeromq/libzmq/tree/master/builds/msvc)
 
-This change is properly accomplished by disabling the "NuGet Dependencies" in the Visual Studio properties user interface and then importing `secp256k1.import.props`, which references `secp256k1.import.xml`.
+This change is properly accomplished by disabling the "NuGet Dependencies" in the Visual Studio properties user interface and then importing `secp256k1.import.props`, which references `secp256k1.import.xml` and `libzmq.import.props`, which references `libzmq.import.xml`.
+
+See [boost documentation](http://www.boost.org/doc/libs/1_57_0/more/getting_started/windows.html) for building boost libraries for Visual C++.
