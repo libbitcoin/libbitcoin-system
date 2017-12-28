@@ -220,23 +220,23 @@ Dependencies apart from the libbitcoin libraries are available as [NuGet package
 The required set of NuGet packages can be viewed using the [NuGet package manager](http://docs.nuget.org/docs/start-here/managing-nuget-packages-using-the-dialog) from the libbitcoin solution. The NuGet package manager will automatically download missing packages, either from the build scripts or after prompting you in the Visual Studio environment. For your reference these are the required packages:
 
 * Packages maintained by [sergey.shandar](http://www.nuget.org/profiles/sergey.shandar)
- * [boost](http://www.nuget.org/packages/boost)
- * [boost\_atomic](http://www.nuget.org/packages/boost_atomic-vc120)
- * [boost\_chrono](http://www.nuget.org/packages/boost_chrono-vc120)
- * [boost\_date\_time](http://www.nuget.org/packages/boost_date_time-vc120)
- * [boost\_filesystem](http://www.nuget.org/packages/boost_filesystem-vc120)
- * [boost\_iostreams](http://www.nuget.org/packages/boost_iostreams-vc120)
- * [boost\_locale](http://www.nuget.org/packages/boost_locale-vc120)
- * [boost\_log](http://www.nuget.org/packages/boost_log-vc120)
- * [boost\_log_setup](http://www.nuget.org/packages/boost_log_setup-vc120)
- * [boost\_program\_options](http://www.nuget.org/packages/boost_program_options-vc120)
- * [boost\_regex](http://www.nuget.org/packages/boost_regex-vc120)
- * [boost\_system](http://www.nuget.org/packages/boost_system-vc120)
- * [boost\_thread](http://www.nuget.org/packages/boost_thread-vc120)
- * [boost\_unit\_test\_framework](http://www.nuget.org/packages/boost_unit_test_framework-vc120)
+  * [boost](http://www.nuget.org/packages/boost)
+  * [boost\_atomic](http://www.nuget.org/packages/boost_atomic-vc120)
+  * [boost\_chrono](http://www.nuget.org/packages/boost_chrono-vc120)
+  * [boost\_date\_time](http://www.nuget.org/packages/boost_date_time-vc120)
+  * [boost\_filesystem](http://www.nuget.org/packages/boost_filesystem-vc120)
+  * [boost\_iostreams](http://www.nuget.org/packages/boost_iostreams-vc120)
+  * [boost\_locale](http://www.nuget.org/packages/boost_locale-vc120)
+  * [boost\_log](http://www.nuget.org/packages/boost_log-vc120)
+  * [boost\_log_setup](http://www.nuget.org/packages/boost_log_setup-vc120)
+  * [boost\_program\_options](http://www.nuget.org/packages/boost_program_options-vc120)
+  * [boost\_regex](http://www.nuget.org/packages/boost_regex-vc120)
+  * [boost\_system](http://www.nuget.org/packages/boost_system-vc120)
+  * [boost\_thread](http://www.nuget.org/packages/boost_thread-vc120)
+  * [boost\_unit\_test\_framework](http://www.nuget.org/packages/boost_unit_test_framework-vc120)
 * Packages maintained by [evoskuil](http://www.nuget.org/profiles/evoskuil)
- * [secp256k1](http://www.nuget.org/packages/secp256k1_vc120)
- * [libzmq](http://www.nuget.org/packages/libzmq_vc120) [required for client-server repositories only]
+  * [secp256k1](http://www.nuget.org/packages/secp256k1_vc120)
+  * [libzmq](http://www.nuget.org/packages/libzmq_vc120) [required for client-server repositories only]
 
 #### Build Libbitcoin Projects
 
@@ -246,7 +246,7 @@ After cloning the the repository the libbitcoin build can be performed manually 
 
 > The libbitcoin dynamic (DLL) build configurations do not compile, as the exports have not yet been fully implemented. These are currently disabled in the build scripts but you will encounter numerous errors if you build then manually.
 
-#### Optional: Building Dependencies
+#### Optional: Building External Dependencies
 
 The secp256k1 and libzmq package above are maintained using the same [Visual Studio template](https://github.com/evoskuil/visual-studio-template) as all libbitcoin libraries. If so desired these can be built locally, in the same manner as libbitcoin.
 
