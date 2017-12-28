@@ -251,7 +251,7 @@ After cloning the the repository the libbitcoin build can be performed manually 
 The secp256k1 and libzmq package above are maintained using the same [Visual Studio template](https://github.com/evoskuil/visual-studio-template) as all libbitcoin libraries. If so desired these can be built locally, in the same manner as libbitcoin.
 
 * [libbitcoin/secp256k1](https://github.com/libbitcoin/secp256k1/tree/version5/builds/msvc)
-* [libbitcoin/libzmq](https://github.com/zeromq/libzmq/tree/master/builds/msvc)
+* [zeromq/libzmq](https://github.com/zeromq/libzmq/tree/master/builds/msvc)
 
 This change is properly accomplished by disabling the "NuGet Dependencies" in the Visual Studio properties user interface and then importing `secp256k1.import.props`, which references `secp256k1.import.xml` and `libzmq.import.props`, which references `libzmq.import.xml`.
 
