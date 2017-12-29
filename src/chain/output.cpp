@@ -43,30 +43,51 @@ const uint32_t output::validation::not_spent = max_uint32;
 //-----------------------------------------------------------------------------
 
 output::output()
-  : value_(not_found), validation{}
+  : value_(not_found),
+    script_{},
+    validation{}
 {
 }
 
 output::output(output&& other)
-  : output(other.value_, std::move(other.script_))
+  : addresses_(other.addresses_cache()),
+    value_(other.value_),
+    script_(std::move(other.script_)),
+    validation(other.validation)
 {
-    validation = std::move(other.validation);
 }
 
 output::output(const output& other)
-  : output(other.value_, other.script_)
+  : addresses_(other.addresses_cache()),
+    value_(other.value_),
+    script_(other.script_),
+    validation(other.validation)
 {
-    validation = other.validation;
 }
 
 output::output(uint64_t value, chain::script&& script)
-  : value_(value), script_(std::move(script)), validation{}
+  : value_(value),
+    script_(std::move(script)),
+    validation{}
 {
 }
 
 output::output(uint64_t value, const chain::script& script)
-  : value_(value), script_(script), validation{}
+  : value_(value),
+    script_(script),
+    validation{}
 {
+}
+
+// Private cache access for copy/move construction.
+output::addresses_ptr output::addresses_cache() const
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    shared_lock lock(mutex_);
+
+    return addresses_;
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 // Operators.
@@ -74,6 +95,7 @@ output::output(uint64_t value, const chain::script& script)
 
 output& output::operator=(output&& other)
 {
+    addresses_ = other.addresses_cache();
     value_ = other.value_;
     script_ = std::move(other.script_);
     validation = std::move(other.validation);
@@ -82,6 +104,7 @@ output& output::operator=(output&& other)
 
 output& output::operator=(const output& other)
 {
+    addresses_ = other.addresses_cache();
     value_ = other.value_;
     script_ = other.script_;
     validation = other.validation;
@@ -219,11 +242,6 @@ void output::set_value(uint64_t value)
     value_ = value;
 }
 
-chain::script& output::script()
-{
-    return script_;
-}
-
 const chain::script& output::script() const
 {
     return script_;
@@ -241,12 +259,6 @@ void output::set_script(chain::script&& value)
     invalidate_cache();
 }
 
-bool output::is_dust(uint64_t minimum_value) const
-{
-    // If provably unspendable it does not expand the unspent output set.
-    return value_ < minimum_value && !script_.is_unspendable();
-}
-
 // protected
 void output::invalidate_cache() const
 {
@@ -254,11 +266,11 @@ void output::invalidate_cache() const
     // Critical Section
     mutex_.lock_upgrade();
 
-    if (address_)
+    if (addresses_)
     {
         mutex_.unlock_upgrade_and_lock();
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        address_.reset();
+        addresses_.reset();
         //---------------------------------------------------------------------
         mutex_.unlock_and_lock_upgrade();
     }
@@ -267,29 +279,36 @@ void output::invalidate_cache() const
     ///////////////////////////////////////////////////////////////////////////
 }
 
-payment_address output::address() const
+payment_address output::address(uint8_t p2kh_version,
+    uint8_t p2sh_version) const
+{
+    const auto value = addresses(p2kh_version, p2sh_version);
+    return value.empty() ? payment_address{} : value.front();
+}
+
+payment_address::list output::addresses(uint8_t p2kh_version,
+    uint8_t p2sh_version) const
 {
     ///////////////////////////////////////////////////////////////////////////
     // Critical Section
     mutex_.lock_upgrade();
 
-    if (!address_)
+    if (!addresses_)
     {
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         mutex_.unlock_upgrade_and_lock();
-
-        address_ = std::make_shared<payment_address>(
-            payment_address::extract_output(script_));
-
+        addresses_ = std::make_shared<payment_address::list>(
+            payment_address::extract_output(script_, p2kh_version,
+                p2sh_version));
         mutex_.unlock_and_lock_upgrade();
         //---------------------------------------------------------------------
     }
 
-    const auto address = *address_;
+    const auto addresses = *addresses_;
     mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 
-    return address;
+    return addresses;
 }
 
 // Validation helpers.
@@ -302,6 +321,12 @@ size_t output::signature_operations(bool bip141) const
 
     // Count heavy sigops in the output script.
     return script_.sigops(false) * sigops_factor;
+}
+
+bool output::is_dust(uint64_t minimum_value) const
+{
+    // If provably unspendable it does not expand the unspent output set.
+    return value_ < minimum_value && !script_.is_unspendable();
 }
 
 bool output::extract_committed_hash(hash_digest& out) const
