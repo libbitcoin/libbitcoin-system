@@ -120,7 +120,7 @@ static boost::shared_ptr<text_file_sink> add_text_file_sink(
         backend->set_rotation_size(rotation.rotation_size);
         backend->set_file_collector(file_collector(rotation));
 
-        // Upon restart, scan the directory for files matching the file_name pattern
+        // Upon restart, scan the directory for files matching the pattern.
         backend->scan_for_files();
     }
 
