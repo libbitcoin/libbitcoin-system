@@ -60,11 +60,6 @@ inline bool is_enforced(size_t count, bool mainnet)
     return count >= (mainnet ? mainnet_enforce : testnet_enforce);
 }
 
-inline bool is_bip16_exception(const checkpoint& check, bool mainnet)
-{
-    return mainnet && check == mainnet_bip16_exception_checkpoint;
-}
-
 inline bool is_bip30_exception(const checkpoint& check, bool mainnet)
 {
     return mainnet &&
@@ -127,6 +122,15 @@ inline bool bip9_bit1_active(size_t height, bool mainnet, bool testnet)
         (mainnet && height == mainnet_bip9_bit1_active_checkpoint.height()) ||
         (testnet && height == testnet_bip9_bit1_active_checkpoint.height()) ||
         (regtest && height == regtest_bip9_bit1_active_checkpoint.height());
+}
+
+inline bool bip16(uint32_t timestamp, bool mainnet, bool testnet)
+{
+    const auto regtest = !mainnet && !testnet;
+    return
+        (mainnet && timestamp >= mainnet_bip16_activation_time) ||
+        (testnet && timestamp >= testnet_bip16_activation_time) ||
+        (regtest && timestamp >= regtest_bip16_activation_time);
 }
 
 inline bool bip34(size_t height, bool frozen, bool mainnet, bool testnet)
@@ -216,10 +220,8 @@ chain_state::activations chain_state::activation(const data& values,
     // bip90 is activated based on configuration alone (hard fork).
     result.forks |= (rule_fork::bip90_rule & forks);
 
-    // bip16 is activated with a one-time test on mainnet/testnet (~55% rule).
-    // There was one invalid p2sh tx mined after that time (code shipped late).
-    if (values.timestamp.self >= bip16_activation_time &&
-        !is_bip16_exception({ values.hash, height }, mainnet))
+    // bip16 was activated based on manual inspection of history (~55% rule).
+    if (bip16(values.timestamp.self, mainnet, testnet))
     {
         result.forks |= (rule_fork::bip16_rule & forks);
     }
