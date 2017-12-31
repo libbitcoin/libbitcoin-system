@@ -158,15 +158,11 @@ BC_CONSTEXPR size_t regtest_bip66_freeze = 1251;
 BC_CONSTEXPR size_t regtest_bip34_freeze = 0;
 
 // Block 514 is the first testnet block after date-based activation.
-// Block 166832 is the first mainnet block after date-based activation.
-BC_CONSTEXPR uint32_t bip16_activation_time = 0x4f3af580;
-
-// Block 170060 was mined with an invalid p2sh (code shipped late).
-// bitcointalk.org/index.php?topic=63165.msg788832#msg788832
-static const config::checkpoint mainnet_bip16_exception_checkpoint
-{
-    "00000000000002dc756eebf4f49723ed8d30cc28a5f108eb94b1ba88ac4f9c22", 170060
-};
+// Block 173805 is the first mainnet block after date-based activation.
+// The first mainnet activation window hardwired in satoshi 0.6.0rc1 failed.
+BC_CONSTEXPR uint32_t mainnet_bip16_activation_time = 0x4f779a80;
+BC_CONSTEXPR uint32_t testnet_bip16_activation_time = 0x4f3af580;
+BC_CONSTEXPR uint32_t regtest_bip16_activation_time = 0x4f3af580;
 
 // github.com/bitcoin/bips/blob/master/bip-0030.mediawiki#specification
 static const config::checkpoint mainnet_bip30_exception_checkpoint1
