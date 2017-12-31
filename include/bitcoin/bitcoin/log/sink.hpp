@@ -31,6 +31,9 @@ namespace log {
 
 typedef boost::shared_ptr<bc::ofstream> file;
 
+/// Initializes null (as opposed to default) logging sinks.
+void initialize();
+
 /// Initializes default non-rotable libbitcoin logging sinks and formats.
 void initialize(log::file& debug_file, log::file& error_file,
     log::stream& output_stream, log::stream& error_stream, bool verbose);

@@ -154,6 +154,37 @@ static boost::shared_ptr<text_stream_sink> add_text_stream_sink(
     return sink;
 }
 
+
+void initialize()
+{
+    class null_stream
+      : public std::ostream
+    {
+    private:
+        class null_buffer
+          : public std::streambuf
+        {
+            public: int overflow(int value)
+            {
+                return value;
+            }
+        } buffer_;
+
+    public:
+        null_stream()
+          : std::ostream(&buffer_)
+        {
+        }
+    };
+
+    // Null stream instances used to disable log output.
+    static auto debug_file = boost::make_shared<bc::ofstream>("/dev/null");
+    static auto error_file = boost::make_shared<bc::ofstream>("/dev/null");
+    static log::stream output_stream = boost::make_shared<null_stream>();
+    static log::stream error_stream = boost::make_shared<null_stream>();
+    initialize(debug_file, error_file, output_stream, error_stream, false);
+}
+
 void initialize(log::file& debug_file, log::file& error_file,
     log::stream& output_stream, log::stream& error_stream, bool verbose)
 {
