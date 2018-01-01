@@ -157,7 +157,6 @@ static boost::shared_ptr<text_stream_sink> add_text_stream_sink(
     return sink;
 }
 
-
 void initialize()
 {
     class null_stream
