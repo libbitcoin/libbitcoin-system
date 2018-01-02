@@ -202,22 +202,19 @@ Visual Studio solutions are maintained for all libbitcoin libraries. NuGet packa
 
 > The libbitcoin execution environment supports `Windows XP Service Pack 2` and newer.
 
-#### Compiler
+#### Supported Compilers
 
 Libbitcoin requires a C++11 compiler, which means Visual Studio 2013 (with a pre-release compiler update) or later. Download and install one of the following free tools as necessary:
 
 * [Visual Studio 2017 Express](https://www.visualstudio.com/downloads)
 * [Visual Studio 2015 Express](https://www.visualstudio.com/vs/older-downloads)
 * [Visual Studio 2013 Express](https://www.visualstudio.com/vs/older-downloads)
-* [November 2013 CTP Compiler for Visual Studio 2013](http://www.microsoft.com/en-us/download/details.aspx?id=41151)
-* See also: [November 2013 CTP Compiler installation issue](http://stackoverflow.com/a/34548651/1172329)
+  * [November 2013 CTP Compiler for Visual Studio 2013](http://www.microsoft.com/en-us/download/details.aspx?id=41151)
+  * [November 2013 CTP Compiler installation issue](http://stackoverflow.com/a/34548651/1172329)
 
+#### NuGet Repository
 
-#### Create Local NuGet Repository
-
-Dependencies apart from the libbitcoin libraries are available as [NuGet packages](https://www.nuget.org/packages?q=evoskuil). The libbitcoin solution files are configured with references to these packages. To avoid redundancies these references expect a [NuGet.config](http://docs.nuget.org/docs/release-notes/nuget-2.1) in a central location.
-
-The required set of NuGet packages can be viewed using the [NuGet package manager](http://docs.nuget.org/docs/start-here/managing-nuget-packages-using-the-dialog) from the libbitcoin solution. The NuGet package manager will automatically download missing packages, either from the build scripts or after prompting you in the Visual Studio environment. For your reference these are the required packages:
+Dependencies apart from the libbitcoin libraries are available as [NuGet packages](https://www.nuget.org):
 
 * Packages maintained by [sergey.shandar](http://www.nuget.org/profiles/sergey.shandar)
   * [boost](http://www.nuget.org/packages/boost)
@@ -238,13 +235,17 @@ The required set of NuGet packages can be viewed using the [NuGet package manage
   * [secp256k1](http://www.nuget.org/packages/secp256k1_vc120)
   * [libzmq](http://www.nuget.org/packages/libzmq_vc120) [required for client-server repositories only]
 
+The packages can be viewed using the [NuGet package manager](http://docs.nuget.org/docs/start-here/managing-nuget-packages-using-the-dialog) from the libbitcoin solution. The package manager will prompt for download of any missing packages.
+  
+The libbitcoin solution files are configured with references to these packages. The location of the NuGet repository is controlled by the [nuget.config](https://github.com/libbitcoin/libbitcoin/blob/master/builds/msvc/nuget.config) file `repositoryPath` setting **and** the `NuGetPackageRoot` element of **each** [\[project\].props](https://github.com/libbitcoin/libbitcoin/blob/master/builds/msvc/vs2017/libbitcoin/libbitcoin.props) file.
+
 #### Build Libbitcoin Projects
 
-After cloning the the repository the libbitcoin build can be performed manually (from within Visual Studio) or using the `buildall.bat` script provided in the `builds\msvc\build\` subdirectory. The scripts automatically download the required NuGet packages.
+After cloning the the repository the libbitcoin build can be performed from within Visual Studio or using the `build_all.bat` script provided in the `builds\msvc\build\` subdirectory. The script automatically downloads all required NuGet packages.
 
-> Tip: The `buildall.bat` script builds *all* valid configurations. The build time can be significantly reduced by disabling all but the desired configuration in `buildbase.bat`.
+> Tip: The `build_all.bat` script builds *all* valid configurations for *all* compilers. The build time can be significantly reduced by disabling all but the desired configuration in `build_base.bat` and `build_all.bat`.
 
-> The libbitcoin dynamic (DLL) build configurations do not compile, as the exports have not yet been fully implemented. These are currently disabled in the build scripts but you will encounter numerous errors if you build then manually.
+The libbitcoin dynamic (DLL) build configurations do not compile, as the exports have not yet been fully implemented. These are currently disabled in the build scripts but you will encounter numerous errors if you build then manually.
 
 #### Optional: Building External Dependencies
 
