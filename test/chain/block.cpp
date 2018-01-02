@@ -50,20 +50,20 @@ BOOST_AUTO_TEST_SUITE(chain_block_tests)
 
 BOOST_AUTO_TEST_CASE(block__locator_size__zero_backoff__returns_top_plus_one)
 {
-    size_t top = 7u;
-    BOOST_REQUIRE_EQUAL(top + 1, chain::block::locator_size(top));
+    const auto top = 7u;
+    BOOST_REQUIRE_EQUAL(chain::block::locator_size(top), top + 1);
 }
 
 BOOST_AUTO_TEST_CASE(block__locator_size__positive_backoff__returns_log_plus_eleven)
 {
-    size_t top = 138u;
-    BOOST_REQUIRE_EQUAL(18u, chain::block::locator_size(top));
+    const auto top = 138u;
+    BOOST_REQUIRE_EQUAL(chain::block::locator_size(top), 18u);
 }
 
 BOOST_AUTO_TEST_CASE(block__locator_heights__zero_backoff__returns_top_to_zero)
 {
     const chain::block::indexes expected{ 7u, 6u, 5u, 4u, 3u, 2u, 1u, 0u };
-    size_t top = 7u;
+    const auto top = 7u;
     auto result = chain::block::locator_heights(top);
     BOOST_REQUIRE_EQUAL(expected.size(), result.size());
     BOOST_REQUIRE(expected == result);
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(block__locator_heights__positive_backoff__returns_top_plus_
         129u, 128u, 126u, 122u, 114u,  98u,  66u,   2u,   0u
     };
 
-    size_t top = 138u;
+    const auto top = 138u;
     auto result = chain::block::locator_heights(top);
     BOOST_REQUIRE_EQUAL(expected.size(), result.size());
     BOOST_REQUIRE(expected == result);
