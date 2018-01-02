@@ -32,14 +32,14 @@ static bool all_valid(const chain::transaction::list& transactions)
 
         for (const auto& input: tx.inputs())
         {
-            valid = valid && input.is_valid();
-            valid = valid && input.script().is_valid();
+            valid &= input.is_valid();
+            valid &= input.script().is_valid();
         }
 
         for (const auto& output: tx.outputs())
         {
-            valid = valid && output.is_valid();
-            valid = valid && output.script().is_valid();
+            valid &= output.is_valid();
+            valid &= output.script().is_valid();
         }
     }
 
