@@ -8,7 +8,7 @@ REM ###########################################################################
 SETLOCAL ENABLEEXTENSIONS
 SET "parent=%~dp0"
 SET "path_base=%~1"
-SET "nuget_pkg_path=%~1\..\nuget"
+SET "nuget_pkg_path=%~1\.nuget\packages"
 SET "msbuild_args=/verbosity:minimal /p:Platform=%~2 /p:Configuration=%~3"
 SET "proj_version=%~4"
 SET "msbuild_exe=msbuild"
