@@ -92,30 +92,6 @@ enum ek_flag : uint8_t
 };
 
 /**
- * Create an intermediate passphrase for subsequent key pair generation.
- * @param[out] out_token   The new intermediate passphrase.
- * @param[in]  passphrase  A passphrase for use in the encryption.
- * @param[in]  entropy     A random value for use in the encryption.
- * @return false if the token could not be created from the entropy.
- */
-BC_API bool create_token(encrypted_token& out_token,
-    const std::string& passphrase, const ek_entropy& entropy);
-
-/**
- * Create an intermediate passphrase for subsequent key pair generation.
- * @param[out] out_token   The new intermediate passphrase.
- * @param[in]  passphrase  A passphrase for use in the encryption.
- * @param[in]  salt        A random value for use in the encryption.
- * @param[in]  lot         A lot, max allowed value 1048575 (2^20-1).
- * @param[in]  sequence    A sequence, max allowed value 4095 (2^12-1).
- * @return false if the lot and/or sequence are out of range or the token
- * could not be created from the entropy.
- */
-BC_API bool create_token(encrypted_token& out_token,
-    const std::string& passphrase, const ek_salt& salt, uint32_t lot,
-    uint32_t sequence);
-
-/**
  * Create an encrypted private key from an intermediate passphrase.
  * The `out_point` paramter is always compressed, so to use it it should be
  * decompressed as necessary to match the state of the `compressed` parameter.
@@ -151,6 +127,30 @@ BC_API bool create_key_pair(encrypted_private& out_private,
     bool compressed=true);
 
 #ifdef WITH_ICU
+
+/**
+ * Create an intermediate passphrase for subsequent key pair generation.
+ * @param[out] out_token   The new intermediate passphrase.
+ * @param[in]  passphrase  A passphrase for use in the encryption.
+ * @param[in]  entropy     A random value for use in the encryption.
+ * @return false if the token could not be created from the entropy.
+ */
+BC_API bool create_token(encrypted_token& out_token,
+    const std::string& passphrase, const ek_entropy& entropy);
+
+/**
+ * Create an intermediate passphrase for subsequent key pair generation.
+ * @param[out] out_token   The new intermediate passphrase.
+ * @param[in]  passphrase  A passphrase for use in the encryption.
+ * @param[in]  salt        A random value for use in the encryption.
+ * @param[in]  lot         A lot, max allowed value 1048575 (2^20-1).
+ * @param[in]  sequence    A sequence, max allowed value 4095 (2^12-1).
+ * @return false if the lot and/or sequence are out of range or the token
+ * could not be created from the entropy.
+ */
+BC_API bool create_token(encrypted_token& out_token,
+    const std::string& passphrase, const ek_salt& salt, uint32_t lot,
+    uint32_t sequence);
 
 /**
  * Encrypt the ec secret to an encrypted public key using the passphrase.
