@@ -231,15 +231,15 @@ void serializer<Iterator>::write_delegated(functor write)
 }
 
 template <typename Iterator>
-template <typename Buffer>
-void serializer<Iterator>::write_forward(const Buffer& data)
+template <typename Tuple>
+void serializer<Iterator>::write_forward(const Tuple& data)
 {
     iterator_ = std::copy(data.begin(), data.end(), iterator_);
 }
 
 template <typename Iterator>
-template <typename Buffer>
-void serializer<Iterator>::write_reverse(const Buffer& data)
+template <typename Tuple>
+void serializer<Iterator>::write_reverse(const Tuple& data)
 {
     iterator_ = std::reverse_copy(data.begin(), data.end(), iterator_);
 }
