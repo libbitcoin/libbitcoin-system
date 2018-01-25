@@ -33,6 +33,7 @@ class point;
 class BC_API point_iterator
 {
 public:
+    // std::iterator_traits
     typedef uint8_t pointer;
     typedef uint8_t reference;
     typedef uint8_t value_type;
