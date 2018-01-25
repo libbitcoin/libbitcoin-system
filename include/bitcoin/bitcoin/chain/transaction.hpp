@@ -53,7 +53,7 @@ public:
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
-        static const uint64_t undetermined_offset;
+        static const uint64_t undetermined_link;
 
         bool simulate = false;
         uint64_t originator = 0;
@@ -61,7 +61,7 @@ public:
         chain_state::ptr state = nullptr;
 
         /// The tx exists if not undertermined (used to attach it to a block).
-        uint64_t offset = undetermined_offset;
+        uint64_t link = undetermined_link;
 
         /// Existing tx is valid for forks (don't validate, update vs. create).
         bool pooled = false;
