@@ -37,7 +37,7 @@
 #endif
 
 // TODO: prefix names with BC_
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && (_MSC_VER <= 1800)
     #define MIN_INT64 INT64_MIN
     #define MAX_INT64 INT64_MAX
     #define MIN_INT32 INT32_MIN
