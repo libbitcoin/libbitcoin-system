@@ -131,7 +131,7 @@ ec_private ec_private::from_uncompressed(const wif_uncompressed& wif,
 // Cast operators.
 // ----------------------------------------------------------------------------
 
-ec_private::operator const bool() const
+ec_private::operator bool() const
 {
     return valid_;
 }

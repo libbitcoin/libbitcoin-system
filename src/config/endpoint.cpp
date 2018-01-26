@@ -93,7 +93,7 @@ std::string endpoint::to_string() const
     return value.str();
 }
 
-endpoint::operator const bool() const
+endpoint::operator bool() const
 {
     // Return true if initialized.
     // TODO: this is a quick hack, along with http/https.

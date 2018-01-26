@@ -45,7 +45,7 @@ stealth_sender::stealth_sender(const ec_secret& ephemeral_private,
     initialize(ephemeral_private, address, seed, filter);
 }
 
-stealth_sender::operator const bool() const
+stealth_sender::operator bool() const
 {
     return address_;
 }

@@ -46,7 +46,7 @@ public:
         const binary& filter, uint8_t version=payment_address::mainnet_p2kh);
 
     /// Caller must test after construct.
-    operator const bool() const;
+    operator bool() const;
 
     /// Attach this script to the output before the send output.
     const chain::script& stealth_script() const;

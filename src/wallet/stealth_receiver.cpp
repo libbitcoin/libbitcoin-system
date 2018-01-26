@@ -42,7 +42,7 @@ stealth_receiver::stealth_receiver(const ec_secret& scan_private,
     }
 }
 
-stealth_receiver::operator const bool() const
+stealth_receiver::operator bool() const
 {
     return address_;
 }
