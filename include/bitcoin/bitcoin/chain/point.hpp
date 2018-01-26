@@ -25,7 +25,6 @@
 #include <vector>
 #include <boost/functional/hash.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/chain/point_iterator.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -86,12 +85,6 @@ public:
     void to_data(std::ostream& stream, bool wire=true) const;
     void to_data(writer& sink, bool wire=true) const;
 
-    // Iteration (limited to store serialization).
-    //-------------------------------------------------------------------------
-
-    point_iterator begin() const;
-    point_iterator end() const;
-
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------
 
@@ -133,40 +126,5 @@ private:
 
 } // namespace chain
 } // namespace libbitcoin
-
-
-// Standard hash.
-//-----------------------------------------------------------------------------
-
-namespace std
-{
-
-// Extend std namespace with our hash wrapper (database key, not checksum).
-template <>
-struct hash<bc::chain::point>
-{
-    size_t operator()(const bc::chain::point& point) const
-    {
-        size_t seed = 0;
-        boost::hash_combine(seed, point.hash());
-        boost::hash_combine(seed, point.index());
-        return seed;
-    }
-};
-
-// Extend std namespace with the non-wire size of point (database key size).
-template <>
-struct tuple_size<bc::chain::point>
-{
-    static const auto value = std::tuple_size<bc::hash_digest>::value +
-        sizeof(uint16_t);
-
-    operator std::size_t() const
-    {
-        return value;
-    }
-};
-
-} // namespace std
 
 #endif

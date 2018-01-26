@@ -280,7 +280,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\output_point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\payment_record.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point_iterator.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point_value.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\points_value.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script.hpp" />

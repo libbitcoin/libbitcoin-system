@@ -46,7 +46,6 @@ src_libbitcoin_la_SOURCES = \
     src/chain/output_point.cpp \
     src/chain/payment_record.cpp \
     src/chain/point.cpp \
-    src/chain/point_iterator.cpp \
     src/chain/point_value.cpp \
     src/chain/points_value.cpp \
     src/chain/script.cpp \
@@ -249,7 +248,6 @@ test_libbitcoin_test_SOURCES = \
     test/chain/output_point.cpp \
     test/chain/payment_record.cpp \
     test/chain/point.cpp \
-    test/chain/point_iterator.cpp \
     test/chain/point_value.cpp \
     test/chain/points_value.cpp \
     test/chain/satoshi_words.cpp \
@@ -376,7 +374,6 @@ include_bitcoin_bitcoin_chain_HEADERS = \
     include/bitcoin/bitcoin/chain/output_point.hpp \
     include/bitcoin/bitcoin/chain/payment_record.hpp \
     include/bitcoin/bitcoin/chain/point.hpp \
-    include/bitcoin/bitcoin/chain/point_iterator.hpp \
     include/bitcoin/bitcoin/chain/point_value.hpp \
     include/bitcoin/bitcoin/chain/points_value.hpp \
     include/bitcoin/bitcoin/chain/script.hpp \

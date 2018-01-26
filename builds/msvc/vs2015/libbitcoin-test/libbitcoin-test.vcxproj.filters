@@ -63,9 +63,6 @@
     <ClCompile Include="..\..\..\..\test\chain\point.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\point_iterator.cpp">
-      <Filter>src\chain</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\point_value.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>

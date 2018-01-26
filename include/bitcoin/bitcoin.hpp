@@ -31,7 +31,6 @@
 #include <bitcoin/bitcoin/chain/output_point.hpp>
 #include <bitcoin/bitcoin/chain/payment_record.hpp>
 #include <bitcoin/bitcoin/chain/point.hpp>
-#include <bitcoin/bitcoin/chain/point_iterator.hpp>
 #include <bitcoin/bitcoin/chain/point_value.hpp>
 #include <bitcoin/bitcoin/chain/points_value.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
