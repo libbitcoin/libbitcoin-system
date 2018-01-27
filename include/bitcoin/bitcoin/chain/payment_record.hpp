@@ -78,8 +78,8 @@ public:
     bool from_data(std::istream& stream, bool wire=true);
     bool from_data(reader& source, bool wire=true);
 
-    /// Skip read of records below this height (non-wire only).
-    bool from_data(reader& source, size_t start_height);
+    /////// Skip read of records below this height (non-wire only).
+    ////bool from_data(reader& source, size_t start_height);
 
     bool is_valid() const;
 

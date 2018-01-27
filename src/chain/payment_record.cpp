@@ -208,31 +208,31 @@ bool payment_record::from_data(reader& source, bool wire)
     return source;
 }
 
-// Optimize reads by short-circuiting what is unnecessary.
-// Invalid returns are conflated with skipped, but are store only.
-bool payment_record::from_data(reader& source, size_t start_height)
-{
-    height_ = source.read_4_bytes_little_endian();
-
-    if (height_ < start_height)
-    {
-        reset();
-        source.skip(serialized_size() - sizeof(uint32_t));
-        return false;
-    }
-
-    kind_ = to_kind(source.read_byte());
-    point_.from_data(source, false);
-    data_ = source.read_8_bytes_little_endian();
-
-    if (kind_ == point_kind::invalid)
-        source.invalidate();
-
-    if (!source)
-        reset();
-
-    return source;
-}
+////// Optimize reads by short-circuiting what is unnecessary.
+////// Invalid returns are conflated with skipped, but are store only.
+////bool payment_record::from_data(reader& source, size_t start_height)
+////{
+////    height_ = source.read_4_bytes_little_endian();
+////
+////    if (height_ < start_height)
+////    {
+////        reset();
+////        source.skip(serialized_size() - sizeof(uint32_t));
+////        return false;
+////    }
+////
+////    kind_ = to_kind(source.read_byte());
+////    point_.from_data(source, false);
+////    data_ = source.read_8_bytes_little_endian();
+////
+////    if (kind_ == point_kind::invalid)
+////        source.invalidate();
+////
+////    if (!source)
+////        reset();
+////
+////    return source;
+////}
 
 // protected
 void payment_record::reset()
