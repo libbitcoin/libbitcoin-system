@@ -200,7 +200,7 @@ bool header::from_data(std::istream& stream, bool wire)
     return from_data(source, wire);
 }
 
-bool header::from_data(reader& source, bool wire)
+bool header::from_data(reader& source, bool)
 {
     ////reset();
 
@@ -210,9 +210,6 @@ bool header::from_data(reader& source, bool wire)
     timestamp_ = source.read_4_bytes_little_endian();
     bits_ = source.read_4_bytes_little_endian();
     nonce_ = source.read_4_bytes_little_endian();
-
-    if (!wire)
-        validation.median_time_past = source.read_4_bytes_little_endian();
 
     if (!source)
         reset();
@@ -281,7 +278,7 @@ void header::to_data(std::ostream& stream, bool wire) const
     to_data(sink, wire);
 }
 
-void header::to_data(writer& sink, bool wire) const
+void header::to_data(writer& sink, bool) const
 {
     sink.write_4_bytes_little_endian(version_);
     sink.write_hash(previous_block_hash_);
@@ -289,9 +286,6 @@ void header::to_data(writer& sink, bool wire) const
     sink.write_4_bytes_little_endian(timestamp_);
     sink.write_4_bytes_little_endian(bits_);
     sink.write_4_bytes_little_endian(nonce_);
-
-    if (!wire)
-        sink.write_4_bytes_little_endian(validation.median_time_past);
 }
 
 // Size.
@@ -308,9 +302,9 @@ size_t header::satoshi_fixed_size()
         + sizeof(nonce_);
 }
 
-size_t header::serialized_size(bool wire) const
+size_t header::serialized_size(bool) const
 {
-    return satoshi_fixed_size() + (wire ? 0 : sizeof(uint32_t));
+    return satoshi_fixed_size();
 }
 
 // Accessors.
