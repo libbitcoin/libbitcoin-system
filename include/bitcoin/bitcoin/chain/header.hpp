@@ -50,8 +50,6 @@ public:
     struct validation
     {
         bool simulate = false;
-        size_t height = 0;
-        uint32_t median_time_past = 0;
         uint64_t originator = 0;
         code error = error::success;
         chain_state::ptr state = nullptr;
