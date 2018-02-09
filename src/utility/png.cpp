@@ -112,8 +112,7 @@ bool png::write_png(std::istream& in, uint32_t size, uint32_t dots_per_inch,
         if (info_ptr == nullptr)
             return false;
 
-        png_color raw_palette;
-        auto palette = &raw_palette;
+        png_color palette[2];
         palette[0].red = foreground.red;
         palette[0].green = foreground.green;
         palette[0].blue = foreground.blue;
