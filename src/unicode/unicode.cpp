@@ -125,52 +125,44 @@ std::string to_normal_nfkd_form(const std::string& value)
 
 #endif
 
-// Convert wmain environment to utf8 main environment.
-data_chunk to_utf8(wchar_t* environment[])
+void free_environment(char* environment[])
+{
+    if (environment != nullptr)
+    {
+        for (auto index = 0; environment[index] != nullptr; ++index)
+            std::free(environment[index]);
+
+        std::free(environment);
+    }
+}
+
+// Convert wchar_t environment buffer to utf8 environment buffer.
+char** allocate_environment(wchar_t* environment[])
 {
     int count;
     for (count = 0; environment[count] != nullptr; count++);
-    return to_utf8(count, environment);
+    return allocate_environment(count, environment);
 }
 
-// Convert wmain parameters to utf8 main parameters.
-data_chunk to_utf8(int argc, wchar_t* argv[])
+// Convert wchar_t argument buffer to utf8 argument buffer.
+// Caller (or compiler, in case of environment replacement) must free.
+char** allocate_environment(int argc, wchar_t* argv[])
 {
-    const auto arg_count = safe_to_unsigned<size_t>(argc);
+    // Allocate argument pointer array.
+    auto arguments = (char**)std::malloc((argc + 1) * sizeof(char*));
+    arguments[argc] = nullptr;
 
-    // Convert each arg and determine the payload size.
-    size_t payload_size = 0;
-    std::vector<std::string> collection(arg_count + 1);
-
-    for (size_t arg = 0; arg < arg_count; arg++)
+    // Covert each argument, allocate and assign to pointer array.
+    for (auto arg = 0; arg < argc; arg++)
     {
-        collection[arg] = to_utf8(argv[arg]);
-        payload_size += collection[arg].size() + 1;
+        const auto utf8 = to_utf8(argv[arg]);
+        const auto size = utf8.size();
+        arguments[arg] = (char*)std::malloc(size + 1);
+        std::copy_n(utf8.begin(), size, arguments[arg]);
+        arguments[arg][size] = '\0';
     }
 
-    // TODO: unsafe multiplication.
-    // Determine the index size.
-    const auto index_size = safe_add(arg_count, size_t{1}) * sizeof(void*);
-
-    // Allocate the new buffer.
-    const auto buffer_size = safe_add(index_size, payload_size);
-    data_chunk buffer(buffer_size, 0x00);
-    buffer.resize(buffer_size);
-
-    // Set pointers into index and payload buffer sections.
-    auto index = reinterpret_cast<char**>(&buffer[0]);
-    auto arguments = reinterpret_cast<char*>(&buffer[index_size]);
-
-    // Clone the converted collection into the new narrow argv.
-    for (size_t arg = 0; arg < arg_count; arg++)
-    {
-        index[arg] = arguments;
-        const auto size = collection[arg].size();
-        std::copy_n(collection[arg].begin(), size, index[arg]);
-        arguments += safe_add(size, size_t{ 1 });
-    }
-
-    return buffer;
+    return arguments;
 }
 
 // Convert wstring to utf8 string.
