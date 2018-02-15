@@ -63,11 +63,16 @@ src_libbitcoin_la_SOURCES = \
     src/config/endpoint.cpp \
     src/config/hash160.cpp \
     src/config/hash256.cpp \
+    src/config/header.cpp \
+    src/config/input.cpp \
+    src/config/output.cpp \
     src/config/parameter.cpp \
     src/config/parser.cpp \
+    src/config/point.cpp \
     src/config/printer.cpp \
     src/config/script.cpp \
     src/config/sodium.cpp \
+    src/config/transaction.cpp \
     src/formats/base_10.cpp \
     src/formats/base_16.cpp \
     src/formats/base_32.cpp \
@@ -168,6 +173,7 @@ src_libbitcoin_la_SOURCES = \
     src/utility/ostream_writer.cpp \
     src/utility/png.cpp \
     src/utility/prioritized_mutex.cpp \
+    src/utility/property_tree.cpp \
     src/utility/random.cpp \
     src/utility/scope_lock.cpp \
     src/utility/sequencer.cpp \
@@ -390,12 +396,17 @@ include_bitcoin_bitcoin_config_HEADERS = \
     include/bitcoin/bitcoin/config/endpoint.hpp \
     include/bitcoin/bitcoin/config/hash160.hpp \
     include/bitcoin/bitcoin/config/hash256.hpp \
+    include/bitcoin/bitcoin/config/header.hpp \
+    include/bitcoin/bitcoin/config/input.hpp \
+    include/bitcoin/bitcoin/config/output.hpp \
     include/bitcoin/bitcoin/config/parameter.hpp \
     include/bitcoin/bitcoin/config/parser.hpp \
+    include/bitcoin/bitcoin/config/point.hpp \
     include/bitcoin/bitcoin/config/printer.hpp \
     include/bitcoin/bitcoin/config/script.hpp \
     include/bitcoin/bitcoin/config/settings.hpp \
-    include/bitcoin/bitcoin/config/sodium.hpp
+    include/bitcoin/bitcoin/config/sodium.hpp \
+    include/bitcoin/bitcoin/config/transaction.hpp
 
 include_bitcoin_bitcoin_formatsdir = ${includedir}/bitcoin/bitcoin/formats
 include_bitcoin_bitcoin_formats_HEADERS = \
@@ -441,8 +452,10 @@ include_bitcoin_bitcoin_impl_utility_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/istream_reader.ipp \
     include/bitcoin/bitcoin/impl/utility/ostream_writer.ipp \
     include/bitcoin/bitcoin/impl/utility/pending.ipp \
+    include/bitcoin/bitcoin/impl/utility/property_tree.ipp \
     include/bitcoin/bitcoin/impl/utility/resubscriber.ipp \
     include/bitcoin/bitcoin/impl/utility/serializer.ipp \
+    include/bitcoin/bitcoin/impl/utility/string.ipp \
     include/bitcoin/bitcoin/impl/utility/subscriber.ipp \
     include/bitcoin/bitcoin/impl/utility/track.ipp
 
@@ -569,6 +582,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/pending.hpp \
     include/bitcoin/bitcoin/utility/png.hpp \
     include/bitcoin/bitcoin/utility/prioritized_mutex.hpp \
+    include/bitcoin/bitcoin/utility/property_tree.hpp \
     include/bitcoin/bitcoin/utility/random.hpp \
     include/bitcoin/bitcoin/utility/reader.hpp \
     include/bitcoin/bitcoin/utility/resubscriber.hpp \

@@ -20,6 +20,7 @@
 #define LIBBITCOIN_DEFINE_HPP
 
 #include <bitcoin/bitcoin/compat.hpp>
+
 // Create bc namespace alias.
 namespace libbitcoin {
 } // namespace libbitcoin
@@ -79,5 +80,7 @@ namespace bc = libbitcoin;
 // Define so we can have better visibility of lcov exclusion ranges.
 #define LCOV_EXCL_START(text)
 #define LCOV_EXCL_STOP()
+
+#define BC_TX_POINT_DELIMITER ":"
 
 #endif
