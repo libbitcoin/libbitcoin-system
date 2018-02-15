@@ -111,6 +111,9 @@
     <ClCompile Include="..\..\..\..\test\formats\base_16.cpp">
       <Filter>src\formats</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\formats\base_32.cpp">
+      <Filter>src\formats</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\formats\base_58.cpp">
       <Filter>src\formats</Filter>
     </ClCompile>
