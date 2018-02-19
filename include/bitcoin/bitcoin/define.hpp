@@ -81,6 +81,4 @@ namespace bc = libbitcoin;
 #define LCOV_EXCL_START(text)
 #define LCOV_EXCL_STOP()
 
-#define BC_TX_POINT_DELIMITER ":"
-
 #endif

@@ -19,6 +19,8 @@
 #ifndef LIBBITCOIN_HEADER_HPP
 #define LIBBITCOIN_HEADER_HPP
 
+#include <iostream>
+#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/header.hpp>
 
@@ -68,8 +70,7 @@ public:
      * @param[out]  argument  The object to receive the read value.
      * @return                The input stream reference.
      */
-    friend std::istream& operator>>(std::istream& input,
-        header& argument);
+    friend std::istream& operator>>(std::istream& input, header& argument);
 
     /**
      * Overload stream out.

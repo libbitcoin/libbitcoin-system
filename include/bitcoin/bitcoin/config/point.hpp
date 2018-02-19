@@ -20,13 +20,10 @@
 #define LIBBITCOIN_POINT_HPP
 
 #include <iostream>
-#include <sstream>
-#include <cstdint>
 #include <string>
-#include <vector>
 #include <bitcoin/bitcoin/chain/input.hpp>
+#include <bitcoin/bitcoin/chain/output_point.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/string.hpp>
 
 namespace libbitcoin {
 namespace config {
@@ -37,6 +34,7 @@ namespace config {
 class BC_API point
 {
 public:
+    static const std::string delimeter;
 
     /**
      * Default constructor.
@@ -73,8 +71,7 @@ public:
      * @param[out]  argument  The object to receive the read value.
      * @return                The input stream reference.
      */
-    friend std::istream& operator>>(std::istream& input,
-        point& argument);
+    friend std::istream& operator>>(std::istream& input, point& argument);
 
     /**
      * Overload stream out.

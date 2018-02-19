@@ -19,13 +19,13 @@
 #ifndef LIBBITCOIN_TRANSACTION_HPP
 #define LIBBITCOIN_TRANSACTION_HPP
 
-#include <bitcoin/bitcoin/define.hpp>
+#include <iostream>
+#include <string>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
+#include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
 namespace config {
-
-typedef chain::transaction tx_type;
 
 /**
  * Serialization helper to convert between serialized and deserialized satoshi
@@ -50,7 +50,7 @@ public:
      * Initialization constructor.
      * @param[in]  value  The value to initialize with.
      */
-    transaction(const tx_type& value);
+    transaction(const chain::transaction& value);
 
     /**
      * Copy constructor.
@@ -62,13 +62,13 @@ public:
      * Return a reference to the data member.
      * @return  A reference to the object's internal data.
      */
-    tx_type& data();
+    chain::transaction& data();
 
     /**
      * Overload cast to internal type.
      * @return  This object's value cast to internal type.
      */
-    operator const tx_type&() const;
+    operator const chain::transaction&() const;
 
     /**
      * Overload stream in. Throws if input is invalid.
@@ -93,7 +93,7 @@ private:
     /**
      * The state of this object's transaction data.
      */
-    tx_type value_;
+    chain::transaction value_;
 };
 
 } // namespace config

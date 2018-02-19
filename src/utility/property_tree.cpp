@@ -84,7 +84,7 @@ ptree property_tree(const std::vector<config::header>& headers, bool json)
 
 // inputs
 
-ptree property_list(const config::tx_input_type& tx_input)
+ptree property_list(const chain::input& tx_input)
 {
     ptree tree;
 
@@ -106,14 +106,14 @@ ptree property_list(const config::tx_input_type& tx_input)
     return tree;
 }
 
-ptree property_tree(const config::tx_input_type& tx_input)
+ptree property_tree(const chain::input& tx_input)
 {
     ptree tree;
     tree.add_child("input", property_list(tx_input));
     return tree;
 }
 
-ptree property_tree(const config::tx_input_type::list& tx_inputs, bool json)
+ptree property_tree(const chain::input::list& tx_inputs, bool json)
 {
     ptree tree;
     tree.add_child("inputs", property_tree_list("input", tx_inputs, json));
@@ -122,7 +122,7 @@ ptree property_tree(const config::tx_input_type::list& tx_inputs, bool json)
 
 ptree property_list(const config::input& input)
 {
-    const tx_input_type& tx_input = input;
+    const chain::input& tx_input = input;
     return property_list(tx_input);
 }
 
@@ -144,7 +144,7 @@ ptree property_tree(const std::vector<config::input>& inputs, bool json)
 
 // outputs
 
-ptree property_list(const config::tx_output_type& tx_output)
+ptree property_list(const chain::output& tx_output)
 {
     ptree tree;
 
@@ -177,14 +177,14 @@ ptree property_list(const config::tx_output_type& tx_output)
     return tree;
 }
 
-ptree property_tree(const config::tx_output_type& tx_output)
+ptree property_tree(const chain::output& tx_output)
 {
     ptree tree;
     tree.add_child("output", property_list(tx_output));
     return tree;
 }
 
-ptree property_tree(const config::tx_output_type::list& tx_outputs, bool json)
+ptree property_tree(const chain::output::list& tx_outputs, bool json)
 {
     ptree tree;
     tree.add_child("outputs", property_tree_list("output", tx_outputs, json));

@@ -21,9 +21,9 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <vector>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/chain/input.hpp>
+#include <bitcoin/bitcoin/chain/input_point.hpp>
 #include <bitcoin/bitcoin/config/point.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 
@@ -33,9 +33,9 @@ namespace config {
 using namespace boost::program_options;
 
 // input is currently a private encoding in bx.
-static bool decode_input(tx_input_type& input, const std::string& tuple)
+static bool decode_input(chain::input& input, const std::string& tuple)
 {
-    const auto tokens = split(tuple, BC_TX_POINT_DELIMITER);
+    const auto tokens = split(tuple, point::delimeter);
     if (tokens.size() != 2 && tokens.size() != 3)
         return false;
 
@@ -49,10 +49,10 @@ static bool decode_input(tx_input_type& input, const std::string& tuple)
 }
 
 // input is currently a private encoding in bx.
-static std::string encode_input(const tx_input_type& input)
+static std::string encode_input(const chain::input& input)
 {
     std::stringstream result;
-    result << point(input.previous_output()) << BC_TX_POINT_DELIMITER
+    result << point(input.previous_output()) << point::delimeter
         << input.sequence();
 
     return result.str();
@@ -68,7 +68,7 @@ input::input(const std::string& tuple)
     std::stringstream(tuple) >> *this;
 }
 
-input::input(const tx_input_type& value)
+input::input(const chain::input& value)
   : value_(value)
 {
 }
@@ -83,7 +83,7 @@ input::input(const chain::input_point& value)
 {
 }
 
-input::operator const tx_input_type&() const
+input::operator const chain::input&() const
 {
     return value_;
 }

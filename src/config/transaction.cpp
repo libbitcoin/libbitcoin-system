@@ -22,10 +22,8 @@
 #include <sstream>
 #include <string>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/config/base16.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/string.hpp>
 
 namespace libbitcoin {
 namespace config {
@@ -42,7 +40,7 @@ transaction::transaction(const std::string& hexcode)
     std::stringstream(hexcode) >> *this;
 }
 
-transaction::transaction(const tx_type& value)
+transaction::transaction(const chain::transaction& value)
   : value_(value)
 {
 }
@@ -52,12 +50,12 @@ transaction::transaction(const transaction& other)
 {
 }
 
-tx_type& transaction::data()
+chain::transaction& transaction::data()
 {
     return value_;
 }
 
-transaction::operator const tx_type&() const
+transaction::operator const chain::transaction&() const
 {
     return value_;
 }
@@ -67,7 +65,7 @@ std::istream& operator>>(std::istream& input, transaction& argument)
     std::string hexcode;
     input >> hexcode;
 
-    if (!deserialize_satoshi_item(argument.value_, base16(hexcode)))
+    if (!argument.value_.from_data(base16(hexcode)))
     {
         BOOST_THROW_EXCEPTION(invalid_option_value(hexcode));
     }
@@ -77,8 +75,7 @@ std::istream& operator>>(std::istream& input, transaction& argument)
 
 std::ostream& operator<<(std::ostream& output, const transaction& argument)
 {
-    const auto bytes = serialize_satoshi_item(argument.value_);
-    output << base16(bytes);
+    output << base16(argument.value_.to_data());
     return output;
 }
 

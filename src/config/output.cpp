@@ -22,12 +22,13 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <vector>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/config/point.hpp>
+#include <bitcoin/bitcoin/config/script.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/math/stealth.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
+#include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 
 namespace libbitcoin {
 namespace config {
@@ -76,7 +77,7 @@ std::istream& operator>>(std::istream& input, output& argument)
     std::string tuple;
     input >> tuple;
 
-    const auto tokens = split(tuple, BC_TX_POINT_DELIMITER);
+    const auto tokens = split(tuple, point::delimeter);
     if (tokens.size() < 2 || tokens.size() > 3)
     {
         BOOST_THROW_EXCEPTION(invalid_option_value(tuple));

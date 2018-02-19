@@ -21,9 +21,11 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <vector>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/bitcoin/chain/output_point.hpp>
+#include <bitcoin/bitcoin/config/hash256.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/utility/string.hpp>
 
 namespace libbitcoin {
 namespace config {
@@ -33,7 +35,7 @@ using namespace boost::program_options;
 // point format is currently private to bx.
 static bool decode_point(chain::output_point& point, const std::string& tuple)
 {
-    const auto tokens = split(tuple, BC_TX_POINT_DELIMITER);
+    const auto tokens = split(tuple, point::delimeter);
     if (tokens.size() != 2)
         return false;
 
@@ -52,9 +54,11 @@ static bool decode_point(chain::output_point& point, const std::string& tuple)
 static std::string encode_point(const chain::output_point& point)
 {
     std::stringstream result;
-    result << hash256(point.hash()) << BC_TX_POINT_DELIMITER << point.index();
+    result << hash256(point.hash()) << point::delimeter << point.index();
     return result.str();
 }
+
+const std::string point::delimeter = ":";
 
 point::point()
   : value_()

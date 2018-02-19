@@ -19,18 +19,17 @@
 #ifndef LIBBITCOIN_INPUT_HPP
 #define LIBBITCOIN_INPUT_HPP
 
+#include <iostream>
+#include <string>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/chain/input_point.hpp>
 #include <bitcoin/bitcoin/chain/input.hpp>
-#include <bitcoin/bitcoin/chain/point.hpp>
+#include <bitcoin/bitcoin/chain/input_point.hpp>
 
 namespace libbitcoin {
 namespace config {
 
-typedef chain::input tx_input_type;
-
 /**
- * Serialization helper stub for tx_input_type.
+ * Serialization helper stub for chain::input.
  */
 class BC_API input
 {
@@ -51,7 +50,7 @@ public:
      * Initialization constructor. Only the point is retained.
      * @param[in]  value  The value to initialize with.
      */
-    input(const tx_input_type& value);
+    input(const chain::input& value);
 
     /**
      * Copy constructor.
@@ -70,7 +69,7 @@ public:
      * Overload cast to internal type.
      * @return  This object's value cast to internal type.
      */
-    operator const tx_input_type&() const;
+    operator const chain::input&() const;
 
     /**
      * Overload stream in. Throws if input is invalid.
@@ -78,8 +77,7 @@ public:
      * @param[out]  argument  The object to receive the read value.
      * @return                The input stream reference.
      */
-    friend std::istream& operator>>(std::istream& stream,
-        input& argument);
+    friend std::istream& operator>>(std::istream& stream, input& argument);
 
     /**
      * Overload stream out.
@@ -95,7 +93,7 @@ private:
     /**
      * The state of this object.
      */
-    tx_input_type value_;
+    chain::input value_;
 };
 
 } // namespace explorer

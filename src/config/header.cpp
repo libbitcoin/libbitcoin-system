@@ -22,10 +22,8 @@
 #include <sstream>
 #include <string>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/config/base16.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/formats/base_16.hpp>
 
 namespace libbitcoin {
 namespace config {

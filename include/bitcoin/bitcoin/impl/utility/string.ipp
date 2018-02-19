@@ -54,12 +54,6 @@ void deserialize(std::vector<Value>& collection, const std::string& text,
     }
 }
 
-template <typename Item>
-bool deserialize_satoshi_item(Item& item, const data_chunk& data)
-{
-    return item.from_data(data);
-}
-
 template <typename Value>
 std::string serialize(const Value& value, const std::string& fallback)
 {
@@ -67,12 +61,6 @@ std::string serialize(const Value& value, const std::string& fallback)
     stream << value;
     const auto& text = stream.str();
     return text.empty() ? fallback : text;
-}
-
-template <typename Item>
-data_chunk serialize_satoshi_item(const Item& item)
-{
-    return item.to_data();
 }
 
 } // namespace libbitcoin

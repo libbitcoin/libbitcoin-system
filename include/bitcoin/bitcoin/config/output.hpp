@@ -19,17 +19,19 @@
 #ifndef LIBBITCOIN_OUTPUT_HPP
 #define LIBBITCOIN_OUTPUT_HPP
 
+#include <cstdint>
+#include <iostream>
+#include <string>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/chain/output.hpp>
+#include <bitcoin/bitcoin/chain/script.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {
 namespace config {
 
-typedef chain::output tx_output_type;
-
 /**
  * Serialization helper to convert between a base58-string:number and
- * a vector of tx_output_type.
+ * a vector of chain::output.
  */
 class BC_API output
 {
@@ -52,7 +54,6 @@ public:
     uint8_t version() const;
     const chain::script& script() const;
     const short_hash& pay_to_hash() const;
-    const data_chunk& ephemeral_data() const;
 
     /**
      * Overload stream in. Throws if input is invalid.
@@ -60,8 +61,7 @@ public:
      * @param[out]  argument  The object to receive the read value.
      * @return                The input stream reference.
      */
-    friend std::istream& operator>>(std::istream& input,
-        output& argument);
+    friend std::istream& operator>>(std::istream& input, output& argument);
 
 private:
 
