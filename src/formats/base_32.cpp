@@ -18,156 +18,242 @@
  */
 #include <bitcoin/bitcoin/formats/base_32.hpp>
 
+#include <algorithm>
+#include <cstddef>
 #include <cstdint>
+#include <iterator>
+#include <string>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 
-const static char lut[] = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
-const int8_t rev_lut[128] = {
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    15, -1, 10, 17, 21, 20, 26, 30,  7,  5, -1, -1, -1, -1, -1, -1,
-    -1, 29, -1, 24, 13, 25,  9,  8, 23, -1, 18, 22, 31, 27, 19, -1,
-     1,  0,  3, 16, 11, 28, 12, 14,  6,  4,  2, -1, -1, -1, -1, -1,
-    -1, 29, -1, 24, 13, 25,  9,  8, 23, -1, 18, 22, 31, 27, 19, -1,
-     1,  0,  3, 16, 11, 28, 12, 14,  6,  4,  2, -1, -1, -1, -1, -1
+static constexpr size_t checksum_size = 6;
+static constexpr size_t prefix_min_size = 1;
+static constexpr size_t combined_max_size = 90;
+static constexpr uint8_t null = 255;
+static constexpr uint8_t separator = '1';
+static const char encode_table[] = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
+static const uint8_t decode_table[] =
+{
+    null, null, null, null, null, null, null, null,
+    null, null, null, null, null, null, null, null,
+    null, null, null, null, null, null, null, null,
+    null, null, null, null, null, null, null, null,
+    null, null, null, null, null, null, null, null,
+    null, null, null, null, null, null, null, null,
+    15,   null, 10,   17,   21,   20,   26,   30,
+    7,    5,    null, null, null, null, null, null,
+    null, 29,   null, 24,   13,   25,   9,    8,
+    23,   null, 18,   22,   31,   27,   19,   null,
+    1,    0,    3,    16,   11,   28,   12,   14,
+    6,    4,    2,    null, null, null, null, null,
+    null, 29,   null, 24,   13,   25,   9,    8,
+    23,   null, 18,   22,   31,   27,   19,   null,
+    1,    0,    3,    16,   11,   28,   12,   14,
+    6,    4,    2,    null, null, null, null, null
 };
-const static char separator = '1';
-const static size_t checksum_length = 6;
-const static size_t hr_part_min_length = 1;
-const static size_t hr_part_max_length = 83;
-const static size_t data_part_min_length = checksum_length;
-const static size_t base32_min_length = hr_part_min_length + 1 + data_part_min_length;
-const static size_t base32_max_length = 90;
 
-uint32_t polymod_base32(const data_chunk& values)
+inline char ascii_to_lowercase(char character)
 {
-    static const std::vector<uint32_t> gen = 
-        {0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3};
-    uint32_t chk = 1;
-    for (const auto& value : values)
-    {
-        const uint32_t b = (chk >> 25);
-        chk = (chk & 0x1ffffff) << 5 ^ value;
-        for (auto i = 0; i < 5; ++i)
-        {
-            if ((b >> i) & 1)
-                chk ^= gen[i];
-            else
-                chk ^= 0;
-        }
-    }
-    return chk;
+    return character + ('a' - 'A');
 }
 
-data_chunk hrp_expand_base32(const std::string& text)
+// Expand the prefix for checksum computation.
+data_chunk expand(const std::string& prefix)
 {
-    data_chunk result(2 * text.size() + 1);
+    data_chunk result(2 * prefix.size() + 1);
     auto iterator = result.begin();
-    for (const auto character : text)
+
+    for (const auto character: prefix)
     {
-        *iterator = character >> 5;
+        *iterator = static_cast<uint8_t>(character >> 5);
         ++iterator;
     }
-    ++iterator; // is already '0'
-    for (const auto character : text)
+
+    // Current position is initialized to 0x00 so skip it.
+    ++iterator;
+
+    for (const auto character: prefix)
     {
-        *iterator = character & 31;
+        *iterator = static_cast<uint8_t>(character & 31);
         ++iterator;
     }
+
     return result;
 }
 
-bool verify_checksum_base32(const std::string& hr_part, const data_chunk& data_part)
+// Do the checksum math.
+uint32_t polymod(const data_chunk& values)
 {
-    data_chunk expanded = hrp_expand_base32(hr_part);
-    expanded.insert(expanded.end(), data_part.begin(), data_part.end());
-    return polymod_base32(expanded) == 1;
-}
+    static const uint32_t magic_numbers[] =
+    {
+        0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3
+    };
 
-data_chunk create_checksum_base32(const std::string& hr_part, const data_chunk& data_part)
-{
-    data_chunk values = hrp_expand_base32(hr_part);
-    values.insert(values.end(), data_part.begin(), data_part.end());
-    values.resize(values.size() + checksum_length);
-    uint32_t polymod = polymod_base32(values) ^ 1;
-    data_chunk result(checksum_length);
-    for (size_t i = 0; i < result.size(); ++i)
-        result[i] = (polymod >> (5 * (5 - i))) & 31;
+    uint32_t result = 1;
+    for (const auto value: values)
+    {
+        const auto shift = (result >> 25);
+        result = (result & 0x1ffffff) << 5 ^ value;
+
+        for (auto index = 0; index < 5; ++index)
+            result ^= (((shift >> index) & 1) != 0 ? magic_numbers[index] : 0);
+    }
+
     return result;
 }
 
-std::string encode_base32(const std::string& hr_part, const data_chunk& data_part)
+// Compute the checksum.
+data_chunk checksum(const base32& value)
 {
-    std::string encoded = hr_part + separator;
-    encoded.reserve(encoded.size() + data_part.size() + checksum_length);
-    data_chunk checksum = create_checksum_base32(hr_part, data_part);
-    for (const auto& value : data_part)
-        encoded += lut[value];
-    for (const auto& value : checksum)
-        encoded += lut[value];
+    static const data_chunk empty_checksum
+    {
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    };
+
+    const auto expanded = build_chunk(
+    {
+        expand(value.prefix),
+        value.payload,
+        empty_checksum
+    });
+
+    data_chunk checksum(checksum_size);
+    const auto modified = polymod(expanded) ^ 1;
+
+    for (size_t index = 0; index < checksum.size(); ++index)
+        checksum[index] = (modified >> (5 * (5 - index))) & 31;
+
+    return checksum;
+}
+
+// Normalize and validate input characters.
+static bool normalize(data_chunk& out, const std::string& in)
+{
+    out.clear();
+    out.reserve(in.length());
+    auto uppercase = false;
+    auto lowercase = false;
+
+    for (auto character: in)
+    {
+        if (character >= 'A' && character <= 'Z')
+        {
+            uppercase = true;
+            character = ascii_to_lowercase(character);
+        }
+        else if (character >= 'a' && character <= 'z')
+        {
+            lowercase = true;
+        }
+        else if (character < '!' || character > '~')
+        {
+            return false;
+        }
+
+        out.push_back(static_cast<uint8_t>(character));
+    }
+
+    // Must not accept mixed case strings.
+    return !(uppercase && lowercase);
+}
+
+// Split the prefix from the payload and validate sizes.
+static bool split(base32& out, const data_chunk& in)
+{
+    static const auto payload_min_size = checksum_size;
+    static const auto prefix_max_size = combined_max_size - sizeof(separator) -
+        payload_min_size;
+
+    if (in.size() > combined_max_size)
+        return false;
+
+    // Find the last instance of the separator byte.
+    const auto reverse = std::find(in.rbegin(), in.rend(), separator);
+
+    if (reverse == in.rend())
+        return false;
+
+    // Convert separator iterator from reverse to forward (min distance is 1).
+    const auto forward = in.begin() + std::distance(reverse, in.rend()) - 1;
+
+    out.prefix = { in.begin(), forward };
+    out.payload = { forward + 1, in.end() };
+
+    return
+        out.prefix.size() >= prefix_min_size &&
+        out.prefix.size() <= prefix_max_size &&
+        out.payload.size() >= payload_min_size;
+}
+
+// Verify the checksummed payload.
+bool verify(const base32& value)
+{
+    const auto expanded = build_chunk(
+    {
+        expand(value.prefix),
+        value.payload
+    });
+
+    return polymod(expanded) == 1;
+}
+
+// public
+//-----------------------------------------------------------------------------
+
+// TODO: add guard against invalid input.
+// There is no guard in the BIP for invalid sizes or prefix characters here,
+// and as a result it is possible to encode a value that cannot be decoded.
+// TODO: guard against uppercase prefix.
+// An uppercase prefix is valid but the BIP reference code does not normalize
+// it. The result is invalid encoded value due to mixed case. There is no tool
+// to produce uppercase encodings, though the values may be simply mapped.
+std::string encode_base32(const base32& unencoded)
+{
+    std::string encoded;
+    encoded.reserve(unencoded.prefix.size() + sizeof(separator) +
+        unencoded.payload.size() + checksum_size);
+
+    // Copy the prefix and add the separator.
+    encoded = unencoded.prefix;
+    encoded += separator;
+
+    // Encode and add the payload.
+    for (const auto value: unencoded.payload)
+        encoded += encode_table[value];
+
+    // Compute, encode and add the checksum.
+    for (const auto value: checksum(unencoded))
+        encoded += encode_table[value];
+
     return encoded;
 }
 
-inline char toLowercase(const char& c)
+bool decode_base32(base32& out, const std::string& in)
 {
-    return c + ('a' - 'A');
-}
+    static const auto check = checksum_size;
+    data_chunk normal;
 
-bool decode_base32(std::string& hr_part, data_chunk& values, const std::string& in)
-{
-    // Basic input check
-    if (in.length() < base32_min_length || in.length() > base32_max_length)
-        return false;
-    
-    // Find separator and check valid hr_part and data_part sizes
-    size_t pos_separator = in.rfind(separator);
-    if (pos_separator == std::string::npos 
-        || pos_separator < hr_part_min_length
-        || in.length() - (pos_separator + 1) < data_part_min_length)
-        return false;
-    
-    // Convert to a lowercase string and check for valid characters
-    bool uppercase = false;
-    bool lowercase = false;
-    std::string encoded;
-    encoded.reserve(in.length());
-    for (auto c : in)
-    {
-        if (c < 33 || c > 126)
-            return false;
-        if (c >= 'A' && c <= 'Z')
-        {
-            uppercase = true;
-            c = toLowercase(c);
-        }
-        else if (c >= 'a' && c <= 'z')
-            lowercase = true;
-        encoded += c;
-    }
-    // Must NOT accept mixed case strings
-    if (uppercase && lowercase)
-        return false;
-    
-    // Convert data part to values
-    const size_t data_part_length = encoded.size() - (pos_separator + 1);
-    data_chunk data_part_values;
-    data_part_values.reserve(data_part_length);
-    for (const unsigned char c : encoded.substr(pos_separator + 1))
-    {
-        if (rev_lut[c] == -1)
-            return false;
-        data_part_values.push_back(rev_lut[c]);
-    }
-    
-    // Verify checksum
-    hr_part = encoded.substr(0, pos_separator);
-    if (!verify_checksum_base32(hr_part, data_part_values))
+    // Normalize and validate input characters.
+    if (!normalize(normal, in))
         return false;
 
-    values = data_chunk(data_part_values.begin(), 
-        data_part_values.end() - checksum_length);
+    // Set prefix and payload with checksum.
+    if (!split(out, normal))
+        return false;
+
+    // Decode payload/checksum in place.
+    for (auto it = out.payload.begin(); it != out.payload.end(); ++it)
+        if (((*it = decode_table[*it])) == null)
+            return false;
+
+    // Verify checksummed payload.
+    if (!verify(out))
+        return false;
+
+    // Truncate checksum from payload.
+    out.payload.resize(out.payload.size() - check);
+    out.payload.shrink_to_fit();
     return true;
 }
 
