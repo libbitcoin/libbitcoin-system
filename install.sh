@@ -236,6 +236,7 @@ for OPTION in "$@"; do
         (--build-zlib)     BUILD_ZLIB="yes";;
         (--build-png)      BUILD_PNG="yes";;
         (--build-qrencode) BUILD_QRENCODE="yes";;
+        (--build-zmq)      BUILD_ZMQ="yes";;
         (--build-boost)    BUILD_BOOST="yes";;
         (--build-dir=*)    BUILD_DIR="${OPTION#*=}";;
 
@@ -279,8 +280,8 @@ fi
 # Set the prefix-based package config directory.
 PREFIX_PKG_CONFIG_DIR="$PREFIX/lib/pkgconfig"
 
-# Augment PKG_CONFIG_PATH search path with our prefix.
-export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$PREFIX_PKG_CONFIG_DIR"
+# Prioritize prefix package config in PKG_CONFIG_PATH search path.
+export PKG_CONFIG_PATH="$PREFIX_PKG_CONFIG_DIR:$PKG_CONFIG_PATH"
 
 # Set a package config save path that can be passed via our builds.
 with_pkgconfigdir="--with-pkgconfigdir=$PREFIX_PKG_CONFIG_DIR"
@@ -315,6 +316,7 @@ display_message "BUILD_ICU             : $BUILD_ICU"
 display_message "BUILD_ZLIB            : $BUILD_ZLIB"
 display_message "BUILD_PNG             : $BUILD_PNG"
 display_message "BUILD_QRENCODE        : $BUILD_QRENCODE"
+display_message "BUILD_ZMQ             : $BUILD_ZMQ"
 display_message "BUILD_BOOST           : $BUILD_BOOST"
 display_message "PREFIX                : $PREFIX"
 display_message "BUILD_DIR             : $BUILD_DIR"

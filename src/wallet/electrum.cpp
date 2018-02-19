@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <string>
 #include <boost/locale.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <bitcoin/bitcoin/define.hpp>
