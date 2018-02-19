@@ -26,19 +26,26 @@
 namespace libbitcoin {
 
 /**
+ * TODO: implement as config class, see wrapped_data.
+ * The structure for bitcoin base32 encoding.
+ */
+struct BC_API base32
+{
+    std::string prefix;
+    data_chunk payload;
+};
+
+/**
  * Encode data as base32.
  * @return the base32 encoded string.
  */
-BC_API std::string encode_base32(const std::string& hr_part, const data_chunk& data_part);
+BC_API std::string encode_base32(const base32& unencoded);
 
 /**
  * Decode base32 data.
- * @param in base32 string to decode.
- * @param hr_part The decoded human-readable part.
- * @param values The decoded values.
  * @return false if the input is not a valid base32 encoded string.
  */
-BC_API bool decode_base32(std::string& hr_part, data_chunk& values, const std::string& in);
+BC_API bool decode_base32(base32& out, const std::string& in);
 
 } // namespace libbitcoin
 
