@@ -92,7 +92,7 @@ BC_API word_list create_mnemonic(const data_chunk& entropy,
  * words must have been created using electrum encoding.
  */
 BC_API bool validate_mnemonic(const word_list& mnemonic,
-    const dictionary& lexicon=language::en,
+    const dictionary& lexicon,
     const seed prefix=electrum::seed::standard);
 
 /**
