@@ -446,7 +446,6 @@ bool header::is_valid_timestamp() const
     return time <= future;
 }
 
-// [CheckProofOfWork]
 bool header::is_valid_proof_of_work(bool retarget) const
 {
     const auto bits = compact(bits_);
@@ -490,7 +489,6 @@ uint256_t header::proof(uint32_t bits)
     return (divisor == 0) ? 0 : (~target / divisor) + 1;
 }
 
-// [GetBlockProof]
 uint256_t header::proof() const
 {
     return proof(bits_);
