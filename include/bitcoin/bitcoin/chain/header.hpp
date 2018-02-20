@@ -149,9 +149,9 @@ public:
     static uint256_t proof(uint32_t bits);
 
     bool is_valid_timestamp() const;
-    bool is_valid_proof_of_work(bool retarget=true) const;
+    bool is_valid_proof_of_work(bool retarget) const;
 
-    code check(bool retarget=false) const;
+    code check(bool retarget) const;
     code accept() const;
     code accept(const chain_state& state) const;
 

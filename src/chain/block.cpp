@@ -893,13 +893,13 @@ code block::connect_transactions(const chain_state& state) const
 //-----------------------------------------------------------------------------
 
 // These checks are self-contained; blockchain (and so version) independent.
-code block::check() const
+code block::check(bool retarget) const
 {
     validation.start_check = asio::steady_clock::now();
 
     code ec;
 
-    if ((ec = header_.check()))
+    if ((ec = header_.check(retarget)))
         return ec;
 
     // TODO: relates to total of tx.size(false) (pool cache).

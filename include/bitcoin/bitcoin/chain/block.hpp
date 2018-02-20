@@ -160,7 +160,7 @@ public:
     bool is_valid_merkle_root() const;
     bool is_segregated() const;
 
-    code check() const;
+    code check(bool retarget) const;
     code check_transactions() const;
     code accept(bool transactions=true, bool header=true) const;
     code accept(const chain_state& state, bool transactions=true,
