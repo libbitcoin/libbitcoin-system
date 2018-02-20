@@ -84,11 +84,17 @@
     <ClCompile Include="..\..\..\..\src\chain\header.cpp">
       <ObjectFileName>$(IntDir)src_chain_header.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\input.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\output.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\input.cpp">
+      <ObjectFileName>$(IntDir)src_chain_input.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\output.cpp">
+      <ObjectFileName>$(IntDir)src_chain_output.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\output_point.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\payment_record.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\point.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\point.cpp">
+      <ObjectFileName>$(IntDir)src_chain_point.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\point_iterator.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\point_value.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\points_value.cpp" />
@@ -110,13 +116,28 @@
     <ClCompile Include="..\..\..\..\src\config\endpoint.cpp" />
     <ClCompile Include="..\..\..\..\src\config\hash160.cpp" />
     <ClCompile Include="..\..\..\..\src\config\hash256.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\header.cpp">
+      <ObjectFileName>$(IntDir)src_config_header.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\input.cpp">
+      <ObjectFileName>$(IntDir)src_config_input.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\output.cpp">
+      <ObjectFileName>$(IntDir)src_config_output.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\parameter.cpp" />
     <ClCompile Include="..\..\..\..\src\config\parser.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\point.cpp">
+      <ObjectFileName>$(IntDir)src_config_point.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\printer.cpp" />
     <ClCompile Include="..\..\..\..\src\config\script.cpp">
       <ObjectFileName>$(IntDir)src_config_script.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\sodium.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\transaction.cpp">
+      <ObjectFileName>$(IntDir)src_config_transaction.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\error.cpp" />
     <ClCompile Include="..\..\..\..\src\formats\base_10.cpp" />
     <ClCompile Include="..\..\..\..\src\formats\base_16.cpp" />
@@ -211,6 +232,7 @@
     <ClCompile Include="..\..\..\..\src\utility\ostream_writer.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\png.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\prioritized_mutex.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\property_tree.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\random.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\scope_lock.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\sequencer.cpp" />
@@ -277,12 +299,17 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\endpoint.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\hash160.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\hash256.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\header.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\input.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\output.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\parameter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\parser.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\printer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\script.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\settings.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\sodium.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\constants.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\define.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\error.hpp" />
@@ -396,6 +423,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\pending.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\png.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\prioritized_mutex.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\property_tree.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\random.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\resubscriber.hpp" />
@@ -479,8 +507,10 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\istream_reader.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\ostream_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\pending.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\property_tree.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\resubscriber.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\serializer.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\string.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\subscriber.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\track.ipp" />
     <None Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_key.ipp" />

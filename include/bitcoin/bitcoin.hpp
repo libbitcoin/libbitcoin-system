@@ -48,12 +48,17 @@
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/config/hash160.hpp>
 #include <bitcoin/bitcoin/config/hash256.hpp>
+#include <bitcoin/bitcoin/config/header.hpp>
+#include <bitcoin/bitcoin/config/input.hpp>
+#include <bitcoin/bitcoin/config/output.hpp>
 #include <bitcoin/bitcoin/config/parameter.hpp>
 #include <bitcoin/bitcoin/config/parser.hpp>
+#include <bitcoin/bitcoin/config/point.hpp>
 #include <bitcoin/bitcoin/config/printer.hpp>
 #include <bitcoin/bitcoin/config/script.hpp>
 #include <bitcoin/bitcoin/config/settings.hpp>
 #include <bitcoin/bitcoin/config/sodium.hpp>
+#include <bitcoin/bitcoin/config/transaction.hpp>
 #include <bitcoin/bitcoin/formats/base_10.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/formats/base_32.hpp>
@@ -163,6 +168,7 @@
 #include <bitcoin/bitcoin/utility/pending.hpp>
 #include <bitcoin/bitcoin/utility/png.hpp>
 #include <bitcoin/bitcoin/utility/prioritized_mutex.hpp>
+#include <bitcoin/bitcoin/utility/property_tree.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/resubscriber.hpp>

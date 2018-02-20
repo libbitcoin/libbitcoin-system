@@ -237,6 +237,16 @@ BC_CONSTEXPR size_t max_get_headers = 2000;
 BC_CONSTEXPR size_t max_get_data = 50000;
 BC_CONSTEXPR size_t max_inventory = 50000;
 
+/**
+ * The minimum safe length of a seed in bits (multiple of 8).
+ */
+BC_CONSTEXPR size_t minimum_seed_bits = 128;
+
+/**
+ * The minimum safe length of a seed in bytes (16).
+ */
+BC_CONSTEXPR size_t minimum_seed_size = minimum_seed_bits / byte_bits;
+
 // Effective limit given a 32 bit chain height boundary: 10 + log2(2^32) + 1.
 BC_CONSTEXPR size_t max_locator = 43;
 

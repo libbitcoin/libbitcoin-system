@@ -195,10 +195,22 @@
     <ClCompile Include="..\..\..\..\src\config\hash256.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\header.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\input.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\output.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\parameter.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\parser.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\point.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\printer.cpp">
@@ -208,6 +220,9 @@
       <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\sodium.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\transaction.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\error.cpp">
@@ -474,6 +489,9 @@
     <ClCompile Include="..\..\..\..\src\utility\prioritized_mutex.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\property_tree.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\random.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
@@ -668,10 +686,22 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\hash256.hpp">
       <Filter>include\bitcoin\bitcoin\config</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\header.hpp">
+      <Filter>include\bitcoin\bitcoin\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\input.hpp">
+      <Filter>include\bitcoin\bitcoin\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\output.hpp">
+      <Filter>include\bitcoin\bitcoin\config</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\parameter.hpp">
       <Filter>include\bitcoin\bitcoin\config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\parser.hpp">
+      <Filter>include\bitcoin\bitcoin\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\point.hpp">
       <Filter>include\bitcoin\bitcoin\config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\printer.hpp">
@@ -684,6 +714,9 @@
       <Filter>include\bitcoin\bitcoin\config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\sodium.hpp">
+      <Filter>include\bitcoin\bitcoin\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\transaction.hpp">
       <Filter>include\bitcoin\bitcoin\config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\constants.hpp">
@@ -1025,6 +1058,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\prioritized_mutex.hpp">
       <Filter>include\bitcoin\bitcoin\utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\property_tree.hpp">
+      <Filter>include\bitcoin\bitcoin\utility</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\random.hpp">
       <Filter>include\bitcoin\bitcoin\utility</Filter>
     </ClInclude>
@@ -1270,10 +1306,16 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\pending.ipp">
       <Filter>include\bitcoin\bitcoin\impl\utility</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\property_tree.ipp">
+      <Filter>include\bitcoin\bitcoin\impl\utility</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\resubscriber.ipp">
       <Filter>include\bitcoin\bitcoin\impl\utility</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\serializer.ipp">
+      <Filter>include\bitcoin\bitcoin\impl\utility</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\string.ipp">
       <Filter>include\bitcoin\bitcoin\impl\utility</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\subscriber.ipp">
