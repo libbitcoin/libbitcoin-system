@@ -161,8 +161,9 @@ static bool normalize(data_chunk& out, const std::string& in)
 // Split the prefix from the payload and validate sizes.
 static bool split(base32& out, const data_chunk& in)
 {
+    static const auto separator_size = sizeof(separator);
     static const auto payload_min_size = checksum_size;
-    static const auto prefix_max_size = combined_max_size - sizeof(separator) -
+    static const auto prefix_max_size = combined_max_size - separator_size -
         payload_min_size;
 
     if (in.size() > combined_max_size)
@@ -175,10 +176,11 @@ static bool split(base32& out, const data_chunk& in)
         return false;
 
     // Convert separator iterator from reverse to forward (min distance is 1).
-    const auto forward = in.begin() + (std::distance(reverse, in.rend()) - 1);
+    const auto offset = std::distance(reverse, in.rend()) - 1;
 
-    out.prefix = { in.begin(), forward };
-    out.payload = { forward + 1, in.end() };
+    // Clang 3.4 cannot handle iterator variable here, so this is a bit ugly.
+    out.prefix = { in.begin(), std::next(in.begin(), offset) };
+    out.payload = { std::next(in.begin(), offset + 1), in.end() };
 
     return
         out.prefix.size() >= prefix_min_size &&
