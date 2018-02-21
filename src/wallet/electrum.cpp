@@ -150,7 +150,7 @@ static cpp_int mnemonic_decode(const word_list& mnemonic,
     return entropy;
 }
 
-static data_chunk get_seed_prefix(const seed prefix)
+static data_chunk get_seed_prefix(seed prefix)
 {
     switch (prefix)
     {
@@ -166,7 +166,7 @@ static data_chunk get_seed_prefix(const seed prefix)
 }
 
 word_list create_mnemonic(const data_chunk& entropy, const dictionary& lexicon,
-    const seed prefix)
+    seed prefix)
 {
     word_list mnemonic;
     const auto electrum_prefix = get_seed_prefix(prefix);
@@ -194,7 +194,7 @@ long_hash decode_mnemonic(const word_list& mnemonic,
 }
 
 bool validate_mnemonic(const word_list& mnemonic, const dictionary& lexicon,
-    const seed prefix)
+    seed prefix)
 {
     return is_new_seed(mnemonic, get_seed_prefix(prefix)) &&
         (mnemonic_decode(mnemonic, lexicon) == 0);
