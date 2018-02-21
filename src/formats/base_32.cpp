@@ -175,7 +175,7 @@ static bool split(base32& out, const data_chunk& in)
         return false;
 
     // Convert separator iterator from reverse to forward (min distance is 1).
-    const auto forward = in.begin() + std::distance(reverse, in.rend()) - 1;
+    const auto forward = in.begin() + (std::distance(reverse, in.rend()) - 1);
 
     out.prefix = { in.begin(), forward };
     out.payload = { forward + 1, in.end() };
