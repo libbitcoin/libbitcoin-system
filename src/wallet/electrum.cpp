@@ -168,17 +168,15 @@ static data_chunk get_seed_prefix(const seed prefix)
 word_list create_mnemonic(const data_chunk& entropy, const dictionary& lexicon,
     const seed prefix)
 {
-    cpp_int nonce = 0;
     word_list mnemonic;
     const auto electrum_prefix = get_seed_prefix(prefix);
 
     // cpp_int requires hex string for arbitrary precision int construction.
-    const auto numeric_entropy = cpp_int("0x" + encode_base16(entropy));
+    auto numeric_entropy = cpp_int("0x" + encode_base16(entropy));
 
     do
     {
-        const auto current_entropy = numeric_entropy + nonce++;
-        mnemonic = mnemonic_encode(current_entropy, lexicon);
+        mnemonic = mnemonic_encode(numeric_entropy++, lexicon);
         BITCOIN_ASSERT(mnemonic_decode(mnemonic, lexicon) == 0);
 
     } while (is_old_seed(mnemonic) || !is_new_seed(mnemonic, electrum_prefix));
