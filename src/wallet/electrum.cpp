@@ -91,8 +91,13 @@ static data_chunk old_mnemonic_decode(const word_list& mnemonic)
     return seed;
 }
 
-static bool is_old_seed(const word_list& mnemonic)
+static bool is_old_seed(const word_list& mnemonic, const dictionary& lexicon)
 {
+    // if we're not in the process of generating an english mnemonic,
+    // it can't possibly be a v1 electrum seed, so skip the check
+    if (lexicon != language::en)
+        return false;
+
     // valid electrum 1.x seed lengths
     static constexpr size_t seed_size_v1_1 = 16;
     static constexpr size_t seed_size_v1_2 = 32;
@@ -179,7 +184,7 @@ word_list create_mnemonic(const data_chunk& entropy, const dictionary& lexicon,
         mnemonic = mnemonic_encode(numeric_entropy++, lexicon);
         BITCOIN_ASSERT(mnemonic_decode(mnemonic, lexicon) == 0);
 
-    } while (is_old_seed(mnemonic) || !is_new_seed(mnemonic, electrum_prefix));
+    } while (is_old_seed(mnemonic, lexicon) || !is_new_seed(mnemonic, electrum_prefix));
 
     return mnemonic;
 }
