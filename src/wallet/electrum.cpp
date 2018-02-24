@@ -40,17 +40,18 @@ namespace wallet {
 namespace electrum {
 
 // Electrum mnemonic private constants.
-static const std::string passphrase_prefix = "electrum";
 static constexpr size_t hmac_iterations = 2048;
-static const auto hmac_data = to_chunk("Seed version");
+static const std::string passphrase_prefix = "electrum";
+static const std::string seed_version = "Seed version";
+static const auto hmac_data = to_chunk(seed_version);
 
 #ifdef WITH_ICU
 
-static size_t special_modulo(int32_t index_distance, size_t dictionary_length)
+static size_t special_modulo(int32_t index_distance, size_t dictionary_size)
 {
     return index_distance < 0 ? 
-        dictionary_length - (-index_distance % dictionary_length) :
-        index_distance % dictionary_length;
+        dictionary_size - (-index_distance % dictionary_size) :
+        index_distance % dictionary_size;
 }
 
 static data_chunk old_mnemonic_decode(const word_list& mnemonic)
@@ -93,8 +94,7 @@ static data_chunk old_mnemonic_decode(const word_list& mnemonic)
 
 static bool is_old_seed(const word_list& mnemonic, const dictionary& lexicon)
 {
-    // if we're not in the process of generating an english mnemonic,
-    // it can't possibly be a v1 electrum seed, so skip the check
+    // Cannot be an old seed if it's not the en dictionary.
     if (lexicon != language::en)
         return false;
 
@@ -125,13 +125,13 @@ static bool is_new_seed(const word_list& mnemonic, const data_slice& prefix)
 static word_list mnemonic_encode(cpp_int entropy, const dictionary& lexicon)
 {
     word_list mnemonic;
-    const auto dictionary_length = lexicon.size();
+    const auto dictionary_size = lexicon.size();
 
     while (entropy != 0)
     {
-        const cpp_int index = entropy % dictionary_length;
-        entropy /= dictionary_length;
+        const cpp_int index = entropy % dictionary_size;
         mnemonic.push_back(lexicon[static_cast<size_t>(index)]);
+        entropy /= dictionary_size;
     }
 
     return mnemonic;
@@ -141,7 +141,7 @@ static cpp_int mnemonic_decode(const word_list& mnemonic,
     const dictionary& lexicon)
 {
     cpp_int entropy = 0;
-    const auto dictionary_length = lexicon.size();
+    const auto dictionary_size = lexicon.size();
 
     for (const auto& word: boost::adaptors::reverse(mnemonic))
     {
@@ -149,7 +149,7 @@ static cpp_int mnemonic_decode(const word_list& mnemonic,
         if (position == -1)
             return{ 1 };
 
-        entropy *= dictionary_length + position;
+        entropy *= dictionary_size + position;
     }
 
     return entropy;
@@ -183,8 +183,8 @@ word_list create_mnemonic(const data_chunk& entropy, const dictionary& lexicon,
     {
         mnemonic = mnemonic_encode(numeric_entropy++, lexicon);
         BITCOIN_ASSERT(mnemonic_decode(mnemonic, lexicon) == 0);
-
-    } while (is_old_seed(mnemonic, lexicon) || !is_new_seed(mnemonic, electrum_prefix));
+    } while (is_old_seed(mnemonic, lexicon) ||
+        !is_new_seed(mnemonic, electrum_prefix));
 
     return mnemonic;
 }
