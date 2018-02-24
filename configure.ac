@@ -181,6 +181,10 @@ AX_BOOST_LOCALE
 AC_SUBST([boost_locale_LIBS], [${BOOST_LOCALE_LIB}])
 AC_MSG_NOTICE([boost_locale_LIBS : ${boost_locale_LIBS}])
 
+AX_BOOST_LOG_SETUP
+AC_SUBST([boost_log_setup_LIBS], [${BOOST_LOG_SETUP_LIB}])
+AC_MSG_NOTICE([boost_log_setup_LIBS : ${boost_log_setup_LIBS}])
+
 AX_BOOST_LOG
 AC_SUBST([boost_log_LIBS], [${BOOST_LOG_LIB}])
 AC_MSG_NOTICE([boost_log_LIBS : ${boost_log_LIBS}])
