@@ -33,7 +33,7 @@ namespace libbitcoin {
  * wide output buffering may be reduced to as much as 256 characters.
  */
 class BC_API unicode_streambuf
-    : public std::streambuf
+  : public std::streambuf
 {
 public:
     /**

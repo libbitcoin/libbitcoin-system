@@ -84,7 +84,7 @@ typedef string_list word_list;
  */
 BC_API word_list create_mnemonic(const data_chunk& entropy,
     const dictionary& lexicon=language::en,
-    const seed prefix=electrum::seed::standard);
+    seed prefix=electrum::seed::standard);
 
 /**
  * Checks an electrum mnemonic against a dictionary to determine if
@@ -93,14 +93,14 @@ BC_API word_list create_mnemonic(const data_chunk& entropy,
  */
 BC_API bool validate_mnemonic(const word_list& mnemonic,
     const dictionary& lexicon,
-    const seed prefix=electrum::seed::standard);
+    seed prefix=electrum::seed::standard);
 
 /**
  * Checks that a mnemonic is valid in at least one of the provided languages.
  */
 BC_API bool validate_mnemonic(const word_list& mnemonic,
     const dictionary_list& lexicons=language::all,
-    const seed prefix=electrum::seed::standard);
+    seed prefix=electrum::seed::standard);
 
 /**
  * Convert an electrum mnemonic and passphrase to a wallet-generation

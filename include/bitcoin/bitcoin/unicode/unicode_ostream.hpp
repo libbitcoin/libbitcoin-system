@@ -29,7 +29,7 @@ namespace libbitcoin {
  * Class to expose a widening output stream.
  */
 class BC_API unicode_ostream
-    : public std::ostream
+  : public std::ostream
 {
 public:
     /**

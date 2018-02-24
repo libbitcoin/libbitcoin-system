@@ -37,7 +37,7 @@ namespace wallet {
 static constexpr size_t bits_per_word = 11;
 static constexpr size_t entropy_bit_divisor = 32;
 static constexpr size_t hmac_iterations = 2048;
-static const char* passphrase_prefix = "mnemonic";
+static const auto passphrase_prefix = "mnemonic";
 
 inline uint8_t bip39_shift(size_t bit)
 {
@@ -76,7 +76,6 @@ bool validate_mnemonic(const word_list& words, const dictionary& lexicon)
     }
 
     data.resize(entropy_bits / byte_bits);
-
     const auto mnemonic = create_mnemonic(data, lexicon);
     return std::equal(mnemonic.begin(), mnemonic.end(), words.begin());
 }
@@ -84,7 +83,7 @@ bool validate_mnemonic(const word_list& words, const dictionary& lexicon)
 word_list create_mnemonic(data_slice entropy, const dictionary &lexicon)
 {
     if ((entropy.size() % mnemonic_seed_multiple) != 0)
-        return word_list();
+        return{};
 
     const size_t entropy_bits = (entropy.size() * byte_bits);
     const size_t check_bits = (entropy_bits / entropy_bit_divisor);
