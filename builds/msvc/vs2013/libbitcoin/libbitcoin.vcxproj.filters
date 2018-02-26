@@ -147,9 +147,6 @@
     <ClCompile Include="..\..\..\..\src\chain\point.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\point_iterator.cpp">
-      <Filter>src\chain</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\point_value.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
@@ -630,9 +627,6 @@
       <Filter>include\bitcoin\bitcoin\chain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point.hpp">
-      <Filter>include\bitcoin\bitcoin\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point_iterator.hpp">
       <Filter>include\bitcoin\bitcoin\chain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point_value.hpp">

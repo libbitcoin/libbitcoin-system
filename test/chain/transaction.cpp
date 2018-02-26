@@ -80,18 +80,18 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_1__always__returns_default_initial
 ////"281a675519b5fd64dd80699dccd509f76e655699f2f625efffffffff"
 
 #define TX3_STORE_SERIALIZED_V3 \
-"02ffffffff1dc05c00000000001976a914e785da41a84114af0762c5a6f9e5b7" \
-"8ff730581988acffffffff70e0cf02000000001976a914607a10e5b5f5361034" \
-"1db013e77ba7c317a10c9088ac0209e300a61db28e4fd3562aec52647646fc55" \
-"aa3e3f7d824f20f451a45db8c95801006a4730440220364484206d2d3977373a" \
-"82135cbdb78f200e2160ec2636c9f080424a61748d15022056c9729b9fbd5c04" \
-"170a7bb63b1d1b02da183fa3605864666dba6e216c3ce9270121027d4b693a28" \
-"51541b1e3937320c5e4173ea8ab3f152f7a7fa96dbb936d2cff73dffffffff1c" \
-"bb3eb8553342210c67e27dab3c2e72a9c0937b20dc6fe4d08d209fc4c2f16300" \
-"006a47304402207bc1940e12ec94544b7080518f73840f9bd191bd5fcb6b00f6" \
-"9a57a5865833bc02201bd759d978305e4346b39a9ee8b38043888621748dd1f8" \
-"ab822df542427e49d6012102a17da2659b6149fb281a675519b5fd64dd80699d" \
-"ccd509f76e655699f2f625efffffffff0001" \
+"0200ffffffff1dc05c00000000001976a914e785da41a84114af0762c5a6f9e5" \
+"b78ff730581988ac00ffffffff70e0cf02000000001976a914607a10e5b5f536" \
+"10341db013e77ba7c317a10c9088ac0209e300a61db28e4fd3562aec52647646" \
+"fc55aa3e3f7d824f20f451a45db8c95801006a4730440220364484206d2d3977" \
+"373a82135cbdb78f200e2160ec2636c9f080424a61748d15022056c9729b9fbd" \
+"5c04170a7bb63b1d1b02da183fa3605864666dba6e216c3ce9270121027d4b69" \
+"3a2851541b1e3937320c5e4173ea8ab3f152f7a7fa96dbb936d2cff73dffffff" \
+"ff1cbb3eb8553342210c67e27dab3c2e72a9c0937b20dc6fe4d08d209fc4c2f1" \
+"6300006a47304402207bc1940e12ec94544b7080518f73840f9bd191bd5fcb6b" \
+"00f69a57a5865833bc02201bd759d978305e4346b39a9ee8b38043888621748d" \
+"d1f8ab822df542427e49d6012102a17da2659b6149fb281a675519b5fd64dd80" \
+"699dccd509f76e655699f2f625efffffffff0001"
 
 #define TX4 \
 "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1" \
@@ -466,9 +466,7 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_output_bytes__failure)
 ////    chain::transaction wire_tx;
 ////    BOOST_REQUIRE(wire_tx.from_data(wire_stream, wire));
 ////    BOOST_REQUIRE(data_wire == wire_tx.to_data(wire));
-////
-////    const auto get_store_text = encode_base16(wire_tx.to_data(!wire));
-////
+////    ////const auto get_store_text = encode_base16(wire_tx.to_data(!wire));
 ////    const auto data_store = to_chunk(base16_literal(TX3_STORE_SERIALIZED_V3));
 ////    data_source store_stream(data_store);
 ////    chain::transaction store_tx;
@@ -852,44 +850,33 @@ BOOST_AUTO_TEST_CASE(transaction__is_missing_previous_outputs__inputs_with_cache
 ////    BOOST_REQUIRE_EQUAL(instance.missing_previous_outputs().size(), 0u);
 ////}
 
-BOOST_AUTO_TEST_CASE(transaction__is_double_spend__empty_inputs__returns_false)
+BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__empty_inputs__returns_false)
 {
     chain::transaction instance;
-    BOOST_REQUIRE(!instance.is_double_spend(false));
-    BOOST_REQUIRE(!instance.is_double_spend(true));
+    BOOST_REQUIRE(!instance.is_confirmed_double_spend());
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_double_spend__unspent_inputs__returns_false)
-{
-    chain::transaction instance;
-    instance.inputs().emplace_back();
-    BOOST_REQUIRE(!instance.is_double_spend(false));
-    BOOST_REQUIRE(!instance.is_double_spend(true));
-}
-
-BOOST_AUTO_TEST_CASE(transaction__is_double_spend__include_unconfirmed_false_with_unconfirmed__returns_false)
+BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__default_input__returns_false)
 {
     chain::transaction instance;
     instance.inputs().emplace_back();
-    instance.inputs().back().previous_output().validation.spent = true;
-    BOOST_REQUIRE(!instance.is_double_spend(false));
+    BOOST_REQUIRE(!instance.is_confirmed_double_spend());
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_double_spend__include_unconfirmed_false_with_confirmed__returns_true)
+BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__unspent_inputs__returns_false)
+{
+    chain::transaction instance;
+    instance.inputs().emplace_back();
+    instance.inputs().back().previous_output().validation.spent = false;
+    BOOST_REQUIRE(!instance.is_confirmed_double_spend());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__spent_input__returns_true)
 {
     chain::transaction instance;
     instance.inputs().emplace_back();
     instance.inputs().back().previous_output().validation.spent = true;
-    instance.inputs().back().previous_output().validation.confirmed = true;
-    BOOST_REQUIRE(instance.is_double_spend(false));
-}
-
-BOOST_AUTO_TEST_CASE(transaction__is_double_spend__include_unconfirmed_true_with_unconfirmed__returns_true)
-{
-    chain::transaction instance;
-    instance.inputs().emplace_back();
-    instance.inputs().back().previous_output().validation.spent = true;
-    BOOST_REQUIRE(instance.is_double_spend(true));
+    BOOST_REQUIRE(instance.is_confirmed_double_spend());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__no_outputs_zero__returns_false)

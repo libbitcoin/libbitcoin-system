@@ -53,22 +53,21 @@ public:
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
-        uint64_t offset = 0;
+        static const uint64_t undetermined_link;
+
+        bool simulate = false;
         uint64_t originator = 0;
-        code error = error::not_found;
+        code error = error::success;
         chain_state::ptr state = nullptr;
 
-        // The transaction is an unspent duplicate.
-        bool duplicate = false;
+        /// The tx exists if not undertermined (used to attach it to a block).
+        uint64_t link = undetermined_link;
 
-        // The unconfirmed tx exists in the store.
+        /// Existing tx is valid for forks (don't validate, update vs. create).
         bool pooled = false;
 
-        // The unconfirmed tx is validated at the block's current fork state.
-        bool current = false;
-
-        // Similate organization and instead just validate the transaction.
-        bool simulate = false;
+        /// The tx is indexed, or pooled (for forks) for pool query, (reject).
+        bool duplicate = false;
     };
 
     // Constructors.
@@ -101,8 +100,8 @@ public:
     static transaction factory(reader& source, bool wire=true, bool witness=false);
 
     // Non-wire store deserializations to preserve hash.
-    static transaction factory(reader& source, hash_digest&& hash, bool wire=true, bool witness=false);
-    static transaction factory(reader& source, const hash_digest& hash, bool wire=true, bool witness=false);
+    static transaction factory(reader& source, hash_digest&& hash,bool wire=true, bool witness=false);
+    static transaction factory(reader& source, const hash_digest& hash,bool wire=true, bool witness=false);
 
     bool from_data(const data_chunk& data, bool wire=true, bool witness=false);
     bool from_data(std::istream& stream, bool wire=true, bool witness=false);
@@ -124,6 +123,7 @@ public:
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------
 
+    static size_t maximum_size(bool is_coinbase);
     size_t serialized_size(bool wire=true, bool witness=false) const;
 
     uint32_t version() const;
@@ -176,7 +176,7 @@ public:
     bool is_mature(size_t height) const;
     bool is_overspent() const;
     bool is_internal_double_spend() const;
-    bool is_double_spend(bool include_unconfirmed) const;
+    bool is_confirmed_double_spend() const;
     bool is_dusty(uint64_t minimum_output_value) const;
     bool is_missing_previous_outputs() const;
     bool is_final(size_t block_height, uint32_t block_time) const;

@@ -29,6 +29,7 @@
 #include <vector>
 #include <boost/optional.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
+#include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/chain/input.hpp>
 #include <bitcoin/bitcoin/chain/output.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
@@ -51,6 +52,9 @@ namespace libbitcoin {
 namespace chain {
 
 using namespace bc::machine;
+
+// HACK: must match tx slab_map::not_found.
+const uint64_t transaction::validation::undetermined_link = 0;
 
 // Read a length-prefixed collection of inputs or outputs from the source.
 template<class Source, class Put>
@@ -259,8 +263,8 @@ transaction transaction::factory(reader& source, bool wire, bool witness)
 }
 
 // static
-transaction transaction::factory(reader& source, hash_digest&& hash,
-    bool wire, bool witness)
+transaction transaction::factory(reader& source, hash_digest&& hash, bool wire,
+    bool witness)
 {
     transaction instance;
     instance.from_data(source, std::move(hash), wire, witness);
@@ -348,15 +352,21 @@ bool transaction::from_data(reader& source, bool wire, bool witness)
 bool transaction::from_data(reader& source, hash_digest&& hash, bool wire,
     bool witness)
 {
+    if (!from_data(source, wire, witness))
+        return false;
+
     hash_ = std::make_shared<hash_digest>(std::move(hash));
-    return from_data(source, wire, witness);
+    return true;
 }
 
 bool transaction::from_data(reader& source, const hash_digest& hash, bool wire,
     bool witness)
 {
+    if (!from_data(source, wire, witness))
+        return false;
+
     hash_ = std::make_shared<hash_digest>(hash);
-    return from_data(source, wire, witness);
+    return true;
 }
 
 // protected
@@ -456,6 +466,20 @@ void transaction::to_data(writer& sink, bool wire, bool witness) const
 
 // Size.
 //-----------------------------------------------------------------------------
+
+// static
+size_t transaction::maximum_size(bool is_coinbase)
+{
+    // TODO: find smallest spendable coinbase tx with maximal input script.
+    // This is not consensus critical but if too small is a disk fill vector.
+    static const auto min_coinbase_tx = 1024;
+
+    static const auto max_coinbase_tx = max_block_size - (sizeof(uint32_t) +
+        header::satoshi_fixed_size());
+
+    // A pool (non-coinbase) tx must fit into a block with at least a coinbase.
+    return is_coinbase ? max_coinbase_tx : max_coinbase_tx - min_coinbase_tx;
+}
 
 size_t transaction::serialized_size(bool wire, bool witness) const
 {
@@ -979,12 +1003,11 @@ bool transaction::is_internal_double_spend() const
     return !distinct;
 }
 
-bool transaction::is_double_spend(bool include_unconfirmed) const
+bool transaction::is_confirmed_double_spend() const
 {
-    const auto spent = [include_unconfirmed](const input& input)
+    const auto spent = [](const input& input)
     {
-        const auto& prevout = input.previous_output().validation;
-        return prevout.spent && (include_unconfirmed || prevout.confirmed);
+        return input.previous_output().validation.spent;
     };
 
     return std::any_of(inputs_.begin(), inputs_.end(), spent);
@@ -1090,7 +1113,8 @@ code transaction::check(bool transaction_pool, bool retarget) const
         return error::transaction_internal_double_spend;
 
     // TODO: reduce by header, txcount and smallest coinbase size for height.
-    else if (transaction_pool && serialized_size(true, false) >= max_block_size)
+    else if (transaction_pool && serialized_size(true, false) >=
+        maximum_size(false))
         return error::transaction_size_limit;
 
     // We cannot know if bip16/bip141 is enabled here so we do not check it.
@@ -1149,7 +1173,7 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     else if (is_missing_previous_outputs())
         return error::missing_previous_output;
 
-    else if (is_double_spend(transaction_pool))
+    else if (is_confirmed_double_spend())
         return error::double_spend;
 
     // This relates height to maturity of spent coinbase. Since reorg is the

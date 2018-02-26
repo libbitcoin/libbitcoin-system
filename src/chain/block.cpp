@@ -536,36 +536,6 @@ void block::strip_witness()
 //-----------------------------------------------------------------------------
 
 // static
-uint256_t block::proof(uint32_t bits)
-{
-    const auto header_bits = compact(bits);
-
-    if (header_bits.is_overflowed())
-        return 0;
-
-    uint256_t target(header_bits);
-
-    //*************************************************************************
-    // CONSENSUS: satoshi will throw division by zero in the case where the
-    // target is (2^256)-1 as the overflow will result in a zero divisor.
-    // While actually achieving this work is improbable, this method operates
-    // on user data method and therefore must be guarded.
-    //*************************************************************************
-    const auto divisor = target + 1;
-
-    // We need to compute 2**256 / (target + 1), but we can't represent 2**256
-    // as it's too large for uint256. However as 2**256 is at least as large as
-    // target + 1, it is equal to ((2**256 - target - 1) / (target + 1)) + 1, or
-    // (~target / (target + 1)) + 1.
-    return (divisor == 0) ? 0 : (~target / divisor) + 1;
-}
-
-// [GetBlockProof]
-uint256_t block::proof() const
-{
-    return proof(header_.bits());
-}
-
 uint64_t block::subsidy(size_t height, bool retarget)
 {
     static const auto overflow = sizeof(uint64_t) * byte_bits;
@@ -578,7 +548,7 @@ uint64_t block::subsidy(size_t height, bool retarget)
 // Returns max_size_t in case of overflow or unpopulated chain state.
 size_t block::signature_operations() const
 {
-    const auto state = validation.state;
+    const auto state = header_.validation.state;
     const auto bip16 = state->is_enabled(rule_fork::bip16_rule);
     const auto bip141 = state->is_enabled(rule_fork::bip141_rule);
     return state ? signature_operations(bip16, bip141) : max_size_t;
@@ -923,13 +893,13 @@ code block::connect_transactions(const chain_state& state) const
 //-----------------------------------------------------------------------------
 
 // These checks are self-contained; blockchain (and so version) independent.
-code block::check() const
+code block::check(bool retarget) const
 {
     validation.start_check = asio::steady_clock::now();
 
     code ec;
 
-    if ((ec = header_.check()))
+    if ((ec = header_.check(retarget)))
         return ec;
 
     // TODO: relates to total of tx.size(false) (pool cache).
@@ -974,7 +944,7 @@ code block::check() const
 
 code block::accept(bool transactions, bool header) const
 {
-    const auto state = validation.state;
+    const auto state = header_.validation.state;
     return state ? accept(*state, transactions, header) :
         error::operation_failed;
 }
@@ -1034,7 +1004,7 @@ code block::accept(const chain_state& state, bool transactions,
 
 code block::connect() const
 {
-    const auto state = validation.state;
+    const auto state = header_.validation.state;
     return state ? connect(*state) : error::operation_failed;
 }
 

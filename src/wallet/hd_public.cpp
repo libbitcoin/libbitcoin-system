@@ -155,7 +155,7 @@ hd_public hd_public::from_string(const std::string& encoded,
 // Cast operators.
 // ----------------------------------------------------------------------------
 
-hd_public::operator const bool() const
+hd_public::operator bool() const
 {
     return valid_;
 }

@@ -141,12 +141,13 @@ public:
     /// Create block state from tx pool chain state of same height.
     chain_state(const chain_state& pool, const chain::block& block);
 
-    /// Create header state from header pool chain state of previous height.
+    /// Create header state from header pool chain state of parent block.
     chain_state(const chain_state& parent, const chain::header& header);
 
     /// Checkpoints must be ordered by height with greatest at back.
     /// Forks and checkpoints must match those provided for map creation.
-    chain_state(data&& values, const checkpoints& checkpoints, uint32_t forks);
+    chain_state(data&& values, const checkpoints& checkpoints, uint32_t forks,
+        uint32_t stale_seconds);
 
     /// Properties.
     size_t height() const;
@@ -158,6 +159,9 @@ public:
 
     /// Construction with zero height or any empty array causes invalid state.
     bool is_valid() const;
+
+    /// Determine if the represented block is stale (top block for pool state).
+    bool is_stale() const;
 
     /// Determine if the fork is set for this block.
     bool is_enabled(machine::rule_fork fork) const;
@@ -214,6 +218,9 @@ private:
 
     // Configured forks are saved for state transitions.
     const uint32_t forks_;
+
+    // Configured minimum age in seconds for a block to be considered stale.
+    const uint32_t stale_seconds_;
 
     // Checkpoints do not affect the data that is collected or promoted.
     const config::checkpoint::list& checkpoints_;

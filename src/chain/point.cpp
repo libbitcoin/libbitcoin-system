@@ -226,20 +226,6 @@ void point::to_data(writer& sink, bool wire) const
     }
 }
 
-// Iterator.
-//-----------------------------------------------------------------------------
-
-point_iterator point::begin() const
-{
-    return point_iterator(*this);
-}
-
-point_iterator point::end() const
-{
-    static const auto store_point_size = std::tuple_size<point>::value;
-    return point_iterator(*this, static_cast<unsigned>(store_point_size));
-}
-
 // Properties.
 //-----------------------------------------------------------------------------
 

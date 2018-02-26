@@ -82,13 +82,6 @@ BOOST_AUTO_TEST_CASE(point__constructor_5__valid_input__returns_input_initialize
     BOOST_REQUIRE(instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(point__begin_end__initialized__begin_not_equal_end)
-{
-    chain::point instance{ null_hash, 0 };
-
-    BOOST_REQUIRE(instance.begin() != instance.end());
-}
-
 BOOST_AUTO_TEST_CASE(point__from_data__insufficient_bytes__failure)
 {
     data_chunk data(10);

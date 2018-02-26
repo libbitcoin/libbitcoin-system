@@ -64,7 +64,7 @@ ek_private ek_private::from_string(const std::string& encoded)
 // Cast operators.
 // ----------------------------------------------------------------------------
 
-ek_private::operator const bool() const
+ek_private::operator bool() const
 {
     return valid_;
 }

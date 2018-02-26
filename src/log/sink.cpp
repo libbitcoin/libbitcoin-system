@@ -159,24 +159,15 @@ static boost::shared_ptr<text_stream_sink> add_text_stream_sink(
 
 void initialize()
 {
-    class null_stream
-      : public std::ostream
+    struct null_stream : public std::ostream
     {
-    private:
-        class null_buffer
-          : public std::streambuf
+        struct null_buffer : public std::streambuf
         {
-            public: int overflow(int value)
-            {
-                return value;
-            }
-        } buffer_;
+            int overflow(int value) { return value; }
+        };
 
-    public:
-        null_stream()
-          : std::ostream(&buffer_)
-        {
-        }
+        null_buffer buffer_;
+        null_stream() : std::ostream(&buffer_) {}
     };
 
     // Null stream instances used to disable log output.

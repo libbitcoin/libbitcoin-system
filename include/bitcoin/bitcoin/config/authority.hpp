@@ -102,7 +102,7 @@ public:
      * Getter.
      * @return True if the port is non-zero.
      */
-    operator const bool() const;
+    operator bool() const;
 
     /**
      * Getter.

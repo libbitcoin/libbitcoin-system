@@ -19,6 +19,7 @@
 #include <bitcoin/bitcoin/chain/output.hpp>
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <sstream>
 #include <bitcoin/bitcoin/constants.hpp>
@@ -36,8 +37,10 @@ using namespace bc::wallet;
 // This is a consensus critical value that must be set on reset.
 const uint64_t output::not_found = sighash_null_value;
 
-// This is a non-consensus sentinel used to indicate an output is unspent.
+// These are non-consensus sentinel values used by the store.
 const uint32_t output::validation::not_spent = max_uint32;
+const uint8_t output::validation::indexed_true = 1;
+const uint8_t output::validation::indexed_false = 0;
 
 // Constructors.
 //-----------------------------------------------------------------------------
@@ -158,7 +161,12 @@ bool output::from_data(reader& source, bool wire, bool)
     reset();
 
     if (!wire)
+    {
+        // This reads updateable data in a non-atomic manner.
+        // The results are unusable unless externally protected.
+        validation.set_indexed(source.read_byte());
         validation.spender_height = source.read_4_bytes_little_endian();
+    }
 
     value_ = source.read_8_bytes_little_endian();
     script_.from_data(source, true);
@@ -207,8 +215,10 @@ void output::to_data(writer& sink, bool wire, bool) const
 {
     if (!wire)
     {
-        auto height32 = safe_unsigned<uint32_t>(validation.spender_height);
-        sink.write_4_bytes_little_endian(height32);
+        // This write is only utilized for unreachable tx serialization.
+        // Later updates and usable reads must be externally protected.
+        sink.write_byte(validation.indexed());
+        sink.write_4_bytes_little_endian(validation.spender_height);
     }
 
     sink.write_8_bytes_little_endian(value_);
@@ -220,9 +230,8 @@ void output::to_data(writer& sink, bool wire, bool) const
 
 size_t output::serialized_size(bool wire) const
 {
-    // validation.spender_height is size_t stored as uint32_t.
-    return (wire ? 0 : sizeof(uint32_t)) + sizeof(value_) +
-        script_.serialized_size(true);
+    const auto metadata = wire ? 0 : sizeof(uint32_t) + sizeof(uint8_t);
+    return metadata + sizeof(value_) + script_.serialized_size(true);
 }
 
 // Accessors.

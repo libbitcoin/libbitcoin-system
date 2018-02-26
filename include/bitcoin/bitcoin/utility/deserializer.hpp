@@ -21,6 +21,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
@@ -36,14 +37,20 @@ class deserializer
   : public reader/*, noncopyable*/
 {
 public:
+    typedef std::function<void(deserializer<Iterator, CheckSafe>&)> functor;
+
     deserializer(const Iterator begin);
     deserializer(const Iterator begin, const Iterator end);
 
-    template <unsigned Size>
-    byte_array<Size> read_forward();
+    ////// TODO: enable complex object store key types.
+    ////template <typename OutputIterator>
+    ////OutputIterator read();
 
-    template <unsigned Size>
-    byte_array<Size> read_reverse();
+    template <typename Tuple>
+    Tuple read_forward();
+
+    template <typename Tuple>
+    Tuple read_reverse();
 
     template <typename Integer>
     Integer read_big_endian();

@@ -191,38 +191,9 @@ payment_record::point_kind payment_record::to_kind(uint8_t value)
 
 bool payment_record::from_data(reader& source, bool wire)
 {
-    if (!wire)
-        return from_data(source, size_t(0));
-
     kind_ = to_kind(source.read_byte());
     point_.from_data(source, wire);
     height_ = source.read_4_bytes_little_endian();
-    data_ = source.read_8_bytes_little_endian();
-
-    if (kind_ == point_kind::invalid)
-        source.invalidate();
-
-    if (!source)
-        reset();
-
-    return source;
-}
-
-// Optimize reads by short-circuiting what is unnecessary.
-// Invalid returns are conflated with skipped, but are store only.
-bool payment_record::from_data(reader& source, size_t start_height)
-{
-    height_ = source.read_4_bytes_little_endian();
-
-    if (height_ < start_height)
-    {
-        reset();
-        source.skip(serialized_size() - sizeof(uint32_t));
-        return false;
-    }
-
-    kind_ = to_kind(source.read_byte());
-    point_.from_data(source, false);
     data_ = source.read_8_bytes_little_endian();
 
     if (kind_ == point_kind::invalid)
@@ -271,22 +242,10 @@ void payment_record::to_data(std::ostream& stream, bool wire) const
 
 void payment_record::to_data(writer& sink, bool wire) const
 {
-    if (wire)
-    {
-        // Client-server v3 protocol preserved.
-        sink.write_byte(static_cast<uint8_t>(kind_));
-        point_.to_data(sink, wire);
-        sink.write_4_bytes_little_endian(height_);
-        sink.write_8_bytes_little_endian(data_);
-    }
-    else
-    {
-        // Store serialization optimized in v4.
-        sink.write_4_bytes_little_endian(height_);
-        sink.write_byte(static_cast<uint8_t>(kind_));
-        point_.to_data(sink, wire);
-        sink.write_8_bytes_little_endian(data_);
-    }
+    sink.write_byte(static_cast<uint8_t>(kind_));
+    point_.to_data(sink, wire);
+    sink.write_4_bytes_little_endian(height_);
+    sink.write_8_bytes_little_endian(data_);
 }
 
 // Properties (size, accessors).

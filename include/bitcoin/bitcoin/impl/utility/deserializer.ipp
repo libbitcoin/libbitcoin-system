@@ -23,6 +23,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <tuple>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -72,25 +73,33 @@ void deserializer<Iterator, CheckSafe>::invalidate()
     valid_ = false;
 }
 
-// Hashes.
+// Objects.
 //-----------------------------------------------------------------------------
+
+////// TODO: enable complex object store key types.
+////template <typename Iterator, bool CheckSafe>
+////template <unsigned OutputIterator>
+////OutputIterator deserializer<Iterator, CheckSafe>::read()
+////{
+////    // TODO: read bytes into the OutputIterator until full.
+////}
 
 template <typename Iterator, bool CheckSafe>
 hash_digest deserializer<Iterator, CheckSafe>::read_hash()
 {
-    return read_forward<hash_size>();
+    return read_forward<hash_digest>();
 }
 
 template <typename Iterator, bool CheckSafe>
 short_hash deserializer<Iterator, CheckSafe>::read_short_hash()
 {
-    return read_forward<short_hash_size>();
+    return read_forward<short_hash>();
 }
 
 template <typename Iterator, bool CheckSafe>
 mini_hash deserializer<Iterator, CheckSafe>::read_mini_hash()
 {
-    return read_forward<mini_hash_size>();
+    return read_forward<mini_hash>();
 }
 
 // Big Endian Integers.
@@ -221,8 +230,6 @@ uint8_t deserializer<Iterator, CheckSafe>::peek_byte()
 template <typename Iterator, bool CheckSafe>
 uint8_t deserializer<Iterator, CheckSafe>::read_byte()
 {
-    ////return read_forward<1>()[0];
-
     if (!safe(1))
         invalidate();
 
@@ -308,35 +315,35 @@ void deserializer<Iterator, CheckSafe>::skip(size_t size)
 }
 
 template <typename Iterator, bool CheckSafe>
-template <unsigned Size>
-byte_array<Size> deserializer<Iterator, CheckSafe>::read_forward()
+template <typename Tuple>
+Tuple deserializer<Iterator, CheckSafe>::read_forward()
 {
-    if (!safe(Size))
+    if (!safe(std::tuple_size<Tuple>::value))
         invalidate();
 
-    if (!valid_ || Size == 0)
+    if (!valid_ || std::tuple_size<Tuple>::value == 0)
         return{};
 
-    byte_array<Size> out;
+    Tuple out;
     const auto begin = iterator_;
-    iterator_ += Size;
-    std::copy_n(begin, Size, out.begin());
+    iterator_ += std::tuple_size<Tuple>::value;
+    std::copy_n(begin, std::tuple_size<Tuple>::value, out.begin());
     return out;
 }
 
 template <typename Iterator, bool CheckSafe>
-template <unsigned Size>
-byte_array<Size> deserializer<Iterator, CheckSafe>::read_reverse()
+template <typename Tuple>
+Tuple deserializer<Iterator, CheckSafe>::read_reverse()
 {
-    if (!safe(Size))
+    if (!safe(std::tuple_size<Tuple>::value))
         invalidate();
 
     if (!valid_)
         return{};
 
-    byte_array<Size> out;
+    Tuple out;
     const auto begin = iterator_;
-    iterator_ += Size;
+    iterator_ += std::tuple_size<Tuple>::value;
     std::reverse_copy(begin, iterator_, out.begin());
     return out;
 }

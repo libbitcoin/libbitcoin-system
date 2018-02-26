@@ -85,7 +85,7 @@ public:
         const hd_public& of);
 
     /// Cast operators.
-    operator const bool() const;
+    operator bool() const;
     operator const ec_compressed&() const;
 
     /// Serializer.

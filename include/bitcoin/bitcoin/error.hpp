@@ -73,12 +73,15 @@ enum error_code_t
     store_block_duplicate = 66,
     store_block_invalid_height = 67,
     store_block_missing_parent = 68,
+    store_lock_failure = 85,
+    store_incorrect_state = 86,
 
     // blockchain
     duplicate_block = 51,
     orphan_block = 5,
     invalid_previous_block = 24,
     insufficient_work = 48,
+    duplicate_transaction = 84,
     orphan_transaction = 14,
     transaction_version = 17,
     insufficient_fee = 70,

@@ -40,18 +40,43 @@ class BC_API output
 public:
     typedef std::vector<output> list;
 
-    /// This is a sentinel used in .value to indicate not found in store.
-    /// This is a sentinel used in cache.value to indicate not populated.
-    /// This is a consensus value used in script::generate_signature_hash.
+    /// This is a sentinel used in .value to indicate not found/populated.
+    /// This is a consensus value required by script::generate_signature_hash.
     static const uint64_t not_found;
 
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
-        /// This is a non-consensus sentinel indicating output is unspent.
+        /// These are non-consensus sentinel values used by the store.
         static const uint32_t not_spent;
+        static const uint8_t indexed_true;
+        static const uint8_t indexed_false;
 
-        size_t spender_height = validation::not_spent;
+        uint8_t indexed() const
+        {
+            return spender_indexed ? indexed_true : indexed_false;
+        }
+
+        void set_indexed(uint8_t value)
+        {
+            BITCOIN_ASSERT(value == indexed_true || value == indexed_false);
+            spender_indexed = (value == indexed_true);
+        }
+
+        /// Set fork_height to max_size_t for tx pool validation.
+        bool spent(size_t fork_height) const
+        {
+            const auto relevant = spender_height <= fork_height;
+            const auto for_pool = fork_height == max_size_t;
+            const auto unspent = spender_height != not_spent;
+            return (spender_indexed && !for_pool) || (relevant && !unspent);
+        }
+
+        // TODO: simplify interface and reduce storage by spender_indexed
+        // in the high order bit of the spender_height, limiting heights to
+        // 2^31 or 2,147,483,648 or about 40,858 years of bitcoin.
+        bool spender_indexed = false;
+        uint32_t spender_height = not_spent;
     };
 
     // Constructors.

@@ -444,6 +444,28 @@ BOOST_AUTO_TEST_CASE(roundtrip_short_hash)
     BOOST_REQUIRE_EQUAL(false, !source);
 }
 
+BOOST_AUTO_TEST_CASE(roundtrip_mini_hash)
+{
+    static const mini_hash expected
+    {
+        0xed, 0x36, 0x48, 0xaf, 0x53, 0xc2
+    };
+
+    data_chunk data(expected.size());
+    auto source = make_safe_deserializer(data.begin(), data.end());
+    auto sink = make_unsafe_serializer(data.begin());
+
+    sink.write_mini_hash(expected);
+
+    const auto result = source.read_mini_hash();
+
+    BOOST_REQUIRE(expected == result);
+    BOOST_REQUIRE((bool)sink);
+    BOOST_REQUIRE((bool)source);
+    BOOST_REQUIRE_EQUAL(false, !sink);
+    BOOST_REQUIRE_EQUAL(false, !source);
+}
+
 BOOST_AUTO_TEST_CASE(roundtrip_fixed_string)
 {
     const std::string expected = "my string data";

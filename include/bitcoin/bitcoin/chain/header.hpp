@@ -49,9 +49,19 @@ public:
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
-        size_t height = 0;
-        uint32_t median_time_past = 0;
+        bool simulate = false;
+        uint64_t originator = 0;
+        code error = error::success;
         chain_state::ptr state = nullptr;
+
+        /// Transactions are populated (don't download).
+        bool populated = false;
+
+        /// Existing header, always valid (don't validate, update vs. create).
+        bool pooled = false;
+
+        /// The header is indexed (reject).
+        bool duplicate = false;
     };
 
     // Constructors.
@@ -135,10 +145,13 @@ public:
     // Validation.
     //-------------------------------------------------------------------------
 
-    bool is_valid_timestamp() const;
-    bool is_valid_proof_of_work(bool retarget=true) const;
+    uint256_t proof() const;
+    static uint256_t proof(uint32_t bits);
 
-    code check(bool retarget=false) const;
+    bool is_valid_timestamp() const;
+    bool is_valid_proof_of_work(bool retarget) const;
+
+    code check(bool retarget) const;
     code accept() const;
     code accept(const chain_state& state) const;
 

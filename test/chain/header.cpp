@@ -389,10 +389,10 @@ BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__bits_exceeds_maximum__retur
 {
     chain::header instance;
     instance.set_bits(retarget_proof_of_work_limit + 1);
-    BOOST_REQUIRE(!instance.is_valid_proof_of_work());
+    BOOST_REQUIRE(!instance.is_valid_proof_of_work(true));
 }
 
-BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__retarget_bits_exceeds_maximum__returns_false)
+BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__no_retarget_bits_exceeds_maximum__returns_false)
 {
     chain::header instance;
     instance.set_bits(no_retarget_proof_of_work_limit + 1);
@@ -409,7 +409,7 @@ BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_greater_bits__returns_
         0u,
         34564u);
 
-    BOOST_REQUIRE(!instance.is_valid_proof_of_work());
+    BOOST_REQUIRE(!instance.is_valid_proof_of_work(true));
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_less_than_bits__returns_true)
@@ -422,7 +422,18 @@ BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_less_than_bits__return
         402972254u,
         2842832236u);
 
-    BOOST_REQUIRE(instance.is_valid_proof_of_work());
+    BOOST_REQUIRE(instance.is_valid_proof_of_work(true));
+}
+
+BOOST_AUTO_TEST_CASE(header__proof1__genesis_mainnet__expected)
+{
+    BOOST_REQUIRE_EQUAL(chain::header::proof(0x1d00ffff), 0x0000000100010001);
+}
+
+BOOST_AUTO_TEST_CASE(header__proof2__genesis_mainnet__expected)
+{
+    const auto block = chain::block::genesis_mainnet();
+    BOOST_REQUIRE_EQUAL(block.header().proof(), 0x0000000100010001);
 }
 
 BOOST_AUTO_TEST_CASE(header__operator_assign_equals__always__matches_equivalent)

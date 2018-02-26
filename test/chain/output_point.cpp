@@ -87,12 +87,6 @@ BOOST_AUTO_TEST_CASE(output_point__constructor_7__valid_input__returns_input_ini
     BOOST_REQUIRE(instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(output_point__begin_end__initialized__begin_not_equal_end)
-{
-    static const chain::output_point instance{ null_hash, 0 };
-    BOOST_REQUIRE(instance.begin() != instance.end());
-}
-
 BOOST_AUTO_TEST_CASE(output_point__from_data__insufficient_bytes__failure)
 {
     static const data_chunk data(10);

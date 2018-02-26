@@ -96,7 +96,7 @@ public:
     friend std::ostream& operator<<(std::ostream& out, const ec_private& of);
 
     /// Cast operators.
-    operator const bool() const;
+    operator bool() const;
     operator const ec_secret&() const;
 
     /// Serializer.

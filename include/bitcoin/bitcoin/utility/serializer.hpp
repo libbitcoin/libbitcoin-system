@@ -21,6 +21,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
@@ -40,11 +41,11 @@ public:
 
     serializer(const Iterator begin);
 
-    template <typename Buffer>
-    void write_forward(const Buffer& data);
+    template <typename Tuple>
+    void write_forward(const Tuple& data);
 
-    template <typename Buffer>
-    void write_reverse(const Buffer& data);
+    template <typename Tuple>
+    void write_reverse(const Tuple& data);
 
     template <typename Integer>
     void write_big_endian(Integer value);

@@ -82,7 +82,6 @@
     <ClCompile Include="..\..\..\..\test\chain\output_point.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\payment_record.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\point.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\point_iterator.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\point_value.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\points_value.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\satoshi_words.cpp" />

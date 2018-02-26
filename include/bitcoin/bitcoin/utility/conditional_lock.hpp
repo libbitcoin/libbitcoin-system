@@ -28,7 +28,10 @@ namespace libbitcoin {
 class BC_API conditional_lock
 {
 public:
-    /// Conditional lock using specified mutex pointer.
+    /// Conditional lock using internally-managed mutex pointer.
+    conditional_lock(bool lock);
+
+    /// Conditional lock using parameterized mutex pointer (may be null).
     conditional_lock(std::shared_ptr<shared_mutex> mutex_ptr);
 
     /// Unlock.
