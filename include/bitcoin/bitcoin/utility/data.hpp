@@ -51,7 +51,7 @@ typedef std::vector<data_chunk> data_stack;
 typedef std::initializer_list<data_slice> loaf;
 
 /**
- * Create a single byte arrray with an initial value.
+ * Create a single byte array with an initial value.
  */
 inline one_byte to_array(uint8_t byte);
 
