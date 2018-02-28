@@ -1143,7 +1143,6 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     const auto bip30 = state.is_enabled(rule_fork::bip30_rule);
     const auto bip68 = state.is_enabled(rule_fork::bip68_rule);
     const auto bip141 = state.is_enabled(rule_fork::bip141_rule);
-    const auto revert_bip30 = state.is_enabled(rule_fork::allow_collisions);
 
     // bip141 discounts segwit sigops by increasing limit and legacy weight.
     const auto max_sigops = bip141 ? max_fast_sigops : max_block_sigops;
@@ -1161,13 +1160,10 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     if (transaction_pool && version() > state.maximum_transaction_version())
         return error::transaction_version;
 
-    //*************************************************************************
-    // CONSENSUS:
-    // A transaction hash that exists in the chain is not acceptable even if
-    // the original is spent in the new block. This is not necessary nor is it
-    // described by BIP30, but it is in the code referenced by BIP30.
-    //*************************************************************************
-    else if (bip30 && !revert_bip30 && validation.duplicate)
+    // An unconfirmed transaction hash that exists in the chain is not accepted
+    // even if the original is spent in the new block. This is not necessary
+    // nor is it described by BIP30, but it is in the code referenced by BIP30.
+    else if (bip30 && validation.duplicate)
         return error::unspent_duplicate;
 
     else if (is_missing_previous_outputs())

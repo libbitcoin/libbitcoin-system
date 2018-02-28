@@ -180,9 +180,10 @@ chain_state::activations chain_state::activation(const data& values,
     const auto version = values.version.self;
     const auto& history = values.version.ordered;
     const auto frozen = script::is_enabled(forks, rule_fork::bip90_rule);
-    const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
+    const auto difficult = script::is_enabled(forks, rule_fork::difficult);
     const auto retarget = script::is_enabled(forks, rule_fork::retarget);
-    const auto mainnet = retarget && !testnet;
+    const auto mainnet = retarget && difficult;
+    const auto testnet = !difficult;
 
     //*************************************************************************
     // CONSENSUS: Though unspecified in bip34, the satoshi implementation
@@ -215,7 +216,7 @@ chain_state::activations chain_state::activation(const data& values,
     result.forks |= (rule_fork::retarget & forks);
 
     // testnet is activated based on configuration alone (hard fork).
-    result.forks |= (rule_fork::easy_blocks & forks);
+    result.forks |= (rule_fork::difficult & forks);
 
     // bip90 is activated based on configuration alone (hard fork).
     result.forks |= (rule_fork::bip90_rule & forks);
@@ -250,12 +251,6 @@ chain_state::activations chain_state::activation(const data& values,
     if (bip65_ice || (is_active(count_4, mainnet) && version >= bip65_version))
     {
         result.forks |= (rule_fork::bip65_rule & forks);
-    }
-
-    // allow_collisions is active above the bip34 checkpoint only.
-    if (allow_collisions(values.allow_collisions_hash, mainnet, testnet))
-    {
-        result.forks |= (rule_fork::allow_collisions & forks);
     }
 
     // bip9_bit0 forks are enforced above the bip9_bit0 checkpoint.
@@ -295,9 +290,9 @@ chain_state::activations chain_state::activation(const data& values,
 
 size_t chain_state::bits_count(size_t height, uint32_t forks)
 {
-    const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
+    const auto difficult = script::is_enabled(forks, rule_fork::difficult);
     const auto retarget = script::is_enabled(forks, rule_fork::retarget);
-    const auto easy_work = testnet && retarget && !is_retarget_height(height);
+    const auto easy_work = !difficult && retarget && !is_retarget_height(height);
     return easy_work ? std::min(height, retargeting_interval) : 1;
 }
 
@@ -310,9 +305,9 @@ size_t chain_state::version_count(size_t height, uint32_t forks)
     }
 
     // Regtest and testnet both use bip34 test activation.
-    const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
+    const auto difficult = script::is_enabled(forks, rule_fork::difficult);
     const auto retarget = script::is_enabled(forks, rule_fork::retarget);
-    return std::min(height, version_sample_size(retarget && !testnet));
+    return std::min(height, version_sample_size(retarget && difficult));
 }
 
 size_t chain_state::timestamp_count(size_t height, uint32_t)
@@ -333,7 +328,7 @@ size_t chain_state::retarget_height(size_t height, uint32_t forks)
 
 size_t chain_state::collision_height(size_t height, uint32_t forks)
 {
-    const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
+    const auto testnet = !script::is_enabled(forks, rule_fork::difficult);
     const auto regtest = !script::is_enabled(forks, rule_fork::retarget);
 
     const auto bip34_height =
@@ -347,7 +342,7 @@ size_t chain_state::collision_height(size_t height, uint32_t forks)
 
 size_t chain_state::bip9_bit0_height(size_t height, uint32_t forks)
 {
-    const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
+    const auto testnet = !script::is_enabled(forks, rule_fork::difficult);
     const auto regtest = !script::is_enabled(forks, rule_fork::retarget);
 
     const auto activation_height =
@@ -361,7 +356,7 @@ size_t chain_state::bip9_bit0_height(size_t height, uint32_t forks)
 
 size_t chain_state::bip9_bit1_height(size_t height, uint32_t forks)
 {
-    const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
+    const auto testnet = !script::is_enabled(forks, rule_fork::difficult);
 
     const auto activation_height = testnet ?
         testnet_bip9_bit1_active_checkpoint.height() :
@@ -403,7 +398,7 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks)
     if (is_retarget_height(values.height))
         return work_required_retarget(values);
 
-    if (script::is_enabled(forks, rule_fork::easy_blocks))
+    if (!script::is_enabled(forks, rule_fork::difficult))
         return easy_work_required(values);
 
     return bits_high(values);
@@ -632,9 +627,10 @@ chain_state::data chain_state::to_block(const chain_state& pool,
     const auto forks = pool.forks_;
 
     // Retargeting and testnet are only activated via configuration.
-    const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
+    const auto difficult = script::is_enabled(forks, rule_fork::difficult);
     const auto retarget = script::is_enabled(forks, rule_fork::retarget);
-    const auto mainnet = retarget && !testnet;
+    const auto mainnet = retarget && difficult;
+    const auto testnet = !difficult;
 
     // Copy data from presumed same-height pool state.
     auto data = pool.data_;
@@ -682,9 +678,10 @@ chain_state::data chain_state::to_header(const chain_state& parent,
     const auto forks = parent.forks_;
 
     // Retargeting and testnet are only activated via configuration.
-    const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
+    const auto difficult = script::is_enabled(forks, rule_fork::difficult);
     const auto retarget = script::is_enabled(forks, rule_fork::retarget);
-    const auto mainnet = retarget && !testnet;
+    const auto mainnet = retarget && difficult;
+    const auto testnet = !difficult;
 
     // Copy and promote data from presumed parent-height header/block state.
     auto data = to_pool(parent);
@@ -725,12 +722,10 @@ chain_state::chain_state(const chain_state& parent, const header& header)
 }
 
 // Constructor (from raw data).
-// The allow_collisions hard fork is always activated (not configurable).
-// TODO: remove allow_collisions fork by incorporating into bip30 revert.
 chain_state::chain_state(data&& values, const checkpoints& checkpoints,
     uint32_t forks, uint32_t stale_seconds)
   : data_(std::move(values)),
-    forks_(forks | rule_fork::allow_collisions),
+    forks_(forks),
     stale_seconds_(stale_seconds),
     checkpoints_(checkpoints),
     active_(activation(data_, forks_)),
