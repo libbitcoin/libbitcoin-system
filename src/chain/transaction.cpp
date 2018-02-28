@@ -54,7 +54,7 @@ namespace chain {
 using namespace bc::machine;
 
 // HACK: must match tx slab_map::not_found.
-const uint64_t transaction::validation::undetermined_link = 0;
+const uint64_t transaction::validation::undetermined_link = max_int64;
 
 // Read a length-prefixed collection of inputs or outputs from the source.
 template<class Source, class Put>
