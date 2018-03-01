@@ -29,28 +29,28 @@ enum rule_fork : uint32_t
     no_rules = 0,
 
     /// Allow minimum difficulty blocks (hard fork, testnet).
-    easy_blocks = 1u << 0,
+    difficult = 1u << 0,
+
+    /// Perform difficulty retargeting (hard fork, regtest).
+    retarget = 1u << 1,
 
     /// Pay-to-script-hash enabled (soft fork, feature).
-    bip16_rule = 1u << 1,
+    bip16_rule = 1u << 2,
 
-    /// No duplicated unspent transaction ids (hard fork, security).
-    bip30_rule = 1u << 2,
+    /// No duplicated unspent transaction ids (soft fork, security).
+    bip30_rule = 1u << 3,
 
     /// Coinbase must include height (soft fork, security).
-    bip34_rule = 1u << 3,
+    bip34_rule = 1u << 4,
 
     /// Strict DER signatures required (soft fork, security).
-    bip66_rule = 1u << 4,
+    bip66_rule = 1u << 5,
 
     /// Operation nop2 becomes check locktime verify (soft fork, feature).
-    bip65_rule = 1u << 5,
+    bip65_rule = 1u << 6,
 
     /// Hard code bip34-based activation heights (hard fork, optimization).
-    bip90_rule = 1u << 6,
-
-    /// Assume hash collisions cannot happen (hard fork, optimization).
-    allow_collisions = 1u << 7,
+    bip90_rule = 1u << 7,
 
     /// Enforce relative locktime (soft fork, feature).
     bip68_rule = 1u << 8,
@@ -70,8 +70,10 @@ enum rule_fork : uint32_t
     /// Prevent dummy value malleability (soft fork, feature).
     bip147_rule = 1u << 13,
 
-    /// Perform difficulty retargeting (hard fork, regtest).
-    retarget = 1u << 30,
+    // TODO: future bitcoin forks work forward from << 14.
+    // TODO: splitcoin/altcoin forks work backwards from << 30.
+    ////time_warp_patch = 1u << 29,
+    ////scrypt_proof = 1u << 30,
 
     /// Sentinel bit to indicate tx has not been validated.
     unverified = 1u << 31,
