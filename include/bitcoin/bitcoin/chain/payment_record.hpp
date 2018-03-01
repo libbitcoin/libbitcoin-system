@@ -49,14 +49,7 @@ public:
     payment_record(chain::payment_record&& other);
     payment_record(const chain::payment_record& other);
 
-    payment_record(size_t height, chain::input_point&& point,
-        uint64_t checksum);
-    payment_record(size_t height, const chain::input_point& point,
-        uint64_t checksum);
-    payment_record(size_t height, chain::output_point&& point,
-        uint64_t value);
-    payment_record(size_t height, const chain::output_point& point,
-        uint64_t value);
+    payment_record(uint64_t link, uint32_t index, uint64_t data, bool output);
 
     // Operators.
     //-------------------------------------------------------------------------
@@ -99,32 +92,30 @@ public:
     /// The point is an output.
     bool is_output() const;
 
-    /// The point is an input.
-    bool is_input() const;
-
     /// The point that identifies the input or output.
     const chain::point& point() const;
 
     /// The value of the input point or checksum of the output point.
     uint64_t data() const;
 
+    /// The blockchain height of the point.
+    uint64_t link() const;
+
+    /// Set the point height.
+    void set_height(size_t height);
+
+    /// Set the point hash.
+    void set_hash(hash_digest&& hash);
+
 protected:
     void reset();
 
 private:
-    enum class point_kind : uint8_t
-    {
-        output = 0,
-        input = 1,
-        invalid = 2
-    };
-
-    static point_kind to_kind(uint8_t value);
-
-    uint32_t height_;
-    point_kind kind_;
+    bool output_;
+    size_t height_;
     chain::point point_;
     uint64_t data_;
+    uint64_t link_;
 };
 
 } // namespace chain

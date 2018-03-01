@@ -35,74 +35,48 @@
 namespace libbitcoin {
 namespace chain {
 
+// HACK: must match tx slab_map::not_found.
+static const uint64_t undetermined_link = max_uint64;
+
 // Constructors.
 //-----------------------------------------------------------------------------
 
 payment_record::payment_record()
-  : height_(0), kind_(point_kind::invalid), point_{}, data_(0)
+  : output_(false),
+    height_(0),
+    point_{},
+    data_(0),
+    link_(undetermined_link)
 {
 }
 
 payment_record::payment_record(chain::payment_record&& other)
-  : height_(static_cast<uint32_t>(other.height_)),
-    kind_(other.kind_),
+  : output_(other.output_),
+    height_(other.height_),
     point_(std::move(other.point_)),
-    data_(other.data_)
+    data_(other.data_),
+    link_(other.link_)
 {
 }
 
 payment_record::payment_record(const chain::payment_record& other)
-  : height_(static_cast<uint32_t>(other.height_)),
-    kind_(other.kind_),
+  : output_(other.output_),
+    height_(other.height_),
     point_(other.point_),
-    data_(other.data_)
+    data_(other.data_),
+    link_(other.link_)
 {
 }
 
-payment_record::payment_record(size_t height, chain::input_point&& point,
-    uint64_t checksum)
-  : height_(static_cast<uint32_t>(height)),
-    kind_(point_kind::input),
-    point_(std::move(point)),
-    data_(checksum)
+payment_record::payment_record(uint64_t link, uint32_t index, uint64_t data,
+    bool output)
+  : output_(output),
+    height_(0),
+    point_{ null_hash, index },
+    data_(data),
+    link_(link)
     
 {
-    // This class is used internal to the store, parameters presumed valid.
-    BITCOIN_ASSERT(height <= max_uint32);
-}
-
-payment_record::payment_record(size_t height, const chain::input_point& point,
-    uint64_t checksum)
-  : height_(static_cast<uint32_t>(height)),
-    kind_(point_kind::input),
-    point_(point),
-    data_(checksum)
-{
-    // This class is used internal to the store, parameters presumed valid.
-    BITCOIN_ASSERT(height <= max_uint32);
-}
-
-payment_record::payment_record(size_t height, chain::output_point&& point,
-    uint64_t value)
-  : height_(static_cast<uint32_t>(height)),
-    kind_(point_kind::output),
-    point_(std::move(point)),
-    data_(value)
-    
-{
-    // This class is used internal to the store, parameters presumed valid.
-    BITCOIN_ASSERT(height <= max_uint32);
-}
-
-payment_record::payment_record(size_t height, const chain::output_point& point,
-    uint64_t value)
-  : height_(static_cast<uint32_t>(height)),
-    kind_(point_kind::output),
-    point_(point),
-    data_(value)
-{
-    // This class is used internal to the store, parameters presumed valid.
-    BITCOIN_ASSERT(height <= max_uint32);
 }
 
 // Operators.
@@ -110,28 +84,31 @@ payment_record::payment_record(size_t height, const chain::output_point& point,
 
 payment_record& payment_record::operator=(payment_record&& other)
 {
+    output_ = other.output_;
     height_ = other.height_;
-    kind_ = other.kind_;
     point_ = std::move(other.point_);
     data_ = other.data_;
+    link_ = other.link_;
     return *this;
 }
 
 payment_record& payment_record::operator=(const payment_record& other)
 {
+    output_ = other.output_;
     height_ = other.height_;
-    kind_ = other.kind_;
     point_ = other.point_;
     data_ = other.data_;
+    link_ = other.link_;
     return *this;
 }
 
 bool payment_record::operator==(const payment_record& other) const
 {
-    return (height_ == other.height_)
-        && (kind_ == other.kind_)
+    return (output_ == other.output_)
+        && (height_ == other.height_)
         && (point_ == other.point_)
-        && (data_ == other.data_);
+        && (data_ == other.data_)
+        && (link_ == other.link_);
 }
 
 bool payment_record::operator!=(const payment_record& other) const
@@ -175,29 +152,22 @@ bool payment_record::from_data(std::istream& stream, bool wire)
     return from_data(source, wire);
 }
 
-// private/static
-payment_record::point_kind payment_record::to_kind(uint8_t value)
-{
-    switch (value)
-    {
-        case 0:
-            return point_kind::output;
-        case 1:
-            return point_kind::input;
-        default:
-            return point_kind::invalid;
-    }
-}
-
 bool payment_record::from_data(reader& source, bool wire)
 {
-    kind_ = to_kind(source.read_byte());
-    point_.from_data(source, wire);
-    height_ = source.read_4_bytes_little_endian();
-    data_ = source.read_8_bytes_little_endian();
+    const auto output = source.read_byte();
 
-    if (kind_ == point_kind::invalid)
+    if (output != 1 && output != 0)
         source.invalidate();
+
+    output_ = output == 1;
+    point_.from_data(source, wire);
+
+    if (wire)
+        height_ = source.read_4_bytes_little_endian();
+    else
+        link_ = source.read_8_bytes_little_endian();
+
+    data_ = source.read_8_bytes_little_endian();
 
     if (!source)
         reset();
@@ -208,15 +178,16 @@ bool payment_record::from_data(reader& source, bool wire)
 // protected
 void payment_record::reset()
 {
+    output_ = false;
     height_ = 0;
-    kind_ = point_kind::invalid;
     point_.reset();
     data_ = 0;
+    link_ = undetermined_link;
 }
 
 bool payment_record::is_valid() const
 {
-    return kind_ != point_kind::invalid && point_.is_valid();
+    return point_.is_valid();
 }
 
 // Serialization.
@@ -240,21 +211,33 @@ void payment_record::to_data(std::ostream& stream, bool wire) const
     to_data(sink, wire);
 }
 
+// Wire assumes height and point.hash population.
 void payment_record::to_data(writer& sink, bool wire) const
 {
-    sink.write_byte(static_cast<uint8_t>(kind_));
+    sink.write_byte(output_ ? 1 : 0);
     point_.to_data(sink, wire);
-    sink.write_4_bytes_little_endian(height_);
+
+    if (wire)
+        sink.write_4_bytes_little_endian(static_cast<uint32_t>(height_));
+    else
+        sink.write_8_bytes_little_endian(link_);
+
     sink.write_8_bytes_little_endian(data_);
 }
 
 // Properties (size, accessors).
 //-----------------------------------------------------------------------------
 
+// TODO: should be further generalized into point with link metadata.
+// Non-wire point does not currently include the tx offset (hacked in).
+// Non-wire payment_record doesn't include height (retrieved from tx store).
 size_t payment_record::satoshi_fixed_size(bool wire)
 {
-    return sizeof(uint8_t) + chain::point::satoshi_fixed_size(wire) + 
-        sizeof(uint32_t) + sizeof(uint64_t);
+    return
+        sizeof(uint8_t) +
+        chain::point::satoshi_fixed_size(wire) +
+        (wire ? sizeof(uint32_t) : sizeof(uint64_t)) +
+        sizeof(uint64_t);
 }
 
 size_t payment_record::serialized_size(bool wire) const
@@ -269,12 +252,7 @@ size_t payment_record::height() const
 
 bool payment_record::is_output() const
 {
-    return kind_ == point_kind::output;
-}
-
-bool payment_record::is_input() const
-{
-    return kind_ == point_kind::input;
+    return output_;
 }
 
 const chain::point& payment_record::point() const
@@ -285,6 +263,24 @@ const chain::point& payment_record::point() const
 uint64_t payment_record::data() const
 {
     return data_;
+}
+
+uint64_t payment_record::link() const
+{
+    return link_;
+}
+
+// Set after non-wire deserializaton (distinct store).
+void payment_record::set_height(size_t height)
+{
+    BITCOIN_ASSERT_MSG(height <= max_size_t, "height overflow");
+    height_ = height;
+}
+
+// Set after non-wire deserializaton (distinct store).
+void payment_record::set_hash(hash_digest&& hash)
+{
+    point_.set_hash(std::move(hash));
 }
 
 } // namespace chain
