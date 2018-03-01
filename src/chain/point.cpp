@@ -157,14 +157,15 @@ bool point::from_data(reader& source, bool wire)
     reset();
 
     valid_ = true;
-    hash_ = source.read_hash();
 
     if (wire)
     {
+        hash_ = source.read_hash();
         index_ = source.read_4_bytes_little_endian();
     }
     else
     {
+        // Non-wire does not currently include the tx offset.
         index_ = source.read_2_bytes_little_endian();
 
         if (index_ == max_uint16)
@@ -187,7 +188,7 @@ void point::reset()
 
 bool point::is_valid() const
 {
-    return valid_ || (hash_ != null_hash) || (index_ != 0);
+    return valid_;
 }
 
 // Serialization.
@@ -213,14 +214,14 @@ void point::to_data(std::ostream& stream, bool wire) const
 
 void point::to_data(writer& sink, bool wire) const
 {
-    sink.write_hash(hash_);
-
     if (wire)
     {
+        sink.write_hash(hash_);
         sink.write_4_bytes_little_endian(index_);
     }
     else
     {
+        // Non-wire does not currently include the tx offset.
         BITCOIN_ASSERT(index_ == null_index || index_ < max_uint16);
         sink.write_2_bytes_little_endian(static_cast<uint16_t>(index_));
     }
@@ -231,7 +232,8 @@ void point::to_data(writer& sink, bool wire) const
 
 size_t point::satoshi_fixed_size(bool wire)
 {
-    return hash_size + (wire ? sizeof(uint32_t) : sizeof(uint16_t));
+    // Non-wire does not currently include the tx offset.
+    return wire ? hash_size + sizeof(uint32_t) : sizeof(uint16_t);
 }
 
 size_t point::serialized_size(bool wire) const
