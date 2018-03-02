@@ -252,7 +252,7 @@ void payment_record::to_data(writer& sink, bool wire) const
     {
         sink.write_8_bytes_little_endian(link_);
 
-        BITCOIN_ASSERT(index_ == null_index || index_ < max_uint16);
+        BITCOIN_ASSERT(index_ == point::null_index || index_ < max_uint16);
 
         // Convert 32 bit sentinel to 16 bit sentinel.
         const auto index = (index_ == point::null_index) ? max_uint16 :
