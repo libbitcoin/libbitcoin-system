@@ -76,9 +76,6 @@
     <Filter Include="src">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000000}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\external">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000005}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\chain">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000001}</UniqueIdentifier>
     </Filter>
