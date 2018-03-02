@@ -23,8 +23,6 @@
 #include <istream>
 #include <utility>
 #include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/chain/input_point.hpp>
-#include <bitcoin/bitcoin/chain/output_point.hpp>
 #include <bitcoin/bitcoin/chain/point.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -36,33 +34,40 @@ namespace libbitcoin {
 namespace chain {
 
 // HACK: must match tx slab_map::not_found.
-static const uint64_t undetermined_link = max_uint64;
+static constexpr uint64_t undetermined_link = max_uint64;
 
 // Constructors.
 //-----------------------------------------------------------------------------
 
+// A default instance is invalid (until modified).
 payment_record::payment_record()
-  : output_(false),
+  : valid_(false),
+    output_(false),
     height_(0),
-    point_{},
+    hash_(null_hash),
+    index_(0),
     data_(0),
     link_(undetermined_link)
 {
 }
 
 payment_record::payment_record(chain::payment_record&& other)
-  : output_(other.output_),
+  : valid_(other.valid_),
+    output_(other.output_),
     height_(other.height_),
-    point_(std::move(other.point_)),
+    hash_(null_hash),
+    index_(0),
     data_(other.data_),
     link_(other.link_)
 {
 }
 
 payment_record::payment_record(const chain::payment_record& other)
-  : output_(other.output_),
+  : valid_(other.valid_),
+    output_(other.output_),
     height_(other.height_),
-    point_(other.point_),
+    hash_(other.hash_),
+    index_(other.index_),
     data_(other.data_),
     link_(other.link_)
 {
@@ -70,9 +75,11 @@ payment_record::payment_record(const chain::payment_record& other)
 
 payment_record::payment_record(uint64_t link, uint32_t index, uint64_t data,
     bool output)
-  : output_(output),
+  : valid_(true),
+    output_(output),
     height_(0),
-    point_{ null_hash, index },
+    hash_(null_hash),
+    index_(index),
     data_(data),
     link_(link)
     
@@ -84,9 +91,11 @@ payment_record::payment_record(uint64_t link, uint32_t index, uint64_t data,
 
 payment_record& payment_record::operator=(payment_record&& other)
 {
+    valid_ = other.valid_;
     output_ = other.output_;
     height_ = other.height_;
-    point_ = std::move(other.point_);
+    hash_ = other.hash_;
+    index_ = other.index_;
     data_ = other.data_;
     link_ = other.link_;
     return *this;
@@ -94,9 +103,11 @@ payment_record& payment_record::operator=(payment_record&& other)
 
 payment_record& payment_record::operator=(const payment_record& other)
 {
+    valid_ = other.valid_;
     output_ = other.output_;
     height_ = other.height_;
-    point_ = other.point_;
+    hash_ = other.hash_;
+    index_ = other.index_;
     data_ = other.data_;
     link_ = other.link_;
     return *this;
@@ -106,7 +117,8 @@ bool payment_record::operator==(const payment_record& other) const
 {
     return (output_ == other.output_)
         && (height_ == other.height_)
-        && (point_ == other.point_)
+        && (hash_ == other.hash_)
+        && (index_ == other.index_)
         && (data_ == other.data_)
         && (link_ == other.link_);
 }
@@ -152,20 +164,30 @@ bool payment_record::from_data(std::istream& stream, bool wire)
     return from_data(source, wire);
 }
 
+// Avoid point reuse due to affect on store tx serialization.
 bool payment_record::from_data(reader& source, bool wire)
 {
-    const auto output = source.read_byte();
-
-    if (output != 1 && output != 0)
-        source.invalidate();
-
-    output_ = output == 1;
-    point_.from_data(source, wire);
+    valid_ = true;
+    output_ = (source.read_byte() == 1);
 
     if (wire)
+    {
         height_ = source.read_4_bytes_little_endian();
+        link_ = undetermined_link;
+        hash_ = source.read_hash();
+        index_ = source.read_4_bytes_little_endian();
+    }
     else
+    {
+        height_ = 0;
         link_ = source.read_8_bytes_little_endian();
+        hash_ = null_hash;
+        index_ = source.read_2_bytes_little_endian();
+
+        // Convert 16 bit sentinel to 32 bit sentinel.
+        if (index_ == max_uint16)
+            index_ = point::null_index;
+    }
 
     data_ = source.read_8_bytes_little_endian();
 
@@ -178,16 +200,17 @@ bool payment_record::from_data(reader& source, bool wire)
 // protected
 void payment_record::reset()
 {
+    valid_ = false;
     output_ = false;
     height_ = 0;
-    point_.reset();
+    hash_ = null_hash;
     data_ = 0;
     link_ = undetermined_link;
 }
 
 bool payment_record::is_valid() const
 {
-    return point_.is_valid();
+    return valid_;
 }
 
 // Serialization.
@@ -215,12 +238,28 @@ void payment_record::to_data(std::ostream& stream, bool wire) const
 void payment_record::to_data(writer& sink, bool wire) const
 {
     sink.write_byte(output_ ? 1 : 0);
-    point_.to_data(sink, wire);
 
     if (wire)
-        sink.write_4_bytes_little_endian(static_cast<uint32_t>(height_));
+    {
+        BITCOIN_ASSERT(height_ <= max_uint32);
+        const auto height = static_cast<uint32_t>(height_);
+        sink.write_4_bytes_little_endian(height);
+
+        sink.write_hash(hash_);
+        sink.write_4_bytes_little_endian(index_);
+    }
     else
+    {
         sink.write_8_bytes_little_endian(link_);
+
+        BITCOIN_ASSERT(index_ == null_index || index_ < max_uint16);
+
+        // Convert 32 bit sentinel to 16 bit sentinel.
+        const auto index = (index_ == point::null_index) ? max_uint16 :
+            static_cast<uint16_t>(index_);
+
+        sink.write_2_bytes_little_endian(index);
+    }
 
     sink.write_8_bytes_little_endian(data_);
 }
@@ -235,8 +274,9 @@ size_t payment_record::satoshi_fixed_size(bool wire)
 {
     return
         sizeof(uint8_t) +
-        chain::point::satoshi_fixed_size(wire) +
-        (wire ? sizeof(uint32_t) : sizeof(uint64_t)) +
+        (wire ? sizeof(uint32_t) : 0) +
+        (wire ? hash_size : sizeof(uint64_t)) +
+        (wire ? sizeof(uint32_t) : sizeof(uint16_t)) +
         sizeof(uint64_t);
 }
 
@@ -245,19 +285,9 @@ size_t payment_record::serialized_size(bool wire) const
     return satoshi_fixed_size(wire);
 }
 
-size_t payment_record::height() const
-{
-    return height_;
-}
-
 bool payment_record::is_output() const
 {
     return output_;
-}
-
-const chain::point& payment_record::point() const
-{
-    return point_;
 }
 
 uint64_t payment_record::data() const
@@ -270,17 +300,26 @@ uint64_t payment_record::link() const
     return link_;
 }
 
+size_t payment_record::height() const
+{
+    return height_;
+}
+
 // Set after non-wire deserializaton (distinct store).
 void payment_record::set_height(size_t height)
 {
-    BITCOIN_ASSERT_MSG(height <= max_size_t, "height overflow");
     height_ = height;
+}
+
+hash_digest payment_record::hash() const
+{
+    return hash_;
 }
 
 // Set after non-wire deserializaton (distinct store).
 void payment_record::set_hash(hash_digest&& hash)
 {
-    point_.set_hash(std::move(hash));
+    hash_ = std::move(hash);
 }
 
 } // namespace chain
