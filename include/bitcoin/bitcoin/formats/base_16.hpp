@@ -75,7 +75,7 @@ BC_API bool decode_hash(hash_digest& out, const std::string& in);
  * Convert a hex string literal into a bitcoin_hash.
  * The bitcoin_hash format is like base16, but with the bytes reversed.
  */
-BC_API hash_digest hash_literal(const char (&string)[2*hash_size + 1]);
+BC_API hash_digest hash_literal(const char (&string)[2 * hash_size + 1]);
 
 } // namespace libbitcoin
 

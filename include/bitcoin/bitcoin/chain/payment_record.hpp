@@ -25,9 +25,6 @@
 #include <vector>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/chain/point.hpp>
-#include <bitcoin/bitcoin/chain/input_point.hpp>
-#include <bitcoin/bitcoin/chain/output_point.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
@@ -86,14 +83,8 @@ public:
     static size_t satoshi_fixed_size(bool wire=true);
     size_t serialized_size(bool wire=true) const;
 
-    /// The blockchain height of the point.
-    size_t height() const;
-
     /// The point is an output.
     bool is_output() const;
-
-    /// The point that identifies the input or output.
-    const chain::point& point() const;
 
     /// The value of the input point or checksum of the output point.
     uint64_t data() const;
@@ -101,8 +92,14 @@ public:
     /// The blockchain height of the point.
     uint64_t link() const;
 
+    /// The blockchain height of the point.
+    size_t height() const;
+
     /// Set the point height.
     void set_height(size_t height);
+
+    /// The hash of the point.
+    hash_digest hash() const;
 
     /// Set the point hash.
     void set_hash(hash_digest&& hash);
@@ -111,9 +108,11 @@ protected:
     void reset();
 
 private:
+    bool valid_;
     bool output_;
     size_t height_;
-    chain::point point_;
+    hash_digest hash_;
+    uint32_t index_;
     uint64_t data_;
     uint64_t link_;
 };

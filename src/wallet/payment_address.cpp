@@ -269,8 +269,8 @@ payment_address::list payment_address::extract_input(
         {
             return
             {
-                { ec_public{ script[1].data() }, p2kh_version },
-                { bitcoin_short_hash(script.back().data()), p2sh_version }
+                { ec_public{ script[1].data() }, p2kh_version }////,
+                ////{ bitcoin_short_hash(script.back().data()), p2sh_version }
             };
         }
         case script_pattern::sign_script_hash:
