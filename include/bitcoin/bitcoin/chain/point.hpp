@@ -111,9 +111,6 @@ public:
     bool is_null() const;
 
 protected:
-    // So that payment_record may call reset from its own.
-    friend class payment_record;
-
     point(hash_digest&& hash, uint32_t index, bool valid);
     point(const hash_digest& hash, uint32_t index, bool valid);
     void reset();
