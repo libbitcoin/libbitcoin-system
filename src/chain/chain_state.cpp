@@ -271,10 +271,20 @@ chain_state::activations chain_state::activation(const data& values,
 
 size_t chain_state::bits_count(size_t height, uint32_t forks)
 {
-    const auto difficult = script::is_enabled(forks, rule_fork::difficult);
-    const auto retarget = script::is_enabled(forks, rule_fork::retarget);
-    const auto easy_work = !difficult && retarget && !is_retarget_height(height);
-    return easy_work ? std::min(height, retargeting_interval) : 1;
+    // Mainnet doesn't use bits in retargeting. 
+    if (script::is_enabled(forks, rule_fork::difficult))
+        return 1;
+
+    // Regtest bypasses all retargeting.
+    if (!script::is_enabled(forks, rule_fork::retarget))
+        return 1;
+
+    // Testnet uses mainnet retargeting on interval.
+    if (is_retarget_height(height))
+        return 1;
+
+    // Testnet requires all bits for inter-interval retargeting.
+    return std::min(height, retargeting_interval);
 }
 
 size_t chain_state::version_count(size_t height, uint32_t forks)
@@ -285,7 +295,7 @@ size_t chain_state::version_count(size_t height, uint32_t forks)
         return 0;
     }
 
-    // Regtest and testnet both use bip34 test activation.
+    // Regtest and testnet both use bip34 testnet activation.
     const auto difficult = script::is_enabled(forks, rule_fork::difficult);
     const auto retarget = script::is_enabled(forks, rule_fork::retarget);
     return std::min(height, version_sample_size(retarget && difficult));
@@ -362,12 +372,15 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks)
     if (!script::is_enabled(forks, rule_fork::retarget))
         return bits_high(values);
 
+    // Mainnet and testnet retarget on interval.
     if (is_retarget_height(values.height))
         return work_required_retarget(values);
 
+    // Testnet retargets easy on inter-interval.
     if (!script::is_enabled(forks, rule_fork::difficult))
         return easy_work_required(values);
 
+    // Mainnet not retargeting.
     return bits_high(values);
 }
 
