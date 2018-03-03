@@ -189,8 +189,8 @@ BOOST_AUTO_TEST_CASE(output_point__is_mature__mature_coinbase_prevout__returns_t
 {
     size_t target_height = 162u;
     chain::output_point instance(hash1, 42);
-    instance.validation.height = 50u;
-    instance.validation.coinbase = true;
+    instance.metadata.height = 50u;
+    instance.metadata.coinbase = true;
     BOOST_REQUIRE(!instance.is_null());
     BOOST_REQUIRE(instance.is_mature(target_height));
 }
@@ -199,8 +199,8 @@ BOOST_AUTO_TEST_CASE(output_point__is_mature__immature_coinbase_prevout__returns
 {
     size_t target_height = 162u;
     chain::output_point instance(hash1, 42);
-    instance.validation.height = 100u;
-    instance.validation.coinbase = true;
+    instance.metadata.height = 100u;
+    instance.metadata.coinbase = true;
     BOOST_REQUIRE(!instance.is_null());
     BOOST_REQUIRE(!instance.is_mature(target_height));
 }
@@ -209,8 +209,8 @@ BOOST_AUTO_TEST_CASE(output_point__is_mature__immature_coinbase_prevout_null_inp
 {
     size_t target_height = 162u;
     chain::output_point instance(null_hash, chain::point::null_index);
-    instance.validation.height = 100u;
-    instance.validation.coinbase = true;
+    instance.metadata.height = 100u;
+    instance.metadata.coinbase = true;
     BOOST_REQUIRE(instance.is_null());
     BOOST_REQUIRE(instance.is_mature(target_height));
 }
@@ -219,8 +219,8 @@ BOOST_AUTO_TEST_CASE(output_point__is_mature__mature_non_coinbase_prevout__retur
 {
     size_t target_height = 162u;
     chain::output_point instance(hash1, 42);
-    instance.validation.height = 50u;
-    instance.validation.coinbase = false;
+    instance.metadata.height = 50u;
+    instance.metadata.coinbase = false;
     BOOST_REQUIRE(!instance.is_null());
     BOOST_REQUIRE(instance.is_mature(target_height));
 }
@@ -229,8 +229,8 @@ BOOST_AUTO_TEST_CASE(output_point__is_mature__immature_non_coinbase_prevout__ret
 {
     size_t target_height = 162u;
     chain::output_point instance(hash1, 42);
-    instance.validation.height = 100u;
-    instance.validation.coinbase = false;
+    instance.metadata.height = 100u;
+    instance.metadata.coinbase = false;
     BOOST_REQUIRE(!instance.is_null());
     BOOST_REQUIRE(instance.is_mature(target_height));
 }

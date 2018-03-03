@@ -48,7 +48,7 @@ const uint8_t output::validation::indexed_false = 0;
 output::output()
   : value_(not_found),
     script_{},
-    validation{}
+    metadata{}
 {
 }
 
@@ -56,7 +56,7 @@ output::output(output&& other)
   : addresses_(other.addresses_cache()),
     value_(other.value_),
     script_(std::move(other.script_)),
-    validation(other.validation)
+    metadata(other.metadata)
 {
 }
 
@@ -64,21 +64,21 @@ output::output(const output& other)
   : addresses_(other.addresses_cache()),
     value_(other.value_),
     script_(other.script_),
-    validation(other.validation)
+    metadata(other.metadata)
 {
 }
 
 output::output(uint64_t value, chain::script&& script)
   : value_(value),
     script_(std::move(script)),
-    validation{}
+    metadata{}
 {
 }
 
 output::output(uint64_t value, const chain::script& script)
   : value_(value),
     script_(script),
-    validation{}
+    metadata{}
 {
 }
 
@@ -97,7 +97,7 @@ output& output::operator=(output&& other)
     addresses_ = other.addresses_cache();
     value_ = other.value_;
     script_ = std::move(other.script_);
-    validation = std::move(other.validation);
+    metadata = std::move(other.metadata);
     return *this;
 }
 
@@ -106,7 +106,7 @@ output& output::operator=(const output& other)
     addresses_ = other.addresses_cache();
     value_ = other.value_;
     script_ = other.script_;
-    validation = other.validation;
+    metadata = other.metadata;
     return *this;
 }
 
@@ -164,8 +164,8 @@ bool output::from_data(reader& source, bool wire, bool)
     {
         // This reads updateable data in a non-atomic manner.
         // The results are unusable unless externally protected.
-        validation.set_indexed(source.read_byte());
-        validation.spender_height = source.read_4_bytes_little_endian();
+        metadata.set_indexed(source.read_byte());
+        metadata.spender_height = source.read_4_bytes_little_endian();
     }
 
     value_ = source.read_8_bytes_little_endian();
@@ -217,8 +217,8 @@ void output::to_data(writer& sink, bool wire, bool) const
     {
         // This write is only utilized for unreachable tx serialization.
         // Later updates and usable reads must be externally protected.
-        sink.write_byte(validation.indexed());
-        sink.write_4_bytes_little_endian(validation.spender_height);
+        sink.write_byte(metadata.indexed());
+        sink.write_4_bytes_little_endian(metadata.spender_height);
     }
 
     sink.write_8_bytes_little_endian(value_);

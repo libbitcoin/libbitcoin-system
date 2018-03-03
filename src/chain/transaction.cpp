@@ -133,7 +133,7 @@ transaction::transaction(transaction&& other)
     locktime_(other.locktime_),
     inputs_(std::move(other.inputs_)),
     outputs_(std::move(other.outputs_)),
-    validation(std::move(other.validation))
+    metadata(std::move(other.metadata))
 {
 }
 
@@ -145,7 +145,7 @@ transaction::transaction(const transaction& other)
     locktime_(other.locktime_),
     inputs_(other.inputs_),
     outputs_(other.outputs_),
-    validation(other.validation)
+    metadata(other.metadata)
 {
 }
 
@@ -155,7 +155,7 @@ transaction::transaction(uint32_t version, uint32_t locktime,
     locktime_(locktime),
     inputs_(std::move(inputs)),
     outputs_(std::move(outputs)),
-    validation{}
+    metadata{}
 {
 }
 
@@ -165,7 +165,7 @@ transaction::transaction(uint32_t version, uint32_t locktime,
     locktime_(locktime),
     inputs_(inputs),
     outputs_(outputs),
-    validation{}
+    metadata{}
 {
 }
 
@@ -202,7 +202,7 @@ transaction& transaction::operator=(transaction&& other)
     locktime_ = other.locktime_;
     inputs_ = std::move(other.inputs_);
     outputs_ = std::move(other.outputs_);
-    validation = std::move(other.validation);
+    metadata = std::move(other.metadata);
     return *this;
 }
 
@@ -216,7 +216,7 @@ transaction& transaction::operator=(const transaction& other)
     locktime_ = other.locktime_;
     inputs_ = other.inputs_;
     outputs_ = other.outputs_;
-    validation = other.validation;
+    metadata = other.metadata;
     return *this;
 }
 
@@ -841,7 +841,7 @@ uint64_t transaction::total_input_value() const
     ////static_assert(max_money() < max_uint64, "overflow sentinel invalid");
     const auto sum = [](uint64_t total, const input& input)
     {
-        const auto& prevout = input.previous_output().validation.cache;
+        const auto& prevout = input.previous_output().metadata.cache;
         const auto missing = !prevout.is_valid();
 
         // Treat missing previous outputs as zero-valued, no math on sentinel.
@@ -903,7 +903,7 @@ bool transaction::is_overspent() const
 // Returns max_size_t in case of overflow.
 size_t transaction::signature_operations() const
 {
-    const auto state = validation.state;
+    const auto state = metadata.state;
     const auto bip16 = state->is_enabled(rule_fork::bip16_rule);
     const auto bip141 = state->is_enabled(rule_fork::bip141_rule);
     return state ? signature_operations(bip16, bip141) : max_size_t;
@@ -940,7 +940,7 @@ bool transaction::is_missing_previous_outputs() const
     {
         const auto& prevout = input.previous_output();
         const auto coinbase = prevout.is_null();
-        const auto missing = !prevout.validation.cache.is_valid();
+        const auto missing = !prevout.metadata.cache.is_valid();
         return missing && !coinbase;
     };
 
@@ -969,7 +969,7 @@ point::list transaction::missing_previous_outputs() const
     const auto accumulator = [&prevouts](const input& input)
     {
         const auto& prevout = input.previous_output();
-        const auto missing = !prevout.validation.cache.is_valid();
+        const auto missing = !prevout.metadata.cache.is_valid();
 
         if (missing && !prevout.is_null())
             prevouts.push_back(prevout);
@@ -1007,7 +1007,7 @@ bool transaction::is_confirmed_double_spend() const
 {
     const auto spent = [](const input& input)
     {
-        return input.previous_output().validation.spent;
+        return input.previous_output().metadata.spent;
     };
 
     return std::any_of(inputs_.begin(), inputs_.end(), spent);
@@ -1075,7 +1075,7 @@ code transaction::connect_input(const chain_state& state,
     if (is_coinbase())
         return error::success;
 
-    const auto& prevout = inputs_[input_index].previous_output().validation;
+    const auto& prevout = inputs_[input_index].previous_output().metadata;
 
     // Verify that the previous output cache has been populated.
     if (!prevout.cache.is_valid())
@@ -1132,7 +1132,7 @@ code transaction::check(bool transaction_pool, bool retarget) const
 
 code transaction::accept(bool transaction_pool) const
 {
-    const auto state = validation.state;
+    const auto state = metadata.state;
     return state ? accept(*state, transaction_pool) : error::operation_failed;
 }
 
@@ -1163,7 +1163,7 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     // An unconfirmed transaction hash that exists in the chain is not accepted
     // even if the original is spent in the new block. This is not necessary
     // nor is it described by BIP30, but it is in the code referenced by BIP30.
-    else if (bip30 && validation.duplicate)
+    else if (bip30 && metadata.duplicate)
         return error::unspent_duplicate;
 
     else if (is_missing_previous_outputs())
@@ -1198,7 +1198,7 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
 
 code transaction::connect() const
 {
-    const auto state = validation.state;
+    const auto state = metadata.state;
     return state ? connect(*state) : error::operation_failed;
 }
 

@@ -95,7 +95,7 @@ transaction new_tx(const script_test& test)
 
     // Assign output script to input's prevout validation metadata.
     output_point outpoint;
-    outpoint.validation.cache.set_script(std::move(output_script));
+    outpoint.metadata.cache.set_script(std::move(output_script));
 
     // Cosntruct transaction with one input and no outputs.
     return transaction
@@ -696,7 +696,7 @@ BOOST_AUTO_TEST_CASE(script__native__block_290329_tx__valid)
     BOOST_REQUIRE_GT(tx.inputs().size(), index);
 
     const auto& input = tx.inputs()[index];
-    auto& prevout = input.previous_output().validation.cache;
+    auto& prevout = input.previous_output().metadata.cache;
 
     prevout.set_script(script::factory(decoded_script, false));
     BOOST_REQUIRE(prevout.script().is_valid());
@@ -735,7 +735,7 @@ BOOST_AUTO_TEST_CASE(script__native__block_438513_tx__valid)
     BOOST_REQUIRE_GT(tx.inputs().size(), index);
 
     const auto& input = tx.inputs()[index];
-    auto& prevout = input.previous_output().validation.cache;
+    auto& prevout = input.previous_output().metadata.cache;
 
     prevout.set_script(script::factory(decoded_script, false));
     BOOST_REQUIRE(prevout.script().is_valid());
@@ -772,7 +772,7 @@ BOOST_AUTO_TEST_CASE(script__native__block_481824_tx__valid)
     BOOST_REQUIRE_GT(tx.inputs().size(), index);
 
     const auto& input = tx.inputs()[index];
-    auto& prevout = input.previous_output().validation.cache;
+    auto& prevout = input.previous_output().metadata.cache;
 
     prevout.set_value(value);
     prevout.set_script(script::factory(decoded_script, false));
@@ -809,7 +809,7 @@ BOOST_AUTO_TEST_CASE(script__native__testnet_block_892321_tx_missing_witness__in
     BOOST_REQUIRE_GT(tx.inputs().size(), index);
 
     const auto& input = tx.inputs()[index];
-    auto& prevout = input.previous_output().validation.cache;
+    auto& prevout = input.previous_output().metadata.cache;
 
     prevout.set_value(value);
     prevout.set_script(script::factory(decoded_script, false));
@@ -831,13 +831,13 @@ BOOST_AUTO_TEST_CASE(script__native__bip143_native_p2wpkh_tx__valid)
     BOOST_REQUIRE(tx.from_data(decoded_tx, true, true));
     BOOST_REQUIRE_EQUAL(tx.inputs().size(), 2u);
 
-    auto& prevout0 = tx.inputs()[0].previous_output().validation.cache;
+    auto& prevout0 = tx.inputs()[0].previous_output().metadata.cache;
     BOOST_REQUIRE(decode_base16(decoded_script, "2103c9f4836b9a4f77fc0d81f7bcb01b7f1b35916864b9476c241ce9fc198bd25432ac"));
     prevout0.set_script(script::factory(decoded_script, false));
     prevout0.set_value(625000000);
     BOOST_REQUIRE(prevout0.script().is_valid());
 
-    auto& prevout1 = tx.inputs()[1].previous_output().validation.cache;
+    auto& prevout1 = tx.inputs()[1].previous_output().metadata.cache;
     BOOST_REQUIRE(decode_base16(decoded_script, "00141d0f172a0ecb48aee1be1f2687d2963ae33f71a1"));
     prevout1.set_script(script::factory(decoded_script, false));
     prevout1.set_value(600000000);
@@ -877,7 +877,7 @@ BOOST_AUTO_TEST_CASE(script__native__bip143_p2sh_p2wpkh_tx__valid)
     BOOST_REQUIRE(tx.from_data(decoded_tx, true, true));
     BOOST_REQUIRE_EQUAL(tx.inputs().size(), 1u);
 
-    auto& prevout0 = tx.inputs()[0].previous_output().validation.cache;
+    auto& prevout0 = tx.inputs()[0].previous_output().metadata.cache;
     BOOST_REQUIRE(decode_base16(decoded_script, "a9144733f37cf4db86fbc2efed2500b4f4e49f31202387"));
     prevout0.set_script(script::factory(decoded_script, false));
     prevout0.set_value(1000000000);
@@ -909,13 +909,13 @@ BOOST_AUTO_TEST_CASE(script__native__bip143_native_p2wsh_1_tx__valid)
     BOOST_REQUIRE(tx.from_data(decoded_tx, true, true));
     BOOST_REQUIRE_EQUAL(tx.inputs().size(), 2u);
 
-    auto& prevout0 = tx.inputs()[0].previous_output().validation.cache;
+    auto& prevout0 = tx.inputs()[0].previous_output().metadata.cache;
     BOOST_REQUIRE(decode_base16(decoded_script, "21036d5c20fa14fb2f635474c1dc4ef5909d4568e5569b79fc94d3448486e14685f8ac"));
     prevout0.set_script(script::factory(decoded_script, false));
     prevout0.set_value(156250000);
     BOOST_REQUIRE(prevout0.script().is_valid());
 
-    auto& prevout1 = tx.inputs()[1].previous_output().validation.cache;
+    auto& prevout1 = tx.inputs()[1].previous_output().metadata.cache;
     BOOST_REQUIRE(decode_base16(decoded_script, "00205d1b56b63d714eebe542309525f484b7e9d6f686b3781b6f61ef925d66d6f6a0"));
     prevout1.set_script(script::factory(decoded_script, false));
     prevout1.set_value(4900000000);
@@ -950,13 +950,13 @@ BOOST_AUTO_TEST_CASE(script__native__bip143_native_p2wsh_2_tx__valid)
     BOOST_REQUIRE(decode_base16(decoded_tx, "01000000000102e9b542c5176808107ff1df906f46bb1f2583b16112b95ee5380665ba7fcfc0010000000000ffffffff80e68831516392fcd100d186b3c2c7b95c80b53c77e77c35ba03a66b429a2a1b0000000000ffffffff0280969800000000001976a914de4b231626ef508c9a74a8517e6783c0546d6b2888ac80969800000000001976a9146648a8cd4531e1ec47f35916de8e259237294d1e88ac02483045022100f6a10b8604e6dc910194b79ccfc93e1bc0ec7c03453caaa8987f7d6c3413566002206216229ede9b4d6ec2d325be245c5b508ff0339bf1794078e20bfe0babc7ffe683270063ab68210392972e2eb617b2388771abe27235fd5ac44af8e61693261550447a4c3e39da98ac024730440220032521802a76ad7bf74d0e2c218b72cf0cbc867066e2e53db905ba37f130397e02207709e2188ed7f08f4c952d9d13986da504502b8c3be59617e043552f506c46ff83275163ab68210392972e2eb617b2388771abe27235fd5ac44af8e61693261550447a4c3e39da98ac00000000"));
     BOOST_REQUIRE(tx.from_data(decoded_tx, true, true));
 
-    auto& prevout0 = tx.inputs()[0].previous_output().validation.cache;
+    auto& prevout0 = tx.inputs()[0].previous_output().metadata.cache;
     BOOST_REQUIRE(decode_base16(decoded_script, "0020ba468eea561b26301e4cf69fa34bde4ad60c81e70f059f045ca9a79931004a4d"));
     prevout0.set_script(script::factory(decoded_script, false));
     prevout0.set_value(16777215);
     BOOST_REQUIRE(prevout0.script().is_valid());
 
-    auto& prevout1 = tx.inputs()[1].previous_output().validation.cache;
+    auto& prevout1 = tx.inputs()[1].previous_output().metadata.cache;
     BOOST_REQUIRE(decode_base16(decoded_script, "0020d9bbfbe56af7c4b7f960a70d7ea107156913d9e5a26b0a71429df5e097ca6537"));
     prevout1.set_script(script::factory(decoded_script, false));
     prevout1.set_value(16777215);
@@ -999,13 +999,13 @@ BOOST_AUTO_TEST_CASE(script__native__bip143_native_p2wsh_2_tx__valid)
     BOOST_REQUIRE(tx.from_data(decoded_tx, true, true));
     BOOST_REQUIRE_EQUAL(tx.inputs().size(), 2u);
 
-    auto& prevout2 = tx.inputs()[0].previous_output().validation.cache;
+    auto& prevout2 = tx.inputs()[0].previous_output().metadata.cache;
     BOOST_REQUIRE(decode_base16(decoded_script, "0020d9bbfbe56af7c4b7f960a70d7ea107156913d9e5a26b0a71429df5e097ca6537"));
     prevout2.set_script(script::factory(decoded_script, false));
     prevout2.set_value(16777215);
     BOOST_REQUIRE(prevout2.script().is_valid());
 
-    auto& prevout3 = tx.inputs()[1].previous_output().validation.cache;
+    auto& prevout3 = tx.inputs()[1].previous_output().metadata.cache;
     BOOST_REQUIRE(decode_base16(decoded_script, "0020ba468eea561b26301e4cf69fa34bde4ad60c81e70f059f045ca9a79931004a4d"));
     prevout3.set_script(script::factory(decoded_script, false));
     prevout3.set_value(16777215);
@@ -1029,7 +1029,7 @@ BOOST_AUTO_TEST_CASE(script__native__bip143_p2sh_p2wsh_tx__valid)
     BOOST_REQUIRE(tx.from_data(decoded_tx, true, true));
     BOOST_REQUIRE_EQUAL(tx.inputs().size(), 1u);
 
-    auto& prevout0 = tx.inputs()[0].previous_output().validation.cache;
+    auto& prevout0 = tx.inputs()[0].previous_output().metadata.cache;
     BOOST_REQUIRE(decode_base16(decoded_script, "a9149993a429037b5d912407a71c252019287b8d27a587"));
     prevout0.set_script(script::factory(decoded_script, false));
     prevout0.set_value(987654321);
@@ -1061,7 +1061,7 @@ BOOST_AUTO_TEST_CASE(script__native__bip143_no_find_and_delete_tx__valid)
     BOOST_REQUIRE(tx.from_data(decoded_tx, true, true));
     BOOST_REQUIRE_EQUAL(tx.inputs().size(), 1u);
 
-    auto& prevout0 = tx.inputs()[0].previous_output().validation.cache;
+    auto& prevout0 = tx.inputs()[0].previous_output().metadata.cache;
     BOOST_REQUIRE(decode_base16(decoded_script, "00209e1be07558ea5cc8e02ed1d80c0911048afad949affa36d5c3951e3159dbea19"));
     prevout0.set_script(script::factory(decoded_script, false));
     prevout0.set_value(200000);

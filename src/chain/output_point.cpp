@@ -31,37 +31,37 @@ namespace chain {
 //-----------------------------------------------------------------------------
 
 output_point::output_point()
-  : point{}, validation{}
+  : point{}, metadata{}
 {
 }
 
 output_point::output_point(point&& value)
-  : point(std::move(value)), validation{}
+  : point(std::move(value)), metadata{}
 {
 }
 
 output_point::output_point(const point& value)
-  : point(value), validation{}
+  : point(value), metadata{}
 {
 }
 
 output_point::output_point(const output_point& other)
-  : point(other), validation(other.validation)
+  : point(other), metadata(other.metadata)
 {
 }
 
 output_point::output_point(output_point&& other)
-  : point(std::move(other)), validation(std::move(other.validation))
+  : point(std::move(other)), metadata(std::move(other.metadata))
 {
 }
 
 output_point::output_point(hash_digest&& hash, uint32_t index)
-  : point({ std::move(hash), index }), validation{}
+  : point({ std::move(hash), index }), metadata{}
 {
 }
 
 output_point::output_point(const hash_digest& hash, uint32_t index)
-  : point(hash, index), validation{}
+  : point(hash, index), metadata{}
 {
 }
 
@@ -85,14 +85,14 @@ output_point& output_point::operator=(const point& other)
 output_point& output_point::operator=(output_point&& other)
 {
     point::operator=(std::move(other));
-    validation = std::move(other.validation);
+    metadata = std::move(other.metadata);
     return *this;
 }
 
 output_point& output_point::operator=(const output_point& other)
 {
     point::operator=(other);
-    validation = other.validation;
+    metadata = other.metadata;
     return *this;
 }
 
@@ -147,11 +147,11 @@ output_point output_point::factory(reader& source, bool wire)
 bool output_point::is_mature(size_t height) const
 {
     // Coinbase (null) inputs and those with non-coinbase prevouts are mature.
-    if (!validation.coinbase || is_null())
+    if (!metadata.coinbase || is_null())
         return true;
 
     // The (non-coinbase) input refers to a coinbase output, so validate depth.
-    return floor_subtract(height, validation.height) >= coinbase_maturity;
+    return floor_subtract(height, metadata.height) >= coinbase_maturity;
 }
 
 } // namespace chain

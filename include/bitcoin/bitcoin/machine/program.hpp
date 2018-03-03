@@ -46,12 +46,12 @@ public:
     typedef data_stack::iterator stack_iterator;
 
     /// Create an instance that does not expect to verify signatures.
-    /// This is useful for script utilities but not with input validation.
+    /// This is useful for script utilities but not with input metadata.
     /// This can only run individual operations via run(op, program).
     program();
 
     /// Create an instance that does not expect to verify signatures.
-    /// This is useful for script utilities but not with input validation.
+    /// This is useful for script utilities but not with input metadata.
     /// This can run ops via run(op, program) or the script via run(program).
     program(const chain::script& script);
 

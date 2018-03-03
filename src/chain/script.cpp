@@ -463,7 +463,7 @@ const operation::list& script::operations() const
 
     // If an op fails it is pushed to operations and the loop terminates.
     // To validate the ops the caller must test the last op.is_valid(), or may
-    // text script.is_valid_operations(), which is done in script validation.
+    // text script.is_valid_operations(), which is done in script metadata.
     while (!source.is_exhausted())
     {
         op.from_data(source);
@@ -1333,7 +1333,7 @@ void script::find_and_delete_(const data_chunk& endorsement)
         op.from_data(source);
     }
 
-    // Delete any found values, reversed to prevent iterator invalidation.
+    // Delete any found values, reversed to prevent iterator inmetadata.
     for (const auto it: reverse(found))
         bytes_.erase(it, it + value.size());
 }
@@ -1455,7 +1455,7 @@ code script::verify(const transaction& tx, uint32_t input, uint32_t forks)
         return error::operation_failed;
 
     const auto& in = tx.inputs()[input];
-    const auto& prevout = in.previous_output().validation.cache;
+    const auto& prevout = in.previous_output().metadata.cache;
     return verify(tx, input, forks, in.script(), in.witness(),
         prevout.script(), prevout.value());
 }
