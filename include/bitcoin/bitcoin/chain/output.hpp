@@ -63,7 +63,7 @@ public:
             spender_indexed = (value == indexed_true);
         }
 
-        /// Set fork_height to max_size_t for tx pool validation.
+        /// Set fork_height to max_size_t for tx pool metadata.
         bool spent(size_t fork_height) const
         {
             const auto relevant = spender_height <= fork_height;
@@ -149,7 +149,7 @@ public:
     bool extract_committed_hash(hash_digest& out) const;
 
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
-    mutable validation validation;
+    mutable validation metadata;
 
 protected:
     void reset();

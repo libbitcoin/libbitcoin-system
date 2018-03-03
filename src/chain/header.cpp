@@ -53,7 +53,7 @@ header::header(header&& other)
     timestamp_(other.timestamp_),
     bits_(other.bits_),
     nonce_(other.nonce_),
-    validation(std::move(other.validation))
+    metadata(std::move(other.metadata))
 {
 }
 
@@ -65,7 +65,7 @@ header::header(const header& other)
     timestamp_(other.timestamp_),
     bits_(other.bits_),
     nonce_(other.nonce_),
-    validation(other.validation)
+    metadata(other.metadata)
 {
 }
 
@@ -77,7 +77,7 @@ header::header(uint32_t version, hash_digest&& previous_block_hash,
     timestamp_(timestamp),
     bits_(bits),
     nonce_(nonce),
-    validation{}
+    metadata{}
 {
 }
 
@@ -90,7 +90,7 @@ header::header(uint32_t version, const hash_digest& previous_block_hash,
     timestamp_(timestamp),
     bits_(bits),
     nonce_(nonce),
-    validation{}
+    metadata{}
 {
 }
 
@@ -113,7 +113,7 @@ header& header::operator=(header&& other)
     timestamp_ = other.timestamp_;
     bits_ = other.bits_;
     nonce_ = other.nonce_;
-    validation = std::move(other.validation);
+    metadata = std::move(other.metadata);
     return *this;
 }
 
@@ -126,7 +126,7 @@ header& header::operator=(const header& other)
     timestamp_ = other.timestamp_;
     bits_ = other.bits_;
     nonce_ = other.nonce_;
-    validation = other.validation;
+    metadata = other.metadata;
     return *this;
 }
 
@@ -512,7 +512,7 @@ code header::check(bool retarget) const
 
 code header::accept() const
 {
-    const auto state = validation.state;
+    const auto state = metadata.state;
     return state ? accept(*state) : error::operation_failed;
 }
 

@@ -101,7 +101,7 @@ inline bool operation_overflow(size_t count)
 
 inline bool program::increment_operation_count(const operation& op)
 {
-    // Addition is safe due to script size validation.
+    // Addition is safe due to script size metadata.
     if (operation::is_counted(op.code()))
         ++operation_count_;
 
@@ -116,7 +116,7 @@ inline bool program::increment_operation_count(int32_t public_keys)
     if (public_keys < 0 || public_keys > max_keys)
         return false;
 
-    // Addition is safe due to script size validation.
+    // Addition is safe due to script size metadata.
     operation_count_ += public_keys;
     return !operation_overflow(operation_count_);
 }
@@ -310,7 +310,7 @@ inline bool program::stack_result(bool clean) const
 inline bool program::is_stack_overflow() const
 {
     // bit.ly/2cowHlP
-    // Addition is safe due to script size validation.
+    // Addition is safe due to script size metadata.
     return size() + alternate_.size() > max_stack_size;
 }
 

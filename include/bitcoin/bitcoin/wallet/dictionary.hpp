@@ -40,7 +40,7 @@ static BC_CONSTEXPR size_t dictionary_size = 2048;
 typedef std::array<const char*, dictionary_size> dictionary;
 
 /**
- * A collection of candidate dictionaries for mnemonic validation.
+ * A collection of candidate dictionaries for mnemonic metadata.
  */
 typedef std::vector<const dictionary*> dictionary_list;
 

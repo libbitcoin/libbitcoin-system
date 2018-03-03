@@ -192,7 +192,7 @@ public:
     code connect_input(const chain_state& state, size_t input_index) const;
 
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
-    mutable validation validation;
+    mutable validation metadata;
 
 protected:
     void reset();

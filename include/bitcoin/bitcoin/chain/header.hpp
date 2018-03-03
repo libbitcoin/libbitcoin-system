@@ -156,7 +156,7 @@ public:
     code accept(const chain_state& state) const;
 
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
-    mutable validation validation;
+    mutable validation metadata;
 
 protected:
     // So that block may call reset from its own.

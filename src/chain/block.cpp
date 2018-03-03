@@ -123,7 +123,7 @@ static const std::string encoded_regtest_genesis_block =
 
 block::block()
   : header_{},
-    validation{}
+    metadata{}
 {
 }
 
@@ -132,7 +132,7 @@ block::block(const block& other)
     non_coinbase_inputs_(other.non_coinbase_inputs_cache()),
     header_(other.header_),
     transactions_(other.transactions_),
-    validation(other.validation)
+    metadata(other.metadata)
 {
 }
 
@@ -141,7 +141,7 @@ block::block(block&& other)
     non_coinbase_inputs_(other.non_coinbase_inputs_cache()),
     header_(std::move(other.header_)),
     transactions_(std::move(other.transactions_)),
-    validation(other.validation)
+    metadata(other.metadata)
 {
 }
 
@@ -149,14 +149,14 @@ block::block(const chain::header& header,
     const transaction::list& transactions)
   : header_(header),
     transactions_(transactions),
-    validation{}
+    metadata{}
 {
 }
 
 block::block(chain::header&& header, transaction::list&& transactions)
   : header_(std::move(header)),
     transactions_(std::move(transactions)),
-    validation{}
+    metadata{}
 {
 }
 
@@ -181,7 +181,7 @@ block& block::operator=(block&& other)
     non_coinbase_inputs_ = other.non_coinbase_inputs_cache();
     header_ = std::move(other.header_);
     transactions_ = std::move(other.transactions_);
-    validation = std::move(other.validation);
+    metadata = std::move(other.metadata);
     return *this;
 }
 
@@ -237,7 +237,7 @@ bool block::from_data(std::istream& stream, bool witness)
 // Full block deserialization is always canonical encoding.
 bool block::from_data(reader& source, bool witness)
 {
-    validation.start_deserialize = asio::steady_clock::now();
+    metadata.start_deserialize = asio::steady_clock::now();
     reset();
 
     if (!header_.from_data(source, true))
@@ -263,7 +263,7 @@ bool block::from_data(reader& source, bool witness)
     if (!source)
         reset();
 
-    validation.end_deserialize = asio::steady_clock::now();
+    metadata.end_deserialize = asio::steady_clock::now();
     return source;
 }
 
@@ -548,7 +548,7 @@ uint64_t block::subsidy(size_t height, bool retarget)
 // Returns max_size_t in case of overflow or unpopulated chain state.
 size_t block::signature_operations() const
 {
-    const auto state = header_.validation.state;
+    const auto state = header_.metadata.state;
     const auto bip16 = state->is_enabled(rule_fork::bip16_rule);
     const auto bip141 = state->is_enabled(rule_fork::bip141_rule);
     return state ? signature_operations(bip16, bip141) : max_size_t;
@@ -895,7 +895,7 @@ code block::connect_transactions(const chain_state& state) const
 // These checks are self-contained; blockchain (and so version) independent.
 code block::check(bool retarget) const
 {
-    validation.start_check = asio::steady_clock::now();
+    metadata.start_check = asio::steady_clock::now();
 
     code ec;
 
@@ -944,7 +944,7 @@ code block::check(bool retarget) const
 
 code block::accept(bool transactions, bool header) const
 {
-    const auto state = header_.validation.state;
+    const auto state = header_.metadata.state;
     return state ? accept(*state, transactions, header) :
         error::operation_failed;
 }
@@ -953,7 +953,7 @@ code block::accept(bool transactions, bool header) const
 code block::accept(const chain_state& state, bool transactions,
     bool header) const
 {
-    validation.start_accept = asio::steady_clock::now();
+    metadata.start_accept = asio::steady_clock::now();
 
     code ec;
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
@@ -1004,13 +1004,13 @@ code block::accept(const chain_state& state, bool transactions,
 
 code block::connect() const
 {
-    const auto state = header_.validation.state;
+    const auto state = header_.metadata.state;
     return state ? connect(*state) : error::operation_failed;
 }
 
 code block::connect(const chain_state& state) const
 {
-    validation.start_connect = asio::steady_clock::now();
+    metadata.start_connect = asio::steady_clock::now();
 
     if (state.is_under_checkpoint())
         return error::success;
