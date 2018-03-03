@@ -78,9 +78,6 @@ public:
         /// (block - (block % 2016 == 0 ? 2016 : block % 2016))
         size_t timestamp_retarget;
 
-        /// mainnet: 227931, testnet: 21111 (or map::unrequested)
-        size_t allow_collisions_height;
-
         /// mainnet: 419328, testnet: 770112 (or map::unrequested)
         size_t bip9_bit0_height;
 
@@ -96,9 +93,6 @@ public:
 
         /// Hash of the candidate block or null_hash for memory pool.
         hash_digest hash;
-
-        /// Hash of the allow_collisions block or null_hash if unrequested.
-        hash_digest allow_collisions_hash;
 
         /// Hash of the bip9_bit0 block or null_hash if unrequested.
         hash_digest bip9_bit0_hash;
@@ -194,7 +188,6 @@ private:
     static size_t version_count(size_t height, uint32_t forks);
     static size_t timestamp_count(size_t height, uint32_t forks);
     static size_t retarget_height(size_t height, uint32_t forks);
-    static size_t collision_height(size_t height, uint32_t forks);
     static size_t bip9_bit0_height(size_t height, uint32_t forks);
     static size_t bip9_bit1_height(size_t height, uint32_t forks);
 

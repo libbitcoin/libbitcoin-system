@@ -67,25 +67,6 @@ inline bool is_bip30_exception(const checkpoint& check, bool mainnet)
          (check == mainnet_bip30_exception_checkpoint2));
 }
 
-inline bool allow_collisions(const hash_digest& hash, bool mainnet,
-    bool testnet)
-{
-    const auto regtest = !mainnet && !testnet;
-    return
-        (mainnet && hash == mainnet_bip34_active_checkpoint.hash()) ||
-        (testnet && hash == testnet_bip34_active_checkpoint.hash()) ||
-        (regtest && hash == regtest_bip34_active_checkpoint.hash());
-}
-
-inline bool allow_collisions(size_t height, bool mainnet, bool testnet)
-{
-    const auto regtest = !mainnet && !testnet;
-    return
-        (mainnet && height == mainnet_bip34_active_checkpoint.height()) ||
-        (testnet && height == testnet_bip34_active_checkpoint.height()) ||
-        (regtest && height == regtest_bip34_active_checkpoint.height());
-}
-
 inline bool bip9_bit0_active(const hash_digest& hash, bool mainnet,
     bool testnet)
 {
@@ -326,20 +307,6 @@ size_t chain_state::retarget_height(size_t height, uint32_t forks)
         retarget_distance(height));
 }
 
-size_t chain_state::collision_height(size_t height, uint32_t forks)
-{
-    const auto testnet = !script::is_enabled(forks, rule_fork::difficult);
-    const auto regtest = !script::is_enabled(forks, rule_fork::retarget);
-
-    const auto bip34_height =
-        testnet ? testnet_bip34_active_checkpoint.height() :
-        regtest ? regtest_bip34_active_checkpoint.height() :
-            mainnet_bip34_active_checkpoint.height();
-
-    // Require collision hash at heights above historical bip34 activation.
-    return height > bip34_height ? bip34_height : map::unrequested;
-}
-
 size_t chain_state::bip9_bit0_height(size_t height, uint32_t forks)
 {
     const auto testnet = !script::is_enabled(forks, rule_fork::difficult);
@@ -520,9 +487,6 @@ chain_state::map chain_state::get_map(size_t height,
     // The most recent past retarget height.
     map.timestamp_retarget = retarget_height(height, forks);
 
-    // The checkpoint above which tx hash collisions are allowed to occur.
-    map.allow_collisions_height = collision_height(height, forks);
-
     // The checkpoint above which bip9_bit0 rules are enforced.
     map.bip9_bit0_height = bip9_bit0_height(height, forks);
 
@@ -595,8 +559,7 @@ chain_state::data chain_state::to_pool(const chain_state& top)
         data.timestamp.retarget = data.timestamp.self;
 
     // Replace previous block state with tx pool chain state for next height
-    // Preserve top block timestamp for use in computation of staleness..
-    // Preserve data.allow_collisions_hash promotion.
+    // Preserve top block timestamp for use in computation of staleness.
     // Preserve data.bip9_bit0_hash promotion.
     // Preserve data.bip9_bit1_hash promotion.
     // Hash and bits.self are unused.
@@ -643,10 +606,6 @@ chain_state::data chain_state::to_block(const chain_state& pool,
     data.version.self = header.version();
     data.timestamp.self = header.timestamp();
 
-    // Cache hash of bip34 height block, otherwise use preceding state.
-    if (allow_collisions(data.height, mainnet, testnet))
-        data.allow_collisions_hash = data.hash;
-
     // Cache hash of bip9 bit0 height block, otherwise use preceding state.
     if (bip9_bit0_active(data.height, mainnet, testnet))
         data.bip9_bit0_hash = data.hash;
@@ -692,10 +651,6 @@ chain_state::data chain_state::to_header(const chain_state& parent,
     data.bits.self = header.bits();
     data.version.self = header.version();
     data.timestamp.self = header.timestamp();
-
-    // Cache hash of bip34 height block, otherwise use preceding state.
-    if (allow_collisions(data.height, mainnet, testnet))
-        data.allow_collisions_hash = data.hash;
 
     // Cache hash of bip9 bit0 height block, otherwise use preceding state.
     if (bip9_bit0_active(data.height, mainnet, testnet))
