@@ -86,12 +86,12 @@ transaction new_tx(const script_test& test)
     // Parse input script from string.
     script input_script;
     if (!input_script.from_string(test.input))
-        return{};
+        return {};
 
     // Parse output script from string.
     script output_script;
     if (!output_script.from_string(test.output))
-        return{};
+        return {};
 
     // Assign output script to input's prevout validation metadata.
     output_point outpoint;

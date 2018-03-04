@@ -478,7 +478,7 @@ chain_state::map chain_state::get_map(size_t height,
     const checkpoints& checkpoints, uint32_t forks)
 {
     if (height == 0)
-        return{};
+        return {};
 
     map map;
 

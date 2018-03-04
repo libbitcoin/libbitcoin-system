@@ -83,7 +83,7 @@ bool validate_mnemonic(const word_list& words, const dictionary& lexicon)
 word_list create_mnemonic(data_slice entropy, const dictionary &lexicon)
 {
     if ((entropy.size() % mnemonic_seed_multiple) != 0)
-        return{};
+        return {};
 
     const size_t entropy_bits = (entropy.size() * byte_bits);
     const size_t check_bits = (entropy_bits / entropy_bit_divisor);

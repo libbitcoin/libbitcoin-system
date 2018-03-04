@@ -278,7 +278,7 @@ std::string deserializer<Iterator, CheckSafe>::read_string(size_t size)
         invalidate();
 
     if (!valid_)
-        return{};
+        return {};
 
     std::string out;
     out.reserve(size);
@@ -322,7 +322,7 @@ Tuple deserializer<Iterator, CheckSafe>::read_forward()
         invalidate();
 
     if (!valid_ || std::tuple_size<Tuple>::value == 0)
-        return{};
+        return {};
 
     Tuple out;
     const auto begin = iterator_;
@@ -339,7 +339,7 @@ Tuple deserializer<Iterator, CheckSafe>::read_reverse()
         invalidate();
 
     if (!valid_)
-        return{};
+        return {};
 
     Tuple out;
     const auto begin = iterator_;
@@ -356,7 +356,7 @@ Integer deserializer<Iterator, CheckSafe>::read_big_endian()
         invalidate();
 
     if (!valid_)
-        return{};
+        return {};
 
     const auto begin = iterator_;
     iterator_ += sizeof(Integer);
@@ -371,7 +371,7 @@ Integer deserializer<Iterator, CheckSafe>::read_little_endian()
         invalidate();
 
     if (!valid_)
-        return{};
+        return {};
 
     const auto begin = iterator_;
     iterator_ += sizeof(Integer);

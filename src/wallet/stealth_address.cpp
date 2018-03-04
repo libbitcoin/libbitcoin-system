@@ -116,7 +116,7 @@ stealth_address stealth_address::from_stealth(const data_chunk& decoded)
     // Size is guarded until we get to N.
     auto required_size = min_address_size;
     if (decoded.size() < required_size || !verify_checksum(decoded))
-        return{};
+        return {};
 
     // [version:1 = 0x2a]
     auto iterator = decoded.begin();
@@ -126,7 +126,7 @@ stealth_address stealth_address::from_stealth(const data_chunk& decoded)
     ++iterator;
     const auto options = *iterator;
     if (options > reuse_key_flag)
-        return{};
+        return {};
 
     // [scan_pubkey:33]
     ++iterator;
@@ -142,7 +142,7 @@ stealth_address stealth_address::from_stealth(const data_chunk& decoded)
     // Adjust and retest required size. for pubkey list.
     required_size += number_spend_pubkeys * ec_compressed_size;
     if (decoded.size() < required_size)
-        return{};
+        return {};
 
     // We don't explicitly save 'reuse', instead we add to spend_keys_.
     point_list spend_keys;
@@ -166,7 +166,7 @@ stealth_address stealth_address::from_stealth(const data_chunk& decoded)
     // [prefix_number_bits:1]
     const auto filter_bits = *iterator;
     if (filter_bits > max_filter_bits)
-        return{};
+        return {};
 
     // [prefix:prefix_number_bits / 8, round up]
     ++iterator;
@@ -175,12 +175,12 @@ stealth_address stealth_address::from_stealth(const data_chunk& decoded)
     // Adjust and retest required size.
     required_size += filter_bytes;
     if (decoded.size() != required_size)
-        return{};
+        return {};
 
     // Deserialize the filter bytes/blocks.
     const data_chunk raw_filter(iterator, iterator + filter_bytes);
     const binary filter(filter_bits, raw_filter);
-    return{ filter, scan_key, spend_keys, signatures, version };
+    return { filter, scan_key, spend_keys, signatures, version };
 }
 
 // This corrects signature and spend_keys.
@@ -196,12 +196,12 @@ stealth_address stealth_address::from_stealth(const binary& filter,
     // Guard against too many keys.
     const auto spend_keys_size = spenders.size();
     if (spend_keys_size > max_spend_key_count)
-        return{};
+        return {};
 
     // Guard against prefix too long.
     auto prefix_number_bits = filter.size();
     if (prefix_number_bits > max_filter_bits)
-        return{};
+        return {};
 
     // Coerce signatures to a valid range.
     const auto maximum = signatures == 0 || signatures > spend_keys_size;
@@ -209,7 +209,7 @@ stealth_address stealth_address::from_stealth(const binary& filter,
         signatures;
 
     // Parameter order is used to change the constructor signature.
-    return{ version, filter, scan_key, spenders, coerced };
+    return { version, filter, scan_key, spenders, coerced };
 }
 
 // Cast operators.
