@@ -169,7 +169,7 @@ $ ./install.sh --enable-testnet
 
 #### Compiling with ICU (International Components for Unicode)
 
-Since the addition of [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) support, libbitcoin conditionally incorporates [ICU](http://site.icu-project.org). To use the BIP-39 passphrase normalization feature libbitcoin must be compiled with ICU support. Currently [libbitcoin-explorer] is the only other library that accesses this feautre, so if you do not intend to use passphrase normalization ICU can be avoided:
+Since the addition of [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) support, libbitcoin conditionally incorporates [ICU](http://site.icu-project.org). To use the BIP-39 passphrase normalization feature libbitcoin must be compiled with ICU support. Currently [libbitcoin-explorer] is the only other library that accesses this feature, so if you do not intend to use passphrase normalization ICU can be avoided:
 ```sh
 $ ./install.sh --with-icu
 ```
