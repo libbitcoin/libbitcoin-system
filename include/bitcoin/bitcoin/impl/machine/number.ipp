@@ -81,7 +81,7 @@ inline bool number::set_data(const data_chunk& data, size_t max_size)
 inline data_chunk number::data() const
 {
     if (value_ == 0)
-        return{};
+        return {};
 
     data_chunk data;
     const bool set_negative = value_ < 0;

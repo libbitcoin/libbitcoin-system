@@ -118,7 +118,7 @@ hd_private hd_private::from_seed(data_slice seed, uint64_t prefixes)
 
     // The key is invalid if parse256(IL) >= n or 0:
     if (!verify(intermediate.left))
-        return{};
+        return {};
 
     const auto master = hd_lineage
     {
@@ -152,7 +152,7 @@ hd_private hd_private::from_key(const hd_key& key, uint64_t prefixes)
 
     // Validate the prefix against the provided value.
     if (prefix != to_prefix(prefixes))
-        return{};
+        return {};
 
     const hd_lineage lineage
     {
@@ -170,7 +170,7 @@ hd_private hd_private::from_string(const std::string& encoded,
 {
     hd_key key;
     if (!decode_base58(key, encoded))
-        return{};
+        return {};
 
     return hd_private(from_key(key, public_prefix));
 }
@@ -251,10 +251,10 @@ hd_private hd_private::derive_private(uint32_t index) const
     // The child key ki is (parse256(IL) + kpar) mod n:
     auto child = secret_;
     if (!ec_add(child, intermediate.left))
-        return{};
+        return {};
 
     if (lineage_.depth == max_uint8)
-        return{};
+        return {};
 
     const hd_lineage lineage
     {

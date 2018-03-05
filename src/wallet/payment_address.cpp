@@ -108,39 +108,39 @@ payment_address payment_address::from_string(const std::string& address)
 {
     payment decoded;
     if (!decode_base58(decoded, address) || !is_address(decoded))
-        return{};
+        return {};
 
-    return{ decoded };
+    return { decoded };
 }
 
 payment_address payment_address::from_payment(const payment& decoded)
 {
     if (!is_address(decoded))
-        return{};
+        return {};
 
     const auto hash = slice<1, short_hash_size + 1>(decoded);
-    return{ hash, decoded.front() };
+    return { hash, decoded.front() };
 }
 
 payment_address payment_address::from_private(const ec_private& secret)
 {
     if (!secret)
-        return{};
+        return {};
 
-    return{ secret.to_public(), secret.payment_version() };
+    return { secret.to_public(), secret.payment_version() };
 }
 
 payment_address payment_address::from_public(const ec_public& point,
     uint8_t version)
 {
     if (!point)
-        return{};
+        return {};
 
     data_chunk data;
     if (!point.to_data(data))
-        return{};
+        return {};
 
-    return{ bitcoin_short_hash(data), version };
+    return { bitcoin_short_hash(data), version };
 }
 
 payment_address payment_address::from_script(const chain::script& script,
@@ -148,7 +148,7 @@ payment_address payment_address::from_script(const chain::script& script,
 {
     // Working around VC++ CTP compiler break here.
     const auto data = script.to_data(false);
-    return{ bitcoin_short_hash(data), version };
+    return { bitcoin_short_hash(data), version };
 }
 
 // Cast operators.
@@ -297,7 +297,7 @@ payment_address::list payment_address::extract_input(
         case script_pattern::non_standard:
         default:
         {
-            return{};
+            return {};
         }
     }
 }
@@ -339,7 +339,7 @@ payment_address::list payment_address::extract_output(
         case script_pattern::non_standard:
         default:
         {
-            return{};
+            return {};
         }
     }
 }

@@ -835,7 +835,7 @@ hash_digest script::generate_signature_hash(const transaction& tx,
         case script_version::reserved:
         default:
             BITCOIN_ASSERT_MSG(false, "invalid script version");
-            return{};
+            return {};
     }
 }
 
@@ -1075,7 +1075,7 @@ bool script::is_sign_script_hash_pattern(const operation::list& ops)
 operation::list script::to_pay_null_data_pattern(data_slice data)
 {
     if (data.size() > max_null_data_size)
-        return{};
+        return {};
 
     return operation::list
     {
@@ -1087,7 +1087,7 @@ operation::list script::to_pay_null_data_pattern(data_slice data)
 operation::list script::to_pay_public_key_pattern(data_slice point)
 {
     if (!is_public_key(point))
-        return{};
+        return {};
 
     return operation::list
     {
@@ -1161,7 +1161,7 @@ operation::list script::to_pay_multisig_pattern(uint8_t signatures,
     for (const auto point: points)
     {
         if (!is_public_key(point))
-            return{};
+            return {};
 
         ops.emplace_back(point);
     }

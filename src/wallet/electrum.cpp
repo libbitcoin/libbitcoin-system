@@ -60,7 +60,7 @@ static data_chunk old_mnemonic_decode(const word_list& mnemonic)
 
     if ((mnemonic.size() < mnemonic_word_multiple) ||
         (mnemonic.size() % mnemonic_word_multiple) != 0)
-        return{};
+        return {};
 
     const auto& lexicon = language::electrum::en_v1;
     const auto seed_size = sizeof(uint32_t) * mnemonic.size() / 3;
@@ -78,7 +78,7 @@ static data_chunk old_mnemonic_decode(const word_list& mnemonic)
         const auto third = find_position(lexicon, mnemonic[i+2]);
 
         if ((first == -1) || (second == -1) || (third == -1))
-            return{};
+            return {};
 
         // TODO: prove there is no overflow risk.
         const auto value = first +
@@ -147,7 +147,7 @@ static cpp_int mnemonic_decode(const word_list& mnemonic,
     {
         const auto position = find_position(lexicon, word);
         if (position == -1)
-            return{ 1 };
+            return { 1 };
 
         entropy *= dictionary_size + position;
     }
@@ -166,7 +166,7 @@ static data_chunk get_seed_prefix(seed prefix)
         case seed::two_factor_authentication:
             return seed_prefix_two_factor_authentication;
         default:
-            return{};
+            return {};
     }
 }
 
