@@ -161,7 +161,7 @@
 #include <bitcoin/bitcoin/utility/pending.hpp>
 #include <bitcoin/bitcoin/utility/png.hpp>
 #include <bitcoin/bitcoin/utility/prioritized_mutex.hpp>
-#include <bitcoin/bitcoin/utility/random.hpp>
+#include <bitcoin/bitcoin/utility/pseudo_random.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/resubscriber.hpp>
 #include <bitcoin/bitcoin/utility/scope_lock.hpp>
