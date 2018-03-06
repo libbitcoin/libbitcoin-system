@@ -319,6 +319,8 @@ hash_digest payment_record::hash() const
 // Set after non-wire deserializaton (distinct store).
 void payment_record::set_hash(hash_digest&& hash)
 {
+    // This is no longer a default instance, so valid.
+    valid_ = true;
     hash_ = std::move(hash);
 }
 
