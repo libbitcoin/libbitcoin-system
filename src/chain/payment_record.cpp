@@ -204,6 +204,7 @@ void payment_record::reset()
     output_ = false;
     height_ = 0;
     hash_ = null_hash;
+    index_ = point::null_index;
     data_ = 0;
     link_ = undetermined_link;
 }
@@ -308,6 +309,8 @@ size_t payment_record::height() const
 // Set after non-wire deserializaton (distinct store).
 void payment_record::set_height(size_t height)
 {
+    // This is no longer a default instance, so valid.
+    valid_ = true;
     height_ = height;
 }
 
