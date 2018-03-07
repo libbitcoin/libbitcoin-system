@@ -459,7 +459,7 @@
     <ClCompile Include="..\..\..\..\src\utility\prioritized_mutex.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\random.cpp">
+    <ClCompile Include="..\..\..\..\src\utility\pseudo_random.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\scope_lock.cpp">
@@ -998,7 +998,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\prioritized_mutex.hpp">
       <Filter>include\bitcoin\bitcoin\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\random.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\pseudo_random.hpp">
       <Filter>include\bitcoin\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\reader.hpp">
