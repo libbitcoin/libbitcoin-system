@@ -104,6 +104,12 @@ public:
     /// Set the point hash.
     void set_hash(hash_digest&& hash);
 
+    /// The index of the point.
+    uint32_t index() const;
+
+    /// Set the point index.
+    void set_index(uint32_t value);
+
 protected:
     void reset();
 

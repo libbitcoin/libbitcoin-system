@@ -45,7 +45,7 @@ payment_record::payment_record()
     output_(false),
     height_(0),
     hash_(null_hash),
-    index_(0),
+    index_(point::null_index),
     data_(0),
     link_(undetermined_link)
 {
@@ -56,7 +56,7 @@ payment_record::payment_record(chain::payment_record&& other)
     output_(other.output_),
     height_(other.height_),
     hash_(null_hash),
-    index_(0),
+    index_(point::null_index),
     data_(other.data_),
     link_(other.link_)
 {
@@ -82,7 +82,7 @@ payment_record::payment_record(uint64_t link, uint32_t index, uint64_t data,
     index_(index),
     data_(data),
     link_(link)
-    
+
 {
 }
 
@@ -204,6 +204,7 @@ void payment_record::reset()
     output_ = false;
     height_ = 0;
     hash_ = null_hash;
+    index_ = point::null_index;
     data_ = 0;
     link_ = undetermined_link;
 }
@@ -308,6 +309,8 @@ size_t payment_record::height() const
 // Set after non-wire deserializaton (distinct store).
 void payment_record::set_height(size_t height)
 {
+    // This is no longer a default instance, so valid.
+    valid_ = true;
     height_ = height;
 }
 
@@ -319,7 +322,21 @@ hash_digest payment_record::hash() const
 // Set after non-wire deserializaton (distinct store).
 void payment_record::set_hash(hash_digest&& hash)
 {
+    // This is no longer a default instance, so valid.
+    valid_ = true;
     hash_ = std::move(hash);
+}
+
+uint32_t payment_record::index() const
+{
+    return index_;
+}
+
+void payment_record::set_index(uint32_t value)
+{
+    // This is no longer a default instance, so valid.
+    valid_ = true;
+    index_ = value;
 }
 
 } // namespace chain
