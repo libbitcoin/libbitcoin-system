@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <utility>
+#include <boost/ptr_container/ptr_vector.hpp>
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
 #include <bitcoin/bitcoin/math/hash.hpp>
@@ -158,6 +159,37 @@ bool ec_multiply(ec_secret& left, const ec_secret& right)
     const auto context = verification.context();
     return secp256k1_ec_privkey_tweak_mul(context, left.data(),
         right.data()) == 1;
+}
+
+typedef boost::ptr_vector<secp256k1_pubkey> secp_pubkey_list;
+
+bool convert_pubkey_list(const secp256k1_context* context,
+    secp_pubkey_list& pubkey_values, const point_list& values)
+{
+    for (const auto& value: values)
+    {
+        secp256k1_pubkey* converted = new secp256k1_pubkey;
+        if (!parse(context, *converted, value))
+            return false;
+        pubkey_values.push_back(converted);
+    }
+    return true;
+}
+
+bool ec_sum(ec_compressed& result, const point_list& values)
+{
+    const auto context = verification.context();
+    // Convert pubkey array to secp format
+    secp_pubkey_list pubkey_values(values.size());
+    secp256k1_pubkey output;
+    return
+        // Convert our values
+        convert_pubkey_list(context, pubkey_values, values) &&
+        // Perform operation
+        secp256k1_ec_pubkey_combine(context, &output,
+            pubkey_values.c_array(), values.size()) == 1 &&
+        // Convert the result
+        serialize(context, result, output);
 }
 
 // Convert keys
