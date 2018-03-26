@@ -203,8 +203,7 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__ec_sum_test)
 
     bool rc = ec_sum(output, points);
     BOOST_REQUIRE(rc);
-    BOOST_REQUIRE_EQUAL(encode_base16(output),
-        "02e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13");
+    BOOST_REQUIRE_EQUAL(encode_base16(output), GENERATOR_POINT_MULT_4);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
