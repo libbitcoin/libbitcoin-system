@@ -105,6 +105,10 @@ BC_API bool ec_multiply(ec_uncompressed& point, const ec_secret& secret);
 /// return false on failure (such as a zero result).
 BC_API bool ec_multiply(ec_secret& left, const ec_secret& right);
 
+/// Compute the addition of EC curve points.
+/// return false on failure (such as infinity or zero).
+BC_API bool ec_sum(ec_compressed& result, const point_list& values);
+
 // Convert keys
 // ----------------------------------------------------------------------------
 
