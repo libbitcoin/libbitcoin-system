@@ -211,20 +211,25 @@ AS_CASE([${with_tests}], [yes],
      AC_MSG_NOTICE([boost_unit_test_framework_LIBS : ${boost_unit_test_framework_LIBS}])],
     [AC_SUBST([boost_unit_test_framework_LIBS], [])])
 
-# Require pthread and output ${pthread_CPPFLAGS/LIBS}.
+# Require pthread if not on android and output ${pthread_CPPFLAGS/LIBS}.
 #------------------------------------------------------------------------------
-AX_PTHREAD(
-    [AC_SUBST([pthread_CPPFLAGS], [${PTHREAD_CPPFLAGS}])
-     AC_SUBST([pthread_LIBS], [${PTHREAD_LIBS}])
-     AC_MSG_NOTICE([pthread_CPPFLAGS : ${pthread_CPPFLAGS}])
-     AC_MSG_NOTICE([pthread_LIBS : ${pthread_LIBS}])],
-    [AC_MSG_ERROR([pthread library is required but was not found.])])
 # Hard wired -lpthread because AX_PTHREAD does not do it.
-AC_SUBST([pthread_LIBS], [-lpthread])
+AS_CASE([${host_os}],
+    [*android*],
+    [AC_SUBST([pthread_LIBS], [])],
+    [AX_PTHREAD(
+        [AC_SUBST([pthread_CPPFLAGS], [${PTHREAD_CPPFLAGS}])
+         AC_SUBST([pthread_LIBS], [-lpthread])
+         AC_MSG_NOTICE([pthread_CPPFLAGS : ${pthread_CPPFLAGS}])
+         AC_MSG_NOTICE([pthread_LIBS : ${pthread_LIBS}])],
+        [AC_MSG_ERROR([pthread library is required but was not found.])])])
 
-# Require rt if on linux and output ${rt_LIBS}.
+# Require rt if on linux if not on android and output ${rt_LIBS}.
 #------------------------------------------------------------------------------
-AS_CASE([${host_os}], [*linux*],
+AS_CASE([${host_os}],
+    [*android*],
+    [AC_SUBST([rt_LIBS], [])],
+    [*linux*],
     [AC_CHECK_LIB([rt], [clock_gettime],
         [AC_SUBST([rt_LIBS], [-lrt])
          AC_MSG_NOTICE([rt_LIBS : ${rt_LIBS}])],
@@ -243,7 +248,8 @@ AS_CASE([${with_icu}], [yes],
 
 # Require dl if on linux and output ${dl_LIBS}.
 #------------------------------------------------------------------------------
-AS_CASE([${host_os}], [*linux*],
+AS_CASE([${host_os}],
+    [*linux*],
     [AC_CHECK_LIB([dl], [dlopen],
         [AC_SUBST([dl_LIBS], [-ldl])
          AC_MSG_NOTICE([dl_LIBS : ${dl_LIBS}])],
