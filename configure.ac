@@ -63,6 +63,17 @@ AC_ARG_VAR([PKG_CONFIG_PATH], "Additional directories for package discovery.")
 #------------------------------------------------------------------------------
 AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
 
+# Platform indicators
+platform_linux="no"
+platform_android="no"
+
+AS_CASE([${host_os}],
+    [*linux*],
+    [platform_linux="yes"],
+    [*android*],
+    [platform_android="yes"],
+    [])
+
 
 # Process options.
 #==============================================================================
@@ -211,25 +222,38 @@ AS_CASE([${with_tests}], [yes],
      AC_MSG_NOTICE([boost_unit_test_framework_LIBS : ${boost_unit_test_framework_LIBS}])],
     [AC_SUBST([boost_unit_test_framework_LIBS], [])])
 
-# Require pthread and output ${pthread_CPPFLAGS/LIBS}.
+# Require pthread if on linux if not on android and output ${pthread_CPPFLAGS/LIBS}.
 #------------------------------------------------------------------------------
-AX_PTHREAD(
-    [AC_SUBST([pthread_CPPFLAGS], [${PTHREAD_CPPFLAGS}])
-     AC_SUBST([pthread_LIBS], [${PTHREAD_LIBS}])
-     AC_MSG_NOTICE([pthread_CPPFLAGS : ${pthread_CPPFLAGS}])
-     AC_MSG_NOTICE([pthread_LIBS : ${pthread_LIBS}])],
-    [AC_MSG_ERROR([pthread library is required but was not found.])])
 # Hard wired -lpthread because AX_PTHREAD does not do it.
-AC_SUBST([pthread_LIBS], [-lpthread])
 
-# Require rt if on linux and output ${rt_LIBS}.
+AS_IF([test "$platform_linux" = "yes"],
+    [AS_IF([test "$platform_android" = "no"],
+        [AX_PTHREAD(
+            [AC_SUBST([pthread_CPPFLAGS], [${PTHREAD_CPPFLAGS}])
+             AC_SUBST([pthread_LIBS], [-lpthread])
+             AC_MSG_NOTICE([pthread_CPPFLAGS : ${pthread_CPPFLAGS}])],
+            [AC_MSG_ERROR([pthread library is required but was not found.])])],
+        [AC_MSG_NOTICE([host_os: ${host_os} excludes pthread])
+         AC_SUBST([pthread_LIBS], [])])],
+    [AC_MSG_NOTICE([host_os: ${host_os} excludes pthread])
+     AC_SUBST([pthread_LIBS], [])])
+
+AC_MSG_NOTICE([pthread_LIBS : ${pthread_LIBS}])
+
+# Require rt if on linux if not on android and output ${rt_LIBS}.
 #------------------------------------------------------------------------------
-AS_CASE([${host_os}], [*linux*],
-    [AC_CHECK_LIB([rt], [clock_gettime],
-        [AC_SUBST([rt_LIBS], [-lrt])
-         AC_MSG_NOTICE([rt_LIBS : ${rt_LIBS}])],
-        [AC_MSG_ERROR([rt library is required but was not found.])])],
-    [AC_SUBST([rt_LIBS], [])])
+
+AS_IF([test "$platform_linux" = "yes"],
+    [AS_IF([test "$platform_android" = "no"],
+        [AC_CHECK_LIB([rt], [clock_gettime],
+            [AC_SUBST([rt_LIBS], [-lrt])],
+            [AC_MSG_ERROR([rt library is required but was not found.])])],
+        [AC_MSG_NOTICE([host_os: ${host_os} excludes rt])
+         AC_SUBST([rt_LIBS], [])])],
+    [AC_MSG_NOTICE([host_os: ${host_os} excludes rt])
+     AC_SUBST([rt_LIBS], [])])
+
+AC_MSG_NOTICE([rt_LIBS : ${rt_LIBS}])
 
 # Require icu-i18n of at least version 51.2 and output ${icu_i18n_CPPFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
@@ -243,12 +267,15 @@ AS_CASE([${with_icu}], [yes],
 
 # Require dl if on linux and output ${dl_LIBS}.
 #------------------------------------------------------------------------------
-AS_CASE([${host_os}], [*linux*],
+
+AS_IF([test "$platform_linux" = "yes"],
     [AC_CHECK_LIB([dl], [dlopen],
-        [AC_SUBST([dl_LIBS], [-ldl])
-         AC_MSG_NOTICE([dl_LIBS : ${dl_LIBS}])],
+        [AC_SUBST([dl_LIBS], [-ldl])],
         [AC_MSG_ERROR([dl library is required but was not found.])])],
-    [AC_SUBST([dl_LIBS], [])])
+    [AC_MSG_NOTICE([host_os: ${host_os} excludes dl])
+     AC_SUBST([dl_LIBS], [])])
+
+AC_MSG_NOTICE([dl_LIBS : ${dl_LIBS}])
 
 # Require png of at least version 1.6.29 and output ${png_CPPFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
