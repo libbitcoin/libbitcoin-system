@@ -157,6 +157,11 @@ const ec_compressed& ec_public::point() const
     return point_;
 }
 
+const uint8_t ec_public::version() const
+{
+    return version_;
+}
+
 const bool ec_public::compressed() const
 {
     return compress_;
