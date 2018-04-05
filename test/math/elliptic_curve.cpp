@@ -21,19 +21,6 @@
 
 using namespace bc;
 
-const ec_compressed derive_generator_point()
-{
-    ec_compressed result;
-
-    ec_secret value_one;
-    std::fill(value_one.begin(), value_one.end(), 0);
-    value_one.back() = 1;
-
-    secret_to_public(result, value_one);
-
-    return result;
-}
-
 BOOST_AUTO_TEST_SUITE(elliptic_curve_tests)
 
 // Scenario 1
@@ -190,19 +177,21 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__ec_multiply_test)
 
 BOOST_AUTO_TEST_CASE(elliptic_curve__ec_sum_test)
 {
-    const ec_compressed generator_point = derive_generator_point();
+    static const auto one_hash = hash_literal("0100000000000000000000000000000000000000000000000000000000000000");
 
-    point_list points{
+    ec_compressed generator_point;
+    BOOST_REQUIRE(secret_to_public(generator_point, one_hash));
+
+    point_list points
+    {
         generator_point,
         generator_point,
         generator_point,
         generator_point
     };
 
-    bc::ec_compressed output;
-
-    bool rc = ec_sum(output, points);
-    BOOST_REQUIRE(rc);
+    ec_compressed output;
+    BOOST_REQUIRE(ec_sum(output, points));
     BOOST_REQUIRE_EQUAL(encode_base16(output), GENERATOR_POINT_MULT_4);
 }
 
