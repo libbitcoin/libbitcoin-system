@@ -32,7 +32,7 @@
 
 namespace libbitcoin {
 
-typedef boost::ptr_vector<secp256k1_pubkey> public_key_list;
+using namespace boost;
 
 static constexpr uint8_t compressed_even = 0x02;
 static constexpr uint8_t compressed_odd = 0x03;
@@ -166,21 +166,18 @@ bool ec_multiply(ec_secret& left, const ec_secret& right)
 bool ec_sum(ec_compressed& result, const point_list& points)
 {
     secp256k1_pubkey pubkey;
-    public_key_list keys(points.size());
+    ptr_vector<secp256k1_pubkey> keys(points.size());
     const auto context = verification.context();
 
     for (const auto& point: points)
     {
-        auto converted = new secp256k1_pubkey;
-        if (!parse(context, *converted, point))
+        keys.push_back(new secp256k1_pubkey);
+        if (!parse(context, keys.back(), point))
             return false;
-
-        keys.push_back(converted);
     }
 
-    return secp256k1_ec_pubkey_combine(context, &pubkey,
-        keys.c_array(), points.size()) == 1 &&
-        serialize(context, result, pubkey);
+    return secp256k1_ec_pubkey_combine(context, &pubkey, keys.c_array(),
+        points.size()) == 1 && serialize(context, result, pubkey);
 }
 
 // Convert keys
