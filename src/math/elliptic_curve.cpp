@@ -20,9 +20,9 @@
 
 #include <algorithm>
 #include <utility>
-#include <boost/ptr_container/ptr_vector.hpp>
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
+#include <boost/ptr_container/ptr_vector.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -31,6 +31,8 @@
 #include "secp256k1_initializer.hpp"
 
 namespace libbitcoin {
+
+typedef boost::ptr_vector<secp256k1_pubkey> public_key_list;
 
 static constexpr uint8_t compressed_even = 0x02;
 static constexpr uint8_t compressed_odd = 0x03;
@@ -161,35 +163,24 @@ bool ec_multiply(ec_secret& left, const ec_secret& right)
         right.data()) == 1;
 }
 
-typedef boost::ptr_vector<secp256k1_pubkey> secp_pubkey_list;
-
-bool convert_pubkey_list(const secp256k1_context* context,
-    secp_pubkey_list& pubkey_values, const point_list& values)
+bool ec_sum(ec_compressed& result, const point_list& points)
 {
-    for (const auto& value: values)
-    {
-        secp256k1_pubkey* converted = new secp256k1_pubkey;
-        if (!parse(context, *converted, value))
-            return false;
-        pubkey_values.push_back(converted);
-    }
-    return true;
-}
-
-bool ec_sum(ec_compressed& result, const point_list& values)
-{
+    secp256k1_pubkey pubkey;
+    public_key_list keys(points.size());
     const auto context = verification.context();
-    // Convert pubkey array to secp format
-    secp_pubkey_list pubkey_values(values.size());
-    secp256k1_pubkey output;
-    return
-        // Convert our values
-        convert_pubkey_list(context, pubkey_values, values) &&
-        // Perform operation
-        secp256k1_ec_pubkey_combine(context, &output,
-            pubkey_values.c_array(), values.size()) == 1 &&
-        // Convert the result
-        serialize(context, result, output);
+
+    for (const auto& point: points)
+    {
+        auto converted = new secp256k1_pubkey;
+        if (!parse(context, *converted, point))
+            return false;
+
+        keys.push_back(converted);
+    }
+
+    return secp256k1_ec_pubkey_combine(context, &pubkey,
+        keys.c_array(), points.size()) == 1 &&
+        serialize(context, result, pubkey);
 }
 
 // Convert keys
