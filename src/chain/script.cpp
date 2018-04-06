@@ -1378,14 +1378,17 @@ bool script::is_unspendable() const
 //-----------------------------------------------------------------------------
 
 code script::verify(const transaction& tx, uint32_t input_index,
-    uint32_t forks, const script& input_script, const witness& input_witness,
-    const script& prevout_script, uint64_t value)
+    uint32_t forks, const script& prevout_script, uint64_t value)
 {
+    if (input_index >= tx.inputs().size())
+        return error::operation_failed;
+
     code ec;
     bool witnessed;
+    const auto& in = tx.inputs()[input_index];
 
     // Evaluate input script.
-    program input(input_script, tx, input_index, forks);
+    program input(in.script(), tx, input_index, forks);
     if ((ec = input.evaluate()))
         return ec;
 
@@ -1402,11 +1405,11 @@ code script::verify(const transaction& tx, uint32_t input_index,
     if ((witnessed = prevout_script.is_pay_to_witness(forks)))
     {
         // The input script must be empty (bip141).
-        if (!input_script.empty())
+        if (!in.script().empty())
             return error::dirty_witness;
 
         // This is a valid witness script so validate it.
-        if ((ec = input_witness.verify(tx, input_index, forks,
+        if ((ec = in.witness().verify(tx, input_index, forks,
             prevout_script, value)))
             return ec;
     }
@@ -1414,7 +1417,7 @@ code script::verify(const transaction& tx, uint32_t input_index,
     // p2sh and p2w are mutually exclusive.
     else if (prevout_script.is_pay_to_script_hash(forks))
     {
-        if (!is_relaxed_push(input_script.operations()))
+        if (!is_relaxed_push(in.script().operations()))
             return error::invalid_script_embed;
 
         // Embedded script must be at the top of the stack (bip16).
@@ -1432,32 +1435,32 @@ code script::verify(const transaction& tx, uint32_t input_index,
         if ((witnessed = embedded_script.is_pay_to_witness(forks)))
         {
             // The input script must be a push of the embedded_script (bip141).
-            if (input_script.size() != 1)
+            if (in.script().size() != 1)
                 return error::dirty_witness;
 
             // This is a valid embedded witness script so validate it.
-            if ((ec = input_witness.verify(tx, input_index, forks,
+            if ((ec = in.witness().verify(tx, input_index, forks,
                 embedded_script, value)))
                 return ec;
         }
     }
 
     // Witness must be empty if no bip141 or valid witness program (bip141).
-    if (!witnessed && !input_witness.empty())
+    if (!witnessed && !in.witness().empty())
         return error::unexpected_witness;
 
     return error::success;
 }
 
-code script::verify(const transaction& tx, uint32_t input, uint32_t forks)
+code script::verify(const transaction& tx, uint32_t input_index,
+    uint32_t forks)
 {
-    if (input >= tx.inputs().size())
+    if (input_index >= tx.inputs().size())
         return error::operation_failed;
 
-    const auto& in = tx.inputs()[input];
+    const auto& in = tx.inputs()[input_index];
     const auto& prevout = in.previous_output().metadata.cache;
-    return verify(tx, input, forks, in.script(), in.witness(),
-        prevout.script(), prevout.value());
+    return verify(tx, input_index, forks, prevout.script(), prevout.value());
 }
 
 } // namespace chain
