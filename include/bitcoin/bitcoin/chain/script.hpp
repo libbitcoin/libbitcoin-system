@@ -209,13 +209,12 @@ public:
     // Validation.
     //-------------------------------------------------------------------------
 
-    static code verify(const transaction& tx, uint32_t input, uint32_t forks);
-
-    // TODO: move back to private.
+    // This obtains the previous output from metadata.
     static code verify(const transaction& tx, uint32_t input_index,
-        uint32_t forks, const script& input_script,
-        const witness& input_witness, const script& prevout_script,
-        uint64_t value);
+        uint32_t forks);
+
+    static code verify(const transaction& tx, uint32_t input_index,
+        uint32_t forks, const script& prevout_script, uint64_t value);
 
 protected:
     // So that input and output may call reset from their own.
