@@ -18,6 +18,14 @@ The libbitcoin toolkit is a set of cross platform C++ libraries for building bit
 
 ## Installation
 
+The master branch is a staging area for the next major release and should be used only by libbitcoin developers. The current release branch is version3. Detailed installation instructions are provided below.
+
+  * [Debian/Ubuntu](#debianubuntu)
+  * [Macintosh](#macintosh)
+  * [Windows](#windows)
+
+### Autotools (advanced users)
+
 On Linux and macOS libbitcoin is built using Autotools as follows.
 ```sh
 $ ./autogen.sh
@@ -27,12 +35,6 @@ $ sudo make install
 $ sudo ldconfig
 ```
 A minimal libbitcoin build requires boost and libsecp256k1. The [libbitcoin/secp256k1](https://github.com/libbitcoin/secp256k1) repository is forked from [bitcoin-core/secp256k1](https://github.com/bitcoin-core/secp256k1) in order to control for changes and to incorporate the necessary Visual Studio build. The original repository can be used directly but recent changes to the public interface may cause build breaks. The `--enable-module-recovery` switch is required.
-
-Detailed instructions are provided below.
-
-  * [Debian/Ubuntu](#debianubuntu)
-  * [Macintosh](#macintosh)
-  * [Windows](#windows)
 
 ### Debian/Ubuntu
 
