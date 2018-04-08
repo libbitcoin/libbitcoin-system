@@ -172,7 +172,7 @@ $ ./install.sh CFLAGS="-Og -g" --prefix=/home/me/myprefix
 
 #### Compiling with ICU (International Components for Unicode)
 
-Since the addition of [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) and later [BIP-38](https://github.com/bitcoin/bips/blob/master/bip-0038.mediawiki) and [Electrum](https://electrum.org/#home) mnemnoic support, libbitcoin conditionally incorporates [ICU](http://site.icu-project.org). To use passphrase normalization for these features libbitcoin must be compiled with the `--with-icu` option. Currently [libbitcoin-explorer](https://github.com/libbitcoin/libbitcoin-explorer) is the only other library that accesses this feature, so if you do not intend to use passphrase normalization this dependency can be avoided.
+Since the addition of [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) and later [BIP-38](https://github.com/bitcoin/bips/blob/master/bip-0038.mediawiki) and [Electrum](https://electrum.org) mnemnoic support, libbitcoin conditionally incorporates [ICU](http://site.icu-project.org). To use passphrase normalization for these features libbitcoin must be compiled with the `--with-icu` option. Currently [libbitcoin-explorer](https://github.com/libbitcoin/libbitcoin-explorer) is the only other library that accesses this feature, so if you do not intend to use passphrase normalization this dependency can be avoided.
 ```sh
 $ ./install.sh --with-icu
 ```
