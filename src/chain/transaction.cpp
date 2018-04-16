@@ -1175,7 +1175,7 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     // This relates height to maturity of spent coinbase. Since reorg is the
     // only way to decrease height and reorg invalidates, this is cache safe.
     else if (!is_mature(state.height()))
-        return error::coinbase_maturity;
+        return error::maturity_coinbase;
 
     else if (is_overspent())
         return error::spend_exceeds_value;

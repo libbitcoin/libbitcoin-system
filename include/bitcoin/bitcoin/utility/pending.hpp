@@ -33,7 +33,7 @@ namespace libbitcoin {
 /// A managed collection of object pointers.
 template <class Element>
 class pending
-  : noncopyable
+  : private noncopyable
 {
 public:
     typedef std::shared_ptr<Element> element_ptr;

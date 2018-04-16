@@ -40,12 +40,12 @@ static BC_CONSTEXPR size_t short_hash_size = 20;
 static BC_CONSTEXPR size_t mini_hash_size = 6;
 
 // Common bitcoin hash containers.
-typedef byte_array<hash_size> hash_digest;
-typedef byte_array<half_hash_size> half_hash;
-typedef byte_array<quarter_hash_size> quarter_hash;
-typedef byte_array<long_hash_size> long_hash;
-typedef byte_array<short_hash_size> short_hash;
-typedef byte_array<mini_hash_size> mini_hash;
+typedef std::array<uint8_t, hash_size> hash_digest;
+typedef std::array<uint8_t, half_hash_size> half_hash;
+typedef std::array<uint8_t, quarter_hash_size> quarter_hash;
+typedef std::array<uint8_t, long_hash_size> long_hash;
+typedef std::array<uint8_t, short_hash_size> short_hash;
+typedef std::array<uint8_t, mini_hash_size> mini_hash;
 
 // Lists of common bitcoin hashes.
 typedef std::vector<hash_digest> hash_list;
@@ -114,7 +114,7 @@ inline uint256_t to_uint256(const hash_digest& hash)
 
 /// Generate a scrypt hash to fill a byte array.
 template <size_t Size>
-byte_array<Size> scrypt(data_slice data, data_slice salt, uint64_t N,
+std::array<uint8_t, Size> scrypt(data_slice data, data_slice salt, uint64_t N,
     uint32_t p, uint32_t r);
 
 /// Generate a scrypt hash of specified length.
@@ -164,9 +164,9 @@ BC_API long_hash pkcs5_pbkdf2_hmac_sha512(data_slice passphrase,
 namespace std
 {
 template <size_t Size>
-struct hash<bc::byte_array<Size>>
+struct hash<std::array<uint8_t, Size>>
 {
-    size_t operator()(const bc::byte_array<Size>& hash) const
+    size_t operator()(const std::array<uint8_t, Size>& hash) const
     {
         return boost::hash_range(hash.begin(), hash.end());
     }
@@ -176,9 +176,9 @@ struct hash<bc::byte_array<Size>>
 namespace boost
 {
 template <size_t Size>
-struct hash<bc::byte_array<Size>>
+struct hash<std::array<uint8_t, Size>>
 {
-    size_t operator()(const bc::byte_array<Size>& hash) const
+    size_t operator()(const std::array<uint8_t, Size>& hash) const
     {
         return boost::hash_range(hash.begin(), hash.end());
     }

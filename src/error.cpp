@@ -136,7 +136,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::unspent_duplicate, "matching transaction with unspent outputs" },
         { error::missing_previous_output, "previous output not found" },
         { error::double_spend, "double spend of input" },
-        { error::coinbase_maturity, "immature coinbase spent" },
+        { error::maturity_coinbase, "immature coinbase spent" },
         { error::spend_exceeds_value, "spend exceeds value of inputs" },
         { error::transaction_embedded_sigop_limit, "too many transaction embedded signature operations" },
         { error::sequence_locked, "transaction currently locked" },

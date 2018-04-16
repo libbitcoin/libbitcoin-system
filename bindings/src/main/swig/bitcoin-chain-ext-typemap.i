@@ -1,0 +1,13 @@
+%typemap("javapackage") block, block *, block & "orb.libbitcoin.bitcoin.chain"
+%typemap("javapackage") header, header *, header & "orb.libbitcoin.bitcoin.chain"
+%typemap("javapackage") input_point, input_point *, input_point & "orb.libbitcoin.bitcoin.chain"
+%typemap("javapackage") input, input *, input & "orb.libbitcoin.bitcoin.chain"
+%typemap("javapackage") output, output *, output & "orb.libbitcoin.bitcoin.chain"
+%typemap("javapackage") output_point, output_point *, output_point & "orb.libbitcoin.bitcoin.chain"
+%typemap("javapackage") point_value, point_value *, point_value & "orb.libbitcoin.bitcoin.chain"
+%typemap("javapackage") points_value, points_value *, points_value & "orb.libbitcoin.bitcoin.chain"
+%typemap("javapackage") script, script *, script & "orb.libbitcoin.bitcoin.chain"
+%typemap("javapackage") transaction, transaction *, transaction & "orb.libbitcoin.bitcoin.chain"
+
+%typemap("javapackage") InputVector, InputVector *, InputVector & "orb.libbitcoin.bitcoin.chain"
+%typemap("javapackage") OutputVector, OutputVector *, OutputVector & "orb.libbitcoin.bitcoin.chain"

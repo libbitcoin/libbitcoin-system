@@ -30,9 +30,11 @@
 
 namespace libbitcoin {
 
+#ifndef SWIG
 // This guards assumptions within the codebase.
 static_assert(sizeof(size_t) == sizeof(uint32_t) || 
     sizeof(size_t) == sizeof(uint64_t), "unsupported size_t");
+#endif
 
 #define BC_USER_AGENT "/libbitcoin:" LIBBITCOIN_VERSION "/"
 

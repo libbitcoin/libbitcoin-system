@@ -1,0 +1,28 @@
+%include <stdint.i>
+
+%include <std_string.i>
+
+%import <bitcoin/bitcoin/define.hpp>
+%import <bitcoin/bitcoin/compat.hpp>
+
+%include <bitcoin/bitcoin/utility/array_slice.hpp>
+
+%rename(get) operator[](size_type index) const;
+%rename(lt) operator<(const binary& other) const;
+%rename(eq) operator==(const binary& other) const;
+%rename(ne) operator!=(const binary& other) const;
+%rename(assign) operator=(const binary& other);
+%ignore operator>>(std::istream& in, binary& to);
+%ignore operator<<(std::ostream& out, const binary& of);
+%include "../include/bitcoin/bitcoin/utility/binary.hpp"
+
+%ignore build_chunk(loaf slices, size_t extra_reserve=0);
+%include <bitcoin/bitcoin/utility/data.hpp>
+
+%include "../include/bitcoin/bitcoin/utility/string.hpp"
+%template(StringVector) std::vector<std::string>;
+
+%include <std_array.i>
+
+%template(OneByte) std::array<unsigned char, 1>;
+%template(DataSlice) libbitcoin::array_slice<uint8_t>;

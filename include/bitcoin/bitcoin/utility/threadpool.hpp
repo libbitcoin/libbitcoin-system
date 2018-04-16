@@ -36,7 +36,7 @@ namespace libbitcoin {
  * A collection of threads which can be passed operations through io_service.
  */
 class BC_API threadpool
-  : noncopyable
+  : private noncopyable
 {
 public:
 

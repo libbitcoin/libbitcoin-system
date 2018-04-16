@@ -16,19 +16,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_EXCEPTIONS_HPP
-#define LIBBITCOIN_EXCEPTIONS_HPP
+package org.libbitcoin.bitcoin;
 
-#include <exception>
-#include <bitcoin/bitcoin/define.hpp>
+class Test {
+	private final static Logger logger = Logger.getLogger(consensusTest.class.getName());
+    private final static String TEST_FAILED = "Test Failed!";
 
-namespace libbitcoin {
+    public static void assertTrue(boolean success) {
+		if (!success) {
+			logger.log(Level.SEVERE, TEST_FAILED, new RuntimeException(TEST_FAILED));
+		}
+	}
 
-class BC_API end_of_stream
-  : private std::exception
-{
-};
+    public static void assertTrue(boolean success) {
+		if (!success) {
+			logger.log(Level.SEVERE, TEST_FAILED, new RuntimeException(TEST_FAILED));
+		}
+	}
 
 }
 
-#endif

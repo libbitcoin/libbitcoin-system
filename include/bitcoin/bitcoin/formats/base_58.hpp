@@ -42,7 +42,7 @@ bool decode_base58(byte_array<Size>& out, const std::string &in);
  * TODO: determine if the sizing function is always accurate.
  */
 template <size_t Size>
-byte_array<Size * 733 / 1000> base58_literal(const char(&string)[Size]);
+byte_array<(size_t)(Size * 733 / 1000)> base58_literal(const char(&string)[Size]);
 
 /**
  * Encode data as base58.

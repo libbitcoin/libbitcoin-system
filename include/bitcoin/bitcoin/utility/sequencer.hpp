@@ -30,8 +30,10 @@
 namespace libbitcoin {
 
 class sequencer
+#ifndef SWIG
   : public enable_shared_from_base<sequencer>
     /*, track<sequencer>*/
+#endif
 {
 public:
     typedef std::shared_ptr<sequencer> ptr;

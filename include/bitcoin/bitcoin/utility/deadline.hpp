@@ -38,8 +38,10 @@ namespace libbitcoin {
  * makes timer firing and cancellation conditions safer.
  */
 class BC_API deadline
+#ifndef SWIG
   : public enable_shared_from_base<deadline>,
     noncopyable
+#endif
     /*, track<deadline>*/
 {
 public:
