@@ -13,6 +13,8 @@
 %import <bitcoin-utility-ext.i>
 %import <bitcoin-utility-ext-typemap.i>
 
+%include <bitcoin-machine-ext.i>
+
 %rename(gt) libbitcoin::machine::number::operator>(int64_t value) const;
 %rename(lt) libbitcoin::machine::number::operator<(int64_t value) const;
 %rename(ge) libbitcoin::machine::number::operator>=(int64_t value) const;
@@ -43,25 +45,6 @@
 
 %include "../include/bitcoin/bitcoin/machine/opcode.hpp"
 
-
-%ignore libbitcoin::machine::operation::operation(operation&& other);
-%ignore libbitcoin::machine::operation::operation(data_chunk&& uncoded, bool minimal=true);
-%ignore libbitcoin::machine::operation::operation(data_chunk&& uncoded, bool minimal);
-%ignore libbitcoin::machine::operation::operation(opcode code, data_chunk&& data, bool valid);
-%ignore libbitcoin::machine::operation::operator=(operation&& other);
-%rename(assign) libbitcoin::machine::operation::operator=(const operation& other);
-%rename(eq) libbitcoin::machine::operation::operator==(const operation& other) const;
-%rename(ne) libbitcoin::machine::operation::operator!=(const operation& other) const;
-%ignore libbitcoin::machine::operation::factory(std::istream& stream);
-%ignore libbitcoin::machine::operation::factory(reader& source);
-%ignore libbitcoin::machine::operation::from_data(std::istream& stream);
-%ignore libbitcoin::machine::operation::from_data(reader& source);
-%ignore libbitcoin::machine::operation::to_data(std::ostream& stream) const;
-%ignore libbitcoin::machine::operation::to_data(writer& sink) const;
-%include "../include/bitcoin/bitcoin/machine/operation.hpp"
-
-%include "../include/bitcoin/bitcoin/machine/script_version.hpp"
-
 %include "typemaps.i"
 // knows about int32_t
 %include "stdint.i"
@@ -75,8 +58,6 @@
 
 %include "../include/bitcoin/bitcoin/machine/interpreter.hpp"
 
-%include "../include/bitcoin/bitcoin/machine/rule_fork.hpp"
-%include "../include/bitcoin/bitcoin/machine/script_pattern.hpp"
 %include "../include/bitcoin/bitcoin/machine/sighash_algorithm.hpp"
 
 %template(OperationVector) std::vector<libbitcoin::machine::operation>;
