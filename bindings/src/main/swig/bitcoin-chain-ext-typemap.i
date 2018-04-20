@@ -11,3 +11,8 @@
 
 %typemap("javapackage") InputVector, InputVector *, InputVector & "orb.libbitcoin.bitcoin.chain"
 %typemap("javapackage") OutputVector, OutputVector *, OutputVector & "orb.libbitcoin.bitcoin.chain"
+%typemap("javapackage") BlockVector, BlockVector *, BlockVector & "orb.libbitcoin.bitcoin.chain"
+%typemap("javapackage") SizeTVector, SizeTVector *, SizeTVector & "orb.libbitcoin.bitcoin.chain"
+%typemap("javapackage") PointVector, PointVector *, PointVector & "orb.libbitcoin.bitcoin.chain"
+%typemap("javapackage") PointValueVector, PointValueVector *, PointValueVector & "orb.libbitcoin.bitcoin.chain"
+%typemap("javapackage") TransactionVector, TransactionVector *, TransactionVector & "orb.libbitcoin.bitcoin.chain"
