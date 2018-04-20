@@ -1,7 +1,16 @@
 %module chain
 %{
+#include <boost/chrono/time_point.hpp>
 #include <bitcoin/bitcoin.hpp>
+using namespace libbitcoin::chain;
+using libbitcoin::byte_array;
+using libbitcoin::code;
+using libbitcoin::asio::time_point;
 %}
+
+%include "vector.i"
+
+%import <bitcoin/bitcoin/define.hpp>
 
 %import "bitcoin-math-ext.i"
 %import "bitcoin-math-ext-typemap.i"
@@ -9,6 +18,8 @@
 %import "bitcoin-config-ext-typemap.i"
 %import "bitcoin-utility-ext.i"
 %import "bitcoin-utility-ext-typemap.i"
+%import "bitcoin-machine-ext.i"
+%import "bitcoin-machine-ext-typemap.i"
 %import "bitcoin-wallet-ext.i"
 %import "bitcoin-wallet-ext-typemap.i"
 
@@ -64,17 +75,6 @@
 %ignore libbitcoin::chain::witness::to_data(std::ostream& stream, bool prefix) const;
 %ignore libbitcoin::chain::witness::to_data(writer& sink, bool prefix) const;
 %include "../../../../include/bitcoin/bitcoin/chain/witness.hpp"
-
-namespace libbitcoin {
-namespace chain {
-%template(BlockVector) std::vector<libbitcoin::chain::block>;
-%template(SizeTVector) std::vector<size_t>;
-
-%template(PointVector) std::vector<libbitcoin::chain::point>;
-%template(PointValueVector) std::vector<libbitcoin::chain::point_value>;
-%template(TransactionVector) std::vector<libbitcoin::chain::transaction>;
-}
-}
 
 %pragma(java) jniclasscode=%{
   static {
