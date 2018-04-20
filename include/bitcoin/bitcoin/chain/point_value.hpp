@@ -53,7 +53,7 @@ public:
     bool operator!=(const point_value& other) const;
 
     // Swap implementation required to properly handle base class.
-    friend void swap(point_value& left, point_value& right);
+    friend void libbitcoin::chain::swap(point_value& left, point_value& right);
 
     // Properties (accessors).
     //-------------------------------------------------------------------------

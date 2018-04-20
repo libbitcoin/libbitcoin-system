@@ -50,16 +50,16 @@ public:
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
-        asio::time_point start_deserialize;
-        asio::time_point end_deserialize;
-        asio::time_point start_check;
-        asio::time_point start_populate;
-        asio::time_point start_accept;
-        asio::time_point start_connect;
-        asio::time_point start_notify;
-        asio::time_point start_pop;
-        asio::time_point start_push;
-        asio::time_point end_push;
+        libbitcoin::asio::time_point start_deserialize;
+        libbitcoin::asio::time_point end_deserialize;
+        libbitcoin::asio::time_point start_check;
+        libbitcoin::asio::time_point start_populate;
+        libbitcoin::asio::time_point start_accept;
+        libbitcoin::asio::time_point start_connect;
+        libbitcoin::asio::time_point start_notify;
+        libbitcoin::asio::time_point start_pop;
+        libbitcoin::asio::time_point start_push;
+        libbitcoin::asio::time_point end_push;
         float cache_efficiency;
     };
 
