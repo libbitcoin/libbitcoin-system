@@ -18,4 +18,5 @@
 
 //%ignore <bc::error::error_code_t>;
 //%ignore is_error_condition_enum<bc::error::error_condition_t>;
+%rename(maturity_coinbase, fullname=1) libbitcoin::error::coinbase_maturity;
 %include "../../../../include/bitcoin/bitcoin/error.hpp"

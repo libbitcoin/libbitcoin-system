@@ -133,7 +133,7 @@ enum error_code_t
     unspent_duplicate = 38,
     missing_previous_output = 19,
     double_spend = 18,
-    maturity_coinbase = 46,
+	coinbase_maturity = 46,
     spend_exceeds_value = 40,
     transaction_embedded_sigop_limit = 55,
     sequence_locked = 78,
