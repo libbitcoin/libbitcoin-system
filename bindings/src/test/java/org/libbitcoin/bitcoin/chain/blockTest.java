@@ -68,7 +68,7 @@ class blockTest {
 	    long[] expected = { 7, 6, 5, 4, 3, 2, 1, 0 };
 	    long top = 7;
 	    SizeTVec result = block.locator_heights(top);
-	    assertEquals(expected, actual)
+	    assertEquals(expected, result)
 	}
 	
 	static boolean assertEquals(long[] expected, SizeTVec actual) {
@@ -80,7 +80,7 @@ class blockTest {
 	
 	public static void block__locator_heights__positive_backoff__returns_top_plus_log_offset_to_zero()
 	{
-	    long expected =
+	    long[] expected =
 	    {
 	        138, 137, 136, 135, 134, 133, 132, 131, 130,
 	        129, 128, 126, 122, 114,  98,  66,   2,   0

@@ -39,8 +39,8 @@ class stealthTest {
 	// $ bx ec-add 03d5b3853bbee336b551ff999b0b1d656e65a7649037ae0dcb02b3c4ff5f29e5be 4b4974266ee6c8bed9eff2cd1087bbc1101f17bad9c37814f8561b67f550c544 | bx ec-to-address - v 111
 	// private static final String P2PKH_ADDRESS_TESTNET = "mwSnRsXSEq3d7LTGqe7AtJYNqhATwHdhMb";
 	
-//	public static void stealth_round_trip()
-//	{
+	public static void stealth_round_trip()
+	{
 //	    ec_secret expected_stealth_private;
 //	    assertTrue(decode_base16(expected_stealth_private, STEALTH_PRIVATE));
 //	
@@ -88,10 +88,10 @@ class stealthTest {
 //	    // versioning: stealth_address::main corresponds to payment_address::main_p2pkh
 //	    wallet::payment_address address(stealth_public, wallet::payment_address::mainnet_p2kh);
 //	    assertEquals(address.encoded(), P2PKH_ADDRESS);
-//	}
-//	
-//	public static void verify_string_constructor)
-//	{
+	}
+	
+	public static void verify_string_constructor()
+	{
 //	    const std::string value = "01100110000";
 //	    binary prefix(value);
 //	    assertEquals(value.size(), prefix.size());
@@ -100,54 +100,54 @@ class stealthTest {
 //	        const auto comparison = value[i] == '1';
 //	        assertEquals(prefix[i], comparison);
 //	    }
-//	}
-//	
-//	// Binary as a value on the left, padded with zeros to the right.
-//	public static void compare_constructor_results)
-//	{
+	}
+	
+	// Binary as a value on the left, padded with zeros to the right.
+	public static void compare_constructor_results()
+	{
 //	    std::string value = "01100111000";
 //	    binary prefix(value);
 //	    data_chunk blocks{ { 0x67, 0x00 } };
 //	    binary prefix2(value.size(), blocks);
 //	    assertEquals(prefix, prefix2);
-//	}
-//	
-//	public static void bitfield_test1)
-//	{
+	}
+	
+	public static void bitfield_test1()
+	{
 //	    binary prefix("01100111001");
 //	    data_chunk raw_bitfield{ { 0x67, 0x20, 0x00, 0x0 } };
 //	    BOOST_REQUIRE_GE(raw_bitfield.size() * 8, prefix.size());
 //	    binary compare(prefix.size(), raw_bitfield);
 //	    assertEquals(prefix, compare);
-//	}
-//	
-//	public static void bitfield_test2)
-//	{
+	}
+	
+	public static void bitfield_test2()
+	{
 //	    const data_chunk blocks{ { 0x8b, 0xf4, 0x1c, 0x69 } };
 //	    const binary prefix(27, blocks);
 //	    const data_chunk raw_bitfield{ { 0x8b, 0xf4, 0x1c, 0x79 } };
 //	    BOOST_REQUIRE_GE(raw_bitfield.size() * 8, prefix.size());
 //	    const binary compare(prefix.size(), raw_bitfield);
 //	    assertEquals(prefix, compare);
-//	}
-//	
-//	public static void bitfield_test3)
-//	{
+	}
+	
+	public static void bitfield_test3()
+	{
 //	    const data_chunk blocks{ { 0x69, 0x1c, 0xf4, 0x8b } };
 //	    const binary prefix(32, blocks);
 //	    const data_chunk raw_bitfield{ { 0x69, 0x1c, 0xf4, 0x8b } };
 //	    const binary compare(prefix.size(), raw_bitfield);
 //	    assertEquals(prefix, compare);
-//	}
-//	
-//	public static void bitfield_test4)
-//	{
+	}
+	
+	public static void bitfield_test4()
+	{
 //	    const data_chunk blocks{ { 0x69, 0x1c, 0xf4, 0x8b } };
 //	    const binary prefix(29, blocks);
 //	    const data_chunk raw_bitfield{ { 0x69, 0x1c, 0xf4, 0x8b } };
 //	    const binary compare(prefix.size(), raw_bitfield);
 //	    assertEquals(prefix, compare);
-//	}
+	}
 	
 	public static void main(String[] args) {
 	}
