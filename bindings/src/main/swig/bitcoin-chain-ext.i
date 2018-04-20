@@ -1,13 +1,5 @@
-%module chain
-%{
-#include <bitcoin/bitcoin.hpp>
-%}
-
-%include "vector.i"
-
-%import <bitcoin/bitcoin/define.hpp>
-
 %rename(assign) libbitcoin::chain::block::operator=(block&& other);
+%ignore libbitcoin::chain::block::operator=(const block& other);
 %rename(eq) libbitcoin::chain::block::operator==(const block& other) const;
 %rename(ne) libbitcoin::chain::block::operator!=(const block& other) const;
 %ignore block(block&& other);
@@ -169,3 +161,10 @@
 
 %template(InputVector) std::vector<libbitcoin::chain::input>;
 %template(OutputVector) std::vector<libbitcoin::chain::output>;
+
+%template(BlockVector) std::vector<libbitcoin::chain::block>;
+%template(SizeTVector) std::vector<size_t>;
+
+%template(PointVector) std::vector<libbitcoin::chain::point>;
+%template(PointValueVector) std::vector<libbitcoin::chain::point_value>;
+%template(TransactionVector) std::vector<libbitcoin::chain::transaction>;
