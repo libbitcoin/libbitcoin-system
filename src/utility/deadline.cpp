@@ -26,7 +26,7 @@
 
 namespace libbitcoin {
 
-using std::placeholders::_1;
+using namespace std::placeholders;
 
 // The timer closure captures an instance of this class and the callback.
 // Deadline is guaranteed to call handler exactly once unless canceled/reset.
