@@ -108,7 +108,7 @@ ec_private ec_private::from_seed(const data_chunk& seed,
     const hd_private key(seed);
 
     // The key is invalid if parse256(IL) >= n or 0:
-    return key ? ec_private(key.secret(), address_version) : ec_private();
+    return key ? ec_private{ key.secret(), address_version } : ec_private{};
 }
 
 ec_private ec_private::from_string(const std::string& wif,
