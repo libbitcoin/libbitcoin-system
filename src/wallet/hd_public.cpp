@@ -222,8 +222,8 @@ hd_public hd_public::derive_public(uint32_t index) const
     const auto intermediate = split(hmac_sha512_hash(data, chain_));
 
     // The returned child key Ki is point(parse256(IL)) + Kpar.
-    auto combined = point_;
-    if (!ec_add(combined, intermediate.left))
+    auto child = point_;
+    if (!ec_add(child, intermediate.left))
         return {};
 
     if (lineage_.depth == max_uint8)
@@ -237,7 +237,7 @@ hd_public hd_public::derive_public(uint32_t index) const
         index
     };
 
-    return hd_public(combined, intermediate.right, lineage);
+    return hd_public(child, intermediate.right, lineage);
 }
 
 // Helpers.
