@@ -55,7 +55,7 @@ static std::once_flag io_mutex;
 // Ensure validate_localization is called only once.
 static std::once_flag icu_mutex;
 
-// Static initializer for bc::cin.
+// Static initializer for bc::cin, see BC_USE_LIBBITCOIN_MAIN.
 static std::istream& cin_stream()
 {
     std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
@@ -63,7 +63,7 @@ static std::istream& cin_stream()
     return input;
 }
 
-// Static initializer for bc::cout.
+// Static initializer for bc::cout, see BC_USE_LIBBITCOIN_MAIN.
 static std::ostream& cout_stream()
 {
     std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
@@ -71,18 +71,13 @@ static std::ostream& cout_stream()
     return output;
 }
 
-// Static initializer for bc::cerr.
+// Static initializer for bc::cerr, see BC_USE_LIBBITCOIN_MAIN.
 static std::ostream& cerr_stream()
 {
     std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
     static unicode_ostream error(std::cerr, std::wcerr, utf16_buffer_size);
     return error;
 }
-
-// Use bc::cin in place of std::cin, etc.
-std::istream& cin = cin_stream();
-std::ostream& cout = cout_stream();
-std::ostream& cerr = cerr_stream();
 
 #ifdef WITH_ICU
 
