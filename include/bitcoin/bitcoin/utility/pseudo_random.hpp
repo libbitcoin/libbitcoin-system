@@ -43,7 +43,7 @@ class BC_API pseudo_random
 
         const auto fill = [&distribution, &twister](uint8_t byte)
         {
-            return distribution(twister);
+            return static_cast<uint8_t>(distribution(twister));
         };
 
         std::transform(out.begin(), out.end(), out.begin(), fill);
