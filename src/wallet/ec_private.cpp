@@ -28,6 +28,7 @@
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/ec_public.hpp>
+#include <bitcoin/bitcoin/wallet/hd_private.hpp>
 #include <bitcoin/bitcoin/wallet/payment_address.hpp>
 
 namespace libbitcoin {
@@ -51,6 +52,11 @@ ec_private::ec_private()
 ec_private::ec_private(const ec_private& other)
   : valid_(other.valid_), compress_(other.compress_), version_(other.version_),
     secret_(other.secret_)
+{
+}
+
+ec_private::ec_private(const data_chunk& seed, uint8_t address_version)
+  : ec_private(from_seed(seed, address_version))
 {
 }
 
@@ -92,6 +98,16 @@ bool ec_private::is_wif(data_slice decoded)
 
 // Factories.
 // ----------------------------------------------------------------------------
+
+ec_private ec_private::from_seed(const data_chunk& seed,
+    uint8_t address_version)
+{
+    // This technique ensures consistent secrets with BIP32 from a given seed.
+    const hd_private key(seed);
+
+    // The key is invalid if parse256(IL) >= n or 0:
+    return key ? ec_private{ key.secret(), address_version } : ec_private{};
+}
 
 ec_private ec_private::from_string(const std::string& wif,
     uint8_t address_version)
