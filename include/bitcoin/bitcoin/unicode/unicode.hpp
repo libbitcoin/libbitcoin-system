@@ -107,10 +107,10 @@
         }
 #else
     #define BC_USE_LIBBITCOIN_MAIN \
+        namespace libbitcoin { \
         std::istream& cin = std::cin; \
         std::ostream& cout = std::cout; \
         std::ostream& cerr = std::cerr; \
-        namespace libbitcoin { \
         int main(int argc, char* argv[]); \
         } \
         \
