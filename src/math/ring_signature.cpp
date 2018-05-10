@@ -20,6 +20,7 @@
 
 #include <map>
 #include <boost/range/combine.hpp>
+#include <secp256k1.h>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/wallet/hd_private.hpp>
 
