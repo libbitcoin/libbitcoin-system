@@ -83,6 +83,10 @@
     #include <windows.h>
     #define BC_USE_LIBBITCOIN_MAIN \
         namespace libbitcoin { \
+        std::istream& cin = cin_stream(); \
+        std::ostream& cout = cout_stream(); \
+        std::ostream& cerr = cerr_stream(); \
+        \
         int main(int argc, char* argv[]); \
         } \
         \
@@ -104,6 +108,9 @@
 #else
     #define BC_USE_LIBBITCOIN_MAIN \
         namespace libbitcoin { \
+        std::istream& cin = std::cin; \
+        std::ostream& cout = std::cout; \
+        std::ostream& cerr = std::cerr; \
         int main(int argc, char* argv[]); \
         } \
         \
