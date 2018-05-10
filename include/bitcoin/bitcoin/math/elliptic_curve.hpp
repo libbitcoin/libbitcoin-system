@@ -81,6 +81,14 @@ static BC_CONSTEXPR ec_uncompressed null_uncompressed_point =
 // Add and multiply EC values
 // ----------------------------------------------------------------------------
 
+/// Negate a scalar
+/// return false on failure
+BC_API bool ec_negate(ec_secret& scalar);
+
+/// Invert a point (flip on Y axis)
+/// return false on failure
+BC_API bool ec_negate(ec_compressed& point);
+
 /// Compute the sum a += G*b, where G is the curve's generator point.
 /// return false on failure (such as infinity or zero).
 BC_API bool ec_add(ec_compressed& point, const ec_secret& secret);

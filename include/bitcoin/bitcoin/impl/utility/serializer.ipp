@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
 
 namespace libbitcoin {
@@ -189,6 +190,12 @@ void serializer<Iterator>::write_byte(uint8_t value)
 
 template <typename Iterator>
 void serializer<Iterator>::write_bytes(const data_chunk& data)
+{
+    write_forward(data);
+}
+
+template <typename Iterator>
+void serializer<Iterator>::write_bytes(const data_slice data)
 {
     write_forward(data);
 }

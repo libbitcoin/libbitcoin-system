@@ -27,6 +27,7 @@
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/wallet/hd_private.hpp>
 #include "../math/external/lax_der_parsing.h"
 #include "secp256k1_initializer.hpp"
 
@@ -62,6 +63,15 @@ bool serialize(const secp256k1_context* context, byte_array<Size>& out,
     const auto flags = to_flags(Size == ec_compressed_size);
     secp256k1_ec_pubkey_serialize(context, out.data(), &size, &point, flags);
     return size == Size;
+}
+
+template <size_t Size>
+bool ec_negate(const secp256k1_context* context, byte_array<Size>& in_out)
+{
+    secp256k1_pubkey pubkey;
+    return parse(context, pubkey, in_out) &&
+        secp256k1_ec_pubkey_negate(context, &pubkey) == 1 &&
+        serialize(context, in_out, pubkey);
 }
 
 template <size_t Size>
@@ -124,6 +134,18 @@ bool verify_signature(const secp256k1_context* context,
 
 // Add and multiply EC values
 // ----------------------------------------------------------------------------
+
+bool ec_negate(ec_secret& scalar)
+{
+    const auto context = verification.context();
+    return secp256k1_ec_privkey_negate(context, scalar.data()) == 1;
+}
+
+bool ec_negate(ec_compressed& point)
+{
+    const auto context = verification.context();
+    return ec_negate(context, point);
+}
 
 bool ec_add(ec_compressed& point, const ec_secret& secret)
 {
