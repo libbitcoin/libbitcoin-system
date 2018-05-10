@@ -144,6 +144,7 @@ public:
         uint32_t stale_seconds);
 
     /// Properties.
+    const hash_digest& hash() const;
     size_t height() const;
     uint32_t enabled_forks() const;
     uint32_t minimum_block_version() const;

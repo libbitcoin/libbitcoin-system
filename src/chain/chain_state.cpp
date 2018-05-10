@@ -646,6 +646,8 @@ chain_state::chain_state(const chain_state& pool, const block& block)
 chain_state::data chain_state::to_header(const chain_state& parent,
     const header& header)
 {
+    BITCOIN_ASSERT(header.previous_block_hash() == parent.hash());
+
     // Alias configured forks.
     const auto forks = parent.forks_;
 
@@ -719,6 +721,11 @@ bool chain_state::is_stale() const
 
 // Properties.
 //-----------------------------------------------------------------------------
+
+const hash_digest& chain_state::hash() const
+{
+    return data_.hash;
+}
 
 size_t chain_state::height() const
 {
