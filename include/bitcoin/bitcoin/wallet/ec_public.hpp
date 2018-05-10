@@ -69,7 +69,6 @@ public:
 
     /// Accessors.
     const ec_compressed& point() const;
-    const uint8_t version() const;
     const bool compressed() const;
 
     /// Methods.
