@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(ring_signature__basic_test)
     BOOST_REQUIRE(is_secret_in_ring(secret_keys[1], ring1));
 
     std::string message = "hello world!";
-    data_chunk message_data = to_chunk(message);
+    const auto message_data = to_chunk(message);
 
     ring_signature signature;
     const auto seed = new_seed();
@@ -99,22 +99,22 @@ BOOST_AUTO_TEST_CASE(ring_signature__basic_test)
 
     BOOST_REQUIRE(verify(rings, message_data, signature));
 
+    BOOST_REQUIRE_EQUAL(signature.s.size(), rings.size());
     for (size_t i = 0; i < rings.size(); ++i)
     {
-        BOOST_REQUIRE(i < signature.s.size());
         const auto& ring = rings[i];
+        BOOST_REQUIRE_EQUAL(signature.s[i].size(), ring.size());
         for (size_t j = 0; j < ring.size(); ++j)
         {
-            BOOST_REQUIRE(j < signature.s[i].size());
             ring_signature signature_copy = signature;
             if (pseudo_random(0, 1))
-                ec_negate(signature_copy.s[i][j]);
+                BOOST_REQUIRE(ec_negate(signature_copy.s[i][j]));
             else
             {
                 ec_secret one;
                 std::fill(one.begin(), one.end(), 0);
                 one.back() = 1;
-                ec_add(signature_copy.s[i][j], one);
+                BOOST_REQUIRE(ec_add(signature_copy.s[i][j], one));
             }
             BOOST_REQUIRE(signature.s[i][j] != signature_copy.s[i][j]);
             BOOST_REQUIRE(!verify(rings, message_data, signature_copy));

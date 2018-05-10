@@ -34,6 +34,8 @@ static BC_CONSTEXPR uint8_t ec_even_sign = 2;
 static BC_CONSTEXPR size_t ec_secret_size = 32;
 typedef byte_array<ec_secret_size> ec_secret;
 
+typedef std::vector<ec_secret> secret_list;
+
 /// Compressed public key:
 static BC_CONSTEXPR size_t ec_compressed_size = 33;
 typedef byte_array<ec_compressed_size> ec_compressed;

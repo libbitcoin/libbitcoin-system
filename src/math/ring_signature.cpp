@@ -38,9 +38,11 @@ const secret_keys_map generate_keys_map(const secret_list& secrets)
         ec_compressed public_key;
         bool rc = secret_to_public(public_key, secret);
         BITCOIN_ASSERT(rc);
+
         // Insert into map
-        keys.insert({public_key, secret});
+        keys.insert({ public_key, secret });
     }
+
     return keys;
 }
 
