@@ -23,21 +23,51 @@
 
 namespace libbitcoin {
 
+/**
+ * key_rings is a collection of public key rings.
+ * Each ring contains several public keys.
+ * To create a valid signature, you must use at least one valid private
+ * key from each ring.
+ * That is given three rings [{A, B, C}, {D, E, F}, {X, Y}], then to
+ * create a valid signature, we must use a private key from each of those
+ * sets.
+ * For example A and E and X. We can summarize this operation as:
+ * (A or B or C) and (D or E or F) and (X or Y)
+ */
 typedef std::vector<point_list> key_rings;
+
+/**
+ * List of secret keys used for signing. There must be one valid secret
+ * key from each ring.
+ * For example given a ring of [{A, B, C}, {D, E, F}, {X, Y}] then we
+ * must have a set of keys that satisfies this constraint:
+ * (A or B or C) and (D or E or F) and (X or Y)
+ */
 typedef std::vector<ec_secret> secret_list;
 
-typedef std::vector<secret_list> s_values_type;
-
+/**
+ * A borromean ring signature.
+ *
+ * theta = {e_0, s_i_j : 0 <= i <= n, 0 <= j <= m_i}
+ */
 struct ring_signature
 {
+    typedef std::vector<secret_list> s_values_type;
+
     ec_secret e;
     s_values_type s;
 };
 
 /**
- * message: the message to sign
- * rings: an array rings; each ring is an array of pubkeys
- * secret_keys: an array of signing keys
+ * Create a borromean ring signature.
+ * There must exist a valid signing key for each ring of public keys.
+ * @param[in]  out      The new signature.
+ * @param[in]  secrets  Secret signing keys. There should be at least one key
+ *                      from each ring.
+ * @param[in]  rings    The rings each with N_i public keys.
+ * @param[in]  message  The message data to sign.
+ * @param[in]  seed     Randomizing seed data.
+ * @return false if the signing operation fails.
  */
 BC_API bool sign(
     ring_signature& out,
@@ -46,6 +76,13 @@ BC_API bool sign(
     const data_slice message,
     const data_slice seed);
 
+/**
+ * Verify a borromean ring signature.
+ * @param[in]  rings        The rings each with N_i public keys.
+ * @param[in]  message      The message data to verify.
+ * @param[in]  signature    Signature.
+ * @return false if the verify operation fails.
+ */
 BC_API bool verify(
     const key_rings& rings,
     const data_slice message,

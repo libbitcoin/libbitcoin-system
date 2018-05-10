@@ -27,19 +27,24 @@ namespace libbitcoin {
 
 typedef std::map<ec_compressed, ec_secret> secret_keys_map;
 
+// Take a list of secret keys and generate a mapping from public key -> secret
 const secret_keys_map generate_keys_map(const secret_list& secrets)
 {
     secret_keys_map keys;
     for (const auto& secret: secrets)
     {
+        // Compute public key
         ec_compressed public_key;
         bool rc = secret_to_public(public_key, secret);
         BITCOIN_ASSERT(rc);
+        // Insert into map
         keys.insert({public_key, secret});
     }
     return keys;
 }
 
+// Make a list of public keys for which we have the corresponding secret key
+// in a single ring of public keys.
 const point_list known_keys_in_ring(
     const secret_keys_map& secret_keys,
     const point_list& ring)
@@ -47,25 +52,31 @@ const point_list known_keys_in_ring(
     point_list known_ring;
     for (const auto& key: ring)
     {
+        // Is this public key in our secret keys map?
         if (secret_keys.find(key) != secret_keys.end())
             known_ring.push_back(key);
     }
     return known_ring;
 }
 
+// For all rings, make a list of known public keys corresponding to each ring.
 const key_rings partition_keys_into_rings(
     const secret_keys_map& secret_keys,
     const key_rings& rings)
 {
     key_rings known_keys;
+    // For each ring in our rings...
     for (const auto& ring: rings)
     {
+        // ... find known keys corresponding to our private keys
         const auto known_ring = known_keys_in_ring(secret_keys, ring);
+        // And add this list to our rings of known public keys.
         known_keys.push_back(known_ring);
     }
     return known_keys;
 }
 
+// Check that all rings are not empty
 bool all_rings_nonzero_size(const key_rings& known_keys)
 {
     for (const auto& ring: known_keys)
@@ -76,24 +87,32 @@ bool all_rings_nonzero_size(const key_rings& known_keys)
 
 typedef std::vector<size_t> index_list;
 
+// Make a list of indexes of where our known key occurs in each ring of
+// public keys. That is given a ring of {A, B, C} where we know the
+// private key of B, it will return 1 (the index in the ring).
+// This function computes this for all rings.
 index_list search_key_indexes(
     const key_rings& rings,
     const key_rings& known_keys_by_ring)
 {
     index_list known_key_indexes;
+    // Iterate all our rings.
     for (size_t i = 0; i < rings.size(); ++i)
     {
         BITCOIN_ASSERT(i < known_keys_by_ring.size());
         const auto& ring = rings[i];
         const auto& known = known_keys_by_ring[i];
+        // Find known key in this current ring.
         const auto it = std::find(ring.begin(), ring.end(), known.back());
         BITCOIN_ASSERT(it != ring.end());
+        // Calculate and store the index
         size_t index = it - ring.begin();
         known_key_indexes.push_back(index);
     }
     return known_key_indexes;
 }
 
+// Returns message || flatten(rings)
 data_chunk concatenate(const data_slice message, const key_rings& rings)
 {
     data_chunk result(message.begin(), message.end());
@@ -103,17 +122,25 @@ data_chunk concatenate(const data_slice message, const key_rings& rings)
     return result;
 }
 
-void populate_k_and_s_values(
-    secret_list& k, s_values_type& s,
+// Generate random k and s values.
+// There is a single k for each ring.
+// Each key in each ring, has a corresponding s value.
+// That is, each ring[i][j] should have a corresponding s[i][j]
+void random_k_and_s_values(
+    secret_list& k, ring_signature::s_values_type& s,
     const key_rings& rings, const data_slice seed)
 {
-    auto random_scalar = [&seed]()
+    // This value increments inside this function with every call
+    // to random_scalar() lambda.
+    uint32_t increment_randomizer = 0;
+    // Use a hd_private wallet as a random generator for ec_secret values.
+    auto random_scalar = [&seed, &increment_randomizer]()
     {
         static const wallet::hd_private generate_secret(to_chunk(seed));
-        static uint32_t i = 0;
-        return generate_secret.derive_private(i++).secret();
+        return generate_secret.derive_private(increment_randomizer++).secret();
     };
 
+    // Each ring[i][j] should have a corresponding s[i][j]
     for (const auto& ring: rings)
     {
         secret_list s_ring;
@@ -184,23 +211,31 @@ bool sign(
     const data_slice message,
     const data_slice seed)
 {
+    // Create public key -> secret key map
     auto secret_keys = generate_keys_map(secrets);
+    // Organize known public keys into corresponding rings
     const auto known_keys_by_ring =
         partition_keys_into_rings(secret_keys, rings);
     // Check we know a secret key in each ring
     if (!all_rings_nonzero_size(known_keys_by_ring))
         return false;
 
+    // Compute indexes for known keys inside the rings.
     const index_list known_key_indexes =
         search_key_indexes(rings, known_keys_by_ring);
     BITCOIN_ASSERT(known_key_indexes.size() == rings.size());
 
+    // Compute message digest M
     const data_chunk message_data = concatenate(message, rings);
     const hash_digest M = sha256_hash(message_data);
 
+    // Generate random k and s values
     secret_list k;
-    populate_k_and_s_values(k, out.s, rings, seed);
+    random_k_and_s_values(k, out.s, rings, seed);
 
+    // ---------------------------------------------------------------------
+    // Step 1: calculate e0
+    // ---------------------------------------------------------------------
     data_chunk e0_data;
 
     for (size_t i = 0; i < rings.size(); ++i)
@@ -209,50 +244,67 @@ bool sign(
         BITCOIN_ASSERT(i < k.size());
         BITCOIN_ASSERT(i < out.s.size());
 
+        // Current ring and index of known key
         const auto& ring = rings[i];
         const size_t known_key_index = known_key_indexes[i];
 
+        // Calculate starting R value...
         ec_compressed R_i_j;
         bool rc = secret_to_public(R_i_j, k[i]);
 
+        // ... Start one above index of known key and loop until the end
         for (size_t j = known_key_index + 1; j < ring.size(); ++j)
         {
             BITCOIN_ASSERT(j < out.s[i].size());
             const auto& s = out.s[i][j];
 
+            // Calculate e and R until the end of this ring.
             const auto e_i_j = borromean_hash(M, R_i_j, i, j);
             R_i_j = calculate_R(s, e_i_j, ring[j]);
         }
+        // Add this ring to e0
         extend_data(e0_data, R_i_j);
     }
     extend_data(e0_data, M);
+    // Hash data to produce e0 value
     out.e = sha256_hash(e0_data);
 
+    // ---------------------------------------------------------------------
+    // Step 2: join up each ring at the index where we know the secret key
+    // ---------------------------------------------------------------------
     for (size_t i = 0; i < rings.size(); ++i)
     {
         BITCOIN_ASSERT(i < known_key_indexes.size());
         BITCOIN_ASSERT(i < k.size());
         BITCOIN_ASSERT(i < out.s.size());
 
+        // Current ring and index of known key
         const auto& ring = rings[i];
         const size_t known_key_index = known_key_indexes[i];
 
+        // Calculate starting e value of this current ring.
         auto e_i_j = borromean_hash(M, out.e, i, 0);
 
+        // Loop until index of known key.
         for (size_t j = 0; j < known_key_index; ++j)
         {
             BITCOIN_ASSERT(j < out.s[i].size());
             const auto& s = out.s[i][j];
 
+            // Calculate e and R until we reach our index.
             BITCOIN_ASSERT(j < ring.size());
             const auto R_i_j = calculate_R(s, e_i_j, ring[j]);
             e_i_j = borromean_hash(M, R_i_j, i, j + 1);
         }
 
+        // Find secret key used for calculation in the next step.
         BITCOIN_ASSERT(known_key_index < ring.size());
         const auto& known_public_key = ring[known_key_index];
         BITCOIN_ASSERT(secret_keys.find(known_public_key) != secret_keys.end());
         const auto& secret = secret_keys[known_public_key];
+
+        // Now close the ring using this calculation:
+        // s = k - e x
         out.s[i][known_key_index] = calculate_s(k[i], e_i_j, secret);
     }
 
@@ -264,17 +316,26 @@ bool verify(
     const data_slice message,
     const ring_signature& signature)
 {
+    // Compute message digest M
     const data_chunk message_data = concatenate(message, rings);
     const hash_digest M = sha256_hash(message_data);
 
+    // As compared with signing, we only have to perform a single step.
+    // The ring has already been computed, so now we just need to verify
+    // it by calculating e0, and looping all the way until the end R value
+    // which we use to recalculate e0.
+    // If the values match then we have a valid ring signature.
+
     data_chunk e0_data;
 
+    // Loop through rings
     for (size_t i = 0; i < rings.size(); ++i)
     {
         BITCOIN_ASSERT(i < signature.s.size());
 
         const auto& ring = rings[i];
 
+        // Calculate first e value for this ring.
         auto e_i_j = borromean_hash(M, signature.e, i, 0);
 
         ec_compressed R_i_j;
@@ -283,6 +344,7 @@ bool verify(
             BITCOIN_ASSERT(j < signature.s[i].size());
             const auto& s = signature.s[i][j];
 
+            // Calculate R and e values until the end.
             BITCOIN_ASSERT(j < ring.size());
             R_i_j = calculate_R(s, e_i_j, ring[j]);
             e_i_j = borromean_hash(M, R_i_j, i, j + 1);
@@ -290,8 +352,10 @@ bool verify(
         extend_data(e0_data, R_i_j);
     }
     extend_data(e0_data, M);
+    // Hash data to produce e0 value
     auto e0_hash = sha256_hash(e0_data);
 
+    // Verification step.
     return e0_hash == signature.e;
 }
 
