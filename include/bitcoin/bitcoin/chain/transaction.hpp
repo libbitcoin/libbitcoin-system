@@ -46,28 +46,35 @@ namespace chain {
 class BC_API transaction
 {
 public:
-    typedef input::list ins;
-    typedef output::list outs;
     typedef std::vector<transaction> list;
 
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
-        static const uint64_t undetermined_link;
+        /// This is a non-consensus sentinel value.
+        static const uint64_t unlinked;
 
-        bool simulate = false;
         uint64_t originator = 0;
-        code error = error::success;
         chain_state::ptr state = nullptr;
 
-        /// The tx exists if not undertermined (used to attach it to a block).
-        uint64_t link = undetermined_link;
+        /// If determined the tx exists at the link (in any state).
+        uint64_t link = unlinked;
 
-        /// Existing tx is valid for forks (don't validate, update vs. create).
-        bool pooled = false;
+        /// Tx is in a candidate chain block (and valid there).
+        bool candidate = false;
 
-        /// The tx is indexed, or pooled (for forks) for pool query, (reject).
-        bool duplicate = false;
+        /// Tx is in a confirmed chain block at given height (and valid there).
+        bool confirmed = false;
+
+        /// There is no distiction between a tx that can be valid under some
+        /// forks and one that cannot be valid under any forks. The only
+        /// criteria for storage is deserialization and DoS protection. The
+        /// latter is provided by pool validation or containing block PoW.
+        /// A transaction that is deconfirmed is set to unverified, which is
+        /// simply a storage space optimization. This results in revalidation
+        /// in the case where the transaction may be confirmed again.
+        /// If verified the tx has been validated relative to given forks.
+        bool verified = false;
     };
 
     // Constructors.
@@ -78,10 +85,10 @@ public:
     transaction(transaction&& other);
     transaction(const transaction& other);
 
-    transaction(uint32_t version, uint32_t locktime, ins&& inputs,
-        outs&& outputs);
-    transaction(uint32_t version, uint32_t locktime, const ins& inputs,
-        const outs& outputs);
+    transaction(uint32_t version, uint32_t locktime, input::list&& inputs,
+        output::list&& outputs);
+    transaction(uint32_t version, uint32_t locktime, const input::list& inputs,
+        const output::list& outputs);
 
     // Operators.
     //-------------------------------------------------------------------------
@@ -133,18 +140,18 @@ public:
     void set_locktime(uint32_t value);
 
     // Deprecated (unsafe).
-    ins& inputs();
+    input::list& inputs();
 
-    const ins& inputs() const;
-    void set_inputs(const ins& value);
-    void set_inputs(ins&& value);
+    const input::list& inputs() const;
+    void set_inputs(const input::list& value);
+    void set_inputs(input::list&& value);
 
     // Deprecated (unsafe).
-    outs& outputs();
+    output::list& outputs();
 
-    const outs& outputs() const;
-    void set_outputs(const outs& value);
-    void set_outputs(outs&& value);
+    const output::list& outputs() const;
+    void set_outputs(const output::list& value);
+    void set_outputs(output::list&& value);
 
     hash_digest outputs_hash() const;
     hash_digest inpoints_hash() const;

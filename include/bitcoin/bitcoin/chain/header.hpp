@@ -49,19 +49,26 @@ public:
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
-        bool simulate = false;
         uint64_t originator = 0;
-        code error = error::success;
         chain_state::ptr state = nullptr;
 
-        /// Transactions are populated (don't download).
+        /// The block validation error code (if validated).
+        code error = error::success;
+
+        /// Header exists, in any state (don't download it).
+        bool exists = false;
+
+        /// Block transactions are populated (don't download block/txs).
         bool populated = false;
 
-        /// Existing header, always valid (don't validate, update vs. create).
-        bool pooled = false;
+        /// Block has been validated (don't re-validate).
+        bool validated = false;
 
-        /// The header is indexed (reject).
-        bool duplicate = false;
+        /// Header is a candidate (and is not yet invalid).
+        bool candidate = false;
+
+        /// Block is confirmed, relative to queried fork point (and is valid).
+        bool confirmed = false;
     };
 
     // Constructors.

@@ -53,8 +53,8 @@ namespace chain {
 
 using namespace bc::machine;
 
-// HACK: must match tx slab_map::not_found.
-const uint64_t transaction::validation::undetermined_link = max_int64;
+// HACK: unlinked must match tx slab_map::not_found.
+const uint64_t transaction::validation::unlinked = max_int64;
 
 // Read a length-prefixed collection of inputs or outputs from the source.
 template<class Source, class Put>
@@ -1163,7 +1163,7 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     // An unconfirmed transaction hash that exists in the chain is not accepted
     // even if the original is spent in the new block. This is not necessary
     // nor is it described by BIP30, but it is in the code referenced by BIP30.
-    else if (bip30 && metadata.duplicate)
+    else if (bip30 && metadata.link != validation::unlinked)
         return error::unspent_duplicate;
 
     else if (is_missing_previous_outputs())

@@ -34,7 +34,7 @@ namespace libbitcoin {
 namespace chain {
 
 // HACK: must match tx slab_map::not_found.
-static constexpr uint64_t undetermined_link = max_uint64;
+static constexpr uint64_t unlinked = max_uint64;
 
 // Constructors.
 //-----------------------------------------------------------------------------
@@ -47,7 +47,7 @@ payment_record::payment_record()
     hash_(null_hash),
     index_(point::null_index),
     data_(0),
-    link_(undetermined_link)
+    link_(unlinked)
 {
 }
 
@@ -173,7 +173,7 @@ bool payment_record::from_data(reader& source, bool wire)
     if (wire)
     {
         height_ = source.read_4_bytes_little_endian();
-        link_ = undetermined_link;
+        link_ = unlinked;
         hash_ = source.read_hash();
         index_ = source.read_4_bytes_little_endian();
     }
@@ -206,7 +206,7 @@ void payment_record::reset()
     hash_ = null_hash;
     index_ = point::null_index;
     data_ = 0;
-    link_ = undetermined_link;
+    link_ = unlinked;
 }
 
 bool payment_record::is_valid() const
