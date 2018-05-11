@@ -157,11 +157,6 @@ const ec_compressed& ec_public::point() const
     return point_;
 }
 
-const uint8_t ec_public::version() const
-{
-    return version_;
-}
-
 const bool ec_public::compressed() const
 {
     return compress_;
@@ -213,7 +208,6 @@ ec_public& ec_public::operator=(const ec_public& other)
 {
     valid_ = other.valid_;
     compress_ = other.compress_;
-    version_ = other.version_;
     point_ = other.point_;
     return *this;
 }
@@ -226,7 +220,7 @@ bool ec_public::operator<(const ec_public& other) const
 bool ec_public::operator==(const ec_public& other) const
 {
     return valid_ == other.valid_ && compress_ == other.compress_ &&
-        version_ == other.version_ && point_ == other.point_;
+        point_ == other.point_;
 }
 
 bool ec_public::operator!=(const ec_public& other) const
