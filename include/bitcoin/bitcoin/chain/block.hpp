@@ -141,7 +141,6 @@ public:
     uint64_t fees() const;
     uint64_t claim() const;
     uint64_t reward(size_t height) const;
-    uint256_t proof() const;
     hash_digest generate_merkle_root(bool witness=false) const;
     size_t signature_operations() const;
     size_t signature_operations(bool bip16, bool bip141) const;
