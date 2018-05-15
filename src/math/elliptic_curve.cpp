@@ -66,15 +66,6 @@ bool serialize(const secp256k1_context* context, byte_array<Size>& out,
 }
 
 template <size_t Size>
-bool ec_negate(const secp256k1_context* context, byte_array<Size>& in_out)
-{
-    secp256k1_pubkey pubkey;
-    return parse(context, pubkey, in_out) &&
-        secp256k1_ec_pubkey_negate(context, &pubkey) == 1 &&
-        serialize(context, in_out, pubkey);
-}
-
-template <size_t Size>
 bool ec_add(const secp256k1_context* context, byte_array<Size>& in_out,
     const ec_secret& secret)
 {
@@ -91,6 +82,15 @@ bool ec_multiply(const secp256k1_context* context, byte_array<Size>& in_out,
     secp256k1_pubkey pubkey;
     return parse(context, pubkey, in_out) &&
         secp256k1_ec_pubkey_tweak_mul(context, &pubkey, secret.data()) == 1 &&
+        serialize(context, in_out, pubkey);
+}
+
+template <size_t Size>
+bool ec_negate(const secp256k1_context* context, byte_array<Size>& in_out)
+{
+    secp256k1_pubkey pubkey;
+    return parse(context, pubkey, in_out) &&
+        secp256k1_ec_pubkey_negate(context, &pubkey) == 1 &&
         serialize(context, in_out, pubkey);
 }
 
@@ -135,18 +135,6 @@ bool verify_signature(const secp256k1_context* context,
 // Add and multiply EC values
 // ----------------------------------------------------------------------------
 
-bool ec_negate(ec_secret& scalar)
-{
-    const auto context = verification.context();
-    return secp256k1_ec_privkey_negate(context, scalar.data()) == 1;
-}
-
-bool ec_negate(ec_compressed& point)
-{
-    const auto context = verification.context();
-    return ec_negate(context, point);
-}
-
 bool ec_add(ec_compressed& point, const ec_secret& secret)
 {
     const auto context = verification.context();
@@ -183,6 +171,18 @@ bool ec_multiply(ec_secret& left, const ec_secret& right)
     const auto context = verification.context();
     return secp256k1_ec_privkey_tweak_mul(context, left.data(),
         right.data()) == 1;
+}
+
+bool ec_negate(ec_secret& scalar)
+{
+    const auto context = verification.context();
+    return secp256k1_ec_privkey_negate(context, scalar.data()) == 1;
+}
+
+bool ec_negate(ec_compressed& point)
+{
+    const auto context = verification.context();
+    return ec_negate(context, point);
 }
 
 bool ec_sum(ec_compressed& result, const point_list& points)

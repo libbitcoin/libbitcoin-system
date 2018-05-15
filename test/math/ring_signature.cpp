@@ -31,7 +31,7 @@ data_chunk new_seed()
 
 ec_secret new_key()
 {
-    const data_chunk seed = new_seed();
+    const auto seed = new_seed();
     const wallet::hd_private key(seed);
     return key.secret();
 }

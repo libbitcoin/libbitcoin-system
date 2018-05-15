@@ -189,12 +189,6 @@ void serializer<Iterator>::write_byte(uint8_t value)
 }
 
 template <typename Iterator>
-void serializer<Iterator>::write_bytes(const data_chunk& data)
-{
-    write_forward(data);
-}
-
-template <typename Iterator>
 void serializer<Iterator>::write_bytes(const data_slice data)
 {
     write_forward(data);

@@ -81,9 +81,6 @@ public:
     void write_byte(uint8_t value);
 
     /// Write all bytes.
-    void write_bytes(const data_chunk& data);
-
-    /// Write all bytes.
     void write_bytes(const data_slice data);
 
     /// Write required size buffer.
