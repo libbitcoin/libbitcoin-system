@@ -236,19 +236,19 @@ bool sign(ring_signature& out, const secret_list& secrets,
     // ---------------------------------------------------------------------
     data_chunk e0_data;
 
+    BITCOIN_ASSERT(known_key_indexes.size() == rings.size());
+    BITCOIN_ASSERT(k.size() == rings.size());
+    BITCOIN_ASSERT(out.s.size() == rings.size());
     for (size_t i = 0; i < rings.size(); ++i)
     {
-        BITCOIN_ASSERT(i < known_key_indexes.size());
-        BITCOIN_ASSERT(i < k.size());
-        BITCOIN_ASSERT(i < out.s.size());
-
         // Current ring and index of known key
         const auto& ring = rings[i];
-        const size_t known_key_index = known_key_indexes[i];
+        const auto known_key_index = known_key_indexes[i];
 
         // Calculate starting R value...
         ec_compressed R_i_j;
-        bool rc = secret_to_public(R_i_j, k[i]);
+        auto rc = secret_to_public(R_i_j, k[i]);
+        BITCOIN_ASSERT(rc);
 
         // ... Start one above index of known key and loop until the end
         for (size_t j = known_key_index + 1; j < ring.size(); ++j)
@@ -272,25 +272,21 @@ bool sign(ring_signature& out, const secret_list& secrets,
     // ---------------------------------------------------------------------
     for (size_t i = 0; i < rings.size(); ++i)
     {
-        BITCOIN_ASSERT(i < known_key_indexes.size());
-        BITCOIN_ASSERT(i < k.size());
-        BITCOIN_ASSERT(i < out.s.size());
-
         // Current ring and index of known key
         const auto& ring = rings[i];
-        const size_t known_key_index = known_key_indexes[i];
+        const auto known_key_index = known_key_indexes[i];
 
         // Calculate starting e value of this current ring.
         auto e_i_j = borromean_hash(M, out.e, i, 0);
 
+        BITCOIN_ASSERT(out.s[i].size() > known_key_index);
+        BITCOIN_ASSERT(ring.size() > known_key_index);
         // Loop until index of known key.
         for (size_t j = 0; j < known_key_index; ++j)
         {
-            BITCOIN_ASSERT(j < out.s[i].size());
             const auto& s = out.s[i][j];
 
             // Calculate e and R until we reach our index.
-            BITCOIN_ASSERT(j < ring.size());
             const auto R_i_j = calculate_R(s, e_i_j, ring[j]);
             e_i_j = borromean_hash(M, R_i_j, i, j + 1);
         }
