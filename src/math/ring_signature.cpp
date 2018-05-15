@@ -305,14 +305,12 @@ bool sign(ring_signature& out, const secret_list& secrets,
     return true;
 }
 
-bool verify(
-    const key_rings& rings,
-    const data_slice message,
+bool verify(const key_rings& rings, const data_slice message,
     const ring_signature& signature)
 {
     // Compute message digest M
-    const data_chunk message_data = concatenate(message, rings);
-    const hash_digest M = sha256_hash(message_data);
+    const auto message_data = concatenate(message, rings);
+    const auto M = sha256_hash(message_data);
 
     // As compared with signing, we only have to perform a single step.
     // The ring has already been computed, so now we just need to verify
@@ -321,11 +319,12 @@ bool verify(
     // If the values match then we have a valid ring signature.
 
     data_chunk e0_data;
+    e0_data.reserve(ec_uncompressed_size * rings.size() + hash_size);
 
+    BITCOIN_ASSERT(signature.s.size() == rings.size());
     // Loop through rings
     for (size_t i = 0; i < rings.size(); ++i)
     {
-        BITCOIN_ASSERT(i < signature.s.size());
 
         const auto& ring = rings[i];
 
@@ -333,13 +332,12 @@ bool verify(
         auto e_i_j = borromean_hash(M, signature.e, i, 0);
 
         ec_compressed R_i_j;
+        BITCOIN_ASSERT(signature.s[i].size() == ring.size());
         for (size_t j = 0; j < ring.size(); ++j)
         {
-            BITCOIN_ASSERT(j < signature.s[i].size());
             const auto& s = signature.s[i][j];
 
             // Calculate R and e values until the end.
-            BITCOIN_ASSERT(j < ring.size());
             R_i_j = calculate_R(s, e_i_j, ring[j]);
             e_i_j = borromean_hash(M, R_i_j, i, j + 1);
         }
@@ -347,7 +345,7 @@ bool verify(
     }
     extend_data(e0_data, M);
     // Hash data to produce e0 value
-    auto e0_hash = sha256_hash(e0_data);
+    const auto e0_hash = sha256_hash(e0_data);
 
     // Verification step.
     return e0_hash == signature.e;
