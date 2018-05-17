@@ -241,6 +241,7 @@ bool sign(ring_signature& out, const secret_list& secrets,
     // Step 1: calculate e0
     // ---------------------------------------------------------------------
     data_chunk e0_data;
+    e0_data.reserve(ec_compressed_size * rings.size() + hash_size);
 
     BITCOIN_ASSERT(known_key_indexes.size() == rings.size());
     BITCOIN_ASSERT(k.size() == rings.size());
