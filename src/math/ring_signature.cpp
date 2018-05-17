@@ -19,7 +19,6 @@
 #include <bitcoin/bitcoin/math/ring_signature.hpp>
 
 #include <map>
-#include <boost/range/combine.hpp>
 #include <secp256k1.h>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/wallet/hd_private.hpp>
@@ -106,7 +105,14 @@ index_list search_key_indexes(
 // Returns message || flatten(rings)
 data_chunk concatenate(data_slice message, const key_rings& rings)
 {
-    data_chunk result(message.begin(), message.end());
+    // Calculate size of result
+    size_t result_size = message.size();
+    for (const auto& ring: rings)
+        result_size += ring.size() * ec_compressed_size;
+    // Build the actual result data
+    data_chunk result;
+    result.reserve(result_size);
+    extend_data(result, message);
     for (const auto& ring: rings)
         for (const auto& key: ring)
             extend_data(result, key);
@@ -319,7 +325,7 @@ bool verify(const key_rings& rings, const data_slice message,
     // If the values match then we have a valid ring signature.
 
     data_chunk e0_data;
-    e0_data.reserve(ec_uncompressed_size * rings.size() + hash_size);
+    e0_data.reserve(ec_compressed_size * rings.size() + hash_size);
 
     BITCOIN_ASSERT(signature.s.size() == rings.size());
     // Loop through rings
