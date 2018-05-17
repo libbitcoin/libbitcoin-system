@@ -24,7 +24,7 @@
 namespace libbitcoin {
 
 /**
- * key_rings is a collection of public key rings.
+ * key_rings is a collection of rings of public keys.
  * Each ring contains several public keys.
  * To create a valid signature, you must use at least one valid private
  * key from each ring.
