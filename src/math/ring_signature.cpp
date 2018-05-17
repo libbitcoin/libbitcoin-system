@@ -214,14 +214,14 @@ bool sign(ring_signature& out, const secret_list& secrets,
         partition_keys_into_rings(secret_keys, rings);
 
     // Check we know a secret key in each ring
-    auto non_empty_ring = [](const point_list& ring)
+    auto empty_ring = [](const point_list& ring)
     {
-        return !ring.empty();
+        return ring.empty();
     };
-    const bool all_rings_nonzero_size = std::all_of(
-        known_keys_by_ring.begin(), known_keys_by_ring.end(), non_empty_ring);
+    const bool any_ring_zero_size = std::any_of(
+        known_keys_by_ring.begin(), known_keys_by_ring.end(), empty_ring);
 
-    if (!all_rings_nonzero_size)
+    if (any_ring_zero_size)
         return false;
 
     // Compute indexes for known keys inside the rings.
