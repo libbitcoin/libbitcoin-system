@@ -189,7 +189,7 @@ ec_secret calculate_s(const ec_secret& k, const ec_secret& e,
 
 {
     // s = k - e x
-    ec_secret result = e;
+    auto result = e;
     // result = e * x
     bool rc = ec_multiply(result, secret);
     BITCOIN_ASSERT(rc);
