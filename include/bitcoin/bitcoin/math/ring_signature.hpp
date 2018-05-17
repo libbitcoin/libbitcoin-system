@@ -59,7 +59,7 @@ struct ring_signature
  * @param[in]  out      The new signature.
  * @param[in]  secrets  Secret signing keys. There should be at least one key
  *                      from each ring.
- * @param[in]  rings    The rings each with N_i public keys.
+ * @param[in]  rings    The rings each with n_i public keys.
  * @param[in]  message  The message data to sign.
  * @param[in]  seed     Randomizing seed data.
  * @return false if the signing operation fails.
