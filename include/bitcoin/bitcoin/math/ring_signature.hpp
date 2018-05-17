@@ -39,7 +39,7 @@ typedef std::vector<point_list> key_rings;
 /**
  * A borromean ring signature.
  *
- * theta = {e_0, s_i_j : 0 <= i <= n, 0 <= j <= m_i}
+ * theta = {e_0, s_{i_j} : 0 <= i <= n, 0 <= j <= m_i}
  */
 struct ring_signature
 {
