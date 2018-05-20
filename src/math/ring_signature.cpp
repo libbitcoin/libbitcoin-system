@@ -18,6 +18,7 @@
  */
 #include <bitcoin/bitcoin/math/ring_signature.hpp>
 
+#include <iostream>
 #include <map>
 #include <secp256k1.h>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
@@ -156,10 +157,10 @@ ec_secret borromean_hash(const hash_digest& M, const R_Type& R,
     // e = H(M || R || i || j)
     data_chunk data(hash_size + R.size() + 4 + 4);
     auto serial = make_unsafe_serializer(data.begin());
-    serial.write_hash(M);
     serial.write_bytes(R);
-    serial.write_4_bytes_little_endian(i);
-    serial.write_4_bytes_little_endian(j);
+    serial.write_hash(M);
+    serial.write_4_bytes_big_endian(i);
+    serial.write_4_bytes_big_endian(j);
     return sha256_hash(data);
 }
 
@@ -199,11 +200,14 @@ ec_secret calculate_s(const ec_secret& k, const ec_secret& e,
     // result = k - e x
     rc = ec_add(result, k);
     BITCOIN_ASSERT(rc);
+    // Reverse byte ordering due to bug in secp256k1-zkp implementation
+    //std::reverse(result.begin(), result.end());
     return result;
 }
 
 bool sign(ring_signature& out, const secret_list& secrets,
-    const key_rings& rings, const data_slice message, const data_slice seed)
+    const key_rings& rings, const hash_digest& M,
+    const secret_list& k)
 {
     // Create public key -> secret key map
     auto secret_keys = generate_keys_map(secrets);
@@ -230,12 +234,8 @@ bool sign(ring_signature& out, const secret_list& secrets,
     BITCOIN_ASSERT(known_key_indexes.size() == rings.size());
 
     // Compute message digest M
-    const auto message_data = concatenate(message, rings);
-    const auto M = sha256_hash(message_data);
-
-    // Generate random k and s values
-    secret_list k;
-    random_k_and_s_values(k, out.s, rings, seed);
+    //const auto message_data = concatenate(message, rings);
+    //const auto M = sha256_hash(message_data);
 
     // ---------------------------------------------------------------------
     // Step 1: calculate e0
@@ -307,17 +307,35 @@ bool sign(ring_signature& out, const secret_list& secrets,
         // Now close the ring using this calculation:
         // s = k - e x
         out.s[i][known_key_index] = calculate_s(k[i], e_i_j, secret);
+        auto& s = out.s[i][known_key_index];
+        //std::reverse(s.begin(), s.end());
     }
 
     return true;
 }
 
+bool sign(ring_signature& out, const secret_list& secrets,
+    const key_rings& rings, const data_slice message, const data_slice seed)
+{
+    // Generate random k and s values
+    secret_list k;
+    random_k_and_s_values(k, out.s, rings, seed);
+    // Do signing
+    //return sign(out, secrets, rings, message, k);
+    return false;
+}
+
 bool verify(const key_rings& rings, const data_slice message,
     const ring_signature& signature)
 {
+}
+
+bool verify(const key_rings& rings, const hash_digest& M,
+    const ring_signature& signature)
+{
     // Compute message digest M
-    const auto message_data = concatenate(message, rings);
-    const auto M = sha256_hash(message_data);
+    //const auto message_data = concatenate(message, rings);
+    //const auto M = sha256_hash(message_data);
 
     // As compared with signing, we only have to perform a single step.
     // The ring has already been computed, so now we just need to verify
@@ -332,9 +350,10 @@ bool verify(const key_rings& rings, const data_slice message,
     // Loop through rings
     for (size_t i = 0; i < rings.size(); ++i)
     {
-
+        std::cout << "i is " << i << " / " << rings.size() << std::endl;
         const auto& ring = rings[i];
 
+        std::cout << "m = " << encode_base16(M) << std::endl;
         // Calculate first e value for this ring.
         auto e_i_j = borromean_hash(M, signature.e, i, 0);
 
@@ -342,17 +361,25 @@ bool verify(const key_rings& rings, const data_slice message,
         BITCOIN_ASSERT(signature.s[i].size() == ring.size());
         for (size_t j = 0; j < ring.size(); ++j)
         {
+            std::cout << "j is " << j << " / " << ring.size() << std::endl;
             const auto& s = signature.s[i][j];
 
             // Calculate R and e values until the end.
+            std::cout << "ec mult " << encode_base16(e_i_j) << " * "
+                << encode_base16(s) << std::endl;
             R_i_j = calculate_R(s, e_i_j, ring[j]);
+            std::cout << "R = " << encode_base16(R_i_j) << std::endl;
             e_i_j = borromean_hash(M, R_i_j, i, j + 1);
+            std::cout << "e = " << encode_base16(e_i_j) << std::endl;
         }
         extend_data(e0_data, R_i_j);
+        std::cout << "sha256_write R" << std::endl;
     }
     extend_data(e0_data, M);
+    std::cout << "sha256 write m = " << encode_base16(M) << std::endl;
     // Hash data to produce e0 value
     const auto e0_hash = sha256_hash(e0_data);
+    std::cout << "e0 = " << encode_base16(e0_hash) << std::endl;
 
     // Verification step.
     return e0_hash == signature.e;

@@ -65,6 +65,10 @@ struct ring_signature
  * @return false if the signing operation fails.
  */
 BC_API bool sign(ring_signature& out, const secret_list& secrets,
+    const key_rings& rings, const hash_digest& M,
+    const secret_list& k);
+
+BC_API bool sign(ring_signature& out, const secret_list& secrets,
     const key_rings& rings, const data_slice message, const data_slice seed);
 
 /**
@@ -75,6 +79,9 @@ BC_API bool sign(ring_signature& out, const secret_list& secrets,
  * @param[in]  signature    Signature.
  * @return false if the verify operation fails.
  */
+BC_API bool verify(const key_rings& rings, const hash_digest& M,
+    const ring_signature& signature);
+
 BC_API bool verify(const key_rings& rings, const data_slice message,
     const ring_signature& signature);
 

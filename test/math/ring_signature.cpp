@@ -19,6 +19,7 @@
 #include <random>
 #include <boost/test/unit_test.hpp>
 #include <bitcoin/bitcoin.hpp>
+#include "ring_signature_vectors.hpp"
 
 using namespace bc;
 
@@ -66,6 +67,24 @@ bool is_secret_in_ring(const ec_secret& secret, const point_list& ring)
 BOOST_AUTO_TEST_SUITE(ring_signature_tests)
 
 BOOST_AUTO_TEST_CASE(ring_signature__basic_test)
+{
+    for (const auto& test: ring_signature_test_vectors)
+    {
+        ring_signature signature;
+        signature.s = test.s;
+
+        BOOST_REQUIRE(sign(
+            signature, test.secrets, test.public_rings, test.message, test.k));
+
+        BOOST_REQUIRE(std::equal(
+            signature.e.begin(), signature.e.end(), test.e.begin()));
+
+        BOOST_REQUIRE(verify(test.public_rings, test.message, signature));
+    }
+}
+
+/*
+BOOST_AUTO_TEST_CASE(ring_signature__basic_test111)
 {
     // Generate new random secret keys
     secret_list secrets;
@@ -121,6 +140,7 @@ BOOST_AUTO_TEST_CASE(ring_signature__basic_test)
         }
     }
 }
+*/
 
 BOOST_AUTO_TEST_SUITE_END()
 
