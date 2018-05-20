@@ -43,11 +43,20 @@ typedef std::vector<point_list> key_rings;
  */
 struct ring_signature
 {
-    typedef std::vector<secret_list> s_values_type;
+    typedef std::vector<secret_list> proof_list;
 
-    ec_secret e;
-    s_values_type s;
+    // The initial 'e' value
+    ec_secret challenge;
+    // The 's' values
+    proof_list proofs;
 };
+
+/**
+ * Prepare hash digest for use in ring signature signing and verification.
+ * Returns sha256(message || flatten(rings))
+ * @return     digest   Ring signature digest
+ */
+BC_API hash_digest prepare_digest(data_slice message, const key_rings& rings);
 
 /**
  * Create a borromean ring signature.
@@ -60,13 +69,13 @@ struct ring_signature
  * @param[in]  secrets  Secret signing keys. There should be at least one key
  *                      from each ring.
  * @param[in]  rings    The rings each with n_i public keys.
- * @param[in]  message  The message data to sign.
- * @param[in]  seed     Randomizing seed data.
+ * @param[in]  digest   The message digest to sign.
+ * @param[in]  salts    Randomizing seed values.
  * @return false if the signing operation fails.
  */
 BC_API bool sign(ring_signature& out, const secret_list& secrets,
-    const key_rings& rings, const hash_digest& M,
-    const secret_list& k);
+    const key_rings& rings, const hash_digest& digest,
+    const secret_list& salts);
 
 BC_API bool sign(ring_signature& out, const secret_list& secrets,
     const key_rings& rings, const data_slice message, const data_slice seed);
@@ -75,14 +84,11 @@ BC_API bool sign(ring_signature& out, const secret_list& secrets,
  * Verify a borromean ring signature.
  *
  * @param[in]  rings        The rings each with N_i public keys.
- * @param[in]  message      The message data to verify.
+ * @param[in]  digest       The message digest to verify.
  * @param[in]  signature    Signature.
  * @return false if the verify operation fails.
  */
-BC_API bool verify(const key_rings& rings, const hash_digest& M,
-    const ring_signature& signature);
-
-BC_API bool verify(const key_rings& rings, const data_slice message,
+BC_API bool verify(const key_rings& rings, const hash_digest& digest,
     const ring_signature& signature);
 
 } // namespace libbitcoin
