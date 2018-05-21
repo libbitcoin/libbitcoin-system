@@ -236,7 +236,10 @@ bool sign(ring_signature& out, const secret_list& secrets,
 
             // Calculate e and R until the end of this ring.
             const auto e_i_j = borromean_hash(digest, R_i_j, i, j);
-            calculate_R(R_i_j, s, e_i_j, ring[j]);
+            if (is_zero(e_i_j))
+                return false;
+            if (!calculate_R(R_i_j, s, e_i_j, ring[j]))
+                return false;
         }
         // Add this ring to e0
         extend_data(e0_data, R_i_j);
@@ -256,6 +259,8 @@ bool sign(ring_signature& out, const secret_list& secrets,
 
         // Calculate starting e value of this current ring.
         auto e_i_j = borromean_hash(digest, out.challenge, i, 0);
+        if (is_zero(e_i_j))
+            return false;
 
         BITCOIN_ASSERT(out.proofs[i].size() > known_key_index);
         BITCOIN_ASSERT(ring.size() > known_key_index);
@@ -266,8 +271,11 @@ bool sign(ring_signature& out, const secret_list& secrets,
 
             // Calculate e and R until we reach our index.
             ec_compressed R_i_j;
-            calculate_R(R_i_j, s, e_i_j, ring[j]);
+            if (!calculate_R(R_i_j, s, e_i_j, ring[j]))
+                return false;
             e_i_j = borromean_hash(digest, R_i_j, i, j + 1);
+            if (is_zero(e_i_j))
+                return false;
         }
 
         // Find secret key used for calculation in the next step.
@@ -278,7 +286,10 @@ bool sign(ring_signature& out, const secret_list& secrets,
 
         // Now close the ring using this calculation:
         // s = k - e x
-        out.proofs[i][known_key_index] = calculate_s(salts[i], e_i_j, secret);
+        auto& s = out.proofs[i][known_key_index];
+        s = calculate_s(salts[i], e_i_j, secret);
+        if (is_zero(s))
+            return false;
     }
 
     return true;
