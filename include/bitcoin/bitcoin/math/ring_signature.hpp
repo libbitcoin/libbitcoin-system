@@ -77,9 +77,6 @@ BC_API bool sign(ring_signature& out, const secret_list& secrets,
     const key_rings& rings, const hash_digest& digest,
     const secret_list& salts);
 
-BC_API bool sign(ring_signature& out, const secret_list& secrets,
-    const key_rings& rings, const data_slice message, const data_slice seed);
-
 /**
  * Verify a borromean ring signature.
  *
