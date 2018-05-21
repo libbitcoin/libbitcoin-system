@@ -295,6 +295,29 @@ bool sign(ring_signature& out, const secret_list& secrets,
     return true;
 }
 
+bool compute_last_R(ec_compressed& R_i_j, const point_list& ring,
+    ec_secret e_i_j, size_t i, const hash_digest& digest,
+    const ring_signature& signature)
+{
+    BITCOIN_ASSERT(signature.proofs[i].size() == ring.size());
+    for (size_t j = 0; j < ring.size(); ++j)
+    {
+        // s_i_j
+        const auto& s = signature.proofs[i][j];
+
+        if (is_zero(s) || is_zero(e_i_j))
+            return false;
+
+        // Calculate R and e values until the end.
+        if (!calculate_R(R_i_j, s, e_i_j, ring[j]))
+            return false;
+
+        // Next e value
+        e_i_j = borromean_hash(digest, R_i_j, i, j + 1);
+    }
+    return true;
+}
+
 bool verify(const key_rings& rings, const hash_digest& digest,
     const ring_signature& signature)
 {
@@ -314,23 +337,13 @@ bool verify(const key_rings& rings, const hash_digest& digest,
         const auto& ring = rings[i];
 
         // Calculate first e value for this ring.
-        auto e_i_j = borromean_hash(digest, signature.challenge, i, 0);
+        const auto e_i_0 = borromean_hash(digest, signature.challenge, i, 0);
 
-        ec_compressed R_i_j;
-        BITCOIN_ASSERT(signature.proofs[i].size() == ring.size());
-        for (size_t j = 0; j < ring.size(); ++j)
-        {
-            const auto& s = signature.proofs[i][j];
+        ec_compressed last_R;
+        if (!compute_last_R(last_R, ring, e_i_0, i, digest, signature))
+            return false;
 
-            if (is_zero(s) || is_zero(e_i_j))
-                return false;
-
-            // Calculate R and e values until the end.
-            if (!calculate_R(R_i_j, s, e_i_j, ring[j]))
-                return false;
-            e_i_j = borromean_hash(digest, R_i_j, i, j + 1);
-        }
-        extend_data(e0_data, R_i_j);
+        extend_data(e0_data, last_R);
     }
     extend_data(e0_data, digest);
     // Hash data to produce e0 value
