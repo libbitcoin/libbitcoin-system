@@ -1,0 +1,11432 @@
+#include <bitcoin/bitcoin.hpp>
+using namespace bc;
+
+// Exported with modified version of secp256k1-zkp
+// Source: https://github.com/narodnik/secp256k1-zkp/
+struct ring_signature_test_vector_type
+{
+    const hash_digest message;
+    const ec_secret e;
+    const std::vector<size_t> secret_indexes;
+    const secret_list secrets;
+    const key_rings public_rings;
+    const secret_list k;
+    const ring_signature::proof_list s;
+};
+
+ring_signature_test_vector_type ring_signature_test_vectors[] = {
+{
+    .message = {0xff, 0xff, 0x03, 0x00, 0xfc, 0xff, 0x01, 0x00, 0x00, 0x00, 0xfc, 0xff, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfe, 0xe7, 0xff},
+    .e = base16_literal("1f28ee25be3489eb7ae28a294f2b9d99b68be18f184c03ecfea6e7f257b524b3"),
+    .secret_indexes = {2, 5, 4},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ffffffffff0100fcffffff3f00000000000000000080ffffffffffffff7f0000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000000000f8ffffff0300000000c0ffffffff3f0000000000000000feffffff"),
+            base16_literal("030000000000000000000000fe01f000000000000000000000ffffffffffffffff"),
+            base16_literal("02ff3f0000000000ffc3ffff7fc0ffffff01000000300000000000e0ff1f000000"),
+            base16_literal("03000000c0ff1f00000000000000f0ffffe1ffffffffffffffffffff0700f8ffff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ff0f00000000000080ffffffffff0f0000000f0080ffffffffffff7f0000fcff"),
+            base16_literal("031c00fc0f000000e03f0000000000000000e0ff3fe003000000c0ffff3f0000f8"),
+            base16_literal("02ffff0f0000e0ffff030000f0fffffdffffffff1f00f0ff030000000000000000")
+        }
+    },
+    .k = {
+        base16_literal("4e7fee78574b38fc965938741ce9619cc640c2d45c47982479680910fdebabc6"),
+        base16_literal("8a96b2847f42449e15784c5caa2edd32a18e3980e6641b83bc669194ac09e5ea"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("73599254449748740c52233f36af21aed47d410aa1205096b0ca81cc5719711d")
+        },
+        {
+            base16_literal("d015f9207618449baab9031a7841028f95275b0835b9198585b8a27010a34892"),
+            base16_literal("950cdb0c59e7f06599558e679b6b8c44c2daa0b152fba1147144f7b412f1942e"),
+            base16_literal("83bac40b333bea8bb7b2fe9cf09a6ea2ac5585b1d34c909e8f42593351a4e421"),
+            base16_literal("1d156c30721968de8df96c3bec4c1af72f0ae9343677956f8905ea52fa4f6bfd"),
+            base16_literal("61c2c9d15190312e29ed9d9c44965496558798a44c35028d6aedba6e750697c9")
+        },
+        {
+            base16_literal("6e62e566a710eaf1c297eb2e31e04c3ec16060ba38072520a42e5bf69a0a31bc"),
+            base16_literal("887c829cef8a804953b2ca06424ad7c23df515610f1a03384d23b670f5621a93"),
+            base16_literal("64d7b40d58358aba2480e6a9a9d12ef25737f600c1cac624ab39495d1562759b"),
+            base16_literal("a41e78ec7947ae153b4eed54780e249730af3e434fb03cc90d307bf7a0f2a1f9")
+        }
+    }
+},
+{
+    .message = {0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfe, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0x00},
+    .e = base16_literal("54a92d6a815560f857c2cc8a89bdca55ec1c4452fe14fb6982f6923b859bf5d1"),
+    .secret_indexes = {1, 8, 4, 7, 4, 3, 8},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("cb8fd76956c909fd13a6a03b219a389001fc03929b4ae42557f9ed8b12fba1ae"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03ffffffff7f00f0ffffff3f0070000000000000e0ffffffffffffffffffff3f00"),
+            base16_literal("0200000000ffffffff000000000000feffffffff7f0000feff00e0fffffffffcff"),
+            base16_literal("03000000f8ffff000000000000000000000000fcff0100f8030000000000000000"),
+            base16_literal("024513bd536855e58cc7eeda16b400fa9e3f713259064d16b32799047ee6b43b5c"),
+            base16_literal("02ffff0f00003e000000000000c00700f0ffffffffffffffffffffff03000000ff"),
+            base16_literal("0300000000000000e0ffffffff3fe0ffffffffffffff0180ffffffffffffffff0f"),
+            base16_literal("033f0000000080ff1f000000000000000080ffff030300000000000000000000f0"),
+            base16_literal("0300000000000000000000000000e0ff3f00000000f003600000feffffffffffff")
+        },
+        {
+            base16_literal("020000000000000000000000f0ff3f0000000000000000e03f0000000000f80700"),
+            base16_literal("02ffffffffff0300000000000080ffffffffffff0100c00000f8ffff3ff8ffff00"),
+            base16_literal("020000f8ffff00000000001800f83f0000000000000000ffff07000000f8ffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("020000000000c0ffffffff00000400000000000000000000000000000000f03f00"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffff01f0ffffffffffffff00ff3f0000000070000000e0f1ffffffffff030000"),
+            base16_literal("02ffffffff0000e0ffffffffff010000000000001f000000e0ffff070000000000"),
+            base16_literal("03ffffffff0100000000000000e00f0000000020e01f00e0ffffffffffff070000"),
+            base16_literal("0200ff0000000000c0ffffff0300c003000000000000000080ffffff0300000000"),
+            base16_literal("020000e0ffffffffffff07000000000000f00300e0ffff7f00feffffffffff1f80")
+        },
+        {
+            base16_literal("02e0ff0700003c0000e0030000000000f8ffffffffffffffff010000f0ffffffff"),
+            base16_literal("02ffffff070000000000fe030000000000fcffffffffff000080ffffffffffff01"),
+            base16_literal("03000000000000000000000000ffffffffe0ffffffffffffffff00fcff7f0000fc"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03ffffffffffffffffffff070000000000c0ffffffffffffffffffff01000000e0"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffffffff7fc0fff907000000f8ffffffffffff9fffffffffffffffffff")
+        },
+        {
+            base16_literal("0200000000fc1f000000c0fff9ffffffff01000000000000000000f0ffffffff03"),
+            base16_literal("02ffffffffff10060000000000c0ffffffffffffff7f00000000c0ffff7f000e00"),
+            base16_literal("0300000000000000000000e0ffffffffffffffffff07000000000000feff030000"),
+            base16_literal("030700000080ffffff7f000000fc000000c0ffffffffffffffe1ff03feffff7f00"),
+            base16_literal("031f80ff03000000000000c0fffffffffffffffffffffffffffeff030000000000"),
+            base16_literal("0380ff0300000000fc0f000000f8ff03000000fcffffff0fe0ffffffff070000fe"),
+            base16_literal("03000000000700000000e0ffff7f00000000f0ff3f0000ffffffffffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("189232eea7eda0ff39327cbf3fe3900f9a8ea7dff3fb8a4bbd539bc3bd5c6bc4")
+        },
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("51940bde81af52d29ee9274c2a63ef3f41a2304db3aaf4a09006e969e18246d6"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("10fa3037bea6275bac2bd412633749111b1c1c5d3f9081e781f7962cb94fe782"),
+            base16_literal("4888e7e94e7314db305cfab826db0c9571074e4349fc209bc32ffd35334a185e")
+        },
+        {
+            base16_literal("e5d2056e403b50c53b8f7e6a0f1504afa727ab91b3438c1b51efbe5b324017fb"),
+            base16_literal("e522fe93cb96d98e6996d22bc817102c4283d539330a317cc1afc719d49703da"),
+            base16_literal("f4e95bf110e56ea722857f883463e9ecc83eebef34489f1bda529f2855b64b66"),
+            base16_literal("7d1616e8bd177ed93c90cbfb1ffe51d23694e93be088668111ca6885af3ffb56")
+        },
+        {
+            base16_literal("b9dd62063d43ef4b38facb782b695d0526c4b15fa8e9ea1d1b5dfdd542aadb1a"),
+            base16_literal("d5f6b139f922638773db4b9fa058cec2992662974135ab8218544cb6cb8179df"),
+            base16_literal("02c1749d54fe5b6b89d2d23e3e5aa04e1ceb912a6f48fe332350f375a279abe3"),
+            base16_literal("79e022b9aa415971d020c260dc59aab0aad27ac29ad8f2308a0edd6b1c535d9d"),
+            base16_literal("cb98ca01974daf0b0f7a4f936989e36231a9bd24925223624df5c33ab07bc987"),
+            base16_literal("787769c15ce955fd5d35a85fd83babfd25683910016d703caf2bac0847dead2a"),
+            base16_literal("8e20e637c1a9164e7ab8d239d20cb1a1ddbe3870f9041027235f7f97a9189d97")
+        },
+        {
+            base16_literal("aad2bc31b04e9a188956bbc951cd6c6c16daf66c094e1b789cd7c92654aa1d69"),
+            base16_literal("3373ffc22422d93d4dafbf065156a38907c20b7906b3fc1e873eff5b5d54867e"),
+            base16_literal("967d4e2ebaf60824cb7aebd9e88f2ba73bd41c950fc586cc485ddc6fad407b7e"),
+            base16_literal("ca84561cdeca93c130c87e68d0eaf1e0f79f87df7318e4872bebe6787f3e7069")
+        },
+        {
+            base16_literal("07d4e9479ea5ebfa0799eb705595fae4f119d122e3d8040bbeb2287feb2f80cf"),
+            base16_literal("63ab9069fc6b30db85e934d82e28dc74507eb6d39265405e598040b721472d09"),
+            base16_literal("a2f938ffe30a7cbbb1240914dfd5bbca8f510cb1f55fd0bd3114b58ff46b359a")
+        },
+        {
+            base16_literal("e13b53fe86514c0e8adb11bfe76275e0ac56ea1b79d15ff1ff55e7e71ea9c1ce"),
+            base16_literal("2c6d1f3ba2bd00384e761988d2636e11535a78fab938d12863e8a35b31553585"),
+            base16_literal("ec76bb5170abb894cdded24a3e002de0a8955499792e6421f36db4c9b4901525"),
+            base16_literal("a35e891ac7bf108bc4d5c1287f2465055f65aa65a1cf40d6053aff556e40c459"),
+            base16_literal("f2abd1844385636af5dd403e78463efd62f33d4f5b0c90f26fd33145f435b42f"),
+            base16_literal("15cbc5abb3cdceeefeaf25f7b42b1ecc0f6c219675ad2cad6aa6a7f6e34ccdad"),
+            base16_literal("61a1ef599b74cf097fb1f01742e20332f7140e317c396d51f34972a780358b49"),
+            base16_literal("f9e38f8062c0a94e7a0ea2fc1ed9c6fc73ba181535917f556f28960795cee680")
+        }
+    }
+},
+{
+    .message = {0x00, 0x70, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfe, 0xff, 0xff, 0xff, 0x07, 0x00, 0xf8, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x03, 0x00, 0xfc, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("af38f351d51f5369aece858e66cf68a0156fd023930f75c23708ffee0994b83a"),
+    .secret_indexes = {7, 5, 6},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("02000000000000f0ffff1f0000000000000000c0ffff7f000000e0ff01e0ff0000"),
+            base16_literal("03000000fe1f00000000fcffff7f00000000e0ff07feffff1f000000fcffffffff"),
+            base16_literal("02000000010080ffffffffffffffffffffffffffffff3f000000fcffffff010000"),
+            base16_literal("02ffffffffffff0fc0ffffffff4f000000000000f800c0ffffff01000000feffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000feffffffffff07007f0000000000f8ff00fff901000000c0ff7f00000000"),
+            base16_literal("02ff0300000000000000feffffff0f000000000000000000000000000000000000")
+        },
+        {
+            base16_literal("03000000e0000000fcffff07fcffffffffff07000000ffffffffffffffffffffff"),
+            base16_literal("03000000000000000000fcffffffffffffffffffffffffffffff00000000000000"),
+            base16_literal("03ffffff1f00000000000000000000e0ffffff07fe1f0000ffffffff7ff0ffffff"),
+            base16_literal("02000000fcffffffffff000000c0fffffffff7ffffffc7fffffffffffffffff8ff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ffffffffff0f0000000000e00300000000f8ffffffc307000000000000feffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000000000000080ffffffff03f8ffffffff3f000000000000f0ffffffff01c6"),
+            base16_literal("03ffff1f00c0ffffffff1f00000000f0ffffffffffffffff03feff0300000000fc"),
+            base16_literal("02ffffff0000000000ffff0f000000000000e0fffffffffeffffffffffffffffff"),
+            base16_literal("03ffffffffffffff03e0ffffffffffffffffff3f000000c01f00000000000000f0")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("efa77eb1cbfcbf6f7ef66f4868fe765689fdb8fb46d205a9fb6000761607bd7e"),
+            base16_literal("9710b5d637c84210bb0a764e1e40a0423b4328a899ebd3edd24015fa414972b5"),
+            base16_literal("831691cf852708b7de6000ce3e9b8d339f3aa91e6781aedc2e5dee93c9f0e170"),
+            base16_literal("7124c50cd9ec41ca033ae300c9f305f86be02e1aec32a85039f9b29ca87d668a")
+        },
+        {
+            base16_literal("f0983340bb363872daf8e91add0c44e0f0503179978ef707349a65e78e861e60"),
+            base16_literal("756be2d83c9125bb133da5f41c3d31156ddbbafc6c4900d1b160ffeebe003e76"),
+            base16_literal("ca2223089e17fb26f83d883634d19da1a0d8bd6b214f896710a376f852be44b1"),
+            base16_literal("8df4af708bfa488a9f53d04c9adeaa9d2da6f617125b2c664e504e77d1b2d222"),
+            base16_literal("49e320b3d4eaf3e2c3f225e9cfeb3ca6ed7540dc8e88959ee32492ed9a3f617a")
+        },
+        {
+            base16_literal("b7432ca9d741be40dce342062b85132483c169a98ef1583c756e8ed9c74a49f4"),
+            base16_literal("a70f9942f4c085ab4facac84012f951e06b047cb74ffb1bf25b37d5b26cf5451"),
+            base16_literal("106034b94ba863c65bd6177f8ac7f0162c500857878e1d6e13eb58fa0da922ab"),
+            base16_literal("db66325208a895d6dddf524ef3326c0ee50ea3996cc765e87d32d75a16de854b"),
+            base16_literal("aa315617e4c8466108536fcb1f6ec078938188d76d3162549cd1d2159d7d6ea4"),
+            base16_literal("19bde4c830e2fcc3c1dd8c65dafd2b0bd08832c15649a9dbdf68670cdb6fddfb")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00, 0x00, 0x00},
+    .e = base16_literal("9d5bfdfeba25d9f2dd25f61718d89ac2031cc3c59362293baf77e70f970e40a5"),
+    .secret_indexes = {2, 6},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0200000000000000fcffffff01fcffffffffffffffffffff7f0000ffffff7f00e0"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffffff070000000060e0ffff00fcffffffffffffffffff000000000000"),
+            base16_literal("0300000000000000000000c0ffffffffffffffffffffffffff0100000000000000"),
+            base16_literal("02ffffffffffff1f0000000000000000e0ffffffff0100000000000000000000f0"),
+            base16_literal("03ffff01f0ffff0700003c00000000000000000080ffffffff0000000000000000"),
+            base16_literal("0200c0ffffffffffffffff03000000feffffffffff7f0000000000000000000000")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("72228944d119c2964e4d23decb9d3184c4fb6718cfe67196ec5769a533787272")
+        },
+        {
+            base16_literal("e27a402b85b05b67897e5ee531f64086a8803513d1b353fbca786151d01bef04"),
+            base16_literal("224bb20a4d68b3c8d5585c76e8f4f48eb69ddb1ade4dec8a5f056149c7d69f2b"),
+            base16_literal("c05bd7d02b9ce791c290cefeb4127441a25e6d26ef229f1176010c1d394a2b61"),
+            base16_literal("7c2b669ba59b9270b21320f5cae5ba2859f2caa6aeaf4a3eab5b7657ee95d0d6"),
+            base16_literal("6a078aa79046ce878df759f77a143eb0a08db74327908b81fdba8a1afc431018"),
+            base16_literal("cb690cbfcfa3730bb28a938622d9dd5d3900102fff9cff95fc09fd780e6b4052")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("1bfa8aa0fe8ccca9a12f777a0805c3d2ae2cb22e2ad129d7c5c9373621c1d712"),
+    .secret_indexes = {7, 2, 5, 8, 3, 8, 2},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("1f308e084e23c2d265b281f45a2af9ca30c20b4c5f814473b8c7fa89d6093f48"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("02ffffffffffffff3f00c0ffff0700fc03000000f01f0000000000000000f8ffff"),
+            base16_literal("02ffffffffffffff0f00000000fcffffffff0f000000feffffff1f00f0ffff1f00"),
+            base16_literal("03ffffffffffffff7fc0ff07000000c0ff0f0000000080ffffffff0300000000e0"),
+            base16_literal("0300000000f8ffffff0300000000fcffff3f0000fcffffffffffffff0100f8ffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000000000fcffffffffffffffff0f000000e0ffffffffffff010000fc0300"),
+            base16_literal("03ffffffffffffffffffffffffff03000000000000000000000000000000000000")
+        },
+        {
+            base16_literal("038ebabb1853ec28cd3738317fe1c12785acdac9fb7570afc66eac4ef11369b900"),
+            base16_literal("020000000000ffffffffffffff030000000000ffffffff1f0000fcffffffefffff")
+        },
+        {
+            base16_literal("03ffffffffff010000c0ffffffffffffffff070000000000000000f0ffffff0fc0"),
+            base16_literal("020000000000ffffffff3f00c0ffffffff0f000000000000fc7f00000000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000f0fffcffffc31f0000000000e0ffff3f0000fcffff01ffffff0700000000"),
+            base16_literal("03ffffff0f000000000000300000fefffff01f0000000000feffffffffff0f1f00")
+        },
+        {
+            base16_literal("031c0000f8ffff7f000080ff0000f0ffffffffffff07fcffff03e07f80ffff7f00"),
+            base16_literal("03ffff7f0000e003ffffffffffffffffffffff07000000f8ffff01000000000000"),
+            base16_literal("030000e0fffff1ffffffffffff7f00000000000000fc0000000000000000000000"),
+            base16_literal("02ffffffffffff0300000000000000feffffffffffffffff3f00feffffffff0700"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0200000000000000fcffffffffffff3f000000ffffffffffffffffffffffff0700"),
+            base16_literal("02ffe1ffffff010000000000000000000000000000000000fcffff070000000000"),
+            base16_literal("03ffffffffffffffffffffffffff0f00000000ff0300000000f8ffffffffffffff")
+        },
+        {
+            base16_literal("0200000000c000000000010000ffffffff1f000000000000001c000000e080ffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000000000f0ffffffff0300000000f0ffffffff0f00000000f8ffffffff0300")
+        },
+        {
+            base16_literal("02ffffffff0f00000080ff01000000c0ffffffffffffff7f0000000000000000fc"),
+            base16_literal("030700000000000000000000000000000000000000c0ff00fcffffffffffffffff"),
+            base16_literal("0300c00f0000000000e0ffffffffffffffffff7ff003000000000000000000fe00"),
+            base16_literal("03ffffffffff1f00000000000000000018000000c0ffffff00000000fcffffffff"),
+            base16_literal("0300000000c01f00000000f0ffffffff00feff0000f00ff8ffff03000000000000"),
+            base16_literal("02ffff1f00e0ffffffffffffffffffffffffffffffffffffffffffff0300f0ffff"),
+            base16_literal("0200000000000000000000000000ffffffffffffffffffffffffff3f0000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffff0f000000fc3f000000000000000000003f000000feffffffffffff030000")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("861eec01882ad8ebcc9c3e77b7cb124cd85460917165bf468c583a534a595ca8"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("11ba045e5712c10001511c4d007f34b8bc0b098d6ff7c099ddfdacdb9bc72b19"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+        },
+        {
+            base16_literal("b0fd3a3dd434fd08ac2ee414465c6660f83890754c9c6cd89075af37e3856a0d"),
+            base16_literal("20988cb49c0b9c06675b212f774a7999ce31249c63fdfcfd7623f8f6d40e4f7c")
+        },
+        {
+            base16_literal("13dcb04b6ee4da79d72b076ef7be4ee51fe0afb570124e4b487079352891c95f"),
+            base16_literal("49abf27cc0adbb85e0c92cba91e8b68c3c8d4bcd1ad5260455a05f5eda3df17c"),
+            base16_literal("96a2ea661eb71dc9ed0e1e797a116ca400b82543f41eb733dc0ec44168db1958"),
+            base16_literal("95bfd657ae509c4f788004ccd9443d9dd667917db14685716ce7f8925f8be671"),
+            base16_literal("8f4d86aabb68c3a022963041a25e1d3d505ec9ebdac079c9b0be50ed3981c87c")
+        },
+        {
+            base16_literal("5b2754165a942be28c0116de8e33253182fa14322312cc50f9ce87b23a2be0e5"),
+            base16_literal("6efda837c136ec643395cafb62d465f686d62d87a65271d6252577acc617528f"),
+            base16_literal("16babd87ccbb590cdf2b266058843f2721907453279378a704ebd23b52f463fa"),
+            base16_literal("79c87eed4e97eab803fcac75c75d4fb1cf4689a94cdcb198fc02567cbf599f68"),
+            base16_literal("3b496f5a7d969afba8b44bf12e149d8d2bf691d65ddf03e5445e93d039f38dea"),
+            base16_literal("6c90889490ed9baba043b1de5c119263526bf07111edba02b0e4854c04546602"),
+            base16_literal("5f2ac75e60b4eeb15d5f429deaea0ba25edb4ce8b3a5a1f59b9772e9f6a6f8d1"),
+            base16_literal("f2b53784c0cb5fb20051a78a05ed07cc07030e831b451a9f1de958ce8bfca0d0")
+        },
+        {
+            base16_literal("c9ab9e9a3271fded68ed00af2ed1b0c0aeec41fc61144a4dac6f9bff3c07e423"),
+            base16_literal("ff6569e622eded172dd63c0b8f88b507c38161fcf8987e17d025a455466c70ca"),
+            base16_literal("cfc6b6efdad24412ab3426d697663a0800d9437e55ab3cb0f65783844b3382e6")
+        },
+        {
+            base16_literal("e4bf80ea9e724b8dcb441f1af22057b414c2963e8a3cca8c7c869aeb6fdf7fab"),
+            base16_literal("6a752752db129f103d954d2cd862f0b08ca98746eac8cd07c20b389a17b8f4c0"),
+            base16_literal("59cc04d71cddccfe3da65b3a640934ce715b424d819ad6fc62bcc844b93da303"),
+            base16_literal("557413a5195ad7fc13c51a2a7fbf8442cdbbff98ef1c49fadc025890fc98dd51"),
+            base16_literal("d5c174c02e88b51bc081f09e327dbb0b5cc8f481cb874e5683353be44d422564"),
+            base16_literal("47d49239f4d9cc384f5ea58fa548b46d2b3ce4c490e77bc8f62dd23e2151e47d"),
+            base16_literal("f44b8106894e4daa1582c5bc63c78c63cd6d1f7b2afccc12596429766474c628"),
+            base16_literal("0b4ce183973376d38b9ee739cf6028fcf0617069c6e77c9a54a7b4d8c6757e5e")
+        },
+        {
+            base16_literal("0238e4f22d99402c66fe27bf86c2b0283af6453fb07795a239af4352ee31fb08"),
+            base16_literal("8258fc7c13e1deff660a82292169fd5d3510aeaf7da3b1461b92dbfc69217f79")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0x1f, 0x00, 0x00, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x03, 0x00, 0x07, 0x00, 0x3f, 0x00, 0x00, 0xf0, 0x3f, 0x00, 0x00, 0xfe, 0xff, 0x1f},
+    .e = base16_literal("ae336e7d4f45290fef9e22bd81088cbad1ece28d221d0dbc1f0ad70c4ef5ddb0"),
+    .secret_indexes = {3, 5},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("02ffffffffffffffff1f0080ffffffffffffffffff07000000000000007f000000"),
+            base16_literal("02ffffff01e0ffffff3f000000e0ffffff01000000000000ffffffffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ffff0000fcffffffffffffffffffffff7f000000ff0f00000000000000f0ffff"),
+            base16_literal("0300000080ffffffff7f00c0ff07000000000000f8ffffffffff7f00fc7f000000"),
+            base16_literal("02ff0000000000000000feffffffffffffffffffffffffff03000000000000ffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffff07000000007000feffffffffffff0700feffffff3f000000ffffff7f0000")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("414d50d95075d406b8c852700aa7e49a7e17551c3273723fbfdc459bfa357eb7")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("a5814fa255dbf7dec8a8a069ba4b3c6c749109670ff84671f0831962638a0ed5")
+        },
+        {
+            base16_literal("cc6bc039b47c6603e27e6a0e3340802ebf233fb8f78a5541ad77678f4da6bcc0"),
+            base16_literal("bca09f1ab39709154433109afd31227743668527029b12798d5e6d602972bd4b"),
+            base16_literal("2e281fd2c6b5162596fb41b26adb61aee1521f92ec98d5e7622d47d1594469ae"),
+            base16_literal("e29e4868d7d62a879d8bc39b01e9b2b6eb874cb9d6b06211132e778811f4300e"),
+            base16_literal("c8d330ea4de13ee12202c7faf0b194a2a7d36de18b1fd45c7e0391474bf83b13")
+        }
+    }
+},
+{
+    .message = {0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0xff, 0x07, 0x00, 0x00, 0x00, 0xfe, 0xff, 0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+    .e = base16_literal("56262ef823068af0c63ede629fc43ba825151923f42caf24e48ee5d23d873b57"),
+    .secret_indexes = {4, 1},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ffffff0000feffffffefff0300000000c0ffffff010000000000ff0ff8ffff0f"),
+            base16_literal("02fcffffffffff00000000000000000000000000000000fc0f0000000000000000"),
+            base16_literal("020000000000000000000000ffffffffffffffffffffff3f00c00000f0ffffff00"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("51cbbf986724ab32d86d9a2eda98913a546acf76c73e80a5423ba395053f9e3a"),
+            base16_literal("307267e9709f087fddfd42ace1c3367cffd32c9fe4fffee264c270c9fcad340f")
+        },
+        {
+            base16_literal("7f1ff4af787a0e0e884a77d0692af2f3846f706fbd5c2585b9bdaf7fd4eeec2c")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0xfe, 0xff, 0xfd, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0xff, 0xff, 0x01, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xc0, 0x3f, 0xe0, 0xff, 0xff},
+    .e = base16_literal("8d4aaa5cda9a91e31265659341099bb1223778229f18cea0ae3ce829b694d8c8"),
+    .secret_indexes = {7},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("03f0ff3f00000000ffffffffff1fffffffffffff3f00000000c03ffeffffffffff"),
+            base16_literal("0300000000000000000000000080ffffffff0700ffffff7f000000000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000ffffff1f0000feffffffffff1f00000000fcffffffff3f000080ffffff7f"),
+            base16_literal("02fcff0f000000c0070000000000000080ff07000000020000000000000000ff7f"),
+            base16_literal("03fcffffffffff011f00000000000000000000e0ffffffff03c0ffff01ffffff7f"),
+            base16_literal("03ffffffffffffffff010000f0fffffff1ffffffff07000000ffff3f00f0ffff0f")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("be1bc29fc7037dbe07a55be2ac34ee89f8cd1cb6f135ec527e400eecec5425ab"),
+            base16_literal("bdd206b1cc365d784435c4373d8966d18c9c56eb625ac1579cba70c36c183dde"),
+            base16_literal("69cad26eaaf11f0b0bf6b13b5d71359b690ea398e4cbf483f22ae3cbaba2958d"),
+            base16_literal("0feebb4d8b38a9e66bd52909395a5ec54585426a0dfc8838821d2df7e6a3fd4d"),
+            base16_literal("55035287682fa9b3f6f5d676344e51e368a63dfc2ca3bb59b5da7c1828d5d466"),
+            base16_literal("59b119977319ae62dd8f7c48641faf6506592b2682f2ce14c62e9155ec7684b6")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0x7f, 0xc0, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x07, 0x00},
+    .e = base16_literal("d0bb498d739a0bf8933c4ca2805c34e944ba736c4e3a5e4179c8ce9e2060cdeb"),
+    .secret_indexes = {4, 1, 4, 6},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("823696406e46cfb3c99648611e34de2c9a718f7a5ac265e17eaae73cd90c609c")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ffffe70000f87000000000000000000000008000f8ffffff0300000000000000"),
+            base16_literal("030f00000000f000f8ffcff0ffffffffffff01000f00feffffffffff1f00000000"),
+            base16_literal("03feffff0700000000c0ffffffffffffffffffff0100fcff000000000000c0ffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("030000000080ffff00fcffffffffffffffffffffffffffff01000000000000f000"),
+            base16_literal("03f0ffffff010000000000000000000000000000000000fcffffffffffffffffff"),
+            base16_literal("020000e0ffffffffffff01000000000000000000000000c0ffffffff7fe0ff0f00"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02a3dfd61224d5620bd24d48287860e7b8dd925a3bebfb325d16f368ae85c62c4f"),
+            base16_literal("03000000fe01f8ffffffffff070000000000000000c0ff1f000000c0ffff3ffcff"),
+            base16_literal("020000000000000000000000000000000000ffffffffffffffffffffffffffffff"),
+            base16_literal("03ffffff03f0ffffff0000000000e0ffffff07c007000000000000e0ffff1fffff"),
+            base16_literal("03000000feffffffff7fffff0100000000fcffffffffff3f00000000000000feff"),
+            base16_literal("030200feffffffffffff7f000000000000feffffff0100e0ffffffffffc0fff3ff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("34dd0a41bee9cd0d41f6a79f48c1a143673137ee32703c88ea41878bf7ee9e3e")
+        },
+        {
+            base16_literal("b03fe9a973d14bc9c9c8b7180c3b9c47fe527a19bb37b68224573ac2bec6cf03")
+        },
+        {
+            base16_literal("6ae8546a6f84f052a6802d908c535553b43c86d08dcf8e262fe50b13f026aa8e"),
+            base16_literal("98ace828c2c1746ee73d1d53a654f84b43e6aaa37dbff966a2b766084ea565f9"),
+            base16_literal("81e75b8b03cbe620b344173ef9bc89ed1d8a80c2e321f1c7cb19e3779bb7e7d5"),
+            base16_literal("14991b0f1ab64462d9ce1b8f70942ed5499d35d33bc7472b8261f6a2076dccf1")
+        },
+        {
+            base16_literal("e60c95a23bd719103406bbacbc84b87c0ee9927abc9cf9debc379e3904088fc0"),
+            base16_literal("6af2e2d93ee36d57b3c31b2b34880d5339322d63b86219e4b2f0a49dcae0a6bf"),
+            base16_literal("fec80902a4a25c44c387d88a5ee52a1db0b1084171c4a1469b4c1ee9b74788a4"),
+            base16_literal("0537e0ee57604eb06fd43104594914f699a3a3c96de05e208ab31352babe138e"),
+            base16_literal("93a55123fbdef90b2c7ce6923bd6a25cbe4b7cf4dfa0b8b441cecb1e89527c74"),
+            base16_literal("022b029443252195fd506cefef8bb00d845b94f85ecce4c7a234539eb2ad59da")
+        }
+    }
+},
+{
+    .message = {0xf0, 0xff, 0xff, 0xff, 0x1f, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0f, 0x00, 0xff, 0x07, 0x00, 0x00, 0x00, 0x00, 0xfc, 0xff, 0xff, 0xff, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff},
+    .e = base16_literal("f70380cfb23b68fcbf3c8dcb23a0ac6602854a98ce087cd387509b7c0b6285d1"),
+    .secret_indexes = {6, 3, 5, 7},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("ef7a77421452001ce3c250859991c61b303a3153db363a7adf394724caace6f4")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffff01000004000000feff00000000000000380000000000000000000000"),
+            base16_literal("03ffffff8001000000fcffffffffffdfffffffff0300000000000000000000c0ff"),
+            base16_literal("02ffffffffff7f000000f8ffffffff0000000078feffffff010000000000000000"),
+            base16_literal("03fffffffdffffff1f000000000000fcffffffffffff07000f0000f0ffff010000"),
+            base16_literal("030000f0ffffffffffff0f00c0ffffffffff7f00c00f0c000000feffffff070000")
+        },
+        {
+            base16_literal("02ff3f0000000000000000000000000000000000c0ffffffffffffffffffffff03"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("023ffeffff1fffffff03000000000000f8ffffffffffff1f000000000000000000")
+        },
+        {
+            base16_literal("03ffffffff0f000000000000ffff00fe83ffff0100000000000040000000f0ffff"),
+            base16_literal("03fffff0ffff0100000000fc00f801000000feffffffffffffffffffffffffffff"),
+            base16_literal("030080ff00000000000000ffffffffffffff3f0080ffffffffffffff07000000fe"),
+            base16_literal("0200000000000000000000f8ffffffffffffffffffffffffffffffffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03000000000000000000ffffffffffff000000000000f01f000800e0ffff030000"),
+            base16_literal("02ffffffffffffffff01c0ffff037e80ff07000000fcc7ff01000000e0ffffff1f"),
+            base16_literal("030000000ff0ffffffff00f0ffffffff070000feffff7f0000ff03000060000038"),
+            base16_literal("038da7292c3cd8fefeafd3be3ee9a725f750fbe913cd252223abe4adb900a1fb26"),
+            base16_literal("0300000700ff7f000000ffffff00000000000080ffff7f000000803f0000000000"),
+            base16_literal("03ffffffffffff7f00000080ff030000000000ffdfffffff010000000000000000"),
+            base16_literal("02ffffffffffffffffff3f000000fcfeffffff000000000000f8ffffffff03f0ff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("7c2a7385d6782af3e346e47f564e68701e550cd558a38c94555f3848a233f21f"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("5c238a529a172a3f964cd976a553a315c4f9ff28f038d084bb0e66f9742ab715"),
+            base16_literal("01a6c2dadd15eff09f44b51ffb882e3bb71d6312d434ab18af70960a772742be")
+        },
+        {
+            base16_literal("5ee9b2eb0174c46312c399f50bb0401e91f2fd4a49dcb6d608c0105275da2575"),
+            base16_literal("69833f02902c9a0fb8f757c3901a8e7f2b6b6a904a3770352902d84bf11fd9b1"),
+            base16_literal("16afabf87b9aac0e9639d9b8472d157aa9d471a3226aafbe36b1686ace338fe9")
+        },
+        {
+            base16_literal("f1787e84b8a9368935dd16b19b51af9dbb17fc77c96ee2ca25930bc23e84172b"),
+            base16_literal("d4409f9d5e82d016ac182fa9ec032f3c876da668b9a03a4a271eb3ef83dc216b"),
+            base16_literal("e924499f0830846e122c1ec65e17e1a4e09117d4afc0ad837ebdc9f1f94a73ec"),
+            base16_literal("38dcb2636a760983b64e539a707df03a848447d76d3f3dc9b127144e66b03b7a"),
+            base16_literal("e83f0f3b0cfc0140c17f8883b766fed4e98c4a23a5017e9459e9f09bc1f9b018")
+        },
+        {
+            base16_literal("db7810f072bfc9d6114487f0d16b8549e2d0c5505333d8ed3473e091b7cd177b"),
+            base16_literal("256036d444a0b3c9f879b1f3731eca98ab2ba5466146ea678ea7941df0170fe4"),
+            base16_literal("f6cc372fe677e15fa7401d7f749c29990b64317e4af491d4aeb58cecad2bd134"),
+            base16_literal("a83d5e250ea4c0e2d4c486546fe84024e6d56f709600aaf9113a8ddd047c9373"),
+            base16_literal("9393dac087cd82e7c178aeac5c2a39e93ae1cad2f1fbad83d9588e057c954741"),
+            base16_literal("4282839728d5609baafadeb5032e9f95d5f0d8214340e6000390c46746acb5d1"),
+            base16_literal("a1c3e2effec252562cf27cd4ee8cb28f568ac63a480d73f17ba40e2d944ef52c")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0xf8, 0xff, 0xff},
+    .e = base16_literal("d7ba0d6c905d16a100a7fd7d05850a217b4a61282fa9c684328bdb93c6493b0f"),
+    .secret_indexes = {4},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ffffffffffffffffffffff3f00803f000000000000000000ffffffffffffffff"),
+            base16_literal("03000000e00000000000000000f8ff3f0000000000000000000000c0ffffffff0f"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02000000fcffffffff1f00fe1f00000000000000000000e0ffff3f000000f0ffff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("d960645ae0da4b59116971c4dd0d93efd455744e781fe21ab22a33f776fd91ef"),
+            base16_literal("568c41394c300531375c3b4fce368264a4a1b060d99f1eb4fcf85d7b7f7e9554"),
+            base16_literal("94de6b9316cc06d7057a0b9d96a823de2fb4d1a5269ce693d3b7378fdc380146")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0xff, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3f, 0x00, 0x00, 0x00, 0xf8, 0xff, 0xff, 0xff, 0x01},
+    .e = base16_literal("fab5d4eb2750f2ae4d40c4acd676a322135961ab8705e8649494279ddae1a0fb"),
+    .secret_indexes = {6, 2, 5, 8, 6, 3, 5, 2},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("030000000000000000000000e0ffffffffffffffffffff7f807f0000f0ffffff07"),
+            base16_literal("0300000000fffffffffcffff3f0000000000000000fcff000000fc00feffffffff"),
+            base16_literal("030000fcffff03000000000000000000000c00fcffff0f00000000f003feffffff"),
+            base16_literal("0300000000e0ffff7f0000000000000000f0ff7f00000000000000f8ffffffff00"),
+            base16_literal("02ffffff010000000000f0000000000080ffffffffffffffff3f000000000000f8"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000001f000000fcffffffffffffff1f0000000000feff07c0ffffffffffffff")
+        },
+        {
+            base16_literal("02ffffffffffffffffffffff0f0080ffffffffffffffffffff030000fcffff07fe"),
+            base16_literal("03ffff0100c0ffffffffffff07fcffff1f007000000000000000000000000000ff"),
+            base16_literal("02ffffffffffffff1f0000ffffffff1fc4ffff0300c0ffff01000000fcffffffff"),
+            base16_literal("0300fefffffffffffff8ffff7f0000000000fcffffff0100007000fc7f00000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02000000000000f8ff1f000000feffffffffffff7f0000000000f8ffffffffffff"),
+            base16_literal("031f000000000000e0ffffffffff1f0e0000000000000000000000f8ffffffffff"),
+            base16_literal("02000000000000000000f0fffffdffffffff1fc01f0000000000fe1f0000000000"),
+            base16_literal("03000000000000000000fcffffc17f0000f8ffffff030000000000000000e0ffc3"),
+            base16_literal("020000000010e0ffffffffffffffff7f00000000fcffffffffffffffffff030000"),
+            base16_literal("0200000000fc070000000000ffffffff3f00000000fcffff7f00000000ffffff07"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02000080ffffff000000e0ffffffff83ffff1f00c00f0080ff0fffffff0f000000")
+        },
+        {
+            base16_literal("0200e00100feffffffc0ffffff3f00e0ffffffff030000000000fff7ffffff8107"),
+            base16_literal("0380ffffffff07ffffffff0f0000feffff0f0000000000ffffff0700000000fcff"),
+            base16_literal("0200000000ffffffffffffffff0100000000fcffffffff1f0000c0fffffffffbff"),
+            base16_literal("03ffffffffffffffffffffffffffffff0f000000f0070000000080ffffffff0f00"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ff1f00fc033e0020e0ff070000000000f0ffffffffffffffffff000800000000")
+        },
+        {
+            base16_literal("03ffff7f00000000000000000000000000feffffffffffffffffffffff7f000000"),
+            base16_literal("03ffffffffffe11f00000000000000000000000000000000000000000000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ffff1f00f8ffffc70000000000f0ffffffff0100000000000000000000f80000"),
+            base16_literal("03ffffff7f0000000000e0030000000080fffffffff3ff1f00ffffffffff1f0000"),
+            base16_literal("03ffffffffffffff0f0000f0ff3f00c0ffff1f00000000000000f800f80f000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000f0ffff0f0000000000f0fffffffff1ffffffffffff0700000000feffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ff6700f007000000000000f8ffff81ffff0700e0ffffffff7f00000000e03ffc")
+        }
+    },
+    .k = {
+        base16_literal("a97625f0291d339ad476b435febed2a8ce8ad7634a5a932d8b48daa58cf59f9e"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("d0dbbbbc33e95fdcc91b4593d438d985a75f98d5b6c128fc031d388ceae4c297")
+        },
+        {
+            base16_literal("059d9ee1939a154afa6171480f7c7409f198882a54ef7931419c3ba16f4c6fe2"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+        },
+        {
+            base16_literal("39277c96d9e4b690baefe812c8df4c851f6d2b702072c8ff66cb77eac79e5117"),
+            base16_literal("a471b9a6e65a8f20747ce2a2af6e44b1e26be1217d5418ec49bebe2da2ef69b7"),
+            base16_literal("124d2d31ad819ce6b37361b2eb717f4406880cab4dc1fa73ca85f85a22ecf66f"),
+            base16_literal("1dccc25bd6f6349f6c51a01bf4d8dad84d0da17bac5bd3056922b5bd0187f525"),
+            base16_literal("b63f916dd498da6953c00cda0e114056aeb886cdecdd745d89a1a7a7cd417c4d")
+        },
+        {
+            base16_literal("5b511d2fbafb89bf598004c2e7df3c44ab5f13475fb4f47b76c7ef18f59956d4"),
+            base16_literal("69c4931e84aff1727184a011460c12b73e12a21884c7fa527ff3213de64fc7b3"),
+            base16_literal("49f7f660b5a084070316e2d4aef3b2df0b449f1353896cdd5e607deff51311dc"),
+            base16_literal("3df01645e5fc08c313e39f0af3da91eacb074e6b0ee0725d05e1de5ae93edcdf"),
+            base16_literal("cb4052f8671dfa67b3dc8ece4b99f1afb93f5b1b9c65ec8e28ac23119912a8ab"),
+            base16_literal("1b5bb871e08b5303a11bd765144b373a5c9f67c76d2fdc0b42561838abca97c6"),
+            base16_literal("03e1d3f5619ecba161150c8f634f3344447329c092d92464f6c8cd230d2fd7bf"),
+            base16_literal("c8e456eaaf6adb38ff6d26aed55c8aa14ad6b215a63b9a8d1691bdff6eeec00b")
+        },
+        {
+            base16_literal("c85461a3196dd5da92c86a74d7fcb7e3746bf90ff2cdd206666077483a50608d"),
+            base16_literal("9cc93bef0b4e74915392697d898b9f732c0d906f61fbb2e7b3694adbbf03d724"),
+            base16_literal("60ac381b809f668e24e49f38f177ca556b22973f0152dc267cd885dd681150eb"),
+            base16_literal("5b43936ccd8b0f5e85d43605b70c427b1ad03573a61dcf269e1a2abc1787813d"),
+            base16_literal("434b233e1e358bb68f3a2c7d3ea3e4599adab9bd9c5075f3fd89fe81108d277b"),
+            base16_literal("94897fb29c10e5579fa147643fff26ddb9af40e8673f0c4af02e46a0fcd9fd14")
+        },
+        {
+            base16_literal("7fbf171a4e44b5e3dc69782edb2597b870b266868e73b3ea1778fae910ba9f21"),
+            base16_literal("01b722b329e63fc77286ba6eb8e209f9602316cd027318563bc8921389d19d98"),
+            base16_literal("ca021b156798e0871d61a2f7984c3eb70ee4b07b3d1784f9ffc3b1c757d75153")
+        },
+        {
+            base16_literal("1101fa7b54998323b174661dbfc8ea5acbdf289f2261785d3c80a412d63028f6"),
+            base16_literal("af3724b4be985105f730e1b607df86ba26045872d9d60a15fe53e184ca8f4425"),
+            base16_literal("8a5256aa3248fbe01a3a29e8c0211a17692f6b107681d95598bcf9782e37c107"),
+            base16_literal("cde94c140ea882b9c1abfd29d14b1e7ec0c5e706747f87f2b591b1abc78fcbfb"),
+            base16_literal("1d12d323193d3092d2947bfed094609dcc720622202996e149c19a3ce0e1285c")
+        },
+        {
+            base16_literal("16acf050004dd3404745cf4cba076422a3b9c5aef31e35ee9e716e53df31a2e0"),
+            base16_literal("a6c2adad4a7eae9804ab262710dcc30db5348b92da52450b78ecbdf02cdfc2e2")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3f, 0x00, 0x00, 0x0c, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x03, 0x00, 0xe0, 0xff, 0x01, 0x00, 0x80, 0xff, 0xff},
+    .e = base16_literal("5b6307c56a9ba6038c4213a0eacec06cf408481957d5024e3984f349ff238fb4"),
+    .secret_indexes = {2, 7, 8, 2, 2, 4, 3, 6},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0200000000f0ffffff1f0000f0ff7f000000000020feffffffffffff0300000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("030000000000000000f0ffff7f00000000000000000000000000feffffff030000"),
+            base16_literal("02000080ffffff1f00f0ff01fcffffffff0700ff030000feffffffffff7f000000"),
+            base16_literal("02ffffffffff1f00000000000000000000fcffffffffff0100fcffffffffffff01"),
+            base16_literal("02ffffffffffff0300000000f8ffffff0700fcffffffffffffff0f000018008001"),
+            base16_literal("0300f0ffffffffffffffffff00f8ffff1ff8ffffffffffffffffffffff1f0003e0"),
+            base16_literal("027f00000000000000000000000000000000000000c007f8ffff0f04e0ffff03ff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03ffffff0100000000030000fcff7f000000c0ff010000000000000000fcff7f00"),
+            base16_literal("0300c0ffff07000000e0ffffff010080ffff070080ffffff0f0000fcffffffffff"),
+            base16_literal("020700fc07000000000000000000000000f80fe0ffff0100000070010000000000"),
+            base16_literal("03030080ff3f00000000fe00e0ff1f00000000f0ffffffff01000000000000c0f0"),
+            base16_literal("02ffffff010000000000f8ffff030000000000000000fcffffffffffcfffffffff"),
+            base16_literal("0300000000000000c0ffff1f80ff3f00000000000fffffffffffff0000000000c0"),
+            base16_literal("02ffffffffffffffffffffffffffffffff0100000000c0ff1f00c0ff07f8ffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300feff7f000000000000fcffffffff7f00f8ffffffffffff0300000000fcffff")
+        },
+        {
+            base16_literal("02000000e00300f00000f00080ffffffffffffff0000ffffffff0000000000fcff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("021f00000700000000fe010000003800000000fcffffff0f000000000000000080"),
+            base16_literal("03ffffffffffff3f00000000f003e03f1ff0ff030000000000fcffffffffffffff"),
+            base16_literal("03cffffffdffffffffff0f0000000000f0ffff010000000000000000f0ffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("030000000000000000000000fcffffffffffffffffffffff010000000000000000"),
+            base16_literal("0300000000f03f00000000000000000000e0ffffffffff01000000c0ffff000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03ffff03000000000080ffffffffffffff03000000000000000000000000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000fcffffffffffcffffffff0ff7f0000803f0000000080ffffffffff1fff"),
+            base16_literal("02ffff0700000000f0ffff87ffffffff01000000f0ffffff7f00000000000000f8"),
+            base16_literal("02feffffffffffffff01000000f8ffffffffffffffffffffffff1f000000c00f00"),
+            base16_literal("020000000000000000f0ffffffff1f00000000fcff7f000000fcff3f00e0ffffff")
+        }
+    },
+    .k = {
+        base16_literal("32f6eda91094a489b7f7b9c2280be46fe78bad62f33b06df7d4dac7bd0817c68"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("9dd54ab18f4d68661ef2a485f73e2833b357d7f068561ca2ea4101debd02d6f6"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("7155c7fe5184f27bd0778805c0660da313dbcb6325898a4bfd924265afcc1545")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("0c6fd096cef5a005d218442de44029ab3a42aa5b58a3475c0dcac4dcb21f4c8b")
+        },
+        {
+            base16_literal("07fb12862b3fd972fb6e73725ab8f3b7692ffc6450a209d99921a7cda5bd69cb"),
+            base16_literal("0ccf2d40da011a8ba65177700835db2a8d04cf897b80c0a42c8631ceaefcea67"),
+            base16_literal("c264a8a20dcc36206077097e504cdd67dfb1be4dead64d42ab216326b0ab92b8"),
+            base16_literal("596cbc05ddb2549979d2f18bc1574d0e7c9e08c6f17aa266fc215093e55dd774"),
+            base16_literal("ffd8a5b355b9e133e7c585eb8059145a26d50ee84004847af889be2bf2dc24c1"),
+            base16_literal("7c01412e545a397ed89fd5bbaad515e92e98b90d891b3c4c22f89ed4bd4d9093"),
+            base16_literal("6dd7f738ca75e6d12066d8dfbf104fcd1043e66b3e3b7822155e755331960b3e"),
+            base16_literal("8acaa31a85731ada9c7c93c8f54e568824e0686f5f2bfcde0252adc5cd04f630")
+        },
+        {
+            base16_literal("7131a8a25d8c71659fb74b7e6024f418be881cb311a10bd036175987f5f9ae51"),
+            base16_literal("dae6b88343ccf6cedec2656fe970949fb01441c5af11aff0708749be31508b14")
+        },
+        {
+            base16_literal("efcfdfc9242a28d114fca831c2c3094d6ce1e9b4ed61760a4b1cf08b3133a847"),
+            base16_literal("692b9359bb2b145856f0962693e3bb73f7a15cbe2202e9441d1ee05b2c6f0287")
+        },
+        {
+            base16_literal("c1ca8322a8bac2863a862029c7645e413f39be82d35b3365e560af262601b8c3"),
+            base16_literal("392f33a43137a0197fb78f565b4aec24df97d0794c21fb79790d5607720136a3"),
+            base16_literal("7ff7a76628121e24d2d951699b6c1f8400dd85cbeca890c4490f90313470d763"),
+            base16_literal("31bd11e53b0c37d61a5c22761c7a094c96e653dc5350fb3a2d3ce26039a207c1")
+        },
+        {
+            base16_literal("3613c731b8929e11acb5adbf424b50fd84232c514dc493ec0024fb4a5e047634"),
+            base16_literal("4fa8207ed8b6b5a7f0af17f5e6cb90a49751e46e817ba381285310eefaf9be1b"),
+            base16_literal("9b0614d0ea13de2fa3ba95f25127c56b7f9d42ce53c6363d4a6c29db839221b7")
+        },
+        {
+            base16_literal("ac87ec7b3a6764452cb0b9a28b1e12f658ce391518ba310f497472224829101c"),
+            base16_literal("b45c218afc4be490d5b32032ae6865dbcc7be296a23800d2252df12227a88a91"),
+            base16_literal("1b9eba3a577b5b048a4c7982b058dd4b792185dabd44faccdfe484abd52bfc7d"),
+            base16_literal("b5d1d4b3f9a5fee394a681d4ec9269c826a85ee120f98a620492c32c32267ef2"),
+            base16_literal("a102ccc5ac570b97b3f2aa96203658299f7698a49fd8cc6f63c198d8d4a773f3"),
+            base16_literal("d087423fc86b208716d3ae752563f594f96f2aca11ef0c5608564be32b70fdda")
+        }
+    }
+},
+{
+    .message = {0xfb, 0xff, 0xff, 0x00, 0x00, 0x00, 0xf8, 0xff, 0xff, 0x83, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0x01, 0x00, 0x00, 0x80},
+    .e = base16_literal("d7dec920963dea73845cbfdcd9d40a6d19c8bc6789597bfe18b8573ff9341152"),
+    .secret_indexes = {4, 1, 7},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("027e0000000000000000000000fe3f000000fe0f00ffff01feffffffffffff0f00"),
+            base16_literal("0200f0ffffffff7f8081ffffff1f0000e0ffffff3fc0ffff7f0000000000003e00"),
+            base16_literal("020000000000000000000000ffffff07ffffffffffffff1f00000000f0ffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("030000000000fcffffffffff00000080ff1f0000fe80ff0f000000000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000000000ff013c000000f8ffff01f87f7000000000000000000000003f00"),
+            base16_literal("02ffffffffffffffffff3f0000000000000000003f0000000000c0ffffffffffff"),
+            base16_literal("02ff07000000000000feffffff0100000000000000000000c0070000c0ffffff00"),
+            base16_literal("020080ffffff010000000000000000000000feffffffffffffffffffffffffffff"),
+            base16_literal("020000e0ffffffffffffffffffff00f8ffffff01000000e0ffffffffffff070000")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("5fc72ddc0b341504b53fc185d80c162873dfa4f93fbc42024cf0ce81b1dc5d53")
+        },
+        {
+            base16_literal("c9ff2d3b60fd78811f066236940704a1cb3c782252d1acf409e49ca528e9bf68")
+        },
+        {
+            base16_literal("1566b0746f689a0746c2b46bdcbd61aa43ae97850075ff283e853f8a49048462"),
+            base16_literal("d842c5c3364723499c1ef0f45076686bae8e2126dd8183d006787c82893f3951"),
+            base16_literal("2d3806a7e9d105b176bfa957e0c100171749bb9aaef15a455109d74192eab155"),
+            base16_literal("c0c313128dd69e04718cd5f5a59b50e1df810d30fadce5c0b8b70aab47fb0819"),
+            base16_literal("34e47e7d6a8df103000fdcb31f7e139ea252cc85c5b7b750ae6482157fa7270a"),
+            base16_literal("ef523899cb30ce94d5496de7ca024a5fe2d81b1e0bdb101f2f2dae7a36a44448"),
+            base16_literal("ad3c59592bb5d81f5cda3e866b5c69b65622f92f4c8d0d635f0c4d9f19b5c4a2")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0x07, 0x00, 0x00, 0x00, 0x70, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xf7, 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00},
+    .e = base16_literal("70f4aaeef23f8f3c0a65c02ee07ea372ab489ec804202243f626c975f99922f4"),
+    .secret_indexes = {3, 6},
+    .secrets = {
+        base16_literal("0d51bf9fe82aa6f60f74013631577c4c59f81ef3fb7cdec4a731ea4261bca47c"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("02502cee672a51166836db83bd94e00417362d0af466fccf162f94d9cce7bbf2b6"),
+            base16_literal("020000000000000000f8ffffffffffffff1f000000e0ffffffffffff07feffc3ff"),
+            base16_literal("03ffffff07000000fcffffffff07c0ffffffffffffff03000000c00100e0ffffff")
+        },
+        {
+            base16_literal("02ffff7f0200807f80ff0300807ffeffffffffffff070000000000000000000000"),
+            base16_literal("02ffffffffffffffff01000000000000000000000000f8ffff0f00000000000000"),
+            base16_literal("03ff3f000000000080ffffffffff1ff8ff3f00e0ffff3f00fffffffffffffff0ff"),
+            base16_literal("0300f80ffcffffffffffffe0ffff01000000000000f0ffffffff1f0000ffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02feffffffff0300000000000070000000000400000000ffffff03c0ffffffffff")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("1663123c17728d145e4f3b9d309d7ddbeae6de990c7c75ef21fe433ad0ad48dd"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("574a9a106de75b5bd42a31b913d5bec85fad7faefdf2d157f7687389e2e189b2")
+        },
+        {
+            base16_literal("05eeb0194a5799bbb8d0277fa356422f331c6b1bc88e8ecad474a6a044142aa9"),
+            base16_literal("78fdaee73349c4d2431fa05e62359ba344582e283c502ae7fcc1d97119a41e43"),
+            base16_literal("457bf4e7510bfa1f774c811e9b44fc1c6e411acf8faeec3ac373ced12e79ec4a"),
+            base16_literal("701562639b2f081d991b776956b58f758bd035b459405c61b0e35317c2d3888f"),
+            base16_literal("a1ac8e0675e764bb3567c8b0ee725c6db25d84d6d4a66257445563a97ab79a7b"),
+            base16_literal("7201e47377525f8e5406989d8573231e7aba7315799f12d5ac32b87ab2e0f148")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0x0f, 0x00, 0xff, 0xff, 0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0xff, 0xe7, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("ca7f0f2e544b4d3286df60591da01f2db205d0ed591f266e36048fc77f0fbd39"),
+    .secret_indexes = {5, 8, 2, 6, 4, 3, 3, 3},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("a8ecc1a0e96ca86d3c51625ad1c7ceed2759f70eaa2cd0ec4d0460e23abba39f"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0300000000000000fefffbffffffffffffffffffff030000000000f8ffffffff1f"),
+            base16_literal("02fffffffffffffffffffffffffffffdffff1f00000000000000000000000000e0"),
+            base16_literal("03000000000000fc01000000f0fffffffffffffffbffffffffff3ffeffffff0100"),
+            base16_literal("02f8ffff07c0ff0300000080ffff1ffeffff0f0000e0ffffffff7ffeffffffff3f"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03ffff0100ffffffff1ff0ffffffffff1f0000ffffffffff00ffffff00000000fc"),
+            base16_literal("03ffffffff0f000000000000000000000000fcffffffffffffffffffffffffffff"),
+            base16_literal("02ffffffff7f000000feffffffff00e0ffffffffffffffff000000001e00000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0200fcffffffffff0700000000000400f0ffff3f80ffffffffff0f000000000000"),
+            base16_literal("020300000000e0ffff1ffcffffffff1ff0ffffffffff0f00000000f0ffffffffff"),
+            base16_literal("03fffff7ffffffffffffff7f000000000000feffffff0f00000000000000000000"),
+            base16_literal("03ffffffffffffffffffffffffff0178e00f00000000e0fffffffffffffffffffc")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("033f00000000000000c07f0000f0ff3f00000080ffff3f000000c07f0000000000")
+        },
+        {
+            base16_literal("02ffffffff0f000000c003e0ffffff0780ffff7f000000000000f0ff3ffeffffff"),
+            base16_literal("027e36d53ae4f1e51122a9b8abc6aa14b5d9711ecb32e5ca38388dccfab078bb24"),
+            base16_literal("020000c0ffff1f000000f8fdff7f000000000000000000000080010000000000ff"),
+            base16_literal("02000000f0ffff000000000000000000f0ffffffffffffffffff07000000f0ffff"),
+            base16_literal("03ffffffffffff0700000000801f0000000080ff7f0000000000ffff1f00feff3f"),
+            base16_literal("03000000000080ffffffffff0f00000000c0ffffff010000000000000000000000")
+        },
+        {
+            base16_literal("020000f0ffffffffff01fcffffffffffffff01000000f0ffffffffffffffffff07"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0200c0ffffff1f0000000000c0ffffffffffffffffffffdfffffff00000000feff"),
+            base16_literal("03ff070000000000007000000000000000807f08ffffffffffffffffffffffffff")
+        },
+        {
+            base16_literal("030080feffff1f00000000000000000000000000ffffffffffffffffffff1f0000"),
+            base16_literal("02ff0700000000c0ffffffff00000000000000fcffffffffffffffffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("030000fcffffffff01f0ffffffffffffffff7f000000000000000000feffffff03"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffff0100feffffffffffffffffff0ff0ffffffffffffffffff0f000000")
+        },
+        {
+            base16_literal("03000000ffff0100000080ffffff030000000000fcffff000000000000ffffff03"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03e0ffffff000000000000c0ffffffffffffffffffff01fcffffffffff1f00f8ff")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("e9cd8c9efd306c40311e7fdae168e02c6d36065e5ab678ccd3175251e3232501")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("3de7615abd59fd4e57814d3ec3f357820b4db5d7dd682dd33dcf2d0b43a773d4"),
+            base16_literal("94eba177066a4e534dbfaa47866d1b838fe4850f5771c2690ea9063ae253de25"),
+            base16_literal("4de04789cc8fa7a6c92720f881c7a4238e6195ec642e4b90ac00f05ad26c0644"),
+            base16_literal("e5a739077c5404bb8a0f5b40f3c5342889c96f33ae462b31b39c57c6199909f8"),
+            base16_literal("7ab9072c3bb846b391693b471830e696178f651f4bbdfb910dbac356e192fa6d")
+        },
+        {
+            base16_literal("8d35d89a98b98817ab22f5556b7dcc4dd469b2ffaf09a4fabb5c330067c44c4a"),
+            base16_literal("93c0b96d9990e51a8bdf7b63c57ad484138abb9eaa5cfcc270bbbd7cc85d8d8e")
+        },
+        {
+            base16_literal("013ca8b598252db5cfd49195427a0481042d60f52e596968e722063513863744"),
+            base16_literal("3bf0f72156466287ad4b2e714fd26ce2b7b98eb30162c99f47d896a504fa75e8"),
+            base16_literal("7d80c49930aa3509e0454b64b5f1be73179fe559fd7c471c1c2c6a89060d5a77"),
+            base16_literal("a96b5ad617e4b40d217f48f2b72d581aaa28f3ee434938463f25df2121c1208d"),
+            base16_literal("9b3d6c4d1131101c30291577e9c0a53d67865143774b4c12eb13f61131621eb4"),
+            base16_literal("3428e36a013c28c57119818aaff3a27fa7d18dade5cfe5e1ec42ef341946f1a7")
+        },
+        {
+            base16_literal("2214d70316ad67ce5f6a38f33b6808723feac3f0e1256792cc6a8cea9680a375"),
+            base16_literal("b99ccf23907e8cd038018ead8f5536f18e9d6120a47bc60706c9c6dc3ae6b220"),
+            base16_literal("bc35144dd0c73447b934619220e9f744024d6811067d843fb72ce4a14a1f5924"),
+            base16_literal("38d4f68885b8c28755b558e1893807c22e98d00dc58073471e7e0664beebc25c")
+        },
+        {
+            base16_literal("13c081ebca73fd5925dc85ebb356af470dc8c2b37cad9a1c552881f14e363ccf"),
+            base16_literal("7d67b7d269f31f2be698f7a936278c0912e88d755a268a110d4c1ccef3e0c5b9"),
+            base16_literal("5dfb42dfba63be6fc0231af07327914a6d7922f1c63a459c215d6266ed704399")
+        },
+        {
+            base16_literal("beb258c5a0b7e1c5ad76666b41fab57620c7dd5d13d5892cae181153731fa4e5"),
+            base16_literal("e26009c4edd174b03764851e5f122f9e6a23d070178c3d01e03d2ff62d29dc97"),
+            base16_literal("226d428813790874a545d484246bcd3a90b0396a8644587bfe7c0d97bbc334b1")
+        },
+        {
+            base16_literal("a0880d56678a525a3e7b9a828d84641adeaab47ef302ad122d031f4533c4b4ea"),
+            base16_literal("7a0a82043d0bf54d9ea14ebcbeef0f9c54282be39a1354485149a6300128548b"),
+            base16_literal("c17c48c6df14a5af4b53dcb8435e7065541305c9dc22c8b648412345b148ce10")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0f, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x07, 0x00, 0x00, 0x00, 0x00, 0xf7, 0xf3, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("af2178649abfb905249c875743018922c9f3d9697a3fdbe45a1a74508b21b763"),
+    .secret_indexes = {6, 1, 6, 6},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("03000000000000c0ffffffffffffffffffffff07000000e0ffffffffff0700fcff"),
+            base16_literal("030000000000fcffffffff070000000000e0ff07000000f0ff07feff0000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300ffffff0300000000000000000000fcffffffffffff0000e003fcffffffffff"),
+            base16_literal("03000000fcffff0700000000fc0300feffff0000000080ffffffffff01ffffffff"),
+            base16_literal("03ffffffff01000000f8ffffffffffffffffffff000000000000000000000000c0")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03000000fcff010000000000c0ffffffff0f00000000feffff7f80ffffffffefe7"),
+            base16_literal("03ffff07000000000000f8ffffffffffff1f0000feff0300006000000000000000"),
+            base16_literal("030000000080ffffffffffff0f0000000000c001000000700000c0ff7f00000000"),
+            base16_literal("03000080ffffff030000e0010000000000000000000000000080ff1f00000080ff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000000000000000000000c0ffffffffff010000000000030000e00100000000")
+        },
+        {
+            base16_literal("03ffffffffffffffffffffffffffffffffffffff030000000000c0ffff01f0ffff"),
+            base16_literal("03ffff0300000000007e000000000000e0ff0f0000000000000000000000feffff"),
+            base16_literal("0280ffffffffffffff3f00000000000007fc0f00000000e0ff3f00000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300ffffffffffffff0f0000000000fcffffffffffffffff7f00000000feff3ff8"),
+            base16_literal("02ffff1f00000000000000fc07ffffffffffffffff0300fcffff7f000000000000")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("58dc365da1befae09343014ae6b0bf347bbc4514ecde55fbeae039fd00e7ecf1"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("b72bb10544dd738cf56f3e3d8ad7d4c74b66169452e20647781f1fd67f7e584f"),
+            base16_literal("10d1b6a888aa0a84d121a6a0dc8913805ca81c8ee20e22e91b03168f72cc8a25")
+        },
+        {
+            base16_literal("55da76e0f7036ed8f70c35d61458fd7fdd15a0b08406b6c91ec202f5c2cb2ade")
+        },
+        {
+            base16_literal("c9384ffe4a7cc1a56c4a4c54ded19ea6b754bafddc75502d161cda1eeb77fde5"),
+            base16_literal("af7ade80548442ca32f3aa62eb42d65c2b8e91843e6d218de5663e1a299bc703"),
+            base16_literal("b46dd289c030d99098f7f1e4f6d6373c8bfa5bd13783a624bb79844c7cbd9c94"),
+            base16_literal("be9983b9e319835b8bcc05d23e61ebea47cbf6b35c229a412bb478431e712e88"),
+            base16_literal("18abf6363a4b75904f02f58643dcf274c120f2ad735d9d8dcbf426065678b77e"),
+            base16_literal("3770867e86747fd67367c0ac7c605ee1d38ce4167a09e3697ad1435fcf492626")
+        },
+        {
+            base16_literal("8892255618ad7ff0efb89e4e6cb7bfdf4159879dea163b7968a21b88f677ba78"),
+            base16_literal("6d9cb22b2587ce2a86ea34b229dfb6b68fbfe86585d0b096e80027053fb9b85b"),
+            base16_literal("54cf9ac0a2e7faa0792d5a432ef99a6a3b36c64f6adf2131298d51af8da81c0c"),
+            base16_literal("3b571686e3f736a5bbb6a027d9870c62954a60d678afa76f5fd9f879129e556b"),
+            base16_literal("a25ad26a3f001232076c3fc0123c7398584d7645c3716c702cec02e2bf90fe36"),
+            base16_literal("fb0841976fb06e3c2cfb281d6ba841a883bbabe2ca945449581881da9aecef7d")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0xfc, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0x0f, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00},
+    .e = base16_literal("2d29443ffb95c3a1b31e297154a0f3195e3b425b31807816717647ba49bbe9e4"),
+    .secret_indexes = {1, 5},
+    .secrets = {
+        base16_literal("32a1b9d5871b4a999b098dcc55560f3bb2174890af5b9fadd1fdb8607a202a1d"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("02e3f70e8d709acda8f38df7c2fa9c482d13dcb41530fac5ab18c4a73bf39f0444")
+        },
+        {
+            base16_literal("0300000000000000f87f000000000000f8ffffffffff07ffff3f00000000f0ffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ff03000000feff03000000f81f000000e0ffffff1f000000fdff3f0000000000"),
+            base16_literal("03ffff01000000000000f8ffff070000000000000000f8ffffffffff7f00000000"),
+            base16_literal("02ffffffffffffffff7f00000000fc3f000000e0c3ffffffffffffff7f00000000")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("4c7cb0786650bee4d250e3c42d93cdd8538b1c6b3b3c4f707cd0b569a6c2b635")
+    },
+    .s = {
+        {
+            base16_literal("dc60075b03c5d0417f589467365c07a8964e6d350377c3de4c33fb1a0879ad46")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("7833aecd349eefecdd32487dbe16ec33a91d274b310e12e8e591e917efc50668"),
+            base16_literal("963a72eac020a77ea53b23efb5ef04e8fbcb1b5b14a3f37d90864c632b77b589"),
+            base16_literal("60d15847bc881a61a9e36966e0351dc61d19ec77c51ef0108ae2833f7b32a3a0"),
+            base16_literal("c1854701f7d02d4f896e0f46433aedd8bbbf76b1e0377596cb4d388926fdc1de")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x80, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0xfc, 0x00, 0x00, 0x00, 0x80, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00},
+    .e = base16_literal("be397bbf4a05486102b3787240bf2c692209da8f18596bdb10499ff96085acc1"),
+    .secret_indexes = {3},
+    .secrets = {
+        base16_literal("db4e00b0c3107ae697f65ccebd4b399234939bc5ad8ec52fbe9ee47605dbf402")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ff00000000000000000000feffffffff7f0000ffffffffffffff3f0000000000"),
+            base16_literal("03e6318af9ccdae2b616857a5d8174aaa8f75a84cb5e7ee11a1b25bd369a0bde89"),
+            base16_literal("03ffff07000000e0ff0100fcffffffffffff01000000feffffffc1cff8ffffffff")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("76aa76470c4ee0fada7654f4760bb6b6688a594ce95d924abee88b3def05ea32"),
+            base16_literal("6852be06183b24d8143660b22f189e588956b02cbd646d2a17fddbbcd755603a")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0xff, 0x00, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x03, 0x00, 0x00, 0xf0, 0xff, 0x80, 0xff, 0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f},
+    .e = base16_literal("48853a6ae02360832d2de90cac3ed0652aba6c2b4c647d6cd248b057e1d0025f"),
+    .secret_indexes = {3, 6, 5, 3, 2, 5, 7},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("abad0f7b65c6becb86f348ef926b77610094f175335c0bce7897a70f212b2445"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffffffffff1f0002fe0300f87f00000000000000000000000000fcffff"),
+            base16_literal("03ff0100fc7f0000000000c0ffffffff7f00000080ffff0f00000000000080ffff")
+        },
+        {
+            base16_literal("02ffffffff7f0000000000ffffffffff03000000000000001e00000038000000ff"),
+            base16_literal("024fcc77fab822698163892e3baf1df68a953023abe5570674d9f6a9f5b0018ffb"),
+            base16_literal("02ffffffff0380ffffffffff7f00000000f8ffffffffff7f000000ffffffffffff"),
+            base16_literal("020000000000007c3c00000000ffffffff7f0000000000000000000000e0ffffff"),
+            base16_literal("02e0ff1f000000000000e0ffff0f00f80700000000000000000000c0ffff0f0000"),
+            base16_literal("02ffff7f000000000000000000e2ff7f0000f80300fcffffffff03000000000000")
+        },
+        {
+            base16_literal("03ffffffffffffffffff3f000000000000f0ffff1f0004e080ffffffffff070000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000000000f0ffffffff070000000000000000ffffffffffff3f00fcffffffff"),
+            base16_literal("03ffffffffffffffffffffffef03000080ffffff0ffe0700000000607cfe7f0000"),
+            base16_literal("03000000000000003f00fcffffffffff7f7c0000feff7f80ffffffffffffffff1f")
+        },
+        {
+            base16_literal("02ffffffff010000000000000000fc07c0ffffffffffffffffff030000fcffffff"),
+            base16_literal("030000000c00c0ffffff3f000000000000e0ffffffffffff80ffffffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03fffffffffffffdffffffffffffffffffffff03000000000000feffffff071000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03000000000000000000000000000000000000e0ff7ff0ffff0300000000000000"),
+            base16_literal("0300000000f8ffffffffffe1ffffff3f0080fffffff7ffffffffffffffffff0f00"),
+            base16_literal("02fcff3f0000c0ff00000000e0ffffffffffffffffff0700f8ffffffffff070000"),
+            base16_literal("0300000000000000001ce00f000080ffffff0300e0ffffffffff03000000f80300"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03ffff07ffffff030000000000000000fcfffffbffffffff7f0000000000000000"),
+            base16_literal("03ffffff00f0ffffff01000000e0ffffff07fcffffff0000000000c07f000000f8"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffffffff7f0000000000000000000000fcffffff7f0000000000ffffff"),
+            base16_literal("02200000000000f0ffffffffffff3f302c00000c00003ffcffffffffffff070000"),
+            base16_literal("03ffffffff7f000000000000000000fe0fe0ffffffff0000000000000000000000"),
+            base16_literal("0300f81ffcffff3f0000000000000000ffffffffff07000000000080ff81ffffff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("c5a40134632008d04da78bbc3464b2a5233887dd944d379fbfcc773c1f547439"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+        },
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("d5c8de4438b1e65e55965c1bddb2d7b7adbe1cb23c6e7381fccda342f277053d"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("ce080a18c79c4dead8a749cddc407887742c21525234a7554ee369a839ff2ca9"),
+            base16_literal("29f83c9d2374b47fe585b2efce64bb0ba722b591b6735e21ae9efbaf7a3c252f")
+        },
+        {
+            base16_literal("fb3e1bd67019c96fe97b7808973cf79d8600964fd74e6fdbf0f4370b6af2204c"),
+            base16_literal("8d4cff959ac5c3e4a7b47c826c493f31db4bd158fcb0a410d3d0bbf0688bfb47"),
+            base16_literal("d5dc78aca96fb56813585e44d51de0cbc1b85e214a76e67e3fcf1ebc7b64853c"),
+            base16_literal("37b8fd683d92ed820b23d399cd65681073aec5e80329878c657936df0ead9163"),
+            base16_literal("e5d375f7dd29701f090f37741868735df37ae16fd43e67445ced2fca1ca891d2")
+        },
+        {
+            base16_literal("5e08ee98beb8d68e7c74a3af728226e0a26b2664a0c3a895172e86e9f0d4af62"),
+            base16_literal("f3f2e53d605fefe2371aa3168af83c45a0e210ee0012fb4c2c24ebd379795bdd"),
+            base16_literal("83993b5058fddfdc5bc775ce9cd3f328577e7fcb06adbca8721b4ac8e27a12d8")
+        },
+        {
+            base16_literal("3bb3eb77e1c83c88d4145003e83e02bd2f9ba67dbda7fc8a0cbcaef7bd75aa3e"),
+            base16_literal("a49949617010df9d0bd1ef4ab9965a9b7a1f4d2d88991f19fbf65eb1dbf6898a")
+        },
+        {
+            base16_literal("5b2b39814a49ac5fe43b1a59ca2c1168c5be4d8ec881da084e90580856ea6f2b"),
+            base16_literal("160d80650c250282f6171490fb715efe88da0e9d4af17a5ced683dcb1a06cf33"),
+            base16_literal("01014a81b5f0b8092dcbf471a11385fd3afa02d06b829f80e79de0a0b3c74ce8"),
+            base16_literal("bcae2dd39b724b4fd58911295d117a312fc699b326e96b11ca0772e2f6f80ae8"),
+            base16_literal("7015e6a72f93b6c5c45b0e610d8f0a2b0e04cec34bef624e0529f978e9011364")
+        },
+        {
+            base16_literal("fb55806ebe31e7caeffe5e565ea36f2bf11a09296e619d7009065702d72ee810"),
+            base16_literal("251499d5f578b389a453e663fcb615f18ab60d40874be59bfb8d4a633c911398"),
+            base16_literal("631e18e70085bdee24951cc68e7590bd28458b25b47191342a881fd840dff378"),
+            base16_literal("57ff971b33a203f7d818ef38f4fb017ad48fef2b657cf53e4d2814b63cef816e"),
+            base16_literal("e90820acb03ac2c2919df90bebe976efc6c2e99407d6ea34ace48ce43d231e63"),
+            base16_literal("36c225e9e6b197fc735026140142180ac4699481e697e102f10329bc74a468ba"),
+            base16_literal("af443bb8aa1b8d7a6f62db55b5b4b42757219b70f0fb4f7ddb5897abdeee7132")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0x00, 0xfe, 0xff, 0xff, 0x07, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff, 0x3f, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("11e6e431cf3f52d4a316164634b9c534b2f8e9d71f59755fbea3e814d88dcb19"),
+    .secret_indexes = {5},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("02ffffffffff0300e0ffffffffffffffffffffffffffffffffff0f06000000f0ff"),
+            base16_literal("03003e000000000070000000e0ffffffffffffff010000000080ffffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02c7ffffffffff7f70000000000000f8ffff0f80ffffffffffffff3f0000000000"),
+            base16_literal("0300000000feff010000000000000000000000f0ffffffffffffffff0f0000c0ff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("9ab057150e164d307ab34e72b66844601b01a564b782cc5061b8f865aa1244fe"),
+            base16_literal("90e35c1e907d49f46cfe60528a93a12a796b793936f92a7144b3fb0dfb0eff04"),
+            base16_literal("01d99b7de36d5838b7aeca7c327d6fdbdcadb5247503dde966ffb1e1a6834901"),
+            base16_literal("786669cffc6dc756cd93cdb9b6fe8eeb47f1b23efb62bf9683b50c44625582b6")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0x1f, 0x00, 0xf8, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f, 0x80, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("506891a0e823a9a740b0614ec262bd5ce9ee1e8d25cde3245a751c48ddd00a0c"),
+    .secret_indexes = {2, 8, 3},
+    .secrets = {
+        base16_literal("8e1c91a7be96d63e91c0db9c744e30a3a7d912f3b3ccaa14771e49a07fe03cad"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ffffffffff1f000000000000c01f00000000000000e0ffffffffffffff7ffcff"),
+            base16_literal("039e2e64a26130d99ff87c58fd4dc589f2d30379ddb78fe4a1cf49feeca9958c09")
+        },
+        {
+            base16_literal("03fcffffff1f000000000000f8ff3f000000000000000000000000000000c01ff8"),
+            base16_literal("0300000000000000000000e0ffffffffffff3f000000ffffffffffffffffff0100"),
+            base16_literal("0300c0ffff0000e0ffffffff07c0ffffffffffffffffffffffffffffffffffffff"),
+            base16_literal("020000000000801ffcffffffffff00000000000000000000fcffffffffffff0700"),
+            base16_literal("030700f0ffffffff070000000000000000ffffff3f000000000000000000000000"),
+            base16_literal("0300000000000000000000000000000000f0fffff0ffffff0f00000000fcffffff"),
+            base16_literal("020000000000100000fcffffffffffffff1f000000ffff0f0000f8010000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("037ffeffffffffffffffff01000000f0ffff3ff01f0000000000000000000000fe"),
+            base16_literal("02000000f0ffffffffe7ffffffff0100001cfe3f00000000fcffffffffffff87ff")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("ed8f8768bfe7f2d113ca53c5237c66bba8e75de2baf6bda487ceb0b65f95e71b")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("0a5ccc0827e922c689521735e9199b2a32f759a69c73f3c5c8338f36dc98957f"),
+            base16_literal("61fd5d481543cd932ba01638e9715121475a20bee3fefcf2f5007a135eb1da6f"),
+            base16_literal("612e93a3a98263be08cef3fa1fb2bd5a8c7b38570dee55157f460918a16820f9"),
+            base16_literal("8c5de93423f9eb1b0ca3c8094183bacdc85e27344cde92604883cfd795e9aab5"),
+            base16_literal("52d6f4fce4525a9cc192d32373720170557575d0f727fb6b398b00db2810609e"),
+            base16_literal("eb4536c30ca390d3d1fb79214ea8bbd6d7e6c4bd4d9106ef41c161db806c7bfa"),
+            base16_literal("5c6d27b3afc76bd9cd8d8fcae99b4ee5d8b54c9ce1fa23a9a9f7917e64879e88")
+        },
+        {
+            base16_literal("7f10c7f7e3372d64fa2f55fbd9043dc0d1d27e8e9c055d7e94d42cc234cb716c"),
+            base16_literal("9cfc61479affa0c443dd20e28b3cf4b1a8ce86fbfeb27bd274d1c190fb87e06e"),
+            base16_literal("e1d03b5b957102c1613d52a8309635625f2bf1904a14b6cc7a82424cd39a4577")
+        }
+    }
+},
+{
+    .message = {0x03, 0xfc, 0xff, 0x0f, 0x00, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0xf0, 0xff, 0xf0, 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00, 0xfe, 0xff, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfe},
+    .e = base16_literal("c013342d96a5c214a3d7ade985b4b90dc5c40f526c7b56625993aed84e24d7c0"),
+    .secret_indexes = {4, 4, 5, 3, 7, 1, 3},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0200000000f8ffffff0000000080030000000000feffffffffffffffffffffffff"),
+            base16_literal("03ffffffffffffffff010000000000f0ff000000ffffffffffffff030000000000"),
+            base16_literal("031f000080ffffff1f0000f80f0080ffffffffff03000000030000000000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02000000000000000000fcff0000f0ffffffffff010000000000000000f0030000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffffffffffff070000000000feffffff0f0000f0ffff3f0000c0ffffff"),
+            base16_literal("03ffffffffffffffffff7f00000000f8ff01e0010000c0ffffffffff010000c0ff")
+        },
+        {
+            base16_literal("02031c001cc00ffcffffffff0fffffff3f000000e0ffff0f0000000000f0ffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000000000000000000000f0ffffffff1fc0ffffffff0300c0ff0000c0e0ffff"),
+            base16_literal("020000000000c0ff3f000000000080ffffffffffffffffffffffff1f000000f01f"),
+            base16_literal("0380e0ffffff07000000000000f0fff7ffff1f00000000fcffffffffff07000000")
+        },
+        {
+            base16_literal("0300000000000000000000000000fcffffffffffffef01000000ffff0ff8030000"),
+            base16_literal("03000000000000fe010000e0ffff000000e01f00000000e0ffffff0f00000000c0"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ff0000000000000000e07f00000000006000fe3f000000f80300000000fc0700"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02feffffffff8fff7fc0ff0700f0ffffff0f0000ffffff00000000000000000080"),
+            base16_literal("02ffffffffffffffffffffff3f00f8ffffff0300e0ff1f000000000000fcffffff"),
+            base16_literal("03ff1f80ff0100f8000000ff0300e0ffff0f0000000000e0ffffffffffffffffff"),
+            base16_literal("030300f8ffffffffffffffffffffff010080ffff0700000000000000c0ffc10000"),
+            base16_literal("0200000000000000feffffffffffffffffffffff0000f8ffffff070000000000f8")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02fc1ff0ffffffffff010000fcff7f00000080ffffffffffff0300000000000000"),
+            base16_literal("03ff010000000000000000fcff3f00f81f00000000000000fcffffffffffff7f00")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("7a55643fe8176de3ffb161df2c3d3a6ef3c10bbca311878de8de9e5ae6a3bebe"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("d6b44dfcfc1775c3164316cf79812c7b6f08b0f58594cf37ff4c08643bbc06c2")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("cecc157b3f3e41a8e79248e28f122ef045f969001e3b33da3551618b79ed4f07"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("8707281b758c1a8c7f22134f99faebfa5679cb317cc57bd0f630b376a93067de")
+        },
+        {
+            base16_literal("ef818f586b0983ddac83fc4d5aac2ec888e005e2dc3500075134b7a94a2d8252"),
+            base16_literal("19fb4c79b4394a45627c9e17eca310854807f13a987e9bcd02366310d5b60459"),
+            base16_literal("35cebb0c26b458da31f317a7309fd2db35e7b043f8672ff1bd977ee09ac35188"),
+            base16_literal("d42c565341103beea162b7b63881e38062d6160b26b713a6ad42292f237c9461"),
+            base16_literal("06555a124d9f2cae73e99297a5bd58854efaa96686364c59133822341334aced")
+        },
+        {
+            base16_literal("a5d8822ab3a540e017b219f58c052f8df0798e560c77db23ff0a27d8b93dd72a"),
+            base16_literal("6fc8a2963c91b43cf3ca4c8bb2849fd8f43bb1a641eba21cdd3f00fa74b7370b"),
+            base16_literal("46db09ab668e51a9a0dee1385bdcc124f28d078d5467407654d2cfd4dec32d9f")
+        },
+        {
+            base16_literal("e09fef4325db1910ae407e3b67d2942bbe2979e5d5c408d02f1eff45bb2e8f64"),
+            base16_literal("fd7c86845132e802fb21c2729427e68e0cfcb2f89617c0fd8a6bc3fe9c616760"),
+            base16_literal("5e0434bd6936d7f83b8e3439e67b8464fbab112404725095138467913178824b"),
+            base16_literal("0ed211433f4ba6b393eb051820aa8e7e67a59f869c59064779a31a318cd4db03"),
+            base16_literal("04515f51024926d9261574efd2d0e0a311c02625eba692c20b37e4a97076bc0f"),
+            base16_literal("44bb1894e3cd12d690e6c101a2e6635ae4948e69c0b7fce7184efb4d3248b219"),
+            base16_literal("d15ab9993c126dcf6a1f0f82a3adbce120d698d9f66e8d3bdbba094182f1081c")
+        },
+        {
+            base16_literal("da1b7ca7cd4a16afa77ec744a06749ae618969bd0c3bfd85c5520ce7d7db5fb9")
+        },
+        {
+            base16_literal("809f55d8cd010954b1184914134a611dde7b7d9a4e7b645cd8b5e36b34510603"),
+            base16_literal("b6dd617da802892619c49422e07037a5897da8fceeceda63c85fb1231d52230f"),
+            base16_literal("fb05d31128d89505116810ea290d90e25485798fcfe3e1a2a356e0645a2ad757")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0x07, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0xfc, 0xff, 0xff, 0x07, 0xfe, 0x7f, 0x00, 0x00, 0x00, 0xf0, 0xff, 0x1f, 0x00, 0x00, 0xfe},
+    .e = base16_literal("e967856de3cfefc801d7181116b2325536dc0e5fa65585cf8acb6b5b8db6e461"),
+    .secret_indexes = {1, 2, 8, 5},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ff3f0000c0ffffffff01000000000000000000000000c0ffffff7f000000feff")
+        },
+        {
+            base16_literal("03ff0700000000feffffff0f00001c00000000feff3f00000000000000007e0000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000000000000000000000f8ffffffff0100800f000000000000000000000000"),
+            base16_literal("02ffff3f00000000000000000000f0ffffffff0000ffffffffffffff0700ffffff"),
+            base16_literal("030000000000f8ff010000f0ffffff000000000000000000f0fffffffffffff33f"),
+            base16_literal("02000000c0ffffffff0300000000000000f8ffff00000000000000000000000000"),
+            base16_literal("02ffff00000000ffffffff3f0000f0ff80ffffffffffffffffffffffffffffffff"),
+            base16_literal("0300fcffff7f0000c0ffff7f00000000000000feff03000000f0000000f8ffffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000f887ffffffff07000000000000ffffffffffff030000001c00f0ffff00"),
+            base16_literal("03ffffe7ffffffffffffffffffffffffffff0f00000000000000f0ffff7ff0ffff"),
+            base16_literal("02ff7f0000000000fcffffffffff0fc0ffffffffffffffffff1f0000000080ffff"),
+            base16_literal("03ffff07000000000000000000000000000000000000fcffffffffffff0f000000")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("c3f5c37178a1106c0cf6d47a9a97b64fb6cf782338b26fdd45bbec8e21bdcb14")
+        },
+        {
+            base16_literal("782374b1fc5a485c20b1d14a6d72efd4f266e8069ff56d637f98d25fbd26fcbf"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("603f483a5048beeb991db4111316629acbfeab4ef67b2fcc48eaf41306351308"),
+            base16_literal("2da736caf9f64e139f1d1a4ad3a4f3be4eb8a0faca3cbaea24ff5261163f5b58"),
+            base16_literal("d6b3c88fb8a7e998405b1606b6120190bfd18ce20d62d6238ce646d59a8d32cc"),
+            base16_literal("66979bb341b2dfbd5ed65b62db0dc91b300ed1b0dd83c26c1bc677e6b8c11faf"),
+            base16_literal("6350cd0cbce560168ba37e65438e3e6e9a8c08b8340a6395f3da8c9b307e5048"),
+            base16_literal("e6c22a9a773319047decdf3ff765f6b126581037357900e56b98e5a099b4aa38"),
+            base16_literal("20ba73158ae5aa35328004e89441dbb9cb22b247a49f00fbcbda4c5db2a2a4ab")
+        },
+        {
+            base16_literal("c2ed6dd32a13289e3370e2545dd1d6b3c4048c280bcaa1bb8e3f82dc0b26596c"),
+            base16_literal("f9bf3113d440e74e648a364f1f9484eed01b934f4a237881e3dc525d8c7fb6ca"),
+            base16_literal("3fbfc906f3db7e6f004bd13e047c86d23441c47390899267d219180f4a00bf18"),
+            base16_literal("e57b9c4cc1c70258c5c89139f6a450d71f9b94746e86f38b8cb808fa56e60846"),
+            base16_literal("f0ce4e4f7edb1db12b28a94585cb661fdcab873184950e0f35a7d2a0e7547ff8")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("46ef60c8418f494379de2b210edd536830c6551d87177ea1f77998eed0f822ca"),
+    .secret_indexes = {2, 1, 2, 8, 1, 2, 8},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("622cb27e1c23e232814861a8cd170d4b1ed420bf7a6eb306f4029ec05df8a5d4"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("72776c658a95ec9de92e3cdc73dcd6153701327b4e478585bb1df55a659ad01a")
+    },
+    .public_rings = {
+        {
+            base16_literal("0300f0000000000080ff0f0000f81fc0ff0100000000e0ffffffff3f000000f00f"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("035a5388b2657b8bb45f0624ee8d03c0a6d25b0c47162397b95cbd4126f405bcef")
+        },
+        {
+            base16_literal("03000000000000feffffffffffffff7f000100001c000000000000f8ff0300c0ff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ffffffffffffffffffffffffff000000000000f0ff0100fcff7f00000000f0ff"),
+            base16_literal("03ffffffffffffffff0700fc0f000000000000fcffffffffffffff1f0000f8ffff"),
+            base16_literal("02e0ffffffffffff7f0000f0ffffffffffffffffffffffffffffff0f000007f8ff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0307e0ff03fe010000f8ffffffffff7f000000000000ffffffffffffff00000000"),
+            base16_literal("03ffffff010000000000000000003cf8ffffffffffffffff3f0000febf7f80ff07"),
+            base16_literal("03001f00f0ffffffffffffffffffffffffffffff03ff7f0c0000000000fcffffff"),
+            base16_literal("02ffffffffffffff0f00000000000080ffffffffffffffffffff0100000000fcff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("020700feff7f000000feffffffffff1f0000fc070000fcffffffffffffffff0000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03000000c0ffff1f000000000000fe8fffff030000fcffff010000000000000000"),
+            base16_literal("0200000000007e00000080070000000080ffffffffffffffffffffffffffff1f00"),
+            base16_literal("02ff070000000000f0ff07000000e0ffffffff0f00000000000080ffff0000ffff"),
+            base16_literal("03e5121e56c6809a1220fd1b3bb6f0ce663f91a0e33bd63e466d9397b3b27cdd5a"),
+            base16_literal("030000feffffffff0300000000000000000000c0ffffffffff3e003c0000000000"),
+            base16_literal("02ffff03f0ffffff7f0000ffffffffffff030000f8ffcfff030000fc1ffcffffff"),
+            base16_literal("020f00fc0f0000000000000000e0ffff1fffffff07000000000000000000000000"),
+            base16_literal("030f00f03f00fefffffffffffffffffffff3ffffffff0300000000000080ff3f00")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("69f864b65cc845d7d730bf74732f1abe5669df94388276118554ef6d0313d901"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("14d0c92e77c05d000fcc54c17f419a4ce6d2641df9e2af86bea8932d5c2164b3")
+        },
+        {
+            base16_literal("f17f52e52e1eef057c71db19357af47edb912d6b03f5bef78506a4bd8c637298")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("8a0146b2fd884a1a9e224e62902eeffa7300a43aae8277305223ebac5ca599cc")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("e74048e24cffa8def397d1019a8d834279b682142493dd0281f31c8e5e53d499"),
+            base16_literal("3e88d20b3f06fabcb46962b909fcf88034b5198c7889f4976a5014998f76980b"),
+            base16_literal("37886e0f9c2ba8737cc17bfab3f7f15ab9310ff13cf0614f0b5fa7442b6e079f"),
+            base16_literal("e5fe9e22c1ec859cc50cb9e623d09ab480730de34d48635c88c567a61ddcc58c"),
+            base16_literal("470332c4fad4d22de64c19dcdb7004fc916d8e73a4537f75e44d237a2e4e027a"),
+            base16_literal("bf4d6474e719463da5b0fa2f7081d15e11d5c4ef141049f643dbf4d339570dc9")
+        },
+        {
+            base16_literal("d5d89a98d471cfe0c24c3886fa65e1d142e126024222dd9a2cb59567c29c0386")
+        },
+        {
+            base16_literal("1cdfb32f1f6146dc7324eb9ac1f944006200eb8b7b21437356f2fe55fa3cb015"),
+            base16_literal("c9d88592ad160c085d39355879011e116bff8b54be25708f892e036782f40e77")
+        },
+        {
+            base16_literal("0119039a9d829a9a326ab9322e971c639c296f1c5c9ac75fe7f38a57e5c9f646"),
+            base16_literal("d86918b2b0883d70dac33d5d8a5c1dad34ab2fc4b2bcfab639206523a19b59ef"),
+            base16_literal("e7520ab867c7e7fe7e700ef2b07ebd3ee0a39d038be9b1d8a57c705b0a781750"),
+            base16_literal("b9c894b7b621051a305e3c541a8c01c589f2e1ea243345d44cd1b38726984acb"),
+            base16_literal("0e44f0f2af33c16758bd5c062ed2a6ec0eefd5f33692d3b03491a603035cf210"),
+            base16_literal("ddda8e30c391a5d9065d0c7bc122e015284196881c1f702f6f3875b3d9bb01d2"),
+            base16_literal("21d3eda01b638e18c88970a5fb328b3c0e83396498be43f8b2b858c576bbb821"),
+            base16_literal("871aabb9a14ae6365074622bd43bef5ae2c63c5ee15b07277a5428e9bc6ba46d")
+        }
+    }
+},
+{
+    .message = {0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x7f, 0xff, 0xff, 0xff, 0x01, 0x80, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0xc0, 0x03, 0x00, 0xff, 0xff, 0xff},
+    .e = base16_literal("796d3094aaf2fed4b6e3e329368be4a4cc002bf31bf266fb15c228934387551a"),
+    .secret_indexes = {1},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("40b7a292f4b7a086e3c147ba88ac666038b2c1e4fe4c155b34b9032948267e6e")
+        }
+    }
+},
+{
+    .message = {0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x03, 0x00, 0x00, 0x00, 0x80, 0xff, 0xe7, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x03, 0x00, 0x00, 0x00, 0xfe, 0x03, 0x00, 0x00, 0x20},
+    .e = base16_literal("dae8611cbb68d77357bb904609333ee6741756fcdf7d977203ac62890555a760"),
+    .secret_indexes = {5, 2, 3},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("03e0ffffffffff1f00001000ff1f00181f00ffffffffffffffff0f00f001000000"),
+            base16_literal("03f8ffff0300000000feffffffff0720000f000000ffffff3f00fcffff1f003800"),
+            base16_literal("03fff0ffffffffffff1f00fcffffffffffffffffff0f000000000000f0ffffffff"),
+            base16_literal("02ffffffffffffffffffffffffffffffffffff010e0000000000000000feffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02000000000000007e00000000000000000000000000000000000000000000ffff")
+        },
+        {
+            base16_literal("02ffffffff81ffffffffffffffffffff01f0ffffffff7f000000feffffffffffff"),
+            base16_literal("03006000000000feffffff01000000000003ffffffff7f0000801f000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("18d55ecb8564bfe43486541b1359a31e92d5ce11ad6d6fa3fa6738de1f8e19bc"),
+            base16_literal("ecf16f132194664fba297213d3a02a424c071e8715dc80086fccfce03f8f67a9")
+        },
+        {
+            base16_literal("79ebd4f5a12f0b76b9f41fb4487e9a5664a357cd4d371fd5488f579f8b93297c"),
+            base16_literal("fb040aff6ea7aaae8456bf9b83e09699a49fcff14e6e6fe86bc74fe132a3df40")
+        },
+        {
+            base16_literal("5bb62557d752a372b8e1de2039cd9ff6c1cdbb7d8538986cc0571ab6db182b25"),
+            base16_literal("eecb752cec4fb084a524d4b2e21abc79a1adc1bfb736dc6694e44f79a43cc24a"),
+            base16_literal("0f72baa669402ca67e039d92ff6affa71f35945da6cdd91649479d2d59b49342")
+        }
+    }
+},
+{
+    .message = {0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfe, 0xff, 0xff, 0x01, 0x00, 0x00},
+    .e = base16_literal("7216f4fd2adb11101cd87163182d26cd21e1edc4045aa93f31b1e44bcb7e2d46"),
+    .secret_indexes = {6, 8, 2, 1, 3},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ffe101f8ffffffffffffffffcfffffffffff3f000000000000000000c00380ff"),
+            base16_literal("030000000080ff3ff8ffffff1f000000000000000000000400000000f0ffffffff"),
+            base16_literal("0300000000f8ffffffffff00000000c0ffffffffffffff07000000000000000000"),
+            base16_literal("02000000f0ffffffff3f0000e0ffffff0f80ff3f0000e0ffffffe3ffffffff0700"),
+            base16_literal("0200000000000000c0ffff00000000fcff1f007000fcffffff7ff8ff0000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03f0ffff7f0000000000f8fffffffffffffffffffff3ffffffff1f0000feffffff"),
+            base16_literal("030000000000feffffffffffff1f0080ffffffffffffffff7f0000000080ffffff"),
+            base16_literal("020000f8ffffffffffffffffffffe03f00000000000080ffffffff1f00000080ff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffffffffffffffffffffffffffffffffff1f0000f0ffff833f0000c001"),
+            base16_literal("030000000000fffffcffffffffffffffff03000000f0ff0000000600803f00ffff"),
+            base16_literal("02ffffffff0f000000000000f0ffffffffffff01c0bfffffffffff01000000f0ff"),
+            base16_literal("02ff03000000ffffffffff0100000000000080ffff07c0ffffff80ffffffffff7f")
+        },
+        {
+            base16_literal("02ffffffffffff1fc0ff1fc0ffffffff7f00fcffff0000fcffff0000000000f80f"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0200f8ff3f0000000000000000000000c0ffffffffffffffffffffff070000c0ff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("033f0000000000000000f0ff010000000000002000000000f0ffff9fffffff0000")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("dd511eb7d237bb82d862c06cfa12af6d6a3a98c6294e36c68e8d3988dbb12d5b"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("9c3ccf62b00901d9a166a801d3bbc8ffcfb6824438c9456e1fc37de703cc823e"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("f5928dc7edaf0b94996947bb27df4df6fa5248fc285955c68c1851e3ded9360f")
+        },
+        {
+            base16_literal("8c13b305db09e697209826e6786cb4925893228d878bf09942de1b109200f718"),
+            base16_literal("6484cf93b9d2e5369b4f8c6c579e5a6b8606d8f07a70460822094be8cb4285fd"),
+            base16_literal("5ef2bf533766d4cad1e666dff3e02a5f8a9973db2e433e1a8912f77bc303ec1a"),
+            base16_literal("3b4d03772ef821a3f31a1b9d26bcfeb39d044c9e6afc3ee9d3853c938c705e62"),
+            base16_literal("a96bb522b71f629a3972a5435d0bb31fadd20f390f81a07f442b5a142d4c68cb"),
+            base16_literal("8f9fbd124ad26de9070a8a590976ce70c0e30df8255ce5d7010faa026b073009"),
+            base16_literal("cb3497779067673107ce99c36b2e50d013c71deec05fd8dd45697bac453e5347"),
+            base16_literal("a85486c033c6e069c8190f31cc57af7efc9846e66fcdd72655c9e9b0402a8792")
+        },
+        {
+            base16_literal("8b2b6bd403b988ee0979c6f3902070b3fe779a39b2505645f28a601602b81418"),
+            base16_literal("cabc9165f2b2ff2e761b6f14b7254728623e9db9ba4558e4c8f0a52e78256df2")
+        },
+        {
+            base16_literal("881b324bee54919b08b9ca3ac6fe024bfd8dfcf3955cc7a6c0457c1c7e0936c6")
+        },
+        {
+            base16_literal("02bb3e113685d018a8162577a89fec37164d6a150f8d88f3257cd80fb7d11d81"),
+            base16_literal("ede7a206a0719ea1483e0d210c7186dadcd7624a805d4429196813c8a5dfbe49"),
+            base16_literal("e6241076bb181a9d34bac13456c0c74509d9dc6e69e3e6c7f669f49c44c25064")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0xf8, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("be509cb370694cab534e7a7750356656c77d0bff73c8e1dab17939df3e3fb286"),
+    .secret_indexes = {2, 3, 1},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("8840f0575f3aa033cbf65fc989b8f2d85ab59fda5f52eff60f405c5245c69bd5")
+    },
+    .public_rings = {
+        {
+            base16_literal("030000c0ffffffff0fe0ffffff3f0000000000060000ffffffffffffffff1f00c0"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ffffffffffffff030080fffbffffffffffff7f000000ff7f00000000f1ff1f00"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffff0700fcffffffffffffffffffffffffffff1f0000ffffffff0000000000")
+        },
+        {
+            base16_literal("03cd9585434e2aa16bdc2f86c2d80ea035015824b96b3188c5b471e518d7a1eb5f")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("c9b93c5b0112dbaffa5a0af1ef88accbf26b81dee2320f488b5634e20f4aa50a")
+        },
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("d3476954fb9f36958da2101ed1bb8bae057bcee4df5190dc4c45cb1df61f543b"),
+            base16_literal("5a3559bc137760ee85bd6e0592f032e0dc5fc685a9cb0192912a0a7208137bea")
+        },
+        {
+            base16_literal("389ea693ab4f6a693931d687cbd1183699b04390755953e4bd1ce5bf3e390718")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x03, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0f},
+    .e = base16_literal("fcff8dbe49406763d547a851643040e4c569c5f5135f61a00f7e5b82e419924e"),
+    .secret_indexes = {1, 4, 7, 5},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030080ffffffffffff030000000000000080ffffffffffffffffffffffffffcf03"),
+            base16_literal("0300f80f0000c0fffffffffffffff00000c0ffffff03000000e0ffffffffff7f00"),
+            base16_literal("0300000000f8ffffffffff0f000000000f0000ffffff7f000000e07f00000000fc")
+        },
+        {
+            base16_literal("030000fcff0f00fcffffffffff030000feffffffff7f00000000000000f8ffffff"),
+            base16_literal("031f0000000000000c00e0ffffffffffffffffffffff3f00000000000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300000000000000040080ffffffffffffffffffff3f000000feffffffffffffff"),
+            base16_literal("0200000000000000fe01c0ffffffffffffff0ffe0000f81f000000f00180ffffff"),
+            base16_literal("03ffffffff1f000000003e00000000f8ffffffffffffffffffffff010000000000"),
+            base16_literal("02ffffffff3f000000c0ffff0f000000ffffff000000000000fcffffffffffffff")
+        },
+        {
+            base16_literal("03ff0300f0ffff9fffffffffff010000c080ffffffffffffffffffffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000000000000000000000000000f0ffffff0ffeff0000f8ffffffff01000000"),
+            base16_literal("030000c0070000fc0300000000300000feffffffffff3f000000feffffffffffff"),
+            base16_literal("0200700000000000000000fcff00000000000000000080030000000000e0ffffff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("e79ee412a85daa6be61bbd7c09718458bffcadc10261db78f3a19aa0d74e3723")
+        },
+        {
+            base16_literal("30f4320e608476aafb223de7548223ec0f7eedb90c69437188127d01731ba37a"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("8ba58e049023788535fa561377621bdb82a3f54d7386fa8c8c9f76687e572c9e")
+        },
+        {
+            base16_literal("d73c80e98b69028879c9eaec9acaf5f2301fb3d78261e4f2633c6ec27164d4bd"),
+            base16_literal("159661b767d528be0896f3a0c57159d2cc52a5c48134e83284f1e958abb02fbc"),
+            base16_literal("11951b15ce01cc720f10ebfc4ce53a0e05ca24dbce1040879c89d53799356331"),
+            base16_literal("10fb3d37f8a3aefaf60da739f53dd8633b10df0e3e35d408588d6c1a2ed3e929"),
+            base16_literal("a35c735f8bc19b50519263dcade4065116e5829465cc802f64afb07cb0bd3c1a"),
+            base16_literal("279e959e6be3b554debf69c103e0a32c002d9ba8f948c5f3ea163c9f8ad2d8f7"),
+            base16_literal("cacaeef1784cac73cc0743c1980bad2707f7e38fce4b036744cb96cf170bedcc")
+        },
+        {
+            base16_literal("0006c09026a28850b89b828432d1443675eaeed5d2e81e24883e08f61b13e8e6"),
+            base16_literal("d248383ffcae1012ed8b7bd22f8273b54c5f7d9902d43a8afa38a8807b18dee5"),
+            base16_literal("2758bd719896ac054660f5f039c7f1ef3acb8c83b0bb28ee73a4c9d132ea379b"),
+            base16_literal("b0636003fcf021b550f3570a81c907895d5ec4da5c12d5cc5fdc8ee20b5a2627"),
+            base16_literal("35d60aeaf72d0ad7862614cf2d058c418dd0336779d3c9b60b2fa4111f66f921")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0x1f, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f, 0x00, 0x00},
+    .e = base16_literal("52e34260d25c5e1601601f8cb2d676a8fe69b6e306d868ebf1424e907401745d"),
+    .secret_indexes = {2, 8, 4},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffffffffffff63000000ffff010080ffffff03e0ffffffffff1f000000")
+        },
+        {
+            base16_literal("0200f0ff0f00000000f8ffffffffff0100e0bfffffff1f0000000080ffffffffff"),
+            base16_literal("03ffffff1f00fcffff1f000000000000001000000080ffffffffffff1f00000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ff7f0000000000000000f8fffffffffff87f000000000000000000e0ffffffff"),
+            base16_literal("02ffffffff3f0000fcffffff03fcff030000e0ff0ffeffffffffffffffffffffff"),
+            base16_literal("03f0ffffffffffffffffffffff1ffeff3f00c0ffffffffffff0304000000000000"),
+            base16_literal("02ffffffffffffffffff1f00007f000000ffff7f00ffffff010000f0ff7f000000"),
+            base16_literal("02ffffffffffff070000000000ffffff0700000000000080ffffffffffffffffff")
+        },
+        {
+            base16_literal("020080ffffff1f000000f8ff01000000feff030300e0ffffffffffffffff7f0000"),
+            base16_literal("0200000000000000000080ffffffffffffff070000fffffffffffffff8ffff7f00"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300f0ffffffffffffff87ff9fffffffffffffffff1fc0ffffffff030000e01f00")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("1b555bcd92b263e292c7965e7b31bf0820884b0e0fca1324877105d855dc98db"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("6837b7bab9f0db5375f8285eeebb995b154ecd2fb652889392fd85d60d26c175"),
+            base16_literal("751561ab88046f395d683a8faebc9650aab2909b8aeaf800683b2bcc678b1fe4"),
+            base16_literal("578a6c657a8b1868d09d26b578e1843467e4db8beefcc6b41c0365138e122c46"),
+            base16_literal("3d843291b0d1a84ac986ea0c3963ef951f3f78ba1a755244837e22a723f17135"),
+            base16_literal("1ef9ab643d7ef069c2aad8fc0ea5a0c155aad99c6909be8447b275cbc40a0185"),
+            base16_literal("5e57b39e77ff4e4eabddb577c71a42f949d4f26d64aac25e1ec94dd11ff15b54"),
+            base16_literal("64f4828e975e42b510bbb3964abf53b52fe1fe8a7ae1decd05ac136a6575da5e")
+        },
+        {
+            base16_literal("944f2897047738109f76adbf89aa5a609830d39735a2e66ec7dc4ded6a6b3334"),
+            base16_literal("c19f7f91f92dfefd46b8bf15fdeb5d73570e294694860135c3c80a5595ed5281"),
+            base16_literal("a427731aad94033e8f44cfe196d2493012d7aebcc6a8e98bccd5875b6a31c498"),
+            base16_literal("71850f3b3ef45d4f3c9d60cd052eb2ad70f4582c14b7f33c091d3106f3356e56")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0x01, 0x80, 0x01, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+    .e = base16_literal("3b3e61f527e70ef16b931d93cacc473fd7adff04e3ac68bd329e64c34eda79ae"),
+    .secret_indexes = {3, 2, 6},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ffff07000000e0ffffffff00000000000080ffff030000000000000000000030"),
+            base16_literal("0303000000f81f00c0ffffffffffffffff03000000000000000000008003000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03000000003f0000c0ff0300000000000000c0f0ffffffffffffff1f0000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("020000fcff1b00c0ffff07000000000000000000ffffffffffff1f0000e0ff0000"),
+            base16_literal("02ffffffffff07000000fcffff1f008001000000f0ff0f00000000000000c0ff00"),
+            base16_literal("02ffff87ffff7000000080ffffffffffff03000060000000000000000000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffff7f0000fcffffff0700000000fcff070000f001000000000000f0ffff8fff"),
+            base16_literal("02ffc3fffffdffffff000000000000000000f8ffff1f80ffffffffffff07000000")
+        }
+    },
+    .k = {
+        base16_literal("2121079efc2400341f4cd141420860dd8195cfd687c2e9c06bc4f7b1ba56be12"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("5ed7d17cedbc6d522ddfada282bbb5476354233b536a7d94f8d542c79bfe34a2")
+        },
+        {
+            base16_literal("c10447d6e8f19b258ec792aff8c8469714dd7e7ab7be20cad0a30793dad5d3ca"),
+            base16_literal("28fcc3a0674e3439d342ce3a130bcc9fd53f54d9ae0cda81326d8927b42db337")
+        },
+        {
+            base16_literal("6585bd046e83dc604ba1ee4730a51a02620719f7b20f43510f7159d76ae07d9e"),
+            base16_literal("e76db198f2fdaf22ccf359bbef9b4cdf6763c6e42ebdf625b2d330c082e660ca"),
+            base16_literal("7eb2eed3f47a8b75c47d41061525841798ebf2a185466f664b1b402b8732f72e"),
+            base16_literal("b30495eac296ca262116a2d528a8074c9de9a5443ed6c02bd79abb3f1a9be1c9"),
+            base16_literal("a7b6718edb6664a3cc9044a153433145906cb5ec38ad2553fbedcd63358d27b9"),
+            base16_literal("4d52e3ad7631a0a1d46da8e763e1a81a7e180535b88744f23731c3da4161ca51")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0x01, 0x00, 0x00},
+    .e = base16_literal("ee84c0c969b4d159045eb4048c56e9d29396447333848ad6fd106b3f8c8508f4"),
+    .secret_indexes = {4, 8, 6, 7, 7, 7, 3},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("c2b6fd3b533a84af2dfa87783d9a43971de47ddee08a4a651e82df8b57e951d6"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("037ffaffff7f00000000000000feffffffff03feffffffff3f00c0ffffff070000"),
+            base16_literal("0300ffffffffffffffff0f000000000000000000000000000000f8ffffff070000"),
+            base16_literal("0300000000000000000000ff0300feffffff3f3c7800ff070000000000fcffffff")
+        },
+        {
+            base16_literal("022868ac8ad2e7d0bb3a856e4c045ff0d6ad5f392fbfd5761b71dd426d2daa39b6"),
+            base16_literal("030000f8ff83ffffffffffffff0300000000ffffffffff0f00c0ffffffff0f00c0"),
+            base16_literal("03f8ff0100000000000000000000c0ffffffff010080ff7f000000f8ffffffffff"),
+            base16_literal("02ffff3f00000000000000800f000000000000000080ff00000000000000008001"),
+            base16_literal("020000e0ffffffffffff0f00000000000000fcffffffffff3ffe01000f00000000"),
+            base16_literal("02e0ffffffffffff3f80ff00f0ffffff7f00000000000000000000008000f0ffff"),
+            base16_literal("0380ffffffff0f000000ffffffffffffffff0ff8ffff0f00000000fcffffffffff"),
+            base16_literal("0300fffff3ff7f0000000000feffff1f1cc0ffffffffffffffffffffffffffff03")
+        },
+        {
+            base16_literal("030700feffffff1f00fc0ffeffffff0f00000000feffffffffff3f00fe000000e0"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02fcffffff3fc0ffffffff3ffcffffffff07ffffffffffffffffff1f00000000f0"),
+            base16_literal("0300000c0000020000000038000000000080ff07fc1f0000000000000000000000"),
+            base16_literal("02ffffffffffffffffffffffffffff03ff7f00000000f803000000000000000080"),
+            base16_literal("03000000000080ffffffffffffffffffffffffffffffefffffffff3f0000000000")
+        },
+        {
+            base16_literal("02ff01000000e0f3380000000000e0ffff03000000000000020000000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffffffff0f0000000000000000000000fc01feffff000002ffffffff1f"),
+            base16_literal("0200000020fcffffffffefff03000000000000000000000000feffffffffffff07"),
+            base16_literal("020000000000e0ffffffff0f00000000c0ff07000000fcffff0000000000000000"),
+            base16_literal("03fe3f00f0ffff03fc7f0000fc3f00000000000000000000000000000000000000"),
+            base16_literal("0280ffffff3f00000000ffffffffffffff03000000e0fff7ffffffffff3f0000fc")
+        },
+        {
+            base16_literal("03e0ffffffffff030000000000f0ffffffffffff0f0000ffffffffff7f80ff81ff"),
+            base16_literal("03ffffffffffffff01000000000080ffffff01f8ffffffffffffffff7f00000000"),
+            base16_literal("02ff0f0000e0ffffffffffffffffffffffff3f00c0fb0f00000000f80000003e00"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02feffffff0ffeffffffffff00000000000000000000feffffffffff0000000000"),
+            base16_literal("02ffffffffffffffffff0700000000fc0300c003000000000000f8ffff3f000000"),
+            base16_literal("030000000000e0ffffffffff1f000000000000ffffffffffffffffe1ffffffffff")
+        },
+        {
+            base16_literal("02ffffffffff3fe00700000080ffffffffff010000f8ff1f80ffffffffffffff01"),
+            base16_literal("03000000fcffffff3f000000f0ffffffffffff7f0000f8ffffffffff010000fcff"),
+            base16_literal("02ffffffffff1f00f8ffffffffff010000feffffffffffff070000000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffffffffff0000f8ff071e000000000000f8ffffffffffffff3f000080"),
+            base16_literal("020100c0ffffff010000fcffffffffffffffffffffffffffffffffff0f00000000"),
+            base16_literal("0300000000000000000080ffffffff3f0080ffffff7f000000f0ff07feffffff3f")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030080ffffffffffffff0000fcffff7f0000000000000000000000000000f0ffff"),
+            base16_literal("020000000000c0ffffffff0700001e0000f80000f0ffff0f00000000000000e0ff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("3b0ec115fc69d6ee25868527ddb3c7bd9474868a52afb074c54e0c8c07b61bd6"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+        },
+        {
+            base16_literal("58dca7976e9995a874c7883c87c9c0bd9b3998e8d0252c458d998c5115905881"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("14612065344ba878ef4397e2ca79daeb4bfc8e4eb8d7d49bcce9b1afee31ae0f"),
+            base16_literal("b86b732a6deccac462cb30a8fef8a1f7c69abde55a6a4549b019a7ae6a0e6b84"),
+            base16_literal("c411aa2e93fda066d50e9a0fc8fc430f16ab3cb29056719044e880da42f721d9"),
+            base16_literal("deb2ad540f8a8d6a073f15131dcd1e1f47161d723b3825203f8c0ead28988fc2"),
+            base16_literal("5a19d292241b625b3914f58ecd744f78daa37e42511dd1b182794c32a342ad93")
+        },
+        {
+            base16_literal("14dcf3bc18e2eb8459ecd86f3d80c40ff2889989e678a8a2fbb43f366c90c23a"),
+            base16_literal("156ecce5fdb61505d9f5a30bd7eff06482e9f3c21287b1e0fc9e4c75ab1515c9"),
+            base16_literal("b72fd41f3c9dca75da14080540c9b9756025324e57cbd0771714153344d8c428"),
+            base16_literal("4b7ffb859765142ae7bb9fe2489a55f81d2941b6ed4290bc970c8ae80e496254"),
+            base16_literal("ad9f89f658b81dc0302d93831098f1b4ea6feca62f88328920fb3a1170b50ccc"),
+            base16_literal("b64d22fd84be7fa23d09edea2c54888724dc4ea916f1c8b944fd9ccc108af376")
+        },
+        {
+            base16_literal("7ee0159dfd714c368450475ba93dbf06bdaf679088da4aea2a21feb085544e71"),
+            base16_literal("aee8d33366b514e0978e786f81f116a5e64ca52fe2b1b651e4cc000f31929af4"),
+            base16_literal("e4b84f14f97cbb3c23db4a3a2aa56edbab14eb9e33c052dbdf49e97c706deae8"),
+            base16_literal("3ad81e676832372918d40d2a581462eac2341547ea634175db9c038698619083"),
+            base16_literal("325156a67edeb3305def94cc8d842efe19ae1aaad8ad3b420665fc3c710cf21c"),
+            base16_literal("88bb1c4faaae0275abc7d1d5e07b5b13b69e25bb936796e9e145ecf20553bcde"),
+            base16_literal("a9411e987b23e8953195e8a5cc60bdd8b66907cd33bb67b1b9fc6128ad5dbdd4")
+        },
+        {
+            base16_literal("7d1f7ca42ec63d7a5f3760923fa99e06ccb7945e9000848ed4dfd460a0db2464"),
+            base16_literal("6cd8e52fdb1953c9d91d3eec99d1d0aeea8d34b1b5aa6346b9b839eb9f4751d6"),
+            base16_literal("65740b523dd7825d5d2c4683f9f0051d9b8741a3a632b1fc800bd7db5fe7912c"),
+            base16_literal("2f4e9ce688fd2841afad84263bbd5870020a13c43d2ee8fe8c8746a79c8a3c46"),
+            base16_literal("ebd491520f7a79d2f0bddfe834a1b4c6b0339ea5fab7e1ae4dc7ed728420568d"),
+            base16_literal("e08e58949212c73b4a972cacdd10931b81fe6881e7db2a31d0fb1ec5a42d186e"),
+            base16_literal("90408d6acdf4a8fa1e544fb53c24cb05c17a2cabd94813e924ecfd0d2bf18a6b")
+        },
+        {
+            base16_literal("8333403ac5c516f1343cb8e5313c4b89c2d220ca673ebc10ba14638976a8cb6f"),
+            base16_literal("3d23dc97a5e6e0a5520c22129c6e3a3fc5480fd66604688d0070bf501c1fadfb"),
+            base16_literal("ac42576c169f4db4c5591d17c26ab6cde3721fa8f3edb0c083c7ba960150bb49"),
+            base16_literal("112650a1ce6a9403f9aff5cd8d2c8dc7b56089fadb6938f66f355784f76b2a87"),
+            base16_literal("048b8c499132f2682a27131da36a250ba6f6669715700680e3b1770ad730dfd8"),
+            base16_literal("5ce69ef7ce0eae2c9239bfed628ef19b13d8cc6bf42e7df47b78ba72a5922068"),
+            base16_literal("53494863d33fd2f18084cdf84486a387ce4242a0304530af24b3f9ce9d1ecd89")
+        },
+        {
+            base16_literal("72126bbab178299b915715ad1dbe953acc6e3a651069fa0415904a78ae4a3d9d"),
+            base16_literal("b97299aa80c740e15cd07eae9950078037722febc00ccab54abc504e110fa420"),
+            base16_literal("bacc53a154d2dbad070205044d17c27bffb9f41db815fad48a75a486190b3d1a")
+        }
+    }
+},
+{
+    .message = {0x07, 0x00, 0x00, 0x00, 0x00, 0x3c, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("1a34b054718e9bb5af0d217c4e60ebf2c6b769a0e39417ae67efa1022ef6398f"),
+    .secret_indexes = {8, 2, 7, 4, 2, 3},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("4868202dfaab7463b304d424a83901c67f0252fc9036d1ba994dddb7161cb090"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("755980c0488cd24fc8a625fe4f5bbf7b48fdf3a7088e158ab373ffe8955e9918")
+    },
+    .public_rings = {
+        {
+            base16_literal("031f000000000000000000e0ffffff01000000000000000000f0ffffffffffffff"),
+            base16_literal("03000000feffffffffffffffffffffff0300000080ffffffffff3ff8ff00000000"),
+            base16_literal("02000000feffffffffffffff1f0080ffffffffffffffffffffffffffff0f000000"),
+            base16_literal("0200803f0000000000000000feffffffffffffffff7f00c0ff07ffffffffffff07"),
+            base16_literal("02ffffffffffffffffff3f0000000000ffffffffffff1f000000feffffff7f0000"),
+            base16_literal("02ffff010000ffff1f000000000000f03f0000000000e0ffffff0300003c000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000feff83ffffffffffffffffff0000f8ffffff030000000000f8ffffffffff")
+        },
+        {
+            base16_literal("022b36e84070717039968d4514a31287462ce75ed61b580271ea2197212c06deea"),
+            base16_literal("02ffff01000000000000e0ffffffffff0f000000ffffffffff010000c0ffffffff")
+        },
+        {
+            base16_literal("03ff1f0100e0ff3f00000000feffffffffffff1f000000ffffffffff3f0000f0ff"),
+            base16_literal("030f000000ffffff1f0000c0ff0000000000f0fffffffffffff3ffffff0f000000"),
+            base16_literal("02000080ff01ffffffffffffff010000000000000000000000f0ff030000000000"),
+            base16_literal("0300000000fcff03000000000000f0ffffffffffffffffffffffff000000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffffff000000f0ffffffffffff03000018807f000000f0ffffff7f0000"),
+            base16_literal("03000000f0ffff00000000e0ffffffff07c0ffffffffff0f000000f8ffffffffff")
+        },
+        {
+            base16_literal("030380f3ff0300000000000000000000000000000000000000feffffffff010000"),
+            base16_literal("0307000000f8ffff1f00f8ffffffff1f000080ffffffffffffffffff00e7ffff1f"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300fcff0000000000000080ffffffffff01f8ffff3ff0ff01c0ff070000000000")
+        },
+        {
+            base16_literal("0300fcffffffffffffff00000000e0ffffffffffff0000c0ffffff3f0000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("026dd3f404e30a96136aa1642cbe12dcd0ff8dcd9c81142ec46e2f521a013e23b3"),
+            base16_literal("02000000000000006000000000000000feff3f0000fcffff0f0000000000e0ffff"),
+            base16_literal("020000e0ff00fcffffffffffffffffffffffffffffffffffc7ff00000000000000")
+        }
+    },
+    .k = {
+        base16_literal("f6f7bd62767871d44c95094f48b531f96cf0a0566698d095cd2329e6f4b6472e"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("0f4bc4634bea93931a9be107010c3ee913109f0ed2b2d1fd9a26148b1c43b993"),
+            base16_literal("1140de9687eab855a0b7930670e3cd6fbc1cacadd8fe09d9dbe56c51e8cc0237")
+        },
+        {
+            base16_literal("fbb476994b65aa39e03def66e7304697843aa542a958c15f19a3e150162ad9df"),
+            base16_literal("9da451f1101cff029c4db5873ea73b19b77306a89dba53c16be2e993ac04ee2f")
+        },
+        {
+            base16_literal("f3e69a74262ef883d0ea23628c30b00ade8dcab3e6f00f8338ad911e5719a892"),
+            base16_literal("1278b1a3168305400c8f92800457117ff7f63ece8758021485b0cbfb952acc24"),
+            base16_literal("6e03370231a052adcee4e837d2dd6940d64110a1062e2b0b1800db6344b5efb0"),
+            base16_literal("e0b50631400fffebd60be148d7eb33455ea0d14fb5c6bc8426d67b336c81c292"),
+            base16_literal("6671af3868df9d4c16b0b7e3ff776c6d3c950a3b1ced72cd74c2623da041c3da"),
+            base16_literal("a45811ada4e8992741f0be31ec83ef796c97d78d2e16f05079c646c5383a9d46"),
+            base16_literal("f1756d905250bf04bb3afd73c8063cd8bd6b9bc6580b11609910dee8778d642d")
+        },
+        {
+            base16_literal("ea58dfe0c5e7a6fc535771ad27b6756f64977cfeab11dca774727d0abfa70231"),
+            base16_literal("d09305b5231e40fb63798404330ae7ad0084a27a4f5a3080a16436f11f8880d3"),
+            base16_literal("40abd061adc8cd45d5c83e124e974ee785ce0f65b6d1ad9e3183a5d515da8166"),
+            base16_literal("1efddd3877b1f30ae62b755a97cad1a26d23d43f1d40dd62383dc8911d5d73f5")
+        },
+        {
+            base16_literal("c9ee68ea09cc7329fb795f9c549269ff35d5c4a650018ba6894059311f868187"),
+            base16_literal("2accb629421e31173bd1c37de67072e10a0801eb1a9b8621348ce7484e051839")
+        },
+        {
+            base16_literal("396090eb1d1fb6812d464adff7b5d64d8ea6c92b1af64f38dd799c1293dfda35"),
+            base16_literal("62586c5ed18bfd08ac54f27a1aad5e2773dadcadc5d4d102783a048b44776971"),
+            base16_literal("eb985c57cb14a628bbe441e0d3dfedb285c78da8f7934280d2ba3d18cc4de782")
+        }
+    }
+},
+{
+    .message = {0x00, 0xfc, 0x01, 0x00, 0xfc, 0xff, 0xff, 0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x0f, 0xfe, 0x0f, 0x70, 0xfe, 0xff, 0xff},
+    .e = base16_literal("df40c4ae4e7dfd257dc79477d3ca20794f6613bf5b52744bfdd6e287545150d0"),
+    .secret_indexes = {6, 6, 6},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0200fcffffff030000000000e0ffffffffff7fffff010000fcffffffffffffffff"),
+            base16_literal("03ffffffffff0f000000ffffff7f00000000000000000000000000000000000000"),
+            base16_literal("033f0000000000000000f0fffffff0ffffffffffffff07e0ffffffff0300000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020f0000f0ffffffffff3f00000000fcffffffffffffffffffffffffffffffffff"),
+            base16_literal("020000000000000000000000000000f8ff0f000000c0ffffff01ffffff00000000")
+        },
+        {
+            base16_literal("02ffffffffffffffffffffffffff7ffcffff3f0000000000000080ffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300f8ffffff07f0ffff0300f8ff00c0ff7f00f8ffffffffffffff030000000000"),
+            base16_literal("02f0ffffffffff00000000e0ff03e0ff0f000000e0ffffffffffffffffffffff07"),
+            base16_literal("030000000000007e00007cc0ff00000000000000000080ffff0f000000f0ffffff"),
+            base16_literal("03ffffffffff0700f8ffffffff1f00ffff0ff0ffffffffff030080ffffffff0f00")
+        },
+        {
+            base16_literal("02c0ffffffffffffffff07000000000000040000c07f0000000000008001fc1f00"),
+            base16_literal("037f000000ffffffffffffffff000000f0ffffffffffffffffffff7f0000000000"),
+            base16_literal("030000fffff307fefffffffffffffffffff8ff00000000600000000000000000fc"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("021f7000000000080000c0ffffffff000000000000000000c0ff03e0ff3f000000"),
+            base16_literal("02ffffffff7f00000000000000c0ffffff0000800700000000e0ffffffffffffff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("3bf707ace31f69923454be208370921471e18cf47519f534debecdf5afe03cb6"),
+            base16_literal("64e73ce42e9badc8f2b69c3741c339cbf181215ab70e13b2ef293cc7ba9ade33"),
+            base16_literal("17fff3e39fed8357b3f8c0605950359281c9546bc1d94d59907fdc2c98207bdf")
+        },
+        {
+            base16_literal("013757a68afe77425cfcdf4fa39cdaa6fc24c7e4b0fa84f319e7a5a8705f6ecf"),
+            base16_literal("9b16ad52db4829a4a2a82a750bc0dac28ed32c8b903ad21a1a5eb178b7ac6c50"),
+            base16_literal("6722daa88b3077c7222bfc9a63098038e716c65833aaf471e1b971ce3f38cabf"),
+            base16_literal("ce03eeb65cb8861a1fc773d430e1115e7308f390351fae0e16a102268db8f4cd"),
+            base16_literal("b1ab91171691e88b2c33940586b5831e3c2618e5a245315448c947d7d29dfca6"),
+            base16_literal("d592618ad707ea7cb8d1c5223ea007996c670854796cadd3d116241237542f6c")
+        },
+        {
+            base16_literal("ff512f69ac10dca198fedd36cbe1ed8fccedd43575451d8ccc5d2c8e57c05653"),
+            base16_literal("1b60c8f11afe0152a1bd433b5eb016c510c47ca714a81ea0e296ccad2634049a"),
+            base16_literal("9868196dfca3064f3876126c3a4e41ff8fe7d1d6a9ad67397c4b8363a29e44cf"),
+            base16_literal("0bddd56dce2933cfd81b319db9a5f7761cf3c8a09cb569a8b83d48a2122eb6a9"),
+            base16_literal("1c941e90b98949b5c09723abbfa9e460fb1dca880528139f19cf65cdc02ccfd1"),
+            base16_literal("eba1ba105d05565ace634f0c658a35ff4a534cbdedb731f690b64d13ef5030de")
+        }
+    }
+},
+{
+    .message = {0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x83, 0x01, 0x00, 0x00, 0x00, 0x00, 0xfc, 0xff, 0xff},
+    .e = base16_literal("1d4ae23d4ac4be333cb83332d37324c2d27dc32a5553548c02bb9bdf31d2d03a"),
+    .secret_indexes = {1, 1, 5, 2, 5, 2, 3, 7},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ffffff03e0ffffffffffffff1f00f8ffffffffff010000000000000000000000"),
+            base16_literal("033e0000c0ffff07000000000000000080ffffffffffffffffffffffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ff01fc3f0000000080ffffffff0100000000ffffffffffffffffffffffff1ffc"),
+            base16_literal("030000000038000080ffffffff0f000000000000000f0000000000ffffffff0100")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffffffffffffffffffff000000000080f8ffffffffffffc77f00000000")
+        },
+        {
+            base16_literal("0300000000ffff7f0e000000000000000000000000000000f00100ffff07001800"),
+            base16_literal("02ffff00f8ff0000fe070000000000c0ffff7f0000ffffffff3f0000c0ffffffff"),
+            base16_literal("02000000000000f0ff0ff0ff0700fcffffffff000000000000fcff0f000000007f"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300f0fffffffffffffffffffffffffffffffffff8ffffffffffffff1f000000c0")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000ffffffffffffffffffff07000000000000000000000e00c0ffffffffff")
+        },
+        {
+            base16_literal("02ffffffe7c0ffffffffff000000000000f01f00000000000000000000000080ff"),
+            base16_literal("02ff0f0000feffffffff0f0000000000000080ff030000e0070000000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03000000fcffffffffffffffffff01000000000000000000000000ffff03000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffff07000000ff0f0000fcffffffffff03000000f0fffffffff7ffffff"),
+            base16_literal("020700800300fcffff1f000000ffffffffffffffff0ff0fffff7ffffffffffffff"),
+            base16_literal("03ffffffffffffffffffffffff01fcffff0f000000000000c0ffffffffffffffff"),
+            base16_literal("020f0000000000000000000000000000000000000000f8ffffffffffffffffffff"),
+            base16_literal("02e0ffffffffffffff3f000080ffffffffff7fffff3fffffffff0ffcffffffffff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("4ad6bb9da950efb9604a2f0bc010a28ee39cbd0288ddfb3294a5e1c34a6bbad8"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("23467f13134cb2fd69937519d0e4887234b478b66bb9cf6ec31a566187a41222")
+        },
+        {
+            base16_literal("ac98a07d604a4216ac2baf9fe6666ead2c693f40e9416a55a7ae28c4cf70d8dd")
+        },
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("cbf96002903cde24ed52de34a62590368dd27609a5213f8423aaaa7222b9d0c8"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+        },
+        {
+            base16_literal("a5b5deaf9175e06f2bc094e5e4d4244f9d92bc2a8d2bac9ad674046bb88f9d2e"),
+            base16_literal("d16601b86e04ff0c4cbedb9ad51292ff3c059de298105aa1052ed6305c9d4a5d")
+        },
+        {
+            base16_literal("c431a4c778f342b91712a0867d4c75c8b3d95850a8d7ea479f590285e2ce16b0"),
+            base16_literal("7d3e530a91dfa67ee42e7cfaf9a4428d1ab9ed750ec02e3c4e21336fe90cb9ca"),
+            base16_literal("1366026c5e5331b3fab31c0a83c4469c95f32b772bd7f0637ad68cb304a47050"),
+            base16_literal("b8b4080fac02957f5dd67c4abe08cd603314618bac7b5b7c9d419b60700cb629"),
+            base16_literal("110591861394ea91e477a5ff4e5e165a1c5fecd385ce519d87e194a3a94aeed9")
+        },
+        {
+            base16_literal("ffa517a331a9f6ff6d50358846bdececbde5ecb92964612fce1287d402bb8cdc"),
+            base16_literal("27545280ccf26987314f92288866a8c739e3ed20a6e3e8f0ff04ad49cfc9c0eb")
+        },
+        {
+            base16_literal("f58c4faf854e65ff8561a51a45d9d488c3c7294958b5b80641490718944b2ac2"),
+            base16_literal("6629a1382eb6e11a85f7680732a53dc478c4e61251cd14c0ba77feec286895bd"),
+            base16_literal("4288da82e5434f0b83912889ef0644fe23824fef4d9e39fcea57087a8cc2ded2")
+        },
+        {
+            base16_literal("56f4127fdce59b5c73d2bed5c2e42e6c54f0b89c015b373dc2901e930dfa8fe9"),
+            base16_literal("0e3fe5b686bc4cba3cf8d7742df7b2c76e842b3860c6f48af8fbf9cf1791fbbc"),
+            base16_literal("16447d41c4c97985627ec1d7a2d68cf49269065093a484533cd9d8b0ad12517e"),
+            base16_literal("c7484785bb905afeaa1bed6750231eedf67a5e926b6e7d41f5489277473bf42c"),
+            base16_literal("89f8a58d3a307ebbdfb74a8f25f3f0c20507665baf11f7a57de25799e2144a9d"),
+            base16_literal("b0a56416fa31ee5ee7bd71eb20564d9ccede853214388181f3659b576f3268d2"),
+            base16_literal("1f21feb61c0bce0cb9f3c35eb87e72a89ee7a88f914aac3aea04ec8202fb41f8")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xff, 0x7f, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0f, 0xe0, 0xff},
+    .e = base16_literal("6ff0b1df6d68a1ec8a982f0ed657561d8ed3743a0b3651fa61bce1d407acba3f"),
+    .secret_indexes = {7, 3, 6, 6, 8, 8, 1, 1},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("02e6070000fcffff03000000000000000000c0ff3f000000000000000080ffffff"),
+            base16_literal("030000ffff00000000feff1f000000001f00e00100000000feffffffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03feff0700f0fffffffffffeffff01f0fff3ffffffffffff01010000f003000000"),
+            base16_literal("03ff070000f0ffffff0100000000f0ffff3f00300080ffff7f0000000000000000"),
+            base16_literal("03ffff01000000000000fcfffffffffffff3ffffffffffc7ffff03c0ff3f200000"),
+            base16_literal("0200000040000000fcffffff0000fcffffff01000000fcffff3fffffffffff7f80")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02fcff0ff0ffffffffffffc7ffffff1f000000000020000000000080ffffffffff"),
+            base16_literal("02ff00000000fcff3f0000000000000000f0ff3f000000e0ffff03000000e0ffff")
+        },
+        {
+            base16_literal("02feffffffff3f0000feffff07fcff0000000000c003000000ffffffffffffffff"),
+            base16_literal("03ffff7ff80f00000000c0ffffffffffffffffffffffffff1f0000000000000000"),
+            base16_literal("0300f0ffffff07000000000000feffffffffff7f000000000000000080ffff0000"),
+            base16_literal("03ffffff070000000000c00300c0ffffffffff0f000000000000f80f0000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02feffff7fffffff3f0000c0ff00f0fbff070000e0010000f8ff03ffffffff7f00")
+        },
+        {
+            base16_literal("020000800f0000000080ffffffffffffff07f8ffffff07000000c0ffffffffff3f"),
+            base16_literal("0300000000000000e0ffff0700f0ffffffffffffffffffffffffff3f0000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffffffffffffffffffff0700f0ffffff3f0000f001000000000000f8ff"),
+            base16_literal("0200000000000000ffffff0100040000000000007ef0ffffffff3f006000e0ffff"),
+            base16_literal("020000f0ffffffff3f0000f8ff1f0000000080ff7f0000000000ffffffffffffff")
+        },
+        {
+            base16_literal("03ffff07ffffff03fc00000000e0ffe3ffffffdfffffffffffffffffffffffffff"),
+            base16_literal("020000000000000000000000000000f0ffff7f000000fffffffffffffc03fc03fe"),
+            base16_literal("0200000000003e0000000000000000000000000000000000000000000000000080"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ff0300000000e0f30700ffffffffffff1f000000000000fefffffffffffffffd"),
+            base16_literal("02ff0300000000000000e0ffffff0ff8ffff3f0000000000000000000000ff0100"),
+            base16_literal("02ffffffffffffffffffffffffffffffffffffff1f0000000000000000ffffff00"),
+            base16_literal("0200f07ffdffffffff7f00000000001c000000e0ffffffff0780ffff7f00000000")
+        },
+        {
+            base16_literal("03c0ffffffffff3f0000e07f0000feffffffffffffffffffffffff3f0000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffff0300000000000000000000006000000000fc00000000f803000000000000"),
+            base16_literal("020080ffff030000f8ffffffff7f0000000000000000f8ffffffffffff07000000"),
+            base16_literal("02ffffffffffffffffff010000000080ffffffffffffffff1f0000c0ffffff0f00"),
+            base16_literal("021f00000000000000f0ffffffffff7f00000000000000001c000000000000fefb"),
+            base16_literal("02ffff7f0000780000f0ffff1f000000f07f80ff1f0000c0ffffffffffffffffff"),
+            base16_literal("02fffffffffff0ffffffffffffffffff7f0000000000fcffff3f0080ffff03ffff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("bf127bf3b583934e87bfbfd924718594e10c725c37215b9fae52e86992148b0f"),
+        base16_literal("813209a9f50969dfccd22d3d3f9847c999a051ca76cbd1e7446685579609e41c"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("e6d22489da21a05c1a3608acb785b8fba01681911383ca724ae57386aef87caf"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("a9462cdd00a6e20905b5fbc048a55ac8fda44298e234b3874649fe5ab681b176")
+        },
+        {
+            base16_literal("ce079b1526df46fc863907641459cb694a565034d32eb348a6ec8fc56838fcd0"),
+            base16_literal("40ce6dc5d33f52dd6cc66920c2e5cb8b893f67c5a85234dc993612fc789e3a48"),
+            base16_literal("dde5a2838397115aef9bf183ed9fba8f8c2d087b8ec63547d015ed8894343133")
+        },
+        {
+            base16_literal("6266466672d168caeb12bdecccba88a907183a949707e919b739b5671187d8ee"),
+            base16_literal("aaa90f6675d87f2b5164b55a8cc774659446194a4a8ca14f3743e6dfce6a6ad8"),
+            base16_literal("c4dbcd3d8a6299c383d26ca1c0c2461eaf2e7410d6be3883001758c0fdd01356"),
+            base16_literal("9aec09c33f5a2ec2d882f586378190ffead0ebc6477fdbf4ac71e174655eed3d"),
+            base16_literal("960182fca7cbb074deb07d7641e3f1dac4ed5b27643304b9435d622b9bab2a27"),
+            base16_literal("af2a878cb6bc0093dce8a03151d4ff5fa79ec1a5de7b5a375964592faee9f2cf")
+        },
+        {
+            base16_literal("a1b2b8abc3041c682a6e07566d6761b1a1ef2af2dd9f1a4635193c77884274a3"),
+            base16_literal("d3574d2db7755a2a86ce7c4abf2fba8994c1847f7a8140a1f3afe60bf9c02b6a"),
+            base16_literal("b41daa5174ce2cc1625514219a3069c8bd4b04f6f884eeba3b6c203ab4a9928b"),
+            base16_literal("504fbcb5c1e1e7b3b2247e263b741424a1854b81a6230065519b8d8e59f9a274"),
+            base16_literal("6a5a93419c3e8ee284d9e8a6e3cb066ce34246a8d8c04128deb21082ddbc9ed7"),
+            base16_literal("ed99a2bd6716af3e2b1e25d1279d12c921711c597be806cfa6a720ef882d7a38")
+        },
+        {
+            base16_literal("0a73342e5cbc753ce07704a82aeaec2a65cd00cd9a498c253113ba886eed79d5"),
+            base16_literal("ae2001ebbd51b820e8b3070fa6a3c7e976bdd8c11203115de47a334d4cda5081"),
+            base16_literal("276b5f3d8308c000d4637476e55aafe3aec2a861e701b03e372292cc67d8283e"),
+            base16_literal("d57575fca28b0365e7e326402cd2f53a604755e531c84c475280e1b512f0b4e4"),
+            base16_literal("d37f3b0bf0d9f893002af99b0cafb986ffb73c2a20198da495605f2b073e41a7"),
+            base16_literal("9a8ac5cf1f737029e2899b1db34a8a70843131f9ecaa253ccad83cb08f202f4a"),
+            base16_literal("f1f8bfc17f4ea3ac5f27ba099d880d8f542649c535aed49637282989e98a7440"),
+            base16_literal("86b0738179251c703ec8f25aebf7b5d6c369fc0552d09c6977e89fbd7272ff71")
+        },
+        {
+            base16_literal("9b7b9dc10cc51d9ff307698393787c73a78afd8257b63f07ee27eddecfda903c"),
+            base16_literal("879d477448d59975b14bacd8ddf3f0f336e0a74df9dd12785e0cd0e149a8b46e"),
+            base16_literal("17305fe12fbc74f50e0cb0fa6b2543d0c79d24dc5ff687d1d9684b8b2f49000d"),
+            base16_literal("609b7e18d54006da09e752c6a69c478a9a7a67f158d0ad5243cf427ca90dc07b"),
+            base16_literal("9f0eacd43f988822b85eb4f0c739410d44736be578ee01a0ab253619f88007a2"),
+            base16_literal("0a8b7fd3950db2935ef1e2649ea32c07b727464bf9e1dfbc49e129f816fc4f7c"),
+            base16_literal("3255ea2d92b2186f6c69392314cd29b741bed2d56fcda456917dea42d8bc141f"),
+            base16_literal("0e840d21e73b2d26b123f1aaa83f4368129c736dd9c5f4113e41698c02172ca5")
+        },
+        {
+            base16_literal("0c7449748cb9dbb4d163b8ea33b5147c91f0f4b77bc73fc35d2db6ae2cd285c2")
+        },
+        {
+            base16_literal("746840e753973b7fdee82ab186564baba211d49adba91a7424c46203e5d6af7b")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0x03, 0x00, 0xfc, 0xff, 0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x07},
+    .e = base16_literal("d2e83b18998636014cb1611af27524c1def57c5eb95a8bb5addcf8c470816eb1"),
+    .secret_indexes = {5, 4, 2},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("02ff0f000000fcffffffffffffffffffff0f0000000000000000000000003c001c"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffffffffffffffff03feffffff030000e0ffffffffffff000000fcffff"),
+            base16_literal("0200f8ff00e0ff1f807f00c0ff03000000000000000000f8ffffffffffffff7f00"),
+            base16_literal("03fffffffffffffffff7ffffff070000000000fcff030000000000f0ff00000000")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ff01000000000000000000ff1f0000000000f8ff0f0c00000000ff1f00000000"),
+            base16_literal("03ff0f000000000000e0ffffff0f0000000000f8ffffffffffff0fe0ffffffffff"),
+            base16_literal("03ff0f00000000f8fffffffffffffffffffffffff1ffffffffff01000000000000")
+        },
+        {
+            base16_literal("03000000000000feffffffffffffff0fe0ff0f000000000000000000c0ffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("ac25dc235985e653e271b0eac2c804ff7eec0eec761b0559db079ff28b0fca32"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("099f08bb35e7b3975b83cea61ed0f423fd3f5c720f50fa6d1b8926112a49b555"),
+            base16_literal("29e73e45f46c3f2fedc5ec62993f706f7af096edad40b3553fccfc5ced4fc137")
+        },
+        {
+            base16_literal("1fd102de21baee9910d211e6ce0286af1fc0450a3edf25b358172f358a4bee79"),
+            base16_literal("5ed484aff533f7da53f02b8ed3ac83c04909dfd59ad39ce4828653e60bc4ca01"),
+            base16_literal("5c92372572226b912add38d822fa12751635b56847925aa520b2d723a789bc81"),
+            base16_literal("fedde842c8ebd4eae4c9b720cb6ab7c0583e0631d8ba4bb7dade6b1b0cdfc891")
+        },
+        {
+            base16_literal("eb5b1ba7c77c26177a50015291db05648d5934255de035489a5182187734f55a"),
+            base16_literal("c9b5d435302a53951ecfb54f2be312d304238364bf17ffbeca2a04dfa99491b1")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x80, 0xff, 0xff, 0x03, 0xf8, 0x3f, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0},
+    .e = base16_literal("9c2af5ba84196bb6aa0174b22fa9510324159e98b81f3e5242ce7151348e3677"),
+    .secret_indexes = {7, 5, 1, 7, 4, 5, 2},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("02fcffffffffff0ff8ffffffffffffff00000000e0ffffffffffffffffffffffff"),
+            base16_literal("02ffffffffff03fc7f000000000000f0ffffff7ffeffffff3f1c00000000000000"),
+            base16_literal("030000fcff7f0000c0ffffffffffffffffffffffff0780ffffffffffffffffffff"),
+            base16_literal("03ffffffffff3f000000e07f0000ff0f00000000f8ffff1fc0ffffff0100000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030f0000000000e0ff070000fc9f1fc0ffff1f00f0ffffffff01000000f0ffffff"),
+            base16_literal("03ffffffffff0f0000fe0700001c000000003800e0ffffffffffff0780ffff3f00")
+        },
+        {
+            base16_literal("020001000000fcffffff0180ffffffff7fc4ffffffffffffffffffffffffffff1f"),
+            base16_literal("02ff010000000000000000000000803f000000f00f000000f8ffffffff07000000"),
+            base16_literal("03ffffff0000000000fcffffffffffff0ffcffffffffffffffffffffffffffffff"),
+            base16_literal("0300000000000000fcffffffffffffffffffffffe0ffff07000000000000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000000000f8ffffffffffffffffff81ffffff0300000000000000000000f8ff"),
+            base16_literal("02ffff7f000000000000f8ff03000000e0ffff0f00f8ffffffff7f0000fc0f0000"),
+            base16_literal("02ffffffffffffffffff03000000f0ff0f003c0000000000f8ffffffffffffffff"),
+            base16_literal("03ffffffffffffffff000000000000c00000e0ffffffffffffffff1f0000c0ffff"),
+            base16_literal("0200000000000000000000ffff3f0000e0ffffffff3f00000000ffffffff030000"),
+            base16_literal("03ff7f0000000000000000e0ffff0700000000feffffffffffffffffffffff0f00")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000000000fc01e0ff010000fcffffff0000f8ffff1f00000080ffffffff0f"),
+            base16_literal("02ff03000000f07f0000000000fcffffffffff7f00000000e00f000000000000fe"),
+            base16_literal("02feffff00f0ff3f0000fcffbfffffffe3ff03000000000000000000c0ff070000")
+        },
+        {
+            base16_literal("02ffffffffffffffffffffffffff1f00c0ff0700c0ffffff1fc0ffffffff010000"),
+            base16_literal("020000f8ffffff000000000000000000803f0000000000f0ffffffffffffff0100"),
+            base16_literal("03ff1f00feffffffffffffffff0f00007000f8ffff0300ffffffffffffffffffff"),
+            base16_literal("0300000000e0ff1f0000000000f8ffffffff070080ffffffffffff7f000000003e"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02fcff3f00ffffffff0100000000fc00000000fcffffff1f00ffffffffffffffff")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("a2d1de8a2ea5bc608899c8126ee316daa0f5d50a22a51223f0c026a6144b3cd3"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+        },
+        {
+            base16_literal("7fd31794f55f72ec3a637aba6572479c5d9b1bd6a4edd2b8277464aa01dee6c1"),
+            base16_literal("1b88135cbec678067e13757da714a9885f976aa174d4e0533d3f65e07a3e3e69"),
+            base16_literal("d5e79a2a60c96b1bb815a5e3d920b206b9e1e054696b3d2274d51eba362f4bd5"),
+            base16_literal("ced272e35a5d2bdcafa8c8668d9557ccc984dd522c7cfa2c123d881709f33973"),
+            base16_literal("b342fc6234723012f8651420443453c1cbe237be8f9143bdc3e2c637a3c963f2")
+        },
+        {
+            base16_literal("ba47a36928ba1e78ce5149e08ddb700edaee998192b258faad5aeae78e57f489")
+        },
+        {
+            base16_literal("e175d0806f0ba8af502421c180f1bd4f441fb995f3918135ccfd2f44eb59e30b"),
+            base16_literal("6b85b2046d83e9e48f9a1d369656e17356834d482dc05bae51701c3362ad05cd"),
+            base16_literal("eee293c444741b16ee10e9a4faa85fdbf1a5aaeedea0dd887994f45af65f6423"),
+            base16_literal("d9bc880891f973e2e839a9461d8328c523f8ba9d822a7903b5f2f8b08368f3cc"),
+            base16_literal("c0086e8dc0455905da0aff7f084161d3d98631f38382a17789677865947bf34d"),
+            base16_literal("a4c75cdf72565e36554e3d63839b7d7066b93734dc24e4b42cf5d0b8e662cbdd"),
+            base16_literal("0b6c650c1b31d25dac362606132b41759380c7c0e3642276f7ece6f7b809681f")
+        },
+        {
+            base16_literal("5210b486f1d30b04dca031f940d876994db8e255a3c7c312e33d882231bc607f"),
+            base16_literal("99d1c0347f1e498659732f37919606aa7ec55493b4caf2ab81553252d4f14d32"),
+            base16_literal("89e91dea4f6ad193a6cf9ee5d7d836498bc0ba18f25ae7fb348a4993f6c671e1"),
+            base16_literal("bdb0a37271a9d069cdb02275ed16f5ee9bdc8f209396eda5a1b1c7e05545018f")
+        },
+        {
+            base16_literal("bc98494534d0e96fb2ab5a18c78a603cb80833277f737706d0e2029b20c359f1"),
+            base16_literal("4fac61fa887012e37d99b961d04d222293c71d1ccbe91e48202c0f48074587d9"),
+            base16_literal("4fdcf82a5395a2c7e50ac293a3a168a1b9d309aa8ce672065c6729a49e265cf2"),
+            base16_literal("19802537b0af91585917b2dccaa8978605249434f2ad2cb2c0dfd36d9a824eab"),
+            base16_literal("0d9984e9cb33b497b43d1788f4aa6529efa0e206fd5b5759353fc9b767e12219")
+        },
+        {
+            base16_literal("268ceea8f227b304ec01ce58b561a78270938d38dc921724b78bdb0ffa38f45f"),
+            base16_literal("d15b824ff8a70748f941b59a04639e70486eafa45c9ccbfd86734358a3c142ba")
+        }
+    }
+},
+{
+    .message = {0xff, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0x0f, 0x80, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0xfc, 0xff, 0xff, 0x1f, 0x00, 0xfe, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+    .e = base16_literal("cb04a00ee86940ea64fd21be64ff221f7e4081c0944eba2ad8cebf4e37daacbc"),
+    .secret_indexes = {4, 1, 3, 6, 3, 2},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ffffffffffffffffffff07000000fcffffff1f00000000000000feff9f3f0000"),
+            base16_literal("030000000000fcfffffffffffbff0700000000f8ffffffff7f0000fcffff010000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffff00000000000000f0ff000000000000000000f0ffff03000000000000")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03ffffffffffffffff01feffffffff000000e0ffffff1f0000000003f0ff01fcff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0201000000fcffffffffffff030080ffffffffffffffffffffffffffffffffffff")
+        },
+        {
+            base16_literal("03000000000000c0ffffffffff3f000000fcffffffffffffffffffffffffffffff"),
+            base16_literal("03ffffffffff1f00feff00000000feffffffffff0000000000f0ffffffffffff0f"),
+            base16_literal("030700f80300000000000000f8ff1f00feffffffffff01000000000000e01f0000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffffff03000000fcffffffffffffffffffffff010000000000f0ff0ffc"),
+            base16_literal("0300000000feffff0100c01f0000c0ffffffffff3f0000000000feffffffffff3f")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000000080ffffffffff7f0000f87f000000000000000000000000ffffffff"),
+            base16_literal("03ffffffffffffdfff0000f81f00e000e0ffffff01380000ffffffffffff1f0000")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000f8ff0100feffffffffffff0ffcffff01000000fcffffffffff1f00000000")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("e92c28caef76d84bac2bb9574f1920bd3cdfc77369402582d39bc671b0169a79"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("7e5272d29229592a7a1be78d6d1bdab29750e85c5f8925b6ff9d9812188131b6"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+        },
+        {
+            base16_literal("e19d18b50e5c2b655bab5483b537396a9f3b98416742de20ff035d73f5e4664b")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("95ab64504c4261b937f0800f50d0684d7ed874b3815da44823cac0b99635af82"),
+            base16_literal("54ba9e88b92760fdc7f75a029a6e61a29402a80c6b06158cd2e3d56a884fece2")
+        },
+        {
+            base16_literal("fa97df70288b09017eb512fb280a897b03c8ba2b805746a1413da56bfaf10867"),
+            base16_literal("5d0fa1d163f879f11ab65d61966596e8c16ef3abea1ed6d76ad4afd182a176cb"),
+            base16_literal("61f6f25c45df83e7a4cc229d11411f12a5315878c2c0472deaffc8c9010cbd4f"),
+            base16_literal("aac2bb9ed91402e09401df2ec7300225384933da354275345060d1bedd1360bd"),
+            base16_literal("46d29bb5b3f95103d50bacd6945b393f2d29c4be9335032f2322fef7a461f359"),
+            base16_literal("2002aa483c96feb1bc8942de4c82654b6e17e983107e85c873c0a9d7f97678fa")
+        },
+        {
+            base16_literal("1aea6c88054ad3be6ac33c1f886d7dc68e42ee9d1d98e5ab3837c5d1720f1144"),
+            base16_literal("0e4b3965d430986bc49d186e9a39e63bcbdb405ac6df3395b46b246b7fc4ecb3"),
+            base16_literal("843e2563b4c52b69827b0c4bfcea86838031cd6a3db53217b72bb7d30f9c2808")
+        },
+        {
+            base16_literal("00a3c0923688002a4d561a5ba99064737e3f795ccf08fe6c871339569a91f155"),
+            base16_literal("08cd8392582388dc14d6a6ac2cf460dfc4a34bf0a7d25b18dadd0b79fa813608")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfc, 0xff, 0xff, 0xff, 0xff, 0x7f, 0x00, 0x00},
+    .e = base16_literal("4be21aa6fbe14b8aa67477ea3cb3ef89915ea4e36994313547f6577274a4f5b2"),
+    .secret_indexes = {7, 3, 4, 5, 3, 1, 6, 1},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("23f26fcc86b9868757d43ebda49f39fb7c1da1c4fce756ad44bb3900f595c6a0")
+    },
+    .public_rings = {
+        {
+            base16_literal("02ffff3f000000000000000080ffffffffffffffffffff1f0000e00300e0030000"),
+            base16_literal("02ffff070001000000000000f0ffffff1ffeffffffff070000f01fc001feff3f00"),
+            base16_literal("02000000f8ffffffffffff3f00001c0000f0ffff0f00000000400000000000f8ff"),
+            base16_literal("033f000000fc07f8ff010000000000fcffffffff7f070000000000000000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffffff0000000000f0ffffffffffff0180ffffffffffefffffff070000"),
+            base16_literal("0300000000c0ffffffffffffffffffffffffff030080ffffffffffffffffffffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0307fcffff0700000000feffffffffff0100fe01ff7f0000f03f00000000000000"),
+            base16_literal("02ffff1fc0ffffffffffffffffffffffffffffffffffffffffffff7f000000f0ff")
+        },
+        {
+            base16_literal("02000080ffffff1f0000f0ff0f00f0ffff010000000000000080ffffff03000000"),
+            base16_literal("03ffffff030000e0ff1f00000000f8ffffffffff0700000000fcffff1f00000000"),
+            base16_literal("03feffffff007f00000000000000000000ffff0f00000080ffffffff7f00feffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03000080fdffffffffffffffff030000e0010000feff00000000feffffffff0000"),
+            base16_literal("030000000000ff070000ff000000000000ffffffff0f00e0ff000000fcffffffff"),
+            base16_literal("03f8ffffffffffffffffffffff030000000000c00000010080ffffff7f00000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ff000000000038000000fcffffffffffffff010000fe0f00000000feff7fe0ff")
+        },
+        {
+            base16_literal("02ffffffffff9fffffffffff7f00000000000000000000f8ff0000000000000000"),
+            base16_literal("0200feffffffffff01000000f8ffff1f0000fcffffffffffffffffffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000000000000000000000000080ffffffff0f00c0ff0100000000000080ff"),
+            base16_literal("0200100000000000fe07000000000000fcffffffffffffffff3f000000000080ff"),
+            base16_literal("03ff0f000000fe3f0000c0ff1f00000000ffff0f0006e0ffff7f000000fef10100"),
+            base16_literal("03ffffffff010000f0ff0100feffff07feffff0f0000fe00000000f8ffffff7f00"),
+            base16_literal("0200feff0f80ffffffffff1f00ffffffffffff1f000000000000000000000010ff")
+        },
+        {
+            base16_literal("023bc425e5406a333e3a8136a9b460a27373363695705bf7301f56d4cb8ee6985c")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("bf209c119b6dc23d33f31ba5135e5be91fefbcf8c02aba619ac8838b529952df"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+        },
+        {
+            base16_literal("efdc4c4f21b07c67a3efc2f0c7340b4e0b6f6ac124ea89f44acdee78bcf77d7b"),
+            base16_literal("e281a37593659c60194f4d37d0f6527bcbda154412c4f5f45af3b195b2d00bc5"),
+            base16_literal("324c1a3e7cf61edc2d44d6ccc331064935249493a2d8aabd96d41f80af1da7af")
+        },
+        {
+            base16_literal("a8423d1f25a091276aef25153d6363c5f481014f3c1de2905d6cda435dbe3a47"),
+            base16_literal("82ba339da53333ee3ae006fc033851ca589201f92069e813a567e0846a3ebb87"),
+            base16_literal("c317fcd2b4416a18d311daacd403df92c6435c1cf857f4aeb42d2922ff9a1b10"),
+            base16_literal("2f265528911da7a889fe70ba1519f70c12861bb72659ad0393be1b3677ded7d4")
+        },
+        {
+            base16_literal("11fadeb4592408d2cd35aa99b46cbdc595819c673489c7088ef6d860fa54baa6"),
+            base16_literal("e87c678c72f84656b497672944a98886c09655c83031c2e05c1935616d10efda"),
+            base16_literal("02ea12b84ba486f88648b77b0eb2d68947f108bb346d88bcbaf1b180784002d9"),
+            base16_literal("98a2b3aabfec4a36e45b754f05188777d07c2abe813eb0ae9bd1b7465f7a16ca"),
+            base16_literal("44da1afe124fbe4c8ed4548215875b38147203b9d663bd0599ee2cdc9267c68a")
+        },
+        {
+            base16_literal("2767392c94a99ba3e6d98bb44579d948c817373b0f1fda3d9bdcaf3ca6646cc5"),
+            base16_literal("7f3b38fd1d3aed42f833ede2c6bf62fc8b8c4fa2babcaff5e76c458f3fd517df"),
+            base16_literal("b3d3ad8275f064b1119199f4d6dde00bddf3b229bea2ce3fec430ccd008890c9")
+        },
+        {
+            base16_literal("7c9b0f28489b5532ec3e75d5210e18e5eca40fc4f551ebfb9524aaec496096b8")
+        },
+        {
+            base16_literal("acea92d56f2bfb29c38517fdfdb493309fea7e4bc1759f9b2cdcf7ab7ff559f0"),
+            base16_literal("7a224f2aececc3eee61a17ff43474162e018fc10d91bb9fa6f9f168e50a64850"),
+            base16_literal("2ecd17962d1b4fa3067fcac9e5fb8a88cd33cfdf8baae0c79ce417024bce48ec"),
+            base16_literal("dbf43696019c6ddde646b735e1d56d4e4fef1f87473dcb077ff2f51b2f017c70"),
+            base16_literal("890afec208258213980492eea5f32418a06b28b8781bff8caa4c6c7a009c7a3a"),
+            base16_literal("ab89f8c0de5b739e879c6174f57c5806db616ed4e424a9b370eeb38b42c5a2dc")
+        },
+        {
+            base16_literal("e2ed83cbfe99bf6f585a494b8cee60c4181681394e459b90b0f0120535184d0b")
+        }
+    }
+},
+{
+    .message = {0xf8, 0xff, 0xff, 0xff, 0x7f, 0xff, 0xfd, 0xff, 0xff, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xcf, 0xff, 0xff, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00},
+    .e = base16_literal("a9b7753acb0dfbb2ee38d3975d03f260d2e16e0ee56e1d8916d3d2a8394f0308"),
+    .secret_indexes = {4, 6, 1, 1, 5, 1, 2, 1},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("202ce645af04bf44b44a5fe3ce93061abd6dffc137c15b3dcdca0d58250fc6b8"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("d787f4692bcbb0bedaf7ef35d037628e06a4b39ee4ae29d82a0da9120d50de2f"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0200000000ffffffffffffffffffff030000000000000000000000000000fcffff"),
+            base16_literal("033f00f0ffffffff0f00f8ffffffffffffffffffffff3f000000e0ffffffffff3f"),
+            base16_literal("027f000000000000f8070000000000fcffff3f0000c0ffffff0000000000f0ff00"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02f8ffff3f000000000000803f0000fc03ffffffffffffffffffffffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02e0ff000080ffffffffffff01fc000080ffff1f0000000000e0ffffffffff0000"),
+            base16_literal("0300000000000000f07f000000c0ffffffffff1fffc3ffff3f0000000000000000"),
+            base16_literal("02ffffffffff0100ffffffffffffffff3f0000000080ffffffffffff0000000000"),
+            base16_literal("020000e0ff1ff0ffffffffffffffffffffffffff03000000000700000000000000")
+        },
+        {
+            base16_literal("0280836d8bf8e3926a0bdc3fdbc7603e72e998feb436886d4965d1c736f73d66ff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0308168420c4e72b09830c7138ebe5c7013df5c36caf0170539828d9955af90a56"),
+            base16_literal("0300000000ff0700000000000000ffff070000fcffffffff070000000000000000"),
+            base16_literal("03ff1f00f8ffffff000000000000000000fcffffff010000000000000000000000"),
+            base16_literal("02000000000000000000f0ffffffffffffffffff3f000000000000fcffff000000"),
+            base16_literal("020000fcff87ffffffffffffffffff0100000000feffffffffffff1f0000000000")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03ffffff0f00000080010000000000000000e003e0ffffffff00fcff00000000f8"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("099ce229c49c07e8e8ce81a93a020d62acd02ce06229fd09644a8d6b416ca62c"),
+            base16_literal("59fc56640e73ffd0502a3aa2787f53d28457194a9449f5a4dfb64aca4ded2f69")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("51a1450ba79f894847e89e87f96ff3545f7dda23ff7fe3c74c388b6a2967a917"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("32fa06c829915378089a487f80b0324e1a32fd2b85a65150533622952a312ff0"),
+            base16_literal("db89f113eb50777435727bc33fbdfa5591e0433b9eb2443baf9613fe3cba9311")
+        },
+        {
+            base16_literal("03b5b6f3130b2d4ba2de787a10e160a48a1eefbec23f43bef5b99a3baa8fbf9c")
+        },
+        {
+            base16_literal("99d535f7f07a78aea59a3121b8f09adf026e6f541f6073a7bdad8736c5e3aae1")
+        },
+        {
+            base16_literal("b838101257ab935c605abe71487d194e17008131536d09fd49ef43bf1f7dfe9a"),
+            base16_literal("f7cb77b41c9bc4ad21e968681821c836746d5ee7e23698e81ea10538b0dff450"),
+            base16_literal("44c550de81aaaa9164f49a722ec94984bde7a86cc65dd62c498613e9fb21ca0d"),
+            base16_literal("7c27823303d95a1eea92847c9af7a7a18a0af6727c3cb745271a6c3fff6b33f2"),
+            base16_literal("e1c7d9b9e61f0c3c0087dab76f99e52820cd81acfe2a85b6c9a9a21a601b2979")
+        },
+        {
+            base16_literal("6d908cf6bcdb5e1dbc61c67d97c800fc2b54bd048fbfeaec114a904449d70159")
+        },
+        {
+            base16_literal("044ba783ea9dbcd754a94d8099b8cf42a07e31723d4333c2be4ccc7078325e92"),
+            base16_literal("ff83703d931c58f48b42889ece56a9a00dc3645a580577f785a7cf40646ebba4")
+        },
+        {
+            base16_literal("9d3d8bb287f4bc665ad4113f28567959c8973467ad8f8f9bd1a6b69c2bcf7aa0")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0xff, 0xff, 0x07, 0x00, 0x00, 0x00, 0x00, 0x1e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("cfffbc14de452285f46489f6a784335abf0e0d4a08b215792058b733d27e4e9d"),
+    .secret_indexes = {3},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0200000000feff000000000080ffffffffffdf0f00feffffffffbfffffff3fc0ff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0200000000e0ff000000000000000000c0ffffff0100000000000000f8ffff0700")
+        }
+    },
+    .k = {
+        base16_literal("782973217fbe417e8bb12657b620a0c42f1a0a7196729f42b388a6d776c0501a")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("b98d0fe61b9e7a0b0299c71eb03dccc121bbd328b73c2b88385d8ad8737a62f4"),
+            base16_literal("ce1b7f8b15e6fc2ee11bc43c1e7b8bcb8822770234377e8ca30f3be1ff75bb7b")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0x7f, 0x00, 0x00, 0xfc, 0x1f, 0x00, 0x00, 0xf8, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00},
+    .e = base16_literal("e76ee5e795112aaf8b6680e94f0ed2090137bf0c99c75dc93d702fba16badd0e"),
+    .secret_indexes = {4, 6, 4, 7},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("02ffffffffffffffffffff7f007e000000000000feffffff0f000000c03fffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300001c00f0ffffffffffffffffffffffff3f000000fcfffeffff1f00000000f8"),
+            base16_literal("02e0ffffffffff0f00fcffcf07000000000000000000000000000000f007000000")
+        },
+        {
+            base16_literal("021f00000000f8016000000000e0ffefffff1f000000000000800300ffff030000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffff0ff03f000000fcffffff7f0000000000feffff0f0000f0ffffff000080ff"),
+            base16_literal("03000000c0ffffffffffffffffffffffff3f000000feffff7f0000ffffffffffff"),
+            base16_literal("03ffffffffffffffff0000feffff3f0000009cffffffffffffffffff0100000000"),
+            base16_literal("03ffffffffc7ff0700c0ffffffffffffffffffffffe1ffffffff00000000000000")
+        },
+        {
+            base16_literal("0300000000feffffffffffffffffffffffffffffffffff07000000000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("021f000080ffffff070000000000000000e07f0000e0ffffffffffffffffffff00"),
+            base16_literal("0320f8ffffffffffffffff7f00000000000000ffffffffffffffffffffff010000")
+        },
+        {
+            base16_literal("02ffffffff7f0000f0ffffffffff810700feffffffffff0100000000f8010000f0"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300000000fcffffffffffffffffffffffff7ffcff3ffeffffffffff7f00000000"),
+            base16_literal("0200000004000000000000ffffffffffff0700c0ffffffff07000000000000fcff"),
+            base16_literal("03ffffffffff01f0ffffff3f00000000000000fc000000000000f8ffffffff0ffc"),
+            base16_literal("03ffffffffff3f000000f8ffff7f00000000e0ffffff0700ffffffffffffffff7f"),
+            base16_literal("03ffffff1ffeffffffffffffff07f0ff1f00000000000000fc0f000000f0ffff1f")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("e5c1b561db0c4e5e647ab29bc77b6aebd814a84de138fa621565af3d4c74ecca"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+        },
+        {
+            base16_literal("06fbcff5a9ddaf816333198bccd6652fd24f64684b55c9ce84bb894b17f34560"),
+            base16_literal("3c92e672345634ca3dd6a484b67d2053b7a418e759585175977f9a737996fcc1"),
+            base16_literal("647fb7be9c72eb5439cddeb658298677a987255305c43e39824731fe2f6396f3"),
+            base16_literal("3a4a97fca65f4858595b02344c469ebc2997f2f9c1ee6254e0bd828220e478b0"),
+            base16_literal("7ef10b1af55e5cc446afe59c3f3652ab5734cfd19aff385f3998236126ba3cc9"),
+            base16_literal("6f6eceba550324204cfeb93be6adb69ab52165142f7d1a5d5bbfedbfcb893326")
+        },
+        {
+            base16_literal("2d4c547a351ba33022f30d6d88bc6497927075aa7242fe28ccf813163d501d98"),
+            base16_literal("cd856f4ce569c52fdf7db7e517300826370e4cb4bf37a199d5704d2d36cbb3af"),
+            base16_literal("54b783c6ad090f2967fdf535e90066d6d4d77863bb0c411b7d7b752cd449b529"),
+            base16_literal("2bc342d1cc286fdc2a8fccdebc0a44995acb9c59d1e8d132074e072eb7c8da8d")
+        },
+        {
+            base16_literal("c84ebd756d308243b0cf6846d4c86ba2658e6fbca74670b152ac40e39dba3f5d"),
+            base16_literal("191e561f9473cb9fd51bbec24e7a9f8ecbd51943e05d1583d0290f3041b48582"),
+            base16_literal("23fd9cd69f6a387d9a16c21eee38669b2f385985194c4dd2caeae805e89f9d0a"),
+            base16_literal("967b1f546d10658b14673b36087bf01457013c9e929db84754c8803558022cf4"),
+            base16_literal("476d65866a692b137129893b0193b2620734fcc6be7752f2a4e7211563ddcdcc"),
+            base16_literal("7442020bdaa32afb874b30ad8d6cfe1b5da89517a24854bd50aff81aef357d58"),
+            base16_literal("7b5ffd06e9da3a5d0ae275439013df33eef7e246f49f0c70289a0e34caf8ed7f")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00},
+    .e = base16_literal("8c885a9e7ca30c07b197e21f92f61480329dbcf00daf9ef8801024b136980198"),
+    .secret_indexes = {4, 8},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("02030000f03f0080ffffffffffffffffff0ff0ffffffffff030000f0ff1f000000"),
+            base16_literal("020000e0ff0100fcffffffffffffffffffffff0f00000000f8ffffcfffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffffffff3f000000000000e0ffffffff7f000080fffffffffffffffff0")
+        },
+        {
+            base16_literal("02f0ffe3ffffffff000000000000000000feffffff010000c01f00000000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02fff7ffffffffffffffffff3f0000000000feffffff7f00000000000000feffff"),
+            base16_literal("03000000fcffffff0f000300000000000000000000000000000080ff80000000f8"),
+            base16_literal("031f0000000000fcffffffffff83ff010000e01f00e0ffffffffefffffffff0f00"),
+            base16_literal("03c01f000000000000ffffff1ff0ffffffffff0300e0ffffffffffffffffffffff"),
+            base16_literal("020000000000000000e0ffffffffffffffff3f003c00e0ffffffffffffffff7f00"),
+            base16_literal("02ffff070000000000000000ffffffffff0100e0ff070000f0ffffffffffffffff")
+        }
+    },
+    .k = {
+        base16_literal("0b9fe38c3675edc26f390f71fc826e9bf9aafcd225f73cea268c7390502b2391"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("7b18f67f3dad39785d24315d640d5a2d95c21d529a3eb32b13d8dc531664d730"),
+            base16_literal("e4e7dd3693795abb95a46d761a23e896f3ef13c4883570371dcd0c59dd100728")
+        },
+        {
+            base16_literal("6e633252d4fc44a8f7978f09a0162b7c0b2a653f05c7c9ccb78ae9f2d0fc2c3c"),
+            base16_literal("595ea753a98f4300d2d3031abec16d59d7943b8b22e409b9a4d94d68c6f2f6db"),
+            base16_literal("8189fafee9e3359ebed30c2d36d236d983b0157736a61750da373e1de0a29c0e"),
+            base16_literal("ed51a9c11727bc5b62d381ee1696e7d719acb9f870a594fcb081b06dbaca7845"),
+            base16_literal("10f72b2d5faaf341bf86de87db9ef595af08920fb75b3d57a57becad8fa01330"),
+            base16_literal("91d24015b4f51d31e0caa136365e1f7263574ab0f78665a7e916561123b8be85"),
+            base16_literal("baaa85c8698e20cf418e37a8d6205d65388bae1cfef6351e83f81f057eeda0fd"),
+            base16_literal("d0f28299a2c1ab1c70599d7323fc621e1f6592c01b59219dcb371ff230f55029")
+        }
+    }
+},
+{
+    .message = {0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0x3f, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x07, 0x00, 0x00, 0x00, 0x00, 0xfc, 0xff, 0xff, 0xff},
+    .e = base16_literal("a211480f4c016d815987dda1b1ce3fe48933c6105fbe243352b9c6530bf3afa4"),
+    .secret_indexes = {1, 8, 7, 3},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ffffffff0000e07f0000000000e3ffffffffff0000000000c0ffffffffffffff"),
+            base16_literal("02c0ff0300fe070080ff0300000070000000e0ff0080ffffffffffff1f000000fe"),
+            base16_literal("02000000000000000000fc010000f0ffffffffffffffffffffffffff1f000000fc"),
+            base16_literal("020100c0ffffffffff0f00000000000000f00000000000000000e0ffffffffff0f"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02000000000000003c00f00f00f0ffffff1f000000000000000000803f00e0ffff"),
+            base16_literal("020000000000000000000000feff3f0000000000000000feffffff7fe001000000"),
+            base16_literal("02fe1f00e0f97ff8ffffff0300000080ffff3f00000000e0ffffffff000080ffff")
+        },
+        {
+            base16_literal("0200000000000000ff000000feff0300000000000000c07f000000000090ff0f00"),
+            base16_literal("020000fcffffffffffff0f0000f8ffffffff0700fc00000000000000ffffffffff"),
+            base16_literal("030000e0ffffffffff0f00fcffffffff0100fcffffffffffffff0f0000c03f00f8"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffffffffffffff0f00feff030000f0ffffffffff1f000000000000f83f"),
+            base16_literal("02ffff1ff0ffe7ffffffffffffffffffff03e0ff0100000000000000000000c0ff"),
+            base16_literal("0200000000000000000000000000000080ffff7fffffffffff03c0ffffffffffff")
+        },
+        {
+            base16_literal("02e77f00f0ffffffffffffff0300c0010000000000000000000000fcffffffffff"),
+            base16_literal("03c0ffffffff1f0000000000c0ffffffffffffffffffffffffff7f00000000fcff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("c6b4a1259b7003a18942fcc49e3285ff67b673e4bc314de85b3db46d5ae667b4")
+    },
+    .s = {
+        {
+            base16_literal("ddf997c15f0b9b3e1b6470c6ceeee721d601a3f492b945388f7a5c23a9db1df3")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("45e85c1722244e044c977db4bdb2a2624dae13db10c40dc2f42b6cb577d7ac30"),
+            base16_literal("4fb85176006d146be448b0bcdc3dd96902992eca203336390a1f46c4473e1c75"),
+            base16_literal("042664c35e16ea0c39a9049951e0a138fa008fbec078498222fd8d0a976ff483"),
+            base16_literal("e11513a7d5b3d1612fcdf18a6d16139cc626c64b43da19ac1bc860b7821e5b4c"),
+            base16_literal("edbf47938ab7fec7851c362e5e1eeb03b16e98be4d514a68d66cb799bd41ce8c")
+        },
+        {
+            base16_literal("36af2f8e14827319c0e45daeb62a4c0cac7608226635f77c172c6587401a79c5"),
+            base16_literal("3a18103dcbbec811a627f9bfaf4e43a15e8b1b9f52f5e27a7c3e85c90974064d"),
+            base16_literal("97344f283b330db57a38015b8ce052001f1f7cbb0df57fa17d948c931d26a3b7"),
+            base16_literal("7a3e24a262c80068139cd5c8ecb7aaa07bbda4e429bb930efdc5c36ee5cf2484"),
+            base16_literal("6988b367cbbc763c7a099d96eeed4d9ab2c1216ac056fa30f6f6b87929937209"),
+            base16_literal("19571d1457979b7f98001347eacbf92abc3e829b933c8f8ad4c80bb73e91921d"),
+            base16_literal("7e60d6265896d8ae1cc026c00cd5048c8ad7431e67c53c4ddc390a61a7a2d92e")
+        },
+        {
+            base16_literal("e95981cceaa5b87200515eecd4af7291f31aaf44189a6c9e2f0aae44014739ed"),
+            base16_literal("16bc9f952d66e81a2701d6610cbb5a1dd54fdccdcbb5adc9e0d4ef3671f29a31"),
+            base16_literal("f1c0d07edd810b770716eab8fc2eb1b8064fd6171aa8f47d4f94f39f7b8cb12d")
+        }
+    }
+},
+{
+    .message = {0x7f, 0x80, 0x0f, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0x0f, 0x00, 0x00, 0xf8, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00},
+    .e = base16_literal("c656b77e94ce69f3b85e6314a6ff8a13ef4e3812516b5c0eb7daa69806729079"),
+    .secret_indexes = {1, 5},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02000000000000000000000000ffffff00f0ff7f00000000f0ffff0300fcffffff"),
+            base16_literal("02ff0300feffffffff0100000000003e0000fefffffffdffff070000c0ffffffff"),
+            base16_literal("02ff0f000000f8ffffffffffffff0700fcffffff7ffcffffffffffffcfffff7f00"),
+            base16_literal("0200000000000000000c00000000000000f0ffffffffffffffffff0f0000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("64ac445ee346ae2cdaf2af480c97515bf48061f533f1684a6b9876fb7c2dd874"),
+        base16_literal("1e915099a798f001cf6017d7784b17104a14deb34b7a325ed80cfd8b8ccab86d")
+    },
+    .s = {
+        {
+            base16_literal("c4898c8ace06b8c8c8775cbeff4db90cc6f885ba5babe908a65c996b7552359e")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("466790376113d089e121d1e6ab31c4ab4eb6520f5d5d0cb827b1d19c4b50c811"),
+            base16_literal("aa24abc42023f1320907e8f69e44ead25a906f0ea4a9a81882b946d2fa8c00cd"),
+            base16_literal("4ab426573a82acf66b53a6a8892e9e0762ed43a0037749b2257587a14ff0ccb3"),
+            base16_literal("a4068c02f653c806b921383ee8128cd1b5aac360b58ae0b1ac4117cbb9529d8d")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xf1, 0xff, 0xff, 0xff, 0x07, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x07, 0xf8, 0xff, 0x03, 0x00, 0x00},
+    .e = base16_literal("76489dacd47134521465488e01c315105ab5bc264cb7882632a5733634789e7f"),
+    .secret_indexes = {1, 8, 3, 6, 8},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("c7905dd356e92b01fc779f9249c67d3ffb584bfc5d64b17f5e25584a9de2021d"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03f0ffffff3f00fe000080ffffffffffff00f8ffffffffff010000000000c0ffff"),
+            base16_literal("03bfffffffffffffffefffffffffffff07000000000000000000000000feffffff"),
+            base16_literal("03ffffffffffff0fe0ffffffffffffffffff0380ffffff0f000000000000000000"),
+            base16_literal("03000000c0ffffffffffff3f00000000ffffff0f000000000000000000e0ffff7f"),
+            base16_literal("030000000000000000000000ff1f000080ff030000f8ff0f000000000000000006"),
+            base16_literal("030000000000000000000000000000000000000000000000000000001800fcffff"),
+            base16_literal("0300000000000000000000000000000000feffff3f00000000c0ff1f00000000f8"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ffffffffffffffffffffffffffffffffff03c0ffffffffffffffffffffff7f00"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000fcffff3f00000000feffff0100000000200000c0ffffffffffffffffffff")
+        },
+        {
+            base16_literal("03fffffffffffff7f8ffffffffffffffffff3f0000000000000000000000f8ffff"),
+            base16_literal("0207000000fcff0300fcffffffffffffffffffffffff1f000000000000f0fffff0"),
+            base16_literal("0300fcff00000080ff7f00f8ffffffffffffffffffff000000000000000000fcff"),
+            base16_literal("0357fe8f9b3d635b18c203579136580a9ae9baacdcc566aa939bacca33e35cc206"),
+            base16_literal("03ffffffff03000000000000fcffffffffffffffffff0f00000000000000000000"),
+            base16_literal("0303000000000000f0ffff3f80ff3fffffff7f00fc0700f0ff1f00000000000000")
+        },
+        {
+            base16_literal("030000000000000000000000000000000000000000000000e0ff0f0000000000ff"),
+            base16_literal("0300000000000000000000000000000000000000fc0700fcffffffffffffffffff"),
+            base16_literal("03ffffff0300c0ffffffff073e0000000000fcffffffff00000000000000f0ff07"),
+            base16_literal("0300000080ffffffffffffff0100000000000000000000000000000080ffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000fc3f0000000000000000000080ffffffffffffffffffffff01fc07f00300"),
+            base16_literal("030700000000f0ffff000000000000fefffffffffffffffffdffffffff03000000"),
+            base16_literal("03000000000000000000e00100000000feff0100000000001e0000000000ffffff")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("3b21f962b5d5edd98703b14b17057c708c6f89f85c7e70411bd0ed987d11286b"),
+        base16_literal("d33f6075baba64aed0422c541622f7d85f26617b5bb55d3ac8f7601c38a4356b")
+    },
+    .s = {
+        {
+            base16_literal("7f4c254ae828be5bfd5e4bc379a066fd8974aacbc264a15dc704584a5613144e")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("83feb843d0b9c7f21d459615c5b09154bb0f81a578b3ec61e38b84667c105553"),
+            base16_literal("63a9b72d5a97ba52f40763b9a8c397bd0b7307d5d73742ef536a0ba3e770cbe9"),
+            base16_literal("98378cf44c49302559a15dc17d450d5082bbc43adb4b1a5f34047e52b44878d0"),
+            base16_literal("b98382d379b5261bfff7206fb22794e63ae0a5d3e29505b0358bec87ed475988")
+        },
+        {
+            base16_literal("a75a756f2b55f92267caf6831b79e8672f050160d241f2e069c62e698056e6a7"),
+            base16_literal("493e863e8718952ff8a4f03270fa97c67d1a968bf2047f714547bf15c162d526"),
+            base16_literal("a260c458b0fde48b270423029d4845bab53492f6b5accd0c3a989b0fdae75a96")
+        },
+        {
+            base16_literal("ab80e7dfde6dee4b44a36c32f9f5522c834467ac33462143b2d69ab6a5d25094"),
+            base16_literal("f503c1621a005422ba44d73e6f9a4733da36fa7ce0d723903c8a29dca2b62d32"),
+            base16_literal("818d6676a95714632d01163fa41d3f5b0347e840a7c9155ab525e91d29fa0224"),
+            base16_literal("6f135fb70c55799b58381e77b2b980e519ab35eeb968d58bf0df8cb91223bf5d"),
+            base16_literal("576e1b94e1dd4c2c2d25a141d8a4da9681b09f358a6bc488c6763c6b0d57877f"),
+            base16_literal("684cd99c9719eae912859bf65fe3b2dd2b96dfee83a2f6f4d3f215ebcb8e29dd")
+        },
+        {
+            base16_literal("33a72daa68dee9092ebad461f49aa40864a9357c91583467ab927eeb3e2442d1"),
+            base16_literal("84e7202181e03f4dca93dcb773f347433129565d52139afb9531d33f821309d1"),
+            base16_literal("761c1f6042fd4ba226b337481f79c22c10e15c027b270a771260bc1e463eaa4f"),
+            base16_literal("4b433c7cfccfd430d0f8ad79c1d6ceb14c6be8d942bc10c163a387eac3e595d4"),
+            base16_literal("cf8beb95e5f13113bfbd51daeef87b11cb352ee81cb5cbe42084eae38b68f236"),
+            base16_literal("249863a3c99a94b267e7047c4853914151ca3936c3686b42bdc82c3cb4eff0bc"),
+            base16_literal("2d8c27276ed7eab5026de0ddf4a1650d28640928452b14563874bdcfa8b86d61"),
+            base16_literal("68da52c2844bad429fdea4bf58e3aeb5596248fd439d0e53702d98fe937ac34e")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0x07, 0x00, 0x00, 0xfe, 0xff, 0x7f, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0x7f, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f, 0x00},
+    .e = base16_literal("ca7a7172899e8611de0f44f2df2d436f7e89ec4b71c7e490245bbb0871a1b366"),
+    .secret_indexes = {3, 1, 4, 2, 8},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("09246530d2659975ef70506bfd8ca7eb5b7276afc738d85a617e1d62f1fdb8ee"),
+        base16_literal("b9d714bda74be39fbcd49233bbeb3483fbc83189949582f0d7239481105c48da"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("030000000000c0ffffff1f0000000000f8ffff7f00f0ffff1f00000000e0ffffff"),
+            base16_literal("020000000000000000000000000000e00f00000000f8ffffffffffffffff070000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("037b45e9e2a555c92657af1213ae48cd1f0e2a1e65d2eba6a658849de9c78bbc5d")
+        },
+        {
+            base16_literal("020000f8fffcff3f00e0e1ffffffffffff3f000000f0fffffffffffffdffff07f8"),
+            base16_literal("03e0ffff03000000000000000000e0ff1f0000000000fcffffffffffff1fb8ffff"),
+            base16_literal("03a3e9b2d0b1a462eb4d59f1517abb56daf55f758fb9bf62e642998801276e8a5a"),
+            base16_literal("03ffffffffff03000000f0ffffff000000700000000000000000feffffffffffff")
+        },
+        {
+            base16_literal("02ffffff0ff8ffffffff03000000f8ffffffffffffffffffffffffffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03ffffffffffffffffff7f020000000000f80100000000feffffffff00fcffff00"),
+            base16_literal("036000000000fce3ff030000007efcff7f00000000e0ffffffff03001fe0ffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffff1f00000000e01f00000000e0ff0f0000000000000000000000000000"),
+            base16_literal("03fefffffffffff8ffff03f8ffff01000000ffffffffffffffffffffffffffffff"),
+            base16_literal("0300000000000000000000000000000000feffffff0f0000c0ffffffffff7f0000"),
+            base16_literal("0200000000000000f0ff0ffcffffff0300f83f000000f8ffffffff03000000001e"),
+            base16_literal("030000807fe0ffffffffff030e00ffffffff000080ff3f00f8ffffff01000000fe")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("270c0d581af7b356b49232a313c00dd3ce5a8e177cb7b6a87c0244df4c513e62")
+        },
+        {
+            base16_literal("20a5a758d9b9f3fadd8b8575f6f2a0ec08d4b24e49d60ede4c26fbea2e89d5f6")
+        },
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("98513312f37f162ef76b7d80223598352aebcb6cc25abdd48f0675155f58d83f"),
+            base16_literal("a8861b0c60ada5ca4de1852b9fafdbb26e4ae0c1578a221b36faa4ba879dee67"),
+            base16_literal("1a930dc01fdb14fac08d852afb849fe2a9ccf2db05a9960f3b9bed96365af6fd")
+        },
+        {
+            base16_literal("17889abfc6db4a95fd2c41880cf88c8fbb5b09295ccd0b399837f626b928c4e6"),
+            base16_literal("b77ec95314ab44f4bb73be42653540321001881d0cb3ce5423b00af2ea274e4c")
+        },
+        {
+            base16_literal("b29bc94f7bb588d4e35a24a947cc6812df8390b7b7b0d99996c487cd2a5a7c58"),
+            base16_literal("10ac4563e48dbdff63ebcc104f467b2b89ed2c416861e8f0a4b78921e6588203"),
+            base16_literal("a19619010b8f5d2f5ea995c8bdcc504b94ebdce6a980eafaa62405e6d82a052f"),
+            base16_literal("31901381da19900b4fcf16dcdf2a998bf60d8282414d8c79cf247cbdaac02711"),
+            base16_literal("ec90aeedaad8e759f1db31c7dd68ead1d93dd380d4a50f605185121c583b72e5"),
+            base16_literal("aa30bf8641b1543c089f47f09dff40c6b7f1862276130c7dfe6c99a5cfe6e166"),
+            base16_literal("68a7687f50409ca8eb5539414c668f7a8166d7290a3839108e219e2813b8447a"),
+            base16_literal("6f4786ed8d8550b6a0637f3d5b7c70f712e62162fd234e10cb32bf053e720f03")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0x8f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff, 0x8f, 0x07, 0x00, 0x80, 0xff},
+    .e = base16_literal("14e5666ff55c6c917f0c852be4df6f48a70c2f0e991b5134a0227ba935297e91"),
+    .secret_indexes = {8, 2},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffffffffffffff1f000000000000feffffffffffff00000000001800cf"),
+            base16_literal("02ff87030000000000000000000600000000e0ffff7f0000000000f8ff7f0000fc"),
+            base16_literal("02fcffff3ffeffffff7f0000000000000000fcffffff070000fc0100000000f0ff"),
+            base16_literal("02ffffffffffffffff000000000000000000f0feffffffffffff01000000000000"),
+            base16_literal("02ffffffff070000c0ffffff010000000000c0ffffffffffffff0f001000f0ffff"),
+            base16_literal("02000000000080ffff3f00f0ffff030000e0ffffffffffffff3f00000000000000"),
+            base16_literal("02ffff0700e0ffffffffffff01feff070000feffffffffffffffffffff0f000000")
+        },
+        {
+            base16_literal("02feffffffff1f0000c0ffffff7ff0fffffffff8ffffffffffffffffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("460234f9c277e89d314b8988212b2d181366723a23e5cd9bbc18f52ba29fb614"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("93018424a444589301465b75ec6c6f488fcaf997d301b74b5f1ee4e63c6d3136"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("0056d17de3bd768849492173bdea59eeb25c271a8092addd6b54c5326e0fb4af"),
+            base16_literal("2004a70a171cddcb29c2d16ab9287e371e028e283cda6b150133cf564ac0d23d"),
+            base16_literal("e7f1d8ceb5f0bc0b8b6d99d8e9f5971d400c1ac61d3842a159625a1cdf42aa3e"),
+            base16_literal("fa2cfac0e8c4033cc7ffa5d1ee41ae5b2fd3ce08c8056c9c4f0e7b1b85d7f35d"),
+            base16_literal("79ad40bc379eb08cdc29dbd1da3b51b8a92a6b0c9713ba41203f009c23211bd1"),
+            base16_literal("25f7ab7462767dc2418fa7485a81e748a6920de5fadb0d95114742c61110c653")
+        },
+        {
+            base16_literal("ccbb02c35903a4149b1ef8970d6cecaee112038facd664a00fb905354c568557"),
+            base16_literal("74e91042eb93294482a7e5da4b8ff8e28ba4bf05f80b3faf3048fa22922b2b63")
+        }
+    }
+}
+};
+ring_signature_test_vector_type ring_signature_negative_test_vectors[] = {
+{
+    .message = {0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x03},
+    .e = base16_literal("a836477d97b909236d6d964db1c214249de7708a45ce25f1259b4a1056a72c5e"),
+    .secret_indexes = {1, 1, 8, 2, 6, 5, 5, 5},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("243adb50939b958ab7f23ea51d8a6192566d209165327a5f5e2b4e3c0e288cdb"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03ffffffffff01000000fec3070000000000007efefffffdffff7f000000007c00"),
+            base16_literal("03ffffffffffff1f00000000781ffc7f00000000ffffffffffffffff0f00000000"),
+            base16_literal("03000000feffffffff0f00000000000002f0ffffffffffffffffffff3f0000f0ff"),
+            base16_literal("0300000000000000000000000000fce0ff0300000000f8ff0000c0ffffffffff00"),
+            base16_literal("027ff0ffffffffffffffffffff0100000000e0fffffffffffffffff77f000000e0"),
+            base16_literal("0380ffffff07f801ffff3f000000fcffffffffffffffff9fffffffffffffffffff"),
+            base16_literal("03000000ffffffffffff03f0ffffffffffffffffff0300000000000080ffff0100"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("020ba7bcef897d0bb189df8ade24875be00d59f90c2e0711a69f578b70578f1673"),
+            base16_literal("02000000000000fcffffffffffff1f00000000fcffffffffffffffffffffff0f00")
+        },
+        {
+            base16_literal("0300e0ffffff07000000000000000000000000000000000020ffffffff7ff00f00"),
+            base16_literal("0300f8fff8ffffffffffffffffffff7f000000401c000000c00780ffff1ff083ff"),
+            base16_literal("0200f0ffff7f00000000feffffffffffffffffff0100000000000000000000ffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffff01000000f0ffffffff03c0ffffffffffffff0f000f0000f0ff0f00"),
+            base16_literal("03ffffffffff7f1f00000000feffffffffffffffffffffff3ff8ffffffffff3f00")
+        },
+        {
+            base16_literal("020000000000e0dfffff0700000000c0ffffffff0700000000000000c0ffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02000000e0ffff1f0000000000c001000000000000e0ffff0f0000f0ffffffffff"),
+            base16_literal("03000000000080ffff0780ffffffffffffffffffffffff3f000000000000000000"),
+            base16_literal("02ffff03000000000000000000ff7f80ff1f00000000ffffffffffffffffffff07")
+        },
+        {
+            base16_literal("020010000000000000000000feff03000000e0ffffffff0f00c0ffffffffffff00"),
+            base16_literal("0300ffffffffff07f080ff00f80300ffffffffff7f1f80ff000000feffffffffe0"),
+            base16_literal("020080ff7ff8ffffffffffffffffffffffffff07ffffffff01ffffffffffffffff"),
+            base16_literal("03ffffff7f000000f0ffffffe0ffffffffffffffffffffffc7ffffcf7f00000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ffffffffffffffffff0100e01f0000fcff000000f0ffffffffffffffffffffff"),
+            base16_literal("03ffffff0ff8ffffffffffff3f00801f00f83f0000feffffff03feffffff0100fc"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000000000e0ffffffffff0000fcffffff0f00000000000000000000e00f0000"),
+            base16_literal("02ffffffffffffffffffffffff030000c0ffffffffffff1f00000000fcff000000")
+        }
+    },
+    .k = {
+        base16_literal("9af5c0ace6b29c160f2ebd6622a179166e2ac0db780e4ff4ed7f124edb773bee"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("b02fd19f60451740f49f44c5c3debb1339fd2d7c269f424c11982cb079659f80"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("62c5c496fffc77445f82fe8194bf6b98d705b6c64411fdef42de76bdbd063d30")
+        },
+        {
+            base16_literal("7b2c9ff6fe007e5bc8eb676183cff7482de9bd430776bf53c0895e9c39d529d7")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("8f75ca7bf400d5327faceaf568ae0e7eae393ee09d8ccce0bac9623bb33bff6b"),
+            base16_literal("5af9c197a5f557fa6f5de5b53b2869f380fb8cbaa41f97b73fe6f094adff072f")
+        },
+        {
+            base16_literal("374633c78568287a243efdbf541d8ce2bf8c2f11181dfce2317322ab64c9adc2"),
+            base16_literal("e1264d2ad0628dc80b3e17d66d70f4af490b080f3fbefb5b5ca52d2d884be6ed")
+        },
+        {
+            base16_literal("05c945a3efcdf53b288e10bfed8d73905ae0dd6c9e92bf9b6eaa09a1fa085131"),
+            base16_literal("d8e7484a4b36bc45ab81f59031f7d4b2c3f2598281ebab85520b2fd08168b146"),
+            base16_literal("b87cc5518c9caf33508ea997c0ce5fa5aff0297e18284f79d0005c37f41268ff"),
+            base16_literal("e68ec17083ffa4c35075c66e482c3d8b800fe1dc26afc02686728714462fa82d"),
+            base16_literal("19798cd7a538a8d340f594b3a7f425584a1d0b372d649fcdc69d9f3bc8f95cb6"),
+            base16_literal("598f3d7fc1b2ca08164069d49b16667a067315643adc35a867b516ae0f436118")
+        },
+        {
+            base16_literal("ef3ba8f8ee60b27c61364d5095a9f0c06ee21b24e0c8de215469d5b4fe7cdca9"),
+            base16_literal("5ed183cb45347cf1c7aeb225996497bde1ed5a5b7ad50036069d52a064b1a7e5"),
+            base16_literal("57182423e0c13298fa2012843fe5d207afbf801d45c8ccd5793d51b006311ac8"),
+            base16_literal("8ae7373739b960c7cc3306afc0c6491d7bd842c99032e502d692eeb5f5787277"),
+            base16_literal("d04a2b7608004c4453b4c41f62c615356cb495c9186662e7798b257f1bbbb71e")
+        },
+        {
+            base16_literal("87ad1098fbf8df45ae812c877caf25bdc990da3a7c5866a00b62689f1f4bcf00"),
+            base16_literal("12983d2e21c8010ce96b8b5d6b1e80f5a2f0c3ab9e63099b3a7b5920206bd74e"),
+            base16_literal("3604b87027d8ee01b06c8453b6b97e7b4cb3a891145b8f634aab34b855a39366"),
+            base16_literal("36f4510553dfc5fd2e23606f611add0437271e3b3896658f3d9b2e483bd85873"),
+            base16_literal("c536ed86506ff11132189e7b2d994217c45177f2b01f18fb54243dc0bb7e73ec")
+        },
+        {
+            base16_literal("09751fb8229462c9239e224e6fa2fbc13dcda8a696714dc4a32056385e5e6719"),
+            base16_literal("7f82130379fc31c64cdd29d653e18eea66698c43da7b4fa3301e4cf4335c736e"),
+            base16_literal("2344cd1fda5965f4fef9116b2eb4dedd1fcc76a8dcbea576f3c3fd6a5c3f1340"),
+            base16_literal("ce3502240efe247b6999464201eb268cb63777927d5da5351fbe1c0e8381287f"),
+            base16_literal("4434a6c164af4c178b32f8cae800f3b43b409b046e8e2206455d75853ad4ebf0")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0xc7, 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff},
+    .e = base16_literal("b8b3b5e68fa625cb254090f75b31c37113693ad12de649ba31e86ad4a86459e8"),
+    .secret_indexes = {4, 1},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ff3ff0ff3f1000000080ffffffffffff01000000ffffffffffffffffffffffff"),
+            base16_literal("02ffffffffffffffffffffff3f00000000000080ffffffffffffff0f00fcfcffff"),
+            base16_literal("038fff7f000000f8ffffffff010000feffff07000000c0ffffffff7f0000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("5b085ebf09083fb578bedfd3be7818bc3a23d73a5cf0597079bb4a931b1c44b6"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("88e9a9ae065e432b4d0b656840dfd1cd10fba0e24e54817c30a16c1da5d250d7"),
+            base16_literal("d8fadb25fe234d133415e291a5251a9cf06ee7e557f94728ccd011b231cdc7d0"),
+            base16_literal("107aceca7752951d10acdd3f4f439c8d9754526c0fc95a6f21dbf4d49f2d297e")
+        },
+        {
+            base16_literal("d542160a148b0b31ca910bd82d6df98c17ad138edfe854f53cbb1c0421031d3d")
+        }
+    }
+},
+{
+    .message = {0xfc, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x7f, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff, 0x03, 0x40, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00},
+    .e = base16_literal("25cf1cb4e057b9d27ea4acac34ec339414cc7361d4b78c010391d7f35f044612"),
+    .secret_indexes = {7, 1, 1, 1, 4, 3, 5, 2},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("b6f5bddb0d9823649ef1e53f166715b10e9005a3133f7eb3172bb0a6f812f856"),
+        base16_literal("d5fc91ceab62da7fc14304dde209e67854c7c312aecb5441d085d14d3526a2a1"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ffffff00000000000000000000ffffffffffffffff010000fcffffffffffffff"),
+            base16_literal("03ffffffff00000000000000000000000000ff07000000ffffff1f000000000018"),
+            base16_literal("02ffffff010000f01fe0ffffffff1f00000000000000000000000080ffffffffff"),
+            base16_literal("02ffffffffffffff0f0000e0ffffff010000f8ffff010000f0ffffffe7ffffffff"),
+            base16_literal("02ffffffffffffffffffffffff0300000000000000000000c00f00ffffffffff0f"),
+            base16_literal("030000000000000000ffffffff01000000c0ffffffffffffff0100ff7f00000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02b3376381c596d5565f29e9beb7b9f55fbb0c4ff3dec496a66c61fcbe14e805ac")
+        },
+        {
+            base16_literal("027ee000ffff0100c0ffffffffffffffffffffffffffffffff3f0000000e000000"),
+            base16_literal("02dc2e8f4a7ddf264615c5b9ee9be200774314e3227865c032b2616719901f2252"),
+            base16_literal("021f00fc3f0000001e000000000000fcffffffffff00ff1f00000000000000f0ff"),
+            base16_literal("02070000000000000000f8ffffffff03000000000000000000000000f8ff030000")
+        },
+        {
+            base16_literal("03feffffff000000000000000000ffffff000000807f0000c0ffffffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000ff3f0000ffffffffff1f0000000080ffffffffff87ffffffffff1f000000")
+        },
+        {
+            base16_literal("030000f01f00fcffffffff1ffeff00000080ffffffffffff01c0feffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02f8ffff070000000000feffff7f00fcffffffffff07000000000000000000feff"),
+            base16_literal("0200000000f80fc0ffffffffff3f0080ffffff000000000000c0ffffffffffffff"),
+            base16_literal("02ffff000000000000e0ff07e0ffffffffffffffff07c0ffffffffffff7f000000")
+        },
+        {
+            base16_literal("02070000000f0000e00f00fc0300000000000080ff01000000000000f8ffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("5fa8b822f1ad7d2fdb121ef5393e91757c2fb716ab9ffee8b2302aaaf2b1ce1f"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("9cccc9b3d80f856deff88285a9dcb04a409ce113d25c925985823c8d8b3fee51"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("266a4cd942643dae23c1e383d8da91c6e79ddcd85882bce3b5546143250adf34")
+        },
+        {
+            base16_literal("c01e20f3e74ea35786b08656ecec064bd6c8da4926ce3f64a46b7aa8de84a8cb")
+        },
+        {
+            base16_literal("9c3e1d9b1c80a4812129d175ff24cd7823ad155f6141446b345c76500b73335a")
+        },
+        {
+            base16_literal("46a7b3d440a705248afc038f0f3c1ba8704e5fdf94440fc496e501d4e7267c5c")
+        },
+        {
+            base16_literal("6a85ca4248d388a89374d5b681628c2e078d009d856541a5da69c5bad61e3c70"),
+            base16_literal("00e4d67053adceee533a9a4fb29e8374ff7d51ae003ca11ce6ac98bb2b67db06"),
+            base16_literal("37496f3724592ea24ffa0f02f9e8749a573ab6a798c189daf5e63ef38439c987"),
+            base16_literal("89f94638dc55d88b57fe776ded73fbaf502c65074036076f6e32529b6a0658de")
+        },
+        {
+            base16_literal("f35a8db1ad5509e54359cf43a62c5432d0ad064e17135fd3594f29142a683c8a"),
+            base16_literal("0bddd42507cffe63e2c864ee2a447e96959f3bce7faf7c9a8953e66d3cc8d93f"),
+            base16_literal("1bbc7486822d02c4887d8fd374d0c8885ab37946bef77685c4cd370f1107c740")
+        },
+        {
+            base16_literal("7a589fa04560d1d5b5adec8006dec7cc186ddf3e1490f9c9c9ae6645e194e561"),
+            base16_literal("61be9a4c695fe1c72a381d54de3ea9bf71d73280aa485a8ae366c1fe57adf805"),
+            base16_literal("64920a2fbc5d0233ee6211ce99215e0b43b397193ffefcb00adb3ab3c63a1421"),
+            base16_literal("d62d1aa7b3426783e421541f0b70f4c3fee1616d073c88942ce5cc495561280e"),
+            base16_literal("4bcdf0bf25cfc3f19136320ad6b7834bde101678a266c7ecc64e22e049333db8")
+        },
+        {
+            base16_literal("9fb9905832a5ea68d7759528fef016e79001174bd83257cb2eea0b50f8409ebe"),
+            base16_literal("b164aa6ddea6357e6d830344ee335db3aad43f806a9ebaea1c37e4f588b7c737")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff, 0xff, 0x03, 0xe0, 0xff, 0x7f, 0x08, 0x00, 0x00, 0xf8, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f},
+    .e = base16_literal("93ffd2778f63a7641c6d1552632d0986ad83f33072b828e00f996402f0b29f9b"),
+    .secret_indexes = {5, 5},
+    .secrets = {
+        base16_literal("6c59102b61e36d54ee5c9b5da91acc7b2cb1c4626fc3421919be911b2c1a1967"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0263ea63c416e97bf751116346bc04b48730a1f332f903f1b46dc417572167f001"),
+            base16_literal("0300feffffffff3f00000000000000f8ffffffff3f00c0ffff833f000000000000"),
+            base16_literal("02ffffff0f000000ffffff9fff0100000000000000ffffffffffffffffffffff01"),
+            base16_literal("03ffff0700f8ffffff7f0000000000c0ffffffffff010000f8ffffffffffffffff"),
+            base16_literal("0307fcffffffffffff3f00000000000000f0ffff0080ffffffff0000e0ffffffff")
+        },
+        {
+            base16_literal("0300000000000080ffffffffff00c07f007e000000f07f00000000000000000000"),
+            base16_literal("03000000000000ffff0300f0ffffffff3f00c0ffffffffffffffffdfffffffffff"),
+            base16_literal("03ffffffffffff0fe00000000000c0ffffffffffffffff00f80300000000000080"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030100ffff0700e0ffffffffe3ff1f00fcffffffffffffffffffffffffffffffff")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("5ddc2976532e60d0b71565e5b9a45681494a3dc328ddd8e4cc5c079915c24cf0"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("141df4c4533e719f9a6d58cf3b562b9673782418d33dc2b6cfb43e22ca982ebf"),
+            base16_literal("25b1a4c7ad49c7f9160dcf72a22904f35df511ad3da9f69a2e949b13bd16a808"),
+            base16_literal("462a9a80668b0ab72feac64442e25c636c397aa6013fe8994780624bc6d096a7")
+        },
+        {
+            base16_literal("5f1e88dc6fead759b1c671195dd09212d03070db4a2e6a5c1efa1754fb41ccd4"),
+            base16_literal("bb3723217baefdb01a978455a98f39ba53f02b53fedb67edba3db7b19b069759"),
+            base16_literal("33aed4713bc34659ebe681e0ff25e03687cb1a6a3b67068f71009fc6ef3f3125"),
+            base16_literal("9051092b0abb61b3aafcd9573d8175bb4613dd5b057ed4cf8da1a467fcc5ad55"),
+            base16_literal("c9f24f7e8ab36049abb358254aadf0b77d5bf251e593b792542b2e876a700278")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0xff, 0x3f, 0x00, 0x00, 0xf0, 0xff, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0xff, 0xff, 0xff, 0x01, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("82c1b81c4ef8c7612863c175923d8c6c717a82b125dc36596f90de859c710361"),
+    .secret_indexes = {2, 2, 2, 5, 1, 6},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("02ffff3f000000000000f0ffffffffffffffffffffffffff1f00f8ffffff070000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03000000000000f8ffffff00f0ffff0100000000fc010000000000e0ff00000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("020000000080ff00000000c0ffffffc1ffffffff03100000f8ffffffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03fffffffdff00000000000000e0ffffffffffffffffffffffffffffffffffffff"),
+            base16_literal("0203feffff07feffffffffffffffffffffff3f00f0ff03000000000000feffffff"),
+            base16_literal("02ff1f00f800000000feffff7f000000ffffffffffc7ff07fcffff3f0000c0ffff"),
+            base16_literal("03ffffff7f0080ffff7f000000feffffffffff7f00000000000000c0ffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03ffffffffff0f0000f8ffffffff1f00800f0000000000000000f0ffffff7f0000"),
+            base16_literal("02ffffff7f0000000000feffff1f000078fcff07000000200000000080ffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffff01f0ffffff1f0000000000000000000018ffff0f0000000000000000"),
+            base16_literal("021f0000000000fc0380ffffffffff3ffcffffffffff1fc01f0000000000000000"),
+            base16_literal("020000000000c01f00000000ffffffffff1f00000000000000c0030000000780ff")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("536f9d30f4b18b8d7462baf6c1c2139efca6d450d127f48d2ef148dbb3689294")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("7c5b772fe3a5fc60994e018fc22c4ae104e1fd82defe734e3acd81ab326c8765")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("9a96f59023a914e8c39a713168f20e77514d75e0568d2f095fe2b16e590a69f1")
+        },
+        {
+            base16_literal("7b620e3c97074c03eb81e5b24317573ee8aa8e100d8ee756fee731b0b1b08933"),
+            base16_literal("2287106d801f159ca576c097b74d52df15fbd9f5a9c3204ff94124ee9fdaf8ca"),
+            base16_literal("430105ac00811c3181aeddd54a9b8664fd6110836659ebfb7664211248a12c75"),
+            base16_literal("e2a3a32729c12f3dbd6c54953f1789eff321d905848078d981deb69dbd42928a"),
+            base16_literal("2c96bac3ab9a8aa486d25aa0e1d41ab6b53acf86d5ca94901e70d2e0e634638a")
+        },
+        {
+            base16_literal("9db09298c4f5646e1bfbcb0e38ff53bffa92a59ae151c44d832ffbbf726e8d8b")
+        },
+        {
+            base16_literal("44baa67747315a45d58becfc390ced8ce3c9a4e016b8c8cf0424b1175f90b2ff"),
+            base16_literal("6bb887ff621ce881f7e548498e9378ec5258e5fb4d79d7c749703c069e6dd32c"),
+            base16_literal("6c47ddbb9026e4d3f9c44b51c20b32c746d1d26ae3824538c2f1cbcc3e93d74e"),
+            base16_literal("e895b4bcae4a380a461aaf3ad1cb00fa22b8f7d36bfabcd81e631cfa44947ca1"),
+            base16_literal("f5eaa19ea79a64fb2bddc11451fcc64d43ab04fdaa8159dc1536b32ad38c0b7f"),
+            base16_literal("2369536f48cb2c1a04576b41e9aead04f888b5bfcdc94c5909ce087065427aea")
+        }
+    }
+},
+{
+    .message = {0xff, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0xff, 0xff, 0xff, 0x07, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xfc, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x03, 0x00, 0x00, 0x00, 0xfe},
+    .e = base16_literal("8848a5e69f2ef1673b66aed425eb415d9aee122b373de1231ae7b228123521c2"),
+    .secret_indexes = {7, 6, 3, 1, 1},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("030000f0ffff0f0000000000000000000000000000c00000000000000000000000"),
+            base16_literal("02000000000000f8fffffffffffffffffbff1f00fe000000000000000000007e00"),
+            base16_literal("03ffffffff7ffc3fe0ffff010000000000000000000000c0ffff0000000000e07f"),
+            base16_literal("02c0ffffffff01000000000000fcffffffff3f0000000000000000c0ff07000000"),
+            base16_literal("033f80fdff1f0000000000000000f0ffffffffffffff0000000000000000c0ffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffff81ffff7f00ff1f8001ffff0700000000f0ff010000f8ffffffffff07e0ff")
+        },
+        {
+            base16_literal("0300000000fcffffffffffffffff000000f00f80ffffffffffffff0300feff3f00"),
+            base16_literal("03ffffffffff3f0000000000003c7f0000f0ffffffffff070000fefffffffdffff"),
+            base16_literal("020100000000fcffff7f00f0ffff0ff003000000fe03000000f00f000000000000"),
+            base16_literal("02ffffffffffff0380ffffffffffffffffffff3f00003800ffffffff1f000000c0"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0200e0ffffffffffffffffffffff010018c0ffffffffffffffe3ffffffffffffff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000000000e0ff1f000000000000003ffeffff070000000000000000000000"),
+            base16_literal("02ff01001ee0ffffffffffffffff0100000000000000003fc03ff8ff00000000fe")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("f9093dae7d973674f8bd3e2f240903293cd720b7f851b274bb2ec70b332d798f"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("624259b6985caa7291b8acb695855332d7d73ff6fd5e52ac36b1298aeb0f1226"),
+            base16_literal("e4b5ac51666b7ea2be6824259cb190b582f3860cc7f312b9f09ad09d4610a849")
+        },
+        {
+            base16_literal("52b81b36f1c964e816e5e1a112a82b33d192dde7fe8dbc96b836503dd43319bc"),
+            base16_literal("07e1ed11dcc4f7ddb81491ef3a44c3025d8746a78d18a2b3c3c7f7aecc43fa18"),
+            base16_literal("044acf1ca0be347638243b491b630856f0ac8dfcf5d3193af1658022c80485cc"),
+            base16_literal("1b42aec3790f4a523600e21de06676bae9540e6d6732d23120c0d3193193ca13"),
+            base16_literal("f8279f4e15a13de710fff298ed4ab79111cf43a983671786f6359a9ce5c3c92a"),
+            base16_literal("b7957843a71035d70a380cac54822169b44d5b1248a6f62577daa417bbdbc080")
+        },
+        {
+            base16_literal("b7c163a4a69aacf2366642f155d4a307fcba4883841825b0c59a470e1fc953b6"),
+            base16_literal("e9bf86c42efee80986412ca3c573e27550682b57028aa0fb2d6a44e8e32c9dfe"),
+            base16_literal("0e85be5e952fbecc3af75d40822098bf60f60bd0f82e44a4493d80d1c9276ab7")
+        },
+        {
+            base16_literal("65785f791f362e45ab3e0670fc26dcb37b5d460792edef63ab539670cb8e655a")
+        },
+        {
+            base16_literal("38ded0f0651794f4f590f1fa84673255c48132ea1ba524c5b1f24c4707082599")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x9f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("f92fda972a4adba8e9e37a97f21ab33255f7a70d222cd1de348d50008ff7b62e"),
+    .secret_indexes = {7, 8, 5, 5, 5, 5, 3, 5},
+    .secrets = {
+        base16_literal("65b2bf9b7431838ed59f07835a8ea3bfc93a71320f8d9abc2d98cd1ab2614b4f"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0349879760ea6f54ae067a91d5832dc18e2a7e29e57a8690744429a72ea3476439"),
+            base16_literal("02ffffffff03000000feff0f00000000ffffffffff1f00000000f8ffff01f8ff07"),
+            base16_literal("03ffffff80ffffffffffffffffffffffff0100fe7f0080ffffffffff1f00000000"),
+            base16_literal("030000e0ffff0300000000c0ff9fffffffffff7f00000000000000feffff3f00ff"),
+            base16_literal("0200000000f0ffffffffffff7ff0ffffff7ffeffffff010000fe0ffe7f00000000"),
+            base16_literal("02ffff7f00000000000000ffffffffffffffffff5fffffffffffffffffff0000fc"),
+            base16_literal("03ffff1f00000000000000feff3f000000000000007ef00fffffffffffffffc000")
+        },
+        {
+            base16_literal("02ffffff03380000000000feffffffffff07ff7f0000e0ffffff00000000000000"),
+            base16_literal("0300fcff7f00f001000000f0ffff0f00000000e0ffffffffffffff0f0000000700"),
+            base16_literal("030000000000feffffffffffff070000fcffffffff3f00000cf8fffff8ffffffff"),
+            base16_literal("033f00000000000000000000000000000000f80f0000fcffffffffff00000000f0"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300000000000000030000000000fc010000000000000038000000000000000000"),
+            base16_literal("02ffffff00feffffff0000000000fcffffffffff7f00000000000000000000c0ff"),
+            base16_literal("02ffffffffffffffffff0f0000000000f8ffffff0000f2ff3f000000000080ffff")
+        },
+        {
+            base16_literal("03ffffffffffffff3ff8ffff01000000f8ffffffff010000000000000000000000"),
+            base16_literal("0203e0fffffffffffffffff8ffffff074000008007000000f8ffffffffffffff1f"),
+            base16_literal("02ff7f000000f8ffffffffffffffffffff07fc0100ffffffffffff3ffcffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000e07ffe000000000000000000000000f0ffffffffffffffffffffff3f00")
+        },
+        {
+            base16_literal("02e0ffffffffff0300f8ffffffff0700001f00feff030000000000003800000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffff3f0000fcff00000000e0ffff0100000000000000000000000000f8ff"),
+            base16_literal("02ffffff7f00000080ffffffffffffffff0000000000000000000080ffffffffff"),
+            base16_literal("031f0000ffffffffffffffffffff01000000000000000000000000000000030000")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffffefffffffffffffffffff3fffffffffffffffffffffffffff0700e0"),
+            base16_literal("02fcffffffffffffffffffffffffe7ff7f0000f8070000e0ffffffffff7f000000"),
+            base16_literal("02ffffffffff1f0000fcffffffffff0ff0fffffffffffffffffffffff3ffffffff"),
+            base16_literal("02000000000000000000f03f000000000000fe3f00000000c0ff7f000000fcffff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02e0ffffffffffffffffffffffffffffffffffff0f00000000ffffffff0fe0ef07"),
+            base16_literal("02ffffffff0d00000000001f0000f8ffffffff0f00000000000000000000000000"),
+            base16_literal("02ffffff010000000080ffffffffffffff0300000080ff01000000000000000000"),
+            base16_literal("02000000000000f803fcffffffff3f00000000ffff07001800f8ffff0100000000")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("031ffc0100000080ffffffffffffff07000000000000600000000000e0fffffffd"),
+            base16_literal("0200000000feff1f0000ffffffff0000ff0300c0ff7f00c0ffffffffffffffffff")
+        },
+        {
+            base16_literal("03ff0f00c0ffffffffffff3f00fcffffffffff7f000000001f0000000000f0ff3f"),
+            base16_literal("02ffffff0300c0ff1ff80100f8ffffff7f00000000000000f801ff3f0002e0ffff"),
+            base16_literal("02ffffffffffffff000000000000f8ffffffffffffffffff1f00feffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300fcffffff7ffeffffffffffffffffff0000c0ffff7f00e0ffff010000000000")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("feba1f4619b3c678a6b75dfae8e3523f7d93a25f598e0fcffd3b530f1f32f29b"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("2070676b590c9a4d19008d0457a54662cd19493d84330b96994f249c945b66b0"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("1423e3a5bc7f27f42262e2cc65651b0daafd3b80a5b60dcb0cd26bd03f7c06a3")
+    },
+    .s = {
+        {
+            base16_literal("c1d755cc191d3ddd153ce042f5f086aedb850c3fd42755f870fc693bea3b6567"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+        },
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("b21c21303f9c92b4a8cd7967d883d066296b7e393b406b11161a02ba344dd51d"),
+            base16_literal("9463696ba5f197ee434cd54a77e758f775cb8672013a4ef08b6ebd648811db5b"),
+            base16_literal("fcf8e57f1df3cb96285b8d8413383d50431aa5952d8782a84295ff70d028e704"),
+            base16_literal("749cbfeaad32cd0514751a850b1a0bb3ff06c050e0d3144fabf486e5ee14f772"),
+            base16_literal("a8fcb9bc46ca12c4735ecd10df40a529a97efe2c5c7436f71408c4c0d0624a1d"),
+            base16_literal("3a4d27730b9b11a7b356a327c508577696cfa21633f28f3d01db6091fc634a04"),
+            base16_literal("dbc86397c70cf7d8fe5a184e8086830b36ae01a7a8e77c108a6f6a6d9d3d602f")
+        },
+        {
+            base16_literal("859cfc118d566f767c85d1a4c9ac6080a60180e616811ceab6d66976b0cfc144"),
+            base16_literal("e06ae5fef75ff23e5c5fe012eb75eb0e566354910cc9c8c8d01ff66310c6d994"),
+            base16_literal("1ba1660970a94172bd99bb51d55e9d3371d13f588d7530c1329e380ab67cf021"),
+            base16_literal("13df5bcc933920cd30e1ea05d913c73db43be7e228d8a61bbda57522ab50c9a8"),
+            base16_literal("2a673ceead4f842450760fba903e54ebc2ffbf056875418ddb496fa797515f5b")
+        },
+        {
+            base16_literal("0ee9ee858d2249a96cc54d62e651df5069567b1ec5ef41baea55ccc69a70f085"),
+            base16_literal("ad3c11eeb2086fece2fe48b57ae6305ccd812d5101717c2c57b347a0a82accf6"),
+            base16_literal("c228d6906ca6b1cd6275a7d5dbf33f7caa710d64c259a616e0bb82422c7afcb8"),
+            base16_literal("aa0fabd4e234e5a74f937d59eebc614a72b4cc128db2ee118740f29ada1429b8"),
+            base16_literal("21c83104947d52b1f538db05f5efdc34d6ebb6277fc45155c59bf257f8838936")
+        },
+        {
+            base16_literal("1a0e74c1578480787af3a04dc9bcdc8cd9d480bb0d6b45319d6057528e1dfd00"),
+            base16_literal("da320f86d5ce738ca8fb08fd2f45ffe416e74c2b97d3d705fb998a1869341307"),
+            base16_literal("972af1e4e73fd1cdb37ba23cdcd4d1be9d4b6026b5780c6f872e90b643ac9528"),
+            base16_literal("ab7fc8b5ebfbc401682e56233df6adc0f43541e1794b955733bd3ed1839ff584"),
+            base16_literal("0164c2d4d6e08571d0d16d178fc1bff887fdf902d6a9f5b8cc80882355b134f0")
+        },
+        {
+            base16_literal("7da851d6e29af461666ae903884c23782d174d0a4e1e67a817e1888df95a427d"),
+            base16_literal("5ad3775ef1ca394d8bbaa861db613d21fda12bfef19d6818a88e63c22a01bd38"),
+            base16_literal("349ee7670d2990045ef2d1bf5670a2e8328d477f8034e66cfafbabd5ee6dc5a9"),
+            base16_literal("b8633d7693c69d304e91985c3f7bb8d7ac456acd0913ad620aea9283d1d7ca83"),
+            base16_literal("3c6c7d97f9fafc4a8e3d7709a63d1836c17920e806167ba7380872eac555ee88")
+        },
+        {
+            base16_literal("3004a2298454dbe7669bc48f8bd876fc4c06e16b301599bf050acb03b17d2daa"),
+            base16_literal("cd5f96e7aa6bc1e81160606186c2f61f753f7e7f018d2bb3614724f3814f3820"),
+            base16_literal("a59c47965a1581a5f600251db55ce87cdae5b1429af6cf6ae9e33168dff92e18")
+        },
+        {
+            base16_literal("6dd90615c31b1b50fa201a6dadc783d41f9ee58347aa457422528ef9ee706f0f"),
+            base16_literal("1a6dfec8c289803f0dd70be6aed7be531b38dc507b78d2798a67e6e7237f4504"),
+            base16_literal("f4939339b045197a075f4fc56d600acda352ef56a4c376c2f2c5d38d8ba3bb97"),
+            base16_literal("a3cae4106f44cbe0129d0065598160b6dce47a5fd70c620a4ff5af10adbd5938"),
+            base16_literal("7c5399daa5c37671ba0244804c25ed27f0ffc8ca7e87823f1f006905cfe33dd3")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0x7f, 0x00, 0x80, 0x00, 0xff, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfe, 0xff, 0xff, 0xff},
+    .e = base16_literal("26ba5d8ac8562d044b857b140ffd8aeadec49e3090033fa1527979592aea3350"),
+    .secret_indexes = {4, 2},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("02e0ffffffffffffffff1f0000000000e0ffff80ff030000000000c0ff1f000000"),
+            base16_literal("02ffffffffffff0f003e0000c30f0000000000ffffffffffffffffffff3f000000"),
+            base16_literal("03ff6f0000000000000000000000000080ff3f80ffffffffffffffffffffff00ff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02e0ffffffffffff007c000000030000000000000000fcffffffffffff0f000000")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("f8193a31506a3d4c1a5eacbdecbd1901ebf3ae2edf6e2b9d0adcd4b8f9d9c825")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("ba07607fe2ee74aa40ae97a24767a2def114fa2419dc4743bf3585b2fb1366e9"),
+            base16_literal("1a31fdcbffee96033be894920a94108d0e15c1f1c44b23bdef4206e982e141b6")
+        },
+        {
+            base16_literal("3819fd9113efdce3eb94ea09f8eb10f52afec7c796697db7a3fa759edcf51372"),
+            base16_literal("829c3694b56f4931385be302ac00d8a69d36d618b5b2a043bff6297cc676c88c")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0f, 0x00, 0x00, 0xfe, 0xff, 0x0f, 0x00, 0xf8, 0xff, 0xef, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("c551d4e7fe821dbf3bbbbe10f0d01b95b155708ccc7492a109063b8580ba3868"),
+    .secret_indexes = {6, 7, 8, 7, 6, 3, 6},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ff3ffc070000000000000000ffffffffffffff1f00000000fe0300000000ffff"),
+            base16_literal("0200000080ffff1f00c07f00000000000000000000000000000000ffffffff80ff"),
+            base16_literal("02ff0100f0ffffff0700000000c0ffffffffff1f000f00000000000000c0ffffff"),
+            base16_literal("02ffffffff010000000000ffffffff3f00c0ffff0100000000000000fcffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300000000000008fefffffffff1ffffff03000000007f00c0ffffff1ffcffffff")
+        },
+        {
+            base16_literal("037000000000feffffffffc1ff03000000000000fcffffffff0f00000000c0ffff"),
+            base16_literal("03ffffffffffffffffffff3f0000fcffffffffffffffffffff010000000000f0ff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300e07f00e0ff3ffe0100fc000000f8ffffffffffffffffffff0ffeffff070000"),
+            base16_literal("02fe0f000000feffffffffff07000000000080ffffffffff000000f8ff0700feff"),
+            base16_literal("0200000000000000800f0084ffffffff000000000000000000e0ff0ff0ffffffff"),
+            base16_literal("0300000000c0ffffffffffff03000000f0ffffffff010000c07f00000000c0ffff")
+        },
+        {
+            base16_literal("03ffffffffffffffffffffff3f0000000000008007000000e0ffffffffffff7f00"),
+            base16_literal("03ff9fffffffffffffffffffffffffffff010000feffffffffffffffff010000ff"),
+            base16_literal("03ff3ffcffffffff7f000000ffffff3f00000000000000000000000000feff7f00"),
+            base16_literal("02ff01000000000080ff1f0000000000000000c0ffffffffffffff0f0000000000"),
+            base16_literal("020000c0ffffffffffff3f80ffffffffffffffffffffff030000f8ffffffffffff"),
+            base16_literal("02000000000000000000000000e001000080fffffffffffffffffffbffffffffff"),
+            base16_literal("0280ff0f0000000020c0ffffffff3f000000000000000000f8ffff7f0000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03ff0000000000ff0000000000feffffff3f000000e0ffff00000000000000fe03"),
+            base16_literal("03ffffffffffffffffffffffffffc3ffffffff010000f8ffffffffffffffff3f00"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000fcffffffffffffffff1fe0ff0700fcffffffffffffffffffffffffffffff"),
+            base16_literal("020000000000e0ffffffffffff1f0000000000000000fcffffffffffffff010000"),
+            base16_literal("03ff01feff03000000000000f8ffffff0180ff3fffffffffffffff0f0000000000"),
+            base16_literal("030000c0ffffffffffffffffffffffffffffffffffffffffffff1f0000000000e0")
+        },
+        {
+            base16_literal("02000000feffff0f007f000000000000000000f07f000000000080ffffffffffff"),
+            base16_literal("03ffffffffffffff7f00007e00000070ffff7f0000fcffff030000000000000080"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffff00f0ffffff0f00800f0000000000000000feffffffffffffffff010038"),
+            base16_literal("03e0010000e0ffffffffffffffff3f00000000000000f8ffffffffff07000000f0"),
+            base16_literal("020000e0ffffffff3fe0ffffffffffffffffffffffffff87ffffffffffffff0f00")
+        },
+        {
+            base16_literal("0300000080ffffffffffffffffffff0700fcfffffffffffffffffffffffff7ffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffffffffffffffff7fffffffffff1f000000000000f8ffffffffff0700")
+        },
+        {
+            base16_literal("02ff8fffffffff030000f81f000000f8ffffdfffffffff7f000000000000f8ffff"),
+            base16_literal("020000000000000000f8ffffffff7f000000000000ffff1f0000000000000000c0"),
+            base16_literal("0200ffffff87ffffffffff3f0078000000f8ffff7f000000000000000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0280ffffffffffffffffffffffffff1f0000000000f0fffffff1ffffffffffff3f"),
+            base16_literal("030000000000fcff1f0000000000004000feffff0700000080ffffffffffff00fe")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("b9321dda4e4b1a6d3ec720cc3129244832438fd7897311e530f91cba610c391e"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("c4f85f81e5a9b39ca20134a4555c534ee324eacf05c14c4fb38493d96edc05ab")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("af48f915e4976d10bd7440da2765d8c19de2baa661c20a26670b501c7f0259ec"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+        },
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("b1d8646717bab5162f977618be6a59334a7fe97d74082477adeeeb241147f3a5"),
+            base16_literal("b5039e726ce1e8da643303d46e145897874d304cbfffb542e68644b7169dd23d"),
+            base16_literal("e28d87413808818fbc453735f0144b5d9a98e1395a324118205290d6d4e11365"),
+            base16_literal("6dfc434f6eaf1b4ad0cd0845e7deb4bf673a9ed6444ad11c96e3c9791447bfe9"),
+            base16_literal("382f3f7ef645956c6771a37fd6e3f539a0d40f419e987e7ff875530e04bd1851"),
+            base16_literal("23b3f81971c7ee247a0967a3637a4bcdd21b30d715e3674af8fa7b9a270320f4")
+        },
+        {
+            base16_literal("7bff127c05627358c8e3fd44abaa05969ed84d50dd75473177db94da8b1c4ce6"),
+            base16_literal("66d9985e1e22a092511f5e45073c5f42581382add2eaee18c63fb46f64cb1b11"),
+            base16_literal("77c9b81ae91e58f1791d77a04412e18e810fb9f6f641b9cd5bc8d1a634be184a"),
+            base16_literal("01efe3b460c5bbfbc8d1bd68a7a8a7a338a8ccf08c3b0eabac7b9aa25ff4c12d"),
+            base16_literal("e3f2d5c237bccc46f29e95d6354313264b42598a896a5f0946fbce6f00e78d2f"),
+            base16_literal("1503803db8f62edd250bb5c78e201a580457fe8bf3e23a5ac18a2c20ceced513"),
+            base16_literal("89017a314cbb717cea90ae20514258dee7ec979fa13cf47d15dd2662582bae4f"),
+            base16_literal("5d4848bd467eec12e30ad6879615af82be2c32292b5045fc6eef4f25b349fd73")
+        },
+        {
+            base16_literal("f3d4217f2de9e39da0605a85a1fa306ddac5c52576f3e54000ddfb8941c337c3"),
+            base16_literal("31b6ef3ad487e0e714b959533f5cd333c3e0680f5b0ae92637c5bd4c5befbc4c"),
+            base16_literal("133017a6e3900716007fb3acdec852a0f82a8a046a2bb4c89a45b5ae636ec57d"),
+            base16_literal("9047715381c8886eeef1d8e62476cf466a2dc40d2d78fd549daf4969bb8957ac"),
+            base16_literal("ad6d0bfe50805556b79c0950d04080d0b33d0087071851a062966331107cf86b"),
+            base16_literal("2cf42d2740e357ddbf41ae9b6490d7ad68b13dbd07d25c74dfe5ed20ef7a4c23"),
+            base16_literal("ab371953364e5da87f78ae29e95cb8ca3a47cfe4c297181223d92698a6d5f4a1")
+        },
+        {
+            base16_literal("efdfbf656b8799f805f52cc6b1aaa4a0ce2a75e93394b5fcfd7dc50fe766b2c2"),
+            base16_literal("0c1f393ac5e0784f8ab453aea527af128b793e406d9048af84776cf76129ba12"),
+            base16_literal("fadab92b8f7a38216aa6ffee1b443e0f50b8411daeabec8a84ab7408d8c57aa6"),
+            base16_literal("84283713994c781e60a27d3336eadf8c57ccf204063c26d2f39747a7ce34b23b"),
+            base16_literal("d821b907cb01450d1dd4beab553cbe099f5d0f1996a6737399604de5ca2869e3"),
+            base16_literal("2276cdbf7d14182234b71288ae963022f7259bb5c34eeea9485d4907ae861991")
+        },
+        {
+            base16_literal("381685e0a8798cfca01d60dfc519ecbd18b26056c0c5df3d2ee7035b964e7f88"),
+            base16_literal("c0c1bb6e7993a0f75de28cf58691b43141d5cfc6e047184c0e24d872d60c1ff8"),
+            base16_literal("224fbb02448b8364778f6286b92345cc372acf631ca496a8ea0cf177f6e0b93c")
+        },
+        {
+            base16_literal("afa51d50b7fb20f4437e0ab4c732189eda1bf41c7c847b676fa0646547a5a578"),
+            base16_literal("4f5b11a4e1cbba61ee81bd19d4fd9a670bccca8701dffa0e5b17d6314eb62f21"),
+            base16_literal("d49e67b0cf2cf8a97e02b14e99c5546b9d569d4e7fce39eb80b080d57759f318"),
+            base16_literal("03c8f8d31e3208c3c2b74c848e71b96ff6a09ef73a812429cd1d3665feb8fd16"),
+            base16_literal("a392566eedf7293101e1d215ea08f6ed68e2a064cba75d7cac4ea84ee48c2ee9"),
+            base16_literal("e4260776c8f45fe79bcc892acc06cd96dbb841497c97fafd1b7de4c1ffba36cb")
+        }
+    }
+},
+{
+    .message = {0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfe, 0xff, 0x07, 0x00, 0xfc, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0x3f},
+    .e = base16_literal("56c6dc6866cde14d8e5cfc4fe78e8ec903362be1cca411a96e90826ab922f40f"),
+    .secret_indexes = {2, 3, 1, 8},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("84e986da592e0d92a8dcb82fe86b75d899e4728dcc12a781f34e4fdb942e0ed3"),
+        base16_literal("4c2694eaa20ce3c93dbf76c91cbf14c7330272fd905f2c0bf5765819b1d5aa40"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffff0f0000000000f8ffff0f000000000000000000c0ffffffffffffffff")
+        },
+        {
+            base16_literal("0200f8ffff3fc0ffffffff1f00000000000000000000f00000000000feff3f0000"),
+            base16_literal("0200ffffff00000000000000c0ffff7fe0ffffffffff0100000000f0ffff0f0000"),
+            base16_literal("0398b47b17545dfe19accd8c6bb243b95b6494438a0ae7a9914e97acd69dea884c")
+        },
+        {
+            base16_literal("03f7eaf703032ba213dd560166b2f3cb86a8a2d385268e9899589f7b0f3e32f3f4")
+        },
+        {
+            base16_literal("0300e6ffff7f000000000000000000000000000000f0ffffff01000080ffff0000"),
+            base16_literal("03010000fcdfffffffffff07f8ffffffffff0f0080ffffffffffffffffffffff7f"),
+            base16_literal("03fffffffff8ffffffff7f000000000000000000000000000000e0ffffff0700f8"),
+            base16_literal("03000080ffff0700000000fcffffff1ffcffffffffffff3f000000000000000000"),
+            base16_literal("03ffffffffff1f00f0ff7f0000000000fcffffffffffff07000000000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000004c0fffffffffffffffffffffffff1ffffffffffffffffff0f00007f0000"),
+            base16_literal("030000000000000000000000f0ffffffffff0100000000000000c0ff0700000000")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("82adc85953a756c0877285adb8148c74eb394662bcab5e7b6efb43135c48e83d"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+        },
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("4fe7edc1a70f1790163ac85eed0ef0a2654c86b986b220c98963e5bc57bc1a06")
+        },
+        {
+            base16_literal("c5605e88cf1298e403137fbafbeaa3c5d3fba265f8b17126eac3a2496a044ec7")
+        },
+        {
+            base16_literal("ba25ec81a45e27909c990ecf9764cbcc2c0517395c7f0e2c71617c98e693d308"),
+            base16_literal("0f69caa2b310cb38ce8555631d1621567076d2e29aa560583895ca75d4f579eb"),
+            base16_literal("3c7179b81809196c0ea49b64dc02dab8c25bc2bc471b81486396d6699f1b4438"),
+            base16_literal("2766b0428d0a9149cc4247f05e40681529a0e08bc8b2448765edd19ab068f397"),
+            base16_literal("19b2e5c87cfb9667086e6e4413c402b7d2db8a4900ca617483478572ae0175ff"),
+            base16_literal("b9453a89463666987a1ca7989942b1bfba4115a67519a8a2b1ed5ec3016b2f93"),
+            base16_literal("dc6e7ec9f19079ffb75873fd9c6780759c85d81d2dfd0beef48c67ad2aeb46f3"),
+            base16_literal("cbe703198b330a583dde94f31378cea5e5e4ea2d3a22eaff446d63e6ef4cc993")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0xe0, 0xff, 0x00, 0x00, 0x00, 0x00, 0xfc, 0xff, 0x01, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x07, 0x00, 0x00, 0xf8, 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00},
+    .e = base16_literal("126c4b3edebc48bce3c5875ff0a8f366b088c94669f08caca1f1ed2f0a44d853"),
+    .secret_indexes = {1, 8},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03ffffffffffff1f0000000000f0ffc10000feffffff0f00000000000000f83f00"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0200000000000000800f0000000ff0ff070000000000f8ffff03000000e0ffffff"),
+            base16_literal("0300000000000000fcffffffffffffff01000000000000c0ffffffffffffffffff"),
+            base16_literal("030000000000e0ff030000f8ff3f00e0071e000000000000ffffffffffffffffff"),
+            base16_literal("03ffff7f000000000000000000000000fcff7f00000000c0ffffff1efc0f000000"),
+            base16_literal("0300000000ffffff0f0000000000e0ffffffff0300000000000000000080ffffff"),
+            base16_literal("03000000000000000000f0ffff0000fe7ffe0f00f0ffff000000e0ffffffffff1f")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("e58e5822cdf03e8acda9e8fb7854c2c4206559c569206d15cb885a11a790043e")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("75fe5cd539e54c28487d515bf1647ba000e719891596625fee9fb061f216b1b0"),
+            base16_literal("e4d3ed2c68a78553dedc0868cc058fd92bac84d46101e34854d439714303844d"),
+            base16_literal("dc2a69b2a339b7dababff620b7bbb33f1c2c0236b82663c791ff5d7ee4e7bd4b"),
+            base16_literal("510fdad76760498af9860af3ba86f2540d429188876a575f612bafddfc44be05"),
+            base16_literal("4d343cb0f243d491002c8691f383e66d20d3a15611a0964ce0d1b0dbee2d9a0a"),
+            base16_literal("7cc575731955d60cfb9bf60ea0b01e68f95b94fbf298e2d71b8a8f9dbfd8ddc1"),
+            base16_literal("3ca4c7fcc87075234c6d3869fb655e4e10a89726de20501d66c7d4f08cf67981")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xff, 0x07, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("a2668fcfa3c33fb069705e1cba09db6b5d02f855714c936beab7d7c282240312"),
+    .secret_indexes = {7, 4, 1, 4},
+    .secrets = {
+        base16_literal("0a992ac3f8d01fa48816d67e066244a5526a7729c19fb4c52833361767497dd6"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0300c0ff1fc0ffff3f000000000000000000000600000000000000fcffffffffff"),
+            base16_literal("02ffff070000000000000000000080fffffffffffffbffffffff03000010000000"),
+            base16_literal("02ffffffffffffff3f00000000c0ffff0180ffffffff7ffcffff1f00000000c0ff"),
+            base16_literal("03ba16c35ada6e1cfd1f3f7b6246d5adfd16ac5c21b27187871e967cd9f95fabe4"),
+            base16_literal("02000000000000ffffffffffff1f00fc03000006000000ffff87ffffffff070000"),
+            base16_literal("02ffffffffffffffff030000000000ffffffff03f8030000fcffffff00fcffffff"),
+            base16_literal("02ff010000c0ffffff7ef80100000000fcffffffffffff0000000000ffffdfff0f")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000c0010000c0ff0f80ffffffffffff07000000f0ffffffffff000000fcffff"),
+            base16_literal("03ffff070000e0ff0300c0ff000000000000780000f8ffffffff03000000000000"),
+            base16_literal("020000000000000000000000000000f8ffff1f00c0ffffffffffff07f8ffffffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0200000000000000f8ffffffffffffff0300e0ffffffff0f000000fefff0ffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300c0ffffffffffffffff3f00000000000000ffffffffffffffff070000000000"),
+            base16_literal("02ffffffffff3f0080ffffffffffffffffffffffff07000007000000c0ffffffff")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("3147c0501355802ff3e5440d4622509913e93cf69414c50933e39d1733f2a6be"),
+            base16_literal("6a8aa4b41f7b3173219cf98bca2ed396fe2d4b8ec64ba653ef12f36c5ea74a78"),
+            base16_literal("229236de54fd9f6e0fd8a0ead0cf21d467f57e258f4d1ffb3c57f187ef074e84"),
+            base16_literal("3bf4bf8ac202af90d966ac409346a44a054bd19c26d5a933c4135656b30b633b")
+        },
+        {
+            base16_literal("0928828286f27774e180f6790d3f4f466d84dc863e2a56a1002ea1cba6ac46cf"),
+            base16_literal("80b7081971c3156b283eedcf80492ba96f9c8e9cc828aade692734b09e1319d7"),
+            base16_literal("36ca680915988c5f5e64555627706727404150cf605ebaa21ff876fb27d1b730"),
+            base16_literal("95fd27e9221098facc4368aabf8916b69b8975c51aa0b3709c0fb9c0c977be38")
+        },
+        {
+            base16_literal("25bb4150b5095c6b57d72b920de2cc937c51a76f1e5a1fa1c1c5bb82dc638855")
+        },
+        {
+            base16_literal("6948547e4a776f675ec21b3bc79840e3c047bac14ce33ecaff56de2ab1cbd416"),
+            base16_literal("61ed46d078c286b2e9ec82bde30df97bb4d0b91106ab09cebd3a6b0065ff670e"),
+            base16_literal("4824119e2f4a7dce6af7b50751b311bc4cf086ea9e3fc276f9acc02c6a9dcb3e"),
+            base16_literal("581ebc649d7fa3feb02d781bfa1dbebda14c4e21399eb0915c79ed89023fd1a2")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("923a77acf95df778515901510315ef2ea7df566d66bc1426634e6aab955aba32"),
+    .secret_indexes = {8},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000000000000000e0ffffffffffffffffffff0380ffffff0f030000000000"),
+            base16_literal("03000000000000000000000000feffffffff3f00000000ffffffff0f0000000000"),
+            base16_literal("02000080ffffff0100000000f8ff0700000000f0ffffffffffffffffffffffff1f"),
+            base16_literal("03ff3f00000000000000000000000080fffffffc7f000000000000c0ff000000ff"),
+            base16_literal("03ffffff0700000000000000f87f0000000000000000c0ffff1f000000000000f8"),
+            base16_literal("02ffffff0f000000fe3f000000feffff7f0f0000fe3f0000000060004000000000"),
+            base16_literal("03ffffffffffffffff0100000000fcffff0100ffffffffff0300000080ff010000")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("cccb40b552e294ecff76873c4267af09e9f3469549cadbfd2909a25ded526655"),
+            base16_literal("00369a74a0420e7092ff2c765eca6a03abdc204e7d23187ae4035d47407d159f"),
+            base16_literal("54604180605227491cb425e4f175995d1ce391b0b3202306b93fcfc39e0b3f8c"),
+            base16_literal("9139d0a65198d368302bac763cc51ce65dc30b06788deb0369947b80ca45fc1d"),
+            base16_literal("40b57facc50c34a1e2faf338e29b27fe0660cfb9be91ba88156143b162708386"),
+            base16_literal("a1fc775fd0010c4afd20ba6ec8658aa447fbec01309fcd0e03f490964f281d2a"),
+            base16_literal("066b2a4d2616df41684b64d20c5d9e78ed3b84684dfe17b170b1112d0af4ff2d"),
+            base16_literal("681c84fda617e8487cb68842ef8f689017b2294f6f9e1462c9c23131ed9269cc")
+        }
+    }
+},
+{
+    .message = {0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe6, 0xff, 0xff, 0xff, 0x03, 0x00, 0x00, 0xe0, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+    .e = base16_literal("23b55aedd82920281cf99261e4957397e78edcf934356d5d36ee0dbdf48bcd2e"),
+    .secret_indexes = {6, 3, 8},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("7f7776e56a7e5d2e4afb7048476441444ed8d913c3c43a96d17ac19301a45419"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ffff3f000000000080ffffffff0000f0ffffffffffff07000000000030000000"),
+            base16_literal("02e0ffffff1f00000000c03f000000000000e0ffffffffff01000000f8ffffff80"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffff0100000e0000f8ffffffffffffff03000100000000c0ffffff0f0000"),
+            base16_literal("03ff0100e0ffffffffff3f0000f0ffffffffffffffffffffffffffff001e00ffff"),
+            base16_literal("030300000000ff01f81f0000fcffffffffff030304000000000000ffff11c0ffff")
+        },
+        {
+            base16_literal("03ffff0f0000fcffffffffffffffffffffffffffffffff01fcffffff3f00000000"),
+            base16_literal("020000000000000000000000000000fcffff0f0000000000fcffffffffffffff7f"),
+            base16_literal("03368a05f32d7de716b3e9bb0f797990e7af61d38095e0077c9b86977605406479")
+        },
+        {
+            base16_literal("03fcffffffff0000000000000000000000000000000000000000000000f0ff1f00"),
+            base16_literal("031fc0ffffffffffff7f000000020000ffffffbfffffffff0000000000e0ff0300"),
+            base16_literal("02ffffffffffff7f0080ff03000000f07f0000fcffffffffffff0f00f0ffffff07"),
+            base16_literal("02000000000000fcffffffff1ffc7ffcffffffffffffffff1f00e0ffffffff0700"),
+            base16_literal("02ff0f00000000feffff1f0000000000000000000000fcffffffffffff3f000000"),
+            base16_literal("020000c0fffffffffffff3ffff07e0ffffffc0ff0f000000000000000000fe1f00"),
+            base16_literal("0300000080ff0f0000feffffffff030000000000c000feff7f0000feffffffff01"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("8baaea0ffb615677e0381391f90d621356e3f53bb5549b551461331c84e78414"),
+            base16_literal("3de393b8b1b9c7ef67f2e1c5d25a5c71feaab91e93f5e442f24c6e4bf8ba0355"),
+            base16_literal("269d012139d763d314ed5d20d05c0447aeb3e3bb6e9c5bc436ced0fc193f5c1e"),
+            base16_literal("eab231e91158849517dae629580f83f76924470bc3e6fd7252cf062fe1cd1b32")
+        },
+        {
+            base16_literal("a80d1f5feec2e04e214323ba51f4556f851c19499079897b789799c09e46ec04"),
+            base16_literal("77883c3654608f8bc3962a6c2c5f3140981e0d3ad840d139656effbeae986472"),
+            base16_literal("1c0d5c81e4767647a29462a9e6fd3bdf317adb109246c8e5bb5c761e2c6a04eb")
+        },
+        {
+            base16_literal("fb7fbec85f5ee1dd75c17b012a64a3493a503491a6dd1ca78c662916a63fc7f9"),
+            base16_literal("cb3afb7ec3611943f8fc0e632c85e3e756bc28593cb1cfff738de1dbb49ad87c"),
+            base16_literal("0f572773f846904171948693808aa183969b2c3b8e95907cb6dc5730b6035a34"),
+            base16_literal("5b2bdd11a74fce30fd08c2b83249552a184f6a01e3729afba8b0be9c4f146169"),
+            base16_literal("f821ebc4739a69da4d84f79fd790807f6e73c02b6baf14746c1b338dae521ef7"),
+            base16_literal("5f37b59e1db16b249c4bea0c4831852c91b9bf644b6653782d631f3f373e6a74"),
+            base16_literal("087fb1cd61fccc7978f108ca67b63601378acfe79d56b85c43596fa46ae43173"),
+            base16_literal("ad2eed64c2306e423d6e61371ca8c5d6388453e71ba74e7145bf03fab202a48c")
+        }
+    }
+},
+{
+    .message = {0x00, 0xfe, 0xff, 0x03, 0x00, 0x00, 0xc0, 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0xe0, 0x00, 0x00, 0x00, 0x00, 0x00},
+    .e = base16_literal("28eba9c8bece1b7939e679563b867d003f641c33ade8cbfc6bf1c7288465df70"),
+    .secret_indexes = {5, 7},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300f0ffff0700f0ffff1f000000000000c0ffffffffffffffff7ffeffff0f0000"),
+            base16_literal("030000000000fcffff0100000000000000000000000000000000ffffffffffffff"),
+            base16_literal("02ffffff0100000000000000f0ff7f00ff0300000000000000f8ffffffff070000"),
+            base16_literal("0200d8ffffffffffff0f000000c0ffffffffffffffff03e0ffffffffffc1ffffff")
+        },
+        {
+            base16_literal("02c0ff0000c0ffffff010080ffff3ff8ffffffffffff01e0ff3f000000000000f0"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02fcffffffffffffffffffff7f000000000080ffffffffffffffff0f0000fcffff"),
+            base16_literal("0380ff030000fcffffffff3f000000f8ffffffffffffff0000000000f8ffffffff"),
+            base16_literal("02ffffffffff0300000000f41f000000000000807f0000f0ffffffffff7f000000"),
+            base16_literal("020000ffffffff0380ffffffff1ffe3f80ffffffffffffffffffffff0300080000"),
+            base16_literal("03f8fffffd0ff00000000080ff07fcff030000000000000000000000003e1c0000")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("5fed02709f814feed6c5c017713bcf470d775c74f778b44696cc9635f9e869d3"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("da9a537200d75d1756133612a463a911d47fce10ead3577f338834e0466aacb6"),
+            base16_literal("c702d78bc2a2c0ff1ffa5a63d902b2b423e280b0ef45cdbfbb338e2d38e88b2b"),
+            base16_literal("2d9e86b9f7809c25c4fd777d8ff3f4df2ed67a4e59f929559a0ea2f52ad08e12")
+        },
+        {
+            base16_literal("2ddd080f3773691509230b27bc6c7db996a1d93f6dc107362987934045fbe558"),
+            base16_literal("0b2fb71df10d0ed66f028a39d79b8f5a67c498af52a3d7ff991253d51e05d390"),
+            base16_literal("a0773165b4aa4fa6045d51729e72f1007ad231efc04e1bde7c684ca39cfb8646"),
+            base16_literal("10f5c01771711006616603fac2f8e3208079633a08be34d951b09e0063a87732"),
+            base16_literal("45fcf7d904f10f07054cf066b204f5080822f1a2ee613d545877969fe66c907d"),
+            base16_literal("74aac4aa759a99f1cd294183f0ef94ed7dd00d12d61653ac9294eeefc992ef06"),
+            base16_literal("39ffe9384f0f9cba8c6672f0130cbf78c4f65eed3044b84de41b992c55a1a718")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0xff, 0xff, 0x7f, 0x00, 0x00, 0xe0, 0x07, 0x00, 0xe0, 0xff, 0xff, 0x01, 0x00, 0x00, 0x00, 0x00, 0xfc, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfe, 0xff, 0xff, 0xff, 0x7f},
+    .e = base16_literal("d074e0679eef17f0457b5d01ad407894cee100a4d02888d0906d9360172775c7"),
+    .secret_indexes = {8, 6},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("02000000000000000000000000000000f8ffffffffffff7f000000003000000000"),
+            base16_literal("03ffffff7f000003e0ff3f00000000f00700fcffff0000000000000000fcffff0f"),
+            base16_literal("03ffffffffffffffff0fc0ff030000007f0000fcffffffffff1fffe00100000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030300000000f0ffffff0f0000c0ffff7fe0ffffffffffffff7f00000000000000"),
+            base16_literal("030000000000000000007f00000000000000f87f00f8ffffffffffffffff0100fc"),
+            base16_literal("0200000000000000fe3ffeff030000e0ff010000f8ffffffffff0000fcffffffff"),
+            base16_literal("02e0ff1f00000000e0ffffffffffff7ffcffffffffffffff010000c0ffffffffff")
+        },
+        {
+            base16_literal("02001000000000000080ffffffff7f0000c0ff7f000000feff1f00000000000000"),
+            base16_literal("020000000000c000f0ffffffff1ffcffffffffff0fffffffffffffffffffffffff"),
+            base16_literal("0300ffffffffff00000000000000fcfffff8ff0f00000000fcffffffffffff0f00"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02000000001c00000000f8ffffffffffff0100000000000000800f80ffbfffff01"),
+            base16_literal("02007f000000000000c0ffff7f0000000000003f0000ff0000f8ffffffffffffff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("8200e54fd83aa3dbe91b3d9eba1ab38ad96c591063265bbceb2f69b23a7f26ac"),
+            base16_literal("79b08e960489f0e5471398f043c22cc316d66e5e6d082d2917a0470a3a8544e8"),
+            base16_literal("187e6e9900499973c62b4ea539a5d08045cef75f4566e71f36dfad1f16967a25"),
+            base16_literal("5a5b95f4eba20727376b4daa9f088c2e0c35598e8f7e312f16bc274fc173170d"),
+            base16_literal("8789dfd9532d30ab3b9dbdcae3f3b38715ed71d780c363f8f424e097095944cd"),
+            base16_literal("3aaca827f9ff0a9dad94914367ae864628f001e7ffed5dcca814f3c03ddd9d27")
+        },
+        {
+            base16_literal("544b62247188464e08ce2d73c1f555e2340ed0ddb8c9e1dffc54b69b455a2432"),
+            base16_literal("508ed55215072b98156d54f03d0d558082fdc0955fae2a5957c44bcef17266b0"),
+            base16_literal("24a113d19ebbb84774e631093374ca445492188a602b7987f299c1cc7cbb0914"),
+            base16_literal("9d8b986eaa65334debdc1e83a177da7584ea00e0dca93768b7b0e2ca1bc4a4f3"),
+            base16_literal("58c99e68c0677d55d6904e7ef96c786053b7221533ba4370a05507324c585a28"),
+            base16_literal("5518353a1ac186c53599cc3075165627851f9ac0caaa462b1a6fe6abf25b64db")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0xff, 0x1f, 0xf0, 0xff, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("e1b87c28878bd558940a7030bacda3de861fe299992c5d8939341f0a95659ef2"),
+    .secret_indexes = {8},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0200000000000000000000000000f0ffffffff7f0000000080ff0000c0ffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000f0ffffffff030000ffffffffffff070000000000000000feffffffffff"),
+            base16_literal("0300600000000000000000000000f0ff01000000c03ffe00000000000000000000"),
+            base16_literal("03ffffff1f000000c037000080ffff1f0000f0ffffffffffffffff070000000000"),
+            base16_literal("0300000000fcfffffffffffffffffffffffffffff3ffffffffffffffffffffffff"),
+            base16_literal("020f00000000ffffffff1f00000000007c00000000000000000000c0ffffffffff"),
+            base16_literal("0200000000fcc3ffffffffffffffff7f000000f0ffffffffffff00000000300000")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("6d774693ded38dccddb2dbb207daab7fe50ed07640507146b2801c0f2f3ecab7"),
+            base16_literal("1f286cdaa663974bd75bb3aa6d5405b8aee71697791a501b6a44ae7fd8b5d767"),
+            base16_literal("093d5d606abc8c86626e175948fc2feca1e0f309d3e923c09fe073174294cc02"),
+            base16_literal("9d9c7f52f112468507ef561273c64ea5f37e3ca155752c7e3d349800f737549d"),
+            base16_literal("a392391670782080a21947980a83d6ae8e87d55ce90b59c08a9dab112bf4d17e"),
+            base16_literal("bf0425d1a85cbbcd92989f02394ccd6b1cdf1cadcefa4c07911f6a7b11e83f92"),
+            base16_literal("cefe428a8caf65ec5e8e393669034ca2f27eddf3a1a672bef0956178e897f393")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0x7f, 0x00, 0xc0, 0xff, 0xff, 0xff, 0x07, 0x00, 0xfc, 0xff, 0x07, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("03f4ede3b4a8a14e3bb9849b9380ab4fa45aee790efdcbc4da3e77db4942469b"),
+    .secret_indexes = {1, 8, 4, 5},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("030080ffffffff07000000ffff1f00000000000000fc0100000000000000000000"),
+            base16_literal("030700ffffffffffffff000000000000000000000000f0ffff7f0000f807000000"),
+            base16_literal("02ffff1f0000000400e0ff1f007c00fc0f0000000000000000fcffffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02e0ffffff3f0000000000000000e0ffc1ff0700f8ffffffffffffff0100000000"),
+            base16_literal("0200000000000080ff03000000ffffffff01000000000000000000000000ff0780"),
+            base16_literal("03ffffff3f0000000000fcff3f00f8ffffffffffffffffff1f00f8ffffff1f0000"),
+            base16_literal("03000000000000feffffffff0700801f000000000000000000000000c0ffffffff")
+        },
+        {
+            base16_literal("030000000400000000f0ffff03c001000000000000c0ffffffffff3f0000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000000080ffffff7f0000000000000000000000fefd000003000000e0ff3f00"),
+            base16_literal("030000000000fcff0100000000f0ffffffffffffff0f00000000feffffffffffff")
+        },
+        {
+            base16_literal("030000ff0f000000000000f8ffff7f000000e0ff0f00000000000000f803f8ff1f"),
+            base16_literal("0300000000000000feffffffff0000000000fedfffffffffffffffffffffffff3f"),
+            base16_literal("030000000000000000000000000000000000000000f8ff0700fc0000000000feff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02fffc1f00000000f83f0000000000000000000000e0ffffffc3ff1ff0ffffffff")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("1e43c04ce072c8100d4155f9f47d02ed75202cf103a8da57e30af1f0ab81a04a")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("3d9ceb8f283e41728ff0b4f8e24508294746b1fd87ca139d254ae99aae73e93c"),
+            base16_literal("d1cca6f6e86b9974bef9169f08e76d60031af47bcdf12705e4802cebef631be3"),
+            base16_literal("0c0a768f331b4a021f0829b003152be02639abf2b4cb05fb7879364d5207f232"),
+            base16_literal("fcf963150920503bc33379e46be5643840b2b4999192240ead8ad318a16cd61e"),
+            base16_literal("201a9c19916e47aeb06a30f8ac606cfbc58dc8a468bb604e7d0b64b4f17bfe40")
+        },
+        {
+            base16_literal("2382fe08ef5a5f4e5f35d99cf730f3ca591255a4172530b174c5933dc043cd78"),
+            base16_literal("81385b414fbba2af0ab70f9c24491993bd819e9740353997b5656f0fb7f72fd0"),
+            base16_literal("f38ba2ae9b43ec911142fe1efe46df4489c87260fa90921fddd7e8135a4e69d2"),
+            base16_literal("ab357ec88d1e3be2c74972f8f8b20b2f17b6aa9b1dcd78236fa6650b899e27c3")
+        },
+        {
+            base16_literal("48307276e39fc871cb4ffb6b345b6466250c7a2d822d92bea12f70243a31a25d"),
+            base16_literal("eb7437e6376d0f731b4ebcfe6a107f5e66d2ad0ada75fe8711be2ab0065e2530"),
+            base16_literal("98edb77bb072e50caf397403c2e45022f6c86aa671b5f6c22e6624ae11363535"),
+            base16_literal("6bf1485dfbae13fb0d1a061fd0b1646e02d96149a19d23ed5a3d6676844d5211"),
+            base16_literal("89e00416848a0201e837ff9e143b401a31ccb0108fc4e6a607027507690ade18")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0x7f, 0x00, 0xc0, 0xff, 0xff, 0xff, 0x07, 0x00, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1f, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+    .e = base16_literal("1aa9fc9d042ecb53d995961a2418f293510c6370279dd927af2d6e7de06a017d"),
+    .secret_indexes = {2, 2, 3, 8, 3, 7, 2},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("020000000000c0ffffffff01fc0f0000fc1f0000fcffffff1f00000000c0e1ffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000e0ffffffffff0000000000c0ffffff0f00000000000000000000f0ffff")
+        },
+        {
+            base16_literal("037f0000000000feffffffffffffff00000000c0ffffffffffffff001800000000"),
+            base16_literal("02ffff1f3ec0ffffff0000000000000000000000fc070000f0ffffffffffff0100"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02fffffffbffffffffffff03000000000000f0ff07000000800700000000f8ffff"),
+            base16_literal("03ffffffffffffffffff7f0000000000000000feffffffffffffffff1f000000e0"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("037f00000000c0ffff07f8ffff01000000000000fc7f0000000000000000000000"),
+            base16_literal("0300000000000000feffffffffffff070000000000000000008000000000000000"),
+            base16_literal("03030000ffffff07000000000080ffffffffffff7fffffffffffff7f0000000c00"),
+            base16_literal("03ffffffff0f000000000000004000000000fe07e0fffff1ffff000000feffffff"),
+            base16_literal("03ffff0f00000000000000000000e0ffffffffffffffff01ffffffffffffffffff")
+        },
+        {
+            base16_literal("03fd03000000000000000000000000000000c0fffff3ff3f000000000c00feffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000000000fc0700e0ffff1f000000fcffffffff03f0ffffff01001c70000000")
+        },
+        {
+            base16_literal("0300000000fcff01000000f8ffffff030000000000000000000000000000000000"),
+            base16_literal("0300000000000000feffffffffffff3ff8ffffffff1f00fcffffffffffffffffff"),
+            base16_literal("030000f8ff1f000000003e0000000000000000ffff03000000000000f07f0000fc"),
+            base16_literal("03ffffffffffffffff0300000000000000ff7f0080ffffffffff070000f0ffffff"),
+            base16_literal("02ffffffffffff1f0000feffffffffff03e0ffffffffffff1f0000fc0100000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0200c0ffffffffffff7fe0ff0f00000000ffff7f00fcffffff3ffcff0100000000")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffff0f000000000000c0ff01f0ffffffffffffffffffffff1f000000ff1300")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("f55430a47b381dfae4e17e199577bdb978a4cc025335dcb1c630efb5cb837d01"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("425c2a9331a5f33af0655ffc6fcb61418adfaefc61966479f7d0d42a980da85b")
+        },
+        {
+            base16_literal("0ee76b472c27becd332c94f4c135e2954be355ad49db42a983d5c9ece509821a"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+        },
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("22da3e79fde2fb7b2986b5237d1e3830e0b2c3ce144c1afc309d4b17803cc969")
+        },
+        {
+            base16_literal("242daee6b101edd11f971258981e4174a2518e46bdc322dd32eb1907468d97c4"),
+            base16_literal("502db86e43ac302f309b3719d1847f17200fca7b604f100c3ad1988e79caf242"),
+            base16_literal("85cc29180ac477af222701da1921512f12055d84ac2809ef59b2ba527e43bf24"),
+            base16_literal("f78ac670fca09cb37df6ec72896dca70b7022a7dabf9f02631238cc5bfba366e"),
+            base16_literal("97adba2cded73d2cf8d4a944a142adb0af42015b59c2f64d671112f0e0072017"),
+            base16_literal("044e7056de42e5f0e5fd1fee0d63b95da58bada6865abc775e5afe7ed939db36"),
+            base16_literal("b81b315060533ea98c83dacad5e720fca71ae35a30da83358deb62e0bc034e7e"),
+            base16_literal("2f0b42c5e27e1cfd5e75211ac6f4c31364800a6a84fdae8da818f44b41c45e32")
+        },
+        {
+            base16_literal("1981c49b49f86b21210c0f532758090f57721274c219be1baed2c97d9be80b03"),
+            base16_literal("79c077768879b56d7498637a9c6109d16656eb5eff834c5cd62d48733304bb50"),
+            base16_literal("db1b5208935eed2f671b61fac27a17533405f4812e8ba7fb8a9573656c4e3182")
+        },
+        {
+            base16_literal("a611906af466f2abf5e69eff362ed0d98acdab7cd3518eb53e830966bf13c30d"),
+            base16_literal("ed4bcac6d76a5c96a827b16c728772a0fdff8c046487c73732557c88a3e8a2bd"),
+            base16_literal("1cae3e71ad1414ca11010c12a3c7701a0df3db1502f85230ef8c22715617ed9e"),
+            base16_literal("8fb2f30fff15f19195486335aecd5819dc6afb7d7894700d76fb0b7f6be53f30"),
+            base16_literal("daba401c2b688e5da40e39bb3284c5ff2385e20eeb610dfb50a567296d81176b"),
+            base16_literal("23d12c1b01b563ac604cec17e1fb627bdc12b2b524337163a8a20affbc5b2671"),
+            base16_literal("903b18117dd85f90fb2bdd1702b69989c13d55804e3dd69fa144dbdcd8089a87")
+        },
+        {
+            base16_literal("b57b48983bbcbe3f3afc98c95f4295251b26c21d38880b6fd01e25353bcc2454"),
+            base16_literal("0542490235ae50bd1a720a940bdc60e236847736c8e7030f219db852affbe098")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff, 0xff, 0x03, 0x00, 0xc0, 0xff, 0xff, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0xff, 0x1f, 0x00, 0x00, 0xf8, 0xff, 0xff, 0x3f},
+    .e = base16_literal("60b47d454ec0dc2ccdff06e2b779574ca30e9dec52f655bdd83b9889985f4d2e"),
+    .secret_indexes = {2},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("02000000000000f0ffffff01f8ffffffffc1ffffffffffff07f0ff1ff0ff0f00ff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("b0b7f617acd54b6eb34c2e67fa1a71f6a38b29192dbd3a69328b5610af962a12")
+        }
+    }
+},
+{
+    .message = {0x0f, 0x00, 0x00, 0x00, 0xfc, 0xff, 0x01, 0xf8, 0x3f, 0x00, 0xc0, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0},
+    .e = base16_literal("08b879be9200895167a283dfa43cebd07a86bbfa38c04479d16d576cd15184b4"),
+    .secret_indexes = {5, 3, 7, 7, 7, 3, 1, 8},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("d17b5089b64b7ce1c9e76126680c46ce2f4f01812238bba0b166c0a00de76f2c"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0300000080ffe1ffff3f0000feff000000c00300ffffffffff3f000000000000f0"),
+            base16_literal("030000000000e0ffffffffffffffff3ffcffff0300000000c0ffffffffff010000"),
+            base16_literal("02feff07feffff7f003f00e0ff0f00000000000000000000000000000000600000"),
+            base16_literal("03ffffffffffffffffffff00feffffffffffff0f0000e0ffffffff070000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03f8070000000000001f80ffff1f0000f0ffffff0f0000000000000000f0ffffff"),
+            base16_literal("03e0ff00c0ffffffffffffffffff000c00f0ff0300000000000000000000c0ff1f"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02fcffff3f00e0ffffffff7f10e0ffffffffffffffffffe0ffffffffffffffffff"),
+            base16_literal("02c01f00f800fc7f0000000000000000000000000000000000c0ffffffffffff1f"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ff830000ffff0f00e0ffffffffffff00000000000000000000000080ffffff7f"),
+            base16_literal("02ffffffffffffffffffffff7f0000000000000000780000000000000000000000"),
+            base16_literal("03ffffffffffff7f0000000000e001000000000000000000000000fcffffffffff"),
+            base16_literal("02000000000000000000f80f00e0ffffffffff3f000000f0ffffffffff7f000000")
+        },
+        {
+            base16_literal("02000000007ef0ffffffff1f000000000000000000000000000000000000000000"),
+            base16_literal("02ffff3f000000ffffffff07000000000000000040f8ff7ffeffffffffffffffff"),
+            base16_literal("0300c00ffeffffffffff07c0ffff01000000000000000000000000fcffff010000"),
+            base16_literal("03000000ffffff7f00000000700000ff0700000000feffffffffff070000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffffffffffffffffff0180070000000000000000000000000000000000"),
+            base16_literal("031f000000000000f01f0000000c000000000000f0ffffff0000000000200000f8")
+        },
+        {
+            base16_literal("02000000000000000000000000000000e0ffffff1f000000000000f8ffff030000"),
+            base16_literal("03000000fcffffffffffffffffffff0300060000feff3f0000c007000000f8ffff"),
+            base16_literal("030000000000000000000000000000f8ffffffffffff7f0000c0ff3f0000feffff"),
+            base16_literal("02ffffffffffffff0100ff03000000c01f0000000000c0ffff0000000000000000"),
+            base16_literal("020000feffffffffff1f00e07f00001e000000000000e0ff0700f8ffff7f000000"),
+            base16_literal("020700000000000000000000f000c00300000000feff07e0ffffff7f00000000fe"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0200ff0f00000000000000700000000000f03f00000000e0ffffff1f00f0010000"),
+            base16_literal("030100000000000000000000f0ff7f000000f0ff1ff8ffff0f000000f8ffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02f7262435328375fd293f04575152b523f1061cb8bf1aaf8e81d3732475798b8b")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0200c0ffffff07000000000038000000e0ffffff1f00feff1f00c0ffffffff0100"),
+            base16_literal("0200000000000000c0ffffffffff3f000000ffffffffffffffff1f000000000000"),
+            base16_literal("02ff7f00000000fcffffffffff1f00000000000000000000000000000000000000"),
+            base16_literal("0200000000f807000000000000c0ffffffffffff0000c0ffffff01000000000000"),
+            base16_literal("03ffffffffff7f0000000000000000e0ffffffffff01000000000000fcffffffff"),
+            base16_literal("02ff0100000000c0ff071f0000000000f0bf3f000000000000e0ffffffffbfffff"),
+            base16_literal("02ffffffffffffffffff7f0000000000000000f8ffffffff07f00ff0ff0f00feff")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("955abc70bfe928eb8793c998662aa2a0772a9473f39ca0dfc2bfd382c95840fd")
+        },
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("9e500718afbbab0f105b3609dc710042369c3c10883228db72864129bae51af5")
+        },
+        {
+            base16_literal("45579d6cae43f30be0eb47fab661e0e5e03598997dcf2d39ba0045adb9a244ac"),
+            base16_literal("813993550ef390fee96d4a72288edcf3e096efcbd1c191569ae30af98c94b06e"),
+            base16_literal("177b756c75c8b7537d4dc8ef4cae722fe2436a4a990a91b17dd1005d328e8d98"),
+            base16_literal("41b3745b2e61b3a69ad4803e46da37e7b1e67d01bcc153386954a73e9ce11b9d"),
+            base16_literal("d428c5a05a2fc016bb4f3e6919927729cc3f80ca88329edb17820d14c223cf7b"),
+            base16_literal("7e28a361a27a8c44784d62531f03465733c548ab1b67bdb39d5c59286be24927"),
+            base16_literal("8b1618d62fa11782ff1a388c96c20aed99c7310126e6f60e2b35cce86bfe3fd2")
+        },
+        {
+            base16_literal("e0d560d02764ea980f7d8a32c2092fa8a67bac0d06f90d4394f9914e9fa1efca"),
+            base16_literal("9ac60162ca6c9bc5ff02f7b58ae461e27d4c6caa41668587e49c47b4b3281038"),
+            base16_literal("76918ebc3dcc1ffdefa4dd6d7a066f7751c4e69f44e7f225bdc66963a90160f0"),
+            base16_literal("29c0bade0329cb4a47d25ced6e49106ac9b7f0e7c83c5cbc6f2b3ebbc1d176c3"),
+            base16_literal("770293a6754b44299ed92316cbb3203470570693da2c8147500b0cea658b403b"),
+            base16_literal("9a6666c260e658d3c6ecf28922e6260a9ebd014d1be00728cc3dca0a43ea115a"),
+            base16_literal("3517ea189d5fb4cb15210ba6ac6eed4a8428d4c3d8c600b8fa3734b53d2cdda8")
+        },
+        {
+            base16_literal("b66795c23dd67927a323d7a2fc304aa2c2c4c9bc28d9581fef2edc34feb787fe"),
+            base16_literal("8904f3491e349bdb7a9784591d68cc8764e0bda78eb10938eba0a04db9651a1b"),
+            base16_literal("63ffcbe9477a233ae7c3b1f710bae751e9f923a87114ff0004805b57918d9c71"),
+            base16_literal("2eb6a8c640154a617f6db84e801092f8cff6f5b29b32b2f1426256e41dc4831b"),
+            base16_literal("6631d1b7bba6f4a7eaa878e440827b00f5e9a982baa4623ec556c98408bb7ec8"),
+            base16_literal("ec3b71b8d7ad36ef0606537099e0cf4e0a2ec0462ed2a1683eb6125dd735ca73"),
+            base16_literal("7ad8360b2143d62c6dada8184f1d442df90b27327aff7d8241352af535a46212")
+        },
+        {
+            base16_literal("b13e81b71241ccfd52ef8eb20a85b0e5f5c968b57385d830b2ca98c09aa18f9c"),
+            base16_literal("02cb706417f42c9addb562db1921fd39679ebad62053d465d9411183d1a5accc"),
+            base16_literal("49955869429ef4fe8a5ea100884bd71f4eb9b4a906b6a401a32edb6cbda67195")
+        },
+        {
+            base16_literal("c1539a9c40a256f8655249e301f0f65d5f7ee9caa847f4da32756fc5f814a214")
+        },
+        {
+            base16_literal("3fe6bb1e146648d2ab17e63761fbc78f88ae912b1ac416821e66465efb2c68a5"),
+            base16_literal("1bc5a1d213e3c87d77e1680a3680fc59f557b2dc2b9dcc6fe2ae6b051c13554e"),
+            base16_literal("febd29b81238c89621126732afc4985c9f8e41535cba9a98334cab874a7221fa"),
+            base16_literal("8d8733dd3c91e2d7882fdf2964849df33cf1af4a795e05aa389005400574bec4"),
+            base16_literal("6c7bdd1e2576422025d6eb7dcf25860e265a1e7277e281a60d74aba2f714da2b"),
+            base16_literal("7abf6707c4330979e6c67c5652428c5a240c66ead7f4b0366bc8ed13f9eaf3a5"),
+            base16_literal("ace427633113efe0ecfa5e56e352378964c64e378b269b3decdca6ace42755b1"),
+            base16_literal("4266f56a5a558954dd73d5a2965ea432908c9c9dbc4094213cea9809ad18a0ab")
+        }
+    }
+},
+{
+    .message = {0xe0, 0xff, 0xff, 0xff, 0x03, 0x00, 0x03, 0x00, 0x80, 0xff, 0xff, 0xff, 0x07, 0x00, 0x00, 0x00, 0x00, 0xff, 0x01, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xc1, 0x07, 0x00, 0x00},
+    .e = base16_literal("ed417f7fb13a4d4c9b164678f68b63be9f4f132da348f56e749728127f03efb0"),
+    .secret_indexes = {6, 3, 5, 2, 8, 7, 1},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("09e119a9b73070b47e257325108bfeb52114c7fb706811ab87860474b9193b77"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("020000fcffffffffffffffffff070000feffffffffffffff1f0000004c00000080"),
+            base16_literal("02e0ffffff000000000000f0000000000000000000f00ff8ffffff3f00000000ff"),
+            base16_literal("0300000000000000000000000000000000000000ff7f0000000000000000f0ffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffff7ff80f0000e007000000000000feff3f00000100000000000000ff01"),
+            base16_literal("0200fffff9ffff0100feffff3f0000000000fe0fe0ffffffffffff0400c3ffffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300e0ffffffffffffffffffffffff0100000000000000000000e0ffffffff3f00"),
+            base16_literal("02f8ff0f000000f803000000000000000000fe00000000c0ffff7f000000000000")
+        },
+        {
+            base16_literal("03e0ffffffffffffffffff0f00fcffffffffffffffffffffffffffffffdf0300fe"),
+            base16_literal("02ffffffff3800e0ffffffffffffffffffffffffffff7f00000000f0ffffffff00"),
+            base16_literal("030000f0ffff1ff81f00000c00ffffffffffffffffff03000000e0030000000000"),
+            base16_literal("03ffff0300000000000000000000000000c0ffffff7f0000fcf9ffffffffffffff"),
+            base16_literal("033c7bd32e08ce5525e53464ddb7c31ddb205ec27fd6e707e2412a7d67221a4c61")
+        },
+        {
+            base16_literal("02ffffffff0f000006c0ffff3f0000000000000000f8ffffffffffffff030e0000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ffffffffffffffffffffffffff3f000000000000000000feff7f000000000000"),
+            base16_literal("02ffffffffffff0700000000ffffffffffffff83ff0f00f0ffffffffffff0f0000"),
+            base16_literal("02070000000000e0ffffffff01000000000000f807feffffffffffff7f00000000"),
+            base16_literal("02ffffffffff00fe7f0000c07f000000000000c00000000000feffffffffffffff"),
+            base16_literal("02ff070000000000ffffffffffffffff7f000000f8ff0080ffffffffffffffff7f"),
+            base16_literal("02fffffffffffffffffffffffffbffffff0100000000f8ffff7f00000000000000"),
+            base16_literal("03ffff070000feffffffffffffffffffffffffffffffffffffffffffffffe3ffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03000000ffffffffffffff03000000ffffffffffff7fe07f0000000000000000fe"),
+            base16_literal("02f8ffff070000000000000000ffffff03000f000000000000f8ff000000ffffff"),
+            base16_literal("02000080ffffffffffffffffffffffffffffffffffffff0f000000000000000000"),
+            base16_literal("03ff7fc0ffffffffff070000fcffffffffffffffff3f0000000080ffffffffffff"),
+            base16_literal("020000f80300e0ffefffffff0700000000e0ffffffc1ffffffff3f00000000fcff"),
+            base16_literal("020f00000000000080ff3f0000fcff3f000000ffffffffffffffffffffffffff00"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("e859d0c6ea825c229492dcd3e7bacec7a7ab16afe7ed8358fcc5896fbd66f3cc"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+        },
+        {
+            base16_literal("7706860196af536734bdcc02ab960d38513b66185f877d1a7dde34bf466b7e4b"),
+            base16_literal("c49b261e79e63a72fda889ffcf419abb5d27e3338492fd3ecab9d58a4564061f"),
+            base16_literal("54ef54875d6cd7a406d6787f9faf9e59caf1b27a1da979e71f026b8fe31cf7fb")
+        },
+        {
+            base16_literal("0245b12cfaf32a40269bf0d412a9d5b25571b80c7d10f2f976b7da47e025119c"),
+            base16_literal("1b51df4d268e9b80f54aa02c8f70a604c57f04d333de50b49ed220590e9a7a9d"),
+            base16_literal("b7c968e35a1fcb556722f6370e6350846d8de03bd90cb6359ab99ead1f329f65"),
+            base16_literal("72cd80d507cca66df61a9f8253ef29971b540eca744dea638d971f318c6dbc67"),
+            base16_literal("821c09bb799da7edb6bf38e92e86ee2e7fcdb6ff789ad81642f2c2217505f9ac")
+        },
+        {
+            base16_literal("3bc168301b78591f40c912968e34273b85ddeb8ed450622de53f2ae901fa1052"),
+            base16_literal("abdd7eb31f406150d3e292e17dd84eb0cd42f8c1bf342319ca643ee1b1d697c3")
+        },
+        {
+            base16_literal("93d4eae93f1f7b1c7a7ad34c9740f2a801be26b82df9b415a03c36ce5e9d5344"),
+            base16_literal("3065211a9ac80256740eb224da4d786c24354002bb7fe47eaa4e5e105bf75abd"),
+            base16_literal("f0d5cecec71ef57dc61984a79e4536592c73354da68c089efc35816f5358fdeb"),
+            base16_literal("36d9a5d184fc62b26787eedccee61a121c14950373e63a12a9c794c4d08de65a"),
+            base16_literal("12f5b7bcf8b430ef498253233ea55b793212f46370817867db84d0b33fd3d1f1"),
+            base16_literal("0c8ffe562b712793e1d7689f7818d1f1f17725e87e1b4e1f55b44504695e74b5"),
+            base16_literal("056d9ff579fe564eb11bc6eb06de0de678572295d3766f706cd41ebc1c02acfe"),
+            base16_literal("bef4c7ec62339ff22afa24ff29687bae275907ed52ece9e82cdf008fd843e960")
+        },
+        {
+            base16_literal("6ca727338d4290c0f7b7f6ff91afea7f0883765db671a13f094bae6fa5ec7536"),
+            base16_literal("2ddb38604557ed5297f5e14ae47fcbc48ba680cf33f2c64d8e47551fc68e9ce0"),
+            base16_literal("c99ff20f2043d9fc5f0ff1a92d8e8a499d494961b892ccb26339491965039578"),
+            base16_literal("4ad6529ec1474f18181edfe32ba2cc5a425ea3b9de0741e33dfe464d310bba94"),
+            base16_literal("f8f2e895e5c8fb8fbab2e150423a2745ff0a9530aa92b7c32818ec9023361c50"),
+            base16_literal("3b03f97ed925661c04711b8efd8395169638438f467afc8800813fed49167a65"),
+            base16_literal("70fac0833d8da011904d83235e057c1088d2cb29be1d8f9ea1f3dba1767ab4d1")
+        },
+        {
+            base16_literal("d0bb1e35ac3533091516b5b56ece1063fa9acade3c385f67ebaf7af418d53b0e")
+        }
+    }
+},
+{
+    .message = {0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0x07, 0xf8, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f},
+    .e = base16_literal("32d832ac34cbe462fb408b77e4464c37bb533e215fd72dac54260027831d964b"),
+    .secret_indexes = {7, 5},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("020f00000000ffffffffffffff8fffffffffffffff1f0000fcffffffff83ffffff"),
+            base16_literal("02000000f0ffffffffffffffffffffffffffffffff0f0000000000ffffffffffff"),
+            base16_literal("03ff1f00000cfeffffff07000000fc0300000000f81fffffffff83ffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffffffff03fcffffffffff04e0ffffffffffffffffff7f0000000000ff"),
+            base16_literal("0280ffffffff01000000070000000000c0ff1f00f8ffffffffffffffffffffffff"),
+            base16_literal("02ffffffff0700f0e7ffffffff070000000000f0ff1f00c0ffffffffffffffffff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000fc1f000000c03fffffffffff3f0000e0ffffffff7f00fcffffffffffff"),
+            base16_literal("02ffffffffff07ffffffffffffffffffffffffffffff0f0000000080ffffffffff"),
+            base16_literal("03000000000000000000000000000000000000f0ffff0100f00100f0ffffffffff"),
+            base16_literal("02000000000000f003000000ffffffffffff3f00000000000000f0ffffffffff7f")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("ddf76c14fa1d50a61f52780ffcea568edc1f3e4bad2781041784898fd6120ca3"),
+            base16_literal("f96878bcf3d0403d260b65e729a9304790d0e644c618f5f8b75afe868f147ccb"),
+            base16_literal("42c6ee48c42ecf60c8cdc9026a78adadd58ee0a8ae30617435921a8961f5aa9d"),
+            base16_literal("54e0a22adb2d4c0145ff51c85d3074289e2917e7c3579c89527ca88a9944eb55"),
+            base16_literal("dcdfd62e10c1dff4c0602af619ffb506e3fdee0c8e2df65535a890fc452315cd")
+        },
+        {
+            base16_literal("5f3e02222c59abb666759a042f9b3a73ad1af92f61f58c25df66bcd2b68e06e5"),
+            base16_literal("5922d6cebf7cd5eb95101d1ed0007d81cf262126fc016ae1e9d5951432c0c939"),
+            base16_literal("2769b96a27090f20784931751b9f6966b2641fe97c678ef1d8d18b92cfd3f6c7"),
+            base16_literal("d05873b8afdbc874b799dea795a28964f5bd0f079d2418ef99311a8bbdfa55b7"),
+            base16_literal("1c4714b334c901f16cd96f8c87b1f4aea5b5ce1eddd8e5eed186b59c9d4a9d73")
+        }
+    }
+},
+{
+    .message = {0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0xff, 0x01, 0xf0, 0xff, 0xff},
+    .e = base16_literal("3842e9a2e17ffce2e2669346ccfd655cfb02fc1f5e63e9bef5090e1819c20b3e"),
+    .secret_indexes = {3, 7, 5, 6},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03030000003e0000fe07000000000000f0ffffffffffffffff0300000000000000"),
+            base16_literal("02000000000000000000fcffffffffffff0000000000000000fe0000003c00f0ff")
+        },
+        {
+            base16_literal("031f0000000000007800000000f0ffff3f00000000f8ffff3f000000000000f8ff"),
+            base16_literal("03000000000000e0ff7f0000ff1f80ffffff0f000000000000fe3f00f8ffffffff"),
+            base16_literal("02000000000000000000000000000000f0ffffffffff0700001800000000ffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ff0700000000ffffffff7f0000000000000000000000000000feffff07000000"),
+            base16_literal("02f8ffffffffffff0300c0ffffffff03c0ffff3f00feffffff0f00000080ffffff"),
+            base16_literal("03000000c8ffffffffffffffffff070000000000000000fcffffffffffffffffff")
+        },
+        {
+            base16_literal("02ffffffffffff01000000c0c1ffe1ffffffff01e0ffffffffffffffffffff01fe"),
+            base16_literal("031f00000000000000000000000000000000c0ffffffffffc1ffff87ffffffffff"),
+            base16_literal("02ffffffffffffffff0f000000000000ffffffff7fc0ffffffffffffffffff0000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03f8ffff010000f0ffffff03fc330000000000fcff7f0000000000e0ff3f00f8ff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300000000000000f00100000000f80100ffff070000f8ffffffffff070000fcff"),
+            base16_literal("03000000feff030000f0ffffff7f00000000f8ffff3f00000000e0ffff3f0000fe"),
+            base16_literal("03fcffffffffffffff0f00000000000000ffffffffffffffffffff0f000000ffff"),
+            base16_literal("0200fcffff000000000080ff1f00000000fe070000000000080000000000000000"),
+            base16_literal("02ffffff0f0000000000000000000000000000000000000000f0ffffff01000080")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0d5ac6b03d88cd31b787438c5840739f39c64d3e892c611c15050f7c6341a164"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+        },
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("13f7f64d58960a802edccca99fd927f901f8edef2ef7c8b58593a4705dde6fd8"),
+            base16_literal("14199e7a32ce067825aaeff38591bb43ebc857ac247eb0395973347ed39d2fe8"),
+            base16_literal("8137579df364bf2fd2d0eff6cc7c5dbda257eaba48efd13987d6e3809919e749"),
+            base16_literal("a0c271a87fc37f4ad3000a5929b67db6b23b33f83a6723b3ba78b2a4acf561aa"),
+            base16_literal("3f3c8bfda5e85e5cbb5f32bb5629324e6695caedbf41d2d069579fd1c7466a27"),
+            base16_literal("9631eb42a87e485daa9888cac36ecac256572f0fda28e383651795faff5bdaf9")
+        },
+        {
+            base16_literal("f95af26e70904bc0ca313310ea019ffcdd0848b0e395e6f8065ac686f5f7a630"),
+            base16_literal("91e4978e329230879f07f95cb57b1751c8e39e62d9be0690151896ffbed9482f"),
+            base16_literal("ff1a6b3312222716caa0c555ac0889a98b821abfdc7a4b09ab01954351768798"),
+            base16_literal("4500640030e7286d5f1533216806e99e57a0068656ea85382fd25be9c1fbcc52"),
+            base16_literal("48835c34853f22fba1565d17e0fbf2d1dd6a2965816388f4ba2b49446d118cea")
+        },
+        {
+            base16_literal("cdb5e5cd1a22cc452c005b8117a2d2f7b40da8a4c19430a10daa7d10d9640e93"),
+            base16_literal("db2fa8ab003b43ff37017f1009d95afc4ee71d5328075a19a8aaf2b5ff9a6bad"),
+            base16_literal("31ef7414de65269819cd2fe22faa889197161a8f9f62f5931b2613e778e6ee2c"),
+            base16_literal("35f244d6f6b2c2b244c54f330feae02f3f665646b71ecda3a24e1f33d5f888b6"),
+            base16_literal("9e07b87dfdd4b3ad1d452dbe2f1c3e888d146f29d8bb901005a65b44d976dc9a"),
+            base16_literal("1afa419a069d60be457006bec44a3716a4de1f7200ccbbbd8ce56fb9005b80a0")
+        }
+    }
+},
+{
+    .message = {0x00, 0xe0, 0xff, 0x03, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x80, 0xff, 0x0f, 0x0c, 0x00, 0x7f, 0xf8, 0xf1, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00, 0x00, 0x3c, 0x00, 0x00, 0x00, 0x00, 0x00},
+    .e = base16_literal("4a070d202cdbef4125bddf2d629cff7663c5bd28f19fea700574a2d7a3f0916d"),
+    .secret_indexes = {4, 1},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ffffffff000000f0ffff00fcffff00c0ffffffffff0700f0ffffffffffffffff"),
+            base16_literal("02c0010000000000f8ff07000000000000000000feffffffffff01000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02feffffffffffffffffffffff000000000000000080ffff80ffffffffffffffff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("f358655080a4b347a69a281b469ab4e6d1fe245e82a9f11fed96204628c4b82f"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("f42cabae4e0c7ef8de8cfc40396f6791f486837868c32ad806b944c8c37c062e"),
+            base16_literal("bc0a01f0907369f19106c6d39089f94246f258da1a6db414e9b92d0ce2e47afc")
+        },
+        {
+            base16_literal("378784f08d13dbf06214b1d57506e86337799cdecf5e5b3fb7109483c3959b1c")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0x7f, 0x00, 0x00, 0x00, 0xf2, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+    .e = base16_literal("8da40958fa010cae5a7899ebdc21598593ac895decc5366eeb6e8e2864fbe4fb"),
+    .secret_indexes = {8, 2, 7, 8, 1, 2},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("02ff3f00000000ffffffff1fc0ffffffffffffffffffffffffff000000000000ff"),
+            base16_literal("0200000000c0ffff00000000000000000000000000fcffffffffff030000000000"),
+            base16_literal("0200807f0000000000000000f0ff0100ffffff1f8007000000000000e0010000c0"),
+            base16_literal("02000000000000000000000100fcffffffffffffffffff1f000000000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ff000000000000fe8fffffffff7f00000000000000c0ffffffff1f3000000000"),
+            base16_literal("0300000000000010e0ff7f0000f007000000000000ffffffffff1fffffffffffff"),
+            base16_literal("020000000000e0ffffffffffffff7ffe0f00000000000000000000fcffffffffff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffff3f00000000000080ff7ffcffff3ffc01f0ffc3ffffffffff0000f89fffff")
+        },
+        {
+            base16_literal("030100000080ffffffff3f8000feffffffffffffffffffffffffffff3f0000c0ff"),
+            base16_literal("02ffff7f00e0ffffffffffffffffffffffe0ff0100000000000000000000000000"),
+            base16_literal("03ffffffff0700000000f0ffffffffffffffff3f000000000000000000f8ff1f00"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0200000000fcffffff00e00100000000feffffffffffffffffffc0ff07000000f0"),
+            base16_literal("0300000000000000000000000000f8ffffffe3ffffff01fe7f0080ffff01000000"),
+            base16_literal("03ffffffffffffffffffffff1f0000f8ffffff0000000000fcffffffffff070000")
+        },
+        {
+            base16_literal("03000000000000feff7f00f8ff0300000000000000c0ffffff7f0000f0ffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000000000000000000070c0ffffc1ff7f00e0ff070000feff1ffeffffffffff"),
+            base16_literal("0201e0ff030070fcffffffffff0700fcffffffff00000000000000fcffffff0fde"),
+            base16_literal("0200000380ffffffff1f000000ffffffffffffffffffffffff0700020000ff0700"),
+            base16_literal("03ff3f000000000080ffffffff070000e0ffffffffffffffffffff0f00f8ffffff"),
+            base16_literal("021ffc01000000fefffffff7ffffff0300fe0f0000000008f0ffffffffffff3f00"),
+            base16_literal("030000000080ffff0700000000f001000000000000ffffffffffffffff03000000")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("030ff00300000000000000000000ffffff7f0000000000f0ff0300000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("babbb51be5edac229f98c8ebee2d5f3bf4fa57709feabef130bf271d17b6a3ed"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0a501091e1f2afaac12b0bb2d7c5522827a04115f0fedc37e2b817f87c712a93"),
+            base16_literal("51876345d3258ebe535d4d2ec8825a04a1f5675013faba3ee6db6a326961fbfc")
+        },
+        {
+            base16_literal("6ad77f0a71276563e8f518b809d6dbc65af2f4c7f51ffaefc758c8ba088c5a6f"),
+            base16_literal("00a599686baaab5068db7b7952de747a9201c62a25c952986ab6a5c1ff94bb2c")
+        },
+        {
+            base16_literal("3e7a7a382293825cfc52ad3cdb01ff16b0c134c84b805f491bbdd47bee808b56"),
+            base16_literal("24186a1a2bbb50804151fc2742281a3a110e28a3659f11c46f7da2e3b151ee76"),
+            base16_literal("127fd4a91188147dd24f4a4cd4cdc42e6907f53f7097a609cd3341071a95f538"),
+            base16_literal("2f947d34d148a4be3aaa9638460cf5c378de7eeb214aa9fa6eeb7287b26f9225"),
+            base16_literal("02c6a328854c0f310b93d184ceee17747478bdd63554d77490ebf7bacf8dd584"),
+            base16_literal("6b51883ba5690c42fb7127ad959cf403a0ac2bf0c24d75d4be86f5512a88dd0a"),
+            base16_literal("80388b5f5c2971cae5566bf68787c95c91887033817c5235370b9938ebbbd7cd")
+        },
+        {
+            base16_literal("4fa176eae808d901218236b2b199af0b69ee5cb1935a74f2f470ea3a17652fb8"),
+            base16_literal("77105a31f9fd587553bc062f9a5082b25d99e483569118ccba7b35f8f52cb0ea"),
+            base16_literal("ffff44433f42d1378204366de6efdb8a2aa7b08285d07f681ad461ea0cdc7756"),
+            base16_literal("bec7614c8891d8902e47a6dadbeac6cfb26369e76fdb9ebfc9d5deafb2177642"),
+            base16_literal("1890316e82cf464fa2c1d33eec9446facde73e72082e7e472b28cbabec2c1334"),
+            base16_literal("9435d253aa341996ad2ce52c51f1854426f3e65e6249838fb6fc78f095b04ada"),
+            base16_literal("76376325c1f4803779a93b92790f75234fa7eb3d1470add9be9569d279d0e924"),
+            base16_literal("07994b76d7f95f36fc63a30a6b638acebf8cdbaf446cb2134f5075c4f73cfb2f")
+        },
+        {
+            base16_literal("e9c4c0b6505fd5f16805e400fcb8d3c6f4b9c8ba2955e0de09efd560c44a6ca1")
+        },
+        {
+            base16_literal("9cb828ae790554ef430b16cd0018efdad404a884af060a78caa275973367aa14"),
+            base16_literal("90276fc8451cb3a11bc5d505cb8b174d13ada9ddfecfe397ac76a43d732aa112")
+        }
+    }
+},
+{
+    .message = {0x0f, 0x00, 0xff, 0x7f, 0x00, 0x00, 0xfe, 0x3f, 0xfe, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xc7},
+    .e = base16_literal("58702f9756d1d2303e90a4a66f58b18e6bea4a5f5ff4385513913bdb7328f108"),
+    .secret_indexes = {1, 5, 6, 1, 4, 5, 7, 6},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("6378d9febe4bacf25de656074205a0223887a50e9cd44498d61249ad94c9e3b6"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("030000000000c001000000000000ffffffffffffffffffffffffffffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300000000e0ffffff000000fcfffffffffffeffffff070000000000000000e0ff"),
+            base16_literal("02ffffffffffff7f0000000000000300000000ffffffffffffffffff0000000000"),
+            base16_literal("03ffffffffffffff3f0000f03f000000fe00000020000000c0ff1f000000000000")
+        },
+        {
+            base16_literal("030000f0ff0000000000000000000000000000000000000000ffffff0f00000000"),
+            base16_literal("02000000f8ff3f0000000000400000000000ffffffff3f000080ffffffffffffff"),
+            base16_literal("0280ff0f000000c0ffff1f0000003e000000e0ffffff7f00000000000000ffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000000000f0ff1f000000fcffffff00000000000000fcffffffffffffffff"),
+            base16_literal("0300000000c0c0ffffffffff1f00000000000000000000000000feffffffc1ffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffffffffffff00000080ff0700007f000000f801000000000000000000"),
+            base16_literal("0300ffffffffffffffffffff7f0000000000000000000000000000000000000000"),
+            base16_literal("023ffeffffff070080ffff9fff0000000000f8ffffff00000000000000ffff0000")
+        },
+        {
+            base16_literal("02ff0000f0ff3ff8ffffffffffffff0f0000000000e00fe0ffffffffffff03c0ff"),
+            base16_literal("0200c0ffffffffffffffffffff070000e0ffffff80ffffffff0100000000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffff1f00000000000000000000000000000000c0ffff0700800000c0ffe301"),
+            base16_literal("03ff03ffff0100fcfbffffff000000000000f8ffff00000000000000000000f007")
+        },
+        {
+            base16_literal("035acd00f8612f3b3fe7d6d7e77f045af414947717a44e66a722d47fb3e167e97c"),
+            base16_literal("0300000000000000f8ffffffffffffffffffffffffffff3f0000fcff0f0000f0ff"),
+            base16_literal("0300f00700c0ffffffffffffffff0180ffffffffffff3fffffff1f000000c0ffff"),
+            base16_literal("02bfffffffffffffffffffff000000000000000000e0ffffff010000fcffffffff"),
+            base16_literal("030000000000f8fffffffffffffffffeffffffff01000000000000000000000000"),
+            base16_literal("02000000000000f8ff01f8ffffffff01000000f8ffff0700f03fe0070000000000"),
+            base16_literal("02ff1f000000000000f0ff9ffffffff0010000f8ff000000000000000000000000")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000000000000000781c80ffffff7f00000000ffffff0100feffffffffffffff"),
+            base16_literal("0307000000ffff0700000000c0ffffffffffff7f0c000000000000000000000000"),
+            base16_literal("030080ffff00000000000000000000fcffff03000000000000fcff070000000000"),
+            base16_literal("03ffffffffff7ffe3f000000000000000000feff03f0ffff1f0000000000000000"),
+            base16_literal("03000000000000ffffe7ffff0380ffffffff3f0000000000000000000000000000")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("cd2c8039371fb84c5de15c05cf404521efcc03945633f1ddbf3c7e1ecc60476c"),
+        base16_literal("74f101683c282d2f75fd75723872c2bc993005c0ea4ea69e5d72d5f3042963aa"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("618f9a878e9590079c18b97846416a9bd7a28408b61c90fe1c53ef08a72ec3f7")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("707f9daf0224e94ac281d6547f1d1e9647cd2151da06dc42b4e0eacf2455e455"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("09423e3b3d0cfcca1cb14076393170dd1240f3f4ef2f034fedbe77d5b329b511"),
+            base16_literal("58125d460bbc15141573103625a8c45dc1462f79354febcee17dc6763ba09166"),
+            base16_literal("30a1f4707fb29f2d85f00dd720cc98ad1f59eb2b4aefa6425f103cdc92b03d62"),
+            base16_literal("8dd12d1fed535ff267f8f6f58b0606ea4f2088dd084f67afa9a1932cfb4f0d8e")
+        },
+        {
+            base16_literal("d4143fbf62b66a82aa97f0f12460e671aff02e95b360990a8c7e63c5baae230c")
+        },
+        {
+            base16_literal("6b7f51aa003ad9f83a1f30a4044f66f05eca51309c27a994b868cbffe8016b04"),
+            base16_literal("fe4913b809d1f4bf113d87b5fc86159548cbc222004a703cdb58aafc54eeb750"),
+            base16_literal("7df163f4ae63cc908342b18e159fd744ca834430283135d9d4c107946f2df8bd"),
+            base16_literal("aaf1c441c4dd6df21bb0b7acc5d6e55eecd298d5531030ebad29273a474ca0b4")
+        },
+        {
+            base16_literal("aa3defa0fa94a6dca6e01c11371ef25911b0f6d3617be459d7234027e7bdfb7f"),
+            base16_literal("09b5a34f72bcdc364692ecaffc4ca83fb37de4f0e34146e41ddcc016bc29ce34"),
+            base16_literal("5dfea388f406750815c6488de973f13864b3ff3e422bda51010db1fb7e0b0e46"),
+            base16_literal("9c5be1c80abe415572a1b459dde4fe84a772f2b38aa5a2663fc7ce873998563c"),
+            base16_literal("9af8fe66831e1aee7256c889f7afb150b87108a10375e34c8309f7b71ba73978")
+        },
+        {
+            base16_literal("baad92e7382263f200aa3f92029a42f0dda9ac58ebf1aea5ab4b5153b1451409"),
+            base16_literal("c426d9ac813336c546beac8300b8da5d6aa89d0c0f7d19637576f19816b69c89"),
+            base16_literal("c0415fec662ed2d4b2e8f90866291296dd31dc52fd453353b6a890422d5dfb3c"),
+            base16_literal("7f26cdf6dc252b88543c77e618be25f617e0207dc8b536f040c7beef2f541f0e"),
+            base16_literal("64a0cf403a988c4b7c2f146109c9cd187000e56e5139b7dcda0aa85046b3ea1a"),
+            base16_literal("cf81a5dba6246e3a535b658afcd2d772a25968ebdc372378af9c8305732321e6"),
+            base16_literal("c903b8f7280615d353bce599d4227be2d71e949a2978bbceb4d467b97ecfa1d1")
+        },
+        {
+            base16_literal("3b4b96e964f79ccdc250fca38a65a02c7222d0ba29adea34a2f0a28673ac18b6"),
+            base16_literal("a7eaaac64c744151de0702e136f5b9e3800af944b57070e529fb4d5384f8236a"),
+            base16_literal("25b7e220b9c04b0f845454a71d61bb31b30494a1b1e858e8cf1dfb51a1fa8638"),
+            base16_literal("d845d889ff8d8637a646f03c2ac1176f903181365bc962c25bdee810bcce28af"),
+            base16_literal("e65c1f6f70e92c54b42370fd9d50cfd1872aecab08af1e3b6ae52599bc92417a"),
+            base16_literal("7d8fb7bfc0e321313123df99faef8debfbd4fe491147d299f81d3ce90aa10e6d")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+    .e = base16_literal("431d5d95f16f957cd53a149ac579d5dff93a5f63f3dfd277dcb554f188bf4b9b"),
+    .secret_indexes = {6, 4, 6, 4},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("2b1921a1492d2dfd942aabb976b900643dbe48bb2d837ad12007dc9a9094f162"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("03000000f0ffffffff1f000000000000000000380000000000000000f8ffffffff"),
+            base16_literal("030f000000c0ffffffffff07000000000000e0ffffffffffffefff070000000000"),
+            base16_literal("0307f003000000600000000000000000f8070000f0ffffffffff0300c0ffff0100"),
+            base16_literal("02c1ffff010000c0ffffffffffffffffffffffffe7ffff3f000000000000000000"),
+            base16_literal("020000c0ffffffffff00800100c0ffffffffff000000f8ffffffffff83ffff0700"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ffffffffffffffffffffffffffffffffffff7fe03fc003000000000000000000"),
+            base16_literal("030000000000000000000000000000fcff000000c0ffffff000080ffffffffff03"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300000000f8ff010000ff07feffffffffffffffffff010000007c0000000000c0")
+        },
+        {
+            base16_literal("0200000000f8ff000000f8ffffffff1f00000000000000000000000000fcff0f00"),
+            base16_literal("03c0e1b6deb7c489486bfbfe97463134755675c388e7a875cb55fb8b964271f137"),
+            base16_literal("03000000000000000000f8ffffffffffffffff070080ffff3f0000000000000000"),
+            base16_literal("02ffffffffffffff3f00000080ff1ff8ffffffffffffff000000e0ffffff070000"),
+            base16_literal("0300f0ffffffffffffffffff0700000000000000000000f8ffff3f00e007c0ffff"),
+            base16_literal("0300000000000000000000000000000000000000000000000000f0ffffffffffff")
+        },
+        {
+            base16_literal("0300000000000000000000801f00f8ffffffffffff1ff0ffffff0ffcfffffff9ff"),
+            base16_literal("0200f01ffcffc03f0000000000000000000080ffff9f0700c0ffff1f00000000e0"),
+            base16_literal("0200000000000000000080ffffffffffffff0000f8ffffff0f00f8ffff07000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("0e544089298827a275b93b668ac0b3ebbf39440722eb96b9f05a018ea34647d7"),
+            base16_literal("ddcd1e94e0ddf4f6f6f6f3c107a77e79ecd92235231ce366c414d7cd2ccfe81f")
+        },
+        {
+            base16_literal("43494dae393f0cef6a7e512c6ec124cca560f1794dd9808604c29195a2ac84d0"),
+            base16_literal("08513ef7a5f330fbe0f68ec94c07c0baaec0cc47bb93d93e76ba229a4576b30b"),
+            base16_literal("7a20bab06496da2fe505c71da5eb88b36c3b55ebd2dcd106872eebdce27b1d60"),
+            base16_literal("71b987b4708547b453430b20bc82de08016c821023c2cedf450bd74bec2554f5")
+        },
+        {
+            base16_literal("a93456d2d1b9bcfa0f7b2634c8769dd6ff207c618e4dd2c02aaaf354aa5b843f"),
+            base16_literal("6db1110f3f9ebdd4210abf4cf9e5eddb5100e66be884b0b166db16391ec09309"),
+            base16_literal("411779133d2872a75d7d49e3bf8edaa91c7836ac6a9b4ce7b13862bfa2b07625"),
+            base16_literal("d7bf4c3d4a6e2103d7b6b68e39c29de56e078e508cd0945f10f19f65f4249923"),
+            base16_literal("5eff93e05e746909c7ef198c8330424775cff5856f9411a39e05ce09452e91aa"),
+            base16_literal("b2f997de30c33481779b45576bd2877c1e8bf098192fd91b0096b652f23607e6")
+        },
+        {
+            base16_literal("6015d4e27db4488828d2f2ebccd8bf968d184ffcb675e487d4db974009343f01"),
+            base16_literal("914463b3d01e3e5f88d0e90a3b9fda6624425578b15f9a18d9653d56a4802c3f"),
+            base16_literal("a2d0ef1c359204a375212fb0a7e189d40fb65cf9312927994495acf6c136295f"),
+            base16_literal("20f6747cf60e5295230bab7d43eece262991966cc52c77726b9056cf6f3ced1c")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0xff, 0xff, 0xc0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("a86a8714a09ac00b5cd1bff666d470a4355d3b1ab2750a327f4cdba62134bee6"),
+    .secret_indexes = {6, 6, 8, 4, 7, 3, 6},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("02000000e0ffffff0f00e003fcffff7f00c0ffff0700000000f007000000000000"),
+            base16_literal("02ffffff030000fcffffff0000000000fe3f000000007c00000000000000fcff07"),
+            base16_literal("0300f8ffff1f00fcff1f0000000000000000feffffffff000000c0ffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000feffff00000000000000ffffffffff07e0ffff1f0000f0ffffffffffff"),
+            base16_literal("02ffffffffffffffffffffffffff070000ffffffffffffffffffffffffffffffff")
+        },
+        {
+            base16_literal("02ffffff01000000000000000000000000000000000000000000fcffffffffffff"),
+            base16_literal("02fcffffff000000000000c003fe3f00f8ffffffffffff03000000000000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300ffffffffffffffffffffffffffff01ff7ff0ffffffffffff3f00000000fcc1"),
+            base16_literal("02ffffffffffffffff7f000000000000800100000000f8ffffffff7f0000000000"),
+            base16_literal("0201000000c0fffffffffffffffffffffffffffffffe0100c0ffffffffffffffff")
+        },
+        {
+            base16_literal("02ffff07000000000000c0ffffffffffffffffffffff00000000f8ff000000f8ff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300000000e0ffff3ffe0f7000000080f9010000fffff1fffeffffffffff0f0000"),
+            base16_literal("02c09f1f0000000000000000ffff0f000000000000000000c0ff0ff8ff0f80ffff"),
+            base16_literal("02000000003000000000f0ffffffffffffff1f0000f8ffffffffffffff9fff00f0"),
+            base16_literal("03ffffff03c0ffffffff0f000000e003f8ffffffffffffffffffff00000000feff"),
+            base16_literal("0300ff0040e0ffffffffff010000000000070000f0ffffffffffffff7f00000000"),
+            base16_literal("0203000000e0ffffffffffffffffffffffff0300000000f0ffffffffffffffff07")
+        },
+        {
+            base16_literal("03ffffffffffffffffffff010000000000f0ffffff3f0000000000f0ffffff0000"),
+            base16_literal("02000000ffffff7f0080ffffffffffff3f00c0ffffffffff0ffcffff3f00000000"),
+            base16_literal("02ffff7f0000ffffffffff0100feff7f00fe001000ffffffffffffffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("030f80ff03f8ffffffffffff83ffffffffff010000000000803f00ffffffff0100"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffff03e0ffffffff00000f000000ffffffffffffff030000000000feff"),
+            base16_literal("02fffffffffffffdffffffffffffffffff7f0000000000ff010000000000000000"),
+            base16_literal("03fffffff3ffffffff3f001f007eff03f0ffffff00f8ffffffffffff7f0000ffff"),
+            base16_literal("0200000000000000000000e0ff3fffffffffffffffffffffff0f3e0000000000e0"),
+            base16_literal("027f0000000000c0ffffffffffffffffffff7f0000ff3f00f8ffffffffffffffff")
+        },
+        {
+            base16_literal("02ffffffffffffffffffff030000f8ffffffffffffffffff030000fcffffffffff"),
+            base16_literal("03000000000000000000000000000000f8ffffff1f000000fcff070000fcffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("030f000000000000000000007800f0ffffff7f00000000000000000000ff3f0000"),
+            base16_literal("03000000f8ffffffff0300000000feffffffffffff0100000000ffffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0380ff0300000000000000000000fcffffffffffffffffffffffffffffffff0100"),
+            base16_literal("03ffffffffff07003cc0ff7f00e0ff0780ffff3ff0ff7f0000000000000000e0ff"),
+            base16_literal("03000000000000000000f0fbffffffffffffff3f00f80000fc0300000000200000")
+        }
+    },
+    .k = {
+        base16_literal("be318b661732ad47c1b5cff45ebcd3d94439f6aa9706af3e8aa3b435405c7439"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("939a00912c59dd522398891b6c22db9d486d6150b15f9cfcb2075be386d684bd"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("152b814570747e64055109a642ac7b941b9bd4b4c97789d96e7a805d78bfc648")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fa0bae6685ee3e4861c43aa738204cdf65a578fe1b17680f612e93313f73ad56"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+        },
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("458858f55894560a2630addc1bf653d2ec66f753929550c4b000eca195603ace"),
+            base16_literal("e6c9085b105f2caed7de69c5cd8a4295098ea087100dac904899a4e286223cd9"),
+            base16_literal("a31ad85561e5e0ba1cd09f32787a735cbbdcbe4ae53feb324c6b2c5a242e0448"),
+            base16_literal("1aef3074e35140c40959805cfcd656478bc47a0092e2a377008def92c0fefe3f"),
+            base16_literal("5f90869ee2c29f114a2b9d02897e060bfe9a53641af80f03c5b960c39a2a4f61")
+        },
+        {
+            base16_literal("f56e63cc42a234cbb34a01a02c6cc33a29b496b4d330b788ee5c36e604f10998"),
+            base16_literal("c97501af7ba2b02c0ba308b6b03bab6c215e363e816739502e848760cc5b41e9"),
+            base16_literal("b897936259c56b41c56654538c46cd1393c9034a337cda3d161ed4d02c077ed1"),
+            base16_literal("349f47d1a3651d1de5855868131d502df9a3c7fff437398773f8c0a54ef5b590"),
+            base16_literal("59643bef88b17a2961b9c0bd2a15cb970d90da7a6a248d31040fa651ddfc7c43"),
+            base16_literal("d0a645d30d8b327e2d5cf6187b2fa0fd427e29738cac9bcbde98514bd3a169e5"),
+            base16_literal("77c91e791dc6a39cf76ea1a8910e6a7f2ea04e1f5e950f5519bee78eb05ca682"),
+            base16_literal("e4bc63b10e0a350311e282a6c20b05f4f412644f1b4b0a930223b974e44bd95f")
+        },
+        {
+            base16_literal("f2b6af6cbece6d7cbd84d5e7769c2f01632cfcddddaf58c260792ade26e17a51"),
+            base16_literal("71c5545939cd5b5e8d8dddcaa513349dc215107b7f19b22044d71ebf2d2b6339"),
+            base16_literal("deb60ee13fe346d35d5aea7ae17867c7eeabb594e1c068d88121557a9e894cfe"),
+            base16_literal("9ae75e03b8dbd670d4dd825e16faecbfa94b8aacfc7cc18ec790d4ce52fe626c")
+        },
+        {
+            base16_literal("69b8e723dc6c373512e9583a72377ed502f0a0657b4d2addb41d4195829abc77"),
+            base16_literal("60fd4c371b5b68a3545038102fe07c50e0ddfc05de1af661f39af953bda09ccc"),
+            base16_literal("d75c61a2b9b20d6083d3900f7b10c001bb6e0b73716a56c8f5b8448a80e87044"),
+            base16_literal("ebfca2b50c98e264fc1889ea14567d9310c4947600c67cfecf414cd033ff4282"),
+            base16_literal("92e18a45fd5f0a7e489139ecf7cd6997cbfdcd62023cc70c5ca3d8b1c2f2cee1"),
+            base16_literal("dde706c56a24026a4c2aa41dda0e36d935b193e0d6a8da486bfeabe90f579f52"),
+            base16_literal("423281baf800b23660d06af0a38c81d9d3c7e7d03c1fd7bc4b8cdfeb99b56277")
+        },
+        {
+            base16_literal("3d4ac372c52e7582e5785c9673e0214862cbbf968d9425fe9ca1fdc7609c6bb7"),
+            base16_literal("a3549023a9135198a12c1209bc730d9e2472fbc8cd0b19c5d681870b72e35c46"),
+            base16_literal("6c2431160946eb1a6f6a783c9956864ee41a7c621b9d17ee9c18e90f111a2b8e")
+        },
+        {
+            base16_literal("5e28ff1c5cdd264be603cb2b35622b83535e584ae83157dcc0830fc163caa8d9"),
+            base16_literal("10e36fd8a6f5abcbce4120662ebc48888eb0e9e00a4d2b410ec4220b2851eca0"),
+            base16_literal("2379da65b00b86fd343cbe545cf5b1a06691adc9912ce90e6384e77bd5e0b0e4"),
+            base16_literal("c3fff524a8f1def672ef55740a7473e4ede737d004fdb862829538913e0d21da"),
+            base16_literal("08b5d59372d27a9235aca4583dbe77918bc970caed4e9f7933d59ea4f3c81f44"),
+            base16_literal("35a2963e1e23b4ffeebb63b854db544ec230dd4289a434858df92bfb3d53a51d")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x07, 0xfc, 0x03, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("3daa522f42cd9bc4f73b75410c4fc6585f45840bb89979e038b503393c4cef33"),
+    .secret_indexes = {5},
+    .secrets = {
+        base16_literal("9c4845b82e7cd213d100b34a201399eadec4f4387b4bd6a824fae33eae7b1f14")
+    },
+    .public_rings = {
+        {
+            base16_literal("03e4218ffea6aa43748853d791a550af82f945fafbd9ffdf0a3de7a6b517849f8d"),
+            base16_literal("020000c0ffffff7f00000000000000c01fc0ffffffffffffff3ff8ffffffffffff"),
+            base16_literal("02ff7f0000ffffff3f000300000000f8ffffffffffffffffffff7ffeffffffff00"),
+            base16_literal("03fffffffffffffffffffffffffffffffffffffcffffbfffffff010000f8ffffff"),
+            base16_literal("02ffffffffffff0100fcffff7f000000000000fcffff030000e0ffff7f00000000")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("09b44a4ba3941527e37e29d531df6cb74f723b362d0c75d39d6aef22e2b3bcc7"),
+            base16_literal("6ae4f8fa092f35d61b0d4809fd1a29e0af16faf04c8b0d975144cc9f7776aa70"),
+            base16_literal("c046f15eed2477ff58bff56716907ca0c3bd63cc657e54b9e29bb96f2aec014e"),
+            base16_literal("e0a0fd9b3dc8bc97ce7651d4e59e5c37784e560c06333568a88da59025538c91"),
+            base16_literal("021a72b6e4ac883012110e212c6f0034f40cd42061beccd13434e0bc2b4660fb")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0x3f, 0xc0, 0x3f, 0x00, 0x80, 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0xff, 0x01, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("6c662e60f6721d0821089e6fee727dbe8189277d7e7ef7f430b1fe4567ea5bdb"),
+    .secret_indexes = {4, 2, 4, 3, 2, 6},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffff0300000000c07b00f0030000000000000080ffff3f0000000000000000e0"),
+            base16_literal("02ff7f00001ee0ffffffff03000000f0ff3f000000fcffff1f0000000000ffffff"),
+            base16_literal("02ffffffff0000000000c0ffffc3ffffff01000000807f000000000000801f0000")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ff1f00000000f8ffffffffffffff010000f8ffffffffffffffffff1ffcffffff")
+        },
+        {
+            base16_literal("03000001000000000000000000000000e0ffffff3ffeffffffffff3f000000ffff"),
+            base16_literal("030000000000000000000000000000fc7f00e0ffffffffffffffffffff1f0000c0"),
+            base16_literal("02ffffffffff070000f8fff7ffffffffff7f00000000c087ffffffffffff1ffcff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0380ffffffffffffffbffffffffffff3ffffffffffff03c0ffffffffff07f00700"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02000000000080ffffffffffffff0f000000000000f0ffffff0300000000f8ffff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffffffffffffffffffffffff00f8ffffff3f000080ffffffffffffffff")
+        },
+        {
+            base16_literal("02fc070000000000000000ff03000000000000f8ffffffffffffffff0f00000000"),
+            base16_literal("03ffff0780ffffffff030000000000000000000000f0ffffff0f00000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03e03fffff070000000000000000fcffffffff0f00000000000000ffffff030000"),
+            base16_literal("02ffffff87ffffffffff0000000000000000000000f8ff070000f8ffcfffffff0f"),
+            base16_literal("02ffffff3f00e0ffffffff0100ff0f0000e0ffffffffff0fc0ffffffe3ffffffff")
+        }
+    },
+    .k = {
+        base16_literal("cb1c08833187090c212bdd921fb2af31ffe9faf786714a4f80fc8f3d07b1eafa"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("46ea8005c566bb08d55b242cebd28f06c89cba29e03b0cf8f0e516baee79f056")
+    },
+    .s = {
+        {
+            base16_literal("0bd508f2faaf77cabb625db9b35b58b5894c5a1cdbe351f78cb9b58cd7fb1c0c"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+        },
+        {
+            base16_literal("74045a4cc8ab22784b7d039c95e53ac322d59c27fd3713e0759dfc4d6582308f"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+        },
+        {
+            base16_literal("1e2c340e62618f70284650fc34f835bc7bec1b9df37f74abdd620f5d6cb50fe8"),
+            base16_literal("4d1bc62e0a34d41a9f423fab15783ee373f2ef6f3346cd7f0f61b3082f07bf3c"),
+            base16_literal("9269fef5038257bb5bf7b162c00c38d89468f21db4974a7d46a2c1d38c41a226"),
+            base16_literal("805f16a2658d4dc7fb8fc036257386ad61af5a6e6edf16292404f14f199fdc0a")
+        },
+        {
+            base16_literal("8e2a77d3ce7313744d2b18da98dd9796c1632fbf7fccc92fdc2f25d0a8086099"),
+            base16_literal("56bd5be93418aee6a079a5bf0246d557bd0a6855b3aaaba499676be39970b4a4"),
+            base16_literal("9413d9a3f76e2d504dfa9ec49f4aea512a525a2a8f838456ef14178ce46c479a")
+        },
+        {
+            base16_literal("350d34d2ecabc6cb276713229dbcb158cde331932757f53c64cc27594cf40af5"),
+            base16_literal("79390d3640bf836ed036445dc095d2af743e36daf6d5cbc79131e3fe64acf0a1")
+        },
+        {
+            base16_literal("913d3791a6878d5fba4c7bf00fff8dd611e9d04ebbacf802df238446d432ad0f"),
+            base16_literal("52ed0970b4515168de1e44b811f349a66eb5dd8609aa512a6bfe735c8cab5cf6"),
+            base16_literal("3baf60d720168057b190c2f0265bddb0c64d87cc2dbbca1f4c9d399153a4970f"),
+            base16_literal("d8be93c831e6df3a619407c650498fd7b8190c657e892b7bdb57c1cdc54a500e"),
+            base16_literal("09d32c98c106d684054c83ae30d339a63f8ef761f86215c48cf5ed5ed71b099f"),
+            base16_literal("272ff1645410067805e76654794712844d41c1d7a764064d15ceba321115ee6e")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0x1f, 0x00, 0x00, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01},
+    .e = base16_literal("fec3af7fb743281298ee8f99397bc909d19c637aa8d82f0ffd05a2c8009a9246"),
+    .secret_indexes = {4, 8, 4, 7, 2, 3},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("027f00000000000000000000000000f8ffffffff0ffcff7ff07f0000f0ffff0300"),
+            base16_literal("020000000000000000c0ffffffffffff0f0000000000e0ffffffffffffffffffff"),
+            base16_literal("02ffffff1f00000000000000000080ff1ffeffff07000000000000feff03000000")
+        },
+        {
+            base16_literal("020000fe0f00000000000000c0ffffffffffffffffff7f0000000000000000e03f"),
+            base16_literal("0300000000000000000000f803000000000000070000000080ff070000f003c0ff"),
+            base16_literal("03000000ffffffff01f0ffff03000000c0ffffffff1f00000000e0ffff1ffe0300"),
+            base16_literal("02ffffffffff010000000c003f000000f0ffffffffffff9fff3f00000000c00300"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ff1ffcffffffffffff00000000000100c0ff3f00000000001f0000000080ffff"),
+            base16_literal("03fcff0f0000ffffffffffff3f000000ffffffffffffffffffff000000ffefff07"),
+            base16_literal("020700000000000080010000000000f0ffffffffff010000000000f8ffffffffff")
+        },
+        {
+            base16_literal("0200feff0fc0ffff3f000000fcffffffffffffff0f000000feff01000000f0ffff"),
+            base16_literal("03ffffffffffffffffffffff7f00000000000000000000e0fffffffffffffffff1"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffff7f0000ffffffffffffff0f002000000000feffffffffc1ffffffffff")
+        },
+        {
+            base16_literal("03000000000000000000000000000000f8ffff3f0000000000c00700ffffffff01"),
+            base16_literal("0200000000000000f8ffffffffffffffff1f00000000fcffdfffffff3f000000f8"),
+            base16_literal("03ffffffffffff0000800f000000000000000000e0fe7f80ffffffffff1f000000"),
+            base16_literal("030000000000f8ff7f000000000003000000000000f8ffffff3f0000000000007f"),
+            base16_literal("030000000080ffffffffffffffffff0040000000001e00000040000080ffff0100"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0200f8ffffffffffffffffff06fcff000000c0ffff7f0000000000000000f0ffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020086ffffffffff07000000fc3f00000000f0fff9ffff01f8ffffffffffffffff")
+        },
+        {
+            base16_literal("03ffffff3f00e0ffffffffffffffffffffff3900000000000000ffffffffff1f00"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffffffffc0ffff3f000000000020000000000000000080ffffff030000")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("47cb7a18f811c667d914aa8060fd98cf5544e672910d0e61412e20a8f5aef253"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("34d35daf7ed6239d11d3196fae381f177059aeca68b5db0abe434829c954efcb"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("46802c5e3ba2c27f41046757340f7525032f6a599121d81b868f21f3d25bffe5"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("b5d898db1dfec835d5f736dbf8460a13393dbe1c7b00d2829d931d50fd12bc49"),
+            base16_literal("8637ead6e3476ef360a952ccc8edcf854433465f5810158cf92fa6bdd28050bc"),
+            base16_literal("a11f3943c66c159d1b29af246300f15d160d3e0024d732b24854d3d1e2fd87ea"),
+            base16_literal("4b40b7800ddb036ed15abcec7f6e14b7190ffe71a1860fad122bb8bd3d8938ea"),
+            base16_literal("b645397455624b3c5abb56d70c74b6d9edb3f2208a7285296cd8d2d9ada83e55"),
+            base16_literal("08d41ea6b54213d2dd86dbdf113cd3480b9b4fca7c3467969ba7034c0945c3d8")
+        },
+        {
+            base16_literal("d2deaec7ca8050f8bfbf60e0486be7ef1347b04569b281d69790f0f7c9ae6b5e"),
+            base16_literal("04ac7ea45d42d692049f9c762c019d05e129602ac70a899bcf2e6eb1d76630fa"),
+            base16_literal("a491eadd72df0879413bf3be05acff37c3f39c1df018e550dade4ba2360870a4"),
+            base16_literal("2674c53766fe4d98d38f1f19113965fe1e17cc32c92035b544137b80520ee27c")
+        },
+        {
+            base16_literal("2bceeb86213f00e9377c1b2a2a37eda5875745f7c7e5524727353f2d3680bce2"),
+            base16_literal("2beddd00a237bc0334f112b4050eaca4f8961edf9f998c2198c7159aa0c1bc3e"),
+            base16_literal("412a2cb53cfd8db67d233634bdb63e351957a712d15e1cce98e91db114711c0a"),
+            base16_literal("282c9cf4603fa159d7fbbff07fa0dd90f20e0608b67ebc060cef4ea9354f0657"),
+            base16_literal("853b144c8d8fb3d1134d7613b567aa6f405395f771a736dfc43898b9eb614d58"),
+            base16_literal("ea548d2c67be72aab9a1ca5b979e7383bd84727623ff3022cc0a2e6a9715dd35"),
+            base16_literal("90a4f138150adc137d45ee738b57162606b49c25d800f43f16032ad67306a37b")
+        },
+        {
+            base16_literal("363dfb8add86eb213ec8f4fda01c40f2e11d7f7755508fbfc9ca365c5ea779c3"),
+            base16_literal("1db77e0f3676b22ff89f5ea41bb17d56683fbe2aecfc40022d9aa0015c090c49")
+        },
+        {
+            base16_literal("7f70ca25793128fafecf8b4d6764da6858a10134776ffe940dcf0d3d5fc4e678"),
+            base16_literal("8a1e3d8b0c759b3fda72514afe6468afe83972d073792855cc8d8b83fa6fd9d2"),
+            base16_literal("5a3136064a161c97aada3c8060d0d81c1635380cfc44ecee680ab0483229c8db")
+        }
+    }
+},
+{
+    .message = {0x00, 0xf8, 0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("41e6a86924008c7861102c190a08c3f126eae711107d76e46648347b08af295f"),
+    .secret_indexes = {5, 6},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ffffffffffffdfffffffff0ff8ffff030000f87ff0ffffffffff3f0000e0ffff"),
+            base16_literal("02e0ffff0000000000ffffff07000000000000fcffffffffffffffffffffff3f00"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffffffff0f00000000000080ffff0ff8ffffffff0300ff0700000080ff"),
+            base16_literal("03ffff3f80ffffffffffffff7ff0ff0ffeffffff0300f8018007f0ffffffffff1f")
+        },
+        {
+            base16_literal("02ffffffffff0f0000f8e3030000000000000080ffffffffffffff0f00fcffffff"),
+            base16_literal("02000080ffffffffffffff7f000000000000f801000000000000ffff00000000c0"),
+            base16_literal("02ffffffffffffffc1ff7f0000e0ffffff01000000000000000000000000000080"),
+            base16_literal("03ff0100000000ffff0700000000ffffffffffffff3f000000c0ffffffffffffff"),
+            base16_literal("03030000000700001c00000000ff01000000000000000000000000000000fcffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("d5a57b19a1a7b6aa54a9735e53f9fbc5fc4c49c4ad44650b223b1c523b68c3f2"),
+        base16_literal("73c40295512f77a32ae6263ad6b37cab24efd08730a76c7f529c77f454ccbffa")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("797efb342ad9d1a4c4f9f47218d24da22a39a06ed8ca10c74edc40df6ded23ae"),
+            base16_literal("24f6df2708fb9cc90e4fb906b54b93c78bbd5c1cf88a300a03dd888be84dd0ea"),
+            base16_literal("aca224ccf582dae3f9f8d462048fe7652a0dda47c9a5aa938bdbc0a7610a10a9")
+        },
+        {
+            base16_literal("efffba35b61dd6b081ac809de0c86b85e3487f8e2511c305aa107c19ecf57cfb"),
+            base16_literal("2e078a18842dd04dd61e7253247d707268bdd9bd81e93434a8e910590f7b9069"),
+            base16_literal("1abee62073a91841cb9f27896e047d5ba530afa72e78ebed758444298ba85f7a"),
+            base16_literal("45e503f55e7f309d0c732dced43b1338d9e69c1db4f0cbcfbaf3efe92b9cdc27"),
+            base16_literal("81cf455103b7b088188ef35f10b15a0977edc8f488aaf418e032d34427afa7ef"),
+            base16_literal("7e5443f37cd026ed5f12e4070eda7aa929830a1756bbbe7e2c9d753b873a30a3")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0xc0, 0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x3e, 0x00, 0x00},
+    .e = base16_literal("baea477f0c2e02c3d9cf8bc55554de0b79175a0f5f6ca4125bd05098a59a717b"),
+    .secret_indexes = {5, 1, 6, 8, 6, 3},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("acb7555b645fb9b19d2647ffacf5e67e2f03083421f7a08950bd552aeeaa0fdb"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("0887393fb904044a5110b7ddf5ee7e10068a81662c18d2f583266099da1d600b")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ff7f0000000000000000000000ffffffffff0000000000000000000000f0ff00"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ff01000000000080ff7f000000fcffffffffffffffff000000ffffffffffffff"),
+            base16_literal("030000000000000000000000f8ff03fcffff0f0000f0ffffffffffffc007000000"),
+            base16_literal("0200fe0f00ffff00000000001800c0ff0300e0ff3ff8ffffffffffff0000001c00")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03070000000000000000000080ffffffffff0f00000000e0ffff07f0ffffffff7f"),
+            base16_literal("02010000e0ffff7f0000fcffffffffff7f000000000000000000feffffff0ff0ff"),
+            base16_literal("03ffffffffffffffff3f00000000000000000000000000000000000000f0ffffff"),
+            base16_literal("0200f8ff3f0000f8ffffffff03000000000000fcffffffff3ff8ffffffffffffff"),
+            base16_literal("0203feffffffffffffffffffffffffffff3ff0ffffffff1f000000000000000000")
+        },
+        {
+            base16_literal("02ff0f00ffffffffffffffff0100000000000000f8ffffffffffff070000000000"),
+            base16_literal("02ffffffffffffff070000f0ffffffff010000000000000000e0ff010000feffff"),
+            base16_literal("0200000000ffffffffffffffffbf3ff8ffffffffff7f0000000000000000000080"),
+            base16_literal("02fe0f000000c0ffffffffffff3f0000000000e0ff01f0ffff7ffcffffffffffff"),
+            base16_literal("020100000000e0ff0f00000000feffffffffffffffffffffff0700000000f8ffff"),
+            base16_literal("020000e0ffffffff3f000000000080ff00000000f8ffffffff0f000000fc030000"),
+            base16_literal("02699e967bec3219ec245feb96bfe2c932e4fa08483db242877260a70193321922"),
+            base16_literal("0200000000fcffff07f8ffffffffffffffffffcfff9fffffff3f00000000000000")
+        },
+        {
+            base16_literal("03ff01ffffff0100feffffffffffff7f00000080ffffffffffffffffffff1f3f00"),
+            base16_literal("030000000200000000f0ffff7f0000000000e0ffffffffff01000000f803000000"),
+            base16_literal("02fcffffffffff1f0000000000000000fcffff00000000000000feffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffffff01000000000080ffffffffffffff1f00000000000000e0ffffff"),
+            base16_literal("03000000000000000000e0ffffffffffffffffff7ff8ff7f000000000020000000")
+        },
+        {
+            base16_literal("0378fbb346f511548e42ff9cedc78089ea21fa3386d92be8af0e5e85dc85dd31a6"),
+            base16_literal("03ffffffffffffff0700000000000000f8ffffcfffffffffffffff1f00feffffff"),
+            base16_literal("0200000000000000000000000300000000f0ffff0100000000feff01007f000000")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("2c5b95cf22a94d4810fa0110229cc6014917dfd0e5a391bc32ec84baa7d29d04"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+        },
+        {
+            base16_literal("e0c8611a7dd30fb3b3620fc577616243b6505a912460b5ddbd51c23a46f8aff6")
+        },
+        {
+            base16_literal("d95ec1fcd9a1eb84a047d9c8ac5c2bda72ff917ae13631f2e6933073026d4d4e"),
+            base16_literal("fa8718a0642a12318991f5b3551ec8726bfc3706ecffd6f3b7bfbf5dd902f9b9"),
+            base16_literal("3e11fe96c7e41bf959c68225d6a5fa807e738cd08f7bc0616332902cf0caa6b3"),
+            base16_literal("68bea6b9208bd01b3a324cd149d74e3ac502c565f2ef8275f1ea13844152b59d"),
+            base16_literal("164b8c1de75af434547c7677016c42ed63347947454a15c888509a9e0bf3faf8"),
+            base16_literal("3dea9cf5d298c67ecf30486c48ebc9ba5389b45d9732a1307266db7013f0c9fb")
+        },
+        {
+            base16_literal("6fc3d6d56b13ff6facd0e25644017974b62859407b0c07ebb8abc81600e3292c"),
+            base16_literal("039a609608dc78f7c2022f5c337a46c0dbf99d084e3aff5f41e2dc58415b0059"),
+            base16_literal("0a1763df1c20c362872f68a9a6e1bd5d001a2c6a95bcfe7da5f1f0b6bafc9168"),
+            base16_literal("6a79e9992e6bb138df1c3ce2f5e27571f32fb4dde69bed5914ff09c498e8c31b"),
+            base16_literal("525649df9ccf54cd75f8e1d5e480fe90d6bf756a2dbe04143d1503aa53f1302f"),
+            base16_literal("47dd16a7db6eba5911273b99b548436b4e563aa767a98152f63f313eee06686f"),
+            base16_literal("ec2fbc5d688e62db27b33cf810b737b59a44a71b8a026f4e006d3b12fe20d695"),
+            base16_literal("33004718c069140e055276411e1ea7553b45682d4e4a05b56132c4e16b57a840")
+        },
+        {
+            base16_literal("bcc35caf418a71388d4383d59cc1c470ffbb445d4563638efcf5b04f8d271beb"),
+            base16_literal("4749e9d6c15890d0bba52fed0a41524a77e6dd529652ef455ba9e1e1220c2a04"),
+            base16_literal("a2f0b75fc15184fd09c39c6aa1078a829402084c01c70e8ee8637d09025cc372"),
+            base16_literal("e88f9c4ed2e1c2dcc83039d3b41002a728a1192d52c16954df626d2a45673180"),
+            base16_literal("b7d9ef6e480c1cf84e02ef1c26532b3e096afd771a499d5d30e4b594cdf3f6d5"),
+            base16_literal("27a1aca9daa6ea3999b97da4d399b18b012a79bd370873e4cf13ea357d52e9dc")
+        },
+        {
+            base16_literal("07c6293e15c4b08cabdf9a84ec5d0c4f43371eabee51d4abe97c5b0a14be5610"),
+            base16_literal("1d679273d306f4cbcc7afac3010ae13c611989cf61fe14faa61055ef4409b944"),
+            base16_literal("fbec28d544486fdf6d00b6e63064ba37a5e327c2f7a021692917d18b89269473")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0x7f, 0x00, 0x00, 0xfc, 0xff, 0xff, 0xff, 0xff, 0xff, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0x3f, 0xf8, 0xff, 0xff, 0xff, 0xff, 0x7f, 0x80, 0xff},
+    .e = base16_literal("486b82750792a0c3e3b4485c1859c72ffd80b3f62e38db4e804820a23a588e28"),
+    .secret_indexes = {4, 2, 2},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000f8ffffffffff03000000e0ffffffffffffffffffffffffffffffffff0700"),
+            base16_literal("0200000000c0807f0080ff3f00000000000000ffffffffffff00feff0f00000000"),
+            base16_literal("02ffffff0f000000000000000080ffffffffffffffff0f0000c0ffffffff000000")
+        },
+        {
+            base16_literal("027f0000000000000000f80000fc03000000fcffffffffff03e00000fedf0fc01f"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02000080ffffffffff0fc0ffffffffffffffffffffffffffff03c0ff9fffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("1c4fbf2c5cb08f86273dcee9bd35ea4503114540a8aca01cdf111ddee1532be1"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("edc5f889848c729187743882009af5ade20feae3500e4fba54cc6832a488ba76"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("eaa9f54bccddc4d23a377708da2e91364205a532856bb810062e79de5d6ab4ac")
+        },
+        {
+            base16_literal("9e54d66ae4086f3cea0f3f9de5c8df5e86291a8f2ec4e474aabfe298489a12f5"),
+            base16_literal("1c152ece1a8771de99ecfd4d0251740b2c4bf497dd79c0fbb47055ee38bd9fa4")
+        },
+        {
+            base16_literal("79249af4a58f087db226478cc5aead44065fe215a300bd75ecbf03a50e3ad147"),
+            base16_literal("f56f78926cb35044853d5079b04170ab070cdf0ac82c93db990a645ca55c5a59")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8},
+    .e = base16_literal("35b0e0a7368e9931991ab5d471a4446dbbbf3b4095a6f657e0a653c11bfd0677"),
+    .secret_indexes = {6, 1, 5, 2, 3},
+    .secrets = {
+        base16_literal("490bebb56a98abf5ea5ba893033b779d0b0056984a9cd5b26d54c65cabc30273"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("025d990fc9325cbaa5e17f4b0045f6c72cd0e17f9dfd4eb855f5f82f9304112d59"),
+            base16_literal("03ffff1ffc010000c00300000000c00300000000000000000000e0ffffffffff0f"),
+            base16_literal("03ff1f00000000e0ffffffffffffffffff01fcff0180ffffffffffffffffffff07"),
+            base16_literal("0200000000000000feffffff3f0000000000f0ffffffffffffffffffff01000000"),
+            base16_literal("03f00700000000c0ff0300000000e0fffffffffffffffffff3ffffffffffffff01"),
+            base16_literal("02000000000000000000000000000000000000ffffffffff01fcffffffffffff7f")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ffffff3f00000000000080ffffffff3f000000000000e0ffffffffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000000000f0ffffff000000fcffffffffff0f00ffffffffffffff0100000000"),
+            base16_literal("03ffffffffffffffff0300000000ffffff0000c00f0000000000feffff1f000000"),
+            base16_literal("02ff7f0000c01f0000f0fffffffffffffffffdffff3f00fcff0100000000000000")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02000000000000001eff7f000080e00cc0ffff07fc3f00000000f8813f00ffffff")
+        },
+        {
+            base16_literal("02ffffffffffffffffffffffffff3f000000000000f81f000000000000000000e0"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000000000e0ff0f00000000e0ff1f0000efffffffffffffffffffffff1f0000")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("665aaa9653d9a0418ac67701b4ea86dbfbad018abd688ab410fd845d0fb7c843"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("a8024e6a352a8b248a58f7c0f3a33dda87dfc2acb859d5975d6b29743c274ef7"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("722db7f83debd5170d21b893a9ca0142c5c2bb95b87f912c21576800377cd884")
+        },
+        {
+            base16_literal("72159d97c0d1c8d060111bdfc4f3e2dbcbab53346823718c6ae99692aef0ed41")
+        },
+        {
+            base16_literal("ebc533e622fe82807bfe7b325571d9baca827e5af868e3bd6fe8463c7fafb1e8"),
+            base16_literal("45dce2e45274f45aa06670d6887ef1503e6eecd0cfba93c22fd93a8c4a886215"),
+            base16_literal("e7cc58d83832c877b35cbd1224d528c80f68899ff9b19fbc7a91e657128a060b"),
+            base16_literal("b46d11cde8692997984e8efd04b9aa570fe1600d8975e0c79e8bf16772784a81"),
+            base16_literal("141d9a36b15454d1a21f00aacf47bbcddc9f0fb8ab9d85ae776df1e527ad2cf3")
+        },
+        {
+            base16_literal("8e3d5d0ab8065a85b56039c2c5ee1c959f190666d4f360e660c6fed6c9f28d4a"),
+            base16_literal("7ef6370baf8e131aac50d104dcec425d7be441fe3417d202760d7ae506ba79b8")
+        },
+        {
+            base16_literal("e2a388387fc84441134fb35ffb12c34dcb5564cd97c0b6848cb3529af77d531f"),
+            base16_literal("1317c3920cc8d38a148b86f82e1f480450559bb2909ecff5ce8ba0fe70c523a1"),
+            base16_literal("dc23ef8668a80784d7c429af77a0f6cb546f98864629b734c12ff33713146b31")
+        }
+    }
+},
+{
+    .message = {0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1f, 0xf8, 0xff, 0xff, 0xff, 0xff, 0x3f, 0x00, 0xfe, 0x3f, 0x00, 0xfe, 0xff, 0x3f, 0x00, 0x00, 0x00, 0x00, 0xf8, 0xff, 0xe0, 0xff, 0xff},
+    .e = base16_literal("8c57135b737fed654d19eaec4aadac86431aa57a2e79d529f05c6d6610cef15d"),
+    .secret_indexes = {1, 5, 5, 5, 3, 6, 2, 4},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("953f8ddbde5a866fec22007c701b03b18005e83caa6a0d7b6f6fe023f405af68"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("281e2c322f0ebfed4465fe1ac58e95cd8af41b3084b2b9c222557f30fb3b3f63"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("036a8f4aa64301807d14d24fc784c8a0da407c6e4f8ff0f5d50a6a7e0fd242d555"),
+            base16_literal("0200f0ffff7f0000000000c0ffffffff01000000feff0700fefffff0ff01000000"),
+            base16_literal("0200000000e0ffffffffffffffffffff21000000fffffffffffffffffffff7ffff"),
+            base16_literal("0200000000000000000000000000000000c0000000000000809f0f000000000000"),
+            base16_literal("0200000000000000fcff1f0000800000000000f0ffffffffffffff030000000000")
+        },
+        {
+            base16_literal("03ffffffffffffffffffffffff030080ff3f000000000000000000000000000000"),
+            base16_literal("030000f8ff03000000000000ffff0300c0ffff7f0000003e0000000000000000c0"),
+            base16_literal("027f0000000000000000ffffffffffffffffff07800f00000000000000fcff0700"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ff07000000000000000000000000007cf8ffff0f0000000000f0ffffff1f0000")
+        },
+        {
+            base16_literal("03ffffffffff00000080ffffffffffff070000f8ffffffffff030080ffffffffff"),
+            base16_literal("03ffffffffffffffffffffff0000000000e0ffffffffffffffffff010000000000"),
+            base16_literal("02ffff1f000000000000000000ffff07f0ff1f000000fcffff0700000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02f8ffffff7f000000feffffff1f00000000000000000002ffffffffff3ff0ffff")
+        },
+        {
+            base16_literal("021f0000001f00000000000000000000003800e0ffff00ff0300f8ff01f8ff1f00"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030f0000000080ffffffffffffffffff1f0000000000000000000000f0ffffffff")
+        },
+        {
+            base16_literal("03ffffffffffffff1ffcff0f000000e0ffffffff0ffeffff7f0000f0ffffffffff"),
+            base16_literal("03000000e0ffffffffff0f00e0ffffff1f00000000000000000000feffffff03f8"),
+            base16_literal("03000000000000c0ff01000000feff0100000000000000000000fcf0ffff030000"),
+            base16_literal("020000f8ff00f8ff030000000000e0ffffff0f00000080ffffffffffffffff0180"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300000000f8ffffffffffffffffffffffffffffffff0300000000000000000000")
+        },
+        {
+            base16_literal("02e5e8117714d3a4ddc7ce0fdfc2d998e0aa222d5dbf8214748082d4659f08bdd0"),
+            base16_literal("02000000000000ff7f000000fcffffe3fbff7f000000fc000000e07fffffffffff")
+        },
+        {
+            base16_literal("03ffffffff03000c0000f0ffff070000fe03000000f800ff7f00000000fcffffff"),
+            base16_literal("03ffffffffff00c0ffffff0700000000f0ffffffffff7f00f0ffffff0f00000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000080ffff0000000000000000000000fc3fff1f00ffff0f00000000000000c0")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("cd874bb49f5fd50ac6b474c5aef6beffdd9cab978efed11bb1704a4975c13c39")
+        },
+        {
+            base16_literal("e464809c70b10a6e49885dd4fab3b640879b9f01efbc3311b999848627aafc4a"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+        },
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("c5e76dfb522a41bd43ba393729ac32c063b24d946ff11c44b82b5699a2d700a4"),
+            base16_literal("782fde46ec810ad21b6a103f331eb3a2a6973fec8389f0ee0ed9afd7ad65c9d8"),
+            base16_literal("4e15d337e6e18dfd7bc8678edd5a280ba2f6c3451871b61946b82fad2934c4b2")
+        },
+        {
+            base16_literal("ff425f74fd4ce539d73128268036c2eeba8ca4b4849364e976f438578940ff84"),
+            base16_literal("e2d3927e92097c568102da3fa3bf3182929067eb9af3dd79893c400ab3c8467e"),
+            base16_literal("529930902490db3d0269b93ff297619f00d1819ef8fa0eff0dab4d143097c7bd"),
+            base16_literal("95796b8edfb6f4cfcfa79f90ecf00ef78aca841dc4a93ed95fa3fc9c0c9e4d4a"),
+            base16_literal("02ec559da2d3c7fe30b87e23dd17ff0eb45c45edf527a27b32dff0770d235cda")
+        },
+        {
+            base16_literal("6e8c0b5e309e0944de8c92e0d1eb9e0b10ad419f7a846b4fbf3b0a7b88068615"),
+            base16_literal("cdaa68319e6d5019a5cc2bf537539661b1d9405dba0be74c10c10981a656f03f"),
+            base16_literal("dcb067831a2d8ad1c7bb9f1a54ebdf43c397d876af7e7eb1e3a9610b329faad3")
+        },
+        {
+            base16_literal("36e2fdec6953234ddb1baa80c2f37ea00375eead66b07cc7e88bf498c5316992"),
+            base16_literal("4b02691d552a461aaec35e71168066057cc29a67b60368e0868400089e646774"),
+            base16_literal("d613f1766c0d5b22cb831d206452485df6ecd8808765e8bb4b5fc99687badbc0"),
+            base16_literal("74cf881ccfcec2f97e844748d8bd864a6b58b9c4e7eb37b0b61dc7a5abf4260b"),
+            base16_literal("ee133db45797f81b371ef44f671ac20d4d023636c5bf39d4c9a53bcfb8804ff1"),
+            base16_literal("f37b1a242186738ebc657501c95c036506c2195cf243fe896ff7473bb86d327e")
+        },
+        {
+            base16_literal("98d6dfa126bdfa75ecc94c68f10ce0862e21e715b5c80d798751e06fff7382a4"),
+            base16_literal("ef7aed52c697c21c5f5d0f6e132828660e18ecc36df28d21cd8b778980acf56f")
+        },
+        {
+            base16_literal("397835eb43f9f9e84d19c022bfe9af54ce700b81e1c3796dbbb77aa74c2eff54"),
+            base16_literal("21cffc762c4ad43ba6910a644b0d8b91833344c56c27d9022de30742998c6f43"),
+            base16_literal("b135d2e7e5cde69aded391d68273ae320f766ad6ae308e86ff42aa995188b4d7"),
+            base16_literal("1f1b72f515ef53c9fcd914808f33c126169711ffae4732f4907f7bc9c4504f6b")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0x03, 0x00, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xc3, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01},
+    .e = base16_literal("a722c7f4ed9aea29e8cc3a77be9b90c27ebba150be4a8a5e45b040dee3eda573"),
+    .secret_indexes = {5, 8, 6, 7, 1, 3, 1},
+    .secrets = {
+        base16_literal("451a7129204242fd38b20df6871a480793ae1d2cca6eb338f456e634b1759f51"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("ee40e13bb58e001eb326484b9a869ed9fed0b1de4616650abf05d34226c81c4c"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("03e2b925649b59413be93020dc12daab5e02b9df5f3f0ef59a6c59f1b9ac394d5d"),
+            base16_literal("03ffffffffff01f0ff0300fc1f00000000f8ff1f00f0ffffffffffffff0340f0ff"),
+            base16_literal("02003f000000000000000000f87f000000000000f0ffffffffffffffffffffffff"),
+            base16_literal("03ff03000000000000000000f0e1ffffff03fc073e00c07f00000000f0ffff1f00"),
+            base16_literal("02ff030000000000000000000000f803f8ffffff070000000000c01fe0ffffffff")
+        },
+        {
+            base16_literal("0300000000000080ff3f00000000e0ffffffffffffffff0300f8ffff3f00000000"),
+            base16_literal("0200ffffc0ffffffff7f0000006000000000f03f00000000000000000000fe0100"),
+            base16_literal("03ffffffffffff00000000000000000000e0ffffffffff1f00000000f0ffff0700"),
+            base16_literal("02000000000000000000000000ffffffffffffff000000c0ffffff1ff0ffff1f00"),
+            base16_literal("023f000000fe3f000000000000e01f00000000000000fffffffffffeffffffffff"),
+            base16_literal("03e0ffffffc0ffff010000f8030000fcffffffffffffff00fc3f00e03f0000c0ff"),
+            base16_literal("03ffffffffff3ff0fdffffffff3fecffffffffffff010000e0ffffffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02000000fcffffffff03000000000000f0ffffff010000f0ffff010000c0ffffff"),
+            base16_literal("020000f8ff030000f0ffff0100ffffffffffffffffffffffffffffff0100000000"),
+            base16_literal("03ffffffffffffffffff0ff8ffff7f00000000ff1f0000000000fcffff0f00fcff"),
+            base16_literal("0234c6b902b175373d83180d0679eefe73b97bdbe3bb2e170ffb7cf768305841a9"),
+            base16_literal("0303e0ffffffffffffffff000000ffffffffff010000feffffff0700c0ff7f0000"),
+            base16_literal("03000000f0030000e0ffbfffffffffff0f00080000f8000000000000000000f003")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0301000000deffffff3f0080ffff030000000000f8ff3f00f801ffff01000000fe"),
+            base16_literal("02ff3fffffff030000000000000000000000000000fcffff0f0080ffffffffffff"),
+            base16_literal("03ffffff000000fcffffffffff3f080000feffffffffffffff030000000000c0ff"),
+            base16_literal("0300000000fcff07000080ff7f000000e0ffffffffffffff3ffeffffffffff0700"),
+            base16_literal("03000000000000000000c0ffffff01ffffffffffffffff0f000000f0ff7f000000"),
+            base16_literal("0200000000fc07f0f7ff01f8ffffffffffff1f000000000000000000000000feff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03030000000000000000e0ffff0700000000000000000000f0ffff1fc0ffffffff"),
+            base16_literal("03000000801f0000feff0080ff0f0000000000c0ff0f0000feff07000000c0c1ff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("9648d14ca9f305cbac78b4d4a6c87ff27c405894a30b7cf6760aeecf9225030b"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("0099402201ee394793bc80a131ffb0eabe02871d612d4a689b2e586999df7daf"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("8d87f16cdea4974c48818994f7601dae62db6ce572e43004484c1e6c19db63c6"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("57e95f66e203c38c84083f7262ab5b90979d0639c189accc4fd0527c44af8106"),
+            base16_literal("dacc8e7dd28ebe15ebb9dd19f38a711ccf413cdd549221f42e0d70cc004bc5fb"),
+            base16_literal("e840dbfbb714ee91f9387dcfe5558e5db31ee65f69bee2b6f5de1f6b195f5c2d"),
+            base16_literal("b2a6b3f6a493a3069f720349b701090abd35dd9ce3a82167ec72bbb1ee1b7d4e"),
+            base16_literal("6471fffb2e9061df6f3c494225d64611c842fac91518348f213f0d42910563dc"),
+            base16_literal("7abab600d290569ec83efb2f78d8b31d677348d0971a61e3dc8eff406b1ab871")
+        },
+        {
+            base16_literal("cd5c5880ddd28f48aaeb07c56b819fa06fa2684b1a38d934041ae765ad080b1b"),
+            base16_literal("838728d5467f878978e7db0d02a76d479962624ea905bb4f605afea62d7202c2"),
+            base16_literal("5536c13807140e45ab4169e62b6f99c20c8aa36e741cd3ef68f1276d2859be81"),
+            base16_literal("85dabd14721a194477e57d8d11b5a810c855152a9c78c92ed41ab0cd00b87499"),
+            base16_literal("3a6c174bfd68729400eb4bd374960b75d09f2242efef0d3c1f08d434d4d7a125"),
+            base16_literal("11b4d86281e3ccf80a4f2f7730cd75fbb0ad7fb2d5d0df24d3a5a5f5503230ea")
+        },
+        {
+            base16_literal("40c880bd6776c0727ee5f2a5a6013f0b322968aac270d55da8bc5bc622670238"),
+            base16_literal("79e5e9e03639b275c382527b1b82c6c22ad450e3e9f9cfd6d8f786fc956bb3d6"),
+            base16_literal("d767e0b935c44aeae6ba18126ec1a4b94f2b1b36128c1527ac6e791349c6c69f"),
+            base16_literal("a384a78a8da7c8e916d041103ba06d2ea08f88573def7ce7f007164c5ce78519"),
+            base16_literal("06372483dcaed320472a467c311464d7fb01cf719e13dd8fe9a71ac7d7744115"),
+            base16_literal("d9b3aab070068c9c05c072e0b447c5c708c7c31b688f3cbe8e7ceb82d13605cb"),
+            base16_literal("8a17e99a7839cd65f4e29a7c778fd7146d8f14e085546cfe72f3f57a40afb200")
+        },
+        {
+            base16_literal("6fd13b1d948a40d5ce1183d391de0bfdb4d75ddd03cc38a89f5530a040120092")
+        },
+        {
+            base16_literal("0d08f1af8bf8301a3681830b289727737d8054ff69bd5f05e3f853f0c0043cab"),
+            base16_literal("79970dbeb347293ef4db855dc81c124c241f145a7d53ddade35cb807091b73b5"),
+            base16_literal("d4d45a1275da576d133c5689dd6b7cea1e0026fc6f8e2364ec0e80a5fc6c72d3")
+        },
+        {
+            base16_literal("c31fcf2153f322934e4bea0e3e3e3357f14eadfbd3b546409fa2c963843faf98")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0xff, 0x0f, 0x00, 0x00, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+    .e = base16_literal("96897559392cd4cbb565bc91c2759d73b50cc84298d2706c4f6b9c2790afed47"),
+    .secret_indexes = {8, 2, 3, 5, 7, 5, 7},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("ff13d1b1fd385fdf83750fd6e9e338ac5ebd8155e957d920bb966d5194489621"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("0abead2dadff8b39a6dd7adbce1a976dad77eb167fda4877b176dec60fb84df5"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ffffffff1f000000000000ffffffffffff7f001fc0ffffffffffffffffffffff"),
+            base16_literal("0300f81f00ffff0000c0ff0f0000000000000000000000000000c07f000000f0ff"),
+            base16_literal("03ffffffffffffffffffffffffff7f0000000c00000000000000feffff07000000"),
+            base16_literal("03f8ffffffe1ffff03000000000000f8ffffffffff1f00f8010000000000000060"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffff03000c000000000600000000fcffffffffffffffffffffffffffff87ffff"),
+            base16_literal("02ffffffffffffffffff01e0ffffff00100000f8ffffffffffff0000f8ffffffff"),
+            base16_literal("02ffffffffffc1f9ffffff0100000000000000000000e0ffffffffffff07080000")
+        },
+        {
+            base16_literal("023e0000ffffffffffffffffffffffffffffffffffffffffffffffffff7f000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ff1f0000000000ffffffffffffffffffffffffffffff1f0000000000000030f0"),
+            base16_literal("03ffffffffff7f0000c07f000000e0ffffffffff7f0000000000000000000000fc"),
+            base16_literal("029c06dbbc6757d8c306c20b627abcace3edc93adedfb6b5869835406de92d9218")
+        },
+        {
+            base16_literal("0200f8ffffe3ffffffffffffffffffffffffffffffff0700000000000000f8ffff"),
+            base16_literal("03ffffffffffffffffffffffffffffff0300fc07000000000000f8ffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffffffff00000000000000000000e03fffffffffffffff00e00100fcff"),
+            base16_literal("03000000feff0f0000f8ff07e0ffffffffff0000feffffffff7f00ffffffffff01")
+        },
+        {
+            base16_literal("03ffffffffffffffff0700eeffff00feffffffffffff07000000001e0000000000"),
+            base16_literal("03ffffff3f00feffe7ffffffc080ffffffff0380e7ffffffffffff0100003800fc"),
+            base16_literal("020000000000000000f8ffffffff01000000380000000000feffffffffff0f0000"),
+            base16_literal("037f00000000000000c0ffffffffffffffffffffffffffffffffffffffffffffff"),
+            base16_literal("02ffffffffffff1fffffffffffffffffffffffff0000000000000000c0ffffffff"),
+            base16_literal("0300030080fffffffffffffffffeffff7f000000f0ff03000000000000e0ffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03d7077ce6aa7164f3d9f7ebad673d3de46f36be9b9b17933106ca47a09ca9f15f"),
+            base16_literal("0200000000000000e0ffffffffffffff01000080ff7f000000000000f8ffffff3f"),
+            base16_literal("02ffff00000000000080ffff7f0000ffffffffffff7f00007c0000000000fcffff"),
+            base16_literal("03ffffffffffffffffff7ff0ffffff3f00000000060000000000000000f8ffff01"),
+            base16_literal("02ff0000f8ffff0300008000f8ffff01ffffffffffff7fffffffffffff7f000000")
+        },
+        {
+            base16_literal("02ffff3f80ff1f00000000003ec0ffffff01000000000080ff0100ff0f18000000"),
+            base16_literal("020000fc0100fcffffffff3f007c000000000000000000000000000080ffffff1f"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffffffff3ffeffffff3f0000000000f8ffffff07f8ffff07f8ffffffff"),
+            base16_literal("03ffffffffffffffffffffffffffffffff000000000000c0ffffff80ffffff3f00"),
+            base16_literal("0200000000000000fcffffff0700000000f0ffffff0300f8ffffffff3f000000f0"),
+            base16_literal("03000000000000000000000000f8ff0000000000000000000000ffffffff000000")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("12cf9d1b1d75c15955c5ed297a8f7c5aff5b8d70b9dda407bf59adbdec50e22e"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("f4d8d2941562a22f16b54bd2d87c37cbf83985f23c99d1f6a947d7b61ea54a86"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("dc34241f005e414211c6253f9387ae81cbe34db73e230790958691cf8423a7da")
+        },
+        {
+            base16_literal("10453b5aa374bed8923de9836283eb52c22f30ced209972576f0772063c0d050"),
+            base16_literal("38f09efc3363a5f2399d338000a1d82b68f4ff75d7b10fb8a80c67e70b72599e")
+        },
+        {
+            base16_literal("b0ebfb13cfa8787c5050be30640073206991a3d4b36e8eaa3e70af6240b7dfe7"),
+            base16_literal("3612c97be5156088079ea66b1e4a036fc47847ff5353b8329e0939309ff83d1e"),
+            base16_literal("e4934174be898b0018224688d6e97df8681d79a427f9dc3a7cdf7abe7523b548")
+        },
+        {
+            base16_literal("35394bca2004fc70d18b42e136220d24f859dc4909dcfde2b32e5717c8ddfa28"),
+            base16_literal("ec36452f7637a3409c236b9f99aa89f2ab3ea7a7894a70b63ef173080dcd4e74"),
+            base16_literal("69a047a30616e4b446dd6950c3fce8b045ae16b8a73656911b8b71cc85d03572"),
+            base16_literal("5fe77ddc080f668f1498948d92c8a4281ea151a012a048da6ba6a5fbd5a121df"),
+            base16_literal("3cd2dc310e59ce19cb63f2d6094723cf9c9ae05b02f3d5670cf544ed4a23c418")
+        },
+        {
+            base16_literal("016b72b7f79458c70b83994c74cc75c4be39675eb745934594c0956e6c1781b0"),
+            base16_literal("1875a145b9d74afec9967712e08194fa0676a0334c470efdfac91a4dcf85e516"),
+            base16_literal("5410f0a964bb17aede1a4fa526e398a48ae6e753b27e23cdd98e730ce30669be"),
+            base16_literal("a2d37d9a87f1b4e6060ae5727b2f1d300b1beabc74cad4ccf335336b1e14ff3c"),
+            base16_literal("32f7e4ed4aa44bfee6023d3b29acc6d2b3db90077e2b45e6ad3aa055f3fbe8b6"),
+            base16_literal("f1865e03da8fe6e69357f05269edad5c20d8ef1cfd7d2ef183e456a7c69b9ebf"),
+            base16_literal("fdc0b4375d33642e4c81ad487fc79c1bb8a07dc2497d33fdcd750a734925e2e6")
+        },
+        {
+            base16_literal("4d6d7c26e0ac7fc57e99614ad5c331780ad7498e561af103ef967eda9f674680"),
+            base16_literal("51821e4687fb6e35c8229dd39844872ffe972b45dac2b147a3a0ba336619a0b1"),
+            base16_literal("0459ad1fd725ffda5705076250bfb2ae533b9c02113c183def74fb5ad10b7fef"),
+            base16_literal("edc4f575a360aa7fe768f1d58523b88655fcf859b19508660a585b0d978924aa"),
+            base16_literal("8ac5b07eec008e7f800db6fc5a6eaf7d9ed9bf1ced3649fc0309ec3b2595e1b1")
+        },
+        {
+            base16_literal("612bf7f3d41b14084bfaccd92b3b003e17196c68a9bc77b8930407f8ac50ac1b"),
+            base16_literal("101098c3c47311d2f6b725de47d18d50cf4ed44a05f07bd9735ab60ecc1ff818"),
+            base16_literal("05e0ed236a1ae6d31491f23d266232f6e466761d9aad43a2fd686267bdf2161c"),
+            base16_literal("72880788da595e6f60a55567aa02c99eca1098f731fd60626bb33f07b30b3bfa"),
+            base16_literal("780c75eb64f546788b92cc07b329c393c4610626ad645676296a8df24d785a12"),
+            base16_literal("a3dd289454c53dfedb9649a1bd7dfc16970b81326e8985c8c08126271a0cbfde"),
+            base16_literal("e355e5929355ce5cc71756a858956ee1db4341ab5f4136d597b39eb546b5bd59")
+        }
+    }
+},
+{
+    .message = {0xff, 0x0f, 0x00, 0x00, 0x00, 0xfe, 0x7f, 0xf0, 0xff, 0xff, 0xff, 0xff, 0x3f, 0xff, 0xff, 0xff, 0x1f, 0x00, 0x00, 0xf0, 0xff, 0xff, 0xff, 0xff, 0x7f, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("1a66486f1ba7cb8c255f97af7d5c5198c98a3ce694c1a81da2335bacfe80090a"),
+    .secret_indexes = {3, 6, 8, 8, 4},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("03fcfffffffffbffffffffffffffffffefffffffffffffffff0000000000f0ffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03c0ffffffffffffffffffffffffffffff1f00000000000000000000e07f000000")
+        },
+        {
+            base16_literal("0300000000600000000000000000000000000000000000feff0f00000038fcffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02f8ffffffff7f000000feffffffffffffffffffffff01c0ffffffffffffffffff"),
+            base16_literal("0200feffffffffffffffffff07feffe3ffffffffffffffffffffff0f0000001000"),
+            base16_literal("020000000000000000000000000000000000e0070000ff1f000000e0ffffffffff"),
+            base16_literal("03ffffff1f0000e0ffffffffffffffff070000000080070000f8ffffffffffffff")
+        },
+        {
+            base16_literal("030000000000000000000000000000feffffffff07001f00000000000000ffffff"),
+            base16_literal("03ffff0000000000000000000000040000000000000000f0ffffffffffffffff7f"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffffffff070000f8ffffffffffffffffff0f0000fcffff1f00f83f0000"),
+            base16_literal("03ffffffffff1f0000fcffffffffffffffe1ffff0000000000000000000000fcff"),
+            base16_literal("030000000000000000000000000000000080ffffffff3f00000000c007fcffffff"),
+            base16_literal("03c0ffffffffffffffff070000000000fcffffffffffffffffff07000000000000"),
+            base16_literal("0300000000001000feffffffff1f000000000000f8ffffffffff0100000000f8ff")
+        },
+        {
+            base16_literal("021f00fc1f00e0ffff07000000e0ff0700feffffffffffffffffffff01f0ff0000"),
+            base16_literal("02000080ffffffffffffffffffff070000000080ffffffffffffffff030000007c"),
+            base16_literal("020000f8ffffffffffffffffff0f00e0ffffffffdfffffffffffffffffff0000e0"),
+            base16_literal("020080ffff3f000000000000e0ffffff1f00000000000080ffffff00f0ffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03007e00000002000000e03f00800000fc3f00000000000000000000000080ffff"),
+            base16_literal("02c0ff07000000e01f00000000000000000000000000000000fc87000000ffffff"),
+            base16_literal("03ffffffffffffffffffffff03000000000000000000fcffffffff7f000000f0ff")
+        },
+        {
+            base16_literal("0300000000003e00e0ffffffff3f7e000000000000fc3fffffff0700000000f0ff"),
+            base16_literal("03ffffffffff00f8ffff000000feffffffffff0f000000f0ffffffffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffc3ffffffffffffffffffff7f0000000000f8ff7f0f000000fcff7fc0ffff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("7a1c5b7dc3aedd032c43bd19a562b205f063a515b558c866f0c7ab101bda8fb9")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("e95aa8844a38909358743443c3a18308e055fe8e375358507978074a6135e1ba"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+        },
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("a3153549d30fe56aed3d27b4c1c07378481ea8bfcdd5eb29665c910afb01da6a"),
+            base16_literal("f9c884dfc65913bf07a29bcc3b23b774ab61a3070d84d37417df4778cbdc381f"),
+            base16_literal("97490f72418b6f6d04ffb6bd865d752d95208dd39f05bf1726ee65fdea94fb73"),
+            base16_literal("acafc24e7a5a7d3d307577ab89eaa9a7527a812d6cfe2d063de806b20b36d285"),
+            base16_literal("a0f30f70a6f0b9253cb7fcdef0b8e4bb763957f127c6d553f9dd994ce81fd341")
+        },
+        {
+            base16_literal("2741edf97379c337f2b0379cf97bf13d3fc5bdb486ad8700f930b9fbfca4b9ac"),
+            base16_literal("117596f5199075128b59c6f481abd25cc90669879647ba9be36c9bba3c601d43"),
+            base16_literal("03d88b4569e8babfe5b2254f4941237a6b2d377a8c984ff262547bb983979d3c"),
+            base16_literal("347707d3c4172368adee86f19f1d07b954ad875ef711cc42bf8bfa1fbfda1678"),
+            base16_literal("68af052a9834bc085dd279acce6960568e7fdebf4e6537b8bdfb1a21d7a7360a"),
+            base16_literal("a58729a2b0fcb797af8b9441a232bdaa8ea4b3b3b92194002c9b667442972075"),
+            base16_literal("ac3101b1d41e895f1f6235fe444d8592ccb631bb03189f36172e44b01e165c93"),
+            base16_literal("56a5a05a03f122fcf005b3a42b4a7a8562ab9d248140b0f3c8b67d605c1496b5")
+        },
+        {
+            base16_literal("1d8c814a0047bc6b8622e34644851111af68d1a3cc2af436201e8d5675c70314"),
+            base16_literal("9cca5d8d5758818221cf89ab3351881f95f2de940858d685f299806b7bc8b527"),
+            base16_literal("ba70a50e5e962dcba930130262315f277463347b902133aed02df304c8253be3"),
+            base16_literal("f72d2e75a4090ec516e38de7e2205dbd870f6413091dff52cff6b04187ee75eb"),
+            base16_literal("964b4b2ce40db4776cc1af8e838536054871828e782b7e5773b44c5f6393a41a"),
+            base16_literal("0f88d978d4e290299883c9ba5b25ed3ea70f0c047fc45fd53f48fcc541e0292a"),
+            base16_literal("47cf1e378185c3ab8cadd2b37aaf6a09262fbd48907ca9539467e6f0be758106"),
+            base16_literal("37f10a563861b0ec90c71ce71d1e4f35ea677c5f86c166a021e9da92dec71c76")
+        },
+        {
+            base16_literal("01af1cd97d16b4d4058ab8190e1c848f8c1757a1e35d4cb1dda6b5a60d3803da"),
+            base16_literal("d18d556dca49180b9db57e356a8f7e7fc1b3e776aa4d1328cc812d67229f6725"),
+            base16_literal("f901d113c000160f75c482f0945f60f23cda4c08fd63b5062b7ec4c298a682dd"),
+            base16_literal("3b7bd2fe54d4836b8acc9a66f08f75e6d4a19646b52856edd4459076e386f17d")
+        }
+    }
+},
+{
+    .message = {0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x38, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+    .e = base16_literal("ecd3c8092a6eccf84661ed7f5e39ceb66a66aedaa327a053313d1b20b41b0b96"),
+    .secret_indexes = {7, 1, 3},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("4f3efeeebc6373653d22a560756dcf26b75eb14be231ff49b984e93596885a19")
+    },
+    .public_rings = {
+        {
+            base16_literal("020000f0ffffff3f000000000000000000000000e0ffffff0080ffffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02000000000000fefffffffffffffffff0ffffffffff0000fc0f00000000e0ffff"),
+            base16_literal("03fffffffff780ff7f00000000000000000000000000c0ffffffff3f0000000000"),
+            base16_literal("02ffff070000000000008003000000f8ffffffff0100e0ffffffffffffffffffff"),
+            base16_literal("0303f0ff0f00000000c01f000000f0ffffffff7f00000000ffffffff7f00000000"),
+            base16_literal("02fcffffffffffff7ffcffffffffffffffff3f0000feffffffffffffffffff1f00")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03ffffffff7f000000000000ffffffffffffffffffff0300f0ffffffe0ff0f00fc"),
+            base16_literal("02fffffffffffffff8f7ffff0fe0ffffffffffffff1f0000feff000080ffffff7f"),
+            base16_literal("0261de4cfc79d1c8f71e6ecb3e90bcc2eb9d3723bf971aad02938dcdfd870e7359")
+        }
+    },
+    .k = {
+        base16_literal("b5278f2a04af495c54733eac91b9edfbcdb7fc860a25e4bf95724c9ce8b46983"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("8bbf25aa86ebb5a0e9b7f481662ede7734e34a0e898101da3ff552caa5a3d354"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("d73983a60b2e30fa51933a751dff6c2b10de7200fd790f686b7bcede9286f07a"),
+            base16_literal("af6cb3f12516f36bc2f13c85abb4a23183bd90ef5b0c4a15622b7a9e657e1980"),
+            base16_literal("b5df9f680609037c7fafcdb5f55ad2c9d6e28b912ff3a30c37cce78632a30526"),
+            base16_literal("46aced5a444d968ca8e62fc53fe34d49594cb465eeb536a382f7fbeb062796c8")
+        },
+        {
+            base16_literal("cc99bec6d984f9c4b2181a1d4b480e4bb4be84399ad833044fe56a8b6d9c8278")
+        },
+        {
+            base16_literal("486739462defa581c586899ded069e396f63359755d96da260ea69d5d3633a1d"),
+            base16_literal("8d5c0cbc368b93663a467b7e6beba9d7aa1caa6cb41e1bb711a618b0ac694832"),
+            base16_literal("e299a52ffc41b9bb1dcfcab9967c8c7997e6d8c4fc770d75b7a51a3f71680dbc")
+        }
+    }
+},
+{
+    .message = {0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xe0, 0xff, 0xff, 0xff, 0x07, 0xc0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("7aa0676dbccfce70cc98cac859a00a780a45802f41b46f31528775528b28fbb3"),
+    .secret_indexes = {8},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("03f0ffcfffff070000000038000000000000ffffffffffff070000fe3f00000000"),
+            base16_literal("0200f8ff0f000000000000000000feffffffff1f000000000000f01f00c00100fe"),
+            base16_literal("02000000feff0f00000000000000ffffff0300f0ffffffffff3f00000080ffff00"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03fffffff807c0ffffff000000000000f8ffffffffffffffff070000f8ffffffff"),
+            base16_literal("02ffffffffffffffffbfffffffffffff1f000000000000f8ffffffffffc0ff0100"),
+            base16_literal("02000000feffffffff0100f0c0ffffffffffffff0000000000f0ffffffff0f0000"),
+            base16_literal("0300000000000700c0ffffffffffff03000000f8ffffffffffff7f00f8ffff3f00")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0b2914d3adff57b993984cc75491d7dfa36ead77d61492e72bba6bb825d8b9e2"),
+            base16_literal("7e16449e10341474cb9cc305538212f213ccfbcf4b4e5eee115cb250be6c0002"),
+            base16_literal("00787332b7eda807e07a4abc8f78544989f46225f8f68cfe7d601239293b19e2"),
+            base16_literal("af8f8f439a49486bb13a805c04de17d21f05b3363ba109889e7884afd8a7295c"),
+            base16_literal("2af3c69e1f26cceaf191dbfb7dc781a77ec271adfe7ece4f771de58524e7f5b9"),
+            base16_literal("82ac17c1ca13aef0588b460bbf77ee799b1d4687c663d27b6274353aa643ed37"),
+            base16_literal("93a0e583736db800ffb36e56a69a2310c8808483cad5a4c7b4a20a5e42d64f3b")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1e, 0xfc, 0xff, 0xff, 0xff},
+    .e = base16_literal("91e7351d0a6ba87ec444e2a879c3e221570dff7fccb98f890cc74a550626b75b"),
+    .secret_indexes = {7, 2, 4, 6, 8},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("02ffff1f00007f000000c0ffff3ffeff7f00f0ffffff07000000fcffffffffffff"),
+            base16_literal("0207c0ffffffffffffffffffffffff0300000000000000ff7f0000e4ffff03f0ff"),
+            base16_literal("031f0000e0ff00f0ffffffffffffffffffffffffff1f000000e0fff70000000000"),
+            base16_literal("03ffffffffffffffff0100fcffff03000000ffffffffffff0f00000000fcffffff"),
+            base16_literal("0300fe3f00000000fcffffff010000f8000000ffffffffffffffffffffffff0100"),
+            base16_literal("0201000000000000001f00ff07000000000000f800000000000000f0ffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ff07f8ffffffffffffffffffffff010000000080ffffffff03000000000000f8")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffff1f000000f0ffffff000000feef01000000f0ff0000f0ffffffff1f000000"),
+            base16_literal("03ffffffffffffffff0700000000f8ffffffffffffffffff07000000f0ff1fffff"),
+            base16_literal("03ffffff7f00f8ff0f00000000000000e0ffffffffffffffffffffffffffffffff")
+        },
+        {
+            base16_literal("03000000000000c0ffffffffff3f0000000000e00f0000e081ffffffffffff3ffc"),
+            base16_literal("03ffff3ffeffffffffffffffff07f8ffffffffffffffffffffffbf1fe001010000"),
+            base16_literal("0300000000000000f0ffff1f80ff1ff8ffff7f0000000000000000000000000000"),
+            base16_literal("03fcffffffffffffffffffff3fe0ffffffffffff03f07f00000000004000801f00"),
+            base16_literal("0200000018000000000000000000000000000000000000000000000000c0ffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("020000000000000000e0ffffffff0f0000000000f0ff0100000000600000000000"),
+            base16_literal("03003000000000000000f8ffffffff1f00000080ffff1ff8ffffffffffffffffff"),
+            base16_literal("02feffffffffff0f0000000000f80300000000000000e0ffffff000000e0ffffff"),
+            base16_literal("030000000000e0ffffffffffffffffffffffffffffffffff03000080ff80ffff07"),
+            base16_literal("02fe0f000000c0ffffff1f00fe00f0ffffff0300000000f0ff01000000ffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ff0000000000000000ffffffffffffffff3f000000c00700000000000000ffff"),
+            base16_literal("02ffff7ffcffff3fe0ffff0300000000000000000080ffffffff1f00feffffffff")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("504f0a4d9c210a1513c755c572171c07c691f52f29545d81545ea80b7236ac57"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("09762b30d42a48b7519d2ddd14d5aaa49f3a1de42797b7e819e8b59636105b2c"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("0deee00d2a51868327cf8cb316a371163830f5a4080a2e25818013e5b8b0f2aa"),
+            base16_literal("70833a67fe258a17ac75e818dbe25f05ade4eb8dfce47192d105b6ed240a776d")
+        },
+        {
+            base16_literal("349e97c174845bce3e005ce4e0d9e7ff53bbe6f6e1cdcbf9baf391703bfa8ace"),
+            base16_literal("42877dd86b2127dc05a3de077ece45e8f8c2fb854f0cb7970bbf4764025259d8")
+        },
+        {
+            base16_literal("2dd4018e354b104f676213c4441c82737b4dcf5642292fd93a1381a0a970cf86"),
+            base16_literal("cf6a257dbd7b7686c17a79fe16bc1ae592fc460910d28abb538d6404f4ac4a35"),
+            base16_literal("85ac104c4565688ccaac67cecb0f719d8b267478f22fa55fb72fa0229037deef"),
+            base16_literal("aac2bb29c595d0a5c1a9b61e093004aa15f5dc6c20026194a24d4ca75a5ba67e")
+        },
+        {
+            base16_literal("df04aafcf0b52431845d17176aa79d05e0b15f9a275aa5c5e35ca933d1f5ee80"),
+            base16_literal("663ffea4cacbd948471b270360bc7068d3019769ba20c90148001b8c95b2ecb3"),
+            base16_literal("8919410c49355ce5cf694d6671e48bd1d244a7192fd688701519ae6b781a8294"),
+            base16_literal("e9101f6a857ab861c790563a32af01cd066fb40313fb02d5ae79013557235246"),
+            base16_literal("843e78041c5d16576a8049e4dbfee9c712e0ab4aba5b5cd2efa5fd3627715273"),
+            base16_literal("a91cad5f17a950a1f204c1dd115d38d94bf0a22b0dd72b30825f25abf2e29b46")
+        },
+        {
+            base16_literal("7940894b6351b481e3b735d43c950da330a82ab123183bb7f7b77096d2d67c8a"),
+            base16_literal("6c599470abdc98af40e57d803e4412fdb3cf15c034254baf92acfc7cda47a9ef"),
+            base16_literal("a2b9aeedc04447f074dcf397183ad6480c05baddc8e1a81b2d43bd26acf752de"),
+            base16_literal("01963d8c6efe5e526cdbc6aa642cceb55e28bd38a66bd22652f6e66ddc37c4aa"),
+            base16_literal("d63271f75e74611d52badd233ba857a24bab7e452c843c05b1e598ba2ffc3aac"),
+            base16_literal("076d4d442f882370ddcc44d13828672ebb9ca3ebcb1e0c3870048a13cd72a987"),
+            base16_literal("793e235e074e4bcd0af66c1264c81ff33e16600f86bda0c4143256e862998cff"),
+            base16_literal("a571b61770288320a99fc7d4609dfc6e76defb81d9cdb7bbdb2017851ef692ad")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0xf8, 0xff, 0x0f, 0x00, 0x00},
+    .e = base16_literal("8a44c8687125e09c7614c4f1f89addf69d4d6fc939b96dff53a223e284450793"),
+    .secret_indexes = {3, 6},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("02000000e200000000000000f0ffffff0f00c0ffffff033efeffffffffffff83ff"),
+            base16_literal("03f80ffc0700000000008087ffffffff0f0000000000000080ff3f00000000f8ff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ffffffffffff01000000000000000000000000c00f00f8ffffff0700000080ff"),
+            base16_literal("0200000000000000000000e0ffffffffffffffffffffff3f0080ffffffffff0300"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffffffff01f8ffffffffff0f0000000000f03ffeff070080ffffffff03"),
+            base16_literal("03000080ffffffff01ffffff3f0000000080ffffffff3f80070000000000000000"),
+            base16_literal("02feffffffffffffffffffffffffff01f0ffffffffffffffffff3f0000000000f8")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("cf7fb2e787e2af9f098c231f6a54c88132cb4ee0e75a77b0c6f7872e55eb0a6c")
+        },
+        {
+            base16_literal("d8ebb3aa3c9c3b1d534cb1b9643093d95a1b3933fc07a98572c2c84c8bd965c8"),
+            base16_literal("78398057a098e6bbc7aa6d40e9b965cff0a47d89e10ed3e6f324769f506a6a00"),
+            base16_literal("760994e70f82874a6c1945de4fa3f76b85085bfbe1baa160c74b7ca1697c83b3"),
+            base16_literal("3350aac720b9713e6d110f0cccb101ed09bf89cebbdb04814cf9319c681260de"),
+            base16_literal("a2440a7ad1157b7e9e4b8dd22dadd30ca619aa5dcc0ede20dbfa964411f9c043"),
+            base16_literal("363f98801d605e3ee1e47740cc5d1f26ea757d4ea6ae29eb83f04647e332f0e0")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0x01, 0xfe, 0xff, 0xff, 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00, 0xe0, 0xff, 0x0f, 0x00, 0xe0, 0xff, 0xff},
+    .e = base16_literal("0df495c0360e5a6a3bb5dbde3b5080cbffbb5aae7fdf5083f7a5cf9c7677106f"),
+    .secret_indexes = {4, 2},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ffff3f80ff0300ff070000000000000000000000f0ffffffffffff01e0000080"),
+            base16_literal("0200f0ff8fffffffffffff3f00f0ffffffffffff3f003c00000000100030000000"),
+            base16_literal("02ffffff7f00000000e0ffffffffffffffffffffc3ffffff1f0000000000f8ffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ff7f000000000000000000000000ffffff077c00000000000000000000000000")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("b7ed9770fed2143d4108d00b804ab46e653808c93b8715f7560b5191f3bc21a4"),
+            base16_literal("129f2e1f1c2cc71fd4b075bdd5104a96f651921df6852c104b15dc1f6dcd945b")
+        },
+        {
+            base16_literal("234d7846605a0bf87b99faa2eab203a71e08130ae2075ea87331449b23f403a8"),
+            base16_literal("168aabe8efd30d3ea96e6a19dbbf5d7e156c723b5ef1c090d73d02cb6519ac27")
+        }
+    }
+},
+{
+    .message = {0xff, 0xf1, 0x1f, 0x00, 0xfe, 0xff, 0xff, 0x1f, 0x00, 0x10, 0xf0, 0xff, 0xff, 0xff, 0xff, 0x07, 0x00, 0xf0, 0xff, 0xff, 0x07, 0x00, 0x00, 0x00, 0xff, 0xff, 0x0f, 0x00, 0xfe, 0xff, 0xff, 0xff},
+    .e = base16_literal("4147811f7e6b132c7fc9d5f6a3dd16245024846e2f23739f2bb903e6c1016f2f"),
+    .secret_indexes = {4, 4, 5, 7},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("1b72102b812119d7e25173b8b4eaf878fd121eb2002eb1bce43a54d15188519a"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03fff1ffffffffffff3f000000000000ffffffff0000f0ffffffff3f0080ffffff"),
+            base16_literal("0200f80f00000000000000c07f0000000000f83f000080ffffffffffffff0f0000"),
+            base16_literal("0200e0ffffff010000000000000000000000fcffffffffffffffffffffffff0100")
+        },
+        {
+            base16_literal("03c86b157abace1c4f101976a030b8a938b298a8d1c427228060aaff5b4c68b6b0"),
+            base16_literal("02ffffffffffffffffffffff07000780ffffffff070000c0ff03c0efffffffffff"),
+            base16_literal("02fffffffd3f0000000000feffffffffffffff0f80ffffffffff07000000000000"),
+            base16_literal("03000000000000fe7f0000000000feffffff1f0000000000000000000000000000")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000000080ffffffffff3000000000000000000000000000f0ffffffffffffff"),
+            base16_literal("02ffffff01000000003e000f80ffffffffffffffffffffffffff0700000000c0ff"),
+            base16_literal("02fffffffffffffffffff9ff3fffffff0fc0ff07fc03000000f07f00f8ff030000"),
+            base16_literal("03ffffffffffffff0300e00f80fffffffffff7ffff030000000000000000c03f00")
+        },
+        {
+            base16_literal("02ff00feffffffff0700000000f8ff03000000000000fcffff3f0000e001000000"),
+            base16_literal("03fe7f00feffffff01000000ffffffffff7fe0ffffff9fffffffffffff07000000"),
+            base16_literal("02000000001c00000000feffffffffffffffffffffff0f00fcffffc71f00000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000ffffffffffffffffffffffffff0f00c0ffffff01000000002000000080ff"),
+            base16_literal("03ff1fffffffffffffffffffffffffffffff0300000080ffffffffffffffffffff"),
+            base16_literal("0200000000000000000000e03f00000000e0ff071c003cfe01000000e07f000000")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("d0a9f3463d9ef8cc40c3de1701b6acc7abaa5654b4d4098080ea1c9f7a189f9d"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+        },
+        {
+            base16_literal("ffcd61fb2121d52c0a3c8129599051271d52e9497ca8a51888f60f177560b78d"),
+            base16_literal("9cbf468d33cd44ea4462ed6e6c9519c07d5e868816ce415d4a46f64dfe0210b1"),
+            base16_literal("f9b70d5d2d0a3df74e5566987d4bc666ef066891b298845e19024f4fb88fcf68"),
+            base16_literal("22f015cad42b2c4bf56763b021bcb740e15c6dac6612060cb84305f3a78c2bdb")
+        },
+        {
+            base16_literal("31cbcf6849897afce19cf0d81cdbe72c820506ce714d99844b88f99b055f2b9d"),
+            base16_literal("669779f676001de97ac8ed2b18a1a42e909dbb135a2b8c9c63bc74a29cd996a9"),
+            base16_literal("9148da9eca62413475e4fe7792a4d1fd2440e89ac1ae67440275784170c7d497"),
+            base16_literal("8b0624127d491e3018578ecd71e92c6ce0d20e8c13884a876fd9c13232d8e769"),
+            base16_literal("7c8507f23289d93b3281b318fafaf7b0646fde788ff32d04ddac2c5c137efc6d")
+        },
+        {
+            base16_literal("9c95e85ce9168bc1c530950945fc8f52d23bd5bdbad3346388aebe40588551de"),
+            base16_literal("780b04d47c8e5272f616832ea8fca4ba1d5bb70c894d5fa0b6e7855691628897"),
+            base16_literal("21ea9885be50bc72b30357b2346d265c83d5e35a69887c3d8a9390666997cc11"),
+            base16_literal("df7fc2324bb3d0ae31ab773670706e264c14a616bf12df8f243d9d89eb4e1d9b"),
+            base16_literal("a67050944f4365a56a5bd333455af781aa62a553677b2f7fa91751a0128089b3"),
+            base16_literal("d01e7eb018e713ae3e0ac641c1ecb98e802d6fc49711147b4d8228e43b6297f0"),
+            base16_literal("3051061239ee6760a65dac4f30fada5205a63000fa99f71e5ea094ac3063da01")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0x03, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xc0},
+    .e = base16_literal("c64fbd16329d4ec115e66324d36eea3900073fbbc09e98b40931fb018088dbae"),
+    .secret_indexes = {5, 7},
+    .secrets = {
+        base16_literal("c7ccdbd08aae49864c30aaa72a1c2dfc242630c471582e2094ddf232ed9f461f"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0366c68216f67c9f14cec4d60104b6afb6d46859344dc1b3bb75ac9f17cfeb6e88"),
+            base16_literal("03ffffff03c0ffffff00000000000000000000000000000000000080ffffffffff"),
+            base16_literal("02000000c0ffffffffff0f000000000000ff1f000000000000000e00e0ffffffff"),
+            base16_literal("02ffffffffff010000000400000000e0ffffff0f000000f01ff8ffffffffffffff"),
+            base16_literal("030000000000000000000000fe030080ff7f00e0ffffffff0004000000000000fe")
+        },
+        {
+            base16_literal("03ffffffff0300000000380000000000000000000000000000000000e0ff7f0000"),
+            base16_literal("03ffffffffffffffff07000000ffffffffffffff3f000000000000f00300000000"),
+            base16_literal("020000000000000000000000ffffffffffffffffffe4000000feffffffffffffff"),
+            base16_literal("02000000000000000000f8ff07e0ffff018001000000ffffffffff010000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03fcffffffffffffffffffffffff7f007800f0ffffffffffffffffffffff0f000c"),
+            base16_literal("03ffffff7f00fcffffffff7f000000000000000000000000000000f8ffff0f0000")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("e20059d81eb20e3cfa258a16eb3b7eba124542274eb5284a022197a3855c9857"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("bde9955b35f4e972465b9a25ca9c6125486d379171b1a8dd688096b59b05bbda"),
+            base16_literal("9cc01089ef0e94a326da63aa24d68475dd9fc88f3de2f99592d43dbb00601464"),
+            base16_literal("e6a88c1743abb756039c14815aa3d8d0f039b7003fe9be78f6aa6aa5e7e05f73")
+        },
+        {
+            base16_literal("c8a4ab1f2d06c558716189ac11d1df539d1741f04ca92ae41079ccf063859ccd"),
+            base16_literal("fc2f18f808a24d8e5d2d4093fcf172e3f81242037a9b335bf6ed2b4aa20ea6fa"),
+            base16_literal("fc51e73c041729fefd3702419061663da7142b2abbe528ef3ed177c57859b7a0"),
+            base16_literal("7dcdcdccd67fef6de0ef7128473043be0677464c54a3eb630d2a5702421931f3"),
+            base16_literal("f68687f04fe119bdd9c72a707ad081992e26df9ffca0ce38e44c2654b3c24f0b"),
+            base16_literal("3f77f7fa5cc7ae372d25b77e2ccb1f1dd6ebab9d7226170d913962087e55c235"),
+            base16_literal("4d22e262493051b926103f57027464ab3b92d4e9945ca31658c6efcb9193e018")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0xe0, 0xff, 0x7f, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0xff, 0xff, 0x07, 0x00, 0xf8, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("1ff0410f217e6ddcb6bed93b674ac664b423fdea1d0327017892e1e6ee00725d"),
+    .secret_indexes = {4, 3, 6},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("03000000000000f8ffff0700000000000000000000000000fcffffff7ffcffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000c0ffffffffffffffffffff3f0000c0ffffff0f0080ffffffff0f00f80f"),
+            base16_literal("03ffffffffffffffffffffffffff07fc01fcffffffc3ffffffffffffffff7f80ff")
+        },
+        {
+            base16_literal("0200feffffffffff3f00000000000000000000000000000000000000000000f0ff"),
+            base16_literal("02ffffffff7f000000000000000000fc0100000000e0ff0000000000000080ffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ffffffffffff0000000000000000000000000f0000000000e0ffffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02000000000000e0ffffffffffdf0f000000fcff0000fcffffffffff0100000000"),
+            base16_literal("03ffffffffffffffffffffffffffffff7f001000907f000000fcffffffffffffff"),
+            base16_literal("020080ffffffffffff0180ffffffff0f00f0ff0700f8ffff07000000f8ffffffff"),
+            base16_literal("03000000000000e0ffffffff3f00000000f0ffffffffe7ffffff3f000000000000")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("5510d0105c57b4b3b1885bf658a1ea0fc982cbcda7d4b9b3a611f92c8e738fe8"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("90a37c2268719f2cdeaeaa9626b9012604b3b4a8a26e18f10cfb0f7bbaae611e")
+        },
+        {
+            base16_literal("6339aef0022a0533458bd85cbfc4f2540d0a12252fe6a76557168373cd5c0598"),
+            base16_literal("ecdce69e8ad3d1039c704358a75155e7cd9158d3db907f19b548d74cf58fa4f9"),
+            base16_literal("0e3847cfb83996618ef6ee71f816998988b4dc505a6e1dfa93a33a0a278e1a1e")
+        },
+        {
+            base16_literal("f73abb0d23e07f38976667caf46428e8cd1b2f4f96061b5223f4a7978a393fc4"),
+            base16_literal("401748ac1673501f6e3af71517fd7f26e8afa9c7215136f89a0a3c52193340e7"),
+            base16_literal("aaf4c9977236613232b35e3f0c9778b57e1a3fbdc8898c87e9e7fe77caed5291"),
+            base16_literal("67f52b91b988d1a5367e7929cd4aa0802302601907952875fb3fc1f63b10a0c6"),
+            base16_literal("ef6837af59fa7133ea37b96347f7c99be1400e2204d8cf90c8508423196ce6ed"),
+            base16_literal("58b5df92f129e8f55ed7b71516ac1531293eb0d76691cbefeaeeb9c2c8160a7b")
+        }
+    }
+},
+{
+    .message = {0x01, 0x00, 0x00, 0x00, 0xe0, 0xff, 0x3f, 0x80, 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc},
+    .e = base16_literal("e857c6319e15445884c1e462e8246c7f243ee9a5be9eea89ac9afe02d62ee131"),
+    .secret_indexes = {6, 7, 5, 4, 3, 6, 3, 2},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffff0f0080ffffffffffffff0f0000c0ffffff0f0000000000e0ffffffff03"),
+            base16_literal("03ffffffffffff7f00fcffffff3f0000f0ffffffffffffffffffffffffff3f0000"),
+            base16_literal("03ffffff7f0000f0ffffffffffffffffff01fcffff9fffff7f0000000000008001"),
+            base16_literal("03000000e00100ffff030000000000fe00f87ff03f00080000000000feff3fffff"),
+            base16_literal("0200000000781c00feffffffffff01000000fcffffffffff0700000000f0ffffff")
+        },
+        {
+            base16_literal("03e0ffffffffffffff7f0000feffff07000000000000fcffffffffff0000000000"),
+            base16_literal("03ffffffffffffffff0080ffffffffffffff030000000000fcff3f0000000000c0"),
+            base16_literal("030000ffffffff030000000000e0fffff0ff070000c0ffff7f0000000000000000"),
+            base16_literal("02ffffffffffffe1ffffff07e0ffffffffff01000000ffff010000e0ffffff0300"),
+            base16_literal("02000000000080ffff0700000000000cffffffffffff0100000000f8ffff0fe0ff"),
+            base16_literal("03ffff7f00001000f0ff1f00ffff00000000000e00000000f8ffffffff7ff8ffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0200fe1f0000f87f00000000000000feffffffff0700000000f8ffff0f00f8ffff"),
+            base16_literal("03000000000080ffff0f0000000000000000000000c0ffffffffffffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000f8ff00000000f0ffffff1f000000800300000000008003000000000000"),
+            base16_literal("03ff0000e0ffffffff1f000000000000000000fe0fffffffffffffff7f00000000")
+        },
+        {
+            base16_literal("030000000000000000f8ffffffff01000000000000000000000000feffffffffff"),
+            base16_literal("0300feff3f00000000f8ff0f000000000000000000000000f8ffffc1ffffffffff"),
+            base16_literal("03000000000000000000e0ffffffff0300000000000000f0ffff0300fc0300fcff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0200ff010000fcffffffffffff07ffffff3f00c0ff1f0000000000800000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02000000f0ff00000000c0ffff0000008001fcffffffffffff3ffcffffffffff01")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffffffff3f0000000000f8ffffffff7f00000000000000780000c0ffff"),
+            base16_literal("03000000000080ffff000000000000fcffffffffffffffff3f0000000000e0ffff"),
+            base16_literal("02ffffffff1f00000000000200000000000000f8ffffffff0000ffffffffff0300"),
+            base16_literal("03ffffffffffffffff1f0000fcffffffff03801f000000000000f01f00e0ffff1f"),
+            base16_literal("02feffffffffffff07000000000000000000c0ffffffffff000000ffffffffffff")
+        },
+        {
+            base16_literal("033ffcfffffffffffbfffffffcffff7f708fffff873f000000000000000000f80f"),
+            base16_literal("02ffffffffffff7f0000fcff8f0f00000000000000feffffffffffffffff3f80ff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("030000c0ffffff3f00e0010e00000080ffffffff0300fe3f000000fe7f000080ff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("7759e2d3cb511c152105ff509501fa1039b8b9581cc2b625db457a936c582796"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("cda49613cc24535c9b27397e24eda0affacaf40c1d4a67fdee5eef3d6869a9f9"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("b127a72c01f6ed1c8e56648abe34b15efefd892f31b5ade4bdb88e8a559e45ca")
+    },
+    .s = {
+        {
+            base16_literal("f741db4114a206b704e1c99c586f30d453af0d456730a88a3905d5884b3d3798"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("ec0f19a1caa82ce4d4cd695e99035f5afb188814c4937b49520a211027dd86c0"),
+            base16_literal("a8af0ccee17fee70293bbc418c3c222853697bb9d254d5be5ed3788837368b6f"),
+            base16_literal("959e6a20e4932adbea43bb9ac412f0eff89c04865acb0dc15a2ba6d6cb8afb65"),
+            base16_literal("935e7adbb5db285c534ba2653561ed1aef9f5ee1110421d6b1543e4d722bda20"),
+            base16_literal("2c1599666ee6e009cca532e905fc56835203e0bf9b7a8f1141c16e88a8cf4d3d")
+        },
+        {
+            base16_literal("f7f0841502b64ccd36e7db798de5295a0ff5061717e885bd1e736b4ba4925f12"),
+            base16_literal("471fc52cc491f38ac96dbaa378038c7b1ad92a4c683d5e7feb8471823fc582e5"),
+            base16_literal("3c594edeb788dd7f27bdf9a03454274a33febae0110e51154547db126bee905c"),
+            base16_literal("d9d6c8ef777c4c3ba5f90c1b0303c287b4c14b2c6d8134c2117dc900fda8c14f"),
+            base16_literal("06906d5ebf9e444f7e4edb6b2325373c1e203b079a3a42794ae04cc405e03ed2")
+        },
+        {
+            base16_literal("5fa9a9f6cb86b8a0309abf65419cba47d3f8a42aec8e52c0f2a41348ce6c4f90"),
+            base16_literal("b923b599e4fa985edb6e14b301f3bfd8c1c186f6b9877844858df0a75aa40395"),
+            base16_literal("052a5b1fd5d8eec122f4f7dd9eb04f0acea78ea71775a2a8092e06fa5e3930b5"),
+            base16_literal("f579a20b166608ba4ae47b6e33d737d175c517835fb928a295cb3046c698077c")
+        },
+        {
+            base16_literal("9a7b361dcac6f70f97817b922e448c5e8a5c0b8b839a447e06774823d89d74c4"),
+            base16_literal("90439530d95397686e676a4283452392f091b1ba018ccea7d3d26db0848fffba"),
+            base16_literal("037667f8399a8eb69f4853bbe488a40d529600abc150f171bb36bd09e5d90753")
+        },
+        {
+            base16_literal("c0444bebda3dff07067c8c41d9bc85cdb242548c526065f26d1ce435390887a5"),
+            base16_literal("5fed54111024b5d654d453ec008e6f6a8a673e1924d8e42af51c7f3a9ef74a11"),
+            base16_literal("4f5dc5c912f9ff2737617dca31d05a259bf319cee341970d37b185e71f2ae3c2"),
+            base16_literal("414e706afbb87f089ac7d5877013efc9fe3570f12e9e11dd0e5cb96b101e6c09"),
+            base16_literal("0ec6b92b2c9d6ca9e620c59e41c82ed82a44a6197f33d4a9aca109545648245b"),
+            base16_literal("d464a2ad3bb1fab63da988f8d952821f19807faa26171ba4fbb99cdae0baeb31")
+        },
+        {
+            base16_literal("bceaf5df3d524517036edbbee6429cb67cd42a7e2423a438005e3c0dac5a7b2a"),
+            base16_literal("d19c92071e67f1c2bcc9f4a80082323b6d54ff98a04997b9b16aa037ace52683"),
+            base16_literal("4d71867a23e6325cffa35f4d0fc1ef51dbf4a71b3981256d63d9a879b0f724ca")
+        },
+        {
+            base16_literal("5b2e65e2cc411da785d3958458a7fe7789cb777267545321177e6599e0146f8f"),
+            base16_literal("c03bbe3c5e814ab750ef633c964f2405d215d94fca1e8a9329625b1561020be4")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0xff, 0xff, 0x0f, 0xf8, 0xff, 0xff, 0xff, 0x00, 0x00, 0xfe, 0xff, 0xef, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x87, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("2ffb6092f588542c1dfd0da56ec28fcc3d04f383e62e7aca4844e4973481ddd0"),
+    .secret_indexes = {8, 3, 6, 7},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffffffff07000000f0ffff010000020000000000ffffffffffffffffff"),
+            base16_literal("02ffffefff03000080ffffffffff00fc3f000000000000000000f8ffffffff1f00"),
+            base16_literal("02fbffffff0f000000ffffffffff3f00fc01c0ff3f00000000000000f0ffffffff"),
+            base16_literal("03c0ffffffffffffffff0f000000e0ffffffffffff0f00e0ffff0ff0f3ffffffff"),
+            base16_literal("02c0ffffffffffffffff3f000000c0ffffffffffffc1ffffffffffffff1f007ce0"),
+            base16_literal("02004000feffffffffff0700f8ffffffffffffffffff000000c0efffffff83ffff"),
+            base16_literal("0301e00100fffffffffffffffffffffffffffffffcff0f000000fffffff3ffffff")
+        },
+        {
+            base16_literal("02ffffffff01000000000000000000feffff3f00000000000000000000fcffffff"),
+            base16_literal("03000000ffffffffffffffffffff7f0000001f000000feffffffffffffff000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("020f00000000f0fff3ffffffffffffff0300000000f0ffffffffffff1f300000ff"),
+            base16_literal("03000000f8ffffffff0f000000000000000000000000000000e0ff070000000000"),
+            base16_literal("0200000000000000000000fcff7f000000000000000000e0ff000000feffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02fcff000000000000fcfffffcff000000000000000000feffffffffffff0f0000"),
+            base16_literal("0200000000feffffffffffffffffffffffff0300000000000000000000000000c0")
+        },
+        {
+            base16_literal("03000000e0ffffff7fffff030000000000000000007e0000fcffffffff3f000000"),
+            base16_literal("03000080ffffff7ff0ffffffffffffff0700000000c0ffffffffffffffffff1f00"),
+            base16_literal("027f00000000f0ffffffffffff0f00000000feffffffffffffff7f00ffffffffff"),
+            base16_literal("030100000000000000ffffffff7f0000000000f8ff07000000007fffffffffffff"),
+            base16_literal("02ffff0ffcffff7f0000f8ffffffffff00f0ffffffffffffff1f00000000c0ffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0200c0ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("595535e6018f97ec49f4146eb59dcbcdc00efff80e56f744261397077057cc7b"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("78958b668cca24b0836f7e587fb62908fb6b44b647b783b78751c40694f5a2b3"),
+            base16_literal("421e077f9a1a83dcb8d2ccee49b0bb02f0ab5ebc227481e6d3902b5e9bc877fb"),
+            base16_literal("ebafcb55e82cea82d8edb726c570e243c1c4cf3b625b4a0d3bf172544efe10e9"),
+            base16_literal("8755a779f22ab66acdb923c0d0de4edce99c26ec4f05d2c0ce5b9d6ebc4391f4")
+        },
+        {
+            base16_literal("ee99f51dafca9cbfdb512ca38b69df9273202597448e2ea316397cff95a1f371"),
+            base16_literal("2799cac1a50418450d915a3bcd14ba65415d06ce87d0bf57983a4ca3aeb01979"),
+            base16_literal("c35ec843d379f0cf33e2470df1ac45f2cd52de3f46c8bded654ed70fd7a27b0c")
+        },
+        {
+            base16_literal("f8fd11adbb1b9456cd551edad13b581d4d671bba7546fe678593c92cbbb9c0a7"),
+            base16_literal("9d592bea02b10c4892c9a2ca745dfece1786ed8083a8e1562f048957b4fb272e"),
+            base16_literal("5278e43eb6118b227ca72b12bea99fbbec13612bd5d9c6eb467d203584bbcaac"),
+            base16_literal("c3352c57866ef8ab152c0c19949816a9429f2d393608c88fff256c4e5371aeea"),
+            base16_literal("d75f339db9b21c1d85427b0da76957b9afcac01723b58077cd3f0ce93c4dcf2c"),
+            base16_literal("dc6a0550e85aabdd6fb51ea67fb16aa4c62c086bdc67998c86559abb3eda23df")
+        },
+        {
+            base16_literal("0dc0ad1abaefb56d94379d52ae9ec70eb48980df0b3c950706bb0869c6e14596"),
+            base16_literal("f71267cc2451b5339b150cbd770d24888eb60882b16776f0ed4327a2038ae3ad"),
+            base16_literal("2cd2c4f475f4332c22aa4defc1ea4a947d7e58ac4d481e3e699ed637ed8d8f53"),
+            base16_literal("b08e735c75853179eccf609e2ff2aba6678ef65da3ef113236e7777386213e06"),
+            base16_literal("7535c5373ed399314a7ebe2a7cdc3dfbe137e2063febc886ae4773052e1154fe"),
+            base16_literal("d89d97cc013b28cd2d3b056688c9c19eb2ad64670cb44f6032c336692055a4a6"),
+            base16_literal("5e11d9b13c50b292d064d0da89eb81f624caf46c2fa085546c9d4d950f34d8f6")
+        }
+    }
+}
+};
+ring_signature_test_vector_type ring_signature_faulty_test_vectors[] = {
+{
+    .message = {0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff, 0xf3, 0xff, 0x01, 0x80, 0x9f, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00},
+    .e = base16_literal("45b5179e0d0d2333028e07ff067a610ecdcd997af8b07ef394142152eb98cf0e"),
+    .secret_indexes = {7, 5, 4, 8, 2, 7},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("02003f000000ffffffffffffffff07000000000f0000000000000000000000e01f"),
+            base16_literal("03000000f8ffff0f00f807ffffffffffffffffff7f00fcffffffffffff00000000"),
+            base16_literal("030000000000f8ffffff010000000780ffffffffffff00000000001f0000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000000000000000000000fc0f1e00000000feffffffffc1ff1f00f0ffff3f00"),
+            base16_literal("03e0ffffffffffff0fe0ff000000e0ffffffffff3f000000fe7f7f00c0ffff3f00"),
+            base16_literal("02ffffff1ffc0f00000000feffffff0f000000c0ffffffffffffffffffffffffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300e0ff000000000000000080ffff3f00000000000000000000f0ffffffff1f00"),
+            base16_literal("02ffff0700000000000000f8ffffffffff7fc07fe0ffffffffff1ff8ffffffffff"),
+            base16_literal("021f0000000000e0ff070000000000ffffffffff070000c0f0ffffffffffffffff"),
+            base16_literal("02ffffffffffffffff03000000ff0000000000fcffffffff0f00000080ffffffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffffffffff0100000000000000000000000000000000000000feffffff"),
+            base16_literal("020300000000010000000000f0ffffffff7f00000000f03f1c0000e0ffffff0700"),
+            base16_literal("0300000000000000fcffc31f0000000000000000f0ffffffff1f00e00f0000ff07")
+        },
+        {
+            base16_literal("03c0ff0000000080ffffffffffffffff3f00000000000000f0ffffff7f000080ff"),
+            base16_literal("03ffffff3f000080ff07000000000000000000fcfcfff8ffff0f0000000f000000"),
+            base16_literal("02ff7f00feff030000f00300000080ffff0300e00300000000fcff1f0000fc0000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffff1fc0ffff0f0000000000feffffffffff07000000000000000000000000"),
+            base16_literal("033f0000e0010000f8ffffffffff0f000000000000ffff3f00803ffcffffffffff"),
+            base16_literal("03000000e00fe0ffffffffffffffffffffffff1f000000000000ffffffffff01f0"),
+            base16_literal("03ffff1f0000000000000000000000f8fffffffffffffff8ffffffff0ff0ffffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000000000000000000000c0ffff07000000000000f03f000000f0ffffffff0f")
+        },
+        {
+            base16_literal("021f000000000000e0ff1f0000000000000000000000ffffff01000000000000e0"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("033e000000c0ffffffffffff010080ffffffff03c0ffffffffffffff0f00fcffff"),
+            base16_literal("0200f8ffffffff3fc0ffff1fffffffff07000000000000f8ffffffffffffffffff"),
+            base16_literal("02ff07000000fcffffff81ffffffff0f00000000000000f8ffffffffffffffff07"),
+            base16_literal("03153507217dd616467c0d7fac4ba26e6a19301ec42af90fcced2d8c21587fc94c"),
+            base16_literal("02ffffffff3ffefeffffff030000ffffffffff01f8ffffffffffffffffffffffff")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("adf0884a284fd7cc3d5fbc9ac7f11444d191ed755c7efce9de2ed32419c077a8"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("9a1bf083238f72fb8a462c8a95a6c57e2c7604e62b1fcb11cd77f83f2d5ae948"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("77874189e8c61c8368fa03788b4c4135dc3d0e3b3072e106d73c0c245b61bb05")
+        },
+        {
+            base16_literal("fab475465357ee38935b207cae07bc9a7c772602ef8ac8f9455c8dcadf4193a8"),
+            base16_literal("528406a16c2b97c3a2ce7ad2acdbe661e66870a3ea62a1eee03a6339a0766f86"),
+            base16_literal("0834d917161710bb878fcf3d893f057b9fa93fdf7fec6ab14d97d54dac0fbbc9"),
+            base16_literal("37ce142bb62527f00e2420f2306f82a3dfafa5aca9efa41de8028cf18a26cdb8"),
+            base16_literal("3d904603764dd3b0fae6add16ef56d8eb92adef06d6ce1ac35952534fc03d306")
+        },
+        {
+            base16_literal("b75c75d4173361eb79b352bce9a28f560ba244dc32898960cb8498213fe80913"),
+            base16_literal("d11629471c239d91a4062e24b615d90da8dfac413a20adc1b75a8f8cfc0a9667"),
+            base16_literal("8b2c569f006c328a65309274e228410aad7af708008459d1e6f991ec3b759d22"),
+            base16_literal("f048b32158025c56eda95a52f560ae495f0bba2f42df57f6c4da1b70e1713cff")
+        },
+        {
+            base16_literal("8f4611080e923802f677edaf88ae45065da6153ccb553b7d8546eccd189a0070"),
+            base16_literal("e63f5e66e9d02ac72037bbe09fd4754237b124941bb310d0c750aecb8908fad8"),
+            base16_literal("24880a1db35a7b5979a9e1e6b459d0b57876b97c17fb963c2fb1d9ffc46712d3"),
+            base16_literal("c7f112bd31779769e54f6b7c9229d5aab525344ccbe1ce9e3a5d481f0304901f"),
+            base16_literal("13072b73be9ba83c3c079275f8cfe11b186070ea810cd7b593a3a6679305767b"),
+            base16_literal("7e7403b1a54435a912dfb20364bc4245abcaf5e61ce4d0cc9c7e426091f9566f"),
+            base16_literal("a6870ec4938e59003c16c4ef03032bc8ce2bea16ddc0555d4da3171036904f81"),
+            base16_literal("b76ac04fbaf87c6af4b81d70189bd8f3935320004186e5176921ebbf90969d3e")
+        },
+        {
+            base16_literal("7efe7844ff4efcf5704e519bce2daea3864b598a37970fdc02dcddf5d9a9ebd9"),
+            base16_literal("39e7d3d66968988b4fabab819b83e81382d57b106e51be2b18c47e956e5061c2")
+        },
+        {
+            base16_literal("5e6ab9d7ff93582ef3e7469e4ad5ce2edac9870377d31917ed4a84f956dbda84"),
+            base16_literal("394fdffe8bc4b4e11cab523fc22dca88a046e05a389a5b04966dd20bc070f169"),
+            base16_literal("3834e0b1ea78347091dd01695e7d01d73a5b57d488e93240067524a594b7eb6b"),
+            base16_literal("837aa228d06e07516bdd5e6b38501909a005de5122c517fc832f3b944b288704"),
+            base16_literal("2ccecc768c258d07d62473033a544e034f82fcfbe4486034f56cbf9b601ff6d6"),
+            base16_literal("4f6f0cf449f045e5ac2f62aed2597350e04a83f268fef31ece0f12c40e7bcaf7"),
+            base16_literal("8d439a379794f5fcb04fe0bd6623e7ccfb0bfc82ebf7cae6bb2732528a6bc496")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff, 0xf3, 0xff, 0x01, 0x80, 0x9f, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00},
+    .e = base16_literal("45b5179e0d0d2333028e07ff067a610ecdcd997af8b07ef394142152eb98cf0e"),
+    .secret_indexes = {7, 5, 4, 8, 2, 7},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("02003f000000ffffffffffffffff07000000000f0000000000000000000000e01f"),
+            base16_literal("03000000f8ffff0f00f807ffffffffffffffffff7f00fcffffffffffff00000000"),
+            base16_literal("030000000000f8ffffff010000000780ffffffffffff00000000001f0000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000000000000000000000fc0f1e00000000feffffffffc1ff1f00f0ffff3f00"),
+            base16_literal("03e0ffffffffffff0fe0ff000000e0ffffffffff3f000000fe7f7f00c0ffff3f00"),
+            base16_literal("02ffffff1ffc0f00000000feffffff0f000000c0ffffffffffffffffffffffffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0335712c146775b01f729e30612018da99a88e2412f6e19cd7f0e55727ec736dd9"),
+            base16_literal("02ffff0700000000000000f8ffffffffff7fc07fe0ffffffffff1ff8ffffffffff"),
+            base16_literal("021f0000000000e0ff070000000000ffffffffff070000c0f0ffffffffffffffff"),
+            base16_literal("02ffffffffffffffff03000000ff0000000000fcffffffff0f00000080ffffffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffffffffff0100000000000000000000000000000000000000feffffff"),
+            base16_literal("020300000000010000000000f0ffffffff7f00000000f03f1c0000e0ffffff0700"),
+            base16_literal("0300000000000000fcffc31f0000000000000000f0ffffffff1f00e00f0000ff07")
+        },
+        {
+            base16_literal("03c0ff0000000080ffffffffffffffff3f00000000000000f0ffffff7f000080ff"),
+            base16_literal("03ffffff3f000080ff07000000000000000000fcfcfff8ffff0f0000000f000000"),
+            base16_literal("02ff7f00feff030000f00300000080ffff0300e00300000000fcff1f0000fc0000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffff1fc0ffff0f0000000000feffffffffff07000000000000000000000000"),
+            base16_literal("033f0000e0010000f8ffffffffff0f000000000000ffff3f00803ffcffffffffff"),
+            base16_literal("03000000e00fe0ffffffffffffffffffffffff1f000000000000ffffffffff01f0"),
+            base16_literal("03ffff1f0000000000000000000000f8fffffffffffffff8ffffffff0ff0ffffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000000000000000000000c0ffff07000000000000f03f000000f0ffffffff0f")
+        },
+        {
+            base16_literal("021f000000000000e0ff1f0000000000000000000000ffffff01000000000000e0"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("033e000000c0ffffffffffff010080ffffffff03c0ffffffffffffff0f00fcffff"),
+            base16_literal("0200f8ffffffff3fc0ffff1fffffffff07000000000000f8ffffffffffffffffff"),
+            base16_literal("02ff07000000fcffffff81ffffffff0f00000000000000f8ffffffffffffffff07"),
+            base16_literal("03153507217dd616467c0d7fac4ba26e6a19301ec42af90fcced2d8c21587fc94c"),
+            base16_literal("02ffffffff3ffefeffffff030000ffffffffff01f8ffffffffffffffffffffffff")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("adf0884a284fd7cc3d5fbc9ac7f11444d191ed755c7efce9de2ed32419c077a8"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("9a1bf083238f72fb8a462c8a95a6c57e2c7604e62b1fcb11cd77f83f2d5ae948"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("77874189e8c61c8368fa03788b4c4135dc3d0e3b3072e106d73c0c245b61bb05")
+        },
+        {
+            base16_literal("fab475465357ee38935b207cae07bc9a7c772602ef8ac8f9455c8dcadf4193a8"),
+            base16_literal("528406a16c2b97c3a2ce7ad2acdbe661e66870a3ea62a1eee03a6339a0766f86"),
+            base16_literal("0834d917161710bb878fcf3d893f057b9fa93fdf7fec6ab14d97d54dac0fbbc9"),
+            base16_literal("37ce142bb62527f00e2420f2306f82a3dfafa5aca9efa41de8028cf18a26cdb8"),
+            base16_literal("3d904603764dd3b0fae6add16ef56d8eb92adef06d6ce1ac35952534fc03d306")
+        },
+        {
+            base16_literal("b75c75d4173361eb79b352bce9a28f560ba244dc32898960cb8498213fe80913"),
+            base16_literal("d11629471c239d91a4062e24b615d90da8dfac413a20adc1b75a8f8cfc0a9667"),
+            base16_literal("8b2c569f006c328a65309274e228410aad7af708008459d1e6f991ec3b759d22"),
+            base16_literal("f048b32158025c56eda95a52f560ae495f0bba2f42df57f6c4da1b70e1713cff")
+        },
+        {
+            base16_literal("8f4611080e923802f677edaf88ae45065da6153ccb553b7d8546eccd189a0070"),
+            base16_literal("e63f5e66e9d02ac72037bbe09fd4754237b124941bb310d0c750aecb8908fad8"),
+            base16_literal("24880a1db35a7b5979a9e1e6b459d0b57876b97c17fb963c2fb1d9ffc46712d3"),
+            base16_literal("c7f112bd31779769e54f6b7c9229d5aab525344ccbe1ce9e3a5d481f0304901f"),
+            base16_literal("13072b73be9ba83c3c079275f8cfe11b186070ea810cd7b593a3a6679305767b"),
+            base16_literal("7e7403b1a54435a912dfb20364bc4245abcaf5e61ce4d0cc9c7e426091f9566f"),
+            base16_literal("a6870ec4938e59003c16c4ef03032bc8ce2bea16ddc0555d4da3171036904f81"),
+            base16_literal("b76ac04fbaf87c6af4b81d70189bd8f3935320004186e5176921ebbf90969d3e")
+        },
+        {
+            base16_literal("7efe7844ff4efcf5704e519bce2daea3864b598a37970fdc02dcddf5d9a9ebd9"),
+            base16_literal("39e7d3d66968988b4fabab819b83e81382d57b106e51be2b18c47e956e5061c2")
+        },
+        {
+            base16_literal("5e6ab9d7ff93582ef3e7469e4ad5ce2edac9870377d31917ed4a84f956dbda84"),
+            base16_literal("394fdffe8bc4b4e11cab523fc22dca88a046e05a389a5b04966dd20bc070f169"),
+            base16_literal("3834e0b1ea78347091dd01695e7d01d73a5b57d488e93240067524a594b7eb6b"),
+            base16_literal("837aa228d06e07516bdd5e6b38501909a005de5122c517fc832f3b944b288704"),
+            base16_literal("2ccecc768c258d07d62473033a544e034f82fcfbe4486034f56cbf9b601ff6d6"),
+            base16_literal("4f6f0cf449f045e5ac2f62aed2597350e04a83f268fef31ece0f12c40e7bcaf7"),
+            base16_literal("8d439a379794f5fcb04fe0bd6623e7ccfb0bfc82ebf7cae6bb2732528a6bc496")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff, 0xf3, 0xff, 0x01, 0x80, 0x9f, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00},
+    .e = base16_literal("45b5179e0d0d2333028e07ff067a610ecdcd997af8b07ef394142152eb98cf0e"),
+    .secret_indexes = {7, 5, 4, 8, 2, 7},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("02003f000000ffffffffffffffff07000000000f0000000000000000000000e01f"),
+            base16_literal("03000000f8ffff0f00f807ffffffffffffffffff7f00fcffffffffffff00000000"),
+            base16_literal("030000000000f8ffffff010000000780ffffffffffff00000000001f0000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000000000000000000000fc0f1e00000000feffffffffc1ff1f00f0ffff3f00"),
+            base16_literal("03e0ffffffffffff0fe0ff000000e0ffffffffff3f000000fe7f7f00c0ffff3f00"),
+            base16_literal("02ffffff1ffc0f00000000feffffff0f000000c0ffffffffffffffffffffffffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0335712c146775b01f729e30612018da99a88e2412f6e19cd7f0e55727ec736dd9"),
+            base16_literal("02ffff0700000000000000f8ffffffffff7fc07fe0ffffffffff1ff8ffffffffff"),
+            base16_literal("021f0000000000e0ff070000000000ffffffffff070000c0f0ffffffffffffffff"),
+            base16_literal("02ffffffffffffffff03000000ff0000000000fcffffffff0f00000080ffffffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffffffffff0100000000000000000000000000000000000000feffffff"),
+            base16_literal("020300000000010000000000f0ffffffff7f00000000f03f1c0000e0ffffff0700"),
+            base16_literal("0300000000000000fcffc31f0000000000000000f0ffffffff1f00e00f0000ff07")
+        },
+        {
+            base16_literal("03c0ff0000000080ffffffffffffffff3f00000000000000f0ffffff7f000080ff"),
+            base16_literal("03ffffff3f000080ff07000000000000000000fcfcfff8ffff0f0000000f000000"),
+            base16_literal("02ff7f00feff030000f00300000080ffff0300e00300000000fcff1f0000fc0000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffff1fc0ffff0f0000000000feffffffffff07000000000000000000000000"),
+            base16_literal("033f0000e0010000f8ffffffffff0f000000000000ffff3f00803ffcffffffffff"),
+            base16_literal("029ef36367cdbff2b4e701f629cd02058542bc039fae164a2161b3c0e5692f71fb"),
+            base16_literal("03ffff1f0000000000000000000000f8fffffffffffffff8ffffffff0ff0ffffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000000000000000000000c0ffff07000000000000f03f000000f0ffffffff0f")
+        },
+        {
+            base16_literal("021f000000000000e0ff1f0000000000000000000000ffffff01000000000000e0"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("033e000000c0ffffffffffff010080ffffffff03c0ffffffffffffff0f00fcffff"),
+            base16_literal("0200f8ffffffff3fc0ffff1fffffffff07000000000000f8ffffffffffffffffff"),
+            base16_literal("02ff07000000fcffffff81ffffffff0f00000000000000f8ffffffffffffffff07"),
+            base16_literal("03153507217dd616467c0d7fac4ba26e6a19301ec42af90fcced2d8c21587fc94c"),
+            base16_literal("02ffffffff3ffefeffffff030000ffffffffff01f8ffffffffffffffffffffffff")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("adf0884a284fd7cc3d5fbc9ac7f11444d191ed755c7efce9de2ed32419c077a8"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("9a1bf083238f72fb8a462c8a95a6c57e2c7604e62b1fcb11cd77f83f2d5ae948"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("77874189e8c61c8368fa03788b4c4135dc3d0e3b3072e106d73c0c245b61bb05")
+        },
+        {
+            base16_literal("fab475465357ee38935b207cae07bc9a7c772602ef8ac8f9455c8dcadf4193a8"),
+            base16_literal("528406a16c2b97c3a2ce7ad2acdbe661e66870a3ea62a1eee03a6339a0766f86"),
+            base16_literal("0834d917161710bb878fcf3d893f057b9fa93fdf7fec6ab14d97d54dac0fbbc9"),
+            base16_literal("37ce142bb62527f00e2420f2306f82a3dfafa5aca9efa41de8028cf18a26cdb8"),
+            base16_literal("3d904603764dd3b0fae6add16ef56d8eb92adef06d6ce1ac35952534fc03d306")
+        },
+        {
+            base16_literal("b75c75d4173361eb79b352bce9a28f560ba244dc32898960cb8498213fe80913"),
+            base16_literal("d11629471c239d91a4062e24b615d90da8dfac413a20adc1b75a8f8cfc0a9667"),
+            base16_literal("8b2c569f006c328a65309274e228410aad7af708008459d1e6f991ec3b759d22"),
+            base16_literal("f048b32158025c56eda95a52f560ae495f0bba2f42df57f6c4da1b70e1713cff")
+        },
+        {
+            base16_literal("8f4611080e923802f677edaf88ae45065da6153ccb553b7d8546eccd189a0070"),
+            base16_literal("e63f5e66e9d02ac72037bbe09fd4754237b124941bb310d0c750aecb8908fad8"),
+            base16_literal("24880a1db35a7b5979a9e1e6b459d0b57876b97c17fb963c2fb1d9ffc46712d3"),
+            base16_literal("c7f112bd31779769e54f6b7c9229d5aab525344ccbe1ce9e3a5d481f0304901f"),
+            base16_literal("13072b73be9ba83c3c079275f8cfe11b186070ea810cd7b593a3a6679305767b"),
+            base16_literal("7e7403b1a54435a912dfb20364bc4245abcaf5e61ce4d0cc9c7e426091f9566f"),
+            base16_literal("a6870ec4938e59003c16c4ef03032bc8ce2bea16ddc0555d4da3171036904f81"),
+            base16_literal("b76ac04fbaf87c6af4b81d70189bd8f3935320004186e5176921ebbf90969d3e")
+        },
+        {
+            base16_literal("7efe7844ff4efcf5704e519bce2daea3864b598a37970fdc02dcddf5d9a9ebd9"),
+            base16_literal("39e7d3d66968988b4fabab819b83e81382d57b106e51be2b18c47e956e5061c2")
+        },
+        {
+            base16_literal("5e6ab9d7ff93582ef3e7469e4ad5ce2edac9870377d31917ed4a84f956dbda84"),
+            base16_literal("394fdffe8bc4b4e11cab523fc22dca88a046e05a389a5b04966dd20bc070f169"),
+            base16_literal("3834e0b1ea78347091dd01695e7d01d73a5b57d488e93240067524a594b7eb6b"),
+            base16_literal("837aa228d06e07516bdd5e6b38501909a005de5122c517fc832f3b944b288704"),
+            base16_literal("2ccecc768c258d07d62473033a544e034f82fcfbe4486034f56cbf9b601ff6d6"),
+            base16_literal("4f6f0cf449f045e5ac2f62aed2597350e04a83f268fef31ece0f12c40e7bcaf7"),
+            base16_literal("8d439a379794f5fcb04fe0bd6623e7ccfb0bfc82ebf7cae6bb2732528a6bc496")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff, 0xf3, 0xff, 0x01, 0x80, 0x9f, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00},
+    .e = base16_literal("45b5179e0d0d2333028e07ff067a610ecdcd997af8b07ef394142152eb98cf0e"),
+    .secret_indexes = {7, 5, 4, 8, 2, 7},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("02003f000000ffffffffffffffff07000000000f0000000000000000000000e01f"),
+            base16_literal("03000000f8ffff0f00f807ffffffffffffffffff7f00fcffffffffffff00000000"),
+            base16_literal("030000000000f8ffffff010000000780ffffffffffff00000000001f0000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000000000000000000000fc0f1e00000000feffffffffc1ff1f00f0ffff3f00"),
+            base16_literal("03f99877111e3ddc08914b841a71e66ccedd52dfc3de4d314551e139903a6d30cc"),
+            base16_literal("02ffffff1ffc0f00000000feffffff0f000000c0ffffffffffffffffffffffffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0335712c146775b01f729e30612018da99a88e2412f6e19cd7f0e55727ec736dd9"),
+            base16_literal("02ffff0700000000000000f8ffffffffff7fc07fe0ffffffffff1ff8ffffffffff"),
+            base16_literal("021f0000000000e0ff070000000000ffffffffff070000c0f0ffffffffffffffff"),
+            base16_literal("02ffffffffffffffff03000000ff0000000000fcffffffff0f00000080ffffffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffffffffff0100000000000000000000000000000000000000feffffff"),
+            base16_literal("020300000000010000000000f0ffffffff7f00000000f03f1c0000e0ffffff0700"),
+            base16_literal("0300000000000000fcffc31f0000000000000000f0ffffffff1f00e00f0000ff07")
+        },
+        {
+            base16_literal("03c0ff0000000080ffffffffffffffff3f00000000000000f0ffffff7f000080ff"),
+            base16_literal("03ffffff3f000080ff07000000000000000000fcfcfff8ffff0f0000000f000000"),
+            base16_literal("02ff7f00feff030000f00300000080ffff0300e00300000000fcff1f0000fc0000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffff1fc0ffff0f0000000000feffffffffff07000000000000000000000000"),
+            base16_literal("033f0000e0010000f8ffffffffff0f000000000000ffff3f00803ffcffffffffff"),
+            base16_literal("029ef36367cdbff2b4e701f629cd02058542bc039fae164a2161b3c0e5692f71fb"),
+            base16_literal("03ffff1f0000000000000000000000f8fffffffffffffff8ffffffff0ff0ffffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030000000000000000000000c0ffff07000000000000f03f000000f0ffffffff0f")
+        },
+        {
+            base16_literal("021f000000000000e0ff1f0000000000000000000000ffffff01000000000000e0"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("033e000000c0ffffffffffff010080ffffffff03c0ffffffffffffff0f00fcffff"),
+            base16_literal("0200f8ffffffff3fc0ffff1fffffffff07000000000000f8ffffffffffffffffff"),
+            base16_literal("02ff07000000fcffffff81ffffffff0f00000000000000f8ffffffffffffffff07"),
+            base16_literal("03153507217dd616467c0d7fac4ba26e6a19301ec42af90fcced2d8c21587fc94c"),
+            base16_literal("02ffffffff3ffefeffffff030000ffffffffff01f8ffffffffffffffffffffffff")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("adf0884a284fd7cc3d5fbc9ac7f11444d191ed755c7efce9de2ed32419c077a8"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("9a1bf083238f72fb8a462c8a95a6c57e2c7604e62b1fcb11cd77f83f2d5ae948"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("77874189e8c61c8368fa03788b4c4135dc3d0e3b3072e106d73c0c245b61bb05")
+        },
+        {
+            base16_literal("fab475465357ee38935b207cae07bc9a7c772602ef8ac8f9455c8dcadf4193a8"),
+            base16_literal("528406a16c2b97c3a2ce7ad2acdbe661e66870a3ea62a1eee03a6339a0766f86"),
+            base16_literal("0834d917161710bb878fcf3d893f057b9fa93fdf7fec6ab14d97d54dac0fbbc9"),
+            base16_literal("37ce142bb62527f00e2420f2306f82a3dfafa5aca9efa41de8028cf18a26cdb8"),
+            base16_literal("3d904603764dd3b0fae6add16ef56d8eb92adef06d6ce1ac35952534fc03d306")
+        },
+        {
+            base16_literal("b75c75d4173361eb79b352bce9a28f560ba244dc32898960cb8498213fe80913"),
+            base16_literal("d11629471c239d91a4062e24b615d90da8dfac413a20adc1b75a8f8cfc0a9667"),
+            base16_literal("8b2c569f006c328a65309274e228410aad7af708008459d1e6f991ec3b759d22"),
+            base16_literal("f048b32158025c56eda95a52f560ae495f0bba2f42df57f6c4da1b70e1713cff")
+        },
+        {
+            base16_literal("8f4611080e923802f677edaf88ae45065da6153ccb553b7d8546eccd189a0070"),
+            base16_literal("e63f5e66e9d02ac72037bbe09fd4754237b124941bb310d0c750aecb8908fad8"),
+            base16_literal("24880a1db35a7b5979a9e1e6b459d0b57876b97c17fb963c2fb1d9ffc46712d3"),
+            base16_literal("c7f112bd31779769e54f6b7c9229d5aab525344ccbe1ce9e3a5d481f0304901f"),
+            base16_literal("13072b73be9ba83c3c079275f8cfe11b186070ea810cd7b593a3a6679305767b"),
+            base16_literal("7e7403b1a54435a912dfb20364bc4245abcaf5e61ce4d0cc9c7e426091f9566f"),
+            base16_literal("a6870ec4938e59003c16c4ef03032bc8ce2bea16ddc0555d4da3171036904f81"),
+            base16_literal("b76ac04fbaf87c6af4b81d70189bd8f3935320004186e5176921ebbf90969d3e")
+        },
+        {
+            base16_literal("7efe7844ff4efcf5704e519bce2daea3864b598a37970fdc02dcddf5d9a9ebd9"),
+            base16_literal("39e7d3d66968988b4fabab819b83e81382d57b106e51be2b18c47e956e5061c2")
+        },
+        {
+            base16_literal("5e6ab9d7ff93582ef3e7469e4ad5ce2edac9870377d31917ed4a84f956dbda84"),
+            base16_literal("394fdffe8bc4b4e11cab523fc22dca88a046e05a389a5b04966dd20bc070f169"),
+            base16_literal("3834e0b1ea78347091dd01695e7d01d73a5b57d488e93240067524a594b7eb6b"),
+            base16_literal("837aa228d06e07516bdd5e6b38501909a005de5122c517fc832f3b944b288704"),
+            base16_literal("2ccecc768c258d07d62473033a544e034f82fcfbe4486034f56cbf9b601ff6d6"),
+            base16_literal("4f6f0cf449f045e5ac2f62aed2597350e04a83f268fef31ece0f12c40e7bcaf7"),
+            base16_literal("8d439a379794f5fcb04fe0bd6623e7ccfb0bfc82ebf7cae6bb2732528a6bc496")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0xff, 0xff, 0xff, 0xff, 0xff, 0x07, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f, 0x00, 0xff, 0xff, 0xff, 0xff, 0x0f, 0x00, 0x00},
+    .e = base16_literal("0575e864d1332a1575eb1913015403da62b3fa7b9479bedf58e27b0f4197191d"),
+    .secret_indexes = {1, 1, 7, 6, 1, 5, 4},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000000000c000000000803f0000000080ffffffffffffff06fcffff87ffff7f"),
+            base16_literal("03ffffffff3f0000f83f000000000000c0fffcffffffffffffffffffffffffffff"),
+            base16_literal("02ffffdf070000000000000000000000c0ff0f00000000000000fcffff010000fe"),
+            base16_literal("02ffff3f000000feffffffffffffffff0700e0ff3f00fcff0700feff0700000000"),
+            base16_literal("0303000000000000000000fffffffffffffffffffff7ffffffffffffff3f000000"),
+            base16_literal("02ffffffffff0180ffff0f00e00f00000000000080ffffffffffffffffffffffff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0200000000000000000000000700000000c0ffffff000000801f000000000000f0"),
+            base16_literal("03000000000000f07f0000000000f8ffffffffffffffffff030000000000000000"),
+            base16_literal("02000000f0ff03000000000080ffffffff3f0000000000000600000000000000fe"),
+            base16_literal("02ffff0f000000000000c0ffff7ffeffff01000000e0ffffff1ffc0f0000000000"),
+            base16_literal("033f0000000000000000fe3ff8ffffffff0f0000000080ffff7f00000000000000")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02000000000000e0ffff7f000000001efcffffff9fffffffffffffffff7f000000"),
+            base16_literal("020000000000000000e0ffffffffffffff010000000000000f00000000f0ffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000080ffffffffffffffffff03000000000000e0ff3f00000007000000000000"),
+            base16_literal("02ff010000000000000000000000000000000000000000f8ffffffffff7f000000")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300000000fe0f00000000f83ff0ffffffffff0000c00f00000000000000ff0018"),
+            base16_literal("0200000000fcff1ff8ff07f0ffff0f000000ffffff1f0000f00ffeffffff0f0000"),
+            base16_literal("0300feffffff0f000000e0ffffff7f000000e07f00000000c0ffffffffffffffff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("f2926e5f8c1958aeebce5d5ec88b1d8dae7e676a37ad7cfb24cc2f6485eb4a3a")
+    },
+    .s = {
+        {
+            base16_literal("e4dffb4d457203343cb74cfb467b98a818687add0863b48acf45faf92b0e5305")
+        },
+        {
+            base16_literal("a4d5657b69b268ea156399733479fa0149fe61f7b89016546f2845519438802f")
+        },
+        {
+            base16_literal("e2a747bd3797b47c5a5827ae5786bb38492bde6b0d3c84c95f9dd4bc820a3715"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("eb6da25ea27430968d90b632eb42f6710e48b7a3e8654a56ff48ddb2ba778a3a"),
+            base16_literal("4c1270dc637ad0f9738170405e78a9cfceb64574110d31de366dc3182f6c458f")
+        },
+        {
+            base16_literal("6bb8e69e96b924ae1cbcc8bca3d63e29bb67178c014940b685fb54581fe31ea9"),
+            base16_literal("e70d6092f23f5aa92f176be2e114b3732634ad424e0d704928a593421fea10c9"),
+            base16_literal("29dc2aa61bc1cee9c3d81e586ac8ca49764774490bd79e59eec20d5910b067d2"),
+            base16_literal("456f1f527b772c7c74704b96737dc2e4501c7c9afa34dd23025ef3247a259dd2"),
+            base16_literal("3767461e0b4dc22d9f59e755fa74974b83af7c9655ab91d1aadccdf317502472"),
+            base16_literal("d5f8332800864dbd17724d2aa460de1fe0573f2ec048fef7f5635303c745e0c2")
+        },
+        {
+            base16_literal("e33eed49a77dd09df3a5d864f175c7e927247332e7abb9ecb039a8074282ddd5")
+        },
+        {
+            base16_literal("2fc8ab9d560349ce821525ffd2741994f2bdc9f0a946f1b0074fc1579ad98035"),
+            base16_literal("21aa1def6a14f6b4974cb6569587c0ae00ad921875df2f630c72eb0234113ee1"),
+            base16_literal("84d81790b02b177670c8ef46e114139cb5d91ccfcd1e09048d411dcd99a80b32"),
+            base16_literal("67c24dea0fe8a5fcd6c916ea1f08f26d2cd2b81b32f7210ff582d820e261e609"),
+            base16_literal("f91e3d0121b93cd4f125f52e984a5551b1736f84c887dcd551cff28df832a709")
+        },
+        {
+            base16_literal("1136b8aa924e0bb48d45ba2082d716c3183e1e352e7d306dc0bc751f8856b570"),
+            base16_literal("2c7b14d380dd63eae81154b6894e79b9191cf268b9a393637ffb4d59132d54d8"),
+            base16_literal("1d2edbb87ad2d51f667afe7b13ba45b81b474cc652e849e563df3c2666209de4"),
+            base16_literal("d67afc905086b457fc80717154ffe321c52e55c4872aa5b1b8f05311894237d8")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0xff, 0xff, 0xff, 0xff, 0xff, 0x07, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f, 0x00, 0xff, 0xff, 0xff, 0xff, 0x0f, 0x00, 0x00},
+    .e = base16_literal("0575e864d1332a1575eb1913015403da62b3fa7b9479bedf58e27b0f4197191d"),
+    .secret_indexes = {1, 1, 7, 6, 1, 5, 4},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000000000c000000000803f0000000080ffffffffffffff06fcffff87ffff7f"),
+            base16_literal("03ffffffff3f0000f83f000000000000c0fffcffffffffffffffffffffffffffff"),
+            base16_literal("02ffffdf070000000000000000000000c0ff0f00000000000000fcffff010000fe"),
+            base16_literal("02ffff3f000000feffffffffffffffff0700e0ff3f00fcff0700feff0700000000"),
+            base16_literal("0303000000000000000000fffffffffffffffffffff7ffffffffffffff3f000000"),
+            base16_literal("02ffffffffff0180ffff0f00e00f00000000000080ffffffffffffffffffffffff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0200000000000000000000000700000000c0ffffff000000801f000000000000f0"),
+            base16_literal("03000000000000f07f0000000000f8ffffffffffffffffff030000000000000000"),
+            base16_literal("02000000f0ff03000000000080ffffffff3f0000000000000600000000000000fe"),
+            base16_literal("0309bef75c63db63bb510ad5dd956876d02d05ff02d2dc259745b0f94a470f3bee"),
+            base16_literal("033f0000000000000000fe3ff8ffffffff0f0000000080ffff7f00000000000000")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02000000000000e0ffff7f000000001efcffffff9fffffffffffffffff7f000000"),
+            base16_literal("020000000000000000e0ffffffffffffff010000000000000f00000000f0ffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000080ffffffffffffffffff03000000000000e0ff3f00000007000000000000"),
+            base16_literal("02ff010000000000000000000000000000000000000000f8ffffffffff7f000000")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300000000fe0f00000000f83ff0ffffffffff0000c00f00000000000000ff0018"),
+            base16_literal("0200000000fcff1ff8ff07f0ffff0f000000ffffff1f0000f00ffeffffff0f0000"),
+            base16_literal("0300feffffff0f000000e0ffffff7f000000e07f00000000c0ffffffffffffffff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("f2926e5f8c1958aeebce5d5ec88b1d8dae7e676a37ad7cfb24cc2f6485eb4a3a")
+    },
+    .s = {
+        {
+            base16_literal("e4dffb4d457203343cb74cfb467b98a818687add0863b48acf45faf92b0e5305")
+        },
+        {
+            base16_literal("a4d5657b69b268ea156399733479fa0149fe61f7b89016546f2845519438802f")
+        },
+        {
+            base16_literal("e2a747bd3797b47c5a5827ae5786bb38492bde6b0d3c84c95f9dd4bc820a3715"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("eb6da25ea27430968d90b632eb42f6710e48b7a3e8654a56ff48ddb2ba778a3a"),
+            base16_literal("4c1270dc637ad0f9738170405e78a9cfceb64574110d31de366dc3182f6c458f")
+        },
+        {
+            base16_literal("6bb8e69e96b924ae1cbcc8bca3d63e29bb67178c014940b685fb54581fe31ea9"),
+            base16_literal("e70d6092f23f5aa92f176be2e114b3732634ad424e0d704928a593421fea10c9"),
+            base16_literal("29dc2aa61bc1cee9c3d81e586ac8ca49764774490bd79e59eec20d5910b067d2"),
+            base16_literal("456f1f527b772c7c74704b96737dc2e4501c7c9afa34dd23025ef3247a259dd2"),
+            base16_literal("3767461e0b4dc22d9f59e755fa74974b83af7c9655ab91d1aadccdf317502472"),
+            base16_literal("d5f8332800864dbd17724d2aa460de1fe0573f2ec048fef7f5635303c745e0c2")
+        },
+        {
+            base16_literal("e33eed49a77dd09df3a5d864f175c7e927247332e7abb9ecb039a8074282ddd5")
+        },
+        {
+            base16_literal("2fc8ab9d560349ce821525ffd2741994f2bdc9f0a946f1b0074fc1579ad98035"),
+            base16_literal("21aa1def6a14f6b4974cb6569587c0ae00ad921875df2f630c72eb0234113ee1"),
+            base16_literal("84d81790b02b177670c8ef46e114139cb5d91ccfcd1e09048d411dcd99a80b32"),
+            base16_literal("67c24dea0fe8a5fcd6c916ea1f08f26d2cd2b81b32f7210ff582d820e261e609"),
+            base16_literal("f91e3d0121b93cd4f125f52e984a5551b1736f84c887dcd551cff28df832a709")
+        },
+        {
+            base16_literal("1136b8aa924e0bb48d45ba2082d716c3183e1e352e7d306dc0bc751f8856b570"),
+            base16_literal("2c7b14d380dd63eae81154b6894e79b9191cf268b9a393637ffb4d59132d54d8"),
+            base16_literal("1d2edbb87ad2d51f667afe7b13ba45b81b474cc652e849e563df3c2666209de4"),
+            base16_literal("d67afc905086b457fc80717154ffe321c52e55c4872aa5b1b8f05311894237d8")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0xff, 0xff, 0xff, 0xff, 0xff, 0x07, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f, 0x00, 0xff, 0xff, 0xff, 0xff, 0x0f, 0x00, 0x00},
+    .e = base16_literal("0575e864d1332a1575eb1913015403da62b3fa7b9479bedf58e27b0f4197191d"),
+    .secret_indexes = {1, 1, 7, 6, 1, 5, 4},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000000000c000000000803f0000000080ffffffffffffff06fcffff87ffff7f"),
+            base16_literal("03ffffffff3f0000f83f000000000000c0fffcffffffffffffffffffffffffffff"),
+            base16_literal("02ffffdf070000000000000000000000c0ff0f00000000000000fcffff010000fe"),
+            base16_literal("02ffff3f000000feffffffffffffffff0700e0ff3f00fcff0700feff0700000000"),
+            base16_literal("0303000000000000000000fffffffffffffffffffff7ffffffffffffff3f000000"),
+            base16_literal("02ffffffffff0180ffff0f00e00f00000000000080ffffffffffffffffffffffff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0200000000000000000000000700000000c0ffffff000000801f000000000000f0"),
+            base16_literal("03000000000000f07f0000000000f8ffffffffffffffffff030000000000000000"),
+            base16_literal("02000000f0ff03000000000080ffffffff3f0000000000000600000000000000fe"),
+            base16_literal("0309bef75c63db63bb510ad5dd956876d02d05ff02d2dc259745b0f94a470f3bee"),
+            base16_literal("033f0000000000000000fe3ff8ffffffff0f0000000080ffff7f00000000000000")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02000000000000e0ffff7f000000001efcffffff9fffffffffffffffff7f000000"),
+            base16_literal("020000000000000000e0ffffffffffffff010000000000000f00000000f0ffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000080ffffffffffffffffff03000000000000e0ff3f00000007000000000000"),
+            base16_literal("02ff010000000000000000000000000000000000000000f8ffffffffff7f000000")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300000000fe0f00000000f83ff0ffffffffff0000c00f00000000000000ff0018"),
+            base16_literal("0200000000fcff1ff8ff07f0ffff0f000000ffffff1f0000f00ffeffffff0f0000"),
+            base16_literal("0300feffffff0f000000e0ffffff7f000000e07f00000000c0ffffffffffffffff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("f2926e5f8c1958aeebce5d5ec88b1d8dae7e676a37ad7cfb24cc2f6485eb4a3a")
+    },
+    .s = {
+        {
+            base16_literal("e4dffb4d457203343cb74cfb467b98a818687add0863b48acf45faf92b0e5305")
+        },
+        {
+            base16_literal("a4d5657b69b268ea156399733479fa0149fe61f7b89016546f2845519438802f")
+        },
+        {
+            base16_literal("e2a747bd3797b47c5a5827ae5786bb38492bde6b0d3c84c95f9dd4bc820a3715"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("eb6da25ea27430968d90b632eb42f6710e48b7a3e8654a56ff48ddb2ba778a3a"),
+            base16_literal("4c1270dc637ad0f9738170405e78a9cfceb64574110d31de366dc3182f6c458f")
+        },
+        {
+            base16_literal("6bb8e69e96b924ae1cbcc8bca3d63e29bb67178c014940b685fb54581fe31ea9"),
+            base16_literal("e70d6092f23f5aa92f176be2e114b3732634ad424e0d704928a593421fea10c9"),
+            base16_literal("29dc2aa61bc1cee9c3d81e586ac8ca49764774490bd79e59eec20d5910b067d2"),
+            base16_literal("456f1f527b772c7c74704b96737dc2e4501c7c9afa34dd23025ef3247a259dd2"),
+            base16_literal("3767461e0b4dc22d9f59e755fa74974b83af7c9655ab91d1aadccdf317502472"),
+            base16_literal("d5f8332800864dbd17724d2aa460de1fe0573f2ec048fef7f5635303c745e0c2")
+        },
+        {
+            base16_literal("e33eed49a77dd09df3a5d864f175c7e927247332e7abb9ecb039a8074282ddd5")
+        },
+        {
+            base16_literal("2fc8ab9d560349ce821525ffd2741994f2bdc9f0a946f1b0074fc1579ad98035"),
+            base16_literal("21aa1def6a14f6b4974cb6569587c0ae00ad921875df2f630c72eb0234113ee2"),
+            base16_literal("84d81790b02b177670c8ef46e114139cb5d91ccfcd1e09048d411dcd99a80b32"),
+            base16_literal("67c24dea0fe8a5fcd6c916ea1f08f26d2cd2b81b32f7210ff582d820e261e609"),
+            base16_literal("f91e3d0121b93cd4f125f52e984a5551b1736f84c887dcd551cff28df832a709")
+        },
+        {
+            base16_literal("1136b8aa924e0bb48d45ba2082d716c3183e1e352e7d306dc0bc751f8856b570"),
+            base16_literal("2c7b14d380dd63eae81154b6894e79b9191cf268b9a393637ffb4d59132d54d8"),
+            base16_literal("1d2edbb87ad2d51f667afe7b13ba45b81b474cc652e849e563df3c2666209de4"),
+            base16_literal("d67afc905086b457fc80717154ffe321c52e55c4872aa5b1b8f05311894237d8")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0xff, 0xff, 0xff, 0xff, 0xff, 0x07, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f, 0x00, 0xff, 0xff, 0xff, 0xff, 0x0f, 0x00, 0x00},
+    .e = base16_literal("0575e864d1332a1575eb1913015403da62b3fa7b9479bedf58e27b0f4197191d"),
+    .secret_indexes = {1, 1, 7, 6, 1, 5, 4},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000000000c000000000803f0000000080ffffffffffffff06fcffff87ffff7f"),
+            base16_literal("03ffffffff3f0000f83f000000000000c0fffcffffffffffffffffffffffffffff"),
+            base16_literal("02ffffdf070000000000000000000000c0ff0f00000000000000fcffff010000fe"),
+            base16_literal("02ffff3f000000feffffffffffffffff0700e0ff3f00fcff0700feff0700000000"),
+            base16_literal("0303000000000000000000fffffffffffffffffffff7ffffffffffffff3f000000"),
+            base16_literal("02ffffffffff0180ffff0f00e00f00000000000080ffffffffffffffffffffffff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0200000000000000000000000700000000c0ffffff000000801f000000000000f0"),
+            base16_literal("03000000000000f07f0000000000f8ffffffffffffffffff030000000000000000"),
+            base16_literal("02000000f0ff03000000000080ffffffff3f0000000000000600000000000000fe"),
+            base16_literal("0309bef75c63db63bb510ad5dd956876d02d05ff02d2dc259745b0f94a470f3bee"),
+            base16_literal("033f0000000000000000fe3ff8ffffffff0f0000000080ffff7f00000000000000")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03351ebcf4ff147e28bdb01e7f2cca3e6ee49ddd5f560908b615eba4855ea0021b"),
+            base16_literal("020000000000000000e0ffffffffffffff010000000000000f00000000f0ffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000080ffffffffffffffffff03000000000000e0ff3f00000007000000000000"),
+            base16_literal("02ff010000000000000000000000000000000000000000f8ffffffffff7f000000")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0300000000fe0f00000000f83ff0ffffffffff0000c00f00000000000000ff0018"),
+            base16_literal("0200000000fcff1ff8ff07f0ffff0f000000ffffff1f0000f00ffeffffff0f0000"),
+            base16_literal("0300feffffff0f000000e0ffffff7f000000e07f00000000c0ffffffffffffffff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("f2926e5f8c1958aeebce5d5ec88b1d8dae7e676a37ad7cfb24cc2f6485eb4a3a")
+    },
+    .s = {
+        {
+            base16_literal("e4dffb4d457203343cb74cfb467b98a818687add0863b48acf45faf92b0e5305")
+        },
+        {
+            base16_literal("a4d5657b69b268ea156399733479fa0149fe61f7b89016546f2845519438802f")
+        },
+        {
+            base16_literal("e2a747bd3797b47c5a5827ae5786bb38492bde6b0d3c84c95f9dd4bc820a3715"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("eb6da25ea27430968d90b632eb42f6710e48b7a3e8654a56ff48ddb2ba778a3a"),
+            base16_literal("4c1270dc637ad0f9738170405e78a9cfceb64574110d31de366dc3182f6c458f")
+        },
+        {
+            base16_literal("6bb8e69e96b924ae1cbcc8bca3d63e29bb67178c014940b685fb54581fe31ea9"),
+            base16_literal("e70d6092f23f5aa92f176be2e114b3732634ad424e0d704928a593421fea10c9"),
+            base16_literal("29dc2aa61bc1cee9c3d81e586ac8ca49764774490bd79e59eec20d5910b067d2"),
+            base16_literal("456f1f527b772c7c74704b96737dc2e4501c7c9afa34dd23025ef3247a259dd2"),
+            base16_literal("3767461e0b4dc22d9f59e755fa74974b83af7c9655ab91d1aadccdf317502472"),
+            base16_literal("d5f8332800864dbd17724d2aa460de1fe0573f2ec048fef7f5635303c745e0c2")
+        },
+        {
+            base16_literal("e33eed49a77dd09df3a5d864f175c7e927247332e7abb9ecb039a8074282ddd5")
+        },
+        {
+            base16_literal("2fc8ab9d560349ce821525ffd2741994f2bdc9f0a946f1b0074fc1579ad98035"),
+            base16_literal("21aa1def6a14f6b4974cb6569587c0ae00ad921875df2f630c72eb0234113ee2"),
+            base16_literal("84d81790b02b177670c8ef46e114139cb5d91ccfcd1e09048d411dcd99a80b32"),
+            base16_literal("67c24dea0fe8a5fcd6c916ea1f08f26d2cd2b81b32f7210ff582d820e261e609"),
+            base16_literal("f91e3d0121b93cd4f125f52e984a5551b1736f84c887dcd551cff28df832a709")
+        },
+        {
+            base16_literal("1136b8aa924e0bb48d45ba2082d716c3183e1e352e7d306dc0bc751f8856b570"),
+            base16_literal("2c7b14d380dd63eae81154b6894e79b9191cf268b9a393637ffb4d59132d54d8"),
+            base16_literal("1d2edbb87ad2d51f667afe7b13ba45b81b474cc652e849e563df3c2666209de4"),
+            base16_literal("d67afc905086b457fc80717154ffe321c52e55c4872aa5b1b8f05311894237d8")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x04, 0x00, 0xff, 0xbf, 0xff, 0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x00, 0x00, 0x00, 0xf0, 0x01, 0x00, 0x00, 0x00, 0x80},
+    .e = base16_literal("a5cbb7d4450f11d846c0c82743a3319f5e1994a094c294b21b581c90dc45fe9e"),
+    .secret_indexes = {7, 4, 1, 4, 1, 4},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("38551f2c312052b689d26899455df002536f513256cd6edf0824f9e54c072bb4"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("a462be57cd819a2dd524f103b2e3e147d441e14bbad117ba49f53992e1a36927")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ffffffffffffffffffffff0300000000000000000000000000000000000000f8"),
+            base16_literal("03000000e0ffffffffffffffffffffffff03001c000000000000000000000000f8"),
+            base16_literal("03000000f8ffffffff03f8ffffffffffffffffffffffffffff1f00000000ff0f00"),
+            base16_literal("02ffffffffffff7fc0ff3fffffff01c07f80ffffffffffffffff0f000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000000000000000feffffffff00000000000000000000fffffffff9ffffffff"),
+            base16_literal("03000400000000feffff7f0000c0ffff1f0000f0ffffffffffffffffffffff0300")
+        },
+        {
+            base16_literal("020000000030ffff0000e007000000f8ffffffffffffffffffdfffffff3e000000"),
+            base16_literal("03000000f8ffffffffffffffffffff0700c0ffff7f00000000000000c01f000000"),
+            base16_literal("02c36769bd86e63678c79607339a255a3b119b01d861d4e6cd048ad78b4630ea15"),
+            base16_literal("0380ffffffffffffffff00000000fcff07007000000000f0ffffffffffffffffff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0300ffffffffffff0f0000fcffffffff3f00000000fe7f0000c0ffffff0300e000"),
+            base16_literal("03ffffffffffffffff070000000000feffffff1f000000f8ff3f000000ffff0700"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffff7f000000feffffffffffffffffffbfffffffffffffff070000000000f0ff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0300000000000000fcffffffffffffff1f00f8ffffff070000000000000000c2ff"),
+            base16_literal("029f1ed7d03a02dbb8c83474402e7f0ef457635365049cc6baa5578fcba8a82f86"),
+            base16_literal("03000000000000000000000000fcffff0700000000000000ff0f0000000000e03f"),
+            base16_literal("03ffff3f000070000000000000fcffffffffffffffffffffffffff1f0000000000")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("5125a529c86e658e2fa512ae2aa1b0f5b0b7746da55f305565a24c189d85e59e"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("456e2407cf3a1dd521da880ebfc735c94cca9992197e64edad4a1d4abf8b9450")
+        },
+        {
+            base16_literal("6968241933d00ed4a0c6f5d40da22dbc4f431418213363a91ba9c76a0b99ca87"),
+            base16_literal("5237af9d66374984f78b899bc9571f3aeaece0b176ea336cf20e6b917fceaf68"),
+            base16_literal("3026500559086e3f67c48eb4c01ccbac64537b1ffa10f2ae78b0b9e035361d0b"),
+            base16_literal("39f3ddba34173a8b9545debfef908d628ee6f5cf4b5229044b0ac69b98f224c2")
+        },
+        {
+            base16_literal("f9cb9cd74e7503f9a7613cf981aaa716028e8b0cce8aefce3bdde81595c71788")
+        },
+        {
+            base16_literal("116e055e28158de8e0d335fb9e06a76829fbc933ba224a805c8ecf4565039e43"),
+            base16_literal("372fb2a1cdd0d732ba15aa0cdeba316e313f4e546031be393a6e8abad5d33896"),
+            base16_literal("35415e1777ee76ddf9ffbde29d95ac196ea47c31a141a584779e54acd4102b89"),
+            base16_literal("bbcf096bd6c57e129d813978a9dfd0856bb5c848e4fc8ed0f1f02f38b2c2d294")
+        },
+        {
+            base16_literal("1137a6145d1f8a2d69713e7d42b6561a962328d34779ae94a3e5e109155cd108")
+        },
+        {
+            base16_literal("e05d7a0b64b72919949aac6128b9a15c43c57ed5143d81ca7da2c353fb7b405f"),
+            base16_literal("259b3d61be01a712be59618471f0fc9565657a55b4cba57fde26547f921815c3"),
+            base16_literal("28d6c4e5eabb652bc20cca75c8b2177854cecf6b6180e0b95aefbc0b15fb4612"),
+            base16_literal("076c2d1ec0643fe5549a5c7af375b29e5a9fa4549af4fea08ef1f46865c827a2")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x04, 0x00, 0xff, 0xbf, 0xff, 0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x00, 0x00, 0x00, 0xf0, 0x01, 0x00, 0x00, 0x00, 0x80},
+    .e = base16_literal("a5cbb7d4450f11d846c0c82743a3319f5e1994a094c294b21b581c90dc45fe9e"),
+    .secret_indexes = {7, 4, 1, 4, 1, 4},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("38551f2c312052b689d26899455df002536f513256cd6edf0824f9e54c072bb4"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("a462be57cd819a2dd524f103b2e3e147d441e14bbad117ba49f53992e1a36927")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ffffffffffffffffffffff0300000000000000000000000000000000000000f8"),
+            base16_literal("03000000e0ffffffffffffffffffffffff03001c000000000000000000000000f8"),
+            base16_literal("03000000f8ffffffff03f8ffffffffffffffffffffffffffff1f00000000ff0f00"),
+            base16_literal("02ffffffffffff7fc0ff3fffffff01c07f80ffffffffffffffff0f000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000000000000000feffffffff00000000000000000000fffffffff9ffffffff"),
+            base16_literal("03000400000000feffff7f0000c0ffff1f0000f0ffffffffffffffffffffff0300")
+        },
+        {
+            base16_literal("020000000030ffff0000e007000000f8ffffffffffffffffffdfffffff3e000000"),
+            base16_literal("03000000f8ffffffffffffffffffff0700c0ffff7f00000000000000c01f000000"),
+            base16_literal("02c36769bd86e63678c79607339a255a3b119b01d861d4e6cd048ad78b4630ea15"),
+            base16_literal("0380ffffffffffffffff00000000fcff07007000000000f0ffffffffffffffffff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0300ffffffffffff0f0000fcffffffff3f00000000fe7f0000c0ffffff0300e000"),
+            base16_literal("03ffffffffffffffff070000000000feffffff1f000000f8ff3f000000ffff0700"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffff7f000000feffffffffffffffffffbfffffffffffffff070000000000f0ff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0300000000000000fcffffffffffffff1f00f8ffffff070000000000000000c2ff"),
+            base16_literal("029f1ed7d03a02dbb8c83474402e7f0ef457635365049cc6baa5578fcba8a82f86"),
+            base16_literal("03000000000000000000000000fcffff0700000000000000ff0f0000000000e03f"),
+            base16_literal("03ffff3f000070000000000000fcffffffffffffffffffffffffff1f0000000000")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("5125a529c86e658e2fa512ae2aa1b0f5b0b7746da55f305565a24c189d85e59e"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("456e2407cf3a1dd521da880ebfc735c94cca9992197e64edad4a1d4abf8b9451")
+        },
+        {
+            base16_literal("6968241933d00ed4a0c6f5d40da22dbc4f431418213363a91ba9c76a0b99ca87"),
+            base16_literal("5237af9d66374984f78b899bc9571f3aeaece0b176ea336cf20e6b917fceaf68"),
+            base16_literal("3026500559086e3f67c48eb4c01ccbac64537b1ffa10f2ae78b0b9e035361d0b"),
+            base16_literal("39f3ddba34173a8b9545debfef908d628ee6f5cf4b5229044b0ac69b98f224c2")
+        },
+        {
+            base16_literal("f9cb9cd74e7503f9a7613cf981aaa716028e8b0cce8aefce3bdde81595c71788")
+        },
+        {
+            base16_literal("116e055e28158de8e0d335fb9e06a76829fbc933ba224a805c8ecf4565039e43"),
+            base16_literal("372fb2a1cdd0d732ba15aa0cdeba316e313f4e546031be393a6e8abad5d33896"),
+            base16_literal("35415e1777ee76ddf9ffbde29d95ac196ea47c31a141a584779e54acd4102b89"),
+            base16_literal("bbcf096bd6c57e129d813978a9dfd0856bb5c848e4fc8ed0f1f02f38b2c2d294")
+        },
+        {
+            base16_literal("1137a6145d1f8a2d69713e7d42b6561a962328d34779ae94a3e5e109155cd108")
+        },
+        {
+            base16_literal("e05d7a0b64b72919949aac6128b9a15c43c57ed5143d81ca7da2c353fb7b405f"),
+            base16_literal("259b3d61be01a712be59618471f0fc9565657a55b4cba57fde26547f921815c3"),
+            base16_literal("28d6c4e5eabb652bc20cca75c8b2177854cecf6b6180e0b95aefbc0b15fb4612"),
+            base16_literal("076c2d1ec0643fe5549a5c7af375b29e5a9fa4549af4fea08ef1f46865c827a2")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x04, 0x00, 0xff, 0xbf, 0xff, 0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x00, 0x00, 0x00, 0xf0, 0x01, 0x00, 0x00, 0x00, 0x80},
+    .e = base16_literal("a5cbb7d4450f11d846c0c82743a3319f5e1994a094c294b21b581c90dc45fe9e"),
+    .secret_indexes = {7, 4, 1, 4, 1, 4},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("38551f2c312052b689d26899455df002536f513256cd6edf0824f9e54c072bb4"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("a462be57cd819a2dd524f103b2e3e147d441e14bbad117ba49f53992e1a36927")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ffffffffffffffffffffff0300000000000000000000000000000000000000f8"),
+            base16_literal("03000000e0ffffffffffffffffffffffff03001c000000000000000000000000f8"),
+            base16_literal("03000000f8ffffffff03f8ffffffffffffffffffffffffffff1f00000000ff0f00"),
+            base16_literal("02ffffffffffff7fc0ff3fffffff01c07f80ffffffffffffffff0f000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000000000000000feffffffff00000000000000000000fffffffff9ffffffff"),
+            base16_literal("03000400000000feffff7f0000c0ffff1f0000f0ffffffffffffffffffffff0300")
+        },
+        {
+            base16_literal("020000000030ffff0000e007000000f8ffffffffffffffffffdfffffff3e000000"),
+            base16_literal("03000000f8ffffffffffffffffffff0700c0ffff7f00000000000000c01f000000"),
+            base16_literal("02c36769bd86e63678c79607339a255a3b119b01d861d4e6cd048ad78b4630ea15"),
+            base16_literal("0380ffffffffffffffff00000000fcff07007000000000f0ffffffffffffffffff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0300ffffffffffff0f0000fcffffffff3f00000000fe7f0000c0ffffff0300e000"),
+            base16_literal("03ffffffffffffffff070000000000feffffff1f000000f8ff3f000000ffff0700"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffff7f000000feffffffffffffffffffbfffffffffffffff070000000000f0ff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0300000000000000fcffffffffffffff1f00f8ffffff070000000000000000c2ff"),
+            base16_literal("029f1ed7d03a02dbb8c83474402e7f0ef457635365049cc6baa5578fcba8a82f86"),
+            base16_literal("03000000000000000000000000fcffff0700000000000000ff0f0000000000e03f"),
+            base16_literal("03ffff3f000070000000000000fcffffffffffffffffffffffffff1f0000000000")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("5125a529c86e658e2fa512ae2aa1b0f5b0b7746da55f305565a24c189d85e59e"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000002"),
+            base16_literal("456e2407cf3a1dd521da880ebfc735c94cca9992197e64edad4a1d4abf8b9451")
+        },
+        {
+            base16_literal("6968241933d00ed4a0c6f5d40da22dbc4f431418213363a91ba9c76a0b99ca87"),
+            base16_literal("5237af9d66374984f78b899bc9571f3aeaece0b176ea336cf20e6b917fceaf68"),
+            base16_literal("3026500559086e3f67c48eb4c01ccbac64537b1ffa10f2ae78b0b9e035361d0b"),
+            base16_literal("39f3ddba34173a8b9545debfef908d628ee6f5cf4b5229044b0ac69b98f224c2")
+        },
+        {
+            base16_literal("f9cb9cd74e7503f9a7613cf981aaa716028e8b0cce8aefce3bdde81595c71788")
+        },
+        {
+            base16_literal("116e055e28158de8e0d335fb9e06a76829fbc933ba224a805c8ecf4565039e43"),
+            base16_literal("372fb2a1cdd0d732ba15aa0cdeba316e313f4e546031be393a6e8abad5d33896"),
+            base16_literal("35415e1777ee76ddf9ffbde29d95ac196ea47c31a141a584779e54acd4102b89"),
+            base16_literal("bbcf096bd6c57e129d813978a9dfd0856bb5c848e4fc8ed0f1f02f38b2c2d294")
+        },
+        {
+            base16_literal("1137a6145d1f8a2d69713e7d42b6561a962328d34779ae94a3e5e109155cd108")
+        },
+        {
+            base16_literal("e05d7a0b64b72919949aac6128b9a15c43c57ed5143d81ca7da2c353fb7b405f"),
+            base16_literal("259b3d61be01a712be59618471f0fc9565657a55b4cba57fde26547f921815c3"),
+            base16_literal("28d6c4e5eabb652bc20cca75c8b2177854cecf6b6180e0b95aefbc0b15fb4612"),
+            base16_literal("076c2d1ec0643fe5549a5c7af375b29e5a9fa4549af4fea08ef1f46865c827a2")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x04, 0x00, 0xff, 0xbf, 0xff, 0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x00, 0x00, 0x00, 0xf0, 0x01, 0x00, 0x00, 0x00, 0x80},
+    .e = base16_literal("a5cbb7d4450f11d846c0c82743a3319f5e1994a094c294b21b581c90dc45fe9e"),
+    .secret_indexes = {7, 4, 1, 4, 1, 4},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("38551f2c312052b689d26899455df002536f513256cd6edf0824f9e54c072bb4"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("a462be57cd819a2dd524f103b2e3e147d441e14bbad117ba49f53992e1a36927")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ffffffffffffffffffffff0300000000000000000000000000000000000000f8"),
+            base16_literal("03000000e0ffffffffffffffffffffffff03001c000000000000000000000000f8"),
+            base16_literal("03000000f8ffffffff03f8ffffffffffffffffffffffffffff1f00000000ff0f00"),
+            base16_literal("03cd23fd32add7e3b4d974cf6e3b0befb9ace2eff7298bfc89976f83f94f624a0b"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000000000000000feffffffff00000000000000000000fffffffff9ffffffff"),
+            base16_literal("03000400000000feffff7f0000c0ffff1f0000f0ffffffffffffffffffffff0300")
+        },
+        {
+            base16_literal("020000000030ffff0000e007000000f8ffffffffffffffffffdfffffff3e000000"),
+            base16_literal("03000000f8ffffffffffffffffffff0700c0ffff7f00000000000000c01f000000"),
+            base16_literal("02c36769bd86e63678c79607339a255a3b119b01d861d4e6cd048ad78b4630ea15"),
+            base16_literal("0380ffffffffffffffff00000000fcff07007000000000f0ffffffffffffffffff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0300ffffffffffff0f0000fcffffffff3f00000000fe7f0000c0ffffff0300e000"),
+            base16_literal("03ffffffffffffffff070000000000feffffff1f000000f8ff3f000000ffff0700"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffff7f000000feffffffffffffffffffbfffffffffffffff070000000000f0ff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0300000000000000fcffffffffffffff1f00f8ffffff070000000000000000c2ff"),
+            base16_literal("029f1ed7d03a02dbb8c83474402e7f0ef457635365049cc6baa5578fcba8a82f86"),
+            base16_literal("03000000000000000000000000fcffff0700000000000000ff0f0000000000e03f"),
+            base16_literal("03ffff3f000070000000000000fcffffffffffffffffffffffffff1f0000000000")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("5125a529c86e658e2fa512ae2aa1b0f5b0b7746da55f305565a24c189d85e59e"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000002"),
+            base16_literal("456e2407cf3a1dd521da880ebfc735c94cca9992197e64edad4a1d4abf8b9451")
+        },
+        {
+            base16_literal("6968241933d00ed4a0c6f5d40da22dbc4f431418213363a91ba9c76a0b99ca87"),
+            base16_literal("5237af9d66374984f78b899bc9571f3aeaece0b176ea336cf20e6b917fceaf68"),
+            base16_literal("3026500559086e3f67c48eb4c01ccbac64537b1ffa10f2ae78b0b9e035361d0b"),
+            base16_literal("39f3ddba34173a8b9545debfef908d628ee6f5cf4b5229044b0ac69b98f224c2")
+        },
+        {
+            base16_literal("f9cb9cd74e7503f9a7613cf981aaa716028e8b0cce8aefce3bdde81595c71788")
+        },
+        {
+            base16_literal("116e055e28158de8e0d335fb9e06a76829fbc933ba224a805c8ecf4565039e43"),
+            base16_literal("372fb2a1cdd0d732ba15aa0cdeba316e313f4e546031be393a6e8abad5d33896"),
+            base16_literal("35415e1777ee76ddf9ffbde29d95ac196ea47c31a141a584779e54acd4102b89"),
+            base16_literal("bbcf096bd6c57e129d813978a9dfd0856bb5c848e4fc8ed0f1f02f38b2c2d294")
+        },
+        {
+            base16_literal("1137a6145d1f8a2d69713e7d42b6561a962328d34779ae94a3e5e109155cd108")
+        },
+        {
+            base16_literal("e05d7a0b64b72919949aac6128b9a15c43c57ed5143d81ca7da2c353fb7b405f"),
+            base16_literal("259b3d61be01a712be59618471f0fc9565657a55b4cba57fde26547f921815c3"),
+            base16_literal("28d6c4e5eabb652bc20cca75c8b2177854cecf6b6180e0b95aefbc0b15fb4612"),
+            base16_literal("076c2d1ec0643fe5549a5c7af375b29e5a9fa4549af4fea08ef1f46865c827a2")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0x00, 0x00, 0xfc, 0xff, 0x7f, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0x07, 0x00, 0x00},
+    .e = base16_literal("54ea8ddc2980858daaa1c5e0c12a806e95701bda59d0ebee8760dc67097a20cc"),
+    .secret_indexes = {5},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0307c0ffffff3f000000000000e0feffff1f0000000000000000fcffff0f000000"),
+            base16_literal("0200000000e0ffffffff7f00ffff7f000000000000000000feffffff03000000fc"),
+            base16_literal("03f8ffffff01f0ffffffffffffffffffffffffffffffffff03f0ffe1ffffffff1f"),
+            base16_literal("0300000000000080ffffffffffffffff3ff0ffffffff0f00000000000000e0ffff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("940ee7f0c5c9aa570a0adbf838e6b6e1df8b52211f5cd83b536e1a4d37567053"),
+            base16_literal("7f921569a7d7e7bd4544f11a10a361e12f4ca82fe0cffbf9b944eafea503c6e2"),
+            base16_literal("c0458ac50ea3c8dbe0490b805b7e31d97cf23b44d1175af6550f9ca9497554d8"),
+            base16_literal("e189ac5fcf68c6a3db364f78dff7ae408f847a37298d843323762ca1b27d0fca"),
+            base16_literal("3ed90a8fa03b4272e3e9c09a73eefbe83557e8774dce647e56341872679ba3b4")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0x00, 0x00, 0xfc, 0xff, 0x7f, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0x07, 0x00, 0x00},
+    .e = base16_literal("54ea8ddc2980858daaa1c5e0c12a806e95701bda59d0ebee8760dc67097a20cc"),
+    .secret_indexes = {5},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0307c0ffffff3f000000000000e0feffff1f0000000000000000fcffff0f000000"),
+            base16_literal("0200000000e0ffffffff7f00ffff7f000000000000000000feffffff03000000fc"),
+            base16_literal("03f8ffffff01f0ffffffffffffffffffffffffffffffffff03f0ffe1ffffffff1f"),
+            base16_literal("0300000000000080ffffffffffffffff3ff0ffffffff0f00000000000000e0ffff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("940ee7f0c5c9aa570a0adbf838e6b6e1df8b52211f5cd83b536e1a4d37567053"),
+            base16_literal("7f921569a7d7e7bd4544f11a10a361e12f4ca82fe0cffbf9b944eafea503c6e2"),
+            base16_literal("c0458ac50ea3c8dbe0490b805b7e31d97cf23b44d1175af6550f9ca9497554d8"),
+            base16_literal("e189ac5fcf68c6a3db364f78dff7ae408f847a37298d843323762ca1b27d0fcb"),
+            base16_literal("3ed90a8fa03b4272e3e9c09a73eefbe83557e8774dce647e56341872679ba3b4")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0x00, 0x00, 0xfc, 0xff, 0x7f, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0x07, 0x00, 0x00},
+    .e = base16_literal("54ea8ddc2980858daaa1c5e0c12a806e95701bda59d0ebee8760dc67097a20cc"),
+    .secret_indexes = {5},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0307c0ffffff3f000000000000e0feffff1f0000000000000000fcffff0f000000"),
+            base16_literal("0200000000e0ffffffff7f00ffff7f000000000000000000feffffff03000000fc"),
+            base16_literal("03f8ffffff01f0ffffffffffffffffffffffffffffffffff03f0ffe1ffffffff1f"),
+            base16_literal("0300000000000080ffffffffffffffff3ff0ffffffff0f00000000000000e0ffff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("940ee7f0c5c9aa570a0adbf838e6b6e1df8b52211f5cd83b536e1a4d37567053"),
+            base16_literal("7f921569a7d7e7bd4544f11a10a361e12f4ca82fe0cffbf9b944eafea503c6e2"),
+            base16_literal("c0458ac50ea3c8dbe0490b805b7e31d97cf23b44d1175af6550f9ca9497554d8"),
+            base16_literal("e189ac5fcf68c6a3db364f78dff7ae408f847a37298d843323762ca1b27d0fcb"),
+            base16_literal("3ed90a8fa03b4272e3e9c09a73eefbe83557e8774dce647e56341872679ba3b5")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0x00, 0x00, 0xfc, 0xff, 0x7f, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0x07, 0x00, 0x00},
+    .e = base16_literal("54ea8ddc2980858daaa1c5e0c12a806e95701bda59d0ebee8760dc67097a20cc"),
+    .secret_indexes = {5},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0256d397f2372447707eeb51613a75122f4a7be9644b4dad3d2e40496f8c0f7628"),
+            base16_literal("0200000000e0ffffffff7f00ffff7f000000000000000000feffffff03000000fc"),
+            base16_literal("03f8ffffff01f0ffffffffffffffffffffffffffffffffff03f0ffe1ffffffff1f"),
+            base16_literal("0300000000000080ffffffffffffffff3ff0ffffffff0f00000000000000e0ffff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("940ee7f0c5c9aa570a0adbf838e6b6e1df8b52211f5cd83b536e1a4d37567053"),
+            base16_literal("7f921569a7d7e7bd4544f11a10a361e12f4ca82fe0cffbf9b944eafea503c6e2"),
+            base16_literal("c0458ac50ea3c8dbe0490b805b7e31d97cf23b44d1175af6550f9ca9497554d8"),
+            base16_literal("e189ac5fcf68c6a3db364f78dff7ae408f847a37298d843323762ca1b27d0fcb"),
+            base16_literal("3ed90a8fa03b4272e3e9c09a73eefbe83557e8774dce647e56341872679ba3b5")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfe, 0xff, 0xff, 0xff, 0xff, 0x0f},
+    .e = base16_literal("1f64afb4a646cc29b37ff851305f57dd18108d14037381d80acf880ea9830366"),
+    .secret_indexes = {7, 5, 4, 1, 5},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("023ff8ffffffffffff03c0ffffffffffff000000f0ffff0700c00f0080ffffffff"),
+            base16_literal("03ffff0700000c0000000000000000000080ffffffffffffffffffff000e000000"),
+            base16_literal("03ffffffffffff0f0000000000f8ffffff03000000ffff0f0000001fe0ff0f0000"),
+            base16_literal("02001000ffffffffffffffffffffffffffffff1f0000f0ffffffffffffffff0300"),
+            base16_literal("03ffff00feffff07feff1fffff0300c0c7ff3f00ff8703003cc0ffffffffffff07"),
+            base16_literal("02000000000000000000fe0f00000000000000fcffffffffffffffffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03000000fcffffffffffffffffffffffff0000000000000000000e000000000000"),
+            base16_literal("030000f8ffff070000000000f0ffff030000000000000000000000000000000000"),
+            base16_literal("030100000000f0ffffffff0000e0ffff1f000000000000000080ffffffffffffc3"),
+            base16_literal("03ffffffff030000000000fcff3f000000000000000080ff0f0000007f00fcff1f"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("030000fffffffffffff3ffffffff3ff801000000000000000000000000ffffffff"),
+            base16_literal("02e0ff7f0000000000e0ffffffffffffff030000000000000000c0ffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("037f00009000000000000000000000fcffffffffffffffffffffffff03fcffffff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0300feffffff1f0000000000e0ffffffff07000000000000f0d9fff7ffffffffff"),
+            base16_literal("03000000000f0000fcffffffffffffffffffffffffff1f000000000000000000f0"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ff1f000000000000ffffffff0080ffffffffffffffffffffffffff030000f0ff"),
+            base16_literal("03000000000000000000f0ffffffffffffffffffffffffffffffffffffffffffff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000002"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("03ed5d97e66c76715d8cd8b3a609cf1e5f17d31187a39d349370b006b37ade37"),
+            base16_literal("68a2faf448ecb1c8c6e73b9d8415636d2ad9a71f2cc82bce29fda87c1ffd15fd")
+        },
+        {
+            base16_literal("e4b42798bc971a243697fcc5670487a57ec69538c29f1ccf199e605df327f118"),
+            base16_literal("dc2d76359a647669ab928146e30ab663229b7c9a16cc9360b9b983e35e3696fd"),
+            base16_literal("ddba9f2b140739e96fd00a43eb02c8bfb2d85ef4daa5a309596250d8e8f715c6"),
+            base16_literal("6f4a3df07b1d6250847cd363bb027c5ff2f604e10930153fb92464e74a3cce65"),
+            base16_literal("df29eadcd0a80760f3f83bcddd28d6e429c9e975f50fb5056d8429e6a18cf67b")
+        },
+        {
+            base16_literal("9ac1c72f490d4752bb1ecb344e8aa7e563fad5cf6992eaf907f62b24c0192f2d"),
+            base16_literal("93c2fed1b4c747dab94b6547d3f3e8ab011cf7750fd369a65572674724ecc297"),
+            base16_literal("49c0b8deaea42f14befb3a3108f56cec0634aab4168b380fe2f1c4c809b96448"),
+            base16_literal("a8e5f4dd6790fcdf7933181b178e0e0ab297e6522b74251009e3af60022df85b")
+        },
+        {
+            base16_literal("2dbcb9b9c925ed0ecb37bd3a8f42a9ec3af795a522f3daa95a8377cccbc1d2c4")
+        },
+        {
+            base16_literal("ff6039999fd44f30bb898f9f7a77d72a063075cdca4a07682a94b811aa93acf1"),
+            base16_literal("b4bd5194958e4e55c2fd7c11661f0208520af3c2e21c0c1b6cc376cb890f3551"),
+            base16_literal("e5d24f811bdc15c0b3ddf27d7924296e09a11cfd0ba222c814af1fa64af0845e"),
+            base16_literal("35d5836ce622e342e54c4ca9fb5a95a2b312a66ab4e0f0600a076636c6b6a811"),
+            base16_literal("67e9027d8c282d95a68e7780be36e033dcd360ea7d51ad360758af72fba5576d")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfe, 0xff, 0xff, 0xff, 0xff, 0x0f},
+    .e = base16_literal("1f64afb4a646cc29b37ff851305f57dd18108d14037381d80acf880ea9830366"),
+    .secret_indexes = {7, 5, 4, 1, 5},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("023ff8ffffffffffff03c0ffffffffffff000000f0ffff0700c00f0080ffffffff"),
+            base16_literal("03ffff0700000c0000000000000000000080ffffffffffffffffffff000e000000"),
+            base16_literal("03ffffffffffff0f0000000000f8ffffff03000000ffff0f0000001fe0ff0f0000"),
+            base16_literal("02001000ffffffffffffffffffffffffffffff1f0000f0ffffffffffffffff0300"),
+            base16_literal("03ffff00feffff07feff1fffff0300c0c7ff3f00ff8703003cc0ffffffffffff07"),
+            base16_literal("02000000000000000000fe0f00000000000000fcffffffffffffffffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03000000fcffffffffffffffffffffffff0000000000000000000e000000000000"),
+            base16_literal("030000f8ffff070000000000f0ffff030000000000000000000000000000000000"),
+            base16_literal("030100000000f0ffffffff0000e0ffff1f000000000000000080ffffffffffffc3"),
+            base16_literal("03ffffffff030000000000fcff3f000000000000000080ff0f0000007f00fcff1f"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("030000fffffffffffff3ffffffff3ff801000000000000000000000000ffffffff"),
+            base16_literal("02e0ff7f0000000000e0ffffffffffffff030000000000000000c0ffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("037f00009000000000000000000000fcffffffffffffffffffffffff03fcffffff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0300feffffff1f0000000000e0ffffffff07000000000000f0d9fff7ffffffffff"),
+            base16_literal("03000000000f0000fcffffffffffffffffffffffffff1f000000000000000000f0"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ff1f000000000000ffffffff0080ffffffffffffffffffffffffff030000f0ff"),
+            base16_literal("03000000000000000000f0ffffffffffffffffffffffffffffffffffffffffffff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000002"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("03ed5d97e66c76715d8cd8b3a609cf1e5f17d31187a39d349370b006b37ade37"),
+            base16_literal("68a2faf448ecb1c8c6e73b9d8415636d2ad9a71f2cc82bce29fda87c1ffd15fd")
+        },
+        {
+            base16_literal("e4b42798bc971a243697fcc5670487a57ec69538c29f1ccf199e605df327f118"),
+            base16_literal("dc2d76359a647669ab928146e30ab663229b7c9a16cc9360b9b983e35e3696fd"),
+            base16_literal("ddba9f2b140739e96fd00a43eb02c8bfb2d85ef4daa5a309596250d8e8f715c6"),
+            base16_literal("6f4a3df07b1d6250847cd363bb027c5ff2f604e10930153fb92464e74a3cce65"),
+            base16_literal("df29eadcd0a80760f3f83bcddd28d6e429c9e975f50fb5056d8429e6a18cf67b")
+        },
+        {
+            base16_literal("9ac1c72f490d4752bb1ecb344e8aa7e563fad5cf6992eaf907f62b24c0192f2d"),
+            base16_literal("93c2fed1b4c747dab94b6547d3f3e8ab011cf7750fd369a65572674724ecc297"),
+            base16_literal("49c0b8deaea42f14befb3a3108f56cec0634aab4168b380fe2f1c4c809b96448"),
+            base16_literal("a8e5f4dd6790fcdf7933181b178e0e0ab297e6522b74251009e3af60022df85b")
+        },
+        {
+            base16_literal("2dbcb9b9c925ed0ecb37bd3a8f42a9ec3af795a522f3daa95a8377cccbc1d2c5")
+        },
+        {
+            base16_literal("ff6039999fd44f30bb898f9f7a77d72a063075cdca4a07682a94b811aa93acf1"),
+            base16_literal("b4bd5194958e4e55c2fd7c11661f0208520af3c2e21c0c1b6cc376cb890f3551"),
+            base16_literal("e5d24f811bdc15c0b3ddf27d7924296e09a11cfd0ba222c814af1fa64af0845e"),
+            base16_literal("35d5836ce622e342e54c4ca9fb5a95a2b312a66ab4e0f0600a076636c6b6a811"),
+            base16_literal("67e9027d8c282d95a68e7780be36e033dcd360ea7d51ad360758af72fba5576d")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfe, 0xff, 0xff, 0xff, 0xff, 0x0f},
+    .e = base16_literal("1f64afb4a646cc29b37ff851305f57dd18108d14037381d80acf880ea9830366"),
+    .secret_indexes = {7, 5, 4, 1, 5},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("023ff8ffffffffffff03c0ffffffffffff000000f0ffff0700c00f0080ffffffff"),
+            base16_literal("03ffff0700000c0000000000000000000080ffffffffffffffffffff000e000000"),
+            base16_literal("03ffffffffffff0f0000000000f8ffffff03000000ffff0f0000001fe0ff0f0000"),
+            base16_literal("02001000ffffffffffffffffffffffffffffff1f0000f0ffffffffffffffff0300"),
+            base16_literal("03ffff00feffff07feff1fffff0300c0c7ff3f00ff8703003cc0ffffffffffff07"),
+            base16_literal("02000000000000000000fe0f00000000000000fcffffffffffffffffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03000000fcffffffffffffffffffffffff0000000000000000000e000000000000"),
+            base16_literal("02be010a7a17005f43c6560ed36dba5639d321071a2dbd19b5d4f33169ae1723f9"),
+            base16_literal("030100000000f0ffffffff0000e0ffff1f000000000000000080ffffffffffffc3"),
+            base16_literal("03ffffffff030000000000fcff3f000000000000000080ff0f0000007f00fcff1f"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("030000fffffffffffff3ffffffff3ff801000000000000000000000000ffffffff"),
+            base16_literal("02e0ff7f0000000000e0ffffffffffffff030000000000000000c0ffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("037f00009000000000000000000000fcffffffffffffffffffffffff03fcffffff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0300feffffff1f0000000000e0ffffffff07000000000000f0d9fff7ffffffffff"),
+            base16_literal("03000000000f0000fcffffffffffffffffffffffffff1f000000000000000000f0"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ff1f000000000000ffffffff0080ffffffffffffffffffffffffff030000f0ff"),
+            base16_literal("03000000000000000000f0ffffffffffffffffffffffffffffffffffffffffffff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000002"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("03ed5d97e66c76715d8cd8b3a609cf1e5f17d31187a39d349370b006b37ade37"),
+            base16_literal("68a2faf448ecb1c8c6e73b9d8415636d2ad9a71f2cc82bce29fda87c1ffd15fd")
+        },
+        {
+            base16_literal("e4b42798bc971a243697fcc5670487a57ec69538c29f1ccf199e605df327f118"),
+            base16_literal("dc2d76359a647669ab928146e30ab663229b7c9a16cc9360b9b983e35e3696fd"),
+            base16_literal("ddba9f2b140739e96fd00a43eb02c8bfb2d85ef4daa5a309596250d8e8f715c6"),
+            base16_literal("6f4a3df07b1d6250847cd363bb027c5ff2f604e10930153fb92464e74a3cce65"),
+            base16_literal("df29eadcd0a80760f3f83bcddd28d6e429c9e975f50fb5056d8429e6a18cf67b")
+        },
+        {
+            base16_literal("9ac1c72f490d4752bb1ecb344e8aa7e563fad5cf6992eaf907f62b24c0192f2d"),
+            base16_literal("93c2fed1b4c747dab94b6547d3f3e8ab011cf7750fd369a65572674724ecc297"),
+            base16_literal("49c0b8deaea42f14befb3a3108f56cec0634aab4168b380fe2f1c4c809b96448"),
+            base16_literal("a8e5f4dd6790fcdf7933181b178e0e0ab297e6522b74251009e3af60022df85b")
+        },
+        {
+            base16_literal("2dbcb9b9c925ed0ecb37bd3a8f42a9ec3af795a522f3daa95a8377cccbc1d2c5")
+        },
+        {
+            base16_literal("ff6039999fd44f30bb898f9f7a77d72a063075cdca4a07682a94b811aa93acf1"),
+            base16_literal("b4bd5194958e4e55c2fd7c11661f0208520af3c2e21c0c1b6cc376cb890f3551"),
+            base16_literal("e5d24f811bdc15c0b3ddf27d7924296e09a11cfd0ba222c814af1fa64af0845e"),
+            base16_literal("35d5836ce622e342e54c4ca9fb5a95a2b312a66ab4e0f0600a076636c6b6a811"),
+            base16_literal("67e9027d8c282d95a68e7780be36e033dcd360ea7d51ad360758af72fba5576d")
+        }
+    }
+},
+{
+    .message = {0xff, 0xff, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfe, 0xff, 0xff, 0xff, 0xff, 0x0f},
+    .e = base16_literal("1f64afb4a646cc29b37ff851305f57dd18108d14037381d80acf880ea9830366"),
+    .secret_indexes = {7, 5, 4, 1, 5},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("023ff8ffffffffffff03c0ffffffffffff000000f0ffff0700c00f0080ffffffff"),
+            base16_literal("03ffff0700000c0000000000000000000080ffffffffffffffffffff000e000000"),
+            base16_literal("031ed5004619447af7d6a53248aa8cbeb7ffdfb5b93c13d779fe4ac907f2c057b2"),
+            base16_literal("02001000ffffffffffffffffffffffffffffff1f0000f0ffffffffffffffff0300"),
+            base16_literal("03ffff00feffff07feff1fffff0300c0c7ff3f00ff8703003cc0ffffffffffff07"),
+            base16_literal("02000000000000000000fe0f00000000000000fcffffffffffffffffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03000000fcffffffffffffffffffffffff0000000000000000000e000000000000"),
+            base16_literal("02be010a7a17005f43c6560ed36dba5639d321071a2dbd19b5d4f33169ae1723f9"),
+            base16_literal("030100000000f0ffffffff0000e0ffff1f000000000000000080ffffffffffffc3"),
+            base16_literal("03ffffffff030000000000fcff3f000000000000000080ff0f0000007f00fcff1f"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("030000fffffffffffff3ffffffff3ff801000000000000000000000000ffffffff"),
+            base16_literal("02e0ff7f0000000000e0ffffffffffffff030000000000000000c0ffffffffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("037f00009000000000000000000000fcffffffffffffffffffffffff03fcffffff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0300feffffff1f0000000000e0ffffffff07000000000000f0d9fff7ffffffffff"),
+            base16_literal("03000000000f0000fcffffffffffffffffffffffffff1f000000000000000000f0"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ff1f000000000000ffffffff0080ffffffffffffffffffffffffff030000f0ff"),
+            base16_literal("03000000000000000000f0ffffffffffffffffffffffffffffffffffffffffffff")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000002"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("03ed5d97e66c76715d8cd8b3a609cf1e5f17d31187a39d349370b006b37ade37"),
+            base16_literal("68a2faf448ecb1c8c6e73b9d8415636d2ad9a71f2cc82bce29fda87c1ffd15fd")
+        },
+        {
+            base16_literal("e4b42798bc971a243697fcc5670487a57ec69538c29f1ccf199e605df327f118"),
+            base16_literal("dc2d76359a647669ab928146e30ab663229b7c9a16cc9360b9b983e35e3696fd"),
+            base16_literal("ddba9f2b140739e96fd00a43eb02c8bfb2d85ef4daa5a309596250d8e8f715c6"),
+            base16_literal("6f4a3df07b1d6250847cd363bb027c5ff2f604e10930153fb92464e74a3cce65"),
+            base16_literal("df29eadcd0a80760f3f83bcddd28d6e429c9e975f50fb5056d8429e6a18cf67b")
+        },
+        {
+            base16_literal("9ac1c72f490d4752bb1ecb344e8aa7e563fad5cf6992eaf907f62b24c0192f2d"),
+            base16_literal("93c2fed1b4c747dab94b6547d3f3e8ab011cf7750fd369a65572674724ecc297"),
+            base16_literal("49c0b8deaea42f14befb3a3108f56cec0634aab4168b380fe2f1c4c809b96448"),
+            base16_literal("a8e5f4dd6790fcdf7933181b178e0e0ab297e6522b74251009e3af60022df85b")
+        },
+        {
+            base16_literal("2dbcb9b9c925ed0ecb37bd3a8f42a9ec3af795a522f3daa95a8377cccbc1d2c5")
+        },
+        {
+            base16_literal("ff6039999fd44f30bb898f9f7a77d72a063075cdca4a07682a94b811aa93acf1"),
+            base16_literal("b4bd5194958e4e55c2fd7c11661f0208520af3c2e21c0c1b6cc376cb890f3551"),
+            base16_literal("e5d24f811bdc15c0b3ddf27d7924296e09a11cfd0ba222c814af1fa64af0845e"),
+            base16_literal("35d5836ce622e342e54c4ca9fb5a95a2b312a66ab4e0f0600a076636c6b6a811"),
+            base16_literal("67e9027d8c282d95a68e7780be36e033dcd360ea7d51ad360758af72fba5576d")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x03, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0e, 0x00, 0x00, 0xf8, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("885375681a66f41f564cdf43ca904d050d45cf98006ddfdb182cfb385c5de0cb"),
+    .secret_indexes = {3, 5, 3, 5, 4},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ffffff0700e0ffffffffffffffffffff0f0000000000e0ff0300ffffffffffff"),
+            base16_literal("02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"),
+            base16_literal("0301ff3f0000000000c0ff010000000000000000ffff0f80ffffffffffffcfffff")
+        },
+        {
+            base16_literal("02ff000000c00000000000000000fcffffffffffffffffffffffff01003c000000"),
+            base16_literal("02ffffffe7ff87ffffffff7f000000f0ff0700000000000000f8ff0f0000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffffffffffffff1fffffffffffffffff877fffffffff070000feffffff"),
+            base16_literal("0200000000000080ffff3f00feffffffffff7f000000fc0f00000000e01f000000")
+        },
+        {
+            base16_literal("03ffffffffffffffff3f80ff000000000000000000f0ffffffffffffffffffffff"),
+            base16_literal("030000000000000000fc7f80ffffffff01000000000000ff0000203800fc1f0000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0300000000feffffffff010000c0ffffffffff7ff8ffffff3f00c0ffffffffffff"),
+            base16_literal("030000000000000000000000000000000000000000e0fffff81f00000000000000"),
+            base16_literal("03ffffff030000000080feffffffff0f000000000080ffffffffffff0f00c0ffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02000000000000000080fbffffffff7fe0ffffff0000f8ffffffffffffff7f1c00")
+        },
+        {
+            base16_literal("02ffffffffff7ff8ffffffffffffffffff0000000000feffff0fc0ffffffffffff"),
+            base16_literal("03000000feffffffffffffffffffffffffffff000000c0033f0000000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0200f0ffffff010000f8ffff0000000000000000000080ff3f00000000000000f0")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("52501776ec2088363585ff8efea9de07a179ea769b22db75b7acceae6633aaf9")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("07a12ecd731ff9a2d30be74ad63a024c741d03a9c384db49c50f370dce893783"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+        },
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("cdc006f5074c94b5894719a37d09f79df029ad9d6010b6b4a4e14a26d5b72d62"),
+            base16_literal("8cfd0bff6043729c40dd67fba5746e912fc50318e38301c1c654c6cbcb68842d"),
+            base16_literal("f9169b8443f267e8a96144de1e02e1c1c0ab7d2f7d849ff644f92863fda461c3")
+        },
+        {
+            base16_literal("dcdf77edfe0d9f40571dd8481a911b3a834a68decca0a309461959d85224859b"),
+            base16_literal("77f8e8d05689bce3251cc99f9f03ece59f35d06d798a82ef75dfc3fa6ef377ba"),
+            base16_literal("a71c7726bd41b6d891314a4fc88649baa3203ff9bcdf0d040d56f9f4cbb57f87")
+        },
+        {
+            base16_literal("dc56e1f1b53aa058632a28909c009049c1e06dbe2ddc5d16b42daf3575d281a0"),
+            base16_literal("136253dbca6ca878daf662043d35c74f67288f6ae8d61c413284672b07420667"),
+            base16_literal("a7e999b8513d96213f4250b593a8b621c2982705ba53e6c368781bf3b60e6137"),
+            base16_literal("5e5ad53b351fcfc212927c38e68712187d044c8ee3baaea5b4c3d6c9dca18929"),
+            base16_literal("238e40edcf8e09d93c0baf59b8050f54c412ccfc6af5242e3c5edfbdbf767396")
+        },
+        {
+            base16_literal("4ff5092e6144a4155a8f2847434c86f3590d9515786c504653113828663ffa37"),
+            base16_literal("bd726fcba021a00e4a8eb5c7df8c740742477815b9d0383c68e999bc5bd02153"),
+            base16_literal("730c06208481b5959c045532aed0775b105d22c85cfe904baa6b7ad08fbd42bb"),
+            base16_literal("9e09c087d0792c43434fbaad3367ad19998c135f265233985314ae503af693cf")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x03, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0e, 0x00, 0x00, 0xf8, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("885375681a66f41f564cdf43ca904d050d45cf98006ddfdb182cfb385c5de0cb"),
+    .secret_indexes = {3, 5, 3, 5, 4},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ffffff0700e0ffffffffffffffffffff0f0000000000e0ff0300ffffffffffff"),
+            base16_literal("02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"),
+            base16_literal("0301ff3f0000000000c0ff010000000000000000ffff0f80ffffffffffffcfffff")
+        },
+        {
+            base16_literal("02ff000000c00000000000000000fcffffffffffffffffffffffff01003c000000"),
+            base16_literal("02ffffffe7ff87ffffffff7f000000f0ff0700000000000000f8ff0f0000000000"),
+            base16_literal("02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"),
+            base16_literal("02ffffffffffffffffffff1fffffffffffffffff877fffffffff070000feffffff"),
+            base16_literal("0200000000000080ffff3f00feffffffffff7f000000fc0f00000000e01f000000")
+        },
+        {
+            base16_literal("03ffffffffffffffff3f80ff000000000000000000f0ffffffffffffffffffffff"),
+            base16_literal("030000000000000000fc7f80ffffffff01000000000000ff0000203800fc1f0000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0300000000feffffffff010000c0ffffffffff7ff8ffffff3f00c0ffffffffffff"),
+            base16_literal("030000000000000000000000000000000000000000e0fffff81f00000000000000"),
+            base16_literal("03ffffff030000000080feffffffff0f000000000080ffffffffffff0f00c0ffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02000000000000000080fbffffffff7fe0ffffff0000f8ffffffffffffff7f1c00")
+        },
+        {
+            base16_literal("02ffffffffff7ff8ffffffffffffffffff0000000000feffff0fc0ffffffffffff"),
+            base16_literal("03000000feffffffffffffffffffffffffffff000000c0033f0000000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0200f0ffffff010000f8ffff0000000000000000000080ff3f00000000000000f0")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("52501776ec2088363585ff8efea9de07a179ea769b22db75b7acceae6633aaf9")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("07a12ecd731ff9a2d30be74ad63a024c741d03a9c384db49c50f370dce893783"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+        },
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("cdc006f5074c94b5894719a37d09f79df029ad9d6010b6b4a4e14a26d5b72d62"),
+            base16_literal("8cfd0bff6043729c40dd67fba5746e912fc50318e38301c1c654c6cbcb68842d"),
+            base16_literal("f9169b8443f267e8a96144de1e02e1c1c0ab7d2f7d849ff644f92863fda461c3")
+        },
+        {
+            base16_literal("dcdf77edfe0d9f40571dd8481a911b3a834a68decca0a309461959d85224859b"),
+            base16_literal("77f8e8d05689bce3251cc99f9f03ece59f35d06d798a82ef75dfc3fa6ef377ba"),
+            base16_literal("a71c7726bd41b6d891314a4fc88649baa3203ff9bcdf0d040d56f9f4cbb57f87")
+        },
+        {
+            base16_literal("dc56e1f1b53aa058632a28909c009049c1e06dbe2ddc5d16b42daf3575d281a0"),
+            base16_literal("136253dbca6ca878daf662043d35c74f67288f6ae8d61c413284672b07420667"),
+            base16_literal("a7e999b8513d96213f4250b593a8b621c2982705ba53e6c368781bf3b60e6137"),
+            base16_literal("5e5ad53b351fcfc212927c38e68712187d044c8ee3baaea5b4c3d6c9dca18929"),
+            base16_literal("238e40edcf8e09d93c0baf59b8050f54c412ccfc6af5242e3c5edfbdbf767396")
+        },
+        {
+            base16_literal("4ff5092e6144a4155a8f2847434c86f3590d9515786c504653113828663ffa37"),
+            base16_literal("bd726fcba021a00e4a8eb5c7df8c740742477815b9d0383c68e999bc5bd02153"),
+            base16_literal("730c06208481b5959c045532aed0775b105d22c85cfe904baa6b7ad08fbd42bb"),
+            base16_literal("9e09c087d0792c43434fbaad3367ad19998c135f265233985314ae503af693cf")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x03, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0e, 0x00, 0x00, 0xf8, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("885375681a66f41f564cdf43ca904d050d45cf98006ddfdb182cfb385c5de0cb"),
+    .secret_indexes = {3, 5, 3, 5, 4},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ffffff0700e0ffffffffffffffffffff0f0000000000e0ff0300ffffffffffff"),
+            base16_literal("02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"),
+            base16_literal("0301ff3f0000000000c0ff010000000000000000ffff0f80ffffffffffffcfffff")
+        },
+        {
+            base16_literal("02ff000000c00000000000000000fcffffffffffffffffffffffff01003c000000"),
+            base16_literal("02ffffffe7ff87ffffffff7f000000f0ff0700000000000000f8ff0f0000000000"),
+            base16_literal("02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"),
+            base16_literal("02ffffffffffffffffffff1fffffffffffffffff877fffffffff070000feffffff"),
+            base16_literal("0200000000000080ffff3f00feffffffffff7f000000fc0f00000000e01f000000")
+        },
+        {
+            base16_literal("03ffffffffffffffff3f80ff000000000000000000f0ffffffffffffffffffffff"),
+            base16_literal("030000000000000000fc7f80ffffffff01000000000000ff0000203800fc1f0000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0300000000feffffffff010000c0ffffffffff7ff8ffffff3f00c0ffffffffffff"),
+            base16_literal("030000000000000000000000000000000000000000e0fffff81f00000000000000"),
+            base16_literal("03ffffff030000000080feffffffff0f000000000080ffffffffffff0f00c0ffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0299422891fab8a9cb3e71c9281856372ba91f86557c42edd4a5079cf56b2db91e")
+        },
+        {
+            base16_literal("02ffffffffff7ff8ffffffffffffffffff0000000000feffff0fc0ffffffffffff"),
+            base16_literal("03000000feffffffffffffffffffffffffffff000000c0033f0000000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0200f0ffffff010000f8ffff0000000000000000000080ff3f00000000000000f0")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("52501776ec2088363585ff8efea9de07a179ea769b22db75b7acceae6633aaf9")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("07a12ecd731ff9a2d30be74ad63a024c741d03a9c384db49c50f370dce893783"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+        },
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("cdc006f5074c94b5894719a37d09f79df029ad9d6010b6b4a4e14a26d5b72d62"),
+            base16_literal("8cfd0bff6043729c40dd67fba5746e912fc50318e38301c1c654c6cbcb68842d"),
+            base16_literal("f9169b8443f267e8a96144de1e02e1c1c0ab7d2f7d849ff644f92863fda461c3")
+        },
+        {
+            base16_literal("dcdf77edfe0d9f40571dd8481a911b3a834a68decca0a309461959d85224859b"),
+            base16_literal("77f8e8d05689bce3251cc99f9f03ece59f35d06d798a82ef75dfc3fa6ef377ba"),
+            base16_literal("a71c7726bd41b6d891314a4fc88649baa3203ff9bcdf0d040d56f9f4cbb57f87")
+        },
+        {
+            base16_literal("dc56e1f1b53aa058632a28909c009049c1e06dbe2ddc5d16b42daf3575d281a0"),
+            base16_literal("136253dbca6ca878daf662043d35c74f67288f6ae8d61c413284672b07420667"),
+            base16_literal("a7e999b8513d96213f4250b593a8b621c2982705ba53e6c368781bf3b60e6137"),
+            base16_literal("5e5ad53b351fcfc212927c38e68712187d044c8ee3baaea5b4c3d6c9dca18929"),
+            base16_literal("238e40edcf8e09d93c0baf59b8050f54c412ccfc6af5242e3c5edfbdbf767396")
+        },
+        {
+            base16_literal("4ff5092e6144a4155a8f2847434c86f3590d9515786c504653113828663ffa37"),
+            base16_literal("bd726fcba021a00e4a8eb5c7df8c740742477815b9d0383c68e999bc5bd02153"),
+            base16_literal("730c06208481b5959c045532aed0775b105d22c85cfe904baa6b7ad08fbd42bb"),
+            base16_literal("9e09c087d0792c43434fbaad3367ad19998c135f265233985314ae503af693cf")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x03, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0e, 0x00, 0x00, 0xf8, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("885375681a66f41f564cdf43ca904d050d45cf98006ddfdb182cfb385c5de0cb"),
+    .secret_indexes = {3, 5, 3, 5, 4},
+    .secrets = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("03ffffff0700e0ffffffffffffffffffff0f0000000000e0ff0300ffffffffffff"),
+            base16_literal("02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"),
+            base16_literal("0301ff3f0000000000c0ff010000000000000000ffff0f80ffffffffffffcfffff")
+        },
+        {
+            base16_literal("02ff000000c00000000000000000fcffffffffffffffffffffffff01003c000000"),
+            base16_literal("02ffffffe7ff87ffffffff7f000000f0ff0700000000000000f8ff0f0000000000"),
+            base16_literal("02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"),
+            base16_literal("02ffffffffffffffffffff1fffffffffffffffff877fffffffff070000feffffff"),
+            base16_literal("0200000000000080ffff3f00feffffffffff7f000000fc0f00000000e01f000000")
+        },
+        {
+            base16_literal("03ffffffffffffffff3f80ff000000000000000000f0ffffffffffffffffffffff"),
+            base16_literal("030000000000000000fc7f80ffffffff01000000000000ff0000203800fc1f0000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0300000000feffffffff010000c0ffffffffff7ff8ffffff3f00c0ffffffffffff"),
+            base16_literal("030000000000000000000000000000000000000000e0fffff81f00000000000000"),
+            base16_literal("03ffffff030000000080feffffffff0f000000000080ffffffffffff0f00c0ffff"),
+            base16_literal("02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"),
+            base16_literal("0299422891fab8a9cb3e71c9281856372ba91f86557c42edd4a5079cf56b2db91e")
+        },
+        {
+            base16_literal("02ffffffffff7ff8ffffffffffffffffff0000000000feffff0fc0ffffffffffff"),
+            base16_literal("03000000feffffffffffffffffffffffffffff000000c0033f0000000000000000"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0200f0ffffff010000f8ffff0000000000000000000080ff3f00000000000000f0")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("52501776ec2088363585ff8efea9de07a179ea769b22db75b7acceae6633aaf9")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("07a12ecd731ff9a2d30be74ad63a024c741d03a9c384db49c50f370dce893783"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+        },
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("cdc006f5074c94b5894719a37d09f79df029ad9d6010b6b4a4e14a26d5b72d62"),
+            base16_literal("8cfd0bff6043729c40dd67fba5746e912fc50318e38301c1c654c6cbcb68842d"),
+            base16_literal("f9169b8443f267e8a96144de1e02e1c1c0ab7d2f7d849ff644f92863fda461c3")
+        },
+        {
+            base16_literal("dcdf77edfe0d9f40571dd8481a911b3a834a68decca0a309461959d85224859b"),
+            base16_literal("77f8e8d05689bce3251cc99f9f03ece59f35d06d798a82ef75dfc3fa6ef377ba"),
+            base16_literal("a71c7726bd41b6d891314a4fc88649baa3203ff9bcdf0d040d56f9f4cbb57f87")
+        },
+        {
+            base16_literal("dc56e1f1b53aa058632a28909c009049c1e06dbe2ddc5d16b42daf3575d281a0"),
+            base16_literal("136253dbca6ca878daf662043d35c74f67288f6ae8d61c413284672b07420667"),
+            base16_literal("a7e999b8513d96213f4250b593a8b621c2982705ba53e6c368781bf3b60e6137"),
+            base16_literal("5e5ad53b351fcfc212927c38e68712187d044c8ee3baaea5b4c3d6c9dca18929"),
+            base16_literal("238e40edcf8e09d93c0baf59b8050f54c412ccfc6af5242e3c5edfbdbf767396")
+        },
+        {
+            base16_literal("4ff5092e6144a4155a8f2847434c86f3590d9515786c504653113828663ffa37"),
+            base16_literal("bd726fcba021a00e4a8eb5c7df8c740742477815b9d0383c68e999bc5bd02153"),
+            base16_literal("730c06208481b5959c045532aed0775b105d22c85cfe904baa6b7ad08fbd42bb"),
+            base16_literal("9e09c087d0792c43434fbaad3367ad19998c135f265233985314ae503af693cf")
+        }
+    }
+},
+{
+    .message = {0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0xff, 0xff, 0x0f, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00, 0x00, 0xfe, 0xf7, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("afc208a2cc84839a0fa08d597b25c130e96b30c8a2cbad6fa2c07811f52d96b6"),
+    .secret_indexes = {1, 1, 2, 7, 5, 6, 6, 7},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("030000000000feffff07e00100000000e0ffffffffffffffffffffffff3f000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03ffff1f0000000000000000003800000000000000ffffffffffff070000000000"),
+            base16_literal("020000000000000000000000000000d03f00000000000000000000000000c03f80"),
+            base16_literal("0200000000000078000000000080ff010000e0ff7ffeffffff00f0ff03f000e0ff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000c0ffffffffffffffffff0000000000000000ff0700000000c001000000"),
+            base16_literal("03000000feffffffffffff9f0f00000000000000000000e0ffffffffff01000000"),
+            base16_literal("033f00000000f8ffff0f000000ffffffffffffffffffffffff0300000000fe0f00")
+        },
+        {
+            base16_literal("023f000080ffffffffffffffffffffffffffffffffffffffffffff07000000fcff"),
+            base16_literal("03000000000000000000000000000000000000000080ffffffffffffffff070000"),
+            base16_literal("0200fc03c0ff0300fcffff1f000000000080ffffffffffffffffffffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000e0c707feffffffffffff3f000000000000000000000000c0ffff01000000")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffff0f0000fcffffffffff7f000000000080ffffffffffffffff01e0ffff"),
+            base16_literal("030300007f000080ffffffffffffffffffffffffffffff013f000000803f0000fc"),
+            base16_literal("030000ffff0000000000040000fcffff1f000000000000f0ff0f000000e03f0000"),
+            base16_literal("020000000000000000000000000000000c0000ff0f0000000080ffffffff7f0000"),
+            base16_literal("03ffffffffff7f0000000000000000000000000000f8ffff0300000000e0ffff01")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffff01807f0000c0ff0000c000000000ffff7f00000000007e00c0ffffffff00"),
+            base16_literal("0280ffff7f000000f8ff0ff8ffffff3ff4ffffff0100000000c0ffffffffffffff"),
+            base16_literal("02ff0f00c0ff1f000000fefffffff7ffffff7f0000000000000000f83f00000000"),
+            base16_literal("02000000feff7f0000e0ff1f000000000000000000040000001f0000000ef0ffff"),
+            base16_literal("03ffff0f0000000000ffffffffffffffff7f00000060000000ffffffffffffff01")
+        },
+        {
+            base16_literal("02ffffffffff000000e0ffff00000000000000000000c0ff1f0000fc1ffeffffff"),
+            base16_literal("023f0000fcffff070000000000feffffffffffffffffff030000f0ffffff0f0000"),
+            base16_literal("02200000000000fc3f0000fcffffffffffffffffffff3f000000000080ffffff7f"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ff0f000000f0ffffffffffff0700000000f8ffffff7f00000000ffff1f00feff"),
+            base16_literal("0300000000e00f00000000feff3f0000ff0100fcffffffffff0f00fc0700000000"),
+            base16_literal("030000000000000000feffffff3f000000000000ffffffffffffffff7f00000000")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("9814ba9192440f798386216d105a6c90d017665ac84397ba2ee6cb166452dea8"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("36cad728b70178125757493fe20aa7f8c493898a4d7ff8192617a60c8cecb323")
+        },
+        {
+            base16_literal("d53f0436e4aba650e3fd06fcfe4a97b6b077f7584bea3df3fd22dd20302ecb83")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("dc590cea776a4a04d427553066fad00d1607b2d4b4dadc1d4fbc2b97e595dd83")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("011b6482e3d71936fd0a042e0dba72202b81ec372a23e50589d072deb36d1135"),
+            base16_literal("8b27a87a4cf5c2f9d2cb9b5ae2efd2a2e6d474ae827bf2c4e51abedaee930eab"),
+            base16_literal("9780b4144048cb253ec415a8f621d5b897a4e57b97b3ca150293aa1adc2aef4b"),
+            base16_literal("7ec49db74cb459ebf6b2466dedb60ae1f4a68deb22f87ee9ddf9328cda9d34e7")
+        },
+        {
+            base16_literal("550a5d7fdb81c3b7e512b8cc09d68d6d368254a8fb5dd74f74c9d3094b0f120e"),
+            base16_literal("e0d11666ceba454a3f9e3da1ce1d21d3401c0da91a69476f0504fd0027045a0f"),
+            base16_literal("39e8aae780bba78f3688b9fa0a8fb2982d0f58e972ad10d4f7f489ac0658d141"),
+            base16_literal("aec109a3c75ed5e6c9cb1c343d4b26ec9a812c7e983926da555afff284af1937"),
+            base16_literal("b2bee9d98d1b2764124b985ab42846c4cc35b6e4eb3966d7d3b8a3a2e03e4f62")
+        },
+        {
+            base16_literal("70b6cbdb48cd06f2a379c87bce6ecd176f8a01fbcb156b84ade59b54f6022964"),
+            base16_literal("72e9ce813aab17fb6b2c3bba1589129a5e0e137d893d4373c1a226bfb8c754b7"),
+            base16_literal("07d353afa24651b261bfeba4860041f82ccb7cc75afd60c9c12e3372ebb77585"),
+            base16_literal("d5fc2a53016faf14be01fc9bb888dd42facbe8ae770aadf4dc31f98924c25673"),
+            base16_literal("de38da924679458b8bd83d087cb2f0881352d019e1484bec245955d2405952aa"),
+            base16_literal("951048d89d17537b4bdce874f156a0ffc8feb454bb74e915377e823dbf62377e")
+        },
+        {
+            base16_literal("925c53198401a7daebc1044e87da74abac4f140611c5b2effee2a269325c45ca"),
+            base16_literal("79aa1bafff3c9dcf130e976343dd325582af1ab2758f2087543d988228d73ba4"),
+            base16_literal("aff26efd82b4a03011bcb5858d58aa82843a515ae055d72dda8c2313925d3b0d"),
+            base16_literal("c9f8d02f4e7859390e2532ee3ce91e3152945f089490edc8fd5588fec1e4d90e"),
+            base16_literal("32d3e67324dba40f586ac881112b9172a69b99dc5fed8cf91a4ba9f49728f3e3"),
+            base16_literal("d810543931586eb19bae4f835de56e4e8c2b90aa0670823d75225b2aa2d854b9")
+        },
+        {
+            base16_literal("86da859099ea284e04cfa71c2b0db173d83a14e2c1d110170dc434289a714a18"),
+            base16_literal("4314c93184c0007660cfda1adfcd398120a9036498f530dfe22575e35eb6118a"),
+            base16_literal("da0f1fe867a688772c44fee6cb1ae02a208ed927b8f07f03b1a1e96ae26a8a59"),
+            base16_literal("3a548d3b0c0739ba647928a1d6c30820e26d5abe5c500597b36e79e87d762c89"),
+            base16_literal("9defb075849c654da1172e3c98adb2b0cbd17b0c03eb740c8cbc44af1b55a1eb"),
+            base16_literal("25c22133d87bb4ab09f5f18242fefb77a8506bbe56b0f3cb1b58a2e0000666d9"),
+            base16_literal("be208828e6256f14731da86241c48278c7494c9a42bceb1a5689ca9c680907b4")
+        }
+    }
+},
+{
+    .message = {0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0xff, 0xff, 0x0f, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00, 0x00, 0xfe, 0xf7, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("afc208a2cc84839a0fa08d597b25c130e96b30c8a2cbad6fa2c07811f52d96b6"),
+    .secret_indexes = {1, 1, 2, 7, 5, 6, 6, 7},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("030000000000feffff07e00100000000e0ffffffffffffffffffffffff3f000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03ffff1f0000000000000000003800000000000000ffffffffffff070000000000"),
+            base16_literal("020000000000000000000000000000d03f00000000000000000000000000c03f80"),
+            base16_literal("0200000000000078000000000080ff010000e0ff7ffeffffff00f0ff03f000e0ff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000c0ffffffffffffffffff0000000000000000ff0700000000c001000000"),
+            base16_literal("03000000feffffffffffff9f0f00000000000000000000e0ffffffffff01000000"),
+            base16_literal("033f00000000f8ffff0f000000ffffffffffffffffffffffff0300000000fe0f00")
+        },
+        {
+            base16_literal("023f000080ffffffffffffffffffffffffffffffffffffffffffff07000000fcff"),
+            base16_literal("03000000000000000000000000000000000000000080ffffffffffffffff070000"),
+            base16_literal("0200fc03c0ff0300fcffff1f000000000080ffffffffffffffffffffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000e0c707feffffffffffff3f000000000000000000000000c0ffff01000000")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffff0f0000fcffffffffff7f000000000080ffffffffffffffff01e0ffff"),
+            base16_literal("030300007f000080ffffffffffffffffffffffffffffff013f000000803f0000fc"),
+            base16_literal("030000ffff0000000000040000fcffff1f000000000000f0ff0f000000e03f0000"),
+            base16_literal("020000000000000000000000000000000c0000ff0f0000000080ffffffff7f0000"),
+            base16_literal("03ffffffffff7f0000000000000000000000000000f8ffff0300000000e0ffff01")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffff01807f0000c0ff0000c000000000ffff7f00000000007e00c0ffffffff00"),
+            base16_literal("0280ffff7f000000f8ff0ff8ffffff3ff4ffffff0100000000c0ffffffffffffff"),
+            base16_literal("02ff0f00c0ff1f000000fefffffff7ffffff7f0000000000000000f83f00000000"),
+            base16_literal("02000000feff7f0000e0ff1f000000000000000000040000001f0000000ef0ffff"),
+            base16_literal("03ffff0f0000000000ffffffffffffffff7f00000060000000ffffffffffffff01")
+        },
+        {
+            base16_literal("02ffffffffff000000e0ffff00000000000000000000c0ff1f0000fc1ffeffffff"),
+            base16_literal("023f0000fcffff070000000000feffffffffffffffffff030000f0ffffff0f0000"),
+            base16_literal("02200000000000fc3f0000fcffffffffffffffffffff3f000000000080ffffff7f"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ff0f000000f0ffffffffffff0700000000f8ffffff7f00000000ffff1f00feff"),
+            base16_literal("0300000000e00f00000000feff3f0000ff0100fcffffffffff0f00fc0700000000"),
+            base16_literal("030000000000000000feffffff3f000000000000ffffffffffffffff7f00000000")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("9814ba9192440f798386216d105a6c90d017665ac84397ba2ee6cb166452dea8"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("36cad728b70178125757493fe20aa7f8c493898a4d7ff8192617a60c8cecb323")
+        },
+        {
+            base16_literal("d53f0436e4aba650e3fd06fcfe4a97b6b077f7584bea3df3fd22dd20302ecb83")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("dc590cea776a4a04d427553066fad00d1607b2d4b4dadc1d4fbc2b97e595dd83")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("011b6482e3d71936fd0a042e0dba72202b81ec372a23e50589d072deb36d1136"),
+            base16_literal("8b27a87a4cf5c2f9d2cb9b5ae2efd2a2e6d474ae827bf2c4e51abedaee930eab"),
+            base16_literal("9780b4144048cb253ec415a8f621d5b897a4e57b97b3ca150293aa1adc2aef4b"),
+            base16_literal("7ec49db74cb459ebf6b2466dedb60ae1f4a68deb22f87ee9ddf9328cda9d34e7")
+        },
+        {
+            base16_literal("550a5d7fdb81c3b7e512b8cc09d68d6d368254a8fb5dd74f74c9d3094b0f120e"),
+            base16_literal("e0d11666ceba454a3f9e3da1ce1d21d3401c0da91a69476f0504fd0027045a0f"),
+            base16_literal("39e8aae780bba78f3688b9fa0a8fb2982d0f58e972ad10d4f7f489ac0658d141"),
+            base16_literal("aec109a3c75ed5e6c9cb1c343d4b26ec9a812c7e983926da555afff284af1937"),
+            base16_literal("b2bee9d98d1b2764124b985ab42846c4cc35b6e4eb3966d7d3b8a3a2e03e4f62")
+        },
+        {
+            base16_literal("70b6cbdb48cd06f2a379c87bce6ecd176f8a01fbcb156b84ade59b54f6022964"),
+            base16_literal("72e9ce813aab17fb6b2c3bba1589129a5e0e137d893d4373c1a226bfb8c754b7"),
+            base16_literal("07d353afa24651b261bfeba4860041f82ccb7cc75afd60c9c12e3372ebb77585"),
+            base16_literal("d5fc2a53016faf14be01fc9bb888dd42facbe8ae770aadf4dc31f98924c25673"),
+            base16_literal("de38da924679458b8bd83d087cb2f0881352d019e1484bec245955d2405952aa"),
+            base16_literal("951048d89d17537b4bdce874f156a0ffc8feb454bb74e915377e823dbf62377e")
+        },
+        {
+            base16_literal("925c53198401a7daebc1044e87da74abac4f140611c5b2effee2a269325c45ca"),
+            base16_literal("79aa1bafff3c9dcf130e976343dd325582af1ab2758f2087543d988228d73ba4"),
+            base16_literal("aff26efd82b4a03011bcb5858d58aa82843a515ae055d72dda8c2313925d3b0d"),
+            base16_literal("c9f8d02f4e7859390e2532ee3ce91e3152945f089490edc8fd5588fec1e4d90e"),
+            base16_literal("32d3e67324dba40f586ac881112b9172a69b99dc5fed8cf91a4ba9f49728f3e3"),
+            base16_literal("d810543931586eb19bae4f835de56e4e8c2b90aa0670823d75225b2aa2d854b9")
+        },
+        {
+            base16_literal("86da859099ea284e04cfa71c2b0db173d83a14e2c1d110170dc434289a714a18"),
+            base16_literal("4314c93184c0007660cfda1adfcd398120a9036498f530dfe22575e35eb6118a"),
+            base16_literal("da0f1fe867a688772c44fee6cb1ae02a208ed927b8f07f03b1a1e96ae26a8a59"),
+            base16_literal("3a548d3b0c0739ba647928a1d6c30820e26d5abe5c500597b36e79e87d762c89"),
+            base16_literal("9defb075849c654da1172e3c98adb2b0cbd17b0c03eb740c8cbc44af1b55a1eb"),
+            base16_literal("25c22133d87bb4ab09f5f18242fefb77a8506bbe56b0f3cb1b58a2e0000666d9"),
+            base16_literal("be208828e6256f14731da86241c48278c7494c9a42bceb1a5689ca9c680907b4")
+        }
+    }
+},
+{
+    .message = {0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0xff, 0xff, 0x0f, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00, 0x00, 0xfe, 0xf7, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("afc208a2cc84839a0fa08d597b25c130e96b30c8a2cbad6fa2c07811f52d96b6"),
+    .secret_indexes = {1, 1, 2, 7, 5, 6, 6, 7},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("030000000000feffff07e00100000000e0ffffffffffffffffffffffff3f000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03ffff1f0000000000000000003800000000000000ffffffffffff070000000000"),
+            base16_literal("020000000000000000000000000000d03f00000000000000000000000000c03f80"),
+            base16_literal("0200000000000078000000000080ff010000e0ff7ffeffffff00f0ff03f000e0ff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000c0ffffffffffffffffff0000000000000000ff0700000000c001000000"),
+            base16_literal("03000000feffffffffffff9f0f00000000000000000000e0ffffffffff01000000"),
+            base16_literal("033f00000000f8ffff0f000000ffffffffffffffffffffffff0300000000fe0f00")
+        },
+        {
+            base16_literal("023f000080ffffffffffffffffffffffffffffffffffffffffffff07000000fcff"),
+            base16_literal("03000000000000000000000000000000000000000080ffffffffffffffff070000"),
+            base16_literal("0200fc03c0ff0300fcffff1f000000000080ffffffffffffffffffffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000e0c707feffffffffffff3f000000000000000000000000c0ffff01000000")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffff0f0000fcffffffffff7f000000000080ffffffffffffffff01e0ffff"),
+            base16_literal("030300007f000080ffffffffffffffffffffffffffffff013f000000803f0000fc"),
+            base16_literal("030000ffff0000000000040000fcffff1f000000000000f0ff0f000000e03f0000"),
+            base16_literal("020000000000000000000000000000000c0000ff0f0000000080ffffffff7f0000"),
+            base16_literal("03ffffffffff7f0000000000000000000000000000f8ffff0300000000e0ffff01")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffff01807f0000c0ff0000c000000000ffff7f00000000007e00c0ffffffff00"),
+            base16_literal("0280ffff7f000000f8ff0ff8ffffff3ff4ffffff0100000000c0ffffffffffffff"),
+            base16_literal("02ff0f00c0ff1f000000fefffffff7ffffff7f0000000000000000f83f00000000"),
+            base16_literal("029a507247b44887a2a82c1489ee0a8837442badf93b71d9404409405b76038c96"),
+            base16_literal("03ffff0f0000000000ffffffffffffffff7f00000060000000ffffffffffffff01")
+        },
+        {
+            base16_literal("02ffffffffff000000e0ffff00000000000000000000c0ff1f0000fc1ffeffffff"),
+            base16_literal("023f0000fcffff070000000000feffffffffffffffffff030000f0ffffff0f0000"),
+            base16_literal("02200000000000fc3f0000fcffffffffffffffffffff3f000000000080ffffff7f"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ff0f000000f0ffffffffffff0700000000f8ffffff7f00000000ffff1f00feff"),
+            base16_literal("0300000000e00f00000000feff3f0000ff0100fcffffffffff0f00fc0700000000"),
+            base16_literal("030000000000000000feffffff3f000000000000ffffffffffffffff7f00000000")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("9814ba9192440f798386216d105a6c90d017665ac84397ba2ee6cb166452dea8"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("36cad728b70178125757493fe20aa7f8c493898a4d7ff8192617a60c8cecb323")
+        },
+        {
+            base16_literal("d53f0436e4aba650e3fd06fcfe4a97b6b077f7584bea3df3fd22dd20302ecb83")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("dc590cea776a4a04d427553066fad00d1607b2d4b4dadc1d4fbc2b97e595dd83")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("011b6482e3d71936fd0a042e0dba72202b81ec372a23e50589d072deb36d1136"),
+            base16_literal("8b27a87a4cf5c2f9d2cb9b5ae2efd2a2e6d474ae827bf2c4e51abedaee930eab"),
+            base16_literal("9780b4144048cb253ec415a8f621d5b897a4e57b97b3ca150293aa1adc2aef4b"),
+            base16_literal("7ec49db74cb459ebf6b2466dedb60ae1f4a68deb22f87ee9ddf9328cda9d34e7")
+        },
+        {
+            base16_literal("550a5d7fdb81c3b7e512b8cc09d68d6d368254a8fb5dd74f74c9d3094b0f120e"),
+            base16_literal("e0d11666ceba454a3f9e3da1ce1d21d3401c0da91a69476f0504fd0027045a0f"),
+            base16_literal("39e8aae780bba78f3688b9fa0a8fb2982d0f58e972ad10d4f7f489ac0658d141"),
+            base16_literal("aec109a3c75ed5e6c9cb1c343d4b26ec9a812c7e983926da555afff284af1937"),
+            base16_literal("b2bee9d98d1b2764124b985ab42846c4cc35b6e4eb3966d7d3b8a3a2e03e4f62")
+        },
+        {
+            base16_literal("70b6cbdb48cd06f2a379c87bce6ecd176f8a01fbcb156b84ade59b54f6022964"),
+            base16_literal("72e9ce813aab17fb6b2c3bba1589129a5e0e137d893d4373c1a226bfb8c754b7"),
+            base16_literal("07d353afa24651b261bfeba4860041f82ccb7cc75afd60c9c12e3372ebb77585"),
+            base16_literal("d5fc2a53016faf14be01fc9bb888dd42facbe8ae770aadf4dc31f98924c25673"),
+            base16_literal("de38da924679458b8bd83d087cb2f0881352d019e1484bec245955d2405952aa"),
+            base16_literal("951048d89d17537b4bdce874f156a0ffc8feb454bb74e915377e823dbf62377e")
+        },
+        {
+            base16_literal("925c53198401a7daebc1044e87da74abac4f140611c5b2effee2a269325c45ca"),
+            base16_literal("79aa1bafff3c9dcf130e976343dd325582af1ab2758f2087543d988228d73ba4"),
+            base16_literal("aff26efd82b4a03011bcb5858d58aa82843a515ae055d72dda8c2313925d3b0d"),
+            base16_literal("c9f8d02f4e7859390e2532ee3ce91e3152945f089490edc8fd5588fec1e4d90e"),
+            base16_literal("32d3e67324dba40f586ac881112b9172a69b99dc5fed8cf91a4ba9f49728f3e3"),
+            base16_literal("d810543931586eb19bae4f835de56e4e8c2b90aa0670823d75225b2aa2d854b9")
+        },
+        {
+            base16_literal("86da859099ea284e04cfa71c2b0db173d83a14e2c1d110170dc434289a714a18"),
+            base16_literal("4314c93184c0007660cfda1adfcd398120a9036498f530dfe22575e35eb6118a"),
+            base16_literal("da0f1fe867a688772c44fee6cb1ae02a208ed927b8f07f03b1a1e96ae26a8a59"),
+            base16_literal("3a548d3b0c0739ba647928a1d6c30820e26d5abe5c500597b36e79e87d762c89"),
+            base16_literal("9defb075849c654da1172e3c98adb2b0cbd17b0c03eb740c8cbc44af1b55a1eb"),
+            base16_literal("25c22133d87bb4ab09f5f18242fefb77a8506bbe56b0f3cb1b58a2e0000666d9"),
+            base16_literal("be208828e6256f14731da86241c48278c7494c9a42bceb1a5689ca9c680907b4")
+        }
+    }
+},
+{
+    .message = {0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0xff, 0xff, 0x0f, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00, 0x00, 0xfe, 0xf7, 0xff, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("afc208a2cc84839a0fa08d597b25c130e96b30c8a2cbad6fa2c07811f52d96b6"),
+    .secret_indexes = {1, 1, 2, 7, 5, 6, 6, 7},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("030000000000feffff07e00100000000e0ffffffffffffffffffffffff3f000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03ffff1f0000000000000000003800000000000000ffffffffffff070000000000"),
+            base16_literal("020000000000000000000000000000d03f00000000000000000000000000c03f80"),
+            base16_literal("0200000000000078000000000080ff010000e0ff7ffeffffff00f0ff03f000e0ff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03000000c0ffffffffffffffffff0000000000000000ff0700000000c001000000"),
+            base16_literal("03000000feffffffffffff9f0f00000000000000000000e0ffffffffff01000000"),
+            base16_literal("033f00000000f8ffff0f000000ffffffffffffffffffffffff0300000000fe0f00")
+        },
+        {
+            base16_literal("023f000080ffffffffffffffffffffffffffffffffffffffffffff07000000fcff"),
+            base16_literal("02c69d7bd54a1a025302146f05f0bd791d7a0b91eb01e8648fd61c666384796844"),
+            base16_literal("0200fc03c0ff0300fcffff1f000000000080ffffffffffffffffffffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000e0c707feffffffffffff3f000000000000000000000000c0ffff01000000")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffff0f0000fcffffffffff7f000000000080ffffffffffffffff01e0ffff"),
+            base16_literal("030300007f000080ffffffffffffffffffffffffffffff013f000000803f0000fc"),
+            base16_literal("030000ffff0000000000040000fcffff1f000000000000f0ff0f000000e03f0000"),
+            base16_literal("020000000000000000000000000000000c0000ff0f0000000080ffffffff7f0000"),
+            base16_literal("03ffffffffff7f0000000000000000000000000000f8ffff0300000000e0ffff01")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffff01807f0000c0ff0000c000000000ffff7f00000000007e00c0ffffffff00"),
+            base16_literal("0280ffff7f000000f8ff0ff8ffffff3ff4ffffff0100000000c0ffffffffffffff"),
+            base16_literal("02ff0f00c0ff1f000000fefffffff7ffffff7f0000000000000000f83f00000000"),
+            base16_literal("029a507247b44887a2a82c1489ee0a8837442badf93b71d9404409405b76038c96"),
+            base16_literal("03ffff0f0000000000ffffffffffffffff7f00000060000000ffffffffffffff01")
+        },
+        {
+            base16_literal("02ffffffffff000000e0ffff00000000000000000000c0ff1f0000fc1ffeffffff"),
+            base16_literal("023f0000fcffff070000000000feffffffffffffffffff030000f0ffffff0f0000"),
+            base16_literal("02200000000000fc3f0000fcffffffffffffffffffff3f000000000080ffffff7f"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ff0f000000f0ffffffffffff0700000000f8ffffff7f00000000ffff1f00feff"),
+            base16_literal("0300000000e00f00000000feff3f0000ff0100fcffffffffff0f00fc0700000000"),
+            base16_literal("030000000000000000feffffff3f000000000000ffffffffffffffff7f00000000")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("9814ba9192440f798386216d105a6c90d017665ac84397ba2ee6cb166452dea8"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("36cad728b70178125757493fe20aa7f8c493898a4d7ff8192617a60c8cecb323")
+        },
+        {
+            base16_literal("d53f0436e4aba650e3fd06fcfe4a97b6b077f7584bea3df3fd22dd20302ecb83")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("dc590cea776a4a04d427553066fad00d1607b2d4b4dadc1d4fbc2b97e595dd83")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("011b6482e3d71936fd0a042e0dba72202b81ec372a23e50589d072deb36d1136"),
+            base16_literal("8b27a87a4cf5c2f9d2cb9b5ae2efd2a2e6d474ae827bf2c4e51abedaee930eab"),
+            base16_literal("9780b4144048cb253ec415a8f621d5b897a4e57b97b3ca150293aa1adc2aef4b"),
+            base16_literal("7ec49db74cb459ebf6b2466dedb60ae1f4a68deb22f87ee9ddf9328cda9d34e7")
+        },
+        {
+            base16_literal("550a5d7fdb81c3b7e512b8cc09d68d6d368254a8fb5dd74f74c9d3094b0f120e"),
+            base16_literal("e0d11666ceba454a3f9e3da1ce1d21d3401c0da91a69476f0504fd0027045a0f"),
+            base16_literal("39e8aae780bba78f3688b9fa0a8fb2982d0f58e972ad10d4f7f489ac0658d141"),
+            base16_literal("aec109a3c75ed5e6c9cb1c343d4b26ec9a812c7e983926da555afff284af1937"),
+            base16_literal("b2bee9d98d1b2764124b985ab42846c4cc35b6e4eb3966d7d3b8a3a2e03e4f62")
+        },
+        {
+            base16_literal("70b6cbdb48cd06f2a379c87bce6ecd176f8a01fbcb156b84ade59b54f6022964"),
+            base16_literal("72e9ce813aab17fb6b2c3bba1589129a5e0e137d893d4373c1a226bfb8c754b7"),
+            base16_literal("07d353afa24651b261bfeba4860041f82ccb7cc75afd60c9c12e3372ebb77585"),
+            base16_literal("d5fc2a53016faf14be01fc9bb888dd42facbe8ae770aadf4dc31f98924c25673"),
+            base16_literal("de38da924679458b8bd83d087cb2f0881352d019e1484bec245955d2405952aa"),
+            base16_literal("951048d89d17537b4bdce874f156a0ffc8feb454bb74e915377e823dbf62377e")
+        },
+        {
+            base16_literal("925c53198401a7daebc1044e87da74abac4f140611c5b2effee2a269325c45ca"),
+            base16_literal("79aa1bafff3c9dcf130e976343dd325582af1ab2758f2087543d988228d73ba4"),
+            base16_literal("aff26efd82b4a03011bcb5858d58aa82843a515ae055d72dda8c2313925d3b0d"),
+            base16_literal("c9f8d02f4e7859390e2532ee3ce91e3152945f089490edc8fd5588fec1e4d90e"),
+            base16_literal("32d3e67324dba40f586ac881112b9172a69b99dc5fed8cf91a4ba9f49728f3e3"),
+            base16_literal("d810543931586eb19bae4f835de56e4e8c2b90aa0670823d75225b2aa2d854b9")
+        },
+        {
+            base16_literal("86da859099ea284e04cfa71c2b0db173d83a14e2c1d110170dc434289a714a18"),
+            base16_literal("4314c93184c0007660cfda1adfcd398120a9036498f530dfe22575e35eb6118a"),
+            base16_literal("da0f1fe867a688772c44fee6cb1ae02a208ed927b8f07f03b1a1e96ae26a8a59"),
+            base16_literal("3a548d3b0c0739ba647928a1d6c30820e26d5abe5c500597b36e79e87d762c89"),
+            base16_literal("9defb075849c654da1172e3c98adb2b0cbd17b0c03eb740c8cbc44af1b55a1eb"),
+            base16_literal("25c22133d87bb4ab09f5f18242fefb77a8506bbe56b0f3cb1b58a2e0000666d9"),
+            base16_literal("be208828e6256f14731da86241c48278c7494c9a42bceb1a5689ca9c680907b4")
+        }
+    }
+},
+{
+    .message = {0x01, 0x00, 0x00, 0xfe, 0xff, 0xf3, 0xff, 0xff, 0xff, 0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("ca2d84a1cb139935dd11cc23108d8d22b1fb09acf446caf3aa8f4f8f41074833"),
+    .secret_indexes = {7, 8, 7, 3, 4, 4},
+    .secrets = {
+        base16_literal("22c0b3d39ca924b3be58c4764fcc2c4d6bcea5425f9bb757ca5c7bc95eff9d26"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("037f00000000000000e0c3ffffffffffff1f000000fcfffffbffffff03e0ffffff"),
+            base16_literal("0300000000f8ffff010000000000feffffffffffffffffff1f000000000000fc01"),
+            base16_literal("035d86802a6f68264419a0edb487bd1b16d106218dc8fe22692c94f5deb235c3b8"),
+            base16_literal("03000000c0ffffffffff3fe0ffffffffff000000000000000000000000feffffff"),
+            base16_literal("03ffffffffffffc7fffffd0300f8ffffffffff07000000c0ffffffffffffffffff"),
+            base16_literal("0200000080ffffffffffffff001c00000000000000000000000080ffffffffffff"),
+            base16_literal("03ffffff7f00000080ffff000000000000fcffffffffffffffff1f00000000f0ff")
+        },
+        {
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("0200000000000000807ffcffff0300c0ffffffffffff3f00000000000000000000"),
+            base16_literal("021ffcffffffffffff7f000000f801f0ffffffffffff7f0000fcffffffffffffff"),
+            base16_literal("02ffffffff0f00000000fcff0300000000c00f00c0ffff0f000010000000000030"),
+            base16_literal("030000000000000000feffffffffffffffffff0f000000000080ffff3f00f0ffff"),
+            base16_literal("03ffffffffffffc703000000000000c000feffffff0f0000c00f000000000080ff"),
+            base16_literal("02ffffffffffffffffffffffff010000000000fcff7f00000000007efeffffff0f"),
+            base16_literal("03fffffffffffbffffffffffffffffffffffffff0700000000000000000000fcff")
+        },
+        {
+            base16_literal("0200feffffffffffffff030000f0ffffffffffffff0700000000c0070000f001e0"),
+            base16_literal("02000f000000ffffffffffffffff1f000000000080ffffffffff1f00000000feff"),
+            base16_literal("02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"),
+            base16_literal("02fcffffffffff00000000f8ffff0ffeff1f000000f0ffff3f00feffffffffffff"),
+            base16_literal("0300000000000000fcff03ff3f000000000000f807000000000000000000000000"),
+            base16_literal("0303000000e0ffffffffff1fffffff7f00c0ffffffffefffffffff7fffffffff1f"),
+            base16_literal("0200000000f0ffffffffff00000000f0ffffffffffff3f0000f0ffff0300006000")
+        },
+        {
+            base16_literal("02ff07000000000000000e00fcffffff03800000f8ffffff1f00000000e0ffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ff1f0000000000fc0000fcffffff0000ffffff00000000000000000000000000")
+        },
+        {
+            base16_literal("02ffff03000000000000f0ff030200000000fcffffffffff070080ffffffffffff"),
+            base16_literal("02ffff3f00c0ffffffffffffffffffffff0770feffffffffff1f00000000c00f00"),
+            base16_literal("02fcff07000000c0ff0f0000003cfeffff0f00e00180ffffffffff070000f00180"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ffffff01000000000000000000feffffffffffff7f00000000000000e0000000"),
+            base16_literal("03ffffffffffffffff3f000083ffffffffffffff0f00fffbffffff1f000000e00f"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030300000000ffffffffffffffffff010000c0ffff030000000002000000000000")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("431558ec422ece6527ad39df42a44df3c50a71a7794425c99474b8080efdd52a"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("3681c28fda7a762a0c008ad6c53f82b395f7d014face3f21188679ef6ce470ba"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("844dc361d2e2bac54c519c48e579571a672c6b7b2da79da4944f0e87883a2bda")
+        },
+        {
+            base16_literal("fa26480083a83746684ffd3bc071983357f81c9dfe1a457c5e9e46b7af55e6a9"),
+            base16_literal("a83d627499240318abc6e4556fc70b92299015d670678adb21b2085277c69640"),
+            base16_literal("be52c9dcf31f259a8da6721cf073c37e54ba7c6301f7319a18120186ff5190eb"),
+            base16_literal("51ac458d3b5b8cc28a0325656eecbce1692cfd416f8ec8092d61df4b37dbb61b"),
+            base16_literal("8bdcf51bf0cca45e42af677aa3a2c97f607e745ef792b234136648a690139128"),
+            base16_literal("29e71f8d9feba4ef08e3cfeb3245bf8bae68539e90e93809886ce093023ee3b7"),
+            base16_literal("0c079999f9e7b10f35295486ac256b4ddc826f2fee1d03ae098d8295c065d117"),
+            base16_literal("45f7ebb46ae86ed8e8d43e2826cbc9ad902e67655e3f50e2e882fc3fdf7946f5")
+        },
+        {
+            base16_literal("38c80f6e5e03769054bc93658ffa2563e6d50e786822b8d8ed87cec49d7c1177"),
+            base16_literal("f51a057e84f74c64f46c1f7fb5607aab308bb1e1d33375937e7a83ca025f6a49"),
+            base16_literal("fb03c44a23811fea7b6f0259d776f04c752702a2be162a6123f791f89cc43514"),
+            base16_literal("4dfb45c9b6037f6d67951c6658e6da5ee363a6f503eca2db807e56e726ce6333"),
+            base16_literal("7b82f742a3e722a36efa61f212f42330ea7a5a79904c965bde680607efe7a56c"),
+            base16_literal("8c68a4cf350e56a7cc768be36869d13308a38cf6f694d1dbb675477aeea35c15"),
+            base16_literal("6cd43a2f939c8aaac8496d91d7d2d50e7c63fbd125e4f659455fa1716f2c7290")
+        },
+        {
+            base16_literal("a8ec96e1c5dd5b4af886cb92a249bdf26e72e8b38a7e14383a9700bbe5f7bab9"),
+            base16_literal("360ddc7034f992f0538db4da2f4ae4d652442d64e88e7ec0ddc51cb9f4d3c08b"),
+            base16_literal("8d1cdab1e1cfb27e4ed2831fa819f4aee64bcf5d6ab1a22776940414cbe207b1")
+        },
+        {
+            base16_literal("2318c0ec141efed7ec6471cdd4feae7cb7df329c046fff8d5c88873399855ae4"),
+            base16_literal("55eab33808ba97818016245a1fc794ae7769c2adc32a5773a3e71b9d9f35004a"),
+            base16_literal("65d02b64503dadd7154566d7f0c00483974c8dd575d931168bf60795205677cd"),
+            base16_literal("19c21cd6f6bbf01bb5dcc30f8efe7e30dee16fdba05ff625f9b818a4ff625c3e")
+        },
+        {
+            base16_literal("0d79c6db5900acc22b22805b8657caf215b4886596a703d5bf52d15f69afe604"),
+            base16_literal("cc09307e9ce059f74ad6668916b46bfe66680fe80af88df67e81490768a0f930"),
+            base16_literal("66a6a1bba962d8d2ee45afbc8739f6af294fc48e900bed95e807f06de3b3c4b7"),
+            base16_literal("473ea301381817dea0137433e8a1d3819b062ad5ec00e9ced109faae07399128")
+        }
+    }
+},
+{
+    .message = {0x01, 0x00, 0x00, 0xfe, 0xff, 0xf3, 0xff, 0xff, 0xff, 0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("ca2d84a1cb139935dd11cc23108d8d22b1fb09acf446caf3aa8f4f8f41074833"),
+    .secret_indexes = {7, 8, 7, 3, 4, 4},
+    .secrets = {
+        base16_literal("22c0b3d39ca924b3be58c4764fcc2c4d6bcea5425f9bb757ca5c7bc95eff9d26"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("037f00000000000000e0c3ffffffffffff1f000000fcfffffbffffff03e0ffffff"),
+            base16_literal("0300000000f8ffff010000000000feffffffffffffffffff1f000000000000fc01"),
+            base16_literal("035d86802a6f68264419a0edb487bd1b16d106218dc8fe22692c94f5deb235c3b8"),
+            base16_literal("03000000c0ffffffffff3fe0ffffffffff000000000000000000000000feffffff"),
+            base16_literal("03ffffffffffffc7fffffd0300f8ffffffffff07000000c0ffffffffffffffffff"),
+            base16_literal("0200000080ffffffffffffff001c00000000000000000000000080ffffffffffff"),
+            base16_literal("03ffffff7f00000080ffff000000000000fcffffffffffffffff1f00000000f0ff")
+        },
+        {
+            base16_literal("02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"),
+            base16_literal("0200000000000000807ffcffff0300c0ffffffffffff3f00000000000000000000"),
+            base16_literal("021ffcffffffffffff7f000000f801f0ffffffffffff7f0000fcffffffffffffff"),
+            base16_literal("02ffffffff0f00000000fcff0300000000c00f00c0ffff0f000010000000000030"),
+            base16_literal("030000000000000000feffffffffffffffffff0f000000000080ffff3f00f0ffff"),
+            base16_literal("03ffffffffffffc703000000000000c000feffffff0f0000c00f000000000080ff"),
+            base16_literal("02ffffffffffffffffffffffff010000000000fcff7f00000000007efeffffff0f"),
+            base16_literal("03fffffffffffbffffffffffffffffffffffffff0700000000000000000000fcff")
+        },
+        {
+            base16_literal("0200feffffffffffffff030000f0ffffffffffffff0700000000c0070000f001e0"),
+            base16_literal("02000f000000ffffffffffffffff1f000000000080ffffffffff1f00000000feff"),
+            base16_literal("02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"),
+            base16_literal("02fcffffffffff00000000f8ffff0ffeff1f000000f0ffff3f00feffffffffffff"),
+            base16_literal("0300000000000000fcff03ff3f000000000000f807000000000000000000000000"),
+            base16_literal("0303000000e0ffffffffff1fffffff7f00c0ffffffffefffffffff7fffffffff1f"),
+            base16_literal("0200000000f0ffffffffff00000000f0ffffffffffff3f0000f0ffff0300006000")
+        },
+        {
+            base16_literal("02ff07000000000000000e00fcffffff03800000f8ffffff1f00000000e0ffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ff1f0000000000fc0000fcffffff0000ffffff00000000000000000000000000")
+        },
+        {
+            base16_literal("02ffff03000000000000f0ff030200000000fcffffffffff070080ffffffffffff"),
+            base16_literal("02ffff3f00c0ffffffffffffffffffffff0770feffffffffff1f00000000c00f00"),
+            base16_literal("02fcff07000000c0ff0f0000003cfeffff0f00e00180ffffffffff070000f00180"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ffffff01000000000000000000feffffffffffff7f00000000000000e0000000"),
+            base16_literal("03ffffffffffffffff3f000083ffffffffffffff0f00fffbffffff1f000000e00f"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030300000000ffffffffffffffffff010000c0ffff030000000002000000000000")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("431558ec422ece6527ad39df42a44df3c50a71a7794425c99474b8080efdd52a"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("3681c28fda7a762a0c008ad6c53f82b395f7d014face3f21188679ef6ce470ba"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("844dc361d2e2bac54c519c48e579571a672c6b7b2da79da4944f0e87883a2bda")
+        },
+        {
+            base16_literal("fa26480083a83746684ffd3bc071983357f81c9dfe1a457c5e9e46b7af55e6a9"),
+            base16_literal("a83d627499240318abc6e4556fc70b92299015d670678adb21b2085277c69640"),
+            base16_literal("be52c9dcf31f259a8da6721cf073c37e54ba7c6301f7319a18120186ff5190eb"),
+            base16_literal("51ac458d3b5b8cc28a0325656eecbce1692cfd416f8ec8092d61df4b37dbb61b"),
+            base16_literal("8bdcf51bf0cca45e42af677aa3a2c97f607e745ef792b234136648a690139128"),
+            base16_literal("29e71f8d9feba4ef08e3cfeb3245bf8bae68539e90e93809886ce093023ee3b7"),
+            base16_literal("0c079999f9e7b10f35295486ac256b4ddc826f2fee1d03ae098d8295c065d117"),
+            base16_literal("45f7ebb46ae86ed8e8d43e2826cbc9ad902e67655e3f50e2e882fc3fdf7946f5")
+        },
+        {
+            base16_literal("38c80f6e5e03769054bc93658ffa2563e6d50e786822b8d8ed87cec49d7c1177"),
+            base16_literal("f51a057e84f74c64f46c1f7fb5607aab308bb1e1d33375937e7a83ca025f6a49"),
+            base16_literal("fb03c44a23811fea7b6f0259d776f04c752702a2be162a6123f791f89cc43514"),
+            base16_literal("4dfb45c9b6037f6d67951c6658e6da5ee363a6f503eca2db807e56e726ce6333"),
+            base16_literal("7b82f742a3e722a36efa61f212f42330ea7a5a79904c965bde680607efe7a56c"),
+            base16_literal("8c68a4cf350e56a7cc768be36869d13308a38cf6f694d1dbb675477aeea35c15"),
+            base16_literal("6cd43a2f939c8aaac8496d91d7d2d50e7c63fbd125e4f659455fa1716f2c7290")
+        },
+        {
+            base16_literal("a8ec96e1c5dd5b4af886cb92a249bdf26e72e8b38a7e14383a9700bbe5f7bab9"),
+            base16_literal("360ddc7034f992f0538db4da2f4ae4d652442d64e88e7ec0ddc51cb9f4d3c08b"),
+            base16_literal("8d1cdab1e1cfb27e4ed2831fa819f4aee64bcf5d6ab1a22776940414cbe207b1")
+        },
+        {
+            base16_literal("2318c0ec141efed7ec6471cdd4feae7cb7df329c046fff8d5c88873399855ae4"),
+            base16_literal("55eab33808ba97818016245a1fc794ae7769c2adc32a5773a3e71b9d9f35004a"),
+            base16_literal("65d02b64503dadd7154566d7f0c00483974c8dd575d931168bf60795205677cd"),
+            base16_literal("19c21cd6f6bbf01bb5dcc30f8efe7e30dee16fdba05ff625f9b818a4ff625c3e")
+        },
+        {
+            base16_literal("0d79c6db5900acc22b22805b8657caf215b4886596a703d5bf52d15f69afe604"),
+            base16_literal("cc09307e9ce059f74ad6668916b46bfe66680fe80af88df67e81490768a0f930"),
+            base16_literal("66a6a1bba962d8d2ee45afbc8739f6af294fc48e900bed95e807f06de3b3c4b7"),
+            base16_literal("473ea301381817dea0137433e8a1d3819b062ad5ec00e9ced109faae07399128")
+        }
+    }
+},
+{
+    .message = {0x01, 0x00, 0x00, 0xfe, 0xff, 0xf3, 0xff, 0xff, 0xff, 0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("ca2d84a1cb139935dd11cc23108d8d22b1fb09acf446caf3aa8f4f8f41074833"),
+    .secret_indexes = {7, 8, 7, 3, 4, 4},
+    .secrets = {
+        base16_literal("22c0b3d39ca924b3be58c4764fcc2c4d6bcea5425f9bb757ca5c7bc95eff9d26"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("037f00000000000000e0c3ffffffffffff1f000000fcfffffbffffff03e0ffffff"),
+            base16_literal("0300000000f8ffff010000000000feffffffffffffffffff1f000000000000fc01"),
+            base16_literal("035d86802a6f68264419a0edb487bd1b16d106218dc8fe22692c94f5deb235c3b8"),
+            base16_literal("03000000c0ffffffffff3fe0ffffffffff000000000000000000000000feffffff"),
+            base16_literal("03ffffffffffffc7fffffd0300f8ffffffffff07000000c0ffffffffffffffffff"),
+            base16_literal("0200000080ffffffffffffff001c00000000000000000000000080ffffffffffff"),
+            base16_literal("03ffffff7f00000080ffff000000000000fcffffffffffffffff1f00000000f0ff")
+        },
+        {
+            base16_literal("02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"),
+            base16_literal("0200000000000000807ffcffff0300c0ffffffffffff3f00000000000000000000"),
+            base16_literal("028e2a086530cdbc35f71424d2fa9e51b025ab168304de865902afaabe93592941"),
+            base16_literal("02ffffffff0f00000000fcff0300000000c00f00c0ffff0f000010000000000030"),
+            base16_literal("030000000000000000feffffffffffffffffff0f000000000080ffff3f00f0ffff"),
+            base16_literal("03ffffffffffffc703000000000000c000feffffff0f0000c00f000000000080ff"),
+            base16_literal("02ffffffffffffffffffffffff010000000000fcff7f00000000007efeffffff0f"),
+            base16_literal("03fffffffffffbffffffffffffffffffffffffff0700000000000000000000fcff")
+        },
+        {
+            base16_literal("0200feffffffffffffff030000f0ffffffffffffff0700000000c0070000f001e0"),
+            base16_literal("02000f000000ffffffffffffffff1f000000000080ffffffffff1f00000000feff"),
+            base16_literal("02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"),
+            base16_literal("02fcffffffffff00000000f8ffff0ffeff1f000000f0ffff3f00feffffffffffff"),
+            base16_literal("0300000000000000fcff03ff3f000000000000f807000000000000000000000000"),
+            base16_literal("0303000000e0ffffffffff1fffffff7f00c0ffffffffefffffffff7fffffffff1f"),
+            base16_literal("0200000000f0ffffffffff00000000f0ffffffffffff3f0000f0ffff0300006000")
+        },
+        {
+            base16_literal("02ff07000000000000000e00fcffffff03800000f8ffffff1f00000000e0ffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ff1f0000000000fc0000fcffffff0000ffffff00000000000000000000000000")
+        },
+        {
+            base16_literal("02ffff03000000000000f0ff030200000000fcffffffffff070080ffffffffffff"),
+            base16_literal("02ffff3f00c0ffffffffffffffffffffff0770feffffffffff1f00000000c00f00"),
+            base16_literal("02fcff07000000c0ff0f0000003cfeffff0f00e00180ffffffffff070000f00180"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ffffff01000000000000000000feffffffffffff7f00000000000000e0000000"),
+            base16_literal("03ffffffffffffffff3f000083ffffffffffffff0f00fffbffffff1f000000e00f"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030300000000ffffffffffffffffff010000c0ffff030000000002000000000000")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("431558ec422ece6527ad39df42a44df3c50a71a7794425c99474b8080efdd52a"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("3681c28fda7a762a0c008ad6c53f82b395f7d014face3f21188679ef6ce470ba"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("844dc361d2e2bac54c519c48e579571a672c6b7b2da79da4944f0e87883a2bda")
+        },
+        {
+            base16_literal("fa26480083a83746684ffd3bc071983357f81c9dfe1a457c5e9e46b7af55e6a9"),
+            base16_literal("a83d627499240318abc6e4556fc70b92299015d670678adb21b2085277c69640"),
+            base16_literal("be52c9dcf31f259a8da6721cf073c37e54ba7c6301f7319a18120186ff5190eb"),
+            base16_literal("51ac458d3b5b8cc28a0325656eecbce1692cfd416f8ec8092d61df4b37dbb61b"),
+            base16_literal("8bdcf51bf0cca45e42af677aa3a2c97f607e745ef792b234136648a690139128"),
+            base16_literal("29e71f8d9feba4ef08e3cfeb3245bf8bae68539e90e93809886ce093023ee3b7"),
+            base16_literal("0c079999f9e7b10f35295486ac256b4ddc826f2fee1d03ae098d8295c065d117"),
+            base16_literal("45f7ebb46ae86ed8e8d43e2826cbc9ad902e67655e3f50e2e882fc3fdf7946f5")
+        },
+        {
+            base16_literal("38c80f6e5e03769054bc93658ffa2563e6d50e786822b8d8ed87cec49d7c1177"),
+            base16_literal("f51a057e84f74c64f46c1f7fb5607aab308bb1e1d33375937e7a83ca025f6a49"),
+            base16_literal("fb03c44a23811fea7b6f0259d776f04c752702a2be162a6123f791f89cc43514"),
+            base16_literal("4dfb45c9b6037f6d67951c6658e6da5ee363a6f503eca2db807e56e726ce6333"),
+            base16_literal("7b82f742a3e722a36efa61f212f42330ea7a5a79904c965bde680607efe7a56c"),
+            base16_literal("8c68a4cf350e56a7cc768be36869d13308a38cf6f694d1dbb675477aeea35c15"),
+            base16_literal("6cd43a2f939c8aaac8496d91d7d2d50e7c63fbd125e4f659455fa1716f2c7290")
+        },
+        {
+            base16_literal("a8ec96e1c5dd5b4af886cb92a249bdf26e72e8b38a7e14383a9700bbe5f7bab9"),
+            base16_literal("360ddc7034f992f0538db4da2f4ae4d652442d64e88e7ec0ddc51cb9f4d3c08b"),
+            base16_literal("8d1cdab1e1cfb27e4ed2831fa819f4aee64bcf5d6ab1a22776940414cbe207b1")
+        },
+        {
+            base16_literal("2318c0ec141efed7ec6471cdd4feae7cb7df329c046fff8d5c88873399855ae4"),
+            base16_literal("55eab33808ba97818016245a1fc794ae7769c2adc32a5773a3e71b9d9f35004a"),
+            base16_literal("65d02b64503dadd7154566d7f0c00483974c8dd575d931168bf60795205677cd"),
+            base16_literal("19c21cd6f6bbf01bb5dcc30f8efe7e30dee16fdba05ff625f9b818a4ff625c3e")
+        },
+        {
+            base16_literal("0d79c6db5900acc22b22805b8657caf215b4886596a703d5bf52d15f69afe604"),
+            base16_literal("cc09307e9ce059f74ad6668916b46bfe66680fe80af88df67e81490768a0f930"),
+            base16_literal("66a6a1bba962d8d2ee45afbc8739f6af294fc48e900bed95e807f06de3b3c4b7"),
+            base16_literal("473ea301381817dea0137433e8a1d3819b062ad5ec00e9ced109faae07399128")
+        }
+    }
+},
+{
+    .message = {0x01, 0x00, 0x00, 0xfe, 0xff, 0xf3, 0xff, 0xff, 0xff, 0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff},
+    .e = base16_literal("ca2d84a1cb139935dd11cc23108d8d22b1fb09acf446caf3aa8f4f8f41074833"),
+    .secret_indexes = {7, 8, 7, 3, 4, 4},
+    .secrets = {
+        base16_literal("22c0b3d39ca924b3be58c4764fcc2c4d6bcea5425f9bb757ca5c7bc95eff9d26"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .public_rings = {
+        {
+            base16_literal("037f00000000000000e0c3ffffffffffff1f000000fcfffffbffffff03e0ffffff"),
+            base16_literal("0300000000f8ffff010000000000feffffffffffffffffff1f000000000000fc01"),
+            base16_literal("035d86802a6f68264419a0edb487bd1b16d106218dc8fe22692c94f5deb235c3b8"),
+            base16_literal("03000000c0ffffffffff3fe0ffffffffff000000000000000000000000feffffff"),
+            base16_literal("03ffffffffffffc7fffffd0300f8ffffffffff07000000c0ffffffffffffffffff"),
+            base16_literal("0200000080ffffffffffffff001c00000000000000000000000080ffffffffffff"),
+            base16_literal("03ffffff7f00000080ffff000000000000fcffffffffffffffff1f00000000f0ff")
+        },
+        {
+            base16_literal("02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"),
+            base16_literal("0200000000000000807ffcffff0300c0ffffffffffff3f00000000000000000000"),
+            base16_literal("028e2a086530cdbc35f71424d2fa9e51b025ab168304de865902afaabe93592941"),
+            base16_literal("02ffffffff0f00000000fcff0300000000c00f00c0ffff0f000010000000000030"),
+            base16_literal("030000000000000000feffffffffffffffffff0f000000000080ffff3f00f0ffff"),
+            base16_literal("03ffffffffffffc703000000000000c000feffffff0f0000c00f000000000080ff"),
+            base16_literal("037f0ca17bd8e2ffa2d9838b1185427da7faccb2e61540f92d870151f684807aa6"),
+            base16_literal("03fffffffffffbffffffffffffffffffffffffff0700000000000000000000fcff")
+        },
+        {
+            base16_literal("0200feffffffffffffff030000f0ffffffffffffff0700000000c0070000f001e0"),
+            base16_literal("02000f000000ffffffffffffffff1f000000000080ffffffffff1f00000000feff"),
+            base16_literal("02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"),
+            base16_literal("02fcffffffffff00000000f8ffff0ffeff1f000000f0ffff3f00feffffffffffff"),
+            base16_literal("0300000000000000fcff03ff3f000000000000f807000000000000000000000000"),
+            base16_literal("0303000000e0ffffffffff1fffffff7f00c0ffffffffefffffffff7fffffffff1f"),
+            base16_literal("0200000000f0ffffffffff00000000f0ffffffffffff3f0000f0ffff0300006000")
+        },
+        {
+            base16_literal("02ff07000000000000000e00fcffffff03800000f8ffffff1f00000000e0ffffff"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ff1f0000000000fc0000fcffffff0000ffffff00000000000000000000000000")
+        },
+        {
+            base16_literal("02ffff03000000000000f0ff030200000000fcffffffffff070080ffffffffffff"),
+            base16_literal("02ffff3f00c0ffffffffffffffffffffff0770feffffffffff1f00000000c00f00"),
+            base16_literal("02fcff07000000c0ff0f0000003cfeffff0f00e00180ffffffffff070000f00180"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ffffff01000000000000000000feffffffffffff7f00000000000000e0000000"),
+            base16_literal("03ffffffffffffffff3f000083ffffffffffffff0f00fffbffffff1f000000e00f"),
+            base16_literal("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("030300000000ffffffffffffffffff010000c0ffff030000000002000000000000")
+        }
+    },
+    .k = {
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+        base16_literal("431558ec422ece6527ad39df42a44df3c50a71a7794425c99474b8080efdd52a"),
+        base16_literal("0000000000000000000000000000000000000000000000000000000000000001")
+    },
+    .s = {
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("3681c28fda7a762a0c008ad6c53f82b395f7d014face3f21188679ef6ce470ba"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000001"),
+            base16_literal("844dc361d2e2bac54c519c48e579571a672c6b7b2da79da4944f0e87883a2bda")
+        },
+        {
+            base16_literal("fa26480083a83746684ffd3bc071983357f81c9dfe1a457c5e9e46b7af55e6a9"),
+            base16_literal("a83d627499240318abc6e4556fc70b92299015d670678adb21b2085277c69640"),
+            base16_literal("be52c9dcf31f259a8da6721cf073c37e54ba7c6301f7319a18120186ff5190eb"),
+            base16_literal("51ac458d3b5b8cc28a0325656eecbce1692cfd416f8ec8092d61df4b37dbb61b"),
+            base16_literal("8bdcf51bf0cca45e42af677aa3a2c97f607e745ef792b234136648a690139128"),
+            base16_literal("29e71f8d9feba4ef08e3cfeb3245bf8bae68539e90e93809886ce093023ee3b7"),
+            base16_literal("0c079999f9e7b10f35295486ac256b4ddc826f2fee1d03ae098d8295c065d117"),
+            base16_literal("45f7ebb46ae86ed8e8d43e2826cbc9ad902e67655e3f50e2e882fc3fdf7946f5")
+        },
+        {
+            base16_literal("38c80f6e5e03769054bc93658ffa2563e6d50e786822b8d8ed87cec49d7c1177"),
+            base16_literal("f51a057e84f74c64f46c1f7fb5607aab308bb1e1d33375937e7a83ca025f6a49"),
+            base16_literal("fb03c44a23811fea7b6f0259d776f04c752702a2be162a6123f791f89cc43514"),
+            base16_literal("4dfb45c9b6037f6d67951c6658e6da5ee363a6f503eca2db807e56e726ce6333"),
+            base16_literal("7b82f742a3e722a36efa61f212f42330ea7a5a79904c965bde680607efe7a56c"),
+            base16_literal("8c68a4cf350e56a7cc768be36869d13308a38cf6f694d1dbb675477aeea35c15"),
+            base16_literal("6cd43a2f939c8aaac8496d91d7d2d50e7c63fbd125e4f659455fa1716f2c7290")
+        },
+        {
+            base16_literal("a8ec96e1c5dd5b4af886cb92a249bdf26e72e8b38a7e14383a9700bbe5f7bab9"),
+            base16_literal("360ddc7034f992f0538db4da2f4ae4d652442d64e88e7ec0ddc51cb9f4d3c08b"),
+            base16_literal("8d1cdab1e1cfb27e4ed2831fa819f4aee64bcf5d6ab1a22776940414cbe207b1")
+        },
+        {
+            base16_literal("2318c0ec141efed7ec6471cdd4feae7cb7df329c046fff8d5c88873399855ae4"),
+            base16_literal("55eab33808ba97818016245a1fc794ae7769c2adc32a5773a3e71b9d9f35004a"),
+            base16_literal("65d02b64503dadd7154566d7f0c00483974c8dd575d931168bf60795205677cd"),
+            base16_literal("19c21cd6f6bbf01bb5dcc30f8efe7e30dee16fdba05ff625f9b818a4ff625c3e")
+        },
+        {
+            base16_literal("0d79c6db5900acc22b22805b8657caf215b4886596a703d5bf52d15f69afe604"),
+            base16_literal("cc09307e9ce059f74ad6668916b46bfe66680fe80af88df67e81490768a0f930"),
+            base16_literal("66a6a1bba962d8d2ee45afbc8739f6af294fc48e900bed95e807f06de3b3c4b7"),
+            base16_literal("473ea301381817dea0137433e8a1d3819b062ad5ec00e9ced109faae07399128")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0xf8, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0xc0, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0xf8, 0x01, 0xf8, 0x03},
+    .e = base16_literal("a25e5899ae9bbeae0d338626e88e4406475fc868d254eaaa4ff9e48624129f09"),
+    .secret_indexes = {3, 8, 7, 7, 2, 6},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("e543dd8bef3e662173aeb77a30a73e6c03b246c1e867a018ec0e9baaaf43234e")
+    },
+    .public_rings = {
+        {
+            base16_literal("0200000000e03f000000000000f8ffffffffffffffffffffff0100e0ffffffff00"),
+            base16_literal("03fffff3ffffffffffffffffff07e0ffff00000000000000e0fffffffffffffcff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02000000ffff0fe0ffffffffffffffffff0f000000000000ffffff3f0000000000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffff1f00f8ff07000000f8ffffff3f00000000000000feff0fe0ff0f00ff"),
+            base16_literal("0200feffff00000000000000fcfffffffffffffdff0380ffffffffffff7f000000"),
+            base16_literal("030100000000000000000000000000000000fcffff1f0000f0fffffffffffffeff"),
+            base16_literal("02ffffff0700feffffffffffffffffffffffffffffffffffffffffffffffffff07"),
+            base16_literal("03ffffffff070000000000e000feffffffffffffff1f00c0ffffffffff00000000"),
+            base16_literal("030000000200fc3f000000000000f0ffffffffffffffffffffffffffff03000000")
+        },
+        {
+            base16_literal("0300000000c0ffffff00000000000000003e0000000060ffffffffffffffffff1f"),
+            base16_literal("03ffffffff7f00f8ffffffff00000000f0070000c03f0000000000e0ffffff7fe0"),
+            base16_literal("0200000000f0ffffffff1f000000000000c0ffffffffffffbfffffffffc1030000"),
+            base16_literal("0300000000000000f83f000080030000000000801f00feff1f00000000f0ffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02e1ffffff03000000feffffffff81ffff0fc0ffffff0300000000000000000000"),
+            base16_literal("0200fe7f00000000000080ffffffffff1f000000ffffffff0000000000f0f7ffff")
+        },
+        {
+            base16_literal("0200fcffffffffff0300000000f8ffffff1f80ffffff3f0000f0fffffffcffffff"),
+            base16_literal("02ffff000000001c000000f0ffffffffffffff3f0000000000002000ffff3f0000"),
+            base16_literal("0200000080ff0700000000807f0000000000000000000000000000feffffffffff"),
+            base16_literal("030000180000000000c000000000000000003c000000f0ffffffffffffff3f0000"),
+            base16_literal("02ffffff1f00e0ffff3f000000000000f0ffffff7f0000ff3f00fcffff83ffffff"),
+            base16_literal("03000000fe0700000000000000f0ff0f00000000e0ff01000000000000c007c000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ffffffff7f0000c0070000e0ffffffffffff000000c0ffffffffffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("021ac148e5f8f22e455c21b5db9233e086c0761684673de51c1d7183ae0afd1e83"),
+            base16_literal("03f1ffffffffffff00f0ff7f00000000c03f040000000000000000e0ffff010080"),
+            base16_literal("03a57e7ea76a9c08456377dbebe50c63a2f546d06d4363bdaa4205d61218ee5efb"),
+            base16_literal("027f000000000000ffffffffffffffffffffff00ffffffffff7f00c0ffffff3fff"),
+            base16_literal("020100000000000000000000ffffff070000000000fcffffffff07fcff3f000000"),
+            base16_literal("02e0ffffffff0700000000e0ffffffffffffffff9fffffffffffffffffff3f0000")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("7cc852028ff6c8d9834203f59f458c97030e34f54661971f7652ec28c99b86cd"),
+        base16_literal("dd16264d6b0e5a5c897e0222ee8bac89b10b2ff83ef72a54cb620d75bc0a8258"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("96d16114aaab92b93d06367cb35585565bb2105df25c5a33f5a7fc5203998e8f")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("112345280cfdd08e6c55eda06a506bc6d64b7be3639267360afa947611874f61"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("8f02384be66b205db54e70530636776f4a6ba7b7df011280f0514784a653f02e"),
+            base16_literal("20eea07ca244c4d1ea08a32446e6f95bcb6ecd233c88f2e9e915ea0be13ba572"),
+            base16_literal("78433afc48a7c98b4caa80887da5dfb1728335b1cb6f621caf9cb0d0b30721e0"),
+            base16_literal("553ed58ede795a39e769c9d20dbcb9fe621a78c0b588e46859f3bae942b5daec"),
+            base16_literal("91e1370dea367a41cf66c423c663e616571d984f9ac048ef263491fa11ff37a6")
+        },
+        {
+            base16_literal("b7e5fb47db0a2c6ba00739b840f427b6fe46220b1d8b85cb58efc8f4ac291b28"),
+            base16_literal("1082cc2334ddc965d78691caf974ca4e09572c23b3a73fb682819873844f9e4a"),
+            base16_literal("e508db7b934e07d5e5b830487984ab4cce53c852b69d4fe5575e185a045ccdd0"),
+            base16_literal("d6446bb306bb9ca3b4aa5184c8df390d5e489daac15dbe17269fac302d02ee2d"),
+            base16_literal("0af3099f694ec5a710230c0cb14fbbbe9623f2c548fb05a50dbad4dc20183eec"),
+            base16_literal("8ea72d3e2c1174c28b62a39e187d0f9f1e6433b70b3ceeaec79c0d03860b6f5b"),
+            base16_literal("e2390ab71138dad295ac2e10b2f832b8877209fa5f2ebb5223193dc0a693411c")
+        },
+        {
+            base16_literal("05a951069b28e5d835ddd799a8fd024cbfedf7d0ec4c6fd9d138883c9abb8daf"),
+            base16_literal("cb14b65a236945e576876d0e539406f6ceb48cb85cd42c6986aaa6a5c058f6d1"),
+            base16_literal("2e6b1f5cc940cb0c9caf3aa2bff1fda2e82bbc430f6fb804be385a0cbc95046b"),
+            base16_literal("fb129be1acd136d65ad1cf9dfb814af06d46b1b2cc0ad349b02601c7acc3c1a5"),
+            base16_literal("f626450e76ab84b805e0c81586f0c0e2d6d5366bfb11c1fc8c1f96d19f24b887"),
+            base16_literal("c712e40cc7e01cba33425bb07be5d07c5bc20531cc730a95b5b6dc1727266f74"),
+            base16_literal("e5f0969c8e730bcb1c2f4f8242b41eaf17d3f92c419f0d6b76040bc20cf63d46")
+        },
+        {
+            base16_literal("7015750f0d06cbf1768f37105ded0e8f5f2101e13df47206d0d91b13e5c7673c"),
+            base16_literal("d08a35431f3b7dd6438cbae18e14d37230a8dcdd84ebb766afc42bb903762556")
+        },
+        {
+            base16_literal("2bf92767494c38c0465d49941864edc585f3a98a835eb236a0924e42dc127690"),
+            base16_literal("d78c4d33274a4a7f9fc3f5b8c0d1c26236d2b0997829a2269ea1771841f95a0f"),
+            base16_literal("bb529c14b829e5a4903a33c9c6fdf51a03d2b4d0c34025cde1aaa13a8ac385e8"),
+            base16_literal("7963a8b384d37ce2227be6280d30bdfe31f4b34aa1c995b203260ed2a568498a"),
+            base16_literal("169bc2d2802e3a5a460931bd4d60d88a61a40d56a6d77bfa41659ed3d9c6d92c"),
+            base16_literal("2f407a0ff4747206483fab6495389ee8bb1d4fc8ec83455f8a70bf6fc6303aec")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0xf8, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0xc0, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0xf8, 0x01, 0xf8, 0x03},
+    .e = base16_literal("a25e5899ae9bbeae0d338626e88e4406475fc868d254eaaa4ff9e48624129f09"),
+    .secret_indexes = {3, 8, 7, 7, 2, 6},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("e543dd8bef3e662173aeb77a30a73e6c03b246c1e867a018ec0e9baaaf43234e")
+    },
+    .public_rings = {
+        {
+            base16_literal("0200000000e03f000000000000f8ffffffffffffffffffffff0100e0ffffffff00"),
+            base16_literal("03fffff3ffffffffffffffffff07e0ffff00000000000000e0fffffffffffffcff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03f1a583ec0ae6782114fdc85028c63d540aa1bc83203a78b51a98f0ca91ce52c8"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffff1f00f8ff07000000f8ffffff3f00000000000000feff0fe0ff0f00ff"),
+            base16_literal("0200feffff00000000000000fcfffffffffffffdff0380ffffffffffff7f000000"),
+            base16_literal("030100000000000000000000000000000000fcffff1f0000f0fffffffffffffeff"),
+            base16_literal("02ffffff0700feffffffffffffffffffffffffffffffffffffffffffffffffff07"),
+            base16_literal("03ffffffff070000000000e000feffffffffffffff1f00c0ffffffffff00000000"),
+            base16_literal("030000000200fc3f000000000000f0ffffffffffffffffffffffffffff03000000")
+        },
+        {
+            base16_literal("0300000000c0ffffff00000000000000003e0000000060ffffffffffffffffff1f"),
+            base16_literal("03ffffffff7f00f8ffffffff00000000f0070000c03f0000000000e0ffffff7fe0"),
+            base16_literal("0200000000f0ffffffff1f000000000000c0ffffffffffffbfffffffffc1030000"),
+            base16_literal("0300000000000000f83f000080030000000000801f00feff1f00000000f0ffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02e1ffffff03000000feffffffff81ffff0fc0ffffff0300000000000000000000"),
+            base16_literal("0200fe7f00000000000080ffffffffff1f000000ffffffff0000000000f0f7ffff")
+        },
+        {
+            base16_literal("0200fcffffffffff0300000000f8ffffff1f80ffffff3f0000f0fffffffcffffff"),
+            base16_literal("02ffff000000001c000000f0ffffffffffffff3f0000000000002000ffff3f0000"),
+            base16_literal("0200000080ff0700000000807f0000000000000000000000000000feffffffffff"),
+            base16_literal("030000180000000000c000000000000000003c000000f0ffffffffffffff3f0000"),
+            base16_literal("02ffffff1f00e0ffff3f000000000000f0ffffff7f0000ff3f00fcffff83ffffff"),
+            base16_literal("03000000fe0700000000000000f0ff0f00000000e0ff01000000000000c007c000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ffffffff7f0000c0070000e0ffffffffffff000000c0ffffffffffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("021ac148e5f8f22e455c21b5db9233e086c0761684673de51c1d7183ae0afd1e83"),
+            base16_literal("03f1ffffffffffff00f0ff7f00000000c03f040000000000000000e0ffff010080"),
+            base16_literal("03a57e7ea76a9c08456377dbebe50c63a2f546d06d4363bdaa4205d61218ee5efb"),
+            base16_literal("027f000000000000ffffffffffffffffffffff00ffffffffff7f00c0ffffff3fff"),
+            base16_literal("020100000000000000000000ffffff070000000000fcffffffff07fcff3f000000"),
+            base16_literal("02e0ffffffff0700000000e0ffffffffffffffff9fffffffffffffffffff3f0000")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("7cc852028ff6c8d9834203f59f458c97030e34f54661971f7652ec28c99b86cd"),
+        base16_literal("dd16264d6b0e5a5c897e0222ee8bac89b10b2ff83ef72a54cb620d75bc0a8258"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("96d16114aaab92b93d06367cb35585565bb2105df25c5a33f5a7fc5203998e8f")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("112345280cfdd08e6c55eda06a506bc6d64b7be3639267360afa947611874f61"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("8f02384be66b205db54e70530636776f4a6ba7b7df011280f0514784a653f02e"),
+            base16_literal("20eea07ca244c4d1ea08a32446e6f95bcb6ecd233c88f2e9e915ea0be13ba572"),
+            base16_literal("78433afc48a7c98b4caa80887da5dfb1728335b1cb6f621caf9cb0d0b30721e0"),
+            base16_literal("553ed58ede795a39e769c9d20dbcb9fe621a78c0b588e46859f3bae942b5daec"),
+            base16_literal("91e1370dea367a41cf66c423c663e616571d984f9ac048ef263491fa11ff37a6")
+        },
+        {
+            base16_literal("b7e5fb47db0a2c6ba00739b840f427b6fe46220b1d8b85cb58efc8f4ac291b28"),
+            base16_literal("1082cc2334ddc965d78691caf974ca4e09572c23b3a73fb682819873844f9e4a"),
+            base16_literal("e508db7b934e07d5e5b830487984ab4cce53c852b69d4fe5575e185a045ccdd0"),
+            base16_literal("d6446bb306bb9ca3b4aa5184c8df390d5e489daac15dbe17269fac302d02ee2d"),
+            base16_literal("0af3099f694ec5a710230c0cb14fbbbe9623f2c548fb05a50dbad4dc20183eec"),
+            base16_literal("8ea72d3e2c1174c28b62a39e187d0f9f1e6433b70b3ceeaec79c0d03860b6f5b"),
+            base16_literal("e2390ab71138dad295ac2e10b2f832b8877209fa5f2ebb5223193dc0a693411c")
+        },
+        {
+            base16_literal("05a951069b28e5d835ddd799a8fd024cbfedf7d0ec4c6fd9d138883c9abb8daf"),
+            base16_literal("cb14b65a236945e576876d0e539406f6ceb48cb85cd42c6986aaa6a5c058f6d1"),
+            base16_literal("2e6b1f5cc940cb0c9caf3aa2bff1fda2e82bbc430f6fb804be385a0cbc95046b"),
+            base16_literal("fb129be1acd136d65ad1cf9dfb814af06d46b1b2cc0ad349b02601c7acc3c1a5"),
+            base16_literal("f626450e76ab84b805e0c81586f0c0e2d6d5366bfb11c1fc8c1f96d19f24b887"),
+            base16_literal("c712e40cc7e01cba33425bb07be5d07c5bc20531cc730a95b5b6dc1727266f74"),
+            base16_literal("e5f0969c8e730bcb1c2f4f8242b41eaf17d3f92c419f0d6b76040bc20cf63d46")
+        },
+        {
+            base16_literal("7015750f0d06cbf1768f37105ded0e8f5f2101e13df47206d0d91b13e5c7673c"),
+            base16_literal("d08a35431f3b7dd6438cbae18e14d37230a8dcdd84ebb766afc42bb903762556")
+        },
+        {
+            base16_literal("2bf92767494c38c0465d49941864edc585f3a98a835eb236a0924e42dc127690"),
+            base16_literal("d78c4d33274a4a7f9fc3f5b8c0d1c26236d2b0997829a2269ea1771841f95a0f"),
+            base16_literal("bb529c14b829e5a4903a33c9c6fdf51a03d2b4d0c34025cde1aaa13a8ac385e8"),
+            base16_literal("7963a8b384d37ce2227be6280d30bdfe31f4b34aa1c995b203260ed2a568498a"),
+            base16_literal("169bc2d2802e3a5a460931bd4d60d88a61a40d56a6d77bfa41659ed3d9c6d92c"),
+            base16_literal("2f407a0ff4747206483fab6495389ee8bb1d4fc8ec83455f8a70bf6fc6303aec")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0xf8, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0xc0, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0xf8, 0x01, 0xf8, 0x03},
+    .e = base16_literal("a25e5899ae9bbeae0d338626e88e4406475fc868d254eaaa4ff9e48624129f09"),
+    .secret_indexes = {3, 8, 7, 7, 2, 6},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("e543dd8bef3e662173aeb77a30a73e6c03b246c1e867a018ec0e9baaaf43234e")
+    },
+    .public_rings = {
+        {
+            base16_literal("0200000000e03f000000000000f8ffffffffffffffffffffff0100e0ffffffff00"),
+            base16_literal("03fffff3ffffffffffffffffff07e0ffff00000000000000e0fffffffffffffcff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03f1a583ec0ae6782114fdc85028c63d540aa1bc83203a78b51a98f0ca91ce52c8"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffff1f00f8ff07000000f8ffffff3f00000000000000feff0fe0ff0f00ff"),
+            base16_literal("0200feffff00000000000000fcfffffffffffffdff0380ffffffffffff7f000000"),
+            base16_literal("030100000000000000000000000000000000fcffff1f0000f0fffffffffffffeff"),
+            base16_literal("02ffffff0700feffffffffffffffffffffffffffffffffffffffffffffffffff07"),
+            base16_literal("03ffffffff070000000000e000feffffffffffffff1f00c0ffffffffff00000000"),
+            base16_literal("030000000200fc3f000000000000f0ffffffffffffffffffffffffffff03000000")
+        },
+        {
+            base16_literal("0300000000c0ffffff00000000000000003e0000000060ffffffffffffffffff1f"),
+            base16_literal("03ffffffff7f00f8ffffffff00000000f0070000c03f0000000000e0ffffff7fe0"),
+            base16_literal("0200000000f0ffffffff1f000000000000c0ffffffffffffbfffffffffc1030000"),
+            base16_literal("0300000000000000f83f000080030000000000801f00feff1f00000000f0ffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02e1ffffff03000000feffffffff81ffff0fc0ffffff0300000000000000000000"),
+            base16_literal("0200fe7f00000000000080ffffffffff1f000000ffffffff0000000000f0f7ffff")
+        },
+        {
+            base16_literal("0200fcffffffffff0300000000f8ffffff1f80ffffff3f0000f0fffffffcffffff"),
+            base16_literal("02ffff000000001c000000f0ffffffffffffff3f0000000000002000ffff3f0000"),
+            base16_literal("0200000080ff0700000000807f0000000000000000000000000000feffffffffff"),
+            base16_literal("030000180000000000c000000000000000003c000000f0ffffffffffffff3f0000"),
+            base16_literal("02ffffff1f00e0ffff3f000000000000f0ffffff7f0000ff3f00fcffff83ffffff"),
+            base16_literal("03000000fe0700000000000000f0ff0f00000000e0ff01000000000000c007c000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ffffffff7f0000c0070000e0ffffffffffff000000c0ffffffffffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("021ac148e5f8f22e455c21b5db9233e086c0761684673de51c1d7183ae0afd1e83"),
+            base16_literal("03f1ffffffffffff00f0ff7f00000000c03f040000000000000000e0ffff010080"),
+            base16_literal("03a57e7ea76a9c08456377dbebe50c63a2f546d06d4363bdaa4205d61218ee5efb"),
+            base16_literal("027f000000000000ffffffffffffffffffffff00ffffffffff7f00c0ffffff3fff"),
+            base16_literal("020100000000000000000000ffffff070000000000fcffffffff07fcff3f000000"),
+            base16_literal("02e0ffffffff0700000000e0ffffffffffffffff9fffffffffffffffffff3f0000")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("7cc852028ff6c8d9834203f59f458c97030e34f54661971f7652ec28c99b86cd"),
+        base16_literal("dd16264d6b0e5a5c897e0222ee8bac89b10b2ff83ef72a54cb620d75bc0a8258"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("96d16114aaab92b93d06367cb35585565bb2105df25c5a33f5a7fc5203998e8f")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("112345280cfdd08e6c55eda06a506bc6d64b7be3639267360afa947611874f61"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("8f02384be66b205db54e70530636776f4a6ba7b7df011280f0514784a653f02e"),
+            base16_literal("20eea07ca244c4d1ea08a32446e6f95bcb6ecd233c88f2e9e915ea0be13ba572"),
+            base16_literal("78433afc48a7c98b4caa80887da5dfb1728335b1cb6f621caf9cb0d0b30721e0"),
+            base16_literal("553ed58ede795a39e769c9d20dbcb9fe621a78c0b588e46859f3bae942b5daec"),
+            base16_literal("91e1370dea367a41cf66c423c663e616571d984f9ac048ef263491fa11ff37a6")
+        },
+        {
+            base16_literal("b7e5fb47db0a2c6ba00739b840f427b6fe46220b1d8b85cb58efc8f4ac291b28"),
+            base16_literal("1082cc2334ddc965d78691caf974ca4e09572c23b3a73fb682819873844f9e4a"),
+            base16_literal("e508db7b934e07d5e5b830487984ab4cce53c852b69d4fe5575e185a045ccdd0"),
+            base16_literal("d6446bb306bb9ca3b4aa5184c8df390d5e489daac15dbe17269fac302d02ee2d"),
+            base16_literal("0af3099f694ec5a710230c0cb14fbbbe9623f2c548fb05a50dbad4dc20183eec"),
+            base16_literal("8ea72d3e2c1174c28b62a39e187d0f9f1e6433b70b3ceeaec79c0d03860b6f5b"),
+            base16_literal("e2390ab71138dad295ac2e10b2f832b8877209fa5f2ebb5223193dc0a693411c")
+        },
+        {
+            base16_literal("05a951069b28e5d835ddd799a8fd024cbfedf7d0ec4c6fd9d138883c9abb8daf"),
+            base16_literal("cb14b65a236945e576876d0e539406f6ceb48cb85cd42c6986aaa6a5c058f6d1"),
+            base16_literal("2e6b1f5cc940cb0c9caf3aa2bff1fda2e82bbc430f6fb804be385a0cbc95046b"),
+            base16_literal("fb129be1acd136d65ad1cf9dfb814af06d46b1b2cc0ad349b02601c7acc3c1a5"),
+            base16_literal("f626450e76ab84b805e0c81586f0c0e2d6d5366bfb11c1fc8c1f96d19f24b887"),
+            base16_literal("c712e40cc7e01cba33425bb07be5d07c5bc20531cc730a95b5b6dc1727266f74"),
+            base16_literal("e5f0969c8e730bcb1c2f4f8242b41eaf17d3f92c419f0d6b76040bc20cf63d46")
+        },
+        {
+            base16_literal("7015750f0d06cbf1768f37105ded0e8f5f2101e13df47206d0d91b13e5c7673c"),
+            base16_literal("d08a35431f3b7dd6438cbae18e14d37230a8dcdd84ebb766afc42bb903762557")
+        },
+        {
+            base16_literal("2bf92767494c38c0465d49941864edc585f3a98a835eb236a0924e42dc127690"),
+            base16_literal("d78c4d33274a4a7f9fc3f5b8c0d1c26236d2b0997829a2269ea1771841f95a0f"),
+            base16_literal("bb529c14b829e5a4903a33c9c6fdf51a03d2b4d0c34025cde1aaa13a8ac385e8"),
+            base16_literal("7963a8b384d37ce2227be6280d30bdfe31f4b34aa1c995b203260ed2a568498a"),
+            base16_literal("169bc2d2802e3a5a460931bd4d60d88a61a40d56a6d77bfa41659ed3d9c6d92c"),
+            base16_literal("2f407a0ff4747206483fab6495389ee8bb1d4fc8ec83455f8a70bf6fc6303aec")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0xf8, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0xc0, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0xf8, 0x01, 0xf8, 0x03},
+    .e = base16_literal("a25e5899ae9bbeae0d338626e88e4406475fc868d254eaaa4ff9e48624129f09"),
+    .secret_indexes = {3, 8, 7, 7, 2, 6},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("e543dd8bef3e662173aeb77a30a73e6c03b246c1e867a018ec0e9baaaf43234e")
+    },
+    .public_rings = {
+        {
+            base16_literal("0200000000e03f000000000000f8ffffffffffffffffffffff0100e0ffffffff00"),
+            base16_literal("03fffff3ffffffffffffffffff07e0ffff00000000000000e0fffffffffffffcff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("03f1a583ec0ae6782114fdc85028c63d540aa1bc83203a78b51a98f0ca91ce52c8"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffff1f00f8ff07000000f8ffffff3f00000000000000feff0fe0ff0f00ff"),
+            base16_literal("02b8210e833e20881fe81a23b03ad8d0e4881032145d1f85bc1f88d83645bec097"),
+            base16_literal("030100000000000000000000000000000000fcffff1f0000f0fffffffffffffeff"),
+            base16_literal("02ffffff0700feffffffffffffffffffffffffffffffffffffffffffffffffff07"),
+            base16_literal("03ffffffff070000000000e000feffffffffffffff1f00c0ffffffffff00000000"),
+            base16_literal("030000000200fc3f000000000000f0ffffffffffffffffffffffffffff03000000")
+        },
+        {
+            base16_literal("0300000000c0ffffff00000000000000003e0000000060ffffffffffffffffff1f"),
+            base16_literal("03ffffffff7f00f8ffffffff00000000f0070000c03f0000000000e0ffffff7fe0"),
+            base16_literal("0200000000f0ffffffff1f000000000000c0ffffffffffffbfffffffffc1030000"),
+            base16_literal("0300000000000000f83f000080030000000000801f00feff1f00000000f0ffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02e1ffffff03000000feffffffff81ffff0fc0ffffff0300000000000000000000"),
+            base16_literal("0200fe7f00000000000080ffffffffff1f000000ffffffff0000000000f0f7ffff")
+        },
+        {
+            base16_literal("0200fcffffffffff0300000000f8ffffff1f80ffffff3f0000f0fffffffcffffff"),
+            base16_literal("02ffff000000001c000000f0ffffffffffffff3f0000000000002000ffff3f0000"),
+            base16_literal("0200000080ff0700000000807f0000000000000000000000000000feffffffffff"),
+            base16_literal("030000180000000000c000000000000000003c000000f0ffffffffffffff3f0000"),
+            base16_literal("02ffffff1f00e0ffff3f000000000000f0ffffff7f0000ff3f00fcffff83ffffff"),
+            base16_literal("03000000fe0700000000000000f0ff0f00000000e0ff01000000000000c007c000"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("02ffffffff7f0000c0070000e0ffffffffffff000000c0ffffffffffffffffffff"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        },
+        {
+            base16_literal("021ac148e5f8f22e455c21b5db9233e086c0761684673de51c1d7183ae0afd1e83"),
+            base16_literal("03f1ffffffffffff00f0ff7f00000000c03f040000000000000000e0ffff010080"),
+            base16_literal("03a57e7ea76a9c08456377dbebe50c63a2f546d06d4363bdaa4205d61218ee5efb"),
+            base16_literal("027f000000000000ffffffffffffffffffffff00ffffffffff7f00c0ffffff3fff"),
+            base16_literal("020100000000000000000000ffffff070000000000fcffffffff07fcff3f000000"),
+            base16_literal("02e0ffffffff0700000000e0ffffffffffffffff9fffffffffffffffffff3f0000")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("7cc852028ff6c8d9834203f59f458c97030e34f54661971f7652ec28c99b86cd"),
+        base16_literal("dd16264d6b0e5a5c897e0222ee8bac89b10b2ff83ef72a54cb620d75bc0a8258"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("96d16114aaab92b93d06367cb35585565bb2105df25c5a33f5a7fc5203998e8f")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("112345280cfdd08e6c55eda06a506bc6d64b7be3639267360afa947611874f61"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("8f02384be66b205db54e70530636776f4a6ba7b7df011280f0514784a653f02e"),
+            base16_literal("20eea07ca244c4d1ea08a32446e6f95bcb6ecd233c88f2e9e915ea0be13ba572"),
+            base16_literal("78433afc48a7c98b4caa80887da5dfb1728335b1cb6f621caf9cb0d0b30721e0"),
+            base16_literal("553ed58ede795a39e769c9d20dbcb9fe621a78c0b588e46859f3bae942b5daec"),
+            base16_literal("91e1370dea367a41cf66c423c663e616571d984f9ac048ef263491fa11ff37a6")
+        },
+        {
+            base16_literal("b7e5fb47db0a2c6ba00739b840f427b6fe46220b1d8b85cb58efc8f4ac291b28"),
+            base16_literal("1082cc2334ddc965d78691caf974ca4e09572c23b3a73fb682819873844f9e4a"),
+            base16_literal("e508db7b934e07d5e5b830487984ab4cce53c852b69d4fe5575e185a045ccdd0"),
+            base16_literal("d6446bb306bb9ca3b4aa5184c8df390d5e489daac15dbe17269fac302d02ee2d"),
+            base16_literal("0af3099f694ec5a710230c0cb14fbbbe9623f2c548fb05a50dbad4dc20183eec"),
+            base16_literal("8ea72d3e2c1174c28b62a39e187d0f9f1e6433b70b3ceeaec79c0d03860b6f5b"),
+            base16_literal("e2390ab71138dad295ac2e10b2f832b8877209fa5f2ebb5223193dc0a693411c")
+        },
+        {
+            base16_literal("05a951069b28e5d835ddd799a8fd024cbfedf7d0ec4c6fd9d138883c9abb8daf"),
+            base16_literal("cb14b65a236945e576876d0e539406f6ceb48cb85cd42c6986aaa6a5c058f6d1"),
+            base16_literal("2e6b1f5cc940cb0c9caf3aa2bff1fda2e82bbc430f6fb804be385a0cbc95046b"),
+            base16_literal("fb129be1acd136d65ad1cf9dfb814af06d46b1b2cc0ad349b02601c7acc3c1a5"),
+            base16_literal("f626450e76ab84b805e0c81586f0c0e2d6d5366bfb11c1fc8c1f96d19f24b887"),
+            base16_literal("c712e40cc7e01cba33425bb07be5d07c5bc20531cc730a95b5b6dc1727266f74"),
+            base16_literal("e5f0969c8e730bcb1c2f4f8242b41eaf17d3f92c419f0d6b76040bc20cf63d46")
+        },
+        {
+            base16_literal("7015750f0d06cbf1768f37105ded0e8f5f2101e13df47206d0d91b13e5c7673c"),
+            base16_literal("d08a35431f3b7dd6438cbae18e14d37230a8dcdd84ebb766afc42bb903762557")
+        },
+        {
+            base16_literal("2bf92767494c38c0465d49941864edc585f3a98a835eb236a0924e42dc127690"),
+            base16_literal("d78c4d33274a4a7f9fc3f5b8c0d1c26236d2b0997829a2269ea1771841f95a0f"),
+            base16_literal("bb529c14b829e5a4903a33c9c6fdf51a03d2b4d0c34025cde1aaa13a8ac385e8"),
+            base16_literal("7963a8b384d37ce2227be6280d30bdfe31f4b34aa1c995b203260ed2a568498a"),
+            base16_literal("169bc2d2802e3a5a460931bd4d60d88a61a40d56a6d77bfa41659ed3d9c6d92c"),
+            base16_literal("2f407a0ff4747206483fab6495389ee8bb1d4fc8ec83455f8a70bf6fc6303aec")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0f, 0xc0, 0xff, 0xff, 0xfd},
+    .e = base16_literal("dbf17642c5757fc5f72b38971e82791ff4b54b494094c4c678ce7fd6a9245439"),
+    .secret_indexes = {3, 5, 7, 1},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffff0f0000000000f83f0000000000000000ffffffffffffffffffffff"),
+            base16_literal("02000000f8ffffff0300e01ff0ffffffffffffffff0700000000000000f83f0000")
+        },
+        {
+            base16_literal("033fc0ffffffffffffff3f80ffffff80ff000000000000000000000000f0ff7f00"),
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("020000000000000000000000c0ffff0700000000000000000000000000000c0000"),
+            base16_literal("0300000000c000000000000000fcff7f1f0000000000000000000000e0ffff7f00"),
+            base16_literal("03fffffffffff8ffffffffffffffffff070000000080ffffffffffff0100000000")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffffffffffffff7f00feffff1f00000000e0ffffffffffffffff1f0000"),
+            base16_literal("02ffffffffffff0f00000000fcffffff7f000000000000000000000000fcff03c0"),
+            base16_literal("028000000000f0ffffffffffff7f00c0ffffffffffffffffffff01000000180000"),
+            base16_literal("0200000000f0ffffffffffffffffffffffffffffffc7fffff8ff01e0ffffffff7f"),
+            base16_literal("0300000080ffff0000ffffffffff0100ffffffffff0300c0ffff3fff0300000000"),
+            base16_literal("03ffff0f80ffffffffff0000e0ff00000000e0ff070000f01f0000feffffffffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("f0c86d632ef9560a7a6963f2063433f0b81e547fc32a5fdb409d4be74318809e"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("0276f3f08af97322518d62b88318787294273810147e3ce4793f82e5765463c8"),
+            base16_literal("980f23edc306bcbf19bc18754c3edc5f110aa36d898fdff95434f03efca9b853"),
+            base16_literal("77de615004259fb8f3614ccb666cb4901d12721581f3afddc557720bfc5c28f7"),
+            base16_literal("90500feec5c1db250723f0e1ee12730bdbf7e60bd368cafdbce4d5c08ac69309")
+        },
+        {
+            base16_literal("a3a30c820b0e1cb03650c476ae552c8347b76ed2662db56ee08ed370af1fdcb9"),
+            base16_literal("cccce320a35bca8520b72ae256f4ed8fa952e937beb58d436e9bc5fac0088c77"),
+            base16_literal("e93356d3dc1839b4f9509935b8e6df2ff7b9bc6748d421fe992b42e5d9bc35df"),
+            base16_literal("1cc018d43865d0fa18045e6db291279bbb3b1f60f987b2c31d37175acc0cd50a"),
+            base16_literal("1f30f6e598071ff7f8f52ed94e255b3b5d166c7be4cd6110eec46a38377653b7"),
+            base16_literal("107ec893fe53dde382a8d1e72e13f484db29196b50cce79af94c3fe7ca62e34e"),
+            base16_literal("f3d40c041d71aa2ed9f0f92328603cf78ff535224200261854adf5aef5035e73")
+        },
+        {
+            base16_literal("1db83f28a7cd4524c8af0aa538beff74356116843ebba08aeeb44253fd55729a")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0f, 0xc0, 0xff, 0xff, 0xfd},
+    .e = base16_literal("dbf17642c5757fc5f72b38971e82791ff4b54b494094c4c678ce7fd6a9245439"),
+    .secret_indexes = {3, 5, 7, 1},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffff0f0000000000f83f0000000000000000ffffffffffffffffffffff"),
+            base16_literal("02000000f8ffffff0300e01ff0ffffffffffffffff0700000000000000f83f0000")
+        },
+        {
+            base16_literal("033fc0ffffffffffffff3f80ffffff80ff000000000000000000000000f0ff7f00"),
+            base16_literal("03c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"),
+            base16_literal("020000000000000000000000c0ffff0700000000000000000000000000000c0000"),
+            base16_literal("0300000000c000000000000000fcff7f1f0000000000000000000000e0ffff7f00"),
+            base16_literal("03fffffffffff8ffffffffffffffffff070000000080ffffffffffff0100000000")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffffffffffffff7f00feffff1f00000000e0ffffffffffffffff1f0000"),
+            base16_literal("02ffffffffffff0f00000000fcffffff7f000000000000000000000000fcff03c0"),
+            base16_literal("028000000000f0ffffffffffff7f00c0ffffffffffffffffffff01000000180000"),
+            base16_literal("0200000000f0ffffffffffffffffffffffffffffffc7fffff8ff01e0ffffffff7f"),
+            base16_literal("0300000080ffff0000ffffffffff0100ffffffffff0300c0ffff3fff0300000000"),
+            base16_literal("03ffff0f80ffffffffff0000e0ff00000000e0ff070000f01f0000feffffffffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("f0c86d632ef9560a7a6963f2063433f0b81e547fc32a5fdb409d4be74318809e"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+        },
+        {
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("0276f3f08af97322518d62b88318787294273810147e3ce4793f82e5765463c8"),
+            base16_literal("980f23edc306bcbf19bc18754c3edc5f110aa36d898fdff95434f03efca9b853"),
+            base16_literal("77de615004259fb8f3614ccb666cb4901d12721581f3afddc557720bfc5c28f7"),
+            base16_literal("90500feec5c1db250723f0e1ee12730bdbf7e60bd368cafdbce4d5c08ac69309")
+        },
+        {
+            base16_literal("a3a30c820b0e1cb03650c476ae552c8347b76ed2662db56ee08ed370af1fdcb9"),
+            base16_literal("cccce320a35bca8520b72ae256f4ed8fa952e937beb58d436e9bc5fac0088c77"),
+            base16_literal("e93356d3dc1839b4f9509935b8e6df2ff7b9bc6748d421fe992b42e5d9bc35df"),
+            base16_literal("1cc018d43865d0fa18045e6db291279bbb3b1f60f987b2c31d37175acc0cd50a"),
+            base16_literal("1f30f6e598071ff7f8f52ed94e255b3b5d166c7be4cd6110eec46a38377653b7"),
+            base16_literal("107ec893fe53dde382a8d1e72e13f484db29196b50cce79af94c3fe7ca62e34e"),
+            base16_literal("f3d40c041d71aa2ed9f0f92328603cf78ff535224200261854adf5aef5035e73")
+        },
+        {
+            base16_literal("1db83f28a7cd4524c8af0aa538beff74356116843ebba08aeeb44253fd55729a")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0f, 0xc0, 0xff, 0xff, 0xfd},
+    .e = base16_literal("dbf17642c5757fc5f72b38971e82791ff4b54b494094c4c678ce7fd6a9245439"),
+    .secret_indexes = {3, 5, 7, 1},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffff0f0000000000f83f0000000000000000ffffffffffffffffffffff"),
+            base16_literal("02000000f8ffffff0300e01ff0ffffffffffffffff0700000000000000f83f0000")
+        },
+        {
+            base16_literal("033fc0ffffffffffffff3f80ffffff80ff000000000000000000000000f0ff7f00"),
+            base16_literal("03c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"),
+            base16_literal("020000000000000000000000c0ffff0700000000000000000000000000000c0000"),
+            base16_literal("0300000000c000000000000000fcff7f1f0000000000000000000000e0ffff7f00"),
+            base16_literal("03fffffffffff8ffffffffffffffffff070000000080ffffffffffff0100000000")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffffffffffffff7f00feffff1f00000000e0ffffffffffffffff1f0000"),
+            base16_literal("02ffffffffffff0f00000000fcffffff7f000000000000000000000000fcff03c0"),
+            base16_literal("028000000000f0ffffffffffff7f00c0ffffffffffffffffffff01000000180000"),
+            base16_literal("0200000000f0ffffffffffffffffffffffffffffffc7fffff8ff01e0ffffffff7f"),
+            base16_literal("0300000080ffff0000ffffffffff0100ffffffffff0300c0ffff3fff0300000000"),
+            base16_literal("03ffff0f80ffffffffff0000e0ff00000000e0ff070000f01f0000feffffffffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("f0c86d632ef9560a7a6963f2063433f0b81e547fc32a5fdb409d4be74318809e"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+        },
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000000"),
+            base16_literal("0276f3f08af97322518d62b88318787294273810147e3ce4793f82e5765463c8"),
+            base16_literal("980f23edc306bcbf19bc18754c3edc5f110aa36d898fdff95434f03efca9b853"),
+            base16_literal("77de615004259fb8f3614ccb666cb4901d12721581f3afddc557720bfc5c28f7"),
+            base16_literal("90500feec5c1db250723f0e1ee12730bdbf7e60bd368cafdbce4d5c08ac69309")
+        },
+        {
+            base16_literal("a3a30c820b0e1cb03650c476ae552c8347b76ed2662db56ee08ed370af1fdcb9"),
+            base16_literal("cccce320a35bca8520b72ae256f4ed8fa952e937beb58d436e9bc5fac0088c77"),
+            base16_literal("e93356d3dc1839b4f9509935b8e6df2ff7b9bc6748d421fe992b42e5d9bc35df"),
+            base16_literal("1cc018d43865d0fa18045e6db291279bbb3b1f60f987b2c31d37175acc0cd50a"),
+            base16_literal("1f30f6e598071ff7f8f52ed94e255b3b5d166c7be4cd6110eec46a38377653b7"),
+            base16_literal("107ec893fe53dde382a8d1e72e13f484db29196b50cce79af94c3fe7ca62e34e"),
+            base16_literal("f3d40c041d71aa2ed9f0f92328603cf78ff535224200261854adf5aef5035e73")
+        },
+        {
+            base16_literal("1db83f28a7cd4524c8af0aa538beff74356116843ebba08aeeb44253fd55729a")
+        }
+    }
+},
+{
+    .message = {0x00, 0x00, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0f, 0xc0, 0xff, 0xff, 0xfd},
+    .e = base16_literal("dbf17642c5757fc5f72b38971e82791ff4b54b494094c4c678ce7fd6a9245439"),
+    .secret_indexes = {3, 5, 7, 1},
+    .secrets = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .public_rings = {
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("03ffffffffff0f0000000000f83f0000000000000000ffffffffffffffffffffff"),
+            base16_literal("02000000f8ffffff0300e01ff0ffffffffffffffff0700000000000000f83f0000")
+        },
+        {
+            base16_literal("033fc0ffffffffffffff3f80ffffff80ff000000000000000000000000f0ff7f00"),
+            base16_literal("03e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13"),
+            base16_literal("020000000000000000000000c0ffff0700000000000000000000000000000c0000"),
+            base16_literal("0300000000c000000000000000fcff7f1f0000000000000000000000e0ffff7f00"),
+            base16_literal("03fffffffffff8ffffffffffffffffff070000000080ffffffffffff0100000000")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
+            base16_literal("02ffffffffffffffffffff7f00feffff1f00000000e0ffffffffffffffff1f0000"),
+            base16_literal("02ffffffffffff0f00000000fcffffff7f000000000000000000000000fcff03c0"),
+            base16_literal("028000000000f0ffffffffffff7f00c0ffffffffffffffffffff01000000180000"),
+            base16_literal("0200000000f0ffffffffffffffffffffffffffffffc7fffff8ff01e0ffffffff7f"),
+            base16_literal("0300000080ffff0000ffffffffff0100ffffffffff0300c0ffff3fff0300000000"),
+            base16_literal("03ffff0f80ffffffffff0000e0ff00000000e0ff070000f01f0000feffffffffff")
+        },
+        {
+            base16_literal("0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+        }
+    },
+    .k = {
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+        base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+    },
+    .s = {
+        {
+            base16_literal("f0c86d632ef9560a7a6963f2063433f0b81e547fc32a5fdb409d4be74318809e"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
+            base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
+        },
+        {
+            base16_literal("0000000000000000000000000000000000000000000000000000000000000000"),
+            base16_literal("0276f3f08af97322518d62b88318787294273810147e3ce4793f82e5765463c8"),
+            base16_literal("980f23edc306bcbf19bc18754c3edc5f110aa36d898fdff95434f03efca9b853"),
+            base16_literal("77de615004259fb8f3614ccb666cb4901d12721581f3afddc557720bfc5c28f7"),
+            base16_literal("90500feec5c1db250723f0e1ee12730bdbf7e60bd368cafdbce4d5c08ac69309")
+        },
+        {
+            base16_literal("a3a30c820b0e1cb03650c476ae552c8347b76ed2662db56ee08ed370af1fdcb9"),
+            base16_literal("cccce320a35bca8520b72ae256f4ed8fa952e937beb58d436e9bc5fac0088c77"),
+            base16_literal("e93356d3dc1839b4f9509935b8e6df2ff7b9bc6748d421fe992b42e5d9bc35df"),
+            base16_literal("1cc018d43865d0fa18045e6db291279bbb3b1f60f987b2c31d37175acc0cd50a"),
+            base16_literal("1f30f6e598071ff7f8f52ed94e255b3b5d166c7be4cd6110eec46a38377653b7"),
+            base16_literal("107ec893fe53dde382a8d1e72e13f484db29196b50cce79af94c3fe7ca62e34e"),
+            base16_literal("f3d40c041d71aa2ed9f0f92328603cf78ff535224200261854adf5aef5035e73")
+        },
+        {
+            base16_literal("1db83f28a7cd4524c8af0aa538beff74356116843ebba08aeeb44253fd55729a")
+        }
+    }
+}
+};
+
+

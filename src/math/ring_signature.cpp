@@ -46,6 +46,15 @@ hash_digest prepare_digest(data_slice message, const key_rings& rings)
     return sha256_hash(data);
 }
 
+bool is_zero(const ec_secret& scalar)
+{
+    return std::all_of(scalar.begin(), scalar.end(),
+        [](ec_secret::value_type value)
+        {
+            return value == 0;
+        });
+}
+
 // Take a list of secret keys and generate a mapping from public key -> secret
 secret_keys_map generate_keys_map(const secret_list& secrets)
 {
@@ -133,8 +142,8 @@ ec_secret borromean_hash(const hash_digest& M, const R_Type& R,
     return sha256_hash(data);
 }
 
-ec_compressed calculate_R(const ec_secret& s, const ec_secret& e,
-    const ec_compressed& ring_key)
+bool calculate_R(ec_compressed& result, const ec_secret& s,
+    const ec_secret& e, const ec_compressed& ring_key)
 {
     // R = s G + e P
     //   = (s + ex) G
@@ -148,10 +157,9 @@ ec_compressed calculate_R(const ec_secret& s, const ec_secret& e,
     rc = secret_to_public(sG, s);
     BITCOIN_ASSERT(rc);
     // result = s G + e P
-    ec_compressed result;
-    rc = ec_sum(result, {sG, eP});
-    BITCOIN_ASSERT(rc);
-    return result;
+    if (!ec_sum(result, {sG, eP}))
+        return false;
+    return true;
 }
 
 ec_secret calculate_s(const ec_secret& k, const ec_secret& e,
@@ -200,10 +208,6 @@ bool sign(ring_signature& out, const secret_list& secrets,
         search_key_indexes(rings, known_keys_by_ring);
     BITCOIN_ASSERT(known_key_indexes.size() == rings.size());
 
-    // Compute message digest M
-    //const auto message_data = concatenate(message, rings);
-    //const auto M = sha256_hash(message_data);
-
     // ---------------------------------------------------------------------
     // Step 1: calculate e0
     // ---------------------------------------------------------------------
@@ -232,7 +236,7 @@ bool sign(ring_signature& out, const secret_list& secrets,
 
             // Calculate e and R until the end of this ring.
             const auto e_i_j = borromean_hash(digest, R_i_j, i, j);
-            R_i_j = calculate_R(s, e_i_j, ring[j]);
+            calculate_R(R_i_j, s, e_i_j, ring[j]);
         }
         // Add this ring to e0
         extend_data(e0_data, R_i_j);
@@ -261,7 +265,8 @@ bool sign(ring_signature& out, const secret_list& secrets,
             const auto& s = out.proofs[i][j];
 
             // Calculate e and R until we reach our index.
-            const auto R_i_j = calculate_R(s, e_i_j, ring[j]);
+            ec_compressed R_i_j;
+            calculate_R(R_i_j, s, e_i_j, ring[j]);
             e_i_j = borromean_hash(digest, R_i_j, i, j + 1);
         }
 
@@ -282,10 +287,6 @@ bool sign(ring_signature& out, const secret_list& secrets,
 bool verify(const key_rings& rings, const hash_digest& digest,
     const ring_signature& signature)
 {
-    // Compute message digest M
-    //const auto message_data = concatenate(message, rings);
-    //const auto M = sha256_hash(message_data);
-
     // As compared with signing, we only have to perform a single step.
     // The ring has already been computed, so now we just need to verify
     // it by calculating e0, and looping all the way until the end R value
@@ -310,8 +311,12 @@ bool verify(const key_rings& rings, const hash_digest& digest,
         {
             const auto& s = signature.proofs[i][j];
 
+            if (is_zero(s) || is_zero(e_i_j))
+                return false;
+
             // Calculate R and e values until the end.
-            R_i_j = calculate_R(s, e_i_j, ring[j]);
+            if (!calculate_R(R_i_j, s, e_i_j, ring[j]))
+                return false;
             e_i_j = borromean_hash(digest, R_i_j, i, j + 1);
         }
         extend_data(e0_data, R_i_j);
