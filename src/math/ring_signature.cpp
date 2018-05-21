@@ -128,6 +128,28 @@ index_list search_key_indexes(
     return known_key_indexes;
 }
 
+index_list generate_known_indexes(
+    const key_rings& rings, const secret_keys_map& secret_keys)
+{
+    // Organize known public keys into corresponding rings
+    const auto known_keys_by_ring =
+        partition_keys_into_rings(secret_keys, rings);
+
+    // Check we know a secret key in each ring
+    auto empty_ring = [](const point_list& ring)
+    {
+        return ring.empty();
+    };
+    const bool any_ring_zero_size = std::any_of(
+        known_keys_by_ring.begin(), known_keys_by_ring.end(), empty_ring);
+
+    if (any_ring_zero_size)
+        return index_list();
+
+    // Compute indexes for known keys inside the rings.
+    return search_key_indexes(rings, known_keys_by_ring);
+}
+
 template <typename R_Type>
 ec_secret borromean_hash(const hash_digest& M, const R_Type& R,
     size_t i, size_t j)
@@ -180,37 +202,33 @@ ec_secret calculate_s(const ec_secret& k, const ec_secret& e,
     return result;
 }
 
-bool sign(ring_signature& out, const secret_list& secrets,
-    const key_rings& rings, const hash_digest& digest,
-    const secret_list& salts)
+bool calculate_last_R_signing(ec_compressed& R_i_j, const point_list& ring,
+    size_t i, const hash_digest& digest, const ring_signature& signature,
+    const size_t known_key_index, const secret_list& salts)
 {
-    // Create public key -> secret key map
-    auto secret_keys = generate_keys_map(secrets);
-    if (secret_keys.empty())
-        return false;
-    // Organize known public keys into corresponding rings
-    const auto known_keys_by_ring =
-        partition_keys_into_rings(secret_keys, rings);
+    auto rc = secret_to_public(R_i_j, salts[i]);
+    BITCOIN_ASSERT(rc);
 
-    // Check we know a secret key in each ring
-    auto empty_ring = [](const point_list& ring)
+    // ... Start one above index of known key and loop until the end
+    for (size_t j = known_key_index + 1; j < ring.size(); ++j)
     {
-        return ring.empty();
-    };
-    const bool any_ring_zero_size = std::any_of(
-        known_keys_by_ring.begin(), known_keys_by_ring.end(), empty_ring);
+        BITCOIN_ASSERT(j < signature.proofs[i].size());
+        const auto& s = signature.proofs[i][j];
 
-    if (any_ring_zero_size)
-        return false;
+        // Calculate e and R until the end of this ring.
+        const auto e_i_j = borromean_hash(digest, R_i_j, i, j);
+        if (is_zero(e_i_j))
+            return false;
+        if (!calculate_R(R_i_j, s, e_i_j, ring[j]))
+            return false;
+    }
+    return true;
+}
 
-    // Compute indexes for known keys inside the rings.
-    const auto known_key_indexes =
-        search_key_indexes(rings, known_keys_by_ring);
-    BITCOIN_ASSERT(known_key_indexes.size() == rings.size());
-
-    // ---------------------------------------------------------------------
-    // Step 1: calculate e0
-    // ---------------------------------------------------------------------
+bool calculate_e0(ring_signature& out, const key_rings& rings,
+    const hash_digest& digest, const secret_list& salts,
+    const index_list& known_key_indexes)
+{
     data_chunk e0_data;
     e0_data.reserve(ec_compressed_size * rings.size() + hash_size);
 
@@ -223,34 +241,47 @@ bool sign(ring_signature& out, const secret_list& secrets,
         const auto& ring = rings[i];
         const auto known_key_index = known_key_indexes[i];
 
-        // Calculate starting R value...
-        ec_compressed R_i_j;
-        auto rc = secret_to_public(R_i_j, salts[i]);
-        BITCOIN_ASSERT(rc);
+        // Calculate the last R value...
+        ec_compressed last_R;
+        if (!calculate_last_R_signing(
+                last_R, ring, i, digest, out, known_key_index, salts))
+            return false;
 
-        // ... Start one above index of known key and loop until the end
-        for (size_t j = known_key_index + 1; j < ring.size(); ++j)
-        {
-            BITCOIN_ASSERT(j < out.proofs[i].size());
-            const auto& s = out.proofs[i][j];
-
-            // Calculate e and R until the end of this ring.
-            const auto e_i_j = borromean_hash(digest, R_i_j, i, j);
-            if (is_zero(e_i_j))
-                return false;
-            if (!calculate_R(R_i_j, s, e_i_j, ring[j]))
-                return false;
-        }
         // Add this ring to e0
-        extend_data(e0_data, R_i_j);
+        extend_data(e0_data, last_R);
     }
     extend_data(e0_data, digest);
     // Hash data to produce e0 value
     out.challenge = sha256_hash(e0_data);
+    return true;
+}
 
-    // ---------------------------------------------------------------------
-    // Step 2: join up each ring at the index where we know the secret key
-    // ---------------------------------------------------------------------
+bool calculate_e_at_known_key_index(ec_secret& e_i_j,
+    const ring_signature& signature, const point_list& ring,
+    const hash_digest& digest, const size_t i, const size_t known_key_index)
+{
+    BITCOIN_ASSERT(signature.proofs[i].size() > known_key_index);
+    BITCOIN_ASSERT(ring.size() > known_key_index);
+    // Loop until index of known key.
+    for (size_t j = 0; j < known_key_index; ++j)
+    {
+        const auto& s = signature.proofs[i][j];
+
+        // Calculate e and R until we reach our index.
+        ec_compressed R_i_j;
+        if (!calculate_R(R_i_j, s, e_i_j, ring[j]))
+            return false;
+        e_i_j = borromean_hash(digest, R_i_j, i, j + 1);
+        if (is_zero(e_i_j))
+            return false;
+    }
+    return true;
+}
+
+bool join_rings_together(ring_signature& out, const key_rings& rings,
+    const hash_digest& digest, const secret_list& salts,
+    const index_list& known_key_indexes, secret_keys_map& secret_keys)
+{
     for (size_t i = 0; i < rings.size(); ++i)
     {
         // Current ring and index of known key
@@ -262,21 +293,9 @@ bool sign(ring_signature& out, const secret_list& secrets,
         if (is_zero(e_i_j))
             return false;
 
-        BITCOIN_ASSERT(out.proofs[i].size() > known_key_index);
-        BITCOIN_ASSERT(ring.size() > known_key_index);
-        // Loop until index of known key.
-        for (size_t j = 0; j < known_key_index; ++j)
-        {
-            const auto& s = out.proofs[i][j];
-
-            // Calculate e and R until we reach our index.
-            ec_compressed R_i_j;
-            if (!calculate_R(R_i_j, s, e_i_j, ring[j]))
-                return false;
-            e_i_j = borromean_hash(digest, R_i_j, i, j + 1);
-            if (is_zero(e_i_j))
-                return false;
-        }
+        if (!calculate_e_at_known_key_index(
+                e_i_j, out, ring, digest, i, known_key_index))
+            return false;
 
         // Find secret key used for calculation in the next step.
         BITCOIN_ASSERT(known_key_index < ring.size());
@@ -291,11 +310,31 @@ bool sign(ring_signature& out, const secret_list& secrets,
         if (is_zero(s))
             return false;
     }
-
     return true;
 }
 
-bool compute_last_R(ec_compressed& R_i_j, const point_list& ring,
+bool sign(ring_signature& out, const secret_list& secrets,
+    const key_rings& rings, const hash_digest& digest,
+    const secret_list& salts)
+{
+    // Create public key -> secret key map
+    auto secret_keys = generate_keys_map(secrets);
+    if (secret_keys.empty())
+        return false;
+
+    // Create index of secret key per ring
+    const auto known_key_indexes = generate_known_indexes(rings, secret_keys);
+    BITCOIN_ASSERT(known_key_indexes.size() == rings.size());
+
+    // Step 1: calculate e0
+    return calculate_e0(out, rings, digest, salts, known_key_indexes) &&
+
+    // Step 2: join up each ring at the index where we know the secret key
+        join_rings_together(out, rings, digest, salts, known_key_indexes,
+            secret_keys);
+}
+
+bool calculate_last_R_verify(ec_compressed& R_i_j, const point_list& ring,
     ec_secret e_i_j, size_t i, const hash_digest& digest,
     const ring_signature& signature)
 {
@@ -339,10 +378,13 @@ bool verify(const key_rings& rings, const hash_digest& digest,
         // Calculate first e value for this ring.
         const auto e_i_0 = borromean_hash(digest, signature.challenge, i, 0);
 
+        // Calculate the last R value...
         ec_compressed last_R;
-        if (!compute_last_R(last_R, ring, e_i_0, i, digest, signature))
+        if (!calculate_last_R_verify(
+                last_R, ring, e_i_0, i, digest, signature))
             return false;
 
+        // Add this ring to e0
         extend_data(e0_data, last_R);
     }
     extend_data(e0_data, digest);
