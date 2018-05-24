@@ -54,6 +54,12 @@ BOOST_AUTO_TEST_CASE(block__locator_size__zero_backoff__returns_top_plus_one)
     BOOST_REQUIRE_EQUAL(chain::block::locator_size(top), top + 1);
 }
 
+BOOST_AUTO_TEST_CASE(block__locator_size__zero_backoff__returns_top_plus_one_regression_check)
+{
+    const auto top = 11u;
+    BOOST_REQUIRE_EQUAL(chain::block::locator_size(top), top + 1);
+}
+
 BOOST_AUTO_TEST_CASE(block__locator_size__positive_backoff__returns_log_plus_eleven)
 {
     const auto top = 138u;
