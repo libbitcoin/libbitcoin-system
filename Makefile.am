@@ -321,6 +321,7 @@ test_libbitcoin_test_SOURCES = \
     test/utility/data.cpp \
     test/utility/endian.cpp \
     test/utility/png.cpp \
+    test/utility/property_tree.cpp \
     test/utility/random.cpp \
     test/utility/serializer.cpp \
     test/utility/stream.cpp \

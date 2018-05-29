@@ -213,6 +213,30 @@ BC_API pt::ptree property_tree(const hash_digest& hash, size_t height,
  */
 BC_API pt::ptree property_tree(const settings_list& settings);
 
+/**
+ * Create a property tree for an error code with a corresponding sequence.
+ * @param[in]  code     The error code.
+ * @param[in]  sequence The sequence.
+ * @returns             A new property tree containing the error and sequence.
+ */
+BC_API pt::ptree property_tree(const std::error_code& code, uint32_t sequence);
+
+/**
+ * Create a property tree for a block height with a corresponding sequence.
+ * @param[in]  height   The block height.
+ * @param[in]  sequence The sequence.
+ * @returns             A new property tree containing the height and sequence.
+ */
+BC_API pt::ptree property_tree(uint64_t height, uint32_t sequence);
+
+/**
+ * Create a property tree from a json-string.
+ * @param[in]  json   A string containing json data.
+ * @returns           A new property tree containing the json equivalent
+ *                    fields. An empty property tree if the json is ill-formed.
+ */
+BC_API pt::ptree property_tree(const std::string& json);
+
 } // namespace libbitcoin
 
 #include <bitcoin/bitcoin/impl/utility/property_tree.ipp>
