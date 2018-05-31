@@ -79,6 +79,14 @@ public:
 
     /**
      * Initialization constructor.
+     * @param[in]  scheme  The scheme to initialize with.
+     * @param[in]  host    The host name or ip address to initialize with.
+     * @param[in]  port    The port to initialize with.
+     */
+    endpoint(const std::string& scheme, const std::string& host, uint16_t port);
+
+    /**
+     * Initialization constructor.
      * @param[in]  endpoint  The endpoint addresss to initialize with.
      */
     endpoint(const asio::endpoint& host);
@@ -120,6 +128,15 @@ public:
      * @return The endpoint in the [scheme://]host[:port] form.
      */
     std::string to_string() const;
+
+    /**
+     * Return a new endpoint that replaces host instances of "*" with
+     * "localhost".  This is intended for clients that wish to connect
+     * to a service that has been configured to bind to all
+     * interfaces.
+     * @return The endpoint in the [scheme://]host[:port] form.
+     */
+    endpoint to_local() const;
 
     /**
      * Override the equality operator.

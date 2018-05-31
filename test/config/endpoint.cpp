@@ -86,6 +86,24 @@ BOOST_AUTO_TEST_CASE(endpoint__construct__scheme_host__expected_values)
     BOOST_REQUIRE_EQUAL(host.port(), 0u);
 }
 
+BOOST_AUTO_TEST_CASE(endpoint__to_local__scheme_host_port__expected_values)
+{
+    endpoint original("tcp://*:12345");
+    const auto host = original.to_local();
+    BOOST_REQUIRE_EQUAL(host.scheme(), "tcp");
+    BOOST_REQUIRE_EQUAL(host.host(), "localhost");
+    BOOST_REQUIRE_EQUAL(host.port(), 12345u);
+}
+
+BOOST_AUTO_TEST_CASE(endpoint__to_local__host_port__expected_values)
+{
+    endpoint original("*:12345");
+    const auto host = original.to_local();
+    BOOST_REQUIRE_EQUAL(host.scheme(), "");
+    BOOST_REQUIRE_EQUAL(host.host(), "localhost");
+    BOOST_REQUIRE_EQUAL(host.port(), 12345u);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

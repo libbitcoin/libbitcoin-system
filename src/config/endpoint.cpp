@@ -61,6 +61,12 @@ endpoint::endpoint(const std::string& host, uint16_t port)
 {
 }
 
+endpoint::endpoint(const std::string& scheme, const std::string& host,
+    uint16_t port)
+  : scheme_(scheme), host_(host), port_(port)
+{
+}
+
 endpoint::endpoint(const asio::endpoint& host)
   : endpoint(host.address(), host.port())
 {
@@ -91,6 +97,12 @@ std::string endpoint::to_string() const
     std::stringstream value;
     value << *this;
     return value.str();
+}
+
+endpoint endpoint::to_local() const
+{
+    const auto host = host_ == "*" ? "localhost" : host_;
+    return endpoint(scheme_, host, port_);
 }
 
 endpoint::operator bool() const
