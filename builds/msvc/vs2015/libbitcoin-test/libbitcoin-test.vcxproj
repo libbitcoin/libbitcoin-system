@@ -161,6 +161,7 @@
     <ClCompile Include="..\..\..\..\test\utility\data.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\endian.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\png.cpp" />
+    <ClCompile Include="..\..\..\..\test\utility\property_tree.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\random.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\serializer.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\stream.cpp" />
