@@ -276,6 +276,9 @@
     <ClCompile Include="..\..\..\..\test\utility\png.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\utility\property_tree.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\utility\random.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
