@@ -34,6 +34,8 @@ static BC_CONSTEXPR uint8_t ec_even_sign = 2;
 static BC_CONSTEXPR size_t ec_secret_size = 32;
 typedef byte_array<ec_secret_size> ec_secret;
 
+typedef std::vector<ec_secret> secret_list;
+
 /// Compressed public key:
 static BC_CONSTEXPR size_t ec_compressed_size = 33;
 typedef byte_array<ec_compressed_size> ec_compressed;
@@ -80,6 +82,14 @@ static BC_CONSTEXPR ec_uncompressed null_uncompressed_point =
 
 // Add and multiply EC values
 // ----------------------------------------------------------------------------
+
+/// Negate a scalar
+/// return false on failure
+BC_API bool ec_negate(ec_secret& scalar);
+
+/// Invert a point (flip on Y axis)
+/// return false on failure
+BC_API bool ec_negate(ec_compressed& point);
 
 /// Compute the sum a += G*b, where G is the curve's generator point.
 /// return false on failure (such as infinity or zero).
