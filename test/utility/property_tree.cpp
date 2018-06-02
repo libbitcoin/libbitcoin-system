@@ -31,12 +31,12 @@ BOOST_AUTO_TEST_CASE(property_tree__property_tree__value__expected_json)
     {
         "{\"sequence\":\"101\",\"command\":\"query fetch-tx\",\"arguments\":\"4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b\"}"
     };
-    const auto input = bc::property_tree(json);
-    BOOST_REQUIRE_EQUAL(input.get<uint32_t>("sequence"), 101u);
-    BOOST_REQUIRE_EQUAL(input.get<std::string>("command"),
-        std::string("query fetch-tx"));
-    BOOST_REQUIRE_EQUAL(input.get<std::string>("arguments"),
-        std::string("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"));
+    boost::property_tree::ptree tree;
+    const auto result = bc::property_tree(tree, json);
+    BOOST_REQUIRE_EQUAL(result, true);
+    BOOST_REQUIRE_EQUAL(tree.get<uint32_t>("sequence"), 101u);
+    BOOST_REQUIRE_EQUAL(tree.get<std::string>("command"), std::string("query fetch-tx"));
+    BOOST_REQUIRE_EQUAL(tree.get<std::string>("arguments"), std::string("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"));
 }
 
 BOOST_AUTO_TEST_CASE(property_tree__property_tree__value__expected_empty)
@@ -45,8 +45,9 @@ BOOST_AUTO_TEST_CASE(property_tree__property_tree__value__expected_empty)
     {
         "{\"sequence\":\"101\" \"arguments\";\"test\"}"
     };
-    const auto input = bc::property_tree(invalid_json);
-    BOOST_REQUIRE_EQUAL(input.empty(), true);
+    boost::property_tree::ptree tree;
+    const auto result = bc::property_tree(tree, invalid_json);
+    BOOST_REQUIRE_EQUAL(result, false);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

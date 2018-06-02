@@ -317,19 +317,18 @@ ptree property_tree(const std::error_code& code, uint32_t sequence)
 
 // safe json input parsing
 
-ptree property_tree(const std::string& json)
+bool property_tree(ptree& out, const std::string& json)
 {
-    ptree tree;
-    stream<array_source> json_stream(json.c_str(), json.size());
     try
     {
-        read_json(json_stream, tree);
+        stream<array_source> json_stream(json.c_str(), json.size());
+        read_json(json_stream, out);
+        return true;
     }
     catch (const std::exception& error)
     {
-        tree.clear();
     }
-    return tree;
+    return false;
 }
 
 } // namespace libbitcoin

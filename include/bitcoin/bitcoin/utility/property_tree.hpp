@@ -232,10 +232,11 @@ BC_API pt::ptree property_tree(uint64_t height, uint32_t sequence);
 /**
  * Create a property tree from a json-string.
  * @param[in]  json   A string containing json data.
- * @returns           A new property tree containing the json equivalent
- *                    fields. An empty property tree if the json is ill-formed.
+ * @param[out] out    A new property tree containing the json equivalent
+ *                    fields on success.
+ * @returns           True on success. False on error.
  */
-BC_API pt::ptree property_tree(const std::string& json);
+BC_API bool property_tree(pt::ptree& out, const std::string& json);
 
 } // namespace libbitcoin
 
