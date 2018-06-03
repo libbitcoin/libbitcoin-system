@@ -189,7 +189,6 @@
     <ClInclude Include="..\..\..\..\test\chain\script.hpp" />
     <ClInclude Include="..\..\..\..\test\machine\number.hpp" />
     <ClInclude Include="..\..\..\..\test\math\hash.hpp" />
-    <ClInclude Include="..\..\..\..\test\math\ring_signature.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonic.hpp" />
   </ItemGroup>
   <ItemGroup>

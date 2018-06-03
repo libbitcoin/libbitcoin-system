@@ -279,7 +279,6 @@ test_libbitcoin_test_SOURCES = \
     test/math/hash.hpp \
     test/math/limits.cpp \
     test/math/ring_signature.cpp \
-    test/math/ring_signature.hpp \
     test/math/stealth.cpp \
     test/math/uint256.cpp \
     test/message/address.cpp \
