@@ -25,7 +25,7 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(ring_signature_tests)
 
-const hash_digest valid_message
+const hash_digest valid_digest
 {
     0xff, 0xff, 0x03, 0x00, 0xfc, 0xff, 0x01, 0x00, 0x00, 0x00, 0xfc, 0xff, 0x07, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0xc0, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfe, 0xe7, 0xff
@@ -84,11 +84,18 @@ const ring_signature::proof_list valid_proofs
     }
 };
 
+BOOST_AUTO_TEST_CASE(ring_signature__digest__always__valid)
+{
+    const data_chunk message{ 0x42 };
+    const auto expected_digest = base16_literal("0095df12de02a8e238fdb0e0420a294914d687d3021c36af672c251d23ebfd31");
+    BOOST_REQUIRE(digest(message, valid_public_rings) == expected_digest);
+}
+
 BOOST_AUTO_TEST_CASE(ring_signature__sign__valid__expected_proofs)
 {
     ring_signature signature;
     signature.proofs = valid_proofs;
-    BOOST_REQUIRE(sign(signature, valid_secrets, valid_public_rings, valid_message, valid_salts));
+    BOOST_REQUIRE(sign(signature, valid_secrets, valid_public_rings, valid_digest, valid_salts));
 
     BOOST_REQUIRE(std::equal(signature.proofs[0][0].begin(), signature.proofs[0][0].end(), valid_proofs[0][0].begin()));
     BOOST_REQUIRE(std::equal(signature.proofs[0][1].begin(), signature.proofs[0][1].end(), valid_proofs[0][1].begin()));
@@ -109,11 +116,11 @@ BOOST_AUTO_TEST_CASE(ring_signature__verify__valid__round_trip)
 {
     ring_signature signature;
     signature.proofs = valid_proofs;
-    BOOST_REQUIRE(sign(signature, valid_secrets, valid_public_rings, valid_message, valid_salts));
-    BOOST_REQUIRE(verify(valid_public_rings, valid_message, signature));
+    BOOST_REQUIRE(sign(signature, valid_secrets, valid_public_rings, valid_digest, valid_salts));
+    BOOST_REQUIRE(verify(valid_public_rings, valid_digest, signature));
 }
 
-const hash_digest negative_message
+const hash_digest negative_digest
 {
     0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfe, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0x01, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x03
@@ -251,10 +258,10 @@ BOOST_AUTO_TEST_CASE(ring_signature__verify__negative__false)
     ring_signature signature;
     signature.challenge = negative_challenge;
     signature.proofs = negative_proofs;
-    BOOST_REQUIRE(!verify(negative_public_rings, negative_message, signature));
+    BOOST_REQUIRE(!verify(negative_public_rings, negative_digest, signature));
 }
 
-const hash_digest faulty_message
+const hash_digest faulty_digest
 {
     0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff, 0xf3, 0xff, 0x01, 0x80, 0x9f,
     0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00
@@ -380,7 +387,7 @@ BOOST_AUTO_TEST_CASE(ring_signature__verify__faulty__false)
     ring_signature signature;
     signature.challenge = faulty_challenge;
     signature.proofs = faulty_proofs;
-    BOOST_REQUIRE(!verify(faulty_public_rings, faulty_message, signature));
+    BOOST_REQUIRE(!verify(faulty_public_rings, faulty_digest, signature));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
