@@ -325,10 +325,10 @@ bool property_tree(ptree& out, const std::string& json)
         read_json(json_stream, out);
         return true;
     }
-    catch (const std::exception& error)
+    catch (const std::exception&)
     {
+        return false;
     }
-    return false;
 }
 
 } // namespace libbitcoin
