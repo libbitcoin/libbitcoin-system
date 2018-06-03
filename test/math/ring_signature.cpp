@@ -19,7 +19,7 @@
 #include <random>
 #include <boost/test/unit_test.hpp>
 #include <bitcoin/bitcoin.hpp>
-#include "ring_signature_vectors.hpp"
+#include "ring_signature.hpp"
 
 using namespace bc;
 

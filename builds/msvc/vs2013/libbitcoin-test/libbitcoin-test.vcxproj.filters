@@ -356,7 +356,7 @@
     <ClInclude Include="..\..\..\..\test\math\hash.hpp">
       <Filter>src\math</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\test\math\ring_signature_vectors.hpp">
+    <ClInclude Include="..\..\..\..\test\math\ring_signature.hpp">
       <Filter>src\math</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\wallet\mnemonic.hpp">
