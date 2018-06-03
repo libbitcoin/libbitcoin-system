@@ -144,6 +144,9 @@
     <ClCompile Include="..\..\..\..\test\math\limits.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\math\ring_signature.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\stealth.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
@@ -351,6 +354,9 @@
       <Filter>src\machine</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\math\hash.hpp">
+      <Filter>src\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\math\ring_signature_vectors.hpp">
       <Filter>src\math</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\wallet\mnemonic.hpp">

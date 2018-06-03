@@ -111,6 +111,7 @@
     <ClCompile Include="..\..\..\..\test\math\elliptic_curve.cpp" />
     <ClCompile Include="..\..\..\..\test\math\hash.cpp" />
     <ClCompile Include="..\..\..\..\test\math\limits.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\ring_signature.cpp" />
     <ClCompile Include="..\..\..\..\test\math\stealth.cpp" />
     <ClCompile Include="..\..\..\..\test\math\uint256.cpp" />
     <ClCompile Include="..\..\..\..\test\message\address.cpp" />
@@ -188,6 +189,7 @@
     <ClInclude Include="..\..\..\..\test\chain\script.hpp" />
     <ClInclude Include="..\..\..\..\test\machine\number.hpp" />
     <ClInclude Include="..\..\..\..\test\math\hash.hpp" />
+    <ClInclude Include="..\..\..\..\test\math\ring_signature_vectors.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonic.hpp" />
   </ItemGroup>
   <ItemGroup>

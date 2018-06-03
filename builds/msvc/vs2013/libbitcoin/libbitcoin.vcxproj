@@ -171,6 +171,7 @@
     <ClCompile Include="..\..\..\..\src\math\external\sha512.c" />
     <ClCompile Include="..\..\..\..\src\math\external\zeroize.c" />
     <ClCompile Include="..\..\..\..\src\math\hash.cpp" />
+    <ClCompile Include="..\..\..\..\src\math\ring_signature.cpp" />
     <ClCompile Include="..\..\..\..\src\math\secp256k1_initializer.cpp" />
     <ClCompile Include="..\..\..\..\src\math\stealth.cpp" />
     <ClCompile Include="..\..\..\..\src\message\address.cpp" />
@@ -349,6 +350,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\elliptic_curve.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\hash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\limits.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\ring_signature.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\stealth.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\uint256.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\address.hpp" />

@@ -92,8 +92,8 @@ src_libbitcoin_la_SOURCES = \
     src/math/checksum.cpp \
     src/math/crypto.cpp \
     src/math/elliptic_curve.cpp \
-    src/math/ring_signature.cpp \
     src/math/hash.cpp \
+    src/math/ring_signature.cpp \
     src/math/secp256k1_initializer.cpp \
     src/math/secp256k1_initializer.hpp \
     src/math/stealth.cpp \
@@ -279,6 +279,7 @@ test_libbitcoin_test_SOURCES = \
     test/math/hash.hpp \
     test/math/limits.cpp \
     test/math/ring_signature.cpp \
+    test/math/ring_signature_vectors.hpp \
     test/math/stealth.cpp \
     test/math/uint256.cpp \
     test/message/address.cpp \
