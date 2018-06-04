@@ -57,8 +57,11 @@ public:
         uint64_t originator = 0;
         chain_state::ptr state = nullptr;
 
-        /// If determined the tx exists at the link (in any state).
+        /// Tx currently exists at the link (in any state).
         uint64_t link = unlinked;
+
+        /// Tx existed before being written (in the current pass).
+        bool existed = false;
 
         /// Tx is in a candidate chain block (and valid there).
         bool candidate = false;
