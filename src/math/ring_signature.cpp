@@ -22,6 +22,7 @@
 #include <map>
 #include <numeric>
 #include <secp256k1.h>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/wallet/hd_private.hpp>
 
@@ -44,14 +45,9 @@ ec_secret borromean_hash(const hash_digest& M, const R_Type& R, uint32_t i,
     return sha256_hash(data);
 }
 
-static bool is_zero(const ec_secret& scalar)
+inline bool is_null(const ec_secret& scalar)
 {
-    const auto is_zero = [](ec_secret::value_type value)
-    {
-        return value == 0;
-    };
-
-    return std::all_of(scalar.begin(), scalar.end(), is_zero);
+    return scalar == null_hash;
 }
 
 // Take a list of secret keys and generate a mapping from public key -> secret.
@@ -176,7 +172,7 @@ static bool calculate_last_R_signing(ec_compressed& R_i_j,
 
         // Calculate e and R until the end of this ring.
         const auto e_i_j = borromean_hash(digest, R_i_j, i, j);
-        if (is_zero(e_i_j))
+        if (is_null(e_i_j))
             return false;
 
         if (!calculate_R(R_i_j, s, e_i_j, ring[j]))
@@ -229,7 +225,7 @@ static bool calculate_e_at_known_key_index(ec_secret& e_i_j,
             return false;
 
         e_i_j = borromean_hash(digest, R_i_j, i, j + 1);
-        if (is_zero(e_i_j))
+        if (is_null(e_i_j))
             return false;
     }
 
@@ -247,7 +243,7 @@ static bool join_rings(ring_signature& out, const key_rings& rings,
 
         // Calculate starting e value of this current ring.
         auto e_i_j = borromean_hash(digest, out.challenge, i, 0);
-        if (is_zero(e_i_j))
+        if (is_null(e_i_j))
             return false;
 
         if (!calculate_e_at_known_key_index(e_i_j, out, ring, digest, i,
@@ -263,7 +259,7 @@ static bool join_rings(ring_signature& out, const key_rings& rings,
 
         // Close the ring using this calculation: s = k - e x.
         auto& s = out.proofs[i][known_key_index];
-        if (!calculate_s(s, salts[i], e_i_j, secret) || is_zero(s))
+        if (!calculate_s(s, salts[i], e_i_j, secret) || is_null(s))
             return false;
     }
 
@@ -280,7 +276,7 @@ static bool calculate_last_R_verify(ec_compressed& R_i_j,
     {
         const auto& s = signature.proofs[i][j];
 
-        if (is_zero(s) || is_zero(e_i_j))
+        if (is_null(s) || is_null(e_i_j))
             return false;
 
         if (!calculate_R(R_i_j, s, e_i_j, ring[j]))
