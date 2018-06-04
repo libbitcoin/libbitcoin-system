@@ -92,8 +92,8 @@ src_libbitcoin_la_SOURCES = \
     src/math/checksum.cpp \
     src/math/crypto.cpp \
     src/math/elliptic_curve.cpp \
-    src/math/ring_signature.cpp \
     src/math/hash.cpp \
+    src/math/ring_signature.cpp \
     src/math/secp256k1_initializer.cpp \
     src/math/secp256k1_initializer.hpp \
     src/math/stealth.cpp \
