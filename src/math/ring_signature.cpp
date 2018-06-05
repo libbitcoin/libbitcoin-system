@@ -316,7 +316,7 @@ bool sign(ring_signature& out, const secret_list& secrets,
     const secret_list& salts)
 {
     // Guard against overflow.
-    if (rings.size() > max_uint32 - 1u)
+    if (rings.size() >= max_uint32)
         return false;
 
     secret_keys_map secret_keys;
@@ -344,7 +344,7 @@ bool verify(const key_rings& rings, const hash_digest& digest,
     const ring_signature& signature)
 {
     // Guard against overflow.
-    if (rings.size() > max_uint32 - 1u)
+    if (rings.size() >= max_uint32)
         return false;
 
     data_chunk e0_data;
