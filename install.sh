@@ -279,8 +279,8 @@ fi
 # Set the prefix-based package config directory.
 PREFIX_PKG_CONFIG_DIR="$PREFIX/lib/pkgconfig"
 
-# Augment PKG_CONFIG_PATH search path with our prefix.
-export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$PREFIX_PKG_CONFIG_DIR"
+# Prioritize prefix package config in PKG_CONFIG_PATH search path.
+export PKG_CONFIG_PATH="$PREFIX_PKG_CONFIG_DIR:$PKG_CONFIG_PATH"
 
 # Set a package config save path that can be passed via our builds.
 with_pkgconfigdir="--with-pkgconfigdir=$PREFIX_PKG_CONFIG_DIR"
