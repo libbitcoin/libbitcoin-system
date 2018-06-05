@@ -122,7 +122,7 @@ static bool generate_known_indexes(index_list& out, const key_rings& rings,
     auto known_keys_by_ring = partition_keys_into_rings(secret_keys, rings);
     BITCOIN_ASSERT(known_keys_by_ring.size() == rings.size());
 
-    auto empty = [](const point_list& ring)
+    const auto empty = [](const point_list& ring)
     {
         return ring.empty();
     };
@@ -344,7 +344,7 @@ bool verify(const key_rings& rings, const hash_digest& digest,
     const ring_signature& signature)
 {
     // Guard against overflow.
-    if (rings.size() > max_uint32 - 1)
+    if (rings.size() > max_uint32 - 1u)
         return false;
 
     data_chunk e0_data;
