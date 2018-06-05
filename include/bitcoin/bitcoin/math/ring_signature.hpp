@@ -19,7 +19,11 @@
 #ifndef LIBBITCOIN_RING_SIGNATURE_HPP
 #define LIBBITCOIN_RING_SIGNATURE_HPP
 
+#include <vector>
+#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 
