@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <map>
 #include <numeric>
+#include <vector>
 #include <secp256k1.h>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
@@ -31,8 +32,12 @@ namespace libbitcoin {
 typedef std::vector<uint32_t> index_list;
 typedef std::map<ec_compressed, ec_secret> secret_keys_map;
 
-template <typename R_Type>
-ec_secret borromean_hash(const hash_digest& M, const R_Type& R, uint32_t i,
+inline bool is_null(const ec_secret& scalar)
+{
+    return scalar == null_hash;
+}
+
+static ec_secret borromean_hash(const hash_digest& M, data_slice R, uint32_t i,
     uint32_t j)
 {
     // e = H(M || R || i || j)
@@ -43,11 +48,6 @@ ec_secret borromean_hash(const hash_digest& M, const R_Type& R, uint32_t i,
     serial.write_4_bytes_big_endian(i);
     serial.write_4_bytes_big_endian(j);
     return sha256_hash(data);
-}
-
-inline bool is_null(const ec_secret& scalar)
-{
-    return scalar == null_hash;
 }
 
 // Take a list of secret keys and generate a mapping from public key -> secret.
@@ -122,7 +122,7 @@ static bool generate_known_indexes(index_list& out, const key_rings& rings,
     auto known_keys_by_ring = partition_keys_into_rings(secret_keys, rings);
     BITCOIN_ASSERT(known_keys_by_ring.size() == rings.size());
 
-    auto empty = [](const point_list& ring)
+    const auto empty = [](const point_list& ring)
     {
         return ring.empty();
     };
@@ -316,7 +316,7 @@ bool sign(ring_signature& out, const secret_list& secrets,
     const secret_list& salts)
 {
     // Guard against overflow.
-    if (rings.size() > max_uint32)
+    if (rings.size() >= max_uint32)
         return false;
 
     secret_keys_map secret_keys;
@@ -344,7 +344,7 @@ bool verify(const key_rings& rings, const hash_digest& digest,
     const ring_signature& signature)
 {
     // Guard against overflow.
-    if (rings.size() > max_uint32)
+    if (rings.size() >= max_uint32)
         return false;
 
     data_chunk e0_data;
