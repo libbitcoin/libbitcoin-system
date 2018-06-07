@@ -138,12 +138,14 @@ static bool generate_known_indexes(index_list& out, const key_rings& rings,
 static bool calculate_R(ec_compressed& out, const ec_secret& s,
     const ec_secret& e, const ec_compressed& ring_key)
 {
-    ec_compressed sG;
     auto eP = ring_key;
 
+    ec_compressed sG;
+    if (!secret_to_public(sG, s))
+        return false;
+
     // R = s G + e P
-    return ec_multiply(eP, e) && secret_to_public(sG, s) && 
-        ec_sum(out, { sG, eP });
+    return ec_multiply(eP, e) && ec_sum(out, { sG, eP });
 }
 
 static bool calculate_s(ec_secret& out, const ec_secret& k, const ec_secret& e,
