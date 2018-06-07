@@ -56,8 +56,8 @@ QRENCODE_ARCHIVE="qrencode-3.4.4.tar.bz2"
 
 # Boost archive.
 #------------------------------------------------------------------------------
-BOOST_URL="http://downloads.sourceforge.net/project/boost/boost/1.57.0/boost_1_57_0.tar.bz2"
-BOOST_ARCHIVE="boost_1_57_0.tar.bz2"
+BOOST_URL="http://downloads.sourceforge.net/project/boost/boost/1.62.0/boost_1_62_0.tar.bz2"
+BOOST_ARCHIVE="boost_1_62_0.tar.bz2"
 
 
 # Define utility functions.
