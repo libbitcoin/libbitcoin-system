@@ -66,7 +66,7 @@ public:
     // Constructors.
     //-------------------------------------------------------------------------
 
-    block();
+    block(const settings& settings);
 
     block(block&& other);
     block(const block& other);
@@ -87,9 +87,12 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static block factory(const data_chunk& data, bool witness=false);
-    static block factory(std::istream& stream, bool witness=false);
-    static block factory(reader& source, bool witness=false);
+    static block factory(const data_chunk& data, const settings& settings,
+        bool witness=false);
+    static block factory(std::istream& stream, const settings& settings,
+        bool witness=false);
+    static block factory(reader& source, const settings& settings,
+        bool witness=false);
 
     bool from_data(const data_chunk& data, bool witness=false);
     bool from_data(std::istream& stream, bool witness=false);
@@ -124,9 +127,9 @@ public:
     // Utilities.
     //-------------------------------------------------------------------------
 
-    static block genesis_mainnet();
-    static block genesis_testnet();
-    static block genesis_regtest();
+    static block genesis_mainnet(const settings& settings);
+    static block genesis_testnet(const settings& settings);
+    static block genesis_regtest(const settings& settings);
     static size_t locator_size(size_t top);
     static indexes locator_heights(size_t top);
 

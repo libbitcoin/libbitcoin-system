@@ -39,11 +39,14 @@ public:
     typedef std::shared_ptr<merkle_block> ptr;
     typedef std::shared_ptr<const merkle_block> const_ptr;
 
-    static merkle_block factory(uint32_t version, const data_chunk& data);
-    static merkle_block factory(uint32_t version, std::istream& stream);
-    static merkle_block factory(uint32_t version, reader& source);
+    static merkle_block factory(uint32_t version, const data_chunk& data,
+        const settings& settings);
+    static merkle_block factory(uint32_t version, std::istream& stream,
+        const settings& settings);
+    static merkle_block factory(uint32_t version, reader& source,
+        const settings& settings);
 
-    merkle_block();
+    merkle_block(const settings& settings);
     merkle_block(const chain::header& header, size_t total_transactions,
         const hash_list& hashes, const data_chunk& flags);
     merkle_block(chain::header&& header, size_t total_transactions,
@@ -70,14 +73,16 @@ public:
     void set_flags(const data_chunk& value);
     void set_flags(data_chunk&& value);
 
-    bool from_data(uint32_t version, const data_chunk& data);
-    bool from_data(uint32_t version, std::istream& stream);
-    bool from_data(uint32_t version, reader& source);
+    bool from_data(uint32_t version, const data_chunk& data,
+        const settings& settings);
+    bool from_data(uint32_t version, std::istream& stream,
+        const settings& settings);
+    bool from_data(uint32_t version, reader& source, const settings& settings);
     data_chunk to_data(uint32_t version) const;
     void to_data(uint32_t version, std::ostream& stream) const;
     void to_data(uint32_t version, writer& sink) const;
     bool is_valid() const;
-    void reset();
+    void reset(const settings& settings);
     size_t serialized_size(uint32_t version) const;
 
     // This class is move assignable but not copy assignable.

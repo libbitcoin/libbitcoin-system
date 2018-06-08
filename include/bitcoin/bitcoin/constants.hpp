@@ -95,31 +95,6 @@ BC_CONSTEXPR uint32_t relative_locktime_mask = 0x0000ffff;
 BC_CONSTEXPR uint32_t relative_locktime_disabled = 0x80000000;
 BC_CONSTEXPR uint32_t relative_locktime_time_locked = 0x00400000;
 
-// Timespan constants.
-//-----------------------------------------------------------------------------
-
-BC_CONSTEXPR uint32_t retargeting_factor = 4;
-BC_CONSTEXPR uint32_t easy_spacing_seconds = 20 * 60;
-BC_CONSTEXPR uint32_t target_spacing_seconds = 10 * 60;
-BC_CONSTEXPR uint32_t target_timespan_seconds = 2 * 7 * 24 * 60 * 60;
-BC_CONSTEXPR uint32_t timestamp_future_seconds = 2 * 60 * 60;
-BC_CONSTEXPR uint32_t retarget_proof_of_work_limit = 0x1d00ffff;
-BC_CONSTEXPR uint32_t no_retarget_proof_of_work_limit = 0x207fffff;
-BC_CONSTFUNC uint32_t work_limit(bool retarget=true)
-{
-    return retarget ? retarget_proof_of_work_limit : no_retarget_proof_of_work_limit;
-}
-
-// The upper and lower bounds for the retargeting timespan.
-BC_CONSTEXPR uint32_t min_timespan =
-    target_timespan_seconds / retargeting_factor;
-BC_CONSTEXPR uint32_t max_timespan =
-    target_timespan_seconds * retargeting_factor;
-
-// The target number of blocks for 2 weeks of work (2016 blocks).
-BC_CONSTEXPR size_t retargeting_interval =
-    target_timespan_seconds / target_spacing_seconds;
-
 // Fork constants.
 //-----------------------------------------------------------------------------
 

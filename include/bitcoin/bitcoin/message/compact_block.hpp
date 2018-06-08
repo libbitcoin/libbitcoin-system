@@ -39,11 +39,14 @@ public:
     typedef mini_hash short_id;
     typedef mini_hash_list short_id_list;
 
-    static compact_block factory(uint32_t version, const data_chunk& data);
-    static compact_block factory(uint32_t version, std::istream& stream);
-    static compact_block factory(uint32_t version, reader& source);
+    static compact_block factory(uint32_t version, const data_chunk& data,
+        const settings& settings);
+    static compact_block factory(uint32_t version, std::istream& stream,
+        const settings& settings);
+    static compact_block factory(uint32_t version, reader& source,
+        const settings& settings);
 
-    compact_block();
+    compact_block(const settings& settings);
     compact_block(const chain::header& header, uint64_t nonce,
         const short_id_list& short_ids,
         const prefilled_transaction::list& transactions);
@@ -71,14 +74,16 @@ public:
     void set_transactions(const prefilled_transaction::list& value);
     void set_transactions(prefilled_transaction::list&& value);
 
-    bool from_data(uint32_t version, const data_chunk& data);
-    bool from_data(uint32_t version, std::istream& stream);
-    bool from_data(uint32_t version, reader& source);
+    bool from_data(uint32_t version, const data_chunk& data,
+        const settings& settings);
+    bool from_data(uint32_t version, std::istream& stream,
+        const settings& settings);
+    bool from_data(uint32_t version, reader& source, const settings& settings);
     data_chunk to_data(uint32_t version) const;
     void to_data(uint32_t version, std::ostream& stream) const;
     void to_data(uint32_t version, writer& sink) const;
     bool is_valid() const;
-    void reset();
+    void reset(const settings& settings);
     size_t serialized_size(uint32_t version) const;
 
     // This class is move assignable but not copy assignable.

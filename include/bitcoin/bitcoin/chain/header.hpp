@@ -28,6 +28,7 @@
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/settings.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -74,17 +75,17 @@ public:
     // Constructors.
     //-------------------------------------------------------------------------
 
-    header();
+    header(const settings& settings);
 
     header(header&& other);
     header(const header& other);
 
     header(uint32_t version, const hash_digest& previous_block_hash,
         const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce);
+        uint32_t nonce, const settings& settings);
     header(uint32_t version, hash_digest&& previous_block_hash,
         hash_digest&& merkle, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce);
+        uint32_t nonce, const settings& settings);
 
     // Operators.
     //-------------------------------------------------------------------------
@@ -98,12 +99,16 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static header factory(const data_chunk& data, bool wire=true);
-    static header factory(std::istream& stream, bool wire=true);
-    static header factory(reader& source, bool wire=true);
-    static header factory(reader& source, hash_digest&& hash, bool wire=true);
-    static header factory(reader& source, const hash_digest& hash,
+    static header factory(const data_chunk& data, const settings& settings,
         bool wire=true);
+    static header factory(std::istream& stream, const settings& settings,
+        bool wire=true);
+    static header factory(reader& source, const settings& settings,
+        bool wire=true);
+    static header factory(reader& source, hash_digest&& hash,
+        const settings& settings, bool wire=true);
+    static header factory(reader& source, const hash_digest& hash,
+        const settings& settings, bool wire=true);
 
     bool from_data(const data_chunk& data, bool wire=true);
     bool from_data(std::istream& stream, bool wire=true);
@@ -186,6 +191,7 @@ private:
     uint32_t timestamp_;
     uint32_t bits_;
     uint32_t nonce_;
+    const settings& settings_;
 };
 
 } // namespace chain
