@@ -8,10 +8,16 @@
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="resource">
-      <UniqueIdentifier>{B726DF7D-6D1D-48FB-0000-000000000001}</UniqueIdentifier>
+      <UniqueIdentifier>{B726DF7D-6D1D-48FB-0000-000000000003}</UniqueIdentifier>
     </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{B726DF7D-6D1D-48FB-0000-000000000000}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\.deps">
+      <UniqueIdentifier>{B726DF7D-6D1D-48FB-0000-000000000001}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\.libs">
+      <UniqueIdentifier>{B726DF7D-6D1D-48FB-0000-000000000002}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
