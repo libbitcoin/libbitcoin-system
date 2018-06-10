@@ -19,18 +19,20 @@
 #ifndef LIBBITCOIN_RING_SIGNATURE_HPP
 #define LIBBITCOIN_RING_SIGNATURE_HPP
 
+#include <vector>
+#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 
 /**
  * key_rings is a collection of rings of public keys.
  * Each ring contains several public keys.
- * To create a valid signature, you must use at least one valid private
- * key from each ring.
- * That is given three rings [{A, B, C}, {D, E, F}, {X, Y}], then to
- * create a valid signature, we must use a private key from each of those
- * sets.
+ * Creating a valid signature requires at least one private key from each ring.
+ * That is given three rings [{A, B, C}, {D, E, F}, {X, Y}], then to create a
+ * valid signature, we must use a private key from each of those sets.
  * For example A and E and X. We can summarize this operation as:
  * (A or B or C) and (D or E or F) and (X or Y)
  */
@@ -38,16 +40,13 @@ typedef std::vector<point_list> key_rings;
 
 /**
  * A borromean ring signature.
- *
  * theta = {e_0, s_{i_j} : 0 <= i <= n, 0 <= j <= m_i}
  */
 struct ring_signature
 {
     typedef std::vector<secret_list> proof_list;
 
-    // The initial 'e' value
     ec_secret challenge;
-    // The 's' values
     proof_list proofs;
 };
 
@@ -56,7 +55,7 @@ struct ring_signature
  * Returns sha256(message || flatten(rings))
  * @return     digest   Ring signature digest
  */
-BC_API hash_digest prepare_digest(data_slice message, const key_rings& rings);
+BC_API hash_digest digest(data_slice message, const key_rings& rings);
 
 /**
  * Create a borromean ring signature.
@@ -64,10 +63,8 @@ BC_API hash_digest prepare_digest(data_slice message, const key_rings& rings);
  * For example given a ring of [{A, B, C}, {D, E, F}, {X, Y}] then we
  * must have a set of keys that satisfies this constraint:
  * (A or B or C) and (D or E or F) and (X or Y)
- *
  * @param[in]  out      The new signature.
- * @param[in]  secrets  Secret signing keys. There should be at least one key
- *                      from each ring.
+ * @param[in]  secrets  Signing keys. Should be at least one from each ring.
  * @param[in]  rings    The rings each with n_i public keys.
  * @param[in]  digest   The message digest to sign.
  * @param[in]  salts    Randomizing seed values.
@@ -79,7 +76,6 @@ BC_API bool sign(ring_signature& out, const secret_list& secrets,
 
 /**
  * Verify a borromean ring signature.
- *
  * @param[in]  rings        The rings each with N_i public keys.
  * @param[in]  digest       The message digest to verify.
  * @param[in]  signature    Signature.

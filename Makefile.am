@@ -93,8 +93,8 @@ src_libbitcoin_la_SOURCES = \
     src/math/crypto.cpp \
     src/math/ec_arithmetic.cpp \
     src/math/elliptic_curve.cpp \
-    src/math/ring_signature.cpp \
     src/math/hash.cpp \
+    src/math/ring_signature.cpp \
     src/math/secp256k1_initializer.cpp \
     src/math/secp256k1_initializer.hpp \
     src/math/stealth.cpp \
@@ -324,6 +324,7 @@ test_libbitcoin_test_SOURCES = \
     test/utility/data.cpp \
     test/utility/endian.cpp \
     test/utility/png.cpp \
+    test/utility/property_tree.cpp \
     test/utility/random.cpp \
     test/utility/serializer.cpp \
     test/utility/stream.cpp \

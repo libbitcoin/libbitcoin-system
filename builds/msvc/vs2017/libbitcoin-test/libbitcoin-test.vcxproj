@@ -111,6 +111,7 @@
     <ClCompile Include="..\..\..\..\test\math\elliptic_curve.cpp" />
     <ClCompile Include="..\..\..\..\test\math\hash.cpp" />
     <ClCompile Include="..\..\..\..\test\math\limits.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\ring_signature.cpp" />
     <ClCompile Include="..\..\..\..\test\math\stealth.cpp" />
     <ClCompile Include="..\..\..\..\test\math\uint256.cpp" />
     <ClCompile Include="..\..\..\..\test\message\address.cpp" />
@@ -161,6 +162,7 @@
     <ClCompile Include="..\..\..\..\test\utility\data.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\endian.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\png.cpp" />
+    <ClCompile Include="..\..\..\..\test\utility\property_tree.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\random.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\serializer.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\stream.cpp" />

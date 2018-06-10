@@ -18,6 +18,7 @@
  */
 #include <bitcoin/bitcoin/math/ec_arithmetic.hpp>
 
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
@@ -65,11 +66,7 @@ ec_scalar& ec_scalar::operator=(const ec_secret& secret)
 
 bool ec_scalar::is_zero() const
 {
-    return std::all_of(scalar_.begin(), scalar_.end(),
-        [](ec_secret::value_type value)
-        {
-            return value == 0;
-        });
+    return scalar_ == null_hash;
 }
 bool ec_scalar::is_valid() const
 {
