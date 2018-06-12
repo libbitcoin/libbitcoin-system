@@ -124,10 +124,10 @@ BC_CONSTEXPR size_t retargeting_interval =
 //-----------------------------------------------------------------------------
 
 // Consensus rule change activation and enforcement parameters.
-BC_CONSTEXPR size_t first_version = 1;
-BC_CONSTEXPR size_t bip34_version = 2;
-BC_CONSTEXPR size_t bip66_version = 3;
-BC_CONSTEXPR size_t bip65_version = 4;
+BC_CONSTEXPR uint32_t first_version = 1;
+BC_CONSTEXPR uint32_t bip34_version = 2;
+BC_CONSTEXPR uint32_t bip66_version = 3;
+BC_CONSTEXPR uint32_t bip65_version = 4;
 BC_CONSTEXPR uint32_t bip9_version_bit0 = 1u << 0;
 BC_CONSTEXPR uint32_t bip9_version_bit1 = 1u << 1;
 BC_CONSTEXPR uint32_t bip9_version_base = 0x20000000;
