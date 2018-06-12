@@ -170,9 +170,9 @@ chain_state::activations chain_state::activation(const data& values,
     // CONSENSUS: Though unspecified in bip34, the satoshi implementation
     // performed this comparison using the signed integer version value.
     //*************************************************************************
-    const auto ge = [](uint32_t value, size_t version)
+    const auto ge = [](uint32_t value, uint32_t version)
     {
-        return static_cast<int32_t>(value) >= version;
+        return static_cast<int32_t>(value) >= static_cast<int32_t>(version);
     };
 
     // Declare bip34-based version predicates.
