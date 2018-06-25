@@ -23,7 +23,8 @@
 #include <numeric>
 #include <vector>
 #include <secp256k1.h>
-#include <bitcoin/bitcoin/math/ec_arithmetic.hpp>
+#include <bitcoin/bitcoin/math/ec_point.hpp>
+#include <bitcoin/bitcoin/math/ec_scalar.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/wallet/hd_private.hpp>
 
