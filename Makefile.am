@@ -276,6 +276,7 @@ test_libbitcoin_test_SOURCES = \
     test/machine/opcode.cpp \
     test/machine/operation.cpp \
     test/math/checksum.cpp \
+    test/math/ec_arithmetic.cpp \
     test/math/elliptic_curve.cpp \
     test/math/hash.cpp \
     test/math/hash.hpp \

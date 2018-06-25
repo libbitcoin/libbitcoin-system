@@ -35,7 +35,6 @@ public:
     ec_scalar& operator=(uint64_t value);
     ec_scalar& operator=(const ec_secret& secret);
 
-    bool is_zero() const;
     bool is_valid() const;
     operator bool() const;
 
@@ -49,6 +48,8 @@ public:
 
     const ec_secret& secret() const;
     operator ec_secret() const;
+
+    static const ec_scalar zero;
 
 private:
     void invalidate();
