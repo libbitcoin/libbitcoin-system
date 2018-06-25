@@ -24,6 +24,7 @@
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/math/ec_point.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
@@ -36,6 +37,7 @@ class payment_address;
 /// Use to pass an ec point as either ec_compressed or ec_uncompressed.
 /// ec_public doesn't carry a version for address creation or base58 encoding.
 class BC_API ec_public
+ : public ec_point
 {
 public:
     static const uint8_t compressed_even;

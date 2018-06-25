@@ -25,6 +25,7 @@
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
+#include <bitcoin/bitcoin/math/ec_scalar.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/wallet/ec_public.hpp>
@@ -43,6 +44,7 @@ typedef byte_array<wif_compressed_size> wif_compressed;
 
 /// Use to pass an ec secret with compresson and version information.
 class BC_API ec_private
+ : public ec_scalar
 {
 public:
     static const uint8_t compressed_sentinel;
