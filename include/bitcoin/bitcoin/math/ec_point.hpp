@@ -16,50 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_EC_ARITHMETIC_HPP
-#define LIBBITCOIN_EC_ARITHMETIC_HPP
+#ifndef LIBBITCOIN_EC_POINT_HPP
+#define LIBBITCOIN_EC_POINT_HPP
 
+#include <bitcoin/bitcoin/math/ec_scalar.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 
 namespace libbitcoin {
-
-class ec_scalar
-{
-public:
-    ec_scalar();
-    ec_scalar(uint64_t value);
-    ec_scalar(const ec_secret& secret);
-
-    void reset();
-
-    ec_scalar& operator=(uint64_t value);
-    ec_scalar& operator=(const ec_secret& secret);
-
-    bool is_zero() const;
-    bool is_valid() const;
-    operator bool() const;
-
-    ec_scalar operator-() const;
-    ec_scalar& operator+=(const ec_scalar& rhs);
-    ec_scalar& operator-=(const ec_scalar& rhs);
-
-    friend ec_scalar operator+(ec_scalar lhs, const ec_scalar& rhs);
-    friend ec_scalar operator-(ec_scalar lhs, const ec_scalar& rhs);
-    friend ec_scalar operator*(ec_scalar lhs, const ec_scalar& rhs);
-
-    const ec_secret& secret() const;
-    operator ec_secret() const;
-
-private:
-    void invalidate();
-
-    bool valid_ = false;
-    ec_secret scalar_;
-};
-
-ec_scalar operator+(ec_scalar lhs, const ec_scalar& rhs);
-ec_scalar operator-(ec_scalar lhs, const ec_scalar& rhs);
-ec_scalar operator*(ec_scalar lhs, const ec_scalar& rhs);
 
 class ec_point
 {
