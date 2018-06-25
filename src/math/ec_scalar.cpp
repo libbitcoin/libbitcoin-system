@@ -24,6 +24,8 @@
 
 namespace libbitcoin {
 
+const ec_scalar ec_scalar::zero = null_hash;
+
 ec_scalar::ec_scalar()
 {
 }
@@ -62,17 +64,13 @@ ec_scalar& ec_scalar::operator=(const ec_secret& secret)
     return *this;
 }
 
-bool ec_scalar::is_zero() const
-{
-    return scalar_ == null_hash;
-}
 bool ec_scalar::is_valid() const
 {
     return valid_;
 }
 ec_scalar::operator bool() const
 {
-    return is_valid() && !is_zero();
+    return is_valid() && scalar_ != null_hash;
 }
 
 ec_scalar ec_scalar::operator-() const
