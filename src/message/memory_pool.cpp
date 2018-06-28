@@ -135,7 +135,7 @@ void memory_pool::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void memory_pool::to_data(uint32_t version, writer& sink) const
+void memory_pool::to_data(uint32_t , writer& ) const
 {
 }
 
@@ -144,7 +144,7 @@ size_t memory_pool::serialized_size(uint32_t version) const
     return memory_pool::satoshi_fixed_size(version);
 }
 
-size_t memory_pool::satoshi_fixed_size(uint32_t version)
+size_t memory_pool::satoshi_fixed_size(uint32_t )
 {
     return 0;
 }

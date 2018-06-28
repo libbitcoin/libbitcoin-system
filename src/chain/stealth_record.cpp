@@ -57,10 +57,10 @@ stealth_record::stealth_record(chain::stealth_record&& other)
 }
 
 stealth_record::stealth_record(const chain::stealth_record& other)
-  : height_(0), prefix_(0),
-    unsigned_ephemeral_(null_hash),
-    public_key_hash_(null_short_hash),
-    transaction_hash_(null_hash)
+  : height_(other.height_), prefix_(other.prefix_),
+    unsigned_ephemeral_(other.unsigned_ephemeral_),
+    public_key_hash_(other.public_key_hash_),
+    transaction_hash_(other.transaction_hash_)
 {
 }
 

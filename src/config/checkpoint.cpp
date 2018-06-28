@@ -71,7 +71,7 @@ const hash_digest& checkpoint::hash() const
     return hash_;
 }
 
-const size_t checkpoint::height() const
+size_t checkpoint::height() const
 {
     return height_;
 }

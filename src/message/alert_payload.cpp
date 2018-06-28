@@ -224,7 +224,7 @@ bool alert_payload::from_data(uint32_t version, std::istream& stream)
     return from_data(version, source);
 }
 
-bool alert_payload::from_data(uint32_t version, reader& source)
+bool alert_payload::from_data(uint32_t , reader& source)
 {
     reset();
 
@@ -274,7 +274,7 @@ void alert_payload::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void alert_payload::to_data(uint32_t version, writer& sink) const
+void alert_payload::to_data(uint32_t , writer& sink) const
 {
     sink.write_4_bytes_little_endian(this->version_);
     sink.write_8_bytes_little_endian(relay_until_);
@@ -299,7 +299,7 @@ void alert_payload::to_data(uint32_t version, writer& sink) const
     sink.write_string(reserved_);
 }
 
-size_t alert_payload::serialized_size(uint32_t version) const
+size_t alert_payload::serialized_size(uint32_t ) const
 {
     size_t size = 40u +
         message::variable_uint_size(comment_.size()) + comment_.size() +

@@ -719,7 +719,7 @@ hash_digest script::to_inpoints(const transaction& tx)
 
 hash_digest script::to_sequences(const transaction& tx)
 {
-    const auto sum = [&](size_t total, const input& input)
+    const auto sum = [&](size_t total, const input& /* input */)
     {
         return total + sizeof(uint32_t);
     };
@@ -773,9 +773,10 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
 
     // Flags derived from the signature hash byte.
     const auto sighash = to_sighash_enum(sighash_type);
+
+    // const auto none = (sighash == sighash_algorithm::none);
     const auto any = (sighash_type & sighash_algorithm::anyone_can_pay) != 0;
     const auto single = (sighash == sighash_algorithm::single);
-    const auto none = (sighash == sighash_algorithm::none);
     const auto all = (sighash == sighash_algorithm::all);
 
     // 1. transaction version (4-byte little endian).

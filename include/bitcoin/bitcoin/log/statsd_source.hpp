@@ -43,7 +43,7 @@ class BC_API statsd_source
     BOOST_LOG_FORWARD_LOGGER_MEMBERS(statsd_source)
 };
 
-BOOST_LOG_INLINE_GLOBAL_LOGGER_DEFAULT(stats, statsd_source);
+BOOST_LOG_INLINE_GLOBAL_LOGGER_DEFAULT(stats, statsd_source)
 
 #define BC_STATS_SIMPLE(name, sequence) \
     BOOST_LOG_WITH_PARAMS(bc::log::stats::get(), \

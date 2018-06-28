@@ -143,7 +143,7 @@ bool inventory_vector::from_data(uint32_t version,
     return from_data(version, source);
 }
 
-bool inventory_vector::from_data(uint32_t version,
+bool inventory_vector::from_data(uint32_t ,
     reader& source)
 {
     reset();
@@ -177,7 +177,7 @@ void inventory_vector::to_data(uint32_t version,
     to_data(version, sink);
 }
 
-void inventory_vector::to_data(uint32_t version,
+void inventory_vector::to_data(uint32_t ,
     writer& sink) const
 {
     const auto raw_type = inventory_vector::to_number(type_);
@@ -190,7 +190,7 @@ size_t inventory_vector::serialized_size(uint32_t version) const
     return inventory_vector::satoshi_fixed_size(version);
 }
 
-size_t inventory_vector::satoshi_fixed_size(uint32_t version)
+size_t inventory_vector::satoshi_fixed_size(uint32_t )
 {
     return sizeof(hash_) + sizeof(uint32_t);
 }
@@ -205,7 +205,7 @@ bool inventory_vector::is_block_type() const
 
 bool inventory_vector::is_transaction_type() const
 {
-    return type_ == type_id::witness_transaction 
+    return type_ == type_id::witness_transaction
         || type_ == type_id::transaction;
 }
 

@@ -176,7 +176,7 @@ void merkle_block::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void merkle_block::to_data(uint32_t version, writer& sink) const
+void merkle_block::to_data(uint32_t , writer& sink) const
 {
     header_.to_data(sink);
 
@@ -191,7 +191,7 @@ void merkle_block::to_data(uint32_t version, writer& sink) const
     sink.write_bytes(flags_);
 }
 
-size_t merkle_block::serialized_size(uint32_t version) const
+size_t merkle_block::serialized_size(uint32_t ) const
 {
     return header_.serialized_size() + 4u +
         message::variable_uint_size(hashes_.size()) + (hash_size * hashes_.size()) +

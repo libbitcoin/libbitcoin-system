@@ -157,7 +157,7 @@ const ec_compressed& ec_public::point() const
     return point_;
 }
 
-const bool ec_public::compressed() const
+bool ec_public::compressed() const
 {
     return compress_;
 }

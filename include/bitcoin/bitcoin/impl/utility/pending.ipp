@@ -49,7 +49,7 @@ typename pending<Element>::elements pending<Element>::collection() const
 
     return elements_;
     ///////////////////////////////////////////////////////////////////////////
-};
+}
 
 template <class Element>
 size_t pending<Element>::size() const
@@ -60,7 +60,7 @@ size_t pending<Element>::size() const
 
     return elements_.size();
     ///////////////////////////////////////////////////////////////////////////
-};
+}
 
 template <class Element>
 bool pending<Element>::exists(finder match) const
@@ -193,7 +193,7 @@ void pending<Element>::close()
 
     elements_.clear();
     ///////////////////////////////////////////////////////////////////////////
-};
+}
 
 } // namespace libbitcoin
 

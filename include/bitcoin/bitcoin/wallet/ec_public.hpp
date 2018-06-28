@@ -69,7 +69,8 @@ public:
 
     /// Accessors.
     const ec_compressed& point() const;
-    const bool compressed() const;
+    uint8_t version() const;
+    bool compressed() const;
 
     /// Methods.
     bool to_data(data_chunk& out) const;

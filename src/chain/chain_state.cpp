@@ -271,7 +271,7 @@ chain_state::activations chain_state::activation(const data& values,
 
 size_t chain_state::bits_count(size_t height, uint32_t forks)
 {
-    // Mainnet doesn't use bits in retargeting. 
+    // Mainnet doesn't use bits in retargeting.
     if (script::is_enabled(forks, rule_fork::difficult))
         return 1;
 
@@ -475,7 +475,7 @@ size_t chain_state::retarget_distance(size_t height)
 
 // static
 chain_state::map chain_state::get_map(size_t height,
-    const checkpoints& checkpoints, uint32_t forks)
+    const checkpoints& /* checkpoints */, uint32_t forks)
 {
     if (height == 0)
         return {};
@@ -715,7 +715,7 @@ bool chain_state::is_valid() const
 // If there is a zero limit then the chain is never considered stale.
 bool chain_state::is_stale() const
 {
-    return stale_seconds_ != 0 && data_.timestamp.self < 
+    return stale_seconds_ != 0 && data_.timestamp.self <
         floor_subtract(static_cast<uint32_t>(zulu_time()), stale_seconds_);
 }
 
