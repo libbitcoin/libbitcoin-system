@@ -135,8 +135,8 @@ public:
     size_t signature_operations(bool bip16, bool bip141) const;
     bool extract_reserved_hash(hash_digest& out) const;
     bool extract_embedded_script(chain::script& out) const;
-    bool extract_witness_script(chain::script& out,
-        const chain::script& prevout) const;
+    ////bool extract_witness_script(chain::script& out,
+    ////    const chain::script& prevout) const;
 
 protected:
     void reset();

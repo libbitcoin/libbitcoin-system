@@ -56,7 +56,7 @@ static std::once_flag io_mutex;
 static std::once_flag icu_mutex;
 
 // Static initializer for bc::cin.
-static std::istream& cin_stream()
+std::istream& cin_stream()
 {
     std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
     static unicode_istream input(std::cin, std::wcin, utf16_buffer_size);
@@ -64,7 +64,7 @@ static std::istream& cin_stream()
 }
 
 // Static initializer for bc::cout.
-static std::ostream& cout_stream()
+std::ostream& cout_stream()
 {
     std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
     static unicode_ostream output(std::cout, std::wcout, utf16_buffer_size);
@@ -72,17 +72,12 @@ static std::ostream& cout_stream()
 }
 
 // Static initializer for bc::cerr.
-static std::ostream& cerr_stream()
+std::ostream& cerr_stream()
 {
     std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
     static unicode_ostream error(std::cerr, std::wcerr, utf16_buffer_size);
     return error;
 }
-
-// Use bc::cin in place of std::cin, etc.
-std::istream& cin = cin_stream();
-std::ostream& cout = cout_stream();
-std::ostream& cerr = cerr_stream();
 
 #ifdef WITH_ICU
 

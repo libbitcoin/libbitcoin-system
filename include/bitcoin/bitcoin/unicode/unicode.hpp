@@ -84,6 +84,10 @@
     #include <windows.h>
     #define BC_USE_LIBBITCOIN_MAIN \
         namespace libbitcoin { \
+        std::istream& cin = cin_stream(); \
+        std::ostream& cout = cout_stream(); \
+        std::ostream& cerr = cerr_stream(); \
+        \
         int main(int argc, char* argv[]); \
         } \
         \
@@ -108,6 +112,9 @@
 #else
     #define BC_USE_LIBBITCOIN_MAIN \
         namespace libbitcoin { \
+        std::istream& cin = std::cin; \
+        std::ostream& cout = std::cout; \
+        std::ostream& cerr = std::cerr; \
         int main(int argc, char* argv[]); \
         } \
         \
@@ -120,19 +127,19 @@
 namespace libbitcoin {
 
 /**
- * Use bc::cin in place of std::cin.
+ * Use bc::cin in place of std::cin, see BC_USE_LIBBITCOIN_MAIN.
  */
-extern std::istream& cin;
+std::istream& cin_stream();
 
 /**
- * Use bc::cout in place of std::cout.
+ * Use bc::cout in place of std::cout, see BC_USE_LIBBITCOIN_MAIN.
  */
-extern std::ostream& cout;
+std::ostream& cout_stream();
 
 /**
- * Use bc::cerr in place of std::cerr.
+ * Use bc::cerr in place of std::cerr, see BC_USE_LIBBITCOIN_MAIN.
  */
-extern std::ostream& cerr;
+std::ostream& cerr_stream();
 
 #ifdef WITH_ICU
 

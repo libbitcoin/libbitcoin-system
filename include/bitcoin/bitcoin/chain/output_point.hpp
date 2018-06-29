@@ -38,24 +38,27 @@ public:
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
-        /// Must be false if confirmed is false.
-        /// output spender's tx->block is indexed or confirmed not above fork. 
+        /// This value is relative to queried fork point and candidacy.
+        /// The output spender's tx->block is candidate/confirmed.
         bool spent = false;
 
-        /// The output->tx is confirmed|indexed, fork point dependent.
+        /// The output->tx is in a candidate chain block's tx.
+        bool candidate = false;
+
+        /// The output->tx is confirmed, relative to queried fork point.
         bool confirmed = false;
 
         /// The previous output is a coinbase (must verify spender maturity).
         bool coinbase = false;
 
-        /// Prevout height is used for coinbase maturity and relative lock time.
+        /// Block height (used for coinbase maturity and relative lock time).
         size_t height = 0;
 
-        /// Median time past is used for relative lock time.
+        /// Median time past of the block (used for relative lock time).
         uint32_t median_time_past = 0;
 
-        /// The output cache contains the output referenced by the input point.
-        /// If the cache.value is not_found (default) the output is not found.
+        /// The output referenced by an input's output point.
+        /// If cache.value is output::not_found then the output is missing.
         output cache;
     };
 

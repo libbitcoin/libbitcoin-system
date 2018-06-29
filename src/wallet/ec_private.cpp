@@ -28,6 +28,7 @@
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/ec_public.hpp>
+#include <bitcoin/bitcoin/wallet/hd_private.hpp>
 #include <bitcoin/bitcoin/wallet/payment_address.hpp>
 
 namespace libbitcoin {
@@ -43,6 +44,8 @@ const uint8_t ec_private::testnet_wif = 0xef;
 const uint8_t ec_private::testnet_p2kh = 0x6f;
 const uint16_t ec_private::testnet = to_version(testnet_p2kh, testnet_wif);
 
+// TODO: review construction for consistency WRT version/address_version.
+
 ec_private::ec_private()
   : valid_(false), compress_(true), version_(0), secret_(null_hash)
 {
@@ -51,6 +54,11 @@ ec_private::ec_private()
 ec_private::ec_private(const ec_private& other)
   : valid_(other.valid_), compress_(other.compress_), version_(other.version_),
     secret_(other.secret_)
+{
+}
+
+ec_private::ec_private(const data_chunk& seed, uint8_t address_version)
+  : ec_private(from_seed(seed, address_version))
 {
 }
 
@@ -93,6 +101,16 @@ bool ec_private::is_wif(data_slice decoded)
 // Factories.
 // ----------------------------------------------------------------------------
 
+ec_private ec_private::from_seed(const data_chunk& seed,
+    uint8_t address_version)
+{
+    // This technique ensures consistent secrets with BIP32 from a given seed.
+    const hd_private key(seed);
+
+    // The key is invalid if parse256(IL) >= n or 0:
+    return key ? ec_private{ key.secret(), address_version } : ec_private{};
+}
+
 ec_private ec_private::from_string(const std::string& wif,
     uint8_t address_version)
 {
@@ -112,7 +130,7 @@ ec_private ec_private::from_compressed(const wif_compressed& wif,
     if (!is_wif(wif))
         return ec_private();
 
-    const uint16_t version = to_version(address_version, wif.front());
+    const auto version = to_version(address_version, wif.front());
     const auto secret = slice<1, ec_secret_size + 1>(wif);
     return ec_private(secret, version, true);
 }
@@ -123,7 +141,7 @@ ec_private ec_private::from_uncompressed(const wif_uncompressed& wif,
     if (!is_wif(wif))
         return ec_private();
 
-    const uint16_t version = to_version(address_version, wif.front());
+    const auto version = to_version(address_version, wif.front());
     const auto secret = slice<1, ec_secret_size + 1>(wif);
     return ec_private(secret, version, false);
 }

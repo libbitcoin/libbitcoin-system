@@ -135,16 +135,16 @@ bool verify_signature(const secp256k1_context* context,
 // Add and multiply EC values
 // ----------------------------------------------------------------------------
 
-bool ec_add(ec_compressed& point, const ec_secret& secret)
+bool ec_add(ec_compressed& point, const ec_secret& scalar)
 {
     const auto context = verification.context();
-    return ec_add(context, point, secret);
+    return ec_add(context, point, scalar);
 }
 
-bool ec_add(ec_uncompressed& point, const ec_secret& secret)
+bool ec_add(ec_uncompressed& point, const ec_secret& scalar)
 {
     const auto context = verification.context();
-    return ec_add(context, point, secret);
+    return ec_add(context, point, scalar);
 }
 
 bool ec_add(ec_secret& left, const ec_secret& right)
@@ -154,16 +154,16 @@ bool ec_add(ec_secret& left, const ec_secret& right)
         right.data()) == 1;
 }
 
-bool ec_multiply(ec_compressed& point, const ec_secret& secret)
+bool ec_multiply(ec_compressed& point, const ec_secret& scalar)
 {
     const auto context = verification.context();
-    return ec_multiply(context, point, secret);
+    return ec_multiply(context, point, scalar);
 }
 
-bool ec_multiply(ec_uncompressed& point, const ec_secret& secret)
+bool ec_multiply(ec_uncompressed& point, const ec_secret& scalar)
 {
     const auto context = verification.context();
-    return ec_multiply(context, point, secret);
+    return ec_multiply(context, point, scalar);
 }
 
 bool ec_multiply(ec_secret& left, const ec_secret& right)
