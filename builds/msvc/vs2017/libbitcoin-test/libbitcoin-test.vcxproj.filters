@@ -282,7 +282,7 @@
     <ClCompile Include="..\..\..\..\test\utility\property_tree.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\utility\random.cpp">
+    <ClCompile Include="..\..\..\..\test\utility\pseudo_random.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\utility\serializer.cpp">

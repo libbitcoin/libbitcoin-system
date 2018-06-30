@@ -230,7 +230,7 @@
     <ClCompile Include="..\..\..\..\src\utility\png.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\prioritized_mutex.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\property_tree.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\random.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\scope_lock.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\sequencer.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\sequential_lock.cpp" />
@@ -421,7 +421,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\png.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\prioritized_mutex.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\property_tree.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\random.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\pseudo_random.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\resubscriber.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\scope_lock.hpp" />

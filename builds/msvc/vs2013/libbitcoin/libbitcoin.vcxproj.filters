@@ -495,7 +495,7 @@
     <ClCompile Include="..\..\..\..\src\utility\property_tree.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\random.cpp">
+    <ClCompile Include="..\..\..\..\src\utility\pseudo_random.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\scope_lock.cpp">
@@ -1064,7 +1064,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\property_tree.hpp">
       <Filter>include\bitcoin\bitcoin\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\random.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\pseudo_random.hpp">
       <Filter>include\bitcoin\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\reader.hpp">
