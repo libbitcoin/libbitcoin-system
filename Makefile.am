@@ -174,7 +174,7 @@ src_libbitcoin_la_SOURCES = \
     src/utility/png.cpp \
     src/utility/prioritized_mutex.cpp \
     src/utility/property_tree.cpp \
-    src/utility/random.cpp \
+    src/utility/pseudo_random.cpp \
     src/utility/scope_lock.cpp \
     src/utility/sequencer.cpp \
     src/utility/sequential_lock.cpp \
@@ -324,7 +324,7 @@ test_libbitcoin_test_SOURCES = \
     test/utility/endian.cpp \
     test/utility/png.cpp \
     test/utility/property_tree.cpp \
-    test/utility/random.cpp \
+    test/utility/pseudo_random.cpp \
     test/utility/serializer.cpp \
     test/utility/stream.cpp \
     test/utility/thread.cpp \
@@ -584,7 +584,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/png.hpp \
     include/bitcoin/bitcoin/utility/prioritized_mutex.hpp \
     include/bitcoin/bitcoin/utility/property_tree.hpp \
-    include/bitcoin/bitcoin/utility/random.hpp \
+    include/bitcoin/bitcoin/utility/pseudo_random.hpp \
     include/bitcoin/bitcoin/utility/reader.hpp \
     include/bitcoin/bitcoin/utility/resubscriber.hpp \
     include/bitcoin/bitcoin/utility/scope_lock.hpp \
