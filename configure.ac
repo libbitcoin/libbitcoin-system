@@ -172,8 +172,10 @@ AC_MSG_RESULT([$enable_isystem])
 AS_CASE([${CC}], [*],
     [AX_BOOST_BASE([1.62.0],
         [AC_SUBST([boost_CPPFLAGS], [${BOOST_CPPFLAGS}])
+         AC_SUBST([boost_ISYS_CPPFLAGS], [`echo ${BOOST_CPPFLAGS} | $SED s/^-I/-isystem/g | $SED s/' -I'/' -isystem'/g`])
          AC_SUBST([boost_LDFLAGS], [${BOOST_LDFLAGS}])
          AC_MSG_NOTICE([boost_CPPFLAGS : ${boost_CPPFLAGS}])
+         AC_MSG_NOTICE([boost_ISYS_CPPFLAGS : ${boost_ISYS_CPPFLAGS}])
          AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])],
         [AC_MSG_ERROR([Boost 1.62.0 or later is required but was not found.])])])
 
@@ -243,7 +245,8 @@ AS_CASE([${host_os}],
         [AC_SUBST([pthread_CPPFLAGS], [${PTHREAD_CPPFLAGS}])
          AC_SUBST([pthread_ISYS_CPPFLAGS], [`echo ${PTHREAD_CPPFLAGS} | $SED s/^-I/-isystem/g | $SED s/' -I'/' -isystem'/g`])
          AC_SUBST([pthread_LIBS], [-lpthread])
-         AC_MSG_NOTICE([pthread_CPPFLAGS : ${pthread_CPPFLAGS}])],
+         AC_MSG_NOTICE([pthread_CPPFLAGS : ${pthread_CPPFLAGS}])
+         AC_MSG_NOTICE([pthread_ISYS_CPPFLAGS : ${pthread_ISYS_CPPFLAGS}])],
         [AC_MSG_ERROR([pthread library is required but was not found.])])
 
     AS_CASE([${enable_isystem}],[yes],
@@ -279,9 +282,12 @@ AS_CASE([${with_icu}], [yes],
      AC_SUBST([icu_i18n_PKG], ['icu-i18n >= 51.2'])
      AC_SUBST([icu_i18n_CPPFLAGS], [${icu_i18n_CFLAGS}])
      AS_IF([test x${icu_i18n_INCLUDEDIR} != "x"],
-        [AC_SUBST([icu_i18n_ISYS_CPPFLAGS], [-isystem${icu_i18n_INCLUDEDIR} ${icu_i18n_OTHER_CFLAGS}])],
+        [AC_SUBST([icu_i18n_ISYS_CPPFLAGS], ["-isystem${icu_i18n_INCLUDEDIR} ${icu_i18n_OTHER_CFLAGS}"])],
         [AC_SUBST([icu_i18n_ISYS_CPPFLAGS], [${icu_i18n_OTHER_CFLAGS}])])
      AC_MSG_NOTICE([icu_i18n_CPPFLAGS : ${icu_i18n_CPPFLAGS}])
+     AC_MSG_NOTICE([icu_i18n_ISYS_CPPFLAGS : ${icu_i18n_ISYS_CPPFLAGS}])
+     AC_MSG_NOTICE([icu_i18n_OTHER_CFLAGS : ${icu_i18n_OTHER_CFLAGS}])
+     AC_MSG_NOTICE([icu_i18n_INCLUDEDIR : ${icu_i18n_INCLUDEDIR}])
      AC_MSG_NOTICE([icu_i18n_LIBS : ${icu_i18n_LIBS}])],
     [AC_SUBST([icu_i18n_PKG], [])])
 
@@ -314,9 +320,12 @@ AS_CASE([${with_png}], [yes],
      AC_SUBST([png_PKG], ['libpng >= 1.6.29'])
      AC_SUBST([png_CPPFLAGS], [${png_CFLAGS}])
      AS_IF([test x${png_INCLUDEDIR} != "x"],
-        [AC_SUBST([png_ISYS_CPPFLAGS], [-isystem${png_INCLUDEDIR} ${png_OTHER_CFLAGS}])],
+        [AC_SUBST([png_ISYS_CPPFLAGS], ["-isystem${png_INCLUDEDIR} ${png_OTHER_CFLAGS}"])],
         [AC_SUBST([png_ISYS_CPPFLAGS], [${png_OTHER_CFLAGS}])])
      AC_MSG_NOTICE([png_CPPFLAGS : ${png_CPPFLAGS}])
+     AC_MSG_NOTICE([png_ISYS_CPPFLAGS : ${png_ISYS_CPPFLAGS}])
+     AC_MSG_NOTICE([png_OTHER_CFLAGS : ${png_OTHER_CFLAGS}])
+     AC_MSG_NOTICE([png_INCLUDEDIR : ${png_INCLUDEDIR}])
      AC_MSG_NOTICE([png_LIBS : ${png_LIBS}])],
     [AC_SUBST([png_PKG], [])])
 
@@ -337,9 +346,12 @@ AS_CASE([${with_qrencode}], [yes],
      AC_SUBST([qrencode_PKG], ['libqrencode >= 3.4.4'])
      AC_SUBST([qrencode_CPPFLAGS], [${qrencode_CFLAGS}])
      AS_IF([test x${qrencode_INCLUDEDIR} != "x"],
-        [AC_SUBST([qrencode_ISYS_CPPFLAGS], [-isystem${qrencode_INCLUDEDIR} ${qrencode_OTHER_CFLAGS}])],
+        [AC_SUBST([qrencode_ISYS_CPPFLAGS], ["-isystem${qrencode_INCLUDEDIR} ${qrencode_OTHER_CFLAGS}"])],
         [AC_SUBST([qrencode_ISYS_CPPFLAGS], [${qrencode_OTHER_CFLAGS}])])
      AC_MSG_NOTICE([qrencode_CPPFLAGS : ${qrencode_CPPFLAGS}])
+     AC_MSG_NOTICE([qrencode_ISYS_CPPFLAGS : ${qrencode_ISYS_CPPFLAGS}])
+     AC_MSG_NOTICE([qrencode_OTHER_CFLAGS : ${qrencode_OTHER_CFLAGS}])
+     AC_MSG_NOTICE([qrencode_INCLUDEDIR : ${qrencode_INCLUDEDIR}])
      AC_MSG_NOTICE([qrencode_LIBS : ${qrencode_LIBS}])],
     [AC_SUBST([qrencode_PKG], [])])
 
@@ -359,9 +371,12 @@ PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1],
 AC_SUBST([secp256k1_PKG], ['libsecp256k1 >= 0.0.1'])
 AC_SUBST([secp256k1_CPPFLAGS], [${secp256k1_CFLAGS}])
 AS_IF([test x${secp256k1_INCLUDEDIR} != "x"],
-    [AC_SUBST([secp256k1_ISYS_CPPFLAGS], [-isystem${secp256k1_INCLUDEDIR} ${secp256k1_OTHER_CFLAGS}])],
+    [AC_SUBST([secp256k1_ISYS_CPPFLAGS], ["-isystem${secp256k1_INCLUDEDIR} ${secp256k1_OTHER_CFLAGS}"])],
     [AC_SUBST([secp256k1_ISYS_CPPFLAGS], [${secp256k1_OTHER_CFLAGS}])])
 AC_MSG_NOTICE([secp256k1_CPPFLAGS : ${secp256k1_CPPFLAGS}])
+AC_MSG_NOTICE([secp256k1_ISYS_CPPFLAGS : ${secp256k1_ISYS_CPPFLAGS}])
+AC_MSG_NOTICE([secp256k1_OTHER_CFLAGS : ${secp256k1_OTHER_CFLAGS}])
+AC_MSG_NOTICE([secp256k1_INCLUDEDIR : ${secp256k1_INCLUDEDIR}])
 AC_MSG_NOTICE([secp256k1_LIBS : ${secp256k1_LIBS}])
 
 AS_CASE([${enable_isystem}],[yes],
