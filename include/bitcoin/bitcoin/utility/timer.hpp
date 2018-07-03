@@ -50,7 +50,7 @@ inline std::string local_time()
     // If count was reached before the entire string could be stored, zero is
     // returned and contents are undefined, so do not return result.
     return result == 0 ? "" : buffer;
-};
+}
 
 // From: github.com/picanumber/bureaucrat/blob/master/time_lapse.h
 // boost::timer::auto_cpu_timer requires the boost timer lib dependency.

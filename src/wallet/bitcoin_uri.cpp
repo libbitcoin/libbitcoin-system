@@ -220,7 +220,7 @@ bool bitcoin_uri::set_path(const std::string& path)
     return address_.empty() && set_address(path);
 }
 
-bool bitcoin_uri::set_fragment(const std::string& fragment)
+bool bitcoin_uri::set_fragment(const std::string& /* fragment */)
 {
     return false;
 }

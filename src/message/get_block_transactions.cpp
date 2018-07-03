@@ -113,7 +113,7 @@ bool get_block_transactions::from_data(uint32_t version,
     return from_data(version, source);
 }
 
-bool get_block_transactions::from_data(uint32_t version,
+bool get_block_transactions::from_data(uint32_t ,
     reader& source)
 {
     reset();
@@ -155,7 +155,7 @@ void get_block_transactions::to_data(uint32_t version,
     to_data(version, sink);
 }
 
-void get_block_transactions::to_data(uint32_t version,
+void get_block_transactions::to_data(uint32_t ,
     writer& sink) const
 {
     sink.write_hash(block_hash_);
@@ -164,7 +164,7 @@ void get_block_transactions::to_data(uint32_t version,
         sink.write_variable_little_endian(element);
 }
 
-size_t get_block_transactions::serialized_size(uint32_t version) const
+size_t get_block_transactions::serialized_size(uint32_t ) const
 {
     auto size = hash_size + message::variable_uint_size(indexes_.size());
 

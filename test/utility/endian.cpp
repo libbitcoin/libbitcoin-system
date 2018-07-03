@@ -34,6 +34,7 @@ BOOST_AUTO_TEST_CASE(endian__from_big_endian_stream_unsafe__insufficient_data__s
     const auto value = from_little_endian_stream_unsafe<uint64_t>(stream);
     BOOST_REQUIRE(!stream);
     BOOST_REQUIRE(stream.eof());
+    BOOST_REQUIRE(value != 0u);
 }
 
 BOOST_AUTO_TEST_CASE(endian__from_big_endian_stream_unsafe__eof__stream_partial_read)
@@ -72,6 +73,7 @@ BOOST_AUTO_TEST_CASE(endian__from_little_endian_stream_unsafe__insufficient_data
     const auto value = from_little_endian_stream_unsafe<uint64_t>(stream);
     BOOST_REQUIRE(!stream);
     BOOST_REQUIRE(stream.eof());
+    BOOST_REQUIRE(value != 0u);
 }
 
 BOOST_AUTO_TEST_CASE(endian__from_little_endian_stream_unsafe__eof__stream_partial_read)

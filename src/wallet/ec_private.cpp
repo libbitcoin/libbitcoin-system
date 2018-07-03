@@ -188,22 +188,22 @@ const ec_secret& ec_private::secret() const
     return secret_;
 }
 
-const uint16_t ec_private::version() const
+uint16_t ec_private::version() const
 {
     return version_;
 }
 
-const uint8_t ec_private::payment_version() const
+uint8_t ec_private::payment_version() const
 {
     return to_address_prefix(version_);
 }
 
-const uint8_t ec_private::wif_version() const
+uint8_t ec_private::wif_version() const
 {
     return to_wif_prefix(version_);
 }
 
-const bool ec_private::compressed() const
+bool ec_private::compressed() const
 {
     return compress_;
 }

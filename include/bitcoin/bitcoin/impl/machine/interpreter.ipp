@@ -704,7 +704,7 @@ inline interpreter::result interpreter::op_check_sig(program& program)
 inline interpreter::result interpreter::op_check_multisig_verify(
     program& program)
 {
-    int32_t key_count;
+    int32_t key_count = 0;
     if (!program.pop(key_count))
         return error::op_check_multisig_verify1;
 

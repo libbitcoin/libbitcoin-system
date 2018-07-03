@@ -164,7 +164,7 @@ void filter_load::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void filter_load::to_data(uint32_t version, writer& sink) const
+void filter_load::to_data(uint32_t , writer& sink) const
 {
     sink.write_variable_little_endian(filter_.size());
     sink.write_bytes(filter_);
@@ -173,7 +173,7 @@ void filter_load::to_data(uint32_t version, writer& sink) const
     sink.write_byte(flags_);
 }
 
-size_t filter_load::serialized_size(uint32_t version) const
+size_t filter_load::serialized_size(uint32_t ) const
 {
     return 1u + 4u + 4u + message::variable_uint_size(filter_.size()) +
         filter_.size();

@@ -144,13 +144,13 @@ void filter_add::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void filter_add::to_data(uint32_t version, writer& sink) const
+void filter_add::to_data(uint32_t , writer& sink) const
 {
     sink.write_variable_little_endian(data_.size());
     sink.write_bytes(data_);
 }
 
-size_t filter_add::serialized_size(uint32_t version) const
+size_t filter_add::serialized_size(uint32_t ) const
 {
     return message::variable_uint_size(data_.size()) + data_.size();
 }
