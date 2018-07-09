@@ -49,7 +49,7 @@ void deserialize(std::vector<Value>& collection, const std::string& text,
     for (const auto& token: tokens)
     {
         Value value;
-        deserialize(value, token, true);
+        deserialize(value, token, trim);
         collection.push_back(value);
     }
 }
