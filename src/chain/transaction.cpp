@@ -913,7 +913,7 @@ hash_list transaction::missing_previous_transactions() const
     hashes.reserve(points.size());
     const auto hasher = [&hashes](const output_point& point)
     {
-        return point.hash();
+        hashes.push_back(point.hash());
     };
 
     std::for_each(points.begin(), points.end(), hasher);
