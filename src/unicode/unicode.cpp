@@ -330,7 +330,12 @@ std::wstring to_utf16(const std::string& narrow)
 
 LCOV_EXCL_START("Untestable but visually-verifiable section.")
 
-static void set_utf8_stdio(FILE* file)
+static void set_utf8_stdio(
+#ifdef _MSC_VER
+    FILE* file)
+#else
+    FILE*)
+#endif
 {
 #ifdef _MSC_VER
     if (_setmode(_fileno(file), _O_U8TEXT) == -1)
@@ -338,7 +343,12 @@ static void set_utf8_stdio(FILE* file)
 #endif
 }
 
-static void set_binary_stdio(FILE* file)
+static void set_binary_stdio(
+#ifdef _MSC_VER
+    FILE* file)
+#else
+    FILE*)
+#endif
 {
 #ifdef _MSC_VER
     if (_setmode(_fileno(file), _O_BINARY) == -1)

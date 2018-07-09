@@ -35,8 +35,8 @@ static constexpr uint32_t mantissa_max = ~(exp_byte | sign_bit);
 static constexpr uint32_t mantissa_bits = (sizeof(uint32_t) - 1) * 8;
 
 // assertions
-static constexpr uint32_t mantissa_mask = ~mantissa_max;
-static constexpr uint32_t first_byte_mask = 0xffffff00;
+DEBUG_ONLY(static constexpr uint32_t mantissa_mask = ~mantissa_max;)
+DEBUG_ONLY(static constexpr uint32_t first_byte_mask = 0xffffff00;)
 
 // Inlines
 //-----------------------------------------------------------------------------

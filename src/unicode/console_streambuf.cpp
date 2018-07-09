@@ -43,7 +43,12 @@ namespace libbitcoin {
 // This class/mathod is a no-op on non-windows platforms.
 // When working in Windows console set font to "Lucida Console".
 // This is the factory method to privately instantiate a singleton class.
-void console_streambuf::initialize(size_t size)
+void console_streambuf::initialize(
+#ifdef _MSC_VER
+    size_t size)
+#else
+    size_t)
+#endif
 {
 #ifdef _MSC_VER
     // Set the console to operate in UTF-8 for this process.
@@ -61,12 +66,14 @@ void console_streambuf::initialize(size_t size)
 }
 
 console_streambuf::console_streambuf(
+#ifdef _MSC_VER
     const std::wstreambuf& stream_buffer, size_t size)
+#else
+    const std::wstreambuf&, size_t)
+#endif
 #ifdef _MSC_VER
   : buffer_size_(size), buffer_(new wchar_t[buffer_size_]),
     std::wstreambuf(stream_buffer)
-#else
-  : buffer_size_(0), buffer_(nullptr)
 #endif
 {
 }
@@ -78,8 +85,12 @@ console_streambuf::~console_streambuf()
 #endif
 }
 
-std::streamsize console_streambuf::xsgetn(wchar_t* buffer,
-    std::streamsize size)
+std::streamsize console_streambuf::xsgetn(
+#ifdef _MSC_VER
+    wchar_t* buffer, std::streamsize size)
+#else
+    wchar_t*, std::streamsize)
+#endif
 {
     std::streamsize read_size = 0;
 
