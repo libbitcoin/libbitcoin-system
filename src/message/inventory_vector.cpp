@@ -190,7 +190,7 @@ size_t inventory_vector::serialized_size(uint32_t version) const
     return inventory_vector::satoshi_fixed_size(version);
 }
 
-size_t inventory_vector::satoshi_fixed_size(uint32_t )
+size_t inventory_vector::satoshi_fixed_size(uint32_t)
 {
     return sizeof(hash_) + sizeof(uint32_t);
 }

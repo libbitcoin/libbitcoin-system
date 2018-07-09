@@ -22,6 +22,7 @@
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
+#include <bitcoin/bitcoin/settings.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -202,9 +203,9 @@ void compact_block::to_data(uint32_t version, writer& sink) const
 size_t compact_block::serialized_size(uint32_t version) const
 {
     auto size = chain::header::satoshi_fixed_size() +
-        message::variable_uint_size(short_ids_.size()) +
+        variable_uint_size(short_ids_.size()) +
         (short_ids_.size() * 6u) +
-        message::variable_uint_size(transactions_.size()) + 8u;
+        variable_uint_size(transactions_.size()) + 8u;
 
     for (const auto& tx: transactions_)
         size += tx.serialized_size(version);

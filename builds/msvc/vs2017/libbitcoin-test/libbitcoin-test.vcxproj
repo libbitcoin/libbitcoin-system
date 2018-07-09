@@ -154,6 +154,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\verack.cpp" />
     <ClCompile Include="..\..\..\..\test\message\version.cpp" />
+    <ClCompile Include="..\..\..\..\test\settings.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\unicode.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\unicode_istream.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\unicode_ostream.cpp" />

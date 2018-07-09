@@ -54,7 +54,7 @@ fee_filter fee_filter::factory(uint32_t version, reader& source)
     return instance;
 }
 
-size_t fee_filter::satoshi_fixed_size(uint32_t )
+size_t fee_filter::satoshi_fixed_size(uint32_t)
 {
     return sizeof(minimum_fee_);
 }

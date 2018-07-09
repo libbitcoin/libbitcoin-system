@@ -20,31 +20,32 @@
 #include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
+using namespace bc::message;
 
 BOOST_AUTO_TEST_SUITE(messages_tests)
 
 BOOST_AUTO_TEST_CASE(messages__variable_uint_size__one_byte__expected)
 {
     static const uint64_t value = 1;
-    BOOST_REQUIRE_EQUAL(message::variable_uint_size(value), 1u);
+    BOOST_REQUIRE_EQUAL(variable_uint_size(value), 1u);
 }
 
 BOOST_AUTO_TEST_CASE(messages__variable_uint_size__two_byte__expected)
 {
     static const uint64_t value = 0xfe;
-    BOOST_REQUIRE_EQUAL(message::variable_uint_size(value), 3u);
+    BOOST_REQUIRE_EQUAL(variable_uint_size(value), 3u);
 }
 
 BOOST_AUTO_TEST_CASE(messages__variable_uint_size__four_byte__expected)
 {
     static const uint64_t value = 0x10000;
-    BOOST_REQUIRE_EQUAL(message::variable_uint_size(value), 5u);
+    BOOST_REQUIRE_EQUAL(variable_uint_size(value), 5u);
 }
 
 BOOST_AUTO_TEST_CASE(messages__variable_uint_size__eight_byte__expected)
 {
     static const uint64_t value = 0x100000000;
-    BOOST_REQUIRE_EQUAL(message::variable_uint_size(value), 9u);
+    BOOST_REQUIRE_EQUAL(variable_uint_size(value), 9u);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -56,7 +56,7 @@ send_compact send_compact::factory(uint32_t version,
     return instance;
 }
 
-size_t send_compact::satoshi_fixed_size(uint32_t )
+size_t send_compact::satoshi_fixed_size(uint32_t)
 {
     return 9;
 }

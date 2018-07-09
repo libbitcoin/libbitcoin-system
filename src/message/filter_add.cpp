@@ -150,9 +150,9 @@ void filter_add::to_data(uint32_t , writer& sink) const
     sink.write_bytes(data_);
 }
 
-size_t filter_add::serialized_size(uint32_t ) const
+size_t filter_add::serialized_size(uint32_t) const
 {
-    return message::variable_uint_size(data_.size()) + data_.size();
+    return variable_uint_size(data_.size()) + data_.size();
 }
 
 data_chunk& filter_add::data()

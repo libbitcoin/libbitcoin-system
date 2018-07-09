@@ -23,6 +23,7 @@
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
+#include <bitcoin/bitcoin/settings.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -194,11 +195,11 @@ void merkle_block::to_data(uint32_t , writer& sink) const
     sink.write_bytes(flags_);
 }
 
-size_t merkle_block::serialized_size(uint32_t ) const
+size_t merkle_block::serialized_size(uint32_t) const
 {
     return header_.serialized_size() + 4u +
-        message::variable_uint_size(hashes_.size()) + (hash_size * hashes_.size()) +
-        message::variable_uint_size(flags_.size()) + flags_.size();
+        variable_uint_size(hashes_.size()) + (hash_size * hashes_.size()) +
+        variable_uint_size(flags_.size()) + flags_.size();
 }
 
 chain::header& merkle_block::header()

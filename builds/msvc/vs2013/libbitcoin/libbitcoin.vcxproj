@@ -214,6 +214,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\verack.cpp" />
     <ClCompile Include="..\..\..\..\src\message\version.cpp" />
+    <ClCompile Include="..\..\..\..\src\settings.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\console_streambuf.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\ifstream.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\ofstream.cpp" />
@@ -387,6 +388,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\verack.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\version.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\settings.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\console_streambuf.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\file_lock.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\ifstream.hpp" />
