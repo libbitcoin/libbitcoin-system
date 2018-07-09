@@ -104,7 +104,7 @@ void get_address::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void get_address::to_data(uint32_t , writer& ) const
+void get_address::to_data(uint32_t, writer&) const
 {
 }
 
@@ -113,7 +113,7 @@ size_t get_address::serialized_size(uint32_t version) const
     return get_address::satoshi_fixed_size(version);
 }
 
-size_t get_address::satoshi_fixed_size(uint32_t )
+size_t get_address::satoshi_fixed_size(uint32_t)
 {
     return 0;
 }
