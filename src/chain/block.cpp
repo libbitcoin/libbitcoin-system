@@ -121,8 +121,8 @@ static const std::string encoded_regtest_genesis_block =
 // Constructors.
 //-----------------------------------------------------------------------------
 
-block::block()
-  : header_{},
+block::block(const settings& settings)
+  : header_(settings),
     metadata{}
 {
 }
@@ -199,25 +199,27 @@ bool block::operator!=(const block& other) const
 //-----------------------------------------------------------------------------
 
 // static
-block block::factory(const data_chunk& data, bool witness)
+block block::factory(const data_chunk& data, const settings& settings,
+    bool witness)
 {
-    block instance;
+    block instance(settings);
     instance.from_data(data, witness);
     return instance;
 }
 
 // static
-block block::factory(std::istream& stream, bool witness)
+block block::factory(std::istream& stream, const settings& settings,
+    bool witness)
 {
-    block instance;
+    block instance(settings);
     instance.from_data(stream, witness);
     return instance;
 }
 
 // static
-block block::factory(reader& source, bool witness)
+block block::factory(reader& source, const settings& settings, bool witness)
 {
-    block instance;
+    block instance(settings);
     instance.from_data(source, witness);
     return instance;
 }
@@ -435,11 +437,11 @@ hash_digest block::hash() const
 // Utilities.
 //-----------------------------------------------------------------------------
 
-chain::block block::genesis_mainnet()
+chain::block block::genesis_mainnet(const settings& settings)
 {
     data_chunk data;
     decode_base16(data, encoded_mainnet_genesis_block);
-    const auto genesis = chain::block::factory(data);
+    const auto genesis = chain::block::factory(data, settings);
 
     BITCOIN_ASSERT(genesis.is_valid());
     BITCOIN_ASSERT(genesis.transactions().size() == 1);
@@ -447,11 +449,11 @@ chain::block block::genesis_mainnet()
     return genesis;
 }
 
-chain::block block::genesis_testnet()
+chain::block block::genesis_testnet(const settings& settings)
 {
     data_chunk data;
     decode_base16(data, encoded_testnet_genesis_block);
-    const auto genesis = chain::block::factory(data);
+    const auto genesis = chain::block::factory(data, settings);
 
     BITCOIN_ASSERT(genesis.is_valid());
     BITCOIN_ASSERT(genesis.transactions().size() == 1);
@@ -459,11 +461,11 @@ chain::block block::genesis_testnet()
     return genesis;
 }
 
-chain::block block::genesis_regtest()
+chain::block block::genesis_regtest(const settings& settings)
 {
     data_chunk data;
     decode_base16(data, encoded_regtest_genesis_block);
-    const auto genesis = chain::block::factory(data);
+    const auto genesis = chain::block::factory(data, settings);
 
     BITCOIN_ASSERT(genesis.is_valid());
     BITCOIN_ASSERT(genesis.transactions().size() == 1);

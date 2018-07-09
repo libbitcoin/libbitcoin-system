@@ -45,7 +45,7 @@ int bc::main(int argc, char* argv[])
 #endif
 
     // Extracting Satoshi's words from genesis block.
-    const auto block = bc::chain::block::genesis_mainnet();
+    const auto block = bc::chain::block::genesis_mainnet(bc::settings());
     const auto& coinbase = block.transactions().front();
     const auto& input = coinbase.inputs().front();
 	BITCOIN_ASSERT_MSG(input.script().size() > 2u, "unexpected genesis");

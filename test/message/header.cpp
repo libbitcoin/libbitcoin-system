@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_SUITE(message_header_tests)
 
 BOOST_AUTO_TEST_CASE(header__constructor_1__always__initialized_invalid)
 {
-    message::header instance;
+    message::header instance(settings{});
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
 }
 
@@ -38,7 +38,8 @@ BOOST_AUTO_TEST_CASE(header__constructor_2__always__equals_params)
     uint32_t bits = 6523454u;
     uint32_t nonce = 68644u;
 
-    message::header instance(version, previous, merkle, timestamp, bits, nonce);
+    message::header instance(version, previous, merkle, timestamp, bits, nonce,
+        settings());
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(timestamp, instance.timestamp());
@@ -57,7 +58,8 @@ BOOST_AUTO_TEST_CASE(header__constructor_3__always__equals_params)
     uint32_t bits = 6523454u;
     uint32_t nonce = 68644u;
 
-    message::header instance(version, std::move(previous), std::move(merkle), timestamp, bits, nonce);
+    message::header instance(version, std::move(previous), std::move(merkle),
+        timestamp, bits, nonce, settings());
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(timestamp, instance.timestamp());
@@ -75,7 +77,8 @@ BOOST_AUTO_TEST_CASE(header__constructor_4__always__equals_params)
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        1234u);
+        1234u,
+        settings());
 
     message::header instance(expected);
     BOOST_REQUIRE(instance.is_valid());
@@ -90,7 +93,8 @@ BOOST_AUTO_TEST_CASE(header__constructor_5__always__equals_params)
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        123u);
+        123u,
+        settings());
 
     message::header instance(std::move(expected));
     BOOST_REQUIRE(instance.is_valid());
@@ -105,7 +109,8 @@ BOOST_AUTO_TEST_CASE(header__constructor_6__always__equals_params)
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        68644u);
+        68644u,
+        settings());
 
     message::header instance(expected);
     BOOST_REQUIRE(instance.is_valid());
@@ -120,7 +125,8 @@ BOOST_AUTO_TEST_CASE(header__constructor_7__always__equals_params)
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        68644u);
+        68644u,
+        settings());
 
     message::header instance(std::move(expected));
     BOOST_REQUIRE(instance.is_valid());
@@ -130,7 +136,7 @@ BOOST_AUTO_TEST_CASE(header__constructor_7__always__equals_params)
 BOOST_AUTO_TEST_CASE(header__from_data__insufficient_bytes__failure)
 {
     data_chunk data(10);
-    message::header header;
+    message::header header(settings{});
     BOOST_REQUIRE_EQUAL(false, header.from_data(message::header::version_maximum, data));
     BOOST_REQUIRE_EQUAL(false, header.is_valid());
 }
@@ -138,6 +144,7 @@ BOOST_AUTO_TEST_CASE(header__from_data__insufficient_bytes__failure)
 BOOST_AUTO_TEST_CASE(header__factory_1__valid_input_canonical_version__no_transaction_count)
 {
     const auto version = message::version::level::canonical;
+    const settings settings;
     message::header expected
     {
         10u,
@@ -145,12 +152,13 @@ BOOST_AUTO_TEST_CASE(header__factory_1__valid_input_canonical_version__no_transa
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        68644u
+        68644u,
+        settings
     };
 
     const auto data = expected.to_data(version);
 
-    const auto result = message::header::factory(version, data);
+    const auto result = message::header::factory(version, data, settings);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -161,6 +169,7 @@ BOOST_AUTO_TEST_CASE(header__factory_1__valid_input_canonical_version__no_transa
 BOOST_AUTO_TEST_CASE(header__factory_1__valid_input__success)
 {
     const auto version = message::header::version_minimum;
+    const settings settings;
     message::header expected
     {
         10u,
@@ -168,12 +177,13 @@ BOOST_AUTO_TEST_CASE(header__factory_1__valid_input__success)
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        68644u
+        68644u,
+        settings
     };
 
     const auto data = expected.to_data(version);
 
-    const auto result = message::header::factory(version, data);
+    const auto result = message::header::factory(version, data, settings);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -184,6 +194,7 @@ BOOST_AUTO_TEST_CASE(header__factory_1__valid_input__success)
 BOOST_AUTO_TEST_CASE(header__factory_2__valid_input__success)
 {
     const auto version = message::header::version_minimum;
+    const settings settings;
     message::header expected
     {
         10u,
@@ -191,13 +202,14 @@ BOOST_AUTO_TEST_CASE(header__factory_2__valid_input__success)
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        68644u
+        68644u,
+        settings
     };
 
     const auto data = expected.to_data(version);
     data_source istream(data);
 
-    const auto result = message::header::factory(version, istream);
+    const auto result = message::header::factory(version, istream, settings);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -208,6 +220,7 @@ BOOST_AUTO_TEST_CASE(header__factory_2__valid_input__success)
 BOOST_AUTO_TEST_CASE(header__factory_3__valid_input__success)
 {
     const auto version = message::header::version_minimum;
+    const settings settings;
     message::header expected
     {
         10u,
@@ -215,14 +228,15 @@ BOOST_AUTO_TEST_CASE(header__factory_3__valid_input__success)
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        68644u
+        68644u,
+        settings
     };
 
     const auto data = expected.to_data(version);
     data_source istream(data);
     istream_reader source(istream);
 
-    const auto result = message::header::factory(version, source);
+    const auto result = message::header::factory(version, source, settings);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -232,17 +246,19 @@ BOOST_AUTO_TEST_CASE(header__factory_3__valid_input__success)
 
 BOOST_AUTO_TEST_CASE(header__operator_assign_equals_1__always__matches_equivalent)
 {
+    const settings settings;
     chain::header value(
         10u,
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        68644u);
+        68644u,
+        settings);
 
     BOOST_REQUIRE(value.is_valid());
 
-    message::header instance;
+    message::header instance(settings);
     BOOST_REQUIRE(!instance.is_valid());
 
     instance = std::move(value);
@@ -252,17 +268,19 @@ BOOST_AUTO_TEST_CASE(header__operator_assign_equals_1__always__matches_equivalen
 
 BOOST_AUTO_TEST_CASE(header__operator_assign_equals_2__always__matches_equivalent)
 {
+    const settings settings;
     message::header value(
         10u,
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        68644u);
+        68644u,
+        settings);
 
     BOOST_REQUIRE(value.is_valid());
 
-    message::header instance;
+    message::header instance(settings);
     BOOST_REQUIRE(!instance.is_valid());
 
     instance = std::move(value);
@@ -278,7 +296,8 @@ BOOST_AUTO_TEST_CASE(header__operator_boolean_equals_1__duplicates__returns_true
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        3565u);
+        3565u,
+        settings());
 
     message::header instance(expected);
     BOOST_REQUIRE(instance == expected);
@@ -286,15 +305,17 @@ BOOST_AUTO_TEST_CASE(header__operator_boolean_equals_1__duplicates__returns_true
 
 BOOST_AUTO_TEST_CASE(header__operator_boolean_equals_1__differs__returns_false)
 {
+    const settings settings;
     const chain::header expected(
         10u,
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         6523454u,
         68644u,
-        4453u);
+        4453u,
+        settings);
 
-    message::header instance;
+    message::header instance(settings);
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
@@ -306,7 +327,8 @@ BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals_1__duplicates__returns_
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         6523454u,
         68644u,
-        2345u);
+        2345u,
+        settings());
 
     message::header instance(expected);
     BOOST_REQUIRE_EQUAL(false, instance != expected);
@@ -314,15 +336,17 @@ BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals_1__duplicates__returns_
 
 BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals_1__differs__returns_true)
 {
+    const settings settings;
     const chain::header expected(
         10u,
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         68644u,
-        47476u);
+        47476u,
+        settings);
 
-    message::header instance;
+    message::header instance(settings);
     BOOST_REQUIRE(instance != expected);
 }
 
@@ -334,7 +358,8 @@ BOOST_AUTO_TEST_CASE(header__operator_boolean_equals_2__duplicates__returns_true
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        68644u);
+        68644u,
+        settings());
 
     message::header instance(expected);
     BOOST_REQUIRE(instance == expected);
@@ -342,15 +367,17 @@ BOOST_AUTO_TEST_CASE(header__operator_boolean_equals_2__duplicates__returns_true
 
 BOOST_AUTO_TEST_CASE(header__operator_boolean_equals_2__differs__returns_false)
 {
+    const settings settings;
     const message::header expected(
         10u,
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        68644u);
+        68644u,
+        settings);
 
-    message::header instance;
+    message::header instance(settings);
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
@@ -362,7 +389,8 @@ BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals_2__duplicates__returns_
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        68644u);
+        68644u,
+        settings());
 
     message::header instance(expected);
     BOOST_REQUIRE_EQUAL(false, instance != expected);
@@ -370,15 +398,17 @@ BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals_2__duplicates__returns_
 
 BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals_2__differs__returns_true)
 {
+    const settings settings;
     const message::header expected(
         10u,
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
-        68644u);
+        68644u,
+        settings);
 
-    message::header instance;
+    message::header instance(settings);
     BOOST_REQUIRE(instance != expected);
 }
 

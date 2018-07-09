@@ -44,18 +44,21 @@ public:
     typedef std::shared_ptr<const_ptr_list> const_ptr_list_ptr;
     typedef std::shared_ptr<const const_ptr_list> const_ptr_list_const_ptr;
 
-    static header factory(uint32_t version, const data_chunk& data);
-    static header factory(uint32_t version, std::istream& stream);
-    static header factory(uint32_t version, reader& source);
+    static header factory(uint32_t version, const data_chunk& data,
+        const settings& settings);
+    static header factory(uint32_t version, std::istream& stream,
+        const settings& settings);
+    static header factory(uint32_t version, reader& source,
+        const settings& settings);
     static size_t satoshi_fixed_size(uint32_t version);
 
-    header();
+    header(const settings& settings);
     header(uint32_t version, const hash_digest& previous_block_hash,
         const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce);
+        uint32_t nonce, const settings& settings);
     header(uint32_t version, hash_digest&& previous_block_hash,
         hash_digest&& merkle, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce);
+        uint32_t nonce, const settings& settings);
     header(const chain::header& other);
     header(chain::header&& other);
     header(const header& other);

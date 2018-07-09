@@ -42,9 +42,12 @@ public:
     typedef std::shared_ptr<headers> ptr;
     typedef std::shared_ptr<const headers> const_ptr;
 
-    static headers factory(uint32_t version, const data_chunk& data);
-    static headers factory(uint32_t version, std::istream& stream);
-    static headers factory(uint32_t version, reader& source);
+    static headers factory(uint32_t version, const data_chunk& data,
+        const settings& settings);
+    static headers factory(uint32_t version, std::istream& stream,
+        const settings& settings);
+    static headers factory(uint32_t version, reader& source,
+        const settings& settings);
 
     headers();
     headers(const header::list& values);
@@ -63,9 +66,11 @@ public:
     void to_inventory(inventory_vector::list& out,
         inventory::type_id type) const;
 
-    bool from_data(uint32_t version, const data_chunk& data);
-    bool from_data(uint32_t version, std::istream& stream);
-    bool from_data(uint32_t version, reader& source);
+    bool from_data(uint32_t version, const data_chunk& data,
+        const settings& settings);
+    bool from_data(uint32_t version, std::istream& stream,
+        const settings& settings);
+    bool from_data(uint32_t version, reader& source, const settings& settings);
     data_chunk to_data(uint32_t version) const;
     void to_data(uint32_t version, std::ostream& stream) const;
     void to_data(uint32_t version, writer& sink) const;

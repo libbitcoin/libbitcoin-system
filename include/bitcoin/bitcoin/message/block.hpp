@@ -45,11 +45,14 @@ public:
     typedef std::shared_ptr<const_ptr_list> const_ptr_list_ptr;
     typedef std::shared_ptr<const const_ptr_list> const_ptr_list_const_ptr;
 
-    static block factory(uint32_t version, const data_chunk& data);
-    static block factory(uint32_t version, std::istream& stream);
-    static block factory(uint32_t version, reader& source);
+    static block factory(uint32_t version, const data_chunk& data,
+        const settings& settings);
+    static block factory(uint32_t version, std::istream& stream,
+        const settings& settings);
+    static block factory(uint32_t version, reader& source,
+        const settings& settings);
 
-    block();
+    block(const settings& settings);
 
     block(block&& other);
     block(const block& other);

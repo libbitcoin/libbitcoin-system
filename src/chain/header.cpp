@@ -40,8 +40,8 @@ using wall_clock = std::chrono::system_clock;
 // Constructors.
 //-----------------------------------------------------------------------------
 
-header::header()
-  : header(0, null_hash, null_hash, 0, 0, 0)
+header::header(const settings& settings)
+  : header(0, null_hash, null_hash, 0, 0, 0, settings)
 {
 }
 
@@ -53,7 +53,8 @@ header::header(header&& other)
     timestamp_(other.timestamp_),
     bits_(other.bits_),
     nonce_(other.nonce_),
-    metadata(std::move(other.metadata))
+    metadata(std::move(other.metadata)),
+    settings_(other.settings_)
 {
 }
 
@@ -65,32 +66,36 @@ header::header(const header& other)
     timestamp_(other.timestamp_),
     bits_(other.bits_),
     nonce_(other.nonce_),
-    metadata(other.metadata)
+    metadata(other.metadata),
+    settings_(other.settings_)
 {
 }
 
 header::header(uint32_t version, hash_digest&& previous_block_hash,
-    hash_digest&& merkle, uint32_t timestamp, uint32_t bits, uint32_t nonce)
+    hash_digest&& merkle, uint32_t timestamp, uint32_t bits, uint32_t nonce,
+    const settings& settings)
   : version_(version),
     previous_block_hash_(std::move(previous_block_hash)),
     merkle_(std::move(merkle)),
     timestamp_(timestamp),
     bits_(bits),
     nonce_(nonce),
-    metadata{}
+    metadata{},
+    settings_(settings)
 {
 }
 
 header::header(uint32_t version, const hash_digest& previous_block_hash,
     const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
-    uint32_t nonce)
+    uint32_t nonce, const settings& settings)
   : version_(version),
     previous_block_hash_(previous_block_hash),
     merkle_(merkle),
     timestamp_(timestamp),
     bits_(bits),
     nonce_(nonce),
-    metadata{}
+    metadata{},
+    settings_(settings)
 {
 }
 
@@ -149,41 +154,45 @@ bool header::operator!=(const header& other) const
 //-----------------------------------------------------------------------------
 
 // static
-header header::factory(const data_chunk& data, bool wire)
+header header::factory(const data_chunk& data, const settings& settings,
+    bool wire)
 {
-    header instance;
+    header instance(settings);
     instance.from_data(data, wire);
     return instance;
 }
 
 // static
-header header::factory(std::istream& stream, bool wire)
+header header::factory(std::istream& stream, const settings& settings,
+    bool wire)
 {
-    header instance;
+    header instance(settings);
     instance.from_data(stream, wire);
     return instance;
 }
 
 // static
-header header::factory(reader& source, bool wire)
+header header::factory(reader& source, const settings& settings, bool wire)
 {
-    header instance;
+    header instance(settings);
     instance.from_data(source, wire);
     return instance;
 }
 
 // static
-header header::factory(reader& source, hash_digest&& hash, bool wire)
+header header::factory(reader& source, hash_digest&& hash,
+    const settings& settings, bool wire)
 {
-    header instance;
+    header instance(settings);
     instance.from_data(source, std::move(hash), wire);
     return instance;
 }
 
 // static
-header header::factory(reader& source, const hash_digest& hash, bool wire)
+header header::factory(reader& source, const hash_digest& hash,
+    const settings& settings, bool wire)
 {
-    header instance;
+    header instance(settings);
     instance.from_data(source, hash, wire);
     return instance;
 }
@@ -440,7 +449,7 @@ hash_digest header::hash() const
 bool header::is_valid_timestamp() const
 {
     using namespace std::chrono;
-    static const auto two_hours = seconds(timestamp_future_seconds);
+    static const auto two_hours = seconds(settings_.timestamp_future_seconds);
     const auto time = wall_clock::from_time_t(timestamp_);
     const auto future = wall_clock::now() + two_hours;
     return time <= future;
@@ -449,7 +458,7 @@ bool header::is_valid_timestamp() const
 bool header::is_valid_proof_of_work(bool retarget) const
 {
     const auto bits = compact(bits_);
-    static const uint256_t pow_limit(compact{ work_limit(retarget) });
+    static const uint256_t pow_limit(compact{ settings_.work_limit(retarget) });
 
     if (bits.is_overflowed())
         return false;

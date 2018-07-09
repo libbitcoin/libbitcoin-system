@@ -41,26 +41,26 @@ const uint32_t headers::version_minimum = version::level::headers;
 const uint32_t headers::version_maximum = version::level::maximum;
 
 headers headers::factory(uint32_t version,
-    const data_chunk& data)
+    const data_chunk& data, const settings& settings)
 {
     headers instance;
-    instance.from_data(version, data);
+    instance.from_data(version, data, settings);
     return instance;
 }
 
 headers headers::factory(uint32_t version,
-    std::istream& stream)
+    std::istream& stream, const settings& settings)
 {
     headers instance;
-    instance.from_data(version, stream);
+    instance.from_data(version, stream, settings);
     return instance;
 }
 
 headers headers::factory(uint32_t version,
-    reader& source)
+    reader& source, const settings& settings)
 {
     headers instance;
-    instance.from_data(version, source);
+    instance.from_data(version, source, settings);
     return instance;
 }
 
@@ -106,19 +106,22 @@ void headers::reset()
     elements_.shrink_to_fit();
 }
 
-bool headers::from_data(uint32_t version, const data_chunk& data)
+bool headers::from_data(uint32_t version, const data_chunk& data,
+    const settings& settings)
 {
     data_source istream(data);
-    return from_data(version, istream);
+    return from_data(version, istream, settings);
 }
 
-bool headers::from_data(uint32_t version, std::istream& stream)
+bool headers::from_data(uint32_t version, std::istream& stream,
+    const settings& settings)
 {
     istream_reader source(stream);
-    return from_data(version, source);
+    return from_data(version, source, settings);
 }
 
-bool headers::from_data(uint32_t version, reader& source)
+bool headers::from_data(uint32_t version, reader& source,
+    const settings& settings)
 {
     reset();
 
@@ -128,7 +131,7 @@ bool headers::from_data(uint32_t version, reader& source)
     if (count > max_get_headers)
         source.invalidate();
     else
-        elements_.resize(count);
+        elements_.resize(count, header(settings));
 
     // Order is required.
     for (auto& element: elements_)

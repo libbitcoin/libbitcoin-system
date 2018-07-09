@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <boost/range/adaptor/reversed.hpp>
+#include <bitcoin/bitcoin/settings.hpp>
 #include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/chain/compact.hpp>
@@ -269,7 +270,8 @@ chain_state::activations chain_state::activation(const data& values,
     return result;
 }
 
-size_t chain_state::bits_count(size_t height, uint32_t forks)
+size_t chain_state::bits_count(size_t height, uint32_t forks,
+    size_t retargeting_interval)
 {
     // Mainnet doesn't use bits in retargeting.
     if (script::is_enabled(forks, rule_fork::difficult))
@@ -280,7 +282,7 @@ size_t chain_state::bits_count(size_t height, uint32_t forks)
         return 1;
 
     // Testnet uses mainnet retargeting on interval.
-    if (is_retarget_height(height))
+    if (is_retarget_height(height, retargeting_interval))
         return 1;
 
     // Testnet requires all bits for inter-interval retargeting.
@@ -306,15 +308,16 @@ size_t chain_state::timestamp_count(size_t height, uint32_t)
     return std::min(height, median_time_past_interval);
 }
 
-size_t chain_state::retarget_height(size_t height, uint32_t forks)
+size_t chain_state::retarget_height(size_t height, uint32_t forks,
+    size_t retargeting_interval)
 {
     if (!script::is_enabled(forks, rule_fork::retarget))
         return map::unrequested;
 
     // Height must be a positive multiple of interval, so underflow safe.
     // If not retarget height get most recent so that it may be promoted.
-    return height - (is_retarget_height(height) ? retargeting_interval :
-        retarget_distance(height));
+    return height - (is_retarget_height(height, retargeting_interval) ?
+        retargeting_interval : retarget_distance(height, retargeting_interval));
 }
 
 size_t chain_state::bip9_bit0_height(size_t height, uint32_t forks)
@@ -362,7 +365,8 @@ uint32_t chain_state::median_time_past(const data& values, uint32_t)
 // work_required
 //-----------------------------------------------------------------------------
 
-uint32_t chain_state::work_required(const data& values, uint32_t forks)
+uint32_t chain_state::work_required(const data& values, uint32_t forks,
+    const settings& settings)
 {
     // Invalid parameter via public interface, test is_valid for results.
     if (values.height == 0)
@@ -373,18 +377,24 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks)
         return bits_high(values);
 
     // Mainnet and testnet retarget on interval.
-    if (is_retarget_height(values.height))
-        return work_required_retarget(values);
+    if (is_retarget_height(values.height, settings.retargeting_interval))
+        return work_required_retarget(values,
+            settings.retarget_proof_of_work_limit, settings.min_timespan,
+            settings.max_timespan, settings.target_timespan_seconds);
 
     // Testnet retargets easy on inter-interval.
     if (!script::is_enabled(forks, rule_fork::difficult))
-        return easy_work_required(values);
+        return easy_work_required(values, settings.retargeting_interval,
+            settings.retarget_proof_of_work_limit,
+            settings.easy_spacing_seconds);
 
     // Mainnet not retargeting.
     return bits_high(values);
 }
 
-uint32_t chain_state::work_required_retarget(const data& values)
+uint32_t chain_state::work_required_retarget(const data& values,
+    uint32_t retarget_proof_of_work_limit, uint32_t min_timespan,
+    uint32_t max_timespan, uint32_t target_timespan_seconds)
 {
     static const uint256_t pow_limit(compact{ retarget_proof_of_work_limit });
 
@@ -392,7 +402,7 @@ uint32_t chain_state::work_required_retarget(const data& values)
     BITCOIN_ASSERT_MSG(!bits.is_overflowed(), "previous block has bad bits");
 
     uint256_t target(bits);
-    target *= retarget_timespan(values);
+    target *= retarget_timespan(values, min_timespan, max_timespan);
     target /= target_timespan_seconds;
 
     // The proof_of_work_limit constant is pre-normalized.
@@ -401,7 +411,8 @@ uint32_t chain_state::work_required_retarget(const data& values)
 }
 
 // Get the bounded total time spanning the highest 2016 blocks.
-uint32_t chain_state::retarget_timespan(const data& values)
+uint32_t chain_state::retarget_timespan(const data& values,
+    uint32_t min_timespan, uint32_t max_timespan)
 {
     const auto high = timestamp_high(values);
     const auto retarget = values.timestamp.retarget;
@@ -414,12 +425,14 @@ uint32_t chain_state::retarget_timespan(const data& values)
     return range_constrain(timespan, min_timespan, max_timespan);
 }
 
-uint32_t chain_state::easy_work_required(const data& values)
+uint32_t chain_state::easy_work_required(const data& values,
+    size_t retargeting_interval, uint32_t retarget_proof_of_work_limit,
+    uint32_t easy_spacing_seconds)
 {
     BITCOIN_ASSERT(values.height != 0);
 
     // If the time limit has passed allow a minimum difficulty block.
-    if (values.timestamp.self > easy_time_limit(values))
+    if (values.timestamp.self > easy_time_limit(values, easy_spacing_seconds))
         return retarget_proof_of_work_limit;
 
     auto height = values.height;
@@ -427,7 +440,8 @@ uint32_t chain_state::easy_work_required(const data& values)
 
     // Reverse iterate the ordered-by-height list of header bits.
     for (auto bit: reverse(bits))
-        if (is_retarget_or_non_limit(--height, bit))
+        if (is_retarget_or_non_limit(--height, bit, retargeting_interval,
+            retarget_proof_of_work_limit))
             return bit;
 
     // Since the set of heights is either a full retarget range or ends at
@@ -436,10 +450,10 @@ uint32_t chain_state::easy_work_required(const data& values)
     return retarget_proof_of_work_limit;
 }
 
-uint32_t chain_state::easy_time_limit(const chain_state::data& values)
+uint32_t chain_state::easy_time_limit(const chain_state::data& values,
+    int64_t spacing)
 {
     const int64_t high = timestamp_high(values);
-    const int64_t spacing = easy_spacing_seconds;
 
     //*************************************************************************
     // CONSENSUS: add unsigned 32 bit numbers in signed 64 bit space in
@@ -449,23 +463,27 @@ uint32_t chain_state::easy_time_limit(const chain_state::data& values)
 }
 
 // A retarget height, or a block that does not have proof_of_work_limit bits.
-bool chain_state::is_retarget_or_non_limit(size_t height, uint32_t bits)
+bool chain_state::is_retarget_or_non_limit(size_t height, uint32_t bits,
+    size_t retargeting_interval, uint32_t retarget_proof_of_work_limit)
 {
     // Zero is a retarget height, ensuring termination before height underflow.
     // This is guaranteed, just asserting here to document the safeguard.
-    BITCOIN_ASSERT_MSG(is_retarget_height(0), "loop overflow potential");
+    BITCOIN_ASSERT_MSG(is_retarget_height(0, retargeting_interval),
+        "loop overflow potential");
 
-    return bits != retarget_proof_of_work_limit || is_retarget_height(height);
+    return bits != retarget_proof_of_work_limit ||
+        is_retarget_height(height, retargeting_interval);
 }
 
 // Determine if height is a multiple of retargeting_interval.
-bool chain_state::is_retarget_height(size_t height)
+bool chain_state::is_retarget_height(size_t height, size_t retargeting_interval)
 {
-    return retarget_distance(height) == 0;
+    return retarget_distance(height, retargeting_interval) == 0;
 }
 
 // Determine the number of blocks back to the closest retarget height.
-size_t chain_state::retarget_distance(size_t height)
+size_t chain_state::retarget_distance(size_t height,
+    size_t retargeting_interval)
 {
     return height % retargeting_interval;
 }
@@ -475,7 +493,8 @@ size_t chain_state::retarget_distance(size_t height)
 
 // static
 chain_state::map chain_state::get_map(size_t height,
-    const checkpoints& /* checkpoints */, uint32_t forks)
+    const checkpoints& /* checkpoints */, uint32_t forks,
+    size_t retargeting_interval)
 {
     if (height == 0)
         return {};
@@ -485,7 +504,7 @@ chain_state::map chain_state::get_map(size_t height,
     // The height bound of the reverse (high to low) retarget search.
     map.bits_self = height;
     map.bits.high = height - 1;
-    map.bits.count = bits_count(height, forks);
+    map.bits.count = bits_count(height, forks, retargeting_interval);
 
     // The height bound of the median time past function.
     map.timestamp_self = height;
@@ -498,7 +517,8 @@ chain_state::map chain_state::get_map(size_t height,
     map.version.count = version_count(height, forks);
 
     // The most recent past retarget height.
-    map.timestamp_retarget = retarget_height(height, forks);
+    map.timestamp_retarget = retarget_height(height, forks,
+        retargeting_interval);
 
     // The checkpoint above which bip9_bit0 rules are enforced.
     map.bip9_bit0_height = bip9_bit0_height(height, forks);
@@ -535,7 +555,8 @@ uint32_t chain_state::signal_version(uint32_t forks)
 }
 
 // This is promotion from a preceding height to the next.
-chain_state::data chain_state::to_pool(const chain_state& top)
+chain_state::data chain_state::to_pool(const chain_state& top,
+    const settings& settings)
 {
     // Alias configured forks.
     const auto forks = top.forks_;
@@ -555,7 +576,8 @@ chain_state::data chain_state::to_pool(const chain_state& top)
     data.timestamp.ordered.push_back(data.timestamp.self);
 
     // If bits collection overflows, dequeue oldest member.
-    if (data.bits.ordered.size() > bits_count(height, forks))
+    if (data.bits.ordered.size() >
+        bits_count(height, forks, settings.retargeting_interval))
         data.bits.ordered.pop_front();
 
     // If version collection overflows, dequeue oldest member.
@@ -568,7 +590,8 @@ chain_state::data chain_state::to_pool(const chain_state& top)
 
     // Regtest does not perform retargeting.
     // If promoting from retarget height, move that timestamp into retarget.
-    if (retarget && is_retarget_height(height - 1u))
+    if (retarget &&
+        is_retarget_height(height - 1u, settings.retargeting_interval))
         data.timestamp.retarget = data.timestamp.self;
 
     // Replace previous block state with tx pool chain state for next height
@@ -578,20 +601,20 @@ chain_state::data chain_state::to_pool(const chain_state& top)
     // Hash and bits.self are unused.
     data.height = height;
     data.hash = null_hash;
-    data.bits.self = work_limit(retarget);
+    data.bits.self = settings.work_limit(retarget);
     data.version.self = signal_version(forks);
     return data;
 }
 
 // Constructor (top to pool).
 // This generates a state for the pool above the presumed top block state.
-chain_state::chain_state(const chain_state& top)
-  : data_(to_pool(top)),
+chain_state::chain_state(const chain_state& top, const settings& settings)
+  : data_(to_pool(top, settings)),
     forks_(top.forks_),
     stale_seconds_(top.stale_seconds_),
     checkpoints_(top.checkpoints_),
     active_(activation(data_, forks_)),
-    work_required_(work_required(data_, forks_)),
+    work_required_(work_required(data_, forks_, settings)),
     median_time_past_(median_time_past(data_, forks_))
 {
 }
@@ -632,19 +655,20 @@ chain_state::data chain_state::to_block(const chain_state& pool,
 
 // Constructor (tx pool to block).
 // This assumes that the pool state is the same height as the block.
-chain_state::chain_state(const chain_state& pool, const block& block)
+chain_state::chain_state(const chain_state& pool, const block& block,
+    const settings& settings)
   : data_(to_block(pool, block)),
     forks_(pool.forks_),
     stale_seconds_(pool.stale_seconds_),
     checkpoints_(pool.checkpoints_),
     active_(activation(data_, forks_)),
-    work_required_(work_required(data_, forks_)),
+    work_required_(work_required(data_, forks_, settings)),
     median_time_past_(median_time_past(data_, forks_))
 {
 }
 
 chain_state::data chain_state::to_header(const chain_state& parent,
-    const header& header)
+    const header& header, const settings& settings)
 {
     BITCOIN_ASSERT(header.previous_block_hash() == parent.hash());
 
@@ -658,7 +682,7 @@ chain_state::data chain_state::to_header(const chain_state& parent,
     const auto testnet = !difficult;
 
     // Copy and promote data from presumed parent-height header/block state.
-    auto data = to_pool(parent);
+    auto data = to_pool(parent, settings);
 
     // Replace the pool (empty) current block state with given header state.
     // Preserve data.timestamp.retarget promotion.
@@ -680,26 +704,27 @@ chain_state::data chain_state::to_header(const chain_state& parent,
 
 // Constructor (parent to header).
 // This assumes that parent is the state of the header's previous block.
-chain_state::chain_state(const chain_state& parent, const header& header)
-  : data_(to_header(parent, header)),
+chain_state::chain_state(const chain_state& parent, const header& header,
+    const settings& settings)
+  : data_(to_header(parent, header, settings)),
     forks_(parent.forks_),
     stale_seconds_(parent.stale_seconds_),
     checkpoints_(parent.checkpoints_),
     active_(activation(data_, forks_)),
-    work_required_(work_required(data_, forks_)),
+    work_required_(work_required(data_, forks_, settings)),
     median_time_past_(median_time_past(data_, forks_))
 {
 }
 
 // Constructor (from raw data).
 chain_state::chain_state(data&& values, const checkpoints& checkpoints,
-    uint32_t forks, uint32_t stale_seconds)
+    uint32_t forks, uint32_t stale_seconds, const settings& settings)
   : data_(std::move(values)),
     forks_(forks),
     stale_seconds_(stale_seconds),
     checkpoints_(checkpoints),
     active_(activation(data_, forks_)),
-    work_required_(work_required(data_, forks_)),
+    work_required_(work_required(data_, forks_, settings)),
     median_time_past_(median_time_past(data_, forks_))
 {
 }
