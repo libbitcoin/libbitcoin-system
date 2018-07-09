@@ -116,7 +116,7 @@ std::streambuf::int_type unicode_streambuf::overflow(
         const auto written = wide_buffer_->sputn(wide_, chars);
 
         // Handle write failure as an EOF.
-        if (written != static_cast<uint8_t>(chars))
+        if (written != static_cast<std::streamsize>(chars))
             return traits_type::eof();
     }
 
