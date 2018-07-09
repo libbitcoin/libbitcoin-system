@@ -24,6 +24,7 @@
 #include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/config/base16.hpp>
+#include <bitcoin/bitcoin/settings.hpp>
 
 namespace libbitcoin {
 namespace config {
