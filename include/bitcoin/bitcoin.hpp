@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/handlers.hpp>
+#include <bitcoin/bitcoin/settings.hpp>
 #include <bitcoin/bitcoin/version.hpp>
 #include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>

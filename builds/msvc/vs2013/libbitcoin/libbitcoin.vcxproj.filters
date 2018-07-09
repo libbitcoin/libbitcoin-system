@@ -438,6 +438,9 @@
     <ClCompile Include="..\..\..\..\src\message\version.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\settings.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\unicode\console_streambuf.cpp">
       <Filter>src\unicode</Filter>
     </ClCompile>
@@ -952,6 +955,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\version.hpp">
       <Filter>include\bitcoin\bitcoin\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\settings.hpp">
+      <Filter>include\bitcoin\bitcoin</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\console_streambuf.hpp">
       <Filter>include\bitcoin\bitcoin\unicode</Filter>
