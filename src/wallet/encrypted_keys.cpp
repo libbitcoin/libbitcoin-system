@@ -71,12 +71,16 @@ static bool address_salt(ek_salt& salt, const ec_compressed& point,
     return address ? address_salt(salt, address) : false;
 }
 
+#ifdef WITH_ICU
+
 static bool address_salt(ek_salt& salt, const ec_secret& secret,
     uint8_t version, bool compressed)
 {
     payment_address address({ secret, version, compressed });
     return address ? address_salt(salt, address) : false;
 }
+
+#endif
 
 static bool address_validate(const ek_salt& salt,
     const payment_address& address)
@@ -85,12 +89,16 @@ static bool address_validate(const ek_salt& salt,
     return std::equal(hash.begin(), hash.begin() + salt.size(), salt.begin());
 }
 
+#ifdef WITH_ICU
+
 static bool address_validate(const ek_salt& salt, const ec_compressed& point,
     uint8_t version, bool compressed)
 {
     payment_address address({ point, compressed }, version);
     return address ? address_validate(salt, address) : false;
 }
+
+#endif
 
 static bool address_validate(const ek_salt& salt, const ec_secret& secret,
     uint8_t version, bool compressed)
@@ -116,13 +124,19 @@ static one_byte point_sign(uint8_t byte, const hash_digest& hash)
     return to_array(sign_byte);
 }
 
+#ifdef WITH_ICU
+
 static one_byte point_sign(const one_byte& single, const hash_digest& hash)
 {
     return point_sign(single.front(), hash);
 }
 
+#endif
+
 // scrypt_
 // ----------------------------------------------------------------------------
+
+#ifdef WITH_ICU
 
 static hash_digest scrypt_token(data_slice data, data_slice salt)
 {
@@ -130,17 +144,23 @@ static hash_digest scrypt_token(data_slice data, data_slice salt)
     return scrypt<hash_size>(data, salt, 16384u, 8u, 8u);
 }
 
+#endif
+
 static long_hash scrypt_pair(data_slice data, data_slice salt)
 {
     // Arbitrary scrypt parameters from BIP38.
     return scrypt<long_hash_size>(data, salt, 1024u, 1u, 1u);
 }
 
+#ifdef WITH_ICU
+
 static long_hash scrypt_private(data_slice data, data_slice salt)
 {
     // Arbitrary scrypt parameters from BIP38.
     return scrypt<long_hash_size>(data, salt, 16384u, 8u, 8u);
 }
+
+#endif
 
 // set_flags
 // ----------------------------------------------------------------------------
@@ -166,10 +186,14 @@ static one_byte set_flags(bool compressed, bool lot_sequence)
     return set_flags(compressed, lot_sequence, false);
 }
 
+#ifdef WITH_ICU
+
 static one_byte set_flags(bool compressed)
 {
     return set_flags(compressed, false);
 }
+
+#endif
 
 // create_key_pair
 // ----------------------------------------------------------------------------
