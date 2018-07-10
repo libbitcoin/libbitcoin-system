@@ -22,7 +22,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <boost/range/adaptor/reversed.hpp>
-#include <bitcoin/bitcoin/settings.hpp>
 #include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
 #include <bitcoin/bitcoin/chain/compact.hpp>

@@ -23,7 +23,6 @@
 #include <cstdint>
 #include <memory>
 #include <deque>
-#include <bitcoin/bitcoin/settings.hpp>
 #include <bitcoin/bitcoin/config/checkpoint.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
