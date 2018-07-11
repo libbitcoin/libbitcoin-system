@@ -80,16 +80,12 @@ static bool address_salt(ek_salt& salt, const ec_secret& secret,
     return address ? address_salt(salt, address) : false;
 }
 
-#endif
-
 static bool address_validate(const ek_salt& salt,
     const payment_address& address)
 {
     const auto hash = address_hash(address);
     return std::equal(hash.begin(), hash.begin() + salt.size(), salt.begin());
 }
-
-#ifdef WITH_ICU
 
 static bool address_validate(const ek_salt& salt, const ec_compressed& point,
     uint8_t version, bool compressed)
@@ -98,14 +94,14 @@ static bool address_validate(const ek_salt& salt, const ec_compressed& point,
     return address ? address_validate(salt, address) : false;
 }
 
-#endif
-
 static bool address_validate(const ek_salt& salt, const ec_secret& secret,
     uint8_t version, bool compressed)
 {
     payment_address address({ secret, version, compressed });
     return address ? address_validate(salt, address) : false;
 }
+
+#endif
 
 // point_
 // ----------------------------------------------------------------------------
@@ -181,12 +177,12 @@ static one_byte set_flags(bool compressed, bool lot_sequence, bool multiplied)
     return to_array(byte);
 }
 
+#ifdef WITH_ICU
+
 static one_byte set_flags(bool compressed, bool lot_sequence)
 {
     return set_flags(compressed, lot_sequence, false);
 }
-
-#ifdef WITH_ICU
 
 static one_byte set_flags(bool compressed)
 {
