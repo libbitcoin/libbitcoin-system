@@ -46,10 +46,6 @@ matrix:
         - os: linux
           compiler: gcc
           env: LINK=static
-          addons:
-            apt:
-              packages:
-                - lcov
     fast_finish:
         - true
 
@@ -90,13 +86,18 @@ script:
 
 after_success:
 
-    # Install coveralls and current lcov.
+    # Download and unpack lcov > 1.10
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then wget https://github.com/linux-test-project/lcov/releases/download/v1.12/lcov-1.12.tar.gz; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then tar xzf lcov-1.12.tar.gz; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then cd lcov-1.12; PREFIX="$TRAVIS_BUILD_DIR/my-prefix" make install; cd ..; fi
+
+    # Install coveralls.
     - if [[ $LINUX && $GCC   && $STATIC  ]]; then gem install coveralls-lcov; fi
 
     # Capture coverage info, filter out system and test code, and debug before upload.
-    - if [[ $LINUX && $GCC   && $STATIC  ]]; then lcov --directory . --capture --output-file coverage.info; fi
-    - if [[ $LINUX && $GCC   && $STATIC  ]]; then lcov --remove coverage.info "/usr/*" "$TRAVIS_BUILD_DIR/my-prefix/*" "my-build/*" "examples/*" "test/*" --output-file coverage.info; fi
-    - if [[ $LINUX && $GCC   && $STATIC  ]]; then lcov --list coverage.info; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then $TRAVIS_BUILD_DIR/my-prefix/usr/bin/lcov --directory . --capture --output-file coverage.info; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then $TRAVIS_BUILD_DIR/my-prefix/usr/bin/lcov --remove coverage.info "/usr/*" "$TRAVIS_BUILD_DIR/my-prefix/*" "my-build/*" "examples/*" "test/*" --output-file coverage.info; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then $TRAVIS_BUILD_DIR/my-prefix/usr/bin/lcov --list coverage.info; fi
 
     # Upload coverage info to coveralls service (--repo-token <private coveralls repo token>).
     - if [[ $LINUX && $GCC   && $STATIC  ]]; then coveralls-lcov coverage.info; fi
