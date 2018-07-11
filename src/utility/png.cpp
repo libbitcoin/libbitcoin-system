@@ -46,8 +46,7 @@ bool png::write_png(const data_chunk& data, uint32_t size,
 {
     data_source istream(data);
     return png::write_png(istream, size, dots_per_inch, margin,
-        inches_per_meter, get_default_foreground(), get_default_background(),
-        out);
+        inches_per_meter, foreground, background, out);
 }
 
 bool png::write_png(std::istream& in, uint32_t size, std::ostream& out)
@@ -66,8 +65,7 @@ extern "C" void sink_write(png_structp png_ptr, png_bytep data,
     sink.write_bytes(reinterpret_cast<const uint8_t*>(data), size);
 }
 
-extern "C" void error_callback(png_structp png_ptr,
-    png_const_charp error_message)
+extern "C" void error_callback(png_structp, png_const_charp error_message)
 {
     throw std::runtime_error(error_message);
 }
@@ -80,7 +78,8 @@ bool png::write_png(std::istream& in, uint32_t size, uint32_t dots_per_inch,
         return false;
 
     istream_reader source(in);
-    auto version = source.read_4_bytes_little_endian();
+    // Skip version.
+    source.skip(4);
     auto width = source.read_4_bytes_little_endian();
 
     if (bc::max_size_t / width < width)
@@ -95,7 +94,12 @@ bool png::write_png(std::istream& in, uint32_t size, uint32_t dots_per_inch,
         static constexpr int32_t bits_per_byte = 8;
         static constexpr uint8_t margin_value = 0xff;
 
-        // TODO: unguarded overflow conditions.
+        if ((size == 0) || (margin > max_size_t / size))
+            return false;
+
+        if ((width + margin * 2) > max_size_t / size)
+            return false;
+
         const auto margin_size = margin * size;
         const auto realwidth = (width + margin * 2) * size;
         const auto row_size = (realwidth + 7) / bits_per_byte;
@@ -142,13 +146,13 @@ bool png::write_png(std::istream& in, uint32_t size, uint32_t dots_per_inch,
 
         // write top margin
         row.assign(row_size, margin_value);
-        for (auto y = 0; y < margin_size; y++)
+        for (size_t y = 0; y < margin_size; y++)
             png_write_row(png_ptr, row.data());
 
         // write data
         uint8_t* row_ptr = nullptr;
         auto data_ptr = data.data();
-        for (auto y = 0; y < width; y++)
+        for (size_t y = 0; y < width; y++)
         {
             // TODO: unguarded overflow conditions.
             auto bit = bits_per_byte - 1;
@@ -157,9 +161,9 @@ bool png::write_png(std::istream& in, uint32_t size, uint32_t dots_per_inch,
             row_ptr += margin_size / bits_per_byte;
             bit = (bits_per_byte - 1) - (margin_size % bits_per_byte);
 
-            for (auto x = 0; x < width; x++)
+            for (size_t x = 0; x < width; x++)
             {
-                for (auto xx = 0; xx < size; xx++)
+                for (size_t xx = 0; xx < size; xx++)
                 {
                     *row_ptr ^= (*data_ptr & 1) << bit;
                     bit--;
@@ -173,13 +177,13 @@ bool png::write_png(std::istream& in, uint32_t size, uint32_t dots_per_inch,
                 data_ptr++;
             }
 
-            for (auto yy = 0; yy < size; yy++)
+            for (size_t yy = 0; yy < size; yy++)
                 png_write_row(png_ptr, row.data());
         }
 
         // write bottom margin
         row.assign(row_size, margin_value);
-        for (auto y = 0; y < margin_size; y++)
+        for (size_t y = 0; y < margin_size; y++)
             png_write_row(png_ptr, row.data());
 
         png_write_end(png_ptr, info_ptr);
