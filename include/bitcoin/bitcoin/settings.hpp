@@ -36,8 +36,6 @@ public:
     settings();
     settings(config::settings context);
 
-    uint32_t work_limit(bool retarget=true) const;
-
     uint32_t retargeting_factor;
     uint32_t target_spacing_seconds;
     uint32_t easy_spacing_seconds;
