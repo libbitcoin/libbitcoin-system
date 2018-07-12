@@ -366,7 +366,7 @@ uint32_t chain_state::median_time_past(const data& values, uint32_t)
 //-----------------------------------------------------------------------------
 
 uint32_t chain_state::work_required(const data& values, uint32_t forks,
-    const settings& settings)
+    const bc::settings& settings)
 {
     // Invalid parameter via public interface, test is_valid for results.
     if (values.height == 0)
@@ -556,7 +556,7 @@ uint32_t chain_state::signal_version(uint32_t forks)
 
 // This is promotion from a preceding height to the next.
 chain_state::data chain_state::to_pool(const chain_state& top,
-    const settings& settings)
+    const bc::settings& settings)
 {
     // Alias configured forks.
     const auto forks = top.forks_;
@@ -608,7 +608,7 @@ chain_state::data chain_state::to_pool(const chain_state& top,
 
 // Constructor (top to pool).
 // This generates a state for the pool above the presumed top block state.
-chain_state::chain_state(const chain_state& top, const settings& settings)
+chain_state::chain_state(const chain_state& top, const bc::settings& settings)
   : data_(to_pool(top, settings)),
     forks_(top.forks_),
     stale_seconds_(top.stale_seconds_),
@@ -656,7 +656,7 @@ chain_state::data chain_state::to_block(const chain_state& pool,
 // Constructor (tx pool to block).
 // This assumes that the pool state is the same height as the block.
 chain_state::chain_state(const chain_state& pool, const block& block,
-    const settings& settings)
+    const bc::settings& settings)
   : data_(to_block(pool, block)),
     forks_(pool.forks_),
     stale_seconds_(pool.stale_seconds_),
@@ -668,7 +668,7 @@ chain_state::chain_state(const chain_state& pool, const block& block,
 }
 
 chain_state::data chain_state::to_header(const chain_state& parent,
-    const header& header, const settings& settings)
+    const header& header, const bc::settings& settings)
 {
     BITCOIN_ASSERT(header.previous_block_hash() == parent.hash());
 
@@ -705,7 +705,7 @@ chain_state::data chain_state::to_header(const chain_state& parent,
 // Constructor (parent to header).
 // This assumes that parent is the state of the header's previous block.
 chain_state::chain_state(const chain_state& parent, const header& header,
-    const settings& settings)
+    const bc::settings& settings)
   : data_(to_header(parent, header, settings)),
     forks_(parent.forks_),
     stale_seconds_(parent.stale_seconds_),
@@ -718,7 +718,7 @@ chain_state::chain_state(const chain_state& parent, const header& header,
 
 // Constructor (from raw data).
 chain_state::chain_state(data&& values, const checkpoints& checkpoints,
-    uint32_t forks, uint32_t stale_seconds, const settings& settings)
+    uint32_t forks, uint32_t stale_seconds, const bc::settings& settings)
   : data_(std::move(values)),
     forks_(forks),
     stale_seconds_(stale_seconds),
