@@ -19,10 +19,13 @@
 #ifndef LIBBITCOIN_SETTINGS_HPP
 #define LIBBITCOIN_SETTINGS_HPP
 
+#include <bitcoin/bitcoin/chain/block.hpp>
+#include <bitcoin/bitcoin/config/settings.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 
 #include <cstdint>
 #include <cstddef>
+#include <string>
 
 namespace libbitcoin {
 
@@ -31,6 +34,7 @@ class BC_API settings
 {
 public:
     settings();
+    settings(config::settings context);
 
     uint32_t retargeting_factor;
     uint32_t target_spacing_seconds;
@@ -46,6 +50,8 @@ public:
 
     // The target number of blocks for 2 weeks of work (2016 blocks).
     size_t retargeting_interval;
+
+    chain::block genesis_block;
 };
 
 } // namespace libbitcoin

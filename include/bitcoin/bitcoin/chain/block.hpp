@@ -32,7 +32,6 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/settings.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -40,6 +39,12 @@
 #include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
+
+/**
+ * Forward declaration to break header cycle.
+ */
+class settings;
+
 namespace chain {
 
 class BC_API block
@@ -128,9 +133,6 @@ public:
     // Utilities.
     //-------------------------------------------------------------------------
 
-    static block genesis_mainnet(const settings& settings);
-    static block genesis_testnet(const settings& settings);
-    static block genesis_regtest(const settings& settings);
     static size_t locator_size(size_t top);
     static indexes locator_heights(size_t top);
 
