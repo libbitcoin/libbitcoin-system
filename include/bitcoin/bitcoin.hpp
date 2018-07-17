@@ -43,6 +43,7 @@
 #include <bitcoin/bitcoin/config/base2.hpp>
 #include <bitcoin/bitcoin/config/base58.hpp>
 #include <bitcoin/bitcoin/config/base64.hpp>
+#include <bitcoin/bitcoin/config/block.hpp>
 #include <bitcoin/bitcoin/config/checkpoint.hpp>
 #include <bitcoin/bitcoin/config/directory.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>

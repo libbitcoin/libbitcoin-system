@@ -110,6 +110,9 @@
     <ClCompile Include="..\..\..\..\src\config\base2.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base58.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base64.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\block.cpp">
+      <ObjectFileName>$(IntDir)src_config_block.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\checkpoint.cpp" />
     <ClCompile Include="..\..\..\..\src\config\directory.cpp" />
     <ClCompile Include="..\..\..\..\src\config\endpoint.cpp" />
@@ -294,6 +297,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base2.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base58.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base64.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\checkpoint.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\directory.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\endpoint.hpp" />

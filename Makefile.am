@@ -58,6 +58,7 @@ src_libbitcoin_la_SOURCES = \
     src/config/base2.cpp \
     src/config/base58.cpp \
     src/config/base64.cpp \
+    src/config/block.cpp \
     src/config/checkpoint.cpp \
     src/config/directory.cpp \
     src/config/endpoint.cpp \
@@ -260,6 +261,7 @@ test_libbitcoin_test_SOURCES = \
     test/chain/transaction.cpp \
     test/config/authority.cpp \
     test/config/base58.cpp \
+    test/config/block.cpp \
     test/config/checkpoint.cpp \
     test/config/endpoint.cpp \
     test/config/hash256.cpp \
@@ -394,6 +396,7 @@ include_bitcoin_bitcoin_config_HEADERS = \
     include/bitcoin/bitcoin/config/base2.hpp \
     include/bitcoin/bitcoin/config/base58.hpp \
     include/bitcoin/bitcoin/config/base64.hpp \
+    include/bitcoin/bitcoin/config/block.hpp \
     include/bitcoin/bitcoin/config/checkpoint.hpp \
     include/bitcoin/bitcoin/config/directory.hpp \
     include/bitcoin/bitcoin/config/endpoint.hpp \
