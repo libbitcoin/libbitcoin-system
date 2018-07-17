@@ -92,6 +92,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\authority.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base58.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\block.cpp">
+      <ObjectFileName>$(IntDir)test_config_block.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\checkpoint.cpp" />
     <ClCompile Include="..\..\..\..\test\config\endpoint.cpp" />
     <ClCompile Include="..\..\..\..\test\config\hash256.cpp" />
