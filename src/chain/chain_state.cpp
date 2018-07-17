@@ -601,7 +601,7 @@ chain_state::data chain_state::to_pool(const chain_state& top,
     // Hash and bits.self are unused.
     data.height = height;
     data.hash = null_hash;
-    data.bits.self = settings.work_limit(retarget);
+    data.bits.self = 0;
     data.version.self = signal_version(forks);
     return data;
 }

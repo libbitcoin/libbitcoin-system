@@ -36,10 +36,4 @@ settings::settings()
 {
 }
 
-uint32_t settings::work_limit(bool retarget) const
-{
-    return retarget ? retarget_proof_of_work_limit :
-        no_retarget_proof_of_work_limit;
-}
-
 } // namespace libbitcoin
