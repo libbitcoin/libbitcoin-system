@@ -29,9 +29,11 @@
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/machine/opcode.hpp>
 #include <bitcoin/bitcoin/machine/rule_fork.hpp>
-#include <bitcoin/bitcoin/settings.hpp>
 
 namespace libbitcoin {
+
+class settings;
+
 namespace chain {
 
 class block;
