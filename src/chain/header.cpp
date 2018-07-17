@@ -459,7 +459,9 @@ bool header::is_valid_timestamp() const
 bool header::is_valid_proof_of_work(bool retarget) const
 {
     const auto bits = compact(bits_);
-    static const uint256_t pow_limit(compact{ settings_.work_limit(retarget) });
+    const auto work_limit = retarget ? settings_.retarget_proof_of_work_limit :
+        settings_.no_retarget_proof_of_work_limit;
+    static const uint256_t pow_limit(compact{ work_limit });
 
     if (bits.is_overflowed())
         return false;
