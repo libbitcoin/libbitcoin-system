@@ -306,7 +306,6 @@ inline bool operation::is_positive(opcode code)
 inline bool operation::is_reserved(opcode code)
 {
     BC_CONSTEXPR auto op_186 = static_cast<uint8_t>(opcode::reserved_186);
-    BC_CONSTEXPR auto op_255 = static_cast<uint8_t>(opcode::reserved_255);
 
     switch (code)
     {
@@ -316,8 +315,7 @@ inline bool operation::is_reserved(opcode code)
         case opcode::reserved_138:
             return true;
         default:
-            const auto value = static_cast<uint8_t>(code);
-            return value >= op_186 && value <= op_255;
+            return static_cast<uint8_t>(code) >= op_186;
     }
 }
 
