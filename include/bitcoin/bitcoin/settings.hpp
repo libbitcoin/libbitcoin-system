@@ -52,6 +52,32 @@ public:
     size_t retargeting_interval;
 
     chain::block genesis_block;
+
+    // Fork settings.
+    //--------------------------------------------------------------------------
+
+    // Consensus rule change activation and enforcement parameters.
+    uint32_t first_version;
+    uint32_t bip34_version;
+    uint32_t bip66_version;
+    uint32_t bip65_version;
+    uint32_t bip9_version_bit0;
+    uint32_t bip9_version_bit1;
+    uint32_t bip9_version_base;
+
+    // Activation parameters (bip34-style activations).
+    size_t net_active;
+    size_t net_enforce;
+    size_t net_sample;
+
+    // Frozen activation heights (frozen_activations).
+    size_t bip65_freeze;
+    size_t bip66_freeze;
+
+    // Block 514 is the first testnet block after date-based activation.
+    // Block 173805 is the first mainnet block after date-based activation.
+    // The first mainnet activation window hardwired in satoshi 0.6.0rc1 failed.
+    uint32_t bip16_activation_time;
 };
 
 } // namespace libbitcoin

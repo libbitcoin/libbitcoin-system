@@ -39,6 +39,13 @@ BOOST_AUTO_TEST_CASE(settings__construct__default_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.min_timespan, 302400);
     BOOST_REQUIRE_EQUAL(configuration.max_timespan, 4838400);
     BOOST_REQUIRE_EQUAL(configuration.retargeting_interval, 2016);
+    BOOST_REQUIRE_EQUAL(configuration.first_version, 1);
+    BOOST_REQUIRE_EQUAL(configuration.bip34_version, 2);
+    BOOST_REQUIRE_EQUAL(configuration.bip66_version, 3);
+    BOOST_REQUIRE_EQUAL(configuration.bip65_version, 4);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, 1u);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, 2u);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000);
 }
 
 BOOST_AUTO_TEST_CASE(settings__construct__mainnet_context__expected)
@@ -91,6 +98,19 @@ BOOST_AUTO_TEST_CASE(settings__construct__mainnet_context__expected)
         0x5c, 0x38, 0x4d, 0xf7, 0xba, 0x0b, 0x8d, 0x57,
         0x8a, 0x4c, 0x70, 0x2b, 0x6b, 0xf1, 0x1d, 0x5f,
         0xac, 0x00, 0x00, 0x00, 0x00}));
+    BOOST_REQUIRE_EQUAL(configuration.first_version, 1);
+    BOOST_REQUIRE_EQUAL(configuration.bip34_version, 2);
+    BOOST_REQUIRE_EQUAL(configuration.bip66_version, 3);
+    BOOST_REQUIRE_EQUAL(configuration.bip65_version, 4);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, 1u);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, 2u);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000);
+    BOOST_REQUIRE_EQUAL(configuration.net_active, 750);
+    BOOST_REQUIRE_EQUAL(configuration.net_enforce, 950);
+    BOOST_REQUIRE_EQUAL(configuration.net_sample, 1000);
+    BOOST_REQUIRE_EQUAL(configuration.bip65_freeze, 388381);
+    BOOST_REQUIRE_EQUAL(configuration.bip66_freeze, 363725);
+    BOOST_REQUIRE_EQUAL(configuration.bip16_activation_time, 0x4f779a80);
 }
 
 BOOST_AUTO_TEST_CASE(settings__construct__testnet_context__expected)
@@ -143,6 +163,19 @@ BOOST_AUTO_TEST_CASE(settings__construct__testnet_context__expected)
         0x5c, 0x38, 0x4d, 0xf7, 0xba, 0x0b, 0x8d, 0x57,
         0x8a, 0x4c, 0x70, 0x2b, 0x6b, 0xf1, 0x1d, 0x5f,
         0xac, 0x00, 0x00, 0x00, 0x00}));
+    BOOST_REQUIRE_EQUAL(configuration.first_version, 1);
+    BOOST_REQUIRE_EQUAL(configuration.bip34_version, 2);
+    BOOST_REQUIRE_EQUAL(configuration.bip66_version, 3);
+    BOOST_REQUIRE_EQUAL(configuration.bip65_version, 4);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, 1u);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, 2u);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000);
+    BOOST_REQUIRE_EQUAL(configuration.net_active, 51);
+    BOOST_REQUIRE_EQUAL(configuration.net_enforce, 75);
+    BOOST_REQUIRE_EQUAL(configuration.net_sample, 100);
+    BOOST_REQUIRE_EQUAL(configuration.bip65_freeze, 581885);
+    BOOST_REQUIRE_EQUAL(configuration.bip66_freeze, 330776);
+    BOOST_REQUIRE_EQUAL(configuration.bip16_activation_time, 0x4f3af580);
 }
 
 BOOST_AUTO_TEST_CASE(settings__construct__regtest_context__expected)
@@ -195,6 +228,16 @@ BOOST_AUTO_TEST_CASE(settings__construct__regtest_context__expected)
         0x5c, 0x38, 0x4d, 0xf7, 0xba, 0x0b, 0x8d, 0x57,
         0x8a, 0x4c, 0x70, 0x2b, 0x6b, 0xf1, 0x1d, 0x5f,
         0xac, 0x00, 0x00, 0x00, 0x00}));
+    BOOST_REQUIRE_EQUAL(configuration.first_version, 1);
+    BOOST_REQUIRE_EQUAL(configuration.bip34_version, 2);
+    BOOST_REQUIRE_EQUAL(configuration.bip66_version, 3);
+    BOOST_REQUIRE_EQUAL(configuration.bip65_version, 4);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, 1u);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, 2u);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000);
+    BOOST_REQUIRE_EQUAL(configuration.bip65_freeze, 1351);
+    BOOST_REQUIRE_EQUAL(configuration.bip66_freeze, 1251);
+    BOOST_REQUIRE_EQUAL(configuration.bip16_activation_time, 0x4f3af580);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
