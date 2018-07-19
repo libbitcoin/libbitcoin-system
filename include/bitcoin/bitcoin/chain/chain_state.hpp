@@ -128,9 +128,9 @@ public:
 
     /// Checkpoints must be ordered by height with greatest at back.
     static map get_map(size_t height, const checkpoints& checkpoints,
-        uint32_t forks, size_t retargeting_interval);
+        uint32_t forks, size_t retargeting_interval, size_t net_sample);
 
-    static uint32_t signal_version(uint32_t forks);
+    static uint32_t signal_version(uint32_t forks, const settings& settings);
 
     /// Create pool state from top chain top block state.
     chain_state(const chain_state& top, const settings& settings);
@@ -185,7 +185,8 @@ protected:
         uint32_t maximum_transaction_version;
     };
 
-    static activations activation(const data& values, uint32_t forks);
+    static activations activation(const data& values, uint32_t forks,
+        const settings& settings);
     static uint32_t median_time_past(const data& values, uint32_t forks);
     static uint32_t work_required(const data& values, uint32_t forks,
         const settings& settings);
@@ -193,7 +194,8 @@ protected:
 private:
     static size_t bits_count(size_t height, uint32_t forks,
         size_t retargeting_interval);
-    static size_t version_count(size_t height, uint32_t forks);
+    static size_t version_count(size_t height, uint32_t forks,
+        size_t net_sample);
     static size_t timestamp_count(size_t height, uint32_t forks);
     static size_t retarget_height(size_t height, uint32_t forks,
         size_t retargeting_interval);
