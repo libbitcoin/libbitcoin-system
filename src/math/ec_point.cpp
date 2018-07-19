@@ -19,6 +19,7 @@
 #include <bitcoin/bitcoin/math/ec_point.hpp>
 
 #include <bitcoin/bitcoin/formats/base_16.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
