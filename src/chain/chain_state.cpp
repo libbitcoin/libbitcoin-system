@@ -46,19 +46,14 @@ using namespace boost::adaptors;
 // Inlines.
 //-----------------------------------------------------------------------------
 
-inline size_t version_sample_size(bool mainnet)
+inline bool is_active(size_t count, size_t net_active)
 {
-    return mainnet ? mainnet_sample : testnet_sample;
+    return count >= net_active;
 }
 
-inline bool is_active(size_t count, bool mainnet)
+inline bool is_enforced(size_t count, size_t net_enforce)
 {
-    return count >= (mainnet ? mainnet_active : testnet_active);
-}
-
-inline bool is_enforced(size_t count, bool mainnet)
-{
-    return count >= (mainnet ? mainnet_enforce : testnet_enforce);
+    return count >= net_enforce;
 }
 
 inline bool is_bip30_exception(const checkpoint& check, bool mainnet)
@@ -106,15 +101,6 @@ inline bool bip9_bit1_active(size_t height, bool mainnet, bool testnet)
         (regtest && height == regtest_bip9_bit1_active_checkpoint.height());
 }
 
-inline bool bip16(uint32_t timestamp, bool mainnet, bool testnet)
-{
-    const auto regtest = !mainnet && !testnet;
-    return
-        (mainnet && timestamp >= mainnet_bip16_activation_time) ||
-        (testnet && timestamp >= testnet_bip16_activation_time) ||
-        (regtest && timestamp >= regtest_bip16_activation_time);
-}
-
 inline bool bip34(size_t height, bool frozen, bool mainnet, bool testnet)
 {
     const auto regtest = !mainnet && !testnet;
@@ -122,24 +108,6 @@ inline bool bip34(size_t height, bool frozen, bool mainnet, bool testnet)
         ((mainnet && height >= mainnet_bip34_freeze) ||
          (testnet && height >= testnet_bip34_freeze) ||
          (regtest && height >= regtest_bip34_freeze));
-}
-
-inline bool bip66(size_t height, bool frozen, bool mainnet, bool testnet)
-{
-    const auto regtest = !mainnet && !testnet;
-    return frozen &&
-        ((mainnet && height >= mainnet_bip66_freeze) ||
-         (testnet && height >= testnet_bip66_freeze) ||
-         (regtest && height >= regtest_bip66_freeze));
-}
-
-inline bool bip65(size_t height, bool frozen, bool mainnet, bool testnet)
-{
-    const auto regtest = !mainnet && !testnet;
-    return frozen &&
-        ((mainnet && height >= mainnet_bip65_freeze) ||
-         (testnet && height >= testnet_bip65_freeze) ||
-         (regtest && height >= regtest_bip65_freeze));
 }
 
 inline uint32_t timestamp_high(const chain_state::data& values)
@@ -156,7 +124,7 @@ inline uint32_t bits_high(const chain_state::data& values)
 //-----------------------------------------------------------------------------
 
 chain_state::activations chain_state::activation(const data& values,
-    uint32_t forks)
+    uint32_t forks, const bc::settings& settings)
 {
     const auto height = values.height;
     const auto version = values.version.self;
@@ -177,9 +145,12 @@ chain_state::activations chain_state::activation(const data& values,
     };
 
     // Declare bip34-based version predicates.
-    const auto ge_2 = [=](uint32_t value) { return ge(value, bip34_version); };
-    const auto ge_3 = [=](uint32_t value) { return ge(value, bip66_version); };
-    const auto ge_4 = [=](uint32_t value) { return ge(value, bip65_version); };
+    const auto ge_2 = [=](uint32_t value) { return ge(value,
+        settings.bip34_version); };
+    const auto ge_3 = [=](uint32_t value) { return ge(value,
+        settings.bip66_version); };
+    const auto ge_4 = [=](uint32_t value) { return ge(value,
+        settings.bip65_version); };
 
     // Compute bip34-based activation version summaries.
     const auto count_2 = std::count_if(history.begin(), history.end(), ge_2);
@@ -188,11 +159,11 @@ chain_state::activations chain_state::activation(const data& values,
 
     // Frozen activations (require version and enforce above freeze height).
     const auto bip34_ice = bip34(height, frozen, mainnet, testnet);
-    const auto bip66_ice = bip66(height, frozen, mainnet, testnet);
-    const auto bip65_ice = bip65(height, frozen, mainnet, testnet);
+    const auto bip66_ice = frozen && height >= settings.bip66_freeze;
+    const auto bip65_ice = frozen && height >= settings.bip65_freeze;
 
     // Initialize activation results with genesis values.
-    activations result{ rule_fork::no_rules, first_version };
+    activations result{ rule_fork::no_rules, settings.first_version };
 
     // retarget is only activated via configuration (hard fork).
     result.forks |= (rule_fork::retarget & forks);
@@ -204,7 +175,7 @@ chain_state::activations chain_state::activation(const data& values,
     result.forks |= (rule_fork::bip90_rule & forks);
 
     // bip16 was activated based on manual inspection of history (~55% rule).
-    if (bip16(values.timestamp.self, mainnet, testnet))
+    if (values.timestamp.self >= settings.bip16_activation_time)
     {
         result.forks |= (rule_fork::bip16_rule & forks);
     }
@@ -218,19 +189,22 @@ chain_state::activations chain_state::activation(const data& values,
     }
 
     // bip34 is activated based on 75% of preceding 1000 mainnet blocks.
-    if (bip34_ice || (is_active(count_2, mainnet) && version >= bip34_version))
+    if (bip34_ice || (is_active(count_2, settings.net_active) && version >=
+        settings.bip34_version))
     {
         result.forks |= (rule_fork::bip34_rule & forks);
     }
 
     // bip66 is activated based on 75% of preceding 1000 mainnet blocks.
-    if (bip66_ice || (is_active(count_3, mainnet) && version >= bip66_version))
+    if (bip66_ice || (is_active(count_3, settings.net_active) && version >=
+        settings.bip66_version))
     {
         result.forks |= (rule_fork::bip66_rule & forks);
     }
 
     // bip65 is activated based on 75% of preceding 1000 mainnet blocks.
-    if (bip65_ice || (is_active(count_4, mainnet) && version >= bip65_version))
+    if (bip65_ice || (is_active(count_4, settings.net_active) && version >=
+        settings.bip65_version))
     {
         result.forks |= (rule_fork::bip65_rule & forks);
     }
@@ -248,21 +222,21 @@ chain_state::activations chain_state::activation(const data& values,
     }
 
     // version 4/3/2 enforced based on 95% of preceding 1000 mainnet blocks.
-    if (bip65_ice || is_enforced(count_4, mainnet))
+    if (bip65_ice || is_enforced(count_4, settings.net_enforce))
     {
-        result.minimum_block_version = bip65_version;
+        result.minimum_block_version = settings.bip65_version;
     }
-    else if (bip66_ice || is_enforced(count_3, mainnet))
+    else if (bip66_ice || is_enforced(count_3, settings.net_enforce))
     {
-        result.minimum_block_version = bip66_version;
+        result.minimum_block_version = settings.bip66_version;
     }
-    else if (bip34_ice || is_enforced(count_2, mainnet))
+    else if (bip34_ice || is_enforced(count_2, settings.net_enforce))
     {
-        result.minimum_block_version = bip34_version;
+        result.minimum_block_version = settings.bip34_version;
     }
     else
     {
-        result.minimum_block_version = first_version;
+        result.minimum_block_version = settings.first_version;
     }
 
     // TODO: add configurable option to apply transaction version policy.
@@ -289,7 +263,8 @@ size_t chain_state::bits_count(size_t height, uint32_t forks,
     return std::min(height, retargeting_interval);
 }
 
-size_t chain_state::version_count(size_t height, uint32_t forks)
+size_t chain_state::version_count(size_t height, uint32_t forks,
+    size_t net_sample)
 {
     if (script::is_enabled(forks, rule_fork::bip90_rule) ||
         !script::is_enabled(forks, rule_fork::bip34_activations))
@@ -300,7 +275,7 @@ size_t chain_state::version_count(size_t height, uint32_t forks)
     // Regtest and testnet both use bip34 testnet activation.
     const auto difficult = script::is_enabled(forks, rule_fork::difficult);
     const auto retarget = script::is_enabled(forks, rule_fork::retarget);
-    return std::min(height, version_sample_size(retarget && difficult));
+    return std::min(height, net_sample);
 }
 
 size_t chain_state::timestamp_count(size_t height, uint32_t)
@@ -494,7 +469,7 @@ size_t chain_state::retarget_distance(size_t height,
 // static
 chain_state::map chain_state::get_map(size_t height,
     const checkpoints& /* checkpoints */, uint32_t forks,
-    size_t retargeting_interval)
+    size_t retargeting_interval, size_t net_sample)
 {
     if (height == 0)
         return {};
@@ -514,7 +489,7 @@ chain_state::map chain_state::get_map(size_t height,
     // The height bound of the version sample for activations.
     map.version_self = height;
     map.version.high = height - 1;
-    map.version.count = version_count(height, forks);
+    map.version.count = version_count(height, forks, net_sample);
 
     // The most recent past retarget height.
     map.timestamp_retarget = retarget_height(height, forks,
@@ -530,28 +505,29 @@ chain_state::map chain_state::get_map(size_t height,
 }
 
 // static
-uint32_t chain_state::signal_version(uint32_t forks)
+uint32_t chain_state::signal_version(uint32_t forks,
+    const bc::settings& settings)
 {
     if (script::is_enabled(forks, rule_fork::bip65_rule))
-        return bip65_version;
+        return settings.bip65_version;
 
     if (script::is_enabled(forks, rule_fork::bip66_rule))
-        return bip66_version;
+        return settings.bip66_version;
 
     if (script::is_enabled(forks, rule_fork::bip34_rule))
-        return bip34_version;
+        return settings.bip34_version;
 
     // TODO: these can be retired.
     // Signal bip9 bit0 if any of the group is configured.
     if (script::is_enabled(forks, rule_fork::bip9_bit0_group))
-        return bip9_version_base | bip9_version_bit0;
+        return settings.bip9_version_base | settings.bip9_version_bit0;
 
     // TODO: these can be retired.
     // Signal bip9 bit1 if any of the group is configured.
     if (script::is_enabled(forks, rule_fork::bip9_bit1_group))
-        return bip9_version_base | bip9_version_bit1;
+        return settings.bip9_version_base | settings.bip9_version_bit1;
 
-    return first_version;
+    return settings.first_version;
 }
 
 // This is promotion from a preceding height to the next.
@@ -581,7 +557,8 @@ chain_state::data chain_state::to_pool(const chain_state& top,
         data.bits.ordered.pop_front();
 
     // If version collection overflows, dequeue oldest member.
-    if (data.version.ordered.size() > version_count(height, forks))
+    if (data.version.ordered.size() > version_count(height, forks,
+            settings.net_sample))
         data.version.ordered.pop_front();
 
     // If timestamp collection overflows, dequeue oldest member.
@@ -602,7 +579,7 @@ chain_state::data chain_state::to_pool(const chain_state& top,
     data.height = height;
     data.hash = null_hash;
     data.bits.self = 0;
-    data.version.self = signal_version(forks);
+    data.version.self = signal_version(forks, settings);
     return data;
 }
 
@@ -613,7 +590,7 @@ chain_state::chain_state(const chain_state& top, const bc::settings& settings)
     forks_(top.forks_),
     stale_seconds_(top.stale_seconds_),
     checkpoints_(top.checkpoints_),
-    active_(activation(data_, forks_)),
+    active_(activation(data_, forks_, settings)),
     work_required_(work_required(data_, forks_, settings)),
     median_time_past_(median_time_past(data_, forks_))
 {
@@ -661,7 +638,7 @@ chain_state::chain_state(const chain_state& pool, const block& block,
     forks_(pool.forks_),
     stale_seconds_(pool.stale_seconds_),
     checkpoints_(pool.checkpoints_),
-    active_(activation(data_, forks_)),
+    active_(activation(data_, forks_, settings)),
     work_required_(work_required(data_, forks_, settings)),
     median_time_past_(median_time_past(data_, forks_))
 {
@@ -710,7 +687,7 @@ chain_state::chain_state(const chain_state& parent, const header& header,
     forks_(parent.forks_),
     stale_seconds_(parent.stale_seconds_),
     checkpoints_(parent.checkpoints_),
-    active_(activation(data_, forks_)),
+    active_(activation(data_, forks_, settings)),
     work_required_(work_required(data_, forks_, settings)),
     median_time_past_(median_time_past(data_, forks_))
 {
@@ -723,7 +700,7 @@ chain_state::chain_state(data&& values, const checkpoints& checkpoints,
     forks_(forks),
     stale_seconds_(stale_seconds),
     checkpoints_(checkpoints),
-    active_(activation(data_, forks_)),
+    active_(activation(data_, forks_, settings)),
     work_required_(work_required(data_, forks_, settings)),
     median_time_past_(median_time_past(data_, forks_))
 {
