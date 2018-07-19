@@ -23,12 +23,9 @@
 #include <numeric>
 #include <vector>
 #include <secp256k1.h>
-<<<<<<< HEAD
-#include <bitcoin/bitcoin/math/hash.hpp>
-=======
->>>>>>> 13dfa4fc213fbf6342c09c5994b653ba2a141914
 #include <bitcoin/bitcoin/math/ec_point.hpp>
 #include <bitcoin/bitcoin/math/ec_scalar.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/wallet/hd_private.hpp>
 
@@ -135,27 +132,8 @@ static bool generate_known_indexes(index_list& out, const key_rings& rings,
     return !has_empty && create_key_indexes(out, rings, known_keys_by_ring);
 }
 
-<<<<<<< HEAD
-static bool calculate_R(ec_compressed& out, const ec_secret& s,
-    const ec_secret& e, const ec_compressed& ring_key)
-{
-    auto eP = ring_key;
-
-    ec_compressed sG;
-    if (!secret_to_public(sG, s))
-        return false;
-
-    // R = s G + e P
-    return ec_multiply(eP, e) && ec_sum(out, { sG, eP });
-}
-
-static bool calculate_s(ec_secret& out, const ec_secret& k, const ec_secret& e,
-    const ec_secret& secret)
-
-=======
 static ec_point calculate_R(const ec_scalar& s, const ec_scalar& e,
     const ec_point& P)
->>>>>>> 13dfa4fc213fbf6342c09c5994b653ba2a141914
 {
     return s * ec_point::G + e * P;
 }
