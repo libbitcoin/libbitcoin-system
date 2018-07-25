@@ -7,10 +7,11 @@
 %array_class(int64_t, int64Array);
 %array_class(unsigned char, ucharArray);
 %array_class(unsigned long long, ulonglongArray);
+%array_class(bool, boolArray);
 
 %include "p_u_long_long.i"
 %include "p_bool.i"
-//%include <p_int32.i>
+%include <p_int32.i>
 
 %include <vector.i>
 %template(ucharVector) std::vector<unsigned char>;

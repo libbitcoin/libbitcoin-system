@@ -16,7 +16,9 @@
 %import "bitcoin-utility-ext.i"
 %import "bitcoin-utility-ext-typemap.i"
 
-%import "p_u_long_long.i"
+//%import "p_u_long_long.i"
+//%apply unsigned long long *OUTVALUE { uint64_t& out };
+//%apply unsigned long long *OUTVALUE { uint64_t& satoshi };
 %apply unsigned long long *OUTVALUE { uint64_t& out };
 %apply unsigned long long *OUTVALUE { uint64_t& satoshi };
 

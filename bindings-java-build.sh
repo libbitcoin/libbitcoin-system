@@ -8,11 +8,11 @@ mkdir -p $TARGET_DIR/objs
 mkdir -p $TARGET_DIR/lib
 mkdir -p $TARGET_DIR/classes
 
-gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$LIB_NAME.cpp -o $TARGET_DIR/objs/javawrap$LIB_NAME.o -I$JAVA_HOME/include -I$JAVA_HOME/include/linux
-PACKAGE=chain && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$LIB_NAME"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$LIB_NAME"_"$PACKAGE.o -I$JAVA_HOME/include -I$JAVA_HOME/include/linux
-exit
-PACKAGE=config && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$LIB_NAME"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$LIB_NAME"_"$PACKAGE.o -I$JAVA_HOME/include -I$JAVA_HOME/include/linux
+#gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$LIB_NAME.cpp -o $TARGET_DIR/objs/javawrap$LIB_NAME.o -I$JAVA_HOME/include -I$JAVA_HOME/include/linux
+#PACKAGE=chain && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$LIB_NAME"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$LIB_NAME"_"$PACKAGE.o -I$JAVA_HOME/include -I$JAVA_HOME/include/linux
+#PACKAGE=config && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$LIB_NAME"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$LIB_NAME"_"$PACKAGE.o -I$JAVA_HOME/include -I$JAVA_HOME/include/linux
 PACKAGE=formats && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$LIB_NAME"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$LIB_NAME"_"$PACKAGE.o -I$JAVA_HOME/include -I$JAVA_HOME/include/linux
+exit
 PACKAGE=machine && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$LIB_NAME"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$LIB_NAME"_"$PACKAGE.o -I$JAVA_HOME/include -I$JAVA_HOME/include/linux
 PACKAGE=math && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$LIB_NAME"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$LIB_NAME"_"$PACKAGE.o -I$JAVA_HOME/include -I$JAVA_HOME/include/linux
 PACKAGE=message && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$LIB_NAME"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$LIB_NAME"_"$PACKAGE.o -I$JAVA_HOME/include -I$JAVA_HOME/include/linux

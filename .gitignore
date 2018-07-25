@@ -25,3 +25,6 @@ obj
 /configure
 /libtool
 .dirstamp
+/.autotools
+/bindings/target/*
+/
