@@ -139,8 +139,8 @@ static ec_point calculate_R(const ec_scalar& s, const ec_scalar& e,
 }
 
 static ec_point calculate_last_R_signing(const point_list& ring,
-    size_t i, const hash_digest& digest, const ring_signature& signature,
-    const size_t known_key_index, const secret_list& salts)
+    uint32_t i, const hash_digest& digest, const ring_signature& signature,
+    const uint32_t known_key_index, const secret_list& salts)
 {
     auto R_i_j = salts[i] * ec_point::G;
     if (!R_i_j)
@@ -181,7 +181,7 @@ static bool calculate_e0(ring_signature& out, const key_rings& rings,
         const auto& ring = rings[i];
         const auto known_key_index = known_key_indexes[i];
 
-        // Calculate the last R value...
+        // Calculate the last R value.
         const auto last_R = calculate_last_R_signing(
             ring, i, digest, out, known_key_index, salts);
         if (!last_R)
@@ -205,18 +205,18 @@ static bool calculate_e_at_known_key_index(ec_scalar& e_i_j,
     BITCOIN_ASSERT(ring.size() > known_key_index);
 
     // Loop until index of known key.
-    for (size_t j = 0; j < known_key_index; ++j)
+    for (uint32_t j = 0; j < known_key_index; ++j)
     {
         const ec_scalar s = signature.proofs[i][j];
         if (!s)
             return false;
 
-        // Calculate e and R until we reach our index.
+        // Calculate e and R until reaching the index.
         const auto R = calculate_R(s, e_i_j, ring[j]);
         if (!R)
             return false;
 
-        e_i_j = borromean_hash(digest, R.point(), i, j + 1);
+        e_i_j = borromean_hash(digest, R.point(), i, j + 1u);
         if (!e_i_j)
             return false;
     }
@@ -234,7 +234,7 @@ static bool join_rings(ring_signature& out, const key_rings& rings,
         const auto known_key_index = known_key_indexes[i];
 
         // Calculate starting e value of this current ring.
-        auto e_i_j = borromean_hash(digest, out.challenge, i, 0);
+        auto e_i_j = borromean_hash(digest, out.challenge, i, 0u);
         if (!e_i_j)
             return false;
 
@@ -257,7 +257,7 @@ static bool join_rings(ring_signature& out, const key_rings& rings,
         if (!s)
             return false;
 
-        // Close the ring
+        // Close the ring.
         out.proofs[i][known_key_index] = s;
     }
 
@@ -265,7 +265,7 @@ static bool join_rings(ring_signature& out, const key_rings& rings,
 }
 
 static ec_point calculate_last_R_verify(const point_list& ring,
-    ec_scalar e_i_j, size_t i, const hash_digest& digest,
+    ec_scalar e_i_j, uint32_t i, const hash_digest& digest,
     const ring_signature& signature)
 {
     ec_point R_i_j;
@@ -284,8 +284,8 @@ static ec_point calculate_last_R_verify(const point_list& ring,
         if (!R_i_j)
             return ec_point();
 
-        // Next e value
-        e_i_j = borromean_hash(digest, R_i_j.point(), i, j + 1);
+        // Calculate the next e value.
+        e_i_j = borromean_hash(digest, R_i_j.point(), i, j + 1u);
         if (!e_i_j)
             return ec_point();
     }
@@ -362,13 +362,13 @@ bool verify(const key_rings& rings, const hash_digest& digest,
         if (!e_i_0)
             return false;
 
-        // Calculate the last R value...
-        const auto last_R = calculate_last_R_verify(
-            rings[i], e_i_0, i, digest, signature);
+        // Calculate the last R value.
+        const auto last_R = calculate_last_R_verify(rings[i], e_i_0, i,
+            digest, signature);
         if (!last_R)
             return false;
 
-        // Add this ring to e0
+        // Add this ring to e0.
         extend_data(e0_data, last_R.point());
     }
 
