@@ -93,8 +93,8 @@ src_libbitcoin_la_SOURCES = \
     src/machine/program.cpp \
     src/math/checksum.cpp \
     src/math/crypto.cpp \
-    src/math/ec_scalar.cpp \
     src/math/ec_point.cpp \
+    src/math/ec_scalar.cpp \
     src/math/elliptic_curve.cpp \
     src/math/hash.cpp \
     src/math/ring_signature.cpp \
@@ -507,8 +507,8 @@ include_bitcoin_bitcoin_mathdir = ${includedir}/bitcoin/bitcoin/math
 include_bitcoin_bitcoin_math_HEADERS = \
     include/bitcoin/bitcoin/math/checksum.hpp \
     include/bitcoin/bitcoin/math/crypto.hpp \
-    include/bitcoin/bitcoin/math/ec_scalar.hpp \
     include/bitcoin/bitcoin/math/ec_point.hpp \
+    include/bitcoin/bitcoin/math/ec_scalar.hpp \
     include/bitcoin/bitcoin/math/elliptic_curve.hpp \
     include/bitcoin/bitcoin/math/hash.hpp \
     include/bitcoin/bitcoin/math/limits.hpp \
