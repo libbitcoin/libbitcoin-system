@@ -26,123 +26,106 @@ namespace libbitcoin {
 
 const ec_scalar ec_scalar::zero = null_hash;
 
+// Null is valid but uninitialized object is invalid.
 ec_scalar::ec_scalar()
+  : valid_(false), secret_(null_hash)
 {
 }
-ec_scalar::ec_scalar(uint64_t value)
-{
-    *this = value;
-}
+
 ec_scalar::ec_scalar(const ec_secret& secret)
+  : valid_(true), secret_(secret)
 {
-    *this = secret;
 }
 
-void ec_scalar::reset()
-{
-    valid_ = true;
-    std::fill(scalar_.begin(), scalar_.end(), 0);
-}
-
-void ec_scalar::invalidate()
-{
-    valid_ = false;
-}
-
-ec_scalar& ec_scalar::operator=(uint64_t value)
-{
-    valid_ = true;
-    reset();
-    auto serial = bc::make_unsafe_serializer(scalar_.end() - 8);
-    serial.write_8_bytes_big_endian(static_cast<uint64_t>(value));
-    return *this;
-}
-ec_scalar& ec_scalar::operator=(const ec_secret& secret)
-{
-    valid_ = true;
-    scalar_ = secret;
-    return *this;
-}
-
-bool ec_scalar::is_valid() const
-{
-    return valid_;
-}
-ec_scalar::operator bool() const
-{
-    return is_valid() && scalar_ != null_hash;
-}
+// Operators.
+// ----------------------------------------------------------------------------
 
 ec_scalar ec_scalar::operator-() const
 {
-    if (!valid_)
+    if (!(*this))
         return *this;
-    auto result = *this;
-    bool rc = ec_negate(result.scalar_);
-    if (!rc)
-        result.invalidate();
-    return result;
+
+    auto negation = *this;
+    if (!ec_negate(negation.secret_))
+        return {};
+
+    return negation;
 }
-ec_scalar& ec_scalar::operator+=(const ec_scalar& rhs)
+
+ec_scalar& ec_scalar::operator+=(const ec_scalar& scalar)
 {
-    if (!valid_)
+    if (!(*this))
         return *this;
-    *this = *this + rhs;
-    return *this;
-}
-ec_scalar& ec_scalar::operator-=(const ec_scalar& rhs)
-{
-    if (!valid_)
-        return *this;
-    *this = *this - rhs;
+
+    *this = *this + scalar;
     return *this;
 }
 
-ec_scalar operator+(ec_scalar lhs, const ec_scalar& rhs)
+ec_scalar& ec_scalar::operator-=(const ec_scalar& scalar)
 {
-    if (!lhs.valid_ || !rhs.valid_)
-    {
-        lhs.invalidate();
-        return lhs;
-    }
-    bool rc = ec_add(lhs.scalar_, rhs.scalar_);
-    if (!rc)
-        lhs.invalidate();
-    return lhs;
+    if (!(*this))
+        return *this;
+
+    *this = *this - scalar;
+    return *this;
 }
-ec_scalar operator-(ec_scalar lhs, const ec_scalar& rhs)
+
+ec_scalar& ec_scalar::operator=(const ec_secret& secret)
 {
-    if (!lhs.valid_ || !rhs.valid_)
-    {
-        lhs.invalidate();
-        return lhs;
-    }
-    const auto negative_rhs = -rhs;
-    if (!negative_rhs.valid_)
-        lhs.invalidate();
-    return lhs + negative_rhs;
+    valid_ = true;
+    secret_ = secret;
+    return *this;
 }
-ec_scalar operator*(ec_scalar lhs, const ec_scalar& rhs)
+
+ec_scalar operator+(ec_scalar left, const ec_scalar& right)
 {
-    if (!lhs.valid_ || !rhs.valid_)
-    {
-        lhs.invalidate();
-        return lhs;
-    }
-    bool rc = ec_multiply(lhs.scalar_, rhs.scalar_);
-    if (!rc)
-        lhs.invalidate();
-    return lhs;
+    if (!left || !right)
+        return {};
+
+    if (!ec_add(left.secret_, right.secret_))
+        return {};
+
+    return left;
+}
+
+ec_scalar operator-(ec_scalar left, const ec_scalar& right)
+{
+    if (!left || !right)
+        return {};
+
+    const auto negative_right = -right;
+    if (!negative_right)
+        return {};
+
+    return left + negative_right;
+}
+
+ec_scalar operator*(ec_scalar left, const ec_scalar& right)
+{
+    if (!left || !right)
+        return {};
+
+    if (!ec_multiply(left.secret_, right.secret_))
+        return {};
+
+    return left;
+}
+
+ec_scalar::operator bool() const
+{
+    // Caller must make both test against zero when that is required.
+    // Overloading bool with valid and non-zero would be very non-intuitive.
+    return valid_ /*&& secret_ != null_hash*/;
+}
+
+ec_scalar::operator const ec_secret&() const
+{
+    return secret_;
 }
 
 const ec_secret& ec_scalar::secret() const
 {
-    return scalar_;
-}
-ec_scalar::operator ec_secret() const
-{
-    return secret();
+    return secret_;
 }
 
 } // namespace libbitcoin
-

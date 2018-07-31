@@ -44,7 +44,7 @@ typedef byte_array<wif_compressed_size> wif_compressed;
 
 /// Use to pass an ec secret with compresson and version information.
 class BC_API ec_private
- : public ec_scalar
+  : public ec_scalar
 {
 public:
     static const uint8_t compressed_sentinel;
@@ -80,6 +80,7 @@ public:
     /// Constructors.
     ec_private();
     ec_private(const ec_private& other);
+    ec_private(const ec_scalar& scalar, uint8_t version=mainnet_p2kh);
     ec_private(const data_chunk& seed, uint8_t version=mainnet_p2kh);
     ec_private(const std::string& wif, uint8_t version=mainnet_p2kh);
     ec_private(const wif_compressed& wif, uint8_t version=mainnet_p2kh);
@@ -91,22 +92,20 @@ public:
         bool compress=true);
 
     /// Operators.
+    ec_private& operator=(ec_private other);
     bool operator<(const ec_private& other) const;
     bool operator==(const ec_private& other) const;
     bool operator!=(const ec_private& other) const;
-    ec_private& operator=(const ec_private& other);
     friend std::istream& operator>>(std::istream& in, ec_private& to);
     friend std::ostream& operator<<(std::ostream& out, const ec_private& of);
 
-    /// Cast operators.
-    operator bool() const;
-    operator const ec_secret&() const;
+    // Swap implementation required to properly handle base class.
+    friend void swap(ec_private& left, ec_private& right);
 
     /// Serializer.
     std::string encoded() const;
 
     /// Accessors.
-    const ec_secret& secret() const;
     uint16_t version() const;
     uint8_t payment_version() const;
     uint8_t wif_version() const;
@@ -128,10 +127,8 @@ private:
 
     /// Members.
     /// These should be const, apart from the need to implement assignment.
-    bool valid_;
     bool compress_;
     uint16_t version_;
-    ec_secret secret_;
 };
 
 } // namespace wallet

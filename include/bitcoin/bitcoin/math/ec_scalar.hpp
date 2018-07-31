@@ -26,41 +26,38 @@ namespace libbitcoin {
 class ec_scalar
 {
 public:
-    ec_scalar();
-    ec_scalar(uint64_t value);
-    ec_scalar(const ec_secret& secret);
-
-    void reset();
-
-    ec_scalar& operator=(uint64_t value);
-    ec_scalar& operator=(const ec_secret& secret);
-
-    bool is_valid() const;
-    operator bool() const;
-
-    ec_scalar operator-() const;
-    ec_scalar& operator+=(const ec_scalar& rhs);
-    ec_scalar& operator-=(const ec_scalar& rhs);
-
-    friend ec_scalar operator+(ec_scalar lhs, const ec_scalar& rhs);
-    friend ec_scalar operator-(ec_scalar lhs, const ec_scalar& rhs);
-    friend ec_scalar operator*(ec_scalar lhs, const ec_scalar& rhs);
-
-    const ec_secret& secret() const;
-    operator ec_secret() const;
-
     static const ec_scalar zero;
 
-private:
-    void invalidate();
+    /// Constructors.
+    ec_scalar();
+    ec_scalar(const ec_secret& secret);
 
-    bool valid_ = false;
-    ec_secret scalar_;
+    /// Operators.
+    // TODO: add equality and inequality operators.
+    ec_scalar operator-() const;
+    ec_scalar& operator+=(const ec_scalar& scalar);
+    ec_scalar& operator-=(const ec_scalar& scalar);
+    ec_scalar& operator=(const ec_secret& secret);
+    friend ec_scalar operator+(ec_scalar left, const ec_scalar& right);
+    friend ec_scalar operator-(ec_scalar left, const ec_scalar& right);
+    friend ec_scalar operator*(ec_scalar left, const ec_scalar& right);
+
+    /// Cast operators.
+    operator bool() const;
+    operator const ec_secret&() const;
+
+    /// Accessors.
+    const ec_secret& secret() const;
+
+protected:
+    // These should be const, apart from the need to implement assignment.
+    bool valid_;
+    ec_secret secret_;
 };
 
-ec_scalar operator+(ec_scalar lhs, const ec_scalar& rhs);
-ec_scalar operator-(ec_scalar lhs, const ec_scalar& rhs);
-ec_scalar operator*(ec_scalar lhs, const ec_scalar& rhs);
+ec_scalar operator+(ec_scalar left, const ec_scalar& right);
+ec_scalar operator-(ec_scalar left, const ec_scalar& right);
+ec_scalar operator*(ec_scalar left, const ec_scalar& right);
 
 } // namespace libbitcoin
 

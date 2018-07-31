@@ -18,135 +18,129 @@
  */
 #include <bitcoin/bitcoin/math/ec_point.hpp>
 
+#include <cstdint>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
+#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 
-const ec_point ec_point::G = ec_point::initialize_G();
+// TODO: use binary value.
+#define LITERAL_G \
+"0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+
+const ec_point ec_point::G = base16_literal(LITERAL_G);
+const uint8_t ec_point::invalid = 0x00;
+const uint8_t ec_point::compressed_even = 0x02;
+const uint8_t ec_point::compressed_odd = 0x03;
+const uint8_t ec_point::uncompressed = 0x04;
+
+// First point byte is used as validity sentinel.
+static_assert(null_compressed_point[0] == ec_point::invalid, "bad sentinel");
 
 ec_point::ec_point()
+  : point_(null_compressed_point)
 {
-    invalidate();
 }
-ec_point::ec_point(const std::string& hex)
-{
-    *this = hex;
-}
+
 ec_point::ec_point(const ec_compressed& point)
+  : point_(point)
 {
-    *this = point;
 }
 
-void ec_point::invalidate()
-{
-    point_[0] = 0;
-}
-
-ec_point& ec_point::operator=(const std::string& hex)
-{
-    bool rc = decode_base16(point_, hex);
-    if (!rc)
-        invalidate();
-    return *this;
-}
-ec_point& ec_point::operator=(const ec_compressed& point)
-{
-    point_ = point;
-    return *this;
-}
-
-bool ec_point::is_valid() const
-{
-    return point_[0] == 2 || point_[0] == 3;
-}
-ec_point::operator bool() const
-{
-    return is_valid();
-}
+// Operators.
+// ----------------------------------------------------------------------------
 
 ec_point ec_point::operator-() const
 {
-    if (!is_valid())
+    if (!(*this))
         return *this;
-    auto result = *this;
-    bool rc = ec_negate(result.point_);
-    if (!rc)
-        result.invalidate();
-    return result;
+
+    auto negation = *this;
+    if (!ec_negate(negation.point_))
+        return {};
+
+    return negation;
 }
-ec_point& ec_point::operator+=(const ec_point& rhs)
+
+ec_point& ec_point::operator+=(const ec_point& point)
 {
-    if (!is_valid())
+    if (!(*this))
         return *this;
-    *this = *this + rhs;
-    return *this;
-}
-ec_point& ec_point::operator-=(const ec_point& rhs)
-{
-    if (!is_valid())
-        return *this;
-    *this = *this - rhs;
+
+    *this = *this + point;
     return *this;
 }
 
-ec_point operator+(ec_point lhs, const ec_point& rhs)
+ec_point& ec_point::operator-=(const ec_point& point)
 {
-    if (!lhs.is_valid() || !rhs.is_valid())
-    {
-        lhs.invalidate();
-        return lhs;
-    }
-    bool rc = ec_sum(lhs.point_, { lhs.point_, rhs.point_ });
-    if (!rc)
-        lhs.invalidate();
-    return lhs;
-}
-ec_point operator-(ec_point lhs, const ec_point& rhs)
-{
-    if (!lhs.is_valid() || !rhs.is_valid())
-    {
-        lhs.invalidate();
-        return lhs;
-    }
-    const auto negative_rhs = -rhs;
-    if (!negative_rhs.is_valid())
-        lhs.invalidate();
-    return lhs + negative_rhs;
-}
-ec_point operator*(ec_point lhs, const ec_scalar& rhs)
-{
-    if (!lhs.is_valid() || !rhs.is_valid())
-    {
-        lhs.invalidate();
-        return lhs;
-    }
-    bool rc = ec_multiply(lhs.point_, rhs.secret());
-    if (!rc)
-        lhs.invalidate();
-    return lhs;
+    if (!(*this))
+        return *this;
+
+    *this = *this - point;
+    return *this;
 }
 
-ec_point operator*(const ec_scalar& lhs, ec_point rhs)
+ec_point& ec_point::operator=(const ec_compressed& compressed)
 {
-    return rhs * lhs;
+    point_ = compressed;
+    return *this;
+}
+
+ec_point operator+(ec_point left, const ec_point& right)
+{
+    if (!left || !right)
+        return {};
+
+    if (!ec_sum(left.point_, { left.point_, right.point_ }))
+        return {};
+
+    return left;
+}
+
+ec_point operator-(ec_point left, const ec_point& right)
+{
+    if (!left || !right)
+        return {};
+
+    const auto negative_right = -right;
+    if (!negative_right)
+        return {};
+
+    return left + negative_right;
+}
+
+ec_point operator*(ec_point left, const ec_scalar& right)
+{
+    if (!left || !right)
+        return {};
+
+    if (!ec_multiply(left.point_, right.secret()))
+        return {};
+
+    return left;
+}
+
+ec_point operator*(const ec_scalar& left, ec_point right)
+{
+    return right * left;
+}
+
+ec_point::operator bool() const
+{
+    // First point byte is used as validity sentinel.
+    return point_[0] != invalid;
+}
+
+ec_point::operator ec_compressed() const
+{
+    return point_;
 }
 
 const ec_compressed& ec_point::point() const
 {
     return point_;
 }
-ec_point::operator ec_compressed() const
-{
-    return point();
-}
-
-ec_point ec_point::initialize_G()
-{
-    return ec_point(
-        "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798");
-}
 
 } // namespace libbitcoin
-
