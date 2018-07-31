@@ -111,6 +111,7 @@
     <ClCompile Include="..\..\..\..\test\machine\operation.cpp" />
     <ClCompile Include="..\..\..\..\test\main.cpp" />
     <ClCompile Include="..\..\..\..\test\math\checksum.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\ec_arithmetic.cpp" />
     <ClCompile Include="..\..\..\..\test\math\elliptic_curve.cpp" />
     <ClCompile Include="..\..\..\..\test\math\hash.cpp" />
     <ClCompile Include="..\..\..\..\test\math\limits.cpp" />
