@@ -138,7 +138,10 @@
     <ClCompile Include="..\..\..\..\test\math\checksum.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\math\ec_arithmetic.cpp">
+    <ClCompile Include="..\..\..\..\test\math\ec_point.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\math\ec_scalar.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\elliptic_curve.cpp">
