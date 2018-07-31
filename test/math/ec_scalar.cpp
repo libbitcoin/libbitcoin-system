@@ -21,7 +21,7 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(ec_arithmetic_tests)
+BOOST_AUTO_TEST_SUITE(ec_point_tests)
 
 #define POINTX "0245dbb7e2cd3a5de19fde8d556fd567a036f9c377ecf69a9202aa4affce41c623"
 #define POINTY "02cfc43e064c50cfd1896766ef70e7da82b16e8cfebd8d5dec618212d0db1e6d12"
@@ -29,11 +29,11 @@ BOOST_AUTO_TEST_SUITE(ec_arithmetic_tests)
 
 BOOST_AUTO_TEST_CASE(ec_point__sum__valid__expected)
 {
-    const ec_point x = base16_literal(POINTX);
-    const ec_point y = base16_literal(POINTY);
-    const auto result = x + y;
-    BOOST_REQUIRE(result);
-    BOOST_REQUIRE_EQUAL(encode_base16(result.point()), SUM);
+    const ec_point x{ base16_literal(POINTX) };
+    const ec_point y{ base16_literal(POINTY) };
+    const auto sum = x + y;
+    BOOST_REQUIRE(sum);
+    BOOST_REQUIRE_EQUAL(encode_base16(sum.point()), SUM);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
