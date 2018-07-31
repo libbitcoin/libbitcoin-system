@@ -37,7 +37,7 @@ const uint8_t ec_point::compressed_odd = 0x03;
 const uint8_t ec_point::uncompressed = 0x04;
 
 // First point byte is used as validity sentinel.
-static_assert(null_compressed_point[0] == ec_point::invalid, "bad sentinel");
+////static_assert(null_compressed_point[0] == ec_point::invalid, "bad sentinel");
 
 ec_point::ec_point()
   : point_(null_compressed_point)
