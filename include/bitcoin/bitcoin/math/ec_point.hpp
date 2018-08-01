@@ -39,7 +39,7 @@ public:
     ec_point(const ec_compressed& point);
 
     /// Operators.
-    // TODO: add equality and inequality.
+    // TODO: add equality and inequality operators.
     ec_point operator-() const;
     ec_point& operator+=(const ec_point& point);
     ec_point& operator-=(const ec_point& point);

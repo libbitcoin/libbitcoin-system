@@ -24,6 +24,7 @@
 
 namespace libbitcoin {
 
+// TODO: implement equality and inequality for ec_scalar and ec_secret.
 const ec_scalar ec_scalar::zero = null_hash;
 
 // Null is valid but uninitialized object is invalid.
@@ -115,7 +116,7 @@ ec_scalar::operator bool() const
 {
     // Caller must make both test against zero when that is required.
     // Overloading bool with valid and non-zero would be very non-intuitive.
-    return valid_ /*&& secret_ != null_hash*/;
+    return valid_ /*&& secret_ != ec_scalar::zero*/;
 }
 
 ec_scalar::operator const ec_secret&() const
