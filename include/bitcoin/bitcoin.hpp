@@ -94,6 +94,8 @@
 #include <bitcoin/bitcoin/machine/sighash_algorithm.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/crypto.hpp>
+#include <bitcoin/bitcoin/math/ec_point.hpp>
+#include <bitcoin/bitcoin/math/ec_scalar.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>

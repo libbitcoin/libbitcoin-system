@@ -160,6 +160,8 @@
     <ClCompile Include="..\..\..\..\src\machine\program.cpp" />
     <ClCompile Include="..\..\..\..\src\math\checksum.cpp" />
     <ClCompile Include="..\..\..\..\src\math\crypto.cpp" />
+    <ClCompile Include="..\..\..\..\src\math\ec_point.cpp" />
+    <ClCompile Include="..\..\..\..\src\math\ec_scalar.cpp" />
     <ClCompile Include="..\..\..\..\src\math\elliptic_curve.cpp" />
     <ClCompile Include="..\..\..\..\src\math\external\aes256.c" />
     <ClCompile Include="..\..\..\..\src\math\external\crypto_scrypt.c" />
@@ -352,6 +354,8 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\sighash_algorithm.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\checksum.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\crypto.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\ec_point.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\ec_scalar.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\elliptic_curve.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\hash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\limits.hpp" />

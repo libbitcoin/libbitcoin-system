@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__secret_testnet__valid_expected)
 
     // MSVC CTP loses the MSB (WIF prefix) byte of the literal version when
     // using this initializer, but the MSB isn't used by payment_address.
-    const payment_address address({ secret, 0x806f });
+    const payment_address address({ secret, 0x806f, true });
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_COMPRESSED_TESTNET);
 }

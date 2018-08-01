@@ -288,6 +288,12 @@
     <ClCompile Include="..\..\..\..\src\math\crypto.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\ec_point.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\ec_scalar.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\elliptic_curve.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
@@ -840,6 +846,12 @@
       <Filter>include\bitcoin\bitcoin\math</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\crypto.hpp">
+      <Filter>include\bitcoin\bitcoin\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\ec_point.hpp">
+      <Filter>include\bitcoin\bitcoin\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\ec_scalar.hpp">
       <Filter>include\bitcoin\bitcoin\math</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\elliptic_curve.hpp">
