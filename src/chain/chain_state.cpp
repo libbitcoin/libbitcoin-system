@@ -272,9 +272,6 @@ size_t chain_state::version_count(size_t height, uint32_t forks,
         return 0;
     }
 
-    // Regtest and testnet both use bip34 testnet activation.
-    const auto difficult = script::is_enabled(forks, rule_fork::difficult);
-    const auto retarget = script::is_enabled(forks, rule_fork::retarget);
     return std::min(height, net_sample);
 }
 
