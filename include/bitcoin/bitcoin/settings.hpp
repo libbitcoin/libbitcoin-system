@@ -73,11 +73,21 @@ public:
     // Frozen activation heights (frozen_activations).
     size_t bip65_freeze;
     size_t bip66_freeze;
+    size_t bip34_freeze;
 
     // Block 514 is the first testnet block after date-based activation.
     // Block 173805 is the first mainnet block after date-based activation.
     // The first mainnet activation window hardwired in satoshi 0.6.0rc1 failed.
     uint32_t bip16_activation_time;
+
+    // bip90 stops checking unspent duplicates above this bip34 activation.
+    config::checkpoint bip34_active_checkpoint;
+
+    // This cannot be reactivated in a future branch due to window expiration.
+    config::checkpoint bip9_bit0_active_checkpoint;
+
+    // This cannot be reactivated in a future branch due to window expiration.
+    config::checkpoint bip9_bit1_active_checkpoint;
 };
 
 } // namespace libbitcoin

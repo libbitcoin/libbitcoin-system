@@ -63,53 +63,6 @@ inline bool is_bip30_exception(const checkpoint& check, bool mainnet)
          (check == mainnet_bip30_exception_checkpoint2));
 }
 
-inline bool bip9_bit0_active(const hash_digest& hash, bool mainnet,
-    bool testnet)
-{
-    const auto regtest = !mainnet && !testnet;
-    return
-        (mainnet && hash == mainnet_bip9_bit0_active_checkpoint.hash()) ||
-        (testnet && hash == testnet_bip9_bit0_active_checkpoint.hash()) ||
-        (regtest && hash == regtest_bip9_bit0_active_checkpoint.hash());
-}
-
-inline bool bip9_bit0_active(size_t height, bool mainnet, bool testnet)
-{
-    const auto regtest = !mainnet && !testnet;
-    return
-        (mainnet && height == mainnet_bip9_bit0_active_checkpoint.height()) ||
-        (testnet && height == testnet_bip9_bit0_active_checkpoint.height()) ||
-        (regtest && height == regtest_bip9_bit0_active_checkpoint.height());
-}
-
-inline bool bip9_bit1_active(const hash_digest& hash, bool mainnet,
-    bool testnet)
-{
-    const auto regtest = !mainnet && !testnet;
-    return
-        (mainnet && hash == mainnet_bip9_bit1_active_checkpoint.hash()) ||
-        (testnet && hash == testnet_bip9_bit1_active_checkpoint.hash()) ||
-        (regtest && hash == regtest_bip9_bit1_active_checkpoint.hash());
-}
-
-inline bool bip9_bit1_active(size_t height, bool mainnet, bool testnet)
-{
-    const auto regtest = !mainnet && !testnet;
-    return
-        (mainnet && height == mainnet_bip9_bit1_active_checkpoint.height()) ||
-        (testnet && height == testnet_bip9_bit1_active_checkpoint.height()) ||
-        (regtest && height == regtest_bip9_bit1_active_checkpoint.height());
-}
-
-inline bool bip34(size_t height, bool frozen, bool mainnet, bool testnet)
-{
-    const auto regtest = !mainnet && !testnet;
-    return frozen &&
-        ((mainnet && height >= mainnet_bip34_freeze) ||
-         (testnet && height >= testnet_bip34_freeze) ||
-         (regtest && height >= regtest_bip34_freeze));
-}
-
 inline uint32_t timestamp_high(const chain_state::data& values)
 {
     return values.timestamp.ordered.back();
@@ -133,7 +86,6 @@ chain_state::activations chain_state::activation(const data& values,
     const auto difficult = script::is_enabled(forks, rule_fork::difficult);
     const auto retarget = script::is_enabled(forks, rule_fork::retarget);
     const auto mainnet = retarget && difficult;
-    const auto testnet = !difficult;
 
     //*************************************************************************
     // CONSENSUS: Though unspecified in bip34, the satoshi implementation
@@ -158,7 +110,7 @@ chain_state::activations chain_state::activation(const data& values,
     const auto count_4 = std::count_if(history.begin(), history.end(), ge_4);
 
     // Frozen activations (require version and enforce above freeze height).
-    const auto bip34_ice = bip34(height, frozen, mainnet, testnet);
+    const auto bip34_ice = frozen && height >= settings.bip34_freeze;
     const auto bip66_ice = frozen && height >= settings.bip66_freeze;
     const auto bip65_ice = frozen && height >= settings.bip65_freeze;
 
@@ -210,13 +162,13 @@ chain_state::activations chain_state::activation(const data& values,
     }
 
     // bip9_bit0 forks are enforced above the bip9_bit0 checkpoint.
-    if (bip9_bit0_active(values.bip9_bit0_hash, mainnet, testnet))
+    if (values.bip9_bit0_hash == settings.bip9_bit0_active_checkpoint.hash())
     {
         result.forks |= (rule_fork::bip9_bit0_group & forks);
     }
 
     // bip9_bit1 forks are enforced above the bip9_bit1 checkpoint.
-    if (bip9_bit1_active(values.bip9_bit1_hash, mainnet, testnet))
+    if (values.bip9_bit1_hash == settings.bip9_bit1_active_checkpoint.hash())
     {
         result.forks |= (rule_fork::bip9_bit1_group & forks);
     }
@@ -292,27 +244,18 @@ size_t chain_state::retarget_height(size_t height, uint32_t forks,
         retargeting_interval : retarget_distance(height, retargeting_interval));
 }
 
-size_t chain_state::bip9_bit0_height(size_t height, uint32_t forks)
+size_t chain_state::bip9_bit0_height(size_t height,
+    const config::checkpoint& bip9_bit0_active_checkpoint)
 {
-    const auto testnet = !script::is_enabled(forks, rule_fork::difficult);
-    const auto regtest = !script::is_enabled(forks, rule_fork::retarget);
-
-    const auto activation_height =
-        testnet ? testnet_bip9_bit0_active_checkpoint.height() :
-        regtest ? regtest_bip9_bit0_active_checkpoint.height() :
-            mainnet_bip9_bit0_active_checkpoint.height();
-
+    const auto activation_height = bip9_bit0_active_checkpoint.height();
     // Require bip9_bit0 hash at heights above historical bip9_bit0 activation.
     return height > activation_height ? activation_height : map::unrequested;
 }
 
-size_t chain_state::bip9_bit1_height(size_t height, uint32_t forks)
+size_t chain_state::bip9_bit1_height(size_t height,
+    const config::checkpoint& bip9_bit1_active_checkpoint)
 {
-    const auto testnet = !script::is_enabled(forks, rule_fork::difficult);
-
-    const auto activation_height = testnet ?
-        testnet_bip9_bit1_active_checkpoint.height() :
-        mainnet_bip9_bit1_active_checkpoint.height();
+    const auto activation_height = bip9_bit1_active_checkpoint.height();
 
     // Require bip9_bit1 hash at heights above historical bip9_bit1 activation.
     return height > activation_height ? activation_height : map::unrequested;
@@ -466,7 +409,9 @@ size_t chain_state::retarget_distance(size_t height,
 // static
 chain_state::map chain_state::get_map(size_t height,
     const checkpoints& /* checkpoints */, uint32_t forks,
-    size_t retargeting_interval, size_t net_sample)
+    size_t retargeting_interval, size_t net_sample,
+    const config::checkpoint& bip9_bit0_active_checkpoint,
+    const config::checkpoint& bip9_bit1_active_checkpoint)
 {
     if (height == 0)
         return {};
@@ -493,10 +438,12 @@ chain_state::map chain_state::get_map(size_t height,
         retargeting_interval);
 
     // The checkpoint above which bip9_bit0 rules are enforced.
-    map.bip9_bit0_height = bip9_bit0_height(height, forks);
+    map.bip9_bit0_height = bip9_bit0_height(height,
+        bip9_bit0_active_checkpoint);
 
     // The checkpoint above which bip9_bit1 rules are enforced.
-    map.bip9_bit1_height = bip9_bit1_height(height, forks);
+    map.bip9_bit1_height = bip9_bit1_height(height,
+        bip9_bit1_active_checkpoint);
 
     return map;
 }
@@ -594,17 +541,9 @@ chain_state::chain_state(const chain_state& top, const bc::settings& settings)
 }
 
 chain_state::data chain_state::to_block(const chain_state& pool,
-    const block& block)
+    const block& block, const config::checkpoint& bip9_bit0_active_checkpoint,
+    const config::checkpoint& bip9_bit1_active_checkpoint)
 {
-    // Alias configured forks.
-    const auto forks = pool.forks_;
-
-    // Retargeting and testnet are only activated via configuration.
-    const auto difficult = script::is_enabled(forks, rule_fork::difficult);
-    const auto retarget = script::is_enabled(forks, rule_fork::retarget);
-    const auto mainnet = retarget && difficult;
-    const auto testnet = !difficult;
-
     // Copy data from presumed same-height pool state.
     auto data = pool.data_;
 
@@ -617,11 +556,11 @@ chain_state::data chain_state::to_block(const chain_state& pool,
     data.timestamp.self = header.timestamp();
 
     // Cache hash of bip9 bit0 height block, otherwise use preceding state.
-    if (bip9_bit0_active(data.height, mainnet, testnet))
+    if (data.height == bip9_bit0_active_checkpoint.height())
         data.bip9_bit0_hash = data.hash;
 
     // Cache hash of bip9 bit1 height block, otherwise use preceding state.
-    if (bip9_bit1_active(data.height, mainnet, testnet))
+    if (data.height == bip9_bit1_active_checkpoint.height())
         data.bip9_bit1_hash = data.hash;
 
     return data;
@@ -631,7 +570,8 @@ chain_state::data chain_state::to_block(const chain_state& pool,
 // This assumes that the pool state is the same height as the block.
 chain_state::chain_state(const chain_state& pool, const block& block,
     const bc::settings& settings)
-  : data_(to_block(pool, block)),
+  : data_(to_block(pool, block, settings.bip9_bit0_active_checkpoint,
+        settings.bip9_bit1_active_checkpoint)),
     forks_(pool.forks_),
     stale_seconds_(pool.stale_seconds_),
     checkpoints_(pool.checkpoints_),
@@ -646,15 +586,6 @@ chain_state::data chain_state::to_header(const chain_state& parent,
 {
     BITCOIN_ASSERT(header.previous_block_hash() == parent.hash());
 
-    // Alias configured forks.
-    const auto forks = parent.forks_;
-
-    // Retargeting and testnet are only activated via configuration.
-    const auto difficult = script::is_enabled(forks, rule_fork::difficult);
-    const auto retarget = script::is_enabled(forks, rule_fork::retarget);
-    const auto mainnet = retarget && difficult;
-    const auto testnet = !difficult;
-
     // Copy and promote data from presumed parent-height header/block state.
     auto data = to_pool(parent, settings);
 
@@ -666,11 +597,11 @@ chain_state::data chain_state::to_header(const chain_state& parent,
     data.timestamp.self = header.timestamp();
 
     // Cache hash of bip9 bit0 height block, otherwise use preceding state.
-    if (bip9_bit0_active(data.height, mainnet, testnet))
+    if (data.height == settings.bip9_bit0_active_checkpoint.height())
         data.bip9_bit0_hash = data.hash;
 
     // Cache hash of bip9 bit1 height block, otherwise use preceding state.
-    if (bip9_bit1_active(data.height, mainnet, testnet))
+    if (data.height == settings.bip9_bit1_active_checkpoint.height())
         data.bip9_bit1_hash = data.hash;
 
     return data;
