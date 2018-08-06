@@ -128,7 +128,9 @@ public:
 
     /// Checkpoints must be ordered by height with greatest at back.
     static map get_map(size_t height, const checkpoints& checkpoints,
-        uint32_t forks, size_t retargeting_interval, size_t net_sample);
+        uint32_t forks, size_t retargeting_interval, size_t net_sample,
+        const config::checkpoint& bip9_bit0_active_checkpoint,
+        const config::checkpoint& bip9_bit1_active_checkpoint);
 
     static uint32_t signal_version(uint32_t forks, const settings& settings);
 
@@ -199,11 +201,15 @@ private:
     static size_t timestamp_count(size_t height, uint32_t forks);
     static size_t retarget_height(size_t height, uint32_t forks,
         size_t retargeting_interval);
-    static size_t bip9_bit0_height(size_t height, uint32_t forks);
-    static size_t bip9_bit1_height(size_t height, uint32_t forks);
+    static size_t bip9_bit0_height(size_t height,
+        const config::checkpoint& bip9_bit0_active_checkpoint);
+    static size_t bip9_bit1_height(size_t height,
+        const config::checkpoint& bip9_bit1_active_checkpoint);
 
     static data to_pool(const chain_state& top, const settings& settings);
-    static data to_block(const chain_state& pool, const block& block);
+    static data to_block(const chain_state& pool, const block& block,
+        const config::checkpoint& bip9_bit0_active_checkpoint,
+        const config::checkpoint& bip9_bit1_active_checkpoint);
     data to_header(const chain_state& parent, const header& header,
         const settings& settings);
 

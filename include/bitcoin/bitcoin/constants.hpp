@@ -98,15 +98,6 @@ BC_CONSTEXPR uint32_t relative_locktime_time_locked = 0x00400000;
 // Fork constants.
 //-----------------------------------------------------------------------------
 
-// Mainnet frozen activation heights (frozen_activations).
-BC_CONSTEXPR size_t mainnet_bip34_freeze = 227931;
-
-// Testnet frozen activation heights (frozen_activations).
-BC_CONSTEXPR size_t testnet_bip34_freeze = 21111;
-
-// Regtest (arbitrary) frozen activation heights (frozen_activations).
-BC_CONSTEXPR size_t regtest_bip34_freeze = 0;
-
 // github.com/bitcoin/bips/blob/master/bip-0030.mediawiki#specification
 static const config::checkpoint mainnet_bip30_exception_checkpoint1
 {
@@ -115,53 +106,6 @@ static const config::checkpoint mainnet_bip30_exception_checkpoint1
 static const config::checkpoint mainnet_bip30_exception_checkpoint2
 {
     "00000000000743f190a18c5577a3c2d2a1f610ae9601ac046a38084ccb7cd721", 91880
-};
-
-// bip90 stops checking unspent duplicates above this bip34 activation.
-static const config::checkpoint mainnet_bip34_active_checkpoint
-{
-    "000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8",
-    mainnet_bip34_freeze
-};
-static const config::checkpoint testnet_bip34_active_checkpoint
-{
-    "0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8",
-    testnet_bip34_freeze
-};
-static const config::checkpoint regtest_bip34_active_checkpoint
-{
-    // Since bip90 assumes a historical bip34 activation block, use genesis.
-    "06226e46111a0b59caaf126043eb5bbf28c34f3a5e332a1fc7b2b73cf188910f", 0
-};
-
-// These cannot be reactivated in a future branch due to window expiration.
-static const config::checkpoint mainnet_bip9_bit0_active_checkpoint
-{
-    "000000000000000004a1b34462cb8aeebd5799177f7a29cf28f2d1961716b5b5", 419328
-};
-static const config::checkpoint testnet_bip9_bit0_active_checkpoint
-{
-    "00000000025e930139bac5c6c31a403776da130831ab85be56578f3fa75369bb", 770112
-};
-static const config::checkpoint regtest_bip9_bit0_active_checkpoint
-{
-    // The activation window is fixed and closed, so assume genesis activation.
-    "06226e46111a0b59caaf126043eb5bbf28c34f3a5e332a1fc7b2b73cf188910f", 0
-};
-
-// These cannot be reactivated in a future branch due to window expiration.
-static const config::checkpoint mainnet_bip9_bit1_active_checkpoint
-{
-    "0000000000000000001c8018d9cb3b742ef25114f27563e3fc4a1902167f9893", 481824
-};
-static const config::checkpoint testnet_bip9_bit1_active_checkpoint
-{
-    "00000000002b980fcd729daaa248fd9316a5200e9b367f4ff2c42453e84201ca", 834624
-};
-static const config::checkpoint regtest_bip9_bit1_active_checkpoint
-{
-    // The activation window is fixed and closed, so assume genesis activation.
-    "06226e46111a0b59caaf126043eb5bbf28c34f3a5e332a1fc7b2b73cf188910f", 0
 };
 
 // Network protocol constants.
