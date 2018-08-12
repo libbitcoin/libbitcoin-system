@@ -36,9 +36,6 @@
 
 namespace libbitcoin {
 
-/*
- * Forward declaration to break header cycle.
- */
 class settings;
 
 namespace chain {
