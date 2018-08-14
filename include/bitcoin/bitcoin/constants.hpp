@@ -160,50 +160,6 @@ BC_CONSTEXPR size_t total_size_contribution = 1;
 BC_CONSTEXPR size_t min_witness_program = 2;
 BC_CONSTEXPR size_t max_witness_program = 40;
 
-// Currency unit constants (uint64_t).
-//-----------------------------------------------------------------------------
-
-BC_CONSTFUNC uint64_t max_money_recursive(uint64_t money)
-{
-    return money > 0 ? money + max_money_recursive(money >> 1) : 0;
-}
-
-BC_CONSTEXPR uint64_t satoshi_per_bitcoin = 100000000;
-BC_CONSTFUNC uint64_t bitcoin_to_satoshi(uint64_t bitcoin_uints=1)
-{
-    return bitcoin_uints * satoshi_per_bitcoin;
-}
-
-BC_CONSTEXPR uint64_t initial_block_subsidy_bitcoin = 50;
-BC_CONSTFUNC uint64_t initial_block_subsidy_satoshi()
-{
-    return bitcoin_to_satoshi(initial_block_subsidy_bitcoin);
-}
-
-BC_CONSTEXPR uint64_t recursive_money = 9999999989u;
-BC_CONSTEXPR uint64_t retarget_subsidy_interval = 210000;
-BC_CONSTEXPR uint64_t no_retarget_subsidy_interval = 150;
-BC_CONSTFUNC uint64_t subsidy_interval(bool retarget=true)
-{
-    return retarget ? retarget_subsidy_interval : no_retarget_subsidy_interval;
-}
-
-//*****************************************************************************
-// CONSENSUS: This is the true maximum amount of money that can be created.
-// The satoshi client uses a "sanity check" value that is effectively based on
-// a round but incorrect value of recursive_money, which is higher than this
-// true value. Despite comments to the contrary in the satoshi code, no value
-// could be consensus critical unless it was *less* than the true value.
-//*****************************************************************************
-BC_CONSTFUNC uint64_t max_money(bool retarget=true)
-{
-    ////// Optimize out the derivation of recursive_money.
-    ////BITCOIN_ASSERT(recursive_money == max_money_recursive(
-    ////    initial_block_subsidy_satoshi()));
-
-    return recursive_money * subsidy_interval(retarget);
-}
-
 } // namespace libbitcoin
 
 #endif

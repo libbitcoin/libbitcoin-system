@@ -41,7 +41,10 @@ settings::settings()
     bip65_version(4),
     bip9_version_bit0(1u << 0),
     bip9_version_bit1(1u << 1),
-    bip9_version_base(0x20000000)
+    bip9_version_base(0x20000000),
+    satoshi_per_bitcoin(100000000),
+    initial_block_subsidy_bitcoin(50),
+    recursive_money(9999999989u)
 {
 }
 
@@ -106,6 +109,7 @@ settings::settings(config::settings context)
                 "0000000000000000001c8018d9cb3b742ef25114f27563e3fc4a1902167f9893",
                 481824);
 
+            subsidy_interval = 210000;
             break;
         }
 
@@ -165,6 +169,7 @@ settings::settings(config::settings context)
                 "00000000002b980fcd729daaa248fd9316a5200e9b367f4ff2c42453e84201ca",
                 834624);
 
+            subsidy_interval = 210000;
             break;
         }
 
@@ -223,6 +228,7 @@ settings::settings(config::settings context)
             bip9_bit0_active_checkpoint = genesis_checkpoint;
             bip9_bit1_active_checkpoint = genesis_checkpoint;
 
+            subsidy_interval = 150;
             break;
         }
 
@@ -231,6 +237,21 @@ settings::settings(config::settings context)
         {
         }
     }
+
+    //**************************************************************************
+    // CONSENSUS: This is the true maximum amount of money that can be created.
+    // The satoshi client uses a "sanity check" value that is effectively based
+    // on a round but incorrect value of recursive_money, which is higher than
+    // this true value. Despite comments to the contrary in the satoshi code, no
+    // value could be consensus critical unless it was *less* than the true
+    // value.
+    //**************************************************************************
+    max_money = recursive_money * subsidy_interval;
+}
+
+uint64_t settings::bitcoin_to_satoshi(uint64_t bitcoin_units) const
+{
+    return bitcoin_units * satoshi_per_bitcoin;
 }
 
 } // namespace libbitcoin

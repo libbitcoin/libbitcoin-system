@@ -36,6 +36,11 @@ public:
     settings();
     settings(config::settings context);
 
+    // Currency unit helper methods (uint64_t).
+    //--------------------------------------------------------------------------
+
+    uint64_t bitcoin_to_satoshi(uint64_t bitcoin_units=1) const;
+
     uint32_t retargeting_factor;
     uint32_t target_spacing_seconds;
     uint32_t easy_spacing_seconds;
@@ -88,6 +93,15 @@ public:
 
     // This cannot be reactivated in a future branch due to window expiration.
     config::checkpoint bip9_bit1_active_checkpoint;
+
+    // Currency unit settings (uint64_t).
+    //--------------------------------------------------------------------------
+
+    uint64_t satoshi_per_bitcoin;
+    uint64_t initial_block_subsidy_bitcoin;
+    uint64_t recursive_money;
+    uint64_t subsidy_interval;
+    uint64_t max_money;
 };
 
 } // namespace libbitcoin

@@ -194,7 +194,7 @@ public:
     bool is_locktime_conflict() const;
     bool is_segregated() const;
 
-    code check(bool transaction_pool=true, bool retarget=true) const;
+    code check(uint64_t max_money, bool transaction_pool=true) const;
     code accept(bool transaction_pool=true) const;
     code accept(const chain_state& state, bool transaction_pool=true) const;
     code connect() const;
