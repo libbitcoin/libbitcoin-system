@@ -85,10 +85,6 @@ std::istream& operator>>(std::istream& input, output& argument)
 
     uint64_t amount;
     deserialize(amount, tokens[1], true);
-    if (amount > max_money())
-    {
-        BOOST_THROW_EXCEPTION(invalid_option_value(tuple));
-    }
 
     argument.amount_ = amount;
     const auto& target = tokens.front();
