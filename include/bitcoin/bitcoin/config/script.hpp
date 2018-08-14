@@ -75,13 +75,14 @@ public:
      * Serialize the script to bytes according to the wire protocol.
      * @return  The byte serialized copy of the script.
      */
-    const bc::data_chunk to_data() const;
+    bc::data_chunk to_data() const;
 
     /**
      * Return a pretty-printed copy of the script.
-     * @return  A mnemonic-printed copy of the internal script.
+     * @param[in]  flags  The rule fork flags to use.
+     * @return            A mnemonic-printed copy of the internal script.
      */
-    const std::string to_string() const;
+    std::string to_string(uint32_t flags=machine::rule_fork::all_rules) const;
 
     /**
      * Overload cast to internal type.
