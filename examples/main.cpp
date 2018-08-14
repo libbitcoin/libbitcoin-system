@@ -45,7 +45,7 @@ int bc::main(int argc, char* argv[])
 #endif
 
     // Extracting Satoshi's words from genesis block.
-    const auto block = bc::settings(bc::config::settings::mainnet)
+    const chain::block block = bc::settings(bc::config::settings::mainnet)
         .genesis_block;
     const auto& coinbase = block.transactions().front();
     const auto& input = coinbase.inputs().front();

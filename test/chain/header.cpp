@@ -453,7 +453,8 @@ BOOST_AUTO_TEST_CASE(header__proof1__genesis_mainnet__expected)
 
 BOOST_AUTO_TEST_CASE(header__proof2__genesis_mainnet__expected)
 {
-    const auto block = settings(bc::config::settings::mainnet).genesis_block;
+    const chain::block block = settings(bc::config::settings::mainnet)
+        .genesis_block;
     BOOST_REQUIRE_EQUAL(block.header().proof(), 0x0000000100010001);
 }
 
