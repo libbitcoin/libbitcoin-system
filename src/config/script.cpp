@@ -65,14 +65,13 @@ script::script(const script& other)
 {
 }
 
-const data_chunk script::to_data() const
+data_chunk script::to_data() const
 {
     return value_.to_data(false);
 }
 
-const std::string script::to_string() const
+std::string script::to_string(uint32_t flags) const
 {
-    static constexpr auto flags = machine::rule_fork::all_rules;
     return value_.to_string(flags);
 }
 
