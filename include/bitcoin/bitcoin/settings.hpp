@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SETTINGS_HPP
 #define LIBBITCOIN_SETTINGS_HPP
 
-#include <bitcoin/bitcoin/chain/block.hpp>
+#include <bitcoin/bitcoin/config/block.hpp>
 #include <bitcoin/bitcoin/config/settings.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 
@@ -56,7 +56,7 @@ public:
     // The target number of blocks for 2 weeks of work (2016 blocks).
     size_t retargeting_interval;
 
-    chain::block genesis_block;
+    config::block genesis_block;
 
     // Fork settings.
     //--------------------------------------------------------------------------

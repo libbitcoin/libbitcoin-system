@@ -75,7 +75,8 @@ BOOST_AUTO_TEST_CASE(settings__construct__mainnet_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.min_timespan, 302400);
     BOOST_REQUIRE_EQUAL(configuration.max_timespan, 4838400);
     BOOST_REQUIRE_EQUAL(configuration.retargeting_interval, 2016);
-    BOOST_REQUIRE_EQUAL(configuration.genesis_block.to_data(), data_chunk({
+    const chain::block genesis_block = configuration.genesis_block;
+    BOOST_REQUIRE_EQUAL(genesis_block.to_data(), data_chunk({
         0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -164,7 +165,8 @@ BOOST_AUTO_TEST_CASE(settings__construct__testnet_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.min_timespan, 302400);
     BOOST_REQUIRE_EQUAL(configuration.max_timespan, 4838400);
     BOOST_REQUIRE_EQUAL(configuration.retargeting_interval, 2016);
-    BOOST_REQUIRE_EQUAL(configuration.genesis_block.to_data(), data_chunk({
+    const chain::block genesis_block = configuration.genesis_block;
+    BOOST_REQUIRE_EQUAL(genesis_block.to_data(), data_chunk({
         0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -253,7 +255,8 @@ BOOST_AUTO_TEST_CASE(settings__construct__regtest_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.min_timespan, 302400);
     BOOST_REQUIRE_EQUAL(configuration.max_timespan, 4838400);
     BOOST_REQUIRE_EQUAL(configuration.retargeting_interval, 2016);
-    BOOST_REQUIRE_EQUAL(configuration.genesis_block.to_data(), data_chunk({
+    const chain::block genesis_block = configuration.genesis_block;
+    BOOST_REQUIRE_EQUAL(genesis_block.to_data(), data_chunk({
         0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -301,7 +304,7 @@ BOOST_AUTO_TEST_CASE(settings__construct__regtest_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.bip66_freeze, 1251);
     BOOST_REQUIRE_EQUAL(configuration.bip34_freeze, 0);
     BOOST_REQUIRE_EQUAL(configuration.bip16_activation_time, 0x4f3af580);
-    const config::checkpoint genesis(configuration.genesis_block.hash(), 0);
+    const config::checkpoint genesis(genesis_block.hash(), 0);
     BOOST_REQUIRE_EQUAL(configuration.bip34_active_checkpoint, genesis);
     BOOST_REQUIRE_EQUAL(configuration.bip9_bit0_active_checkpoint, genesis);
     BOOST_REQUIRE_EQUAL(configuration.bip9_bit1_active_checkpoint, genesis);

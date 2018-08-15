@@ -50,6 +50,12 @@ block::block(const block& other)
 {
 }
 
+block& block::operator=(chain::block&& other)
+{
+    value_ = std::move(other);
+    return *this;
+}
+
 bool block::operator==(const block& other) const
 {
     return value_ == other.value_;
