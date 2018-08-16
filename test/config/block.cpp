@@ -26,8 +26,6 @@ using namespace bc::config;
 
 BOOST_AUTO_TEST_SUITE(block_tests)
 
-static const bc::settings settings;
-
 static const std::string encoded_genesis_block =
     "01000000"
     "0000000000000000000000000000000000000000000000000000000000000000"
@@ -49,7 +47,7 @@ static const std::string encoded_genesis_block =
     "00000000";
 
 
-static const auto genesis_block = block(encoded_genesis_block, settings);
+static const auto genesis_block = block(encoded_genesis_block);
 
 // ------------------------------------------------------------------------- //
 
@@ -57,7 +55,7 @@ BOOST_AUTO_TEST_SUITE(block__construct)
 
 BOOST_AUTO_TEST_CASE(block__construct__default)
 {
-    const block block(settings);
+    const block block;
     BOOST_REQUIRE_EQUAL(block.to_string(), std::string(162, '0'));
 }
 
@@ -69,7 +67,7 @@ BOOST_AUTO_TEST_CASE(block__construct__copy__expected)
 
 BOOST_AUTO_TEST_CASE(block__construct__string__expected)
 {
-    const block block(encoded_genesis_block, settings);
+    const block block(encoded_genesis_block);
     BOOST_REQUIRE_EQUAL(block, genesis_block);
 }
 
@@ -81,7 +79,7 @@ BOOST_AUTO_TEST_SUITE(block__istream)
 
 BOOST_AUTO_TEST_CASE(block__istream__populated__expected)
 {
-    block deserialized(settings);
+    block deserialized;
     std::stringstream serialized(encoded_genesis_block);
     serialized >> deserialized;
     BOOST_REQUIRE_EQUAL(deserialized.to_string(), encoded_genesis_block);
@@ -96,7 +94,7 @@ BOOST_AUTO_TEST_SUITE(block__ostream)
 BOOST_AUTO_TEST_CASE(block__ostream__empty__expected)
 {
     std::stringstream serialized;
-    serialized << block(settings);
+    serialized << block();
     BOOST_REQUIRE_EQUAL(serialized.str(), std::string(162, '0'));
 }
 

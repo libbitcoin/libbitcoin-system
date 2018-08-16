@@ -69,7 +69,7 @@ public:
     // Constructors.
     //-------------------------------------------------------------------------
 
-    block(const settings& settings);
+    block();
 
     block(block&& other);
     block(const block& other);
@@ -90,12 +90,9 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static block factory(const data_chunk& data, const settings& settings,
-        bool witness=false);
-    static block factory(std::istream& stream, const settings& settings,
-        bool witness=false);
-    static block factory(reader& source, const settings& settings,
-        bool witness=false);
+    static block factory(const data_chunk& data, bool witness=false);
+    static block factory(std::istream& stream, bool witness=false);
+    static block factory(reader& source, bool witness=false);
 
     bool from_data(const data_chunk& data, bool witness=false);
     bool from_data(std::istream& stream, bool witness=false);
@@ -165,7 +162,9 @@ public:
     bool is_valid_merkle_root() const;
     bool is_segregated() const;
 
-    code check(uint64_t max_money, bool retarget=true) const;
+    code check(uint64_t max_money, uint32_t timestamp_future_seconds,
+    uint32_t retarget_proof_of_work_limit,
+    uint32_t no_retarget_proof_of_work_limit,  bool retarget=true) const;
     code check_transactions(uint64_t max_money) const;
     code accept(const settings& settings, bool transactions=true,
         bool header=true) const;
