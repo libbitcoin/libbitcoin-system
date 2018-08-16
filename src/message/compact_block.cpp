@@ -22,7 +22,6 @@
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
-#include <bitcoin/bitcoin/settings.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -35,32 +34,29 @@ const std::string compact_block::command = "cmpctblock";
 const uint32_t compact_block::version_minimum = version::level::bip152;
 const uint32_t compact_block::version_maximum = version::level::bip152;
 
-compact_block compact_block::factory(uint32_t version,
-    const data_chunk& data, const settings& settings)
+compact_block compact_block::factory(uint32_t version, const data_chunk& data)
 {
-    compact_block instance(settings);
-    instance.from_data(version, data, settings);
+    compact_block instance;
+    instance.from_data(version, data);
     return instance;
 }
 
-compact_block compact_block::factory(uint32_t version,
-    std::istream& stream, const settings& settings)
+compact_block compact_block::factory(uint32_t version, std::istream& stream)
 {
-    compact_block instance(settings);
-    instance.from_data(version, stream, settings);
+    compact_block instance;
+    instance.from_data(version, stream);
     return instance;
 }
 
-compact_block compact_block::factory(uint32_t version,
-    reader& source, const settings& settings)
+compact_block compact_block::factory(uint32_t version, reader& source)
 {
-    compact_block instance(settings);
-    instance.from_data(version, source, settings);
+    compact_block instance;
+    instance.from_data(version, source);
     return instance;
 }
 
-compact_block::compact_block(const settings& settings)
-  : header_(settings), nonce_(0), short_ids_(), transactions_()
+compact_block::compact_block()
+  : header_(), nonce_(0), short_ids_(), transactions_()
 {
 }
 
@@ -100,9 +96,9 @@ bool compact_block::is_valid() const
     return header_.is_valid() && !short_ids_.empty() && !transactions_.empty();
 }
 
-void compact_block::reset(const settings& settings)
+void compact_block::reset()
 {
-    header_ = chain::header(settings);
+    header_ = chain::header();
     nonce_ = 0;
     short_ids_.clear();
     short_ids_.shrink_to_fit();
@@ -110,24 +106,21 @@ void compact_block::reset(const settings& settings)
     transactions_.shrink_to_fit();
 }
 
-bool compact_block::from_data(uint32_t version, const data_chunk& data,
-    const settings& settings)
+bool compact_block::from_data(uint32_t version, const data_chunk& data)
 {
     data_source istream(data);
-    return from_data(version, istream, settings);
+    return from_data(version, istream);
 }
 
-bool compact_block::from_data(uint32_t version, std::istream& stream,
-    const settings& settings)
+bool compact_block::from_data(uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
-    return from_data(version, source, settings);
+    return from_data(version, source);
 }
 
-bool compact_block::from_data(uint32_t version, reader& source,
-    const settings& settings)
+bool compact_block::from_data(uint32_t version, reader& source)
 {
-    reset(settings);
+    reset();
 
     if (!header_.from_data(source))
         return false;
@@ -162,7 +155,7 @@ bool compact_block::from_data(uint32_t version, reader& source,
         source.invalidate();
 
     if (!source)
-        reset(settings);
+        reset();
 
     return source;
 }

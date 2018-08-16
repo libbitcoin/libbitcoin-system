@@ -23,7 +23,6 @@
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
-#include <bitcoin/bitcoin/settings.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -37,32 +36,29 @@ const std::string merkle_block::command = "merkleblock";
 const uint32_t merkle_block::version_minimum = version::level::bip37;
 const uint32_t merkle_block::version_maximum = version::level::maximum;
 
-merkle_block merkle_block::factory(uint32_t version,
-    const data_chunk& data, const settings& settings)
+merkle_block merkle_block::factory(uint32_t version, const data_chunk& data)
 {
-    merkle_block instance(settings);
-    instance.from_data(version, data, settings);
+    merkle_block instance;
+    instance.from_data(version, data);
     return instance;
 }
 
-merkle_block merkle_block::factory(uint32_t version,
-    std::istream& stream, const settings& settings)
+merkle_block merkle_block::factory(uint32_t version, std::istream& stream)
 {
-    merkle_block instance(settings);
-    instance.from_data(version, stream, settings);
+    merkle_block instance;
+    instance.from_data(version, stream);
     return instance;
 }
 
-merkle_block merkle_block::factory(uint32_t version,
-    reader& source, const settings& settings)
+merkle_block merkle_block::factory(uint32_t version, reader& source)
 {
-    merkle_block instance(settings);
-    instance.from_data(version, source, settings);
+    merkle_block instance;
+    instance.from_data(version, source);
     return instance;
 }
 
-merkle_block::merkle_block(const settings& settings)
-  : header_(settings), total_transactions_(0), hashes_(), flags_()
+merkle_block::merkle_block()
+  : header_(), total_transactions_(0), hashes_(), flags_()
 {
 }
 
@@ -107,9 +103,9 @@ bool merkle_block::is_valid() const
     return !hashes_.empty() || !flags_.empty() || header_.is_valid();
 }
 
-void merkle_block::reset(const settings& settings)
+void merkle_block::reset()
 {
-    header_ = chain::header(settings);
+    header_ = chain::header();
     total_transactions_ = 0;
     hashes_.clear();
     hashes_.shrink_to_fit();
@@ -117,24 +113,21 @@ void merkle_block::reset(const settings& settings)
     flags_.shrink_to_fit();
 }
 
-bool merkle_block::from_data(uint32_t version, const data_chunk& data,
-    const settings& settings)
+bool merkle_block::from_data(uint32_t version, const data_chunk& data)
 {
     data_source istream(data);
-    return from_data(version, istream, settings);
+    return from_data(version, istream);
 }
 
-bool merkle_block::from_data(uint32_t version, std::istream& stream,
-    const settings& settings)
+bool merkle_block::from_data(uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
-    return from_data(version, source, settings);
+    return from_data(version, source);
 }
 
-bool merkle_block::from_data(uint32_t version, reader& source,
-    const settings& settings)
+bool merkle_block::from_data(uint32_t version, reader& source)
 {
-    reset(settings);
+    reset();
 
     if (!header_.from_data(source))
         return false;
@@ -157,7 +150,7 @@ bool merkle_block::from_data(uint32_t version, reader& source,
         source.invalidate();
 
     if (!source)
-        reset(settings);
+        reset();
 
     return source;
 }

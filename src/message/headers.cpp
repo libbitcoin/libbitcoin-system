@@ -28,7 +28,6 @@
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
-#include <bitcoin/bitcoin/settings.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -41,27 +40,24 @@ const std::string headers::command = "headers";
 const uint32_t headers::version_minimum = version::level::headers;
 const uint32_t headers::version_maximum = version::level::maximum;
 
-headers headers::factory(uint32_t version,
-    const data_chunk& data, const settings& settings)
+headers headers::factory(uint32_t version, const data_chunk& data)
 {
     headers instance;
-    instance.from_data(version, data, settings);
+    instance.from_data(version, data);
     return instance;
 }
 
-headers headers::factory(uint32_t version,
-    std::istream& stream, const settings& settings)
+headers headers::factory(uint32_t version, std::istream& stream)
 {
     headers instance;
-    instance.from_data(version, stream, settings);
+    instance.from_data(version, stream);
     return instance;
 }
 
-headers headers::factory(uint32_t version,
-    reader& source, const settings& settings)
+headers headers::factory(uint32_t version, reader& source)
 {
     headers instance;
-    instance.from_data(version, source, settings);
+    instance.from_data(version, source);
     return instance;
 }
 
@@ -107,22 +103,19 @@ void headers::reset()
     elements_.shrink_to_fit();
 }
 
-bool headers::from_data(uint32_t version, const data_chunk& data,
-    const settings& settings)
+bool headers::from_data(uint32_t version, const data_chunk& data)
 {
     data_source istream(data);
-    return from_data(version, istream, settings);
+    return from_data(version, istream);
 }
 
-bool headers::from_data(uint32_t version, std::istream& stream,
-    const settings& settings)
+bool headers::from_data(uint32_t version, std::istream& stream)
 {
     istream_reader source(stream);
-    return from_data(version, source, settings);
+    return from_data(version, source);
 }
 
-bool headers::from_data(uint32_t version, reader& source,
-    const settings& settings)
+bool headers::from_data(uint32_t version, reader& source)
 {
     reset();
 
@@ -132,7 +125,7 @@ bool headers::from_data(uint32_t version, reader& source,
     if (count > max_get_headers)
         source.invalidate();
     else
-        elements_.resize(count, header(settings));
+        elements_.resize(count);
 
     // Order is required.
     for (auto& element: elements_)

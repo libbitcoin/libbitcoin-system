@@ -25,9 +25,6 @@
 #include <bitcoin/bitcoin/chain/block.hpp>
 
 namespace libbitcoin {
-
-class settings;
-
 namespace config {
 
 /**
@@ -41,13 +38,13 @@ public:
     /**
      * Default constructor.
      */
-    block(const libbitcoin::settings& settings);
+    block();
 
     /**
      * Initialization constructor.
      * @param[in]  hexcode  The value to initialize with.
      */
-    block(const std::string& hexcode, const libbitcoin::settings& settings);
+    block(const std::string& hexcode);
 
     /**
      * Initialization constructor.

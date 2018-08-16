@@ -26,7 +26,6 @@
 #include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
-#include <bitcoin/bitcoin/settings.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 
@@ -45,21 +44,18 @@ public:
     typedef std::shared_ptr<const_ptr_list> const_ptr_list_ptr;
     typedef std::shared_ptr<const const_ptr_list> const_ptr_list_const_ptr;
 
-    static header factory(uint32_t version, const data_chunk& data,
-        const settings& settings);
-    static header factory(uint32_t version, std::istream& stream,
-        const settings& settings);
-    static header factory(uint32_t version, reader& source,
-        const settings& settings);
+    static header factory(uint32_t version, const data_chunk& data);
+    static header factory(uint32_t version, std::istream& stream);
+    static header factory(uint32_t version, reader& source);
     static size_t satoshi_fixed_size(uint32_t version);
 
-    header(const settings& settings);
+    header();
     header(uint32_t version, const hash_digest& previous_block_hash,
         const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce, const settings& settings);
+        uint32_t nonce);
     header(uint32_t version, hash_digest&& previous_block_hash,
         hash_digest&& merkle, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce, const settings& settings);
+        uint32_t nonce);
     header(const chain::header& other);
     header(chain::header&& other);
     header(const header& other);

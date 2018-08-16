@@ -26,7 +26,6 @@
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/message/messages.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
-#include <bitcoin/bitcoin/settings.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -39,26 +38,23 @@ const std::string header::command = "headers";
 const uint32_t header::version_minimum = version::level::minimum;
 const uint32_t header::version_maximum = version::level::maximum;
 
-header header::factory(uint32_t version, const data_chunk& data,
-    const settings& settings)
+header header::factory(uint32_t version, const data_chunk& data)
 {
-    header instance(settings);
+    header instance;
     instance.from_data(version, data);
     return instance;
 }
 
-header header::factory(uint32_t version, std::istream& stream,
-    const settings& settings)
+header header::factory(uint32_t version, std::istream& stream)
 {
-    header instance(settings);
+    header instance;
     instance.from_data(version, stream);
     return instance;
 }
 
-header header::factory(uint32_t version, reader& source,
-    const settings& settings)
+header header::factory(uint32_t version, reader& source)
 {
-    header instance(settings);
+    header instance;
     instance.from_data(version, source);
     return instance;
 }
@@ -70,24 +66,23 @@ size_t header::satoshi_fixed_size(uint32_t version)
         (canonical ? 0 : variable_uint_size(0));
 }
 
-header::header(const settings& settings)
-  : chain::header(settings)
+header::header()
+  : chain::header()
 {
 }
 
 header::header(uint32_t version,
     const hash_digest& previous_block_hash, const hash_digest& merkle,
-    uint32_t timestamp, uint32_t bits, uint32_t nonce, const settings& settings)
-  : chain::header(version, previous_block_hash, merkle, timestamp, bits, nonce,
-      settings)
+    uint32_t timestamp, uint32_t bits, uint32_t nonce)
+  : chain::header(version, previous_block_hash, merkle, timestamp, bits, nonce)
 {
 }
 
 header::header(uint32_t version,
     hash_digest&& previous_block_hash, hash_digest&& merkle,
-    uint32_t timestamp, uint32_t bits, uint32_t nonce, const settings& settings)
+    uint32_t timestamp, uint32_t bits, uint32_t nonce)
   : chain::header(version, std::move(previous_block_hash), std::move(merkle),
-      timestamp, bits, nonce, settings)
+      timestamp, bits, nonce)
 {
 }
 

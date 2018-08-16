@@ -26,7 +26,6 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/settings.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -41,8 +40,8 @@ using wall_clock = std::chrono::system_clock;
 // Constructors.
 //-----------------------------------------------------------------------------
 
-header::header(const settings& settings)
-  : header(0, null_hash, null_hash, 0, 0, 0, settings)
+header::header()
+  : header(0, null_hash, null_hash, 0, 0, 0)
 {
 }
 
@@ -54,8 +53,7 @@ header::header(header&& other)
     timestamp_(other.timestamp_),
     bits_(other.bits_),
     nonce_(other.nonce_),
-    metadata(std::move(other.metadata)),
-    settings_(other.settings_)
+    metadata(std::move(other.metadata))
 {
 }
 
@@ -67,36 +65,32 @@ header::header(const header& other)
     timestamp_(other.timestamp_),
     bits_(other.bits_),
     nonce_(other.nonce_),
-    metadata(other.metadata),
-    settings_(other.settings_)
+    metadata(other.metadata)
 {
 }
 
 header::header(uint32_t version, hash_digest&& previous_block_hash,
-    hash_digest&& merkle, uint32_t timestamp, uint32_t bits, uint32_t nonce,
-    const settings& settings)
+    hash_digest&& merkle, uint32_t timestamp, uint32_t bits, uint32_t nonce)
   : version_(version),
     previous_block_hash_(std::move(previous_block_hash)),
     merkle_(std::move(merkle)),
     timestamp_(timestamp),
     bits_(bits),
     nonce_(nonce),
-    metadata{},
-    settings_(settings)
+    metadata{}
 {
 }
 
 header::header(uint32_t version, const hash_digest& previous_block_hash,
     const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
-    uint32_t nonce, const settings& settings)
+    uint32_t nonce)
   : version_(version),
     previous_block_hash_(previous_block_hash),
     merkle_(merkle),
     timestamp_(timestamp),
     bits_(bits),
     nonce_(nonce),
-    metadata{},
-    settings_(settings)
+    metadata{}
 {
 }
 
@@ -155,45 +149,41 @@ bool header::operator!=(const header& other) const
 //-----------------------------------------------------------------------------
 
 // static
-header header::factory(const data_chunk& data, const settings& settings,
-    bool wire)
+header header::factory(const data_chunk& data, bool wire)
 {
-    header instance(settings);
+    header instance;
     instance.from_data(data, wire);
     return instance;
 }
 
 // static
-header header::factory(std::istream& stream, const settings& settings,
-    bool wire)
+header header::factory(std::istream& stream, bool wire)
 {
-    header instance(settings);
+    header instance;
     instance.from_data(stream, wire);
     return instance;
 }
 
 // static
-header header::factory(reader& source, const settings& settings, bool wire)
+header header::factory(reader& source, bool wire)
 {
-    header instance(settings);
+    header instance;
     instance.from_data(source, wire);
     return instance;
 }
 
 // static
-header header::factory(reader& source, hash_digest&& hash,
-    const settings& settings, bool wire)
+header header::factory(reader& source, hash_digest&& hash, bool wire)
 {
-    header instance(settings);
+    header instance;
     instance.from_data(source, std::move(hash), wire);
     return instance;
 }
 
 // static
-header header::factory(reader& source, const hash_digest& hash,
-    const settings& settings, bool wire)
+header header::factory(reader& source, const hash_digest& hash, bool wire)
 {
-    header instance(settings);
+    header instance;
     instance.from_data(source, hash, wire);
     return instance;
 }
@@ -447,20 +437,21 @@ hash_digest header::hash() const
 //-----------------------------------------------------------------------------
 
 /// BUGBUG: bitcoin 32bit unix time: en.wikipedia.org/wiki/Year_2038_problem
-bool header::is_valid_timestamp() const
+bool header::is_valid_timestamp(uint32_t timestamp_future_seconds) const
 {
     using namespace std::chrono;
-    static const auto two_hours = seconds(settings_.timestamp_future_seconds);
+    static const auto two_hours = seconds(timestamp_future_seconds);
     const auto time = wall_clock::from_time_t(timestamp_);
     const auto future = wall_clock::now() + two_hours;
     return time <= future;
 }
 
-bool header::is_valid_proof_of_work(bool retarget) const
+bool header::is_valid_proof_of_work(uint32_t retarget_proof_of_work_limit,
+    uint32_t no_retarget_proof_of_work_limit, bool retarget) const
 {
     const auto bits = compact(bits_);
-    const auto work_limit = retarget ? settings_.retarget_proof_of_work_limit :
-        settings_.no_retarget_proof_of_work_limit;
+    const auto work_limit = retarget ? retarget_proof_of_work_limit :
+        no_retarget_proof_of_work_limit;
     static const uint256_t pow_limit(compact{ work_limit });
 
     if (bits.is_overflowed())
@@ -510,12 +501,16 @@ uint256_t header::proof() const
 // Validation.
 //-----------------------------------------------------------------------------
 
-code header::check(bool retarget) const
+code header::check(uint32_t timestamp_future_seconds,
+    uint32_t retarget_proof_of_work_limit,
+    uint32_t no_retarget_proof_of_work_limit, bool retarget) const
 {
-    if (!is_valid_proof_of_work(retarget))
+
+    if (!is_valid_proof_of_work(retarget_proof_of_work_limit,
+        no_retarget_proof_of_work_limit, retarget))
         return error::invalid_proof_of_work;
 
-    else if (!is_valid_timestamp())
+    else if (!is_valid_timestamp(timestamp_future_seconds))
         return error::futuristic_timestamp;
 
     else
