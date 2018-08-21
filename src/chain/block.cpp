@@ -806,14 +806,16 @@ code block::connect_transactions(const chain_state& state) const
 // These checks are self-contained; blockchain (and so version) independent.
 code block::check(uint64_t max_money, uint32_t timestamp_future_seconds,
     uint32_t retarget_proof_of_work_limit,
-    uint32_t no_retarget_proof_of_work_limit, bool retarget) const
+    uint32_t no_retarget_proof_of_work_limit, bool retarget, bool litecoin)
+    const
 {
     metadata.start_check = asio::steady_clock::now();
 
     code ec;
 
     if ((ec = header_.check(timestamp_future_seconds,
-        retarget_proof_of_work_limit, no_retarget_proof_of_work_limit, retarget)
+        retarget_proof_of_work_limit, no_retarget_proof_of_work_limit, retarget,
+        litecoin)
         ))
         return ec;
 
