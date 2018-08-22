@@ -29,8 +29,6 @@ settings::settings()
     easy_spacing_seconds(20 * 60),
     timestamp_future_seconds(2 * 60 * 60),
     target_timespan_seconds(2 * 7 * 24 * 60 * 60),
-    retarget_proof_of_work_limit(0x1d00ffff),
-    no_retarget_proof_of_work_limit(0x207fffff),
     min_timespan(target_timespan_seconds / retargeting_factor),
     max_timespan(target_timespan_seconds * retargeting_factor),
     retargeting_interval(target_timespan_seconds / target_spacing_seconds),
@@ -54,6 +52,7 @@ settings::settings(config::settings context)
     {
         case config::settings::mainnet:
         {
+            proof_of_work_limit = 0x1d00ffff;
             genesis_block = chain::block::factory({
                 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -114,6 +113,7 @@ settings::settings(config::settings context)
 
         case config::settings::testnet:
         {
+            proof_of_work_limit = 0x1d00ffff;
             genesis_block = chain::block::factory({
                 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -174,6 +174,7 @@ settings::settings(config::settings context)
 
         case config::settings::regtest:
         {
+            proof_of_work_limit = 0x207fffff;
             genesis_block = chain::block::factory({
                 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,

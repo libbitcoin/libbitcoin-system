@@ -388,23 +388,15 @@ BOOST_AUTO_TEST_CASE(header__is_valid_timestamp__timestamp_greater_than_2_hours_
 
 BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__bits_exceeds_maximum__returns_false)
 {
-    const settings settings;
+    const settings settings(bc::config::settings::mainnet);
     chain::header instance;
-    instance.set_bits(settings.retarget_proof_of_work_limit + 1);
-    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.retarget_proof_of_work_limit, settings.no_retarget_proof_of_work_limit, true));
-}
-
-BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__no_retarget_bits_exceeds_maximum__returns_false)
-{
-    const settings settings;
-    chain::header instance;
-    instance.set_bits(settings.no_retarget_proof_of_work_limit + 1);
-    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.retarget_proof_of_work_limit, settings.no_retarget_proof_of_work_limit, false));
+    instance.set_bits(settings.proof_of_work_limit + 1);
+    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit));
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_greater_bits__returns_false)
 {
-    const settings settings;
+    const settings settings(bc::config::settings::mainnet);
     const chain::header instance(
         11234u,
         hash_literal("abababababababababababababababababababababababababababababababab"),
@@ -413,12 +405,12 @@ BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_greater_bits__returns_
         0u,
         34564u);
 
-    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.retarget_proof_of_work_limit, settings.no_retarget_proof_of_work_limit, true));
+    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit));
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_less_than_bits__returns_true)
 {
-    const settings settings;
+    const settings settings(bc::config::settings::mainnet);
     const chain::header instance(
         4u,
         hash_literal("000000000000000003ddc1e929e2944b8b0039af9aa0d826c480a83d8b39c373"),
@@ -427,7 +419,7 @@ BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_less_than_bits__return
         402972254u,
         2842832236u);
 
-    BOOST_REQUIRE(instance.is_valid_proof_of_work(settings.retarget_proof_of_work_limit, settings.no_retarget_proof_of_work_limit, true));
+    BOOST_REQUIRE(instance.is_valid_proof_of_work(settings.proof_of_work_limit));
 }
 
 BOOST_AUTO_TEST_CASE(header__proof1__genesis_mainnet__expected)

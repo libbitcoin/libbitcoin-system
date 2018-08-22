@@ -160,12 +160,10 @@ public:
     static uint256_t proof(uint32_t bits);
 
     bool is_valid_timestamp(uint32_t timestamp_future_seconds) const;
-    bool is_valid_proof_of_work(uint32_t retarget_proof_of_work_limit,
-        uint32_t no_retarget_proof_of_work_limit, bool retarget) const;
+    bool is_valid_proof_of_work(uint32_t proof_of_work_limit) const;
 
-    code check(uint32_t timestamp_future_seconds,
-        uint32_t retarget_proof_of_work_limit,
-        uint32_t no_retarget_proof_of_work_limit, bool retarget) const;
+    code check(uint32_t timestamp_future_seconds, uint32_t proof_of_work_limit)
+        const;
     code accept() const;
     code accept(const chain_state& state) const;
 

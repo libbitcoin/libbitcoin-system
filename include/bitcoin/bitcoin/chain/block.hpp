@@ -163,8 +163,7 @@ public:
     bool is_segregated() const;
 
     code check(uint64_t max_money, uint32_t timestamp_future_seconds,
-    uint32_t retarget_proof_of_work_limit,
-    uint32_t no_retarget_proof_of_work_limit,  bool retarget=true) const;
+        uint32_t proof_of_work_limit) const;
     code check_transactions(uint64_t max_money) const;
     code accept(const settings& settings, bool transactions=true,
         bool header=true) const;

@@ -446,13 +446,10 @@ bool header::is_valid_timestamp(uint32_t timestamp_future_seconds) const
     return time <= future;
 }
 
-bool header::is_valid_proof_of_work(uint32_t retarget_proof_of_work_limit,
-    uint32_t no_retarget_proof_of_work_limit, bool retarget) const
+bool header::is_valid_proof_of_work(uint32_t proof_of_work_limit) const
 {
     const auto bits = compact(bits_);
-    const auto work_limit = retarget ? retarget_proof_of_work_limit :
-        no_retarget_proof_of_work_limit;
-    static const uint256_t pow_limit(compact{ work_limit });
+    static const uint256_t pow_limit(compact{ proof_of_work_limit });
 
     if (bits.is_overflowed())
         return false;
@@ -502,12 +499,10 @@ uint256_t header::proof() const
 //-----------------------------------------------------------------------------
 
 code header::check(uint32_t timestamp_future_seconds,
-    uint32_t retarget_proof_of_work_limit,
-    uint32_t no_retarget_proof_of_work_limit, bool retarget) const
+    uint32_t proof_of_work_limit) const
 {
 
-    if (!is_valid_proof_of_work(retarget_proof_of_work_limit,
-        no_retarget_proof_of_work_limit, retarget))
+    if (!is_valid_proof_of_work(proof_of_work_limit))
         return error::invalid_proof_of_work;
 
     else if (!is_valid_timestamp(timestamp_future_seconds))
