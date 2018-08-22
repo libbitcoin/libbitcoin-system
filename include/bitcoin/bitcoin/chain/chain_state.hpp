@@ -214,19 +214,19 @@ private:
         const settings& settings);
 
     static uint32_t work_required_retarget(const data& values,
-        uint32_t retarget_proof_of_work_limit, uint32_t min_timespan,
+        uint32_t proof_of_work_limit, uint32_t min_timespan,
         uint32_t max_timespan, uint32_t target_timespan_seconds);
     static uint32_t retarget_timespan(const chain_state::data& values,
         uint32_t min_timespan, uint32_t max_timespan);
 
     // easy blocks
     static uint32_t easy_work_required(const data& values,
-        size_t retargeting_interval, uint32_t retarget_proof_of_work_limit,
+        size_t retargeting_interval, uint32_t proof_of_work_limit,
         uint32_t easy_spacing_seconds);
     static uint32_t easy_time_limit(const chain_state::data& values,
         int64_t spacing);
     static bool is_retarget_or_non_limit(size_t height, uint32_t bits,
-        size_t retargeting_interval, uint32_t retarget_proof_of_work_limit);
+        size_t retargeting_interval, uint32_t proof_of_work_limit);
     static bool is_retarget_height(size_t height, size_t retargeting_interval);
     static size_t retarget_distance(size_t height, size_t retargeting_interval);
 

@@ -294,13 +294,13 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks,
     // Mainnet and testnet retarget on interval.
     if (is_retarget_height(values.height, settings.retargeting_interval))
         return work_required_retarget(values,
-            settings.retarget_proof_of_work_limit, settings.min_timespan,
+            settings.proof_of_work_limit, settings.min_timespan,
             settings.max_timespan, settings.target_timespan_seconds);
 
     // Testnet retargets easy on inter-interval.
     if (!script::is_enabled(forks, rule_fork::difficult))
         return easy_work_required(values, settings.retargeting_interval,
-            settings.retarget_proof_of_work_limit,
+            settings.proof_of_work_limit,
             settings.easy_spacing_seconds);
 
     // Mainnet not retargeting.
@@ -308,10 +308,10 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks,
 }
 
 uint32_t chain_state::work_required_retarget(const data& values,
-    uint32_t retarget_proof_of_work_limit, uint32_t min_timespan,
+    uint32_t proof_of_work_limit, uint32_t min_timespan,
     uint32_t max_timespan, uint32_t target_timespan_seconds)
 {
-    static const uint256_t pow_limit(compact{ retarget_proof_of_work_limit });
+    static const uint256_t pow_limit(compact{ proof_of_work_limit });
 
     const compact bits(bits_high(values));
     BITCOIN_ASSERT_MSG(!bits.is_overflowed(), "previous block has bad bits");
@@ -321,7 +321,7 @@ uint32_t chain_state::work_required_retarget(const data& values,
     target /= target_timespan_seconds;
 
     // The proof_of_work_limit constant is pre-normalized.
-    return target > pow_limit ? retarget_proof_of_work_limit :
+    return target > pow_limit ? proof_of_work_limit :
         compact(target).normal();
 }
 
@@ -341,14 +341,14 @@ uint32_t chain_state::retarget_timespan(const data& values,
 }
 
 uint32_t chain_state::easy_work_required(const data& values,
-    size_t retargeting_interval, uint32_t retarget_proof_of_work_limit,
+    size_t retargeting_interval, uint32_t proof_of_work_limit,
     uint32_t easy_spacing_seconds)
 {
     BITCOIN_ASSERT(values.height != 0);
 
     // If the time limit has passed allow a minimum difficulty block.
     if (values.timestamp.self > easy_time_limit(values, easy_spacing_seconds))
-        return retarget_proof_of_work_limit;
+        return proof_of_work_limit;
 
     auto height = values.height;
     const auto& bits = values.bits.ordered;
@@ -356,13 +356,13 @@ uint32_t chain_state::easy_work_required(const data& values,
     // Reverse iterate the ordered-by-height list of header bits.
     for (auto bit: reverse(bits))
         if (is_retarget_or_non_limit(--height, bit, retargeting_interval,
-            retarget_proof_of_work_limit))
+            proof_of_work_limit))
             return bit;
 
     // Since the set of heights is either a full retarget range or ends at
     // zero this is not reachable unless the data set is invalid.
     BITCOIN_ASSERT(false);
-    return retarget_proof_of_work_limit;
+    return proof_of_work_limit;
 }
 
 uint32_t chain_state::easy_time_limit(const chain_state::data& values,
@@ -379,14 +379,14 @@ uint32_t chain_state::easy_time_limit(const chain_state::data& values,
 
 // A retarget height, or a block that does not have proof_of_work_limit bits.
 bool chain_state::is_retarget_or_non_limit(size_t height, uint32_t bits,
-    size_t retargeting_interval, uint32_t retarget_proof_of_work_limit)
+    size_t retargeting_interval, uint32_t proof_of_work_limit)
 {
     // Zero is a retarget height, ensuring termination before height underflow.
     // This is guaranteed, just asserting here to document the safeguard.
     BITCOIN_ASSERT_MSG(is_retarget_height(0, retargeting_interval),
         "loop overflow potential");
 
-    return bits != retarget_proof_of_work_limit ||
+    return bits != proof_of_work_limit ||
         is_retarget_height(height, retargeting_interval);
 }
 
