@@ -49,6 +49,12 @@ block::block(const block& other)
 {
 }
 
+block& block::operator=(const block& other)
+{
+    value_ = chain::block(other.value_);
+    return *this;
+}
+
 block& block::operator=(chain::block&& other)
 {
     value_ = std::move(other);

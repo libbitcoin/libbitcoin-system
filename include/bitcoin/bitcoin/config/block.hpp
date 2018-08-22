@@ -59,6 +59,12 @@ public:
     block(const block& other);
 
     /**
+     * Copy assignment operator.
+     * @param[in]  other  The object to copy into self on assignment.
+     */
+    block& operator=(const block& other);
+
+    /**
      * Move assignment operator.
      * @param[in]  other  The object to move into self on assignment.
      */

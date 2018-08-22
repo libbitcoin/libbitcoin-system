@@ -65,6 +65,13 @@ BOOST_AUTO_TEST_CASE(block__construct__copy__expected)
     BOOST_REQUIRE_EQUAL(block, genesis_block);
 }
 
+BOOST_AUTO_TEST_CASE(block__copy_assign__always__expected)
+{
+    block block;
+    block = genesis_block;
+    BOOST_REQUIRE_EQUAL(block, genesis_block);
+}
+
 BOOST_AUTO_TEST_CASE(block__construct__string__expected)
 {
     const block block(encoded_genesis_block);
