@@ -86,6 +86,7 @@ chain_state::activations chain_state::activation(const data& values,
     const auto difficult = script::is_enabled(forks, rule_fork::difficult);
     const auto retarget = script::is_enabled(forks, rule_fork::retarget);
     const auto mainnet = retarget && difficult;
+    const auto litecoin = script::is_enabled(forks, rule_fork::litecoin);
 
     //*************************************************************************
     // CONSENSUS: Though unspecified in bip34, the satoshi implementation
@@ -191,6 +192,9 @@ chain_state::activations chain_state::activation(const data& values,
         result.minimum_block_version = settings.first_version;
     }
 
+    if (litecoin)
+        result.forks |= (rule_fork::litecoin & forks);
+
     // TODO: add configurable option to apply transaction version policy.
     result.maximum_transaction_version = max_uint32;
     return result;
@@ -293,7 +297,7 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks,
 
     // Mainnet and testnet retarget on interval.
     if (is_retarget_height(values.height, settings.retargeting_interval))
-        return work_required_retarget(values,
+        return work_required_retarget(values, forks,
             settings.retarget_proof_of_work_limit, settings.min_timespan,
             settings.max_timespan, settings.target_timespan_seconds);
 
@@ -307,7 +311,7 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks,
     return bits_high(values);
 }
 
-uint32_t chain_state::work_required_retarget(const data& values,
+uint32_t chain_state::work_required_retarget(const data& values, uint32_t forks,
     uint32_t retarget_proof_of_work_limit, uint32_t min_timespan,
     uint32_t max_timespan, uint32_t target_timespan_seconds)
 {
@@ -317,8 +321,14 @@ uint32_t chain_state::work_required_retarget(const data& values,
     BITCOIN_ASSERT_MSG(!bits.is_overflowed(), "previous block has bad bits");
 
     uint256_t target(bits);
+    const bool needs_shift = msb(target) > msb(pow_limit) - 1;
+    const auto litecoin = script::is_enabled(forks, rule_fork::litecoin);
+    if (litecoin && needs_shift)
+        target >>= 1;
     target *= retarget_timespan(values, min_timespan, max_timespan);
     target /= target_timespan_seconds;
+    if (litecoin && needs_shift)
+        target <<= 1;
 
     // The proof_of_work_limit constant is pre-normalized.
     return target > pow_limit ? retarget_proof_of_work_limit :
@@ -481,8 +491,9 @@ chain_state::data chain_state::to_pool(const chain_state& top,
     // Alias configured forks.
     const auto forks = top.forks_;
 
-    // Retargeting is only activated via configuration.
+    // Retargeting and litcoin are only activated via configuration.
     const auto retarget = script::is_enabled(forks, rule_fork::retarget);
+    const auto litecoin = script::is_enabled(forks, rule_fork::litecoin);
 
     // Copy data from presumed previous-height block state.
     auto data = top.data_;
@@ -513,7 +524,13 @@ chain_state::data chain_state::to_pool(const chain_state& top,
     // If promoting from retarget height, move that timestamp into retarget.
     if (retarget &&
         is_retarget_height(height - 1u, settings.retargeting_interval))
-        data.timestamp.retarget = data.timestamp.self;
+    {
+        // litecoin fixed Satoshi's off-by-one retargeting bug.
+        if (!litecoin || height == 1)
+            data.timestamp.retarget = data.timestamp.self;
+        else
+            data.timestamp.retarget = *next(data.timestamp.ordered.crbegin());
+    }
 
     // Replace previous block state with tx pool chain state for next height
     // Preserve top block timestamp for use in computation of staleness.

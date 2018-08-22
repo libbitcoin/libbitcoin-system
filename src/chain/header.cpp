@@ -411,7 +411,7 @@ void header::invalidate_cache() const
     ///////////////////////////////////////////////////////////////////////////
 }
 
-hash_digest header::hash() const
+hash_digest header::hash(bool litecoin) const
 {
     ///////////////////////////////////////////////////////////////////////////
     // Critical Section
@@ -430,6 +430,8 @@ hash_digest header::hash() const
     mutex_.unlock_upgrade();
     ///////////////////////////////////////////////////////////////////////////
 
+    if (litecoin)
+        return litecoin_hash(to_data());
     return hash;
 }
 
@@ -447,7 +449,8 @@ bool header::is_valid_timestamp(uint32_t timestamp_future_seconds) const
 }
 
 bool header::is_valid_proof_of_work(uint32_t retarget_proof_of_work_limit,
-    uint32_t no_retarget_proof_of_work_limit, bool retarget) const
+    uint32_t no_retarget_proof_of_work_limit, bool retarget, bool litecoin)
+    const
 {
     const auto bits = compact(bits_);
     const auto work_limit = retarget ? retarget_proof_of_work_limit :
@@ -464,7 +467,7 @@ bool header::is_valid_proof_of_work(uint32_t retarget_proof_of_work_limit,
         return false;
 
     // Ensure actual work is at least claimed amount (smaller is more work).
-    return to_uint256(hash()) <= target;
+    return to_uint256(hash(litecoin)) <= target;
 }
 
 // static
@@ -503,11 +506,12 @@ uint256_t header::proof() const
 
 code header::check(uint32_t timestamp_future_seconds,
     uint32_t retarget_proof_of_work_limit,
-    uint32_t no_retarget_proof_of_work_limit, bool retarget) const
+    uint32_t no_retarget_proof_of_work_limit, bool retarget, bool litecoin)
+    const
 {
 
     if (!is_valid_proof_of_work(retarget_proof_of_work_limit,
-        no_retarget_proof_of_work_limit, retarget))
+        no_retarget_proof_of_work_limit, retarget, litecoin))
         return error::invalid_proof_of_work;
 
     else if (!is_valid_timestamp(timestamp_future_seconds))

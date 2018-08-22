@@ -391,7 +391,7 @@ BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__bits_exceeds_maximum__retur
     const settings settings;
     chain::header instance;
     instance.set_bits(settings.retarget_proof_of_work_limit + 1);
-    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.retarget_proof_of_work_limit, settings.no_retarget_proof_of_work_limit, true));
+    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.retarget_proof_of_work_limit, settings.no_retarget_proof_of_work_limit, true, false));
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__no_retarget_bits_exceeds_maximum__returns_false)
@@ -399,7 +399,7 @@ BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__no_retarget_bits_exceeds_ma
     const settings settings;
     chain::header instance;
     instance.set_bits(settings.no_retarget_proof_of_work_limit + 1);
-    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.retarget_proof_of_work_limit, settings.no_retarget_proof_of_work_limit, false));
+    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.retarget_proof_of_work_limit, settings.no_retarget_proof_of_work_limit, false, false));
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_greater_bits__returns_false)
@@ -413,7 +413,7 @@ BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_greater_bits__returns_
         0u,
         34564u);
 
-    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.retarget_proof_of_work_limit, settings.no_retarget_proof_of_work_limit, true));
+    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.retarget_proof_of_work_limit, settings.no_retarget_proof_of_work_limit, true, false));
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_less_than_bits__returns_true)
@@ -427,7 +427,7 @@ BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_less_than_bits__return
         402972254u,
         2842832236u);
 
-    BOOST_REQUIRE(instance.is_valid_proof_of_work(settings.retarget_proof_of_work_limit, settings.no_retarget_proof_of_work_limit, true));
+    BOOST_REQUIRE(instance.is_valid_proof_of_work(settings.retarget_proof_of_work_limit, settings.no_retarget_proof_of_work_limit, true, false));
 }
 
 BOOST_AUTO_TEST_CASE(header__proof1__genesis_mainnet__expected)

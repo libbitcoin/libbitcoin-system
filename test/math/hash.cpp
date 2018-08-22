@@ -90,4 +90,14 @@ BOOST_AUTO_TEST_CASE(pkcs5_pbkdf2_hmac_sha512_test)
     }
 }
 
+BOOST_AUTO_TEST_CASE(litecoin_hash_test)
+{
+    for (const auto& result: litecoin_hash_tests)
+    {
+        data_chunk data;
+        BOOST_REQUIRE(decode_base16(data, result.input));
+        BOOST_REQUIRE_EQUAL(encode_base16(litecoin_hash(data)), result.result);
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END()

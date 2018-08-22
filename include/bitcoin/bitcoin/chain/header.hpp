@@ -151,7 +151,7 @@ public:
     uint32_t nonce() const;
     void set_nonce(uint32_t value);
 
-    hash_digest hash() const;
+    hash_digest hash(bool litecoin=false) const;
 
     // Validation.
     //-------------------------------------------------------------------------
@@ -161,11 +161,13 @@ public:
 
     bool is_valid_timestamp(uint32_t timestamp_future_seconds) const;
     bool is_valid_proof_of_work(uint32_t retarget_proof_of_work_limit,
-        uint32_t no_retarget_proof_of_work_limit, bool retarget) const;
+        uint32_t no_retarget_proof_of_work_limit, bool retarget, bool litecoin)
+        const;
 
     code check(uint32_t timestamp_future_seconds,
         uint32_t retarget_proof_of_work_limit,
-        uint32_t no_retarget_proof_of_work_limit, bool retarget) const;
+        uint32_t no_retarget_proof_of_work_limit, bool retarget, bool litecoin)
+        const;
     code accept() const;
     code accept(const chain_state& state) const;
 

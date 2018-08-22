@@ -213,7 +213,7 @@ private:
     data to_header(const chain_state& parent, const header& header,
         const settings& settings);
 
-    static uint32_t work_required_retarget(const data& values,
+    static uint32_t work_required_retarget(const data& values, uint32_t forks,
         uint32_t retarget_proof_of_work_limit, uint32_t min_timespan,
         uint32_t max_timespan, uint32_t target_timespan_seconds);
     static uint32_t retarget_timespan(const chain_state::data& values,
