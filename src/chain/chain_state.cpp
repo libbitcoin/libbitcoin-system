@@ -46,14 +46,14 @@ using namespace boost::adaptors;
 // Inlines.
 //-----------------------------------------------------------------------------
 
-inline bool is_active(size_t count, size_t net_active)
+inline bool is_active(size_t count, size_t activation_threshold)
 {
-    return count >= net_active;
+    return count >= activation_threshold;
 }
 
-inline bool is_enforced(size_t count, size_t net_enforce)
+inline bool is_enforced(size_t count, size_t enforcement_threshold)
 {
-    return count >= net_enforce;
+    return count >= enforcement_threshold;
 }
 
 inline bool is_bip30_exception(const checkpoint& check, bool mainnet)
@@ -141,21 +141,21 @@ chain_state::activations chain_state::activation(const data& values,
     }
 
     // bip34 is activated based on 75% of preceding 1000 mainnet blocks.
-    if (bip34_ice || (is_active(count_2, settings.net_active) && version >=
+    if (bip34_ice || (is_active(count_2, settings.activation_threshold) && version >=
         settings.bip34_version))
     {
         result.forks |= (rule_fork::bip34_rule & forks);
     }
 
     // bip66 is activated based on 75% of preceding 1000 mainnet blocks.
-    if (bip66_ice || (is_active(count_3, settings.net_active) && version >=
+    if (bip66_ice || (is_active(count_3, settings.activation_threshold) && version >=
         settings.bip66_version))
     {
         result.forks |= (rule_fork::bip66_rule & forks);
     }
 
     // bip65 is activated based on 75% of preceding 1000 mainnet blocks.
-    if (bip65_ice || (is_active(count_4, settings.net_active) && version >=
+    if (bip65_ice || (is_active(count_4, settings.activation_threshold) && version >=
         settings.bip65_version))
     {
         result.forks |= (rule_fork::bip65_rule & forks);
@@ -174,15 +174,15 @@ chain_state::activations chain_state::activation(const data& values,
     }
 
     // version 4/3/2 enforced based on 95% of preceding 1000 mainnet blocks.
-    if (bip65_ice || is_enforced(count_4, settings.net_enforce))
+    if (bip65_ice || is_enforced(count_4, settings.enforcement_threshold))
     {
         result.minimum_block_version = settings.bip65_version;
     }
-    else if (bip66_ice || is_enforced(count_3, settings.net_enforce))
+    else if (bip66_ice || is_enforced(count_3, settings.enforcement_threshold))
     {
         result.minimum_block_version = settings.bip66_version;
     }
-    else if (bip34_ice || is_enforced(count_2, settings.net_enforce))
+    else if (bip34_ice || is_enforced(count_2, settings.enforcement_threshold))
     {
         result.minimum_block_version = settings.bip34_version;
     }
@@ -216,7 +216,7 @@ size_t chain_state::bits_count(size_t height, uint32_t forks,
 }
 
 size_t chain_state::version_count(size_t height, uint32_t forks,
-    size_t net_sample)
+    size_t activation_sample)
 {
     if (script::is_enabled(forks, rule_fork::bip90_rule) ||
         !script::is_enabled(forks, rule_fork::bip34_activations))
@@ -224,7 +224,7 @@ size_t chain_state::version_count(size_t height, uint32_t forks,
         return 0;
     }
 
-    return std::min(height, net_sample);
+    return std::min(height, activation_sample);
 }
 
 size_t chain_state::timestamp_count(size_t height, uint32_t)
@@ -294,8 +294,8 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks,
     // Mainnet and testnet retarget on interval.
     if (is_retarget_height(values.height, settings.retargeting_interval))
         return work_required_retarget(values,
-            settings.proof_of_work_limit, settings.min_timespan,
-            settings.max_timespan, settings.target_timespan_seconds);
+            settings.proof_of_work_limit, settings.minimum_timespan,
+            settings.maximum_timespan, settings.target_timespan_seconds);
 
     // Testnet retargets easy on inter-interval.
     if (!script::is_enabled(forks, rule_fork::difficult))
@@ -308,8 +308,8 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks,
 }
 
 uint32_t chain_state::work_required_retarget(const data& values,
-    uint32_t proof_of_work_limit, uint32_t min_timespan,
-    uint32_t max_timespan, uint32_t target_timespan_seconds)
+    uint32_t proof_of_work_limit, uint32_t minimum_timespan,
+    uint32_t maximum_timespan, uint32_t target_timespan_seconds)
 {
     static const uint256_t pow_limit(compact{ proof_of_work_limit });
 
@@ -317,7 +317,7 @@ uint32_t chain_state::work_required_retarget(const data& values,
     BITCOIN_ASSERT_MSG(!bits.is_overflowed(), "previous block has bad bits");
 
     uint256_t target(bits);
-    target *= retarget_timespan(values, min_timespan, max_timespan);
+    target *= retarget_timespan(values, minimum_timespan, maximum_timespan);
     target /= target_timespan_seconds;
 
     // The proof_of_work_limit constant is pre-normalized.
@@ -327,7 +327,7 @@ uint32_t chain_state::work_required_retarget(const data& values,
 
 // Get the bounded total time spanning the highest 2016 blocks.
 uint32_t chain_state::retarget_timespan(const data& values,
-    uint32_t min_timespan, uint32_t max_timespan)
+    uint32_t minimum_timespan, uint32_t maximum_timespan)
 {
     const auto high = timestamp_high(values);
     const auto retarget = values.timestamp.retarget;
@@ -337,7 +337,7 @@ uint32_t chain_state::retarget_timespan(const data& values,
     // order to prevent underflow before applying the range constraint.
     //*************************************************************************
     const auto timespan = cast_subtract<int64_t>(high, retarget);
-    return range_constrain(timespan, min_timespan, max_timespan);
+    return range_constrain(timespan, minimum_timespan, maximum_timespan);
 }
 
 uint32_t chain_state::easy_work_required(const data& values,
@@ -409,7 +409,7 @@ size_t chain_state::retarget_distance(size_t height,
 // static
 chain_state::map chain_state::get_map(size_t height,
     const checkpoints& /* checkpoints */, uint32_t forks,
-    size_t retargeting_interval, size_t net_sample,
+    size_t retargeting_interval, size_t activation_sample,
     const config::checkpoint& bip9_bit0_active_checkpoint,
     const config::checkpoint& bip9_bit1_active_checkpoint)
 {
@@ -431,7 +431,7 @@ chain_state::map chain_state::get_map(size_t height,
     // The height bound of the version sample for activations.
     map.version_self = height;
     map.version.high = height - 1;
-    map.version.count = version_count(height, forks, net_sample);
+    map.version.count = version_count(height, forks, activation_sample);
 
     // The most recent past retarget height.
     map.timestamp_retarget = retarget_height(height, forks,
@@ -502,7 +502,7 @@ chain_state::data chain_state::to_pool(const chain_state& top,
 
     // If version collection overflows, dequeue oldest member.
     if (data.version.ordered.size() > version_count(height, forks,
-            settings.net_sample))
+            settings.activation_sample))
         data.version.ordered.pop_front();
 
     // If timestamp collection overflows, dequeue oldest member.

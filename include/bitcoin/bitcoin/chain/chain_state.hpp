@@ -128,7 +128,7 @@ public:
 
     /// Checkpoints must be ordered by height with greatest at back.
     static map get_map(size_t height, const checkpoints& checkpoints,
-        uint32_t forks, size_t retargeting_interval, size_t net_sample,
+        uint32_t forks, size_t retargeting_interval, size_t activation_sample,
         const config::checkpoint& bip9_bit0_active_checkpoint,
         const config::checkpoint& bip9_bit1_active_checkpoint);
 
@@ -197,7 +197,7 @@ private:
     static size_t bits_count(size_t height, uint32_t forks,
         size_t retargeting_interval);
     static size_t version_count(size_t height, uint32_t forks,
-        size_t net_sample);
+        size_t activation_sample);
     static size_t timestamp_count(size_t height, uint32_t forks);
     static size_t retarget_height(size_t height, uint32_t forks,
         size_t retargeting_interval);
@@ -214,10 +214,10 @@ private:
         const settings& settings);
 
     static uint32_t work_required_retarget(const data& values,
-        uint32_t proof_of_work_limit, uint32_t min_timespan,
-        uint32_t max_timespan, uint32_t target_timespan_seconds);
+        uint32_t proof_of_work_limit, uint32_t minimum_timespan,
+        uint32_t maximum_timespan, uint32_t target_timespan_seconds);
     static uint32_t retarget_timespan(const chain_state::data& values,
-        uint32_t min_timespan, uint32_t max_timespan);
+        uint32_t minimum_timespan, uint32_t maximum_timespan);
 
     // easy blocks
     static uint32_t easy_work_required(const data& values,
