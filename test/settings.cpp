@@ -39,8 +39,8 @@ BOOST_AUTO_TEST_CASE(settings__construct__default_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.easy_spacing_seconds, 1200);
     BOOST_REQUIRE_EQUAL(configuration.timestamp_future_seconds, 7200);
     BOOST_REQUIRE_EQUAL(configuration.target_timespan_seconds, 1209600);
-    BOOST_REQUIRE_EQUAL(configuration.min_timespan, 302400);
-    BOOST_REQUIRE_EQUAL(configuration.max_timespan, 4838400);
+    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan, 302400);
+    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan, 4838400);
     BOOST_REQUIRE_EQUAL(configuration.retargeting_interval, 2016);
     BOOST_REQUIRE_EQUAL(configuration.first_version, 1);
     BOOST_REQUIRE_EQUAL(configuration.bip34_version, 2);
@@ -69,8 +69,8 @@ BOOST_AUTO_TEST_CASE(settings__construct__mainnet_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.timestamp_future_seconds, 7200);
     BOOST_REQUIRE_EQUAL(configuration.target_timespan_seconds, 1209600);
     BOOST_REQUIRE_EQUAL(configuration.proof_of_work_limit, 0x1d00ffff);
-    BOOST_REQUIRE_EQUAL(configuration.min_timespan, 302400);
-    BOOST_REQUIRE_EQUAL(configuration.max_timespan, 4838400);
+    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan, 302400);
+    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan, 4838400);
     BOOST_REQUIRE_EQUAL(configuration.retargeting_interval, 2016);
     const chain::block genesis_block = configuration.genesis_block;
     BOOST_REQUIRE_EQUAL(genesis_block.to_data(), data_chunk({
@@ -117,9 +117,9 @@ BOOST_AUTO_TEST_CASE(settings__construct__mainnet_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, 1u);
     BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, 2u);
     BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000);
-    BOOST_REQUIRE_EQUAL(configuration.net_active, 750);
-    BOOST_REQUIRE_EQUAL(configuration.net_enforce, 950);
-    BOOST_REQUIRE_EQUAL(configuration.net_sample, 1000);
+    BOOST_REQUIRE_EQUAL(configuration.activation_threshold, 750);
+    BOOST_REQUIRE_EQUAL(configuration.enforcement_threshold, 950);
+    BOOST_REQUIRE_EQUAL(configuration.activation_sample, 1000);
     BOOST_REQUIRE_EQUAL(configuration.bip65_freeze, 388381);
     BOOST_REQUIRE_EQUAL(configuration.bip66_freeze, 363725);
     BOOST_REQUIRE_EQUAL(configuration.bip34_freeze, 227931);
@@ -158,8 +158,8 @@ BOOST_AUTO_TEST_CASE(settings__construct__testnet_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.timestamp_future_seconds, 7200);
     BOOST_REQUIRE_EQUAL(configuration.target_timespan_seconds, 1209600);
     BOOST_REQUIRE_EQUAL(configuration.proof_of_work_limit, 0x1d00ffff);
-    BOOST_REQUIRE_EQUAL(configuration.min_timespan, 302400);
-    BOOST_REQUIRE_EQUAL(configuration.max_timespan, 4838400);
+    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan, 302400);
+    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan, 4838400);
     BOOST_REQUIRE_EQUAL(configuration.retargeting_interval, 2016);
     const chain::block genesis_block = configuration.genesis_block;
     BOOST_REQUIRE_EQUAL(genesis_block.to_data(), data_chunk({
@@ -206,9 +206,9 @@ BOOST_AUTO_TEST_CASE(settings__construct__testnet_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, 1u);
     BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, 2u);
     BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000);
-    BOOST_REQUIRE_EQUAL(configuration.net_active, 51);
-    BOOST_REQUIRE_EQUAL(configuration.net_enforce, 75);
-    BOOST_REQUIRE_EQUAL(configuration.net_sample, 100);
+    BOOST_REQUIRE_EQUAL(configuration.activation_threshold, 51);
+    BOOST_REQUIRE_EQUAL(configuration.enforcement_threshold, 75);
+    BOOST_REQUIRE_EQUAL(configuration.activation_sample, 100);
     BOOST_REQUIRE_EQUAL(configuration.bip65_freeze, 581885);
     BOOST_REQUIRE_EQUAL(configuration.bip66_freeze, 330776);
     BOOST_REQUIRE_EQUAL(configuration.bip34_freeze, 21111);
@@ -247,8 +247,8 @@ BOOST_AUTO_TEST_CASE(settings__construct__regtest_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.timestamp_future_seconds, 7200);
     BOOST_REQUIRE_EQUAL(configuration.target_timespan_seconds, 1209600);
     BOOST_REQUIRE_EQUAL(configuration.proof_of_work_limit, 0x207fffff);
-    BOOST_REQUIRE_EQUAL(configuration.min_timespan, 302400);
-    BOOST_REQUIRE_EQUAL(configuration.max_timespan, 4838400);
+    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan, 302400);
+    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan, 4838400);
     BOOST_REQUIRE_EQUAL(configuration.retargeting_interval, 2016);
     const chain::block genesis_block = configuration.genesis_block;
     BOOST_REQUIRE_EQUAL(genesis_block.to_data(), data_chunk({

@@ -49,8 +49,8 @@ public:
     uint32_t proof_of_work_limit;
 
     // The upper and lower bounds for the retargeting timespan.
-    uint32_t min_timespan;
-    uint32_t max_timespan;
+    uint32_t minimum_timespan;
+    uint32_t maximum_timespan;
 
     // The target number of blocks for 2 weeks of work (2016 blocks).
     size_t retargeting_interval;
@@ -70,9 +70,9 @@ public:
     uint32_t bip9_version_base;
 
     // Activation parameters (bip34-style activations).
-    size_t net_active;
-    size_t net_enforce;
-    size_t net_sample;
+    size_t activation_threshold;
+    size_t enforcement_threshold;
+    size_t activation_sample;
 
     // Frozen activation heights (frozen_activations).
     size_t bip65_freeze;
