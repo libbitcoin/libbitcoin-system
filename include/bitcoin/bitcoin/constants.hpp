@@ -189,7 +189,7 @@ static const config::checkpoint testnet_bip34_active_checkpoint
 static const config::checkpoint regtest_bip34_active_checkpoint
 {
     // Since bip90 assumes a historical bip34 activation block, use genesis.
-    "06226e46111a0b59caaf126043eb5bbf28c34f3a5e332a1fc7b2b73cf188910f", 0
+    "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0
 };
 
 // These cannot be reactivated in a future branch due to window expiration.
@@ -204,7 +204,7 @@ static const config::checkpoint testnet_bip9_bit0_active_checkpoint
 static const config::checkpoint regtest_bip9_bit0_active_checkpoint
 {
     // The activation window is fixed and closed, so assume genesis activation.
-    "06226e46111a0b59caaf126043eb5bbf28c34f3a5e332a1fc7b2b73cf188910f", 0
+    "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0
 };
 
 // These cannot be reactivated in a future branch due to window expiration.
@@ -219,7 +219,7 @@ static const config::checkpoint testnet_bip9_bit1_active_checkpoint
 static const config::checkpoint regtest_bip9_bit1_active_checkpoint
 {
     // The activation window is fixed and closed, so assume genesis activation.
-    "06226e46111a0b59caaf126043eb5bbf28c34f3a5e332a1fc7b2b73cf188910f", 0
+    "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0
 };
 
 // Network protocol constants.

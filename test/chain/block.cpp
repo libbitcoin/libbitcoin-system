@@ -260,7 +260,7 @@ BOOST_AUTO_TEST_CASE(block__from_data__insufficient_bytes__failure)
 
 BOOST_AUTO_TEST_CASE(block__from_data__insufficient_transaction_bytes__failure)
 {
-    const data_chunk data = to_chunk(base16_literal(
+    const auto data = to_chunk(base16_literal(
         "010000007f110631052deeee06f0754a3629ad7663e56359fd5f3aa7b3e30a00"
         "000000005f55996827d9712147a8eb6d7bae44175fe0bcfa967e424a25bfe9f4"
         "dc118244d67fb74c9d8e2f1bea5ee82a03010000000100000000000000000000"
@@ -274,28 +274,33 @@ BOOST_AUTO_TEST_CASE(block__from_data__insufficient_transaction_bytes__failure)
 
 BOOST_AUTO_TEST_CASE(block__genesis__mainnet__valid_structure)
 {
+    const auto genesis_hash = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     const auto genesis = bc::chain::block::genesis_mainnet();
     BOOST_REQUIRE(genesis.is_valid());
     BOOST_REQUIRE_EQUAL(genesis.transactions().size(), 1u);
     BOOST_REQUIRE(genesis.header().merkle() == genesis.generate_merkle_root());
+    BOOST_REQUIRE(genesis.hash() == genesis_hash);
 }
 
 BOOST_AUTO_TEST_CASE(block__genesis__testnet__valid_structure)
 {
+    const auto genesis_hash = hash_literal("000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943");
     const auto genesis = bc::chain::block::genesis_testnet();
     BOOST_REQUIRE(genesis.is_valid());
     BOOST_REQUIRE_EQUAL(genesis.transactions().size(), 1u);
     BOOST_REQUIRE(genesis.header().merkle() == genesis.generate_merkle_root());
+    BOOST_REQUIRE(genesis.hash() == genesis_hash);
 }
 
 BOOST_AUTO_TEST_CASE(block__genesis__regtest__valid_structure)
 {
+    const auto genesis_hash = hash_literal("0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206");
     const auto genesis = bc::chain::block::genesis_regtest();
     BOOST_REQUIRE(genesis.is_valid());
     BOOST_REQUIRE_EQUAL(genesis.transactions().size(), 1u);
     BOOST_REQUIRE(genesis.header().merkle() == genesis.generate_merkle_root());
+    BOOST_REQUIRE(genesis.hash() == genesis_hash);
 }
-
 
 BOOST_AUTO_TEST_CASE(block__factory_from_data_1__genesis_mainnet__success)
 {
