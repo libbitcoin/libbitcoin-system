@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <boost/range/adaptor/reversed.hpp>
 #include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
@@ -125,6 +126,9 @@ chain_state::activations chain_state::activation(const data& values,
 
     // bip90 is activated based on configuration alone (hard fork).
     result.forks |= (rule_fork::bip90_rule & forks);
+
+    // time_warp_patch is activated based on configuration alone (hard fork).
+    result.forks |= (rule_fork::time_warp_patch & forks);
 
     // bip16 was activated based on manual inspection of history (~55% rule).
     if (values.timestamp.self >= settings.bip16_activation_time)
@@ -513,7 +517,9 @@ chain_state::data chain_state::to_pool(const chain_state& top,
     // If promoting from retarget height, move that timestamp into retarget.
     if (retarget &&
         is_retarget_height(height - 1u, settings.retargeting_interval))
-        data.timestamp.retarget = data.timestamp.self;
+        data.timestamp.retarget = (script::is_enabled(forks,
+            rule_fork::time_warp_patch) && height != 1) ?
+            *std::next(data.timestamp.ordered.crbegin()) : data.timestamp.self;
 
     // Replace previous block state with tx pool chain state for next height
     // Preserve top block timestamp for use in computation of staleness.
