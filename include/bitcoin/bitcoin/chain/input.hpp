@@ -104,9 +104,6 @@ public:
     void set_script(const chain::script& value);
     void set_script(chain::script&& value);
 
-    // Deprecated (unsafe).
-    chain::witness& witness();
-
     const chain::witness& witness() const;
     void set_witness(const chain::witness& value);
     void set_witness(chain::witness&& value);

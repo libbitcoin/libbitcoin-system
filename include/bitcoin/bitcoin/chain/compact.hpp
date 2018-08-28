@@ -36,12 +36,6 @@ public:
     /// Construct a normal form compact number from a 256 bit number
     explicit compact(const uint256_t& big);
 
-    /// Move constructor.
-    compact(compact&& other);
-
-    /// Copy constructor.
-    compact(const compact& other);
-
     /// True if construction overflowed.
     bool is_overflowed() const;
 

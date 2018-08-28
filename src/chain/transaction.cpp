@@ -100,7 +100,7 @@ inline void read_witnesses(reader& source, input::list& inputs)
 {
     const auto deserialize = [&](input& input)
     {
-        input.witness().from_data(source, true);
+        input.set_witness(witness::factory(source, true));
     };
 
     std::for_each(inputs.begin(), inputs.end(), deserialize);

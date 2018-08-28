@@ -245,11 +245,6 @@ size_t point::serialized_size(bool wire) const
     return satoshi_fixed_size(wire);
 }
 
-hash_digest& point::hash()
-{
-    return hash_;
-}
-
 const hash_digest& point::hash() const
 {
     return hash_;
