@@ -42,10 +42,10 @@ public:
     uint64_t bitcoin_to_satoshi(uint64_t bitcoin_units=1) const;
 
     uint32_t retargeting_factor;
-    uint32_t target_spacing_seconds;
+    uint32_t block_spacing_seconds;
     uint32_t easy_spacing_seconds;
-    uint32_t timestamp_future_seconds;
-    uint32_t target_timespan_seconds;
+    uint32_t timestamp_limit_seconds;
+    uint32_t retargeting_interval_seconds;
     uint32_t proof_of_work_limit;
 
     // The upper and lower bounds for the retargeting timespan.

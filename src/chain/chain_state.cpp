@@ -299,7 +299,7 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks,
     if (is_retarget_height(values.height, settings.retargeting_interval))
         return work_required_retarget(values,
             settings.proof_of_work_limit, settings.minimum_timespan,
-            settings.maximum_timespan, settings.target_timespan_seconds);
+            settings.maximum_timespan, settings.retargeting_interval_seconds);
 
     // Testnet retargets easy on inter-interval.
     if (!script::is_enabled(forks, rule_fork::difficult))
@@ -313,7 +313,7 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks,
 
 uint32_t chain_state::work_required_retarget(const data& values,
     uint32_t proof_of_work_limit, uint32_t minimum_timespan,
-    uint32_t maximum_timespan, uint32_t target_timespan_seconds)
+    uint32_t maximum_timespan, uint32_t retargeting_interval_seconds)
 {
     static const uint256_t pow_limit(compact{ proof_of_work_limit });
 
@@ -322,7 +322,7 @@ uint32_t chain_state::work_required_retarget(const data& values,
 
     uint256_t target(bits);
     target *= retarget_timespan(values, minimum_timespan, maximum_timespan);
-    target /= target_timespan_seconds;
+    target /= retargeting_interval_seconds;
 
     // The proof_of_work_limit constant is pre-normalized.
     return target > pow_limit ? proof_of_work_limit :

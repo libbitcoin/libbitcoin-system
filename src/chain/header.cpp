@@ -437,10 +437,10 @@ hash_digest header::hash() const
 //-----------------------------------------------------------------------------
 
 /// BUGBUG: bitcoin 32bit unix time: en.wikipedia.org/wiki/Year_2038_problem
-bool header::is_valid_timestamp(uint32_t timestamp_future_seconds) const
+bool header::is_valid_timestamp(uint32_t timestamp_limit_seconds) const
 {
     using namespace std::chrono;
-    static const auto two_hours = seconds(timestamp_future_seconds);
+    static const auto two_hours = seconds(timestamp_limit_seconds);
     const auto time = wall_clock::from_time_t(timestamp_);
     const auto future = wall_clock::now() + two_hours;
     return time <= future;
@@ -498,14 +498,14 @@ uint256_t header::proof() const
 // Validation.
 //-----------------------------------------------------------------------------
 
-code header::check(uint32_t timestamp_future_seconds,
+code header::check(uint32_t timestamp_limit_seconds,
     uint32_t proof_of_work_limit) const
 {
 
     if (!is_valid_proof_of_work(proof_of_work_limit))
         return error::invalid_proof_of_work;
 
-    else if (!is_valid_timestamp(timestamp_future_seconds))
+    else if (!is_valid_timestamp(timestamp_limit_seconds))
         return error::futuristic_timestamp;
 
     else

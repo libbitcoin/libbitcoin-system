@@ -373,7 +373,7 @@ BOOST_AUTO_TEST_CASE(header__is_valid_timestamp__timestamp_less_than_2_hours_fro
     const auto now = std::chrono::system_clock::now();
     const auto now_time = std::chrono::system_clock::to_time_t(now);
     instance.set_timestamp(static_cast<uint32_t>(now_time));
-    BOOST_REQUIRE(instance.is_valid_timestamp(settings().timestamp_future_seconds));
+    BOOST_REQUIRE(instance.is_valid_timestamp(settings().timestamp_limit_seconds));
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_timestamp__timestamp_greater_than_2_hours_from_now__returns_false)
@@ -383,7 +383,7 @@ BOOST_AUTO_TEST_CASE(header__is_valid_timestamp__timestamp_greater_than_2_hours_
     const auto duration = std::chrono::hours(3);
     const auto future = std::chrono::system_clock::to_time_t(now + duration);
     instance.set_timestamp(static_cast<uint32_t>(future));
-    BOOST_REQUIRE(!instance.is_valid_timestamp(settings().timestamp_future_seconds));
+    BOOST_REQUIRE(!instance.is_valid_timestamp(settings().timestamp_limit_seconds));
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__bits_exceeds_maximum__returns_false)
