@@ -1160,11 +1160,11 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     if (transaction_pool && version() > state.maximum_transaction_version())
         return error::transaction_version;
 
-    // An unconfirmed transaction hash that exists in the chain is not accepted
-    // even if the original is spent in the new block. This is not necessary
-    // nor is it described by BIP30, but it is in the code referenced by BIP30.
-    else if (bip30 && metadata.link != validation::unlinked)
-        return error::unspent_duplicate;
+    //// An unconfirmed transaction hash that exists in the chain is not accepted
+    //// even if the original is spent in the new block. This is not necessary
+    //// nor is it described by BIP30, but it is in the code referenced by BIP30.
+    //else if (bip30 && metadata.existed)
+    //    return error::unspent_duplicate;
 
     else if (is_missing_previous_outputs())
         return error::missing_previous_output;
