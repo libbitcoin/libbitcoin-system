@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <boost/multiprecision/integer.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
@@ -129,6 +130,9 @@ chain_state::activations chain_state::activation(const data& values,
 
     // time_warp_patch is activated based on configuration alone (hard fork).
     result.forks |= (rule_fork::time_warp_patch & forks);
+
+    // retarget_overflow_patch is activated based on configuration alone (hard fork).
+    result.forks |= (rule_fork::retarget_overflow_patch & forks);
 
     // bip16 was activated based on manual inspection of history (~55% rule).
     if (values.timestamp.self >= settings.bip16_activation_time)
@@ -297,7 +301,7 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks,
 
     // Mainnet and testnet retarget on interval.
     if (is_retarget_height(values.height, settings.retargeting_interval))
-        return work_required_retarget(values,
+        return work_required_retarget(values, forks,
             settings.proof_of_work_limit, settings.minimum_timespan,
             settings.maximum_timespan, settings.retargeting_interval_seconds);
 
@@ -311,7 +315,7 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks,
     return bits_high(values);
 }
 
-uint32_t chain_state::work_required_retarget(const data& values,
+uint32_t chain_state::work_required_retarget(const data& values, uint32_t forks,
     uint32_t proof_of_work_limit, uint32_t minimum_timespan,
     uint32_t maximum_timespan, uint32_t retargeting_interval_seconds)
 {
@@ -321,8 +325,15 @@ uint32_t chain_state::work_required_retarget(const data& values,
     BITCOIN_ASSERT_MSG(!bits.is_overflowed(), "previous block has bad bits");
 
     uint256_t target(bits);
+    const auto retarget_overflow = script::is_enabled(forks,
+        rule_fork::retarget_overflow_patch);
+    using namespace boost::multiprecision;
+    const auto shift = retarget_overflow && (msb(target) + 1 > msb(pow_limit)) ?
+        1u : 0u;
+    target >>= shift;
     target *= retarget_timespan(values, minimum_timespan, maximum_timespan);
     target /= retargeting_interval_seconds;
+    target <<= shift;
 
     // The proof_of_work_limit constant is pre-normalized.
     return target > pow_limit ? proof_of_work_limit :
