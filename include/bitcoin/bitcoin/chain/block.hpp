@@ -113,7 +113,6 @@ public:
 
     size_t serialized_size(bool witness=false) const;
 
-    chain::header& header();
     const chain::header& header() const;
     void set_header(const chain::header& value);
     void set_header(chain::header&& value);

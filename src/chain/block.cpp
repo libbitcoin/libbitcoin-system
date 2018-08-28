@@ -321,11 +321,6 @@ size_t block::serialized_size(bool witness) const
     return value;
 }
 
-chain::header& block::header()
-{
-    return header_;
-}
-
 const chain::header& block::header() const
 {
     return header_;
@@ -336,7 +331,6 @@ void block::set_header(const chain::header& value)
     header_ = value;
 }
 
-// TODO: see set_header comments.
 void block::set_header(chain::header&& value)
 {
     header_ = std::move(value);

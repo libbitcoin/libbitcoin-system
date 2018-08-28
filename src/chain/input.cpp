@@ -308,11 +308,6 @@ const chain::witness& input::witness() const
     return witness_;
 }
 
-chain::witness& input::witness()
-{
-    return witness_;
-}
-
 void input::set_witness(const chain::witness& value)
 {
     witness_ = value;
