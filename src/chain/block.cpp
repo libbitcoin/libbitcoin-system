@@ -246,7 +246,7 @@ void block::to_data(std::ostream& stream, bool witness) const
 void block::to_data(writer& sink, bool witness) const
 {
     header_.to_data(sink, true);
-    sink.write_size_little_endian(transactions_.size());
+    sink.write_variable_little_endian(transactions_.size());
     const auto to = [&sink, witness](const transaction& tx)
     {
         tx.to_data(sink, true, witness);
