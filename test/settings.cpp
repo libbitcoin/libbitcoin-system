@@ -35,10 +35,10 @@ BOOST_AUTO_TEST_CASE(settings__construct__default_context__expected)
 {
     settings configuration;
     BOOST_REQUIRE_EQUAL(configuration.retargeting_factor, 4);
-    BOOST_REQUIRE_EQUAL(configuration.target_spacing_seconds, 600);
+    BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600);
     BOOST_REQUIRE_EQUAL(configuration.easy_spacing_seconds, 1200);
-    BOOST_REQUIRE_EQUAL(configuration.timestamp_future_seconds, 7200);
-    BOOST_REQUIRE_EQUAL(configuration.target_timespan_seconds, 1209600);
+    BOOST_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200);
+    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600);
     BOOST_REQUIRE_EQUAL(configuration.minimum_timespan, 302400);
     BOOST_REQUIRE_EQUAL(configuration.maximum_timespan, 4838400);
     BOOST_REQUIRE_EQUAL(configuration.retargeting_interval, 2016);
@@ -64,10 +64,10 @@ BOOST_AUTO_TEST_CASE(settings__construct__mainnet_context__expected)
 {
     settings configuration(config::settings::mainnet);
     BOOST_REQUIRE_EQUAL(configuration.retargeting_factor, 4);
-    BOOST_REQUIRE_EQUAL(configuration.target_spacing_seconds, 600);
+    BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600);
     BOOST_REQUIRE_EQUAL(configuration.easy_spacing_seconds, 1200);
-    BOOST_REQUIRE_EQUAL(configuration.timestamp_future_seconds, 7200);
-    BOOST_REQUIRE_EQUAL(configuration.target_timespan_seconds, 1209600);
+    BOOST_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200);
+    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600);
     BOOST_REQUIRE_EQUAL(configuration.proof_of_work_limit, 0x1d00ffff);
     BOOST_REQUIRE_EQUAL(configuration.minimum_timespan, 302400);
     BOOST_REQUIRE_EQUAL(configuration.maximum_timespan, 4838400);
@@ -153,10 +153,10 @@ BOOST_AUTO_TEST_CASE(settings__construct__testnet_context__expected)
 {
     settings configuration(config::settings::testnet);
     BOOST_REQUIRE_EQUAL(configuration.retargeting_factor, 4);
-    BOOST_REQUIRE_EQUAL(configuration.target_spacing_seconds, 600);
+    BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600);
     BOOST_REQUIRE_EQUAL(configuration.easy_spacing_seconds, 1200);
-    BOOST_REQUIRE_EQUAL(configuration.timestamp_future_seconds, 7200);
-    BOOST_REQUIRE_EQUAL(configuration.target_timespan_seconds, 1209600);
+    BOOST_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200);
+    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600);
     BOOST_REQUIRE_EQUAL(configuration.proof_of_work_limit, 0x1d00ffff);
     BOOST_REQUIRE_EQUAL(configuration.minimum_timespan, 302400);
     BOOST_REQUIRE_EQUAL(configuration.maximum_timespan, 4838400);
@@ -242,10 +242,10 @@ BOOST_AUTO_TEST_CASE(settings__construct__regtest_context__expected)
 {
     settings configuration(config::settings::regtest);
     BOOST_REQUIRE_EQUAL(configuration.retargeting_factor, 4);
-    BOOST_REQUIRE_EQUAL(configuration.target_spacing_seconds, 600);
+    BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600);
     BOOST_REQUIRE_EQUAL(configuration.easy_spacing_seconds, 1200);
-    BOOST_REQUIRE_EQUAL(configuration.timestamp_future_seconds, 7200);
-    BOOST_REQUIRE_EQUAL(configuration.target_timespan_seconds, 1209600);
+    BOOST_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200);
+    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600);
     BOOST_REQUIRE_EQUAL(configuration.proof_of_work_limit, 0x207fffff);
     BOOST_REQUIRE_EQUAL(configuration.minimum_timespan, 302400);
     BOOST_REQUIRE_EQUAL(configuration.maximum_timespan, 4838400);

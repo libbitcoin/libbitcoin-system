@@ -215,7 +215,7 @@ private:
 
     static uint32_t work_required_retarget(const data& values,
         uint32_t proof_of_work_limit, uint32_t minimum_timespan,
-        uint32_t maximum_timespan, uint32_t target_timespan_seconds);
+        uint32_t maximum_timespan, uint32_t retargeting_interval_seconds);
     static uint32_t retarget_timespan(const chain_state::data& values,
         uint32_t minimum_timespan, uint32_t maximum_timespan);
 
