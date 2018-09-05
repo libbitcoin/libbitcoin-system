@@ -70,8 +70,11 @@ enum rule_fork : uint32_t
     /// Prevent dummy value malleability (soft fork, feature).
     bip147_rule = 1u << 13,
 
-    /// Fix Satoshi's time warp bug (hard fork, feature).
+    /// Fix Satoshi's time warp bug (hard fork, security).
     time_warp_patch = 1u << 14,
+
+    /// Fix target overflow for very low difficulty (hard fork, security).
+    retarget_overflow_patch = 1u << 15,
 
     // TODO: future bitcoin forks work forward from << 14.
     // TODO: splitcoin/altcoin forks work backwards from << 30.

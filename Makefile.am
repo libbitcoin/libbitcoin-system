@@ -247,6 +247,7 @@ test_libbitcoin_test_SOURCES = \
     test/main.cpp \
     test/settings.cpp \
     test/chain/block.cpp \
+    test/chain/chain_state.cpp \
     test/chain/compact.cpp \
     test/chain/header.cpp \
     test/chain/input.cpp \
