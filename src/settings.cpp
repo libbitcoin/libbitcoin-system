@@ -26,7 +26,6 @@ namespace libbitcoin {
 settings::settings()
   : retargeting_factor(4),
     block_spacing_seconds(10 * 60),
-    easy_spacing_seconds(20 * 60),
     timestamp_limit_seconds(2 * 60 * 60),
     retargeting_interval_seconds(2 * 7 * 24 * 60 * 60),
     minimum_timespan(retargeting_interval_seconds / retargeting_factor),

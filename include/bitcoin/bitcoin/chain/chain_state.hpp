@@ -222,7 +222,7 @@ private:
     // easy blocks
     static uint32_t easy_work_required(const data& values,
         size_t retargeting_interval, uint32_t proof_of_work_limit,
-        uint32_t easy_spacing_seconds);
+        uint32_t block_spacing_seconds);
     static uint32_t easy_time_limit(const chain_state::data& values,
         int64_t spacing);
     static bool is_retarget_or_non_limit(size_t height, uint32_t bits,
