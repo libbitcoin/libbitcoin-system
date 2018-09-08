@@ -308,8 +308,7 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks,
     // Testnet retargets easy on inter-interval.
     if (!script::is_enabled(forks, rule_fork::difficult))
         return easy_work_required(values, settings.retargeting_interval,
-            settings.proof_of_work_limit,
-            settings.easy_spacing_seconds);
+            settings.proof_of_work_limit, settings.block_spacing_seconds);
 
     // Mainnet not retargeting.
     return bits_high(values);
@@ -357,9 +356,12 @@ uint32_t chain_state::retarget_timespan(const data& values,
 
 uint32_t chain_state::easy_work_required(const data& values,
     size_t retargeting_interval, uint32_t proof_of_work_limit,
-    uint32_t easy_spacing_seconds)
+    uint32_t block_spacing_seconds)
 {
     BITCOIN_ASSERT(values.height != 0);
+
+    // Overflow allowed here since supported coins would not do so.
+    const auto easy_spacing_seconds = block_spacing_seconds << 1;
 
     // If the time limit has passed allow a minimum difficulty block.
     if (values.timestamp.self > easy_time_limit(values, easy_spacing_seconds))
