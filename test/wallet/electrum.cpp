@@ -89,12 +89,6 @@ BOOST_AUTO_TEST_CASE(electrum__create_mnemonic__en_dictionary_prefix__valid)
 
 BOOST_AUTO_TEST_CASE(electrum__create_mnemonic__es_dictionary_prefix__valid)
 {
-    // Required for proper initialization of a non-ascii dictionary in vc++.
-    set_utf8_stdout();
-
-    // Verify the UTF8 initialization.
-    BOOST_REQUIRE(language::es[0] == std::string("ábaco"));
-
     data_chunk entropy;
     decode_base16(entropy, "05e669b4270f4e25bce6fc3736170d423c");
     const auto mnemonic = electrum::create_mnemonic(entropy, language::es, electrum::seed::standard);
