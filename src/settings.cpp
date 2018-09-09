@@ -38,9 +38,8 @@ settings::settings()
     bip9_version_bit0(1u << 0),
     bip9_version_bit1(1u << 1),
     bip9_version_base(0x20000000),
-    satoshi_per_bitcoin(100000000),
-    initial_block_subsidy_bitcoin(50),
-    recursive_money(9999999989u)
+    initial_block_subsidy_bitcoin_(50),
+    recursive_money_(9999999989u)
 {
 }
 
@@ -106,7 +105,7 @@ settings::settings(config::settings context)
                 "0000000000000000001c8018d9cb3b742ef25114f27563e3fc4a1902167f9893",
                 481824);
 
-            subsidy_interval = 210000;
+            subsidy_interval_ = 210000;
             break;
         }
 
@@ -167,7 +166,7 @@ settings::settings(config::settings context)
                 "00000000002b980fcd729daaa248fd9316a5200e9b367f4ff2c42453e84201ca",
                 834624);
 
-            subsidy_interval = 210000;
+            subsidy_interval_ = 210000;
             break;
         }
 
@@ -227,7 +226,7 @@ settings::settings(config::settings context)
             bip9_bit0_active_checkpoint = genesis_checkpoint;
             bip9_bit1_active_checkpoint = genesis_checkpoint;
 
-            subsidy_interval = 150;
+            subsidy_interval_ = 150;
             break;
         }
 
@@ -236,6 +235,24 @@ settings::settings(config::settings context)
         {
         }
     }
+    max_money_ = recursive_money_ * subsidy_interval_;
+}
+
+uint64_t settings::bitcoin_to_satoshi(uint64_t value) const
+{
+    static const uint64_t satoshi_per_bitcoin = 100000000;
+    return value * satoshi_per_bitcoin;
+}
+
+void settings::initial_block_subsidy_bitcoin(uint64_t value)
+{
+    initial_block_subsidy_bitcoin_ = value;
+    const std::function<uint64_t(uint64_t)> recursive_money =
+        [&recursive_money](uint64_t money)
+        {
+            return money > 0 ? money + recursive_money(money >> 1u) : 0;
+        };
+    recursive_money_ = recursive_money(bitcoin_to_satoshi(value));
 
     //**************************************************************************
     // CONSENSUS: This is the true maximum amount of money that can be created.
@@ -245,12 +262,28 @@ settings::settings(config::settings context)
     // value could be consensus critical unless it was *less* than the true
     // value.
     //**************************************************************************
-    max_money = recursive_money * subsidy_interval;
+    max_money_ = recursive_money_ * subsidy_interval_;
 }
 
-uint64_t settings::bitcoin_to_satoshi(uint64_t bitcoin_units) const
+uint64_t settings::initial_block_subsidy_bitcoin() const
 {
-    return bitcoin_units * satoshi_per_bitcoin;
+    return initial_block_subsidy_bitcoin_;
+}
+
+void settings::subsidy_interval(uint64_t value)
+{
+    subsidy_interval_ = value;
+    max_money_ = recursive_money_ * subsidy_interval_;
+}
+
+uint64_t settings::subsidy_interval() const
+{
+    return subsidy_interval_;
+}
+
+uint64_t settings::max_money() const
+{
+    return max_money_;
 }
 
 } // namespace libbitcoin
