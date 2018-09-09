@@ -76,6 +76,9 @@ enum rule_fork : uint32_t
     /// Fix target overflow for very low difficulty (hard fork, security).
     retarget_overflow_patch = 1u << 15,
 
+    /// Use scrypt hashing for proof of work (hard fork, feature).
+    scrypt_proof_of_work = 1u << 16,
+
     // TODO: future bitcoin forks work forward from << 14.
     // TODO: splitcoin/altcoin forks work backwards from << 30.
     ////time_warp_patch = 1u << 29,

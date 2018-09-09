@@ -799,13 +799,14 @@ code block::connect_transactions(const chain_state& state) const
 
 // These checks are self-contained; blockchain (and so version) independent.
 code block::check(uint64_t max_money, uint32_t timestamp_limit_seconds,
-    uint32_t proof_of_work_limit) const
+    uint32_t proof_of_work_limit, bool scrypt) const
 {
     metadata.start_check = asio::steady_clock::now();
 
     code ec;
 
-    if ((ec = header_.check(timestamp_limit_seconds, proof_of_work_limit)))
+    if ((ec = header_.check(timestamp_limit_seconds, proof_of_work_limit,
+        scrypt)))
         return ec;
 
     // TODO: relates to total of tx.size(false) (pool cache).

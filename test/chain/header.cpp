@@ -391,7 +391,7 @@ BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__bits_exceeds_maximum__retur
     const settings settings(bc::config::settings::mainnet);
     chain::header instance;
     instance.set_bits(settings.proof_of_work_limit + 1);
-    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit));
+    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_greater_bits__returns_false)
@@ -405,7 +405,7 @@ BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_greater_bits__returns_
         0u,
         34564u);
 
-    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit));
+    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_less_than_bits__returns_true)
@@ -419,7 +419,36 @@ BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_less_than_bits__return
         402972254u,
         2842832236u);
 
-    BOOST_REQUIRE(instance.is_valid_proof_of_work(settings.proof_of_work_limit));
+    BOOST_REQUIRE(instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
+}
+
+BOOST_AUTO_TEST_CASE(header__is_valid_scrypt_proof_of_work__hash_greater_than_bits__returns_false)
+{
+    const settings settings(bc::config::settings::mainnet);
+    const chain::header instance(
+        536870912u,
+        hash_literal("abababababababababababababababababababababababababababababababab"),
+        hash_literal("5163359dde15eb3f49cbd0926981f065ef1405fc9d4cece8818662b3b65f5dc6"),
+        1535119178u,
+        436332170u,
+        2135224651u);
+
+    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, true));
+}
+
+BOOST_AUTO_TEST_CASE(header__is_valid_scrypt_proof_of_work__hash_less_than_bits__returns_true)
+{
+    const settings settings(bc::config::settings::mainnet);
+    const chain::header instance(
+        536870912u,
+        hash_literal("313ced849aafeff324073bb2bd31ecdcc365ed215a34e827bb797ad33d158542"),
+        hash_literal("5163359dde15eb3f49cbd0926981f065ef1405fc9d4cece8818662b3b65f5dc6"),
+        1535119178u,
+        436332170u,
+        2135224651u);
+
+    BOOST_REQUIRE(instance.is_valid_proof_of_work(settings.proof_of_work_limit, true));
+    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
 }
 
 BOOST_AUTO_TEST_CASE(header__proof1__genesis_mainnet__expected)

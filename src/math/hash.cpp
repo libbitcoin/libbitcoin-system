@@ -40,6 +40,11 @@ hash_digest bitcoin_hash(data_slice data)
     return sha256_hash(sha256_hash(data));
 }
 
+hash_digest scrypt_hash(data_slice data)
+{
+    return scrypt<hash_size>(data, data, 1024u, 1u, 1u);
+}
+
 short_hash bitcoin_short_hash(data_slice data)
 {
     return ripemd160_hash(sha256_hash(data));
