@@ -87,7 +87,7 @@ initialize_the_build_environment()
     parse_command_line_options "$@"
     configure_build_parallelism 
     define_operating_system_specific_settings
-    link_to_standard_library_in_nondefault_scnearios
+    link_to_standard_library_in_nondefault_scenarios
     normalize_static_and_shared_options "$@"
     purge_custom_build_options
     set_prefix_dependent_options
@@ -183,7 +183,7 @@ define_operating_system_specific_settings()
     fi
 }
 
-link_to_standard_library_in_nondefault_scnearios()
+link_to_standard_library_in_nondefault_scenarios()
 {
     if [[ ($OS == Linux && $CC == "clang") || ($OS == OpenBSD) ]]; then
         export LDLIBS="-l$STDLIB $LDLIBS"
