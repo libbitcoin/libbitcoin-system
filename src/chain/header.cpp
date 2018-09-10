@@ -446,7 +446,8 @@ bool header::is_valid_timestamp(uint32_t timestamp_limit_seconds) const
     return time <= future;
 }
 
-bool header::is_valid_proof_of_work(uint32_t proof_of_work_limit) const
+bool header::is_valid_proof_of_work(uint32_t proof_of_work_limit,
+    bool scrypt) const
 {
     const auto bits = compact(bits_);
     static const uint256_t pow_limit(compact{ proof_of_work_limit });
@@ -461,7 +462,7 @@ bool header::is_valid_proof_of_work(uint32_t proof_of_work_limit) const
         return false;
 
     // Ensure actual work is at least claimed amount (smaller is more work).
-    return to_uint256(hash()) <= target;
+    return to_uint256(scrypt ? scrypt_hash(to_data()) : hash()) <= target;
 }
 
 // static
@@ -499,10 +500,10 @@ uint256_t header::proof() const
 //-----------------------------------------------------------------------------
 
 code header::check(uint32_t timestamp_limit_seconds,
-    uint32_t proof_of_work_limit) const
+    uint32_t proof_of_work_limit, bool scrypt) const
 {
 
-    if (!is_valid_proof_of_work(proof_of_work_limit))
+    if (!is_valid_proof_of_work(proof_of_work_limit, scrypt))
         return error::invalid_proof_of_work;
 
     else if (!is_valid_timestamp(timestamp_limit_seconds))

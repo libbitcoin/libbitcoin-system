@@ -134,6 +134,9 @@ chain_state::activations chain_state::activation(const data& values,
     // retarget_overflow_patch is activated based on configuration alone (hard fork).
     result.forks |= (rule_fork::retarget_overflow_patch & forks);
 
+    // scrypt_proof_of_work is activated based on configuration alone (hard fork).
+    result.forks |= (rule_fork::scrypt_proof_of_work & forks);
+
     // bip16 was activated based on manual inspection of history (~55% rule).
     if (values.timestamp.self >= settings.bip16_activation_time)
     {

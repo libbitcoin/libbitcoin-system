@@ -124,6 +124,9 @@ BC_API data_chunk scrypt(data_slice data, data_slice salt, uint64_t N,
 /// Generate a bitcoin hash.
 BC_API hash_digest bitcoin_hash(data_slice data);
 
+/// Generate a scrypt hash.
+BC_API hash_digest scrypt_hash(data_slice data);
+
 /// Generate a bitcoin short hash.
 BC_API short_hash bitcoin_short_hash(data_slice data);
 
