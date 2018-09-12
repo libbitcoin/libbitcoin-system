@@ -19,18 +19,15 @@
 #include <cstdint>
 #include <bitcoin/bitcoin/settings.hpp>
 #include <bitcoin/bitcoin/chain/block.hpp>
+#include <bitcoin/bitcoin/chain/chain_state.hpp>
 
 namespace libbitcoin {
 
+using namespace chain;
+
 // Common default values (no settings context).
 settings::settings()
-  : retargeting_factor(4),
-    block_spacing_seconds(10 * 60),
-    timestamp_limit_seconds(2 * 60 * 60),
-    retargeting_interval_seconds(2 * 7 * 24 * 60 * 60),
-    minimum_timespan(retargeting_interval_seconds / retargeting_factor),
-    maximum_timespan(retargeting_interval_seconds * retargeting_factor),
-    retargeting_interval(retargeting_interval_seconds / block_spacing_seconds),
+  : timestamp_limit_seconds(2 * 60 * 60),
     first_version(1),
     bip34_version(2),
     bip66_version(3),
@@ -38,6 +35,15 @@ settings::settings()
     bip9_version_bit0(1u << 0),
     bip9_version_bit1(1u << 1),
     bip9_version_base(0x20000000),
+    retargeting_factor_(4),
+    block_spacing_seconds_(10 * 60),
+    retargeting_interval_seconds_(2 * 7 * 24 * 60 * 60),
+    minimum_timespan_(chain_state::minimum_timespan(
+        retargeting_interval_seconds_, retargeting_factor_)),
+    maximum_timespan_(chain_state::maximum_timespan(
+        retargeting_interval_seconds_, retargeting_factor_)),
+    retargeting_interval_(chain_state::retargeting_interval(
+        retargeting_interval_seconds_, block_spacing_seconds_)),
     initial_block_subsidy_bitcoin_(50),
     recursive_money_(9999999989u)
 {
@@ -236,6 +242,58 @@ settings::settings(config::settings context)
         }
     }
     max_money_ = recursive_money_ * subsidy_interval_;
+}
+
+void settings::retargeting_factor(uint32_t value)
+{
+    retargeting_factor_ = value;
+    minimum_timespan_ = chain_state::minimum_timespan(
+        retargeting_interval_seconds_, retargeting_factor_);
+    maximum_timespan_ = chain_state::maximum_timespan(
+        retargeting_interval_seconds_, retargeting_factor_);
+}
+
+uint32_t settings::retargeting_interval_seconds() const
+{
+    return retargeting_interval_seconds_;
+}
+
+void settings::retargeting_interval_seconds(uint32_t value)
+{
+    retargeting_interval_seconds_ = value;
+    minimum_timespan_ = chain_state::minimum_timespan(
+        retargeting_interval_seconds_, retargeting_factor_);
+    maximum_timespan_ = chain_state::maximum_timespan(
+        retargeting_interval_seconds_, retargeting_factor_);
+    retargeting_interval_ = chain_state::retargeting_interval(
+        retargeting_interval_seconds_, block_spacing_seconds_);
+}
+
+uint32_t settings::block_spacing_seconds() const
+{
+    return block_spacing_seconds_;
+}
+
+void settings::block_spacing_seconds(uint32_t value)
+{
+    block_spacing_seconds_ = value;
+    retargeting_interval_ = chain_state::retargeting_interval(
+        retargeting_interval_seconds_, block_spacing_seconds_);
+}
+
+uint32_t settings::minimum_timespan() const
+{
+    return minimum_timespan_;
+}
+
+uint32_t settings::maximum_timespan() const
+{
+    return maximum_timespan_;
+}
+
+size_t settings::retargeting_interval() const
+{
+    return retargeting_interval_;
 }
 
 uint64_t settings::bitcoin_to_satoshi(uint64_t value) const

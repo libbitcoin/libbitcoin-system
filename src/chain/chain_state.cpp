@@ -303,15 +303,16 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks,
         return bits_high(values);
 
     // Mainnet and testnet retarget on interval.
-    if (is_retarget_height(values.height, settings.retargeting_interval))
+    if (is_retarget_height(values.height, settings.retargeting_interval()))
         return work_required_retarget(values, forks,
-            settings.proof_of_work_limit, settings.minimum_timespan,
-            settings.maximum_timespan, settings.retargeting_interval_seconds);
+            settings.proof_of_work_limit, settings.minimum_timespan(),
+            settings.maximum_timespan(),
+            settings.retargeting_interval_seconds());
 
     // Testnet retargets easy on inter-interval.
     if (!script::is_enabled(forks, rule_fork::difficult))
-        return easy_work_required(values, settings.retargeting_interval,
-            settings.proof_of_work_limit, settings.block_spacing_seconds);
+        return easy_work_required(values, settings.retargeting_interval(),
+            settings.proof_of_work_limit, settings.block_spacing_seconds());
 
     // Mainnet not retargeting.
     return bits_high(values);
@@ -494,6 +495,27 @@ uint32_t chain_state::signal_version(uint32_t forks,
     return settings.first_version;
 }
 
+// static
+uint32_t chain_state::minimum_timespan(uint32_t retargeting_interval_seconds,
+    uint32_t retargeting_factor)
+{
+    return retargeting_interval_seconds / retargeting_factor;
+}
+
+// static
+uint32_t chain_state::maximum_timespan(uint32_t retargeting_interval_seconds,
+    uint32_t retargeting_factor)
+{
+    return retargeting_interval_seconds * retargeting_factor;
+}
+
+// static
+uint32_t chain_state::retargeting_interval(
+    uint32_t retargeting_interval_seconds, uint32_t block_spacing_seconds)
+{
+    return retargeting_interval_seconds / block_spacing_seconds;
+}
+
 // This is promotion from a preceding height to the next.
 chain_state::data chain_state::to_pool(const chain_state& top,
     const bc::settings& settings)
@@ -517,7 +539,7 @@ chain_state::data chain_state::to_pool(const chain_state& top,
 
     // If bits collection overflows, dequeue oldest member.
     if (data.bits.ordered.size() >
-        bits_count(height, forks, settings.retargeting_interval))
+        bits_count(height, forks, settings.retargeting_interval()))
         data.bits.ordered.pop_front();
 
     // If version collection overflows, dequeue oldest member.
@@ -532,7 +554,7 @@ chain_state::data chain_state::to_pool(const chain_state& top,
     // Regtest does not perform retargeting.
     // If promoting from retarget height, move that timestamp into retarget.
     if (retarget &&
-        is_retarget_height(height - 1u, settings.retargeting_interval))
+        is_retarget_height(height - 1u, settings.retargeting_interval()))
         data.timestamp.retarget = (script::is_enabled(forks,
             rule_fork::time_warp_patch) && height != 1) ?
             *std::next(data.timestamp.ordered.crbegin()) : data.timestamp.self;

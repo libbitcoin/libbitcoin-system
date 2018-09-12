@@ -134,6 +134,13 @@ public:
 
     static uint32_t signal_version(uint32_t forks, const settings& settings);
 
+    static uint32_t minimum_timespan(uint32_t retargeting_interval_seconds,
+        uint32_t retargeting_factor);
+    static uint32_t maximum_timespan(uint32_t retargeting_interval_seconds,
+        uint32_t retargeting_factor);
+    static uint32_t retargeting_interval(uint32_t retargeting_interval_seconds,
+        uint32_t block_spacing_seconds);
+
     /// Create pool state from top chain top block state.
     chain_state(const chain_state& top, const settings& settings);
 
