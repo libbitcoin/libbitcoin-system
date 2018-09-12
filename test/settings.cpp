@@ -29,13 +29,12 @@ BOOST_AUTO_TEST_SUITE(settings_tests)
 BOOST_AUTO_TEST_CASE(settings__construct__default_context__expected)
 {
     settings configuration;
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_factor, 4);
-    BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600);
+    BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds(), 600);
     BOOST_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600);
-    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan, 302400);
-    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan, 4838400);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval, 2016);
+    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds(), 1209600);
+    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan(), 302400);
+    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan(), 4838400);
+    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval(), 2016);
     BOOST_REQUIRE_EQUAL(configuration.first_version, 1);
     BOOST_REQUIRE_EQUAL(configuration.bip34_version, 2);
     BOOST_REQUIRE_EQUAL(configuration.bip66_version, 3);
@@ -50,14 +49,13 @@ BOOST_AUTO_TEST_CASE(settings__construct__default_context__expected)
 BOOST_AUTO_TEST_CASE(settings__construct__mainnet_context__expected)
 {
     settings configuration(config::settings::mainnet);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_factor, 4);
-    BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600);
+    BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds(), 600);
     BOOST_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600);
+    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds(), 1209600);
     BOOST_REQUIRE_EQUAL(configuration.proof_of_work_limit, 0x1d00ffff);
-    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan, 302400);
-    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan, 4838400);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval, 2016);
+    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan(), 302400);
+    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan(), 4838400);
+    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval(), 2016);
     const chain::block genesis_block = configuration.genesis_block;
     BOOST_REQUIRE_EQUAL(genesis_block.to_data(), data_chunk({
         0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -131,14 +129,13 @@ BOOST_AUTO_TEST_CASE(settings__construct__mainnet_context__expected)
 BOOST_AUTO_TEST_CASE(settings__construct__testnet_context__expected)
 {
     settings configuration(config::settings::testnet);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_factor, 4);
-    BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600);
+    BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds(), 600);
     BOOST_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600);
+    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds(), 1209600);
     BOOST_REQUIRE_EQUAL(configuration.proof_of_work_limit, 0x1d00ffff);
-    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan, 302400);
-    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan, 4838400);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval, 2016);
+    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan(), 302400);
+    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan(), 4838400);
+    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval(), 2016);
     const chain::block genesis_block = configuration.genesis_block;
     BOOST_REQUIRE_EQUAL(genesis_block.to_data(), data_chunk({
         0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -212,14 +209,13 @@ BOOST_AUTO_TEST_CASE(settings__construct__testnet_context__expected)
 BOOST_AUTO_TEST_CASE(settings__construct__regtest_context__expected)
 {
     settings configuration(config::settings::regtest);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_factor, 4);
-    BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600);
+    BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds(), 600);
     BOOST_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600);
+    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds(), 1209600);
     BOOST_REQUIRE_EQUAL(configuration.proof_of_work_limit, 0x207fffff);
-    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan, 302400);
-    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan, 4838400);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval, 2016);
+    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan(), 302400);
+    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan(), 4838400);
+    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval(), 2016);
     const chain::block genesis_block = configuration.genesis_block;
     BOOST_REQUIRE_EQUAL(genesis_block.to_data(), data_chunk({
         0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -301,6 +297,40 @@ BOOST_AUTO_TEST_CASE(settings__subsidy_interval__set_double_value__max_money_dou
     configuration.subsidy_interval(double_subsidy_interval);
     BOOST_REQUIRE_EQUAL(configuration.subsidy_interval(), double_subsidy_interval);
     BOOST_REQUIRE_EQUAL(configuration.max_money(), double_max_money);
+}
+
+BOOST_AUTO_TEST_CASE(settings__retargeting_factor__set_double_value__timespan_limits_scaled)
+{
+    settings configuration(config::settings::mainnet);
+    const auto double_maximum_timespan = configuration.maximum_timespan() * 2;
+    const auto half_minimum_timespan = configuration.minimum_timespan() / 2;
+    configuration.retargeting_factor(8);
+    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan(), double_maximum_timespan);
+    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan(), half_minimum_timespan);
+}
+
+BOOST_AUTO_TEST_CASE(settings__retargeting_interval_seconds__set_double_value__timespan_limits_scaled)
+{
+    settings configuration(config::settings::mainnet);
+    const auto double_interval_seconds = configuration.retargeting_interval_seconds() * 2;
+    const auto double_maximum_timespan = configuration.maximum_timespan() * 2;
+    const auto double_minimum_timespan = configuration.minimum_timespan() * 2;
+    const auto double_retargeting_interval = configuration.retargeting_interval() * 2;
+    configuration.retargeting_interval_seconds(double_interval_seconds);
+    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds(), double_interval_seconds);
+    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan(), double_maximum_timespan);
+    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan(), double_minimum_timespan);
+    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval(), double_retargeting_interval);
+}
+
+BOOST_AUTO_TEST_CASE(settings__block_spacing_seconds__set_double_value__retargeting_interval_halved)
+{
+    settings configuration(config::settings::mainnet);
+    const auto double_block_spacing_seconds = configuration.block_spacing_seconds() * 2;
+    const auto half_retargeting_interval = configuration.retargeting_interval() / 2;
+    configuration.block_spacing_seconds(double_block_spacing_seconds);
+    BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds(), double_block_spacing_seconds);
+    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval(), half_retargeting_interval);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
