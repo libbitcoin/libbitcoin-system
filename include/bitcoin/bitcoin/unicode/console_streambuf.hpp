@@ -64,12 +64,14 @@ protected:
      */
     virtual std::wstreambuf::int_type underflow();
 
+#ifdef _MSC_VER
 private:
     // The constructed buffer size.
     size_t buffer_size_;
 
     // The dynamically-allocated buffers.
     wchar_t* buffer_;
+#endif
 };
 
 } // namespace libbitcoin

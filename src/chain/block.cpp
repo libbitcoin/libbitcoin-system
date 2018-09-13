@@ -44,6 +44,7 @@
 #include <bitcoin/bitcoin/machine/opcode.hpp>
 #include <bitcoin/bitcoin/machine/rule_fork.hpp>
 #include <bitcoin/bitcoin/message/messages.hpp>
+#include <bitcoin/bitcoin/settings.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -58,71 +59,11 @@ using namespace bc::config;
 using namespace bc::machine;
 using namespace boost::adaptors;
 
-static const std::string encoded_mainnet_genesis_block =
-    "01000000"
-    "0000000000000000000000000000000000000000000000000000000000000000"
-    "3ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"
-    "29ab5f49"
-    "ffff001d"
-    "1dac2b7c"
-    "01"
-    "01000000"
-    "01"
-    "0000000000000000000000000000000000000000000000000000000000000000ffffffff"
-    "4d"
-    "04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73"
-    "ffffffff"
-    "01"
-    "00f2052a01000000"
-    "43"
-    "4104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac"
-    "00000000";
-
-static const std::string encoded_testnet_genesis_block =
-    "01000000"
-    "0000000000000000000000000000000000000000000000000000000000000000"
-    "3ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"
-    "dae5494d"
-    "ffff001d"
-    "1aa4ae18"
-    "01"
-    "01000000"
-    "01"
-    "0000000000000000000000000000000000000000000000000000000000000000ffffffff"
-    "4d"
-    "04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73"
-    "ffffffff"
-    "01"
-    "00f2052a01000000"
-    "43"
-    "4104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac"
-    "00000000";
-
-static const std::string encoded_regtest_genesis_block =
-    "01000000"
-    "0000000000000000000000000000000000000000000000000000000000000000"
-    "3ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"
-    "dae5494d"
-    "ffff7f20"
-    "02000000"
-    "01"
-    "01000000"
-    "01"
-    "0000000000000000000000000000000000000000000000000000000000000000ffffffff"
-    "4d"
-    "04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73"
-    "ffffffff"
-    "01"
-    "00f2052a01000000"
-    "43"
-    "4104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac"
-    "00000000";
-
 // Constructors.
 //-----------------------------------------------------------------------------
 
 block::block()
-  : header_{},
+  : header_(),
     metadata{}
 {
 }
@@ -305,7 +246,7 @@ void block::to_data(std::ostream& stream, bool witness) const
 void block::to_data(writer& sink, bool witness) const
 {
     header_.to_data(sink, true);
-    sink.write_size_little_endian(transactions_.size());
+    sink.write_variable_little_endian(transactions_.size());
     const auto to = [&sink, witness](const transaction& tx)
     {
         tx.to_data(sink, true, witness);
@@ -380,11 +321,6 @@ size_t block::serialized_size(bool witness) const
     return value;
 }
 
-chain::header& block::header()
-{
-    return header_;
-}
-
 const chain::header& block::header() const
 {
     return header_;
@@ -395,7 +331,6 @@ void block::set_header(const chain::header& value)
     header_ = value;
 }
 
-// TODO: see set_header comments.
 void block::set_header(chain::header&& value)
 {
     header_ = std::move(value);
@@ -435,42 +370,6 @@ hash_digest block::hash() const
 // Utilities.
 //-----------------------------------------------------------------------------
 
-chain::block block::genesis_mainnet()
-{
-    data_chunk data;
-    decode_base16(data, encoded_mainnet_genesis_block);
-    const auto genesis = chain::block::factory(data);
-
-    BITCOIN_ASSERT(genesis.is_valid());
-    BITCOIN_ASSERT(genesis.transactions().size() == 1);
-    BITCOIN_ASSERT(genesis.generate_merkle_root() == genesis.header().merkle());
-    return genesis;
-}
-
-chain::block block::genesis_testnet()
-{
-    data_chunk data;
-    decode_base16(data, encoded_testnet_genesis_block);
-    const auto genesis = chain::block::factory(data);
-
-    BITCOIN_ASSERT(genesis.is_valid());
-    BITCOIN_ASSERT(genesis.transactions().size() == 1);
-    BITCOIN_ASSERT(genesis.generate_merkle_root() == genesis.header().merkle());
-    return genesis;
-}
-
-chain::block block::genesis_regtest()
-{
-    data_chunk data;
-    decode_base16(data, encoded_regtest_genesis_block);
-    const auto genesis = chain::block::factory(data);
-
-    BITCOIN_ASSERT(genesis.is_valid());
-    BITCOIN_ASSERT(genesis.transactions().size() == 1);
-    BITCOIN_ASSERT(genesis.generate_merkle_root() == genesis.header().merkle());
-    return genesis;
-}
-
 // With a 32 bit chain the size of the result should not exceed 43 and with a
 // 64 bit chain should not exceed 75, using a limit of: 10 + log2(height) + 1.
 size_t block::locator_size(size_t top)
@@ -480,7 +379,8 @@ size_t block::locator_size(size_t top)
 
     const auto first_ten_or_top = std::min(size_t(10), top);
     const auto remaining = top - first_ten_or_top;
-    const auto back_off = remaining == 0 ? 0.0 : std::log2(remaining);
+    const auto back_off = remaining == 0 ? 0.0 :
+                          remaining == 1 ? 1.0 : std::log2(remaining);
     const auto rounded_up_log = static_cast<size_t>(std::nearbyint(back_off));
     return first_ten_or_top + rounded_up_log + size_t(1);
 }
@@ -536,11 +436,12 @@ void block::strip_witness()
 //-----------------------------------------------------------------------------
 
 // static
-uint64_t block::subsidy(size_t height, bool retarget)
+uint64_t block::subsidy(size_t height, uint64_t subsidy_interval,
+    uint64_t initial_block_subsidy_satoshi)
 {
     static const auto overflow = sizeof(uint64_t) * byte_bits;
-    auto subsidy = initial_block_subsidy_satoshi();
-    const auto halvings = height / subsidy_interval(retarget);
+    auto subsidy = initial_block_subsidy_satoshi;
+    const auto halvings = height / subsidy_interval;
     subsidy >>= (halvings >= overflow ? 0 : halvings);
     return subsidy;
 }
@@ -784,15 +685,19 @@ uint64_t block::claim() const
 }
 
 // Overflow returns max_uint64.
-uint64_t block::reward(size_t height) const
+uint64_t block::reward(size_t height, uint64_t subsidy_interval,
+    uint64_t initial_block_subsidy_satoshi) const
 {
     ////static_assert(max_money() < max_uint64, "overflow sentinel invalid");
-    return ceiling_add(fees(), subsidy(height));
+    return ceiling_add(fees(), subsidy(height, subsidy_interval,
+        initial_block_subsidy_satoshi));
 }
 
-bool block::is_valid_coinbase_claim(size_t height) const
+bool block::is_valid_coinbase_claim(size_t height, uint64_t subsidy_interval,
+    uint64_t initial_block_subsidy_satoshi) const
 {
-    return claim() <= reward(height);
+    return claim() <= reward(height, subsidy_interval,
+        initial_block_subsidy_satoshi);
 }
 
 bool block::is_valid_coinbase_script(size_t height) const
@@ -856,12 +761,12 @@ bool block::is_segregated() const
     return value;
 }
 
-code block::check_transactions() const
+code block::check_transactions(uint64_t max_money) const
 {
     code ec;
 
     for (const auto& tx: transactions_)
-        if ((ec = tx.check(false)))
+        if ((ec = tx.check(max_money, false)))
             return ec;
 
     return error::success;
@@ -893,13 +798,15 @@ code block::connect_transactions(const chain_state& state) const
 //-----------------------------------------------------------------------------
 
 // These checks are self-contained; blockchain (and so version) independent.
-code block::check(bool retarget) const
+code block::check(uint64_t max_money, uint32_t timestamp_limit_seconds,
+    uint32_t proof_of_work_limit, bool scrypt) const
 {
     metadata.start_check = asio::steady_clock::now();
 
     code ec;
 
-    if ((ec = header_.check(retarget)))
+    if ((ec = header_.check(timestamp_limit_seconds, proof_of_work_limit,
+        scrypt)))
         return ec;
 
     // TODO: relates to total of tx.size(false) (pool cache).
@@ -939,19 +846,20 @@ code block::check(bool retarget) const
     ////    return error::block_legacy_sigop_limit;
 
     else
-        return check_transactions();
+        return check_transactions(max_money);
 }
 
-code block::accept(bool transactions, bool header) const
+code block::accept(const bc::settings& settings, bool transactions, bool header)
+    const
 {
     const auto state = header_.metadata.state;
-    return state ? accept(*state, transactions, header) :
+    return state ? accept(*state, settings, transactions, header) :
         error::operation_failed;
 }
 
 // These checks assume that prevout caching is completed on all tx.inputs.
-code block::accept(const chain_state& state, bool transactions,
-    bool header) const
+code block::accept(const chain_state& state, const bc::settings& settings,
+    bool transactions, bool header) const
 {
     metadata.start_accept = asio::steady_clock::now();
 
@@ -979,7 +887,9 @@ code block::accept(const chain_state& state, bool transactions,
         return error::coinbase_height_mismatch;
 
     // TODO: relates height to total of tx.fee (pool cach).
-    else if (!is_valid_coinbase_claim(state.height()))
+    else if (!is_valid_coinbase_claim(state.height(),
+            settings.subsidy_interval(), settings.bitcoin_to_satoshi(
+                settings.initial_block_subsidy_bitcoin())))
         return error::coinbase_value_limit;
 
     // TODO: relates median time past to tx.locktime (pool cache min tx.time).

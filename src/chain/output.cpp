@@ -38,9 +38,9 @@ using namespace bc::wallet;
 const uint64_t output::not_found = sighash_null_value;
 
 // These are non-consensus sentinel values used by the store.
-const uint32_t output::validation::not_spent = max_uint32;
-const uint8_t output::validation::indexed_true = 1;
-const uint8_t output::validation::indexed_false = 0;
+const uint32_t output::validation::unspent = max_uint32;
+const uint8_t output::validation::candidate_spent = 1;
+const uint8_t output::validation::candidate_unspent = 0;
 
 // Constructors.
 //-----------------------------------------------------------------------------
@@ -162,10 +162,13 @@ bool output::from_data(reader& source, bool wire, bool)
 
     if (!wire)
     {
-        // This reads updateable data in a non-atomic manner.
+        const auto spent = source.read_byte() == 
+            output::validation::candidate_spent;
+
+        // These read updateable data in a non-atomic manner.
         // The results are unusable unless externally protected.
-        metadata.set_indexed(source.read_byte());
-        metadata.spender_height = source.read_4_bytes_little_endian();
+        metadata.candidate_spend = spent;
+        metadata.confirmed_spend_height = source.read_4_bytes_little_endian();
     }
 
     value_ = source.read_8_bytes_little_endian();
@@ -215,10 +218,14 @@ void output::to_data(writer& sink, bool wire, bool) const
 {
     if (!wire)
     {
-        // This write is only utilized for unreachable tx serialization.
+        const auto spent = metadata.candidate_spend ?
+            output::validation::candidate_spent :
+            output::validation::candidate_unspent;
+
+        // These writes are only utilized for unreachable tx serialization.
         // Later updates and usable reads must be externally protected.
-        sink.write_byte(metadata.indexed());
-        sink.write_4_bytes_little_endian(metadata.spender_height);
+        sink.write_byte(spent);
+        sink.write_4_bytes_little_endian(metadata.confirmed_spend_height);
     }
 
     sink.write_8_bytes_little_endian(value_);

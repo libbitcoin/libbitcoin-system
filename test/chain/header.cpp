@@ -60,7 +60,8 @@ BOOST_AUTO_TEST_CASE(header__constructor_3__always__equals_params)
     auto previous = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     auto merkle = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
-    chain::header instance(version, std::move(previous), std::move(merkle), timestamp, bits, nonce);
+    chain::header instance(version, std::move(previous), std::move(merkle),
+        timestamp, bits, nonce);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(timestamp, instance.timestamp());
@@ -120,7 +121,7 @@ BOOST_AUTO_TEST_CASE(header__factory_1__valid_input__success)
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234,
         6523454,
-        68644
+        68644,
     };
 
     const auto data = expected.to_data();
@@ -372,7 +373,7 @@ BOOST_AUTO_TEST_CASE(header__is_valid_timestamp__timestamp_less_than_2_hours_fro
     const auto now = std::chrono::system_clock::now();
     const auto now_time = std::chrono::system_clock::to_time_t(now);
     instance.set_timestamp(static_cast<uint32_t>(now_time));
-    BOOST_REQUIRE(instance.is_valid_timestamp());
+    BOOST_REQUIRE(instance.is_valid_timestamp(settings().timestamp_limit_seconds));
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_timestamp__timestamp_greater_than_2_hours_from_now__returns_false)
@@ -382,25 +383,20 @@ BOOST_AUTO_TEST_CASE(header__is_valid_timestamp__timestamp_greater_than_2_hours_
     const auto duration = std::chrono::hours(3);
     const auto future = std::chrono::system_clock::to_time_t(now + duration);
     instance.set_timestamp(static_cast<uint32_t>(future));
-    BOOST_REQUIRE(!instance.is_valid_timestamp());
+    BOOST_REQUIRE(!instance.is_valid_timestamp(settings().timestamp_limit_seconds));
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__bits_exceeds_maximum__returns_false)
 {
+    const settings settings(bc::config::settings::mainnet);
     chain::header instance;
-    instance.set_bits(retarget_proof_of_work_limit + 1);
-    BOOST_REQUIRE(!instance.is_valid_proof_of_work(true));
-}
-
-BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__no_retarget_bits_exceeds_maximum__returns_false)
-{
-    chain::header instance;
-    instance.set_bits(no_retarget_proof_of_work_limit + 1);
-    BOOST_REQUIRE(!instance.is_valid_proof_of_work(false));
+    instance.set_bits(settings.proof_of_work_limit + 1);
+    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_greater_bits__returns_false)
 {
+    const settings settings(bc::config::settings::mainnet);
     const chain::header instance(
         11234u,
         hash_literal("abababababababababababababababababababababababababababababababab"),
@@ -409,11 +405,12 @@ BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_greater_bits__returns_
         0u,
         34564u);
 
-    BOOST_REQUIRE(!instance.is_valid_proof_of_work(true));
+    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_less_than_bits__returns_true)
 {
+    const settings settings(bc::config::settings::mainnet);
     const chain::header instance(
         4u,
         hash_literal("000000000000000003ddc1e929e2944b8b0039af9aa0d826c480a83d8b39c373"),
@@ -422,7 +419,36 @@ BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_less_than_bits__return
         402972254u,
         2842832236u);
 
-    BOOST_REQUIRE(instance.is_valid_proof_of_work(true));
+    BOOST_REQUIRE(instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
+}
+
+BOOST_AUTO_TEST_CASE(header__is_valid_scrypt_proof_of_work__hash_greater_than_bits__returns_false)
+{
+    const settings settings(bc::config::settings::mainnet);
+    const chain::header instance(
+        536870912u,
+        hash_literal("abababababababababababababababababababababababababababababababab"),
+        hash_literal("5163359dde15eb3f49cbd0926981f065ef1405fc9d4cece8818662b3b65f5dc6"),
+        1535119178u,
+        436332170u,
+        2135224651u);
+
+    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, true));
+}
+
+BOOST_AUTO_TEST_CASE(header__is_valid_scrypt_proof_of_work__hash_less_than_bits__returns_true)
+{
+    const settings settings(bc::config::settings::mainnet);
+    const chain::header instance(
+        536870912u,
+        hash_literal("313ced849aafeff324073bb2bd31ecdcc365ed215a34e827bb797ad33d158542"),
+        hash_literal("5163359dde15eb3f49cbd0926981f065ef1405fc9d4cece8818662b3b65f5dc6"),
+        1535119178u,
+        436332170u,
+        2135224651u);
+
+    BOOST_REQUIRE(instance.is_valid_proof_of_work(settings.proof_of_work_limit, true));
+    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
 }
 
 BOOST_AUTO_TEST_CASE(header__proof1__genesis_mainnet__expected)
@@ -432,7 +458,8 @@ BOOST_AUTO_TEST_CASE(header__proof1__genesis_mainnet__expected)
 
 BOOST_AUTO_TEST_CASE(header__proof2__genesis_mainnet__expected)
 {
-    const auto block = chain::block::genesis_mainnet();
+    const chain::block block = settings(bc::config::settings::mainnet)
+        .genesis_block;
     BOOST_REQUIRE_EQUAL(block.header().proof(), 0x0000000100010001);
 }
 

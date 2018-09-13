@@ -105,7 +105,7 @@ bool alert::from_data(uint32_t version, std::istream& stream)
     return from_data(version, source);
 }
 
-bool alert::from_data(uint32_t version, reader& source)
+bool alert::from_data(uint32_t , reader& source)
 {
     reset();
 
@@ -136,7 +136,7 @@ void alert::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void alert::to_data(uint32_t version, writer& sink) const
+void alert::to_data(uint32_t , writer& sink) const
 {
     sink.write_variable_little_endian(payload_.size());
     sink.write_bytes(payload_);
@@ -144,10 +144,10 @@ void alert::to_data(uint32_t version, writer& sink) const
     sink.write_bytes(signature_);
 }
 
-size_t alert::serialized_size(uint32_t version) const
+size_t alert::serialized_size(uint32_t) const
 {
-    return message::variable_uint_size(payload_.size()) + payload_.size() +
-        message::variable_uint_size(signature_.size()) + signature_.size();
+    return variable_uint_size(payload_.size()) + payload_.size() +
+        variable_uint_size(signature_.size()) + signature_.size();
 }
 
 data_chunk& alert::payload()

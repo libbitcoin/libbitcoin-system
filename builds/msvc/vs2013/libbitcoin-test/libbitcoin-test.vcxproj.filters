@@ -42,6 +42,9 @@
     <ClCompile Include="..\..\..\..\test\chain\block.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\chain_state.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\compact.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
@@ -85,6 +88,9 @@
       <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\base58.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\config\block.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\checkpoint.cpp">
@@ -135,6 +141,12 @@
     <ClCompile Include="..\..\..\..\test\math\checksum.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\math\ec_point.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\math\ec_scalar.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\elliptic_curve.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
@@ -142,6 +154,9 @@
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\limits.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\math\ring_signature.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\stealth.cpp">
@@ -252,6 +267,9 @@
     <ClCompile Include="..\..\..\..\test\message\version.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\settings.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\unicode\unicode.cpp">
       <Filter>src\unicode</Filter>
     </ClCompile>
@@ -276,7 +294,10 @@
     <ClCompile Include="..\..\..\..\test\utility\png.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\utility\random.cpp">
+    <ClCompile Include="..\..\..\..\test\utility\property_tree.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\utility\pseudo_random.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\utility\serializer.cpp">

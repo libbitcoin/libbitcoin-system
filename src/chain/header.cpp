@@ -437,19 +437,20 @@ hash_digest header::hash() const
 //-----------------------------------------------------------------------------
 
 /// BUGBUG: bitcoin 32bit unix time: en.wikipedia.org/wiki/Year_2038_problem
-bool header::is_valid_timestamp() const
+bool header::is_valid_timestamp(uint32_t timestamp_limit_seconds) const
 {
     using namespace std::chrono;
-    static const auto two_hours = seconds(timestamp_future_seconds);
+    static const auto two_hours = seconds(timestamp_limit_seconds);
     const auto time = wall_clock::from_time_t(timestamp_);
     const auto future = wall_clock::now() + two_hours;
     return time <= future;
 }
 
-bool header::is_valid_proof_of_work(bool retarget) const
+bool header::is_valid_proof_of_work(uint32_t proof_of_work_limit,
+    bool scrypt) const
 {
     const auto bits = compact(bits_);
-    static const uint256_t pow_limit(compact{ work_limit(retarget) });
+    static const uint256_t pow_limit(compact{ proof_of_work_limit });
 
     if (bits.is_overflowed())
         return false;
@@ -461,7 +462,7 @@ bool header::is_valid_proof_of_work(bool retarget) const
         return false;
 
     // Ensure actual work is at least claimed amount (smaller is more work).
-    return to_uint256(hash()) <= target;
+    return to_uint256(scrypt ? scrypt_hash(to_data()) : hash()) <= target;
 }
 
 // static
@@ -498,12 +499,14 @@ uint256_t header::proof() const
 // Validation.
 //-----------------------------------------------------------------------------
 
-code header::check(bool retarget) const
+code header::check(uint32_t timestamp_limit_seconds,
+    uint32_t proof_of_work_limit, bool scrypt) const
 {
-    if (!is_valid_proof_of_work(retarget))
+
+    if (!is_valid_proof_of_work(proof_of_work_limit, scrypt))
         return error::invalid_proof_of_work;
 
-    else if (!is_valid_timestamp())
+    else if (!is_valid_timestamp(timestamp_limit_seconds))
         return error::futuristic_timestamp;
 
     else

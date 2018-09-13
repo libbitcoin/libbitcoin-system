@@ -106,7 +106,7 @@ bool prefilled_transaction::from_data(uint32_t version,
     return from_data(version, source);
 }
 
-bool prefilled_transaction::from_data(uint32_t version,
+bool prefilled_transaction::from_data(uint32_t ,
     reader& source)
 {
     reset();
@@ -139,17 +139,16 @@ void prefilled_transaction::to_data(uint32_t version,
     to_data(version, sink);
 }
 
-void prefilled_transaction::to_data(uint32_t version,
+void prefilled_transaction::to_data(uint32_t ,
     writer& sink) const
 {
     sink.write_variable_little_endian(index_);
     transaction_.to_data(sink);
 }
 
-size_t prefilled_transaction::serialized_size(uint32_t version) const
+size_t prefilled_transaction::serialized_size(uint32_t) const
 {
-    return message::variable_uint_size(index_) +
-        transaction_.serialized_size(true);
+    return variable_uint_size(index_) + transaction_.serialized_size(true);
 }
 
 uint64_t prefilled_transaction::index() const

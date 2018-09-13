@@ -34,37 +34,43 @@ BOOST_AUTO_TEST_SUITE(ec_private_tests)
 //#define WIF_COMPRESSED_TESTNET "cRseHatKciTzFiXnoDjt5pWE3j3N2Hgd8qsVsCD4Ljv2DCwuD1V6"
 //#define WIF_UNCOMPRESSED_TESTNET "92ZKR9aqAuSbirHVW3tQMaRJ1AXScBaSrosQkzpbHhzKrVBsZBL"
 
-BOOST_AUTO_TEST_CASE(ec_private__compressed_wif__compressed__test)
+BOOST_AUTO_TEST_CASE(ec_private__seed__empty__valid)
+{
+    const data_chunk empty_seed;
+    BOOST_REQUIRE(ec_private(empty_seed));
+}
+
+BOOST_AUTO_TEST_CASE(ec_private__compressed_wif__compressed__true)
 {
     BOOST_REQUIRE(ec_private(WIF_COMPRESSED).compressed());
 }
 
-BOOST_AUTO_TEST_CASE(ec_private__uncompressed_wif__not_compressed__test)
+BOOST_AUTO_TEST_CASE(ec_private__uncompressed_wif__not_compressed__true)
 {
     BOOST_REQUIRE(!ec_private(WIF_UNCOMPRESSED).compressed());
 }
 
-BOOST_AUTO_TEST_CASE(ec_private__encode_wif__compressed__test)
+BOOST_AUTO_TEST_CASE(ec_private__encode_wif__compressed__expected)
 {
     BOOST_REQUIRE_EQUAL(ec_private(base16_literal(SECRET)).encoded(), WIF_COMPRESSED);
 }
 
-BOOST_AUTO_TEST_CASE(ec_private__encode_wif__uncompressed__test)
+BOOST_AUTO_TEST_CASE(ec_private__encode_wif__uncompressed__expected)
 {
     BOOST_REQUIRE_EQUAL(ec_private(base16_literal(SECRET), 0x8000, false).encoded(), WIF_UNCOMPRESSED);
 }
 
-BOOST_AUTO_TEST_CASE(ec_private__decode_wif__compressed__test)
+BOOST_AUTO_TEST_CASE(ec_private__decode_wif__compressed__true)
 {
-    ec_private secret(WIF_COMPRESSED);
+    const ec_private secret(WIF_COMPRESSED);
     BOOST_REQUIRE_EQUAL(encode_base16(secret.secret()), SECRET);
     BOOST_REQUIRE_EQUAL(secret.version(), 0x8000);
     BOOST_REQUIRE(secret.compressed());
 }
 
-BOOST_AUTO_TEST_CASE(ec_private__decode_wif__uncompressed__test)
+BOOST_AUTO_TEST_CASE(ec_private__decode_wif__uncompressed__false)
 {
-    ec_private secret(WIF_UNCOMPRESSED);
+    const ec_private secret(WIF_UNCOMPRESSED);
     BOOST_REQUIRE_EQUAL(encode_base16(secret.secret()), SECRET);
     BOOST_REQUIRE_EQUAL(secret.version(), 0x8000);
     BOOST_REQUIRE(!secret.compressed());

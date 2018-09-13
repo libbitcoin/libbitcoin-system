@@ -39,6 +39,9 @@ BOOST_AUTO_TEST_SUITE(elliptic_curve_tests)
 #define EC_SIGNATURE3 "4832febef8b31c7c922a15cb4063a43ab69b099bba765e24facef50dfbb4d057928ed5c6b6886562c2fe6972fd7c7f462e557129067542cce6b37d72e5ea5037"
 #define DER_SIGNATURE3 "3044022057d0b4fb0df5cefa245e76ba9b099bb63aa46340cb152a927c1cb3f8befe324802203750eae5727db3e6cc4275062971552e467f7cfd7269fec2626588b6c6d58e92"
 
+// EC_SUM
+#define GENERATOR_POINT_MULT_4 "02e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13"
+
 BOOST_AUTO_TEST_CASE(elliptic_curve__secret_to_public__positive__test)
 {
     ec_compressed point;
@@ -170,6 +173,26 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__ec_multiply_test)
     ec_compressed public2;
     BOOST_REQUIRE(secret_to_public(public2, secret1));
     BOOST_REQUIRE(std::equal(public1.begin(), public1.end(), public2.begin()));
+}
+
+BOOST_AUTO_TEST_CASE(elliptic_curve__ec_sum_test)
+{
+    static const auto one_hash = hash_literal("0100000000000000000000000000000000000000000000000000000000000000");
+
+    ec_compressed generator_point;
+    BOOST_REQUIRE(secret_to_public(generator_point, one_hash));
+
+    point_list points
+    {
+        generator_point,
+        generator_point,
+        generator_point,
+        generator_point
+    };
+
+    ec_compressed output;
+    BOOST_REQUIRE(ec_sum(output, points));
+    BOOST_REQUIRE_EQUAL(encode_base16(output), GENERATOR_POINT_MULT_4);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

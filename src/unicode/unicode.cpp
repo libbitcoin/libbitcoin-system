@@ -52,11 +52,15 @@ constexpr size_t utf8_max_character_size = 4;
 // Ensure console_streambuf::initialize is called only once.
 static std::once_flag io_mutex;
 
+#ifdef WITH_ICU
+
 // Ensure validate_localization is called only once.
 static std::once_flag icu_mutex;
 
+#endif
+
 // Static initializer for bc::cin.
-static std::istream& cin_stream()
+std::istream& cin_stream()
 {
     std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
     static unicode_istream input(std::cin, std::wcin, utf16_buffer_size);
@@ -64,7 +68,7 @@ static std::istream& cin_stream()
 }
 
 // Static initializer for bc::cout.
-static std::ostream& cout_stream()
+std::ostream& cout_stream()
 {
     std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
     static unicode_ostream output(std::cout, std::wcout, utf16_buffer_size);
@@ -72,17 +76,12 @@ static std::ostream& cout_stream()
 }
 
 // Static initializer for bc::cerr.
-static std::ostream& cerr_stream()
+std::ostream& cerr_stream()
 {
     std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
     static unicode_ostream error(std::cerr, std::wcerr, utf16_buffer_size);
     return error;
 }
-
-// Use bc::cin in place of std::cin, etc.
-std::istream& cin = cin_stream();
-std::ostream& cout = cout_stream();
-std::ostream& cerr = cerr_stream();
 
 #ifdef WITH_ICU
 
@@ -335,7 +334,12 @@ std::wstring to_utf16(const std::string& narrow)
 
 LCOV_EXCL_START("Untestable but visually-verifiable section.")
 
-static void set_utf8_stdio(FILE* file)
+static void set_utf8_stdio(
+#ifdef _MSC_VER
+    FILE* file)
+#else
+    FILE*)
+#endif
 {
 #ifdef _MSC_VER
     if (_setmode(_fileno(file), _O_U8TEXT) == -1)
@@ -343,7 +347,12 @@ static void set_utf8_stdio(FILE* file)
 #endif
 }
 
-static void set_binary_stdio(FILE* file)
+static void set_binary_stdio(
+#ifdef _MSC_VER
+    FILE* file)
+#else
+    FILE*)
+#endif
 {
 #ifdef _MSC_VER
     if (_setmode(_fileno(file), _O_BINARY) == -1)

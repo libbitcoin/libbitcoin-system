@@ -40,7 +40,7 @@ inline std::time_t zulu_time()
 /// Standard date-time string, e.g. Sun Oct 17 04:41:13 2010, locale dependent.
 inline std::string local_time()
 {
-    static BC_CONSTEXPR size_t size = 24;
+    static BC_CONSTEXPR size_t size = 25;
     char buffer[size];
     const auto time = zulu_time();
 
@@ -50,7 +50,7 @@ inline std::string local_time()
     // If count was reached before the entire string could be stored, zero is
     // returned and contents are undefined, so do not return result.
     return result == 0 ? "" : buffer;
-};
+}
 
 // From: github.com/picanumber/bureaucrat/blob/master/time_lapse.h
 // boost::timer::auto_cpu_timer requires the boost timer lib dependency.

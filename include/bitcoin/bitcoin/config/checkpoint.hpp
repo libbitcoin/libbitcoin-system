@@ -108,7 +108,7 @@ public:
      * Getter.
      * @return The block height of the checkpoint.
      */
-    const size_t height() const;
+    size_t height() const;
 
     /**
      * Get the checkpoint as a string.

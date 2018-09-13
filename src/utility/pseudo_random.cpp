@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/random.hpp>
+#include <bitcoin/bitcoin/utility/pseudo_random.hpp>
 
 #include <chrono>
 #include <cstdint>
@@ -25,7 +25,6 @@
 #include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
 
 namespace libbitcoin {
 
@@ -35,13 +34,28 @@ using namespace std::chrono;
 // DO NOT USE srand() and rand() on MSVC as srand must be called per thread.
 // Values may be truly random depending on the underlying device.
 
+uint64_t pseudo_random()
+{
+    return pseudo_random::next();
+}
+
+uint64_t pseudo_random(uint64_t begin, uint64_t end)
+{
+    return pseudo_random::next(begin, end);
+}
+
+void pseudo_random_fill(data_chunk& out)
+{
+    return pseudo_random::fill<data_chunk>(out);
+}
+
 static uint32_t get_clock_seed()
 {
     const auto now = high_resolution_clock::now();
     return static_cast<uint32_t>(now.time_since_epoch().count());
 }
 
-static std::mt19937& get_twister()
+std::mt19937& pseudo_random::get_twister()
 {
     // Boost.thread will clean up the thread statics using this function.
     const auto deleter = [](std::mt19937* twister)
@@ -52,7 +66,7 @@ static std::mt19937& get_twister()
     // Maintain thread static state space.
     static boost::thread_specific_ptr<std::mt19937> twister(deleter);
 
-    // This is thread safe because the instance is static.
+    // This is thread safe because the instance is thread static.
     if (twister.get() == nullptr)
     {
         // Seed with high resolution clock.
@@ -62,30 +76,27 @@ static std::mt19937& get_twister()
     return *twister;
 }
 
-uint64_t pseudo_random()
+uint64_t pseudo_random::next()
 {
-    return pseudo_random(0, max_uint64);
+    return next(0, max_uint64);
 }
 
-uint64_t pseudo_random(uint64_t begin, uint64_t end)
+uint64_t pseudo_random::next(uint64_t begin, uint64_t end)
 {
     std::uniform_int_distribution<uint64_t> distribution(begin, end);
     return distribution(get_twister());
 }
 
-void pseudo_random_fill(data_chunk& chunk)
+asio::duration pseudo_randomize(const asio::duration& expiration,
+    uint8_t ratio)
 {
-    // uniform_int_distribution is undefined for sizes < 16 bits.
-    std::uniform_int_distribution<uint16_t> distribution(0, max_uint8);
-
-    for (auto& byte: chunk)
-        byte = static_cast<uint8_t>(distribution(get_twister()));
+    return pseudo_random::duration(expiration, ratio);
 }
 
 // Randomly select a time duration in the range:
 // [(expiration - expiration / ratio) .. expiration]
 // Not fully testable due to lack of random engine injection.
-asio::duration pseudo_randomize(const asio::duration& expiration,
+asio::duration pseudo_random::duration(const asio::duration& expiration,
     uint8_t ratio)
 {
     if (ratio == 0)
@@ -101,7 +112,7 @@ asio::duration pseudo_randomize(const asio::duration& expiration,
         return expiration;
 
     // [0..2^64) % 2500 => [0..2500]
-    const auto random_offset = static_cast<int>(pseudo_random(0, limit));
+    const auto random_offset = static_cast<int>(pseudo_random::next(0, limit));
 
     // (10000 - [0..2500]) => [7500..10000]
     const auto expires = max_expire - random_offset;

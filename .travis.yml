@@ -46,10 +46,6 @@ matrix:
         - os: linux
           compiler: gcc
           env: LINK=static
-          addons:
-            apt:
-              packages:
-                - lcov
     fast_finish:
         - true
 
@@ -81,22 +77,27 @@ install:
 script:
 
     # Download and build libbitcoin and all dependencies.
-    - if [[ $OSX   && $CLANG && $STATIC  ]]; then CC=$CC CXX=$CXX ./install.sh --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --disable-shared --prefix=$TRAVIS_BUILD_DIR/my-prefix; fi
-    - if [[ $LINUX && $CLANG && $STATIC  ]]; then CC=$CC CXX=$CXX ./install.sh --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --disable-shared --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os' CXXFLAGS='-Os'; fi
-    - if [[ $LINUX && $GCC   && $STATIC  ]]; then CC=$CC CXX=$CXX ./install.sh --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --disable-shared --build-dir=my-build --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Og -g --coverage' CXXFLAGS='-Og -g --coverage'; fi
-    - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then CC=$CC CXX=$CXX ./install.sh --disable-static; fi
-    - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then CC=$CC CXX=$CXX ./install.sh --with-icu --build-icu --build-boost --disable-ndebug --disable-static --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os' CXXFLAGS='-Os'; fi
-    - if [[ $LINUX && $GCC   && $DYNAMIC ]]; then CC=$CC CXX=$CXX ./install.sh --disable-static --build-boost --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os -s' CXXFLAGS='-Os -s'; fi
+    - if [[ $OSX   && $CLANG && $STATIC  ]]; then CC=$CC CXX=$CXX ./install.sh --enable-isystem --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --disable-shared --prefix=$TRAVIS_BUILD_DIR/my-prefix; fi
+    - if [[ $LINUX && $CLANG && $STATIC  ]]; then CC=$CC CXX=$CXX ./install.sh --enable-isystem --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --disable-shared --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os' CXXFLAGS='-Os'; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then CC=$CC CXX=$CXX ./install.sh --enable-isystem --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --disable-shared --build-dir=my-build --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Og -g --coverage' CXXFLAGS='-Og -g --coverage'; fi
+    - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then CC=$CC CXX=$CXX ./install.sh --enable-isystem --disable-static; fi
+    - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then CC=$CC CXX=$CXX ./install.sh --enable-isystem --with-icu --build-icu --build-boost --disable-ndebug --disable-static --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os' CXXFLAGS='-Os'; fi
+    - if [[ $LINUX && $GCC   && $DYNAMIC ]]; then CC=$CC CXX=$CXX ./install.sh --enable-isystem --disable-static --build-boost --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os -s' CXXFLAGS='-Os -s'; fi
 
 after_success:
 
-    # Install coveralls and current lcov.
+    # Download and unpack lcov > 1.10
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then wget https://github.com/linux-test-project/lcov/releases/download/v1.12/lcov-1.12.tar.gz; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then tar xzf lcov-1.12.tar.gz; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then cd lcov-1.12; PREFIX="$TRAVIS_BUILD_DIR/my-prefix" make install; cd ..; fi
+
+    # Install coveralls.
     - if [[ $LINUX && $GCC   && $STATIC  ]]; then gem install coveralls-lcov; fi
 
     # Capture coverage info, filter out system and test code, and debug before upload.
-    - if [[ $LINUX && $GCC   && $STATIC  ]]; then lcov --directory . --capture --output-file coverage.info; fi
-    - if [[ $LINUX && $GCC   && $STATIC  ]]; then lcov --remove coverage.info "/usr/*" "$TRAVIS_BUILD_DIR/my-prefix/*" "my-build/*" "examples/*" "test/*" --output-file coverage.info; fi
-    - if [[ $LINUX && $GCC   && $STATIC  ]]; then lcov --list coverage.info; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then $TRAVIS_BUILD_DIR/my-prefix/usr/bin/lcov --directory . --capture --output-file coverage.info; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then $TRAVIS_BUILD_DIR/my-prefix/usr/bin/lcov --remove coverage.info "/usr/*" "$TRAVIS_BUILD_DIR/my-prefix/*" "my-build/*" "examples/*" "test/*" --output-file coverage.info; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then $TRAVIS_BUILD_DIR/my-prefix/usr/bin/lcov --list coverage.info; fi
 
     # Upload coverage info to coveralls service (--repo-token <private coveralls repo token>).
     - if [[ $LINUX && $GCC   && $STATIC  ]]; then coveralls-lcov coverage.info; fi

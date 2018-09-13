@@ -34,6 +34,8 @@ static BC_CONSTEXPR uint8_t ec_even_sign = 2;
 static BC_CONSTEXPR size_t ec_secret_size = 32;
 typedef byte_array<ec_secret_size> ec_secret;
 
+typedef std::vector<ec_secret> secret_list;
+
 /// Compressed public key:
 static BC_CONSTEXPR size_t ec_compressed_size = 33;
 typedef byte_array<ec_compressed_size> ec_compressed;
@@ -82,28 +84,31 @@ static BC_CONSTEXPR ec_uncompressed null_uncompressed_point =
 // ----------------------------------------------------------------------------
 
 /// Compute the sum a += G*b, where G is the curve's generator point.
-/// return false on failure (such as infinity or zero).
-BC_API bool ec_add(ec_compressed& point, const ec_secret& secret);
+BC_API bool ec_add(ec_compressed& point, const ec_secret& scalar);
 
 /// Compute the sum a += G*b, where G is the curve's generator point.
-/// return false on failure (such as infinity or zero).
-BC_API bool ec_add(ec_uncompressed& point, const ec_secret& secret);
+BC_API bool ec_add(ec_uncompressed& point, const ec_secret& scalar);
 
 /// Compute the sum a = (a + b) % n, where n is the curve order.
-/// return false on failure (such as a zero result).
 BC_API bool ec_add(ec_secret& left, const ec_secret& right);
 
 /// Compute the product point *= secret.
-/// return false on failure (such as infinity or zero).
-BC_API bool ec_multiply(ec_compressed& point, const ec_secret& secret);
+BC_API bool ec_multiply(ec_compressed& point, const ec_secret& scalar);
 
 /// Compute the product point *= secret.
-/// return false on failure (such as infinity or zero).
-BC_API bool ec_multiply(ec_uncompressed& point, const ec_secret& secret);
+BC_API bool ec_multiply(ec_uncompressed& point, const ec_secret& scalar);
 
 /// Compute the product a = (a * b) % n, where n is the curve order.
-/// return false on failure (such as a zero result).
 BC_API bool ec_multiply(ec_secret& left, const ec_secret& right);
+
+/// Negate a scalar.
+BC_API bool ec_negate(ec_secret& scalar);
+
+/// Invert a point (flip on Y axis).
+BC_API bool ec_negate(ec_compressed& point);
+
+/// Compute the addition of EC curve points.
+BC_API bool ec_sum(ec_compressed& result, const point_list& values);
 
 // Convert keys
 // ----------------------------------------------------------------------------

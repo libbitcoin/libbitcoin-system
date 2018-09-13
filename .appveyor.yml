@@ -4,10 +4,9 @@
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
 ###############################################################################
-version: 3.0.0.{build}-{branch}
+version: 4.0.0.{build}-{branch}
 
-os:
-  - Visual Studio 2013
+image: Visual Studio 2013
 
 clone_folder: c:\git\libbitcoin
 skip_tags: true
@@ -47,11 +46,14 @@ before_build:
           | Where-Object { $_.DisplayName -and $_.DisplayName.Contains($product_name) } `
           | Select UninstallString).UninstallString
       }
-      Write-Host "Uninstalling Microsoft Visual C++ 2013 Redistributable (x64)..." -ForegroundColor Yellow;
-      "$(GetUninstallString "Microsoft Visual C++ 2013 Redistributable (x64)") /quiet" | out-file "$env:TEMP\uninstall.cmd" -Encoding ASCII;
+      Write-Host "Uninstalling Microsoft Visual C++ 2013 Redistributable (x64) - 12.0.21005..." -ForegroundColor Yellow;
+      "$(GetUninstallString "Microsoft Visual C++ 2013 Redistributable (x64) - 12.0.21005") /quiet" | out-file "$env:TEMP\uninstall.cmd" -Encoding ASCII;
       & $env:temp\uninstall.cmd;
-      Write-Host "Uninstalling Microsoft Visual C++ 2013 Redistributable (x86)..." -Foreground Yellow;
-      "$(GetUninstallString "Microsoft Visual C++ 2013 Redistributable (x86)") /quiet" | out-file "$env:TEMP\uninstall.cmd" -Encoding ASCII;
+      Write-Host "Uninstalling Microsoft Visual C++ 2013 Redistributable (x64) - 12.0.30501..." -ForegroundColor Yellow;
+      "$(GetUninstallString "Microsoft Visual C++ 2013 Redistributable (x64) - 12.0.30501") /quiet" | out-file "$env:TEMP\uninstall.cmd" -Encoding ASCII;
+      & $env:temp\uninstall.cmd;
+      Write-Host "Uninstalling Microsoft Visual C++ 2013 Redistributable (x86) - 12.0.30501..." -Foreground Yellow;
+      "$(GetUninstallString "Microsoft Visual C++ 2013 Redistributable (x86) - 12.0.30501") /quiet" | out-file "$env:TEMP\uninstall.cmd" -Encoding ASCII;
       & $env:temp\uninstall.cmd;
       Write-Host "Downloading Visual C++ Compiler November 2013 CTP..." -ForegroundColor Yellow;
       $CTP_INSTALLER_PATH = "$($env:TEMP)\$CTP_FILENAME";

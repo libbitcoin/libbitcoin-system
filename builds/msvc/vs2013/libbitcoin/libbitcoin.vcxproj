@@ -110,6 +110,9 @@
     <ClCompile Include="..\..\..\..\src\config\base2.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base58.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base64.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\block.cpp">
+      <ObjectFileName>$(IntDir)src_config_block.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\checkpoint.cpp" />
     <ClCompile Include="..\..\..\..\src\config\directory.cpp" />
     <ClCompile Include="..\..\..\..\src\config\endpoint.cpp" />
@@ -157,6 +160,8 @@
     <ClCompile Include="..\..\..\..\src\machine\program.cpp" />
     <ClCompile Include="..\..\..\..\src\math\checksum.cpp" />
     <ClCompile Include="..\..\..\..\src\math\crypto.cpp" />
+    <ClCompile Include="..\..\..\..\src\math\ec_point.cpp" />
+    <ClCompile Include="..\..\..\..\src\math\ec_scalar.cpp" />
     <ClCompile Include="..\..\..\..\src\math\elliptic_curve.cpp" />
     <ClCompile Include="..\..\..\..\src\math\external\aes256.c" />
     <ClCompile Include="..\..\..\..\src\math\external\crypto_scrypt.c" />
@@ -171,6 +176,7 @@
     <ClCompile Include="..\..\..\..\src\math\external\sha512.c" />
     <ClCompile Include="..\..\..\..\src\math\external\zeroize.c" />
     <ClCompile Include="..\..\..\..\src\math\hash.cpp" />
+    <ClCompile Include="..\..\..\..\src\math\ring_signature.cpp" />
     <ClCompile Include="..\..\..\..\src\math\secp256k1_initializer.cpp" />
     <ClCompile Include="..\..\..\..\src\math\stealth.cpp" />
     <ClCompile Include="..\..\..\..\src\message\address.cpp" />
@@ -213,6 +219,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\verack.cpp" />
     <ClCompile Include="..\..\..\..\src\message\version.cpp" />
+    <ClCompile Include="..\..\..\..\src\settings.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\console_streambuf.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\ifstream.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\ofstream.cpp" />
@@ -232,7 +239,7 @@
     <ClCompile Include="..\..\..\..\src\utility\png.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\prioritized_mutex.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\property_tree.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\random.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\scope_lock.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\sequencer.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\sequential_lock.cpp" />
@@ -292,6 +299,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base2.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base58.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base64.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\checkpoint.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\directory.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\endpoint.hpp" />
@@ -346,9 +354,12 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\sighash_algorithm.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\checksum.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\crypto.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\ec_point.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\ec_scalar.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\elliptic_curve.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\hash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\limits.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\ring_signature.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\stealth.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\uint256.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\address.hpp" />
@@ -385,6 +396,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\verack.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\version.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\settings.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\console_streambuf.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\file_lock.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\ifstream.hpp" />
@@ -422,7 +434,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\png.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\prioritized_mutex.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\property_tree.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\random.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\pseudo_random.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\resubscriber.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\scope_lock.hpp" />

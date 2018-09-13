@@ -21,13 +21,16 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
+#include <utility>
 #include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/formats/base_58.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
+#include <bitcoin/bitcoin/math/ec_scalar.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/ec_public.hpp>
+#include <bitcoin/bitcoin/wallet/hd_private.hpp>
 #include <bitcoin/bitcoin/wallet/payment_address.hpp>
 
 namespace libbitcoin {
@@ -43,14 +46,25 @@ const uint8_t ec_private::testnet_wif = 0xef;
 const uint8_t ec_private::testnet_p2kh = 0x6f;
 const uint16_t ec_private::testnet = to_version(testnet_p2kh, testnet_wif);
 
+// TODO: review construction for consistency WRT version/address_version.
+
 ec_private::ec_private()
-  : valid_(false), compress_(true), version_(0), secret_(null_hash)
+  : ec_private(ec_scalar{})
+{
+}
+
+ec_private::ec_private(const ec_scalar& scalar, uint8_t address_version)
+  : ec_scalar(scalar), compress_(true), version_(address_version)
 {
 }
 
 ec_private::ec_private(const ec_private& other)
-  : valid_(other.valid_), compress_(other.compress_), version_(other.version_),
-    secret_(other.secret_)
+  : ec_scalar(other), compress_(other.compress_), version_(other.version_)
+{
+}
+
+ec_private::ec_private(const data_chunk& seed, uint8_t address_version)
+  : ec_private(from_seed(seed, address_version))
 {
 }
 
@@ -70,7 +84,7 @@ ec_private::ec_private(const wif_uncompressed& wif, uint8_t address_version)
 }
 
 ec_private::ec_private(const ec_secret& secret, uint16_t version, bool compress)
-  : valid_(true), compress_(compress), version_(version), secret_(secret)
+  : ec_scalar(secret), compress_(compress), version_(version)
 {
 }
 
@@ -93,12 +107,23 @@ bool ec_private::is_wif(data_slice decoded)
 // Factories.
 // ----------------------------------------------------------------------------
 
+ec_private ec_private::from_seed(const data_chunk& seed,
+    uint8_t address_version)
+{
+    // This technique ensures consistent secrets with BIP32 from a given seed.
+    const hd_private key(seed);
+
+    // The key is invalid if parse256(IL) >= n or 0:
+    return key ? ec_private(key.secret(), address_version, true) :
+        ec_private();
+}
+
 ec_private ec_private::from_string(const std::string& wif,
     uint8_t address_version)
 {
     data_chunk decoded;
     if (!decode_base58(decoded, wif) || !is_wif(decoded))
-        return ec_private();
+        return {};
 
     const auto compressed = decoded.size() == wif_compressed_size;
     return compressed ?
@@ -110,9 +135,9 @@ ec_private ec_private::from_compressed(const wif_compressed& wif,
     uint8_t address_version)
 {
     if (!is_wif(wif))
-        return ec_private();
+        return {};
 
-    const uint16_t version = to_version(address_version, wif.front());
+    const auto version = to_version(address_version, wif.front());
     const auto secret = slice<1, ec_secret_size + 1>(wif);
     return ec_private(secret, version, true);
 }
@@ -121,24 +146,11 @@ ec_private ec_private::from_uncompressed(const wif_uncompressed& wif,
     uint8_t address_version)
 {
     if (!is_wif(wif))
-        return ec_private();
+        return {};
 
-    const uint16_t version = to_version(address_version, wif.front());
+    const auto version = to_version(address_version, wif.front());
     const auto secret = slice<1, ec_secret_size + 1>(wif);
     return ec_private(secret, version, false);
-}
-
-// Cast operators.
-// ----------------------------------------------------------------------------
-
-ec_private::operator bool() const
-{
-    return valid_;
-}
-
-ec_private::operator const ec_secret&() const
-{
-    return secret_;
 }
 
 // Serializer.
@@ -165,27 +177,22 @@ std::string ec_private::encoded() const
 // Accessors.
 // ----------------------------------------------------------------------------
 
-const ec_secret& ec_private::secret() const
-{
-    return secret_;
-}
-
-const uint16_t ec_private::version() const
+uint16_t ec_private::version() const
 {
     return version_;
 }
 
-const uint8_t ec_private::payment_version() const
+uint8_t ec_private::payment_version() const
 {
     return to_address_prefix(version_);
 }
 
-const uint8_t ec_private::wif_version() const
+uint8_t ec_private::wif_version() const
 {
     return to_wif_prefix(version_);
 }
 
-const bool ec_private::compressed() const
+bool ec_private::compressed() const
 {
     return compress_;
 }
@@ -210,12 +217,9 @@ payment_address ec_private::to_payment_address() const
 // Operators.
 // ----------------------------------------------------------------------------
 
-ec_private& ec_private::operator=(const ec_private& other)
+ec_private& ec_private::operator=(ec_private other)
 {
-    valid_ = other.valid_;
-    compress_ = other.compress_;
-    version_ = other.version_;
-    secret_ = other.secret_;
+    swap(*this, other);
     return *this;
 }
 
@@ -254,6 +258,17 @@ std::ostream& operator<<(std::ostream& out, const ec_private& of)
 {
     out << of.encoded();
     return out;
+}
+
+// friend function, see: stackoverflow.com/a/5695855/1172329
+void swap(ec_private& left, ec_private& right)
+{
+    using std::swap;
+
+    // Must be unqualified (no std namespace).
+    swap(static_cast<ec_scalar&>(left), static_cast<ec_scalar&>(right));
+    swap(left.compress_, right.compress_);
+    swap(left.version_, right.version_);
 }
 
 } // namespace wallet

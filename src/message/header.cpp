@@ -63,7 +63,7 @@ size_t header::satoshi_fixed_size(uint32_t version)
 {
     const auto canonical = (version == version::level::canonical);
     return chain::header::satoshi_fixed_size() +
-        (canonical ? 0 : message::variable_uint_size(0));
+        (canonical ? 0 : variable_uint_size(0));
 }
 
 header::header()

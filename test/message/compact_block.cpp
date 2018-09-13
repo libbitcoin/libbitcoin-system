@@ -166,8 +166,9 @@ BOOST_AUTO_TEST_CASE(compact_block__constructor_5__always__equals_params)
 BOOST_AUTO_TEST_CASE(compact_block__from_data__insufficient_bytes__failure)
 {
     const data_chunk raw{ 0xab, 0xcd };
-    message::compact_block instance{};
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(message::compact_block::version_minimum, raw));
+    message::compact_block instance;
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(
+        message::compact_block::version_minimum, raw));
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__from_data__insufficient_bytes_mid_transaction__failure)
@@ -178,8 +179,9 @@ BOOST_AUTO_TEST_CASE(compact_block__from_data__insufficient_bytes_mid_transactio
         "221b08003e8a6300240c0100d2040000000000000400000012121212121234343434"
         "3434565656565678789a9a02010000000100000000000001000000010000000"));
 
-    message::compact_block instance{};
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(message::compact_block::version_minimum, raw));
+    message::compact_block instance;
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(
+        message::compact_block::version_minimum, raw));
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__from_data__insufficient_version__failure)
@@ -195,7 +197,7 @@ BOOST_AUTO_TEST_CASE(compact_block__from_data__insufficient_version__failure)
     const auto data = expected.to_data(message::compact_block::version_minimum);
     BOOST_REQUIRE(raw == data);
 
-    message::compact_block instance{};
+    message::compact_block instance;
     BOOST_REQUIRE_EQUAL(false, instance.from_data(
         message::compact_block::version_minimum - 1, data));
 }

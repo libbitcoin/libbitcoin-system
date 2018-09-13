@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <utility>
 #include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
@@ -31,18 +32,20 @@
 namespace libbitcoin {
 namespace wallet {
 
-const uint8_t ec_public::compressed_even = 0x02;
-const uint8_t ec_public::compressed_odd = 0x03;
-const uint8_t ec_public::uncompressed = 0x04;
 const uint8_t ec_public::mainnet_p2kh = 0x00;
 
 ec_public::ec_public()
- : valid_(false), compress_(true), point_(null_compressed_point)
+  : ec_public(ec_point{})
+{
+}
+
+ec_public::ec_public(const ec_point& point)
+  : ec_point(point), compress_(true)
 {
 }
 
 ec_public::ec_public(const ec_public& other)
-  : valid_(other.valid_), compress_(other.compress_), point_(other.point_)
+  : ec_point(other), compress_(other.compress_)
 {
 }
 
@@ -61,13 +64,13 @@ ec_public::ec_public(const std::string& base16)
 {
 }
 
-ec_public::ec_public(const ec_uncompressed& point, bool compress)
-  : ec_public(from_point(point, compress))
+ec_public::ec_public(const ec_compressed& compressed, bool compress)
+  : ec_point(compressed), compress_(compress)
 {
 }
 
-ec_public::ec_public(const ec_compressed& point, bool compress)
-  : valid_(true), compress_(compress), point_(point)
+ec_public::ec_public(const ec_uncompressed& uncompressed, bool compress)
+  : ec_public(from_point(uncompressed, compress))
 {
 }
 
@@ -102,7 +105,7 @@ ec_public ec_public::from_string(const std::string& base16)
 ec_public ec_public::from_data(const data_chunk& decoded)
 {
     if (!is_point(decoded))
-        return ec_public();
+        return {};
 
     if (is_compressed_key(decoded))
         return ec_public(to_array<ec_compressed_size>(decoded), true);
@@ -115,24 +118,11 @@ ec_public ec_public::from_data(const data_chunk& decoded)
 ec_public ec_public::from_point(const ec_uncompressed& point, bool compress)
 {
     if (!is_point(point))
-        return ec_public();
+        return {};
 
     ec_compressed compressed;
     return bc::compress(compressed, point) ? ec_public(compressed, compress) :
         ec_public();
-}
-
-// Cast operators.
-// ----------------------------------------------------------------------------
-
-ec_public::operator bool() const
-{
-    return valid_;
-}
-
-ec_public::operator const ec_compressed&() const
-{
-    return point_;
 }
 
 // Serializer.
@@ -144,7 +134,7 @@ std::string ec_public::encoded() const
         return encode_base16(point_);
 
     // If the point is valid it should always decompress, but if not, is null.
-    ec_uncompressed uncompressed(null_uncompressed_point);
+    ec_uncompressed uncompressed;
     to_uncompressed(uncompressed);
     return encode_base16(uncompressed);
 }
@@ -152,12 +142,7 @@ std::string ec_public::encoded() const
 // Accessors.
 // ----------------------------------------------------------------------------
 
-const ec_compressed& ec_public::point() const
-{
-    return point_;
-}
-
-const bool ec_public::compressed() const
+bool ec_public::compressed() const
 {
     return compress_;
 }
@@ -167,7 +152,7 @@ const bool ec_public::compressed() const
 
 bool ec_public::to_data(data_chunk& out) const
 {
-    if (!valid_)
+    if (!(*this))
         return false;
 
     if (compressed())
@@ -190,7 +175,7 @@ bool ec_public::to_data(data_chunk& out) const
 
 bool ec_public::to_uncompressed(ec_uncompressed& out) const
 {
-    if (!valid_)
+    if (!(*this))
         return false;
 
     return bc::decompress(out, to_array<ec_compressed_size>(point_));
@@ -204,12 +189,9 @@ payment_address ec_public::to_payment_address(uint8_t version) const
 // Operators.
 // ----------------------------------------------------------------------------
 
-ec_public& ec_public::operator=(const ec_public& other)
+ec_public& ec_public::operator=(ec_public other)
 {
-    valid_ = other.valid_;
-    compress_ = other.compress_;
-    version_ = other.version_;
-    point_ = other.point_;
+    swap(*this, other);
     return *this;
 }
 
@@ -220,8 +202,7 @@ bool ec_public::operator<(const ec_public& other) const
 
 bool ec_public::operator==(const ec_public& other) const
 {
-    return valid_ == other.valid_ && compress_ == other.compress_ &&
-        version_ == other.version_ && point_ == other.point_;
+    return compress_ == other.compress_ && point_ == other.point_;
 }
 
 bool ec_public::operator!=(const ec_public& other) const
@@ -248,6 +229,16 @@ std::ostream& operator<<(std::ostream& out, const ec_public& of)
 {
     out << of.encoded();
     return out;
+}
+
+// friend function, see: stackoverflow.com/a/5695855/1172329
+void swap(ec_public& left, ec_public& right)
+{
+    using std::swap;
+
+    // Must be unqualified (no std namespace).
+    swap(static_cast<ec_point&>(left), static_cast<ec_point&>(right));
+    swap(left.compress_, right.compress_);
 }
 
 } // namespace wallet

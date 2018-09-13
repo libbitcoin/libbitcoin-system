@@ -182,7 +182,7 @@ void reject::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void reject::to_data(uint32_t version, writer& sink) const
+void reject::to_data(uint32_t , writer& sink) const
 {
     sink.write_string(message_);
     sink.write_byte(reason_to_byte(code_));
@@ -195,11 +195,10 @@ void reject::to_data(uint32_t version, writer& sink) const
     }
 }
 
-size_t reject::serialized_size(uint32_t version) const
+size_t reject::serialized_size(uint32_t) const
 {
-    size_t size = 1u + message::variable_uint_size(message_.size()) +
-        message_.size() + message::variable_uint_size(reason_.size()) +
-        reason_.size();
+    size_t size = 1u + variable_uint_size(message_.size()) +
+        message_.size() + variable_uint_size(reason_.size()) + reason_.size();
 
     if ((message_ == block::command) ||
         (message_ == transaction::command))

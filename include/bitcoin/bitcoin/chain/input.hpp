@@ -104,9 +104,6 @@ public:
     void set_script(const chain::script& value);
     void set_script(chain::script&& value);
 
-    // Deprecated (unsafe).
-    chain::witness& witness();
-
     const chain::witness& witness() const;
     void set_witness(const chain::witness& value);
     void set_witness(chain::witness&& value);
@@ -135,8 +132,8 @@ public:
     size_t signature_operations(bool bip16, bool bip141) const;
     bool extract_reserved_hash(hash_digest& out) const;
     bool extract_embedded_script(chain::script& out) const;
-    bool extract_witness_script(chain::script& out,
-        const chain::script& prevout) const;
+    ////bool extract_witness_script(chain::script& out,
+    ////    const chain::script& prevout) const;
 
 protected:
     void reset();

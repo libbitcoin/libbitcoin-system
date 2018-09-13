@@ -247,12 +247,12 @@ void witness::to_data(writer& sink, bool prefix) const
 {
     // Witness prefix is an element count, not byte length (unlike script).
     if (prefix)
-        sink.write_size_little_endian(stack_.size());
+        sink.write_variable_little_endian(stack_.size());
 
     const auto serialize = [&sink](const data_chunk& element)
     {
         // Tokens encoded as variable integer prefixed byte array (bip144).
-        sink.write_size_little_endian(element.size());
+        sink.write_variable_little_endian(element.size());
         sink.write_bytes(element);
     };
 

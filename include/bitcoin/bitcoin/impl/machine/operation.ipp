@@ -132,19 +132,6 @@ inline bool operation::operator!=(const operation& other) const
 // Properties (size, accessors, cache).
 //-----------------------------------------------------------------------------
 
-// TODO: consolidate with message implementation into common math utility.
-static size_t variable_uint_size(uint64_t value)
-{
-    if (value < 0xfd)
-        return 1;
-    else if (value <= 0xffff)
-        return 3;
-    else if (value <= 0xffffffff)
-        return 5;
-    else
-        return 9;
-}
-
 inline size_t operation::serialized_size() const
 {
     static BC_CONSTEXPR auto op_size = sizeof(uint8_t);
@@ -319,7 +306,6 @@ inline bool operation::is_positive(opcode code)
 inline bool operation::is_reserved(opcode code)
 {
     BC_CONSTEXPR auto op_186 = static_cast<uint8_t>(opcode::reserved_186);
-    BC_CONSTEXPR auto op_255 = static_cast<uint8_t>(opcode::reserved_255);
 
     switch (code)
     {
@@ -329,8 +315,7 @@ inline bool operation::is_reserved(opcode code)
         case opcode::reserved_138:
             return true;
         default:
-            const auto value = static_cast<uint8_t>(code);
-            return value >= op_186 && value <= op_255;
+            return static_cast<uint8_t>(code) >= op_186;
     }
 }
 

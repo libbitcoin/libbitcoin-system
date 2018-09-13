@@ -40,24 +40,21 @@ const std::string headers::command = "headers";
 const uint32_t headers::version_minimum = version::level::headers;
 const uint32_t headers::version_maximum = version::level::maximum;
 
-headers headers::factory(uint32_t version,
-    const data_chunk& data)
+headers headers::factory(uint32_t version, const data_chunk& data)
 {
     headers instance;
     instance.from_data(version, data);
     return instance;
 }
 
-headers headers::factory(uint32_t version,
-    std::istream& stream)
+headers headers::factory(uint32_t version, std::istream& stream)
 {
     headers instance;
     instance.from_data(version, stream);
     return instance;
 }
 
-headers headers::factory(uint32_t version,
-    reader& source)
+headers headers::factory(uint32_t version, reader& source)
 {
     headers instance;
     instance.from_data(version, source);
@@ -215,7 +212,7 @@ void headers::to_inventory(inventory_vector::list& out,
 
 size_t headers::serialized_size(uint32_t version) const
 {
-    return message::variable_uint_size(elements_.size()) +
+    return variable_uint_size(elements_.size()) +
         (elements_.size() * header::satoshi_fixed_size(version));
 }
 

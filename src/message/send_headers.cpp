@@ -55,7 +55,7 @@ send_headers send_headers::factory(uint32_t version,
     return instance;
 }
 
-size_t send_headers::satoshi_fixed_size(uint32_t version)
+size_t send_headers::satoshi_fixed_size(uint32_t)
 {
     return 0;
 }
@@ -137,7 +137,7 @@ data_chunk send_headers::to_data(uint32_t version) const
     return data;
 }
 
-void send_headers::to_data(uint32_t version, std::ostream& stream) const
+void send_headers::to_data(uint32_t, std::ostream&) const
 {
 }
 

@@ -46,12 +46,14 @@ static uint32_t factory(int32_t logical_exponent, bool negative, uint32_t mantis
 
 BOOST_AUTO_TEST_CASE(compact__constructor1__proof_of_work_limit__normalizes_unchanged)
 {
-    BOOST_REQUIRE_EQUAL(compact(retarget_proof_of_work_limit).normal(), retarget_proof_of_work_limit);
+    const auto pow_limit = settings(bc::config::settings::mainnet).proof_of_work_limit;
+    BOOST_REQUIRE_EQUAL(compact(pow_limit).normal(), pow_limit);
 }
 
 BOOST_AUTO_TEST_CASE(compact__constructor1__no_retarget_proof_of_work_limit__normalizes_unchanged)
 {
-    BOOST_REQUIRE_EQUAL(compact(no_retarget_proof_of_work_limit).normal(), no_retarget_proof_of_work_limit);
+    const auto no_pow_limit = settings(bc::config::settings::regtest).proof_of_work_limit;
+    BOOST_REQUIRE_EQUAL(compact(no_pow_limit).normal(), no_pow_limit);
 }
 
 // constructor1/normal

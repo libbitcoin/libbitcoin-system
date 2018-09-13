@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(merkle_block__constructor_5__always__equals_params)
 BOOST_AUTO_TEST_CASE(from_data_insufficient_data_fails)
 {
     const data_chunk data{ 10 };
-    message::merkle_block instance{};
+    message::merkle_block instance;
 
     BOOST_REQUIRE(!instance.from_data(message::version::level::maximum, data));
     BOOST_REQUIRE(!instance.is_valid());
@@ -168,9 +168,10 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_version_fails)
     };
 
     const auto data = expected.to_data(message::version::level::maximum);
-    message::merkle_block instance{};
+    message::merkle_block instance;
 
-    BOOST_REQUIRE(!instance.from_data(message::merkle_block::version_minimum - 1, data));
+    BOOST_REQUIRE(!instance.from_data(
+        message::merkle_block::version_minimum - 1, data));
     BOOST_REQUIRE(!instance.is_valid());
 }
 

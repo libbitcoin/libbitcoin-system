@@ -568,7 +568,6 @@ BOOST_AUTO_TEST_CASE(encrypted__encrypt__compressed_testnet__matches_secret_vers
     encrypted_private out_private_key;
     const uint8_t version = 111;
     const auto is_compressed = true;
-    const auto seed = base16_literal("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
     BOOST_REQUIRE(encrypt(out_private_key, secret, passphrase, version, is_compressed));
 
     // Decrypt the secret from the private key.

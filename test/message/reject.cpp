@@ -342,7 +342,6 @@ BOOST_AUTO_TEST_CASE(reject__code_setter__roundtrip__success)
     auto code = message::reject::reason_code::nonstandard;
     std::string message = "Alpha Beta";
     std::string reason = "Gamma Delta";
-    hash_digest data = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     message::reject instance;
     BOOST_REQUIRE(code != instance.code());
     instance.set_code(code);

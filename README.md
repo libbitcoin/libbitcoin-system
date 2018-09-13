@@ -18,6 +18,14 @@ The libbitcoin toolkit is a set of cross platform C++ libraries for building bit
 
 ## Installation
 
+The master branch is a staging area for the next major release and should be used only by libbitcoin developers. The current release branch is version3. Detailed installation instructions are provided below.
+
+  * [Debian/Ubuntu](#debianubuntu)
+  * [Macintosh](#macintosh)
+  * [Windows](#windows)
+
+### Autotools (advanced users)
+
 On Linux and macOS libbitcoin is built using Autotools as follows.
 ```sh
 $ ./autogen.sh
@@ -27,12 +35,6 @@ $ sudo make install
 $ sudo ldconfig
 ```
 A minimal libbitcoin build requires boost and libsecp256k1. The [libbitcoin/secp256k1](https://github.com/libbitcoin/secp256k1) repository is forked from [bitcoin-core/secp256k1](https://github.com/bitcoin-core/secp256k1) in order to control for changes and to incorporate the necessary Visual Studio build. The original repository can be used directly but recent changes to the public interface may cause build breaks. The `--enable-module-recovery` switch is required.
-
-Detailed instructions are provided below.
-
-  * [Debian/Ubuntu](#debianubuntu)
-  * [Macintosh](#macintosh)
-  * [Windows](#windows)
 
 ### Debian/Ubuntu
 
@@ -59,21 +61,17 @@ Next install the [build system](http://wikipedia.org/wiki/GNU_build_system) (Aut
 ```sh
 $ sudo apt-get install build-essential autoconf automake libtool pkg-config git
 ```
-Next install the [Boost](http://www.boost.org) (minimum 1.57.0) development package:
-```sh
-$ sudo apt-get install libboost-all-dev
-```
 Next download the [install script](https://github.com/libbitcoin/libbitcoin/blob/version3/install.sh) and enable execution:
 ```sh
 $ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version3/install.sh
 $ chmod +x install.sh
 ```
-Finally install libbitcoin with default [build options](#build-notes-for-linux--macos):
+Finally install libbitcoin with recommended [build options](#build-notes-for-linux--macos):
 ```sh
-$ sudo ./install.sh
+$ ./install.sh --prefix=/home/me/myprefix --build-boost --disable-shared
 ```
 
-Libbitcoin is now installed in `/usr/local/`.
+Libbitcoin is now installed in `/home/me/myprefix/`.
 
 ### Macintosh
 
@@ -104,21 +102,17 @@ Next install the [build system](http://wikipedia.org/wiki/GNU_build_system) (Aut
 ```sh
 $ brew install autoconf automake libtool pkgconfig wget
 ```
-Next install the [Boost](http://www.boost.org) (1.57.0 or newer) development package:
-```sh
-$ brew install boost
-```
 Next download the [install script](https://github.com/libbitcoin/libbitcoin/blob/version3/install.sh) and enable execution:
 ```sh
 $ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version3/install.sh
 $ chmod +x install.sh
 ```
-Finally install libbitcoin with default [build options](#build-notes-for-linux--macos):
+Finally install libbitcoin with recommended [build options](#build-notes-for-linux--macos):
 ```sh
-$ ./install.sh
+$ ./install.sh --prefix=/home/me/myprefix --build-boost --disable-shared
 ```
 
-Libbitcoin is now installed in `/usr/local/`.
+Libbitcoin is now installed in `/home/me/myprefix/`.
 
 ##### Installing from Formula
 
@@ -135,10 +129,6 @@ Next install the [build system](http://wikipedia.org/wiki/GNU_build_system) (Aut
 ```sh
 $ sudo port install autoconf automake libtool pkgconfig wget
 ```
-Next install the [Boost](http://www.boost.org) (1.57.0 or newer) development package. The `-` options remove MacPort defaults that are not Boost defaults:
-```sh
-$ sudo port install boost -no_single -no_static -python27
-```
 Next download the [install script](https://github.com/libbitcoin/libbitcoin/blob/version3/install.sh) and enable execution:
 ```sh
 $ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version3/install.sh
@@ -146,10 +136,10 @@ $ chmod +x install.sh
 ```
 Finally install libbitcoin with default [build options](#build-notes-for-linux--macos):
 ```sh
-$ ./install.sh
+$ ./install.sh --prefix=/home/me/myprefix --build-boost --disable-shared
 ```
 
-Libbitcoin is now installed in `/usr/local/`.
+Libbitcoin is now installed in `/home/me/myprefix/`.
 
 ### Build Notes for Linux / macOS
 The [install script](https://github.com/libbitcoin/libbitcoin/blob/version3/install.sh) itself is commented so that the manual build steps for each dependency can be inferred by a developer.
@@ -172,28 +162,28 @@ $ ./install.sh CFLAGS="-Og -g" --prefix=/home/me/myprefix
 
 #### Compiling with ICU (International Components for Unicode)
 
-Since the addition of [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) and later [BIP-38](https://github.com/bitcoin/bips/blob/master/bip-0038.mediawiki) support, libbitcoin conditionally incorporates [ICU](http://site.icu-project.org). To use the BIP-38 and BIP-39 passphrase normalization features libbitcoin must be compiled with the `--with-icu` option. Currently [libbitcoin-explorer](https://github.com/libbitcoin/libbitcoin-explorer) is the only other library that accesses this feature, so if you do not intend to use passphrase normalization this dependency can be avoided.
+Since the addition of [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) and later [BIP-38](https://github.com/bitcoin/bips/blob/master/bip-0038.mediawiki) and [Electrum](https://electrum.org) mnemnoic support, libbitcoin conditionally incorporates [ICU](http://site.icu-project.org). To use passphrase normalization for these features libbitcoin must be compiled with the `--with-icu` option. Currently [libbitcoin-explorer](https://github.com/libbitcoin/libbitcoin-explorer) is the only other library that accesses this feature, so if you do not intend to use passphrase normalization this dependency can be avoided.
 ```sh
-$ ./install.sh --with-icu
+$ ./install.sh --with-icu --build-icu --build-boost --disable-shared
 ```
 
 #### Compiling with QR Code Support
 
 Since the addition of [qrcode](https://github.com/evoskuil/libbitcoin/blob/master/src/wallet/qrcode.cpp) support, libbitcoin conditionally incorporates `qrencode`. This requires compiling with the `--with-qrencode` option. Currently [libbitcoin-explorer](https://github.com/libbitcoin/libbitcoin-explorer) is the only other library that accesses this feature, so if you do not intend to use qrcode this dependency can be avoided.
 ```sh
-$ ./install.sh --with-qrencode
+$ ./install.sh --with-qrencode --build-qrencode --build-boost --disable-shared
 ```
 
 Since the addition of [png](https://github.com/evoskuil/libbitcoin/blob/master/src/utility/png.cpp) support, libbitcoin conditionally incorporates `libpng` (which in turn requires `zlib`). This requires compiling with the `--with-png` option. Currently [libbitcoin-explorer](https://github.com/libbitcoin/libbitcoin-explorer) is the only other library that accesses this feature, so if you do not intend to use png this dependency can be avoided.
 ```sh
-$ ./install.sh --with-png
+$ ./install.sh --with-png --build-png --build-boost --disable-shared
 ```
 
 #### Building ICU, ZLib, PNG, QREncode and/or Boost
 
 The installer can download and install any or all of these dependencies. ICU is a large package that is not typically preinstalled at a sufficient level. Using these builds ensures compiler and configuration compatibility across all of the build components. It is recommended to use a prefix directory when building these components.
 ```sh
-$ ./install.sh --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --prefix=/home/me/myprefix
+$ ./install.sh --prefix=/home/me/myprefix --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --disable-shared
 ```
 
 ### Windows

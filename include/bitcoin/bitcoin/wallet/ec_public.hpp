@@ -24,6 +24,7 @@
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/math/ec_point.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
@@ -36,43 +37,37 @@ class payment_address;
 /// Use to pass an ec point as either ec_compressed or ec_uncompressed.
 /// ec_public doesn't carry a version for address creation or base58 encoding.
 class BC_API ec_public
+  : public ec_point
 {
 public:
-    static const uint8_t compressed_even;
-    static const uint8_t compressed_odd;
-    static const uint8_t uncompressed;
     static const uint8_t mainnet_p2kh;
 
     /// Constructors.
     ec_public();
     ec_public(const ec_public& other);
+    ec_public(const ec_point& point);
     ec_public(const ec_private& secret);
     ec_public(const data_chunk& decoded);
     ec_public(const std::string& base16);
-    ec_public(const ec_compressed& point, bool compress=true);
-    ec_public(const ec_uncompressed& point, bool compress=false);
+    ec_public(const ec_compressed& compressed, bool compress=true);
+    ec_public(const ec_uncompressed& uncompressed, bool compress=false);
 
     /// Operators.
+    ec_public& operator=(ec_public other);
     bool operator<(const ec_public& other) const;
     bool operator==(const ec_public& other) const;
     bool operator!=(const ec_public& other) const;
-    ec_public& operator=(const ec_public& other);
     friend std::istream& operator>>(std::istream& in, ec_public& to);
     friend std::ostream& operator<<(std::ostream& out, const ec_public& of);
 
-    /// Cast operators.
-    operator bool() const;
-    operator const ec_compressed&() const;
+    // Swap implementation required to properly handle base class.
+    friend void swap(ec_public& left, ec_public& right);
 
     /// Serializer.
     std::string encoded() const;
 
     /// Accessors.
-    const ec_compressed& point() const;
-    const uint16_t version() const;
-    const uint8_t payment_version() const;
-    const uint8_t wif_version() const;
-    const bool compressed() const;
+    bool compressed() const;
 
     /// Methods.
     bool to_data(data_chunk& out) const;
@@ -90,11 +85,8 @@ private:
     static ec_public from_point(const ec_uncompressed& point, bool compress);
 
     /// Members.
-    /// These should be const, apart from the need to implement assignment.
-    bool valid_;
+    /// This should be const, apart from the need to implement assignment.
     bool compress_;
-    uint8_t version_;
-    ec_compressed point_;
 };
 
 } // namespace wallet

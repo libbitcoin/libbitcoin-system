@@ -58,7 +58,7 @@ struct custom_reader
         return true;
     }
 
-    virtual bool set_authority(const std::string& authority)
+    virtual bool set_authority(const std::string& /* authority */)
     {
         // This URI doesn't support an authority component.
         authority_ = true;

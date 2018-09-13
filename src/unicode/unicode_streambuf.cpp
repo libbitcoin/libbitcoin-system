@@ -116,7 +116,7 @@ std::streambuf::int_type unicode_streambuf::overflow(
         const auto written = wide_buffer_->sputn(wide_, chars);
 
         // Handle write failure as an EOF.
-        if (written != chars)
+        if (written != static_cast<std::streamsize>(chars))
             return traits_type::eof();
     }
 
@@ -132,7 +132,7 @@ std::streambuf::int_type unicode_streambuf::overflow(
 
     // Return the overflow byte or EOF sentinel.
     return character;
-};
+}
 
 // Flush our output sequence.
 int unicode_streambuf::sync()

@@ -53,8 +53,8 @@ namespace chain {
 
 using namespace bc::machine;
 
-// HACK: must match tx slab_map::not_found.
-const uint64_t transaction::validation::undetermined_link = max_int64;
+// HACK: unlinked must match tx slab_map::not_found.
+const uint64_t transaction::validation::unlinked = max_int64;
 
 // Read a length-prefixed collection of inputs or outputs from the source.
 template<class Source, class Put>
@@ -100,7 +100,7 @@ inline void read_witnesses(reader& source, input::list& inputs)
 {
     const auto deserialize = [&](input& input)
     {
-        input.witness().from_data(source, true);
+        input.set_witness(witness::factory(source, true));
     };
 
     std::for_each(inputs.begin(), inputs.end(), deserialize);
@@ -987,7 +987,7 @@ hash_list transaction::missing_previous_transactions() const
     hashes.reserve(points.size());
     const auto hasher = [&hashes](const output_point& point)
     {
-        return point.hash();
+        hashes.push_back(point.hash());
     };
 
     std::for_each(points.begin(), points.end(), hasher);
@@ -1092,7 +1092,7 @@ code transaction::connect_input(const chain_state& state,
 //-----------------------------------------------------------------------------
 
 // These checks are self-contained; blockchain (and so version) independent.
-code transaction::check(bool transaction_pool, bool retarget) const
+code transaction::check(uint64_t max_money, bool transaction_pool) const
 {
     if (inputs_.empty() || outputs_.empty())
         return error::empty_transaction;
@@ -1100,7 +1100,7 @@ code transaction::check(bool transaction_pool, bool retarget) const
     else if (is_null_non_coinbase())
         return error::previous_output_null;
 
-    else if (total_output_value() > max_money(retarget))
+    else if (total_output_value() > max_money)
         return error::spend_overflow;
 
     else if (!transaction_pool && is_oversized_coinbase())
@@ -1160,11 +1160,11 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     if (transaction_pool && version() > state.maximum_transaction_version())
         return error::transaction_version;
 
-    // An unconfirmed transaction hash that exists in the chain is not accepted
-    // even if the original is spent in the new block. This is not necessary
-    // nor is it described by BIP30, but it is in the code referenced by BIP30.
-    else if (bip30 && metadata.duplicate)
-        return error::unspent_duplicate;
+    //// An unconfirmed transaction hash that exists in the chain is not accepted
+    //// even if the original is spent in the new block. This is not necessary
+    //// nor is it described by BIP30, but it is in the code referenced by BIP30.
+    //else if (bip30 && metadata.existed)
+    //    return error::unspent_duplicate;
 
     else if (is_missing_previous_outputs())
         return error::missing_previous_output;

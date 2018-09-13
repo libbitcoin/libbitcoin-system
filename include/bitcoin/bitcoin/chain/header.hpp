@@ -35,6 +35,9 @@
 #include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
+
+class settings;
+
 namespace chain {
 
 class BC_API header
@@ -43,25 +46,33 @@ public:
     typedef std::vector<header> list;
     typedef std::shared_ptr<header> ptr;
     typedef std::shared_ptr<const header> const_ptr;
-    typedef std::vector<header> ptr_list;
+    typedef std::vector<ptr> ptr_list;
     typedef std::vector<const_ptr> const_ptr_list;
 
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
-        bool simulate = false;
         uint64_t originator = 0;
-        code error = error::success;
+        uint32_t median_time_past = 0;
         chain_state::ptr state = nullptr;
 
-        /// Transactions are populated (don't download).
+        /// The block validation error code (if validated).
+        code error = error::success;
+
+        /// Header exists, in any state (don't download it).
+        bool exists = false;
+
+        /// Block transactions are populated (don't download block/txs).
         bool populated = false;
 
-        /// Existing header, always valid (don't validate, update vs. create).
-        bool pooled = false;
+        /// Block has been validated (don't re-validate).
+        bool validated = false;
 
-        /// The header is indexed (reject).
-        bool duplicate = false;
+        /// Header is a candidate (and is not yet invalid).
+        bool candidate = false;
+
+        /// Block is confirmed, relative to queried fork point (and is valid).
+        bool confirmed = false;
     };
 
     // Constructors.
@@ -148,10 +159,12 @@ public:
     uint256_t proof() const;
     static uint256_t proof(uint32_t bits);
 
-    bool is_valid_timestamp() const;
-    bool is_valid_proof_of_work(bool retarget) const;
+    bool is_valid_timestamp(uint32_t timestamp_limit_seconds) const;
+    bool is_valid_proof_of_work(uint32_t proof_of_work_limit,
+        bool scrypt=false) const;
 
-    code check(bool retarget) const;
+    code check(uint32_t timestamp_limit_seconds, uint32_t proof_of_work_limit,
+        bool scrypt=false) const;
     code accept() const;
     code accept(const chain_state& state) const;
 

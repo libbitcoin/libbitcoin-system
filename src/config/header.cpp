@@ -36,6 +36,7 @@ header::header()
 }
 
 header::header(const std::string& hexcode)
+  : value_()
 {
     std::stringstream(hexcode) >> *this;
 }

@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/handlers.hpp>
+#include <bitcoin/bitcoin/settings.hpp>
 #include <bitcoin/bitcoin/version.hpp>
 #include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
@@ -42,6 +43,7 @@
 #include <bitcoin/bitcoin/config/base2.hpp>
 #include <bitcoin/bitcoin/config/base58.hpp>
 #include <bitcoin/bitcoin/config/base64.hpp>
+#include <bitcoin/bitcoin/config/block.hpp>
 #include <bitcoin/bitcoin/config/checkpoint.hpp>
 #include <bitcoin/bitcoin/config/directory.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
@@ -92,9 +94,12 @@
 #include <bitcoin/bitcoin/machine/sighash_algorithm.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/crypto.hpp>
+#include <bitcoin/bitcoin/math/ec_point.hpp>
+#include <bitcoin/bitcoin/math/ec_scalar.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
+#include <bitcoin/bitcoin/math/ring_signature.hpp>
 #include <bitcoin/bitcoin/math/stealth.hpp>
 #include <bitcoin/bitcoin/math/uint256.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
@@ -168,7 +173,7 @@
 #include <bitcoin/bitcoin/utility/png.hpp>
 #include <bitcoin/bitcoin/utility/prioritized_mutex.hpp>
 #include <bitcoin/bitcoin/utility/property_tree.hpp>
-#include <bitcoin/bitcoin/utility/random.hpp>
+#include <bitcoin/bitcoin/utility/pseudo_random.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/resubscriber.hpp>
 #include <bitcoin/bitcoin/utility/scope_lock.hpp>

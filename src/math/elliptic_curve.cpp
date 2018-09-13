@@ -22,14 +22,18 @@
 #include <utility>
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
+#include <boost/ptr_container/ptr_vector.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/wallet/hd_private.hpp>
 #include "../math/external/lax_der_parsing.h"
 #include "secp256k1_initializer.hpp"
 
 namespace libbitcoin {
+
+using namespace boost;
 
 static constexpr uint8_t compressed_even = 0x02;
 static constexpr uint8_t compressed_odd = 0x03;
@@ -82,6 +86,15 @@ bool ec_multiply(const secp256k1_context* context, byte_array<Size>& in_out,
 }
 
 template <size_t Size>
+bool ec_negate(const secp256k1_context* context, byte_array<Size>& in_out)
+{
+    secp256k1_pubkey pubkey;
+    return parse(context, pubkey, in_out) &&
+        secp256k1_ec_pubkey_negate(context, &pubkey) == 1 &&
+        serialize(context, in_out, pubkey);
+}
+
+template <size_t Size>
 bool secret_to_public(const secp256k1_context* context, byte_array<Size>& out,
     const ec_secret& secret)
 {
@@ -122,16 +135,16 @@ bool verify_signature(const secp256k1_context* context,
 // Add and multiply EC values
 // ----------------------------------------------------------------------------
 
-bool ec_add(ec_compressed& point, const ec_secret& secret)
+bool ec_add(ec_compressed& point, const ec_secret& scalar)
 {
     const auto context = verification.context();
-    return ec_add(context, point, secret);
+    return ec_add(context, point, scalar);
 }
 
-bool ec_add(ec_uncompressed& point, const ec_secret& secret)
+bool ec_add(ec_uncompressed& point, const ec_secret& scalar)
 {
     const auto context = verification.context();
-    return ec_add(context, point, secret);
+    return ec_add(context, point, scalar);
 }
 
 bool ec_add(ec_secret& left, const ec_secret& right)
@@ -141,16 +154,16 @@ bool ec_add(ec_secret& left, const ec_secret& right)
         right.data()) == 1;
 }
 
-bool ec_multiply(ec_compressed& point, const ec_secret& secret)
+bool ec_multiply(ec_compressed& point, const ec_secret& scalar)
 {
     const auto context = verification.context();
-    return ec_multiply(context, point, secret);
+    return ec_multiply(context, point, scalar);
 }
 
-bool ec_multiply(ec_uncompressed& point, const ec_secret& secret)
+bool ec_multiply(ec_uncompressed& point, const ec_secret& scalar)
 {
     const auto context = verification.context();
-    return ec_multiply(context, point, secret);
+    return ec_multiply(context, point, scalar);
 }
 
 bool ec_multiply(ec_secret& left, const ec_secret& right)
@@ -158,6 +171,35 @@ bool ec_multiply(ec_secret& left, const ec_secret& right)
     const auto context = verification.context();
     return secp256k1_ec_privkey_tweak_mul(context, left.data(),
         right.data()) == 1;
+}
+
+bool ec_negate(ec_secret& scalar)
+{
+    const auto context = verification.context();
+    return secp256k1_ec_privkey_negate(context, scalar.data()) == 1;
+}
+
+bool ec_negate(ec_compressed& point)
+{
+    const auto context = verification.context();
+    return ec_negate(context, point);
+}
+
+bool ec_sum(ec_compressed& result, const point_list& points)
+{
+    secp256k1_pubkey pubkey;
+    ptr_vector<secp256k1_pubkey> keys(points.size());
+    const auto context = verification.context();
+
+    for (const auto& point: points)
+    {
+        keys.push_back(new secp256k1_pubkey);
+        if (!parse(context, keys.back(), point))
+            return false;
+    }
+
+    return secp256k1_ec_pubkey_combine(context, &pubkey, keys.c_array(),
+        points.size()) == 1 && serialize(context, result, pubkey);
 }
 
 // Convert keys
@@ -369,7 +411,7 @@ bool verify_signature(data_slice point, const hash_digest& hash,
 bool sign_recoverable(recoverable_signature& out, const ec_secret& secret,
     const hash_digest& hash)
 {
-    int recovery_id;
+    int recovery_id = 0;
     const auto context = signing.context();
     secp256k1_ecdsa_recoverable_signature signature;
 
