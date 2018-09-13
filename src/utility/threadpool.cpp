@@ -28,6 +28,7 @@ namespace libbitcoin {
 threadpool::threadpool(size_t number_threads, thread_priority priority)
   : size_(0)
 {
+    shutdown_ = false; // prevents deadlock due to threads_ that may spawn during shutdown
     spawn(number_threads, priority);
 }
 
@@ -52,45 +53,51 @@ size_t threadpool::size() const
 // This is not thread safe.
 void threadpool::spawn(size_t number_threads, thread_priority priority)
 {
-    // This allows the pool to be restarted.
-    service_.reset();
+    if(!shutdown_)
+    {
+        // This allows the pool to be restarted.
+        service_.reset();
 
-    for (size_t i = 0; i < number_threads; ++i)
-        spawn_once(priority);
+        for (size_t i = 0; i < number_threads; ++i)
+            spawn_once(priority);
+    }
 }
 
 void threadpool::spawn_once(thread_priority priority)
 {
-    ///////////////////////////////////////////////////////////////////////////
-    // Critical Section
-    work_mutex_.lock_upgrade();
-
-    // Work prevents the service from running out of work and terminating.
-    if (!work_)
+    if(!shutdown_)
     {
-        work_mutex_.unlock_upgrade_and_lock();
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        work_ = std::make_shared<asio::service::work>(service_);
+        ///////////////////////////////////////////////////////////////////////////
+        // Critical Section
+        work_mutex_.lock_upgrade();
 
-        work_mutex_.unlock_and_lock_upgrade();
-        //-----------------------------------------------------------------
+        // Work prevents the service from running out of work and terminating.
+        if (!work_)
+        {
+            work_mutex_.unlock_upgrade_and_lock();
+            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            work_ = std::make_shared<asio::service::work>(service_);
+
+            work_mutex_.unlock_and_lock_upgrade();
+            //-----------------------------------------------------------------
+        }
+
+        work_mutex_.unlock_upgrade();
+        ///////////////////////////////////////////////////////////////////////////
+
+        ///////////////////////////////////////////////////////////////////////////
+        // Critical Section
+        unique_lock lock(threads_mutex_);
+
+        threads_.push_back(asio::thread([this, priority]()
+        {
+            set_priority(priority);
+            service_.run();
+        }));
+
+        ++size_;
+        ///////////////////////////////////////////////////////////////////////////
     }
-
-    work_mutex_.unlock_upgrade();
-    ///////////////////////////////////////////////////////////////////////////
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Critical Section
-    unique_lock lock(threads_mutex_);
-
-    threads_.push_back(asio::thread([this, priority]()
-    {
-        set_priority(priority);
-        service_.run();
-    }));
-
-    ++size_;
-    ///////////////////////////////////////////////////////////////////////////
 }
 
 void threadpool::abort()
@@ -102,6 +109,7 @@ void threadpool::shutdown()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Critical Section
+    shutdown_ = true; // prevents deadlock due to threads_ that may spawn during shutdown
     unique_lock lock(work_mutex_);
 
     work_.reset();
