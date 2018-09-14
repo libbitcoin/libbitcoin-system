@@ -110,6 +110,7 @@ private:
 
     std::shared_ptr<asio::service::work> work_;
     mutable upgrade_mutex work_mutex_;
+    bool shutdown_; // prevents deadlock due to threads_ that may spawn_once during shutdown    
 };
 
 } // namespace libbitcoin
