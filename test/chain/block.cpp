@@ -714,4 +714,76 @@ BOOST_AUTO_TEST_CASE(block__is_forward_reference__forward_reference__true)
 
 BOOST_AUTO_TEST_SUITE_END()
 
+BOOST_AUTO_TEST_SUITE(is_internal_double_spend_block_tests)
+
+#define HASH_TX1 \
+"bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270"
+
+const auto hash_tx1 = hash_literal(HASH_TX1);
+
+#define HASH_TX2 \
+"8a6d9302fbe24f0ec756a94ecfc837eaffe16c43d1e68c62dfe980d99eea556f"
+
+const auto hash_tx2 = hash_literal(HASH_TX2);
+
+#define HASH_TX3 \
+"cb1e303db604f066225eb14d59d3f8d2231200817bc9d4610d2802586bd93f8a"
+
+const auto hash_tx3 = hash_literal(HASH_TX3);
+
+BOOST_AUTO_TEST_CASE(block__is_internal_double_spend__empty_transactions__false)
+{
+    chain::block instance;
+    BOOST_REQUIRE_EQUAL(instance.is_internal_double_spend(), false);
+}
+
+BOOST_AUTO_TEST_CASE(block__is_internal_double_spend__unique_prevouts__false)
+{
+    chain::block instance;
+    chain::transaction::list tx_list;
+    chain::transaction coinbase;
+    tx_list.emplace_back(coinbase);
+    chain::transaction tx1;
+    tx1.inputs().emplace_back(chain::output_point{ hash_tx1, 42 }, chain::script{}, 0);
+    tx_list.emplace_back(tx1);
+    chain::transaction tx2;
+    tx2.inputs().emplace_back(chain::output_point{ hash_tx2, 27 }, chain::script{}, 0);
+    tx_list.emplace_back(tx2);
+    chain::transaction tx3;
+    tx3.inputs().emplace_back(chain::output_point{ hash_tx3, 36 }, chain::script{}, 0);
+    tx_list.emplace_back(tx3);
+    instance.set_transactions(tx_list);
+    BOOST_REQUIRE_EQUAL(instance.is_internal_double_spend(), false);
+}
+
+BOOST_AUTO_TEST_CASE(block__is_internal_double_spend__nonunique_prevouts__true)
+{
+    chain::block instance;
+    chain::transaction::list tx_list;
+    chain::transaction coinbase;
+    tx_list.emplace_back(coinbase);
+    chain::transaction tx1;
+    tx1.inputs().emplace_back(chain::output_point{ hash_tx1, 42 }, chain::script{}, 0);
+    tx_list.emplace_back(tx1);
+    chain::transaction tx2;
+    tx2.inputs().emplace_back(chain::output_point{ hash_tx2, 27 }, chain::script{}, 0);
+    tx_list.emplace_back(tx2);
+    chain::transaction tx3;
+    tx3.inputs().emplace_back(chain::output_point{ hash_tx3, 36 }, chain::script{}, 0);
+    tx_list.emplace_back(tx3);
+    chain::transaction tx4;
+    tx4.inputs().emplace_back(chain::output_point{ hash_tx1, 42 }, chain::script{}, 0);
+    tx_list.emplace_back(tx4);
+    chain::transaction tx5;
+    tx5.inputs().emplace_back(chain::output_point{ hash_tx2, 27 }, chain::script{}, 0);
+    tx_list.emplace_back(tx5);
+    chain::transaction tx6;
+    tx6.inputs().emplace_back(chain::output_point{ hash_tx3, 36 }, chain::script{}, 0);
+    tx_list.emplace_back(tx6);
+    instance.set_transactions(tx_list);
+    BOOST_REQUIRE_EQUAL(instance.is_internal_double_spend(), true);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()

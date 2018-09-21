@@ -1050,4 +1050,35 @@ BOOST_AUTO_TEST_CASE(transaction__hash__block320670__success)
     BOOST_REQUIRE(data == instance.to_data());
 }
 
+BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__empty_prevouts__false)
+{
+    chain::transaction instance;
+    BOOST_REQUIRE_EQUAL(instance.is_internal_double_spend(), false);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__unique_prevouts__false)
+{
+    chain::transaction instance;
+    const auto hash1 = hash_literal(TX1_HASH);
+    instance.inputs().emplace_back(chain::output_point{ hash1, 42 }, chain::script{}, 0);
+    const auto hash2 = hash_literal(TX4_HASH);
+    instance.inputs().emplace_back(chain::output_point{ hash2, 27 }, chain::script{}, 0);
+    const auto hash3 = hash_literal(TX7_HASH);
+    instance.inputs().emplace_back(chain::output_point{ hash3, 36 }, chain::script{}, 0);
+    BOOST_REQUIRE_EQUAL(instance.is_internal_double_spend(), false);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__nonunique_prevouts__true)
+{
+    chain::transaction instance;
+    const auto hash1 = hash_literal(TX1_HASH);
+    instance.inputs().emplace_back(chain::output_point{ hash1, 42 }, chain::script{}, 0);
+    const auto hash2 = hash_literal(TX4_HASH);
+    instance.inputs().emplace_back(chain::output_point{ hash2, 27 }, chain::script{}, 0);
+    const auto hash3 = hash_literal(TX7_HASH);
+    instance.inputs().emplace_back(chain::output_point{ hash3, 36 }, chain::script{}, 0);
+    instance.inputs().emplace_back(chain::output_point{ hash3, 36 }, chain::script{}, 0);
+    BOOST_REQUIRE_EQUAL(instance.is_internal_double_spend(), true);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
