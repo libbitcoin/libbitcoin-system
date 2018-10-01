@@ -86,6 +86,23 @@ ptree property_tree(const std::vector<config::header>& headers, bool json)
     return tree;
 }
 
+// block
+
+ptree property_list(const chain::block& block, bool json)
+{
+    ptree tree = property_list(block.header());
+    tree.add_child("transactions", property_tree_list_of_lists("transaction",
+        block.transactions(), json));
+    return tree;
+}
+
+ptree property_tree(const chain::block& block, bool json)
+{
+    ptree tree;
+    tree.add_child("block", property_list(block, json));
+    return tree;
+}
+
 // inputs
 
 ptree property_list(const chain::input& tx_input)
