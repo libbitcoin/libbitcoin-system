@@ -72,7 +72,7 @@ bool read(Source& source, std::vector<Put>& puts, bool wire, bool witness)
     const auto deserialize = [&](Put& put)
     {
         result = result && put.from_data(source, wire, witness);
-#ifndef NDBEUG
+#ifndef NDEBUG
         put.script().operations();
 #endif
     };
