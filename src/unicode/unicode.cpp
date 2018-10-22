@@ -151,7 +151,7 @@ char** allocate_environment(int argc, wchar_t* argv[])
     auto arguments = (char**)std::malloc((argc + 1) * sizeof(char*));
     arguments[argc] = nullptr;
 
-    // Covert each argument, allocate and assign to pointer array.
+    // Convert each argument, allocate and assign to pointer array.
     for (auto arg = 0; arg < argc; arg++)
     {
         const auto utf8 = to_utf8(argv[arg]);
