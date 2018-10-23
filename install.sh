@@ -1,6 +1,6 @@
 #!/bin/bash
 ###############################################################################
-#  Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+#  Copyright (c) 2014-2018 libbitcoin developers (see COPYING).
 #
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
@@ -274,7 +274,6 @@ for OPTION in "$@"; do
         (--build-zlib)          BUILD_ZLIB="yes";;
         (--build-png)           BUILD_PNG="yes";;
         (--build-qrencode)      BUILD_QRENCODE="yes";;
-        (--build-zmq)           BUILD_ZMQ="yes";;
         (--build-boost)         BUILD_BOOST="yes";;
 
         # Unique script options.
@@ -536,9 +535,15 @@ build_from_tarball()
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
 
-    configure_options "${CONFIGURATION[@]}"
-    make_jobs $JOBS --silent
-    make install
+    if [[ $ARCHIVE == $MBEDTLS_ARCHIVE ]]; then
+        make -j $JOBS lib
+        make DESTDIR=$PREFIX install
+    else
+        configure_options "${CONFIGURATION[@]}"
+        make_jobs $JOBS --silent
+        make install
+    fi
+
     configure_links
 
     # Enable shared only zlib build.
