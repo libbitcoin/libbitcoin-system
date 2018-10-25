@@ -20,12 +20,13 @@
 #define LIBBITCOIN_EC_POINT_HPP
 
 #include <cstdint>
+#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/ec_scalar.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 
 namespace libbitcoin {
 
-class ec_point
+class BC_API ec_point
 {
 public:
     static const ec_point G;
