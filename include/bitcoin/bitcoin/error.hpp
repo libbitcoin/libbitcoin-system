@@ -155,6 +155,11 @@ enum error_code_t
     dirty_witness = 81,
     stack_false = 65,
 
+    // http
+    http_invalid_request = 90,
+    http_method_not_found = 91,
+    http_internal_error = 92,
+
     // op eval
     op_disabled = 100,
     op_reserved,

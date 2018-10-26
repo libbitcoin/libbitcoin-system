@@ -24,6 +24,7 @@
 #include <vector>
 #include <boost/property_tree/ptree.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/chain/points_value.hpp>
 #include <bitcoin/bitcoin/config/header.hpp>
 #include <bitcoin/bitcoin/config/input.hpp>
@@ -43,6 +44,22 @@ class wrapper;
 typedef std::map<std::string, std::string> settings_list;
 
 /**
+ * Generate a property list for a block.
+ * @param[in]  block  The block.
+ * @param[in]  json   Use json array formatting.
+ * @return            A property list.
+ */
+BC_API pt::ptree property_list(const chain::block& block, bool json);
+
+/**
+ * Generate a property tree for a block.
+ * @param[in]  block  The block.
+ * @param[in]  json   Use json array formatting.
+ * @return            A property tree.
+ */
+BC_API pt::ptree property_tree(const chain::block& block, bool json);
+
+/**
  * Generate a property list for a block header.
  * @param[in]  header  The header.
  * @return             A property list.
@@ -59,6 +76,7 @@ BC_API pt::ptree property_tree(const config::header& header);
 /**
  * Generate a property tree for a set of headers.
  * @param[in]  headers  The set of headers.
+ * @param[in]  json     Use json array formatting.
  * @return              A property tree.
  */
 BC_API pt::ptree property_tree(const std::vector<config::header>& headers,

@@ -158,6 +158,11 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::dirty_witness, "dirty witness" },
         { error::stack_false, "stack false" },
 
+        // http
+        { error::http_invalid_request, "invalid request" },
+        { error::http_method_not_found, "method not found" },
+        { error::http_internal_error, "internal error" },
+
         // op eval
         { error::op_disabled, "op_disabled" },
         { error::op_reserved, "op_reserved" },

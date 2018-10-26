@@ -433,6 +433,12 @@ bool witness::extract_embedded_script(script& out_script,
                     return false;
 
                 // The hash160 of public key must match the program (bip141).
+                // This is enforced by script evaluation, so optimized out here.
+                ////if (!std::equal(program.begin(), program.end(),
+                ////    bitcoin_short_hash(out_stack[1]).begin()))
+                ////    return false;
+
+                // The script is derived from the stack (bip141).
                 out_script.from_operations(to_pay_key_hash(std::move(program)));
                 return true;
             }
@@ -451,7 +457,7 @@ bool witness::extract_embedded_script(script& out_script,
                 if (!is_push_size(out_stack))
                     return false;
 
-                // SHA256 of the witness script must match program (bip141).
+                // The SHA256 of the witness script must match program (bip141).
                 return std::equal(program.begin(), program.end(),
                     sha256_hash(out_script.to_data(false)).begin());
             }

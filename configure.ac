@@ -36,6 +36,7 @@ AC_USE_SYSTEM_EXTENSIONS
 AM_PROG_AR
 
 # Initialize libtool.
+LT_PREREQ(2.4.2)
 LT_INIT
 
 # Determine C++ compiler to use.
@@ -58,6 +59,9 @@ PKG_PROG_PKG_CONFIG
 AS_IF([test -n "$PKG_CONFIG"], [],
     [AC_MSG_ERROR([pkg-config is required but was not found.])])
 
+AS_CASE([${enable_static}],
+    [yes], [AC_SUBST([PKG_CONFIG], ["$PKG_CONFIG --static"])],
+    [])
 
 # Declare environment variables that affect the build.
 #------------------------------------------------------------------------------

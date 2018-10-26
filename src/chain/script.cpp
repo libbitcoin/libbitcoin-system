@@ -1334,7 +1334,7 @@ void script::find_and_delete_(const data_chunk& endorsement)
         op.from_data(source);
     }
 
-    // Delete any found values, reversed to prevent iterator inmetadata.
+    // Delete any found values, reversed to prevent iterator invalidation.
     for (const auto it: reverse(found))
         bytes_.erase(it, it + value.size());
 }
