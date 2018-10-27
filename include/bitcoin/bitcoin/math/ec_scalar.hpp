@@ -19,11 +19,12 @@
 #ifndef LIBBITCOIN_EC_SCALAR_HPP
 #define LIBBITCOIN_EC_SCALAR_HPP
 
+#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 
 namespace libbitcoin {
 
-class ec_scalar
+class BC_API ec_scalar
 {
 public:
     static const ec_scalar zero;

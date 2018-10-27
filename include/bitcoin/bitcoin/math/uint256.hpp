@@ -23,8 +23,6 @@
 
 namespace libbitcoin {
 
-
-
 } // namespace libbitcoin
 
 #endif

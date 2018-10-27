@@ -223,12 +223,10 @@ settings::settings(config::settings context)
             const config::checkpoint genesis_checkpoint(
                 static_cast<chain::block>(genesis_block).hash(), 0);
 
-            // Since bip90 assumes a historical bip34 activation block,
-            // use genesis.
+            // bip90 assumes a historical bip34 activation block, use genesis.
             bip34_active_checkpoint = genesis_checkpoint;
 
-            // The activation window is fixed and closed, so assume
-            // genesis activation.
+            // This is fixed and closed, so assume genesis activation.
             bip9_bit0_active_checkpoint = genesis_checkpoint;
             bip9_bit1_active_checkpoint = genesis_checkpoint;
 
