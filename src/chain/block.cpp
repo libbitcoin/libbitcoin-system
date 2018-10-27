@@ -230,7 +230,7 @@ data_chunk block::to_data(bool witness) const
     const auto size = serialized_size(witness);
     data.reserve(size);
     data_sink ostream(data);
-    to_data(ostream);
+    to_data(ostream, witness);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);
     return data;
