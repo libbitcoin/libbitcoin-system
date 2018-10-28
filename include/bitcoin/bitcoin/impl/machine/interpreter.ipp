@@ -734,7 +734,7 @@ inline interpreter::result interpreter::op_check_multisig_verify(
     // CONSENSUS: Satoshi bug, discard stack element, malleable until bip147.
     //*************************************************************************
     if (!program.pop().empty() && chain::script::is_enabled(program.forks(),
-        rule_fork::bip147_rule))
+        bip147_rule))
         return error::op_check_multisig_verify8;
 
     uint8_t sighash;
