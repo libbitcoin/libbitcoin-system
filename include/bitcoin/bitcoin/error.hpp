@@ -48,7 +48,7 @@ enum error_code_t
 {
     // general codes
     success = 0,
-    deprecated1 = 6,
+    deprecated = 6,
     unknown = 43,
     not_found = 3,
     file_system = 42,
@@ -145,7 +145,7 @@ enum error_code_t
     invalid_stack_scope = 60,
     invalid_script_embed = 61,
     invalid_signature_encoding = 62,
-    deprecated2 = 63,
+    invalid_signature_lax_encoding = 63,
     incorrect_signature = 64,
     unexpected_witness = 77,
     invalid_witness = 80,
