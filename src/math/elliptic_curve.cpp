@@ -297,14 +297,13 @@ bool is_endorsement(const endorsement& endorsement)
 // ----------------------------------------------------------------------------
 
 bool parse_endorsement(uint8_t& sighash_type, der_signature& der_signature,
-    endorsement&& endorsement)
+    const endorsement& endorsement)
 {
     if (endorsement.empty())
         return false;
 
     sighash_type = endorsement.back();
-    endorsement.pop_back();
-    der_signature = std::move(endorsement);
+    der_signature = { endorsement.begin(), endorsement.end() - 1 };
     return true;
 }
 
