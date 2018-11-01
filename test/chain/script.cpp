@@ -670,7 +670,47 @@ BOOST_AUTO_TEST_CASE(script__generate_signature_hash__all__expected)
 // Ad-hoc test cases.
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(script__native__block_290329_tx__valid)
+BOOST_AUTO_TEST_CASE(script__verify__testnet_block_23428_multisig_tx__valid)
+{
+    //// DEBUG[blockchain] Verify failed[23428] : stack false (consensus patch bug)
+    //// libconsensus : false
+    //// forks : 1073742031
+    //// outpoint : 18327d91dcf0ded31212b0da3efd472b98766d9f21f887a65d04ddfe35a01eca : 1
+    //// script : a9144aba54e2541475f91659ccdbb13ce0b490778c7f87
+    //// value : 100000000
+    //// inpoint : d5f973b43e0b7df603264a98d04ea21dfc47b07a679e539ea695bbed23304435 : 1
+    //// transaction : 0100000002c0cd5346700d18a937575424eb84888bdc277bdbfade39b3bb9a4ce31fd4455101000000fdf60100483045022100f681bb660ef85bb191e337450f2ba3493c37b90a8622864d932cec5b40a74428022007cab269d846b7e63899b8e7082bdea94375d4b1c197b7c50365823c9ffd935e01483045022100b4d3be95b088c8ef176b25c9cee0b16ac7f91c10ccf645ab7421ad3de1d8aba802205c6b3bd9df0b19271abefc47997ce7bd113a6f069674003c821c01440d49a48b0148304502207fad219634211fb614cef1654bdb956a9ed751a352e47c2b64d4ac8459e05ec2022100bd4ae53e76f266938f2ec09d1b2d515eaf5e21b990e5c7df0779ca61f24a10de014830450221009f2dd7fa5eafdf9f660e764750aabffd86628bb19501d49007551151f6409266022019fad776d46c6896a849bf7fcacefa73da6d5db22680c7bacdd055d8d8547858014ccf542102d7dafdc7f5d63bc1e5210a93a93c57e96acfb123df06ca02318be689791fa634210204affb8e9fd6228d370aed6b8fff2fc33bbe9603e2933ae3b92b11a67d7e7d3d210269fa9a07b38c01440ecabc74481fdd2ede1591e293a1108ba1ac511d85e40ca62102f24bda0faab218a98c5975cb7eb035b37020ec3758e454d95f382e1f274da2112102795716e51a5539961872b559f2e938a29862565c1d0c70ed6a748adb8541c82b2103828209539e87cc72694e0d397a00ae1c1b3aa3aa7931df3bb72c71172758ed7756aeffffffffca1ea035fedd045da687f8219f6d76982b47fd3edab01212d3def0dc917d321801000000fdf40100473044022050cf9d0bf024af1780af7ce91a8cac62fd54a3df96cc1eb27889a58aaf82f09e02205f85c010faa5978963f569cfa6bd7202363841ad82bab0a6044c1092140ba49001483045022100f3f5076e1f233acf3fd2bb1188da82f3259224ee29a50af287b707c71503543f02202e82db849e59f8eb836ec6c55dab6a3d61b6511e9d25e550901d5534276432320148304502210094ff0cd6c74dd756a07334c2b76373dd4fb8f5ef7c1da7e09a168d54cf79a7770220114337de0ac0edd7871c079b796ad422d2d5e50d350d3b9f7371b0f1bd66fe7a01473044022022bc92872b6c680da40aa6388e28ef396c7ffa410317ae574c1f31836c85b28602203b43a7d2cdcc2ba1afaf53c1a0c0b474933581b0e359aed788ad7ad819260dfb014ccf542102d7dafdc7f5d63bc1e5210a93a93c57e96acfb123df06ca02318be689791fa634210204affb8e9fd6228d370aed6b8fff2fc33bbe9603e2933ae3b92b11a67d7e7d3d210269fa9a07b38c01440ecabc74481fdd2ede1591e293a1108ba1ac511d85e40ca62102f24bda0faab218a98c5975cb7eb035b37020ec3758e454d95f382e1f274da2112102795716e51a5539961872b559f2e938a29862565c1d0c70ed6a748adb8541c82b2103828209539e87cc72694e0d397a00ae1c1b3aa3aa7931df3bb72c71172758ed7756aeffffffff02605af405000000001976a914bb6754a948265de730c60fbd745aeb5868ea921e88ac00e1f5050000000017a9144aba54e2541475f91659ccdbb13ce0b490778c7f8700000000
+
+    static const auto index = 1u;
+    static const auto forks = static_cast<rule_fork>(1073742031);
+    static const auto encoded_script = "a9144aba54e2541475f91659ccdbb13ce0b490778c7f87";
+    static const auto encoded_tx = "0100000002c0cd5346700d18a937575424eb84888bdc277bdbfade39b3bb9a4ce31fd4455101000000fdf60100483045022100f681bb660ef85bb191e337450f2ba3493c37b90a8622864d932cec5b40a74428022007cab269d846b7e63899b8e7082bdea94375d4b1c197b7c50365823c9ffd935e01483045022100b4d3be95b088c8ef176b25c9cee0b16ac7f91c10ccf645ab7421ad3de1d8aba802205c6b3bd9df0b19271abefc47997ce7bd113a6f069674003c821c01440d49a48b0148304502207fad219634211fb614cef1654bdb956a9ed751a352e47c2b64d4ac8459e05ec2022100bd4ae53e76f266938f2ec09d1b2d515eaf5e21b990e5c7df0779ca61f24a10de014830450221009f2dd7fa5eafdf9f660e764750aabffd86628bb19501d49007551151f6409266022019fad776d46c6896a849bf7fcacefa73da6d5db22680c7bacdd055d8d8547858014ccf542102d7dafdc7f5d63bc1e5210a93a93c57e96acfb123df06ca02318be689791fa634210204affb8e9fd6228d370aed6b8fff2fc33bbe9603e2933ae3b92b11a67d7e7d3d210269fa9a07b38c01440ecabc74481fdd2ede1591e293a1108ba1ac511d85e40ca62102f24bda0faab218a98c5975cb7eb035b37020ec3758e454d95f382e1f274da2112102795716e51a5539961872b559f2e938a29862565c1d0c70ed6a748adb8541c82b2103828209539e87cc72694e0d397a00ae1c1b3aa3aa7931df3bb72c71172758ed7756aeffffffffca1ea035fedd045da687f8219f6d76982b47fd3edab01212d3def0dc917d321801000000fdf40100473044022050cf9d0bf024af1780af7ce91a8cac62fd54a3df96cc1eb27889a58aaf82f09e02205f85c010faa5978963f569cfa6bd7202363841ad82bab0a6044c1092140ba49001483045022100f3f5076e1f233acf3fd2bb1188da82f3259224ee29a50af287b707c71503543f02202e82db849e59f8eb836ec6c55dab6a3d61b6511e9d25e550901d5534276432320148304502210094ff0cd6c74dd756a07334c2b76373dd4fb8f5ef7c1da7e09a168d54cf79a7770220114337de0ac0edd7871c079b796ad422d2d5e50d350d3b9f7371b0f1bd66fe7a01473044022022bc92872b6c680da40aa6388e28ef396c7ffa410317ae574c1f31836c85b28602203b43a7d2cdcc2ba1afaf53c1a0c0b474933581b0e359aed788ad7ad819260dfb014ccf542102d7dafdc7f5d63bc1e5210a93a93c57e96acfb123df06ca02318be689791fa634210204affb8e9fd6228d370aed6b8fff2fc33bbe9603e2933ae3b92b11a67d7e7d3d210269fa9a07b38c01440ecabc74481fdd2ede1591e293a1108ba1ac511d85e40ca62102f24bda0faab218a98c5975cb7eb035b37020ec3758e454d95f382e1f274da2112102795716e51a5539961872b559f2e938a29862565c1d0c70ed6a748adb8541c82b2103828209539e87cc72694e0d397a00ae1c1b3aa3aa7931df3bb72c71172758ed7756aeffffffff02605af405000000001976a914bb6754a948265de730c60fbd745aeb5868ea921e88ac00e1f5050000000017a9144aba54e2541475f91659ccdbb13ce0b490778c7f8700000000";
+
+    data_chunk decoded_tx;
+    BOOST_REQUIRE(decode_base16(decoded_tx, encoded_tx));
+
+    data_chunk decoded_script;
+    BOOST_REQUIRE(decode_base16(decoded_script, encoded_script));
+
+    transaction tx;
+    BOOST_REQUIRE(tx.from_data(decoded_tx));
+    BOOST_REQUIRE_GT(tx.inputs().size(), index);
+
+    const auto& input = tx.inputs()[index];
+    auto& prevout = input.previous_output().validation.cache;
+
+    prevout.set_script(script::factory_from_data(decoded_script, false));
+    BOOST_REQUIRE(prevout.script().is_valid());
+
+    std::cout << prevout.script().to_string(forks) << std::endl;
+    std::cout << input.script().to_string(forks) << std::endl;
+    ////std::cout << input.witness().to_string() << std::endl;
+
+    const auto result = script::verify(tx, index, forks);
+    BOOST_REQUIRE_EQUAL(result.value(), error::success);
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__block_290329_tx__valid)
 {
     //// DEBUG [blockchain] Verify failed [290329] : stack false (find and delete).
     //// libconsensus : false
@@ -709,7 +749,7 @@ BOOST_AUTO_TEST_CASE(script__native__block_290329_tx__valid)
     BOOST_REQUIRE_EQUAL(result.value(), error::success);
 }
 
-BOOST_AUTO_TEST_CASE(script__native__block_438513_tx__valid)
+BOOST_AUTO_TEST_CASE(script__verify__block_438513_tx__valid)
 {
     //// DEBUG [blockchain] Input validation failed (stack false)
     //// libconsensus : false
@@ -744,7 +784,7 @@ BOOST_AUTO_TEST_CASE(script__native__block_438513_tx__valid)
     BOOST_REQUIRE_EQUAL(result.value(), error::success);
 }
 
-BOOST_AUTO_TEST_CASE(script__native__block_481824_tx__valid)
+BOOST_AUTO_TEST_CASE(script__verify__block_481824_tx__valid)
 {
     //// DEBUG [blockchain] Verify failed [481824] : stack false
     //// libconsensus : false
@@ -782,7 +822,7 @@ BOOST_AUTO_TEST_CASE(script__native__block_481824_tx__valid)
     BOOST_REQUIRE_EQUAL(result.value(), error::success);
 }
 
-BOOST_AUTO_TEST_CASE(script__native__testnet_block_892321_tx_missing_witness__invalid_witness)
+BOOST_AUTO_TEST_CASE(script__verify__testnet_block_892321_tx_missing_witness__invalid_witness)
 {
     //// DEBUG [blockchain] Verify failed [892321] : invalid witness
     //// libconsensus : false
@@ -822,7 +862,7 @@ BOOST_AUTO_TEST_CASE(script__native__testnet_block_892321_tx_missing_witness__in
 // bip143 test cases.
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(script__native__bip143_native_p2wpkh_tx__valid)
+BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wpkh_tx__valid)
 {
     transaction tx;
     data_chunk decoded_tx;
@@ -868,7 +908,7 @@ BOOST_AUTO_TEST_CASE(script__native__bip143_native_p2wpkh_tx__valid)
     BOOST_REQUIRE_EQUAL(result1.value(), error::unexpected_witness);
 }
 
-BOOST_AUTO_TEST_CASE(script__native__bip143_p2sh_p2wpkh_tx__valid)
+BOOST_AUTO_TEST_CASE(script__verify__bip143_p2sh_p2wpkh_tx__valid)
 {
     transaction tx;
     data_chunk decoded_tx;
@@ -900,7 +940,7 @@ BOOST_AUTO_TEST_CASE(script__native__bip143_p2sh_p2wpkh_tx__valid)
     BOOST_REQUIRE_EQUAL(result0.value(), error::stack_false);
 }
 
-BOOST_AUTO_TEST_CASE(script__native__bip143_native_p2wsh_1_tx__valid)
+BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wsh_1_tx__valid)
 {
     transaction tx;
     data_chunk decoded_tx;
@@ -942,7 +982,7 @@ BOOST_AUTO_TEST_CASE(script__native__bip143_native_p2wsh_1_tx__valid)
     BOOST_REQUIRE_EQUAL(result1.value(), error::unexpected_witness);
 }
 
-BOOST_AUTO_TEST_CASE(script__native__bip143_native_p2wsh_2_tx__valid)
+BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wsh_2_tx__valid)
 {
     transaction tx;
     data_chunk decoded_tx;
@@ -1020,7 +1060,7 @@ BOOST_AUTO_TEST_CASE(script__native__bip143_native_p2wsh_2_tx__valid)
     BOOST_REQUIRE_EQUAL(result1.value(), error::success);
 }
 
-BOOST_AUTO_TEST_CASE(script__native__bip143_p2sh_p2wsh_tx__valid)
+BOOST_AUTO_TEST_CASE(script__verify__bip143_p2sh_p2wsh_tx__valid)
 {
     transaction tx;
     data_chunk decoded_tx;
@@ -1052,7 +1092,7 @@ BOOST_AUTO_TEST_CASE(script__native__bip143_p2sh_p2wsh_tx__valid)
     BOOST_REQUIRE_EQUAL(result0.value(), error::stack_false);
 }
 
-BOOST_AUTO_TEST_CASE(script__native__bip143_no_find_and_delete_tx__valid)
+BOOST_AUTO_TEST_CASE(script__verify__bip143_no_find_and_delete_tx__valid)
 {
     transaction tx;
     data_chunk decoded_tx;
