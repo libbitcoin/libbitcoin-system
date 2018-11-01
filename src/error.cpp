@@ -51,7 +51,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
     {
         // general codes
         { error::success, "success" },
-        { error::deprecated, "deprecated" },
+        { error::deprecated1, "deprecated1" },
         { error::unknown, "unknown error" },
         { error::not_found, "object does not exist" },
         { error::file_system, "file system error" },
@@ -151,7 +151,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         { error::invalid_stack_scope, "invalid stack scope" },
         { error::invalid_script_embed, "invalid script embed" },
         { error::invalid_signature_encoding, "invalid signature encoding" },
-        { error::invalid_signature_lax_encoding, "invalid signature lax encoding" },
+        { error::deprecated2, "deprecated2" },
         { error::incorrect_signature, "incorrect signature" },
         { error::unexpected_witness, "unexpected witness" },
         { error::invalid_witness, "invalid witness" },
