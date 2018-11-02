@@ -846,7 +846,7 @@ bool script::check_signature(const ec_signature& signature,
     const script& script_code, const transaction& tx, uint32_t input_index,
     script_version version, uint64_t value)
 {
-    if (public_key.empty())
+    if (signature.empty() || public_key.empty())
         return false;
 
     // This always produces a valid signature hash, including one_hash.
