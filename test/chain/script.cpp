@@ -702,8 +702,8 @@ BOOST_AUTO_TEST_CASE(script__verify__testnet_block_23428_multisig_tx__valid)
     prevout.set_script(script::factory(decoded_script, false));
     BOOST_REQUIRE(prevout.script().is_valid());
 
-    std::cout << prevout.script().to_string(forks) << std::endl;
-    std::cout << input.script().to_string(forks) << std::endl;
+    ////std::cout << prevout.script().to_string(forks) << std::endl;
+    ////std::cout << input.script().to_string(forks) << std::endl;
     ////std::cout << input.witness().to_string() << std::endl;
 
     const auto result = script::verify(tx, index, forks);
