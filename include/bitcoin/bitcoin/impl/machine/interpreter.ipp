@@ -671,14 +671,14 @@ inline interpreter::result interpreter::op_check_sig_verify(program& program)
     if (!(bip143 && program.version() == script_version::zero))
         script_code.find_and_delete({ endorsement });
 
-    // BIP62: An empty endorsement is not considered lax encoding.
-    if (!parse_endorsement(sighash, distinguished, std::move(endorsement)))
-        return error::invalid_signature_encoding;
+    // BIP66: Continue to allow empty signature to push false vs. fail.
+    if (endorsement.empty())
+        return error::incorrect_signature;
 
-    // Parse DER signature into an EC signature.
-    if (!parse_signature(signature, distinguished, bip66))
-        return bip66 ? error::invalid_signature_lax_encoding :
-            error::invalid_signature_encoding;
+    // Parse endorsement into DER signature into an EC signature.
+    if (!parse_endorsement(sighash, distinguished, std::move(endorsement)) ||
+        !parse_signature(signature, distinguished, bip66))
+        return error::invalid_signature_encoding;
 
     // Version condition preserves independence of bip141 and bip143.
     auto version = bip143 ? program.version() : script_version::unversioned;
@@ -692,9 +692,10 @@ inline interpreter::result interpreter::op_check_sig_verify(program& program)
 inline interpreter::result interpreter::op_check_sig(program& program)
 {
     const auto verified = op_check_sig_verify(program);
+    const auto bip66 = chain::script::is_enabled(program.forks(), bip66_rule);
 
-    // BIP62: only lax encoding fails the operation.
-    if (verified == error::invalid_signature_lax_encoding)
+    // BIP66: invalid signature encoding fails the operation.
+    if (bip66 && verified == error::invalid_signature_encoding)
         return error::op_check_sig;
 
     program.push(verified == error::success);
@@ -734,15 +735,16 @@ inline interpreter::result interpreter::op_check_multisig_verify(
     // CONSENSUS: Satoshi bug, discard stack element, malleable until bip147.
     //*************************************************************************
     if (!program.pop().empty() && chain::script::is_enabled(program.forks(),
-        rule_fork::bip147_rule))
+        bip147_rule))
         return error::op_check_multisig_verify8;
 
     uint8_t sighash;
     ec_signature signature;
     der_signature distinguished;
-    auto public_key = public_keys.begin();
+    auto endorsement = endorsements.begin();
     auto bip66 = chain::script::is_enabled(program.forks(), bip66_rule);
     auto bip143 = chain::script::is_enabled(program.forks(), bip143_rule);
+    auto version = bip143 ? program.version() : script_version::unversioned;
 
     // Before looping create subscript with endorsements stripped (sort of).
     chain::script script_code(program.subscript());
@@ -751,45 +753,39 @@ inline interpreter::result interpreter::op_check_multisig_verify(
     if (!(bip143 && program.version() == script_version::zero))
         script_code.find_and_delete(endorsements);
 
-    // The exact number of signatures are required and must be in order.
-    // One key can validate more than one script. So we always advance
-    // until we exhaust either pubkeys (fail) or signatures (pass).
-    for (auto& endorsement: endorsements)
+    for (const auto& public_key: public_keys)
     {
-        // BIP62: An empty endorsement is not considered lax encoding.
-        if (!parse_endorsement(sighash, distinguished, std::move(endorsement)))
+        // The exact number of signatures are required and must be in order.
+        if (endorsement == endorsements.end())
+            break;
+
+        // BIP66: Continue to allow empty signature to push false vs. fail.
+        if (endorsement->empty())
+            continue;
+
+        // Parse endorsement into DER signature into an EC signature.
+        if (!parse_endorsement(sighash, distinguished, *endorsement) ||
+            !parse_signature(signature, distinguished, bip66))
             return error::invalid_signature_encoding;
 
-        // Parse DER signature into an EC signature.
-        if (!parse_signature(signature, distinguished, bip66))
-            return bip66 ? error::invalid_signature_lax_encoding :
-                error::invalid_signature_encoding;
-
         // Version condition preserves independence of bip141 and bip143.
-        auto version = bip143 ? program.version() : script_version::unversioned;
-
-        while (true)
-        {
-            // Version condition preserves independence of bip141 and bip143.
-            if (chain::script::check_signature(signature, sighash, *public_key,
-                script_code, program.transaction(), program.input_index(),
-                    version, program.value()))
-                break;
-
-            if (++public_key == public_keys.end())
-                return error::incorrect_signature;
-        }
+        if (chain::script::check_signature(signature, sighash, public_key,
+            script_code, program.transaction(), program.input_index(),
+            version, program.value()))
+            ++endorsement;
     }
 
-    return error::success;
+    return endorsement == endorsements.end() ? error::success :
+        error::incorrect_signature;
 }
 
 inline interpreter::result interpreter::op_check_multisig(program& program)
 {
     const auto verified = op_check_multisig_verify(program);
+    const auto bip66 = chain::script::is_enabled(program.forks(), bip66_rule);
 
-    // BIP62: only lax encoding fails the operation.
-    if (verified == error::invalid_signature_lax_encoding)
+    // BIP66: invalid signature encoding fails the operation.
+    if (bip66 && verified == error::invalid_signature_encoding)
         return error::op_check_multisig;
 
     program.push(verified == error::success);
