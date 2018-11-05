@@ -52,6 +52,31 @@ BOOST_AUTO_TEST_CASE(unicode__to_normal_nfkd_form__validate__test)
     BOOST_REQUIRE_EQUAL(normalized.c_str(), ascii_space_sandwich);
 }
 
+BOOST_AUTO_TEST_CASE(unicode__to_normal_nfkd_form__61cc81__c3a1)
+{
+    const std::string literal_c3a1 = "á";
+
+    // This is pasted from the the BIP39 encoding:
+    //// github.com/bitcoin/bips/blob/master/bip-0039/spanish.txt#L93
+    const std::string literal_61cc81 = "á";
+
+    const std::string string_c3a1 = "\xc3\xa1";
+    const std::string string_61cc81 = "\x61\xcc\x81";
+    BOOST_REQUIRE_EQUAL(string_c3a1, literal_c3a1);
+    BOOST_REQUIRE_EQUAL(string_61cc81, literal_61cc81);
+
+    const auto normalized_c3a1 = to_normal_nfkd_form(string_c3a1);
+    const auto normalized_61cc81 = to_normal_nfkd_form(string_61cc81);
+
+#ifdef _MSC_VER
+    BOOST_REQUIRE_EQUAL(normalized_61cc81.c_str(), string_c3a1);
+    BOOST_REQUIRE_EQUAL(normalized_c3a1.c_str(), string_c3a1);
+#else
+    BOOST_REQUIRE_EQUAL(normalized_61cc81.c_str(), string_61cc81);
+    BOOST_REQUIRE_EQUAL(normalized_c3a1.c_str(), string_61cc81);
+#endif
+}
+
 #endif
 
 // Use of L is not recommended as it will only work for ascii.
