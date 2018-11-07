@@ -42,17 +42,8 @@ set( CMAKE_CXX_STANDARD_REQUIRED ON )
 # Warn on all stuff.
 add_compile_options( "-Wall" )
 
-# Warn on all stuff.
-add_compile_options( "-Wall" )
-
 # Warn on extra stuff.
 add_compile_options( "-Wextra" )
-
-# Warn on extra stuff.
-add_compile_options( "-Wextra" )
-
-# Be really annoying.
-add_compile_options( "-Wpedantic" )
 
 # Be really annoying.
 add_compile_options( "-Wpedantic" )
