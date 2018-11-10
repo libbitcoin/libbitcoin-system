@@ -42,7 +42,7 @@ typedef byte_array<wif_uncompressed_size> wif_uncompressed;
 static BC_CONSTEXPR size_t wif_compressed_size = wif_uncompressed_size + 1u;
 typedef byte_array<wif_compressed_size> wif_compressed;
 
-/// Use to pass an ec secret with compresson and version information.
+/// Use to pass an ec secret with compression and version information.
 class BC_API ec_private
   : public ec_scalar
 {
