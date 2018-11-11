@@ -99,14 +99,4 @@ std::string encode_base10(uint64_t amount, uint8_t decimal_places)
     return string;
 }
 
-bool btc_to_satoshi(uint64_t& satoshi, const std::string& btc)
-{
-    return decode_base10(satoshi, btc, btc_decimal_places);
-}
-
-std::string satoshi_to_btc(uint64_t satoshi)
-{
-    return encode_base10(satoshi, btc_decimal_places);
-}
-
 } // namespace libbitcoin
