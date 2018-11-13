@@ -38,8 +38,8 @@ BOOST_AUTO_TEST_CASE(parse_amount_##NAME##_test) \
     BOOST_REQUIRE(!decode_base10(result, __VA_ARGS__)); \
 }
 
-#define TEST_FORMAT(NAME, EXPECTED, ...) \
-BOOST_AUTO_TEST_CASE(format_amount_##NAME##_test) \
+#define TEST_FORMAT(CONDITION, EXPECTED, ...) \
+BOOST_AUTO_TEST_CASE(base10__encode_base10__##CONDITION##__formatted_string) \
 { \
     std::string expected = EXPECTED; \
     std::string result = encode_base10(__VA_ARGS__); \
