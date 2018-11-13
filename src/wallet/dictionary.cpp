@@ -25,6 +25,7 @@ namespace language {
 const dictionary en =
 {
     {
+        "abandon",
         "ability",
         "able",
         "about",
@@ -40,7 +41,6 @@ const dictionary en =
         "accuse",
         "achieve",
         "acid",
-        "abandon",
         "acoustic",
         "acquire",
         "across",
