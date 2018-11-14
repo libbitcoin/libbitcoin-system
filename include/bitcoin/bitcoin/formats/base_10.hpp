@@ -32,7 +32,7 @@ BC_CONSTEXPR uint8_t ubtc_decimal_places = 2;
 
 /**
  * Validates and parses an amount string according to the BIP 21 grammar.
- * @param decmial_places the location of the decimal point.
+ * @param decimal_places the location of the decimal point.
  * The default is 0, which treats the input as a normal integer.
  * @param strict true to treat fractional results as an error,
  * or false to round them upwards.
