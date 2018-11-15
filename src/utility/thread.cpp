@@ -60,7 +60,7 @@ static int get_priority(thread_priority priority)
     }
 }
 
-// Set the thread priority (or process if thread priority is not avaliable).
+// Set the thread priority (or process if thread priority is not available).
 void set_priority(thread_priority priority)
 {
     const auto prioritization = get_priority(priority);
