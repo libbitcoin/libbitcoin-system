@@ -269,7 +269,7 @@ static bool is_terminal_utf8_character(const char text[], size_t size)
 
 // This optimizes character split detection by taking advantage of utf8
 // character recognition so we don't have to convert in full up to 3 times.
-// This does not guaratee that the entire string is valid as utf8, just that a
+// This does not guarantee that the entire string is valid as utf8, just that a
 // returned offset follows the last byte of a utf8 terminal char if it exists.
 static uint8_t offset_to_terminal_utf8_character(const char text[], size_t size)
 {
