@@ -179,8 +179,8 @@ uint32_t compact::from_big(const uint256_t& big)
         mantissa >>= 8;
     }
 
-    BITCOIN_ASSERT_MSG((exponent & first_byte_mask) == 0, "size exceess");
-    BITCOIN_ASSERT_MSG((mantissa & mantissa_mask) == 0, "value exceess");
+    BITCOIN_ASSERT_MSG((exponent & first_byte_mask) == 0, "size excess");
+    BITCOIN_ASSERT_MSG((mantissa & mantissa_mask) == 0, "value excess");
 
     // Assemble the compact notation.
     return (exponent << mantissa_bits) | mantissa;
