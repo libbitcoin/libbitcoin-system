@@ -43,7 +43,7 @@ unicode_streambuf::unicode_streambuf(std::wstreambuf* wide_buffer, size_t size)
     // Input buffer is not yet populated, reflect zero length buffer here.
     setg(narrow_, narrow_, narrow_);
 
-    // Output buffer is underexposed by 1 byte to accomodate the overflow byte.
+    // Output buffer is underexposed by 1 byte to accommodate the overflow byte.
     setp(narrow_, &narrow_[narrow_size_ - 1]);
 }
 
