@@ -121,7 +121,7 @@ bool get_block_transactions::from_data(uint32_t ,
     block_hash_ = source.read_hash();
     const auto count = source.read_size_little_endian();
 
-    // Guard against potential for arbitary memory allocation.
+    // Guard against potential for arbitrary memory allocation.
     if (count > max_block_size)
         source.invalidate();
     else

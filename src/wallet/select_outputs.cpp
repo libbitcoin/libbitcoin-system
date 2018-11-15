@@ -63,7 +63,7 @@ void select_outputs::greedy(points_value& out, const points_value& unspent,
         return left.value() > right.value();
     };
 
-    // Reorder list beteen values that exceed minimum and those that do not.
+    // Reorder list between values that exceed minimum and those that do not.
     const auto sufficient = std::partition(copy.begin(), copy.end(), below);
 
     // If there are values large enough, return the smallest (of the largest).
@@ -130,5 +130,5 @@ void select_outputs::select(points_value& out, const points_value& unspent,
     }
 }
 
-} // namspace wallet
-} // namspace libbitcoin
+} // namespace wallet
+} // namespace libbitcoin

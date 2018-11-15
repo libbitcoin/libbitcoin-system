@@ -114,7 +114,7 @@ bool get_blocks::from_data(uint32_t , reader& source)
     source.read_4_bytes_little_endian();
     const auto count = source.read_size_little_endian();
 
-    // Guard against potential for arbitary memory allocation.
+    // Guard against potential for arbitrary memory allocation.
     if (count > max_get_blocks)
         source.invalidate();
     else
