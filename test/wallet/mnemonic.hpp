@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_TEST_MNEMONIC_HPP
-#define LIBBITCOIN_TEST_MNEMONIC_HPP
+#ifndef LIBBITCOIN_SYSTEM_TEST_MNEMONIC_HPP
+#define LIBBITCOIN_SYSTEM_TEST_MNEMONIC_HPP
 
 #include <string>
 #include <vector>

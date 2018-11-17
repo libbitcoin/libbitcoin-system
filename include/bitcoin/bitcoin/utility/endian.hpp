@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_ENDIAN_HPP
-#define LIBBITCOIN_ENDIAN_HPP
+#ifndef LIBBITCOIN_SYSTEM_ENDIAN_HPP
+#define LIBBITCOIN_SYSTEM_ENDIAN_HPP
 
 #include <istream>
 #include <bitcoin/bitcoin/define.hpp>

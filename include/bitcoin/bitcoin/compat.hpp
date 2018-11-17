@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_COMPAT_HPP
-#define LIBBITCOIN_COMPAT_HPP
+#ifndef LIBBITCOIN_SYSTEM_COMPAT_HPP
+#define LIBBITCOIN_SYSTEM_COMPAT_HPP
 
 #include <cstdint>
 #include <limits>

@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_BASE_58_IPP
-#define LIBBITCOIN_BASE_58_IPP
+#ifndef LIBBITCOIN_SYSTEM_BASE_58_IPP
+#define LIBBITCOIN_SYSTEM_BASE_58_IPP
 
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>

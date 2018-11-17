@@ -6,8 +6,8 @@
  *  DATE:     1 March 1996       VERSION:  1.0
   * ADAPTED:  by Libbitcoin Developers on 7 September 2016
 \********************************************************************/
-#ifndef LIBBITCOIN_RIPEMD160_H
-#define LIBBITCOIN_RIPEMD160_H
+#ifndef LIBBITCOIN_SYSTEM_RIPEMD160_H
+#define LIBBITCOIN_SYSTEM_RIPEMD160_H
 
 #include <stdint.h>
 #include <stddef.h>

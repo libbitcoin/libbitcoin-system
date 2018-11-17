@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_PARSE_ENCRYPTED_TOKEN_HPP
-#define LIBBITCOIN_PARSE_ENCRYPTED_TOKEN_HPP
+#ifndef LIBBITCOIN_SYSTEM_PARSE_ENCRYPTED_TOKEN_HPP
+#define LIBBITCOIN_SYSTEM_PARSE_ENCRYPTED_TOKEN_HPP
 
 #include <cstdint>
 #include <cstddef>

@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_LOG_UDP_CLIENT_SINK_HPP
-#define LIBBITCOIN_LOG_UDP_CLIENT_SINK_HPP
+#ifndef LIBBITCOIN_SYSTEM_LOG_UDP_CLIENT_SINK_HPP
+#define LIBBITCOIN_SYSTEM_LOG_UDP_CLIENT_SINK_HPP
 
 #include <string>
 #include <boost/asio.hpp>

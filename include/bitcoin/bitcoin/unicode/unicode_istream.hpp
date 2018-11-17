@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_UNICODE_ISTREAM_HPP
-#define LIBBITCOIN_UNICODE_ISTREAM_HPP
+#ifndef LIBBITCOIN_SYSTEM_UNICODE_ISTREAM_HPP
+#define LIBBITCOIN_SYSTEM_UNICODE_ISTREAM_HPP
 
 #include <cstddef>
 #include <iostream>

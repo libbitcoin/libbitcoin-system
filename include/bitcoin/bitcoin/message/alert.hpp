@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_MESSAGE_ALERT_HPP
-#define LIBBITCOIN_MESSAGE_ALERT_HPP
+#ifndef LIBBITCOIN_SYSTEM_MESSAGE_ALERT_HPP
+#define LIBBITCOIN_SYSTEM_MESSAGE_ALERT_HPP
 
 #include <istream>
 #include <memory>

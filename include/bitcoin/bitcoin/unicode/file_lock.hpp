@@ -10,8 +10,8 @@
 
 // Modification of boost header to patch a lack of unicode path support.
 
-#ifndef LIBBITCOIN_INTERPROCESS_FILE_LOCK_HPP
-#define LIBBITCOIN_INTERPROCESS_FILE_LOCK_HPP
+#ifndef LIBBITCOIN_SYSTEM_INTERPROCESS_FILE_LOCK_HPP
+#define LIBBITCOIN_SYSTEM_INTERPROCESS_FILE_LOCK_HPP
 
 #include <string>
 #include <boost/interprocess/detail/config_begin.hpp>

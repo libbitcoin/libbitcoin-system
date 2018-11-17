@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SETTINGS_HPP
-#define LIBBITCOIN_SETTINGS_HPP
+#ifndef LIBBITCOIN_SYSTEM_SETTINGS_HPP
+#define LIBBITCOIN_SYSTEM_SETTINGS_HPP
 
 #include <bitcoin/bitcoin/config/block.hpp>
 #include <bitcoin/bitcoin/config/settings.hpp>

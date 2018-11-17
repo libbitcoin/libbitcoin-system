@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_MESSAGE_ANNOUNCE_VERSION_HPP
-#define LIBBITCOIN_MESSAGE_ANNOUNCE_VERSION_HPP
+#ifndef LIBBITCOIN_SYSTEM_MESSAGE_ANNOUNCE_VERSION_HPP
+#define LIBBITCOIN_SYSTEM_MESSAGE_ANNOUNCE_VERSION_HPP
 
 #include <cstdint>
 #include <istream>

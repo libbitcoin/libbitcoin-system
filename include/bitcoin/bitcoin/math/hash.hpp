@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_HASH_HPP
-#define LIBBITCOIN_HASH_HPP
+#ifndef LIBBITCOIN_SYSTEM_HASH_HPP
+#define LIBBITCOIN_SYSTEM_HASH_HPP
 
 #include <cstddef>
 #include <string>

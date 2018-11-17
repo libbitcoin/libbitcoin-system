@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_LOG_FEATURES_METRIC_HPP
-#define LIBBITCOIN_LOG_FEATURES_METRIC_HPP
+#ifndef LIBBITCOIN_SYSTEM_LOG_FEATURES_METRIC_HPP
+#define LIBBITCOIN_SYSTEM_LOG_FEATURES_METRIC_HPP
 
 #include <boost/log/sources/features.hpp>
 #include <boost/log/sources/threading_models.hpp>
