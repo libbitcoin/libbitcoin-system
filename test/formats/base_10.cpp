@@ -38,8 +38,8 @@ BOOST_AUTO_TEST_CASE(parse_amount_##NAME##_test) \
     BOOST_REQUIRE(!decode_base10(result, __VA_ARGS__)); \
 }
 
-#define TEST_FORMAT(NAME, EXPECTED, ...) \
-BOOST_AUTO_TEST_CASE(format_amount_##NAME##_test) \
+#define TEST_FORMAT(CONDITION, EXPECTED, ...) \
+BOOST_AUTO_TEST_CASE(base10__encode_base10__##CONDITION##__formatted_string) \
 { \
     std::string expected = EXPECTED; \
     std::string result = encode_base10(__VA_ARGS__); \
@@ -86,7 +86,9 @@ TEST_AMOUNT_NEGATIVE(fractional_amount, "0.999999999", btc_decimal_places)
 
 // Limits:
 TEST_FORMAT(zero, "0", 0)
+TEST_FORMAT(zero_max_decimal_places, "0", 0, max_uint8)
 TEST_FORMAT(max_uint64, "18446744073709551615", max_uint64)
+TEST_FORMAT(max_uint64_max_decimal_places, "0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000018446744073709551615", max_uint64, max_uint8)
 
 // Max money (mainnet, testnet):
 TEST_FORMAT(max_money_retarget, "20999999.9769", settings(bc::config::settings::mainnet).max_money(), btc_decimal_places)
