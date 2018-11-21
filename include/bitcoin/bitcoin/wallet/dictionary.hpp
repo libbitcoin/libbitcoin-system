@@ -58,8 +58,21 @@ extern const dictionary uk;
 extern const dictionary zh_Hans;
 extern const dictionary zh_Hant;
 
-// All built-in languages:
-extern const dictionary_list all;
+// Word lists from:
+// github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md
+const dictionary_list all
+{
+    &en,
+    &es,
+    &ja,
+    &it,
+    &fr,
+    &cs,
+    &ru,
+    &uk,
+    &zh_Hans,
+    &zh_Hant
+};
 
 } // namespace language
 

@@ -56,6 +56,13 @@ typedef string_list word_list;
 BC_API word_list create_mnemonic(data_slice entropy,
     const dictionary &lexicon=language::en);
 
+
+/**
+ * Checks that a mnemonic is valid in at least one of the provided languages.
+ */
+BC_API bool validate_mnemonic(const word_list& mnemonic,
+    const dictionary_list& lexicons=language::all);
+
 /**
  * Checks a mnemonic against a dictionary to determine if the
  * words are spelled correctly and the checksum matches.
@@ -63,12 +70,6 @@ BC_API word_list create_mnemonic(data_slice entropy,
  */
 BC_API bool validate_mnemonic(const word_list& mnemonic,
     const dictionary &lexicon);
-
-/**
- * Checks that a mnemonic is valid in at least one of the provided languages.
- */
-BC_API bool validate_mnemonic(const word_list& mnemonic,
-    const dictionary_list& lexicons=language::all);
 
 /**
  * Convert a mnemonic with no passphrase to a wallet-generation seed.

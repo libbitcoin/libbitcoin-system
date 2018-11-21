@@ -50,9 +50,21 @@ BOOST_AUTO_TEST_CASE(mnemonic__decode_mnemonic__trezor)
     }
 }
 
-BOOST_AUTO_TEST_CASE(mnemonic__decode_mnemonic__bx)
+BOOST_AUTO_TEST_CASE(mnemonic__decode_mnemonic__japanese)
 {
-    for (const auto& vector: mnemonic_bx_to_seed_vectors)
+    for (const auto& vector: mnemonic_japanese_vectors)
+    {
+        const auto words = split(vector.mnemonic, ",");
+        BOOST_REQUIRE(!words.empty());
+        BOOST_REQUIRE(validate_mnemonic(words, vector.language));
+        const auto seed = decode_mnemonic(words, vector.passphrase);
+        BOOST_REQUIRE_EQUAL(encode_base16(seed), vector.seed);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__decode_mnemonic)
+{
+    for (const auto& vector: mnemonic_to_seed_vectors)
     {
         const auto words = split(vector.mnemonic, ",");
         BOOST_REQUIRE(validate_mnemonic(words));
@@ -60,8 +72,6 @@ BOOST_AUTO_TEST_CASE(mnemonic__decode_mnemonic__bx)
         BOOST_REQUIRE_EQUAL(encode_base16(seed), vector.seed);
     }
 }
-
-#endif
 
 BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__trezor)
 {
@@ -76,9 +86,23 @@ BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__trezor)
     }
 }
 
-BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__bx)
+BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__japanese)
 {
-    for (const mnemonic_result& vector: mnemonic_bx_new_vectors)
+    for (const mnemonic_result& vector: mnemonic_japanese_vectors)
+    {
+        BOOST_REQUIRE(vector.entropy.size() % 2 == 0);
+        data_chunk entropy;
+        decode_base16(entropy, vector.entropy);
+        const auto mnemonic = create_mnemonic(entropy, vector.language);
+        BOOST_REQUIRE(mnemonic.size() > 0);
+        BOOST_REQUIRE_EQUAL(join(mnemonic, ","), vector.mnemonic);
+        BOOST_REQUIRE(validate_mnemonic(mnemonic));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic)
+{
+    for (const mnemonic_result& vector: mnemonic_create_vectors)
     {
         data_chunk entropy;
         decode_base16(entropy, vector.entropy);
@@ -113,6 +137,8 @@ BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__giant)
     BOOST_REQUIRE_EQUAL(mnemonic.size(), 768u);
     BOOST_REQUIRE(validate_mnemonic(mnemonic));
 }
+
+#endif
 
 BOOST_AUTO_TEST_CASE(mnemonic__dictionary__en_es__no_intersection)
 {

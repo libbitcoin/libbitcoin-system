@@ -188,7 +188,16 @@ src_libbitcoin_la_SOURCES = \
     src/utility/threadpool.cpp \
     src/utility/work.cpp \
     src/wallet/bitcoin_uri.cpp \
-    src/wallet/dictionary.cpp \
+    src/wallet/dictionary_cs.cpp \
+    src/wallet/dictionary_en.cpp \
+    src/wallet/dictionary_es.cpp \
+    src/wallet/dictionary_fr.cpp \
+    src/wallet/dictionary_it.cpp \
+    src/wallet/dictionary_ja.cpp \
+    src/wallet/dictionary_ru.cpp \
+    src/wallet/dictionary_uk.cpp \
+    src/wallet/dictionary_zh_Hans.cpp \
+    src/wallet/dictionary_zh_Hant.cpp \
     src/wallet/ec_private.cpp \
     src/wallet/ec_public.cpp \
     src/wallet/ek_private.cpp \
@@ -196,6 +205,11 @@ src_libbitcoin_la_SOURCES = \
     src/wallet/ek_token.cpp \
     src/wallet/electrum.cpp \
     src/wallet/electrum_dictionary.cpp \
+    src/wallet/electrum_dictionary_en.cpp \
+    src/wallet/electrum_dictionary_es.cpp \
+    src/wallet/electrum_dictionary_ja.cpp \
+    src/wallet/electrum_dictionary_pt.cpp \
+    src/wallet/electrum_dictionary_zh_Hans.cpp \
     src/wallet/encrypted_keys.cpp \
     src/wallet/hd_private.cpp \
     src/wallet/hd_public.cpp \

@@ -28,7 +28,7 @@
 #include <bitcoin/bitcoin/unicode/unicode.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
-#include <bitcoin/bitcoin/wallet/dictionary.hpp>
+#include <bitcoin/bitcoin/wallet/electrum_dictionary.hpp>
 
 namespace libbitcoin {
 namespace wallet {
@@ -64,13 +64,6 @@ enum class seed : uint8_t
 };
 
 /**
- * Valid seed prefixes.
- */
-static const data_chunk seed_prefix_standard{ 0x01 };
-static const data_chunk seed_prefix_witness{ 0x01, 0x00 };
-static const data_chunk seed_prefix_two_factor_authentication{ 0x01, 0x01 };
-
-/**
  * Represents an electrum word list.
  */
 typedef string_list word_list;
@@ -83,7 +76,7 @@ typedef string_list word_list;
  * later be converted to a seed for use in electrum wallet creation.
  */
 BC_API word_list create_mnemonic(const data_chunk& entropy,
-    const dictionary& lexicon=language::en,
+    const dictionary& lexicon=libbitcoin::wallet::language::electrum::en,
     seed prefix=electrum::seed::standard);
 
 /**
@@ -99,7 +92,7 @@ BC_API bool validate_mnemonic(const word_list& mnemonic,
  * Checks that a mnemonic is valid in at least one of the provided languages.
  */
 BC_API bool validate_mnemonic(const word_list& mnemonic,
-    const dictionary_list& lexicons=language::all,
+    const dictionary_list& lexicons=libbitcoin::wallet::language::electrum::all,
     seed prefix=electrum::seed::standard);
 
 /**
@@ -110,13 +103,14 @@ BC_API bool validate_mnemonic(const word_list& mnemonic,
 BC_API long_hash decode_mnemonic(const word_list& mnemonic,
     const std::string& passphrase);
 
-#endif
 
 /**
  * Convert an electrum mnemonic without a passphrase to a
  * wallet-generation seed.
  */
 BC_API long_hash decode_mnemonic(const word_list& mnemonic);
+
+#endif
 
 } // namespace electrum
 } // namespace wallet

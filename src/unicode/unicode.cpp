@@ -122,6 +122,16 @@ std::string to_normal_nfkd_form(const std::string& value)
     return normal_form(value, norm_type::norm_nfkd);
 }
 
+// The backend selection is ignored if invalid (in this case on Windows).
+std::string to_lower(const std::string& value)
+{
+    std::call_once(icu_mutex, validate_localization);
+    auto backend = localization_backend_manager::global();
+    backend.select(BC_LOCALE_BACKEND);
+    const generator locale(backend);
+    return boost::locale::to_lower(value, locale(BC_LOCALE_UTF8));
+}
+
 #endif
 
 void free_environment(char* environment[])

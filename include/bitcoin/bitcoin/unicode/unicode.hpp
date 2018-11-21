@@ -159,6 +159,14 @@ BC_API std::string to_normal_nfc_form(const std::string& value);
  */
 BC_API std::string to_normal_nfkd_form(const std::string& value);
 
+/**
+ * Lowercase a string value with locale awareness where possible.
+ * This function requires the ICU dependency.
+ * @param[in]  value  The value to lowercase.
+ * @return            The lowercased value.
+ */
+BC_API std::string to_lower(const std::string& value);
+
 #endif
 
 /**

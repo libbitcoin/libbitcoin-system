@@ -46,6 +46,23 @@ typedef std::vector<const dictionary*> dictionary_list;
 namespace language {
 namespace electrum {
 
+extern const dictionary en;
+extern const dictionary es;
+extern const dictionary ja;
+extern const dictionary pt;
+extern const dictionary zh_Hans;
+
+// Word lists from:
+// github.com/spesmilo/electrum/tree/master/electrum/wordlist
+const dictionary_list all
+{
+    &en,
+    &es,
+    &ja,
+    &pt,
+    &zh_Hans
+};
+
 // electrum v1 dictionary required for v2 compatibility
 extern const dictionary_v1 en_v1;
 
