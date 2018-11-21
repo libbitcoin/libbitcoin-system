@@ -358,9 +358,11 @@ size_t chain_state::bip9_bit0_height(size_t height, uint32_t forks)
 size_t chain_state::bip9_bit1_height(size_t height, uint32_t forks)
 {
     const auto testnet = script::is_enabled(forks, rule_fork::easy_blocks);
+    const auto regtest = !script::is_enabled(forks, rule_fork::retarget);
 
-    const auto activation_height = testnet ?
-        testnet_bip9_bit1_active_checkpoint.height() :
+    const auto activation_height =
+        testnet ? testnet_bip9_bit1_active_checkpoint.height() :
+        regtest ? regtest_bip9_bit1_active_checkpoint.height() :
         mainnet_bip9_bit1_active_checkpoint.height();
 
     // Require bip9_bit1 hash at heights above historical bip9_bit1 activation.
