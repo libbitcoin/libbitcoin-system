@@ -16,15 +16,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/math/ec_point.hpp>
+#include <bitcoin/system/math/ec_point.hpp>
 
 #include <cstdint>
-#include <bitcoin/bitcoin/formats/base_16.hpp>
-#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/utility/serializer.hpp>
+#include <bitcoin/system/formats/base_16.hpp>
+#include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/utility/serializer.hpp>
 
 namespace libbitcoin {
+namespace system {
 
 // TODO: use binary value.
 #define LITERAL_G \
@@ -143,4 +144,5 @@ const ec_compressed& ec_point::point() const
     return point_;
 }
 
+} // namespace system
 } // namespace libbitcoin

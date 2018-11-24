@@ -1,5 +1,5 @@
 ###############################################################################
-#  Copyright (c) 2014-2018 libbitcoin developers (see COPYING).
+#  Copyright (c) 2014-2018 libbitcoin-system developers (see COPYING).
 #
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
@@ -8,7 +8,7 @@ version: 4.0.0.{build}-{branch}
 
 image: Visual Studio 2013
 
-clone_folder: c:\git\libbitcoin
+clone_folder: c:\git\libbitcoin-system
 skip_tags: true
 
 environment:
@@ -63,7 +63,7 @@ before_build:
       Write-Host "CTP Compiler Installation Complete." -ForegroundColor Green;
 
 build_script:
-  - c:\git\libbitcoin\build.cmd c:\git %PLATFORM% %CONFIGURATION% vs2013
+  - c:\git\libbitcoin-system\build.cmd c:\git %PLATFORM% %CONFIGURATION% vs2013
   - cd /d %APPVEYOR_BUILD_FOLDER%
 
 test_script:

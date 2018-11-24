@@ -21,10 +21,11 @@
 
 #include <cstdint>
 #include <cstddef>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/wallet/encrypted_keys.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace wallet {
 
 template<size_t Size>
@@ -59,6 +60,7 @@ void parse_encrypted_prefix<Size>::valid(bool value)
 }
 
 } // namespace wallet
+} // namespace system
 } // namespace libbitcoin
 
 #endif

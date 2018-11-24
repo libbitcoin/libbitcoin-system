@@ -17,9 +17,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <boost/test/unit_test.hpp>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
 using namespace bc;
+using namespace bc::system;
 
 BOOST_AUTO_TEST_SUITE(chain_transaction_tests)
 

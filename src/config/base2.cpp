@@ -16,16 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/config/base2.hpp>
+#include <bitcoin/system/config/base2.hpp>
 
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/binary.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/utility/binary.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace config {
 
 base2::base2()
@@ -80,4 +81,5 @@ std::ostream& operator<<(std::ostream& output, const base2& argument)
 }
 
 } // namespace config
+} // namespace system
 } // namespace libbitcoin

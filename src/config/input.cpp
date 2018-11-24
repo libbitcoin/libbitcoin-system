@@ -16,18 +16,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/config/input.hpp>
+#include <bitcoin/system/config/input.hpp>
 
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin/chain/input.hpp>
-#include <bitcoin/bitcoin/chain/input_point.hpp>
-#include <bitcoin/bitcoin/config/point.hpp>
-#include <bitcoin/bitcoin/utility/string.hpp>
+#include <bitcoin/system/chain/input.hpp>
+#include <bitcoin/system/chain/input_point.hpp>
+#include <bitcoin/system/config/point.hpp>
+#include <bitcoin/system/utility/string.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace config {
 
 using namespace boost::program_options;
@@ -108,4 +109,5 @@ std::ostream& operator<<(std::ostream& output, const input& argument)
 }
 
 } // namespace config
+} // namespace system
 } // namespace libbitcoin

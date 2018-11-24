@@ -16,9 +16,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/dictionary.hpp>
+#include <bitcoin/system/wallet/dictionary.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace wallet {
 namespace language {
 
@@ -2078,4 +2079,5 @@ const dictionary fr =
 
 } // namespace language
 } // namespace wallet
+} // namespace system
 } // namespace libbitcoin

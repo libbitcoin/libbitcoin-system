@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/system/error.hpp>
 
 #include <boost/asio.hpp>
 #include <boost/system/error_code.hpp>
-#include <bitcoin/bitcoin/compat.hpp>
+#include <bitcoin/system/compat.hpp>
 
-using namespace bc;
+using namespace bc::system;
 
 class error_category_impl
   : public std::error_category
@@ -264,6 +264,7 @@ std::error_condition error_category_impl::default_error_condition(int ev)
 }
 
 namespace libbitcoin {
+namespace system {
 namespace error {
 
     code make_error_code(error_code_t e)
@@ -440,4 +441,5 @@ namespace error {
     }
 
 } // namespace error
+} // namespace system
 } // namespace libbitcoin

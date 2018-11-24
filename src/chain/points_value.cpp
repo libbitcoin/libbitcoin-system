@@ -18,11 +18,12 @@
  */
 #include <numeric>
 #include <cstdint>
-#include <bitcoin/bitcoin/chain/point_value.hpp>
-#include <bitcoin/bitcoin/chain/points_value.hpp>
-#include <bitcoin/bitcoin/math/limits.hpp>
+#include <bitcoin/system/chain/point_value.hpp>
+#include <bitcoin/system/chain/points_value.hpp>
+#include <bitcoin/system/math/limits.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace chain {
 
 uint64_t points_value::value() const
@@ -36,4 +37,5 @@ uint64_t points_value::value() const
 }
 
 } // namespace chain
+} // namespace system
 } // namespace libbitcoin

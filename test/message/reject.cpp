@@ -19,9 +19,9 @@
 #include <boost/test/unit_test.hpp>
 
 #include <string>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
-using namespace bc;
+using namespace bc::system;
 
 // /Satoshi:0.12.1/
 // Invalid reject payload from [46.101.110.115:8333] bad data stream

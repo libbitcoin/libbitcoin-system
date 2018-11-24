@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/config/checkpoint.hpp>
+#include <bitcoin/system/config/checkpoint.hpp>
 
 #include <cstddef>
 #include <iostream>
@@ -25,18 +25,19 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 #include <boost/regex.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/formats/base_16.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/formats/base_16.hpp>
+#include <bitcoin/system/math/hash.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace config {
 
 using namespace boost;
 using namespace boost::program_options;
 
 checkpoint::checkpoint()
-  : height_(0), hash_(bc::null_hash)
+  : height_(0), hash_(null_hash)
 {
 }
 
@@ -156,4 +157,5 @@ std::ostream& operator<<(std::ostream& output, const checkpoint& argument)
 }
 
 } // namespace config
+} // namespace system
 } // namespace libbitcoin

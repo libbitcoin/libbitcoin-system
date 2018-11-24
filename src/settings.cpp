@@ -17,11 +17,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <cstdint>
-#include <bitcoin/bitcoin/settings.hpp>
-#include <bitcoin/bitcoin/chain/block.hpp>
-#include <bitcoin/bitcoin/chain/chain_state.hpp>
+#include <bitcoin/system/settings.hpp>
+#include <bitcoin/system/chain/block.hpp>
+#include <bitcoin/system/chain/chain_state.hpp>
 
 namespace libbitcoin {
+namespace system {
 
 using namespace chain;
 
@@ -342,4 +343,5 @@ uint64_t settings::max_money() const
     return max_money_;
 }
 
+} // namespace system
 } // namespace libbitcoin

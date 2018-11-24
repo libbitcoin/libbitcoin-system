@@ -16,17 +16,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/message/inventory_vector.hpp>
+#include <bitcoin/system/message/inventory_vector.hpp>
 
 #include <cstdint>
 #include <string>
-#include <bitcoin/bitcoin/message/inventory.hpp>
-#include <bitcoin/bitcoin/utility/container_sink.hpp>
-#include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream_reader.hpp>
-#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/system/message/inventory.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace message {
 
 uint32_t inventory_vector::to_number(type_id inventory_type)
@@ -263,4 +264,5 @@ bool inventory_vector::operator!=(const inventory_vector& other) const
 }
 
 } // namespace message
+} // namespace system
 } // namespace libbitcoin

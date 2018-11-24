@@ -16,24 +16,25 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/message/headers.hpp>
+#include <bitcoin/system/message/headers.hpp>
 
 #include <algorithm>
 #include <cstdint>
 #include <initializer_list>
 #include <istream>
 #include <utility>
-#include <bitcoin/bitcoin/math/limits.hpp>
-#include <bitcoin/bitcoin/message/inventory.hpp>
-#include <bitcoin/bitcoin/message/inventory_vector.hpp>
-#include <bitcoin/bitcoin/message/messages.hpp>
-#include <bitcoin/bitcoin/message/version.hpp>
-#include <bitcoin/bitcoin/utility/container_sink.hpp>
-#include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream_reader.hpp>
-#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/message/inventory.hpp>
+#include <bitcoin/system/message/inventory_vector.hpp>
+#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/message/version.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace message {
 
 const std::string headers::command = "headers";
@@ -253,4 +254,5 @@ bool headers::operator!=(const headers& other) const
 }
 
 } // namespace message
+} // namespace system
 } // namespace libbitcoin

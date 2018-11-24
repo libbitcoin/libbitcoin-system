@@ -15,10 +15,11 @@
 
 // Modification of boost implementation to alter log file rotation naming.
 
-#include <bitcoin/bitcoin/log/file_counter_formatter.hpp>
-#include <bitcoin/bitcoin/log/file_char_traits.hpp>
+#include <bitcoin/system/log/file_counter_formatter.hpp>
+#include <bitcoin/system/log/file_char_traits.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace log {
 
 file_counter_formatter::file_counter_formatter(unsigned int width)
@@ -64,4 +65,5 @@ bool file_counter_formatter::scan_seperator(path_string_type::const_iterator& it
 }
 
 } // namespace log
+} // namespace system
 } // namespace libbitcoin

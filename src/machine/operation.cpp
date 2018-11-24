@@ -16,22 +16,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/machine/operation.hpp>
+#include <bitcoin/system/machine/operation.hpp>
 
 #include <string>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include <bitcoin/bitcoin/formats/base_16.hpp>
-#include <bitcoin/bitcoin/machine/opcode.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/container_sink.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream_reader.hpp>
-#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
-#include <bitcoin/bitcoin/utility/string.hpp>
+#include <bitcoin/system/formats/base_16.hpp>
+#include <bitcoin/system/machine/opcode.hpp>
+#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
+#include <bitcoin/system/utility/string.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace machine {
 
 // Deserialization.
@@ -311,4 +312,5 @@ std::string operation::to_string(uint32_t active_forks) const
 }
 
 } // namespace machine
+} // namespace system
 } // namespace libbitcoin

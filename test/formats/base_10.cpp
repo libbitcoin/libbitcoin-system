@@ -17,9 +17,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <boost/test/unit_test.hpp>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
 using namespace bc;
+using namespace bc::system;
 
 BOOST_AUTO_TEST_SUITE(base_10_tests)
 
@@ -51,12 +52,12 @@ TEST_AMOUNT(zero, 0, "0")
 TEST_AMOUNT(max_uint64, max_uint64, "18446744073709551615")
 
 // Max money (mainnet, testnet):
-TEST_AMOUNT(max_money_retarget, settings(bc::config::settings::mainnet).max_money(), "20999999.9769", btc_decimal_places)
-TEST_AMOUNT(overflow_max_money_retarget, settings(bc::config::settings::mainnet).max_money() + 1, "20999999.97690001", btc_decimal_places)
+TEST_AMOUNT(max_money_retarget, settings(config::settings::mainnet).max_money(), "20999999.9769", btc_decimal_places)
+TEST_AMOUNT(overflow_max_money_retarget, settings(config::settings::mainnet).max_money() + 1, "20999999.97690001", btc_decimal_places)
 
 // Max money (regtest):
-TEST_AMOUNT(max_money, settings(bc::config::settings::regtest).max_money(), "14999.99998350", btc_decimal_places)
-TEST_AMOUNT(overflow_max_money, settings(bc::config::settings::regtest).max_money() + 1, "14999.99998351", btc_decimal_places)
+TEST_AMOUNT(max_money, settings(config::settings::regtest).max_money(), "14999.99998350", btc_decimal_places)
+TEST_AMOUNT(overflow_max_money, settings(config::settings::regtest).max_money() + 1, "14999.99998351", btc_decimal_places)
 
 // Decimal points:
 TEST_AMOUNT(pure_integer, 42, "42.0", 0)
@@ -91,12 +92,12 @@ TEST_FORMAT(max_uint64, "18446744073709551615", max_uint64)
 TEST_FORMAT(max_uint64_max_decimal_places, "0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000018446744073709551615", max_uint64, max_uint8)
 
 // Max money (mainnet, testnet):
-TEST_FORMAT(max_money_retarget, "20999999.9769", settings(bc::config::settings::mainnet).max_money(), btc_decimal_places)
-TEST_FORMAT(overflow_max_money_retarget, "20999999.97690001", settings(bc::config::settings::mainnet).max_money() + 1, btc_decimal_places)
+TEST_FORMAT(max_money_retarget, "20999999.9769", settings(config::settings::mainnet).max_money(), btc_decimal_places)
+TEST_FORMAT(overflow_max_money_retarget, "20999999.97690001", settings(config::settings::mainnet).max_money() + 1, btc_decimal_places)
 
 // Max money (regtest):
-TEST_FORMAT(max_money, "14999.9999835", settings(bc::config::settings::regtest).max_money(), btc_decimal_places)
-TEST_FORMAT(overflow_max_money, "14999.99998351", settings(bc::config::settings::regtest).max_money() + 1, btc_decimal_places)
+TEST_FORMAT(max_money, "14999.9999835", settings(config::settings::regtest).max_money(), btc_decimal_places)
+TEST_FORMAT(overflow_max_money, "14999.99998351", settings(config::settings::regtest).max_money() + 1, btc_decimal_places)
 
 // Decimal points:
 TEST_FORMAT(pure_integer, "42", 42, 0)

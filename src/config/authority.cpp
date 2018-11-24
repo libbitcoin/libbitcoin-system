@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/config/authority.hpp>
+#include <bitcoin/system/config/authority.hpp>
 
 #include <algorithm>
 #include <sstream>
@@ -25,12 +25,13 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 #include <boost/regex.hpp>
-#include <bitcoin/bitcoin/formats/base_16.hpp>
-#include <bitcoin/bitcoin/utility/asio.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/string.hpp>
+#include <bitcoin/system/formats/base_16.hpp>
+#include <bitcoin/system/utility/asio.hpp>
+#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/utility/string.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace config {
 
 using namespace boost;
@@ -259,4 +260,5 @@ std::ostream& operator<<(std::ostream& output, const authority& argument)
 }
 
 } // namespace config
+} // namespace system
 } // namespace libbitcoin

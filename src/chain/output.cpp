@@ -16,23 +16,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/chain/output.hpp>
+#include <bitcoin/system/chain/output.hpp>
 
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <sstream>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/utility/container_sink.hpp>
-#include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream_reader.hpp>
-#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
-#include <bitcoin/bitcoin/wallet/payment_address.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
+#include <bitcoin/system/wallet/payment_address.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace chain {
 
-using namespace bc::wallet;
+using namespace bc::system::wallet;
 
 // This is a consensus critical value that must be set on reset.
 const uint64_t output::not_found = sighash_null_value;
@@ -355,4 +356,5 @@ bool output::extract_committed_hash(hash_digest& out) const
 }
 
 } // namespace chain
+} // namespace system
 } // namespace libbitcoin

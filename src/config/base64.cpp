@@ -16,17 +16,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/config/base64.hpp>
+#include <bitcoin/system/config/base64.hpp>
 
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/formats/base_64.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/formats/base_64.hpp>
+#include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace config {
 
 base64::base64()
@@ -79,4 +80,5 @@ std::ostream& operator<<(std::ostream& output, const base64& argument)
 }
 
 } // namespace config
+} // namespace system
 } // namespace libbitcoin

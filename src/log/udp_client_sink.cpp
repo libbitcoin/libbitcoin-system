@@ -16,15 +16,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/log/udp_client_sink.hpp>
+#include <bitcoin/system/log/udp_client_sink.hpp>
 
 #include <cstddef>
 #include <functional>
 #include <string>
 #include <boost/make_shared.hpp>
-#include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/system/error.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace log {
 
 using namespace std::placeholders;
@@ -63,4 +64,5 @@ void udp_client_sink::handle_send(const boost_code&, size_t,
 }
 
 } // namespace log
+} // namespace system
 } // namespace libbitcoin

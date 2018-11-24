@@ -21,8 +21,8 @@
 
 #include <cstdint>
 #include <cstddef>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/wallet/encrypted_keys.hpp>
 
 // BIP38
 // Alt-chain implementers should exploit the address hash for [identification].
@@ -33,6 +33,7 @@
 // such that encrypted addresses do not start with "6P".
 
 namespace libbitcoin {
+namespace system {
 namespace wallet {
 
 template<size_t Size>
@@ -60,6 +61,7 @@ private:
 };
 
 } // namespace wallet
+} // namespace system
 } // namespace libbitcoin
 
 #include "parse_encrypted_prefix.ipp"

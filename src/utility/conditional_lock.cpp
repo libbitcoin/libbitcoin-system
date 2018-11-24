@@ -16,12 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/conditional_lock.hpp>
+#include <bitcoin/system/utility/conditional_lock.hpp>
 
 #include <memory>
-#include <bitcoin/bitcoin/utility/thread.hpp>
+#include <bitcoin/system/utility/thread.hpp>
 
 namespace libbitcoin {
+namespace system {
 
 conditional_lock::conditional_lock(bool lock)
   : conditional_lock(lock ? std::make_shared<shared_mutex>() : nullptr)
@@ -41,4 +42,5 @@ conditional_lock::~conditional_lock()
         mutex_ptr_->unlock();
 }
 
+} // namespace system
 } // namespace libbitcoin

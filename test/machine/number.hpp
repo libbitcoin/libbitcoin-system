@@ -21,7 +21,7 @@
 
 #include <cstdint>
 #include <limits>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
 // (-2147483647 - 1)  and (-9223372036854775807 - 1) prevent warnings.
 
@@ -66,7 +66,7 @@ sizeof(number_offsets) / sizeof(number_offsets[0]);
 struct number_buffer
 {
     int32_t number;
-    bc::data_chunk bytes;
+    bc::system::data_chunk bytes;
 };
 
 struct number_subtract

@@ -16,15 +16,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/formats/base_16.hpp>
+#include <bitcoin/system/formats/base_16.hpp>
 
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
 #include <boost/algorithm/string.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
+namespace system {
 
 std::string encode_base16(data_slice data)
 {
@@ -112,4 +113,5 @@ bool decode_base16_private(uint8_t* out, size_t out_size, const char* in)
     return true;
 }
 
+} // namespace system
 } // namespace libbitcoin

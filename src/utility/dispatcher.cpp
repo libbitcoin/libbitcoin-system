@@ -16,14 +16,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/dispatcher.hpp>
+#include <bitcoin/system/utility/dispatcher.hpp>
 
 #include <memory>
 #include <string>
-#include <bitcoin/bitcoin/utility/threadpool.hpp>
-#include <bitcoin/bitcoin/utility/work.hpp>
+#include <bitcoin/system/utility/threadpool.hpp>
+#include <bitcoin/system/utility/work.hpp>
 
 namespace libbitcoin {
+namespace system {
 
 dispatcher::dispatcher(threadpool& pool, const std::string& name)
   : heap_(std::make_shared<work>(pool, name)), pool_(pool)
@@ -50,4 +51,5 @@ dispatcher::dispatcher(threadpool& pool, const std::string& name)
 ////    return heap_->combined_backlog();
 ////}
 
+} // namespace system
 } // namespace libbitcoin

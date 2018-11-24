@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <bitcoin/bitcoin/utility/property_tree.hpp>
+#include <bitcoin/system/utility/property_tree.hpp>
 
 #include <cstdint>
 #include <exception>
@@ -26,24 +26,25 @@
 #include <boost/iostreams/stream.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/config/base16.hpp>
-#include <bitcoin/bitcoin/config/header.hpp>
-#include <bitcoin/bitcoin/config/hash160.hpp>
-#include <bitcoin/bitcoin/config/hash256.hpp>
-#include <bitcoin/bitcoin/config/input.hpp>
-#include <bitcoin/bitcoin/config/output.hpp>
-#include <bitcoin/bitcoin/config/transaction.hpp>
-#include <bitcoin/bitcoin/math/stealth.hpp>
-#include <bitcoin/bitcoin/utility/collection.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/config/base16.hpp>
+#include <bitcoin/system/config/header.hpp>
+#include <bitcoin/system/config/hash160.hpp>
+#include <bitcoin/system/config/hash256.hpp>
+#include <bitcoin/system/config/input.hpp>
+#include <bitcoin/system/config/output.hpp>
+#include <bitcoin/system/config/transaction.hpp>
+#include <bitcoin/system/math/stealth.hpp>
+#include <bitcoin/system/utility/collection.hpp>
 
 
 namespace libbitcoin {
+namespace system {
 
 using namespace pt;
-using namespace bc::config;
-using namespace bc::machine;
-using namespace bc::wallet;
+using namespace bc::system::config;
+using namespace bc::system::machine;
+using namespace bc::system::wallet;
 using namespace boost::iostreams;
 
 // property_tree is very odd in that what one might consider a node or element,
@@ -348,4 +349,5 @@ bool property_tree(ptree& out, const std::string& json)
     }
 }
 
+} // namespace system
 } // namespace libbitcoin

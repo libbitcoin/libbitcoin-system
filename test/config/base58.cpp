@@ -18,10 +18,10 @@
  */
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test_suite.hpp>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
-using namespace bc;
-using namespace bc::config;
+using namespace bc::system;
+using namespace bc::system::config;
 
 #define BASE58_ENCODED_A "vYxp6yFC7qiVtK1RcGQQt3L6EqTc8YhEDLnSMLqDvp8D"
 #define BASE58_DECODED_A \

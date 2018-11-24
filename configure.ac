@@ -1,5 +1,5 @@
 ###############################################################################
-#  Copyright (c) 2014-2018 libbitcoin developers (see COPYING).
+#  Copyright (c) 2014-2018 libbitcoin-system developers (see COPYING).
 #
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
@@ -13,7 +13,7 @@
 AC_PREREQ([2.65])
 
 # Process command-line arguments and perform initialization and verification.
-AC_INIT([libbitcoin], [4.0.0], [eric@voskuil.org])
+AC_INIT([libbitcoin-system], [4.0.0], [eric@voskuil.org])
 
 # Do compilation tests.
 AC_LANG(C++)
@@ -495,5 +495,5 @@ AS_CASE([${CC}], [*gcc*],
 
 # Process outputs into templates.
 #==============================================================================
-AC_CONFIG_FILES([Makefile libbitcoin.pc])
+AC_CONFIG_FILES([Makefile libbitcoin-system.pc])
 AC_OUTPUT

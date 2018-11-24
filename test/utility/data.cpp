@@ -21,9 +21,9 @@
 
 #include <map>
 #include <vector>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
-using namespace bc;
+using namespace bc::system;
 
 BOOST_AUTO_TEST_SUITE(data_tests)
 

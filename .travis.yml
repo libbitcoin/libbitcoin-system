@@ -1,5 +1,5 @@
 ###############################################################################
-#  Copyright (c) 2014-2018 libbitcoin developers (see COPYING).
+#  Copyright (c) 2014-2018 libbitcoin-system developers (see COPYING).
 #
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
@@ -76,7 +76,7 @@ install:
 
 script:
 
-    # Download and build libbitcoin and all dependencies.
+    # Download and build libbitcoin-system and all dependencies.
     - if [[ $OSX   && $CLANG && $STATIC  ]]; then CC=$CC CXX=$CXX ./install.sh --enable-isystem --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --disable-shared --prefix=$TRAVIS_BUILD_DIR/my-prefix; fi
     - if [[ $LINUX && $CLANG && $STATIC  ]]; then CC=$CC CXX=$CXX ./install.sh --enable-isystem --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --disable-shared --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os' CXXFLAGS='-Os'; fi
     - if [[ $LINUX && $GCC   && $STATIC  ]]; then CC=$CC CXX=$CXX ./install.sh --enable-isystem --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --disable-shared --build-dir=my-build --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Og -g --coverage' CXXFLAGS='-Og -g --coverage'; fi

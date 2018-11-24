@@ -19,10 +19,10 @@
 #include <sstream>
 #include <boost/program_options.hpp>
 #include <boost/test/unit_test.hpp>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
-using namespace bc;
-using namespace bc::config;
+using namespace bc::system;
+using namespace bc::system::config;
 using namespace boost::program_options;
 
 BOOST_AUTO_TEST_SUITE(authority_tests)

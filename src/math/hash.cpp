@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/system/math/hash.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -34,6 +34,7 @@
 #include "../math/external/sha512.h"
 
 namespace libbitcoin {
+namespace system {
 
 hash_digest bitcoin_hash(data_slice data)
 {
@@ -165,4 +166,5 @@ data_chunk scrypt(data_slice data, data_slice salt, uint64_t N, uint32_t p,
     return output;
 }
 
+} // namespace system
 } // namespace libbitcoin

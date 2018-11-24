@@ -16,13 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/chain/compact.hpp>
+#include <bitcoin/system/chain/compact.hpp>
 
 #include <cstdint>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/utility/assert.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace chain {
 
 // Bitcoin compact for represents a value in base 256 notation as follows:
@@ -187,4 +188,5 @@ uint32_t compact::from_big(const uint256_t& big)
 }
 
 } // namespace chain
+} // namespace system
 } // namespace libbitcoin

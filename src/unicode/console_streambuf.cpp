@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/unicode/console_streambuf.hpp>
+#include <bitcoin/system/unicode/console_streambuf.hpp>
 
 #include <cstddef>
 #include <iostream>
 #include <new>
 #include <streambuf>
-#include <bitcoin/bitcoin/math/limits.hpp>
+#include <bitcoin/system/math/limits.hpp>
 
 #ifdef _MSC_VER
 #include <windows.h>
@@ -39,6 +39,7 @@ static LPVOID get_input_handle()
 #endif
 
 namespace libbitcoin {
+namespace system {
 
 // This class/mathod is a no-op on non-windows platforms.
 // When working in Windows console set font to "Lucida Console".
@@ -125,4 +126,5 @@ std::wstreambuf::int_type console_streambuf::underflow()
     return traits_type::to_int_type(*gptr());
 }
 
+} // namespace system
 } // namespace libbitcoin

@@ -1,5 +1,5 @@
 REM ###########################################################################
-REM #  Copyright (c) 2014-2018 libbitcoin developers (see COPYING).
+REM #  Copyright (c) 2014-2018 libbitcoin-system developers (see COPYING).
 REM #
 REM #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 REM #
@@ -23,9 +23,9 @@ IF NOT EXIST "%nuget_pkg_path%" (
   )
 )
 
-call :bld_repo libbitcoin
+call :bld_repo libbitcoin-system
 IF %ERRORLEVEL% NEQ 0 (
-  call :failure "Building libbitcoin failed."
+  call :failure "Building libbitcoin-system failed."
   exit /b 1
 )
 

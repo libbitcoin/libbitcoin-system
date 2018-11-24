@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/config/printer.hpp>
+#include <bitcoin/system/config/printer.hpp>
 
 #include <algorithm>
 #include <iostream>
@@ -25,11 +25,11 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin/config/parameter.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/collection.hpp>
-#include <bitcoin/bitcoin/utility/string.hpp>
+#include <bitcoin/system/config/parameter.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/utility/collection.hpp>
+#include <bitcoin/system/utility/string.hpp>
 
 // We built this because po::options_description.print() sucks.
 
@@ -65,8 +65,8 @@
 #define BC_PRINTER_SETTING_REQUIRED_FORMAT "%1% = %2%\n"
 
 namespace po = boost::program_options;
-using namespace libbitcoin;
-using namespace libbitcoin::config;
+using namespace libbitcoin::system;
+using namespace libbitcoin::system::config;
 using boost::format;
 
 const int printer::max_arguments = 256;

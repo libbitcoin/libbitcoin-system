@@ -16,9 +16,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/sequential_lock.hpp>
+#include <bitcoin/system/utility/sequential_lock.hpp>
 
 namespace libbitcoin {
+namespace system {
 
 sequential_lock::sequential_lock()
   : sequence_(0)
@@ -51,4 +52,5 @@ bool sequential_lock::end_write()
     return !is_write_locked(++sequence_);
 }
 
+} // namespace system
 } // namespace libbitcoin

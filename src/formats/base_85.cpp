@@ -46,15 +46,16 @@
 //  DEALINGS IN THE SOFTWARE.
 //  --------------------------------------------------------------------------
 
-#include <bitcoin/bitcoin/formats/base_85.hpp>
+#include <bitcoin/system/formats/base_85.hpp>
 
 #include <cstddef>
 #include <cstdint>
 #include <string>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
+namespace system {
 
 // Maps binary to base 85.
 static char encoder[85 + 1] =
@@ -151,4 +152,5 @@ bool decode_base85(data_chunk& out, const std::string& in)
     return true;
 }
 
+} // namespace system
 } // namespace libbitcoin

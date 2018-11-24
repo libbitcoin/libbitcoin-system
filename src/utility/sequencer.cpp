@@ -16,14 +16,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/sequencer.hpp>
+#include <bitcoin/system/utility/sequencer.hpp>
 
 #include <utility>
-#include <bitcoin/bitcoin/utility/asio.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/thread.hpp>
+#include <bitcoin/system/utility/asio.hpp>
+#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/utility/thread.hpp>
 
 namespace libbitcoin {
+namespace system {
 
 sequencer::sequencer(asio::service& service)
   : service_(service), executing_(false)
@@ -88,4 +89,5 @@ void sequencer::unlock()
         service_.post(std::move(handler));
 }
 
+} // namespace system
 } // namespace libbitcoin

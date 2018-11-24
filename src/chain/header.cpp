@@ -16,22 +16,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/chain/header.hpp>
+#include <bitcoin/system/chain/header.hpp>
 
 #include <chrono>
 #include <cstddef>
 #include <utility>
-#include <bitcoin/bitcoin/chain/chain_state.hpp>
-#include <bitcoin/bitcoin/chain/compact.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/utility/container_sink.hpp>
-#include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream_reader.hpp>
-#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/system/chain/chain_state.hpp>
+#include <bitcoin/system/chain/compact.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/error.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace chain {
 
 // Use system clock because we require accurate time of day.
@@ -541,4 +542,5 @@ code header::accept(const chain_state& state) const
 }
 
 } // namespace chain
+} // namespace system
 } // namespace libbitcoin

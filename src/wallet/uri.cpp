@@ -16,14 +16,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/uri.hpp>
+#include <bitcoin/system/wallet/uri.hpp>
 
 #include <iomanip>
 #include <sstream>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/formats/base_16.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/formats/base_16.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace wallet {
 
 // These character classification functions correspond to RFC 3986.
@@ -387,4 +388,5 @@ void uri::encode_query(const query_map& map)
 }
 
 } // namespace wallet
+} // namespace system
 } // namespace libbitcoin

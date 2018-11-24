@@ -19,12 +19,12 @@
 #include <boost/test/unit_test.hpp>
 
 #include <sstream>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 #include "script.hpp"
 
-using namespace bc;
-using namespace bc::chain;
-using namespace bc::machine;
+using namespace bc::system;
+using namespace bc::system::chain;
+using namespace bc::system::machine;
 
 #define SCRIPT_RETURN "return"
 #define SCRIPT_RETURN_EMPTY "return []"

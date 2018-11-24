@@ -16,14 +16,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/work.hpp>
+#include <bitcoin/system/utility/work.hpp>
 
 #include <memory>
 #include <string>
-#include <bitcoin/bitcoin/utility/delegates.hpp>
-#include <bitcoin/bitcoin/utility/threadpool.hpp>
+#include <bitcoin/system/utility/delegates.hpp>
+#include <bitcoin/system/utility/threadpool.hpp>
 
 namespace libbitcoin {
+namespace system {
 
 work::work(threadpool& pool, const std::string& name)
   : name_(name),
@@ -62,4 +63,5 @@ work::work(threadpool& pool, const std::string& name)
 ////    return ordered_backlog() + unordered_backlog() + concurrent_backlog();
 ////}
 
+} // namespace system
 } // namespace libbitcoin

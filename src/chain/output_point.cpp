@@ -16,15 +16,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/chain/output_point.hpp>
+#include <bitcoin/system/chain/output_point.hpp>
 
 #include <cstddef>
 #include <cstdint>
 #include <utility>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/chain/point.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/chain/point.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace chain {
 
 // Constructors.
@@ -155,4 +156,5 @@ bool output_point::is_mature(size_t height) const
 }
 
 } // namespace chain
+} // namespace system
 } // namespace libbitcoin

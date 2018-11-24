@@ -17,9 +17,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <boost/test/unit_test.hpp>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
 using namespace bc;
+using namespace bc::system;
 
 BOOST_AUTO_TEST_SUITE(endian_tests)
 
@@ -40,7 +41,7 @@ BOOST_AUTO_TEST_CASE(endian__from_big_endian_stream_unsafe__insufficient_data__s
 BOOST_AUTO_TEST_CASE(endian__from_big_endian_stream_unsafe__eof__stream_partial_read)
 {
     static const uint8_t content = 0xFF;
-    static const auto shift = (sizeof(uint32_t) - sizeof(uint8_t)) * bc::byte_bits;
+    static const auto shift = (sizeof(uint32_t) - sizeof(uint8_t)) * byte_bits;
     const uint32_t expected = static_cast<uint32_t>(content) << shift;
     std::stringstream stream;
     stream.put(content);

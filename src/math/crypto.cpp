@@ -16,15 +16,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/math/crypto.hpp>
+#include <bitcoin/system/math/crypto.hpp>
 
-#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/utility/data.hpp>
 #include "../math/external/aes256.h"
 
 namespace libbitcoin {
+namespace system {
 
 void aes256_encrypt(const aes_secret& key, aes_block& block)
 {
@@ -42,4 +43,5 @@ void aes256_decrypt(const aes_secret& key, aes_block& block)
     aes256_done(&context);
 }
 
+} // namespace system
 } // namespace libbitcoin

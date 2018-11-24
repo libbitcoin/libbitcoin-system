@@ -16,14 +16,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/threadpool.hpp>
+#include <bitcoin/system/utility/threadpool.hpp>
 
 #include <thread>
-#include <bitcoin/bitcoin/utility/asio.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/thread.hpp>
+#include <bitcoin/system/utility/asio.hpp>
+#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/utility/thread.hpp>
 
 namespace libbitcoin {
+namespace system {
 
 threadpool::threadpool(size_t number_threads, thread_priority priority)
   : size_(0)
@@ -138,4 +139,5 @@ const asio::service& threadpool::service() const
     return service_;
 }
 
+} // namespace system
 } // namespace libbitcoin
