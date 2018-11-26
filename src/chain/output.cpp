@@ -46,39 +46,39 @@ const uint8_t output::validation::candidate_unspent = 0;
 //-----------------------------------------------------------------------------
 
 output::output()
-  : value_(not_found),
-    script_{},
-    metadata{}
+  : metadata{},
+    value_(not_found),
+    script_{}
 {
 }
 
 output::output(output&& other)
-  : addresses_(other.addresses_cache()),
+  : metadata(other.metadata),
+    addresses_(other.addresses_cache()),
     value_(other.value_),
-    script_(std::move(other.script_)),
-    metadata(other.metadata)
+    script_(std::move(other.script_))
 {
 }
 
 output::output(const output& other)
-  : addresses_(other.addresses_cache()),
+  : metadata(other.metadata),
+    addresses_(other.addresses_cache()),
     value_(other.value_),
-    script_(other.script_),
-    metadata(other.metadata)
+    script_(other.script_)
 {
 }
 
 output::output(uint64_t value, chain::script&& script)
-  : value_(value),
-    script_(std::move(script)),
-    metadata{}
+  : metadata{},
+    value_(value),
+    script_(std::move(script))
 {
 }
 
 output::output(uint64_t value, const chain::script& script)
-  : value_(value),
-    script_(script),
-    metadata{}
+  : metadata{},
+    value_(value),
+    script_(script)
 {
 }
 

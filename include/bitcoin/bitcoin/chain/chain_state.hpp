@@ -252,8 +252,8 @@ private:
 
     // These are computed on construct from sample and checkpoints.
     const activations active_;
-    const uint32_t median_time_past_;
     const uint32_t work_required_;
+    const uint32_t median_time_past_;
 };
 
 } // namespace chain

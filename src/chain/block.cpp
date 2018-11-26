@@ -63,41 +63,42 @@ using namespace boost::adaptors;
 //-----------------------------------------------------------------------------
 
 block::block()
-  : header_(),
-    metadata{}
+  : metadata{},
+    header_(),
+    transactions_()
 {
 }
 
 block::block(const block& other)
-  : total_inputs_(other.total_inputs_cache()),
-    non_coinbase_inputs_(other.non_coinbase_inputs_cache()),
+  : metadata(other.metadata),
     header_(other.header_),
     transactions_(other.transactions_),
-    metadata(other.metadata)
+    total_inputs_(other.total_inputs_cache()),
+    non_coinbase_inputs_(other.non_coinbase_inputs_cache())
 {
 }
 
 block::block(block&& other)
-  : total_inputs_(other.total_inputs_cache()),
-    non_coinbase_inputs_(other.non_coinbase_inputs_cache()),
+  : metadata(other.metadata),
     header_(std::move(other.header_)),
     transactions_(std::move(other.transactions_)),
-    metadata(other.metadata)
+    total_inputs_(other.total_inputs_cache()),
+    non_coinbase_inputs_(other.non_coinbase_inputs_cache())
 {
 }
 
 block::block(const chain::header& header,
     const transaction::list& transactions)
-  : header_(header),
-    transactions_(transactions),
-    metadata{}
+  : metadata{},
+    header_(header),
+    transactions_(transactions)
 {
 }
 
 block::block(chain::header&& header, transaction::list&& transactions)
-  : header_(std::move(header)),
-    transactions_(std::move(transactions)),
-    metadata{}
+  : metadata{},
+    header_(std::move(header)),
+    transactions_(std::move(transactions))
 {
 }
 
