@@ -421,6 +421,14 @@ static std::string normalize_text(const std::string& text)
         if (!is_combining(ch))
             normal += ch;
 
+    if (normal.empty())
+        return {};
+
+    if (normal.size() < 3)
+        return boost::locale::conv::utf_to_utf<char, char32_t>(
+            reinterpret_cast<const char32_t*>(normal.c_str()),
+                boost::locale::conv::stop);
+
     // Remove whitespaces between CJK by building an output with them.
     std::u32string output{ normal.begin(), normal.begin() + 1 };
 
