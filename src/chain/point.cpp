@@ -42,29 +42,39 @@ const uint32_t point::null_index = no_previous_output;
 
 // A default instance is invalid (until modified).
 point::point()
-  : hash_(null_hash), index_(0), valid_(false)
+  : hash_(null_hash),
+    index_(0),
+    valid_(false)
 {
 }
 
 point::point(const hash_digest& hash, uint32_t index)
-  : hash_(hash), index_(index), valid_(true)
+  : hash_(hash),
+    index_(index),
+    valid_(true)
 {
 }
 
 point::point(hash_digest&& hash, uint32_t index)
-  : hash_(std::move(hash)), index_(index), valid_(true)
+  : hash_(std::move(hash)),
+    index_(index),
+    valid_(true)
 {
 }
 
 // protected
 point::point(const hash_digest& hash, uint32_t index, bool valid)
-  : hash_(hash), index_(index), valid_(valid)
+  : hash_(hash),
+    index_(index),
+    valid_(valid)
 {
 }
 
 // protected
 point::point(hash_digest&& hash, uint32_t index, bool valid)
-  : hash_(std::move(hash)), index_(index), valid_(valid)
+  : hash_(std::move(hash)),
+    index_(index),
+    valid_(valid)
 {
 }
 

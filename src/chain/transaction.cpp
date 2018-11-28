@@ -121,51 +121,55 @@ inline void write_witnesses(writer& sink, const input::list& inputs)
 //-----------------------------------------------------------------------------
 
 transaction::transaction()
-  : transaction(0, 0, {}, {})
+  : metadata{},
+    version_(0),
+    locktime_(0),
+    inputs_{},
+    outputs_{}
 {
 }
 
 transaction::transaction(transaction&& other)
-  : hash_(other.hash_cache()),
-    total_input_value_(other.total_input_value_cache()),
-    total_output_value_(other.total_output_value_cache()),
+  : metadata(std::move(other.metadata)),
     version_(other.version_),
     locktime_(other.locktime_),
     inputs_(std::move(other.inputs_)),
     outputs_(std::move(other.outputs_)),
-    metadata(std::move(other.metadata))
+    hash_(other.hash_cache()),
+    total_input_value_(other.total_input_value_cache()),
+    total_output_value_(other.total_output_value_cache())
 {
 }
 
 transaction::transaction(const transaction& other)
-  : hash_(other.hash_cache()),
-    total_input_value_(other.total_input_value_cache()),
-    total_output_value_(other.total_output_value_cache()),
+  : metadata(other.metadata),
     version_(other.version_),
     locktime_(other.locktime_),
     inputs_(other.inputs_),
     outputs_(other.outputs_),
-    metadata(other.metadata)
+    hash_(other.hash_cache()),
+    total_input_value_(other.total_input_value_cache()),
+    total_output_value_(other.total_output_value_cache())
 {
 }
 
 transaction::transaction(uint32_t version, uint32_t locktime,
     input::list&& inputs, output::list&& outputs)
-  : version_(version),
+  : metadata{},
+    version_(version),
     locktime_(locktime),
     inputs_(std::move(inputs)),
-    outputs_(std::move(outputs)),
-    metadata{}
+    outputs_(std::move(outputs))
 {
 }
 
 transaction::transaction(uint32_t version, uint32_t locktime,
     const input::list& inputs, const output::list& outputs)
-  : version_(version),
+  : metadata{},
+    version_(version),
     locktime_(locktime),
     inputs_(inputs),
-    outputs_(outputs),
-    metadata{}
+    outputs_(outputs)
 {
 }
 
@@ -1140,7 +1144,7 @@ code transaction::accept(bool transaction_pool) const
 code transaction::accept(const chain_state& state, bool transaction_pool) const
 {
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
-    const auto bip30 = state.is_enabled(rule_fork::bip30_rule);
+    //const auto bip30 = state.is_enabled(rule_fork::bip30_rule);
     const auto bip68 = state.is_enabled(rule_fork::bip68_rule);
     const auto bip141 = state.is_enabled(rule_fork::bip141_rule);
 

@@ -32,6 +32,20 @@ BOOST_AUTO_TEST_SUITE(electrum_tests)
 
 #ifdef WITH_ICU
 
+BOOST_AUTO_TEST_CASE(electrum__decode_mnemonic__empty__valid)
+{
+    static const word_list mnemonic{ "" };
+    const auto seed = electrum::decode_mnemonic(mnemonic);
+    BOOST_REQUIRE_EQUAL(encode_base16(seed), "2e3749b0a2e6fbbd771b8f0e9227469d0b63d03eeb8c5cddd2a47d7c6f80d0275623ecd50952bef13c0216b52c1272d5bb6e3463e26a696c3d116ae2c4e980f3");
+}
+
+BOOST_AUTO_TEST_CASE(electrum__decode_mnemonic__single__valid)
+{
+    static const word_list mnemonic{ "冬" };
+    const auto seed = electrum::decode_mnemonic(mnemonic);
+    BOOST_REQUIRE_EQUAL(encode_base16(seed), "6d0e28a68510d84a46db3daffdef720cb1f796cb68f66b2b5c3294a2805772ebbaa7665a3594addb4440c9024c25b75c80fadb89f1e9ac123dadc65e35e101af");
+}
+
 BOOST_AUTO_TEST_CASE(electrum__decode_mnemonic__no_passphrase_1__valid)
 {
     static const word_list mnemonic{ "foo", "bar", "baz" };
