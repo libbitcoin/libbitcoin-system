@@ -46,8 +46,7 @@ bool png::write_png(const data_chunk& data, uint32_t size,
 {
     data_source istream(data);
     return png::write_png(istream, size, dots_per_inch, margin,
-        inches_per_meter, get_default_foreground(), get_default_background(),
-        out);
+        inches_per_meter, foreground, background, out);
 }
 
 bool png::write_png(std::istream& in, uint32_t size, std::ostream& out)
@@ -66,7 +65,7 @@ extern "C" void sink_write(png_structp png_ptr, png_bytep data,
     sink.write_bytes(reinterpret_cast<const uint8_t*>(data), size);
 }
 
-extern "C" void error_callback(png_structp png_ptr,
+extern "C" void error_callback(png_structp /* png_ptr */,
     png_const_charp error_message)
 {
     throw std::runtime_error(error_message);
@@ -80,7 +79,7 @@ bool png::write_png(std::istream& in, uint32_t size, uint32_t dots_per_inch,
         return false;
 
     istream_reader source(in);
-    auto version = source.read_4_bytes_little_endian();
+    /* auto version =  */source.read_4_bytes_little_endian();
     auto width = source.read_4_bytes_little_endian();
 
     if (bc::max_size_t / width < width)
@@ -96,9 +95,9 @@ bool png::write_png(std::istream& in, uint32_t size, uint32_t dots_per_inch,
         static constexpr uint8_t margin_value = 0xff;
 
         // TODO: unguarded overflow conditions.
-        const auto margin_size = margin * size;
-        const auto realwidth = (width + margin * 2) * size;
-        const auto row_size = (realwidth + 7) / bits_per_byte;
+        const size_t margin_size = margin * size;
+        const size_t real_width = (width + margin * 2) * size;
+        const size_t row_size = (real_width + 7) / bits_per_byte;
 
         data_chunk row;
         row.reserve(row_size);
@@ -112,18 +111,17 @@ bool png::write_png(std::istream& in, uint32_t size, uint32_t dots_per_inch,
         if (info_ptr == nullptr)
             return false;
 
-        png_color raw_palette;
-        auto palette = &raw_palette;
-        palette[0].red = foreground.red;
-        palette[0].green = foreground.green;
-        palette[0].blue = foreground.blue;
-        palette[1].red = background.red;
-        palette[1].green = background.green;
-        palette[1].blue = background.blue;
+        const png_color palette[] =
+        {
+            { foreground.red, foreground.green, foreground.blue },
+            { background.red, background.green, background.blue }
+        };
 
-        png_byte alpha_values[2];
-        alpha_values[0] = foreground.alpha;
-        alpha_values[1] = background.alpha;
+        const png_byte alpha_values[2] =
+        {
+            foreground.alpha,
+            background.alpha
+        };
 
         png_set_PLTE(png_ptr, info_ptr, palette, 2);
         png_set_tRNS(png_ptr, info_ptr, alpha_values, 2, nullptr);
@@ -132,7 +130,7 @@ bool png::write_png(std::istream& in, uint32_t size, uint32_t dots_per_inch,
         png_set_write_fn(png_ptr, &sink, sink_write, nullptr);
         png_set_error_fn(png_ptr, nullptr, error_callback, nullptr);
 
-        png_set_IHDR(png_ptr, info_ptr, realwidth, realwidth, bit_depth,
+        png_set_IHDR(png_ptr, info_ptr, real_width, real_width, bit_depth,
             PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE,
             PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
@@ -143,13 +141,13 @@ bool png::write_png(std::istream& in, uint32_t size, uint32_t dots_per_inch,
 
         // write top margin
         row.assign(row_size, margin_value);
-        for (auto y = 0; y < margin_size; y++)
+        for (size_t y = 0; y < margin_size; y++)
             png_write_row(png_ptr, row.data());
 
         // write data
         uint8_t* row_ptr = nullptr;
         auto data_ptr = data.data();
-        for (auto y = 0; y < width; y++)
+        for (size_t y = 0; y < width; y++)
         {
             // TODO: unguarded overflow conditions.
             auto bit = bits_per_byte - 1;
@@ -158,9 +156,9 @@ bool png::write_png(std::istream& in, uint32_t size, uint32_t dots_per_inch,
             row_ptr += margin_size / bits_per_byte;
             bit = (bits_per_byte - 1) - (margin_size % bits_per_byte);
 
-            for (auto x = 0; x < width; x++)
+            for (size_t x = 0; x < width; x++)
             {
-                for (auto xx = 0; xx < size; xx++)
+                for (uint32_t xx = 0; xx < size; xx++)
                 {
                     *row_ptr ^= (*data_ptr & 1) << bit;
                     bit--;
@@ -174,13 +172,13 @@ bool png::write_png(std::istream& in, uint32_t size, uint32_t dots_per_inch,
                 data_ptr++;
             }
 
-            for (auto yy = 0; yy < size; yy++)
+            for (uint32_t yy = 0; yy < size; yy++)
                 png_write_row(png_ptr, row.data());
         }
 
         // write bottom margin
         row.assign(row_size, margin_value);
-        for (auto y = 0; y < margin_size; y++)
+        for (size_t y = 0; y < margin_size; y++)
             png_write_row(png_ptr, row.data());
 
         png_write_end(png_ptr, info_ptr);
