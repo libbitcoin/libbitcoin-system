@@ -31,7 +31,7 @@ namespace libbitcoin {
 
 template <typename Iterator>
 serializer<Iterator>::serializer(const Iterator begin)
-  : iterator_(begin), valid_(true)
+  : valid_(true), iterator_(begin)
 {
 }
 
