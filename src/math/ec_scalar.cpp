@@ -42,8 +42,8 @@ ec_scalar::ec_scalar(uint64_t value)
   : valid_(true)
 {
     secret_ = null_hash;
-    auto serial = make_unsafe_serializer(secret_.end() - 4);
-    serial.write_4_bytes_big_endian(value);
+    auto serial = make_unsafe_serializer(secret_.end() - 8);
+    serial.write_8_bytes_big_endian(value);
 }
 
 // Operators.
