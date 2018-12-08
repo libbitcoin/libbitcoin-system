@@ -34,14 +34,14 @@ namespace libbitcoin {
 // Since the end is not used just use begin.
 template <typename Iterator, bool CheckSafe>
 deserializer<Iterator, CheckSafe>::deserializer(const Iterator begin)
-  : iterator_(begin), end_(begin), valid_(true)
+  : valid_(true), iterator_(begin), end_(begin)
 {
 }
 
 template <typename Iterator, bool CheckSafe>
 deserializer<Iterator, CheckSafe>::deserializer(const Iterator begin,
     const Iterator end)
-  : iterator_(begin), end_(end), valid_(true)
+  : valid_(true), iterator_(begin), end_(end)
 {
 }
 
