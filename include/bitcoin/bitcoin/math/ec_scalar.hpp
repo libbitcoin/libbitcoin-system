@@ -32,6 +32,7 @@ public:
     /// Constructors.
     ec_scalar();
     ec_scalar(const ec_secret& secret);
+    ec_scalar(uint64_t value);
 
     /// Operators.
     // TODO: add equality and inequality operators.
@@ -49,6 +50,7 @@ public:
 
     /// Accessors.
     const ec_secret& secret() const;
+    ec_secret& secret();
 
 protected:
     // These should be const, apart from the need to implement assignment.

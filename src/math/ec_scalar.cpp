@@ -38,6 +38,14 @@ ec_scalar::ec_scalar(const ec_secret& secret)
 {
 }
 
+ec_scalar::ec_scalar(uint64_t value)
+  : valid_(true)
+{
+    secret_ = zero;
+    auto serial = make_unsafe_serializer(secret_.end() - 4);
+    serial.write_4_bytes_big_endian(value);
+}
+
 // Operators.
 // ----------------------------------------------------------------------------
 
@@ -125,6 +133,10 @@ ec_scalar::operator const ec_secret&() const
 }
 
 const ec_secret& ec_scalar::secret() const
+{
+    return secret_;
+}
+ec_secret& ec_scalar::secret()
 {
     return secret_;
 }

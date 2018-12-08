@@ -21,19 +21,88 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(ec_point_tests)
+BOOST_AUTO_TEST_SUITE(ec_scalar_tests)
 
-#define POINTX "0245dbb7e2cd3a5de19fde8d556fd567a036f9c377ecf69a9202aa4affce41c623"
-#define POINTY "02cfc43e064c50cfd1896766ef70e7da82b16e8cfebd8d5dec618212d0db1e6d12"
-#define SUM "03332bf6821c7c0e1080efc131d2b745760a8245c0b91a05f13308ff8600d30525"
+#define SECRET1A "b9d22ea0ed7e3d53cc9e1b3d436bb9260fc3211634c821f6bb3cb3a73ee7a0b5"
+#define SECRET1B "f9416cd856d81a00366ad7234a7b5e5dbda61812e56effcb4cde0695bc092380"
+#define SUM1 "b3139b79445657540308f2608de7178512ba5c426aee818648485bb02aba82f4"
+#define PRODUCT1 "aba800424dd618d36a42bf6d6d3156a38a74298b9e4519bbba34cf0d7dce4d4f"
 
-BOOST_AUTO_TEST_CASE(ec_point__sum__valid__expected)
+#define POSITIVE_ONE "0000000000000000000000000000000000000000000000000000000000000001"
+#define POSITIVE_TWO "0000000000000000000000000000000000000000000000000000000000000002"
+#define NEGATIVE_ONE "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"
+
+#define SECRET2 "8010b1bb119ad37d4b65a1022a314897b1b3614b345974332cb1b9582cf03536"
+#define COMPRESSED2 "0309ba8621aefd3b6ba4ca6d11a4746e8df8d35d9b51b383338f627ba7fc732731"
+
+BOOST_AUTO_TEST_CASE(ec_scalar__zero__multiply_g__fail)
 {
-    const ec_point x{ base16_literal(POINTX) };
-    const ec_point y{ base16_literal(POINTY) };
+    const auto product = ec_scalar::zero * ec_point::G;
+    BOOST_REQUIRE(!product);
+}
+
+BOOST_AUTO_TEST_CASE(ec_scalar__add__valid__expected)
+{
+    const ec_scalar x{ base16_literal(SECRET1A) };
+    const ec_scalar y{ base16_literal(SECRET1B) };
     const auto sum = x + y;
     BOOST_REQUIRE(sum);
-    BOOST_REQUIRE_EQUAL(encode_base16(sum.point()), SUM);
+    BOOST_REQUIRE_EQUAL(encode_base16(sum.secret()), SUM1);
+}
+
+BOOST_AUTO_TEST_CASE(ec_scalar__multiply__valid__expected)
+{
+    const ec_scalar x{ base16_literal(SECRET1A) };
+    const ec_scalar y{ base16_literal(SECRET1B) };
+    const auto product = x * y;
+    BOOST_REQUIRE(product);
+    BOOST_REQUIRE_EQUAL(encode_base16(product.secret()), PRODUCT1);
+}
+
+BOOST_AUTO_TEST_CASE(ec_scalar__negate__positive__expected)
+{
+    const ec_scalar one{ base16_literal(POSITIVE_ONE) };
+    const auto negation = -one;
+    BOOST_REQUIRE(one);
+    BOOST_REQUIRE(negation);
+    BOOST_REQUIRE_EQUAL(encode_base16(negation.secret()), NEGATIVE_ONE);
+}
+
+BOOST_AUTO_TEST_CASE(ec_scalar__add__negative__expected)
+{
+    const ec_scalar one{ base16_literal(POSITIVE_ONE) };
+    const ec_scalar two{ base16_literal(POSITIVE_TWO) };
+    BOOST_REQUIRE(one);
+    BOOST_REQUIRE(two);
+
+    const auto sum = -one + two;
+    BOOST_REQUIRE(sum);
+    BOOST_REQUIRE_EQUAL(encode_base16(sum.secret()), encode_base16(one.secret()));
+}
+
+BOOST_AUTO_TEST_CASE(ec_arithmetic__point__multiply_g__expected)
+{
+    const ec_scalar key = base16_literal(SECRET2);
+    const auto product = key * ec_point::G;
+    BOOST_REQUIRE(product);
+    BOOST_REQUIRE_EQUAL(encode_base16(product.point()), COMPRESSED2);
+}
+
+BOOST_AUTO_TEST_CASE(ec_scalar__init__expected)
+{
+    const ec_scalar one{ base16_literal(POSITIVE_ONE) };
+    const ec_scalar two{ base16_literal(POSITIVE_TWO) };
+    BOOST_REQUIRE(one);
+    BOOST_REQUIRE(two);
+
+    const ec_scalar one_uint64(1);
+    const ec_scalar two_uint64(2);
+    BOOST_REQUIRE(one_uint64);
+    BOOST_REQUIRE(two_uint64);
+    BOOST_REQUIRE_EQUAL(encode_base16(
+        one.secret()), encode_base16(one_uint64.secret()));
+    BOOST_REQUIRE_EQUAL(encode_base16(
+        two.secret()), encode_base16(two_uint64.secret()));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
