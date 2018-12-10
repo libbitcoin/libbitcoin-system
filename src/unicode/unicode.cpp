@@ -88,9 +88,9 @@ std::ostream& cerr_stream()
 // The backend selection is ignored if invalid (in this case on Windows).
 static std::string normal_form(const std::string& value, norm_type form)
 {
-    auto backend = localization_backend_manager::global();
-    backend.select(BC_LOCALE_BACKEND);
-    const generator locale(backend);
+    auto backend_manager = localization_backend_manager::global();
+    backend_manager.select(BC_LOCALE_BACKEND);
+    const generator locale(backend_manager);
     return normalize(value, form, locale(BC_LOCALE_UTF8));
 }
 
@@ -99,11 +99,12 @@ static std::string normal_form(const std::string& value, norm_type form)
 // normalization if the ICU dependency is missing.
 static void validate_localization()
 {
-    const auto ascii_space = "> <";
-    const auto ideographic_space = ">　<";
-    const auto normal = normal_form(ideographic_space, norm_type::norm_nfkd);
+    const auto backend_manager = localization_backend_manager::global();
+    const auto available_backends = backend_manager.get_all_backends();
+    const auto iterator = std::find(available_backends.cbegin(),
+        available_backends.cend(), BC_LOCALE_BACKEND);
 
-    if (normal != ascii_space)
+    if (iterator == available_backends.cend())
         throw std::runtime_error(
             "Unicode normalization test failed, a dependency may be missing.");
 }
