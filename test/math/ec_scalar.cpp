@@ -88,21 +88,4 @@ BOOST_AUTO_TEST_CASE(ec_arithmetic__point__multiply_g__expected)
     BOOST_REQUIRE_EQUAL(encode_base16(product.point()), COMPRESSED2);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__init__expected)
-{
-    const ec_scalar one{ base16_literal(POSITIVE_ONE) };
-    const ec_scalar two{ base16_literal(POSITIVE_TWO) };
-    BOOST_REQUIRE(one);
-    BOOST_REQUIRE(two);
-
-    const ec_scalar one_uint64(1);
-    const ec_scalar two_uint64(2);
-    BOOST_REQUIRE(one_uint64);
-    BOOST_REQUIRE(two_uint64);
-    BOOST_REQUIRE_EQUAL(encode_base16(
-        one.secret()), encode_base16(one_uint64.secret()));
-    BOOST_REQUIRE_EQUAL(encode_base16(
-        two.secret()), encode_base16(two_uint64.secret()));
-}
-
 BOOST_AUTO_TEST_SUITE_END()
