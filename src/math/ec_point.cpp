@@ -143,4 +143,9 @@ const ec_compressed& ec_point::point() const
     return point_;
 }
 
+ec_compressed& ec_point::point()
+{
+    return point_;
+}
+
 } // namespace libbitcoin

@@ -55,6 +55,7 @@ public:
 
     /// Accessors.
     const ec_compressed& point() const;
+    ec_compressed& point();
 
 protected:
     // This should be const, apart from the need to implement assignment.
