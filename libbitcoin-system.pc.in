@@ -17,7 +17,7 @@ includedir=@includedir@
 #==============================================================================
 Name: libbitcoin-system
 Description: Bitcoin Cross-Platform C++ Development Toolkit
-URL: https://github.com/pmienk/libbitcoin-system
+URL: https://github.com/libbitcoin/libbitcoin-system
 Version: @PACKAGE_VERSION@
 
 
