@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/payment_address.hpp>
+#include <bitcoin/system/wallet/payment_address.hpp>
 
 #include <algorithm>
 #include <cstdint>
@@ -24,17 +24,18 @@
 #include <string>
 #include <utility>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin/formats/base_58.hpp>
-#include <bitcoin/bitcoin/math/checksum.hpp>
-#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/wallet/ec_private.hpp>
-#include <bitcoin/bitcoin/wallet/ec_public.hpp>
+#include <bitcoin/system/formats/base_58.hpp>
+#include <bitcoin/system/math/checksum.hpp>
+#include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/wallet/ec_private.hpp>
+#include <bitcoin/system/wallet/ec_public.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace wallet {
 
-using namespace bc::machine;
+using namespace bc::system::machine;
 
 const uint8_t payment_address::mainnet_p2kh = 0x00;
 const uint8_t payment_address::mainnet_p2sh = 0x05;
@@ -345,4 +346,5 @@ payment_address::list payment_address::extract_output(
 }
 
 } // namespace wallet
+} // namespace system
 } // namespace libbitcoin

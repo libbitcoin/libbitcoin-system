@@ -16,12 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/formats/base_58.hpp>
+#include <bitcoin/system/formats/base_58.hpp>
 
 #include <boost/algorithm/string.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/system/utility/assert.hpp>
 
 namespace libbitcoin {
+namespace system {
 
 const std::string base58_chars =
     "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
@@ -193,4 +194,5 @@ bool decode_base58_private(uint8_t* out, size_t out_size, const char* in)
     return true;
 }
 
+} // namespace system
 } // namespace libbitcoin

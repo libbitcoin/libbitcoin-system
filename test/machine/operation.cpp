@@ -17,10 +17,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <boost/test/unit_test.hpp>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
-using namespace bc;
-using namespace bc::machine;
+using namespace bc::system;
+using namespace bc::system::machine;
 
 data_chunk valid_raw_operation = to_chunk(base16_literal("0900ff11ee22bb33aa44"));
 

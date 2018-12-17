@@ -19,10 +19,11 @@
 #include <cstdint>
 #include <utility>
 #include <vector>
-#include <bitcoin/bitcoin/chain/point.hpp>
-#include <bitcoin/bitcoin/chain/point_value.hpp>
+#include <bitcoin/system/chain/point.hpp>
+#include <bitcoin/system/chain/point_value.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace chain {
 
 // Constructors.
@@ -98,4 +99,5 @@ void point_value::set_value(uint64_t value)
 }
 
 } // namespace chain
+} // namespace system
 } // namespace libbitcoin

@@ -16,20 +16,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/bitcoin_uri.hpp>
+#include <bitcoin/system/wallet/bitcoin_uri.hpp>
 
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <map>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin/formats/base_10.hpp>
-#include <bitcoin/bitcoin/wallet/payment_address.hpp>
-#include <bitcoin/bitcoin/wallet/stealth_address.hpp>
-#include <bitcoin/bitcoin/wallet/uri.hpp>
-#include <bitcoin/bitcoin/wallet/uri_reader.hpp>
+#include <bitcoin/system/formats/base_10.hpp>
+#include <bitcoin/system/wallet/payment_address.hpp>
+#include <bitcoin/system/wallet/stealth_address.hpp>
+#include <bitcoin/system/wallet/uri.hpp>
+#include <bitcoin/system/wallet/uri_reader.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace wallet {
 
 static const auto bitcoin_scheme = "bitcoin";
@@ -298,4 +299,5 @@ std::ostream& operator<<(std::ostream& out, const bitcoin_uri& from)
 }
 
 } // namespace wallet
+} // namespace system
 } // namespace libbitcoin

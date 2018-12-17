@@ -32,7 +32,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <bitcoin/bitcoin/compat.h>
+#include <bitcoin/system/compat.h>
 #include "pbkdf2_sha256.h"
 
 static void blkcpy(uint8_t*, uint8_t*, size_t);

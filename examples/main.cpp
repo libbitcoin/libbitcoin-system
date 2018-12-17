@@ -18,42 +18,45 @@
  */
 #include <cstdlib>
 #include <string>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
 BC_USE_LIBBITCOIN_MAIN
 
 // Testing out our http://utf8everywhere.org implementation.
-int bc::main(int argc, char* argv[])
+int bc::system::main(int argc, char* argv[])
 {
+    using namespace bc;
+    using namespace bc::system;
+
     // Windows utf8 everywhere demonstration.
     set_utf8_stdio();
 
-    bc::cout << "output : acción.кошка.日本国" << std::endl;
-    bc::cerr << "error : acción.кошка.日本国" << std::endl;
+    system::cout << "output : acción.кошка.日本国" << std::endl;
+    system::cerr << "error : acción.кошка.日本国" << std::endl;
 
-    bc::cout << "Enter text to input..." << std::endl;
+    system::cout << "Enter text to input..." << std::endl;
     std::string console;
-    bc::cin >> console;
-    bc::cout << "input[0]  : " << console << std::endl;
+    system::cin >> console;
+    system::cout << "input[0]  : " << console << std::endl;
 
     if (argc > 1)
-        bc::cout << "argv[1] : " << argv[1] << std::endl;
+        system::cout << "argv[1] : " << argv[1] << std::endl;
 
 #ifdef _MSC_VER
     if (environ[0] != nullptr)
-        bc::cout << "environ[0] : " << environ[0] << std::endl;
+        system::cout << "environ[0] : " << environ[0] << std::endl;
 #endif
 
     // Extracting Satoshi's words from genesis block.
-    const chain::block block = bc::settings(bc::config::settings::mainnet)
+    const chain::block block = settings(config::settings::mainnet)
         .genesis_block;
     const auto& coinbase = block.transactions().front();
     const auto& input = coinbase.inputs().front();
-	BITCOIN_ASSERT_MSG(input.script().size() > 2u, "unexpected genesis");
+    BITCOIN_ASSERT_MSG(input.script().size() > 2u, "unexpected genesis");
 
-	const auto headline = input.script()[2].data();
-	std::string message(headline.begin(), headline.end());
-    bc::cout << message << std::endl;
+    const auto headline = input.script()[2].data();
+    std::string message(headline.begin(), headline.end());
+    system::cout << message << std::endl;
 
     return EXIT_SUCCESS;
 }

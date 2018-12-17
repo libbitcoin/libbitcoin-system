@@ -16,12 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_TEST_MACHINE_NUMBER_HPP
-#define LIBBITCOIN_TEST_MACHINE_NUMBER_HPP
+#ifndef LIBBITCOIN_SYSTEM_TEST_MACHINE_NUMBER_HPP
+#define LIBBITCOIN_SYSTEM_TEST_MACHINE_NUMBER_HPP
 
 #include <cstdint>
 #include <limits>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
 // (-2147483647 - 1)  and (-9223372036854775807 - 1) prevent warnings.
 
@@ -66,7 +66,7 @@ sizeof(number_offsets) / sizeof(number_offsets[0]);
 struct number_buffer
 {
     int32_t number;
-    bc::data_chunk bytes;
+    bc::system::data_chunk bytes;
 };
 
 struct number_subtract

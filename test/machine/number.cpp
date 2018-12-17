@@ -24,7 +24,7 @@
 #include <sstream>
 #include <string>
 #include <boost/format.hpp>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 #include "number.hpp"
 #ifdef ENABLE_DATAGEN
 #include "big_number.hpp"
@@ -32,30 +32,30 @@
 
 BOOST_AUTO_TEST_SUITE(number_tests)
 
-using namespace bc;
-using namespace bc::machine;
+using namespace bc::system;
+using namespace bc::system::machine;
 
 // Helpers
 // ----------------------------------------------------------------------------
 
 #define BC_SCRIPT_NUMBER_CHECK_EQ(buffer_num, script_num, value, offset, test) \
     BOOST_CHECK_MESSAGE( \
-    	encode_base16((buffer_num).bytes) == encode_base16((script_num).data()), \
-    	"\n\tvalue index : " << value << \
-		"\n\tvalue       : " << number_values[value] << \
-		"\n\toffset index: " << offset << \
-		"\n\toffset      : " << number_offsets[offset] << \
-		"\n\ttest        : " << test << \
-		"\n\tFAILURE     : [" << encode_base16((buffer_num).bytes) << " != " << \
-		encode_base16((script_num).data()) << "]"); \
+        encode_base16((buffer_num).bytes) == encode_base16((script_num).data()), \
+        "\n\tvalue index : " << value << \
+        "\n\tvalue       : " << number_values[value] << \
+        "\n\toffset index: " << offset << \
+        "\n\toffset      : " << number_offsets[offset] << \
+        "\n\ttest        : " << test << \
+        "\n\tFAILURE     : [" << encode_base16((buffer_num).bytes) << " != " << \
+        encode_base16((script_num).data()) << "]"); \
     BOOST_CHECK_MESSAGE((buffer_num).number == (script_num).int32(), \
-       	"\n\tvalue index : " << value << \
-   		"\n\tvalue       : " << number_values[value] << \
-   		"\n\toffset index: " << offset << \
-    	"\n\toffset      : " << number_offsets[offset] << \
-		"\n\ttest        : " << test << \
-		"\n\tFAILURE     : [" << (buffer_num).number << " != " << \
-		(script_num).int32() << "]")
+        "\n\tvalue index : " << value << \
+        "\n\tvalue       : " << number_values[value] << \
+        "\n\toffset index: " << offset << \
+        "\n\toffset      : " << number_offsets[offset] << \
+        "\n\ttest        : " << test << \
+        "\n\tFAILURE     : [" << (buffer_num).number << " != " << \
+        (script_num).int32() << "]")
 
 static bool is(uint8_t byte)
 {
@@ -86,25 +86,25 @@ static bool negate_overflow64(const int64_t number)
 // ----------------------------------------------------------------------------
 
 static void CheckAdd(const int64_t num1, const int64_t num2, size_t value,
-	size_t offset, size_t test)
+    size_t offset, size_t test)
 {
-	const number_buffer& add = number_adds[value][offset][test];
+    const number_buffer& add = number_adds[value][offset][test];
     const number scriptnum1(num1);
     const number scriptnum2(num2);
 
     if (!add_overflow64(num1, num2))
     {
         BC_SCRIPT_NUMBER_CHECK_EQ(add, scriptnum1 + scriptnum2, value, offset,
-        	test);
+            test);
         BC_SCRIPT_NUMBER_CHECK_EQ(add, scriptnum1 + num2, value, offset, test);
         BC_SCRIPT_NUMBER_CHECK_EQ(add, scriptnum2 + num1, value, offset, test);
     }
 }
 
 static void CheckNegate(const int64_t num, size_t value,
-	size_t offset, size_t test)
+    size_t offset, size_t test)
 {
-	const number_buffer& negated = number_negates[value][offset][test];
+    const number_buffer& negated = number_negates[value][offset][test];
     const number scriptnum(num);
 
     if (!negate_overflow64(num))
@@ -114,31 +114,31 @@ static void CheckNegate(const int64_t num, size_t value,
 }
 
 static void CheckSubtract(const int64_t num1, const int64_t num2, size_t value,
-	size_t offset, size_t test)
+    size_t offset, size_t test)
 {
-	const number_subtract& subtract = number_subtracts[value][offset][test];
+    const number_subtract& subtract = number_subtracts[value][offset][test];
     const number scriptnum1(num1);
     const number scriptnum2(num2);
 
     if (!subtract_overflow64(num1, num2))
     {
         BC_SCRIPT_NUMBER_CHECK_EQ(subtract.forward, scriptnum1 - scriptnum2,
-        	value, offset, test);
+            value, offset, test);
         BC_SCRIPT_NUMBER_CHECK_EQ(subtract.forward, scriptnum1 - num2, value,
-        	offset, test);
+            offset, test);
     }
 
     if (!subtract_overflow64(num2, num1))
     {
         BC_SCRIPT_NUMBER_CHECK_EQ(subtract.reverse, scriptnum2 - scriptnum1,
-        	value, offset, test);
+            value, offset, test);
         BC_SCRIPT_NUMBER_CHECK_EQ(subtract.reverse, scriptnum2 - num1, value,
-        	offset, test);
+            offset, test);
     }
 }
 
 static void CheckCompare(const int64_t num1, const int64_t num2,
-	size_t value, size_t offset, size_t test)
+    size_t value, size_t offset, size_t test)
 {
     const number_compare& compare = number_compares[value][offset][test];
     const number scriptnum1(num1);
@@ -188,10 +188,10 @@ static void RunOperators(const int64_t num1, int64_t num2, size_t value,
     //    % num1 % num2 % value % offset % test;
     //BOOST_MESSAGE(message.str());
 
-	CheckAdd(num1, num2, value, offset, test);
-	CheckNegate(num1, value, offset, test);
-	CheckSubtract(num1, num2, value, offset, test);
-	CheckCompare(num1, num2, value, offset, test);
+    CheckAdd(num1, num2, value, offset, test);
+    CheckNegate(num1, value, offset, test);
+    CheckSubtract(num1, num2, value, offset, test);
+    CheckCompare(num1, num2, value, offset, test);
 }
 
 BOOST_AUTO_TEST_CASE(check_operators)
@@ -309,7 +309,7 @@ static number_compare MakeCompare(const int64_t num1, const int64_t num2)
 // Formatter Helpers
 // ----------------------------------------------------------------------------
 
-static void write_bytes(bc::data_chunk chunk, std::ostream& out)
+static void write_bytes(data_chunk chunk, std::ostream& out)
 {
     for (const auto& byte : chunk)
         out << (boost::format(" 0x%02x, ") % static_cast<uint16_t>(byte));

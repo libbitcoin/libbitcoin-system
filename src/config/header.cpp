@@ -16,16 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/config/header.hpp>
+#include <bitcoin/system/config/header.hpp>
 
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin/chain/header.hpp>
-#include <bitcoin/bitcoin/config/base16.hpp>
+#include <bitcoin/system/chain/header.hpp>
+#include <bitcoin/system/config/base16.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace config {
 
 using namespace boost::program_options;
@@ -78,4 +79,5 @@ std::ostream& operator<<(std::ostream& output, const header& argument)
 }
 
 } // namespace config
+} // namespace system
 } // namespace libbitcoin

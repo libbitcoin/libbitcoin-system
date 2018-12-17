@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/log/sink.hpp>
+#include <bitcoin/system/log/sink.hpp>
 
 #include <map>
 #include <string>
@@ -27,13 +27,14 @@
 #include <boost/log/sinks.hpp>
 #include <boost/log/support/date_time.hpp>
 #include <boost/smart_ptr/make_shared.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/log/attributes.hpp>
-#include <bitcoin/bitcoin/log/file_collector_repository.hpp>
-#include <bitcoin/bitcoin/log/severity.hpp>
-#include <bitcoin/bitcoin/unicode/ofstream.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/log/attributes.hpp>
+#include <bitcoin/system/log/file_collector_repository.hpp>
+#include <bitcoin/system/log/severity.hpp>
+#include <bitcoin/system/unicode/ofstream.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace log {
 
 using namespace boost::log;
@@ -95,7 +96,7 @@ static boost::shared_ptr<collector> file_collector(
     const rotable_file& rotation)
 {
     // rotation_size controls enable/disable so use zero as max sentinel.
-    return bc::log::make_collector(
+    return log::make_collector(
         rotation.archive_directory,
         rotation.maximum_archive_size == 0 ? max_size_t :
             rotation.maximum_archive_size,
@@ -171,8 +172,8 @@ void initialize()
     };
 
     // Null stream instances used to disable log output.
-    static auto debug_file = boost::make_shared<bc::ofstream>("/dev/null");
-    static auto error_file = boost::make_shared<bc::ofstream>("/dev/null");
+    static auto debug_file = boost::make_shared<ofstream>("/dev/null");
+    static auto error_file = boost::make_shared<ofstream>("/dev/null");
     static log::stream output_stream = boost::make_shared<null_stream>();
     static log::stream error_stream = boost::make_shared<null_stream>();
     initialize(debug_file, error_file, output_stream, error_stream, false);
@@ -205,4 +206,5 @@ void initialize(const rotable_file& debug_file, const rotable_file& error_file,
 }
 
 } // namespace log
+} // namespace system
 } // namespace libbitcoin

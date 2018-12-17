@@ -16,16 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/stealth_receiver.hpp>
+#include <bitcoin/system/wallet/stealth_receiver.hpp>
 
 #include <cstdint>
-#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <bitcoin/bitcoin/math/stealth.hpp>
-#include <bitcoin/bitcoin/utility/binary.hpp>
-#include <bitcoin/bitcoin/wallet/payment_address.hpp>
-#include <bitcoin/bitcoin/wallet/stealth_address.hpp>
+#include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/math/stealth.hpp>
+#include <bitcoin/system/utility/binary.hpp>
+#include <bitcoin/system/wallet/payment_address.hpp>
+#include <bitcoin/system/wallet/stealth_address.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace wallet {
 
 // TODO: use to factory and make address_ and spend_public_ const.
@@ -73,4 +74,5 @@ bool stealth_receiver::derive_private(ec_secret& out_private,
 }
 
 } // namespace wallet
+} // namespace system
 } // namespace libbitcoin

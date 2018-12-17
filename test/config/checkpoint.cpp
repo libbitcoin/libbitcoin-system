@@ -21,10 +21,10 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 #include <boost/test/unit_test.hpp>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
-using namespace bc;
-using namespace bc::config;
+using namespace bc::system;
+using namespace bc::system::config;
 using namespace boost::program_options;
 
 BOOST_AUTO_TEST_SUITE(checkpoint_tests)
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(checkpoint__construct__digest__expected)
     const size_t expected_height = 42;
     const auto expected_hash = CHECKPOINT_HASH_A;
     hash_digest digest;
-    bc::decode_hash(digest, expected_hash);
+    decode_hash(digest, expected_hash);
     const checkpoint genesis(digest, expected_height);
     BOOST_REQUIRE_EQUAL(genesis.height(), expected_height);
     BOOST_REQUIRE_EQUAL(encode_hash(genesis.hash()), expected_hash);

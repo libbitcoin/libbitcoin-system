@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/thread.hpp>
+#include <bitcoin/system/utility/thread.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -41,6 +41,7 @@
 #endif
 
 namespace libbitcoin {
+namespace system {
 
 // Privately map the class enum thread priority value to an interger.
 static int get_priority(thread_priority priority)
@@ -120,4 +121,5 @@ size_t thread_floor(size_t configured)
     return std::max(configured, cores());
 }
 
+} // namespace system
 } // namespace libbitcoin

@@ -16,16 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/stealth_sender.hpp>
+#include <bitcoin/system/wallet/stealth_sender.hpp>
 
 #include <cstdint>
-#include <bitcoin/bitcoin/chain/script.hpp>
-#include <bitcoin/bitcoin/math/stealth.hpp>
-#include <bitcoin/bitcoin/utility/binary.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/wallet/payment_address.hpp>
+#include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/math/stealth.hpp>
+#include <bitcoin/system/utility/binary.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/wallet/payment_address.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace wallet {
 
 stealth_sender::stealth_sender(const stealth_address& address,
@@ -86,4 +87,5 @@ const wallet::payment_address& stealth_sender::payment_address() const
 }
 
 } // namespace wallet
+} // namespace system
 } // namespace libbitcoin

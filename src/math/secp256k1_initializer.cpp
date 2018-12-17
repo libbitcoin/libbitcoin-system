@@ -22,6 +22,7 @@
 #include <secp256k1.h>
 
 namespace libbitcoin {
+namespace system {
 
 // We do not share contexts because they may or may not both be required.
 secp256k1_signing signing;
@@ -66,4 +67,5 @@ secp256k1_verification::secp256k1_verification()
 {
 }
 
+} // namespace system
 } // namespace libbitcoin

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/config/parser.hpp>
+#include <bitcoin/system/config/parser.hpp>
 
 #include <string>
 #include <sstream>
@@ -24,9 +24,10 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <boost/throw_exception.hpp>
-#include <bitcoin/bitcoin/unicode/ifstream.hpp>
+#include <bitcoin/system/unicode/ifstream.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace config {
 
 using namespace boost::filesystem;
@@ -96,7 +97,7 @@ bool parser::load_configuration_variables(variables_map& variables,
     if (!config_path.empty() && exists(config_path, code))
     {
         const auto& path = config_path.string();
-        bc::ifstream file(path);
+        ifstream file(path);
 
         if (!file.good())
         {
@@ -116,4 +117,5 @@ bool parser::load_configuration_variables(variables_map& variables,
 }
 
 } // namespace config
+} // namespace system
 } // namespace libbitcoin

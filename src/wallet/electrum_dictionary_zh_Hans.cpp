@@ -16,17 +16,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/electrum_dictionary.hpp>
+#include <bitcoin/system/wallet/electrum_dictionary.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace wallet {
 namespace language {
 namespace electrum {
 
 // This dictionary is identical to the BIP39 reference word lists.
-const dictionary zh_Hans = libbitcoin::wallet::language::zh_Hans;
+const dictionary zh_Hans = libbitcoin::system::wallet::language::zh_Hans;
 
 } // namespace electrum
 } // namespace language
 } // namespace wallet
+} // namespace system
 } // namespace libbitcoin

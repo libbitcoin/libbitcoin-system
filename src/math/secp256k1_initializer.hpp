@@ -16,14 +16,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SECP256K1_INITIALIZER_HPP
-#define LIBBITCOIN_SECP256K1_INITIALIZER_HPP
+#ifndef LIBBITCOIN_SYSTEM_SECP256K1_INITIALIZER_HPP
+#define LIBBITCOIN_SYSTEM_SECP256K1_INITIALIZER_HPP
 
 #include <mutex>
 #include <secp256k1.h>
-#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
+namespace system {
 
 /**
  * Virtual base class for secp256k1 context management.
@@ -88,15 +89,17 @@ public:
 };
 
 /**
- * Use bc::signing.context() to obtain the secp256k1 signing context.
+ * Use bc::system::signing.context() to obtain the secp256k1 signing context.
  */
 extern secp256k1_signing signing;
 
 /**
- * Use bc::verification.context() to obtain the secp256k1 verification context.
+ * Use bc::system::verification.context() to obtain the secp256k1 verification
+ * context.
  */
 extern secp256k1_verification verification;
 
+} // namespace system
 } // namespace libbitcoin
 
 #endif

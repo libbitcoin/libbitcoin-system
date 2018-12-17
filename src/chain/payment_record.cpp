@@ -16,21 +16,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/chain/payment_record.hpp>
+#include <bitcoin/system/chain/payment_record.hpp>
 
 #include <cstddef>
 #include <cstdint>
 #include <istream>
 #include <utility>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/chain/point.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/container_sink.hpp>
-#include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream_reader.hpp>
-#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/chain/point.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace chain {
 
 // HACK: must match tx slab_map::not_found.
@@ -340,4 +341,5 @@ void payment_record::set_index(uint32_t value)
 }
 
 } // namespace chain
+} // namespace system
 } // namespace libbitcoin

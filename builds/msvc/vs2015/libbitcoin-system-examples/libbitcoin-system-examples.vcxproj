@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ |  Copyright (c) 2014-2018 libbitcoin-system developers (see COPYING).
+ |
+ |         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
+ |
+ -->
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <ProjectGuid>{B726DF7D-6D1D-48FB-AC02-34EB45F9145E}</ProjectGuid>
+    <ProjectName>libbitcoin-system-examples</ProjectName>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugDEXE|Win32">
+      <Configuration>DebugDEXE</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseDEXE|Win32">
+      <Configuration>ReleaseDEXE</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugDEXE|x64">
+      <Configuration>DebugDEXE</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseDEXE|x64">
+      <Configuration>ReleaseDEXE</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugLEXE|Win32">
+      <Configuration>DebugLEXE</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseLEXE|Win32">
+      <Configuration>ReleaseLEXE</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugLEXE|x64">
+      <Configuration>DebugLEXE</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseLEXE|x64">
+      <Configuration>ReleaseLEXE</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugSEXE|Win32">
+      <Configuration>DebugSEXE</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseSEXE|Win32">
+      <Configuration>ReleaseSEXE</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugSEXE|x64">
+      <Configuration>DebugSEXE</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseSEXE|x64">
+      <Configuration>ReleaseSEXE</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(ProjectDir)..\..\properties\$(Configuration).props" />
+    <Import Project="$(ProjectDir)..\..\properties\Output.props" />
+    <Import Project="$(ProjectDir)$(ProjectName).props" />
+  </ImportGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\examples\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\resource.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(NuGetPackageRoot)boost.1.64.0.0\build\native\boost.targets" Condition="Exists('$(NuGetPackageRoot)boost.1.64.0.0\build\native\boost.targets')" />
+    <Import Project="$(NuGetPackageRoot)boost_atomic-vc140.1.64.0.0\build\native\boost_atomic-vc140.targets" Condition="Exists('$(NuGetPackageRoot)boost_atomic-vc140.1.64.0.0\build\native\boost_atomic-vc140.targets')" />
+    <Import Project="$(NuGetPackageRoot)boost_chrono-vc140.1.64.0.0\build\native\boost_chrono-vc140.targets" Condition="Exists('$(NuGetPackageRoot)boost_chrono-vc140.1.64.0.0\build\native\boost_chrono-vc140.targets')" />
+    <Import Project="$(NuGetPackageRoot)boost_date_time-vc140.1.64.0.0\build\native\boost_date_time-vc140.targets" Condition="Exists('$(NuGetPackageRoot)boost_date_time-vc140.1.64.0.0\build\native\boost_date_time-vc140.targets')" />
+    <Import Project="$(NuGetPackageRoot)boost_filesystem-vc140.1.64.0.0\build\native\boost_filesystem-vc140.targets" Condition="Exists('$(NuGetPackageRoot)boost_filesystem-vc140.1.64.0.0\build\native\boost_filesystem-vc140.targets')" />
+    <Import Project="$(NuGetPackageRoot)boost_iostreams-vc140.1.64.0.0\build\native\boost_iostreams-vc140.targets" Condition="Exists('$(NuGetPackageRoot)boost_iostreams-vc140.1.64.0.0\build\native\boost_iostreams-vc140.targets')" />
+    <Import Project="$(NuGetPackageRoot)boost_locale-vc140.1.64.0.0\build\native\boost_locale-vc140.targets" Condition="Exists('$(NuGetPackageRoot)boost_locale-vc140.1.64.0.0\build\native\boost_locale-vc140.targets')" />
+    <Import Project="$(NuGetPackageRoot)boost_log_setup-vc140.1.64.0.0\build\native\boost_log_setup-vc140.targets" Condition="Exists('$(NuGetPackageRoot)boost_log_setup-vc140.1.64.0.0\build\native\boost_log_setup-vc140.targets')" />
+    <Import Project="$(NuGetPackageRoot)boost_log-vc140.1.64.0.0\build\native\boost_log-vc140.targets" Condition="Exists('$(NuGetPackageRoot)boost_log-vc140.1.64.0.0\build\native\boost_log-vc140.targets')" />
+    <Import Project="$(NuGetPackageRoot)boost_program_options-vc140.1.64.0.0\build\native\boost_program_options-vc140.targets" Condition="Exists('$(NuGetPackageRoot)boost_program_options-vc140.1.64.0.0\build\native\boost_program_options-vc140.targets')" />
+    <Import Project="$(NuGetPackageRoot)boost_regex-vc140.1.64.0.0\build\native\boost_regex-vc140.targets" Condition="Exists('$(NuGetPackageRoot)boost_regex-vc140.1.64.0.0\build\native\boost_regex-vc140.targets')" />
+    <Import Project="$(NuGetPackageRoot)boost_system-vc140.1.64.0.0\build\native\boost_system-vc140.targets" Condition="Exists('$(NuGetPackageRoot)boost_system-vc140.1.64.0.0\build\native\boost_system-vc140.targets')" />
+    <Import Project="$(NuGetPackageRoot)boost_thread-vc140.1.64.0.0\build\native\boost_thread-vc140.targets" Condition="Exists('$(NuGetPackageRoot)boost_thread-vc140.1.64.0.0\build\native\boost_thread-vc140.targets')" />
+    <Import Project="$(NuGetPackageRoot)secp256k1-vc140.0.1.0.16\build\native\secp256k1-vc140.targets" Condition="Exists('$(NuGetPackageRoot)secp256k1-vc140.0.1.0.16\build\native\secp256k1-vc140.targets')" />
+  </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(NuGetPackageRoot)boost.1.64.0.0\build\native\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost.1.64.0.0\build\native\boost.targets'))" />
+    <Error Condition="!Exists('$(NuGetPackageRoot)boost_atomic-vc140.1.64.0.0\build\native\boost_atomic-vc140.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_atomic-vc140.1.64.0.0\build\native\boost_atomic-vc140.targets'))" />
+    <Error Condition="!Exists('$(NuGetPackageRoot)boost_chrono-vc140.1.64.0.0\build\native\boost_chrono-vc140.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_chrono-vc140.1.64.0.0\build\native\boost_chrono-vc140.targets'))" />
+    <Error Condition="!Exists('$(NuGetPackageRoot)boost_date_time-vc140.1.64.0.0\build\native\boost_date_time-vc140.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_date_time-vc140.1.64.0.0\build\native\boost_date_time-vc140.targets'))" />
+    <Error Condition="!Exists('$(NuGetPackageRoot)boost_filesystem-vc140.1.64.0.0\build\native\boost_filesystem-vc140.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_filesystem-vc140.1.64.0.0\build\native\boost_filesystem-vc140.targets'))" />
+    <Error Condition="!Exists('$(NuGetPackageRoot)boost_iostreams-vc140.1.64.0.0\build\native\boost_iostreams-vc140.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_iostreams-vc140.1.64.0.0\build\native\boost_iostreams-vc140.targets'))" />
+    <Error Condition="!Exists('$(NuGetPackageRoot)boost_locale-vc140.1.64.0.0\build\native\boost_locale-vc140.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_locale-vc140.1.64.0.0\build\native\boost_locale-vc140.targets'))" />
+    <Error Condition="!Exists('$(NuGetPackageRoot)boost_log_setup-vc140.1.64.0.0\build\native\boost_log_setup-vc140.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_log_setup-vc140.1.64.0.0\build\native\boost_log_setup-vc140.targets'))" />
+    <Error Condition="!Exists('$(NuGetPackageRoot)boost_log-vc140.1.64.0.0\build\native\boost_log-vc140.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_log-vc140.1.64.0.0\build\native\boost_log-vc140.targets'))" />
+    <Error Condition="!Exists('$(NuGetPackageRoot)boost_program_options-vc140.1.64.0.0\build\native\boost_program_options-vc140.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_program_options-vc140.1.64.0.0\build\native\boost_program_options-vc140.targets'))" />
+    <Error Condition="!Exists('$(NuGetPackageRoot)boost_regex-vc140.1.64.0.0\build\native\boost_regex-vc140.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_regex-vc140.1.64.0.0\build\native\boost_regex-vc140.targets'))" />
+    <Error Condition="!Exists('$(NuGetPackageRoot)boost_system-vc140.1.64.0.0\build\native\boost_system-vc140.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_system-vc140.1.64.0.0\build\native\boost_system-vc140.targets'))" />
+    <Error Condition="!Exists('$(NuGetPackageRoot)boost_thread-vc140.1.64.0.0\build\native\boost_thread-vc140.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_thread-vc140.1.64.0.0\build\native\boost_thread-vc140.targets'))" />
+    <Error Condition="!Exists('$(NuGetPackageRoot)secp256k1-vc140.0.1.0.16\build\native\secp256k1-vc140.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)secp256k1-vc140.0.1.0.16\build\native\secp256k1-vc140.targets'))" />
+  </Target>
+  <ItemGroup>
+    <ProjectReference Include="..\libbitcoin-system\libbitcoin-system.vcxproj">
+      <Project>{39F60708-FF48-4C22-952D-43470866F684}</Project>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

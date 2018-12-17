@@ -16,15 +16,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_PARSE_ENCRYPTED_PREFIX_IPP
-#define LIBBITCOIN_PARSE_ENCRYPTED_PREFIX_IPP
+#ifndef LIBBITCOIN_SYSTEM_PARSE_ENCRYPTED_PREFIX_IPP
+#define LIBBITCOIN_SYSTEM_PARSE_ENCRYPTED_PREFIX_IPP
 
 #include <cstdint>
 #include <cstddef>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/wallet/encrypted_keys.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace wallet {
 
 template<size_t Size>
@@ -59,6 +60,7 @@ void parse_encrypted_prefix<Size>::valid(bool value)
 }
 
 } // namespace wallet
+} // namespace system
 } // namespace libbitcoin
 
 #endif

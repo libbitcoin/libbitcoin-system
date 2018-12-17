@@ -16,16 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/message/get_data.hpp>
+#include <bitcoin/system/message/get_data.hpp>
 
 #include <algorithm>
 #include <initializer_list>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/message/inventory.hpp>
-#include <bitcoin/bitcoin/message/inventory_vector.hpp>
-#include <bitcoin/bitcoin/message/version.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/message/inventory.hpp>
+#include <bitcoin/system/message/inventory_vector.hpp>
+#include <bitcoin/system/message/version.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace message {
 
 const std::string get_data::command = "getdata";
@@ -142,4 +143,5 @@ bool get_data::operator!=(const get_data& other) const
 }
 
 } // namespace message
+} // namespace system
 } // namespace libbitcoin

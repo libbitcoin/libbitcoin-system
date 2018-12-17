@@ -16,16 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/message.hpp>
+#include <bitcoin/system/wallet/message.hpp>
 
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/math/limits.hpp>
-#include <bitcoin/bitcoin/utility/container_sink.hpp>
-#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
-#include <bitcoin/bitcoin/wallet/ec_private.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
+#include <bitcoin/system/wallet/ec_private.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace wallet {
 
 static constexpr uint8_t max_recovery_id = 3;
@@ -159,4 +160,5 @@ bool verify_message(data_slice message, const payment_address& address,
 }
 
 } // namespace wallet
+} // namespace system
 } // namespace libbitcoin

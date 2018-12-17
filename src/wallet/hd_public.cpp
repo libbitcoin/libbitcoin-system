@@ -16,27 +16,28 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/hd_public.hpp>
+#include <bitcoin/system/wallet/hd_public.hpp>
 
 #include <cstdint>
 #include <iostream>
 #include <string>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/formats/base_58.hpp>
-#include <bitcoin/bitcoin/math/checksum.hpp>
-#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/math/limits.hpp>
-#include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/endian.hpp>
-#include <bitcoin/bitcoin/utility/istream_reader.hpp>
-#include <bitcoin/bitcoin/wallet/ec_public.hpp>
-#include <bitcoin/bitcoin/wallet/hd_private.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/formats/base_58.hpp>
+#include <bitcoin/system/math/checksum.hpp>
+#include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/endian.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/wallet/ec_public.hpp>
+#include <bitcoin/system/wallet/hd_private.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace wallet {
 
 const uint32_t hd_public::mainnet = 76067358;
@@ -314,4 +315,5 @@ bool hd_lineage::operator!=(const hd_lineage& other) const
 }
 
 } // namespace wallet
+} // namespace system
 } // namespace libbitcoin

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/config/point.hpp>
+#include <bitcoin/system/config/point.hpp>
 
 #include <iostream>
 #include <iostream>
@@ -24,12 +24,13 @@
 #include <string>
 #include <utility>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin/chain/output_point.hpp>
-#include <bitcoin/bitcoin/config/hash256.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/utility/string.hpp>
+#include <bitcoin/system/chain/output_point.hpp>
+#include <bitcoin/system/config/hash256.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/utility/string.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace config {
 
 using namespace boost::program_options;
@@ -108,4 +109,5 @@ std::ostream& operator<<(std::ostream& output, const point& argument)
 }
 
 } // namespace config
+} // namespace system
 } // namespace libbitcoin

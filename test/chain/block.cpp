@@ -17,9 +17,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <boost/test/unit_test.hpp>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
 using namespace bc;
+using namespace bc::system;
 
 // Test helper.
 static bool all_valid(const chain::transaction::list& transactions)
@@ -269,7 +270,7 @@ BOOST_AUTO_TEST_CASE(block__from_data__insufficient_transaction_bytes__failure)
 
 BOOST_AUTO_TEST_CASE(block__genesis__mainnet__valid_structure)
 {
-    const chain::block genesis = settings(bc::config::settings::mainnet).genesis_block;
+    const chain::block genesis = settings(config::settings::mainnet).genesis_block;
     BOOST_REQUIRE(genesis.is_valid());
     BOOST_REQUIRE_EQUAL(genesis.transactions().size(), 1u);
     BOOST_REQUIRE(genesis.header().merkle() == genesis.generate_merkle_root());
@@ -277,7 +278,7 @@ BOOST_AUTO_TEST_CASE(block__genesis__mainnet__valid_structure)
 
 BOOST_AUTO_TEST_CASE(block__genesis__testnet__valid_structure)
 {
-    const chain::block genesis = settings(bc::config::settings::testnet).genesis_block;
+    const chain::block genesis = settings(config::settings::testnet).genesis_block;
     BOOST_REQUIRE(genesis.is_valid());
     BOOST_REQUIRE_EQUAL(genesis.transactions().size(), 1u);
     BOOST_REQUIRE(genesis.header().merkle() == genesis.generate_merkle_root());
@@ -285,7 +286,7 @@ BOOST_AUTO_TEST_CASE(block__genesis__testnet__valid_structure)
 
 BOOST_AUTO_TEST_CASE(block__genesis__regtest__valid_structure)
 {
-    const chain::block genesis = settings(bc::config::settings::regtest).genesis_block;
+    const chain::block genesis = settings(config::settings::regtest).genesis_block;
     BOOST_REQUIRE(genesis.is_valid());
     BOOST_REQUIRE_EQUAL(genesis.transactions().size(), 1u);
     BOOST_REQUIRE(genesis.header().merkle() == genesis.generate_merkle_root());
@@ -294,7 +295,7 @@ BOOST_AUTO_TEST_CASE(block__genesis__regtest__valid_structure)
 
 BOOST_AUTO_TEST_CASE(block__factory_1__genesis_mainnet__success)
 {
-    const chain::block genesis = settings(bc::config::settings::mainnet).genesis_block;
+    const chain::block genesis = settings(config::settings::mainnet).genesis_block;
     BOOST_REQUIRE_EQUAL(genesis.serialized_size(), 285u);
     BOOST_REQUIRE_EQUAL(genesis.header().serialized_size(), 80u);
 
@@ -314,7 +315,7 @@ BOOST_AUTO_TEST_CASE(block__factory_1__genesis_mainnet__success)
 
 BOOST_AUTO_TEST_CASE(block__factory_2__genesis_mainnet__success)
 {
-    const chain::block genesis = settings(bc::config::settings::mainnet).genesis_block;
+    const chain::block genesis = settings(config::settings::mainnet).genesis_block;
     BOOST_REQUIRE_EQUAL(genesis.serialized_size(), 285u);
     BOOST_REQUIRE_EQUAL(genesis.header().serialized_size(), 80u);
 
@@ -335,7 +336,7 @@ BOOST_AUTO_TEST_CASE(block__factory_2__genesis_mainnet__success)
 
 BOOST_AUTO_TEST_CASE(block__factory_3__genesis_mainnet__success)
 {
-    const chain::block genesis = settings(bc::config::settings::mainnet).genesis_block;
+    const chain::block genesis = settings(config::settings::mainnet).genesis_block;
     BOOST_REQUIRE_EQUAL(genesis.serialized_size(), 285u);
     BOOST_REQUIRE_EQUAL(genesis.header().serialized_size(), 80u);
 

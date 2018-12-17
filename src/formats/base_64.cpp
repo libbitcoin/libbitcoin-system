@@ -16,16 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/formats/base_64.hpp>
+#include <bitcoin/system/formats/base_64.hpp>
 
 #include <cstdint>
 #include <string>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/system/utility/data.hpp>
 
 // This implementation derived from public domain:
 // en.wikibooks.org/wiki/Algorithm_Implementation/Miscellaneous/Base64
 
 namespace libbitcoin {
+namespace system {
 
 const static char pad = '=';
 
@@ -147,5 +148,6 @@ bool decode_base64(data_chunk& out, const std::string& in)
     return true;
 }
 
+} // namespace system
 } // namespace libbitcoin
 

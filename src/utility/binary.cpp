@@ -16,17 +16,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/binary.hpp>
+#include <bitcoin/system/utility/binary.hpp>
 
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <bitcoin/bitcoin/math/limits.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/endian.hpp>
+#include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/utility/endian.hpp>
 
 namespace libbitcoin {
+namespace system {
 
 binary::size_type binary::blocks_size(size_type bit_size)
 {
@@ -325,4 +326,5 @@ std::ostream& operator<<(std::ostream& out, const binary& of)
     return out;
 }
 
+} // namespace system
 } // namespace libbitcoin

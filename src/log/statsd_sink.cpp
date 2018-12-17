@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/log/statsd_sink.hpp>
+#include <bitcoin/system/log/statsd_sink.hpp>
 
 #include <map>
 #include <string>
@@ -27,23 +27,24 @@
 #include <boost/log/sinks.hpp>
 #include <boost/log/support/date_time.hpp>
 #include <boost/log/utility/setup/formatter_parser.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/log/features/counter.hpp>
-#include <bitcoin/bitcoin/log/features/gauge.hpp>
-#include <bitcoin/bitcoin/log/features/metric.hpp>
-#include <bitcoin/bitcoin/log/features/rate.hpp>
-#include <bitcoin/bitcoin/log/features/timer.hpp>
-#include <bitcoin/bitcoin/log/file_collector_repository.hpp>
-#include <bitcoin/bitcoin/log/severity.hpp>
-#include <bitcoin/bitcoin/log/udp_client_sink.hpp>
-#include <bitcoin/bitcoin/unicode/ofstream.hpp>
-#include <bitcoin/bitcoin/utility/asio.hpp>
-#include <bitcoin/bitcoin/utility/threadpool.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/log/features/counter.hpp>
+#include <bitcoin/system/log/features/gauge.hpp>
+#include <bitcoin/system/log/features/metric.hpp>
+#include <bitcoin/system/log/features/rate.hpp>
+#include <bitcoin/system/log/features/timer.hpp>
+#include <bitcoin/system/log/file_collector_repository.hpp>
+#include <bitcoin/system/log/severity.hpp>
+#include <bitcoin/system/log/udp_client_sink.hpp>
+#include <bitcoin/system/unicode/ofstream.hpp>
+#include <bitcoin/system/utility/asio.hpp>
+#include <bitcoin/system/utility/threadpool.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace log {
 
-using namespace bc::config;
+using namespace bc::system::config;
 using namespace boost::asio::ip;
 using namespace boost::log;
 using namespace boost::log::expressions;
@@ -79,7 +80,7 @@ static boost::shared_ptr<collector> file_collector(
     const rotable_file& rotation)
 {
     // rotation_size controls enable/disable so use zero as max sentinel.
-    return bc::log::make_collector(
+    return log::make_collector(
         rotation.archive_directory,
         rotation.maximum_archive_size == 0 ? max_size_t :
             rotation.maximum_archive_size,
@@ -149,4 +150,5 @@ void initialize_statsd(threadpool& pool, const authority& server)
 }
 
 } // namespace log
+} // namespace system
 } // namespace libbitcoin

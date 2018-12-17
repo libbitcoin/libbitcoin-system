@@ -1,15 +1,15 @@
 ###############################################################################
-#  Copyright (c) 2014-2018 libbitcoin developers (see COPYING).
+#  Copyright (c) 2014-2018 libbitcoin-system developers (see COPYING).
 #
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
 ###############################################################################
 
-# libbitcoin project configuration.
+# libbitcoin-system project configuration.
 #------------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
-project(libbitcoin LANGUAGES C CXX)
+project(libbitcoin-system LANGUAGES C CXX)
 
 enable_testing()
 
@@ -20,9 +20,9 @@ include(CheckSymbolExists)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 if (MSVC)
-  set( CANONICAL_LIB_NAME libbitcoin )
+  set( CANONICAL_LIB_NAME libbitcoin-system )
 else ()
-  set( CANONICAL_LIB_NAME bitcoin )
+  set( CANONICAL_LIB_NAME bitcoin-system )
   find_package( PkgConfig REQUIRED )
 
   set( prefix "${CMAKE_PREFIX_PATH}" )
@@ -588,28 +588,28 @@ else()
         ${secp256k1_STATIC_LIBRARIES} )
 endif()
 
-# Define libbitcoin-examples project.
+# Define libbitcoin-system-examples project.
 #------------------------------------------------------------------------------
 if (with-examples)
-    add_executable( libbitcoin-examples
+    add_executable( libbitcoin-system-examples
         "../../examples/main.cpp" )
 
-#     libbitcoin-examples project specific include directories.
+#     libbitcoin-system-examples project specific include directories.
 #------------------------------------------------------------------------------
-    target_include_directories( libbitcoin-examples PRIVATE
+    target_include_directories( libbitcoin-system-examples PRIVATE
         "../../include" )
 
-#     libbitcoin-examples project specific libraries/linker flags.
+#     libbitcoin-system-examples project specific libraries/linker flags.
 #------------------------------------------------------------------------------
-    target_link_libraries( libbitcoin-examples
+    target_link_libraries( libbitcoin-system-examples
         ${CANONICAL_LIB_NAME} )
 
 endif()
 
-# Define libbitcoin-test project.
+# Define libbitcoin-system-test project.
 #------------------------------------------------------------------------------
 if (with-tests)
-    add_executable( libbitcoin-test
+    add_executable( libbitcoin-system-test
         "../../test/.gitignore"
         "../../test/main.cpp"
         "../../test/settings.cpp"
@@ -723,21 +723,21 @@ if (with-tests)
         "../../test/wallet/uri.cpp"
         "../../test/wallet/uri_reader.cpp" )
 
-    add_test( NAME libbitcoin-test COMMAND libbitcoin-test
+    add_test( NAME libbitcoin-system-test COMMAND libbitcoin-system-test
             --run_test=*
             --show_progress=no
             --detect_memory_leak=0
             --report_level=no
             --build_info=yes )
 
-#     libbitcoin-test project specific include directories.
+#     libbitcoin-system-test project specific include directories.
 #------------------------------------------------------------------------------
-    target_include_directories( libbitcoin-test PRIVATE
+    target_include_directories( libbitcoin-system-test PRIVATE
         "../../include" )
 
-#     libbitcoin-test project specific libraries/linker flags.
+#     libbitcoin-system-test project specific libraries/linker flags.
 #------------------------------------------------------------------------------
-    target_link_libraries( libbitcoin-test
+    target_link_libraries( libbitcoin-system-test
         ${CANONICAL_LIB_NAME}
         ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
 
@@ -746,11 +746,11 @@ endif()
 # Manage pkgconfig installation.
 #------------------------------------------------------------------------------
 configure_file(
-  "../../libbitcoin.pc.in"
-  "libbitcoin.pc" @ONLY )
+  "../../libbitcoin-system.pc.in"
+  "libbitcoin-system.pc" @ONLY )
 
 install( FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/libbitcoin.pc"
+    "${CMAKE_CURRENT_BINARY_DIR}/libbitcoin-system.pc"
     DESTINATION "${pkgconfigdir}" )
 
 # Manage installation of docs.
@@ -762,7 +762,7 @@ install( FILES
     "../../INSTALL"
     "../../NEWS"
     "../../README"
-    DESTINATION share/doc/libbitcoin )
+    DESTINATION share/doc/libbitcoin-system )
 
 # Manage ${CANONICAL_LIB_NAME} installation.
 #------------------------------------------------------------------------------

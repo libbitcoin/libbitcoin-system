@@ -19,10 +19,10 @@
 #include <boost/test/unit_test.hpp>
 
 #include <cstdint>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
-using namespace bc;
-using namespace bc::wallet;
+using namespace bc::system;
+using namespace bc::system::wallet;
 
 BOOST_AUTO_TEST_SUITE(qrcode_tests)
 

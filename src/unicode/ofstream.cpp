@@ -16,22 +16,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/unicode/ofstream.hpp>
+#include <bitcoin/system/unicode/ofstream.hpp>
 
 #include <fstream>
 #include <string>
-#include <bitcoin/bitcoin/unicode/unicode.hpp>
+#include <bitcoin/system/unicode/unicode.hpp>
 
 namespace libbitcoin {
+namespace system {
 
-// Construct bc::ofstream.
+// Construct bc::system::ofstream.
 ofstream::ofstream(const std::string& path, std::ofstream::openmode mode)
 #ifdef _MSC_VER
-  : std::ofstream(bc::to_utf16(path), mode)
+  : std::ofstream(system::to_utf16(path), mode)
 #else
   : std::ofstream(path, mode)
 #endif
 {
 }
 
+} // namespace system
 } // namespace libbitcoin

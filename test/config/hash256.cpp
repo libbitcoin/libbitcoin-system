@@ -18,10 +18,10 @@
  */
 #include <boost/test/unit_test.hpp>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
-using namespace bc;
-using namespace bc::config;
+using namespace bc::system;
+using namespace bc::system::config;
 
 BOOST_AUTO_TEST_SUITE(hash256_tests)
 
@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_SUITE(hash256__construct)
 BOOST_AUTO_TEST_CASE(hash256__construct__default__null_hash)
 {
     const hash256 uninitialized_hash;
-    const auto expectation = encode_hash(bc::null_hash);
+    const auto expectation = encode_hash(null_hash);
     const auto result = encode_hash(uninitialized_hash);
     BOOST_REQUIRE_EQUAL(expectation, result);
 }

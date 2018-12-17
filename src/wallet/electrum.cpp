@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/electrum.hpp>
+#include <bitcoin/system/wallet/electrum.hpp>
 
 #include <algorithm>
 #include <cstdint>
@@ -24,19 +24,20 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/locale.hpp>
 #include <boost/range/adaptor/reversed.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/unicode/unicode.hpp>
-#include <bitcoin/bitcoin/unicode/unicode_ostream.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/binary.hpp>
-#include <bitcoin/bitcoin/utility/collection.hpp>
-#include <bitcoin/bitcoin/utility/string.hpp>
-#include <bitcoin/bitcoin/utility/container_sink.hpp>
-#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
-#include <bitcoin/bitcoin/wallet/electrum_dictionary.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/unicode/unicode.hpp>
+#include <bitcoin/system/unicode/unicode_ostream.hpp>
+#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/utility/binary.hpp>
+#include <bitcoin/system/utility/collection.hpp>
+#include <bitcoin/system/utility/string.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
+#include <bitcoin/system/wallet/electrum_dictionary.hpp>
 #include "../math/external/pkcs5_pbkdf2.h"
 
 namespace libbitcoin {
+namespace system {
 namespace wallet {
 namespace electrum {
 
@@ -559,4 +560,5 @@ long_hash decode_mnemonic(const word_list& mnemonic)
 
 } // namespace electrum
 } // namespace wallet
+} // namespace system
 } // namespace libbitcoin

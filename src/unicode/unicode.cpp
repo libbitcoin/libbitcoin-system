@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/unicode/unicode.hpp>
+#include <bitcoin/system/unicode/unicode.hpp>
 
 #include <cstddef>
 #include <cstring>
@@ -26,13 +26,13 @@
 #include <stdexcept>
 #include <string>
 #include <boost/locale.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/math/limits.hpp>
-#include <bitcoin/bitcoin/unicode/console_streambuf.hpp>
-#include <bitcoin/bitcoin/unicode/unicode_istream.hpp>
-#include <bitcoin/bitcoin/unicode/unicode_ostream.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/unicode/console_streambuf.hpp>
+#include <bitcoin/system/unicode/unicode_istream.hpp>
+#include <bitcoin/system/unicode/unicode_ostream.hpp>
+#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/utility/data.hpp>
 
 #ifdef _MSC_VER
     #include <fcntl.h>
@@ -40,6 +40,7 @@
 #endif
 
 namespace libbitcoin {
+namespace system {
 
 using namespace boost::locale;
 
@@ -59,7 +60,7 @@ static std::once_flag icu_mutex;
 
 #endif
 
-// Static initializer for bc::cin.
+// Static initializer for bc::system::cin.
 std::istream& cin_stream()
 {
     std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
@@ -67,7 +68,7 @@ std::istream& cin_stream()
     return input;
 }
 
-// Static initializer for bc::cout.
+// Static initializer for bc::system::cout.
 std::ostream& cout_stream()
 {
     std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
@@ -75,7 +76,7 @@ std::ostream& cout_stream()
     return output;
 }
 
-// Static initializer for bc::cerr.
+// Static initializer for bc::system::cerr.
 std::ostream& cerr_stream()
 {
     std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
@@ -411,4 +412,5 @@ void set_binary_stdout()
 
 LCOV_EXCL_STOP()
 
+} // namespace system
 } // namespace libbitcoin

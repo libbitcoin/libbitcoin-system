@@ -16,12 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/message/messages.hpp>
+#include <bitcoin/system/message/messages.hpp>
 
 #include <cstddef>
 #include <cstdint>
 
 namespace libbitcoin {
+namespace system {
 namespace message {
 
 size_t variable_uint_size(uint64_t value)
@@ -37,4 +38,5 @@ size_t variable_uint_size(uint64_t value)
 }
 
 } // namespace message
+} // namespace system
 } // namespace libbitcoin

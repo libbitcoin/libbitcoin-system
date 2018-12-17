@@ -16,19 +16,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/pseudo_random.hpp>
+#include <bitcoin/system/utility/pseudo_random.hpp>
 
 #include <chrono>
 #include <cstdint>
 #include <random>
 #include <boost/thread.hpp>
-#include <bitcoin/bitcoin/utility/asio.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/thread.hpp>
+#include <bitcoin/system/utility/asio.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/thread.hpp>
 
 namespace libbitcoin {
+namespace system {
 
-using namespace bc::asio;
+using namespace bc::system::asio;
 using namespace std::chrono;
 
 // DO NOT USE srand() and rand() on MSVC as srand must be called per thread.
@@ -121,4 +122,5 @@ asio::duration pseudo_random::duration(const asio::duration& expiration,
     return milliseconds(expires);
 }
 
+} // namespace system
 } // namespace libbitcoin

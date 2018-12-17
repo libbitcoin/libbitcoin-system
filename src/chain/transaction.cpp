@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/chain/transaction.hpp>
+#include <bitcoin/system/chain/transaction.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -28,30 +28,31 @@
 #include <utility>
 #include <vector>
 #include <boost/optional.hpp>
-#include <bitcoin/bitcoin/chain/chain_state.hpp>
-#include <bitcoin/bitcoin/chain/header.hpp>
-#include <bitcoin/bitcoin/chain/input.hpp>
-#include <bitcoin/bitcoin/chain/output.hpp>
-#include <bitcoin/bitcoin/chain/script.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/math/limits.hpp>
-#include <bitcoin/bitcoin/machine/opcode.hpp>
-#include <bitcoin/bitcoin/machine/operation.hpp>
-#include <bitcoin/bitcoin/machine/rule_fork.hpp>
-#include <bitcoin/bitcoin/message/messages.hpp>
-#include <bitcoin/bitcoin/utility/collection.hpp>
-#include <bitcoin/bitcoin/utility/container_sink.hpp>
-#include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/endian.hpp>
-#include <bitcoin/bitcoin/utility/istream_reader.hpp>
-#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/system/chain/chain_state.hpp>
+#include <bitcoin/system/chain/header.hpp>
+#include <bitcoin/system/chain/input.hpp>
+#include <bitcoin/system/chain/output.hpp>
+#include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/error.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/machine/opcode.hpp>
+#include <bitcoin/system/machine/operation.hpp>
+#include <bitcoin/system/machine/rule_fork.hpp>
+#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/utility/collection.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/endian.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace chain {
 
-using namespace bc::machine;
+using namespace bc::system::machine;
 
 // HACK: unlinked must match tx slab_map::not_found.
 const uint64_t transaction::validation::unlinked = max_int64;
@@ -1218,4 +1219,5 @@ code transaction::connect(const chain_state& state) const
 }
 
 } // namespace chain
+} // namespace system
 } // namespace libbitcoin

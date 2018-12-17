@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/chain/block.hpp>
+#include <bitcoin/system/chain/block.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -30,33 +30,34 @@
 #include <utility>
 #include <unordered_map>
 #include <boost/range/adaptor/reversed.hpp>
-#include <bitcoin/bitcoin/chain/chain_state.hpp>
-#include <bitcoin/bitcoin/chain/compact.hpp>
-#include <bitcoin/bitcoin/chain/input_point.hpp>
-#include <bitcoin/bitcoin/chain/script.hpp>
-#include <bitcoin/bitcoin/config/checkpoint.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/formats/base_16.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/math/limits.hpp>
-#include <bitcoin/bitcoin/machine/number.hpp>
-#include <bitcoin/bitcoin/machine/opcode.hpp>
-#include <bitcoin/bitcoin/machine/rule_fork.hpp>
-#include <bitcoin/bitcoin/message/messages.hpp>
-#include <bitcoin/bitcoin/settings.hpp>
-#include <bitcoin/bitcoin/utility/asio.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/container_sink.hpp>
-#include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream_reader.hpp>
-#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/system/chain/chain_state.hpp>
+#include <bitcoin/system/chain/compact.hpp>
+#include <bitcoin/system/chain/input_point.hpp>
+#include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/config/checkpoint.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/error.hpp>
+#include <bitcoin/system/formats/base_16.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/machine/number.hpp>
+#include <bitcoin/system/machine/opcode.hpp>
+#include <bitcoin/system/machine/rule_fork.hpp>
+#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/settings.hpp>
+#include <bitcoin/system/utility/asio.hpp>
+#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace chain {
 
-using namespace bc::config;
-using namespace bc::machine;
+using namespace bc::system::config;
+using namespace bc::system::machine;
 using namespace boost::adaptors;
 
 // Constructors.
@@ -850,8 +851,8 @@ code block::check(uint64_t max_money, uint32_t timestamp_limit_seconds,
         return check_transactions(max_money);
 }
 
-code block::accept(const bc::settings& settings, bool transactions, bool header)
-    const
+code block::accept(const system::settings& settings, bool transactions,
+    bool header) const
 {
     const auto state = header_.metadata.state;
     return state ? accept(*state, settings, transactions, header) :
@@ -859,8 +860,8 @@ code block::accept(const bc::settings& settings, bool transactions, bool header)
 }
 
 // These checks assume that prevout caching is completed on all tx.inputs.
-code block::accept(const chain_state& state, const bc::settings& settings,
-    bool transactions, bool header) const
+code block::accept(const chain_state& state,
+    const system::settings& settings, bool transactions, bool header) const
 {
     metadata.start_accept = asio::steady_clock::now();
 
@@ -931,4 +932,5 @@ code block::connect(const chain_state& state) const
 }
 
 } // namespace chain
+} // namespace system
 } // namespace libbitcoin

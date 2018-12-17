@@ -16,13 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/unicode/unicode_ostream.hpp>
+#include <bitcoin/system/unicode/unicode_ostream.hpp>
 
 #include <cstddef>
 #include <iostream>
-#include <bitcoin/bitcoin/unicode/unicode_streambuf.hpp>
+#include <bitcoin/system/unicode/unicode_streambuf.hpp>
 
 namespace libbitcoin {
+namespace system {
 
 unicode_ostream::unicode_ostream(
 #ifdef _MSC_VER
@@ -45,4 +46,5 @@ unicode_ostream::~unicode_ostream()
 #endif
 }
 
+} // namespace system
 } // namespace libbitcoin

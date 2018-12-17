@@ -16,20 +16,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/ec_public.hpp>
+#include <bitcoin/system/wallet/ec_public.hpp>
 
 #include <algorithm>
 #include <iostream>
 #include <utility>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin/formats/base_16.hpp>
-#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/wallet/ec_private.hpp>
-#include <bitcoin/bitcoin/wallet/payment_address.hpp>
+#include <bitcoin/system/formats/base_16.hpp>
+#include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/wallet/ec_private.hpp>
+#include <bitcoin/system/wallet/payment_address.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace wallet {
 
 const uint8_t ec_public::mainnet_p2kh = 0x00;
@@ -79,7 +80,7 @@ ec_public::ec_public(const ec_uncompressed& uncompressed, bool compress)
 
 bool ec_public::is_point(data_slice decoded)
 {
-    return bc::is_public_key(decoded);
+    return is_public_key(decoded);
 }
 
 // Factories.
@@ -111,7 +112,7 @@ ec_public ec_public::from_data(const data_chunk& decoded)
         return ec_public(to_array<ec_compressed_size>(decoded), true);
 
     ec_compressed compressed;
-    return bc::compress(compressed, to_array<ec_uncompressed_size>(decoded)) ?
+    return system::compress(compressed, to_array<ec_uncompressed_size>(decoded)) ?
         ec_public(compressed, false) : ec_public();
 }
 
@@ -121,8 +122,8 @@ ec_public ec_public::from_point(const ec_uncompressed& point, bool compress)
         return {};
 
     ec_compressed compressed;
-    return bc::compress(compressed, point) ? ec_public(compressed, compress) :
-        ec_public();
+    return system::compress(compressed, point) ?
+        ec_public(compressed, compress) : ec_public();
 }
 
 // Serializer.
@@ -178,7 +179,7 @@ bool ec_public::to_uncompressed(ec_uncompressed& out) const
     if (!(*this))
         return false;
 
-    return bc::decompress(out, to_array<ec_compressed_size>(point_));
+    return decompress(out, to_array<ec_compressed_size>(point_));
 }
 
 payment_address ec_public::to_payment_address(uint8_t version) const
@@ -242,4 +243,5 @@ void swap(ec_public& left, ec_public& right)
 }
 
 } // namespace wallet
+} // namespace system
 } // namespace libbitcoin

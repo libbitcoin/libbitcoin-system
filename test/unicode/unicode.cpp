@@ -21,9 +21,9 @@
 #include <stdexcept>
 #include <vector>
 #include <boost/test/unit_test.hpp>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
-using namespace bc;
+using namespace bc::system;
 
 BOOST_AUTO_TEST_SUITE(unicode_tests)
 
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(unicode__to_normal_nfc_form__validate__test)
     BOOST_REQUIRE(decode_base16(normal, "cf9300f0909080f09f92a9"));
     std::string expected_normal_string(normal.begin(), normal.end());
 
-    const auto derived_normal_string = bc::to_normal_nfc_form(original_string);
+    const auto derived_normal_string = to_normal_nfc_form(original_string);
     BOOST_REQUIRE_EQUAL(expected_normal_string, derived_normal_string);
 }
 

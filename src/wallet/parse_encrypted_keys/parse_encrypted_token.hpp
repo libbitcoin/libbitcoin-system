@@ -16,17 +16,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_PARSE_ENCRYPTED_TOKEN_HPP
-#define LIBBITCOIN_PARSE_ENCRYPTED_TOKEN_HPP
+#ifndef LIBBITCOIN_SYSTEM_PARSE_ENCRYPTED_TOKEN_HPP
+#define LIBBITCOIN_SYSTEM_PARSE_ENCRYPTED_TOKEN_HPP
 
 #include <cstdint>
 #include <cstddef>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/wallet/encrypted_keys.hpp>
 #include "parse_encrypted_key.hpp"
 
 namespace libbitcoin {
+namespace system {
 namespace wallet {
 
 // Swap not defined.
@@ -57,6 +58,7 @@ private:
 };
 
 } // namespace wallet
+} // namespace system
 } // namespace libbitcoin
 
 #endif

@@ -19,9 +19,9 @@
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test_suite.hpp>
 
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
-using namespace bc;
+using namespace bc::system;
 
 BOOST_AUTO_TEST_SUITE(property_tree_tests)
 
@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(property_tree__property_tree__value__expected_json)
         "{\"sequence\":\"101\",\"command\":\"query fetch-tx\",\"arguments\":\"4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b\"}"
     };
     boost::property_tree::ptree tree;
-    const auto result = bc::property_tree(tree, json);
+    const auto result = property_tree(tree, json);
     BOOST_REQUIRE_EQUAL(result, true);
     BOOST_REQUIRE_EQUAL(tree.get<uint32_t>("sequence"), 101u);
     BOOST_REQUIRE_EQUAL(tree.get<std::string>("command"), std::string("query fetch-tx"));
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(property_tree__property_tree__value__expected_empty)
         "{\"sequence\":\"101\" \"arguments\";\"test\"}"
     };
     boost::property_tree::ptree tree;
-    const auto result = bc::property_tree(tree, invalid_json);
+    const auto result = property_tree(tree, invalid_json);
     BOOST_REQUIRE_EQUAL(result, false);
 }
 

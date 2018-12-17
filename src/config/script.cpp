@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/config/script.hpp>
+#include <bitcoin/system/config/script.hpp>
 
 #include <iostream>
 #include <sstream>
@@ -24,11 +24,12 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin/chain/script.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/string.hpp>
+#include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/string.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace config {
 
 using namespace boost;
@@ -103,4 +104,5 @@ std::ostream& operator<<(std::ostream& output, const script& argument)
 }
 
 } // namespace config
+} // namespace system
 } // namespace libbitcoin

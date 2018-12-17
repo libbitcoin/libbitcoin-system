@@ -16,20 +16,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/math/ring_signature.hpp>
+#include <bitcoin/system/math/ring_signature.hpp>
 
 #include <algorithm>
 #include <map>
 #include <numeric>
 #include <vector>
 #include <secp256k1.h>
-#include <bitcoin/bitcoin/math/ec_point.hpp>
-#include <bitcoin/bitcoin/math/ec_scalar.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/utility/serializer.hpp>
-#include <bitcoin/bitcoin/wallet/hd_private.hpp>
+#include <bitcoin/system/math/ec_point.hpp>
+#include <bitcoin/system/math/ec_scalar.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/utility/serializer.hpp>
+#include <bitcoin/system/wallet/hd_private.hpp>
 
 namespace libbitcoin {
+namespace system {
 
 typedef std::vector<uint32_t> index_list;
 typedef std::map<ec_compressed, ec_secret> secret_keys_map;
@@ -381,4 +382,5 @@ bool verify(const key_rings& rings, const hash_digest& digest,
     return e0_hash == signature.challenge;
 }
 
+} // namespace system
 } // namespace libbitcoin

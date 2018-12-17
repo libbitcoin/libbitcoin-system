@@ -16,27 +16,28 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/flush_lock.hpp>
+#include <bitcoin/system/utility/flush_lock.hpp>
 
 #include <memory>
 #include <boost/filesystem.hpp>
-#include <bitcoin/bitcoin/unicode/file_lock.hpp>
-#include <bitcoin/bitcoin/unicode/ifstream.hpp>
-#include <bitcoin/bitcoin/unicode/ofstream.hpp>
+#include <bitcoin/system/unicode/file_lock.hpp>
+#include <bitcoin/system/unicode/ifstream.hpp>
+#include <bitcoin/system/unicode/ofstream.hpp>
 
 namespace libbitcoin {
+namespace system {
 
 // static
 bool flush_lock::create(const std::string& file)
 {
-    bc::ofstream stream(file);
+    ofstream stream(file);
     return stream.good();
 }
 
 // static
 bool flush_lock::exists(const std::string& file)
 {
-    bc::ifstream stream(file);
+    ifstream stream(file);
     return stream.good();
     ////return boost::filesystem::exists(file);
 }
@@ -78,4 +79,5 @@ bool flush_lock::unlock_shared()
     return !locked_;
 }
 
+} // namespace system
 } // namespace libbitcoin

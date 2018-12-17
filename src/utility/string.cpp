@@ -16,13 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/string.hpp>
+#include <bitcoin/system/utility/string.hpp>
 
 #include <string>
 #include <vector>
 #include <boost/algorithm/string.hpp>
 
 namespace libbitcoin {
+namespace system {
 
 std::string join(const string_list& words, const std::string& delimiter)
 {
@@ -49,4 +50,5 @@ string_list split(const std::string& sentence, const std::string& delimiter,
     return words;
 }
 
+} // namespace system
 } // namespace libbitcoin
