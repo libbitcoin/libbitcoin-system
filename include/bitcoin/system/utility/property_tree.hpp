@@ -30,6 +30,8 @@
 #include <bitcoin/system/config/input.hpp>
 #include <bitcoin/system/config/output.hpp>
 #include <bitcoin/system/config/transaction.hpp>
+#include <bitcoin/system/wallet/bitcoin_uri.hpp>
+#include <bitcoin/system/wallet/stealth_address.hpp>
 
 namespace pt = boost::property_tree;
 
@@ -233,6 +235,36 @@ BC_API pt::ptree property_tree(const hash_digest& hash, size_t height,
 BC_API pt::ptree property_tree(const settings_list& settings);
 
 /**
+ * Create a property tree for single hash.
+ * @param[in]  hash    The block hash.
+ * @returns            A new property tree containing the hash.
+ */
+BC_API pt::ptree property_list(const hash_digest& hash);
+
+/**
+ * Create a property tree for a single hash.
+ * @param[in]  hash    The block hash.
+ * @returns            A new property tree containing the hash.
+ */
+BC_API pt::ptree property_tree(const hash_digest& hash);
+
+/**
+ * Create a property list for a hash_list.
+ * @param[in]  hashes  The list of block hashes.
+ * @param[in]  json    Use json array formatting.
+ * @returns            A new property tree containing the list.
+ */
+BC_API pt::ptree property_list(const hash_list& hashes, bool json);
+
+/**
+ * Create a property tree for a hash_list.
+ * @param[in]  hashes  The list of block hashes.
+ * @param[in]  json    Use json array formatting.
+ * @returns            A new property tree containing the list.
+ */
+BC_API pt::ptree property_tree(const hash_list& hashes, bool json);
+
+/**
  * Create a property tree for an error code with a corresponding sequence.
  * @param[in]  code     The error code.
  * @param[in]  sequence The sequence.
@@ -256,6 +288,31 @@ BC_API pt::ptree property_tree(uint64_t height, uint32_t sequence);
  * @returns           True on success. False on error.
  */
 BC_API bool property_tree(pt::ptree& out, const std::string& json);
+
+/**
+ * Create a property tree for a parsed bitcoin uri.
+ * @param[in]  uri   The parsed uri.
+ * @returns          A new property tree containing the settings.
+ */
+BC_API pt::ptree property_tree(const wallet::bitcoin_uri& uri);
+
+/**
+ * Generate a property list for a stealth address.
+ * @param[in]  stealth_address  The stealth address.
+ * @param[in]  json             Use json array formatting.
+ * @return                      A property list.
+ */
+BC_API pt::ptree property_list(const wallet::stealth_address& stealth,
+    bool json);
+
+/**
+ * Generate a property tree for a stealth address.
+ * @param[in]  stealth_address  The stealth address.
+ * @param[in]  json             Use json array formatting.
+ * @return                      A property tree.
+ */
+BC_API pt::ptree property_tree(const wallet::stealth_address& stealth,
+    bool json);
 
 } // namespace system
 } // namespace libbitcoin

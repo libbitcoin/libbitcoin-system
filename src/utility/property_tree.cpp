@@ -31,9 +31,6 @@
 #include <bitcoin/system/config/header.hpp>
 #include <bitcoin/system/config/hash160.hpp>
 #include <bitcoin/system/config/hash256.hpp>
-#include <bitcoin/system/config/input.hpp>
-#include <bitcoin/system/config/output.hpp>
-#include <bitcoin/system/config/transaction.hpp>
 #include <bitcoin/system/math/stealth.hpp>
 #include <bitcoin/system/utility/collection.hpp>
 
@@ -311,6 +308,38 @@ ptree property_tree(const settings_list& settings)
     return tree;
 }
 
+// (non-metadata) hash / hash_list
+
+ptree property_list(const hash_digest& hash)
+{
+    ptree tree;
+    tree.put_value(hash256(hash));
+    return tree;
+}
+
+ptree property_tree(const hash_digest& hash)
+{
+    ptree tree;
+    tree.add_child("hash", property_list(hash));
+    return tree;
+}
+
+ptree property_list(const hash_list& hashes, bool json)
+{
+    ptree tree;
+    for (const auto& hash: hashes)
+        add_child(tree, "hash", property_list(hash), json);
+
+    return tree;
+}
+
+ptree property_tree(const hash_list& hashes, bool json)
+{
+    ptree tree;
+    tree.add_child("hashes", property_list(hashes, json));
+    return tree;
+}
+
 // sequence
 
 ptree property_tree(uint64_t height, uint32_t sequence)
@@ -347,6 +376,65 @@ bool property_tree(ptree& out, const std::string& json)
     {
         return false;
     }
+}
+
+// stealth_address
+
+ptree property_list(const stealth_address& stealth, bool json)
+{
+    // We don't serialize a "reuse key" value as this is strictly an
+    // optimization for the purpose of serialization and otherwise complicates
+    // understanding of what is actually otherwise very simple behavior.
+    // So instead we emit the reused key as one of the spend keys.
+    // This means that it is typical to see the same key in scan and spend.
+
+    const auto spends = cast<ec_compressed, ec_public>(
+        stealth.spend_keys());
+    const auto spends_values = property_value_list("public_key", spends, json);
+
+    ptree tree;
+    tree.put("encoded", stealth);
+    tree.put("filter", stealth.filter());
+    tree.put("scan_public_key", ec_public(stealth.scan_key()));
+    tree.put("signatures", stealth.signatures());
+    tree.add_child("spends", spends_values);
+    tree.put("version", stealth.version());
+    return tree;
+}
+
+ptree property_tree(const stealth_address& stealth, bool json)
+{
+    ptree tree;
+    tree.add_child("stealth_address", property_list(stealth, json));
+    return tree;
+}
+
+// uri
+
+ptree property_tree(const bitcoin_uri& uri)
+{
+    ptree uri_props;
+
+    if (!uri.address().empty())
+        uri_props.put("address", uri.address());
+
+    if (uri.amount() != 0)
+        uri_props.put("amount", uri.amount());
+
+    if (!uri.label().empty())
+        uri_props.put("label", uri.label());
+
+    if (!uri.message().empty())
+        uri_props.put("message", uri.message());
+
+    if (!uri.r().empty())
+        uri_props.put("r", uri.r());
+
+    uri_props.put("scheme", "bitcoin");
+
+    ptree tree;
+    tree.add_child("uri", uri_props);
+    return tree;
 }
 
 } // namespace system
