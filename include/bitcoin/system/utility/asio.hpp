@@ -38,6 +38,7 @@ typedef std::chrono::minutes minutes;
 typedef std::chrono::seconds seconds;
 typedef std::chrono::milliseconds milliseconds;
 typedef std::chrono::microseconds microseconds;
+typedef std::chrono::nanoseconds nanoseconds;
 
 // Steady clock: use for continuity, not time of day determinations.
 typedef std::chrono::steady_clock steady_clock;
