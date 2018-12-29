@@ -180,7 +180,8 @@ bool block::from_data(std::istream& stream, bool witness)
 // Full block deserialization is always canonical encoding.
 bool block::from_data(reader& source, bool witness)
 {
-    metadata.start_deserialize = asio::steady_clock::now();
+    const auto start = asio::steady_clock::now();
+
     reset();
 
     if (!header_.from_data(source, true))
@@ -206,7 +207,7 @@ bool block::from_data(reader& source, bool witness)
     if (!source)
         reset();
 
-    metadata.end_deserialize = asio::steady_clock::now();
+    metadata.deserialize = asio::steady_clock::now() - start;
     return source;
 }
 
@@ -803,8 +804,6 @@ code block::connect_transactions(const chain_state& state) const
 code block::check(uint64_t max_money, uint32_t timestamp_limit_seconds,
     uint32_t proof_of_work_limit, bool scrypt) const
 {
-    metadata.start_check = asio::steady_clock::now();
-
     code ec;
 
     if ((ec = header_.check(timestamp_limit_seconds, proof_of_work_limit,
@@ -863,8 +862,6 @@ code block::accept(const system::settings& settings, bool transactions,
 code block::accept(const chain_state& state,
     const system::settings& settings, bool transactions, bool header) const
 {
-    metadata.start_accept = asio::steady_clock::now();
-
     code ec;
     const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
     const auto bip34 = state.is_enabled(rule_fork::bip34_rule);
@@ -922,8 +919,6 @@ code block::connect() const
 
 code block::connect(const chain_state& state) const
 {
-    metadata.start_connect = asio::steady_clock::now();
-
     if (state.is_under_checkpoint())
         return error::success;
 
