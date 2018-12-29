@@ -54,11 +54,13 @@ public:
     struct validation
     {
         uint64_t originator = 0;
-        uint32_t median_time_past = 0;
         chain_state::ptr state = nullptr;
 
         /// The block validation error code (if validated).
         code error = error::success;
+
+        /// Always exists for a validated header.
+        uint32_t median_time_past = 0;
 
         /// Header exists, in any state (don't download it).
         bool exists = false;
