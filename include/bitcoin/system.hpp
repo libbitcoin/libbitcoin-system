@@ -101,7 +101,6 @@
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/math/ring_signature.hpp>
 #include <bitcoin/system/math/stealth.hpp>
-#include <bitcoin/system/math/uint256.hpp>
 #include <bitcoin/system/message/address.hpp>
 #include <bitcoin/system/message/alert.hpp>
 #include <bitcoin/system/message/alert_payload.hpp>

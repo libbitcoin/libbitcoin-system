@@ -911,9 +911,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\stealth.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\uint256.hpp">
-      <Filter>include\bitcoin\system\math</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\address.hpp">
       <Filter>include\bitcoin\system\message</Filter>
     </ClInclude>

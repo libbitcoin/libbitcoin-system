@@ -529,8 +529,7 @@ include_bitcoin_system_math_HEADERS = \
     include/bitcoin/system/math/hash.hpp \
     include/bitcoin/system/math/limits.hpp \
     include/bitcoin/system/math/ring_signature.hpp \
-    include/bitcoin/system/math/stealth.hpp \
-    include/bitcoin/system/math/uint256.hpp
+    include/bitcoin/system/math/stealth.hpp
 
 include_bitcoin_system_messagedir = ${includedir}/bitcoin/system/message
 include_bitcoin_system_message_HEADERS = \
