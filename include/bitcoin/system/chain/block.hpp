@@ -60,12 +60,13 @@ public:
         asio::nanoseconds associate;
 
         // Validate
-        asio::nanoseconds get_block;
+        ////asio::nanoseconds deserialize;
         asio::nanoseconds populate;
         asio::nanoseconds accept;
         asio::nanoseconds connect;
         asio::nanoseconds candidate;
         asio::nanoseconds confirm;
+        asio::nanoseconds catalog;
 
         float cache_efficiency;
     };
