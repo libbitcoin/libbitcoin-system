@@ -40,8 +40,9 @@ const std::string point::delimeter = ":";
 // Point format is currently private to bx.
 static bool decode_point(chain::output_point& point, const std::string& tuple)
 {
+    uint32_t index;
     const auto tokens = split(tuple, point::delimeter);
-    if (tokens.size() != 2)
+    if (tokens.size() != 2 || !deserialize(index, tokens[1], true))
         return false;
 
     // Validate and deserialize the transaction hash.
@@ -52,7 +53,7 @@ static bool decode_point(chain::output_point& point, const std::string& tuple)
     // Copy the input point values.
     std::copy(hash.begin(), hash.end(), copy.begin());
     point.set_hash(std::move(copy));
-    point.set_index(deserialize<uint32_t>(tokens[1], true));
+    point.set_index(index);
     return true;
 }
 

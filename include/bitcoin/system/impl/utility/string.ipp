@@ -19,47 +19,54 @@
 #ifndef LIBBITCOIN_SYSTEM_STRING_IPP
 #define LIBBITCOIN_SYSTEM_STRING_IPP
 
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/trim.hpp>
+
 namespace libbitcoin {
 namespace system {
 
 template <typename Value>
-Value deserialize(const std::string& text, bool trim)
+bool deserialize(Value& out_value, const std::string& text, bool trim)
 {
-    if (trim)
-        return boost::lexical_cast<Value>(boost::trim_copy(text));
-    else
-        return boost::lexical_cast<Value>(text);
+    try
+    {
+        if (trim)
+            out_value = boost::lexical_cast<Value>(boost::trim_copy(text));
+        else
+            out_value = boost::lexical_cast<Value>(text);
+    }
+    catch (const boost::bad_lexical_cast&)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 template <typename Value>
-void deserialize(Value& value, const std::string& text, bool trim)
-{
-    if (trim)
-        value = boost::lexical_cast<Value>(boost::trim_copy(text));
-    else
-        value = boost::lexical_cast<Value>(text);
-}
-
-template <typename Value>
-void deserialize(std::vector<Value>& collection, const std::string& text,
+bool deserialize(std::vector<Value>& out_collection, const std::string& text,
     bool trim)
 {
     // This had problems with the inclusion of the ideographic (CJK) space
-    // (0xe3,0x80, 0x80). Need to infuse the local in bc::system::split().
+    // (0xe3, 0x80, 0x80). Need to infuse the local in bc::system::split().
     const auto tokens = split(text, " \n\r\t");
     for (const auto& token: tokens)
     {
         Value value;
-        deserialize(value, token, trim);
-        collection.push_back(value);
+        if (!deserialize(value, token, trim))
+            return false;
+
+        out_collection.push_back(value);
     }
+
+    return true;
 }
 
 template <typename Value>
-std::string serialize(const Value& value, const std::string& fallback)
+std::string serialize(const Value& out_value, const std::string& fallback)
 {
     std::stringstream stream;
-    stream << value;
+    stream << out_value;
     const auto& text = stream.str();
     return text.empty() ? fallback : text;
 }

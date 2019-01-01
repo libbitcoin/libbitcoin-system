@@ -157,15 +157,12 @@ static bool opcode_from_data_prefix(opcode& out_code,
 static bool data_from_number_token(data_chunk& out_data,
     const std::string& token)
 {
-    try
-    {
-        out_data = number(boost::lexical_cast<int64_t>(token)).data();
-        return true;
-    }
-    catch (const boost::bad_lexical_cast&)
-    {
+    int64_t value;
+    if (!deserialize(value, token, false))
         return false;
-    }
+
+    out_data = number(value).data();
+    return true;
 }
 
 // The removal of spaces in v3 data is a compatability break with our v2.

@@ -44,7 +44,13 @@ static bool decode_input(chain::input& input, const std::string& tuple)
     input.set_previous_output(point(tokens[0] + ":" + tokens[1]));
 
     if (tokens.size() == 3)
-        input.set_sequence(deserialize<uint32_t>(tokens[2], true));
+    {
+        uint32_t value;
+        if (!deserialize(value, tokens[2], true))
+            return false;
+
+        input.set_sequence(value);
+    }
 
     return true;
 }
