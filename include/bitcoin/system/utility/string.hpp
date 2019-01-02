@@ -33,44 +33,36 @@ typedef std::vector<std::string> string_list;
 
 /**
  * Convert a text string to the specified type.
- * @param      <Value>  The converted type.
- * @param[in]  text     The text to convert.
- * @param[in]  trim     True if value should be trimmed before conversion.
- * return               The parsed value.
+ * @param      <Value>    The converted type.
+ * @param[out] out_value  The parsed value.
+ * @param[in]  text       The text to convert.
+ * @param[in]  trim       True if text should be trimmed.
+ * @return                True if successful.
  */
 template <typename Value>
-Value deserialize(const std::string& text, bool trim);
-
-/**
- * Convert a text string to the specified type.
- * @param      <Value>  The converted type.
- * @param[out] value    The parsed value.
- * @param[in]  text     The text to convert.
- * @param[in]  trim     True if value should be trimmed before conversion.
- */
-template <typename Value>
-void deserialize(Value& value, const std::string& text, bool trim);
+bool deserialize(Value& out_value, const std::string& text, bool trim);
 
 /**
  * Deserialize the tokens of a text string to a vector of the inner type.
- * @param      <Value>     The inner type.
- * @param[out] collection  The parsed vector value.
- * @param[in]  text        The text to convert.
- * @param[in]  trim        True if value should be trimmed before conversion.
+ * @param      <Value>         The inner type.
+ * @param[out] out_collection  The parsed vector value.
+ * @param[in]  text            The text to convert.
+ * @param[in]  trim            True if text values should be trimmed.
+ * @return                     True if successful.
  */
 template <typename Value>
-void deserialize(std::vector<Value>& collection, const std::string& text,
+bool deserialize(std::vector<Value>& out_collection, const std::string& text,
     bool trim);
 
 /**
  * Conveniently convert an instance of the specified type to string.
  * @param      <Value>   The type to serialize.
- * @param[in]  value     The instance to convert.
+ * @param[in]  out_value The instance to convert.
  * @param[in]  fallback  The text to populate if value is empty.
  * @return               The serialized value.
  */
 template <typename Value>
-std::string serialize(const Value& value, const std::string& fallback="");
+std::string serialize(const Value& out_value, const std::string& fallback="");
 
 /**
  * Join a list of strings into a single string, in order.
