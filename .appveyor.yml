@@ -1,5 +1,5 @@
 ###############################################################################
-#  Copyright (c) 2014-2018 libbitcoin-system developers (see COPYING).
+#  Copyright (c) 2014-2019 libbitcoin-system developers (see COPYING).
 #
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
@@ -69,7 +69,7 @@ build_script:
 test_script:
   - ps: >-
       Write-Host "Locating test executables..." -ForegroundColor Yellow;
-      $BC_TEST_EXES = @(Get-ChildItem -Path "$env:APPVEYOR_BUILD_FOLDER\bin" -recurse | Where-Object { $_.Name -eq "$env:APPVEYOR_PROJECT_NAME-test.exe" });
+      $BC_TEST_EXES = @(Get-ChildItem -Path "$env:APPVEYOR_BUILD_FOLDER\bin" -recurse | Where-Object { $_.Name -eq "libbitcoin-system-test.exe" });
       If ($BC_TEST_EXES.Count -ne 1) {
         Write-Host "Failure, invalid count of test executables." -ForegroundColor Red;
         exit 1;
