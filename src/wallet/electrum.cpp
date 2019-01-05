@@ -41,6 +41,8 @@ namespace system {
 namespace wallet {
 namespace electrum {
 
+#ifdef WITH_ICU
+
 using namespace std::placeholders;
 
 // Electrum mnemonic private constants.
@@ -54,8 +56,6 @@ static const std::string seed_prefix_empty{};
 static const std::string seed_prefix_standard{ "01" };
 static const std::string seed_prefix_witness{ "100" };
 static const std::string seed_prefix_two_factor_authentication{ "101" };
-
-#ifdef WITH_ICU
 
 typedef std::pair<char32_t, char32_t> unicode_interval;
 typedef std::vector<unicode_interval> unicode_interval_list;
