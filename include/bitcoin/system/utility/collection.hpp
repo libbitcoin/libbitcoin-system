@@ -24,8 +24,6 @@
 #include <vector>
 #include <bitcoin/system/define.hpp>
 
-/* NOTE: don't declare 'using namespace foo' in headers. */
-
 namespace libbitcoin {
 namespace system {
 
