@@ -50,7 +50,7 @@ header::header(header&& other)
   : hash_(other.hash_cache()),
     version_(other.version_),
     previous_block_hash_(std::move(other.previous_block_hash_)),
-    merkle_(std::move(other.merkle_)),
+    merkle_root_(std::move(other.merkle_root_)),
     timestamp_(other.timestamp_),
     bits_(other.bits_),
     nonce_(other.nonce_),
@@ -62,7 +62,7 @@ header::header(const header& other)
   : hash_(other.hash_cache()),
     version_(other.version_),
     previous_block_hash_(other.previous_block_hash_),
-    merkle_(other.merkle_),
+    merkle_root_(other.merkle_root_),
     timestamp_(other.timestamp_),
     bits_(other.bits_),
     nonce_(other.nonce_),
@@ -71,10 +71,10 @@ header::header(const header& other)
 }
 
 header::header(uint32_t version, hash_digest&& previous_block_hash,
-    hash_digest&& merkle, uint32_t timestamp, uint32_t bits, uint32_t nonce)
+    hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits, uint32_t nonce)
   : version_(version),
     previous_block_hash_(std::move(previous_block_hash)),
-    merkle_(std::move(merkle)),
+    merkle_root_(std::move(merkle_root)),
     timestamp_(timestamp),
     bits_(bits),
     nonce_(nonce),
@@ -83,11 +83,11 @@ header::header(uint32_t version, hash_digest&& previous_block_hash,
 }
 
 header::header(uint32_t version, const hash_digest& previous_block_hash,
-    const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
+    const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
     uint32_t nonce)
   : version_(version),
     previous_block_hash_(previous_block_hash),
-    merkle_(merkle),
+    merkle_root_(merkle_root),
     timestamp_(timestamp),
     bits_(bits),
     nonce_(nonce),
@@ -110,7 +110,7 @@ header& header::operator=(header&& other)
     hash_ = other.hash_cache();
     version_ = other.version_;
     previous_block_hash_ = std::move(other.previous_block_hash_);
-    merkle_ = std::move(other.merkle_);
+    merkle_root_ = std::move(other.merkle_root_);
     timestamp_ = other.timestamp_;
     bits_ = other.bits_;
     nonce_ = other.nonce_;
@@ -123,7 +123,7 @@ header& header::operator=(const header& other)
     hash_ = other.hash_cache();
     version_ = other.version_;
     previous_block_hash_ = other.previous_block_hash_;
-    merkle_ = other.merkle_;
+    merkle_root_ = other.merkle_root_;
     timestamp_ = other.timestamp_;
     bits_ = other.bits_;
     nonce_ = other.nonce_;
@@ -135,7 +135,7 @@ bool header::operator==(const header& other) const
 {
     return (version_ == other.version_)
         && (previous_block_hash_ == other.previous_block_hash_)
-        && (merkle_ == other.merkle_)
+        && (merkle_root_ == other.merkle_root_)
         && (timestamp_ == other.timestamp_)
         && (bits_ == other.bits_)
         && (nonce_ == other.nonce_);
@@ -207,7 +207,7 @@ bool header::from_data(reader& source, bool)
 
     version_ = source.read_4_bytes_little_endian();
     previous_block_hash_ = source.read_hash();
-    merkle_ = source.read_hash();
+    merkle_root_ = source.read_hash();
     timestamp_ = source.read_4_bytes_little_endian();
     bits_ = source.read_4_bytes_little_endian();
     nonce_ = source.read_4_bytes_little_endian();
@@ -241,7 +241,7 @@ void header::reset()
 {
     version_ = 0;
     previous_block_hash_.fill(0);
-    merkle_.fill(0);
+    merkle_root_.fill(0);
     timestamp_ = 0;
     bits_ = 0;
     nonce_ = 0;
@@ -252,7 +252,7 @@ bool header::is_valid() const
 {
     return (version_ != 0) ||
         (previous_block_hash_ != null_hash) ||
-        (merkle_ != null_hash) ||
+        (merkle_root_ != null_hash) ||
         (timestamp_ != 0) ||
         (bits_ != 0) ||
         (nonce_ != 0);
@@ -283,7 +283,7 @@ void header::to_data(writer& sink, bool) const
 {
     sink.write_4_bytes_little_endian(version_);
     sink.write_hash(previous_block_hash_);
-    sink.write_hash(merkle_);
+    sink.write_hash(merkle_root_);
     sink.write_4_bytes_little_endian(timestamp_);
     sink.write_4_bytes_little_endian(bits_);
     sink.write_4_bytes_little_endian(nonce_);
@@ -339,20 +339,20 @@ void header::set_previous_block_hash(hash_digest&& value)
     invalidate_cache();
 }
 
-const hash_digest& header::merkle() const
+const hash_digest& header::merkle_root() const
 {
-    return merkle_;
+    return merkle_root_;
 }
 
-void header::set_merkle(const hash_digest& value)
+void header::set_merkle_root(const hash_digest& value)
 {
-    merkle_ = value;
+    merkle_root_ = value;
     invalidate_cache();
 }
 
-void header::set_merkle(hash_digest&& value)
+void header::set_merkle_root(hash_digest&& value)
 {
-    merkle_ = std::move(value);
+    merkle_root_ = std::move(value);
     invalidate_cache();
 }
 

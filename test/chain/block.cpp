@@ -273,7 +273,7 @@ BOOST_AUTO_TEST_CASE(block__genesis__mainnet__valid_structure)
     const chain::block genesis = settings(config::settings::mainnet).genesis_block;
     BOOST_REQUIRE(genesis.is_valid());
     BOOST_REQUIRE_EQUAL(genesis.transactions().size(), 1u);
-    BOOST_REQUIRE(genesis.header().merkle() == genesis.generate_merkle_root());
+    BOOST_REQUIRE(genesis.header().merkle_root() == genesis.generate_merkle_root());
 }
 
 BOOST_AUTO_TEST_CASE(block__genesis__testnet__valid_structure)
@@ -281,7 +281,7 @@ BOOST_AUTO_TEST_CASE(block__genesis__testnet__valid_structure)
     const chain::block genesis = settings(config::settings::testnet).genesis_block;
     BOOST_REQUIRE(genesis.is_valid());
     BOOST_REQUIRE_EQUAL(genesis.transactions().size(), 1u);
-    BOOST_REQUIRE(genesis.header().merkle() == genesis.generate_merkle_root());
+    BOOST_REQUIRE(genesis.header().merkle_root() == genesis.generate_merkle_root());
 }
 
 BOOST_AUTO_TEST_CASE(block__genesis__regtest__valid_structure)
@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE(block__genesis__regtest__valid_structure)
     const chain::block genesis = settings(config::settings::regtest).genesis_block;
     BOOST_REQUIRE(genesis.is_valid());
     BOOST_REQUIRE_EQUAL(genesis.transactions().size(), 1u);
-    BOOST_REQUIRE(genesis.header().merkle() == genesis.generate_merkle_root());
+    BOOST_REQUIRE(genesis.header().merkle_root() == genesis.generate_merkle_root());
 }
 
 
@@ -310,7 +310,7 @@ BOOST_AUTO_TEST_CASE(block__factory_1__genesis_mainnet__success)
     BOOST_REQUIRE(genesis.header() == block.header());
 
     // Verify merkle root from transactions.
-    BOOST_REQUIRE(genesis.header().merkle() == block.generate_merkle_root());
+    BOOST_REQUIRE(genesis.header().merkle_root() == block.generate_merkle_root());
 }
 
 BOOST_AUTO_TEST_CASE(block__factory_2__genesis_mainnet__success)
@@ -331,7 +331,7 @@ BOOST_AUTO_TEST_CASE(block__factory_2__genesis_mainnet__success)
     BOOST_REQUIRE(genesis.header() == block.header());
 
     // Verify merkle root from transactions.
-    BOOST_REQUIRE(genesis.header().merkle() == block.generate_merkle_root());
+    BOOST_REQUIRE(genesis.header().merkle_root() == block.generate_merkle_root());
 }
 
 BOOST_AUTO_TEST_CASE(block__factory_3__genesis_mainnet__success)
@@ -353,7 +353,7 @@ BOOST_AUTO_TEST_CASE(block__factory_3__genesis_mainnet__success)
     BOOST_REQUIRE(genesis.header() == block.header());
 
     // Verify merkle root from transactions.
-    BOOST_REQUIRE(genesis.header().merkle() == block.generate_merkle_root());
+    BOOST_REQUIRE(genesis.header().merkle_root() == block.generate_merkle_root());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -404,7 +404,7 @@ BOOST_AUTO_TEST_CASE(block__generate_merkle_root__block_with_multiple_transactio
     const auto header = block100k.header();
     const auto transactions = block100k.transactions();
     BOOST_REQUIRE(all_valid(transactions));
-    BOOST_REQUIRE(header.merkle() == block100k.generate_merkle_root());
+    BOOST_REQUIRE(header.merkle_root() == block100k.generate_merkle_root());
 }
 
 BOOST_AUTO_TEST_CASE(block__header_accessor__always__returns_initialized_value)

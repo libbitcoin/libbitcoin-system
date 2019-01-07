@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE(block__factory_data_1__genesis_mainnet__success)
     BOOST_REQUIRE(genesis.header() == block.header());
 
     // Verify merkle root from transactions.
-    BOOST_REQUIRE(block.generate_merkle_root() == genesis.header().merkle());
+    BOOST_REQUIRE(block.generate_merkle_root() == genesis.header().merkle_root());
 
     auto raw_reserialization = block.to_data(version::level::minimum);
     BOOST_REQUIRE(raw_reserialization == raw_block);
@@ -213,7 +213,7 @@ BOOST_AUTO_TEST_CASE(block__factory_data_2__genesis_mainnet__success)
     BOOST_REQUIRE(genesis.header() == block.header());
 
     // Verify merkle root from transactions.
-    BOOST_REQUIRE(block.generate_merkle_root() == genesis.header().merkle());
+    BOOST_REQUIRE(block.generate_merkle_root() == genesis.header().merkle_root());
 
     data_chunk raw_reserialization;
     data_sink sink(raw_reserialization);
@@ -242,7 +242,7 @@ BOOST_AUTO_TEST_CASE(block__factory_data_3__genesis_mainnet__success)
     BOOST_REQUIRE(genesis.header() == block.header());
 
     // Verify merkle root from transactions.
-    BOOST_REQUIRE(block.generate_merkle_root() == genesis.header().merkle());
+    BOOST_REQUIRE(block.generate_merkle_root() == genesis.header().merkle_root());
 
     data_chunk raw_reserialization;
     data_sink sink(raw_reserialization);

@@ -665,7 +665,7 @@ bool block::is_internal_double_spend() const
 
 bool block::is_valid_merkle_root() const
 {
-    return generate_merkle_root() == header_.merkle();
+    return generate_merkle_root() == header_.merkle_root();
 }
 
 // Overflow returns max_uint64.
