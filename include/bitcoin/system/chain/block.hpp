@@ -170,9 +170,9 @@ public:
         uint32_t proof_of_work_limit, bool scrypt=false,
         bool header=true) const;
     code check_transactions(uint64_t max_money) const;
-    code accept(const settings& settings, bool transactions=true,
+    code accept(const system::settings& settings, bool transactions=true,
         bool header=true) const;
-    code accept(const chain_state& state, const settings& settings,
+    code accept(const chain_state& state, const system::settings& settings,
         bool transactions=true, bool header=true) const;
     code accept_transactions(const chain_state& state) const;
     code connect() const;
