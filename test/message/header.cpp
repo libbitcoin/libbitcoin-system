@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(header__constructor_2__always__equals_params)
     BOOST_REQUIRE_EQUAL(bits, instance.bits());
     BOOST_REQUIRE_EQUAL(nonce, instance.nonce());
     BOOST_REQUIRE(previous == instance.previous_block_hash());
-    BOOST_REQUIRE(merkle == instance.merkle());
+    BOOST_REQUIRE(merkle == instance.merkle_root());
 }
 
 BOOST_AUTO_TEST_CASE(header__constructor_3__always__equals_params)
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(header__constructor_3__always__equals_params)
     BOOST_REQUIRE_EQUAL(bits, instance.bits());
     BOOST_REQUIRE_EQUAL(nonce, instance.nonce());
     BOOST_REQUIRE(previous == instance.previous_block_hash());
-    BOOST_REQUIRE(merkle == instance.merkle());
+    BOOST_REQUIRE(merkle == instance.merkle_root());
 }
 
 BOOST_AUTO_TEST_CASE(header__constructor_4__always__equals_params)

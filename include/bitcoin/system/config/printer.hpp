@@ -27,8 +27,6 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/config/parameter.hpp>
 
-/* NOTE: don't declare 'using namespace foo' in headers. */
-
 namespace libbitcoin {
 namespace system {
 namespace config {

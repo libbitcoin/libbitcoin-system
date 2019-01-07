@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(header__constructor_2__always__equals_params)
     BOOST_REQUIRE_EQUAL(bits, instance.bits());
     BOOST_REQUIRE_EQUAL(nonce, instance.nonce());
     BOOST_REQUIRE(previous == instance.previous_block_hash());
-    BOOST_REQUIRE(merkle == instance.merkle());
+    BOOST_REQUIRE(merkle == instance.merkle_root());
 }
 
 BOOST_AUTO_TEST_CASE(header__constructor_3__always__equals_params)
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(header__constructor_3__always__equals_params)
     BOOST_REQUIRE_EQUAL(bits, instance.bits());
     BOOST_REQUIRE_EQUAL(nonce, instance.nonce());
     BOOST_REQUIRE(previous == instance.previous_block_hash());
-    BOOST_REQUIRE(merkle == instance.merkle());
+    BOOST_REQUIRE(merkle == instance.merkle_root());
 }
 
 BOOST_AUTO_TEST_CASE(header__constructor_4__always__equals_params)
@@ -259,7 +259,7 @@ BOOST_AUTO_TEST_CASE(header__merkle_accessor_1__always__returns_initialized_valu
         4356344u,
         34564u);
 
-    BOOST_REQUIRE(value == instance.merkle());
+    BOOST_REQUIRE(value == instance.merkle_root());
 }
 
 BOOST_AUTO_TEST_CASE(header__merkle_accessor_2__always__returns_initialized_value)
@@ -273,16 +273,16 @@ BOOST_AUTO_TEST_CASE(header__merkle_accessor_2__always__returns_initialized_valu
         4356344u,
         34564u);
 
-    BOOST_REQUIRE(value == instance.merkle());
+    BOOST_REQUIRE(value == instance.merkle_root());
 }
 
 BOOST_AUTO_TEST_CASE(header__merkle_setter_1__roundtrip__success)
 {
     const auto expected = hash_literal("abababababababababababababababababababababababababababababababab");
     chain::header instance;
-    BOOST_REQUIRE(expected != instance.merkle());
-    instance.set_merkle(expected);
-    BOOST_REQUIRE(expected == instance.merkle());
+    BOOST_REQUIRE(expected != instance.merkle_root());
+    instance.set_merkle_root(expected);
+    BOOST_REQUIRE(expected == instance.merkle_root());
 }
 
 BOOST_AUTO_TEST_CASE(header__merkle_setter_2__roundtrip__success)
@@ -293,9 +293,9 @@ BOOST_AUTO_TEST_CASE(header__merkle_setter_2__roundtrip__success)
     hash_digest duplicate = expected;
 
     chain::header instance;
-    BOOST_REQUIRE(expected != instance.merkle());
-    instance.set_merkle(std::move(duplicate));
-    BOOST_REQUIRE(expected == instance.merkle());
+    BOOST_REQUIRE(expected != instance.merkle_root());
+    instance.set_merkle_root(std::move(duplicate));
+    BOOST_REQUIRE(expected == instance.merkle_root());
 }
 
 BOOST_AUTO_TEST_CASE(header__timestamp_accessor__always__returns_initialized_value)

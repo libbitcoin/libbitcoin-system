@@ -87,10 +87,10 @@ public:
     header(const header& other);
 
     header(uint32_t version, const hash_digest& previous_block_hash,
-        const hash_digest& merkle, uint32_t timestamp, uint32_t bits,
+        const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
         uint32_t nonce);
     header(uint32_t version, hash_digest&& previous_block_hash,
-        hash_digest&& merkle, uint32_t timestamp, uint32_t bits,
+        hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
         uint32_t nonce);
 
     // Operators.
@@ -141,9 +141,9 @@ public:
     void set_previous_block_hash(hash_digest&& value);
 
     /// This may not match the computed value, validation compares them.
-    const hash_digest& merkle() const;
-    void set_merkle(const hash_digest& value);
-    void set_merkle(hash_digest&& value);
+    const hash_digest& merkle_root() const;
+    void set_merkle_root(const hash_digest& value);
+    void set_merkle_root(hash_digest&& value);
 
     uint32_t timestamp() const;
     void set_timestamp(uint32_t value);
@@ -191,7 +191,7 @@ private:
 
     uint32_t version_;
     hash_digest previous_block_hash_;
-    hash_digest merkle_;
+    hash_digest merkle_root_;
     uint32_t timestamp_;
     uint32_t bits_;
     uint32_t nonce_;

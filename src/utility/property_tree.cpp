@@ -62,7 +62,7 @@ ptree property_list(const config::header& header)
     ptree tree;
     tree.put("bits", block_header.bits());
     tree.put("hash", hash256(block_header.hash()));
-    tree.put("merkle_tree_hash", hash256(block_header.merkle()));
+    tree.put("merkle_root", hash256(block_header.merkle_root()));
     tree.put("nonce", block_header.nonce());
     tree.put("previous_block_hash", hash256(block_header.previous_block_hash()));
     tree.put("time_stamp", block_header.timestamp());
