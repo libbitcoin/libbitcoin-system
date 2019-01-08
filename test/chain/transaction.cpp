@@ -868,7 +868,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__unspent_inputs__ret
 {
     chain::transaction instance;
     instance.inputs().emplace_back();
-    instance.inputs().back().previous_output().metadata.spent = false;
+    instance.inputs().back().previous_output().metadata.confirmed_spent = false;
     BOOST_REQUIRE(!instance.is_confirmed_double_spend());
 }
 
@@ -876,7 +876,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__spent_input__return
 {
     chain::transaction instance;
     instance.inputs().emplace_back();
-    instance.inputs().back().previous_output().metadata.spent = true;
+    instance.inputs().back().previous_output().metadata.confirmed_spent = true;
     BOOST_REQUIRE(instance.is_confirmed_double_spend());
 }
 

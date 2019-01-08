@@ -55,29 +55,35 @@ public:
         /// This is a non-consensus sentinel value.
         static const uint64_t unlinked;
 
+        /// Set by node transaction in protocol.
         uint64_t originator = 0;
+
+        /// Set by blockchain tx organizer.
         chain_state::ptr state = nullptr;
 
+        /// Derived from hash table or block reference.
         /// Tx currently exists at the link (in any state).
         uint64_t link = unlinked;
 
+        /// False if read from wire and not found in store.
         /// Tx existed before being written (in the current pass).
         bool existed = false;
 
+        /// Stored on transaction.
         /// Tx is in a candidate chain block (and valid there).
         bool candidate = false;
 
+        /// Derived from tx position (non-sentinel).
         /// Tx is in a confirmed chain block at given height (and valid there).
         bool confirmed = false;
 
+        /// Derived from height (when not confirmed).
         /// There is no distiction between a tx that can be valid under some
         /// forks and one that cannot be valid under any forks. The only
         /// criteria for storage is deserialization and DoS protection. The
         /// latter is provided by pool validation or containing block PoW.
-        /// A transaction that is deconfirmed is set to unverified, which is
-        /// simply a storage space optimization. This results in revalidation
-        /// in the case where the transaction may be confirmed again.
-        /// If verified the tx has been validated relative to given forks.
+        /// This results in revalidation in the case where the tx may be 
+        // confirmed again. If true tx is validated relative to fork point.
         bool verified = false;
     };
 
