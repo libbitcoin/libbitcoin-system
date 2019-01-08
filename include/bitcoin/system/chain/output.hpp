@@ -53,12 +53,14 @@ public:
         static const uint8_t candidate_spent;
         static const uint8_t candidate_unspent;
 
+        // Expects max_size_t sentinel for unconfirmed.
         // Transaction pool spentness is not store-indexed.
         // Determine spent by confirmed below fork, or candidate as applicable.
         bool spent(size_t fork_height, bool candidate) const
         {
-            return (confirmed_spend_height <= fork_height) ||
-                (candidate_spend && candidate);
+            const auto confirm = (fork_height != max_size_t);
+            const auto confirmed = confirmed_spend_height <= fork_height;
+            return (confirm && confirmed) || (candidate_spend && candidate);
         }
 
         bool candidate_spend = false;
