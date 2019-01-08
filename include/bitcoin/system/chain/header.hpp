@@ -56,25 +56,33 @@ public:
         uint64_t originator = 0;
         chain_state::ptr state = nullptr;
 
+        /// Stored in checksum field stored on header (when invalid).
         /// The block validation error code (if validated).
         code error = error::success;
 
-        /// Always exists for a validated header.
+        // Stored on header.
+        /// Height also always exists, but we always pass it explicitly.
+        /// The median time past of the header, derived from its ancestry.
         uint32_t median_time_past = 0;
 
-        /// Header exists, in any state (don't download it).
+        /// False if not found in store.
+        /// Header exists, in any state (do not download it).
         bool exists = false;
 
-        /// Block transactions are populated (don't download block/txs).
+        /// Derived from header transaction count (non-zero).
+        /// Block transactions are populated (do not download block/txs).
         bool populated = false;
 
-        /// Block has been validated (don't re-validate).
+        /// Derived from state stored on header (valid or failed).
+        /// Block has been validated (do not revalidate).
         bool validated = false;
 
-        /// Header is a candidate (and is not yet invalid).
+        /// Derived from state stored on header.
+        /// Header is in candidate state and referenced by the candidate index.
         bool candidate = false;
 
-        /// Block is confirmed, relative to queried fork point (and is valid).
+        /// Derived from state stored on header (no fork point considered).
+        /// Block is in confirmed state and referenced by the confirmed index.
         bool confirmed = false;
     };
 

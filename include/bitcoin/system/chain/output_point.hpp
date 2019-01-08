@@ -39,27 +39,36 @@ public:
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
-        /// This value is relative to queried fork point and candidacy.
-        /// The output spender's tx->block is candidate/confirmed.
-        bool spent = false;
+        /// Derived from prevout tx block position (zero).
+        /// The prevout is of its block's first tx (verify spender maturity).
+        bool coinbase;
 
-        /// The output->tx is in a candidate chain block's tx.
+        /// Stored on prevout tx.
+        /// The prevout is in a candidate block tx.
         bool candidate = false;
 
-        /// The output->tx is confirmed, relative to queried fork point.
+        /// Derived from prevout tx position and height relative to fork point.
+        /// The prevout is confirmed relative to fork point.
         bool confirmed = false;
 
-        /// The previous output is a coinbase (must verify spender maturity).
-        bool coinbase = false;
+        /// This is redundant with cache.metadata.candidate_spent.
+        /// The prevout is spent by a candidate block.
+        bool candidate_spent = false;
 
-        /// Block height (used for coinbase maturity and relative lock time).
+        /// Derived from prevout spent height relative to fork point.
+        /// The prevout is spent by a confirmed block relative to fork point.
+        bool confirmed_spent = false;
+
+        /// Stored on prevout tx (forks if not confirmed).
+        /// The prevout height (for coinbase maturity and relative lock time).
         size_t height = 0;
 
-        /// Median time past of the block (used for relative lock time).
+        /// Stored on prevout tx (0 if not confirmed).
+        /// The prevout block median time past (used for relative lock time).
         uint32_t median_time_past = 0;
 
-        /// The output referenced by an input's output point.
-        /// If cache.value is output::not_found then the output is missing.
+        /// Stored on prevout tx (cache.value is output::not_found if missing).
+        /// The prevout referenced by this output point.
         output cache;
     };
 

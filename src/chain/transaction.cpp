@@ -1012,7 +1012,7 @@ bool transaction::is_confirmed_double_spend() const
 {
     const auto spent = [](const input& input)
     {
-        return input.previous_output().metadata.spent;
+        return input.previous_output().metadata.confirmed_spent;
     };
 
     return std::any_of(inputs_.begin(), inputs_.end(), spent);

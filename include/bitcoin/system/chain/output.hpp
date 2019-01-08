@@ -49,20 +49,17 @@ public:
     struct validation
     {
         /// These are non-consensus sentinel values.
-        static const uint32_t unspent;
-        static const uint8_t candidate_spent;
-        static const uint8_t candidate_unspent;
+        static const uint32_t not_spent;
+        static const uint8_t candidate_spent_true;
+        static const uint8_t candidate_spent_false;
 
-        // Transaction pool spentness is not store-indexed.
-        // Determine spent by confirmed below fork, or candidate as applicable.
-        bool spent(size_t fork_height, bool candidate) const
-        {
-            return (confirmed_spend_height <= fork_height) ||
-                (candidate_spend && candidate);
-        }
+        /// Stored on output.
+        /// The output is spent by a candidate block.
+        bool candidate_spent = false;
 
-        bool candidate_spend = false;
-        uint32_t confirmed_spend_height = unspent;
+        /// Stored on output.
+        /// The output is spent by a confirmed block at the given height.
+        uint32_t confirmed_spent_height = not_spent;
     };
 
     // Constructors.
