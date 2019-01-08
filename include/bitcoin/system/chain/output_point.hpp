@@ -39,18 +39,20 @@ public:
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
     {
-        /// This value is relative to queried fork point and candidacy.
-        /// The output spender's tx->block is candidate/confirmed.
-        bool spent = false;
-
-        /// The output->tx is in a candidate chain block's tx.
+        /// The prevout is in a candidate block tx.
         bool candidate = false;
 
-        /// The output->tx is confirmed, relative to queried fork point.
+        /// The prevout is confirmed relative to fork point.
         bool confirmed = false;
 
-        /// The previous output is a coinbase (must verify spender maturity).
+        /// The prevout is a coinbase (must verify spender maturity).
         bool coinbase = false;
+
+        /// The prevout spender's block is a candidate.
+        bool candidate_spent = false;
+
+        /// The prevout spender's block is confirmed, relative to fork point
+        bool confirmed_spent = false;
 
         /// Block height (used for coinbase maturity and relative lock time).
         size_t height = 0;
