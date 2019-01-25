@@ -186,6 +186,22 @@ const short_hash& payment_address::hash() const
     return hash_;
 }
 
+chain::script payment_address::output_script() const
+{
+    switch (version_)
+    {
+        case 0:
+        case 111:
+            return chain::script::to_pay_key_hash_pattern(hash_);
+
+        case 5:
+        case 196:
+            return chain::script::to_pay_script_hash_pattern(hash_);
+    }
+
+    return {};
+}
+
 // Methods.
 // ----------------------------------------------------------------------------
 

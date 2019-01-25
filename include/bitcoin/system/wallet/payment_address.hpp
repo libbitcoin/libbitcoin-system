@@ -94,6 +94,7 @@ public:
     /// Accessors.
     uint8_t version() const;
     const short_hash& hash() const;
+    chain::script output_script() const;
 
     /// Methods.
     payment to_payment() const;
