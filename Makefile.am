@@ -188,14 +188,12 @@ src_libbitcoin_system_la_SOURCES = \
     src/utility/threadpool.cpp \
     src/utility/work.cpp \
     src/wallet/bitcoin_uri.cpp \
-    src/wallet/dictionary_cs.cpp \
     src/wallet/dictionary_en.cpp \
     src/wallet/dictionary_es.cpp \
     src/wallet/dictionary_fr.cpp \
     src/wallet/dictionary_it.cpp \
     src/wallet/dictionary_ja.cpp \
-    src/wallet/dictionary_ru.cpp \
-    src/wallet/dictionary_uk.cpp \
+    src/wallet/dictionary_ko.cpp \
     src/wallet/dictionary_zh_Hans.cpp \
     src/wallet/dictionary_zh_Hant.cpp \
     src/wallet/ec_private.cpp \

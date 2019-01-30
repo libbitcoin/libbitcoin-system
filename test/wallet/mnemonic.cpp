@@ -220,38 +220,6 @@ BOOST_AUTO_TEST_CASE(mnemonic__dictionary__fr_it__no_intersection)
     BOOST_REQUIRE_EQUAL(intersection, 0u);
 }
 
-BOOST_AUTO_TEST_CASE(mnemonic__dictionary__cs_ru__no_intersection)
-{
-    const auto& czech = language::cs;
-    const auto& russian = language::ru;
-    size_t intersection = 0;
-    for (const auto ru: russian)
-    {
-        std::string test(ru);
-        const auto iter = std::find(czech.begin(), czech.end(), test);
-        if (iter != std::end(czech))
-            intersection++;
-    }
-
-    BOOST_REQUIRE_EQUAL(intersection, 0u);
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__dictionary__cs_uk__no_intersection)
-{
-    const auto& czech = language::cs;
-    const auto& ukranian = language::uk;
-    size_t intersection = 0;
-    for (const auto uk: ukranian)
-    {
-        std::string test(uk);
-        const auto iter = std::find(czech.begin(), czech.end(), test);
-        if (iter != std::end(czech))
-            intersection++;
-    }
-
-    BOOST_REQUIRE_EQUAL(intersection, 0u);
-}
-
 BOOST_AUTO_TEST_CASE(mnemonic__dictionary__zh_Hans_Hant__intersection)
 {
     const auto& simplified = language::zh_Hans;

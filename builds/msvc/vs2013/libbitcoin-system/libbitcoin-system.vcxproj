@@ -249,14 +249,12 @@
     <ClCompile Include="..\..\..\..\src\utility\threadpool.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\work.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\bitcoin_uri.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\dictionary_cs.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\dictionary_en.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\dictionary_es.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\dictionary_fr.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\dictionary_it.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\dictionary_ja.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\dictionary_ru.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\dictionary_uk.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\dictionary_ko.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\dictionary_zh_Hans.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\dictionary_zh_Hant.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\ec_private.cpp" />

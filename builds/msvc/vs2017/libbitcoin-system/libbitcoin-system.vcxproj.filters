@@ -531,9 +531,6 @@
     <ClCompile Include="..\..\..\..\src\wallet\bitcoin_uri.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\dictionary_cs.cpp">
-      <Filter>src\wallet</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\dictionary_en.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
@@ -549,10 +546,7 @@
     <ClCompile Include="..\..\..\..\src\wallet\dictionary_ja.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\dictionary_ru.cpp">
-      <Filter>src\wallet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\dictionary_uk.cpp">
+    <ClCompile Include="..\..\..\..\src\wallet\dictionary_ko.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\dictionary_zh_Hans.cpp">
