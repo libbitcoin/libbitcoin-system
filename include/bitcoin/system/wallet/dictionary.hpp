@@ -50,12 +50,10 @@ namespace language {
 // Individual built-in languages:
 extern const dictionary en;
 extern const dictionary es;
-extern const dictionary ja;
-extern const dictionary it;
 extern const dictionary fr;
-extern const dictionary cs;
-extern const dictionary ru;
-extern const dictionary uk;
+extern const dictionary it;
+extern const dictionary ja;
+extern const dictionary ko;
 extern const dictionary zh_Hans;
 extern const dictionary zh_Hant;
 
@@ -65,12 +63,10 @@ const dictionary_list all
 {
     &en,
     &es,
-    &ja,
-    &it,
     &fr,
-    &cs,
-    &ru,
-    &uk,
+    &it,
+    &ja,
+    &ko,
     &zh_Hans,
     &zh_Hant
 };
