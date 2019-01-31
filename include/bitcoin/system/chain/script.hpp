@@ -191,6 +191,10 @@ public:
         const point_list& points);
     static operation::list to_pay_multisig_pattern(uint8_t signatures,
         const data_stack& points);
+    static operation::list to_pay_witness_key_hash_pattern(
+        const short_hash& hash);
+    static operation::list to_pay_witness_script_hash_pattern(
+        const hash_digest& hash);
 
     // Utilities (non-static).
     //-------------------------------------------------------------------------

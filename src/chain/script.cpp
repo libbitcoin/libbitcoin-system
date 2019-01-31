@@ -1171,6 +1171,24 @@ operation::list script::to_pay_multisig_pattern(uint8_t signatures,
     return ops;
 }
 
+operation::list script::to_pay_witness_key_hash_pattern(const short_hash& hash)
+{
+    return operation::list
+    {
+        { opcode::push_size_0 },
+        { to_chunk(hash) },
+    };
+}
+
+operation::list script::to_pay_witness_script_hash_pattern(const hash_digest& hash)
+{
+    return operation::list
+    {
+        { opcode::push_size_0 },
+        { to_chunk(hash) }
+    };
+}
+
 // Utilities (non-static).
 //-----------------------------------------------------------------------------
 

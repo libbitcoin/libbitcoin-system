@@ -504,6 +504,7 @@ add_library( ${CANONICAL_LIB_NAME}
     "../../src/wallet/stealth_receiver.cpp"
     "../../src/wallet/stealth_sender.cpp"
     "../../src/wallet/uri.cpp"
+    "../../src/wallet/witness_address.cpp"
     "../../src/wallet/parse_encrypted_keys/parse_encrypted_key.hpp"
     "../../src/wallet/parse_encrypted_keys/parse_encrypted_key.ipp"
     "../../src/wallet/parse_encrypted_keys/parse_encrypted_prefix.hpp"
@@ -718,7 +719,8 @@ if (with-tests)
         "../../test/wallet/stealth_receiver.cpp"
         "../../test/wallet/stealth_sender.cpp"
         "../../test/wallet/uri.cpp"
-        "../../test/wallet/uri_reader.cpp" )
+        "../../test/wallet/uri_reader.cpp"
+        "../../test/wallet/witness_address.cpp" )
 
     add_test( NAME libbitcoin-system-test COMMAND libbitcoin-system-test
             --run_test=*

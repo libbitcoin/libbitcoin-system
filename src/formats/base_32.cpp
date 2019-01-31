@@ -22,7 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
-#include <string>
+#include <sstream>
 #include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
@@ -122,8 +122,8 @@ data_chunk checksum(const base32& value)
     data_chunk checksum(checksum_size);
     const auto modified = polymod(expanded) ^ 1;
 
-    for (size_t index = 0; index < checksum.size(); ++index)
-        checksum[index] = (modified >> (5 * (5 - index))) & 31;
+    for (size_t index = 0; index < checksum_size; ++index)
+        checksum[index] = (modified >> 5 * (5 - index)) & 31;
 
     return checksum;
 }
@@ -213,23 +213,20 @@ bool verify(const base32& value)
 // to produce uppercase encodings, though the values may be simply mapped.
 std::string encode_base32(const base32& unencoded)
 {
-    std::string encoded;
-    encoded.reserve(unencoded.prefix.size() + sizeof(separator) +
-        unencoded.payload.size() + checksum_size);
+    std::stringstream encoded;
 
     // Copy the prefix and add the separator.
-    encoded = unencoded.prefix;
-    encoded += separator;
+    encoded << unencoded.prefix << separator;
 
     // Encode and add the payload.
     for (const auto value: unencoded.payload)
-        encoded += encode_table[value];
+        encoded << encode_table[value];
 
     // Compute, encode and add the checksum.
     for (const auto value: checksum(unencoded))
-        encoded += encode_table[value];
+        encoded << encode_table[value];
 
-    return encoded;
+    return encoded.str();
 }
 
 bool decode_base32(base32& out, const std::string& in)
