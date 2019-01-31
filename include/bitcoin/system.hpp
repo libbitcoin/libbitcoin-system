@@ -212,5 +212,6 @@
 #include <bitcoin/system/wallet/stealth_sender.hpp>
 #include <bitcoin/system/wallet/uri.hpp>
 #include <bitcoin/system/wallet/uri_reader.hpp>
+#include <bitcoin/system/wallet/witness_address.hpp>
 
 #endif

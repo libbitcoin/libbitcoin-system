@@ -360,6 +360,9 @@
     <ClCompile Include="..\..\..\..\test\wallet\uri_reader.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\witness_address.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\test\chain\script.hpp">

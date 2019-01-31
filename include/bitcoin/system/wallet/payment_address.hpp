@@ -111,6 +111,8 @@ private:
     static payment_address from_script(const chain::script& script,
         uint8_t version);
 
+protected:
+
     /// Members.
     /// These should be const, apart from the need to implement assignment.
     bool valid_;

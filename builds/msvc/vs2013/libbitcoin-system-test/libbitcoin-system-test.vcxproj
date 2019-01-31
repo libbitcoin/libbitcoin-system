@@ -191,6 +191,7 @@
     <ClCompile Include="..\..\..\..\test\wallet\stealth_sender.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\uri.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\uri_reader.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\witness_address.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\test\chain\script.hpp" />
