@@ -1,0 +1,97 @@
+/**
+ * Copyright (c) 2011-2017 libbitcoin developers (see AUTHORS)
+ *
+ * This file is part of libbitcoin.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#ifndef LIBBITCOIN__WALLET_MNEMONIC_HPP
+#define LIBBITCOIN__WALLET_MNEMONIC_HPP
+
+//#include <cstddef>
+//#include <string>
+//#include <vector>
+//#include <bitcoin/bitcoin/compat.hpp>
+#include <bitcoin/bitcoin/define.hpp>
+//#include <bitcoin/bitcoin/math/hash.hpp>
+//#include <bitcoin/bitcoin/unicode/unicode.hpp>
+//#include <bitcoin/bitcoin/utility/data.hpp>
+#include <utility_data_slice.hpp>
+//#include <bitcoin/bitcoin/utility/string.hpp>
+#include <bitcoin/bitcoin/wallet/dictionary.hpp>
+#include <wallet_dictionary.hpp>
+#include <wallet_dictionary_list.hpp>
+#include <wallet_electrum_word_list.hpp>
+
+namespace libbitcoin {
+//namespace wallet {
+namespace api {
+
+/**
+ * A valid mnemonic word count is evenly divisible by this number.
+ */
+//static BC_CONSTEXPR size_t mnemonic_word_multiple = 3;
+
+/**
+ * A valid seed byte count is evenly divisible by this number.
+ */
+//static BC_CONSTEXPR size_t mnemonic_seed_multiple = 4;
+
+/**
+ * Represents a mnemonic word list.
+ */
+//typedef string_list word_list;
+
+/**
+ * Create a new mnenomic (list of words) from provided entropy and a dictionary
+ * selection. The mnemonic can later be converted to a seed for use in wallet
+ * creation. Entropy byte count must be evenly divisible by 4.
+ */
+BC_API wallet_electrum_word_list create_mnemonic(utility_data_slice entropy,
+    const wallet_dictionary &lexicon=wallet::language::en);
+
+/**
+ * Checks a mnemonic against a dictionary to determine if the
+ * words are spelled correctly and the checksum matches.
+ * The words must have been created using mnemonic encoding.
+ */
+BC_API bool validate_mnemonic(const wallet_electrum_word_list& mnemonic,
+    const wallet_dictionary &lexicon);
+
+/**
+ * Checks that a mnemonic is valid in at least one of the provided languages.
+ */
+BC_API bool validate_mnemonic(const wallet_electrum_word_list& mnemonic,
+    const wallet_dictionary_list& lexicons=wallet::language::all);
+
+/**
+ * Convert a mnemonic with no passphrase to a wallet-generation seed.
+ */
+BC_API long_hash decode_mnemonic(const wallet_electrum_word_list& mnemonic);
+
+#ifdef WITH_ICU
+
+/**
+ * Convert a mnemonic and passphrase to a wallet-generation seed.
+ * Any passphrase can be used and will change the resulting seed.
+ */
+BC_API long_hash decode_mnemonic(const wallet_electrum_word_list& mnemonic,
+    const std::string& passphrase);
+
+#endif
+
+} // namespace wallet
+} // namespace libbitcoin
+
+#endif

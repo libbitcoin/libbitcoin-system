@@ -1,0 +1,85 @@
+/**
+ * Copyright (c) 2011-2017 libbitcoin developers (see AUTHORS)
+ *
+ * This file is part of libbitcoin.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#ifndef LIBBITCOIN__CONFIG_OUTPUT_HPP
+#define LIBBITCOIN__CONFIG_OUTPUT_HPP
+
+#include <cstdint>
+#include <iostream>
+#include <string>
+#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/chain_script.hpp>
+#include <bitcoin/bitcoin/config/output.hpp>
+#include <bitcoin/math_short_hash.hpp>
+
+namespace libbitcoin {
+namespace config {
+namespace api {
+
+/**
+ * Serialization helper to convert between a base58-string:number and
+ * a vector of chain::output.
+ */
+class BC_API config_output : public config::output
+{
+public:
+
+    /**
+     * Default constructor.
+     */
+    config_output();
+
+    /**
+     * Initialization constructor.
+     * @param[in]  tuple  The value to initialize with.
+     */
+    config_output(const std::string& tuple);
+
+    /// Parsed properties
+    bool is_stealth() const;
+    uint64_t amount() const;
+    uint8_t version() const;
+    const chain::api::chain_script& script() const;
+    const libbitcoin::api::math_short_hash& pay_to_hash() const;
+
+    /**
+     * Overload stream in. Throws if input is invalid.
+     * @param[in]   input     The input stream to read the value from.
+     * @param[out]  argument  The object to receive the read value.
+     * @return                The input stream reference.
+     */
+//    friend std::istream& operator>>(std::istream& input, output& argument);
+
+//private:
+//
+//    /**
+//     * The transaction output state of this object.
+//     * This data is translated to an output given expected version information.
+//     */
+//    bool is_stealth_;
+//    uint64_t amount_;
+//    uint8_t version_;
+//    chain::script script_;
+//    short_hash pay_to_hash_;
+};
+
+} // namespace api
+} // namespace config
+} // namespace libbitcoin
+
+#endif

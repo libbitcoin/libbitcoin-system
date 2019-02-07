@@ -9,20 +9,20 @@
 //%import <bits/wordsize.h>
 %import <stdint.i>
 
-%import "../../../../include/bitcoin/bitcoin/compat.h"
-%import "../../../../include/bitcoin/bitcoin/compat.hpp"
-%import "../../../../include/bitcoin/bitcoin/define.hpp"
+%import "bitcoin/bitcoin/compat.h"
+%import "bitcoin/bitcoin/compat.hpp"
+%import "bitcoin/bitcoin/define.hpp"
 
 %import "bitcoin-config-ext.i"
-%import "bitcoin-config-ext-typemap.i"
+//%import "bitcoin-config-ext-typemap.i"
 
 %include "bitcoin-ext.i"
 
 %include "enums.swg"
 %javaconst(1);
 
-%include "../../../../include/bitcoin/bitcoin/version.hpp"
-%include "../../../../include/bitcoin/bitcoin/constants.hpp"
-%include "../../../../include/bitcoin/bitcoin/define.hpp"
-%include "../../../../include/bitcoin/bitcoin/handlers.hpp"
-%include "../../../../include/bitcoin/bitcoin/version.hpp"
+%include "bitcoin/bitcoin/version.hpp"
+%include "bitcoin/bitcoin/constants.hpp"
+%include "bitcoin/bitcoin/define.hpp"
+%include "bitcoin/bitcoin/handlers.hpp"
+%include "bitcoin/bitcoin/version.hpp"

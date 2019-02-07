@@ -27,22 +27,26 @@ class blockTest {
         System.loadLibrary("javawrapchain");
 	}
 	
-	static boolean all_valid(TransactionVec transactions)
+	static boolean all_valid(chain_transaction_list transactions)
 	{
 	    boolean valid = true;
 	
-	    for (transaction tx: transactions)
+	    for (int i=0; i<transactions.getSize(); i++)
 	    {
+	    	
+	    	transaction tx = transactions.get(i);
 	        valid = valid && tx.is_valid();
 	
-	        for (input _input: tx.inputs())
+	        for (int j=0; j<tx.inputs().getSize(); j++)
 	        {
+		        input _input = tx.inputs().get(j);
 	            valid &= _input.is_valid();
 	            valid &= _input.script().is_valid();
 	        }
 	
-	        for (output _output: tx.outputs())
+	        for (int j=0; j<tx.outputs().getSize(); j++)
 	        {
+	        	output _output = tx.outputs().get(j);
 	            valid &= _output.is_valid();
 	            valid &= _output.script().is_valid();
 	        }
@@ -54,6 +58,7 @@ class blockTest {
 	public static void block__locator_size__zero_backoff__returns_top_plus_one()
 	{
 		long top = 7;
+		chain_block block = new chain_block();
 	    assertEquals(block.locator_size(top), top + 1);
 	}
 	
@@ -67,6 +72,7 @@ class blockTest {
 	{
 	    long[] expected = { 7, 6, 5, 4, 3, 2, 1, 0 };
 	    long top = 7;
+	    chain_block block = new chain_block();
 	    SizeTVec result = block.locator_heights(top);
 	    assertEquals(expected, result)
 	}

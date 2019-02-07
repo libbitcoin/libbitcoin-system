@@ -1,0 +1,65 @@
+/**
+ * Copyright (c) 2011-2017 libbitcoin developers (see AUTHORS)
+ *
+ * This file is part of libbitcoin.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#ifndef LIBBITCOIN__CHAIN_STEALTH_RECORD_LIST_HPP
+#define LIBBITCOIN__CHAIN_STEALTH_RECORD_LIST_HPP
+
+#include <bitcoin/bitcoin/chain/stealth_record.hpp>
+#include <bitcoin/bitcoin/define.hpp>
+//#include <bitcoin/bitcoin/error.hpp>
+
+namespace libbitcoin {
+//namespace chain {
+namespace api {
+
+class BC_API chain_stealth_record_list : public libbitcoin::chain::stealth_record::list
+{
+//public:
+//
+//  chain_stealth_record_list()
+//    : stealth_records(new stealth_record::list())
+//  {
+//  }
+//
+//  stealth_record get(size_t i) {
+//    return chain_stealth_record_list::stealth_records[i];
+//  }
+//
+//  void set(size_t i, stealth_record *t) {
+//    chain_stealth_record_list::stealth_records[i] = *t;
+//  }
+//
+//  stealth_record::list cast() {
+//    return stealth_records;
+//  }
+//
+//  size_t getSize() {
+//    return stealth_records.size();
+//  }
+//
+//private:
+//
+//  stealth_record::list stealth_records;
+//
+};
+
+} // namespace api
+//} // namespace chain
+} // namespace libbitcoin
+
+#endif
