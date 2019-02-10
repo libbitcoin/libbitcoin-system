@@ -27,34 +27,32 @@ namespace libbitcoin {
 //namespace chain {
 namespace api {
 
-class BC_API chain_block_list : public libbitcoin::chain::block::list
+class BC_API chain_block_list
 {
-//public:
-//
-//  chain_block_list()
-//    : blocks(new block::list())
-//  {
-//  }
-//
-//  block get(size_t i) {
-//    return chain_block_list::blocks[i];
-//  }
-//
-//  void set(size_t i, block *t) {
-//    chain_block_list::blocks[i] = *t;
-//  }
-//
-//  block::list getBlocks() {
-//    return blocks;
-//  }
-//
-//  size_t getSize() {
-//    return blocks.size();
-//  }
-//
-//private:
-//
-//  block::list blocks;
+public:
+
+	chain_block_list() : value( new chain::block::list()) {
+	}
+
+	chain::block get(size_t i) {
+		return chain_block_list::value[i];
+	}
+
+	void set(size_t i, chain::block *t) {
+		chain_block_list::value[i] = *t;
+	}
+
+	chain::block::list getvalue() {
+		return value;
+	}
+
+	size_t getSize() {
+		return value.size();
+	}
+
+private:
+
+	chain::block::list value;
 
 };
 

@@ -34,7 +34,6 @@ namespace libbitcoin {
 namespace api {
 
 class BC_API chain_output_point
-  : public libbitcoin::chain::output_point
 {
 public:
 
@@ -110,12 +109,23 @@ public:
     /// True if cached previous output is mature enough to spend from height.
     bool is_mature(size_t height) const;
 
+    chain::output_point getValue() {
+		return value;
+	}
+
+	void setValue(chain::output_point value) {
+		this->value = value;
+	}
 //    // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
 //    mutable validation metadata;
 //
 //protected:
 //    // So that input may call reset from its own.
 //    friend class input;
+
+private:
+	chain::output_point value;
+
 };
 
 } // namespace api

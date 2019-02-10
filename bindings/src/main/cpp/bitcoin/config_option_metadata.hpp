@@ -7,7 +7,17 @@
 namespace libbitcoin {
 namespace api {
 
-class config_option_metadata : public option_metadata {
+class config_option_metadata {
+public:
+	option_metadata getValue() {
+		return value;
+	}
+
+	void setValue(option_metadata value) {
+		this->value = value;
+	}
+private:
+	option_metadata value;
 
 };
 

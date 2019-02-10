@@ -25,7 +25,18 @@ namespace libbitcoin {
 //namespace chain {
 namespace api {
 
-class chain_input_point : public chain::input_point {
+class chain_input_point
+{
+public:
+	chain::input_point getValue() {
+		return value;
+	}
+
+	void setValue(chain::input_point value) {
+		this->value = value;
+	}
+private:
+	chain::input_point value;
 };
 
 } // namespace api

@@ -6,7 +6,7 @@
 namespace libbitcoin {
 namespace api {
 
-class math_ec_compressed : public ec_compressed {
+class math_ec_compressed {
 public:
 	ec_compressed getValue() {
 		return value;

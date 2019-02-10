@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN__MATH_HASH_LIST_HPP
-#define LIBBITCOIN__MATH_HASH_LIST_HPP
+#ifndef LIBBITCOIN__MATH_HASH_valueHPP
+#define LIBBITCOIN__MATH_HASH_valueHPP
 
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/define.hpp>
@@ -27,34 +27,37 @@ namespace libbitcoin {
 //namespace math {
 namespace api {
 
-class BC_API math_hash_list : public hash_list
+class BC_API math_hash_list
 {
-//public:
-//
-//  math_hash_list()
-//    : list_(new hash_list())
-//  {
+public:
+
+  math_hash_list()
+    : value(new hash_list())
+  {
+  }
+
+  hash_digest get(size_t i) {
+    return value[i];
+  }
+
+  void set(size_t i, hash_digest *t) {
+    value[i] = *t;
+  }
+
+  hash_list getValue() {
+    return value;
+  }
+
+  void setValue(hash_list value) {
+	  this->value = value;
+  }
+
+//  size_t getSize() {
+//    return value.size();
 //  }
-//
-//  hash_digest get(size_t i) {
-//    return list_[i];
-//  }
-//
-//  void set(size_t i, hash_digest *t) {
-//    list_[i] = *t;
-//  }
-//
-//  hash_list *getList() {
-//    return list_;
-//  }
-//
-////  size_t getSize() {
-////    return list_.size();
-////  }
-//
-//private:
-//
-//  hash_list list_;
+
+private:
+  hash_list value;
 
 };
 

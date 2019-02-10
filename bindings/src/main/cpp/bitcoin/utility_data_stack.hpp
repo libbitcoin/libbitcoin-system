@@ -6,7 +6,18 @@
 namespace libbitcoin {
 namespace api {
 
-class utility_data_stack : public libbitcoin::data_stack {
+class utility_data_stack
+{
+public:
+	libbitcoin::data_stack getValue() {
+		return value;
+	}
+
+	void setValue(libbitcoin::data_stack value) {
+		this->value = value;
+	}
+private:
+	libbitcoin::data_stack value;
 };
 
 } // namespace api

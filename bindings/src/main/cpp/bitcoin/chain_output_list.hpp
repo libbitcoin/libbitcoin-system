@@ -27,34 +27,38 @@ namespace libbitcoin {
 //namespace chain {
 namespace api {
 
-class BC_API chain_output_list : public chain::output::list
+class BC_API chain_output_list
 {
-//public:
-//
-//  chain_output_list()
-//    : outputs(new libbitcoin::chain::output::list())
-//  {
-//  }
-//
-//  libbitcoin::chain::output get(size_t i) {
-//    return chain_output_list::outputs[i];
-//  }
-//
-//  void set(size_t i, libbitcoin::chain::output *t) {
-//    chain_output_list::outputs[i] = *t;
-//  }
-//
-//  libbitcoin::chain::output::list getoutputs() {
-//    return outputs;
-//  }
-//
-//  size_t getSize() {
-//    return outputs.size();
-//  }
-//
-//private:
-//
-//  libbitcoin::chain::output::list outputs;
+public:
+
+  chain_output_list()
+    : value(new libbitcoin::chain::output::list())
+  {
+  }
+
+  libbitcoin::chain::output get(size_t i) {
+    return chain_output_list::value[i];
+  }
+
+  void set(size_t i, libbitcoin::chain::output *t) {
+    chain_output_list::value[i] = *t;
+  }
+
+  libbitcoin::chain::output::list getvalue() {
+    return value;
+  }
+
+  void setValue(chain::output::list value) {
+	  this->value = value;
+  }
+
+  size_t getSize() {
+    return value.size();
+  }
+
+private:
+
+  libbitcoin::chain::output::list value;
 
 };
 

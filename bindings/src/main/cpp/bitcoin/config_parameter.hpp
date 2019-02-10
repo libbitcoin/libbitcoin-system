@@ -31,7 +31,7 @@
 /* NOTE: don't declare 'using namespace foo' in headers. */
 
 namespace libbitcoin {
-namespace config {
+//namespace config {
 namespace api {
 
 /**
@@ -62,7 +62,7 @@ namespace api {
  * Normalized storage for command line arguments and options.
  * TEST: option_metadata does not provide virtual methods so must wrap to mock.
  */
-class BC_API config_parameter : public parameter
+class BC_API config_parameter
 {
 //private:
 //
@@ -82,6 +82,8 @@ class BC_API config_parameter : public parameter
 //    };
 
 public:
+
+	virtual ~config_parameter();
 
 //    /**
 //     * Sentinel - the option is not a positional argument.
@@ -137,6 +139,16 @@ public:
     virtual char short_name(
         const libbitcoin::api::config_option_description& option) const;
 
+    config::parameter getValue() {
+		return value;
+	}
+
+	void setValue(config::parameter value) {
+		this->value = value;
+	}
+private:
+	config::parameter value;
+
     /**
      * Virtual property declarations.
      */
@@ -153,7 +165,7 @@ public:
 #undef BC_PROPERTY
 
 } // namespace api
-} // namespace config
+//} // namespace config
 } // namespace libbitcoin
 
 #endif

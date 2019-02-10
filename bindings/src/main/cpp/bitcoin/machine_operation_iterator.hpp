@@ -27,34 +27,34 @@ namespace libbitcoin {
 //namespace machine {
 namespace api {
 
-class BC_API machine_operation_iterator : public machine::operation::iterator
+class BC_API machine_operation_iterator
 {
-//public:
-//
-//  chain_transaction_list()
-//    : transactions(new transaction::list())
-//  {
-//  }
-//
-//  transaction get(size_t i) {
-//    return chain_transaction_list::transactions[i];
-//  }
-//
-//  void set(size_t i, transaction *t) {
-//    chain_transaction_list::transactions[i] = *t;
-//  }
-//
-//  transaction::list getTransactions() {
-//    return transactions;
-//  }
-//
-//  size_t getSize() {
-//    return transactions.size();
-//  }
-//
-//private:
-//
-//  transaction::list transactions;
+public:
+
+	machine_operation_iterator()
+	: value(new machine::operation::iterator())
+	{
+	}
+
+	machine::operation::iterator getValue() {
+		return machine_operation_iterator::value;
+	}
+
+	void setValue(machine::operation::iterator t) {
+		machine_operation_iterator::value = t;
+	}
+
+	machine::operation::iterator getvalue() {
+		return value;
+	}
+
+//	size_t getSize() {
+//		return value.size();
+//	}
+
+private:
+
+	 machine::operation::iterator value;
 
 };
 

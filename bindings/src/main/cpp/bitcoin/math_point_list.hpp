@@ -6,7 +6,7 @@
 namespace libbitcoin {
 namespace api {
 
-class math_point_list : public point_list {
+class math_point_list {
 public:
 	point_list getValue() {
 		return value;

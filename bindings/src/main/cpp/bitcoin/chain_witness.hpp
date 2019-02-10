@@ -37,7 +37,7 @@ namespace libbitcoin {
 //namespace chain {
 namespace api {
 
-class BC_API chain_witness : public witness
+class BC_API chain_witness
 {
 public:
 //    typedef machine::operation operation;
@@ -130,6 +130,17 @@ public:
 
     error_code verify(const chain_transaction& tx, uint32_t input_index, uint32_t forks,
         const chain_script& program_script, uint64_t value) const;
+
+public:
+	chain::witness getValue() {
+		return value;
+	}
+
+	void setValue(chain::witness value) {
+		this->value = value;
+	}
+private:
+	chain::witness value;
 
 //protected:
 //    // So that input may call reset from its own.

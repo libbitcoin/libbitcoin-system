@@ -27,34 +27,37 @@ namespace libbitcoin {
 //namespace chain {
 namespace api {
 
-class BC_API chain_block_indexes : public libbitcoin::chain::block::indexes
+class BC_API chain_block_indexes
 {
-//public:
-//
-//  chain_block_indexes()
-//    : indexes(new block::indexes())
-//  {
-//  }
-//
-//  size_t get(size_t i) {
-//    return chain_block_indexes::indexes[i];
-//  }
-//
-//  void set(size_t i, block *t) {
-//    chain_block_indexes::indexes[i] = *t;
-//  }
-//
-//  block::indexes getIndexes() {
-//    return indexes;
-//  }
-//
-//  size_t getSize() {
-//    return indexes.size();
-//  }
-//
-//private:
-//
-//  block::indexes indexes;
+public:
+
+	chain_block_indexes() :
+			value(new chain::block::indexes()) {
+	}
+
+	size_t get(size_t i) {
+		return chain_block_indexes::value[i];
+	}
+
+	void set(size_t i, chain::block *t) {
+		chain_block_indexes::value[i] = *t;
+	}
+
+	chain::block::indexes getValue() {
+		return value;
+	}
+
+	void setValue(chain::block::indexes value) {
+		this->value = value;
+	}
+
+	size_t getSize() {
+		return value.size();
+	}
+
+private:
+
+	chain::block::indexes value;
 
 };
 

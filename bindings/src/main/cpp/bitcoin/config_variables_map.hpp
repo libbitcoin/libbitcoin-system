@@ -7,8 +7,17 @@
 namespace libbitcoin {
 namespace api {
 
-class config_variables_map : public libbitcoin::variables_map {
+class config_variables_map {
+public:
+	variables_map getValue() {
+		return value;
+	}
 
+	void setValue(variables_map value) {
+		this->value = value;
+	}
+private:
+	variables_map value;
 };
 
 } // namespace api

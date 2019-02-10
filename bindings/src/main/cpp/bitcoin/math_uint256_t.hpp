@@ -24,7 +24,17 @@
 namespace libbitcoin {
 namespace api {
 
-class math_uint256_t : public libbitcoin::uint256_t {
+class math_uint256_t {
+public:
+	uint256_t getValue() {
+		return value;
+	}
+
+	void setValue(uint256_t value) {
+		this->value = value;
+	}
+private:
+	uint256_t value;
 
 };
 

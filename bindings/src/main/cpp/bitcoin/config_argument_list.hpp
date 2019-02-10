@@ -5,13 +5,23 @@
 #include <bitcoin/bitcoin/config/parameter.hpp>
 
 namespace libbitcoin {
-namespace config {
+//namespace config {
 namespace api {
 
-class config_argument_list : public argument_list {
+class config_argument_list {
+public:
+	config::argument_list getValue() {
+		return value;
+	}
+
+	void setValue(config::argument_list value) {
+		this->value = value;
+	}
+private:
+	config::argument_list value;
 };
 
 } // namespace api
-} // namespace config
+//} // namespace config
 } // namespace libbitcoin
 #endif
