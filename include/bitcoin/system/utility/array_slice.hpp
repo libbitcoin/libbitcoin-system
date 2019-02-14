@@ -25,7 +25,7 @@ namespace libbitcoin {
 namespace system {
 
 /**
- * An read-only STL-style wrapper for array-style collections.
+ * A read-only STL-style wrapper for array-style collections.
  *
  * This class allows std::array, std::vector, std::string, and c-style arrays
  * to be used interchangeably in functions that expect an iterable container.
