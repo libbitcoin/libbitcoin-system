@@ -107,7 +107,7 @@ bool get_blocks::from_data(uint32_t version, std::istream& stream)
     return from_data(version, source);
 }
 
-bool get_blocks::from_data(uint32_t , reader& source)
+bool get_blocks::from_data(uint32_t, reader& source)
 {
     reset();
 

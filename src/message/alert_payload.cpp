@@ -225,7 +225,7 @@ bool alert_payload::from_data(uint32_t version, std::istream& stream)
     return from_data(version, source);
 }
 
-bool alert_payload::from_data(uint32_t , reader& source)
+bool alert_payload::from_data(uint32_t, reader& source)
 {
     reset();
 
@@ -275,7 +275,7 @@ void alert_payload::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void alert_payload::to_data(uint32_t , writer& sink) const
+void alert_payload::to_data(uint32_t, writer& sink) const
 {
     sink.write_4_bytes_little_endian(this->version_);
     sink.write_8_bytes_little_endian(relay_until_);

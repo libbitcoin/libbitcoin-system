@@ -85,7 +85,7 @@ bool pong::from_data(uint32_t version, std::istream& stream)
     return from_data(version, source);
 }
 
-bool pong::from_data(uint32_t , reader& source)
+bool pong::from_data(uint32_t, reader& source)
 {
     reset();
 
@@ -116,7 +116,7 @@ void pong::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void pong::to_data(uint32_t , writer& sink) const
+void pong::to_data(uint32_t, writer& sink) const
 {
     sink.write_8_bytes_little_endian(nonce_);
 }

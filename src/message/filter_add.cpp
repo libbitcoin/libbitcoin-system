@@ -145,7 +145,7 @@ void filter_add::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void filter_add::to_data(uint32_t , writer& sink) const
+void filter_add::to_data(uint32_t, writer& sink) const
 {
     sink.write_variable_little_endian(data_.size());
     sink.write_bytes(data_);
