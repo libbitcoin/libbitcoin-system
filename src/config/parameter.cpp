@@ -39,7 +39,7 @@ void parameter::initialize(const po::option_description& option,
     const argument_list& arguments)
 {
     set_position(position(option, arguments));
-    set_args_limit(arguments_limit(get_position(), option, arguments));
+    set_args_limit(arguments_limit(position(), option, arguments));
     set_required(option.semantic()->is_required());
     set_long_name(option.long_name());
     set_short_name(short_name(option));
@@ -64,7 +64,7 @@ char parameter::short_name(const po::option_description& option) const
 
     // This is a substitute that allows us to use boost 1.49 for libbitcoin.
     const auto name = split(option.format_name()).front();
-    auto is_short_name = name[0] == option_prefix_char &&
+    const auto is_short_name = name[0] == option_prefix_char &&
         name[1] != option_prefix_char;
 
     return is_short_name ? name[1] : no_short_name;

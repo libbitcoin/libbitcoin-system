@@ -33,7 +33,7 @@ namespace config {
  * Shorthand for property declarations in parameter class.
  */
 #define BC_PROPERTY(type, name) \
-    public: virtual type get_##name() const { return name##_; } \
+    public: virtual type name() const { return name##_; } \
     public: virtual void set_##name(type value) { name##_ = value; } \
     private: type name##_
 
