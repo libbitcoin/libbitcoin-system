@@ -77,7 +77,7 @@ public:
 
 private:
     /// Validators.
-    static bool is_point(data_slice decoded);
+    static bool is_point(const data_slice& decoded);
 
     /// Factories.
     static ec_public from_data(const data_chunk& decoded);

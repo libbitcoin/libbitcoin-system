@@ -100,7 +100,7 @@ public:
 
 private:
     /// Validators.
-    static bool is_address(data_slice decoded);
+    static bool is_address(const data_slice& decoded);
 
     /// Factories.
     static payment_address from_string(const std::string& address);

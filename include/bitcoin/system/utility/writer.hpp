@@ -60,7 +60,7 @@ public:
     virtual void write_byte(uint8_t value) = 0;
 
     /// Write all bytes.
-    virtual void write_bytes(const data_slice data) = 0;
+    virtual void write_bytes(const data_slice& data) = 0;
 
     /// Write required size buffer.
     virtual void write_bytes(const uint8_t* data, size_t size) = 0;

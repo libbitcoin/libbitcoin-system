@@ -36,7 +36,7 @@ static constexpr uint8_t magic_differential = magic_compressed - magic_uncompres
 static_assert(magic_differential > max_recovery_id, "oops!");
 static_assert(max_uint8 - max_recovery_id >= magic_uncompressed, "oops!");
 
-hash_digest hash_message(data_slice message)
+hash_digest hash_message(const data_slice& message)
 {
     // This is a specified magic prefix.
     static const std::string prefix("Bitcoin Signed Message:\n");
@@ -113,13 +113,13 @@ bool magic_to_recovery_id(uint8_t& out_recovery_id, bool& out_compressed,
     return true;
 }
 
-bool sign_message(message_signature& signature, data_slice message,
+bool sign_message(message_signature& signature, const data_slice& message,
     const ec_private& secret)
 {
     return sign_message(signature, message, secret, secret.compressed());
 }
 
-bool sign_message(message_signature& signature, data_slice message,
+bool sign_message(message_signature& signature, const data_slice& message,
     const std::string& wif)
 {
     ec_private secret(wif);
@@ -127,7 +127,7 @@ bool sign_message(message_signature& signature, data_slice message,
         sign_message(signature, message, secret, secret.compressed()));
 }
 
-bool sign_message(message_signature& signature, data_slice message,
+bool sign_message(message_signature& signature, const data_slice& message,
     const ec_secret& secret, bool compressed)
 {
     recoverable_signature recoverable;
@@ -142,7 +142,7 @@ bool sign_message(message_signature& signature, data_slice message,
     return true;
 }
 
-bool verify_message(data_slice message, const payment_address& address,
+bool verify_message(const data_slice& message, const payment_address& address,
     const message_signature& signature)
 {
     const auto magic = signature.front();

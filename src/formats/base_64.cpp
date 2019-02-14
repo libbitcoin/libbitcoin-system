@@ -33,7 +33,7 @@ const static char pad = '=';
 const static char table[] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-std::string encode_base64(data_slice unencoded)
+std::string encode_base64(const data_slice& unencoded)
 {
     std::string encoded;
     const auto size = unencoded.size();

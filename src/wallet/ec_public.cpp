@@ -78,7 +78,7 @@ ec_public::ec_public(const ec_uncompressed& uncompressed, bool compress)
 // Validators.
 // ----------------------------------------------------------------------------
 
-bool ec_public::is_point(data_slice decoded)
+bool ec_public::is_point(const data_slice& decoded)
 {
     return is_public_key(decoded);
 }

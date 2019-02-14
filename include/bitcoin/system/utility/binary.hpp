@@ -41,7 +41,7 @@ public:
     binary(const binary& other);
     binary(const std::string& bit_string);
     binary(size_type size, uint32_t number);
-    binary(size_type size, data_slice blocks);
+    binary(size_type size, const data_slice& blocks);
 
     void resize(size_type size);
     bool operator[](size_type index) const;
@@ -56,7 +56,7 @@ public:
     void shift_right(size_type distance);
     binary substring(size_type first, size_type length=max_size_t) const;
 
-    bool is_prefix_of(data_slice field) const;
+    bool is_prefix_of(const data_slice& field) const;
     bool is_prefix_of(uint32_t field) const;
     bool is_prefix_of(const binary& field) const;
 

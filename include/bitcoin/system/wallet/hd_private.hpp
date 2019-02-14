@@ -92,7 +92,7 @@ public:
 
 private:
     /// Factories.
-    static hd_private from_seed(data_slice seed, uint64_t prefixes);
+    static hd_private from_seed(const data_slice& seed, uint64_t prefixes);
     static hd_private from_key(const hd_key& decoded, uint32_t prefix);
     static hd_private from_key(const hd_key& decoded, uint64_t public_prefix);
     static hd_private from_string(const std::string& encoded,

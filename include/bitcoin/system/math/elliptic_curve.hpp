@@ -145,13 +145,13 @@ BC_API bool verify(const ec_uncompressed& point);
 bool is_even_key(const ec_compressed& point);
 
 /// Fast detection of compressed public key structure.
-bool is_compressed_key(data_slice point);
+bool is_compressed_key(const data_slice& point);
 
 /// Fast detection of uncompressed public key structure.
-bool is_uncompressed_key(data_slice point);
+bool is_uncompressed_key(const data_slice& point);
 
 /// Fast detection of compressed or uncompressed public key structure.
-bool is_public_key(data_slice point);
+bool is_public_key(const data_slice& point);
 
 /// Fast detection of endorsement structure (DER with signature hash type).
 bool is_endorsement(const endorsement& endorsement);
@@ -187,7 +187,7 @@ BC_API bool verify_signature(const ec_uncompressed& point,
     const hash_digest& hash, const ec_signature& signature);
 
 /// Verify an EC signature using a potential point.
-BC_API bool verify_signature(data_slice point, const hash_digest& hash,
+BC_API bool verify_signature(const data_slice& point, const hash_digest& hash,
     const ec_signature& signature);
 
 // Recoverable sign/recover

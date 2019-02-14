@@ -97,7 +97,7 @@ payment_address::payment_address(const short_hash& hash, uint8_t version)
 // Validators.
 // ----------------------------------------------------------------------------
 
-bool payment_address::is_address(data_slice decoded)
+bool payment_address::is_address(const data_slice& decoded)
 {
     return (decoded.size() == payment_size) && verify_checksum(decoded);
 }

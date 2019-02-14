@@ -36,7 +36,7 @@ bool is_base16(const char c);
 /**
  * Convert data into a user-readable hex string.
  */
-BC_API std::string encode_base16(data_slice data);
+BC_API std::string encode_base16(const data_slice& data);
 
 /**
  * Convert a hex string into bytes.

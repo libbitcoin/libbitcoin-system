@@ -183,8 +183,8 @@ public:
     static bool is_sign_script_hash_pattern(const operation::list& ops);
 
     /// Stack factories.
-    static operation::list to_pay_null_data_pattern(data_slice data);
-    static operation::list to_pay_public_key_pattern(data_slice point);
+    static operation::list to_pay_null_data_pattern(const data_slice& data);
+    static operation::list to_pay_public_key_pattern(const data_slice& point);
     static operation::list to_pay_key_hash_pattern(const short_hash& hash);
     static operation::list to_pay_script_hash_pattern(const short_hash& hash);
     static operation::list to_pay_multisig_pattern(uint8_t signatures,

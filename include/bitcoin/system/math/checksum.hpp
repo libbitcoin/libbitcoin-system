@@ -94,13 +94,13 @@ BC_API void append_checksum(data_chunk& data);
  *
  * int(sha256(sha256(data))[-4:])
  */
-BC_API uint32_t bitcoin_checksum(data_slice data);
+BC_API uint32_t bitcoin_checksum(const data_slice& data);
 
 /**
  * Verifies the last four bytes of a data chunk are a valid checksum of the
  * earlier bytes. This is typically used to verify base58 data.
  */
-BC_API bool verify_checksum(data_slice data);
+BC_API bool verify_checksum(const data_slice& data);
 
 } // namespace system
 } // namespace libbitcoin

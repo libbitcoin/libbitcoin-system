@@ -27,7 +27,7 @@
 namespace libbitcoin {
 namespace system {
 
-std::string encode_base16(data_slice data)
+std::string encode_base16(const data_slice& data)
 {
     std::stringstream ss;
     ss << std::hex << std::setfill('0');

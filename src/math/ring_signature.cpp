@@ -35,7 +35,7 @@ namespace system {
 typedef std::vector<uint32_t> index_list;
 typedef std::map<ec_compressed, ec_secret> secret_keys_map;
 
-static ec_scalar borromean_hash(const hash_digest& M, data_slice R, uint32_t i,
+static ec_scalar borromean_hash(const hash_digest& M, const data_slice& R, uint32_t i,
     uint32_t j)
 {
     // e = H(M || R || i || j)
@@ -296,7 +296,7 @@ static ec_point calculate_last_R_verify(const point_list& ring,
 // API
 //-----------------------------------------------------------------------------
 
-hash_digest digest(data_slice message, const key_rings& rings)
+hash_digest digest(const data_slice& message, const key_rings& rings)
 {
     const auto sum = [](size_t size, const point_list& ring)
     {

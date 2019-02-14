@@ -49,7 +49,7 @@ byte_array<Size * 733 / 1000> base58_literal(const char(&string)[Size]);
  * Encode data as base58.
  * @return the base58 encoded string.
  */
-BC_API std::string encode_base58(data_slice unencoded);
+BC_API std::string encode_base58(const data_slice& unencoded);
 
 /**
  * Attempt to decode base58 data.
