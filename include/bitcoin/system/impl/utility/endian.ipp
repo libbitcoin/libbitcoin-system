@@ -32,10 +32,10 @@ Integer from_big_endian(Iterator start, const Iterator end)
 {
     VERIFY_UNSIGNED(Integer);
     Integer out = 0;
-    size_t i = sizeof(Integer);
+    size_t index = sizeof(Integer);
 
-    while (0 < i && start != end)
-        out |= static_cast<Integer>(*start++) << (8 * --i);
+    while (0 < index && start != end)
+        out |= static_cast<Integer>(*start++) << (8 * --index);
 
     return out;
 }
@@ -46,10 +46,10 @@ Integer from_little_endian(Iterator start, const Iterator end)
     //// TODO: Type traits does not work for uint256_t.
     ////VERIFY_UNSIGNED(Integer);
     Integer out = 0;
-    size_t i = 0;
+    size_t index = 0;
 
-    while (i < sizeof(Integer) && start != end)
-        out |= static_cast<Integer>(*start++) << (8 * i++);
+    while (index < sizeof(Integer) && start != end)
+        out |= static_cast<Integer>(*start++) << (8 * index++);
 
     return out;
 }
@@ -59,10 +59,10 @@ Integer from_big_endian_unsafe(Iterator start)
 {
     VERIFY_UNSIGNED(Integer);
     Integer out = 0;
-    size_t i = sizeof(Integer);
+    size_t index = sizeof(Integer);
 
-    while (0 < i)
-        out |= static_cast<Integer>(*start++) << (8 * --i);
+    while (0 < index)
+        out |= static_cast<Integer>(*start++) << (8 * --index);
 
     return out;
 }
@@ -72,10 +72,10 @@ Integer from_little_endian_unsafe(Iterator start)
 {
     VERIFY_UNSIGNED(Integer);
     Integer out = 0;
-    size_t i = 0;
+    size_t index = 0;
 
-    while (i < sizeof(Integer))
-        out |= static_cast<Integer>(*start++) << (8 * i++);
+    while (index < sizeof(Integer))
+        out |= static_cast<Integer>(*start++) << (8 * index++);
 
     return out;
 }
@@ -86,11 +86,11 @@ Integer from_big_endian_stream_unsafe(std::istream& stream)
     VERIFY_UNSIGNED(Integer);
     Integer out = 0;
 
-    for (size_t i = sizeof(Integer); (i > 0) && stream; i--)
+    for (size_t index = sizeof(Integer); (index > 0) && stream; index--)
     {
         uint8_t value = 0;
         stream.read(reinterpret_cast<char*>(&value), sizeof value);
-        out |= static_cast<Integer>(value) << (8 * (i - 1));
+        out |= static_cast<Integer>(value) << (8 * (index - 1));
     }
 
     return out;
@@ -102,11 +102,11 @@ Integer from_little_endian_stream_unsafe(std::istream& stream)
     VERIFY_UNSIGNED(Integer);
     Integer out = 0;
 
-    for (size_t i = 0; (i < sizeof(Integer)) && stream; i++)
+    for (size_t index = 0; (index < sizeof(Integer)) && stream; index++)
     {
         uint8_t value = 0;
         stream.read(reinterpret_cast<char*>(&value), sizeof value);
-        out |= static_cast<Integer>(value) << (8 * i);
+        out |= static_cast<Integer>(value) << (8 * index);
     }
 
     return out;

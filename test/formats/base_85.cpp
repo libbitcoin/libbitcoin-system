@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_SUITE(base_85_tests)
 BOOST_AUTO_TEST_CASE(encode_base85_empty_test)
 {
     std::string encoded;
-    BOOST_REQUIRE(encode_base85(encoded, data_chunk()));
+    BOOST_REQUIRE(encode_base85(encoded, data_chunk{}));
     BOOST_REQUIRE(encoded.empty());
 }
 

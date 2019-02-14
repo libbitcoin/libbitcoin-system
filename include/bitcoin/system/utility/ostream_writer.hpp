@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_OSTREAM_WRITER_HPP
 #define LIBBITCOIN_SYSTEM_OSTREAM_WRITER_HPP
 
+#include <cstddef>
 #include <ostream>
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/utility/writer.hpp>
@@ -32,10 +33,10 @@ class BC_API ostream_writer
 public:
     ostream_writer(std::ostream& stream);
 
-    template <unsigned Size>
+    template <size_t Size>
     void write_forward(const byte_array<Size>& value);
 
-    template <unsigned Size>
+    template <size_t Size>
     void write_reverse(const byte_array<Size>& value);
 
     template <typename Integer>

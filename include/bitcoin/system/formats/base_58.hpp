@@ -34,7 +34,7 @@ BC_API bool is_base58(const std::string& text);
  * @return false if the input is malformed, or the wrong length.
  */
 template <size_t Size>
-bool decode_base58(byte_array<Size>& out, const std::string &in);
+bool decode_base58(byte_array<Size>& out, const std::string& in);
 
 /**
  * Converts a base58 string literal to a data array.

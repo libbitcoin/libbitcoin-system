@@ -33,10 +33,10 @@ class BC_API istream_reader
 public:
     istream_reader(std::istream& stream);
 
-    template <unsigned Size>
+    template <size_t Size>
     byte_array<Size> read_forward();
 
-    template <unsigned Size>
+    template <size_t Size>
     byte_array<Size> read_reverse();
 
     template <typename Integer>
