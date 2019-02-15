@@ -175,7 +175,7 @@ data_chunk serialize(uint32_t version, const Message& packet,
     BITCOIN_ASSERT(data.size() == message_size);
 
     // Create the payload checksum without copying the buffer.
-    const data_slice& slice(data.data() + heading_size, data.data() + message_size);
+    const data_slice slice(data.data() + heading_size, data.data() + message_size);
     const auto check = bitcoin_checksum(slice);
     const auto payload_size32 = safe_unsigned<uint32_t>(payload_size);
 
