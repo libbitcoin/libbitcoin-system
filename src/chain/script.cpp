@@ -1074,7 +1074,7 @@ bool script::is_sign_script_hash_pattern(const operation::list& ops)
         && !ops.back().data().empty();
 }
 
-operation::list script::to_pay_null_data_pattern(data_slice data)
+operation::list script::to_pay_null_data_pattern(const data_slice& data)
 {
     if (data.size() > max_null_data_size)
         return {};
@@ -1086,7 +1086,7 @@ operation::list script::to_pay_null_data_pattern(data_slice data)
     };
 }
 
-operation::list script::to_pay_public_key_pattern(data_slice point)
+operation::list script::to_pay_public_key_pattern(const data_slice& point)
 {
     if (!is_public_key(point))
         return {};

@@ -111,7 +111,7 @@ bool network_address::from_data(uint32_t version,
     return from_data(version, source, with_timestamp);
 }
 
-bool network_address::from_data(uint32_t , reader& source,
+bool network_address::from_data(uint32_t, reader& source,
     bool with_timestamp)
 {
     reset();

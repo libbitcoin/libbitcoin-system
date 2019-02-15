@@ -183,7 +183,7 @@ void reject::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void reject::to_data(uint32_t , writer& sink) const
+void reject::to_data(uint32_t, writer& sink) const
 {
     sink.write_string(message_);
     sink.write_byte(reason_to_byte(code_));

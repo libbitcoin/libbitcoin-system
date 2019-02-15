@@ -89,9 +89,9 @@ static uint8_t decoder[96] =
 };
 
 // Accepts only byte arrays bounded to 4 bytes.
-bool encode_base85(std::string& out, data_slice in)
+bool encode_base85(std::string& out, const data_slice& in)
 {
-    const size_t size = in.size();
+    const auto size = in.size();
     if (size % 4 != 0)
         return false;
 

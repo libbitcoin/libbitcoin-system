@@ -30,7 +30,7 @@ BC_API bool decode_base58_private(uint8_t* out, size_t out_size,
     const char* in);
 
 template <size_t Size>
-bool decode_base58(byte_array<Size>& out, const std::string &in)
+bool decode_base58(byte_array<Size>& out, const std::string& in)
 {
     byte_array<Size> result;
     if (!decode_base58_private(result.data(), result.size(), in.data()))

@@ -56,7 +56,7 @@ struct ring_signature
  * Returns sha256(message || flatten(rings))
  * @return     digest   Ring signature digest
  */
-BC_API hash_digest digest(data_slice message, const key_rings& rings);
+BC_API hash_digest digest(const data_slice& message, const key_rings& rings);
 
 /**
  * Create a borromean ring signature.

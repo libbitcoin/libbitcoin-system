@@ -115,50 +115,50 @@ inline uint256_t to_uint256(const hash_digest& hash)
 
 /// Generate a scrypt hash to fill a byte array.
 template <size_t Size>
-byte_array<Size> scrypt(data_slice data, data_slice salt, uint64_t N,
+byte_array<Size> scrypt(const data_slice& data, const data_slice& salt, uint64_t N,
     uint32_t p, uint32_t r);
 
 /// Generate a scrypt hash of specified length.
-BC_API data_chunk scrypt(data_slice data, data_slice salt, uint64_t N,
+BC_API data_chunk scrypt(const data_slice& data, const data_slice& salt, uint64_t N,
     uint32_t p, uint32_t r, size_t length);
 
 /// Generate a bitcoin hash.
-BC_API hash_digest bitcoin_hash(data_slice data);
+BC_API hash_digest bitcoin_hash(const data_slice& data);
 
 /// Generate a scrypt hash.
-BC_API hash_digest scrypt_hash(data_slice data);
+BC_API hash_digest scrypt_hash(const data_slice& data);
 
 /// Generate a bitcoin short hash.
-BC_API short_hash bitcoin_short_hash(data_slice data);
+BC_API short_hash bitcoin_short_hash(const data_slice& data);
 
 /// Generate a ripemd160 hash
-BC_API short_hash ripemd160_hash(data_slice data);
-BC_API data_chunk ripemd160_hash_chunk(data_slice data);
+BC_API short_hash ripemd160_hash(const data_slice& data);
+BC_API data_chunk ripemd160_hash_chunk(const data_slice& data);
 
 /// Generate a sha1 hash.
-BC_API short_hash sha1_hash(data_slice data);
-BC_API data_chunk sha1_hash_chunk(data_slice data);
+BC_API short_hash sha1_hash(const data_slice& data);
+BC_API data_chunk sha1_hash_chunk(const data_slice& data);
 
 /// Generate a sha256 hash.
-BC_API hash_digest sha256_hash(data_slice data);
-BC_API data_chunk sha256_hash_chunk(data_slice data);
+BC_API hash_digest sha256_hash(const data_slice& data);
+BC_API data_chunk sha256_hash_chunk(const data_slice& data);
 
 /// Generate a sha256 hash.
 /// This hash function was used in electrum seed stretching (obsoleted).
-BC_API hash_digest sha256_hash(data_slice first, data_slice second);
+BC_API hash_digest sha256_hash(const data_slice& first, const data_slice& second);
 
 // Generate a hmac sha256 hash.
-BC_API hash_digest hmac_sha256_hash(data_slice data, data_slice key);
+BC_API hash_digest hmac_sha256_hash(const data_slice& data, const data_slice& key);
 
 /// Generate a sha512 hash.
-BC_API long_hash sha512_hash(data_slice data);
+BC_API long_hash sha512_hash(const data_slice& data);
 
 /// Generate a hmac sha512 hash.
-BC_API long_hash hmac_sha512_hash(data_slice data, data_slice key);
+BC_API long_hash hmac_sha512_hash(const data_slice& data, const data_slice& key);
 
 /// Generate a pkcs5 pbkdf2 hmac sha512 hash.
-BC_API long_hash pkcs5_pbkdf2_hmac_sha512(data_slice passphrase,
-    data_slice salt, size_t iterations);
+BC_API long_hash pkcs5_pbkdf2_hmac_sha512(const data_slice& passphrase,
+    const data_slice& salt, size_t iterations);
 
 } // namespace system
 } // namespace libbitcoin

@@ -118,7 +118,7 @@ public:
 
 private:
     /// Validators.
-    static bool is_wif(data_slice decoded);
+    static bool is_wif(const data_slice& decoded);
 
     /// Factories.
     static ec_private from_seed(const data_chunk& seed, uint8_t address_version);

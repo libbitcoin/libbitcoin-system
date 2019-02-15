@@ -121,7 +121,7 @@ byte_array_parts<Size / 2> split(const byte_array<Size>& bytes)
 
 // unsafe
 template <size_t Size>
-byte_array<Size> to_array(data_slice bytes)
+byte_array<Size> to_array(const data_slice& bytes)
 {
     byte_array<Size> out;
     DEBUG_ONLY(const auto result =) build_array(out, { bytes });
@@ -146,30 +146,31 @@ bool starts_with(const typename Source::const_iterator& begin,
 
 // unsafe
 template <size_t Size>
-byte_array<Size> xor_data(data_slice bytes1, data_slice bytes2)
+byte_array<Size> xor_data(const data_slice& bytes1, const data_slice& bytes2)
 {
     return xor_data<Size>(bytes1, bytes2, 0);
 }
 
 // unsafe
 template <size_t Size>
-byte_array<Size> xor_data(data_slice bytes1, data_slice bytes2, size_t offset)
+byte_array<Size> xor_data(const data_slice& bytes1, const data_slice& bytes2,
+    size_t offset)
 {
     return xor_data<Size>(bytes1, bytes2, offset, offset);
 }
 
 // unsafe
 template <size_t Size>
-byte_array<Size> xor_data(data_slice bytes1, data_slice bytes2, size_t offset1,
-    size_t offset2)
+byte_array<Size> xor_data(const data_slice& bytes1, const data_slice& bytes2,
+    size_t offset1, size_t offset2)
 {
     BITCOIN_ASSERT(offset1 + Size <= bytes1.size());
     BITCOIN_ASSERT(offset2 + Size <= bytes2.size());
     const auto& data1 = bytes1.data();
     const auto& data2 = bytes2.data();
     byte_array<Size> out;
-    for (size_t i = 0; i < Size; i++)
-        out[i] = data1[i + offset1] ^ data2[i + offset2];
+    for (size_t index = 0; index < Size; index++)
+        out[index] = data1[index + offset1] ^ data2[index + offset2];
 
     return out;
 }

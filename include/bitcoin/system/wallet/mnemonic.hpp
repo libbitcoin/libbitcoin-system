@@ -54,7 +54,7 @@ typedef string_list word_list;
  * selection. The mnemonic can later be converted to a seed for use in wallet
  * creation. Entropy byte count must be evenly divisible by 4.
  */
-BC_API word_list create_mnemonic(data_slice entropy,
+BC_API word_list create_mnemonic(const data_slice& entropy,
     const dictionary &lexicon=language::en);
 
 

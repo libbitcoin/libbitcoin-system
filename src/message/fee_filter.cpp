@@ -136,7 +136,7 @@ void fee_filter::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void fee_filter::to_data(uint32_t , writer& sink) const
+void fee_filter::to_data(uint32_t, writer& sink) const
 {
     sink.write_8_bytes_little_endian(minimum_fee_);
 }

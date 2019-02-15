@@ -31,22 +31,21 @@ void append_checksum(data_chunk& data)
     extend_data(data, to_little_endian(checksum));
 }
 
-uint32_t bitcoin_checksum(data_slice data)
+uint32_t bitcoin_checksum(const data_slice& data)
 {
     const auto hash = bitcoin_hash(data);
     return from_little_endian_unsafe<uint32_t>(hash.begin());
 }
 
-bool verify_checksum(data_slice data)
+bool verify_checksum(const data_slice& data)
 {
     if (data.size() < checksum_size)
         return false;
 
     // TODO: create a bitcoin_checksum overload that can accept begin/end.
     const auto checksum_begin = data.end() - checksum_size;
-    data_slice slice(data.begin(), checksum_begin);
     auto checksum = from_little_endian_unsafe<uint32_t>(checksum_begin);
-    return bitcoin_checksum(slice) == checksum;
+    return bitcoin_checksum({ data.begin(), checksum_begin }) == checksum;
 }
 
 } // namespace system

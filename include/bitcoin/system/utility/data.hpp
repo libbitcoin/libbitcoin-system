@@ -112,7 +112,7 @@ byte_array<Left + Middle + Right> splice(const std::array<uint8_t, Left>& left,
  * Convert the data slice to an array. Underfill is ok.
  */
 template <size_t Size>
-byte_array<Size> to_array(data_slice bytes);
+byte_array<Size> to_array(const data_slice& bytes);
 
 /**
  * Create a data chunk from an iterable object.
@@ -133,7 +133,7 @@ bool starts_with(const typename Source::const_iterator& begin,
  * either buffer.
  */
 template <size_t Size>
-byte_array<Size> xor_data(data_slice bytes1, data_slice bytes2);
+byte_array<Size> xor_data(const data_slice& bytes1, const data_slice& bytes2);
 
 /**
  * Perform an exclusive or (xor) across two buffers to the length specified.
@@ -141,7 +141,8 @@ byte_array<Size> xor_data(data_slice bytes1, data_slice bytes2);
  * exceed either buffer.
  */
 template <size_t Size>
-byte_array<Size> xor_data(data_slice bytes1, data_slice bytes2, size_t offset);
+byte_array<Size> xor_data(const data_slice& bytes1, const data_slice& bytes2,
+    size_t offset);
 
 /**
  * Perform an exclusive or (xor) across two buffers to the length specified.
@@ -149,8 +150,8 @@ byte_array<Size> xor_data(data_slice bytes1, data_slice bytes2, size_t offset);
  * exceed the respective buffers.
  */
 template <size_t Size>
-byte_array<Size> xor_data(data_slice bytes1, data_slice bytes2, size_t offset1,
-    size_t offset2);
+byte_array<Size> xor_data(const data_slice& bytes1, const data_slice& bytes2,
+    size_t offset1, size_t offset2);
 
 } // namespace system
 } // namespace libbitcoin

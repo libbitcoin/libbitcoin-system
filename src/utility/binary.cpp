@@ -64,7 +64,7 @@ binary::binary(size_type size, uint32_t number)
 {
 }
 
-binary::binary(size_type size, data_slice blocks)
+binary::binary(size_type size, const data_slice& blocks)
   : binary()
 {
     // Copy blocks
@@ -237,7 +237,7 @@ bool binary::is_prefix_of(const binary& field) const
     return is_prefix_of(field.blocks());
 }
 
-bool binary::is_prefix_of(data_slice field) const
+bool binary::is_prefix_of(const data_slice& field) const
 {
     const binary truncated_prefix(size(), field);
     return *this == truncated_prefix;

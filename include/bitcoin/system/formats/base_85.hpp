@@ -30,7 +30,7 @@ namespace system {
  * Encode data as base85 (Z85).
  * @return false if the input is not of base85 size (% 4).
  */
-BC_API bool encode_base85(std::string& out, data_slice in);
+BC_API bool encode_base85(std::string& out, const data_slice& in);
 
 /**
  * Attempt to decode base85 (Z85) data.

@@ -135,7 +135,7 @@ static one_byte point_sign(const one_byte& single, const hash_digest& hash)
 
 #ifdef WITH_ICU
 
-static hash_digest scrypt_token(data_slice data, data_slice salt)
+static hash_digest scrypt_token(const data_slice& data, const data_slice& salt)
 {
     // Arbitrary scrypt parameters from BIP38.
     return scrypt<hash_size>(data, salt, 16384u, 8u, 8u);
@@ -143,7 +143,7 @@ static hash_digest scrypt_token(data_slice data, data_slice salt)
 
 #endif
 
-static long_hash scrypt_pair(data_slice data, data_slice salt)
+static long_hash scrypt_pair(const data_slice& data, const data_slice& salt)
 {
     // Arbitrary scrypt parameters from BIP38.
     return scrypt<long_hash_size>(data, salt, 1024u, 1u, 1u);
@@ -151,7 +151,7 @@ static long_hash scrypt_pair(data_slice data, data_slice salt)
 
 #ifdef WITH_ICU
 
-static long_hash scrypt_private(data_slice data, data_slice salt)
+static long_hash scrypt_private(const data_slice& data, const data_slice& salt)
 {
     // Arbitrary scrypt parameters from BIP38.
     return scrypt<long_hash_size>(data, salt, 16384u, 8u, 8u);
@@ -309,7 +309,7 @@ static data_chunk normal(const std::string& passphrase)
 }
 
 static bool create_token(encrypted_token& out_token,
-    const std::string& passphrase, data_slice owner_salt,
+    const std::string& passphrase, const data_slice& owner_salt,
     const ek_entropy& owner_entropy,
     const byte_array<parse_encrypted_token::prefix_size>& prefix)
 {

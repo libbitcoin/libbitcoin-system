@@ -19,6 +19,7 @@
 #include <bitcoin/system/formats/base_16.hpp>
 
 #include <algorithm>
+#include <cstdint>
 #include <iomanip>
 #include <sstream>
 #include <boost/algorithm/string.hpp>
@@ -27,30 +28,34 @@
 namespace libbitcoin {
 namespace system {
 
-std::string encode_base16(data_slice data)
+std::string encode_base16(const data_slice& data)
 {
-    std::stringstream ss;
-    ss << std::hex << std::setfill('0');
-    for (int val: data)
-        ss << std::setw(2) << val;
-    return ss.str();
+    std::stringstream out;
+    out << std::hex << std::setfill('0');
+
+    for (const uint16_t value: data)
+        out << std::setw(2) << value;
+
+    return out.str();
 }
 
-bool is_base16(const char c)
+bool is_base16(char character)
 {
     return
-        ('0' <= c && c <= '9') ||
-        ('A' <= c && c <= 'F') ||
-        ('a' <= c && c <= 'f');
+        ('0' <= character && character <= '9') ||
+        ('A' <= character && character <= 'F') ||
+        ('a' <= character && character <= 'f');
 }
 
-static unsigned from_hex(const char c)
+static unsigned from_hex(char character)
 {
-    if ('A' <= c && c <= 'F')
-        return 10 + c - 'A';
-    if ('a' <= c && c <= 'f')
-        return 10 + c - 'a';
-    return c - '0';
+    if ('A' <= character && character <= 'F')
+        return 10 + character - 'A';
+
+    if ('a' <= character && character <= 'f')
+        return 10 + character - 'a';
+
+    return character - '0';
 }
 
 bool decode_base16(data_chunk& out, const std::string& in)
@@ -99,14 +104,14 @@ hash_digest hash_literal(const char (&string)[2 * hash_size + 1])
 }
 
 // For support of template implementation only, do not call directly.
-bool decode_base16_private(uint8_t* out, size_t out_size, const char* in)
+bool decode_base16_private(uint8_t* out, size_t size, const char* in)
 {
-    if (!std::all_of(in, in + 2 * out_size, is_base16))
+    if (!std::all_of(in, in + 2 * size, is_base16))
         return false;
 
-    for (size_t i = 0; i < out_size; ++i)
+    for (size_t index = 0; index < size; ++index)
     {
-        out[i] = (from_hex(in[0]) << 4) + from_hex(in[1]);
+        out[index] = (from_hex(in[0]) << 4) + from_hex(in[1]);
         in += 2;
     }
 

@@ -19,13 +19,14 @@
 #ifndef LIBBITCOIN_SYSTEM_OSTREAM_WRITER_IPP
 #define LIBBITCOIN_SYSTEM_OSTREAM_WRITER_IPP
 
+#include <cstddef>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/endian.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-template <unsigned Size>
+template <size_t Size>
 void ostream_writer::write_forward(const byte_array<Size>& value)
 {
     const auto size = value.size();
@@ -33,11 +34,11 @@ void ostream_writer::write_forward(const byte_array<Size>& value)
         stream_.write(reinterpret_cast<const char*>(value.data()), size);
 }
 
-template <unsigned Size>
+template <size_t Size>
 void ostream_writer::write_reverse(const byte_array<Size>& value)
 {
-    for (unsigned i = 0; i < Size; i++)
-        write_byte(value[Size - (i + 1)]);
+    for (unsigned index = 0; index < Size; index++)
+        write_byte(value[Size - (index + 1)]);
 }
 
 template <typename Integer>

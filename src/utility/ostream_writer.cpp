@@ -169,7 +169,7 @@ void ostream_writer::write_byte(uint8_t value)
     stream_.put(value);
 }
 
-void ostream_writer::write_bytes(const data_slice data)
+void ostream_writer::write_bytes(const data_slice& data)
 {
     const auto size = data.size();
 

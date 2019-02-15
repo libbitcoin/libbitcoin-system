@@ -34,6 +34,13 @@ namespace config {
 /**
  * Shorthand for property declarations in printer class.
  */
+#define BC_PROPERTY(type, name) \
+    public: virtual const type& name() const { return name##_; } \
+    private: type name##_
+
+/**
+ * Shorthand for reference getter declarations in printer class.
+ */
 #define BC_PROPERTY_GET_REF(type, name) \
     public: virtual type& get_##name() { return name##_; } \
     private: type name##_
@@ -151,11 +158,11 @@ public:
     /**
      * Virtual property declarations, passed on construct.
      */
-    BC_PROPERTY_GET_REF(boost::program_options::options_description, options);
-    BC_PROPERTY_GET_REF(boost::program_options::positional_options_description, arguments);
-    BC_PROPERTY_GET_REF(std::string, application);
-    BC_PROPERTY_GET_REF(std::string, description);
-    BC_PROPERTY_GET_REF(std::string, command);
+    BC_PROPERTY(boost::program_options::options_description, options);
+    BC_PROPERTY(boost::program_options::positional_options_description, arguments);
+    BC_PROPERTY(std::string, application);
+    BC_PROPERTY(std::string, description);
+    BC_PROPERTY(std::string, command);
 
     /**
      * Virtual property declarations, generated from metadata.

@@ -174,7 +174,7 @@ void merkle_block::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void merkle_block::to_data(uint32_t , writer& sink) const
+void merkle_block::to_data(uint32_t, writer& sink) const
 {
     header_.to_data(sink);
 

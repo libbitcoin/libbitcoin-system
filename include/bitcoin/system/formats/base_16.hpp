@@ -31,25 +31,25 @@ namespace system {
  * The C standard library function `isxdigit` depends on the current locale,
  * and does not necessarily match the base16 encoding.
  */
-bool is_base16(const char c);
+bool is_base16(char character);
 
 /**
  * Convert data into a user-readable hex string.
  */
-BC_API std::string encode_base16(data_slice data);
+BC_API std::string encode_base16(const data_slice& data);
 
 /**
  * Convert a hex string into bytes.
  * @return false if the input is malformed.
  */
-BC_API bool decode_base16(data_chunk& out, const std::string &in);
+BC_API bool decode_base16(data_chunk& out, const std::string& in);
 
 /**
  * Converts a hex string to a number of bytes.
  * @return false if the input is malformed, or the wrong length.
  */
 template <size_t Size>
-bool decode_base16(byte_array<Size>& out, const std::string &in);
+bool decode_base16(byte_array<Size>& out, const std::string& in);
 
 /**
  * Converts a hex string literal to a data array.

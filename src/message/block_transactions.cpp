@@ -158,7 +158,7 @@ void block_transactions::to_data(uint32_t version,
     to_data(version, sink);
 }
 
-void block_transactions::to_data(uint32_t , writer& sink) const
+void block_transactions::to_data(uint32_t, writer& sink) const
 {
     sink.write_hash(block_hash_);
     sink.write_variable_little_endian(transactions_.size());
