@@ -43,16 +43,16 @@ BC_API hash_digest hash_message(const data_slice& message);
 
 /**
  * Signs a message using deterministic signature.
- * @param[in] out_signature The signature in Bitcoin's own format.
+ * @param[out] out_signature The signature in Bitcoin's own format.
  * This should be base64 encoded for presentation to the user.
  * @return true if wif is valid and signature encoding is successful.
  */
-BC_API bool sign_message(message_signature& signature,
+BC_API bool sign_message(message_signature& out_signature,
     const data_slice& message, const ec_private& secret);
 
 /**
  * Signs a message using deterministic signature.
- * @param[in] out_signature The signature in Bitcoin's own format.
+ * @param[out] out_signature The signature in Bitcoin's own format.
  * This should be base64 encoded for presentation to the user.
  * @return true if wif is valid and signature encoding is successful.
  */
@@ -61,7 +61,7 @@ BC_API bool sign_message(message_signature& out_signature,
 
 /**
  * Signs a message using deterministic signature.
- * @param[in] out_signature The signature in Bitcoin's own format.
+ * @param[out] out_signature The signature in Bitcoin's own format.
  * This should be base64 encoded for presentation to the user.
  * @param[in] compressed true if the bitcoin address derived from the
  * private key is in compressed format.
@@ -72,7 +72,7 @@ BC_API bool sign_message(message_signature& out_signature,
 
 /**
  * Verifies a message.
- * @param signature a message signature in Bitcoin's own format.
+ * @param[in] signature a message signature in Bitcoin's own format.
  * The user will generally provide this as a base64 string,
  * which the user interface must decode.
  * @return false if the signature does not match the address or if there are

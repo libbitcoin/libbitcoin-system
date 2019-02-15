@@ -113,21 +113,21 @@ bool magic_to_recovery_id(uint8_t& out_recovery_id, bool& out_compressed,
     return true;
 }
 
-bool sign_message(message_signature& signature, const data_slice& message,
+bool sign_message(message_signature& out_signature, const data_slice& message,
     const ec_private& secret)
 {
-    return sign_message(signature, message, secret, secret.compressed());
+    return sign_message(out_signature, message, secret, secret.compressed());
 }
 
-bool sign_message(message_signature& signature, const data_slice& message,
+bool sign_message(message_signature& out_signature, const data_slice& message,
     const std::string& wif)
 {
     ec_private secret(wif);
     return (secret &&
-        sign_message(signature, message, secret, secret.compressed()));
+        sign_message(out_signature, message, secret, secret.compressed()));
 }
 
-bool sign_message(message_signature& signature, const data_slice& message,
+bool sign_message(message_signature& out_signature, const data_slice& message,
     const ec_secret& secret, bool compressed)
 {
     recoverable_signature recoverable;
@@ -138,7 +138,7 @@ bool sign_message(message_signature& signature, const data_slice& message,
     if (!recovery_id_to_magic(magic, recoverable.recovery_id, compressed))
         return false;
 
-    signature = splice(to_array(magic), recoverable.signature);
+    out_signature = splice(to_array(magic), recoverable.signature);
     return true;
 }
 
