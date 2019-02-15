@@ -109,7 +109,7 @@ BC_API bool create_key_pair(encrypted_private& out_private,
     const ek_seed& seed, uint8_t version, bool compressed=true);
 
 /**
- * DEPRECATED
+ * DEPRECATED (scenario)
  * Create an encrypted key pair from an intermediate passphrase.
  * The `out_point` paramter is always compressed, so to use it it should be
  * decompressed as necessary to match the state of the `compressed` parameter.
@@ -179,14 +179,14 @@ BC_API bool decrypt(ec_secret& out_secret, uint8_t& out_version,
     const std::string& passphrase);
 
 /**
- * DEPRECATED
+ * DEPRECATED (scenario)
  * Decrypt the ec point associated with the encrypted public key.
  * @param[out] out_point       The decrypted ec compressed point.
  * @param[out] out_version     The coin address version of the public key.
  * @param[out] out_compressed  The public key specified compression state.
  * @param[in]  key             An encrypted public key.
  * @param[in]  passphrase      The passphrase of the associated token.
- * @return false if the key    checksum or passphrase is not valid.
+ * @return false if the key checksum or passphrase is not valid.
  */
 BC_API bool decrypt(ec_compressed& out_point, uint8_t& out_version,
     bool& out_compressed, const encrypted_public& key,

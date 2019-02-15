@@ -86,27 +86,27 @@ class BC_API pseudo_random
 };
 
 /**
- * DEPRECATED
+ * DEPRECATED (use class pseudo_random)
  * Generate a pseudo random number within the domain.
  * @return  The 64 bit number.
  */
 BC_API uint64_t pseudo_random();
 
 /**
- * DEPRECATED
+ * DEPRECATED (use class pseudo_random)
  * Generate a pseudo random number within [begin, end].
  * @return  The 64 bit number.
  */
 BC_API uint64_t pseudo_random(uint64_t begin, uint64_t end);
 
 /**
- * DEPRECATED
+ * DEPRECATED (use class pseudo_random)
  * Fill a buffer with randomness using the default random engine.
  */
 BC_API void pseudo_random_fill(data_chunk& out);
 
 /**
- * DEPRECATED
+ * DEPRECATED (use class pseudo_random)
  * Convert a time duration to a value in the range [max/ratio, max].
  * @param[in]  maximum  The maximum value to return.
  * @param[in]  ratio    The determinant of the minimum duration as the inverse
