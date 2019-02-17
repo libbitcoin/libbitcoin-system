@@ -90,7 +90,7 @@ public:
     /// The value of the input point or checksum of the output point.
     uint64_t data() const;
 
-    /// The blockchain height of the point.
+    /// The transaction link of the point.
     uint64_t link() const;
 
     /// The blockchain height of the point.
