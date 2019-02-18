@@ -24,6 +24,7 @@
 #include <utility>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/chain/point.hpp>
+#include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/container_sink.hpp>
 #include <bitcoin/system/utility/container_source.hpp>
@@ -34,8 +35,8 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-// HACK: must match tx slab_map::not_found.
-static constexpr uint64_t unlinked = max_uint64;
+const size_t payment_record::unconfirmed = max_size_t;
+static const auto unlinked = transaction::validation::unlinked;
 
 // Constructors.
 //-----------------------------------------------------------------------------
@@ -44,7 +45,7 @@ static constexpr uint64_t unlinked = max_uint64;
 payment_record::payment_record()
   : valid_(false),
     output_(false),
-    height_(0),
+    height_(unconfirmed),
     hash_(null_hash),
     index_(point::null_index),
     data_(0),
@@ -78,7 +79,7 @@ payment_record::payment_record(uint64_t link, uint32_t index, uint64_t data,
     bool output)
   : valid_(true),
     output_(output),
-    height_(0),
+    height_(unconfirmed),
     hash_(null_hash),
     index_(index),
     data_(data),
@@ -180,7 +181,7 @@ bool payment_record::from_data(reader& source, bool wire)
     }
     else
     {
-        height_ = 0;
+        height_ = unconfirmed;
         link_ = source.read_8_bytes_little_endian();
         hash_ = null_hash;
         index_ = source.read_2_bytes_little_endian();
@@ -203,7 +204,7 @@ void payment_record::reset()
 {
     valid_ = false;
     output_ = false;
-    height_ = 0;
+    height_ = unconfirmed;
     hash_ = null_hash;
     index_ = point::null_index;
     data_ = 0;
@@ -243,7 +244,8 @@ void payment_record::to_data(writer& sink, bool wire) const
 
     if (wire)
     {
-        BITCOIN_ASSERT(height_ <= max_uint32);
+        // HACK: Height sentinel is cast from size_t to uint32_t.
+        BITCOIN_ASSERT(height_ <= max_uint32 || height_ == unconfirmed);
         const auto height = static_cast<uint32_t>(height_);
         sink.write_4_bytes_little_endian(height);
 
@@ -333,12 +335,12 @@ uint32_t payment_record::index() const
     return index_;
 }
 
-void payment_record::set_index(uint32_t value)
-{
-    // This is no longer a default instance, so valid.
-    valid_ = true;
-    index_ = value;
-}
+////void payment_record::set_index(uint32_t value)
+////{
+////    // This is no longer a default instance, so valid.
+////    valid_ = true;
+////    index_ = value;
+////}
 
 } // namespace chain
 } // namespace system

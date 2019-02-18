@@ -39,6 +39,9 @@ class BC_API payment_record
 public:
     typedef std::vector<payment_record> list;
 
+    /// This is a non-consensus sentinel value.
+    static const size_t unconfirmed;
+
     // Constructors.
     //-------------------------------------------------------------------------
 
@@ -90,26 +93,26 @@ public:
     /// The value of the input point or checksum of the output point.
     uint64_t data() const;
 
-    /// The transaction link of the point.
+    /// The link of the point's transaction.
     uint64_t link() const;
 
-    /// The blockchain height of the point.
+    /// The block height of the point's transaction.
     size_t height() const;
 
-    /// Set the point height.
+    /// Set the block height of the point's transaction.
     void set_height(size_t height);
 
-    /// The hash of the point.
+    /// The hash of the point's transaction.
     hash_digest hash() const;
 
-    /// Set the point hash.
+    /// Set the hash of the point's transaction.
     void set_hash(hash_digest&& hash);
 
     /// The index of the point.
     uint32_t index() const;
 
-    /// Set the point index.
-    void set_index(uint32_t value);
+    /////// Set the point index.
+    ////void set_index(uint32_t value);
 
 protected:
     void reset();
