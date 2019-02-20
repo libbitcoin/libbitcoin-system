@@ -183,6 +183,15 @@
     <ClCompile Include="..\..\..\..\test\message\compact_block.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\compact_filter.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\compact_filter_checkpoint.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\compact_filter_headers.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\fee_filter.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
@@ -202,6 +211,15 @@
       <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\get_blocks.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\get_compact_filter_checkpoint.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\get_compact_filter_headers.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\get_compact_filters.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\get_data.cpp">

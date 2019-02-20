@@ -187,6 +187,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\block_transactions.cpp" />
     <ClCompile Include="..\..\..\..\src\message\compact_block.cpp" />
+    <ClCompile Include="..\..\..\..\src\message\compact_filter.cpp" />
+    <ClCompile Include="..\..\..\..\src\message\compact_filter_checkpoint.cpp" />
+    <ClCompile Include="..\..\..\..\src\message\compact_filter_headers.cpp" />
     <ClCompile Include="..\..\..\..\src\message\fee_filter.cpp" />
     <ClCompile Include="..\..\..\..\src\message\filter_add.cpp" />
     <ClCompile Include="..\..\..\..\src\message\filter_clear.cpp" />
@@ -194,6 +197,9 @@
     <ClCompile Include="..\..\..\..\src\message\get_address.cpp" />
     <ClCompile Include="..\..\..\..\src\message\get_block_transactions.cpp" />
     <ClCompile Include="..\..\..\..\src\message\get_blocks.cpp" />
+    <ClCompile Include="..\..\..\..\src\message\get_compact_filter_checkpoint.cpp" />
+    <ClCompile Include="..\..\..\..\src\message\get_compact_filter_headers.cpp" />
+    <ClCompile Include="..\..\..\..\src\message\get_compact_filters.cpp" />
     <ClCompile Include="..\..\..\..\src\message\get_data.cpp" />
     <ClCompile Include="..\..\..\..\src\message\get_headers.cpp" />
     <ClCompile Include="..\..\..\..\src\message\header.cpp">
@@ -380,6 +386,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\block_transactions.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\compact_block.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\compact_filter.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\compact_filter_checkpoint.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\compact_filter_headers.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\fee_filter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\filter_add.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\filter_clear.hpp" />
@@ -387,6 +396,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_block_transactions.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_blocks.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_compact_filter_checkpoint.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_compact_filter_headers.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_compact_filters.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_data.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_headers.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\header.hpp" />

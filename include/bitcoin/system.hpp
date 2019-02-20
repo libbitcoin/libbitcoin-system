@@ -107,6 +107,9 @@
 #include <bitcoin/system/message/block.hpp>
 #include <bitcoin/system/message/block_transactions.hpp>
 #include <bitcoin/system/message/compact_block.hpp>
+#include <bitcoin/system/message/compact_filter.hpp>
+#include <bitcoin/system/message/compact_filter_checkpoint.hpp>
+#include <bitcoin/system/message/compact_filter_headers.hpp>
 #include <bitcoin/system/message/fee_filter.hpp>
 #include <bitcoin/system/message/filter_add.hpp>
 #include <bitcoin/system/message/filter_clear.hpp>
@@ -114,6 +117,9 @@
 #include <bitcoin/system/message/get_address.hpp>
 #include <bitcoin/system/message/get_block_transactions.hpp>
 #include <bitcoin/system/message/get_blocks.hpp>
+#include <bitcoin/system/message/get_compact_filter_checkpoint.hpp>
+#include <bitcoin/system/message/get_compact_filter_headers.hpp>
+#include <bitcoin/system/message/get_compact_filters.hpp>
 #include <bitcoin/system/message/get_data.hpp>
 #include <bitcoin/system/message/get_headers.hpp>
 #include <bitcoin/system/message/header.hpp>

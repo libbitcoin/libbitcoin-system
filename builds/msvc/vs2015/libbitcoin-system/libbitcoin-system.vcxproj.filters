@@ -357,6 +357,15 @@
     <ClCompile Include="..\..\..\..\src\message\compact_block.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\message\compact_filter.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\message\compact_filter_checkpoint.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\message\compact_filter_headers.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\fee_filter.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
@@ -376,6 +385,15 @@
       <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\get_blocks.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\message\get_compact_filter_checkpoint.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\message\get_compact_filter_headers.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\message\get_compact_filters.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\get_data.cpp">
@@ -920,6 +938,15 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\compact_block.hpp">
       <Filter>include\bitcoin\system\message</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\compact_filter.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\compact_filter_checkpoint.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\compact_filter_headers.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\fee_filter.hpp">
       <Filter>include\bitcoin\system\message</Filter>
     </ClInclude>
@@ -939,6 +966,15 @@
       <Filter>include\bitcoin\system\message</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_blocks.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_compact_filter_checkpoint.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_compact_filter_headers.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_compact_filters.hpp">
       <Filter>include\bitcoin\system\message</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_data.hpp">

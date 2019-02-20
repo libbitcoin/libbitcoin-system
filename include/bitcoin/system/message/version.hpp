@@ -42,6 +42,9 @@ public:
 
     enum level: uint32_t
     {
+        // compact filters
+        bip157 = 70015,
+
         // compact blocks protocol
         bip152 = 70014,
 
@@ -82,7 +85,7 @@ public:
         minimum = 31402,
 
         // We support at most this internally (bound to settings default).
-        maximum = bip133,
+        maximum = bip157,
 
         // Used to generate canonical size required by consensus checks.
         canonical = 0

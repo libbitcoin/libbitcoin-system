@@ -128,6 +128,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\block_transactions.cpp" />
     <ClCompile Include="..\..\..\..\test\message\compact_block.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\compact_filter.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\compact_filter_checkpoint.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\compact_filter_headers.cpp" />
     <ClCompile Include="..\..\..\..\test\message\fee_filter.cpp" />
     <ClCompile Include="..\..\..\..\test\message\filter_add.cpp" />
     <ClCompile Include="..\..\..\..\test\message\filter_clear.cpp" />
@@ -135,6 +138,9 @@
     <ClCompile Include="..\..\..\..\test\message\get_address.cpp" />
     <ClCompile Include="..\..\..\..\test\message\get_block_transactions.cpp" />
     <ClCompile Include="..\..\..\..\test\message\get_blocks.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\get_compact_filter_checkpoint.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\get_compact_filter_headers.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\get_compact_filters.cpp" />
     <ClCompile Include="..\..\..\..\test\message\get_data.cpp" />
     <ClCompile Include="..\..\..\..\test\message\get_headers.cpp" />
     <ClCompile Include="..\..\..\..\test\message\header.cpp">

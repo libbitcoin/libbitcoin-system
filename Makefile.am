@@ -131,6 +131,9 @@ src_libbitcoin_system_la_SOURCES = \
     src/message/block.cpp \
     src/message/block_transactions.cpp \
     src/message/compact_block.cpp \
+    src/message/compact_filter.cpp \
+    src/message/compact_filter_checkpoint.cpp \
+    src/message/compact_filter_headers.cpp \
     src/message/fee_filter.cpp \
     src/message/filter_add.cpp \
     src/message/filter_clear.cpp \
@@ -138,6 +141,9 @@ src_libbitcoin_system_la_SOURCES = \
     src/message/get_address.cpp \
     src/message/get_block_transactions.cpp \
     src/message/get_blocks.cpp \
+    src/message/get_compact_filter_checkpoint.cpp \
+    src/message/get_compact_filter_headers.cpp \
+    src/message/get_compact_filters.cpp \
     src/message/get_data.cpp \
     src/message/get_headers.cpp \
     src/message/header.cpp \
@@ -309,6 +315,9 @@ test_libbitcoin_system_test_SOURCES = \
     test/message/block.cpp \
     test/message/block_transactions.cpp \
     test/message/compact_block.cpp \
+    test/message/compact_filter.cpp \
+    test/message/compact_filter_checkpoint.cpp \
+    test/message/compact_filter_headers.cpp \
     test/message/fee_filter.cpp \
     test/message/filter_add.cpp \
     test/message/filter_clear.cpp \
@@ -316,6 +325,9 @@ test_libbitcoin_system_test_SOURCES = \
     test/message/get_address.cpp \
     test/message/get_block_transactions.cpp \
     test/message/get_blocks.cpp \
+    test/message/get_compact_filter_checkpoint.cpp \
+    test/message/get_compact_filter_headers.cpp \
+    test/message/get_compact_filters.cpp \
     test/message/get_data.cpp \
     test/message/get_headers.cpp \
     test/message/header.cpp \
@@ -539,6 +551,9 @@ include_bitcoin_system_message_HEADERS = \
     include/bitcoin/system/message/block.hpp \
     include/bitcoin/system/message/block_transactions.hpp \
     include/bitcoin/system/message/compact_block.hpp \
+    include/bitcoin/system/message/compact_filter.hpp \
+    include/bitcoin/system/message/compact_filter_checkpoint.hpp \
+    include/bitcoin/system/message/compact_filter_headers.hpp \
     include/bitcoin/system/message/fee_filter.hpp \
     include/bitcoin/system/message/filter_add.hpp \
     include/bitcoin/system/message/filter_clear.hpp \
@@ -546,6 +561,9 @@ include_bitcoin_system_message_HEADERS = \
     include/bitcoin/system/message/get_address.hpp \
     include/bitcoin/system/message/get_block_transactions.hpp \
     include/bitcoin/system/message/get_blocks.hpp \
+    include/bitcoin/system/message/get_compact_filter_checkpoint.hpp \
+    include/bitcoin/system/message/get_compact_filter_headers.hpp \
+    include/bitcoin/system/message/get_compact_filters.hpp \
     include/bitcoin/system/message/get_data.hpp \
     include/bitcoin/system/message/get_headers.hpp \
     include/bitcoin/system/message/header.hpp \
