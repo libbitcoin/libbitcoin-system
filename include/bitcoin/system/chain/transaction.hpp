@@ -77,6 +77,11 @@ public:
         /// Tx is in a confirmed chain block at given height (and valid there).
         bool confirmed = false;
 
+        /// Derived from tx position (non-sentinel).
+        /// Tx is not unconfirmed, i.e. has been confirmed once even
+        /// if is deconfirmed now.
+        bool cataloged = false;
+        
         /// Derived from height (when not confirmed).
         /// There is no distiction between a tx that can be valid under some
         /// forks and one that cannot be valid under any forks. The only
