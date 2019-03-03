@@ -36,7 +36,7 @@ namespace libbitcoin {
 namespace api {
 
 /// Writer interface.
-class BC_API utility_writer : public libbitcoin::writer
+class BC_API utility_writer
 {
 public:
     /// Context.
@@ -81,6 +81,7 @@ public:
     virtual void skip(size_t size) = 0;
 
     virtual ~utility_writer();
+
 };
 
 } // namespace api

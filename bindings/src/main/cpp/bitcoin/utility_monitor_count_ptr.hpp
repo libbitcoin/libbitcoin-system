@@ -6,7 +6,17 @@
 namespace libbitcoin {
 namespace api {
 
-class utility_monitor_count_ptr : public libbitcoin::monitor::count_ptr {
+class utility_monitor_count_ptr {
+public:
+	monitor::count_ptr getValue() {
+        return value;
+    }
+
+    void setValue(monitor::count_ptr value) {
+        this->value = value;
+    }
+private:
+    monitor::count_ptr value;
 };
 
 } // namespace api

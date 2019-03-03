@@ -6,7 +6,17 @@
 namespace libbitcoin {
 namespace api {
 
-class utility_duration : public libbitcoin::asio::duration {
+class utility_duration {
+public:
+	libbitcoin::asio::duration getValue() {
+        return value;
+    }
+
+    void setValue(libbitcoin::asio::duration value) {
+        this->value = value;
+    }
+private:
+    libbitcoin::asio::duration value;
 };
 
 } // namespace api

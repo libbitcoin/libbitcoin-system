@@ -6,7 +6,16 @@
 namespace libbitcoin {
 namespace api {
 
-class utility_service : public boost::asio::io_service {
+class utility_service {
+	boost::asio::io_service getValue() {
+       return value;
+   }
+
+   void setValue(boost::asio::io_service value) {
+       this->value = value;
+   }
+private:
+   boost::asio::io_service value;
 };
 
 } // namespace api

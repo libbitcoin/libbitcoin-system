@@ -19,33 +19,41 @@
 #ifndef LIBBITCOIN__UTILITY_SEQUENCER_HPP
 #define LIBBITCOIN__UTILITY_SEQUENCER_HPP
 
-#include <functional>
-#include <memory>
-#include <queue>
+//#include <functional>
+//#include <memory>
+//#include <queue>
 //#include <bitcoin/bitcoin/utility/asio.hpp>
 //#include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
 //#include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/sequencer.hpp>
-#include <bitcoin/utility_service.hpp>
-#include <bitcoin/utility_action.hpp>
+#include <utility_service.hpp>
+#include <utility_action.hpp>
 
 
 namespace libbitcoin {
 namespace api {
 
-class utility_sequencer : public libbitcoin::sequencer
+class utility_sequencer
 {
 public:
 //    typedef std::shared_ptr<sequencer> ptr;
 //    typedef std::function<void()> action;
 
-    utility_sequencer(libbitcoin::api::utility_service& service);
+    utility_sequencer(utility_service& service);
     virtual ~utility_sequencer();
 
-    void lock(libbitcoin::api::utility_action&& handler);
+    void lock(utility_action&& handler);
     void unlock();
 
-//private:
+	sequencer getValue() {
+		return value;
+	}
+
+	void setValue(sequencer value) {
+		this->value = value;
+	}
+private:
+	sequencer value;
 //    // This is thread safe.
 //    asio::service& service_;
 //

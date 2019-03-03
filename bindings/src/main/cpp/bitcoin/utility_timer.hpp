@@ -25,12 +25,13 @@
 #include <string>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
+#include <p_std_time_t.hpp>
 
 namespace libbitcoin {
 namespace api {
 /// Current zulu (utc) time using the wall clock.
 /// BUGBUG: en.wikipedia.org/wiki/Year_2038_problem
-inline std::time_t zulu_time()
+inline p_std_time_t zulu_time()
 {
     using wall_clock = std::chrono::system_clock;
     const auto now = wall_clock::now();

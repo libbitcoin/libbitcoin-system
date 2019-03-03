@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef LIBBITCOIN_UTILITY_SERIALIZER_HPP
-#define LIBBITCOIN_SERIALIZER_HPP
+#define LIBBITCOIN_UTILITY_SERIALIZER_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -29,23 +29,24 @@
 ////#include <bitcoin/bitcoin/utility/noncopyable.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
-#include <bitcoin/math_hash_digest.hpp>
-#include <bitcoin/math_short_hash.hpp>
-#include <bitcoin/math_mini_hash.hpp>
-#include <bitcoin/utility_data_slice.hpp>
+#include <math_hash_digest.hpp>
+#include <math_short_hash.hpp>
+#include <math_mini_hash.hpp>
+#include <utility_data_slice.hpp>
+#include <utility_serializer_functor.hpp>
 
 namespace libbitcoin {
 namespace api {
 
 /// Writer to wrap arbitrary iterator.
 template <typename Iterator>
-class utility_serializer : public libbitcoin::serializer
+class utility_serializer
 //  : public writer/*, noncopyable*/
 {
 public:
-    typedef std::function<void(serializer<Iterator>&)> functor;
+//    typedef std::function<void(serializer<Iterator>&)> functor;
 
-    serializer(const Iterator begin);
+    utility_serializer(const Iterator begin);
 
     template <typename Tuple>
     void write_forward(const Tuple& data);
@@ -64,9 +65,9 @@ public:
     bool operator!() const;
 
     /// Write hashes.
-    void write_hash(const libbitcoin::api::math_hash_digest& hash);
-    void write_short_hash(const libbitcoin::api::math_short_hash& hash);
-    void write_mini_hash(const libbitcoin::api::math_mini_hash& hash);
+    void write_hash(const math_hash_digest& hash);
+    void write_short_hash(const math_short_hash& hash);
+    void write_mini_hash(const math_mini_hash& hash);
 
     /// Write big endian integers.
     void write_2_bytes_big_endian(uint16_t value);
@@ -87,7 +88,7 @@ public:
     void write_byte(uint8_t value);
 
     /// Write all bytes.
-    void write_bytes(const libbitcoin::api::utility_data_slice data);
+    void write_bytes(const utility_data_slice data);
 
     /// Write required size buffer.
     void write_bytes(const uint8_t* data, size_t size);
@@ -105,7 +106,7 @@ public:
     //-------------------------------------------------------------------------
 
     /// Delegate write to a write function.
-    void write_delegated(functor write);
+    void write_delegated(utility_serializer_functor<Iterator> write);
 
     /// Utility for variable skipping of writer.
     size_t read_size_big_endian();
@@ -113,7 +114,15 @@ public:
     /// Utility for variable skipping of writer.
     size_t read_size_little_endian();
 
-//private:
+	serializer<Iterator> getValue() {
+		return value;
+	}
+
+	void setValue(serializer<Iterator> value) {
+		this->value = value;
+	}
+private:
+	serializer<Iterator> value;
 //    bool valid_;
 //    Iterator iterator_;
 };

@@ -19,15 +19,15 @@
 #ifndef LIBBITCOIN__UTILITY_MONITOR_HPP
 #define LIBBITCOIN__UTILITY_MONITOR_HPP
 
-#include <atomic>
-#include <cstddef>
-#include <memory>
-#include <string>
-#include <utility>
+//#include <atomic>
+//#include <cstddef>
+//#include <memory>
+//#include <string>
+//#include <utility>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/monitor.hpp>
-#include <bitcoin/utility_monitor_count_ptr.hpp>
-#include <bitcoin/p_std_string.hpp>
+#include <utility_monitor_count_ptr.hpp>
+#include <p_std_string.hpp>
 
 // libbitcoin defines the log and tracking but does not use them.
 // These are defined in bc so that they can be used in network and blockchain.
@@ -36,7 +36,7 @@ namespace libbitcoin {
 namespace api {
 
 /// A reference counting wrapper for closures placed on the asio work heap.
-class BC_API utility_monitor : public monitor
+class BC_API utility_monitor
 {
 public:
 //    typedef std::atomic<size_t> count;
@@ -60,7 +60,16 @@ public:
         ////#endif
     }
 
-//private:
+public:
+    monitor getValue() {
+        return value;
+    }
+
+    void setValue(monitor value) {
+        this->value = value;
+    }
+private:
+    monitor value;
 //    count_ptr counter_;
 //    const std::string name_;
 };

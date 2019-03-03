@@ -6,7 +6,17 @@
 namespace libbitcoin {
 namespace api {
 
-class utility_path : public boost::filesystem::path {
+class utility_path {
+public:
+	boost::filesystem::path getValue() {
+        return value;
+    }
+
+    void setValue(boost::filesystem::path value) {
+        this->value = value;
+    }
+private:
+    boost::filesystem::path value;
 };
 
 } // api

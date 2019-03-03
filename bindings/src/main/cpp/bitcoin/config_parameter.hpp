@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef LIBBITCOIN__CONFIG_PARAMETER_HPP
-#define LIBBITCOIN_CONFIG_PARAMETER_HPP
+#define LIBBITCOIN__CONFIG_PARAMETER_HPP
 
 #include <string>
 #include <utility>
@@ -25,8 +25,8 @@
 #include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/config/parameter.hpp>
-#include <bitcoin/config_argument_list.hpp>
-#include <bitcoin/config_option_description.hpp>
+#include <config_argument_list.hpp>
+#include <config_option_description.hpp>
 
 /* NOTE: don't declare 'using namespace foo' in headers. */
 
@@ -37,10 +37,10 @@ namespace api {
 /**
  * Shorthand for property declarations in parameter class.
  */
-#define BC_PROPERTY(type, name) \
-    public: virtual type get_##name() const { return name##_; } \
-    public: virtual void set_##name(type value) { name##_ = value; } \
-    private: type name##_
+//#define BC_PROPERTY(type, name) \
+//    public: virtual type get_##name() const { return name##_; } \
+//    public: virtual void set_##name(type value) { name##_ = value; } \
+//    private: type name##_
 
 /**
  * A tuple to represent a positional argument name count.
@@ -106,8 +106,8 @@ public:
      * @param[in]  arguments  The list of supported positional arguments.
      */
     virtual void initialize(
-        const libbitcoin::api::config_option_description& option,
-        const libbitcoin::config::api::config_argument_list& arguments);
+        const config_option_description& option,
+        const config_argument_list& arguments);
 
     /**
      * Determine if the option is an argument by testing for it by name in the
@@ -117,8 +117,8 @@ public:
      * @return                Relative position or -1 if not positional.
      */
     virtual int position(
-        const libbitcoin::api::config_option_description& option,
-        const libbitcoin::config::api::config_argument_list& arguments) const;
+        const config_option_description& option,
+        const config_argument_list& arguments) const;
 
     /**
      * Get the value for the args_limit property.
@@ -128,8 +128,8 @@ public:
      * @return                The arguments limit value for the option.
      */
     unsigned arguments_limit(int position,
-        const libbitcoin::api::config_option_description& option,
-        const libbitcoin::config::api::config_argument_list& arguments) const;
+        const config_option_description& option,
+        const config_argument_list& arguments) const;
 
     /**
      * Get the option's short name character or zero.
@@ -137,7 +137,7 @@ public:
      * @return             The short name character or null character.
      */
     virtual char short_name(
-        const libbitcoin::api::config_option_description& option) const;
+        const config_option_description& option) const;
 
     config::parameter getValue() {
 		return value;
@@ -149,17 +149,17 @@ public:
 private:
 	config::parameter value;
 
-    /**
-     * Virtual property declarations.
-     */
-    BC_PROPERTY(int, position);
-    BC_PROPERTY(bool, required);
-    BC_PROPERTY(char, short_name);
-    BC_PROPERTY(unsigned, args_limit);
-    BC_PROPERTY(std::string, long_name);
-    BC_PROPERTY(std::string, description);
-    BC_PROPERTY(std::string, format_name);
-    BC_PROPERTY(std::string, format_parameter);
+//    /**
+//     * Virtual property declarations.
+//     */
+//    BC_PROPERTY(int, position);
+//    BC_PROPERTY(bool, required);
+//    BC_PROPERTY(char, short_name);
+//    BC_PROPERTY(unsigned, args_limit);
+//    BC_PROPERTY(std::string, long_name);
+//    BC_PROPERTY(std::string, description);
+//    BC_PROPERTY(std::string, format_name);
+//    BC_PROPERTY(std::string, format_parameter);
 };
 
 #undef BC_PROPERTY

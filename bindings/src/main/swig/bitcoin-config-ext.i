@@ -16,17 +16,21 @@
 %import "bitcoin/utility_endpoint.hpp"
 %import "bitcoin/utility_ipv6.hpp"
 %include "bitcoin/config_authority.hpp"
+%ignore setValue(config::authority::list value);
+%include "bitcoin/config_authority_list.hpp"
 
 //%rename(eq) libbitcoin::config::checkpoint::operator==(const checkpoint& other) const;
 //%ignore operator>>(std::istream& input, checkpoint& argument);
 //%ignore operator<<(std::ostream& output, const checkpoint& argument);
 %import "bitcoin/bitcoin/config/checkpoint.hpp"
 %include "bitcoin/config_checkpoint.hpp"
+%include "bitcoin/config_checkpoint_list.hpp"
 
 //%rename(toHeader) libbitcoin::config::header::operator const chain::header&() const;
 //%ignore operator>>(std::istream& input, header& argument);
 //%ignore operator<<(std::ostream& output, const header& argument);
 %import "bitcoin/bitcoin/config/header.hpp"
+%import "bitcoin/chain_header.hpp"
 %include "bitcoin/config_header.hpp"
 
 //%rename(toInput) libbitcoin::config::input::operator const chain::input&() const;

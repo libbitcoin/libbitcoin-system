@@ -27,13 +27,13 @@
 #include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
-namespace config {
+//namespace config {
 namespace api {
 
 /**
  * Serialization helper to convert between text and an output_point.
  */
-class BC_API config_point : public config::point
+class BC_API config_point
 {
 public:
 //    static const std::string delimeter;
@@ -53,7 +53,7 @@ public:
      * Initialization constructor.
      * @param[in]  value  The value to initialize with.
      */
-    config_point(const chain::api::chain_output_point& value);
+    config_point(const chain_output_point& value);
 
     /**
      * Copy constructor.
@@ -84,16 +84,19 @@ public:
      */
 //    friend std::ostream& operator<<(std::ostream& output, const point& argument);
 
-//private:
-//
-//    /**
-//     * The state of this object.
-//     */
-//    chain::output_point value_;
+    config::point getValue() {
+		return value;
+	}
+
+	void setValue(config::point value) {
+		this->value = value;
+	}
+private:
+	config::point value;
 };
 
 } // namespace api
-} // namespace config
+//} // namespace config
 } // namespace libbitcoin
 
 #endif

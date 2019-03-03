@@ -16,7 +16,17 @@
 namespace libbitcoin {
 namespace api {
 
-class utility_handler : public std::function<void(const libbitcoin::code&)>  {
+class utility_handler  {
+public:
+	std::function<void(const libbitcoin::code&)> getValue() {
+        return value;
+    }
+
+    void setValue(std::function<void(const libbitcoin::code&)> value) {
+        this->value = value;
+    }
+private:
+    std::function<void(const libbitcoin::code&)> value;
 };
 
 } // namespace api

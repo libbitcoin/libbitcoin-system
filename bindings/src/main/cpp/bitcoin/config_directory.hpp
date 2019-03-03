@@ -16,15 +16,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CONFIG_DIRECTORY_HPP
-#define LIBBITCOIN_CONFIG_DIRECTORY_HPP
+#ifndef LIBBITCOIN__CONFIG_DIRECTORY_HPP
+#define LIBBITCOIN__CONFIG_DIRECTORY_HPP
 
 #include <string>
 #include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
-namespace config {
+//namespace config {
+namespace api {
 
 // Declare config_default_path() via BC_DECLARE_CONFIG_DEFAULT_PATH(relative).
 #define CONFIG_DEFAULT_PATH(directory, subdirectory) \
@@ -50,7 +51,8 @@ namespace config {
  */
 BC_API std::string windows_config_directory();
 
-} // namespace config
+} // namespace api
+//} // namespace config
 } // namespace libbitcoin
 
 #endif

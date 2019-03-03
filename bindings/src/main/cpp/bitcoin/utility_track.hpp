@@ -27,20 +27,28 @@
 // libbitcoin defines the log and tracking but does not use them.
 // These are defined in bc so that they can be used in network and blockchain.
 
-#define CONSTRUCT_TRACK(class_name) \
-    track<class_name>(#class_name)
+//#define CONSTRUCT_TRACK(class_name) \
+//    track<class_name>(#class_name)
 
 template <class Shared>
-class utility_track : public track<class Shared>
+class utility_track
 {
-public:
-    static std::atomic<size_t> instances;
+//public:
+//    static std::atomic<size_t> instances;
 
 protected:
     utility_track(const std::string& class_name);
     virtual ~utility_track();
 
-//private:
+    track<class Shared> getValue() {
+       return value;
+   }
+
+   void setValue(track<class Shared> value) {
+       this->value = value;
+   }
+private:
+   track<class Shared> value;
 //    const std::string class_;
 };
 

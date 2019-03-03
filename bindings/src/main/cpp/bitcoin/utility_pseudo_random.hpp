@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_PSEUDO_RANDOM_HPP
-#define LIBBITCOIN_PSEUDO_RANDOM_HPP
+#ifndef LIBBITCOIN__PSEUDO_RANDOM_HPP
+#define LIBBITCOIN__PSEUDO_RANDOM_HPP
 
 #include <random>
 #include <cstdint>

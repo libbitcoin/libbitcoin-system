@@ -16,33 +16,34 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_RESUBSCRIBER_HPP
-#define LIBBITCOIN_RESUBSCRIBER_HPP
+#ifndef LIBBITCOIN__RESUBSCRIBER_HPP
+#define LIBBITCOIN__RESUBSCRIBER_HPP
 
-#include <functional>
-#include <memory>
-#include <string>
-#include <vector>
-#include <bitcoin/bitcoin/utility/dispatcher.hpp>
-#include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
-#include <bitcoin/bitcoin/utility/thread.hpp>
-#include <bitcoin/bitcoin/utility/threadpool.hpp>
+//#include <functional>
+//#include <memory>
+//#include <string>
+//#include <vector>
+//#include <bitcoin/bitcoin/utility/dispatcher.hpp>
+//#include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
+//#include <bitcoin/bitcoin/utility/thread.hpp>
+//#include <bitcoin/bitcoin/utility/threadpool.hpp>
 ////#include <bitcoin/bitcoin/utility/track.hpp>
+#include <utility_resubscriber_handler.hpp>
+#include <utility_threadpool.hpp>
 
 namespace libbitcoin {
+namespace api {
 
 template <typename... Args>
-class resubscriber
-  : public enable_shared_from_base<resubscriber<Args...>>
-    /*, track<resubscriber<Args...>>*/
+class utility_resubscriber
 {
 public:
-    typedef std::function<bool (Args...)> handler;
-    typedef std::shared_ptr<resubscriber<Args...>> ptr;
+//    typedef std::function<bool (Args...)> handler;
+//    typedef std::shared_ptr<resubscriber<Args...>> ptr;
 
     /// Construct an instance. The class_name is for debugging.
-    resubscriber(threadpool& pool, const std::string& class_name);
-    virtual ~resubscriber();
+    utility_resubscriber(utility_threadpool& pool, const std::string& class_name);
+    virtual ~utility_resubscriber();
 
     /// Enable new subscriptions.
     void start();
@@ -52,7 +53,7 @@ public:
 
     /// Subscribe to notifications with an option to resubscribe.
     /// Return true from the handler to resubscribe to notifications.
-    void subscribe(handler&& notify, Args... stopped_args);
+    void subscribe(utility_resubscriber_handler<Args>&& notify, Args... stopped_args);
 
     /// Invoke all handlers sequentially (blocking).
     void invoke(Args... args);
@@ -60,18 +61,19 @@ public:
     /// Invoke all handlers sequentially (non-blocking).
     void relay(Args... args);
 
-private:
-    typedef std::vector<handler> list;
-
-    void do_invoke(Args... args);
-
-    bool stopped_;
-    list subscriptions_;
-    dispatcher dispatch_;
-    mutable upgrade_mutex invoke_mutex_;
-    mutable upgrade_mutex subscribe_mutex_;
+//private:
+//    typedef std::vector<handler> list;
+//
+//    void do_invoke(Args... args);
+//
+//    bool stopped_;
+//    list subscriptions_;
+//    dispatcher dispatch_;
+//    mutable upgrade_mutex invoke_mutex_;
+//    mutable upgrade_mutex subscribe_mutex_;
 };
 
+} // namespace api
 } // namespace libbitcoin
 
 #include <bitcoin/bitcoin/impl/utility/resubscriber.ipp>

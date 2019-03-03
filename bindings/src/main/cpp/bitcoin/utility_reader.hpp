@@ -16,22 +16,27 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_READER_HPP
-#define LIBBITCOIN_READER_HPP
+#ifndef LIBBITCOIN__UTILITY_READER_HPP
+#define LIBBITCOIN__UTILITY_READER_HPP
 
 #include <cstddef>
 #include <cstdint>
 #include <string>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
+#include <utility_data_chunk.hpp>
+#include <math_hash_digest.hpp>
+#include <math_short_hash.hpp>
+#include <math_mini_hash.hpp>
 
 namespace libbitcoin {
+namespace api {
 
 /// Reader interface.
-class BC_API reader
+class BC_API utility_reader
 {
 public:
+	virtual ~utility_reader();
+
     /// Context.
     virtual operator bool() const = 0;
     virtual bool operator!() const = 0;
@@ -39,9 +44,9 @@ public:
     virtual void invalidate() = 0;
 
     /// Read hashes.
-    virtual hash_digest read_hash() = 0;
-    virtual short_hash read_short_hash() = 0;
-    virtual mini_hash read_mini_hash() = 0;
+    virtual math_hash_digest read_hash() = 0;
+    virtual math_short_hash read_short_hash() = 0;
+    virtual math_mini_hash read_mini_hash() = 0;
 
     /// Read big endian integers.
     virtual uint16_t read_2_bytes_big_endian() = 0;
@@ -63,10 +68,10 @@ public:
     virtual uint8_t read_byte() = 0;
 
     /// Read all remaining bytes.
-    virtual data_chunk read_bytes() = 0;
+    virtual utility_data_chunk read_bytes() = 0;
 
     /// Read required size buffer.
-    virtual data_chunk read_bytes(size_t size) = 0;
+    virtual utility_data_chunk read_bytes(size_t size) = 0;
 
     /// Read variable length string.
     virtual std::string read_string() = 0;
@@ -78,6 +83,7 @@ public:
     virtual void skip(size_t size) = 0;
 };
 
+} // namespace api
 } // namespace libbitcoin
 
 #endif

@@ -6,7 +6,17 @@
 namespace libbitcoin {
 namespace api {
 
-class utility_action : public libbitcoin::sequencer::action {
+class utility_action {
+public:
+	sequencer::action getValue() {
+        return value;
+    }
+
+    void setValue(sequencer::action value) {
+        this->value = value;
+    }
+private:
+    sequencer::action value;
 };
 
 } // namespace api

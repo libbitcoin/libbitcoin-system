@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN__ARGUMENTS_METADATA_HPP
-#define LIBBITCOIN__ARGUMENTS_METADATA_HPP
+#ifndef LIBBITCOIN__CONFIG_ARGUMENTS_METADATA_HPP
+#define LIBBITCOIN__CONFIG_ARGUMENTS_METADATA_HPP
 
 #include <cstdint>
 #include <bitcoin/bitcoin/config/parser.hpp>

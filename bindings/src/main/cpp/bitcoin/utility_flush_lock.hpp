@@ -20,30 +20,38 @@
 #define LIBBITCOIN__UTILITY_FLUSH_LOCK_HPP
 
 #include <bitcoin/bitcoin/utility/flush_lock.hpp>
-#include <bitcoin/utility_path.hpp>
+#include <utility_path.hpp>
 
 namespace libbitcoin {
 namespace api {
 
 /// This class is not thread safe.
 /// Guard a resource that may be corrupted due to an interrupted write.
-class BC_API utility_flush_lock : public libbitcoin::flush_lock
+class BC_API utility_flush_lock
 {
 public:
 
-    utility_flush_lock(const libbitcoin::api::utility_path& file);
+    utility_flush_lock(const utility_path& file);
 
     bool try_lock();
     bool lock_shared();
     bool unlock_shared();
 
-private:
-    static bool create(const std::string& file);
-    static bool exists(const std::string& file);
-    static bool destroy(const std::string& file);
+    flush_lock getValue() {
+        return value;
+    }
 
-    bool locked_;
-    const std::string file_;
+    void setValue(flush_lock value) {
+        this->value = value;
+    }
+private:
+    flush_lock value;
+//    static bool create(const std::string& file);
+//    static bool exists(const std::string& file);
+//    static bool destroy(const std::string& file);
+//
+//    bool locked_;
+//    const std::string file_;
 };
 
 } // namespace api

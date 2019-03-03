@@ -30,7 +30,7 @@ namespace api {
 /// This class is thread safe.
 /// Encapsulation of prioritized locking conditions.
 /// This is unconcerned with thread priority and is instead explicit.
-class BC_API utility_prioritized_mutex : public prioritized_mutex
+class BC_API utility_prioritized_mutex
 {
 public:
 //    typedef std::shared_ptr<utility_prioritized_mutex> ptr;
@@ -43,7 +43,16 @@ public:
     void lock_high_priority();
     void unlock_high_priority();
 
-//private:
+public:
+    prioritized_mutex getValue() {
+        return value;
+    }
+
+    void setValue(prioritized_mutex value) {
+        this->value = value;
+    }
+private:
+    prioritized_mutex value;
 //    const bool prioritize_;
 //    shared_mutex data_mutex_;
 //    shared_mutex next_mutex_;

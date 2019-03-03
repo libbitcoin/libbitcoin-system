@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_STRING_VECTOR_HPP
-#define LIBBITCOIN_STRING_VECTOR_HPP
+#ifndef LIBBITCOIN__STRING_VECTOR_HPP
+#define LIBBITCOIN__STRING_VECTOR_HPP
 
 #include <vector>
 #include <string>

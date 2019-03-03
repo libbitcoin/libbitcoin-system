@@ -21,16 +21,16 @@
 
 #include <cstdint>
 #include <vector>
-#include <bitcoin/bitcoin/chain/point_value.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/chain/point_value.hpp>
+#include <chain_point.hpp>
 
 namespace libbitcoin {
-namespace chain {
+//namespace chain {
 namespace api {
 
 /// A valued point, does not implement specialized serialization methods.
 class BC_API chain_point_value
-  : public point_value
 {
 public:
 //    typedef std::vector<point_value> list;
@@ -40,7 +40,7 @@ public:
 
     chain_point_value();
 //    point_value(point_value&& other);
-    chain_point_value(const point_value& other);
+    chain_point_value(const chain_point_value& other);
 //    point_value(point&& instance, uint64_t value);
     chain_point_value(const point& instance, uint64_t value);
 
@@ -49,14 +49,14 @@ public:
 
     /// This class is move assignable and copy assignable.
 //    point_value& operator=(point_value other);
-    point_value& assign(point_value other);
+    chain_point_value& assign(chain_point_value other);
 
 //    bool operator==(const point_value& other) const;
-    bool eq(const point_value& other) const;
+    bool eq(const chain_point_value& other) const;
 //    bool operator!=(const point_value& other) const;
 
     // Swap implementation required to properly handle base class.
-    friend void libbitcoin::chain::swap(point_value& left, point_value& right);
+    friend void libbitcoin::chain::swap(chain_point_value& left, chain_point_value& right);
 
     // Properties (accessors).
     //-------------------------------------------------------------------------
@@ -64,12 +64,21 @@ public:
     uint64_t value() const;
     void set_value(uint64_t value);
 
-//private:
+public:
+    chain::point_value getValue() {
+        return value;
+    }
+
+    void setValue(chain::point_value value) {
+        this->value = value;
+    }
+private:
+    chain::point_value value;
 //    uint64_t value_;
 };
 
 } // namespace api
-} // namespace chain
+//} // namespace chain
 } // namespace libbitcoin
 
 #endif

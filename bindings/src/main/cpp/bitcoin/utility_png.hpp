@@ -33,7 +33,7 @@
 namespace libbitcoin {
 namespace api {
 
-class BC_API utility_png : public libbitcoin::png
+class BC_API utility_png
 {
 public:
     static BC_CONSTEXPR uint32_t margin = 2;

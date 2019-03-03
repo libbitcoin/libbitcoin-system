@@ -19,68 +19,73 @@
 #ifndef LIBBITCOIN_CONFIG_BLOCK_HPP
 #define LIBBITCOIN_CONFIG_BLOCK_HPP
 
-#include <iostream>
+//#include <iostream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/chain/block.hpp>
+#include <bitcoin/bitcoin/config/block.hpp>
+#include <chain_block.hpp>
 
 namespace libbitcoin {
-namespace config {
+//namespace config {
+namespace api {
 
 /**
  * Serialization helper to convert between serialized and deserialized satoshi
  * block.
  */
-class BC_API block
+class BC_API config_block
 {
 public:
 
     /**
      * Default constructor.
      */
-    block();
+    config_block();
 
     /**
      * Initialization constructor.
      * @param[in]  hexcode  The value to initialize with.
      */
-    block(const std::string& hexcode);
+    config_block(const std::string& hexcode);
 
     /**
      * Initialization constructor.
      * @param[in]  value  The value to initialize with.
      */
-    block(const chain::block& value);
+    config_block(const chain_block& value);
 
     /**
      * Copy constructor.
      * @param[in]  other  The object to copy into self on construct.
      */
-    block(const block& other);
+    config_block(const config_block& other);
 
     /**
      * Copy assignment operator.
      * @param[in]  other  The object to copy into self on assignment.
      */
-    block& operator=(const block& other);
+//    config_block& operator=(const config_block& other);
 
     /**
      * Move assignment operator.
      * @param[in]  other  The object to move into self on assignment.
      */
-    block& operator=(chain::block&& other);
+//    config_block& operator=(chain::config_block&& other);
+    config_block& assign(chain_block&& other);
 
     /**
      * Override the equality operator.
      * @param[in]  other  The other object with which to compare.
      */
-    bool operator==(const block& other) const;
+//    bool operator==(const block& other) const;
+    bool eq(const block& other) const;
 
     /**
      * Overload cast to internal type.
      * @return  This object's value cast to internal type.
      */
-    operator const chain::block&() const;
+//    operator const chain::block&() const;
+    const chain::block& to_chain_block() const;
 
     /**
      * Get the block as a string.
@@ -94,7 +99,7 @@ public:
      * @param[out]  argument  The object to receive the read value.
      * @return                The input stream reference.
      */
-    friend std::istream& operator>>(std::istream& input, block& argument);
+//    friend std::istream& operator>>(std::istream& input, block& argument);
 
     /**
      * Overload stream out.
@@ -102,18 +107,29 @@ public:
      * @param[out]  argument  The object from which to obtain the value.
      * @return                The output stream reference.
      */
-    friend std::ostream& operator<<(std::ostream& output,
-        const block& argument);
+//    friend std::ostream& operator<<(std::ostream& output,
+//        const block& argument);
 
+	config::block getValue() {
+		return value;
+	}
+
+	void setValue(config::block value) {
+		this->value = value;
+	}
 private:
+	config::block value;
 
-    /**
-     * The state of this object's block data.
-     */
-    chain::block value_;
+//private:
+//
+//    /**
+//     * The state of this object's block data.
+//     */
+//    chain::block value_;
 };
 
-} // namespace config
+} // namespace api
+//} // namespace config
 } // namespace libbitcoin
 
 #endif

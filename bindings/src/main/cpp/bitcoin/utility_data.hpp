@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_DATA_HPP
-#define LIBBITCOIN_DATA_HPP
+#ifndef LIBBITCOIN__DATA_HPP
+#define LIBBITCOIN__DATA_HPP
 
 #include <array>
 #include <cstddef>
@@ -27,10 +27,10 @@
 #include <queue>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/utility_array_slice.hpp>
-#include <bitcoin/utility_data_chunk.hpp>
-#include <bitcoin/utility_data_slice_vector.hpp>
-#include <bitcoin/utility_one_byte.hpp>
+#include <utility_array_slice.hpp>
+#include <utility_data_chunk.hpp>
+#include <utility_data_slice_vector.hpp>
+#include <utility_one_byte.hpp>
 
 namespace libbitcoin {
 namespace api {

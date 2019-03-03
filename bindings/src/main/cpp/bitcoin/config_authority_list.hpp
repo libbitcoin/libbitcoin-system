@@ -20,46 +20,54 @@
 #define LIBBITCOIN__CONFIG_AUTHORITY_LIST_HPP
 
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/config_authority.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
+#include <config_authority.hpp>
 
 namespace libbitcoin {
-namespace config {
+//namespace config {
 namespace api {
 
-class BC_API config_authority_list
-{
+class BC_API config_authority_list {
 public:
 
-  config_authority_list()
-    : authorities(new libbitcoin::config::authority::list())
-  {
-  }
+	config_authority_list() :
+			value(new libbitcoin::config::authority::list()) {
+	}
 
-  config_authority get(size_t i) {
-    return authorities[i];
-  }
+	config_authority get(size_t i) {
+		return value[i];
+	}
 
-  void set(size_t i, authority *t) {
-    authorities[i] = *t;
-  }
+	void set(size_t i, config::authority *t) {
+		value[i] = *t;
+	}
 
-  libbitcoin::config::authority::list cast() {
-    return authorities;
-  }
+	libbitcoin::config::authority::list cast() {
+		return value;
+	}
 
-  size_t getSize() {
-    return authorities.size();
-  }
+	size_t getSize() {
+		return value.size();
+	}
+
+	config::authority::list getValue() {
+		return value;
+	}
+
+	void setValue(config::authority::list value) {
+		this->value = value;
+	}
+private:
+	value;
 
 private:
 
-  libbitcoin::config::authority::list authorities;
+	libbitcoin::config::authority::list value;
 
 };
 
 } // namespace api
-} // namespace chain
+//} // namespace config
 } // namespace libbitcoin
 
 #endif

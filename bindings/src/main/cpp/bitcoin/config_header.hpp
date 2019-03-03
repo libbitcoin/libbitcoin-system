@@ -27,14 +27,14 @@
 #include <bitcoin/config_header.hpp>
 
 namespace libbitcoin {
-namespace config {
+//namespace config {
 namespace api {
 
 /**
  * Serialization helper to convert between serialized and deserialized satoshi
  * header.
  */
-class BC_API config_header : public config::header
+class BC_API config_header
 {
 public:
 
@@ -53,7 +53,7 @@ public:
      * Initialization constructor.
      * @param[in]  value  The value to initialize with.
      */
-    config_header(const chain::api::chain_header& value);
+    config_header(const chain_header& value);
 
     /**
      * Copy constructor.
@@ -85,16 +85,21 @@ public:
     //friend std::ostream& operator<<(std::ostream& output,
     //    const header& argument);
 
-//private:
+public:
+	config::header getValue() {
+		return value;
+	}
 
-    /**
-     * The state of this object's header data.
-     */
-    //chain::header value_;
+	void setValue(config::header value) {
+		this->value = value;
+	}
+private:
+	config::header value;
+
 };
 
 } // namespace api
-} // namespace config
+//} // namespace config
 } // namespace libbitcoin
 
 #endif

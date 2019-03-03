@@ -20,46 +20,52 @@
 #define LIBBITCOIN__CONFIG_ENDPOINT_LIST_HPP
 
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/config_endpoint.hpp>
+#include <config_endpoint.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 
 namespace libbitcoin {
-namespace config {
+//namespace config {
 namespace api {
 
-class BC_API config_endpoint_list
-{
+class BC_API config_endpoint_list {
 public:
 
-  config_endpoint_list()
-    : endpoints(new libbitcoin::config::endpoint::list())
-  {
-  }
+	config_endpoint_list() :
+			value(new libbitcoin::config::endpoint::list()) {
+	}
 
-  config_endpoint get(size_t i) {
-    return endpoints[i];
-  }
+	config_endpoint get(size_t i) {
+		return value[i];
+	}
 
-  void set(size_t i, endpoint *t) {
-    endpoints[i] = *t;
-  }
+	void set(size_t i, config::endpoint *t) {
+		value[i] = *t;
+	}
 
-  libbitcoin::config::endpoint::list cast() {
-    return endpoints;
-  }
+	libbitcoin::config::endpoint::list cast() {
+		return value;
+	}
 
-  size_t getSize() {
-    return endpoints.size();
-  }
+	size_t getSize() {
+		return value.size();
+	}
+
+	config::endpoint::list getValue() {
+		return value;
+	}
+
+	void setValue(config::endpoint::list value) {
+		this->value = value;
+	}
 
 private:
 
-  libbitcoin::config::endpoint::list endpoints;
+	libbitcoin::config::endpoint::list value;
 
 };
 
 } // namespace api
-} // namespace chain
+//} // namespace chain
 } // namespace libbitcoin
 
 #endif

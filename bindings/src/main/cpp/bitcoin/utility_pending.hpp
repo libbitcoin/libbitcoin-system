@@ -19,12 +19,12 @@
 #ifndef LIBBITCOIN__UTILITY_PENDING_HPP
 #define LIBBITCOIN__UTILITY_PENDING_HPP
 
-#include <atomic>
-#include <cstddef>
-#include <functional>
-#include <memory>
-#include <vector>
-#include <bitcoin/bitcoin/error.hpp>
+//#include <atomic>
+//#include <cstddef>
+//#include <functional>
+//#include <memory>
+//#include <vector>
+//#include <bitcoin/bitcoin/error.hpp>
 //#include <bitcoin/bitcoin/utility/noncopyable.hpp>
 //#include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/pending.hpp>
@@ -35,7 +35,6 @@ namespace api {
 /// A managed collection of object pointers.
 template <class Element>
 class utility_pending
-  : private libbitcoin::pending
 {
 public:
     typedef std::shared_ptr<Element> element_ptr;
@@ -69,7 +68,16 @@ public:
     /// Close and erase all elements of the collection (blocking).
     void close();
 
-//private:
+
+    libbitcoin::pending getValue() {
+        return value;
+    }
+
+    void setValue(libbitcoin::pending value) {
+        this->value = value;
+    }
+private:
+    libbitcoin::pending value;
 //
 //    // This is thread safe.
 //    std::atomic<bool> stopped_;

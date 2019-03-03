@@ -31,7 +31,7 @@
 namespace libbitcoin {
 namespace api {
 
-class BC_API utility_binary : public libbitcoin::binary
+class BC_API utility_binary
 {
 public:
     typedef uint8_t block;
@@ -75,7 +75,16 @@ public:
 //    friend std::istream& operator>>(std::istream& in, utility_binary& to);
 //    friend std::ostream& operator<<(std::ostream& out, const utility_binary& of);
 
-//private:
+    libbitcoin::binary getValue() {
+        return value;
+    }
+
+    void setValue(libbitcoin::binary value) {
+        this->value = value;
+    }
+
+private:
+    libbitcoin::binary value;
 //    static uint8_t shift_block_right(uint8_t next, uint8_t current, uint8_t prior,
 //        size_type original_offset, size_type intended_offset);
 //

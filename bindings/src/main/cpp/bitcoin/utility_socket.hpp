@@ -35,7 +35,7 @@ namespace libbitcoin {
 namespace api {
 
 /// This class is thread safe but the socket may not be used concurrently.
-class BC_API utility_socket : public socket
+class BC_API utility_socket
 //  : private noncopyable
 //    /*, public track<socket>*/
 {
@@ -46,7 +46,7 @@ public:
     utility_socket(utility_threadpool& thread);
 
     /// Obtain the authority of the remote endpoint.
-    libbitcoin::config::api::config_authority authority() const;
+    config_authority authority() const;
 
     /// The underlying socket.
     utility_socket& get();
@@ -55,6 +55,16 @@ public:
     virtual void stop();
 
     virtual ~utility_socket();
+
+    socket getValue() {
+		return value;
+	}
+
+	void setValue(socket value) {
+		this->value = value;
+	}
+private:
+	socket value;
 
 //private:
 //    // This is thread safe.

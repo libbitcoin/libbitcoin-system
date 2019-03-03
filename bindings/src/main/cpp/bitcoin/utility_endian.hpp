@@ -24,6 +24,7 @@
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
+namespace api {
 
 template <typename Integer, typename Iterator>
 Integer from_big_endian(Iterator start, Iterator end);
@@ -49,6 +50,7 @@ byte_array<sizeof(Integer)> to_big_endian(Integer value);
 template <typename Integer>
 byte_array<sizeof(Integer)> to_little_endian(Integer value);
 
+} // namespace api
 } // namespace libbitcoin
 
 #include <bitcoin/bitcoin/impl/utility/endian.ipp>

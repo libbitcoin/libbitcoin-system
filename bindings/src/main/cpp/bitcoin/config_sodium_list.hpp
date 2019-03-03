@@ -19,47 +19,53 @@
 #ifndef LIBBITCOIN__CONFIG_SODIUM_LIST_HPP
 #define LIBBITCOIN__CONFIG_SODIUM_LIST_HPP
 
-#include <bitcoin/bitcoin/config/sodium.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/config/sodium.hpp>
 //#include <bitcoin/bitcoin/error.hpp>
 
 namespace libbitcoin {
-namespace config {
+//namespace config {
 namespace api {
 
-class BC_API config_sodium_list
-{
+class BC_API config_sodium_list {
 public:
 
-  config_sodium_list()
-    : list(new sodium::list())
-  {
-  }
+	config_sodium_list() :
+			value(new config::sodium::list()) {
+	}
 
-  sodium get(size_t i) {
-    return config_sodium_list::list[i];
-  }
+	config::sodium get(size_t i) {
+		return config_sodium_list::value[i];
+	}
 
-  void set(size_t i, sodium *t) {
-    config_sodium_list::list[i] = *t;
-  }
+	void set(size_t i, config::sodium *t) {
+		config_sodium_list::value[i] = *t;
+	}
 
-  sodium::list cast() {
-    return list;
-  }
+	config::sodium::list cast() {
+		return value;
+	}
 
-  size_t getSize() {
-    return list.size();
-  }
+	size_t getSize() {
+		return value.size();
+	}
+
+	config::sodium::list getValue() {
+		return value;
+	}
+
+	void setValue(config::sodium::list value) {
+		this->value = value;
+	}
 
 private:
 
-  sodium::list list;
+	config::sodium::list value;
 
 };
 
 } // namespace api
-} // namespace config
+//} // namespace config
 } // namespace libbitcoin
 
 #endif

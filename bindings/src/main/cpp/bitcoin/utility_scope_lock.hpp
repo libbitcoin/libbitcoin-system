@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN__UTILITY_SCOPE_LOCK_HPP
 #define LIBBITCOIN__UTILITY_SCOPE_LOCK_HPP
 
-#include <memory>
+//#include <memory>
 //#include <bitcoin/bitcoin/define.hpp>
 //#include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/scope_lock.hpp>
@@ -30,16 +30,26 @@ namespace api {
 
 /// This class is thread safe.
 /// Reserve exclusive access to a resource while this object is in scope.
-class BC_API utility_scope_lock : public libbitcoin::scope_lock
+class BC_API utility_scope_lock
 {
 public:
-    typedef std::shared_ptr<scope_lock> ptr;
+//    typedef std::shared_ptr<scope_lock> ptr;
 
     /// Lock using the specified mutex reference.
     utility_scope_lock(utility_shared_mutex& mutex);
 
     /// Unlock.
     virtual ~utility_scope_lock();
+
+    scope_lock getValue() {
+		return value;
+	}
+
+	void setValue(scope_lock value) {
+		this->value = value;
+	}
+private:
+	scope_lock value;
 
 //private:
 //    shared_mutex& mutex_;

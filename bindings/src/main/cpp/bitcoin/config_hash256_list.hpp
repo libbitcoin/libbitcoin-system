@@ -24,42 +24,40 @@
 //#include <bitcoin/bitcoin/error.hpp>
 
 namespace libbitcoin {
-namespace config {
+//namespace config {
 namespace api {
 
-class BC_API config_hash256_list
-{
+class BC_API config_hash256_list {
 public:
 
-  config_hash256_list()
-    : list(new hash256::list())
-  {
-  }
+	config_hash256_list() :
+			value(new config::hash256::list()) {
+	}
 
-  hash256 get(size_t i) {
-    return config_hash256_list::list[i];
-  }
+	config::hash256 get(size_t i) {
+		return config_hash256_list::value[i];
+	}
 
-  void set(size_t i, hash256 *t) {
-    config_hash256_list::list[i] = *t;
-  }
+	void set(size_t i, config::hash256 *t) {
+		config_hash256_list::value[i] = *t;
+	}
 
-  hash256::list cast() {
-    return list;
-  }
+	config::hash256::list getValue() {
+		return value;
+	}
 
-  size_t getSize() {
-    return list.size();
-  }
+	size_t getSize() {
+		return value.size();
+	}
 
 private:
 
-  hash256::list list;
+	config::hash256::list value;
 
 };
 
 } // namespace api
-} // namespace config
+//} // namespace config
 } // namespace libbitcoin
 
 #endif

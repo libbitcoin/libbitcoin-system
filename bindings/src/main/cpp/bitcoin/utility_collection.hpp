@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_COLLECTION_HPP
-#define LIBBITCOIN_COLLECTION_HPP
+#ifndef LIBBITCOIN__COLLECTION_HPP
+#define LIBBITCOIN__COLLECTION_HPP
 
 #include <iterator>
 #include <iostream>
@@ -27,6 +27,7 @@
 /* NOTE: don't declare 'using namespace foo' in headers. */
 
 namespace libbitcoin {
+namespace api {
 
 #define BC_SENTENCE_DELIMITER " "
 
@@ -99,6 +100,7 @@ void move_append(std::vector<Type>& target, std::vector<Type>& source);
 template <typename Element>
 Element pop(std::vector<Element>& stack);
 
+} // namespace api
 } // namespace libbitcoin
 
 namespace std {

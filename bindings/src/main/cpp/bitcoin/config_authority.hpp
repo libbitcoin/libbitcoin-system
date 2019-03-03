@@ -25,21 +25,21 @@
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
-#include <bitcoin/message_ip_address.hpp>
-#include <bitcoin/message_network_address.hpp>
-#include <bitcoin/utility_address.hpp>
-#include <bitcoin/utility_ipv6.hpp>
-#include <bitcoin/utility_endpoint.hpp>
+#include <message_ip_address.hpp>
+#include <message_network_address.hpp>
+#include <utility_address.hpp>
+#include <utility_ipv6.hpp>
+#include <utility_endpoint.hpp>
 
 namespace libbitcoin {
-namespace config {
+//namespace config {
 namespace api {
 
 /**
  * Serialization helper for a network authority.
  * This is a container for a {ip address, port} tuple.
  */
-class BC_API config_authority : public authority
+class BC_API config_authority
 {
 public:
     /**
@@ -73,14 +73,14 @@ public:
      * Initialization constructor.
      * @param[in]  net  The network address (ip and port) to initialize with.
      */
-    config_authority(const message::api::message_network_address& address);
+    config_authority(const message_network_address& address);
 
     /**
      * Initialization constructor.
      * @param[in]  ip    The ip addresss to initialize with.
      * @param[in]  port  The port to initialize with.
      */
-    config_authority(const message::api::message_ip_address& ip, uint16_t port);
+    config_authority(const message_ip_address& ip, uint16_t port);
 
     /**
      * Initialization constructor.
@@ -95,13 +95,13 @@ public:
      * @param[in]  ip    The boost ip addresss to initialize with.
      * @param[in]  port  The port to initialize with.
      */
-    config_authority(const libbitcoin::api::utility_address& ip, uint16_t port);
+    config_authority(const utility_address& ip, uint16_t port);
 
     /**
      * Initialization constructor.
      * @param[in]  endpoint  The boost endpoint address to initialize with.
      */
-    config_authority(const libbitcoin::api::utility_endpoint& endpoint);
+    config_authority(const utility_endpoint& endpoint);
 
     /**
      * Getter.
@@ -120,7 +120,7 @@ public:
      * Getter.
      * @return The ip address of the authority.
      */
-    message::api::message_ip_address ip() const;
+    message_ip_address ip() const;
 
     /**
      * Getter.
@@ -148,7 +148,7 @@ public:
      * Convert to bitcoin network address type.
      * @return  The authority converted to a network address.
      */
-    message::api::message_network_address to_network_address() const;
+    message_network_address to_network_address() const;
 
     /**
      * Override the equality operator.
@@ -182,13 +182,23 @@ public:
 //    friend std::ostream& operator<<(std::ostream& output,
 //        const authority& argument);
 
+	config::authority getValue() {
+		return value;
+	}
+
+	void setValue(config::authority value) {
+		this->value = value;
+	}
+private:
+	config::authority value;
+
 //private:
 //    asio::ipv6 ip_;
 //    uint16_t port_;
 };
 
 } // namespace api
-} // namespace config
+//} // namespace config
 } // namespace libbitcoin
 
 #endif

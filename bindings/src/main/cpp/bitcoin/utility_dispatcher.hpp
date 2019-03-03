@@ -16,25 +16,28 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_DISPATCHER_HPP
-#define LIBBITCOIN_DISPATCHER_HPP
+#ifndef LIBBITCOIN__UTILITY_DISPATCHER_HPP
+#define LIBBITCOIN__UTILITY_DISPATCHER_HPP
 
-#include <cstddef>
-#include <functional>
-#include <string>
-#include <utility>
-#include <vector>
+//#include <cstddef>
+//#include <functional>
+//#include <string>
+//#include <utility>
+//#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/utility/asio.hpp>
-#include <bitcoin/bitcoin/utility/deadline.hpp>
-#include <bitcoin/bitcoin/utility/delegates.hpp>
-#include <bitcoin/bitcoin/utility/noncopyable.hpp>
-#include <bitcoin/bitcoin/utility/synchronizer.hpp>
-#include <bitcoin/bitcoin/utility/threadpool.hpp>
-#include <bitcoin/bitcoin/utility/work.hpp>
+#include <bitcoin/bitcoin/utility/dispatcher.hpp>
+//#include <bitcoin/bitcoin/error.hpp>
+//#include <bitcoin/bitcoin/utility/asio.hpp>
+//#include <bitcoin/bitcoin/utility/deadline.hpp>
+//#include <bitcoin/bitcoin/utility/delegates.hpp>
+//#include <bitcoin/bitcoin/utility/noncopyable.hpp>
+//#include <bitcoin/bitcoin/utility/synchronizer.hpp>
+#include <bitcoin/utility_threadpool.hpp>
+//#include <bitcoin/bitcoin/utility/work.hpp>
+#include <utility_dispatcher_delay_handler.hpp>
 
 namespace libbitcoin {
+namespace api {
 
 #define FORWARD_ARGS(args) \
     std::forward<Args>(args)...
@@ -53,13 +56,12 @@ namespace libbitcoin {
 
 /// This  class is thread safe.
 /// If the ios service is stopped jobs will not be dispatched.
-class BC_API dispatcher
-  : noncopyable
+class BC_API utility_dispatcher
 {
 public:
-    typedef std::function<void(const code&)> delay_handler;
+//    typedef std::function<void(const code&)> delay_handler;
 
-    dispatcher(threadpool& pool, const std::string& name);
+    utility_dispatcher(utility_threadpool& pool, const std::string& name);
 
     ////size_t ordered_backlog();
     ////size_t unordered_backlog();
@@ -70,21 +72,21 @@ public:
     template <typename... Args>
     static void bound(Args&&... args)
     {
-        BIND_ARGS(args)();
+        value.bound(args);
     }
 
     /// Posts a job to the service. Concurrent and not ordered.
     template <typename... Args>
     void concurrent(Args&&... args)
     {
-        heap_->concurrent(BIND_ARGS(args));
+        value.concurrent(args);
     }
 
     /// Post a job to the strand. Ordered and not concurrent.
     template <typename... Args>
     void ordered(Args&&... args)
     {
-        heap_->ordered(BIND_ARGS(args));
+        value.ordered(args);
     }
 
     /// Posts a strand-wrapped job to the service. Not ordered or concurrent.
@@ -92,7 +94,7 @@ public:
     template <typename... Args>
     void unordered(Args&&... args)
     {
-        heap_->unordered(BIND_ARGS(args));
+        value.unordered(args);
     }
 
     /// Posts an asynchronous job to the sequencer. Ordered and not concurrent.
@@ -100,48 +102,34 @@ public:
     template <typename... Args>
     void lock(Args&&... args)
     {
-        heap_->lock(BIND_ARGS(args));
+        value.lock(args);
     }
 
     /// Complete sequential execution.
     inline void unlock()
     {
-        heap_->unlock();
+        value.unlock();
     }
 
     /// Posts job to service after specified delay. Concurrent and not ordered.
     /// The timer cannot be canceled so delay should be within stop criteria.
-    inline void delayed(const asio::duration& delay, delay_handler handler)
+    inline void delayed(const asio::duration& delay, utility_dispatcher_delay_handler handler)
     {
-        auto timer = std::make_shared<deadline>(pool_, delay);
-        timer->start([handler, timer](const code& ec)
-        {
-            handler(ec);
-            timer->stop();
-        });
+        value.delayed(delay, handler.value);
     }
 
     /// Returns a delegate that will execute the job on the current thread.
-    template <typename... Args>
-    static auto bound_delegate(Args&&... args) ->
-        delegates::bound<decltype(BIND_ARGS(args))>
-    {
-        return
-        {
-            BIND_ARGS(args)
-        };
-    }
+//    template <typename... Args>
+//    static auto bound_delegate(Args&&... args)
+//    {
+//        return value.bound_delegate(args);
+//    }
 
     /// Returns a delegate that will post the job via the service.
     template <typename... Args>
-    auto concurrent_delegate(Args&&... args) ->
-        delegates::concurrent<decltype(BIND_ARGS(args))>
+    auto concurrent_delegate(Args&&... args)
     {
-        return
-        {
-            BIND_ARGS(args),
-            heap_
-        };
+        return value.concurrent_delegate(args);
     }
 
     /// Returns a delegate that will post the job via the strand.
@@ -149,11 +137,7 @@ public:
     auto ordered_delegate(Args&&... args) ->
         delegates::ordered<decltype(BIND_ARGS(args))>
     {
-        return
-        {
-            BIND_ARGS(args),
-            heap_
-        };
+        return value.ordered_delegate(args);
     }
 
     /// Returns a delegate that will post a wrapped job via the service.
@@ -161,11 +145,7 @@ public:
     auto unordered_delegate(Args&&... args) ->
         delegates::unordered<decltype(BIND_ARGS(args))>
     {
-        return
-        {
-            BIND_ARGS(args),
-            heap_
-        };
+        return value.unordered_delegate(args);
     }
 
     /// Returns a delegate that will post a job via the sequencer.
@@ -173,11 +153,7 @@ public:
     auto sequence_delegate(Args&&... args) ->
         delegates::sequence<decltype(BIND_ARGS(args))>
     {
-        return
-        {
-            BIND_ARGS(args),
-            heap_
-        };
+        return value.sequence_delegate(args);
     }
 
     /////// Executes multiple identical jobs concurrently until one completes.
@@ -249,14 +225,23 @@ public:
     /// The size of the dispatcher's threadpool at the time of calling.
     inline size_t size() const
     {
-        return pool_.size();
+        return value.size();
     }
 
-private:
+public:
+    dispatcher getValue() {
+        return value;
+    }
 
-    // This is thread safe.
-    work::ptr heap_;
-    threadpool& pool_;
+    void setValue(dispatcher value) {
+        this->value = value;
+    }
+private:
+    dispatcher value;
+
+//    // This is thread safe.
+//    work::ptr heap_;
+//    threadpool& pool_;
 };
 
 #undef FORWARD_ARGS
@@ -266,6 +251,7 @@ private:
 #undef BIND_RACE
 #undef BIND_ELEMENT
 
+} // namespace api
 } // namespace libbitcoin
 
 #endif

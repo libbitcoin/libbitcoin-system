@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN__UTILITY_SEQUENTIAL_LOCK_HPP
 #define LIBBITCOIN__UTILITY_SEQUENTIAL_LOCK_HPP
 
-#include <atomic>
-#include <cstddef>
+//#include <atomic>
+//#include <cstddef>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/sequential_lock.hpp>
 
@@ -29,7 +29,7 @@ namespace api {
 
 /// This class is thread safe.
 /// Encapsulation of sequential locking conditions.
-class BC_API utility_sequential_lock : public libbitcoin::sequential_lock
+class BC_API utility_sequential_lock
 {
 public:
     typedef size_t handle;
@@ -48,7 +48,15 @@ public:
     bool begin_write();
     bool end_write();
 
-//private:
+	sequential_lock getValue() {
+		return value;
+	}
+
+	void setValue(sequential_lock value) {
+		this->value = value;
+	}
+private:
+	sequential_lock value;
 //    std::atomic<size_t> sequence_;
 };
 

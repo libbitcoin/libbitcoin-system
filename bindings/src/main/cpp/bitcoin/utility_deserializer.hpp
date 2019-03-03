@@ -36,7 +36,6 @@ namespace api {
 /// Reader to wrap arbitrary iterator.
 template <typename Iterator, bool CheckSafe>
 class utility_deserializer
-  : public libbitcoin::deserializer
 {
 public:
     typedef std::function<void(deserializer<Iterator, CheckSafe>&)> functor;
@@ -104,6 +103,16 @@ public:
 
     /// Advance iterator without reading.
     void skip(size_t size);
+
+    libbitcoin::deserializer getValue() {
+        return value;
+    }
+
+    void setValue(libbitcoin::deserializer value) {
+        this->value = value;
+    }
+private:
+    libbitcoin::deserializer value;
 
 //private:
 //    // True if is a safe deserializer and size does not exceed remaining bytes.

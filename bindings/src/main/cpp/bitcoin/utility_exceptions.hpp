@@ -25,8 +25,17 @@ namespace libbitcoin {
 namespace api {
 
 class BC_API utility_end_of_stream
-  : public libbitcoin::end_of_stream
 {
+public:
+	libbitcoin::end_of_stream getValue() {
+        return value;
+    }
+
+    void setValue(libbitcoin::end_of_stream value) {
+        this->value = value;
+    }
+private:
+    libbitcoin::end_of_stream value;
 };
 
 } // namespace api

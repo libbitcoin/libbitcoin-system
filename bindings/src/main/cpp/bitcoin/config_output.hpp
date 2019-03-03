@@ -28,14 +28,14 @@
 #include <bitcoin/math_short_hash.hpp>
 
 namespace libbitcoin {
-namespace config {
+//namespace config {
 namespace api {
 
 /**
  * Serialization helper to convert between a base58-string:number and
  * a vector of chain::output.
  */
-class BC_API config_output : public config::output
+class BC_API config_output
 {
 public:
 
@@ -54,8 +54,8 @@ public:
     bool is_stealth() const;
     uint64_t amount() const;
     uint8_t version() const;
-    const chain::api::chain_script& script() const;
-    const libbitcoin::api::math_short_hash& pay_to_hash() const;
+    const chain_script& script() const;
+    const math_short_hash& pay_to_hash() const;
 
     /**
      * Overload stream in. Throws if input is invalid.
@@ -64,6 +64,17 @@ public:
      * @return                The input stream reference.
      */
 //    friend std::istream& operator>>(std::istream& input, output& argument);
+
+public:
+    config::output getValue() {
+		return value;
+	}
+
+	void setValue(config::output value) {
+		this->value = value;
+	}
+private:
+	config::output value;
 
 //private:
 //
@@ -79,7 +90,7 @@ public:
 };
 
 } // namespace api
-} // namespace config
+//} // namespace config
 } // namespace libbitcoin
 
 #endif

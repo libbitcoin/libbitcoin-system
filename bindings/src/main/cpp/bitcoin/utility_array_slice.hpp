@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_ARRAY_SLICE_HPP
-#define LIBBITCOIN_ARRAY_SLICE_HPP
+#ifndef LIBBITCOIN__UTILITY_ARRAY_SLICE_HPP
+#define LIBBITCOIN__UTILITY_ARRAY_SLICE_HPP
 
 #include <bitcoin/bitcoin/utility/array_slice.hpp>
 
@@ -33,7 +33,7 @@ namespace api {
  * buffer (c-style array) is more performant than the iterator abstraction.
  */
 template <typename Iterable>
-class utility_array_slice : public libbitcoin::array_slice
+class utility_array_slice
 {
 public:
     template <typename Container>
@@ -47,9 +47,19 @@ public:
     std::size_t size() const;
     bool empty() const;
 
+    libbitcoin::array_slice getValue() {
+        return value;
+    }
+
+    void setValue(libbitcoin::array_slice value) {
+        this->value = value;
+    }
 private:
-    const Iterable* begin_;
-    const Iterable* end_;
+    libbitcoin::array_slice value;
+
+//private:
+//    const Iterable* begin_;
+//    const Iterable* end_;
 };
 
 } // namespace api

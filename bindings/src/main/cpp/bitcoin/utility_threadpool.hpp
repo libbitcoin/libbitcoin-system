@@ -19,11 +19,11 @@
 #ifndef LIBBITCOIN__UTILITY_THREADPOOL_HPP
 #define LIBBITCOIN__UTILITY_THREADPOOL_HPP
 
-#include <atomic>
-#include <cstddef>
-#include <memory>
-#include <functional>
-#include <thread>
+//#include <atomic>
+//#include <cstddef>
+//#include <memory>
+//#include <functional>
+//#include <thread>
 #include <bitcoin/bitcoin/define.hpp>
 //#include <bitcoin/bitcoin/utility/asio.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -38,7 +38,6 @@ namespace api {
  * A collection of threads which can be passed operations through io_service.
  */
 class BC_API utility_threadpool
-  : public libbitcoin::threadpool
 {
 public:
 
@@ -97,6 +96,15 @@ public:
      * Underlying boost::io_service object.
      */
 //    const asio::service& service() const;
+    libbitcoin::threadpool getValue() {
+    	return value;
+    }
+
+    void setValue(libbitcoin::threadpool value) {
+    	this->value = value;
+    }
+private:
+    libbitcoin::threadpool value;
 
 //private:
 //    void spawn_once(thread_priority priority=thread_priority::normal);

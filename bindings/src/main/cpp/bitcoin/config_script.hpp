@@ -19,23 +19,23 @@
 #ifndef LIBBITCOIN__CONFIG_SCRIPT_HPP
 #define LIBBITCOIN__CONFIG_SCRIPT_HPP
 
-#include <iostream>
-#include <string>
-#include <vector>
-#include <bitcoin/chain_script.hpp>
+//#include <iostream>
+//#include <string>
+//#include <vector>
 #include <bitcoin/bitcoin/config/script.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/string_vector.hpp>
-#include <bitcoin/utility_data_chunk.hpp>
+#include <chain_script.hpp>
+#include <bitcoin/define.hpp>
+#include <string_vector.hpp>
+#include <utility_data_chunk.hpp>
 
 namespace libbitcoin {
-namespace config {
+//namespace config {
 namespace api {
 
 /**
  * Serialization helper to convert between base16/raw script and script_type.
  */
-class BC_API config_script : public config::script
+class BC_API config_script
 {
 public:
 
@@ -54,19 +54,19 @@ public:
      * Initialization constructor.
      * @param[in]  value  The value to initialize with.
      */
-    config_script(const libbitcoin::chain::api::chain_script& value);
+    config_script(const chain_script& value);
 
     /**
      * Initialization constructor.
      * @param[in]  value  The value to initialize with.
      */
-    config_script(const libbitcoin::api::utility_data_chunk& value);
+    config_script(const utility_data_chunk& value);
 
     /**
      * Initialization constructor.
      * @param[in]  tokens  The mnemonic tokens to initialize with.
      */
-    config_script(const libbitcoin::api::string_vector& tokens);
+    config_script(const string_vector& tokens);
 
     /**
      * Copy constructor.
@@ -78,7 +78,7 @@ public:
      * Serialize the script to bytes according to the wire protocol.
      * @return  The byte serialized copy of the script.
      */
-    libbitcoin::api::utility_data_chunk to_data() const;
+    utility_data_chunk to_data() const;
 
     /**
      * Return a pretty-printed copy of the script.
@@ -92,7 +92,7 @@ public:
      * @return  This object's value cast to internal type.
      */
 //    operator const chain::script&() const;
-    const libbitcoin::chain::api::chain_script& to_script() const;
+    const chain_script& to_script() const;
 
     /**
      * Overload stream in. Throws if input is invalid.
@@ -110,6 +110,17 @@ public:
      */
 //    friend std::ostream& operator<<(std::ostream& output, const script& argument);
 
+public:
+    config::script getValue() {
+        return value;
+    }
+
+    void setValue(config::script value) {
+        this->value = value;
+    }
+private:
+    config::script value;
+
 //private:
 //
 //    /**
@@ -119,7 +130,7 @@ public:
 };
 
 } // namespace api
-} // namespace config
+//} // namespace config
 } // namespace libbitcoin
 
 #endif

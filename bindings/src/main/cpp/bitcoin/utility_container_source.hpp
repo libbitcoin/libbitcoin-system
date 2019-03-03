@@ -30,40 +30,41 @@
 #include <bitcoin/utility_data_chunk.hpp>
 
 namespace libbitcoin {
+namespace api {
 
 // modified from boost.iostreams example
 // boost.org/doc/libs/1_55_0/libs/iostreams/doc/tutorial/container_source.html
 template <typename Container, typename SourceType, typename CharType>
-class BC_API utility_container_source : public libbitcoin::container_source
+class BC_API utility_container_source
 {
 public:
     typedef CharType char_type;
     typedef boost::iostreams::source_tag category;
 
     utility_container_source(const Container& container)
-      : container_(container), position_(0)
+      : value(new libbitcoin::container_source(container))
     {
         static_assert(sizeof(SourceType) == sizeof(CharType), "invalid size");
     }
 
     std::streamsize read(char_type* buffer, std::streamsize size)
     {
-        auto amount = safe_subtract(container_.size(), position_);
-        auto result = std::min(size, static_cast<std::streamsize>(amount));
-
-        // TODO: use ios eof symbol (template-based).
-        if (result <= 0)
-            return -1;
-
-        const auto value = static_cast<typename Container::size_type>(result);
-        std::copy_n(container_.begin() + position_, value, buffer);
-        position_ += value;
-        return result;
+        return value.read(buffer, size);
     }
 
+    libbitcoin::container_source getValue() {
+        return value;
+    }
+
+    void setValue(libbitcoin::container_source value) {
+        this->value = value;
+    }
 private:
-    const Container& container_;
-    typename Container::size_type position_;
+    libbitcoin::container_source value;
+
+//private:
+//    const Container& container_;
+//    typename Container::size_type position_;
 };
 
 template <typename Container>
@@ -74,6 +75,7 @@ using utility_stream_source = boost::iostreams::stream<byte_source<Container>>;
 
 using utility_data_source = utility_stream_source<libbitcoin::api::utility_data_chunk>;
 
+} // namespace api
 } // namespace libbitcoin
 
 #endif

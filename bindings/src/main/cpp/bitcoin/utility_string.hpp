@@ -21,14 +21,16 @@
 
 #include <string>
 #include <vector>
+#include <string_vector.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/lexical_cast.hpp>
+//#include <bitcoin/bitcoin/utility/data.hpp>
+//#include <boost/algorithm/string/trim.hpp>
+//#include <boost/lexical_cast.hpp>
 
 namespace libbitcoin {
+namespace api {
 
-typedef std::vector<std::string> string_list;
+//typedef std::vector<std::string> string_list;
 
 /**
  * Convert a text string to the specified type.
@@ -77,7 +79,7 @@ std::string serialize(const Value& value, const std::string& fallback="");
  * @param[in]  delimiter  The delimiter, defaults to " ".
  * @return                The resulting string.
  */
-BC_API std::string join(const string_list& words,
+BC_API std::string join(const string_vector& words,
     const std::string& delimiter=" ");
 
 /**
@@ -88,9 +90,10 @@ BC_API std::string join(const string_list& words,
  * @param[in]  trim       Trim the sentence for whitespace, defaults to true.
  * @return                The list of resulting strings.
  */
-BC_API string_list split(const std::string& sentence,
+BC_API string_vector split(const std::string& sentence,
     const std::string& delimiter=" ", bool trim=true);
 
+} // namespace api
 } // namespace libbitcoin
 
 #include <bitcoin/bitcoin/impl/utility/string.ipp>

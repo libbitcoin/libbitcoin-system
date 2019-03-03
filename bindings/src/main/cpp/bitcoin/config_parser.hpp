@@ -36,14 +36,15 @@ namespace libbitcoin {
 //typedef boost::program_options::positional_options_description
 //    arguments_metadata;
 
-namespace config {
+//namespace config {
+namespace api {
 
 #define PROPERTY(type, property) \
     value<type>()->notifier([&](type value) { property(value); })
 
 /// Parse configurable values from environment variables, settings file, and
 /// command line positional and non-positional options.
-class BC_API parser
+class BC_API config_parser
 {
 public:
     static std::string format_invalid_parameter(const std::string& message);
@@ -63,18 +64,30 @@ public:
     /// Load configuration file settings.
     virtual libbitcoin::api::config_options_metadata load_settings() = 0;
 
-protected:
-    virtual void load_command_variables(libbitcoin::api::config_variables_map& variables,
-        int argc, const char* argv[]);
+   config::parser getValue() {
+       return value;
+   }
 
-    virtual bool load_configuration_variables(libbitcoin::api::config_variables_map& variables,
-        const std::string& option_name);
+//   void setValue(config::parser value) {
+//       this->value = value;
+//   }
 
-    virtual void load_environment_variables(libbitcoin::api::config_variables_map& variables,
-        const std::string& prefix);
+//protected:
+//    virtual void load_command_variables(libbitcoin::api::config_variables_map& variables,
+//        int argc, const char* argv[]);
+//
+//    virtual bool load_configuration_variables(libbitcoin::api::config_variables_map& variables,
+//        const std::string& option_name);
+//
+//    virtual void load_environment_variables(libbitcoin::api::config_variables_map& variables,
+//        const std::string& prefix);
+
+private:
+   config::parser value;
 };
 
-} // namespace config
+} // namespace api
+//} // namespace config
 } // namespace libbitcoin
 
 #endif

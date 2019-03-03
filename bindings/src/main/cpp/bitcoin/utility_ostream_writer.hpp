@@ -16,20 +16,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_OSTREAM_WRITER_HPP
-#define LIBBITCOIN_OSTREAM_WRITER_HPP
+#ifndef LIBBITCOIN__UTILITY_OSTREAM_WRITER_HPP
+#define LIBBITCOIN__UTILITY_OSTREAM_WRITER_HPP
 
 #include <ostream>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/utility/writer.hpp>
+#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <math_hash_digest.hpp>
+#include <math_short_hash.hpp>
+#include <math_mini_hash.hpp>
+#include <utility_data_slice.hpp>
 
 namespace libbitcoin {
+namespace api {
 
-class BC_API ostream_writer
-  : public writer
+class BC_API utility_ostream_writer
 {
 public:
-    ostream_writer(std::ostream& stream);
+    utility_ostream_writer(std::ostream& stream);
 
     template <unsigned Size>
     void write_forward(const byte_array<Size>& value);
@@ -48,9 +52,9 @@ public:
     bool operator!() const;
 
     /// Write hashes.
-    void write_hash(const hash_digest& value);
-    void write_short_hash(const short_hash& value);
-    void write_mini_hash(const mini_hash& value);
+    void write_hash(const math_hash_digest& value);
+    void write_short_hash(const math_short_hash& value);
+    void write_mini_hash(const math_mini_hash& value);
 
     /// Write big endian integers.
     void write_2_bytes_big_endian(uint16_t value);
@@ -71,7 +75,7 @@ public:
     void write_byte(uint8_t value);
 
     /// Write all bytes.
-    void write_bytes(const data_slice data);
+    void write_bytes(const utility_data_slice data);
 
     /// Write required size buffer.
     void write_bytes(const uint8_t* data, size_t size);
@@ -85,10 +89,19 @@ public:
     /// Advance iterator without writing.
     void skip(size_t size);
 
+    ostream_writer getValue() {
+        return value;
+    }
+
+    void setValue(ostream_writer value) {
+        this->value = value;
+    }
 private:
-    std::ostream& stream_;
+    ostream_writer value;
+//    std::ostream& stream_;
 };
 
+} // namespace api
 } // namespace libbitcoin
 
 #include <bitcoin/bitcoin/impl/utility/ostream_writer.ipp>

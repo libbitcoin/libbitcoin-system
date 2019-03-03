@@ -25,16 +25,27 @@
 namespace libbitcoin {
 namespace api {
 
-class BC_API utility_noncopyable : public libbitcoin::noncopyable
+class BC_API utility_noncopyable
 {
 public:
     utility_noncopyable(const utility_noncopyable&) = delete;
     void operator=(const utility_noncopyable&) = delete;
 
-protected:
-    utility_noncopyable()
-    {
+public:
+    noncopyable getValue() {
+        return value;
     }
+
+    void setValue(noncopyable value) {
+        this->value = value;
+    }
+//protected:
+//    utility_noncopyable()
+//    {
+//    }
+private:
+    noncopyable value;
+
 };
 
 } // namespace api

@@ -19,6 +19,8 @@
 %import "bitcoin-chain-ext.i"
 //%import "bitcoin-chain-ext-typemap.i"
 
+%ignore getValue();
+
 %include "bitcoin-config-ext.i"
 
 //%rename(toData_chunk) libbitcoin::config::base16::operator const data_chunk&() const;
@@ -48,6 +50,8 @@
 //%ignore operator<<(std::ostream& output, const base64& argument);
 %import "bitcoin/bitcoin/config/base64.hpp"
 %include "bitcoin/config_base64.hpp"
+%ignore setValue(config::block value);
+%include "bitcoin/config_block.hpp"
 
 %include "bitcoin/config_directory.hpp"
 
@@ -56,7 +60,10 @@
 //%ignore operator>>(std::istream& input, endpoint& argument);
 //%ignore operator<<(std::ostream& output, const endpoint& argument);
 %import "bitcoin/bitcoin/config/endpoint.hpp"
+%ignore setValue(config::endpoint value);
 %include "bitcoin/config_endpoint.hpp"
+%ignore setValue(config::endpoint::list value);
+%include "bitcoin/config_endpoint_list.hpp"
 
 //%rename(toShort_hash) libbitcoin::config::hash160::operator const short_hash&() const;
 //%ignore operator>>(std::istream& input, hash160& argument);
@@ -70,19 +77,32 @@
 //%ignore operator<<(std::ostream& output, const hash256& argument);
 %import "bitcoin/bitcoin/config/hash256.hpp"
 %include "bitcoin/config_hash256.hpp"
+%include "bitcoin/config_hash256_list.hpp"
 
 //%ignore operator>>(std::istream& input, output& argument);
 %import "bitcoin/bitcoin/config/output.hpp"
 %import "bitcoin/math_short_hash.hpp"
+%import "bitcoin/chain_script.hpp"
 %include "bitcoin/config_output.hpp"
-%import "bitcoin/config_option_description.hpp"
-%import "bitcoin/config_argument_list.hpp"
+%ignore setValue(boost::program_options::option_description value);
+%include "bitcoin/config_option_description.hpp"
+%ignore setValue(boost::program_options::options_description value);
+%include "bitcoin/config_options_description.hpp"
+%ignore setValue(config::argument_list value);
+%include "bitcoin/config_argument_list.hpp"
+%ignore setValue(config::parameter value);
 %include "bitcoin/config_parameter.hpp"
+%ignore setValue(config::parameter_list value);
+%include "bitcoin/config_parameter_list.hpp"
 
 %import "bitcoin/bitcoin/config/parser.hpp"
+%ignore setValue(variables_map value);
 %include "bitcoin/config_variables_map.hpp"
+%ignore setValue(option_metadata value);
 %include "bitcoin/config_option_metadata.hpp"
+%ignore setValue(options_metadata value);
 %include "bitcoin/config_options_metadata.hpp"
+%ignore setValue(arguments_metadata value);
 %include "bitcoin/config_arguments_metadata.hpp"
 %include "bitcoin/config_parser.hpp"
 
@@ -90,7 +110,17 @@
 //%ignore operator>>(std::istream& input, point& argument);
 //%ignore operator<<(std::ostream& output, const point& argument);
 %import "bitcoin/bitcoin/config/point.hpp"
+%ignore setValue(config::point value);
 %include "bitcoin/config_point.hpp"
+
+%ignore setValue(boost::program_options::positional_options_description value);
+%include "bitcoin/config_positional_options_description.hpp"
+
+%include "bitcoin/config_printer.hpp"
+
+%ignore setValue(config::script value);
+%include "bitcoin/config_script.hpp"
+%include "bitcoin/config_settings.hpp"
 
 //%ignore libbitcoin::config::printer::commandline(std::ostream& output);
 //%ignore libbitcoin::config::printer::settings(std::ostream& output);
@@ -112,7 +142,10 @@
 //%ignore operator>>(std::istream& input, sodium& argument);
 //%ignore operator<<(std::ostream& output, const sodium& argument);
 %import "bitcoin/bitcoin/config/sodium.hpp"
+%ignore setValue(config::sodium value);
 %include "bitcoin/config_sodium.hpp"
+%ignore setValue(config::sodium::list value);
+%include "bitcoin/config_sodium_list.hpp"
 
 
 //%template(CheckpointVector) std::vector<libbitcoin::config::checkpoint>;

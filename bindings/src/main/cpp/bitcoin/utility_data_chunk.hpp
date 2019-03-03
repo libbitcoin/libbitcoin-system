@@ -6,7 +6,17 @@
 namespace libbitcoin {
 namespace api {
 
-class utility_data_chunk : public uint8_t_vector {
+class utility_data_chunk {
+public:
+	uint8_t_vector getValue() {
+        return value;
+    }
+
+    void setValue(uint8_t_vector value) {
+        this->value = value;
+    }
+private:
+    uint8_t_vector value;
 };
 
 } // api

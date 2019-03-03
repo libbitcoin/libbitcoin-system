@@ -28,13 +28,13 @@
 #include <bitcoin/chain_input_point.hpp>
 
 namespace libbitcoin {
-namespace config {
+//namespace config {
 namespace api {
 
 /**
  * Serialization helper stub for chain::input.
  */
-class BC_API config_input : public config::input
+class BC_API config_input
 {
 public:
 
@@ -53,7 +53,7 @@ public:
      * Initialization constructor. Only the point is retained.
      * @param[in]  value  The value to initialize with.
      */
-    config_input(const chain::api::chain_input& value);
+    config_input(const chain_input& value);
 
     /**
      * Copy constructor.
@@ -66,14 +66,14 @@ public:
      * are defaulted.
      * @param[in]  value  The value to initialize with.
      */
-    config_input(const chain::api::chain_input_point& value);
+    config_input(const chain_input_point& value);
 
     /**
      * Overload cast to internal type.
      * @return  This object's value cast to internal type.
      */
 //    operator const chain::input&() const;
-    const chain::input& cast() const;
+    const chain::input& to_chain_input() const;
 
     /**
      * Overload stream in. Throws if input is invalid.
@@ -91,16 +91,19 @@ public:
      */
 //    friend std::ostream& operator<<(std::ostream& output, const input& argument);
 
-//private:
-//
-//    /**
-//     * The state of this object.
-//     */
-//    chain::input value_;
+    config::input getValue() {
+		return value;
+	}
+
+	void setValue(config::input value) {
+		this->value = value;
+	}
+private:
+	config::input value;
 };
 
 } // namespace api
-} // namespace explorer
+//} // namespace config
 } // namespace libbitcoin
 
 #endif

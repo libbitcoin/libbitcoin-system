@@ -27,17 +27,26 @@ namespace api {
 
 /// This class is not thread safe.
 /// Guard a resource againt concurrent use by another instance of this app.
-class BC_API utility_interprocess_lock : public libbitcoin::interprocess_lock
+class BC_API utility_interprocess_lock
 {
 public:
 
-    utility_interprocess_lock(const libbitcoin::api::utility_path& file);
+    utility_interprocess_lock(const utility_path& file);
     virtual ~utility_interprocess_lock();
 
     bool lock();
     bool unlock();
 
-//private:
+public:
+    interprocess_lock getValue() {
+        return value;
+    }
+
+    void setValue(interprocess_lock value) {
+        this->value = value;
+    }
+private:
+    interprocess_lock value;
 //    typedef interprocess::file_lock lock_file;
 //    typedef std::shared_ptr<lock_file> lock_ptr;
 

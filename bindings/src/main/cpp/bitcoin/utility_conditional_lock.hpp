@@ -19,27 +19,35 @@
 #ifndef LIBBITCOIN__UTILITY_CONDITIONAL_LOCK_HPP
 #define LIBBITCOIN__UTILITY_CONDITIONAL_LOCK_HPP
 
-#include <memory>
-#include <bitcoin/bitcoin/define.hpp>
+//#include <memory>
+//#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/conditional_lock.hpp>
-#include <bitcoin/utility_mutex_ptr.hpp>
+#include <utility_mutex_ptr.hpp>
 
 namespace libbitcoin {
 namespace api {
 
-class BC_API utility_conditional_lock : public libbitcoin::conditional_lock
+class BC_API utility_conditional_lock
 {
 public:
     /// Conditional lock using internally-managed mutex pointer.
     utility_conditional_lock(bool lock);
 
     /// Conditional lock using parameterized mutex pointer (may be null).
-    utility_conditional_lock(libbitcoin::api::utility_mutex_ptr mutex_ptr);
+    utility_conditional_lock(utility_mutex_ptr mutex_ptr);
 
     /// Unlock.
     virtual ~utility_conditional_lock();
 
-//private:
+    libbitcoin::conditional_lock getValue() {
+        return value;
+    }
+
+    void setValue(libbitcoin::conditional_lock value) {
+        this->value = value;
+    }
+private:
+    libbitcoin::conditional_lock value;
 //    const std::shared_ptr<shared_mutex> mutex_ptr_;
 };
 

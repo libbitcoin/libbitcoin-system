@@ -16,21 +16,25 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_ISTREAM_READER_HPP
-#define LIBBITCOIN_ISTREAM_READER_HPP
+#ifndef LIBBITCOIN__UTILITY_ISTREAM_READER_HPP
+#define LIBBITCOIN__UTILITY_ISTREAM_READER_HPP
 
 #include <cstddef>
 #include <cstdint>
 #include <istream>
-#include <bitcoin/bitcoin/utility/reader.hpp>
+#include <bitcoin/bitcoin/utility/istream_reader.hpp>
+#include <math_hash_digest.hpp>
+#include <math_short_hash.hpp>
+#include <math_mini_hash.hpp>
+#include <utility_data_chunk.hpp>
 
 namespace libbitcoin {
+namespace api {
 
-class BC_API istream_reader
-  : public reader
+class BC_API utility_istream_reader
 {
 public:
-    istream_reader(std::istream& stream);
+    utility_istream_reader(std::istream& stream);
 
     template <unsigned Size>
     byte_array<Size> read_forward();
@@ -51,9 +55,9 @@ public:
     void invalidate();
 
     /// Read hashes.
-    hash_digest read_hash();
-    short_hash read_short_hash();
-    mini_hash read_mini_hash();
+    math_hash_digest read_hash();
+    math_short_hash read_short_hash();
+    math_mini_hash read_mini_hash();
 
     /// Read big endian integers.
     uint16_t read_2_bytes_big_endian();
@@ -75,10 +79,10 @@ public:
     uint8_t read_byte();
 
     /// Read all remaining bytes.
-    data_chunk read_bytes();
+    utility_data_chunk read_bytes();
 
     /// Read required size buffer.
-    data_chunk read_bytes(size_t size);
+    utility_data_chunk read_bytes(size_t size);
 
     /// Read variable length string.
     std::string read_string();
@@ -89,15 +93,26 @@ public:
     /// Advance iterator without reading.
     void skip(size_t size);
 
-private:
-    // The buffer is faulted or at eof.
-    bool empty() const;
 
-    std::istream& stream_;
+public:
+    istream_reader getValue() {
+        return value;
+    }
+
+    void setValue(istream_reader value) {
+        this->value = value;
+    }
+private:
+    istream_reader value;
+//    // The buffer is faulted or at eof.
+//    bool empty() const;
+//
+//    std::istream& stream_;
 };
 
+} // namespace api
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/utility/istream_reader.ipp>
+//#include <bitcoin/bitcoin/impl/utility/istream_reader.ipp>
 
 #endif

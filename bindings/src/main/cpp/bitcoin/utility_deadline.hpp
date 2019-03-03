@@ -19,19 +19,19 @@
 #ifndef LIBBITCOIN__UTILITY_DEADLINE_HPP
 #define LIBBITCOIN__UTILITY_DEADLINE_HPP
 
-#include <memory>
+//#include <memory>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/error.hpp>
+//#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
-#include <bitcoin/utility_asio.hpp>
+#include <utility_asio.hpp>
 //#include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
 //#include <bitcoin/bitcoin/utility/assert.hpp>
 //#include <bitcoin/bitcoin/utility/noncopyable.hpp>
 //#include <bitcoin/bitcoin/utility/thread.hpp>
-#include <bitcoin/utility_threadpool.hpp>
+#include <utility_threadpool.hpp>
 ////#include <bitcoin/bitcoin/utility/track.hpp>
-#include <bitcoin/utility_duration.hpp>
-#include <bitcoin/utility_handler.hpp>
+#include <utility_duration.hpp>
+#include <utility_handler.hpp>
 
 namespace libbitcoin {
 namespace api {
@@ -41,7 +41,7 @@ namespace api {
  * This simplifies invocation, eliminates boost-specific error handling and
  * makes timer firing and cancellation conditions safer.
  */
-class BC_API utility_deadline : public deadline
+class BC_API utility_deadline
 //#ifndef SWIG
 //  : public enable_shared_from_base<deadline>,
 //    noncopyable
@@ -87,7 +87,15 @@ public:
      */
     void stop();
 
-//private:
+    deadline getValue() {
+        return value;
+    }
+
+    void setValue(deadline value) {
+        this->value = value;
+    }
+private:
+    deadline value;
 //    void handle_timer(const boost_code& ec, handler handle) const;
 //
 //    asio::timer timer_;

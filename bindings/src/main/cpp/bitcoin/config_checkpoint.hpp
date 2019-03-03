@@ -27,7 +27,7 @@
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/config/checkpoint.hpp>
 #include <config_checkpoint_list.hpp>
-#include <bitcoin/math_hash_digest.hpp>
+#include <math_hash_digest.hpp>
 
 namespace libbitcoin {
 //namespace config {
@@ -67,7 +67,7 @@ public:
      * @param[in]  height  The height of checkpoint.
      * @param[in]  checks  The set of checkpoints.
      */
-    static bool validate(const libbitcoin::api::math_hash_digest& hash, size_t height,
+    static bool validate(const math_hash_digest& hash, size_t height,
         const config_checkpoint_list& checks);
 
     /**
@@ -100,13 +100,13 @@ public:
      * @param[in]  hash    The block hash for the checkpoint.
      * @param[in]  height  The height of the hash.
      */
-    config_checkpoint(const libbitcoin::api::math_hash_digest& hash, size_t height);
+    config_checkpoint(const math_hash_digest& hash, size_t height);
 
     /**
      * Getter.
      * @return The block hash of the checkpoint.
      */
-    const libbitcoin::api::math_hash_digest& hash() const;
+    const math_hash_digest& hash() const;
 
     /**
      * Getter.

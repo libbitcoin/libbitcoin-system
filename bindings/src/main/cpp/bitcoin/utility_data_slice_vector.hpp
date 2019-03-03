@@ -14,45 +14,53 @@ typedef size_t size_type;
 class utility_data_slice_vector {
 
 public:
-  utility_data_slice_vector() : vector_(new std::vector<utility_data_slice>){
-  }
-    
-/*  utility_data_slice_vector(std::vector<utility_data_slice>value, unsigned int n) {
-    p = value;
-    size = n;
-  }
+	utility_data_slice_vector() :
+			value(new std::vector<utility_data_slice>) {
+	}
 
-  void set(std::vector<utility_data_slice>value, unsigned int n) {
-    if (p) delete [] p;
-    size = n;
-    p = new utility_data_slice[size];
-    for (int i=0; i<size; i++) {
-      p[i] = value[i];
-    }
-  }
-*/
-  void set(size_type i, utility_data_slice value) {
-      vector_[i] = value;
-  }
+	/*  utility_data_slice_vector(std::vector<utility_data_slice>value, unsigned int n) {
+	 p = value;
+	 size = n;
+	 }
 
-  const std::vector<utility_data_slice>& cast() const {
-    return vector_;
-  }
+	 void set(std::vector<utility_data_slice>value, unsigned int n) {
+	 if (p) delete [] p;
+	 size = n;
+	 p = new utility_data_slice[size];
+	 for (int i=0; i<size; i++) {
+	 p[i] = value[i];
+	 }
+	 }
+	 */
+	void set(size_type i, utility_data_slice value) {
+		this->value[i] = value;
+	}
 
-  utility_data_slice get(size_type i) {
-    return vector_[i];
-  }
+	const std::vector<utility_data_slice>& cast() const {
+		return value;
+	}
 
-  size_t getSize() {
-    return vector_.size();
-  }
+	utility_data_slice get(size_type i) {
+		return value[i];
+	}
 
-  ~utility_data_slice_vector() {
-	vector_.clear();
-  }
+	size_t getSize() {
+		return value.size();
+	}
 
+	~utility_data_slice_vector() {
+		value.clear();
+	}
+
+	std::vector<utility_data_slice> getValue() {
+		return value;
+	}
+
+	void setValue(std::vector<utility_data_slice> value) {
+		this->value = value;
+	}
 private:
-  std::vector<utility_data_slice> vector_;
+	std::vector<utility_data_slice> value;
 };
 
 } // namespace api

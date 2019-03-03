@@ -16,26 +16,31 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_ENABLE_SHARED_FROM_BASE_HPP
-#define LIBBITCOIN_ENABLE_SHARED_FROM_BASE_HPP
+#ifndef LIBBITCOIN__ENABLE_SHARED_FROM_BASE_HPP
+#define LIBBITCOIN__ENABLE_SHARED_FROM_BASE_HPP
 
 #include <memory>
 
 namespace libbitcoin {
+namespace api {
 
 /// Because enable_shared_from_this doesn't support inheritance.
 template <class Base>
-class enable_shared_from_base
-  : public std::enable_shared_from_this<Base>
+class utility_enable_shared_from_base
 {
-protected:
-    template <class Derived>
-    std::shared_ptr<Derived> shared_from_base()
-    {
-        return std::static_pointer_cast<Derived>(this->shared_from_this());
+public:
+	std::enable_shared_from_this<Base> getValue() {
+        return value;
     }
+
+    void setValue(std::enable_shared_from_this<Base> value) {
+        this->value = value;
+    }
+private:
+    std::enable_shared_from_this<Base> value;
 };
 
+} // namespace api
 } // namespace libbitcoin
 
 #endif

@@ -25,7 +25,7 @@ namespace libbitcoin {
 namespace api {
 
 template <typename Type>
-class utility_atomic : public libbitcoin::atomic
+class utility_atomic
 {
 public:
 
@@ -36,47 +36,58 @@ public:
 
     /// Create an atomically-accessible copied instance of the type.
     utility_atomic(const Type& instance)
-      : instance_(instance)
+      : value(instance)
     {
     }
 
     /// Create an atomically-accessible moved instance of the type.
     utility_atomic(Type&& instance)
-      : instance_(std::forward<Type>(instance))
+      : value(std::forward<Type>(instance))
     {
     }
 
     Type load() const
     {
+    	value.load();
         // Critical Section
         ///////////////////////////////////////////////////////////////////////
-        shared_lock lock(mutex_);
-
-        return instance_;
+//        shared_lock lock(mutex_);
+//
+//        return instance_;
         ///////////////////////////////////////////////////////////////////////
     }
 
     void store(const Type& instance)
     {
+    	value.store(instance);
         // Critical Section
         ///////////////////////////////////////////////////////////////////////
-        unique_lock lock(mutex_);
-
-        instance_ = instance;
+//        unique_lock lock(mutex_);
+//
+//        instance_ = instance;
         ///////////////////////////////////////////////////////////////////////
     }
 
     void store(Type&& instance)
     {
+    	value.store(instance);
         // Critical Section
         ///////////////////////////////////////////////////////////////////////
-        unique_lock lock(mutex_);
-
-        instance_ = std::forward<Type>(instance);
+//        unique_lock lock(mutex_);
+//
+//        instance_ = std::forward<Type>(instance);
         ///////////////////////////////////////////////////////////////////////
     }
 
-//private:
+    libbitcoin::atomic getValue() {
+        return value;
+    }
+
+    void setValue(libbitcoin::atomic value) {
+        this->value = value;
+    }
+private:
+    libbitcoin::atomic value;
 //    typedef typename std::decay<Type>::type decay_type;
 //
 //    decay_type instance_;

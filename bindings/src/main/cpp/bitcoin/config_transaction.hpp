@@ -22,19 +22,19 @@
 #include <iostream>
 #include <string>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
-#include <bitcoin/chain_transaction.hpp>
+#include <chain_transaction.hpp>
 #include <bitcoin/bitcoin/config/transaction.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
-namespace config {
+//namespace config {
 namespace api {
 
 /**
  * Serialization helper to convert between serialized and deserialized satoshi
  * transaction.
  */
-class BC_API config_transaction : public config::transaction
+class BC_API config_transaction
 {
 public:
 
@@ -53,7 +53,7 @@ public:
      * Initialization constructor.
      * @param[in]  value  The value to initialize with.
      */
-    config_transaction(const chain::api::chain_transaction& value);
+    config_transaction(const chain_transaction& value);
 
     /**
      * Copy constructor.
@@ -72,7 +72,7 @@ public:
      * @return  This object's value cast to internal type.
      */
 //    operator const chain::transaction&() const;
-    const chain::transaction& cast() const;
+    const chain::transaction& to_chain_transaction() const;
 
     /**
      * Overload stream in. Throws if input is invalid.
@@ -90,6 +90,15 @@ public:
      */
 //    friend std::ostream& operator<<(std::ostream& output, const transaction& argument);
 
+    config::transaction getValue() {
+		return value;
+	}
+
+	void setValue(config::transaction value) {
+		this->value = value;
+	}
+private:
+	config::transaction value;
 //private:
 //
 //    /**
@@ -99,7 +108,7 @@ public:
 };
 
 } // namespace api
-} // namespace config
+//} // namespace config
 } // namespace libbitcoin
 
 #endif

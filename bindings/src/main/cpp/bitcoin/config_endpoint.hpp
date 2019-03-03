@@ -32,14 +32,14 @@
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 
 namespace libbitcoin {
-namespace config {
+//namespace config {
 namespace api {
 
 /**
  * Serialization helper for a network endpoint in URI format.
  * This is a container for a {scheme, host, port} tuple.
  */
-class BC_API config_endpoint : public config::endpoint
+class BC_API config_endpoint
 {
 public:
     /**
@@ -166,6 +166,16 @@ public:
      */
 //    friend std::ostream& operator<<(std::ostream& output, const endpoint& argument);
 
+	config::endpoint getValue() {
+		return value;
+	}
+
+	void setValue(config::endpoint value) {
+		this->value = value;
+	}
+private:
+	config::endpoint value;
+
 //private:
 //    std::string scheme_;
 //    std::string host_;
@@ -173,7 +183,7 @@ public:
 };
 
 } // namespace api
-} // namespace config
+//} // namespace config
 } // namespace libbitcoin
 
 #endif

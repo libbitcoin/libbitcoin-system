@@ -16,40 +16,41 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CONFIG_PRINTER_HPP
-#define LIBBITCOIN_CONFIG_PRINTER_HPP
+#ifndef LIBBITCOIN__CONFIG_PRINTER_HPP
+#define LIBBITCOIN__CONFIG_PRINTER_HPP
 
-#include <iostream>
-#include <string>
-#include <vector>
-#include <boost/format.hpp>
-#include <boost/program_options.hpp>
+//#include <iostream>
+//#include <string>
+//#include <vector>
+//#include <boost/format.hpp>
+//#include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/config/printer.hpp>
-#include <bitcoin/config_parameter.hpp>
-#include <bitcoin/config_argument_list.hpp>
-#include <bitcoin/config_parameter_list.hpp>
-#include <bitcoin/config_options_description.hpp>
-#include <bitcoin/config_positional_options_description.hpp>
-#include <bitcoin/string_vector.hpp>
+#include <config_parameter.hpp>
+#include <config_argument_list.hpp>
+#include <config_parameter_list.hpp>
+#include <config_options_description.hpp>
+#include <config_positional_options_description.hpp>
+#include <string_vector.hpp>
+//#include <p_std_string.hpp>
 
 /* NOTE: don't declare 'using namespace foo' in headers. */
 
 namespace libbitcoin {
-namespace config {
+//namespace config {
 namespace api {
 
 /**
  * Shorthand for property declarations in printer class.
  */
-#define BC_PROPERTY_GET_REF(type, name) \
-    public: virtual type& get_##name() { return name##_; } \
-    private: type name##_
+//#define BC_PROPERTY_GET_REF(type, name) \
+//    public: virtual type& get_##name() { return name##_; } \
+//    private: type name##_
 
 /**
  * Class for managing the serialization of command line options and arguments.
  */
-class BC_API config_printer : public printer
+class BC_API config_printer
 {
 public:
 
@@ -64,7 +65,7 @@ public:
      * @param[in]  application  This application (e.g. 'bitcoin_server').
      * @param[in]  description  This application description (e.g. 'Server').
      */
-    config_printer(const libbitcoin::api::config_options_description& settings,
+    config_printer(const config_options_description& settings,
         const std::string& application, const std::string& description="");
 
     /**
@@ -75,10 +76,12 @@ public:
      * @param[in]  description  This command description (e.g. 'Convert BTC').
      * @param[in]  command      This command (e.g. 'btc').
      */
-    config_printer(const libbitcoin::api::config_options_description& options,
-        const libbitcoin::api::config_positional_options_description& arguments,
+    config_printer(const config_options_description& options,
+        const config_positional_options_description& arguments,
         const std::string& application, const std::string& description="",
         const std::string& command="");
+
+    virtual ~config_printer();
 
     /**
      * Convert a paragraph of text into a column.
@@ -88,7 +91,7 @@ public:
      * @param[in]  paragraph  The paragraph to columnize.
      * @return                The column, as a list of fragments.
      */
-    virtual bc::api::string_vector columnize(const std::string& paragraph,
+    virtual string_vector columnize(const std::string& paragraph,
         size_t width);
 
     /**
@@ -159,23 +162,35 @@ public:
     /**
      * Virtual property declarations, passed on construct.
      */
-    BC_PROPERTY_GET_REF(libbitcoin::api::config_options_description, options);
-    BC_PROPERTY_GET_REF(libbitcoin::api::config_positional_options_description, arguments);
-    BC_PROPERTY_GET_REF(std::string, application);
-    BC_PROPERTY_GET_REF(std::string, description);
-    BC_PROPERTY_GET_REF(std::string, command);
+//    BC_PROPERTY_GET_REF(config_options_description, options);
+//    BC_PROPERTY_GET_REF(config_positional_options_description, arguments);
+//    BC_PROPERTY_GET_REF(p_std_string, application);
+//    BC_PROPERTY_GET_REF(p_std_string, description);
+//    BC_PROPERTY_GET_REF(p_std_string, command);
 
     /**
      * Virtual property declarations, generated from metadata.
      */
-    BC_PROPERTY_GET_REF(libbitcoin::config::api::config_argument_list, argument_names);
-    BC_PROPERTY_GET_REF(libbitcoin::config::api::config_parameter_list, parameters);
+//    BC_PROPERTY_GET_REF(config_argument_list, argument_names);
+//    BC_PROPERTY_GET_REF(config_parameter_list, parameters);
+
+public:
+    config::printer getValue() {
+        return value;
+    }
+
+    void setValue(config::printer value) {
+        this->value = value;
+    }
+private:
+    config::printer value;
+
 };
 
 #undef PROPERTY_GET_REF
 
 } // namespace api
-} // namespace config
+//} // namespace config
 } // namespace libbitcoin
 
 #endif

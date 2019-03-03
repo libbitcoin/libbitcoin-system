@@ -17,13 +17,17 @@
 %import "bitcoin/bitcoin/utility/binary.hpp"
 //%import <stddef.h>
 %ignore cast() const;
+%ignore setValue(std::size_t value);
 %include "bitcoin/utility_size_type.hpp"
+%ignore setValue(libbitcoin::data_slice value);
 %include "bitcoin/utility_data_slice.hpp"
 %include "bitcoin/utility_binary.hpp"
 
 //%ignore build_chunk(loaf slices, size_t extra_reserve=0);
 %include "bitcoin/utility_data_chunk.hpp"
+%ignore setValue(std::vector<utility_data_slice> value);
 %include "bitcoin/utility_data_slice_vector.hpp"
+%ignore setValue(one_byte value);
 %include "bitcoin/utility_one_byte.hpp"
 %include "bitcoin/utility_data.hpp"
 

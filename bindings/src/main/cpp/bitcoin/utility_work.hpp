@@ -19,10 +19,10 @@
 #ifndef LIBBITCOIN__UTILITY_WORK_HPP
 #define LIBBITCOIN__UTILITY_WORK_HPP
 
-#include <functional>
-#include <string>
-#include <memory>
-#include <utility>
+//#include <functional>
+//#include <string>
+//#include <memory>
+//#include <utility>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/work.hpp>
@@ -30,7 +30,7 @@
 //#include <bitcoin/bitcoin/utility/monitor.hpp>
 //#include <bitcoin/bitcoin/utility/noncopyable.hpp>
 //#include <bitcoin/bitcoin/utility/sequencer.hpp>
-//#include <bitcoin/bitcoin/utility/threadpool.hpp>
+#include <utility_threadpool.hpp>
 
 namespace libbitcoin {
 namespace api {
@@ -49,13 +49,13 @@ namespace api {
 
 /// This  class is thread safe.
 /// boost asio class wrapper to enable work heap management.
-class BC_API utility_work : public libbitcoin::work
+class BC_API utility_work
 {
 public:
-    typedef std::shared_ptr<work> ptr;
+//    typedef std::shared_ptr<work> ptr;
 
     /// Create an instance.
-    utility_work(threadpool& pool, const std::string& name);
+    utility_work(utility_threadpool& pool, const std::string& name);
 
     /// Local execution for any operation, equivalent to std::bind.
     template <typename Handler, typename... Args>
@@ -69,7 +69,7 @@ public:
     void concurrent(Handler&& handler, Args&&... args)
     {
         // Service post ensures the job does not execute in the current thread.
-    	work::concurrent(handler, args);
+    	value.concurrent(handler, args);
         ////service_.post(inject(BIND_HANDLER(handler, args), CONCURRENT,
         ////    concurrent_));
     }
@@ -80,7 +80,7 @@ public:
     {
         // Use a strand to prevent concurrency and post vs. dispatch to ensure
         // that the job is not executed in the current thread.
-        work::ordered(handler, args);
+        value.ordered(handler, args);
         ////strand_.post(inject(BIND_HANDLER(handler, args), ORDERED, ordered_));
     }
 
@@ -90,7 +90,7 @@ public:
     {
         // Use a strand wrapper to prevent concurrency and a service post
         // to deny ordering while ensuring execution on another thread.
-        work::unordered(handler, args);
+        value.unordered(handler, args);
         ////service_.post(strand_.wrap(inject(BIND_HANDLER(handler, args),
         ////    UNORDERED, unordered_)));
     }
@@ -102,7 +102,7 @@ public:
     {
         // Use a sequence to track the asynchronous operation to completion,
         // ensuring each asynchronous op executes independently and in order.
-        work::lock(BIND_HANDLER(handler, args));
+        value.lock(BIND_HANDLER(handler, args));
         ////sequence_.lock(inject(BIND_HANDLER(handler, args), SEQUENCE,
         ////    sequence_));
     }
@@ -110,7 +110,7 @@ public:
     /// Complete sequential execution.
     void unlock()
     {
-        work::unlock();
+        value.unlock();
     }
 
     ////size_t ordered_backlog();
@@ -119,7 +119,15 @@ public:
     ////size_t sequential_backlog();
     ////size_t combined_backlog();
 
-//private:
+	work getValue() {
+		return value;
+	}
+
+	void setValue(work value) {
+		this->value = value;
+	}
+private:
+	work value;
 //    ////template <typename Handler>
 //    ////auto inject(Handler&& handler, const std::string& context,
 //    ////    monitor::count_ptr counter) -> std::function<void()>
