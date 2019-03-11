@@ -37,22 +37,22 @@ namespace api {
 
 // Define a byte array of a specified length.
 template <size_t Size>
-using byte_array = std::array<uint8_t, Size>;
+using utility_byte_array = std::array<uint8_t, Size>;
 
 template <size_t Size>
-struct byte_array_parts
+struct utility_byte_array_parts
 {
     std::array<uint8_t, Size> left;
     std::array<uint8_t, Size> right;
 };
 
 // Define arbitrary byte storage types.
-typedef std::array<uint8_t, 1> one_byte;
-typedef array_slice<uint8_t> data_slice;
-typedef std::vector<uint8_t> data_chunk;
-typedef std::queue<data_chunk> data_queue;
-typedef std::vector<data_chunk> data_stack;
-typedef utility_data_slice_vector loaf;
+//typedef std::array<uint8_t, 1> one_byte;
+//typedef array_slice<uint8_t> data_slice;
+//typedef std::vector<uint8_t> data_chunk;
+//typedef std::queue<data_chunk> data_queue;
+//typedef std::vector<data_chunk> data_stack;
+//typedef utility_data_slice_vector loaf;
 
 /**
  * Create a single byte array with an initial value.

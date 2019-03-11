@@ -6,7 +6,17 @@
 namespace libbitcoin {
 namespace api {
 
-class math_key_rings : public key_rings {
+class math_key_rings {
+public:
+	key_rings getValue() {
+        return value;
+    }
+
+    void setValue(key_rings value) {
+        this->value = value;
+    }
+private:
+    key_rings value;
 };
 
 } // namespace api

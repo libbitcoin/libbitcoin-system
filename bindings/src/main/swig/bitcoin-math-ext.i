@@ -8,12 +8,18 @@
 
 %import <bitcoin/bitcoin/math/hash.hpp>
 %import <bitcoin/bitcoin/math/elliptic_curve.hpp>
+%ignore setValue(der_signature value);
 %include <bitcoin/math_der_signature.hpp>
+%ignore setValue(ec_compressed value);
 %include <bitcoin/math_ec_compressed.hpp>
+%ignore setValue(ec_uncompressed value);
 %include <bitcoin/math_ec_uncompressed.hpp>
 %include <bitcoin/math_point_list.hpp>
+%ignore setValue(ec_secret value);
 %include <bitcoin/math_ec_secret.hpp>
+%ignore setValue(ec_signature value);
 %include <bitcoin/math_ec_signature.hpp>
+%ignore setValue(hash_digest value);
 %include <bitcoin/math_hash_digest.hpp>
 %include <bitcoin/math_recoverable_signature.hpp>
 %include "bitcoin/math_elliptic_curve.hpp"

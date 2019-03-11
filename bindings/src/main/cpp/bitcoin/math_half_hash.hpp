@@ -8,7 +8,7 @@
 namespace libbitcoin {
 namespace api {
 
-class math_half_hash : public half_hash {
+class math_half_hash {
 
 //public:
 //  math_half_hash() : hash(new half_hash) {
@@ -54,6 +54,16 @@ class math_half_hash : public half_hash {
 //
 //private:
 //  half_hash hash;
+public:
+	half_hash getValue() {
+        return value;
+    }
+
+    void setValue(half_hash value) {
+        this->value = value;
+    }
+private:
+    half_hash value;
 };
 
 } // namespace api

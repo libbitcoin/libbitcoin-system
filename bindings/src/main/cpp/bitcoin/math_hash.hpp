@@ -33,6 +33,7 @@
 #include <math_quarter_hash.hpp>
 #include <math_long_hash.hpp>
 #include <math_mini_hash.hpp>
+#include <math_uint256_t.hpp>
 #include <utility_data_slice.hpp>
 #include <utility_data_chunk.hpp>
 
@@ -115,9 +116,9 @@ BC_CONSTEXPR math_mini_hash null_mini_hash
     }
 };
 
-inline uint256_t to_uint256(const math_hash_digest& hash)
+inline math_uint256_t to_uint256(const math_hash_digest& hash)
 {
-    return from_little_endian<uint256_t>(hash.begin(), hash.end());
+    return new math_uint256_t(from_little_endian<uint256_t>(hash.value.begin(), hash.value.end()));
 }
 
 /// Generate a scrypt hash to fill a byte array.
@@ -173,30 +174,30 @@ BC_API math_long_hash pkcs5_pbkdf2_hmac_sha512(utility_data_slice passphrase,
 // Extend std and boost namespaces with our hash wrappers.
 //-----------------------------------------------------------------------------
 
-namespace std
-{
-template <size_t Size>
-struct hash<std::array<uint8_t, Size>>
-{
-    size_t operator()(const std::array<uint8_t, Size>& hash) const
-    {
-        return boost::hash_range(hash.begin(), hash.end());
-    }
-};
-} // namespace std
+//namespace std
+//{
+//template <size_t Size>
+//struct hash<std::array<uint8_t, Size>>
+//{
+//    size_t operator()(const std::array<uint8_t, Size>& hash) const
+//    {
+//        return boost::hash_range(hash.begin(), hash.end());
+//    }
+//};
+//} // namespace std
 
-namespace boost
-{
-template <size_t Size>
-struct hash<std::array<uint8_t, Size>>
-{
-    size_t operator()(const std::array<uint8_t, Size>& hash) const
-    {
-        return boost::hash_range(hash.begin(), hash.end());
-    }
-};
-} // namespace boost
+//namespace boost
+//{
+//template <size_t Size>
+//struct hash<std::array<uint8_t, Size>>
+//{
+//    size_t operator()(const std::array<uint8_t, Size>& hash) const
+//    {
+//        return boost::hash_range(hash.begin(), hash.end());
+//    }
+//};
+//} // namespace boost
 
-#include <bitcoin/bitcoin/impl/math/hash.ipp>
+//#include <bitcoin/bitcoin/impl/math/hash.ipp>
 
 #endif

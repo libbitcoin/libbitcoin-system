@@ -6,7 +6,17 @@
 namespace libbitcoin {
 namespace api {
 
-class math_aes_secret : public libbitcoin::aes_secret {
+class math_aes_secret {
+public:
+	aes_secret getValue() {
+        return value;
+    }
+
+    void setValue(aes_secret value) {
+        this->value = value;
+    }
+private:
+    aes_secret value;
 };
 
 } // namespace api

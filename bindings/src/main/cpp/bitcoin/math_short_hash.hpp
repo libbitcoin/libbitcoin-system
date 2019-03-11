@@ -11,49 +11,58 @@ namespace api {
 class math_short_hash {
 
 public:
-  math_short_hash() : hash(new short_hash) {
-  }
-    
-/*  math_short_hash(unsigned char *value, unsigned int n) {
-    p = value;
-    size = n;
-  }
+	math_short_hash() :
+			value(new short_hash) {
+	}
 
-  void set(unsigned char *value, unsigned int n) {
-    if (p) delete [] p;
-    size = n;
-    p = new unsigned char[size];
-    for (int i=0; i<size; i++) {
-      p[i] = value[i];
-    }
-  }
-*/
-  void set(size_t i, uint8_t value) {
-    if (i<short_hash_size) {
-      hash[i] = value;
-    } else {
-    	std::cerr << "SEVERE: index " << i << " is out of range [0;" << short_hash_size << ")\n";
-    }
-  }
+	/*  math_short_hash(unsigned char *value, unsigned int n) {
+	 p = value;
+	 size = n;
+	 }
 
-  short_hash cast() {
-    return hash;
-  }
+	 void set(unsigned char *value, unsigned int n) {
+	 if (p) delete [] p;
+	 size = n;
+	 p = new unsigned char[size];
+	 for (int i=0; i<size; i++) {
+	 p[i] = value[i];
+	 }
+	 }
+	 */
+	void set(size_t i, uint8_t value) {
+		if (i < short_hash_size) {
+			value[i] = value;
+		} else {
+			std::cerr << "SEVERE: index " << i << " is out of range [0;"
+					<< short_hash_size << ")\n";
+		}
+	}
 
-  uint8_t get(size_t i) {
-    return hash[i];
-  }
+	short_hash cast() {
+		return value;
+	}
 
-  size_t getSize() {
-    return short_hash_size;
-  }
+	uint8_t get(size_t i) {
+		return value[i];
+	}
 
-  ~math_short_hash() {
-	  delete hash;
-  }
+	size_t getSize() {
+		return short_hash_size;
+	}
 
+	~math_short_hash() {
+		delete value;
+	}
+
+	short_hash getValue() {
+		return value;
+	}
+
+	void setValue(short_hash value) {
+		this->value = value;
+	}
 private:
-  short_hash hash;
+	short_hash value;
 };
 
 } // namespace api

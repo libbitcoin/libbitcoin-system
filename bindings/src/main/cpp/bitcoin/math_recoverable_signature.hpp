@@ -6,7 +6,17 @@
 namespace libbitcoin {
 namespace api {
 
-class math_recoverable_signature : public recoverable_signature {
+class math_recoverable_signature {
+public:
+	recoverable_signature getValue() {
+        return value;
+    }
+
+    void setValue(recoverable_signature value) {
+        this->value = value;
+    }
+private:
+    recoverable_signature value;
 };
 
 } // namespace api

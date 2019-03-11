@@ -6,7 +6,17 @@
 namespace libbitcoin {
 namespace api {
 
-class math_secret_list : public std::vector<ec_secret> {
+class math_secret_list {
+public:
+	secret_list getValue() {
+        return value;
+    }
+
+    void setValue(secret_list value) {
+        this->value = value;
+    }
+private:
+    secret_list value;
 };
 
 } // namespace api

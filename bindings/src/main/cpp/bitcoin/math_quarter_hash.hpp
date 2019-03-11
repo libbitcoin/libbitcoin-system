@@ -11,7 +11,7 @@ namespace api {
 class math_quarter_hash {
 
 public:
-  math_quarter_hash() : hash(new quarter_hash) {
+  math_quarter_hash() : value(new quarter_hash) {
   }
     
 /*  math_quarter_hash(unsigned char *value, unsigned int n) {
@@ -30,18 +30,18 @@ public:
 */
   void set(size_t i, uint8_t value) {
     if (i<quarter_hash_size) {
-      hash[i] = value;
+      value[i] = value;
     } else {
     	std::cerr << "SEVERE: index " << i << " is out of range [0;" << quarter_hash_size << ")\n";
     }
   }
 
   quarter_hash cast() {
-    return hash;
+    return value;
   }
 
   uint8_t get(size_t i) {
-    return hash[i];
+    return value[i];
   }
 
   size_t getSize() {
@@ -49,11 +49,19 @@ public:
   }
 
   ~math_quarter_hash() {
-	  delete hash;
+	  delete value;
   }
 
+public:
+  quarter_hash getValue() {
+        return value;
+    }
+
+    void setValue(quarter_hash value) {
+        this->value = value;
+    }
 private:
-  quarter_hash hash;
+    quarter_hash value;
 };
 
 } // namespace api

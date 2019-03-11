@@ -6,7 +6,17 @@
 namespace libbitcoin {
 namespace api {
 
-class math_proof_list : public libbitcoin::ring_signature::proof_list {
+class math_proof_list {
+public:
+	ring_signature::proof_list getValue() {
+        return value;
+    }
+
+    void setValue(ring_signature::proof_list value) {
+        this->value = value;
+    }
+private:
+    ring_signature::proof_list value;
 };
 
 } // namespace api

@@ -27,27 +27,30 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/chain_transaction.hpp>
+#include <chain_transaction.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
-#include <bitcoin/chain_transaction.hpp>
+#include <chain_transaction.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <bitcoin/math_hash_digest.hpp>
-#include <bitcoin/math_ec_signature.hpp>
-#include <bitcoin/math_ec_secret.hpp>
-#include <bitcoin/math_endorsement.hpp>
-#include <bitcoin/math_point_list.hpp>
-#include <bitcoin/math_short_hash.hpp>
-#include <bitcoin/machine_operation_iterator.hpp>
+#include <math_hash_digest.hpp>
+#include <math_ec_signature.hpp>
+#include <math_ec_secret.hpp>
+#include <math_endorsement.hpp>
+#include <math_point_list.hpp>
+#include <math_short_hash.hpp>
+#include <machine_operation_iterator.hpp>
 #include <bitcoin/bitcoin/machine/rule_fork.hpp>
 #include <bitcoin/bitcoin/machine/script_pattern.hpp>
 #include <bitcoin/bitcoin/machine/script_version.hpp>
-#include <bitcoin/utility_data_chunk.hpp>
-#include <bitcoin/utility_data_slice.hpp>
-#include <bitcoin/utility_data_stack.hpp>
+#include <utility_data_chunk.hpp>
+#include <utility_data_slice.hpp>
+#include <utility_data_stack.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
-#include <bitcoin/chain_script_operation_list.hpp>
+#include <chain_script_operation_list.hpp>
+#include <machine_operation.hpp>
+#include <machine_script_version.hpp>
+#include <machine_rule_fork.hpp>
 
 namespace libbitcoin {
 namespace api {
@@ -55,7 +58,7 @@ namespace api {
 //class chain_transaction;
 //class witness;
 
-class BC_API chain_script : public libbitcoin::chain::script
+class BC_API chain_script
 {
 public:
 //    typedef machine::operation operation;
@@ -127,11 +130,11 @@ public:
     void clear();
     bool empty() const;
     size_t size() const;
-    const operation& front() const;
-    const operation& back() const;
+    const machine_operation& front() const;
+    const machine_operation& back() const;
     machine_operation_iterator begin() const;
     machine_operation_iterator end() const;
-    const operation& getElement(size_t index) const;
+    const machine_operation& getElement(size_t index) const;
 //    const operation& operator[](size_t index) const;
 
     // Properties (size, accessors, cache).
@@ -146,19 +149,19 @@ public:
 	static math_hash_digest generate_signature_hash(
 			const chain_transaction& tx, uint32_t input_index,
 			const chain_script& script_code, uint8_t sighash_type,
-			script_version version = script_version::unversioned,
+			machine_script_version version = machine_script_version::unversioned,
 			uint64_t value = max_uint64);
 
 	static bool check_signature(const math_ec_signature& signature,
 			uint8_t sighash_type, const utility_data_chunk& public_key,
 			const chain_script& script_code, const chain_transaction& tx,
-			uint32_t input_index, script_version version =
-					script_version::unversioned, uint64_t value = max_uint64);
+			uint32_t input_index, machine_script_version version =
+					machine_script_version::unversioned, uint64_t value = max_uint64);
 
     static bool create_endorsement(math_endorsement& out, const math_ec_secret& secret,
-        const script& prevout_script, const chain_transaction& tx,
+        const chain_script& prevout_script, const chain_transaction& tx,
         uint32_t input_index, uint8_t sighash_type,
-        script_version version=script_version::unversioned,
+        machine_script_version version=machine_script_version::unversioned,
         uint64_t value=max_uint64);
 
     // Utilities (static).
@@ -170,7 +173,7 @@ public:
     static math_hash_digest to_sequences(const chain_transaction& tx);
 
     /// Determine if the fork is enabled in the active forks set.
-    static bool is_enabled(uint32_t active_forks, rule_fork fork)
+    static bool is_enabled(uint32_t active_forks, machine_rule_fork fork)
     {
         return (fork & active_forks) != 0;
     }
@@ -212,10 +215,10 @@ public:
 
     /// Common pattern detection.
     utility_data_chunk witness_program() const;
-    script_version version() const;
-    script_pattern pattern() const;
-    script_pattern input_pattern() const;
-    script_pattern output_pattern() const;
+    machine_script_version version() const;
+    machine_script_pattern pattern() const;
+    machine_script_pattern input_pattern() const;
+    machine_script_pattern output_pattern() const;
 
     /// Consensus computations.
     size_t sigops(bool accurate) const;
@@ -232,6 +235,14 @@ public:
     static error_code verify(const chain_transaction& tx, uint32_t input_index,
         uint32_t forks, const chain_script& prevout_script, uint64_t value);
 
+public:
+    chain::script getValue() {
+        return value;
+    }
+
+    void setValue(chain::script value) {
+        this->value = value;
+    }
 //protected:
 //    // So that input and output may call reset from their own.
 //    friend class input;
@@ -241,7 +252,8 @@ public:
 //    bool is_pay_to_witness(uint32_t forks) const;
 //    bool is_pay_to_script_hash(uint32_t forks) const;
 //
-//private:
+private:
+    chain::script value;
 //    static size_t serialized_size(const chain_script_operation_list& ops);
 //    static data_chunk operations_to_data(const chain_script_operation_list& ops);
 //    static hash_digest generate_unversioned_signature_hash(

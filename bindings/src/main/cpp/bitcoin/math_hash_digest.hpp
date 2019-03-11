@@ -47,8 +47,8 @@ public:
 		return value[i];
 	}
 
-	hash_digest getValue(size_t i) {
-		return value[i];
+	hash_digest getValue() {
+		return value;
 	}
 
 	void setValue(hash_digest value) {

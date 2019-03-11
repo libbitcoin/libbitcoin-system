@@ -20,6 +20,7 @@
 #define LIBBBITCOIN__MATH_UINT256_T_HPP
 
 #include <bitcoin/bitcoin/math/hash.hpp>
+//#include <boost/multiprecision/cpp_int.hpp>
 
 namespace libbitcoin {
 namespace api {

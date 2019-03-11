@@ -16,17 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_STEALTH_HPP
-#define LIBBITCOIN_STEALTH_HPP
+#ifndef LIBBITCOIN__MATH_STEALTH_HPP
+#define LIBBITCOIN__MATH_STEALTH_HPP
 
 #include <cstdint>
 //#include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/math_elliptic_curve.hpp>
-#include <bitcoin/utility_binary.hpp>
-#include <bitcoin/chain_script.hpp>
-#include <bitcoin/p_uint32_t.hpp>
+#include <math_elliptic_curve.hpp>
+#include <utility_binary.hpp>
+#include <chain_script.hpp>
+#include <p_uint32_t.hpp>
 
 namespace libbitcoin {
 namespace api {

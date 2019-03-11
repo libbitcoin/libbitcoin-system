@@ -6,7 +6,17 @@
 namespace libbitcoin {
 namespace api {
 
-class math_ec_scalar : public libbitcoin::ec_scalar {
+class math_ec_scalar {
+public:
+	ec_scalar getValue() {
+        return value;
+    }
+
+    void setValue(ec_scalar value) {
+        this->value = value;
+    }
+private:
+    ec_scalar value;
 };
 
 } // namespace api

@@ -8,7 +8,7 @@
 namespace libbitcoin {
 namespace api {
 
-class math_mini_hash_list : public mini_hash_list {
+class math_mini_hash_list {
 
 //public:
 //  math_mini_hash() : hash(new mini_hash) {
@@ -54,6 +54,16 @@ class math_mini_hash_list : public mini_hash_list {
 //
 //private:
 //  mini_hash hash;
+public:
+	mini_hash_list getValue() {
+        return value;
+    }
+
+    void setValue(mini_hash_list value) {
+        this->value = value;
+    }
+private:
+    mini_hash_list value;
 };
 
 } // namespace api

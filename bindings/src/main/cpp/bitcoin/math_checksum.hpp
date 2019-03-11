@@ -19,12 +19,13 @@
 #ifndef LIBBITCOIN__MATH_CHECKSUM_HPP
 #define LIBBITCOIN__MATH_CHECKSUM_HPP
 
-#include <algorithm>
-#include <cstddef>
-#include <cstdint>
-#include <initializer_list>
-#include <bitcoin/bitcoin/compat.hpp>
+//#include <algorithm>
+//#include <cstddef>
+//#include <cstdint>
+//#include <initializer_list>
+//#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/utility_data.hpp>
 #include <bitcoin/utility_data_chunk.hpp>
 #include <bitcoin/utility_data_slice.hpp>
 
@@ -41,8 +42,8 @@ static BC_CONSTEXPR size_t checksum_size = sizeof(uint32_t);
  * checksum.
  */
 template <size_t Size>
-bool build_checked_array(byte_array<Size>& out,
-    const std::initializer_list<data_slice>& slices);
+bool build_checked_array(utility_byte_array<Size>& out,
+    const std::initializer_list<utility_data_slice>& slices);
 
 /**
  * Appends a four-byte checksum into the end of an array.
