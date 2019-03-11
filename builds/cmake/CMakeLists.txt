@@ -608,7 +608,6 @@ endif()
 #------------------------------------------------------------------------------
 if (with-tests)
     add_executable( libbitcoin-system-test
-        "../../test/.gitignore"
         "../../test/main.cpp"
         "../../test/settings.cpp"
         "../../test/chain/block.cpp"
