@@ -23,8 +23,8 @@
 #include <string>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/p_uint64_t.hpp>
-#include <bitcoin/p_std_string.hpp>
+#include <p_uint64_t.hpp>
+#include <p_std_string.hpp>
 
 namespace libbitcoin {
 namespace api {

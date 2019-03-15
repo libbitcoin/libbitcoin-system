@@ -21,9 +21,8 @@
 
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
-//#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/utility_data_slice.hpp>
-#include <bitcoin/utility_data_chunk.hpp>
+#include <utility_data_slice.hpp>
+#include <utility_data_chunk.hpp>
 
 namespace libbitcoin {
 namespace api {
@@ -62,7 +61,7 @@ BC_API bool decode_base58(utility_data_chunk& out, const std::string& in);
 } // namespace api
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/formats/base_58.ipp>
+//#include <bitcoin/bitcoin/impl/formats/base_58.ipp>
 
 #endif
 

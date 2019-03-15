@@ -22,9 +22,9 @@
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/utility_data_slice.hpp>
-#include <bitcoin/math_hash_digest.hpp>
-#include <bitcoin/utility_data_chunk.hpp>
+#include <utility_data_slice.hpp>
+#include <math_hash_digest.hpp>
+#include <utility_data_chunk.hpp>
 
 namespace libbitcoin {
 namespace api {
@@ -85,6 +85,6 @@ BC_API math_hash_digest hash_literal(const std::string& string);
 } // namespace api
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/formats/base_16.ipp>
+//#include <bitcoin/bitcoin/impl/formats/base_16.ipp>
 
 #endif

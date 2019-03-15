@@ -21,9 +21,9 @@
 
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/utility_data_slice.hpp>
-#include <bitcoin/utility_data_chunk.hpp>
-#include <bitcoin/p_std_string.hpp>
+#include <utility_data_slice.hpp>
+#include <utility_data_chunk.hpp>
+#include <p_std_string.hpp>
 
 namespace libbitcoin {
 namespace api {
