@@ -20,8 +20,6 @@
 #define LIBBITCOIN__CHAIN_SCRIPT_OPERATION_LIST_HPP
 
 #include <bitcoin/bitcoin/chain/script.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-//#include <bitcoin/bitcoin/error.hpp>
 
 namespace libbitcoin {
 //namespace chain {

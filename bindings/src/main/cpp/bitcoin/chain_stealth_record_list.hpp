@@ -20,42 +20,47 @@
 #define LIBBITCOIN__CHAIN_STEALTH_RECORD_LIST_HPP
 
 #include <bitcoin/bitcoin/chain/stealth_record.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-//#include <bitcoin/bitcoin/error.hpp>
 
 namespace libbitcoin {
 //namespace chain {
 namespace api {
 
-class BC_API chain_stealth_record_list : public libbitcoin::chain::stealth_record::list
+class BC_API chain_stealth_record_list
 {
-//public:
-//
-//  chain_stealth_record_list()
-//    : stealth_records(new stealth_record::list())
-//  {
-//  }
-//
-//  stealth_record get(size_t i) {
-//    return chain_stealth_record_list::stealth_records[i];
-//  }
-//
-//  void set(size_t i, stealth_record *t) {
-//    chain_stealth_record_list::stealth_records[i] = *t;
-//  }
-//
-//  stealth_record::list cast() {
-//    return stealth_records;
-//  }
-//
-//  size_t getSize() {
-//    return stealth_records.size();
-//  }
-//
-//private:
-//
-//  stealth_record::list stealth_records;
-//
+public:
+
+  chain_stealth_record_list()
+    : value(new chain::stealth_record::list())
+  {
+  }
+
+  chain::stealth_record get(size_t i) {
+    return chain_stealth_record_list::value[i];
+  }
+
+  void set(size_t i, chain::stealth_record *t) {
+    chain_stealth_record_list::value[i] = *t;
+  }
+
+  chain::stealth_record::list cast() {
+    return value;
+  }
+
+  size_t getSize() {
+    return value.size();
+  }
+
+  chain::stealth_record::list getValue() {
+        return value;
+    }
+
+    void setValue(chain::stealth_record::list value) {
+        this->value = value;
+    }
+private:
+
+  chain::stealth_record::list value;
+
 };
 
 } // namespace api

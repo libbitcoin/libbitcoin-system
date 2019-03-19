@@ -22,16 +22,19 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
-#include <deque>
-#include <bitcoin/config_checkpoint.hpp>
-#include <bitcoin/config_checkpoint_list.hpp>
+//#include <deque>
+//#include <bitcoin/bitcoin/constants.hpp>
+//#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/config/settings.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/math_hash_digest.hpp>
-#include <bitcoin/bitcoin/machine/opcode.hpp>
-#include <bitcoin/bitcoin/machine/rule_fork.hpp>
+//#include <bitcoin/bitcoin/machine/opcode.hpp>
+//#include <bitcoin/bitcoin/machine/rule_fork.hpp>
 #include <bitcoin/bitcoin/chain/chain_state.hpp>
+#include <config_checkpoint.hpp>
+#include <config_checkpoint_list.hpp>
+#include <math_hash_digest.hpp>
+#include <chain_chain_state_map.hpp>
+#include <chain_chain_state_data.hpp>
+#include <chain_header.hpp>
 
 namespace libbitcoin {
 
@@ -41,7 +44,9 @@ namespace libbitcoin {
 
 namespace api {
 
-class BC_API chain_chain_state : public libbitcoin::chain::chain_state
+class chain_block;
+
+class BC_API chain_chain_state
 {
 public:
 //    typedef std::deque<uint32_t> bitss;
@@ -129,10 +134,10 @@ public:
 //    };
 
     /// Checkpoints must be ordered by height with greatest at back.
-    static map get_map(size_t height, const libbitcoin::config::api::config_checkpoint_list& checkpoints,
+    static chain_chain_state_map get_map(size_t height, const config_checkpoint_list& checkpoints,
         uint32_t forks, size_t retargeting_interval, size_t activation_sample,
-        const libbitcoin::config::api::config_checkpoint& bip9_bit0_active_checkpoint,
-        const libbitcoin::config::api::config_checkpoint& bip9_bit1_active_checkpoint);
+        const config_checkpoint& bip9_bit0_active_checkpoint,
+        const config_checkpoint& bip9_bit1_active_checkpoint);
 
     static uint32_t signal_version(uint32_t forks, const libbitcoin::config::settings& settings);
 
@@ -147,20 +152,20 @@ public:
     chain_chain_state(const chain_chain_state& top, const libbitcoin::config::settings& settings);
 
     /// Create block state from tx pool chain state of same height.
-    chain_chain_state(const chain_chain_state& pool, const chain::block& block,
+    chain_chain_state(const chain_chain_state& pool, const chain_block& block,
         const libbitcoin::config::settings& settings);
 
     /// Create header state from header pool chain state of parent block.
-    chain_chain_state(const chain_chain_state& parent, const chain::header& header,
+    chain_chain_state(const chain_chain_state& parent, const chain_header& header,
         const libbitcoin::config::settings& settings);
 
     /// Checkpoints must be ordered by height with greatest at back.
     /// Forks and checkpoints must match those provided for map creation.
-    chain_chain_state(data&& values, const libbitcoin::config::api::config_checkpoint_list& checkpoints, uint32_t forks,
+    chain_chain_state(chain_chain_state_data&& values, const config_checkpoint_list& checkpoints, uint32_t forks,
         uint32_t stale_seconds, const libbitcoin::config::settings& settings);
 
     /// Properties.
-    const libbitcoin::api::math_hash_digest& hash() const;
+    const math_hash_digest& hash() const;
     size_t height() const;
     uint32_t enabled_forks() const;
     uint32_t minimum_block_version() const;
@@ -178,12 +183,12 @@ public:
     bool is_enabled(machine::rule_fork fork) const;
 
     /// Determine if this block hash fails a checkpoint at this height.
-    bool is_checkpoint_conflict(const libbitcoin::api::math_hash_digest& hash) const;
+    bool is_checkpoint_conflict(const math_hash_digest& hash) const;
 
     /// This block height is less than or equal to that of the top checkpoint.
     bool is_under_checkpoint() const;
 
-protected:
+//protected:
 //    struct activations
 //    {
 //        // The forks that are active at this height.
@@ -196,11 +201,21 @@ protected:
 //        uint32_t maximum_transaction_version;
 //    };
 
-    static activations activation(const data& values, uint32_t forks,
-        const libbitcoin::config::settings& settings);
-    static uint32_t median_time_past(const data& values, uint32_t forks);
-    static uint32_t work_required(const data& values, uint32_t forks,
-        const libbitcoin::config::settings& settings);
+//    static activations activation(const data& values, uint32_t forks,
+//        const libbitcoin::config::settings& settings);
+//    static uint32_t median_time_past(const data& values, uint32_t forks);
+//    static uint32_t work_required(const data& values, uint32_t forks,
+//        const libbitcoin::config::settings& settings);
+
+    chain::chain_state getValue() {
+        return value;
+    }
+
+    void setValue(chain::chain_state value) {
+        this->value = value;
+    }
+private:
+    chain::chain_state value;
 
 //private:
 //    static size_t bits_count(size_t height, uint32_t forks,

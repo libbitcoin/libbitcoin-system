@@ -19,19 +19,19 @@
 #ifndef LIBBITCOIN__CHAIN_WITNESS_HPP
 #define LIBBITCOIN__CHAIN_WITNESS_HPP
 
-#include <cstddef>
-#include <istream>
-#include <string>
-#include <bitcoin/chain_script.hpp>
+//#include <cstddef>
+//#include <istream>
+//#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/witness.hpp>
-#include <bitcoin/machine_operation_iterator.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/utility_data_stack.hpp>
-#include <bitcoin/utility_data_chunk.hpp>
-#include <bitcoin/bitcoin/utility/reader.hpp>
-#include <bitcoin/bitcoin/utility/thread.hpp>
-#include <bitcoin/bitcoin/utility/writer.hpp>
+#include <chain_script.hpp>
+#include <machine_operation_iterator.hpp>
+//#include <bitcoin/bitcoin/utility/data.hpp>
+#include <utility_data_stack.hpp>
+#include <utility_data_chunk.hpp>
+//#include <bitcoin/bitcoin/utility/reader.hpp>
+//#include <bitcoin/bitcoin/utility/thread.hpp>
+//#include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
 //namespace chain {
@@ -131,7 +131,6 @@ public:
     error_code verify(const chain_transaction& tx, uint32_t input_index, uint32_t forks,
         const chain_script& program_script, uint64_t value) const;
 
-public:
 	chain::witness getValue() {
 		return value;
 	}

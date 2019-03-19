@@ -16,12 +16,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CHAIN_TRANSACTION_LIST_HPP
-#define LIBBITCOIN_CHAIN_TRANSACTION_LIST_HPP
+#ifndef LIBBITCOIN__CHAIN_TRANSACTION_LIST_HPP
+#define LIBBITCOIN__CHAIN_TRANSACTION_LIST_HPP
 
 #include <bitcoin/bitcoin/chain/transaction.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-//#include <bitcoin/bitcoin/error.hpp>
 
 namespace libbitcoin {
 //namespace chain {

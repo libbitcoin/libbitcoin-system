@@ -19,27 +19,28 @@
 #ifndef LIBBITCOIN__CHAIN_STEALTH_RECORD_HPP
 #define LIBBITCOIN__CHAIN_STEALTH_RECORD_HPP
 
-#include <cstddef>
-#include <cstdint>
-#include <istream>
-#include <vector>
+//#include <cstddef>
+//#include <cstdint>
+//#include <istream>
+//#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/stealth_record.hpp>
-#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <bitcoin/math_ec_compressed.hpp>
-#include <bitcoin/math_hash_digest.hpp>
-#include <bitcoin/math_short_hash.hpp>
-#include <bitcoin/bitcoin/utility/binary.hpp>
-#include <bitcoin/utility_data_chunk.hpp>
+//#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
+#include <math_ec_compressed.hpp>
+#include <math_hash_digest.hpp>
+#include <math_short_hash.hpp>
+//#include <bitcoin/bitcoin/utility/binary.hpp>
+#include <utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
-namespace chain {
+//namespace chain {
+namespace api {
     
 /// This class models blockchain storage of a stealth record.
 /// The store excludes assumed sign byte (0x02) of the ephemeral public key.
-class BC_API chain_stealth_record : public stealth_record
+class BC_API chain_stealth_record
 {
 public:
 //    typedef std::vector<stealth_record> list;
@@ -57,35 +58,35 @@ public:
 //        hash_digest&& ephemeral_public_key, short_hash&& public_key_hash,
 //        hash_digest&& transaction_hash);
     chain_stealth_record(size_t height, uint32_t prefix,
-        const libbitcoin::api::math_hash_digest& ephemeral_public_key,
-        const libbitcoin::api::math_short_hash& public_key_hash, const libbitcoin::api::math_hash_digest& transaction_hash);
+        const math_hash_digest& ephemeral_public_key,
+        const math_short_hash& public_key_hash, const math_hash_digest& transaction_hash);
 
 //    stealth_record(size_t height, uint32_t prefix,
-//        const libbitcoin::api::math_ec_compressed& ephemeral_public_key,
-//        short_hash&& public_key_hash, libbitcoin::api::math_hash_digest&& transaction_hash);
+//        const math_ec_compressed& ephemeral_public_key,
+//        short_hash&& public_key_hash, math_hash_digest&& transaction_hash);
     chain_stealth_record(size_t height, uint32_t prefix,
-        const libbitcoin::api::math_ec_compressed& ephemeral_public_key,
-        const libbitcoin::api::math_short_hash& public_key_hash, const libbitcoin::api::math_hash_digest& transaction_hash);
+        const math_ec_compressed& ephemeral_public_key,
+        const math_short_hash& public_key_hash, const math_hash_digest& transaction_hash);
 
     // Operators.
     //-------------------------------------------------------------------------
 
 //    stealth_record& operator=(stealth_record&& other);
-    stealth_record& assign(const stealth_record& other);
+    chain_stealth_record& assign(const chain_stealth_record& other);
 //    stealth_record& operator=(const stealth_record& other);
 
-    bool eq(const stealth_record& other) const;
+    bool eq(const chain_stealth_record& other) const;
 //    bool operator==(const stealth_record& other) const;
 //    bool operator!=(const stealth_record& other) const;
 
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static stealth_record factory(const libbitcoin::api::utility_data_chunk& data, bool wire=true);
+    static chain_stealth_record factory(const utility_data_chunk& data, bool wire=true);
 //    static stealth_record factory(std::istream& stream, bool wire=true);
 //    static stealth_record factory(reader& source, bool wire=true);
 
-    bool from_data(const libbitcoin::api::utility_data_chunk& data, bool wire=true);
+    bool from_data(const utility_data_chunk& data, bool wire=true);
 //    bool from_data(std::istream& stream, bool wire=true);
 //    bool from_data(reader& source, bool wire=true);
 
@@ -97,7 +98,7 @@ public:
     // Serialization.
     //-------------------------------------------------------------------------
 
-    libbitcoin::api::utility_data_chunk to_data(bool wire=true) const;
+    utility_data_chunk to_data(bool wire=true) const;
 //    void to_data(std::ostream& stream, bool wire=true) const;
 //    void to_data(writer& sink, bool wire=true) const;
 
@@ -109,15 +110,23 @@ public:
 
     size_t height() const;
     uint32_t prefix() const;
-    libbitcoin::api::math_ec_compressed ephemeral_public_key() const;
-    const libbitcoin::api::math_hash_digest& unsigned_ephemeral_public_key() const;
-    const libbitcoin::api::math_short_hash& public_key_hash() const;
-    const libbitcoin::api::math_hash_digest& transaction_hash() const;
+    math_ec_compressed ephemeral_public_key() const;
+    const math_hash_digest& unsigned_ephemeral_public_key() const;
+    const math_short_hash& public_key_hash() const;
+    const math_hash_digest& transaction_hash() const;
 
-protected:
-    void reset();
+    chain::stealth_record getValue() {
+        return value;
+    }
 
-//private:
+    void setValue(chain::stealth_record value) {
+        this->value = value;
+    }
+//protected:
+//    void reset();
+
+private:
+    chain::stealth_record value;
 //    uint32_t height_;
 //    uint32_t prefix_;
 //    hash_digest unsigned_ephemeral_;

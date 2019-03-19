@@ -20,49 +20,54 @@
 #define LIBBITCOIN__CHAIN_POINT_VALUE_LIST_HPP
 
 #include <bitcoin/bitcoin/chain/point_value.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-//#include <bitcoin/bitcoin/error.hpp>
 
 namespace libbitcoin {
-namespace chain {
+//namespace chain {
 namespace api {
 
-class BC_API chain_point_value_list
-{
+class BC_API chain_point_value_list {
 public:
 
-  chain_point_value_list()
-    : point_values(new point_value::list())
-  {
-  }
+	chain_point_value_list() :
+			value(new chain::point_value::list()) {
+	}
 
-  chain_point_value_list(chain_point_value_list points) : point_values(points.point_values) {
-  }
+	chain_point_value_list(chain_point_value_list points) :
+			value(points.value) {
+	}
 
-  point_value get(size_t i) {
-    return chain_point_value_list::point_values[i];
-  }
+	chain::point_value get(size_t i) {
+		return chain_point_value_list::value[i];
+	}
 
-  void set(size_t i, point_value *t) {
-    chain_point_value_list::point_values[i] = *t;
-  }
+	void set(size_t i, chain::point_value *t) {
+		chain_point_value_list::value[i] = *t;
+	}
 
-  chain_point_value_list getpoint_values() {
-    return new chain_point_value_list(point_values);
-  }
+	chain_point_value_list getpoint_values() {
+		return new chain_point_value_list(value);
+	}
 
-  size_t getSize() {
-    return point_values.size();
-  }
+	size_t getSize() {
+		return value.size();
+	}
+
+	chain::point_value::list getValue() {
+		return value;
+	}
+
+	void setValue(chain::point_value::list value) {
+		this->value = value;
+	}
 
 private:
 
-  point_value::list point_values;
+	chain::point_value::list value;
 
 };
 
 } // namespace api
-} // namespace chain
+//} // namespace chain
 } // namespace libbitcoin
 
 #endif

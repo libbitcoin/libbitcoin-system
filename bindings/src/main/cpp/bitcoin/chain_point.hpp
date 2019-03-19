@@ -6,7 +6,17 @@
 namespace libbitcoin {
 namespace api {
 
-class chain_point : public libbitcoin::chain::point {
+class chain_point {
+public:
+	chain::point getValue() {
+        return value;
+    }
+
+    void setValue(chain::point value) {
+        this->value = value;
+    }
+private:
+    chain::point value;
 };
 
 } // namespace api

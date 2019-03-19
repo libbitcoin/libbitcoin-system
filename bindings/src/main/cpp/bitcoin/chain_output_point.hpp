@@ -26,12 +26,14 @@
 #include <bitcoin/bitcoin/chain/output_point.hpp>
 //#include <bitcoin/chain_output_point.hpp>
 //#include <bitcoin/chain_output.hpp>
-#include <bitcoin/chain_point.hpp>
+#include <chain_point.hpp>
 //#include <bitcoin/chain_script.hpp>
 
 namespace libbitcoin {
 //namespace chain {
 namespace api {
+
+class chain_point;
 
 class BC_API chain_output_point
 {

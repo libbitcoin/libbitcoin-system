@@ -20,41 +20,41 @@
 #define LIBBITCOIN__CHAIN_PAYMENT_RECORD_LIST_HPP
 
 #include <bitcoin/bitcoin/chain/payment_record.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-//#include <bitcoin/bitcoin/error.hpp>
 
 namespace libbitcoin {
 //namespace chain {
 namespace api {
 
-class BC_API chain_payment_record_list : public chain::payment_record::list
-{
-//public:
-//
-//  chain_payment_record_list()
-//    : payment_records(new payment_record::list())
-//  {
-//  }
-//
-//  payment_record get(size_t i) {
-//    return chain_payment_record_list::payment_records[i];
-//  }
-//
-//  void set(size_t i, payment_record *t) {
-//    chain_payment_record_list::payment_records[i] = *t;
-//  }
-//
-//  payment_record::list getpayment_records() {
-//    return payment_records;
-//  }
-//
-//  size_t getSize() {
-//    return payment_records.size();
-//  }
-//
-//private:
-//
-//  point_value::list point_values;
+class BC_API chain_payment_record_list {
+public:
+
+	chain_payment_record_list() :
+			value(new chain::payment_record::list()) {
+	}
+
+	chain::payment_record get(size_t i) {
+		return chain_payment_record_list::value[i];
+	}
+
+	void set(size_t i, chain::payment_record *t) {
+		chain_payment_record_list::value[i] = *t;
+	}
+
+	size_t getSize() {
+		return value.size();
+	}
+
+	chain::payment_record::list getValue() {
+		return value;
+	}
+
+	void setValue(chain::payment_record::list value) {
+		this->value = value;
+	}
+
+private:
+
+	chain::payment_record::list value;
 
 };
 

@@ -19,30 +19,30 @@
 #ifndef LIBBITCOIN__CHAIN_TRANSACTION_HPP
 #define LIBBITCOIN__CHAIN_TRANSACTION_HPP
 
-#include <cstddef>
-#include <cstdint>
-#include <istream>
-#include <memory>
-#include <string>
-#include <vector>
-#include <boost/optional.hpp>
-#include <bitcoin/chain_chain_state.hpp>
-#include <bitcoin/chain_input.hpp>
-#include <bitcoin/chain_input_list.hpp>
-#include <bitcoin/chain_output.hpp>
-#include <bitcoin/chain_output_list.hpp>
-#include <bitcoin/chain_point.hpp>
-#include <bitcoin/chain_point_list.hpp>
+//#include <cstddef>
+//#include <cstdint>
+//#include <istream>
+//#include <memory>
+//#include <string>
+//#include <vector>
+//#include <boost/optional.hpp>
+#include <chain_chain_state.hpp>
+#include <chain_input.hpp>
+#include <chain_input_list.hpp>
+#include <chain_output.hpp>
+#include <chain_output_list.hpp>
+#include <chain_point.hpp>
+#include <chain_point_list.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/error_code.hpp>
-#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <bitcoin/math_hash_digest.hpp>
-#include <bitcoin/math_hash_list.hpp>
-#include <bitcoin/bitcoin/machine/opcode.hpp>
-#include <bitcoin/bitcoin/machine/rule_fork.hpp>
-#include <bitcoin/utility_data_chunk.hpp>
+#include <error_code.hpp>
+//#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
+#include <math_hash_digest.hpp>
+#include <math_hash_list.hpp>
+//#include <bitcoin/bitcoin/machine/opcode.hpp>
+//#include <bitcoin/bitcoin/machine/rule_fork.hpp>
+#include <utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
-#include <bitcoin/bitcoin/utility/thread.hpp>
+//#include <bitcoin/bitcoin/utility/thread.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
@@ -50,7 +50,7 @@ namespace api {
 
 using namespace libbitcoin::chain;
 
-class BC_API chain_transaction : public transaction
+class BC_API chain_transaction
 {
 public:
 //    typedef std::vector<transaction> list;
@@ -97,7 +97,7 @@ public:
 
 //    transaction(uint32_t version, uint32_t locktime, input::list&& inputs,
 //        output::list&& outputs);
-    chain_transaction(uint32_t version, uint32_t locktime, const libbitcoin::api::chain_input_list& inputs,
+    chain_transaction(uint32_t version, uint32_t locktime, const chain_input_list& inputs,
         const chain_output_list& outputs);
 
     // Operators.
@@ -114,28 +114,28 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static transaction factory(const libbitcoin::api::error_code& data, bool wire=true, bool witness=false);
+    static transaction factory(const error_code& data, bool wire=true, bool witness=false);
 //    static transaction factory(std::istream& stream, bool wire=true, bool witness=false);
 //    static transaction factory(reader& source, bool wire=true, bool witness=false);
 
     // Non-wire store deserializations to preserve hash.
-//    static transaction factory(reader& source, libbitcoin::api::math_hash_digest&& hash,bool wire=true, bool witness=false);
-//    static transaction factory(reader& source, const libbitcoin::api::math_hash_digest& hash,bool wire=true, bool witness=false);
+//    static transaction factory(reader& source, math_hash_digest&& hash,bool wire=true, bool witness=false);
+//    static transaction factory(reader& source, const math_hash_digest& hash,bool wire=true, bool witness=false);
 
-    bool from_data(const libbitcoin::api::error_code& data, bool wire=true, bool witness=false);
+    bool from_data(const error_code& data, bool wire=true, bool witness=false);
 //    bool from_data(std::istream& stream, bool wire=true, bool witness=false);
 //    bool from_data(reader& source, bool wire=true, bool witness=false);
 
     // Non-wire store deserializations to preserve hash.
-//    bool from_data(reader& source, libbitcoin::api::math_hash_digest&& hash, bool wire=true, bool witness=false);
-//    bool from_data(reader& source, const libbitcoin::api::math_hash_digest& hash, bool wire=true, bool witness=false);
+//    bool from_data(reader& source, math_hash_digest&& hash, bool wire=true, bool witness=false);
+//    bool from_data(reader& source, const math_hash_digest& hash, bool wire=true, bool witness=false);
 
     bool is_valid() const;
 
     // Serialization.
     //-------------------------------------------------------------------------
 
-    libbitcoin::api::error_code to_data(bool wire=true, bool witness=false) const;
+    error_code to_data(bool wire=true, bool witness=false) const;
 //    void to_data(std::ostream& stream, bool wire=true, bool witness=false) const;
 //    void to_data(writer& sink, bool wire=true, bool witness=false) const;
 
@@ -165,10 +165,10 @@ public:
     void set_outputs(const chain_output_list& value);
 //    void set_outputs(output::list&& value);
 
-    libbitcoin::api::math_hash_digest outputs_hash() const;
-    libbitcoin::api::math_hash_digest inpoints_hash() const;
-    libbitcoin::api::math_hash_digest sequences_hash() const;
-    libbitcoin::api::math_hash_digest hash(bool witness=false) const;
+    math_hash_digest outputs_hash() const;
+    math_hash_digest inpoints_hash() const;
+    math_hash_digest sequences_hash() const;
+    math_hash_digest hash(bool witness=false) const;
 
     // Utilities.
     //-------------------------------------------------------------------------
@@ -182,7 +182,7 @@ public:
     uint64_t fees() const;
     chain_point_list previous_outputs() const;
     chain_point_list missing_previous_outputs() const;
-    libbitcoin::math::api::math_hash_list missing_previous_transactions() const;
+    math_hash_list missing_previous_transactions() const;
     uint64_t total_input_value() const;
     uint64_t total_output_value() const;
     size_t signature_operations() const;
@@ -203,23 +203,31 @@ public:
     bool is_locktime_conflict() const;
     bool is_segregated() const;
 
-    libbitcoin::api::error_code check(uint64_t max_money, bool transaction_pool=true) const;
-    libbitcoin::api::error_code accept(bool transaction_pool=true) const;
-    libbitcoin::api::error_code accept(const chain_chain_state& state, bool transaction_pool=true) const;
-    libbitcoin::api::error_code connect() const;
-    libbitcoin::api::error_code connect(const chain_chain_state& state) const;
-    libbitcoin::api::error_code connect_input(const chain_chain_state& state, size_t input_index) const;
+    error_code check(uint64_t max_money, bool transaction_pool=true) const;
+    error_code accept(bool transaction_pool=true) const;
+    error_code accept(const chain_chain_state& state, bool transaction_pool=true) const;
+    error_code connect() const;
+    error_code connect(const chain_chain_state& state) const;
+    error_code connect_input(const chain_chain_state& state, size_t input_index) const;
 
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
-    mutable validation metadata;
+//    mutable validation metadata;
 
-protected:
-    void reset();
-    void invalidate_cache() const;
-    bool all_inputs_final() const;
+    transaction getValue() {
+        return value;
+    }
 
-//private:
-//    typedef std::shared_ptr<libbitcoin::api::math_hash_digest> hash_ptr;
+    void setValue(transaction value) {
+        this->value = value;
+    }
+//protected:
+//    void reset();
+//    void invalidate_cache() const;
+//    bool all_inputs_final() const;
+
+private:
+    transaction value;
+//    typedef std::shared_ptr<math_hash_digest> hash_ptr;
 //    typedef boost::optional<uint64_t> optional_value;
 //
 //    hash_ptr hash_cache() const;

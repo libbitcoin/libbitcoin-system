@@ -16,35 +16,32 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN__CHAIN_POINTS_VALUE_HPP
-#define LIBBITCOIN__CHAIN_POINTS_VALUE_HPP
+#ifndef LIBBITCOIN__CHAIN_CHAIN_STATE_MAP_HPP
+#define LIBBITCOIN__CHAIN_CHAIN_STATE_MAP_HPP
 
-//#include <numeric>
-//#include <cstdint>
-#include <bitcoin/bitcoin/chain/points_value.hpp>
-//#include <chain_point_value_list.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-//#include <bitcoin/bitcoin/math/limits.hpp>
+#include <bitcoin/bitcoin/chain/chain_state.hpp>
 
 namespace libbitcoin {
+
 //namespace chain {
+
 namespace api {
 
-class BC_API chain_points_value
+struct chain_chain_state_map
 {
 public:
-	chain::points_value getValue() {
-        return value;
-    }
+	chain::chain_state::map getValue() {
+		return value;
+	}
 
-    void setValue(chain::points_value value) {
-        this->value = value;
-    }
+	void setValue(chain::chain_state::map value) {
+		this->value = value;
+	}
 private:
-    chain::points_value value;
+	chain::chain_state::map value;
 };
 
-} // namespace api
+} // api
 //} // namespace chain
 } // namespace libbitcoin
 

@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN__CHAIN_BLOCK_INDEXES_HPP
 #define LIBBITCOIN__CHAIN_BLOCK_INDEXES_HPP
 
-#include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/chain/block.hpp>
 //#include <bitcoin/bitcoin/error.hpp>
 
 namespace libbitcoin {

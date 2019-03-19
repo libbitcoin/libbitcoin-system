@@ -42,7 +42,7 @@ public:
 //    point_value(point_value&& other);
     chain_point_value(const chain_point_value& other);
 //    point_value(point&& instance, uint64_t value);
-    chain_point_value(const point& instance, uint64_t value);
+    chain_point_value(const chain_point& instance, uint64_t value);
 
     // Operators.
     //-------------------------------------------------------------------------
@@ -56,15 +56,14 @@ public:
 //    bool operator!=(const point_value& other) const;
 
     // Swap implementation required to properly handle base class.
-    friend void libbitcoin::chain::swap(chain_point_value& left, chain_point_value& right);
+//    friend void libbitcoin::chain::swap(chain_point_value& left, chain_point_value& right);
 
     // Properties (accessors).
     //-------------------------------------------------------------------------
 
-    uint64_t value() const;
-    void set_value(uint64_t value);
+//    uint64_t value() const;
+//    void set_value(uint64_t value);
 
-public:
     chain::point_value getValue() {
         return value;
     }

@@ -12,6 +12,8 @@ using libbitcoin::asio::time_point;
 
 %import <bitcoin/bitcoin/define.hpp>
 
+%ignore getValue();
+
 %import "bitcoin-math-ext.i"
 //%import "bitcoin-math-ext-typemap.i"
 %import "bitcoin-config-ext.i"
@@ -64,6 +66,7 @@ using libbitcoin::asio::time_point;
 %include "bitcoin/chain_stealth_record.hpp"
 //%ignore cast();
 %import "bitcoin/bitcoin/chain/stealth_record.hpp"
+%ignore  setValue(chain::stealth_record::list value);
 %include "bitcoin/chain_stealth_record_list.hpp"
 
 //%ignore libbitcoin::chain::witness::witness(witness&& other);
@@ -84,6 +87,7 @@ using libbitcoin::asio::time_point;
 %include "bitcoin/chain_witness.hpp"
 
 %include "bitcoin/chain_payment_record.hpp"
+%ignore setValue(chain::payment_record::list value);
 %include "bitcoin/chain_payment_record_list.hpp"
 
 //%pragma(java) jniclasscode=%{

@@ -20,46 +20,45 @@
 #define LIBBITCOIN__CHAIN_POINT_INDEXES_HPP
 
 #include <bitcoin/bitcoin/chain/point.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-//#include <bitcoin/bitcoin/error.hpp>
 
 namespace libbitcoin {
-namespace chain {
+//namespace chain {
 namespace api {
 
-class BC_API chain_point_indexes
-{
+class BC_API chain_point_indexes {
 public:
 
-  chain_point_indexes()
-    : indexes(new point::indexes())
-  {
-  }
+	chain_point_indexes() :
+			value(new chain::point::indexes()) {
+	}
 
-  size_t get(size_t i) {
-    return chain_point_indexes::indexes[i];
-  }
+	size_t get(size_t i) {
+		return chain_point_indexes::value[i];
+	}
 
-  void set(size_t i, point *t) {
-    chain_point_indexes::indexes[i] = *t;
-  }
+	void set(size_t i, chain::point *t) {
+		chain_point_indexes::value[i] = *t;
+	}
 
-  point::indexes cast() {
-    return indexes;
-  }
+	chain::point::indexes cast() {
+		return value;
+	}
 
-  size_t getSize() {
-    return indexes.size();
-  }
+	chain::point::indexes getValue() {
+		return value;
+	}
 
+	void setValue(chain::point::indexes value) {
+		this->value = value;
+	}
 private:
 
-  point::indexes indexes;
+	chain::point::indexes value;
 
 };
 
 } // namespace api
-} // namespace chain
+//} // namespace chain
 } // namespace libbitcoin
 
 #endif

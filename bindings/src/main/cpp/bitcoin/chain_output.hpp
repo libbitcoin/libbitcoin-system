@@ -38,7 +38,7 @@ namespace libbitcoin {
 //namespace chain {
 namespace api {
 
-class BC_API chain_output : public chain::output
+class BC_API chain_output
 {
 public:
 //    typedef std::vector<output> list;
@@ -73,7 +73,7 @@ public:
     chain_output();
 
 //    output(output&& other);
-    chain_output(const output& other);
+    chain_output(const chain_output& other);
 
 //    output(uint64_t value, chain::script&& script);
     chain_output(uint64_t value, const chain_script& script);
@@ -82,21 +82,21 @@ public:
     //-------------------------------------------------------------------------
 
 //    output& operator=(output&& other);
-    output& assign(const output& other);
+    chain_output& assign(const chain_output& other);
 //    output& operator=(const output& other);
 
-    bool eq(const output& other) const;
+    bool eq(const chain_output& other) const;
 //    bool operator==(const output& other) const;
 //    bool operator!=(const output& other) const;
 
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static output factory(const utility_data_chunk& data, bool wire=true);
+    static chain_output factory(const utility_data_chunk& data, bool wire=true);
 //    static output factory(std::istream& stream, bool wire=true);
 //    static output factory(reader& source, bool wire=true);
 
-    bool from_data(const libbitcoin::api::utility_data_chunk& data, bool wire=true);
+    bool from_data(const utility_data_chunk& data, bool wire=true);
 //    bool from_data(std::istream& stream, bool wire=true);
 //    bool from_data(reader& source, bool wire=true, bool unused=false);
 
@@ -105,7 +105,7 @@ public:
     // Serialization.
     //-------------------------------------------------------------------------
 
-    libbitcoin::api::utility_data_chunk to_data(bool wire=true) const;
+    utility_data_chunk to_data(bool wire=true) const;
 //    void to_data(std::ostream& stream, bool wire=true) const;
 //    void to_data(writer& sink, bool wire=true, bool unused=false) const;
 
@@ -138,14 +138,22 @@ public:
     bool is_dust(uint64_t minimum_output_value) const;
     bool extract_committed_hash(math_hash_digest& out) const;
 
+    chain::output getValue() {
+        return value_;
+    }
+
+    void setValue(chain::output value) {
+        this->value_ = value;
+    }
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
-    mutable validation metadata;
+//    mutable validation metadata;
 
-protected:
-    void reset();
-    void invalidate_cache() const;
+//protected:
+//    void reset();
+//    void invalidate_cache() const;
 
-//private:
+private:
+    chain::output value_;
 //    typedef std::shared_ptr<wallet::payment_address::list> addresses_ptr;
 //
 //    addresses_ptr addresses_cache() const;

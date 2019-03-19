@@ -19,24 +19,24 @@
 #ifndef LIBBITCOIN__CHAIN_PAYMENT_RECORD_HPP
 #define LIBBITCOIN__CHAIN_PAYMENT_RECORD_HPP
 
-#include <cstddef>
-#include <cstdint>
-#include <istream>
-#include <vector>
-#include <bitcoin/bitcoin/constants.hpp>
+//#include <cstddef>
+//#include <cstdint>
+//#include <istream>
+//#include <vector>
+//#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/payment_record.hpp>
-#include <bitcoin/math_hash_digest.hpp>
-#include <bitcoin/utility_data_chunk.hpp>
+#include <math_hash_digest.hpp>
+#include <utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
-namespace chain {
+//namespace chain {
 namespace api {
 
 /// This class models blockchain storage of a payment record.
-class BC_API chain_payment_record : public payment_record
+class BC_API chain_payment_record
 {
 public:
 //    typedef std::vector<payment_record> list;
@@ -47,7 +47,7 @@ public:
     chain_payment_record();
 
 //    chain_payment_record(chain::payment_record&& other);
-    chain_payment_record(const chain::payment_record& other);
+    chain_payment_record(const chain_payment_record& other);
 
     chain_payment_record(uint64_t link, uint32_t index, uint64_t data, bool output);
 
@@ -55,21 +55,21 @@ public:
     //-------------------------------------------------------------------------
 
 //    payment_record& operator=(payment_record&& other);
-    payment_record& assing(const payment_record& other);
+    chain_payment_record& assing(const chain_payment_record& other);
 //    payment_record& operator=(const payment_record& other);
 
-    bool eq(const payment_record& other) const;
+    bool eq(const chain_payment_record& other) const;
 //    bool operator==(const payment_record& other) const;
 //    bool operator!=(const payment_record& other) const;
 
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static payment_record factory(const libbitcoin::api::utility_data_chunk& data, bool wire=true);
+    static chain_payment_record factory(const utility_data_chunk& data, bool wire=true);
 //    static payment_record factory(std::istream& stream, bool wire=true);
 //    static payment_record factory(reader& source, bool wire=true);
 
-    bool from_data(const libbitcoin::api::utility_data_chunk& data, bool wire=true);
+    bool from_data(const utility_data_chunk& data, bool wire=true);
 //    bool from_data(std::istream& stream, bool wire=true);
 //    bool from_data(reader& source, bool wire=true);
 
@@ -78,7 +78,7 @@ public:
     // Serialization.
     //-------------------------------------------------------------------------
 
-    libbitcoin::api::utility_data_chunk to_data(bool wire=true) const;
+    utility_data_chunk to_data(bool wire=true) const;
 //    void to_data(std::ostream& stream, bool wire=true) const;
 //    void to_data(writer& sink, bool wire=true) const;
 
@@ -104,10 +104,10 @@ public:
     void set_height(size_t height);
 
     /// The hash of the point.
-    libbitcoin::api::math_hash_digest hash() const;
+    math_hash_digest hash() const;
 
     /// Set the point hash.
-    void set_hash(libbitcoin::api::math_hash_digest&& hash);
+    void set_hash(math_hash_digest&& hash);
 
     /// The index of the point.
     uint32_t index() const;
@@ -115,21 +115,29 @@ public:
     /// Set the point index.
     void set_index(uint32_t value);
 
-protected:
-    void reset();
+    chain::payment_record getValue() {
+        return value;
+    }
 
-//private:
+    void setValue(chain::payment_record value) {
+        this->value = value;
+    }
+//protected:
+//    void reset();
+
+private:
+    chain::payment_record value;
 //    bool valid_;
 //    bool output_;
 //    size_t height_;
-//    libbitcoin::api::math_hash_digest hash_;
+//    math_hash_digest hash_;
 //    uint32_t index_;
 //    uint64_t data_;
 //    uint64_t link_;
 };
 
 } // namespace api
-} // namespace chain
+//} // namespace chain
 } // namespace libbitcoin
 
 #endif

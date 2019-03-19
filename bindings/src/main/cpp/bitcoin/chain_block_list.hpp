@@ -42,7 +42,11 @@ public:
 		chain_block_list::value[i] = *t;
 	}
 
-	chain::block::list getvalue() {
+	void setValue(chain::block t) {
+		this->value = t;
+	}
+
+	chain::block::list getValue() {
 		return value;
 	}
 

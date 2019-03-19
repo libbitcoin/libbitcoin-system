@@ -20,8 +20,6 @@
 #define LIBBITCOIN__CHAIN_POINT_LIST_HPP
 
 #include <bitcoin/bitcoin/chain/point.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-//#include <bitcoin/bitcoin/error.hpp>
 
 namespace libbitcoin {
 //namespace chain {
@@ -44,7 +42,7 @@ public:
     chain_point_list::value[i] = *t;
   }
 
-  chain::point::list getvalue() {
+  chain::point::list getValue() {
     return value;
   }
 

@@ -51,7 +51,6 @@ public:
 //    operator const uint256_t&() const;
     const math_uint256_t& to_uint256_t() const;
 
-public:
     chain::compact getValue() {
         return value;
     }

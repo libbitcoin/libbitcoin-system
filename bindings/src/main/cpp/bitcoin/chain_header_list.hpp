@@ -44,12 +44,16 @@ public:
     chain_header_list::value[i] = *t;
   }
 
-  chain::header::list getvalue() {
-    return value;
-  }
-
   size_t getSize() {
     return value.size();
+  }
+
+  void setValue(chain::header t) {
+    this->value = t;
+  }
+
+  chain::header::list getValue() {
+    return value;
   }
 
 private:

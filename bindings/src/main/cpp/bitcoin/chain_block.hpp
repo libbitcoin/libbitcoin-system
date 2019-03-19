@@ -19,31 +19,31 @@
 #ifndef LIBBITCOIN__CHAIN_BLOCK_HPP
 #define LIBBITCOIN__CHAIN_BLOCK_HPP
 
-#include <cstddef>
-#include <cstdint>
-#include <istream>
-#include <memory>
-#include <string>
-#include <vector>
-#include <boost/optional.hpp>
-#include <chain_block_indexes.hpp>
-#include <chain_chain_state.hpp>
-#include <chain_header.hpp>
-#include <chain_transaction.hpp>
-#include <chain_transaction_list.hpp>
+//#include <cstddef>
+//#include <cstdint>
+//#include <istream>
+//#include <memory>
+//#include <string>
+//#include <vector>
+//#include <boost/optional.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/error_code.hpp>
-#include <bitcoin/bitcoin/config/settings.hpp>
 #include <bitcoin/bitcoin/chain/block.hpp>
-#include <math_hash_digest.hpp>
+#include <chain_block_indexes.hpp>
+//#include <chain_chain_state.hpp>
+#include <chain_header.hpp>
+//#include <chain_transaction.hpp>
+#include <chain_transaction_list.hpp>
+//#include <error_code.hpp>
+//#include <bitcoin/bitcoin/config/settings.hpp>
+//#include <math_hash_digest.hpp>
 #include <math_hash_list.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/utility/asio.hpp>
-#include <utility_data_chunk.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/reader.hpp>
-#include <bitcoin/bitcoin/utility/thread.hpp>
-#include <bitcoin/bitcoin/utility/writer.hpp>
+//#include <bitcoin/bitcoin/math/hash.hpp>
+//#include <bitcoin/bitcoin/utility/asio.hpp>
+//#include <utility_data_chunk.hpp>
+//#include <bitcoin/bitcoin/utility/data.hpp>
+//#include <bitcoin/bitcoin/utility/reader.hpp>
+//#include <bitcoin/bitcoin/utility/thread.hpp>
+//#include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
 
@@ -52,7 +52,7 @@ namespace libbitcoin {
 //namespace chain {
 namespace api {
 
-class BC_API chain_block : public block
+class BC_API chain_block
 {
 public:
 
@@ -82,11 +82,11 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static chain_block factory(const libbitcoin::api::utility_data_chunk& data, bool witness=false);
+    static chain_block factory(const utility_data_chunk& data, bool witness=false);
 //    static block factory(std::istream& stream, bool witness=false);
 //    static block factory(reader& source, bool witness=false);
 
-    bool from_data(const libbitcoin::api::utility_data_chunk& data, bool witness=false);
+    bool from_data(const utility_data_chunk& data, bool witness=false);
 //    bool from_data(std::istream& stream, bool witness=false);
 //    bool from_data(reader& source, bool witness=false);
 
@@ -95,10 +95,10 @@ public:
     // Serialization.
     //-------------------------------------------------------------------------
 
-    libbitcoin::api::utility_data_chunk to_data(bool witness=false) const;
+    utility_data_chunk to_data(bool witness=false) const;
 //    void to_data(std::ostream& stream, bool witness=false) const;
 //    void to_data(writer& sink, bool witness=false) const;
-    libbitcoin::math::api::math_hash_list to_hashes(bool witness=false) const;
+    math_hash_list to_hashes(bool witness=false) const;
 
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------
@@ -113,7 +113,7 @@ public:
     void set_transactions(const chain_transaction_list& value);
 //    void set_transactions(transaction::list&& value);
 
-    libbitcoin::api::math_hash_digest hash() const;
+    math_hash_digest hash() const;
 
     // Utilities.
     //-------------------------------------------------------------------------
@@ -134,7 +134,7 @@ public:
     uint64_t claim() const;
     uint64_t reward(size_t height, uint64_t subsidy_interval,
         uint64_t initial_block_subsidy_satoshi) const;
-    libbitcoin::api::math_hash_digest generate_merkle_root(bool witness=false) const;
+    math_hash_digest generate_merkle_root(bool witness=false) const;
     size_t signature_operations() const;
     size_t signature_operations(bool bip16, bool bip141) const;
     size_t total_non_coinbase_inputs() const;
@@ -153,23 +153,32 @@ public:
     bool is_valid_merkle_root() const;
     bool is_segregated() const;
 
-    libbitcoin::api::error_code check(uint64_t max_money, uint32_t timestamp_limit_seconds,
+    error_code check(uint64_t max_money, uint32_t timestamp_limit_seconds,
         uint32_t proof_of_work_limit, bool scrypt=false) const;
-    libbitcoin::api::error_code check_transactions(uint64_t max_money) const;
-    libbitcoin::api::error_code accept(const libbitcoin::config::settings& settings, bool transactions=true,
+    error_code check_transactions(uint64_t max_money) const;
+    error_code accept(const libbitcoin::config::settings& settings, bool transactions=true,
         bool header=true) const;
-    libbitcoin::api::error_code accept(const chain_chain_state& state, const libbitcoin::config::settings& settings,
+    error_code accept(const chain_chain_state& state, const libbitcoin::config::settings& settings,
         bool transactions=true, bool header=true) const;
-    libbitcoin::api::error_code accept_transactions(const chain_chain_state& state) const;
-    libbitcoin::api::error_code connect() const;
-    libbitcoin::api::error_code connect(const chain_chain_state& state) const;
-    libbitcoin::api::error_code connect_transactions(const chain_chain_state& state) const;
+    error_code accept_transactions(const chain_chain_state& state) const;
+    error_code connect() const;
+    error_code connect(const chain_chain_state& state) const;
+    error_code connect_transactions(const chain_chain_state& state) const;
 
+    chain::block getValue() {
+        return value;
+    }
+
+    void setValue(chain::block value) {
+        this->value = value;
+    }
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
 //    mutable block::validation metadata;
 
-protected:
-    void reset();
+//protected:
+//    void reset();
+private:
+    chain::block value;
 
 };
 
