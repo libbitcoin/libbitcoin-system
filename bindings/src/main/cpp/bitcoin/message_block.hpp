@@ -37,7 +37,6 @@ namespace libbitcoin {
 namespace api {
 
 class BC_API message_block
-  : public message::block
 {
 public:
 //    typedef std::shared_ptr<block> ptr;
@@ -91,6 +90,17 @@ public:
 //    static const std::string command;
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
+public:
+    message::block getValue() {
+        return value;
+    }
+
+    void setValue(message::block value) {
+        this->value = value;
+    }
+private:
+    message::block value;
+
 };
 
 } // namespace api

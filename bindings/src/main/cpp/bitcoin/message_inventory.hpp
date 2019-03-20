@@ -38,7 +38,7 @@ namespace libbitcoin {
 //namespace message {
 namespace api {
 
-class BC_API message_inventory : public message::inventory
+class BC_API message_inventory
 {
 public:
 //    typedef std::shared_ptr<inventory> ptr;
@@ -89,7 +89,16 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 //
-//private:
+public:
+    message::inventory getValue() {
+        return value;
+    }
+
+    void setValue(message::inventory value) {
+        this->value = value;
+    }
+private:
+    message::inventory value;
 //    message_inventory_vector::list inventories_;
 };
 

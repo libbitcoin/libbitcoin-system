@@ -35,7 +35,7 @@ namespace libbitcoin {
 //namespace message {
 namespace api {
 
-class BC_API message_merkle_block : public message::merkle_block
+class BC_API message_merkle_block
 {
 public:
 //    typedef std::vector<merkle_block> list;
@@ -96,7 +96,16 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 
-//private:
+public:
+    message::merkle_block getValue() {
+        return value;
+    }
+
+    void setValue(message::merkle_block value) {
+        this->value = value;
+    }
+private:
+    message::merkle_block value;
 //    chain::header header_;
 //    size_t total_transactions_;
 //    math_hash_list hashes_;

@@ -36,7 +36,7 @@ namespace libbitcoin {
 //namespace message {
 namespace api {
 
-class BC_API message_transaction : public message::transaction
+class BC_API message_transaction
 //  : public chain::transaction
 {
 public:
@@ -91,6 +91,16 @@ public:
 //    static const std::string command;
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
+public:
+    message::transaction getValue() {
+        return value;
+    }
+
+    void setValue(message::transaction value) {
+        this->value = value;
+    }
+private:
+    message::transaction value;
 };
 
 } // namespace api

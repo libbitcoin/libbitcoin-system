@@ -10,6 +10,8 @@
 %import "bitcoin/bitcoin/compat.hpp"
 %import "bitcoin/bitcoin/define.hpp"
 
+%ignore getValue();
+
 %import <bitcoin-ext.i>
 //%import <bitcoin-ext-typemap.i>
 %import <bitcoin-chain-ext.i>
@@ -36,7 +38,9 @@
 %import "bitcoin/bitcoin/message/address.hpp"
 %import "bitcoin/unsigned_char_vector.hpp"
 %import "bitcoin/utility_data_chunk.hpp"
+%ignore setValue(message::network_address::list value);
 %include "bitcoin/message_network_address_list.hpp"
+%ignore setValue(message::address value);
 %include "bitcoin/message_address.hpp"
 
 //%ignore libbitcoin::message::alert::alert(data_chunk&& payload, data_chunk&& signature);
@@ -59,6 +63,7 @@
 //%ignore libbitcoin::message::alert::to_data(uint32_t version, std::ostream& stream) const;
 //%ignore libbitcoin::message::alert::to_data(uint32_t version, writer& sink) const;
 %import "bitcoin/bitcoin/message/alert.hpp"
+%ignore setValue(message::alert value);
 %include "bitcoin/message_alert.hpp"
 
 //%ignore libbitcoin::message::alert_payload::alert_payload(uint32_t version, uint64_t relay_until, uint64_t expiration,
@@ -94,6 +99,7 @@
 %import "bitcoin/p_std_string.hpp"
 %import <bitcoin/string_vector.hpp>
 %import <bitcoin/uint32_t_vector.hpp>
+%ignore setValue(message::alert_payload value);
 %include "bitcoin/message_alert_payload.hpp"
 
 //%ignore libbitcoin::message::block::block(block&& other);
@@ -118,6 +124,7 @@
 //%rename(ne) operator!=(const block& other) const;
 
 %import "bitcoin/bitcoin/message/block.hpp"
+%ignore setValue(message::block value);
 %include "bitcoin/message_block.hpp"
 
 //%ignore libbitcoin::message::block_transactions::block_transactions(hash_digest&& block_hash, chain::transaction::list&& transactions);
@@ -141,6 +148,7 @@
 //%rename(eq) operator==(const block_transactions& other) const;
 //%rename(ne) operator!=(const block_transactions& other) const;
 %import "bitcoin/bitcoin/message/block_transactions.hpp"
+%ignore setValue(message::block_transactions value);
 %include "bitcoin/message_block_transactions.hpp"
 
 //%ignore libbitcoin::message::compact_block::compact_block(chain::header&& header, uint64_t nonce, short_id_list&& short_ids, prefilled_transaction::list&& transactions);
@@ -165,8 +173,10 @@
 //%rename(eq) operator==(const compact_block& other) const;
 //%rename(ne) operator!=(const compact_block& other) const;
 
+%ignore setValue(message::compact_block value);
 %import "bitcoin/bitcoin/message/compact_block.hpp"
 %import "bitcoin/math_mini_hash_list.hpp"
+%ignore setValue(message::prefilled_transaction::list value);
 %include "bitcoin/message_prefilled_transaction_list.hpp"
 %include "bitcoin/message_compact_block.hpp"
 
@@ -185,6 +195,7 @@
 //%rename(eq) operator==(const fee_filter& other) const;
 //%rename(ne) operator!=(const fee_filter& other) const;
 %import "bitcoin/bitcoin/message/fee_filter.hpp"
+%ignore setValue(message::fee_filter value);
 %include "bitcoin/message_fee_filter.hpp"
 
 //%ignore libbitcoin::message::filter_add::filter_add(data_chunk&& data);
@@ -205,6 +216,7 @@
 //%rename(eq) operator==(const filter_add& other) const;
 //%rename(ne) operator!=(const filter_add& other) const;
 %import "bitcoin/bitcoin/message/filter_add.hpp"
+%ignore setValue(message::filter_add value);
 %include "bitcoin/message_filter_add.hpp"
 
 //%ignore libbitcoin::message::filter_clear::filter_clear(filter_clear&& other);
@@ -216,6 +228,7 @@
 //%ignore libbitcoin::message::filter_clear::to_data(uint32_t version, std::ostream& stream) const;
 //%ignore libbitcoin::message::filter_clear::to_data(uint32_t version, writer& sink) const;
 %import "bitcoin/bitcoin/message/filter_clear.hpp"
+%ignore setValue(message::filter_clear value);
 %include "bitcoin/message_filter_clear.hpp"
 
 //%ignore libbitcoin::message::filter_load::filter_load(data_chunk&& filter, uint32_t hash_functions, uint32_t tweak, uint8_t flags);
@@ -235,6 +248,7 @@
 //%rename(eq) operator==(const filter_load& other) const;
 //%rename(ne) operator!=(const filter_load& other) const;
 %import "bitcoin/bitcoin/message/filter_load.hpp"
+%ignore setValue(message::filter_load value);
 %include "bitcoin/message_filter_load.hpp"
 
 //%ignore libbitcoin::message::get_address::factory(uint32_t version, std::istream& stream);
@@ -244,6 +258,7 @@
 //%ignore libbitcoin::message::get_address::to_data(uint32_t version, std::ostream& stream) const;
 //%ignore libbitcoin::message::get_address::to_data(uint32_t version, writer& sink) const;
 %import "bitcoin/bitcoin/message/get_address.hpp"
+%ignore setValue(message::get_address value);
 %include "bitcoin/message_get_address.hpp"
 
 //%ignore libbitcoin::message::get_block_transactions::get_block_transactions(hash_digest&& block_hash, std::vector<uint64_t>&& indexes);
@@ -268,6 +283,7 @@
 
 %import "bitcoin/bitcoin/message/get_block_transactions.hpp"
 %import "bitcoin/uint64_t_vector.hpp"
+%ignore setValue(message::get_block_transactions value);
 %include "bitcoin/message_get_block_transactions.hpp"
 
 //%ignore libbitcoin::message::get_blocks::get_blocks(hash_list&& start, hash_digest&& stop);
@@ -291,6 +307,7 @@
 
 %import "bitcoin/bitcoin/message/get_blocks.hpp"
 %import "bitcoin/uint64_t_vector.hpp"
+%ignore setValue(message::get_blocks value);
 %include "bitcoin/message_get_blocks.hpp"
 
 //%ignore libbitcoin::message::inventory::inventory(inventory_vector::list&& values);
@@ -310,8 +327,12 @@
 //%rename(eq) operator==(const inventory& other) const;
 //%rename(ne) operator!=(const inventory& other) const;
 %import "bitcoin/bitcoin/message/inventory.hpp"
+%ignore setValue(message::inventory_vector::list value);
 %include "bitcoin/message_inventory_vector_list.hpp"
+%ignore setValue(message::inventory value);
 %include "bitcoin/message_inventory.hpp"
+%ignore setValue(message::inventory_vector::list value);
+%include "bitcoin/message_inventory_list.hpp"
 
 //%ignore libbitcoin::message::get_data::get_data(inventory_vector::list&& list);
 //%ignore libbitcoin::message::get_data::get_data(get_data&& other);
@@ -327,6 +348,7 @@
 //%rename(ne) operator!=(const get_data& other) const;
 
 %import "bitcoin/bitcoin/message/get_data.hpp"
+%ignore setValue(message::get_data value);
 %include "bitcoin/message_get_data.hpp"
 
 //%ignore libbitcoin::message::get_headers::get_headers(hash_list&& start, hash_digest&& stop);
@@ -343,6 +365,7 @@
 //%rename(eq) operator==(const get_headers& other) const;
 //%rename(ne) operator!=(const get_headers& other) const;
 %import "bitcoin/bitcoin/message/get_headers.hpp"
+%ignore setValue(message::get_headers value);
 %include "bitcoin/message_get_headers.hpp"
 
 //%ignore libbitcoin::message::header::header(chain::header&& other);
@@ -366,6 +389,7 @@
 //%rename(eq) operator==(const header& other) const;
 //%rename(ne) operator!=(const header& other) const;
 %import "bitcoin/bitcoin/message/header.hpp"
+%ignore setValue(message::header value);
 %include "bitcoin/message_header.hpp"
 
 //%ignore libbitcoin::message::headers::headers(header::list&& values);
@@ -385,7 +409,9 @@
 //%rename(eq) operator==(const headers& other) const;
 //%rename(ne) operator!=(const headers& other) const;
 %import "bitcoin/bitcoin/message/headers.hpp"
+%ignore setValue(message::header::list value);
 %include "bitcoin/message_header_list.hpp"
+%ignore setValue(message::headers value);
 %include "bitcoin/message_headers.hpp"
 
 //%ignore libbitcoin::message::heading::heading(heading&& other);
@@ -404,7 +430,11 @@
 //%rename(eq) operator==(const heading& other) const;
 //%rename(ne) operator!=(const heading& other) const;
 %import "bitcoin/bitcoin/message/heading.hpp"
+%ignore setValue(message::heading value);
 %include "bitcoin/message_heading.hpp"
+
+%import "bitcoin/bitcoin/message/inventory.hpp"
+%include "bitcoin/message_inventory_vector_type_id.hpp"
 
 //%ignore libbitcoin::message::inventory_vector::inventory_vector(type_id type, hash_digest&& hash);
 //%ignore libbitcoin::message::inventory_vector::inventory_vector(inventory_vector&& other);
@@ -423,6 +453,7 @@
 //%rename(eq) operator==(const inventory_vector& other) const;
 //%rename(ne) operator!=(const inventory_vector& other) const;
 %import "bitcoin/bitcoin/message/inventory_vector.hpp"
+%ignore setValue(message::inventory_vector value);
 %include "bitcoin/message_inventory_vector.hpp"
 
 //%ignore libbitcoin::message::memory_pool::memory_pool(memory_pool&& other);
@@ -435,6 +466,7 @@
 //%ignore libbitcoin::message::memory_pool::to_data(uint32_t version, writer& sink) const;
 
 %import "bitcoin/bitcoin/message/memory_pool.hpp"
+%ignore setValue(message::memory_pool value);
 %include "bitcoin/message_memory_pool.hpp"
 
 //%ignore libbitcoin::message::merkle_block::merkle_block(chain::header&& header, size_t total_transactions, hash_list&& hashes, data_chunk&& flags);
@@ -459,6 +491,7 @@
 //%rename(ne) operator!=(const merkle_block& other) const;
 
 %import "bitcoin/bitcoin/message/merkle_block.hpp"
+%ignore setValue(message::merkle_block value);
 %include "bitcoin/message_merkle_block.hpp"
 %import "bitcoin/bitcoin/message/messages.hpp"
 %include "bitcoin/message_messages.hpp"
@@ -480,7 +513,9 @@
 //%rename(ne) operator!=(const network_address& other) const;
 
 %import"bitcoin/bitcoin/message/network_address.hpp"
+%ignore setValue(message::ip_address value);
 %include "bitcoin/message_ip_address.hpp"
+%ignore setValue(message::network_address value);
 %include "bitcoin/message_network_address.hpp"
 
 //%ignore libbitcoin::message::not_found::not_found(inventory_vector::list&& values);
@@ -497,8 +532,7 @@
 //%rename(ne) operator!=(const not_found& other) const;
 
 %import "bitcoin/bitcoin/message/not_found.hpp"
-%import "bitcoin/bitcoin/message/inventory.hpp"
-%include "bitcoin/message_inventory_vector_type_id.hpp"
+%ignore setValue(message::not_found value);
 %include "bitcoin/message_not_found.hpp"
 
 //%ignore libbitcoin::message::ping::factory(uint32_t version, std::istream& stream);
@@ -515,6 +549,7 @@
 //%rename(ne) operator!=(const ping& other) const;
 
 %import "bitcoin/bitcoin/message/ping.hpp"
+%ignore setValue(message::ping value);
 %include "bitcoin/message_ping.hpp"
 
 //%ignore libbitcoin::message::pong::factory(uint32_t version, std::istream& stream);
@@ -530,6 +565,7 @@
 //%rename(eq) operator==(const pong& other) const;
 //%rename(ne) operator!=(const pong& other) const;
 %import "bitcoin/bitcoin/message/pong.hpp"
+%ignore setValue(message::pong value);
 %include "bitcoin/message_pong.hpp"
 
 //%ignore libbitcoin::message::prefilled_transaction::prefilled_transaction(uint64_t index, chain::transaction&& tx);
@@ -550,6 +586,7 @@
 //%rename(eq) operator==(const prefilled_transaction& other) const;
 //%rename(ne) operator!=(const prefilled_transaction& other) const;
 %import "bitcoin/bitcoin/message/prefilled_transaction.hpp"
+%ignore setValue(message::prefilled_transaction value);
 %include "bitcoin/message_prefilled_transaction.hpp"
 
 //%ignore libbitcoin::message::reject::reject(reject&& other);
@@ -569,6 +606,7 @@
 //%rename(eq) operator==(const reject& other) const;
 //%rename(ne) operator!=(const reject& other) const;
 %import "bitcoin/bitcoin/message/reject.hpp"
+%include "bitcoin/message_reject_reason_code.hpp"
 %include "bitcoin/message_reject.hpp"
 
 //%ignore libbitcoin::message::send_compact::send_compact(send_compact&& other);
@@ -584,6 +622,7 @@
 //%rename(eq) operator==(const send_compact& other) const;
 //%rename(ne) operator!=(const send_compact& other) const;
 %import "bitcoin/bitcoin/message/send_compact.hpp"
+%ignore setValue(message::send_compact value);
 %include "bitcoin/message_send_compact.hpp"
 
 //%ignore libbitcoin::message::send_headers::send_headers(send_headers&& other);
@@ -594,6 +633,7 @@
 //%ignore libbitcoin::message::send_headers::to_data(uint32_t version, std::ostream& stream) const;
 //%ignore libbitcoin::message::send_headers::to_data(uint32_t version, writer& sink) const;
 %import "bitcoin/bitcoin/message/send_headers.hpp"
+%ignore setValue(message::send_headers value);
 %include "bitcoin/message_send_headers.hpp"
 
 //%ignore libbitcoin::message::transaction::transaction(transaction&& other);
@@ -618,6 +658,7 @@
 //%rename(eq) operator==(const transaction& other) const;
 //%rename(ne) operator!=(const transaction& other) const;
 %import "bitcoin/bitcoin/message/transaction.hpp"
+%ignore setValue(message::transaction value);
 %include "bitcoin/message_transaction.hpp"
 
 //%ignore libbitcoin::message::verack::factory(uint32_t version, std::istream& stream);
@@ -628,6 +669,7 @@
 //%ignore libbitcoin::message::verack::to_data(uint32_t version, writer& sink) const;
 
 %import "bitcoin/bitcoin/message/verack.hpp"
+%ignore setValue(message::verack value);
 %include "bitcoin/message_verack.hpp"
 
 //%ignore libbitcoin::message::version::version(version&& other);
@@ -652,4 +694,5 @@
 //%rename(ne) operator!=(const version& other) const;
 
 %import "bitcoin/bitcoin/message/version.hpp"
+%ignore setValue(message::version value);
 %include "bitcoin/message_version.hpp"

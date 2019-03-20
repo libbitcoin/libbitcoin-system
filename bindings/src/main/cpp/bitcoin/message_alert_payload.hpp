@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN__MESSAGE_ALERT_FORMATTED_PAYLOAD_HPP
 #define LIBBITCOIN__MESSAGE_ALERT_FORMATTED_PAYLOAD_HPP
 
-#include <istream>
-#include <string>
+//#include <istream>
+//#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/alert_payload.hpp>
 //#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
@@ -36,7 +36,7 @@ namespace libbitcoin {
 //namespace message {
 namespace api {
 
-class BC_API message_alert_payload : public message::alert_payload
+class BC_API message_alert_payload
 {
 public:
     static message_alert_payload factory(uint32_t version, const utility_data_chunk& data);
@@ -131,7 +131,16 @@ public:
 
 //    static const ec_uncompressed satoshi_public_key;
 
-//private:
+public:
+    message::alert_payload getValue() {
+        return value;
+    }
+
+    void setValue(message::alert_payload value) {
+        this->value = value;
+    }
+private:
+    message::alert_payload value;
 //    uint32_t version_;
 //    uint64_t relay_until_;
 //    uint64_t expiration_;

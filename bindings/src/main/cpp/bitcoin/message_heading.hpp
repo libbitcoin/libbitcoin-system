@@ -69,7 +69,7 @@ namespace api {
 //    version
 //};
 
-class BC_API message_heading : public message::heading
+class BC_API message_heading
 {
 public:
     static size_t maximum_size();
@@ -121,7 +121,16 @@ public:
     bool eq(const message_heading& other) const;
 //    bool operator!=(const message_heading& other) const;
 
-//private:
+public:
+    message::heading getValue() {
+        return value;
+    }
+
+    void setValue(message::heading value) {
+        this->value = value;
+    }
+private:
+    message::heading value;
 //    uint32_t magic_;
 //    std::string command_;
 //    uint32_t payload_size_;

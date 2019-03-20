@@ -19,9 +19,9 @@
 #ifndef LIBBITCOIN__MESSAGE_ALERT_HPP
 #define LIBBITCOIN__MESSAGE_ALERT_HPP
 
-#include <istream>
-#include <memory>
-#include <string>
+//#include <istream>
+//#include <memory>
+//#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/alert.hpp>
 //#include <bitcoin/bitcoin/utility/data.hpp>
@@ -33,7 +33,7 @@ namespace libbitcoin {
 //namespace message {
 namespace api {
 
-class BC_API message_alert : public message::alert
+class BC_API message_alert
 {
 public:
 //    typedef std::shared_ptr<alert> ptr;
@@ -82,7 +82,16 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 //
-//private:
+public:
+    message::alert getValue() {
+        return value;
+    }
+
+    void setValue(message::alert value) {
+        this->value = value;
+    }
+private:
+    message::alert value;
 //    utility_data_chunk payload_;
 //    utility_data_chunk signature_;
 };

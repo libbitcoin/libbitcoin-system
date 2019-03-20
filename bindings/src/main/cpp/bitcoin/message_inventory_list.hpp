@@ -6,7 +6,17 @@
 namespace libbitcoin {
 namespace api {
 
-class message_inventory_list : public message::inventory_vector::list {
+class message_inventory_list {
+public:
+	message::inventory_vector::list getValue() {
+        return value;
+    }
+
+    void setValue(message::inventory_vector::list value) {
+        this->value = value;
+    }
+private:
+    message::inventory_vector::list value;
 };
 
 } // namespace api

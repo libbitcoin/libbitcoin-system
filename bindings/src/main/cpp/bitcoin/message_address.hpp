@@ -33,7 +33,7 @@ namespace libbitcoin {
 //namespace message {
 namespace api {
 
-class BC_API message_address : public message::address
+class BC_API message_address
 {
 public:
 //    typedef std::shared_ptr<address> ptr;
@@ -78,8 +78,15 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 
-//private:
-//    network_address::list addresses_;
+    message::address getValue() {
+        return value;
+    }
+
+    void setValue(message::address value) {
+        this->value = value;
+    }
+private:
+    message::address value;
 };
 
 } // namespace api

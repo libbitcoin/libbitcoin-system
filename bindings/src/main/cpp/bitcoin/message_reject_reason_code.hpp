@@ -16,25 +16,25 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBBITCOIN__MESSAGE_NETWORK_ADDRESS_LIST_HPP
-#define LIBBBITCOIN__MESSAGE_NETWORK_ADDRESS_LIST_HPP
+#ifndef LIBBBITCOIN__MESSAGE_REJECT_REASON_CODE_HPP
+#define LIBBBITCOIN__MESSAGE_REJECT_REASON_CODE_HPP
 
-#include <bitcoin/message/network_address.hpp>
+#include <bitcoin/message/reject.hpp>
 
 namespace libbitcoin {
 namespace api {
 
-class message_network_address_list {
-public:
-	message::network_address::list getValue() {
-        return value;
-    }
-
-    void setValue(message::network_address::list value) {
-        this->value = value;
-    }
-private:
-    message::network_address::list value;
+enum message_reject_reason_code : message::reject::reason_code {
+//public:
+//	message::reject::reason_code getValue() {
+//        return value;
+//    }
+//
+//    void setValue(message::reject::reason_code value) {
+//        this->value = value;
+//    }
+//private:
+//    message::reject::reason_code value;
 
 };
 

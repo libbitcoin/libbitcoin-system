@@ -87,7 +87,16 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 //
-//private:
+public:
+    message::filter_load getValue() {
+        return value;
+    }
+
+    void setValue(message::filter_load value) {
+        this->value = value;
+    }
+private:
+    message::filter_load value;
 //    utility_data_chunk filter_;
 //    uint32_t hash_functions_;
 //    uint32_t tweak_;

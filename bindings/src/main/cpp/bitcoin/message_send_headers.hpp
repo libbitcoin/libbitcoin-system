@@ -32,7 +32,7 @@ namespace libbitcoin {
 //namespace message {
 namespace api {
 
-class BC_API message_send_headers : public message::send_headers
+class BC_API message_send_headers
 {
 public:
 //    typedef std::shared_ptr<send_headers> ptr;
@@ -57,6 +57,14 @@ public:
     void reset();
     size_t serialized_size(uint32_t version) const;
 
+public:
+    message::send_headers getValue() {
+        return value;
+    }
+
+    void setValue(message::send_headers value) {
+        this->value = value;
+    }
 //    static const std::string command;
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
@@ -64,7 +72,8 @@ public:
 //protected:
 //    message_send_headers(bool insufficient_version);
 //
-//private:
+private:
+    message::send_headers value;
 //    bool insufficient_version_;
 };
 

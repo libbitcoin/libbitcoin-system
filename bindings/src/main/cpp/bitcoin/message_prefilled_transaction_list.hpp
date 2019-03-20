@@ -24,7 +24,17 @@
 namespace libbitcoin {
 namespace api {
 
-class message_prefilled_transaction_list : public message::prefilled_transaction::list {
+class message_prefilled_transaction_list {
+public:
+	message::prefilled_transaction::list getValue() {
+        return value;
+    }
+
+    void setValue(message::prefilled_transaction::list value) {
+        this->value = value;
+    }
+private:
+    message::prefilled_transaction::list value;
 
 };
 

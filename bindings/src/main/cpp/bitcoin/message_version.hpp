@@ -36,7 +36,7 @@ namespace libbitcoin {
 namespace api {
 
 // The checksum is ignored by the version command.
-class BC_API message_version : public message::version
+class BC_API message_version
 {
 public:
 //    typedef std::shared_ptr<version> ptr;
@@ -186,7 +186,16 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 //
-//private:
+public:
+    message::version getValue() {
+        return value_;
+    }
+
+    void setValue(message::version value) {
+        this->value_ = value;
+    }
+private:
+    message::version value_;
 //    uint32_t value_;
 //    uint64_t services_;
 //    uint64_t timestamp_;

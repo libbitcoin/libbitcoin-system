@@ -33,7 +33,7 @@ namespace libbitcoin {
 //namespace message {
 namespace api {
 
-class BC_API message_get_headers : public message::get_headers
+class BC_API message_get_headers
 //  : public get_blocks
 {
 public:
@@ -67,6 +67,16 @@ public:
 //    static const std::string command;
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
+public:
+    message::get_headers getValue() {
+        return value;
+    }
+
+    void setValue(message::get_headers value) {
+        this->value = value;
+    }
+private:
+    message::get_headers value;
 };
 
 } // namespace api

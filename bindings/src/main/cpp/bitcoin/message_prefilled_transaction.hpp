@@ -32,7 +32,7 @@ namespace libbitcoin {
 //namespace message {
 namespace api {
 
-class BC_API message_prefilled_transaction : public message::prefilled_transaction
+class BC_API message_prefilled_transaction
 {
 public:
 //    typedef std::vector<prefilled_transaction> list;
@@ -74,7 +74,16 @@ public:
     bool eq(const message_prefilled_transaction& other) const;
 //    bool operator!=(const message_prefilled_transaction& other) const;
 
-//private:
+public:
+    message::prefilled_transaction getValue() {
+        return value;
+    }
+
+    void setValue(message::prefilled_transaction value) {
+        this->value = value;
+    }
+private:
+    message::prefilled_transaction value;
 //    uint64_t index_;
 //    chain::transaction transaction_;
 };

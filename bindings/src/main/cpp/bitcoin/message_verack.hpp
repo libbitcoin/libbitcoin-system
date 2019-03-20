@@ -33,7 +33,7 @@ namespace libbitcoin {
 namespace api {
 
 // The checksum is ignored by the verack command.
-class BC_API message_verack : public message::verack
+class BC_API message_verack
 {
 public:
 //    typedef std::shared_ptr<verack> ptr;
@@ -59,6 +59,17 @@ public:
 //    static const std::string command;
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
+public:
+    message::verack getValue() {
+        return value;
+    }
+
+    void setValue(message::verack value) {
+        this->value = value;
+    }
+private:
+    message::verack value;
+
 };
 
 } // namespace api

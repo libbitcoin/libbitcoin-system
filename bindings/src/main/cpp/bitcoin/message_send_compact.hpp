@@ -32,7 +32,7 @@ namespace libbitcoin {
 //namespace message {
 namespace api {
 
-class BC_API message_send_compact : public message::send_compact
+class BC_API message_send_compact
 {
 public:
 //    typedef std::shared_ptr<send_compact> ptr;
@@ -77,7 +77,16 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 //
-//private:
+public:
+    message::send_compact getValue() {
+        return value;
+    }
+
+    void setValue(message::send_compact value) {
+        this->value = value;
+    }
+private:
+    message::send_compact value;
 //    bool high_bandwidth_mode_;
 //    uint64_t version_;
 };

@@ -33,7 +33,7 @@ namespace libbitcoin {
 //namespace message {
 namespace api {
 
-class BC_API message_pong : public message::pong
+class BC_API message_pong
 {
 public:
 //    typedef std::shared_ptr<pong> ptr;
@@ -75,7 +75,16 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 //
-//private:
+public:
+    message::pong getValue() {
+        return value;
+    }
+
+    void setValue(message::pong value) {
+        this->value = value;
+    }
+private:
+    message::pong value;
 //    uint64_t nonce_;
 //    bool valid_;
 };

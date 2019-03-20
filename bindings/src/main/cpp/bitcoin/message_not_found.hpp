@@ -36,7 +36,7 @@ namespace libbitcoin {
 //namespace message {
 namespace api {
 
-class BC_API message_not_found : public message::not_found
+class BC_API message_not_found
 //  : public inventory
 {
 public:
@@ -72,6 +72,17 @@ public:
 //    static const std::string command;
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
+public:
+    message::not_found getValue() {
+        return value;
+    }
+
+    void setValue(message::not_found value) {
+        this->value = value;
+    }
+private:
+    message::not_found value;
+
 };
 
 } // namespace api

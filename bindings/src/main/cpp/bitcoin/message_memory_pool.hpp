@@ -32,7 +32,7 @@ namespace libbitcoin {
 //namespace message {
 namespace api {
 
-class BC_API message_memory_pool : public message::memory_pool
+class BC_API message_memory_pool
 {
 public:
 //    typedef std::shared_ptr<memory_pool> ptr;
@@ -64,7 +64,16 @@ public:
 //protected:
 //    message_memory_pool(bool insufficient_version);
 //
-//private:
+public:
+    message::memory_pool getValue() {
+        return value;
+    }
+
+    void setValue(message::memory_pool value) {
+        this->value = value;
+    }
+private:
+    message::memory_pool value;
 //    bool insufficient_version_;
 };
 

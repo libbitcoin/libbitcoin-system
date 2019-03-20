@@ -39,7 +39,7 @@ namespace libbitcoin {
 //namespace message {
 namespace api {
 
-class BC_API message_headers : public message::headers
+class BC_API message_headers
 {
 public:
 //    typedef std::shared_ptr<headers> ptr;
@@ -89,7 +89,16 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 //
-//private:
+public:
+    message::headers getValue() {
+        return value;
+    }
+
+    void setValue(message::headers value) {
+        this->value = value;
+    }
+private:
+    message::headers value;
 //    header::list elements_;
 };
 

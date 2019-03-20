@@ -25,6 +25,7 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <math_hash_digest.hpp>
+#include <message_inventory_vector_type_id.hpp>
 #include <utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
@@ -33,7 +34,7 @@ namespace libbitcoin {
 //namespace message {
 namespace api {
 
-class BC_API message_inventory_vector : public message::inventory_vector
+class BC_API message_inventory_vector
 {
 public:
 //    typedef std::vector<inventory_vector> list;
@@ -51,9 +52,9 @@ public:
 //        reserved = witness | filtered_block
 //    };
 
-    static type_id to_type(uint32_t value);
-    static uint32_t to_number(type_id type);
-    static std::string to_string(type_id type);
+    static message_inventory_vector_type_id to_type(uint32_t value);
+    static uint32_t to_number(message_inventory_vector_type_id type);
+    static std::string to_string(message_inventory_vector_type_id type);
 
     static message_inventory_vector factory(uint32_t version, const utility_data_chunk& data);
 //    static message_inventory_vector factory(uint32_t version, std::istream& stream);
@@ -61,13 +62,13 @@ public:
     static size_t satoshi_fixed_size(uint32_t version);
 
     message_inventory_vector();
-//    message_inventory_vector(type_id type, const math_hash_digest& hash);
-    message_inventory_vector(type_id type, math_hash_digest&& hash);
+//    message_inventory_vector(message_inventory_vector_type_id type, const math_hash_digest& hash);
+    message_inventory_vector(message_inventory_vector_type_id type, math_hash_digest&& hash);
 //    message_inventory_vector(const message_inventory_vector& other);
     message_inventory_vector(message_inventory_vector&& other);
 
-    type_id type() const;
-    void set_type(type_id value);
+    message_inventory_vector_type_id type() const;
+    void set_type(message_inventory_vector_type_id value);
 
     math_hash_digest& hash();
 //    const math_hash_digest& hash() const;
@@ -97,7 +98,16 @@ public:
     bool eq(const message_inventory_vector& other) const;
 //    bool operator!=(const message_inventory_vector& other) const;
 
-//private:
+public:
+    message::inventory_vector getValue() {
+        return value;
+    }
+
+    void setValue(message::inventory_vector value) {
+        this->value = value;
+    }
+private:
+    message::inventory_vector value;
 //    type_id type_;
 //    math_hash_digest hash_;
 };

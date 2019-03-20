@@ -33,7 +33,7 @@ namespace libbitcoin {
 //namespace message {
 namespace api {
 
-class BC_API message_ping : public message::ping
+class BC_API message_ping
 {
 public:
 //    typedef std::shared_ptr<ping> ptr;
@@ -75,7 +75,16 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 //
-//private:
+public:
+    message::ping getValue() {
+        return value;
+    }
+
+    void setValue(message::ping value) {
+        this->value = value;
+    }
+private:
+    message::ping value;
 //    uint64_t nonce_;
 //    bool nonceless_;
 //    bool valid_;

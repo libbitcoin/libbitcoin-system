@@ -33,7 +33,7 @@ namespace libbitcoin {
 //namespace message {
 namespace api {
 
-class BC_API message_filter_add : public message::filter_add
+class BC_API message_filter_add
 {
 public:
 //    typedef std::shared_ptr<filter_add> ptr;
@@ -77,7 +77,16 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 //
-//private:
+public:
+    message::filter_add getValue() {
+        return value;
+    }
+
+    void setValue(message::filter_add value) {
+        this->value = value;
+    }
+private:
+    message::filter_add value;
 //    utility_data_chunk data_;
 };
 

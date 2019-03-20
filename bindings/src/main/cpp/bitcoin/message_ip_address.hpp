@@ -12,49 +12,58 @@ namespace api {
 class message_ip_address {
 
 public:
-  message_ip_address() : ip_address(new message::ip_address) {
-  }
-    
-/*  message_ip_address(unsigned char *value, unsigned int n) {
-    p = value;
-    size = n;
-  }
+	message_ip_address() :
+			value(new message::ip_address) {
+	}
 
-  void set(unsigned char *value, unsigned int n) {
-    if (p) delete [] p;
-    size = n;
-    p = new unsigned char[size];
-    for (int i=0; i<size; i++) {
-      p[i] = value[i];
-    }
-  }
-*/
-  void set(size_t i, uint8_t value) {
-    if (i<16) {
-      ip_address[i] = value;
-    } else {
-    	std::cerr << "SEVERE: index " << i << " is out of range [0;16)\n";
-    }
-  }
+	/*  message_ip_address(unsigned char *value, unsigned int n) {
+	 p = value;
+	 size = n;
+	 }
 
-  message::ip_address cast() {
-    return ip_address;
-  }
+	 void set(unsigned char *value, unsigned int n) {
+	 if (p) delete [] p;
+	 size = n;
+	 p = new unsigned char[size];
+	 for (int i=0; i<size; i++) {
+	 p[i] = value[i];
+	 }
+	 }
+	 */
+	void set(size_t i, uint8_t value) {
+		if (i < 16) {
+			value[i] = value;
+		} else {
+			std::cerr << "SEVERE: index " << i << " is out of range [0;16)\n";
+		}
+	}
 
-  uint8_t get(size_t i) {
-    return ip_address[i];
-  }
+	message::ip_address cast() {
+		return value;
+	}
 
-  size_t getSize() {
-    return 16;
-  }
+	uint8_t get(size_t i) {
+		return value[i];
+	}
 
-  ~message_ip_address() {
-	  delete ip_address;
-  }
+	size_t getSize() {
+		return 16;
+	}
 
+	~message_ip_address() {
+		delete value;
+	}
+
+public:
+	message::ip_address getValue() {
+		return value;
+	}
+
+	void setValue(message::ip_address value) {
+		this->value = value;
+	}
 private:
-  message::ip_address ip_address;
+	message::ip_address value;
 };
 
 } // namespace api

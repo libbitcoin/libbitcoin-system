@@ -25,6 +25,7 @@
 //#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/reject.hpp>
+#include <message_reject_reason_code.hpp>
 #include <utility_data_chunk.hpp>
 #include <math_hash_digest.hpp>
 #include <p_std_string.hpp>
@@ -35,7 +36,7 @@ namespace libbitcoin {
 //namespace message {
 namespace api {
 
-class BC_API message_reject : public message::reject
+class BC_API message_reject
 {
 public:
 //    enum class reason_code: uint8_t
@@ -81,18 +82,18 @@ public:
 
 //    message_reject(reason_code code, const std::string& message,
 //        const std::string& reason);
-    message_reject(reason_code code, p_std_string& message, p_std_string& reason);
+    message_reject(message_reject_reason_code code, p_std_string& message, p_std_string& reason);
 
-//    message_reject(reason_code code, const std::string& message,
+//    message_reject(message_reject_reason_code code, const std::string& message,
 //        const std::string& reason, const math_hash_digest& data);
-    message_reject(reason_code code, p_std_string& message, p_std_string& reason,
+    message_reject(message_reject_reason_code code, p_std_string& message, p_std_string& reason,
         math_hash_digest&& data);
 
 //    message_reject(const message_reject& other);
     message_reject(message_reject&& other);
 
-    reason_code code() const;
-    void set_code(reason_code value);
+    message_reject_reason_code code() const;
+    void set_code(message_reject_reason_code value);
 
     p_std_string message();
 //    const std::string& message() const;
@@ -132,11 +133,20 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 //
-//private:
-//    static reason_code reason_from_byte(uint8_t byte);
-//    static uint8_t reason_to_byte(reason_code value);
+public:
+    message::reject getValue() {
+        return value;
+    }
+
+    void setValue(message::reject value) {
+        this->value = value;
+    }
+private:
+    message::reject value;
+//    static message_reject_reason_code reason_from_byte(uint8_t byte);
+//    static uint8_t reason_to_byte(message_reject_reason_code value);
 //
-//    reason_code code_;
+//    message_reject_reason_code code_;
 //    std::string message_;
 //    std::string reason_;
 //    math_hash_digest data_;

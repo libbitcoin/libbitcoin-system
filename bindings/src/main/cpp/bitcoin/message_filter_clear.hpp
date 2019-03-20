@@ -32,7 +32,7 @@ namespace libbitcoin {
 //namespace message {
 namespace api {
 
-class BC_API message_filter_clear : public message::filter_clear
+class BC_API message_filter_clear
 {
 public:
 //    typedef std::shared_ptr<filter_clear> ptr;
@@ -61,10 +61,19 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 //
+public:
+    message::filter_clear getValue() {
+        return value;
+    }
+
+    void setValue(message::filter_clear value) {
+        this->value = value;
+    }
 //protected:
 //    filter_clear(bool insufficient_version);
 //
-//private:
+private:
+    message::filter_clear value;
 //    bool insufficient_version_;
 };
 

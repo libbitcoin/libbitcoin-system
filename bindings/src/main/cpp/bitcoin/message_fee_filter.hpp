@@ -33,7 +33,7 @@ namespace libbitcoin {
 //namespace message {
 namespace api {
 
-class BC_API message_fee_filter : public message::fee_filter
+class BC_API message_fee_filter
 {
 public:
 //    typedef std::shared_ptr<fee_filter> ptr;
@@ -75,10 +75,19 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 
-protected:
-    message_fee_filter(uint64_t minimum, bool insufficient_version);
+//protected:
+//    message_fee_filter(uint64_t minimum, bool insufficient_version);
 
-//private:
+public:
+    message::fee_filter getValue() {
+        return value;
+    }
+
+    void setValue(message::fee_filter value) {
+        this->value = value;
+    }
+private:
+    message::fee_filter value;
 //    uint64_t minimum_fee_;
 //    bool insufficient_version_;
 };

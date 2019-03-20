@@ -33,7 +33,7 @@ namespace libbitcoin {
 //namespace message {
 namespace api {
 
-class BC_API message_compact_block : public message::compact_block
+class BC_API message_compact_block
 {
 public:
 //    typedef std::shared_ptr<compact_block> ptr;
@@ -97,7 +97,16 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 //
-//private:
+public:
+    message::compact_block getValue() {
+        return value;
+    }
+
+    void setValue(message::compact_block value) {
+        this->value = value;
+    }
+private:
+    message::compact_block value;
 //    chain_header header_;
 //    uint64_t nonce_;
 //    math_mini_hash_list short_ids_;
