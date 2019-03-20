@@ -20,7 +20,9 @@
 //%ignore libbitcoin::machine::operation::to_data(writer& sink) const;
 %import "bitcoin/bitcoin/machine/operation.hpp"
 %include "bitcoin/machine_operation.hpp"
+%ignore setValue(machine::operation::list value);
 %include "bitcoin/machine_operation_list.hpp"
+%include "bitcoin/machine_operation_iterator.hpp"
 
 %import "bitcoin/bitcoin/machine/rule_fork.hpp"
 %include "bitcoin/machine_rule_fork.hpp"

@@ -39,7 +39,7 @@ namespace libbitcoin {
 //namespace machine {
 namespace api {
 
-class BC_API machine_program : public machine::program
+class BC_API machine_program
 {
 public:
 //    typedef data_stack::value_type value_type;
@@ -148,7 +148,16 @@ public:
     bool closed() const;
     bool succeeded() const;
 
-//private:
+public:
+    machine::program getValue() {
+        return value_;
+    }
+
+    void setValue(machine::program value) {
+        this->value_ = value;
+    }
+private:
+    machine::program value_;
 //    // A space-efficient dynamic bitset (specialized).
 //    typedef std::vector<bool> bool_stack;
 //

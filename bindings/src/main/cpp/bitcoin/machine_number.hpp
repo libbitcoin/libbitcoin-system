@@ -22,7 +22,7 @@
 #include <cstddef>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/machine/number.hpp>
-#include <bitcoin/utility_data_chunk.hpp>
+#include <utility_data_chunk.hpp>
 
 namespace libbitcoin {
 //namespace machine {
@@ -39,29 +39,29 @@ namespace api {
  * bytes but throwing an exception if arithmetic is done or the result is
  * interpreted as an integer.
  */
-class BC_API machine_number : public machine::number
+class BC_API machine_number
 {
 public:
-    static const uint8_t negative_1;
-    static const uint8_t negative_0;
-    static const uint8_t positive_0;
-    static const uint8_t positive_1;
-    static const uint8_t positive_2;
-    static const uint8_t positive_3;
-    static const uint8_t positive_4;
-    static const uint8_t positive_5;
-    static const uint8_t positive_6;
-    static const uint8_t positive_7;
-    static const uint8_t positive_8;
-    static const uint8_t positive_9;
-    static const uint8_t positive_10;
-    static const uint8_t positive_11;
-    static const uint8_t positive_12;
-    static const uint8_t positive_13;
-    static const uint8_t positive_14;
-    static const uint8_t positive_15;
-    static const uint8_t positive_16;
-    static const uint8_t negative_mask;
+//    static const uint8_t negative_1;
+//    static const uint8_t negative_0;
+//    static const uint8_t positive_0;
+//    static const uint8_t positive_1;
+//    static const uint8_t positive_2;
+//    static const uint8_t positive_3;
+//    static const uint8_t positive_4;
+//    static const uint8_t positive_5;
+//    static const uint8_t positive_6;
+//    static const uint8_t positive_7;
+//    static const uint8_t positive_8;
+//    static const uint8_t positive_9;
+//    static const uint8_t positive_10;
+//    static const uint8_t positive_11;
+//    static const uint8_t positive_12;
+//    static const uint8_t positive_13;
+//    static const uint8_t positive_14;
+//    static const uint8_t positive_15;
+//    static const uint8_t positive_16;
+//    static const uint8_t negative_mask;
 
     /// Construct with zero value.
     machine_number();
@@ -147,8 +147,16 @@ public:
 //    machine_number& operator-=(const machine_number& other);
     machine_number& dec(const machine_number& other);
 
-//private:
-//    int64_t value_;
+public:
+    machine::number getValue() {
+        return value;
+    }
+
+    void setValue(machine::number value) {
+        this->value = value;
+    }
+private:
+    machine::number value;
 };
 
 } // namespace api

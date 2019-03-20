@@ -44,10 +44,6 @@ public:
 		machine_operation_iterator::value = t;
 	}
 
-	machine::operation::iterator getvalue() {
-		return value;
-	}
-
 //	size_t getSize() {
 //		return value.size();
 //	}

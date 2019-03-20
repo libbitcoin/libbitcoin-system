@@ -19,23 +19,23 @@
 #ifndef LIBBITCOIN__MACHINE_OPERATION_HPP
 #define LIBBITCOIN__MACHINE_OPERATION_HPP
 
-#include <cstddef>
-#include <cstdint>
-#include <iostream>
-#include <vector>
+//#include <cstddef>
+//#include <cstdint>
+//#include <iostream>
+//#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/machine/operation.hpp>
-#include <bitcoin/machine_opcode.hpp>
-#include <bitcoin/machine_script_pattern.hpp>
-#include <bitcoin/utility_data_chunk.hpp>
-#include <bitcoin/utility_reader.hpp>
-#include <bitcoin/utility_writer.hpp>
+#include <machine_opcode.hpp>
+#include <machine_script_pattern.hpp>
+#include <utility_data_chunk.hpp>
+#include <utility_reader.hpp>
+#include <utility_writer.hpp>
 
 namespace libbitcoin {
 //namespace machine {
 namespace api {
 
-class BC_API machine_operation : public machine::operation
+class BC_API machine_operation
 {
 public:
 //    typedef std::vector<operation> list;
@@ -144,14 +144,22 @@ public:
     bool is_minimal_push() const;
     bool is_nominal_push() const;
 
-protected:
-    machine_operation(machine_opcode code, utility_data_chunk&& data, bool valid);
-    machine_operation(machine_opcode code, const utility_data_chunk& data, bool valid);
-    static uint32_t read_data_size(machine_opcode code, reader& source);
-    machine_opcode opcode_from_data(const utility_data_chunk& data, bool minimal);
-    void reset();
+    machine::operation getValue() {
+        return value;
+    }
 
-//private:
+    void setValue(machine::operation value) {
+        this->value = value;
+    }
+//protected:
+//    machine_operation(machine_opcode code, utility_data_chunk&& data, bool valid);
+//    machine_operation(machine_opcode code, const utility_data_chunk& data, bool valid);
+//    static uint32_t read_data_size(machine_opcode code, reader& source);
+//    machine_opcode opcode_from_data(const utility_data_chunk& data, bool minimal);
+//    void reset();
+
+private:
+    machine::operation value;
 //    opcode code_;
 //    data_chunk data_;
 //    bool valid_;

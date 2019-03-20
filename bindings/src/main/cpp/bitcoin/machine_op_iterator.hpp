@@ -6,7 +6,17 @@
 namespace libbitcoin {
 namespace api {
 
-class machine_op_iterator : public machine::program::op_iterator {
+class machine_op_iterator {
+public:
+	machine::program::op_iterator getValue() {
+        return value;
+    }
+
+    void setValue(machine::program::op_iterator value) {
+        this->value = value;
+    }
+private:
+    machine::program::op_iterator value;
 };
 
 } // namespace api

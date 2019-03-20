@@ -23,94 +23,95 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/machine/interpreter.hpp>
-#include <bitcoin/machine_opcode.hpp>
-#include <bitcoin/machine_operation.hpp>
-#include <bitcoin/machine_program.hpp>
-#include <bitcoin/utility_data_chunk.hpp>
+#include <machine_opcode.hpp>
+#include <machine_operation.hpp>
+#include <machine_program.hpp>
+#include <utility_data_chunk.hpp>
+#include <machine_interpreter_result.hpp>
 
 namespace libbitcoin {
 //namespace machine {
 namespace api {
 
-class BC_API machine_interpreter : public machine::interpreter
+class BC_API machine_interpreter
 {
 public:
-//    typedef error::error_code_t result;
+//    typedef error::error_code_t machine_interpreter_result;
 
     // Operations (shared).
     //-------------------------------------------------------------------------
 
-    static result op_nop(machine_opcode);
-    static result op_disabled(machine_opcode);
-    static result op_reserved(machine_opcode);
-    static result op_push_number(machine_program& program, uint8_t value);
-    static result op_push_size(machine_program& program, const machine_operation& op);
-    static result op_push_data(machine_program& program, const utility_data_chunk& data,
+    static machine_interpreter_result op_nop(machine_opcode);
+    static machine_interpreter_result op_disabled(machine_opcode);
+    static machine_interpreter_result op_reserved(machine_opcode);
+    static machine_interpreter_result op_push_number(machine_program& program, uint8_t value);
+    static machine_interpreter_result op_push_size(machine_program& program, const machine_operation& op);
+    static machine_interpreter_result op_push_data(machine_program& program, const utility_data_chunk& data,
         uint32_t size_limit);
 
     // Operations (not shared).
     //-------------------------------------------------------------------------
 
-    static result op_if(machine_program& program);
-    static result op_notif(machine_program& program);
-    static result op_else(machine_program& program);
-    static result op_endif(machine_program& program);
-    static result op_verify(machine_program& program);
-    static result op_return(machine_program& program);
-    static result op_to_alt_stack(machine_program& program);
-    static result op_from_alt_stack(machine_program& program);
-    static result op_drop2(machine_program& program);
-    static result op_dup2(machine_program& program);
-    static result op_dup3(machine_program& program);
-    static result op_over2(machine_program& program);
-    static result op_rot2(machine_program& program);
-    static result op_swap2(machine_program& program);
-    static result op_if_dup(machine_program& program);
-    static result op_depth(machine_program& program);
-    static result op_drop(machine_program& program);
-    static result op_dup(machine_program& program);
-    static result op_nip(machine_program& program);
-    static result op_over(machine_program& program);
-    static result op_pick(machine_program& program);
-    static result op_roll(machine_program& program);
-    static result op_rot(machine_program& program);
-    static result op_swap(machine_program& program);
-    static result op_tuck(machine_program& program);
-    static result op_size(machine_program& program);
-    static result op_equal(machine_program& program);
-    static result op_equal_verify(machine_program& program);
-    static result op_add1(machine_program& program);
-    static result op_sub1(machine_program& program);
-    static result op_negate(machine_program& program);
-    static result op_abs(machine_program& program);
-    static result op_not(machine_program& program);
-    static result op_nonzero(machine_program& program);
-    static result op_add(machine_program& program);
-    static result op_sub(machine_program& program);
-    static result op_bool_and(machine_program& program);
-    static result op_bool_or(machine_program& program);
-    static result op_num_equal(machine_program& program);
-    static result op_num_equal_verify(machine_program& program);
-    static result op_num_not_equal(machine_program& program);
-    static result op_less_than(machine_program& program);
-    static result op_greater_than(machine_program& program);
-    static result op_less_than_or_equal(machine_program& program);
-    static result op_greater_than_or_equal(machine_program& program);
-    static result op_min(machine_program& program);
-    static result op_max(machine_program& program);
-    static result op_within(machine_program& program);
-    static result op_ripemd160(machine_program& program);
-    static result op_sha1(machine_program& program);
-    static result op_sha256(machine_program& program);
-    static result op_hash160(machine_program& program);
-    static result op_hash256(machine_program& program);
-    static result op_codeseparator(machine_program& program, const machine_operation& op);
-    static result op_check_sig_verify(machine_program& program);
-    static result op_check_sig(machine_program& program);
-    static result op_check_multisig_verify(machine_program& program);
-    static result op_check_multisig(machine_program& program);
-    static result op_check_locktime_verify(machine_program& program);
-    static result op_check_sequence_verify(machine_program& program);
+    static machine_interpreter_result op_if(machine_program& program);
+    static machine_interpreter_result op_notif(machine_program& program);
+    static machine_interpreter_result op_else(machine_program& program);
+    static machine_interpreter_result op_endif(machine_program& program);
+    static machine_interpreter_result op_verify(machine_program& program);
+    static machine_interpreter_result op_return(machine_program& program);
+    static machine_interpreter_result op_to_alt_stack(machine_program& program);
+    static machine_interpreter_result op_from_alt_stack(machine_program& program);
+    static machine_interpreter_result op_drop2(machine_program& program);
+    static machine_interpreter_result op_dup2(machine_program& program);
+    static machine_interpreter_result op_dup3(machine_program& program);
+    static machine_interpreter_result op_over2(machine_program& program);
+    static machine_interpreter_result op_rot2(machine_program& program);
+    static machine_interpreter_result op_swap2(machine_program& program);
+    static machine_interpreter_result op_if_dup(machine_program& program);
+    static machine_interpreter_result op_depth(machine_program& program);
+    static machine_interpreter_result op_drop(machine_program& program);
+    static machine_interpreter_result op_dup(machine_program& program);
+    static machine_interpreter_result op_nip(machine_program& program);
+    static machine_interpreter_result op_over(machine_program& program);
+    static machine_interpreter_result op_pick(machine_program& program);
+    static machine_interpreter_result op_roll(machine_program& program);
+    static machine_interpreter_result op_rot(machine_program& program);
+    static machine_interpreter_result op_swap(machine_program& program);
+    static machine_interpreter_result op_tuck(machine_program& program);
+    static machine_interpreter_result op_size(machine_program& program);
+    static machine_interpreter_result op_equal(machine_program& program);
+    static machine_interpreter_result op_equal_verify(machine_program& program);
+    static machine_interpreter_result op_add1(machine_program& program);
+    static machine_interpreter_result op_sub1(machine_program& program);
+    static machine_interpreter_result op_negate(machine_program& program);
+    static machine_interpreter_result op_abs(machine_program& program);
+    static machine_interpreter_result op_not(machine_program& program);
+    static machine_interpreter_result op_nonzero(machine_program& program);
+    static machine_interpreter_result op_add(machine_program& program);
+    static machine_interpreter_result op_sub(machine_program& program);
+    static machine_interpreter_result op_bool_and(machine_program& program);
+    static machine_interpreter_result op_bool_or(machine_program& program);
+    static machine_interpreter_result op_num_equal(machine_program& program);
+    static machine_interpreter_result op_num_equal_verify(machine_program& program);
+    static machine_interpreter_result op_num_not_equal(machine_program& program);
+    static machine_interpreter_result op_less_than(machine_program& program);
+    static machine_interpreter_result op_greater_than(machine_program& program);
+    static machine_interpreter_result op_less_than_or_equal(machine_program& program);
+    static machine_interpreter_result op_greater_than_or_equal(machine_program& program);
+    static machine_interpreter_result op_min(machine_program& program);
+    static machine_interpreter_result op_max(machine_program& program);
+    static machine_interpreter_result op_within(machine_program& program);
+    static machine_interpreter_result op_ripemd160(machine_program& program);
+    static machine_interpreter_result op_sha1(machine_program& program);
+    static machine_interpreter_result op_sha256(machine_program& program);
+    static machine_interpreter_result op_hash160(machine_program& program);
+    static machine_interpreter_result op_hash256(machine_program& program);
+    static machine_interpreter_result op_codeseparator(machine_program& program, const machine_operation& op);
+    static machine_interpreter_result op_check_sig_verify(machine_program& program);
+    static machine_interpreter_result op_check_sig(machine_program& program);
+    static machine_interpreter_result op_check_multisig_verify(machine_program& program);
+    static machine_interpreter_result op_check_multisig(machine_program& program);
+    static machine_interpreter_result op_check_locktime_verify(machine_program& program);
+    static machine_interpreter_result op_check_sequence_verify(machine_program& program);
 
     /// Run program script.
     static error_code run(machine_program& program);
@@ -120,7 +121,7 @@ public:
     static error_code run(const machine_operation& op, machine_program& program);
 
 //private:
-//    static result run_op(const machine_operation& op, machine_program& program);
+//    static machine_interpreter_result run_op(const machine_operation& op, machine_program& program);
 };
 
 } // namespace api

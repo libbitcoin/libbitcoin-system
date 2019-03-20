@@ -5,6 +5,8 @@
 
 %import <stdint.i>
 
+%ignore getValue();
+
 %import <bitcoin/bitcoin/define.hpp>
 %import <bitcoin/bitcoin/compat.hpp>
 %import <bitcoin-ext.i>
@@ -54,10 +56,14 @@
 //%apply int32_t* {int32_t& out_value}
 //%rename(op_iterator) libbitcoin::program::operation::iterator;
 %import "bitcoin/bitcoin/machine/program.hpp"
+%ignore setValue(machine::program::stack_iterator value);
 %include "bitcoin/machine_stack_iterator.hpp"
+%ignore setValue(machine::program::op_iterator value);
 %include "bitcoin/machine_op_iterator.hpp"
 %include "bitcoin/machine_program.hpp"
 
+%ignore setValue(machine::interpreter::result value);
+%include "bitcoin/machine_interpreter_result.hpp"
 
 %import "bitcoin/bitcoin/machine/interpreter.hpp"
 %include "bitcoin/machine_interpreter.hpp"
