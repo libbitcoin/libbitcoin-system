@@ -61,7 +61,7 @@ public:
     wallet_stealth_address(const wallet_stealth_address& other);
     wallet_stealth_address(const utility_binary& filter, const math_ec_compressed& scan_key,
         const math_point_list& spend_keys, uint8_t signatures=0,
-        uint8_t version=mainnet_p2kh);
+        uint8_t version=wallet::stealth_address::mainnet_p2kh);
 
     /// Operators.
 //    bool operator<(const wallet_stealth_address& other) const;

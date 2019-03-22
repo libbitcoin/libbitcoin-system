@@ -46,8 +46,9 @@ namespace api {
 //typedef byte_array<hd_key_size> hd_key;
 
 /// Key derivation information used in the serialization format.
-struct BC_API wallet_hd_lineage : wallet::hd_lineage
+class BC_API wallet_hd_lineage
 {
+public:
 //    uint64_t prefixes;
 //    uint8_t depth;
 //    uint32_t parent_fingerprint;
@@ -56,6 +57,15 @@ struct BC_API wallet_hd_lineage : wallet::hd_lineage
 //    bool operator==(const hd_lineage& other) const;
     bool eq(const wallet_hd_lineage& other) const;
 //    bool operator!=(const hd_lineage& other) const;
+    wallet::hd_lineage getValue() {
+		return value;
+	}
+
+	void setValue(wallet::hd_lineage value) {
+		this->value = value;
+	}
+private:
+	wallet::hd_lineage value;
 };
 
 //class hd_private;

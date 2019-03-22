@@ -30,9 +30,10 @@
 #include <utility_data_slice.hpp>
 //#include <bitcoin/bitcoin/utility/string.hpp>
 #include <bitcoin/bitcoin/wallet/dictionary.hpp>
+#include <math_long_hash.hpp>
 #include <wallet_dictionary.hpp>
 #include <wallet_dictionary_list.hpp>
-#include <wallet_electrum_word_list.hpp>
+#include <wallet_word_list.hpp>
 
 namespace libbitcoin {
 //namespace wallet {
@@ -58,7 +59,7 @@ namespace api {
  * selection. The mnemonic can later be converted to a seed for use in wallet
  * creation. Entropy byte count must be evenly divisible by 4.
  */
-BC_API wallet_electrum_word_list create_mnemonic(utility_data_slice entropy,
+BC_API wallet_word_list create_mnemonic(utility_data_slice entropy,
     const wallet_dictionary &lexicon=wallet::language::en);
 
 /**
@@ -66,19 +67,19 @@ BC_API wallet_electrum_word_list create_mnemonic(utility_data_slice entropy,
  * words are spelled correctly and the checksum matches.
  * The words must have been created using mnemonic encoding.
  */
-BC_API bool validate_mnemonic(const wallet_electrum_word_list& mnemonic,
+BC_API bool validate_mnemonic(const wallet_word_list& mnemonic,
     const wallet_dictionary &lexicon);
 
 /**
  * Checks that a mnemonic is valid in at least one of the provided languages.
  */
-BC_API bool validate_mnemonic(const wallet_electrum_word_list& mnemonic,
+BC_API bool validate_mnemonic(const wallet_word_list& mnemonic,
     const wallet_dictionary_list& lexicons=wallet::language::all);
 
 /**
  * Convert a mnemonic with no passphrase to a wallet-generation seed.
  */
-BC_API long_hash decode_mnemonic(const wallet_electrum_word_list& mnemonic);
+BC_API math_long_hash decode_mnemonic(const wallet_word_list& mnemonic);
 
 #ifdef WITH_ICU
 
@@ -86,7 +87,7 @@ BC_API long_hash decode_mnemonic(const wallet_electrum_word_list& mnemonic);
  * Convert a mnemonic and passphrase to a wallet-generation seed.
  * Any passphrase can be used and will change the resulting seed.
  */
-BC_API long_hash decode_mnemonic(const wallet_electrum_word_list& mnemonic,
+BC_API long_hash decode_mnemonic(const wallet_word_list& mnemonic,
     const std::string& passphrase);
 
 #endif

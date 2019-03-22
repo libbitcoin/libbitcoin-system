@@ -32,6 +32,7 @@
 #include <utility_data_slice.hpp>
 #include <wallet_ec_private.hpp>
 #include <wallet_message_signature.hpp>
+#include <wallet_payment_address.hpp>
 
 namespace libbitcoin {
 //namespace wallet {
