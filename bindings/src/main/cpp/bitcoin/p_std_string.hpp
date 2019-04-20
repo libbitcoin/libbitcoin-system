@@ -11,15 +11,11 @@ public:
 	p_std_string() : value_(new std::string){
   }
 
-  void set(std::string value) {
+  void setValue(std::string* value) {
       value_ = value;
   }
 
-  const std::string cast() const {
-    return value_;
-  }
-
-  std::string get() {
+  std::string* getValue() const {
     return value_;
   }
 
@@ -28,7 +24,7 @@ public:
   }
 
 private:
-  std::string value_;
+  std::string *value_;
 };
 
 } // namespace api

@@ -24,11 +24,11 @@
 //#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/witness.hpp>
-#include <chain_script.hpp>
-#include <machine_operation_iterator.hpp>
+#include <bitcoin/chain_script.hpp>
+#include <bitcoin/machine_operation_iterator.hpp>
 //#include <bitcoin/bitcoin/utility/data.hpp>
-#include <utility_data_stack.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/utility_data_stack.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/thread.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>

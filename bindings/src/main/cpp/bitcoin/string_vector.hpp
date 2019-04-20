@@ -9,31 +9,40 @@ namespace api {
 
 class string_vector {
 public:
-  string_vector() : vector_(new std::vector<std::string>){
-  }
+	string_vector() :
+			value_(new std::vector<std::string>) {
+	}
 
-  void set(size_t i, std::string value) {
-      vector_[i] = value;
-  }
+	void set(size_t i, std::string value) {
+		(*value_)[i] = value;
+	}
 
-  const std::vector<std::string> cast() const {
-    return vector_;
-  }
+	const std::vector<std::string> *cast() const {
+		return value_;
+	}
 
-  std::string get(size_t i) {
-    return vector_[i];
-  }
+	std::string get(size_t i) const {
+		return (*value_)[i];
+	}
 
-  size_t getSize() {
-    return vector_.size();
-  }
+	size_t getSize() const {
+		return value_->size();
+	}
 
-  ~string_vector() {
-	vector_.clear();
-  }
+	std::vector<std::string>* getValue() const {
+		return value_;
+	}
+
+	void setValue(std::vector<std::string>* value) {
+		this->value_ = value;
+	}
+
+	~string_vector() {
+		value_->clear();
+	}
 
 private:
-  std::vector<std::string> vector_;
+	std::vector<std::string> *value_;
 };
 
 } // namespace api

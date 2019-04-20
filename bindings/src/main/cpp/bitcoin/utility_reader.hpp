@@ -19,14 +19,14 @@
 #ifndef LIBBITCOIN__UTILITY_READER_HPP
 #define LIBBITCOIN__UTILITY_READER_HPP
 
-#include <cstddef>
-#include <cstdint>
-#include <string>
+//#include <cstddef>
+//#include <cstdint>
+//#include <string>
 #include <bitcoin/bitcoin/error.hpp>
-#include <utility_data_chunk.hpp>
-#include <math_hash_digest.hpp>
-#include <math_short_hash.hpp>
-#include <math_mini_hash.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
+#include <bitcoin/math_hash_digest.hpp>
+#include <bitcoin/math_short_hash.hpp>
+#include <bitcoin/math_mini_hash.hpp>
 
 namespace libbitcoin {
 namespace api {

@@ -19,9 +19,9 @@
 #ifndef LIBBITCOIN__CONFIG_OUTPUT_HPP
 #define LIBBITCOIN__CONFIG_OUTPUT_HPP
 
-#include <cstdint>
-#include <iostream>
-#include <string>
+//#include <cstdint>
+//#include <iostream>
+//#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/chain_script.hpp>
 #include <bitcoin/bitcoin/config/output.hpp>

@@ -26,12 +26,12 @@
 //#include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/config/printer.hpp>
-#include <config_parameter.hpp>
-#include <config_argument_list.hpp>
-#include <config_parameter_list.hpp>
-#include <config_options_description.hpp>
-#include <config_positional_options_description.hpp>
-#include <string_vector.hpp>
+#include <bitcoin/config_parameter.hpp>
+#include <bitcoin/config_argument_list.hpp>
+#include <bitcoin/config_parameter_list.hpp>
+#include <bitcoin/config_options_description.hpp>
+#include <bitcoin/config_positional_options_description.hpp>
+#include <bitcoin/string_vector.hpp>
 //#include <p_std_string.hpp>
 
 /* NOTE: don't declare 'using namespace foo' in headers. */
@@ -175,15 +175,15 @@ public:
 //    BC_PROPERTY_GET_REF(config_parameter_list, parameters);
 
 public:
-    config::printer getValue() {
+    config::printer* getValue() {
         return value;
     }
 
-    void setValue(config::printer value) {
+    void setValue(config::printer *value) {
         this->value = value;
     }
 private:
-    config::printer value;
+    config::printer* value;
 
 };
 

@@ -19,6 +19,7 @@
 //%ignore libbitcoin::machine::operation::to_data(std::ostream& stream) const;
 //%ignore libbitcoin::machine::operation::to_data(writer& sink) const;
 %import "bitcoin/bitcoin/machine/operation.hpp"
+%ignore operator=(const machine_operation& other);
 %include "bitcoin/machine_operation.hpp"
 %ignore setValue(machine::operation::list value);
 %include "bitcoin/machine_operation_list.hpp"

@@ -8,15 +8,15 @@ namespace api {
 
 class math_aes_block {
 public:
-	aes_block getValue() {
+	aes_block* getValue() {
         return value;
     }
 
-    void setValue(aes_block value) {
+    void setValue(aes_block* value) {
         this->value = value;
     }
 private:
-    aes_block value;
+    aes_block* value;
 };
 
 } // namespace api

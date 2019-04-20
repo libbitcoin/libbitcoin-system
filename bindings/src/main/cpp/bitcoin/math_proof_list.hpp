@@ -8,15 +8,15 @@ namespace api {
 
 class math_proof_list {
 public:
-	ring_signature::proof_list getValue() {
-        return value;
+	ring_signature::proof_list* getValue() {
+        return value_;
     }
 
-    void setValue(ring_signature::proof_list value) {
-        this->value = value;
+    void setValue(ring_signature::proof_list* value) {
+        value_ = value;
     }
 private:
-    ring_signature::proof_list value;
+    ring_signature::proof_list* value_;
 };
 
 } // namespace api

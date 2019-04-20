@@ -25,11 +25,11 @@
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
-#include <message_ip_address.hpp>
-#include <message_network_address.hpp>
-#include <utility_address.hpp>
-#include <utility_ipv6.hpp>
-#include <utility_endpoint.hpp>
+#include <bitcoin/message_ip_address.hpp>
+#include <bitcoin/message_network_address.hpp>
+#include <bitcoin/utility_address.hpp>
+#include <bitcoin/utility_ipv6.hpp>
+#include <bitcoin/utility_endpoint.hpp>
 
 namespace libbitcoin {
 //namespace config {
@@ -149,6 +149,8 @@ public:
      * @return  The authority converted to a network address.
      */
     message_network_address to_network_address() const;
+
+    config_authority operator=(const config::authority);
 
     /**
      * Override the equality operator.

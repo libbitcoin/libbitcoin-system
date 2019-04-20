@@ -1,7 +1,7 @@
 #ifndef LIBBITCOIN__UTILITY_DATA_CHUNK_HPP
 #define LIBBITCOIN__UTILITY_DATA_CHUNK_HPP
 
-#include <uint8_t_vector.hpp>
+#include <bitcoin/uint8_t_vector.hpp>
 
 namespace libbitcoin {
 namespace api {

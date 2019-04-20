@@ -23,7 +23,7 @@
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/point_value.hpp>
-#include <chain_point.hpp>
+#include <bitcoin/chain_point.hpp>
 
 namespace libbitcoin {
 //namespace chain {
@@ -64,15 +64,15 @@ public:
 //    uint64_t value() const;
 //    void set_value(uint64_t value);
 
-    chain::point_value getValue() {
-        return value;
+    chain::point_value* getValue() const {
+        return value_;
     }
 
-    void setValue(chain::point_value value) {
-        this->value = value;
+    void setValue(chain::point_value* value) {
+        value_ = value;
     }
 private:
-    chain::point_value value;
+    chain::point_value* value_;
 //    uint64_t value_;
 };
 

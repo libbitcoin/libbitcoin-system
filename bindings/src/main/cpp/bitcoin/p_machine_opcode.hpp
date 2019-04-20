@@ -8,27 +8,36 @@ namespace api {
 
 class p_machine_opcode {
 public:
-	p_machine_opcode() : value_(new machine::opcode){
-  }
+	p_machine_opcode() :
+			value_(new libbitcoin::machine::opcode) {
+	}
 
-  void set(machine::opcode value) {
-      value_ = value;
-  }
+	~p_machine_opcode() {
+		delete value_;
+	}
 
-  const machine::opcode cast() const {
-    return value_;
-  }
+	void set(libbitcoin::machine::opcode *value) {
+		value_ = value;
+	}
 
-  machine::opcode get() {
-    return value_;
-  }
+	const libbitcoin::machine::opcode *cast() const {
+		return value_;
+	}
 
-  ~p_machine_opcode() {
-	delete value_;
-  }
+	libbitcoin::machine::opcode* get() {
+		return value_;
+	}
+
+	libbitcoin::machine::opcode* getValue() {
+        return value_;
+    }
+
+    void setValue(libbitcoin::machine::opcode* value) {
+        value_ = value;
+    }
 
 private:
-  machine::opcode value_;
+	libbitcoin::machine::opcode *value_;
 };
 
 } // namespace api

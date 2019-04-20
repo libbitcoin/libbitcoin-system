@@ -8,15 +8,15 @@ namespace api {
 
 class math_recoverable_signature {
 public:
-	recoverable_signature getValue() {
-        return value;
+	recoverable_signature* getValue() {
+        return value_;
     }
 
-    void setValue(recoverable_signature value) {
-        this->value = value;
+    void setValue(recoverable_signature* value) {
+        value_ = value;
     }
 private:
-    recoverable_signature value;
+    recoverable_signature* value_;
 };
 
 } // namespace api

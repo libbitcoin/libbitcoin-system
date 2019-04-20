@@ -23,7 +23,7 @@
 #include <bitcoin/bitcoin/define.hpp>
 //#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/chain/compact.hpp>
-#include <math_uint256_t.hpp>
+#include <bitcoin/math_uint256_t.hpp>
 
 namespace libbitcoin {
 //namespace chain {

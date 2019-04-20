@@ -31,28 +31,28 @@ class BC_API config_hash256_list {
 public:
 
 	config_hash256_list() :
-			value(new config::hash256::list()) {
+			value_(new config::hash256::list) {
 	}
 
-	config::hash256 get(size_t i) {
-		return config_hash256_list::value[i];
+	config::hash256& get(size_t i) {
+		return (*value_)[i];
 	}
 
 	void set(size_t i, config::hash256 *t) {
-		config_hash256_list::value[i] = *t;
+		(*value_)[i] = *t;
 	}
 
-	config::hash256::list getValue() {
-		return value;
+	config::hash256::list* getValue() {
+		return value_;
 	}
 
 	size_t getSize() {
-		return value.size();
+		return value_->size();
 	}
 
 private:
 
-	config::hash256::list value;
+	config::hash256::list* value_;
 
 };
 

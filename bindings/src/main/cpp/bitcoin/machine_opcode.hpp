@@ -20,17 +20,17 @@
 #define LIBBITCOIN__MACHINE_OPCODE_HPP
 
 #include <cstdint>
-#include <string>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/utility_assert.hpp>
+//#include <string>
+//#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/machine/opcode.hpp>
-#include <bitcoin/utility_data.hpp>
+//#include <bitcoin/utility_assert.hpp>
+//#include <bitcoin/utility_data.hpp>
 
 namespace libbitcoin {
 //namespace machine {
 namespace api {
 
-enum class machine_opcode : machine::opcode
+enum class machine_opcode : uint8_t //: machine::opcode
 {
     //-------------------------------------------------------------------------
     // is_relaxed_push, is_push (excluding reserved_80)

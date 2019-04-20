@@ -24,8 +24,8 @@
 //#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
-#include <message_ip_address.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/message_ip_address.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/data.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
@@ -57,6 +57,8 @@ public:
 //      : timestamp_(timestamp), services_(services), ip_(ip), port_(port)
 //    {
 //    }
+
+    message_network_address(const message_network_address&);
 
     message_network_address(uint32_t timestamp, uint64_t services, message_ip_address&& ip,
         uint16_t port);
@@ -92,8 +94,8 @@ public:
     void reset();
     size_t serialized_size(uint32_t version, bool with_timestamp) const;
 
-//    message_network_address& operator=(message_network_address&& other);
-//    message_network_address& operator=(const message_network_address& other);
+    message_network_address& operator=(message_network_address&& other);
+    message_network_address& operator=(const message_network_address& other);
     message_network_address& assign(const message_network_address& other);
 
 //    bool operator==(const message_network_address& other) const;
@@ -119,25 +121,34 @@ private:
 };
 
 // version::services::none
-BC_CONSTEXPR uint32_t no_services = 0;
-BC_CONSTEXPR uint32_t no_timestamp = 0;
-BC_CONSTEXPR uint16_t unspecified_ip_port = 0;
-BC_CONSTEXPR message_ip_address unspecified_ip_address
-{
-    {
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00
-    }
-};
-
-// Defaults to full node services.
-BC_CONSTEXPR message_network_address unspecified_network_address
-{
-    no_timestamp,
-    no_services,
-    unspecified_ip_address,
-    unspecified_ip_port
-};
+//BC_CONSTEXPR uint32_t no_services = 0;
+//BC_CONSTEXPR uint32_t no_timestamp = 0;
+//BC_CONSTEXPR uint16_t unspecified_ip_port = 0;
+//BC_CONSTEXPR message::ip_address unspecified_ip_address
+//{
+//    {
+//        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+//        0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00
+//    }
+//};
+//
+//BC_CONSTEXPR message_ip_address message_unspecified_ip_address {
+//	unspecified_ip_address
+//};
+//
+//// Defaults to full node services.
+//BC_CONSTEXPR message::network_address unspecified_network_address
+//{
+//    no_timestamp,
+//    no_services,
+//    unspecified_ip_address,
+//    unspecified_ip_port
+//};
+//
+//BC_CONSTEXPR message_network_address message_unspecified_network_address
+//{
+//	unspecified_network_address
+//};
 
 } // namespace api
 //} // namespace message

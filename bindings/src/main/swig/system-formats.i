@@ -1,20 +1,21 @@
 %module formats
 %{
 #include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system_formats.hpp>
 %}
 
 %import "bitcoin/bitcoin/compat.h"
 %import "bitcoin/bitcoin/compat.hpp"
 %import "bitcoin/bitcoin/define.hpp"
 
-%import "bitcoin-ext.i"
-//%import "bitcoin-ext-typemap.i"
+%import "system-ext.i"
+//%import "system-ext-typemap.i"
 
-%import "bitcoin-math-ext.i"
-//%import "bitcoin-math-ext-typemap.i"
+%import "system-math-ext.i"
+//%import "system-math-ext-typemap.i"
 
-%import "bitcoin-utility-ext.i"
-//%import "bitcoin-utility-ext-typemap.i"
+%import "system-utility-ext.i"
+//%import "system-utility-ext-typemap.i"
 
 //%import "p_u_long_long.i"
 //%apply unsigned long long *OUTVALUE { uint64_t& out };

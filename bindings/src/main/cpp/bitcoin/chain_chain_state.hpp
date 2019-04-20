@@ -19,22 +19,23 @@
 #ifndef LIBBITCOIN__CHAIN_CHAIN_STATE_HPP
 #define LIBBITCOIN__CHAIN_CHAIN_STATE_HPP
 
-#include <cstddef>
-#include <cstdint>
-#include <memory>
+//#include <cstddef>
+//#include <cstdint>
+//#include <memory>
 //#include <deque>
 //#include <bitcoin/bitcoin/constants.hpp>
-//#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/config/settings.hpp>
+#include <bitcoin/bitcoin/define.hpp>
+//#undef LIBBITCOIN_CHAIN_CHAIN_STATE_HPP
+#include <bitcoin/bitcoin/chain/chain_state.hpp>
+#include <bitcoin/config_settings.hpp>
 //#include <bitcoin/bitcoin/machine/opcode.hpp>
 //#include <bitcoin/bitcoin/machine/rule_fork.hpp>
-#include <bitcoin/bitcoin/chain/chain_state.hpp>
-#include <config_checkpoint.hpp>
-#include <config_checkpoint_list.hpp>
-#include <math_hash_digest.hpp>
-#include <chain_chain_state_map.hpp>
-#include <chain_chain_state_data.hpp>
-#include <chain_header.hpp>
+#include <bitcoin/config_checkpoint.hpp>
+#include <bitcoin/config_checkpoint_list.hpp>
+#include <bitcoin/math_hash_digest.hpp>
+#include <bitcoin/chain_header.hpp>
+#include <bitcoin/chain_chain_state_map.hpp>
+#include <bitcoin/chain_chain_state_data.hpp>
 
 namespace libbitcoin {
 
@@ -133,13 +134,16 @@ public:
 //        } timestamp;
 //    };
 
+	chain_chain_state( chain::chain_state* value) : value_(value) {
+	}
+
     /// Checkpoints must be ordered by height with greatest at back.
     static chain_chain_state_map get_map(size_t height, const config_checkpoint_list& checkpoints,
         uint32_t forks, size_t retargeting_interval, size_t activation_sample,
         const config_checkpoint& bip9_bit0_active_checkpoint,
         const config_checkpoint& bip9_bit1_active_checkpoint);
 
-    static uint32_t signal_version(uint32_t forks, const libbitcoin::config::settings& settings);
+    static uint32_t signal_version(uint32_t forks, const config_settings& settings);
 
     static uint32_t minimum_timespan(uint32_t retargeting_interval_seconds,
         uint32_t retargeting_factor);
@@ -149,20 +153,20 @@ public:
         uint32_t block_spacing_seconds);
 
     /// Create pool state from top chain top block state.
-    chain_chain_state(const chain_chain_state& top, const libbitcoin::config::settings& settings);
+    chain_chain_state(const chain_chain_state& top, const config_settings& settings);
 
     /// Create block state from tx pool chain state of same height.
     chain_chain_state(const chain_chain_state& pool, const chain_block& block,
-        const libbitcoin::config::settings& settings);
+        const config_settings& settings);
 
     /// Create header state from header pool chain state of parent block.
     chain_chain_state(const chain_chain_state& parent, const chain_header& header,
-        const libbitcoin::config::settings& settings);
+        const config_settings& settings);
 
     /// Checkpoints must be ordered by height with greatest at back.
     /// Forks and checkpoints must match those provided for map creation.
     chain_chain_state(chain_chain_state_data&& values, const config_checkpoint_list& checkpoints, uint32_t forks,
-        uint32_t stale_seconds, const libbitcoin::config::settings& settings);
+        uint32_t stale_seconds, const config_settings& settings);
 
     /// Properties.
     const math_hash_digest& hash() const;
@@ -202,20 +206,20 @@ public:
 //    };
 
 //    static activations activation(const data& values, uint32_t forks,
-//        const libbitcoin::config::settings& settings);
+//        const config_settings& settings);
 //    static uint32_t median_time_past(const data& values, uint32_t forks);
 //    static uint32_t work_required(const data& values, uint32_t forks,
-//        const libbitcoin::config::settings& settings);
+//        const config_settings& settings);
 
-    chain::chain_state getValue() {
-        return value;
+    chain::chain_state* getValue() {
+        return value_;
     }
 
-    void setValue(chain::chain_state value) {
-        this->value = value;
-    }
+//    void setValue(chain::chain_state value) {
+//        this->value = value;
+//    }
 private:
-    chain::chain_state value;
+    chain::chain_state* value_;
 
 //private:
 //    static size_t bits_count(size_t height, uint32_t forks,
@@ -230,7 +234,7 @@ private:
 //    static size_t bip9_bit1_height(size_t height,
 //        const config::checkpoint& bip9_bit1_active_checkpoint);
 //
-//    static data to_pool(const chain_state& top, const libbitcoin::config::settings& settings);
+//    static data to_pool(const chain_state& top, const config_settings& settings);
 //    static data to_block(const chain_state& pool, const block& block,
 //        const config::checkpoint& bip9_bit0_active_checkpoint,
 //        const config::checkpoint& bip9_bit1_active_checkpoint);

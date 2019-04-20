@@ -23,10 +23,10 @@
 //#include <string>
 //#include <vector>
 #include <bitcoin/bitcoin/config/script.hpp>
-#include <chain_script.hpp>
-#include <bitcoin/define.hpp>
-#include <string_vector.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/chain_script.hpp>
+#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/string_vector.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 
 namespace libbitcoin {
 //namespace config {

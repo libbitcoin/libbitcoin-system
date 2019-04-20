@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN__MACHINE_SCRIPT_PATTERN_HPP
 #define LIBBITCOIN__MACHINE_SCRIPT_PATTERN_HPP
 
-#include <bitcoin/bitcoin/machine/script_pattern.hpp>
+//#include <bitcoin/bitcoin/machine/script_pattern.hpp>
 
 namespace libbitcoin {
 //namespace machine {
@@ -27,7 +27,7 @@ namespace api {
 
 /// Script patterms.
 /// Comments from: bitcoin.org/en/developer-guide#signature-hash-types
-enum class machine_script_pattern : machine::script_pattern
+enum class machine_script_pattern //: machine::script_pattern
 {
     /// Null Data
     /// Pubkey Script: OP_RETURN <0 to 80 bytes of data> (formerly 40 bytes)

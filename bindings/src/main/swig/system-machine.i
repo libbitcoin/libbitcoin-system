@@ -1,6 +1,7 @@
 %module machine
 %{
 #include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system_machine.hpp>
 %}
 
 %import <stdint.i>
@@ -9,14 +10,14 @@
 
 %import <bitcoin/bitcoin/define.hpp>
 %import <bitcoin/bitcoin/compat.hpp>
-%import <bitcoin-ext.i>
-//%import <bitcoin-ext-typemap.i>
-%import <bitcoin-chain-ext.i>
-//%import <bitcoin-chain-ext-typemap.i>
-%import <bitcoin-utility-ext.i>
-//%import <bitcoin-utility-ext-typemap.i>
+%import <system-ext.i>
+//%import <system-ext-typemap.i>
+%import <system-chain-ext.i>
+//%import <system-chain-ext-typemap.i>
+%import <system-utility-ext.i>
+//%import <system-utility-ext-typemap.i>
 
-%include <bitcoin-machine-ext.i>
+%include <system-machine-ext.i>
 
 //%rename(gt) libbitcoin::machine::number::operator>(int64_t value) const;
 //%rename(lt) libbitcoin::machine::number::operator<(int64_t value) const;
@@ -60,6 +61,7 @@
 %include "bitcoin/machine_stack_iterator.hpp"
 %ignore setValue(machine::program::op_iterator value);
 %include "bitcoin/machine_op_iterator.hpp"
+%ignore setValue(machine::program* value);
 %include "bitcoin/machine_program.hpp"
 
 %ignore setValue(machine::interpreter::result value);

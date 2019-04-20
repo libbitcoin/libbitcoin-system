@@ -31,19 +31,20 @@
 //#include <bitcoin/bitcoin/math/checksum.hpp>
 //#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 //#include <bitcoin/bitcoin/math/hash.hpp>
-#include <math_short_hash.hpp>
-#include <utility_data_chunk.hpp>
-#include <wallet_ec_private.hpp>
-#include <wallet_ec_public.hpp>
-#include <wallet_payment_address.hpp>
-#include <wallet_payment_address_list.hpp>
+#include <bitcoin/math_short_hash.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
+#include <bitcoin/wallet_ec_private.hpp>
+#include <bitcoin/wallet_ec_public.hpp>
+#include <bitcoin/wallet_payment.hpp>
+//#include <bitcoin/wallet_payment_address.hpp>
+#include <bitcoin/wallet_payment_address_list.hpp>
 
 namespace libbitcoin {
 //namespace wallet {
 namespace api {
 
-static BC_CONSTEXPR size_t payment_size = 1u + short_hash_size + checksum_size;
-typedef byte_array<payment_size> payment;
+//static BC_CONSTEXPR size_t payment_size = 1u + short_hash_size + checksum_size;
+//typedef byte_array<payment_size> payment;
 
 /// A class for working with non-stealth payment addresses.
 class BC_API wallet_payment_address
@@ -70,7 +71,7 @@ public:
     wallet_payment_address();
     wallet_payment_address(wallet_payment_address&& other);
     wallet_payment_address(const wallet_payment_address& other);
-    wallet_payment_address(const payment& decoded);
+    wallet_payment_address(const wallet_payment& decoded);
     wallet_payment_address(const wallet_ec_private& secret);
     wallet_payment_address(const std::string& address);
     wallet_payment_address(math_short_hash&& hash, uint8_t version=mainnet_p2kh);
@@ -85,7 +86,7 @@ public:
     bool eq(const wallet_payment_address& other) const;
 //    bool operator!=(const wallet_payment_address& other) const;
     bool ne(const wallet_payment_address& other) const;
-//    wallet_payment_address& operator=(const wallet_payment_address& other);
+    wallet_payment_address& operator=(const wallet_payment_address& other);
     wallet_payment_address& assign(const wallet_payment_address& other);
 //    friend std::istream& operator>>(std::istream& in, wallet_payment_address& to);
 //    friend std::ostream& operator<<(std::ostream& out,
@@ -105,17 +106,17 @@ public:
     const math_short_hash& hash() const;
 
     /// Methods.
-    payment to_payment() const;
+    wallet_payment to_payment() const;
 
-    wallet::payment_address getValue() {
-		return value;
+    wallet::payment_address* getValue() const {
+		return value_;
 	}
 
-	void setValue(wallet::payment_address value) {
-		this->value = value;
+	void setValue(wallet::payment_address* value) {
+		value_ = value;
 	}
 private:
-	wallet::payment_address value;
+	wallet::payment_address* value_;
 //    /// Validators.
 //    static bool is_address(data_slice decoded);
 //

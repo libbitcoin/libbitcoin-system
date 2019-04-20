@@ -2,7 +2,8 @@
 cd `dirname "$0"`
 export BASE_DIR=`pwd`
 export GROUP_ID=org.libbitcoin
-export ARTIFACT_ID=libbitcoin
+export SUB_ARTIFACT_ID=system
+export ARTIFACT_ID=libbitcoin-$SUB_ARTIFACT_ID
 export LIB_NAME=$ARTIFACT_ID
 export MAJOR=1.
 export MINOR=0.

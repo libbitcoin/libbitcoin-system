@@ -19,24 +19,24 @@
 #ifndef LIBBITCOIN__CONFIG_BASE16_HPP
 #define LIBBITCOIN__CONFIG_BASE16_HPP
 
-#include <array>
-#include <iostream>
-#include <string>
-#include <cstdint>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/config/base16.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/utility_data_chunk.hpp>
+//#include <array>
+//#include <iostream>
+//#include <string>
+//#include <cstdint>
+//#include <bitcoin/bitcoin/define.hpp>
+//#include <bitcoin/bitcoin/config/base16.hpp>
+//#include <bitcoin/bitcoin/utility/data.hpp>
+//#include <bitcoin/utility_data_chunk.hpp>
 #include <bitcoin/utility_data_slice.hpp>
 
 namespace libbitcoin {
-namespace config {
+//namespace config {
 namespace api {
 
 /**
  * Serialization helper for base16 encoded data.
  */
-class BC_API config_base16 : public config::base16
+class BC_API config_base16
 {
 public:
 
@@ -55,7 +55,7 @@ public:
      * Initialization constructor.
      * @param[in]  value  The value to initialize with.
      */
-    config_base16(const libbitcoin::api::utility_data_chunk& value);
+    config_base16(const utility_data_chunk& value);
 
     /**
      * Initialization constructor.
@@ -63,7 +63,7 @@ public:
      */
     template<size_t Size>
     config_base16(const byte_array<Size>& value)
-      : value_(value.begin(), value.end())
+      : value_(value)
     {
     }
 
@@ -78,14 +78,14 @@ public:
      * @return  This object's value cast to internal type reference.
      */
 //    operator const data_chunk&() const;
-    const libbitcoin::api::utility_data_chunk& to_data_chunk() const;
+    const utility_data_chunk& to_data_chunk() const;
 
     /**
      * Overload cast to generic data reference.
      * @return  This object's value cast to a generic data.
      */
 //    operator data_slice() const;
-    libbitcoin::api::utility_data_slice to_data_slice() const;
+    utility_data_slice to_data_slice() const;
 
     /**
      * Overload stream in. If input is invalid sets no bytes in argument.
@@ -103,7 +103,16 @@ public:
      */
 //    friend std::ostream& operator<<(std::ostream& output, const base16& argument);
 
-//private:
+public:
+    config::base16* getValue() {
+        return value_;
+    }
+
+    void setValue(config::base16* value) {
+        value_ = value;
+    }
+private:
+    config::base16* value_;
 //
 //    /**
 //     * The state of this object.
@@ -112,7 +121,7 @@ public:
 };
 
 } // namespace api
-} // namespace config
+//} // namespace config
 } // namespace libbitcoin
 
 #endif

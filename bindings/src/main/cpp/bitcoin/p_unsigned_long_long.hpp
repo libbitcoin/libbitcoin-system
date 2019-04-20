@@ -11,7 +11,7 @@ class p_unsigned_long_long {
 
 public:
   p_unsigned_long_long(size_t n) {
-    p = new unsigned char[n];
+    p = new unsigned long long[n];
     size = n;
   }
     

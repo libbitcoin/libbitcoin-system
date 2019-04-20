@@ -19,29 +19,27 @@
 #ifndef LIBBITCOIN__MACHINE_OPERATION_ITERATOR_HPP
 #define LIBBITCOIN__MACHINE_OPERATION_ITERATOR_HPP
 
-#include <bitcoin/bitcoin/machine/operation.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/machine/operation.hpp>
 //#include <bitcoin/bitcoin/error.hpp>
 
 namespace libbitcoin {
 //namespace machine {
 namespace api {
 
-class BC_API machine_operation_iterator
-{
+class BC_API machine_operation_iterator {
 public:
 
-	machine_operation_iterator()
-	: value(new machine::operation::iterator())
-	{
+	machine_operation_iterator() :
+			value_(new machine::operation::iterator()) {
 	}
 
-	machine::operation::iterator getValue() {
-		return machine_operation_iterator::value;
+	machine::operation::iterator* getValue() {
+		return value_;
 	}
 
-	void setValue(machine::operation::iterator t) {
-		machine_operation_iterator::value = t;
+	void setValue(machine::operation::iterator* t) {
+		value_ = t;
 	}
 
 //	size_t getSize() {
@@ -50,7 +48,7 @@ public:
 
 private:
 
-	 machine::operation::iterator value;
+	machine::operation::iterator* value_;
 
 };
 

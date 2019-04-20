@@ -27,15 +27,19 @@ namespace api {
 
 class math_uint256_t {
 public:
-	uint256_t getValue() {
-		return value;
+	math_uint256_t(uint256_t* value) {
+		value_ = value;
 	}
 
-	void setValue(uint256_t value) {
-		this->value = value;
+	uint256_t* getValue() {
+		return value_;
+	}
+
+	void setValue(uint256_t* value) {
+		value_ = value;
 	}
 private:
-	uint256_t value;
+	uint256_t* value_;
 
 };
 

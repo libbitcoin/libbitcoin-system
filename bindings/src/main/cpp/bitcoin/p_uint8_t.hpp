@@ -37,7 +37,7 @@ public:
     }
   }
 
-  uint8_t* cast() {
+  uint8_t* cast() const {
     return p;
   }
 

@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN__CONFIG_HEADER_HPP
 #define LIBBITCOIN__CONFIG_HEADER_HPP
 
-#include <iostream>
-#include <string>
+//#include <iostream>
+//#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/chain_header.hpp>
 #include <bitcoin/bitcoin/config/header.hpp>

@@ -15,8 +15,9 @@
 %import "bitcoin/utility_address.hpp"
 %import "bitcoin/utility_endpoint.hpp"
 %import "bitcoin/utility_ipv6.hpp"
+%ignore operator=(const config::authority);
 %include "bitcoin/config_authority.hpp"
-%ignore setValue(config::authority::list value);
+%ignore libbitcoin::api::config_authority_list::setValue(config::authority::list* value);
 %include "bitcoin/config_authority_list.hpp"
 
 //%rename(eq) libbitcoin::config::checkpoint::operator==(const checkpoint& other) const;

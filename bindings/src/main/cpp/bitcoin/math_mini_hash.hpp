@@ -12,7 +12,11 @@ class math_mini_hash {
 
 public:
 	math_mini_hash() :
-			value(new mini_hash) {
+			value_(new mini_hash) {
+	}
+
+	math_mini_hash(mini_hash hash) :
+			value_(&hash) {
 	}
 
 	/*  math_mini_hash(unsigned char *value, unsigned int n) {
@@ -31,19 +35,19 @@ public:
 	 */
 	void set(size_t i, uint8_t value) {
 		if (i < mini_hash_size) {
-			value[i] = value;
+			(*value_)[i] = value;
 		} else {
 			std::cerr << "SEVERE: index " << i << " is out of range [0;"
 					<< mini_hash_size << ")\n";
 		}
 	}
 
-	mini_hash cast() {
-		return value;
+	mini_hash* cast() {
+		return value_;
 	}
 
 	uint8_t get(size_t i) {
-		return value[i];
+		return (*value_)[i];
 	}
 
 	size_t getSize() {
@@ -51,19 +55,19 @@ public:
 	}
 
 	~math_mini_hash() {
-		delete value;
+		delete value_;
 	}
 
 public:
-	mini_hash getValue() {
-		return value;
+	mini_hash* getValue() {
+		return value_;
 	}
 
-	void setValue(mini_hash value) {
-		this->value = value;
+	void setValue(mini_hash *value) {
+		value_ = value;
 	}
 private:
-	mini_hash value;
+	mini_hash* value_;
 };
 
 } // namespace api

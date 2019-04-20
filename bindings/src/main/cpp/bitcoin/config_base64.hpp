@@ -33,7 +33,7 @@ namespace api {
 /**
  * Serialization helper for base64 encoded data.
  */
-class BC_API config_base64 : public config::base64
+class BC_API config_base64
 {
 public:
 
@@ -90,7 +90,16 @@ public:
      */
 //    friend std::ostream& operator<<(std::ostream& output, const base64& argument);
 
-//private:
+public:
+    config::base64 getValue() {
+        return value;
+    }
+
+    void setValue(config::base64 value) {
+        this->value = value;
+    }
+private:
+    config::base64 value;
 //
 //    /**
 //     * The state of this object.

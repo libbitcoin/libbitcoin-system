@@ -30,15 +30,15 @@ namespace api {
 struct chain_chain_state_data
 {
 public:
-	chain::chain_state::data getValue() {
-		return value;
+	chain::chain_state::data* getValue() {
+		return value_;
 	}
 
-	void setValue(chain::chain_state::data value) {
-		this->value = value;
+	void setValue(chain::chain_state::data* value) {
+		value_ = value;
 	}
 private:
-	chain::chain_state::data value;
+	chain::chain_state::data* value_;
 };
 
 } // api

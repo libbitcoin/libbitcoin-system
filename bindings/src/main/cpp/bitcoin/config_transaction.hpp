@@ -19,10 +19,10 @@
 #ifndef LIBBITCOIN__CONFIG_TRANSACTION_HPP
 #define LIBBITCOIN__CONFIG_TRANSACTION_HPP
 
-#include <iostream>
-#include <string>
+//#include <iostream>
+//#include <string>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
-#include <chain_transaction.hpp>
+#include <bitcoin/chain_transaction.hpp>
 #include <bitcoin/bitcoin/config/transaction.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 
@@ -65,14 +65,14 @@ public:
      * Return a reference to the data member.
      * @return  A reference to the object's internal data.
      */
-    chain::transaction& data();
+    chain_transaction& data();
 
     /**
      * Overload cast to internal type.
      * @return  This object's value cast to internal type.
      */
 //    operator const chain::transaction&() const;
-    const chain::transaction& to_chain_transaction() const;
+    const chain_transaction& to_chain_transaction() const;
 
     /**
      * Overload stream in. Throws if input is invalid.

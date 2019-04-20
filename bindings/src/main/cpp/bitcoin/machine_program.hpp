@@ -148,16 +148,15 @@ public:
     bool closed() const;
     bool succeeded() const;
 
-public:
-    machine::program getValue() {
+    machine::program* getValue() {
         return value_;
     }
 
-    void setValue(machine::program value) {
-        this->value_ = value;
+    void setValue(machine::program* value) {
+        value_ = value;
     }
 private:
-    machine::program value_;
+    machine::program* value_;
 //    // A space-efficient dynamic bitset (specialized).
 //    typedef std::vector<bool> bool_stack;
 //

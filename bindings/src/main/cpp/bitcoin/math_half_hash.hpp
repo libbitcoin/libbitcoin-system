@@ -10,10 +10,15 @@ namespace api {
 
 class math_half_hash {
 
-//public:
-//  math_half_hash() : hash(new half_hash) {
-//  }
-//
+public:
+	math_half_hash(half_hash hash) :
+			value(&hash) {
+	}
+
+	math_half_hash() :
+			value(new half_hash) {
+	}
+
 ///*  math_half_hash(unsigned char *value, unsigned int n) {
 //    p = value;
 //    size = n;
@@ -55,15 +60,15 @@ class math_half_hash {
 //private:
 //  half_hash hash;
 public:
-	half_hash getValue() {
+	half_hash* getValue() {
         return value;
     }
 
-    void setValue(half_hash value) {
+    void setValue(half_hash* value) {
         this->value = value;
     }
 private:
-    half_hash value;
+    half_hash* value;
 };
 
 } // namespace api

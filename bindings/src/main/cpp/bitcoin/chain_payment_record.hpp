@@ -26,8 +26,8 @@
 //#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/payment_record.hpp>
-#include <math_hash_digest.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/math_hash_digest.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 

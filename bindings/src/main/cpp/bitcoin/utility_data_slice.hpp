@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <bitcoin/bitcoin/utility/array_slice.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/p_uint8_t.hpp>
 //#include <bitcoin/bitcoin/utility/array_slice.hpp>
 
 namespace libbitcoin {
@@ -12,30 +13,19 @@ namespace api {
 class utility_data_slice {
 
 public:
-  utility_data_slice() : value(new libbitcoin::data_slice()){
+	utility_data_slice(p_uint8_t& data, size_t begin, size_t end) :
+			value(new libbitcoin::data_slice(data.cast()+begin, data.cast()+end)) {
   }
 
-  const libbitcoin::data_slice cast() const {
-    return value;
-  }
-
-//  size_t getSize() {
-//    return data_.size();
-//  }
-
-//  ~utility_data_slice() {
-//	data_.clear();
-//  }
-
-  libbitcoin::data_slice getValue() {
+  libbitcoin::data_slice* getValue() {
         return value;
     }
 
-    void setValue(libbitcoin::data_slice value) {
+    void setValue(libbitcoin::data_slice *value) {
         this->value = value;
     }
 private:
-    libbitcoin::data_slice value;
+    libbitcoin::data_slice *value;
 
 };
 

@@ -35,7 +35,9 @@ class BC_API utility_binary
 {
 public:
     typedef uint8_t block;
-    typedef libbitcoin::api::utility_size_type size_type;
+//    typedef libbitcoin::api::utility_size_type size_type;
+
+    typedef std::size_t size_type;
 
     static BC_CONSTEXPR size_type bits_per_block = byte_bits;
     static size_type blocks_size(size_type bit_size);

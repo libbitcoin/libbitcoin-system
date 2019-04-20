@@ -1,6 +1,7 @@
 %module wallet
 %{
 #include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system_wallet.hpp>
 %}
 
 %import "boost/functional/hash_fwd.hpp"
@@ -9,10 +10,13 @@
 %import "bitcoin/bitcoin/compat.hpp"
 %import "bitcoin/bitcoin/define.hpp"
 
+%ignore getValue();
+
 %import <bitcoin-ext.i>
 %import "bitcoin/bitcoin/chain/point.hpp"
 %import "bitcoin/bitcoin/chain/output_point.hpp"
 %import "bitcoin/bitcoin/chain/witness.hpp"
+%import "bitcoin/bitcoin/math/ec_scalar.hpp"
 
 //%import <bitcoin-ext-typemap.i>
 %import <bitcoin-chain-ext.i>
@@ -23,6 +27,7 @@
 //%import <bitcoin-utility-ext-typemap.i>
 
 %import "bitcoin/bitcoin/wallet/uri.hpp"
+%ignore setValue(wallet::uri::query_map value);
 %include "bitcoin/wallet_uri_query_map.hpp"
 %include "bitcoin/wallet_uri.hpp"
 %import "bitcoin/bitcoin/wallet/uri_reader.hpp"
@@ -37,13 +42,6 @@
 //%rename(toBoolean) libbitcoin::wallet::ec_public::operator bool() const;
 //%rename(toEc_compressed) libbitcoin::wallet::ec_public::operator const ec_compressed&() const;
 
-%import "bitcoin/bitcoin/math/ec_scalar.hpp"
-%import "bitcoin/bitcoin/math/ec_point.hpp"
-%import "bitcoin/bitcoin/wallet/ec_public.hpp"
-%import "bitcoin/math_ec_point.hpp"
-%import "bitcoin/math_ec_scalar.hpp"
-%include "bitcoin/wallet_ec_public.hpp"
-
 //%rename(lt) libbitcoin::wallet::ec_private::operator<(const ec_private& other) const;
 //%rename(eq) libbitcoin::wallet::ec_private::operator==(const ec_private& other) const;
 //%rename(ne) libbitcoin::wallet::ec_private::operator!=(const ec_private& other) const;
@@ -52,10 +50,20 @@
 //%ignore operator<<(std::ostream& out, const ec_private& of);
 //%rename(toBoolean) libbitcoin::wallet::ec_private::operator bool() const;
 //%rename(toEc_secret) libbitcoin::wallet::ec_private::operator const ec_secret&() const;
+%ignore setValue(wallet::wif_compressed value);
 %include "bitcoin/wallet_wif_compressed.hpp"
+%ignore setValue(wallet::wif_uncompressed value);
 %include "bitcoin/wallet_wif_uncompressed.hpp"
 %import "bitcoin/bitcoin/wallet/ec_private.hpp"
+%import "bitcoin/math_ec_scalar.hpp"
 %include "bitcoin/wallet_ec_private.hpp"
+
+%import "bitcoin/bitcoin/math/ec_scalar.hpp"
+%import "bitcoin/bitcoin/math/ec_point.hpp"
+%import "bitcoin/bitcoin/wallet/ec_public.hpp"
+%import "bitcoin/math_ec_point.hpp"
+%import "bitcoin/math_ec_scalar.hpp"
+%include "bitcoin/wallet_ec_public.hpp"
 
 //%ignore libbitcoin::wallet::payment_address::payment_address(payment_address&& other);
 //%ignore libbitcoin::wallet::payment_address::payment_address(short_hash&& hash, uint8_t version=mainnet_p2kh);
@@ -100,12 +108,17 @@
 
 %include "bitcoin/wallet_bitcoin_uri.hpp"
 %import "bitcoin/bitcoin/wallet/dictionary.hpp"
+%ignore setValue(wallet::dictionary value);
 %include "bitcoin/wallet_dictionary.hpp"
 
 %import "bitcoin/bitcoin/wallet/encrypted_keys.hpp"
+%ignore setValue(wallet::ek_seed value);
 %include "bitcoin/wallet_ek_seed.hpp"
+%ignore setValue(wallet::encrypted_private value);
 %include "bitcoin/wallet_encrypted_private.hpp"
+%ignore setValue(wallet::encrypted_public value);
 %include "bitcoin/wallet_encrypted_public.hpp"
+%ignore setValue(wallet::encrypted_token value);
 %include "bitcoin/wallet_encrypted_token.hpp"
 %include "bitcoin/wallet_encrypted_keys.hpp"
 
@@ -149,8 +162,11 @@
 //%rename(electrum_decode_mnemonic) libbitcoin::wallet::electrum::decode_mnemonic(const word_list& mnemonic);
 
 %import "bitcoin/bitcoin/wallet/electrum_dictionary.hpp"
+%ignore setValue(wallet::electrum::word_list value);
 %include "bitcoin/wallet_electrum_word_list.hpp"
+%ignore setValue(wallet::dictionary_v1 value);
 %include "bitcoin/wallet_electrum_dictionary.hpp"
+%ignore setValue(wallet::dictionary_list value);
 %include "bitcoin/wallet_dictionary_list.hpp"
 %import "bitcoin/bitcoin/wallet/electrum.hpp"
 %import "bitcoin/math_long_hash.hpp"
@@ -168,7 +184,9 @@
 //%rename(toEc_compressed) operator const ec_compressed&() const;
 
 %import "bitcoin/bitcoin/wallet/hd_public.hpp"
+%ignore setValue(wallet::hd_chain_code value);
 %include "bitcoin/wallet_hd_chain_code.hpp"
+%ignore setValue(wallet::hd_key value);
 %include "bitcoin/wallet_hd_key.hpp"
 %include "bitcoin/wallet_hd_public.hpp"
 
@@ -189,8 +207,12 @@
 //%apply bool * {bool& out_compressed}
 //%apply uint8_t * {uint8_t& out_recovery_id}
 %import "bitcoin/bitcoin/wallet/message.hpp"
+%ignore setValue(wallet::message_signature value);
 %include "bitcoin/wallet_message_signature.hpp"
 %include "bitcoin/wallet_message.hpp"
+
+%ignore setValue(wallet::word_list value);
+%include "bitcoin/wallet_word_list.hpp"
 
 %import "bitcoin/bitcoin/wallet/mini_keys.hpp"
 %include "bitcoin/wallet_mini_keys.hpp"

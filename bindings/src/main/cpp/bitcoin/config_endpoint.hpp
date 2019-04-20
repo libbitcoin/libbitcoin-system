@@ -19,11 +19,11 @@
 #ifndef LIBBITCOIN__CONFIG_ENDPOINT_HPP
 #define LIBBITCOIN__CONFIG_ENDPOINT_HPP
 
-#include <cstdint>
-#include <iostream>
-#include <string>
-#include <vector>
-#include <boost/asio.hpp>
+//#include <cstdint>
+//#include <iostream>
+//#include <string>
+//#include <vector>
+//#include <boost/asio.hpp>
 #include <bitcoin/config_authority.hpp>
 #include <bitcoin/utility_address.hpp>
 #include <bitcoin/utility_endpoint.hpp>

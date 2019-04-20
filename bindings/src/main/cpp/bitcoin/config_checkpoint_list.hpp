@@ -35,32 +35,28 @@ public:
 	}
 
 	config::checkpoint get(size_t i) {
-		return value[i];
+		return (*value)[i];
 	}
 
 	void set(size_t i, config::checkpoint *t) {
-		value[i] = *t;
-	}
-
-	config::checkpoint::list getTransactions() {
-		return value;
+		(*value)[i] = *t;
 	}
 
 	size_t getSize() {
-		return value.size();
+		return value->size();
 	}
 
-	config::checkpoint::list getValue() {
+	config::checkpoint::list* getValue() {
 		return value;
 	}
 
-	void setValue(config::checkpoint::list value) {
+	void setValue(config::checkpoint::list *value) {
 		this->value = value;
 	}
 
 private:
 
-	config::checkpoint::list value;
+	config::checkpoint::list *value;
 
 };
 

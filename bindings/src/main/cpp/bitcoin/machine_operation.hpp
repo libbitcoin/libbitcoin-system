@@ -25,11 +25,11 @@
 //#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/machine/operation.hpp>
-#include <machine_opcode.hpp>
-#include <machine_script_pattern.hpp>
-#include <utility_data_chunk.hpp>
-#include <utility_reader.hpp>
-#include <utility_writer.hpp>
+#include <bitcoin/machine_opcode.hpp>
+#include <bitcoin/machine_script_pattern.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
+#include <bitcoin/utility_reader.hpp>
+#include <bitcoin/utility_writer.hpp>
 
 namespace libbitcoin {
 //namespace machine {
@@ -47,7 +47,7 @@ public:
     machine_operation();
 
     machine_operation(machine_operation&& other);
-//    machine_operation(const machine_operation& other);
+    machine_operation(const machine_operation& other);
 
     machine_operation(utility_data_chunk&& uncoded, bool minimal=true);
 //    machine_operation(const utility_data_chunk& uncoded, bool minimal=true);
@@ -59,7 +59,7 @@ public:
 
 //    machine_operation& operator=(machine_operation&& other);
     machine_operation& assign(machine_operation&& other);
-//    machine_operation& operator=(const machine_operation& other);
+    machine_operation& operator=(const machine_operation& other);
 
 //    bool operator==(const machine_operation& other) const;
     bool eq(const machine_operation& other) const;

@@ -25,20 +25,20 @@
 //#include <bitcoin/bitcoin/compat.hpp>
 //#include <bitcoin/bitcoin/define.hpp>
 //#include <bitcoin/bitcoin/math/checksum.hpp>
-#include <math_ec_scalar.hpp>
-#include <math_ec_secret.hpp>
+#include <bitcoin/math_ec_scalar.hpp>
+#include <bitcoin/math_ec_secret.hpp>
 //#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 //#include <bitcoin/bitcoin/math/hash.hpp>
-//#include <wallet_ec_public.hpp>
-#include <wallet_wif_compressed.hpp>
-#include <wallet_wif_uncompressed.hpp>
-#include <wallet_payment_address.hpp>
+#include <bitcoin/wallet_ec_public.hpp>
+#include <bitcoin/wallet_wif_compressed.hpp>
+#include <bitcoin/wallet_wif_uncompressed.hpp>
+#include <bitcoin/wallet_payment_address.hpp>
 
 namespace libbitcoin {
 //namespace wallet {
 namespace api {
 
-class wallet_ec_public;
+//class wallet_ec_public;
 
 //class wallet_payment_address;
 //

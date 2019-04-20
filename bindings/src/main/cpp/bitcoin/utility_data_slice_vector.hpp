@@ -15,7 +15,7 @@ class utility_data_slice_vector {
 
 public:
 	utility_data_slice_vector() :
-			value(new std::vector<utility_data_slice>) {
+			value_(new std::vector<utility_data_slice>) {
 	}
 
 	/*  utility_data_slice_vector(std::vector<utility_data_slice>value, unsigned int n) {
@@ -33,34 +33,34 @@ public:
 	 }
 	 */
 	void set(size_type i, utility_data_slice value) {
-		this->value[i] = value;
+		(*value_)[i] = value;
 	}
 
-	const std::vector<utility_data_slice>& cast() const {
-		return value;
+	const std::vector<utility_data_slice>* cast() const {
+		return value_;
 	}
 
-	utility_data_slice get(size_type i) {
-		return value[i];
+	utility_data_slice& get(size_type i) {
+		return (*value_)[i];
 	}
 
 	size_t getSize() {
-		return value.size();
+		return value_->size();
 	}
 
 	~utility_data_slice_vector() {
-		value.clear();
+		value_->clear();
 	}
 
-	std::vector<utility_data_slice> getValue() {
-		return value;
+	std::vector<utility_data_slice>* getValue() {
+		return value_;
 	}
 
-	void setValue(std::vector<utility_data_slice> value) {
-		this->value = value;
+	void setValue(std::vector<utility_data_slice>* value) {
+		value_ = value;
 	}
 private:
-	std::vector<utility_data_slice> value;
+	std::vector<utility_data_slice>* value_;
 };
 
 } // namespace api

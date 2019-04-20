@@ -29,40 +29,44 @@ class BC_API chain_point_value_list {
 public:
 
 	chain_point_value_list() :
-			value(new chain::point_value::list()) {
+			value_(new chain::point_value::list) {
 	}
 
-	chain_point_value_list(chain_point_value_list points) :
-			value(points.value) {
+	chain_point_value_list(chain::point_value::list* list) :
+			value_(list) {
+	}
+
+	chain_point_value_list(const chain_point_value_list& points) :
+			value_(points.value_) {
 	}
 
 	chain::point_value get(size_t i) {
-		return chain_point_value_list::value[i];
+		return (*value_)[i];
 	}
 
 	void set(size_t i, chain::point_value *t) {
-		chain_point_value_list::value[i] = *t;
+		(*value_)[i] = *t;
 	}
 
-	chain_point_value_list getpoint_values() {
-		return new chain_point_value_list(value);
+	chain_point_value_list* getpoint_values() {
+		return new chain_point_value_list(value_);
 	}
 
 	size_t getSize() {
-		return value.size();
+		return value_->size();
 	}
 
-	chain::point_value::list getValue() {
-		return value;
+	chain::point_value::list* getValue() {
+		return value_;
 	}
 
-	void setValue(chain::point_value::list value) {
-		this->value = value;
+	void setValue(chain::point_value::list* value) {
+		value_ = value;
 	}
 
 private:
 
-	chain::point_value::list value;
+	chain::point_value::list* value_;
 
 };
 

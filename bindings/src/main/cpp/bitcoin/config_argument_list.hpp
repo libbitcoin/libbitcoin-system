@@ -10,15 +10,15 @@ namespace api {
 
 class config_argument_list {
 public:
-	config::argument_list getValue() {
-		return value;
+	config::argument_list* getValue() const {
+		return value_;
 	}
 
-	void setValue(config::argument_list value) {
-		this->value = value;
+	void setValue(config::argument_list* value) {
+		value_ = value;
 	}
 private:
-	config::argument_list value;
+	config::argument_list* value_;
 };
 
 } // namespace api

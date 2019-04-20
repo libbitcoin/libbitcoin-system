@@ -8,9 +8,13 @@
 namespace libbitcoin {
 namespace api {
 
-class math_hash_digest {
+class BC_API math_hash_digest {
 
 public:
+	math_hash_digest(hash_digest hash) :
+			value(&hash) {
+	}
+
 	math_hash_digest() :
 			value(new hash_digest) {
 	}
@@ -32,26 +36,26 @@ public:
 
 	void set(size_t i, uint8_t value) {
 		if (i < hash_size) {
-			value[i] = value;
+			(*math_hash_digest::value)[i] = value;
 		} else {
 			std::cerr << "SEVERE: index " << i << " is out of range [0;"
 					<< hash_size << ")\n";
 		}
 	}
 
-	hash_digest cast() {
+	hash_digest* cast() const {
 		return value;
 	}
 
 	uint8_t get(size_t i) {
-		return value[i];
+		return (*value)[i];
 	}
 
-	hash_digest getValue() {
+	hash_digest* getValue() const {
 		return value;
 	}
 
-	void setValue(hash_digest value) {
+	void setValue(hash_digest *value) {
 		this->value = value;
 	}
 
@@ -59,12 +63,12 @@ public:
 		return hash_size;
 	}
 
-	~math_hash_digest() {
-		delete value;
-	}
+//	~math_hash_digest() {
+//		delete value;
+//	}
 
 private:
-	hash_digest value;
+	hash_digest *value;
 };
 
 } // namespace api

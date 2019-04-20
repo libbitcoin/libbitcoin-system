@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN__VARIABLES_MAP_HPP
-#define LIBBITCOIN__VARIABLES_MAP_HPP
+#ifndef LIBBITCOIN__CONFIG_VARIABLES_MAP_HPP
+#define LIBBITCOIN__CONFIG_VARIABLES_MAP_HPP
 
 #include <cstdint>
 #include <bitcoin/bitcoin/config/parser.hpp>

@@ -9,15 +9,15 @@ namespace api {
 
 class config_arguments_metadata {
 public:
-	arguments_metadata getValue() {
+	arguments_metadata* getValue() {
 		return value;
 	}
 
-	void setValue(arguments_metadata value) {
+	void setValue(arguments_metadata* value) {
 		this->value = value;
 	}
 private:
-	arguments_metadata value;
+	arguments_metadata* value;
 
 };
 

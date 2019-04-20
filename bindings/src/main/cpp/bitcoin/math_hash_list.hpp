@@ -27,37 +27,39 @@ namespace libbitcoin {
 //namespace math {
 namespace api {
 
-class BC_API math_hash_list
-{
+class BC_API math_hash_list {
 public:
 
-  math_hash_list()
-    : value(new hash_list())
-  {
-  }
+	math_hash_list() :
+			value(new hash_list()) {
+	}
 
-  hash_digest get(size_t i) {
-    return value[i];
-  }
+	~math_hash_list() {
+		delete value;
+	}
 
-  void set(size_t i, hash_digest *t) {
-    value[i] = *t;
-  }
+	hash_digest get(size_t i) {
+		return (*value)[i];
+	}
 
-  hash_list getValue() {
-    return value;
-  }
+	void set(size_t i, hash_digest *t) {
+		(*value)[i] = *t;
+	}
 
-  void setValue(hash_list value) {
-	  this->value = value;
-  }
+	hash_list* getValue() {
+		return value;
+	}
+
+	void setValue(hash_list* value) {
+		this->value = value;
+	}
 
 //  size_t getSize() {
 //    return value.size();
 //  }
 
 private:
-  hash_list value;
+	hash_list *value;
 
 };
 

@@ -19,10 +19,10 @@
 #ifndef LIBBITCOIN__CONFIG_INPUT_HPP
 #define LIBBITCOIN__CONFIG_INPUT_HPP
 
-#include <iostream>
-#include <string>
+//#include <iostream>
+//#include <string>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/chain/input.hpp>
+//#include <bitcoin/bitcoin/chain/input.hpp>
 #include <bitcoin/bitcoin/config/input.hpp>
 #include <bitcoin/chain_input.hpp>
 #include <bitcoin/chain_input_point.hpp>
@@ -73,7 +73,7 @@ public:
      * @return  This object's value cast to internal type.
      */
 //    operator const chain::input&() const;
-    const chain::input& to_chain_input() const;
+    const chain_input& to_chain_input() const;
 
     /**
      * Overload stream in. Throws if input is invalid.

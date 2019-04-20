@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN__CONFIG_POINT_HPP
 #define LIBBITCOIN__CONFIG_POINT_HPP
 
-#include <iostream>
-#include <string>
+//#include <iostream>
+//#include <string>
 #include <bitcoin/chain_input.hpp>
 #include <bitcoin/chain_output_point.hpp>
 #include <bitcoin/bitcoin/config/point.hpp>
@@ -66,7 +66,7 @@ public:
      * @return  This object's value cast to internal type.
      */
 //    operator const chain::output_point&() const;
-    const chain::output_point& to_output_point() const;
+    const chain_output_point& to_output_point() const;
 
     /**
      * Overload stream in. Throws if input is invalid.

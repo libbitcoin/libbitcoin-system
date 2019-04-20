@@ -16,16 +16,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CONFIG_PARSER_HPP
-#define LIBBITCOIN_CONFIG_PARSER_HPP
+#ifndef LIBBITCOIN__CONFIG_PARSER_HPP
+#define LIBBITCOIN__CONFIG_PARSER_HPP
 
 #include <string>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/config/parser.hpp>
 #include <bitcoin/config_variables_map.hpp>
 #include <bitcoin/config_options_metadata.hpp>
 #include <bitcoin/config_arguments_metadata.hpp>
+#include <bitcoin/config_filesystem_path.hpp>
 
 namespace libbitcoin {
 
@@ -47,26 +49,28 @@ namespace api {
 class BC_API config_parser
 {
 public:
+	virtual ~config_parser();
+
     static std::string format_invalid_parameter(const std::string& message);
-    static bool get_option(libbitcoin::api::config_variables_map& variables, const std::string& name);
-    static boost::filesystem::path get_config_option(libbitcoin::api::config_variables_map& variables,
+    static bool get_option(config_variables_map& variables, const std::string& name);
+    static config_filesystem_path get_config_option(config_variables_map& variables,
         const std::string& name);
 
     /// Load command line options (named).
-    virtual libbitcoin::api::config_options_metadata load_options() = 0;
+    virtual config_options_metadata load_options() = 0;
 
     /// Load command line arguments (positional).
-    virtual libbitcoin::api::config_arguments_metadata load_arguments() = 0;
+    virtual config_arguments_metadata load_arguments() = 0;
 
     /// Load environment variable settings.
-    virtual libbitcoin::api::config_options_metadata load_environment() = 0;
+    virtual config_options_metadata load_environment() = 0;
 
     /// Load configuration file settings.
-    virtual libbitcoin::api::config_options_metadata load_settings() = 0;
+    virtual config_options_metadata load_settings() = 0;
 
-   config::parser getValue() {
-       return value;
-   }
+//   config::parser getValue() {
+//       return value;
+//   }
 
 //   void setValue(config::parser value) {
 //       this->value = value;
@@ -82,8 +86,8 @@ public:
 //    virtual void load_environment_variables(libbitcoin::api::config_variables_map& variables,
 //        const std::string& prefix);
 
-private:
-   config::parser value;
+//private:
+//   config::parser value;
 };
 
 } // namespace api

@@ -19,20 +19,20 @@
 #ifndef LIBBITCOIN__CHAIN_OUTPUT_HPP
 #define LIBBITCOIN__CHAIN_OUTPUT_HPP
 
-#include <cstddef>
-#include <cstdint>
-#include <istream>
-#include <memory>
-#include <string>
-#include <vector>
+//#include <cstddef>
+//#include <cstdint>
+//#include <istream>
+//#include <memory>
+//#include <string>
+//#include <vector>
 #include <bitcoin/chain_script.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/utility_data_chunk.hpp>
-#include <bitcoin/bitcoin/utility/reader.hpp>
-#include <bitcoin/bitcoin/utility/thread.hpp>
-#include <bitcoin/bitcoin/utility/writer.hpp>
-#include <bitcoin/wallet_payment_address.hpp>
-#include <bitcoin/wallet_payment_address_list.hpp>
+//#include <bitcoin/bitcoin/define.hpp>
+//#include <bitcoin/utility_data_chunk.hpp>
+//#include <bitcoin/bitcoin/utility/reader.hpp>
+//#include <bitcoin/bitcoin/utility/thread.hpp>
+//#include <bitcoin/bitcoin/utility/writer.hpp>
+//#include <bitcoin/wallet_payment_address.hpp>
+//#include <bitcoin/wallet_payment_address_list.hpp>
 
 namespace libbitcoin {
 //namespace chain {
@@ -138,11 +138,11 @@ public:
     bool is_dust(uint64_t minimum_output_value) const;
     bool extract_committed_hash(math_hash_digest& out) const;
 
-    chain::output getValue() {
+    chain::output* getValue() const {
         return value_;
     }
 
-    void setValue(chain::output value) {
+    void setValue(chain::output* value) {
         this->value_ = value;
     }
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
@@ -153,7 +153,7 @@ public:
 //    void invalidate_cache() const;
 
 private:
-    chain::output value_;
+    chain::output* value_;
 //    typedef std::shared_ptr<wallet::payment_address::list> addresses_ptr;
 //
 //    addresses_ptr addresses_cache() const;

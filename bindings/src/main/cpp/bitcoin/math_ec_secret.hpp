@@ -8,15 +8,15 @@ namespace api {
 
 class math_ec_secret {
 public:
-	ec_secret getValue() {
-		return value;
+	ec_secret* getValue() {
+		return value_;
 	}
 
-	void setValue(ec_secret value) {
-		this->value = value;
+	void setValue(ec_secret* value) {
+		value_ = value;
 	}
 private:
-	ec_secret value;
+	ec_secret* value_;
 };
 
 } // namespace api

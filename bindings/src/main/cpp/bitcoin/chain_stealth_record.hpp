@@ -26,11 +26,11 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/stealth_record.hpp>
 //#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <math_ec_compressed.hpp>
-#include <math_hash_digest.hpp>
-#include <math_short_hash.hpp>
+#include <bitcoin/math_ec_compressed.hpp>
+#include <bitcoin/math_hash_digest.hpp>
+#include <bitcoin/math_short_hash.hpp>
 //#include <bitcoin/bitcoin/utility/binary.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -115,18 +115,18 @@ public:
     const math_short_hash& public_key_hash() const;
     const math_hash_digest& transaction_hash() const;
 
-    chain::stealth_record getValue() {
-        return value;
+    chain::stealth_record* getValue() {
+        return value_;
     }
 
-    void setValue(chain::stealth_record value) {
-        this->value = value;
+    void setValue(chain::stealth_record* value) {
+        value_ = value;
     }
 //protected:
 //    void reset();
 
 private:
-    chain::stealth_record value;
+    chain::stealth_record* value_;
 //    uint32_t height_;
 //    uint32_t prefix_;
 //    hash_digest unsigned_ephemeral_;

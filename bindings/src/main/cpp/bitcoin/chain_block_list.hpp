@@ -19,8 +19,9 @@
 #ifndef LIBBITCOIN__CHAIN_BLOCK_LIST_HPP
 #define LIBBITCOIN__CHAIN_BLOCK_LIST_HPP
 
-#include <bitcoin/bitcoin/chain/block.hpp>
+#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/chain/block.hpp>
 //#include <bitcoin/bitcoin/error.hpp>
 
 namespace libbitcoin {
@@ -31,32 +32,32 @@ class BC_API chain_block_list
 {
 public:
 
-	chain_block_list() : value( new chain::block::list()) {
+	chain_block_list() : value_( new std::vector<block*>) {
 	}
 
-	chain::block get(size_t i) {
-		return chain_block_list::value[i];
+	chain::block* get(size_t i) {
+		return (*value_)[i];
 	}
 
 	void set(size_t i, chain::block *t) {
-		chain_block_list::value[i] = *t;
+		(*value_)[i] = t;
 	}
 
-	void setValue(chain::block t) {
-		this->value = t;
+	void setValue(std::vector<block*>* t) {
+		value_ = t;
 	}
 
-	chain::block::list getValue() {
-		return value;
+	std::vector<block*>* getValue() {
+		return value_;
 	}
 
 	size_t getSize() {
-		return value.size();
+		return value_->size();
 	}
 
 private:
 
-	chain::block::list value;
+	std::vector<block*>* value_;
 
 };
 

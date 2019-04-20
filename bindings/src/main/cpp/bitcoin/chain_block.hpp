@@ -28,15 +28,15 @@
 //#include <boost/optional.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/block.hpp>
-#include <chain_block_indexes.hpp>
+#include <bitcoin/chain_block_indexes.hpp>
 //#include <chain_chain_state.hpp>
-#include <chain_header.hpp>
+#include <bitcoin/chain_header.hpp>
 //#include <chain_transaction.hpp>
-#include <chain_transaction_list.hpp>
+#include <bitcoin/chain_transaction_list.hpp>
 //#include <error_code.hpp>
-//#include <bitcoin/bitcoin/config/settings.hpp>
+#include <bitcoin/config_settings.hpp>
 //#include <math_hash_digest.hpp>
-#include <math_hash_list.hpp>
+#include <bitcoin/math_hash_list.hpp>
 //#include <bitcoin/bitcoin/math/hash.hpp>
 //#include <bitcoin/bitcoin/utility/asio.hpp>
 //#include <utility_data_chunk.hpp>
@@ -156,20 +156,20 @@ public:
     error_code check(uint64_t max_money, uint32_t timestamp_limit_seconds,
         uint32_t proof_of_work_limit, bool scrypt=false) const;
     error_code check_transactions(uint64_t max_money) const;
-    error_code accept(const libbitcoin::config::settings& settings, bool transactions=true,
+    error_code accept(const config_settings& settings, bool transactions=true,
         bool header=true) const;
-    error_code accept(const chain_chain_state& state, const libbitcoin::config::settings& settings,
+    error_code accept(const chain_chain_state& state, const config_settings& settings,
         bool transactions=true, bool header=true) const;
     error_code accept_transactions(const chain_chain_state& state) const;
     error_code connect() const;
     error_code connect(const chain_chain_state& state) const;
     error_code connect_transactions(const chain_chain_state& state) const;
 
-    chain::block getValue() {
+    chain::block *getValue() {
         return value;
     }
 
-    void setValue(chain::block value) {
+    void setValue(chain::block *value) {
         this->value = value;
     }
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
@@ -178,7 +178,7 @@ public:
 //protected:
 //    void reset();
 private:
-    chain::block value;
+    chain::block *value;
 
 };
 

@@ -25,41 +25,39 @@ namespace libbitcoin {
 //namespace chain {
 namespace api {
 
-class BC_API chain_stealth_record_list
-{
+class BC_API chain_stealth_record_list {
 public:
 
-  chain_stealth_record_list()
-    : value(new chain::stealth_record::list())
-  {
-  }
+	chain_stealth_record_list() :
+			value_(new chain::stealth_record::list()) {
+	}
 
-  chain::stealth_record get(size_t i) {
-    return chain_stealth_record_list::value[i];
-  }
+	chain::stealth_record get(size_t i) {
+		return (*value_)[i];
+	}
 
-  void set(size_t i, chain::stealth_record *t) {
-    chain_stealth_record_list::value[i] = *t;
-  }
+	void set(size_t i, chain::stealth_record t) {
+		(*value_)[i] = t;
+	}
 
-  chain::stealth_record::list cast() {
-    return value;
-  }
+	chain::stealth_record::list* cast() {
+		return value_;
+	}
 
-  size_t getSize() {
-    return value.size();
-  }
+	size_t getSize() {
+		return value_->size();
+	}
 
-  chain::stealth_record::list getValue() {
-        return value;
-    }
+	chain::stealth_record::list* getValue() {
+		return value_;
+	}
 
-    void setValue(chain::stealth_record::list value) {
-        this->value = value;
-    }
+	void setValue(chain::stealth_record::list* value) {
+		value_ = value;
+	}
 private:
 
-  chain::stealth_record::list value;
+	chain::stealth_record::list* value_;
 
 };
 

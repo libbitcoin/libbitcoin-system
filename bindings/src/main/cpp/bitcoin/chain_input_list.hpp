@@ -27,38 +27,40 @@ namespace libbitcoin {
 //namespace chain {
 namespace api {
 
-class BC_API chain_input_list
-{
+class BC_API chain_input_list {
 public:
 
-  chain_input_list()
-    : value(new chain::input::list())
-  {
-  }
+	chain_input_list() :
+			value_(new chain::input::list) {
+	}
 
-  chain::input get(size_t i) {
-    return chain_input_list::value[i];
-  }
+	~chain_input_list() {
+		delete value_;
+	}
 
-  void set(size_t i, chain::input *t) {
-    chain_input_list::value[i] = *t;
-  }
+	chain::input& get(size_t i) {
+		return (*value_)[i];
+	}
 
-  chain::input::list getValue() {
-    return value;
-  }
+	void set(size_t i, chain::input *t) {
+		(*value_)[i] = *t;
+	}
 
-  void setValue(chain::input::list value) {
-	  this->value = value;
-  }
+	chain::input::list* getValue() {
+		return value_;
+	}
 
-  size_t getSize() {
-    return value.size();
-  }
+	void setValue(chain::input::list* value) {
+		value_ = value;
+	}
+
+	size_t getSize() {
+		return value_->size();
+	}
 
 private:
 
-  chain::input::list value;
+	chain::input::list* value_;
 
 };
 

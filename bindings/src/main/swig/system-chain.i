@@ -6,6 +6,7 @@ using namespace libbitcoin::chain;
 using libbitcoin::byte_array;
 using libbitcoin::code;
 using libbitcoin::asio::time_point;
+#include <bitcoin/system_chain.hpp>
 %}
 
 //%include "vector.i"
@@ -14,18 +15,18 @@ using libbitcoin::asio::time_point;
 
 %ignore getValue();
 
-%import "bitcoin-math-ext.i"
-//%import "bitcoin-math-ext-typemap.i"
-%import "bitcoin-config-ext.i"
-//%import "bitcoin-config-ext-typemap.i"
-%import "bitcoin-utility-ext.i"
-//%import "bitcoin-utility-ext-typemap.i"
-%import "bitcoin-machine-ext.i"
-//%import "bitcoin-machine-ext-typemap.i"
-%import "bitcoin-wallet-ext.i"
-//%import "bitcoin-wallet-ext-typemap.i"
+%import "system-math-ext.i"
+//%import "system-math-ext-typemap.i"
+%import "system-config-ext.i"
+//%import "system-config-ext-typemap.i"
+%import "system-utility-ext.i"
+//%import "system-utility-ext-typemap.i"
+%import "system-machine-ext.i"
+//%import "system-machine-ext-typemap.i"
+%import "system-wallet-ext.i"
+//%import "system-wallet-ext-typemap.i"
 
-%include "bitcoin-chain-ext.i"
+%include "system-chain-ext.i"
 
 //%ignore libbitcoin::chain::payment_record::payment_record(chain::payment_record&& other);
 //%ignore libbitcoin::chain::payment_record::operator=(payment_record&& other);
@@ -66,7 +67,7 @@ using libbitcoin::asio::time_point;
 %include "bitcoin/chain_stealth_record.hpp"
 //%ignore cast();
 %import "bitcoin/bitcoin/chain/stealth_record.hpp"
-%ignore  setValue(chain::stealth_record::list value);
+%ignore  setValue(chain::stealth_record::list* value);
 %include "bitcoin/chain_stealth_record_list.hpp"
 
 //%ignore libbitcoin::chain::witness::witness(witness&& other);
@@ -87,7 +88,7 @@ using libbitcoin::asio::time_point;
 %include "bitcoin/chain_witness.hpp"
 
 %include "bitcoin/chain_payment_record.hpp"
-%ignore setValue(chain::payment_record::list value);
+%ignore setValue(chain::payment_record::list* value);
 %include "bitcoin/chain_payment_record_list.hpp"
 
 //%pragma(java) jniclasscode=%{

@@ -29,32 +29,32 @@ class BC_API chain_script_operation_list {
 public:
 
 	chain_script_operation_list() :
-			value(new chain::script::operation::list()) {
+			value_(new chain::script::operation::list) {
 	}
 
-	chain::script::operation get(size_t i) {
-		return chain_script_operation_list::value[i];
+	chain::script::operation& get(size_t i) {
+		return (*value_)[i];
 	}
 
 	void set(size_t i, chain::script::operation t) {
-		chain_script_operation_list::value[i] = t;
+		(*value_)[i] = t;
 	}
 
-	chain::script::operation::list getValue() {
-		return value;
+	chain::script::operation::list* getValue() {
+		return value_;
 	}
 
-	void setValue(chain::script::operation:: list value) {
-		this->value = value;
+	void setValue(chain::script::operation::list* value) {
+		value_ = value;
 	}
 
 	size_t getSize() {
-		return value.size();
+		return value_->size();
 	}
 
 private:
 
-	chain::script::operation::list value;
+	chain::script::operation::list* value_;
 
 };
 

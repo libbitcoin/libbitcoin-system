@@ -19,14 +19,14 @@
 #ifndef LIBBITCOIN__MACHINE_SCRIPT_VERSION_HPP
 #define LIBBITCOIN__MACHINE_SCRIPT_VERSION_HPP
 
-#include <bitcoin/bitcoin/machine/script_version.hpp>
+//#include <bitcoin/bitcoin/machine/script_version.hpp>
 
 namespace libbitcoin {
 //namespace machine {
 namespace api {
 
 /// Script versions (bip141).
-enum class machine_script_version : machine::script_version
+enum class machine_script_version //: machine::script_version
 {
     /// Defined by bip141.
     zero,

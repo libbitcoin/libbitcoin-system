@@ -8,15 +8,15 @@ namespace api {
 
 class math_point_list {
 public:
-	point_list getValue() {
-		return value;
+	point_list* getValue() {
+		return value_;
 	}
 
-	void setValue(point_list value) {
-		this->value = value;
+	void setValue(point_list* value) {
+		value_ = value;
 	}
 private:
-	point_list value;
+	point_list* value_;
 };
 
 } // namespace api

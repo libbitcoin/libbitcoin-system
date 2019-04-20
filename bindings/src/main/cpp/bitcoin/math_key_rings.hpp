@@ -8,15 +8,15 @@ namespace api {
 
 class math_key_rings {
 public:
-	key_rings getValue() {
-        return value;
+	key_rings* getValue() {
+        return value_;
     }
 
-    void setValue(key_rings value) {
-        this->value = value;
+    void setValue(key_rings* value) {
+        value_ = value;
     }
 private:
-    key_rings value;
+    key_rings* value_;
 };
 
 } // namespace api

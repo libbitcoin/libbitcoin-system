@@ -32,7 +32,7 @@ namespace api {
 /**
  * Serialization helper for a bitcoin 256 bit hash.
  */
-class BC_API config_hash256 : public config::hash256
+class BC_API config_hash256
 {
 public:
     /**
@@ -101,7 +101,15 @@ public:
      */
 //    friend std::ostream& operator<<(std::ostream& output, const hash256& argument);
 
-//private:
+    config::hash256 getValue() {
+        return value;
+    }
+
+    void setValue(config::hash256 value) {
+        this->value = value;
+    }
+private:
+    config::hash256 value;
 //    hash_digest value_;
 };
 

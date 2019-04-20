@@ -11,20 +11,24 @@ namespace api {
 class error_code {
 
 public:
-  error_code(code code) {
-    this->code_ = code;
-  }
+	error_code(code* code) {
+		this->value = code;
+	}
 
-  code cast() {
-    return code_;
-  }
+	code* getValue() {
+		return value;
+	}
 
-  ~error_code() {
-	  delete code_;
-  }
+	void setValue(code* value) {
+		this->value = value;
+	}
+
+	~error_code() {
+		delete value;
+	}
 
 private:
-  code code_;
+	code *value;
 };
 
 } // namespace api

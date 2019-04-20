@@ -31,36 +31,36 @@ class BC_API config_sodium_list {
 public:
 
 	config_sodium_list() :
-			value(new config::sodium::list()) {
+			value_(new config::sodium::list()) {
 	}
 
 	config::sodium get(size_t i) {
-		return config_sodium_list::value[i];
+		return (*value_)[i];
 	}
 
 	void set(size_t i, config::sodium *t) {
-		config_sodium_list::value[i] = *t;
+		(*value_)[i] = *t;
 	}
 
-	config::sodium::list cast() {
-		return value;
+	config::sodium::list* cast() {
+		return value_;
 	}
 
 	size_t getSize() {
-		return value.size();
+		return value_->size();
 	}
 
-	config::sodium::list getValue() {
-		return value;
+	config::sodium::list* getValue() const {
+		return value_;
 	}
 
-	void setValue(config::sodium::list value) {
-		this->value = value;
+	void setValue(config::sodium::list* value) {
+		value_ = value;
 	}
 
 private:
 
-	config::sodium::list value;
+	config::sodium::list* value_;
 
 };
 

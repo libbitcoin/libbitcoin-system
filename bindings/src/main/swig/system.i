@@ -1,6 +1,7 @@
 %module bitcoin
 %{
 #include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system_common.hpp>
 %}
 #pragma SWIG nowarn=342
 
@@ -13,10 +14,10 @@
 %import "bitcoin/bitcoin/compat.hpp"
 %import "bitcoin/bitcoin/define.hpp"
 
-%import "bitcoin-config-ext.i"
+%import "system-config-ext.i"
 //%import "bitcoin-config-ext-typemap.i"
 
-%include "bitcoin-ext.i"
+%include "system-ext.i"
 
 %include "enums.swg"
 %javaconst(1);

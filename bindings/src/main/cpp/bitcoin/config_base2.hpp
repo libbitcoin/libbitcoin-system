@@ -27,13 +27,13 @@
 #include <bitcoin/bitcoin/utility/binary.hpp>
 
 namespace libbitcoin {
-namespace config {
+//namespace config {
 namespace api {
 
 /**
  * Serialization helper for base2 encoded data.
  */
-class BC_API config_base2 : public config::base2
+class BC_API config_base2
 {
 public:
 
@@ -88,7 +88,16 @@ public:
      */
 //    friend std::ostream& operator<<(std::ostream& output, const base2& argument);
 
-//private:
+public:
+    config::base2 getValue() {
+        return value;
+    }
+
+    void setValue(config::base2 value) {
+        this->value = value;
+    }
+private:
+    config::base2 value;
 //
 //    /**
 //     * The state of this object.
@@ -97,7 +106,7 @@ public:
 };
 
 } // namespace api
-} // namespace config
+//} // namespace config
 } // namespace libbitcoin
 
 #endif

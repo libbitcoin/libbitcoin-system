@@ -1,6 +1,7 @@
 %module message
 %{
 #include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system_message.hpp>
 %}
 
 %include <std_string.i>

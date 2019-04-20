@@ -8,15 +8,15 @@ namespace api {
 
 class math_ec_scalar {
 public:
-	ec_scalar getValue() {
-        return value;
+	ec_scalar* getValue() {
+        return value_;
     }
 
-    void setValue(ec_scalar value) {
-        this->value = value;
+    void setValue(ec_scalar* value) {
+        value_ = value;
     }
 private:
-    ec_scalar value;
+    ec_scalar* value_;
 };
 
 } // namespace api

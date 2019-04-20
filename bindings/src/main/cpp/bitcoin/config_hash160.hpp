@@ -19,21 +19,21 @@
 #ifndef LIBBITCOIN__CONFIG_HASH160_HPP
 #define LIBBITCOIN__CONFIG_HASH160_HPP
 
-#include <iostream>
-#include <string>
+//#include <iostream>
+//#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/config/hash160.hpp>
 #include <bitcoin/math_short_hash.hpp>
 #include <bitcoin/math_hash.hpp>
 
 namespace libbitcoin {
-namespace config {
+//namespace config {
 namespace api {
 
 /**
  * Serialization helper for a bitcoin 160 bit hash.
  */
-class BC_API config_hash160 : public config::hash160
+class BC_API config_hash160
 {
 public:
 
@@ -83,7 +83,15 @@ public:
      */
 //    friend std::ostream& operator<<(std::ostream& output, const hash160& argument);
 
-//private:
+    config::hash160 getValue() {
+        return value;
+    }
+
+    void setValue(config::hash160 value) {
+        this->value = value;
+    }
+private:
+    config::hash160 value;
 //
 //    /**
 //     * The state of this object.
@@ -92,7 +100,7 @@ public:
 };
 
 } // namespace api
-} // namespace config
+//} // namespace config
 } // namespace libbitcoin
 
 #endif

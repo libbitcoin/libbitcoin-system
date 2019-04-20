@@ -16,14 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CONFIG_BLOCK_HPP
-#define LIBBITCOIN_CONFIG_BLOCK_HPP
+#ifndef LIBBITCOIN__CONFIG_BLOCK_HPP
+#define LIBBITCOIN__CONFIG_BLOCK_HPP
 
 //#include <iostream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/config/block.hpp>
-#include <chain_block.hpp>
+#include <bitcoin/chain_block.hpp>
 
 namespace libbitcoin {
 //namespace config {
@@ -78,14 +78,14 @@ public:
      * @param[in]  other  The other object with which to compare.
      */
 //    bool operator==(const block& other) const;
-    bool eq(const block& other) const;
+    bool eq(const config_block& other) const;
 
     /**
      * Overload cast to internal type.
      * @return  This object's value cast to internal type.
      */
 //    operator const chain::block&() const;
-    const chain::block& to_chain_block() const;
+    const chain_block& to_chain_block() const;
 
     /**
      * Get the block as a string.

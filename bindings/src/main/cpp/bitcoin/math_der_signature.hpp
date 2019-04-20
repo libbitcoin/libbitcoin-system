@@ -8,15 +8,15 @@ namespace api {
 
 class math_der_signature {
 public:
-	der_signature getValue() {
-		return value;
+	der_signature* getValue() {
+		return value_;
 	}
 
-	void setValue(der_signature value) {
-		this->value = value;
+	void setValue(der_signature* value) {
+		value_ = value;
 	}
 private:
-	der_signature value;
+	der_signature* value_;
 };
 
 } // namespace api

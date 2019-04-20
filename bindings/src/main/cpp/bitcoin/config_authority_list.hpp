@@ -21,7 +21,7 @@
 
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
-#include <config_authority.hpp>
+#include <bitcoin/config_authority.hpp>
 
 namespace libbitcoin {
 //namespace config {
@@ -34,35 +34,36 @@ public:
 			value(new libbitcoin::config::authority::list()) {
 	}
 
-	config_authority get(size_t i) {
-		return value[i];
+	~config_authority_list() {
+		delete value;
 	}
 
-	void set(size_t i, config::authority *t) {
-		value[i] = *t;
+	config::authority get(size_t i) {
+		return (*value)[i];
 	}
 
-	libbitcoin::config::authority::list cast() {
+	void set(size_t i, config::authority* t) {
+		(*value)[i] = *t;
+	}
+
+	libbitcoin::config::authority::list* cast() {
 		return value;
 	}
 
 	size_t getSize() {
-		return value.size();
+		return value->size();
 	}
 
-	config::authority::list getValue() {
+	config::authority::list* getValue() const {
 		return value;
 	}
 
-	void setValue(config::authority::list value) {
+	void setValue(config::authority::list* value) {
 		this->value = value;
 	}
 private:
-	value;
 
-private:
-
-	libbitcoin::config::authority::list value;
+	libbitcoin::config::authority::list* value;
 
 };
 

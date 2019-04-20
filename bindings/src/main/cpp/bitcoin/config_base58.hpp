@@ -33,7 +33,7 @@ namespace api {
 /**
  * Serialization helper for base58 encoded text.
  */
-class BC_API config_base58 : public config::base58
+class BC_API config_base58
 {
 public:
 
@@ -90,7 +90,16 @@ public:
      */
 //    friend std::ostream& operator<<(std::ostream& output, const base58& argument);
 
-//private:
+public:
+    config::base58 getValue() {
+        return value;
+    }
+
+    void setValue(config::base58 value) {
+        this->value = value;
+    }
+private:
+    config::base58 value;
 //
 //    /**
 //     * The state of this object.

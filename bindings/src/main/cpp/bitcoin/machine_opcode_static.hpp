@@ -23,8 +23,8 @@
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 //#include <bitcoin/utility_assert.hpp>
-#include <machine_opcode.hpp>
-#include <p_machine_opcode.hpp>
+#include <bitcoin/machine_opcode.hpp>
+#include <bitcoin/p_machine_opcode.hpp>
 //#include <bitcoin/utility_data.hpp>
 
 namespace libbitcoin {

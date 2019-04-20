@@ -19,23 +19,23 @@
 #ifndef LIBBITCOIN__WALLET_EC_PUBLIC_HPP
 #define LIBBITCOIN__WALLET_EC_PUBLIC_HPP
 
-#include <cstdint>
-#include <iostream>
-#include <string>
+//#include <cstdint>
+//#include <iostream>
+//#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 //#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/wallet/ec_public.hpp>
-#include <math_ec_point.hpp>
-#include <math_ec_compressed.hpp>
-#include <math_ec_uncompressed.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/math_ec_point.hpp>
+#include <bitcoin/math_ec_compressed.hpp>
+#include <bitcoin/math_ec_uncompressed.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 
 namespace libbitcoin {
 //namespace wallet {
 namespace api {
 
-//class wallet_ec_private;
-//class wallet_payment_address;
+class wallet_ec_private;
+class wallet_payment_address;
 
 /// Use to pass an ec point as either ec_compressed or ec_uncompressed.
 /// ec_public doesn't carry a version for address creation or base58 encoding.

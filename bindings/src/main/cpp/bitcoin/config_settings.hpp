@@ -16,15 +16,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CONFIG_SETTINGS_HPP
-#define LIBBITCOIN_CONFIG_SETTINGS_HPP
+#ifndef LIBBITCOIN__CONFIG_SETTINGS_HPP
+#define LIBBITCOIN__CONFIG_SETTINGS_HPP
 
 namespace libbitcoin {
-namespace config {
+//namespace config {
 namespace api {
 
 // For configuration settings initialization in other libraries.
-enum class settings
+enum class config_settings
 {
     none,
     mainnet,
@@ -33,7 +33,7 @@ enum class settings
 };
 
 } // api
-} // namespace config
+//} // namespace config
 } // namespace libbitcoin
 
 #endif

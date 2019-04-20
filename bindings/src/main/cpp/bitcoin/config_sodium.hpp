@@ -19,22 +19,22 @@
 #ifndef LIBBITCOIN__CONFIG_SODIUM_HPP
 #define LIBBITCOIN__CONFIG_SODIUM_HPP
 
-#include <iostream>
-#include <string>
-#include <vector>
+//#include <iostream>
+//#include <string>
+//#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/utility_data_slice.hpp>
 #include <bitcoin/math_hash_digest.hpp>
 #include <bitcoin/bitcoin/config/sodium.hpp>
 
 namespace libbitcoin {
-namespace config {
+//namespace config {
 namespace api {
 
 /**
  * Serialization helper for base58 sodium keys.
  */
-class BC_API config_sodium : public config::sodium
+class BC_API config_sodium
 {
 public:
     /**
@@ -110,7 +110,16 @@ public:
      */
 //    friend std::ostream& operator<<(std::ostream& output, const sodium& argument);
 
-//private:
+public:
+    config::sodium* getValue() {
+        return value;
+    }
+
+    void setValue(config::sodium* value) {
+        this->value = value;
+    }
+private:
+    config::sodium *value;
 //
 //    /**
 //     * The state of this object.
@@ -119,7 +128,7 @@ public:
 };
 
 } // namespace api
-} // namespace config
+//} // namespace config
 } // namespace libbitcoin
 
 #endif

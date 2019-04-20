@@ -29,32 +29,32 @@ class BC_API chain_payment_record_list {
 public:
 
 	chain_payment_record_list() :
-			value(new chain::payment_record::list()) {
+			value_(new chain::payment_record::list) {
 	}
 
 	chain::payment_record get(size_t i) {
-		return chain_payment_record_list::value[i];
+		return (*value_)[i];
 	}
 
 	void set(size_t i, chain::payment_record *t) {
-		chain_payment_record_list::value[i] = *t;
+		(*value_)[i] = *t;
 	}
 
 	size_t getSize() {
-		return value.size();
+		return value_->size();
 	}
 
-	chain::payment_record::list getValue() {
-		return value;
+	chain::payment_record::list* getValue() {
+		return value_;
 	}
 
-	void setValue(chain::payment_record::list value) {
-		this->value = value;
+	void setValue(chain::payment_record::list *value) {
+		value_ = value;
 	}
 
 private:
 
-	chain::payment_record::list value;
+	chain::payment_record::list* value_;
 
 };
 

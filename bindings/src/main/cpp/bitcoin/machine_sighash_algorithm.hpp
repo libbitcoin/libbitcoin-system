@@ -27,7 +27,7 @@ namespace api {
 
 /// Signature hash types.
 /// Comments from: bitcoin.org/en/developer-guide#standard-transactions
-enum machine_sighash_algorithm : machine::sighash_algorithm
+enum machine_sighash_algorithm
 {
     /// The default, signs all the inputs and outputs, protecting everything
     /// except the signature scripts against modification.

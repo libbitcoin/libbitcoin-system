@@ -26,21 +26,21 @@
 //#include <string>
 //#include <vector>
 //#include <boost/optional.hpp>
-#include <chain_chain_state.hpp>
-#include <chain_input.hpp>
-#include <chain_input_list.hpp>
-#include <chain_output.hpp>
-#include <chain_output_list.hpp>
-#include <chain_point.hpp>
-#include <chain_point_list.hpp>
+#include <bitcoin/chain_chain_state.hpp>
+#include <bitcoin/chain_input.hpp>
+#include <bitcoin/chain_input_list.hpp>
+#include <bitcoin/chain_output.hpp>
+#include <bitcoin/chain_output_list.hpp>
+#include <bitcoin/chain_point.hpp>
+#include <bitcoin/chain_point_list.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <error_code.hpp>
+#include <bitcoin/error_code.hpp>
 //#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <math_hash_digest.hpp>
-#include <math_hash_list.hpp>
+#include <bitcoin/math_hash_digest.hpp>
+#include <bitcoin/math_hash_list.hpp>
 //#include <bitcoin/bitcoin/machine/opcode.hpp>
 //#include <bitcoin/bitcoin/machine/rule_fork.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/thread.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
@@ -213,12 +213,12 @@ public:
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
 //    mutable validation metadata;
 
-    transaction getValue() {
-        return value;
+    transaction* getValue() {
+        return value_;
     }
 
-    void setValue(transaction value) {
-        this->value = value;
+    void setValue(transaction* value) {
+        value_ = value;
     }
 //protected:
 //    void reset();
@@ -226,7 +226,7 @@ public:
 //    bool all_inputs_final() const;
 
 private:
-    transaction value;
+    transaction* value_;
 //    typedef std::shared_ptr<math_hash_digest> hash_ptr;
 //    typedef boost::optional<uint64_t> optional_value;
 //

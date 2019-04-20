@@ -23,10 +23,10 @@
 //#include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <math_elliptic_curve.hpp>
-#include <utility_binary.hpp>
-#include <chain_script.hpp>
-#include <p_uint32_t.hpp>
+#include <bitcoin/math_elliptic_curve.hpp>
+#include <bitcoin/utility_binary.hpp>
+#include <bitcoin/chain_script.hpp>
+#include <bitcoin/p_uint32_t.hpp>
 
 namespace libbitcoin {
 namespace api {

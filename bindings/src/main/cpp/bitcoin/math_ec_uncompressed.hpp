@@ -8,15 +8,15 @@ namespace api {
 
 class math_ec_uncompressed {
 public:
-	ec_uncompressed getValue() {
-		return value;
+	ec_uncompressed* getValue() {
+		return value_;
 	}
 
-	void setValue(ec_uncompressed value) {
-		this->value = value;
+	void setValue(ec_uncompressed* value) {
+		value_ = value;
 	}
 private:
-	ec_uncompressed value;
+	ec_uncompressed* value_;
 };
 
 } // namespace api

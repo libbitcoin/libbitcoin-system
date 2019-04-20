@@ -1,6 +1,7 @@
 %module utility
 %{
 #include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system_utility.hpp>
 %}
 #pragma SWIG nowarn=317
 #pragma SWIG nowarn=341
@@ -8,14 +9,14 @@
 
 %ignore getValue();
 
-%import "bitcoin-math-ext.i"
+%import "system-math-ext.i"
 //%import "bitcoin-math-ext-typemap.i"
-%import "bitcoin-chain-ext.i"
+%import "system-chain-ext.i"
 //%import "bitcoin-chain-ext-typemap.i"
-%import "bitcoin-config-ext.i"
+%import "system-config-ext.i"
 //%import "bitcoin-config-ext-typemap.i"
 
-%include "bitcoin-utility-ext.i"
+%include "system-utility-ext.i"
 
 //%import "boost/asio.hpp"
 //%import "boost/asio/ip/address.hpp"

@@ -27,15 +27,17 @@
 //#include <bitcoin/bitcoin/compat.hpp>
 //#include <bitcoin/bitcoin/define.hpp>
 //#include <bitcoin/bitcoin/utility/data.hpp>
-//#include <bitcoin/bitcoin/utility/endian.hpp>
-#include <math_hash_digest.hpp>
-#include <math_half_hash.hpp>
-#include <math_quarter_hash.hpp>
-#include <math_long_hash.hpp>
-#include <math_mini_hash.hpp>
-#include <math_uint256_t.hpp>
-#include <utility_data_slice.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/bitcoin/utility/endian.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/math_hash_digest.hpp>
+#include <bitcoin/math_half_hash.hpp>
+#include <bitcoin/math_quarter_hash.hpp>
+#include <bitcoin/math_long_hash.hpp>
+#include <bitcoin/math_short_hash.hpp>
+#include <bitcoin/math_mini_hash.hpp>
+#include <bitcoin/math_uint256_t.hpp>
+#include <bitcoin/utility_data_slice.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 
 namespace libbitcoin {
 namespace api {
@@ -69,56 +71,38 @@ namespace api {
 
 // Null-valued common bitcoin hashes.
 
-BC_CONSTEXPR math_hash_digest null_hash
-{
-    {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    }
-};
+//BC_CONSTEXPR math_hash_digest math_null_hash
+//{
+//	null_hash
+//};
+//
+//BC_CONSTEXPR math_half_hash math_null_half_hash {
+//	null_half_hash
+//};
+//
+//BC_CONSTEXPR math_quarter_hash math_null_quarter_hash
+//{
+//	null_quarter_hash
+//};
+//
+//BC_CONSTEXPR math_long_hash math_null_long_hash
+//{
+//	null_long_hash
+//};
+//
+//BC_CONSTEXPR math_short_hash math_null_short_hash
+//{
+//	null_short_hash
+//};
+//
+//BC_CONSTEXPR math_mini_hash math_null_mini_hash
+//{
+//	null_mini_hash
+//};
 
-BC_CONSTEXPR math_half_hash null_half_hash
+inline math_uint256_t* to_uint256(const math_hash_digest& hash)
 {
-    {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    }
-};
-
-BC_CONSTEXPR math_quarter_hash null_quarter_hash
-{
-    {
-        0, 0, 0, 0, 0, 0, 0, 0
-    }
-};
-
-BC_CONSTEXPR math_long_hash null_long_hash
-{
-    {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    }
-};
-
-BC_CONSTEXPR math_short_hash null_short_hash
-{
-    {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0
-    }
-};
-
-BC_CONSTEXPR math_mini_hash null_mini_hash
-{
-    {
-        0, 0, 0, 0, 0, 0
-    }
-};
-
-inline math_uint256_t to_uint256(const math_hash_digest& hash)
-{
-    return new math_uint256_t(from_little_endian<uint256_t>(hash.value.begin(), hash.value.end()));
+    return new math_uint256_t(libbitcoin::to_uint256(*hash.getValue()));
 }
 
 /// Generate a scrypt hash to fill a byte array.

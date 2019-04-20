@@ -32,32 +32,32 @@ class BC_API chain_block_indexes
 public:
 
 	chain_block_indexes() :
-			value(new chain::block::indexes()) {
+			value_(new chain::block::indexes) {
 	}
 
 	size_t get(size_t i) {
-		return chain_block_indexes::value[i];
+		return (*value_)[i];
 	}
 
-	void set(size_t i, chain::block *t) {
-		chain_block_indexes::value[i] = *t;
+	void set(size_t i, size_t t) {
+		(*value_)[i] = t;
 	}
 
-	chain::block::indexes getValue() {
-		return value;
+	chain::block::indexes* getValue() {
+		return value_;
 	}
 
-	void setValue(chain::block::indexes value) {
-		this->value = value;
+	void setValue(chain::block::indexes *value) {
+		value_ = value;
 	}
 
 	size_t getSize() {
-		return value.size();
+		return value_->size();
 	}
 
 private:
 
-	chain::block::indexes value;
+	chain::block::indexes *value_;
 
 };
 

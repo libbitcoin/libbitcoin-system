@@ -26,8 +26,8 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/formats/base_16.hpp>
 #include <bitcoin/bitcoin/config/checkpoint.hpp>
-#include <config_checkpoint_list.hpp>
-#include <math_hash_digest.hpp>
+#include <bitcoin/config_checkpoint_list.hpp>
+#include <bitcoin/math_hash_digest.hpp>
 
 namespace libbitcoin {
 //namespace config {

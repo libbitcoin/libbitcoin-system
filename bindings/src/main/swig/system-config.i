@@ -1,6 +1,7 @@
 %module config
 %{
 #include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system_config.hpp>
 %}
 
 %import <stdint.i>
@@ -10,18 +11,19 @@
 
 %import <bitcoin/bitcoin/define.hpp>
 
-%import "bitcoin-ext.i"
-//%import "bitcoin-ext-typemap.i"
-%import "bitcoin-math-ext.i"
-//%import "bitcoin-math-ext-typemap.i"
-%import "bitcoin-utility-ext.i"
-//%import "bitcoin-utility-ext-typemap.i"
-%import "bitcoin-chain-ext.i"
-//%import "bitcoin-chain-ext-typemap.i"
+%import "system-ext.i"
+//%import "system-ext-typemap.i"
+%import "system-math-ext.i"
+//%import "system-math-ext-typemap.i"
+%import "system-utility-ext.i"
+//%import "system-utility-ext-typemap.i"
+%import "system-chain-ext.i"
+//%import "system-chain-ext-typemap.i"
 
 %ignore getValue();
+%ignore getValue() const;
 
-%include "bitcoin-config-ext.i"
+%include "system-config-ext.i"
 
 //%rename(toData_chunk) libbitcoin::config::base16::operator const data_chunk&() const;
 //%rename(toData_slice) libbitcoin::config::base16::operator data_slice() const;
@@ -62,7 +64,7 @@
 %import "bitcoin/bitcoin/config/endpoint.hpp"
 %ignore setValue(config::endpoint value);
 %include "bitcoin/config_endpoint.hpp"
-%ignore setValue(config::endpoint::list value);
+%ignore libbitcoin::api::config_endpoint_list::setValue(config::endpoint::list* value);
 %include "bitcoin/config_endpoint_list.hpp"
 
 //%rename(toShort_hash) libbitcoin::config::hash160::operator const short_hash&() const;
@@ -84,11 +86,14 @@
 %import "bitcoin/math_short_hash.hpp"
 %import "bitcoin/chain_script.hpp"
 %include "bitcoin/config_output.hpp"
-%ignore setValue(boost::program_options::option_description value);
+%ignore config_option_description(boost::program_options::option_description* value);
+%ignore setValue(boost::program_options::option_description* value);
 %include "bitcoin/config_option_description.hpp"
-%ignore setValue(boost::program_options::options_description value);
+%ignore config_option_description(boost::program_options::option_description* value);
+%ignore setValue(boost::program_options::options_description* value);
 %include "bitcoin/config_options_description.hpp"
-%ignore setValue(config::argument_list value);
+%ignore libbitcoin::api::config_argument_list::getValue() const;
+%ignore libbitcoin::api::config_argument_list::setValue(config::argument_list* value);
 %include "bitcoin/config_argument_list.hpp"
 %ignore setValue(config::parameter value);
 %include "bitcoin/config_parameter.hpp"
@@ -100,10 +105,13 @@
 %include "bitcoin/config_variables_map.hpp"
 %ignore setValue(option_metadata value);
 %include "bitcoin/config_option_metadata.hpp"
-%ignore setValue(options_metadata value);
+%ignore setValue(options_metadata* value);
 %include "bitcoin/config_options_metadata.hpp"
-%ignore setValue(arguments_metadata value);
+%ignore setValue(arguments_metadata* value);
 %include "bitcoin/config_arguments_metadata.hpp"
+//%import "boost/filesystem/path.hpp"
+%ignore setValue(boost::filesystem::path* value);
+%include "bitcoin/config_filesystem_path.hpp"
 %include "bitcoin/config_parser.hpp"
 
 //%rename(toOutput_point) libbitcoin::config::point::operator const chain::output_point&() const;
@@ -144,7 +152,7 @@
 %import "bitcoin/bitcoin/config/sodium.hpp"
 %ignore setValue(config::sodium value);
 %include "bitcoin/config_sodium.hpp"
-%ignore setValue(config::sodium::list value);
+%ignore libbitcoin::api::config_sodium_list::setValue(config::sodium::list* value);
 %include "bitcoin/config_sodium_list.hpp"
 
 

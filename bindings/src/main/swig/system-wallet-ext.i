@@ -12,5 +12,6 @@
 //%ignore std::hash<bc::wallet::payment_address>;
 //%import <boost/functional.hpp>
 %import "bitcoin/bitcoin/wallet/payment_address.hpp"
+%ignore operator=(const wallet_payment_address& other);
 %include "bitcoin/wallet_payment_address.hpp"
 //%template(PaymentAddressVector) std::vector<libbitcoin::wallet::payment_address>;

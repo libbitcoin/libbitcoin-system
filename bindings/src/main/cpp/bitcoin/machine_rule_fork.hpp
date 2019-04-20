@@ -19,13 +19,14 @@
 #ifndef LIBBITCOIN__MACHINE_RULE_FORK_HPP
 #define LIBBITCOIN__MACHINE_RULE_FORK_HPP
 
-#include <bitcoin/bitcoin/machine/rule_fork.hpp>
+#include <cstdint>
+//#include <bitcoin/bitcoin/machine/rule_fork.hpp>
 
 namespace libbitcoin {
 //namespace machine {
 namespace api {
 
-enum machine_rule_fork : machine::rule_fork
+enum machine_rule_fork : uint32_t //: machine::rule_fork
 {
     no_rules = 0,
 

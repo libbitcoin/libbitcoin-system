@@ -19,15 +19,17 @@
 #ifndef LIBBITCOIN__CHAIN_OUTPUT_POINT_HPP
 #define LIBBITCOIN__CHAIN_OUTPUT_POINT_HPP
 
-#include <cstddef>
-#include <cstdint>
-#include <vector>
+//#include <cstddef>
+//#include <cstdint>
+//#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/output_point.hpp>
 //#include <bitcoin/chain_output_point.hpp>
 //#include <bitcoin/chain_output.hpp>
-#include <chain_point.hpp>
+#include <bitcoin/chain_point.hpp>
 //#include <bitcoin/chain_script.hpp>
+#include <bitcoin/math_hash_digest.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 
 namespace libbitcoin {
 //namespace chain {

@@ -29,27 +29,28 @@ public:
   }
 */
   void set(size_t i, std::uint8_t value) {
-      vector_[i] = value;
+      (*vector_)[i] = value;
   }
 
-  const std::vector<std::uint8_t> cast() const {
+  const std::vector<std::uint8_t>* cast() const {
     return vector_;
   }
 
   std::uint8_t get(size_t i) {
-    return vector_[i];
+    return (*vector_)[i];
   }
 
   size_t getSize() {
-    return vector_.size();
+    return vector_->size();
   }
 
   ~uint8_t_vector() {
-	vector_.clear();
+	vector_->clear();
+	delete vector_;
   }
 
 private:
-  std::vector<std::uint8_t> vector_;
+  std::vector<std::uint8_t> *vector_;
 };
 
 } // namespace api

@@ -47,15 +47,15 @@ public:
     std::size_t size() const;
     bool empty() const;
 
-    libbitcoin::array_slice getValue() {
+    libbitcoin::array_slice<Iterable> getValue() {
         return value;
     }
 
-    void setValue(libbitcoin::array_slice value) {
+    void setValue(libbitcoin::array_slice<Iterable> value) {
         this->value = value;
     }
 private:
-    libbitcoin::array_slice value;
+    libbitcoin::array_slice<Iterable> value;
 
 //private:
 //    const Iterable* begin_;

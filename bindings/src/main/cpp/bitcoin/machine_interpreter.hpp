@@ -23,11 +23,11 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/machine/interpreter.hpp>
-#include <machine_opcode.hpp>
-#include <machine_operation.hpp>
-#include <machine_program.hpp>
-#include <utility_data_chunk.hpp>
-#include <machine_interpreter_result.hpp>
+#include <bitcoin/machine_opcode.hpp>
+#include <bitcoin/machine_operation.hpp>
+#include <bitcoin/machine_program.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
+#include <bitcoin/machine_interpreter_result.hpp>
 
 namespace libbitcoin {
 //namespace machine {

@@ -22,9 +22,9 @@
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <utility_data_slice.hpp>
-#include <math_hash_digest.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/utility_data_slice.hpp>
+#include <bitcoin/math_hash_digest.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 
 namespace libbitcoin {
 namespace api {

@@ -30,11 +30,11 @@
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/thread.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
-#include <chain_chain_state.hpp>
-#include <error_code.hpp>
-#include <math_hash_digest.hpp>
-#include <math_uint256_t.hpp>
-#include <utility_data_chunk.hpp>
+//#include <bitcoin/chain_chain_state.hpp>
+#include <bitcoin/error_code.hpp>
+#include <bitcoin/math_hash_digest.hpp>
+#include <bitcoin/math_uint256_t.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 
 namespace libbitcoin {
 
@@ -43,6 +43,8 @@ namespace libbitcoin {
 //namespace chain {
 
 namespace api {
+
+class chain_chain_state;
 
 class BC_API chain_header
 {
@@ -174,11 +176,11 @@ public:
     error_code accept() const;
     error_code accept(const chain_chain_state& state) const;
 
-    chain::header getValue() {
+    chain::header* getValue() {
         return value;
     }
 
-    void setValue(chain::header value) {
+    void setValue(chain::header *value) {
         this->value = value;
     }
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
@@ -192,7 +194,7 @@ public:
 //    void invalidate_cache() const;
 
 private:
-    chain::header value;
+    chain::header *value;
 //    typedef std::shared_ptr<math_hash_digest> hash_ptr;
 //
 //    hash_ptr hash_cache() const;

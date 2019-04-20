@@ -20,8 +20,8 @@
 #define LIBBITCOIN__CONFIG_ENDPOINT_LIST_HPP
 
 #include <bitcoin/bitcoin/define.hpp>
-#include <config_endpoint.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
+#include <bitcoin/config_endpoint.hpp>
 
 namespace libbitcoin {
 //namespace config {
@@ -31,36 +31,36 @@ class BC_API config_endpoint_list {
 public:
 
 	config_endpoint_list() :
-			value(new libbitcoin::config::endpoint::list()) {
+			value(new libbitcoin::config::endpoint::list) {
 	}
 
-	config_endpoint get(size_t i) {
-		return value[i];
+	libbitcoin::config::endpoint& get(size_t i) {
+		return (*value)[i];
 	}
 
 	void set(size_t i, config::endpoint *t) {
-		value[i] = *t;
+		(*value)[i] = *t;
 	}
 
-	libbitcoin::config::endpoint::list cast() {
+	libbitcoin::config::endpoint::list *cast() {
 		return value;
 	}
 
 	size_t getSize() {
-		return value.size();
+		return value->size();
 	}
 
-	config::endpoint::list getValue() {
+	config::endpoint::list* getValue() {
 		return value;
 	}
 
-	void setValue(config::endpoint::list value) {
+	void setValue(config::endpoint::list* value) {
 		this->value = value;
 	}
 
 private:
 
-	libbitcoin::config::endpoint::list value;
+	libbitcoin::config::endpoint::list* value;
 
 };
 

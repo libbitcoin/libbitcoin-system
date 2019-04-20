@@ -22,7 +22,7 @@
 #include <cstddef>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/machine/number.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 
 namespace libbitcoin {
 //namespace machine {

@@ -19,14 +19,14 @@
 #ifndef LIBBITCOIN__CONFIG_PARAMETER_HPP
 #define LIBBITCOIN__CONFIG_PARAMETER_HPP
 
-#include <string>
-#include <utility>
-#include <vector>
+//#include <string>
+//#include <utility>
+//#include <vector>
 #include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/config/parameter.hpp>
-#include <config_argument_list.hpp>
-#include <config_option_description.hpp>
+#include <bitcoin/config_argument_list.hpp>
+#include <bitcoin/config_option_description.hpp>
 
 /* NOTE: don't declare 'using namespace foo' in headers. */
 

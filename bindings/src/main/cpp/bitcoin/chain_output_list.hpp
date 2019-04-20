@@ -31,32 +31,36 @@ class BC_API chain_output_list {
 public:
 
 	chain_output_list() :
-			value(new chain::output::list()) {
+			value_(new chain::output::list) {
 	}
 
-	chain::output get(size_t i) {
-		return chain_output_list::value[i];
+	~chain_output_list() {
+		delete value_;
+	}
+
+	chain::output& get(size_t i) {
+		return (*value_)[i];
 	}
 
 	void set(size_t i, chain::output *t) {
-		chain_output_list::value[i] = *t;
+		(*value_)[i] = *t;
 	}
 
-	chain::output::list getValue() {
-		return value;
+	chain::output::list* getValue() {
+		return value_;
 	}
 
-	void setValue(chain::output::list value) {
-		this->value = value;
+	void setValue(chain::output::list* value) {
+		value_ = value;
 	}
 
 	size_t getSize() {
-		return value.size();
+		return value_->size();
 	}
 
 private:
 
-	chain::output::list value;
+	chain::output::list* value_;
 
 };
 

@@ -29,31 +29,31 @@ class BC_API chain_point_indexes {
 public:
 
 	chain_point_indexes() :
-			value(new chain::point::indexes()) {
+			value_(new chain::point::indexes) {
 	}
 
-	size_t get(size_t i) {
-		return chain_point_indexes::value[i];
+	uint32_t get(size_t i) {
+		return (*value_)[i];
 	}
 
-	void set(size_t i, chain::point *t) {
-		chain_point_indexes::value[i] = *t;
+	void set(size_t i, uint32_t t) {
+		(*value_)[i] = t;
 	}
 
-	chain::point::indexes cast() {
-		return value;
+	chain::point::indexes* cast() {
+		return value_;
 	}
 
-	chain::point::indexes getValue() {
-		return value;
+	chain::point::indexes* getValue() {
+		return value_;
 	}
 
-	void setValue(chain::point::indexes value) {
-		this->value = value;
+	void setValue(chain::point::indexes* value) {
+		value_ = value;
 	}
 private:
 
-	chain::point::indexes value;
+	chain::point::indexes* value_;
 
 };
 

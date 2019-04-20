@@ -25,38 +25,40 @@ namespace libbitcoin {
 //namespace chain {
 namespace api {
 
-class BC_API chain_point_list
-{
+class BC_API chain_point_list {
 public:
 
-  chain_point_list()
-    : value(new chain::point::list())
-  {
-  }
+	chain_point_list() :
+			value_(new chain::point::list) {
+	}
 
-  chain::point get(size_t i) {
-    return chain_point_list::value[i];
-  }
+	~chain_point_list() {
+		delete value_;
+	}
 
-  void set(size_t i, chain::point *t) {
-    chain_point_list::value[i] = *t;
-  }
+	chain::point get(size_t i) {
+		return (*value_)[i];
+	}
 
-  chain::point::list getValue() {
-    return value;
-  }
+	void set(size_t i, chain::point *t) {
+		(*value_)[i] = *t;
+	}
 
-  void setValue(chain::point::list value) {
-	  this->value = value;
-  }
+	chain::point::list* getValue() {
+		return value_;
+	}
 
-  size_t getSize() {
-    return value.size();
-  }
+	void setValue(chain::point::list* value) {
+		value_ = value;
+	}
+
+	size_t getSize() {
+		return value_->size();
+	}
 
 private:
 
-  chain::point::list value;
+	chain::point::list* value_;
 
 };
 

@@ -8,30 +8,32 @@ mkdir -p $TARGET_DIR/objs
 mkdir -p $TARGET_DIR/lib
 mkdir -p $TARGET_DIR/classes
 
-#gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$LIB_NAME.cpp -o $TARGET_DIR/objs/javawrap$LIB_NAME.o -I$JAVA_HOME/include -I$JAVA_HOME/include/linux
-#PACKAGE=chain && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$LIB_NAME"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$LIB_NAME"_"$PACKAGE.o -I$JAVA_HOME/include -I$JAVA_HOME/include/linux
-#PACKAGE=config && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$LIB_NAME"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$LIB_NAME"_"$PACKAGE.o -I$JAVA_HOME/include -I$JAVA_HOME/include/linux
-PACKAGE=formats && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$LIB_NAME"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$LIB_NAME"_"$PACKAGE.o -I$JAVA_HOME/include -I$JAVA_HOME/include/linux
+export INCLUDE="-I$JAVA_HOME/include -I$JAVA_HOME/include/linux -I$MAIN_SRC_DIR/cpp -I$BASE_DIR/include"
+
+#gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$SUB_ARTIFACT_ID.cpp -o $TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID.o $INCLUDE
+#PACKAGE=config && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$SUB_ARTIFACT_ID"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID"_"$PACKAGE.o $INCLUDE
+#PACKAGE=chain && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$SUB_ARTIFACT_ID"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID"_"$PACKAGE.o $INCLUDE
+#PACKAGE=formats && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$SUB_ARTIFACT_ID"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID"_"$PACKAGE.o $INCLUDE
+#PACKAGE=machine && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$SUB_ARTIFACT_ID"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID"_"$PACKAGE.o $INCLUDE
+PACKAGE=math && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$SUB_ARTIFACT_ID"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID"_"$PACKAGE.o $INCLUDE
+#PACKAGE=message && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$SUB_ARTIFACT_ID"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID"_"$PACKAGE.o $INCLUDE
+#PACKAGE=utility && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$SUB_ARTIFACT_ID"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID"_"$PACKAGE.o $INCLUDE
+#PACKAGE=wallet && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$SUB_ARTIFACT_ID"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID"_"$PACKAGE.o $INCLUDE
 exit
-PACKAGE=machine && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$LIB_NAME"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$LIB_NAME"_"$PACKAGE.o -I$JAVA_HOME/include -I$JAVA_HOME/include/linux
-PACKAGE=math && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$LIB_NAME"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$LIB_NAME"_"$PACKAGE.o -I$JAVA_HOME/include -I$JAVA_HOME/include/linux
-PACKAGE=message && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$LIB_NAME"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$LIB_NAME"_"$PACKAGE.o -I$JAVA_HOME/include -I$JAVA_HOME/include/linux
-PACKAGE=utility && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$LIB_NAME"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$LIB_NAME"_"$PACKAGE.o -I$JAVA_HOME/include -I$JAVA_HOME/include/linux
-PACKAGE=wallet && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$LIB_NAME"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$LIB_NAME"_"$PACKAGE.o -I$JAVA_HOME/include -I$JAVA_HOME/include/linux
 gcc -fPIC  -shared \
-	$TARGET_DIR/objs/javawrap$LIB_NAME.o \
-	$TARGET_DIR/objs/javawrap$LIB_NAME_chain.o \
-	$TARGET_DIR/objs/javawrap$LIB_NAME_config.o \
-	$TARGET_DIR/objs/javawrap$LIB_NAME_formats.o \
-	$TARGET_DIR/objs/javawrap$LIB_NAME_machine.o \
-	$TARGET_DIR/objs/javawrap$LIB_NAME_math.o \
-	$TARGET_DIR/objs/javawrap$LIB_NAME_message.o \
-	$TARGET_DIR/objs/javawrap$LIB_NAME_utility.o \
-	$TARGET_DIR/objs/javawrap$LIB_NAME_wallet.o \
-	-o $TARGET_DIR/lib/libjavawrap$LIB_NAME.so -L/usr/local/lib -lbitcoin-$ARTIFACT_ID
+	$TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID.o \
+	$TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID_chain.o \
+	$TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID_config.o \
+	$TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID_formats.o \
+	$TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID_machine.o \
+	$TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID_math.o \
+	$TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID_message.o \
+	$TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID_utility.o \
+	$TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID_wallet.o \
+	-o $TARGET_DIR/lib/libjavawrap$SUB_ARTIFACT_ID.so -L/usr/local/lib -lbitcoin-$ARTIFACT_ID
 
-#$JAVA_HOME/bin/javac -sourcepath $TARGET_DIR/generated-sources/src/main/java/ $TARGET_DIR/generated-sources/src/main/java/org/libbitcoin/$LIB_NAME/*.java -d $TARGET_DIR/classes
-#$JAVA_HOME/bin/javac -sourcepath bindings/src/main/java/ bindings/src/main/java/org/libbitcoin/$LIB_NAME/*.java -d $TARGET_DIR/classes
+#$JAVA_HOME/bin/javac -sourcepath $TARGET_DIR/generated-sources/src/main/java/ $TARGET_DIR/generated-sources/src/main/java/org/libbitcoin/$SUB_ARTIFACT_ID/*.java -d $TARGET_DIR/classes
+#$JAVA_HOME/bin/javac -sourcepath bindings/src/main/java/ bindings/src/main/java/org/libbitcoin/$SUB_ARTIFACT_ID/*.java -d $TARGET_DIR/classes
 
-#$JAVA_HOME/bin/jar cf $TARGET_DIR/lib/$LIB_NAME-$VERSION.jar -C $TARGET_DIR/classes .
-#$JAVA_HOME/bin/jar uf $TARGET_DIR/lib/$LIB_NAME-$VERSION.jar -C $TARGET_DIR/lib libjavawrap$LIB_NAME.so 
+#$JAVA_HOME/bin/jar cf $TARGET_DIR/lib/$SUB_ARTIFACT_ID-$VERSION.jar -C $TARGET_DIR/classes .
+#$JAVA_HOME/bin/jar uf $TARGET_DIR/lib/$SUB_ARTIFACT_ID-$VERSION.jar -C $TARGET_DIR/lib libjavawrap$SUB_ARTIFACT_ID.so 

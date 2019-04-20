@@ -27,36 +27,36 @@
 //#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 //#include <bitcoin/bitcoin/error.hpp>
-#include <chain_transaction.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
-#include <chain_transaction.hpp>
+//#include <bitcoin/chain_transaction.hpp>
 //#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <math_hash_digest.hpp>
-#include <math_ec_signature.hpp>
-#include <math_ec_secret.hpp>
-#include <math_endorsement.hpp>
-#include <math_point_list.hpp>
-#include <math_short_hash.hpp>
-#include <machine_operation_iterator.hpp>
+#include <bitcoin/math_hash_digest.hpp>
+#include <bitcoin/math_ec_signature.hpp>
+#include <bitcoin/math_ec_secret.hpp>
+#include <bitcoin/math_endorsement.hpp>
+#include <bitcoin/math_point_list.hpp>
+#include <bitcoin/math_short_hash.hpp>
+#include <bitcoin/machine_operation_iterator.hpp>
 //#include <bitcoin/bitcoin/machine/rule_fork.hpp>
 //#include <bitcoin/bitcoin/machine/script_pattern.hpp>
 //#include <bitcoin/bitcoin/machine/script_version.hpp>
-#include <utility_data_chunk.hpp>
-#include <utility_data_slice.hpp>
-#include <utility_data_stack.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
+#include <bitcoin/utility_data_slice.hpp>
+#include <bitcoin/utility_data_stack.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/thread.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
-#include <chain_script_operation_list.hpp>
-#include <machine_operation.hpp>
-#include <machine_script_version.hpp>
-#include <machine_rule_fork.hpp>
+#include <bitcoin/chain_script_operation_list.hpp>
+#include <bitcoin/error_code.hpp>
+#include <bitcoin/machine_operation.hpp>
+#include <bitcoin/machine_script_version.hpp>
+#include <bitcoin/machine_rule_fork.hpp>
 
 namespace libbitcoin {
 namespace api {
 
-//class chain_transaction;
-//class witness;
+class chain_transaction;
+//class chain_witness;
 
 class BC_API chain_script
 {
@@ -235,13 +235,12 @@ public:
     static error_code verify(const chain_transaction& tx, uint32_t input_index,
         uint32_t forks, const chain_script& prevout_script, uint64_t value);
 
-public:
-    chain::script getValue() {
-        return value;
+    chain::script* getValue() {
+        return value_;
     }
 
-    void setValue(chain::script value) {
-        this->value = value;
+    void setValue(chain::script* value) {
+        value_ = value;
     }
 //protected:
 //    // So that input and output may call reset from their own.
@@ -253,7 +252,7 @@ public:
 //    bool is_pay_to_script_hash(uint32_t forks) const;
 //
 private:
-    chain::script value;
+    chain::script* value_;
 //    static size_t serialized_size(const chain_script_operation_list& ops);
 //    static data_chunk operations_to_data(const chain_script_operation_list& ops);
 //    static hash_digest generate_unversioned_signature_hash(

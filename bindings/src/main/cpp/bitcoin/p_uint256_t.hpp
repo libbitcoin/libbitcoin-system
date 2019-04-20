@@ -12,7 +12,7 @@ class p_uint256_t {
 
 public:
   p_uint256_t(size_t n) {
-    p = new uint256_t[n];
+    p = new libbitcoin::uint256_t[n];
     size = n;
   }
     
@@ -30,7 +30,7 @@ public:
     }
   }
 */
-  void set(size_t i, uint256_t value) {
+  void set(size_t i, libbitcoin::uint256_t value) {
     if (i<size) {
       p[i] = value;
     } else {
@@ -38,15 +38,15 @@ public:
     }
   }
 
-  uint256_t* cast() {
+  libbitcoin::uint256_t* cast() const {
     return p;
   }
 
-  uint256_t get(size_t i) {
+  libbitcoin::uint256_t get(size_t i) const {
     return p[i];
   }
 
-  size_t getSize() {
+  size_t getSize() const {
     return size;
   }
 

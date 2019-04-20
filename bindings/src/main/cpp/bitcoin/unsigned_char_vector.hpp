@@ -30,27 +30,28 @@ public:
   }
 */
   void set(size_t i, unsigned char value) {
-      vector_[i] = value;
+      (*vector_)[i] = value;
   }
 
-  const std::vector<unsigned char>& cast() const {
+  const std::vector<unsigned char> *cast() const {
     return vector_;
   }
 
   unsigned char get(size_t i) {
-    return vector_[i];
+    return (*vector_)[i];
   }
 
   size_t getSize() {
-    return vector_.size();
+    return vector_->size();
   }
 
   ~unsigned_char_vector() {
-	vector_.clear();
+	vector_->clear();
+	delete vector_;
   }
 
 private:
-  std::vector<unsigned char> vector_;
+  std::vector<unsigned char> *vector_;
 };
 
 } // namespace api
