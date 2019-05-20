@@ -33,7 +33,7 @@ const char parameter::no_short_name = 0x00;
 const char parameter::option_prefix_char = '-';
 
 // 100% component coverage, common scenarios.
-// A required argument may only be preceeded by required arguments.
+// A required argument may only be preceded by required arguments.
 // Requiredness may be in error if the metadata is inconsistent.
 void parameter::initialize(const po::option_description& option,
     const argument_list& arguments)

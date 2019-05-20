@@ -87,7 +87,7 @@ std::streambuf::int_type unicode_streambuf::underflow()
 // MSVC does not support a UTF8 locale and as such streams interpret
 // narrow characters in the default locale. This implementation
 // assumes the stream will treat each byte of a multibyte narrow
-// chracter as an individual single byte character.
+// character as an individual single byte character.
 std::streambuf::int_type unicode_streambuf::overflow(
     std::streambuf::int_type character)
 {

@@ -480,7 +480,7 @@ bool witness::extract_embedded_script(script& out_script,
 //-----------------------------------------------------------------------------
 
 // static
-// The program script is either a prevout script or an emedded script.
+// The program script is either a prevout script or an embedded script.
 // It validates this witness, from which the witness script is derived.
 code witness::verify(const transaction& tx, uint32_t input_index,
     uint32_t forks, const script& program_script, uint64_t value) const

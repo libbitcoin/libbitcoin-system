@@ -43,7 +43,7 @@
 namespace libbitcoin {
 namespace system {
 
-// Privately map the class enum thread priority value to an interger.
+// Privately map the class enum thread priority value to an integer.
 static int get_priority(thread_priority priority)
 {
     switch (priority)

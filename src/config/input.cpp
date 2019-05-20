@@ -36,7 +36,7 @@ using namespace boost::program_options;
 // input is currently a private encoding in bx.
 static bool decode_input(chain::input& input, const std::string& tuple)
 {
-    const auto tokens = split(tuple, point::delimeter);
+    const auto tokens = split(tuple, point::delimiter);
     if (tokens.size() != 2 && tokens.size() != 3)
         return false;
 
@@ -59,7 +59,7 @@ static bool decode_input(chain::input& input, const std::string& tuple)
 static std::string encode_input(const chain::input& input)
 {
     std::stringstream result;
-    result << point(input.previous_output()) << point::delimeter
+    result << point(input.previous_output()) << point::delimiter
         << input.sequence();
 
     return result.str();
