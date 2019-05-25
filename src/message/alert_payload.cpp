@@ -29,7 +29,7 @@ namespace libbitcoin {
 namespace system {
 namespace message {
 
-// Libbitcon doesn't use this.
+// Libbitcoin doesn't use this.
 const ec_uncompressed alert_payload::satoshi_public_key
 {
     {

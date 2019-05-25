@@ -35,7 +35,7 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-// The sign byte of the ephmemeral key is fixed (0x02) by convention.
+// The sign byte of the ephemeral key is fixed (0x02) by convention.
 static const auto sign = to_array(ec_even_sign);
 
 // Constructors.
@@ -318,7 +318,7 @@ uint32_t stealth_record::prefix() const
     return prefix_;
 }
 
-// Restore the default sign byte to the ephermal key as a convenience.
+// Restore the default sign byte to the ephemeral key as a convenience.
 ec_compressed stealth_record::ephemeral_public_key() const
 {
     return splice(sign, unsigned_ephemeral_);

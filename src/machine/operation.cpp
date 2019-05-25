@@ -165,7 +165,7 @@ static bool data_from_number_token(data_chunk& out_data,
     return true;
 }
 
-// The removal of spaces in v3 data is a compatability break with our v2.
+// The removal of spaces in v3 data is a compatibility break with our v2.
 bool operation::from_string(const std::string& mnemonic)
 {
     reset();
@@ -295,7 +295,7 @@ static std::string opcode_to_prefix(opcode code, const data_chunk& data)
     }
 }
 
-// The removal of spaces in v3 data is a compatability break with our v2.
+// The removal of spaces in v3 data is a compatibility break with our v2.
 std::string operation::to_string(uint32_t active_forks) const
 {
     if (!valid_)

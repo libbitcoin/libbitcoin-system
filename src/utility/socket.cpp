@@ -69,7 +69,7 @@ void socket::stop()
     // Critical Section.
     unique_lock lock(mutex_);
 
-    // Signal the end of oustanding async socket functions (read).
+    // Signal the end of outstanding async socket functions (read).
     socket_.shutdown(asio::socket::shutdown_both, ignore);
 
     // BUGBUG: this is documented to fail on Windows XP and Server 2003.

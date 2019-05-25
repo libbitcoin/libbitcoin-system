@@ -35,7 +35,7 @@ namespace config {
 class BC_API point
 {
 public:
-    static const std::string delimeter;
+    static const std::string delimiter;
 
     /**
      * Default constructor.

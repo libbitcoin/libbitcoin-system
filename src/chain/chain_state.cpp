@@ -145,7 +145,7 @@ chain_state::activations chain_state::activation(const data& values,
     }
 
     // bip30 is active for all but two mainnet blocks that violate the rule.
-    // These two blocks each have a coinbase transaction that exctly duplicates
+    // These two blocks each have a coinbase transaction that exactly duplicates
     // another that is not spent by the arrival of the corresponding duplicate.
     if (!is_bip30_exception({ values.hash, height }, mainnet))
     {

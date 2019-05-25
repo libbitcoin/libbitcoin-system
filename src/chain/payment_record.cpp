@@ -322,7 +322,7 @@ hash_digest payment_record::hash() const
     return hash_;
 }
 
-// Set after non-wire deserializaton (distinct store).
+// Set after non-wire deserialization (distinct store).
 void payment_record::set_hash(hash_digest&& hash)
 {
     // This is no longer a default instance, so valid.

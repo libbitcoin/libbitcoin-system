@@ -35,16 +35,16 @@ namespace machine {
 using namespace bc::system::chain;
 
 // Fixed tuning parameters, max_stack_size ensures no reallocation.
-static constexpr size_t stack_capactity = max_stack_size;
-static constexpr size_t condition_capactity = max_counted_ops;
+static constexpr size_t stack_capacity = max_stack_size;
+static constexpr size_t condition_capacity = max_counted_ops;
 static const chain::transaction default_tx_;
 static const chain::script default_script_;
 
 void program::reserve_stacks()
 {
-    primary_.reserve(stack_capactity);
-    alternate_.reserve(stack_capactity);
-    condition_.reserve(condition_capactity);
+    primary_.reserve(stack_capacity);
+    alternate_.reserve(stack_capacity);
+    condition_.reserve(condition_capacity);
 }
 
 // Constructors.

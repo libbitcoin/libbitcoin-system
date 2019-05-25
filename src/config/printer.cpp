@@ -203,7 +203,7 @@ std::string printer::format_paragraph(const std::string& paragraph)
 static std::string format_setting(const parameter& value,
     const std::string& name)
 {
-    // A required argument may only be preceeded by required arguments.
+    // A required argument may only be preceded by required arguments.
     // Requiredness may be in error if the metadata is inconsistent.
     auto required = value.required();
 
@@ -308,7 +308,7 @@ std::string printer::format_usage_parameters()
 
     for (const auto& parameter: parameters)
     {
-        // A required argument may only be preceeded by required arguments.
+        // A required argument may only be preceded by required arguments.
         // Requiredness may be in error if the metadata is inconsistent.
         const auto required = parameter.required();
 
@@ -470,7 +470,7 @@ void printer::generate_parameters()
     {
         param.initialize(*option_ptr, argument_names);
 
-        // Sort non-positonal parameters (i.e. options).
+        // Sort non-positional parameters (i.e. options).
         if (param.position() == parameter::not_positional)
             insert_sorted(parameters, param, compare_parameters);
         else

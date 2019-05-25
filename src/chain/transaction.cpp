@@ -64,7 +64,7 @@ bool read(Source& source, std::vector<Put>& puts, bool wire, bool witness)
     auto result = true;
     const auto count = source.read_size_little_endian();
 
-    // Guard against potential for arbitary memory allocation.
+    // Guard against potential for arbitrary memory allocation.
     if (count > max_block_size)
         source.invalidate();
     else

@@ -129,7 +129,7 @@ bool compact_block::from_data(uint32_t version, reader& source)
     nonce_ = source.read_8_bytes_little_endian();
     auto count = source.read_size_little_endian();
 
-    // Guard against potential for arbitary memory allocation.
+    // Guard against potential for arbitrary memory allocation.
     if (count > max_block_size)
         source.invalidate();
     else

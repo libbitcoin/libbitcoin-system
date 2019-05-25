@@ -86,13 +86,13 @@ std::string checkpoint::to_string() const
 
 config::checkpoint::list checkpoint::sort(const list& checks)
 {
-    const auto comparitor = [](const checkpoint& left, const checkpoint& right)
+    const auto comparator = [](const checkpoint& left, const checkpoint& right)
     {
         return left.height() < right.height();
     };
 
     auto copy = checks;
-    std::sort(copy.begin(), copy.end(), comparitor);
+    std::sort(copy.begin(), copy.end(), comparator);
     return copy;
 }
 
