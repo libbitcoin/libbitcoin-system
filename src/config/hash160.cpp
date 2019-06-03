@@ -18,11 +18,9 @@
  */
 #include <bitcoin/system/config/hash160.hpp>
 
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <boost/program_options.hpp>
-#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/formats/base_16.hpp>
 #include <bitcoin/system/math/hash.hpp>
 

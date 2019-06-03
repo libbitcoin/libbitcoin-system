@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/config/input.hpp>
 
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <boost/program_options.hpp>

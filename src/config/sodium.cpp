@@ -18,11 +18,9 @@
  */
 #include <bitcoin/system/config/sodium.hpp>
 
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <boost/program_options.hpp>
-#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/formats/base_85.hpp>
 #include <bitcoin/system/math/hash.hpp>
 

@@ -21,7 +21,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <sstream>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/utility/container_sink.hpp>
 #include <bitcoin/system/utility/container_source.hpp>

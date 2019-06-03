@@ -18,8 +18,6 @@
  */
 #include <bitcoin/system/config/point.hpp>
 
-#include <iostream>
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <utility>

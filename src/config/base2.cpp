@@ -18,11 +18,9 @@
  */
 #include <bitcoin/system/config/base2.hpp>
 
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <boost/program_options.hpp>
-#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/utility/binary.hpp>
 
 namespace libbitcoin {

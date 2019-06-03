@@ -19,15 +19,11 @@
 #include <bitcoin/system/config/endpoint.hpp>
 
 #include <cstdint>
-#include <iostream>
-#include <regex>
 #include <string>
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 #include <boost/regex.hpp>
 #include <bitcoin/system/config/endpoint.hpp>
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/formats/base_16.hpp>
 #include <bitcoin/system/utility/asio.hpp>
 
 namespace libbitcoin {

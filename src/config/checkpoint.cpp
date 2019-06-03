@@ -19,13 +19,11 @@
 #include <bitcoin/system/config/checkpoint.hpp>
 
 #include <cstddef>
-#include <iostream>
 #include <regex>
 #include <string>
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 #include <boost/regex.hpp>
-#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/formats/base_16.hpp>
 #include <bitcoin/system/math/hash.hpp>
 

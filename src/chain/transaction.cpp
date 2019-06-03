@@ -21,10 +21,8 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <limits>
 #include <numeric>
 #include <type_traits>
-#include <sstream>
 #include <utility>
 #include <vector>
 #include <boost/optional.hpp>
@@ -38,13 +36,11 @@
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/machine/opcode.hpp>
-#include <bitcoin/system/machine/operation.hpp>
 #include <bitcoin/system/machine/rule_fork.hpp>
 #include <bitcoin/system/message/messages.hpp>
 #include <bitcoin/system/utility/collection.hpp>
 #include <bitcoin/system/utility/container_sink.hpp>
 #include <bitcoin/system/utility/container_source.hpp>
-#include <bitcoin/system/utility/endian.hpp>
 #include <bitcoin/system/utility/istream_reader.hpp>
 #include <bitcoin/system/utility/ostream_writer.hpp>
 

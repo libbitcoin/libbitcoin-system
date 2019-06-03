@@ -25,7 +25,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 #include <boost/regex.hpp>
-#include <bitcoin/system/formats/base_16.hpp>
 #include <bitcoin/system/utility/asio.hpp>
 #include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/string.hpp>
