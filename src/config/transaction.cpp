@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/config/transaction.hpp>
 
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <boost/program_options.hpp>

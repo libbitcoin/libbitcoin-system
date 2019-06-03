@@ -19,7 +19,6 @@
 #include <bitcoin/system/chain/input.hpp>
 
 #include <algorithm>
-#include <sstream>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/chain/witness.hpp>
 #include <bitcoin/system/constants.hpp>

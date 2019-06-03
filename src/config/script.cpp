@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/config/script.hpp>
 
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>

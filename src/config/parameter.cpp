@@ -18,10 +18,7 @@
  */
 #include <bitcoin/system/config/parameter.hpp>
 
-#include <iostream>
-#include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
-#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/utility/collection.hpp>
 #include <bitcoin/system/utility/string.hpp>
 

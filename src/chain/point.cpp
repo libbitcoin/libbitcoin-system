@@ -19,17 +19,14 @@
 #include <bitcoin/system/chain/point.hpp>
 
 #include <cstdint>
-#include <sstream>
 #include <utility>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/formats/base_16.hpp>
 #include <bitcoin/system/message/messages.hpp>
 #include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/container_sink.hpp>
 #include <bitcoin/system/utility/container_source.hpp>
 #include <bitcoin/system/utility/istream_reader.hpp>
 #include <bitcoin/system/utility/ostream_writer.hpp>
-#include <bitcoin/system/utility/serializer.hpp>
 
 namespace libbitcoin {
 namespace system {

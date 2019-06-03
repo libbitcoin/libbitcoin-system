@@ -19,7 +19,6 @@
 #include <bitcoin/system/config/output.hpp>
 
 #include <cstdint>
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <boost/program_options.hpp>
