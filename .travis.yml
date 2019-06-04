@@ -35,7 +35,7 @@ matrix:
               sources:
                 - sourceline: 'ppa:h-rayflood/llvm'
               packages:
-                - clang-3.4
+                - clang-3.8
         - os: linux
           compiler: gcc
           env: LINK=dynamic
@@ -66,7 +66,7 @@ install:
 
     # Export CC/CXX to control compiler/version.
     - if [[ $OSX   && $CLANG && $STATIC  ]]; then export CC=clang; export CXX=clang++; fi
-    - if [[ $LINUX && $CLANG && $STATIC  ]]; then export CC=clang-3.4; export CXX=clang++-3.4; fi
+    - if [[ $LINUX && $CLANG && $STATIC  ]]; then export CC=clang-3.8; export CXX=clang++-3.8; fi
     - if [[ $LINUX && $GCC   && $STATIC  ]]; then export CC=gcc; export CXX=g++; fi
     - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then export CC=clang; export CXX=clang++; fi
     - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then export CC=clang; export CXX=clang++; fi
