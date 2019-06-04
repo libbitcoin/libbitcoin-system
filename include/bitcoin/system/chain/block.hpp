@@ -21,9 +21,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <istream>
-#include <memory>
-#include <string>
 #include <vector>
 #include <boost/optional.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
