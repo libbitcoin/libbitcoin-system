@@ -43,9 +43,47 @@ const std::string witness_address::mainnet_prefix = "bc";
 const std::string witness_address::testnet_prefix = "tb";
 
 
+// Discovery based on string is not ideal.  This use case is for
+// accepting a witness_address as a string without a further specified
+// encoding type.
+static witness_address::encoding get_bech32_encoding(const std::string& address,
+    size_t hash_length)
+{
+    const auto prefix = address.substr(0, 2);
+    if (prefix == "bc")
+        return hash_length == short_hash_size ?
+            witness_address::encoding::mainnet_p2wpkh :
+            witness_address::encoding::mainnet_p2wsh;
+    else if (prefix == "tb")
+        return hash_length == short_hash_size ?
+            witness_address::encoding::testnet_p2wpkh :
+            witness_address::encoding::testnet_p2wsh;
+
+    return witness_address::encoding::unknown;
+}
+
+static witness_address::encoding get_base58_encoding(const std::string& address,
+    size_t decoded_length)
+{
+    if (decoded_length == witness_p2wpkh_size)
+    {
+        const auto prefix = address.substr(0, 2);
+        return prefix == "p2" ? witness_address::encoding::mainnet_p2sh_p2wpkh :
+            witness_address::encoding::testnet_p2sh_p2wpkh;
+    }
+    else if (decoded_length == witness_p2wsh_size)
+    {
+        const auto prefix = address.substr(0, 3);
+        return prefix == "7Xh" ? witness_address::encoding::mainnet_p2sh_p2wsh :
+            witness_address::encoding::testnet_p2sh_p2wsh;
+    }
+
+    return witness_address::encoding::unknown;
+}
+
 witness_address::witness_address()
   : payment_address(),
-    encoding_(encoding::mainnet_p2wpkh),
+    encoding_(encoding::unknown),
     witness_version_(0),
     witness_hash_(null_hash)
 {
@@ -151,7 +189,6 @@ bool witness_address::is_address(data_slice decoded)
 
 // Factories.
 // ----------------------------------------------------------------------------
-
 // static
 witness_address witness_address::from_string(const std::string& address,
     encoding out_type)
@@ -184,6 +221,9 @@ witness_address witness_address::from_string(const std::string& address,
         if (converted.size() < 2 || converted.size() > 40)
             return {};
 
+        if (out_type == encoding::unknown)
+            out_type = get_bech32_encoding(address, converted.size());
+
         // Reinterpret casting avoids a copy, but should probably be replaced.
         if (converted.size() == hash_size)
             return { *reinterpret_cast<const hash_digest*>(&converted[0]),
@@ -201,6 +241,9 @@ witness_address witness_address::from_string(const std::string& address,
     if (!decode_base58(decoded, address) || !is_address(decoded))
         return {};
 
+    if (out_type == encoding::unknown)
+        out_type = get_base58_encoding(address, decoded.size());
+
     // Reinterpret casting avoids a copy, but should probably be replaced.
     if (decoded.size() == witness_p2wpkh_size)
         return { *reinterpret_cast<witness_p2wpkh*>(&decoded[0]), out_type };
@@ -215,7 +258,7 @@ witness_address witness_address::from_string(const std::string& address,
 witness_address witness_address::from_data(const data_chunk& data,
     encoding out_type)
 {
-    switch(out_type)
+    switch (out_type)
     {
         case encoding::mainnet_p2wpkh:
         case encoding::testnet_p2wpkh:
@@ -273,20 +316,28 @@ witness_address witness_address::from_public(const ec_public& point,
     if (!point.to_data(data))
         return {};
 
-    if (out_type == encoding::mainnet_p2sh_p2wpkh ||
-        out_type == encoding::testnet_p2sh_p2wpkh ||
-        out_type == encoding::mainnet_p2wpkh ||
-        out_type == encoding::testnet_p2wpkh)
-        return { bitcoin_short_hash(data), out_type };
+    switch (out_type)
+    {
+        case encoding::mainnet_p2sh_p2wsh:
+        case encoding::testnet_p2sh_p2wsh:
+        case encoding::mainnet_p2wsh:
+        case encoding::testnet_p2wsh:
+            return { bitcoin_hash(data), out_type };
 
-    return { bitcoin_hash(data), out_type };
+        case encoding::mainnet_p2sh_p2wpkh:
+        case encoding::testnet_p2sh_p2wpkh:
+        case encoding::mainnet_p2wpkh:
+        case encoding::testnet_p2wpkh:
+        default: // if no encoding is set, default to p2wpkh
+            return { bitcoin_short_hash(data), out_type };
+    }
 }
 
 // static
 witness_address witness_address::from_script(const chain::script& script,
     encoding out_type)
 {
-    switch(out_type)
+    switch (out_type)
     {
         case encoding::mainnet_p2sh_p2wpkh:
         case encoding::testnet_p2sh_p2wpkh:
@@ -483,9 +534,40 @@ bool witness_address::operator!=(const witness_address& other) const
 
 std::istream& operator>>(std::istream& in, witness_address& to)
 {
+    static constexpr size_t p2wpkh_address_size = 42;
+    static constexpr size_t p2wsh_address_size = 62;
+    static constexpr size_t p2sh_p2wpkh_address_size = 36;
+    static constexpr size_t p2sh_p2wsh_address_size = 53;
+
     std::string value;
     in >> value;
-    to = witness_address(value);
+
+    // witness version 0 only supported.
+    witness_address::encoding out_type;
+    switch(value.size())
+    {
+        case p2wpkh_address_size:
+            out_type = get_bech32_encoding(value, short_hash_size);
+            break;
+
+        case p2wsh_address_size:
+            out_type = get_bech32_encoding(value, hash_size);
+            break;
+
+        case p2sh_p2wpkh_address_size:
+            out_type = get_base58_encoding(value, witness_p2wpkh_size);
+            break;
+
+        case p2sh_p2wsh_address_size:
+            out_type = get_base58_encoding(value, witness_p2wsh_size);
+            break;
+
+        default:
+            out_type = witness_address::encoding::unknown;
+            break;
+    }
+
+    to = witness_address(value, out_type);
 
     if (!to)
     {
