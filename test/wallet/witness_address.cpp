@@ -85,7 +85,7 @@ test_address_list witness_address_tests =
     { "tb1qqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesrxh6hy", "0020000000c4a5cad46221b2a187905e5266362b99d5e91c6ce24d165dab93e86433" }
 };
 
-BOOST_AUTO_TEST_CASE(witness_address__construct__public_to_p2wpkh__valid_expected)
+BOOST_AUTO_TEST_CASE(witness_address__construct__to_p2wpkh__valid_expected)
 {
     const witness_address address(ec_public(BIP142_PUBLIC_KEY), witness_address::encoding::mainnet_p2sh_p2wpkh);
     BOOST_REQUIRE(address);
@@ -99,21 +99,21 @@ BOOST_AUTO_TEST_CASE(witness_address__construct__from_p2sh_p2wpkh_string__valid_
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_P2WPKH);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__construct__public_testnet_to_p2wpkh__valid_expected)
+BOOST_AUTO_TEST_CASE(witness_address__construct__testnet_to_p2wpkh__valid_expected)
 {
     const witness_address address(ec_public(BIP142_PUBLIC_KEY), witness_address::encoding::testnet_p2sh_p2wpkh);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_P2WPKH_TESTNET);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__construct__public_testnet_to_p2wpkh_string__valid_expected)
+BOOST_AUTO_TEST_CASE(witness_address__construct__testnet_to_p2wpkh_string__valid_expected)
 {
     const witness_address address(std::string(ADDRESS_P2WPKH_TESTNET), witness_address::encoding::testnet_p2sh_p2wpkh);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_P2WPKH_TESTNET);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__construct__public_mainnet_to_p2wsh__valid_expected)
+BOOST_AUTO_TEST_CASE(witness_address__construct__mainnet_to_p2wsh__valid_expected)
 {
     chain::script script;
     script.from_string(MAINNET_P2WSH_SCRIPT);
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(witness_address__construct__public_mainnet_to_p2wsh__valid_
     BOOST_REQUIRE_EQUAL(address.encoded(), MAINNET_P2WSH_ADDRESS);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__construct__public_testnet_to_p2wsh__valid_expected)
+BOOST_AUTO_TEST_CASE(witness_address__construct__testnet_to_p2wsh__valid_expected)
 {
     chain::script script;
     script.from_string(TESTNET_P2WSH_SCRIPT);

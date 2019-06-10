@@ -51,7 +51,9 @@ public:
         mainnet_p2wsh,
         testnet_p2wpkh,
         testnet_p2wsh,
-     };
+
+        unknown
+    };
 
     static const uint8_t mainnet_p2sh_p2wpkh;
     static const uint8_t mainnet_p2sh_p2wsh;
@@ -80,31 +82,28 @@ public:
     witness_address(witness_address&& other);
     witness_address(const witness_address& other);
     witness_address(const witness_p2wpkh& decoded,
-        encoding out_type=encoding::mainnet_p2wpkh);
+        encoding out_type=encoding::unknown);
     witness_address(const witness_p2wsh& decoded,
-        encoding out_type=encoding::mainnet_p2wpkh);
+        encoding out_type=encoding::unknown);
     witness_address(const data_chunk& data,
-        encoding out_type=encoding::mainnet_p2wpkh);
+        encoding out_type=encoding::unknown);
     witness_address(const std::string& address,
-        encoding out_type=encoding::mainnet_p2wpkh);
-    witness_address(short_hash&& hash,
-        encoding out_type=encoding::mainnet_p2wpkh,
+        encoding out_type=encoding::unknown);
+    witness_address(short_hash&& hash, encoding out_type=encoding::unknown,
         uint8_t witness_version=0);
-    witness_address(const short_hash& hash,
-        encoding out_type=encoding::mainnet_p2wpkh,
+    witness_address(const short_hash& hash, encoding out_type=encoding::unknown,
         uint8_t witness_version=0);
-    witness_address(hash_digest&& hash,
-        encoding out_type=encoding::mainnet_p2wpkh,
+    witness_address(hash_digest&& hash, encoding out_type=encoding::unknown,
         uint8_t witness_version=0);
     witness_address(const hash_digest& hash,
-        encoding out_type=encoding::mainnet_p2wpkh,
+        encoding out_type=encoding::unknown,
         uint8_t witness_version=0);
     witness_address(const chain::script& script,
-        encoding out_type=encoding::mainnet_p2wpkh);
+        encoding out_type=encoding::unknown);
     witness_address(const ec_private& secret,
-        encoding out_type=encoding::mainnet_p2wpkh);
+        encoding out_type=encoding::unknown);
     witness_address(const ec_public& point,
-        encoding out_type=encoding::mainnet_p2wpkh);
+        encoding out_type=encoding::unknown);
 
     /// Operators.
     bool operator<(const witness_address& other) const;
@@ -133,19 +132,19 @@ private:
 
     /// Factories.
     static witness_address from_string(const std::string& address,
-        encoding out_type=encoding::mainnet_p2wpkh);
+        encoding out_type=encoding::unknown);
     static witness_address from_witness(const witness_p2wpkh& decoded,
-        encoding out_type=encoding::mainnet_p2wpkh);
+        encoding out_type=encoding::unknown);
     static witness_address from_witness(const witness_p2wsh& decoded,
-        encoding out_type=encoding::mainnet_p2wpkh);
+        encoding out_type=encoding::unknown);
     static witness_address from_data(const data_chunk& data,
-        encoding out_type=encoding::mainnet_p2wpkh);
+        encoding out_type=encoding::unknown);
     static witness_address from_script(const chain::script& script,
-        encoding out_type=encoding::mainnet_p2wpkh);
+        encoding out_type=encoding::unknown);
     static witness_address from_private(const ec_private& secret,
-        encoding out_type=encoding::mainnet_p2wpkh);
+        encoding out_type=encoding::unknown);
     static witness_address from_public(const ec_public& point,
-        encoding out_type=encoding::mainnet_p2wpkh);
+        encoding out_type=encoding::unknown);
 
     encoding encoding_;
     uint8_t witness_version_;
