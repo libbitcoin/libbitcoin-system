@@ -174,6 +174,17 @@ BOOST_AUTO_TEST_CASE(witness_address__witness_vectors__valid_expected)
     }
 }
 
+struct witness_address_accessor
+  : public witness_address
+{
+    data_chunk convert_bits(uint32_t from_bits, uint32_t to_bits,
+        bool pad, const data_chunk& in, size_t in_offset)
+    {
+        return witness_address::convert_bits(
+            from_bits, to_bits, pad, in, in_offset);
+    }
+};
+
 BOOST_AUTO_TEST_CASE(base32__witness_address_vectors__valid_expected)
 {
     for (const auto& test: witness_address_tests)
@@ -185,7 +196,8 @@ BOOST_AUTO_TEST_CASE(base32__witness_address_vectors__valid_expected)
         if (witness_version != 0)
             witness_version += 0x50;
 
-        const auto witness_program = witness_address::convert_bits(5, 8, false,
+        witness_address_accessor converter;
+        const auto witness_program = converter.convert_bits(5, 8, false,
             decoded.payload, 1);
         BOOST_REQUIRE(witness_program.size() > 1 &&
                       witness_program.size() < 41);

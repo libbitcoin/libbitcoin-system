@@ -42,6 +42,8 @@ using namespace bc::system::machine;
 const std::string witness_address::mainnet_prefix = "bc";
 const std::string witness_address::testnet_prefix = "tb";
 
+const size_t bech32_contracted_bit_size = 5;
+const size_t bech32_expanded_bit_size = 8;
 
 // Discovery based on string is not ideal.  This use case is for
 // accepting a witness_address as a string without a further specified
@@ -193,6 +195,20 @@ bool witness_address::is_address(data_slice decoded)
 witness_address witness_address::from_string(const std::string& address,
     encoding out_type)
 {
+    // BIP 141 constants
+    static constexpr size_t witness_program_min_size = 2;
+    static constexpr size_t witness_program_max_size = 40;
+
+    // BIP 173 witness version 0 constants
+    static constexpr size_t p2wpkh_size = 42;
+    static constexpr size_t p2wsh_size = 62;
+    static constexpr size_t bech32_address_min_size = 14;
+    static constexpr size_t bech32_address_max_size = 74;
+    static constexpr size_t bech32_address_size_modulo = 8;
+    static constexpr size_t bech32_address_modulo_invalid_1 = 0;
+    static constexpr size_t bech32_address_modulo_invalid_2 = 3;
+    static constexpr size_t bech32_address_modulo_invalid_3 = 5;
+
     // Attempt to decode BIP 173 address format.
     base32 bech32_decoded;
     if (decode_base32(bech32_decoded, address))
@@ -200,7 +216,8 @@ witness_address witness_address::from_string(const std::string& address,
         const uint8_t witness_version = bech32_decoded.payload.front();
 
         // Checks specific to witness version 0.
-        if (witness_version == 0 && (address.size() < 42 || address.size() > 62))
+        if (witness_version == 0 &&
+            (address.size() < p2wpkh_size || address.size() > p2wsh_size))
             return {};
 
         // Verify witness version is valid (only version 0 is
@@ -209,16 +226,20 @@ witness_address witness_address::from_string(const std::string& address,
             return {};
 
         // Verify additional properties (BIP173 decoding).
-        if (address.size() < 14 || address.size() > 74)
+        if (address.size() < bech32_address_min_size ||
+            address.size() > bech32_address_max_size)
             return {};
 
-        const auto address_mod = address.size() % 8;
-        if (address_mod == 0 || address_mod == 3 || address_mod == 5)
+        const auto address_mod = address.size() % bech32_address_size_modulo;
+        if (address_mod == bech32_address_modulo_invalid_1 ||
+            address_mod == bech32_address_modulo_invalid_2 ||
+            address_mod == bech32_address_modulo_invalid_3)
             return {};
 
-        const auto converted = convert_bits(5, 8, false,
-            bech32_decoded.payload, 1);
-        if (converted.size() < 2 || converted.size() > 40)
+        const auto converted = convert_bits(bech32_contracted_bit_size,
+            bech32_expanded_bit_size, false, bech32_decoded.payload, 1);
+        if (converted.size() < witness_program_min_size ||
+            converted.size() > witness_program_max_size)
             return {};
 
         if (out_type == encoding::unknown)
@@ -377,8 +398,9 @@ std::string witness_address::bech32(const std::string& prefix) const
     bech32.payload = to_chunk(witness_version_);
 
     const auto converted = (witness_hash_ == null_hash ?
-        convert_bits(8, 5, true, to_chunk(hash_), 0) :
-        convert_bits(8, 5, true, to_chunk(witness_hash_), 0));
+        convert_bits(bech32_expanded_bit_size, bech32_contracted_bit_size, true,
+            to_chunk(hash_), 0) : convert_bits(bech32_expanded_bit_size,
+                bech32_contracted_bit_size, true, to_chunk(witness_hash_), 0));
 
     extend_data(bech32.payload, converted);
     return encode_base32(bech32);
