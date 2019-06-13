@@ -61,10 +61,6 @@ public:
     typedef std::vector<witness_address> list;
     typedef std::shared_ptr<witness_address> ptr;
 
-    /// Public for unit testing.
-    static data_chunk convert_bits(uint32_t from_bits, uint32_t to_bits,
-        bool pad, const data_chunk& in, size_t in_offset);
-
     /// Create base58 witness programs using provided information.
     static void to_witness(witness_p2wpkh& out, encoding out_type,
         uint8_t witness_version, short_hash hash);
@@ -119,6 +115,11 @@ public:
     uint8_t witness_version() const;
     const hash_digest& witness_hash() const;
     chain::script output_script() const;
+
+protected:
+    /// Protected for unit testing.
+    static data_chunk convert_bits(uint32_t from_bits, uint32_t to_bits,
+        bool pad, const data_chunk& in, size_t in_offset);
 
 private:
     /// Validators.
