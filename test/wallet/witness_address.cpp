@@ -46,12 +46,12 @@ typedef std::vector<test_vector> test_list;
 test_list native_witness_tests =
 {
     // hash, address, testnet, encoding, witness_version
-    { "78f0c6aeafc418a10bc92c2bb24cdd2d27dc0a0b", "QWz8m8pbR6nqXJHEdtRTAxoQ6YHkxRNxLw7x", true, witness_address::encoding::testnet_p2sh_p2wpkh, 0 },
-    { "a2594531c857b98e4f1a8aa78e2edb74efe8ff37", "p2y9GjzzvXoHJ8WWMaYaz7hf8sv74LiU8dLK", false, witness_address::encoding::mainnet_p2sh_p2wpkh, 0 },
-    { "91df9b382022f8dbcf33a960d9c5d82e996d2020", "p2y7mdSZzcPLZL1S5woeBmafWvnE1yFk3H2f", false, witness_address::encoding::mainnet_p2sh_p2wpkh, 0 },
-    { "59bc07ec402a63b072f07115bfc83d73a8a88c1654c85e2dd64bc6aee40cc239", "T7nYVDjPz5V9vPCfBJq4R55LvFkA3ReMfbvT5AX6vxAEgZRGtKF5d", true, witness_address::encoding::testnet_p2sh_p2wsh, 0 },
-    { "0b1572dae6a95c50e7e8203b4de0d06291be349b9a8b9ef49d6389fc2f785dcf", "T7nXtahqZTvcSfU3QHhKSfJsTVb57oEM9aFRTQa6i5jnaUw5wvNAb", true, witness_address::encoding::testnet_p2sh_p2wsh, 0 },
-    { "99071ccd792c8bb97138de5817169043c09676872e8f90e6aab433f8e532a693", "7XhQN533dfoMqSCNMt85Pu77pmjXE84Pq9FSsVTb6Rzu5h8oAc8Tn", false, witness_address::encoding::mainnet_p2sh_p2wsh, 0 }
+    { "78f0c6aeafc418a10bc92c2bb24cdd2d27dc0a0b", "QWz8m8pbR6nqXJHEdtRTAxoQ6YHkxRNxLw7x", true, witness_address::encoding::testnet_base58_p2wpkh, 0 },
+    { "a2594531c857b98e4f1a8aa78e2edb74efe8ff37", "p2y9GjzzvXoHJ8WWMaYaz7hf8sv74LiU8dLK", false, witness_address::encoding::mainnet_base58_p2wpkh, 0 },
+    { "91df9b382022f8dbcf33a960d9c5d82e996d2020", "p2y7mdSZzcPLZL1S5woeBmafWvnE1yFk3H2f", false, witness_address::encoding::mainnet_base58_p2wpkh, 0 },
+    { "59bc07ec402a63b072f07115bfc83d73a8a88c1654c85e2dd64bc6aee40cc239", "T7nYVDjPz5V9vPCfBJq4R55LvFkA3ReMfbvT5AX6vxAEgZRGtKF5d", true, witness_address::encoding::testnet_base58_p2wsh, 0 },
+    { "0b1572dae6a95c50e7e8203b4de0d06291be349b9a8b9ef49d6389fc2f785dcf", "T7nXtahqZTvcSfU3QHhKSfJsTVb57oEM9aFRTQa6i5jnaUw5wvNAb", true, witness_address::encoding::testnet_base58_p2wsh, 0 },
+    { "99071ccd792c8bb97138de5817169043c09676872e8f90e6aab433f8e532a693", "7XhQN533dfoMqSCNMt85Pu77pmjXE84Pq9FSsVTb6Rzu5h8oAc8Tn", false, witness_address::encoding::mainnet_base58_p2wsh, 0 }
 };
 
 // BIP 173 test constants.
@@ -87,28 +87,28 @@ test_address_list witness_address_tests =
 
 BOOST_AUTO_TEST_CASE(witness_address__construct__to_p2wpkh__valid_expected)
 {
-    const witness_address address(ec_public(BIP142_PUBLIC_KEY), witness_address::encoding::mainnet_p2sh_p2wpkh);
+    const witness_address address(ec_public(BIP142_PUBLIC_KEY), witness_address::encoding::mainnet_base58_p2wpkh);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_P2WPKH);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__construct__from_p2sh_p2wpkh_string__valid_expected)
+BOOST_AUTO_TEST_CASE(witness_address__construct__from_base58_p2wpkh_string__valid_expected)
 {
-    const witness_address address(std::string(ADDRESS_P2WPKH), witness_address::encoding::mainnet_p2sh_p2wpkh);
+    const witness_address address(std::string(ADDRESS_P2WPKH), witness_address::encoding::mainnet_base58_p2wpkh);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_P2WPKH);
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__construct__testnet_to_p2wpkh__valid_expected)
 {
-    const witness_address address(ec_public(BIP142_PUBLIC_KEY), witness_address::encoding::testnet_p2sh_p2wpkh);
+    const witness_address address(ec_public(BIP142_PUBLIC_KEY), witness_address::encoding::testnet_base58_p2wpkh);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_P2WPKH_TESTNET);
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__construct__testnet_to_p2wpkh_string__valid_expected)
 {
-    const witness_address address(std::string(ADDRESS_P2WPKH_TESTNET), witness_address::encoding::testnet_p2sh_p2wpkh);
+    const witness_address address(std::string(ADDRESS_P2WPKH_TESTNET), witness_address::encoding::testnet_base58_p2wpkh);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_P2WPKH_TESTNET);
 }
@@ -154,8 +154,8 @@ BOOST_AUTO_TEST_CASE(witness_address__witness_vectors__valid_expected)
 {
     for (const auto& test: native_witness_tests)
     {
-        if (test.encoding == witness_address::encoding::mainnet_p2sh_p2wpkh ||
-            test.encoding == witness_address::encoding::testnet_p2sh_p2wpkh)
+        if (test.encoding == witness_address::encoding::mainnet_base58_p2wpkh ||
+            test.encoding == witness_address::encoding::testnet_base58_p2wpkh)
         {
             short_hash hash;
             BOOST_REQUIRE(decode_base16(hash, test.hash));

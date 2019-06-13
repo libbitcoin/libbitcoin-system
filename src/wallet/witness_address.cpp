@@ -68,14 +68,14 @@ static witness_address::encoding get_base58_encoding(const std::string& address,
     if (decoded_length == witness_p2wpkh_size)
     {
         const auto prefix = address.substr(0, 2);
-        return prefix == "p2" ? witness_address::encoding::mainnet_p2sh_p2wpkh :
-            witness_address::encoding::testnet_p2sh_p2wpkh;
+        return prefix == "p2" ? witness_address::encoding::mainnet_base58_p2wpkh :
+            witness_address::encoding::testnet_base58_p2wpkh;
     }
     else if (decoded_length == witness_p2wsh_size)
     {
         const auto prefix = address.substr(0, 3);
-        return prefix == "7Xh" ? witness_address::encoding::mainnet_p2sh_p2wsh :
-            witness_address::encoding::testnet_p2sh_p2wsh;
+        return prefix == "7Xh" ? witness_address::encoding::mainnet_base58_p2wsh :
+            witness_address::encoding::testnet_base58_p2wsh;
     }
 
     return witness_address::encoding::unknown;
@@ -318,14 +318,14 @@ witness_address witness_address::from_public(const ec_public& point,
 
     switch (out_type)
     {
-        case encoding::mainnet_p2sh_p2wsh:
-        case encoding::testnet_p2sh_p2wsh:
+        case encoding::mainnet_base58_p2wsh:
+        case encoding::testnet_base58_p2wsh:
         case encoding::mainnet_p2wsh:
         case encoding::testnet_p2wsh:
             return { bitcoin_hash(data), out_type };
 
-        case encoding::mainnet_p2sh_p2wpkh:
-        case encoding::testnet_p2sh_p2wpkh:
+        case encoding::mainnet_base58_p2wpkh:
+        case encoding::testnet_base58_p2wpkh:
         case encoding::mainnet_p2wpkh:
         case encoding::testnet_p2wpkh:
         default: // if no encoding is set, default to p2wpkh
@@ -339,15 +339,15 @@ witness_address witness_address::from_script(const chain::script& script,
 {
     switch (out_type)
     {
-        case encoding::mainnet_p2sh_p2wpkh:
-        case encoding::testnet_p2sh_p2wpkh:
+        case encoding::mainnet_base58_p2wpkh:
+        case encoding::testnet_base58_p2wpkh:
         case encoding::mainnet_p2wpkh:
         case encoding::testnet_p2wpkh:
             return witness_address(ripemd160_hash(sha256_hash(
                 script.to_data(false))), out_type);
 
-        case encoding::mainnet_p2sh_p2wsh:
-        case encoding::testnet_p2sh_p2wsh:
+        case encoding::mainnet_base58_p2wsh:
+        case encoding::testnet_base58_p2wsh:
         case encoding::mainnet_p2wsh:
         case encoding::testnet_p2wsh:
             return witness_address(sha256_hash(script.to_data(false)),
@@ -390,16 +390,16 @@ std::string witness_address::encoded() const
 {
     switch (encoding_)
     {
-        case encoding::mainnet_p2sh_p2wpkh:
-        case encoding::testnet_p2sh_p2wpkh:
+        case encoding::mainnet_base58_p2wpkh:
+        case encoding::testnet_base58_p2wpkh:
         {
             witness_p2wpkh witness;
             to_witness(witness, encoding_, witness_version_, hash_);
             return encode_base58(witness);
         }
 
-        case encoding::mainnet_p2sh_p2wsh:
-        case encoding::testnet_p2sh_p2wsh:
+        case encoding::mainnet_base58_p2wsh:
+        case encoding::testnet_base58_p2wsh:
         {
             witness_p2wsh witness;
             to_witness(witness, encoding_, witness_version_, witness_hash_);
@@ -436,32 +436,16 @@ chain::script witness_address::output_script() const
 {
     switch (encoding_)
     {
-        case encoding::mainnet_p2sh_p2wpkh:
-        case encoding::testnet_p2sh_p2wpkh:
-        {
-            const operation::list operations{ opcode(0), operation(to_chunk(hash_)) };
-            const chain::script witness_program(operations);
-            const auto witness_hash = bitcoin_short_hash(witness_program.to_data(false));
-
-            return chain::script::to_pay_script_hash_pattern(witness_hash);
-        }
-
-        case encoding::mainnet_p2sh_p2wsh:
-        case encoding::testnet_p2sh_p2wsh:
-        {
-            const operation::list operations{ opcode(0), operation(to_chunk(witness_hash_)) };
-            const chain::script witness_program(operations);
-            const auto witness_hash = bitcoin_short_hash(witness_program.to_data(false));
-
-            return chain::script::to_pay_script_hash_pattern(witness_hash);
-        }
-
         case encoding::mainnet_p2wpkh:
         case encoding::testnet_p2wpkh:
+        case encoding::mainnet_base58_p2wpkh:
+        case encoding::testnet_base58_p2wpkh:
             return chain::script::to_pay_witness_key_hash_pattern(hash_);
 
         case encoding::mainnet_p2wsh:
         case encoding::testnet_p2wsh:
+        case encoding::mainnet_base58_p2wsh:
+        case encoding::testnet_base58_p2wsh:
             return chain::script::to_pay_witness_script_hash_pattern(witness_hash_);
 
         default:
@@ -536,8 +520,8 @@ std::istream& operator>>(std::istream& in, witness_address& to)
 {
     static constexpr size_t p2wpkh_address_size = 42;
     static constexpr size_t p2wsh_address_size = 62;
-    static constexpr size_t p2sh_p2wpkh_address_size = 36;
-    static constexpr size_t p2sh_p2wsh_address_size = 53;
+    static constexpr size_t base58_p2wpkh_address_size = 36;
+    static constexpr size_t base58_p2wsh_address_size = 53;
 
     std::string value;
     in >> value;
@@ -554,11 +538,11 @@ std::istream& operator>>(std::istream& in, witness_address& to)
             out_type = get_bech32_encoding(value, hash_size);
             break;
 
-        case p2sh_p2wpkh_address_size:
+        case base58_p2wpkh_address_size:
             out_type = get_base58_encoding(value, witness_p2wpkh_size);
             break;
 
-        case p2sh_p2wsh_address_size:
+        case base58_p2wsh_address_size:
             out_type = get_base58_encoding(value, witness_p2wsh_size);
             break;
 

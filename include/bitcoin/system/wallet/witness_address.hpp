@@ -41,10 +41,10 @@ public:
     {
         // BIP 142 p2wpkh and p2wsh address versions.
         // https://github.com/bitcoin/bips/blob/master/bip-0142.mediawiki#specification
-        mainnet_p2sh_p2wpkh = 0x06,
-        testnet_p2sh_p2wpkh = 0x03,
-        mainnet_p2sh_p2wsh = 0x0a,
-        testnet_p2sh_p2wsh = 0x28,
+        mainnet_base58_p2wpkh = 0x06,
+        testnet_base58_p2wpkh = 0x03,
+        mainnet_base58_p2wsh = 0x0a,
+        testnet_base58_p2wsh = 0x28,
 
         // These encoding values are not from a specification.
         mainnet_p2wpkh,
@@ -54,12 +54,6 @@ public:
 
         unknown
     };
-
-    static const uint8_t mainnet_p2sh_p2wpkh;
-    static const uint8_t mainnet_p2sh_p2wsh;
-
-    static const uint8_t testnet_p2sh_p2wpkh;
-    static const uint8_t testnet_p2sh_p2wsh;
 
     static const std::string mainnet_prefix;
     static const std::string testnet_prefix;
@@ -71,7 +65,7 @@ public:
     static data_chunk convert_bits(uint32_t from_bits, uint32_t to_bits,
         bool pad, const data_chunk& in, size_t in_offset);
 
-    /// Create p2sh witness programs using provided information.
+    /// Create base58 witness programs using provided information.
     static void to_witness(witness_p2wpkh& out, encoding out_type,
         uint8_t witness_version, short_hash hash);
     static void to_witness(witness_p2wsh& out, encoding out_type,
