@@ -114,13 +114,6 @@ $ ./install.sh --prefix=/home/me/myprefix --build-boost --disable-shared
 
 Libbitcoin is now installed in `/home/me/myprefix/`.
 
-##### Installing from Formula
-
-Instead of building, libbitcoin can be installed from a formula:
-```sh
-$ brew install libbitcoin
-```
-
 #### Using MacPorts
 
 First install [MacPorts](https://www.macports.org/install.php).
