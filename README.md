@@ -121,7 +121,7 @@ Libbitcoin is now installed in `/usr/local/`.
 
 First install [MacPorts](https://www.macports.org/install.php).
 
-Next install the [build system](http://wikipedia.org/wiki/GNU_build_system) (Automake minimum 1.14) and [wget](http://www.gnu.org/software/wget):
+Next install the [build system](http://wikipedia.org/wiki/GNU_build_system) (Automake minimum 1.16.1_1) and [wget](http://www.gnu.org/software/wget):
 ```sh
 $ sudo port install autoconf automake libtool pkgconfig wget
 ```
