@@ -98,7 +98,7 @@ $ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/maste
 ```
 You may encounter a prompt to install the Xcode command line developer tools, in which case accept the prompt.
 
-Next install the [build system](http://wikipedia.org/wiki/GNU_build_system) (Automake minimum 1.14) and [wget](http://www.gnu.org/software/wget):
+Next install the [build system](http://wikipedia.org/wiki/GNU_build_system) (Automake minimum 1.16.1_1) and [wget](http://www.gnu.org/software/wget):
 ```sh
 $ brew install autoconf automake libtool pkgconfig wget
 ```
