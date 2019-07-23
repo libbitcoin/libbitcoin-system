@@ -37,6 +37,29 @@ namespace wallet {
 
 using namespace bc::system::machine;
 
+// BIP 142 p2wpkh and p2wsh address versions.
+// https://github.com/bitcoin/bips/blob/master/bip-0142.mediawiki#specification
+const uint8_t witness_address::mainnet_base58_p2wpkh = 0x06;
+const uint8_t witness_address::mainnet_base58_p2wsh = 0x0a;
+
+const uint8_t witness_address::testnet_base58_p2wpkh = 0x03;
+const uint8_t witness_address::testnet_base58_p2wsh = 0x28;
+
+// These version values are not meaningful but are required to
+// distinguish from other address version values.
+const uint8_t witness_address::mainnet_bech32_p2wpkh = 0xd0;
+const uint8_t witness_address::mainnet_bech32_p2wsh = 0xe0;
+
+const uint8_t witness_address::testnet_bech32_p2wpkh = 0xd1;
+const uint8_t witness_address::testnet_bech32_p2wsh = 0xe1;
+
+// BIP 142 prefix constants.
+// https://github.com/bitcoin/bips/blob/master/bip-0142.mediawiki#Specification
+const std::string witness_address::mainnet_p2wpkh = "p2";
+const std::string witness_address::testnet_p2wpkh = "7Xh";
+const std::string witness_address::mainnet_p2wsh = "QW";
+const std::string witness_address::testnet_p2wsh = "T7n";
+
 // BIP 173 prefix constants.
 // https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki#segwit-address-format
 const std::string witness_address::mainnet_prefix = "bc";
@@ -45,47 +68,8 @@ const std::string witness_address::testnet_prefix = "tb";
 const size_t bech32_contracted_bit_size = 5;
 const size_t bech32_expanded_bit_size = 8;
 
-// Discovery based on string is not ideal.  This use case is for
-// accepting a witness_address as a string without a further specified
-// encoding type.
-static witness_address::encoding get_bech32_encoding(const std::string& address,
-    size_t hash_length)
-{
-    const auto prefix = address.substr(0, 2);
-    if (prefix == "bc")
-        return hash_length == short_hash_size ?
-            witness_address::encoding::mainnet_p2wpkh :
-            witness_address::encoding::mainnet_p2wsh;
-    else if (prefix == "tb")
-        return hash_length == short_hash_size ?
-            witness_address::encoding::testnet_p2wpkh :
-            witness_address::encoding::testnet_p2wsh;
-
-    return witness_address::encoding::unknown;
-}
-
-static witness_address::encoding get_base58_encoding(const std::string& address,
-    size_t decoded_length)
-{
-    if (decoded_length == witness_p2wpkh_size)
-    {
-        const auto prefix = address.substr(0, 2);
-        return prefix == "p2" ? witness_address::encoding::mainnet_base58_p2wpkh :
-            witness_address::encoding::testnet_base58_p2wpkh;
-    }
-    else if (decoded_length == witness_p2wsh_size)
-    {
-        const auto prefix = address.substr(0, 3);
-        return prefix == "7Xh" ? witness_address::encoding::mainnet_base58_p2wsh :
-            witness_address::encoding::testnet_base58_p2wsh;
-    }
-
-    return witness_address::encoding::unknown;
-}
-
 witness_address::witness_address()
   : payment_address(),
-    encoding_(encoding::unknown),
     witness_version_(0),
     witness_hash_(null_hash)
 {
@@ -93,7 +77,7 @@ witness_address::witness_address()
 
 witness_address::witness_address(witness_address&& other)
   : payment_address(other),
-    encoding_(other.encoding_),
+    prefix_(other.prefix_),
     witness_version_(other.witness_version_),
     witness_hash_(std::move(other.witness_hash_))
 {
@@ -101,80 +85,76 @@ witness_address::witness_address(witness_address&& other)
 
 witness_address::witness_address(const witness_address& other)
   : payment_address(other),
-    encoding_(other.encoding_),
+    prefix_(other.prefix_),
     witness_version_(other.witness_version_),
     witness_hash_(other.witness_hash_)
 {
 }
 
-witness_address::witness_address(const witness_p2wpkh& decoded,
-    encoding out_type)
-  : witness_address(from_witness(decoded, out_type))
+witness_address::witness_address(const witness_p2wpkh& decoded, uint8_t version)
+  : witness_address(from_witness(decoded, version))
 {
 }
 
-witness_address::witness_address(const witness_p2wsh& decoded,
-    encoding out_type)
-  : witness_address(from_witness(decoded, out_type))
+witness_address::witness_address(const witness_p2wsh& decoded, uint8_t version)
+  : witness_address(from_witness(decoded, version))
 {
 }
 
-witness_address::witness_address(const data_chunk& data, encoding out_type)
-  : witness_address(from_data(data, out_type))
+witness_address::witness_address(const std::string& address, uint8_t version)
+  : witness_address(from_string(address, version))
 {
 }
 
-witness_address::witness_address(const std::string& address, encoding out_type)
-  : witness_address(from_string(address, out_type))
+witness_address::witness_address(const ec_private& secret, uint8_t version,
+    const std::string& prefix)
+  : witness_address(from_private(secret, version, prefix))
 {
 }
 
-witness_address::witness_address(const ec_private& secret, encoding out_type)
-  : witness_address(from_private(secret, out_type))
+witness_address::witness_address(const ec_public& point, uint8_t version,
+    const std::string& prefix)
+  : witness_address(from_public(point, version, prefix))
 {
 }
 
-witness_address::witness_address(const ec_public& point, encoding out_type)
-  : witness_address(from_public(point, out_type))
+witness_address::witness_address(const chain::script& script, uint8_t version,
+    const std::string& prefix)
+  : witness_address(from_script(script, version, prefix))
 {
 }
 
-witness_address::witness_address(const chain::script& script, encoding out_type)
-  : witness_address(from_script(script, out_type))
-{
-}
-
-witness_address::witness_address(short_hash&& hash, encoding out_type,
-    uint8_t witness_version)
-  : payment_address(std::move(hash)),
-    encoding_(out_type),
+witness_address::witness_address(short_hash&& hash, uint8_t version,
+    uint8_t witness_version, const std::string& prefix)
+  : payment_address(std::move(hash), version),
+    prefix_(prefix),
     witness_version_(witness_version),
     witness_hash_(null_hash)
 {
 }
 
-witness_address::witness_address(const short_hash& hash, encoding out_type,
-    uint8_t witness_version)
-  : payment_address(hash),
-    encoding_(out_type),
+witness_address::witness_address(const short_hash& hash, uint8_t version,
+    uint8_t witness_version, const std::string& prefix)
+  : payment_address(hash, version),
+    prefix_(prefix),
     witness_version_(witness_version),
     witness_hash_(null_hash)
 {
 }
 
-witness_address::witness_address(hash_digest&& hash, encoding out_type,
-    uint8_t witness_version)
-  : payment_address(null_short_hash),
-    encoding_(out_type),
+witness_address::witness_address(hash_digest&& hash, uint8_t version,
+    uint8_t witness_version, const std::string& prefix)
+  : payment_address(null_short_hash, version),
+    prefix_(prefix),
     witness_version_(witness_version),
     witness_hash_(std::move(hash))
 {
 }
 
-witness_address::witness_address(const hash_digest& hash, encoding out_type,
-    uint8_t witness_version)
-  : payment_address(null_short_hash),
-    encoding_(out_type),
+witness_address::witness_address(const hash_digest& hash, uint8_t version,
+    uint8_t witness_version, const std::string& prefix)
+  : payment_address(null_short_hash, version),
+    prefix_(prefix),
     witness_version_(witness_version),
     witness_hash_(hash)
 {
@@ -193,7 +173,7 @@ bool witness_address::is_address(data_slice decoded)
 // ----------------------------------------------------------------------------
 // static
 witness_address witness_address::from_string(const std::string& address,
-    encoding out_type)
+    uint8_t version, const std::string& prefix)
 {
     // BIP 141 constants
     static constexpr size_t witness_program_min_size = 2;
@@ -242,16 +222,13 @@ witness_address witness_address::from_string(const std::string& address,
             converted.size() > witness_program_max_size)
             return {};
 
-        if (out_type == encoding::unknown)
-            out_type = get_bech32_encoding(address, converted.size());
-
         // Reinterpret casting avoids a copy, but should probably be replaced.
         if (converted.size() == hash_size)
             return { *reinterpret_cast<const hash_digest*>(&converted[0]),
-                out_type, witness_version };
+                version, witness_version, prefix };
         else if (converted.size() == short_hash_size)
             return { *reinterpret_cast<const short_hash*>(&converted[0]),
-                out_type, witness_version };
+                version, witness_version, prefix };
 
         // This is a witness_version 0 of an unsupported length.
         return {};
@@ -262,73 +239,53 @@ witness_address witness_address::from_string(const std::string& address,
     if (!decode_base58(decoded, address) || !is_address(decoded))
         return {};
 
-    if (out_type == encoding::unknown)
-        out_type = get_base58_encoding(address, decoded.size());
-
     // Reinterpret casting avoids a copy, but should probably be replaced.
     if (decoded.size() == witness_p2wpkh_size)
-        return { *reinterpret_cast<witness_p2wpkh*>(&decoded[0]), out_type };
+        return { *reinterpret_cast<witness_p2wpkh*>(&decoded[0]), version };
     else if (decoded.size() == witness_p2wsh_size)
-        return { *reinterpret_cast<witness_p2wsh*>(&decoded[0]), out_type };
+        return { *reinterpret_cast<witness_p2wsh*>(&decoded[0]), version };
 
     // Address is an unrecognized format.
     return {};
 }
 
 // static
-witness_address witness_address::from_data(const data_chunk& data,
-    encoding out_type)
-{
-    switch (out_type)
-    {
-        case encoding::mainnet_p2wpkh:
-        case encoding::testnet_p2wpkh:
-            return witness_address(ripemd160_hash(sha256_hash(data)), out_type);
-
-        case encoding::mainnet_p2wsh:
-        case encoding::testnet_p2wsh:
-            return witness_address(sha256_hash(data), out_type);
-
-        default:
-            return {};
-    }
-}
-
-// static
 witness_address witness_address::from_witness(const witness_p2wpkh& decoded,
-    encoding out_type)
+    uint8_t version)
 {
     if (!is_address(decoded))
         return {};
 
-    const short_hash hash = slice<3, short_hash_size + 3>(decoded);
-    return { hash, out_type };
+    const short_hash hash = slice<witness_prefix_size, short_hash_size +
+        witness_prefix_size>(decoded);
+    return { hash, version };
 }
 
 // static
 witness_address witness_address::from_witness(const witness_p2wsh& decoded,
-    encoding out_type)
+    uint8_t version)
 {
     if (!is_address(decoded))
         return {};
 
-    const hash_digest hash = slice<3, hash_size + 3>(decoded);
-    return { hash, out_type };
+    const hash_digest hash = slice<witness_prefix_size, hash_size +
+        witness_prefix_size>(decoded);
+    return { hash, version };
 }
 
 // static
 witness_address witness_address::from_private(const ec_private& secret,
-    encoding out_type)
+    uint8_t version, const std::string& prefix)
 {
     if (secret)
-        return { secret.to_public(), out_type };
+        return { secret.to_public(), version, prefix };
 
     return {};
 }
 
 // static
 witness_address witness_address::from_public(const ec_public& point,
-    encoding out_type)
+    uint8_t version, const std::string& prefix)
 {
     if (!point)
         return {};
@@ -337,42 +294,49 @@ witness_address witness_address::from_public(const ec_public& point,
     if (!point.to_data(data))
         return {};
 
-    switch (out_type)
-    {
-        case encoding::mainnet_base58_p2wsh:
-        case encoding::testnet_base58_p2wsh:
-        case encoding::mainnet_p2wsh:
-        case encoding::testnet_p2wsh:
-            return { bitcoin_hash(data), out_type };
+    const uint8_t witness_version = 0;
 
-        case encoding::mainnet_base58_p2wpkh:
-        case encoding::testnet_base58_p2wpkh:
-        case encoding::mainnet_p2wpkh:
-        case encoding::testnet_p2wpkh:
-        default: // if no encoding is set, default to p2wpkh
-            return { bitcoin_short_hash(data), out_type };
+    switch (version)
+    {
+        case witness_address::mainnet_bech32_p2wsh:
+        case witness_address::testnet_bech32_p2wsh:
+        case witness_address::mainnet_base58_p2wsh:
+        case witness_address::testnet_base58_p2wsh:
+            return { bitcoin_hash(data), version, witness_version, prefix };
+
+        case witness_address::mainnet_bech32_p2wpkh:
+        case witness_address::testnet_bech32_p2wpkh:
+        case witness_address::mainnet_base58_p2wpkh:
+        case witness_address::testnet_base58_p2wpkh:
+            return { bitcoin_short_hash(data), version, witness_version,
+                prefix };
+
+        default:
+            return {};
     }
 }
 
 // static
 witness_address witness_address::from_script(const chain::script& script,
-    encoding out_type)
+    uint8_t version, const std::string& prefix)
 {
-    switch (out_type)
-    {
-        case encoding::mainnet_base58_p2wpkh:
-        case encoding::testnet_base58_p2wpkh:
-        case encoding::mainnet_p2wpkh:
-        case encoding::testnet_p2wpkh:
-            return witness_address(ripemd160_hash(sha256_hash(
-                script.to_data(false))), out_type);
+    const uint8_t witness_version = 0;
 
-        case encoding::mainnet_base58_p2wsh:
-        case encoding::testnet_base58_p2wsh:
-        case encoding::mainnet_p2wsh:
-        case encoding::testnet_p2wsh:
-            return witness_address(sha256_hash(script.to_data(false)),
-                out_type);
+    switch (version)
+    {
+        case witness_address::mainnet_bech32_p2wpkh:
+        case witness_address::testnet_bech32_p2wpkh:
+        case witness_address::mainnet_base58_p2wpkh:
+        case witness_address::testnet_base58_p2wpkh:
+            return witness_address(ripemd160_hash(script.to_payments_key()),
+                version, witness_version, prefix);
+
+        case witness_address::mainnet_bech32_p2wsh:
+        case witness_address::testnet_bech32_p2wsh:
+        case witness_address::mainnet_base58_p2wsh:
+        case witness_address::testnet_base58_p2wsh:
+            return witness_address(script.to_payments_key(), version,
+                witness_version, prefix);
 
         default:
             return {};
@@ -391,10 +355,10 @@ witness_address::operator bool() const
 // ----------------------------------------------------------------------------
 
 // Returns the bech32 encoded witness address.
-std::string witness_address::bech32(const std::string& prefix) const
+std::string witness_address::bech32() const
 {
     base32 bech32;
-    bech32.prefix = prefix;
+    bech32.prefix = prefix_;
     bech32.payload = to_chunk(witness_version_);
 
     const auto converted = (witness_hash_ == null_hash ?
@@ -410,31 +374,29 @@ std::string witness_address::bech32(const std::string& prefix) const
 // the encoding.
 std::string witness_address::encoded() const
 {
-    switch (encoding_)
+    switch (version_)
     {
-        case encoding::mainnet_base58_p2wpkh:
-        case encoding::testnet_base58_p2wpkh:
+        case witness_address::mainnet_base58_p2wpkh:
+        case witness_address::testnet_base58_p2wpkh:
         {
             witness_p2wpkh witness;
-            to_witness(witness, encoding_, witness_version_, hash_);
+            to_witness(witness, version_, witness_version_, hash_);
             return encode_base58(witness);
         }
 
-        case encoding::mainnet_base58_p2wsh:
-        case encoding::testnet_base58_p2wsh:
+        case witness_address::mainnet_base58_p2wsh:
+        case witness_address::testnet_base58_p2wsh:
         {
             witness_p2wsh witness;
-            to_witness(witness, encoding_, witness_version_, witness_hash_);
+            to_witness(witness, version_, witness_version_, witness_hash_);
             return encode_base58(witness);
         }
 
-        case encoding::mainnet_p2wpkh:
-        case encoding::mainnet_p2wsh:
-            return bech32(mainnet_prefix);
-
-        case encoding::testnet_p2wpkh:
-        case encoding::testnet_p2wsh:
-            return bech32(testnet_prefix);
+        case witness_address::mainnet_bech32_p2wpkh:
+        case witness_address::mainnet_bech32_p2wsh:
+        case witness_address::testnet_bech32_p2wpkh:
+        case witness_address::testnet_bech32_p2wsh:
+            return bech32();
 
         default:
             return {};
@@ -456,18 +418,18 @@ const hash_digest& witness_address::witness_hash() const
 
 chain::script witness_address::output_script() const
 {
-    switch (encoding_)
+    switch (version_)
     {
-        case encoding::mainnet_p2wpkh:
-        case encoding::testnet_p2wpkh:
-        case encoding::mainnet_base58_p2wpkh:
-        case encoding::testnet_base58_p2wpkh:
+        case witness_address::mainnet_bech32_p2wpkh:
+        case witness_address::testnet_bech32_p2wpkh:
+        case witness_address::mainnet_base58_p2wpkh:
+        case witness_address::testnet_base58_p2wpkh:
             return chain::script::to_pay_witness_key_hash_pattern(hash_);
 
-        case encoding::mainnet_p2wsh:
-        case encoding::testnet_p2wsh:
-        case encoding::mainnet_base58_p2wsh:
-        case encoding::testnet_base58_p2wsh:
+        case witness_address::mainnet_bech32_p2wsh:
+        case witness_address::testnet_bech32_p2wsh:
+        case witness_address::mainnet_base58_p2wsh:
+        case witness_address::testnet_base58_p2wsh:
             return chain::script::to_pay_witness_script_hash_pattern(witness_hash_);
 
         default:
@@ -479,12 +441,12 @@ chain::script witness_address::output_script() const
 // ----------------------------------------------------------------------------
 
 /// static
-void witness_address::to_witness(witness_p2wpkh& out, encoding out_type,
+void witness_address::to_witness(witness_p2wpkh& out, uint8_t version,
     uint8_t witness_version, short_hash hash)
 {
     build_array(out,
     {
-        to_array(static_cast<uint8_t>(out_type)),
+        to_array(version),
         to_array(witness_version),
         to_array(padding),
         hash
@@ -494,12 +456,12 @@ void witness_address::to_witness(witness_p2wpkh& out, encoding out_type,
 }
 
 /// static
-void witness_address::to_witness(witness_p2wsh& out, encoding out_type,
+void witness_address::to_witness(witness_p2wsh& out, uint8_t version,
     uint8_t witness_version, hash_digest hash)
 {
     build_array(out,
     {
-        to_array(static_cast<uint8_t>(out_type)),
+        to_array(version),
         to_array(witness_version),
         to_array(padding),
         hash
@@ -514,9 +476,10 @@ void witness_address::to_witness(witness_p2wsh& out, encoding out_type,
 witness_address& witness_address::operator=(const witness_address& other)
 {
     valid_ = other.valid_;
-    encoding_ = other.encoding_;
-    witness_version_ = other.witness_version_;
+    version_ = other.version_;
     hash_ = other.hash_;
+    prefix_ = other.prefix_;
+    witness_version_ = other.witness_version_;
     witness_hash_ = other.witness_hash_;
     return *this;
 }
@@ -528,60 +491,15 @@ bool witness_address::operator<(const witness_address& other) const
 
 bool witness_address::operator==(const witness_address& other) const
 {
-    return valid_ == other.valid_ && encoding_ == other.encoding_ &&
-        witness_version_ == other.witness_version_ &&
-        hash_ == other.hash_ && witness_hash_ == other.witness_hash_;
+    return valid_ == other.valid_ && version_ == other.version_ &&
+        prefix_ == other.prefix_ &&
+        witness_version_ == other.witness_version_ && hash_ == other.hash_ &&
+        witness_hash_ == other.witness_hash_;
 }
 
 bool witness_address::operator!=(const witness_address& other) const
 {
     return !(*this == other);
-}
-
-std::istream& operator>>(std::istream& in, witness_address& to)
-{
-    static constexpr size_t p2wpkh_address_size = 42;
-    static constexpr size_t p2wsh_address_size = 62;
-    static constexpr size_t base58_p2wpkh_address_size = 36;
-    static constexpr size_t base58_p2wsh_address_size = 53;
-
-    std::string value;
-    in >> value;
-
-    // witness version 0 only supported.
-    witness_address::encoding out_type;
-    switch(value.size())
-    {
-        case p2wpkh_address_size:
-            out_type = get_bech32_encoding(value, short_hash_size);
-            break;
-
-        case p2wsh_address_size:
-            out_type = get_bech32_encoding(value, hash_size);
-            break;
-
-        case base58_p2wpkh_address_size:
-            out_type = get_base58_encoding(value, witness_p2wpkh_size);
-            break;
-
-        case base58_p2wsh_address_size:
-            out_type = get_base58_encoding(value, witness_p2wsh_size);
-            break;
-
-        default:
-            out_type = witness_address::encoding::unknown;
-            break;
-    }
-
-    to = witness_address(value, out_type);
-
-    if (!to)
-    {
-        using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(invalid_option_value(value));
-    }
-
-    return in;
 }
 
 std::ostream& operator<<(std::ostream& out, const witness_address& of)

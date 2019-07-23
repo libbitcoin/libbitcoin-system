@@ -367,6 +367,12 @@ std::string script::to_string(uint32_t active_forks) const
     return text.str();
 }
 
+hash_digest script::to_payments_key() const
+{
+    return sha256_hash(to_data(false));
+}
+
+
 // Iteration.
 //-----------------------------------------------------------------------------
 // These are syntactic sugar that allow the caller to iterate ops directly.

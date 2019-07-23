@@ -31,6 +31,8 @@ namespace system {
 static constexpr size_t checksum_size = 6;
 static constexpr size_t prefix_min_size = 1;
 static constexpr size_t combined_max_size = 90;
+static constexpr size_t bit_group_size = 5;
+static constexpr size_t bit_group_mask = 31; // 11111
 static constexpr uint8_t null = 255;
 static constexpr uint8_t separator = '1';
 static const char encode_table[] = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
@@ -67,7 +69,7 @@ data_chunk expand(const std::string& prefix)
 
     for (const auto character: prefix)
     {
-        *iterator = static_cast<uint8_t>(character >> 5);
+        *iterator = static_cast<uint8_t>(character >> bit_group_size);
         ++iterator;
     }
 
@@ -76,7 +78,7 @@ data_chunk expand(const std::string& prefix)
 
     for (const auto character: prefix)
     {
-        *iterator = static_cast<uint8_t>(character & 31);
+        *iterator = static_cast<uint8_t>(character & bit_group_mask);
         ++iterator;
     }
 
@@ -95,9 +97,9 @@ uint32_t polymod(const data_chunk& values)
     for (const auto value: values)
     {
         const auto shift = (result >> 25);
-        result = (result & 0x1ffffff) << 5 ^ value;
+        result = (result & 0x1ffffff) << bit_group_size ^ value;
 
-        for (auto index = 0; index < 5; ++index)
+        for (size_t index = 0; index < bit_group_size; ++index)
             result ^= (((shift >> index) & 1) != 0 ? magic_numbers[index] : 0);
     }
 
@@ -123,7 +125,8 @@ data_chunk checksum(const base32& value)
     const auto modified = polymod(expanded) ^ 1;
 
     for (size_t index = 0; index < checksum_size; ++index)
-        checksum[index] = (modified >> 5 * (5 - index)) & 31;
+        checksum[index] = (modified >> bit_group_size * (bit_group_size -
+            index)) & bit_group_mask;
 
     return checksum;
 }

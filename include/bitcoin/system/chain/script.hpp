@@ -107,6 +107,7 @@ public:
     void to_data(writer& sink, bool prefix) const;
 
     std::string to_string(uint32_t active_forks) const;
+    hash_digest to_payments_key() const;
 
     // Iteration.
     //-------------------------------------------------------------------------
