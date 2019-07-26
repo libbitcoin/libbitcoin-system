@@ -60,9 +60,7 @@ using namespace boost::adaptors;
 //-----------------------------------------------------------------------------
 
 block::block()
-  : metadata{},
-    header_(),
-    transactions_()
+  : metadata{}
 {
 }
 
@@ -388,7 +386,7 @@ size_t block::locator_size(size_t top)
 block::indexes block::locator_heights(size_t top)
 {
     size_t step = 1;
-    block::indexes heights;
+    indexes heights;
     const auto reservation = locator_size(top);
     heights.reserve(reservation);
 
@@ -449,8 +447,8 @@ uint64_t block::subsidy(size_t height, uint64_t subsidy_interval,
 size_t block::signature_operations() const
 {
     const auto state = header_.metadata.state;
-    const auto bip16 = state->is_enabled(rule_fork::bip16_rule);
-    const auto bip141 = state->is_enabled(rule_fork::bip141_rule);
+    const auto bip16 = state->is_enabled(bip16_rule);
+    const auto bip141 = state->is_enabled(bip141_rule);
     return state ? signature_operations(bip16, bip141) : max_size_t;
 }
 
@@ -859,16 +857,16 @@ code block::accept(const chain_state& state,
     const system::settings& settings, bool transactions, bool header) const
 {
     code ec;
-    const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
-    const auto bip34 = state.is_enabled(rule_fork::bip34_rule);
-    const auto bip113 = state.is_enabled(rule_fork::bip113_rule);
-    const auto bip141 = state.is_enabled(rule_fork::bip141_rule);
+    const auto bip16 = state.is_enabled(bip16_rule);
+    const auto bip34 = state.is_enabled(bip34_rule);
+    const auto bip113 = state.is_enabled(bip113_rule);
+    const auto bip141 = state.is_enabled(bip141_rule);
 
     const auto max_sigops = bip141 ? max_fast_sigops : max_block_sigops;
     const auto block_time = bip113 ? state.median_time_past() :
         header_.timestamp();
 
-    if (header && (ec = header_.accept(state)))
+    if (header && ((ec = header_.accept(state))))
         return ec;
 
     else if (state.is_under_checkpoint())
@@ -918,8 +916,7 @@ code block::connect(const chain_state& state) const
     if (state.is_under_checkpoint())
         return error::success;
 
-    else
-        return connect_transactions(state);
+    return connect_transactions(state);
 }
 
 } // namespace chain
