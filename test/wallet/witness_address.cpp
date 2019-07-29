@@ -95,32 +95,28 @@ const test_address_list witness_address_nonzero_version_tests =
 
 BOOST_AUTO_TEST_CASE(witness_address__construct__from_ec_public__valid_expected)
 {
-    const witness_address address(ec_public(BIP142_PUBLIC_KEY),
-        witness_address::mainnet_base58_p2wpkh);
+    const witness_address address(ec_public(BIP142_PUBLIC_KEY), witness_address::mainnet_base58_p2wpkh);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_P2WPKH);
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__construct__from_base58_p2wpkh_string__valid_expected)
 {
-    const witness_address address(std::string(ADDRESS_P2WPKH),
-        witness_address::mainnet_base58_p2wpkh);
+    const witness_address address(std::string(ADDRESS_P2WPKH), witness_address::mainnet_base58_p2wpkh);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_P2WPKH);
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__construct__testnet_to_p2wpkh__valid_expected)
 {
-    const witness_address address(ec_public(BIP142_PUBLIC_KEY),
-        witness_address::testnet_base58_p2wpkh);
+    const witness_address address(ec_public(BIP142_PUBLIC_KEY), witness_address::testnet_base58_p2wpkh);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_P2WPKH_TESTNET);
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__construct__testnet_to_p2wpkh_string__valid_expected)
 {
-    const witness_address address(std::string(ADDRESS_P2WPKH_TESTNET),
-        witness_address::testnet_base58_p2wpkh);
+    const witness_address address(std::string(ADDRESS_P2WPKH_TESTNET), witness_address::testnet_base58_p2wpkh);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_P2WPKH_TESTNET);
 }
@@ -129,8 +125,7 @@ BOOST_AUTO_TEST_CASE(witness_address__construct__mainnet_to_p2wsh__valid_expecte
 {
     chain::script script;
     script.from_string(MAINNET_P2WSH_SCRIPT);
-    const witness_address address(script, witness_address::mainnet_bech32_p2wsh,
-        witness_address::mainnet_prefix);
+    const witness_address address(script, witness_address::mainnet_bech32_p2wsh, witness_address::mainnet_prefix);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), MAINNET_P2WSH_ADDRESS);
 }
@@ -139,8 +134,7 @@ BOOST_AUTO_TEST_CASE(witness_address__construct__testnet_to_p2wsh__valid_expecte
 {
     chain::script script;
     script.from_string(TESTNET_P2WSH_SCRIPT);
-    const witness_address address(script, witness_address::testnet_bech32_p2wsh,
-        witness_address::testnet_prefix);
+    const witness_address address(script, witness_address::testnet_bech32_p2wsh, witness_address::testnet_prefix);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), TESTNET_P2WSH_ADDRESS);
 }
@@ -151,11 +145,8 @@ BOOST_AUTO_TEST_CASE(witness_address__construct__ec_public_to_testnet_p2wpkh__va
     // https://www.blockchain.com/btctest/tx/d869f854e1f8788bcff294cc83b280942a8c728de71eb709a2c29d10bfe21b7c
 
     // Create the same witness address from ec_public.
-    const std::string test_public_key =
-        "038262a6c6cec93c2d3ecd6c6072efea86d02ff8e3328bbd0242b20af3425990ac";
-    const witness_address address(ec_public(test_public_key),
-        witness_address::testnet_bech32_p2wpkh,
-        witness_address::testnet_prefix);
+    const std::string test_public_key = "038262a6c6cec93c2d3ecd6c6072efea86d02ff8e3328bbd0242b20af3425990ac";
+    const witness_address address(ec_public(test_public_key), witness_address::testnet_bech32_p2wpkh, witness_address::testnet_prefix);
 
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.bech32(), TESTNET_P2WPKH_ADDRESS2);
@@ -199,20 +190,27 @@ struct witness_address_accessor
 
 BOOST_AUTO_TEST_CASE(base32__witness_address_zero_version_tests__valid_expected)
 {
+    const auto bech32_contracted_bit_size = 5;
+    const auto bech32_expanded_bit_size = 8;
+    const auto witness_v0_program_minimum_limit = 1;
+    const auto witness_v0_program_maximum_limit = 41;
+
     for (const auto& test: witness_address_zero_version_tests)
     {
         base32 decoded;
         BOOST_REQUIRE(decode_base32(decoded, test.address));
+
         uint8_t witness_version = decoded.payload.front();
         BOOST_REQUIRE(witness_version == 0);
 
         witness_address_accessor converter;
-        const auto witness_program = converter.convert_bits(5, 8, false,
+        const auto witness_program = converter.convert_bits(
+            bech32_contracted_bit_size, bech32_expanded_bit_size, false,
             decoded.payload, 1);
-        BOOST_REQUIRE(witness_program.size() > 1 &&
-                      witness_program.size() < 41);
-        const auto witness_program_size = static_cast<uint8_t>(
-            witness_program.size());
+
+        const auto witness_program_size = static_cast<uint8_t>(witness_program.size());
+        BOOST_REQUIRE(witness_program_size > witness_v0_program_minimum_limit &&
+                      witness_program_size < witness_v0_program_maximum_limit);
 
         const auto result = build_chunk(
         {
@@ -233,6 +231,8 @@ BOOST_AUTO_TEST_CASE(base32__witness_address_nonzero_version_tests__valid_expect
     const auto op_version_gap = 0x50;
     const auto witness_v0_program_minimum_limit = 1;
     const auto witness_v0_program_maximum_limit = 41;
+    const auto bech32_contracted_bit_size = 5;
+    const auto bech32_expanded_bit_size = 8;
 
     for (const auto& test: witness_address_nonzero_version_tests)
     {
@@ -243,11 +243,11 @@ BOOST_AUTO_TEST_CASE(base32__witness_address_nonzero_version_tests__valid_expect
         witness_version += op_version_gap;
 
         witness_address_accessor converter;
-        const auto witness_program = converter.convert_bits(5, 8, false,
+        const auto witness_program = converter.convert_bits(
+            bech32_contracted_bit_size, bech32_expanded_bit_size, false,
             decoded.payload, 1);
 
-        const auto witness_program_size = static_cast<uint8_t>(
-            witness_program.size());
+        const auto witness_program_size = static_cast<uint8_t>(witness_program.size());
         BOOST_REQUIRE(witness_program_size > witness_v0_program_minimum_limit &&
                       witness_program_size < witness_v0_program_maximum_limit);
 

@@ -226,12 +226,10 @@ witness_address witness_address::from_string(const std::string& address,
         if (converted.size() == hash_size)
             return { *reinterpret_cast<const hash_digest*>(&converted[0]),
                 version, witness_version, prefix };
-        else if (converted.size() == short_hash_size)
-            return { *reinterpret_cast<const short_hash*>(&converted[0]),
-                version, witness_version, prefix };
 
-        // This is a witness_version 0 of an unsupported length.
-        return {};
+        BITCOIN_ASSERT(converted.size() == short_hash_size);
+        return { *reinterpret_cast<const short_hash*>(&converted[0]),
+            version, witness_version, prefix };
     }
 
     // Attempt to decode BIP 142 address format.
@@ -242,45 +240,35 @@ witness_address witness_address::from_string(const std::string& address,
     // Reinterpret casting avoids a copy, but should probably be replaced.
     if (decoded.size() == witness_p2wpkh_size)
         return { *reinterpret_cast<witness_p2wpkh*>(&decoded[0]), version };
-    else if (decoded.size() == witness_p2wsh_size)
-        return { *reinterpret_cast<witness_p2wsh*>(&decoded[0]), version };
 
-    // Address is an unrecognized format.
-    return {};
+    BITCOIN_ASSERT(decoded.size() == witness_p2wsh_size);
+    return { *reinterpret_cast<witness_p2wsh*>(&decoded[0]), version };
 }
 
 // static
 witness_address witness_address::from_witness(const witness_p2wpkh& decoded,
     uint8_t version)
 {
-    if (!is_address(decoded))
-        return {};
-
-    const short_hash hash = slice<witness_prefix_size, short_hash_size +
-        witness_prefix_size>(decoded);
-    return { hash, version };
+    return is_address(decoded) ? witness_address(short_hash(
+        slice<witness_prefix_size, short_hash_size + witness_prefix_size>(
+            decoded)), version) : witness_address();
 }
 
 // static
 witness_address witness_address::from_witness(const witness_p2wsh& decoded,
     uint8_t version)
 {
-    if (!is_address(decoded))
-        return {};
-
-    const hash_digest hash = slice<witness_prefix_size, hash_size +
-        witness_prefix_size>(decoded);
-    return { hash, version };
+    return is_address(decoded) ? witness_address(hash_digest(
+        slice<witness_prefix_size, hash_size + witness_prefix_size>(decoded)),
+            version) : witness_address();
 }
 
 // static
 witness_address witness_address::from_private(const ec_private& secret,
     uint8_t version, const std::string& prefix)
 {
-    if (secret)
-        return { secret.to_public(), version, prefix };
-
-    return {};
+        return secret ? witness_address(secret.to_public(), version, prefix)
+            : witness_address();
 }
 
 // static
@@ -359,14 +347,16 @@ std::string witness_address::bech32() const
 {
     base32 bech32;
     bech32.prefix = prefix_;
-    bech32.payload = to_chunk(witness_version_);
+    bech32.payload = build_chunk(
+    {
+        to_chunk(witness_version_),
+        witness_hash_ == null_hash ? convert_bits(bech32_expanded_bit_size,
+            bech32_contracted_bit_size, true, to_chunk(hash_), 0) :
+                convert_bits(bech32_expanded_bit_size,
+                    bech32_contracted_bit_size, true, to_chunk(witness_hash_),
+                        0)
+    });
 
-    const auto converted = (witness_hash_ == null_hash ?
-        convert_bits(bech32_expanded_bit_size, bech32_contracted_bit_size, true,
-            to_chunk(hash_), 0) : convert_bits(bech32_expanded_bit_size,
-                bech32_contracted_bit_size, true, to_chunk(witness_hash_), 0));
-
-    extend_data(bech32.payload, converted);
     return encode_base32(bech32);
 }
 
@@ -442,7 +432,7 @@ chain::script witness_address::output_script() const
 
 /// static
 void witness_address::to_witness(witness_p2wpkh& out, uint8_t version,
-    uint8_t witness_version, short_hash hash)
+    uint8_t witness_version, const short_hash& hash)
 {
     build_array(out,
     {
@@ -457,7 +447,7 @@ void witness_address::to_witness(witness_p2wpkh& out, uint8_t version,
 
 /// static
 void witness_address::to_witness(witness_p2wsh& out, uint8_t version,
-    uint8_t witness_version, hash_digest hash)
+    uint8_t witness_version, const hash_digest& hash)
 {
     build_array(out,
     {
@@ -491,10 +481,12 @@ bool witness_address::operator<(const witness_address& other) const
 
 bool witness_address::operator==(const witness_address& other) const
 {
-    return valid_ == other.valid_ && version_ == other.version_ &&
-        prefix_ == other.prefix_ &&
-        witness_version_ == other.witness_version_ && hash_ == other.hash_ &&
-        witness_hash_ == other.witness_hash_;
+    return valid_ == other.valid_
+        && version_ == other.version_
+        && prefix_ == other.prefix_
+        && witness_version_ == other.witness_version_
+        && hash_ == other.hash_
+        && witness_hash_ == other.witness_hash_;
 }
 
 bool witness_address::operator!=(const witness_address& other) const

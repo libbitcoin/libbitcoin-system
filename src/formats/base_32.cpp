@@ -93,11 +93,13 @@ uint32_t polymod(const data_chunk& values)
         0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3
     };
 
+    const auto result_mask = 0x1ffffff;
+
     uint32_t result = 1;
     for (const auto value: values)
     {
         const auto shift = (result >> 25);
-        result = (result & 0x1ffffff) << bit_group_size ^ value;
+        result = (result & result_mask) << bit_group_size ^ value;
 
         for (size_t index = 0; index < bit_group_size; ++index)
             result ^= (((shift >> index) & 1) != 0 ? magic_numbers[index] : 0);

@@ -67,9 +67,9 @@ class BC_API witness_address
 
     /// Create base58 witness programs using provided information.
     static void to_witness(witness_p2wsh& out, uint8_t version,
-        uint8_t witness_version, hash_digest hash);
+        uint8_t witness_version, const hash_digest& hash);
     static void to_witness(witness_p2wpkh& out, uint8_t version,
-        uint8_t witness_version, short_hash hash);
+        uint8_t witness_version, const short_hash& hash);
 
     /// Constructors.
     witness_address();
