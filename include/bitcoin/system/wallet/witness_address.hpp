@@ -26,79 +26,49 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-static BC_CONSTEXPR uint8_t padding = 0x00;
-static BC_CONSTEXPR size_t witness_prefix_size = 3u;
-static BC_CONSTEXPR size_t witness_p2wsh_size = witness_prefix_size +
-    hash_size + checksum_size;
-static BC_CONSTEXPR size_t witness_p2wpkh_size = witness_prefix_size +
-    short_hash_size + checksum_size;
-
-typedef byte_array<witness_p2wsh_size> witness_p2wsh;
-typedef byte_array<witness_p2wpkh_size> witness_p2wpkh;
-
 /// A class for working with standard witness payment addresses.
 class BC_API witness_address
   : public payment_address
 {
   public:
+    enum class address_format: uint8_t
+    {
+        p2wpkh,
+        p2wsh
+    };
+
     static const std::string mainnet_prefix;
     static const std::string testnet_prefix;
 
-    static const std::string mainnet_p2wpkh;
-    static const std::string testnet_p2wpkh;
-
-    static const std::string mainnet_p2wsh;
-    static const std::string testnet_p2wsh;
-
-    static const uint8_t mainnet_bech32_p2wpkh;
-    static const uint8_t mainnet_bech32_p2wsh;
-
-    static const uint8_t testnet_bech32_p2wpkh;
-    static const uint8_t testnet_bech32_p2wsh;
-
-    static const uint8_t mainnet_base58_p2wpkh;
-    static const uint8_t mainnet_base58_p2wsh;
-
-    static const uint8_t testnet_base58_p2wpkh;
-    static const uint8_t testnet_base58_p2wsh;
-
     typedef std::vector<witness_address> list;
     typedef std::shared_ptr<witness_address> ptr;
-
-    /// Create base58 witness programs using provided information.
-    static void to_witness(witness_p2wsh& out, uint8_t version,
-        uint8_t witness_version, const hash_digest& hash);
-    static void to_witness(witness_p2wpkh& out, uint8_t version,
-        uint8_t witness_version, const short_hash& hash);
 
     /// Constructors.
     witness_address();
     witness_address(witness_address&& other);
     witness_address(const witness_address& other);
-    witness_address(const witness_p2wpkh& decoded,
-        uint8_t version=mainnet_bech32_p2wpkh);
-    witness_address(const witness_p2wsh& decoded,
-        uint8_t version=mainnet_bech32_p2wpkh);
     witness_address(const std::string& address,
-        uint8_t version=mainnet_bech32_p2wpkh);
-    witness_address(short_hash&& hash, uint8_t version=mainnet_bech32_p2wpkh,
+        address_format format=address_format::p2wpkh);
+    witness_address(short_hash&& hash,
+        address_format format=address_format::p2wpkh,
         uint8_t witness_version=0, const std::string& prefix=mainnet_prefix);
     witness_address(const short_hash& hash,
-        uint8_t version=mainnet_bech32_p2wpkh, uint8_t witness_version=0,
-        const std::string& prefix=mainnet_prefix);
-    witness_address(hash_digest&& hash, uint8_t version=mainnet_bech32_p2wpkh,
+        address_format format=address_format::p2wpkh,
+        uint8_t witness_version=0, const std::string& prefix=mainnet_prefix);
+    witness_address(hash_digest&& hash,
+        address_format format=address_format::p2wpkh,
         uint8_t witness_version=0, const std::string& prefix=mainnet_prefix);
     witness_address(const hash_digest& hash,
-        uint8_t version=mainnet_bech32_p2wpkh, uint8_t witness_version=0,
-        const std::string& prefix=mainnet_prefix);
+        address_format format=address_format::p2wpkh,
+        uint8_t witness_version=0, const std::string& prefix=mainnet_prefix);
     witness_address(const chain::script& script,
-        uint8_t version=mainnet_bech32_p2wpkh,
+        address_format format=address_format::p2wpkh,
         const std::string& prefix=mainnet_prefix);
     witness_address(const ec_private& secret,
-        uint8_t version=mainnet_bech32_p2wpkh,
+        address_format format=address_format::p2wpkh,
         const std::string& prefix=mainnet_prefix);
     witness_address(const ec_public& point,
-        uint8_t version=mainnet_bech32_p2wpkh,
+        address_format format=address_format::p2wpkh,
         const std::string& prefix=mainnet_prefix);
 
     /// Operators.
@@ -113,7 +83,6 @@ class BC_API witness_address
     operator bool() const;
 
     /// Serializer.
-    std::string bech32() const;
     std::string encoded() const;
 
     /// Accessors.
@@ -132,23 +101,20 @@ private:
 
     /// Factories.
     static witness_address from_string(const std::string& address,
-        uint8_t version=mainnet_bech32_p2wpkh,
+        address_format format=address_format::p2wpkh,
         const std::string& prefix=mainnet_prefix);
-    static witness_address from_witness(const witness_p2wpkh& decoded,
-        uint8_t version=mainnet_base58_p2wpkh);
-    static witness_address from_witness(const witness_p2wsh& decoded,
-        uint8_t version=mainnet_base58_p2wsh);
     static witness_address from_script(const chain::script& script,
-        uint8_t version=mainnet_bech32_p2wpkh,
+        address_format format=address_format::p2wpkh,
         const std::string& prefix=mainnet_prefix);
     static witness_address from_private(const ec_private& secret,
-        uint8_t version=mainnet_bech32_p2wpkh,
+        address_format format=address_format::p2wpkh,
         const std::string& prefix=mainnet_prefix);
     static witness_address from_public(const ec_public& point,
-        uint8_t version=mainnet_bech32_p2wpkh,
+        address_format format=address_format::p2wpkh,
         const std::string& prefix=mainnet_prefix);
 
     std::string prefix_;
+    address_format format_;
     uint8_t witness_version_;
     hash_digest witness_hash_;
 };

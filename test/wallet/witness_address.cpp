@@ -25,38 +25,6 @@ using namespace bc::system::wallet;
 
 BOOST_AUTO_TEST_SUITE(witness_address_tests)
 
-// BIP 142 test constants.
-#define BIP142_PUBLIC_KEY "0450863ad64a87ae8a2fe83c1af1a8403cb53f53e486d8511dad8a04887e5b23522cd470243453a299fa9e77237716103abc11a1df38855ed6f2ee187e9c582ba6"
-#define ADDRESS_P2WPKH "p2xtZoXeX5X8BP8JfFhQK2nD3emtjch7UeFm"
-#define ADDRESS_P2WPKH_TESTNET "QWywq9EVRcURXVarfKmHtyZ1MUGY4sJy5Dpq"
-
-// BIP 142 witness test vectors
-// https://github.com/theuni/bitcoin/blob/segwit-bip142/src/test/data/base58_keys_valid.json
-struct test_vector
-{
-    std::string hash;
-    std::string address;
-    bool testnet;
-    uint8_t version;
-    uint8_t witness_version;
-};
-
-const std::vector<test_vector> native_witness_p2wpkh_tests =
-{
-    // hash, address, testnet, version, witness_version
-    { "78f0c6aeafc418a10bc92c2bb24cdd2d27dc0a0b", "QWz8m8pbR6nqXJHEdtRTAxoQ6YHkxRNxLw7x", true, witness_address::testnet_base58_p2wpkh, 0 },
-    { "a2594531c857b98e4f1a8aa78e2edb74efe8ff37", "p2y9GjzzvXoHJ8WWMaYaz7hf8sv74LiU8dLK", false, witness_address::mainnet_base58_p2wpkh, 0 },
-    { "91df9b382022f8dbcf33a960d9c5d82e996d2020", "p2y7mdSZzcPLZL1S5woeBmafWvnE1yFk3H2f", false, witness_address::mainnet_base58_p2wpkh, 0 },
-};
-
-const std::vector<test_vector> native_witness_p2wsh_tests =
-{
-    // hash, address, testnet, version, witness_version
-    { "59bc07ec402a63b072f07115bfc83d73a8a88c1654c85e2dd64bc6aee40cc239", "T7nYVDjPz5V9vPCfBJq4R55LvFkA3ReMfbvT5AX6vxAEgZRGtKF5d", true, witness_address::testnet_base58_p2wsh, 0 },
-    { "0b1572dae6a95c50e7e8203b4de0d06291be349b9a8b9ef49d6389fc2f785dcf", "T7nXtahqZTvcSfU3QHhKSfJsTVb57oEM9aFRTQa6i5jnaUw5wvNAb", true, witness_address::testnet_base58_p2wsh, 0 },
-    { "99071ccd792c8bb97138de5817169043c09676872e8f90e6aab433f8e532a693", "7XhQN533dfoMqSCNMt85Pu77pmjXE84Pq9FSsVTb6Rzu5h8oAc8Tn", false, witness_address::mainnet_base58_p2wsh, 0 }
-};
-
 // BIP 173 test constants.
 #define MAINNET_P2WPKH_ADDRESS "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4"
 #define TESTNET_P2WPKH_ADDRESS "tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx"
@@ -93,39 +61,11 @@ const test_address_list witness_address_nonzero_version_tests =
     { "bc1zw508d6qejxtdg4y5r3zarvaryvg6kdaj", "5210751e76e8199196d454941c45d1b3a323" },
 };
 
-BOOST_AUTO_TEST_CASE(witness_address__construct__from_ec_public__valid_expected)
-{
-    const witness_address address(ec_public(BIP142_PUBLIC_KEY), witness_address::mainnet_base58_p2wpkh);
-    BOOST_REQUIRE(address);
-    BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_P2WPKH);
-}
-
-BOOST_AUTO_TEST_CASE(witness_address__construct__from_base58_p2wpkh_string__valid_expected)
-{
-    const witness_address address(std::string(ADDRESS_P2WPKH), witness_address::mainnet_base58_p2wpkh);
-    BOOST_REQUIRE(address);
-    BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_P2WPKH);
-}
-
-BOOST_AUTO_TEST_CASE(witness_address__construct__testnet_to_p2wpkh__valid_expected)
-{
-    const witness_address address(ec_public(BIP142_PUBLIC_KEY), witness_address::testnet_base58_p2wpkh);
-    BOOST_REQUIRE(address);
-    BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_P2WPKH_TESTNET);
-}
-
-BOOST_AUTO_TEST_CASE(witness_address__construct__testnet_to_p2wpkh_string__valid_expected)
-{
-    const witness_address address(std::string(ADDRESS_P2WPKH_TESTNET), witness_address::testnet_base58_p2wpkh);
-    BOOST_REQUIRE(address);
-    BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_P2WPKH_TESTNET);
-}
-
 BOOST_AUTO_TEST_CASE(witness_address__construct__mainnet_to_p2wsh__valid_expected)
 {
     chain::script script;
     script.from_string(MAINNET_P2WSH_SCRIPT);
-    const witness_address address(script, witness_address::mainnet_bech32_p2wsh, witness_address::mainnet_prefix);
+    const witness_address address(script, witness_address::address_format::p2wsh, witness_address::mainnet_prefix);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), MAINNET_P2WSH_ADDRESS);
 }
@@ -134,7 +74,7 @@ BOOST_AUTO_TEST_CASE(witness_address__construct__testnet_to_p2wsh__valid_expecte
 {
     chain::script script;
     script.from_string(TESTNET_P2WSH_SCRIPT);
-    const witness_address address(script, witness_address::testnet_bech32_p2wsh, witness_address::testnet_prefix);
+    const witness_address address(script, witness_address::address_format::p2wsh, witness_address::testnet_prefix);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), TESTNET_P2WSH_ADDRESS);
 }
@@ -146,35 +86,10 @@ BOOST_AUTO_TEST_CASE(witness_address__construct__ec_public_to_testnet_p2wpkh__va
 
     // Create the same witness address from ec_public.
     const std::string test_public_key = "038262a6c6cec93c2d3ecd6c6072efea86d02ff8e3328bbd0242b20af3425990ac";
-    const witness_address address(ec_public(test_public_key), witness_address::testnet_bech32_p2wpkh, witness_address::testnet_prefix);
+    const witness_address address(ec_public(test_public_key), witness_address::address_format::p2wpkh, witness_address::testnet_prefix);
 
     BOOST_REQUIRE(address);
-    BOOST_REQUIRE_EQUAL(address.bech32(), TESTNET_P2WPKH_ADDRESS2);
     BOOST_REQUIRE_EQUAL(address.encoded(), TESTNET_P2WPKH_ADDRESS2);
-}
-
-BOOST_AUTO_TEST_CASE(witness_address__witness_p2wpkh_vectors__valid_expected)
-{
-    for (const auto& test: native_witness_p2wpkh_tests)
-    {
-        short_hash hash;
-        BOOST_REQUIRE(decode_base16(hash, test.hash));
-        const witness_address address(hash, test.version);
-        BOOST_REQUIRE(address);
-        BOOST_REQUIRE_EQUAL(address.encoded(), test.address);
-    }
-}
-
-BOOST_AUTO_TEST_CASE(witness_address__witness_p2wsh_vectors__valid_expected)
-{
-    for (const auto& test: native_witness_p2wsh_tests)
-    {
-        hash_digest hash;
-        BOOST_REQUIRE(decode_base16(hash, test.hash));
-        const witness_address address(hash, test.version);
-        BOOST_REQUIRE(address);
-        BOOST_REQUIRE_EQUAL(address.encoded(), test.address);
-    }
 }
 
 struct witness_address_accessor
