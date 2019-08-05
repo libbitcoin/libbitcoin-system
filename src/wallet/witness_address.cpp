@@ -144,8 +144,8 @@ witness_address witness_address::from_string(const std::string& address,
     static constexpr size_t witness_program_max_size = 40;
 
     // BIP 173 witness version 0 constants
-    static constexpr size_t p2wpkh_size = 42;
-    static constexpr size_t p2wsh_size = 62;
+    static constexpr size_t witness_pubkey_hash_size = 42;
+    static constexpr size_t witness_script_hash_size = 62;
     static constexpr size_t bech32_address_min_size = 14;
     static constexpr size_t bech32_address_max_size = 74;
     static constexpr size_t bech32_address_size_modulo = 8;
@@ -161,8 +161,8 @@ witness_address witness_address::from_string(const std::string& address,
     const uint8_t witness_version = bech32_decoded.payload.front();
 
     // Checks specific to witness version 0.
-    if (witness_version == 0 &&
-        (address.size() < p2wpkh_size || address.size() > p2wsh_size))
+    if (witness_version == 0 && (address.size() < witness_pubkey_hash_size ||
+        address.size() > witness_script_hash_size))
         return {};
 
     // Verify witness version is valid (only version 0 is
@@ -187,14 +187,15 @@ witness_address witness_address::from_string(const std::string& address,
         converted.size() > witness_program_max_size)
         return {};
 
-    // Reinterpret casting avoids a copy, but should probably be replaced.
     if (converted.size() == hash_size)
-        return { *reinterpret_cast<const hash_digest*>(&converted[0]),
-            format, witness_version, prefix };
+    {
+        auto hash = to_array<hash_size>(converted);
+        return { std::move(hash), format, witness_version, prefix };
+    }
 
     BITCOIN_ASSERT(converted.size() == short_hash_size);
-    return { *reinterpret_cast<const short_hash*>(&converted[0]),
-        format, witness_version, prefix };
+    auto hash = to_array<short_hash_size>(converted);
+    return { std::move(hash), format, witness_version, prefix };
 }
 
 // static
@@ -218,7 +219,7 @@ witness_address witness_address::from_public(const ec_public& point,
 
     const uint8_t witness_version = 0;
 
-    return format == address_format::p2wpkh ?
+    return format == address_format::witness_pubkey_hash ?
         witness_address(bitcoin_short_hash(data), format, witness_version, prefix) :
         witness_address(bitcoin_hash(data), format, witness_version, prefix);
 }
@@ -230,7 +231,7 @@ witness_address witness_address::from_script(const chain::script& script,
     const uint8_t witness_version = 0;
     const auto key = script.to_payments_key();
 
-    return format == address_format::p2wpkh ?
+    return format == address_format::witness_pubkey_hash ?
         witness_address(ripemd160_hash(key), format, witness_version, prefix) :
         witness_address(key, format, witness_version, prefix);
 }
@@ -254,11 +255,11 @@ std::string witness_address::encoded() const
     bech32.payload = build_chunk(
     {
         to_chunk(witness_version_),
-        witness_hash_ == null_hash ? convert_bits(bech32_expanded_bit_size,
-            bech32_contracted_bit_size, true, to_chunk(hash_), 0) :
-                convert_bits(bech32_expanded_bit_size,
-                    bech32_contracted_bit_size, true, to_chunk(witness_hash_),
-                        0)
+        witness_hash_ == null_hash ?
+            convert_bits(bech32_expanded_bit_size, bech32_contracted_bit_size,
+                true, to_chunk(hash_), 0) :
+            convert_bits(bech32_expanded_bit_size, bech32_contracted_bit_size,
+                true, to_chunk(witness_hash_), 0)
     });
 
     return encode_base32(bech32);
@@ -279,7 +280,7 @@ const hash_digest& witness_address::witness_hash() const
 
 chain::script witness_address::output_script() const
 {
-    return format_ == address_format::p2wpkh ?
+    return format_ == address_format::witness_pubkey_hash ?
         chain::script::to_pay_witness_key_hash_pattern(hash_) :
         chain::script::to_pay_witness_script_hash_pattern(witness_hash_);
 }
@@ -317,6 +318,21 @@ bool witness_address::operator==(const witness_address& other) const
 bool witness_address::operator!=(const witness_address& other) const
 {
     return !(*this == other);
+}
+
+std::istream& operator>>(std::istream& in, witness_address& to)
+{
+    std::string value;
+    in >> value;
+    to = witness_address(value);
+
+    if (!to)
+    {
+        using namespace boost::program_options;
+        BOOST_THROW_EXCEPTION(invalid_option_value(value));
+    }
+
+    return in;
 }
 
 std::ostream& operator<<(std::ostream& out, const witness_address& of)

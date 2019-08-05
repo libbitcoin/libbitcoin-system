@@ -26,15 +26,15 @@ using namespace bc::system::wallet;
 BOOST_AUTO_TEST_SUITE(witness_address_tests)
 
 // BIP 173 test constants.
-#define MAINNET_P2WPKH_ADDRESS "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4"
-#define TESTNET_P2WPKH_ADDRESS "tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx"
-#define TESTNET_P2WPKH_ADDRESS2 "tb1qr47dd36u96r0fjle36hdygdnp0v6pwfgqe6jxg"
+#define MAINNET_WITNESS_PUBKEY_HASH_ADDRESS "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4"
+#define TESTNET_WITNESS_PUBKEY_HASH_ADDRESS "tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx"
+#define TESTNET_WITNESS_PUBKEY_HASH_ADDRESS2 "tb1qr47dd36u96r0fjle36hdygdnp0v6pwfgqe6jxg"
 
-#define MAINNET_P2WSH_ADDRESS "bc1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qccfmv3"
-#define MAINNET_P2WSH_SCRIPT "[0279BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798] checksig"
+#define MAINNET_WITNESS_SCRIPT_HASH_ADDRESS "bc1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qccfmv3"
+#define MAINNET_WITNESS_SCRIPT_HASH_SCRIPT "[0279BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798] checksig"
 
-#define TESTNET_P2WSH_ADDRESS "tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7"
-#define TESTNET_P2WSH_SCRIPT "[0279BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798] checksig"
+#define TESTNET_WITNESS_SCRIPT_HASH_ADDRESS "tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7"
+#define TESTNET_WITNESS_SCRIPT_HASH_SCRIPT "[0279BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798] checksig"
 
 // BIP 173 witness address vectors
 // https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki#test-vectors
@@ -61,35 +61,35 @@ const test_address_list witness_address_nonzero_version_tests =
     { "bc1zw508d6qejxtdg4y5r3zarvaryvg6kdaj", "5210751e76e8199196d454941c45d1b3a323" },
 };
 
-BOOST_AUTO_TEST_CASE(witness_address__construct__mainnet_to_p2wsh__valid_expected)
+BOOST_AUTO_TEST_CASE(witness_address__construct__mainnet_to_witness_script_hash__valid_expected)
 {
     chain::script script;
-    script.from_string(MAINNET_P2WSH_SCRIPT);
-    const witness_address address(script, witness_address::address_format::p2wsh, witness_address::mainnet_prefix);
+    script.from_string(MAINNET_WITNESS_SCRIPT_HASH_SCRIPT);
+    const witness_address address(script, witness_address::address_format::witness_script_hash, witness_address::mainnet_prefix);
     BOOST_REQUIRE(address);
-    BOOST_REQUIRE_EQUAL(address.encoded(), MAINNET_P2WSH_ADDRESS);
+    BOOST_REQUIRE_EQUAL(address.encoded(), MAINNET_WITNESS_SCRIPT_HASH_ADDRESS);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__construct__testnet_to_p2wsh__valid_expected)
+BOOST_AUTO_TEST_CASE(witness_address__construct__testnet_to_witness_script_hash__valid_expected)
 {
     chain::script script;
-    script.from_string(TESTNET_P2WSH_SCRIPT);
-    const witness_address address(script, witness_address::address_format::p2wsh, witness_address::testnet_prefix);
+    script.from_string(TESTNET_WITNESS_SCRIPT_HASH_SCRIPT);
+    const witness_address address(script, witness_address::address_format::witness_script_hash, witness_address::testnet_prefix);
     BOOST_REQUIRE(address);
-    BOOST_REQUIRE_EQUAL(address.encoded(), TESTNET_P2WSH_ADDRESS);
+    BOOST_REQUIRE_EQUAL(address.encoded(), TESTNET_WITNESS_SCRIPT_HASH_ADDRESS);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__construct__ec_public_to_testnet_p2wpkh__valid_expected)
+BOOST_AUTO_TEST_CASE(witness_address__construct__ec_public_to_testnet_witness_pubkey_hash__valid_expected)
 {
     // Based on witness data from:
     // https://www.blockchain.com/btctest/tx/d869f854e1f8788bcff294cc83b280942a8c728de71eb709a2c29d10bfe21b7c
 
     // Create the same witness address from ec_public.
     const std::string test_public_key = "038262a6c6cec93c2d3ecd6c6072efea86d02ff8e3328bbd0242b20af3425990ac";
-    const witness_address address(ec_public(test_public_key), witness_address::address_format::p2wpkh, witness_address::testnet_prefix);
+    const witness_address address(ec_public(test_public_key), witness_address::address_format::witness_pubkey_hash, witness_address::testnet_prefix);
 
     BOOST_REQUIRE(address);
-    BOOST_REQUIRE_EQUAL(address.encoded(), TESTNET_P2WPKH_ADDRESS2);
+    BOOST_REQUIRE_EQUAL(address.encoded(), TESTNET_WITNESS_PUBKEY_HASH_ADDRESS2);
 }
 
 struct witness_address_accessor
@@ -119,13 +119,10 @@ BOOST_AUTO_TEST_CASE(base32__witness_address_zero_version_tests__valid_expected)
         BOOST_REQUIRE(witness_version == 0);
 
         witness_address_accessor converter;
-        const auto witness_program = converter.convert_bits(
-            bech32_contracted_bit_size, bech32_expanded_bit_size, false,
-            decoded.payload, 1);
-
+        const auto witness_program = converter.convert_bits(bech32_contracted_bit_size, bech32_expanded_bit_size, false, decoded.payload, 1);
         const auto witness_program_size = static_cast<uint8_t>(witness_program.size());
-        BOOST_REQUIRE(witness_program_size > witness_v0_program_minimum_limit &&
-                      witness_program_size < witness_v0_program_maximum_limit);
+        BOOST_REQUIRE(witness_program_size > witness_v0_program_minimum_limit);
+        BOOST_REQUIRE(witness_program_size < witness_v0_program_maximum_limit);
 
         const auto result = build_chunk(
         {
@@ -142,7 +139,7 @@ BOOST_AUTO_TEST_CASE(base32__witness_address_nonzero_version_tests__valid_expect
 {
     // This op_version gap is used to normalize the value difference
     // between the defined OP_0 opcode (value 0) and the OP_1 opcode
-    // (value 0x51)
+    // (value 0x51).
     const auto op_version_gap = 0x50;
     const auto witness_v0_program_minimum_limit = 1;
     const auto witness_v0_program_maximum_limit = 41;
@@ -158,13 +155,10 @@ BOOST_AUTO_TEST_CASE(base32__witness_address_nonzero_version_tests__valid_expect
         witness_version += op_version_gap;
 
         witness_address_accessor converter;
-        const auto witness_program = converter.convert_bits(
-            bech32_contracted_bit_size, bech32_expanded_bit_size, false,
-            decoded.payload, 1);
-
+        const auto witness_program = converter.convert_bits(bech32_contracted_bit_size, bech32_expanded_bit_size, false, decoded.payload, 1);
         const auto witness_program_size = static_cast<uint8_t>(witness_program.size());
-        BOOST_REQUIRE(witness_program_size > witness_v0_program_minimum_limit &&
-                      witness_program_size < witness_v0_program_maximum_limit);
+        BOOST_REQUIRE(witness_program_size > witness_v0_program_minimum_limit);
+        BOOST_REQUIRE(witness_program_size < witness_v0_program_maximum_limit);
 
         const auto result = build_chunk(
         {

@@ -88,24 +88,32 @@ data_chunk expand(const std::string& prefix)
 // Do the checksum math.
 uint32_t polymod(const data_chunk& values)
 {
-    static const uint32_t magic_numbers[] =
+    // Polynomials in the bech32 implementation are represented by
+    // simple integers. Generally 30-bit integers are used, where each
+    // bit corresponds to one coefficient of the polynomial.
+    //
+    // https://bitcoin.stackexchange.com/questions/74573/how-is-bech32-based-on-bch-codes
+    static const uint32_t bech32_generator_polynomials[] =
     {
         0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3
     };
 
-    const auto result_mask = 0x1ffffff;
+    // Mask for low 25 bits.
+    const uint32_t checksum_mask = 0x1ffffff;
 
-    uint32_t result = 1;
+    uint32_t checksum = 1;
     for (const auto value: values)
     {
-        const auto shift = (result >> 25);
-        result = (result & result_mask) << bit_group_size ^ value;
+        const auto shift = (checksum >> 25);
+        checksum = (checksum & checksum_mask) << bit_group_size ^ value;
 
         for (size_t index = 0; index < bit_group_size; ++index)
-            result ^= (((shift >> index) & 1) != 0 ? magic_numbers[index] : 0);
+            checksum ^= (((shift >> index) & 1) != 0 ?
+                bech32_generator_polynomials[index] :
+                0);
     }
 
-    return result;
+    return checksum;
 }
 
 // Compute the checksum.
