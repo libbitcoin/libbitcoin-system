@@ -120,6 +120,9 @@
     <ClCompile Include="$(VC_CTP_Nov2013_InstallDir)\crt\src\threadsafestatics.cpp">
       <Filter>src\external</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\basic_compact_filter.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\block.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
@@ -127,6 +130,9 @@
       <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\compact.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\compact_filter.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\header.cpp">
@@ -332,6 +338,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\external\zeroize.c">
       <Filter>src\math\external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\golomb_coded_sets.cpp">
+      <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\hash.cpp">
       <Filter>src\math</Filter>
@@ -671,6 +680,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system.hpp">
       <Filter>include\bitcoin</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\basic_compact_filter.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\block.hpp">
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>
@@ -678,6 +690,9 @@
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\compact.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\compact_filter.hpp">
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\header.hpp">
@@ -912,6 +927,9 @@
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\elliptic_curve.hpp">
+      <Filter>include\bitcoin\system\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\golomb_coded_sets.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\hash.hpp">

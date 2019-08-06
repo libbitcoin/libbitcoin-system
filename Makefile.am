@@ -38,9 +38,11 @@ src_libbitcoin_system_la_LIBADD = ${boost_chrono_LIBS} ${boost_date_time_LIBS} $
 src_libbitcoin_system_la_SOURCES = \
     src/error.cpp \
     src/settings.cpp \
+    src/chain/basic_compact_filter.cpp \
     src/chain/block.cpp \
     src/chain/chain_state.cpp \
     src/chain/compact.cpp \
+    src/chain/compact_filter.cpp \
     src/chain/header.cpp \
     src/chain/input.cpp \
     src/chain/output.cpp \
@@ -96,6 +98,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/math/ec_point.cpp \
     src/math/ec_scalar.cpp \
     src/math/elliptic_curve.cpp \
+    src/math/golomb_coded_sets.cpp \
     src/math/hash.cpp \
     src/math/ring_signature.cpp \
     src/math/secp256k1_initializer.cpp \
@@ -265,9 +268,11 @@ test_libbitcoin_system_test_LDADD = src/libbitcoin-system.la ${boost_unit_test_f
 test_libbitcoin_system_test_SOURCES = \
     test/main.cpp \
     test/settings.cpp \
+    test/chain/basic_compact_filter.cpp \
     test/chain/block.cpp \
     test/chain/chain_state.cpp \
     test/chain/compact.cpp \
+    test/chain/compact_filter.cpp \
     test/chain/header.cpp \
     test/chain/input.cpp \
     test/chain/output.cpp \
@@ -403,9 +408,11 @@ include_bitcoin_system_HEADERS = \
 
 include_bitcoin_system_chaindir = ${includedir}/bitcoin/system/chain
 include_bitcoin_system_chain_HEADERS = \
+    include/bitcoin/system/chain/basic_compact_filter.hpp \
     include/bitcoin/system/chain/block.hpp \
     include/bitcoin/system/chain/chain_state.hpp \
     include/bitcoin/system/chain/compact.hpp \
+    include/bitcoin/system/chain/compact_filter.hpp \
     include/bitcoin/system/chain/header.hpp \
     include/bitcoin/system/chain/input.hpp \
     include/bitcoin/system/chain/input_point.hpp \
@@ -538,6 +545,7 @@ include_bitcoin_system_math_HEADERS = \
     include/bitcoin/system/math/ec_point.hpp \
     include/bitcoin/system/math/ec_scalar.hpp \
     include/bitcoin/system/math/elliptic_curve.hpp \
+    include/bitcoin/system/math/golomb_coded_sets.hpp \
     include/bitcoin/system/math/hash.hpp \
     include/bitcoin/system/math/limits.hpp \
     include/bitcoin/system/math/ring_signature.hpp \

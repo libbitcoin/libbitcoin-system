@@ -76,11 +76,15 @@
     <ClCompile Include="$(VC_CTP_Nov2013_InstallDir)\crt\src\threadsafestatics.cpp">
       <ExcludedFromBuild Condition="$(PlatformToolset) != 'CTP_Nov2013'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\basic_compact_filter.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\block.cpp">
       <ObjectFileName>$(IntDir)src_chain_block.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\chain_state.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\compact.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\compact_filter.cpp">
+      <ObjectFileName>$(IntDir)src_chain_compact_filter.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\header.cpp">
       <ObjectFileName>$(IntDir)src_chain_header.obj</ObjectFileName>
     </ClCompile>
@@ -175,6 +179,7 @@
     <ClCompile Include="..\..\..\..\src\math\external\sha256.c" />
     <ClCompile Include="..\..\..\..\src\math\external\sha512.c" />
     <ClCompile Include="..\..\..\..\src\math\external\zeroize.c" />
+    <ClCompile Include="..\..\..\..\src\math\golomb_coded_sets.cpp" />
     <ClCompile Include="..\..\..\..\src\math\hash.cpp" />
     <ClCompile Include="..\..\..\..\src\math\ring_signature.cpp" />
     <ClCompile Include="..\..\..\..\src\math\secp256k1_initializer.cpp" />
@@ -187,7 +192,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\block_transactions.cpp" />
     <ClCompile Include="..\..\..\..\src\message\compact_block.cpp" />
-    <ClCompile Include="..\..\..\..\src\message\compact_filter.cpp" />
+    <ClCompile Include="..\..\..\..\src\message\compact_filter.cpp">
+      <ObjectFileName>$(IntDir)src_message_compact_filter.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\compact_filter_checkpoint.cpp" />
     <ClCompile Include="..\..\..\..\src\message\compact_filter_headers.cpp" />
     <ClCompile Include="..\..\..\..\src\message\fee_filter.cpp" />
@@ -295,9 +302,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\bitcoin\system.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\basic_compact_filter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\chain_state.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\compact.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\compact_filter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\header.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\input.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\input_point.hpp" />
@@ -376,6 +385,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\ec_point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\ec_scalar.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\elliptic_curve.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\golomb_coded_sets.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\hash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\limits.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\ring_signature.hpp" />

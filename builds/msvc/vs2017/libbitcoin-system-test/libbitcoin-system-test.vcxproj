@@ -70,11 +70,15 @@
     <Import Project="$(ProjectDir)$(ProjectName).props" />
   </ImportGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\test\chain\basic_compact_filter.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\block.cpp">
       <ObjectFileName>$(IntDir)test_chain_block.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\chain_state.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\compact.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\compact_filter.cpp">
+      <ObjectFileName>$(IntDir)test_chain_compact_filter.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\header.cpp">
       <ObjectFileName>$(IntDir)test_chain_header.obj</ObjectFileName>
     </ClCompile>
@@ -128,7 +132,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\block_transactions.cpp" />
     <ClCompile Include="..\..\..\..\test\message\compact_block.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\compact_filter.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\compact_filter.cpp">
+      <ObjectFileName>$(IntDir)test_message_compact_filter.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\compact_filter_checkpoint.cpp" />
     <ClCompile Include="..\..\..\..\test\message\compact_filter_headers.cpp" />
     <ClCompile Include="..\..\..\..\test\message\fee_filter.cpp" />

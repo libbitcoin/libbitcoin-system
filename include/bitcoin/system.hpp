@@ -22,9 +22,11 @@
 #include <bitcoin/system/handlers.hpp>
 #include <bitcoin/system/settings.hpp>
 #include <bitcoin/system/version.hpp>
+#include <bitcoin/system/chain/basic_compact_filter.hpp>
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/compact.hpp>
+#include <bitcoin/system/chain/compact_filter.hpp>
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/input_point.hpp>
@@ -97,6 +99,7 @@
 #include <bitcoin/system/math/ec_point.hpp>
 #include <bitcoin/system/math/ec_scalar.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/math/golomb_coded_sets.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/math/ring_signature.hpp>
