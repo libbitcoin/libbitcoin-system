@@ -221,6 +221,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/wallet/stealth_receiver.cpp \
     src/wallet/stealth_sender.cpp \
     src/wallet/uri.cpp \
+    src/wallet/witness_address.cpp \
     src/wallet/parse_encrypted_keys/parse_encrypted_key.hpp \
     src/wallet/parse_encrypted_keys/parse_encrypted_key.ipp \
     src/wallet/parse_encrypted_keys/parse_encrypted_prefix.hpp \
@@ -366,7 +367,8 @@ test_libbitcoin_system_test_SOURCES = \
     test/wallet/stealth_receiver.cpp \
     test/wallet/stealth_sender.cpp \
     test/wallet/uri.cpp \
-    test/wallet/uri_reader.cpp
+    test/wallet/uri_reader.cpp \
+    test/wallet/witness_address.cpp
 
 endif WITH_TESTS
 
@@ -650,7 +652,8 @@ include_bitcoin_system_wallet_HEADERS = \
     include/bitcoin/system/wallet/stealth_receiver.hpp \
     include/bitcoin/system/wallet/stealth_sender.hpp \
     include/bitcoin/system/wallet/uri.hpp \
-    include/bitcoin/system/wallet/uri_reader.hpp
+    include/bitcoin/system/wallet/uri_reader.hpp \
+    include/bitcoin/system/wallet/witness_address.hpp
 
 
 # Custom make targets.

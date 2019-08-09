@@ -367,6 +367,12 @@ std::string script::to_string(uint32_t active_forks) const
     return text.str();
 }
 
+hash_digest script::to_payments_key() const
+{
+    return sha256_hash(to_data(false));
+}
+
+
 // Iteration.
 //-----------------------------------------------------------------------------
 // These are syntactic sugar that allow the caller to iterate ops directly.
@@ -1169,6 +1175,24 @@ operation::list script::to_pay_multisig_pattern(uint8_t signatures,
     ops.emplace_back(op_n);
     ops.emplace_back(opcode::checkmultisig);
     return ops;
+}
+
+operation::list script::to_pay_witness_key_hash_pattern(const short_hash& hash)
+{
+    return
+    {
+        { opcode::push_size_0 },
+        { to_chunk(hash) },
+    };
+}
+
+operation::list script::to_pay_witness_script_hash_pattern(const hash_digest& hash)
+{
+    return
+    {
+        { opcode::push_size_0 },
+        { to_chunk(hash) }
+    };
 }
 
 // Utilities (non-static).

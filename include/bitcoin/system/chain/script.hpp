@@ -107,6 +107,7 @@ public:
     void to_data(writer& sink, bool prefix) const;
 
     std::string to_string(uint32_t active_forks) const;
+    hash_digest to_payments_key() const;
 
     // Iteration.
     //-------------------------------------------------------------------------
@@ -191,6 +192,10 @@ public:
         const point_list& points);
     static operation::list to_pay_multisig_pattern(uint8_t signatures,
         const data_stack& points);
+    static operation::list to_pay_witness_key_hash_pattern(
+        const short_hash& hash);
+    static operation::list to_pay_witness_script_hash_pattern(
+        const hash_digest& hash);
 
     // Utilities (non-static).
     //-------------------------------------------------------------------------

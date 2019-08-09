@@ -22,7 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
-#include <string>
+#include <sstream>
 #include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
@@ -31,6 +31,8 @@ namespace system {
 static constexpr size_t checksum_size = 6;
 static constexpr size_t prefix_min_size = 1;
 static constexpr size_t combined_max_size = 90;
+static constexpr size_t bit_group_size = 5;
+static constexpr size_t bit_group_mask = 31; // 11111
 static constexpr uint8_t null = 255;
 static constexpr uint8_t separator = '1';
 static const char encode_table[] = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
@@ -67,7 +69,7 @@ data_chunk expand(const std::string& prefix)
 
     for (const auto character: prefix)
     {
-        *iterator = static_cast<uint8_t>(character >> 5);
+        *iterator = static_cast<uint8_t>(character >> bit_group_size);
         ++iterator;
     }
 
@@ -76,7 +78,7 @@ data_chunk expand(const std::string& prefix)
 
     for (const auto character: prefix)
     {
-        *iterator = static_cast<uint8_t>(character & 31);
+        *iterator = static_cast<uint8_t>(character & bit_group_mask);
         ++iterator;
     }
 
@@ -86,22 +88,32 @@ data_chunk expand(const std::string& prefix)
 // Do the checksum math.
 uint32_t polymod(const data_chunk& values)
 {
-    static const uint32_t magic_numbers[] =
+    // Polynomials in the bech32 implementation are represented by
+    // simple integers. Generally 30-bit integers are used, where each
+    // bit corresponds to one coefficient of the polynomial.
+    //
+    // bitcoin.stackexchange.com/questions/74573/how-is-bech32-based-on-bch-codes
+    static const uint32_t bech32_generator_polynomials[] =
     {
         0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3
     };
 
-    uint32_t result = 1;
+    // Mask for low 25 bits.
+    const uint32_t checksum_mask = 0x1ffffff;
+
+    uint32_t checksum = 1;
     for (const auto value: values)
     {
-        const auto shift = (result >> 25);
-        result = (result & 0x1ffffff) << 5 ^ value;
+        const auto shift = (checksum >> 25);
+        checksum = (checksum & checksum_mask) << bit_group_size ^ value;
 
-        for (auto index = 0; index < 5; ++index)
-            result ^= (((shift >> index) & 1) != 0 ? magic_numbers[index] : 0);
+        for (size_t index = 0; index < bit_group_size; ++index)
+            checksum ^= (((shift >> index) & 1) != 0 ?
+                bech32_generator_polynomials[index] :
+                0);
     }
 
-    return result;
+    return checksum;
 }
 
 // Compute the checksum.
@@ -122,8 +134,9 @@ data_chunk checksum(const base32& value)
     data_chunk checksum(checksum_size);
     const auto modified = polymod(expanded) ^ 1;
 
-    for (size_t index = 0; index < checksum.size(); ++index)
-        checksum[index] = (modified >> (5 * (5 - index))) & 31;
+    for (size_t index = 0; index < checksum_size; ++index)
+        checksum[index] = (modified >> bit_group_size * (bit_group_size -
+            index)) & bit_group_mask;
 
     return checksum;
 }
@@ -213,23 +226,20 @@ bool verify(const base32& value)
 // to produce uppercase encodings, though the values may be simply mapped.
 std::string encode_base32(const base32& unencoded)
 {
-    std::string encoded;
-    encoded.reserve(unencoded.prefix.size() + sizeof(separator) +
-        unencoded.payload.size() + checksum_size);
+    std::stringstream encoded;
 
     // Copy the prefix and add the separator.
-    encoded = unencoded.prefix;
-    encoded += separator;
+    encoded << unencoded.prefix << separator;
 
     // Encode and add the payload.
     for (const auto value: unencoded.payload)
-        encoded += encode_table[value];
+        encoded << encode_table[value];
 
     // Compute, encode and add the checksum.
     for (const auto value: checksum(unencoded))
-        encoded += encode_table[value];
+        encoded << encode_table[value];
 
-    return encoded;
+    return encoded.str();
 }
 
 bool decode_base32(base32& out, const std::string& in)
