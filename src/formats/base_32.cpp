@@ -92,7 +92,7 @@ uint32_t polymod(const data_chunk& values)
     // simple integers. Generally 30-bit integers are used, where each
     // bit corresponds to one coefficient of the polynomial.
     //
-    // https://bitcoin.stackexchange.com/questions/74573/how-is-bech32-based-on-bch-codes
+    // bitcoin.stackexchange.com/questions/74573/how-is-bech32-based-on-bch-codes
     static const uint32_t bech32_generator_polynomials[] =
     {
         0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3

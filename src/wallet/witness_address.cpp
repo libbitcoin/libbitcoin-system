@@ -203,7 +203,7 @@ witness_address witness_address::from_private(const ec_private& secret,
     address_format format, const std::string& prefix)
 {
     return secret ? witness_address(secret.to_public(), format, prefix)
-        : witness_address();
+        : witness_address{};
 }
 
 // static
@@ -217,23 +217,25 @@ witness_address witness_address::from_public(const ec_public& point,
     if (!point.to_data(data))
         return {};
 
-    const uint8_t witness_version = 0;
+    // Witness version.
+    const uint8_t version = 0;
 
     return format == address_format::witness_pubkey_hash ?
-        witness_address(bitcoin_short_hash(data), format, witness_version, prefix) :
-        witness_address(bitcoin_hash(data), format, witness_version, prefix);
+        witness_address(bitcoin_short_hash(data), format, version, prefix) :
+        witness_address(bitcoin_hash(data), format, version, prefix);
 }
 
 // static
 witness_address witness_address::from_script(const chain::script& script,
     address_format format, const std::string& prefix)
 {
-    const uint8_t witness_version = 0;
+    // Witness version.
+    const uint8_t version = 0;
     const auto key = script.to_payments_key();
 
     return format == address_format::witness_pubkey_hash ?
-        witness_address(ripemd160_hash(key), format, witness_version, prefix) :
-        witness_address(key, format, witness_version, prefix);
+        witness_address(ripemd160_hash(key), format, version, prefix) :
+        witness_address(key, format, version, prefix);
 }
 
 // Cast operators.
@@ -250,6 +252,8 @@ witness_address::operator bool() const
 // Returns the bech32 encoded witness address.
 std::string witness_address::encoded() const
 {
+    const size_t conversion_offset = 0;
+
     base32 bech32;
     bech32.prefix = prefix_;
     bech32.payload = build_chunk(
@@ -257,9 +261,9 @@ std::string witness_address::encoded() const
         to_chunk(witness_version_),
         witness_hash_ == null_hash ?
             convert_bits(bech32_expanded_bit_size, bech32_contracted_bit_size,
-                true, to_chunk(hash_), 0) :
+                true, to_chunk(hash_), conversion_offset) :
             convert_bits(bech32_expanded_bit_size, bech32_contracted_bit_size,
-                true, to_chunk(witness_hash_), 0)
+                true, to_chunk(witness_hash_), conversion_offset)
     });
 
     return encode_base32(bech32);
@@ -358,10 +362,10 @@ data_chunk witness_address::convert_bits(uint32_t from_bits, uint32_t to_bits,
         if (offset++ < in_offset)
             continue;
 
-        accumulator = ((accumulator << from_bits) | value) &
-            maximum_accumulator;
-        bit_count += from_bits;
+        accumulator = ((accumulator << from_bits) | value);
+        accumulator &= maximum_accumulator;
 
+        bit_count += from_bits;
         while (bit_count >= to_bits)
         {
             bit_count -= to_bits;
