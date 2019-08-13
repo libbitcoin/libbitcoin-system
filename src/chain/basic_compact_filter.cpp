@@ -89,15 +89,15 @@ basic_compact_filter::basic_compact_filter(basic_compact_filter&& other)
 basic_compact_filter::basic_compact_filter(const compact_filter& other)
   : compact_filter(other)
 {
-//    if (filter_type() != basic_compact_filter::basic_filter_type)
-//        reset();
+    if (filter_type() != basic_compact_filter::basic_filter_type)
+        reset();
 }
 
 basic_compact_filter::basic_compact_filter(compact_filter&& other)
   : compact_filter(std::move(other))
 {
-//    if (filter_type() != basic_compact_filter::basic_filter_type)
-//        reset();
+    if (filter_type() != basic_compact_filter::basic_filter_type)
+        reset();
 }
 
 bool basic_compact_filter::is_valid() const
@@ -143,11 +143,6 @@ bool basic_compact_filter::operator!=(const basic_compact_filter& other) const
 bool basic_compact_filter::operator!=(const compact_filter& other) const
 {
     return !(*this == other);
-}
-
-hash_digest basic_compact_filter::get_header(hash_digest /*previous*/) const
-{
-    return null_hash;
 }
 
 bool basic_compact_filter::match(

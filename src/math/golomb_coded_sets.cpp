@@ -20,26 +20,19 @@
 // Sponsored in part by Digital Contract Design, LLC
 
 #include <bitcoin/system/math/golomb_coded_sets.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/math/siphash.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace gcs {
 
-data_chunk construct(data_stack items, uint64_t bit_param, half_hash entropy,
-	uint64_t target_false_positive_rate)
+uint64_t inline hash_to_range(data_slice item, uint64_t F, uint64_t k0, uint64_t k1)
 {
-	return data_chunk{};
+    uint64_t hash = siphash(k0, k1, item);
+    return static_cast<uint64_t>(
+        (static_cast<uint128_t>(hash) * static_cast<uint128_t>(F)) >> 64);
 }
-
-bool match(half_hash entropy, data_chunk compressed_set, uint64_t set_size,
-	uint64_t bit_param, uint64_t target_false_positive_rate)
-{
-	return false;
-}
-
-
-//hash_to_range(item: []byte, F: uint64, k: [16]byte) -> uint64:
-//    return (siphash(k, item) * F) >> 64
 
 //hashed_set_construct(raw_items: [][]byte, k: [16]byte, M: uint) -> []uint64:
 //    let N = len(raw_items)
@@ -53,25 +46,55 @@ bool match(half_hash entropy, data_chunk compressed_set, uint64_t set_size,
 //
 //    return set_items
 
-//golomb_encode(stream, x: uint64, P: uint):
-//	let q = x >> P
+//void golomb_encode(writer& sink, uint64_t x, uint8_t P)
+//{
+//    golomb_encode(stream, x: uint64, P: uint):
+//        let q = x >> P
 //
-//	while q > 0:
-//		write_bit(stream, 1)
-//		q--
-//	write_bit(stream, 0)
+//        while q > 0:
+//            write_bit(stream, 1)
+//            q--
+//        write_bit(stream, 0)
 //
-//	write_bits_big_endian(stream, x, P)
+//        write_bits_big_endian(stream, x, P)
+//    uint64_t q = x >> P;
 //
-//golomb_decode(stream, P: uint) -> uint64:
-//	let q = 0
-//	while read_bit(stream) == 1:
-//		q++
+//    while (q > 0)
+//    {
+//        if (q >= 8)
+//            sink.write_byte(0xff);
+//        else
+//        {
 //
-//	let r = read_bits_big_endian(stream, P)
+//        }
+//        sink.
+//    }
+//}
+
+//uint64_t inline golomb_decode(reader& source, uint8_t P)
+//{
+//    golomb_decode(stream, P: uint) -> uint64:
+//        let q = 0
+//        while read_bit(stream) == 1:
+//            q++
 //
-//	let x = (q << P) + r
-//	return x
+//        let r = read_bits_big_endian(stream, P)
+//
+//        let x = (q << P) + r
+//        return x
+//}
+
+data_chunk construct(data_stack items, uint64_t bit_param, half_hash entropy,
+	uint64_t target_false_positive_rate)
+{
+	return data_chunk{};
+}
+
+bool match(half_hash entropy, data_chunk compressed_set, uint64_t set_size,
+	uint64_t bit_param, uint64_t target_false_positive_rate)
+{
+	return false;
+}
 
 } // namespace gcs
 } // namespace system

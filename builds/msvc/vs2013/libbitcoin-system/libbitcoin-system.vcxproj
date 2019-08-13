@@ -183,6 +183,7 @@
     <ClCompile Include="..\..\..\..\src\math\hash.cpp" />
     <ClCompile Include="..\..\..\..\src\math\ring_signature.cpp" />
     <ClCompile Include="..\..\..\..\src\math\secp256k1_initializer.cpp" />
+    <ClCompile Include="..\..\..\..\src\math\siphash.cpp" />
     <ClCompile Include="..\..\..\..\src\math\stealth.cpp" />
     <ClCompile Include="..\..\..\..\src\message\address.cpp" />
     <ClCompile Include="..\..\..\..\src\message\alert.cpp" />
@@ -389,6 +390,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\hash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\limits.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\ring_signature.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\siphash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\stealth.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\alert.hpp" />

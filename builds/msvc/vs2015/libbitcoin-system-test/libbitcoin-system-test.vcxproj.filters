@@ -165,6 +165,9 @@
     <ClCompile Include="..\..\..\..\test\math\ring_signature.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\math\siphash.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\stealth.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
@@ -291,6 +294,9 @@
     <ClCompile Include="..\..\..\..\test\message\version.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\overloads.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\settings.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -397,6 +403,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\math\hash.hpp">
       <Filter>src\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\math\siphash.hpp">
+      <Filter>src\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\overloads.hpp">
+      <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\wallet\mnemonic.hpp">
       <Filter>src\wallet</Filter>

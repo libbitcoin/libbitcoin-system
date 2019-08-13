@@ -345,6 +345,9 @@
     <ClCompile Include="..\..\..\..\src\math\secp256k1_initializer.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\siphash.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\stealth.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
@@ -933,6 +936,9 @@
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\ring_signature.hpp">
+      <Filter>include\bitcoin\system\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\siphash.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\stealth.hpp">

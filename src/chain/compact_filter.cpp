@@ -77,13 +77,18 @@ compact_filter::compact_filter(uint8_t filter_type, hash_digest&& block_hash,
 }
 
 compact_filter::compact_filter(const compact_filter& other)
-  : compact_filter(other.filter_type_, other.block_hash_, other.filter_)
+  : hash_(other.hash_cache()),
+    filter_type_(other.filter_type_),
+    block_hash_(other.block_hash_),
+    filter_(other.filter_)
 {
 }
 
 compact_filter::compact_filter(compact_filter&& other)
-  : compact_filter(other.filter_type_, std::move(other.block_hash_),
-      std::move(other.filter_))
+  : hash_(other.hash_cache()),
+    filter_type_(other.filter_type_),
+    block_hash_(std::move(other.block_hash_)),
+    filter_(std::move(other.filter_))
 {
 }
 
@@ -98,6 +103,7 @@ void compact_filter::reset()
     block_hash_.fill(0);
     filter_.clear();
     filter_.shrink_to_fit();
+    invalidate_cache();
 }
 
 bool compact_filter::from_data(const data_chunk& data)
@@ -213,10 +219,12 @@ void compact_filter::set_filter(const data_chunk& value)
 void compact_filter::set_filter(data_chunk&& value)
 {
     filter_ = std::move(value);
+    invalidate_cache();
 }
 
 compact_filter& compact_filter::operator=(compact_filter&& other)
 {
+    hash_ = other.hash_cache();
     filter_type_ = other.filter_type_;
     block_hash_ = std::move(other.block_hash_);
     filter_ = std::move(other.filter_);
@@ -233,6 +241,72 @@ bool compact_filter::operator==(const compact_filter& other) const
 bool compact_filter::operator!=(const compact_filter& other) const
 {
     return !(*this == other);
+}
+
+hash_digest compact_filter::get_header(hash_digest previous) const
+{
+    data_chunk data;
+
+    {
+        data_sink ostream(data);
+        ostream_writer sink(ostream);
+        sink.write_hash(hash());
+        sink.write_hash(previous);
+    }
+
+    return bitcoin_hash(data);
+}
+
+hash_digest compact_filter::hash() const
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    mutex_.lock_upgrade();
+
+    if (!hash_)
+    {
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        mutex_.unlock_upgrade_and_lock();
+        hash_ = std::make_shared<hash_digest>(bitcoin_hash(filter()));
+        mutex_.unlock_and_lock_upgrade();
+        //---------------------------------------------------------------------
+    }
+
+    const auto hash = *hash_;
+    mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
+
+    return hash;
+}
+
+// Cache.
+//-----------------------------------------------------------------------------
+
+// protected
+void compact_filter::invalidate_cache() const
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // Critical Section
+    mutex_.lock_upgrade();
+
+    if (hash_)
+    {
+        mutex_.unlock_upgrade_and_lock();
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        hash_.reset();
+        //---------------------------------------------------------------------
+        mutex_.unlock_and_lock_upgrade();
+    }
+
+    mutex_.unlock_upgrade();
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+// Private cache access for copy/move construction.
+compact_filter::hash_ptr compact_filter::hash_cache() const
+{
+    shared_lock lock(mutex_);
+    return hash_;
 }
 
 } // namespace chain

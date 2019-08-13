@@ -27,6 +27,7 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/reader.hpp>
+#include <bitcoin/system/utility/thread.hpp>
 #include <bitcoin/system/utility/writer.hpp>
 
 namespace libbitcoin {
@@ -50,6 +51,8 @@ public:
         data_chunk&& filter);
     compact_filter(const compact_filter& other);
     compact_filter(compact_filter&& other);
+
+    hash_digest get_header(hash_digest previous) const;
 
     uint8_t filter_type() const;
     void set_filter_type(uint8_t value);
@@ -81,7 +84,19 @@ public:
     bool operator==(const compact_filter& other) const;
     bool operator!=(const compact_filter& other) const;
 
+    hash_digest hash() const;
+
+protected:
+    void invalidate_cache() const;
+
 private:
+    typedef std::shared_ptr<hash_digest> hash_ptr;
+
+    hash_ptr hash_cache() const;
+
+    mutable hash_ptr hash_;
+    mutable upgrade_mutex mutex_;
+
     uint8_t filter_type_;
     hash_digest block_hash_;
     data_chunk filter_;

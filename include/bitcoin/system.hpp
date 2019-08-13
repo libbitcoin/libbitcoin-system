@@ -103,6 +103,7 @@
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/math/ring_signature.hpp>
+#include <bitcoin/system/math/siphash.hpp>
 #include <bitcoin/system/math/stealth.hpp>
 #include <bitcoin/system/message/address.hpp>
 #include <bitcoin/system/message/alert.hpp>

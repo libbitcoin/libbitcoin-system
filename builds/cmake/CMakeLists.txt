@@ -386,6 +386,7 @@ add_library( ${CANONICAL_LIB_NAME}
     "../../src/math/ring_signature.cpp"
     "../../src/math/secp256k1_initializer.cpp"
     "../../src/math/secp256k1_initializer.hpp"
+    "../../src/math/siphash.cpp"
     "../../src/math/stealth.cpp"
     "../../src/math/external/aes256.c"
     "../../src/math/external/aes256.h"
@@ -619,6 +620,8 @@ endif()
 if (with-tests)
     add_executable( libbitcoin-system-test
         "../../test/main.cpp"
+        "../../test/overloads.cpp"
+        "../../test/overloads.hpp"
         "../../test/settings.cpp"
         "../../test/chain/basic_compact_filter.cpp"
         "../../test/chain/block.cpp"
@@ -664,6 +667,8 @@ if (with-tests)
         "../../test/math/hash.hpp"
         "../../test/math/limits.cpp"
         "../../test/math/ring_signature.cpp"
+        "../../test/math/siphash.cpp"
+        "../../test/math/siphash.hpp"
         "../../test/math/stealth.cpp"
         "../../test/math/uint256.cpp"
         "../../test/message/address.cpp"

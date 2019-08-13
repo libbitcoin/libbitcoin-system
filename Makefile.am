@@ -103,6 +103,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/math/ring_signature.cpp \
     src/math/secp256k1_initializer.cpp \
     src/math/secp256k1_initializer.hpp \
+    src/math/siphash.cpp \
     src/math/stealth.cpp \
     src/math/external/aes256.c \
     src/math/external/aes256.h \
@@ -267,6 +268,8 @@ test_libbitcoin_system_test_LDFLAGS = ${boost_LDFLAGS}
 test_libbitcoin_system_test_LDADD = src/libbitcoin-system.la ${boost_unit_test_framework_LIBS} ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_log_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${png_LIBS} ${qrencode_LIBS} ${secp256k1_LIBS}
 test_libbitcoin_system_test_SOURCES = \
     test/main.cpp \
+    test/overloads.cpp \
+    test/overloads.hpp \
     test/settings.cpp \
     test/chain/basic_compact_filter.cpp \
     test/chain/block.cpp \
@@ -312,6 +315,8 @@ test_libbitcoin_system_test_SOURCES = \
     test/math/hash.hpp \
     test/math/limits.cpp \
     test/math/ring_signature.cpp \
+    test/math/siphash.cpp \
+    test/math/siphash.hpp \
     test/math/stealth.cpp \
     test/math/uint256.cpp \
     test/message/address.cpp \
@@ -549,6 +554,7 @@ include_bitcoin_system_math_HEADERS = \
     include/bitcoin/system/math/hash.hpp \
     include/bitcoin/system/math/limits.hpp \
     include/bitcoin/system/math/ring_signature.hpp \
+    include/bitcoin/system/math/siphash.hpp \
     include/bitcoin/system/math/stealth.hpp
 
 include_bitcoin_system_messagedir = ${includedir}/bitcoin/system/message

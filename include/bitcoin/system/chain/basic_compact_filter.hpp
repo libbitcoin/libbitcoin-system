@@ -58,7 +58,6 @@ public:
     basic_compact_filter(const compact_filter& other);
     basic_compact_filter(compact_filter&& other);
 
-    hash_digest get_header(hash_digest previous) const;
     bool match(const wallet::payment_address::list addresses) const;
     bool populate(const block validated_block);
 
