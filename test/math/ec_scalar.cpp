@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(ec_scalar__from__uint64__valid__expected)
 BOOST_AUTO_TEST_CASE(ec_scalar__move__success)
 {
     ec_scalar x(256);
-    ec_scalar y(std::move(y));
+    ec_scalar y(std::move(x));
     BOOST_REQUIRE(!x);
     BOOST_REQUIRE(y);
 }
