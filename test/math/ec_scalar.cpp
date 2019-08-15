@@ -50,6 +50,24 @@ BOOST_AUTO_TEST_CASE(ec_scalar__add__valid__expected)
     BOOST_REQUIRE_EQUAL(encode_base16(sum.secret()), SUM1);
 }
 
+BOOST_AUTO_TEST_CASE(ec_scalar__from__uint64__valid__expected)
+{
+    const ec_scalar x(110);
+    const ec_scalar y(256);
+    const auto sum = x + y;
+    BOOST_REQUIRE(sum);
+    const ec_scalar result(110 + 256);
+    BOOST_REQUIRE_EQUAL(sum, result);
+}
+
+BOOST_AUTO_TEST_CASE(ec_scalar__move__success)
+{
+    ec_scalar x(256);
+    ec_scalar y(std::move(y));
+    BOOST_REQUIRE(!x);
+    BOOST_REQUIRE(y);
+}
+
 BOOST_AUTO_TEST_CASE(ec_scalar__multiply__valid__expected)
 {
     const ec_scalar x{ base16_literal(SECRET1A) };
