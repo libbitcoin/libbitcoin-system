@@ -26,7 +26,7 @@
 namespace libbitcoin {
 namespace system {
 
-const ec_scalar ec_scalar::zero = null_hash;
+const ec_scalar ec_scalar::zero(0);
 
 ec_scalar::ec_scalar()
 {
