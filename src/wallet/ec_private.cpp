@@ -160,18 +160,21 @@ ec_private ec_private::from_uncompressed(const wif_uncompressed& wif,
 // Conversion to WIF loses payment address version info.
 std::string ec_private::encoded() const
 {
+    if (!secret_)
+        return {};
+
     if (compressed())
     {
         wif_compressed wif;
         const auto prefix = to_array(wif_version());
         const auto compressed = to_array(compressed_sentinel);
-        build_checked_array(wif, { prefix, secret_, compressed });
+        build_checked_array(wif, { prefix, *secret_, compressed });
         return encode_base58(wif);
     }
 
     wif_uncompressed wif;
     const auto prefix = to_array(wif_version());
-    build_checked_array(wif, { prefix, secret_ });
+    build_checked_array(wif, { prefix, *secret_ });
     return encode_base58(wif);
 }
 
@@ -206,7 +209,7 @@ bool ec_private::compressed() const
 ec_public ec_private::to_public() const
 {
     ec_compressed point;
-    return valid_ && secret_to_public(point, secret_) ?
+    return secret_ && secret_to_public(point, *secret_) ?
         ec_public(point, compressed()) : ec_public();
 }
 
@@ -231,8 +234,8 @@ bool ec_private::operator<(const ec_private& other) const
 
 bool ec_private::operator==(const ec_private& other) const
 {
-    return valid_ == other.valid_ && compress_ == other.compress_ &&
-        version_ == other.version_ && secret_ == other.secret_;
+    return compress_ == other.compress_ && version_ == other.version_ &&
+        *static_cast<const ec_scalar*>(this) == other;
 }
 
 bool ec_private::operator!=(const ec_private& other) const
