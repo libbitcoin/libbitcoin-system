@@ -64,11 +64,7 @@ struct timer
     template <typename Function, typename ...Args>
     static typename Time::rep execution(Function func, Args&&... args)
     {
-        const auto start = Clock::now();
-        func(std::forward<Args>(args)...);
-        const auto difference = Clock::now() - start;
-        const auto duration = std::chrono::duration_cast<Time>(difference);
-        return duration.count();
+        return duration(func, std::forward<Args>(args)...).count();
     }
 
     /// Returns the duration (in chrono's type system) of the elapsed time.
