@@ -77,7 +77,12 @@ ec_scalar& ec_scalar::operator=(const ec_secret& secret)
 
 ec_scalar& ec_scalar::operator=(const ec_scalar& scalar)
 {
-    secret_.reset(new ec_secret(*scalar.secret_));
+    if (!scalar)
+    {
+        secret_.reset();
+        return *this;
+    }
+    secret_.reset(new ec_secret(scalar.secret()));
     return *this;
 }
 
@@ -93,6 +98,7 @@ ec_scalar ec_scalar::operator-() const
         return *this;
 
     auto negation = *this;
+    BITCOIN_ASSERT(negation.secret_);
     if (!ec_negate(*negation.secret_))
         return {};
 
@@ -156,6 +162,8 @@ ec_scalar operator+(ec_scalar left, const ec_scalar& right)
     if (!left || !right)
         return {};
 
+    BITCOIN_ASSERT(left.secret_);
+    BITCOIN_ASSERT(right.secret_);
     if (!ec_add(*left.secret_, *right.secret_))
         return {};
 
@@ -179,6 +187,8 @@ ec_scalar operator*(ec_scalar left, const ec_scalar& right)
     if (!left || !right)
         return {};
 
+    BITCOIN_ASSERT(left.secret_);
+    BITCOIN_ASSERT(right.secret_);
     if (!ec_multiply(*left.secret_, *right.secret_))
         return {};
 
