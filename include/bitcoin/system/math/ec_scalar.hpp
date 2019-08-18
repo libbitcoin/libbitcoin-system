@@ -61,9 +61,9 @@ protected:
     friend ec_scalar operator-(ec_scalar left, const ec_scalar& right);
     friend ec_scalar operator*(ec_scalar left, const ec_scalar& right);
 
-    using ec_secret_uniq = std::unique_ptr<ec_secret>;
+    using ec_secret_uptr = std::unique_ptr<ec_secret>;
 
-    ec_secret_uniq secret_;
+    ec_secret_uptr secret_;
 };
 
 bool operator==(const ec_scalar& left, const ec_scalar& right);

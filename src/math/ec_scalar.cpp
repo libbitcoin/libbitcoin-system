@@ -60,11 +60,12 @@ ec_scalar::ec_scalar(ec_scalar&& scalar)
 ec_scalar& ec_scalar::operator=(uint64_t value)
 {
     secret_.reset(new ec_secret);
-    BITCOIN_ASSERT(secret_->size() == 32);
-    auto serial = bc::system::make_unsafe_serializer(secret_->begin());
-    serial.write_8_bytes_big_endian(0);
-    serial.write_8_bytes_big_endian(0);
-    serial.write_8_bytes_big_endian(0);
+    static_assert(ec_secret_size == 32, "invalid size for ec_secret");
+    auto last_int_iterator = secret_->end() - 8;
+    // Fill first 24 bytes with zeroes
+    std::fill(secret_->begin(), last_int_iterator, 0);
+    // Write last 8 bytes with our uint64_t
+    auto serial = bc::system::make_unsafe_serializer(last_int_iterator);
     serial.write_8_bytes_big_endian(value);
     return *this;
 }
