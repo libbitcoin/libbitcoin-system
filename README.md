@@ -40,24 +40,7 @@ A minimal libbitcoin build requires boost and libsecp256k1. The [libbitcoin/secp
 
 Libbitcoin requires a C++11 compiler, currently minimum [GCC 4.8.0](https://gcc.gnu.org/projects/cxx0x.html) or Clang based on [LLVM 3.5](http://llvm.org/releases/3.5.0/docs/ReleaseNotes.html).
 
-To see your GCC version:
-```sh
-$ g++ --version
-```
-```
-g++ (Ubuntu 4.8.2-19ubuntu1) 4.8.2
-Copyright (C) 2013 Free Software Foundation, Inc.
-This is free software; see the source for copying conditions.  There is NO
-warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-```
-If necessary, upgrade your compiler as follows:
-```sh
-$ sudo apt-get install g++-4.8
-$ sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
-$ sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
-$ sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-4.8 50
-```
-Next install the [build system](http://wikipedia.org/wiki/GNU_build_system) (Automake minimum 1.14) and git:
+Install the [build system](http://wikipedia.org/wiki/GNU_build_system) (Automake minimum 1.14) and git:
 ```sh
 $ sudo apt-get install build-essential autoconf automake libtool pkg-config git
 ```
