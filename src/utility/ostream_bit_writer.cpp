@@ -29,8 +29,9 @@
 namespace libbitcoin {
 namespace system {
 
-BC_CONSTEXPR uint8_t bits_per_byte = 0x08;
 BC_CONSTEXPR uint8_t bit_mask = 0x01;
+BC_CONSTEXPR uint64_t low_byte_mask_64 = 0x00000000000000FF;
+BC_CONSTEXPR uint64_t low_bit_mask_64 = 0x0000000000000001;
 
 ostream_bit_writer::ostream_bit_writer(writer& writer)
   : buffer_(0x00), offset_(0), writer_(writer)
@@ -46,10 +47,10 @@ void ostream_bit_writer::buffered_write(data_chunk& data)
 {
     if (data.size() > 0)
     {
-        uint8_t next_buffer = (data.back() << (bits_per_byte - offset_));
+        uint8_t next_buffer = (data.back() << (byte_bits - offset_));
 
         for (auto index = (data.size() - 1); index > 0; index--)
-            data[index] = ((data[index] << (bits_per_byte - offset_))
+            data[index] = ((data[index] << (byte_bits - offset_))
                 | (data[index - 1] >> offset_));
 
         data[0] = (buffer_ | (data[0] >> offset_));
@@ -141,6 +142,26 @@ void ostream_bit_writer::write_variable_big_endian(uint64_t value)
     }
 }
 
+void ostream_bit_writer::write_variable_bits_big_endian(uint64_t value,
+    uint8_t least_significant_bits)
+{
+    // TODO: should be an exception
+    auto remaining_bits = std::min(static_cast<uint64_t>(least_significant_bits),
+        (byte_bits * sizeof(uint64_t)));
+
+    while (remaining_bits > byte_bits)
+    {
+        uint8_t current = ((value >> (remaining_bits - byte_bits))
+            & low_byte_mask_64);
+
+        write_byte(current);
+        remaining_bits -= byte_bits;
+    }
+
+    for (uint8_t index = 1; index <= remaining_bits; index++)
+        write_bit((value >> (remaining_bits - index)) & low_bit_mask_64);
+}
+
 void ostream_bit_writer::write_size_big_endian(size_t value)
 {
     write_variable_big_endian(value);
@@ -206,7 +227,7 @@ void ostream_bit_writer::write_bit(bool value)
     buffer_ |= (byte_value >> offset_);
     offset_++;
 
-    if (offset_ >= bits_per_byte)
+    if (offset_ >= byte_bits)
         flush();
 }
 
@@ -217,7 +238,7 @@ void ostream_bit_writer::write_byte(uint8_t value)
     if (offset_ > 0)
     {
         next_byte = buffer_ | (value >> offset_);
-        buffer_ = value << (bits_per_byte - offset_);
+        buffer_ = value << (byte_bits - offset_);
     }
 
     writer_.write_byte(next_byte);

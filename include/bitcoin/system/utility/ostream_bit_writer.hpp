@@ -61,6 +61,9 @@ public:
     void write_4_bytes_big_endian(uint32_t value);
     void write_8_bytes_big_endian(uint64_t value);
     void write_variable_big_endian(uint64_t value);
+    void write_variable_bits_big_endian(uint64_t value,
+        uint8_t significant_bits);
+
     void write_size_big_endian(size_t value);
 
     /// Write little endian integers.

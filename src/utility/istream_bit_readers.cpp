@@ -18,6 +18,8 @@
  */
 #include <bitcoin/system/utility/istream_bit_reader.hpp>
 
+#include <algorithm>
+#include <cstddef>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/endian.hpp>
@@ -25,17 +27,17 @@
 namespace libbitcoin {
 namespace system {
 
-BC_CONSTEXPR uint8_t bits_per_byte = 0x08;
 BC_CONSTEXPR uint8_t bit_mask = 0x80;
+BC_CONSTEXPR uint64_t low_bit_mask_64 = 0x01;
 
 istream_bit_reader::istream_bit_reader(reader& reader)
-  : buffer_(0x00), offset_(bits_per_byte), reader_(reader)
+  : buffer_(0x00), offset_(byte_bits), reader_(reader)
 {
 }
 
 void istream_bit_reader::feed()
 {
-    if (offset_ >= bits_per_byte)
+    if (offset_ >= byte_bits)
     {
         buffer_ = reader_.read_byte();
 
@@ -59,13 +61,13 @@ bool istream_bit_reader::operator!() const
 
 bool istream_bit_reader::is_exhausted() const
 {
-    return reader_.is_exhausted() & (offset_  >= bits_per_byte);
+    return reader_.is_exhausted() & (offset_  >= byte_bits);
 }
 
 void istream_bit_reader::invalidate()
 {
     reader_.invalidate();
-    offset_ = bits_per_byte;
+    offset_ = byte_bits;
 }
 
 // Hashes.
@@ -119,6 +121,29 @@ uint64_t istream_bit_reader::read_variable_big_endian()
         default:
             return value;
     }
+}
+
+uint64_t istream_bit_reader::read_variable_bits_big_endian(
+    uint8_t least_significant_bits)
+{
+    // TODO: should be an exception
+    auto remaining_bits = std::min(static_cast<uint64_t>(least_significant_bits),
+        (byte_bits * sizeof(uint64_t)));
+
+    uint64_t result = 0;
+
+    while (remaining_bits > byte_bits)
+    {
+        uint8_t current = read_byte();
+        result |= (static_cast<uint64_t>(current) << (remaining_bits - byte_bits));
+        remaining_bits -= byte_bits;
+    }
+
+    for (uint8_t index = 1; index <= remaining_bits; index++)
+        if (read_bit())
+            result |= (low_bit_mask_64 << (remaining_bits - index));
+
+    return result;
 }
 
 size_t istream_bit_reader::read_size_big_endian()
@@ -207,13 +232,13 @@ uint8_t istream_bit_reader::peek_byte()
 {
     uint8_t result = buffer_;
 
-    if (offset_ >= bits_per_byte)
+    if (offset_ >= byte_bits)
         result = reader_.peek_byte();
     else if (offset_ > 0)
     {
         uint8_t hi = (buffer_ << offset_);
         uint8_t low = reader_ ?
-            (reader_.peek_byte() >> (bits_per_byte - offset_)) : 0x00;
+            (reader_.peek_byte() >> (byte_bits - offset_)) : 0x00;
 
         result = hi | low;
     }
@@ -225,7 +250,7 @@ uint8_t istream_bit_reader::read_byte()
 {
     uint8_t result = buffer_;
 
-    if (offset_ >= bits_per_byte)
+    if (offset_ >= byte_bits)
         result = reader_.read_byte();
     else if (offset_ > 0)
     {
@@ -236,14 +261,14 @@ uint8_t istream_bit_reader::read_byte()
         else
         {
             buffer_ = 0x00;
-            offset_ = bits_per_byte;
+            offset_ = byte_bits;
         }
 
-        uint8_t low = (buffer_ >> (bits_per_byte - offset_));
+        uint8_t low = (buffer_ >> (byte_bits - offset_));
         result = hi | low;
     }
     else
-        offset_ = bits_per_byte;
+        offset_ = byte_bits;
 
     return result;
 }
@@ -272,21 +297,21 @@ data_chunk istream_bit_reader::read_bytes(size_t size)
     if (offset_ == 0)
         out.push_back(0x00);
 
-    if (offset_ < bits_per_byte)
+    if (offset_ < byte_bits)
     {
         uint8_t next_buffer = out.back();
 
         for (auto index = (out.size() - 1); index > 0; index--)
-            out[index] = ((out[index] >> (bits_per_byte - offset_))
+            out[index] = ((out[index] >> (byte_bits - offset_))
                 | (out[index - 1] << offset_));
 
         out[0] = ((buffer_ << offset_)
-            | (out[0] >> (bits_per_byte - offset_)));
+            | (out[0] >> (byte_bits - offset_)));
 
         if (offset_ == 0)
         {
             buffer_ = next_buffer;
-            offset_ = bits_per_byte;
+            offset_ = byte_bits;
         }
     }
 
@@ -330,7 +355,7 @@ void istream_bit_reader::skip(size_t size)
 
 bool istream_bit_reader::empty() const
 {
-    return (offset_ >= bits_per_byte)
+    return (offset_ >= byte_bits)
         && (reader_.peek_byte() == std::istream::traits_type::eof());
 }
 

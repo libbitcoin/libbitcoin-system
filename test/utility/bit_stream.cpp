@@ -167,8 +167,6 @@ BOOST_AUTO_TEST_CASE(roundtrip_bits_and_bytes)
         BOOST_REQUIRE_EQUAL(expected_first_byte, source.read_byte());
         BOOST_REQUIRE_EQUAL(false, source.read_bit());
         data_chunk result = source.read_bytes(expected_multi_byte_read.size());
-        std::cout << "expect: " << encode_base16(expected_multi_byte_read) << std::endl;
-        std::cout << "result: " << encode_base16(result) << std::endl;
         BOOST_REQUIRE_EQUAL(expected_multi_byte_read, result);
         BOOST_REQUIRE((bool)source);
         BOOST_REQUIRE_EQUAL(false, !source);
@@ -250,6 +248,74 @@ BOOST_AUTO_TEST_CASE(roundtrip_bits_and_8_bytes_big_endian)
     }
 
     BOOST_REQUIRE_EQUAL(expected_numeric, result);
+}
+
+BOOST_AUTO_TEST_CASE(roundtrip_variable_bits_big_endian)
+{
+    const uint64_t expected = 0x000000aaaaaaaa;
+    const uint8_t bits = 32;
+    uint64_t result = 0;
+
+    const data_chunk expected_buffer = to_chunk(base16_literal("aaaaaaaa"));
+    data_chunk buffer;
+
+    {
+        data_sink stream(buffer);
+        ostream_writer writer(stream);
+        ostream_bit_writer sink(writer);
+        sink.write_variable_bits_big_endian(expected, bits);
+        BOOST_REQUIRE((bool)sink);
+        BOOST_REQUIRE_EQUAL(false, !sink);
+    }
+
+    BOOST_REQUIRE_EQUAL(expected_buffer, buffer);
+
+    {
+        data_source stream(buffer);
+        istream_reader reader(stream);
+        istream_bit_reader source(reader);
+        result = source.read_variable_bits_big_endian(bits);
+        BOOST_REQUIRE((bool)source);
+        BOOST_REQUIRE_EQUAL(false, !source);
+        BOOST_REQUIRE(stream);
+    }
+
+    BOOST_REQUIRE_EQUAL(expected, result);
+}
+
+BOOST_AUTO_TEST_CASE(roundtrip_variable_bits_big_endian_misaligned)
+{
+    const uint64_t expected = 0x000000aaaaaaaa;
+    const uint8_t bits = 32;
+    uint64_t result = 0;
+
+    const data_chunk expected_buffer = to_chunk(base16_literal("5555555500"));
+    data_chunk buffer;
+
+    {
+        data_sink stream(buffer);
+        ostream_writer writer(stream);
+        ostream_bit_writer sink(writer);
+        sink.write_bit(false);
+        sink.write_variable_bits_big_endian(expected, bits);
+        BOOST_REQUIRE((bool)sink);
+        BOOST_REQUIRE_EQUAL(false, !sink);
+    }
+
+    BOOST_REQUIRE_EQUAL(expected_buffer, buffer);
+
+    {
+        data_source stream(buffer);
+        istream_reader reader(stream);
+        istream_bit_reader source(reader);
+        BOOST_REQUIRE_EQUAL(false, source.read_bit());
+        result = source.read_variable_bits_big_endian(bits);
+        BOOST_REQUIRE((bool)source);
+        BOOST_REQUIRE_EQUAL(false, !source);
+        BOOST_REQUIRE(stream);
+    }
+
+    BOOST_REQUIRE_EQUAL(expected, result);
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_byte)

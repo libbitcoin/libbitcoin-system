@@ -31,6 +31,9 @@ class BC_API bit_reader
 public:
     /// Read bit.
     virtual bool read_bit() = 0;
+
+    virtual uint64_t read_variable_bits_big_endian(
+        uint8_t least_significant_bits) = 0;
 };
 
 } // namespace system

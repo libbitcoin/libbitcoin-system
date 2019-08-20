@@ -31,6 +31,9 @@ class BC_API bit_writer
 public:
     /// Write bit.
     virtual void write_bit(bool value) = 0;
+
+    virtual void write_variable_bits_big_endian(uint64_t value,
+        uint8_t significant_bits) = 0;
 };
 
 } // namespace system
