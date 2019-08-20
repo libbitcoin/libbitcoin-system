@@ -26,7 +26,6 @@
 #include <memory>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/chain/block.hpp>
-#include <bitcoin/system/chain/compact_filter_headers.hpp>
 #include <bitcoin/system/chain/compact_filter.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/reader.hpp>

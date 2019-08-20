@@ -16,21 +16,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef LIBBITCOIN_SYSTEM_BIT_READER_HPP
+#define LIBBITCOIN_SYSTEM_BIT_READER_HPP
 
-#include "overloads.hpp"
+#include <bitcoin/system/utility/reader.hpp>
 
-namespace std {
+namespace libbitcoin {
+namespace system {
 
-std::ostream& operator<<(std::ostream& os, const bc::system::hash_digest& obj)
+/// Reader interface.
+class BC_API bit_reader
+  : public reader
 {
-    os << bc::system::encode_hash(obj);
-    return os;
-}
+public:
+    /// Read bit.
+    virtual bool read_bit() = 0;
+};
 
-//std::ostream& operator<<(std::ostream& os, const bc::system::data_slice& obj)
-//{
-//    os << bc::system::encode_base16(obj);
-//    return os;
-//}
+} // namespace system
+} // namespace libbitcoin
 
-} // namespace std
+#endif

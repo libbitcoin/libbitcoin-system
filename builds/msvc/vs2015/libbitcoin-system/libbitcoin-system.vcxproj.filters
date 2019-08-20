@@ -513,10 +513,16 @@
     <ClCompile Include="..\..\..\..\src\utility\interprocess_lock.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\istream_bit_readers.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\istream_reader.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\monitor.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\ostream_bit_writer.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\ostream_writer.cpp">
@@ -1106,6 +1112,12 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\binary.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\bit_reader.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\bit_writer.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\collection.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
@@ -1154,6 +1166,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\interprocess_lock.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\istream_bit_reader.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\istream_reader.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
@@ -1161,6 +1176,9 @@
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\noncopyable.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\ostream_bit_writer.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\ostream_writer.hpp">
@@ -1418,6 +1436,9 @@
       <Filter>include\bitcoin\system\impl\utility</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\istream_reader.ipp">
+      <Filter>include\bitcoin\system\impl\utility</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\ostream_bit_writer.ipp">
       <Filter>include\bitcoin\system\impl\utility</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\ostream_writer.ipp">

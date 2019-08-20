@@ -247,8 +247,10 @@
     <ClCompile Include="..\..\..\..\src\utility\dispatcher.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\flush_lock.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\interprocess_lock.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\istream_bit_readers.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\istream_reader.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\monitor.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\ostream_bit_writer.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\ostream_writer.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\png.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\prioritized_mutex.cpp" />
@@ -446,6 +448,8 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\assert.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\atomic.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\binary.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\bit_reader.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\bit_writer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\collection.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\color.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\conditional_lock.hpp" />
@@ -462,9 +466,11 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\exceptions.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\flush_lock.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\interprocess_lock.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\istream_bit_reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\istream_reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\monitor.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\noncopyable.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\ostream_bit_writer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\ostream_writer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\pending.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\png.hpp" />
@@ -552,6 +558,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\deserializer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\endian.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\istream_reader.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\ostream_bit_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\ostream_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\pending.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\property_tree.ipp" />

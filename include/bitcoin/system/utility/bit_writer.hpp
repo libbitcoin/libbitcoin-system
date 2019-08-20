@@ -16,21 +16,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef LIBBITCOIN_SYSTEM_BIT_WRITER_HPP
+#define LIBBITCOIN_SYSTEM_BIT_WRITER_HPP
 
-#include "overloads.hpp"
+#include <bitcoin/system/utility/writer.hpp>
 
-namespace std {
+namespace libbitcoin {
+namespace system {
 
-std::ostream& operator<<(std::ostream& os, const bc::system::hash_digest& obj)
+/// Writer interface.
+class BC_API bit_writer
+  : public writer
 {
-    os << bc::system::encode_hash(obj);
-    return os;
-}
+public:
+    /// Write bit.
+    virtual void write_bit(bool value) = 0;
+};
 
-//std::ostream& operator<<(std::ostream& os, const bc::system::data_slice& obj)
-//{
-//    os << bc::system::encode_base16(obj);
-//    return os;
-//}
+} // namespace system
+} // namespace libbitcoin
 
-} // namespace std
+#endif

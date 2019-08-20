@@ -158,6 +158,8 @@
 #include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/atomic.hpp>
 #include <bitcoin/system/utility/binary.hpp>
+#include <bitcoin/system/utility/bit_reader.hpp>
+#include <bitcoin/system/utility/bit_writer.hpp>
 #include <bitcoin/system/utility/collection.hpp>
 #include <bitcoin/system/utility/color.hpp>
 #include <bitcoin/system/utility/conditional_lock.hpp>
@@ -174,9 +176,11 @@
 #include <bitcoin/system/utility/exceptions.hpp>
 #include <bitcoin/system/utility/flush_lock.hpp>
 #include <bitcoin/system/utility/interprocess_lock.hpp>
+#include <bitcoin/system/utility/istream_bit_reader.hpp>
 #include <bitcoin/system/utility/istream_reader.hpp>
 #include <bitcoin/system/utility/monitor.hpp>
 #include <bitcoin/system/utility/noncopyable.hpp>
+#include <bitcoin/system/utility/ostream_bit_writer.hpp>
 #include <bitcoin/system/utility/ostream_writer.hpp>
 #include <bitcoin/system/utility/pending.hpp>
 #include <bitcoin/system/utility/png.hpp>

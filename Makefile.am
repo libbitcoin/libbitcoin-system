@@ -182,8 +182,10 @@ src_libbitcoin_system_la_SOURCES = \
     src/utility/dispatcher.cpp \
     src/utility/flush_lock.cpp \
     src/utility/interprocess_lock.cpp \
+    src/utility/istream_bit_readers.cpp \
     src/utility/istream_reader.cpp \
     src/utility/monitor.cpp \
+    src/utility/ostream_bit_writer.cpp \
     src/utility/ostream_writer.cpp \
     src/utility/png.cpp \
     src/utility/prioritized_mutex.cpp \
@@ -363,6 +365,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/unicode/unicode_istream.cpp \
     test/unicode/unicode_ostream.cpp \
     test/utility/binary.cpp \
+    test/utility/bit_stream.cpp \
     test/utility/collection.cpp \
     test/utility/data.cpp \
     test/utility/endian.cpp \
@@ -499,6 +502,7 @@ include_bitcoin_system_impl_utility_HEADERS = \
     include/bitcoin/system/impl/utility/deserializer.ipp \
     include/bitcoin/system/impl/utility/endian.ipp \
     include/bitcoin/system/impl/utility/istream_reader.ipp \
+    include/bitcoin/system/impl/utility/ostream_bit_writer.ipp \
     include/bitcoin/system/impl/utility/ostream_writer.ipp \
     include/bitcoin/system/impl/utility/pending.ipp \
     include/bitcoin/system/impl/utility/property_tree.ipp \
@@ -618,6 +622,8 @@ include_bitcoin_system_utility_HEADERS = \
     include/bitcoin/system/utility/assert.hpp \
     include/bitcoin/system/utility/atomic.hpp \
     include/bitcoin/system/utility/binary.hpp \
+    include/bitcoin/system/utility/bit_reader.hpp \
+    include/bitcoin/system/utility/bit_writer.hpp \
     include/bitcoin/system/utility/collection.hpp \
     include/bitcoin/system/utility/color.hpp \
     include/bitcoin/system/utility/conditional_lock.hpp \
@@ -634,9 +640,11 @@ include_bitcoin_system_utility_HEADERS = \
     include/bitcoin/system/utility/exceptions.hpp \
     include/bitcoin/system/utility/flush_lock.hpp \
     include/bitcoin/system/utility/interprocess_lock.hpp \
+    include/bitcoin/system/utility/istream_bit_reader.hpp \
     include/bitcoin/system/utility/istream_reader.hpp \
     include/bitcoin/system/utility/monitor.hpp \
     include/bitcoin/system/utility/noncopyable.hpp \
+    include/bitcoin/system/utility/ostream_bit_writer.hpp \
     include/bitcoin/system/utility/ostream_writer.hpp \
     include/bitcoin/system/utility/pending.hpp \
     include/bitcoin/system/utility/png.hpp \

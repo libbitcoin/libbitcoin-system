@@ -312,6 +312,9 @@
     <ClCompile Include="..\..\..\..\test\utility\binary.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\utility\bit_stream.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\utility\collection.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>

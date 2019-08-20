@@ -179,6 +179,7 @@
     <ClCompile Include="..\..\..\..\test\unicode\unicode_istream.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\unicode_ostream.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\binary.cpp" />
+    <ClCompile Include="..\..\..\..\test\utility\bit_stream.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\collection.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\data.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\endian.cpp" />
