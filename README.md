@@ -172,7 +172,6 @@ Visual Studio solutions are maintained for all libbitcoin libraries. NuGet packa
 
 Libbitcoin requires a C++11 compiler, which means Visual Studio 2013 (with a pre-release compiler update) or later. Download and install one of the following free tools as necessary:
 
-* [Visual Studio 2019 Community](https://www.visualstudio.com/downloads)
 * [Visual Studio 2017 Community](https://www.visualstudio.com/vs/older-downloads)
 * [Visual Studio 2015 Express](https://www.visualstudio.com/vs/older-downloads)
 * [Visual Studio 2013 Express](https://www.visualstudio.com/vs/older-downloads)
