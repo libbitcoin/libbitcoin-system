@@ -23,16 +23,21 @@
 #define LIBBITCOIN_SYSTEM_GOLOMB_CODED_SETS
 
 #include <cstdint>
+#include <istream>
+#include <ostream>
 #include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/siphash.hpp>
 #include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/reader.hpp>
 #include <bitcoin/system/utility/writer.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace gcs {
 
+    // Golomb-coded set construction
+    // ------------------------------------------------------------------------
     data_chunk construct(const data_stack& items, uint64_t bit_param,
         const half_hash& entropy, uint64_t target_false_positive_rate);
 
@@ -55,21 +60,57 @@ namespace gcs {
         uint64_t bit_param, const numeric_key& entropy,
         uint64_t target_false_positive_rate);
 
-	bool match(const half_hash& entropy, uint64_t bit_param,
-	    uint64_t target_false_positive_rate, uint64_t set_size,
-	    const data_chunk& compressed_set, const data_chunk& target);
+    // Single element match
+    // ------------------------------------------------------------------------
+    bool match(const data_chunk& target, const data_chunk& compressed_set,
+        uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+        uint64_t target_false_positive_rate);
 
-    bool match(const numeric_key& entropy, uint64_t bit_param,
-        uint64_t target_false_positive_rate, uint64_t set_size,
-        const data_chunk& compressed_set, const data_chunk& target);
+    bool match(const data_chunk& target, const data_chunk& compressed_set,
+        uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+        uint64_t target_false_positive_rate);
 
-    bool match(const half_hash& entropy, uint64_t bit_param,
-        uint64_t target_false_positive_rate, uint64_t set_size,
-        const data_chunk& compressed_set, const data_stack& targets);
+    bool match(const data_chunk& target, std::istream& compressed_set,
+        uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+        uint64_t target_false_positive_rate);
 
-	bool match(const numeric_key& entropy, uint64_t bit_param,
-	    uint64_t target_false_positive_rate, uint64_t set_size,
-	    const data_chunk& compressed_set, const data_stack& targets);
+    bool match(const data_chunk& target, std::istream& compressed_set,
+        uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+        uint64_t target_false_positive_rate);
+
+    bool match(const data_chunk& target, reader& compressed_set,
+        uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+        uint64_t target_false_positive_rate);
+
+    bool match(const data_chunk& target, reader& compressed_set,
+        uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+        uint64_t target_false_positive_rate);
+
+	// Intersection match
+	// ------------------------------------------------------------------------
+    bool match(const data_stack& targets, const data_chunk& compressed_set,
+        uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+        uint64_t target_false_positive_rate);
+
+    bool match(const data_stack& targets, const data_chunk& compressed_set,
+        uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+        uint64_t target_false_positive_rate);
+
+    bool match(const data_stack& targets, std::istream& compressed_set,
+        uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+        uint64_t target_false_positive_rate);
+
+    bool match(const data_stack& targets, std::istream& compressed_set,
+        uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+        uint64_t target_false_positive_rate);
+
+    bool match(const data_stack& targets, reader& compressed_set,
+        uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+        uint64_t target_false_positive_rate);
+
+    bool match(const data_stack& targets, reader& compressed_set,
+        uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+        uint64_t target_false_positive_rate);
 
 } // namespace gcs
 } // namespace system

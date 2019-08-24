@@ -73,6 +73,8 @@ std::vector<uint64_t> hashed_set_construct(const data_stack& items,
     return hashed_items;
 }
 
+// Golomb-coded set construction
+// ----------------------------------------------------------------------------
 data_chunk construct(const data_stack& items, uint64_t bit_param,
     const half_hash& entropy, uint64_t target_false_positive_rate)
 {
@@ -139,25 +141,61 @@ void construct(writer& stream, const data_stack& items,
     }
 }
 
-bool match(const half_hash& entropy, uint64_t bit_param,
-    uint64_t target_false_positive_rate, uint64_t set_size,
-    const data_chunk& compressed_set, const data_chunk& target)
+// Single element match
+// ----------------------------------------------------------------------------
+bool match(const data_chunk& target, const data_chunk& compressed_set,
+    uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+    uint64_t target_false_positive_rate)
 {
     auto key = to_numeric_key(entropy);
-    return match(key, bit_param, target_false_positive_rate, set_size,
-        compressed_set, target);
+    return match(target, compressed_set, set_size, key, bit_param,
+        target_false_positive_rate);
 }
 
-bool match(const numeric_key& entropy, uint64_t bit_param,
-    uint64_t target_false_positive_rate, uint64_t set_size,
-    const data_chunk& compressed_set, const data_chunk& target)
+bool match(const data_chunk& target, const data_chunk& compressed_set,
+    uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+    uint64_t target_false_positive_rate)
+{
+    data_source source(compressed_set);
+    return match(target, source, set_size, entropy, bit_param,
+        target_false_positive_rate);
+}
+
+bool match(const data_chunk& target, std::istream& compressed_set,
+    uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+    uint64_t target_false_positive_rate)
+{
+    auto key = to_numeric_key(entropy);
+    return match(target, compressed_set, set_size, key, bit_param,
+        target_false_positive_rate);
+}
+
+bool match(const data_chunk& target, std::istream& compressed_set,
+    uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+    uint64_t target_false_positive_rate)
+{
+    istream_reader reader(compressed_set);
+    return match(target, reader, set_size, entropy, bit_param,
+        target_false_positive_rate);
+}
+
+bool match(const data_chunk& target, reader& compressed_set,
+    uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+    uint64_t target_false_positive_rate)
+{
+    auto key = to_numeric_key(entropy);
+    return match(target, compressed_set, set_size, key, bit_param,
+        target_false_positive_rate);
+}
+
+bool match(const data_chunk& target, reader& compressed_set,
+    uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+    uint64_t target_false_positive_rate)
 {
     uint64_t bound = target_false_positive_rate * set_size;
     uint64_t target_hash = hash_to_range(target, bound, entropy);
 
-    data_source stream(compressed_set);
-    istream_reader reader(stream);
-    istream_bit_reader source(reader);
+    istream_bit_reader source(compressed_set);
 
     uint64_t prev = 0;
 
@@ -175,21 +213,59 @@ bool match(const numeric_key& entropy, uint64_t bit_param,
         prev = item_hash;
     }
 
-	return false;
+    return false;
 }
 
-bool match(const half_hash& entropy, uint64_t bit_param,
-    uint64_t target_false_positive_rate, uint64_t set_size,
-    const data_chunk& compressed_set, const data_stack& targets)
+// Intersection match
+// ----------------------------------------------------------------------------
+bool match(const data_stack& targets, const data_chunk& compressed_set,
+    uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+    uint64_t target_false_positive_rate)
 {
     auto key = to_numeric_key(entropy);
-    return match(key, bit_param, target_false_positive_rate, set_size,
-        compressed_set, targets);
+    return match(targets, compressed_set, set_size, key, bit_param,
+        target_false_positive_rate);
 }
 
-bool match(const numeric_key& entropy, uint64_t bit_param,
-    uint64_t target_false_positive_rate, uint64_t set_size,
-    const data_chunk& compressed_set, const data_stack& targets)
+bool match(const data_stack& targets, const data_chunk& compressed_set,
+    uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+    uint64_t target_false_positive_rate)
+{
+    data_source source(compressed_set);
+    return match(targets, source, set_size, entropy, bit_param,
+        target_false_positive_rate);
+}
+
+bool match(const data_stack& targets, std::istream& compressed_set,
+    uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+    uint64_t target_false_positive_rate)
+{
+    auto key = to_numeric_key(entropy);
+    return match(targets, compressed_set, set_size, key, bit_param,
+        target_false_positive_rate);
+}
+
+bool match(const data_stack& targets, std::istream& compressed_set,
+    uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+    uint64_t target_false_positive_rate)
+{
+    istream_reader reader(compressed_set);
+    return match(targets, reader, set_size, entropy, bit_param,
+        target_false_positive_rate);
+}
+
+bool match(const data_stack& targets, reader& compressed_set,
+    uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+    uint64_t target_false_positive_rate)
+{
+    auto key = to_numeric_key(entropy);
+    return match(targets, compressed_set, set_size, key, bit_param,
+        target_false_positive_rate);
+}
+
+bool match(const data_stack& targets, reader& compressed_set,
+    uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+    uint64_t target_false_positive_rate)
 {
     if (targets.size() == 0)
         return false;
@@ -202,9 +278,7 @@ bool match(const numeric_key& entropy, uint64_t bit_param,
 
     std::sort(target_hashes.begin(), target_hashes.end(), std::less<uint64_t>());
 
-    data_source stream(compressed_set);
-    istream_reader reader(stream);
-    istream_bit_reader source(reader);
+    istream_bit_reader source(compressed_set);
 
     uint64_t value = 0;
     uint64_t target_index = 0;

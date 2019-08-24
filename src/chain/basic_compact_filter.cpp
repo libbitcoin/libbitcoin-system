@@ -24,14 +24,15 @@
 #include <bitcoin/system/machine/opcode.hpp>
 #include <bitcoin/system/math/golomb_coded_sets.hpp>
 #include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
 #include <bitcoin/system/utility/ostream_writer.hpp>
 
 //#include <initializer_list>
 //#include <bitcoin/system/math/limits.hpp>
 //#include <bitcoin/system/message/messages.hpp>
 //#include <bitcoin/system/message/version.hpp>
-//#include <bitcoin/system/utility/container_source.hpp>
-//#include <bitcoin/system/utility/istream_reader.hpp>
+
 
 namespace libbitcoin {
 namespace system {
@@ -145,10 +146,34 @@ bool basic_compact_filter::operator!=(const compact_filter& other) const
     return !(*this == other);
 }
 
-bool basic_compact_filter::match(
-    const wallet::payment_address::list /*addresses*/) const
+bool basic_compact_filter::match(const wallet::payment_address address) const
 {
-    return false;
+    wallet::payment_address::list list = { address };
+    return match(list);
+}
+
+bool basic_compact_filter::match(
+    const wallet::payment_address::list addresses) const
+{
+    bool result = false;
+    const auto key = to_numeric_key(slice<0, half_hash_size, hash_size>(
+        block_hash()));
+
+    auto data = filter();
+    data_source stream(data);
+    istream_reader reader(stream);
+    auto set_size = reader.read_variable_little_endian();
+
+    data_stack targets;
+
+    for (auto address : addresses)
+        targets.emplace_back(address.output_script().to_data(false));
+
+    if (reader)
+        result = gcs::match(targets, reader, set_size, key,
+            golomb_bit_parameter, golomb_target_false_positive_rate);
+
+    return result;
 }
 
 bool basic_compact_filter::populate(const block validated_block)
