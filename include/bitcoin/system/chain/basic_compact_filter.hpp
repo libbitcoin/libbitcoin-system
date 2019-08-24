@@ -72,8 +72,6 @@ public:
     bool operator==(const compact_filter& other) const;
     bool operator!=(const basic_compact_filter& other) const;
     bool operator!=(const compact_filter& other) const;
-
-    static const uint8_t basic_filter_type;
 };
 
 } // namespace chain

@@ -21,20 +21,21 @@
 
 #include <bitcoin/system/chain/basic_compact_filter.hpp>
 
+#include <bitcoin/system/machine/opcode.hpp>
+#include <bitcoin/system/math/golomb_coded_sets.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
+
 //#include <initializer_list>
 //#include <bitcoin/system/math/limits.hpp>
 //#include <bitcoin/system/message/messages.hpp>
 //#include <bitcoin/system/message/version.hpp>
-//#include <bitcoin/system/utility/container_sink.hpp>
 //#include <bitcoin/system/utility/container_source.hpp>
 //#include <bitcoin/system/utility/istream_reader.hpp>
-//#include <bitcoin/system/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
-
-const uint8_t basic_compact_filter::basic_filter_type = 0u;
 
 basic_compact_filter basic_compact_filter::factory(const data_chunk& data)
 {
@@ -64,14 +65,13 @@ basic_compact_filter::basic_compact_filter()
 
 basic_compact_filter::basic_compact_filter(const hash_digest& block_hash,
 	const data_chunk& filter)
-  : compact_filter(basic_compact_filter::basic_filter_type, block_hash,
-        filter)
+  : compact_filter(basic_filter_type, block_hash, filter)
 {
 }
 
 basic_compact_filter::basic_compact_filter(hash_digest&& block_hash,
 	data_chunk&& filter)
-  : compact_filter(basic_compact_filter::basic_filter_type,
+  : compact_filter(basic_filter_type,
       std::move(block_hash), std::move(filter))
 {
 }
@@ -89,27 +89,27 @@ basic_compact_filter::basic_compact_filter(basic_compact_filter&& other)
 basic_compact_filter::basic_compact_filter(const compact_filter& other)
   : compact_filter(other)
 {
-    if (filter_type() != basic_compact_filter::basic_filter_type)
+    if (filter_type() != basic_filter_type)
         reset();
 }
 
 basic_compact_filter::basic_compact_filter(compact_filter&& other)
   : compact_filter(std::move(other))
 {
-    if (filter_type() != basic_compact_filter::basic_filter_type)
+    if (filter_type() != basic_filter_type)
         reset();
 }
 
 bool basic_compact_filter::is_valid() const
 {
     return compact_filter::is_valid()
-        && (filter_type() == basic_compact_filter::basic_filter_type);
+        && (filter_type() == basic_filter_type);
 }
 
 void basic_compact_filter::reset()
 {
     compact_filter::reset();
-    set_filter_type(basic_compact_filter::basic_filter_type);
+    set_filter_type(basic_filter_type);
 }
 
 basic_compact_filter& basic_compact_filter::operator=(
@@ -151,9 +151,71 @@ bool basic_compact_filter::match(
     return false;
 }
 
-bool basic_compact_filter::populate(const block /*validated_block*/)
+bool basic_compact_filter::populate(const block validated_block)
 {
-    return true;
+    bool incomplete_data = false;
+    const auto hash = validated_block.hash();
+    const auto key = to_numeric_key(slice<0, half_hash_size, hash_size>(hash));
+
+    data_stack items;
+
+    for (const auto tx : validated_block.transactions())
+    {
+        if (!tx.is_coinbase())
+        {
+            for (const auto input : tx.inputs())
+            {
+                const auto prevout = input.previous_output();
+                if (prevout.metadata.cache.value() == output::not_found)
+                {
+                    incomplete_data = true;
+                    break;
+                }
+
+                const auto script = prevout.metadata.cache.script();
+                const auto data = script.to_data(false);
+                if (data.size() > 0)
+                    items.emplace_back(data);
+            }
+        }
+
+        if (incomplete_data)
+            break;
+
+        for (const auto output : tx.outputs())
+        {
+            const auto script = output.script();
+            if ((script.size() > 0) &&
+                (script.front().code() != machine::opcode::return_))
+            {
+                const auto data = script.to_data(false);
+                items.emplace_back(data);
+            }
+        }
+    }
+
+    // remove duplicates
+    std::sort(items.begin(), items.end(), std::less<data_chunk>());
+    auto last = std::unique(items.begin(), items.end());
+    items.erase(last, items.end());
+
+    if (!incomplete_data)
+    {
+        data_chunk filter;
+        {
+            data_sink stream(filter);
+            ostream_writer writer(stream);
+            writer.write_variable_little_endian(items.size());
+            gcs::construct(writer, items, golomb_bit_parameter, key,
+                golomb_target_false_positive_rate);
+        }
+
+        set_block_hash(hash);
+        set_filter_type(basic_filter_type);
+        set_filter(filter);
+    }
+
+    return !incomplete_data;
 }
 
 } // namespace chain

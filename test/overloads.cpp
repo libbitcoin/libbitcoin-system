@@ -27,10 +27,10 @@ std::ostream& operator<<(std::ostream& os, const bc::system::hash_digest& obj)
     return os;
 }
 
-//std::ostream& operator<<(std::ostream& os, const bc::system::data_slice& obj)
-//{
-//    os << bc::system::encode_base16(obj);
-//    return os;
-//}
+std::ostream& operator<<(std::ostream& os, const bc::system::data_chunk& obj)
+{
+    os << bc::system::encode_base16(obj);
+    return os;
+}
 
 } // namespace std

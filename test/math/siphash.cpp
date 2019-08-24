@@ -37,25 +37,19 @@ BOOST_AUTO_TEST_SUITE(siphash_tests)
 
 BOOST_AUTO_TEST_CASE(siphash_hash_test)
 {
-    const data_chunk raw_key = to_chunk(
-        base16_literal("000102030405060708090a0b0c0d0e0f"));
+    const half_hash key = base16_literal("000102030405060708090a0b0c0d0e0f");
 
     const data_chunk message = to_chunk(
         base16_literal("000102030405060708090a0b0c0d0e"));
 
     uint64_t expected = 0xa129ca6149be45e5;
 
-    data_source key_stream(raw_key);
-    istream_reader key_source(key_stream);
-    uint64_t k0 = key_source.read_8_bytes_little_endian();
-    uint64_t k1 = key_source.read_8_bytes_little_endian();
-
-    BOOST_REQUIRE_EQUAL(siphash(k0, k1, message), expected);
+    BOOST_REQUIRE_EQUAL(siphash(key, message), expected);
 }
 
 BOOST_AUTO_TEST_CASE(siphash_1__tests)
 {
-    byte_array<16> raw_key;
+    half_hash raw_key;
     BOOST_REQUIRE(decode_base16(raw_key, raw_test_key));
 
     for (const auto& result: siphash_hash_tests)
@@ -70,12 +64,9 @@ BOOST_AUTO_TEST_CASE(siphash_1__tests)
 
 BOOST_AUTO_TEST_CASE(siphash_2__tests)
 {
-    data_chunk raw_key;
+    half_hash raw_key;
     BOOST_REQUIRE(decode_base16(raw_key, raw_test_key));
-    data_source key_stream(raw_key);
-    istream_reader key_source(key_stream);
-    const uint64_t k0 = key_source.read_8_bytes_little_endian();
-    const uint64_t k1 = key_source.read_8_bytes_little_endian();
+    const auto key = to_numeric_key(raw_key);
 
     for (const auto& result: siphash_hash_tests)
     {
@@ -83,7 +74,7 @@ BOOST_AUTO_TEST_CASE(siphash_2__tests)
         BOOST_REQUIRE(decode_base16(data, result.message));
         BOOST_REQUIRE(decode_base16(raw_expected, result.result));
         uint64_t expected = read_uint64(raw_expected);
-        BOOST_REQUIRE_EQUAL(siphash(k0, k1, data), expected);
+        BOOST_REQUIRE_EQUAL(siphash(key, data), expected);
     }
 }
 

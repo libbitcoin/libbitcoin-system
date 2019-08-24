@@ -16,11 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <iterator>
+
+// Sponsored in part by Digital Contract Design, LLC
+
 #include <bitcoin/system/utility/ostream_bit_writer.hpp>
 
 #include <algorithm>
 #include <iostream>
+#include <iterator>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/utility/endian.hpp>

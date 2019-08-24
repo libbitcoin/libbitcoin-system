@@ -19,24 +19,20 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/siphash.hpp>
 #include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/endian.hpp>
 #include <bitcoin/system/utility/istream_reader.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-using data_slice_source = stream_source<data_slice>;
-
-const uint64_t i0 = 0x736f6d6570736575;
-const uint64_t i1 = 0x646f72616e646f6d;
-const uint64_t i2 = 0x6c7967656e657261;
-const uint64_t i3 = 0x7465646279746573;
-const uint64_t finalization = 0xff;
-const uint32_t max_encoded_byte_count = 256;
+BC_CONSTEXPR uint64_t finalization = 0x00000000000000ff;
+BC_CONSTEXPR uint32_t max_encoded_byte_count = (1 << byte_bits);
 
 // NOTE: C++20 provides std::rotl which could replace this functionality.
-uint64_t inline rotate_left(uint64_t& value, uint8_t shift)
+uint64_t inline rotate_left(uint64_t value, uint8_t shift)
 {
     return (uint64_t)((value << shift) | (value >> (64 - shift)));
 }
@@ -62,7 +58,8 @@ void inline sipround(uint64_t& v0, uint64_t& v1, uint64_t& v2, uint64_t& v3)
     v2 = rotate_left(v2, 32);
 }
 
-void inline compression_round(uint64_t& v0, uint64_t& v1, uint64_t& v2, uint64_t& v3, uint64_t word)
+void inline compression_round(uint64_t& v0, uint64_t& v1, uint64_t& v2,
+    uint64_t& v3, uint64_t word)
 {
     v3 ^= word;
     sipround(v0, v1, v2, v3);
@@ -70,27 +67,24 @@ void inline compression_round(uint64_t& v0, uint64_t& v1, uint64_t& v2, uint64_t
     v0 ^= word;
 }
 
-uint64_t siphash(byte_array<16> key, const data_slice& message)
+uint64_t siphash(const half_hash& key, const data_slice& message)
 {
-    data_slice_source istream(key);
-    istream_reader source(istream);
-    uint64_t k0 = source.read_8_bytes_little_endian();
-    uint64_t k1 = source.read_8_bytes_little_endian();
-    return siphash(k0, k1, message);
+    auto entropy = to_numeric_key(key);
+    return siphash(entropy, message);
 }
 
-uint64_t siphash(uint64_t k0, uint64_t k1, const data_slice& message)
+uint64_t siphash(const numeric_key& key, const data_slice& message)
 {
-    uint64_t v0 = k0 ^ i0;
-    uint64_t v1 = k1 ^ i1;
-    uint64_t v2 = k0 ^ i2;
-    uint64_t v3 = k1 ^ i3;
+    uint64_t v0 = siphash_magic_0 ^ std::get<0>(key);
+    uint64_t v1 = siphash_magic_1 ^ std::get<1>(key);
+    uint64_t v2 = siphash_magic_2 ^ std::get<0>(key);
+    uint64_t v3 = siphash_magic_3 ^ std::get<1>(key);
 
     uint64_t byte_count = message.size();
-    data_slice_source istream(message);
+    stream_source<data_slice> istream(message);
     istream_reader source(istream);
 
-    for (uint64_t i = 8; i <= byte_count; i += 8)
+    for (uint64_t index = 8; index <= byte_count; index += byte_bits)
     {
         uint64_t word = source.read_8_bytes_little_endian();
         compression_round(v0, v1, v2, v3, word);
@@ -98,7 +92,7 @@ uint64_t siphash(uint64_t k0, uint64_t k1, const data_slice& message)
 
     uint64_t last_word = 0;
 
-    if (byte_count % 8 > 0)
+    if (byte_count % byte_bits > 0)
         last_word = source.read_8_bytes_little_endian();
 
     last_word ^= ((byte_count % max_encoded_byte_count) << 56);
@@ -111,6 +105,28 @@ uint64_t siphash(uint64_t k0, uint64_t k1, const data_slice& message)
     sipround(v0, v1, v2, v3);
 
     return v0 ^ v1 ^ v2 ^ v3;
+}
+
+//numeric_key to_numeric_key(const half_hash& value)
+//{
+//    uint64_t upper = from_little_endian<uint64_t, half_hash::const_iterator>(
+//        value.begin(), value.begin() + (half_hash_size / 2));
+//
+//    uint64_t lower = from_little_endian<uint64_t, half_hash::const_iterator>(
+//        value.begin() + (half_hash_size / 2), value.end());
+//
+//    return std::make_tuple(upper, lower);
+//}
+
+numeric_key to_numeric_key(const half_hash& value)
+{
+    uint64_t upper = from_little_endian<uint64_t, half_hash::const_iterator>(
+        value.begin(), value.begin() + (half_hash_size / 2));
+
+    uint64_t lower = from_little_endian<uint64_t, half_hash::const_iterator>(
+        value.begin() + (half_hash_size / 2), value.end());
+
+    return std::make_tuple(upper, lower);
 }
 
 } // namespace system

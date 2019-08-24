@@ -32,7 +32,7 @@ std::ostream& operator<<(std::ostream& os, const bc::system::byte_array<Size>& o
 
 std::ostream& operator<<(std::ostream& os, const bc::system::hash_digest& obj);
 
-//std::ostream& operator<<(std::ostream& os, const bc::system::data_slice obj);
+std::ostream& operator<<(std::ostream& os, const bc::system::data_chunk& obj);
 
 } // namespace std
 

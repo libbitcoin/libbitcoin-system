@@ -31,9 +31,13 @@
 namespace libbitcoin {
 namespace system {
 
-    uint64_t siphash(byte_array<16> key, const data_slice& message);
+    typedef std::tuple<uint64_t, uint64_t> numeric_key;
 
-    uint64_t siphash(uint64_t k0, uint64_t k1, const data_slice& message);
+    numeric_key to_numeric_key(const half_hash& value);
+
+    uint64_t siphash(const half_hash& key, const data_slice& message);
+
+    uint64_t siphash(const numeric_key& key, const data_slice& message);
 
 } // namespace system
 } // namespace libbitcoin

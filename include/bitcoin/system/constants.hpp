@@ -161,6 +161,19 @@ BC_CONSTEXPR size_t total_size_contribution = 1;
 BC_CONSTEXPR size_t min_witness_program = 2;
 BC_CONSTEXPR size_t max_witness_program = 40;
 
+// Golomb-Rice related values (bip158).
+//-----------------------------------------------------------------------------
+BC_CONSTEXPR uint8_t basic_filter_type = 0x00;
+BC_CONSTEXPR uint64_t golomb_target_false_positive_rate = 784931;   // M
+BC_CONSTEXPR uint64_t golomb_bit_parameter = 19;                    // P
+
+// siphash related values
+//-----------------------------------------------------------------------------
+BC_CONSTEXPR uint64_t siphash_magic_0 = 0x736f6d6570736575;
+BC_CONSTEXPR uint64_t siphash_magic_1 = 0x646f72616e646f6d;
+BC_CONSTEXPR uint64_t siphash_magic_2 = 0x6c7967656e657261;
+BC_CONSTEXPR uint64_t siphash_magic_3 = 0x7465646279746573;
+
 } // namespace libbitcoin
 
 #endif

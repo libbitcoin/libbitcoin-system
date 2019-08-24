@@ -16,6 +16,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+ 
+// Sponsored in part by Digital Contract Design, LLC
+
 #ifndef LIBBITCOIN_SYSTEM_ISTREAM_BIT_READER_IPP
 #define LIBBITCOIN_SYSTEM_ISTREAM_BIT_READER_IPP
 
