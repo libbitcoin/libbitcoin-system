@@ -148,14 +148,17 @@ bool basic_compact_filter::operator!=(const compact_filter& other) const
 
 bool basic_compact_filter::match(const wallet::payment_address address) const
 {
-    wallet::payment_address::list list = { address };
-    return match(list);
+    return match(address.output_script());
 }
 
-bool basic_compact_filter::match(
-    const wallet::payment_address::list addresses) const
+bool basic_compact_filter::match(const script script) const
 {
     bool result = false;
+    data_chunk target = script.to_data(false);
+
+    if (target.size() == 0)
+        return result;
+
     const auto key = to_numeric_key(slice<0, half_hash_size, hash_size>(
         block_hash()));
 
@@ -164,10 +167,43 @@ bool basic_compact_filter::match(
     istream_reader reader(stream);
     auto set_size = reader.read_variable_little_endian();
 
-    data_stack targets;
+    if (reader)
+        result = gcs::match(target, reader, set_size, key,
+            golomb_bit_parameter, golomb_target_false_positive_rate);
+
+    return result;
+}
+
+bool basic_compact_filter::match(
+    const wallet::payment_address::list addresses) const
+{
+    script::list scripts;
 
     for (auto address : addresses)
-        targets.emplace_back(address.output_script().to_data(false));
+        scripts.emplace_back(address.output_script());
+
+    return match(scripts);
+}
+
+bool basic_compact_filter::match(const script::list scripts) const
+{
+    bool result = false;
+
+    data_stack targets;
+    for (auto script : scripts)
+        if (script.serialized_size(false) > 0)
+            targets.emplace_back(script.to_data(false));
+
+    if (targets.size() == 0)
+        return result;
+
+    const auto key = to_numeric_key(slice<0, half_hash_size, hash_size>(
+        block_hash()));
+
+    auto data = filter();
+    data_source stream(data);
+    istream_reader reader(stream);
+    auto set_size = reader.read_variable_little_endian();
 
     if (reader)
         result = gcs::match(targets, reader, set_size, key,

@@ -942,8 +942,6 @@ BOOST_AUTO_TEST_CASE(basic_compact_filter__populate__block_926485__success)
 
     BOOST_REQUIRE(add_metadata(validated_block, metadata));
 
-    print_metadata(validated_block);
-
     chain::basic_compact_filter filter;
     BOOST_REQUIRE(filter.populate(validated_block));
     BOOST_REQUIRE_EQUAL(filter.block_hash(), expected_block_hash);
@@ -1052,6 +1050,76 @@ BOOST_AUTO_TEST_CASE(basic_compact_filter__populate__block_1414221__success)
     BOOST_REQUIRE(filter.populate(validated_block));
     BOOST_REQUIRE_EQUAL(filter.block_hash(), expected_block_hash);
     BOOST_REQUIRE_EQUAL(filter.filter(), expected_filter);
+}
+
+BOOST_AUTO_TEST_CASE(basic_compact_filter__match_1__input_prevout__return_true)
+{
+    const chain::basic_compact_filter basic_filter(
+        hash_literal(
+            "00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
+        to_chunk(base16_literal(
+            "0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026")));
+
+    const wallet::payment_address address(
+        base16_literal("001fa7459a6cfc64bdc178ba7e7a21603bb2568f"),
+        wallet::payment_address::testnet_p2kh);
+
+    BOOST_REQUIRE_EQUAL(true, basic_filter.match(address));
+}
+
+BOOST_AUTO_TEST_CASE(basic_compact_filter__match_1__unrelated_address__return_false)
+{
+    const chain::basic_compact_filter basic_filter(
+        hash_literal(
+            "00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
+        to_chunk(base16_literal(
+            "0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026")));
+
+    const wallet::payment_address address(
+        base16_literal("001fa005900cf004b00100ba700021000b00500f"),
+        wallet::payment_address::testnet_p2kh);
+
+    BOOST_REQUIRE_EQUAL(false, basic_filter.match(address));
+}
+
+BOOST_AUTO_TEST_CASE(basic_compact_filter__match_2__input_prevout__return_true)
+{
+    const chain::basic_compact_filter basic_filter(
+        hash_literal(
+            "00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
+        to_chunk(base16_literal(
+            "0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026")));
+
+    const wallet::payment_address::list addresses = {
+        {
+            base16_literal("001fa7459a6cfc64bdc100ba700a21003b005000"),
+            wallet::payment_address::testnet_p2kh
+        },
+        {
+            base16_literal("001fa7459a6cfc64bdc178ba7e7a21603bb2568f"),
+            wallet::payment_address::testnet_p2kh
+        }
+    };
+
+    BOOST_REQUIRE_EQUAL(true, basic_filter.match(addresses));
+}
+
+BOOST_AUTO_TEST_CASE(basic_compact_filter__match_2__unrelated_address__return_false)
+{
+    const chain::basic_compact_filter basic_filter(
+        hash_literal(
+            "00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
+        to_chunk(base16_literal(
+            "0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026")));
+
+    const wallet::payment_address::list addresses = {
+        {
+            base16_literal("001fa7459a6cfc64bdc100ba700a21003b005000"),
+            wallet::payment_address::testnet_p2kh
+        }
+    };
+
+    BOOST_REQUIRE_EQUAL(false, basic_filter.match(addresses));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

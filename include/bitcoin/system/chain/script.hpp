@@ -51,6 +51,7 @@ public:
     typedef machine::rule_fork rule_fork;
     typedef machine::script_pattern script_pattern;
     typedef machine::script_version script_version;
+    typedef std::vector<script> list;
 
     // Constructors.
     //-------------------------------------------------------------------------

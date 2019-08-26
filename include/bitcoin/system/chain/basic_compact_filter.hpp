@@ -57,6 +57,8 @@ public:
     basic_compact_filter(const compact_filter& other);
     basic_compact_filter(compact_filter&& other);
 
+    bool match(const script script) const;
+    bool match(const script::list scripts) const;
     bool match(const wallet::payment_address address) const;
     bool match(const wallet::payment_address::list addresses) const;
     bool populate(const block validated_block);
