@@ -1435,6 +1435,9 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\endian.ipp">
       <Filter>include\bitcoin\system\impl\utility</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\istream_bit_reader.ipp">
+      <Filter>include\bitcoin\system\impl\utility</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\istream_reader.ipp">
       <Filter>include\bitcoin\system\impl\utility</Filter>
     </None>

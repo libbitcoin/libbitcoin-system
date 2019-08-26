@@ -501,6 +501,7 @@ include_bitcoin_system_impl_utility_HEADERS = \
     include/bitcoin/system/impl/utility/data.ipp \
     include/bitcoin/system/impl/utility/deserializer.ipp \
     include/bitcoin/system/impl/utility/endian.ipp \
+    include/bitcoin/system/impl/utility/istream_bit_reader.ipp \
     include/bitcoin/system/impl/utility/istream_reader.ipp \
     include/bitcoin/system/impl/utility/ostream_bit_writer.ipp \
     include/bitcoin/system/impl/utility/ostream_writer.ipp \

@@ -554,6 +554,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\data.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\deserializer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\endian.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\istream_bit_reader.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\istream_reader.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\ostream_bit_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\ostream_writer.ipp" />
