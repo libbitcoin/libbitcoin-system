@@ -4,7 +4,7 @@
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
 ###############################################################################
-version: 3.4.0.{build}-{branch}
+version: 3.6.0.{build}-{branch}
 
 image: Visual Studio 2013
 
