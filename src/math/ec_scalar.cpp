@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <array>
+#include <memory>
 #include <utility>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
@@ -62,19 +63,24 @@ ec_scalar::ec_scalar(uint64_t value)
 
 ec_scalar& ec_scalar::operator=(const ec_secret& secret)
 {
-    secret_.reset(new ec_secret(secret));
+    secret_ = std::make_shared<ec_secret>(secret);
     return *this;
 }
 
 ec_scalar& ec_scalar::operator=(const ec_scalar& scalar)
 {
-    scalar ? secret_.reset(new ec_secret(scalar.secret())) : secret_.reset();
+    if (scalar)
+        *this = scalar.secret();
+    else
+        this->secret_.reset();
+
     return *this;
 }
 
 ec_scalar& ec_scalar::operator=(ec_scalar&& scalar)
 {
-    secret_ = std::move(scalar.secret_);
+    secret_ = scalar.secret_;
+    scalar.secret_.reset();
     return *this;
 }
 
@@ -84,11 +90,9 @@ ec_scalar& ec_scalar::operator=(uint64_t value)
     static constexpr auto value_size = sizeof(uint64_t);
     static_assert(std::tuple_size<ec_secret>::value >= value_size, "overflow");
 
-    secret_.reset(new ec_secret);
+    // ec_secret is value-initialized to zero.
+    secret_ = std::make_shared<ec_secret>(ec_secret{});
     auto value_iterator = secret_->end() - value_size;
-
-    // Zeroize up to last value_size bytes.
-    std::fill(secret_->begin(), value_iterator, 0);
 
     // Write last value_size bytes with value.
     auto serial = bc::system::make_unsafe_serializer(value_iterator);

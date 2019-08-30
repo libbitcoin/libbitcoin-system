@@ -62,7 +62,7 @@ protected:
     friend ec_scalar operator-(const ec_scalar& left, const ec_scalar& right);
     friend ec_scalar operator*(const ec_scalar& left, const ec_scalar& right);
 
-    std::unique_ptr<ec_secret> secret_;
+    std::shared_ptr<ec_secret> secret_;
 };
 
 bool operator==(const ec_scalar& left, const ec_scalar& right);
