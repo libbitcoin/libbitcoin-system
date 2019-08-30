@@ -121,7 +121,7 @@ ec_scalar& ec_scalar::operator-=(const ec_scalar& scalar)
     // TODO: any way to avoid copy (cannot change const parameter)?
     auto copy = scalar;
 
-    if (!(*this) || !scalar || !(ec_add(*secret_, -copy)))
+    if (!(*this) || !scalar || !ec_add(*secret_, -copy))
         secret_.reset();
 
     return *this;
