@@ -614,7 +614,7 @@ initialize_boost_icu_configuration()
         BOOST_ICU_POSIX="off"
 
         # Extract ICU libs from package config variables and augment with -ldl.
-        ICU_LIBS=( `pkg-config icu-i18n --libs` "-ldl" )
+        ICU_LIBS="`pkg-config icu-i18n --libs` -ldl"
 
         # This is a hack for boost m4 scripts that fail with ICU dependency.
         # See custom edits in ax-boost-locale.m4 and ax_boost_regex.m4.
