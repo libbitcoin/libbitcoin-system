@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_EC_SCALAR_HPP
 #define LIBBITCOIN_SYSTEM_EC_SCALAR_HPP
 
+#include <cstdint>
 #include <memory>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
@@ -33,21 +34,21 @@ public:
 
     /// Constructors.
     ec_scalar();
-    explicit ec_scalar(uint64_t value);
     ec_scalar(const ec_secret& secret);
     ec_scalar(const ec_scalar& scalar);
     ec_scalar(ec_scalar&& scalar);
-    ~ec_scalar() = default;
+    ec_scalar(uint64_t value);
 
     /// Operators.
-    ec_scalar& operator=(uint64_t value);
     ec_scalar& operator=(const ec_secret& secret);
     ec_scalar& operator=(const ec_scalar& scalar);
     ec_scalar& operator=(ec_scalar&& scalar);
+    ec_scalar& operator=(uint64_t value);
 
-    ec_scalar operator-() const;
+    ec_scalar operator-();
     ec_scalar& operator+=(const ec_scalar& scalar);
     ec_scalar& operator-=(const ec_scalar& scalar);
+    ec_scalar& operator*=(const ec_scalar& scalar);
 
     /// Cast operators.
     operator bool() const;
@@ -57,20 +58,18 @@ public:
     const ec_secret& secret() const;
 
 protected:
-    friend ec_scalar operator+(ec_scalar left, const ec_scalar& right);
-    friend ec_scalar operator-(ec_scalar left, const ec_scalar& right);
-    friend ec_scalar operator*(ec_scalar left, const ec_scalar& right);
+    friend ec_scalar operator+(const ec_scalar& left, const ec_scalar& right);
+    friend ec_scalar operator-(const ec_scalar& left, const ec_scalar& right);
+    friend ec_scalar operator*(const ec_scalar& left, const ec_scalar& right);
 
-    using ec_secret_uptr = std::unique_ptr<ec_secret>;
-
-    ec_secret_uptr secret_;
+    std::unique_ptr<ec_secret> secret_;
 };
 
 bool operator==(const ec_scalar& left, const ec_scalar& right);
 bool operator!=(const ec_scalar& left, const ec_scalar& right);
-ec_scalar operator+(ec_scalar left, const ec_scalar& right);
-ec_scalar operator-(ec_scalar left, const ec_scalar& right);
-ec_scalar operator*(ec_scalar left, const ec_scalar& right);
+ec_scalar operator+(const ec_scalar& left, const ec_scalar& right);
+ec_scalar operator-(const ec_scalar& left, const ec_scalar& right);
+ec_scalar operator*(const ec_scalar& left, const ec_scalar& right);
 
 } // namespace system
 } // namespace libbitcoin
