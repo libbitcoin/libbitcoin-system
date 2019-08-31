@@ -372,7 +372,7 @@ hash_digest block::hash() const
 size_t block::locator_size(size_t top)
 {
     // Set rounding behavior, not consensus-related, thread side effect :<.
-    std::fesetround(FE_UPWARD);
+    std::fesetround(FE_TONEAREST);
 
     const auto first_ten_or_top = std::min(size_t(10), top);
     const auto remaining = top - first_ten_or_top;
