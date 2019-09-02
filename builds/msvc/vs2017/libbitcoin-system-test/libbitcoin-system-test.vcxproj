@@ -101,6 +101,9 @@
       <ObjectFileName>$(IntDir)test_config_block.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\checkpoint.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\compact_filter.cpp">
+      <ObjectFileName>$(IntDir)test_config_compact_filter.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\endpoint.cpp" />
     <ClCompile Include="..\..\..\..\test\config\hash256.cpp" />
     <ClCompile Include="..\..\..\..\test\config\parameter.cpp" />

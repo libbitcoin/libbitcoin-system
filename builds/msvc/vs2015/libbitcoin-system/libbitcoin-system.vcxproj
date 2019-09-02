@@ -115,6 +115,9 @@
       <ObjectFileName>$(IntDir)src_config_block.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\checkpoint.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\compact_filter.cpp">
+      <ObjectFileName>$(IntDir)src_config_compact_filter.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\directory.cpp" />
     <ClCompile Include="..\..\..\..\src\config\endpoint.cpp" />
     <ClCompile Include="..\..\..\..\src\config\hash160.cpp" />
@@ -329,6 +332,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base64.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\checkpoint.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\compact_filter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\directory.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\endpoint.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\hash160.hpp" />

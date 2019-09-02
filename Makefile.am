@@ -62,6 +62,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/config/base64.cpp \
     src/config/block.cpp \
     src/config/checkpoint.cpp \
+    src/config/compact_filter.cpp \
     src/config/directory.cpp \
     src/config/endpoint.cpp \
     src/config/hash160.cpp \
@@ -295,6 +296,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/config/base58.cpp \
     test/config/block.cpp \
     test/config/checkpoint.cpp \
+    test/config/compact_filter.cpp \
     test/config/endpoint.cpp \
     test/config/hash256.cpp \
     test/config/parameter.cpp \
@@ -444,6 +446,7 @@ include_bitcoin_system_config_HEADERS = \
     include/bitcoin/system/config/base64.hpp \
     include/bitcoin/system/config/block.hpp \
     include/bitcoin/system/config/checkpoint.hpp \
+    include/bitcoin/system/config/compact_filter.hpp \
     include/bitcoin/system/config/directory.hpp \
     include/bitcoin/system/config/endpoint.hpp \
     include/bitcoin/system/config/hash160.hpp \

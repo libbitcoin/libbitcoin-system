@@ -47,6 +47,7 @@
 #include <bitcoin/system/config/base64.hpp>
 #include <bitcoin/system/config/block.hpp>
 #include <bitcoin/system/config/checkpoint.hpp>
+#include <bitcoin/system/config/compact_filter.hpp>
 #include <bitcoin/system/config/directory.hpp>
 #include <bitcoin/system/config/endpoint.hpp>
 #include <bitcoin/system/config/hash160.hpp>

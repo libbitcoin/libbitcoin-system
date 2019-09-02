@@ -102,6 +102,9 @@
     <ClCompile Include="..\..\..\..\test\config\checkpoint.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\config\compact_filter.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\endpoint.cpp">
       <Filter>src\config</Filter>
     </ClCompile>

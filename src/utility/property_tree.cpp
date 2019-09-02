@@ -439,7 +439,7 @@ ptree property_tree(const bitcoin_uri& uri)
 
 // compact_filter
 
-ptree property_list(const message::compact_filter& filter, bool json)
+ptree property_list(const message::compact_filter& filter, bool )
 {
     ptree tree;
     tree.put("filter_type", filter.filter_type());
