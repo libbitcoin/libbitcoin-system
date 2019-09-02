@@ -437,5 +437,69 @@ ptree property_tree(const bitcoin_uri& uri)
     return tree;
 }
 
+// compact_filter
+
+ptree property_list(const message::compact_filter& filter, bool json)
+{
+    ptree tree;
+    tree.put("filter_type", filter.filter_type());
+    tree.put("block_hash", hash256(filter.block_hash()));
+    tree.put("filter", base16(filter.filter()));
+
+    return tree;
+}
+
+ptree property_tree(const message::compact_filter& filter, bool json)
+{
+    ptree tree;
+    tree.add_child("compact_filter", property_list(filter, json));
+    return tree;
+}
+
+// compact_filter_checkpoint
+
+ptree property_list(const message::compact_filter_checkpoint& checkpoint,
+    bool json)
+{
+    ptree tree;
+    tree.put("filter_type", checkpoint.filter_type());
+    tree.put("stop_hash", hash256(checkpoint.stop_hash()));
+    tree.add_child("filter_headers", property_list(
+        checkpoint.filter_headers(), json));
+
+    return tree;
+}
+
+ptree property_tree(const message::compact_filter_checkpoint& checkpoint,
+    bool json)
+{
+    ptree tree;
+    tree.add_child("compact_filter_checkpoint", property_list(checkpoint, json));
+    return tree;
+}
+
+// compact_filter_headers
+
+ptree property_list(const message::compact_filter_headers& headers, bool json)
+{
+    ptree tree;
+    tree.put("filter_type", headers.filter_type());
+    tree.put("stop_hash", hash256(headers.stop_hash()));
+    tree.put("previous_filter_header", hash256(
+        headers.previous_filter_header()));
+
+    tree.add_child("filter_hashes", property_list(headers.filter_hashes(),
+        json));
+
+    return tree;
+}
+
+ptree property_tree(const message::compact_filter_headers& headers, bool json)
+{
+    ptree tree;
+    tree.add_child("compact_filter_headers", property_list(headers, json));
+    return tree;
+}
+
 } // namespace system
 } // namespace libbitcoin

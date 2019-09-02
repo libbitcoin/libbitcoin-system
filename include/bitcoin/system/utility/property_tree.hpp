@@ -30,6 +30,9 @@
 #include <bitcoin/system/config/input.hpp>
 #include <bitcoin/system/config/output.hpp>
 #include <bitcoin/system/config/transaction.hpp>
+#include <bitcoin/system/message/compact_filter.hpp>
+#include <bitcoin/system/message/compact_filter_checkpoint.hpp>
+#include <bitcoin/system/message/compact_filter_headers.hpp>
 #include <bitcoin/system/wallet/bitcoin_uri.hpp>
 #include <bitcoin/system/wallet/stealth_address.hpp>
 
@@ -312,6 +315,60 @@ BC_API pt::ptree property_list(const wallet::stealth_address& stealth,
  * @return                      A property tree.
  */
 BC_API pt::ptree property_tree(const wallet::stealth_address& stealth,
+    bool json);
+
+/**
+ * Generate a property list for a compact_filter.
+ * @param[in]  filter  The compact filter.
+ * @param[in]  json    Use json array formatting.
+ * @return             A property list.
+ */
+BC_API pt::ptree property_list(const message::compact_filter& filter,
+    bool json);
+
+/**
+ * Generate a property tree for a compact_filter.
+ * @param[in]  filter  The compact filter.
+ * @param[in]  json    Use json array formatting.
+ * @return             A property tree.
+ */
+BC_API pt::ptree property_tree(const message::compact_filter& filter,
+    bool json);
+
+/**
+ * Generate a property list for a compact_filter_checkpoint.
+ * @param[in]  checkpoint  The compact filter checkpoint.
+ * @param[in]  json        Use json array formatting.
+ * @return                 A property list.
+ */
+BC_API pt::ptree property_list(
+    const message::compact_filter_checkpoint& checkpoint, bool json);
+
+/**
+ * Generate a property tree for a compact_filter_checkpoint.
+ * @param[in]  checkpoint  The compact filter checkpoint.
+ * @param[in]  json        Use json array formatting.
+ * @return                 A property tree.
+ */
+BC_API pt::ptree property_tree(
+    const message::compact_filter_checkpoint& checkpoint, bool json);
+
+/**
+ * Generate a property list for a compact_filter_headers.
+ * @param[in]  headers  The compact filter headers.
+ * @param[in]  json     Use json array formatting.
+ * @return              A property list.
+ */
+BC_API pt::ptree property_list(const message::compact_filter_headers& headers,
+    bool json);
+
+/**
+ * Generate a property tree for a compact_filter_headers.
+ * @param[in]  headers  The compact filter headers.
+ * @param[in]  json     Use json array formatting.
+ * @return              A property tree.
+ */
+BC_API pt::ptree property_tree(const message::compact_filter_headers& headers,
     bool json);
 
 } // namespace system
