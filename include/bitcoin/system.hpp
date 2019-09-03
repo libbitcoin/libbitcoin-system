@@ -22,7 +22,6 @@
 #include <bitcoin/system/handlers.hpp>
 #include <bitcoin/system/settings.hpp>
 #include <bitcoin/system/version.hpp>
-#include <bitcoin/system/chain/basic_compact_filter.hpp>
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/compact.hpp>
@@ -30,6 +29,7 @@
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/input_point.hpp>
+#include <bitcoin/system/chain/neutrino_filter.hpp>
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/output_point.hpp>
 #include <bitcoin/system/chain/payment_record.hpp>

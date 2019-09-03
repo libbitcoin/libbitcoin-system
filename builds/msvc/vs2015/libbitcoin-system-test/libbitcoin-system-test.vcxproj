@@ -70,7 +70,6 @@
     <Import Project="$(ProjectDir)$(ProjectName).props" />
   </ImportGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\test\chain\basic_compact_filter.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\block.cpp">
       <ObjectFileName>$(IntDir)test_chain_block.obj</ObjectFileName>
     </ClCompile>
@@ -83,6 +82,7 @@
       <ObjectFileName>$(IntDir)test_chain_header.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\input.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\neutrino_filter.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\output.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\output_point.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\payment_record.cpp" />

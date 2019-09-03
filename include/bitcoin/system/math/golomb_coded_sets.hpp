@@ -34,7 +34,7 @@
 
 namespace libbitcoin {
 namespace system {
-namespace gcs {
+namespace golomb {
 
     // Golomb-coded set construction
     // ------------------------------------------------------------------------
@@ -112,7 +112,7 @@ namespace gcs {
         uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
         uint64_t target_false_positive_rate);
 
-} // namespace gcs
+} // namespace golomb
 } // namespace system
 } // namespace libbitcoin
 

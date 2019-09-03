@@ -30,7 +30,7 @@
 
 namespace libbitcoin {
 namespace system {
-namespace gcs {
+namespace golomb {
 
 void golomb_encode(bit_writer& sink, uint64_t value, uint8_t modulo_exponent)
 {
@@ -306,6 +306,6 @@ bool match(const data_stack& targets, reader& compressed_set,
     return false;
 }
 
-} // namespace gcs
+} // namespace golomb
 } // namespace system
 } // namespace libbitcoin

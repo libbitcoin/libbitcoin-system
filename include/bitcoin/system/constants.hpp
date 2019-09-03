@@ -163,7 +163,7 @@ BC_CONSTEXPR size_t max_witness_program = 40;
 
 // Golomb-Rice related values (bip158).
 //-----------------------------------------------------------------------------
-BC_CONSTEXPR uint8_t basic_filter_type = 0x00;
+BC_CONSTEXPR uint8_t neutrino_filter_type = 0x00;
 BC_CONSTEXPR uint64_t golomb_target_false_positive_rate = 784931;   // M
 BC_CONSTEXPR uint64_t golomb_bit_parameter = 19;                    // P
 

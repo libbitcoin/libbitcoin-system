@@ -76,7 +76,6 @@
     <ClCompile Include="$(VC_CTP_Nov2013_InstallDir)\crt\src\threadsafestatics.cpp">
       <ExcludedFromBuild Condition="$(PlatformToolset) != 'CTP_Nov2013'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\basic_compact_filter.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\block.cpp">
       <ObjectFileName>$(IntDir)src_chain_block.obj</ObjectFileName>
     </ClCompile>
@@ -91,6 +90,7 @@
     <ClCompile Include="..\..\..\..\src\chain\input.cpp">
       <ObjectFileName>$(IntDir)src_chain_input.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\neutrino_filter.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\output.cpp">
       <ObjectFileName>$(IntDir)src_chain_output.obj</ObjectFileName>
     </ClCompile>
@@ -308,7 +308,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\bitcoin\system.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\basic_compact_filter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\chain_state.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\compact.hpp" />
@@ -316,6 +315,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\header.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\input.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\input_point.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\neutrino_filter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\output.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\output_point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\payment_record.hpp" />

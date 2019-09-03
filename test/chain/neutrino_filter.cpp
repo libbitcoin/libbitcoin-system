@@ -38,22 +38,22 @@ public:
     data_chunk script;
 };
 
-void print_metadata(chain::block& block)
-{
-    for (const auto& tx: block.transactions())
-    {
-        std::cout << "tx: " << tx.hash() << "\t\t\tis_coinbase: " << tx.is_coinbase() << std::endl;
-        for (size_t index = 0; index < tx.inputs().size(); index++)
-        {
-            auto& output = tx.inputs()[index].previous_output().metadata.cache;
-            data_chunk script = output.script().to_data(false);
-            std::cout << "  input: " << index << std::endl;
-            std::cout << "    populated : " << (output.value() != chain::output::not_found) << std::endl;
-            std::cout << "    script    : " << script << std::endl;
-
-        }
-    }
-}
+//void print_metadata(chain::block& block)
+//{
+//    for (const auto& tx: block.transactions())
+//    {
+//        std::cout << "tx: " << tx.hash() << "\t\t\tis_coinbase: " << tx.is_coinbase() << std::endl;
+//        for (size_t index = 0; index < tx.inputs().size(); index++)
+//        {
+//            auto& output = tx.inputs()[index].previous_output().metadata.cache;
+//            data_chunk script = output.script().to_data(false);
+//            std::cout << "  input: " << index << std::endl;
+//            std::cout << "    populated : " << (output.value() != chain::output::not_found) << std::endl;
+//            std::cout << "    script    : " << script << std::endl;
+//
+//        }
+//    }
+//}
 
 bool add_metadata(chain::block& block, prevout_data::list& metadata)
 {
@@ -82,351 +82,12 @@ bool add_metadata(chain::block& block, prevout_data::list& metadata)
     return result;
 }
 
-BOOST_AUTO_TEST_SUITE(chain_basic_compact_filter_tests)
+BOOST_AUTO_TEST_SUITE(chain_neutrino_filter_tests)
 
-BOOST_AUTO_TEST_CASE(basic_compact_filter__constructor_1__always__invalid)
+BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_0__success)
 {
-    chain::basic_compact_filter instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__constructor_2__always__equals_params)
-{
-    const uint8_t filter_type = bc::basic_filter_type;
-    const hash_digest block_hash = hash_literal(
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
-
-    chain::basic_compact_filter instance(block_hash, filter);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(filter_type == instance.filter_type());
-    BOOST_REQUIRE(block_hash == instance.block_hash());
-    BOOST_REQUIRE(filter == instance.filter());
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__constructor_3__always__equals_params)
-{
-    const uint8_t filter_type = bc::basic_filter_type;
-    const hash_digest block_hash = hash_literal(
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    hash_digest dup_hash = block_hash;
-    const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
-    data_chunk dup_filter = filter;
-
-    chain::basic_compact_filter instance(std::move(dup_hash),
-        std::move(dup_filter));
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(filter_type == instance.filter_type());
-    BOOST_REQUIRE(block_hash == instance.block_hash());
-    BOOST_REQUIRE(filter == instance.filter());
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__constructor_4__always__equals_params)
-{
-    const uint8_t filter_type = bc::basic_filter_type;
-    const hash_digest block_hash = hash_literal(
-        "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const data_chunk filter = to_chunk(base16_literal("fedcba9876543210"));
-
-    chain::basic_compact_filter value(block_hash, filter);
-
-    chain::basic_compact_filter instance(value);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(filter_type == instance.filter_type());
-    BOOST_REQUIRE(block_hash == instance.block_hash());
-    BOOST_REQUIRE(filter == instance.filter());
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__constructor_5__always__equals_params)
-{
-    const uint8_t filter_type = bc::basic_filter_type;
-    const hash_digest block_hash = hash_literal(
-        "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const data_chunk filter = to_chunk(base16_literal("fedcba9876543210"));
-
-    chain::basic_compact_filter value(block_hash, filter);
-
-    chain::basic_compact_filter instance(std::move(value));
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(filter_type == instance.filter_type());
-    BOOST_REQUIRE(block_hash == instance.block_hash());
-    BOOST_REQUIRE(filter == instance.filter());
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__constructor_6__always__equals_params)
-{
-    const uint8_t filter_type = bc::basic_filter_type;
-    const hash_digest block_hash = hash_literal(
-        "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const data_chunk filter = to_chunk(base16_literal("fedcba9876543210"));
-
-    chain::compact_filter value(filter_type, block_hash, filter);
-
-    chain::basic_compact_filter instance(value);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(filter_type == instance.filter_type());
-    BOOST_REQUIRE(block_hash == instance.block_hash());
-    BOOST_REQUIRE(filter == instance.filter());
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__constructor_7__always__equals_params)
-{
-    const uint8_t filter_type = bc::basic_filter_type;
-    const hash_digest block_hash = hash_literal(
-        "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const data_chunk filter = to_chunk(base16_literal("fedcba9876543210"));
-
-    chain::compact_filter value(filter_type, block_hash, filter);
-
-    chain::basic_compact_filter instance(std::move(value));
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(filter_type == instance.filter_type());
-    BOOST_REQUIRE(block_hash == instance.block_hash());
-    BOOST_REQUIRE(filter == instance.filter());
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__from_data__insufficient_bytes__failure)
-{
-    const data_chunk raw{ 0xab, 0xcd };
-    chain::basic_compact_filter instance;
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__factory_1__valid_input__success)
-{
-    const auto raw = to_chunk(base16_literal(
-        "000000006fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d619000022"
-        "00003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"));
-
-    chain::basic_compact_filter expected;
-    expected.from_data(raw);
-    const auto data = expected.to_data();
-    BOOST_REQUIRE(raw == data);
-
-    const auto result = chain::basic_compact_filter::factory(data);
-
-    BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__factory_1__invalid_input__is_not_valid)
-{
-    const auto raw = to_chunk(base16_literal(
-        "0a0000006fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d619000022"
-        "00003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"));
-
-    chain::basic_compact_filter expected;
-    expected.from_data(raw);
-    const auto data = expected.to_data();
-    BOOST_REQUIRE(raw == data);
-
-    const auto result = chain::basic_compact_filter::factory(data);
-
-    BOOST_REQUIRE(!result.is_valid());
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__factory_2__valid_input__success)
-{
-    const auto raw = to_chunk(base16_literal(
-        "000000006fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d619000022"
-        "00003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"));
-
-    chain::basic_compact_filter expected;
-    expected.from_data(raw);
-    const auto data = expected.to_data();
-    BOOST_REQUIRE(raw == data);
-
-    data_source istream(data);
-    auto result = chain::basic_compact_filter::factory(istream);
-
-    BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__factory_2__invalid_input__is_not_valid)
-{
-    const auto raw = to_chunk(base16_literal(
-        "0a0000006fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d619000022"
-        "00003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"));
-
-    chain::basic_compact_filter expected;
-    expected.from_data(raw);
-    const auto data = expected.to_data();
-    BOOST_REQUIRE(raw == data);
-
-    data_source istream(data);
-    auto result = chain::basic_compact_filter::factory(istream);
-
-    BOOST_REQUIRE(!result.is_valid());
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__factory_3__valid_input__success)
-{
-    const auto raw = to_chunk(base16_literal(
-        "000000006fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d619000022"
-        "00003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"));
-
-    chain::basic_compact_filter expected;
-    expected.from_data(raw);
-    const auto data = expected.to_data();
-    BOOST_REQUIRE(raw == data);
-
-    data_source istream(data);
-    istream_reader source(istream);
-    const auto result = chain::basic_compact_filter::factory(source);
-
-    BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__factory_3__invalid_input__is_not_valid)
-{
-    const auto raw = to_chunk(base16_literal(
-        "0a0000006fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d619000022"
-        "00003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"));
-
-    chain::basic_compact_filter expected;
-    expected.from_data(raw);
-    const auto data = expected.to_data();
-    BOOST_REQUIRE(raw == data);
-
-    data_source istream(data);
-    istream_reader source(istream);
-    const auto result = chain::basic_compact_filter::factory(source);
-
-    BOOST_REQUIRE(!result.is_valid());
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__operator_assign_equals_1__always__matches_equivalent)
-{
-    const uint8_t filter_type = bc::basic_filter_type;
-    const hash_digest block_hash = hash_literal(
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
-
-    chain::basic_compact_filter value(block_hash, filter);
-    BOOST_REQUIRE(value.is_valid());
-    chain::basic_compact_filter instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
-    instance = std::move(value);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(filter_type == instance.filter_type());
-    BOOST_REQUIRE(block_hash == instance.block_hash());
-    BOOST_REQUIRE(filter == instance.filter());
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__operator_assign_equals_2__always__matches_equivalent)
-{
-    const uint8_t filter_type = bc::basic_filter_type;
-    const hash_digest block_hash = hash_literal(
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
-
-    chain::compact_filter value(filter_type, block_hash, filter);
-    BOOST_REQUIRE(value.is_valid());
-    chain::basic_compact_filter instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
-    instance = std::move(value);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(filter_type == instance.filter_type());
-    BOOST_REQUIRE(block_hash == instance.block_hash());
-    BOOST_REQUIRE(filter == instance.filter());
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__operator_boolean_equals_1__duplicates__returns_true)
-{
-    const chain::basic_compact_filter expected(
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        to_chunk(base16_literal("0123456789abcdef")));
-
-    chain::basic_compact_filter instance(expected);
-    BOOST_REQUIRE(instance == expected);
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__operator_boolean_equals_1__differs__returns_false)
-{
-    const chain::basic_compact_filter expected(
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        to_chunk(base16_literal("0123456789abcdef")));
-
-    chain::basic_compact_filter instance;
-    BOOST_REQUIRE_EQUAL(false, instance == expected);
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__operator_boolean_equals_2__duplicates__returns_true)
-{
-    const chain::compact_filter expected(
-        bc::basic_filter_type,
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        to_chunk(base16_literal("0123456789abcdef")));
-
-    chain::basic_compact_filter instance(expected);
-    BOOST_REQUIRE(instance == expected);
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__operator_boolean_equals_2__differs__returns_false)
-{
-    const chain::compact_filter expected(
-        bc::basic_filter_type,
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        to_chunk(base16_literal("0123456789abcdef")));
-
-    chain::basic_compact_filter instance;
-    BOOST_REQUIRE_EQUAL(false, instance == expected);
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__operator_boolean_not_equals_1__duplicates__returns_false)
-{
-    const chain::basic_compact_filter expected(
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        to_chunk(base16_literal("0123456789abcdef")));
-
-    chain::basic_compact_filter instance(expected);
-    BOOST_REQUIRE_EQUAL(false, instance != expected);
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__operator_boolean_not_equals_1__differs__returns_true)
-{
-    const chain::basic_compact_filter expected(
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        to_chunk(base16_literal("0123456789abcdef")));
-
-    chain::basic_compact_filter instance;
-    BOOST_REQUIRE(instance != expected);
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__operator_boolean_not_equals_2__duplicates__returns_false)
-{
-    const chain::compact_filter expected(
-        bc::basic_filter_type,
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        to_chunk(base16_literal("0123456789abcdef")));
-
-    chain::basic_compact_filter instance(expected);
-    BOOST_REQUIRE_EQUAL(false, instance != expected);
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__operator_boolean_not_equals_2__differs__returns_true)
-{
-    const chain::compact_filter expected(
-        bc::basic_filter_type,
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        to_chunk(base16_literal("0123456789abcdef")));
-
-    chain::basic_compact_filter instance;
-    BOOST_REQUIRE(instance != expected);
-}
-
-BOOST_AUTO_TEST_CASE(basic_compact_filter__populate__block_0__success)
-{
-    const auto expected_block_hash = hash_literal(
-        "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943");
+//    const auto expected_block_hash = hash_literal(
+//        "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943");
 
     const auto expected_filter = to_chunk(base16_literal("019dfca8"));
 
@@ -448,16 +109,14 @@ BOOST_AUTO_TEST_CASE(basic_compact_filter__populate__block_0__success)
 
     BOOST_REQUIRE(add_metadata(validated_block, metadata));
 
-    chain::basic_compact_filter filter;
-    BOOST_REQUIRE(filter.populate(validated_block));
-    BOOST_REQUIRE_EQUAL(filter.block_hash(), expected_block_hash);
-    BOOST_REQUIRE_EQUAL(filter.filter(), expected_filter);
+    auto result = chain::compute_neutrino_filter(validated_block);
+    BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(basic_compact_filter__populate__block_2__success)
+BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_2__success)
 {
-    const auto expected_block_hash = hash_literal(
-        "000000006c02c8ea6e4ff69651f7fcde348fb9d557a06e6957b65552002a7820");
+//    const auto expected_block_hash = hash_literal(
+//        "000000006c02c8ea6e4ff69651f7fcde348fb9d557a06e6957b65552002a7820");
 
     const auto expected_filter = to_chunk(base16_literal("0174a170"));
 
@@ -476,16 +135,14 @@ BOOST_AUTO_TEST_CASE(basic_compact_filter__populate__block_2__success)
 
     BOOST_REQUIRE(add_metadata(validated_block, metadata));
 
-    chain::basic_compact_filter filter;
-    BOOST_REQUIRE(filter.populate(validated_block));
-    BOOST_REQUIRE_EQUAL(filter.block_hash(), expected_block_hash);
-    BOOST_REQUIRE_EQUAL(filter.filter(), expected_filter);
+    auto result = chain::compute_neutrino_filter(validated_block);
+    BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(basic_compact_filter__populate__block_3__success)
+BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_3__success)
 {
-    const auto expected_block_hash = hash_literal(
-        "000000008b896e272758da5297bcd98fdc6d97c9b765ecec401e286dc1fdbe10");
+//    const auto expected_block_hash = hash_literal(
+//        "000000008b896e272758da5297bcd98fdc6d97c9b765ecec401e286dc1fdbe10");
 
     const auto expected_filter = to_chunk(base16_literal("016cf7a0"));
 
@@ -504,16 +161,14 @@ BOOST_AUTO_TEST_CASE(basic_compact_filter__populate__block_3__success)
 
     BOOST_REQUIRE(add_metadata(validated_block, metadata));
 
-    chain::basic_compact_filter filter;
-    BOOST_REQUIRE(filter.populate(validated_block));
-    BOOST_REQUIRE_EQUAL(filter.block_hash(), expected_block_hash);
-    BOOST_REQUIRE_EQUAL(filter.filter(), expected_filter);
+    auto result = chain::compute_neutrino_filter(validated_block);
+    BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(basic_compact_filter__populate__block_15007__success)
+BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_15007__success)
 {
-    const auto expected_block_hash = hash_literal(
-        "0000000038c44c703bae0f98cdd6bf30922326340a5996cc692aaae8bacf47ad");
+//    const auto expected_block_hash = hash_literal(
+//        "0000000038c44c703bae0f98cdd6bf30922326340a5996cc692aaae8bacf47ad");
 
     const auto expected_filter = to_chunk(base16_literal("013c3710"));
 
@@ -532,16 +187,14 @@ BOOST_AUTO_TEST_CASE(basic_compact_filter__populate__block_15007__success)
 
     BOOST_REQUIRE(add_metadata(validated_block, metadata));
 
-    chain::basic_compact_filter filter;
-    BOOST_REQUIRE(filter.populate(validated_block));
-    BOOST_REQUIRE_EQUAL(filter.block_hash(), expected_block_hash);
-    BOOST_REQUIRE_EQUAL(filter.filter(), expected_filter);
+    auto result = chain::compute_neutrino_filter(validated_block);
+    BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(basic_compact_filter__populate__block_49291__success)
+BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_49291__success)
 {
-    const auto expected_block_hash = hash_literal(
-        "0000000018b07dca1b28b4b5a119f6d6e71698ce1ed96f143f54179ce177a19c");
+//    const auto expected_block_hash = hash_literal(
+//        "0000000018b07dca1b28b4b5a119f6d6e71698ce1ed96f143f54179ce177a19c");
 
     const auto expected_filter = to_chunk(base16_literal(
         "0afbc2920af1b027f31f87b592276eb4c32094bb4d3697021b4c6380"));
@@ -667,16 +320,14 @@ BOOST_AUTO_TEST_CASE(basic_compact_filter__populate__block_49291__success)
 
     BOOST_REQUIRE(add_metadata(validated_block, metadata));
 
-    chain::basic_compact_filter filter;
-    BOOST_REQUIRE(filter.populate(validated_block));
-    BOOST_REQUIRE_EQUAL(filter.block_hash(), expected_block_hash);
-    BOOST_REQUIRE_EQUAL(filter.filter(), expected_filter);
+    auto result = chain::compute_neutrino_filter(validated_block);
+    BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(basic_compact_filter__populate__block_180480__success)
+BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_180480__success)
 {
-    const auto expected_block_hash = hash_literal(
-        "00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a");
+//    const auto expected_block_hash = hash_literal(
+//        "00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a");
 
     const auto expected_filter = to_chunk(base16_literal(
         "0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026"));
@@ -795,16 +446,14 @@ BOOST_AUTO_TEST_CASE(basic_compact_filter__populate__block_180480__success)
 
     BOOST_REQUIRE(add_metadata(validated_block, metadata));
 
-    chain::basic_compact_filter filter;
-    BOOST_REQUIRE(filter.populate(validated_block));
-    BOOST_REQUIRE_EQUAL(filter.block_hash(), expected_block_hash);
-    BOOST_REQUIRE_EQUAL(filter.filter(), expected_filter);
+    auto result = chain::compute_neutrino_filter(validated_block);
+    BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(basic_compact_filter__populate__block_926485__success)
+BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_926485__success)
 {
-    const auto expected_block_hash = hash_literal(
-        "000000000000015d6077a411a8f5cc95caf775ccf11c54e27df75ce58d187313");
+//    const auto expected_block_hash = hash_literal(
+//        "000000000000015d6077a411a8f5cc95caf775ccf11c54e27df75ce58d187313");
 
     const auto expected_filter = to_chunk(base16_literal(
         "09027acea61b6cc3fb33f5d52f7d088a6b2f75d234e89ca800"));
@@ -942,16 +591,14 @@ BOOST_AUTO_TEST_CASE(basic_compact_filter__populate__block_926485__success)
 
     BOOST_REQUIRE(add_metadata(validated_block, metadata));
 
-    chain::basic_compact_filter filter;
-    BOOST_REQUIRE(filter.populate(validated_block));
-    BOOST_REQUIRE_EQUAL(filter.block_hash(), expected_block_hash);
-    BOOST_REQUIRE_EQUAL(filter.filter(), expected_filter);
+    auto result = chain::compute_neutrino_filter(validated_block);
+    BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(basic_compact_filter__populate__block_987876__success)
+BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_987876__success)
 {
-    const auto expected_block_hash = hash_literal(
-        "0000000000000c00901f2049055e2a437c819d79a3d54fd63e6af796cd7b8a79");
+//    const auto expected_block_hash = hash_literal(
+//        "0000000000000c00901f2049055e2a437c819d79a3d54fd63e6af796cd7b8a79");
 
     const auto expected_filter = to_chunk(base16_literal("010c0b40"));
 
@@ -970,16 +617,14 @@ BOOST_AUTO_TEST_CASE(basic_compact_filter__populate__block_987876__success)
 
     BOOST_REQUIRE(add_metadata(validated_block, metadata));
 
-    chain::basic_compact_filter filter;
-    BOOST_REQUIRE(filter.populate(validated_block));
-    BOOST_REQUIRE_EQUAL(filter.block_hash(), expected_block_hash);
-    BOOST_REQUIRE_EQUAL(filter.filter(), expected_filter);
+    auto result = chain::compute_neutrino_filter(validated_block);
+    BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(basic_compact_filter__populate__block_1263442__success)
+BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_1263442__success)
 {
-    const auto expected_block_hash = hash_literal(
-        "000000006f27ddfe1dd680044a34548f41bed47eba9e6f0b310da21423bc5f33");
+//    const auto expected_block_hash = hash_literal(
+//        "000000006f27ddfe1dd680044a34548f41bed47eba9e6f0b310da21423bc5f33");
 
     const auto expected_filter = to_chunk(base16_literal("0385acb4f0fe889ef0"));
 
@@ -1019,16 +664,14 @@ BOOST_AUTO_TEST_CASE(basic_compact_filter__populate__block_1263442__success)
 
     BOOST_REQUIRE(add_metadata(validated_block, metadata));
 
-    chain::basic_compact_filter filter;
-    BOOST_REQUIRE(filter.populate(validated_block));
-    BOOST_REQUIRE_EQUAL(filter.block_hash(), expected_block_hash);
-    BOOST_REQUIRE_EQUAL(filter.filter(), expected_filter);
+    auto result = chain::compute_neutrino_filter(validated_block);
+    BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(basic_compact_filter__populate__block_1414221__success)
+BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_1414221__success)
 {
-    const auto expected_block_hash = hash_literal(
-        "0000000000000027b2b3b3381f114f674f481544ff2be37ae3788d7e078383b1");
+//    const auto expected_block_hash = hash_literal(
+//        "0000000000000027b2b3b3381f114f674f481544ff2be37ae3788d7e078383b1");
 
     const auto expected_filter = to_chunk(base16_literal("00"));
 
@@ -1046,15 +689,14 @@ BOOST_AUTO_TEST_CASE(basic_compact_filter__populate__block_1414221__success)
 
     BOOST_REQUIRE(add_metadata(validated_block, metadata));
 
-    chain::basic_compact_filter filter;
-    BOOST_REQUIRE(filter.populate(validated_block));
-    BOOST_REQUIRE_EQUAL(filter.block_hash(), expected_block_hash);
-    BOOST_REQUIRE_EQUAL(filter.filter(), expected_filter);
+    auto result = chain::compute_neutrino_filter(validated_block);
+    BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(basic_compact_filter__match_1__input_prevout__return_true)
+BOOST_AUTO_TEST_CASE(neutrino_filter__match_1__input_prevout__return_true)
 {
-    const chain::basic_compact_filter basic_filter(
+    const chain::compact_filter filter(
+        bc::neutrino_filter_type,
         hash_literal(
             "00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
         to_chunk(base16_literal(
@@ -1064,12 +706,13 @@ BOOST_AUTO_TEST_CASE(basic_compact_filter__match_1__input_prevout__return_true)
         base16_literal("001fa7459a6cfc64bdc178ba7e7a21603bb2568f"),
         wallet::payment_address::testnet_p2kh);
 
-    BOOST_REQUIRE_EQUAL(true, basic_filter.match(address));
+    BOOST_REQUIRE_EQUAL(true, match_neutrino_filter(filter, address));
 }
 
-BOOST_AUTO_TEST_CASE(basic_compact_filter__match_1__unrelated_address__return_false)
+BOOST_AUTO_TEST_CASE(match_neutrino_filter_1__unrelated_address__return_false)
 {
-    const chain::basic_compact_filter basic_filter(
+    const chain::compact_filter filter(
+        bc::neutrino_filter_type,
         hash_literal(
             "00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
         to_chunk(base16_literal(
@@ -1079,12 +722,13 @@ BOOST_AUTO_TEST_CASE(basic_compact_filter__match_1__unrelated_address__return_fa
         base16_literal("001fa005900cf004b00100ba700021000b00500f"),
         wallet::payment_address::testnet_p2kh);
 
-    BOOST_REQUIRE_EQUAL(false, basic_filter.match(address));
+    BOOST_REQUIRE_EQUAL(false, match_neutrino_filter(filter, address));
 }
 
-BOOST_AUTO_TEST_CASE(basic_compact_filter__match_2__input_prevout__return_true)
+BOOST_AUTO_TEST_CASE(match_neutrino_filter_2__input_prevout__return_true)
 {
-    const chain::basic_compact_filter basic_filter(
+    const chain::compact_filter filter(
+        bc::neutrino_filter_type,
         hash_literal(
             "00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
         to_chunk(base16_literal(
@@ -1101,12 +745,13 @@ BOOST_AUTO_TEST_CASE(basic_compact_filter__match_2__input_prevout__return_true)
         }
     };
 
-    BOOST_REQUIRE_EQUAL(true, basic_filter.match(addresses));
+    BOOST_REQUIRE_EQUAL(true, match_neutrino_filter(filter, addresses));
 }
 
-BOOST_AUTO_TEST_CASE(basic_compact_filter__match_2__unrelated_address__return_false)
+BOOST_AUTO_TEST_CASE(match_neutrino_filter_2__unrelated_address__return_false)
 {
-    const chain::basic_compact_filter basic_filter(
+    const chain::compact_filter filter(
+        bc::neutrino_filter_type,
         hash_literal(
             "00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
         to_chunk(base16_literal(
@@ -1119,7 +764,7 @@ BOOST_AUTO_TEST_CASE(basic_compact_filter__match_2__unrelated_address__return_fa
         }
     };
 
-    BOOST_REQUIRE_EQUAL(false, basic_filter.match(addresses));
+    BOOST_REQUIRE_EQUAL(false, match_neutrino_filter(filter, addresses));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

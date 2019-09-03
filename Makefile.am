@@ -38,13 +38,13 @@ src_libbitcoin_system_la_LIBADD = ${boost_chrono_LIBS} ${boost_date_time_LIBS} $
 src_libbitcoin_system_la_SOURCES = \
     src/error.cpp \
     src/settings.cpp \
-    src/chain/basic_compact_filter.cpp \
     src/chain/block.cpp \
     src/chain/chain_state.cpp \
     src/chain/compact.cpp \
     src/chain/compact_filter.cpp \
     src/chain/header.cpp \
     src/chain/input.cpp \
+    src/chain/neutrino_filter.cpp \
     src/chain/output.cpp \
     src/chain/output_point.cpp \
     src/chain/payment_record.cpp \
@@ -274,13 +274,13 @@ test_libbitcoin_system_test_SOURCES = \
     test/overloads.cpp \
     test/overloads.hpp \
     test/settings.cpp \
-    test/chain/basic_compact_filter.cpp \
     test/chain/block.cpp \
     test/chain/chain_state.cpp \
     test/chain/compact.cpp \
     test/chain/compact_filter.cpp \
     test/chain/header.cpp \
     test/chain/input.cpp \
+    test/chain/neutrino_filter.cpp \
     test/chain/output.cpp \
     test/chain/output_point.cpp \
     test/chain/payment_record.cpp \
@@ -418,7 +418,6 @@ include_bitcoin_system_HEADERS = \
 
 include_bitcoin_system_chaindir = ${includedir}/bitcoin/system/chain
 include_bitcoin_system_chain_HEADERS = \
-    include/bitcoin/system/chain/basic_compact_filter.hpp \
     include/bitcoin/system/chain/block.hpp \
     include/bitcoin/system/chain/chain_state.hpp \
     include/bitcoin/system/chain/compact.hpp \
@@ -426,6 +425,7 @@ include_bitcoin_system_chain_HEADERS = \
     include/bitcoin/system/chain/header.hpp \
     include/bitcoin/system/chain/input.hpp \
     include/bitcoin/system/chain/input_point.hpp \
+    include/bitcoin/system/chain/neutrino_filter.hpp \
     include/bitcoin/system/chain/output.hpp \
     include/bitcoin/system/chain/output_point.hpp \
     include/bitcoin/system/chain/payment_record.hpp \
