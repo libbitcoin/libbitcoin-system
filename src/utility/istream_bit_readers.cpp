@@ -131,7 +131,7 @@ uint64_t istream_bit_reader::read_variable_bits_big_endian(
 {
     // TODO: should be an exception
     auto remaining_bits = std::min(static_cast<uint64_t>(least_significant_bits),
-        (byte_bits * sizeof(uint64_t)));
+        static_cast<uint64_t>(byte_bits * sizeof(uint64_t)));
 
     uint64_t result = 0;
 
