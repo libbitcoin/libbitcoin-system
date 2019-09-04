@@ -78,16 +78,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\chain_state.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\compact.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\compact_filter.cpp">
-      <ObjectFileName>$(IntDir)src_chain_compact_filter.obj</ObjectFileName>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\header.cpp">
       <ObjectFileName>$(IntDir)src_chain_header.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\input.cpp">
       <ObjectFileName>$(IntDir)src_chain_input.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\neutrino_filter.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\output.cpp">
       <ObjectFileName>$(IntDir)src_chain_output.obj</ObjectFileName>
     </ClCompile>
@@ -250,6 +246,7 @@
     <ClCompile Include="..\..\..\..\src\utility\istream_bit_readers.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\istream_reader.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\monitor.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\neutrino_filter.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\ostream_bit_writer.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\ostream_writer.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\png.cpp" />
@@ -308,11 +305,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\chain_state.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\compact.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\compact_filter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\header.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\input.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\input_point.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\neutrino_filter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\output.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\output_point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\payment_record.hpp" />
@@ -470,6 +465,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\istream_bit_reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\istream_reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\monitor.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\neutrino_filter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\noncopyable.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\ostream_bit_writer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\ostream_writer.hpp" />

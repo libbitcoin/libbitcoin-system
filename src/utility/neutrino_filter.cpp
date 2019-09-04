@@ -19,7 +19,7 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#include <bitcoin/system/chain/neutrino_filter.hpp>
+#include <bitcoin/system/utility/neutrino_filter.hpp>
 
 //#include <bitcoin/system/machine/opcode.hpp>
 #include <bitcoin/system/math/golomb_coded_sets.hpp>
@@ -30,9 +30,9 @@
 
 namespace libbitcoin {
 namespace system {
-namespace chain {
+namespace neutrino {
 
-data_chunk compute_neutrino_filter(const block& validated_block)
+data_chunk compute_filter(const chain::block& validated_block)
 {
     bool incomplete_data = false;
     const auto hash = validated_block.hash();
@@ -47,7 +47,7 @@ data_chunk compute_neutrino_filter(const block& validated_block)
             for (const auto input : tx.inputs())
             {
                 const auto prevout = input.previous_output();
-                if (prevout.metadata.cache.value() == output::not_found)
+                if (prevout.metadata.cache.value() == chain::output::not_found)
                 {
                     incomplete_data = true;
                     break;
@@ -97,8 +97,23 @@ data_chunk compute_neutrino_filter(const block& validated_block)
     return filter;
 }
 
-bool match_neutrino_filter(const compact_filter& filter,
-    const script& script)
+hash_digest compute_filter_header(const hash_digest& previous_block_hash,
+    const data_chunk& filter)
+{
+    data_chunk data;
+
+        {
+            data_sink ostream(data);
+            ostream_writer sink(ostream);
+            sink.write_hash(bitcoin_hash(filter));
+            sink.write_hash(previous_block_hash);
+        }
+
+        return bitcoin_hash(data);
+}
+
+bool match_filter(const message::compact_filter& filter,
+    const chain::script& script)
 {
     bool result = false;
 
@@ -125,8 +140,8 @@ bool match_neutrino_filter(const compact_filter& filter,
     return result;
 }
 
-bool match_neutrino_filter(const compact_filter& filter,
-    const script::list& scripts)
+bool match_filter(const message::compact_filter& filter,
+    const chain::script::list& scripts)
 {
     bool result = false;
 
@@ -156,27 +171,27 @@ bool match_neutrino_filter(const compact_filter& filter,
     return result;
 }
 
-bool match_neutrino_filter(const compact_filter& filter,
+bool match_filter(const message::compact_filter& filter,
     const wallet::payment_address& address)
 {
     if (filter.filter_type() != neutrino_filter_type)
         return false;
 
-    return match_neutrino_filter(filter, address.output_script());
+    return match_filter(filter, address.output_script());
 }
 
-bool match_neutrino_filter(const compact_filter& filter,
+bool match_filter(const message::compact_filter& filter,
     const wallet::payment_address::list& addresses)
 {
     if (filter.filter_type() != neutrino_filter_type)
         return false;
 
-    script::list scripts;
+    chain::script::list scripts;
 
     for (auto address : addresses)
         scripts.emplace_back(address.output_script());
 
-    return match_neutrino_filter(filter, scripts);
+    return match_filter(filter, scripts);
 }
 
 } // namespace chain

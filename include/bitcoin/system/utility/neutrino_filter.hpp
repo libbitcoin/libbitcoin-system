@@ -19,14 +19,15 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#ifndef LIBBITCOIN_SYSTEM_CHAIN_NEUTRINO_FILTER_HPP
-#define LIBBITCOIN_SYSTEM_CHAIN_NEUTRINO_FILTER_HPP
+#ifndef LIBBITCOIN_SYSTEM_UTILITY_NEUTRINO_FILTER_HPP
+#define LIBBITCOIN_SYSTEM_UTILITY_NEUTRINO_FILTER_HPP
 
 #include <istream>
 #include <memory>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/chain/block.hpp>
-#include <bitcoin/system/chain/compact_filter.hpp>
+#include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/message/compact_filter.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/reader.hpp>
 #include <bitcoin/system/utility/writer.hpp>
@@ -34,23 +35,26 @@
 
 namespace libbitcoin {
 namespace system {
-namespace chain {
+namespace neutrino {
 
-data_chunk compute_neutrino_filter(const block& validated_block);
+data_chunk compute_filter(const chain::block& validated_block);
 
-bool match_neutrino_filter(const compact_filter& filter,
-    const script& script);
+hash_digest compute_filter_header(const hash_digest& previous_block_hash,
+    const data_chunk& filter);
 
-bool match_neutrino_filter(const compact_filter& filter,
-    const script::list& scripts);
+bool match_filter(const message::compact_filter& filter,
+    const chain::script& script);
 
-bool match_neutrino_filter(const compact_filter& filter,
+bool match_filter(const message::compact_filter& filter,
+    const chain::script::list& scripts);
+
+bool match_filter(const message::compact_filter& filter,
     const wallet::payment_address& address);
 
-bool match_neutrino_filter(const compact_filter& filter,
+bool match_filter(const message::compact_filter& filter,
     const wallet::payment_address::list& addresses);
 
-} // namespace chain
+} // namespace neutrino
 } // namespace system
 } // namespace libbitcoin
 

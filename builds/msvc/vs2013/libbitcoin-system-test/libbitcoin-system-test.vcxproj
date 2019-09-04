@@ -75,14 +75,10 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\chain_state.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\compact.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\compact_filter.cpp">
-      <ObjectFileName>$(IntDir)test_chain_compact_filter.obj</ObjectFileName>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\header.cpp">
       <ObjectFileName>$(IntDir)test_chain_header.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\input.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\neutrino_filter.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\output.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\output_point.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\payment_record.cpp" />
@@ -186,6 +182,7 @@
     <ClCompile Include="..\..\..\..\test\utility\collection.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\data.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\endian.cpp" />
+    <ClCompile Include="..\..\..\..\test\utility\neutrino_filter.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\png.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\property_tree.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\pseudo_random.cpp" />

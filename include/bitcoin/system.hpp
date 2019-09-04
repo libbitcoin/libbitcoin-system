@@ -25,11 +25,9 @@
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/compact.hpp>
-#include <bitcoin/system/chain/compact_filter.hpp>
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/input_point.hpp>
-#include <bitcoin/system/chain/neutrino_filter.hpp>
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/output_point.hpp>
 #include <bitcoin/system/chain/payment_record.hpp>
@@ -180,6 +178,7 @@
 #include <bitcoin/system/utility/istream_bit_reader.hpp>
 #include <bitcoin/system/utility/istream_reader.hpp>
 #include <bitcoin/system/utility/monitor.hpp>
+#include <bitcoin/system/utility/neutrino_filter.hpp>
 #include <bitcoin/system/utility/noncopyable.hpp>
 #include <bitcoin/system/utility/ostream_bit_writer.hpp>
 #include <bitcoin/system/utility/ostream_writer.hpp>

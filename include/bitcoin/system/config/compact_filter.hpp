@@ -25,7 +25,7 @@
 #include <iostream>
 #include <string>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/chain/compact_filter.hpp>
+#include <bitcoin/system/message/compact_filter.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -54,7 +54,7 @@ public:
      * Initialization constructor.
      * @param[in]  value  The value to initialize with.
      */
-    compact_filter(const chain::compact_filter& value);
+    compact_filter(const message::compact_filter& value);
 
     /**
      * Copy constructor.
@@ -72,7 +72,7 @@ public:
      * Move assignment operator.
      * @param[in]  other  The object to move into self on assignment.
      */
-    compact_filter& operator=(chain::compact_filter&& other);
+    compact_filter& operator=(message::compact_filter&& other);
 
     /**
      * Override the equality operator.
@@ -84,7 +84,7 @@ public:
      * Overload cast to internal type.
      * @return  This object's value cast to internal type.
      */
-    operator const chain::compact_filter&() const;
+    operator const message::compact_filter&() const;
 
     /**
      * Get the block as a string.
@@ -115,7 +115,7 @@ private:
     /**
      * The state of this object's block data.
      */
-    chain::compact_filter value_;
+    message::compact_filter value_;
 };
 
 } // namespace config

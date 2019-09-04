@@ -84,7 +84,170 @@ bool add_metadata(chain::block& block, prevout_data::list& metadata)
 
 BOOST_AUTO_TEST_SUITE(chain_neutrino_filter_tests)
 
-BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_0__success)
+BOOST_AUTO_TEST_CASE(compute_filter_header__get_headers__block_0__success)
+{
+    const auto expected = hash_literal(
+        "21584579b7eb08997773e5aeff3a7f932700042d0ed2a6129012b7d7ae81b750");
+
+    const auto previous_header = hash_literal(
+        "0000000000000000000000000000000000000000000000000000000000000000");
+
+    const auto filter = to_chunk(base16_literal("019dfca8"));
+
+    const auto result = neutrino::compute_filter_header(previous_header,
+        filter);
+
+    BOOST_REQUIRE_EQUAL(result, expected);
+}
+
+BOOST_AUTO_TEST_CASE(compute_filter_header__block_2__success)
+{
+    const auto expected = hash_literal(
+        "186afd11ef2b5e7e3504f2e8cbf8df28a1fd251fe53d60dff8b1467d1b386cf0");
+
+    const auto previous_header = hash_literal(
+        "d7bdac13a59d745b1add0d2ce852f1a0442e8945fc1bf3848d3cbffd88c24fe1");
+
+    const auto filter = to_chunk(base16_literal("0174a170"));
+
+    const auto result = neutrino::compute_filter_header(previous_header,
+        filter);
+
+    BOOST_REQUIRE_EQUAL(result, expected);
+}
+
+BOOST_AUTO_TEST_CASE(compute_filter_header__block_3__success)
+{
+    const auto expected = hash_literal(
+        "8d63aadf5ab7257cb6d2316a57b16f517bff1c6388f124ec4c04af1212729d2a");
+
+    const auto previous_header = hash_literal(
+        "186afd11ef2b5e7e3504f2e8cbf8df28a1fd251fe53d60dff8b1467d1b386cf0");
+
+    const auto filter = to_chunk(base16_literal("016cf7a0"));
+
+    const auto result = neutrino::compute_filter_header(previous_header,
+        filter);
+
+    BOOST_REQUIRE_EQUAL(result, expected);
+}
+
+BOOST_AUTO_TEST_CASE(compute_filter_header__block_15007__success)
+{
+    const auto expected = hash_literal(
+        "07384b01311867949e0c046607c66b7a766d338474bb67f66c8ae9dbd454b20e");
+
+    const auto previous_header = hash_literal(
+        "18b5c2b0146d2d09d24fb00ff5b52bd0742f36c9e65527abdb9de30c027a4748");
+
+    const auto filter = to_chunk(base16_literal("013c3710"));
+
+    const auto result = neutrino::compute_filter_header(previous_header,
+        filter);
+
+    BOOST_REQUIRE_EQUAL(result, expected);
+}
+
+BOOST_AUTO_TEST_CASE(compute_filter_header__block_49291__success)
+{
+    const auto expected = hash_literal(
+        "b6d98692cec5145f67585f3434ec3c2b3030182e1cb3ec58b855c5c164dfaaa3");
+
+    const auto previous_header = hash_literal(
+        "ed47705334f4643892ca46396eb3f4196a5e30880589e4009ef38eae895d4a13");
+
+    const auto filter = to_chunk(base16_literal(
+        "0afbc2920af1b027f31f87b592276eb4c32094bb4d3697021b4c6380"));
+
+    const auto result = neutrino::compute_filter_header(previous_header,
+        filter);
+
+    BOOST_REQUIRE_EQUAL(result, expected);
+}
+
+BOOST_AUTO_TEST_CASE(compute_filter_header__block_180480__success)
+{
+    const auto expected = hash_literal(
+        "c582d51c0ca365e3fcf36c51cb646d7f83a67e867cb4743fd2128e3e022b700c");
+
+    const auto previous_header = hash_literal(
+        "d34ef98386f413769502808d4bac5f20f8dfd5bffc9eedafaa71de0eb1f01489");
+
+    const auto filter = to_chunk(base16_literal(
+        "0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026"));
+
+    const auto result = neutrino::compute_filter_header(previous_header,
+        filter);
+
+    BOOST_REQUIRE_EQUAL(result, expected);
+}
+
+BOOST_AUTO_TEST_CASE(compute_filter_header__block_926485__success)
+{
+    const auto expected = hash_literal(
+        "546c574a0472144bcaf9b6aeabf26372ad87c7af7d1ee0dbfae5e099abeae49c");
+
+    const auto previous_header = hash_literal(
+        "8f13b9a9c85611635b47906c3053ac53cfcec7211455d4cb0d63dc9acc13d472");
+
+    const auto filter = to_chunk(base16_literal(
+        "09027acea61b6cc3fb33f5d52f7d088a6b2f75d234e89ca800"));
+
+    const auto result = neutrino::compute_filter_header(previous_header,
+        filter);
+
+    BOOST_REQUIRE_EQUAL(result, expected);
+}
+
+BOOST_AUTO_TEST_CASE(compute_filter_header__block_987876__success)
+{
+    const auto expected = hash_literal(
+        "0965a544743bbfa36f254446e75630c09404b3d164a261892372977538928ed5");
+
+    const auto previous_header = hash_literal(
+        "fe4d230dbb0f4fec9bed23a5283e08baf996e3f32b93f52c7de1f641ddfd04ad");
+
+    const auto filter = to_chunk(base16_literal("010c0b40"));
+
+    const auto result = neutrino::compute_filter_header(previous_header,
+        filter);
+
+    BOOST_REQUIRE_EQUAL(result, expected);
+}
+
+BOOST_AUTO_TEST_CASE(compute_filter_header__block_1263442__success)
+{
+    const auto expected = hash_literal(
+        "4e6d564c2a2452065c205dd7eb2791124e0c4e0dbb064c410c24968572589dec");
+
+    const auto previous_header = hash_literal(
+        "31d66d516a9eda7de865df29f6ef6cb8e4bf9309e5dac899968a9a62a5df61e3");
+
+    const auto filter = to_chunk(base16_literal("0385acb4f0fe889ef0"));
+
+    const auto result = neutrino::compute_filter_header(previous_header,
+        filter);
+
+    BOOST_REQUIRE_EQUAL(result, expected);
+}
+
+BOOST_AUTO_TEST_CASE(compute_filter_header__block_1414221__success)
+{
+    const auto expected = hash_literal(
+        "021e8882ef5a0ed932edeebbecfeda1d7ce528ec7b3daa27641acf1189d7b5dc");
+
+    const auto previous_header = hash_literal(
+        "5e5e12d90693c8e936f01847859404c67482439681928353ca1296982042864e");
+
+    const auto filter = to_chunk(base16_literal("00"));
+
+    const auto result = neutrino::compute_filter_header(previous_header,
+        filter);
+
+    BOOST_REQUIRE_EQUAL(result, expected);
+}
+
+BOOST_AUTO_TEST_CASE(compute_filter__block_0__success)
 {
 //    const auto expected_block_hash = hash_literal(
 //        "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943");
@@ -109,11 +272,11 @@ BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_0__success)
 
     BOOST_REQUIRE(add_metadata(validated_block, metadata));
 
-    auto result = chain::compute_neutrino_filter(validated_block);
+    auto result = neutrino::compute_filter(validated_block);
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_2__success)
+BOOST_AUTO_TEST_CASE(compute_filter__block_2__success)
 {
 //    const auto expected_block_hash = hash_literal(
 //        "000000006c02c8ea6e4ff69651f7fcde348fb9d557a06e6957b65552002a7820");
@@ -135,11 +298,11 @@ BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_2__success)
 
     BOOST_REQUIRE(add_metadata(validated_block, metadata));
 
-    auto result = chain::compute_neutrino_filter(validated_block);
+    auto result = neutrino::compute_filter(validated_block);
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_3__success)
+BOOST_AUTO_TEST_CASE(compute_filter__block_3__success)
 {
 //    const auto expected_block_hash = hash_literal(
 //        "000000008b896e272758da5297bcd98fdc6d97c9b765ecec401e286dc1fdbe10");
@@ -161,11 +324,11 @@ BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_3__success)
 
     BOOST_REQUIRE(add_metadata(validated_block, metadata));
 
-    auto result = chain::compute_neutrino_filter(validated_block);
+    auto result = neutrino::compute_filter(validated_block);
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_15007__success)
+BOOST_AUTO_TEST_CASE(compute_filter__block_15007__success)
 {
 //    const auto expected_block_hash = hash_literal(
 //        "0000000038c44c703bae0f98cdd6bf30922326340a5996cc692aaae8bacf47ad");
@@ -187,11 +350,11 @@ BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_15007__success)
 
     BOOST_REQUIRE(add_metadata(validated_block, metadata));
 
-    auto result = chain::compute_neutrino_filter(validated_block);
+    auto result = neutrino::compute_filter(validated_block);
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_49291__success)
+BOOST_AUTO_TEST_CASE(compute_filter__block_49291__success)
 {
 //    const auto expected_block_hash = hash_literal(
 //        "0000000018b07dca1b28b4b5a119f6d6e71698ce1ed96f143f54179ce177a19c");
@@ -320,11 +483,11 @@ BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_49291__success)
 
     BOOST_REQUIRE(add_metadata(validated_block, metadata));
 
-    auto result = chain::compute_neutrino_filter(validated_block);
+    auto result = neutrino::compute_filter(validated_block);
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_180480__success)
+BOOST_AUTO_TEST_CASE(compute_filter__block_180480__success)
 {
 //    const auto expected_block_hash = hash_literal(
 //        "00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a");
@@ -446,11 +609,11 @@ BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_180480__success)
 
     BOOST_REQUIRE(add_metadata(validated_block, metadata));
 
-    auto result = chain::compute_neutrino_filter(validated_block);
+    auto result = neutrino::compute_filter(validated_block);
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_926485__success)
+BOOST_AUTO_TEST_CASE(compute_filter__block_926485__success)
 {
 //    const auto expected_block_hash = hash_literal(
 //        "000000000000015d6077a411a8f5cc95caf775ccf11c54e27df75ce58d187313");
@@ -591,11 +754,11 @@ BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_926485__success)
 
     BOOST_REQUIRE(add_metadata(validated_block, metadata));
 
-    auto result = chain::compute_neutrino_filter(validated_block);
+    auto result = neutrino::compute_filter(validated_block);
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_987876__success)
+BOOST_AUTO_TEST_CASE(compute_filter__block_987876__success)
 {
 //    const auto expected_block_hash = hash_literal(
 //        "0000000000000c00901f2049055e2a437c819d79a3d54fd63e6af796cd7b8a79");
@@ -617,11 +780,11 @@ BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_987876__success)
 
     BOOST_REQUIRE(add_metadata(validated_block, metadata));
 
-    auto result = chain::compute_neutrino_filter(validated_block);
+    auto result = neutrino::compute_filter(validated_block);
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_1263442__success)
+BOOST_AUTO_TEST_CASE(compute_filter__block_1263442__success)
 {
 //    const auto expected_block_hash = hash_literal(
 //        "000000006f27ddfe1dd680044a34548f41bed47eba9e6f0b310da21423bc5f33");
@@ -664,11 +827,11 @@ BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_1263442__success)
 
     BOOST_REQUIRE(add_metadata(validated_block, metadata));
 
-    auto result = chain::compute_neutrino_filter(validated_block);
+    auto result = neutrino::compute_filter(validated_block);
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_1414221__success)
+BOOST_AUTO_TEST_CASE(compute_filter__block_1414221__success)
 {
 //    const auto expected_block_hash = hash_literal(
 //        "0000000000000027b2b3b3381f114f674f481544ff2be37ae3788d7e078383b1");
@@ -689,13 +852,13 @@ BOOST_AUTO_TEST_CASE(compute_neutrino_filter__block_1414221__success)
 
     BOOST_REQUIRE(add_metadata(validated_block, metadata));
 
-    auto result = chain::compute_neutrino_filter(validated_block);
+    auto result = neutrino::compute_filter(validated_block);
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino_filter__match_1__input_prevout__return_true)
+BOOST_AUTO_TEST_CASE(filter_match_1__input_prevout__return_true)
 {
-    const chain::compact_filter filter(
+    const message::compact_filter filter(
         bc::neutrino_filter_type,
         hash_literal(
             "00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
@@ -706,12 +869,12 @@ BOOST_AUTO_TEST_CASE(neutrino_filter__match_1__input_prevout__return_true)
         base16_literal("001fa7459a6cfc64bdc178ba7e7a21603bb2568f"),
         wallet::payment_address::testnet_p2kh);
 
-    BOOST_REQUIRE_EQUAL(true, match_neutrino_filter(filter, address));
+    BOOST_REQUIRE_EQUAL(true, neutrino::match_filter(filter, address));
 }
 
-BOOST_AUTO_TEST_CASE(match_neutrino_filter_1__unrelated_address__return_false)
+BOOST_AUTO_TEST_CASE(match_filter_1__unrelated_address__return_false)
 {
-    const chain::compact_filter filter(
+    const message::compact_filter filter(
         bc::neutrino_filter_type,
         hash_literal(
             "00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
@@ -722,12 +885,12 @@ BOOST_AUTO_TEST_CASE(match_neutrino_filter_1__unrelated_address__return_false)
         base16_literal("001fa005900cf004b00100ba700021000b00500f"),
         wallet::payment_address::testnet_p2kh);
 
-    BOOST_REQUIRE_EQUAL(false, match_neutrino_filter(filter, address));
+    BOOST_REQUIRE_EQUAL(false, neutrino::match_filter(filter, address));
 }
 
-BOOST_AUTO_TEST_CASE(match_neutrino_filter_2__input_prevout__return_true)
+BOOST_AUTO_TEST_CASE(match_filter_2__input_prevout__return_true)
 {
-    const chain::compact_filter filter(
+    const message::compact_filter filter(
         bc::neutrino_filter_type,
         hash_literal(
             "00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
@@ -745,12 +908,12 @@ BOOST_AUTO_TEST_CASE(match_neutrino_filter_2__input_prevout__return_true)
         }
     };
 
-    BOOST_REQUIRE_EQUAL(true, match_neutrino_filter(filter, addresses));
+    BOOST_REQUIRE_EQUAL(true, neutrino::match_filter(filter, addresses));
 }
 
-BOOST_AUTO_TEST_CASE(match_neutrino_filter_2__unrelated_address__return_false)
+BOOST_AUTO_TEST_CASE(match_filter_2__unrelated_address__return_false)
 {
-    const chain::compact_filter filter(
+    const message::compact_filter filter(
         bc::neutrino_filter_type,
         hash_literal(
             "00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
@@ -764,7 +927,7 @@ BOOST_AUTO_TEST_CASE(match_neutrino_filter_2__unrelated_address__return_false)
         }
     };
 
-    BOOST_REQUIRE_EQUAL(false, match_neutrino_filter(filter, addresses));
+    BOOST_REQUIRE_EQUAL(false, neutrino::match_filter(filter, addresses));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

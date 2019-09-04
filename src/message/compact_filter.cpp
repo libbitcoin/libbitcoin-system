@@ -60,41 +60,116 @@ compact_filter compact_filter::factory(uint32_t version, reader& source)
 }
 
 compact_filter::compact_filter()
-  : chain::compact_filter()
+  : filter_type_(0u), block_hash_(null_hash), filter_()
 {
 }
 
 compact_filter::compact_filter(uint8_t filter_type,
     const hash_digest& block_hash, const data_chunk& filter)
-  : chain::compact_filter(filter_type, block_hash, filter)
+  : filter_type_(filter_type),
+    block_hash_(block_hash),
+    filter_(filter)
 {
 }
 
 compact_filter::compact_filter(uint8_t filter_type, hash_digest&& block_hash,
     data_chunk&& filter)
-  : chain::compact_filter(filter_type , std::move(block_hash),
-      std::move(filter))
+: filter_type_(filter_type),
+  block_hash_(std::move(block_hash)),
+  filter_(std::move(filter))
 {
 }
 
 compact_filter::compact_filter(const compact_filter& other)
-  : chain::compact_filter(other)
-{
-}
-
-compact_filter::compact_filter(const chain::compact_filter& other)
-  : chain::compact_filter(other)
+: filter_type_(other.filter_type_),
+  block_hash_(other.block_hash_),
+  filter_(other.filter_)
 {
 }
 
 compact_filter::compact_filter(compact_filter&& other)
-  : chain::compact_filter(std::move(other))
+: filter_type_(other.filter_type_),
+  block_hash_(std::move(other.block_hash_)),
+  filter_(std::move(other.filter_))
 {
 }
 
-compact_filter::compact_filter(chain::compact_filter&& other)
-  : chain::compact_filter(std::move(other))
+bool compact_filter::is_valid() const
 {
+    return !filter_.empty();
+}
+
+void compact_filter::reset()
+{
+    filter_type_ = 0u;
+    block_hash_.fill(0);
+    filter_.clear();
+    filter_.shrink_to_fit();
+}
+
+bool compact_filter::from_data(const data_chunk& data)
+{
+    data_source istream(data);
+    return from_data(istream);
+}
+
+bool compact_filter::from_data(std::istream& stream)
+{
+    istream_reader source(stream);
+    return from_data(source);
+}
+
+bool compact_filter::from_data(reader& source)
+{
+    reset();
+
+    filter_type_ = source.read_byte();
+    block_hash_ = source.read_hash();
+
+    auto count = source.read_size_little_endian();
+
+    // Guard against potential for arbitrary memory allocation.
+    if (count > max_block_size)
+        source.invalidate();
+    else
+        filter_ = source.read_bytes(count);
+
+    if (!source)
+        reset();
+
+    return source;
+}
+
+data_chunk compact_filter::to_data() const
+{
+    data_chunk data;
+    const auto size = serialized_size();
+    data.reserve(size);
+    data_sink ostream(data);
+    to_data(ostream);
+    ostream.flush();
+    BITCOIN_ASSERT(data.size() == size);
+    return data;
+}
+
+void compact_filter::to_data(std::ostream& stream) const
+{
+    ostream_writer sink(stream);
+    to_data(sink);
+}
+
+void compact_filter::to_data(writer& sink) const
+{
+    sink.write_byte(filter_type_);
+    sink.write_hash(block_hash_);
+    sink.write_variable_little_endian(filter_.size());
+    sink.write_bytes(filter_);
+}
+
+size_t compact_filter::serialized_size() const
+{
+    return sizeof(filter_type_) + hash_size +
+        message::variable_uint_size(filter_.size()) + filter_.size();
 }
 
 bool compact_filter::from_data(uint32_t version, const data_chunk& data)
@@ -114,19 +189,12 @@ bool compact_filter::from_data(uint32_t version, reader& source)
     if (version < compact_filter::version_minimum)
         source.invalidate();
 
-    return chain::compact_filter::from_data(source);
+    return from_data(source);
 }
 
 data_chunk compact_filter::to_data(uint32_t version) const
 {
-    data_chunk data;
-    const auto size = serialized_size(version);
-    data.reserve(size);
-    data_sink ostream(data);
-    to_data(version, ostream);
-    ostream.flush();
-    BITCOIN_ASSERT(data.size() == size);
-    return data;
+    return to_data();
 }
 
 void compact_filter::to_data(uint32_t version, std::ostream& stream) const
@@ -137,39 +205,80 @@ void compact_filter::to_data(uint32_t version, std::ostream& stream) const
 
 void compact_filter::to_data(uint32_t , writer& sink) const
 {
-    chain::compact_filter::to_data(sink);
+    sink.write_byte(filter_type_);
+    sink.write_hash(block_hash_);
+    sink.write_variable_little_endian(filter_.size());
+    sink.write_bytes(filter_);
 }
 
 size_t compact_filter::serialized_size(uint32_t ) const
 {
-    return chain::compact_filter::serialized_size();
+    return serialized_size();
 }
 
-compact_filter& compact_filter::operator=(chain::compact_filter&& other)
+uint8_t compact_filter::filter_type() const
 {
-    chain::compact_filter::operator=(std::move(other));
-    return *this;
+    return filter_type_;
+}
+
+void compact_filter::set_filter_type(uint8_t value)
+{
+    filter_type_ = value;
+}
+
+hash_digest& compact_filter::block_hash()
+{
+    return block_hash_;
+}
+
+const hash_digest& compact_filter::block_hash() const
+{
+    return block_hash_;
+}
+
+void compact_filter::set_block_hash(const hash_digest& value)
+{
+    block_hash_ = value;
+}
+
+void compact_filter::set_block_hash(hash_digest&& value)
+{
+    block_hash_ = std::move(value);
+}
+
+data_chunk& compact_filter::filter()
+{
+    return filter_;
+}
+
+const data_chunk& compact_filter::filter() const
+{
+    return filter_;
+}
+
+void compact_filter::set_filter(const data_chunk& value)
+{
+    filter_ = value;
+}
+
+void compact_filter::set_filter(data_chunk&& value)
+{
+    filter_ = std::move(value);
 }
 
 compact_filter& compact_filter::operator=(compact_filter&& other)
 {
-    chain::compact_filter::operator=(std::move(other));
+    filter_type_ = other.filter_type_;
+    block_hash_ = std::move(other.block_hash_);
+    filter_ = std::move(other.filter_);
     return *this;
-}
-
-bool compact_filter::operator==(const chain::compact_filter& other) const
-{
-    return chain::compact_filter::operator==(other);
-}
-
-bool compact_filter::operator!=(const chain::compact_filter& other) const
-{
-    return !(*this == other);
 }
 
 bool compact_filter::operator==(const compact_filter& other) const
 {
-    return chain::compact_filter::operator==(other);
+    return (filter_type_ == other.filter_type_)
+        && (block_hash_ == other.block_hash_)
+        && (filter_ == other.filter_);
 }
 
 bool compact_filter::operator!=(const compact_filter& other) const

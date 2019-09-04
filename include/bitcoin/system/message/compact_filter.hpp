@@ -25,7 +25,6 @@
 #include <istream>
 #include <memory>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/chain/compact_filter.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/reader.hpp>
 #include <bitcoin/system/utility/writer.hpp>
@@ -35,7 +34,6 @@ namespace system {
 namespace message {
 
 class BC_API compact_filter
-	: public chain::compact_filter
 {
 public:
     typedef std::shared_ptr<compact_filter> ptr;
@@ -52,8 +50,19 @@ public:
         data_chunk&& filter);
     compact_filter(const compact_filter& other);
     compact_filter(compact_filter&& other);
-    compact_filter(const chain::compact_filter& other);
-    compact_filter(chain::compact_filter&& other);
+
+    uint8_t filter_type() const;
+    void set_filter_type(uint8_t value);
+
+    hash_digest& block_hash();
+    const hash_digest& block_hash() const;
+    void set_block_hash(const hash_digest& value);
+    void set_block_hash(hash_digest&& value);
+
+    data_chunk& filter();
+    const data_chunk& filter() const;
+    void set_filter(const data_chunk& value);
+    void set_filter(data_chunk&& value);
 
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
@@ -61,21 +70,33 @@ public:
     data_chunk to_data(uint32_t version) const;
     void to_data(uint32_t version, std::ostream& stream) const;
     void to_data(uint32_t version, writer& sink) const;
+    bool is_valid() const;
+    void reset();
     size_t serialized_size(uint32_t version) const;
+
+    bool from_data(const data_chunk& data);
+    bool from_data(std::istream& stream);
+    bool from_data(reader& source);
+    data_chunk to_data() const;
+    void to_data(std::ostream& stream) const;
+    void to_data(writer& sink) const;
+    size_t serialized_size() const;
 
     // This class is move assignable but not copy assignable.
     compact_filter& operator=(compact_filter&& other);
-    compact_filter& operator=(chain::compact_filter&& other);
     void operator=(const compact_filter&) = delete;
 
     bool operator==(const compact_filter& other) const;
-    bool operator==(const chain::compact_filter& other) const;
     bool operator!=(const compact_filter& other) const;
-    bool operator!=(const chain::compact_filter& other) const;
 
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
+
+private:
+    uint8_t filter_type_;
+    hash_digest block_hash_;
+    data_chunk filter_;
 };
 
 } // namespace message

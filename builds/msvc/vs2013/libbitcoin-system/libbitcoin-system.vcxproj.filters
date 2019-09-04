@@ -129,16 +129,10 @@
     <ClCompile Include="..\..\..\..\src\chain\compact.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\compact_filter.cpp">
-      <Filter>src\chain</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\header.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\input.cpp">
-      <Filter>src\chain</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\neutrino_filter.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\output.cpp">
@@ -531,6 +525,9 @@
     <ClCompile Include="..\..\..\..\src\utility\monitor.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\neutrino_filter.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\ostream_bit_writer.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
@@ -701,9 +698,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\compact.hpp">
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\compact_filter.hpp">
-      <Filter>include\bitcoin\system\chain</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\header.hpp">
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>
@@ -711,9 +705,6 @@
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\input_point.hpp">
-      <Filter>include\bitcoin\system\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\neutrino_filter.hpp">
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\output.hpp">
@@ -1185,6 +1176,9 @@
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\monitor.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\neutrino_filter.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\noncopyable.hpp">

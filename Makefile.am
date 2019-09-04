@@ -41,10 +41,8 @@ src_libbitcoin_system_la_SOURCES = \
     src/chain/block.cpp \
     src/chain/chain_state.cpp \
     src/chain/compact.cpp \
-    src/chain/compact_filter.cpp \
     src/chain/header.cpp \
     src/chain/input.cpp \
-    src/chain/neutrino_filter.cpp \
     src/chain/output.cpp \
     src/chain/output_point.cpp \
     src/chain/payment_record.cpp \
@@ -186,6 +184,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/utility/istream_bit_readers.cpp \
     src/utility/istream_reader.cpp \
     src/utility/monitor.cpp \
+    src/utility/neutrino_filter.cpp \
     src/utility/ostream_bit_writer.cpp \
     src/utility/ostream_writer.cpp \
     src/utility/png.cpp \
@@ -277,10 +276,8 @@ test_libbitcoin_system_test_SOURCES = \
     test/chain/block.cpp \
     test/chain/chain_state.cpp \
     test/chain/compact.cpp \
-    test/chain/compact_filter.cpp \
     test/chain/header.cpp \
     test/chain/input.cpp \
-    test/chain/neutrino_filter.cpp \
     test/chain/output.cpp \
     test/chain/output_point.cpp \
     test/chain/payment_record.cpp \
@@ -371,6 +368,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/utility/collection.cpp \
     test/utility/data.cpp \
     test/utility/endian.cpp \
+    test/utility/neutrino_filter.cpp \
     test/utility/png.cpp \
     test/utility/property_tree.cpp \
     test/utility/pseudo_random.cpp \
@@ -421,11 +419,9 @@ include_bitcoin_system_chain_HEADERS = \
     include/bitcoin/system/chain/block.hpp \
     include/bitcoin/system/chain/chain_state.hpp \
     include/bitcoin/system/chain/compact.hpp \
-    include/bitcoin/system/chain/compact_filter.hpp \
     include/bitcoin/system/chain/header.hpp \
     include/bitcoin/system/chain/input.hpp \
     include/bitcoin/system/chain/input_point.hpp \
-    include/bitcoin/system/chain/neutrino_filter.hpp \
     include/bitcoin/system/chain/output.hpp \
     include/bitcoin/system/chain/output_point.hpp \
     include/bitcoin/system/chain/payment_record.hpp \
@@ -647,6 +643,7 @@ include_bitcoin_system_utility_HEADERS = \
     include/bitcoin/system/utility/istream_bit_reader.hpp \
     include/bitcoin/system/utility/istream_reader.hpp \
     include/bitcoin/system/utility/monitor.hpp \
+    include/bitcoin/system/utility/neutrino_filter.hpp \
     include/bitcoin/system/utility/noncopyable.hpp \
     include/bitcoin/system/utility/ostream_bit_writer.hpp \
     include/bitcoin/system/utility/ostream_writer.hpp \
