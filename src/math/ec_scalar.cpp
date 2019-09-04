@@ -19,6 +19,9 @@
 #include <bitcoin/system/math/ec_scalar.hpp>
 
 #include <algorithm>
+#include <array>
+#include <memory>
+#include <utility>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/utility/serializer.hpp>
@@ -30,13 +33,8 @@ const ec_scalar ec_scalar::zero(0);
 
 ec_scalar::ec_scalar()
 {
-    // Avoid initializing secret by default.
-    // Helps when you pre-allocate large arrays of values.
-}
-
-ec_scalar::ec_scalar(uint64_t value)
-{
-    *this = value;
+    // Avoid initializing secret pointer by default.
+    // Improves performance when pre-allocating large sets of ec_scalar.
 }
 
 ec_scalar::ec_scalar(const ec_secret& secret)
@@ -54,100 +52,93 @@ ec_scalar::ec_scalar(ec_scalar&& scalar)
     *this = std::move(scalar);
 }
 
+ec_scalar::ec_scalar(uint64_t value)
+{
+    *this = value;
+}
+
+
 // Operators.
 // ----------------------------------------------------------------------------
 
-ec_scalar& ec_scalar::operator=(uint64_t value)
-{
-    secret_.reset(new ec_secret);
-    static_assert(ec_secret_size == 32, "invalid size for ec_secret");
-    auto last_int_iterator = secret_->end() - 8;
-    // Fill first 24 bytes with zeroes
-    std::fill(secret_->begin(), last_int_iterator, 0);
-    // Write last 8 bytes with our uint64_t
-    auto serial = bc::system::make_unsafe_serializer(last_int_iterator);
-    serial.write_8_bytes_big_endian(value);
-    return *this;
-}
-
 ec_scalar& ec_scalar::operator=(const ec_secret& secret)
 {
-    secret_.reset(new ec_secret(secret));
+    secret_ = std::make_shared<ec_secret>(secret);
     return *this;
 }
 
 ec_scalar& ec_scalar::operator=(const ec_scalar& scalar)
 {
-    if (!scalar)
-    {
-        secret_.reset();
-        return *this;
-    }
-    secret_.reset(new ec_secret(scalar.secret()));
+    if (scalar)
+        *this = scalar.secret();
+    else
+        this->secret_.reset();
+
     return *this;
 }
 
 ec_scalar& ec_scalar::operator=(ec_scalar&& scalar)
 {
-    secret_ = std::move(scalar.secret_);
+    secret_ = scalar.secret_;
+    scalar.secret_.reset();
     return *this;
 }
 
-ec_scalar ec_scalar::operator-() const
+// Canonical conversion from 64 bit unsigned integer is defined by OpenSSL.
+ec_scalar& ec_scalar::operator=(uint64_t value)
 {
-    if (!(*this))
-        return *this;
+    static constexpr auto value_size = sizeof(uint64_t);
+    static_assert(std::tuple_size<ec_secret>::value >= value_size, "overflow");
 
-    auto negation = *this;
-    BITCOIN_ASSERT(negation.secret_);
-    if (!ec_negate(*negation.secret_))
+    // ec_secret is value-initialized to zero.
+    secret_ = std::make_shared<ec_secret>(ec_secret{});
+    auto value_iterator = secret_->end() - value_size;
+
+    // Write last value_size bytes with value.
+    auto serial = bc::system::make_unsafe_serializer(value_iterator);
+    serial.write_8_bytes_big_endian(value);
+    return *this;
+}
+
+ec_scalar ec_scalar::operator-()
+{
+    if (!(*this) || !ec_negate(*secret_))
         return {};
 
-    return negation;
+    return *this;
 }
 
 ec_scalar& ec_scalar::operator+=(const ec_scalar& scalar)
 {
-    if (!(*this))
-        return *this;
+    if (!(*this) || !scalar || !ec_add(*secret_, scalar))
+        secret_.reset();
 
-    *this = *this + scalar;
     return *this;
 }
 
 ec_scalar& ec_scalar::operator-=(const ec_scalar& scalar)
 {
-    if (!(*this))
-        return *this;
+    // TODO: any way to avoid copy (cannot change const parameter)?
+    auto copy = scalar;
 
-    *this = *this - scalar;
+    if (!(*this) || !scalar || !ec_add(*secret_, -copy))
+        secret_.reset();
+
     return *this;
 }
 
-ec_scalar::operator bool() const
+ec_scalar& ec_scalar::operator*=(const ec_scalar& scalar)
 {
-    // Caller must make both test against zero when that is required.
-    // Overloading bool with valid and non-zero would be very non-intuitive.
-    return static_cast<bool>(secret_);
-}
+    if (!(*this) || !scalar || !ec_multiply(*secret_, scalar))
+        secret_.reset();
 
-ec_scalar::operator const ec_secret&() const
-{
-    BITCOIN_ASSERT(secret_);
-    return *secret_;
-}
-
-const ec_secret& ec_scalar::secret() const
-{
-    BITCOIN_ASSERT(secret_);
-    return *secret_;
+    return *this;
 }
 
 bool operator==(const ec_scalar& left, const ec_scalar& right)
 {
-    // Compare arrays from left and right in reverse order since
-    // scalars are encoded in big endian format.
-    // The beginning bytes will be only zeroes for small scalars.
+    // Compare arrays from left and right in reverse order since scalars are
+    // encoded in big endian format, with leading bytes zero for small scalars.
     return left && right &&
         std::equal(left.secret().rbegin(), left.secret().rend(),
             right.secret().rbegin());
@@ -158,42 +149,65 @@ bool operator!=(const ec_scalar& left, const ec_scalar& right)
     return !(left == right);
 }
 
-ec_scalar operator+(ec_scalar left, const ec_scalar& right)
+ec_scalar operator+(const ec_scalar& left, const ec_scalar& right)
 {
     if (!left || !right)
         return {};
 
-    BITCOIN_ASSERT(left.secret_);
-    BITCOIN_ASSERT(right.secret_);
-    if (!ec_add(*left.secret_, *right.secret_))
-        return {};
+    // TODO: any way to avoid copy (cannot change const parameter)?
+    auto copy = left;
 
-    return left;
+    return copy += right;
 }
 
-ec_scalar operator-(ec_scalar left, const ec_scalar& right)
+ec_scalar operator-(const ec_scalar& left, const ec_scalar& right)
 {
     if (!left || !right)
         return {};
 
-    const auto negative_right = -right;
-    if (!negative_right)
-        return {};
+    // TODO: any way to avoid copies (cannot change const parameters)?
+    auto left_copy = left;
+    auto right_copy = right;
 
-    return left + negative_right;
+    return left_copy += -right_copy;
 }
 
-ec_scalar operator*(ec_scalar left, const ec_scalar& right)
+ec_scalar operator*(const ec_scalar& left, const ec_scalar& right)
 {
     if (!left || !right)
         return {};
 
-    BITCOIN_ASSERT(left.secret_);
-    BITCOIN_ASSERT(right.secret_);
-    if (!ec_multiply(*left.secret_, *right.secret_))
-        return {};
+    // TODO: any way to avoid copy (cannot change const parameter)?
+    auto copy = left;
 
-    return left;
+    return copy *= right;
+}
+
+// Cast operators.
+// ----------------------------------------------------------------------------
+
+ec_scalar::operator bool() const
+{
+    // Caller must make both test against zero when that is required.
+    // Overloading bool with valid and non-zero would be very non-intuitive.
+    return static_cast<bool>(secret_);
+}
+
+ec_scalar::operator const ec_secret&() const
+{
+    // Operation results or the object must be tested by the caller.
+    BITCOIN_ASSERT(secret_);
+    return *secret_;
+}
+
+// Accessors.
+// ----------------------------------------------------------------------------
+
+const ec_secret& ec_scalar::secret() const
+{
+    // Operation results or the object must be tested by the caller.
+    BITCOIN_ASSERT(secret_);
+    return *secret_;
 }
 
 } // namespace system
