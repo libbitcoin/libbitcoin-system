@@ -77,7 +77,7 @@ static std::vector<uint64_t> hashed_set_construct(const data_stack& items,
     hashes.reserve(items.size());
 
     std::transform(items.begin(), items.end(), std::back_inserter(hashes),
-        [&](const auto& item){ return hash_to_range(item, bound, key); });
+        [&](const data_chunk& item){ return hash_to_range(item, bound, key); });
 
     std::sort(hashes.begin(), hashes.end(), std::less<uint64_t>());
     return hashes;
@@ -126,16 +126,16 @@ void construct(writer& stream, const data_stack& items, uint8_t bits,
 void construct(writer& stream, const data_stack& items, uint8_t bits,
     const siphash_key& entropy, uint64_t target_false_positive_rate)
 {
-    const auto hashes = hashed_set_construct(items, items.size(),
+    const auto set = hashed_set_construct(items, items.size(),
         target_false_positive_rate, entropy);
 
     uint64_t previous = 0;
     ostream_bit_writer sink(stream);
 
-    std::for_each(hashes.begin(), hashes.end(), [&](const auto& hash)
+    std::for_each(set.begin(), set.end(), [&](const uint64_t& value)
     {
-        golomb_encode(sink, hash - previous, bits);
-        previous = hash;
+        golomb_encode(sink, value - previous, bits);
+        previous = value;
     });
 }
 
@@ -195,15 +195,15 @@ bool match(const data_chunk& target, reader& compressed_set,
 
     for (uint64_t index = 0; index < set_size; index++)
     {
-        const auto hash = previous + golomb_decode(source, bits);
+        const auto value = previous + golomb_decode(source, bits);
 
-        if (hash == range)
+        if (value == range)
             return true;
 
-        if (hash > range)
+        if (value > range)
             break;
 
-        previous = hash;
+        previous = value;
     }
 
     return false;
@@ -261,23 +261,23 @@ bool match(const data_stack& targets, reader& compressed_set,
     if (targets.empty())
         return false;
 
-    const auto hashes = hashed_set_construct(targets, set_size,
+    const auto set = hashed_set_construct(targets, set_size,
         target_false_positive_rate, entropy);
 
     uint64_t range = 0;
-    auto it = hashes.begin();
+    auto it = set.begin();
     istream_bit_reader source(compressed_set);
 
-    for (uint64_t index = 0; index < set_size && it != hashes.end(); index++)
+    for (uint64_t index = 0; index < set_size && it != set.end(); index++)
     {
         range += golomb_decode(source, bits);
 
-        for (auto hash = *it; it != hashes.end(); hash = *(++it))
+        for (auto value = *it; it != set.end(); value = *(++it))
         {
-            if (hash == range)
+            if (value == range)
                 return true;
 
-            if (hash > range)
+            if (value > range)
                 break;
         }
     }
