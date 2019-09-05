@@ -278,7 +278,7 @@ uint8_t istream_bit_reader::read_byte()
         const uint8_t low = (buffer_ >> (byte_bits - offset_));
         return hi | low;
     }
-    
+
     offset_ = byte_bits;
     return buffer_;
 }
@@ -364,7 +364,7 @@ void istream_bit_reader::skip(size_t size)
 
 bool istream_bit_reader::empty() const
 {
-    return (offset_ >= byte_bits) || (reader_.peek_byte() == unsigned_eof);
+    return (offset_ >= byte_bits) && (reader_.peek_byte() == unsigned_eof);
 }
 
 } // namespace system
