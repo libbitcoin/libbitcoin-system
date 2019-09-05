@@ -97,7 +97,7 @@ compact_filter_checkpoint::compact_filter_checkpoint(
 
 bool compact_filter_checkpoint::is_valid() const
 {
-    return !(stop_hash_ == null_hash) && !filter_headers_.empty();
+    return stop_hash_ != null_hash && !filter_headers_.empty();
 }
 
 void compact_filter_checkpoint::reset()
@@ -129,8 +129,9 @@ bool compact_filter_checkpoint::from_data(uint32_t version, reader& source)
     filter_type_ = source.read_byte();
     stop_hash_ = source.read_hash();
 
-    auto count = source.read_size_little_endian();
+    const auto count = source.read_size_little_endian();
 
+    // TODO: is this the corrected protocol limit?
     // Guard against potential for arbitrary memory allocation.
     if (count > max_block_size)
         source.invalidate();

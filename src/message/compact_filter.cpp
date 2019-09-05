@@ -126,7 +126,7 @@ bool compact_filter::from_data(reader& source)
     filter_type_ = source.read_byte();
     block_hash_ = source.read_hash();
 
-    auto count = source.read_size_little_endian();
+    const auto count = source.read_size_little_endian();
 
     // Guard against potential for arbitrary memory allocation.
     if (count > max_block_size)

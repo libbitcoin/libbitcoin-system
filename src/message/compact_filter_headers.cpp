@@ -104,8 +104,9 @@ compact_filter_headers::compact_filter_headers(compact_filter_headers&& other)
 
 bool compact_filter_headers::is_valid() const
 {
-    return !(stop_hash_ == null_hash)
-        && !(previous_filter_header_ == null_hash) && !filter_hashes_.empty();
+    return stop_hash_ != null_hash
+        && previous_filter_header_ != null_hash
+        && !filter_hashes_.empty();
 }
 
 void compact_filter_headers::reset()
@@ -138,8 +139,9 @@ bool compact_filter_headers::from_data(uint32_t version, reader& source)
     stop_hash_ = source.read_hash();
     previous_filter_header_ = source.read_hash();
 
-    auto count = source.read_size_little_endian();
+    const auto count = source.read_size_little_endian();
 
+    // TODO: is this the corrected protocol limit?
     // Guard against potential for arbitrary memory allocation.
     if (count > max_block_size)
         source.invalidate();
@@ -185,7 +187,7 @@ void compact_filter_headers::to_data(uint32_t , writer& sink) const
     sink.write_hash(previous_filter_header_);
     sink.write_variable_little_endian(filter_hashes_.size());
 
-    for (const auto& element : filter_hashes_)
+    for (const auto& element: filter_hashes_)
         sink.write_hash(element);
 }
 

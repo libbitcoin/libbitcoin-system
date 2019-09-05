@@ -96,7 +96,7 @@ get_compact_filter_checkpoint::get_compact_filter_checkpoint(
 
 bool get_compact_filter_checkpoint::is_valid() const
 {
-    return !(stop_hash_ == null_hash);
+    return stop_hash_ != null_hash;
 }
 
 void get_compact_filter_checkpoint::reset()
