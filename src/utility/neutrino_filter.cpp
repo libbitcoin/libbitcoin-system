@@ -122,11 +122,12 @@ bool match_filter(const message::compact_filter& filter,
     data_stack stack;
     stack.reserve(scripts.size());
 
-    std::for_each(scripts.begin(), scripts.end(), [&](const auto& script)
-    {
-        if (!script.empty())
-            stack.push_back(script.to_data(false));
-    });
+    std::for_each(scripts.begin(), scripts.end(),
+        [&](const chain::script& script)
+        {
+            if (!script.empty())
+                stack.push_back(script.to_data(false));
+        });
 
     if (stack.empty())
         return false;
@@ -160,10 +161,11 @@ bool match_filter(const message::compact_filter& filter,
     chain::script::list stack;
     stack.reserve(addresses.size());
 
-    std::for_each(addresses.begin(), addresses.end(), [&](const auto& address)
-    {
-        stack.push_back(address.output_script());
-    });
+    std::for_each(addresses.begin(), addresses.end(),
+        [&](const wallet::payment_address& address)
+        {
+            stack.push_back(address.output_script());
+        });
 
     return match_filter(filter, stack);
 }
