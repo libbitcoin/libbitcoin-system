@@ -21,8 +21,9 @@
 
 #include <bitcoin/system/utility/neutrino_filter.hpp>
 
-//#include <bitcoin/system/machine/opcode.hpp>
+#include <algorithm>
 #include <bitcoin/system/math/golomb_coded_sets.hpp>
+#include <bitcoin/system/utility/collection.hpp>
 #include <bitcoin/system/utility/container_sink.hpp>
 #include <bitcoin/system/utility/container_source.hpp>
 #include <bitcoin/system/utility/istream_reader.hpp>
@@ -34,65 +35,46 @@ namespace neutrino {
 
 data_chunk compute_filter(const chain::block& validated_block)
 {
-    bool incomplete_data = false;
     const auto hash = validated_block.hash();
-    const auto key = to_numeric_key(slice<0, half_hash_size, hash_size>(hash));
-
+    const auto key = to_siphash_key(slice<0, half_hash_size, hash_size>(hash));
     data_stack items;
+    data_chunk filter;
 
-    for (const auto tx : validated_block.transactions())
+    for (const auto& tx: validated_block.transactions())
     {
         if (!tx.is_coinbase())
         {
-            for (const auto input : tx.inputs())
+            for (const auto& input: tx.inputs())
             {
-                const auto prevout = input.previous_output();
-                if (prevout.metadata.cache.value() == chain::output::not_found)
-                {
-                    incomplete_data = true;
-                    break;
-                }
+                const auto& prevout = input.previous_output();
+                if (!prevout.metadata.cache.is_valid())
+                    return filter;
 
-                const auto script = prevout.metadata.cache.script();
-                const auto data = script.to_data(false);
-                if (data.size() > 0)
-                    items.emplace_back(data);
+                const auto& script = prevout.metadata.cache.script();
+                if (!script.empty())
+                    items.push_back(script.to_data(false));
             }
         }
 
-        if (incomplete_data)
-            break;
-
-        for (const auto output : tx.outputs())
+        for (const auto& output: tx.outputs())
         {
-            const auto script = output.script();
+            const auto& script = output.script();
 
-            // is_unspendable was (script.front().code() != machine::opcode::return_)
-            if ((script.size() > 0) && !script.is_unspendable())
-            {
-                const auto data = script.to_data(false);
-                items.emplace_back(data);
-            }
+            // is_unspendable: script.front().code() != machine::opcode::return_
+            if (!script.empty() && !script.is_unspendable())
+                items.push_back(script.to_data(false));
         }
     }
 
-    // remove duplicates
-    std::sort(items.begin(), items.end(), std::less<data_chunk>());
-    auto last = std::unique(items.begin(), items.end());
-    items.erase(last, items.end());
+    // Remove duplicates.
+    bc::system::distinct(items);
 
-    data_chunk filter;
-
-    if (!incomplete_data)
-    {
-        {
-            data_sink stream(filter);
-            ostream_writer writer(stream);
-            writer.write_variable_little_endian(items.size());
-            golomb::construct(writer, items, golomb_bit_parameter, key,
-                golomb_target_false_positive_rate);
-        }
-    }
+    data_sink stream(filter);
+    ostream_writer writer(stream);
+    writer.write_variable_little_endian(items.size());
+    golomb::construct(writer, items, golomb_bits, key,
+        golomb_target_false_positive_rate);
+    stream.flush();
 
     return filter;
 }
@@ -101,97 +83,89 @@ hash_digest compute_filter_header(const hash_digest& previous_block_hash,
     const data_chunk& filter)
 {
     data_chunk data;
+    data_sink stream(data);
+    ostream_writer sink(stream);
+    sink.write_hash(bitcoin_hash(filter));
+    sink.write_hash(previous_block_hash);
+    stream.flush();
 
-        {
-            data_sink ostream(data);
-            ostream_writer sink(ostream);
-            sink.write_hash(bitcoin_hash(filter));
-            sink.write_hash(previous_block_hash);
-        }
-
-        return bitcoin_hash(data);
+    return bitcoin_hash(data);
 }
 
 bool match_filter(const message::compact_filter& filter,
     const chain::script& script)
 {
-    bool result = false;
+    if (script.empty() || filter.filter_type() != neutrino_filter_type)
+        return false;
 
-    if (filter.filter_type() != neutrino_filter_type)
-        return result;
+    data_source stream(filter.filter());
+    istream_reader reader(stream);
+    const auto set_size = reader.read_variable_little_endian();
 
-    data_chunk target = script.to_data(false);
+    if (!reader)
+        return false;
 
-    if (target.size() == 0)
-        return result;
-
-    const auto key = to_numeric_key(slice<0, half_hash_size, hash_size>(
+    const auto target = script.to_data(false);
+    const auto key = to_siphash_key(slice<0, half_hash_size, hash_size>(
         filter.block_hash()));
 
-    auto data = filter.filter();
-    data_source stream(data);
-    istream_reader reader(stream);
-    auto set_size = reader.read_variable_little_endian();
-
-    if (reader)
-        result = golomb::match(target, reader, set_size, key,
-            golomb_bit_parameter, golomb_target_false_positive_rate);
-
-    return result;
+    return golomb::match(target, reader, set_size, key, golomb_bits,
+        golomb_target_false_positive_rate);
 }
 
 bool match_filter(const message::compact_filter& filter,
     const chain::script::list& scripts)
 {
-    bool result = false;
+    if (scripts.empty() || filter.filter_type() != neutrino_filter_type)
+        return false;
 
-    if (filter.filter_type() != neutrino_filter_type)
-        return result;
+    data_stack stack;
+    stack.reserve(scripts.size());
 
-    data_stack targets;
-    for (auto script : scripts)
-        if (script.serialized_size(false) > 0)
-            targets.emplace_back(script.to_data(false));
+    std::for_each(scripts.begin(), scripts.end(), [&](const auto& script)
+    {
+        if (!script.empty())
+            stack.push_back(script.to_data(false));
+    });
 
-    if (targets.size() == 0)
-        return result;
+    if (stack.empty())
+        return false;
 
-    const auto key = to_numeric_key(slice<0, half_hash_size, hash_size>(
-        filter.block_hash()));
-
-    auto data = filter.filter();
-    data_source stream(data);
+    data_source stream(filter.filter());
     istream_reader reader(stream);
     auto set_size = reader.read_variable_little_endian();
 
-    if (reader)
-        result = golomb::match(targets, reader, set_size, key,
-            golomb_bit_parameter, golomb_target_false_positive_rate);
+    if (!reader)
+        return false;
 
-    return result;
+    const auto key = to_siphash_key(slice<0, half_hash_size, hash_size>(
+        filter.block_hash()));
+
+    return golomb::match(stack, reader, set_size, key, golomb_bits,
+        golomb_target_false_positive_rate);
 }
 
 bool match_filter(const message::compact_filter& filter,
     const wallet::payment_address& address)
 {
-    if (filter.filter_type() != neutrino_filter_type)
-        return false;
-
     return match_filter(filter, address.output_script());
 }
 
 bool match_filter(const message::compact_filter& filter,
     const wallet::payment_address::list& addresses)
 {
-    if (filter.filter_type() != neutrino_filter_type)
+    if (addresses.empty() || filter.filter_type() != neutrino_filter_type)
         return false;
 
-    chain::script::list scripts;
+    chain::script::list stack;
+    stack.reserve(addresses.size());
 
-    for (auto address : addresses)
-        scripts.emplace_back(address.output_script());
+    std::for_each(addresses.begin(), addresses.end(), [&](const auto& address)
+    {
+        stack.push_back(address.output_script());
+    });
 
-    return match_filter(filter, scripts);
+    return match_filter(filter, stack);
 }
 
 } // namespace chain

@@ -38,78 +38,77 @@ namespace golomb {
 
     // Golomb-coded set construction
     // ------------------------------------------------------------------------
-    data_chunk construct(const data_stack& items, uint64_t bit_param,
+
+    data_chunk construct(const data_stack& items, uint8_t bits,
         const half_hash& entropy, uint64_t target_false_positive_rate);
 
-    data_chunk construct(const data_stack& items, uint64_t bit_param,
-        const numeric_key& entropy, uint64_t target_false_positive_rate);
+    data_chunk construct(const data_stack& items, uint8_t bits,
+        const siphash_key& entropy, uint64_t target_false_positive_rate);
 
-    void construct(writer& stream, const data_stack& items,
-        uint64_t bit_param, const half_hash& entropy,
-        uint64_t target_false_positive_rate);
+    void construct(writer& stream, const data_stack& items, uint8_t bits,
+        const half_hash& entropy, uint64_t target_false_positive_rate);
 
-    void construct(writer& stream, const data_stack& items,
-        uint64_t bit_param, const numeric_key& entropy,
-        uint64_t target_false_positive_rate);
+    void construct(writer& stream, const data_stack& items, uint8_t bits,
+        const siphash_key& entropy, uint64_t target_false_positive_rate);
 
-	void construct(std::ostream& stream, const data_stack& items,
-	    uint64_t bit_param, const half_hash& entropy,
-	    uint64_t target_false_positive_rate);
+	void construct(std::ostream& stream, const data_stack& items, uint8_t bits,
+        const half_hash& entropy, uint64_t target_false_positive_rate);
 
-    void construct(std::ostream& stream, const data_stack& items,
-        uint64_t bit_param, const numeric_key& entropy,
-        uint64_t target_false_positive_rate);
+    void construct(std::ostream& stream, const data_stack& items, uint8_t bits,
+        const siphash_key& entropy, uint64_t target_false_positive_rate);
 
     // Single element match
     // ------------------------------------------------------------------------
+
     bool match(const data_chunk& target, const data_chunk& compressed_set,
-        uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+        uint64_t set_size, const half_hash& entropy, uint8_t bits,
         uint64_t target_false_positive_rate);
 
     bool match(const data_chunk& target, const data_chunk& compressed_set,
-        uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+        uint64_t set_size, const siphash_key& entropy, uint8_t bits,
         uint64_t target_false_positive_rate);
 
     bool match(const data_chunk& target, std::istream& compressed_set,
-        uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+        uint64_t set_size, const half_hash& entropy, uint8_t bits,
         uint64_t target_false_positive_rate);
 
     bool match(const data_chunk& target, std::istream& compressed_set,
-        uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+        uint64_t set_size, const siphash_key& entropy, uint8_t bits,
         uint64_t target_false_positive_rate);
 
     bool match(const data_chunk& target, reader& compressed_set,
-        uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+        uint64_t set_size, const half_hash& entropy, uint8_t bits,
         uint64_t target_false_positive_rate);
 
     bool match(const data_chunk& target, reader& compressed_set,
-        uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+        uint64_t set_size, const siphash_key& entropy, uint8_t bits,
         uint64_t target_false_positive_rate);
 
 	// Intersection match
 	// ------------------------------------------------------------------------
+
     bool match(const data_stack& targets, const data_chunk& compressed_set,
-        uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+        uint64_t set_size, const half_hash& entropy, uint8_t bits,
         uint64_t target_false_positive_rate);
 
     bool match(const data_stack& targets, const data_chunk& compressed_set,
-        uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+        uint64_t set_size, const siphash_key& entropy, uint8_t bits,
         uint64_t target_false_positive_rate);
 
     bool match(const data_stack& targets, std::istream& compressed_set,
-        uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+        uint64_t set_size, const half_hash& entropy, uint8_t bits,
         uint64_t target_false_positive_rate);
 
     bool match(const data_stack& targets, std::istream& compressed_set,
-        uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+        uint64_t set_size, const siphash_key& entropy, uint8_t bits,
         uint64_t target_false_positive_rate);
 
     bool match(const data_stack& targets, reader& compressed_set,
-        uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+        uint64_t set_size, const half_hash& entropy, uint8_t bits,
         uint64_t target_false_positive_rate);
 
     bool match(const data_stack& targets, reader& compressed_set,
-        uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+        uint64_t set_size, const siphash_key& entropy, uint8_t bits,
         uint64_t target_false_positive_rate);
 
 } // namespace golomb

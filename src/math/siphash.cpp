@@ -31,7 +31,7 @@ namespace system {
 BC_CONSTEXPR uint64_t finalization = 0x00000000000000ff;
 BC_CONSTEXPR uint32_t max_encoded_byte_count = (1 << byte_bits);
 
-// NOTE: C++20 provides std::rotl which could replace this functionality.
+// NOTE: C++20 provides std::rotl which could replace this function.
 uint64_t inline rotate_left(uint64_t value, uint8_t shift)
 {
     return (uint64_t)((value << shift) | (value >> (64 - shift)));
@@ -67,13 +67,12 @@ void inline compression_round(uint64_t& v0, uint64_t& v1, uint64_t& v2,
     v0 ^= word;
 }
 
-uint64_t siphash(const half_hash& key, const data_slice& message)
+uint64_t siphash(const half_hash& hash, const data_slice& message)
 {
-    auto entropy = to_numeric_key(key);
-    return siphash(entropy, message);
+    return siphash(to_siphash_key(hash), message);
 }
 
-uint64_t siphash(const numeric_key& key, const data_slice& message)
+uint64_t siphash(const siphash_key& key, const data_slice& message)
 {
     uint64_t v0 = siphash_magic_0 ^ std::get<0>(key);
     uint64_t v1 = siphash_magic_1 ^ std::get<1>(key);
@@ -107,24 +106,13 @@ uint64_t siphash(const numeric_key& key, const data_slice& message)
     return v0 ^ v1 ^ v2 ^ v3;
 }
 
-//numeric_key to_numeric_key(const half_hash& value)
-//{
-//    uint64_t upper = from_little_endian<uint64_t, half_hash::const_iterator>(
-//        value.begin(), value.begin() + (half_hash_size / 2));
-//
-//    uint64_t lower = from_little_endian<uint64_t, half_hash::const_iterator>(
-//        value.begin() + (half_hash_size / 2), value.end());
-//
-//    return std::make_tuple(upper, lower);
-//}
-
-numeric_key to_numeric_key(const half_hash& value)
+siphash_key to_siphash_key(const half_hash& hash)
 {
-    uint64_t upper = from_little_endian<uint64_t, half_hash::const_iterator>(
-        value.begin(), value.begin() + (half_hash_size / 2));
+    const auto upper = from_little_endian<uint64_t, half_hash::const_iterator>(
+        hash.begin(), hash.begin() + (half_hash_size / 2));
 
-    uint64_t lower = from_little_endian<uint64_t, half_hash::const_iterator>(
-        value.begin() + (half_hash_size / 2), value.end());
+    const auto lower = from_little_endian<uint64_t, half_hash::const_iterator>(
+        hash.begin() + (half_hash_size / 2), hash.end());
 
     return std::make_tuple(upper, lower);
 }

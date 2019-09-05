@@ -23,6 +23,7 @@
 #define LIBBITCOIN_SYSTEM_SIPHASH
 
 #include <cstdint>
+#include <tuple>
 #include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/hash.hpp>
@@ -31,13 +32,11 @@
 namespace libbitcoin {
 namespace system {
 
-    typedef std::tuple<uint64_t, uint64_t> numeric_key;
+typedef std::tuple<uint64_t, uint64_t> siphash_key;
 
-    numeric_key to_numeric_key(const half_hash& value);
-
-    uint64_t siphash(const half_hash& key, const data_slice& message);
-
-    uint64_t siphash(const numeric_key& key, const data_slice& message);
+siphash_key to_siphash_key(const half_hash& hash);
+uint64_t siphash(const half_hash& hash, const data_slice& message);
+uint64_t siphash(const siphash_key& key, const data_slice& message);
 
 } // namespace system
 } // namespace libbitcoin

@@ -19,8 +19,13 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-//#include <algorithm>
-//#include <utility>
+#include <algorithm>
+#include <cstdint>
+#include <functional>
+#include <iostream>
+#include <iterator>
+#include <vector>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/golomb_coded_sets.hpp>
 #include <bitcoin/system/utility/container_source.hpp>
 #include <bitcoin/system/utility/container_sink.hpp>
@@ -32,9 +37,10 @@ namespace libbitcoin {
 namespace system {
 namespace golomb {
 
-void golomb_encode(bit_writer& sink, uint64_t value, uint8_t modulo_exponent)
+static void golomb_encode(bit_writer& sink, uint64_t value,
+    uint8_t modulo_exponent)
 {
-    uint64_t quotient = value >> modulo_exponent;
+    const uint64_t quotient = value >> modulo_exponent;
     for (uint64_t index = 0; index < quotient; index++)
         sink.write_bit(true);
 
@@ -42,7 +48,7 @@ void golomb_encode(bit_writer& sink, uint64_t value, uint8_t modulo_exponent)
     sink.write_variable_bits_big_endian(value, modulo_exponent);
 }
 
-uint64_t golomb_decode(bit_reader& source, uint8_t modulo_exponent)
+static uint64_t golomb_decode(bit_reader& source, uint8_t modulo_exponent)
 {
     uint64_t quotient = 0;
     while(source.read_bit())
@@ -52,165 +58,152 @@ uint64_t golomb_decode(bit_reader& source, uint8_t modulo_exponent)
     return ((quotient << modulo_exponent) + remainder);
 }
 
-uint64_t hash_to_range(const data_slice& item, uint64_t bound,
-    const numeric_key& key)
+static uint64_t hash_to_range(const data_slice& item, uint64_t bound,
+    const siphash_key& key)
 {
-    uint64_t hash = siphash(key, item);
-    return static_cast<uint64_t>(
-        (static_cast<uint128_t>(hash) * static_cast<uint128_t>(bound)) >> 64);
+    static const auto range_shift = sizeof(uint64_t) * bc::byte_bits;
+
+    return static_cast<uint64_t>((
+        static_cast<uint128_t>(siphash(key, item)) *
+        static_cast<uint128_t>(bound)) >> range_shift);
 }
 
-std::vector<uint64_t> hashed_set_construct(const data_stack& items,
-    uint64_t target_false_positive_rate, const numeric_key& key)
+static std::vector<uint64_t> hashed_set_construct(const data_stack& items,
+    size_t set_size, uint64_t target_false_positive_rate, const siphash_key& key)
 {
-    std::vector<uint64_t> hashed_items;
-    uint64_t bound = static_cast<uint64_t>(
-        target_false_positive_rate * items.size());
+    auto bound = static_cast<uint64_t>(target_false_positive_rate * set_size);
 
-    for (auto element : items)
-        hashed_items.push_back(hash_to_range(element, bound, key));
+    std::vector<uint64_t> hashes;
+    hashes.reserve(items.size());
 
-    return hashed_items;
+    std::transform(items.begin(), items.end(), std::back_inserter(hashes),
+        [&](const auto& item){ return hash_to_range(item, bound, key); });
+
+    std::sort(hashes.begin(), hashes.end(), std::less<uint64_t>());
+    return hashes;
 }
 
 // Golomb-coded set construction
 // ----------------------------------------------------------------------------
-data_chunk construct(const data_stack& items, uint64_t bit_param,
+
+data_chunk construct(const data_stack& items, uint8_t bits,
     const half_hash& entropy, uint64_t target_false_positive_rate)
 {
-    auto key = to_numeric_key(entropy);
-    return construct(items, bit_param, key, target_false_positive_rate);
+    return construct(items, bits, to_siphash_key(entropy),
+        target_false_positive_rate);
 }
 
-data_chunk construct(const data_stack& items, uint64_t bit_param,
-    const numeric_key& entropy, uint64_t target_false_positive_rate)
+data_chunk construct(const data_stack& items, uint8_t bits,
+    const siphash_key& entropy, uint64_t target_false_positive_rate)
 {
     data_chunk result;
-    {
-        data_sink stream(result);
-        construct(stream, items, bit_param, entropy, target_false_positive_rate);
-    }
-
+    data_sink stream(result);
+    construct(stream, items, bits, entropy, target_false_positive_rate);
     return result;
 }
 
-void construct(std::ostream& stream, const data_stack& items,
-    uint64_t bit_param, const half_hash& entropy,
-    uint64_t target_false_positive_rate)
+void construct(std::ostream& stream, const data_stack& items, uint8_t bits,
+    const half_hash& entropy, uint64_t target_false_positive_rate)
 {
-    auto key = to_numeric_key(entropy);
-    construct(stream, items, bit_param, key, target_false_positive_rate);
+    construct(stream, items, bits, to_siphash_key(entropy),
+        target_false_positive_rate);
 }
 
-void construct(std::ostream& stream, const data_stack& items,
-    uint64_t bit_param, const numeric_key& entropy,
-    uint64_t target_false_positive_rate)
+void construct(std::ostream& stream, const data_stack& items, uint8_t bits,
+    const siphash_key& entropy, uint64_t target_false_positive_rate)
 {
     ostream_writer writer(stream);
-    construct(writer, items, bit_param, entropy, target_false_positive_rate);
+    construct(writer, items, bits, entropy, target_false_positive_rate);
 }
 
-void construct(writer& stream, const data_stack& items,
-    uint64_t bit_param, const half_hash& entropy,
-    uint64_t target_false_positive_rate)
+void construct(writer& stream, const data_stack& items, uint8_t bits,
+    const half_hash& entropy, uint64_t target_false_positive_rate)
 {
-    auto key = to_numeric_key(entropy);
-    construct(stream, items, bit_param, key, target_false_positive_rate);
+    construct(stream, items, bits, to_siphash_key(entropy),
+        target_false_positive_rate);
 }
 
-void construct(writer& stream, const data_stack& items,
-    uint64_t bit_param, const numeric_key& entropy,
-    uint64_t target_false_positive_rate)
+void construct(writer& stream, const data_stack& items, uint8_t bits,
+    const siphash_key& entropy, uint64_t target_false_positive_rate)
 {
-    auto hashed_items = hashed_set_construct(items, target_false_positive_rate,
-        entropy);
+    const auto hashes = hashed_set_construct(items, items.size(),
+        target_false_positive_rate, entropy);
 
-    std::sort(hashed_items.begin(), hashed_items.end(), std::less<uint64_t>());
+    uint64_t previous = 0;
+    ostream_bit_writer sink(stream);
 
+    std::for_each(hashes.begin(), hashes.end(), [&](const auto& hash)
     {
-        // Declared within scope to guarantee flush of buffered writer
-        ostream_bit_writer sink(stream);
-
-        uint64_t prev = 0;
-        for (auto item : hashed_items)
-        {
-            uint64_t delta = item - prev;
-            golomb_encode(sink, delta, bit_param);
-            prev = item;
-        }
-    }
+        golomb_encode(sink, hash - previous, bits);
+        previous = hash;
+    });
 }
 
 // Single element match
 // ----------------------------------------------------------------------------
+
 bool match(const data_chunk& target, const data_chunk& compressed_set,
-    uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+    uint64_t set_size, const half_hash& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
-    auto key = to_numeric_key(entropy);
-    return match(target, compressed_set, set_size, key, bit_param,
-        target_false_positive_rate);
+    return match(target, compressed_set, set_size, to_siphash_key(entropy),
+        bits, target_false_positive_rate);
 }
 
 bool match(const data_chunk& target, const data_chunk& compressed_set,
-    uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+    uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
     data_source source(compressed_set);
-    return match(target, source, set_size, entropy, bit_param,
+    return match(target, source, set_size, entropy, bits,
         target_false_positive_rate);
 }
 
 bool match(const data_chunk& target, std::istream& compressed_set,
-    uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+    uint64_t set_size, const half_hash& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
-    auto key = to_numeric_key(entropy);
-    return match(target, compressed_set, set_size, key, bit_param,
-        target_false_positive_rate);
+    return match(target, compressed_set, set_size, to_siphash_key(entropy),
+        bits, target_false_positive_rate);
 }
 
 bool match(const data_chunk& target, std::istream& compressed_set,
-    uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+    uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
     istream_reader reader(compressed_set);
-    return match(target, reader, set_size, entropy, bit_param,
+    return match(target, reader, set_size, entropy, bits,
         target_false_positive_rate);
 }
 
 bool match(const data_chunk& target, reader& compressed_set,
-    uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+    uint64_t set_size, const half_hash& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
-    auto key = to_numeric_key(entropy);
-    return match(target, compressed_set, set_size, key, bit_param,
-        target_false_positive_rate);
+    return match(target, compressed_set, set_size, to_siphash_key(entropy),
+        bits, target_false_positive_rate);
 }
 
 bool match(const data_chunk& target, reader& compressed_set,
-    uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+    uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
-    uint64_t bound = target_false_positive_rate * set_size;
-    uint64_t target_hash = hash_to_range(target, bound, entropy);
-
+    const auto bound = target_false_positive_rate * set_size;
+    const auto range = hash_to_range(target, bound, entropy);
     istream_bit_reader source(compressed_set);
-
-    uint64_t prev = 0;
+    uint64_t previous = 0;
 
     for (uint64_t index = 0; index < set_size; index++)
     {
-        uint64_t delta = golomb_decode(source, bit_param);
-        uint64_t item_hash = prev + delta;
+        const auto hash = previous + golomb_decode(source, bits);
 
-        if (item_hash == target_hash)
+        if (hash == range)
             return true;
 
-        if (item_hash > target_hash)
+        if (hash > range)
             break;
 
-        prev = item_hash;
+        previous = hash;
     }
 
     return false;
@@ -218,89 +211,75 @@ bool match(const data_chunk& target, reader& compressed_set,
 
 // Intersection match
 // ----------------------------------------------------------------------------
+
 bool match(const data_stack& targets, const data_chunk& compressed_set,
-    uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+    uint64_t set_size, const half_hash& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
-    auto key = to_numeric_key(entropy);
-    return match(targets, compressed_set, set_size, key, bit_param,
-        target_false_positive_rate);
+    return match(targets, compressed_set, set_size, to_siphash_key(entropy),
+        bits, target_false_positive_rate);
 }
 
 bool match(const data_stack& targets, const data_chunk& compressed_set,
-    uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+    uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
     data_source source(compressed_set);
-    return match(targets, source, set_size, entropy, bit_param,
+    return match(targets, source, set_size, entropy, bits,
         target_false_positive_rate);
 }
 
 bool match(const data_stack& targets, std::istream& compressed_set,
-    uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+    uint64_t set_size, const half_hash& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
-    auto key = to_numeric_key(entropy);
-    return match(targets, compressed_set, set_size, key, bit_param,
-        target_false_positive_rate);
+    return match(targets, compressed_set, set_size, to_siphash_key(entropy),
+        bits, target_false_positive_rate);
 }
 
 bool match(const data_stack& targets, std::istream& compressed_set,
-    uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+    uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
     istream_reader reader(compressed_set);
-    return match(targets, reader, set_size, entropy, bit_param,
+    return match(targets, reader, set_size, entropy, bits,
         target_false_positive_rate);
 }
 
 bool match(const data_stack& targets, reader& compressed_set,
-    uint64_t set_size, const half_hash& entropy, uint64_t bit_param,
+    uint64_t set_size, const half_hash& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
-    auto key = to_numeric_key(entropy);
-    return match(targets, compressed_set, set_size, key, bit_param,
-        target_false_positive_rate);
+    return match(targets, compressed_set, set_size, to_siphash_key(entropy),
+        bits, target_false_positive_rate);
 }
 
 bool match(const data_stack& targets, reader& compressed_set,
-    uint64_t set_size, const numeric_key& entropy, uint64_t bit_param,
+    uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
-    if (targets.size() == 0)
+    if (targets.empty())
         return false;
 
-    uint64_t bound = target_false_positive_rate * set_size;
+    const auto hashes = hashed_set_construct(targets, set_size,
+        target_false_positive_rate, entropy);
 
-    std::vector<uint64_t> target_hashes;
-    for (data_stack::size_type index = 0; index < targets.size(); index++)
-        target_hashes.push_back(hash_to_range(targets[index], bound, entropy));
-
-    std::sort(target_hashes.begin(), target_hashes.end(), std::less<uint64_t>());
-
+    uint64_t range = 0;
+    auto it = hashes.begin();
     istream_bit_reader source(compressed_set);
 
-    uint64_t value = 0;
-    uint64_t target_index = 0;
-
-    for (uint64_t index = 0; index < set_size; index++)
+    for (uint64_t index = 0; index < set_size && it != hashes.end(); index++)
     {
-        uint64_t delta = golomb_decode(source, bit_param);
-        value += delta;
+        range += golomb_decode(source, bits);
 
-        while (target_index < target_hashes.size())
+        for (auto hash = *it; it != hashes.end(); hash = *(++it))
         {
-            if (target_hashes[target_index] == value)
+            if (hash == range)
                 return true;
 
-            if (target_hashes[target_index] > value)
+            if (hash > range)
                 break;
-
-            target_index++;
         }
-
-        if (target_index >= target_hashes.size())
-            break;
     }
 
     return false;
