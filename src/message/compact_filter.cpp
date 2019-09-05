@@ -192,7 +192,7 @@ bool compact_filter::from_data(uint32_t version, reader& source)
     return from_data(source);
 }
 
-data_chunk compact_filter::to_data(uint32_t version) const
+data_chunk compact_filter::to_data(uint32_t) const
 {
     return to_data();
 }
