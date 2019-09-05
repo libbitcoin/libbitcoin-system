@@ -35,8 +35,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__constructor_1__always__invalid)
 BOOST_AUTO_TEST_CASE(compact_filter__constructor_2__always__equals_params)
 {
     const uint8_t filter_type = 16u;
-    const hash_digest block_hash = hash_literal(
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
 
     message::compact_filter instance(filter_type, block_hash, filter);
@@ -49,14 +48,12 @@ BOOST_AUTO_TEST_CASE(compact_filter__constructor_2__always__equals_params)
 BOOST_AUTO_TEST_CASE(compact_filter__constructor_3__always__equals_params)
 {
     const uint8_t filter_type = 16u;
-    const hash_digest block_hash = hash_literal(
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     hash_digest dup_hash = block_hash;
     const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
     data_chunk dup_filter = filter;
 
-    message::compact_filter instance(filter_type, std::move(dup_hash),
-        std::move(dup_filter));
+    message::compact_filter instance(filter_type, std::move(dup_hash), std::move(dup_filter));
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(filter_type == instance.filter_type());
     BOOST_REQUIRE(block_hash == instance.block_hash());
@@ -66,12 +63,10 @@ BOOST_AUTO_TEST_CASE(compact_filter__constructor_3__always__equals_params)
 BOOST_AUTO_TEST_CASE(compact_filter__constructor_4__always__equals_params)
 {
     const uint8_t filter_type = 16u;
-    const hash_digest block_hash = hash_literal(
-        "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
+    const hash_digest block_hash = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     const data_chunk filter = to_chunk(base16_literal("fedcba9876543210"));
 
     message::compact_filter value(filter_type, block_hash, filter);
-
     message::compact_filter instance(value);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(filter_type == instance.filter_type());
@@ -82,12 +77,10 @@ BOOST_AUTO_TEST_CASE(compact_filter__constructor_4__always__equals_params)
 BOOST_AUTO_TEST_CASE(compact_filter__constructor_5__always__equals_params)
 {
     const uint8_t filter_type = 16u;
-    const hash_digest block_hash = hash_literal(
-        "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
+    const hash_digest block_hash = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     const data_chunk filter = to_chunk(base16_literal("fedcba9876543210"));
 
     message::compact_filter value(filter_type, block_hash, filter);
-
     message::compact_filter instance(std::move(value));
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(filter_type == instance.filter_type());
@@ -99,8 +92,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__from_data__insufficient_bytes__failure)
 {
     const data_chunk raw{ 0xab, 0xcd };
     message::compact_filter instance;
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(
-        message::compact_filter::version_minimum, raw));
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(message::compact_filter::version_minimum, raw));
 }
 
 BOOST_AUTO_TEST_CASE(compact_filter__from_data__insufficient_version__failure)
@@ -115,8 +107,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__from_data__insufficient_version__failure)
     BOOST_REQUIRE(raw == data);
 
     message::compact_filter instance;
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(
-        message::compact_filter::version_minimum - 1, data));
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(message::compact_filter::version_minimum - 1, data));
 }
 
 BOOST_AUTO_TEST_CASE(compact_filter__factory_1__valid_input__success)
@@ -130,16 +121,11 @@ BOOST_AUTO_TEST_CASE(compact_filter__factory_1__valid_input__success)
     const auto data = expected.to_data(message::compact_filter::version_minimum);
     BOOST_REQUIRE(raw == data);
 
-    const auto result = message::compact_filter::factory(
-        message::compact_filter::version_minimum, data);
-
+    const auto result = message::compact_filter::factory(message::compact_filter::version_minimum, data);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(message::compact_filter::version_minimum));
-    BOOST_REQUIRE_EQUAL(
-        expected.serialized_size(message::compact_filter::version_minimum),
-        result.serialized_size(message::compact_filter::version_minimum));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(message::compact_filter::version_minimum));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::compact_filter::version_minimum), result.serialized_size(message::compact_filter::version_minimum));
 }
 
 BOOST_AUTO_TEST_CASE(compact_filter__factory_2__valid_input__success)
@@ -154,16 +140,11 @@ BOOST_AUTO_TEST_CASE(compact_filter__factory_2__valid_input__success)
     BOOST_REQUIRE(raw == data);
 
     data_source istream(data);
-    auto result = message::compact_filter::factory(
-        message::compact_filter::version_minimum, istream);
-
+    const auto result = message::compact_filter::factory(message::compact_filter::version_minimum, istream);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(message::compact_filter::version_minimum));
-    BOOST_REQUIRE_EQUAL(
-        expected.serialized_size(message::compact_filter::version_minimum),
-        result.serialized_size(message::compact_filter::version_minimum));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(message::compact_filter::version_minimum));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::compact_filter::version_minimum), result.serialized_size(message::compact_filter::version_minimum));
 }
 
 BOOST_AUTO_TEST_CASE(compact_filter__factory_3__valid_input__success)
@@ -179,23 +160,18 @@ BOOST_AUTO_TEST_CASE(compact_filter__factory_3__valid_input__success)
 
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = message::compact_filter::factory(
-        message::compact_filter::version_minimum, source);
+    const auto result = message::compact_filter::factory(message::compact_filter::version_minimum, source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(message::compact_filter::version_minimum));
-    BOOST_REQUIRE_EQUAL(
-        expected.serialized_size(message::compact_filter::version_minimum),
-        result.serialized_size(message::compact_filter::version_minimum));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(message::compact_filter::version_minimum));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::compact_filter::version_minimum), result.serialized_size(message::compact_filter::version_minimum));
 }
 
 BOOST_AUTO_TEST_CASE(compact_filter__filter_type_accessor__always__returns_initialized_value)
 {
     const uint8_t filter_type = 55u;
-    const hash_digest block_hash = hash_literal(
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
 
     message::compact_filter instance(filter_type, block_hash, filter);
@@ -215,8 +191,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__filter_type_setter__roundtrip__success)
 BOOST_AUTO_TEST_CASE(compact_filter__block_hash_accessor_1__always__returns_initialized_value)
 {
     const uint8_t filter_type = 55u;
-    const hash_digest block_hash = hash_literal(
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
 
     message::compact_filter instance(filter_type, block_hash, filter);
@@ -226,8 +201,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__block_hash_accessor_1__always__returns_init
 BOOST_AUTO_TEST_CASE(compact_filter__block_hash_accessor_2__always__returns_initialized_value)
 {
     const uint8_t filter_type = 55u;
-    const hash_digest block_hash = hash_literal(
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
 
     const message::compact_filter instance(filter_type, block_hash, filter);
@@ -236,8 +210,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__block_hash_accessor_2__always__returns_init
 
 BOOST_AUTO_TEST_CASE(compact_filter__block_hash_setter_1__roundtrip__success)
 {
-    const hash_digest block_hash = hash_literal(
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     message::compact_filter instance;
     BOOST_REQUIRE(block_hash != instance.block_hash());
@@ -247,8 +220,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__block_hash_setter_1__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(compact_filter__block_hash_setter_2__roundtrip__success)
 {
-    const hash_digest block_hash = hash_literal(
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     hash_digest dup = block_hash;
 
     message::compact_filter instance;
@@ -260,8 +232,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__block_hash_setter_2__roundtrip__success)
 BOOST_AUTO_TEST_CASE(compact_filter__filter_accessor_1__always__returns_initialized_value)
 {
     const uint8_t filter_type = 55u;
-    const hash_digest block_hash = hash_literal(
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
 
     message::compact_filter instance(filter_type, block_hash, filter);
@@ -271,8 +242,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__filter_accessor_1__always__returns_initiali
 BOOST_AUTO_TEST_CASE(compact_filter__filter_accessor_2__always__returns_initialized_value)
 {
     const uint8_t filter_type = 55u;
-    const hash_digest block_hash = hash_literal(
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
 
     const message::compact_filter instance(filter_type, block_hash, filter);
@@ -303,14 +273,15 @@ BOOST_AUTO_TEST_CASE(compact_filter__filter_setter_2__roundtrip__success)
 BOOST_AUTO_TEST_CASE(compact_filter__operator_assign_equals__always__matches_equivalent)
 {
     const uint8_t filter_type = 55u;
-    const hash_digest block_hash = hash_literal(
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
 
     message::compact_filter value(filter_type, block_hash, filter);
     BOOST_REQUIRE(value.is_valid());
+
     message::compact_filter instance;
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+
     instance = std::move(value);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(filter_type == instance.filter_type());

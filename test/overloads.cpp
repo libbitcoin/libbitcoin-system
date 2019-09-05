@@ -19,18 +19,22 @@
 
 #include "overloads.hpp"
 
+#include <ostream>
+
 namespace std {
 
-std::ostream& operator<<(std::ostream& os, const bc::system::hash_digest& obj)
+std::ostream& operator<<(std::ostream& stream,
+    const bc::system::hash_digest& hash)
 {
-    os << bc::system::encode_hash(obj);
-    return os;
+    stream << bc::system::encode_hash(hash);
+    return stream;
 }
 
-std::ostream& operator<<(std::ostream& os, const bc::system::data_chunk& obj)
+std::ostream& operator<<(std::ostream& stream,
+    const bc::system::data_chunk& data)
 {
-    os << bc::system::encode_base16(obj);
-    return os;
+    stream << bc::system::encode_base16(data);
+    return stream;
 }
 
 } // namespace std

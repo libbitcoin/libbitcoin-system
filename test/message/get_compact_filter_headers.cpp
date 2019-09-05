@@ -29,18 +29,16 @@ BOOST_AUTO_TEST_SUITE(get_compact_filter_headers_tests)
 BOOST_AUTO_TEST_CASE(get_compact_filter_headers__constructor_1__always__invalid)
 {
     message::get_compact_filter_headers instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(get_compact_filter_headers__constructor_2__always__equals_params)
 {
     const uint8_t filter_type = 16u;
     const uint32_t start_height = 62334u;
-    const hash_digest stop_hash = hash_literal(
-        "bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
+    const hash_digest stop_hash = hash_literal("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
 
-    message::get_compact_filter_headers instance(filter_type, start_height,
-        stop_hash);
+    message::get_compact_filter_headers instance(filter_type, start_height, stop_hash);
 
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(filter_type == instance.filter_type());
@@ -52,12 +50,10 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__constructor_3__always__equals_p
 {
     const uint8_t filter_type = 16u;
     const uint32_t start_height = 62334u;
-    const hash_digest stop_hash = hash_literal(
-        "bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
-    hash_digest dup_stop = stop_hash;
+    const hash_digest stop_hash = hash_literal("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
+    hash_digest copy_stop = stop_hash;
 
-    message::get_compact_filter_headers instance(filter_type, start_height,
-        std::move(dup_stop));
+    message::get_compact_filter_headers instance(filter_type, start_height, std::move(copy_stop));
 
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(filter_type == instance.filter_type());
@@ -69,11 +65,9 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__constructor_4__always__equals_p
 {
     const uint8_t filter_type = 16u;
     const uint32_t start_height = 62334u;
-    const hash_digest stop_hash = hash_literal(
-        "bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
+    const hash_digest stop_hash = hash_literal("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
 
-    message::get_compact_filter_headers value(filter_type, start_height,
-        stop_hash);
+    message::get_compact_filter_headers value(filter_type, start_height, stop_hash);
 
     message::get_compact_filter_headers instance(value);
     BOOST_REQUIRE(instance.is_valid());
@@ -86,11 +80,9 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__constructor_5__always__equals_p
 {
     const uint8_t filter_type = 16u;
     const uint32_t start_height = 62334u;
-    const hash_digest stop_hash = hash_literal(
-        "bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
+    const hash_digest stop_hash = hash_literal("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
 
-    message::get_compact_filter_headers value(filter_type, start_height,
-        stop_hash);
+    message::get_compact_filter_headers value(filter_type, start_height, stop_hash);
 
     message::get_compact_filter_headers instance(std::move(value));
     BOOST_REQUIRE(instance.is_valid());
@@ -106,8 +98,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__from_data__insufficient_bytes__
         "000032"));
 
     message::get_compact_filter_headers instance;
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(
-        message::get_compact_filter_headers::version_minimum, raw));
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(message::get_compact_filter_headers::version_minimum, raw));
 }
 
 BOOST_AUTO_TEST_CASE(get_compact_filter_headers__from_data__insufficient_version__failure)
@@ -118,17 +109,15 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__from_data__insufficient_version
         "bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040"));
 
     message::get_compact_filter_headers expected;
-    auto result = expected.from_data(
-        message::get_compact_filter_headers::version_minimum, raw);
-    BOOST_REQUIRE_EQUAL(true, result);
-    BOOST_REQUIRE_EQUAL(true, expected.is_valid());
-    const auto data = expected.to_data(
-        message::get_compact_filter_headers::version_minimum);
+    const auto result = expected.from_data(message::get_compact_filter_headers::version_minimum, raw);
+    BOOST_REQUIRE(result);
+    BOOST_REQUIRE(expected.is_valid());
+
+    const auto data = expected.to_data(message::get_compact_filter_headers::version_minimum);
     BOOST_REQUIRE(raw == data);
 
     message::get_compact_filter_headers instance;
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(
-        message::get_compact_filter_headers::version_minimum - 1, data));
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(message::get_compact_filter_headers::version_minimum - 1, data));
 }
 
 BOOST_AUTO_TEST_CASE(get_compact_filter_headers__factory_1__valid_input__success)
@@ -139,25 +128,16 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__factory_1__valid_input__success
         "bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040"));
 
     message::get_compact_filter_headers expected;
-    expected.from_data(message::get_compact_filter_headers::version_minimum,
-        raw);
-    const auto data = expected.to_data(
-        message::get_compact_filter_headers::version_minimum);
+    expected.from_data(message::get_compact_filter_headers::version_minimum, raw);
+    const auto data = expected.to_data(message::get_compact_filter_headers::version_minimum);
     BOOST_REQUIRE(raw == data);
 
-    const auto result = message::get_compact_filter_headers::factory(
-        message::get_compact_filter_headers::version_minimum, data);
+    const auto result = message::get_compact_filter_headers::factory(message::get_compact_filter_headers::version_minimum, data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(
-            message::get_compact_filter_headers::version_minimum));
-    BOOST_REQUIRE_EQUAL(
-        expected.serialized_size(
-            message::get_compact_filter_headers::version_minimum),
-        result.serialized_size(
-            message::get_compact_filter_headers::version_minimum));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(message::get_compact_filter_headers::version_minimum));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::get_compact_filter_headers::version_minimum), result.serialized_size(message::get_compact_filter_headers::version_minimum));
 }
 
 BOOST_AUTO_TEST_CASE(get_compact_filter_headers__factory_2__valid_input__success)
@@ -168,26 +148,17 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__factory_2__valid_input__success
         "bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040"));
 
     message::get_compact_filter_headers expected;
-    expected.from_data(message::get_compact_filter_headers::version_minimum,
-        raw);
-    const auto data = expected.to_data(
-        message::get_compact_filter_headers::version_minimum);
+    expected.from_data(message::get_compact_filter_headers::version_minimum, raw);
+    const auto data = expected.to_data(message::get_compact_filter_headers::version_minimum);
     BOOST_REQUIRE(raw == data);
 
     data_source istream(data);
-    auto result = message::get_compact_filter_headers::factory(
-        message::get_compact_filter_headers::version_minimum, istream);
+    const auto result = message::get_compact_filter_headers::factory(message::get_compact_filter_headers::version_minimum, istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(
-            message::get_compact_filter_headers::version_minimum));
-    BOOST_REQUIRE_EQUAL(
-        expected.serialized_size(
-            message::get_compact_filter_headers::version_minimum),
-        result.serialized_size(
-            message::get_compact_filter_headers::version_minimum));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(message::get_compact_filter_headers::version_minimum));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::get_compact_filter_headers::version_minimum), result.serialized_size(message::get_compact_filter_headers::version_minimum));
 }
 
 BOOST_AUTO_TEST_CASE(get_compact_filter_headers__factory_3__valid_input__success)
@@ -198,38 +169,27 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__factory_3__valid_input__success
         "bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040"));
 
     message::get_compact_filter_headers expected;
-    expected.from_data(message::get_compact_filter_headers::version_minimum,
-        raw);
-    const auto data = expected.to_data(
-        message::get_compact_filter_headers::version_minimum);
+    expected.from_data(message::get_compact_filter_headers::version_minimum, raw);
+    const auto data = expected.to_data(message::get_compact_filter_headers::version_minimum);
     BOOST_REQUIRE(raw == data);
 
     data_source istream(data);
     istream_reader source(istream);
-    const auto result = message::get_compact_filter_headers::factory(
-        message::get_compact_filter_headers::version_minimum, source);
+    const auto result = message::get_compact_filter_headers::factory(message::get_compact_filter_headers::version_minimum, source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(
-            message::get_compact_filter_headers::version_minimum));
-    BOOST_REQUIRE_EQUAL(
-        expected.serialized_size(
-            message::get_compact_filter_headers::version_minimum),
-        result.serialized_size(
-            message::get_compact_filter_headers::version_minimum));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(message::get_compact_filter_headers::version_minimum));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::get_compact_filter_headers::version_minimum), result.serialized_size(message::get_compact_filter_headers::version_minimum));
 }
 
 BOOST_AUTO_TEST_CASE(get_compact_filter_headers__filter_type_accessor__always__returns_initialized_value)
 {
     const uint8_t filter_type = 55u;
     const uint32_t start_height = 64323u;
-    const hash_digest stop_hash = hash_literal(
-        "bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
+    const hash_digest stop_hash = hash_literal("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
 
-    message::get_compact_filter_headers instance(filter_type, start_height,
-        stop_hash);
+    message::get_compact_filter_headers instance(filter_type, start_height, stop_hash);
 
     BOOST_REQUIRE(filter_type == instance.filter_type());
 }
@@ -240,6 +200,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__filter_type_setter__roundtrip__
 
     message::get_compact_filter_headers instance;
     BOOST_REQUIRE(filter_type != instance.filter_type());
+
     instance.set_filter_type(filter_type);
     BOOST_REQUIRE(filter_type == instance.filter_type());
 }
@@ -248,12 +209,9 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__start_height_accessor__always__
 {
     const uint8_t filter_type = 55u;
     const uint32_t start_height = 64323u;
-    const hash_digest stop_hash = hash_literal(
-        "bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
+    const hash_digest stop_hash = hash_literal("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
 
-    message::get_compact_filter_headers instance(filter_type, start_height,
-        stop_hash);
-
+    message::get_compact_filter_headers instance(filter_type, start_height, stop_hash);
     BOOST_REQUIRE(start_height == instance.start_height());
 }
 
@@ -263,6 +221,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__start_height_setter__roundtrip_
 
     message::get_compact_filter_headers instance;
     BOOST_REQUIRE(start_height != instance.start_height());
+
     instance.set_start_height(start_height);
     BOOST_REQUIRE(start_height == instance.start_height());
 }
@@ -271,12 +230,9 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__stop_hash_accessor_1__always__r
 {
     const uint8_t filter_type = 55u;
     const uint32_t start_height = 64323u;
-    const hash_digest stop_hash = hash_literal(
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest stop_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
-    message::get_compact_filter_headers instance(filter_type, start_height,
-        stop_hash);
-
+    message::get_compact_filter_headers instance(filter_type, start_height, stop_hash);
     BOOST_REQUIRE(stop_hash == instance.stop_hash());
 }
 
@@ -284,35 +240,32 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__stop_hash_accessor_2__always__r
 {
     const uint8_t filter_type = 55u;
     const uint32_t start_height = 64323u;
-    const hash_digest stop_hash = hash_literal(
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest stop_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
-    const message::get_compact_filter_headers instance(filter_type,
-        start_height, stop_hash);
-
+    const message::get_compact_filter_headers instance(filter_type, start_height, stop_hash);
     BOOST_REQUIRE(stop_hash == instance.stop_hash());
 }
 
 BOOST_AUTO_TEST_CASE(get_compact_filter_headers__stop_hash_setter_1__roundtrip__success)
 {
-    const hash_digest stop_hash = hash_literal(
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest stop_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     message::get_compact_filter_headers instance;
     BOOST_REQUIRE(stop_hash != instance.stop_hash());
+
     instance.set_stop_hash(stop_hash);
     BOOST_REQUIRE(stop_hash == instance.stop_hash());
 }
 
 BOOST_AUTO_TEST_CASE(get_compact_filter_headers__stop_hash_setter_2__roundtrip__success)
 {
-    const hash_digest stop_hash = hash_literal(
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    hash_digest dup = stop_hash;
+    const hash_digest stop_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest copy = stop_hash;
 
     message::get_compact_filter_headers instance;
     BOOST_REQUIRE(stop_hash != instance.stop_hash());
-    instance.set_stop_hash(std::move(dup));
+
+    instance.set_stop_hash(std::move(copy));
     BOOST_REQUIRE(stop_hash == instance.stop_hash());
 }
 
@@ -320,15 +273,14 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__operator_assign_equals__always_
 {
     const uint8_t filter_type = 55u;
     const uint32_t start_height = 64323u;
-    const hash_digest stop_hash = hash_literal(
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest stop_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
-    message::get_compact_filter_headers value(filter_type, start_height,
-        stop_hash);
-
+    message::get_compact_filter_headers value(filter_type, start_height, stop_hash);
     BOOST_REQUIRE(value.is_valid());
+
     message::get_compact_filter_headers instance;
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+
     instance = std::move(value);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(filter_type == instance.filter_type());
