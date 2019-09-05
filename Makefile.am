@@ -181,7 +181,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/utility/dispatcher.cpp \
     src/utility/flush_lock.cpp \
     src/utility/interprocess_lock.cpp \
-    src/utility/istream_bit_readers.cpp \
+    src/utility/istream_bit_reader.cpp \
     src/utility/istream_reader.cpp \
     src/utility/monitor.cpp \
     src/utility/neutrino_filter.cpp \

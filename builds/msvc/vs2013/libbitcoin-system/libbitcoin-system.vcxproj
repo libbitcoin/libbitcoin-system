@@ -246,7 +246,7 @@
     <ClCompile Include="..\..\..\..\src\utility\dispatcher.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\flush_lock.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\interprocess_lock.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\istream_bit_readers.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\istream_bit_reader.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\istream_reader.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\monitor.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\neutrino_filter.cpp" />

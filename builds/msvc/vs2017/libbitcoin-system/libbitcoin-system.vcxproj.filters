@@ -510,7 +510,7 @@
     <ClCompile Include="..\..\..\..\src\utility\interprocess_lock.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\istream_bit_readers.cpp">
+    <ClCompile Include="..\..\..\..\src\utility\istream_bit_reader.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\istream_reader.cpp">
