@@ -96,6 +96,9 @@
     <ClCompile Include="..\..\..\..\test\config\checkpoint.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\config\compact_filter.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\endpoint.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
@@ -159,6 +162,9 @@
     <ClCompile Include="..\..\..\..\test\math\ring_signature.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\math\siphash.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\stealth.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
@@ -183,6 +189,15 @@
     <ClCompile Include="..\..\..\..\test\message\compact_block.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\compact_filter.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\compact_filter_checkpoint.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\compact_filter_headers.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\fee_filter.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
@@ -202,6 +217,15 @@
       <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\get_blocks.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\get_compact_filter_checkpoint.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\get_compact_filter_headers.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\get_compact_filters.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\get_data.cpp">
@@ -267,6 +291,9 @@
     <ClCompile Include="..\..\..\..\test\message\version.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\overloads.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\settings.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -282,6 +309,9 @@
     <ClCompile Include="..\..\..\..\test\utility\binary.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\utility\bit_stream.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\utility\collection.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
@@ -289,6 +319,9 @@
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\utility\endian.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\utility\neutrino_filter.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\utility\png.cpp">
@@ -373,6 +406,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\math\hash.hpp">
       <Filter>src\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\math\siphash.hpp">
+      <Filter>src\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\overloads.hpp">
+      <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\wallet\mnemonic.hpp">
       <Filter>src\wallet</Filter>

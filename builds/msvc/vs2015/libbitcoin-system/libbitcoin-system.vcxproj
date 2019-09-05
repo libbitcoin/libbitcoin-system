@@ -111,6 +111,9 @@
       <ObjectFileName>$(IntDir)src_config_block.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\checkpoint.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\compact_filter.cpp">
+      <ObjectFileName>$(IntDir)src_config_compact_filter.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\directory.cpp" />
     <ClCompile Include="..\..\..\..\src\config\endpoint.cpp" />
     <ClCompile Include="..\..\..\..\src\config\hash160.cpp" />
@@ -172,9 +175,11 @@
     <ClCompile Include="..\..\..\..\src\math\external\sha256.c" />
     <ClCompile Include="..\..\..\..\src\math\external\sha512.c" />
     <ClCompile Include="..\..\..\..\src\math\external\zeroize.c" />
+    <ClCompile Include="..\..\..\..\src\math\golomb_coded_sets.cpp" />
     <ClCompile Include="..\..\..\..\src\math\hash.cpp" />
     <ClCompile Include="..\..\..\..\src\math\ring_signature.cpp" />
     <ClCompile Include="..\..\..\..\src\math\secp256k1_initializer.cpp" />
+    <ClCompile Include="..\..\..\..\src\math\siphash.cpp" />
     <ClCompile Include="..\..\..\..\src\math\stealth.cpp" />
     <ClCompile Include="..\..\..\..\src\message\address.cpp" />
     <ClCompile Include="..\..\..\..\src\message\alert.cpp" />
@@ -184,6 +189,11 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\block_transactions.cpp" />
     <ClCompile Include="..\..\..\..\src\message\compact_block.cpp" />
+    <ClCompile Include="..\..\..\..\src\message\compact_filter.cpp">
+      <ObjectFileName>$(IntDir)src_message_compact_filter.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\message\compact_filter_checkpoint.cpp" />
+    <ClCompile Include="..\..\..\..\src\message\compact_filter_headers.cpp" />
     <ClCompile Include="..\..\..\..\src\message\fee_filter.cpp" />
     <ClCompile Include="..\..\..\..\src\message\filter_add.cpp" />
     <ClCompile Include="..\..\..\..\src\message\filter_clear.cpp" />
@@ -191,6 +201,9 @@
     <ClCompile Include="..\..\..\..\src\message\get_address.cpp" />
     <ClCompile Include="..\..\..\..\src\message\get_block_transactions.cpp" />
     <ClCompile Include="..\..\..\..\src\message\get_blocks.cpp" />
+    <ClCompile Include="..\..\..\..\src\message\get_compact_filter_checkpoint.cpp" />
+    <ClCompile Include="..\..\..\..\src\message\get_compact_filter_headers.cpp" />
+    <ClCompile Include="..\..\..\..\src\message\get_compact_filters.cpp" />
     <ClCompile Include="..\..\..\..\src\message\get_data.cpp" />
     <ClCompile Include="..\..\..\..\src\message\get_headers.cpp" />
     <ClCompile Include="..\..\..\..\src\message\header.cpp">
@@ -230,8 +243,11 @@
     <ClCompile Include="..\..\..\..\src\utility\dispatcher.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\flush_lock.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\interprocess_lock.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\istream_bit_reader.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\istream_reader.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\monitor.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\neutrino_filter.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\ostream_bit_writer.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\ostream_writer.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\png.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\prioritized_mutex.cpp" />
@@ -311,6 +327,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base64.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\checkpoint.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\compact_filter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\directory.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\endpoint.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\hash160.hpp" />
@@ -367,9 +384,11 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\ec_point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\ec_scalar.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\elliptic_curve.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\golomb_coded_sets.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\hash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\limits.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\ring_signature.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\siphash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\stealth.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\alert.hpp" />
@@ -377,6 +396,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\block_transactions.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\compact_block.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\compact_filter.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\compact_filter_checkpoint.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\compact_filter_headers.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\fee_filter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\filter_add.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\filter_clear.hpp" />
@@ -384,6 +406,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_block_transactions.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_blocks.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_compact_filter_checkpoint.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_compact_filter_headers.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_compact_filters.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_data.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_headers.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\header.hpp" />
@@ -419,6 +444,8 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\assert.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\atomic.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\binary.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\bit_reader.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\bit_writer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\collection.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\color.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\conditional_lock.hpp" />
@@ -435,9 +462,12 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\exceptions.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\flush_lock.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\interprocess_lock.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\istream_bit_reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\istream_reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\monitor.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\neutrino_filter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\noncopyable.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\ostream_bit_writer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\ostream_writer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\pending.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\png.hpp" />
@@ -524,7 +554,9 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\data.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\deserializer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\endian.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\istream_bit_reader.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\istream_reader.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\ostream_bit_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\ostream_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\pending.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\property_tree.ipp" />

@@ -118,20 +118,17 @@ BC_CONSTEXPR size_t command_size = 12;
 BC_CONSTEXPR size_t max_address = 1000;
 BC_CONSTEXPR size_t max_filter_add = 520;
 BC_CONSTEXPR size_t max_filter_functions = 50;
+BC_CONSTEXPR size_t max_filter_hashes = 2000;
 BC_CONSTEXPR size_t max_filter_load = 36000;
 BC_CONSTEXPR size_t max_get_blocks = 500;
 BC_CONSTEXPR size_t max_get_headers = 2000;
 BC_CONSTEXPR size_t max_get_data = 50000;
 BC_CONSTEXPR size_t max_inventory = 50000;
 
-/**
- * The minimum safe length of a seed in bits (multiple of 8).
- */
+// The minimum safe length of a seed in bits (multiple of 8).
 BC_CONSTEXPR size_t minimum_seed_bits = 128;
 
-/**
- * The minimum safe length of a seed in bytes (16).
- */
+// The minimum safe length of a seed in bytes (16).
 BC_CONSTEXPR size_t minimum_seed_size = minimum_seed_bits / byte_bits;
 
 // Effective limit given a 32 bit chain height boundary: 10 + log2(2^32) + 1.
@@ -159,6 +156,21 @@ BC_CONSTEXPR size_t base_size_contribution = 3;
 BC_CONSTEXPR size_t total_size_contribution = 1;
 BC_CONSTEXPR size_t min_witness_program = 2;
 BC_CONSTEXPR size_t max_witness_program = 40;
+
+// Golomb-Rice related values (bip158).
+//-----------------------------------------------------------------------------
+
+BC_CONSTEXPR uint8_t neutrino_filter_type = 0x00;
+BC_CONSTEXPR uint8_t golomb_bits = 19;
+BC_CONSTEXPR uint64_t golomb_target_false_positive_rate = 784931;
+
+// Siphash related values.
+//-----------------------------------------------------------------------------
+
+BC_CONSTEXPR uint64_t siphash_magic_0 = 0x736f6d6570736575;
+BC_CONSTEXPR uint64_t siphash_magic_1 = 0x646f72616e646f6d;
+BC_CONSTEXPR uint64_t siphash_magic_2 = 0x6c7967656e657261;
+BC_CONSTEXPR uint64_t siphash_magic_3 = 0x7465646279746573;
 
 } // namespace libbitcoin
 

@@ -29,6 +29,9 @@
 #include <bitcoin/system/message/block.hpp>
 #include <bitcoin/system/message/block_transactions.hpp>
 #include <bitcoin/system/message/compact_block.hpp>
+#include <bitcoin/system/message/compact_filter.hpp>
+#include <bitcoin/system/message/compact_filter_checkpoint.hpp>
+#include <bitcoin/system/message/compact_filter_headers.hpp>
 #include <bitcoin/system/message/fee_filter.hpp>
 #include <bitcoin/system/message/filter_add.hpp>
 #include <bitcoin/system/message/filter_clear.hpp>
@@ -36,6 +39,9 @@
 #include <bitcoin/system/message/get_address.hpp>
 #include <bitcoin/system/message/get_block_transactions.hpp>
 #include <bitcoin/system/message/get_blocks.hpp>
+#include <bitcoin/system/message/get_compact_filter_checkpoint.hpp>
+#include <bitcoin/system/message/get_compact_filter_headers.hpp>
+#include <bitcoin/system/message/get_compact_filters.hpp>
 #include <bitcoin/system/message/get_data.hpp>
 #include <bitcoin/system/message/get_headers.hpp>
 #include <bitcoin/system/message/headers.hpp>
@@ -101,6 +107,13 @@
 // filterload   --      70001   BIP037  no intent to support, see BIP111
 // filteradd    --      70001   BIP037  no intent to support, see BIP111
 // filterclear  --      70001   BIP037  no intent to support, see BIP111
+// ----------------------------------------------------------------------------
+// cfilter      --      70015   BIP157
+// getcfilters  --      70015   BIP157
+// cfcheckpt    --      70015   BIP157
+// getcfcheckpt --      70015   BIP157
+// cfheaders    --      70015   BIP157
+// getcfheaders --      70015   BIP157
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 namespace libbitcoin {
@@ -120,9 +133,15 @@ typedef message::type::const_ptr_list_const_ptr type##_const_ptr_list_const_ptr
 DECLARE_MESSAGE_POINTER_TYPES(address);
 DECLARE_MESSAGE_POINTER_TYPES(block);
 DECLARE_MESSAGE_POINTER_TYPES(compact_block);
+DECLARE_MESSAGE_POINTER_TYPES(compact_filter);
+DECLARE_MESSAGE_POINTER_TYPES(compact_filter_checkpoint);
+DECLARE_MESSAGE_POINTER_TYPES(compact_filter_headers);
 DECLARE_MESSAGE_POINTER_TYPES(get_address);
 DECLARE_MESSAGE_POINTER_TYPES(fee_filter);
 DECLARE_MESSAGE_POINTER_TYPES(get_blocks);
+DECLARE_MESSAGE_POINTER_TYPES(get_compact_filter_checkpoint);
+DECLARE_MESSAGE_POINTER_TYPES(get_compact_filter_headers);
+DECLARE_MESSAGE_POINTER_TYPES(get_compact_filters);
 DECLARE_MESSAGE_POINTER_TYPES(get_data);
 DECLARE_MESSAGE_POINTER_TYPES(get_headers);
 DECLARE_MESSAGE_POINTER_TYPES(header);

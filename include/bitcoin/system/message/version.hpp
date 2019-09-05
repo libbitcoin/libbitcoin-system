@@ -42,6 +42,9 @@ public:
 
     enum level: uint32_t
     {
+        // compact filters service bit
+        bip157 = 70015,
+
         // compact blocks protocol
         bip152 = 70014,
 
@@ -82,7 +85,7 @@ public:
         minimum = 31402,
 
         // We support at most this internally (bound to settings default).
-        maximum = bip133,
+        maximum = bip157,
 
         // Used to generate canonical size required by consensus checks.
         canonical = 0
@@ -106,7 +109,12 @@ public:
 
         // Independent of network protocol level.
         // The node is capable of responding to witness inventory requests.
-        node_witness = (1u << 3)
+        node_witness = (1u << 3),
+
+        // Requires version.value >= level::bip157
+        // The node is capable of responding to getcfilters, getcfheaders,
+        // and getcfcheckpt protocol requests.
+        node_compact_filters = (1u << 6)
     };
 
     static version factory(uint32_t version, const data_chunk& data);

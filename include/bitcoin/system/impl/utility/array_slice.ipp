@@ -54,7 +54,7 @@ const Iterable* array_slice<Iterable>::data() const
 }
 
 template <typename Iterable>
-std::size_t array_slice<Iterable>::size() const
+typename array_slice<Iterable>::size_type array_slice<Iterable>::size() const
 {
     return end_ - begin_;
 }

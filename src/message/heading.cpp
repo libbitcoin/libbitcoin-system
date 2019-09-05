@@ -195,6 +195,8 @@ message_type heading::type() const
         return message_type::block;
     if (command_ == compact_block::command)
         return message_type::compact_block;
+    if (command_ == compact_filter::command)
+        return message_type::compact_filter;
     if (command_ == fee_filter::command)
         return message_type::fee_filter;
     if (command_ == filter_add::command)

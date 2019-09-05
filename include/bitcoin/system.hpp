@@ -45,6 +45,7 @@
 #include <bitcoin/system/config/base64.hpp>
 #include <bitcoin/system/config/block.hpp>
 #include <bitcoin/system/config/checkpoint.hpp>
+#include <bitcoin/system/config/compact_filter.hpp>
 #include <bitcoin/system/config/directory.hpp>
 #include <bitcoin/system/config/endpoint.hpp>
 #include <bitcoin/system/config/hash160.hpp>
@@ -97,9 +98,11 @@
 #include <bitcoin/system/math/ec_point.hpp>
 #include <bitcoin/system/math/ec_scalar.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/math/golomb_coded_sets.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/math/ring_signature.hpp>
+#include <bitcoin/system/math/siphash.hpp>
 #include <bitcoin/system/math/stealth.hpp>
 #include <bitcoin/system/message/address.hpp>
 #include <bitcoin/system/message/alert.hpp>
@@ -107,6 +110,9 @@
 #include <bitcoin/system/message/block.hpp>
 #include <bitcoin/system/message/block_transactions.hpp>
 #include <bitcoin/system/message/compact_block.hpp>
+#include <bitcoin/system/message/compact_filter.hpp>
+#include <bitcoin/system/message/compact_filter_checkpoint.hpp>
+#include <bitcoin/system/message/compact_filter_headers.hpp>
 #include <bitcoin/system/message/fee_filter.hpp>
 #include <bitcoin/system/message/filter_add.hpp>
 #include <bitcoin/system/message/filter_clear.hpp>
@@ -114,6 +120,9 @@
 #include <bitcoin/system/message/get_address.hpp>
 #include <bitcoin/system/message/get_block_transactions.hpp>
 #include <bitcoin/system/message/get_blocks.hpp>
+#include <bitcoin/system/message/get_compact_filter_checkpoint.hpp>
+#include <bitcoin/system/message/get_compact_filter_headers.hpp>
+#include <bitcoin/system/message/get_compact_filters.hpp>
 #include <bitcoin/system/message/get_data.hpp>
 #include <bitcoin/system/message/get_headers.hpp>
 #include <bitcoin/system/message/header.hpp>
@@ -148,6 +157,8 @@
 #include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/atomic.hpp>
 #include <bitcoin/system/utility/binary.hpp>
+#include <bitcoin/system/utility/bit_reader.hpp>
+#include <bitcoin/system/utility/bit_writer.hpp>
 #include <bitcoin/system/utility/collection.hpp>
 #include <bitcoin/system/utility/color.hpp>
 #include <bitcoin/system/utility/conditional_lock.hpp>
@@ -164,9 +175,12 @@
 #include <bitcoin/system/utility/exceptions.hpp>
 #include <bitcoin/system/utility/flush_lock.hpp>
 #include <bitcoin/system/utility/interprocess_lock.hpp>
+#include <bitcoin/system/utility/istream_bit_reader.hpp>
 #include <bitcoin/system/utility/istream_reader.hpp>
 #include <bitcoin/system/utility/monitor.hpp>
+#include <bitcoin/system/utility/neutrino_filter.hpp>
 #include <bitcoin/system/utility/noncopyable.hpp>
+#include <bitcoin/system/utility/ostream_bit_writer.hpp>
 #include <bitcoin/system/utility/ostream_writer.hpp>
 #include <bitcoin/system/utility/pending.hpp>
 #include <bitcoin/system/utility/png.hpp>

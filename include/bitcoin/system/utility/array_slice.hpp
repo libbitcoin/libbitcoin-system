@@ -36,6 +36,8 @@ template <typename Iterable>
 class array_slice
 {
 public:
+    typedef std::size_t size_type;
+
     template <typename Container>
     array_slice(const Container& container);
 
@@ -44,7 +46,7 @@ public:
     const Iterable* begin() const;
     const Iterable* end() const;
     const Iterable* data() const;
-    std::size_t size() const;
+    size_type size() const;
     bool empty() const;
 
 private:
