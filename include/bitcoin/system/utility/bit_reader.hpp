@@ -22,6 +22,7 @@
 #ifndef LIBBITCOIN_SYSTEM_BIT_READER_HPP
 #define LIBBITCOIN_SYSTEM_BIT_READER_HPP
 
+#include <cstdint>
 #include <bitcoin/system/utility/reader.hpp>
 
 namespace libbitcoin {

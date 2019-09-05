@@ -22,6 +22,7 @@
 #ifndef LIBBITCOIN_SYSTEM_BIT_WRITER_HPP
 #define LIBBITCOIN_SYSTEM_BIT_WRITER_HPP
 
+#include <cstdint>
 #include <bitcoin/system/utility/writer.hpp>
 
 namespace libbitcoin {
