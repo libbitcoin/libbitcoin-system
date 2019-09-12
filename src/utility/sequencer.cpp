@@ -70,7 +70,9 @@ void sequencer::unlock()
 
     unique_lock lock{mutex_};
     auto current_size = actions_.size();
+
     BITCOIN_ASSERT_MSG(current_size != 0,"called unlock but sequence not locked");
+
     actions_.pop();
     if(current_size > 1)
     	service_.post(std::move(actions_.front()));
