@@ -27,66 +27,54 @@ namespace libbitcoin {
 namespace system {
 
 sequencer::sequencer(asio::service& service)
-  : service_(service), executing_(false)
+  : service_(service)
 {
 }
 
 sequencer::~sequencer()
 {
-    BITCOIN_ASSERT_MSG(actions_.empty(), "sequencer not cleared");
+	/* First-handler would be a dummy one, even not popped from queue-- it's ok,
+	 * and, if not actions_.size() <= 1, then we have valid handlers pending for
+	 * execution; Assert it.
+	 */
+    BITCOIN_ASSERT_MSG(actions_.size() <= 1, "sequencer not cleared");
 }
 
 void sequencer::lock(action&& handler)
 {
-    auto post = false;
 
-    // Critical Section
-    ///////////////////////////////////////////////////////////////////////
-    mutex_.lock();
+	/*
+	 * Lock the mutex, check whether the queue is empty, if yes, then move the handler to io_service::post.
+	 * Finally, move the handler to action_ queue as well-- moving the handler twice is fine in our case,
+	 * because, if the handler is already posted to io_service, then what we are going to push is Just a
+	 * dummy object which perhaps lost its essence and will be popped on this->unlock() call. If not
+	 * posted to io_service, then what we have Just pushed is a valid work that is "pending" and will be executed
+	 * on this->unlock() call.
+	 */
 
-    if (executing_)
-    {
-        actions_.push(std::move(handler));
-    }
-    else
-    {
-        post = true;
-        executing_ = true;
-    }
+	unique_lock lock{mutex_};
+	if(actions_.empty())
+		service_.post(std::move(handler));
+	actions_.push(std::move(handler));
 
-    mutex_.unlock();
-    ///////////////////////////////////////////////////////////////////////
-
-    if (post)
-        service_.post(std::move(handler));
 }
 
 void sequencer::unlock()
 {
-    action handler;
 
-    // Critical Section
-    ///////////////////////////////////////////////////////////////////////
-    mutex_.lock();
+    /*
+     * Lock the mutex, get the current queue size, assert if the queue size is 0 else
+     * pop the first handler which would be a dummy one, then check, do we have more handlers?
+     * if yes, move the now-first-handler to io_service queue.
+     */
 
-    BITCOIN_ASSERT_MSG(executing_, "called unlock but sequence not locked");
+    unique_lock lock{mutex_};
+    auto current_size = actions_.size();
+    BITCOIN_ASSERT_MSG(current_size != 0,"called unlock but sequence not locked");
+    actions_.pop();
+    if(current_size > 1)
+    	service_.post(std::move(actions_.front()));
 
-    if (actions_.empty())
-    {
-        executing_ = false;
-    }
-    else
-    {
-        executing_ = true;
-        std::swap(handler, actions_.front());
-        actions_.pop();
-    }
-
-    mutex_.unlock();
-    ///////////////////////////////////////////////////////////////////////
-
-    if (handler)
-        service_.post(std::move(handler));
 }
 
 } // namespace system

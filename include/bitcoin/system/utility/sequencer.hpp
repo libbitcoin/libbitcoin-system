@@ -49,7 +49,6 @@ private:
     asio::service& service_;
 
     // These are protected by mutex.
-    bool executing_;
     std::queue<action> actions_;
     mutable shared_mutex mutex_;
 };
