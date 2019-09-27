@@ -37,45 +37,26 @@ namespace chain {
 // HACK: unlinked must match tx slab_map::not_found.
 const uint64_t block_filter::validation::unlinked = max_int64;
 
-block_filter block_filter::factory(const data_chunk& data, bool roundtrip)
-{
-    block_filter instance;
-    instance.from_data(data, roundtrip);
-    return instance;
-}
-
-block_filter block_filter::factory(std::istream& stream, bool roundtrip)
-{
-    block_filter instance;
-    instance.from_data(stream, roundtrip);
-    return instance;
-}
-
-block_filter block_filter::factory(reader& source, bool roundtrip)
-{
-    block_filter instance;
-    instance.from_data(source, roundtrip);
-    return instance;
-}
-
 block_filter::block_filter()
-  : filter_type_(0u), header_(null_hash), filter_(),
+  : filter_type_(0u), block_hash_(null_hash), header_(null_hash), filter_(),
     metadata{}
 {
 }
 
-block_filter::block_filter(uint8_t filter_type, const hash_digest& header,
-    const data_chunk& filter)
+block_filter::block_filter(uint8_t filter_type, const hash_digest& block_hash,
+    const hash_digest& header, const data_chunk& filter)
   : filter_type_(filter_type),
+    block_hash_(block_hash),
     header_(header),
     filter_(filter),
     metadata{}
 {
 }
 
-block_filter::block_filter(uint8_t filter_type, hash_digest&& header,
-    data_chunk&& filter)
+block_filter::block_filter(uint8_t filter_type, hash_digest&& block_hash,
+    hash_digest&& header, data_chunk&& filter)
   : filter_type_(filter_type),
+    block_hash_(std::move(block_hash)),
     header_(std::move(header)),
     filter_(std::move(filter)),
     metadata{}
@@ -84,6 +65,7 @@ block_filter::block_filter(uint8_t filter_type, hash_digest&& header,
 
 block_filter::block_filter(const block_filter& other)
   : filter_type_(other.filter_type_),
+    block_hash_(other.block_hash_),
     header_(other.header_),
     filter_(other.filter_),
     metadata(other.metadata)
@@ -92,6 +74,7 @@ block_filter::block_filter(const block_filter& other)
 
 block_filter::block_filter(block_filter&& other)
   : filter_type_(other.filter_type_),
+    block_hash_(std::move(other.block_hash_)),
     header_(std::move(other.header_)),
     filter_(std::move(other.filter_)),
     metadata(std::move(other.metadata))
@@ -106,95 +89,10 @@ bool block_filter::is_valid() const
 void block_filter::reset()
 {
     filter_type_ = 0u;
+    block_hash_.fill(0);
     header_.fill(0);
     filter_.clear();
     filter_.shrink_to_fit();
-}
-
-bool block_filter::from_data(const data_chunk& data, bool roundtrip)
-{
-    data_source istream(data);
-    return from_data(istream, roundtrip);
-}
-
-bool block_filter::from_data(std::istream& stream, bool roundtrip)
-{
-    istream_reader source(stream);
-    return from_data(source, roundtrip);
-}
-
-bool block_filter::from_data(reader& source, bool roundtrip)
-{
-    reset();
-
-    if (roundtrip)
-    {
-        filter_type_ = source.read_byte();
-        header_ = source.read_hash();
-    }
-
-    const auto count = source.read_size_little_endian();
-
-    // Guard against potential for arbitrary memory allocation.
-    if (count > max_block_size)
-        source.invalidate();
-    else
-        filter_ = source.read_bytes(count);
-
-    if (!source)
-        reset();
-
-    return source;
-}
-
-data_chunk block_filter::to_data(bool roundtrip) const
-{
-    data_chunk data;
-    const auto size = serialized_size(roundtrip);
-    data.reserve(size);
-    data_sink ostream(data);
-    to_data(ostream, roundtrip);
-    ostream.flush();
-    BITCOIN_ASSERT(data.size() == size);
-    return data;
-}
-
-void block_filter::to_data(std::ostream& stream, bool roundtrip) const
-{
-    ostream_writer sink(stream);
-    to_data(sink, roundtrip);
-}
-
-void block_filter::to_data(writer& sink, bool roundtrip) const
-{
-    if (roundtrip)
-    {
-        sink.write_byte(filter_type_);
-        sink.write_hash(header_);
-    }
-
-    sink.write_size_little_endian(filter_.size());
-    sink.write_bytes(filter_);
-}
-
-size_t block_filter::serialized_size(bool roundtrip) const
-{
-    size_t result = hash_size +
-        message::variable_uint_size(filter_.size()) + filter_.size();
-
-    if (roundtrip)
-        result += sizeof(filter_type_);
-
-    return result;
-}
-
-bool block_filter::from_data(reader& source, uint8_t filter_type)
-{
-    if (!from_data(source, false))
-        return false;
-
-    filter_type_ = filter_type;
-    return true;
 }
 
 uint8_t block_filter::filter_type() const
@@ -205,6 +103,26 @@ uint8_t block_filter::filter_type() const
 void block_filter::set_filter_type(uint8_t value)
 {
     filter_type_ = value;
+}
+
+hash_digest& block_filter::block_hash()
+{
+    return block_hash_;
+}
+
+const hash_digest& block_filter::block_hash() const
+{
+    return block_hash_;
+}
+
+void block_filter::set_block_hash(const hash_digest& value)
+{
+    block_hash_ = value;
+}
+
+void block_filter::set_block_hash(hash_digest&& value)
+{
+    block_hash_ = std::move(value);
 }
 
 hash_digest& block_filter::header()
@@ -250,6 +168,7 @@ void block_filter::set_filter(data_chunk&& value)
 block_filter& block_filter::operator=(block_filter&& other)
 {
     filter_type_ = other.filter_type_;
+    block_hash_ = std::move(other.block_hash_);
     header_ = std::move(other.header_);
     filter_ = std::move(other.filter_);
     metadata = std::move(other.metadata);
@@ -259,6 +178,7 @@ block_filter& block_filter::operator=(block_filter&& other)
 bool block_filter::operator==(const block_filter& other) const
 {
     return (filter_type_ == other.filter_type_)
+        && (block_hash_ == other.block_hash_)
         && (header_ == other.header_)
         && (filter_ == other.filter_);
 }

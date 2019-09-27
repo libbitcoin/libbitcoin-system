@@ -50,20 +50,21 @@ public:
         uint64_t link = unlinked;
     };
 
-    static block_filter factory(const data_chunk& data, bool roundtrip);
-    static block_filter factory(std::istream& stream, bool roundtrip);
-    static block_filter factory(reader& source, bool roundtrip);
-
     block_filter();
-    block_filter(uint8_t filter_type, const hash_digest& header,
-        const data_chunk& filter);
-    block_filter(uint8_t filter_type, hash_digest&& header,
-        data_chunk&& filter);
+    block_filter(uint8_t filter_type, const hash_digest& block_hash,
+        const hash_digest& header, const data_chunk& filter);
+    block_filter(uint8_t filter_type, hash_digest&& block_hash,
+        hash_digest&& header, data_chunk&& filter);
     block_filter(const block_filter& other);
     block_filter(block_filter&& other);
 
     uint8_t filter_type() const;
     void set_filter_type(uint8_t value);
+
+    hash_digest& block_hash();
+    const hash_digest& block_hash() const;
+    void set_block_hash(const hash_digest& value);
+    void set_block_hash(hash_digest&& value);
 
     hash_digest& header();
     const hash_digest& header() const;
@@ -78,16 +79,6 @@ public:
     bool is_valid() const;
     void reset();
 
-    bool from_data(const data_chunk& data, bool roundtrip);
-    bool from_data(std::istream& stream, bool roundtrip);
-    bool from_data(reader& source, bool roundtrip);
-    data_chunk to_data(bool roundtrip) const;
-    void to_data(std::ostream& stream, bool roundtrip) const;
-    void to_data(writer& sink, bool roundtrip) const;
-    size_t serialized_size(bool roundtrip) const;
-
-    bool from_data(reader& source, uint8_t filter_type);
-
     // This class is move assignable but not copy assignable.
     block_filter& operator=(block_filter&& other);
     void operator=(const block_filter&) = delete;
@@ -100,6 +91,7 @@ public:
 
 private:
     uint8_t filter_type_;
+    hash_digest block_hash_;
     hash_digest header_;
     data_chunk filter_;
 };

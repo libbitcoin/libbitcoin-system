@@ -35,14 +35,14 @@ BOOST_AUTO_TEST_CASE(block_filter__constructor_1__always__invalid)
 BOOST_AUTO_TEST_CASE(block_filter__constructor_2__always__equals_params)
 {
     const uint8_t filter_type = 16u;
-    // const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const hash_digest header = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
 
-    chain::block_filter instance(filter_type, header, filter);
+    chain::block_filter instance(filter_type, block_hash, header, filter);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(filter_type == instance.filter_type());
-    // BOOST_REQUIRE(block_hash == instance.block_hash());
+    BOOST_REQUIRE(block_hash == instance.block_hash());
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(filter == instance.filter());
 }
@@ -50,17 +50,17 @@ BOOST_AUTO_TEST_CASE(block_filter__constructor_2__always__equals_params)
 BOOST_AUTO_TEST_CASE(block_filter__constructor_3__always__equals_params)
 {
     const uint8_t filter_type = 16u;
-    // const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    // hash_digest dup_hash = block_hash;
+    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest dup_hash = block_hash;
     const hash_digest header = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     hash_digest dup_header = header;
     const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
     data_chunk dup_filter = filter;
 
-    chain::block_filter instance(filter_type, std::move(dup_header), std::move(dup_filter));
+    chain::block_filter instance(filter_type, std::move(dup_hash), std::move(dup_header), std::move(dup_filter));
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(filter_type == instance.filter_type());
-    // BOOST_REQUIRE(block_hash == instance.block_hash());
+    BOOST_REQUIRE(block_hash == instance.block_hash());
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(filter == instance.filter());
 }
@@ -68,15 +68,15 @@ BOOST_AUTO_TEST_CASE(block_filter__constructor_3__always__equals_params)
 BOOST_AUTO_TEST_CASE(block_filter__constructor_4__always__equals_params)
 {
     const uint8_t filter_type = 16u;
-    // const hash_digest block_hash = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
+    const hash_digest block_hash = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     const hash_digest header = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const data_chunk filter = to_chunk(base16_literal("fedcba9876543210"));
 
-    chain::block_filter value(filter_type, header, filter);
+    chain::block_filter value(filter_type, block_hash, header, filter);
     chain::block_filter instance(value);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(filter_type == instance.filter_type());
-    // BOOST_REQUIRE(block_hash == instance.block_hash());
+    BOOST_REQUIRE(block_hash == instance.block_hash());
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(filter == instance.filter());
 }
@@ -84,101 +84,27 @@ BOOST_AUTO_TEST_CASE(block_filter__constructor_4__always__equals_params)
 BOOST_AUTO_TEST_CASE(block_filter__constructor_5__always__equals_params)
 {
     const uint8_t filter_type = 16u;
-    // const hash_digest block_hash = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
+    const hash_digest block_hash = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     const hash_digest header = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const data_chunk filter = to_chunk(base16_literal("fedcba9876543210"));
 
-    chain::block_filter value(filter_type, header, filter);
+    chain::block_filter value(filter_type, block_hash, header, filter);
     chain::block_filter instance(std::move(value));
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(filter_type == instance.filter_type());
-    // BOOST_REQUIRE(block_hash == instance.block_hash());
+    BOOST_REQUIRE(block_hash == instance.block_hash());
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(filter == instance.filter());
-}
-
-BOOST_AUTO_TEST_CASE(block_filter__from_data__insufficient_bytes__failure)
-{
-    const data_chunk raw{ 0xab, 0xcd };
-    chain::block_filter instance;
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(raw, true));
-}
-
-BOOST_AUTO_TEST_CASE(block_filter__factory_1__valid_input__success)
-{
-    const auto raw = to_chunk(base16_literal(
-        "0a"
-        // "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"
-        "08"
-        "fedcba9876543210"));
-
-    chain::block_filter expected;
-    expected.from_data(raw, true);
-    const auto data = expected.to_data(true);
-    BOOST_REQUIRE(raw == data);
-
-    const auto result = chain::block_filter::factory(data, true);
-    BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(true));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(true), result.serialized_size(true));
-}
-
-BOOST_AUTO_TEST_CASE(block_filter__factory_2__valid_input__success)
-{
-    const auto raw = to_chunk(base16_literal(
-        "0a"
-        // "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"
-        "08"
-        "fedcba9876543210"));
-
-    chain::block_filter expected;
-    expected.from_data(raw, true);
-    const auto data = expected.to_data(true);
-    BOOST_REQUIRE(raw == data);
-
-    data_source istream(data);
-    const auto result = chain::block_filter::factory(istream, true);
-    BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(true));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(true), result.serialized_size(true));
-}
-
-BOOST_AUTO_TEST_CASE(block_filter__factory_3__valid_input__success)
-{
-    const auto raw = to_chunk(base16_literal(
-        "0a"
-        // "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"
-        "08"
-        "fedcba9876543210"));
-
-    chain::block_filter expected;
-    expected.from_data(raw, true);
-    const auto data = expected.to_data(true);
-    BOOST_REQUIRE(raw == data);
-
-    data_source istream(data);
-    istream_reader source(istream);
-    const auto result = chain::block_filter::factory(source, true);
-
-    BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(true));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(true), result.serialized_size(true));
 }
 
 BOOST_AUTO_TEST_CASE(block_filter__filter_type_accessor__always__returns_initialized_value)
 {
     const uint8_t filter_type = 55u;
-    // const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const hash_digest header = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
 
-    chain::block_filter instance(filter_type, header, filter);
+    chain::block_filter instance(filter_type, block_hash, header, filter);
     BOOST_REQUIRE(filter_type == instance.filter_type());
 }
 
@@ -192,68 +118,68 @@ BOOST_AUTO_TEST_CASE(block_filter__filter_type_setter__roundtrip__success)
     BOOST_REQUIRE(filter_type == instance.filter_type());
 }
 
-//BOOST_AUTO_TEST_CASE(block_filter__block_hash_accessor_1__always__returns_initialized_value)
-//{
-//    const uint8_t filter_type = 55u;
-//    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-//    const hash_digest header = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-//    const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
-//
-//    chain::block_filter instance(filter_type, header, filter);
-//    BOOST_REQUIRE(block_hash == instance.block_hash());
-//}
-//
-//BOOST_AUTO_TEST_CASE(block_filter__block_hash_accessor_2__always__returns_initialized_value)
-//{
-//    const uint8_t filter_type = 55u;
-//    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-//    const hash_digest header = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-//    const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
-//
-//    const chain::block_filter instance(filter_type, block_hash, header, filter);
-//    BOOST_REQUIRE(block_hash == instance.block_hash());
-//}
-//
-//BOOST_AUTO_TEST_CASE(block_filter__block_hash_setter_1__roundtrip__success)
-//{
-//    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-//
-//    chain::block_filter instance;
-//    BOOST_REQUIRE(block_hash != instance.block_hash());
-//    instance.set_block_hash(block_hash);
-//    BOOST_REQUIRE(block_hash == instance.block_hash());
-//}
-//
-//BOOST_AUTO_TEST_CASE(block_filter__block_hash_setter_2__roundtrip__success)
-//{
-//    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-//    hash_digest dup = block_hash;
-//
-//    chain::block_filter instance;
-//    BOOST_REQUIRE(block_hash != instance.block_hash());
-//    instance.set_block_hash(std::move(dup));
-//    BOOST_REQUIRE(block_hash == instance.block_hash());
-//}
+BOOST_AUTO_TEST_CASE(block_filter__block_hash_accessor_1__always__returns_initialized_value)
+{
+    const uint8_t filter_type = 55u;
+    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest header = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
+    const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
+
+    chain::block_filter instance(filter_type, block_hash, header, filter);
+    BOOST_REQUIRE(block_hash == instance.block_hash());
+}
+
+BOOST_AUTO_TEST_CASE(block_filter__block_hash_accessor_2__always__returns_initialized_value)
+{
+    const uint8_t filter_type = 55u;
+    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest header = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
+    const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
+
+    const chain::block_filter instance(filter_type, block_hash, header, filter);
+    BOOST_REQUIRE(block_hash == instance.block_hash());
+}
+
+BOOST_AUTO_TEST_CASE(block_filter__block_hash_setter_1__roundtrip__success)
+{
+    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+
+    chain::block_filter instance;
+    BOOST_REQUIRE(block_hash != instance.block_hash());
+    instance.set_block_hash(block_hash);
+    BOOST_REQUIRE(block_hash == instance.block_hash());
+}
+
+BOOST_AUTO_TEST_CASE(block_filter__block_hash_setter_2__roundtrip__success)
+{
+    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest dup = block_hash;
+
+    chain::block_filter instance;
+    BOOST_REQUIRE(block_hash != instance.block_hash());
+    instance.set_block_hash(std::move(dup));
+    BOOST_REQUIRE(block_hash == instance.block_hash());
+}
 
 BOOST_AUTO_TEST_CASE(block_filter__header_accessor_1__always__returns_initialized_value)
 {
     const uint8_t filter_type = 55u;
-    // const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const hash_digest header = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
 
-    chain::block_filter instance(filter_type, header, filter);
+    chain::block_filter instance(filter_type, block_hash, header, filter);
     BOOST_REQUIRE(header == instance.header());
 }
 
 BOOST_AUTO_TEST_CASE(block_filter__header_accessor_2__always__returns_initialized_value)
 {
     const uint8_t filter_type = 55u;
-    // const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const hash_digest header = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
 
-    const chain::block_filter instance(filter_type, header, filter);
+    const chain::block_filter instance(filter_type, block_hash, header, filter);
     BOOST_REQUIRE(header == instance.header());
 }
 
@@ -281,22 +207,22 @@ BOOST_AUTO_TEST_CASE(block_filter__header_setter_2__roundtrip__success)
 BOOST_AUTO_TEST_CASE(block_filter__filter_accessor_1__always__returns_initialized_value)
 {
     const uint8_t filter_type = 55u;
-    // const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const hash_digest header = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
 
-    chain::block_filter instance(filter_type, header, filter);
+    chain::block_filter instance(filter_type, block_hash, header, filter);
     BOOST_REQUIRE(filter == instance.filter());
 }
 
 BOOST_AUTO_TEST_CASE(block_filter__filter_accessor_2__always__returns_initialized_value)
 {
     const uint8_t filter_type = 55u;
-    // const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const hash_digest header = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
 
-    const chain::block_filter instance(filter_type, header, filter);
+    const chain::block_filter instance(filter_type, block_hash, header, filter);
     BOOST_REQUIRE(filter == instance.filter());
 }
 
@@ -324,11 +250,11 @@ BOOST_AUTO_TEST_CASE(block_filter__filter_setter_2__roundtrip__success)
 BOOST_AUTO_TEST_CASE(block_filter__operator_assign_equals__always__matches_equivalent)
 {
     const uint8_t filter_type = 55u;
-    // const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const hash_digest header = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
 
-    chain::block_filter value(filter_type, header, filter);
+    chain::block_filter value(filter_type, block_hash, header, filter);
     BOOST_REQUIRE(value.is_valid());
 
     chain::block_filter instance;
@@ -337,7 +263,7 @@ BOOST_AUTO_TEST_CASE(block_filter__operator_assign_equals__always__matches_equiv
     instance = std::move(value);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(filter_type == instance.filter_type());
-    // BOOST_REQUIRE(block_hash == instance.block_hash());
+    BOOST_REQUIRE(block_hash == instance.block_hash());
     BOOST_REQUIRE(header == instance.header());
     BOOST_REQUIRE(filter == instance.filter());
 }
@@ -346,7 +272,7 @@ BOOST_AUTO_TEST_CASE(block_filter__operator_boolean_equals__duplicates__returns_
 {
     const chain::block_filter expected(
         19u,
-        // hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
         to_chunk(base16_literal("0123456789abcdef")));
 
@@ -358,7 +284,7 @@ BOOST_AUTO_TEST_CASE(block_filter__operator_boolean_equals__differs__returns_fal
 {
     const chain::block_filter expected(
         19u,
-        // hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
         to_chunk(base16_literal("0123456789abcdef")));
 
@@ -370,7 +296,7 @@ BOOST_AUTO_TEST_CASE(block_filter__operator_boolean_not_equals__duplicates__retu
 {
     const chain::block_filter expected(
         19u,
-        // hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
         to_chunk(base16_literal("0123456789abcdef")));
 
@@ -382,7 +308,7 @@ BOOST_AUTO_TEST_CASE(block_filter__operator_boolean_not_equals__differs__returns
 {
     const chain::block_filter expected(
         19u,
-        // hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
         to_chunk(base16_literal("0123456789abcdef")));
 
