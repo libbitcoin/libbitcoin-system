@@ -50,9 +50,9 @@ public:
         uint64_t link = unlinked;
     };
 
-    static block_filter factory(const data_chunk& data, bool wire);
-    static block_filter factory(std::istream& stream, bool wire);
-    static block_filter factory(reader& source, bool wire);
+    static block_filter factory(const data_chunk& data, bool roundtrip);
+    static block_filter factory(std::istream& stream, bool roundtrip);
+    static block_filter factory(reader& source, bool roundtrip);
 
     block_filter();
     block_filter(uint8_t filter_type, const hash_digest& header,
@@ -78,13 +78,13 @@ public:
     bool is_valid() const;
     void reset();
 
-    bool from_data(const data_chunk& data, bool wire);
-    bool from_data(std::istream& stream, bool wire);
-    bool from_data(reader& source, bool wire);
-    data_chunk to_data(bool wire) const;
-    void to_data(std::ostream& stream, bool wire) const;
-    void to_data(writer& sink, bool wire) const;
-    size_t serialized_size(bool wire) const;
+    bool from_data(const data_chunk& data, bool roundtrip);
+    bool from_data(std::istream& stream, bool roundtrip);
+    bool from_data(reader& source, bool roundtrip);
+    data_chunk to_data(bool roundtrip) const;
+    void to_data(std::ostream& stream, bool roundtrip) const;
+    void to_data(writer& sink, bool roundtrip) const;
+    size_t serialized_size(bool roundtrip) const;
 
     bool from_data(reader& source, uint8_t filter_type);
 

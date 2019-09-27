@@ -37,24 +37,24 @@ namespace chain {
 // HACK: unlinked must match tx slab_map::not_found.
 const uint64_t block_filter::validation::unlinked = max_int64;
 
-block_filter block_filter::factory(const data_chunk& data, bool wire)
+block_filter block_filter::factory(const data_chunk& data, bool roundtrip)
 {
     block_filter instance;
-    instance.from_data(data, wire);
+    instance.from_data(data, roundtrip);
     return instance;
 }
 
-block_filter block_filter::factory(std::istream& stream, bool wire)
+block_filter block_filter::factory(std::istream& stream, bool roundtrip)
 {
     block_filter instance;
-    instance.from_data(stream, wire);
+    instance.from_data(stream, roundtrip);
     return instance;
 }
 
-block_filter block_filter::factory(reader& source, bool wire)
+block_filter block_filter::factory(reader& source, bool roundtrip)
 {
     block_filter instance;
-    instance.from_data(source, wire);
+    instance.from_data(source, roundtrip);
     return instance;
 }
 
@@ -111,26 +111,27 @@ void block_filter::reset()
     filter_.shrink_to_fit();
 }
 
-bool block_filter::from_data(const data_chunk& data, bool wire)
+bool block_filter::from_data(const data_chunk& data, bool roundtrip)
 {
     data_source istream(data);
-    return from_data(istream, wire);
+    return from_data(istream, roundtrip);
 }
 
-bool block_filter::from_data(std::istream& stream, bool wire)
+bool block_filter::from_data(std::istream& stream, bool roundtrip)
 {
     istream_reader source(stream);
-    return from_data(source, wire);
+    return from_data(source, roundtrip);
 }
 
-bool block_filter::from_data(reader& source, bool wire)
+bool block_filter::from_data(reader& source, bool roundtrip)
 {
     reset();
 
-    if (wire)
+    if (roundtrip)
+    {
         filter_type_ = source.read_byte();
-
-    header_ = source.read_hash();
+        header_ = source.read_hash();
+    }
 
     const auto count = source.read_size_little_endian();
 
@@ -146,40 +147,42 @@ bool block_filter::from_data(reader& source, bool wire)
     return source;
 }
 
-data_chunk block_filter::to_data(bool wire) const
+data_chunk block_filter::to_data(bool roundtrip) const
 {
     data_chunk data;
-    const auto size = serialized_size(wire);
+    const auto size = serialized_size(roundtrip);
     data.reserve(size);
     data_sink ostream(data);
-    to_data(ostream, wire);
+    to_data(ostream, roundtrip);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 
-void block_filter::to_data(std::ostream& stream, bool wire) const
+void block_filter::to_data(std::ostream& stream, bool roundtrip) const
 {
     ostream_writer sink(stream);
-    to_data(sink, wire);
+    to_data(sink, roundtrip);
 }
 
-void block_filter::to_data(writer& sink, bool wire) const
+void block_filter::to_data(writer& sink, bool roundtrip) const
 {
-    if (wire)
+    if (roundtrip)
+    {
         sink.write_byte(filter_type_);
+        sink.write_hash(header_);
+    }
 
-    sink.write_hash(header_);
     sink.write_size_little_endian(filter_.size());
     sink.write_bytes(filter_);
 }
 
-size_t block_filter::serialized_size(bool wire) const
+size_t block_filter::serialized_size(bool roundtrip) const
 {
     size_t result = hash_size +
         message::variable_uint_size(filter_.size()) + filter_.size();
 
-    if (wire)
+    if (roundtrip)
         result += sizeof(filter_type_);
 
     return result;
