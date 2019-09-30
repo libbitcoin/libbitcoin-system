@@ -185,7 +185,7 @@ void compact_filter_headers::to_data(uint32_t , writer& sink) const
     sink.write_byte(filter_type_);
     sink.write_hash(stop_hash_);
     sink.write_hash(previous_filter_header_);
-    sink.write_variable_little_endian(filter_hashes_.size());
+    sink.write_size_little_endian(filter_hashes_.size());
 
     for (const auto& element: filter_hashes_)
         sink.write_hash(element);

@@ -23,6 +23,7 @@
 #include <bitcoin/system/settings.hpp>
 #include <bitcoin/system/version.hpp>
 #include <bitcoin/system/chain/block.hpp>
+#include <bitcoin/system/chain/block_filter.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/compact.hpp>
 #include <bitcoin/system/chain/header.hpp>

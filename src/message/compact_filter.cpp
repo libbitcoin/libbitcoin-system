@@ -162,7 +162,7 @@ void compact_filter::to_data(writer& sink) const
 {
     sink.write_byte(filter_type_);
     sink.write_hash(block_hash_);
-    sink.write_variable_little_endian(filter_.size());
+    sink.write_size_little_endian(filter_.size());
     sink.write_bytes(filter_);
 }
 

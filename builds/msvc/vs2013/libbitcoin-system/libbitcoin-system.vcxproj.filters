@@ -123,6 +123,9 @@
     <ClCompile Include="..\..\..\..\src\chain\block.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\block_filter.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\chain_state.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
@@ -690,6 +693,9 @@
       <Filter>include\bitcoin</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\block.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\block_filter.hpp">
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\chain_state.hpp">

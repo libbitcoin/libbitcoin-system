@@ -73,6 +73,7 @@
     <ClCompile Include="..\..\..\..\test\chain\block.cpp">
       <ObjectFileName>$(IntDir)test_chain_block.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\block_filter.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\chain_state.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\compact.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\header.cpp">

@@ -39,6 +39,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/error.cpp \
     src/settings.cpp \
     src/chain/block.cpp \
+    src/chain/block_filter.cpp \
     src/chain/chain_state.cpp \
     src/chain/compact.cpp \
     src/chain/header.cpp \
@@ -274,6 +275,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/overloads.hpp \
     test/settings.cpp \
     test/chain/block.cpp \
+    test/chain/block_filter.cpp \
     test/chain/chain_state.cpp \
     test/chain/compact.cpp \
     test/chain/header.cpp \
@@ -417,6 +419,7 @@ include_bitcoin_system_HEADERS = \
 include_bitcoin_system_chaindir = ${includedir}/bitcoin/system/chain
 include_bitcoin_system_chain_HEADERS = \
     include/bitcoin/system/chain/block.hpp \
+    include/bitcoin/system/chain/block_filter.hpp \
     include/bitcoin/system/chain/chain_state.hpp \
     include/bitcoin/system/chain/compact.hpp \
     include/bitcoin/system/chain/header.hpp \

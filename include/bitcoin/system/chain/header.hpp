@@ -25,6 +25,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <bitcoin/system/chain/block_filter.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error.hpp>
@@ -84,6 +85,9 @@ public:
         /// Derived from state stored on header (no fork point considered).
         /// Block is in confirmed state and referenced by the confirmed index.
         bool confirmed = false;
+
+        // Filter population
+        block_filter::ptr filter_data;
     };
 
     // Constructors.
