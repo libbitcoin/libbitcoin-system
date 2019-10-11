@@ -247,7 +247,11 @@ enum error_code_t
     op_check_sequence_verify7,
 
     // Added out of order (bip147).
-    op_check_multisig_verify8
+    op_check_multisig_verify8,
+
+    // Added bip157 blockchain related
+    unrecognized_filter_type,
+    invalid_response_range
 };
 
 enum error_condition_t

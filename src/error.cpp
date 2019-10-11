@@ -250,6 +250,10 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
 
         // Added out of order (bip147).
         { error::op_check_multisig_verify8, "op_check_multisig_verify8" },
+
+        // Added bip157 blockchain related
+        { error::unrecognized_filter_type, "Unrecognized filter type" },
+        { error::invalid_response_range, "The range of responses is invalid" }
     };
 
     const auto message = messages.find(ev);

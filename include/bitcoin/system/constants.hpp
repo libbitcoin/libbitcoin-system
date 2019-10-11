@@ -124,6 +124,11 @@ BC_CONSTEXPR size_t max_get_blocks = 500;
 BC_CONSTEXPR size_t max_get_headers = 2000;
 BC_CONSTEXPR size_t max_get_data = 50000;
 BC_CONSTEXPR size_t max_inventory = 50000;
+BC_CONSTEXPR size_t max_get_compact_filter_headers = 1999;
+BC_CONSTEXPR size_t max_get_compact_filters = 99;
+
+// compact filter checkpoint interval
+BC_CONSTEXPR size_t compact_filter_checkpoint_interval = 1000;
 
 // The minimum safe length of a seed in bits (multiple of 8).
 BC_CONSTEXPR size_t minimum_seed_bits = 128;
