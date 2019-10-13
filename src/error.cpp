@@ -253,7 +253,8 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
 
         // Added bip157 blockchain related
         { error::unrecognized_filter_type, "Unrecognized filter type" },
-        { error::invalid_response_range, "The range of responses is invalid" }
+        { error::invalid_response_range, "The range of responses is invalid" },
+        { error::configuration_disabled, "Disabled by configuration" }
     };
 
     const auto message = messages.find(ev);
