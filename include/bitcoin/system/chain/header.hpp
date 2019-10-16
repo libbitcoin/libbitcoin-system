@@ -86,8 +86,8 @@ public:
         /// Block is in confirmed state and referenced by the confirmed index.
         bool confirmed = false;
 
-        // Filter population
-        block_filter::ptr filter_data;
+        // Neutrino filter.
+        block_filter::ptr neutrino_filter;
     };
 
     // Constructors.
