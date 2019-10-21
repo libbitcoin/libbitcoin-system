@@ -33,12 +33,11 @@ namespace libbitcoin {
 namespace system {
 namespace neutrino {
 
-data_chunk compute_filter(const chain::block& validated_block)
+bool compute_filter(const chain::block& validated_block, data_chunk& out_filter)
 {
     const auto hash = validated_block.hash();
     const auto key = to_siphash_key(slice<0, half_hash_size, hash_size>(hash));
     data_stack items;
-    data_chunk filter;
 
     for (const auto& tx: validated_block.transactions())
     {
@@ -48,7 +47,7 @@ data_chunk compute_filter(const chain::block& validated_block)
             {
                 const auto& prevout = input.previous_output();
                 if (!prevout.metadata.cache.is_valid())
-                    return filter;
+                    return false;
 
                 const auto& script = prevout.metadata.cache.script();
                 if (!script.empty())
@@ -69,14 +68,14 @@ data_chunk compute_filter(const chain::block& validated_block)
     // Remove duplicates.
     bc::system::distinct(items);
 
-    data_sink stream(filter);
+    data_sink stream(out_filter);
     ostream_writer writer(stream);
     writer.write_variable_little_endian(items.size());
     golomb::construct(writer, items, golomb_bits, key,
         golomb_target_false_positive_rate);
     stream.flush();
 
-    return filter;
+    return true;
 }
 
 hash_digest compute_filter_header(const hash_digest& previous_block_hash,

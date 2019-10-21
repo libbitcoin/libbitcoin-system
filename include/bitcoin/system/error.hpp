@@ -252,7 +252,8 @@ enum error_code_t
     // Added bip157 blockchain related
     unrecognized_filter_type,
     invalid_response_range,
-    configuration_disabled
+    configuration_disabled,
+    metadata_prevout_missing
 };
 
 enum error_condition_t

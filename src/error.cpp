@@ -254,7 +254,8 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         // Added bip157 blockchain related
         { error::unrecognized_filter_type, "Unrecognized filter type" },
         { error::invalid_response_range, "The range of responses is invalid" },
-        { error::configuration_disabled, "Disabled by configuration" }
+        { error::configuration_disabled, "Disabled by configuration" },
+        { error::metadata_prevout_missing, "Missing expected cached prevout" }
     };
 
     const auto message = messages.find(ev);
