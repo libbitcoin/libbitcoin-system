@@ -195,6 +195,10 @@ message_type heading::type() const
         return message_type::block;
     if (command_ == compact_block::command)
         return message_type::compact_block;
+    if (command_ == compact_filter_checkpoint::command)
+        return message_type::compact_filter_checkpoint;
+    if (command_ == compact_filter_headers::command)
+        return message_type::compact_filter_headers;
     if (command_ == compact_filter::command)
         return message_type::compact_filter;
     if (command_ == fee_filter::command)
@@ -211,6 +215,12 @@ message_type heading::type() const
         return message_type::get_block_transactions;
     if (command_ == get_blocks::command)
         return message_type::get_blocks;
+    if (command_ == get_compact_filter_checkpoint::command)
+        return message_type::get_compact_filter_checkpoint;
+    if (command_ == get_compact_filter_headers::command)
+        return message_type::get_compact_filter_headers;
+    if (command_ == get_compact_filters::command)
+        return message_type::get_compact_filters;
     if (command_ == get_data::command)
         return message_type::get_data;
     if (command_ == get_headers::command)
