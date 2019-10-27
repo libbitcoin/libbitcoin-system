@@ -42,11 +42,11 @@ public:
 
     enum level: uint32_t
     {
-        // compact filters service bit
-        bip157 = 70015,
-
         // compact blocks protocol
         bip152 = 70014,
+
+        // compact filters service bit
+        bip157 = 70013,
 
         // fee_filter
         bip133 = 70013,
@@ -85,7 +85,7 @@ public:
         minimum = 31402,
 
         // We support at most this internally (bound to settings default).
-        maximum = bip157,
+        maximum = bip152,
 
         // Used to generate canonical size required by consensus checks.
         canonical = 0
