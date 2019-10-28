@@ -59,8 +59,8 @@ bool compute_filter(const chain::block& validated_block, data_chunk& out_filter)
         {
             const auto& script = output.script();
 
-            // is_unspendable: script.front().code() != machine::opcode::return_
-            if (!script.empty() && !script.is_unspendable())
+            if (!script.empty() &&
+                (script.front().code() != machine::opcode::return_))
                 items.push_back(script.to_data(false));
         }
     }
