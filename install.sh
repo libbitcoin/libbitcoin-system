@@ -796,7 +796,7 @@ build_all()
     build_from_tarball "$PNG_URL" "$PNG_ARCHIVE" xz . "$PARALLEL" "$BUILD_PNG" "${PNG_OPTIONS[@]}" "$@"
     build_from_tarball "$QRENCODE_URL" "$QRENCODE_ARCHIVE" bzip2 . "$PARALLEL" "$BUILD_QRENCODE" "${QRENCODE_OPTIONS[@]}" "$@"
     build_from_tarball_boost "$BOOST_URL" "$BOOST_ARCHIVE" bzip2 . "$PARALLEL" "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
-    build_from_github libbitcoin secp256k1 version5 "$PARALLEL" "${SECP256K1_OPTIONS[@]}" "$@"
+    build_from_github libbitcoin secp256k1 version6 "$PARALLEL" "${SECP256K1_OPTIONS[@]}" "$@"
     build_from_travis libbitcoin libbitcoin-system master "$PARALLEL" "${BITCOIN_SYSTEM_OPTIONS[@]}" "$@"
 }
 
