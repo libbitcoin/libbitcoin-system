@@ -208,6 +208,7 @@ BOOST_AUTO_TEST_CASE(compute_filter_header__block_1414221__success)
     BOOST_REQUIRE_EQUAL(result, expected);
 }
 
+#ifndef _MSC_VER
 BOOST_AUTO_TEST_CASE(compute_filter__block_54503__success)
 {
     const auto raw_block = to_chunk(base16_literal(
@@ -1427,6 +1428,7 @@ BOOST_AUTO_TEST_CASE(compute_filter__block_54503__success)
     const auto expected_filter = to_chunk(base16_literal("06294070f18c8b0ff84b92738259ca89b4"));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
+#endif
 
 BOOST_AUTO_TEST_CASE(compute_filter__block_54499__success)
 {
@@ -2846,6 +2848,7 @@ BOOST_AUTO_TEST_CASE(compute_filter__block_54499__success)
     const auto expected_filter = to_chunk(base16_literal("1c275e3182d7d12a3bde9c34441fddffd314e1600dc25e30bfdcecdc40a35594e1561678bd8cac799f9fd001c2f8dfd2d4c909755e5a6bdc7731c39e00b8f73326e1508039cff3bc39d000"));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
+#endif
 
 BOOST_AUTO_TEST_CASE(compute_filter__block_0__success)
 {
