@@ -208,6 +208,7 @@ BOOST_AUTO_TEST_CASE(compute_filter_header__block_1414221__success)
     BOOST_REQUIRE_EQUAL(result, expected);
 }
 
+// msvc errors on length of string containing hex encoded block, tests made conditional.
 #ifndef _MSC_VER
 BOOST_AUTO_TEST_CASE(compute_filter__block_54503__success)
 {
