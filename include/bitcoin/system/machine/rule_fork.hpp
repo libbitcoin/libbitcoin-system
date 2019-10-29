@@ -44,46 +44,47 @@ enum rule_fork : uint32_t
     /// Coinbase must include height (soft fork, security).
     bip34_rule = 1u << 4,
 
+    /// Finite monetary supply (soft fork, feature).
+    bip42_rule = 1u << 5,
+
     /// Strict DER signatures required (soft fork, security).
-    bip66_rule = 1u << 5,
+    bip66_rule = 1u << 6,
 
     /// Operation nop2 becomes check locktime verify (soft fork, feature).
-    bip65_rule = 1u << 6,
+    bip65_rule = 1u << 7,
 
     /// Hard code bip34-based activation heights (hard fork, optimization).
-    bip90_rule = 1u << 7,
+    bip90_rule = 1u << 8,
 
     /// Enforce relative locktime (soft fork, feature).
-    bip68_rule = 1u << 8,
+    bip68_rule = 1u << 9,
 
     /// Operation nop3 becomes check sequence verify (soft fork, feature).
-    bip112_rule = 1u << 9,
+    bip112_rule = 1u << 10,
 
     /// Use median time past for locktime (soft fork, feature).
-    bip113_rule = 1u << 10,
+    bip113_rule = 1u << 11,
 
     /// Segregated witness consensus layer (soft fork, feature).
-    bip141_rule = 1u << 11,
+    bip141_rule = 1u << 12,
 
     /// Segregated witness v0 verification (soft fork, feature).
-    bip143_rule = 1u << 12,
+    bip143_rule = 1u << 13,
 
     /// Prevent dummy value malleability (soft fork, feature).
-    bip147_rule = 1u << 13,
+    bip147_rule = 1u << 14,
+
+    // Future bitcoin forks work forward from << 15.
+    // Splitcoin/altcoin forks work backwards from << 30.
 
     /// Fix Satoshi's time warp bug (hard fork, security).
-    time_warp_patch = 1u << 14,
+    time_warp_patch = 1u << 28,
 
     /// Fix target overflow for very low difficulty (hard fork, security).
-    retarget_overflow_patch = 1u << 15,
+    retarget_overflow_patch = 1u << 29,
 
     /// Use scrypt hashing for proof of work (hard fork, feature).
-    scrypt_proof_of_work = 1u << 16,
-
-    // TODO: future bitcoin forks work forward from << 14.
-    // TODO: splitcoin/altcoin forks work backwards from << 30.
-    ////time_warp_patch = 1u << 29,
-    ////scrypt_proof = 1u << 30,
+    scrypt_proof_of_work = 1u << 30,
 
     /// Sentinel bit to indicate tx has not been validated.
     unverified = 1u << 31,
@@ -106,7 +107,7 @@ enum rule_fork : uint32_t
         rule_fork::bip143_rule |
         rule_fork::bip147_rule,
 
-    /// Simple mask to set all bits.
+    /// Mask to set all rule bits.
     all_rules = 0xffffffff
 };
 
