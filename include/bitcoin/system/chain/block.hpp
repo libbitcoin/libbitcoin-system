@@ -138,12 +138,12 @@ public:
     //-------------------------------------------------------------------------
 
     static uint64_t subsidy(size_t height, uint64_t subsidy_interval,
-        uint64_t initial_block_subsidy_satoshi);
+        uint64_t initial_block_subsidy_satoshi, bool bip42);
 
     uint64_t fees() const;
     uint64_t claim() const;
     uint64_t reward(size_t height, uint64_t subsidy_interval,
-        uint64_t initial_block_subsidy_satoshi) const;
+        uint64_t initial_block_subsidy_satoshi, bool bip42) const;
     hash_digest generate_merkle_root(bool witness=false) const;
     size_t signature_operations() const;
     size_t signature_operations(bool bip16, bool bip141) const;
@@ -155,7 +155,7 @@ public:
     bool is_final(size_t height, uint32_t block_time) const;
     bool is_distinct_transaction_set() const;
     bool is_valid_coinbase_claim(size_t height, uint64_t subsidy_interval,
-        uint64_t initial_block_subsidy_satoshi) const;
+        uint64_t initial_block_subsidy_satoshi, bool bip42) const;
     bool is_valid_coinbase_script(size_t height) const;
     bool is_valid_witness_commitment() const;
     bool is_forward_reference() const;

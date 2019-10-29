@@ -462,6 +462,7 @@ bool header::is_valid_proof_of_work(uint32_t proof_of_work_limit,
     if (target < 1 || target > pow_limit)
         return false;
 
+    // Conditionally use scrypt proof of work (e.g. Litecoin).
     // Ensure actual work is at least claimed amount (smaller is more work).
     return to_uint256(scrypt ? scrypt_hash(to_data()) : hash()) <= target;
 }
