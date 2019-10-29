@@ -35,8 +35,8 @@ namespace system {
 namespace message {
 
 const std::string compact_filter_checkpoint::command = "cfcheckpt";
-const uint32_t compact_filter_checkpoint::version_minimum = version::level::bip157;
-const uint32_t compact_filter_checkpoint::version_maximum = version::level::bip157;
+const uint32_t compact_filter_checkpoint::version_minimum = version::level::minimum;
+const uint32_t compact_filter_checkpoint::version_maximum = version::level::maximum;
 
 compact_filter_checkpoint compact_filter_checkpoint::factory(uint32_t version,
     const data_chunk& data)

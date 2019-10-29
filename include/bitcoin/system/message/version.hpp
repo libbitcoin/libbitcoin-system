@@ -45,9 +45,6 @@ public:
         // compact blocks protocol
         bip152 = 70014,
 
-        // compact filters service bit
-        bip157 = 70013,
-
         // fee_filter
         bip133 = 70013,
 
@@ -111,7 +108,6 @@ public:
         // The node is capable of responding to witness inventory requests.
         node_witness = (1u << 3),
 
-        // Requires version.value >= level::bip157
         // The node is capable of responding to getcfilters, getcfheaders,
         // and getcfcheckpt protocol requests.
         node_compact_filters = (1u << 6)
