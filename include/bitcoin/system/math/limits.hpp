@@ -87,6 +87,20 @@ Integer safe_subtract(Integer left, Integer right)
     return left - right;
 }
 
+template <typename Integer, typename = UNSIGNED(Integer)>
+Integer safe_multiply(Integer left, Integer right)
+{
+    static const auto maximum = std::numeric_limits<Integer>::max();
+
+    if (left == 0u || right == 0u)
+        return 0u;
+
+    if (left > maximum / right)
+        throw std::overflow_error("multiplication overflow");
+
+    return left * right;
+}
+
 template <typename Integer>
 void safe_increment(Integer& value)
 {

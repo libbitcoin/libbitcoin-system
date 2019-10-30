@@ -882,8 +882,7 @@ code block::accept(const chain_state& state,
 
     // TODO: relates height to total of tx.fee (pool cach).
     else if (!is_valid_coinbase_claim(state.height(),
-            settings.subsidy_interval(), settings.bitcoin_to_satoshi(
-                settings.initial_block_subsidy_bitcoin()), bip42))
+        settings.subsidy_interval_blocks, settings.initial_subsidy(), bip42))
         return error::coinbase_value_limit;
 
     // TODO: relates median time past to tx.locktime (pool cache min tx.time).

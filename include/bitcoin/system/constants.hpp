@@ -85,6 +85,7 @@ BC_CONSTEXPR size_t locktime_threshold = 500000000;
 BC_CONSTEXPR size_t max_block_size = 1000000;
 BC_CONSTEXPR size_t max_sigops_factor = 50;
 BC_CONSTEXPR size_t max_block_sigops = max_block_size / max_sigops_factor;
+BC_CONSTEXPR uint64_t satoshi_per_bitcoin = 100000000;
 
 // Relative locktime constants.
 //-----------------------------------------------------------------------------
