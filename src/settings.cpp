@@ -28,25 +28,21 @@ using namespace chain;
 
 // Common default values (no settings context).
 settings::settings()
-  : timestamp_limit_seconds(2 * 60 * 60),
-    first_version(1),
+  : first_version(1),
     bip34_version(2),
     bip66_version(3),
     bip65_version(4),
     bip9_version_bit0(1u << 0),
     bip9_version_bit1(1u << 1),
     bip9_version_base(0x20000000),
-    retargeting_factor_(4),
-    block_spacing_seconds_(10 * 60),
-    retargeting_interval_seconds_(2 * 7 * 24 * 60 * 60),
-    minimum_timespan_(chain_state::minimum_timespan(
-        retargeting_interval_seconds_, retargeting_factor_)),
-    maximum_timespan_(chain_state::maximum_timespan(
-        retargeting_interval_seconds_, retargeting_factor_)),
-    retargeting_interval_(chain_state::retargeting_interval(
-        retargeting_interval_seconds_, block_spacing_seconds_)),
-    initial_block_subsidy_bitcoin_(50),
-    recursive_money_(9999999989u)
+    retargeting_factor(4),
+    retargeting_interval_seconds(2 * 7 * 24 * 60 * 60),
+    block_spacing_seconds(10 * 60),
+    timestamp_limit_seconds(2 * 60 * 60),
+    proof_of_work_limit(0x1d00ffff),
+    initial_subsidy_bitcoin(50),
+    subsidy_interval_blocks(210000),
+    genesis_block{}
 {
 }
 
@@ -57,7 +53,6 @@ settings::settings(config::settings context)
     {
         case config::settings::mainnet:
         {
-            proof_of_work_limit = 0x1d00ffff;
             genesis_block = chain::block::factory({
                 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -98,6 +93,7 @@ settings::settings(config::settings context)
             activation_threshold = 750;
             enforcement_threshold = 950;
             activation_sample = 1000;
+
             bip65_freeze = 388381;
             bip66_freeze = 363725;
             bip34_freeze = 227931;
@@ -112,13 +108,11 @@ settings::settings(config::settings context)
                 "0000000000000000001c8018d9cb3b742ef25114f27563e3fc4a1902167f9893",
                 481824);
 
-            subsidy_interval_ = 210000;
             break;
         }
 
         case config::settings::testnet:
         {
-            proof_of_work_limit = 0x1d00ffff;
             genesis_block = chain::block::factory({
                 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -159,6 +153,7 @@ settings::settings(config::settings context)
             activation_threshold = 51;
             enforcement_threshold = 75;
             activation_sample = 100;
+
             bip65_freeze = 581885;
             bip66_freeze = 330776;
             bip34_freeze = 21111;
@@ -173,13 +168,13 @@ settings::settings(config::settings context)
                 "00000000002b980fcd729daaa248fd9316a5200e9b367f4ff2c42453e84201ca",
                 834624);
 
-            subsidy_interval_ = 210000;
             break;
         }
 
         case config::settings::regtest:
         {
             proof_of_work_limit = 0x207fffff;
+            subsidy_interval_blocks = 150;
             genesis_block = chain::block::factory({
                 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -217,10 +212,12 @@ settings::settings(config::settings context)
                 0x5c, 0x38, 0x4d, 0xf7, 0xba, 0x0b, 0x8d, 0x57,
                 0x8a, 0x4c, 0x70, 0x2b, 0x6b, 0xf1, 0x1d, 0x5f,
                 0xac, 0x00, 0x00, 0x00, 0x00});
+
             bip65_freeze = 1351;
             bip66_freeze = 1251;
             bip34_freeze = 0;
             bip16_activation_time = 0x4f3af580;
+
             const config::checkpoint genesis_checkpoint(
                 static_cast<chain::block>(genesis_block).hash(), 0);
 
@@ -231,7 +228,6 @@ settings::settings(config::settings context)
             bip9_bit0_active_checkpoint = genesis_checkpoint;
             bip9_bit1_active_checkpoint = genesis_checkpoint;
 
-            subsidy_interval_ = 150;
             break;
         }
 
@@ -240,107 +236,66 @@ settings::settings(config::settings context)
         {
         }
     }
-    max_money_ = recursive_money_ * subsidy_interval_;
 }
 
-void settings::retargeting_factor(uint32_t value)
-{
-    retargeting_factor_ = value;
-    minimum_timespan_ = chain_state::minimum_timespan(
-        retargeting_interval_seconds_, retargeting_factor_);
-    maximum_timespan_ = chain_state::maximum_timespan(
-        retargeting_interval_seconds_, retargeting_factor_);
-}
+// Computed properties.
+// TODO: optimize to prevent recomputation.
 
-uint32_t settings::retargeting_interval_seconds() const
+// The true maximum amount of money as of bip42.
+uint64_t settings::max_money() const
 {
-    return retargeting_interval_seconds_;
-}
-
-void settings::retargeting_interval_seconds(uint32_t value)
-{
-    retargeting_interval_seconds_ = value;
-    minimum_timespan_ = chain_state::minimum_timespan(
-        retargeting_interval_seconds_, retargeting_factor_);
-    maximum_timespan_ = chain_state::maximum_timespan(
-        retargeting_interval_seconds_, retargeting_factor_);
-    retargeting_interval_ = chain_state::retargeting_interval(
-        retargeting_interval_seconds_, block_spacing_seconds_);
-}
-
-uint32_t settings::block_spacing_seconds() const
-{
-    return block_spacing_seconds_;
-}
-
-void settings::block_spacing_seconds(uint32_t value)
-{
-    block_spacing_seconds_ = value;
-    retargeting_interval_ = chain_state::retargeting_interval(
-        retargeting_interval_seconds_, block_spacing_seconds_);
-}
-
-uint32_t settings::minimum_timespan() const
-{
-    return minimum_timespan_;
-}
-
-uint32_t settings::maximum_timespan() const
-{
-    return maximum_timespan_;
-}
-
-size_t settings::retargeting_interval() const
-{
-    return retargeting_interval_;
-}
-
-uint64_t settings::bitcoin_to_satoshi(uint64_t value) const
-{
-    static const uint64_t satoshi_per_bitcoin = 100000000;
-    return value * satoshi_per_bitcoin;
-}
-
-void settings::initial_block_subsidy_bitcoin(uint64_t value)
-{
-    initial_block_subsidy_bitcoin_ = value;
+    //*************************************************************************
+    // CONSENSUS: This assumes bip42 as otherwise money supply is unbounded.
+    //*************************************************************************
     const std::function<uint64_t(uint64_t)> recursive_money =
         [&recursive_money](uint64_t money)
         {
-            return money > 0 ? money + recursive_money(money >> 1u) : 0;
+            return money > 0 ? safe_add(money, recursive_money(money >> 1u)) : 0;
         };
-    recursive_money_ = recursive_money(bitcoin_to_satoshi(value));
 
-    //**************************************************************************
-    // CONSENSUS: This is the true maximum amount of money that can be created.
-    // The satoshi client uses a "sanity check" value that is effectively based
-    // on a round but incorrect value of recursive_money, which is higher than
-    // this true value. Despite comments to the contrary in the satoshi code, no
-    // value could be consensus critical unless it was *less* than the true
-    // value.
-    //**************************************************************************
-    max_money_ = recursive_money_ * subsidy_interval_;
+    //*************************************************************************
+    // CONSENSUS: The satoshi client uses a "sanity check" value that is
+    // effectively based on a round but incorrect value of recursive_money,
+    // which is higher than this true value. Despite comments to the contrary
+    // in the satoshi code, no value could be consensus critical unless it was
+    // *less* than the true value.
+    //*************************************************************************
+    return safe_multiply(recursive_money(initial_subsidy()),
+        subsidy_interval_blocks);
 }
 
-uint64_t settings::initial_block_subsidy_bitcoin() const
+// The initial block subsidy in satoshis.
+uint64_t settings::initial_subsidy() const
 {
-    return initial_block_subsidy_bitcoin_;
+    return bitcoin_to_satoshi(initial_subsidy_bitcoin);
 }
 
-void settings::subsidy_interval(uint64_t value)
+// The lower bound for the retargeting timespan.
+uint32_t settings::minimum_timespan() const
 {
-    subsidy_interval_ = value;
-    max_money_ = recursive_money_ * subsidy_interval_;
+    return chain_state::minimum_timespan(retargeting_interval_seconds,
+        retargeting_factor);
 }
 
-uint64_t settings::subsidy_interval() const
+// The upper bound for the retargeting timespan.
+uint32_t settings::maximum_timespan() const
 {
-    return subsidy_interval_;
+    return chain_state::maximum_timespan(retargeting_interval_seconds,
+        retargeting_factor);
 }
 
-uint64_t settings::max_money() const
+// The target number of blocks for 2 weeks of work (2016 blocks).
+size_t settings::retargeting_interval() const
 {
-    return max_money_;
+    return chain_state::retargeting_interval(retargeting_interval_seconds,
+        block_spacing_seconds);
+}
+
+// Utility.
+
+uint64_t settings::bitcoin_to_satoshi(uint64_t value) const
+{
+    return safe_multiply(value, satoshi_per_bitcoin);
 }
 
 } // namespace system

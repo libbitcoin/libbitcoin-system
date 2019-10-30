@@ -311,12 +311,12 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks,
         return work_required_retarget(values, forks,
             settings.proof_of_work_limit, settings.minimum_timespan(),
             settings.maximum_timespan(),
-            settings.retargeting_interval_seconds());
+            settings.retargeting_interval_seconds);
 
     // Testnet retargets easy on inter-interval.
     if (!script::is_enabled(forks, rule_fork::difficult))
         return easy_work_required(values, settings.retargeting_interval(),
-            settings.proof_of_work_limit, settings.block_spacing_seconds());
+            settings.proof_of_work_limit, settings.block_spacing_seconds);
 
     // Mainnet not retargeting.
     return bits_high(values);
