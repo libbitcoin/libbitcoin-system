@@ -35,8 +35,8 @@ namespace system {
 namespace message {
 
 const std::string compact_filter_headers::command = "cfheaders";
-const uint32_t compact_filter_headers::version_minimum = version::level::bip157;
-const uint32_t compact_filter_headers::version_maximum = version::level::bip157;
+const uint32_t compact_filter_headers::version_minimum = version::level::minimum;
+const uint32_t compact_filter_headers::version_maximum = version::level::maximum;
 
 compact_filter_headers compact_filter_headers::factory(uint32_t version,
     const data_chunk& data)
