@@ -442,7 +442,7 @@ static std::string normalize_text(const std::string& text)
         }
     }
 
-    output += normal[normal.size() -1];
+    output += normal[normal.size() - 1];
 
     // Return the converted UTF-32 string to UTF-8.
     return boost::locale::conv::utf_to_utf<char, char32_t>(
