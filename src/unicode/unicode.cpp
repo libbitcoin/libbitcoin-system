@@ -26,6 +26,7 @@
 #include <stdexcept>
 #include <string>
 #include <boost/locale.hpp>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/unicode/console_streambuf.hpp>
@@ -37,6 +38,7 @@
 #ifdef _MSC_VER
     #include <fcntl.h>
     #include <io.h>
+    #include <Windows.h>
 #endif
 
 namespace libbitcoin {
@@ -86,13 +88,66 @@ std::ostream& cerr_stream()
 
 #ifdef WITH_ICU
 
+#ifdef _MSC_VER
+
+static NORM_FORM to_win32_normal_form(boost::locale::norm_type form)
+{
+    switch (form)
+    {
+        case norm_type::norm_nfkd :
+            return NormalizationKD;
+        case norm_type::norm_nfkc :
+            return NormalizationKC;
+        case norm_type::norm_nfd:
+            return NormalizationD;
+
+        // NFC is the boost::locale default and this is the full enumeration.
+        case norm_type::norm_nfc :
+        default :
+            return NormalizationC;
+    }
+}
+
+#endif
+
 // The backend selection is ignored if invalid (in this case on Windows).
 static std::string normal_form(const std::string& value, norm_type form)
 {
+    if (value.empty())
+        return value;
+
+#ifdef _MSC_VER
+    // Windows boost locale with ICU compiles but doesn't normalize.
+    const auto norm = to_win32_normal_form(form);
+    const auto wide_value = to_utf16(value);
+    const auto source = wide_value.c_str();
+    const auto full_size = wide_value.size();
+
+    // The input length exceeds the maximum convertible size.
+    if (full_size > max_int32)
+        return {};
+
+    SetLastError(ERROR_SUCCESS);
+    const auto size = static_cast<uint32_t>(full_size);
+    const auto estimate = NormalizeString(norm, source, size, NULL, 0);
+
+    if (estimate <= 0)
+        return {};
+
+    auto buffer = std::wstring(estimate, {});
+    const auto length = NormalizeString(norm, source, size, &buffer.front(),
+        estimate);
+
+    if (length <= 0)
+        return {};
+
+    return to_utf8(buffer.substr(0, length));
+#else
     auto backend_manager = localization_backend_manager::global();
     backend_manager.select(BC_LOCALE_BACKEND);
     const generator locale(backend_manager);
     return normalize(value, form, locale(BC_LOCALE_UTF8));
+#endif
 }
 
 // One time verifier of the localization backend manager. This is
@@ -100,6 +155,7 @@ static std::string normal_form(const std::string& value, norm_type form)
 // normalization if the ICU dependency is missing.
 static void validate_localization()
 {
+#ifndef _MSC_VER
     const auto backend_manager = localization_backend_manager::global();
     const auto available_backends = backend_manager.get_all_backends();
     const auto iterator = std::find(available_backends.cbegin(),
@@ -108,6 +164,7 @@ static void validate_localization()
     if (iterator == available_backends.cend())
         throw std::runtime_error(
             "Unicode normalization test failed, a dependency may be missing.");
+#endif
 }
 
 // Normalize strings using unicode nfc normalization.

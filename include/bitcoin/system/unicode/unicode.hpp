@@ -150,6 +150,7 @@ std::ostream& cerr_stream();
 
 /**
  * Normalize a string value using nfc normalization.
+ * Failure is indicated by empty string return for non-empty value.
  * This function requires the ICU dependency.
  * @param[in]  value  The value to normalize.
  * @return            The normalized value.
@@ -158,6 +159,7 @@ BC_API std::string to_normal_nfc_form(const std::string& value);
 
 /**
  * Normalize a string value using nfkd normalization.
+ * Failure is indicated by empty string return for non-empty value.
  * This function requires the ICU dependency.
  * @param[in]  value  The value to normalize.
  * @return            The normalized value.

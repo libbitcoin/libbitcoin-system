@@ -67,14 +67,8 @@ BOOST_AUTO_TEST_CASE(unicode__to_normal_nfkd_form__61cc81__c3a1)
 
     const auto normalized_c3a1 = to_normal_nfkd_form(string_c3a1);
     const auto normalized_61cc81 = to_normal_nfkd_form(string_61cc81);
-
-#ifdef _MSC_VER
-    BOOST_REQUIRE_EQUAL(normalized_61cc81.c_str(), string_c3a1);
-    BOOST_REQUIRE_EQUAL(normalized_c3a1.c_str(), string_c3a1);
-#else
     BOOST_REQUIRE_EQUAL(normalized_61cc81.c_str(), string_61cc81);
     BOOST_REQUIRE_EQUAL(normalized_c3a1.c_str(), string_61cc81);
-#endif
 }
 
 #endif
