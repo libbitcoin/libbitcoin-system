@@ -300,10 +300,10 @@ static const unicode_interval_list combining
     { 0x1e948, 0x1e94a }, // adlam consonant modifier..adlam nukta
 };
 
-static bool in_range(const unicode_interval_list& intervals, char32_t ch)
+static bool in_range(const unicode_interval_list& intervals, char32_t character)
 {
     for (const auto& interval: intervals)
-        if (ch >= interval.first && ch <= interval.second)
+        if (character >= interval.first && character <= interval.second)
             return true;
 
     return false;
@@ -407,7 +407,7 @@ static std::string normalize_text(const std::string& text)
     auto normal_list = split(to_lower(to_normal_nfkd_form(text)));
 
     // Whitespace removal.
-    for (auto& word : normal_list)
+    for (auto& word: normal_list)
         boost::algorithm::trim(word);
 
     // Normalize whitespaces and convert the UTF-8 string to a UTF-32 string.
@@ -418,9 +418,9 @@ static std::string normalize_text(const std::string& text)
     std::u32string normal{};
 
     // Remove unicode combining characters (accents).
-    for (const auto ch : expanded)
-        if (!is_combining(ch))
-            normal += ch;
+    for (const auto character: expanded)
+        if (!is_combining(character))
+            normal += character;
 
     if (normal.empty())
         return {};
@@ -433,11 +433,13 @@ static std::string normalize_text(const std::string& text)
     // Remove whitespaces between CJK by building an output with them.
     std::u32string output{ normal.begin(), normal.begin() + 1 };
 
-    for (size_t i = 1; i < normal.size() - 1; i++)
+    for (size_t index = 1; index < normal.size() - 1; index++)
     {
-        if (!(is_ascii_space(normal[i]) &&
-              is_cjk(normal[i-1]) && is_cjk(normal[i+1])))
-            output += normal[i];
+        if (!(is_ascii_space(normal[index]) &&
+            is_cjk(normal[index - 1]) && is_cjk(normal[index + 1])))
+        {
+            output += normal[index];
+        }
     }
 
     output += normal[normal.size() -1];
