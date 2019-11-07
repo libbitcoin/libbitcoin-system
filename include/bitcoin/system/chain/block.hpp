@@ -64,6 +64,7 @@ public:
         asio::nanoseconds candidate;
         asio::nanoseconds confirm;
         asio::nanoseconds catalog;
+        asio::nanoseconds filter;
 
         float cache_efficiency;
     };
