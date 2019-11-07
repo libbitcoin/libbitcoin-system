@@ -117,7 +117,7 @@ static std::string normal_form(const std::string& value, norm_type form)
         return value;
 
 #ifdef _MSC_VER
-    // Windows boost locale with ICU compiles but doesn't normalize.
+    // Workaround lack of ICU support in published boost-locale NuGet packages.
     const auto norm = to_win32_normal_form(form);
     const auto wide_value = to_utf16(value);
     const auto source = wide_value.c_str();
@@ -127,7 +127,6 @@ static std::string normal_form(const std::string& value, norm_type form)
     if (full_size > max_int32)
         return {};
 
-    SetLastError(ERROR_SUCCESS);
     const auto size = static_cast<uint32_t>(full_size);
     const auto estimate = NormalizeString(norm, source, size, NULL, 0);
 
