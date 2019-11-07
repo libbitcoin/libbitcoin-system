@@ -39,8 +39,8 @@ BOOST_AUTO_TEST_CASE(settings__construct__default_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.bip34_version, 2);
     BOOST_REQUIRE_EQUAL(configuration.bip66_version, 3);
     BOOST_REQUIRE_EQUAL(configuration.bip65_version, 4);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, 1u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, 2u);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, 1);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, 2);
     BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000);
     BOOST_REQUIRE_EQUAL(configuration.initial_subsidy_bitcoin, 50);
     BOOST_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000);
@@ -62,8 +62,8 @@ BOOST_AUTO_TEST_CASE(settings__construct__mainnet_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.bip34_version, 2);
     BOOST_REQUIRE_EQUAL(configuration.bip66_version, 3);
     BOOST_REQUIRE_EQUAL(configuration.bip65_version, 4);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, 1u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, 2u);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, 1);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, 2);
     BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000);
     BOOST_REQUIRE_EQUAL(configuration.activation_threshold, 750);
     BOOST_REQUIRE_EQUAL(configuration.enforcement_threshold, 950);
@@ -100,8 +100,8 @@ BOOST_AUTO_TEST_CASE(settings__construct__testnet_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.bip34_version, 2);
     BOOST_REQUIRE_EQUAL(configuration.bip66_version, 3);
     BOOST_REQUIRE_EQUAL(configuration.bip65_version, 4);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, 1u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, 2u);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, 1);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, 2);
     BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000);
     BOOST_REQUIRE_EQUAL(configuration.activation_threshold, 51);
     BOOST_REQUIRE_EQUAL(configuration.enforcement_threshold, 75);
@@ -138,8 +138,8 @@ BOOST_AUTO_TEST_CASE(settings__construct__regtest_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.bip34_version, 2);
     BOOST_REQUIRE_EQUAL(configuration.bip66_version, 3);
     BOOST_REQUIRE_EQUAL(configuration.bip65_version, 4);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, 1u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, 2u);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, 1);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, 2);
     BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000);
     BOOST_REQUIRE_EQUAL(configuration.bip65_freeze, 1351);
     BOOST_REQUIRE_EQUAL(configuration.bip66_freeze, 1251);
