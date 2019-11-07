@@ -28,21 +28,21 @@ using namespace chain;
 
 // Common default values (no settings context).
 settings::settings()
-  : first_version(1),
-    bip34_version(2),
-    bip66_version(3),
-    bip65_version(4),
-    bip9_version_bit0(1u << 0),
-    bip9_version_bit1(1u << 1),
-    bip9_version_base(0x20000000),
-    retargeting_factor(4),
+  : retargeting_factor(4),
     retargeting_interval_seconds(2 * 7 * 24 * 60 * 60),
     block_spacing_seconds(10 * 60),
     timestamp_limit_seconds(2 * 60 * 60),
     proof_of_work_limit(0x1d00ffff),
     initial_subsidy_bitcoin(50),
     subsidy_interval_blocks(210000),
-    genesis_block{}
+    genesis_block{},
+    first_version(1),
+    bip34_version(2),
+    bip66_version(3),
+    bip65_version(4),
+    bip9_version_bit0(1u << 0),
+    bip9_version_bit1(1u << 1),
+    bip9_version_base(0x20000000)
 {
 }
 
