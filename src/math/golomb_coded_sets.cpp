@@ -51,7 +51,7 @@ static void golomb_encode(bit_writer& sink, uint64_t value,
 static uint64_t golomb_decode(bit_reader& source, uint8_t modulo_exponent)
 {
     uint64_t quotient = 0;
-    while(source.read_bit())
+    while (source.read_bit())
         quotient++;
 
     uint64_t remainder = source.read_variable_bits_big_endian(modulo_exponent);
