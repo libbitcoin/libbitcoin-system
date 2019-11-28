@@ -25,9 +25,7 @@
 #include <istream>
 #include <memory>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/reader.hpp>
-#include <bitcoin/system/utility/writer.hpp>
+#include <bitcoin/system/math/hash.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -50,41 +48,52 @@ public:
         uint64_t link = unlinked;
     };
 
+    // Constructors.
+    //-------------------------------------------------------------------------
+
     block_filter();
-    block_filter(uint8_t filter_type, const hash_digest& block_hash,
-        const hash_digest& header, const data_chunk& filter);
+
+    block_filter(block_filter&& other);
+    block_filter(const block_filter& other);
+
     block_filter(uint8_t filter_type, hash_digest&& block_hash,
         hash_digest&& header, data_chunk&& filter);
-    block_filter(const block_filter& other);
-    block_filter(block_filter&& other);
+    block_filter(uint8_t filter_type, const hash_digest& block_hash,
+        const hash_digest& header, const data_chunk& filter);
 
-    uint8_t filter_type() const;
-    void set_filter_type(uint8_t value);
+    // Operators.
+    //-------------------------------------------------------------------------
 
-    hash_digest& block_hash();
-    const hash_digest& block_hash() const;
-    void set_block_hash(const hash_digest& value);
-    void set_block_hash(hash_digest&& value);
-
-    hash_digest& header();
-    const hash_digest& header() const;
-    void set_header(const hash_digest& value);
-    void set_header(hash_digest&& value);
-
-    data_chunk& filter();
-    const data_chunk& filter() const;
-    void set_filter(const data_chunk& value);
-    void set_filter(data_chunk&& value);
-
-    bool is_valid() const;
-    void reset();
-
-    // This class is move assignable but not copy assignable.
+    /// This class is move assignable but not copy assignable (performance).
     block_filter& operator=(block_filter&& other);
     void operator=(const block_filter&) = delete;
 
     bool operator==(const block_filter& other) const;
     bool operator!=(const block_filter& other) const;
+
+    // Properties (size, accessors, cache).
+    //-------------------------------------------------------------------------
+
+    uint8_t filter_type() const;
+    void set_filter_type(uint8_t value);
+
+    const hash_digest& block_hash() const;
+    void set_block_hash(const hash_digest& value);
+    void set_block_hash(hash_digest&& value);
+
+    const hash_digest& header() const;
+    void set_header(const hash_digest& value);
+    void set_header(hash_digest&& value);
+
+    const data_chunk& filter() const;
+    void set_filter(const data_chunk& value);
+    void set_filter(data_chunk&& value);
+
+    // Validation.
+    //-------------------------------------------------------------------------
+
+    bool is_valid() const;
+    void reset();
 
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     mutable validation metadata;
