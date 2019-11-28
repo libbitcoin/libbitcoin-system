@@ -93,7 +93,7 @@ void move_append(std::vector<Type>& target, std::vector<Type>& source);
 /**
  * Pop an element from the stack and return its value.
  * @param      <Element>  The stack element type.
- * @param[in]  stack       The stack.
+ * @param[in]  stack      The stack.
  */
 template <typename Element>
 Element pop(std::vector<Element>& stack);
