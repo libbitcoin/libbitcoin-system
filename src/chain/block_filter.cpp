@@ -21,14 +21,9 @@
 
 #include <bitcoin/system/chain/block_filter.hpp>
 
-#include <initializer_list>
-#include <bitcoin/system/math/limits.hpp>
-#include <bitcoin/system/message/messages.hpp>
-#include <bitcoin/system/message/version.hpp>
-#include <bitcoin/system/utility/container_sink.hpp>
-#include <bitcoin/system/utility/container_source.hpp>
-#include <bitcoin/system/utility/istream_reader.hpp>
-#include <bitcoin/system/utility/ostream_writer.hpp>
+#include <utility>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/math/hash.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -38,17 +33,10 @@ namespace chain {
 const uint64_t block_filter::validation::unlinked = max_int64;
 
 block_filter::block_filter()
-  : filter_type_(0u), block_hash_(null_hash), header_(null_hash), filter_(),
-    metadata{}
-{
-}
-
-block_filter::block_filter(uint8_t filter_type, const hash_digest& block_hash,
-    const hash_digest& header, const data_chunk& filter)
-  : filter_type_(filter_type),
-    block_hash_(block_hash),
-    header_(header),
-    filter_(filter),
+  : filter_type_(0u),
+    block_hash_(null_hash),
+    header_(null_hash),
+    filter_(),
     metadata{}
 {
 }
@@ -63,12 +51,13 @@ block_filter::block_filter(uint8_t filter_type, hash_digest&& block_hash,
 {
 }
 
-block_filter::block_filter(const block_filter& other)
-  : filter_type_(other.filter_type_),
-    block_hash_(other.block_hash_),
-    header_(other.header_),
-    filter_(other.filter_),
-    metadata(other.metadata)
+block_filter::block_filter(uint8_t filter_type, const hash_digest& block_hash,
+    const hash_digest& header, const data_chunk& filter)
+  : filter_type_(filter_type),
+    block_hash_(block_hash),
+    header_(header),
+    filter_(filter),
+    metadata{}
 {
 }
 
@@ -81,89 +70,17 @@ block_filter::block_filter(block_filter&& other)
 {
 }
 
-bool block_filter::is_valid() const
+block_filter::block_filter(const block_filter& other)
+  : filter_type_(other.filter_type_),
+    block_hash_(other.block_hash_),
+    header_(other.header_),
+    filter_(other.filter_),
+    metadata(other.metadata)
 {
-    return !filter_.empty();
 }
 
-void block_filter::reset()
-{
-    filter_type_ = 0u;
-    block_hash_.fill(0);
-    header_.fill(0);
-    filter_.clear();
-    filter_.shrink_to_fit();
-}
-
-uint8_t block_filter::filter_type() const
-{
-    return filter_type_;
-}
-
-void block_filter::set_filter_type(uint8_t value)
-{
-    filter_type_ = value;
-}
-
-hash_digest& block_filter::block_hash()
-{
-    return block_hash_;
-}
-
-const hash_digest& block_filter::block_hash() const
-{
-    return block_hash_;
-}
-
-void block_filter::set_block_hash(const hash_digest& value)
-{
-    block_hash_ = value;
-}
-
-void block_filter::set_block_hash(hash_digest&& value)
-{
-    block_hash_ = std::move(value);
-}
-
-hash_digest& block_filter::header()
-{
-    return header_;
-}
-
-const hash_digest& block_filter::header() const
-{
-    return header_;
-}
-
-void block_filter::set_header(const hash_digest& value)
-{
-    header_ = value;
-}
-
-void block_filter::set_header(hash_digest&& value)
-{
-    header_ = std::move(value);
-}
-
-data_chunk& block_filter::filter()
-{
-    return filter_;
-}
-
-const data_chunk& block_filter::filter() const
-{
-    return filter_;
-}
-
-void block_filter::set_filter(const data_chunk& value)
-{
-    filter_ = value;
-}
-
-void block_filter::set_filter(data_chunk&& value)
-{
-    filter_ = std::move(value);
-}
+// Operators.
+//-----------------------------------------------------------------------------
 
 block_filter& block_filter::operator=(block_filter&& other)
 {
@@ -186,6 +103,81 @@ bool block_filter::operator==(const block_filter& other) const
 bool block_filter::operator!=(const block_filter& other) const
 {
     return !(*this == other);
+}
+
+// Properties.
+//-----------------------------------------------------------------------------
+
+uint8_t block_filter::filter_type() const
+{
+    return filter_type_;
+}
+
+void block_filter::set_filter_type(uint8_t value)
+{
+    filter_type_ = value;
+}
+
+const hash_digest& block_filter::block_hash() const
+{
+    return block_hash_;
+}
+
+void block_filter::set_block_hash(const hash_digest& value)
+{
+    block_hash_ = value;
+}
+
+void block_filter::set_block_hash(hash_digest&& value)
+{
+    block_hash_ = std::move(value);
+}
+
+const hash_digest& block_filter::header() const
+{
+    return header_;
+}
+
+void block_filter::set_header(const hash_digest& value)
+{
+    header_ = value;
+}
+
+void block_filter::set_header(hash_digest&& value)
+{
+    header_ = std::move(value);
+}
+
+const data_chunk& block_filter::filter() const
+{
+    return filter_;
+}
+
+void block_filter::set_filter(const data_chunk& value)
+{
+    filter_ = value;
+}
+
+void block_filter::set_filter(data_chunk&& value)
+{
+    filter_ = std::move(value);
+}
+
+// Validation.
+//-----------------------------------------------------------------------------
+
+bool block_filter::is_valid() const
+{
+    return !filter_.empty();
+}
+
+void block_filter::reset()
+{
+    filter_type_ = 0u;
+    block_hash_.fill(0);
+    header_.fill(0);
+    filter_.clear();
+    filter_.shrink_to_fit();
 }
 
 } // namespace chain

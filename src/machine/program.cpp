@@ -23,7 +23,6 @@
 #include <utility>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
-#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/machine/interpreter.hpp>
 #include <bitcoin/system/machine/script_version.hpp>
 #include <bitcoin/system/utility/data.hpp>
@@ -34,18 +33,8 @@ namespace machine {
 
 using namespace bc::system::chain;
 
-// Fixed tuning parameters, max_stack_size ensures no reallocation.
-static constexpr size_t stack_capacity = max_stack_size;
-static constexpr size_t condition_capacity = max_counted_ops;
 static const chain::transaction default_tx_;
 static const chain::script default_script_;
-
-void program::reserve_stacks()
-{
-    primary_.reserve(stack_capacity);
-    alternate_.reserve(stack_capacity);
-    condition_.reserve(condition_capacity);
-}
 
 // Constructors.
 //-----------------------------------------------------------------------------
@@ -61,7 +50,6 @@ program::program()
     operation_count_(0),
     jump_(script_.begin())
 {
-    reserve_stacks();
 }
 
 program::program(const script& script)
@@ -75,7 +63,6 @@ program::program(const script& script)
     operation_count_(0),
     jump_(script_.begin())
 {
-    reserve_stacks();
 }
 
 program::program(const script& script, const chain::transaction& transaction,
@@ -90,7 +77,6 @@ program::program(const script& script, const chain::transaction& transaction,
     operation_count_(0),
     jump_(script_.begin())
 {
-    reserve_stacks();
 }
 
 // Condition, alternate, jump and operation_count are not copied.
@@ -108,7 +94,6 @@ program::program(const script& script, const chain::transaction& transaction,
     jump_(script_.begin()),
     primary_(std::move(stack))
 {
-    reserve_stacks();
 }
 
 
@@ -125,7 +110,6 @@ program::program(const script& script, const program& other)
     jump_(script_.begin()),
     primary_(other.primary_)
 {
-    reserve_stacks();
 }
 
 // Condition, alternate, jump and operation_count are not moved.
@@ -141,7 +125,6 @@ program::program(const script& script, program&& other, bool)
     jump_(script_.begin()),
     primary_(std::move(other.primary_))
 {
-    reserve_stacks();
 }
 
 // Instructions.

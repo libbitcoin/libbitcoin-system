@@ -429,9 +429,8 @@ bool input::is_locked(size_t block_height, uint32_t median_time_past) const
 // This cannot overflow because each total is limited by max ops.
 size_t input::signature_operations(bool bip16, bool bip141) const
 {
-    chain::script witness, embedded;
+    chain::script script, embedded;
     const auto& prevout = previous_output_.metadata.cache.script();
-    ////BITCOIN_ASSERT_MSG(!bip141 || bip16, "bip141 implies bip16");
 
     // Penalize quadratic signature operations (bip141).
     const auto sigops_factor = bip141 ? fast_sigops_factor : 1u;
@@ -439,18 +438,18 @@ size_t input::signature_operations(bool bip16, bool bip141) const
     // Count heavy sigops in the input script.
     auto sigops = script_.sigops(false) * sigops_factor;
 
-    if (bip141 && witness_.extract_sigop_script(witness, prevout))
+    if (bip141 && witness_.extract_sigop_script(script, prevout))
     {
-        // Add sigops in the witness (bip141).
-        return sigops + witness.sigops(true);
+        // Add sigops in the witness script (bip141).
+        return sigops + script.sigops(true);
     }
 
     if (bip16 && extract_embedded_script(embedded))
     {
-        if (bip141 && witness_.extract_sigop_script(witness, embedded))
+        if (bip141 && witness_.extract_sigop_script(script, embedded))
         {
-            // Add sigops in the embedded witness (bip141).
-            return sigops + witness.sigops(true);
+            // Add sigops in the embedded witness script (bip141).
+            return sigops + script.sigops(true);
         }
         else
         {

@@ -152,9 +152,9 @@ public:
     //-------------------------------------------------------------------------
 
     /// Transaction helpers.
-    static hash_digest to_outputs(const transaction& tx);
-    static hash_digest to_inpoints(const transaction& tx);
-    static hash_digest to_sequences(const transaction& tx);
+    static data_chunk to_outputs(const transaction& tx);
+    static data_chunk to_inpoints(const transaction& tx);
+    static data_chunk to_sequences(const transaction& tx);
 
     /// Determine if the fork is enabled in the active forks set.
     static bool is_enabled(uint32_t active_forks, rule_fork fork)
@@ -211,6 +211,7 @@ public:
     /// Consensus computations.
     size_t sigops(bool accurate) const;
     void find_and_delete(const data_stack& endorsements);
+    bool is_oversized() const;
     bool is_unspendable() const;
 
     // Validation.

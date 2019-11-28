@@ -492,6 +492,7 @@ inline hash_digest signature_hash(const transaction& tx, uint32_t sighash_type)
     // There is no rational interpretation of a signature hash for a coinbase.
     BITCOIN_ASSERT(!tx.is_coinbase());
 
+    // TODO: pass overallocated stream buffer to serializer (optimization).
     auto serialized = tx.to_data(true, false);
     extend_data(serialized, to_little_endian(sighash_type));
     return bitcoin_hash(serialized);
@@ -513,11 +514,6 @@ inline sighash_algorithm to_sighash_enum(uint8_t sighash_type)
         default:
             return sighash_algorithm::all;
     }
-}
-
-inline uint8_t is_sighash_enum(uint8_t sighash_type, sighash_algorithm value)
-{
-    return to_sighash_enum(sighash_type) == value;
 }
 
 static hash_digest sign_none(const transaction& tx, uint32_t input_index,
@@ -625,6 +621,15 @@ static hash_digest sign_all(const transaction& tx, uint32_t input_index,
     return signature_hash(out, sighash_type);
 }
 
+static bool is_index_overflow(const transaction& tx, uint32_t input_index,
+    sighash_algorithm sighash)
+{
+    return input_index >= tx.inputs().size() ||
+        (input_index >= tx.outputs().size() && 
+            sighash == sighash_algorithm::single);
+}
+
+// TODO: optimize to prevent script reconstruction.
 static script strip_code_seperators(const script& script_code)
 {
     operation::list ops;
@@ -633,7 +638,7 @@ static script strip_code_seperators(const script& script_code)
         if (op->code() != opcode::codeseparator)
             ops.push_back(*op);
 
-    return script(std::move(ops));
+    return { std::move(ops) };
 }
 
 // private/static
@@ -641,15 +646,12 @@ hash_digest script::generate_unversioned_signature_hash(const transaction& tx,
     uint32_t input_index, const script& script_code, uint8_t sighash_type)
 {
     const auto sighash = to_sighash_enum(sighash_type);
-    if (input_index >= tx.inputs().size() ||
-        (input_index >= tx.outputs().size() &&
-            sighash == sighash_algorithm::single))
-    {
-        //*********************************************************************
-        // CONSENSUS: wacky satoshi behavior.
-        //*********************************************************************
+
+    //*************************************************************************
+    // CONSENSUS: wacky satoshi behavior (continuing with null hash).
+    //*************************************************************************
+    if (is_index_overflow(tx, input_index, sighash))
         return one_hash;
-    }
 
     //*************************************************************************
     // CONSENSUS: more wacky satoshi behavior.
@@ -672,7 +674,7 @@ hash_digest script::generate_unversioned_signature_hash(const transaction& tx,
 // Signing (version 0).
 //-----------------------------------------------------------------------------
 
-hash_digest script::to_outputs(const transaction& tx)
+data_chunk script::to_outputs(const transaction& tx)
 {
     const auto sum = [&](size_t total, const output& output)
     {
@@ -694,10 +696,10 @@ hash_digest script::to_outputs(const transaction& tx)
     std::for_each(outs.begin(), outs.end(), write);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);
-    return bitcoin_hash(data);
+    return data;
 }
 
-hash_digest script::to_inpoints(const transaction& tx)
+data_chunk script::to_inpoints(const transaction& tx)
 {
     const auto sum = [&](size_t total, const input& input)
     {
@@ -719,10 +721,10 @@ hash_digest script::to_inpoints(const transaction& tx)
     std::for_each(ins.begin(), ins.end(), write);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);
-    return bitcoin_hash(data);
+    return data;
 }
 
-hash_digest script::to_sequences(const transaction& tx)
+data_chunk script::to_sequences(const transaction& tx)
 {
     const auto sum = [&](size_t total, const input& /* input */)
     {
@@ -744,10 +746,10 @@ hash_digest script::to_sequences(const transaction& tx)
     std::for_each(ins.begin(), ins.end(), write);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);
-    return bitcoin_hash(data);
+    return data;
 }
 
-static size_t preimage_size(size_t script_size)
+static size_t version_0_preimage_size(size_t script_size)
 {
     return sizeof(uint32_t)
         + hash_size
@@ -766,31 +768,31 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
     uint32_t input_index, const script& script_code, uint64_t value,
     uint8_t sighash_type)
 {
+    const auto sighash = to_sighash_enum(sighash_type);
+
+    const auto any = (sighash_type & sighash_algorithm::anyone_can_pay) != 0;
+    const auto single = (sighash == sighash_algorithm::single);
+    //// const auto none = (sighash == sighash_algorithm::none);
+    const auto all = (sighash == sighash_algorithm::all);
+
     // Unlike unversioned algorithm this does not allow an invalid input index.
     BITCOIN_ASSERT(input_index < tx.inputs().size());
     const auto& input = tx.inputs()[input_index];
-    const auto size = preimage_size(script_code.serialized_size(true));
+    const auto script_size = script_code.serialized_size(true);
+    const auto size = version_0_preimage_size(script_size);
 
     data_chunk data;
     data.reserve(size);
     data_sink ostream(data);
     ostream_writer sink(ostream);
 
-    // Flags derived from the signature hash byte.
-    const auto sighash = to_sighash_enum(sighash_type);
-
-    // const auto none = (sighash == sighash_algorithm::none);
-    const auto any = (sighash_type & sighash_algorithm::anyone_can_pay) != 0;
-    const auto single = (sighash == sighash_algorithm::single);
-    const auto all = (sighash == sighash_algorithm::all);
-
-    // 1. transaction version (4-byte little endian).
+    // 1. transaction version (4).
     sink.write_little_endian(tx.version());
 
-    // 2. inpoints hash (32-byte hash).
+    // 2. inpoints double sha256 hash (32).
     sink.write_hash(!any ? tx.inpoints_hash() : null_hash);
 
-    // 3. sequences hash (32-byte hash).
+    // 3. sequences double sha256 hash (32).
     sink.write_hash(!any && all ? tx.sequences_hash() : null_hash);
 
     // 4. outpoint (32-byte hash + 4-byte little endian).
@@ -799,21 +801,21 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
     // 5. script of the input (with prefix).
     script_code.to_data(sink, true);
 
-    // 6. value of the output spent by this input (8-byte little endian).
+    // 6. value of the output spent by this input (8).
     sink.write_little_endian(value);
 
-    // 7. sequence of the input (4-byte little endian).
+    // 7. sequence of the input (4).
     sink.write_little_endian(input.sequence());
 
-    // 8. outputs hash (32-byte hash).
+    // 8. outputs (or output) double hash, or null hash (32).
     sink.write_hash(all ? tx.outputs_hash() :
         (single && input_index < tx.outputs().size() ?
             bitcoin_hash(tx.outputs()[input_index].to_data()) : null_hash));
 
-    // 9. transaction locktime (4-byte little endian).
+    // 9. transaction locktime (4).
     sink.write_little_endian(tx.locktime());
 
-    // 10. sighash type of the signature (4-byte [not 1] little endian).
+    // 10. hash type of the signature (4 [not 1]).
     sink.write_4_bytes_little_endian(sighash_type);
 
     ostream.flush();
@@ -821,7 +823,7 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
     return bitcoin_hash(data);
 }
 
-// Signing (common).
+// Signing (unversioned and version 0).
 //-----------------------------------------------------------------------------
 
 // static
@@ -1124,6 +1126,7 @@ operation::list script::to_pay_script_hash_pattern(const short_hash& hash)
     };
 }
 
+// TODO: limit to 20 for consistency with op_check_multisig.
 operation::list script::to_pay_multisig_pattern(uint8_t signatures,
     const point_list& points)
 {
@@ -1213,9 +1216,13 @@ script_version script::version() const
     if (!is_witness_program_pattern(ops))
         return script_version::unversioned;
 
-    // Version 0 is specified, others are reserved (bip141).
-    return (ops[0].code() == opcode::push_size_0) ? script_version::zero :
-        script_version::reserved;
+    switch (ops[0].code())
+    {
+        case opcode::push_size_0:
+            return script_version::zero;
+        default:
+            return script_version::reserved;
+    }
 }
 
 // Caller should test for is_sign_script_hash_pattern when sign_key_hash result
@@ -1243,6 +1250,7 @@ script_pattern script::output_pattern() const
     if (is_pay_public_key_pattern(operations_))
         return script_pattern::pay_public_key;
 
+    // Limited to 16 signatures though op_check_multisig allows 20.
     if (is_pay_multisig_pattern(operations_))
         return script_pattern::pay_multisig;
 
@@ -1388,14 +1396,18 @@ void script::find_and_delete(const data_stack& endorsements)
 ////    return std::equal(expected.begin(), expected.end(), actual.begin());
 ////}
 
+bool script::is_oversized() const
+{
+    return serialized_size(false) > max_script_size;
+}
+
 // An unspendable script is any that can provably not be spent under any
 // circumstance. This allows for exclusion of the output as unspendable.
 // The criteria below are not be comprehensive but are fast to evaluate.
 bool script::is_unspendable() const
 {
     // The first operations access must be method-based to guarantee the cache.
-    return (!operations().empty() && operations_[0].code() == opcode::return_)
-        || serialized_size(false) > max_script_size;
+    return !operations().empty() && operations_[0].code() == opcode::return_;
 }
 
 // Validation.
@@ -1432,9 +1444,9 @@ code script::verify(const transaction& tx, uint32_t input_index,
         if (!in.script().empty())
             return error::dirty_witness;
 
-        // This is a valid witness script so validate it.
-        if ((ec = in.witness().verify(tx, input_index, forks,
-            prevout_script, value)))
+        // Validate the native script.
+        if ((ec = in.witness().verify(tx, input_index, forks, prevout_script,
+            value)))
             return ec;
     }
 
@@ -1462,14 +1474,14 @@ code script::verify(const transaction& tx, uint32_t input_index,
             if (in.script().size() != 1)
                 return error::dirty_witness;
 
-            // This is a valid embedded witness script so validate it.
+            // Validate the non-native script.
             if ((ec = in.witness().verify(tx, input_index, forks,
                 embedded_script, value)))
                 return ec;
         }
     }
 
-    // Witness must be empty if no bip141 or valid witness program (bip141).
+    // Witness must be empty if no bip141 or invalid witness program (bip141).
     if (!witnessed && !in.witness().empty())
         return error::unexpected_witness;
 

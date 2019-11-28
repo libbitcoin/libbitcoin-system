@@ -233,7 +233,7 @@ size_t istream_bit_reader::read_size_little_endian()
 bool istream_bit_reader::read_bit()
 {
     feed();
-    return (buffer_ << offset_++) & bit_mask;
+    return ((buffer_ << offset_++) & bit_mask) != 0;
 }
 
 // Bytes.

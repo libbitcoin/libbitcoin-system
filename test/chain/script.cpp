@@ -126,7 +126,8 @@ std::string test_name(const script_test& test)
             << test.input_sequence << ", "
             << test.locktime << ", "
             << test.version
-        << ")";
+        << ") "
+        << "name: " << test.description;
     return out.str();
 }
 
