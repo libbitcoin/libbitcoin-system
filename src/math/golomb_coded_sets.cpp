@@ -69,9 +69,9 @@ static uint64_t hash_to_range(const data_slice& item, uint64_t bound,
 }
 
 static std::vector<uint64_t> hashed_set_construct(const data_stack& items,
-    size_t set_size, uint64_t target_false_positive_rate, const siphash_key& key)
+    uint64_t set_size, uint64_t target_false_positive_rate, const siphash_key& key)
 {
-    auto bound = static_cast<uint64_t>(target_false_positive_rate * set_size);
+    auto bound = safe_multiply(target_false_positive_rate, set_size);
 
     std::vector<uint64_t> hashes;
     hashes.reserve(items.size());
