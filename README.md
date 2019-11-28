@@ -203,7 +203,7 @@ Dependencies apart from the libbitcoin libraries are available as [NuGet package
 
 The packages can be viewed using the [NuGet package manager](http://docs.nuget.org/docs/start-here/managing-nuget-packages-using-the-dialog) from the libbitcoin solution. The package manager will prompt for download of any missing packages.
   
-The libbitcoin solution files are configured with references to these packages. The location of the NuGet repository is controlled by the [nuget.config](https://github.com/libbitcoin/libbitcoin/blob/master/builds/msvc/nuget.config) file `repositoryPath` setting **and** the `NuGetPackageRoot` element of **each** [\[project\].props](https://github.com/libbitcoin/libbitcoin/blob/master/builds/msvc/vs2017/libbitcoin/libbitcoin.props) file.
+The libbitcoin solution files are configured with references to these packages. The location of the NuGet repository is controlled by the [nuget.config](https://github.com/libbitcoin/libbitcoin/blob/master/builds/msvc/nuget.config) file `repositoryPath` setting **and** the `NuGetPackageRoot` element of **each** [\[project\].props](https://github.com/libbitcoin/libbitcoin-system/blob/master/builds/msvc/vs2017/libbitcoin-system/libbitcoin-system.props) file.
 
 #### Build Libbitcoin Projects
 
