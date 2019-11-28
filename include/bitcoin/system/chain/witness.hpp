@@ -77,7 +77,7 @@ public:
     bool from_data(std::istream& stream, bool prefix);
     bool from_data(reader& source, bool prefix);
 
-    /// The witness deserialized ccording to count and size prefixing.
+    /// The witness deserialized according to count and size prefixing.
     bool is_valid() const;
 
     // Serialization.
@@ -115,7 +115,7 @@ public:
 
     bool extract_sigop_script(script& out_script,
         const script& program_script) const;
-    bool extract_embedded_script(script& out_script, data_stack& out_stack,
+    bool extract_script(script& out_script, data_stack& out_stack,
         const script& program_script) const;
 
     // Validation.

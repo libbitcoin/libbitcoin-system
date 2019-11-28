@@ -102,6 +102,7 @@ witness& witness::operator=(const witness& other)
     valid_ = other.valid_;
     return *this;
 }
+
 bool witness::operator==(const witness& other) const
 {
     return stack_ == other.stack_;
@@ -321,7 +322,7 @@ witness::iterator witness::end() const
     return stack_.end();
 }
 
-// Properties (size).
+// Properties.
 //-----------------------------------------------------------------------------
 
 size_t witness::serialized_size(bool prefix) const
@@ -338,6 +339,11 @@ const data_stack& witness::stack() const
 
 // Utilities.
 //-----------------------------------------------------------------------------
+
+inline data_chunk top_element(const data_stack stack)
+{
+    return stack.empty() ? data_chunk{} : stack.back();
+}
 
 // static
 bool witness::is_push_size(const data_stack& stack)
@@ -374,11 +380,11 @@ operation::list witness::to_pay_key_hash(data_chunk&& program)
     };
 }
 
-// The return script is useful only for sigop counting.
-// Returns true if is a witness program - even if potentially invalid.
+// The return script is only useful only for sigop counting.
 bool witness::extract_sigop_script(script& out_script,
     const script& program_script) const
 {
+    static const auto single_signature_script = script{ { opcode::checksig } };
     out_script.clear();
 
     switch (program_script.version())
@@ -387,87 +393,93 @@ bool witness::extract_sigop_script(script& out_script,
         {
             switch (program_script.witness_program().size())
             {
+                // Each p2wkh input is counted as 1 sigop (bip141).
                 case short_hash_size:
-                    out_script.from_operations({ { opcode::checksig } });
+                    out_script = single_signature_script;
                     return true;
 
+                // p2wsh sigops are counted as before for p2sh (bip141).
                 case hash_size:
-                    if (!stack_.empty())
-                        out_script.from_data(stack_.back(), false);
-
+                    out_script.from_data(top_element(stack_), false);
                     return true;
 
+                // Undefined v0 witness script, will not validate.
                 default:
                     return true;
             }
-        }
-
-        case script_version::reserved:
-            return true;
-
-        case script_version::unversioned:
-        default:
-            return false;
-    }
-}
-
-// Extract P2WPKH or P2WSH script as indicated by program script.
-bool witness::extract_embedded_script(script& out_script,
-    data_stack& out_stack, const script& program_script) const
-{
-    switch (program_script.version())
-    {
-        // The v0 program size must be either 20 or 32 bytes (bip141).
-        case script_version::zero:
-        {
-            auto program = program_script.witness_program();
-            const auto program_size = program.size();
-            out_stack = stack_;
-
-            // always: <signature> <pubkey>
-            if (program_size == short_hash_size)
-            {
-                // Stack must be 2 elements, within push size limit (bip141).
-                if (out_stack.size() != 2 || !is_push_size(out_stack))
-                    return false;
-
-                // The hash160 of public key must match the program (bip141).
-                // This is enforced by script evaluation, so optimized out here.
-                ////if (!std::equal(program.begin(), program.end(),
-                ////    bitcoin_short_hash(out_stack[1]).begin()))
-                ////    return false;
-
-                // The script is derived from the stack (bip141).
-                out_script.from_operations(to_pay_key_hash(std::move(program)));
-                return true;
-            }
-
-            // example: 0 <signature1> <1 <pubkey1> <pubkey2> 2 CHECKMULTISIG>
-            if (program_size == hash_size)
-            {
-                // The witness must consist of at least 1 item (bip141).
-                if (out_stack.empty())
-                    return false;
-
-                // The script is popped off the initial witness stack (bip141).
-                out_script.from_data(pop(out_stack), false);
-
-                // Stack elements must be within push size limit (bip141).
-                if (!is_push_size(out_stack))
-                    return false;
-
-                // The SHA256 of the witness script must match program (bip141).
-                return std::equal(program.begin(), program.end(),
-                    sha256_hash(out_script.to_data(false)).begin());
-            }
-
-            return false;
         }
 
         // These versions are reserved for future extensions (bip141).
         case script_version::reserved:
             return true;
 
+        // Return false only if this is not a witness script.
+        case script_version::unversioned:
+        default:
+            return false;
+    }
+}
+
+// Extract script and initial execution stack.
+bool witness::extract_script(script& out_script,
+    data_stack& out_stack, const script& program_script) const
+{
+    auto program = program_script.witness_program();
+    const auto program_size = program.size();
+    out_stack = stack_;
+
+    switch (program_script.version())
+    {
+        case script_version::zero:
+        {
+            switch (program.size())
+            {
+                // p2wkh
+                // witness stack : <signature> <public-key>
+                // input script  : (empty)
+                // output script : <0> <20-byte-hash-of-public-key>
+                case short_hash_size:
+                {
+                    // Stack must be 2 elements (bip141).
+                    if (out_stack.size() != 2)
+                        return false;
+
+                    // Create a pay-to-key-hash input script from the program.
+                    // The hash160 of public key must match program (bip141).
+                    out_script.from_operations(to_pay_key_hash(
+                        std::move(program)));
+                    return true;
+                }
+
+                // p2wsh
+                // witness stack : <script> [stack-elements]
+                // input script  : (empty)
+                // output script : <0> <32-byte-hash-of-script>
+                case hash_size:
+                {
+                    // The stack must consist of at least 1 element (bip141).
+                    if (out_stack.empty())
+                        return false;
+
+                    // Input script is popped from the stack (bip141).
+                    out_script.from_data(pop(out_stack), false);
+
+                    // The sha256 of popped script must match program (bip141).
+                    return std::equal(program.begin(), program.end(),
+                        sha256_hash(out_script.to_data(false)).begin());
+                }
+
+                // The witness extraction is invalid for v0.
+                default:
+                    return false;
+            }
+        }
+
+        // These versions are reserved for future extensions (bip141).
+        case script_version::reserved:
+            return true;
+
+        // The witness version is undefined.
         case script_version::unversioned:
         default:
             return false;
@@ -483,17 +495,17 @@ bool witness::extract_embedded_script(script& out_script,
 code witness::verify(const transaction& tx, uint32_t input_index,
     uint32_t forks, const script& program_script, uint64_t value) const
 {
+    code ec;
+    script script;
+    data_stack stack;
     const auto version = program_script.version();
 
     switch (version)
     {
+        // Version 0 (bip141).
         case script_version::zero:
         {
-            code ec;
-            script script;
-            data_stack stack;
-
-            if (!extract_embedded_script(script, stack, program_script))
+            if (!extract_script(script, stack, program_script))
                 return error::invalid_witness;
 
             program witness(script, tx, input_index, forks, std::move(stack),
@@ -503,8 +515,7 @@ code witness::verify(const transaction& tx, uint32_t input_index,
                 return ec;
 
             // A v0 script must succeed with a clean true stack (bip141).
-            if (!witness.stack_result(true))
-                return error::stack_false;
+            return witness.stack_result(true) ? ec : error::stack_false;
         }
 
         // These versions are reserved for future extensions (bip141).

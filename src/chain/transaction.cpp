@@ -50,6 +50,19 @@ namespace chain {
 
 using namespace bc::system::machine;
 
+#define RETURN_CACHED(name, type, context) \
+    hash_mutex_.lock_upgrade(); \
+    if (!name##_##context##_) \
+    { \
+        hash_mutex_.unlock_upgrade_and_lock(); \
+        name##_##context##_ = std::make_shared<hash_digest>(type##_hash( \
+            script::to_##name(*this))); \
+        hash_mutex_.unlock_and_lock_upgrade(); \
+    } \
+    const auto hash = *name##_##context##_; \
+    hash_mutex_.unlock_upgrade(); \
+    return hash
+
 // HACK: unlinked must match tx slab_map::not_found.
 const uint64_t transaction::validation::unlinked = max_int64;
 
@@ -657,71 +670,17 @@ hash_digest transaction::hash(bool witness) const
 
 hash_digest transaction::outputs_hash() const
 {
-    ///////////////////////////////////////////////////////////////////////////
-    // Critical Section
-    hash_mutex_.lock_upgrade();
-
-    if (!outputs_hash_)
-    {
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        hash_mutex_.unlock_upgrade_and_lock();
-        outputs_hash_ = std::make_shared<hash_digest>(
-            script::to_outputs(*this));
-        hash_mutex_.unlock_and_lock_upgrade();
-        //-----------------------------------------------------------------
-    }
-
-    const auto hash = *outputs_hash_;
-    hash_mutex_.unlock_upgrade();
-    ///////////////////////////////////////////////////////////////////////////
-
-    return hash;
+    RETURN_CACHED(outputs, bitcoin, hash);
 }
 
 hash_digest transaction::inpoints_hash() const
 {
-    ///////////////////////////////////////////////////////////////////////////
-    // Critical Section
-    hash_mutex_.lock_upgrade();
-
-    if (!inpoints_hash_)
-    {
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        hash_mutex_.unlock_upgrade_and_lock();
-        inpoints_hash_ = std::make_shared<hash_digest>(
-            script::to_inpoints(*this));
-        hash_mutex_.unlock_and_lock_upgrade();
-        //-----------------------------------------------------------------
-    }
-
-    const auto hash = *inpoints_hash_;
-    hash_mutex_.unlock_upgrade();
-    ///////////////////////////////////////////////////////////////////////////
-
-    return hash;
+    RETURN_CACHED(inpoints, bitcoin, hash);
 }
 
 hash_digest transaction::sequences_hash() const
 {
-    ///////////////////////////////////////////////////////////////////////////
-    // Critical Section
-    hash_mutex_.lock_upgrade();
-
-    if (!sequences_hash_)
-    {
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        hash_mutex_.unlock_upgrade_and_lock();
-        sequences_hash_ = std::make_shared<hash_digest>(
-            script::to_sequences(*this));
-        hash_mutex_.unlock_and_lock_upgrade();
-        //-----------------------------------------------------------------
-    }
-
-    const auto hash = *sequences_hash_;
-    hash_mutex_.unlock_upgrade();
-    ///////////////////////////////////////////////////////////////////////////
-
-    return hash;
+    RETURN_CACHED(sequences, bitcoin, hash);
 }
 
 // Utilities.
@@ -1206,6 +1165,8 @@ code transaction::connect(const chain_state& state) const
 
     return error::success;
 }
+
+#undef RETURN_CACHED
 
 } // namespace chain
 } // namespace system

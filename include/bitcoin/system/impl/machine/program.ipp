@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
+#include <bitcoin/system/chain/witness.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/machine/number.hpp>
 #include <bitcoin/system/machine/operation.hpp>
@@ -38,10 +39,15 @@ namespace machine {
 // Constant registers.
 //-----------------------------------------------------------------------------
 
+// Check initial program state for validity (i.e. can evaluation return true).
 inline bool program::is_valid() const
 {
+    // Stack elements must be within push size limit (bip141).
     // Invalid operations indicates a failure deserializing individual ops.
-    return script_.is_valid_operations() && !script_.is_unspendable();
+    return script_.is_valid_operations()
+        && !script_.is_unspendable()
+        && chain::witness::is_push_size(primary_)
+        && !script_.is_oversized();
 }
 
 inline uint32_t program::forks() const
@@ -234,7 +240,7 @@ inline bool program::pop(data_stack& section, size_t count)
     if (size() < count)
         return false;
 
-    for (size_t i = 0; i < count; ++i)
+    for (size_t index = 0; index < count; ++index)
         section.push_back(pop());
 
     return true;

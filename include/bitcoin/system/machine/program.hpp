@@ -147,7 +147,6 @@ private:
     // A space-efficient dynamic bitset (specialized).
     typedef std::vector<bool> bool_stack;
 
-    void reserve_stacks();
     bool stack_to_bool(bool clean) const;
 
     const chain::script& script_;
