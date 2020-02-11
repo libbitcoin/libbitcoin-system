@@ -32,19 +32,19 @@ public:
     void operator=(const utility_noncopyable&) = delete;
 
 public:
-    noncopyable getValue() {
-        return value;
+    noncopyable* getValue() {
+        return value_;
     }
 
-    void setValue(noncopyable value) {
-        this->value = value;
+    void setValue(noncopyable* value) {
+        value_ = value;
     }
 //protected:
 //    utility_noncopyable()
 //    {
 //    }
 private:
-    noncopyable value;
+    noncopyable* value_;
 
 };
 

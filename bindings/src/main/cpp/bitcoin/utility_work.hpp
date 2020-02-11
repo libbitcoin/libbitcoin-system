@@ -30,7 +30,7 @@
 //#include <bitcoin/bitcoin/utility/monitor.hpp>
 //#include <bitcoin/bitcoin/utility/noncopyable.hpp>
 //#include <bitcoin/bitcoin/utility/sequencer.hpp>
-#include <utility_threadpool.hpp>
+#include <bitcoin/utility_threadpool.hpp>
 
 namespace libbitcoin {
 namespace api {
@@ -69,7 +69,7 @@ public:
     void concurrent(Handler&& handler, Args&&... args)
     {
         // Service post ensures the job does not execute in the current thread.
-    	value.concurrent(handler, args);
+    	value_->concurrent(handler, args...);
         ////service_.post(inject(BIND_HANDLER(handler, args), CONCURRENT,
         ////    concurrent_));
     }
@@ -80,7 +80,7 @@ public:
     {
         // Use a strand to prevent concurrency and post vs. dispatch to ensure
         // that the job is not executed in the current thread.
-        value.ordered(handler, args);
+        value_->ordered(handler, args...);
         ////strand_.post(inject(BIND_HANDLER(handler, args), ORDERED, ordered_));
     }
 
@@ -90,7 +90,7 @@ public:
     {
         // Use a strand wrapper to prevent concurrency and a service post
         // to deny ordering while ensuring execution on another thread.
-        value.unordered(handler, args);
+        value_->unordered(handler, args...);
         ////service_.post(strand_.wrap(inject(BIND_HANDLER(handler, args),
         ////    UNORDERED, unordered_)));
     }
@@ -102,7 +102,7 @@ public:
     {
         // Use a sequence to track the asynchronous operation to completion,
         // ensuring each asynchronous op executes independently and in order.
-        value.lock(BIND_HANDLER(handler, args));
+        value_->lock(BIND_HANDLER(handler, args...));
         ////sequence_.lock(inject(BIND_HANDLER(handler, args), SEQUENCE,
         ////    sequence_));
     }
@@ -110,7 +110,7 @@ public:
     /// Complete sequential execution.
     void unlock()
     {
-        value.unlock();
+        value_->unlock();
     }
 
     ////size_t ordered_backlog();
@@ -119,15 +119,15 @@ public:
     ////size_t sequential_backlog();
     ////size_t combined_backlog();
 
-	work getValue() {
-		return value;
+	work* getValue() {
+		return value_;
 	}
 
-	void setValue(work value) {
-		this->value = value;
+	void setValue(work* value) {
+		value_ = value;
 	}
 private:
-	work value;
+	work* value_;
 //    ////template <typename Handler>
 //    ////auto inject(Handler&& handler, const std::string& context,
 //    ////    monitor::count_ptr counter) -> std::function<void()>

@@ -24,7 +24,7 @@
 //#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/filter_add.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/data.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
@@ -46,8 +46,8 @@ public:
     message_filter_add();
 //    message_filter_add(const utility_data_chunk& data);
     message_filter_add(utility_data_chunk&& data);
-//    message_filter_add(const message_filter_add& other);
-    message_filter_add(message_filter_add&& other);
+    message_filter_add(const message_filter_add& other);
+//    message_filter_add(message_filter_add&& other);
 
     utility_data_chunk& data();
 //    const utility_data_chunk& data() const;
@@ -78,15 +78,15 @@ public:
 //    static const uint32_t version_maximum;
 //
 public:
-    message::filter_add getValue() {
-        return value;
+    message::filter_add* getValue() {
+        return value_;
     }
 
-    void setValue(message::filter_add value) {
-        this->value = value;
+    void setValue(message::filter_add* value) {
+        value_ = value;
     }
 private:
-    message::filter_add value;
+    message::filter_add* value_;
 //    utility_data_chunk data_;
 };
 

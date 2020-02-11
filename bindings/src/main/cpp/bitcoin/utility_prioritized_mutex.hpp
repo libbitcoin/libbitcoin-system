@@ -44,15 +44,15 @@ public:
     void unlock_high_priority();
 
 public:
-    prioritized_mutex getValue() {
-        return value;
+    prioritized_mutex* getValue() {
+        return value_;
     }
 
-    void setValue(prioritized_mutex value) {
-        this->value = value;
+    void setValue(prioritized_mutex* value) {
+        value_ = value;
     }
 private:
-    prioritized_mutex value;
+    prioritized_mutex* value_;
 //    const bool prioritize_;
 //    shared_mutex data_mutex_;
 //    shared_mutex next_mutex_;

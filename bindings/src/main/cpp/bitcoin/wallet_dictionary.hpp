@@ -42,15 +42,15 @@ namespace api {
 //typedef std::array<const char*, dictionary_size> dictionary;
 class wallet_dictionary {
 public:
-	wallet::dictionary getValue() {
-		return value;
+	wallet::dictionary* getValue() {
+		return value_;
 	}
 
-	void setValue(wallet::dictionary value) {
-		this->value = value;
+	void setValue(wallet::dictionary* value) {
+		value_ = value;
 	}
 private:
-	wallet::dictionary value;
+	wallet::dictionary* value_;
 };
 
 /**

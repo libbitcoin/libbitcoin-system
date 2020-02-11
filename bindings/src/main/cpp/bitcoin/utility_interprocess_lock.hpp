@@ -38,15 +38,15 @@ public:
     bool unlock();
 
 public:
-    interprocess_lock getValue() {
-        return value;
+    interprocess_lock* getValue() {
+        return value_;
     }
 
-    void setValue(interprocess_lock value) {
-        this->value = value;
+    void setValue(interprocess_lock* value) {
+        value_ = value;
     }
 private:
-    interprocess_lock value;
+    interprocess_lock* value_;
 //    typedef interprocess::file_lock lock_file;
 //    typedef std::shared_ptr<lock_file> lock_ptr;
 

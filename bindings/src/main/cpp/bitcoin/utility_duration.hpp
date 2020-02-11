@@ -8,15 +8,15 @@ namespace api {
 
 class utility_duration {
 public:
-	libbitcoin::asio::duration getValue() {
-        return value;
+	libbitcoin::asio::duration* getValue() {
+        return value_;
     }
 
-    void setValue(libbitcoin::asio::duration value) {
-        this->value = value;
+    void setValue(libbitcoin::asio::duration* value) {
+        value_ = value;
     }
 private:
-    libbitcoin::asio::duration value;
+    libbitcoin::asio::duration* value_;
 };
 
 } // namespace api

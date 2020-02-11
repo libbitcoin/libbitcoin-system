@@ -48,15 +48,15 @@ public:
     bool begin_write();
     bool end_write();
 
-	sequential_lock getValue() {
-		return value;
+	sequential_lock* getValue() {
+		return value_;
 	}
 
-	void setValue(sequential_lock value) {
-		this->value = value;
+	void setValue(sequential_lock* value) {
+		value_ = value;
 	}
 private:
-	sequential_lock value;
+	sequential_lock* value_;
 //    std::atomic<size_t> sequence_;
 };
 

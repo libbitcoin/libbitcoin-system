@@ -24,12 +24,12 @@
 //#include <vector>
 #include <boost/property_tree/ptree.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <chain_point_value.hpp>
-#include <chain_points_value.hpp>
-#include <config_header.hpp>
-#include <config_input.hpp>
-#include <config_output.hpp>
-#include <config_transaction.hpp>
+#include <bitcoin/chain_point_value.hpp>
+#include <bitcoin/chain_points_value.hpp>
+#include <bitcoin/config_header.hpp>
+#include <bitcoin/config_input.hpp>
+#include <bitcoin/config_output.hpp>
+#include <bitcoin/config_transaction.hpp>
 
 namespace pt = boost::property_tree;
 

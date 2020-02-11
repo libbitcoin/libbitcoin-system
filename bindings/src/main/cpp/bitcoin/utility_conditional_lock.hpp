@@ -22,7 +22,7 @@
 //#include <memory>
 //#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/conditional_lock.hpp>
-#include <utility_mutex_ptr.hpp>
+#include <bitcoin/utility_mutex_ptr.hpp>
 
 namespace libbitcoin {
 namespace api {
@@ -39,15 +39,15 @@ public:
     /// Unlock.
     virtual ~utility_conditional_lock();
 
-    libbitcoin::conditional_lock getValue() {
-        return value;
+    libbitcoin::conditional_lock* getValue() {
+        return value_;
     }
 
-    void setValue(libbitcoin::conditional_lock value) {
-        this->value = value;
+    void setValue(libbitcoin::conditional_lock* value) {
+        value_ = value;
     }
 private:
-    libbitcoin::conditional_lock value;
+    libbitcoin::conditional_lock* value_;
 //    const std::shared_ptr<shared_mutex> mutex_ptr_;
 };
 

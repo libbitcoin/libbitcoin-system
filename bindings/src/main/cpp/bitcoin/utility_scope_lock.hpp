@@ -41,15 +41,15 @@ public:
     /// Unlock.
     virtual ~utility_scope_lock();
 
-    scope_lock getValue() {
-		return value;
+    scope_lock* getValue() {
+		return value_;
 	}
 
-	void setValue(scope_lock value) {
-		this->value = value;
+	void setValue(scope_lock* value) {
+		value_ = value;
 	}
 private:
-	scope_lock value;
+	scope_lock* value_;
 
 //private:
 //    shared_mutex& mutex_;

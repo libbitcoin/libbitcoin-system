@@ -8,15 +8,15 @@ namespace api {
 
 class utility_monitor_count_ptr {
 public:
-	monitor::count_ptr getValue() {
-        return value;
+	monitor::count_ptr* getValue() {
+        return value_;
     }
 
-    void setValue(monitor::count_ptr value) {
-        this->value = value;
+    void setValue(monitor::count_ptr* value) {
+        value_ = value;
     }
 private:
-    monitor::count_ptr value;
+    monitor::count_ptr* value_;
 };
 
 } // namespace api

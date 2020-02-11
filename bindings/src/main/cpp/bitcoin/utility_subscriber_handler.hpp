@@ -8,15 +8,16 @@ namespace api {
 
 template<typename ... Args>
 class utility_subscriber_handler {
-	std::function<void(Args...)> getValue() {
-		return value;
+public:
+	std::function<void(Args...)>* getValue() {
+		return value_;
 	}
 
-	void setValue(std::function<void(Args...)> value) {
-		this->value = value;
+	void setValue(std::function<void(Args...)>* value) {
+		value_ = value;
 	}
 private:
-	std::function<void(Args...)> value;
+	std::function<void(Args...)>* value_;
 };
 
 } // namespace api

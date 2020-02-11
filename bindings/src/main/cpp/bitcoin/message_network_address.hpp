@@ -58,7 +58,7 @@ public:
 //    {
 //    }
 
-    message_network_address(const message_network_address&);
+    message_network_address(const message_network_address& other);
 
     message_network_address(uint32_t timestamp, uint64_t services, message_ip_address&& ip,
         uint16_t port);
@@ -104,15 +104,15 @@ public:
     bool ne(const message_network_address& other) const;
 
 public:
-    message::network_address getValue() {
-		return value;
+    message::network_address* getValue() {
+		return value_;
 	}
 
-	void setValue(message::network_address value) {
-		this->value = value;
+	void setValue(message::network_address* value) {
+		value_ = value;
 	}
 private:
-	message::network_address value;
+	message::network_address* value_;
 
 //    uint32_t timestamp_;
 //    uint64_t services_;

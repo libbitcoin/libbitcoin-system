@@ -8,15 +8,16 @@ namespace libbitcoin {
 namespace api {
 
 class utility_dispatcher_delay_handler {
-	std::function<void(const code&)> getValue() {
-       return value;
+public:
+	std::function<void(const code&)>* getValue() {
+       return value_;
    }
 
-   void setValue(std::function<void(const code&)> value) {
-       this->value = value;
+   void setValue(std::function<void(const code&)>* value) {
+       value_ = value;
    }
 private:
-   std::function<void(const code&)> value;
+   std::function<void(const code&)>* value_;
 };
 
 } // namespace api

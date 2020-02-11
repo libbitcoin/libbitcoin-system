@@ -25,7 +25,7 @@
 //#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/ping.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -76,15 +76,15 @@ public:
 //    static const uint32_t version_maximum;
 //
 public:
-    message::ping getValue() {
-        return value;
+    message::ping* getValue() {
+        return value_;
     }
 
-    void setValue(message::ping value) {
-        this->value = value;
+    void setValue(message::ping* value) {
+        value_ = value;
     }
 private:
-    message::ping value;
+    message::ping* value_;
 //    uint64_t nonce_;
 //    bool nonceless_;
 //    bool valid_;

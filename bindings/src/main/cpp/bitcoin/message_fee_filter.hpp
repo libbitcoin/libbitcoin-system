@@ -25,7 +25,7 @@
 //#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/fee_filter.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -46,8 +46,8 @@ public:
 
     message_fee_filter();
     message_fee_filter(uint64_t minimum);
-//    message_fee_filter(const message_fee_filter& other);
-    message_fee_filter(message_fee_filter&& other);
+    message_fee_filter(const message_fee_filter& other);
+//    message_fee_filter(message_fee_filter&& other);
 
     uint64_t minimum_fee() const;
     void set_minimum_fee(uint64_t value);
@@ -79,15 +79,15 @@ public:
 //    message_fee_filter(uint64_t minimum, bool insufficient_version);
 
 public:
-    message::fee_filter getValue() {
-        return value;
+    message::fee_filter* getValue() {
+        return value_;
     }
 
-    void setValue(message::fee_filter value) {
-        this->value = value;
+    void setValue(message::fee_filter* value) {
+        value_ = value;
     }
 private:
-    message::fee_filter value;
+    message::fee_filter* value_;
 //    uint64_t minimum_fee_;
 //    bool insufficient_version_;
 };

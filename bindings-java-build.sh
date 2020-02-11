@@ -15,9 +15,9 @@ export INCLUDE="-I$JAVA_HOME/include -I$JAVA_HOME/include/linux -I$MAIN_SRC_DIR/
 #PACKAGE=chain && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$SUB_ARTIFACT_ID"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID"_"$PACKAGE.o $INCLUDE
 #PACKAGE=formats && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$SUB_ARTIFACT_ID"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID"_"$PACKAGE.o $INCLUDE
 #PACKAGE=machine && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$SUB_ARTIFACT_ID"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID"_"$PACKAGE.o $INCLUDE
-PACKAGE=math && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$SUB_ARTIFACT_ID"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID"_"$PACKAGE.o $INCLUDE
+#PACKAGE=math && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$SUB_ARTIFACT_ID"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID"_"$PACKAGE.o $INCLUDE
 #PACKAGE=message && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$SUB_ARTIFACT_ID"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID"_"$PACKAGE.o $INCLUDE
-#PACKAGE=utility && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$SUB_ARTIFACT_ID"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID"_"$PACKAGE.o $INCLUDE
+PACKAGE=utility && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$SUB_ARTIFACT_ID"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID"_"$PACKAGE.o $INCLUDE
 #PACKAGE=wallet && gcc -fPIC -std=c++11 -c $GENERATED_SRC/src/main/cpp/java-wrap/$SUB_ARTIFACT_ID"_"$PACKAGE.cpp -o $TARGET_DIR/objs/javawrap$SUB_ARTIFACT_ID"_"$PACKAGE.o $INCLUDE
 exit
 gcc -fPIC  -shared \

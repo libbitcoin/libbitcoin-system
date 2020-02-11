@@ -8,15 +8,15 @@ namespace api {
 
 class utility_one_byte {
 public:
-	one_byte getValue() {
-		return value;
+	one_byte* getValue() {
+		return value_;
 	}
 
-	void setValue(one_byte value) {
-		this->value = value;
+	void setValue(one_byte* value) {
+		value_ = value;
 	}
 private:
-	one_byte value;
+	one_byte* value_;
 };
 
 } // namespace api

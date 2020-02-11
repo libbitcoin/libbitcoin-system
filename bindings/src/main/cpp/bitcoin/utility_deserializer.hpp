@@ -40,8 +40,8 @@ class utility_deserializer
 public:
     typedef std::function<void(deserializer<Iterator, CheckSafe>&)> functor;
 
-    deserializer(const Iterator begin);
-    deserializer(const Iterator begin, const Iterator end);
+    utility_deserializer(const Iterator begin);
+    utility_deserializer(const Iterator begin, const Iterator end);
 
     ////// TODO: enable complex object store key types.
     ////template <typename OutputIterator>
@@ -104,15 +104,15 @@ public:
     /// Advance iterator without reading.
     void skip(size_t size);
 
-    libbitcoin::deserializer getValue() {
-        return value;
+    libbitcoin::deserializer<Iterator, CheckSafe> getValue() {
+        return value_;
     }
 
-    void setValue(libbitcoin::deserializer value) {
-        this->value = value;
+    void setValue(libbitcoin::deserializer<Iterator, CheckSafe>* value) {
+        value_ = value;
     }
 private:
-    libbitcoin::deserializer value;
+    libbitcoin::deserializer<Iterator, CheckSafe>* value_;
 
 //private:
 //    // True if is a safe deserializer and size does not exceed remaining bytes.
@@ -143,6 +143,6 @@ utility_deserializer<Iterator, false> make_unsafe_deserializer(const Iterator be
 } // namespace api
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/utility/deserializer.ipp>
+//#include <bitcoin/bitcoin/impl/utility/deserializer.ipp>
 
 #endif

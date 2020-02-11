@@ -1,8 +1,8 @@
 #ifndef LIBBITCOIN__UTILITY_DATA_SLICE_VECTOR_HPP
 #define LIBBITCOIN__UTILITY_DATA_SLICE_VECTOR_HPP
 
-#include <bitcoin/utility_data_slice.hpp>
 #include <vector>
+#include <bitcoin/utility_data_slice.hpp>
 
 namespace libbitcoin {
 namespace api {

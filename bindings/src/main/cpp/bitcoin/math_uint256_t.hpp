@@ -27,9 +27,20 @@ namespace api {
 
 class math_uint256_t {
 public:
+	math_uint256_t() :
+			value_(new uint256_t) {
+	}
+
+//	math_uint256_t(long double value) :
+//			value_(new uint256_t(value)) {
+//	}
+
 	math_uint256_t(uint256_t* value) {
 		value_ = value;
 	}
+
+//	bool operator>(const long double value);
+//	bool operator>(math_uint256_t value);
 
 	uint256_t* getValue() {
 		return value_;

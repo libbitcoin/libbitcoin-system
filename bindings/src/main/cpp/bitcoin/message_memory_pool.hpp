@@ -24,7 +24,7 @@
 //#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/memory_pool.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -44,8 +44,8 @@ public:
     static size_t satoshi_fixed_size(uint32_t version);
 
     message_memory_pool();
-//    message_memory_pool(const message_memory_pool& other);
-    message_memory_pool(message_memory_pool&& other);
+    message_memory_pool(const message_memory_pool& other);
+//    message_memory_pool(message_memory_pool&& other);
 
     bool from_data(uint32_t version, const utility_data_chunk& data);
 //    bool from_data(uint32_t version, std::istream& stream);
@@ -65,15 +65,15 @@ public:
 //    message_memory_pool(bool insufficient_version);
 //
 public:
-    message::memory_pool getValue() {
-        return value;
+    message::memory_pool* getValue() {
+        return value_;
     }
 
-    void setValue(message::memory_pool value) {
-        this->value = value;
+    void setValue(message::memory_pool* value) {
+        value_ = value;
     }
 private:
-    message::memory_pool value;
+    message::memory_pool* value_;
 //    bool insufficient_version_;
 };
 

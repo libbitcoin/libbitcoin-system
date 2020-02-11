@@ -24,9 +24,9 @@
 //#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/get_headers.hpp>
-#include <math_hash_digest.hpp>
-#include <math_hash_list.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/math_hash_digest.hpp>
+#include <bitcoin/math_hash_list.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/message/get_blocks.hpp>
 
 namespace libbitcoin {
@@ -47,11 +47,11 @@ public:
     message_get_headers();
 //    message_get_headers(const math_hash_list& start, const hash_digest& stop);
     message_get_headers(math_hash_list&& start, math_hash_digest&& stop);
-//    message_get_headers(const message_get_headers& other);
-    message_get_headers(message_get_headers&& other);
+    message_get_headers(const message_get_headers& other);
+//    message_get_headers(message_get_headers&& other);
     virtual ~message_get_headers();
 
-    bool from_data(uint32_t version, const utility_data_chunk& data) override;
+    bool from_data(uint32_t version, const utility_data_chunk& data);// override;
 //    bool from_data(uint32_t version, std::istream& stream) override;
 //    bool from_data(uint32_t version, reader& source) override;
 
@@ -68,15 +68,15 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 public:
-    message::get_headers getValue() {
-        return value;
+    message::get_headers* getValue() {
+        return value_;
     }
 
-    void setValue(message::get_headers value) {
-        this->value = value;
+    void setValue(message::get_headers* value) {
+        value_ = value;
     }
 private:
-    message::get_headers value;
+    message::get_headers* value_;
 };
 
 } // namespace api

@@ -57,12 +57,12 @@ struct utility_byte_array_parts
 /**
  * Create a single byte array with an initial value.
  */
-inline libbitcoin::api::utility_one_byte to_array(uint8_t byte);
+//inline libbitcoin::api::utility_one_byte to_array(uint8_t byte);
 
 /**
 * Create a single byte data chunk with an initial value.
 */
-inline libbitcoin::api::utility_data_chunk to_chunk(uint8_t byte);
+//inline libbitcoin::api::utility_data_chunk to_chunk(uint8_t byte);
 
 /**
  * Concatenate several data slices into a single data_chunk.
@@ -70,14 +70,14 @@ inline libbitcoin::api::utility_data_chunk to_chunk(uint8_t byte);
  * `reserve` on the data_chunk (as an optimization).
  */
 //inline data_chunk build_chunk(loaf slices, size_t extra_reserve=0);
-inline libbitcoin::api::utility_data_chunk build_chunk(loaf slices, size_t extra_reserve=0);
+//inline libbitcoin::api::utility_data_chunk build_chunk(utility_data_slice_vector slices, size_t extra_reserve=0);
 
 /**
  * Concatenate several data slices into a single fixed size array.
  * Returns false if the slices don't fit in the array. Underfill is ok.
  */
 template <size_t Size>
-bool build_array(std::array<uint8_t, Size>& out, loaf slices);
+bool build_array(std::array<uint8_t, Size>& out, utility_data_slice_vector slices);
 
 /**
  * Extend iterable object by appending other.
@@ -115,14 +115,14 @@ std::array<uint8_t, Left + Middle + Right> splice(const std::array<uint8_t, Left
 /**
  * Convert the data slice to an array. Underfill is ok.
  */
-template <size_t Size>
-std::array<uint8_t, Size> to_array(utility_data_slice bytes);
+//template <size_t Size>
+//std::array<uint8_t, Size> to_array(utility_data_slice bytes);
 
 /**
  * Create a data chunk from an iterable object.
  */
-template <typename Source>
-libbitcoin::api::utility_data_chunk to_chunk(const Source& bytes);
+//template <typename Source>
+//libbitcoin::api::utility_data_chunk to_chunk(const Source& bytes);
 
 /**
  * Safely determine if a buffer starts with a byte sequence.

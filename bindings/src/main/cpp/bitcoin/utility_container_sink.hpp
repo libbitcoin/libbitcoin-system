@@ -24,7 +24,7 @@
 //#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 
 namespace libbitcoin {
 namespace api {
@@ -39,26 +39,26 @@ public:
     typedef boost::iostreams::sink_tag category;
 
     utility_container_sink(Container& container)
-      : value(new libbitcoin::container_sink(container))
+      : value_(new libbitcoin::container_sink<Container, SinkType, CharType>(container))
     {
         static_assert(sizeof(SinkType) == sizeof(CharType), "invalid size");
     }
 
     std::streamsize write(const char_type* buffer, std::streamsize size)
     {
-    	return value.write(buffer, size);
+    	return value_->write(buffer, size);
     }
 
 public:
-    libbitcoin::container_sink getValue() {
-        return value;
+    libbitcoin::container_sink<Container, SinkType, CharType>* getValue() {
+        return value_;
     }
 
-    void setValue(libbitcoin::container_sink value) {
-        this->value = value;
+    void setValue(libbitcoin::container_sink<Container, SinkType, CharType>* value) {
+        value_ = value;
     }
 private:
-    libbitcoin::container_sink value;
+    libbitcoin::container_sink<Container, SinkType, CharType>* value_;
 };
 
 template <typename Container>

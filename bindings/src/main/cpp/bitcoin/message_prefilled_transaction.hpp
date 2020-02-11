@@ -24,7 +24,7 @@
 #include <bitcoin/bitcoin/message/prefilled_transaction.hpp>
 //#include <bitcoin/bitcoin/chain/transaction.hpp>
 //#include <bitcoin/bitcoin/math/hash.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -45,8 +45,8 @@ public:
     message_prefilled_transaction();
 //    message_prefilled_transaction(uint64_t index, const chain::transaction& tx);
     message_prefilled_transaction(uint64_t index, chain::transaction&& tx);
-//    message_prefilled_transaction(const message_prefilled_transaction& other);
-    message_prefilled_transaction(message_prefilled_transaction&& other);
+    message_prefilled_transaction(const message_prefilled_transaction& other);
+//    message_prefilled_transaction(message_prefilled_transaction&& other);
 
     uint64_t index() const;
     void set_index(uint64_t value);
@@ -75,15 +75,15 @@ public:
 //    bool operator!=(const message_prefilled_transaction& other) const;
 
 public:
-    message::prefilled_transaction getValue() {
-        return value;
+    message::prefilled_transaction* getValue() {
+        return value_;
     }
 
-    void setValue(message::prefilled_transaction value) {
-        this->value = value;
+    void setValue(message::prefilled_transaction* value) {
+        value_ = value;
     }
 private:
-    message::prefilled_transaction value;
+    message::prefilled_transaction* value_;
 //    uint64_t index_;
 //    chain::transaction transaction_;
 };

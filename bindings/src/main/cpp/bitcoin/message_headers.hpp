@@ -25,10 +25,10 @@
 //#include <memory>
 //#include <string>
 #include <bitcoin/bitcoin/define.hpp>
-#include <math_hash_list.hpp>
-#include <message_header_list.hpp>
+#include <bitcoin/math_hash_list.hpp>
+#include <bitcoin/message_header_list.hpp>
 #include <bitcoin/bitcoin/message/headers.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/message/inventory.hpp>
 //#include <bitcoin/bitcoin/message/inventory_vector.hpp>
 //#include <bitcoin/bitcoin/utility/data.hpp>
@@ -53,8 +53,8 @@ public:
 //    message_headers(const header::list& values);
     message_headers(message_header_list&& values);
 //    message_headers(const std::initializer_list<header>& values);
-//    message_headers(const message_headers& other);
-    message_headers(message_headers&& other);
+    message_headers(const message_headers& other);
+//    message_headers(message_headers&& other);
 
     message_header_list& elements();
 //    const message_header_list& elements() const;
@@ -90,15 +90,15 @@ public:
 //    static const uint32_t version_maximum;
 //
 public:
-    message::headers getValue() {
-        return value;
+    message::headers* getValue() {
+        return value_;
     }
 
-    void setValue(message::headers value) {
-        this->value = value;
+    void setValue(message::headers* value) {
+        value_ = value;
     }
 private:
-    message::headers value;
+    message::headers* value_;
 //    header::list elements_;
 };
 

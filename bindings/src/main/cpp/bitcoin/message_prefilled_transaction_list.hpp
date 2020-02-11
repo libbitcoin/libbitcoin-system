@@ -19,22 +19,22 @@
 #ifndef LIBBBITCOIN__MESSAGE_PREFILLED_TRANSACTION_LIST_HPP
 #define LIBBBITCOIN__MESSAGE_PREFILLED_TRANSACTION_LIST_HPP
 
-#include <bitcoin/message/prefilled_transaction.hpp>
+#include <bitcoin/bitcoin/message/prefilled_transaction.hpp>
 
 namespace libbitcoin {
 namespace api {
 
 class message_prefilled_transaction_list {
 public:
-	message::prefilled_transaction::list getValue() {
-        return value;
+	message::prefilled_transaction::list* getValue() {
+        return value_;
     }
 
-    void setValue(message::prefilled_transaction::list value) {
-        this->value = value;
+    void setValue(message::prefilled_transaction::list* value) {
+        value_ = value;
     }
 private:
-    message::prefilled_transaction::list value;
+    message::prefilled_transaction::list* value_;
 
 };
 

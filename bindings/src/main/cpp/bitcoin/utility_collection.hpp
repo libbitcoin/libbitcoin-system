@@ -19,9 +19,9 @@
 #ifndef LIBBITCOIN__COLLECTION_HPP
 #define LIBBITCOIN__COLLECTION_HPP
 
-#include <iterator>
-#include <iostream>
-#include <vector>
+//#include <iterator>
+//#include <iostream>
+//#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 
 /* NOTE: don't declare 'using namespace foo' in headers. */

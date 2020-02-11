@@ -30,25 +30,25 @@ class utility_atomic
 public:
 
     /// Create an atomically-accessible default instance of the type.
-    utility_atomic()
+    utility_atomic() : value_()
     {
     }
 
     /// Create an atomically-accessible copied instance of the type.
     utility_atomic(const Type& instance)
-      : value(instance)
+      : value_(&instance)
     {
     }
 
     /// Create an atomically-accessible moved instance of the type.
     utility_atomic(Type&& instance)
-      : value(std::forward<Type>(instance))
+      : value_(std::forward<Type>(instance))
     {
     }
 
     Type load() const
     {
-    	value.load();
+    	value_->load();
         // Critical Section
         ///////////////////////////////////////////////////////////////////////
 //        shared_lock lock(mutex_);
@@ -59,7 +59,7 @@ public:
 
     void store(const Type& instance)
     {
-    	value.store(instance);
+    	value_->store(instance);
         // Critical Section
         ///////////////////////////////////////////////////////////////////////
 //        unique_lock lock(mutex_);
@@ -70,7 +70,7 @@ public:
 
     void store(Type&& instance)
     {
-    	value.store(instance);
+    	value_->store(instance);
         // Critical Section
         ///////////////////////////////////////////////////////////////////////
 //        unique_lock lock(mutex_);
@@ -79,15 +79,15 @@ public:
         ///////////////////////////////////////////////////////////////////////
     }
 
-    libbitcoin::atomic getValue() {
-        return value;
+    libbitcoin::atomic<Type>* getValue() {
+        return value_;
     }
 
-    void setValue(libbitcoin::atomic value) {
-        this->value = value;
+    void setValue(libbitcoin::atomic<Type>* value) {
+        value_ = value;
     }
 private:
-    libbitcoin::atomic value;
+    libbitcoin::atomic<Type>* value_;
 //    typedef typename std::decay<Type>::type decay_type;
 //
 //    decay_type instance_;

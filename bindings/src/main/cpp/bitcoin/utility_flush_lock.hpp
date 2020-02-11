@@ -20,7 +20,7 @@
 #define LIBBITCOIN__UTILITY_FLUSH_LOCK_HPP
 
 #include <bitcoin/bitcoin/utility/flush_lock.hpp>
-#include <utility_path.hpp>
+#include <bitcoin/utility_path.hpp>
 
 namespace libbitcoin {
 namespace api {
@@ -37,15 +37,15 @@ public:
     bool lock_shared();
     bool unlock_shared();
 
-    flush_lock getValue() {
-        return value;
+    flush_lock* getValue() {
+        return value_;
     }
 
-    void setValue(flush_lock value) {
-        this->value = value;
+    void setValue(flush_lock* value) {
+        value_ = value;
     }
 private:
-    flush_lock value;
+    flush_lock* value_;
 //    static bool create(const std::string& file);
 //    static bool exists(const std::string& file);
 //    static bool destroy(const std::string& file);

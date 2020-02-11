@@ -23,10 +23,10 @@
 #include <cstdint>
 #include <istream>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
-#include <math_hash_digest.hpp>
-#include <math_short_hash.hpp>
-#include <math_mini_hash.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/math_hash_digest.hpp>
+#include <bitcoin/math_short_hash.hpp>
+#include <bitcoin/math_mini_hash.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 
 namespace libbitcoin {
 namespace api {
@@ -95,15 +95,15 @@ public:
 
 
 public:
-    istream_reader getValue() {
-        return value;
+    istream_reader* getValue() {
+        return value_;
     }
 
-    void setValue(istream_reader value) {
-        this->value = value;
+    void setValue(istream_reader* value) {
+        value_ = value;
     }
 private:
-    istream_reader value;
+    istream_reader* value_;
 //    // The buffer is faulted or at eof.
 //    bool empty() const;
 //

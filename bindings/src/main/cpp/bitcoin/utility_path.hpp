@@ -8,15 +8,15 @@ namespace api {
 
 class utility_path {
 public:
-	boost::filesystem::path getValue() {
-        return value;
+	boost::filesystem::path* getValue() {
+        return value_;
     }
 
-    void setValue(boost::filesystem::path value) {
-        this->value = value;
+    void setValue(boost::filesystem::path* value) {
+        value_ = value;
     }
 private:
-    boost::filesystem::path value;
+    boost::filesystem::path* value_;
 };
 
 } // api

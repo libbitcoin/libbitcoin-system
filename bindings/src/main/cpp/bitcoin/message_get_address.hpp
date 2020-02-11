@@ -24,7 +24,7 @@
 //#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/get_address.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -59,15 +59,15 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 public:
-    message::get_address getValue() {
-        return value;
+    message::get_address* getValue() {
+        return value_;
     }
 
-    void setValue(message::get_address value) {
-        this->value = value;
+    void setValue(message::get_address* value) {
+        value_ = value;
     }
 private:
-    message::get_address value;
+    message::get_address* value_;
 };
 
 } // namespace message

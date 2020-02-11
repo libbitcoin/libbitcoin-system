@@ -8,15 +8,15 @@ namespace api {
 
 class utility_mutex_ptr {
 public:
-	std::shared_ptr<shared_mutex> getValue() {
-        return value;
+	std::shared_ptr<shared_mutex>* getValue() {
+        return value_;
     }
 
-    void setValue(std::shared_ptr<shared_mutex> value) {
-        this->value = value;
+    void setValue(std::shared_ptr<shared_mutex>* value) {
+        value_ = value;
     }
 private:
-    std::shared_ptr<shared_mutex> value;
+    std::shared_ptr<shared_mutex>* value_;
 };
 
 } // namespace api

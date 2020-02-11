@@ -30,25 +30,24 @@
 //#define CONSTRUCT_TRACK(class_name) \
 //    track<class_name>(#class_name)
 
-template <class Shared>
-class utility_track
-{
+template<class Shared>
+class utility_track {
 //public:
 //    static std::atomic<size_t> instances;
 
 protected:
-    utility_track(const std::string& class_name);
-    virtual ~utility_track();
+	utility_track(const std::string& class_name);
+	virtual ~utility_track();
 
-    track<class Shared> getValue() {
-       return value;
-   }
+	track<Shared>* getValue() {
+		return value_;
+	}
 
-   void setValue(track<class Shared> value) {
-       this->value = value;
-   }
+	void setValue(track<Shared>* value) {
+		value_ = value;
+	}
 private:
-   track<class Shared> value;
+	track<Shared>* value_;
 //    const std::string class_;
 };
 

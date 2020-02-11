@@ -8,15 +8,15 @@ namespace api {
 
 class utility_data_chunk {
 public:
-	uint8_t_vector getValue() {
-        return value;
+	uint8_t_vector* getValue() {
+        return value_;
     }
 
-    void setValue(uint8_t_vector value) {
-        this->value = value;
+    void setValue(uint8_t_vector* value) {
+        value_ = value;
     }
 private:
-    uint8_t_vector value;
+    uint8_t_vector* value_;
 };
 
 } // api

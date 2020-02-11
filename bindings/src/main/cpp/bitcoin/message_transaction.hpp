@@ -27,7 +27,7 @@
 #include <bitcoin/bitcoin/message/transaction.hpp>
 //#include <bitcoin/bitcoin/chain/input.hpp>
 //#include <bitcoin/bitcoin/chain/output.hpp>
-#include <chain_transaction.hpp>
+#include <bitcoin/chain_transaction.hpp>
 //#include <bitcoin/bitcoin/message/version.hpp>
 //#include <bitcoin/bitcoin/utility/data.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
@@ -53,11 +53,11 @@ public:
 
     message_transaction();
 
-    message_transaction(message_transaction&& other);
-    message_transaction(chain_transaction&& other);
+//    message_transaction(message_transaction&& other);
+//    message_transaction(chain_transaction&& other);
 
-//    message_transaction(const message_transaction& other);
-//    message_transaction(const chain_transaction& other);
+    message_transaction(const message_transaction& other);
+    message_transaction(const chain_transaction& other);
 
     message_transaction(uint32_t version, uint32_t locktime,
         chain_input_list&& inputs, chain_output_list&& outputs);
@@ -92,15 +92,15 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 public:
-    message::transaction getValue() {
-        return value;
+    message::transaction* getValue() {
+        return value_;
     }
 
-    void setValue(message::transaction value) {
-        this->value = value;
+    void setValue(message::transaction* value) {
+        value_ = value;
     }
 private:
-    message::transaction value;
+    message::transaction* value_;
 };
 
 } // namespace api

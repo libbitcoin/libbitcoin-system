@@ -22,10 +22,10 @@
 #include <ostream>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
-#include <math_hash_digest.hpp>
-#include <math_short_hash.hpp>
-#include <math_mini_hash.hpp>
-#include <utility_data_slice.hpp>
+#include <bitcoin/math_hash_digest.hpp>
+#include <bitcoin/math_short_hash.hpp>
+#include <bitcoin/math_mini_hash.hpp>
+#include <bitcoin/utility_data_slice.hpp>
 
 namespace libbitcoin {
 namespace api {
@@ -89,15 +89,15 @@ public:
     /// Advance iterator without writing.
     void skip(size_t size);
 
-    ostream_writer getValue() {
-        return value;
+    ostream_writer* getValue() {
+        return value_;
     }
 
-    void setValue(ostream_writer value) {
-        this->value = value;
+    void setValue(ostream_writer* value) {
+        value_ = value;
     }
 private:
-    ostream_writer value;
+    ostream_writer* value_;
 //    std::ostream& stream_;
 };
 

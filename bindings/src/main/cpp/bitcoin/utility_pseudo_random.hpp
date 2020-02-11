@@ -23,65 +23,62 @@
 #include <cstdint>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/asio.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/utility/pseudo_random.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 
 namespace libbitcoin {
+namespace api {
 
-class BC_API pseudo_random
-{
-  public:
-    /**
-     * Fill a container with randomness using the default random engine.
-     */
-    template<class Container>
-    static void fill(Container& out)
-    {
-        // uniform_int_distribution is undefined for sizes < 16 bits.
-        std::uniform_int_distribution<uint16_t> distribution(0, max_uint8);
-        auto& twister = pseudo_random::get_twister();
+class BC_API utility_pseudo_random {
+public:
+	/**
+	 * Fill a container with randomness using the default random engine.
+	 */
+	template<class Container>
+	static void fill(Container& out) {
+		// uniform_int_distribution is undefined for sizes < 16 bits.
+		std::uniform_int_distribution<uint16_t> distribution(0, max_uint8);
+		auto& twister = pseudo_random::get_twister();
 
-        const auto fill = [&distribution, &twister](uint8_t)
-        {
-            return static_cast<uint8_t>(distribution(twister));
-        };
+		const auto fill = [&distribution, &twister](uint8_t)
+		{
+			return static_cast<uint8_t>(distribution(twister));
+		};
 
-        std::transform(out.begin(), out.end(), out.begin(), fill);
-    }
+		std::transform(out.begin(), out.end(), out.begin(), fill);
+	}
 
-    /**
-     * Shuffle a container using the default random engine.
-     */
-    template<class Container>
-    static void shuffle(Container& out)
-    {
-        std::shuffle(out.begin(), out.end(), get_twister());
-    }
+	/**
+	 * Shuffle a container using the default random engine.
+	 */
+	template<class Container>
+	static void shuffle(Container& out) {
+		pseudo_random::shuffle(out);
+	}
 
-    /**
-     * Generate a pseudo random number within the domain.
-     * @return  The 64 bit number.
-     */
-    static uint64_t next();
+	/**
+	 * Generate a pseudo random number within the domain.
+	 * @return  The 64 bit number.
+	 */
+	static uint64_t next();
 
-    /**
-     * Generate a pseudo random number within [begin, end].
-     * @return  The 64 bit number.
-     */
-    static uint64_t next(uint64_t begin, uint64_t end);
+	/**
+	 * Generate a pseudo random number within [begin, end].
+	 * @return  The 64 bit number.
+	 */
+	static uint64_t next(uint64_t begin, uint64_t end);
 
-    /**
-     * Convert a time duration to a value in the range [max/ratio, max].
-     * @param[in]  maximum  The maximum value to return.
-     * @param[in]  ratio    The determinant of the minimum duration as the inverse
-     *                      portion of the maximum duration.
-     * @return              The randomized duration.
-     */
-    static asio::duration duration(const asio::duration& maximum,
-        uint8_t ratio=2);
+	/**
+	 * Convert a time duration to a value in the range [max/ratio, max].
+	 * @param[in]  maximum  The maximum value to return.
+	 * @param[in]  ratio    The determinant of the minimum duration as the inverse
+	 *                      portion of the maximum duration.
+	 * @return              The randomized duration.
+	 */
+	static asio::duration duration(const asio::duration& maximum,
+			uint8_t ratio = 2);
 
-  private:
-    static std::mt19937& get_twister();
+//    static std::mt19937& get_twister();
 };
 
 /**
@@ -102,7 +99,7 @@ BC_API uint64_t pseudo_random(uint64_t begin, uint64_t end);
  * DEPRECATED
  * Fill a buffer with randomness using the default random engine.
  */
-BC_API void pseudo_random_fill(data_chunk& out);
+BC_API void pseudo_random_fill(utility_data_chunk& out);
 
 /**
  * DEPRECATED
@@ -113,8 +110,9 @@ BC_API void pseudo_random_fill(data_chunk& out);
  * @return              The randomized duration.
  */
 BC_API asio::duration pseudo_randomize(const asio::duration& maximum,
-    uint8_t ratio=2);
+		uint8_t ratio = 2);
 
+} // namespace api
 } // namespace libbitcoin
 
 #endif

@@ -19,13 +19,13 @@
 #ifndef LIBBITCOIN__MESSAGE_COMPACT_BLOCK_HPP
 #define LIBBITCOIN__MESSAGE_COMPACT_BLOCK_HPP
 
-#include <istream>
+//#include <istream>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/compact_block.hpp>
-#include <chain_header.hpp>
-#include <math_mini_hash_list.hpp>
-#include <message_prefilled_transaction_list.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/chain_header.hpp>
+#include <bitcoin/math_mini_hash_list.hpp>
+#include <bitcoin/message_prefilled_transaction_list.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -98,15 +98,15 @@ public:
 //    static const uint32_t version_maximum;
 //
 public:
-    message::compact_block getValue() {
-        return value;
+    message::compact_block* getValue() {
+        return value_;
     }
 
-    void setValue(message::compact_block value) {
-        this->value = value;
+    void setValue(message::compact_block* value) {
+        value_ = value;
     }
 private:
-    message::compact_block value;
+    message::compact_block* value_;
 //    chain_header header_;
 //    uint64_t nonce_;
 //    math_mini_hash_list short_ids_;

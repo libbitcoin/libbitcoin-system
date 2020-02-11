@@ -24,7 +24,7 @@
 //#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/filter_clear.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -44,8 +44,8 @@ public:
     static size_t satoshi_fixed_size(uint32_t version);
 
     message_filter_clear();
-//    message_filter_clear(const message_filter_clear& other);
-    message_filter_clear(message_filter_clear&& other);
+    message_filter_clear(const message_filter_clear& other);
+//    message_filter_clear(message_filter_clear&& other);
 
     bool from_data(uint32_t version, const utility_data_chunk& data);
 //    bool from_data(uint32_t version, std::istream& stream);
@@ -62,18 +62,18 @@ public:
 //    static const uint32_t version_maximum;
 //
 public:
-    message::filter_clear getValue() {
-        return value;
+    message::filter_clear* getValue() {
+        return value_;
     }
 
-    void setValue(message::filter_clear value) {
-        this->value = value;
+    void setValue(message::filter_clear* value) {
+        value_ = value;
     }
 //protected:
 //    filter_clear(bool insufficient_version);
 //
 private:
-    message::filter_clear value;
+    message::filter_clear* value_;
 //    bool insufficient_version_;
 };
 

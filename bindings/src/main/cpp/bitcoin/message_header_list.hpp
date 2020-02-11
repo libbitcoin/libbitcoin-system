@@ -8,15 +8,15 @@ namespace api {
 
 class message_header_list {
 public:
-	message::header::list getValue() {
-        return value;
+	message::header::list* getValue() {
+        return value_;
     }
 
-    void setValue(message::header::list value) {
-        this->value = value;
+    void setValue(message::header::list* value) {
+        value_ = value;
     }
 private:
-    message::header::list value;
+    message::header::list* value_;
 };
 
 } // namespace api

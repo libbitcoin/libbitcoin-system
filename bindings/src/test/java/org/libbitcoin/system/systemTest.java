@@ -18,15 +18,12 @@
  */
 package org.libbitcoin.bitcoin;
 
-class Test {
-	private final static Logger logger = Logger.getLogger(consensusTest.class.getName());
-    private final static String TEST_FAILED = "Test Failed!";
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
-    public static void assertTrue(boolean success) {
-		if (!success) {
-			logger.log(Level.SEVERE, TEST_FAILED, new RuntimeException(TEST_FAILED));
-		}
-	}
+class systemTest {
+	private final static Logger logger = Logger.getLogger(systemTest.class.getName());
+    private final static String TEST_FAILED = "Test Failed!";
 
     public static void assertTrue(boolean success) {
 		if (!success) {

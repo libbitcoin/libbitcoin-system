@@ -19,22 +19,22 @@
 #ifndef LIBBBITCOIN__MESSAGE_NETWORK_ADDRESS_LIST_HPP
 #define LIBBBITCOIN__MESSAGE_NETWORK_ADDRESS_LIST_HPP
 
-#include <bitcoin/message/network_address.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
 
 namespace libbitcoin {
 namespace api {
 
 class message_network_address_list {
 public:
-	message::network_address::list getValue() {
-        return value;
+	message::network_address::list* getValue() {
+        return value_;
     }
 
-    void setValue(message::network_address::list value) {
-        this->value = value;
+    void setValue(message::network_address::list* value) {
+        value_ = value;
     }
 private:
-    message::network_address::list value;
+    message::network_address::list* value_;
 
 };
 

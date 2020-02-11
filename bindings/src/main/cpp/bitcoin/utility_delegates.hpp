@@ -23,7 +23,8 @@
 #include <bitcoin/bitcoin/utility/work.hpp>
 
 namespace libbitcoin {
-namespace delegates {
+//namespace delegates {
+namespace api {
 
 #define FORWARD_ARGS(args) \
     std::forward<Args>(args)...
@@ -34,7 +35,7 @@ namespace delegates {
 
 /// Binding delegate (current thread).
 template <typename Handler>
-struct bound
+struct utility_bound
 {
     template <typename... Args>
     void operator()(Args&&... args)
@@ -47,7 +48,7 @@ struct bound
 
 /// Asynchronous delegate.
 template <typename Handler>
-struct concurrent
+struct utility_concurrent
 {
     template <typename... Args>
     void operator()(Args&&... args)
@@ -61,7 +62,7 @@ struct concurrent
 
 /// Ordered synchronous delegate.
 template <typename Handler>
-struct ordered
+struct utility_ordered
 {
     template <typename... Args>
     void operator()(Args&&... args)
@@ -75,7 +76,7 @@ struct ordered
 
 /// Unordered synchronous delegate.
 template <typename Handler>
-struct unordered
+struct utility_unordered
 {
     template <typename... Args>
     void operator()(Args&&... args)
@@ -89,7 +90,7 @@ struct unordered
 
 /// Sequence ordering delegate.
 template <typename Handler>
-struct sequence
+struct utility_sequence
 {
     template <typename... Args>
     void operator()(Args&&... args)
@@ -105,7 +106,8 @@ struct sequence
 #undef FORWARD_HANDLER
 #undef BIND_HANDLER
 
-} // namespace delegates
+} // namespace api
+//} // namespace delegates
 } // namespace libbitcoin
 
 #endif

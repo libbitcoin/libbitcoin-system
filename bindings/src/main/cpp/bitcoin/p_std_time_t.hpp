@@ -8,24 +8,24 @@ namespace api {
 
 class p_std_time_t {
 public:
-	p_std_time_t() :
-			value(new std::time_t) {
+//	p_std_time_t() :
+//			value(0) {
+//	}
+
+	p_std_time_t(std::time_t* value) :
+			value_(value) {
 	}
 
-	void setValue(std::time_t *value) {
-		this->value = value;
+	void setValue(std::time_t* value) {
+		value_ = value;
 	}
 
-	std::time_t *getValue() const {
-		return value;
-	}
-
-	~p_std_time_t() {
-		delete value;
+	std::time_t* getValue() const {
+		return value_;
 	}
 
 private:
-	std::time_t *value;
+	std::time_t* value_;
 };
 
 } // namespace api

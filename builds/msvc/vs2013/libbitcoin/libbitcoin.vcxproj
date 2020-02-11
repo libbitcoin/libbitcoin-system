@@ -358,6 +358,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\ec_scalar.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\elliptic_curve.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\hash.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\hash20180404.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\limits.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\ring_signature.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\stealth.hpp" />
@@ -416,6 +417,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\container_sink.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\container_source.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\data.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\data20180404.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\deadline.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\decorator.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\delegates.hpp" />

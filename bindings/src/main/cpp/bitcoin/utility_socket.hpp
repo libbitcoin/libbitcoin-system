@@ -56,15 +56,15 @@ public:
 
     virtual ~utility_socket();
 
-    socket getValue() {
-		return value;
+    socket* getValue() {
+		return value_;
 	}
 
-	void setValue(socket value) {
-		this->value = value;
+	void setValue(socket* value) {
+		value_ = value;
 	}
 private:
-	socket value;
+	socket* value_;
 
 //private:
 //    // This is thread safe.

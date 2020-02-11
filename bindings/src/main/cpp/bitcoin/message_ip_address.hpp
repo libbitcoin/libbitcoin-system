@@ -13,26 +13,26 @@ class message_ip_address {
 
 public:
 	message_ip_address(message::ip_address *value) :
-			value(value) {
+			value_(value) {
 	}
 
 	message_ip_address() :
-			value(new message::ip_address) {
+			value_(new message::ip_address) {
 	}
 
 	~message_ip_address() {
-		delete value;
+		delete value_;
 	}
 
 	message::ip_address* getValue() {
-		return value;
+		return value_;
 	}
 
 	void setValue(message::ip_address *value) {
-		this->value = value;
+		value_ = value;
 	}
 private:
-	message::ip_address *value;
+	message::ip_address *value_;
 };
 
 } // namespace api

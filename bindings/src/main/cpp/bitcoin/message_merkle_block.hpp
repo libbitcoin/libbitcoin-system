@@ -24,10 +24,10 @@
 //#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/merkle_block.hpp>
-#include <chain_block.hpp>
-#include <chain_header.hpp>
-#include <math_hash_list.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/chain_block.hpp>
+#include <bitcoin/chain_header.hpp>
+#include <bitcoin/math_hash_list.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -52,8 +52,8 @@ public:
     message_merkle_block(chain_header&& header, size_t total_transactions,
         math_hash_list&& hashes, utility_data_chunk&& flags);
     message_merkle_block(const chain_block& block);
-//    message_merkle_block(const message_merkle_block& other);
-    message_merkle_block(message_merkle_block&& other);
+    message_merkle_block(const message_merkle_block& other);
+//    message_merkle_block(message_merkle_block&& other);
 
     chain_header& header();
 //    const chain::header& header() const;
@@ -97,15 +97,15 @@ public:
 //    static const uint32_t version_maximum;
 
 public:
-    message::merkle_block getValue() {
-        return value;
+    message::merkle_block* getValue() {
+        return value_;
     }
 
-    void setValue(message::merkle_block value) {
-        this->value = value;
+    void setValue(message::merkle_block* value) {
+        value_ = value;
     }
 private:
-    message::merkle_block value;
+    message::merkle_block* value_;
 //    chain::header header_;
 //    size_t total_transactions_;
 //    math_hash_list hashes_;

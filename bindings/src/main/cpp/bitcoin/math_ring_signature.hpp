@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_RING_SIGNATURE_HPP
-#define LIBBITCOIN_RING_SIGNATURE_HPP
+#ifndef LIBBITCOIN__MATH_RING_SIGNATURE_HPP
+#define LIBBITCOIN__MATH_RING_SIGNATURE_HPP
 
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>

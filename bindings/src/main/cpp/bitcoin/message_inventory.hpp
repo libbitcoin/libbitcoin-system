@@ -27,10 +27,10 @@
 //#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/inventory.hpp>
-#include <math_hash_list.hpp>
-#include <message_inventory_list.hpp>
-#include <message_inventory_vector_list.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/math_hash_list.hpp>
+#include <bitcoin/message_inventory_list.hpp>
+#include <bitcoin/message_inventory_vector_list.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -54,8 +54,8 @@ public:
     message_inventory(message_inventory_vector_list&& values);
     message_inventory(const math_hash_list& hashes, type_id type);
 //    message_inventory(const std::initializer_list<message_inventory_vector>& values);
-//    message_inventory(const message_inventory& other);
-    message_inventory(message_inventory&& other);
+    message_inventory(const message_inventory& other);
+//    message_inventory(message_inventory&& other);
     virtual ~message_inventory();
 
     message_inventory_vector_list& inventories();
@@ -90,15 +90,15 @@ public:
 //    static const uint32_t version_maximum;
 //
 public:
-    message::inventory getValue() {
-        return value;
+    message::inventory* getValue() {
+        return value_;
     }
 
-    void setValue(message::inventory value) {
-        this->value = value;
+    void setValue(message::inventory* value) {
+        value_ = value;
     }
 private:
-    message::inventory value;
+    message::inventory* value_;
 //    message_inventory_vector::list inventories_;
 };
 

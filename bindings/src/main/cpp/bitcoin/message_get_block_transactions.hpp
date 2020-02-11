@@ -23,9 +23,9 @@
 //#include <memory>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/get_block_transactions.hpp>
-#include <math_hash_digest.hpp>
-#include <uint64_t_vector.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/math_hash_digest.hpp>
+#include <bitcoin/uint64_t_vector.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -48,8 +48,8 @@ public:
 //        const uint64_t_vector& indexes);
     message_get_block_transactions(math_hash_digest&& block_hash,
         uint64_t_vector&& indexes);
-//    message_get_block_transactions(const message_get_block_transactions& other);
-    message_get_block_transactions(message_get_block_transactions&& other);
+    message_get_block_transactions(const message_get_block_transactions& other);
+//    message_get_block_transactions(message_get_block_transactions&& other);
 
     math_hash_digest& block_hash();
 //    const math_hash_digest& block_hash() const;
@@ -85,15 +85,15 @@ public:
 //    static const uint32_t version_maximum;
 //
 public:
-    message::get_block_transactions getValue() {
-        return value;
+    message::get_block_transactions* getValue() {
+        return value_;
     }
 
-    void setValue(message::get_block_transactions value) {
-        this->value = value;
+    void setValue(message::get_block_transactions* value) {
+        value_ = value;
     }
 private:
-    message::get_block_transactions value;
+    message::get_block_transactions* value_;
 //    math_hash_digest block_hash_;
 //    uint64_t_vector indexes_;
 };

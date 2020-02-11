@@ -25,7 +25,7 @@
 //#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/pong.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -76,15 +76,15 @@ public:
 //    static const uint32_t version_maximum;
 //
 public:
-    message::pong getValue() {
-        return value;
+    message::pong* getValue() {
+        return value_;
     }
 
-    void setValue(message::pong value) {
-        this->value = value;
+    void setValue(message::pong* value) {
+        value_ = value;
     }
 private:
-    message::pong value;
+    message::pong* value_;
 //    uint64_t nonce_;
 //    bool valid_;
 };

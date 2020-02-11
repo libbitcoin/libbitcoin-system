@@ -19,13 +19,13 @@
 #ifndef LIBBITCOIN__MESSAGE_BLOCK_TRANSACTIONS_HPP
 #define LIBBITCOIN__MESSAGE_BLOCK_TRANSACTIONS_HPP
 
-#include <istream>
+//#include <istream>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/block_transactions.hpp>
 //#include <bitcoin/bitcoin/chain/transaction.hpp>
-#include <chain_transaction_list.hpp>
-#include <math_hash_digest.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/chain_transaction_list.hpp>
+#include <bitcoin/math_hash_digest.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -48,8 +48,8 @@ public:
 //        const chain_transaction_list& transactions);
     message_block_transactions(math_hash_digest&& block_hash,
         chain_transaction_list&& transactions);
-//    message_block_transactions(const message_block_transactions& other);
-    message_block_transactions(message_block_transactions&& other);
+    message_block_transactions(const message_block_transactions& other);
+//    message_block_transactions(message_block_transactions&& other);
 
     math_hash_digest& block_hash();
 //    const math_hash_digest& block_hash() const;
@@ -85,15 +85,15 @@ public:
 //    static const uint32_t version_maximum;
 //
 public:
-    message::block_transactions getValue() {
-        return value;
+    message::block_transactions* getValue() {
+        return value_;
     }
 
-    void setValue(message::block_transactions value) {
-        this->value = value;
+    void setValue(message::block_transactions* value) {
+        value_ = value;
     }
 private:
-    message::block_transactions value;
+    message::block_transactions* value_;
 //    hash_digest block_hash_;
 //    chain::transaction::list transactions_;
 };

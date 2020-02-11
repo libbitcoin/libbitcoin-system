@@ -8,15 +8,15 @@ namespace api {
 
 class utility_action {
 public:
-	sequencer::action getValue() {
-        return value;
+	sequencer::action* getValue() {
+        return value_;
     }
 
-    void setValue(sequencer::action value) {
-        this->value = value;
+    void setValue(sequencer::action* value) {
+        value_ = value;
     }
 private:
-    sequencer::action value;
+    sequencer::action* value_;
 };
 
 } // namespace api

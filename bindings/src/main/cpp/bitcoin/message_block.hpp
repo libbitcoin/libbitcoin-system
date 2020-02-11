@@ -19,17 +19,17 @@
 #ifndef LIBBITCOIN__MESSAGE_BLOCK_HPP
 #define LIBBITCOIN__MESSAGE_BLOCK_HPP
 
-#include <cstdint>
-#include <cstddef>
-#include <istream>
-#include <memory>
+//#include <cstdint>
+//#include <cstddef>
+//#include <istream>
+//#include <memory>
 #include <bitcoin/bitcoin/message/block.hpp>
-#include <chain_block.hpp>
+#include <bitcoin/chain_block.hpp>
 //#include <bitcoin/bitcoin/chain/header.hpp>
-#include <chain_transaction_list.hpp>
+#include <bitcoin/chain_transaction_list.hpp>
 //#include <bitcoin/bitcoin/define.hpp>
 //#include <bitcoin/bitcoin/message/version.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 
 namespace libbitcoin {
@@ -52,11 +52,11 @@ public:
 
     message_block();
 
-    message_block(message_block&& other);
-//    message_block(const message_block& other);
+//    message_block(message_block&& other);
+    message_block(const message_block& other);
 
-    message_block(chain_block&& other);
-//    message_block(const chain_block& other);
+//    message_block(chain_block&& other);
+    message_block(const chain_block& other);
 
     message_block(chain_header&& header,
     		chain_transaction_list&& transactions);
@@ -77,7 +77,7 @@ public:
     // This class is move assignable but not copy assignable.
 //    message_block& operator=(message_block&& other);
     message_block& assign(message_block&& other);
-//    void operator=(const message_block&) = delete;
+//    void operator=(const message_block& other);
 
 //    bool operator==(const chain::message_block& other) const;
     bool eq(const chain_block& other) const;
@@ -91,15 +91,15 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 public:
-    message::block getValue() {
-        return value;
+    message::block* getValue() {
+        return value_;
     }
 
-    void setValue(message::block value) {
-        this->value = value;
+    void setValue(message::block* value) {
+        value_ = value;
     }
 private:
-    message::block value;
+    message::block* value_;
 
 };
 

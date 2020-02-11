@@ -23,15 +23,15 @@
 #include <bitcoin/bitcoin/define.hpp>
 //#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
-#include <utility_asio.hpp>
+#include <bitcoin/utility_asio.hpp>
 //#include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
 //#include <bitcoin/bitcoin/utility/assert.hpp>
 //#include <bitcoin/bitcoin/utility/noncopyable.hpp>
 //#include <bitcoin/bitcoin/utility/thread.hpp>
-#include <utility_threadpool.hpp>
+#include <bitcoin/utility_threadpool.hpp>
 ////#include <bitcoin/bitcoin/utility/track.hpp>
-#include <utility_duration.hpp>
-#include <utility_handler.hpp>
+#include <bitcoin/utility_duration.hpp>
+#include <bitcoin/utility_handler.hpp>
 
 namespace libbitcoin {
 namespace api {
@@ -87,15 +87,15 @@ public:
      */
     void stop();
 
-    deadline getValue() {
-        return value;
+    deadline* getValue() {
+        return value_;
     }
 
-    void setValue(deadline value) {
-        this->value = value;
+    void setValue(deadline* value) {
+        value_ = value;
     }
 private:
-    deadline value;
+    deadline* value_;
 //    void handle_timer(const boost_code& ec, handler handle) const;
 //
 //    asio::timer timer_;

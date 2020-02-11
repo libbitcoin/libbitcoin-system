@@ -24,7 +24,7 @@
 //#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/send_headers.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -44,8 +44,8 @@ public:
     static size_t satoshi_fixed_size(uint32_t version);
 
     message_send_headers();
-//    message_send_headers(const message_send_headers& other);
-    message_send_headers(message_send_headers&& other);
+    message_send_headers(const message_send_headers& other);
+//    message_send_headers(message_send_headers&& other);
 
     bool from_data(uint32_t version, const utility_data_chunk& data);
 //    bool from_data(uint32_t version, std::istream& stream);
@@ -58,12 +58,12 @@ public:
     size_t serialized_size(uint32_t version) const;
 
 public:
-    message::send_headers getValue() {
-        return value;
+    message::send_headers* getValue() {
+        return value_;
     }
 
-    void setValue(message::send_headers value) {
-        this->value = value;
+    void setValue(message::send_headers* value) {
+        value_ = value;
     }
 //    static const std::string command;
 //    static const uint32_t version_minimum;
@@ -73,7 +73,7 @@ public:
 //    message_send_headers(bool insufficient_version);
 //
 private:
-    message::send_headers value;
+    message::send_headers* value_;
 //    bool insufficient_version_;
 };
 

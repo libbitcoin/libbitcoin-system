@@ -44,9 +44,9 @@ public:
 //    static message_address factory(uint32_t version, reader& source);
 
     message_address();
-//    message_address(const message_network_address_list& message_addresses);
+    message_address(const message_network_address_list& message_addresses);
     message_address(message_network_address_list&& message_addresses);
-//    message_address(const message_address& other);
+    message_address(const message_address& other);
     message_address(message_address&& other);
 
     message_network_address_list& addresses();
@@ -67,7 +67,8 @@ public:
     /// This class is move assignable but not copy assignable.
 //    address& operator=(address&& other);
     message_address& assign(message_address&& other);
-//    void operator=(const address&) = delete;
+    //    void operator=(const address&) = delete;
+    void operator=(const message_address& other);
 
 //    bool operator==(const address& other) const;
     bool eq(const message_address& other) const;
@@ -78,15 +79,15 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 
-    message::address getValue() {
-        return value;
+    message::address* getValue() {
+        return value_;
     }
 
-    void setValue(message::address value) {
-        this->value = value;
+    void setValue(message::address* value) {
+        value_ = value;
     }
 private:
-    message::address value;
+    message::address* value_;
 };
 
 } // namespace api

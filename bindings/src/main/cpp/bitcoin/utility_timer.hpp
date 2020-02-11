@@ -25,32 +25,37 @@
 #include <string>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/utility/asio.hpp>
-#include <p_std_time_t.hpp>
+#include <bitcoin/bitcoin/utility/timer.hpp>
+#include <bitcoin/p_std_time_t.hpp>
 
 namespace libbitcoin {
 namespace api {
-/// Current zulu (utc) time using the wall clock.
-/// BUGBUG: en.wikipedia.org/wiki/Year_2038_problem
-inline p_std_time_t zulu_time()
+// Current zulu (utc) time using the wall clock.
+// BUGBUG: en.wikipedia.org/wiki/Year_2038_problem
+//inline p_std_time_t* zulu_time()
+inline std::time_t zulu_time()
 {
-    using wall_clock = std::chrono::system_clock;
-    const auto now = wall_clock::now();
-    return wall_clock::to_time_t(now);
+//	return new p_std_time_t(libbitcoin::zulu_time());
+	return libbitcoin::zulu_time();
+//    using wall_clock = std::chrono::system_clock;
+//    const auto now = wall_clock::now();
+//    return wall_clock::to_time_t(now);
 }
 
 /// Standard date-time string, e.g. Sun Oct 17 04:41:13 2010, locale dependent.
 inline std::string local_time()
 {
-    static BC_CONSTEXPR size_t size = 25;
-    char buffer[size];
-    const auto time = zulu_time();
-
-    // std::strftime is required because gcc doesn't implement std::put_time.
-    auto result = std::strftime(buffer, size, "%c", std::localtime(&time));
-
-    // If count was reached before the entire string could be stored, zero is
-    // returned and contents are undefined, so do not return result.
-    return result == 0 ? "" : buffer;
+	return libbitcoin::local_time();
+//    static BC_CONSTEXPR size_t size = 25;
+//    char buffer[size];
+//    const auto time = zulu_time();
+//
+//    // std::strftime is required because gcc doesn't implement std::put_time.
+//    auto result = std::strftime(buffer, size, "%c", std::localtime(&time));
+//
+//    // If count was reached before the entire string could be stored, zero is
+//    // returned and contents are undefined, so do not return result.
+//    return result == 0 ? "" : buffer;
 }
 
 // From: github.com/picanumber/bureaucrat/blob/master/time_lapse.h
@@ -58,27 +63,30 @@ inline std::string local_time()
 
 /// Class to measure the execution time of a callable.
 template <typename Time=asio::milliseconds, class Clock=asio::steady_clock>
-struct timer
+class utility_timer
 {
     /// Returns the quantity (count) of the elapsed time as TimeT units.
     template <typename Function, typename ...Args>
     static typename Time::rep execution(Function func, Args&&... args)
     {
-        const auto start = Clock::now();
-        func(std::forward<Args>(args)...);
-        const auto difference = Clock::now() - start;
-        const auto duration = std::chrono::duration_cast<Time>(difference);
-        return duration.count();
+    	return libbitcoin::timer<Time, Clock>::execution(func, args...);
+//        const auto start = Clock::now();
+//        func(std::forward<Args>(args)...);
+//        const auto difference = Clock::now() - start;
+//        const auto duration = std::chrono::duration_cast<Time>(difference);
+//        return duration.count();
     }
 
     /// Returns the duration (in chrono's type system) of the elapsed time.
     template <typename Function, typename... Args>
     static Time duration(Function func, Args&&... args)
     {
-        auto start = Clock::now();
-        func(std::forward<Args>(args)...);
-        return std::chrono::duration_cast<Time>(Clock::now() - start);
+    	return libbitcoin::timer<Time, Clock>::duration(func, args...);
+//        auto start = Clock::now();
+//        func(std::forward<Args>(args)...);
+//        return std::chrono::duration_cast<Time>(Clock::now() - start);
     }
+
 };
 
 } // namespace api

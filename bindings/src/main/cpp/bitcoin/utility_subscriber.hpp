@@ -29,8 +29,8 @@
 //#include <bitcoin/bitcoin/utility/threadpool.hpp>
 ////#include <bitcoin/bitcoin/utility/track.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
-#include <utility_threadpool.hpp>
-#include <utility_subscriber_handler.hpp>
+#include <bitcoin/utility_threadpool.hpp>
+#include <bitcoin/utility_subscriber_handler.hpp>
 
 namespace libbitcoin {
 namespace api {
@@ -54,7 +54,8 @@ public:
     void stop();
 
     /// Subscribe to notifications (for one invocation only).
-    void subscribe(utility_subscriber_handler<Args>&& notify, Args... stopped_args);
+    // FIXME later
+//    void subscribe(utility_subscriber_handler<Args>&& notify, Args... stopped_args);
 
     /// Invoke and clear all handlers sequentially (blocking).
     void invoke(Args... args);
@@ -62,15 +63,16 @@ public:
     /// Invoke and clear all handlers sequentially (non-blocking).
     void relay(Args... args);
 
-	subscriber<Args> getValue() {
-		return value;
-	}
-
-	void setValue(subscriber<Args> value) {
-		this->value = value;
-	}
-private:
-	subscriber<Args> value;
+    // FIXME later
+//	subscriber<Args>* getValue() {
+//		return value_;
+//	}
+//
+//	void setValue(subscriber<Args>*... value) {
+//		value_ = value;
+//	}
+//private:
+//	subscriber<Args>* value_;
 //    typedef std::vector<handler> list;
 //
 //    void do_invoke(Args... args);

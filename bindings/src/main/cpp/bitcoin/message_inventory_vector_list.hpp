@@ -8,15 +8,15 @@ namespace api {
 
 class message_inventory_vector_list {
 public:
-	message::inventory_vector::list getValue() {
-        return value;
+	message::inventory_vector::list* getValue() {
+        return value_;
     }
 
-    void setValue(message::inventory_vector::list value) {
-        this->value = value;
+    void setValue(message::inventory_vector::list* value) {
+        value_ = value;
     }
 private:
-    message::inventory_vector::list value;
+    message::inventory_vector::list* value_;
 };
 
 } // namespace api

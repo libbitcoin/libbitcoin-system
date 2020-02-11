@@ -25,10 +25,10 @@
 #include <bitcoin/bitcoin/message/alert_payload.hpp>
 //#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 //#include <bitcoin/bitcoin/utility/data.hpp>
-#include <utility_data_chunk.hpp>
-#include <p_std_string.hpp>
-#include <string_vector.hpp>
-#include <uint32_t_vector.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
+#include <bitcoin/p_std_string.hpp>
+#include <bitcoin/string_vector.hpp>
+#include <bitcoin/uint32_t_vector.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -56,8 +56,8 @@ public:
         string_vector&& set_sub_version, uint32_t priority,
         p_std_string& comment, p_std_string& status_bar,
         p_std_string& reserved);
-//    message_alert_payload(const message_alert_payload& other);
-    message_alert_payload(message_alert_payload&& other);
+    message_alert_payload(const message_alert_payload& other);
+//    message_alert_payload(message_alert_payload&& other);
 
     uint32_t version() const;
     void set_version(uint32_t value);
@@ -121,8 +121,7 @@ public:
     /// This class is move assignable but not copy assignable.
 //    alert_payload& operator=(alert_payload&& other);
     message_alert_payload& assign(message_alert_payload&& other);
-//    void operator=(const alert_payload&) = delete;
-//    void operator=(const alert_payload&) = delete;
+    void operator=(const message_alert_payload& other);
 
 //    bool operator==(const alert_payload& other) const;
     bool eq(const message_alert_payload& other) const;
@@ -132,15 +131,15 @@ public:
 //    static const ec_uncompressed satoshi_public_key;
 
 public:
-    message::alert_payload getValue() {
-        return value;
+    message::alert_payload* getValue() {
+        return value_;
     }
 
-    void setValue(message::alert_payload value) {
-        this->value = value;
+    void setValue(message::alert_payload* value) {
+        value_ = value;
     }
 private:
-    message::alert_payload value;
+    message::alert_payload* value_;
 //    uint32_t version_;
 //    uint64_t relay_until_;
 //    uint64_t expiration_;

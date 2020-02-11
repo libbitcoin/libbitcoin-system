@@ -28,8 +28,8 @@
 //#include <bitcoin/bitcoin/math/hash.hpp>
 //#include <bitcoin/bitcoin/message/inventory.hpp>
 //#include <bitcoin/bitcoin/message/inventory_vector.hpp>
-#include <utility_data_chunk.hpp>
-#include <message_inventory_vector_list.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
+#include <bitcoin/message_inventory_vector_list.hpp>
 
 namespace libbitcoin {
 //namespace message {
@@ -51,11 +51,11 @@ public:
     message_get_data(message_inventory_vector_list&& list);
 //    message_get_data(const hash_list& hashes, type_id type);
 //    message_get_data(const std::initializer_list<inventory_vector>& elements);
-//    message_get_data(const message_get_data& other);
-    message_get_data(message_get_data&& other);
+    message_get_data(const message_get_data& other);
+//    message_get_data(message_get_data&& other);
     virtual ~message_get_data();
 
-    bool from_data(uint32_t version, const utility_data_chunk& data) override;
+    bool from_data(uint32_t version, const utility_data_chunk& data);// override;
 //    bool from_data(uint32_t version, std::istream& stream) override;
 //    bool from_data(uint32_t version, reader& source) override;
 
@@ -75,15 +75,15 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 public:
-    message::get_data getValue() {
-        return value;
+    message::get_data* getValue() {
+        return value_;
     }
 
-    void setValue(message::get_data value) {
-        this->value = value;
+    void setValue(message::get_data* value) {
+        value_ = value;
     }
 private:
-    message::get_data value;
+    message::get_data* value_;
 };
 
 } // namespace api

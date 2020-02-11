@@ -26,8 +26,8 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/header.hpp>
 //#include <bitcoin/bitcoin/message/version.hpp>
-#include <chain_header.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/chain_header.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 
 namespace libbitcoin {
@@ -60,8 +60,8 @@ public:
         uint32_t nonce);
 //    message_header(const chain::message_header& other);
     message_header(chain_header&& other);
-//    message_header(const message_header& other);
-    message_header(message_header&& other);
+    message_header(const message_header& other);
+//    message_header(message_header&& other);
 
     bool from_data(uint32_t version, const utility_data_chunk& data);
 //    bool from_data(uint32_t version, std::istream& stream);
@@ -92,15 +92,15 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 public:
-    message::header getValue() {
-        return value;
+    message::header* getValue() {
+        return value_;
     }
 
-    void setValue(message::header value) {
-        this->value = value;
+    void setValue(message::header* value) {
+        value_ = value;
     }
 private:
-    message::header value;
+    message::header* value_;
 };
 
 } // namespace api

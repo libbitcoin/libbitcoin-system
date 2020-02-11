@@ -44,7 +44,7 @@ struct byte_array_parts
 
 // Define arbitrary byte storage types.
 typedef std::array<uint8_t, 1> one_byte;
-typedef array_slice<uint8_t> data_slice;
+typedef libbitcoin::array_slice<uint8_t> data_slice;
 typedef std::vector<uint8_t> data_chunk;
 typedef std::queue<data_chunk> data_queue;
 typedef std::vector<data_chunk> data_stack;

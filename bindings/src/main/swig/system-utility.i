@@ -1,6 +1,7 @@
 %module utility
 %{
 #include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system_common.hpp>
 #include <bitcoin/system_utility.hpp>
 %}
 #pragma SWIG nowarn=317
@@ -9,6 +10,7 @@
 
 %ignore getValue();
 
+//%import "system-ext.i"
 %import "system-math-ext.i"
 //%import "bitcoin-math-ext-typemap.i"
 %import "system-chain-ext.i"
@@ -26,6 +28,7 @@
 //%import "boost/asio/ip/address_v6.hpp"
 %include "bitcoin/utility_ipv6.hpp"
 //%import "boost/asio/io_service.hpp"
+%ignore setValue(boost::asio::io_service* value);
 %include "bitcoin/utility_service.hpp"
 %include "bitcoin/utility_array_slice.hpp"
 %import <bitcoin/bitcoin/compat.hpp>
@@ -37,10 +40,10 @@
 %include "bitcoin/utility_atomic.hpp"
 
 %include "bitcoin/utility_collection.hpp"
-%ignore setValue(color value);
+%ignore setValue(color* value);
 %include "bitcoin/utility_color.hpp"
 %import "bitcoin/bitcoin/utility/conditional_lock.hpp"
-%ignore setValue(std::shared_ptr<shared_mutex> value);
+%ignore setValue(std::shared_ptr<shared_mutex>* value);
 %include "bitcoin/utility_mutex_ptr.hpp"
 %include "bitcoin/utility_conditional_lock.hpp"
 %include "bitcoin/utility_container_sink.hpp"
@@ -62,11 +65,11 @@
 %include "bitcoin/utility_data_stack.hpp"
 
 %import "bitcoin/utility_duration.hpp"
-%ignore setValue(std::function<void(const libbitcoin::code&)> value);
+%ignore setValue(std::function<void(const libbitcoin::code&)>* value);
 %include "bitcoin/utility_handler.hpp"
 %import "bitcoin/bitcoin/utility/thread.hpp"
 %include "bitcoin/utility_threadpool.hpp"
-%ignore setValue(deadline value);
+%ignore setValue(deadline* value);
 %include "bitcoin/utility_deadline.hpp"
 //%import <boost/functional.hpp>
 %include "bitcoin/utility_decorator.hpp"
@@ -82,10 +85,11 @@
 %import "bitcoin/bitcoin/utility/exceptions.hpp"
 %include "bitcoin/utility_exceptions.hpp"
 %import "bitcoin/bitcoin/utility/flush_lock.hpp"
-%ignore setValue(boost::filesystem::path value);
+%ignore setValue(boost::filesystem::path* value);
 %include "bitcoin/utility_path.hpp"
 %include "bitcoin/utility_flush_lock.hpp"
 %import "bitcoin/bitcoin/utility/interprocess_lock.hpp"
+%ignore setValue(interprocess_lock* value);
 %include "bitcoin/utility_interprocess_lock.hpp"
 
 //%rename(toBoolean) libbitcoin::reader::operator bool() const;
@@ -95,7 +99,7 @@
 //%rename(toBoolean) libbitcoin::istream_reader::operator bool() const;
 //%rename(notOp) libbitcoin::istream_reader::operator!() const;
 //%include "bitcoin/utility/istream_reader.hpp"
-%ignore setValue(monitor::count_ptr value);
+%ignore setValue(monitor::count_ptr* value);
 %include "bitcoin/utility_monitor_count_ptr.hpp"
 %import "bitcoin/p_std_string.hpp"
 %import "bitcoin/bitcoin/utility/monitor.hpp"
@@ -123,10 +127,11 @@
 //%include "bitcoin/utility_resubscriber_handler.hpp"
 //%include "bitcoin/utility_resubscriber.hpp"
 %import "bitcoin/bitcoin/utility/scope_lock.hpp"
+%ignore setValue(libbitcoin::shared_mutex* value);
 %include "bitcoin/utility_shared_mutex.hpp"
 %include "bitcoin/utility_scope_lock.hpp"
 
-%ignore setValue(sequencer::action value);
+%ignore setValue(sequencer::action* value);
 %include "bitcoin/utility_action.hpp"
 %import "bitcoin/bitcoin/utility/sequencer.hpp"
 %include "bitcoin/utility_sequencer.hpp"
@@ -134,7 +139,7 @@
 %include "bitcoin/utility_sequential_lock.hpp"
 %include "bitcoin/utility_serializer_functor.hpp"
 %include "bitcoin/utility_serializer.hpp"
-%ignore setValue(socket value);
+%ignore setValue(socket* value);
 %include "bitcoin/utility_socket.hpp"
 //%include "bitcoin/utility_subscriber_handler.hpp"
 %include "bitcoin/utility_subscriber.hpp"

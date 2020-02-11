@@ -96,15 +96,15 @@ public:
      * Underlying boost::io_service object.
      */
 //    const asio::service& service() const;
-    libbitcoin::threadpool getValue() {
-    	return value;
+    libbitcoin::threadpool* getValue() {
+    	return value_;
     }
 
-    void setValue(libbitcoin::threadpool value) {
-    	this->value = value;
+    void setValue(libbitcoin::threadpool* value) {
+    	value_ = value;
     }
 private:
-    libbitcoin::threadpool value;
+    libbitcoin::threadpool* value_;
 
 //private:
 //    void spawn_once(thread_priority priority=thread_priority::normal);

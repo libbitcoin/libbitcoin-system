@@ -26,8 +26,8 @@
 //#include <boost/optional.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/wallet/bitcoin_uri.hpp>
-#include <wallet_payment_address.hpp>
-#include <wallet_stealth_address.hpp>
+#include <bitcoin/wallet_payment_address.hpp>
+#include <bitcoin/wallet_stealth_address.hpp>
 //#include <bitcoin/bitcoin/wallet/uri_reader.hpp>
 
 namespace libbitcoin {
@@ -93,16 +93,16 @@ public:
     bool set_fragment(const std::string& fragment);
     bool set_parameter(const std::string& key, const std::string& value);
 
-    wallet::bitcoin_uri getValue() {
+    wallet::bitcoin_uri* getValue() {
     	return value_;
     }
 
-    void setValue(wallet::bitcoin_uri value) {
+    void setValue(wallet::bitcoin_uri* value) {
     	value_ = value;
     }
 
 private:
-    wallet::bitcoin_uri value_;
+    wallet::bitcoin_uri* value_;
 //    /// Private helpers.
 //    bool set_amount(const std::string& satoshis);
 //

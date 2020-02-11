@@ -24,7 +24,7 @@
 //#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/verack.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -60,15 +60,15 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 public:
-    message::verack getValue() {
-        return value;
+    message::verack* getValue() {
+        return value_;
     }
 
-    void setValue(message::verack value) {
-        this->value = value;
+    void setValue(message::verack* value) {
+        value_ = value;
     }
 private:
-    message::verack value;
+    message::verack* value_;
 
 };
 

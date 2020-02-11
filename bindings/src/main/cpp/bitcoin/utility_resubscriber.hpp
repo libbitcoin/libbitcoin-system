@@ -28,14 +28,15 @@
 //#include <bitcoin/bitcoin/utility/thread.hpp>
 //#include <bitcoin/bitcoin/utility/threadpool.hpp>
 ////#include <bitcoin/bitcoin/utility/track.hpp>
-#include <utility_resubscriber_handler.hpp>
-#include <utility_threadpool.hpp>
+#include <bitcoin/utility_resubscriber_handler.hpp>
+#include <bitcoin/utility_threadpool.hpp>
 
 namespace libbitcoin {
 namespace api {
 
 template <typename... Args>
 class utility_resubscriber
+		  : public enable_shared_from_base<utility_resubscriber<Args...>>
 {
 public:
 //    typedef std::function<bool (Args...)> handler;
@@ -53,7 +54,8 @@ public:
 
     /// Subscribe to notifications with an option to resubscribe.
     /// Return true from the handler to resubscribe to notifications.
-    void subscribe(utility_resubscriber_handler<Args>&& notify, Args... stopped_args);
+    // FIXME later
+//    void subscribe(utility_resubscriber_handler<Args>&& notify, Args... stopped_args);
 
     /// Invoke all handlers sequentially (blocking).
     void invoke(Args... args);
@@ -76,6 +78,6 @@ public:
 } // namespace api
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/utility/resubscriber.ipp>
+//#include <bitcoin/bitcoin/impl/utility/resubscriber.ipp>
 
 #endif

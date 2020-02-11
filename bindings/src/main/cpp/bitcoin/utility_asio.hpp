@@ -45,10 +45,10 @@ class milliseconds { std::chrono::milliseconds value; };
 class microseconds { std::chrono::microseconds value; };
 
 // Steady clock: use for continuity, not time of day determinations.
-//typedef std::chrono::steady_clock steady_clock;
-class steady_clock { std::chrono::steady_clock value; };
-//typedef steady_clock::duration duration;
-class duration { std::chrono::steady_clock::duration value; };
+typedef std::chrono::steady_clock steady_clock;
+//class steady_clock { std::chrono::steady_clock value; };
+typedef steady_clock::duration duration;
+//class duration { std::chrono::steady_clock::duration value; };
 class time_point { std::chrono::steady_clock::time_point value; };
 class timer { boost::asio::basic_waitable_timer<steady_clock> value; };
 

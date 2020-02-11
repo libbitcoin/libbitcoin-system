@@ -69,15 +69,15 @@ public:
     void close();
 
 
-    libbitcoin::pending getValue() {
-        return value;
+    libbitcoin::pending<Element>* getValue() {
+        return value_;
     }
 
-    void setValue(libbitcoin::pending value) {
-        this->value = value;
+    void setValue(libbitcoin::pending<Element>* value) {
+        value_ = value;
     }
 private:
-    libbitcoin::pending value;
+    libbitcoin::pending<Element>* value_;
 //
 //    // This is thread safe.
 //    std::atomic<bool> stopped_;

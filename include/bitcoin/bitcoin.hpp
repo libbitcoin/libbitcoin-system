@@ -98,6 +98,7 @@
 #include <bitcoin/bitcoin/math/ec_scalar.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/math/hash20180404.hpp>
 #include <bitcoin/bitcoin/math/limits.hpp>
 #include <bitcoin/bitcoin/math/ring_signature.hpp>
 #include <bitcoin/bitcoin/math/stealth.hpp>
@@ -155,6 +156,7 @@
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/utility/data20180404.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/decorator.hpp>
 #include <bitcoin/bitcoin/utility/delegates.hpp>

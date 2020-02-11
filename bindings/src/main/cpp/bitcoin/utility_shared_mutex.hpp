@@ -7,15 +7,16 @@ namespace libbitcoin {
 namespace api {
 
 class utility_shared_mutex {
-	libbitcoin::shared_mutex getValue() {
-		return value;
+public:
+	libbitcoin::shared_mutex* getValue() {
+		return value_;
 	}
 
-	void setValue(libbitcoin::shared_mutex value) {
-		this->value = value;
+	void setValue(libbitcoin::shared_mutex* value) {
+		value_ = value;
 	}
 private:
-	libbitcoin::shared_mutex value;
+	libbitcoin::shared_mutex* value_;
 };
 
 } // namespace api

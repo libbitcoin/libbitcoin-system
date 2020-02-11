@@ -26,8 +26,8 @@
 //#include <utility>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/monitor.hpp>
-#include <utility_monitor_count_ptr.hpp>
-#include <p_std_string.hpp>
+#include <bitcoin/utility_monitor_count_ptr.hpp>
+#include <bitcoin/p_std_string.hpp>
 
 // libbitcoin defines the log and tracking but does not use them.
 // These are defined in bc so that they can be used in network and blockchain.
@@ -61,15 +61,15 @@ public:
     }
 
 public:
-    monitor getValue() {
-        return value;
+    monitor* getValue() {
+        return value_;
     }
 
-    void setValue(monitor value) {
-        this->value = value;
+    void setValue(monitor* value) {
+        value_ = value;
     }
 private:
-    monitor value;
+    monitor* value_;
 //    count_ptr counter_;
 //    const std::string name_;
 };

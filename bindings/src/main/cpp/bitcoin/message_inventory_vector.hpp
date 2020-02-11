@@ -24,9 +24,9 @@
 //#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
-#include <math_hash_digest.hpp>
-#include <message_inventory_vector_type_id.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/math_hash_digest.hpp>
+#include <bitcoin/message_inventory_vector_type_id.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -64,8 +64,8 @@ public:
     message_inventory_vector();
 //    message_inventory_vector(message_inventory_vector_type_id type, const math_hash_digest& hash);
     message_inventory_vector(message_inventory_vector_type_id type, math_hash_digest&& hash);
-//    message_inventory_vector(const message_inventory_vector& other);
-    message_inventory_vector(message_inventory_vector&& other);
+    message_inventory_vector(const message_inventory_vector& other);
+//    message_inventory_vector(message_inventory_vector&& other);
 
     message_inventory_vector_type_id type() const;
     void set_type(message_inventory_vector_type_id value);
@@ -99,15 +99,15 @@ public:
 //    bool operator!=(const message_inventory_vector& other) const;
 
 public:
-    message::inventory_vector getValue() {
-        return value;
+    message::inventory_vector* getValue() {
+        return value_;
     }
 
-    void setValue(message::inventory_vector value) {
-        this->value = value;
+    void setValue(message::inventory_vector* value) {
+        value_ = value;
     }
 private:
-    message::inventory_vector value;
+    message::inventory_vector* value_;
 //    type_id type_;
 //    math_hash_digest hash_;
 };

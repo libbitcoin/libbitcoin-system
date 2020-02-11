@@ -24,7 +24,7 @@
 //#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/send_compact.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -45,8 +45,8 @@ public:
 
     message_send_compact();
     message_send_compact(bool high_bandwidth_mode, uint64_t version);
-//    message_send_compact(const message_send_compact& other);
-    message_send_compact(message_send_compact&& other);
+    message_send_compact(const message_send_compact& other);
+//    message_send_compact(message_send_compact&& other);
 
     bool high_bandwidth_mode() const;
     void set_high_bandwidth_mode(bool mode);
@@ -78,15 +78,15 @@ public:
 //    static const uint32_t version_maximum;
 //
 public:
-    message::send_compact getValue() {
-        return value;
+    message::send_compact* getValue() {
+        return value_;
     }
 
-    void setValue(message::send_compact value) {
-        this->value = value;
+    void setValue(message::send_compact* value) {
+        value_ = value;
     }
 private:
-    message::send_compact value;
+    message::send_compact* value_;
 //    bool high_bandwidth_mode_;
 //    uint64_t version_;
 };

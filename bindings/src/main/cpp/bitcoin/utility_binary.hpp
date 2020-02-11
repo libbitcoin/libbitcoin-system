@@ -23,6 +23,7 @@
 #include <string>
 //#include <bitcoin/bitcoin/constants.hpp>
 //#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/p_std_size_t.hpp>
 #include <bitcoin/bitcoin/utility/binary.hpp>
 #include <bitcoin/utility_data_chunk.hpp>
 #include <bitcoin/utility_data_slice.hpp>
@@ -37,6 +38,7 @@ public:
     typedef uint8_t block;
 //    typedef libbitcoin::api::utility_size_type size_type;
 
+//    typedef p_std_size_t size_type;
     typedef std::size_t size_type;
 
     static BC_CONSTEXPR size_type bits_per_block = byte_bits;

@@ -26,8 +26,8 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 //#include <bitcoin/bitcoin/constants.hpp>
-#include <message_network_address.hpp>
-#include <p_std_string.hpp>
+#include <bitcoin/message_network_address.hpp>
+#include <bitcoin/p_std_string.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -125,8 +125,8 @@ public:
         message_network_address&& address_receiver, message_network_address&& address_sender,
         uint64_t nonce, p_std_string& user_agent, uint32_t start_height,
         bool relay);
-//    message_version(const message_version& other);
-    message_version(message_version&& other);
+    message_version(const message_version& other);
+//    message_version(message_version&& other);
 
     uint32_t value() const;
     void set_value(uint32_t value);
@@ -186,16 +186,16 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 //
-public:
-    message::version getValue() {
+
+    message::version* getValue() {
         return value_;
     }
 
-    void setValue(message::version value) {
-        this->value_ = value;
+    void setValue(message::version* value) {
+        value_ = value;
     }
 private:
-    message::version value_;
+    message::version* value_;
 //    uint32_t value_;
 //    uint64_t services_;
 //    uint64_t timestamp_;

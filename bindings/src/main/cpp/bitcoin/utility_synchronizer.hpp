@@ -34,7 +34,7 @@
 namespace libbitcoin {
 namespace api {
 
-enum class synchronizer_terminate
+enum class utility_synchronizer_terminate
 {
     /// Terminate on first error or count.
     /// Return code on first error, otherwise success.
@@ -54,38 +54,38 @@ class utility_synchronizer
 {
 public:
 	utility_synchronizer(Handler&& handler, size_t clearance_count,
-        const std::string& name, synchronizer_terminate mode)
-      : value(new synchronizer<Handler>(handler, clearance_count, name, mode))
+        const std::string& name, utility_synchronizer_terminate mode)
+      : value_(new synchronizer<Handler>(handler, clearance_count, name, mode))
     {
     }
 
     // Determine if the code is cause for termination.
     bool complete(const code& ec)
     {
-        return value.complete(ec);
+        return value_->complete(ec);
     }
 
     // Assuming we are terminating, generate the proper result code.
     code result(const code& ec)
     {
-        return value.result(ec);
+        return value_->result(ec);
     }
 
     template <typename... Args>
     void operator()(const code& ec, Args&&... args)
     {
-    	value(ec, args);
+    	value(ec, args...);
     }
 
-	synchronizer<Handler> getValue() {
-		return value;
+	synchronizer<Handler>* getValue() {
+		return value_;
 	}
 
 	void setValue(synchronizer<Handler> value) {
-		this->value = value;
+		value_ = value;
 	}
 private:
-	synchronizer<Handler> value;
+	synchronizer<Handler>* value_;
 //    typedef typename std::decay<Handler>::type decay_handler;
 //
 //    decay_handler handler_;
@@ -100,8 +100,8 @@ private:
 
 template <typename Handler>
 utility_synchronizer<Handler> synchronize(Handler&& handler, size_t clearance_count,
-    const std::string& name, synchronizer_terminate mode=
-        synchronizer_terminate::on_error)
+    const std::string& name, utility_synchronizer_terminate mode=
+        utility_synchronizer_terminate::on_error)
 {
     return utility_synchronizer<Handler>(std::forward<Handler>(handler),
         clearance_count, name, mode);

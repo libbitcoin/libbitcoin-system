@@ -28,8 +28,8 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/heading.hpp>
 //#include <bitcoin/bitcoin/math/checksum.hpp>
-#include <p_std_string.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/p_std_string.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -84,8 +84,8 @@ public:
 //        uint32_t checksum);
     message_heading(uint32_t magic, p_std_string& command, uint32_t payload_size,
         uint32_t checksum);
-//    message_heading(const message_heading& other);
-    message_heading(message_heading&& other);
+    message_heading(const message_heading& other);
+//    message_heading(message_heading&& other);
 
     uint32_t magic() const;
     void set_magic(uint32_t value);
@@ -122,15 +122,15 @@ public:
 //    bool operator!=(const message_heading& other) const;
 
 public:
-    message::heading getValue() {
-        return value;
+    message::heading* getValue() {
+        return value_;
     }
 
-    void setValue(message::heading value) {
-        this->value = value;
+    void setValue(message::heading* value) {
+        value_ = value;
     }
 private:
-    message::heading value;
+    message::heading* value_;
 //    uint32_t magic_;
 //    std::string command_;
 //    uint32_t payload_size_;

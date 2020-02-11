@@ -21,6 +21,7 @@
 %ignore libbitcoin::api::p_std_string::getValue() const;
 %ignore libbitcoin::api::p_std_string::setValue(std::string* value);
 %include "bitcoin/p_std_string.hpp"
+%ignore libbitcoin::api::p_std_time_t::p_std_time_t(std::time_t* value);
 %ignore libbitcoin::api::p_std_time_t::getValue() const;
 %ignore libbitcoin::api::p_std_time_t::setValue(std::time_t *value);
 %include "bitcoin/p_std_time_t.hpp"

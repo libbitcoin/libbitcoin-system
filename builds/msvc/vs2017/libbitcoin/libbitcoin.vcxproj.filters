@@ -854,6 +854,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\hash.hpp">
       <Filter>include\bitcoin\bitcoin\math</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\hash20180404.hpp">
+      <Filter>include\bitcoin\bitcoin\math</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\limits.hpp">
       <Filter>include\bitcoin\bitcoin\math</Filter>
     </ClInclude>
@@ -1026,6 +1029,9 @@
       <Filter>include\bitcoin\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\data.hpp">
+      <Filter>include\bitcoin\bitcoin\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\data20180404.hpp">
       <Filter>include\bitcoin\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\deadline.hpp">

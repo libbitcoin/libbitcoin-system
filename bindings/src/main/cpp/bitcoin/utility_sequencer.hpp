@@ -26,8 +26,8 @@
 //#include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
 //#include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/sequencer.hpp>
-#include <utility_service.hpp>
-#include <utility_action.hpp>
+#include <bitcoin/utility_service.hpp>
+#include <bitcoin/utility_action.hpp>
 
 
 namespace libbitcoin {
@@ -45,15 +45,15 @@ public:
     void lock(utility_action&& handler);
     void unlock();
 
-	sequencer getValue() {
-		return value;
+	sequencer* getValue() {
+		return value_;
 	}
 
-	void setValue(sequencer value) {
-		this->value = value;
+	void setValue(sequencer* value) {
+		value_ = value;
 	}
 private:
-	sequencer value;
+	sequencer* value_;
 //    // This is thread safe.
 //    asio::service& service_;
 //

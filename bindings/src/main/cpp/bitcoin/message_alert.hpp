@@ -46,8 +46,8 @@ public:
     message_alert();
 //    message_alert(const utility_data_chunk& payload, const utility_data_chunk& signature);
     message_alert(utility_data_chunk&& payload, utility_data_chunk&& signature);
-//    message_alert(const message_alert& other);
-    message_alert(message_alert&& other);
+    message_alert(const message_alert& other);
+//    message_alert(message_alert&& other);
 
     utility_data_chunk& payload();
 //    const utility_data_chunk& payload() const;
@@ -72,7 +72,7 @@ public:
     /// This class is move assignable but not copy assignable.
 //    alert& operator=(message_alert&& other);
     message_alert& assign(message_alert&& other);
-//    void operator=(const message_alert&) = delete;
+//    void operator=(const message_alert&);
 
 //    bool operator==(const message_alert& other) const;
     bool eq(const message_alert& other) const;
@@ -83,15 +83,15 @@ public:
 //    static const uint32_t version_maximum;
 //
 public:
-    message::alert getValue() {
-        return value;
+    message::alert* getValue() {
+        return value_;
     }
 
-    void setValue(message::alert value) {
-        this->value = value;
+    void setValue(message::alert* value) {
+        value_ = value;
     }
 private:
-    message::alert value;
+    message::alert* value_;
 //    utility_data_chunk payload_;
 //    utility_data_chunk signature_;
 };

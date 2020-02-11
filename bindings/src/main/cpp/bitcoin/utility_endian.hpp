@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN__UTILITY_ENDIAN_HPP
 #define LIBBITCOIN__UTILITY_ENDIAN_HPP
 
-#include <istream>
+//#include <istream>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
@@ -38,11 +38,11 @@ Integer from_big_endian_unsafe(Iterator start);
 template <typename Integer, typename Iterator>
 Integer from_little_endian_unsafe(Iterator start);
 
-template <typename Integer>
-Integer from_big_endian_stream_unsafe(std::istream& stream);
+//template <typename Integer>
+//Integer from_big_endian_stream_unsafe(std::istream& stream);
 
-template <typename Integer>
-Integer from_little_endian_stream_unsafe(std::istream& stream);
+//template <typename Integer>
+//Integer from_little_endian_stream_unsafe(std::istream& stream);
 
 template <typename Integer>
 byte_array<sizeof(Integer)> to_big_endian(Integer value);

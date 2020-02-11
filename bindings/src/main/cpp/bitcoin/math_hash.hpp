@@ -100,10 +100,11 @@ namespace api {
 //	null_mini_hash
 //};
 
-inline math_uint256_t* to_uint256(const math_hash_digest& hash)
-{
-    return new math_uint256_t(libbitcoin::to_uint256(*hash.getValue()));
-}
+// TODO implement convertion later, if either needed
+//inline math_uint256_t* to_uint256(const math_hash_digest& hash)
+//{
+//    return new math_uint256_t(libbitcoin::to_uint256(*hash.getValue()));
+//}
 
 /// Generate a scrypt hash to fill a byte array.
 template <size_t Size>

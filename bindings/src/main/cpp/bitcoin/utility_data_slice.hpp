@@ -13,19 +13,19 @@ namespace api {
 class utility_data_slice {
 
 public:
-	utility_data_slice(p_uint8_t& data, size_t begin, size_t end) :
-			value(new libbitcoin::data_slice(data.cast()+begin, data.cast()+end)) {
+	utility_data_slice(libbitcoin::api::p_uint8_t& data, size_t begin, size_t end) :
+			value_(new libbitcoin::data_slice(data.cast()+begin, data.cast()+end)) {
   }
 
   libbitcoin::data_slice* getValue() {
-        return value;
+        return value_;
     }
 
     void setValue(libbitcoin::data_slice *value) {
-        this->value = value;
+        value_ = value;
     }
 private:
-    libbitcoin::data_slice *value;
+    libbitcoin::data_slice *value_;
 
 };
 

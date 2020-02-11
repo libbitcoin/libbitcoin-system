@@ -30,15 +30,15 @@ namespace api {
 class BC_API utility_color
 {
 public:
-	color getValue() {
-        return value;
+	color* getValue() {
+        return value_;
     }
 
-    void setValue(color value) {
-        this->value = value;
+    void setValue(color* value) {
+        value_ = value;
     }
 private:
-    color value;
+    color* value_;
 //    uint8_t red;
 //    uint8_t green;
 //    uint8_t blue;

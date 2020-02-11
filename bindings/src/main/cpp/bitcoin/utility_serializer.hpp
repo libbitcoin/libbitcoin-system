@@ -29,11 +29,11 @@
 ////#include <bitcoin/bitcoin/utility/noncopyable.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
-#include <math_hash_digest.hpp>
-#include <math_short_hash.hpp>
-#include <math_mini_hash.hpp>
-#include <utility_data_slice.hpp>
-#include <utility_serializer_functor.hpp>
+#include <bitcoin/math_hash_digest.hpp>
+#include <bitcoin/math_short_hash.hpp>
+#include <bitcoin/math_mini_hash.hpp>
+#include <bitcoin/utility_data_slice.hpp>
+#include <bitcoin/utility_serializer_functor.hpp>
 
 namespace libbitcoin {
 namespace api {

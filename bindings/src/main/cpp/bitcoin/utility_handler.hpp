@@ -18,15 +18,15 @@ namespace api {
 
 class utility_handler  {
 public:
-	std::function<void(const libbitcoin::code&)> getValue() {
-        return value;
+	std::function<void(const libbitcoin::code&)>* getValue() {
+        return value_;
     }
 
-    void setValue(std::function<void(const libbitcoin::code&)> value) {
-        this->value = value;
+    void setValue(std::function<void(const libbitcoin::code&)>* value) {
+        value_ = value;
     }
 private:
-    std::function<void(const libbitcoin::code&)> value;
+    std::function<void(const libbitcoin::code&)>* value_;
 };
 
 } // namespace api

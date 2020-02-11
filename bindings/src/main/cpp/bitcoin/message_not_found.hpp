@@ -26,11 +26,11 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/not_found.hpp>
 //#include <bitcoin/bitcoin/constants.hpp>
-#include <math_hash_list.hpp>
+#include <bitcoin/math_hash_list.hpp>
 //#include <bitcoin/bitcoin/message/inventory.hpp>
-#include <message_inventory_vector_list.hpp>
-#include <message_inventory_vector_type_id.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/message_inventory_vector_list.hpp>
+#include <bitcoin/message_inventory_vector_type_id.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 
 namespace libbitcoin {
 //namespace message {
@@ -53,10 +53,10 @@ public:
     message_not_found(message_inventory_vector_list&& values);
     message_not_found(const math_hash_list& hashes, message_inventory_vector_type_id type);
 //    message_not_found(const std::initializer_list<inventory_vector>& values);
-//    message_not_found(const message_not_found& other);
-    message_not_found(message_not_found&& other);
+    message_not_found(const message_not_found& other);
+//    message_not_found(message_not_found&& other);
 
-    bool from_data(uint32_t version, const utility_data_chunk& data) override;
+    bool from_data(uint32_t version, const utility_data_chunk& data);// override;
 //    bool from_data(uint32_t version, std::istream& stream) override;
 //    bool from_data(uint32_t version, reader& source) override;
 
@@ -73,15 +73,15 @@ public:
 //    static const uint32_t version_minimum;
 //    static const uint32_t version_maximum;
 public:
-    message::not_found getValue() {
-        return value;
+    message::not_found* getValue() {
+        return value_;
     }
 
-    void setValue(message::not_found value) {
-        this->value = value;
+    void setValue(message::not_found* value) {
+        value_ = value;
     }
 private:
-    message::not_found value;
+    message::not_found* value_;
 
 };
 

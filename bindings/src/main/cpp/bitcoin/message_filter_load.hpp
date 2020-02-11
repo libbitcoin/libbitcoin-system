@@ -24,7 +24,7 @@
 //#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/filter_load.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -47,8 +47,8 @@ public:
 //        uint32_t tweak, uint8_t flags);
     message_filter_load(utility_data_chunk&& filter, uint32_t hash_functions,
         uint32_t tweak, uint8_t flags);
-//    message_filter_load(const message_filter_load& other);
-    message_filter_load(message_filter_load&& other);
+    message_filter_load(const message_filter_load& other);
+//    message_filter_load(message_filter_load&& other);
 
     utility_data_chunk& filter();
 //    const utility_data_chunk& filter() const;
@@ -88,15 +88,15 @@ public:
 //    static const uint32_t version_maximum;
 //
 public:
-    message::filter_load getValue() {
-        return value;
+    message::filter_load* getValue() {
+        return value_;
     }
 
-    void setValue(message::filter_load value) {
-        this->value = value;
+    void setValue(message::filter_load* value) {
+        value_ = value;
     }
 private:
-    message::filter_load value;
+    message::filter_load* value_;
 //    utility_data_chunk filter_;
 //    uint32_t hash_functions_;
 //    uint32_t tweak_;

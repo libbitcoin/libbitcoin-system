@@ -25,10 +25,10 @@
 //#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/reject.hpp>
-#include <message_reject_reason_code.hpp>
-#include <utility_data_chunk.hpp>
-#include <math_hash_digest.hpp>
-#include <p_std_string.hpp>
+#include <bitcoin/message_reject_reason_code.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
+#include <bitcoin/math_hash_digest.hpp>
+#include <bitcoin/p_std_string.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -89,8 +89,8 @@ public:
     message_reject(message_reject_reason_code code, p_std_string& message, p_std_string& reason,
         math_hash_digest&& data);
 
-//    message_reject(const message_reject& other);
-    message_reject(message_reject&& other);
+    message_reject(const message_reject& other);
+//    message_reject(message_reject&& other);
 
     message_reject_reason_code code() const;
     void set_code(message_reject_reason_code value);
@@ -134,15 +134,15 @@ public:
 //    static const uint32_t version_maximum;
 //
 public:
-    message::reject getValue() {
-        return value;
+    message::reject* getValue() {
+        return value_;
     }
 
-    void setValue(message::reject value) {
-        this->value = value;
+    void setValue(message::reject* value) {
+        value_ = value;
     }
 private:
-    message::reject value;
+    message::reject* value_;
 //    static message_reject_reason_code reason_from_byte(uint8_t byte);
 //    static uint8_t reason_to_byte(message_reject_reason_code value);
 //

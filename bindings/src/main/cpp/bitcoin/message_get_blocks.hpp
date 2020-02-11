@@ -25,9 +25,9 @@
 //#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/get_blocks.hpp>
-#include <math_hash_digest.hpp>
-#include <math_hash_list.hpp>
-#include <utility_data_chunk.hpp>
+#include <bitcoin/math_hash_digest.hpp>
+#include <bitcoin/math_hash_list.hpp>
+#include <bitcoin/utility_data_chunk.hpp>
 //#include <bitcoin/bitcoin/utility/reader.hpp>
 //#include <bitcoin/bitcoin/utility/writer.hpp>
 
@@ -48,8 +48,9 @@ public:
     message_get_blocks();
 //    message_get_blocks(const math_hash_list& start, const hash_digest& stop);
     message_get_blocks(math_hash_list&& start, math_hash_digest&& stop);
-//    message_get_blocks(const message_get_blocks& other);
-    message_get_blocks(message_get_blocks&& other);
+    message_get_blocks(const message_get_blocks& other);
+//    message_get_blocks(message_get_blocks&& other);
+    virtual ~message_get_blocks();
 
     math_hash_list& start_hashes();
 //    const math_hash_list& start_hashes() const;
@@ -85,19 +86,18 @@ public:
 //    static const uint32_t version_maximum;
 //
 public:
-    message::get_blocks getValue() {
-        return value;
+    message::get_blocks* getValue() {
+        return value_;
     }
 
-    void setValue(message::get_blocks value) {
-        this->value = value;
+    void setValue(message::get_blocks* value) {
+        value_ = value;
     }
 private:
-    message::get_blocks value;
+    message::get_blocks* value_;
 //    // 10 sequential hashes, then exponential samples until reaching genesis.
 //    math_hash_list start_hashes_;
 //    math_hash_digest stop_hash_;
-    virtual ~message_get_blocks();
 };
 
 } // namespace api

@@ -21,7 +21,7 @@
 
 #include <string>
 #include <vector>
-#include <string_vector.hpp>
+#include <bitcoin/string_vector.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 //#include <bitcoin/bitcoin/utility/data.hpp>
 //#include <boost/algorithm/string/trim.hpp>
@@ -96,6 +96,6 @@ BC_API string_vector split(const std::string& sentence,
 } // namespace api
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/utility/string.ipp>
+//#include <bitcoin/bitcoin/impl/utility/string.ipp>
 
 #endif
