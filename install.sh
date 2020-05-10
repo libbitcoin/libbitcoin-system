@@ -59,18 +59,18 @@ BUILD_DIR="build-libbitcoin"
 
 # ICU archive.
 #------------------------------------------------------------------------------
-ICU_URL="http://download.icu-project.org/files/icu4c/55.1/icu4c-55_1-src.tgz"
-ICU_ARCHIVE="icu4c-55_1-src.tgz"
+ICU_URL="https://github.com/unicode-org/icu/releases/download/release-55-2/icu4c-55_2-src.tgz"
+ICU_ARCHIVE="icu4c-55_2-src.tgz"
 
 # ZLib archive.
 #------------------------------------------------------------------------------
-ZLIB_URL="https://github.com/madler/zlib/archive/v1.2.9.tar.gz"
-ZLIB_ARCHIVE="v1.2.9.tar.gz"
+ZLIB_URL="https://github.com/madler/zlib/archive/v1.2.11.tar.gz"
+ZLIB_ARCHIVE="v1.2.11.tar.gz"
 
 # PNG archive.
 #------------------------------------------------------------------------------
-PNG_URL="http://downloads.sourceforge.net/project/libpng/libpng16/older-releases/1.6.29/libpng-1.6.29.tar.xz"
-PNG_ARCHIVE="libpng-1.6.29.tar.xz"
+PNG_URL="https://sourceforge.net/projects/libpng/files/libpng16/1.6.37/libpng-1.6.37.tar.xz"
+PNG_ARCHIVE="libpng-1.6.37.tar.xz"
 
 # QREncode archive.
 #------------------------------------------------------------------------------
