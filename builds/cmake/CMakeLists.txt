@@ -1,5 +1,5 @@
 ###############################################################################
-#  Copyright (c) 2014-2019 libbitcoin-system developers (see COPYING).
+#  Copyright (c) 2014-2020 libbitcoin-system developers (see COPYING).
 #
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
@@ -204,7 +204,7 @@ endif()
 # Find png
 #------------------------------------------------------------------------------
 if (with-png)
-    find_package( Png 1.6.29 REQUIRED )
+    find_package( Png 1.6.37 REQUIRED )
 endif()
 
 # Find qrencode
