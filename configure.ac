@@ -1,5 +1,5 @@
 ###############################################################################
-#  Copyright (c) 2014-2019 libbitcoin-system developers (see COPYING).
+#  Copyright (c) 2014-2020 libbitcoin-system developers (see COPYING).
 #
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
@@ -313,15 +313,15 @@ AS_CASE([${host_os}],
 
 AC_MSG_NOTICE([dl_LIBS : ${dl_LIBS}])
 
-# Require png of at least version 1.6.29 and output ${png_CPPFLAGS/LIBS/PKG}.
+# Require png of at least version 1.6.37 and output ${png_CPPFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
 AS_CASE([${with_png}], [yes],
-    [PKG_CHECK_MODULES([png], [libpng >= 1.6.29],
-        [png_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "libpng >= 1.6.29" 2>/dev/null`"
-         png_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "libpng >= 1.6.29" 2>/dev/null`"],
+    [PKG_CHECK_MODULES([png], [libpng >= 1.6.37],
+        [png_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "libpng >= 1.6.37" 2>/dev/null`"
+         png_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "libpng >= 1.6.37" 2>/dev/null`"],
         [png_INCLUDEDIR=""
          png_OTHER_CFLAGS=""])
-     AC_SUBST([png_PKG], ['libpng >= 1.6.29'])
+     AC_SUBST([png_PKG], ['libpng >= 1.6.37'])
      AC_SUBST([png_CPPFLAGS], [${png_CFLAGS}])
      AS_IF([test x${png_INCLUDEDIR} != "x"],
         [AC_SUBST([png_ISYS_CPPFLAGS], ["-isystem${png_INCLUDEDIR} ${png_OTHER_CFLAGS}"])],
