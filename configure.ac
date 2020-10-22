@@ -281,8 +281,7 @@ AS_CASE([${with_icu}], [yes],
     [PKG_CHECK_MODULES([icu_i18n], [icu-i18n >= 51.2],
         [icu_i18n_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "icu-i18n >= 51.2" 2>/dev/null`"
          icu_i18n_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "icu-i18n >= 51.2" 2>/dev/null`"],
-        [icu_i18n_INCLUDEDIR=""
-         icu_i18n_OTHER_CFLAGS=""])
+        [AC_MSG_ERROR([--with-icu specified but icu-i18n >= 51.2 was not found.])])
      AC_SUBST([icu_i18n_PKG], ['icu-i18n >= 51.2'])
      AC_SUBST([icu_i18n_CPPFLAGS], [${icu_i18n_CFLAGS}])
      AS_IF([test x${icu_i18n_INCLUDEDIR} != "x"],
@@ -319,8 +318,7 @@ AS_CASE([${with_png}], [yes],
     [PKG_CHECK_MODULES([png], [libpng >= 1.6.37],
         [png_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "libpng >= 1.6.37" 2>/dev/null`"
          png_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "libpng >= 1.6.37" 2>/dev/null`"],
-        [png_INCLUDEDIR=""
-         png_OTHER_CFLAGS=""])
+        [AC_MSG_ERROR([--with-png specified but libpng >= 1.6.37 was not found.])])
      AC_SUBST([png_PKG], ['libpng >= 1.6.37'])
      AC_SUBST([png_CPPFLAGS], [${png_CFLAGS}])
      AS_IF([test x${png_INCLUDEDIR} != "x"],
@@ -345,8 +343,7 @@ AS_CASE([${with_qrencode}], [yes],
     [PKG_CHECK_MODULES([qrencode], [libqrencode >= 3.4.4],
         [qrencode_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "libqrencode >= 3.4.4" 2>/dev/null`"
          qrencode_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "libqrencode >= 3.4.4" 2>/dev/null`"],
-        [qrencode_INCLUDEDIR=""
-         qrencode_OTHER_CFLAGS=""])
+        [AC_MSG_ERROR([--with-qrencode specified but libqrencode >= 3.4.4 was not found.])])
      AC_SUBST([qrencode_PKG], ['libqrencode >= 3.4.4'])
      AC_SUBST([qrencode_CPPFLAGS], [${qrencode_CFLAGS}])
      AS_IF([test x${qrencode_INCLUDEDIR} != "x"],
@@ -370,8 +367,7 @@ AC_MSG_NOTICE([qrencode_BUILD_CPPFLAGS : ${qrencode_BUILD_CPPFLAGS}])
 PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1],
     [secp256k1_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "libsecp256k1 >= 0.0.1" 2>/dev/null`"
      secp256k1_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "libsecp256k1 >= 0.0.1" 2>/dev/null`"],
-    [secp256k1_INCLUDEDIR=""
-     secp256k1_OTHER_CFLAGS=""])
+    [AC_MSG_ERROR([libsecp256k1 >= 0.0.1 is required but was not found.])])
 AC_SUBST([secp256k1_PKG], ['libsecp256k1 >= 0.0.1'])
 AC_SUBST([secp256k1_CPPFLAGS], [${secp256k1_CFLAGS}])
 AS_IF([test x${secp256k1_INCLUDEDIR} != "x"],
