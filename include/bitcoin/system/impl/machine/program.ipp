@@ -41,14 +41,14 @@ namespace machine {
 //-----------------------------------------------------------------------------
 
 // Check initial program state for validity (i.e. can evaluation return true).
-inline bool program::is_valid() const
+inline bool program::is_invalid() const
 {
     // Stack elements must be within push size limit (bip141).
     // Invalid operations indicates a failure deserializing individual ops.
-    return script_.is_valid_operations()
-        && !script_.is_unspendable()
-        && chain::witness::is_push_size(primary_)
-        && !script_.is_oversized();
+    return !script_.is_valid_operations()
+        || script_.is_unspendable()
+        || script_.is_oversized()
+        || !chain::witness::is_push_size(primary_);
 }
 
 inline uint32_t program::forks() const

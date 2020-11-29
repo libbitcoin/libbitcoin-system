@@ -72,7 +72,7 @@ public:
     program(const chain::script& script, program&& other, bool move);
 
     /// Constant registers.
-    bool is_valid() const;
+    bool is_invalid() const;
     uint32_t forks() const;
     uint32_t input_index() const;
     uint64_t value() const;
