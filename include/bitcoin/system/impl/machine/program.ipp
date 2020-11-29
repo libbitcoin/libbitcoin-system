@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/chain/witness.hpp>
@@ -280,20 +281,27 @@ inline void program::erase(const stack_iterator& first,
 // Primary push/pop optimizations (passive).
 //-----------------------------------------------------------------------------
 
+// Reversed byte order in this example (big-endian).
+// []               : false (empty)
+// [00 00 00 00 00] : false (+zero)
+// [80 00 00 00 00] : false (-zero)
+// [42 00 00 00 00] : true
+// [00 80 00 00 00] : true
+
 // private
 inline bool program::stack_to_bool(bool clean) const
 {
-    if (clean && primary_.size() != 1)
+    const auto& top = primary_.back();
+
+    if (top.empty() || (clean && primary_.size() != 1))
         return false;
 
-    const auto& back = primary_.back();
+    auto not_zero = [](uint8_t value) { return (value != number::positive_0); };
+    auto non_zero = [](uint8_t value) { return (value & ~number::negative_sign)
+        != number::positive_0; };
 
-    // It's not non-zero it's the terminating negative sentinel.
-    for (auto it = back.begin(); it != back.end(); ++it)
-        if (*it != 0)
-            return !(it == back.end() - 1 && *it == number::negative_0);
-
-    return false;
+    return non_zero(top.back()) ||
+        std::any_of(top.begin(), std::prev(top.end()), not_zero);
 }
 
 inline bool program::empty() const
