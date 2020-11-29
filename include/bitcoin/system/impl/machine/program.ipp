@@ -335,6 +335,7 @@ inline bool program::if_(const operation& op) const
     return op.is_conditional() || succeeded();
 }
 
+// This must be guarded.
 inline const data_stack::value_type& program::item(size_t index) /*const*/
 {
     return *position(index);
@@ -345,11 +346,12 @@ inline bool program::top(number& out_number, size_t maxiumum_size)
     return !empty() && out_number.set_data(item(0), maxiumum_size);
 }
 
+// This must be guarded.
 inline program::stack_iterator program::position(size_t index) /*const*/
 {
-    // Subtracting 1 makes the stack indexes zero-based (unlike satoshi).
+    // Decrementing 1 makes the stack index zero-based (unlike satoshi).
     BITCOIN_ASSERT(index < size());
-    return (primary_.end() - 1) - index;
+    return std::prev(primary_.end(), ++index);
 }
 
 // Pop jump-to-end, push all back, use to construct a script.
@@ -402,8 +404,7 @@ inline void program::open(bool value)
 // This must be guarded.
 inline void program::negate()
 {
-    BITCOIN_ASSERT(!closed());
-
+    BITCOIN_ASSERT(!closed())
     const auto value = condition_.back();
     negative_count_ += (value ? 1 : -1);
     condition_.back() = !value;
@@ -415,8 +416,7 @@ inline void program::negate()
 // This must be guarded.
 inline void program::close()
 {
-    BITCOIN_ASSERT(!closed());
-
+    BITCOIN_ASSERT(!closed())
     const auto value = condition_.back();
     negative_count_ += (value ? 0 : -1);
     condition_.pop_back();
