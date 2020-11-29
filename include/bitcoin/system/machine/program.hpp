@@ -154,8 +154,8 @@ private:
     const uint32_t input_index_;
     const uint32_t forks_;
     const uint64_t value_;
+    const script_version version_;
 
-    script_version version_;
     size_t negative_count_;
     size_t operation_count_;
     op_iterator jump_;
