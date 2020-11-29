@@ -404,7 +404,7 @@ inline void program::open(bool value)
 // This must be guarded.
 inline void program::negate()
 {
-    BITCOIN_ASSERT(!closed())
+    BITCOIN_ASSERT(!closed());
     const auto value = condition_.back();
     negative_count_ += (value ? 1 : -1);
     condition_.back() = !value;
@@ -416,7 +416,7 @@ inline void program::negate()
 // This must be guarded.
 inline void program::close()
 {
-    BITCOIN_ASSERT(!closed())
+    BITCOIN_ASSERT(!closed());
     const auto value = condition_.back();
     negative_count_ += (value ? 0 : -1);
     condition_.pop_back();
