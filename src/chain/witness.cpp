@@ -425,7 +425,6 @@ bool witness::extract_script(script& out_script,
     data_stack& out_stack, const script& program_script) const
 {
     auto program = program_script.witness_program();
-    const auto program_size = program.size();
     out_stack = stack_;
 
     switch (program_script.version())
