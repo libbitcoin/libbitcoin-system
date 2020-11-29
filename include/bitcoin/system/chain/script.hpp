@@ -202,7 +202,7 @@ public:
     //-------------------------------------------------------------------------
 
     /// Common pattern detection.
-    data_chunk witness_program() const;
+    const data_chunk& witness_program() const;
     script_version version() const;
     script_pattern pattern() const;
     script_pattern input_pattern() const;

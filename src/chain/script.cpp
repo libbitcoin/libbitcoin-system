@@ -1201,11 +1201,13 @@ operation::list script::to_pay_witness_script_hash_pattern(const hash_digest& ha
 // Utilities (non-static).
 //-----------------------------------------------------------------------------
 
-data_chunk script::witness_program() const
+const data_chunk& script::witness_program() const
 {
+    static const data_chunk empty;
+
     // The first operations access must be method-based to guarantee the cache.
     const auto& ops = operations();
-    return is_witness_program_pattern(ops) ? ops[1].data() : data_chunk{};
+    return is_witness_program_pattern(ops) ? ops[1].data() : empty;
 }
 
 script_version script::version() const
