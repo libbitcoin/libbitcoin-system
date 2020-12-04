@@ -44,6 +44,7 @@ namespace system {
 namespace chain {
 
 using namespace bc::system::machine;
+static const auto checksig_script = script{ { opcode::checksig } };
 
 // Constructors.
 //-----------------------------------------------------------------------------
@@ -384,7 +385,7 @@ operation::list witness::to_pay_key_hash(data_chunk&& program)
 bool witness::extract_sigop_script(script& out_script,
     const script& program_script) const
 {
-    static const auto single_signature_script = script{ { opcode::checksig } };
+    // Caller may recycle script parameter.
     out_script.clear();
 
     switch (program_script.version())
@@ -395,7 +396,7 @@ bool witness::extract_sigop_script(script& out_script,
             {
                 // Each p2wkh input is counted as 1 sigop (bip141).
                 case short_hash_size:
-                    out_script = single_signature_script;
+                    out_script = checksig_script;
                     return true;
 
                 // p2wsh sigops are counted as before for p2sh (bip141).
@@ -425,7 +426,6 @@ bool witness::extract_script(script& out_script,
     data_stack& out_stack, const script& program_script) const
 {
     auto program = program_script.witness_program();
-    const auto program_size = program.size();
     out_stack = stack_;
 
     switch (program_script.version())

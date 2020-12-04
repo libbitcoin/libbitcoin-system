@@ -71,8 +71,10 @@ public:
     /// Create using copied tx, input, forks, value and moved stack (p2sh run).
     program(const chain::script& script, program&& other, bool move);
 
+    /// Utilities.
+    bool is_invalid() const;
+
     /// Constant registers.
-    bool is_valid() const;
     uint32_t forks() const;
     uint32_t input_index() const;
     uint64_t value() const;
@@ -154,8 +156,8 @@ private:
     const uint32_t input_index_;
     const uint32_t forks_;
     const uint64_t value_;
+    const script_version version_;
 
-    script_version version_;
     size_t negative_count_;
     size_t operation_count_;
     op_iterator jump_;

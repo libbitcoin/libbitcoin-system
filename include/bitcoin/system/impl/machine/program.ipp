@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/chain/witness.hpp>
@@ -40,14 +41,14 @@ namespace machine {
 //-----------------------------------------------------------------------------
 
 // Check initial program state for validity (i.e. can evaluation return true).
-inline bool program::is_valid() const
+inline bool program::is_invalid() const
 {
     // Stack elements must be within push size limit (bip141).
     // Invalid operations indicates a failure deserializing individual ops.
-    return script_.is_valid_operations()
-        && !script_.is_unspendable()
-        && chain::witness::is_push_size(primary_)
-        && !script_.is_oversized();
+    return !script_.is_valid_operations()
+        || script_.is_unspendable()
+        || script_.is_oversized()
+        || !chain::witness::is_push_size(primary_);
 }
 
 inline uint32_t program::forks() const
@@ -280,20 +281,27 @@ inline void program::erase(const stack_iterator& first,
 // Primary push/pop optimizations (passive).
 //-----------------------------------------------------------------------------
 
+// Reversed byte order in this example (big-endian).
+// []               : false (empty)
+// [00 00 00 00 00] : false (+zero)
+// [80 00 00 00 00] : false (-zero)
+// [42 00 00 00 00] : true
+// [00 80 00 00 00] : true
+
 // private
 inline bool program::stack_to_bool(bool clean) const
 {
-    if (clean && primary_.size() != 1)
+    const auto& top = primary_.back();
+
+    if (top.empty() || (clean && primary_.size() != 1))
         return false;
 
-    const auto& back = primary_.back();
+    auto not_zero = [](uint8_t value) { return (value != number::positive_0); };
+    auto non_zero = [](uint8_t value) { return (value & ~number::negative_sign)
+        != number::positive_0; };
 
-    // It's not non-zero it's the terminating negative sentinel.
-    for (auto it = back.begin(); it != back.end(); ++it)
-        if (*it != 0)
-            return !(it == back.end() - 1 && *it == number::negative_0);
-
-    return false;
+    return non_zero(top.back()) ||
+        std::any_of(top.begin(), std::prev(top.end()), not_zero);
 }
 
 inline bool program::empty() const
@@ -327,6 +335,7 @@ inline bool program::if_(const operation& op) const
     return op.is_conditional() || succeeded();
 }
 
+// This must be guarded.
 inline const data_stack::value_type& program::item(size_t index) /*const*/
 {
     return *position(index);
@@ -337,11 +346,12 @@ inline bool program::top(number& out_number, size_t maxiumum_size)
     return !empty() && out_number.set_data(item(0), maxiumum_size);
 }
 
+// This must be guarded.
 inline program::stack_iterator program::position(size_t index) /*const*/
 {
-    // Subtracting 1 makes the stack indexes zero-based (unlike satoshi).
+    // Decrementing 1 makes the stack index zero-based (unlike satoshi).
     BITCOIN_ASSERT(index < size());
-    return (primary_.end() - 1) - index;
+    return std::prev(primary_.end(), ++index);
 }
 
 // Pop jump-to-end, push all back, use to construct a script.
@@ -395,7 +405,6 @@ inline void program::open(bool value)
 inline void program::negate()
 {
     BITCOIN_ASSERT(!closed());
-
     const auto value = condition_.back();
     negative_count_ += (value ? 1 : -1);
     condition_.back() = !value;
@@ -408,7 +417,6 @@ inline void program::negate()
 inline void program::close()
 {
     BITCOIN_ASSERT(!closed());
-
     const auto value = condition_.back();
     negative_count_ += (value ? 0 : -1);
     condition_.pop_back();

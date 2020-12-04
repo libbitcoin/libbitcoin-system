@@ -24,8 +24,7 @@ namespace libbitcoin {
 namespace system {
 namespace machine {
 
-const uint8_t number::negative_1 = negative_mask | positive_1;
-const uint8_t number::negative_0 = negative_mask | positive_0;
+const uint8_t number::negative_1 = negative_sign | positive_1;
 const uint8_t number::positive_0 = 0;
 const uint8_t number::positive_1 = 1;
 const uint8_t number::positive_2 = 2;
@@ -43,7 +42,7 @@ const uint8_t number::positive_13 = 13;
 const uint8_t number::positive_14 = 14;
 const uint8_t number::positive_15 = 15;
 const uint8_t number::positive_16 = 16;
-const uint8_t number::negative_mask = 0x80;
+const uint8_t number::negative_sign = 0x80;
 
 } // namespace machine
 } // namespace system

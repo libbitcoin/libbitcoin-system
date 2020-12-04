@@ -31,7 +31,7 @@ code interpreter::run(program& program)
 {
     code ec;
 
-    if (!program.is_valid())
+    if (program.is_invalid())
         return error::invalid_script;
 
     for (const auto& op: program)

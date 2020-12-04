@@ -661,6 +661,7 @@ inline interpreter::result interpreter::op_check_sig_verify(program& program)
     der_signature distinguished;
     auto bip66 = chain::script::is_enabled(program.forks(), bip66_rule);
     auto bip143 = chain::script::is_enabled(program.forks(), bip143_rule);
+    auto version = bip143 ? program.version() : script_version::unversioned;
 
     const auto public_key = program.pop();
     auto endorsement = program.pop();
@@ -669,7 +670,7 @@ inline interpreter::result interpreter::op_check_sig_verify(program& program)
     chain::script script_code(program.subscript());
 
     // BIP143: find and delete of the signature is not applied for v0.
-    if (!(bip143 && program.version() == script_version::zero))
+    if (program.version() != script_version::zero)
         script_code.find_and_delete({ endorsement });
 
     // BIP66: Continue to allow empty signature to push false vs. fail.
@@ -682,8 +683,6 @@ inline interpreter::result interpreter::op_check_sig_verify(program& program)
         return error::invalid_signature_encoding;
 
     // Version condition preserves independence of bip141 and bip143.
-    auto version = bip143 ? program.version() : script_version::unversioned;
-
     return chain::script::check_signature(signature, sighash, public_key,
         script_code, program.transaction(), program.input_index(),
             version, program.value()) ? error::success :
@@ -751,7 +750,7 @@ inline interpreter::result interpreter::op_check_multisig_verify(
     chain::script script_code(program.subscript());
 
     // BIP143: find and delete of the signature is not applied for v0.
-    if (!(bip143 && program.version() == script_version::zero))
+    if (version != script_version::zero)
         script_code.find_and_delete(endorsements);
 
     for (const auto& public_key: public_keys)

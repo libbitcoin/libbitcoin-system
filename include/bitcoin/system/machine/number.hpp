@@ -42,7 +42,6 @@ class BC_API number
 {
 public:
     static const uint8_t negative_1;
-    static const uint8_t negative_0;
     static const uint8_t positive_0;
     static const uint8_t positive_1;
     static const uint8_t positive_2;
@@ -60,7 +59,7 @@ public:
     static const uint8_t positive_14;
     static const uint8_t positive_15;
     static const uint8_t positive_16;
-    static const uint8_t negative_mask;
+    static const uint8_t negative_sign;
 
     /// Construct with zero value.
     number();

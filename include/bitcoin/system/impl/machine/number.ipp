@@ -31,13 +31,13 @@ namespace libbitcoin {
 namespace system {
 namespace machine {
 
-static const uint64_t negative_bit = number::negative_mask;
 static const uint64_t unsigned_max_int64 = max_int64;
 static const uint64_t absolute_min_int64 = min_int64;
+static const uint64_t negative_bit = number::negative_sign;
 
 inline bool is_negative(const data_chunk& data)
 {
-    return (data.back() & number::negative_mask) != 0;
+    return (data.back() & number::negative_sign) != 0;
 }
 
 inline number::number()
@@ -85,7 +85,7 @@ inline data_chunk number::data() const
         return {};
 
     data_chunk data;
-    const bool set_negative = value_ < 0;
+    const auto set_negative = value_ < 0;
     uint64_t absolute = set_negative ? -value_ : value_;
 
     // This is "to little endian" with a minimal buffer.
@@ -101,7 +101,7 @@ inline data_chunk number::data() const
     // push a new 0x80 byte that will be popped off when converting to
     // an integral.
     if (negative_bit_set && set_negative)
-        data.push_back(number::negative_mask);
+        data.push_back(number::negative_sign);
 
     // If the most significant byte is >= 0x80 and the value is positive,
     // push a new zero-byte to make the significant byte < 0x80 again.
@@ -112,7 +112,7 @@ inline data_chunk number::data() const
     // add 0x80 to it, since it will be subtracted and interpreted as
     // a negative when converting to an integral.
     else if (set_negative)
-        data.back() |= number::negative_mask;
+        data.back() |= number::negative_sign;
 
     return data;
 }
