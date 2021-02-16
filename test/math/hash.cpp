@@ -90,6 +90,15 @@ BOOST_AUTO_TEST_CASE(pkcs5_pbkdf2_hmac_sha512_test)
     }
 }
 
+BOOST_AUTO_TEST_CASE(pbkdf2_hmac_sha256_test)
+{
+    for (const auto& result: pbkdf2_hmac_sha256_tests)
+    {
+        const auto data = pbkdf2_hmac_sha256(to_chunk(result.passphrase), to_chunk(result.salt), result.iterations, result.length);
+        BOOST_REQUIRE_EQUAL(encode_base16(data), result.result);
+    }
+}
+
 BOOST_AUTO_TEST_CASE(scrypt_hash_test)
 {
     for (const auto& result: scrypt_hash_tests)

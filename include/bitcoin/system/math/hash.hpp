@@ -161,6 +161,10 @@ BC_API long_hash hmac_sha512_hash(const data_slice& data, const data_slice& key)
 BC_API long_hash pkcs5_pbkdf2_hmac_sha512(const data_slice& passphrase,
     const data_slice& salt, size_t iterations);
 
+/// Compute pbkdf2(passphrase, salt, iterations, length) using hmac_sha256 as the PRF.
+BC_API data_chunk pbkdf2_hmac_sha256(const data_slice& passphrase,
+    const data_slice& salt, size_t iterations, size_t length);
+
 } // namespace system
 } // namespace libbitcoin
 

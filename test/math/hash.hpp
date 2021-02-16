@@ -34,9 +34,17 @@ struct pkcs5_pbkdf2_hmac_sha512_result
     std::string result;
 };
 
+struct pbkdf2_hmac_sha256_result
+{
+    std::string passphrase, salt;
+    size_t iterations, length;
+    std::string result;
+};
+
 typedef std::vector<hash_result> hash_result_list;
 typedef std::vector<pkcs5_pbkdf2_hmac_sha512_result>
     pkcs5_pbkdf2_hmac_sha512_result_list;
+typedef std::vector<pbkdf2_hmac_sha256_result> pbkdf2_hmac_sha256_result_list;
 
 hash_result_list sha1_tests{{
     {"", "da39a3ee5e6b4b0d3255bfef95601890afd80709"},
@@ -140,6 +148,11 @@ pkcs5_pbkdf2_hmac_sha512_result_list pkcs5_pbkdf2_hmac_sha512_tests{{
     {"password", "salt", 4096, "d197b1b33db0143e018b12f3d1d1479e6cdebdcc97c5c0f87f6902e072f457b5143f30602641b3d55cd335988cb36b84376060ecd532e039b742a239434af2d5"},
     {"passwordPASSWORDpassword", "saltSALTsaltSALTsaltSALTsaltSALTsalt", 4096, "8c0511f4c6e597c6ac6315d8f0362e225f3c501495ba23b868c005174dc4ee71115b59f9e60cd9532fa33e0f75aefe30225c583a186cd82bd4daea9724a3d3b8"},
     {"password", "NaCL", 1, "73decfa58aa2e84f94771a75736bb88bd3c7b38270cfb50cb390ed78b305656af8148e52452b2216b2b8098b761fc6336060a09f76415e9f71ea47f9e9064306"}
+}};
+
+pbkdf2_hmac_sha256_result_list pbkdf2_hmac_sha256_tests{{
+    {"passwd", "salt", 1, 64, "55ac046e56e3089fec1691c22544b605f94185216dde0465e68b9d57c20dacbc49ca9cccf179b645991664b39d77ef317c71b845b1e30bd509112041d3a19783"},
+    {"Password", "NaCl", 80000, 64, "4ddcd8f60b98be21830cee5ef22701f9641a4418d04c0414aeff08876b34ab56a1d425a1225833549adb841b51c9b3176a272bdebba1d078478f62b397f33c8d"}
 }};
 
 hash_result_list scrypt_hash_tests({
