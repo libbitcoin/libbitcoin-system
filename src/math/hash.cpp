@@ -27,6 +27,7 @@
 #include "../math/external/crypto_scrypt.h"
 #include "../math/external/hmac_sha256.h"
 #include "../math/external/hmac_sha512.h"
+#include "../math/external/pbkdf2_sha256.h"
 #include "../math/external/pkcs5_pbkdf2.h"
 #include "../math/external/ripemd160.h"
 #include "../math/external/sha1.h"
@@ -136,6 +137,15 @@ long_hash pkcs5_pbkdf2_hmac_sha512(const data_slice& passphrase,
         throw std::bad_alloc();
 
     return hash;
+}
+
+data_chunk pbkdf2_hmac_sha256(const data_slice& passphrase,
+    const data_slice& salt, size_t iterations, size_t length)
+{
+    data_chunk output(length);
+    pbkdf2_sha256(passphrase.data(), passphrase.size(), salt.data(),
+        salt.size(), iterations, output.data(), length);
+    return output;
 }
 
 static void handle_script_result(int result)
