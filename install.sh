@@ -351,8 +351,12 @@ normalize_static_and_shared_options()
     fi
 }
 
+handle_custom_options()
+{
+}
+
 remove_build_options()
-{    
+{
     # Purge custom build options so they don't break configure.
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-*/}")
 }
@@ -400,6 +404,7 @@ set_with_boost_prefix()
 enable_exit_on_error
 parse_command_line_options "$@"
 handle_help_line_option
+handle_custom_options
 set_operating_system
 configure_build_parallelism
 set_os_specific_compiler_settings "$@"
