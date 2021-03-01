@@ -353,6 +353,8 @@ normalize_static_and_shared_options()
 
 handle_custom_options()
 {
+    # bash doesn't like empty functions.
+    FOO="bar"
 }
 
 remove_build_options()
