@@ -52,16 +52,6 @@ typedef std::vector<data_chunk> data_stack;
 typedef std::initializer_list<data_slice> loaf;
 
 /**
- * Create a single byte array with an initial value.
- */
-inline one_byte to_array(uint8_t byte);
-
-/**
-* Create a single byte data chunk with an initial value.
-*/
-inline data_chunk to_chunk(uint8_t byte);
-
-/**
  * Concatenate several data slices into a single data_chunk.
  * @param  extra_reserve  Include this many additional bytes when calling
  * `reserve` on the data_chunk (as an optimization).
