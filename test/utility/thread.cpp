@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_SUITE(thread_tests)
 
 static int get_thread_priority_test()
 {
-#if defined(_WIN32)
+#if defined(_MSC_VER)
     return GetThreadPriority(GetCurrentThread());
 #elif defined(PRIO_THREAD)
     return getpriority(PRIO_LWP, pthread_self());
@@ -54,7 +54,7 @@ static int get_thread_priority_test()
 
 void set_thread_priority_test(int priority)
 {
-#if defined(_WIN32)
+#if defined(_MSC_VER)
     SetThreadPriority(GetCurrentThread(), priority);
 #elif defined(PRIO_THREAD)
     setpriority(PRIO_THREAD, pthread_self(), priority);
