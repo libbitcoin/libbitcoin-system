@@ -42,7 +42,7 @@ inline void move_file(
     filesystem::path const& from,
     filesystem::path const& to)
 {
-#if defined(BOOST_WINDOWS_API)
+#ifdef BOOST_WINDOWS_API
     // On Windows MoveFile already does what we need
     filesystem::rename(from, to);
 #else
