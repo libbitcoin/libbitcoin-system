@@ -13,8 +13,6 @@
     <ClCompile>
       <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <EnablePREfast>false</EnablePREfast>
-      <!-- WIN32_LEAN_AND_MEAN avoids boost conflict: lists.boost.org/boost-users/2008/07/37824.php. -->
-      <PreprocessorDefinitions>_WIN32_WINNT=0x0600;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
 
