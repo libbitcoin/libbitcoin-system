@@ -202,8 +202,8 @@ witness_address witness_address::from_string(const std::string& address,
 witness_address witness_address::from_private(const ec_private& secret,
     address_format format, const std::string& prefix)
 {
-    return secret ? witness_address(secret.to_public(), format, prefix)
-        : witness_address{};
+    return secret ? witness_address(secret.to_public(), format, prefix) : 
+        witness_address{};
 }
 
 // static

@@ -37,7 +37,8 @@ namespace libbitcoin {
 namespace system {
 namespace neutrino {
 
-bool compute_filter(const chain::block& validated_block, data_chunk& out_filter);
+bool compute_filter(const chain::block& validated_block,
+    data_chunk& out_filter);
 
 hash_digest compute_filter_header(const hash_digest& previous_block_hash,
     const data_chunk& filter);

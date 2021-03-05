@@ -32,7 +32,7 @@ static constexpr size_t checksum_size = 6;
 static constexpr size_t prefix_min_size = 1;
 static constexpr size_t combined_max_size = 90;
 static constexpr size_t bit_group_size = 5;
-static constexpr size_t bit_group_mask = 31; // 11111
+static constexpr size_t bit_group_mask = 31;
 static constexpr uint8_t null = 255;
 static constexpr uint8_t separator = '1';
 static const char encode_table[] = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
@@ -109,8 +109,7 @@ uint32_t polymod(const data_chunk& values)
 
         for (size_t index = 0; index < bit_group_size; ++index)
             checksum ^= (((shift >> index) & 1) != 0 ?
-                bech32_generator_polynomials[index] :
-                0);
+                bech32_generator_polynomials[index] : 0);
     }
 
     return checksum;
@@ -169,7 +168,7 @@ static bool normalize(data_chunk& out, const std::string& in)
     }
 
     // Must not accept mixed case strings.
-    return !(uppercase && lowercase);
+    return !uppercase || !lowercase;
 }
 
 // Split the prefix from the payload and validate sizes.
@@ -244,7 +243,6 @@ std::string encode_base32(const base32& unencoded)
 
 bool decode_base32(base32& out, const std::string& in)
 {
-    static const auto check = checksum_size;
     data_chunk normal;
 
     // Normalize and validate input characters.
@@ -264,8 +262,8 @@ bool decode_base32(base32& out, const std::string& in)
     if (!verify(out))
         return false;
 
-    // Truncate checksum from payload.
-    out.payload.resize(out.payload.size() - check);
+    // Truncate checksum from payload (underflow guarded by split call).
+    out.payload.resize(out.payload.size() - checksum_size);
     out.payload.shrink_to_fit();
     return true;
 }
