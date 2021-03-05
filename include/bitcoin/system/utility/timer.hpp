@@ -21,7 +21,7 @@
 
 #include <chrono>
 #include <cstddef>
-#include <ctime>
+#include <time.h>
 #include <string>
 #include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/utility/asio.hpp>
@@ -38,19 +38,35 @@ inline std::time_t zulu_time()
     return wall_clock::to_time_t(now);
 }
 
+/// Current local time using the wall clock, false and empty string on failure.
+inline bool local_time(tm& out_local, std::time_t zulu)
+{
+    // localtime not threadsafe due to static buffer return, use localtime_s.
+#ifdef _MSC_VER
+    // proprietary msvc implemention, parameters swapped, returns errno_t.
+    return localtime_s(&out_local, &zulu) == 0;
+#else
+    // C++11 implemention returns parameter pointer, nullptr implies failure.
+    return localtime_s(&zulu, &out_local) != nullptr;
+#endif
+}
+
 /// Standard date-time string, e.g. Sun Oct 17 04:41:13 2010, locale dependent.
 inline std::string local_time()
 {
+    tm out_local{};
+    if (!local_time(out_local, zulu_time()))
+        return "";
+
+    // %c writes standard date and time string, e.g.
+    // Sun Oct 17 04:41:13 2010 (locale dependent)
+    static const auto format = "%c";
     static BC_CONSTEXPR size_t size = 25;
     char buffer[size];
-    const auto time = zulu_time();
 
     // std::strftime is required because gcc doesn't implement std::put_time.
-    auto result = std::strftime(buffer, size, "%c", std::localtime(&time));
-
-    // If count was reached before the entire string could be stored, zero is
-    // returned and contents are undefined, so do not return result.
-    return result == 0 ? "" : buffer;
+    // Returns number of characters, zero implies failure and undefined buffer.
+    return std::strftime(buffer, size, format, &out_local) == 0 ? "" : buffer;
 }
 
 // From: github.com/picanumber/bureaucrat/blob/master/time_lapse.h
