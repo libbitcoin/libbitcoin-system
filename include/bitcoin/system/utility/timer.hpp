@@ -47,7 +47,7 @@ inline bool local_time(tm& out_local, std::time_t zulu)
     return localtime_s(&out_local, &zulu) == 0;
 #else
     // C++11 implemention returns parameter pointer, nullptr implies failure.
-    return localtime_s(&zulu, &out_local) != nullptr;
+    return localtime_r(&zulu, &out_local) != nullptr;
 #endif
 }
 
