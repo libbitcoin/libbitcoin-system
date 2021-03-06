@@ -30,9 +30,10 @@
 // Windows and other environments, such as Java, that supported Unicode prior
 // to the advent of utf8 utilize 16 bit characters. These are typically encoded
 // as wchar_t in C++. Unicode no longer fits in 16 bits and as such these
-// implementations now require variable length character encoding just as utf8.
+// implementations now require variable length character encoding just as utf8
+// boost.org/doc/libs/1_75_0/libs/locale/doc/html/recommendations_and_myths.html
 //
-// Libbitcoin embraces the "utf8 everywhere" design: http://utf8everywhere.org
+// Libbitcoin embraces the "utf8 everywhere" design: utf8everywhere.org
 // The objective is to use utf8 as the canonical string encoding, pushing
 // wchar_t translation to the edge (stdio, argv, O/S and external API calls).
 // The macro BC_USE_LIBBITCOIN_MAIN does most of the heavy lifting to ensure
