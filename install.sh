@@ -612,7 +612,7 @@ build_from_tarball()
     pop_directory
 }
 
-# Because boost ICU detection assumes in incorrect ICU path.
+# Because boost ICU static lib detection assumes in incorrect ICU path.
 circumvent_boost_icu_detection()
 {
     # Boost expects a directory structure for ICU which is incorrect.
@@ -652,27 +652,30 @@ initialize_boost_configuration()
 }
 
 # Because boost doesn't use pkg-config.
+# The hacks below are still required as of boost 1.72.0.
 initialize_boost_icu_configuration()
 {
     BOOST_ICU_ICONV="on"
     BOOST_ICU_POSIX="on"
 
     if [[ $WITH_ICU ]]; then
-        circumvent_boost_icu_detection
-
         # Restrict other locale options when compiling boost with icu.
         BOOST_ICU_ICONV="off"
         BOOST_ICU_POSIX="off"
+        
+        # Work around boost ICU static lib discovery bug.
+        circumvent_boost_icu_detection
 
+        # Extract ICU prefix directory from package config variable.
+        ICU_PREFIX=$(pkg-config icu-i18n --variable=prefix)
+
+        # Because boost doesn't use pkg-config.
         # Extract ICU libs from package config variables and augment with -ldl.
         ICU_LIBS="$(pkg-config icu-i18n --libs) -ldl"
 
         # This is a hack for boost m4 scripts that fail with ICU dependency.
         # See custom edits in ax-boost-locale.m4 and ax_boost_regex.m4.
         export BOOST_ICU_LIBS=("${ICU_LIBS[@]}")
-
-        # Extract ICU prefix directory from package config variable.
-        ICU_PREFIX=$(pkg-config icu-i18n --variable=prefix)
     fi
 }
 
@@ -721,7 +724,7 @@ build_from_tarball_boost()
     display_message "boost.locale.posix    : $BOOST_ICU_POSIX"
     display_message "-sNO_BZIP2            : 1"
     display_message "-sICU_PATH            : $ICU_PREFIX"
-    display_message "-sICU_LINK            : " "${ICU_LIBS[*]}"
+ ## display_message "-sICU_LINK            : " "${ICU_LIBS[*]}"
     display_message "-sZLIB_LIBPATH        : $PREFIX/lib"
     display_message "-sZLIB_INCLUDE        : $PREFIX/include"
     display_message "-j                    : $JOBS"
@@ -732,15 +735,24 @@ build_from_tarball_boost()
     display_message "BOOST_OPTIONS         : $*"
     display_message "--------------------------------------------------------------------"
 
-    # boost_iostreams
-    # The zlib options prevent boost linkage to system libs in the case where
-    # we have built zlib in a prefix dir. Disabling zlib in boost is broken in
-    # all versions (through 1.60). https://svn.boost.org/trac/boost/ticket/9156
-    # The bzip2 auto-detection is not implemented, but disabling it works.
-
     ./bootstrap.sh \
         "--prefix=$PREFIX" \
         "--with-icu=$ICU_PREFIX"
+
+    # boost_iostreams:
+    # The zlib options prevent boost linkage to system libs in the case where
+    # we have built zlib in a prefix dir. Disabling zlib in boost is broken in
+    # all versions (through 1.61). There has been a patch pull request since
+    # 2015 but not merged as of 3/5/2021. svn.boost.org/trac/boost/ticket/9156
+    # The bzip2 auto-detection is not implemented, but disabling it works.
+
+ ## Succeed all (0)
+    # boost_regex:
+    # As of boost 1.72.0 the ICU_LINK symbol is no longer supported and
+    # produces a hard stop if WITH_ICU is also defined. Removal is sufficient.
+    # github.com/libbitcoin/libbitcoin-system/issues/1192
+    # ICU_LIBS should be BOOST_ICU_LIBS as ICU_LIBS isn't exported, but moot.
+    # "-sICU_LINK=${ICU_LIBS[*]}"
 
     ./b2 install \
         "variant=release" \
@@ -753,7 +765,6 @@ build_from_tarball_boost()
         "boost.locale.posix=$BOOST_ICU_POSIX" \
         "-sNO_BZIP2=1" \
         "-sICU_PATH=$ICU_PREFIX" \
-        "-sICU_LINK=${ICU_LIBS[*]}" \
         "-sZLIB_LIBPATH=$PREFIX/lib" \
         "-sZLIB_INCLUDE=$PREFIX/include" \
         "-j $JOBS" \
