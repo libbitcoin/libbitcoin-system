@@ -337,14 +337,14 @@ AS_CASE([${enable_isystem}],[yes],
 
 AC_MSG_NOTICE([png_BUILD_CPPFLAGS : ${png_BUILD_CPPFLAGS}])
 
-# Require qrencode of at least version 3.4.4 and output ${qrencode_CPPFLAGS/LIBS/PKG}.
+# Require qrencode of at least version 4.1.1 and output ${qrencode_CPPFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
 AS_CASE([${with_qrencode}], [yes],
-    [PKG_CHECK_MODULES([qrencode], [libqrencode >= 3.4.4],
-        [qrencode_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "libqrencode >= 3.4.4" 2>/dev/null`"
-         qrencode_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "libqrencode >= 3.4.4" 2>/dev/null`"],
-        [AC_MSG_ERROR([--with-qrencode specified but libqrencode >= 3.4.4 was not found.])])
-     AC_SUBST([qrencode_PKG], ['libqrencode >= 3.4.4'])
+    [PKG_CHECK_MODULES([qrencode], [libqrencode >= 4.1.1],
+        [qrencode_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "libqrencode >= 4.1.1" 2>/dev/null`"
+         qrencode_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "libqrencode >= 4.1.1" 2>/dev/null`"],
+        [AC_MSG_ERROR([--with-qrencode specified but libqrencode >= 4.1.1 was not found.])])
+     AC_SUBST([qrencode_PKG], ['libqrencode >= 4.1.1'])
      AC_SUBST([qrencode_CPPFLAGS], [${qrencode_CFLAGS}])
      AS_IF([test x${qrencode_INCLUDEDIR} != "x"],
         [AC_SUBST([qrencode_ISYS_CPPFLAGS], ["-isystem${qrencode_INCLUDEDIR} ${qrencode_OTHER_CFLAGS}"])],

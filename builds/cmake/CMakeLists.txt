@@ -210,7 +210,7 @@ endif()
 # Find qrencode
 #------------------------------------------------------------------------------
 if (with-qrencode)
-    find_package( Qrencode 3.4.4 REQUIRED )
+    find_package( Qrencode 4.1.1 REQUIRED )
 endif()
 
 # Find secp256k1

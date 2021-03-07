@@ -74,8 +74,8 @@ PNG_ARCHIVE="libpng-1.6.37.tar.xz"
 
 # QREncode archive.
 #------------------------------------------------------------------------------
-QRENCODE_URL="http://fukuchi.org/works/qrencode/qrencode-3.4.4.tar.bz2"
-QRENCODE_ARCHIVE="qrencode-3.4.4.tar.bz2"
+QRENCODE_URL="http://fukuchi.org/works/qrencode/qrencode-4.1.1.tar.bz2"
+QRENCODE_ARCHIVE="qrencode-4.1.1.tar.bz2"
 
 # Boost archive.
 #------------------------------------------------------------------------------
@@ -746,7 +746,6 @@ build_from_tarball_boost()
     # 2015 but not merged as of 3/5/2021. svn.boost.org/trac/boost/ticket/9156
     # The bzip2 auto-detection is not implemented, but disabling it works.
 
- ## Succeed all (0)
     # boost_regex:
     # As of boost 1.72.0 the ICU_LINK symbol is no longer supported and
     # produces a hard stop if WITH_ICU is also defined. Removal is sufficient.

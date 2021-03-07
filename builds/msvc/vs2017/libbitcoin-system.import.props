@@ -34,6 +34,12 @@
       <AdditionalLibraryDirectories Condition="$(Configuration.IndexOf('Debug')) != -1">$(ProjectDir)..\..\..\..\..\libbitcoin-system\bin\$(PlatformName)\Debug\$(PlatformToolset)\$(Linkage-libbitcoin-system)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalLibraryDirectories Condition="$(Configuration.IndexOf('Release')) != -1">$(ProjectDir)..\..\..\..\..\libbitcoin-system\bin\$(PlatformName)\Release\$(PlatformToolset)\$(Linkage-libbitcoin-system)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <Link Condition="$(PlatformToolset) == 'v120'">
+      <!-- Need to link $(VC_CTP_Nov2013_LibraryPath_x86), $(VC_CTP_Nov2013_LibraryPath_x64), or $(VC_CTP_Nov2013_LibraryPath_ARM). -->
+      <AdditionalLibraryDirectories Condition="$(PlatformName) == 'ARM'">$(ProgramFiles)\Microsoft Visual C++ Compiler Nov 2013 CTP\lib\arm;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories Condition="$(PlatformName) == 'x64'">$(ProgramFiles)\Microsoft Visual C++ Compiler Nov 2013 CTP\lib\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories Condition="$(PlatformName) == 'Win32'">$(ProgramFiles)\Microsoft Visual C++ Compiler Nov 2013 CTP\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
   </ItemDefinitionGroup>
 
   <!-- Copy -->
