@@ -1,5 +1,5 @@
 # ===========================================================================
-#      http://www.gnu.org/software/autoconf-archive/ax_boost_chrono.html
+#     https://www.gnu.org/software/autoconf-archive/ax_boost_chrono.html
 # ===========================================================================
 #
 # SYNOPSIS
@@ -8,7 +8,7 @@
 #
 # DESCRIPTION
 #
-#   Test for System library from the Boost C++ libraries. The macro requires
+#   Test for Chrono library from the Boost C++ libraries. The macro requires
 #   a preceding call to AX_BOOST_BASE. Further documentation is available at
 #   <http://randspringer.de/boost/index.html>.
 #
@@ -29,7 +29,7 @@
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 1
+#serial 5
 
 AC_DEFUN([AX_BOOST_CHRONO],
 [
@@ -68,7 +68,7 @@ AC_DEFUN([AX_BOOST_CHRONO],
 			 CXXFLAGS_SAVE=$CXXFLAGS
 
 			 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[@%:@include <boost/chrono.hpp>]],
-                                   [[boost::chrono::system_clock::time_point time;]])],
+                                   [[boost::chrono::system_clock::time_point* time = new boost::chrono::system_clock::time_point; delete time;]])],
                    ax_cv_boost_chrono=yes, ax_cv_boost_chrono=no)
 			 CXXFLAGS=$CXXFLAGS_SAVE
              AC_LANG_POP([C++])
@@ -105,7 +105,7 @@ AC_DEFUN([AX_BOOST_CHRONO],
 
             fi
             if test "x$ax_lib" = "x"; then
-                AC_MSG_ERROR(Could not find a version of the library!)
+                AC_MSG_ERROR(Could not find a version of the Boost::Chrono library!)
             fi
 			if test "x$link_chrono" = "xno"; then
 				AC_MSG_ERROR(Could not link against $ax_lib !)
