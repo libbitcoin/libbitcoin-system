@@ -1,6 +1,6 @@
-# ================================================================================
-#  http://www.gnu.org/software/autoconf-archive/ax_boost_unit_test_framework.html
-# ================================================================================
+# =================================================================================
+#  https://www.gnu.org/software/autoconf-archive/ax_boost_unit_test_framework.html
+# =================================================================================
 #
 # SYNOPSIS
 #
@@ -29,7 +29,7 @@
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 19
+#serial 22
 
 AC_DEFUN([AX_BOOST_UNIT_TEST_FRAMEWORK],
 [
@@ -66,7 +66,7 @@ AC_DEFUN([AX_BOOST_UNIT_TEST_FRAMEWORK],
         [AC_LANG_PUSH([C++])
 			 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[@%:@include <boost/test/unit_test.hpp>]],
                                     [[using boost::unit_test::test_suite;
-							 test_suite* test= BOOST_TEST_SUITE( "Unit test example 1" ); return 0;]])],
+							 test_suite* test= BOOST_TEST_SUITE( "Unit test example 1" ); if (test == NULL) { return 1; } else { return 0; }]])],
                    ax_cv_boost_unit_test_framework=yes, ax_cv_boost_unit_test_framework=no)
          AC_LANG_POP([C++])
 		])
@@ -124,7 +124,7 @@ AC_DEFUN([AX_BOOST_UNIT_TEST_FRAMEWORK],
                done
             fi
             if test "x$ax_lib" = "x"; then
-                AC_MSG_ERROR(Could not find a version of the library!)
+                AC_MSG_ERROR(Could not find a version of the Boost::Unit_Test_Framework library!)
             fi
 			if test "x$link_unit_test_framework" != "xyes"; then
 				AC_MSG_ERROR(Could not link against $ax_lib !)

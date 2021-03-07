@@ -1,6 +1,6 @@
-# ============================================================================
-#  http://www.gnu.org/software/autoconf-archive/ax_boost_program_options.html
-# ============================================================================
+# =============================================================================
+#  https://www.gnu.org/software/autoconf-archive/ax_boost_program_options.html
+# =============================================================================
 #
 # SYNOPSIS
 #
@@ -29,7 +29,7 @@
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 22
+#serial 26
 
 AC_DEFUN([AX_BOOST_PROGRAM_OPTIONS],
 [
@@ -63,9 +63,9 @@ AC_DEFUN([AX_BOOST_PROGRAM_OPTIONS],
 		AC_CACHE_CHECK([whether the Boost::Program_Options library is available],
 					   ax_cv_boost_program_options,
 					   [AC_LANG_PUSH(C++)
-				AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[@%:@include <boost/program_options.hpp>
+				AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[@%:@include <boost/program_options/errors.hpp>
                                                           ]],
-                                  [[boost::program_options::options_description generic("Generic options");
+                                  [[boost::program_options::error err("Error message");
                                    return 0;]])],
                            ax_cv_boost_program_options=yes, ax_cv_boost_program_options=no)
 					AC_LANG_POP([C++])
@@ -96,7 +96,7 @@ AC_DEFUN([AX_BOOST_PROGRAM_OPTIONS],
                   done
                 fi
             if test "x$ax_lib" = "x"; then
-                AC_MSG_ERROR(Could not find a version of the library!)
+                AC_MSG_ERROR(Could not find a version of the Boost::Program_Options library!)
             fi
 				if test "x$link_program_options" != "xyes"; then
 					AC_MSG_ERROR([Could not link against [$ax_lib] !])

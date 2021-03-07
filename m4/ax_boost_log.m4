@@ -1,5 +1,5 @@
 # ===========================================================================
-#       http://www.gnu.org/software/autoconf-archive/ax_boost_log.html
+#       https://www.gnu.org/software/autoconf-archive/ax_boost_log.html
 # ===========================================================================
 #
 # SYNOPSIS
@@ -31,7 +31,7 @@
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 1
+#serial 3
 
 AC_DEFUN([AX_BOOST_LOG],
 [
@@ -87,7 +87,7 @@ AC_DEFUN([AX_BOOST_LOG],
 					ax_lib=${libextension}
 					AC_CHECK_LIB($ax_lib, exit,
 						[BOOST_LOG_LIB="-l$ax_lib"; AC_SUBST(BOOST_LOG_LIB) link_log="yes"; break],
-					[link_log="no"],[$BOOST_ICU_LIBS])
+					[link_log="no"])
 				done
 
 				if test "x$link_log" != "xyes"; then
@@ -95,7 +95,7 @@ AC_DEFUN([AX_BOOST_LOG],
 						ax_lib=${libextension}
 						AC_CHECK_LIB($ax_lib, exit,
 							[BOOST_LOG_LIB="-l$ax_lib"; AC_SUBST(BOOST_LOG_LIB) link_log="yes"; break],
-							[link_log="no"],[$BOOST_ICU_LIBS])
+							[link_log="no"])
 					done
 				fi
 
@@ -103,12 +103,12 @@ AC_DEFUN([AX_BOOST_LOG],
 				for ax_lib in $ax_boost_user_log_lib boost_log-$ax_boost_user_log_lib; do
 					AC_CHECK_LIB($ax_lib, exit,
 						[BOOST_LOG_LIB="-l$ax_lib"; AC_SUBST(BOOST_LOG_LIB) link_log="yes"; break],
-						[link_log="no"],[$BOOST_ICU_LIBS])
+						[link_log="no"])
 				done
 			fi
 
 			if test "x$ax_lib" = "x"; then
-				AC_MSG_ERROR(Could not find a version of the library!)
+				AC_MSG_ERROR(Could not find a version of the Boost::Log library!)
 			fi
 
 			if test "x$link_log" = "xno"; then
