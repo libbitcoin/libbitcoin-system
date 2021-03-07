@@ -482,8 +482,9 @@ BOOST_OPTIONS=(
 #------------------------------------------------------------------------------
 SECP256K1_OPTIONS=(
 "--disable-tests" \
+"--enable-experimental" \
 "--enable-module-recovery" \
-"--enable-endomorphism")
+"--enable-module-schnorrsig")
 
 # Define bitcoin-system options.
 #------------------------------------------------------------------------------
@@ -662,19 +663,17 @@ initialize_boost_icu_configuration()
         # Restrict other locale options when compiling boost with icu.
         BOOST_ICU_ICONV="off"
         BOOST_ICU_POSIX="off"
-        
+
         # Work around boost ICU static lib discovery bug.
         circumvent_boost_icu_detection
 
         # Extract ICU prefix directory from package config variable.
         ICU_PREFIX=$(pkg-config icu-i18n --variable=prefix)
 
-        # Because boost doesn't use pkg-config.
         # Extract ICU libs from package config variables and augment with -ldl.
         ICU_LIBS="$(pkg-config icu-i18n --libs) -ldl"
 
         # This is a hack for boost m4 scripts that fail with ICU dependency.
-        # See custom edits in ax-boost-locale.m4 and ax_boost_regex.m4.
         export BOOST_ICU_LIBS=("${ICU_LIBS[@]}")
     fi
 }
@@ -724,7 +723,7 @@ build_from_tarball_boost()
     display_message "boost.locale.posix    : $BOOST_ICU_POSIX"
     display_message "-sNO_BZIP2            : 1"
     display_message "-sICU_PATH            : $ICU_PREFIX"
- ## display_message "-sICU_LINK            : " "${ICU_LIBS[*]}"
+  # display_message "-sICU_LINK            : " "${ICU_LIBS[*]}"
     display_message "-sZLIB_LIBPATH        : $PREFIX/lib"
     display_message "-sZLIB_INCLUDE        : $PREFIX/include"
     display_message "-j                    : $JOBS"
@@ -750,7 +749,6 @@ build_from_tarball_boost()
     # As of boost 1.72.0 the ICU_LINK symbol is no longer supported and
     # produces a hard stop if WITH_ICU is also defined. Removal is sufficient.
     # github.com/libbitcoin/libbitcoin-system/issues/1192
-    # ICU_LIBS should be BOOST_ICU_LIBS as ICU_LIBS isn't exported, but moot.
     # "-sICU_LINK=${ICU_LIBS[*]}"
 
     ./b2 install \
