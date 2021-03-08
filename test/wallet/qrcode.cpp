@@ -28,9 +28,9 @@ BOOST_AUTO_TEST_SUITE(qrcode_tests)
 
 #ifdef WITH_QRENCODE
 
-BOOST_AUTO_TEST_CASE(qrcode__invoke__qrencode_data__success)
+BOOST_AUTO_TEST_CASE(qrcode__construct__always__expected)
 {
-    static const uint8_t expected_data[]
+    static const data_chunk expected
     {
         0x03, 0x00, 0x00, 0x00, 0x1d, 0x00, 0x00, 0x00, 0xc1, 0xc1, 0xc1, 0xc1,
         0xc1, 0xc1, 0xc1, 0xc0, 0x84, 0x02, 0x03, 0x02, 0x03, 0x03, 0x03, 0x02,
@@ -105,12 +105,11 @@ BOOST_AUTO_TEST_CASE(qrcode__invoke__qrencode_data__success)
         0x02, 0x03, 0x02, 0x02, 0x03, 0x03, 0x03, 0x02, 0x02
     };
 
-    static const auto expected_data_length = sizeof(expected_data) / sizeof(uint8_t);
-    static const std::string address = "bitcoin:1L4M4obtbpexxuKpLrDimMEYWB2Rx2yzus";
-    const auto encoded_qrcode = qr::encode(to_chunk(address));
+    const auto qrcode = qr::encode(to_chunk(std::string{ "bitcoin:1L4M4obtbpexxuKpLrDimMEYWB2Rx2yzus" }));
+    BOOST_REQUIRE_EQUAL(qrcode.size(), expected.size());
 
-    BOOST_REQUIRE_EQUAL(encoded_qrcode.size(), expected_data_length);
-    BOOST_REQUIRE(std::memcmp(encoded_qrcode.data(), expected_data, expected_data_length) == 0);
+    // Encode as base16 so that failure message is intelligible.
+    BOOST_REQUIRE_EQUAL(encode_base16(qrcode), encode_base16(expected));
 }
 
 #endif // WITH_QRENCODE
