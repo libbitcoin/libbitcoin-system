@@ -18,7 +18,6 @@
  */
 #include <boost/test/unit_test.hpp>
 
-#include <cstdint>
 #include <bitcoin/system.hpp>
 
 using namespace bc::system;
@@ -28,6 +27,7 @@ BOOST_AUTO_TEST_SUITE(qrcode_tests)
 
 #ifdef WITH_QRENCODE
 
+// This test may be sensitive to changes in dependency conversion formatting.
 BOOST_AUTO_TEST_CASE(qrcode__construct__always__expected)
 {
     static const data_chunk expected
@@ -105,11 +105,11 @@ BOOST_AUTO_TEST_CASE(qrcode__construct__always__expected)
         0x02, 0x03, 0x02, 0x02, 0x03, 0x03, 0x03, 0x02, 0x02
     };
 
-    const auto qrcode = qr::encode(to_chunk(std::string{ "bitcoin:1L4M4obtbpexxuKpLrDimMEYWB2Rx2yzus" }));
-    BOOST_REQUIRE_EQUAL(qrcode.size(), expected.size());
+    const auto bitmap = qr::encode(to_chunk(std::string{ "bitcoin:1L4M4obtbpexxuKpLrDimMEYWB2Rx2yzus" }));
+    BOOST_REQUIRE_EQUAL(bitmap.size(), expected.size());
 
     // Encode as base16 so that failure message is intelligible.
-    BOOST_REQUIRE_EQUAL(encode_base16(qrcode), encode_base16(expected));
+    BOOST_REQUIRE_EQUAL(encode_base16(bitmap), encode_base16(expected));
 }
 
 #endif // WITH_QRENCODE

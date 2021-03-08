@@ -27,12 +27,10 @@ BOOST_AUTO_TEST_SUITE(png_tests)
 
 #ifdef WITH_PNG
 
-BOOST_AUTO_TEST_CASE(png__size_one__success)
+// This test may be sensitive to changes in dependency conversion formatting.
+BOOST_AUTO_TEST_CASE(png__write_png__size_one__success)
 {
-    data_chunk out;
-    data_sink ostream(out);
-
-    const uint8_t raw_input_data[] =
+    const data_chunk bitmap
     {
         0x03, 0x00, 0x00, 0x00, 0x1d, 0x00, 0x00, 0x00, 0xc1, 0xc1, 0xc1, 0xc1,
         0xc1, 0xc1, 0xc1, 0xc0, 0x84, 0x02, 0x03, 0x02, 0x03, 0x03, 0x03, 0x02,
@@ -106,9 +104,8 @@ BOOST_AUTO_TEST_CASE(png__size_one__success)
         0x85, 0x02, 0x03, 0x02, 0x03, 0x02, 0x03, 0x02, 0x02, 0x02, 0x02, 0x03,
         0x02, 0x03, 0x02, 0x02, 0x03, 0x03, 0x03, 0x02, 0x02
     };
-    const auto input_data = to_chunk(raw_input_data);
 
-    const uint8_t expected_data[] =
+    const data_chunk expected
     {
         0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
         0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x21, 0x00, 0x00, 0x00, 0x21,
@@ -135,13 +132,13 @@ BOOST_AUTO_TEST_CASE(png__size_one__success)
         0x00, 0x15, 0x36, 0x6f, 0x4e, 0xff, 0x43, 0x64, 0x8e, 0x00, 0x00, 0x00,
         0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
     };
-    constexpr uint32_t expected_data_length = 285;
 
-    constexpr uint32_t size = 1;
-    /* result */ png::write_png(input_data, size, ostream);
+    data_chunk portable;
+    data_sink stream(portable);
+    BOOST_REQUIRE(png::write_png(bitmap, 1, stream));
 
-    BOOST_REQUIRE_EQUAL(out.size(), expected_data_length);
-    BOOST_REQUIRE_EQUAL(std::memcmp(out.data(), expected_data, expected_data_length), 0);
+    // Encode as base16 so that failure message is intelligible.
+    BOOST_REQUIRE_EQUAL(encode_base16(portable), encode_base16(expected));
 }
 
 #endif // WITH_PNG
