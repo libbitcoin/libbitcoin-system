@@ -56,7 +56,7 @@
 
   <Target Name="LinkageInfo" BeforeTargets="PrepareForBuild">
     <Message Text="Linkage-secp256k1 : $(Linkage-secp256k1)" Importance="high"/>
-    <Message Text="Linkage-libbitcoin-system: $(Linkage-libbitcoin-system)" Importance="high"/>
+    <Message Text="Linkage-_system   : $(Linkage-libbitcoin-system)" Importance="high"/>
     <!--<Message Text="Linkage-openssl   : $(Linkage-openssl)" Importance="high" Condition="'$(Option-datagen)' == 'true'"/>-->
   </Target>
 

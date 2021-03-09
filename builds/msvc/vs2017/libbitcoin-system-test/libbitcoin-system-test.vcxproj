@@ -236,7 +236,7 @@
     <Import Project="$(NuGetPackageRoot)boost_regex-vc141.1.72.0.0\build\boost_regex-vc141.targets" Condition="Exists('$(NuGetPackageRoot)boost_regex-vc141.1.72.0.0\build\boost_regex-vc141.targets')" />
     <Import Project="$(NuGetPackageRoot)boost_system-vc141.1.72.0.0\build\boost_system-vc141.targets" Condition="Exists('$(NuGetPackageRoot)boost_system-vc141.1.72.0.0\build\boost_system-vc141.targets')" />
     <Import Project="$(NuGetPackageRoot)boost_thread-vc141.1.72.0.0\build\boost_thread-vc141.targets" Condition="Exists('$(NuGetPackageRoot)boost_thread-vc141.1.72.0.0\build\boost_thread-vc141.targets')" />
-    <Import Project="$(NuGetPackageRoot)secp256k1_vc141.0.1.0.18\build\native\secp256k1_vc141.targets" Condition="Exists('$(NuGetPackageRoot)secp256k1_vc141.0.1.0.18\build\native\secp256k1_vc141.targets')" />
+    <Import Project="$(NuGetPackageRoot)secp256k1_vc141.0.1.0.19\build\native\secp256k1_vc141.targets" Condition="Exists('$(NuGetPackageRoot)secp256k1_vc141.0.1.0.19\build\native\secp256k1_vc141.targets')" />
     <Import Project="$(NuGetPackageRoot)boost_unit_test_framework-vc141.1.72.0.0\build\boost_unit_test_framework-vc141.targets" Condition="Exists('$(NuGetPackageRoot)boost_unit_test_framework-vc141.1.72.0.0\build\boost_unit_test_framework-vc141.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
@@ -256,7 +256,7 @@
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_regex-vc141.1.72.0.0\build\boost_regex-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_regex-vc141.1.72.0.0\build\boost_regex-vc141.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_system-vc141.1.72.0.0\build\boost_system-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_system-vc141.1.72.0.0\build\boost_system-vc141.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_thread-vc141.1.72.0.0\build\boost_thread-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_thread-vc141.1.72.0.0\build\boost_thread-vc141.targets'))" />
-    <Error Condition="!Exists('$(NuGetPackageRoot)secp256k1_vc141.0.1.0.18\build\native\secp256k1_vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)secp256k1_vc141.0.1.0.18\build\native\secp256k1_vc141.targets'))" />
+    <Error Condition="!Exists('$(NuGetPackageRoot)secp256k1_vc141.0.1.0.19\build\native\secp256k1_vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)secp256k1_vc141.0.1.0.19\build\native\secp256k1_vc141.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_unit_test_framework-vc141.1.72.0.0\build\boost_unit_test_framework-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_unit_test_framework-vc141.1.72.0.0\build\boost_unit_test_framework-vc141.targets'))" />
   </Target>
   <ItemGroup>
