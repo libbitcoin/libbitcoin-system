@@ -362,13 +362,13 @@ AS_CASE([${enable_isystem}],[yes],
 
 AC_MSG_NOTICE([qrencode_BUILD_CPPFLAGS : ${qrencode_BUILD_CPPFLAGS}])
 
-# Require secp256k1 of at least version 0.0.1 and output ${secp256k1_CPPFLAGS/LIBS/PKG}.
+# Require secp256k1 of at least version 0.1.0.19 and output ${secp256k1_CPPFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
-PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1],
-    [secp256k1_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "libsecp256k1 >= 0.0.1" 2>/dev/null`"
-     secp256k1_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "libsecp256k1 >= 0.0.1" 2>/dev/null`"],
-    [AC_MSG_ERROR([libsecp256k1 >= 0.0.1 is required but was not found.])])
-AC_SUBST([secp256k1_PKG], ['libsecp256k1 >= 0.0.1'])
+PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.1.0.19],
+    [secp256k1_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "libsecp256k1 >= 0.1.0.19" 2>/dev/null`"
+     secp256k1_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "libsecp256k1 >= 0.1.0.19" 2>/dev/null`"],
+    [AC_MSG_ERROR([libsecp256k1 >= 0.1.0.19 is required but was not found.])])
+AC_SUBST([secp256k1_PKG], ['libsecp256k1 >= 0.1.0.19'])
 AC_SUBST([secp256k1_CPPFLAGS], [${secp256k1_CFLAGS}])
 AS_IF([test x${secp256k1_INCLUDEDIR} != "x"],
     [AC_SUBST([secp256k1_ISYS_CPPFLAGS], ["-isystem${secp256k1_INCLUDEDIR} ${secp256k1_OTHER_CFLAGS}"])],
