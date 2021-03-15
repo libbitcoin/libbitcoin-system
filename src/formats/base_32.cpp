@@ -28,11 +28,11 @@
 namespace libbitcoin {
 namespace system {
 
-static constexpr size_t checksum_size = 6;
-static constexpr size_t prefix_min_size = 1;
-static constexpr size_t combined_max_size = 90;
-static constexpr size_t bit_group_size = 5;
-static constexpr size_t bit_group_mask = 31;
+static constexpr uint8_t checksum_size = 6;
+static constexpr uint8_t prefix_min_size = 1;
+static constexpr uint8_t combined_max_size = 90;
+static constexpr uint8_t bit_group_size = 5;
+static constexpr uint8_t bit_group_mask = 31;
 static constexpr uint8_t null = 255;
 static constexpr uint8_t separator = '1';
 static const char encode_table[] = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
@@ -56,31 +56,20 @@ static const uint8_t decode_table[] =
     6,    4,    2,    null, null, null, null, null
 };
 
-inline char ascii_to_lowercase(char character)
-{
-    return character + ('a' - 'A');
-}
-
 // Expand the prefix for checksum computation.
 data_chunk expand(const std::string& prefix)
 {
-    data_chunk result(2 * prefix.size() + 1);
+    data_chunk result(2u * prefix.size() + 1u, 0x00);
     auto iterator = result.begin();
 
     for (const auto character: prefix)
-    {
-        *iterator = static_cast<uint8_t>(character >> bit_group_size);
-        ++iterator;
-    }
+        *iterator++ = static_cast<uint8_t>(character) >> bit_group_size;
 
     // Current position is initialized to 0x00 so skip it.
     ++iterator;
 
     for (const auto character: prefix)
-    {
-        *iterator = static_cast<uint8_t>(character & bit_group_mask);
-        ++iterator;
-    }
+        *iterator++ = static_cast<uint8_t>(character) & bit_group_mask;
 
     return result;
 }
@@ -91,24 +80,22 @@ uint32_t polymod(const data_chunk& values)
     // Polynomials in the bech32 implementation are represented by
     // simple integers. Generally 30-bit integers are used, where each
     // bit corresponds to one coefficient of the polynomial.
-    //
-    // bitcoin.stackexchange.com/questions/74573/how-is-bech32-based-on-bch-codes
     static const uint32_t bech32_generator_polynomials[] =
     {
         0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3
     };
 
     // Mask for low 25 bits.
-    const uint32_t checksum_mask = 0x1ffffff;
+    static const uint32_t checksum_mask = 0x1ffffff;
 
     uint32_t checksum = 1;
     for (const auto value: values)
     {
-        const auto shift = (checksum >> 25);
+        const auto shift = (checksum >> 25u);
         checksum = (checksum & checksum_mask) << bit_group_size ^ value;
 
         for (size_t index = 0; index < bit_group_size; ++index)
-            checksum ^= (((shift >> index) & 1) != 0 ?
+            checksum ^= (((shift >> index) & 1u) != 0 ?
                 bech32_generator_polynomials[index] : 0);
     }
 
@@ -118,11 +105,7 @@ uint32_t polymod(const data_chunk& values)
 // Compute the checksum.
 data_chunk checksum(const base32& value)
 {
-    static const data_chunk empty_checksum
-    {
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-    };
-
+    static const data_chunk empty_checksum(checksum_size, 0x00);
     const auto expanded = build_chunk(
     {
         expand(value.prefix),
@@ -131,7 +114,7 @@ data_chunk checksum(const base32& value)
     });
 
     data_chunk checksum(checksum_size);
-    const auto modified = polymod(expanded) ^ 1;
+    const auto modified = polymod(expanded) ^ 1u;
 
     for (size_t index = 0; index < checksum_size; ++index)
         checksum[index] = (modified >> bit_group_size * (bit_group_size -
@@ -153,7 +136,7 @@ static bool normalize(data_chunk& out, const std::string& in)
         if (character >= 'A' && character <= 'Z')
         {
             uppercase = true;
-            character = ascii_to_lowercase(character);
+            character += ('a' - 'A');
         }
         else if (character >= 'a' && character <= 'z')
         {
@@ -168,7 +151,7 @@ static bool normalize(data_chunk& out, const std::string& in)
     }
 
     // Must not accept mixed case strings.
-    return !uppercase || !lowercase;
+    return !(uppercase && lowercase);
 }
 
 // Split the prefix from the payload and validate sizes.
@@ -189,11 +172,11 @@ static bool split(base32& out, const data_chunk& in)
         return false;
 
     // Convert separator iterator from reverse to forward (min distance is 1).
-    const auto offset = std::distance(reverse, in.rend()) - 1;
+    const auto offset = std::distance(reverse, in.rend()) - 1u;
 
     // Clang 3.4 cannot handle iterator variable here, so this is a bit ugly.
     out.prefix = { in.begin(), std::next(in.begin(), offset) };
-    out.payload = { std::next(in.begin(), offset + 1), in.end() };
+    out.payload = { std::next(in.begin(), offset + 1u), in.end() };
 
     return
         out.prefix.size() >= prefix_min_size &&
@@ -210,7 +193,7 @@ bool verify(const base32& value)
         value.payload
     });
 
-    return polymod(expanded) == 1;
+    return polymod(expanded) == 1u;
 }
 
 // public
