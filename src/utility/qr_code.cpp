@@ -40,6 +40,7 @@ namespace libbitcoin {
 namespace system {
 
 #ifdef WITH_QRENCODE
+
 static QRecLevel recovery_level_to_qr_recovery_level(
     qr_code::recovery_level level)
 {
@@ -78,13 +79,11 @@ static QRencodeMode encode_mode_to_qr_encode_mode(qr_code::encode_mode mode)
             return QR_MODE_NUL;
     }
 }
-#endif
 
 bool qr_code::encode(std::ostream& out, const std::string& value,
     uint32_t version, uint16_t scale, uint16_t margin, bool case_sensitive,
     recovery_level level, encode_mode mode)
 {
-#ifdef WITH_QRENCODE
     const auto qrcode = QRcode_encodeString(value.c_str(), version,
         recovery_level_to_qr_recovery_level(level),
         encode_mode_to_qr_encode_mode(mode), case_sensitive);
@@ -117,10 +116,17 @@ bool qr_code::encode(std::ostream& out, const std::string& value,
 
     // Convert to TIFF image stream (does not fail as long as sizes match).
     return tiff::to_image(out, pixels, width);
-#else
-    return false;
-#endif
 }
+
+#else
+
+bool qr_code::encode(std::ostream&, const std::string&, uint32_t, uint16_t,
+    uint16_t, bool, recovery_level, encode_mode)
+{
+    return false;
+}
+
+#endif
 
 // Scale may move the image off of a byte-aligned square of pixels in bytes.
 // So the dimensions cannot be derived from the result, caller must retain.
@@ -143,7 +149,8 @@ data_chunk qr_code::to_image_data(const data_chunk& coded, uint16_t scale,
         return {};
 
     // Guard against mismatched sizes from qrencode.
-    if (coded.size() != width * static_cast<uint64_t>(width))
+    if (coded.size() - sizeof(uint32_t) - sizeof(uint32_t) != width *
+        static_cast<uint64_t>(width))
         return {};
 
     // Any scale increase can potentially cause an overflow.
@@ -202,6 +209,8 @@ data_chunk qr_code::to_image_data(const data_chunk& coded, uint16_t scale,
         for (size_t column = 0; column < horizontal_margin; ++column)
             row_bit_writer.write_bit(pixel_off);
 
+        row_sink.flush();
+
         // Write row buffer scale times.
         for (size_t scaled = 0; scaled < scale; ++scaled)
         {
@@ -223,6 +232,7 @@ data_chunk qr_code::to_image_data(const data_chunk& coded, uint16_t scale,
     if (!image_bit_writer || !image_reader || !image_reader.is_exhausted())
         return {};
 
+    image_sink.flush();
     return image_out;
 }
 
