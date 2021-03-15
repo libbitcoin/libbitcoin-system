@@ -188,10 +188,10 @@ src_libbitcoin_system_la_SOURCES = \
     src/utility/neutrino_filter.cpp \
     src/utility/ostream_bit_writer.cpp \
     src/utility/ostream_writer.cpp \
-    src/utility/png.cpp \
     src/utility/prioritized_mutex.cpp \
     src/utility/property_tree.cpp \
     src/utility/pseudo_random.cpp \
+    src/utility/qr_code.cpp \
     src/utility/scope_lock.cpp \
     src/utility/sequencer.cpp \
     src/utility/sequential_lock.cpp \
@@ -199,6 +199,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/utility/string.cpp \
     src/utility/thread.cpp \
     src/utility/threadpool.cpp \
+    src/utility/tiff.cpp \
     src/utility/work.cpp \
     src/wallet/bitcoin_uri.cpp \
     src/wallet/dictionary_en.cpp \
@@ -228,7 +229,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/wallet/mini_keys.cpp \
     src/wallet/mnemonic.cpp \
     src/wallet/payment_address.cpp \
-    src/wallet/qrcode.cpp \
     src/wallet/select_outputs.cpp \
     src/wallet/stealth_address.cpp \
     src/wallet/stealth_receiver.cpp \
@@ -371,12 +371,13 @@ test_libbitcoin_system_test_SOURCES = \
     test/utility/data.cpp \
     test/utility/endian.cpp \
     test/utility/neutrino_filter.cpp \
-    test/utility/png.cpp \
     test/utility/property_tree.cpp \
     test/utility/pseudo_random.cpp \
+    test/utility/qr_code.cpp \
     test/utility/serializer.cpp \
     test/utility/stream.cpp \
     test/utility/thread.cpp \
+    test/utility/tiff.cpp \
     test/wallet/bitcoin_uri.cpp \
     test/wallet/ec_private.cpp \
     test/wallet/ec_public.cpp \
@@ -388,7 +389,6 @@ test_libbitcoin_system_test_SOURCES = \
     test/wallet/mnemonic.cpp \
     test/wallet/mnemonic.hpp \
     test/wallet/payment_address.cpp \
-    test/wallet/qrcode.cpp \
     test/wallet/select_outputs.cpp \
     test/wallet/stealth_address.cpp \
     test/wallet/stealth_receiver.cpp \
@@ -651,10 +651,10 @@ include_bitcoin_system_utility_HEADERS = \
     include/bitcoin/system/utility/ostream_bit_writer.hpp \
     include/bitcoin/system/utility/ostream_writer.hpp \
     include/bitcoin/system/utility/pending.hpp \
-    include/bitcoin/system/utility/png.hpp \
     include/bitcoin/system/utility/prioritized_mutex.hpp \
     include/bitcoin/system/utility/property_tree.hpp \
     include/bitcoin/system/utility/pseudo_random.hpp \
+    include/bitcoin/system/utility/qr_code.hpp \
     include/bitcoin/system/utility/reader.hpp \
     include/bitcoin/system/utility/resubscriber.hpp \
     include/bitcoin/system/utility/scope_lock.hpp \
@@ -667,6 +667,7 @@ include_bitcoin_system_utility_HEADERS = \
     include/bitcoin/system/utility/synchronizer.hpp \
     include/bitcoin/system/utility/thread.hpp \
     include/bitcoin/system/utility/threadpool.hpp \
+    include/bitcoin/system/utility/tiff.hpp \
     include/bitcoin/system/utility/timer.hpp \
     include/bitcoin/system/utility/track.hpp \
     include/bitcoin/system/utility/work.hpp \
@@ -690,7 +691,6 @@ include_bitcoin_system_wallet_HEADERS = \
     include/bitcoin/system/wallet/mini_keys.hpp \
     include/bitcoin/system/wallet/mnemonic.hpp \
     include/bitcoin/system/wallet/payment_address.hpp \
-    include/bitcoin/system/wallet/qrcode.hpp \
     include/bitcoin/system/wallet/select_outputs.hpp \
     include/bitcoin/system/wallet/stealth_address.hpp \
     include/bitcoin/system/wallet/stealth_receiver.hpp \

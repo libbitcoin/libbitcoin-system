@@ -531,9 +531,6 @@
     <ClCompile Include="..\..\..\..\src\utility\ostream_writer.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\png.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\prioritized_mutex.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
@@ -541,6 +538,9 @@
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\pseudo_random.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\qr_code.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\scope_lock.cpp">
@@ -562,6 +562,9 @@
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\threadpool.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\tiff.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\work.cpp">
@@ -658,9 +661,6 @@
       <Filter>src\wallet\parse_encrypted_keys</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\payment_address.cpp">
-      <Filter>src\wallet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\qrcode.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\select_outputs.cpp">
@@ -1193,9 +1193,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\pending.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\png.hpp">
-      <Filter>include\bitcoin\system\utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\prioritized_mutex.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
@@ -1203,6 +1200,9 @@
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\pseudo_random.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\qr_code.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\reader.hpp">
@@ -1239,6 +1239,9 @@
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\threadpool.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\tiff.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\timer.hpp">
@@ -1302,9 +1305,6 @@
       <Filter>include\bitcoin\system\wallet</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\payment_address.hpp">
-      <Filter>include\bitcoin\system\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\qrcode.hpp">
       <Filter>include\bitcoin\system\wallet</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\select_outputs.hpp">

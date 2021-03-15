@@ -184,10 +184,10 @@
 #include <bitcoin/system/utility/ostream_bit_writer.hpp>
 #include <bitcoin/system/utility/ostream_writer.hpp>
 #include <bitcoin/system/utility/pending.hpp>
-#include <bitcoin/system/utility/png.hpp>
 #include <bitcoin/system/utility/prioritized_mutex.hpp>
 #include <bitcoin/system/utility/property_tree.hpp>
 #include <bitcoin/system/utility/pseudo_random.hpp>
+#include <bitcoin/system/utility/qr_code.hpp>
 #include <bitcoin/system/utility/reader.hpp>
 #include <bitcoin/system/utility/resubscriber.hpp>
 #include <bitcoin/system/utility/scope_lock.hpp>
@@ -200,6 +200,7 @@
 #include <bitcoin/system/utility/synchronizer.hpp>
 #include <bitcoin/system/utility/thread.hpp>
 #include <bitcoin/system/utility/threadpool.hpp>
+#include <bitcoin/system/utility/tiff.hpp>
 #include <bitcoin/system/utility/timer.hpp>
 #include <bitcoin/system/utility/track.hpp>
 #include <bitcoin/system/utility/work.hpp>
@@ -220,7 +221,6 @@
 #include <bitcoin/system/wallet/mini_keys.hpp>
 #include <bitcoin/system/wallet/mnemonic.hpp>
 #include <bitcoin/system/wallet/payment_address.hpp>
-#include <bitcoin/system/wallet/qrcode.hpp>
 #include <bitcoin/system/wallet/select_outputs.hpp>
 #include <bitcoin/system/wallet/stealth_address.hpp>
 #include <bitcoin/system/wallet/stealth_receiver.hpp>

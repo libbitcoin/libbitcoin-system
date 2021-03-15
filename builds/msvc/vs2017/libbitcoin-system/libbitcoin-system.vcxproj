@@ -250,10 +250,10 @@
     <ClCompile Include="..\..\..\..\src\utility\neutrino_filter.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\ostream_bit_writer.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\ostream_writer.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\png.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\prioritized_mutex.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\property_tree.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\pseudo_random.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\qr_code.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\scope_lock.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\sequencer.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\sequential_lock.cpp" />
@@ -261,6 +261,7 @@
     <ClCompile Include="..\..\..\..\src\utility\string.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\thread.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\threadpool.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\tiff.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\work.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\bitcoin_uri.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\dictionary_en.cpp" />
@@ -293,7 +294,6 @@
     <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_public.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_token.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\payment_address.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\qrcode.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\select_outputs.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\stealth_address.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\stealth_receiver.cpp" />
@@ -472,10 +472,10 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\ostream_bit_writer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\ostream_writer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\pending.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\png.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\prioritized_mutex.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\property_tree.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\pseudo_random.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\qr_code.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\resubscriber.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\scope_lock.hpp" />
@@ -488,6 +488,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\synchronizer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\thread.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\threadpool.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\tiff.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\timer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\track.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\work.hpp" />
@@ -509,7 +510,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\mini_keys.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\mnemonic.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\payment_address.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\qrcode.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\select_outputs.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\stealth_address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\stealth_receiver.hpp" />

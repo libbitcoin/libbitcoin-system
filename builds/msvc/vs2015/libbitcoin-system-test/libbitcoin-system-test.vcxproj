@@ -184,12 +184,13 @@
     <ClCompile Include="..\..\..\..\test\utility\data.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\endian.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\neutrino_filter.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\png.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\property_tree.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\pseudo_random.cpp" />
+    <ClCompile Include="..\..\..\..\test\utility\qr_code.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\serializer.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\stream.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\thread.cpp" />
+    <ClCompile Include="..\..\..\..\test\utility\tiff.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\bitcoin_uri.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\ec_private.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\ec_public.cpp" />
@@ -200,7 +201,6 @@
     <ClCompile Include="..\..\..\..\test\wallet\message.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\mnemonic.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\payment_address.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\qrcode.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\select_outputs.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\stealth_address.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\stealth_receiver.cpp" />
