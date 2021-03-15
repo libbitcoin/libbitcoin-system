@@ -98,9 +98,6 @@ protected:
         bool pad, const data_chunk& in, size_t in_offset);
 
 private:
-    /// Validators.
-    static bool is_address(data_slice decoded);
-
     /// Factories.
     static witness_address from_string(const std::string& address,
         address_format format=address_format::witness_pubkey_hash,

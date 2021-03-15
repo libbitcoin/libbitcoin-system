@@ -60,4 +60,3 @@ private:
 #include <bitcoin/system/impl/utility/array_slice.ipp>
 
 #endif
-

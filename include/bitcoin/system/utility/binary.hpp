@@ -68,9 +68,6 @@ public:
     friend std::ostream& operator<<(std::ostream& out, const binary& of);
 
 private:
-    static uint8_t shift_block_right(uint8_t next, uint8_t current, uint8_t prior,
-        size_type original_offset, size_type intended_offset);
-
     data_chunk blocks_;
     uint8_t final_block_excess_;
 };
