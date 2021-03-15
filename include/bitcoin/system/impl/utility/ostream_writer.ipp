@@ -37,7 +37,7 @@ void ostream_writer::write_forward(const byte_array<Size>& value)
 template <size_t Size>
 void ostream_writer::write_reverse(const byte_array<Size>& value)
 {
-    for (unsigned index = 0; index < Size; index++)
+    for (size_t index = 0; index < Size; index++)
         write_byte(value[Size - (index + 1)]);
 }
 
