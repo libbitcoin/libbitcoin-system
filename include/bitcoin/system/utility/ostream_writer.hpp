@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <ostream>
 #include <bitcoin/system/error.hpp>
+#include <bitcoin/system/utility/reader.hpp>
 #include <bitcoin/system/utility/writer.hpp>
 
 namespace libbitcoin {
@@ -68,6 +69,9 @@ public:
     void write_8_bytes_little_endian(uint64_t value);
     void write_variable_little_endian(uint64_t value);
     void write_size_little_endian(size_t value);
+
+    /// Write until reader is exhausted.
+    void write(reader& in);
 
     /// Write one byte.
     void write_byte(uint8_t value);

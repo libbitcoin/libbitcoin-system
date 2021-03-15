@@ -334,6 +334,12 @@ BOOST_AUTO_TEST_CASE(roundtrip_variable_uint_big_endian_8_bytes)
     BOOST_REQUIRE_EQUAL(false, !source);
 }
 
+// TODO
+BOOST_AUTO_TEST_CASE(roundtrip_stream)
+{
+    BOOST_REQUIRE(true);
+}
+
 BOOST_AUTO_TEST_CASE(roundtrip_data_chunk)
 {
     const data_chunk expected

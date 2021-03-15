@@ -77,6 +77,9 @@ public:
     void write_variable_little_endian(uint64_t value);
     void write_size_little_endian(size_t value);
 
+    /// Write until reader is exhausted.
+    void write(reader& in);
+
     /// Write bit.
     void write_bit(bool value);
 

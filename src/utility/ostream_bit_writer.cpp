@@ -224,6 +224,12 @@ void ostream_bit_writer::write_size_little_endian(size_t value)
 // Bytes.
 //-----------------------------------------------------------------------------
 
+void ostream_bit_writer::write(reader& in)
+{
+    while (!in.is_exhausted())
+        write_byte(in.read_byte());
+}
+
 void ostream_bit_writer::write_bit(bool value)
 {
     uint8_t byte_value = value ? 0x80 : 0x00;
