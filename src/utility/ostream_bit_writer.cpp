@@ -236,7 +236,7 @@ void ostream_bit_writer::write_bit(bool value)
     buffer_ |= (byte_value >> offset_);
     offset_++;
 
-    if (offset_ >= byte_bits)
+    if (offset_ == byte_bits)
         flush();
 }
 

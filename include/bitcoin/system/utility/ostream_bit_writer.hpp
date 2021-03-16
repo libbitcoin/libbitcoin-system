@@ -101,8 +101,10 @@ public:
     /// Advance iterator without writing.
     void skip(size_t size);
 
-protected:
+    /// Flush the buffer on a zero-padded byte boundary.
     void flush();
+
+protected:
     void buffered_write(data_chunk& data);
 
 private:

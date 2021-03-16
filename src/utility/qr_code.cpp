@@ -148,16 +148,21 @@ data_chunk qr_code::to_image_data(const data_chunk& coded, uint16_t scale,
     if (!image_reader)
         return {};
 
+    // Bounds: (2^32 - 1)^2 < (2^64 - 1).
     // Guard against mismatched sizes from qrencode.
     if (coded.size() - sizeof(uint32_t) - sizeof(uint32_t) != width *
         static_cast<uint64_t>(width))
         return {};
 
-    // Any scale increase can potentially cause an overflow.
+    // Bounds: 2^16 * 2^32 < 2^48 < 2^64.
     const auto scaled_width = scale * static_cast<uint64_t>(width);
 
-    // Guard against scaling overflow.
-    if (scaled_width > max_uint32)
+    // Bounds: 2^48 + 2 * 2^16 < 2^48 + 2^17 < 2 * 2^48 < 2^64.
+    const auto full_width = margin + scaled_width + margin;
+
+    // TODO: test.
+    // Guard against index overflows (all below limited to size_t).
+    if (full_width > 0u && max_size_t / full_width < full_width)
         return {};
 
     // Pixel is the least significant bit of a qrencode byte.
@@ -168,7 +173,6 @@ data_chunk qr_code::to_image_data(const data_chunk& coded, uint16_t scale,
     const auto height = width;
     const auto vertical_margin = margin;
     const auto horizontal_margin = margin;
-    const auto full_row_width = horizontal_margin + width + horizontal_margin;
 
     // For writing the image bit stream.
     data_chunk image_out;
@@ -178,7 +182,7 @@ data_chunk qr_code::to_image_data(const data_chunk& coded, uint16_t scale,
 
     // Write top margin.
     for (size_t row = 0; row < vertical_margin; ++row)
-        for (size_t column = 0; column < full_row_width; ++column)
+        for (size_t column = 0; column < full_width; ++column)
             image_bit_writer.write_bit(pixel_off);
 
     // Write each row.
@@ -209,6 +213,8 @@ data_chunk qr_code::to_image_data(const data_chunk& coded, uint16_t scale,
         for (size_t column = 0; column < horizontal_margin; ++column)
             row_bit_writer.write_bit(pixel_off);
 
+        // Flush any partial byte and then flush bytes to data_chunk.
+        row_bit_writer.flush();
         row_sink.flush();
 
         // Write row buffer scale times.
@@ -219,20 +225,25 @@ data_chunk qr_code::to_image_data(const data_chunk& coded, uint16_t scale,
             istream_reader row_reader(row_source);
             istream_bit_reader row_bit_reader(row_reader);
 
-            image_bit_writer.write_bit(row_bit_reader.read_bit());
+            // Copy each bit in the row buffer to the output buffer.
+            for (size_t column = 0; column < full_width; ++column)
+                image_bit_writer.write_bit(row_bit_reader.read_bit());
         }
     }
 
     // Write bottom margin.
     for (size_t row = 0; row < vertical_margin; ++row)
-        for (size_t column = 0; column < full_row_width; ++column)
+        for (size_t column = 0; column < full_width; ++column)
             image_bit_writer.write_bit(pixel_off);
 
     // Guard against writer failure and unexpected stream length.
     if (!image_bit_writer || !image_reader || !image_reader.is_exhausted())
         return {};
 
+    // Flush any partial byte and then flush bytes to data_chunk.
+    image_bit_writer.flush();
     image_sink.flush();
+
     return image_out;
 }
 
