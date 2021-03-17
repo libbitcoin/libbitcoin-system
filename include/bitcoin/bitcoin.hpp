@@ -185,6 +185,8 @@
 #include <bitcoin/bitcoin/wallet/ek_private.hpp>
 #include <bitcoin/bitcoin/wallet/ek_public.hpp>
 #include <bitcoin/bitcoin/wallet/ek_token.hpp>
+#include <bitcoin/bitcoin/wallet/electrum.hpp>
+#include <bitcoin/bitcoin/wallet/electrum_dictionary.hpp>
 #include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
 #include <bitcoin/bitcoin/wallet/hd_private.hpp>
 #include <bitcoin/bitcoin/wallet/hd_public.hpp>
