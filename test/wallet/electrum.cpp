@@ -18,7 +18,7 @@
  */
 
 #include <boost/test/unit_test.hpp>
-#include <bitcoin/system.hpp>
+#include <bitcoin/bitcoin.hpp>
 
 using namespace bc::system;
 using namespace bc::system::wallet;
