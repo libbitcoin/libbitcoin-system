@@ -187,7 +187,6 @@
 #include <bitcoin/system/utility/prioritized_mutex.hpp>
 #include <bitcoin/system/utility/property_tree.hpp>
 #include <bitcoin/system/utility/pseudo_random.hpp>
-#include <bitcoin/system/utility/qr_code.hpp>
 #include <bitcoin/system/utility/reader.hpp>
 #include <bitcoin/system/utility/resubscriber.hpp>
 #include <bitcoin/system/utility/scope_lock.hpp>
@@ -221,6 +220,7 @@
 #include <bitcoin/system/wallet/mini_keys.hpp>
 #include <bitcoin/system/wallet/mnemonic.hpp>
 #include <bitcoin/system/wallet/payment_address.hpp>
+#include <bitcoin/system/wallet/qr_code.hpp>
 #include <bitcoin/system/wallet/select_outputs.hpp>
 #include <bitcoin/system/wallet/stealth_address.hpp>
 #include <bitcoin/system/wallet/stealth_receiver.hpp>

@@ -333,9 +333,6 @@
     <ClCompile Include="..\..\..\..\test\utility\pseudo_random.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\utility\qr_code.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\utility\serializer.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
@@ -376,6 +373,9 @@
       <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\payment_address.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\qr_code.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\select_outputs.cpp">

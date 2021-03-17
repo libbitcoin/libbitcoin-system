@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -16,16 +16,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_QR_CODE_HPP
-#define LIBBITCOIN_SYSTEM_QR_CODE_HPP
+#ifndef LIBBITCOIN_SYSTEM_QRENCODE_HPP
+#define LIBBITCOIN_SYSTEM_QRENCODE_HPP
 
 #include <cstdint>
 #include <iostream>
+#include <string>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
 namespace system {
+namespace wallet {
 
 class BC_API qr_code
 {
@@ -50,17 +52,21 @@ public:
         highest
     };
 
-    /// Create a TIFF qrcode representing the given string value.
+    static uint8_t maximum_version;
+
+    /// Create a TIFF formatter QR code representing the given string value.
     static bool encode(std::ostream& out, const std::string& value,
-        uint32_t version=0, uint16_t scale=8, uint16_t margin=2,
-        bool case_sensitive=true, recovery_level level=recovery_level::low,
+        uint8_t version=0, uint16_t scale=8, uint16_t margin=2,
+        recovery_level level=recovery_level::low,
         encode_mode mode=encode_mode::eight_bit);
 
-    /// Convert qr encoded data stream to bit stream with margin and scaling.
-    static data_chunk to_image_data(const data_chunk& coded, uint16_t scale=8,
-        uint16_t margin=2);
+protected:
+    /// Convert QR encoded data stream to bit stream with margin and scaling.
+    static data_chunk to_pixels(const data_chunk& coded, uint32_t coded_width,
+        uint16_t scale=8, uint16_t margin=2);
 };
 
+} // namespace wallet
 } // namespace system
 } // namespace libbitcoin
 

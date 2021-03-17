@@ -8,70 +8,70 @@
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="include">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-00000000000D}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-00000000000E}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system">
+    <Filter Include="include\bitcoin">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-00000000000F}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\chain">
+    <Filter Include="include\bitcoin\system">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000001}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\config">
+    <Filter Include="include\bitcoin\system\chain">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000002}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\config">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000003}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\formats">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000003}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000004}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\impl">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000004}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\system\impl\formats">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000B1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\system\impl\log">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000C1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\system\impl\log\features">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000002}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\system\impl\machine">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000D1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\system\impl\math">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000E1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\system\impl\utility">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000F1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\system\log">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000005}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\log\features">
+    <Filter Include="include\bitcoin\system\impl\formats">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000C1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\impl\log">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000D1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\impl\log\features">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000003}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\machine">
+    <Filter Include="include\bitcoin\system\impl\machine">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000E1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\impl\math">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000F1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\impl\utility">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000002}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\log">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000006}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\math">
+    <Filter Include="include\bitcoin\system\log\features">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000004}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\machine">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000007}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\message">
+    <Filter Include="include\bitcoin\system\math">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000008}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\unicode">
+    <Filter Include="include\bitcoin\system\message">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000009}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\utility">
+    <Filter Include="include\bitcoin\system\unicode">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000010}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\wallet">
+    <Filter Include="include\bitcoin\system\utility">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000A1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\bitcoin\system\wallet">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000B1}</UniqueIdentifier>
+    </Filter>
     <Filter Include="resource">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000004}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000005}</UniqueIdentifier>
     </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000000}</UniqueIdentifier>
@@ -111,6 +111,9 @@
     </Filter>
     <Filter Include="src\wallet\parse_encrypted_keys">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-00000000000C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\wallet\qrencode">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-00000000000D}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -540,9 +543,6 @@
     <ClCompile Include="..\..\..\..\src\utility\pseudo_random.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\qr_code.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\scope_lock.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
@@ -662,6 +662,36 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\payment_address.cpp">
       <Filter>src\wallet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\qr_code.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\qrencode\bitstream.c">
+      <Filter>src\wallet\qrencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\qrencode\mask.c">
+      <Filter>src\wallet\qrencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\qrencode\mmask.c">
+      <Filter>src\wallet\qrencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\qrencode\mqrspec.c">
+      <Filter>src\wallet\qrencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\qrencode\qrencode.c">
+      <Filter>src\wallet\qrencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\qrencode\qrinput.c">
+      <Filter>src\wallet\qrencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\qrencode\qrspec.c">
+      <Filter>src\wallet\qrencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\qrencode\rsecc.c">
+      <Filter>src\wallet\qrencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\qrencode\split.c">
+      <Filter>src\wallet\qrencode</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\select_outputs.cpp">
       <Filter>src\wallet</Filter>
@@ -1202,9 +1232,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\pseudo_random.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\qr_code.hpp">
-      <Filter>include\bitcoin\system\utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\reader.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
@@ -1307,6 +1334,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\payment_address.hpp">
       <Filter>include\bitcoin\system\wallet</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\qr_code.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\select_outputs.hpp">
       <Filter>include\bitcoin\system\wallet</Filter>
     </ClInclude>
@@ -1381,6 +1411,36 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_token.hpp">
       <Filter>src\wallet\parse_encrypted_keys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\wallet\qrencode\bitstream.h">
+      <Filter>src\wallet\qrencode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\wallet\qrencode\mask.h">
+      <Filter>src\wallet\qrencode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\wallet\qrencode\mmask.h">
+      <Filter>src\wallet\qrencode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\wallet\qrencode\mqrspec.h">
+      <Filter>src\wallet\qrencode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\wallet\qrencode\qrencode.h">
+      <Filter>src\wallet\qrencode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\wallet\qrencode\qrencode_inner.h">
+      <Filter>src\wallet\qrencode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\wallet\qrencode\qrinput.h">
+      <Filter>src\wallet\qrencode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\wallet\qrencode\qrspec.h">
+      <Filter>src\wallet\qrencode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\wallet\qrencode\rsecc.h">
+      <Filter>src\wallet\qrencode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\wallet\qrencode\split.h">
+      <Filter>src\wallet\qrencode</Filter>
     </ClInclude>
     <ClInclude Include="..\..\resource.h">
       <Filter>resource</Filter>

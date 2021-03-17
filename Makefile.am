@@ -191,7 +191,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/utility/prioritized_mutex.cpp \
     src/utility/property_tree.cpp \
     src/utility/pseudo_random.cpp \
-    src/utility/qr_code.cpp \
     src/utility/scope_lock.cpp \
     src/utility/sequencer.cpp \
     src/utility/sequential_lock.cpp \
@@ -229,6 +228,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/wallet/mini_keys.cpp \
     src/wallet/mnemonic.cpp \
     src/wallet/payment_address.cpp \
+    src/wallet/qr_code.cpp \
     src/wallet/select_outputs.cpp \
     src/wallet/stealth_address.cpp \
     src/wallet/stealth_receiver.cpp \
@@ -244,7 +244,26 @@ src_libbitcoin_system_la_SOURCES = \
     src/wallet/parse_encrypted_keys/parse_encrypted_public.cpp \
     src/wallet/parse_encrypted_keys/parse_encrypted_public.hpp \
     src/wallet/parse_encrypted_keys/parse_encrypted_token.cpp \
-    src/wallet/parse_encrypted_keys/parse_encrypted_token.hpp
+    src/wallet/parse_encrypted_keys/parse_encrypted_token.hpp \
+    src/wallet/qrencode/bitstream.c \
+    src/wallet/qrencode/bitstream.h \
+    src/wallet/qrencode/mask.c \
+    src/wallet/qrencode/mask.h \
+    src/wallet/qrencode/mmask.c \
+    src/wallet/qrencode/mmask.h \
+    src/wallet/qrencode/mqrspec.c \
+    src/wallet/qrencode/mqrspec.h \
+    src/wallet/qrencode/qrencode.c \
+    src/wallet/qrencode/qrencode.h \
+    src/wallet/qrencode/qrencode_inner.h \
+    src/wallet/qrencode/qrinput.c \
+    src/wallet/qrencode/qrinput.h \
+    src/wallet/qrencode/qrspec.c \
+    src/wallet/qrencode/qrspec.h \
+    src/wallet/qrencode/rsecc.c \
+    src/wallet/qrencode/rsecc.h \
+    src/wallet/qrencode/split.c \
+    src/wallet/qrencode/split.h
 
 # local: examples/libbitcoin-system-examples
 #------------------------------------------------------------------------------
@@ -373,7 +392,6 @@ test_libbitcoin_system_test_SOURCES = \
     test/utility/neutrino_filter.cpp \
     test/utility/property_tree.cpp \
     test/utility/pseudo_random.cpp \
-    test/utility/qr_code.cpp \
     test/utility/serializer.cpp \
     test/utility/stream.cpp \
     test/utility/thread.cpp \
@@ -389,6 +407,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/wallet/mnemonic.cpp \
     test/wallet/mnemonic.hpp \
     test/wallet/payment_address.cpp \
+    test/wallet/qr_code.cpp \
     test/wallet/select_outputs.cpp \
     test/wallet/stealth_address.cpp \
     test/wallet/stealth_receiver.cpp \
@@ -654,7 +673,6 @@ include_bitcoin_system_utility_HEADERS = \
     include/bitcoin/system/utility/prioritized_mutex.hpp \
     include/bitcoin/system/utility/property_tree.hpp \
     include/bitcoin/system/utility/pseudo_random.hpp \
-    include/bitcoin/system/utility/qr_code.hpp \
     include/bitcoin/system/utility/reader.hpp \
     include/bitcoin/system/utility/resubscriber.hpp \
     include/bitcoin/system/utility/scope_lock.hpp \
@@ -691,6 +709,7 @@ include_bitcoin_system_wallet_HEADERS = \
     include/bitcoin/system/wallet/mini_keys.hpp \
     include/bitcoin/system/wallet/mnemonic.hpp \
     include/bitcoin/system/wallet/payment_address.hpp \
+    include/bitcoin/system/wallet/qr_code.hpp \
     include/bitcoin/system/wallet/select_outputs.hpp \
     include/bitcoin/system/wallet/stealth_address.hpp \
     include/bitcoin/system/wallet/stealth_receiver.hpp \

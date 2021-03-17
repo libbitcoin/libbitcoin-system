@@ -253,7 +253,6 @@
     <ClCompile Include="..\..\..\..\src\utility\prioritized_mutex.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\property_tree.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\pseudo_random.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\qr_code.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\scope_lock.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\sequencer.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\sequential_lock.cpp" />
@@ -294,6 +293,16 @@
     <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_public.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_token.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\payment_address.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\qr_code.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\qrencode\bitstream.c" />
+    <ClCompile Include="..\..\..\..\src\wallet\qrencode\mask.c" />
+    <ClCompile Include="..\..\..\..\src\wallet\qrencode\mmask.c" />
+    <ClCompile Include="..\..\..\..\src\wallet\qrencode\mqrspec.c" />
+    <ClCompile Include="..\..\..\..\src\wallet\qrencode\qrencode.c" />
+    <ClCompile Include="..\..\..\..\src\wallet\qrencode\qrinput.c" />
+    <ClCompile Include="..\..\..\..\src\wallet\qrencode\qrspec.c" />
+    <ClCompile Include="..\..\..\..\src\wallet\qrencode\rsecc.c" />
+    <ClCompile Include="..\..\..\..\src\wallet\qrencode\split.c" />
     <ClCompile Include="..\..\..\..\src\wallet\select_outputs.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\stealth_address.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\stealth_receiver.cpp" />
@@ -475,7 +484,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\prioritized_mutex.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\property_tree.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\pseudo_random.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\qr_code.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\resubscriber.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\scope_lock.hpp" />
@@ -510,6 +518,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\mini_keys.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\mnemonic.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\payment_address.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\qr_code.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\select_outputs.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\stealth_address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\stealth_receiver.hpp" />
@@ -535,6 +544,16 @@
     <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_private.hpp" />
     <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_public.hpp" />
     <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_token.hpp" />
+    <ClInclude Include="..\..\..\..\src\wallet\qrencode\bitstream.h" />
+    <ClInclude Include="..\..\..\..\src\wallet\qrencode\mask.h" />
+    <ClInclude Include="..\..\..\..\src\wallet\qrencode\mmask.h" />
+    <ClInclude Include="..\..\..\..\src\wallet\qrencode\mqrspec.h" />
+    <ClInclude Include="..\..\..\..\src\wallet\qrencode\qrencode.h" />
+    <ClInclude Include="..\..\..\..\src\wallet\qrencode\qrencode_inner.h" />
+    <ClInclude Include="..\..\..\..\src\wallet\qrencode\qrinput.h" />
+    <ClInclude Include="..\..\..\..\src\wallet\qrencode\qrspec.h" />
+    <ClInclude Include="..\..\..\..\src\wallet\qrencode\rsecc.h" />
+    <ClInclude Include="..\..\..\..\src\wallet\qrencode\split.h" />
     <ClInclude Include="..\..\resource.h" />
   </ItemGroup>
   <ItemGroup>
