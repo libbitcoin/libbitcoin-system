@@ -77,14 +77,14 @@ BOOST_AUTO_TEST_CASE(tiff__to_image__maximum_bytes__expected_size_true)
     }
 
     static const auto width = 1u;
-    static const size_t expected_image_bytes = tiff::max_image_bytes;
+    static const auto expected_tiff_size = tiff::image_offset + tiff::max_image_bytes;
 
     // 2^32 memory allocation here.
-    data_chunk bitmap(expected_image_bytes, 'x');
+    data_chunk bitmap(tiff::max_image_bytes, 'x');
     data_chunk tiff;
     data_sink stream(tiff);
     BOOST_REQUIRE(tiff::to_image(stream, bitmap, width));
-    BOOST_REQUIRE_EQUAL(tiff.size(), tiff::image_offset + expected_image_bytes);
+    BOOST_REQUIRE_EQUAL(tiff.size(), expected_tiff_size);
 }
 
 BOOST_AUTO_TEST_CASE(tiff__to_image__overflow_bytes__false)
@@ -97,9 +97,10 @@ BOOST_AUTO_TEST_CASE(tiff__to_image__overflow_bytes__false)
     }
 
     static const auto width = 1u;
+    static const auto excess_image_size = tiff::max_image_bytes + 1u;
 
     // 2^32 + 1 memory allocation here.
-    data_chunk bitmap(tiff::max_image_bytes + 1u, 'x');
+    data_chunk bitmap(excess_image_size, 'x');
     data_chunk tiff;
     data_sink stream(tiff);
     BOOST_REQUIRE(!tiff::to_image(stream, bitmap, width));
