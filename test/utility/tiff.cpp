@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(tiff__to_image__width_0__false)
 BOOST_AUTO_TEST_CASE(tiff__to_image__maximum_bytes__expected_size_true)
 {
     // Guard against overflow in tiff data_chunk (not a method/stream limit).
-    if (bc::max_size_t < bc::max_uint64)
+    if (sizeof(data_chunk::size_type) < sizeof(uint64_t))
     {
         BOOST_REQUIRE(true);
         return;
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(tiff__to_image__maximum_bytes__expected_size_true)
 BOOST_AUTO_TEST_CASE(tiff__to_image__overflow_bytes__false)
 {
     // Guard against overflow in tiff data_chunk (not a method/stream limit).
-    if (bc::max_size_t < bc::max_uint64)
+    if (sizeof(data_chunk::size_type) < sizeof(uint64_t))
     {
         BOOST_REQUIRE(true);
         return;
