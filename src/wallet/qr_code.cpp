@@ -172,6 +172,9 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t coded_width,
     // For readability (image is always square).
     const auto coded_height = coded_width;
 
+    // Horizontal margins and full row copies can be done bytewise.
+    const auto row_bytes = (pixel_width + (byte_bits - 1u)) / byte_bits;
+
     // For reading the qrcode byte stream.
     data_source image_source(coded);
     istream_reader image_reader(image_source);
@@ -182,15 +185,10 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t coded_width,
     ostream_writer image_writer(image_sink);
     ostream_bit_writer image_bit_writer(image_writer);
 
-    // Write top margin.
+    // Write top margin bytes.
     for (size_t row = 0; row < margin; ++row)
-    {
-        for (size_t column = 0; column < pixel_width; ++column)
-            image_bit_writer.write_bit(pixel_off);
-
-        // Flush any partial byte.
-        image_bit_writer.flush();
-    }
+        for (size_t column = 0; column < row_bytes; ++column)
+            image_bit_writer.write_byte(pixels_off);
 
     // Write each row.
     for (size_t row = 0; row < coded_height; ++row)
@@ -230,26 +228,17 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t coded_width,
             // For repeatedly reading the row buffer.
             data_source row_source(row_out);
             istream_reader row_reader(row_source);
-            istream_bit_reader row_bit_reader(row_reader);
 
-            // Copy each bit in the row buffer to the output buffer.
-            for (size_t column = 0; column < pixel_width; ++column)
-                image_bit_writer.write_bit(row_bit_reader.read_bit());
-
-            // Flush any partial byte.
-            image_bit_writer.flush();
+            // Copy each byte in the row buffer to the output buffer.
+            for (size_t column = 0; column < row_bytes; ++column)
+                image_bit_writer.write_byte(row_reader.read_byte());
         }
     }
 
-    // Write bottom margin.
+    // Write bottom margin bytes.
     for (size_t row = 0; row < margin; ++row)
-    {
-        for (size_t column = 0; column < pixel_width; ++column)
-            image_bit_writer.write_bit(pixel_off);
-
-        // Flush any partial byte.
-        image_bit_writer.flush();
-    }
+        for (size_t column = 0; column < row_bytes; ++column)
+            image_bit_writer.write_byte(pixels_off);
 
     // Guard against writer failure and unexpected stream length.
     if (!image_bit_writer || !image_reader || !image_reader.is_exhausted())
