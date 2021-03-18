@@ -281,9 +281,12 @@ static char *dupAndToUpper(const char *str, QRencodeMode hint)
 	char *newstr, *p;
 	QRencodeMode mode;
 
-    // Changed by Libbitcoin, prevent deprecation warning.
-    newstr = _strdup(str);
-	////newstr = strdup(str);
+// Added by to prevent deprecation warning in vc++ - ekv.
+#pragma warning(push)
+#pragma warning(disable : 4996)
+	newstr = strdup(str);
+#pragma warning(pop)
+
 	if(newstr == NULL) return NULL;
 
 	p = newstr;
