@@ -109,7 +109,7 @@ bool qr_code::encode(std::ostream& out, const std::string& value,
         recovery_level_to_qr_recovery_level(level),
         encode_mode_to_qr_encode_mode(mode), case_sensitive);
 
-    // Empty or excessive value returns null pointer.
+    // Empty or excessive value string length returns null pointer.
     if (qrcode == nullptr)
         return false;
 

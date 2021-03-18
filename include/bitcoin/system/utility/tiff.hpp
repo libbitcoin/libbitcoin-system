@@ -38,8 +38,9 @@ public:
 
     /// (((2^16) - 1)^2 + 7)/ 8 = 536,854,529 or 0x1fffc001 bytes.
     static uint32_t max_image_bytes;
-        
-    /// Data size must be (width^2 + 7) / 8. Last byte may be buffered.
+
+    /// False if width parameter is inconsistent with data size.
+    /// Data size must be (width^2 + 7) / 8. Last byte padded as necessary.
     static bool to_image(std::ostream& out, const data_chunk& data,
         uint16_t width);
 };
