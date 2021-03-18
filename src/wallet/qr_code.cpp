@@ -166,6 +166,7 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t coded_width,
 
     // Pixel is the least significant bit of a qrencode byte.
     constexpr auto pixel_mask = uint8_t{ 0x01 };
+    constexpr auto pixels_off = uint8_t{ 0x00 };
     constexpr auto pixel_off = false;
 
     // For readability (image is always square).

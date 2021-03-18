@@ -40,8 +40,8 @@
  *****************************************************************************/
 
 typedef struct {
-	int width; ///< Edge length of the symbol
-	int ec[4]; ///< Number of ECC code (bytes)
+	int width; /* < Edge length of the symbol */
+	int ec[4]; /* < Number of ECC code (bytes) */
 } MQRspec_Capacity;
 
 /**
@@ -109,7 +109,7 @@ int MQRspec_maximumWords(QRencodeMode mode, int version)
 	bits = lengthTableBits[mode][version - 1];
 	words = (1 << bits) - 1;
 	if(mode == QR_MODE_KANJI) {
-		words *= 2; // the number of bytes is required
+		words *= 2; /* the number of bytes is required */
 	}
 
 	return words;

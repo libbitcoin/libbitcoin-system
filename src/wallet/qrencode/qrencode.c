@@ -344,7 +344,7 @@ static unsigned char *FrameFiller_next(FrameFiller *filler)
 	filler->y = y;
 
 	if(p[y * w + x] & 0x80) {
-		// This tail recursion could be optimized.
+		/* This tail recursion could be optimized. */
 		return FrameFiller_next(filler);
 	}
 	return &p[y * w + x];
@@ -494,7 +494,7 @@ STATIC_IN_RELEASE QRcode *QRcode_encodeMask(QRinput *input, int mask)
 	}
 
 	/* masking */
-	if(mask == -2) { // just for debug purpose
+	if(mask == -2) { /* just for debug purpose */
 		masked = (unsigned char *)malloc((size_t)(width * width));
 		memcpy(masked, frame, (size_t)(width * width));
 	} else if(mask < 0) {
@@ -581,7 +581,7 @@ STATIC_IN_RELEASE QRcode *QRcode_encodeMaskMQR(QRinput *input, int mask)
 	raw = NULL;
 
 	/* masking */
-	if(mask == -2) { // just for debug purpose
+	if(mask == -2) { /* just for debug purpose */
 		masked = (unsigned char *)malloc((size_t)(width * width));
 		memcpy(masked, frame, (size_t)(width * width));
 	} else if(mask < 0) {
@@ -914,24 +914,24 @@ QRcode_List *QRcode_encodeStringStructured(const char *string, int version, QRec
  * System utilities
  *****************************************************************************/
 
-// Changed by Libbitcoin (use own version defines).
+/* Hardcoded versions by Libbitcoin */
 
 void QRcode_APIVersion(int *major_version, int *minor_version, int *micro_version)
 {
 	if(major_version != NULL) {
-		*major_version = LIBBITCOIN_SYSTEM_MAJOR_VERSION;
+		*major_version = 4;
 	}
 	if(minor_version != NULL) {
-		*minor_version = LIBBITCOIN_SYSTEM_MINOR_VERSION;
+		*minor_version = 1;
 	}
 	if(micro_version != NULL) {
-		*micro_version = LIBBITCOIN_SYSTEM_PATCH_VERSION;
+		*micro_version = 1;
 	}
 }
 
 char *QRcode_APIVersionString(void)
 {
-	return LIBBITCOIN_SYSTEM_VERSION;
+	return "4.1.1";
 }
 
 void QRcode_clearCache(void)

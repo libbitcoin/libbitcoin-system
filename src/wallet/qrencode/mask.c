@@ -179,11 +179,12 @@ unsigned char *Mask_makeMask(int width, unsigned char *frame, int mask, QRecLeve
 	return masked;
 }
 
-
-//static int n1;
-//static int n2;
-//static int n3;
-//static int n4;
+/*
+static int n1;
+static int n2;
+static int n3;
+static int n4;
+*/
 
 STATIC_IN_RELEASE int Mask_calcN1N3(int length, int *runLength)
 {
@@ -194,7 +195,7 @@ STATIC_IN_RELEASE int Mask_calcN1N3(int length, int *runLength)
 	for(i = 0; i < length; i++) {
 		if(runLength[i] >= 5) {
 			demerit += N1 + (runLength[i] - 5);
-			//n1 += N1 + (runLength[i] - 5);
+			/* n1 += N1 + (runLength[i] - 5); */
 		}
 		if((i & 1)) {
 			if(i >= 3 && i < length-2 && (runLength[i] % 3) == 0) {
@@ -205,10 +206,10 @@ STATIC_IN_RELEASE int Mask_calcN1N3(int length, int *runLength)
 				   runLength[i+2] == fact) {
 					if(i == 3 || runLength[i-3] >= 4 * fact) {
 						demerit += N3;
-						//n3 += N3;
+						/* n3 += N3; */
 					} else if(i+4 >= length || runLength[i+3] >= 4 * fact) {
 						demerit += N3;
-						//n3 += N3;
+                        /* n3 += N3; */
 					}
 				}
 			}
@@ -338,15 +339,15 @@ unsigned char *Mask_mask(int width, unsigned char *frame, QRecLevel level)
 	}
 
 	for(i = 0; i < maskNum; i++) {
-//		n1 = n2 = n3 = n4 = 0;
+/*		n1 = n2 = n3 = n4 = 0; */
 		demerit = 0;
 		blacks = maskMakers[i](width, frame, mask);
 		blacks += Mask_writeFormatInformation(width, mask, i, level);
 		bratio = (200 * blacks + w2) / w2 / 2; /* (int)(100*blacks/w2+0.5) */
 		demerit = (abs(bratio - 50) / 5) * N4;
-//		n4 = demerit;
+/* 		n4 = demerit; */
 		demerit += Mask_evaluateSymbol(width, mask);
-//		printf("(%d,%d,%d,%d)=%d\n", n1, n2, n3 ,n4, demerit);
+/* 		printf("(%d,%d,%d,%d)=%d\n", n1, n2, n3 ,n4, demerit); */
 		if(demerit < minDemerit) {
 			minDemerit = demerit;
 			memcpy(bestMask, mask, (size_t)w2);
