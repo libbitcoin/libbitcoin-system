@@ -283,7 +283,6 @@ uint8_t istream_bit_reader::read_byte()
     return buffer_;
 }
 
-
 data_chunk istream_bit_reader::read_bytes()
 {
     data_chunk out;

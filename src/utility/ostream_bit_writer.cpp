@@ -232,7 +232,7 @@ void ostream_bit_writer::write(reader& in)
 
 void ostream_bit_writer::write_bit(bool value)
 {
-    uint8_t byte_value = value ? 0x80 : 0x00;
+    const uint8_t byte_value = value ? 0x80 : 0x00;
     buffer_ |= (byte_value >> offset_);
     offset_++;
 
