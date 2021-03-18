@@ -456,26 +456,6 @@ initialize_icu_packages()
     fi
 }
 
-# Because ZLIB doesn't actually parse its --disable-shared option.
-# Because ZLIB doesn't follow GNU recommentation for unknown arguments.
-patch_zlib_configuration()
-{
-    sed -i.tmp "s/leave 1/shift/" configure
-    sed -i.tmp "s/--static/--static | --disable-shared/" configure
-    sed -i.tmp "/unknown option/d" configure
-    sed -i.tmp "/help for help/d" configure
-
-    # display_message "Hack: ZLIB configuration options modified."
-}
-
-# Because ZLIB can't build shared only.
-clean_zlib_build()
-{
-    if [[ $DISABLE_STATIC ]]; then
-        rm --force "$PREFIX/lib/libz.a"
-    fi
-}
-
 # Standard build from tarball.
 build_from_tarball()
 {
@@ -496,17 +476,10 @@ build_from_tarball()
         return
     fi
 
-    # Because libpng doesn't actually use pkg-config to locate zlib.
     # Because ICU tools don't know how to locate internal dependencies.
-    if [[ ($ARCHIVE == "$ICU_ARCHIVE") || ($ARCHIVE == "$PNG_ARCHIVE") ]]; then
+    if [[ ($ARCHIVE == "$ICU_ARCHIVE") ]]; then
         local SAVE_LDFLAGS="$LDFLAGS"
         export LDFLAGS="-L$PREFIX/lib $LDFLAGS"
-    fi
-
-    # Because libpng doesn't actually use pkg-config to locate zlib.h.
-    if [[ ($ARCHIVE == "$PNG_ARCHIVE") ]]; then
-        local SAVE_CPPFLAGS="$CPPFLAGS"
-        export CPPFLAGS="-I$PREFIX/include $CPPFLAGS"
     fi
 
     display_heading_message "Download $ARCHIVE"
@@ -522,11 +495,6 @@ build_from_tarball()
     tar --extract --file "$ARCHIVE" "--$COMPRESSION" --strip-components=1
     push_directory "$PUSH_DIR"
 
-    # Enable static only zlib build.
-    if [[ $ARCHIVE == "$ZLIB_ARCHIVE" ]]; then
-        patch_zlib_configuration
-    fi
-
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
 
@@ -540,11 +508,6 @@ build_from_tarball()
     fi
 
     configure_links
-
-    # Enable shared only zlib build.
-    if [[ $ARCHIVE == "$ZLIB_ARCHIVE" ]]; then
-        clean_zlib_build
-    fi
 
     pop_directory
     pop_directory
@@ -667,8 +630,6 @@ build_from_tarball_boost()
     display_message "-sNO_BZIP2            : 1"
     display_message "-sICU_PATH            : $ICU_PREFIX"
   # display_message "-sICU_LINK            : " "${ICU_LIBS[*]}"
-    display_message "-sZLIB_LIBPATH        : $PREFIX/lib"
-    display_message "-sZLIB_INCLUDE        : $PREFIX/include"
     display_message "-j                    : $JOBS"
     display_message "-d0                   : [supress informational messages]"
     display_message "-q                    : [stop at the first error]"
@@ -680,13 +641,6 @@ build_from_tarball_boost()
     ./bootstrap.sh \
         "--prefix=$PREFIX" \
         "--with-icu=$ICU_PREFIX"
-
-    # boost_iostreams:
-    # The zlib options prevent boost linkage to system libs in the case where
-    # we have built zlib in a prefix dir. Disabling zlib in boost is broken in
-    # all versions (through 1.61). There has been a patch pull request since
-    # 2015 but not merged as of 3/5/2021. svn.boost.org/trac/boost/ticket/9156
-    # The bzip2 auto-detection is not implemented, but disabling it works.
 
     # boost_regex:
     # As of boost 1.72.0 the ICU_LINK symbol is no longer supported and
@@ -705,8 +659,6 @@ build_from_tarball_boost()
         "boost.locale.posix=$BOOST_ICU_POSIX" \
         "-sNO_BZIP2=1" \
         "-sICU_PATH=$ICU_PREFIX" \
-        "-sZLIB_LIBPATH=$PREFIX/lib" \
-        "-sZLIB_INCLUDE=$PREFIX/include" \
         "-j $JOBS" \
         "-d0" \
         "-q" \
