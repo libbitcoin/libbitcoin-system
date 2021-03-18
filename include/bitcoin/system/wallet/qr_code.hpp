@@ -63,7 +63,7 @@ public:
 
 protected:
     /// Convert QR encoded data stream to bit stream with margin and scaling.
-    static data_chunk to_pixels(const data_chunk& coded, uint32_t coded_width,
+    static data_chunk to_pixels(const data_chunk& coded, uint32_t width_coded,
         uint16_t scale=8, uint16_t margin=2);
 };
 

@@ -119,14 +119,14 @@ bool qr_code::encode(std::ostream& out, const std::string& value,
     // Bound: 2^1 * 2^16 + 2^32 < 2^64.
     const auto pixel_width = uint64_t{ 2u } * margin + scale * qrcode->width;
 
-    // Guard against TIFF parameter overflow.
+    // Guard: TIFF parameter overflow.
     if (pixel_width > max_uint16)
         return safe_free_and_return(qrcode, false);
 
-    // Bound: (2^32 - 1)^2 < (2^64 - 1).
+    // Bound: (2^32 - 1)^2 < 2^64.
     const auto data_area = qrcode->width * static_cast<uint64_t>(qrcode->width);
 
-    // Guard against data_chunk overflow (32 bit builds).
+    // Guard: data_chunk overflow (32 bit builds).
     if (data_area > max_size_t)
         return safe_free_and_return(qrcode, false);
 
@@ -146,34 +146,44 @@ bool qr_code::encode(std::ostream& out, const std::string& value,
 // pixel_width = 2 * margin + scale * coded_width.
 // The result may be up to max_size_t, which exceeds the TIFF limit of 2^32
 // when size_t is 2^64. Caller can optimize a failure by guarding pixel_width.
-data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t coded_width,
+data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
     uint16_t scale, uint16_t margin)
 {
-    // Bound: (2^32 - 1)^2 < (2^64 - 1).
-    // Guard against mismatched sizes from qrencode.
-    if (coded.size() != coded_width * static_cast<uint64_t>(coded_width))
-        return {};
-
-    // Bound: 2^16 * 2^32 < 2^48 < 2^64.
-    const auto scaled_width = scale * static_cast<uint64_t>(coded_width);
-
-    // Bound: 2^48 + 2 * 2^16 < 2^48 + 2^17 < 2 * 2^48 < 2^64.
-    const auto pixel_width = (margin + scaled_width + margin);
-
-    // Guard against index overflows (all below limited to size_t).
-    if ((pixel_width > 0u) && (max_size_t / pixel_width < pixel_width))
-        return {};
-
     // Pixel is the least significant bit of a qrencode byte.
     constexpr auto pixel_mask = uint8_t{ 0x01 };
     constexpr auto pixels_off = uint8_t{ 0x00 };
     constexpr auto pixel_off = false;
 
     // For readability (image is always square).
-    const auto coded_height = coded_width;
+    const auto height_coded = width_coded;
+
+    // Bound: (2^32 - 1)^2 < 2^64.
+    const auto size = width_coded * height_coded;
+
+    // Guard: mismatched sizes.
+    if (coded.size() != size)
+        return {};
+
+    // Bound: 2^16 * 2^32 < 2^48 < 2^64.
+    const auto width_scaled = scale * static_cast<uint64_t>(width_coded);
+
+    // Bound: 2^48 + 2^1 * 2^16 < 2^48 + 2^17 < 2^1 * 2^48 < 2^64.
+    const auto width_pixels = (margin + width_scaled + margin);
+
+    // Guard: empty image and division by zero.
+    if (width_pixels == 0u)
+        return {};
+
+    // Guard: area overflow (all below limited to size_t).
+    if (max_size_t / width_pixels < width_pixels)
+        return {};
 
     // Horizontal margins and full row copies can be done bytewise.
-    const auto row_bytes = (pixel_width + (byte_bits - 1u)) / byte_bits;
+    const auto row_bytes = (width_pixels + (byte_bits - 1u)) / byte_bits;
+    const auto row_margin = data_chunk(row_bytes, pixels_off);
+
+    // Bound: (2^16 - 1)^2 < 2^32 or (2^32 - 1)^2 < 2^64.
+    const auto area_bytes = row_bytes * static_cast<size_t>(width_pixels);
 
     // For reading the qrcode byte stream.
     data_source image_source(coded);
@@ -184,27 +194,30 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t coded_width,
     data_sink image_sink(image_out);
     ostream_writer image_writer(image_sink);
     ostream_bit_writer image_bit_writer(image_writer);
+    image_out.reserve(area_bytes);
 
-    // Write top margin bytes.
+    // ------------------------- Write top margin -------------------------
     for (size_t row = 0; row < margin; ++row)
-        for (size_t column = 0; column < row_bytes; ++column)
-            image_bit_writer.write_byte(pixels_off);
+        image_bit_writer.write_bytes(row_margin);
+    // --------------------------------------------------------------------
 
     // Write each row.
-    for (size_t row = 0; row < coded_height; ++row)
+    for (size_t row = 0; row < height_coded; ++row)
     {
         // For repeatedly writing a row buffer.
         data_chunk row_out;
         data_sink row_sink(row_out);
         ostream_writer row_writer(row_sink);
         ostream_bit_writer row_bit_writer(row_writer);
+        row_out.reserve(row_bytes);
 
-        // Buffer left margin.
+        // ------------------------ Buffer left margin ------------------------
         for (size_t column = 0; column < margin; ++column)
             row_bit_writer.write_bit(pixel_off);
+        // --------------------------------------------------------------------
 
         // Buffer scaled row pixels.
-        for (size_t column = 0; column < coded_width; ++column)
+        for (size_t column = 0; column < width_coded; ++column)
         {
             // Read byte and extract pixel (least significant) bit.
             const auto pixel_on = (image_reader.read_byte() & pixel_mask) != 0;
@@ -214,9 +227,10 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t coded_width,
                 row_bit_writer.write_bit(pixel_on);
         }
 
-        // Buffer right margin.
+        // ------------------------ Buffer right margin -----------------------
         for (size_t column = 0; column < margin; ++column)
             row_bit_writer.write_bit(pixel_off);
+        // --------------------------------------------------------------------
 
         // Flush any partial byte and then flush bytes to data_chunk.
         row_bit_writer.flush();
@@ -224,21 +238,13 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t coded_width,
 
         // Write row buffer scale times.
         for (size_t scaled = 0; scaled < scale; ++scaled)
-        {
-            // For repeatedly reading the row buffer.
-            data_source row_source(row_out);
-            istream_reader row_reader(row_source);
-
-            // Copy each byte in the row buffer to the output buffer.
-            for (size_t column = 0; column < row_bytes; ++column)
-                image_bit_writer.write_byte(row_reader.read_byte());
-        }
+            image_bit_writer.write_bytes(row_out);
     }
 
-    // Write bottom margin bytes.
+    // ------------------------ Write bottom margin -----------------------
     for (size_t row = 0; row < margin; ++row)
-        for (size_t column = 0; column < row_bytes; ++column)
-            image_bit_writer.write_byte(pixels_off);
+        image_bit_writer.write_bytes(row_margin);
+    // --------------------------------------------------------------------
 
     // Guard against writer failure and unexpected stream length.
     if (!image_bit_writer || !image_reader || !image_reader.is_exhausted())
