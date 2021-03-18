@@ -100,7 +100,7 @@
 #define QRENCODE_H
 
 // Added by Libbitcoin.
-#include "..\include\bitcoin\system\version.hpp"
+#include "../../../include/bitcoin/system/version.hpp"
 #define STATIC_IN_RELEASE static
 
 #if defined(__cplusplus)
