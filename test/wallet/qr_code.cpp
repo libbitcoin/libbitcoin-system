@@ -97,20 +97,20 @@ BOOST_AUTO_TEST_CASE(qr_code__encode__one_character_version_0_scale_1_margin_0__
         0xba, 0xad, 0xf0, 0x0d,
 
         // Image data.
-        0xfe, 0x5b, 0xfc, 0x13,
-        0x90, 0x6e, 0xb6, 0xbb,
-        0x74, 0xa5, 0xdb, 0xa2,
-        0xae, 0xc1, 0x05, 0x07,
-        0xfa, 0xaf, 0xe0, 0x1b,
-        0x00, 0xef, 0xf6, 0x21,
-        0x88, 0x11, 0xaf, 0xea,
-        0x22, 0x40, 0x04, 0x70,
-        0xee, 0xaa, 0x80, 0x4a,
-        0xab, 0xfa, 0x5d, 0xd0,
-        0x57, 0xba, 0xba, 0xb7,
-        0x6d, 0xd0, 0x11, 0xae,
-        0xa2, 0x23, 0x05, 0xc4,
-        0x7f, 0xec, 0xaa, 0x80
+        0x7f, 0xda, 0x3f, 0xc8,
+        0x09, 0x76, 0x6d, 0xdd,
+        0x2e, 0xa5, 0xdb, 0x45,
+        0x75, 0x83, 0xa0, 0xe0,
+        0x5f, 0xf5, 0x07, 0xd8,
+        0x00, 0xf7, 0x6f, 0x84,
+        0x11, 0x88, 0xf5, 0x57,
+        0x44, 0x02, 0x20, 0x0e,
+        0x77, 0x55, 0x01, 0x52,
+        0xd5, 0x5f, 0xba, 0x0b,
+        0xea, 0x5d, 0x5d, 0xed,
+        0xb6, 0x0b, 0x88, 0x75,
+        0x45, 0xc4, 0xa0, 0x23,
+        0xfe, 0x37, 0x55, 0x01
     };
 
     data_chunk out;
@@ -209,8 +209,8 @@ BOOST_AUTO_TEST_CASE(qr_code__to_pixels__one_pixel_scale_0_margin_0__empty)
 BOOST_AUTO_TEST_CASE(qr_code__to_pixels__one_pixel_scale_1_margin_0__expected)
 {
     // Scale 1 does not expand. A single pixel image with no margin creates a
-    // one byte image with only the most significant bit set to 1.
-    static const data_chunk expected{ 0x80 };
+    // one byte image with only the least significant bit set to 1.
+    static const data_chunk expected{ 0x01 };
 
     // This pixel state is true.
     static const data_chunk data{ 0x01 };
@@ -223,8 +223,8 @@ BOOST_AUTO_TEST_CASE(qr_code__to_pixels__one_pixel_scale_1_margin_0__expected)
 BOOST_AUTO_TEST_CASE(qr_code__to_pixels__one_pixel_scale_1_margin_1__expected)
 {
     // Scale 1 does not expand. A single pixel image with single pixel margin
-    // creates a 9 pixel image with the 5th most significant bit set.
-    static const data_chunk expected{ 0x08, 0x00 };
+    // creates a 9 pixel image with the 5th least significant bit set to 1.
+    static const data_chunk expected{ 0x10, 0x00 };
 
     // This pixel state is true.
     static const data_chunk data{ 0x01 };
@@ -234,7 +234,7 @@ BOOST_AUTO_TEST_CASE(qr_code__to_pixels__one_pixel_scale_1_margin_1__expected)
     BOOST_REQUIRE_EQUAL(encode_base16(pixels), encode_base16(expected));
 }
 
-BOOST_AUTO_TEST_CASE(qr_code__to_pixels__four_pixels_scale_2_margin_2__expected)
+BOOST_AUTO_TEST_CASE(qr_code__to_pixels__endianness_independent__expected)
 {
     // Area is 2x2px so image is scaled to 4x4px and 2px margin makes it 8x8px.
     static const data_chunk expected
@@ -260,6 +260,41 @@ BOOST_AUTO_TEST_CASE(qr_code__to_pixels__four_pixels_scale_2_margin_2__expected)
         0xfe, 0xfe
     };
 
+    // This test is mirror image with respect to bitwise endianness so it
+    // succeeds whether bits are written big endian or little endian. 
+    const auto pixels = qr_code_accessor::to_pixels(data, 2, 2, 2);
+
+    // Encode as base16 so that failure message is intelligible.
+    BOOST_REQUIRE_EQUAL(encode_base16(pixels), encode_base16(expected));
+}
+
+BOOST_AUTO_TEST_CASE(qr_code__to_pixels__little_endian_dependent__expected)
+{
+    // Area is 2x2px so image is scaled to 4x4px and 2px margin makes it 8x8px.
+    static const data_chunk expected
+    {
+        // byte  pixel
+        0x00, // 00 0000 00 
+        0x00, // 00 0000 00
+
+        0x0c, // 00 0011 00
+        0x0c, // 00 0011 00
+
+        0x30, // 00 1100 00
+        0x30, // 00 1100 00
+
+        0x00, // 00 0000 00
+        0x00  // 00 0000 00
+    };
+
+    // The pixel states are true, false, false, true.
+    static const data_chunk data
+    {
+        0x01, 0xfe,
+        0xfe, 0xff
+    };
+
+    // This test is not mirror image with respect to bitwise endianness.
     const auto pixels = qr_code_accessor::to_pixels(data, 2, 2, 2);
 
     // Encode as base16 so that failure message is intelligible.
