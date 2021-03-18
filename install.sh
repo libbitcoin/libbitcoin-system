@@ -17,23 +17,7 @@
 #                            accesses this feature, so if you do not intend to
 #                            use passphrase normalization this dependency can
 #                            be avoided.
-# --with-png               Compile with QR Code PNG Output Support
-#                            Since the addition of png support, libbitcoin
-#                            conditionally incorporates libpng (which in turn
-#                            requires zlib). Currently libbitcoin-explorer is
-#                            the only other library that accesses this feature,
-#                            so if you do not intend to use png this dependency
-#                            can be avoided.
-# --with-qrencode          Compile with QR Code Support
-#                            Since the addition of qrcode support, libbitcoin
-#                            conditionally incorporates qrencode. Currently
-#                            libbitcoin-explorer is the only other library that
-#                            accesses this feature, so if you do not intend to
-#                            use qrcode this dependency can be avoided.
 # --build-icu              Builds ICU libraries.
-# --build-zlib             Builds ZLib libraries.
-# --build-png              Builds PNG libraries.
-# --build-qrencode         Builds QREncode libraries.
 # --build-boost            Builds Boost libraries.
 # --build-dir=<path>       Location of downloaded and intermediate files.
 # --prefix=<absolute-path> Library install location (defaults to /usr/local).
@@ -61,21 +45,6 @@ BUILD_DIR="build-libbitcoin-system"
 #------------------------------------------------------------------------------
 ICU_URL="https://github.com/unicode-org/icu/releases/download/release-55-2/icu4c-55_2-src.tgz"
 ICU_ARCHIVE="icu4c-55_2-src.tgz"
-
-# ZLib archive.
-#------------------------------------------------------------------------------
-ZLIB_URL="https://github.com/madler/zlib/archive/v1.2.11.tar.gz"
-ZLIB_ARCHIVE="v1.2.11.tar.gz"
-
-# PNG archive.
-#------------------------------------------------------------------------------
-PNG_URL="https://sourceforge.net/projects/libpng/files/libpng16/1.6.37/libpng-1.6.37.tar.xz"
-PNG_ARCHIVE="libpng-1.6.37.tar.xz"
-
-# QREncode archive.
-#------------------------------------------------------------------------------
-QRENCODE_URL="http://fukuchi.org/works/qrencode/qrencode-4.1.1.tar.bz2"
-QRENCODE_ARCHIVE="qrencode-4.1.1.tar.bz2"
 
 # Boost archive.
 #------------------------------------------------------------------------------
@@ -225,23 +194,7 @@ display_help()
     display_message "                             accesses this feature, so if you do not intend to "
     display_message "                             use passphrase normalization this dependency can "
     display_message "                             be avoided."
-    display_message "  --with-png               Compile with QR Code PNG Output Support"
-    display_message "                             Since the addition of png support, libbitcoin "
-    display_message "                             conditionally incorporates libpng (which in turn "
-    display_message "                             requires zlib). Currently libbitcoin-explorer is "
-    display_message "                             the only other library that accesses this feature, "
-    display_message "                             so if you do not intend to use png this dependency "
-    display_message "                             can be avoided."
-    display_message "  --with-qrencode          Compile with QR Code Support"
-    display_message "                             Since the addition of qrcode support, libbitcoin "
-    display_message "                             conditionally incorporates qrencode. Currently "
-    display_message "                             libbitcoin-explorer is the only other library that "
-    display_message "                             accesses this feature, so if you do not intend to "
-    display_message "                             use qrcode this dependency can be avoided."
     display_message "  --build-icu              Builds ICU libraries."
-    display_message "  --build-zlib             Builds ZLib libraries."
-    display_message "  --build-png              Builds PNG libraries."
-    display_message "  --build-qrencode         Builds QREncode libraries."
     display_message "  --build-boost            Builds Boost libraries."
     display_message "  --build-dir=<path>       Location of downloaded and intermediate files."
     display_message "  --prefix=<absolute-path> Library install location (defaults to /usr/local)."
@@ -269,14 +222,9 @@ parse_command_line_options()
 
             # Common project options.
             (--with-icu)            WITH_ICU="yes";;
-            (--with-png)            WITH_PNG="yes";;
-            (--with-qrencode)       WITH_QRENCODE="yes";;
 
             # Custom build options (in the form of --build-<option>).
             (--build-icu)           BUILD_ICU="yes";;
-            (--build-zlib)          BUILD_ZLIB="yes";;
-            (--build-png)           BUILD_PNG="yes";;
-            (--build-qrencode)      BUILD_QRENCODE="yes";;
             (--build-boost)         BUILD_BOOST="yes";;
 
             # Unique script options.
@@ -431,12 +379,7 @@ display_configuration()
     display_message "LDFLAGS               : $LDFLAGS"
     display_message "LDLIBS                : $LDLIBS"
     display_message "WITH_ICU              : $WITH_ICU"
-    display_message "WITH_PNG              : $WITH_PNG"
-    display_message "WITH_QRENCODE         : $WITH_QRENCODE"
     display_message "BUILD_ICU             : $BUILD_ICU"
-    display_message "BUILD_ZLIB            : $BUILD_ZLIB"
-    display_message "BUILD_PNG             : $BUILD_PNG"
-    display_message "BUILD_QRENCODE        : $BUILD_QRENCODE"
     display_message "BUILD_BOOST           : $BUILD_BOOST"
     display_message "BUILD_DIR             : $BUILD_DIR"
     display_message "PREFIX                : $PREFIX"
@@ -852,9 +795,6 @@ build_from_travis()
 build_all()
 {
     build_from_tarball "$ICU_URL" "$ICU_ARCHIVE" gzip source "$PARALLEL" "$BUILD_ICU" "${ICU_OPTIONS[@]}" "$@"
-    build_from_tarball "$ZLIB_URL" "$ZLIB_ARCHIVE" gzip . "$PARALLEL" "$BUILD_ZLIB" "${ZLIB_OPTIONS[@]}" "$@"
-    build_from_tarball "$PNG_URL" "$PNG_ARCHIVE" xz . "$PARALLEL" "$BUILD_PNG" "${PNG_OPTIONS[@]}" "$@"
-    build_from_tarball "$QRENCODE_URL" "$QRENCODE_ARCHIVE" bzip2 . "$PARALLEL" "$BUILD_QRENCODE" "${QRENCODE_OPTIONS[@]}" "$@"
     build_from_tarball_boost "$BOOST_URL" "$BOOST_ARCHIVE" bzip2 . "$PARALLEL" "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
     build_from_github libbitcoin secp256k1 version7 "$PARALLEL" "${SECP256K1_OPTIONS[@]}" "$@"
     build_from_travis libbitcoin libbitcoin-system master "$PARALLEL" "${BITCOIN_SYSTEM_OPTIONS[@]}" "$@"

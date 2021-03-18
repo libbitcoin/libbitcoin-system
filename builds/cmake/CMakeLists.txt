@@ -97,22 +97,6 @@ if (with-icu)
     set( icu "-DWITH_ICU" )
 endif()
 
-# Implement -Dwith-png and output ${png}.
-#------------------------------------------------------------------------------
-set( with-png "no" CACHE BOOL "Compile with Libpng support." )
-
-if (with-png)
-    set( png "-DWITH_PNG" )
-endif()
-
-# Implement -Dwith-qrencode and output ${qrencode}.
-#------------------------------------------------------------------------------
-set( with-qrencode "no" CACHE BOOL "Compile with QREncode." )
-
-if (with-qrencode)
-    set( qrencode "-DWITH_QRENCODE" )
-endif()
-
 # Implement -Denable-ndebug and define NDEBUG.
 #------------------------------------------------------------------------------
 set( enable-ndebug "yes" CACHE BOOL "Compile without debug assertions." )
@@ -201,18 +185,6 @@ if ((${CMAKE_SYSTEM_NAME} MATCHES "Linux"))
     find_package( Dl REQUIRED )
 endif()
 
-# Find png
-#------------------------------------------------------------------------------
-if (with-png)
-    find_package( Png 1.6.37 REQUIRED )
-endif()
-
-# Find qrencode
-#------------------------------------------------------------------------------
-if (with-qrencode)
-    find_package( Qrencode 4.1.1 REQUIRED )
-endif()
-
 # Find secp256k1
 #------------------------------------------------------------------------------
 find_package( Secp256K1 0.1.0.19 REQUIRED )
@@ -226,8 +198,6 @@ if (BUILD_SHARED_LIBS)
         ${rt_INCLUDE_DIRS}
         ${icu_i18n_INCLUDE_DIRS}
         ${dl_INCLUDE_DIRS}
-        ${png_INCLUDE_DIRS}
-        ${qrencode_INCLUDE_DIRS}
         ${secp256k1_INCLUDE_DIRS} )
 else()
     include_directories( SYSTEM
@@ -236,8 +206,6 @@ else()
         ${rt_INCLUDE_DIRS}
         ${icu_i18n_STATIC_INCLUDE_DIRS}
         ${dl_INCLUDE_DIRS}
-        ${png_STATIC_INCLUDE_DIRS}
-        ${qrencode_STATIC_INCLUDE_DIRS}
         ${secp256k1_STATIC_INCLUDE_DIRS} )
 endif()
 
@@ -250,8 +218,6 @@ if (BUILD_SHARED_LIBS)
         ${rt_LIBRARY_DIRS}
         ${icu_i18n_LIBRARY_DIRS}
         ${dl_LIBRARY_DIRS}
-        ${png_LIBRARY_DIRS}
-        ${qrencode_LIBRARY_DIRS}
         ${secp256k1_LIBRARY_DIRS} )
 else()
     link_directories(
@@ -260,8 +226,6 @@ else()
         ${rt_LIBRARY_DIRS}
         ${icu_i18n_STATIC_LIBRARY_DIRS}
         ${dl_LIBRARY_DIRS}
-        ${png_STATIC_LIBRARY_DIRS}
-        ${qrencode_STATIC_LIBRARY_DIRS}
         ${secp256k1_STATIC_LIBRARY_DIRS} )
 endif()
 
@@ -285,8 +249,6 @@ if (BUILD_SHARED_LIBS)
         ${rt_LIBRARIES}
         ${icu_i18n_LIBRARIES}
         ${dl_LIBRARIES}
-        ${png_LIBRARIES}
-        ${qrencode_LIBRARIES}
         ${secp256k1_LIBRARIES} )
 else()
     link_libraries(
@@ -306,15 +268,11 @@ else()
         ${rt_LIBRARIES}
         ${icu_i18n_STATIC_LIBRARIES}
         ${dl_LIBRARIES}
-        ${png_STATIC_LIBRARIES}
-        ${qrencode_STATIC_LIBRARIES}
         ${secp256k1_STATIC_LIBRARIES} )
 endif()
 
 add_definitions(
-    ${icu}
-    ${png}
-    ${qrencode} )
+    ${icu} )
 
 # Define ${CANONICAL_LIB_NAME} project.
 #------------------------------------------------------------------------------
@@ -558,8 +516,6 @@ if (BUILD_SHARED_LIBS)
         ${rt_INCLUDE_DIRS}
         ${icu_i18n_INCLUDE_DIRS}
         ${dl_INCLUDE_DIRS}
-        ${png_INCLUDE_DIRS}
-        ${qrencode_INCLUDE_DIRS}
         ${secp256k1_INCLUDE_DIRS} )
 else()
     target_include_directories( ${CANONICAL_LIB_NAME} PRIVATE
@@ -569,8 +525,6 @@ else()
         ${rt_INCLUDE_DIRS}
         ${icu_i18n_STATIC_INCLUDE_DIRS}
         ${dl_INCLUDE_DIRS}
-        ${png_STATIC_INCLUDE_DIRS}
-        ${qrencode_STATIC_INCLUDE_DIRS}
         ${secp256k1_STATIC_INCLUDE_DIRS} )
 endif()
 
@@ -595,8 +549,6 @@ if (BUILD_SHARED_LIBS)
         ${rt_LIBRARIES}
         ${icu_i18n_LIBRARIES}
         ${dl_LIBRARIES}
-        ${png_LIBRARIES}
-        ${qrencode_LIBRARIES}
         ${secp256k1_LIBRARIES} )
 else()
     target_link_libraries( ${CANONICAL_LIB_NAME}
@@ -614,8 +566,6 @@ else()
         ${rt_LIBRARIES}
         ${icu_i18n_STATIC_LIBRARIES}
         ${dl_LIBRARIES}
-        ${png_STATIC_LIBRARIES}
-        ${qrencode_STATIC_LIBRARIES}
         ${secp256k1_STATIC_LIBRARIES} )
 endif()
 
