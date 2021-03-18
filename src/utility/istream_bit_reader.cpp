@@ -46,7 +46,7 @@ istream_bit_reader::istream_bit_reader(reader& reader)
 
 void istream_bit_reader::feed()
 {
-    if (offset_ >= byte_bits)
+    if (offset_ == byte_bits)
     {
         buffer_ = reader_.read_byte();
 
@@ -70,7 +70,7 @@ bool istream_bit_reader::operator!() const
 
 bool istream_bit_reader::is_exhausted() const
 {
-    return reader_.is_exhausted() && (offset_ >= byte_bits);
+    return reader_.is_exhausted() && (offset_ == byte_bits);
 }
 
 void istream_bit_reader::invalidate()
@@ -241,7 +241,7 @@ bool istream_bit_reader::read_bit()
 
 uint8_t istream_bit_reader::peek_byte()
 {
-    if (offset_ >= byte_bits)
+    if (offset_ == byte_bits)
         return reader_.peek_byte();
 
     if (offset_ > 0)
@@ -258,7 +258,7 @@ uint8_t istream_bit_reader::peek_byte()
 
 uint8_t istream_bit_reader::read_byte()
 {
-    if (offset_ >= byte_bits)
+    if (offset_ == byte_bits)
         return reader_.read_byte();
 
     if (offset_ > 0)
@@ -364,7 +364,7 @@ void istream_bit_reader::skip(size_t size)
 
 bool istream_bit_reader::empty() const
 {
-    return (offset_ >= byte_bits) && (reader_.peek_byte() == unsigned_eof);
+    return (offset_ == byte_bits) && (reader_.peek_byte() == unsigned_eof);
 }
 
 } // namespace system
