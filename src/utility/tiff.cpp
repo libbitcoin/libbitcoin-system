@@ -137,22 +137,29 @@ static_assert(strip0_offset % sizeof(offset) == 0,
 
 // Public symbol used to parse file for image stream.
 uint32_t tiff::image_offset = strip0_offset;
-uint32_t tiff::max_image_bytes = 0x1fffc001;
+size_t tiff::max_image_bytes = max_uint32;
 
-// Data size must be [(width * width + 7u) / 8u] bytes.
-// Max achievable data size given 16 bit integer width is 0x1fffc001.
 bool tiff::to_image(std::ostream& out, const data_chunk& data, uint16_t width)
 {
-    // Get pixel area, safe because (2^16 - 1)^2 < (2^32 - 1).
-    const auto area = width * static_cast<uint64_t>(width);
-
-    // Total number of pixels divided into bytes, last byte may be partial.
-    // Safe: ((2^16) - 1)^2 + 7) / 8 = 536,854,528.125 = 536,854,529 bytes.
-    const auto size = static_cast<uint32_t>((area + 7u) / bc::byte_bits);
-
-    // Guard against mismatched image size.
-    if (size != data.size())
+    // Empty image is not valid TIFF.
+    if (width == 0u || data.empty())
         return false;
+
+    // TIFF encoding limit is max_uint32 (0xfffe0001 if square).
+    if (data.size() > max_image_bytes)
+        return false;
+
+    const auto size = static_cast<uint32_t>(data.size());
+
+    // The width > 0 and therefore row_bytes > 0.
+    const auto row_bytes = (width + (byte_bits - 1u)) / byte_bits;
+
+    // Each row is the same width, so there must be no remainder.
+    if (size % row_bytes != 0u)
+        return false;
+
+    // All rows will be stored in a single strip.
+    const auto rows = size / row_bytes;
 
     ostream_writer writer(out);
 
@@ -185,7 +192,7 @@ bool tiff::to_image(std::ostream& out, const data_chunk& data, uint16_t width)
     writer.write_2_bytes_big_endian(field_tag::image_length);
     writer.write_2_bytes_big_endian(field_type::full);
     writer.write_4_bytes_big_endian(field_value_count::single);
-    writer.write_4_bytes_big_endian(width);
+    writer.write_4_bytes_big_endian(rows);
 
     // ............... IFDE[2] ..............
     writer.write_2_bytes_big_endian(field_tag::compression);
@@ -211,7 +218,7 @@ bool tiff::to_image(std::ostream& out, const data_chunk& data, uint16_t width)
     writer.write_2_bytes_big_endian(field_tag::rows_per_strip);
     writer.write_2_bytes_big_endian(field_type::full);
     writer.write_4_bytes_big_endian(field_value_count::single);
-    writer.write_4_bytes_big_endian(width);
+    writer.write_4_bytes_big_endian(rows);
 
     // ............... IFDE[6] ..............
     writer.write_2_bytes_big_endian(field_tag::strip_byte_counts);

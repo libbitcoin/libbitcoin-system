@@ -27,7 +27,7 @@
 namespace libbitcoin {
 namespace system {
 
-/// Convert a data chunk or stream to a square black on white tiff file.
+/// Convert a data chunk to a black on white tiff file.
 class BC_API tiff
 {
 public:
@@ -36,11 +36,11 @@ public:
     /// The last image byte may contain padding, image bit size is width^2.
     static uint32_t image_offset;
 
-    /// (((2^16) - 1)^2 + 7)/ 8 = 536,854,529 or 0x1fffc001 bytes.
-    static uint32_t max_image_bytes;
+    /// The maximal image data size is 0xffffffff.
+    static size_t max_image_bytes;
 
     /// False if width parameter is inconsistent with data size.
-    /// Data size must be (width^2 + 7) / 8. Last byte padded as necessary.
+    /// Each row is padded to a whole byte, all rows same length.
     static bool to_image(std::ostream& out, const data_chunk& data,
         uint16_t width);
 };

@@ -59,7 +59,7 @@ public:
     static bool encode(std::ostream& out, const std::string& value,
         uint8_t version=0, uint16_t scale=8, uint16_t margin=2,
         recovery_level level=recovery_level::low,
-        encode_mode mode=encode_mode::eight_bit);
+        encode_mode mode=encode_mode::eight_bit, bool case_sensitive=true);
 
 protected:
     /// Convert QR encoded data stream to bit stream with margin and scaling.

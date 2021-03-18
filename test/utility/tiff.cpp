@@ -77,7 +77,8 @@ BOOST_AUTO_TEST_CASE(tiff__to_image_data__perfect_square__expected_true)
     // A square with sides of 4 pixels is [(4^2 + 7) / 8 = 2] bytes.
     static const data_chunk bitmap
     {
-        0x2a, 0x2b
+        0x20, 0xa0,
+        0x20, 0xb0
     };
 
     // Manually-contructed expectation of tiff encoding.
@@ -135,7 +136,7 @@ BOOST_AUTO_TEST_CASE(tiff__to_image_data__perfect_square__expected_true)
         0x01, 0x17,             // strip_byte_counts
         0x00, 0x04,             // long value
         0x00, 0x00, 0x00, 0x01, // count
-        0x00, 0x00, 0x00, 0x02, // value (not offset)
+        0x00, 0x00, 0x00, 0x04, // value (not offset)
 
         // IFDE7
         0x01, 0x1a,             // x_resolution
@@ -175,8 +176,13 @@ BOOST_AUTO_TEST_CASE(tiff__to_image_data__perfect_square__expected_true)
 
         // [Image strips may be anywhere in the file.]
 
-        // Image (strip).
-        0x2a, 0x2b
+        // Image (strip) - each row padded.
+        // 0010 0000
+        // 1010 0000
+        // 0010 0000
+        // 1011 0000
+        0x20, 0xa0,
+        0x20, 0xb0
     };
 
     data_chunk tiff;
