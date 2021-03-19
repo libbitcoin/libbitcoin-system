@@ -291,6 +291,9 @@
     <ClCompile Include="..\..\..\..\test\wallet\ec_public.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\electrum.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\encrypted_keys.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
