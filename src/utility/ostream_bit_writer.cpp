@@ -63,16 +63,6 @@ void ostream_bit_writer::buffered_write(data_chunk& data)
     }
 }
 
-void ostream_bit_writer::flush()
-{
-    if (offset_ > 0)
-    {
-        writer_.write_byte(buffer_);
-        buffer_ = 0x00;
-        offset_ = 0;
-    }
-}
-
 // Context.
 //-----------------------------------------------------------------------------
 
@@ -305,6 +295,16 @@ void ostream_bit_writer::skip(size_t size)
 
     // skip
     writer_.skip(size);
+}
+
+void ostream_bit_writer::flush()
+{
+    if (offset_ > 0)
+    {
+        writer_.write_byte(buffer_);
+        buffer_ = 0x00;
+        offset_ = 0;
+    }
 }
 
 } // namespace system

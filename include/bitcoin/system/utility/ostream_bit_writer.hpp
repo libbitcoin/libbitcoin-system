@@ -101,6 +101,7 @@ public:
     /// Advance iterator without writing.
     void skip(size_t size);
 
+    /// This does not flush the member stream.
     /// Flush the buffer on a zero-padded byte boundary.
     void flush();
 
