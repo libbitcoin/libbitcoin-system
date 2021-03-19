@@ -119,10 +119,10 @@ bool qr_code::encode(std::ostream& out, const std::string& value,
         return safe_free_and_return(qrcode, false);
 
     // Bound: 2^1 * 2^16 + 2^32 < 2^64.
-    const auto width_pixels = uint64_t{ 2u } * margin + scale * qrcode->width;
+    const auto width = uint64_t{ 2u } * margin + scale * qrcode->width;
 
     // Guard: TIFF parameter overflow.
-    if (width_pixels > max_uint16)
+    if (width > max_uint16)
         return safe_free_and_return(qrcode, false);
 
     // Bound: (2^32 - 1)^2 < 2^64.
@@ -139,11 +139,13 @@ bool qr_code::encode(std::ostream& out, const std::string& value,
     const auto pixels = to_pixels(data, qrcode->width, scale, margin);
 
     // Convert to TIFF image stream.
-    return safe_free_and_return(qrcode, tiff::to_image(out, pixels,
-        static_cast<uint16_t>(width_pixels)));
+    const auto result = tiff::to_image(out, pixels,
+        static_cast<uint16_t>(width));
+
+    return safe_free_and_return(qrcode, result);
 }
 
-// TODO: return stream and split out scaling and margining.
+// TODO: accept and return stream and split out scaling and margining.
 // Scale may move the image off of a byte-aligned square of pixels in bytes.
 // So the dimensions cannot be derived from the result, caller must retain.
 // pixel_width = 2 * margin + scale * coded_width.

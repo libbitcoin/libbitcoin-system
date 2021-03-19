@@ -139,6 +139,7 @@ static_assert(strip0_offset % sizeof(offset) == 0,
 uint32_t tiff::image_offset = strip0_offset;
 size_t tiff::max_image_bytes = max_uint32;
 
+// TODO: accept and return stream.
 bool tiff::to_image(std::ostream& out, const data_chunk& data, uint16_t width)
 {
     // Empty image is not valid TIFF.
