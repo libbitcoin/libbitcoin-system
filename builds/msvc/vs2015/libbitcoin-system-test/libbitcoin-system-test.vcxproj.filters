@@ -327,9 +327,6 @@
     <ClCompile Include="..\..\..\..\test\utility\neutrino_filter.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\utility\png.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\utility\property_tree.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
@@ -343,6 +340,9 @@
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\utility\thread.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\utility\tiff.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\bitcoin_uri.cpp">
@@ -375,7 +375,7 @@
     <ClCompile Include="..\..\..\..\test\wallet\payment_address.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\qrcode.cpp">
+    <ClCompile Include="..\..\..\..\test\wallet\qr_code.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\select_outputs.cpp">

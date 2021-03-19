@@ -94,6 +94,11 @@ public:
     static const char option_prefix_char;
 
     /**
+     * Destructor.
+     */
+    virtual ~parameter();
+
+    /**
      * Populate with normalized parameter data.
      * @param[in]  option     The metadata of the option to test.
      * @param[in]  arguments  The list of supported positional arguments.

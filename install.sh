@@ -17,23 +17,7 @@
 #                            accesses this feature, so if you do not intend to
 #                            use passphrase normalization this dependency can
 #                            be avoided.
-# --with-png               Compile with QR Code PNG Output Support
-#                            Since the addition of png support, libbitcoin
-#                            conditionally incorporates libpng (which in turn
-#                            requires zlib). Currently libbitcoin-explorer is
-#                            the only other library that accesses this feature,
-#                            so if you do not intend to use png this dependency
-#                            can be avoided.
-# --with-qrencode          Compile with QR Code Support
-#                            Since the addition of qrcode support, libbitcoin
-#                            conditionally incorporates qrencode. Currently
-#                            libbitcoin-explorer is the only other library that
-#                            accesses this feature, so if you do not intend to
-#                            use qrcode this dependency can be avoided.
 # --build-icu              Builds ICU libraries.
-# --build-zlib             Builds ZLib libraries.
-# --build-png              Builds PNG libraries.
-# --build-qrencode         Builds QREncode libraries.
 # --build-boost            Builds Boost libraries.
 # --build-dir=<path>       Location of downloaded and intermediate files.
 # --prefix=<absolute-path> Library install location (defaults to /usr/local).
@@ -62,25 +46,10 @@ BUILD_DIR="build-libbitcoin-system"
 ICU_URL="https://github.com/unicode-org/icu/releases/download/release-55-2/icu4c-55_2-src.tgz"
 ICU_ARCHIVE="icu4c-55_2-src.tgz"
 
-# ZLib archive.
-#------------------------------------------------------------------------------
-ZLIB_URL="https://github.com/madler/zlib/archive/v1.2.11.tar.gz"
-ZLIB_ARCHIVE="v1.2.11.tar.gz"
-
-# PNG archive.
-#------------------------------------------------------------------------------
-PNG_URL="https://sourceforge.net/projects/libpng/files/libpng16/1.6.37/libpng-1.6.37.tar.xz"
-PNG_ARCHIVE="libpng-1.6.37.tar.xz"
-
-# QREncode archive.
-#------------------------------------------------------------------------------
-QRENCODE_URL="http://fukuchi.org/works/qrencode/qrencode-3.4.4.tar.bz2"
-QRENCODE_ARCHIVE="qrencode-3.4.4.tar.bz2"
-
 # Boost archive.
 #------------------------------------------------------------------------------
-BOOST_URL="http://downloads.sourceforge.net/project/boost/boost/1.62.0/boost_1_62_0.tar.bz2"
-BOOST_ARCHIVE="boost_1_62_0.tar.bz2"
+BOOST_URL="http://downloads.sourceforge.net/project/boost/boost/1.72.0/boost_1_72_0.tar.bz2"
+BOOST_ARCHIVE="boost_1_72_0.tar.bz2"
 
 
 # Define utility functions.
@@ -225,23 +194,7 @@ display_help()
     display_message "                             accesses this feature, so if you do not intend to "
     display_message "                             use passphrase normalization this dependency can "
     display_message "                             be avoided."
-    display_message "  --with-png               Compile with QR Code PNG Output Support"
-    display_message "                             Since the addition of png support, libbitcoin "
-    display_message "                             conditionally incorporates libpng (which in turn "
-    display_message "                             requires zlib). Currently libbitcoin-explorer is "
-    display_message "                             the only other library that accesses this feature, "
-    display_message "                             so if you do not intend to use png this dependency "
-    display_message "                             can be avoided."
-    display_message "  --with-qrencode          Compile with QR Code Support"
-    display_message "                             Since the addition of qrcode support, libbitcoin "
-    display_message "                             conditionally incorporates qrencode. Currently "
-    display_message "                             libbitcoin-explorer is the only other library that "
-    display_message "                             accesses this feature, so if you do not intend to "
-    display_message "                             use qrcode this dependency can be avoided."
     display_message "  --build-icu              Builds ICU libraries."
-    display_message "  --build-zlib             Builds ZLib libraries."
-    display_message "  --build-png              Builds PNG libraries."
-    display_message "  --build-qrencode         Builds QREncode libraries."
     display_message "  --build-boost            Builds Boost libraries."
     display_message "  --build-dir=<path>       Location of downloaded and intermediate files."
     display_message "  --prefix=<absolute-path> Library install location (defaults to /usr/local)."
@@ -269,14 +222,9 @@ parse_command_line_options()
 
             # Common project options.
             (--with-icu)            WITH_ICU="yes";;
-            (--with-png)            WITH_PNG="yes";;
-            (--with-qrencode)       WITH_QRENCODE="yes";;
 
             # Custom build options (in the form of --build-<option>).
             (--build-icu)           BUILD_ICU="yes";;
-            (--build-zlib)          BUILD_ZLIB="yes";;
-            (--build-png)           BUILD_PNG="yes";;
-            (--build-qrencode)      BUILD_QRENCODE="yes";;
             (--build-boost)         BUILD_BOOST="yes";;
 
             # Unique script options.
@@ -431,12 +379,7 @@ display_configuration()
     display_message "LDFLAGS               : $LDFLAGS"
     display_message "LDLIBS                : $LDLIBS"
     display_message "WITH_ICU              : $WITH_ICU"
-    display_message "WITH_PNG              : $WITH_PNG"
-    display_message "WITH_QRENCODE         : $WITH_QRENCODE"
     display_message "BUILD_ICU             : $BUILD_ICU"
-    display_message "BUILD_ZLIB            : $BUILD_ZLIB"
-    display_message "BUILD_PNG             : $BUILD_PNG"
-    display_message "BUILD_QRENCODE        : $BUILD_QRENCODE"
     display_message "BUILD_BOOST           : $BUILD_BOOST"
     display_message "BUILD_DIR             : $BUILD_DIR"
     display_message "PREFIX                : $PREFIX"
@@ -482,8 +425,9 @@ BOOST_OPTIONS=(
 #------------------------------------------------------------------------------
 SECP256K1_OPTIONS=(
 "--disable-tests" \
+"--enable-experimental" \
 "--enable-module-recovery" \
-"--enable-endomorphism")
+"--enable-module-schnorrsig")
 
 # Define bitcoin-system options.
 #------------------------------------------------------------------------------
@@ -512,26 +456,6 @@ initialize_icu_packages()
     fi
 }
 
-# Because ZLIB doesn't actually parse its --disable-shared option.
-# Because ZLIB doesn't follow GNU recommentation for unknown arguments.
-patch_zlib_configuration()
-{
-    sed -i.tmp "s/leave 1/shift/" configure
-    sed -i.tmp "s/--static/--static | --disable-shared/" configure
-    sed -i.tmp "/unknown option/d" configure
-    sed -i.tmp "/help for help/d" configure
-
-    # display_message "Hack: ZLIB configuration options modified."
-}
-
-# Because ZLIB can't build shared only.
-clean_zlib_build()
-{
-    if [[ $DISABLE_STATIC ]]; then
-        rm --force "$PREFIX/lib/libz.a"
-    fi
-}
-
 # Standard build from tarball.
 build_from_tarball()
 {
@@ -552,17 +476,10 @@ build_from_tarball()
         return
     fi
 
-    # Because libpng doesn't actually use pkg-config to locate zlib.
     # Because ICU tools don't know how to locate internal dependencies.
-    if [[ ($ARCHIVE == "$ICU_ARCHIVE") || ($ARCHIVE == "$PNG_ARCHIVE") ]]; then
+    if [[ ($ARCHIVE == "$ICU_ARCHIVE") ]]; then
         local SAVE_LDFLAGS="$LDFLAGS"
         export LDFLAGS="-L$PREFIX/lib $LDFLAGS"
-    fi
-
-    # Because libpng doesn't actually use pkg-config to locate zlib.h.
-    if [[ ($ARCHIVE == "$PNG_ARCHIVE") ]]; then
-        local SAVE_CPPFLAGS="$CPPFLAGS"
-        export CPPFLAGS="-I$PREFIX/include $CPPFLAGS"
     fi
 
     display_heading_message "Download $ARCHIVE"
@@ -578,11 +495,6 @@ build_from_tarball()
     tar --extract --file "$ARCHIVE" "--$COMPRESSION" --strip-components=1
     push_directory "$PUSH_DIR"
 
-    # Enable static only zlib build.
-    if [[ $ARCHIVE == "$ZLIB_ARCHIVE" ]]; then
-        patch_zlib_configuration
-    fi
-
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
 
@@ -597,11 +509,6 @@ build_from_tarball()
 
     configure_links
 
-    # Enable shared only zlib build.
-    if [[ $ARCHIVE == "$ZLIB_ARCHIVE" ]]; then
-        clean_zlib_build
-    fi
-
     pop_directory
     pop_directory
 
@@ -612,7 +519,7 @@ build_from_tarball()
     pop_directory
 }
 
-# Because boost ICU detection assumes in incorrect ICU path.
+# Because boost ICU static lib detection assumes in incorrect ICU path.
 circumvent_boost_icu_detection()
 {
     # Boost expects a directory structure for ICU which is incorrect.
@@ -652,27 +559,28 @@ initialize_boost_configuration()
 }
 
 # Because boost doesn't use pkg-config.
+# The hacks below are still required as of boost 1.72.0.
 initialize_boost_icu_configuration()
 {
     BOOST_ICU_ICONV="on"
     BOOST_ICU_POSIX="on"
 
     if [[ $WITH_ICU ]]; then
-        circumvent_boost_icu_detection
-
         # Restrict other locale options when compiling boost with icu.
         BOOST_ICU_ICONV="off"
         BOOST_ICU_POSIX="off"
+
+        # Work around boost ICU static lib discovery bug.
+        circumvent_boost_icu_detection
+
+        # Extract ICU prefix directory from package config variable.
+        ICU_PREFIX=$(pkg-config icu-i18n --variable=prefix)
 
         # Extract ICU libs from package config variables and augment with -ldl.
         ICU_LIBS="$(pkg-config icu-i18n --libs) -ldl"
 
         # This is a hack for boost m4 scripts that fail with ICU dependency.
-        # See custom edits in ax-boost-locale.m4 and ax_boost_regex.m4.
         export BOOST_ICU_LIBS=("${ICU_LIBS[@]}")
-
-        # Extract ICU prefix directory from package config variable.
-        ICU_PREFIX=$(pkg-config icu-i18n --variable=prefix)
     fi
 }
 
@@ -721,9 +629,7 @@ build_from_tarball_boost()
     display_message "boost.locale.posix    : $BOOST_ICU_POSIX"
     display_message "-sNO_BZIP2            : 1"
     display_message "-sICU_PATH            : $ICU_PREFIX"
-    display_message "-sICU_LINK            : " "${ICU_LIBS[*]}"
-    display_message "-sZLIB_LIBPATH        : $PREFIX/lib"
-    display_message "-sZLIB_INCLUDE        : $PREFIX/include"
+  # display_message "-sICU_LINK            : " "${ICU_LIBS[*]}"
     display_message "-j                    : $JOBS"
     display_message "-d0                   : [supress informational messages]"
     display_message "-q                    : [stop at the first error]"
@@ -732,15 +638,15 @@ build_from_tarball_boost()
     display_message "BOOST_OPTIONS         : $*"
     display_message "--------------------------------------------------------------------"
 
-    # boost_iostreams
-    # The zlib options prevent boost linkage to system libs in the case where
-    # we have built zlib in a prefix dir. Disabling zlib in boost is broken in
-    # all versions (through 1.60). https://svn.boost.org/trac/boost/ticket/9156
-    # The bzip2 auto-detection is not implemented, but disabling it works.
-
     ./bootstrap.sh \
         "--prefix=$PREFIX" \
         "--with-icu=$ICU_PREFIX"
+
+    # boost_regex:
+    # As of boost 1.72.0 the ICU_LINK symbol is no longer supported and
+    # produces a hard stop if WITH_ICU is also defined. Removal is sufficient.
+    # github.com/libbitcoin/libbitcoin-system/issues/1192
+    # "-sICU_LINK=${ICU_LIBS[*]}"
 
     ./b2 install \
         "variant=release" \
@@ -753,9 +659,6 @@ build_from_tarball_boost()
         "boost.locale.posix=$BOOST_ICU_POSIX" \
         "-sNO_BZIP2=1" \
         "-sICU_PATH=$ICU_PREFIX" \
-        "-sICU_LINK=${ICU_LIBS[*]}" \
-        "-sZLIB_LIBPATH=$PREFIX/lib" \
-        "-sZLIB_INCLUDE=$PREFIX/include" \
         "-j $JOBS" \
         "-d0" \
         "-q" \
@@ -844,11 +747,8 @@ build_from_travis()
 build_all()
 {
     build_from_tarball "$ICU_URL" "$ICU_ARCHIVE" gzip source "$PARALLEL" "$BUILD_ICU" "${ICU_OPTIONS[@]}" "$@"
-    build_from_tarball "$ZLIB_URL" "$ZLIB_ARCHIVE" gzip . "$PARALLEL" "$BUILD_ZLIB" "${ZLIB_OPTIONS[@]}" "$@"
-    build_from_tarball "$PNG_URL" "$PNG_ARCHIVE" xz . "$PARALLEL" "$BUILD_PNG" "${PNG_OPTIONS[@]}" "$@"
-    build_from_tarball "$QRENCODE_URL" "$QRENCODE_ARCHIVE" bzip2 . "$PARALLEL" "$BUILD_QRENCODE" "${QRENCODE_OPTIONS[@]}" "$@"
     build_from_tarball_boost "$BOOST_URL" "$BOOST_ARCHIVE" bzip2 . "$PARALLEL" "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
-    build_from_github libbitcoin secp256k1 version6 "$PARALLEL" "${SECP256K1_OPTIONS[@]}" "$@"
+    build_from_github libbitcoin secp256k1 version7 "$PARALLEL" "${SECP256K1_OPTIONS[@]}" "$@"
     build_from_travis libbitcoin libbitcoin-system master "$PARALLEL" "${BITCOIN_SYSTEM_OPTIONS[@]}" "$@"
 }
 

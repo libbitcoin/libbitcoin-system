@@ -77,6 +77,9 @@ public:
     void write_variable_little_endian(uint64_t value);
     void write_size_little_endian(size_t value);
 
+    /// Write until reader is exhausted.
+    void write(reader& in);
+
     /// Write bit.
     void write_bit(bool value);
 
@@ -98,8 +101,11 @@ public:
     /// Advance iterator without writing.
     void skip(size_t size);
 
-protected:
+    /// This does not flush the member stream.
+    /// Flush the buffer on a zero-padded byte boundary.
     void flush();
+
+protected:
     void buffered_write(data_chunk& data);
 
 private:

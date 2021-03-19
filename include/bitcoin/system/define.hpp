@@ -32,15 +32,16 @@ namespace bc = libbitcoin;
 // See http://gcc.gnu.org/wiki/Visibility
 
 // Generic helper definitions for shared library support
+// GNU visibilty attribute overrides compiler flag `fvisibility`.
 #if defined _MSC_VER || defined __CYGWIN__
     #define BC_HELPER_DLL_IMPORT __declspec(dllimport)
     #define BC_HELPER_DLL_EXPORT __declspec(dllexport)
     #define BC_HELPER_DLL_LOCAL
 #else
     #if __GNUC__ >= 4
-        #define BC_HELPER_DLL_IMPORT __attribute__ ((visibility ("default")))
-        #define BC_HELPER_DLL_EXPORT __attribute__ ((visibility ("default")))
-        #define BC_HELPER_DLL_LOCAL  __attribute__ ((visibility ("internal")))
+        #define BC_HELPER_DLL_IMPORT __attribute__((visibility("default")))
+        #define BC_HELPER_DLL_EXPORT __attribute__((visibility("default")))
+        #define BC_HELPER_DLL_LOCAL  __attribute__((visibility("internal")))
     #else
         #define BC_HELPER_DLL_IMPORT
         #define BC_HELPER_DLL_EXPORT

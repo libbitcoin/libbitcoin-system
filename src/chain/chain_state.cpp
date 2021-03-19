@@ -399,7 +399,7 @@ uint32_t chain_state::easy_time_limit(const chain_state::data& values,
     const int64_t high = timestamp_high(values);
 
     //*************************************************************************
-    // CONSENSUS: add unsigned 32 bit numbers in signed 64 bit space in
+    // CONSENSUS: add signed 32 bit numbers in signed 64 bit space in
     // order to prevent overflow before applying the domain constraint.
     //*************************************************************************
     return domain_constrain<uint32_t>(cast_add<int64_t>(high, spacing));

@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_SUITE(witness_address_tests)
 #define TESTNET_WITNESS_SCRIPT_HASH_SCRIPT "[0279BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798] checksig"
 
 // BIP 173 witness address vectors
-// https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki#test-vectors
+// github.com/bitcoin/bips/blob/master/bip-0173.mediawiki#test-vectors
 struct test_address
 {
     std::string address;
@@ -61,7 +61,7 @@ const test_address_list witness_address_nonzero_version_tests
     { "bc1zw508d6qejxtdg4y5r3zarvaryvg6kdaj", "5210751e76e8199196d454941c45d1b3a323" },
 };
 
-BOOST_AUTO_TEST_CASE(witness_address__construct__mainnet_to_witness_script_hash__valid__expected)
+BOOST_AUTO_TEST_CASE(witness_address__construct__mainnet_to_witness_script_hash__valid_expected)
 {
     chain::script script;
     script.from_string(MAINNET_WITNESS_SCRIPT_HASH_SCRIPT);
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(witness_address__construct__mainnet_to_witness_script_hash_
     BOOST_REQUIRE_EQUAL(address.encoded(), MAINNET_WITNESS_SCRIPT_HASH_ADDRESS);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__construct__testnet_to_witness_script_hash__valid__expected)
+BOOST_AUTO_TEST_CASE(witness_address__construct__testnet_to_witness_script_hash__valid_expected)
 {
     chain::script script;
     script.from_string(TESTNET_WITNESS_SCRIPT_HASH_SCRIPT);
@@ -79,10 +79,10 @@ BOOST_AUTO_TEST_CASE(witness_address__construct__testnet_to_witness_script_hash_
     BOOST_REQUIRE_EQUAL(address.encoded(), TESTNET_WITNESS_SCRIPT_HASH_ADDRESS);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__construct__ec_public_to_testnet_witness_pubkey_hash__valid__expected)
+BOOST_AUTO_TEST_CASE(witness_address__construct__ec_public_to_testnet_witness_pubkey_hash__valid_expected)
 {
     // Based on witness data from:
-    // https://www.blockchain.com/btctest/tx/d869f854e1f8788bcff294cc83b280942a8c728de71eb709a2c29d10bfe21b7c
+    // blockchain.com/btctest/tx/d869f854e1f8788bcff294cc83b280942a8c728de71eb709a2c29d10bfe21b7c
 
     // Create the same witness address from ec_public.
     const std::string test_public_key = "038262a6c6cec93c2d3ecd6c6072efea86d02ff8e3328bbd0242b20af3425990ac";
@@ -102,7 +102,7 @@ struct witness_address_accessor
     }
 };
 
-BOOST_AUTO_TEST_CASE(base32__witness_address_zero_version_tests__valid__expected)
+BOOST_AUTO_TEST_CASE(witness_address__convert_bits__zero_version__valid_expected)
 {
     const auto zero_witness_version = 0u;
     const auto bech32_contracted_bit_size = 5u;
@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE(base32__witness_address_zero_version_tests__valid__expected
     }
 }
 
-BOOST_AUTO_TEST_CASE(base32__witness_address_nonzero_version_tests__valid__expected)
+BOOST_AUTO_TEST_CASE(witness_address__convert_bits__nonzero_version__valid_expected)
 {
     // This op_version gap is used to normalize the value difference
     // between the defined OP_0 opcode (value 0) and the OP_1 opcode

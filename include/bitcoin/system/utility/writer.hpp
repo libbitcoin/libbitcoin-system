@@ -25,6 +25,7 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/reader.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -55,6 +56,9 @@ public:
     virtual void write_8_bytes_little_endian(uint64_t value) = 0;
     virtual void write_variable_little_endian(uint64_t value) = 0;
     virtual void write_size_little_endian(size_t value) = 0;
+
+    /// Write until reader is exhausted.
+    virtual void write(reader& in) = 0;
 
     /// Write one byte.
     virtual void write_byte(uint8_t value) = 0;

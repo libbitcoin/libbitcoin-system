@@ -121,28 +121,6 @@ AC_MSG_RESULT([$with_icu])
 AS_CASE([${with_icu}], [yes], AC_DEFINE([BOOST_HAS_ICU]))
 AS_CASE([${with_icu}], [yes], AC_SUBST([icu], [-DWITH_ICU]))
 
-# Implement --with-png and output ${png}.
-#------------------------------------------------------------------------------
-AC_MSG_CHECKING([--with-png option])
-AC_ARG_WITH([png],
-    AS_HELP_STRING([--with-png],
-        [Compile with Libpng support. @<:@default=no@:>@]),
-    [with_png=$withval],
-    [with_png=no])
-AC_MSG_RESULT([$with_png])
-AS_CASE([${with_png}], [yes], AC_SUBST([png], [-DWITH_PNG]))
-
-# Implement --with-qrencode and output ${qrencode}.
-#------------------------------------------------------------------------------
-AC_MSG_CHECKING([--with-qrencode option])
-AC_ARG_WITH([qrencode],
-    AS_HELP_STRING([--with-qrencode],
-        [Compile with QREncode. @<:@default=no@:>@]),
-    [with_qrencode=$withval],
-    [with_qrencode=no])
-AC_MSG_RESULT([$with_qrencode])
-AS_CASE([${with_qrencode}], [yes], AC_SUBST([qrencode], [-DWITH_QRENCODE]))
-
 # Implement --enable-ndebug and define NDEBUG.
 #------------------------------------------------------------------------------
 AC_MSG_CHECKING([--enable-ndebug option])
@@ -171,17 +149,17 @@ AC_MSG_RESULT([$enable_isystem])
 
 # Check dependencies.
 #==============================================================================
-# Require Boost of at least version 1.62.0 and output ${boost_CPPFLAGS/LDFLAGS}.
+# Require Boost of at least version 1.72.0 and output ${boost_CPPFLAGS/LDFLAGS}.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*],
-    [AX_BOOST_BASE([1.62.0],
+    [AX_BOOST_BASE([1.72.0],
         [AC_SUBST([boost_CPPFLAGS], [${BOOST_CPPFLAGS}])
          AC_SUBST([boost_ISYS_CPPFLAGS], [`echo ${BOOST_CPPFLAGS} | $SED s/^-I/-isystem/g | $SED s/' -I'/' -isystem'/g`])
          AC_SUBST([boost_LDFLAGS], [${BOOST_LDFLAGS}])
          AC_MSG_NOTICE([boost_CPPFLAGS : ${boost_CPPFLAGS}])
          AC_MSG_NOTICE([boost_ISYS_CPPFLAGS : ${boost_ISYS_CPPFLAGS}])
          AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])],
-        [AC_MSG_ERROR([Boost 1.62.0 or later is required but was not found.])])])
+        [AC_MSG_ERROR([Boost 1.72.0 or later is required but was not found.])])])
 
 AS_CASE([${enable_isystem}],[yes],
     [AC_SUBST([boost_BUILD_CPPFLAGS], [${boost_ISYS_CPPFLAGS}])],
@@ -312,63 +290,13 @@ AS_CASE([${host_os}],
 
 AC_MSG_NOTICE([dl_LIBS : ${dl_LIBS}])
 
-# Require png of at least version 1.6.37 and output ${png_CPPFLAGS/LIBS/PKG}.
+# Require secp256k1 of at least version 0.1.0.19 and output ${secp256k1_CPPFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
-AS_CASE([${with_png}], [yes],
-    [PKG_CHECK_MODULES([png], [libpng >= 1.6.37],
-        [png_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "libpng >= 1.6.37" 2>/dev/null`"
-         png_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "libpng >= 1.6.37" 2>/dev/null`"],
-        [AC_MSG_ERROR([--with-png specified but libpng >= 1.6.37 was not found.])])
-     AC_SUBST([png_PKG], ['libpng >= 1.6.37'])
-     AC_SUBST([png_CPPFLAGS], [${png_CFLAGS}])
-     AS_IF([test x${png_INCLUDEDIR} != "x"],
-        [AC_SUBST([png_ISYS_CPPFLAGS], ["-isystem${png_INCLUDEDIR} ${png_OTHER_CFLAGS}"])],
-        [AC_SUBST([png_ISYS_CPPFLAGS], [${png_OTHER_CFLAGS}])])
-     AC_MSG_NOTICE([png_CPPFLAGS : ${png_CPPFLAGS}])
-     AC_MSG_NOTICE([png_ISYS_CPPFLAGS : ${png_ISYS_CPPFLAGS}])
-     AC_MSG_NOTICE([png_OTHER_CFLAGS : ${png_OTHER_CFLAGS}])
-     AC_MSG_NOTICE([png_INCLUDEDIR : ${png_INCLUDEDIR}])
-     AC_MSG_NOTICE([png_LIBS : ${png_LIBS}])],
-    [AC_SUBST([png_PKG], [])])
-
-AS_CASE([${enable_isystem}],[yes],
-    [AC_SUBST([png_BUILD_CPPFLAGS], [${png_ISYS_CPPFLAGS}])],
-    [AC_SUBST([png_BUILD_CPPFLAGS], [${png_CPPFLAGS}])])
-
-AC_MSG_NOTICE([png_BUILD_CPPFLAGS : ${png_BUILD_CPPFLAGS}])
-
-# Require qrencode of at least version 3.4.4 and output ${qrencode_CPPFLAGS/LIBS/PKG}.
-#------------------------------------------------------------------------------
-AS_CASE([${with_qrencode}], [yes],
-    [PKG_CHECK_MODULES([qrencode], [libqrencode >= 3.4.4],
-        [qrencode_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "libqrencode >= 3.4.4" 2>/dev/null`"
-         qrencode_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "libqrencode >= 3.4.4" 2>/dev/null`"],
-        [AC_MSG_ERROR([--with-qrencode specified but libqrencode >= 3.4.4 was not found.])])
-     AC_SUBST([qrencode_PKG], ['libqrencode >= 3.4.4'])
-     AC_SUBST([qrencode_CPPFLAGS], [${qrencode_CFLAGS}])
-     AS_IF([test x${qrencode_INCLUDEDIR} != "x"],
-        [AC_SUBST([qrencode_ISYS_CPPFLAGS], ["-isystem${qrencode_INCLUDEDIR} ${qrencode_OTHER_CFLAGS}"])],
-        [AC_SUBST([qrencode_ISYS_CPPFLAGS], [${qrencode_OTHER_CFLAGS}])])
-     AC_MSG_NOTICE([qrencode_CPPFLAGS : ${qrencode_CPPFLAGS}])
-     AC_MSG_NOTICE([qrencode_ISYS_CPPFLAGS : ${qrencode_ISYS_CPPFLAGS}])
-     AC_MSG_NOTICE([qrencode_OTHER_CFLAGS : ${qrencode_OTHER_CFLAGS}])
-     AC_MSG_NOTICE([qrencode_INCLUDEDIR : ${qrencode_INCLUDEDIR}])
-     AC_MSG_NOTICE([qrencode_LIBS : ${qrencode_LIBS}])],
-    [AC_SUBST([qrencode_PKG], [])])
-
-AS_CASE([${enable_isystem}],[yes],
-    [AC_SUBST([qrencode_BUILD_CPPFLAGS], [${qrencode_ISYS_CPPFLAGS}])],
-    [AC_SUBST([qrencode_BUILD_CPPFLAGS], [${qrencode_CPPFLAGS}])])
-
-AC_MSG_NOTICE([qrencode_BUILD_CPPFLAGS : ${qrencode_BUILD_CPPFLAGS}])
-
-# Require secp256k1 of at least version 0.0.1 and output ${secp256k1_CPPFLAGS/LIBS/PKG}.
-#------------------------------------------------------------------------------
-PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1],
-    [secp256k1_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "libsecp256k1 >= 0.0.1" 2>/dev/null`"
-     secp256k1_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "libsecp256k1 >= 0.0.1" 2>/dev/null`"],
-    [AC_MSG_ERROR([libsecp256k1 >= 0.0.1 is required but was not found.])])
-AC_SUBST([secp256k1_PKG], ['libsecp256k1 >= 0.0.1'])
+PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.1.0.19],
+    [secp256k1_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "libsecp256k1 >= 0.1.0.19" 2>/dev/null`"
+     secp256k1_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "libsecp256k1 >= 0.1.0.19" 2>/dev/null`"],
+    [AC_MSG_ERROR([libsecp256k1 >= 0.1.0.19 is required but was not found.])])
+AC_SUBST([secp256k1_PKG], ['libsecp256k1 >= 0.1.0.19'])
 AC_SUBST([secp256k1_CPPFLAGS], [${secp256k1_CFLAGS}])
 AS_IF([test x${secp256k1_INCLUDEDIR} != "x"],
     [AC_SUBST([secp256k1_ISYS_CPPFLAGS], ["-isystem${secp256k1_INCLUDEDIR} ${secp256k1_OTHER_CFLAGS}"])],

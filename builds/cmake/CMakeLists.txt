@@ -97,22 +97,6 @@ if (with-icu)
     set( icu "-DWITH_ICU" )
 endif()
 
-# Implement -Dwith-png and output ${png}.
-#------------------------------------------------------------------------------
-set( with-png "no" CACHE BOOL "Compile with Libpng support." )
-
-if (with-png)
-    set( png "-DWITH_PNG" )
-endif()
-
-# Implement -Dwith-qrencode and output ${qrencode}.
-#------------------------------------------------------------------------------
-set( with-qrencode "no" CACHE BOOL "Compile with QREncode." )
-
-if (with-qrencode)
-    set( qrencode "-DWITH_QRENCODE" )
-endif()
-
 # Implement -Denable-ndebug and define NDEBUG.
 #------------------------------------------------------------------------------
 set( enable-ndebug "yes" CACHE BOOL "Compile without debug assertions." )
@@ -129,7 +113,7 @@ endif()
 
 # Find boost
 #------------------------------------------------------------------------------
-find_package( Boost 1.62.0 REQUIRED COMPONENTS
+find_package( Boost 1.72.0 REQUIRED COMPONENTS
     atomic
     chrono
     date_time
@@ -201,21 +185,9 @@ if ((${CMAKE_SYSTEM_NAME} MATCHES "Linux"))
     find_package( Dl REQUIRED )
 endif()
 
-# Find png
-#------------------------------------------------------------------------------
-if (with-png)
-    find_package( Png 1.6.37 REQUIRED )
-endif()
-
-# Find qrencode
-#------------------------------------------------------------------------------
-if (with-qrencode)
-    find_package( Qrencode 3.4.4 REQUIRED )
-endif()
-
 # Find secp256k1
 #------------------------------------------------------------------------------
-find_package( Secp256K1 0.0.1 REQUIRED )
+find_package( Secp256K1 0.1.0.19 REQUIRED )
 
 # Define project common includes directories
 #------------------------------------------------------------------------------
@@ -226,8 +198,6 @@ if (BUILD_SHARED_LIBS)
         ${rt_INCLUDE_DIRS}
         ${icu_i18n_INCLUDE_DIRS}
         ${dl_INCLUDE_DIRS}
-        ${png_INCLUDE_DIRS}
-        ${qrencode_INCLUDE_DIRS}
         ${secp256k1_INCLUDE_DIRS} )
 else()
     include_directories( SYSTEM
@@ -236,8 +206,6 @@ else()
         ${rt_INCLUDE_DIRS}
         ${icu_i18n_STATIC_INCLUDE_DIRS}
         ${dl_INCLUDE_DIRS}
-        ${png_STATIC_INCLUDE_DIRS}
-        ${qrencode_STATIC_INCLUDE_DIRS}
         ${secp256k1_STATIC_INCLUDE_DIRS} )
 endif()
 
@@ -250,8 +218,6 @@ if (BUILD_SHARED_LIBS)
         ${rt_LIBRARY_DIRS}
         ${icu_i18n_LIBRARY_DIRS}
         ${dl_LIBRARY_DIRS}
-        ${png_LIBRARY_DIRS}
-        ${qrencode_LIBRARY_DIRS}
         ${secp256k1_LIBRARY_DIRS} )
 else()
     link_directories(
@@ -260,8 +226,6 @@ else()
         ${rt_LIBRARY_DIRS}
         ${icu_i18n_STATIC_LIBRARY_DIRS}
         ${dl_LIBRARY_DIRS}
-        ${png_STATIC_LIBRARY_DIRS}
-        ${qrencode_STATIC_LIBRARY_DIRS}
         ${secp256k1_STATIC_LIBRARY_DIRS} )
 endif()
 
@@ -285,8 +249,6 @@ if (BUILD_SHARED_LIBS)
         ${rt_LIBRARIES}
         ${icu_i18n_LIBRARIES}
         ${dl_LIBRARIES}
-        ${png_LIBRARIES}
-        ${qrencode_LIBRARIES}
         ${secp256k1_LIBRARIES} )
 else()
     link_libraries(
@@ -306,15 +268,11 @@ else()
         ${rt_LIBRARIES}
         ${icu_i18n_STATIC_LIBRARIES}
         ${dl_LIBRARIES}
-        ${png_STATIC_LIBRARIES}
-        ${qrencode_STATIC_LIBRARIES}
         ${secp256k1_STATIC_LIBRARIES} )
 endif()
 
 add_definitions(
-    ${icu}
-    ${png}
-    ${qrencode} )
+    ${icu} )
 
 # Define ${CANONICAL_LIB_NAME} project.
 #------------------------------------------------------------------------------
@@ -471,7 +429,6 @@ add_library( ${CANONICAL_LIB_NAME}
     "../../src/utility/neutrino_filter.cpp"
     "../../src/utility/ostream_bit_writer.cpp"
     "../../src/utility/ostream_writer.cpp"
-    "../../src/utility/png.cpp"
     "../../src/utility/prioritized_mutex.cpp"
     "../../src/utility/property_tree.cpp"
     "../../src/utility/pseudo_random.cpp"
@@ -482,6 +439,7 @@ add_library( ${CANONICAL_LIB_NAME}
     "../../src/utility/string.cpp"
     "../../src/utility/thread.cpp"
     "../../src/utility/threadpool.cpp"
+    "../../src/utility/tiff.cpp"
     "../../src/utility/work.cpp"
     "../../src/wallet/bitcoin_uri.cpp"
     "../../src/wallet/dictionary_en.cpp"
@@ -511,7 +469,7 @@ add_library( ${CANONICAL_LIB_NAME}
     "../../src/wallet/mini_keys.cpp"
     "../../src/wallet/mnemonic.cpp"
     "../../src/wallet/payment_address.cpp"
-    "../../src/wallet/qrcode.cpp"
+    "../../src/wallet/qr_code.cpp"
     "../../src/wallet/select_outputs.cpp"
     "../../src/wallet/stealth_address.cpp"
     "../../src/wallet/stealth_receiver.cpp"
@@ -527,7 +485,26 @@ add_library( ${CANONICAL_LIB_NAME}
     "../../src/wallet/parse_encrypted_keys/parse_encrypted_public.cpp"
     "../../src/wallet/parse_encrypted_keys/parse_encrypted_public.hpp"
     "../../src/wallet/parse_encrypted_keys/parse_encrypted_token.cpp"
-    "../../src/wallet/parse_encrypted_keys/parse_encrypted_token.hpp" )
+    "../../src/wallet/parse_encrypted_keys/parse_encrypted_token.hpp"
+    "../../src/wallet/qrencode/bitstream.c"
+    "../../src/wallet/qrencode/bitstream.h"
+    "../../src/wallet/qrencode/mask.c"
+    "../../src/wallet/qrencode/mask.h"
+    "../../src/wallet/qrencode/mmask.c"
+    "../../src/wallet/qrencode/mmask.h"
+    "../../src/wallet/qrencode/mqrspec.c"
+    "../../src/wallet/qrencode/mqrspec.h"
+    "../../src/wallet/qrencode/qrencode.c"
+    "../../src/wallet/qrencode/qrencode.h"
+    "../../src/wallet/qrencode/qrencode_inner.h"
+    "../../src/wallet/qrencode/qrinput.c"
+    "../../src/wallet/qrencode/qrinput.h"
+    "../../src/wallet/qrencode/qrspec.c"
+    "../../src/wallet/qrencode/qrspec.h"
+    "../../src/wallet/qrencode/rsecc.c"
+    "../../src/wallet/qrencode/rsecc.h"
+    "../../src/wallet/qrencode/split.c"
+    "../../src/wallet/qrencode/split.h" )
 
 # ${CANONICAL_LIB_NAME} project specific include directories.
 #------------------------------------------------------------------------------
@@ -539,8 +516,6 @@ if (BUILD_SHARED_LIBS)
         ${rt_INCLUDE_DIRS}
         ${icu_i18n_INCLUDE_DIRS}
         ${dl_INCLUDE_DIRS}
-        ${png_INCLUDE_DIRS}
-        ${qrencode_INCLUDE_DIRS}
         ${secp256k1_INCLUDE_DIRS} )
 else()
     target_include_directories( ${CANONICAL_LIB_NAME} PRIVATE
@@ -550,8 +525,6 @@ else()
         ${rt_INCLUDE_DIRS}
         ${icu_i18n_STATIC_INCLUDE_DIRS}
         ${dl_INCLUDE_DIRS}
-        ${png_STATIC_INCLUDE_DIRS}
-        ${qrencode_STATIC_INCLUDE_DIRS}
         ${secp256k1_STATIC_INCLUDE_DIRS} )
 endif()
 
@@ -576,8 +549,6 @@ if (BUILD_SHARED_LIBS)
         ${rt_LIBRARIES}
         ${icu_i18n_LIBRARIES}
         ${dl_LIBRARIES}
-        ${png_LIBRARIES}
-        ${qrencode_LIBRARIES}
         ${secp256k1_LIBRARIES} )
 else()
     target_link_libraries( ${CANONICAL_LIB_NAME}
@@ -595,8 +566,6 @@ else()
         ${rt_LIBRARIES}
         ${icu_i18n_STATIC_LIBRARIES}
         ${dl_LIBRARIES}
-        ${png_STATIC_LIBRARIES}
-        ${qrencode_STATIC_LIBRARIES}
         ${secp256k1_STATIC_LIBRARIES} )
 endif()
 
@@ -723,12 +692,12 @@ if (with-tests)
         "../../test/utility/data.cpp"
         "../../test/utility/endian.cpp"
         "../../test/utility/neutrino_filter.cpp"
-        "../../test/utility/png.cpp"
         "../../test/utility/property_tree.cpp"
         "../../test/utility/pseudo_random.cpp"
         "../../test/utility/serializer.cpp"
         "../../test/utility/stream.cpp"
         "../../test/utility/thread.cpp"
+        "../../test/utility/tiff.cpp"
         "../../test/wallet/bitcoin_uri.cpp"
         "../../test/wallet/ec_private.cpp"
         "../../test/wallet/ec_public.cpp"
@@ -740,7 +709,7 @@ if (with-tests)
         "../../test/wallet/mnemonic.cpp"
         "../../test/wallet/mnemonic.hpp"
         "../../test/wallet/payment_address.cpp"
-        "../../test/wallet/qrcode.cpp"
+        "../../test/wallet/qr_code.cpp"
         "../../test/wallet/select_outputs.cpp"
         "../../test/wallet/stealth_address.cpp"
         "../../test/wallet/stealth_receiver.cpp"

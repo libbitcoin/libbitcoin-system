@@ -63,16 +63,6 @@ void ostream_bit_writer::buffered_write(data_chunk& data)
     }
 }
 
-void ostream_bit_writer::flush()
-{
-    if (offset_ > 0)
-    {
-        writer_.write_byte(buffer_);
-        buffer_ = 0x00;
-        offset_ = 0;
-    }
-}
-
 // Context.
 //-----------------------------------------------------------------------------
 
@@ -224,13 +214,19 @@ void ostream_bit_writer::write_size_little_endian(size_t value)
 // Bytes.
 //-----------------------------------------------------------------------------
 
+void ostream_bit_writer::write(reader& in)
+{
+    while (!in.is_exhausted())
+        write_byte(in.read_byte());
+}
+
 void ostream_bit_writer::write_bit(bool value)
 {
-    uint8_t byte_value = value ? 0x80 : 0x00;
+    const uint8_t byte_value = value ? 0x80 : 0x00;
     buffer_ |= (byte_value >> offset_);
     offset_++;
 
-    if (offset_ >= byte_bits)
+    if (offset_ == byte_bits)
         flush();
 }
 
@@ -299,6 +295,16 @@ void ostream_bit_writer::skip(size_t size)
 
     // skip
     writer_.skip(size);
+}
+
+void ostream_bit_writer::flush()
+{
+    if (offset_ > 0)
+    {
+        writer_.write_byte(buffer_);
+        buffer_ = 0x00;
+        offset_ = 0;
+    }
 }
 
 } // namespace system

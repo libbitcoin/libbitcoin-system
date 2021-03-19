@@ -164,6 +164,12 @@ void ostream_writer::write_size_little_endian(size_t value)
 // Bytes.
 //-----------------------------------------------------------------------------
 
+void ostream_writer::write(reader& in)
+{
+    while (!in.is_exhausted())
+        write_byte(in.read_byte());
+}
+
 void ostream_writer::write_byte(uint8_t value)
 {
     stream_.put(value);

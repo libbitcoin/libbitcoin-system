@@ -184,6 +184,13 @@ void serializer<Iterator>::write_size_little_endian(size_t value)
 //-----------------------------------------------------------------------------
 
 template <typename Iterator>
+void serializer<Iterator>::write(reader& in)
+{
+    while (!in.is_exhausted())
+        write_byte(in.read_byte());
+}
+
+template <typename Iterator>
 void serializer<Iterator>::write_byte(uint8_t value)
 {
     *iterator_++ = value;

@@ -58,6 +58,11 @@ public:
     BC_API static const int max_arguments;
 
     /**
+     * Destructor.
+     */
+    virtual ~printer();
+
+    /**
      * Construct an instance of the printer class.
      * @param[in]  settings     Populated config file settings metadata.
      * @param[in]  application  This application (e.g. 'bitcoin_server').
