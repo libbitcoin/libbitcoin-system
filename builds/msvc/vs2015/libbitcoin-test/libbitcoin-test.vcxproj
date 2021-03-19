@@ -166,6 +166,7 @@
     <ClCompile Include="..\..\..\..\test\wallet\bitcoin_uri.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\ec_private.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\ec_public.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\electrum.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\encrypted_keys.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\hd_private.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\hd_public.cpp" />
