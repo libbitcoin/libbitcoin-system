@@ -81,6 +81,19 @@ BOOST_AUTO_TEST_CASE(tiff__to_image__maximum_bytes__expected_size_true)
 
     // 2^32 memory allocation here.
     data_chunk bitmap(tiff::max_image_bytes, 'x');
+
+    // CHECK FOR UNEXPECTED ALLOCATION.
+    BOOST_REQUIRE_EQUAL(bitmap.size(), tiff::max_image_bytes);
+
+    // CHECK FOR UNEXPECTED VECTOR SIZE TYPE.
+    BOOST_REQUIRE_EQUAL(sizeof(data_chunk::size_type), sizeof(uint64_t));
+
+    // CHECK FOR UNEXPECTED VECTOR SIZE LIMIT.
+    // cppreference.com/w/cpp/container/vector/max_size
+    // At runtime, the size of the container may be limited to a value
+    // smaller than max_size() by the amount of RAM available.
+    BOOST_REQUIRE_EQUAL(bitmap.max_size(), bc::max_uint64);
+
     data_chunk tiff;
     data_sink stream(tiff);
     BOOST_REQUIRE(tiff::to_image(stream, bitmap, width));
