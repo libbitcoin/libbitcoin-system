@@ -94,6 +94,8 @@ static bool safe_free_and_return(QRcode* qrcode, bool result)
     return result;
 }
 
+// TODO: remove scale and margin, call to_pixels() independently.
+// TODO: create independent method to perform scaling and margining.
 bool qr_code::encode(std::ostream& out, const std::string& value,
     uint8_t version, uint16_t scale, uint16_t margin, recovery_level level,
     encode_mode mode, bool case_sensitive)
@@ -117,10 +119,10 @@ bool qr_code::encode(std::ostream& out, const std::string& value,
         return safe_free_and_return(qrcode, false);
 
     // Bound: 2^1 * 2^16 + 2^32 < 2^64.
-    const auto pixel_width = uint64_t{ 2u } * margin + scale * qrcode->width;
+    const auto width_pixels = uint64_t{ 2u } * margin + scale * qrcode->width;
 
     // Guard: TIFF parameter overflow.
-    if (pixel_width > max_uint16)
+    if (width_pixels > max_uint16)
         return safe_free_and_return(qrcode, false);
 
     // Bound: (2^32 - 1)^2 < 2^64.
@@ -138,14 +140,13 @@ bool qr_code::encode(std::ostream& out, const std::string& value,
 
     // Convert to TIFF image stream.
     return safe_free_and_return(qrcode, tiff::to_image(out, pixels,
-        static_cast<uint16_t>(pixel_width)));
+        static_cast<uint16_t>(width_pixels)));
 }
 
+// TODO: return stream and split out scaling and margining.
 // Scale may move the image off of a byte-aligned square of pixels in bytes.
 // So the dimensions cannot be derived from the result, caller must retain.
 // pixel_width = 2 * margin + scale * coded_width.
-// The result may be up to max_size_t, which exceeds the TIFF limit of 2^32
-// when size_t is 2^64. Caller can optimize a failure by guarding pixel_width.
 data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
     uint16_t scale, uint16_t margin)
 {
@@ -178,12 +179,16 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
     if (max_size_t / width_pixels < width_pixels)
         return {};
 
+    // Cast guarded width and define height for readability.
+    const auto width = static_cast<size_t>(width_pixels);
+    const auto height = static_cast<size_t>(height_coded);
+
     // Horizontal margins and full row copies can be done bytewise.
-    const auto row_bytes = (width_pixels + (byte_bits - 1u)) / byte_bits;
+    const auto row_bytes = (width + (byte_bits - 1u)) / byte_bits;
     const auto row_margin = data_chunk(row_bytes, pixels_off);
 
     // Bound: (2^16 - 1)^2 < 2^32 or (2^32 - 1)^2 < 2^64.
-    const auto area_bytes = row_bytes * static_cast<size_t>(width_pixels);
+    const auto area_bytes = height * row_bytes;
 
     // For reading the qrcode byte stream.
     data_source image_source(coded);

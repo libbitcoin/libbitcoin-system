@@ -146,6 +146,7 @@ bool tiff::to_image(std::ostream& out, const data_chunk& data, uint16_t width)
         return false;
 
     // TIFF encoding limit is max_uint32.
+    // This method is otherwise limited only by the stream capacity.
     if (data.size() > max_image_bytes)
         return false;
 
