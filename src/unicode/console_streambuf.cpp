@@ -73,7 +73,6 @@ console_streambuf::console_streambuf(
 }
 #else
 console_streambuf::console_streambuf(const std::wstreambuf&, size_t)
-  : buffer_size_(0), buffer_(nullptr)
 {
 }
 #endif
