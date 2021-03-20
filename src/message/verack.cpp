@@ -98,7 +98,7 @@ data_chunk verack::to_data(uint32_t version) const
     return data;
 }
 
-void verack::to_data(uint32_t version, std::ostream& stream) const
+void verack::to_data(uint32_t /* version */, std::ostream& /* stream */) const
 {
 }
 

@@ -85,12 +85,10 @@ console_streambuf::~console_streambuf()
 #endif
 }
 
+#ifdef _MSC_VER
 std::streamsize console_streambuf::xsgetn(wchar_t* buffer,
     std::streamsize size)
 {
-    std::streamsize read_size = 0;
-
-#ifdef _MSC_VER
     DWORD read_bytes;
     const auto result = ReadConsoleW(get_input_handle(), buffer,
         static_cast<DWORD>(size), &read_bytes, nullptr);
@@ -98,15 +96,11 @@ std::streamsize console_streambuf::xsgetn(wchar_t* buffer,
     if (result == FALSE)
         throw std::iostream::failure("Failed to read from console.");
 
-    read_size = static_cast<std::streamsize>(read_bytes);
-#endif
-
-    return read_size;
+    return static_cast<std::streamsize>(read_bytes);
 }
 
 std::wstreambuf::int_type console_streambuf::underflow()
 {
-#ifdef _MSC_VER
     if (gptr() == nullptr || gptr() >= egptr())
     {
         const auto length = xsgetn(buffer_, buffer_size_);
@@ -114,11 +108,19 @@ std::wstreambuf::int_type console_streambuf::underflow()
             setg(buffer_, buffer_, &buffer_[length]);
     }
 
-    if (gptr() == nullptr || gptr() >= egptr())
-        return traits_type::eof();
-#endif
+    return (gptr() == nullptr || gptr() >= egptr()) ?
+        traits_type::eof() : traits_type::to_int_type(*gptr());
+}
+#else
+std::streamsize console_streambuf::xsgetn(wchar_t*, std::streamsize size)
+{
+    return 0;
+}
 
+std::wstreambuf::int_type console_streambuf::underflow()
+{
     return traits_type::to_int_type(*gptr());
 }
+#endif
 
 } // namespace libbitcoin

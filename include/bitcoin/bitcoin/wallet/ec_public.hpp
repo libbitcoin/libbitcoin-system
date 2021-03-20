@@ -69,10 +69,10 @@ public:
 
     /// Accessors.
     const ec_compressed& point() const;
-    const uint16_t version() const;
-    const uint8_t payment_version() const;
-    const uint8_t wif_version() const;
-    const bool compressed() const;
+    uint16_t version() const;
+    uint8_t payment_version() const;
+    uint8_t wif_version() const;
+    bool compressed() const;
 
     /// Methods.
     bool to_data(data_chunk& out) const;

@@ -104,7 +104,7 @@ void get_address::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void get_address::to_data(uint32_t version, writer& sink) const
+void get_address::to_data(uint32_t /* version */, writer& /* sink */) const
 {
 }
 

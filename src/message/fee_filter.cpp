@@ -54,7 +54,7 @@ fee_filter fee_filter::factory_from_data(uint32_t version, reader& source)
     return instance;
 }
 
-size_t fee_filter::satoshi_fixed_size(uint32_t version)
+size_t fee_filter::satoshi_fixed_size(uint32_t /* version */)
 {
     return sizeof(minimum_fee_);
 }
@@ -135,7 +135,7 @@ void fee_filter::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void fee_filter::to_data(uint32_t version, writer& sink) const
+void fee_filter::to_data(uint32_t /* version */, writer& sink) const
 {
     sink.write_8_bytes_little_endian(minimum_fee_);
 }

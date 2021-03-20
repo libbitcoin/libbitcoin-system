@@ -498,7 +498,7 @@ size_t chain_state::retarget_distance(size_t height)
 
 // static
 chain_state::map chain_state::get_map(size_t height,
-    const checkpoints& checkpoints, uint32_t forks)
+    const checkpoints& /* checkpoints */, uint32_t forks)
 {
     if (height == 0)
         return{};

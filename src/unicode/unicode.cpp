@@ -355,7 +355,7 @@ static void set_utf8_stdio(FILE* file)
         throw std::runtime_error("Could not set STDIO to utf8 mode.");
 }
 #else
-static void set_utf8_stdio(FILE* file)
+static void set_utf8_stdio(FILE*)
 {
 }
 #endif

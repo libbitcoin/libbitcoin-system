@@ -45,11 +45,15 @@ namespace config {
 class BC_API printer
 {
 public:
+    /**
+     * Destructor.
+     */
+    virtual printer::~printer();
 
     /**
      * Number of arguments above which the argument is considered unlimited.
      */
-    BC_API static const int max_arguments;
+    static const int max_arguments;
 
     /**
      * Construct an instance of the printer class.

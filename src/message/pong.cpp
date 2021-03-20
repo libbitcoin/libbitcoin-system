@@ -115,7 +115,7 @@ void pong::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void pong::to_data(uint32_t version, writer& sink) const
+void pong::to_data(uint32_t /* version */, writer& sink) const
 {
     sink.write_8_bytes_little_endian(nonce_);
 }

@@ -136,7 +136,7 @@ void filter_clear::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void filter_clear::to_data(uint32_t version, writer& sink) const
+void filter_clear::to_data(uint32_t /* version */, writer& /* sink */) const
 {
 }
 

@@ -31,7 +31,8 @@ unicode_istream::unicode_istream(std::istream& narrow_stream,
 {
 }
 #else
-unicode_istream::unicode_istream(std::istream&, std::wistream&, size_t)
+unicode_istream::unicode_istream(std::istream& narrow_stream,
+    std::wistream&, size_t)
   : std::istream(narrow_stream.rdbuf())
 {
 }
