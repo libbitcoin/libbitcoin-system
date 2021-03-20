@@ -48,7 +48,7 @@ public:
     /**
      * Destructor.
      */
-    virtual printer::~printer();
+    virtual ~printer();
 
     /**
      * Number of arguments above which the argument is considered unlimited.

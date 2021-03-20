@@ -81,7 +81,7 @@ public:
     /**
      * Destructor.
      */
-    virtual parameter::~parameter();
+    virtual ~parameter();
 
     /**
      * Sentinel - the option is not a positional argument.
