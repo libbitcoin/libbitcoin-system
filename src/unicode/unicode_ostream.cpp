@@ -31,7 +31,8 @@ unicode_ostream::unicode_ostream(std::ostream& narrow_stream,
 {
 }
 #else
-unicode_ostream::unicode_ostream(std::ostream&, std::wostream&, size_t)
+unicode_ostream::unicode_ostream(std::ostream& narrow_stream, std::wostream&,
+    size_t)
   : std::ostream(narrow_stream.rdbuf())
 {
 }
